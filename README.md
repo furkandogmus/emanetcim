@@ -11,3 +11,5 @@ Next.js tabanlı Emanetçi uygulaması (PostgreSQL, Prisma, Auth.js, iyzico).
 | Ortam şablonu | [`.env.example`](.env.example) |
 
 CI: `main` dalına push / PR’da **test** ve **build** (GitHub Actions). ESLint uyarıları azalınca workflow’a `npm run lint` eklenebilir.
+
+**Dallar:** günlük işler için `develop` + `feature/...`; ayrıntı [`docs/BRANCHING.md`](docs/BRANCHING.md). Yerel `npm run dev` hangi dalda olursanız olun aynı hızda çalışır.
