@@ -11,6 +11,10 @@ import { authConfig } from "./auth.config";
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
+  trustHost:
+    process.env.AUTH_TRUST_HOST === "true" ||
+    process.env.NODE_ENV === "development" ||
+    process.env.VERCEL === "1",
   ...authConfig,
   callbacks: {
     async session({ session, token }: any) {

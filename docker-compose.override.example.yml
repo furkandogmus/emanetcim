@@ -1,0 +1,9 @@
+# Geliştirme: Next.js'e doğrudan host üzerinden erişmek için kopyalayın:
+#   cp docker-compose.override.example.yml docker-compose.override.yml
+# Sonra: docker compose up -d
+# Uygulama: http://localhost:3000 (Nginx olmadan web konteyneri)
+
+services:
+  web:
+    ports:
+      - "3000:3000"

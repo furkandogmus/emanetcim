@@ -2,4 +2,12 @@
 
 Next.js tabanlı Emanetçi uygulaması (PostgreSQL, Prisma, Auth.js, iyzico).
 
-Yerel geliştirme: `npm install` → `npm run dev`. Docker (Postgres + Next + **Nginx**): `docs/DOCKER.md` — uygulama **http://localhost** (80).
+| | |
+|--|--|
+| Geliştirme | `npm install` → `npm run dev` |
+| Test | `npm run test` |
+| Lint | `npm run lint` (`eslint`) |
+| Docker | `npm run docker:up` veya `docker compose up --build -d` — **http://localhost** (Nginx, 80). Ayrıntı: [`docs/DOCKER.md`](docs/DOCKER.md) |
+| Ortam şablonu | [`.env.example`](.env.example) |
+
+CI: `main` dalına push / PR’da **test** ve **build** (GitHub Actions). ESLint uyarıları azalınca workflow’a `npm run lint` eklenebilir.

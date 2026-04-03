@@ -28,6 +28,10 @@ docker compose up --build -d
 
 Yapılandırma: `nginx/conf.d/default.conf`.
 
+**Auth.js** Nginx arkasında doğru çalışsın diye `web` servisinde **`AUTH_TRUST_HOST=true`** (varsayılan) verilir; kapatmak için `AUTH_TRUST_HOST=false` kullanın.
+
+Next.js’e doğrudan **3000** portundan erişmek için: `docker-compose.override.example.yml` dosyasını `docker-compose.override.yml` olarak kopyalayın (`.gitignore`’da); sonra `docker compose up -d`.
+
 Sağlık kontrolleri (Nginx üzerinden):
 
 - `GET http://localhost/api/health/live` — süreç ayakta (DB yok)
