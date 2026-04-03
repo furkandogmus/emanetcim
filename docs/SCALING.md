@@ -41,7 +41,7 @@ Bu proje **Next.js (App Router)**, **PostgreSQL**, **Prisma**, **Auth.js**, **iy
 - `AUTH_SECRET`, `AUTH_URL` (dış domain)
 - iyzico ve webhook URL’leri production domain ile
 
-**Docker Compose** ile aynı stack’i tek sunucuda denemek için: **`docs/DOCKER.md`**.
+**Docker Compose** ile aynı stack’i tek sunucuda denemek için: **`docs/DOCKER.md`** (Postgres + Next + **Nginx** reverse proxy).
 
 ---
 

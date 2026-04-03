@@ -1,11 +1,12 @@
-# Docker Compose (Postgres + Next.js)
+# Docker Compose (Postgres + Next.js + Nginx)
 
-Vercel/serverless kullanmadan tek makinede veya sunucuda çalıştırmak için **PostgreSQL 16** ve **Next.js (standalone)** birlikte ayağa kalkar.
+Vercel/serverless kullanmadan tek makinede veya sunucuda çalıştırmak için **PostgreSQL 16**, **Next.js (standalone)** ve önde **Nginx** (reverse proxy + `public/` statikleri) birlikte ayağa kalkar.
 
 ## Gereksinimler
 
 - Docker + Docker Compose v2
 - İlk çalıştırmada imaj derlenir (`docker compose build`)
+- **80** numaralı port boş olmalı (Nginx). Doluysa `docker-compose.yml` içinde `nginx` → `ports` satırını örneğin `"8080:80"` yapın.
 
 ## Hızlı başlangıç
 
@@ -13,17 +14,28 @@ Vercel/serverless kullanmadan tek makinede veya sunucuda çalıştırmak için *
 docker compose up --build -d
 ```
 
-- Uygulama: **http://localhost:3000**
+- Uygulama (Nginx üzerinden): **http://localhost** (port **80**)
+- Next.js konteyneri dışarıya kapalıdır; yalnızca Docker ağında `web:3000` olarak dinler.
 - Postgres (host makineden): **localhost:5433** → konteyner içi `postgres:5432` (host’ta **5432** çoğu zaman dolu olduğu için **5433** kullanılır)
 
-Sağlık kontrolleri:
+### Nginx ne yapıyor?
 
-- `GET http://localhost:3000/api/health/live` — süreç ayakta (DB yok)
-- `GET http://localhost:3000/api/health` — Postgres `SELECT 1`
+| Yol | Davranış |
+|-----|----------|
+| `/_next/static/` | Next.js’e proxy; `Cache-Control: public, max-age=31536000, immutable` |
+| `public/` altında dosya (ör. `/manifest.json`, `/icons/…`, `*.svg`) | Doğrudan diskten (volume) |
+| Diğer tüm istekler | Next.js’e proxy (sayfalar, API, RSC) |
+
+Yapılandırma: `nginx/conf.d/default.conf`.
+
+Sağlık kontrolleri (Nginx üzerinden):
+
+- `GET http://localhost/api/health/live` — süreç ayakta (DB yok)
+- `GET http://localhost/api/health` — Postgres `SELECT 1`
 
 ## Ortam değişkenleri
 
-`docker-compose.yml` içinde varsayılanlar tanımlıdır. Üretim benzeri deneme için:
+`docker-compose.yml` içinde varsayılanlar tanımlıdır. Tarayıcı ve Auth.js için taban URL **http://localhost** (port 80) olacak şekilde `AUTH_URL` / `NEXT_PUBLIC_APP_URL` ayarlıdır. Üretim benzeri deneme için:
 
 ```bash
 export AUTH_SECRET="$(openssl rand -base64 32)"
