@@ -3,10 +3,16 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import QRCode from 'qrcode';
-import { ChevronLeft, ShieldCheck, CreditCard, CheckCircle2, QrCode, MapPin, AlertCircle, Calendar, Lock, User } from 'lucide-react';
+import { ChevronLeft, ShieldCheck, CreditCard, CheckCircle2, QrCode, AlertCircle, Calendar, Lock, User, Minus, Plus } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import BagSelector from '@/components/guest/BagSelector';
 import { createBookingAction } from '@/actions/booking';
+import {
+  computeDailyBagLineTotal,
+  computeServiceTotalForStay,
+  MAX_STAY_DAYS,
+  roundedSlotPrices,
+} from '@/lib/bag-pricing';
 
 interface CheckoutClientProps {
   shopId: string;
@@ -17,24 +23,22 @@ interface CheckoutClientProps {
 
 export default function CheckoutClient({ shopId, shopName, shopAddress, pricePerDay }: CheckoutClientProps) {
   const t = useTranslations('Guest');
-  const common = useTranslations('Common');
-  
-  // Fiyat Çarpanları
-  const priceS = Math.round(pricePerDay * 0.8);
-  const priceM = Math.round(pricePerDay * 1.0);
-  const priceXl = Math.round(pricePerDay * 1.5);
 
-  // Rezervasyon State
+  const slot = roundedSlotPrices(pricePerDay);
+  const priceS = slot.s;
+  const priceM = slot.m;
+  const priceXl = slot.xl;
+
   const [bagS, setBagS] = useState(0);
   const [bagM, setBagM] = useState(1);
   const [bagXl, setBagXl] = useState(0);
-  
-  // ... (Card state stays same)
+  const [numberOfDays, setNumberOfDays] = useState(1);
+
   const [cardHolder, setCardHolder] = useState("");
   const [cardNumber, setCardNumber] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
-  
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +46,14 @@ export default function CheckoutClient({ shopId, shopName, shopAddress, pricePer
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [couponCode, setCouponCode] = useState("");
 
-  const totalPrice = (bagS * priceS) + (bagM * priceM) + (bagXl * priceXl);
+  const dailyLine = computeDailyBagLineTotal(pricePerDay, bagS, bagM, bagXl);
+  const totalPrice = computeServiceTotalForStay(
+    pricePerDay,
+    bagS,
+    bagM,
+    bagXl,
+    numberOfDays
+  );
   const insuranceFee = totalPrice > 0 ? 15 : 0;
 
   const handlePayment = async () => {
@@ -55,16 +66,22 @@ export default function CheckoutClient({ shopId, shopName, shopAddress, pricePer
     setError(null);
 
     const [expMonth, expYear] = expiry.split('/');
-    
+
+    const checkInTime = new Date();
+    const checkOutTime = new Date(
+      checkInTime.getTime() + numberOfDays * 24 * 60 * 60 * 1000
+    );
+
     const result = await createBookingAction({
       shopId,
       bagCountS: bagS,
       bagCountM: bagM,
       bagCountXl: bagXl,
-      unitPrice: pricePerDay, // İade hesabı için o anki fiyatı mühürle
+      unitPrice: pricePerDay,
       totalPrice: totalPrice + insuranceFee,
-      checkInTime: new Date(),
-      checkOutTime: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      insuranceFee,
+      checkInTime,
+      checkOutTime,
       cardInfo: {
         cardHolderName: cardHolder,
         cardNumber: cardNumber.replace(/\s/g, ''),
@@ -76,7 +93,7 @@ export default function CheckoutClient({ shopId, shopName, shopAddress, pricePer
     });
 
     setIsProcessing(false);
-    
+
     if (result.success && result.bookingId) {
       setBookingId(result.bookingId);
       if ("qrCodeToken" in result && result.qrCodeToken) {
@@ -142,25 +159,74 @@ export default function CheckoutClient({ shopId, shopName, shopAddress, pricePer
       </header>
 
       <main className="flex-1 max-w-2xl mx-auto w-full p-6 flex flex-col gap-10 pb-32">
-        {/* Step 1: Bag Selection */}
         <section className="flex flex-col gap-4">
           <div className="flex justify-between items-baseline mb-2">
             <h2 className="text-sm font-black uppercase tracking-widest text-gray-900">{t('selectBags')}</h2>
             <span className="text-xs text-gray-400 font-bold">{shopName}</span>
           </div>
-          
+
           <BagSelector 
-            label={t('smallBag')} sublabel="S / ₺60" count={bagS}
+            label={t('smallBag')} sublabel={`S / ₺${priceS}`} count={bagS}
             onIncrease={() => setBagS(bagS + 1)} onDecrease={() => setBagS(Math.max(0, bagS - 1))}
           />
           <BagSelector 
-            label={t('mediumBag')} sublabel="M/L / ₺80" count={bagM}
+            label={t('mediumBag')} sublabel={`M/L / ₺${priceM}`} count={bagM}
             onIncrease={() => setBagM(bagM + 1)} onDecrease={() => setBagM(Math.max(0, bagM - 1))}
           />
           <BagSelector 
-            label={t('xlBag')} sublabel="XL / ₺120" count={bagXl}
+            label={t('xlBag')} sublabel={`XL / ₺${priceXl}`} count={bagXl}
             onIncrease={() => setBagXl(bagXl + 1)} onDecrease={() => setBagXl(Math.max(0, bagXl - 1))}
           />
+        </section>
+
+        <section className="flex flex-col gap-3" data-testid="checkout-stay-days">
+          <div className="flex justify-between items-baseline mb-1">
+            <h2 className="text-sm font-black uppercase tracking-widest text-gray-900">{t('stayDuration')}</h2>
+          </div>
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100 group hover:border-orange-200 transition-all">
+            <div className="flex items-center gap-4">
+              <div className="bg-white p-3 rounded-xl shadow-sm text-gray-400 group-hover:text-orange-600 transition-colors">
+                <Calendar size={24} strokeWidth={1.5} />
+              </div>
+              <div>
+                <p className="font-bold text-gray-900 text-sm">
+                  {numberOfDays} {t('daysUnit')}
+                </p>
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                  {t('dailyRate', { amount: dailyLine })}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                data-testid="checkout-stay-days-decrease"
+                onClick={() => setNumberOfDays((d) => Math.max(1, d - 1))}
+                disabled={numberOfDays <= 1}
+                aria-label="Decrease days"
+                className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-900 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 shadow-sm"
+              >
+                <Minus size={18} />
+              </button>
+              <span
+                data-testid="checkout-stay-days-value"
+                className="w-8 text-center font-black text-lg text-gray-900"
+              >
+                {numberOfDays}
+              </span>
+              <button
+                type="button"
+                data-testid="checkout-stay-days-increase"
+                onClick={() => setNumberOfDays((d) => Math.min(MAX_STAY_DAYS, d + 1))}
+                disabled={numberOfDays >= MAX_STAY_DAYS}
+                aria-label="Increase days"
+                className="w-10 h-10 rounded-full bg-orange-600 flex items-center justify-center text-white hover:bg-orange-700 transition-all active:scale-95 shadow-md shadow-orange-200 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <Plus size={18} />
+              </button>
+            </div>
+          </div>
+          <p className="text-xs text-gray-400 leading-relaxed">{t('stayDaysHint')}</p>
         </section>
 
         <section className="flex flex-col gap-2">
@@ -174,7 +240,6 @@ export default function CheckoutClient({ shopId, shopName, shopAddress, pricePer
           />
         </section>
 
-        {/* Insurance Banner */}
         <div className="bg-green-50 border border-green-100 p-5 rounded-3xl flex items-start gap-4">
           <div className="bg-green-600 p-2 rounded-xl text-white">
             <ShieldCheck size={24} />
@@ -185,12 +250,10 @@ export default function CheckoutClient({ shopId, shopName, shopAddress, pricePer
           </div>
         </div>
 
-        {/* Step 2: Card Information */}
         <section className="flex flex-col gap-6">
           <h2 className="text-sm font-black uppercase tracking-widest text-gray-900">Kart Bilgileri</h2>
-          
+
           <div className="flex flex-col gap-4">
-             {/* Card Holder */}
              <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
                 <input 
@@ -202,7 +265,6 @@ export default function CheckoutClient({ shopId, shopName, shopAddress, pricePer
                 />
              </div>
 
-             {/* Card Number */}
              <div className="relative">
                 <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
                 <input 
@@ -248,11 +310,17 @@ export default function CheckoutClient({ shopId, shopName, shopAddress, pricePer
           </div>
         )}
 
-        {/* Pricing Summary */}
         <section className="mt-4 pt-10 border-t border-gray-100 flex flex-col gap-4">
-           <div className="flex justify-between items-center text-sm">
-             <span className="text-gray-400 font-medium">Hizmet Bedeli</span>
-             <span className="text-gray-900 font-bold">₺{totalPrice}</span>
+           <div className="flex justify-between items-start text-sm">
+             <div className="flex flex-col gap-0.5">
+               <span className="text-gray-400 font-medium">Hizmet Bedeli</span>
+               {numberOfDays > 1 && (
+                 <span className="text-[10px] text-gray-400">
+                   ₺{dailyLine} × {numberOfDays} {t('daysUnit')}
+                 </span>
+               )}
+             </div>
+             <span className="text-gray-900 font-bold" data-testid="checkout-service-total">₺{totalPrice}</span>
            </div>
            <div className="flex justify-between items-center text-sm">
              <span className="text-gray-400 font-medium">Sigorta ve Güvence</span>
@@ -260,12 +328,16 @@ export default function CheckoutClient({ shopId, shopName, shopAddress, pricePer
            </div>
            <div className="flex justify-between items-baseline pt-4">
              <span className="text-lg font-black text-gray-900 uppercase tracking-tighter">{t('total')}</span>
-             <span className="text-3xl font-black text-orange-600 tracking-tighter cursor-default">₺{totalPrice + insuranceFee}</span>
+             <span
+               data-testid="checkout-total-amount"
+               className="text-3xl font-black text-orange-600 tracking-tighter cursor-default"
+             >
+               ₺{totalPrice + insuranceFee}
+             </span>
            </div>
         </section>
       </main>
 
-      {/* Sticky Bottom Payment Button */}
       <footer className="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-2xl w-full p-6 bg-white/80 backdrop-blur-xl border-t border-gray-50 flex flex-col gap-4 z-20">
         <button 
           onClick={handlePayment}

@@ -17,7 +17,11 @@ export const config = {
   iyzico: {
     apiKey: process.env.IYZICO_API_KEY,
     secretKey: process.env.IYZICO_SECRET_KEY,
-    uri: process.env.IYZICO_URI || 'https://sandbox-api.iyzipay.com',
+    /** Tek kaynak: IYZICO_BASE_URL (iyzipay.ts ile aynı). */
+    baseUrl:
+      process.env.IYZICO_BASE_URL ||
+      process.env.IYZICO_URI ||
+      "https://sandbox-api.iyzipay.com",
   },
   
   auth: {

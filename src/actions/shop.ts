@@ -3,29 +3,47 @@
 import { auth } from "@/auth";
 import prisma from "@/lib/db";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
+import { z } from "zod";
 
-export async function updateShopSettingsAction(shopId: string, data: {
-  capacity?: number;
-  openingTime?: string;
-  closingTime?: string;
-  pricePerDay?: number;
-}) {
+const hm = /^\d{1,2}:\d{2}$/;
+
+const shopSettingsSchema = z.object({
+  capacity: z.number().int().min(1).max(100_000).optional(),
+  openingTime: z.string().regex(hm, "Saat HH:mm olmalıdır.").optional(),
+  closingTime: z.string().regex(hm, "Saat HH:mm olmalıdır.").optional(),
+  pricePerDay: z.number().min(0).max(1_000_000).optional(),
+});
+
+export async function updateShopSettingsAction(
+  shopId: string,
+  data: {
+    capacity?: number;
+    openingTime?: string;
+    closingTime?: string;
+    pricePerDay?: number;
+  }
+) {
   const session = await auth();
-  
+
   if (!session?.user?.id) throw new Error("Unauthorized");
 
-  // Önce dükkanın sahibi mi kontrol et
   const shop = await prisma.shop.findUnique({ where: { id: shopId } });
   if (!shop || shop.ownerId !== session.user.id) {
-    if (session.user.role !== 'ADMIN') throw new Error("Unauthorized");
+    if (session.user.role !== "ADMIN") throw new Error("Unauthorized");
+  }
+
+  const parsed = shopSettingsSchema.safeParse(data);
+  if (!parsed.success) {
+    const first = parsed.error.flatten().formErrors[0] ?? "Geçersiz veri.";
+    throw new Error(first);
   }
 
   await prisma.shop.update({
     where: { id: shopId },
     data: {
-      ...data,
-      updatedAt: new Date()
-    }
+      ...parsed.data,
+      updatedAt: new Date(),
+    },
   });
 
   revalidatePathAllLocales("/partner");

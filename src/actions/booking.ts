@@ -1,13 +1,24 @@
 "use server";
 
 import { auth } from "@/auth";
-import { bookingService } from "@/services/BookingService";
+import {
+  bookingService,
+  BookingCapacityExceededError,
+} from "@/services/BookingService";
 import { paymentService } from "@/services/PaymentService";
 import { notificationService } from "@/services/NotificationService";
 import prisma from "@/lib/db";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { isPaymentSuccess } from "@/lib/payment-status";
 import { computeSubMerchantShare } from "@/lib/platform-split";
+import logger from "@/lib/logger";
+import type { PrismaClient } from "@prisma/client";
+
+/** İnteraktif transaction istemcisi (Prisma.TransactionClient ile uyumlu). */
+type PrismaTransactionClient = Omit<
+  PrismaClient,
+  "$connect" | "$disconnect" | "$on" | "$transaction" | "$extends" | "$use"
+>;
 
 export type CreateBookingInput = {
   shopId: string;
@@ -16,6 +27,7 @@ export type CreateBookingInput = {
   bagCountXl: number;
   unitPrice: number;
   totalPrice: number;
+  insuranceFee?: number;
   checkInTime: Date;
   checkOutTime: Date;
   cardInfo: {
@@ -68,12 +80,18 @@ export async function createBookingAction(data: CreateBookingInput) {
     return { success: false as const, error: "Bu dükkan için ödeme (subMerchant) yapılandırması eksik." };
   }
 
+  const insuranceFee =
+    typeof data.insuranceFee === "number" && Number.isFinite(data.insuranceFee)
+      ? Math.max(0, data.insuranceFee)
+      : 0;
+
   let booking;
   try {
     booking = await bookingService.createInitialBooking({
       guestId: session.user.id,
       shopId: data.shopId,
       totalPrice,
+      insuranceFee,
       bagCountS: data.bagCountS,
       bagCountM: data.bagCountM,
       bagCountXl: data.bagCountXl,
@@ -82,6 +100,9 @@ export async function createBookingAction(data: CreateBookingInput) {
       unitPrice: data.unitPrice,
     });
   } catch (e: unknown) {
+    if (e instanceof BookingCapacityExceededError) {
+      return { success: false as const, error: e.message };
+    }
     console.error("createInitialBooking", e);
     return { success: false as const, error: "Rezervasyon oluşturulamadı." };
   }
@@ -108,14 +129,24 @@ export async function createBookingAction(data: CreateBookingInput) {
       return { success: false as const, error: "Ödeme başarısız veya reddedildi." };
     }
 
-    await bookingService.markAsPaid(booking.id);
-
-    if (couponId) {
-      await prisma.coupon.update({
-        where: { id: couponId },
-        data: { usedCount: { increment: 1 } },
+    await prisma.$transaction(async (tx: PrismaTransactionClient) => {
+      await tx.booking.update({
+        where: { id: booking.id },
+        data: { status: "PAID" },
       });
-    }
+      if (couponId) {
+        const affected = await tx.$executeRawUnsafe(
+          `UPDATE "Coupon" SET "usedCount" = "usedCount" + 1 WHERE "id" = $1::uuid AND ("maxUses" IS NULL OR "usedCount" < "maxUses")`,
+          couponId
+        );
+        if (Number(affected) !== 1) {
+          logger.warn(
+            { couponId, bookingId: booking.id },
+            "coupon_increment_atomic_failed_or_exhausted"
+          );
+        }
+      }
+    });
 
     const fresh = await prisma.booking.findUnique({ where: { id: booking.id } });
 

@@ -54,7 +54,7 @@ export default function GuestPage() {
           </div>
           <div>
             <h4 className="font-bold mb-1">{t('insuranceIncluded')}</h4>
-            <p className="text-gray-500 leading-relaxed">Tüm valizleriniz anlaşmalı sigorta kapsamında %100 güvendedir.</p>
+            <p className="text-gray-500 leading-relaxed">{t('trustInsuranceBody')}</p>
           </div>
         </div>
         <div className="flex flex-col items-center gap-4">
@@ -62,8 +62,8 @@ export default function GuestPage() {
             <MapPin size={28} />
           </div>
           <div>
-            <h4 className="font-bold mb-1">Geniş Ağ</h4>
-            <p className="text-gray-500 leading-relaxed">İstanbul'un en turistik noktalarında binlerce yan dükkan.</p>
+            <h4 className="font-bold mb-1">{t('trustNetworkTitle')}</h4>
+            <p className="text-gray-500 leading-relaxed">{t('trustNetworkBody')}</p>
           </div>
         </div>
         <div className="flex flex-col items-center gap-4">
@@ -71,8 +71,8 @@ export default function GuestPage() {
             <Clock size={28} />
           </div>
           <div>
-            <h4 className="font-bold mb-1">7/24 Destek</h4>
-            <p className="text-gray-500 leading-relaxed">Herhangi bir uyuşmazlıkta 7/24 yanınızdayız.</p>
+            <h4 className="font-bold mb-1">{t('trustSupportTitle')}</h4>
+            <p className="text-gray-500 leading-relaxed">{t('trustSupportBody')}</p>
           </div>
         </div>
       </section>

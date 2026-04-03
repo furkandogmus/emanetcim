@@ -27,6 +27,8 @@ interface PartnerClientProps {
   shopId: string;
   activeCount: number;
   totalEarnings: number;
+  /** PLATFORM_COMMISSION_RATE ile uyumlu esnaf payı oranı (örn. 0.5 komisyon → 0.5) */
+  merchantShareRatio: number;
   shopName: string;
   initialCapacity: number;
   initialOpening: string;
@@ -41,6 +43,7 @@ export default function PartnerClient({
   shopId,
   activeCount,
   totalEarnings,
+  merchantShareRatio,
   shopName,
   initialCapacity,
   initialOpening,
@@ -209,7 +212,8 @@ export default function PartnerClient({
     }
   };
 
-  const netEarnings = Math.round(totalEarnings * 0.8 * 100) / 100;
+  const netEarnings =
+    Math.round(totalEarnings * merchantShareRatio * 100) / 100;
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 text-gray-900 p-6 md:p-12 relative overflow-hidden font-sans">
@@ -439,7 +443,9 @@ export default function PartnerClient({
                         <p className="font-black text-xl text-gray-900">
                           {booking.status === "CANCELLED"
                             ? "0"
-                            : Math.round(booking.totalPrice * 0.8 * 100) / 100}
+                            : Math.round(
+                                booking.totalPrice * merchantShareRatio * 100
+                              ) / 100}
                           <span className="text-[10px] ml-1 opacity-40 uppercase">
                             TL
                           </span>

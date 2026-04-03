@@ -152,6 +152,8 @@ model Booking {
 
   unitPrice  Float @default(50.0) // Rezervasyon anındaki birim fiyat
   totalPrice Float @default(0.0)
+  /// Sigorta / güvence ücreti (iptal ve erken iade hesaplarında hariç tutulur)
+  insuranceFee Float @default(0)
 
   qrCodeToken  String? @unique // Güvenli şifrelenmiş QR verisi
   sealPhotoUrl String? // Esnafın çekmek zorunda olduğu mühür fotoğrafı

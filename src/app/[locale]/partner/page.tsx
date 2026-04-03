@@ -4,6 +4,7 @@ import { shopService } from "@/services/ShopService";
 import { bookingService } from "@/services/BookingService";
 import PartnerClient from "@/components/partner/PartnerClient";
 import { redirect } from "next/navigation";
+import { getMerchantShareRatio } from "@/lib/platform-split";
 
 /**
  * esnaf Ana Sayfası - Partner Dashboard (Server Component)
@@ -56,12 +57,15 @@ export default async function PartnerPage({
     0
   );
 
+  const merchantShareRatio = getMerchantShareRatio();
+
   return (
     <PartnerClient
       shopId={activeShop.id}
       shopName={activeShop.name}
       activeCount={activeCount}
       totalEarnings={totalEarnings}
+      merchantShareRatio={merchantShareRatio}
       initialCapacity={activeShop.capacity}
       initialOpening={activeShop.openingTime || "09:00"}
       initialClosing={activeShop.closingTime || "20:00"}

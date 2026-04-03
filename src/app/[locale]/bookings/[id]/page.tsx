@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 import { bookingService } from "@/services/BookingService";
 import { notFound, redirect } from "next/navigation";
 import { Calendar, Package, MapPin, CheckCircle2 } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import PrintButton from "@/components/guest/PrintButton";
 import BookingQrDisplay from "@/components/guest/BookingQrDisplay";
 
@@ -17,6 +17,7 @@ export default async function BookingDetailPage({
   params: Promise<{ locale: string, id: string }> 
 }) {
   const { locale, id } = await params;
+  setRequestLocale(locale);
   const session = await auth();
   const t = await getTranslations("Guest");
   const dateLocale = locale === "tr" ? "tr-TR" : "en-US";

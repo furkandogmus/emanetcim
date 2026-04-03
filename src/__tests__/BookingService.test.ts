@@ -5,7 +5,7 @@ import prisma from '@/lib/db';
 vi.mock('@/lib/db', () => ({
   default: {
     shop: { findUnique: vi.fn() },
-    booking: { create: vi.fn(), update: vi.fn() },
+    booking: { create: vi.fn(), update: vi.fn(), findMany: vi.fn() },
   },
 }));
 
@@ -20,7 +20,9 @@ describe('BookingService', () => {
     vi.mocked(prisma.shop.findUnique).mockResolvedValue({
       id: 'shop-1',
       pricePerDay: 50,
+      capacity: 100,
     } as never);
+    vi.mocked(prisma.booking.findMany).mockResolvedValue([]);
     vi.mocked(prisma.booking.create).mockResolvedValue({
       id: 'booking-123',
       guestId: 'guest-1',

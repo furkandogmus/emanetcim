@@ -18,9 +18,9 @@ test.describe('Emanetçi All Pages Flows', () => {
     await page.getByTestId('shop-list-item').first().click();
     await expect(page).toHaveURL(/\/tr\/checkout\//);
 
-    await expect(page.locator('text=₺95')).toBeVisible();
+    await expect(page.getByTestId('checkout-total-amount')).toHaveText('₺95');
     await page.getByRole('button', { name: 'Increase' }).nth(1).click();
-    await expect(page.locator('text=₺175')).toBeVisible();
+    await expect(page.getByTestId('checkout-total-amount')).toHaveText('₺175');
 
     await page.getByPlaceholder('Kart Üzerindeki İsim').fill('Test User');
     await page.getByPlaceholder('0000 0000 0000 0000').fill('5528790000000008');

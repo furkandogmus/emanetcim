@@ -19,6 +19,13 @@ export async function createDisputeAction(input: {
     return { success: false as const, error: "Rezervasyon bulunamadı veya yetkisiz." };
   }
 
+  if (booking.status !== "CHECKED_IN" && booking.status !== "CHECKED_OUT") {
+    return {
+      success: false as const,
+      error: "Şikayet yalnızca valiz dükkana alındıktan veya teslim edildikten sonra açılabilir.",
+    };
+  }
+
   const existing = await prisma.dispute.findUnique({ where: { bookingId: input.bookingId } });
   if (existing) {
     return { success: false as const, error: "Bu rezervasyon için zaten bir kayıt var." };
