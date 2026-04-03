@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { paymentService } from "@/services/PaymentService";
 import { verifyIyzicoWebhookSignatureV3 } from "@/lib/iyzico-webhook";
 import logger from "@/lib/logger";
+import { rateLimit } from "@/lib/rate-limit";
 
 /**
  * iyzico Payment Webhook Handler
@@ -10,6 +11,17 @@ import logger from "@/lib/logger";
  */
 export async function POST(req: NextRequest) {
   try {
+    const ip =
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      req.headers.get("x-real-ip") ||
+      "unknown";
+    if (!rateLimit(`webhook:${ip}`, 120, 60_000)) {
+      return NextResponse.json(
+        { status: "Error", message: "Too many requests" },
+        { status: 429 }
+      );
+    }
+
     const raw = await req.text();
     const body = JSON.parse(raw) as Record<string, unknown>;
 

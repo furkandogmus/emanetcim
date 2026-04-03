@@ -7,6 +7,7 @@ export type PartnerCheckInErrorCode =
 export type PartnerCheckOutErrorCode =
   | "NOT_FOUND"
   | "INVALID_STATUS"
+  | "REFUND_FAILED"
   | "UNKNOWN";
 
 export type PartnerCheckInResult =

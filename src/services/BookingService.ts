@@ -1,13 +1,19 @@
-import { Booking } from '@prisma/client';
+import { Booking, Prisma } from '@prisma/client';
 import prisma from '@/lib/db';
 import { createQrToken } from '@/lib/qr-token';
 import { isRefundSuccess } from '@/lib/payment-status';
 import { isShopOpenAt } from '@/lib/shop-hours';
 import { totalBagCount } from '@/lib/bag-pricing';
+import { moneyToNumber } from '@/lib/money';
 import type {
   PartnerCheckInResult,
   PartnerCheckOutResult,
 } from '@/types/partner-booking';
+
+type TxClient = Omit<
+  Prisma.TransactionClient,
+  '$connect' | '$disconnect' | '$on' | '$transaction' | '$extends' | '$use'
+>;
 
 export class BookingCapacityExceededError extends Error {
   constructor(message: string) {
@@ -47,66 +53,81 @@ export class BookingService implements IBookingService {
     unitPrice?: number;
     insuranceFee?: number;
   }): Promise<Booking> {
-    const shop = await prisma.shop.findUnique({ where: { id: data.shopId } });
-    if (!shop) {
-      throw new Error('Dükkan bulunamadı.');
-    }
-    const unitPrice = data.unitPrice || shop?.pricePerDay || 50;
-    const insuranceFee =
-      typeof data.insuranceFee === 'number' && Number.isFinite(data.insuranceFee)
-        ? Math.max(0, data.insuranceFee)
-        : 0;
+    return prisma.$transaction(
+      async (tx) => {
+        const shop = await tx.shop.findUnique({ where: { id: data.shopId } });
+        if (!shop) {
+          throw new Error('Dükkan bulunamadı.');
+        }
+        await tx.$executeRawUnsafe(
+          `SELECT 1 FROM "Shop" WHERE id = $1::uuid FOR UPDATE`,
+          data.shopId
+        );
 
-    const newBags = totalBagCount(
-      data.bagCountS,
-      data.bagCountM,
-      data.bagCountXl
-    );
-    await this.assertCapacity(
-      shop,
-      data.shopId,
-      data.checkInTime,
-      data.checkOutTime,
-      newBags
-    );
+        const unitPrice =
+          typeof data.unitPrice === 'number' && Number.isFinite(data.unitPrice)
+            ? data.unitPrice
+            : moneyToNumber(shop.pricePerDay) || 50;
+        const insuranceFee =
+          typeof data.insuranceFee === 'number' && Number.isFinite(data.insuranceFee)
+            ? Math.max(0, data.insuranceFee)
+            : 0;
 
-    const booking = await prisma.booking.create({
-      data: {
-        guestId: data.guestId,
-        shopId: data.shopId,
-        totalPrice: data.totalPrice,
-        insuranceFee,
-        bagCountS: data.bagCountS,
-        bagCountM: data.bagCountM,
-        bagCountXl: data.bagCountXl,
-        checkInTime: data.checkInTime,
-        checkOutTime: data.checkOutTime,
-        unitPrice,
-        qrCodeToken: `temp_${crypto.randomUUID()}`,
-        status: 'PENDING',
+        const newBags = totalBagCount(
+          data.bagCountS,
+          data.bagCountM,
+          data.bagCountXl
+        );
+        await this.assertCapacityTx(
+          tx,
+          shop,
+          data.shopId,
+          data.checkInTime,
+          data.checkOutTime,
+          newBags
+        );
+
+        const booking = await tx.booking.create({
+          data: {
+            guestId: data.guestId,
+            shopId: data.shopId,
+            totalPrice: data.totalPrice,
+            insuranceFee,
+            bagCountS: data.bagCountS,
+            bagCountM: data.bagCountM,
+            bagCountXl: data.bagCountXl,
+            checkInTime: data.checkInTime,
+            checkOutTime: data.checkOutTime,
+            unitPrice,
+            qrCodeToken: `temp_${crypto.randomUUID()}`,
+            status: 'PENDING',
+          },
+        });
+
+        const qrCodeToken = await createQrToken({
+          bookingId: booking.id,
+          guestId: data.guestId,
+          shopId: data.shopId,
+        });
+
+        return tx.booking.update({
+          where: { id: booking.id },
+          data: { qrCodeToken },
+        });
       },
-    });
-
-    const qrCodeToken = await createQrToken({
-      bookingId: booking.id,
-      guestId: data.guestId,
-      shopId: data.shopId,
-    });
-
-    return prisma.booking.update({
-      where: { id: booking.id },
-      data: { qrCodeToken },
-    });
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
+    );
   }
 
-  private async assertCapacity(
+  private async assertCapacityTx(
+    tx: TxClient,
     shop: { capacity: number },
     shopId: string,
     checkInTime: Date,
     checkOutTime: Date,
     newBags: number
   ): Promise<void> {
-    const overlapping = await prisma.booking.findMany({
+    const overlapping = await tx.booking.findMany({
       where: {
         shopId,
         status: { in: ['PENDING', 'PAID', 'CHECKED_IN'] },
@@ -228,6 +249,12 @@ export class BookingService implements IBookingService {
 
         if (!isRefundSuccess(refundResult.status)) {
           console.error('Early check-out refund failed:', refundResult);
+          return {
+            ok: false,
+            code: 'REFUND_FAILED',
+            message:
+              'Erken teslimat iadesi şu an tamamlanamadı. Lütfen tekrar deneyin veya destek ile iletişime geçin.',
+          };
         }
       }
 
@@ -310,8 +337,8 @@ export class BookingService implements IBookingService {
 
     try {
       if (booking.status === 'PAID') {
-        const insuranceFee = booking.insuranceFee ?? 0;
-        const serviceBase = Math.max(0, booking.totalPrice - insuranceFee);
+        const insuranceFee = moneyToNumber(booking.insuranceFee);
+        const serviceBase = Math.max(0, moneyToNumber(booking.totalPrice) - insuranceFee);
         const refundAmount = Math.max(0, serviceBase - 20); // 20 TL Sabit Kesinti (hizmet bedeli)
         const { paymentService } = await import('./PaymentService');
         await paymentService.refundPayment(bookingId, refundAmount);

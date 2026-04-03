@@ -1,6 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { shopService } from "@/services/ShopService";
 import prisma from "@/lib/db";
+import { moneyToNumber } from "@/lib/money";
 import AdminDashboardClient from "@/components/admin/AdminDashboardClient";
 
 const PAID_STATUSES = ["PAID", "CHECKED_IN", "CHECKED_OUT"] as const;
@@ -35,7 +36,7 @@ async function getDailyChartData() {
     });
     out.push({
       name: `${dayStart.getDate()}/${dayStart.getMonth() + 1}`,
-      ciro: Math.round(agg._sum.totalPrice || 0),
+      ciro: Math.round(moneyToNumber(agg._sum.totalPrice ?? 0)),
       emanet: agg._count,
     });
   }
@@ -59,18 +60,22 @@ export default async function AdminDashboard({
   const totalBookings = await prisma.booking.count();
   const activePartnersCount = await prisma.shop.count({ where: { isActive: true } });
 
-  const activeShops = await prisma.shop.findMany({
+  const activeShopsRaw = await prisma.shop.findMany({
     where: { isActive: true },
     take: 5,
     orderBy: { createdAt: "desc" },
     include: { _count: { select: { bookings: true } } },
   });
+  const activeShops = activeShopsRaw.map((s) => ({
+    ...s,
+    pricePerDay: moneyToNumber(s.pricePerDay),
+  }));
 
   const revenueData = await prisma.booking.aggregate({
     where: { status: { in: [...PAID_STATUSES] } },
     _sum: { totalPrice: true },
   });
-  const totalRevenue = revenueData._sum.totalPrice || 0;
+  const totalRevenue = moneyToNumber(revenueData._sum.totalPrice ?? 0);
 
   const now = new Date();
   const start7 = new Date(now);
@@ -122,8 +127,8 @@ export default async function AdminDashboard({
       bookings: buildWeekOverWeekTrend(t, last7Bookings, prev7Bookings),
       revenue: buildWeekOverWeekTrend(
         t,
-        Math.round(last7Rev._sum.totalPrice || 0),
-        Math.round(prev7Rev._sum.totalPrice || 0)
+        Math.round(moneyToNumber(last7Rev._sum.totalPrice ?? 0)),
+        Math.round(moneyToNumber(prev7Rev._sum.totalPrice ?? 0))
       ),
       partners: buildWeekOverWeekTrend(t, shopsWeek, shopsPrev),
     },

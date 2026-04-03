@@ -46,8 +46,8 @@ function computeV3Hex(secretKey: string, body: Record<string, unknown>): string 
 
 /**
  * X-IYZ-SIGNATURE-V3 doğrulaması.
- * Header yoksa: true (iyzico panelde imza kapalı olabilir).
- * Header varsa: IYZICO_SECRET_KEY (veya IYZICO_WEBHOOK_SECRET) ile doğrulanır.
+ * Varsayılan: imza yoksa reddet (sahte webhook).
+ * Yerel test: `IYZICO_WEBHOOK_ALLOW_UNSIGNED=true` ile imzasız kabul (yalnızca güvenilir ortamda).
  */
 export function verifyIyzicoWebhookSignatureV3(
   body: Record<string, unknown>,
@@ -58,7 +58,7 @@ export function verifyIyzicoWebhookSignatureV3(
   const sig = signatureHeader?.trim();
 
   if (!sig) {
-    return true;
+    return process.env.IYZICO_WEBHOOK_ALLOW_UNSIGNED === "true";
   }
 
   if (!secretKey) {

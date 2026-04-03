@@ -12,6 +12,8 @@ import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { isPaymentSuccess } from "@/lib/payment-status";
 import { computeSubMerchantShare } from "@/lib/platform-split";
 import logger from "@/lib/logger";
+import { computeAuthoritativeCheckoutTotals } from "@/lib/booking-server-price";
+import { moneyToNumber } from "@/lib/money";
 import type { PrismaClient } from "@prisma/client";
 
 /** İnteraktif transaction istemcisi (Prisma.TransactionClient ile uyumlu). */
@@ -50,7 +52,34 @@ export async function createBookingAction(data: CreateBookingInput) {
     return { success: false as const, error: "Oturum açmanız gerekiyor." };
   }
 
-  let totalPrice = data.totalPrice;
+  const shop = await prisma.shop.findUnique({ where: { id: data.shopId } });
+  if (!shop) {
+    return { success: false as const, error: "Dükkan bulunamadı." };
+  }
+  if (!shop.subMerchantKey) {
+    return { success: false as const, error: "Bu dükkan için ödeme (subMerchant) yapılandırması eksik." };
+  }
+
+  const checkInTime = new Date(data.checkInTime);
+  const checkOutTime = new Date(data.checkOutTime);
+
+  const authTotals = computeAuthoritativeCheckoutTotals(
+    moneyToNumber(shop.pricePerDay),
+    data.bagCountS,
+    data.bagCountM,
+    data.bagCountXl,
+    checkInTime,
+    checkOutTime
+  );
+
+  if (authTotals.subtotalBeforeCoupon <= 0) {
+    return {
+      success: false as const,
+      error: "Geçerli bir hizmet tutarı için en az bir valiz ve tarih seçin.",
+    };
+  }
+
+  let totalPrice = authTotals.subtotalBeforeCoupon;
   let couponId: string | undefined;
 
   if (data.couponCode?.trim()) {
@@ -61,29 +90,35 @@ export async function createBookingAction(data: CreateBookingInput) {
       coupon?.isActive &&
       (!coupon.expiresAt || coupon.expiresAt > now) &&
       (coupon.maxUses == null || coupon.usedCount < coupon.maxUses) &&
-      (coupon.minPrice == null || totalPrice >= coupon.minPrice)
+      (coupon.minPrice == null ||
+        totalPrice >= moneyToNumber(coupon.minPrice))
     ) {
       if (coupon.isPercent) {
-        totalPrice = Math.max(0, Math.round(totalPrice * (1 - coupon.discount / 100) * 100) / 100);
+        totalPrice = Math.max(
+          0,
+          Math.round(
+            totalPrice * (1 - moneyToNumber(coupon.discount) / 100) * 100
+          ) / 100
+        );
       } else {
-        totalPrice = Math.max(0, Math.round((totalPrice - coupon.discount) * 100) / 100);
+        totalPrice = Math.max(
+          0,
+          Math.round((totalPrice - moneyToNumber(coupon.discount)) * 100) / 100
+        );
       }
       couponId = coupon.id;
     }
   }
 
-  const shop = await prisma.shop.findUnique({ where: { id: data.shopId } });
-  if (!shop) {
-    return { success: false as const, error: "Dükkan bulunamadı." };
+  if (process.env.NODE_ENV === "development" && data.totalPrice != null) {
+    const drift = Math.abs(data.totalPrice - authTotals.subtotalBeforeCoupon);
+    if (drift > 0.02) {
+      logger.warn(
+        { clientTotal: data.totalPrice, serverTotal: authTotals.subtotalBeforeCoupon },
+        "checkout_client_total_mismatch_ignored"
+      );
+    }
   }
-  if (!shop.subMerchantKey) {
-    return { success: false as const, error: "Bu dükkan için ödeme (subMerchant) yapılandırması eksik." };
-  }
-
-  const insuranceFee =
-    typeof data.insuranceFee === "number" && Number.isFinite(data.insuranceFee)
-      ? Math.max(0, data.insuranceFee)
-      : 0;
 
   let booking;
   try {
@@ -91,13 +126,13 @@ export async function createBookingAction(data: CreateBookingInput) {
       guestId: session.user.id,
       shopId: data.shopId,
       totalPrice,
-      insuranceFee,
-      bagCountS: data.bagCountS,
-      bagCountM: data.bagCountM,
-      bagCountXl: data.bagCountXl,
-      checkInTime: new Date(data.checkInTime),
-      checkOutTime: new Date(data.checkOutTime),
-      unitPrice: data.unitPrice,
+      insuranceFee: authTotals.insuranceFee,
+      bagCountS: authTotals.bagCountS,
+      bagCountM: authTotals.bagCountM,
+      bagCountXl: authTotals.bagCountXl,
+      checkInTime,
+      checkOutTime,
+      unitPrice: moneyToNumber(shop.pricePerDay) || 50,
     });
   } catch (e: unknown) {
     if (e instanceof BookingCapacityExceededError) {

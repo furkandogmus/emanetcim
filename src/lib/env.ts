@@ -27,5 +27,13 @@ export function getServerEnv(): ServerEnv {
 export function requireProdSecrets(): void {
   if (process.env.NODE_ENV !== "production") return;
   const e = getServerEnv();
-  if (!e.AUTH_SECRET) throw new Error("AUTH_SECRET is required in production");
+  if (!e.AUTH_SECRET?.trim()) {
+    throw new Error("AUTH_SECRET is required in production");
+  }
+  if (!e.IYZICO_API_KEY?.trim()) {
+    throw new Error("IYZICO_API_KEY is required in production");
+  }
+  if (!e.IYZICO_SECRET_KEY?.trim()) {
+    throw new Error("IYZICO_SECRET_KEY is required in production");
+  }
 }

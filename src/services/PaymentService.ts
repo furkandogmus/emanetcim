@@ -2,6 +2,7 @@ import { iyzipay } from "@/lib/iyzipay";
 import Iyzipay from 'iyzipay';
 import prisma from '@/lib/db';
 import { isPaymentSuccess } from '@/lib/payment-status';
+import { moneyToNumber } from '@/lib/money';
 
 export interface IPaymentService {
   initializeMarketplacePayment(data: any): Promise<any>;
@@ -159,9 +160,15 @@ export class PaymentService implements IPaymentService {
       return { success: false, message: "Booking not found" };
     }
 
-    // 3. İdempolans (Zaten onaylıysa tekrar işlem yapma)
+    // 3. İdempolans ve terminal durumlar (webhook yalnızca PENDING -> PAID)
     if (booking.status === 'PAID' || booking.status === 'CHECKED_IN') {
       return { success: true, message: "Already processed" };
+    }
+    if (booking.status !== 'PENDING') {
+      return {
+        success: false,
+        message: "Webhook ignored: booking not awaiting payment",
+      };
     }
 
     // 4. Onay İşlemi (Transaction içinde)
@@ -177,7 +184,7 @@ export class PaymentService implements IPaymentService {
           create: {
             bookingId: conversationId,
             transactionId: paymentId,
-            amount: booking.totalPrice,
+            amount: moneyToNumber(booking.totalPrice),
             status: 'SUCCESS',
             splitCompleted: true
           }

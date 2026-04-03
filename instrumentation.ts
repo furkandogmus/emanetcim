@@ -4,11 +4,7 @@ import type { InstrumentationOnRequestError } from "next/dist/server/instrumenta
 
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
-    try {
-      requireProdSecrets();
-    } catch (e) {
-      console.error("[instrumentation]", e);
-    }
+    requireProdSecrets();
   }
 }
 

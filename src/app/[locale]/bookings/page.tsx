@@ -20,5 +20,7 @@ export default async function BookingsPage({ params }: { params: Promise<{ local
   // Veritabanından kullanıcının kendi rezervasyonlarını çek
   const bookings = await bookingService.getUserBookings(session.user.id);
 
-  return <BookingsClient bookings={bookings} />;
+  return (
+    <BookingsClient bookings={JSON.parse(JSON.stringify(bookings))} />
+  );
 }

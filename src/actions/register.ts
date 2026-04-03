@@ -1,9 +1,11 @@
 "use server";
 
+import { headers } from "next/headers";
 import prisma from "@/lib/db";
 import { hashPassword } from "@/lib/auth-password";
 import { Role } from "@prisma/client";
 import { z } from "zod";
+import { rateLimit } from "@/lib/rate-limit";
 
 const guestSchema = z.object({
   email: z.string().email(),
@@ -24,6 +26,18 @@ export async function registerGuestAction(data: unknown) {
   const parsed = guestSchema.safeParse(data);
   if (!parsed.success) {
     return { success: false as const, error: "Geçersiz form verisi." };
+  }
+
+  const h = await headers();
+  const ip =
+    h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    h.get("x-real-ip") ||
+    "unknown";
+  if (!rateLimit(`register_guest:${ip}`, 8, 60 * 60 * 1000)) {
+    return {
+      success: false as const,
+      error: "Çok fazla kayıt denemesi. Lütfen daha sonra tekrar deneyin.",
+    };
   }
 
   const email = parsed.data.email.trim().toLowerCase();
@@ -49,6 +63,18 @@ export async function registerPartnerApplicationAction(data: unknown) {
   const parsed = partnerSchema.safeParse(data);
   if (!parsed.success) {
     return { success: false as const, error: "Geçersiz form verisi." };
+  }
+
+  const h = await headers();
+  const ip =
+    h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    h.get("x-real-ip") ||
+    "unknown";
+  if (!rateLimit(`register_partner:${ip}`, 5, 60 * 60 * 1000)) {
+    return {
+      success: false as const,
+      error: "Çok fazla başvuru denemesi. Lütfen daha sonra tekrar deneyin.",
+    };
   }
 
   const email = parsed.data.email.trim().toLowerCase();

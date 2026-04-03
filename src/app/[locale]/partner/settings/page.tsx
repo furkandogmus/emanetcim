@@ -6,6 +6,7 @@ import { auth } from "@/auth";
 import { shopService } from "@/services/ShopService";
 import { redirect } from "next/navigation";
 import PartnerShopSettingsForm from "@/components/partner/PartnerShopSettingsForm";
+import { moneyToNumber } from "@/lib/money";
 
 /**
  * Partner Settings — DB ile senkron (PartnerClient AYARLAR ile aynı aksiyon)
@@ -67,7 +68,7 @@ export default async function PartnerSettingsPage({
           initialCapacity={shop.capacity}
           initialOpening={shop.openingTime || "09:00"}
           initialClosing={shop.closingTime || "20:00"}
-          initialPricePerDay={shop.pricePerDay || 50}
+          initialPricePerDay={moneyToNumber(shop.pricePerDay) || 50}
         />
       </main>
     </div>

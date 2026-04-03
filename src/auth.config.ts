@@ -3,6 +3,7 @@ import Apple from "next-auth/providers/apple";
 import Credentials from "next-auth/providers/credentials";
 import type { NextAuthConfig } from "next-auth";
 import { verifyPassword } from "@/lib/auth-password";
+import { rateLimit } from "@/lib/rate-limit";
 
 /**
  * OAuth sağlayıcıları env eksikken bile tanımlanırsa Auth.js `Configuration` hatası verebilir;
@@ -43,6 +44,12 @@ export const authConfig = {
         const email = (credentials?.email as string | undefined)?.trim();
         const password = credentials?.password as string | undefined;
         if (!email || !password) return null;
+
+        if (
+          !rateLimit(`credentials:${email.toLowerCase()}`, 25, 15 * 60 * 1000)
+        ) {
+          return null;
+        }
 
         const { default: prisma } = await import("@/lib/db");
         const user = await prisma.user.findFirst({

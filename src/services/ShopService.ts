@@ -1,5 +1,6 @@
 import prisma from '@/lib/db';
 import { distanceKm } from '@/lib/geo';
+import { moneyToNumber } from '@/lib/money';
 
 export interface IShopService {
   findNearby(latitude: number, longitude: number, radiusInKm: number): Promise<any[]>;
@@ -22,6 +23,7 @@ export class ShopService implements IShopService {
         .filter((s) => s.latitude != null && s.longitude != null)
         .map((s) => ({
           ...s,
+          pricePerDay: moneyToNumber(s.pricePerDay),
           distanceKm: distanceKm(latitude, longitude, s.latitude!, s.longitude!),
         }))
         .filter((s) => s.distanceKm <= radiusInKm)

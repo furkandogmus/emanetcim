@@ -15,6 +15,7 @@ import {
   Luggage,
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
+import { moneyToNumber } from "@/lib/money";
 import QRScanner from "@/components/partner/QRScanner";
 import PartnerShopSettingsForm from "@/components/partner/PartnerShopSettingsForm";
 import {
@@ -447,7 +448,9 @@ export default function PartnerClient({
                           {booking.status === "CANCELLED"
                             ? "0"
                             : Math.round(
-                                booking.totalPrice * merchantShareRatio * 100
+                                moneyToNumber(booking.totalPrice) *
+                                  merchantShareRatio *
+                                  100
                               ) / 100}
                           <span className="text-[10px] ml-1 opacity-40 uppercase">
                             TL

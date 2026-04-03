@@ -5,6 +5,7 @@ import { bookingService } from "@/services/BookingService";
 import PartnerClient from "@/components/partner/PartnerClient";
 import { redirect } from "next/navigation";
 import { getMerchantShareRatio } from "@/lib/platform-split";
+import { moneyToNumber } from "@/lib/money";
 
 /**
  * esnaf Ana Sayfası - Partner Dashboard (Server Component)
@@ -53,7 +54,8 @@ export default async function PartnerPage({
     (b) => b.status === "PAID" || b.status === "CHECKED_IN"
   ).length;
   const totalEarnings = bookings.reduce(
-    (sum, b) => sum + (b.status !== "CANCELLED" ? b.totalPrice : 0),
+    (sum, b) =>
+      sum + (b.status !== "CANCELLED" ? moneyToNumber(b.totalPrice) : 0),
     0
   );
 
@@ -69,7 +71,7 @@ export default async function PartnerPage({
       initialCapacity={activeShop.capacity}
       initialOpening={activeShop.openingTime || "09:00"}
       initialClosing={activeShop.closingTime || "20:00"}
-      initialPricePerDay={activeShop.pricePerDay || 50}
+      initialPricePerDay={moneyToNumber(activeShop.pricePerDay) || 50}
       bookings={JSON.parse(JSON.stringify(bookings))}
       initialBookingId={initialBookingId}
       initialCheckoutBookingId={initialCheckoutBookingId}

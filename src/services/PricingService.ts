@@ -1,4 +1,5 @@
 import { computeDailyBagLineTotal } from '@/lib/bag-pricing';
+import { moneyToNumber } from '@/lib/money';
 
 /**
  * PricingService - Emanetçi Fiyatlandırma ve İade Motoru
@@ -22,16 +23,19 @@ export class PricingService {
    * Kural: Tamamlanmamış her "Tam Gün" (24 saatlik blok) iade edilir.
    * Günlük hizmet tutarı, S/M/XL çarpanları checkout ile aynı şekilde hesaplanır.
    */
-  calculateEarlyRefund(booking: {
-    checkInTime: Date | string;
-    checkOutTime: Date | string;
-    unitPrice?: number | null;
-    bagCountS?: number | null;
-    bagCountM?: number | null;
-    bagCountXl?: number | null;
-    totalPrice?: number | null;
-    insuranceFee?: number | null;
-  }, actualCheckOut: Date): number {
+  calculateEarlyRefund(
+    booking: {
+      checkInTime: Date | string;
+      checkOutTime: Date | string;
+      unitPrice?: unknown;
+      bagCountS?: number | null;
+      bagCountM?: number | null;
+      bagCountXl?: number | null;
+      totalPrice?: unknown;
+      insuranceFee?: unknown;
+    },
+    actualCheckOut: Date
+  ): number {
     const checkInTime = new Date(booking.checkInTime);
     const scheduledCheckOutTime = new Date(booking.checkOutTime);
 
@@ -45,7 +49,7 @@ export class PricingService {
 
     if (savedDays <= 0) return 0;
 
-    const unitPrice = booking.unitPrice || 50;
+    const unitPrice = moneyToNumber(booking.unitPrice) || 50;
     const dailyService = computeDailyBagLineTotal(
       unitPrice,
       booking.bagCountS ?? 0,
@@ -55,8 +59,8 @@ export class PricingService {
 
     const rawRefund = savedDays * dailyService * 0.9;
 
-    const insuranceFee = typeof booking.insuranceFee === 'number' ? booking.insuranceFee : 0;
-    const servicePaid = Math.max(0, (booking.totalPrice ?? 0) - insuranceFee);
+    const insuranceFee = moneyToNumber(booking.insuranceFee);
+    const servicePaid = Math.max(0, moneyToNumber(booking.totalPrice) - insuranceFee);
 
     const capped = Math.min(rawRefund, servicePaid);
     return Math.round(capped * 100) / 100;

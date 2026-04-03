@@ -111,7 +111,7 @@ model Shop {
   capacity  Int     @default(10) // Günlük maksimum valiz sayısı
   isActive  Boolean @default(false)
   rating    Float?  @default(0.0)
-  pricePerDay Float   @default(50.0) // Günlük valiz başı ücret
+  pricePerDay Decimal @db.Decimal(12, 2) @default(50) // Günlük valiz başı ücret (TRY)
   hasRestroom Boolean @default(false)
   open247     Boolean @default(false)
 
@@ -150,14 +150,14 @@ model Booking {
   bagCountM  Int @default(0)
   bagCountXl Int @default(0)
 
-  unitPrice  Float @default(50.0) // Rezervasyon anındaki birim fiyat
-  totalPrice Float @default(0.0)
+  unitPrice  Decimal @db.Decimal(12, 2) @default(50) // Rezervasyon anındaki birim fiyat (TRY)
+  totalPrice Decimal @db.Decimal(12, 2) @default(0)
   /// Sigorta / güvence ücreti (iptal ve erken iade hesaplarında hariç tutulur)
-  insuranceFee Float @default(0)
+  insuranceFee Decimal @db.Decimal(12, 2) @default(0)
 
   qrCodeToken  String? @unique // Güvenli şifrelenmiş QR verisi
   sealPhotoUrl String? // Esnafın çekmek zorunda olduğu mühür fotoğrafı
-  lateFeeApplied Float @default(0)
+  lateFeeApplied Decimal @db.Decimal(12, 2) @default(0)
   pendingBagRevision Json? // { bagCountS, bagCountM, bagCountXl, extraAmount } partner revizyon talebi
 
   createdAt DateTime @default(now())
@@ -180,7 +180,7 @@ model PaymentLog {
   bookingId String
 
   transactionId  String?       @unique // iyzico tarafındaki referans numarası
-  amount         Float
+  amount         Decimal @db.Decimal(12, 2)
   status         PaymentStatus @default(SUCCESS)
   splitCompleted Boolean       @default(false) // Esnafa para yattı mı?
 
@@ -228,9 +228,9 @@ model Review {
 model Coupon {
   id        String   @id @default(uuid())
   code      String   @unique
-  discount  Float    // Yüzde veya sabit TL indirimi
+  discount  Decimal @db.Decimal(12, 2) // Yüzde veya sabit TL indirimi
   isPercent Boolean  @default(true)
-  minPrice  Float?   @default(0.0)
+  minPrice  Decimal? @db.Decimal(12, 2) @default(0)
   maxUses   Int?     @default(100)
   usedCount Int      @default(0)
   expiresAt DateTime?
@@ -271,7 +271,7 @@ model Campaign {
   id              String   @id @default(uuid())
   name            String
   message         String?
-  discountPercent Float?
+  discountPercent Decimal? @db.Decimal(5, 2)
   isActive        Boolean  @default(true)
   startsAt        DateTime?
   endsAt          DateTime?

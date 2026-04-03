@@ -2,6 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { ChevronLeft } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import prisma from "@/lib/db";
+import { moneyToNumber } from "@/lib/money";
 import AdminCampaignsClient from "@/components/admin/AdminCampaignsClient";
 
 /**
@@ -29,7 +30,7 @@ export default async function AdminCampaignsPage({
     select: { discountPercent: true },
   });
   const maxDiscount = activeCampaigns.reduce(
-    (m, c) => Math.max(m, c.discountPercent ?? 0),
+    (m, c) => Math.max(m, moneyToNumber(c.discountPercent ?? 0)),
     0
   );
   const activeDiscountLabel =
@@ -54,7 +55,8 @@ export default async function AdminCampaignsPage({
     id: c.id,
     name: c.name,
     message: c.message,
-    discountPercent: c.discountPercent,
+    discountPercent:
+      c.discountPercent != null ? moneyToNumber(c.discountPercent) : null,
     isActive: c.isActive,
     endsAt: c.endsAt ? c.endsAt.toISOString() : null,
   }));
