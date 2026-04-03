@@ -1,0 +1,278 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ----------------------------------------------------------------------------
+// ENUMS
+// ----------------------------------------------------------------------------
+
+enum Role {
+  GUEST
+  PARTNER
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING // Ödeme bekleniyor
+  PAID // Ödendi, müşteri bekleniyor
+  CHECKED_IN // Valiz dükkanda
+  CHECKED_OUT // Valiz teslim edildi
+  CANCELLED // İptal edildi
+}
+
+enum PaymentStatus {
+  SUCCESS
+  REFUNDED
+  FAILED
+}
+
+// ----------------------------------------------------------------------------
+// MODELS
+// ----------------------------------------------------------------------------
+
+model User {
+  id            String    @id @default(uuid())
+  role          Role      @default(GUEST)
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  phone         String?   @unique
+  name          String?
+  /// bcrypt hash; OAuth-only kullanıcılarda null
+  passwordHash  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Auth.js İlişkileri
+  accounts Account[]
+  sessions Session[]
+
+  // Uygulama İlişkileri
+  shops    Shop[] // Eğer rolü PARTNER ise
+  bookings Booking[] // Eğer rolü GUEST ise
+  reviews  Review[] // Misafir olarak yaptığı yorumlar
+
+  @@index([email])
+}
+
+model Account {
+  id                 String  @id @default(uuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Shop {
+  id        String  @id @default(uuid())
+  ownerId   String
+  name      String
+  address   String?
+  latitude  Float?
+  longitude Float?
+  capacity  Int     @default(10) // Günlük maksimum valiz sayısı
+  isActive  Boolean @default(false)
+  rating    Float?  @default(0.0)
+  pricePerDay Float   @default(50.0) // Günlük valiz başı ücret
+  hasRestroom Boolean @default(false)
+  open247     Boolean @default(false)
+
+  // iyzico Marketplace Alanları
+  subMerchantKey  String? @unique
+  subMerchantType String? // PERSONAL, PRIVATE_COMPANY, LIMITED_OR_JOINT_STOCK_COMPANY
+
+  // Çalışma Saatleri (Örn: "09:00", "20:00")
+  openingTime String? @default("09:00")
+  closingTime String? @default("20:00")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+
+  owner    User      @relation(fields: [ownerId], references: [id])
+  bookings Booking[]
+  reviews  Review[]
+  sealRequests SealRequest[]
+
+  @@index([ownerId])
+  @@index([isActive])
+}
+
+model Booking {
+  id      String @id @default(uuid())
+  guestId String
+  shopId  String
+
+  status BookingStatus @default(PENDING)
+
+  checkInTime  DateTime
+  checkOutTime DateTime
+
+  bagCountS  Int @default(0)
+  bagCountM  Int @default(0)
+  bagCountXl Int @default(0)
+
+  unitPrice  Float @default(50.0) // Rezervasyon anındaki birim fiyat
+  totalPrice Float @default(0.0)
+
+  qrCodeToken  String? @unique // Güvenli şifrelenmiş QR verisi
+  sealPhotoUrl String? // Esnafın çekmek zorunda olduğu mühür fotoğrafı
+  lateFeeApplied Float @default(0)
+  pendingBagRevision Json? // { bagCountS, bagCountM, bagCountXl, extraAmount } partner revizyon talebi
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  guest       User         @relation(fields: [guestId], references: [id])
+  shop        Shop         @relation(fields: [shopId], references: [id])
+  paymentLogs PaymentLog[]
+  notificationLogs NotificationLog[]
+  review      Review?
+  dispute     Dispute?
+
+  @@index([guestId])
+  @@index([shopId])
+  @@index([status])
+}
+
+model PaymentLog {
+  id        String @id @default(uuid())
+  bookingId String
+
+  transactionId  String?       @unique // iyzico tarafındaki referans numarası
+  amount         Float
+  status         PaymentStatus @default(SUCCESS)
+  splitCompleted Boolean       @default(false) // Esnafa para yattı mı?
+
+  createdAt DateTime @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+}
+
+model NotificationLog {
+  id        String   @id @default(uuid())
+  bookingId String?
+  type      String   // EMAIL, SMS, PUSH
+  recipient String
+  subject   String?
+  content   String
+  status    String   @default("SENT") // SENT, FAILED
+  error     String?
+
+  createdAt DateTime @default(now())
+
+  booking   Booking? @relation(fields: [bookingId], references: [id])
+
+  @@index([bookingId])
+  @@index([recipient])
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  bookingId String   @unique
+  guestId   String
+  shopId    String
+  rating    Int      @default(5)
+  comment   String?  @db.Text
+  
+  createdAt DateTime @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+  guest   User    @relation(fields: [guestId], references: [id])
+  shop    Shop    @relation(fields: [shopId], references: [id])
+
+  @@index([shopId])
+  @@index([guestId])
+}
+
+model Coupon {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  discount  Float    // Yüzde veya sabit TL indirimi
+  isPercent Boolean  @default(true)
+  minPrice  Float?   @default(0.0)
+  maxUses   Int?     @default(100)
+  usedCount Int      @default(0)
+  expiresAt DateTime?
+
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model Dispute {
+  id        String   @id @default(uuid())
+  bookingId String   @unique
+  reason    String   // DAMAGE, THEFT, OTHER
+  description String @db.Text
+  status    String   @default("OPEN") // OPEN, IN_REVIEW, RESOLVED, CLOSED
+  adminNote String?  @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  booking   Booking  @relation(fields: [bookingId], references: [id])
+}
+
+model SealRequest {
+  id        String   @id @default(uuid())
+  shopId    String
+  quantity  Int
+  status    String   @default("PENDING") // PENDING, SHIPPED, DELIVERED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  shop Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@index([shopId])
+  @@index([status])
+}
+
+model Campaign {
+  id              String   @id @default(uuid())
+  name            String
+  message         String?
+  discountPercent Float?
+  isActive        Boolean  @default(true)
+  startsAt        DateTime?
+  endsAt          DateTime?
+  createdAt       DateTime @default(now())
+}
+

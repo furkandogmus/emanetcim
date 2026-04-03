@@ -1,0 +1,89 @@
+"use client";
+
+import { signOut, useSession } from 'next-auth/react';
+import { User, LogOut, Shield, Store, ChevronDown } from 'lucide-react';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from '@/i18n/routing';
+
+export default function UserNav() {
+  const { data: session, status } = useSession();
+  const [isOpen, setIsOpen] = useState(false);
+
+  if (status === 'loading') return <div className="w-8 h-8 rounded-full bg-gray-100 animate-pulse" />;
+  if (status === 'unauthenticated') {
+    return (
+      <Link 
+        href="/login" 
+        className="text-xs font-black uppercase tracking-widest bg-orange-600 text-white px-6 py-3 rounded-full hover:bg-orange-700 transition-all shadow-lg shadow-orange-100 active:scale-95"
+      >
+        Giriş Yap
+      </Link>
+    );
+  }
+
+  const roleLabels: Record<string, { label: string, icon: any, color: string }> = {
+    'ADMIN': { label: 'Yönetici', icon: Shield, color: 'text-purple-600' },
+    'PARTNER': { label: 'Esnaf', icon: Store, color: 'text-blue-600' },
+    'GUEST': { label: 'Misafir', icon: User, color: 'text-orange-600' }
+  };
+
+  const currentRole = roleLabels[session?.user?.role as string] || roleLabels['GUEST'];
+  const Icon = currentRole.icon;
+
+  return (
+    <div className="relative">
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-3 bg-white border border-gray-100 p-2 pr-4 rounded-full shadow-sm hover:shadow-md transition-all active:scale-95"
+      >
+        <div className="w-8 h-8 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center font-bold text-sm">
+          {session?.user?.name?.[0] || 'U'}
+        </div>
+        <div className="hidden sm:block text-left">
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-tighter leading-none mb-1">Hoş Geldin</p>
+          <p className="text-xs font-bold text-gray-900 leading-none">{session?.user?.name?.split(' ')[0]}</p>
+        </div>
+        <ChevronDown size={14} className={`text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div 
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+            className="absolute right-0 mt-3 w-56 bg-white rounded-[2rem] shadow-2xl border border-gray-100 overflow-hidden z-[100]"
+          >
+            <div className="p-6 border-b border-gray-100 bg-gray-50/50">
+               <div className="flex items-center gap-2 mb-1">
+                  <Icon size={14} className={currentRole.color} />
+                  <span className={`text-[10px] font-black uppercase tracking-widest ${currentRole.color}`}>{currentRole.label}</span>
+               </div>
+               <p className="text-xs font-bold text-gray-500 truncate">{session?.user?.email}</p>
+            </div>
+
+            <div className="p-2">
+              <Link 
+                href={session?.user?.role === 'PARTNER' ? '/partner' : session?.user?.role === 'ADMIN' ? '/admin' : '/bookings'}
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-3 w-full p-4 hover:bg-gray-50 rounded-2xl transition-colors text-sm font-bold text-gray-700 cursor-pointer"
+              >
+                <Icon size={18} />
+                {session?.user?.role === 'ADMIN' ? 'Yönetim Paneli' : session?.user?.role === 'PARTNER' ? 'Mağaza Paneli' : 'Rezervasyonlarım'}
+              </Link>
+              
+              <button 
+                onClick={() => signOut()}
+                className="flex items-center gap-3 w-full p-4 hover:bg-red-50 rounded-2xl transition-colors text-sm font-bold text-red-600"
+              >
+                <LogOut size={18} />
+                Çıkış Yap
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}

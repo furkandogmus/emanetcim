@@ -1,0 +1,135 @@
+import { setRequestLocale, getTranslations } from "next-intl/server";
+import { shopService } from "@/services/ShopService";
+import prisma from "@/lib/db";
+import AdminDashboardClient from "@/components/admin/AdminDashboardClient";
+
+const PAID_STATUSES = ["PAID", "CHECKED_IN", "CHECKED_OUT"] as const;
+
+function buildWeekOverWeekTrend(
+  t: Awaited<ReturnType<typeof getTranslations>>,
+  current: number,
+  previous: number
+): string {
+  if (previous === 0 && current === 0) return t("trendNone");
+  if (previous === 0) return t("trendPrev7Zero", { count: current });
+  const raw = Math.round(((current - previous) / previous) * 100);
+  const pctLabel = raw >= 0 ? `+${raw}` : `${raw}`;
+  return t("trendWeekOverWeek", { pctLabel });
+}
+
+async function getDailyChartData() {
+  const out: { name: string; ciro: number; emanet: number }[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const dayStart = new Date();
+    dayStart.setHours(0, 0, 0, 0);
+    dayStart.setDate(dayStart.getDate() - i);
+    const dayEnd = new Date(dayStart);
+    dayEnd.setDate(dayEnd.getDate() + 1);
+    const agg = await prisma.booking.aggregate({
+      where: {
+        createdAt: { gte: dayStart, lt: dayEnd },
+        status: { in: [...PAID_STATUSES] },
+      },
+      _sum: { totalPrice: true },
+      _count: true,
+    });
+    out.push({
+      name: `${dayStart.getDate()}/${dayStart.getMonth() + 1}`,
+      ciro: Math.round(agg._sum.totalPrice || 0),
+      emanet: agg._count,
+    });
+  }
+  return out;
+}
+
+/**
+ * Admin Dashboard - Yönetim Masası (Server Component)
+ */
+export default async function AdminDashboard({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
+  const t = await getTranslations("Admin");
+
+  const pendingApps = await shopService.getPendingShops();
+  const totalBookings = await prisma.booking.count();
+  const activePartnersCount = await prisma.shop.count({ where: { isActive: true } });
+
+  const activeShops = await prisma.shop.findMany({
+    where: { isActive: true },
+    take: 5,
+    orderBy: { createdAt: "desc" },
+    include: { _count: { select: { bookings: true } } },
+  });
+
+  const revenueData = await prisma.booking.aggregate({
+    where: { status: { in: [...PAID_STATUSES] } },
+    _sum: { totalPrice: true },
+  });
+  const totalRevenue = revenueData._sum.totalPrice || 0;
+
+  const now = new Date();
+  const start7 = new Date(now);
+  start7.setDate(start7.getDate() - 7);
+  start7.setHours(0, 0, 0, 0);
+  const start14 = new Date(start7);
+  start14.setDate(start14.getDate() - 7);
+
+  const [
+    last7Bookings,
+    prev7Bookings,
+    last7Rev,
+    prev7Rev,
+    shopsWeek,
+    shopsPrev,
+    chartData,
+  ] = await Promise.all([
+    prisma.booking.count({ where: { createdAt: { gte: start7 } } }),
+    prisma.booking.count({
+      where: { createdAt: { gte: start14, lt: start7 } },
+    }),
+    prisma.booking.aggregate({
+      where: {
+        createdAt: { gte: start7 },
+        status: { in: [...PAID_STATUSES] },
+      },
+      _sum: { totalPrice: true },
+    }),
+    prisma.booking.aggregate({
+      where: {
+        createdAt: { gte: start14, lt: start7 },
+        status: { in: [...PAID_STATUSES] },
+      },
+      _sum: { totalPrice: true },
+    }),
+    prisma.shop.count({ where: { createdAt: { gte: start7 } } }),
+    prisma.shop.count({
+      where: { createdAt: { gte: start14, lt: start7 } },
+    }),
+    getDailyChartData(),
+  ]);
+
+  const stats = {
+    totalBookings: totalBookings.toLocaleString(),
+    dailyRevenue: `₺${Math.round(totalRevenue).toLocaleString()}`,
+    activePartners: activePartnersCount,
+    pendingApplications: pendingApps.length,
+    trends: {
+      bookings: buildWeekOverWeekTrend(t, last7Bookings, prev7Bookings),
+      revenue: buildWeekOverWeekTrend(
+        t,
+        Math.round(last7Rev._sum.totalPrice || 0),
+        Math.round(prev7Rev._sum.totalPrice || 0)
+      ),
+      partners: buildWeekOverWeekTrend(t, shopsWeek, shopsPrev),
+    },
+  };
+
+  return (
+    <AdminDashboardClient stats={stats} activeShops={activeShops} chartData={chartData} />
+  );
+}
