@@ -5,18 +5,34 @@ import type { NextAuthConfig } from "next-auth";
 import { verifyPassword } from "@/lib/auth-password";
 
 /**
+ * OAuth sağlayıcıları env eksikken bile tanımlanırsa Auth.js `Configuration` hatası verebilir;
+ * yalnızca kimlik bilgisi doluysa eklenir.
+ */
+const oauthProviders = [
+  ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+    ? [
+        Google({
+          clientId: process.env.GOOGLE_CLIENT_ID,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        }),
+      ]
+    : []),
+  ...(process.env.APPLE_ID && process.env.APPLE_SECRET
+    ? [
+        Apple({
+          clientId: process.env.APPLE_ID,
+          clientSecret: process.env.APPLE_SECRET,
+        }),
+      ]
+    : []),
+];
+
+/**
  * Auth.js Edge-Compatible Configuration
  */
 export const authConfig = {
   providers: [
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }),
-    Apple({
-      clientId: process.env.APPLE_ID,
-      clientSecret: process.env.APPLE_SECRET,
-    }),
+    ...oauthProviders,
     Credentials({
       name: "credentials",
       credentials: {

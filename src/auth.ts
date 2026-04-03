@@ -38,6 +38,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: "/login",
     error: "/auth/error",
   },
-  secret: process.env.AUTH_SECRET,
+  /** Yerel geliştirmede .env’de AUTH_SECRET yoksa giriş `Configuration` hatası verir; prod’da AUTH_SECRET zorunlu. */
+  secret:
+    process.env.AUTH_SECRET ||
+    (process.env.NODE_ENV === "development"
+      ? "dev-only-auth-secret-not-for-production"
+      : undefined),
 });
 

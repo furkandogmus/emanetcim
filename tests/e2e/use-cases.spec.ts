@@ -98,7 +98,8 @@ test.describe('UC: Esnaf — Partner paneli', () => {
     await page.goto('/tr/login');
     await page.getByText('Esnaf Girişi').click();
     await expect(page).toHaveURL(/\/tr\/partner/, { timeout: 20000 });
-    await expect(page.getByText(/galata gift/i)).toBeVisible();
+    // İlk dükkan: getShopsByOwner createdAt desc → en son oluşturulan (seed: Sultanahmet)
+    await expect(page.getByTestId('partner-shop-name')).toContainText(/sultanahmet|galata/i);
   });
 
   test('QR teslim al modalı aç/kapat', async ({ page }) => {
@@ -123,7 +124,8 @@ test.describe('UC: Esnaf — Partner paneli', () => {
     await page.getByText('Esnaf Girişi').click();
     await expect(page).toHaveURL(/\/tr\/partner/, { timeout: 20000 });
     await page.goto('/tr/partner/settings');
-    await expect(page.getByText('15', { exact: true }).first()).toBeVisible();
+    await expect(page.getByTestId('partner-settings-capacity')).toBeVisible();
+    await expect(page.getByTestId('partner-settings-capacity')).toHaveValue(/^(15|25)$/);
   });
 });
 

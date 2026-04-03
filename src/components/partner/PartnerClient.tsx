@@ -320,7 +320,10 @@ export default function PartnerClient({
 
       <header className="flex justify-between items-start mb-12 gap-4">
         <div>
-          <h1 className="text-3xl font-black tracking-tighter text-gray-900 border-b-4 border-orange-500 pb-1 inline-block capitalize">
+          <h1
+            className="text-3xl font-black tracking-tighter text-gray-900 border-b-4 border-orange-500 pb-1 inline-block capitalize"
+            data-testid="partner-shop-name"
+          >
             {shopName.toLowerCase()}
           </h1>
           <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-3">

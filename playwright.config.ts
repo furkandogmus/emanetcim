@@ -37,5 +37,12 @@ export default defineConfig({
     stdout: 'pipe',
     stderr: 'pipe',
     timeout: 120 * 1000,
+    env: {
+      ...process.env,
+      // docker-compose.yml postgres (host 5433); .env yoksa veya yanlışsa E2E yine DB’ye bağlansın
+      DATABASE_URL:
+        process.env.DATABASE_URL ||
+        'postgresql://emanetci:emanetci@localhost:5433/emanetci?schema=public',
+    },
   },
 });

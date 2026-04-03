@@ -92,7 +92,13 @@ export default function LoginPage() {
           </button>
 
           <button 
-            onClick={() => signIn('credentials', { email: 'galata@shop.com', callbackUrl: '/tr/partner' })}
+            onClick={() =>
+              signIn('credentials', {
+                email: 'galata@shop.com',
+                password: DEMO_PASSWORD,
+                callbackUrl: '/tr/partner',
+              })
+            }
             className="group p-4 border border-blue-50 rounded-2xl bg-blue-50/30 hover:bg-blue-50 transition-all flex flex-col items-center gap-2 text-center"
           >
             <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">

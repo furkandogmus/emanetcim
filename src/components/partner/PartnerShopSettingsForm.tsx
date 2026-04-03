@@ -68,6 +68,7 @@ export default function PartnerShopSettingsForm({
               <Luggage size={20} className="text-gray-300" />
               <input
                 type="number"
+                data-testid="partner-settings-capacity"
                 value={capacity}
                 onChange={(e) => setCapacity(parseInt(e.target.value, 10) || 0)}
                 className="flex-1 bg-gray-50 p-4 rounded-2xl font-bold outline-none border border-transparent focus:border-orange-500 transition-all"

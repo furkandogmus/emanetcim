@@ -25,11 +25,9 @@ test.describe('Emanetçi Core Flows', () => {
 
   test('should navigate to the search page when clicking the search bar', async ({ page }) => {
     await page.goto('/tr');
-    
-    // Landing page has a Link to /search
-    await page.click('text=Emanet Noktası Bul');
-    
-    // Wait for navigation
+
+    await page.getByRole('link', { name: /Emanet Noktası Bul/i }).click();
+
     await expect(page).toHaveURL(/\/tr\/search/);
   });
 
