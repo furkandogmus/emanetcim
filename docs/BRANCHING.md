@@ -27,6 +27,10 @@ Kabaca:
 
 `main`’i doğrudan korumak için GitHub’da branch protection (Settings → Branches) ile PR zorunluluğu açabilirsiniz.
 
+## Sürüm (kısa)
+
+`npm run release:patch` ve tag push — ayrıntı **`docs/VERSIONING.md`**.
+
 ## Acil düzeltme (hotfix)
 
 Kritik üretim hatası: `main`’den `hotfix/acil-düzeltme` açıp düzeltme → PR → `main` + `develop`’e geri merge (dalınızı kaybetmemek için).

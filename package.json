@@ -16,7 +16,10 @@
     "postinstall": "prisma generate",
     "docker:up": "docker compose up --build -d",
     "docker:down": "docker compose down",
-    "docker:logs": "docker compose logs -f web"
+    "docker:logs": "docker compose logs -f web",
+    "release:patch": "npm version patch -m \"chore(release): %s\"",
+    "release:minor": "npm version minor -m \"chore(release): %s\"",
+    "release:major": "npm version major -m \"chore(release): %s\""
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",

@@ -13,3 +13,5 @@ Next.js tabanlı Emanetçi uygulaması (PostgreSQL, Prisma, Auth.js, iyzico).
 CI: `main` dalına push / PR’da **test** ve **build** (GitHub Actions). ESLint uyarıları azalınca workflow’a `npm run lint` eklenebilir.
 
 **Dallar:** günlük işler için `develop` + `feature/...`; ayrıntı [`docs/BRANCHING.md`](docs/BRANCHING.md). Yerel `npm run dev` hangi dalda olursanız olun aynı hızda çalışır.
+
+**Sürüm:** `npm run release:patch` → `git push --follow-tags` → GitHub’da otomatik Release. [`docs/VERSIONING.md`](docs/VERSIONING.md).
