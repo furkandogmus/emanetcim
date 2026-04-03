@@ -25,6 +25,23 @@ describe("iyzico X-IYZ-SIGNATURE-V3 (Direct Format)", () => {
     }
   });
 
+  it("production: missing signature is always rejected", () => {
+    const prevEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "production";
+    process.env.IYZICO_WEBHOOK_ALLOW_UNSIGNED = "true";
+    try {
+      expect(
+        verifyIyzicoWebhookSignatureV3(
+          { status: "SUCCESS", paymentConversationId: "x" },
+          undefined
+        )
+      ).toBe(false);
+    } finally {
+      process.env.NODE_ENV = prevEnv;
+      delete process.env.IYZICO_WEBHOOK_ALLOW_UNSIGNED;
+    }
+  });
+
   it("HPP: uses token branch when token is non-empty", () => {
     const secretKey = "sec";
     const body = {

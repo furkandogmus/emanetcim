@@ -13,6 +13,7 @@ import { isPaymentSuccess } from "@/lib/payment-status";
 import { computeSubMerchantShare } from "@/lib/platform-split";
 import logger from "@/lib/logger";
 import { computeAuthoritativeCheckoutTotals } from "@/lib/booking-server-price";
+import { getPricingRules } from "@/lib/platform-settings";
 import { moneyToNumber } from "@/lib/money";
 import type { PrismaClient } from "@prisma/client";
 
@@ -63,13 +64,15 @@ export async function createBookingAction(data: CreateBookingInput) {
   const checkInTime = new Date(data.checkInTime);
   const checkOutTime = new Date(data.checkOutTime);
 
+  const pricingRules = await getPricingRules();
   const authTotals = computeAuthoritativeCheckoutTotals(
     moneyToNumber(shop.pricePerDay),
     data.bagCountS,
     data.bagCountM,
     data.bagCountXl,
     checkInTime,
-    checkOutTime
+    checkOutTime,
+    pricingRules
   );
 
   if (authTotals.subtotalBeforeCoupon <= 0) {
@@ -132,7 +135,8 @@ export async function createBookingAction(data: CreateBookingInput) {
       bagCountXl: authTotals.bagCountXl,
       checkInTime,
       checkOutTime,
-      unitPrice: moneyToNumber(shop.pricePerDay) || 50,
+      unitPrice:
+        moneyToNumber(shop.pricePerDay) || pricingRules.defaultPricePerDay,
     });
   } catch (e: unknown) {
     if (e instanceof BookingCapacityExceededError) {
@@ -225,15 +229,14 @@ export async function cancelBookingAction(bookingId: string) {
   }
 
   try {
-    const success = await bookingService.cancelBooking(bookingId);
+    const result = await bookingService.cancelBooking(bookingId);
 
-    if (success) {
+    if (result.ok) {
       revalidatePathAllLocales("/bookings");
       revalidatePathAllLocales("/admin");
       return { success: true };
-    } else {
-      return { success: false, error: "İptal işlemi sırasında bir hata oluştu." };
     }
+    return { success: false, error: result.message };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Bilinmeyen bir hata oluştu.";
     return { success: false, error: message };

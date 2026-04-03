@@ -10,21 +10,22 @@ import { createBookingAction } from '@/actions/booking';
 import {
   computeDailyBagLineTotal,
   computeServiceTotalForStay,
-  MAX_STAY_DAYS,
   roundedSlotPrices,
 } from '@/lib/bag-pricing';
+import type { PricingRules } from '@/lib/pricing-rules';
 
 interface CheckoutClientProps {
   shopId: string;
   shopName: string;
   shopAddress: string;
   pricePerDay: number;
+  pricingRules: PricingRules;
 }
 
-export default function CheckoutClient({ shopId, shopName, shopAddress, pricePerDay }: CheckoutClientProps) {
+export default function CheckoutClient({ shopId, shopName, shopAddress, pricePerDay, pricingRules }: CheckoutClientProps) {
   const t = useTranslations('Guest');
 
-  const slot = roundedSlotPrices(pricePerDay);
+  const slot = roundedSlotPrices(pricePerDay, pricingRules);
   const priceS = slot.s;
   const priceM = slot.m;
   const priceXl = slot.xl;
@@ -46,15 +47,16 @@ export default function CheckoutClient({ shopId, shopName, shopAddress, pricePer
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [couponCode, setCouponCode] = useState("");
 
-  const dailyLine = computeDailyBagLineTotal(pricePerDay, bagS, bagM, bagXl);
+  const dailyLine = computeDailyBagLineTotal(pricePerDay, bagS, bagM, bagXl, pricingRules);
   const totalPrice = computeServiceTotalForStay(
     pricePerDay,
     bagS,
     bagM,
     bagXl,
-    numberOfDays
+    numberOfDays,
+    pricingRules
   );
-  const insuranceFee = totalPrice > 0 ? 15 : 0;
+  const insuranceFee = totalPrice > 0 ? pricingRules.insuranceFeeTry : 0;
 
   const handlePayment = async () => {
     if (!cardHolder || cardNumber.length < 16 || !expiry || cvv.length < 3) {
@@ -217,8 +219,8 @@ export default function CheckoutClient({ shopId, shopName, shopAddress, pricePer
               <button
                 type="button"
                 data-testid="checkout-stay-days-increase"
-                onClick={() => setNumberOfDays((d) => Math.min(MAX_STAY_DAYS, d + 1))}
-                disabled={numberOfDays >= MAX_STAY_DAYS}
+                onClick={() => setNumberOfDays((d) => Math.min(pricingRules.maxStayDays, d + 1))}
+                disabled={numberOfDays >= pricingRules.maxStayDays}
                 aria-label="Increase days"
                 className="w-10 h-10 rounded-full bg-orange-600 flex items-center justify-center text-white hover:bg-orange-700 transition-all active:scale-95 shadow-md shadow-orange-200 disabled:opacity-40 disabled:cursor-not-allowed"
               >

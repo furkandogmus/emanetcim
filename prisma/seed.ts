@@ -12,6 +12,12 @@ export const SEED_GALATA_SHOP_ID = 'e2e00000-0000-4000-8000-000000000001';
 async function main() {
   console.log('Seedleme başlatılıyor...');
 
+  await prisma.platformSettings.upsert({
+    where: { id: 'default' },
+    create: { id: 'default' },
+    update: {},
+  });
+
   /** Login sayfası ile aynı: `NEXT_PUBLIC_DEMO_PASSWORD` yoksa `Demo123!` (DEMO_PASSWORD tek başına istemcide yok). */
   const demoPassword =
     typeof process.env.NEXT_PUBLIC_DEMO_PASSWORD === 'string' &&

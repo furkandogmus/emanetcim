@@ -2,12 +2,15 @@ import { Booking, Prisma } from '@prisma/client';
 import prisma from '@/lib/db';
 import { createQrToken } from '@/lib/qr-token';
 import { isRefundSuccess } from '@/lib/payment-status';
+import logger from '@/lib/logger';
 import { isShopOpenAt } from '@/lib/shop-hours';
 import { totalBagCount } from '@/lib/bag-pricing';
+import { getPricingRules } from '@/lib/platform-settings';
 import { moneyToNumber } from '@/lib/money';
 import type {
   PartnerCheckInResult,
   PartnerCheckOutResult,
+  CancelBookingResult,
 } from '@/types/partner-booking';
 
 type TxClient = Omit<
@@ -30,7 +33,7 @@ export interface IBookingService {
   getUserBookings(userId: string): Promise<any[]>;
   getPartnerBookings(shopId: string): Promise<any[]>;
   getBookingDetails(id: string): Promise<any>;
-  cancelBooking(bookingId: string): Promise<boolean>;
+  cancelBooking(bookingId: string): Promise<CancelBookingResult>;
   markAsPaid(bookingId: string): Promise<void>;
 }
 
@@ -53,6 +56,7 @@ export class BookingService implements IBookingService {
     unitPrice?: number;
     insuranceFee?: number;
   }): Promise<Booking> {
+    const rules = await getPricingRules();
     return prisma.$transaction(
       async (tx) => {
         const shop = await tx.shop.findUnique({ where: { id: data.shopId } });
@@ -67,7 +71,7 @@ export class BookingService implements IBookingService {
         const unitPrice =
           typeof data.unitPrice === 'number' && Number.isFinite(data.unitPrice)
             ? data.unitPrice
-            : moneyToNumber(shop.pricePerDay) || 50;
+            : moneyToNumber(shop.pricePerDay) || rules.defaultPricePerDay;
         const insuranceFee =
           typeof data.insuranceFee === 'number' && Number.isFinite(data.insuranceFee)
             ? Math.max(0, data.insuranceFee)
@@ -237,11 +241,16 @@ export class BookingService implements IBookingService {
       const now = new Date();
 
       // 1. Erken Teslimat İadesi Hesabı (UC_E_06_EXTRA)
+      const pricingRules = await getPricingRules();
       const { pricingService } = await import('./PricingService');
-      const refundAmount = pricingService.calculateEarlyRefund(booking, now);
+      const refundAmount = pricingService.calculateEarlyRefund(
+        booking,
+        now,
+        pricingRules
+      );
 
       if (refundAmount > 0) {
-        const { paymentService } = await import('./PaymentService');
+        const { paymentService } = await import('@/services/PaymentService');
         const refundResult = await paymentService.refundPayment(
           bookingId,
           refundAmount
@@ -327,32 +336,66 @@ export class BookingService implements IBookingService {
 
   /**
    * Rezervasyon İptali ve İade Süreci
+   * PAID iken iade başarısızsa rezervasyon CANCELLED yapılmaz (finansal tutarlılık).
    */
-  async cancelBooking(bookingId: string): Promise<boolean> {
+  async cancelBooking(bookingId: string): Promise<CancelBookingResult> {
     const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
 
-    if (!booking || booking.status === 'CANCELLED' || booking.status === 'CHECKED_IN' || booking.status === 'CHECKED_OUT') {
-      return false;
+    if (!booking) {
+      return { ok: false, code: 'NOT_FOUND', message: 'Rezervasyon bulunamadı.' };
+    }
+    if (
+      booking.status === 'CANCELLED' ||
+      booking.status === 'CHECKED_IN' ||
+      booking.status === 'CHECKED_OUT'
+    ) {
+      return {
+        ok: false,
+        code: 'INVALID_STATUS',
+        message: 'Bu rezervasyon iptal edilemez.',
+      };
     }
 
     try {
+      const rules = await getPricingRules();
       if (booking.status === 'PAID') {
         const insuranceFee = moneyToNumber(booking.insuranceFee);
         const serviceBase = Math.max(0, moneyToNumber(booking.totalPrice) - insuranceFee);
-        const refundAmount = Math.max(0, serviceBase - 20); // 20 TL Sabit Kesinti (hizmet bedeli)
-        const { paymentService } = await import('./PaymentService');
-        await paymentService.refundPayment(bookingId, refundAmount);
+        const refundAmount = Math.max(
+          0,
+          serviceBase - rules.cancelFixedFeeTry
+        );
+        const { paymentService } = await import('@/services/PaymentService');
+        if (refundAmount > 0) {
+          const refundResult = await paymentService.refundPayment(bookingId, refundAmount);
+          if (!isRefundSuccess(refundResult?.status)) {
+            logger.error(
+              { bookingId, refundAmount, status: refundResult?.status },
+              'cancelBooking_refund_failed',
+            );
+            return {
+              ok: false,
+              code: 'REFUND_FAILED',
+              message:
+                'İade şu an tamamlanamadı. Lütfen daha sonra tekrar deneyin veya destek ile iletişime geçin.',
+            };
+          }
+        }
       }
 
       await prisma.booking.update({
         where: { id: bookingId },
-        data: { status: 'CANCELLED' }
+        data: { status: 'CANCELLED' },
       });
 
-      return true;
+      return { ok: true };
     } catch (error) {
-      console.error('BookingService::cancelBooking Error:', error);
-      return false;
+      logger.error({ err: error, bookingId }, 'BookingService::cancelBooking');
+      return {
+        ok: false,
+        code: 'UNKNOWN',
+        message: 'İptal sırasında beklenmeyen bir hata oluştu.',
+      };
     }
   }
 }

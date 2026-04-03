@@ -1,14 +1,25 @@
-/**
- * Merkezi valiz fiyat çarpanları — CheckoutClient ve PricingService ile aynı kurallar.
- */
-export const BAG_MULTIPLIERS = { S: 0.8, M: 1.0, XL: 1.5 } as const;
+import {
+  DEFAULT_PRICING_RULES,
+  type PricingRules,
+} from "@/lib/pricing-rules";
 
-export function roundedSlotPrices(pricePerDay: number) {
-  const base = Number.isFinite(pricePerDay) ? pricePerDay : 50;
+export type { PricingRules };
+
+/**
+ * Merkezi valiz fiyat çarpanları — `PricingRules` ile DB ayarlarından beslenir.
+ */
+export function roundedSlotPrices(
+  pricePerDay: number,
+  rules: PricingRules = DEFAULT_PRICING_RULES
+) {
+  const base = Number.isFinite(pricePerDay)
+    ? pricePerDay
+    : rules.defaultPricePerDay;
+  const m = rules.bagMultipliers;
   return {
-    s: Math.round(base * BAG_MULTIPLIERS.S),
-    m: Math.round(base * BAG_MULTIPLIERS.M),
-    xl: Math.round(base * BAG_MULTIPLIERS.XL),
+    s: Math.round(base * m.S),
+    m: Math.round(base * m.M),
+    xl: Math.round(base * m.XL),
   };
 }
 
@@ -17,12 +28,11 @@ export function computeDailyBagLineTotal(
   pricePerDay: number,
   bagCountS: number,
   bagCountM: number,
-  bagCountXl: number
+  bagCountXl: number,
+  rules: PricingRules = DEFAULT_PRICING_RULES
 ): number {
-  const p = roundedSlotPrices(pricePerDay);
-  return (
-    bagCountS * p.s + bagCountM * p.m + bagCountXl * p.xl
-  );
+  const p = roundedSlotPrices(pricePerDay, rules);
+  return bagCountS * p.s + bagCountM * p.m + bagCountXl * p.xl;
 }
 
 export function totalBagCount(
@@ -33,27 +43,28 @@ export function totalBagCount(
   return bagCountS + bagCountM + bagCountXl;
 }
 
-const MAX_STAY_DAYS = 30;
-
 /** Günlük hizmet satırı × gün sayısı (checkout ile aynı yuvarlama). */
 export function computeServiceTotalForStay(
   pricePerDay: number,
   bagCountS: number,
   bagCountM: number,
   bagCountXl: number,
-  numberOfDays: number
+  numberOfDays: number,
+  rules: PricingRules = DEFAULT_PRICING_RULES
 ): number {
   const daily = computeDailyBagLineTotal(
     pricePerDay,
     bagCountS,
     bagCountM,
-    bagCountXl
+    bagCountXl,
+    rules
   );
   const days = Math.max(
     1,
-    Math.min(MAX_STAY_DAYS, Math.floor(numberOfDays))
+    Math.min(rules.maxStayDays, Math.floor(numberOfDays))
   );
   return Math.round(daily * days * 100) / 100;
 }
 
-export { MAX_STAY_DAYS };
+/** Geriye dönük uyumluluk (test / sabit referans). */
+export const MAX_STAY_DAYS = DEFAULT_PRICING_RULES.maxStayDays;

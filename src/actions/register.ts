@@ -6,6 +6,7 @@ import { hashPassword } from "@/lib/auth-password";
 import { Role } from "@prisma/client";
 import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
+import { getPricingRules } from "@/lib/platform-settings";
 
 const guestSchema = z.object({
   email: z.string().email(),
@@ -84,6 +85,7 @@ export async function registerPartnerApplicationAction(data: unknown) {
   }
 
   const passwordHash = await hashPassword(parsed.data.password);
+  const rules = await getPricingRules();
 
   await prisma.$transaction(async (tx) => {
     const user = await tx.user.create({
@@ -101,8 +103,8 @@ export async function registerPartnerApplicationAction(data: unknown) {
         name: parsed.data.shopName.trim(),
         address: parsed.data.shopAddress.trim(),
         isActive: false,
-        capacity: 10,
-        pricePerDay: 50,
+        capacity: rules.defaultShopCapacity,
+        pricePerDay: rules.defaultPricePerDay,
       },
     });
   });

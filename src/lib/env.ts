@@ -26,9 +26,17 @@ export function getServerEnv(): ServerEnv {
 
 export function requireProdSecrets(): void {
   if (process.env.NODE_ENV !== "production") return;
+  if (process.env.IYZICO_WEBHOOK_ALLOW_UNSIGNED === "true") {
+    throw new Error(
+      "IYZICO_WEBHOOK_ALLOW_UNSIGNED must not be set to true in production"
+    );
+  }
   const e = getServerEnv();
   if (!e.AUTH_SECRET?.trim()) {
     throw new Error("AUTH_SECRET is required in production");
+  }
+  if (!e.DATABASE_URL?.trim()) {
+    throw new Error("DATABASE_URL is required in production");
   }
   if (!e.IYZICO_API_KEY?.trim()) {
     throw new Error("IYZICO_API_KEY is required in production");

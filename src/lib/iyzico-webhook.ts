@@ -58,6 +58,10 @@ export function verifyIyzicoWebhookSignatureV3(
   const sig = signatureHeader?.trim();
 
   if (!sig) {
+    // Production: never accept unsigned webhooks (misconfiguration footgun).
+    if (process.env.NODE_ENV === "production") {
+      return false;
+    }
     return process.env.IYZICO_WEBHOOK_ALLOW_UNSIGNED === "true";
   }
 

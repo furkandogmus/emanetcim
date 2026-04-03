@@ -17,3 +17,13 @@ export type PartnerCheckInResult =
 export type PartnerCheckOutResult =
   | { ok: true }
   | { ok: false; code: PartnerCheckOutErrorCode; message: string };
+
+export type CancelBookingErrorCode =
+  | "NOT_FOUND"
+  | "INVALID_STATUS"
+  | "REFUND_FAILED"
+  | "UNKNOWN";
+
+export type CancelBookingResult =
+  | { ok: true }
+  | { ok: false; code: CancelBookingErrorCode; message: string };

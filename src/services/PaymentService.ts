@@ -1,8 +1,10 @@
 import { iyzipay } from "@/lib/iyzipay";
 import Iyzipay from 'iyzipay';
+import { Prisma } from '@prisma/client';
 import prisma from '@/lib/db';
 import { isPaymentSuccess } from '@/lib/payment-status';
 import { moneyToNumber } from '@/lib/money';
+import logger from '@/lib/logger';
 
 export interface IPaymentService {
   initializeMarketplacePayment(data: any): Promise<any>;
@@ -15,6 +17,21 @@ export interface IPaymentService {
  * Paranın esnaf ve platform arasında bölünmesini yönetir.
  */
 export class PaymentService implements IPaymentService {
+  /** PostgreSQL: aynı booking için ödeme init sıralaması (çifte iyzico çağrısı önleme). */
+  private async acquirePaymentLock(bookingId: string): Promise<void> {
+    await prisma.$executeRawUnsafe(
+      `SELECT pg_advisory_lock(hashtext($1::text)::bigint)`,
+      bookingId
+    );
+  }
+
+  private async releasePaymentLock(bookingId: string): Promise<void> {
+    await prisma.$executeRawUnsafe(
+      `SELECT pg_advisory_unlock(hashtext($1::text)::bigint)`,
+      bookingId
+    );
+  }
+
   /**
    * Bölünmüş ödemeyi (Marketplace Payment) başlatır.
    * "Idempotency": Aynı bookingId için mükerrer işlem yapılmasını engeller.
@@ -27,14 +44,15 @@ export class PaymentService implements IPaymentService {
     card: any;
     buyer: any;
   }): Promise<any> {
-    // 1. İdempolans Kontrolü (Duplicate Payment Prevention)
-    const existingLog = await prisma.paymentLog.findFirst({
-      where: { bookingId: data.bookingId, status: "SUCCESS" }
-    });
+    await this.acquirePaymentLock(data.bookingId);
+    try {
+      const existingLog = await prisma.paymentLog.findUnique({
+        where: { bookingId: data.bookingId },
+      });
 
-    if (existingLog) {
-      return { status: "success", message: "Already processed." };
-    }
+      if (existingLog?.status === 'SUCCESS') {
+        return { status: 'success', message: 'Already processed.' };
+      }
 
     const request = {
       locale: Iyzipay.LOCALE.TR,
@@ -98,14 +116,22 @@ export class PaymentService implements IPaymentService {
     if (process.env.NODE_ENV === "development" && (process.env.IYZICO_API_KEY === "sandbox-api-key" || !process.env.IYZICO_API_KEY)) {
       console.log("💰 [DEV MODE] Simulating successful payment for booking:", data.bookingId);
       const paymentId = `MOCK_TX_${Date.now()}`;
-      await prisma.paymentLog.create({
-        data: {
-          bookingId: data.bookingId,
-          transactionId: paymentId,
-          amount: data.totalPrice,
-          status: "SUCCESS",
-        },
-      });
+      try {
+        await prisma.paymentLog.create({
+          data: {
+            bookingId: data.bookingId,
+            transactionId: paymentId,
+            amount: data.totalPrice,
+            status: "SUCCESS",
+          },
+        });
+      } catch (e) {
+        if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+          logger.warn({ bookingId: data.bookingId }, 'payment_init_duplicate_row');
+          return { status: 'success', message: 'Already processed.' };
+        }
+        throw e;
+      }
       return { status: "success", paymentId };
     }
 
@@ -118,17 +144,28 @@ export class PaymentService implements IPaymentService {
 
     // 2. İşlemi Logla
     if (isPaymentSuccess(result.status)) {
-      await prisma.paymentLog.create({
-        data: {
-          bookingId: data.bookingId,
-          transactionId: result.paymentId,
-          amount: data.totalPrice,
-          status: "SUCCESS"
+      try {
+        await prisma.paymentLog.create({
+          data: {
+            bookingId: data.bookingId,
+            transactionId: result.paymentId,
+            amount: data.totalPrice,
+            status: "SUCCESS"
+          }
+        });
+      } catch (e) {
+        if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+          logger.warn({ bookingId: data.bookingId }, 'payment_init_duplicate_row_after_iyzico');
+          return { status: 'success', message: 'Already processed.' };
         }
-      });
+        throw e;
+      }
     }
 
     return result;
+    } finally {
+      await this.releasePaymentLock(data.bookingId);
+    }
   }
 
   /**

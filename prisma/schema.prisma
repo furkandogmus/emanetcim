@@ -177,7 +177,7 @@ model Booking {
 
 model PaymentLog {
   id        String @id @default(uuid())
-  bookingId String
+  bookingId String @unique // Rezervasyon başına tek ödeme kaydı (yarış / çifte tahsilat önleme)
 
   transactionId  String?       @unique // iyzico tarafındaki referans numarası
   amount         Decimal @db.Decimal(12, 2)
@@ -276,5 +276,23 @@ model Campaign {
   startsAt        DateTime?
   endsAt          DateTime?
   createdAt       DateTime @default(now())
+}
+
+/// Tek satır platform iş kuralları (panelden güncellenebilir).
+model PlatformSettings {
+  id String @id @default("default")
+
+  maxStayDays         Int     @default(30)
+  maxBagsPerSlot      Int     @default(50)
+  insuranceFeeTry     Decimal @db.Decimal(12, 2) @default(15)
+  earlyRefundRatio    Decimal @db.Decimal(6, 4) @default(0.9)
+  cancelFixedFeeTry   Decimal @db.Decimal(12, 2) @default(20)
+  defaultShopCapacity Int     @default(10)
+  defaultPricePerDay  Decimal @db.Decimal(12, 2) @default(50)
+  bagMultiplierS      Decimal @db.Decimal(6, 4) @default(0.8)
+  bagMultiplierM      Decimal @db.Decimal(6, 4) @default(1.0)
+  bagMultiplierXl     Decimal @db.Decimal(6, 4) @default(1.5)
+
+  updatedAt DateTime @updatedAt
 }
 

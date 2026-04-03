@@ -1,5 +1,7 @@
 import { computeDailyBagLineTotal } from '@/lib/bag-pricing';
 import { moneyToNumber } from '@/lib/money';
+import type { PricingRules } from '@/lib/pricing-rules';
+import { DEFAULT_PRICING_RULES } from '@/lib/pricing-rules';
 
 /**
  * PricingService - Emanetçi Fiyatlandırma ve İade Motoru
@@ -34,7 +36,8 @@ export class PricingService {
       totalPrice?: unknown;
       insuranceFee?: unknown;
     },
-    actualCheckOut: Date
+    actualCheckOut: Date,
+    rules: PricingRules = DEFAULT_PRICING_RULES
   ): number {
     const checkInTime = new Date(booking.checkInTime);
     const scheduledCheckOutTime = new Date(booking.checkOutTime);
@@ -49,15 +52,17 @@ export class PricingService {
 
     if (savedDays <= 0) return 0;
 
-    const unitPrice = moneyToNumber(booking.unitPrice) || 50;
+    const unitPrice =
+      moneyToNumber(booking.unitPrice) || rules.defaultPricePerDay;
     const dailyService = computeDailyBagLineTotal(
       unitPrice,
       booking.bagCountS ?? 0,
       booking.bagCountM ?? 0,
-      booking.bagCountXl ?? 0
+      booking.bagCountXl ?? 0,
+      rules
     );
 
-    const rawRefund = savedDays * dailyService * 0.9;
+    const rawRefund = savedDays * dailyService * rules.earlyRefundRatio;
 
     const insuranceFee = moneyToNumber(booking.insuranceFee);
     const servicePaid = Math.max(0, moneyToNumber(booking.totalPrice) - insuranceFee);

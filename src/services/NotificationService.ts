@@ -17,6 +17,9 @@ export class NotificationService implements INotificationService {
   async sendEmail(to: string, subject: string, body: string, bookingId?: string): Promise<boolean> {
     try {
       const resendKey = process.env.RESEND_API_KEY;
+      let status: "SENT" | "FAILED" | "SKIPPED" = "SKIPPED";
+      let errorDetail: string | null = null;
+
       if (resendKey && to.includes("@")) {
         const from = process.env.RESEND_FROM || "Emanetçi <onboarding@resend.dev>";
         const r = await fetch("https://api.resend.com/emails", {
@@ -28,13 +31,21 @@ export class NotificationService implements INotificationService {
           body: JSON.stringify({ from, to: [to], subject, text: body }),
         });
         if (!r.ok) {
-          const err = await r.text();
-          logger.error({ err, status: r.status }, "[Notification] Resend API error");
+          errorDetail = await r.text();
+          status = "FAILED";
+          logger.error(
+            { status: r.status, err: errorDetail, to, subject, bookingId },
+            "notification_resend_error",
+          );
         } else {
-          logger.info({ to, subject }, "[Notification] Email sent via Resend");
+          status = "SENT";
+          logger.info({ to, subject, bookingId }, "notification_email_sent");
         }
       } else {
-        logger.info({ to, subject }, "[Notification] Email (log only — set RESEND_API_KEY for delivery)");
+        logger.info(
+          { to, subject, bookingId },
+          "notification_email_skipped_no_resend",
+        );
       }
 
       await prisma.notificationLog.create({
@@ -44,13 +55,29 @@ export class NotificationService implements INotificationService {
           recipient: to,
           subject,
           content: body,
-          status: "SENT",
+          status,
+          error: errorDetail,
         },
       });
 
-      return true;
+      return status !== "FAILED";
     } catch (error) {
-      logger.error({ error }, "[Notification] Email Failed");
+      logger.error({ err: error, to, bookingId }, "notification_email_exception");
+      try {
+        await prisma.notificationLog.create({
+          data: {
+            bookingId,
+            type: "EMAIL",
+            recipient: to,
+            subject,
+            content: body,
+            status: "FAILED",
+            error: error instanceof Error ? error.message : String(error),
+          },
+        });
+      } catch {
+        /* ignore */
+      }
       return false;
     }
   }
