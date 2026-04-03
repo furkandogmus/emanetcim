@@ -72,5 +72,8 @@
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
+  },
+  "overrides": {
+    "@swc/helpers": "0.5.21"
   }
 }
