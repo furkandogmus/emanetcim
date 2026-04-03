@@ -13,6 +13,8 @@
     "test:ui": "vitest --ui",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:e2e:local": "playwright test",
+    "test:e2e:sandbox": "playwright test tests/e2e/payment-iyzico-sandbox.spec.ts",
     "postinstall": "prisma generate",
     "docker:up": "docker compose up --build -d",
     "docker:down": "docker compose down",

@@ -304,7 +304,10 @@ export default function CheckoutClient({ shopId, shopName, shopAddress, pricePer
         </section>
 
         {error && (
-          <div className="bg-red-50 text-red-600 p-4 rounded-2xl text-xs font-bold flex items-center gap-2 border border-red-100 animate-in fade-in slide-in-from-bottom-2">
+          <div
+            data-testid="checkout-payment-error"
+            className="bg-red-50 text-red-600 p-4 rounded-2xl text-xs font-bold flex items-center gap-2 border border-red-100 animate-in fade-in slide-in-from-bottom-2"
+          >
             <AlertCircle size={16} />
             {error}
           </div>
