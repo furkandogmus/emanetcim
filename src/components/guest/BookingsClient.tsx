@@ -5,11 +5,13 @@ import { useLocale, useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, Calendar, MapPin, Clock, QrCode } from 'lucide-react';
 import { Link, useRouter } from '@/i18n/routing';
+import { moneyToNumber } from '@/lib/money';
 import { toast } from 'sonner';
 import ReviewForm from './ReviewForm';
+import type { GuestBookingListItem } from '@/services/BookingService';
 
 interface BookingsClientProps {
-  bookings: any[];
+  bookings: GuestBookingListItem[];
 }
 
 /**
@@ -20,7 +22,7 @@ export default function BookingsClient({ bookings }: BookingsClientProps) {
   const locale = useLocale();
   const dateLocale = locale === 'tr' ? 'tr-TR' : 'en-US';
   const router = useRouter();
-  const [reviewBooking, setReviewBooking] = useState<any | null>(null);
+  const [reviewBooking, setReviewBooking] = useState<GuestBookingListItem | null>(null);
 
   if (bookings.length === 0) {
     return (
@@ -102,14 +104,16 @@ export default function BookingsClient({ bookings }: BookingsClientProps) {
               <div className="mt-6 flex items-center justify-between pt-6 border-t border-gray-50">
                 <div className="flex flex-col">
                   <div className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">{t('totalAmount')}</div>
-                  <div className="text-xl font-black text-gray-900 tracking-tighter">₺{booking.totalPrice}</div>
+                  <div className="text-xl font-black text-gray-900 tracking-tighter">
+                    ₺{moneyToNumber(booking.totalPrice)}
+                  </div>
                 </div>
                 
                 <div className="flex gap-2">
                   {(booking.status === 'PAID' || booking.status === 'PENDING') && (
                     <button 
                       onClick={async () => {
-                        const refundAmount = Math.max(0, booking.totalPrice - 20);
+                        const refundAmount = Math.max(0, moneyToNumber(booking.totalPrice) - 20);
                         if (confirm(booking.status === 'PAID'
                           ? t('confirmCancelPaid', { amount: refundAmount })
                           : t('confirmCancelPending'))) {

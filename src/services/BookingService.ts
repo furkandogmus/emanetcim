@@ -1,5 +1,34 @@
 import { Booking, Prisma } from '@prisma/client';
 import prisma from '@/lib/db';
+
+export type CreateInitialBookingInput = {
+  guestId: string;
+  shopId: string;
+  totalPrice: number;
+  bagCountS: number;
+  bagCountM: number;
+  bagCountXl: number;
+  checkInTime: Date;
+  checkOutTime: Date;
+  unitPrice?: number;
+  insuranceFee?: number;
+};
+
+export type BookingWithGuestShop = Prisma.BookingGetPayload<{
+  include: { guest: true; shop: true };
+}>;
+
+export type BookingWithShopGuestDetails = Prisma.BookingGetPayload<{
+  include: { shop: true; guest: true };
+}>;
+
+export type GuestBookingListItem = Prisma.BookingGetPayload<{
+  include: { shop: true; dispute: true };
+}>;
+
+export type PartnerBookingListItem = Prisma.BookingGetPayload<{
+  include: { guest: true };
+}>;
 import { createQrToken } from '@/lib/qr-token';
 import { isRefundSuccess } from '@/lib/payment-status';
 import logger from '@/lib/logger';
@@ -28,11 +57,11 @@ export class BookingCapacityExceededError extends Error {
 export interface IBookingService {
   checkIn(bookingId: string, sealPhotoUrl: string): Promise<PartnerCheckInResult>;
   checkOut(bookingId: string): Promise<PartnerCheckOutResult>;
-  getBookingByToken(token: string): Promise<any>;
-  createInitialBooking(data: any): Promise<Booking>;
-  getUserBookings(userId: string): Promise<any[]>;
-  getPartnerBookings(shopId: string): Promise<any[]>;
-  getBookingDetails(id: string): Promise<any>;
+  getBookingByToken(token: string): Promise<BookingWithGuestShop | null>;
+  createInitialBooking(data: CreateInitialBookingInput): Promise<Booking>;
+  getUserBookings(userId: string): Promise<GuestBookingListItem[]>;
+  getPartnerBookings(shopId: string): Promise<PartnerBookingListItem[]>;
+  getBookingDetails(id: string): Promise<BookingWithShopGuestDetails | null>;
   cancelBooking(bookingId: string): Promise<CancelBookingResult>;
   markAsPaid(bookingId: string): Promise<void>;
 }
@@ -44,18 +73,7 @@ export class BookingService implements IBookingService {
   /**
    * Misafir için ilk rezervasyonu oluşturur.
    */
-  async createInitialBooking(data: {
-    guestId: string;
-    shopId: string;
-    totalPrice: number;
-    bagCountS: number;
-    bagCountM: number;
-    bagCountXl: number;
-    checkInTime: Date;
-    checkOutTime: Date;
-    unitPrice?: number;
-    insuranceFee?: number;
-  }): Promise<Booking> {
+  async createInitialBooking(data: CreateInitialBookingInput): Promise<Booking> {
     const rules = await getPricingRules();
     return prisma.$transaction(
       async (tx) => {
@@ -288,7 +306,7 @@ export class BookingService implements IBookingService {
     }
   }
 
-  async getBookingByToken(token: string): Promise<any> {
+  async getBookingByToken(token: string): Promise<BookingWithGuestShop | null> {
     const { verifyQrToken } = await import('@/lib/qr-token');
     const payload = await verifyQrToken(token);
     if (payload) {
@@ -311,14 +329,14 @@ export class BookingService implements IBookingService {
     });
   }
 
-  async getBookingDetails(id: string): Promise<any> {
+  async getBookingDetails(id: string): Promise<BookingWithShopGuestDetails | null> {
     return await prisma.booking.findUnique({
       where: { id },
       include: { shop: true, guest: true }
     });
   }
 
-  async getUserBookings(userId: string): Promise<any[]> {
+  async getUserBookings(userId: string): Promise<GuestBookingListItem[]> {
     return await prisma.booking.findMany({
       where: { guestId: userId },
       include: { shop: true, dispute: true },
@@ -326,7 +344,7 @@ export class BookingService implements IBookingService {
     });
   }
 
-  async getPartnerBookings(shopId: string): Promise<any[]> {
+  async getPartnerBookings(shopId: string): Promise<PartnerBookingListItem[]> {
     return await prisma.booking.findMany({
       where: { shopId },
       include: { guest: true },

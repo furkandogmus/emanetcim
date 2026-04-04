@@ -52,7 +52,7 @@ export default async function RootLayout({
 }) {
   const {locale} = await params;
 
-  if (!routing.locales.includes(locale as any)) {
+  if (!routing.locales.includes(locale as (typeof routing.locales)[number])) {
     notFound();
   }
 
@@ -60,7 +60,10 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body suppressHydrationWarning className="bg-gray-50 antialiased selection:bg-orange-100 selection:text-orange-900">
+      <body
+        suppressHydrationWarning
+        className={`${geistSans.variable} ${geistMono.variable} bg-gray-50 antialiased selection:bg-orange-100 selection:text-orange-900`}
+      >
         <NextIntlClientProvider messages={messages}>
           <Providers>
             <PWARegister />

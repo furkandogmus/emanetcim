@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from 'react';
-import { useTranslations } from 'next-intl';
 import { AlertTriangle, RefreshCcw } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -12,8 +11,6 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  const t = useTranslations('Common');
-
   useEffect(() => {
     console.error(error);
   }, [error]);

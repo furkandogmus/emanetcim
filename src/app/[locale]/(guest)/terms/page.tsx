@@ -27,7 +27,7 @@ export default async function TermsPage({ params }: { params: Promise<{ locale: 
                 1. Sözleşmenin Tarafları ve Konusu
               </h2>
               <p className="font-bold leading-relaxed">
-                İşbu Kullanıcı Sözleşmesi, Emanetçi Teknoloji A.Ş. ile platformu kullanan Misafirler ve İş Ortakları (Emanet Noktaları) arasındaki hak ve yükümlülükleri belirler. Platformun temelini "Saklama Sözleşmesi" (TBK 561-580) oluşturur.
+                İşbu Kullanıcı Sözleşmesi, Emanetçi Teknoloji A.Ş. ile platformu kullanan Misafirler ve İş Ortakları (Emanet Noktaları) arasındaki hak ve yükümlülükleri belirler. Platformun temelini &quot;Saklama Sözleşmesi&quot; (TBK 561-580) oluşturur.
               </p>
            </section>
 

@@ -1,4 +1,6 @@
 import NextAuth from "next-auth";
+import type { Session, User } from "next-auth";
+import type { JWT } from "next-auth/jwt";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { Role } from "@prisma/client";
 import prisma from "@/lib/db";
@@ -17,14 +19,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     process.env.VERCEL === "1",
   ...authConfig,
   callbacks: {
-    async session({ session, token }: any) {
+    async session({ session, token }: { session: Session; token: JWT }) {
       if (session.user) {
         session.user.role = token.role || Role.GUEST;
         session.user.id = token.sub || "";
       }
       return session;
     },
-    async jwt({ token, user }: any) {
+    async jwt({ token, user }: { token: JWT; user?: User }) {
       if (user) {
         const dbUser = await prisma.user.findUnique({
           where: { id: user.id },

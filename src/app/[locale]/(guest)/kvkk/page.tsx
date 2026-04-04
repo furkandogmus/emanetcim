@@ -27,7 +27,7 @@ export default async function KVKKPage({ params }: { params: Promise<{ locale: s
                 Veri Sorumlusu
               </h2>
               <p>
-                Emanetçi Teknoloji A.Ş. olarak, 6698 Sayılı Kişisel Verilerin Korunması Kanunu uyarınca verilerinizin "Veri Sorumlusu" sıfatıyla işlenmesini taahhüt ediyoruz.
+                Emanetçi Teknoloji A.Ş. olarak, 6698 Sayılı Kişisel Verilerin Korunması Kanunu uyarınca verilerinizin &quot;Veri Sorumlusu&quot; sıfatıyla işlenmesini taahhüt ediyoruz.
               </p>
            </section>
 

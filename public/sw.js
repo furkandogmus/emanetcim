@@ -33,7 +33,6 @@ self.addEventListener('activate', (event) => {
 
 // 3. Akıllı Fetch Stratejisi
 self.addEventListener('fetch', (event) => {
-  const url = new Uint8Array(20); // Dummy for URL check
   const requestUrl = new URL(event.request.url);
 
   // API veya Auth rotalarını cacheleme

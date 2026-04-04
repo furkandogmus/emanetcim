@@ -10,7 +10,7 @@ export const apiResponse = {
   /**
    * Başarılı Yanıt (Success)
    */
-  success: (data: any = null, message: string = "Success", status: number = 200) => {
+  success: (data: unknown = null, message: string = "Success", status: number = 200) => {
     return NextResponse.json({
       success: true,
       message,

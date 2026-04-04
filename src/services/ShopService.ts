@@ -1,20 +1,42 @@
+import type { Prisma, Shop } from '@prisma/client';
 import prisma from '@/lib/db';
 import { distanceKm } from '@/lib/geo';
 import { moneyToNumber } from '@/lib/money';
 
+export type ShopWithDistance = Omit<Shop, 'pricePerDay'> & {
+  pricePerDay: number;
+  distanceKm: number;
+};
+
+export type ShopWithOwner = Prisma.ShopGetPayload<{
+  include: { owner: true };
+}>;
+
 export interface IShopService {
-  findNearby(latitude: number, longitude: number, radiusInKm: number): Promise<any[]>;
-  getShopDetails(shopId: string): Promise<any | null>;
-  getPendingShops(): Promise<any[]>;
+  findNearby(
+    latitude: number,
+    longitude: number,
+    radiusInKm: number,
+    page?: number,
+    limit?: number
+  ): Promise<ShopWithDistance[]>;
+  getShopDetails(shopId: string): Promise<Shop | null>;
+  getPendingShops(): Promise<ShopWithOwner[]>;
   approveShop(shopId: string): Promise<boolean>;
-  getShopsByOwner(ownerId: string): Promise<any[]>;
+  getShopsByOwner(ownerId: string): Promise<Shop[]>;
 }
 
 /**
  * ShopService - SOLID: Single Responsibility
  */
 export class ShopService implements IShopService {
-  async findNearby(latitude: number, longitude: number, radiusInKm: number, page: number = 1, limit: number = 10): Promise<any[]> {
+  async findNearby(
+    latitude: number,
+    longitude: number,
+    radiusInKm: number,
+    page: number = 1,
+    limit: number = 10
+  ): Promise<ShopWithDistance[]> {
     try {
       const shops = await prisma.shop.findMany({
         where: { isActive: true },
@@ -37,13 +59,13 @@ export class ShopService implements IShopService {
     }
   }
 
-  async getShopDetails(shopId: string): Promise<any | null> {
+  async getShopDetails(shopId: string): Promise<Shop | null> {
     return await prisma.shop.findUnique({
       where: { id: shopId }
     });
   }
 
-  async getPendingShops(): Promise<any[]> {
+  async getPendingShops(): Promise<ShopWithOwner[]> {
     return await prisma.shop.findMany({
       where: { isActive: false },
       include: { owner: true }
@@ -88,7 +110,7 @@ export class ShopService implements IShopService {
     }
   }
 
-  async getShopsByOwner(ownerId: string): Promise<any[]> {
+  async getShopsByOwner(ownerId: string): Promise<Shop[]> {
     return await prisma.shop.findMany({
       where: { ownerId },
       orderBy: { createdAt: 'desc' },

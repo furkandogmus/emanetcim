@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { X } from "lucide-react";
 
@@ -26,7 +26,7 @@ export default function QRScanner({ onResult, onClose }: QRScannerProps) {
       onResult(decodedText);
     };
 
-    const onScanFailure = (error: any) => {
+    const onScanFailure = () => {
       // Sessiz hata - her karede olabilir
     };
 

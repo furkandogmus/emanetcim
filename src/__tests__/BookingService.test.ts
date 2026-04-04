@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { BookingService } from "../services/BookingService";
-import prisma from "@/lib/db";
 
 const { mockGetPricingRules } = vi.hoisted(() => ({
   mockGetPricingRules: vi.fn().mockResolvedValue({

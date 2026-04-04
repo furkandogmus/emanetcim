@@ -1,6 +1,7 @@
 "use client";
 
 import { signOut, useSession } from 'next-auth/react';
+import type { LucideIcon } from 'lucide-react';
 import { User, LogOut, Shield, Store, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -22,7 +23,7 @@ export default function UserNav() {
     );
   }
 
-  const roleLabels: Record<string, { label: string, icon: any, color: string }> = {
+  const roleLabels: Record<string, { label: string; icon: LucideIcon; color: string }> = {
     'ADMIN': { label: 'Yönetici', icon: Shield, color: 'text-purple-600' },
     'PARTNER': { label: 'Esnaf', icon: Store, color: 'text-blue-600' },
     'GUEST': { label: 'Misafir', icon: User, color: 'text-orange-600' }

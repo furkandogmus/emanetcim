@@ -21,7 +21,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
             {t('title')}
           </h1>
           <p className="text-xl font-bold text-gray-400 leading-relaxed max-w-xl">
-             Emanetçi, seyahat ederken yanınızdaki ağır yüklerden kurtulmanızı sağlayan, Türkiye'nin en yaygın yerel emanet ağıdır.
+             Emanetçi, seyahat ederken yanınızdaki ağır yüklerden kurtulmanızı sağlayan, Türkiye&apos;nin en yaygın yerel emanet ağıdır.
           </p>
         </header>
 
@@ -33,7 +33,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
              </div>
              <h3 className="text-2xl font-black text-gray-900 uppercase tracking-tight">{t('vision')}</h3>
              <p className="font-bold text-gray-400 leading-relaxed">
-                Türkiye'nin her köşesinde, her gezginin eşyasını güvenle bırakabileceği dijital bir emanet ağı oluşturmak.
+                Türkiye&apos;nin her köşesinde, her gezginin eşyasını güvenle bırakabileceği dijital bir emanet ağı oluşturmak.
              </p>
           </div>
           <div className="p-10 bg-gray-900 text-white rounded-[3rem] flex flex-col gap-4 shadow-2xl shadow-gray-200">

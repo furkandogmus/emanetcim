@@ -1,13 +1,10 @@
 "use client";
 
-import { useTranslations } from 'next-intl';
 import { Search, MapPin } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { motion } from 'framer-motion';
 
 export default function NotFound() {
-  const t = useTranslations('Common');
-
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
       <motion.div 

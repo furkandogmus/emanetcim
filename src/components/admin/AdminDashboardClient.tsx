@@ -13,6 +13,16 @@ import { motion } from "framer-motion";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 
+type AdminShopRow = {
+  id: string;
+  name: string;
+  address?: string | null;
+  isActive: boolean;
+  capacity: number;
+  pricePerDay: number;
+  _count?: { bookings: number };
+};
+
 const AnalyticsChart = dynamic(
   () => import("@/components/admin/AnalyticsChart"),
   {
@@ -37,7 +47,7 @@ interface AdminDashboardClientProps {
       partners: string;
     };
   };
-  activeShops: any[];
+  activeShops: AdminShopRow[];
   chartData: ChartRow[];
 }
 

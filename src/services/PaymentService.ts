@@ -9,9 +9,36 @@ import { withTimeout } from '@/lib/async-timeout';
 
 const IYZICO_OP_TIMEOUT_MS = Number(process.env.IYZICO_HTTP_TIMEOUT_MS) || 45_000;
 
+export interface PaymentCardInput {
+  cardHolderName: string;
+  cardNumber: string;
+  expireMonth: string;
+  expireYear: string;
+  cvc: string;
+}
+
+export interface PaymentBuyerInput {
+  id: string;
+  name: string;
+  phone?: string;
+  email: string;
+}
+
+export type MarketplacePaymentInput = {
+  bookingId: string;
+  totalPrice: number;
+  subMerchantKey: string;
+  subMerchantPrice: number;
+  card: PaymentCardInput;
+  buyer: PaymentBuyerInput;
+};
+
+/** iyzico SDK / dahili mock yanıtı */
+export type PaymentSdkResult = Record<string, unknown>;
+
 export interface IPaymentService {
-  initializeMarketplacePayment(data: any): Promise<any>;
-  refundPayment(bookingId: string, amount: number): Promise<any>;
+  initializeMarketplacePayment(data: MarketplacePaymentInput): Promise<PaymentSdkResult>;
+  refundPayment(bookingId: string, amount: number): Promise<PaymentSdkResult>;
   /** Ödeme logu SUCCESS iken booking hâlâ PENDING kalan tutarsızlıkları düzeltir (webhook gecikmesi vb.). */
   reconcileStalePaymentBookings(): Promise<{ fixed: number; bookingIds: string[] }>;
 }
@@ -41,14 +68,9 @@ export class PaymentService implements IPaymentService {
    * Bölünmüş ödemeyi (Marketplace Payment) başlatır.
    * "Idempotency": Aynı bookingId için mükerrer işlem yapılmasını engeller.
    */
-  async initializeMarketplacePayment(data: {
-    bookingId: string;
-    totalPrice: number;
-    subMerchantKey: string;
-    subMerchantPrice: number;
-    card: any;
-    buyer: any;
-  }): Promise<any> {
+  async initializeMarketplacePayment(
+    data: MarketplacePaymentInput
+  ): Promise<PaymentSdkResult> {
     await this.acquirePaymentLock(data.bookingId);
     try {
       const existingLog = await prisma.paymentLog.findUnique({
@@ -140,24 +162,37 @@ export class PaymentService implements IPaymentService {
       return { status: "success", paymentId };
     }
 
-    const result: any = await withTimeout(
-      new Promise((resolve) => {
-        iyzipay.payment.create(request, (err: any, res: any) => {
-          if (err) resolve({ status: 'failure', errorMessage: err.message });
-          else resolve(res);
+    const result = (await withTimeout(
+      new Promise<PaymentSdkResult>((resolve) => {
+        iyzipay.payment.create(request, (err: unknown, res: unknown) => {
+          if (err) {
+            resolve({
+              status: 'failure',
+              errorMessage:
+                err instanceof Error ? err.message : String(err),
+            });
+          } else {
+            resolve(
+              typeof res === 'object' && res !== null
+                ? (res as PaymentSdkResult)
+                : { value: res }
+            );
+          }
         });
       }),
       IYZICO_OP_TIMEOUT_MS,
       'iyzico_payment_create'
-    );
+    )) as PaymentSdkResult;
 
     // 2. İşlemi Logla
     if (isPaymentSuccess(result.status)) {
       try {
+        const paymentId =
+          typeof result.paymentId === 'string' ? result.paymentId : undefined;
         await prisma.paymentLog.create({
           data: {
             bookingId: data.bookingId,
-            transactionId: result.paymentId,
+            transactionId: paymentId,
             amount: data.totalPrice,
             status: "SUCCESS"
           }
@@ -249,7 +284,7 @@ export class PaymentService implements IPaymentService {
    * iyzico İade (Refund) İşlemi
    * Misafir iptalleri (UC_M_07) için parayı iyzico üzerinden geri gönderir.
    */
-  async refundPayment(bookingId: string, amount: number): Promise<any> {
+  async refundPayment(bookingId: string, amount: number): Promise<PaymentSdkResult> {
     // 1. Orijinal ödeme kaydını bul (Transaction ID gerekiyor)
     const paymentLog = await prisma.paymentLog.findFirst({
       where: { bookingId, status: "SUCCESS" }
@@ -275,16 +310,27 @@ export class PaymentService implements IPaymentService {
       ip: '85.34.78.112'
     };
 
-    const result: any = await withTimeout(
-      new Promise((resolve) => {
-        iyzipay.refund.create(request, (err: any, res: any) => {
-          if (err) resolve({ status: 'failure', errorMessage: err.message });
-          else resolve(res);
+    const result = (await withTimeout(
+      new Promise<PaymentSdkResult>((resolve) => {
+        iyzipay.refund.create(request, (err: unknown, res: unknown) => {
+          if (err) {
+            resolve({
+              status: 'failure',
+              errorMessage:
+                err instanceof Error ? err.message : String(err),
+            });
+          } else {
+            resolve(
+              typeof res === 'object' && res !== null
+                ? (res as PaymentSdkResult)
+                : { value: res }
+            );
+          }
         });
       }),
       IYZICO_OP_TIMEOUT_MS,
       'iyzico_refund_create'
-    );
+    )) as PaymentSdkResult;
 
     // 4. Logla
     if (isPaymentSuccess(result.status)) {

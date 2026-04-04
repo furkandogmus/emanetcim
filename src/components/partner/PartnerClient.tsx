@@ -23,6 +23,7 @@ import {
   checkOutAction,
   getPartnerBookingPreviewAction,
 } from "@/actions/partner";
+import type { PartnerBookingListItem } from "@/services/BookingService";
 
 interface PartnerClientProps {
   shopId: string;
@@ -35,7 +36,7 @@ interface PartnerClientProps {
   initialOpening: string;
   initialClosing: string;
   initialPricePerDay: number;
-  bookings: any[];
+  bookings: PartnerBookingListItem[];
   initialBookingId?: string;
   initialCheckoutBookingId?: string;
 }
@@ -261,11 +262,14 @@ export default function PartnerClient({
             <div className="flex flex-col gap-4">
               <label className="flex flex-col items-center justify-center w-full min-h-[200px] border-4 border-dashed border-gray-100 hover:border-orange-200 rounded-[2.5rem] cursor-pointer transition-all bg-gray-50 overflow-hidden group">
                 {sealPhoto ? (
-                  <img
-                    src={sealPhoto}
-                    alt={t("sealPhotoAlt")}
-                    className="w-full h-48 object-cover rounded-[2rem] shadow-xl ring-2 ring-gray-100"
-                  />
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element -- blob/data URL önizlemesi */}
+                    <img
+                      src={sealPhoto}
+                      alt={t("sealPhotoAlt")}
+                      className="w-full h-48 object-cover rounded-[2rem] shadow-xl ring-2 ring-gray-100"
+                    />
+                  </>
                 ) : (
                   <div className="flex flex-col items-center gap-3">
                     <div className="p-4 bg-white rounded-full shadow-sm text-gray-400 group-hover:text-orange-600 transition-colors">
@@ -398,11 +402,11 @@ export default function PartnerClient({
             ) : (
               [...bookings]
                 .sort(
-                  (a: any, b: any) =>
+                  (a, b) =>
                     new Date(b.createdAt).getTime() -
                     new Date(a.createdAt).getTime()
                 )
-                .map((booking: any) => (
+                .map((booking) => (
                   <div
                     key={booking.id}
                     className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-xl shadow-gray-100/50 flex flex-col gap-6 hover:translate-y-[-4px] transition-all group overflow-hidden relative"

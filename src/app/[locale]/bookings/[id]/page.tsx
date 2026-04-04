@@ -5,6 +5,7 @@ import { Calendar, Package, MapPin, CheckCircle2 } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import PrintButton from "@/components/guest/PrintButton";
 import BookingQrDisplay from "@/components/guest/BookingQrDisplay";
+import { moneyToNumber } from "@/lib/money";
 
 
 /**
@@ -92,7 +93,7 @@ export default async function BookingDetailPage({
                  <Package size={20} />
                  <span className="font-bold">{booking.bagCountS + booking.bagCountM + booking.bagCountXl} {t("bagsUnit")}</span>
               </div>
-              <span className="font-black text-lg">₺{booking.totalPrice}</span>
+              <span className="font-black text-lg">₺{moneyToNumber(booking.totalPrice)}</span>
            </div>
         </div>
 

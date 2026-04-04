@@ -4,8 +4,6 @@ import { useEffect, useRef } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-/* eslint-disable react-hooks/exhaustive-deps -- tek harita örneği; marker tıklaması güncel callback */
-
 type Shop = {
   id: string;
   name: string;
@@ -33,7 +31,10 @@ export default function SearchMap({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const selectRef = useRef(onSelectShop);
-  selectRef.current = onSelectShop;
+
+  useEffect(() => {
+    selectRef.current = onSelectShop;
+  }, [onSelectShop]);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -57,7 +58,7 @@ export default function SearchMap({
       el.textContent = "₺";
       el.title = shop.name;
 
-      const marker = new maplibregl.Marker({ element: el })
+      new maplibregl.Marker({ element: el })
         .setLngLat([shop.longitude!, shop.latitude!])
         .addTo(map);
 

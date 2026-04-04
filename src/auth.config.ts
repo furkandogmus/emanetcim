@@ -1,7 +1,8 @@
 import Google from "next-auth/providers/google";
 import Apple from "next-auth/providers/apple";
 import Credentials from "next-auth/providers/credentials";
-import type { NextAuthConfig } from "next-auth";
+import type { NextAuthConfig, Session, User } from "next-auth";
+import type { JWT } from "next-auth/jwt";
 import { verifyPassword } from "@/lib/auth-password";
 import { rateLimit } from "@/lib/rate-limit";
 
@@ -74,21 +75,27 @@ export const authConfig = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }: any) {
+    async jwt({ token, user }: { token: JWT; user?: User }) {
       if (user) {
         token.role = user.role;
       }
       return token;
     },
-    async session({ session, token }: any) {
+    async session({
+      session,
+      token,
+    }: {
+      session: Session;
+      token: JWT;
+    }) {
       if (session.user) {
-        session.user.role = token.role;
+        session.user.role = token.role ?? session.user.role;
       }
       return session;
     },
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
-      const userRole = (auth?.user as any)?.role;
+      const userRole = auth?.user?.role;
       const pathname = nextUrl.pathname;
 
       const isAdminRoute = pathname.match(/^\/(tr|en)\/admin/) || pathname.startsWith("/admin");

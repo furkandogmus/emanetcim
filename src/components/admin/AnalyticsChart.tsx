@@ -9,7 +9,6 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
 /**
@@ -21,18 +20,7 @@ export default function AnalyticsChart({
   data: { name: string; ciro: number; emanet: number }[];
 }) {
   const t = useTranslations("Admin");
-  const [mounted, setMounted] = useState(false);
   const chartData = data?.length ? data : [];
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return (
-      <div className="w-full h-[300px] bg-gray-50/50 rounded-3xl animate-pulse" />
-    );
-  }
 
   if (chartData.length === 0) {
     return (

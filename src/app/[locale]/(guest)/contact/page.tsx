@@ -1,5 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import { Mail, MessageCircle, MapPin, Phone, Send } from "lucide-react";
+import { Mail, MessageCircle, MapPin, Send } from "lucide-react";
 
 export default async function ContactPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;

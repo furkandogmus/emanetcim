@@ -1,6 +1,5 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { Printer } from "lucide-react";
 
 interface PrintButtonProps {

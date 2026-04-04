@@ -40,10 +40,8 @@ jobs:
         env:
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
 
-      # Kod tabanında birikmiş ESLint hataları giderilene kadar pipeline’ı bloklamaz (çıktı izlenir).
       - name: Lint
         run: npm run lint
-        continue-on-error: true
 
       - name: Typecheck
         run: npm run typecheck

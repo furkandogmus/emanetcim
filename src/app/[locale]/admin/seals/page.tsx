@@ -1,7 +1,8 @@
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { ChevronLeft, ShieldCheck, CheckCircle2, Download } from 'lucide-react';
+import Link from 'next/link';
 import SealShipButton from '@/components/admin/SealShipButton';
-import { Link } from '@/i18n/routing';
+import { Link as I18nLink } from '@/i18n/routing';
 import prisma from '@/lib/db';
 
 /**
@@ -26,9 +27,9 @@ export default async function AdminSealsPage({ params }: { params: Promise<{ loc
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       <header className="p-10 bg-white border-b border-gray-100 flex items-center gap-4 sticky top-0 z-10">
-        <Link href="/admin" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+        <I18nLink href="/admin" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
           <ChevronLeft size={24} />
-        </Link>
+        </I18nLink>
         <h1 className="text-3xl font-black tracking-tight">{t('sealRequests')}</h1>
       </header>
 
@@ -80,12 +81,12 @@ export default async function AdminSealsPage({ params }: { params: Promise<{ loc
           </div>
         ))}
 
-        <a
+        <Link
           href="/api/admin/seals/export"
           className="mt-6 w-full py-6 bg-white border-2 border-dashed border-gray-200 rounded-3xl text-gray-400 text-sm font-bold hover:border-orange-200 hover:text-orange-600 transition-all flex items-center justify-center gap-2"
         >
           <Download size={18} /> {t('exportCsv')}
-        </a>
+        </Link>
       </main>
     </div>
   );

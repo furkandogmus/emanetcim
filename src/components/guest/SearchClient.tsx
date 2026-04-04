@@ -8,9 +8,10 @@ import { useRouter } from '@/i18n/routing';
 import ShopListItem from '@/components/guest/ShopListItem';
 import SearchMap from '@/components/guest/SearchMap';
 import { motion, AnimatePresence } from 'framer-motion';
+import type { ShopWithDistance } from '@/services/ShopService';
 
 interface SearchClientProps {
-  initialShops: any[];
+  initialShops: ShopWithDistance[];
 }
 
 /**
