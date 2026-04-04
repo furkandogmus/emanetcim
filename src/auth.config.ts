@@ -46,7 +46,11 @@ export const authConfig = {
         if (!email || !password) return null;
 
         if (
-          !rateLimit(`credentials:${email.toLowerCase()}`, 25, 15 * 60 * 1000)
+          !(await rateLimit(
+            `credentials:${email.toLowerCase()}`,
+            25,
+            15 * 60 * 1000
+          ))
         ) {
           return null;
         }

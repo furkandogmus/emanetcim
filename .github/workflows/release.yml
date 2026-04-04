@@ -17,6 +17,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Pre-release checklist (bilgi)
+        run: |
+          echo "Kontrol: staging smoke, migration notu, rollback sorumlusu, prod env doğrulaması (AUTH_SECRET, iyzico, CRON_SECRET)."
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:

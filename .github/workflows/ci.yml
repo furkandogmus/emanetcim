@@ -40,16 +40,27 @@ jobs:
         env:
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
 
-      # next lint kaldırıldı (Next 16); eslint kullanılıyor. Kod tabanındaki uyarılar giderilene kadar
-      # yerelde: npm run lint
-      - name: Unit tests
+      # Kod tabanında birikmiş ESLint hataları giderilene kadar pipeline’ı bloklamaz (çıktı izlenir).
+      - name: Lint
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: npm audit (high+)
+        run: npm audit --audit-level=high
+
+      - name: Unit + integration tests
         run: npm run test
         env:
+          CI: true
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
 
       - name: Build
         run: npm run build
         env:
+          CI: true
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
           AUTH_SECRET: ci-build-placeholder-not-for-production
           IYZICO_API_KEY: ci-placeholder-not-for-production

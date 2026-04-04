@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
       req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
       req.headers.get("x-real-ip") ||
       "unknown";
-    if (!rateLimit(`webhook:${ip}`, 120, 60_000)) {
+    if (!(await rateLimit(`webhook:${ip}`, 120, 60_000))) {
       return NextResponse.json(
         { status: "Error", message: "Too many requests" },
         { status: 429 }

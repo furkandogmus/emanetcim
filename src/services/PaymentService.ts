@@ -5,10 +5,15 @@ import prisma from '@/lib/db';
 import { isPaymentSuccess } from '@/lib/payment-status';
 import { moneyToNumber } from '@/lib/money';
 import logger from '@/lib/logger';
+import { withTimeout } from '@/lib/async-timeout';
+
+const IYZICO_OP_TIMEOUT_MS = Number(process.env.IYZICO_HTTP_TIMEOUT_MS) || 45_000;
 
 export interface IPaymentService {
   initializeMarketplacePayment(data: any): Promise<any>;
   refundPayment(bookingId: string, amount: number): Promise<any>;
+  /** Ödeme logu SUCCESS iken booking hâlâ PENDING kalan tutarsızlıkları düzeltir (webhook gecikmesi vb.). */
+  reconcileStalePaymentBookings(): Promise<{ fixed: number; bookingIds: string[] }>;
 }
 
 /**
@@ -135,12 +140,16 @@ export class PaymentService implements IPaymentService {
       return { status: "success", paymentId };
     }
 
-    const result: any = await new Promise((resolve) => {
-      iyzipay.payment.create(request, (err: any, res: any) => {
-        if (err) resolve({ status: 'failure', errorMessage: err.message });
-        else resolve(res);
-      });
-    });
+    const result: any = await withTimeout(
+      new Promise((resolve) => {
+        iyzipay.payment.create(request, (err: any, res: any) => {
+          if (err) resolve({ status: 'failure', errorMessage: err.message });
+          else resolve(res);
+        });
+      }),
+      IYZICO_OP_TIMEOUT_MS,
+      'iyzico_payment_create'
+    );
 
     // 2. İşlemi Logla
     if (isPaymentSuccess(result.status)) {
@@ -266,12 +275,16 @@ export class PaymentService implements IPaymentService {
       ip: '85.34.78.112'
     };
 
-    const result: any = await new Promise((resolve) => {
-      iyzipay.refund.create(request, (err: any, res: any) => {
-        if (err) resolve({ status: 'failure', errorMessage: err.message });
-        else resolve(res);
-      });
-    });
+    const result: any = await withTimeout(
+      new Promise((resolve) => {
+        iyzipay.refund.create(request, (err: any, res: any) => {
+          if (err) resolve({ status: 'failure', errorMessage: err.message });
+          else resolve(res);
+        });
+      }),
+      IYZICO_OP_TIMEOUT_MS,
+      'iyzico_refund_create'
+    );
 
     // 4. Logla
     if (isPaymentSuccess(result.status)) {
@@ -282,6 +295,33 @@ export class PaymentService implements IPaymentService {
     }
 
     return result;
+  }
+
+  /**
+   * Booking PENDING + PaymentLog SUCCESS tutarsızlığı: webhook veya DB transaction yarışı sonrası.
+   * Cron veya manuel tetikleme ile çalıştırılmalıdır.
+   */
+  async reconcileStalePaymentBookings(): Promise<{
+    fixed: number;
+    bookingIds: string[];
+  }> {
+    const stuck = await prisma.booking.findMany({
+      where: {
+        status: 'PENDING',
+        paymentLogs: { some: { status: 'SUCCESS' } },
+      },
+      select: { id: true },
+    });
+    const bookingIds: string[] = [];
+    for (const b of stuck) {
+      await prisma.booking.update({
+        where: { id: b.id },
+        data: { status: 'PAID' },
+      });
+      bookingIds.push(b.id);
+      logger.info({ bookingId: b.id }, 'finance_reconcile_pending_to_paid');
+    }
+    return { fixed: stuck.length, bookingIds };
   }
 }
 

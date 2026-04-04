@@ -34,7 +34,7 @@ export async function registerGuestAction(data: unknown) {
     h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     h.get("x-real-ip") ||
     "unknown";
-  if (!rateLimit(`register_guest:${ip}`, 8, 60 * 60 * 1000)) {
+  if (!(await rateLimit(`register_guest:${ip}`, 8, 60 * 60 * 1000))) {
     return {
       success: false as const,
       error: "Çok fazla kayıt denemesi. Lütfen daha sonra tekrar deneyin.",
@@ -71,7 +71,7 @@ export async function registerPartnerApplicationAction(data: unknown) {
     h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     h.get("x-real-ip") ||
     "unknown";
-  if (!rateLimit(`register_partner:${ip}`, 5, 60 * 60 * 1000)) {
+  if (!(await rateLimit(`register_partner:${ip}`, 5, 60 * 60 * 1000))) {
     return {
       success: false as const,
       error: "Çok fazla başvuru denemesi. Lütfen daha sonra tekrar deneyin.",

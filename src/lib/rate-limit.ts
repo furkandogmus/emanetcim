@@ -1,3 +1,5 @@
+import { Redis } from "@upstash/redis";
+
 const buckets = new Map<string, number[]>();
 
 const MAX_RETENTION_MS = 5 * 60 * 1000;
@@ -14,7 +16,15 @@ function sweepStaleKeys(now: number) {
   }
 }
 
-export function rateLimit(key: string, max: number, windowMs: number): boolean {
+/**
+ * Tek süreç / geliştirme ortamı için in-memory sliding window.
+ * Çoklu instance veya serverless replika için `redisRateLimit` kullanın.
+ */
+export function rateLimitLocalMemory(
+  key: string,
+  max: number,
+  windowMs: number
+): boolean {
   const now = Date.now();
   sweepStaleKeys(now);
 
@@ -27,4 +37,52 @@ export function rateLimit(key: string, max: number, windowMs: number): boolean {
   fresh.push(now);
   buckets.set(key, fresh);
   return true;
+}
+
+let upstash: Redis | null | undefined;
+
+function getUpstashRedis(): Redis | null {
+  if (upstash !== undefined) return upstash;
+  const url = process.env.UPSTASH_REDIS_REST_URL?.trim();
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
+  if (!url || !token) {
+    upstash = null;
+    return null;
+  }
+  upstash = new Redis({ url, token });
+  return upstash;
+}
+
+/**
+ * Dağıtık rate limit: `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` tanımlıysa Upstash Redis kullanılır.
+ * Aksi halde in-memory `rateLimitLocalMemory` ile düşer.
+ */
+async function redisRateLimit(
+  key: string,
+  max: number,
+  windowMs: number
+): Promise<boolean> {
+  const redis = getUpstashRedis();
+  if (!redis) {
+    return rateLimitLocalMemory(key, max, windowMs);
+  }
+  const now = Date.now();
+  const windowId = Math.floor(now / windowMs);
+  const redisKey = `rl:v1:${key}:${windowId}`;
+  const count = await redis.incr(redisKey);
+  if (count === 1) {
+    await redis.pexpire(redisKey, windowMs);
+  }
+  return count <= max;
+}
+
+/**
+ * Rate limit (async). Üretimde çoklu instance için Upstash Redis env değişkenlerini ayarlayın.
+ */
+export async function rateLimit(
+  key: string,
+  max: number,
+  windowMs: number
+): Promise<boolean> {
+  return redisRateLimit(key, max, windowMs);
 }

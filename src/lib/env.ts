@@ -8,6 +8,11 @@ const serverSchema = z.object({
   IYZICO_SECRET_KEY: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
   IYZICO_WEBHOOK_SECRET: z.string().optional(),
+  CRON_SECRET: z.string().optional(),
+  UPSTASH_REDIS_REST_URL: z.string().optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+  SENTRY_DSN: z.string().optional(),
+  SENTRY_TRACES_SAMPLE_RATE: z.string().optional(),
 });
 
 export type ServerEnv = z.infer<typeof serverSchema>;
@@ -24,6 +29,17 @@ export function getServerEnv(): ServerEnv {
   return cached;
 }
 
+function isPlaceholderIyzico(key: string | undefined): boolean {
+  if (!key?.trim()) return false;
+  const k = key.trim().toLowerCase();
+  return (
+    k.includes("placeholder") ||
+    k.includes("your_api_key") ||
+    k.includes("your_secret") ||
+    k === "ci-placeholder-not-for-production"
+  );
+}
+
 export function requireProdSecrets(): void {
   if (process.env.NODE_ENV !== "production") return;
   if (process.env.IYZICO_WEBHOOK_ALLOW_UNSIGNED === "true") {
@@ -35,6 +51,11 @@ export function requireProdSecrets(): void {
   if (!e.AUTH_SECRET?.trim()) {
     throw new Error("AUTH_SECRET is required in production");
   }
+  if (e.AUTH_SECRET.trim().length < 32) {
+    throw new Error(
+      "AUTH_SECRET must be at least 32 characters in production"
+    );
+  }
   if (!e.DATABASE_URL?.trim()) {
     throw new Error("DATABASE_URL is required in production");
   }
@@ -43,5 +64,22 @@ export function requireProdSecrets(): void {
   }
   if (!e.IYZICO_SECRET_KEY?.trim()) {
     throw new Error("IYZICO_SECRET_KEY is required in production");
+  }
+  // GitHub Actions vb. CI ortamında kasıtlı placeholder anahtarlar kullanılabilir.
+  if (
+    process.env.CI !== "true" &&
+    (isPlaceholderIyzico(e.IYZICO_API_KEY) ||
+      isPlaceholderIyzico(e.IYZICO_SECRET_KEY))
+  ) {
+    throw new Error(
+      "IYZICO_API_KEY / IYZICO_SECRET_KEY must not use placeholder values in production"
+    );
+  }
+  const upstashUrl = e.UPSTASH_REDIS_REST_URL?.trim();
+  const upstashToken = e.UPSTASH_REDIS_REST_TOKEN?.trim();
+  if ((upstashUrl && !upstashToken) || (!upstashUrl && upstashToken)) {
+    throw new Error(
+      "UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN must both be set or both omitted"
+    );
   }
 }

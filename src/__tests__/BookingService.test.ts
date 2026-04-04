@@ -54,6 +54,7 @@ vi.mock("@/lib/qr-token", () => ({
 vi.mock("@/services/PaymentService", () => ({
   paymentService: {
     refundPayment: (...args: unknown[]) => mockRefundPayment(...args),
+    reconcileStalePaymentBookings: vi.fn().mockResolvedValue({ fixed: 0, bookingIds: [] }),
   },
 }));
 

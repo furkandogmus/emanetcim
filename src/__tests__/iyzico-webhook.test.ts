@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import {
   computeIyzicoWebhookSignatureV3Hex,
   verifyIyzicoWebhookSignatureV3,
@@ -26,20 +26,18 @@ describe("iyzico X-IYZ-SIGNATURE-V3 (Direct Format)", () => {
   });
 
   it("production: missing signature is always rejected", () => {
-    const prevEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = "production";
-    process.env.IYZICO_WEBHOOK_ALLOW_UNSIGNED = "true";
-    try {
-      expect(
-        verifyIyzicoWebhookSignatureV3(
-          { status: "SUCCESS", paymentConversationId: "x" },
-          undefined
-        )
-      ).toBe(false);
-    } finally {
-      process.env.NODE_ENV = prevEnv;
-      delete process.env.IYZICO_WEBHOOK_ALLOW_UNSIGNED;
-    }
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("IYZICO_WEBHOOK_ALLOW_UNSIGNED", "true");
+    expect(
+      verifyIyzicoWebhookSignatureV3(
+        { status: "SUCCESS", paymentConversationId: "x" },
+        undefined
+      )
+    ).toBe(false);
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it("HPP: uses token branch when token is non-empty", () => {
