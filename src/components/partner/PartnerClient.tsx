@@ -14,6 +14,7 @@ import {
   BarChart3,
   Luggage,
 } from "lucide-react";
+import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { moneyToNumber } from "@/lib/money";
 import QRScanner from "@/components/partner/QRScanner";
@@ -262,14 +263,16 @@ export default function PartnerClient({
             <div className="flex flex-col gap-4">
               <label className="flex flex-col items-center justify-center w-full min-h-[200px] border-4 border-dashed border-gray-100 hover:border-orange-200 rounded-[2.5rem] cursor-pointer transition-all bg-gray-50 overflow-hidden group">
                 {sealPhoto ? (
-                  <>
-                    {/* eslint-disable-next-line @next/next/no-img-element -- blob/data URL önizlemesi */}
-                    <img
+                  <div className="relative w-full h-48">
+                    <Image
                       src={sealPhoto}
                       alt={t("sealPhotoAlt")}
-                      className="w-full h-48 object-cover rounded-[2rem] shadow-xl ring-2 ring-gray-100"
+                      fill
+                      unoptimized
+                      className="object-cover rounded-[2rem] shadow-xl ring-2 ring-gray-100"
+                      sizes="(max-width: 768px) 100vw, 480px"
                     />
-                  </>
+                  </div>
                 ) : (
                   <div className="flex flex-col items-center gap-3">
                     <div className="p-4 bg-white rounded-full shadow-sm text-gray-400 group-hover:text-orange-600 transition-colors">

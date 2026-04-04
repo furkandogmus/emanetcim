@@ -4,7 +4,13 @@
     "search": "Ara",
     "save": "Kaydet",
     "cancel": "İptal",
-    "loading": "Yükleniyor..."
+    "loading": "Yükleniyor...",
+    "errorTitle": "Eyvah, bir sorun oldu!",
+    "errorDescription": "Uygulamada teknik bir aksaklık yaşandı. Lütfen sayfayı yenilemeyi deneyin.",
+    "errorRetry": "TEKRAR DENE",
+    "notFoundTitle": "KAYBOLDUN!",
+    "notFoundDescription": "Aradığın emanet noktası burası değil gibi görünüyor. Belki de henüz keşfedilmemiştir?",
+    "notFoundBackHome": "ANASAYFAYA DÖN"
   },
   "Partner": {
     "scanQr": "MÜHÜRLE VE EMANET AL",
@@ -254,9 +260,19 @@
   },
   "About": {
     "title": "Hikayemiz",
+    "badge": "Güven İnşa Ediyoruz",
+    "intro": "Emanetçi, seyahat ederken yanınızdaki ağır yüklerden kurtulmanızı sağlayan, Türkiye'nin en yaygın yerel emanet ağıdır.",
     "vision": "Vizyonumuz",
+    "visionBody": "Türkiye'nin her köşesinde, her gezginin eşyasını güvenle bırakabileceği dijital bir emanet ağı oluşturmak.",
     "mission": "Misyonumuz",
-    "whyUs": "Neden Emanetçi?"
+    "missionBody": "Yerel esnafın atıl alanlarını teknolojiyle birleştirerek, turistlere özgürlük, esnafa ise ek gelir sağlamak.",
+    "whyUs": "Neden Emanetçi?",
+    "value1Title": "%100 Yerel",
+    "value1Desc": "Esnafımızla el ele veriyoruz.",
+    "value2Title": "Maksimum Güven",
+    "value2Desc": "Mühürlü valiz sistemiyle tam koruma.",
+    "value3Title": "Kolay Kullanım",
+    "value3Desc": "Saniyeler içinde rezervasyon yapın."
   },
   "Contact": {
     "title": "Bize Ulaşın",
@@ -265,7 +281,56 @@
     "name": "Ad Soyad",
     "email": "E-posta",
     "message": "Mesajınız",
-    "send": "GÖNDER"
+    "send": "GÖNDER",
+    "whatsappTitle": "WhatsApp Destek",
+    "whatsappSubtitle": "Saniyeler içinde yanıt veriyoruz.",
+    "whatsappCta": "SOHBETE BAŞLA",
+    "emailTitle": "E-posta",
+    "emailSubtitle": "Genel sorular ve esnaf başvuruları.",
+    "emailAddress": "destek@emanetci.tr",
+    "opsTitle": "Operasyon Üssü",
+    "opsAddress": "Beyoğlu, İstanbul / Türkiye",
+    "opsBadge": "MERKEZ OFİS"
+  },
+  "KVKK": {
+    "pageTitle": "KVKK Aydınlatma",
+    "subtitle": "6698 Sayılı Kanun Uyarınca",
+    "section1Title": "Veri Sorumlusu",
+    "section1Body": "Emanetçi Teknoloji A.Ş. olarak, 6698 Sayılı Kişisel Verilerin Korunması Kanunu uyarınca verilerinizin \"Veri Sorumlusu\" sıfatıyla işlenmesini taahhüt ediyoruz.",
+    "section2Title": "İşleme Amaçları",
+    "purpose1": "Hizmetin ifası ve rezervasyon yönetimi",
+    "purpose2": "iyzico üzerinden ödemelerin güvenli gerçekleştirilmesi",
+    "purpose3": "Kullanıcıya bildirim ve duyuruların iletilmesi",
+    "purpose4": "Yasal yükümlülüklerin yerine getirilmesi",
+    "section3Title": "Haklarınız",
+    "section3Body": "KVKK 11. Maddesi uyarınca; verilerinizin işlenip işlenmediğini öğrenme, işlenmişse bilgi talep etme ve eksik/yanlış verilerin düzeltilmesini isteme hakkına sahipsiniz. Başvurularınızı kvkk@emanetci.tr adresine iletebilirsiniz."
+  },
+  "Terms": {
+    "pageTitle": "Kullanım Koşulları",
+    "lastUpdated": "Son Güncelleme: 03.04.2024",
+    "section1Title": "1. Sözleşmenin Tarafları ve Konusu",
+    "section1Body": "İşbu Kullanıcı Sözleşmesi, Emanetçi Teknoloji A.Ş. ile platformu kullanan Misafirler ve İş Ortakları (Emanet Noktaları) arasındaki hak ve yükümlülükleri belirler. Platformun temelini \"Saklama Sözleşmesi\" (TBK 561-580) oluşturur.",
+    "section2Title": "2. Sorumluluk Limitleri (Sigorta)",
+    "section2Body": "Emanetçi, her bir bagaj için oluşabilecek hasar, kayıp veya hırsızlık durumunda maksimum 5.000 TL (Beş Bin Türk Lirası) tutarında tazminat ödemeyi taahhüt eder. Bu miktarı aşan değerdeki (nakit para, ziynet eşyası, elektronik cihaz vb.) eşyaların emanete bırakılmasından doğan zararlardan platform sorumlu değildir.",
+    "section3Title": "3. Yasaklı Eşyalar",
+    "forbidden1": "Yanıcı veya patlayıcı maddeler",
+    "forbidden2": "Ateşli silahlar ve mühimmat",
+    "forbidden3": "Yasal olmayan tüm maddeler",
+    "forbidden4": "Canlı hayvanlar",
+    "forbidden5": "Bozulabilir gıda maddeleri",
+    "forbidden6": "Kıymetli evrak ve nakit para"
+  },
+  "Privacy": {
+    "lastUpdated": "Son Güncelleme: 03.04.2024",
+    "section1Title": "Gizlilik Taahhüdümüz",
+    "section1Body": "Emanetçi olarak, kişisel verilerinizin güvenliğini her şeyin üstünde tutuyoruz. Platformumuzu kullanırken paylaştığınız her türlü bilgi, en yüksek şifreleme yöntemleriyle (AES-256) korunmaktadır.",
+    "section2Title": "Hangi Verileri Topluyoruz?",
+    "dataType1": "Telefon numarası (SMS onayı için)",
+    "dataType2": "Konum verisi (yakındaki esnafları bulmak için)",
+    "dataType3": "Kredi kartı maskeli bilgisi (iyzico aracılığıyla)",
+    "dataType4": "Emanet teslimat fotoğrafları (mühür onayı için)",
+    "section3Title": "Çerezler ve Takip Teknolojileri",
+    "section3Body": "Platformun sorunsuz çalışması, oturum yönetimi ve size en uygun emanet noktalarını önerebilmemiz için zorunlu çerezler kullanıyoruz. Ayrıca deneyiminizi iyileştirmek için anonim analitik çerezlerden faydalanıyoruz."
   },
   "FAQ": {
     "title": "Sıkça Sorulan Sorular",

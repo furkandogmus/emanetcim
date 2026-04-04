@@ -4,7 +4,13 @@
     "search": "Search",
     "save": "Save",
     "cancel": "Cancel",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "errorTitle": "Something went wrong",
+    "errorDescription": "We hit a technical issue. Please try refreshing the page.",
+    "errorRetry": "TRY AGAIN",
+    "notFoundTitle": "LOST?",
+    "notFoundDescription": "This doesn’t look like the storage point you were looking for. Maybe it hasn’t been discovered yet?",
+    "notFoundBackHome": "BACK TO HOME"
   },
   "Partner": {
     "scanQr": "SEAL & DROP-OFF",
@@ -254,9 +260,19 @@
   },
   "About": {
     "title": "Our Story",
+    "badge": "Building Trust",
+    "intro": "Emanetçi helps you shed the heavy load while you travel—it’s Türkiye’s widest local luggage storage network.",
     "vision": "Our Vision",
+    "visionBody": "To build a digital storage network where every traveler can safely leave their belongings, in every corner of Türkiye.",
     "mission": "Our Mission",
-    "whyUs": "Why Us?"
+    "missionBody": "Combine local businesses’ unused space with technology—freedom for travelers, extra income for partners.",
+    "whyUs": "Why Emanetçi?",
+    "value1Title": "100% Local",
+    "value1Desc": "We work hand in hand with local partners.",
+    "value2Title": "Maximum Security",
+    "value2Desc": "Sealed luggage system for full protection.",
+    "value3Title": "Easy to Use",
+    "value3Desc": "Book in seconds."
   },
   "Contact": {
     "title": "Contact Us",
@@ -265,7 +281,56 @@
     "name": "Full Name",
     "email": "Email",
     "message": "Your Message",
-    "send": "SEND"
+    "send": "SEND",
+    "whatsappTitle": "WhatsApp Support",
+    "whatsappSubtitle": "We reply within minutes.",
+    "whatsappCta": "START CHAT",
+    "emailTitle": "Email",
+    "emailSubtitle": "General questions and partner applications.",
+    "emailAddress": "destek@emanetci.tr",
+    "opsTitle": "Operations Hub",
+    "opsAddress": "Beyoğlu, Istanbul / Türkiye",
+    "opsBadge": "HEAD OFFICE"
+  },
+  "KVKK": {
+    "pageTitle": "KVKK Disclosure",
+    "subtitle": "Under Law No. 6698",
+    "section1Title": "Data Controller",
+    "section1Body": "As Emanetçi Technology Inc., we commit to processing your data as the \"Data Controller\" under the Turkish Personal Data Protection Law No. 6698.",
+    "section2Title": "Purposes of Processing",
+    "purpose1": "Service delivery and reservation management",
+    "purpose2": "Secure payment processing via iyzico",
+    "purpose3": "Sending notifications and announcements to users",
+    "purpose4": "Fulfilling legal obligations",
+    "section3Title": "Your Rights",
+    "section3Body": "Under Article 11 of the KVKK, you have the right to learn whether your data is processed, request information if it is, and request correction of incomplete or inaccurate data. You can contact us at kvkk@emanetci.tr."
+  },
+  "Terms": {
+    "pageTitle": "Terms of Use",
+    "lastUpdated": "Last updated: 03 Apr 2024",
+    "section1Title": "1. Parties and Subject",
+    "section1Body": "This User Agreement sets out the rights and obligations between Emanetçi Technology Inc. and Guests and Business Partners (storage points) using the platform. It is based on the \"Storage Agreement\" (Turkish Civil Code 561–580).",
+    "section2Title": "2. Liability Limits (Insurance)",
+    "section2Body": "Emanetçi undertakes to compensate up to 5,000 TRY per bag for damage, loss, or theft. The platform is not liable for items above this value (cash, jewelry, electronics, etc.).",
+    "section3Title": "3. Prohibited Items",
+    "forbidden1": "Flammable or explosive materials",
+    "forbidden2": "Firearms and ammunition",
+    "forbidden3": "Any illegal substances",
+    "forbidden4": "Live animals",
+    "forbidden5": "Perishable food",
+    "forbidden6": "Valuable documents and cash"
+  },
+  "Privacy": {
+    "lastUpdated": "Last updated: 03 Apr 2024",
+    "section1Title": "Our Privacy Commitment",
+    "section1Body": "At Emanetçi, we put the security of your personal data first. Any information you share while using the platform is protected with strong encryption (AES-256).",
+    "section2Title": "What Data We Collect",
+    "dataType1": "Phone number (for SMS verification)",
+    "dataType2": "Location (to find nearby partners)",
+    "dataType3": "Masked card data (via iyzico)",
+    "dataType4": "Drop-off photos (for seal verification)",
+    "section3Title": "Cookies and Tracking",
+    "section3Body": "We use essential cookies for the platform to work, session management, and recommending suitable storage points. We also use anonymous analytics cookies to improve your experience."
   },
   "FAQ": {
     "title": "Frequently Asked Questions",
