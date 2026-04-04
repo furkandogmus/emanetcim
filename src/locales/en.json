@@ -357,5 +357,14 @@
     "benefit3Desc": "Digital records and sealed delivery ensure no headaches.",
     "howItWorks": "How It Works?",
     "joinUs": "APPLY NOW"
+  },
+  "CookieConsent": {
+    "bannerTitle": "Cookie preferences",
+    "bannerText": "Essential cookies are required for the site to work. You may also allow anonymous analytics cookies to help us improve the experience.",
+    "acceptAll": "Accept all",
+    "essentialOnly": "Essential only",
+    "linksIntro": "Learn more:",
+    "privacy": "Privacy policy",
+    "kvkk": "Privacy notice (KVKK)"
   }
 }

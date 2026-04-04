@@ -357,5 +357,14 @@
     "benefit3Desc": "Dijital kayıt ve mühürlü teslimatla başınız ağrımaz.",
     "howItWorks": "Nasıl Çalışır?",
     "joinUs": "ŞİMDİ BAŞVURUN"
+  },
+  "CookieConsent": {
+    "bannerTitle": "Çerez tercihleri",
+    "bannerText": "Zorunlu çerezler siteyi çalıştırmak için gereklidir. İsterseniz deneyimi iyileştirmek için anonim analitik çerezlerine de onay verebilirsiniz.",
+    "acceptAll": "Tümünü kabul et",
+    "essentialOnly": "Yalnızca zorunlu",
+    "linksIntro": "Ayrıntılar:",
+    "privacy": "Gizlilik Politikası",
+    "kvkk": "KVKK Aydınlatma"
   }
 }

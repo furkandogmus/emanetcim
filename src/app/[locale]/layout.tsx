@@ -42,6 +42,7 @@ import PWARegister from '@/components/PWARegister';
 import { Providers } from "@/components/Providers";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import CookieConsent from "@/components/CookieConsent";
 
 export default async function RootLayout({
   children,
@@ -72,6 +73,7 @@ export default async function RootLayout({
               {children}
             </main>
             <Footer />
+            <CookieConsent />
           </Providers>
         </NextIntlClientProvider>
       </body>
