@@ -2,6 +2,8 @@
 
 Vercel/serverless kullanmadan tek makinede veya sunucuda çalıştırmak için **PostgreSQL 16**, **Next.js (standalone)** ve önde **Nginx** (reverse proxy + `public/` statikleri) birlikte ayağa kalkar.
 
+**LAN’daki Ubuntu VM + `emanetci.local`:** [VM-LAN.md](./VM-LAN.md).
+
 ## Gereksinimler
 
 - Docker + Docker Compose v2
