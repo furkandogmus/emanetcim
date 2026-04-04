@@ -31,7 +31,9 @@ const authProxy = auth((req) => {
     pathname.startsWith('/manifest.json') ||
     pathname.startsWith('/icons/') ||
     pathname.startsWith('/_next/') ||
-    pathname === '/favicon.ico'
+    pathname === '/favicon.ico' ||
+    pathname === '/sitemap.xml' ||
+    pathname === '/robots.txt'
   ) {
     return NextResponse.next();
   }
@@ -101,6 +103,9 @@ const authProxy = auth((req) => {
 export function proxy(request: NextRequest) {
   return (authProxy as (r: NextRequest) => ReturnType<typeof authProxy>)(request);
 }
+
+/** Next.js 16: `middleware` adı `proxy.ts` içinde tanımlanır (ayrı `middleware.ts` dosyası kullanılmaz). */
+export { proxy as middleware };
 
 export const config = {
   // Matcher for i18n and Auth (Excluding static assets strictly)
