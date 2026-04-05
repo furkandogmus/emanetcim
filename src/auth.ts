@@ -21,16 +21,9 @@ const adminEmailSet = new Set(
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
-  // AUTH_URL doluysa NextAuth isteği o origin’e çevirir; ngrok/LAN çoklu host için AUTH_URL boş + trustHost.
-  trustHost:
-    process.env.AUTH_TRUST_HOST === "false"
-      ? false
-      : process.env.AUTH_TRUST_HOST === "true" ||
-        process.env.NODE_ENV === "development" ||
-        process.env.VERCEL === "1" ||
-        !(process.env.AUTH_URL ?? process.env.NEXTAUTH_URL)?.trim(),
   ...authConfig,
   callbacks: {
+    ...authConfig.callbacks,
     async session({ session, token }: { session: Session; token: JWT }) {
       if (session.user) {
         session.user.role = token.role || Role.GUEST;
@@ -68,5 +61,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     (process.env.NODE_ENV === "development"
       ? "dev-only-auth-secret-not-for-production"
       : undefined),
+  // Son sırada: ...authConfig ve setEnvDefaults ile ezilmesin. Docker/nginx/ngrok arkasında Host güvenilir.
+  // AUTH_TRUST_HOST=false ile kapatılabilir.
+  trustHost: process.env.AUTH_TRUST_HOST !== "false",
 });
 

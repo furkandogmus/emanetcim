@@ -266,15 +266,18 @@ export default function LoginPage() {
           </>
         )}
 
-        {/* Güvenlik rozeti */}
-        <div className="mt-10 flex items-center gap-2 text-green-600 bg-green-50 px-4 py-2 rounded-xl border border-green-100">
-          <ShieldCheck size={16} />
-          <span className="text-[10px] font-black uppercase tracking-widest leading-none">Safe & Secure Auth</span>
+        {/* Güvenlik rozeti + gizlilik — kart içinde tam ortalı */}
+        <div className="mt-10 w-full flex flex-col items-center gap-0">
+          <div className="inline-flex items-center justify-center gap-2 text-green-600 bg-green-50 px-4 py-2.5 rounded-xl border border-green-100 mx-auto">
+            <ShieldCheck size={16} className="shrink-0" aria-hidden />
+            <span className="text-[10px] font-black uppercase tracking-widest leading-tight text-center">
+              Safe & Secure Auth
+            </span>
+          </div>
+          <p className="mt-6 w-full max-w-xs mx-auto text-[10px] text-gray-400 font-bold text-center leading-relaxed uppercase tracking-widest opacity-50 px-2">
+            {t('privacyPolicy')}
+          </p>
         </div>
-
-        <p className="mt-6 text-[10px] text-gray-400 font-bold max-w-[200px] text-center leading-normal uppercase tracking-widest opacity-50">
-          {t('privacyPolicy')}
-        </p>
       </motion.div>
     </div>
   );

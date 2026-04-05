@@ -5,7 +5,10 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { routing } from './i18n/routing';
 
-const { auth } = NextAuth(authConfig);
+const { auth } = NextAuth({
+  ...authConfig,
+  trustHost: process.env.AUTH_TRUST_HOST !== "false",
+});
 
 
 const intlMiddleware = createMiddleware(routing);
@@ -36,6 +39,15 @@ const authProxy = auth((req) => {
     pathname === '/robots.txt'
   ) {
     return NextResponse.next();
+  }
+
+  // Auth.js pages.signIn locale öneki olmadan "/login" döner — next-intl'den önce locale ekle
+  if (pathname === '/login' || pathname === '/auth/error') {
+    const cookieLocale = req.cookies.get('NEXT_LOCALE')?.value;
+    const locale = cookieLocale === 'en' ? 'en' : 'tr';
+    const url = nextUrl.clone();
+    url.pathname = `/${locale}${pathname}`;
+    return NextResponse.redirect(url);
   }
 
   // API: istek korelasyonu (loglar ve hata ayıklama)
