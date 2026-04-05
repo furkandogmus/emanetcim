@@ -32,9 +32,14 @@ const securityHeaders = [
   },
 ];
 
-const nextConfig: NextConfig = {
+const nextConfig = {
   output: "standalone",
   reactCompiler: true,
+  experimental: {
+    // Nginx / ngrok gibi ters vekil arkasında: Next.js istek URL'ini Host header'ından üretir.
+    // false iken bind adresi (0.0.0.0:3000) kullanılır → Auth.js callbackUrl bozulur.
+    trustHostHeader: true,
+  },
   // Prisma 7 ve Next.js 16 (Turbopack) uyumluluğu için gereklidir.
   serverExternalPackages: ["@prisma/client", "pg", "iyzipay", "@netgsm/sms"],
   async headers() {
@@ -47,5 +52,5 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withNextIntl(nextConfig);
+export default withNextIntl(nextConfig as NextConfig);
 
