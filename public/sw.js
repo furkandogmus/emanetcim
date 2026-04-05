@@ -1,13 +1,8 @@
-// Emanetçi Service Worker - Production Ready 🚀
-const CACHE_NAME = 'emanetci-v3';
-const ASSETS_TO_CACHE = [
-  '/',
-  '/manifest.json',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png',
-];
+// Emanetçi Service Worker — PWA ikon/manifest; sayfa ve Next.js iç yollarına müdahale etme.
+// (ngrok ara sayfası / RSC / OAuth için navigasyon ve _next cache'lenmez.)
+const CACHE_NAME = 'emanetci-v4';
+const ASSETS_TO_CACHE = ['/manifest.json', '/icons/icon-192x192.png', '/icons/icon-512x512.png'];
 
-// 1. Statik varlıkları önbelleğe al (addAll tek 404'te patlar; eksik dosya/ngrok uyarısı için tek tek)
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
@@ -17,7 +12,7 @@ self.addEventListener('install', (event) => {
             const res = await fetch(new Request(url, { cache: 'reload' }));
             if (res.ok) await cache.put(url, res);
           } catch (_) {
-            /* yok say: ikon eksik, ngrok ara sayfası vb. */
+            /* ikon eksik vb. */
           }
         })
       );
@@ -26,46 +21,45 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// 2. Aktivasyon ve Eski Önbellek Temizliği
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
+    caches.keys().then((cacheNames) =>
+      Promise.all(
         cacheNames.map((name) => {
           if (name !== CACHE_NAME) return caches.delete(name);
         })
-      );
-    })
+      )
+    )
   );
+  self.clients.claim();
 });
 
-// 3. Akıllı Fetch Stratejisi
+function shouldBypassSw(url) {
+  const path = url.pathname;
+  if (path.startsWith('/api/')) return true;
+  if (path.startsWith('/_next/')) return true;
+  if (path.includes('/login')) return true;
+  if (path.includes('/auth')) return true;
+  if (url.searchParams.has('_rsc')) return true;
+  return false;
+}
+
 self.addEventListener('fetch', (event) => {
   const requestUrl = new URL(event.request.url);
+  if (requestUrl.origin !== self.location.origin) return;
 
-  // API veya Auth rotalarını cacheleme
-  if (requestUrl.pathname.startsWith('/api') || requestUrl.pathname.startsWith('/login')) {
+  if (shouldBypassSw(requestUrl)) {
     return;
   }
 
-  // HTML sayfaları için 'Network First, Fallback to Cache'
+  // Tüm doküman geçişleri: yalnızca ağ (HTML/ngrok/Auth.js için önbellek yok)
   if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-          return response;
-        })
-        .catch(() => caches.match(event.request))
-    );
+    event.respondWith(fetch(event.request));
     return;
   }
 
-  // Diğer varlıklar için 'Cache First'
+  // Diğer istekler: önce önbellek (sabit ikon vb.)
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
+    caches.match(event.request).then((response) => response || fetch(event.request))
   );
 });
