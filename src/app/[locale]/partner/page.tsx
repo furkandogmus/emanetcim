@@ -1,12 +1,16 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
 import { shopService } from "@/services/ShopService";
-import { bookingService } from "@/services/BookingService";
+import {
+  bookingService,
+  type PartnerBookingListItem,
+} from "@/services/BookingService";
 import PartnerClient from "@/components/partner/PartnerClient";
 import { redirect } from "next/navigation";
 import { getMerchantShareRatio } from "@/lib/platform-split";
 import { moneyToNumber } from "@/lib/money";
 import { getPricingRules } from "@/lib/platform-settings";
+import prisma from "@/lib/db";
 
 /**
  * esnaf Ana Sayfası - Partner Dashboard (Server Component)
@@ -51,10 +55,18 @@ export default async function PartnerPage({
     );
   }
 
-  const [bookings, pricingRules] = await Promise.all([
+  const [bookings, pricingRules, ownerPhoneRow] = (await Promise.all([
     bookingService.getPartnerBookings(activeShop.id),
     getPricingRules(),
-  ]);
+    prisma.user.findUnique({
+      where: { id: session!.user.id },
+      select: { phone: true },
+    }),
+  ])) as [
+    PartnerBookingListItem[],
+    Awaited<ReturnType<typeof getPricingRules>>,
+    { phone: string | null } | null,
+  ];
   const activeCount = bookings.filter(
     (b) => b.status === "PAID" || b.status === "CHECKED_IN"
   ).length;
@@ -82,6 +94,7 @@ export default async function PartnerPage({
       bookings={JSON.parse(JSON.stringify(bookings))}
       initialBookingId={initialBookingId}
       initialCheckoutBookingId={initialCheckoutBookingId}
+      initialPhone={ownerPhoneRow?.phone ?? ""}
     />
   );
 }

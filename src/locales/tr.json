@@ -71,6 +71,8 @@
     "openingTime": "Açılış",
     "closingTime": "Kapanış",
     "settingsSaved": "Ayarlar güncellendi.",
+    "smsNotifyPhone": "SMS bildirim telefonu (GSM)",
+    "smsNotifyPhoneHint": "Yeni ödeme alındığında Netgsm ile bu numaraya kısa mesaj gider. Misafirlere SMS gönderilmez.",
     "noShopTitle": "Henüz Kayıtlı Dükkanınız Yok",
     "noShopDesc": "İşletmenizi sisteme kaydetmek için admin onayı bekliyor olabilirsiniz.",
     "backToPanel": "Panele dön"

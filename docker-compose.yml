@@ -37,6 +37,12 @@ services:
       ADMIN_EMAILS: ${ADMIN_EMAILS:-}
       # /api/admin/setup endpointini korur; boş bırakılırsa endpoint kapalıdır
       ADMIN_SETUP_KEY: ${ADMIN_SETUP_KEY:-}
+      # Netgsm SMS (esnaf + NETGSM_ADMIN_PHONES; misafir yok)
+      NETGSM_USERNAME: ${NETGSM_USERNAME:-}
+      NETGSM_PASSWORD: ${NETGSM_PASSWORD:-}
+      NETGSM_MSGHEADER: ${NETGSM_MSGHEADER:-}
+      NETGSM_APPNAME: ${NETGSM_APPNAME:-}
+      NETGSM_ADMIN_PHONES: ${NETGSM_ADMIN_PHONES:-}
     depends_on:
       postgres:
         condition: service_healthy

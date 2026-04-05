@@ -1,5 +1,11 @@
 import logger from "../lib/logger";
 import prisma from "../lib/db";
+import {
+  isNetgsmConfigured,
+  normalizeTrGsm10,
+  parseAdminGsmNumbers,
+  sendNetgsmRestSms,
+} from "@/lib/netgsm";
 
 export interface INotificationService {
   sendEmail(to: string, subject: string, body: string, bookingId?: string): Promise<boolean>;
@@ -9,6 +15,7 @@ export interface INotificationService {
 
 /**
  * NotificationService - Merkezi Bildirim Yönetimi
+ * SMS: Netgsm (@netgsm/sms) — yalnızca esnaf / admin numaralarına (misafir SMS yok).
  */
 export class NotificationService implements INotificationService {
   /**
@@ -88,7 +95,7 @@ export class NotificationService implements INotificationService {
   async sendPush(userId: string, title: string, message: string, bookingId?: string): Promise<boolean> {
     try {
       logger.info({ userId, title }, "[Notification] Push Sent Simulation");
-      
+
       await prisma.notificationLog.create({
         data: {
           bookingId,
@@ -96,8 +103,8 @@ export class NotificationService implements INotificationService {
           recipient: userId,
           subject: title,
           content: message,
-          status: "SENT"
-        }
+          status: "SENT",
+        },
       });
 
       return true;
@@ -108,31 +115,79 @@ export class NotificationService implements INotificationService {
   }
 
   /**
-   * SMS gönderimi
+   * Netgsm ile SMS (REST). NETGSM_* tanımlı değilse SKIPPED.
+   * `to` — normalize edilmiş 10 hane (5xxxxxxxxx) veya ham GSM; içeride normalize edilir.
    */
   async sendSms(to: string, message: string, bookingId?: string): Promise<boolean> {
-    try {
-      logger.info({ to, message }, "[Notification] SMS Sent Simulation");
-      
+    const no = normalizeTrGsm10(to);
+    if (!no) {
+      logger.warn({ to, bookingId }, "notification_sms_invalid_number");
       await prisma.notificationLog.create({
         data: {
           bookingId,
           type: "SMS",
           recipient: to,
           content: message,
-          status: "SENT"
-        }
+          status: "FAILED",
+          error: "invalid_gsm",
+        },
       });
+      return false;
+    }
 
-      return true;
+    if (!isNetgsmConfigured()) {
+      logger.info({ to: no, bookingId }, "notification_sms_skipped_netgsm_not_configured");
+      await prisma.notificationLog.create({
+        data: {
+          bookingId,
+          type: "SMS",
+          recipient: no,
+          content: message,
+          status: "SKIPPED",
+          error: "netgsm_not_configured",
+        },
+      });
+      return false;
+    }
+
+    try {
+      const result = await sendNetgsmRestSms({ to10: no, message });
+      const ok = result.ok;
+      await prisma.notificationLog.create({
+        data: {
+          bookingId,
+          type: "SMS",
+          recipient: no,
+          content: message,
+          status: ok ? "SENT" : "FAILED",
+          error: ok ? (result.jobId ?? null) : (result.error ?? "netgsm_failed"),
+        },
+      });
+      if (ok) {
+        logger.info({ to: no, bookingId, jobId: result.jobId }, "notification_sms_sent");
+      } else {
+        logger.error({ to: no, bookingId, err: result.error }, "notification_sms_failed");
+      }
+      return ok;
     } catch (error) {
-      logger.error({ error }, "[Notification] SMS Failed");
+      const errMsg = error instanceof Error ? error.message : String(error);
+      logger.error({ err: error, to: no, bookingId }, "notification_sms_exception");
+      await prisma.notificationLog.create({
+        data: {
+          bookingId,
+          type: "SMS",
+          recipient: no,
+          content: message,
+          status: "FAILED",
+          error: errMsg,
+        },
+      });
       return false;
     }
   }
 
   /**
-   * Rezervasyon Onay Bildirimi
+   * Misafir: yalnızca e-posta (SMS gönderilmez).
    */
   async notifyBookingSuccess(emailOrPlaceholder: string, bookingId: string, totalPrice: number): Promise<void> {
     const subject = "Emanetçi: Rezervasyonunuz Onaylandı! 🎒";
@@ -141,9 +196,46 @@ export class NotificationService implements INotificationService {
     if (emailOrPlaceholder.includes("@")) {
       await this.sendEmail(emailOrPlaceholder, subject, body, bookingId);
     }
-    const phoneLike = /^\+?[0-9\s-]{10,}$/.test(emailOrPlaceholder);
-    if (phoneLike) {
-      await this.sendSms(emailOrPlaceholder, `Emanetçi: Rezervasyonunuz (${bookingId.substring(0, 6)}) onaylandı.`, bookingId);
+  }
+
+  /**
+   * Ödeme sonrası: esnafa (dükkan sahibi telefonu) + isteğe bağlı admin numaralarına SMS.
+   */
+  async notifyPartnerAndAdminsForNewPaidBooking(params: {
+    bookingId: string;
+    shopName: string;
+    partnerPhone: string | null | undefined;
+    totalPrice: number;
+  }): Promise<void> {
+    const { bookingId, shopName, partnerPhone, totalPrice } = params;
+    const shortId = bookingId.replace(/-/g, "").slice(0, 8);
+    const partnerMsg = `Emanetçi: Yeni rezervasyon — ${shopName}. Kod: ${shortId} Tutar: ${Number(totalPrice).toFixed(2)} TL`;
+
+    const p = normalizeTrGsm10(partnerPhone ?? undefined);
+    if (p) {
+      await this.sendSms(p, partnerMsg, bookingId);
+    } else {
+      logger.info({ bookingId }, "partner_sms_skipped_no_phone");
+    }
+
+    const adminMsg = `Emanetçi [Admin]: Yeni ödeme — ${shopName}. ${shortId} ${Number(totalPrice).toFixed(2)} TL`;
+    for (const adminNo of parseAdminGsmNumbers()) {
+      await this.sendSms(adminNo, adminMsg, bookingId);
+    }
+  }
+
+  /**
+   * Şikayet açıldığında yalnızca admin GSM listesine SMS.
+   */
+  async notifyAdminsForDispute(params: {
+    bookingId: string;
+    reason: string;
+  }): Promise<void> {
+    const { bookingId, reason } = params;
+    const shortId = bookingId.replace(/-/g, "").slice(0, 8);
+    const msg = `Emanetçi [Admin]: Yeni şikayet (${reason}) — rez. ${shortId}`;
+    for (const adminNo of parseAdminGsmNumbers()) {
+      await this.sendSms(adminNo, msg, bookingId);
     }
   }
 

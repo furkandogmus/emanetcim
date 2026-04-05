@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { Clock, Loader2, Luggage, Settings, CheckCircle } from "lucide-react";
+import { Clock, Loader2, Luggage, Settings, CheckCircle, Phone } from "lucide-react";
 import { updateShopSettingsAction } from "@/actions/shop";
+import { updatePartnerPhoneAction } from "@/actions/partner";
 
 type Props = {
   shopId: string;
@@ -16,6 +17,8 @@ type Props = {
   marketPrice: number;
   /** Sıkışık varyant (panel sekmesi) */
   compact?: boolean;
+  /** Netgsm: yeni rezervasyon SMS — dükkan sahibi GSM */
+  initialPhone?: string;
 };
 
 export default function PartnerShopSettingsForm({
@@ -26,6 +29,7 @@ export default function PartnerShopSettingsForm({
   initialPricePerDay,
   marketPrice,
   compact = false,
+  initialPhone = "",
 }: Props) {
   const t = useTranslations("Partner");
   const router = useRouter();
@@ -33,9 +37,11 @@ export default function PartnerShopSettingsForm({
   const [openingTime, setOpeningTime] = useState(initialOpening);
   const [closingTime, setClosingTime] = useState(initialClosing);
   const [pricePerDay, setPricePerDay] = useState(initialPricePerDay);
+  const [partnerPhone, setPartnerPhone] = useState(initialPhone);
   const [isUpdating, setIsUpdating] = useState(false);
   const [saved, setSaved] = useState(false);
   const [priceError, setPriceError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
 
   const minPrice = Math.round(marketPrice / 2);
   const maxPrice = marketPrice * 2;
@@ -57,6 +63,7 @@ export default function PartnerShopSettingsForm({
     }
     setIsUpdating(true);
     setSaved(false);
+    setPhoneError(null);
     try {
       await updateShopSettingsAction(shopId, {
         capacity,
@@ -64,6 +71,11 @@ export default function PartnerShopSettingsForm({
         closingTime,
         pricePerDay,
       });
+      const phoneRes = await updatePartnerPhoneAction(partnerPhone);
+      if (!phoneRes.success) {
+        setPhoneError(phoneRes.error);
+        return;
+      }
       router.refresh();
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
@@ -127,6 +139,28 @@ export default function PartnerShopSettingsForm({
                 {t("priceRangeHint", { min: minPrice, max: maxPrice })}
               </p>
             )}
+          </div>
+
+          <div>
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">
+              {t("smsNotifyPhone")}
+            </label>
+            <div className="flex items-center gap-4">
+              <Phone size={20} className="text-gray-300 shrink-0" />
+              <input
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                placeholder="5xx xxx xx xx"
+                value={partnerPhone}
+                onChange={(e) => setPartnerPhone(e.target.value)}
+                className="flex-1 bg-gray-50 p-4 rounded-2xl font-bold outline-none border border-transparent focus:border-orange-500 transition-all"
+              />
+            </div>
+            <p className="text-xs text-gray-400 font-medium mt-1.5">{t("smsNotifyPhoneHint")}</p>
+            {phoneError ? (
+              <p className="text-xs text-red-500 font-semibold mt-1.5">{phoneError}</p>
+            ) : null}
           </div>
 
           <div className="grid grid-cols-2 gap-4">

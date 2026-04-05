@@ -7,6 +7,7 @@ import prisma from "@/lib/db";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { verifyQrToken } from "@/lib/qr-token";
 import type { SealAssignmentInput } from "@/services/SealService";
+import { normalizeTrGsm10 } from "@/lib/netgsm";
 
 function revalidatePartnerPaths() {
   revalidatePathAllLocales("/partner");
@@ -240,4 +241,48 @@ export async function checkOutAction(qrTokenOrBookingId: string) {
     error: result.message,
     code: result.code,
   };
+}
+
+/**
+ * Esnaf / admin hesabına GSM (Netgsm bildirimleri için). Misafirlere SMS gönderilmez.
+ */
+export async function updatePartnerPhoneAction(phone: string) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false as const, error: "Oturum gerekli." };
+  }
+  if (session.user.role !== "PARTNER" && session.user.role !== "ADMIN") {
+    return { success: false as const, error: "Yetkisiz." };
+  }
+
+  const trimmed = phone.trim();
+  const normalized = normalizeTrGsm10(trimmed);
+  if (trimmed && !normalized) {
+    return {
+      success: false as const,
+      error: "Geçerli bir Türkiye GSM numarası girin (örn. 5xx xxx xx xx).",
+    };
+  }
+
+  try {
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: { phone: normalized },
+    });
+  } catch (e: unknown) {
+    const code =
+      e && typeof e === "object" && "code" in e
+        ? (e as { code?: string }).code
+        : undefined;
+    if (code === "P2002") {
+      return {
+        success: false as const,
+        error: "Bu numara başka bir hesaba bağlı.",
+      };
+    }
+    throw e;
+  }
+
+  revalidatePartnerPaths();
+  return { success: true as const };
 }

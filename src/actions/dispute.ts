@@ -3,6 +3,7 @@
 import { auth } from "@/auth";
 import prisma from "@/lib/db";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
+import { notificationService } from "@/services/NotificationService";
 
 export async function createDisputeAction(input: {
   bookingId: string;
@@ -39,6 +40,13 @@ export async function createDisputeAction(input: {
       status: "OPEN",
     },
   });
+
+  void notificationService
+    .notifyAdminsForDispute({
+      bookingId: input.bookingId,
+      reason: input.reason,
+    })
+    .catch(() => {});
 
   revalidatePathAllLocales("/bookings");
   revalidatePathAllLocales("/admin");

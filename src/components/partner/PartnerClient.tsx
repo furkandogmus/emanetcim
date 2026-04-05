@@ -51,6 +51,7 @@ interface PartnerClientProps {
   bookings: PartnerBookingListItem[];
   initialBookingId?: string;
   initialCheckoutBookingId?: string;
+  initialPhone?: string;
 }
 
 export default function PartnerClient({
@@ -67,6 +68,7 @@ export default function PartnerClient({
   bookings,
   initialBookingId,
   initialCheckoutBookingId,
+  initialPhone = "",
 }: PartnerClientProps) {
   const t = useTranslations("Partner");
   const locale = useLocale();
@@ -756,6 +758,7 @@ export default function PartnerClient({
             initialClosing={initialClosing}
             initialPricePerDay={initialPricePerDay}
             marketPrice={marketPrice}
+            initialPhone={initialPhone}
             compact
           />
         </main>

@@ -53,7 +53,10 @@ export async function createBookingAction(data: CreateBookingInput) {
     return { success: false as const, error: "Oturum açmanız gerekiyor." };
   }
 
-  const shop = await prisma.shop.findUnique({ where: { id: data.shopId } });
+  const shop = await prisma.shop.findUnique({
+    where: { id: data.shopId },
+    include: { owner: { select: { phone: true } } },
+  });
   if (!shop) {
     return { success: false as const, error: "Dükkan bulunamadı." };
   }
@@ -195,6 +198,15 @@ export async function createBookingAction(data: CreateBookingInput) {
         booking.id,
         totalPrice
       )
+      .catch(() => {});
+
+    void notificationService
+      .notifyPartnerAndAdminsForNewPaidBooking({
+        bookingId: booking.id,
+        shopName: shop.name,
+        partnerPhone: shop.owner.phone,
+        totalPrice,
+      })
       .catch(() => {});
 
     revalidatePathAllLocales("/bookings");

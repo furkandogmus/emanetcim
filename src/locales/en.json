@@ -71,6 +71,8 @@
     "openingTime": "Opening",
     "closingTime": "Closing",
     "settingsSaved": "Settings saved.",
+    "smsNotifyPhone": "SMS notification phone (GSM)",
+    "smsNotifyPhoneHint": "When a new booking is paid, Netgsm sends a short SMS to this number. Guests are not sent SMS.",
     "noShopTitle": "No Shop Registered Yet",
     "noShopDesc": "Your shop may be awaiting admin approval.",
     "backToPanel": "Back to panel"

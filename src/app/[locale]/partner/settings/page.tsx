@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 import PartnerShopSettingsForm from "@/components/partner/PartnerShopSettingsForm";
 import { moneyToNumber } from "@/lib/money";
 import { getPricingRules } from "@/lib/platform-settings";
+import prisma from "@/lib/db";
 
 /**
  * Partner Settings — DB ile senkron (PartnerClient AYARLAR ile aynı aksiyon)
@@ -32,9 +33,13 @@ export default async function PartnerSettingsPage({
     redirect(`/${locale}`);
   }
 
-  const [shops, pricingRules] = await Promise.all([
+  const [shops, pricingRules, ownerPhoneRow] = await Promise.all([
     shopService.getShopsByOwner(session.user.id),
     getPricingRules(),
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { phone: true },
+    }),
   ]);
   const shop = shops[0];
   const marketPrice = pricingRules.defaultPricePerDay;
@@ -75,6 +80,7 @@ export default async function PartnerSettingsPage({
           initialClosing={shop.closingTime || "20:00"}
           initialPricePerDay={moneyToNumber(shop.pricePerDay) || marketPrice}
           marketPrice={marketPrice}
+          initialPhone={ownerPhoneRow?.phone ?? ""}
         />
       </main>
     </div>

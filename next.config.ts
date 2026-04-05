@@ -36,7 +36,7 @@ const nextConfig: NextConfig = {
   output: "standalone",
   reactCompiler: true,
   // Prisma 7 ve Next.js 16 (Turbopack) uyumluluğu için gereklidir.
-  serverExternalPackages: ["@prisma/client", "pg", "iyzipay"],
+  serverExternalPackages: ["@prisma/client", "pg", "iyzipay", "@netgsm/sms"],
   async headers() {
     return [
       {
