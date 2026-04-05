@@ -136,17 +136,7 @@ export class NotificationService implements INotificationService {
     }
 
     if (!isNetgsmConfigured()) {
-      logger.info({ to: no, bookingId }, "notification_sms_skipped_netgsm_not_configured");
-      await prisma.notificationLog.create({
-        data: {
-          bookingId,
-          type: "SMS",
-          recipient: no,
-          content: message,
-          status: "SKIPPED",
-          error: "netgsm_not_configured",
-        },
-      });
+      logger.debug({ to: no, bookingId }, "notification_sms_skipped_netgsm_not_configured");
       return false;
     }
 
@@ -207,6 +197,11 @@ export class NotificationService implements INotificationService {
     partnerPhone: string | null | undefined;
     totalPrice: number;
   }): Promise<void> {
+    if (!isNetgsmConfigured()) {
+      logger.debug({ bookingId: params.bookingId }, "netgsm_off_skipping_booking_sms");
+      return;
+    }
+
     const { bookingId, shopName, partnerPhone, totalPrice } = params;
     const shortId = bookingId.replace(/-/g, "").slice(0, 8);
     const partnerMsg = `Emanetçi: Yeni rezervasyon — ${shopName}. Kod: ${shortId} Tutar: ${Number(totalPrice).toFixed(2)} TL`;
@@ -215,7 +210,7 @@ export class NotificationService implements INotificationService {
     if (p) {
       await this.sendSms(p, partnerMsg, bookingId);
     } else {
-      logger.info({ bookingId }, "partner_sms_skipped_no_phone");
+      logger.debug({ bookingId }, "partner_sms_skipped_no_phone");
     }
 
     const adminMsg = `Emanetçi [Admin]: Yeni ödeme — ${shopName}. ${shortId} ${Number(totalPrice).toFixed(2)} TL`;
@@ -231,10 +226,17 @@ export class NotificationService implements INotificationService {
     bookingId: string;
     reason: string;
   }): Promise<void> {
+    if (!isNetgsmConfigured()) {
+      logger.debug({ bookingId: params.bookingId }, "netgsm_off_skipping_dispute_sms");
+      return;
+    }
+    const admins = parseAdminGsmNumbers();
+    if (admins.length === 0) return;
+
     const { bookingId, reason } = params;
     const shortId = bookingId.replace(/-/g, "").slice(0, 8);
     const msg = `Emanetçi [Admin]: Yeni şikayet (${reason}) — rez. ${shortId}`;
-    for (const adminNo of parseAdminGsmNumbers()) {
+    for (const adminNo of admins) {
       await this.sendSms(adminNo, msg, bookingId);
     }
   }

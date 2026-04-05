@@ -1,8 +1,10 @@
-import Netgsm, { SendSmsErrorCode } from "@netgsm/sms";
+import logger from "@/lib/logger";
 
 /**
  * Netgsm REST API — kullanıcı adı / şifre panelden.
  * NETGSM_MSGHEADER: onaylı SMS başlığı (gönderici adı).
+ *
+ * `@netgsm/sms` yalnızca gönderim anında dinamik import edilir; env yoksa paket yüklenmez.
  */
 export function isNetgsmConfigured(): boolean {
   return !!(
@@ -47,23 +49,35 @@ export async function sendNetgsmRestSms(params: {
   const msgheader = process.env.NETGSM_MSGHEADER!.trim();
   const text = params.message.replace(/\s+/g, " ").trim().slice(0, 900);
 
-  const netgsm = new Netgsm({
-    username: process.env.NETGSM_USERNAME!.trim(),
-    password: process.env.NETGSM_PASSWORD!.trim(),
-    appname: process.env.NETGSM_APPNAME?.trim() || undefined,
-  });
+  try {
+    const mod = await import("@netgsm/sms");
+    const Netgsm = mod.default;
+    const SendSmsErrorCode = mod.SendSmsErrorCode;
 
-  const res = await netgsm.sendRestSms({
-    msgheader,
-    encoding: "TR",
-    messages: [{ msg: text, no: params.to10 }],
-  });
+    const netgsm = new Netgsm({
+      username: process.env.NETGSM_USERNAME!.trim(),
+      password: process.env.NETGSM_PASSWORD!.trim(),
+      appname: process.env.NETGSM_APPNAME?.trim() || undefined,
+    });
 
-  if (res.code === SendSmsErrorCode.SUCCESS) {
-    return { ok: true, jobId: res.jobid };
+    const res = await netgsm.sendRestSms({
+      msgheader,
+      encoding: "TR",
+      messages: [{ msg: text, no: params.to10 }],
+    });
+
+    const success =
+      res.code === SendSmsErrorCode.SUCCESS || String(res.code) === "00";
+    if (success) {
+      return { ok: true, jobId: res.jobid };
+    }
+    return {
+      ok: false,
+      error: `${res.code}: ${res.description ?? "netgsm_error"}`,
+    };
+  } catch (e) {
+    const errMsg = e instanceof Error ? e.message : String(e);
+    logger.error({ err: e }, "netgsm_send_exception");
+    return { ok: false, error: errMsg };
   }
-  return {
-    ok: false,
-    error: `${res.code}: ${res.description ?? "netgsm_error"}`,
-  };
 }
