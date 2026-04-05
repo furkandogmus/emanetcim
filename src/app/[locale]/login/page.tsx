@@ -3,7 +3,8 @@
 import { useTranslations } from 'next-intl';
 import { signIn } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
+import { sanitizeAuthCallbackUrl } from '@/lib/auth-callback-url';
 import { Package, ShieldCheck, Globe, Loader2, Store, Shield, Mail, Lock, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -17,7 +18,25 @@ const DEMO_PASSWORD =
 export default function LoginPage() {
   const t = useTranslations('Auth');
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/';
+  const rawCallback = searchParams.get('callbackUrl');
+  const callbackUrl = useMemo(
+    () => sanitizeAuthCallbackUrl(rawCallback),
+    [rawCallback],
+  );
+
+  useEffect(() => {
+    if (rawCallback == null || rawCallback === '') return;
+    const cleaned = sanitizeAuthCallbackUrl(rawCallback);
+    if (cleaned === rawCallback) return;
+    const url = new URL(window.location.href);
+    if (cleaned === '/') {
+      url.searchParams.delete('callbackUrl');
+    } else {
+      url.searchParams.set('callbackUrl', cleaned);
+    }
+    const next = url.pathname + url.search + url.hash;
+    window.history.replaceState({}, '', next);
+  }, [rawCallback]);
 
   const [isLoggingIn, setIsLoggingIn] = useState<string | null>(null);
   const [showEmailForm, setShowEmailForm] = useState(false);

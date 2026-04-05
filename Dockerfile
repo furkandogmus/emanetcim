@@ -28,7 +28,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
-ENV HOSTNAME=0.0.0.0
+# HOSTNAME=0.0.0.0 kullanmayın: bazı ortamlarda istek URL’si 0.0.0.0:3000 olarak üretilip
+# Auth callbackUrl’e karışabiliyor. Standalone varsayılanı tüm arayüzlere dinlemeye yeter.
 # prisma.config.ts + global `prisma` CLI modül çözümlemesi
 ENV NODE_PATH=/usr/local/lib/node_modules
 RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates \
