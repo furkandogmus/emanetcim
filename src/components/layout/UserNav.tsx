@@ -61,7 +61,7 @@ export default function UserNav() {
             <div className="p-6 border-b border-gray-100 bg-gray-50/50">
                <div className="flex items-center gap-2 mb-1">
                   <Icon size={14} className={currentRole.color} />
-                  <span className={`text-[10px] font-black uppercase tracking-widest ${currentRole.color}`}>{currentRole.label}</span>
+                  <span className={`text-[10px] font-black uppercase tracking-widest ${currentRole.color}`}>{t(currentRole.labelKey)}</span>
                </div>
                <p className="text-xs font-bold text-gray-500 truncate">{session?.user?.email}</p>
             </div>
