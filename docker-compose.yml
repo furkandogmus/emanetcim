@@ -20,11 +20,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    # Konteyner hostname’i yoksa Linux’ta rastgele id olur; Next.js log satırındaki URL okunaksız görünür.
+    # Konteyner hostname’i yoksa Linux’ta rastgele id olur; log satırı için okunabilir isim.
     hostname: emanetci-web
-    expose:
-      - "3000"
+    # Host makineden ve LAN’dan doğrudan erişim (nginx :80’e ek olarak).
+    ports:
+      - "0.0.0.0:3000:3000"
     environment:
+      # Next.js standalone server.js: bind adresi. Konteyner HOSTNAME’i bazen 127.0.0.1’e kilitlenir;
+      # OAuth / vekil için AUTH_PUBLIC_HOST + AUTH_TRUST_HOST kullanın (0.0.0.0 URL üretmesin diye).
+      HOSTNAME: "0.0.0.0"
       # OAuth redirect_uri kökü — tek kaynak (src/lib/auth-public-url.ts → AUTH_URL).
       AUTH_PUBLIC_HOST: ${AUTH_PUBLIC_HOST:-}
       DATABASE_URL: postgresql://emanetci:emanetci@postgres:5432/emanetci?schema=public
