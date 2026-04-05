@@ -1,3 +1,4 @@
+import "@/lib/auth-public-url";
 import { requireProdSecrets } from "@/lib/env";
 import logger from "@/lib/logger";
 import type { InstrumentationOnRequestError } from "next/dist/server/instrumentation/types";
