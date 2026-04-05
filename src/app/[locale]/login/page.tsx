@@ -148,14 +148,16 @@ export default function LoginPage() {
             type="button"
             onClick={() => setShowEmailForm((v) => !v)}
             disabled={busy}
-            className="w-full h-14 border-2 border-gray-100 rounded-2xl flex items-center justify-center gap-3 hover:border-orange-200 transition-all group disabled:opacity-50"
+            className="w-full h-14 border-2 border-gray-100 rounded-2xl flex items-center justify-center gap-3 hover:border-orange-200 transition-all group disabled:opacity-50 relative"
           >
             <Mail size={20} className="text-gray-400 group-hover:text-orange-600 transition-colors" />
             <span className="font-bold text-gray-700">{t('continueWithEmail')}</span>
-            <ChevronDown
-              size={16}
-              className={`ml-auto mr-1 text-gray-300 transition-transform duration-200 ${showEmailForm ? 'rotate-180' : ''}`}
-            />
+            <div className="absolute right-6 top-1/2 -translate-y-1/2">
+              <ChevronDown
+                size={16}
+                className={`text-gray-300 transition-transform duration-200 ${showEmailForm ? 'rotate-180' : ''}`}
+              />
+            </div>
           </button>
 
           {/* E-posta formu */}
