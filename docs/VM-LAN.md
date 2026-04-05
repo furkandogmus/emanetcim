@@ -110,10 +110,23 @@ Sonra tarayıcıdan: **http://emanetci.local**
 
 ---
 
-## 6. Sorun giderme
+## 6. ngrok (dışarıdan tünel)
+
+Auth.js, **`AUTH_URL` tanımlıysa** tüm istek URL’sini bu adrese çevirir; bu yüzden ngrok adresiyle girseniz bile OAuth **`emanetci.local`** gibi sabit bir `AUTH_URL`’e dönebilir.
+
+**Yapılacaklar:**
+
+1. VM’deki `docker-compose.env` içinde **`AUTH_URL` ve `NEXT_PUBLIC_APP_URL` satırlarını kaldırın** veya boş bırakın (compose varsayılanı boştur). LAN’da yalnızca `emanetci.local` kullanacaksanız bu iki satırı tekrar doldurun.
+2. `AUTH_TRUST_HOST=true` kalsın (varsayılan).
+3. Google Cloud OAuth’ta **Yetkilendirilmiş yönlendirme URI’leri** içine `https://<ngrok-host>/api/auth/callback/google` ekleyin.
+4. Nginx, `X-Forwarded-Proto` / `X-Forwarded-Host` zincirini Next.js’e iletir; gerekirse `docker compose restart nginx web`.
+
+---
+
+## 7. Sorun giderme
 
 | Sorun | Kontrol |
 |-------|---------|
 | `emanetci.local` açılmıyor | VM’de `docker compose ps`, `hosts` satırı, ping, port 80 |
-| Auth redirect / cookie | `AUTH_URL` ve `NEXT_PUBLIC_APP_URL` tam olarak tarayıcıda adresle aynı (http + host) |
+| Auth redirect / cookie | Tek host ise `AUTH_URL` / `NEXT_PUBLIC_APP_URL` tarayıcı adresiyle aynı; **ngrok için bu iki değişkeni boş bırakın** |
 | `connection refused` | VM firewall, Docker’ın 80’i publish etmesi (`nginx` → `ports: "80:80"`) |

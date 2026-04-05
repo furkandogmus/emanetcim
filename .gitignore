@@ -34,6 +34,8 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# Sunucuda kopyalanır; git clean -fd ile silinmesin diye ignore (örn. docker-compose.env.example → docker-compose.env)
+docker-compose.env
 
 # vercel
 .vercel

@@ -6,8 +6,10 @@ import { User, LogOut, Shield, Store, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
 
 export default function UserNav() {
+  const t = useTranslations('UserNav');
   const { data: session, status } = useSession();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -18,15 +20,15 @@ export default function UserNav() {
         href="/login" 
         className="text-xs font-black uppercase tracking-widest bg-orange-600 text-white px-6 py-3 rounded-full hover:bg-orange-700 transition-all shadow-lg shadow-orange-100 active:scale-95"
       >
-        Giriş Yap
+        {t('signIn')}
       </Link>
     );
   }
 
-  const roleLabels: Record<string, { label: string; icon: LucideIcon; color: string }> = {
-    'ADMIN': { label: 'Yönetici', icon: Shield, color: 'text-purple-600' },
-    'PARTNER': { label: 'Esnaf', icon: Store, color: 'text-blue-600' },
-    'GUEST': { label: 'Misafir', icon: User, color: 'text-orange-600' }
+  const roleLabels: Record<string, { labelKey: 'roleAdmin' | 'rolePartner' | 'roleGuest'; icon: LucideIcon; color: string }> = {
+    'ADMIN': { labelKey: 'roleAdmin', icon: Shield, color: 'text-purple-600' },
+    'PARTNER': { labelKey: 'rolePartner', icon: Store, color: 'text-blue-600' },
+    'GUEST': { labelKey: 'roleGuest', icon: User, color: 'text-orange-600' }
   };
 
   const currentRole = roleLabels[session?.user?.role as string] || roleLabels['GUEST'];
@@ -42,7 +44,7 @@ export default function UserNav() {
           {session?.user?.name?.[0] || 'U'}
         </div>
         <div className="hidden sm:block text-left">
-          <p className="text-[10px] font-black text-gray-400 uppercase tracking-tighter leading-none mb-1">Hoş Geldin</p>
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-tighter leading-none mb-1">{t('welcomeGreeting')}</p>
           <p className="text-xs font-bold text-gray-900 leading-none">{session?.user?.name?.split(' ')[0]}</p>
         </div>
         <ChevronDown size={14} className={`text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
@@ -71,7 +73,7 @@ export default function UserNav() {
                 className="flex items-center gap-3 w-full p-4 hover:bg-gray-50 rounded-2xl transition-colors text-sm font-bold text-gray-700 cursor-pointer"
               >
                 <Icon size={18} />
-                {session?.user?.role === 'ADMIN' ? 'Yönetim Paneli' : session?.user?.role === 'PARTNER' ? 'Mağaza Paneli' : 'Rezervasyonlarım'}
+                {session?.user?.role === 'ADMIN' ? t('navAdminPanel') : session?.user?.role === 'PARTNER' ? t('navPartnerPanel') : t('navBookings')}
               </Link>
               
               <button 
@@ -79,7 +81,7 @@ export default function UserNav() {
                 className="flex items-center gap-3 w-full p-4 hover:bg-red-50 rounded-2xl transition-colors text-sm font-bold text-red-600"
               >
                 <LogOut size={18} />
-                Çıkış Yap
+                {t('signOut')}
               </button>
             </div>
           </motion.div>

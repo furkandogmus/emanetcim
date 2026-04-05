@@ -46,10 +46,10 @@ export default async function FAQPage({ params }: { params: Promise<{ locale: st
         </div>
 
         <div className="mt-20 p-10 bg-gray-900 text-white rounded-[3rem] text-center shadow-2xl shadow-gray-200">
-           <h3 className="text-2xl font-black mb-4 italic">Başka bir sorunuz mu var?</h3>
-           <p className="font-bold opacity-40 mb-8">Operasyon ekibimiz 7/24 yanınızda.</p>
+           <h3 className="text-2xl font-black mb-4 italic">{t("ctaTitle")}</h3>
+           <p className="font-bold opacity-40 mb-8">{t("ctaSubtitle")}</p>
            <a href={`/${locale}/contact`} className="inline-flex h-16 px-10 bg-orange-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest items-center hover:bg-orange-500 transition-all">
-              DESTEK MERKEZİNE GİT
+              {t("ctaButton")}
            </a>
         </div>
 

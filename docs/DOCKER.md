@@ -41,7 +41,7 @@ Sağlık kontrolleri (Nginx üzerinden):
 
 ## Ortam değişkenleri
 
-`docker-compose.yml` içinde varsayılanlar tanımlıdır. Tarayıcı ve Auth.js için taban URL **http://localhost** (port 80) olacak şekilde `AUTH_URL` / `NEXT_PUBLIC_APP_URL` ayarlıdır. Üretim benzeri deneme için:
+`docker-compose.yml` içinde **`AUTH_URL` / `NEXT_PUBLIC_APP_URL` varsayılan olarak boştur**; Auth.js isteğin `Host` ve `X-Forwarded-*` başlıklarından URL üretir (ngrok ve tek makinede localhost uyumu). Tek sabit domain (ör. `emanetci.local`) için `docker-compose.env` içinde bu iki değişkeni doldurun — aksi halde OAuth yine tünel adresine döner. Üretim benzeri deneme için:
 
 ```bash
 export AUTH_SECRET="$(openssl rand -base64 32)"

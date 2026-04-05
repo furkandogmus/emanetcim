@@ -313,7 +313,20 @@
     "demoMode": "DEMO MODE",
     "demoGuest": "Guest Demo",
     "demoPartner": "Partner Login",
-    "demoAdmin": "Admin Login"
+    "demoAdmin": "Admin Login",
+    "demoToggleHide": "Hide demo options",
+    "demoToggleShow": "Sign in with demo mode"
+  },
+  "UserNav": {
+    "signIn": "Sign in",
+    "welcomeGreeting": "Welcome",
+    "roleAdmin": "Admin",
+    "rolePartner": "Partner",
+    "roleGuest": "Guest",
+    "navAdminPanel": "Admin panel",
+    "navPartnerPanel": "Shop panel",
+    "navBookings": "My bookings",
+    "signOut": "Sign out"
   },
   "Footer": {
     "about": "About Us",
@@ -422,7 +435,10 @@
     "q3": "Can I pay in cash?",
     "a3": "For your security, all payments are made digitally through our platform.",
     "q4": "What if the storage point is closed?",
-    "a4": "We immediately find the nearest alternative through our 24/7 support line."
+    "a4": "We immediately find the nearest alternative through our 24/7 support line.",
+    "ctaTitle": "Have another question?",
+    "ctaSubtitle": "Our operations team is here for you 24/7.",
+    "ctaButton": "Go to support center"
   },
   "PartnersPage": {
     "title": "Become an Emanetçi Partner",

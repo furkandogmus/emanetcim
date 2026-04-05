@@ -314,7 +314,20 @@
     "demoMode": "DEMO MODU",
     "demoGuest": "Misafir Demo",
     "demoPartner": "Esnaf Girişi",
-    "demoAdmin": "Admin Girişi"
+    "demoAdmin": "Admin Girişi",
+    "demoToggleHide": "DEMO SEÇENEKLERİNİ GİZLE",
+    "demoToggleShow": "DEMO MODU İLE GİRİŞ YAP"
+  },
+  "UserNav": {
+    "signIn": "Giriş yap",
+    "welcomeGreeting": "Hoş geldin",
+    "roleAdmin": "Yönetici",
+    "rolePartner": "Esnaf",
+    "roleGuest": "Misafir",
+    "navAdminPanel": "Yönetim Paneli",
+    "navPartnerPanel": "Mağaza Paneli",
+    "navBookings": "Rezervasyonlarım",
+    "signOut": "Çıkış Yap"
   },
   "Footer": {
     "about": "Hakkımızda",
@@ -423,7 +436,10 @@
     "q3": "Nakit ödeme yapabilir miyim?",
     "a3": "Güvenliğiniz için tüm ödemeler platform üzerinden dijital olarak yapılır.",
     "q4": "Emanet Noktası kapalıysa ne yapmalıyım?",
-    "a4": "7/24 destek hattımız üzerinden size en yakın alternatif noktayı hemen buluyoruz."
+    "a4": "7/24 destek hattımız üzerinden size en yakın alternatif noktayı hemen buluyoruz.",
+    "ctaTitle": "Başka bir sorunuz mu var?",
+    "ctaSubtitle": "Operasyon ekibimiz 7/24 yanınızda.",
+    "ctaButton": "Destek merkezine git"
   },
   "PartnersPage": {
     "title": "Emanetçi İş Ortağı Olun",

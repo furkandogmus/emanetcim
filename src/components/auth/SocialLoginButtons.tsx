@@ -3,11 +3,13 @@
 import { signIn } from "next-auth/react";
 import { LogIn, Apple, ShieldCheck, Store, User } from "lucide-react";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 /**
  * SocialLoginButtons - Demo Modu Destekli Giriş Paneli
  */
 export default function SocialLoginButtons() {
+  const t = useTranslations("Auth");
   const [isDemoOpen, setIsDemoOpen] = useState(false);
 
   const handleDemoLogin = (email: string) => {
@@ -27,7 +29,7 @@ export default function SocialLoginButtons() {
           className="w-full bg-white border border-gray-200 text-gray-700 py-4 px-6 rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-gray-50 transition-all active:scale-[0.98] shadow-sm"
         >
           <LogIn size={20} className="text-blue-500" />
-          Google ile Devam Et
+          {t("continueWithGoogle")}
         </button>
 
         <button 
@@ -35,7 +37,7 @@ export default function SocialLoginButtons() {
           className="w-full bg-gray-900 border border-transparent text-white py-4 px-6 rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-black transition-all active:scale-[0.98] shadow-xl"
         >
           <Apple size={20} fill="currentColor" />
-          Apple ile Devam Et
+          {t("continueWithApple")}
         </button>
       </div>
 
@@ -45,7 +47,7 @@ export default function SocialLoginButtons() {
            onClick={() => setIsDemoOpen(!isDemoOpen)}
            className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] hover:text-orange-600 transition-colors mx-auto"
          >
-           {isDemoOpen ? "DEMO SEÇENEKLERİNİ GİZLE" : "DEMO MODU İLE GİRİŞ YAP"}
+           {isDemoOpen ? t("demoToggleHide") : t("demoToggleShow")}
          </button>
 
          {isDemoOpen && (

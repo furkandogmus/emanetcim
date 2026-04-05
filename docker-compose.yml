@@ -26,8 +26,10 @@ services:
       DATABASE_URL: postgresql://emanetci:emanetci@postgres:5432/emanetci?schema=public
       NODE_ENV: production
       AUTH_SECRET: ${AUTH_SECRET:-docker-dev-change-me-use-openssl-rand-hex-32}
-      AUTH_URL: ${AUTH_URL:-http://localhost}
-      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost}
+      # Boş: Auth.js isteğin Host / X-Forwarded-* ile URL üretir (ngrok, çoklu host).
+      # Tek sabit domain (LAN emanetci.local) için docker-compose.env içinde AUTH_URL tanımlayın.
+      AUTH_URL: ${AUTH_URL:-}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
       AUTH_TRUST_HOST: ${AUTH_TRUST_HOST:-true}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
