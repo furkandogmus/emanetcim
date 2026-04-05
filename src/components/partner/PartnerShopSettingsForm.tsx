@@ -12,6 +12,8 @@ type Props = {
   initialOpening: string;
   initialClosing: string;
   initialPricePerDay: number;
+  /** Platform piyasa fiyatı — min/max limitlerini belirler */
+  marketPrice: number;
   /** Sıkışık varyant (panel sekmesi) */
   compact?: boolean;
 };
@@ -22,6 +24,7 @@ export default function PartnerShopSettingsForm({
   initialOpening,
   initialClosing,
   initialPricePerDay,
+  marketPrice,
   compact = false,
 }: Props) {
   const t = useTranslations("Partner");
@@ -32,8 +35,26 @@ export default function PartnerShopSettingsForm({
   const [pricePerDay, setPricePerDay] = useState(initialPricePerDay);
   const [isUpdating, setIsUpdating] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [priceError, setPriceError] = useState<string | null>(null);
+
+  const minPrice = Math.round(marketPrice / 2);
+  const maxPrice = marketPrice * 2;
+
+  const handlePriceChange = (val: number) => {
+    setPricePerDay(val);
+    if (val < minPrice || val > maxPrice) {
+      setPriceError(t("priceOutOfRange", { min: minPrice, max: maxPrice }));
+    } else {
+      setPriceError(null);
+    }
+  };
 
   const handleSave = async () => {
+    if (priceError) return;
+    if (pricePerDay < minPrice || pricePerDay > maxPrice) {
+      setPriceError(t("priceOutOfRange", { min: minPrice, max: maxPrice }));
+      return;
+    }
     setIsUpdating(true);
     setSaved(false);
     try {
@@ -90,10 +111,22 @@ export default function PartnerShopSettingsForm({
               <input
                 type="number"
                 value={pricePerDay}
-                onChange={(e) => setPricePerDay(parseFloat(e.target.value) || 0)}
-                className="flex-1 bg-gray-50 p-4 rounded-2xl font-bold outline-none border border-transparent focus:border-orange-500 transition-all"
+                min={minPrice}
+                max={maxPrice}
+                step={1}
+                onChange={(e) => handlePriceChange(parseFloat(e.target.value) || 0)}
+                className={`flex-1 bg-gray-50 p-4 rounded-2xl font-bold outline-none border transition-all ${
+                  priceError ? "border-red-400 bg-red-50" : "border-transparent focus:border-orange-500"
+                }`}
               />
             </div>
+            {priceError ? (
+              <p className="text-xs text-red-500 font-semibold mt-1.5">{priceError}</p>
+            ) : (
+              <p className="text-xs text-gray-400 font-medium mt-1.5">
+                {t("priceRangeHint", { min: minPrice, max: maxPrice })}
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -140,7 +173,7 @@ export default function PartnerShopSettingsForm({
         <button
           type="button"
           onClick={handleSave}
-          disabled={isUpdating}
+          disabled={isUpdating || !!priceError}
           className="w-full bg-orange-600 hover:bg-orange-700 py-5 rounded-[2rem] text-white font-black shadow-xl shadow-orange-100 flex items-center justify-center gap-3 transition-all active:scale-95 disabled:opacity-60"
         >
           {isUpdating ? (

@@ -57,6 +57,8 @@
     "sealPhotoAlt": "Seal",
     "checkInWord": "Check-in",
     "dailyPrice": "Daily Price per Bag (₺)",
+    "priceRangeHint": "Allowed range: {min}₺ – {max}₺ (½ – 2× market price)",
+    "priceOutOfRange": "Price must be between {min}₺ and {max}₺.",
     "openingTime": "Opening",
     "closingTime": "Closing",
     "settingsSaved": "Settings saved.",

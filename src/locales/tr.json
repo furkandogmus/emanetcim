@@ -57,6 +57,8 @@
     "sealPhotoAlt": "Mühür",
     "checkInWord": "Giriş",
     "dailyPrice": "Günlük Birim Fiyat (₺)",
+    "priceRangeHint": "İzin verilen aralık: {min}₺ – {max}₺ (piyasa fiyatının ½ – 2×)",
+    "priceOutOfRange": "Birim fiyat {min}₺ ile {max}₺ arasında olmalıdır.",
     "openingTime": "Açılış",
     "closingTime": "Kapanış",
     "settingsSaved": "Ayarlar güncellendi.",

@@ -3,6 +3,7 @@
 import { auth } from "@/auth";
 import prisma from "@/lib/db";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
+import { getPricingRules } from "@/lib/platform-settings";
 import { z } from "zod";
 
 const hm = /^\d{1,2}:\d{2}$/;
@@ -36,6 +37,15 @@ export async function updateShopSettingsAction(
   if (!parsed.success) {
     const first = parsed.error.flatten().formErrors[0] ?? "Geçersiz veri.";
     throw new Error(first);
+  }
+
+  if (parsed.data.pricePerDay !== undefined) {
+    const rules = await getPricingRules();
+    const minPrice = Math.round(rules.defaultPricePerDay / 2);
+    const maxPrice = rules.defaultPricePerDay * 2;
+    if (parsed.data.pricePerDay < minPrice || parsed.data.pricePerDay > maxPrice) {
+      throw new Error(`Birim fiyat ${minPrice}₺ ile ${maxPrice}₺ arasında olmalıdır.`);
+    }
   }
 
   await prisma.shop.update({
