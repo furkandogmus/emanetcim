@@ -5,6 +5,7 @@ import { signIn } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
 import { useMemo, useState, useEffect } from 'react';
 import { sanitizeAuthCallbackUrl } from '@/lib/auth-callback-url';
+import { authErrorMessage } from '@/lib/auth-error-message';
 import { Package, ShieldCheck, Globe, Loader2, Store, Shield, Mail, Lock, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -19,6 +20,7 @@ export default function LoginPage() {
   const t = useTranslations('Auth');
   const searchParams = useSearchParams();
   const rawCallback = searchParams.get('callbackUrl');
+  const oauthErrorCode = searchParams.get('error');
   const callbackUrl = useMemo(
     () => sanitizeAuthCallbackUrl(rawCallback),
     [rawCallback],
@@ -43,12 +45,20 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [credError, setCredError] = useState('');
+  const [oauthActionError, setOauthActionError] = useState<string | null>(null);
+
+  const oauthBanner =
+    oauthErrorCode != null && oauthErrorCode !== ''
+      ? authErrorMessage(t, oauthErrorCode)
+      : oauthActionError;
 
   const handleOAuth = async (provider: string) => {
     setIsLoggingIn(provider);
+    setOauthActionError(null);
     try {
       await signIn(provider, { callbackUrl });
     } catch {
+      setOauthActionError(t('oauthUnexpectedError'));
       setIsLoggingIn(null);
     }
   };
@@ -94,6 +104,12 @@ export default function LoginPage() {
         <p className="text-gray-400 text-sm font-medium mb-10 text-center leading-relaxed">
           {t('loginSubtitle')}
         </p>
+
+        {oauthBanner && (
+          <p className="w-full text-xs text-red-600 font-semibold text-center mb-4 leading-snug px-1">
+            {oauthBanner}
+          </p>
+        )}
 
         <div className="w-full flex flex-col gap-3">
 

@@ -317,7 +317,20 @@
     "demoPartner": "Partner Login",
     "demoAdmin": "Admin Login",
     "demoToggleHide": "Hide demo options",
-    "demoToggleShow": "Sign in with demo mode"
+    "demoToggleShow": "Sign in with demo mode",
+    "authErrorTitle": "Sign-in could not complete",
+    "authErrorGeneric": "Something went wrong while signing in. Please try again shortly.",
+    "authErrorConfiguration": "Server configuration is incomplete (AUTH_SECRET, OAuth client credentials, or Google redirect URI). Contact the administrator.",
+    "authErrorAccessDenied": "Access was denied or sign-in was cancelled.",
+    "authErrorVerification": "The verification link may have expired or already been used.",
+    "authErrorOAuthSignin": "Could not start Google sign-in. Check your connection and browser blockers.",
+    "authErrorOAuthCallback": "Something went wrong after Google redirected back. In Google Cloud Console, ensure the redirect URI matches this site’s URL.",
+    "authErrorOAuthCreateAccount": "Could not create the account.",
+    "authErrorEmailCreateAccount": "Could not create the account with email.",
+    "authErrorCallback": "The sign-in callback failed.",
+    "authErrorOAuthAccountNotLinked": "This email is already registered with another sign-in method.",
+    "authErrorSessionRequired": "Session required.",
+    "oauthUnexpectedError": "Google sign-in could not complete. Check your network and try again shortly."
   },
   "UserNav": {
     "signIn": "Sign in",

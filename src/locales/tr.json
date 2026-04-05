@@ -318,7 +318,20 @@
     "demoPartner": "Esnaf Girişi",
     "demoAdmin": "Admin Girişi",
     "demoToggleHide": "DEMO SEÇENEKLERİNİ GİZLE",
-    "demoToggleShow": "DEMO MODU İLE GİRİŞ YAP"
+    "demoToggleShow": "DEMO MODU İLE GİRİŞ YAP",
+    "authErrorTitle": "Giriş tamamlanamadı",
+    "authErrorGeneric": "Oturum açma sırasında bir sorun oluştu. Biraz sonra tekrar deneyin.",
+    "authErrorConfiguration": "Sunucu yapılandırması eksik (AUTH_SECRET, OAuth istemci bilgileri veya Google yönlendirme adresi). Yöneticiye bildirin.",
+    "authErrorAccessDenied": "Erişim reddedildi veya giriş iptal edildi.",
+    "authErrorVerification": "Doğrulama bağlantısının süresi dolmuş veya zaten kullanılmış olabilir.",
+    "authErrorOAuthSignin": "Google ile giriş başlatılamadı. İnternet bağlantınızı ve tarayıcı engelleyicilerini kontrol edin.",
+    "authErrorOAuthCallback": "Google dönüşünde bir hata oluştu. Google Cloud Console’da yönlendirme adresinin bu site adresiyle eşleştiğinden emin olun.",
+    "authErrorOAuthCreateAccount": "Hesap oluşturulamadı.",
+    "authErrorEmailCreateAccount": "E-posta ile hesap oluşturulamadı.",
+    "authErrorCallback": "Giriş geri çağrısı başarısız.",
+    "authErrorOAuthAccountNotLinked": "Bu e-posta başka bir giriş yöntemiyle kayıtlı.",
+    "authErrorSessionRequired": "Oturum gerekli.",
+    "oauthUnexpectedError": "Google ile giriş isteği tamamlanamadı. Ağ bağlantınızı deneyin veya biraz sonra tekrar deneyin."
   },
   "UserNav": {
     "signIn": "Giriş yap",
