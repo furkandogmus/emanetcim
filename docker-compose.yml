@@ -23,6 +23,9 @@ services:
     expose:
       - "3000"
     environment:
+      # Docker varsayılan HOSTNAME=container_id; Next standalone bunu bind adresi yapıyor → 127.0.0.1:3000 healthcheck düşer.
+      # 0.0.0.0 ile tüm arayüzler; Auth callback URL tarafında sanitize (auth-callback-url.ts) kullanılır.
+      HOSTNAME: "0.0.0.0"
       DATABASE_URL: postgresql://emanetci:emanetci@postgres:5432/emanetci?schema=public
       NODE_ENV: production
       AUTH_SECRET: ${AUTH_SECRET:-docker-dev-change-me-use-openssl-rand-hex-32}
