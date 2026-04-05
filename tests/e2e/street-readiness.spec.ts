@@ -20,12 +20,15 @@ test.describe('Emanetçi: guest booking smoke', () => {
     await expect(page).toHaveURL(/\/tr\/checkout\//);
     await expect(page.locator('h1')).toContainText(/Ödeme ve Onay/i);
 
-    await page.getByPlaceholder('Kart Üzerindeki İsim').fill('Street Test');
+    await page.getByTestId('checkout-footer-primary').click();
+    await page.getByTestId('checkout-footer-primary').click();
+
+    await page.getByPlaceholder(/Kart üzerindeki isim|Name on card/i).fill('Street Test');
     await page.getByPlaceholder('0000 0000 0000 0000').fill('5528790000000008');
-    await page.getByPlaceholder('AA/YY').fill('12/30');
+    await page.getByPlaceholder(/AA\/YY|MM\/YY/i).fill('12/30');
     await page.getByPlaceholder('CVV').fill('123');
 
-    await page.getByRole('button', { name: /ÖDEMEYİ TAMAMLA VE REZERVASYON YAP/i }).click();
+    await page.getByTestId('checkout-footer-primary').click();
 
     await expect(page.getByRole('heading', { name: /Rezervasyon Başarılı/i })).toBeVisible({
       timeout: 20000,

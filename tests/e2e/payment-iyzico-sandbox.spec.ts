@@ -31,17 +31,19 @@ test.describe('iyzico sandbox — gerçek API (yerel .env)', () => {
     await page.goto('/tr/search');
     await page.getByTestId('shop-list-item').first().click();
     await expect(page).toHaveURL(/\/tr\/checkout\//);
+    await page.getByTestId('checkout-footer-primary').click();
+    await page.getByTestId('checkout-footer-primary').click();
   }
 
   async function fillCard(page: import('@playwright/test').Page, cardNumber: string) {
-    await page.getByPlaceholder('Kart Üzerindeki İsim').fill('Sandbox Test');
+    await page.getByPlaceholder(/Kart üzerindeki isim|Name on card/i).fill('Sandbox Test');
     await page.getByPlaceholder('0000 0000 0000 0000').fill(cardNumber);
-    await page.getByPlaceholder('AA/YY').fill('12/30');
+    await page.getByPlaceholder(/AA\/YY|MM\/YY/i).fill('12/30');
     await page.getByPlaceholder('CVV').fill('123');
   }
 
   async function submitPayment(page: import('@playwright/test').Page) {
-    await page.getByRole('button', { name: /ÖDEMEYİ TAMAMLA VE REZERVASYON YAP/i }).click();
+    await page.getByTestId('checkout-footer-primary').click();
   }
 
   test('başarılı: Halkbank MasterCard (kredi)', async ({ page }) => {

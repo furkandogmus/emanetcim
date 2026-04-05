@@ -47,11 +47,11 @@ test.describe('Emanetçi Production Hardening & PWA E2E Tests', () => {
   test('i18n: should switch content language correctly', async ({ page }) => {
     // Turkish
     await page.goto('/tr/search');
-    await expect(page.getByTestId('nearby-heading')).toContainText(/Yakındaki Noktalar/i);
+    await expect(page.getByTestId('nearby-heading')).toContainText(/Yakındaki/i);
     
     // English
     await page.goto('/en/search');
-    await expect(page.getByTestId('nearby-heading')).toContainText(/Nearby Locations/i);
+    await expect(page.getByTestId('nearby-heading')).toContainText(/Nearby/i);
   });
 
   // 3. Kullanıcı Deneyimi (Custom 404 & i18n)

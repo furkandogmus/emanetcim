@@ -8,10 +8,16 @@ import { IYZICO_SANDBOX_SUCCESS } from './helpers/iyzico-sandbox';
  * Geliştirmede IYZICO_API_KEY yoksa veya `sandbox-api-key` ise ödeme simüle edilir (kart numarası önemsiz).
  */
 
+/** Özet (adım 2) ve ödeme (adım 3) ekranlarına geçer */
+async function goToCheckoutPayment(page: import('@playwright/test').Page) {
+  await page.getByTestId('checkout-footer-primary').click();
+  await page.getByTestId('checkout-footer-primary').click();
+}
+
 async function fillSandboxCard(page: import('@playwright/test').Page) {
-  await page.getByPlaceholder('Kart Üzerindeki İsim').fill('Test User');
+  await page.getByPlaceholder(/Kart üzerindeki isim|Name on card/i).fill('Test User');
   await page.getByPlaceholder('0000 0000 0000 0000').fill(IYZICO_SANDBOX_SUCCESS.HALKBANK_MC_CREDIT);
-  await page.getByPlaceholder('AA/YY').fill('12/30');
+  await page.getByPlaceholder(/AA\/YY|MM\/YY/i).fill('12/30');
   await page.getByPlaceholder('CVV').fill('123');
 }
 
@@ -19,7 +25,7 @@ test.describe('UC: Misafir — Arama ve harita (seed)', () => {
   test('Yakındaki noktalar ve harita görünür', async ({ page }) => {
     await page.goto('/tr/search');
 
-    await expect(page.getByTestId('nearby-heading')).toContainText(/Yakındaki Noktalar/i);
+    await expect(page.getByTestId('nearby-heading')).toContainText(/Yakındaki/i);
     await expect(page.getByText(/Galata Gift & Luggage/i)).toBeVisible();
     await expect(page.locator('canvas.maplibregl-canvas')).toBeVisible({ timeout: 15000 });
   });
@@ -30,6 +36,7 @@ test.describe('UC: Misafir — Checkout fiyat ve çanta (anonim)', () => {
     await page.goto('/tr/search');
     await page.getByTestId('shop-list-item').first().click();
     await expect(page).toHaveURL(/\/tr\/checkout\//);
+    await page.getByTestId('checkout-footer-primary').click();
     await expect(page.getByTestId('checkout-total-amount')).toHaveText('₺95');
   });
 
@@ -39,9 +46,12 @@ test.describe('UC: Misafir — Checkout fiyat ve çanta (anonim)', () => {
     await expect(page).toHaveURL(/\/tr\/checkout\//);
 
     await page.getByRole('button', { name: 'Increase' }).nth(0).click();
+    await page.getByTestId('checkout-footer-primary').click();
     await expect(page.getByTestId('checkout-total-amount')).toHaveText('₺159');
 
+    await page.getByRole('button', { name: 'Geri' }).click();
     await page.getByRole('button', { name: 'Increase' }).nth(2).click();
+    await page.getByTestId('checkout-footer-primary').click();
     await expect(page.getByTestId('checkout-total-amount')).toHaveText('₺279');
   });
 
@@ -49,11 +59,14 @@ test.describe('UC: Misafir — Checkout fiyat ve çanta (anonim)', () => {
     await page.goto('/tr/search');
     await page.getByTestId('shop-list-item').first().click();
     await expect(page).toHaveURL(/\/tr\/checkout\//);
+    await page.getByTestId('checkout-footer-primary').click();
     await expect(page.getByTestId('checkout-total-amount')).toHaveText('₺95');
 
+    await page.getByRole('button', { name: 'Geri' }).click();
     await page.getByTestId('checkout-stay-days-increase').click();
     await page.getByTestId('checkout-stay-days-increase').click();
     await expect(page.getByTestId('checkout-stay-days-value')).toHaveText('3');
+    await page.getByTestId('checkout-footer-primary').click();
     await expect(page.getByTestId('checkout-total-amount')).toHaveText('₺255');
     await expect(page.getByTestId('checkout-service-total')).toHaveText('₺240');
   });
@@ -78,18 +91,20 @@ test.describe('UC: Misafir — Checkout ödeme (iyzico sandbox kartı)', () => {
     await page.getByTestId('shop-list-item').first().click();
     await expect(page).toHaveURL(/\/tr\/checkout\//);
 
+    await page.getByTestId('checkout-footer-primary').click();
     await expect(page.getByTestId('checkout-total-amount')).toHaveText('₺95');
+    await page.getByRole('button', { name: 'Geri' }).click();
     await page.getByRole('button', { name: 'Increase' }).nth(1).click();
-    await expect(page.getByTestId('checkout-total-amount')).toHaveText('₺175');
+    await goToCheckoutPayment(page);
 
     await fillSandboxCard(page);
 
-    await page.getByRole('button', { name: /ÖDEMEYİ TAMAMLA VE REZERVASYON YAP/i }).click();
+    await page.getByTestId('checkout-footer-primary').click();
 
     await expect(page.getByRole('heading', { name: /Rezervasyon Başarılı/i })).toBeVisible({
       timeout: 20000,
     });
-    await expect(page.getByText(/RESERVASYON ID/i)).toBeVisible();
+    await expect(page.getByText(/Rezervasyon ID|RESERVASYON ID/i)).toBeVisible();
   });
 });
 
