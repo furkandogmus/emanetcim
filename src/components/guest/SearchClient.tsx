@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { useState, useMemo, useCallback } from 'react';
-import { Search as SearchIcon, ChevronLeft } from 'lucide-react';
+import { Search as SearchIcon, ChevronLeft, MapPin } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { useRouter } from '@/i18n/routing';
 import ShopListItem from '@/components/guest/ShopListItem';
@@ -10,14 +10,17 @@ import SearchMap from '@/components/guest/SearchMap';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { ShopWithDistance } from '@/services/ShopService';
 
+type Tab = "nearby" | "all";
+
 interface SearchClientProps {
   initialShops: ShopWithDistance[];
+  allShops: ShopWithDistance[];
 }
 
 /**
  * Arama: filtreler, mesafe (sunucu), harita (MapLibre).
  */
-export default function SearchClient({ initialShops }: SearchClientProps) {
+export default function SearchClient({ initialShops, allShops }: SearchClientProps) {
   const t = useTranslations('Guest');
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,6 +28,7 @@ export default function SearchClient({ initialShops }: SearchClientProps) {
   const [maxPrice, setMaxPrice] = useState(500);
   const [open247Only, setOpen247Only] = useState(false);
   const [hasRestroom, setHasRestroom] = useState(false);
+  const [activeTab, setActiveTab] = useState<Tab>("nearby");
 
   const onSelectShop = useCallback(
     (id: string) => {
@@ -33,8 +37,10 @@ export default function SearchClient({ initialShops }: SearchClientProps) {
     [router]
   );
 
+  const sourceShops = activeTab === "nearby" ? initialShops : allShops;
+
   const filteredShops = useMemo(() => {
-    return initialShops.filter((shop) => {
+    return sourceShops.filter((shop) => {
       const matchText =
         shop.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (shop.address && shop.address.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -44,7 +50,7 @@ export default function SearchClient({ initialShops }: SearchClientProps) {
       const wc = hasRestroom ? shop.hasRestroom === true : true;
       return matchText && r >= minRating && p <= maxPrice && open && wc;
     });
-  }, [searchQuery, initialShops, minRating, maxPrice, open247Only, hasRestroom]);
+  }, [searchQuery, sourceShops, minRating, maxPrice, open247Only, hasRestroom]);
 
   return (
     <div className="flex flex-col h-screen bg-white font-sans selection:bg-orange-100">
@@ -55,7 +61,6 @@ export default function SearchClient({ initialShops }: SearchClientProps) {
           </Link>
           <div className="flex-1">
             <h1 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">{t('searchPlaceholder')}</h1>
-            <p className="text-sm font-bold text-gray-900 truncate">İstanbul, Galata</p>
           </div>
         </div>
 
@@ -72,9 +77,34 @@ export default function SearchClient({ initialShops }: SearchClientProps) {
           />
         </div>
 
+        <div className="flex items-center gap-3 mb-3">
+          <div className="flex bg-gray-100 rounded-xl p-1 flex-1">
+            <button
+              onClick={() => setActiveTab("nearby")}
+              className={`flex-1 py-2 px-3 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                activeTab === "nearby"
+                  ? "bg-white text-orange-600 shadow-sm"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              {t("nearbyShops")} ({initialShops.length})
+            </button>
+            <button
+              onClick={() => setActiveTab("all")}
+              className={`flex-1 py-2 px-3 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                activeTab === "all"
+                  ? "bg-white text-orange-600 shadow-sm"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              {t("allShops")} ({allShops.length})
+            </button>
+          </div>
+        </div>
+
         <div className="flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-widest">
           <label className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-lg">
-            Min ★
+            {t("filterMinRating")}
             <input
               type="number"
               min={0}
@@ -86,7 +116,7 @@ export default function SearchClient({ initialShops }: SearchClientProps) {
             />
           </label>
           <label className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-lg">
-            Max ₺
+            {t("filterMaxPrice")}
             <input
               type="number"
               min={0}
@@ -113,31 +143,47 @@ export default function SearchClient({ initialShops }: SearchClientProps) {
               data-testid="nearby-heading"
               className="text-sm font-black text-gray-900 uppercase tracking-widest"
             >
-              {t('nearbyShops')} ({filteredShops.length})
+              {activeTab === "nearby" ? t("nearbyShops") : t("allShops")} ({filteredShops.length})
             </h2>
           </div>
 
-          <div className="flex flex-col gap-3">
-            <AnimatePresence mode="popLayout">
-              {filteredShops.map((shop, index) => (
-                <motion.div
-                  key={shop.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ delay: index * 0.05 }}
+          {filteredShops.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center gap-3">
+              <MapPin size={40} className="text-gray-300" />
+              <p className="text-sm font-bold text-gray-500">{t("noShopsFound")}</p>
+              <p className="text-xs text-gray-400 max-w-[200px]">{t("noShopsFoundDesc")}</p>
+              {activeTab === "nearby" && allShops.length > 0 && (
+                <button
+                  onClick={() => setActiveTab("all")}
+                  className="mt-2 text-xs font-black text-orange-600 uppercase tracking-wider hover:underline"
                 >
-                  <ShopListItem
-                    name={shop.name}
-                    rating={shop.rating || 0}
-                    price={shop.pricePerDay?.toString() || "50"}
-                    distance={shop.distanceKm != null ? Math.round(shop.distanceKm * 1000).toString() : "—"}
-                    onClick={() => router.push(`/checkout/${shop.id}`)}
-                  />
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
+                  {t("allShops")} →
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <AnimatePresence mode="popLayout">
+                {filteredShops.map((shop, index) => (
+                  <motion.div
+                    key={shop.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    <ShopListItem
+                      name={shop.name}
+                      rating={shop.rating || 0}
+                      price={shop.pricePerDay?.toString() || "50"}
+                      distance={shop.distanceKm != null ? Math.round(shop.distanceKm * 1000).toString() : "—"}
+                      onClick={() => router.push(`/checkout/${shop.id}`)}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          )}
         </div>
 
         <div className="flex-1 h-1/2 md:h-full bg-gray-100 relative order-1 md:order-2 overflow-hidden">

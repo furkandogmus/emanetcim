@@ -20,6 +20,7 @@ export interface IShopService {
     page?: number,
     limit?: number
   ): Promise<ShopWithDistance[]>;
+  getAllActive(latitude: number, longitude: number): Promise<ShopWithDistance[]>;
   getShopDetails(shopId: string): Promise<Shop | null>;
   getPendingShops(): Promise<ShopWithOwner[]>;
   approveShop(shopId: string): Promise<boolean>;
@@ -55,6 +56,28 @@ export class ShopService implements IShopService {
       return withDist.slice(skip, skip + limit);
     } catch (error) {
       console.error('ShopService::findNearby Error:', error);
+      return [];
+    }
+  }
+
+  async getAllActive(
+    latitude: number,
+    longitude: number
+  ): Promise<ShopWithDistance[]> {
+    try {
+      const shops = await prisma.shop.findMany({
+        where: { isActive: true },
+      });
+      return shops
+        .filter((s) => s.latitude != null && s.longitude != null)
+        .map((s) => ({
+          ...s,
+          pricePerDay: moneyToNumber(s.pricePerDay),
+          distanceKm: distanceKm(latitude, longitude, s.latitude!, s.longitude!),
+        }))
+        .sort((a, b) => a.distanceKm - b.distanceKm);
+    } catch (error) {
+      console.error('ShopService::getAllActive Error:', error);
       return [];
     }
   }
