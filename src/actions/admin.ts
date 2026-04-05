@@ -7,6 +7,7 @@ import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { invalidatePricingRulesCache } from "@/lib/platform-settings";
+import { sealService } from "@/services/SealService";
 
 function revalidateAdmin() {
   revalidatePathAllLocales("/admin");
@@ -116,6 +117,40 @@ export async function markSealRequestShippedAction(sealRequestId: string) {
   });
   revalidatePathAllLocales("/admin/seals");
   return { success: true as const };
+}
+
+export async function bulkCreateSealsAction(fromSerial: number, toSerial: number) {
+  const session = await auth();
+  if (session?.user?.role !== "ADMIN") {
+    throw new Error("Unauthorized");
+  }
+  try {
+    const { created } = await sealService.bulkCreateSeals(fromSerial, toSerial);
+    revalidatePathAllLocales("/admin/seals");
+    return { success: true as const, created };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "unknown";
+    return { success: false as const, error: msg };
+  }
+}
+
+export async function assignSealsToShopAction(
+  shopId: string,
+  fromSerial: number,
+  toSerial: number
+) {
+  const session = await auth();
+  if (session?.user?.role !== "ADMIN") {
+    throw new Error("Unauthorized");
+  }
+  try {
+    const { updated } = await sealService.assignSealsToShop(shopId, fromSerial, toSerial);
+    revalidatePathAllLocales("/admin/seals");
+    return { success: true as const, updated };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "unknown";
+    return { success: false as const, error: msg };
+  }
 }
 
 export async function createCampaignAction(data: {

@@ -2,6 +2,12 @@ export type PartnerCheckInErrorCode =
   | "NOT_FOUND"
   | "INVALID_STATUS"
   | "SHOP_CLOSED"
+  | "SEAL_REQUIRED"
+  | "SEAL_COUNT_MISMATCH"
+  | "SEAL_INVALID"
+  | "SEAL_FAULTY_INVALID"
+  | "SEAL_NOT_ASSIGNED"
+  | "FAULTY_OVERLAPS_ASSIGNMENT"
   | "UNKNOWN";
 
 export type PartnerCheckOutErrorCode =

@@ -2,8 +2,10 @@ import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { ChevronLeft, ShieldCheck, CheckCircle2, Download } from 'lucide-react';
 import Link from 'next/link';
 import SealShipButton from '@/components/admin/SealShipButton';
+import AdminSealInventoryClient from '@/components/admin/AdminSealInventoryClient';
 import { Link as I18nLink } from '@/i18n/routing';
 import prisma from '@/lib/db';
+import { sealService } from '@/services/SealService';
 
 /**
  * Admin Seals Page - Mühür Stok ve Talep Yönetimi
@@ -24,6 +26,12 @@ export default async function AdminSealsPage({ params }: { params: Promise<{ loc
   const shipped = await prisma.sealRequest.count({ where: { status: 'SHIPPED' } });
   const delivered = await prisma.sealRequest.count({ where: { status: 'DELIVERED' } });
 
+  const sealCounts = await sealService.getSealCounts();
+  const shops = await prisma.shop.findMany({
+    select: { id: true, name: true, isActive: true },
+    orderBy: { name: 'asc' },
+  });
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       <header className="p-10 bg-white border-b border-gray-100 flex items-center gap-4 sticky top-0 z-10">
@@ -34,6 +42,17 @@ export default async function AdminSealsPage({ params }: { params: Promise<{ loc
       </header>
 
       <main className="p-10 max-w-5xl mx-auto w-full flex flex-col gap-6">
+        <section className="flex flex-col gap-4">
+          <h2 className="text-sm font-black uppercase tracking-widest text-gray-400 px-2">
+            {t('sealInventorySection')}
+          </h2>
+          <AdminSealInventoryClient sealCounts={sealCounts} shops={shops} />
+        </section>
+
+        <h2 className="text-sm font-black uppercase tracking-widest text-gray-400 mt-4 px-2">
+          {t('sealRequestsSection')}
+        </h2>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
            <div className="bg-orange-600 text-white p-8 rounded-[2.5rem] shadow-xl shadow-orange-200">
               <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-2">{t('sealsPending')}</p>

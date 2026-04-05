@@ -23,8 +23,18 @@ import {
   checkInAction,
   checkOutAction,
   getPartnerBookingPreviewAction,
+  getPartnerBookingSealsAction,
 } from "@/actions/partner";
 import type { PartnerBookingListItem } from "@/services/BookingService";
+
+function buildBagSlots(s: number, m: number, xl: number) {
+  const out: { bagIndex: number; bagSize: string }[] = [];
+  let idx = 1;
+  for (let i = 0; i < s; i++) out.push({ bagIndex: idx++, bagSize: "S" });
+  for (let i = 0; i < m; i++) out.push({ bagIndex: idx++, bagSize: "M" });
+  for (let i = 0; i < xl; i++) out.push({ bagIndex: idx++, bagSize: "XL" });
+  return out;
+}
 
 interface PartnerClientProps {
   shopId: string;
@@ -75,7 +85,23 @@ export default function PartnerClient({
     id: string;
     guestName: string;
     bags: string;
+    bagCountS: number;
+    bagCountM: number;
+    bagCountXl: number;
+    totalBags: number;
   } | null>(null);
+  const [firstSealInput, setFirstSealInput] = useState("");
+  const [sealRows, setSealRows] = useState<
+    { bagIndex: number; bagSize: string; sealNumber: number }[]
+  >([]);
+  const [faultySealNumbers, setFaultySealNumbers] = useState<number[]>([]);
+  const [checkoutOpen, setCheckoutOpen] = useState<{
+    bookingId: string;
+    seals: { sealNumber: number; bagIndex: number; bagSize: string }[];
+  } | null>(null);
+  const [sealConfirmChecks, setSealConfirmChecks] = useState<
+    Record<number, boolean>
+  >({});
   const [successBanner, setSuccessBanner] = useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [checkingOutId, setCheckingOutId] = useState<string | null>(null);
@@ -99,14 +125,83 @@ export default function PartnerClient({
           id: preview.bookingId,
           guestName: preview.guestName,
           bags: preview.bagsLabel,
+          bagCountS: preview.bagCountS,
+          bagCountM: preview.bagCountM,
+          bagCountXl: preview.bagCountXl,
+          totalBags: preview.totalBags,
         });
         setSealPhoto(null);
+        setFirstSealInput("");
+        setFaultySealNumbers([]);
+        setSealRows([]);
       } finally {
         setPreviewLoading(false);
       }
     },
     [t]
   );
+
+  const executeCheckout = useCallback(
+    async (bookingId: string): Promise<boolean> => {
+      setCheckingOutId(bookingId);
+      try {
+        const result = await checkOutAction(bookingId);
+        if (result.success) {
+          setSuccessBanner(t("checkoutDone"));
+          setTimeout(() => setSuccessBanner(null), 3000);
+          router.replace(pathname);
+          router.refresh();
+          return true;
+        }
+        alert(result.error || t("checkoutFailed"));
+        return false;
+      } finally {
+        setCheckingOutId(null);
+      }
+    },
+    [pathname, router, t]
+  );
+
+  const openCheckoutFlow = useCallback(
+    async (bookingId: string, onCancelConfirm?: () => void) => {
+      const res = await getPartnerBookingSealsAction(bookingId);
+      if (!res.success) {
+        alert(res.error);
+        return;
+      }
+      if (res.seals.length === 0) {
+        if (!confirm(t("confirmCheckout"))) {
+          onCancelConfirm?.();
+          return;
+        }
+        await executeCheckout(bookingId);
+        return;
+      }
+      setCheckoutOpen({ bookingId, seals: res.seals });
+      const init: Record<number, boolean> = {};
+      for (const s of res.seals) {
+        init[s.sealNumber] = false;
+      }
+      setSealConfirmChecks(init);
+    },
+    [executeCheckout, t]
+  );
+
+  const confirmCheckoutWithSeals = async () => {
+    if (!checkoutOpen) return;
+    const allOk = checkoutOpen.seals.every(
+      (s) => sealConfirmChecks[s.sealNumber]
+    );
+    if (!allOk) {
+      alert(t("checkoutSealConfirmEach"));
+      return;
+    }
+    const id = checkoutOpen.bookingId;
+    const ok = await executeCheckout(id);
+    if (ok) {
+      setCheckoutOpen(null);
+    }
+  };
 
   const runCheckoutFromUrl = useCallback(
     async (bookingId: string) => {
@@ -121,26 +216,12 @@ export default function PartnerClient({
           alert(t("checkoutNotReady", { status: preview.status }));
           return;
         }
-        if (!confirm(t("confirmCheckout"))) {
-          router.replace(pathname);
-          return;
-        }
-        setCheckingOutId(bookingId);
-        const result = await checkOutAction(bookingId);
-        if (result.success) {
-          setSuccessBanner(t("checkoutDone"));
-          setTimeout(() => setSuccessBanner(null), 3000);
-          router.replace(pathname);
-          router.refresh();
-        } else {
-          alert(result.error || t("checkoutFailed"));
-        }
+        await openCheckoutFlow(bookingId, () => router.replace(pathname));
       } finally {
-        setCheckingOutId(null);
         setPreviewLoading(false);
       }
     },
-    [pathname, router, t]
+    [openCheckoutFlow, pathname, router, t]
   );
 
   useEffect(() => {
@@ -164,6 +245,46 @@ export default function PartnerClient({
     runCheckoutFromUrl,
   ]);
 
+  useEffect(() => {
+    if (!scanResult || scanResult.totalBags <= 0) {
+      setSealRows([]);
+      return;
+    }
+    const n = parseInt(firstSealInput, 10);
+    if (!Number.isFinite(n)) {
+      setSealRows([]);
+      return;
+    }
+    const slots = buildBagSlots(
+      scanResult.bagCountS,
+      scanResult.bagCountM,
+      scanResult.bagCountXl
+    );
+    setSealRows(
+      slots.map((slot, i) => ({
+        ...slot,
+        sealNumber: n + i,
+      }))
+    );
+  }, [firstSealInput, scanResult]);
+
+  useEffect(() => {
+    setFaultySealNumbers([]);
+  }, [firstSealInput]);
+
+  const markFaultyAtRow = (rowIdx: number) => {
+    if (!sealRows[rowIdx]) return;
+    setFaultySealNumbers((prev) => [...prev, sealRows[rowIdx].sealNumber]);
+    setSealRows((prev) => {
+      const next = prev.map((r) => ({ ...r }));
+      for (let j = rowIdx; j < next.length; j++) {
+        next[j].sealNumber =
+          j === rowIdx ? next[j].sealNumber + 1 : next[j - 1].sealNumber + 1;
+      }
+      return next;
+    });
+  };
+
   const handleScanResult = (result: string) => {
     void applyPreviewForCheckIn(result, true);
   };
@@ -182,18 +303,37 @@ export default function PartnerClient({
   };
 
   const handleCheckIn = async () => {
-    if (!scanResult || !sealPhoto) {
-      alert(t("takeSealPhotoAlert"));
-      return;
+    if (!scanResult) return;
+    const tb = scanResult.totalBags;
+    if (tb > 0) {
+      const first = parseInt(firstSealInput, 10);
+      if (!Number.isFinite(first)) {
+        alert(t("firstSealNumber"));
+        return;
+      }
+      if (sealRows.length !== tb) {
+        alert(t("checkInFailed"));
+        return;
+      }
     }
     setIsProcessing(true);
-    const result = await checkInAction(scanResult.id, sealPhoto);
+    const result = await checkInAction(scanResult.id, sealPhoto, {
+      sealAssignments: sealRows.map((r) => ({
+        sealNumber: r.sealNumber,
+        bagIndex: r.bagIndex,
+        bagSize: r.bagSize,
+      })),
+      faultySealNumbers,
+    });
     setIsProcessing(false);
 
     if (result.success) {
       setSuccessBanner(t("checkInSuccess"));
       setScanResult(null);
       setSealPhoto(null);
+      setFirstSealInput("");
+      setSealRows([]);
+      setFaultySealNumbers([]);
       setTimeout(() => setSuccessBanner(null), 3000);
       router.refresh();
     } else {
@@ -201,20 +341,8 @@ export default function PartnerClient({
     }
   };
 
-  const handleCheckoutFromList = async (bookingId: string) => {
-    if (!confirm(t("confirmCheckout"))) {
-      return;
-    }
-    setCheckingOutId(bookingId);
-    const result = await checkOutAction(bookingId);
-    setCheckingOutId(null);
-    if (result.success) {
-      setSuccessBanner(t("checkoutDone"));
-      setTimeout(() => setSuccessBanner(null), 3000);
-      router.refresh();
-    } else {
-      alert(result.error || t("checkoutFailed"));
-    }
+  const handleCheckoutFromList = (bookingId: string) => {
+    void openCheckoutFlow(bookingId);
   };
 
   const netEarnings =
@@ -238,8 +366,8 @@ export default function PartnerClient({
       )}
 
       {scanResult && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 text-white animate-in fade-in duration-300">
-          <div className="bg-white text-gray-900 rounded-[2.5rem] w-full max-w-sm p-10 flex flex-col gap-10 shadow-2xl relative border border-gray-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 text-white animate-in fade-in duration-300 overflow-y-auto">
+          <div className="bg-white text-gray-900 rounded-[2.5rem] w-full max-w-lg p-10 flex flex-col gap-8 shadow-2xl relative border border-gray-100 my-8">
             <button
               type="button"
               onClick={() => setScanResult(null)}
@@ -262,8 +390,56 @@ export default function PartnerClient({
               </div>
             </div>
 
+            {scanResult.totalBags > 0 && (
+              <div className="flex flex-col gap-4 border border-gray-100 rounded-3xl p-5 bg-gray-50/80">
+                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                  {t("sealAssignmentsTitle")}
+                </p>
+                <label className="flex flex-col gap-2">
+                  <span className="text-xs font-bold text-gray-500">
+                    {t("firstSealNumber")}
+                  </span>
+                  <input
+                    type="number"
+                    className="bg-white border border-gray-200 rounded-2xl px-4 py-3 font-black text-lg"
+                    value={firstSealInput}
+                    onChange={(e) => setFirstSealInput(e.target.value)}
+                    placeholder="e.g. 1001"
+                  />
+                </label>
+                <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
+                  {sealRows.map((row, idx) => (
+                    <div
+                      key={`${row.bagIndex}-${idx}`}
+                      className="flex items-center justify-between gap-2 bg-white rounded-2xl px-4 py-3 border border-gray-100"
+                    >
+                      <span className="text-sm font-bold">
+                        {t("sealRowLabel", {
+                          index: row.bagIndex,
+                          size: row.bagSize,
+                        })}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-black text-orange-600">
+                          {t("sealNumberShort")}
+                          {row.sealNumber}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => markFaultyAtRow(idx)}
+                          className="text-[10px] font-black uppercase text-red-600 bg-red-50 px-2 py-1 rounded-lg hover:bg-red-100"
+                        >
+                          {t("markSealFaulty")}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="flex flex-col gap-4">
-              <label className="flex flex-col items-center justify-center w-full min-h-[200px] border-4 border-dashed border-gray-100 hover:border-orange-200 rounded-[2.5rem] cursor-pointer transition-all bg-gray-50 overflow-hidden group">
+              <label className="flex flex-col items-center justify-center w-full min-h-[160px] border-4 border-dashed border-gray-100 hover:border-orange-200 rounded-[2.5rem] cursor-pointer transition-all bg-gray-50 overflow-hidden group">
                 {sealPhoto ? (
                   <div className="relative w-full h-48">
                     <Image
@@ -303,9 +479,17 @@ export default function PartnerClient({
             <button
               type="button"
               onClick={() => void handleCheckIn()}
-              disabled={isProcessing || !sealPhoto || isPhotoLoading}
+              disabled={
+                isProcessing ||
+                isPhotoLoading ||
+                (scanResult.totalBags > 0 &&
+                  (sealRows.length !== scanResult.totalBags ||
+                    !firstSealInput.trim()))
+              }
               className={`w-full h-20 rounded-[2rem] font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 active:scale-95 transition-all shadow-2xl ${
-                sealPhoto
+                scanResult.totalBags === 0 ||
+                (sealRows.length === scanResult.totalBags &&
+                  !!firstSealInput.trim())
                   ? "bg-orange-600 text-white hover:bg-orange-700 shadow-orange-200/50"
                   : "bg-gray-100 text-gray-300 cursor-not-allowed grayscale"
               }`}
@@ -317,6 +501,69 @@ export default function PartnerClient({
               )}
               {t("sealAndStart")}
             </button>
+          </div>
+        </div>
+      )}
+
+      {checkoutOpen && (
+        <div className="fixed inset-0 z-[55] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-[2rem] w-full max-w-md p-8 shadow-2xl border border-gray-100 flex flex-col gap-6">
+            <h3 className="font-black text-xl text-gray-900">
+              {t("checkoutSealsTitle")}
+            </h3>
+            <p className="text-sm text-gray-500">{t("checkoutSealConfirmEach")}</p>
+            <ul className="flex flex-col gap-3 max-h-64 overflow-y-auto">
+              {checkoutOpen.seals.map((s) => (
+                <li
+                  key={`${s.bagIndex}-${s.sealNumber}`}
+                  className="flex items-center justify-between gap-3 bg-gray-50 rounded-xl px-4 py-3"
+                >
+                  <span className="text-sm font-bold text-gray-700">
+                    {t("sealRowLabel", { index: s.bagIndex, size: s.bagSize })}{" "}
+                    · {t("sealNumberShort")}
+                    {s.sealNumber}
+                  </span>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={sealConfirmChecks[s.sealNumber] ?? false}
+                      onChange={(e) =>
+                        setSealConfirmChecks((prev) => ({
+                          ...prev,
+                          [s.sealNumber]: e.target.checked,
+                        }))
+                      }
+                      className="w-5 h-5 accent-orange-600"
+                    />
+                  </label>
+                </li>
+              ))}
+            </ul>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setCheckoutOpen(null)}
+                className="flex-1 py-4 rounded-2xl bg-gray-100 font-black text-sm uppercase"
+              >
+                {t("checkoutCancel")}
+              </button>
+              <button
+                type="button"
+                disabled={
+                  !checkoutOpen.seals.every(
+                    (s) => sealConfirmChecks[s.sealNumber]
+                  ) || checkingOutId === checkoutOpen.bookingId
+                }
+                onClick={() => void confirmCheckoutWithSeals()}
+                className="flex-1 py-4 rounded-2xl bg-gray-900 text-white font-black text-sm uppercase disabled:opacity-40"
+              >
+                {checkingOutId === checkoutOpen.bookingId ? (
+                  <Loader2 className="inline animate-spin w-5 h-5" />
+                ) : (
+                  t("confirmCheckoutSeals")
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

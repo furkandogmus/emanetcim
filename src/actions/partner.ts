@@ -6,6 +6,7 @@ import { notificationService } from "@/services/NotificationService";
 import prisma from "@/lib/db";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { verifyQrToken } from "@/lib/qr-token";
+import type { SealAssignmentInput } from "@/services/SealService";
 
 function revalidatePartnerPaths() {
   revalidatePathAllLocales("/partner");
@@ -57,14 +58,79 @@ export async function getPartnerBookingPreviewAction(raw: string) {
     bookingId: booking.id,
     guestName: booking.guest?.name || "Misafir",
     bagsLabel,
+    bagCountS: booking.bagCountS,
+    bagCountM: booking.bagCountM,
+    bagCountXl: booking.bagCountXl,
+    totalBags: total,
     status: booking.status,
+  };
+}
+
+/**
+ * Check-out öncesi rezervasyona bağlı mühür listesi (onay ekranı).
+ */
+export async function getPartnerBookingSealsAction(bookingIdRaw: string) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false as const, error: "Oturum açmanız gerekiyor." };
+  }
+  if (session.user.role !== "PARTNER" && session.user.role !== "ADMIN") {
+    return { success: false as const, error: "Bu işlem için esnaf yetkisi gerekir." };
+  }
+
+  let bookingId = bookingIdRaw.trim();
+  const payload = await verifyQrToken(bookingIdRaw);
+  if (payload) bookingId = payload.bookingId;
+
+  const booking = await prisma.booking.findUnique({
+    where: { id: bookingId },
+    include: { shop: true },
+  });
+  if (!booking) {
+    return { success: false as const, error: "Rezervasyon bulunamadı." };
+  }
+  if (
+    session.user.role === "PARTNER" &&
+    booking.shop.ownerId !== session.user.id
+  ) {
+    return {
+      success: false as const,
+      error: "Bu rezervasyon sizin dükkanınıza ait değil.",
+    };
+  }
+
+  const seals = await prisma.bookingSeal.findMany({
+    where: { bookingId },
+    orderBy: { bagIndex: "asc" },
+    select: {
+      sealNumber: true,
+      bagIndex: true,
+      bagSize: true,
+    },
+  });
+
+  return {
+    success: true as const,
+    bookingId,
+    seals: seals.map((s) => ({
+      sealNumber: s.sealNumber,
+      bagIndex: s.bagIndex,
+      bagSize: s.bagSize,
+    })),
   };
 }
 
 /**
  * checkInAction - QR JWT veya ham token / booking id ile check-in.
  */
-export async function checkInAction(qrTokenOrBookingId: string, sealPhotoUrl: string) {
+export async function checkInAction(
+  qrTokenOrBookingId: string,
+  sealPhotoUrl: string | null,
+  sealPayload: {
+    sealAssignments: SealAssignmentInput[];
+    faultySealNumbers: number[];
+  }
+) {
   const session = await auth();
 
   if (session?.user?.role !== "PARTNER" && session?.user?.role !== "ADMIN") {
@@ -95,7 +161,11 @@ export async function checkInAction(qrTokenOrBookingId: string, sealPhotoUrl: st
     };
   }
 
-  const result = await bookingService.checkIn(bookingId, sealPhotoUrl);
+  const result = await bookingService.checkIn(
+    bookingId,
+    sealPhotoUrl,
+    sealPayload
+  );
 
   if (result.ok) {
     const b = await prisma.booking.findUnique({

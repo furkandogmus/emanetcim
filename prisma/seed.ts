@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { Role, BookingStatus } from '@prisma/client';
+import { Role, BookingStatus, SealStatus } from '@prisma/client';
 import prisma from '../src/lib/db';
 import { hashPassword } from '../src/lib/auth-password';
 
@@ -166,6 +166,16 @@ async function main() {
       },
     });
   }
+
+  await prisma.seal.createMany({
+    data: Array.from({ length: 40 }, (_, i) => ({
+      serialNumber: 100100 + i,
+      shopId: galataShop.id,
+      status: SealStatus.ASSIGNED,
+      assignedAt: new Date(),
+    })),
+    skipDuplicates: true,
+  });
 
   console.log('Seedleme tamamlandı!');
   console.table({

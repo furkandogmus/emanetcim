@@ -36,6 +36,14 @@ enum PaymentStatus {
   FAILED
 }
 
+enum SealStatus {
+  STOCK // Depoda, dükkan atanmamış
+  ASSIGNED // Dükkana verildi, kullanıma hazır
+  IN_USE // Check-in ile valizde
+  RETURNED // Check-out ile iade
+  FAULTY // Bozuk / hatalı raporlandı
+}
+
 // ----------------------------------------------------------------------------
 // MODELS
 // ----------------------------------------------------------------------------
@@ -131,6 +139,7 @@ model Shop {
   bookings Booking[]
   reviews  Review[]
   sealRequests SealRequest[]
+  seals        Seal[]
 
   @@index([ownerId])
   @@index([isActive])
@@ -169,6 +178,7 @@ model Booking {
   notificationLogs NotificationLog[]
   review      Review?
   dispute     Dispute?
+  seals       BookingSeal[]
 
   @@index([guestId])
   @@index([shopId])
@@ -251,6 +261,37 @@ model Dispute {
   updatedAt DateTime @updatedAt
 
   booking   Booking  @relation(fields: [bookingId], references: [id])
+}
+
+/// Fiziksel mühür stoku (seri numarası = PK)
+model Seal {
+  serialNumber Int        @id
+  shopId       String?
+  status       SealStatus @default(STOCK)
+  assignedAt   DateTime?
+
+  shop         Shop?          @relation(fields: [shopId], references: [id], onDelete: SetNull)
+  bookingSeals BookingSeal[]
+
+  @@index([shopId])
+  @@index([status])
+}
+
+/// Rezervasyonda hangi mühür hangi valize takıldı
+model BookingSeal {
+  id         String   @id @default(uuid())
+  bookingId  String
+  sealNumber Int
+  bagIndex   Int
+  bagSize    String
+  photoUrl   String?
+  createdAt  DateTime @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  seal    Seal    @relation(fields: [sealNumber], references: [serialNumber])
+
+  @@unique([bookingId, bagIndex])
+  @@index([sealNumber])
 }
 
 model SealRequest {
