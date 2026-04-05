@@ -4,6 +4,8 @@ Vercel/serverless kullanmadan tek makinede veya sunucuda çalıştırmak için *
 
 **LAN’daki Ubuntu VM + `emanetci.local`:** [VM-LAN.md](./VM-LAN.md).
 
+**Yedek / geri yükleme (Postgres):** [BACKUP.md](./BACKUP.md).
+
 ## Gereksinimler
 
 - Docker + Docker Compose v2

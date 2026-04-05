@@ -72,6 +72,10 @@ Başka branch: `BRANCH=main ./scripts/vm-update.sh`
 
 İsteğe bağlı kısayol (sunucuda bir kez): `ln -sf /opt/emanetci/scripts/vm-update.sh /usr/local/bin/emanetci-update` — sonra SSH’te sadece `emanetci-update`.
 
+### 2.5 Yedek ve geri yükleme (PostgreSQL)
+
+Kullanıcı verisi Postgres’te; düzenli yedek ve felaket senaryosu için: **[BACKUP.md](./BACKUP.md)** (`scripts/backup.sh`, `scripts/restore.sh`).
+
 ---
 
 ## 3. Kendi bilgisayarında (LAN): yerel alan adı
