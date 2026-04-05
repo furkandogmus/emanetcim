@@ -11,7 +11,7 @@ self.addEventListener('install', (event) => {
           try {
             const res = await fetch(new Request(url, { cache: 'reload' }));
             if (res.ok) await cache.put(url, res);
-          } catch (_) {
+          } catch {
             /* ikon eksik vb. */
           }
         })
