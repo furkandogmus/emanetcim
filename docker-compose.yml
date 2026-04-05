@@ -31,8 +31,11 @@ services:
       HOSTNAME: "0.0.0.0"
       # OAuth redirect_uri kökü — tek kaynak (src/lib/auth-public-url.ts → AUTH_URL).
       AUTH_PUBLIC_HOST: ${AUTH_PUBLIC_HOST:-}
+      NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL:-}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-}
+      PUBLIC_URL_PROTOCOL: ${PUBLIC_URL_PROTOCOL:-}
       DATABASE_URL: postgresql://emanetci:emanetci@postgres:5432/emanetci?schema=public
-      NODE_ENV: production
+      NODE_ENV: development
       AUTH_SECRET: ${AUTH_SECRET:-docker-dev-change-me-use-openssl-rand-hex-32}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
       AUTH_TRUST_HOST: ${AUTH_TRUST_HOST:-true}

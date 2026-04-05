@@ -5,7 +5,7 @@ cd /app
 if [ -d "prisma/migrations" ] && [ "$(ls -A prisma/migrations 2>/dev/null)" ]; then
   prisma migrate deploy
 else
-  prisma db push
+  prisma db push --accept-data-loss
 fi
 
 # Next.js standalone: trustHostHeader varsayılan false; ters vekil (nginx/ngrok) arkasında

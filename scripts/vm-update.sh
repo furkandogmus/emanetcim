@@ -29,9 +29,19 @@ if [[ ! -f "$ENV_FILE" ]]; then
   echo "vm-update: uyarı: $ENV_FILE yok; compose varsayılanlarla çalışır." >&2
 fi
 
+# Docker Compose v2: yalnızca --env-file docker-compose.env verilirse proje kökündeki .env
+# interpolasyon için yüklenmeyebilir → GOOGLE_CLIENT_ID / AUTH_PUBLIC_HOST boş kalır.
+# Önce .env, sonra docker-compose.env (sonraki dosya aynı anahtarları ezer).
 compose() {
-  if [[ -f "$ENV_FILE" ]]; then
-    docker compose --env-file "$ENV_FILE" "$@"
+  local args=()
+  if [[ -f "$ROOT/.env" ]]; then
+    args+=(--env-file "$ROOT/.env")
+  fi
+  if [[ -f "$ROOT/$ENV_FILE" ]]; then
+    args+=(--env-file "$ROOT/$ENV_FILE")
+  fi
+  if [[ ${#args[@]} -gt 0 ]]; then
+    docker compose "${args[@]}" "$@"
   else
     docker compose "$@"
   fi
