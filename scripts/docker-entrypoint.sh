@@ -3,7 +3,7 @@ set -e
 cd /app
 
 if [ -d "prisma/migrations" ] && [ "$(ls -A prisma/migrations 2>/dev/null)" ]; then
-  prisma migrate deploy
+  prisma migrate deploy || prisma db push --accept-data-loss
 else
   prisma db push --accept-data-loss
 fi
