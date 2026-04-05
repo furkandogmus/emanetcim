@@ -235,7 +235,16 @@
     "partnerApplySuccess": "Application received. After admin approval, sign in to use the panel.",
     "backToLogin": "Back to sign in",
     "demoDivider": "OR DEMO",
-    "demoPasswordHint": "Demo password matches seed (default: Demo123!)"
+    "demoPasswordHint": "Demo password matches seed (default: Demo123!)",
+    "continueWithGoogle": "Continue with Google",
+    "continueWithApple": "Continue with Apple",
+    "continueWithEmail": "Continue with Email",
+    "comingSoon": "Coming Soon",
+    "orDivider": "or",
+    "demoMode": "DEMO MODE",
+    "demoGuest": "Guest Demo",
+    "demoPartner": "Partner Login",
+    "demoAdmin": "Admin Login"
   },
   "Footer": {
     "about": "About Us",

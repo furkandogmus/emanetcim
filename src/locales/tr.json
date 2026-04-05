@@ -235,7 +235,16 @@
     "partnerApplySuccess": "Başvurunuz alındı. Yönetici onayından sonra giriş yaparak paneli kullanabilirsiniz.",
     "backToLogin": "Girişe dön",
     "demoDivider": "VEYA DEMO",
-    "demoPasswordHint": "Demo şifresi seed ile aynı (varsayılan: Demo123!)"
+    "demoPasswordHint": "Demo şifresi seed ile aynı (varsayılan: Demo123!)",
+    "continueWithGoogle": "Google ile Devam Et",
+    "continueWithApple": "Apple ile Devam Et",
+    "continueWithEmail": "E-posta ile Devam Et",
+    "comingSoon": "Yakında",
+    "orDivider": "veya",
+    "demoMode": "DEMO MODU",
+    "demoGuest": "Misafir Demo",
+    "demoPartner": "Esnaf Girişi",
+    "demoAdmin": "Admin Girişi"
   },
   "Footer": {
     "about": "Hakkımızda",

@@ -10,6 +10,14 @@ import { authConfig } from "./auth.config";
  * Auth.js (v5) - Merkezi Kimlik Doğrulama Konfigürasyonu
  * Google ve Apple sosyal girişlerini ve RBAC (Role-Based Access Control) yönetimini sağlar.
  */
+/** ADMIN_EMAILS: virgülle ayrılmış e-posta listesi; Google ile ilk girişte bu adresler otomatik ADMIN olur. */
+const adminEmailSet = new Set(
+  (process.env.ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean)
+);
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
@@ -31,7 +39,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const dbUser = await prisma.user.findUnique({
           where: { id: user.id },
         });
-        token.role = dbUser?.role || Role.GUEST;
+
+        const emailLower = (user.email ?? "").toLowerCase();
+        if (adminEmailSet.has(emailLower) && dbUser?.role !== Role.ADMIN) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { role: Role.ADMIN },
+          });
+          token.role = Role.ADMIN;
+        } else {
+          token.role = dbUser?.role || Role.GUEST;
+        }
       }
       return token;
     },
