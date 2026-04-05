@@ -54,6 +54,24 @@ sudo ufw allow 80/tcp
 sudo ufw enable
 ```
 
+### 2.4 SSH ile hızlı güncelleme
+
+Repo kökünde `scripts/vm-update.sh`: **`develop` branch’ini çeker** ve `docker compose --env-file docker-compose.env up -d --build` çalıştırır.
+
+```bash
+cd /opt/emanetci   # veya klonladığın dizin
+chmod +x scripts/vm-update.sh   # ilk sefer
+./scripts/vm-update.sh
+```
+
+Başka dizin: `./scripts/vm-update.sh /path/to/emanetci`
+
+Sadece yeniden derle / ayağa kaldır (pull yok): `SKIP_GIT=1 ./scripts/vm-update.sh`
+
+Başka branch: `BRANCH=main ./scripts/vm-update.sh`
+
+İsteğe bağlı kısayol (sunucuda bir kez): `ln -sf /opt/emanetci/scripts/vm-update.sh /usr/local/bin/emanetci-update` — sonra SSH’te sadece `emanetci-update`.
+
 ---
 
 ## 3. Kendi bilgisayarında (LAN): yerel alan adı

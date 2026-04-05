@@ -1,18 +1,26 @@
 // Emanetçi Service Worker - Production Ready 🚀
-const CACHE_NAME = 'emanetci-v2';
+const CACHE_NAME = 'emanetci-v3';
 const ASSETS_TO_CACHE = [
   '/',
   '/manifest.json',
   '/icons/icon-192x192.png',
   '/icons/icon-512x512.png',
-  '/favicon.ico'
 ];
 
-// 1. Statik varlıkları önbelleğe al
+// 1. Statik varlıkları önbelleğe al (addAll tek 404'te patlar; eksik dosya/ngrok uyarısı için tek tek)
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
+    caches.open(CACHE_NAME).then(async (cache) => {
+      await Promise.all(
+        ASSETS_TO_CACHE.map(async (url) => {
+          try {
+            const res = await fetch(new Request(url, { cache: 'reload' }));
+            if (res.ok) await cache.put(url, res);
+          } catch (_) {
+            /* yok say: ikon eksik, ngrok ara sayfası vb. */
+          }
+        })
+      );
     })
   );
   self.skipWaiting();

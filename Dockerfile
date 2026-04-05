@@ -39,6 +39,8 @@ RUN npm install -g prisma@7.6.0 && npm cache clean --force
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/node_modules/dotenv ./node_modules/dotenv
+# Next standalone bazen @swc/helpers izini düşürür (reactCompiler); runtime için gerekli
+COPY --from=builder /app/node_modules/@swc ./node_modules/@swc
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
