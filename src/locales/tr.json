@@ -55,7 +55,14 @@
     "bagCountUnit": "Adet",
     "deliveryCheckoutShort": "TESLİM ET (CHECK-OUT)",
     "sealPhotoAlt": "Mühür",
-    "checkInWord": "Giriş"
+    "checkInWord": "Giriş",
+    "dailyPrice": "Günlük Birim Fiyat (₺)",
+    "openingTime": "Açılış",
+    "closingTime": "Kapanış",
+    "settingsSaved": "Ayarlar güncellendi.",
+    "noShopTitle": "Henüz Kayıtlı Dükkanınız Yok",
+    "noShopDesc": "İşletmenizi sisteme kaydetmek için admin onayı bekliyor olabilirsiniz.",
+    "backToPanel": "Panele dön"
   },
   "Guest": {
     "heroTitle": "Valizini Güvenle Bırak, Özgürce Gez",

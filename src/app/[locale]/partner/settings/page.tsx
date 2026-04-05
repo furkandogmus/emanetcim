@@ -38,13 +38,13 @@ export default async function PartnerSettingsPage({
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-10 text-center">
         <h1 className="text-2xl font-black text-gray-900 mb-4">
-          Henüz Kayıtlı Dükkanınız Yok
+          {t("noShopTitle")}
         </h1>
         <Link
           href="/partner"
           className="text-orange-600 font-bold underline"
         >
-          Panele dön
+          {t("backToPanel")}
         </Link>
       </div>
     );

@@ -55,7 +55,14 @@
     "bagCountUnit": "pcs",
     "deliveryCheckoutShort": "HAND OVER (CHECK-OUT)",
     "sealPhotoAlt": "Seal",
-    "checkInWord": "Check-in"
+    "checkInWord": "Check-in",
+    "dailyPrice": "Daily Price per Bag (₺)",
+    "openingTime": "Opening",
+    "closingTime": "Closing",
+    "settingsSaved": "Settings saved.",
+    "noShopTitle": "No Shop Registered Yet",
+    "noShopDesc": "Your shop may be awaiting admin approval.",
+    "backToPanel": "Back to panel"
   },
   "Guest": {
     "heroTitle": "Drop Your Bags, Explore Freely",

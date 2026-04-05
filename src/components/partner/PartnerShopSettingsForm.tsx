@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { Clock, Loader2, Luggage, Settings } from "lucide-react";
+import { Clock, Loader2, Luggage, Settings, CheckCircle } from "lucide-react";
 import { updateShopSettingsAction } from "@/actions/shop";
 
 type Props = {
@@ -31,9 +31,11 @@ export default function PartnerShopSettingsForm({
   const [closingTime, setClosingTime] = useState(initialClosing);
   const [pricePerDay, setPricePerDay] = useState(initialPricePerDay);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const handleSave = async () => {
     setIsUpdating(true);
+    setSaved(false);
     try {
       await updateShopSettingsAction(shopId, {
         capacity,
@@ -42,7 +44,8 @@ export default function PartnerShopSettingsForm({
         pricePerDay,
       });
       router.refresh();
-      alert("Ayarlar güncellendi.");
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
     } finally {
       setIsUpdating(false);
     }
@@ -78,7 +81,7 @@ export default function PartnerShopSettingsForm({
 
           <div>
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">
-              Günlük Birim Fiyat (₺)
+              {t("dailyPrice")}
             </label>
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 bg-orange-100 flex items-center justify-center rounded-xl text-orange-600 font-black font-sans">
@@ -96,7 +99,7 @@ export default function PartnerShopSettingsForm({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">
-                Açılış
+                {t("openingTime")}
               </label>
               <div className="flex items-center gap-4">
                 <Clock size={20} className="text-gray-300" />
@@ -111,7 +114,7 @@ export default function PartnerShopSettingsForm({
             </div>
             <div>
               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">
-                Kapanış
+                {t("closingTime")}
               </label>
               <div className="flex items-center gap-4">
                 <Clock size={20} className="text-gray-300" />
@@ -126,6 +129,13 @@ export default function PartnerShopSettingsForm({
             </div>
           </div>
         </div>
+
+        {saved && (
+          <div className="flex items-center gap-2 text-green-600 bg-green-50 border border-green-100 rounded-2xl px-4 py-3 text-sm font-bold">
+            <CheckCircle size={16} />
+            {t("settingsSaved")}
+          </div>
+        )}
 
         <button
           type="button"

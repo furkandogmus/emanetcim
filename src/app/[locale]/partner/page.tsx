@@ -1,4 +1,4 @@
-import { setRequestLocale } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
 import { shopService } from "@/services/ShopService";
 import { bookingService } from "@/services/BookingService";
@@ -20,6 +20,7 @@ export default async function PartnerPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const t = await getTranslations("Partner");
 
   const sp = (await searchParams) ?? {};
   const initialBookingId = sp.booking?.trim() || undefined;
@@ -40,10 +41,10 @@ export default async function PartnerPage({
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-10 text-center">
         <h1 className="text-2xl font-black text-gray-900 mb-4">
-          Henüz Kayıtlı Dükkanınız Yok
+          {t("noShopTitle")}
         </h1>
         <p className="text-gray-500 mb-8 max-w-xs">
-          İşletmenizi sisteme kaydetmek için admin onayı bekliyor olabilirsiniz.
+          {t("noShopDesc")}
         </p>
       </div>
     );
