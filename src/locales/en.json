@@ -136,6 +136,8 @@
     "occupancy": "Occupancy",
     "dashboardLiveAnalytics": "Live analytics",
     "dashboardChartEmpty": "No chart data yet",
+    "chartRevenue": "Revenue (₺)",
+    "chartBookings": "Bookings",
     "noActivePartners": "No active partners.",
     "versionLabel": "Emanetçi v2.0.4",
     "defaultCityFallback": "Istanbul",

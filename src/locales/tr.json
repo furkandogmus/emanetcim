@@ -136,6 +136,8 @@
     "occupancy": "Doluluk",
     "dashboardLiveAnalytics": "Canlı Analiz",
     "dashboardChartEmpty": "Henüz grafik verisi yok",
+    "chartRevenue": "Ciro (₺)",
+    "chartBookings": "Emanet",
     "noActivePartners": "Aktif esnaf bulunmuyor.",
     "versionLabel": "Emanetçi v2.0.4",
     "defaultCityFallback": "İstanbul",

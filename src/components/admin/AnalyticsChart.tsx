@@ -9,11 +9,42 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import type { ValueType, NameType } from "recharts/types/component/DefaultTooltipContent";
 import { useTranslations } from "next-intl";
 
 /**
  * AnalyticsChart — son 7 gün (parent’tan gelen veri).
  */
+interface TooltipEntry {
+  dataKey?: string | number;
+  name?: NameType;
+  value?: ValueType;
+  color?: string;
+}
+
+function CustomTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: TooltipEntry[];
+  label?: string;
+}) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 px-4 py-3 text-xs font-bold">
+      <p className="text-gray-400 mb-1">{label}</p>
+      {payload.map((entry) => (
+        <p key={String(entry.dataKey)} style={{ color: entry.color }}>
+          {entry.name}:{" "}
+          {typeof entry.value === "number" ? entry.value.toLocaleString() : entry.value}
+        </p>
+      ))}
+    </div>
+  );
+}
+
 export default function AnalyticsChart({
   data,
 }: {
@@ -56,18 +87,11 @@ export default function AnalyticsChart({
             tickLine={false}
             tick={{ fontSize: 10, fontWeight: 700, fill: "#9ca3af" }}
           />
-          <Tooltip
-            contentStyle={{
-              borderRadius: "16px",
-              border: "none",
-              boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
-              fontSize: "12px",
-              fontWeight: "bold",
-            }}
-          />
+          <Tooltip content={<CustomTooltip />} />
           <Area
             type="monotone"
             dataKey="ciro"
+            name={t("chartRevenue")}
             stroke="#f97316"
             strokeWidth={3}
             fillOpacity={1}
