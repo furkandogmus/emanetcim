@@ -17,10 +17,10 @@ const guestSchema = z.object({
 });
 
 const partnerSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8).max(128),
-  name: z.string().min(1).max(120),
-  phone: z.string().max(32).optional(),
+  name: z.string().min(2),
+  email: z.string().email().optional().or(z.literal("")),
+  phone: z.string().min(10, "Telefon numarası en az 10 karakter olmalıdır"),
+  password: z.string().min(6),
   shopName: z.string().min(2).max(200),
   shopAddress: z.string().min(5).max(500),
 });
@@ -56,6 +56,7 @@ export async function registerGuestAction(data: unknown) {
       name: parsed.data.name.trim(),
       role: Role.GUEST,
       passwordHash,
+      lastIp: ip,
     },
   });
 
@@ -84,39 +85,48 @@ export async function registerPartnerApplicationAction(data: unknown) {
     };
   }
 
-  const email = parsed.data.email.trim().toLowerCase();
-  const exists = await prisma.user.findUnique({ where: { email } });
-  if (exists) {
-    return { success: false as const, error: "Bu e-posta adresi zaten kayıtlı." };
+  const email = parsed.data.email?.trim().toLowerCase() || null;
+  if (email) {
+    const exists = await prisma.user.findUnique({ where: { email } });
+    if (exists) {
+      return { success: false as const, error: "Bu e-posta adresi zaten kayıtlı." };
+    }
+  }
+
+  const phone = parsed.data.phone.trim();
+  const phoneExists = await prisma.user.findUnique({ where: { phone } });
+  if (phoneExists) {
+    return { success: false as const, error: "Bu telefon numarası zaten kayıtlı." };
   }
 
   const passwordHash = await hashPassword(parsed.data.password);
-  const rules = await getPricingRules();
 
   await prisma.$transaction(async (tx) => {
     const user = await tx.user.create({
       data: {
-        email,
+        email: email || null,
         name: parsed.data.name.trim(),
-        phone: parsed.data.phone?.trim() || null,
+        phone: phone,
         role: Role.PARTNER,
         passwordHash,
-      },
-    });
-    await tx.shop.create({
-      data: {
-        ownerId: user.id,
-        name: parsed.data.shopName.trim(),
-        address: parsed.data.shopAddress.trim(),
-        isActive: false,
-        capacity: rules.defaultShopCapacity,
-        pricePerDay: rules.defaultPricePerDay,
+        lastIp: ip,
       },
     });
 
-    // Verify Email (Partner başvurusu sonrası)
-    const verificationToken = await generateVerificationToken(user.email!);
-    await sendVerificationEmail(user.email!, verificationToken.token);
+    await tx.shop.create({
+      data: {
+        name: parsed.data.shopName.trim(),
+        address: parsed.data.shopAddress.trim(),
+        ownerId: user.id,
+        isActive: false, // Admin onayı bekleyecek
+      },
+    });
+
+    // Sadece e-posta girilmişse doğrulama gönder
+    if (user.email) {
+      const verificationToken = await generateVerificationToken(user.email);
+      await sendVerificationEmail(user.email, verificationToken.token);
+    }
   });
 
   return { success: true as const };

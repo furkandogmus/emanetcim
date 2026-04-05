@@ -8,9 +8,13 @@ else
   prisma db push --accept-data-loss
 fi
 
-# Next.js standalone: trustHostHeader varsayılan false; ters vekil (nginx/ngrok) arkasında
-# Host header'ı yerine bind adresi (0.0.0.0:3000) kullanılır → Auth.js URL'leri bozulur.
-# Bu seçenek kullanıcı config'inden ayarlanamıyor (dahili), runtime'da patchliyoruz.
-sed -i 's/"trustHostHeader":false/"trustHostHeader":true/' /app/server.js 2>/dev/null || true
+# Standalone modunda server.js patch'lemesi (sadece dosya varsa)
+[ -f /app/server.js ] && sed -i 's/"trustHostHeader":false/"trustHostHeader":true/' /app/server.js || true
 
-exec node server.js
+# Eğer dışarıdan bir komut verilmişse (ör: npm run dev), onu çalıştır.
+# Verilmemişse varsayılan olarak server.js ile başlat.
+if [ "$#" -gt 0 ]; then
+  exec "$@"
+else
+  exec node server.js
+fi

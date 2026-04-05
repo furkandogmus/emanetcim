@@ -58,6 +58,8 @@ model User {
   name          String?
   /// bcrypt hash; OAuth-only kullanıcılarda null
   passwordHash  String?
+  isBanned      Boolean   @default(false)
+  lastIp        String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -335,5 +337,11 @@ model PlatformSettings {
   bagMultiplierXl     Decimal @db.Decimal(6, 4) @default(1.5)
 
   updatedAt DateTime @updatedAt
+}
+
+model BlockedIp {
+  ip        String   @id
+  reason    String?
+  createdAt DateTime @default(now())
 }
 

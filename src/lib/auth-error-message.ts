@@ -28,6 +28,8 @@ export function authErrorMessage(
       return t("authErrorSessionRequired");
     case "EmailVerificationRequired":
       return t("authErrorEmailVerificationRequired");
+    case "UserBanned":
+      return t("authErrorUserBanned");
     default:
       return t("authErrorGeneric");
   }

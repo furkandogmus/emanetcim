@@ -7,6 +7,9 @@ import {
   MapPin,
   ChevronRight,
   Package,
+  Store,
+  ArrowRight,
+  ShieldAlert,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
@@ -124,6 +127,53 @@ export default function AdminDashboardClient({
               {t("partnerStatus")}
             </h3>
             <div className="flex flex-col gap-3">
+              <Link
+                href="/admin/applications"
+                className="group flex items-center justify-between p-5 bg-orange-50 hover:bg-orange-100 rounded-[2rem] transition-all border border-orange-100/50"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-orange-600 shadow-sm group-hover:scale-110 transition-transform">
+                    <Store size={24} />
+                  </div>
+                  <div>
+                    <p className="font-black text-gray-900 tracking-tight">{t("applications")}</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-orange-600/60">{t("approveShop")}</p>
+                  </div>
+                </div>
+                <ArrowRight className="text-orange-300 group-hover:translate-x-1 transition-transform" size={20} />
+              </Link>
+
+              <Link
+                href="/admin/partners"
+                className="group flex items-center justify-between p-5 bg-blue-50 hover:bg-blue-100 rounded-[2rem] transition-all border border-blue-100/50"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-blue-600 shadow-sm group-hover:scale-110 transition-transform">
+                    <Store size={24} />
+                  </div>
+                  <div>
+                    <p className="font-black text-gray-900 tracking-tight">{t("shopManagement")}</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-blue-600/60">{t("activePartners")}</p>
+                  </div>
+                </div>
+                <ArrowRight className="text-blue-300 group-hover:translate-x-1 transition-transform" size={20} />
+              </Link>
+
+              <Link
+                href="/admin/users"
+                className="group flex items-center justify-between p-5 bg-gray-50 hover:bg-gray-100 rounded-[2rem] transition-all border border-gray-100"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-gray-600 shadow-sm group-hover:scale-110 transition-transform">
+                    <ShieldAlert size={24} />
+                  </div>
+                  <div>
+                    <p className="font-black text-gray-900 tracking-tight">{t("usersManagement")}</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">{t("banDeleteUsers")}</p>
+                  </div>
+                </div>
+                <ArrowRight className="text-gray-300 group-hover:translate-x-1 transition-transform" size={20} />
+              </Link>
               {activeShops.map((shop, i) => (
                 <div
                   key={shop.id || i}

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from 'react';
-import { Star, X, Loader2, Send } from 'lucide-react';
+import { X, Loader2, Send } from 'lucide-react';
 import { addReviewAction } from '@/actions/review';
+import StarRating from '@/components/common/StarRating';
 
 interface ReviewFormProps {
   bookingId: string;
@@ -22,7 +23,6 @@ export default function ReviewForm({
 }: ReviewFormProps) {
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
-  const [hoveredRating, setHoveredRating] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -68,27 +68,13 @@ export default function ReviewForm({
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-8">
            {/* Stars Selection */}
-           <div className="flex justify-center gap-2">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  onMouseEnter={() => setHoveredRating(star)}
-                  onMouseLeave={() => setHoveredRating(0)}
-                  onClick={() => setRating(star)}
-                  className="transition-transform active:scale-90"
-                >
-                  <Star 
-                    size={40} 
-                    strokeWidth={2.5}
-                    className={`transition-colors ${
-                      (hoveredRating || rating) >= star 
-                        ? 'fill-orange-500 text-orange-500' 
-                        : 'text-gray-200'
-                    }`} 
-                  />
-                </button>
-              ))}
+           <div className="flex justify-center">
+              <StarRating 
+                rating={rating} 
+                interactive={true} 
+                size={40} 
+                onRatingChange={(val) => setRating(val)} 
+              />
            </div>
 
            {/* Comment Area */}
