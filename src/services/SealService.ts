@@ -155,6 +155,59 @@ export class SealService {
       });
     }
   }
+
+  /**
+   * Aktif atamaları (ASSIGNED) dükkan bazlı ve ardışık aralıklar halinde getirir.
+   */
+  async getAssignedSealBatches() {
+    const seals = await prisma.seal.findMany({
+      where: { status: "ASSIGNED", shopId: { not: null } },
+      include: { shop: { select: { name: true } } },
+      orderBy: { serialNumber: "asc" },
+    });
+
+    if (seals.length === 0) return [];
+
+    const batches: {
+      shopId: string;
+      shopName: string;
+      fromSerial: number;
+      toSerial: number;
+      count: number;
+    }[] = [];
+
+    let currentBatch = {
+      shopId: seals[0].shopId!,
+      shopName: seals[0].shop?.name || "Unknown",
+      fromSerial: seals[0].serialNumber,
+      toSerial: seals[0].serialNumber,
+      count: 1,
+    };
+
+    for (let i = 1; i < seals.length; i++) {
+      const s = seals[i];
+      const isContiguous = s.serialNumber === currentBatch.toSerial + 1;
+      const isSameShop = s.shopId === currentBatch.shopId;
+
+      if (isContiguous && isSameShop) {
+        currentBatch.toSerial = s.serialNumber;
+        currentBatch.count++;
+      } else {
+        batches.push(currentBatch);
+        currentBatch = {
+          shopId: s.shopId!,
+          shopName: s.shop?.name || "Unknown",
+          fromSerial: s.serialNumber,
+          toSerial: s.serialNumber,
+          count: 1,
+        };
+      }
+    }
+    batches.push(currentBatch);
+
+    // En son verilen batçları en üstte göstermek için bitiş seri nosuna göre ters sıralayalım
+    return batches.sort((a, b) => b.toSerial - a.toSerial);
+  }
 }
 
 export const sealService = new SealService();

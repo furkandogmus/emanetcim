@@ -28,68 +28,85 @@ async function main() {
   console.log(`Demo hesap şifresi (NEXT_PUBLIC_DEMO_PASSWORD veya varsayılan): ${demoPassword}`);
 
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@emanetci.com' },
-    update: { passwordHash },
+    where: { email: 'admin@test.com' },
+    update: { 
+      passwordHash,
+      emailVerified: new Date(),
+      role: Role.ADMIN,
+    },
     create: {
-      email: 'admin@emanetci.com',
-      name: 'Emanetçi Admin',
+      email: 'admin@test.com',
+      name: 'Test Admin',
       role: Role.ADMIN,
       passwordHash,
+      emailVerified: new Date(),
+      phone: '+905001112233',
     },
   });
 
-  const partnerMatcha = await prisma.user.upsert({
-    where: { email: 'galata@shop.com' },
-    update: { passwordHash },
+  const partner = await prisma.user.upsert({
+    where: { email: 'esnaf@test.com' },
+    update: { 
+      passwordHash,
+      emailVerified: new Date(),
+      role: Role.PARTNER,
+    },
     create: {
-      email: 'galata@shop.com',
-      name: 'Hüseyin Usta',
+      email: 'esnaf@test.com',
+      name: 'Örnek Esnaf (Mehmet Usta)',
       role: Role.PARTNER,
       passwordHash,
+      emailVerified: new Date(),
+      phone: '+905004445566',
     },
   });
 
   const guest = await prisma.user.upsert({
-    where: { email: 'misafir@örnek.com' },
-    update: { passwordHash },
+    where: { email: 'misafir@test.com' },
+    update: { passwordHash, emailVerified: new Date() },
     create: {
-      email: 'misafir@örnek.com',
-      name: 'Demo Misafir',
+      email: 'misafir@test.com',
+      name: 'Test Misafir',
       role: Role.GUEST,
       passwordHash,
+      emailVerified: new Date(),
+      phone: '+905007778899',
     },
   });
 
-  const galataShop = await prisma.shop.upsert({
-    where: { subMerchantKey: 'galata-123' },
+  const testShop = await prisma.shop.upsert({
+    where: { subMerchantKey: 'test-shop-123' },
     update: {
+      isActive: true,
+      ownerId: partner.id,
       pricePerDay: 80,
-      hasRestroom: true,
     },
     create: {
       id: SEED_GALATA_SHOP_ID,
-      ownerId: partnerMatcha.id,
-      name: 'Galata Gift & Luggage',
-      address: 'Galata Kulesi Sk. No:12, İstanbul',
+      ownerId: partner.id,
+      name: 'Emanetçi Test Noktası (Galata)',
+      address: 'Galata Kulesi Sk. No:12, Beyoğlu, İstanbul',
       latitude: 41.0256,
       longitude: 28.9741,
-      capacity: 25,
+      capacity: 50,
       isActive: true,
-      rating: 4.9,
+      rating: 5.0,
       pricePerDay: 80,
-      subMerchantKey: 'galata-123',
+      subMerchantKey: 'test-shop-123',
       subMerchantType: 'PRIVATE_COMPANY',
       hasRestroom: true,
-      open247: false,
+      open247: true,
+      openingTime: '00:00',
+      closingTime: '23:59',
     },
   });
 
   const sultanahmetShop = await prisma.shop.upsert({
     where: { subMerchantKey: 'sultan-456' },
-    update: {},
+    update: { isActive: true },
     create: {
-      ownerId: partnerMatcha.id,
-      name: 'Sultanahmet Corner',
+      ownerId: partner.id,
+      name: 'Sultanahmet Corner (Test)',
       address: 'Ayasofya Meydanı No:2, İstanbul',
       latitude: 41.0085,
       longitude: 28.9802,
@@ -139,21 +156,21 @@ async function main() {
   if (sealCount === 0) {
     await prisma.sealRequest.createMany({
       data: [
-        { shopId: galataShop.id, quantity: 50, status: 'PENDING' },
-        { shopId: galataShop.id, quantity: 100, status: 'SHIPPED' },
+        { shopId: testShop.id, quantity: 50, status: 'PENDING' },
+        { shopId: testShop.id, quantity: 100, status: 'SHIPPED' },
         { shopId: sultanahmetShop.id, quantity: 25, status: 'DELIVERED' },
       ],
     });
   }
 
   const existingSample = await prisma.booking.findFirst({
-    where: { guestId: guest.id, shopId: galataShop.id, status: BookingStatus.PAID },
+    where: { guestId: guest.id, shopId: testShop.id, status: BookingStatus.PAID },
   });
   if (!existingSample) {
     await prisma.booking.create({
       data: {
         guestId: guest.id,
-        shopId: galataShop.id,
+        shopId: testShop.id,
         status: BookingStatus.PAID,
         checkInTime: new Date(),
         checkOutTime: new Date(Date.now() + 86400000),
@@ -170,7 +187,7 @@ async function main() {
   await prisma.seal.createMany({
     data: Array.from({ length: 40 }, (_, i) => ({
       serialNumber: 100100 + i,
-      shopId: galataShop.id,
+      shopId: testShop.id,
       status: SealStatus.ASSIGNED,
       assignedAt: new Date(),
     })),
@@ -180,9 +197,9 @@ async function main() {
   console.log('Seedleme tamamlandı!');
   console.table({
     'Admin Email': admin.email,
-    'Partner Email': partnerMatcha.email,
+    'Partner Email': partner.email,
     'Guest Email': guest.email,
-    'Galata Shop ID': galataShop.id,
+    'Test Shop ID': testShop.id,
     'Shops': 2,
   });
 }

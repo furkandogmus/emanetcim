@@ -27,6 +27,7 @@ export default async function AdminSealsPage({ params }: { params: Promise<{ loc
   const delivered = await prisma.sealRequest.count({ where: { status: 'DELIVERED' } });
 
   const sealCounts = await sealService.getSealCounts();
+  const assignedBatches = await sealService.getAssignedSealBatches();
   const shops = await prisma.shop.findMany({
     select: { id: true, name: true, isActive: true },
     orderBy: { name: 'asc' },
@@ -46,7 +47,11 @@ export default async function AdminSealsPage({ params }: { params: Promise<{ loc
           <h2 className="text-sm font-black uppercase tracking-widest text-gray-400 px-2">
             {t('sealInventorySection')}
           </h2>
-          <AdminSealInventoryClient sealCounts={sealCounts} shops={shops} />
+          <AdminSealInventoryClient 
+            sealCounts={sealCounts} 
+            shops={shops} 
+            assignedBatches={assignedBatches} 
+          />
         </section>
 
         <h2 className="text-sm font-black uppercase tracking-widest text-gray-400 mt-4 px-2">

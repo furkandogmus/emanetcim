@@ -10,7 +10,7 @@ const loginSchema = z.object({
   password: z.string().min(1, "Şifre gereklidir"),
 });
 
-export default {
+export const authConfig: NextAuthConfig = {
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -130,3 +130,5 @@ export default {
     error: "/login", // Hata durumunda login sayfasına ve query param'a düşer (auth-error-message.ts ile yakalıyoruz)
   },
 } satisfies NextAuthConfig;
+
+export default authConfig;
