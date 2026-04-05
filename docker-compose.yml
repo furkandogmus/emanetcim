@@ -20,17 +20,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    # Konteyner hostname’i yoksa Linux’ta rastgele id olur; Next.js log satırındaki URL okunaksız görünür.
+    hostname: emanetci-web
     expose:
       - "3000"
     environment:
-      # OAuth redirect_uri kökü — ngrok/LAN için (Docker’ın HOSTNAME’i ile karışmaması için ayrı isim)
+      # OAuth redirect_uri kökü — tek kaynak (src/lib/auth-public-url.ts → AUTH_URL).
       AUTH_PUBLIC_HOST: ${AUTH_PUBLIC_HOST:-}
       DATABASE_URL: postgresql://emanetci:emanetci@postgres:5432/emanetci?schema=public
       NODE_ENV: production
       AUTH_SECRET: ${AUTH_SECRET:-docker-dev-change-me-use-openssl-rand-hex-32}
-      # Boş: Auth.js isteğin Host / X-Forwarded-* ile URL üretir (ngrok, çoklu host).
-      # Tek sabit domain (LAN emanetci.local) için docker-compose.env içinde AUTH_URL tanımlayın.
-      AUTH_URL: ${AUTH_URL:-}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
       AUTH_TRUST_HOST: ${AUTH_TRUST_HOST:-true}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}

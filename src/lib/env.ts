@@ -59,6 +59,19 @@ export function requireProdSecrets(): void {
   if (!e.DATABASE_URL?.trim()) {
     throw new Error("DATABASE_URL is required in production");
   }
+  const hasGoogleOAuth =
+    process.env.GOOGLE_CLIENT_ID?.trim() &&
+    process.env.GOOGLE_CLIENT_SECRET?.trim();
+  const hasAppleOAuth =
+    process.env.APPLE_ID?.trim() && process.env.APPLE_SECRET?.trim();
+  if (
+    (hasGoogleOAuth || hasAppleOAuth) &&
+    !process.env.AUTH_PUBLIC_HOST?.trim()
+  ) {
+    throw new Error(
+      "AUTH_PUBLIC_HOST is required in production when OAuth providers are configured",
+    );
+  }
   if (!e.IYZICO_API_KEY?.trim()) {
     throw new Error("IYZICO_API_KEY is required in production");
   }
