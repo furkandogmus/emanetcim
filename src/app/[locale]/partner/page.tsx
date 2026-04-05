@@ -6,6 +6,7 @@ import PartnerClient from "@/components/partner/PartnerClient";
 import { redirect } from "next/navigation";
 import { getMerchantShareRatio } from "@/lib/platform-split";
 import { moneyToNumber } from "@/lib/money";
+import { getPricingRules } from "@/lib/platform-settings";
 
 /**
  * esnaf Ana Sayfası - Partner Dashboard (Server Component)
@@ -50,7 +51,10 @@ export default async function PartnerPage({
     );
   }
 
-  const bookings = await bookingService.getPartnerBookings(activeShop.id);
+  const [bookings, pricingRules] = await Promise.all([
+    bookingService.getPartnerBookings(activeShop.id),
+    getPricingRules(),
+  ]);
   const activeCount = bookings.filter(
     (b) => b.status === "PAID" || b.status === "CHECKED_IN"
   ).length;
@@ -61,6 +65,7 @@ export default async function PartnerPage({
   );
 
   const merchantShareRatio = getMerchantShareRatio();
+  const marketPrice = pricingRules.defaultPricePerDay;
 
   return (
     <PartnerClient
@@ -72,7 +77,8 @@ export default async function PartnerPage({
       initialCapacity={activeShop.capacity}
       initialOpening={activeShop.openingTime || "09:00"}
       initialClosing={activeShop.closingTime || "20:00"}
-      initialPricePerDay={moneyToNumber(activeShop.pricePerDay) || 50}
+      initialPricePerDay={moneyToNumber(activeShop.pricePerDay) || marketPrice}
+      marketPrice={marketPrice}
       bookings={JSON.parse(JSON.stringify(bookings))}
       initialBookingId={initialBookingId}
       initialCheckoutBookingId={initialCheckoutBookingId}

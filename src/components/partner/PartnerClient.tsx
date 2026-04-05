@@ -37,6 +37,7 @@ interface PartnerClientProps {
   initialOpening: string;
   initialClosing: string;
   initialPricePerDay: number;
+  marketPrice: number;
   bookings: PartnerBookingListItem[];
   initialBookingId?: string;
   initialCheckoutBookingId?: string;
@@ -52,6 +53,7 @@ export default function PartnerClient({
   initialOpening,
   initialClosing,
   initialPricePerDay,
+  marketPrice,
   bookings,
   initialBookingId,
   initialCheckoutBookingId,
@@ -506,6 +508,7 @@ export default function PartnerClient({
             initialOpening={initialOpening}
             initialClosing={initialClosing}
             initialPricePerDay={initialPricePerDay}
+            marketPrice={marketPrice}
             compact
           />
         </main>
