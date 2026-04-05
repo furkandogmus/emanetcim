@@ -1,7 +1,7 @@
 import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
-import { Role } from "@prisma/client";
+import { Role, User as PrismaUser } from "@prisma/client";
 import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
 
@@ -50,7 +50,7 @@ export const authConfig: NextAuthConfig = {
         if (!isValid) return null;
 
         // Ban kontrolü
-        if ((user as any).isBanned) {
+        if ((user as PrismaUser).isBanned) {
           throw new Error("UserBanned");
         }
 
@@ -69,7 +69,7 @@ export const authConfig: NextAuthConfig = {
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       if (account?.provider === "google") {
         const { default: prisma } = await import("@/lib/db");
         const adminEmails = (process.env.ADMIN_EMAILS || "").split(",");
@@ -98,7 +98,7 @@ export const authConfig: NextAuthConfig = {
         }
         
         // Ban kontrolü
-        if (existingUser.isBanned) {
+        if ((existingUser as PrismaUser).isBanned) {
           return false;
         }
 

@@ -75,7 +75,7 @@ async function main() {
   });
 
   const testShop = await prisma.shop.upsert({
-    where: { subMerchantKey: 'test-shop-123' },
+    where: { id: SEED_GALATA_SHOP_ID },
     update: {
       isActive: true,
       ownerId: partner.id,

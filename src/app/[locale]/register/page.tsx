@@ -1,8 +1,6 @@
 "use client";
 
-import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { registerGuestAction, registerPartnerApplicationAction } from '@/actions/register';
 import { 
   Package, 
@@ -17,14 +15,12 @@ import {
   MapPin,
   CheckCircle2
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Link } from '@/i18n/routing';
 
 type RegisterType = 'GUEST' | 'PARTNER';
 
 export default function RegisterPage() {
-  const t = useTranslations('Auth');
-  const adminT = useTranslations('Admin');
   const [activeTab, setActiveTab] = useState<RegisterType>('GUEST');
   
   const [isPending, setIsPending] = useState(false);

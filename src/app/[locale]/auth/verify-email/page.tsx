@@ -1,6 +1,5 @@
 import prisma from "@/lib/db";
-import { redirect } from "next/navigation";
-import { Package, ShieldCheck, Mail, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { CheckCircle2, XCircle } from 'lucide-react';
 import Link from 'next/link';
 
 interface VerifyEmailPageProps {

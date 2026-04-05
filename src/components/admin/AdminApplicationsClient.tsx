@@ -32,7 +32,7 @@ interface Application {
 }
 
 interface AdminApplicationsClientProps {
-  applications: any[];
+  applications: Application[];
 }
 
 export default function AdminApplicationsClient({ applications: initialApps }: AdminApplicationsClientProps) {
@@ -54,8 +54,8 @@ export default function AdminApplicationsClient({ applications: initialApps }: A
       await approveShopAction(id);
       setApps(prev => prev.filter(a => a.id !== id));
       toast.success(t("approveSuccess"));
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : String(error));
     } finally {
       setLoadingId(null);
     }
@@ -68,8 +68,8 @@ export default function AdminApplicationsClient({ applications: initialApps }: A
       await rejectShopAction(id);
       setApps(prev => prev.filter(a => a.id !== id));
       toast.success(t("rejectSuccess"));
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : String(error));
     } finally {
       setLoadingId(null);
     }

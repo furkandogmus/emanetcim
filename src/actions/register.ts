@@ -6,7 +6,6 @@ import { hashPassword } from "@/lib/auth-password";
 import { Role } from "@prisma/client";
 import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
-import { getPricingRules } from "@/lib/platform-settings";
 import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
 

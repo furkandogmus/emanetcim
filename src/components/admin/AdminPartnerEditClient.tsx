@@ -21,7 +21,33 @@ import { motion } from "framer-motion";
 import StarRating from "@/components/common/StarRating";
 
 interface AdminPartnerEditClientProps {
-  shop: any;
+  shop: {
+    id: string;
+    name: string;
+    address: string | null;
+    latitude: number | null;
+    longitude: number | null;
+    capacity: number;
+    pricePerDay: number; // Decimal
+    isActive: boolean;
+    rating: number;
+    owner: {
+      name: string | null;
+      phone: string | null;
+    };
+    reviews: Array<{
+      id: string;
+      rating: number;
+      comment: string | null;
+      createdAt: Date;
+      guest: {
+        name: string | null;
+      };
+    }>;
+    _count: {
+      bookings: number;
+    };
+  };
 }
 
 export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientProps) {
@@ -47,8 +73,8 @@ export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientP
       await updateShopAction(shop.id, formData);
       toast.success(t("shopUpdatedSuccess") || "Dükkan güncellendi.");
       router.refresh();
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : String(error));
     } finally {
       setLoading(false);
     }
@@ -223,7 +249,7 @@ export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientP
                     {t("noReviewsYet") || "Henüz yorum yok."}
                   </p>
                 ) : (
-                  shop.reviews.map((review: any) => (
+                  shop.reviews.map((review) => (
                     <div key={review.id} className="p-5 bg-gray-50 rounded-3xl flex flex-col gap-3 group relative">
                        <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
@@ -238,8 +264,8 @@ export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientP
                                    await deleteReviewAction(review.id);
                                    toast.success(t("reviewDeletedSuccess") || "Yorum silindi.");
                                    router.refresh();
-                                 } catch(e: any) {
-                                   toast.error(e.message);
+                                 } catch(err: unknown) {
+                                   toast.error(err instanceof Error ? err.message : String(err));
                                  }
                                }
                             }}
@@ -248,7 +274,7 @@ export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientP
                           </button>
                        </div>
                        <p className="text-xs text-gray-600 font-medium leading-relaxed italic">
-                         "{review.comment}"
+                         &quot;{review.comment}&quot;
                        </p>
                        <p className="text-[8px] font-black text-gray-300 uppercase tracking-widest">
                          {new Date(review.createdAt).toLocaleDateString()}

@@ -31,7 +31,7 @@ interface User {
 }
 
 interface AdminUsersClientProps {
-  users: any[]; // DB'den gelen ham liste
+  users: User[]; // DB'den gelen ham liste
 }
 
 export default function AdminUsersClient({ users: initialUsers }: AdminUsersClientProps) {
@@ -52,8 +52,8 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
       await toggleUserBanAction(id, !currentBan);
       setUsers(prev => prev.map(u => u.id === id ? { ...u, isBanned: !currentBan } : u));
       toast.success(currentBan ? t("userUnbanned") : t("userBanned"));
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : String(error));
     } finally {
       setLoadingId(null);
     }
@@ -66,8 +66,8 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
       await deleteUserAction(id);
       setUsers(prev => prev.filter(u => u.id !== id));
       toast.success(t("userDeleted"));
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : String(error));
     } finally {
       setLoadingId(null);
     }
@@ -77,8 +77,8 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
     try {
       await resendVerificationEmailAction(email);
       toast.success(t("resendSuccess"));
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : String(error));
     }
   };
 
@@ -87,8 +87,8 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
     try {
       await blockIpAction(ip, "Admin manually blocked this IP from user list.");
       toast.warning(t("ipBlockedSuccess"));
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : String(error));
     }
   };
 

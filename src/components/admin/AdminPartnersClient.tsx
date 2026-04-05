@@ -23,7 +23,7 @@ interface Shop {
   address: string | null;
   isActive: boolean;
   rating: number;
-  pricePerDay: any; // Decimal
+  pricePerDay: number; // Decimal
   createdAt: Date;
   owner: {
     name: string | null;
@@ -37,7 +37,7 @@ interface Shop {
 }
 
 interface AdminPartnersClientProps {
-  shops: any[];
+  shops: Shop[];
 }
 
 export default function AdminPartnersClient({ shops: initialShops }: AdminPartnersClientProps) {

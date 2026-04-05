@@ -2,7 +2,6 @@
 
 import { useTranslations } from 'next-intl';
 import { signIn } from 'next-auth/react';
-import { toast } from 'sonner';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useMemo, useState, useEffect } from 'react';
@@ -239,7 +238,7 @@ export default function LoginPage() {
             <div className="w-full grid grid-cols-1 sm:grid-cols-3 gap-3">
               <button
                 type="button"
-                onClick={() => signIn("credentials", { email: "misafir@örnek.com", password: DEMO_PASSWORD, callbackUrl: "/tr/bookings" })}
+                onClick={() => signIn("credentials", { email: "misafir@test.com", password: DEMO_PASSWORD, callbackUrl: "/tr/bookings" })}
                 className="group p-4 border border-green-50 rounded-2xl bg-green-50/30 hover:bg-green-50 transition-all flex flex-col items-center gap-2 text-center"
               >
                 <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform">
@@ -250,7 +249,7 @@ export default function LoginPage() {
 
               <button
                 type="button"
-                onClick={() => signIn("credentials", { email: "galata@shop.com", password: DEMO_PASSWORD, callbackUrl: "/tr/partner" })}
+                onClick={() => signIn("credentials", { email: "esnaf@test.com", password: DEMO_PASSWORD, callbackUrl: "/tr/partner" })}
                 className="group p-4 border border-blue-50 rounded-2xl bg-blue-50/30 hover:bg-blue-50 transition-all flex flex-col items-center gap-2 text-center"
               >
                 <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
@@ -261,7 +260,7 @@ export default function LoginPage() {
 
               <button
                 type="button"
-                onClick={() => signIn("credentials", { email: "admin@emanetci.com", password: DEMO_PASSWORD, callbackUrl: "/tr/admin" })}
+                onClick={() => signIn("credentials", { email: "admin@test.com", password: DEMO_PASSWORD, callbackUrl: "/tr/admin" })}
                 className="group p-4 border border-purple-50 rounded-2xl bg-purple-50/30 hover:bg-purple-50 transition-all flex flex-col items-center gap-2 text-center"
               >
                 <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform">
