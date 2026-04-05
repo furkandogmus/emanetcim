@@ -331,7 +331,9 @@
     "authErrorCallback": "Giriş geri çağrısı başarısız.",
     "authErrorOAuthAccountNotLinked": "Bu e-posta başka bir giriş yöntemiyle kayıtlı.",
     "authErrorSessionRequired": "Oturum gerekli.",
-    "oauthUnexpectedError": "Google ile giriş isteği tamamlanamadı. Ağ bağlantınızı deneyin veya biraz sonra tekrar deneyin."
+    "authErrorEmailVerificationRequired": "Hesabınızı kullanabilmek için e-posta adresinizi doğrulamanız gerekmektedir. Lütfen gelen kutunuzu kontrol edin.",
+    "oauthUnexpectedError": "Google ile giriş isteği tamamlanamadı. Ağ bağlantınızı deneyin veya biraz sonra tekrar deneyin.",
+    "signUp": "Kayıt Ol"
   },
   "UserNav": {
     "signIn": "Giriş yap",

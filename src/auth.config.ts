@@ -65,6 +65,11 @@ export const authConfig = {
         const ok = await verifyPassword(password, user.passwordHash);
         if (!ok) return null;
 
+        // E-posta doğrulama kontrolü: Sadece e-postası doğrulanmış kullanıcılar giriş yapabilir.
+        if (!user.emailVerified) {
+          throw new Error("EmailVerificationRequired");
+        }
+
         return {
           id: user.id,
           email: user.email ?? email,

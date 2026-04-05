@@ -7,6 +7,8 @@ import { Role } from "@prisma/client";
 import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
 import { getPricingRules } from "@/lib/platform-settings";
+import { generateVerificationToken } from "@/lib/tokens";
+import { sendVerificationEmail } from "@/lib/mail";
 
 const guestSchema = z.object({
   email: z.string().email(),
@@ -48,7 +50,7 @@ export async function registerGuestAction(data: unknown) {
   }
 
   const passwordHash = await hashPassword(parsed.data.password);
-  await prisma.user.create({
+  const user = await prisma.user.create({
     data: {
       email,
       name: parsed.data.name.trim(),
@@ -56,6 +58,10 @@ export async function registerGuestAction(data: unknown) {
       passwordHash,
     },
   });
+
+  // Verify Email (sadece e-posta ile kayıt/login flowu için)
+  const verificationToken = await generateVerificationToken(user.email!);
+  await sendVerificationEmail(user.email!, verificationToken.token);
 
   return { success: true as const };
 }
@@ -107,6 +113,10 @@ export async function registerPartnerApplicationAction(data: unknown) {
         pricePerDay: rules.defaultPricePerDay,
       },
     });
+
+    // Verify Email (Partner başvurusu sonrası)
+    const verificationToken = await generateVerificationToken(user.email!);
+    await sendVerificationEmail(user.email!, verificationToken.token);
   });
 
   return { success: true as const };

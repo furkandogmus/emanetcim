@@ -26,6 +26,8 @@ export function authErrorMessage(
       return t("authErrorOAuthAccountNotLinked");
     case "SessionRequired":
       return t("authErrorSessionRequired");
+    case "EmailVerificationRequired":
+      return t("authErrorEmailVerificationRequired");
     default:
       return t("authErrorGeneric");
   }
