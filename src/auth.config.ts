@@ -15,6 +15,7 @@ export const authConfig: NextAuthConfig = {
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      allowDangerousEmailAccountLinking: true,
     }),
     Credentials({
       name: "credentials",
@@ -72,38 +73,15 @@ export const authConfig: NextAuthConfig = {
     async signIn({ user, account }) {
       if (account?.provider === "google") {
         const { default: prisma } = await import("@/lib/db");
-        const adminEmails = (process.env.ADMIN_EMAILS || "").split(",");
-        const isDefaultAdmin = adminEmails.includes(user.email || "");
-
-        // Mevcut kullanıcıyı bul
-        let existingUser = await prisma.user.findUnique({
+        
+        // Sadece ban kontrolü yapıyoruz. Kullanıcı oluşturma/bağlama işini adapter otomatik yapar.
+        const existingUser = await prisma.user.findUnique({
           where: { email: user.email! },
         });
 
-        if (!existingUser) {
-          existingUser = await prisma.user.create({
-            data: {
-              email: user.email!,
-              name: user.name,
-              image: user.image,
-              role: isDefaultAdmin ? Role.ADMIN : Role.GUEST,
-              emailVerified: new Date(),
-            },
-          });
-        } else if (isDefaultAdmin && existingUser.role !== Role.ADMIN) {
-          await prisma.user.update({
-            where: { id: existingUser.id },
-            data: { role: Role.ADMIN },
-          });
-        }
-        
-        // Ban kontrolü
-        if ((existingUser as PrismaUser).isBanned) {
+        if (existingUser && (existingUser as PrismaUser).isBanned) {
           return false;
         }
-
-        user.role = existingUser.role;
-        user.id = existingUser.id;
       }
       return true;
     },

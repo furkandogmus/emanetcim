@@ -33,5 +33,14 @@ export default async function AdminPartnersPage({
     },
   });
 
-  return <AdminPartnersClient shops={shops} />;
+  // Decimal alanları number’a çeviriyoruz (build hatası ve serileştirme için)
+  const serializedShops = shops.map((shop) => ({
+    ...shop,
+    pricePerDay: Number(shop.pricePerDay),
+    rating: shop.rating || 0,
+    latitude: shop.latitude || null,
+    longitude: shop.longitude || null,
+  }));
+
+  return <AdminPartnersClient shops={serializedShops} />;
 }

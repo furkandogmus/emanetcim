@@ -44,5 +44,14 @@ export default async function AdminPartnerEditPage({
     notFound();
   }
 
-  return <AdminPartnerEditClient shop={shop} />;
+  // Decimal alanları number’a çeviriyoruz (build hatası ve serileştirme için)
+  const serializedShop = {
+    ...shop,
+    pricePerDay: Number(shop.pricePerDay),
+    rating: shop.rating || 0,
+    latitude: shop.latitude || null,
+    longitude: shop.longitude || null,
+  };
+
+  return <AdminPartnerEditClient shop={serializedShop} />;
 }
