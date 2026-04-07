@@ -326,7 +326,14 @@
     "confirmDeleteReview": "Bu yorumu kalıcı olarak silmek istediğinize emin misiniz?",
     "reviewDeletedSuccess": "Yorum başarıyla silindi.",
     "totalEarnings": "Toplam Kazanç / Performans",
-    "bookingsCountLabel": "toplam işlem üzerinden."
+    "bookingsCountLabel": "toplam işlem üzerinden.",
+    "shopAddress": "Adres",
+    "capacity": "Günlük Kapasite",
+    "saveSettings": "Kaydet",
+    "fullName": "Ad Soyad",
+    "phone": "Telefon",
+    "reviews": "Yorumlar",
+    "noReviewsYet": "Henüz yorum yok."
   },
   "Auth": {
     "loginTitle": "Emanetçi'ye Giriş Yap",

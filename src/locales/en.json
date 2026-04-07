@@ -281,7 +281,14 @@
     "platformSettingsSave": "SAVE",
     "platformSettingsSaved": "Settings saved.",
     "platformSettingsInvalid": "Invalid values. Check numeric fields.",
-    "platformSettingsNav": "Platform settings"
+    "platformSettingsNav": "Platform settings",
+    "shopAddress": "Address",
+    "capacity": "Daily Capacity",
+    "saveSettings": "Save",
+    "fullName": "Full Name",
+    "phone": "Phone",
+    "reviews": "Reviews",
+    "noReviewsYet": "No reviews yet."
   },
   "Auth": {
     "loginTitle": "Sign in to Emanetçi",
