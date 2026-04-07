@@ -5,9 +5,6 @@ services:
       POSTGRES_USER: emanetci
       POSTGRES_PASSWORD: emanetci
       POSTGRES_DB: emanetci
-    # Host’ta 5432 doluysa çakışmayı önlemek için 5433 (iç ağda web→postgres:5432 değişmez)
-    ports:
-      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -15,6 +12,12 @@ services:
       interval: 3s
       timeout: 5s
       retries: 10
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+        reservations:
+          memory: 64m
 
   web:
     build:
@@ -22,9 +25,6 @@ services:
       dockerfile: Dockerfile
     # Konteyner hostname’i yoksa Linux’ta rastgele id olur; log satırı için okunabilir isim.
     hostname: emanetci-web
-    # Host makineden ve LAN’dan doğrudan erişim (nginx :80’e ek olarak).
-    ports:
-      - "0.0.0.0:3000:3000"
     environment:
       # Next.js standalone server.js: bind adresi. Konteyner HOSTNAME’i bazen 127.0.0.1’e kilitlenir;
       # OAuth / vekil için AUTH_PUBLIC_HOST + AUTH_TRUST_HOST kullanın (0.0.0.0 URL üretmesin diye).
@@ -67,6 +67,12 @@ services:
       timeout: 5s
       retries: 6
       start_period: 90s
+    deploy:
+      resources:
+        limits:
+          memory: 1536m
+        reservations:
+          memory: 256m
 
   nginx:
     image: nginx:1.27-alpine
@@ -88,6 +94,12 @@ services:
     depends_on:
       web:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+        reservations:
+          memory: 16m
 
 volumes:
   postgres_data:
