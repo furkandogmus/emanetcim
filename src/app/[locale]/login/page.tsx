@@ -286,7 +286,7 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center gap-2 text-green-600 bg-green-50 px-4 py-2.5 rounded-xl border border-green-100 mx-auto">
             <ShieldCheck size={16} className="shrink-0" aria-hidden />
             <span className="text-[10px] font-black uppercase tracking-widest leading-tight text-center">
-              Safe & Secure Auth
+              {t('secureRegister')}
             </span>
           </div>
           <p className="mt-6 w-full max-w-xs mx-auto text-[10px] text-gray-400 font-bold text-center leading-relaxed uppercase tracking-widest opacity-50 px-2">

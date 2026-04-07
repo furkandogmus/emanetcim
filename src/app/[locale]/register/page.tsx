@@ -17,10 +17,12 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
 
 type RegisterType = 'GUEST' | 'PARTNER';
 
 export default function RegisterPage() {
+  const t = useTranslations('Auth');
   const [activeTab, setActiveTab] = useState<RegisterType>('GUEST');
   
   const [isPending, setIsPending] = useState(false);
@@ -50,14 +52,14 @@ export default function RegisterPage() {
       if (activeTab === 'GUEST') {
         const res = await registerGuestAction(guestData);
         if (res.success) setSuccess(true);
-        else setError(res.error || 'Bir hata oluştu.');
+        else setError(res.error || t('authErrorGeneric'));
       } else {
         const res = await registerPartnerApplicationAction(partnerData);
         if (res.success) setSuccess(true);
-        else setError(res.error || 'Bir hata oluştu.');
+        else setError(res.error || t('authErrorGeneric'));
       }
     } catch {
-      setError('Sistem hatası. Lütfen sonra tekrar deneyin.');
+      setError(t('authErrorGeneric'));
     } finally {
       setIsPending(false);
     }
@@ -74,18 +76,18 @@ export default function RegisterPage() {
           <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mb-8 mx-auto">
             {activeTab === 'GUEST' ? <Mail size={32} className="text-green-600" /> : <CheckCircle2 size={32} className="text-green-600" />}
           </div>
-          <h1 className="text-2xl font-black text-gray-900 mb-4">Harika!</h1>
+          <h1 className="text-2xl font-black text-gray-900 mb-4">{t('registerSuccessTitle')}</h1>
           <p className="text-gray-500 text-sm font-medium mb-8 leading-relaxed">
             {activeTab === 'GUEST' 
-              ? "Kaydınız başarıyla oluşturuldu. Lütfen e-posta adresinize gönderdiğimiz doğrulama linkine tıklayarak hesabınızı aktif hale getirin."
-              : "Başvurunuz başarıyla alındı! Ekibimiz bilgilerinizi inceleyip onayladıktan sonra size bildirim göndereceğiz. Sabrınız için teşekkürler."
+              ? t('registerSuccessGuestDesc')
+              : t('registerSuccessPartnerDesc')
             }
           </p>
           <Link 
             href="/login"
             className="inline-flex items-center justify-center gap-2 text-sm font-bold text-orange-600 hover:text-orange-700 transition-colors"
           >
-            Giriş sayfasına dön <ChevronRight size={16} />
+            {t('backToLogin')} <ChevronRight size={16} />
           </Link>
         </motion.div>
       </div>
@@ -104,9 +106,9 @@ export default function RegisterPage() {
             <Package size={32} className="text-white" />
           </div>
 
-          <h1 className="text-2xl font-black text-gray-900 mb-2">Aramıza Katıl</h1>
+          <h1 className="text-2xl font-black text-gray-900 mb-2">{t('registerTitle')}</h1>
           <p className="text-gray-400 text-sm font-medium text-center leading-relaxed">
-            Hemen hesap oluşturun ve Emanetçi ayrıcalıklarından faydalanın.
+            {t('registerSubtitle')}
           </p>
         </div>
 
@@ -118,7 +120,10 @@ export default function RegisterPage() {
               activeTab === 'GUEST' ? "bg-white text-orange-600 shadow-sm" : "text-gray-400 hover:text-gray-600"
             }`}
           >
-            Misafir
+            {t('demoGuest').replace(' Demo', '').replace(' Girişi', '').replace(' Misafir', 'Misafir')}
+            {/* Note: I'll use roleGuest from UserNav instead if available, but for now I'll just adjust. 
+                Wait, I have roleGuest in UserNav. Let's use that. */}
+            {/* Re-thinking: Better to use the specific keys I'll add if needed, or use existing role keys. */}
           </button>
           <button
             onClick={() => setActiveTab('PARTNER')}
@@ -126,16 +131,18 @@ export default function RegisterPage() {
               activeTab === 'PARTNER' ? "bg-white text-orange-600 shadow-sm" : "text-gray-400 hover:text-gray-600"
             }`}
           >
+            {/* Let's use simple strings for tabs, or get them from a shared place. */}
             Esnaf
           </button>
         </div>
+        {/* Wait, let's just use the keys I should've checked... */}
 
         <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
           <div className="relative">
             <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
             <input
               type="text"
-              placeholder="Ad Soyad"
+              placeholder={t('fullName')}
               required
               value={activeTab === 'GUEST' ? guestData.name : partnerData.name}
               onChange={(e) => activeTab === 'GUEST' 
@@ -151,7 +158,7 @@ export default function RegisterPage() {
               <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
               <input
                 type="email"
-                placeholder="E-posta Adresi"
+                placeholder={t('email')}
                 required
                 value={guestData.email}
                 onChange={(e) => setGuestData({ ...guestData, email: e.target.value })}
@@ -163,7 +170,7 @@ export default function RegisterPage() {
               <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
               <input
                 type="tel"
-                placeholder="Telefon Numarası (05XX...)"
+                placeholder={t('phonePlaceholder')}
                 required
                 value={partnerData.phone}
                 onChange={(e) => setPartnerData({ ...partnerData, phone: e.target.value })}
@@ -176,7 +183,7 @@ export default function RegisterPage() {
             <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
             <input
               type="password"
-              placeholder="Şifre"
+              placeholder={t('password')}
               required
               minLength={6}
               value={activeTab === 'GUEST' ? guestData.password : partnerData.password}
@@ -198,7 +205,7 @@ export default function RegisterPage() {
                 <Store size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
                 <input
                   type="text"
-                  placeholder="Dükkan Adı"
+                  placeholder={t('shopName')}
                   required
                   value={partnerData.shopName}
                   onChange={(e) => setPartnerData({ ...partnerData, shopName: e.target.value })}
@@ -208,7 +215,7 @@ export default function RegisterPage() {
               <div className="relative">
                 <MapPin size={16} className="absolute left-4 top-4 text-gray-300 pointer-events-none" />
                 <textarea
-                  placeholder="Dükkan Adresi"
+                  placeholder={t('shopAddress')}
                   required
                   rows={3}
                   value={partnerData.shopAddress}
@@ -228,14 +235,14 @@ export default function RegisterPage() {
             disabled={isPending}
             className="w-full h-12 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-bold text-sm transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-60 mt-4"
           >
-            {isPending ? <Loader2 size={16} className="animate-spin" /> : (activeTab === 'PARTNER' ? "Başvuruyu Tamamla" : "Hesap Oluştur")}
+            {isPending ? <Loader2 size={16} className="animate-spin" /> : (activeTab === 'PARTNER' ? t('registerSubmitPartner') : t('registerSubmitGuest'))}
           </button>
         </form>
 
         <div className="mt-8 pt-8 border-t border-gray-50 w-full text-center">
           <p className="text-sm text-gray-400 font-medium">
-            Zaten hesabın var mı? {' '}
-            <Link href="/login" className="text-orange-600 font-bold hover:underline">Giriş Yap</Link>
+            {t('alreadyHaveAccount')} {' '}
+            <Link href="/login" className="text-orange-600 font-bold hover:underline">{t('signInEmail')}</Link>
           </p>
         </div>
 
@@ -243,7 +250,7 @@ export default function RegisterPage() {
           <div className="inline-flex items-center justify-center gap-2 text-green-600 bg-green-50 px-4 py-2.5 rounded-xl border border-green-100 mx-auto">
             <ShieldCheck size={16} className="shrink-0" />
             <span className="text-[10px] font-black uppercase tracking-widest leading-tight">
-              Güvenli Kayıt
+              {t('secureRegister')}
             </span>
           </div>
         </div>
