@@ -3,7 +3,7 @@
 # Emanetçi - Otomatik Güncelleme Scripti
 # ============================================================
 # Kullanım: /root/emanetci/update.sh
-# Cronjob : 0 * * * * /root/emanetci/update.sh >> /root/emanetci/update.log 2>&1
+# Cronjob : * * * * * /root/emanetci/update.sh >> /root/emanetci/update.log 2>&1
 #
 # Her saat başı GitHub develop branch'ini kontrol eder.
 # Yeni commit varsa git pull + docker compose up --build çalıştırır.
