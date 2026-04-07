@@ -11,8 +11,8 @@ const domain = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 export const sendVerificationEmail = async (email: string, token: string) => {
   const confirmLink = `${domain}/auth/verify-email?token=${token}`;
 
-  await resend.emails.send({
-    from: "Emanetçi <onboarding@resend.dev>",
+  const { data, error } = await resend.emails.send({
+    from: "Emanetçi <onboarding@bagajpark.com>",
     to: email,
     subject: "E-postanızı Doğrulayın",
     html: `
@@ -29,4 +29,10 @@ export const sendVerificationEmail = async (email: string, token: string) => {
       </div>
     `,
   });
+
+  if (error) {
+    console.error("[mail] Verification email failed:", error);
+  } else {
+    console.log("[mail] Verification email sent:", data?.id, "→", email);
+  }
 };
