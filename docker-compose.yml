@@ -8,9 +8,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U emanetci -d emanetci"]
+      test: ["CMD-SHELL", "pg_isready -U bagajpark -d bagajpark"]
       interval: 3s
       timeout: 5s
       retries: 10
@@ -36,7 +36,7 @@ services:
       NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL:-}
       NEXTAUTH_URL: ${NEXTAUTH_URL:-}
       PUBLIC_URL_PROTOCOL: ${PUBLIC_URL_PROTOCOL:-}
-      DATABASE_URL: postgresql://emanetci:emanetci@postgres:5432/emanetci?schema=public
+      DATABASE_URL: postgresql://bagajpark:bagajpark@postgres:5432/bagajpark?schema=public
       NODE_ENV: development
       AUTH_SECRET: ${AUTH_SECRET:-docker-dev-change-me-use-openssl-rand-hex-32}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
