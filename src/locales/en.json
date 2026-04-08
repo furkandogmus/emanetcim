@@ -161,9 +161,6 @@
     "qrPending": "The QR code is created after payment is completed.",
     "qrAlt": "Booking QR",
     "guestDefaultName": "Guest",
-    "bookingCodeLabel": "Booking code",
-
-    "dashboardTitle": "BagajPark Admin Center",
     "totalBookings": "Total bookings",
     "pendingShops": "Pending shop approvals",
     "dailyRevenue": "Revenue (paid)",
