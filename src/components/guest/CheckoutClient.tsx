@@ -89,8 +89,40 @@ export default function CheckoutClient({
 
   const totalBags = bagS + bagM + bagXl;
 
+  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/\D/g, "");
+    const formatted = val.match(/.{1,4}/g)?.join(" ") || val;
+    setCardNumber(formatted.substring(0, 19));
+  };
+
+  const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, "");
+    if (val.length >= 2) {
+      const month = parseInt(val.substring(0, 2), 10);
+      if (month > 12) val = "12" + val.substring(2);
+      else if (month === 0 && val.length >= 2) val = "01" + val.substring(2);
+      val = val.substring(0, 2) + "/" + val.substring(2, 4);
+    }
+    setExpiry(val);
+  };
+
+  const handleCvvChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/\D/g, "");
+    setCvv(val.substring(0, 4));
+  };
+
   const handlePayment = async () => {
-    if (!cardHolder || cardNumber.length < 16 || !expiry || cvv.length < 3) {
+    const strippedCard = cardNumber.replace(/\s/g, "");
+    const [expMonth, expYear] = expiry.split("/");
+    
+    if (
+      !cardHolder.trim() || 
+      strippedCard.length < 16 || 
+      !expMonth || 
+      !expYear || 
+      expYear.length !== 2 || 
+      cvv.length < 3
+    ) {
       setError(t("checkoutCardValidationError"));
       return;
     }
@@ -98,7 +130,7 @@ export default function CheckoutClient({
     setIsProcessing(true);
     setError(null);
 
-    const [expMonth, expYear] = expiry.split("/");
+
 
     const checkInTime = new Date();
     const checkOutTime = new Date(
@@ -471,10 +503,11 @@ export default function CheckoutClient({
                   />
                   <input
                     type="text"
+                    inputMode="numeric"
                     placeholder={t("checkoutCardNumberPlaceholder")}
                     maxLength={19}
                     value={cardNumber}
-                    onChange={(e) => setCardNumber(e.target.value)}
+                    onChange={handleCardNumberChange}
                     className="w-full bg-gray-50 border border-gray-100 p-4 pl-12 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-orange-500 outline-none transition-all"
                   />
                 </div>
@@ -487,9 +520,11 @@ export default function CheckoutClient({
                     />
                     <input
                       type="text"
+                      inputMode="numeric"
                       placeholder={t("checkoutExpiryPlaceholder")}
+                      maxLength={5}
                       value={expiry}
-                      onChange={(e) => setExpiry(e.target.value)}
+                      onChange={handleExpiryChange}
                       className="w-full bg-gray-50 border border-gray-100 p-4 pl-12 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-orange-500 outline-none transition-all"
                     />
                   </div>
@@ -500,10 +535,11 @@ export default function CheckoutClient({
                     />
                     <input
                       type="text"
+                      inputMode="numeric"
                       placeholder={t("checkoutCvvPlaceholder")}
-                      maxLength={3}
+                      maxLength={4}
                       value={cvv}
-                      onChange={(e) => setCvv(e.target.value)}
+                      onChange={handleCvvChange}
                       className="w-full bg-gray-50 border border-gray-100 p-4 pl-12 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-orange-500 outline-none transition-all"
                     />
                   </div>
