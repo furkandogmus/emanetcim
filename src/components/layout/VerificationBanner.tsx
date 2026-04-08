@@ -27,7 +27,7 @@ export default function VerificationBanner() {
       } else {
         toast.error(result.error);
       }
-    } catch (error) {
+    } catch {
       toast.error(t("errorTitle"));
     } finally {
       setLoading(false);

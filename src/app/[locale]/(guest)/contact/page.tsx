@@ -1,5 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import { Mail, MessageCircle, MapPin, Send } from "lucide-react";
+import { Mail, MessageCircle, MapPin } from "lucide-react";
 
 export default async function ContactPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -31,7 +31,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
               className="px-10 py-5 bg-green-500 text-white rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-green-600 transition-all shadow-xl shadow-green-500/30 w-full sm:w-auto"
             >
               <MessageCircle size={20} />
-              WHATSAPP'TAN YAZ
+              WHATSAPP&apos;TAN YAZ
             </a>
             <p className="mt-6 text-sm font-bold text-gray-400">
               <span className="text-gray-900">+90 542 241 55 97</span>

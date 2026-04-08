@@ -3,13 +3,13 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { 
-  FileText, 
   ArrowLeft, 
   Save,
   Globe,
   Link as LinkIcon,
   Image as ImageIcon,
-  CheckCircle2
+  CheckCircle2,
+  Edit3
 } from "lucide-react";
 import { Link, useRouter } from "@/i18n/routing";
 import { upsertBlogPostAction } from "@/actions/blog-actions";
@@ -50,7 +50,7 @@ export default function AdminBlogEditClient({ post, locale: currentLocale }: Adm
       toast.success(post ? "Yazı güncellendi." : "Yazı oluşturuldu.");
       router.push("/admin/blog");
       router.refresh();
-    } catch (error) {
+    } catch {
       toast.error("Bir hata oluştu.");
     } finally {
       setLoading(false);
@@ -186,7 +186,7 @@ export default function AdminBlogEditClient({ post, locale: currentLocale }: Adm
               <CheckCircle2 size={16} />
               <span className="font-black uppercase tracking-widest">SEO İpucu</span>
             </div>
-            Yazı içeriğinde anahtar kelimeleri (valiz emanet, bagaj saklama vb.) kalın yaparak ve alt başlıklar kullanarak Google'da daha üstte yer alabiliriz.
+            Yazı içeriğinde anahtar kelimeleri (valiz emanet, bagaj saklama vb.) kalın yaparak ve alt başlıklar kullanarak Google&apos;da daha üstte yer alabiliriz.
           </div>
         </div>
       </form>
@@ -194,5 +194,3 @@ export default function AdminBlogEditClient({ post, locale: currentLocale }: Adm
   );
 }
 
-// Missing import fix
-import { Edit3 } from "lucide-react";

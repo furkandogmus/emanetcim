@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 /**
  * Yeni blog yazısı oluşturur veya mevcut olanı günceller.
  */
-export async function upsertBlogPostAction(formData: any) {
+export async function upsertBlogPostAction(formData: Record<string, any>) {
   const session = await auth();
   if (session?.user?.role !== "ADMIN") {
     throw new Error("Yetkisiz işlem.");

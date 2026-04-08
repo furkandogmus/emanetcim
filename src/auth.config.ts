@@ -84,8 +84,8 @@ export const authConfig: NextAuthConfig = {
     async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
-        token.role = (user as any).role;
-        token.emailVerified = (user as any).emailVerified;
+        token.role = (user as PrismaUser).role;
+        token.emailVerified = (user as PrismaUser).emailVerified;
       }
       if (trigger === "update" && session) {
         token.name = session.user.name;

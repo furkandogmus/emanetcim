@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { 
-  FileText, 
+  FileText,
   Search, 
   Edit3, 
   ArrowLeft, 
@@ -42,7 +42,7 @@ export default function AdminBlogClient({ posts: initialPosts }: AdminBlogClient
       await deleteBlogPostAction(id);
       setPosts(prev => prev.filter(p => p.id !== id));
       toast.success(t("postDeletedSuccess") || "Yazı başarıyla silindi.");
-    } catch (error) {
+    } catch {
       toast.error(t("errorTitle") || "Bir hata oluştu.");
     } finally {
       setLoadingId(null);

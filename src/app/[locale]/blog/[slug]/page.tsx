@@ -118,7 +118,7 @@ export default async function BlogDetailPage({
         <div className="mt-20 pt-10 border-t border-gray-100">
           <div className="bg-orange-50 p-8 rounded-[2.5rem] border border-orange-100">
             <h4 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-2">Sende Keşfetmeye Başla!</h4>
-            <p className="text-sm font-bold text-gray-500 mb-6 leading-relaxed">Valizlerini BagajPark'ın güvenli dükkanlarına bırak, şehri yüklerinden kurtularak doyasıya gez.</p>
+            <p className="text-sm font-bold text-gray-500 mb-6 leading-relaxed">Valizlerini BagajPark&apos;ın güvenli dükkanlarına bırak, şehri yüklerinden kurtularak doyasıya gez.</p>
             <Link 
               href="/search"
               className="inline-flex items-center gap-2 bg-orange-600 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-orange-200 hover:scale-105 transition-all"

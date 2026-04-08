@@ -10,6 +10,11 @@ import {
   Store,
   ArrowRight,
   ShieldAlert,
+  Activity,
+  MessageSquare,
+  Settings,
+  Zap,
+  TrendingUp
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
@@ -225,33 +230,50 @@ export default function AdminDashboardClient({
                 href="/admin/applications"
                 className="w-full py-4 px-6 bg-white/10 rounded-2xl text-sm font-bold hover:bg-white/20 transition-all text-left flex items-center justify-between group"
               >
-                {t("approveShop")}
-                <span className="w-5 h-5 bg-orange-600 rounded-full flex items-center justify-center text-[10px] group-hover:scale-110 transition-transform">
+                <span className="flex items-center gap-3">
+                  <Package size={18} className="opacity-40" />
+                  {t("approveShop")}
+                </span>
+                <span className="w-5 h-5 bg-orange-600 rounded-full flex items-center justify-center text-[10px] group-hover:scale-110 transition-transform font-black">
                   {stats.pendingApplications}
                 </span>
               </Link>
               <Link
                 href="/admin/seals"
-                className="w-full py-4 px-6 bg-white/10 rounded-2xl text-sm font-bold hover:bg-white/20 transition-all text-left"
+                className="w-full py-4 px-6 bg-white/10 rounded-2xl text-sm font-bold hover:bg-white/20 transition-all text-left flex items-center gap-3"
               >
+                <Zap size={18} className="opacity-40" />
                 {t("sealRequests")}
               </Link>
               <Link
                 href="/admin/campaigns"
-                className="w-full py-4 px-6 bg-white/10 rounded-2xl text-sm font-bold hover:bg-white/20 transition-all text-left"
+                className="w-full py-4 px-6 bg-white/10 rounded-2xl text-sm font-bold hover:bg-white/20 transition-all text-left flex items-center gap-3"
               >
+                <TrendingUp size={18} className="opacity-40" />
                 {t("createCampaign")}
               </Link>
               <Link
-                href="/admin/platform-settings"
-                className="w-full py-4 px-6 bg-white/10 rounded-2xl text-sm font-bold hover:bg-white/20 transition-all text-left"
+                href="/admin/status"
+                className="w-full py-4 px-6 bg-orange-600 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all text-left flex items-center justify-between group shadow-lg shadow-orange-900/40"
               >
+                <span className="flex items-center gap-3">
+                  <Activity size={18} />
+                  {t("systemStatus")}
+                </span>
+                <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+              </Link>
+              <Link
+                href="/admin/platform-settings"
+                className="w-full py-4 px-6 bg-white/10 rounded-2xl text-sm font-bold hover:bg-white/20 transition-all text-left flex items-center gap-3"
+              >
+                <Settings size={18} className="opacity-40" />
                 {t("platformSettingsNav")}
               </Link>
               <Link
                 href="/admin/messages"
-                className="w-full py-4 px-6 bg-white/10 rounded-2xl text-sm font-bold hover:bg-white/20 transition-all text-left"
+                className="w-full py-4 px-6 bg-white/10 rounded-2xl text-sm font-bold hover:bg-white/20 transition-all text-left flex items-center gap-3"
               >
+                <MessageSquare size={18} className="opacity-40" />
                 {t("messagesTitle")}
               </Link>
             </div>
@@ -260,7 +282,7 @@ export default function AdminDashboardClient({
             <span className="text-[10px] font-bold opacity-40 uppercase tracking-widest">
               {t("versionLabel")}
             </span>
-            <div className="p-2 bg-orange-600 rounded-lg">
+            <div className="p-2 bg-orange-600 rounded-lg shadow-lg shadow-orange-900/40">
               <Package size={16} />
             </div>
           </div>

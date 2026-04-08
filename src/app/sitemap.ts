@@ -45,7 +45,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     select: { slug: true, locale: true, updatedAt: true },
   });
 
-  const blogEntries: MetadataRoute.Sitemap = blogPosts.map((post: any) => ({
+  const blogEntries: MetadataRoute.Sitemap = blogPosts.map((post) => ({
     url: `${base}/${post.locale}/blog/${post.slug}`,
     lastModified: post.updatedAt,
     changeFrequency: "weekly",
