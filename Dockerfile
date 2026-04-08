@@ -14,8 +14,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-cert
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
-# prisma generate / build için geçerli biçimde URL (çalışma anında compose verir)
-ENV DATABASE_URL="postgresql://bagajpark:bagajpark@localhost:5432/bagajpark?schema=public"
 # next build (production) — requireProdSecrets + iyzipay modülü için placeholder (runtime compose ile değiştirilir)
 RUN npx prisma generate
 RUN npm run build
@@ -32,7 +30,7 @@ ENV NODE_PATH=/usr/local/lib/node_modules
 RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates \
   && rm -rf /var/lib/apt/lists/*
 RUN groupadd --system --gid 1001 nodejs && useradd --system --uid 1001 --gid nodejs nextjs
-RUN npm install -g prisma@7.6.0 && npm cache clean --force
+RUN npm install -g prisma@7.7.0 && npm cache clean --force
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
