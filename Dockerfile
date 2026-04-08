@@ -14,6 +14,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-cert
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+# build-time placeholders (runtime compose ile değiştirilir)
+ENV IYZICO_API_KEY=build_placeholder
+ENV IYZICO_SECRET_KEY=build_placeholder
+ENV DATABASE_URL="postgresql://postgres:postgres@localhost:5432/placeholder?schema=public"
 # next build (production) — requireProdSecrets + iyzipay modülü için placeholder (runtime compose ile değiştirilir)
 RUN npx prisma generate
 RUN npm run build
