@@ -21,7 +21,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     } satisfies MetadataRoute.Sitemap[number];
   });
 
-  let shopEntries: MetadataRoute.Sitemap = [];
+  const shopEntries: MetadataRoute.Sitemap = [];
   try {
     // 2. Dinamik Dükkan Sayfaları (Checkout Akışı)
     const shops = await prisma.shop.findMany({

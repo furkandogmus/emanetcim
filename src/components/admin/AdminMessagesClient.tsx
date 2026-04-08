@@ -230,9 +230,7 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
                                       <summary className="cursor-pointer font-black uppercase tracking-widest mb-2 hover:text-orange-600 transition-colors">
                                         Ham Veriyi Görüntüle (Raw Payload)
                                       </summary>
-                                      <pre className="overflow-auto max-h-60 mt-2">
-                                        {JSON.stringify(msg.raw as any, null, 2)}
-                                      </pre>
+
                                     </details>
                                   )}
                                 </div>

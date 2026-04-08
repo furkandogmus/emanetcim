@@ -4,10 +4,21 @@ import { auth } from "@/auth";
 import prisma from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
+type BlogPostFormData = {
+  id?: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt?: string;
+  coverImage?: string;
+  locale: string;
+  isPublished?: boolean;
+};
+
 /**
  * Yeni blog yazısı oluşturur veya mevcut olanı günceller.
  */
-export async function upsertBlogPostAction(formData: Record<string, any>) {
+export async function upsertBlogPostAction(formData: BlogPostFormData) {
   const session = await auth();
   if (session?.user?.role !== "ADMIN") {
     throw new Error("Yetkisiz işlem.");
