@@ -137,7 +137,9 @@ export default async function RootLayout({
             <PWARegister />
             <VerificationBanner />
             <Header />
-
+            <main className="min-h-screen pt-24">
+              {children}
+            </main>
             <Footer />
             <CookieConsent />
           </Providers>
@@ -146,5 +148,3 @@ export default async function RootLayout({
     </html>
   );
 }
-
-
