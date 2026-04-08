@@ -162,9 +162,7 @@
     "qrAlt": "Booking QR",
     "guestDefaultName": "Guest",
     "bookingCodeLabel": "Booking code",
-    "cityFallback": "Istanbul"
-  },
-  "Admin": {
+
     "dashboardTitle": "BagajPark Admin Center",
     "totalBookings": "Total bookings",
     "pendingShops": "Pending shop approvals",

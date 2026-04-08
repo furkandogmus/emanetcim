@@ -162,7 +162,9 @@
     "qrAlt": "Rezervasyon QR",
     "guestDefaultName": "Misafir",
     "bookingCodeLabel": "Rezervasyon Kodu",
-    "cityFallback": "İstanbul"
+    "cityFallback": "İstanbul",
+    "searchTitle": "{query} Yakınındaki Emanet Noktaları",
+    "searchDescription": "{query} bölgesinde güvenli ve sigortalı valiz depolama alanlarını bulun."
   },
   "Admin": {
     "dashboardTitle": "BagajPark Yönetim Masası",
