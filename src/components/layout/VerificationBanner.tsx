@@ -11,8 +11,8 @@ export default function VerificationBanner() {
   const { data: session } = useSession();
   const t = useTranslations("Common");
 
-  // Kullanıcı giriş yapmamışsa veya zaten doğrulanmışsa hiçbir şey gösterme
-  if (!session?.user || session.user.emailVerified) {
+  // Kullanıcı giriş yapmamışsa, zaten doğrulanmışsa veya YÖNETİCİ ise hiçbir şey gösterme
+  if (!session?.user || session.user.emailVerified || session.user.role === "ADMIN") {
     return null;
   }
 
