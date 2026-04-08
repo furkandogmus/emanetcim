@@ -22,9 +22,7 @@ services:
           memory: 64m
 
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/furkandogmus/emanetcim:latest
     # Konteyner hostname’i yoksa Linux’ta rastgele id olur; log satırı için okunabilir isim.
     hostname: emanetci-web
     environment:
@@ -37,7 +35,7 @@ services:
       NEXTAUTH_URL: ${NEXTAUTH_URL:-}
       PUBLIC_URL_PROTOCOL: ${PUBLIC_URL_PROTOCOL:-}
       DATABASE_URL: postgresql://bagajpark:bagajpark@postgres:5432/bagajpark?schema=public
-      NODE_ENV: development
+      NODE_ENV: production
       AUTH_SECRET: ${AUTH_SECRET:-docker-dev-change-me-use-openssl-rand-hex-32}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
       AUTH_TRUST_HOST: ${AUTH_TRUST_HOST:-true}

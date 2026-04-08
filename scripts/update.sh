@@ -1,12 +1,10 @@
+#!/bin/bash
 # ============================================================
-# BagajPark - Otomatik Güncelleme ve Deployment Scripti
+# BagajPark - Otomatik Güncelleme Scripti (GHCR Image tabanlı)
 # ============================================================
-# Kullanım: /root/emanetci/update.sh
-# Cronjob : * * * * * /root/emanetci/update.sh >> /root/emanetci/update.log 2>&1
-#
-# Bu script GitHub develop branch'ini kontrol eder, değişiklik varsa
-# sistemi durdurmadan yeni image'ları build eder ve Prisma 
-# senkronizasyonunu (db push) otomatik olarak tetikler.
+# Bu script artık sadece docker-compose.yml ve config
+# dosyalarını günceller; image build YAPMAZ.
+# Image GitHub Actions tarafından GHCR'ye push edilir.
 # ============================================================
 
 set -e
@@ -30,17 +28,19 @@ fi
 
 echo "[$(date)] >>> Yeni commit bulundu! Uygulama guncelleniyor..."
 
-# 2. Kodları çek (Yerel değişiklikleri ezmemek için stash/reset)
+# 2. Kodları çek (config dosyaları, nginx vb.)
 git stash || true
 git reset --hard origin/develop
 
-# 3. Docker build ve restart
-# --build flag'i Dockerfile içindeki 'prisma generate' adımını tetikler
-# docker-entrypoint.sh ise 'prisma db push' adımını konteyner başladığında yapar.
-echo "[$(date)] Docker konteynerlari yeniden insa ediliyor..."
-docker compose up -d --build
+# 3. Yeni image'ı GHCR'den çek
+echo "[$(date)] GHCR'den yeni image cekiliyor..."
+docker pull ghcr.io/furkandogmus/emanetcim:latest
 
-# 4. Temizlik
+# 4. Konteynerleri yeniden başlat (build YOK)
+echo "[$(date)] Konteynerler yeniden baslatiliyor..."
+docker compose up -d --no-build
+
+# 5. Temizlik
 echo "[$(date)] Kullanilmayan eski imajlar temizleniyor..."
 docker image prune -f
 
