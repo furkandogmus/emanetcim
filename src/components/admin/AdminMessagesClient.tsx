@@ -222,7 +222,21 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
                               {msg.subject || "(Konu Yok)"}
                             </h3>
                             <div className="prose prose-sm prose-orange max-w-none prose-p:leading-relaxed text-gray-700 whitespace-pre-wrap">
-                              {msg.text || msg.html || <span className="italic text-gray-400">İçerik yok.</span>}
+                              {msg.text || msg.html || (
+                                <div className="space-y-4">
+                                  <span className="italic text-gray-400">İçerik otomatik olarak ayrıştırılamadı.</span>
+                                  {msg.raw && (
+                                    <details className="text-[10px] bg-gray-50 p-4 rounded-xl border border-gray-100 font-mono text-gray-500">
+                                      <summary className="cursor-pointer font-black uppercase tracking-widest mb-2 hover:text-orange-600 transition-colors">
+                                        Ham Veriyi Görüntüle (Raw Payload)
+                                      </summary>
+                                      <pre className="overflow-auto max-h-60 mt-2">
+                                        {JSON.stringify(msg.raw as any, null, 2)}
+                                      </pre>
+                                    </details>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
