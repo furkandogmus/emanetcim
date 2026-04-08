@@ -333,7 +333,20 @@
     "fullName": "Ad Soyad",
     "phone": "Telefon",
     "reviews": "Yorumlar",
-    "noReviewsYet": "Henüz yorum yok."
+    "noReviewsYet": "Henüz yorum yok.",
+    "messagesTitle": "Gelen Kutusu",
+    "messagesSearchPlaceholder": "Gönderen veya e-posta ara...",
+    "messagesEmpty": "Henüz mesaj bulunmuyor.",
+    "messagesMarkAsRead": "Okundu İşaretle",
+    "messagesDelete": "Mesajı Sil",
+    "messagesDate": "Tarih",
+    "messagesFrom": "Gönderen",
+    "messagesTo": "Alıcı",
+    "messagesSubject": "Konu",
+    "messagesFilterAll": "Tümü",
+    "messagesFilterUnread": "Okunmamış",
+    "messageMarkedReadInfo": "Mesaj okundu olarak işaretlendi.",
+    "messageDeletedInfo": "Mesaj başarıyla silindi."
   },
   "Auth": {
     "loginTitle": "Emanetçi'ye Giriş Yap",

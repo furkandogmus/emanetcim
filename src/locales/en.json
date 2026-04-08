@@ -288,7 +288,20 @@
     "fullName": "Full Name",
     "phone": "Phone",
     "reviews": "Reviews",
-    "noReviewsYet": "No reviews yet."
+    "noReviewsYet": "No reviews yet.",
+    "messagesTitle": "Inbox",
+    "messagesSearchPlaceholder": "Search sender or email...",
+    "messagesEmpty": "No messages found.",
+    "messagesMarkAsRead": "Mark as Read",
+    "messagesDelete": "Delete Message",
+    "messagesDate": "Date",
+    "messagesFrom": "From",
+    "messagesTo": "To",
+    "messagesSubject": "Subject",
+    "messagesFilterAll": "All",
+    "messagesFilterUnread": "Unread",
+    "messageMarkedReadInfo": "Message marked as read.",
+    "messageDeletedInfo": "Message deleted successfully."
   },
   "Auth": {
     "loginTitle": "Sign in to Emanetçi",

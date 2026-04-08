@@ -345,3 +345,14 @@ model BlockedIp {
   createdAt DateTime @default(now())
 }
 
+model ContactMessage {
+  id        String   @id @default(cuid())
+  from      String
+  to        String
+  subject   String?
+  text      String?
+  html      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+

@@ -248,6 +248,12 @@ export default function AdminDashboardClient({
               >
                 {t("platformSettingsNav")}
               </Link>
+              <Link
+                href="/admin/messages"
+                className="w-full py-4 px-6 bg-white/10 rounded-2xl text-sm font-bold hover:bg-white/20 transition-all text-left"
+              >
+                {t("messagesTitle")}
+              </Link>
             </div>
           </div>
           <div className="pt-8 mt-8 border-t border-white/10 flex items-center justify-between">
