@@ -41,22 +41,32 @@ export async function POST(req: Request) {
      * Resend'den tam e-posta içeriğini API yoluyla çekelim.
      * (E-posta bildirimlerinde içerik doğrudan payload'da olmayabilir.)
      */
+    let fetchAttempted = false;
+    let fetchErrorMsg = "";
+
     if ((!text && !html) && email_id) {
+      fetchAttempted = true;
       try {
         const fullEmail = await resend.emails.get(email_id);
         if (fullEmail?.data) {
           text = fullEmail.data.text || text;
           html = fullEmail.data.html || html;
+        } else if (fullEmail?.error) {
+          fetchErrorMsg = JSON.stringify(fullEmail.error);
         }
-      } catch (fetchError) {
+      } catch (fetchError: any) {
         console.error("[Resend Webhook Fetch Error]", fetchError);
-        // Hata durumunda webhook içindeki kısıtlı bilgiyle devam edilir.
+        fetchErrorMsg = fetchError.message || String(fetchError);
       }
     }
 
     // Eğer hala hiçbir içerik yoksa, tüm body'yi text olarak kaydedelim ki admin ne geldiğini görebilsin
     if (!text && !html) {
-      text = "[Otomatik Yakalama] İçerik bulunamadı. Ham Veri:\n" + JSON.stringify(body, null, 2);
+      if (fetchAttempted) {
+         text = `[Otomatik Yakalama] İçerik bulunamadı. API ile çekme denendi ancak başarısız oldu veya içerik dömedi.\nHata: ${fetchErrorMsg}\n\nHam Veri:\n` + JSON.stringify(body, null, 2);
+      } else {
+         text = "[Otomatik Yakalama] İçerik bulunamadı (email_id yok). Ham Veri:\n" + JSON.stringify(body, null, 2);
+      }
     }
 
     // Resend gönderilen adresleri array olarak veriyor olabilir

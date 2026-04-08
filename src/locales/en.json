@@ -164,7 +164,12 @@
     "bookingCodeLabel": "Booking code",
     "cityFallback": "Istanbul",
     "searchTitle": "{query} Nearby Storage Points",
-    "searchDescription": "Find secure and insured luggage storage locations in the {query} area."
+    "searchDescription": "Find secure and insured luggage storage locations in the {query} area.",
+    "blogTitle": "BagajPark Blog | Travel Tips and Luggage Storage Guide",
+    "blogDescription": "How to get rid of your load while traveling, Istanbul guide, and everything about luggage security.",
+    "blogTagline": "Tips to ease your travels, city guides, and everything about luggage storage is here.",
+    "noPostsFound": "No posts shared yet.",
+    "readMore": "Read More"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -499,17 +504,18 @@
   "Terms": {
     "pageTitle": "Terms of Use",
     "lastUpdated": "Last updated: 03 Apr 2024",
-    "section1Title": "1. Parties and Subject",
-    "section1Body": "This User Agreement sets out the rights and obligations between BagajPark Technology Inc. and Guests and Business Partners (storage points) using the platform. It is based on the \"Storage Agreement\" (Turkish Civil Code 561–580).",
-    "section2Title": "2. Liability Limits (Insurance)",
-    "section2Body": "BagajPark undertakes to compensate up to 5,000 TRY per bag for damage, loss, or theft. The platform is not liable for items above this value (cash, jewelry, electronics, etc.).",
-    "section3Title": "3. Prohibited Items",
-    "forbidden1": "Flammable or explosive materials",
-    "forbidden2": "Firearms and ammunition",
-    "forbidden3": "Any illegal substances",
-    "forbidden4": "Live animals",
-    "forbidden5": "Perishable food",
-    "forbidden6": "Valuable documents and cash"
+    "q1": "1. Parties and Subject",
+    "a1": "This User Agreement sets out the rights and obligations between BagajPark Technology Inc. and Guests and Business Partners (storage points) using the platform. It is based on the \"Storage Agreement\" (Turkish Civil Code 561–580).",
+    "q2": "2. Liability Limits (Insurance)",
+    "a2": "BagajPark undertakes to compensate up to 5,000 TRY per bag for damage, loss, or theft. The platform is not liable for items above this value (cash, jewelry, electronics, etc.).",
+    "q3": "3. Prohibited Items",
+    "a3": "The following items are strictly prohibited from being stored:\n1. Flammable or explosive materials\n2. Firearms and ammunition\n3. Any illegal substances\n4. Live animals\n5. Perishable food\n6. Valuable documents and cash",
+    "q4": "4. Cancellation and Refund Policy",
+    "a4": "Users can cancel their reservations free of charge up to 24 hours before the start time. A service fee deduction may apply for later cancellations.",
+    "q5": "5. Seal and Security Procedures",
+    "a5": "Every handed-over bag must be sealed with special BagajPark seals. It is the user's responsibility to report any damage to the seal immediately to customer service.",
+    "q6": "6. Agreement Changes",
+    "a6": "BagajPark reserves the right to change these terms of use without prior notice. Changes take effect as soon as they are published on the site."
   },
   "Privacy": {
     "lastUpdated": "Last updated: 03 Apr 2024",

@@ -164,7 +164,12 @@
     "bookingCodeLabel": "Rezervasyon Kodu",
     "cityFallback": "İstanbul",
     "searchTitle": "{query} Yakınındaki Emanet Noktaları",
-    "searchDescription": "{query} bölgesinde güvenli ve sigortalı valiz depolama alanlarını bulun."
+    "searchDescription": "{query} bölgesinde güvenli ve sigortalı valiz depolama alanlarını bulun.",
+    "blogTitle": "BagajPark Blog | Seyahat İpuçları ve Bavul Emanet Rehberi",
+    "blogDescription": "Seyahat ederken yüklerinden kurtulmanın yolları, İstanbul rehberi ve bagaj güvenliği hakkında her şey.",
+    "blogTagline": "Seyahatlerinizi kolaylaştıracak ipuçları, şehir rehberleri ve bavul emanetine dair her şey burada.",
+    "noPostsFound": "Henüz yazı paylaşılmadı.",
+    "readMore": "Devamını Oku"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Yönetim Masası",
@@ -426,8 +431,7 @@
     "navAdminPanel": "Yönetim Paneli",
     "navPartnerPanel": "Mağaza Paneli",
     "navBookings": "Rezervasyonlarım",
-    "signOut": "Çıkış Yap",
-    "blogTitle": "BagajPark Blog | Seyahat İpuçları ve Bavul Emanet Rehberi"
+    "signOut": "Çıkış Yap"
   },
   "Footer": {
     "about": "Hakkımızda",
@@ -500,17 +504,18 @@
   "Terms": {
     "pageTitle": "Kullanım Koşulları",
     "lastUpdated": "Son Güncelleme: 03.04.2024",
-    "section1Title": "1. Sözleşmenin Tarafları ve Konusu",
-    "section1Body": "İşbu Kullanıcı Sözleşmesi, BagajPark Teknoloji A.Ş. ile platformu kullanan Misafirler ve İş Ortakları (Emanet Noktaları) arasındaki hak ve yükümlülükleri belirler. Platformun temelini \"Saklama Sözleşmesi\" (TBK 561-580) oluşturur.",
-    "section2Title": "2. Sorumluluk Limitleri (Sigorta)",
-    "section2Body": "BagajPark, her bir bagaj için oluşabilecek hasar, kayıp veya hırsızlık durumunda maksimum 5.000 TL (Beş Bin Türk Lirası) tutarında tazminat ödemeyi taahhüt eder. Bu miktarı aşan değerdeki (nakit para, ziynet eşyası, elektronik cihaz vb.) eşyaların emanete bırakılmasından doğan zararlardan platform sorumlu değildir.",
-    "section3Title": "3. Yasaklı Eşyalar",
-    "forbidden1": "Yanıcı veya patlayıcı maddeler",
-    "forbidden2": "Ateşli silahlar ve mühimmat",
-    "forbidden3": "Yasal olmayan tüm maddeler",
-    "forbidden4": "Canlı hayvanlar",
-    "forbidden5": "Bozulabilir gıda maddeleri",
-    "forbidden6": "Kıymetli evrak ve nakit para"
+    "q1": "1. Sözleşmenin Tarafları ve Konusu",
+    "a1": "İşbu Kullanıcı Sözleşmesi, BagajPark Teknoloji A.Ş. ile platformu kullanan Misafirler ve İş Ortakları (Emanet Noktaları) arasındaki hak ve yükümlülükleri belirler. Platformun temelini \"Saklama Sözleşmesi\" (TBK 561-580) oluşturur.",
+    "q2": "2. Sorumluluk Limitleri (Sigorta)",
+    "a2": "BagajPark, her bir bagaj için oluşabilecek hasar, kayıp veya hırsızlık durumunda maksimum 5.000 TL (Beş Bin Türk Lirası) tutarında tazminat ödemeyi taahhüt eder. Bu miktarı aşan değerdeki (nakit para, ziynet eşyası, elektronik cihaz vb.) eşyaların emanete bırakılmasından doğan zararlardan platform sorumlu değildir.",
+    "q3": "3. Yasaklı Eşyalar",
+    "a3": "Aşağıdaki eşyaların emanete bırakılması kesinlikle yasaktır:\n1. Yanıcı veya patlayıcı maddeler\n2. Ateşli silahlar ve mühimmat\n3. Yasal olmayan tüm maddeler\n4. Canlı hayvanlar\n5. Bozulabilir gıda maddeleri\n6. Kıymetli evrak ve nakit para",
+    "q4": "4. İptal ve İade Koşulları",
+    "a4": "Kullanıcılar, rezervasyonlarını başlangıç saatinden 24 saat öncesine kadar kesintisiz iptal edebilirler. Daha geç iptallerde hizmet bedeli kesintisi uygulanabilir.",
+    "q5": "5. Mühür ve Güvenlik İşlemleri",
+    "a5": "Teslim edilen her bagaj özel BagajPark mühürleri ile mühürlenmek zorundadır. Mührün zedelenmesi halinde durumu gecikmeden müşteri hizmetlerine bildirmek kullanıcının sorumluluğundadır.",
+    "q6": "6. Sözleşme Değişiklikleri",
+    "a6": "BagajPark, bu kullanım koşullarını önceden bildirmeksizin değiştirme hakkını saklı tutar. Değişiklikler sitede yayımlandığı an yürürlüğe girer."
   },
   "Privacy": {
     "lastUpdated": "Son Güncelleme: 03.04.2024",
