@@ -28,7 +28,7 @@ export class NotificationService implements INotificationService {
       let errorDetail: string | null = null;
 
       if (resendKey && to.includes("@")) {
-        const from = process.env.RESEND_FROM || "Emanetçi <onboarding@resend.dev>";
+        const from = process.env.RESEND_FROM || "BagajPark <onboarding@resend.dev>";
         const r = await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
@@ -180,7 +180,7 @@ export class NotificationService implements INotificationService {
    * Misafir: yalnızca e-posta (SMS gönderilmez).
    */
   async notifyBookingSuccess(emailOrPlaceholder: string, bookingId: string, totalPrice: number): Promise<void> {
-    const subject = "Emanetçi: Rezervasyonunuz Onaylandı! 🎒";
+    const subject = "BagajPark: Rezervasyonunuz Onaylandı! 🎒";
     const body = `Merhaba, ${bookingId} numaralı rezervasyonunuz başarıyla tamamlandı. \n\nToplam Tutar: ₺${totalPrice}\nBiletiniz: /bookings/${bookingId}`;
 
     if (emailOrPlaceholder.includes("@")) {
@@ -204,7 +204,7 @@ export class NotificationService implements INotificationService {
 
     const { bookingId, shopName, partnerPhone, totalPrice } = params;
     const shortId = bookingId.replace(/-/g, "").slice(0, 8);
-    const partnerMsg = `Emanetçi: Yeni rezervasyon — ${shopName}. Kod: ${shortId} Tutar: ${Number(totalPrice).toFixed(2)} TL`;
+    const partnerMsg = `BagajPark: Yeni rezervasyon — ${shopName}. Kod: ${shortId} Tutar: ${Number(totalPrice).toFixed(2)} TL`;
 
     const p = normalizeTrGsm10(partnerPhone ?? undefined);
     if (p) {
@@ -213,7 +213,7 @@ export class NotificationService implements INotificationService {
       logger.debug({ bookingId }, "partner_sms_skipped_no_phone");
     }
 
-    const adminMsg = `Emanetçi [Admin]: Yeni ödeme — ${shopName}. ${shortId} ${Number(totalPrice).toFixed(2)} TL`;
+    const adminMsg = `BagajPark [Admin]: Yeni ödeme — ${shopName}. ${shortId} ${Number(totalPrice).toFixed(2)} TL`;
     for (const adminNo of parseAdminGsmNumbers()) {
       await this.sendSms(adminNo, adminMsg, bookingId);
     }
@@ -235,7 +235,7 @@ export class NotificationService implements INotificationService {
 
     const { bookingId, reason } = params;
     const shortId = bookingId.replace(/-/g, "").slice(0, 8);
-    const msg = `Emanetçi [Admin]: Yeni şikayet (${reason}) — rez. ${shortId}`;
+    const msg = `BagajPark [Admin]: Yeni şikayet (${reason}) — rez. ${shortId}`;
     for (const adminNo of admins) {
       await this.sendSms(adminNo, msg, bookingId);
     }

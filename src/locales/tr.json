@@ -1,6 +1,6 @@
 {
   "Common": {
-    "appName": "Emanetçi",
+    "appName": "BagajPark",
     "search": "Ara",
     "save": "Kaydet",
     "cancel": "İptal",
@@ -164,7 +164,7 @@
     "cityFallback": "İstanbul"
   },
   "Admin": {
-    "dashboardTitle": "Emanetçi Yönetim Masası",
+    "dashboardTitle": "BagajPark Yönetim Masası",
     "totalBookings": "Toplam Emanet",
     "pendingShops": "Bekleyen Esnaf Onayı",
     "dailyRevenue": "Günlük Ciro",
@@ -189,7 +189,7 @@
     "chartRevenue": "Ciro (₺)",
     "chartBookings": "Emanet",
     "noActivePartners": "Aktif esnaf bulunmuyor.",
-    "versionLabel": "Emanetçi v2.0.4",
+    "versionLabel": "BagajPark v2.0.4",
     "defaultCityFallback": "İstanbul",
     "trendNone": "—",
     "trendPrev7Zero": "+{count} (önceki 7 gün: 0)",
@@ -349,7 +349,7 @@
     "messageDeletedInfo": "Mesaj başarıyla silindi."
   },
   "Auth": {
-    "loginTitle": "Emanetçi'ye Giriş Yap",
+    "loginTitle": "BagajPark.a Giriş Yap",
     "loginSubtitle": "Gezgin veya Esnaf olarak devam etmek için giriş yapın.",
     "privacyPolicy": "Giriş yaparak kullanım koşullarını kabul etmiş olursunuz.",
     "welcomeBack": "Tekrar Hoş Geldin!",
@@ -448,12 +448,12 @@
   "About": {
     "title": "Hikayemiz",
     "badge": "Güven İnşa Ediyoruz",
-    "intro": "Emanetçi, seyahat ederken yanınızdaki ağır yüklerden kurtulmanızı sağlayan, Türkiye'nin en yaygın yerel emanet ağıdır.",
+    "intro": "BagajPark, seyahat ederken yanınızdaki ağır yüklerden kurtulmanızı sağlayan, Türkiye'nin en yaygın yerel emanet ağıdır.",
     "vision": "Vizyonumuz",
     "visionBody": "Türkiye'nin her köşesinde, her gezginin eşyasını güvenle bırakabileceği dijital bir emanet ağı oluşturmak.",
     "mission": "Misyonumuz",
     "missionBody": "Yerel esnafın atıl alanlarını teknolojiyle birleştirerek, turistlere özgürlük, esnafa ise ek gelir sağlamak.",
-    "whyUs": "Neden Emanetçi?",
+    "whyUs": "Neden BagajPark?",
     "value1Title": "%100 Yerel",
     "value1Desc": "Esnafımızla el ele veriyoruz.",
     "value2Title": "Maksimum Güven",
@@ -474,7 +474,7 @@
     "whatsappCta": "SOHBETE BAŞLA",
     "emailTitle": "E-posta",
     "emailSubtitle": "Genel sorular ve esnaf başvuruları.",
-    "emailAddress": "destek@emanetci.tr",
+    "emailAddress": "destek@bagajpark.com",
     "opsTitle": "Operasyon Üssü",
     "opsAddress": "Beyoğlu, İstanbul / Türkiye",
     "opsBadge": "MERKEZ OFİS"
@@ -483,22 +483,22 @@
     "pageTitle": "KVKK Aydınlatma",
     "subtitle": "6698 Sayılı Kanun Uyarınca",
     "section1Title": "Veri Sorumlusu",
-    "section1Body": "Emanetçi Teknoloji A.Ş. olarak, 6698 Sayılı Kişisel Verilerin Korunması Kanunu uyarınca verilerinizin \"Veri Sorumlusu\" sıfatıyla işlenmesini taahhüt ediyoruz.",
+    "section1Body": "BagajPark Teknoloji A.Ş. olarak, 6698 Sayılı Kişisel Verilerin Korunması Kanunu uyarınca verilerinizin \"Veri Sorumlusu\" sıfatıyla işlenmesini taahhüt ediyoruz.",
     "section2Title": "İşleme Amaçları",
     "purpose1": "Hizmetin ifası ve rezervasyon yönetimi",
     "purpose2": "iyzico üzerinden ödemelerin güvenli gerçekleştirilmesi",
     "purpose3": "Kullanıcıya bildirim ve duyuruların iletilmesi",
     "purpose4": "Yasal yükümlülüklerin yerine getirilmesi",
     "section3Title": "Haklarınız",
-    "section3Body": "KVKK 11. Maddesi uyarınca; verilerinizin işlenip işlenmediğini öğrenme, işlenmişse bilgi talep etme ve eksik/yanlış verilerin düzeltilmesini isteme hakkına sahipsiniz. Başvurularınızı kvkk@emanetci.tr adresine iletebilirsiniz."
+    "section3Body": "KVKK 11. Maddesi uyarınca; verilerinizin işlenip işlenmediğini öğrenme, işlenmişse bilgi talep etme ve eksik/yanlış verilerin düzeltilmesini isteme hakkına sahipsiniz. Başvurularınızı kvkk@bagajpark.com adresine iletebilirsiniz."
   },
   "Terms": {
     "pageTitle": "Kullanım Koşulları",
     "lastUpdated": "Son Güncelleme: 03.04.2024",
     "section1Title": "1. Sözleşmenin Tarafları ve Konusu",
-    "section1Body": "İşbu Kullanıcı Sözleşmesi, Emanetçi Teknoloji A.Ş. ile platformu kullanan Misafirler ve İş Ortakları (Emanet Noktaları) arasındaki hak ve yükümlülükleri belirler. Platformun temelini \"Saklama Sözleşmesi\" (TBK 561-580) oluşturur.",
+    "section1Body": "İşbu Kullanıcı Sözleşmesi, BagajPark Teknoloji A.Ş. ile platformu kullanan Misafirler ve İş Ortakları (Emanet Noktaları) arasındaki hak ve yükümlülükleri belirler. Platformun temelini \"Saklama Sözleşmesi\" (TBK 561-580) oluşturur.",
     "section2Title": "2. Sorumluluk Limitleri (Sigorta)",
-    "section2Body": "Emanetçi, her bir bagaj için oluşabilecek hasar, kayıp veya hırsızlık durumunda maksimum 5.000 TL (Beş Bin Türk Lirası) tutarında tazminat ödemeyi taahhüt eder. Bu miktarı aşan değerdeki (nakit para, ziynet eşyası, elektronik cihaz vb.) eşyaların emanete bırakılmasından doğan zararlardan platform sorumlu değildir.",
+    "section2Body": "BagajPark, her bir bagaj için oluşabilecek hasar, kayıp veya hırsızlık durumunda maksimum 5.000 TL (Beş Bin Türk Lirası) tutarında tazminat ödemeyi taahhüt eder. Bu miktarı aşan değerdeki (nakit para, ziynet eşyası, elektronik cihaz vb.) eşyaların emanete bırakılmasından doğan zararlardan platform sorumlu değildir.",
     "section3Title": "3. Yasaklı Eşyalar",
     "forbidden1": "Yanıcı veya patlayıcı maddeler",
     "forbidden2": "Ateşli silahlar ve mühimmat",
@@ -510,7 +510,7 @@
   "Privacy": {
     "lastUpdated": "Son Güncelleme: 03.04.2024",
     "section1Title": "Gizlilik Taahhüdümüz",
-    "section1Body": "Emanetçi olarak, kişisel verilerinizin güvenliğini her şeyin üstünde tutuyoruz. Platformumuzu kullanırken paylaştığınız her türlü bilgi, en yüksek şifreleme yöntemleriyle (AES-256) korunmaktadır.",
+    "section1Body": "BagajPark olarak, kişisel verilerinizin güvenliğini her şeyin üstünde tutuyoruz. Platformumuzu kullanırken paylaştığınız her türlü bilgi, en yüksek şifreleme yöntemleriyle (AES-256) korunmaktadır.",
     "section2Title": "Hangi Verileri Topluyoruz?",
     "dataType1": "Telefon numarası (SMS onayı için)",
     "dataType2": "Konum verisi (yakındaki esnafları bulmak için)",
@@ -537,7 +537,7 @@
     "ctaButton": "Destek merkezine git"
   },
   "PartnersPage": {
-    "title": "Emanetçi İş Ortağı Olun",
+    "title": "BagajPark İş Ortağı Olun",
     "subtitle": "Dükkanınızdaki atıl alanı ek gelire dönüştürün.",
     "benefit1Title": "Sıfır Yatırım",
     "benefit1Desc": "Hiçbir ücret ödemeden sisteme dahil olun.",

@@ -1,6 +1,6 @@
 {
   "Common": {
-    "appName": "Emanetçi",
+    "appName": "BagajPark",
     "search": "Search",
     "save": "Save",
     "cancel": "Cancel",
@@ -163,7 +163,7 @@
     "cityFallback": "Istanbul"
   },
   "Admin": {
-    "dashboardTitle": "Emanetçi Admin Center",
+    "dashboardTitle": "BagajPark Admin Center",
     "totalBookings": "Total bookings",
     "pendingShops": "Pending shop approvals",
     "dailyRevenue": "Revenue (paid)",
@@ -188,7 +188,7 @@
     "chartRevenue": "Revenue (₺)",
     "chartBookings": "Bookings",
     "noActivePartners": "No active partners.",
-    "versionLabel": "Emanetçi v2.0.4",
+    "versionLabel": "BagajPark v2.0.4",
     "defaultCityFallback": "Istanbul",
     "trendNone": "—",
     "trendPrev7Zero": "+{count} (previous 7 days: 0)",
@@ -304,7 +304,7 @@
     "messageDeletedInfo": "Message deleted successfully."
   },
   "Auth": {
-    "loginTitle": "Sign in to Emanetçi",
+    "loginTitle": "Sign in to BagajPark",
     "loginSubtitle": "Login to continue as a Traveler or Partner.",
     "privacyPolicy": "By signing in, you agree to our Terms and Conditions.",
     "welcomeBack": "Welcome Back!",
@@ -403,12 +403,12 @@
   "About": {
     "title": "Our Story",
     "badge": "Building Trust",
-    "intro": "Emanetçi helps you shed the heavy load while you travel—it’s Türkiye’s widest local luggage storage network.",
+    "intro": "BagajPark helps you shed the heavy load while you travel—it’s Türkiye’s widest local luggage storage network.",
     "vision": "Our Vision",
     "visionBody": "To build a digital storage network where every traveler can safely leave their belongings, in every corner of Türkiye.",
     "mission": "Our Mission",
     "missionBody": "Combine local businesses’ unused space with technology—freedom for travelers, extra income for partners.",
-    "whyUs": "Why Emanetçi?",
+    "whyUs": "Why BagajPark?",
     "value1Title": "100% Local",
     "value1Desc": "We work hand in hand with local partners.",
     "value2Title": "Maximum Security",
@@ -429,7 +429,7 @@
     "whatsappCta": "START CHAT",
     "emailTitle": "Email",
     "emailSubtitle": "General questions and partner applications.",
-    "emailAddress": "destek@emanetci.tr",
+    "emailAddress": "destek@bagajpark.com",
     "opsTitle": "Operations Hub",
     "opsAddress": "Beyoğlu, Istanbul / Türkiye",
     "opsBadge": "HEAD OFFICE"
@@ -438,22 +438,22 @@
     "pageTitle": "KVKK Disclosure",
     "subtitle": "Under Law No. 6698",
     "section1Title": "Data Controller",
-    "section1Body": "As Emanetçi Technology Inc., we commit to processing your data as the \"Data Controller\" under the Turkish Personal Data Protection Law No. 6698.",
+    "section1Body": "As BagajPark Technology Inc., we commit to processing your data as the \"Data Controller\" under the Turkish Personal Data Protection Law No. 6698.",
     "section2Title": "Purposes of Processing",
     "purpose1": "Service delivery and reservation management",
     "purpose2": "Secure payment processing via iyzico",
     "purpose3": "Sending notifications and announcements to users",
     "purpose4": "Fulfilling legal obligations",
     "section3Title": "Your Rights",
-    "section3Body": "Under Article 11 of the KVKK, you have the right to learn whether your data is processed, request information if it is, and request correction of incomplete or inaccurate data. You can contact us at kvkk@emanetci.tr."
+    "section3Body": "Under Article 11 of the KVKK, you have the right to learn whether your data is processed, request information if it is, and request correction of incomplete or inaccurate data. You can contact us at kvkk@bagajpark.com."
   },
   "Terms": {
     "pageTitle": "Terms of Use",
     "lastUpdated": "Last updated: 03 Apr 2024",
     "section1Title": "1. Parties and Subject",
-    "section1Body": "This User Agreement sets out the rights and obligations between Emanetçi Technology Inc. and Guests and Business Partners (storage points) using the platform. It is based on the \"Storage Agreement\" (Turkish Civil Code 561–580).",
+    "section1Body": "This User Agreement sets out the rights and obligations between BagajPark Technology Inc. and Guests and Business Partners (storage points) using the platform. It is based on the \"Storage Agreement\" (Turkish Civil Code 561–580).",
     "section2Title": "2. Liability Limits (Insurance)",
-    "section2Body": "Emanetçi undertakes to compensate up to 5,000 TRY per bag for damage, loss, or theft. The platform is not liable for items above this value (cash, jewelry, electronics, etc.).",
+    "section2Body": "BagajPark undertakes to compensate up to 5,000 TRY per bag for damage, loss, or theft. The platform is not liable for items above this value (cash, jewelry, electronics, etc.).",
     "section3Title": "3. Prohibited Items",
     "forbidden1": "Flammable or explosive materials",
     "forbidden2": "Firearms and ammunition",
@@ -465,7 +465,7 @@
   "Privacy": {
     "lastUpdated": "Last updated: 03 Apr 2024",
     "section1Title": "Our Privacy Commitment",
-    "section1Body": "At Emanetçi, we put the security of your personal data first. Any information you share while using the platform is protected with strong encryption (AES-256).",
+    "section1Body": "At BagajPark, we put the security of your personal data first. Any information you share while using the platform is protected with strong encryption (AES-256).",
     "section2Title": "What Data We Collect",
     "dataType1": "Phone number (for SMS verification)",
     "dataType2": "Location (to find nearby partners)",
@@ -492,7 +492,7 @@
     "ctaButton": "Go to support center"
   },
   "PartnersPage": {
-    "title": "Become an Emanetçi Partner",
+    "title": "Become an BagajPark Partner",
     "subtitle": "Turn your unused space into extra income.",
     "benefit1Title": "Zero Investment",
     "benefit1Desc": "Join the system without paying any fees.",

@@ -18,7 +18,7 @@ export default function Header() {
         className="text-2xl font-black text-orange-600 tracking-tighter hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
       >
         <div className="w-8 h-8 bg-orange-600 rounded-xl"></div>
-        Emanetçi
+        BagajPark
       </Link>
       
       <div className="flex items-center gap-6">

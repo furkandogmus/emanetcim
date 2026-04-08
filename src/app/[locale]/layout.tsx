@@ -22,29 +22,29 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://bagajpark.com"),
-  title: "Emanetçi | Valizini Güvenle Bırak, Özgürce Gez",
+  title: "BagajPark | Valizini Güvenle Bırak, Özgürce Gez",
   description: "Türkiye'nin en yaygın ve güvenilir emanet noktası ağı. Valizini esnafımıza bırak, şehri özgürce keşfet.",
   keywords: ["valiz emanet", "bagaj bırakma", "istanbul luggage storage", "emanetçi", "emanet noktası", "güvenli bagaj", "esnaf emanet"],
-  authors: [{ name: "Emanetçi", url: "https://bagajpark.com" }],
+  authors: [{ name: "BagajPark", url: "https://bagajpark.com" }],
   openGraph: {
     type: "website",
     locale: "tr_TR",
     url: "https://bagajpark.com",
-    siteName: "Emanetçi",
-    title: "Emanetçi | Valizini Güvenle Bırak, Özgürce Gez",
+    siteName: "BagajPark",
+    title: "BagajPark | Valizini Güvenle Bırak, Özgürce Gez",
     description: "Türkiye'nin en yaygın ve güvenilir emanet noktası ağı.",
     images: [
       {
         url: "/icons/icon-512x512.png",
         width: 512,
         height: 512,
-        alt: "Emanetçi - Güvenli Bagaj Ağı",
+        alt: "BagajPark - Güvenli Bagaj Ağı",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Emanetçi | Valizini Güvenle Bırak",
+    title: "BagajPark | Valizini Güvenle Bırak",
     description: "Türkiye'nin emanet noktası ağı.",
     images: ["/icons/icon-512x512.png"],
   },
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Emanetçi",
+    title: "BagajPark",
   },
   icons: {
     apple: "/icons/icon-192x192.png",
@@ -87,7 +87,7 @@ export default async function RootLayout({
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "name": "Emanetçi",
+    "name": "BagajPark",
     "url": "https://bagajpark.com",
     "description": "Türkiye'nin en yaygın ve güvenilir emanet noktası ağı.",
     "potentialAction": {
@@ -100,7 +100,7 @@ export default async function RootLayout({
   const orgLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    "name": "Emanetçi",
+    "name": "BagajPark",
     "url": "https://bagajpark.com",
     "logo": "https://bagajpark.com/icons/icon-512x512.png",
     "contactPoint": {

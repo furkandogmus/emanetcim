@@ -77,7 +77,7 @@ export interface IBookingService {
 }
 
 /**
- * BookingService - Emanetçi Operasyonel ve Finansal Yönetim Servisi
+ * BookingService - BagajPark Operasyonel ve Finansal Yönetim Servisi
  */
 export class BookingService implements IBookingService {
   /**
