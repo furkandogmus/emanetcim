@@ -3,6 +3,8 @@ import { buildLocalizedUrls, getSiteBaseUrl } from "@/lib/site-urls";
 import prisma from "@/lib/db";
 import { routing } from "@/i18n/routing";
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Dynamic Sitemap - Statik sayfalar + Tüm Aktif Dükkanlar
  */
@@ -41,7 +43,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   } catch (error) {
     console.error("Sitemap generation error (Shops):", error);
-    // Build sırasında veritabanı erişilemiyorsa sadece statik sayfaları döndürecek şekilde devam et
+    // Build sırasında veritabanı erişilemiyorsa sadece statik sayfalarla devam et
   }
 
   let blogEntries: MetadataRoute.Sitemap = [];

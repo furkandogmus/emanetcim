@@ -5,6 +5,7 @@ import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
 import { rateLimit } from "@/lib/rate-limit";
 import { headers } from "next/headers";
+import { getLocale } from "next-intl/server";
 
 /**
  * Oturumu açık olan ama e-postası doğrulanmamış kullanıcıya tekrar link gönderir.
@@ -30,8 +31,9 @@ export async function resendVerificationAction() {
   }
 
   try {
+    const locale = await getLocale();
     const verificationToken = await generateVerificationToken(session.user.email);
-    await sendVerificationEmail(session.user.email, verificationToken.token);
+    await sendVerificationEmail(session.user.email, verificationToken.token, locale);
     
     return { success: true };
   } catch (error) {

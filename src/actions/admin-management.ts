@@ -6,6 +6,7 @@ import { Role } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
+import { getLocale } from "next-intl/server";
 
 /**
  * Admin koruması sağlayan yardımcı fonksiyon
@@ -60,8 +61,9 @@ export async function deleteUserAction(userId: string) {
 export async function resendVerificationEmailAction(email: string) {
   await ensureAdmin();
 
+  const locale = await getLocale();
   const verificationToken = await generateVerificationToken(email);
-  await sendVerificationEmail(email, verificationToken.token);
+  await sendVerificationEmail(email, verificationToken.token, locale);
 
   return { success: true };
 }

@@ -9,6 +9,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
 import { isDisposableEmail } from "@/lib/disposable-emails";
+import { getLocale } from "next-intl/server";
 
 const guestSchema = z.object({
   email: z.string().email(),
@@ -66,8 +67,9 @@ export async function registerGuestAction(data: unknown) {
   });
 
   // Verify Email (sadece e-posta ile kayıt/login flowu için)
+  const locale = await getLocale();
   const verificationToken = await generateVerificationToken(user.email!);
-  await sendVerificationEmail(user.email!, verificationToken.token);
+  await sendVerificationEmail(user.email!, verificationToken.token, locale);
 
   return { success: true as const };
 }
@@ -132,8 +134,9 @@ export async function registerPartnerApplicationAction(data: unknown) {
 
     // Sadece e-posta girilmişse doğrulama gönder
     if (user.email) {
+      const locale = await getLocale();
       const verificationToken = await generateVerificationToken(user.email);
-      await sendVerificationEmail(user.email, verificationToken.token);
+      await sendVerificationEmail(user.email, verificationToken.token, locale);
     }
   });
 

@@ -4,8 +4,8 @@ import logger from "@/lib/logger";
 const resend = new Resend(process.env.RESEND_API_KEY);
 const domain = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
-export const sendVerificationEmail = async (email: string, token: string) => {
-  const confirmLink = `${domain}/new-verification?token=${token}`;
+export const sendVerificationEmail = async (email: string, token: string, locale: string = "tr") => {
+  const confirmLink = `${domain}/${locale}/auth/verify-email?token=${token}`;
 
   try {
     const { data, error } = await resend.emails.send({
@@ -37,8 +37,10 @@ export const sendVerificationEmail = async (email: string, token: string) => {
   }
 };
 
-export const sendPasswordResetEmail = async (email: string, token: string) => {
-  const resetLink = `${domain}/new-password?token=${token}`;
+export const sendPasswordResetEmail = async (email: string, token: string, locale: string = "tr") => {
+  // Not: Şifre sıfırlama sayfası henüz oluşturulmamış olabilir, 
+  // ancak genel yapı için auth/new-password olarak varsayıyoruz.
+  const resetLink = `${domain}/${locale}/auth/new-password?token=${token}`;
 
   try {
     const { data, error } = await resend.emails.send({
