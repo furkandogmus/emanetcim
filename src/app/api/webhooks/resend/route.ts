@@ -47,7 +47,7 @@ export async function POST(req: Request) {
     if ((!text && !html) && email_id) {
       fetchAttempted = true;
       try {
-        const fullEmail = await resend.emails.get(email_id);
+        const fullEmail = await resend.emails.receiving.get(email_id);
         if (fullEmail?.data) {
           text = fullEmail.data.text || text;
           html = fullEmail.data.html || html;
