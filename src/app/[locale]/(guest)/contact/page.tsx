@@ -15,83 +15,52 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
           <p className="text-xl font-bold text-gray-400 max-w-xl leading-relaxed">{t("subtitle")}</p>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
-          <div className="bg-gray-50 p-10 rounded-[3rem] border border-gray-100 shadow-sm order-2 md:order-1">
-            <h2 className="text-2xl font-black text-gray-900 mb-8 uppercase tracking-widest">{t("formTitle")}</h2>
-            <form className="flex flex-col gap-6">
-              <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">
-                  {t("name")}
-                </label>
-                <input
-                  type="text"
-                  className="w-full h-16 bg-white rounded-2xl px-6 font-bold border border-gray-100 focus:border-orange-500 outline-none transition-all"
-                />
-              </div>
-              <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">
-                  {t("email")}
-                </label>
-                <input
-                  type="email"
-                  className="w-full h-16 bg-white rounded-2xl px-6 font-bold border border-gray-100 focus:border-orange-500 outline-none transition-all"
-                />
-              </div>
-              <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">
-                  {t("message")}
-                </label>
-                <textarea
-                  rows={4}
-                  className="w-full bg-white rounded-2xl px-6 py-4 font-bold border border-gray-100 focus:border-orange-500 outline-none transition-all resize-none"
-                ></textarea>
-              </div>
-              <button className="w-full h-16 bg-gray-900 text-white rounded-2xl font-black text-sm uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-orange-600 transition-all shadow-xl shadow-gray-200">
-                {t("send")}
-                <Send size={18} />
-              </button>
-            </form>
+        <div className="flex flex-col gap-10">
+          <div className="bg-gray-50 flex flex-col items-center justify-center p-12 md:p-20 rounded-[3rem] border border-gray-100 shadow-sm text-center group transition-all hover:bg-orange-50/30">
+            <div className="w-24 h-24 bg-green-100 text-green-600 rounded-[2rem] flex items-center justify-center mb-8 shadow-2xl shadow-green-200/50 group-hover:scale-110 transition-transform">
+              <MessageCircle size={48} />
+            </div>
+            <h2 className="text-3xl font-black text-gray-900 mb-4">{t("whatsappTitle")}</h2>
+            <p className="text-lg font-bold text-gray-500 max-w-lg mb-10 leading-relaxed">
+              Bizimle en hızlı şekilde iletişime geçmek için doğrudan WhatsApp destek hattımızı kullanabilirsiniz. Ekibimiz anında yanıt verecektir.
+            </p>
+            <a
+              href="https://wa.me/905422415597"
+              target="_blank"
+              rel="noreferrer"
+              className="px-10 py-5 bg-green-500 text-white rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-green-600 transition-all shadow-xl shadow-green-500/30 w-full sm:w-auto"
+            >
+              <MessageCircle size={20} />
+              WHATSAPP'TAN YAZ
+            </a>
+            <p className="mt-6 text-sm font-bold text-gray-400">
+              <span className="text-gray-900">+90 542 241 55 97</span>
+            </p>
           </div>
 
-          <div className="flex flex-col gap-10 order-1 md:order-2 py-6">
-            <div className="flex items-start gap-6 group">
-              <div className="w-14 h-14 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-orange-100/50">
-                <MessageCircle size={28} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="flex items-center gap-6 p-10 rounded-[2.5rem] bg-white border border-gray-100 shadow-sm group">
+              <div className="w-16 h-16 bg-gray-900 text-white rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Mail size={32} />
               </div>
               <div>
-                <h4 className="text-lg font-black text-gray-900 mb-1">{t("whatsappTitle")}</h4>
-                <p className="font-bold text-gray-400 text-sm mb-2">{t("whatsappSubtitle")}</p>
-                <a
-                  href="#"
-                  className="text-orange-600 font-black text-xs uppercase tracking-widest underline decoration-2 underline-offset-4 decoration-orange-200"
-                >
-                  {t("whatsappCta")}
-                </a>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-6 group">
-              <div className="w-14 h-14 bg-gray-900 text-white rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Mail size={28} />
-              </div>
-              <div>
-                <h4 className="text-lg font-black text-gray-900 mb-1">{t("emailTitle")}</h4>
+                <h4 className="text-xl font-black text-gray-900 mb-1">{t("emailTitle")}</h4>
                 <p className="font-bold text-gray-400 text-sm mb-2">{t("emailSubtitle")}</p>
                 <a
                   href={`mailto:${t("emailAddress")}`}
-                  className="text-gray-400 font-black text-xs uppercase tracking-widest underline decoration-2 underline-offset-4 decoration-gray-100"
+                  className="text-gray-900 font-black text-xs uppercase tracking-widest underline decoration-2 underline-offset-4 decoration-gray-200"
                 >
                   {t("emailAddress")}
                 </a>
               </div>
             </div>
 
-            <div className="flex items-start gap-6 group">
-              <div className="w-14 h-14 bg-gray-50 text-gray-400 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                <MapPin size={28} />
+            <div className="flex items-center gap-6 p-10 rounded-[2.5rem] bg-white border border-gray-100 shadow-sm group">
+              <div className="w-16 h-16 bg-gray-50 text-gray-400 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                <MapPin size={32} />
               </div>
               <div>
-                <h4 className="text-lg font-black text-gray-900 mb-1">{t("opsTitle")}</h4>
+                <h4 className="text-xl font-black text-gray-900 mb-1">{t("opsTitle")}</h4>
                 <p className="font-bold text-gray-400 text-sm mb-2">{t("opsAddress")}</p>
                 <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest leading-none">
                   {t("opsBadge")}
