@@ -47,6 +47,10 @@ export async function POST(req: Request) {
     if ((!text && !html) && email_id) {
       fetchAttempted = true;
       try {
+        // Resend webhook'u çok hızlı tetikliyor, email henüz API'ye yansımamış (404) olabilir. 
+        // 3 saniye (3000ms) bekleyip öyle çekmeyi deneyelim (Race condition çözümü).
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        
         const fullEmail = await resend.emails.receiving.get(email_id);
         if (fullEmail?.data) {
           text = fullEmail.data.text || text;
