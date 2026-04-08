@@ -18,6 +18,8 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV IYZICO_API_KEY=build_placeholder
 ENV IYZICO_SECRET_KEY=build_placeholder
 ENV DATABASE_URL="postgresql://postgres:postgres@localhost:5432/placeholder?schema=public"
+ENV RESEND_API_KEY=build_placeholder
+ENV RESEND_WEBHOOK_SECRET=build_placeholder
 # next build (production) — requireProdSecrets + iyzipay modülü için placeholder (runtime compose ile değiştirilir)
 RUN npx prisma generate
 RUN npm run build

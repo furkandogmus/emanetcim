@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { Resend } from "resend";
 
+export const dynamic = 'force-dynamic';
+
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
@@ -67,7 +69,7 @@ export async function POST(req: Request) {
         subject: subject || "No Subject",
         text: typeof text === "string" ? text : JSON.stringify(text),
         html: typeof html === "string" ? html : JSON.stringify(html),
-        raw: body, // Tam payload'u her zaman saklıyoruz
+        raw: body || {}, // Tam payload'u her zaman saklıyoruz
         isRead: false,
       },
     });
