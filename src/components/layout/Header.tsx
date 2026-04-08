@@ -21,7 +21,13 @@ export default function Header() {
         BagajPark
       </Link>
       
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-4 sm:gap-8">
+        <Link 
+          href="/blog" 
+          className="hidden sm:block text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-orange-600 hover:scale-105 transition-all"
+        >
+          BLOG
+        </Link>
         <UserNav />
       </div>
     </header>

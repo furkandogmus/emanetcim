@@ -22,14 +22,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   });
 
   // 2. Dinamik Dükkan Sayfaları (Checkout Akışı)
-  // Gelecekte dükkan detay sayfaları açılırsa buralar güncellenebilir.
   const shops = await prisma.shop.findMany({
     where: { isActive: true },
     select: { id: true, updatedAt: true },
   });
 
   const shopEntries: MetadataRoute.Sitemap = [];
-  
   for (const shop of shops) {
     for (const locale of routing.locales) {
       shopEntries.push({
@@ -41,5 +39,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  return [...staticPages, ...shopEntries];
+  // 3. Dinamik Blog Yazıları
+  const blogPosts = await prisma.blogPost.findMany({
+    where: { isPublished: true },
+    select: { slug: true, locale: true, updatedAt: true },
+  });
+
+  const blogEntries: MetadataRoute.Sitemap = blogPosts.map((post: any) => ({
+    url: `${base}/${post.locale}/blog/${post.slug}`,
+    lastModified: post.updatedAt,
+    changeFrequency: "weekly",
+    priority: 0.8,
+  }));
+
+  return [...staticPages, ...shopEntries, ...blogEntries];
 }
