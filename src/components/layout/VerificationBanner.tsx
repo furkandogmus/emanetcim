@@ -37,7 +37,7 @@ export default function VerificationBanner() {
   };
 
   return (
-    <div className="bg-orange-600 text-white py-3 px-6 fixed top-0 left-0 w-full z-[60] flex flex-col sm:flex-row items-center justify-center gap-4 animate-in slide-in-from-top duration-500 shadow-lg border-b border-orange-500">
+    <div className="bg-orange-600 text-white py-3 px-6 sticky top-0 left-0 w-full z-[60] flex flex-col sm:flex-row items-center justify-center gap-4 animate-in slide-in-from-top duration-500 shadow-lg border-b border-orange-500">
       <div className="flex items-center gap-2">
         <AlertCircle size={18} className="shrink-0" />
         <p className="text-[10px] md:text-xs font-black uppercase tracking-widest text-center">
