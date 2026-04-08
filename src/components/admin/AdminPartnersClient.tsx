@@ -51,8 +51,8 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 md:p-10">
-      <header className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div className="min-h-screen bg-gray-50 px-6 py-32 md:px-10 md:pt-40">
+      <header className="mb-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
         <div>
           <Link href="/admin" className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors mb-4 group">
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
@@ -62,16 +62,20 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
             <Store className="text-orange-600" />
             {t("shopManagement")}
           </h1>
+          <p className="text-xs font-bold text-gray-400 mt-2 uppercase tracking-widest">
+            {initialShops.length} {t("totalShops") || "Toplam Esnaf"}
+          </p>
         </div>
 
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+        <div className="relative w-full lg:w-96 group">
+          <div className="absolute inset-0 bg-orange-600/5 rounded-2xl blur-xl group-focus-within:bg-orange-600/10 transition-all opacity-0 group-focus-within:opacity-100"></div>
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-600 transition-colors" size={20} />
           <input
             type="text"
-            placeholder={t("searchShopsPlaceholder") || "Dükkan, sahip veya telefon ara..."}
+            placeholder={t("searchShopsPlaceholder") || "Esnaf, dükkan veya telefon ara..."}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-12 pr-6 py-4 bg-white border border-gray-100 rounded-2xl w-full md:w-80 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-bold text-sm"
+            className="relative w-full pl-14 pr-6 py-5 bg-white border border-gray-100 rounded-2xl shadow-sm focus:outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all font-bold text-sm"
           />
         </div>
       </header>
