@@ -21,36 +21,46 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     } satisfies MetadataRoute.Sitemap[number];
   });
 
-  // 2. Dinamik Dükkan Sayfaları (Checkout Akışı)
-  const shops = await prisma.shop.findMany({
-    where: { isActive: true },
-    select: { id: true, updatedAt: true },
-  });
+  let shopEntries: MetadataRoute.Sitemap = [];
+  try {
+    // 2. Dinamik Dükkan Sayfaları (Checkout Akışı)
+    const shops = await prisma.shop.findMany({
+      where: { isActive: true },
+      select: { id: true, updatedAt: true },
+    });
 
-  const shopEntries: MetadataRoute.Sitemap = [];
-  for (const shop of shops) {
-    for (const locale of routing.locales) {
-      shopEntries.push({
-        url: `${base}/${locale}/checkout/${shop.id}`,
-        lastModified: shop.updatedAt,
-        changeFrequency: "weekly",
-        priority: 0.6,
-      });
+    for (const shop of shops) {
+      for (const locale of routing.locales) {
+        shopEntries.push({
+          url: `${base}/${locale}/checkout/${shop.id}`,
+          lastModified: shop.updatedAt,
+          changeFrequency: "weekly",
+          priority: 0.6,
+        });
+      }
     }
+  } catch (error) {
+    console.error("Sitemap generation error (Shops):", error);
+    // Build sırasında veritabanı erişilemiyorsa sadece statik sayfaları döndürecek şekilde devam et
   }
 
-  // 3. Dinamik Blog Yazıları
-  const blogPosts = await prisma.blogPost.findMany({
-    where: { isPublished: true },
-    select: { slug: true, locale: true, updatedAt: true },
-  });
+  let blogEntries: MetadataRoute.Sitemap = [];
+  try {
+    // 3. Dinamik Blog Yazıları
+    const blogPosts = await prisma.blogPost.findMany({
+      where: { isPublished: true },
+      select: { slug: true, locale: true, updatedAt: true },
+    });
 
-  const blogEntries: MetadataRoute.Sitemap = blogPosts.map((post) => ({
-    url: `${base}/${post.locale}/blog/${post.slug}`,
-    lastModified: post.updatedAt,
-    changeFrequency: "weekly",
-    priority: 0.8,
-  }));
+    blogEntries = blogPosts.map((post) => ({
+      url: `${base}/${post.locale}/blog/${post.slug}`,
+      lastModified: post.updatedAt,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    }));
+  } catch (error) {
+    console.error("Sitemap generation error (Blog):", error);
+  }
 
   return [...staticPages, ...shopEntries, ...blogEntries];
 }

@@ -1,70 +1,67 @@
-import { setRequestLocale, getTranslations } from "next-intl/server";
-import { ShieldCheck, Scale, FileText, AlertTriangle } from "lucide-react";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Gavel, Scale } from "lucide-react";
+import { Link } from "@/i18n/routing";
 
 export default async function TermsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-
   const t = await getTranslations("Terms");
 
-  const forbidden = [
-    t("forbidden1"),
-    t("forbidden2"),
-    t("forbidden3"),
-    t("forbidden4"),
-    t("forbidden5"),
-    t("forbidden6"),
-  ];
-
   return (
-    <div className="min-h-screen bg-white font-sans pt-32 pb-20 px-6">
-      <div className="max-w-3xl mx-auto">
-        <header className="mb-16">
-          <div className="w-16 h-16 bg-gray-50 text-gray-900 rounded-[1.5rem] flex items-center justify-center mb-6">
-            <Scale size={32} />
+    <div className="min-h-screen bg-white">
+      <header className="py-24 px-6 bg-orange-600 text-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-orange-700 to-orange-500" />
+        <div className="max-w-4xl mx-auto relative z-10">
+          <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center text-white mb-8 border border-white/20">
+            <Gavel size={32} />
           </div>
-          <h1 className="text-4xl font-black tracking-tighter text-gray-900 mb-4">{t("pageTitle")}</h1>
-          <p className="text-sm font-bold text-gray-400 uppercase tracking-widest leading-none">
+          <h1 className="text-5xl font-black tracking-tighter mb-4">
+            {t("title")}
+          </h1>
+          <p className="text-orange-100 font-bold text-lg">
             {t("lastUpdated")}
           </p>
-        </header>
+        </div>
+      </header>
 
-        <article className="prose prose-gray prose-headings:text-gray-900 prose-headings:font-black prose-p:text-gray-500 prose-strong:text-gray-900 max-w-none flex flex-col gap-10">
-          <section>
-            <h2 className="text-2xl font-black mb-4 flex items-center gap-3">
-              <FileText size={20} className="text-orange-600" />
-              {t("section1Title")}
-            </h2>
-            <p className="font-bold leading-relaxed">{t("section1Body")}</p>
-          </section>
+      <main className="max-w-4xl mx-auto py-24 px-6">
+        <div className="prose prose-orange max-w-none">
+          <div className="flex items-start gap-4 p-8 bg-gray-50 rounded-3xl border border-gray-100 mb-16">
+            <Scale className="text-gray-400 shrink-0" size={24} />
+            <p className="text-gray-500 text-sm font-bold leading-relaxed m-0 italic">
+              &quot;BagajPark platformunu kullanarak bu kuralları kabul etmiş sayılırsınız. Lütfen dikkatle okuyunuz.&quot;
+            </p>
+          </div>
 
-          <section className="bg-orange-50 p-8 rounded-[2rem] border border-orange-100">
-            <h2 className="text-2xl font-black mb-4 flex items-center gap-3 text-orange-900">
-              <ShieldCheck size={20} className="text-orange-600" />
-              {t("section2Title")}
-            </h2>
-            <p className="text-orange-900/70 font-bold leading-relaxed">{t("section2Body")}</p>
-          </section>
+          <div className="space-y-20">
+            {[1, 2, 3, 4, 5, 6].map((idx) => {
+              const qKey = `q${idx}`;
+              const aKey = `a${idx}`;
+              return (
+                <section key={idx}>
+                  <h2 className="text-2xl font-black text-gray-900 mb-6 flex items-baseline gap-4">
+                    <span className="text-4xl font-black text-orange-600/20">
+                      {idx}
+                    </span>
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    {t(qKey as any)}
+                  </h2>
+                  <div className="text-gray-500 font-medium leading-relaxed bg-gray-50/30 p-10 rounded-[3rem] border border-gray-100">
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    {t(aKey as any)}
+                  </div>
+                </section>
+              );
+            })}
+          </div>
+        </div>
 
-          <section>
-            <h2 className="text-2xl font-black mb-4 flex items-center gap-3">
-              <AlertTriangle size={20} className="text-red-500" />
-              {t("section3Title")}
-            </h2>
-            <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 list-none p-0">
-              {forbidden.map((item, i) => (
-                <li
-                  key={i}
-                  className="bg-gray-50 p-4 rounded-xl text-xs font-bold text-gray-500 flex items-center gap-2"
-                >
-                  <div className="w-1.5 h-1.5 rounded-full bg-red-400"></div>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </section>
-        </article>
-      </div>
+        <div className="mt-24 pt-12 border-t border-gray-100 text-center">
+          <p className="text-gray-400 font-bold text-sm">
+            Kurallar hakkında sorunuz mu var? <Link href="/contact" className="text-orange-600 hover:underline">Destek ekibimizle</Link> iletişime geçin.
+          </p>
+        </div>
+      </main>
     </div>
   );
 }

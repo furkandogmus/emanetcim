@@ -1,84 +1,123 @@
-import { setRequestLocale, getTranslations } from "next-intl/server";
-import { Store, TrendingUp, Users, ShieldCheck, Zap, ChevronRight } from "lucide-react";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Store, TrendingUp, Shield, Smartphone, ArrowRight, MessageCircle } from "lucide-react";
 import { Link } from "@/i18n/routing";
 
 export default async function PartnersPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-
-  const t = await getTranslations("PartnersPage");
-
-  const benefits = [
-    { title: t('benefit1Title'), desc: t('benefit1Desc'), icon: <Zap size={24} /> },
-    { title: t('benefit2Title'), desc: t('benefit2Desc'), icon: <Users size={24} /> },
-    { title: t('benefit3Title'), desc: t('benefit3Desc'), icon: <ShieldCheck size={24} /> },
-  ];
+  const t = await getTranslations("Partners");
 
   return (
-    <div className="min-h-screen bg-white font-sans pt-32 pb-20 px-6">
-      <div className="max-w-5xl mx-auto">
-        
-        {/* Hero Section */}
-        <header className="mb-24 text-center">
-           <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 text-green-600 rounded-full mb-6">
-              <TrendingUp size={16} />
-              <span className="text-xs font-black uppercase tracking-widest leading-none">Ek Gelir Kapısı</span>
-           </div>
-           <h1 className="text-6xl font-black tracking-tighter text-gray-900 mb-8 max-w-2xl mx-auto">
-              {t('title')}
-           </h1>
-           <p className="text-xl font-bold text-gray-400 max-w-xl mx-auto leading-relaxed">
-              {t('subtitle')}
-           </p>
-        </header>
-
-        {/* Benefits Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-32">
-           {benefits.map((benefit, i) => (
-             <div key={i} className="p-10 bg-gray-50 rounded-[3rem] border border-gray-100 flex flex-col gap-6 group hover:translate-y-[-8px] transition-all duration-500 hover:shadow-2xl hover:shadow-gray-200">
-                <div className="w-14 h-14 bg-white rounded-2xl shadow-sm flex items-center justify-center text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-all">
-                   {benefit.icon}
-                </div>
-                <div>
-                   <h3 className="text-2xl font-black text-gray-900 mb-2 uppercase tracking-tight">{benefit.title}</h3>
-                   <p className="font-bold text-gray-400 leading-relaxed text-sm">
-                      {benefit.desc}
-                   </p>
-                </div>
-             </div>
-           ))}
+    <div className="min-h-screen bg-white">
+      {/* Hero Section */}
+      <section className="relative py-24 px-6 overflow-hidden bg-blue-600">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-700 to-blue-500" />
+        <div className="max-w-7xl mx-auto relative z-10 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-white text-xs font-black uppercase tracking-widest mb-8 border border-white/10">
+            <Store size={14} />
+            {t("heroBadge")}
+          </div>
+          <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter mb-8 leading-none">
+            {t("heroTitle")}
+          </h1>
+          <p className="text-xl text-blue-100 font-bold max-w-2xl mx-auto mb-10">
+            {t("heroSubtitle")}
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link href="/register?role=PARTNER" className="h-16 inline-flex items-center px-12 bg-white text-blue-600 rounded-2xl font-black text-lg transition-all active:scale-95 shadow-xl shadow-blue-900/20">
+              {t("heroCta")}
+            </Link>
+            <a href="https://wa.me/905422415597" target="_blank" className="h-16 inline-flex items-center px-10 bg-blue-500 text-white border border-blue-400/30 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-blue-400 transition-all">
+              Bize Ulaşın
+            </a>
+          </div>
         </div>
+      </section>
 
-        {/* How it Works / CTA */}
-        <div className="relative p-12 md:p-20 bg-gray-900 text-white rounded-[4rem] overflow-hidden flex flex-col items-start gap-10">
-           <div className="absolute top-0 right-0 w-96 h-96 bg-orange-600/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
-           
-           <div className="max-w-xl relative z-10">
-              <h2 className="text-4xl font-black mb-6 uppercase tracking-tight">{t('howItWorks')}</h2>
-              <ul className="flex flex-col gap-6 mb-12">
-                 {[
-                   "Başvurunuzu yapın ve dükkanınızı ücretsiz sisteme kaydedin.",
-                   "Onaylanan dükkanınıza mühür ve tanıtım malzemelerinizi gönderelim.",
-                   "Gelen turistlerin valizlerini mühürleyip sisteme kaydedin, anında kazanmaya başlayın."
-                 ].map((step, i) => (
-                   <li key={i} className="flex gap-4 items-start">
-                      <div className="w-6 h-6 rounded-full bg-orange-600 text-[10px] font-black flex items-center justify-center shrink-0 mt-1">0{i+1}</div>
-                      <p className="font-bold opacity-60 leading-relaxed">{step}</p>
-                   </li>
-                 ))}
-              </ul>
-              <Link href="/contact" className="inline-flex h-20 px-12 bg-white text-gray-900 rounded-[2rem] font-black text-sm uppercase tracking-widest items-center gap-4 hover:bg-orange-600 hover:text-white transition-all shadow-2xl">
-                 {t('joinUs')}
-                 <ChevronRight size={20} />
-              </Link>
-           </div>
-           
-           <div className="hidden md:block absolute bottom-12 right-12 opacity-10 grayscale">
-              <Store size={240} strokeWidth={1} />
-           </div>
+      {/* Benefits */}
+      <section className="py-32 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            {[1, 2, 3].map((idx) => {
+              const Icons = [TrendingUp, Shield, Smartphone];
+              const Icon = Icons[idx - 1];
+              const titleKey = `benefit${idx}Title`;
+              const descKey = `benefit${idx}Desc`;
+              return (
+                <div key={idx} className="flex flex-col gap-6">
+                  <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
+                    <Icon size={32} />
+                  </div>
+                  <h3 className="text-2xl font-black text-gray-900 tracking-tight">
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    {t(titleKey as any)}
+                  </h3>
+                  <p className="text-gray-500 font-bold leading-relaxed">
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    {t(descKey as any)}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
         </div>
+      </section>
 
-      </div>
+      {/* How it works */}
+      <section className="py-32 px-6 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl font-black text-gray-900 tracking-tighter mb-20 text-center">
+            {t("howItWorksTitle")}
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            {[1, 2, 3, 4].map((idx) => {
+              const titleKey = `step${idx}Title`;
+              const descKey = `step${idx}Desc`;
+              return (
+                <div key={idx} className="relative p-10 bg-white rounded-[3rem] border border-gray-100 shadow-sm">
+                  <div className="absolute -top-4 -left-4 w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-black shadow-lg shadow-blue-200">
+                    {idx}
+                  </div>
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                  <h4 className="text-xl font-black text-gray-900 mb-4">{t(titleKey as any)}</h4>
+                  <p className="text-sm text-gray-400 font-bold leading-relaxed">
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    {t(descKey as any)}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Stats/Social Proof */}
+      <section className="py-32 px-6">
+        <div className="max-w-5xl mx-auto bg-gray-900 rounded-[4rem] p-12 md:p-24 text-center text-white relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-600/20 to-transparent" />
+          <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-12 relative z-10">
+            {t("ctaTitle")}
+          </h2>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 relative z-10">
+            <Link href="/register?role=PARTNER" className="h-16 w-full sm:w-auto inline-flex items-center px-12 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black text-lg transition-all active:scale-95 shadow-xl shadow-blue-900/40">
+              {t("ctaButton")}
+              <ArrowRight className="ml-3" size={20} />
+            </Link>
+            <div className="flex items-center gap-3 px-6 py-4 bg-white/5 rounded-2xl border border-white/10">
+              <MessageCircle size={20} className="text-blue-400" />
+              <span className="text-sm font-bold uppercase tracking-widest text-blue-100">7/24 Esnaf Desteği</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Link */}
+      <section className="py-20 text-center">
+        <p className="text-gray-400 font-bold mb-4">Aklınızda başka sorular mı var?</p>
+        <Link href="/faq" className="text-blue-600 font-black hover:underline uppercase tracking-widest text-sm">
+          Sıkça Sorulan Sorulara Göz Atın
+        </Link>
+      </section>
     </div>
   );
 }
