@@ -7,15 +7,14 @@ import { Link } from "@/i18n/routing";
 import { motion, AnimatePresence } from "framer-motion";
 import { markMessageAsReadAction, deleteMessageAction } from "@/actions/admin-management";
 import { toast } from "sonner";
-import { ContactMessage } from "@prisma/client";
 
 interface AdminMessagesClientProps {
-  messages: ContactMessage[];
+  messages: any[]; // Prisma tipiyle çalışma sırasındaki uyuşmazlığı gidermek için esnek tip
 }
 
 export default function AdminMessagesClient({ messages: initialMessages }: AdminMessagesClientProps) {
   const t = useTranslations("Admin");
-  const [messages, setMessages] = useState<ContactMessage[]>(initialMessages);
+  const [messages, setMessages] = useState<any[]>(initialMessages);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"ALL" | "UNREAD">("ALL");
   const [loadingId, setLoadingId] = useState<string | null>(null);
@@ -24,9 +23,9 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
   const filteredMessages = messages.filter((m) => {
     const searchLower = search.toLowerCase();
     const matchSearch =
-      m.from.toLowerCase().includes(searchLower) ||
-      m.subject?.toLowerCase().includes(searchLower) ||
-      m.text?.toLowerCase().includes(searchLower);
+      (m.from || "").toLowerCase().includes(searchLower) ||
+      (m.subject || "").toLowerCase().includes(searchLower) ||
+      (m.text || "").toLowerCase().includes(searchLower);
 
     const matchFilter = filter === "ALL" || (filter === "UNREAD" && !m.isRead);
 
@@ -153,7 +152,7 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
                           {msg.subject || "(Konu Yok)"}
                         </p>
                         <p className="text-xs text-gray-400 font-medium mt-1 truncate">
-                          {msg.text?.substring(0, 100)}...
+                          {(msg.text || "").substring(0, 100)}...
                         </p>
                       </div>
                     </div>
@@ -187,7 +186,6 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
                     </div>
                   </div>
 
-                  {/* Expanded View */}
                   <AnimatePresence>
                     {expandedId === msg.id && (
                       <motion.div
@@ -224,18 +222,28 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
                             <div className="prose prose-sm prose-orange max-w-none prose-p:leading-relaxed text-gray-700 whitespace-pre-wrap">
                               {msg.text || msg.html || (
                                 <div className="space-y-4">
-                                  <span className="italic text-gray-400">İçerik otomatik olarak ayrıştırılamadı.</span>
-                                  {msg.raw && (
-                                    <details className="text-[10px] bg-gray-50 p-4 rounded-xl border border-gray-100 font-mono text-gray-500">
-                                      <summary className="cursor-pointer font-black uppercase tracking-widest mb-2 hover:text-orange-600 transition-colors">
-                                        Ham Veriyi Görüntüle (Raw Payload)
-                                      </summary>
-                                      <pre className="whitespace-pre-wrap break-all">{JSON.stringify(msg.raw, null, 2)}</pre>
-                                    </details>
-                                  )}
+                                  <span className="italic text-gray-400">İçerik otomatik olarak ayrıştırılamadı. Lütfen aşağıdaki ham veriyi kontrol edin.</span>
                                 </div>
                               )}
                             </div>
+                            
+                            {msg.raw && (
+                              <div className="mt-8 border-t border-gray-50 pt-8">
+                                <details className="group">
+                                  <summary className="cursor-pointer flex items-center gap-2 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-orange-600 transition-colors">
+                                    <span className="w-6 h-6 flex items-center justify-center rounded-lg bg-gray-50 group-hover:bg-orange-50 transition-colors">
+                                      {'{ }'}
+                                    </span>
+                                    Ham Veriyi Görüntüle (Raw Payload)
+                                  </summary>
+                                  <div className="mt-4 p-6 bg-gray-950 text-orange-400 rounded-3xl font-mono text-[10px] leading-relaxed overflow-x-auto border border-gray-800 shadow-inner">
+                                    <pre className="whitespace-pre-wrap break-all">
+                                      {JSON.stringify(msg.raw, null, 2)}
+                                    </pre>
+                                  </div>
+                                </details>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </motion.div>
