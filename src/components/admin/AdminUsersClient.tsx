@@ -38,13 +38,25 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
   const t = useTranslations("Admin");
   const [users, setUsers] = useState<User[]>(initialUsers);
   const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState("ALL");
+  const [statusFilter, setStatusFilter] = useState("ALL");
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
-  const filteredUsers = users.filter(u => 
-    u.email?.toLowerCase().includes(search.toLowerCase()) ||
-    u.name?.toLowerCase().includes(search.toLowerCase()) ||
-    u.lastIp?.includes(search)
-  );
+  const filteredUsers = users.filter(u => {
+    const searchLower = search.toLowerCase();
+    const matchSearch = u.email?.toLowerCase().includes(searchLower) ||
+      u.name?.toLowerCase().includes(searchLower) ||
+      u.lastIp?.includes(search);
+
+    const matchRole = roleFilter === "ALL" || u.role === roleFilter;
+
+    let matchStatus = true;
+    if (statusFilter === "BANNED") matchStatus = u.isBanned;
+    else if (statusFilter === "UNVERIFIED") matchStatus = !u.isBanned && !u.emailVerified;
+    else if (statusFilter === "ACTIVE") matchStatus = !u.isBanned && !!u.emailVerified;
+
+    return matchSearch && matchRole && matchStatus;
+  });
 
   const handleToggleBan = async (id: string, currentBan: boolean) => {
     setLoadingId(id);
@@ -106,15 +118,39 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
           </h1>
         </div>
 
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-          <input
-            type="text"
-            placeholder={t("searchUsersPlaceholder")}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-12 pr-6 py-4 bg-white border border-gray-100 rounded-2xl w-full md:w-80 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-bold text-sm"
-          />
+        <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+          <select
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+            className="px-4 py-4 bg-white border border-gray-100 rounded-2xl text-xs font-black uppercase tracking-widest text-gray-500 hover:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+          >
+            <option value="ALL">Tüm Roller</option>
+            <option value="ADMIN">Admin</option>
+            <option value="PARTNER">Esnaf</option>
+            <option value="GUEST">Misafir</option>
+          </select>
+
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-4 py-4 bg-white border border-gray-100 rounded-2xl text-xs font-black uppercase tracking-widest text-gray-500 hover:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+          >
+            <option value="ALL">Tüm Durumlar</option>
+            <option value="ACTIVE">Aktif (Doğrulanmış)</option>
+            <option value="UNVERIFIED">Doğrulanmamış</option>
+            <option value="BANNED">Banlı</option>
+          </select>
+
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              type="text"
+              placeholder={t("searchUsersPlaceholder")}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-12 pr-6 py-4 bg-white border border-gray-100 rounded-2xl w-full sm:w-64 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-bold text-sm"
+            />
+          </div>
         </div>
       </header>
 
