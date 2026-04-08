@@ -10,7 +10,8 @@
     "errorRetry": "TEKRAR DENE",
     "notFoundTitle": "KAYBOLDUN!",
     "notFoundDescription": "Aradığın emanet noktası burası değil gibi görünüyor. Belki de henüz keşfedilmemiştir?",
-    "notFoundBackHome": "ANASAYFAYA DÖN"
+    "notFoundBackHome": "ANASAYFAYA DÖN",
+    "emailVerificationRequiredBanner": "E-posta adresiniz henüz doğrulanmamış. Lütfen gelen kutunuzu kontrol edin."
   },
   "Partner": {
     "scanQr": "MÜHÜRLE VE EMANET AL",

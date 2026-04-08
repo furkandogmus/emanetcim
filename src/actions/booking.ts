@@ -53,6 +53,10 @@ export async function createBookingAction(data: CreateBookingInput) {
     return { success: false as const, error: "Oturum açmanız gerekiyor." };
   }
 
+  if (!session.user.emailVerified) {
+    return { success: false as const, error: "Lütfen rezervasyon yapabilmek için önce e-posta adresinizi doğrulayın." };
+  }
+
   const shop = await prisma.shop.findUnique({
     where: { id: data.shopId },
     include: { owner: { select: { phone: true } } },

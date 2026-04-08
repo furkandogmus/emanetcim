@@ -68,6 +68,7 @@ import { Providers } from "@/components/Providers";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import CookieConsent from "@/components/CookieConsent";
+import VerificationBanner from "@/components/layout/VerificationBanner";
 
 export default async function RootLayout({
   children,
@@ -128,6 +129,7 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <Providers>
             <PWARegister />
+            <VerificationBanner />
             <Header />
             <main className="min-h-screen">
               {children}

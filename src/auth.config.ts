@@ -55,16 +55,12 @@ export const authConfig: NextAuthConfig = {
           throw new Error("UserBanned");
         }
 
-        // Email doğrulama kontrolü: Eğer email varsa doğrulanmış olmalı
-        if (user.email && !user.emailVerified) {
-          throw new Error("EmailVerificationRequired");
-        }
-
         return {
           id: user.id,
           email: user.email,
           name: user.name,
           role: user.role,
+          emailVerified: user.emailVerified,
         };
       },
     }),
@@ -88,7 +84,8 @@ export const authConfig: NextAuthConfig = {
     async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
-        token.role = user.role;
+        token.role = (user as any).role;
+        token.emailVerified = (user as any).emailVerified;
       }
       if (trigger === "update" && session) {
         token.name = session.user.name;
@@ -99,6 +96,7 @@ export const authConfig: NextAuthConfig = {
       if (token && session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as Role;
+        session.user.emailVerified = token.emailVerified as Date | null;
       }
       return session;
     },

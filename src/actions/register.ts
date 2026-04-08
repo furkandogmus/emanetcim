@@ -8,6 +8,7 @@ import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
 import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
+import { isDisposableEmail } from "@/lib/disposable-emails";
 
 const guestSchema = z.object({
   email: z.string().email(),
@@ -43,6 +44,11 @@ export async function registerGuestAction(data: unknown) {
   }
 
   const email = parsed.data.email.trim().toLowerCase();
+  
+  if (isDisposableEmail(email)) {
+    return { success: false as const, error: "Geçici e-posta adresleri güvenlik nedeniyle kabul edilmemektedir." };
+  }
+
   const exists = await prisma.user.findUnique({ where: { email } });
   if (exists) {
     return { success: false as const, error: "Bu e-posta adresi zaten kayıtlı." };
@@ -86,6 +92,9 @@ export async function registerPartnerApplicationAction(data: unknown) {
 
   const email = parsed.data.email?.trim().toLowerCase() || null;
   if (email) {
+    if (isDisposableEmail(email)) {
+      return { success: false as const, error: "Geçici e-posta adresleri güvenlik nedeniyle kabul edilmemektedir." };
+    }
     const exists = await prisma.user.findUnique({ where: { email } });
     if (exists) {
       return { success: false as const, error: "Bu e-posta adresi zaten kayıtlı." };

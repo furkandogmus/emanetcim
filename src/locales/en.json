@@ -9,8 +9,9 @@
     "errorDescription": "We hit a technical issue. Please try refreshing the page.",
     "errorRetry": "TRY AGAIN",
     "notFoundTitle": "LOST?",
-    "notFoundDescription": "This doesn’t look like the storage point you were looking for. Maybe it hasn’t been discovered yet?",
-    "notFoundBackHome": "BACK TO HOME"
+    "notFoundDescription": "The luggage point you're looking for doesn't seem to be here. Maybe it hasn't been discovered yet?",
+    "notFoundBackHome": "BACK TO HOME",
+    "emailVerificationRequiredBanner": "Your email address is not verified yet. Please check your inbox."
   },
   "Partner": {
     "scanQr": "SEAL & DROP-OFF",
