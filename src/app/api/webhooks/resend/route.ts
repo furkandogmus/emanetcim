@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
   try {
@@ -21,18 +24,35 @@ export async function POST(req: Request) {
     const data = isNested ? body.data : body;
     
     // Inbound e-postalarda type olmayabilir, bu yüzden sadece body.type kontrolü yapmak riskli.
-    // Eğer nested ise ve tip "email.received" değilse (örn: email.sent), isteğe göre filtreleyebiliriz.
     if (isNested && body.type && body.type !== "email.received") {
       return NextResponse.json({ message: "Ignored event type: " + body.type }, { status: 200 });
     }
 
-    const { from, to, subject } = data;
+    const { from, to, subject, email_id } = data;
     
-    // Robust Content Extraction (Farklı Resend sürümleri ve formatlar için)
+    // Başlangıç değerleri (webhook içinden gelenler)
     let text = data.text || data.content?.text || data.body || data.snippet || "";
     let html = data.html || data.content?.html || "";
 
-    // Eğer hiçbir içerik yoksa, tüm body'yi text olarak kaydedelim ki admin ne geldiğini görebilsin
+    /**
+     * EĞER İÇERİK BOŞ VE email_id VARSA:
+     * Resend'den tam e-posta içeriğini API yoluyla çekelim.
+     * (E-posta bildirimlerinde içerik doğrudan payload'da olmayabilir.)
+     */
+    if ((!text && !html) && email_id) {
+      try {
+        const fullEmail = await resend.emails.get(email_id);
+        if (fullEmail?.data) {
+          text = fullEmail.data.text || text;
+          html = fullEmail.data.html || html;
+        }
+      } catch (fetchError) {
+        console.error("[Resend Webhook Fetch Error]", fetchError);
+        // Hata durumunda webhook içindeki kısıtlı bilgiyle devam edilir.
+      }
+    }
+
+    // Eğer hala hiçbir içerik yoksa, tüm body'yi text olarak kaydedelim ki admin ne geldiğini görebilsin
     if (!text && !html) {
       text = "[Otomatik Yakalama] İçerik bulunamadı. Ham Veri:\n" + JSON.stringify(body, null, 2);
     }
