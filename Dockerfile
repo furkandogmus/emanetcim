@@ -17,9 +17,6 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # prisma generate / build için geçerli biçimde URL (çalışma anında compose verir)
 ENV DATABASE_URL="postgresql://bagajpark:bagajpark@localhost:5432/bagajpark?schema=public"
 # next build (production) — requireProdSecrets + iyzipay modülü için placeholder (runtime compose ile değiştirilir)
-ENV AUTH_SECRET="docker-build-placeholder-not-for-production"
-ENV IYZICO_API_KEY="docker-build-placeholder"
-ENV IYZICO_SECRET_KEY="docker-build-placeholder"
 RUN npx prisma generate
 RUN npm run build
 
