@@ -31,6 +31,11 @@ export type MarketplacePaymentInput = {
   subMerchantPrice: number;
   card: PaymentCardInput;
   buyer: PaymentBuyerInput;
+  ip: string;
+  shopLocation?: {
+    city: string;
+    address: string;
+  };
 };
 
 /** iyzico SDK / dahili mock yanıtı */
@@ -104,27 +109,27 @@ export class PaymentService implements IPaymentService {
         gsmNumber: data.buyer.phone || '+905000000000',
         email: data.buyer.email,
         identityNumber: '11111111111',
-        lastLoginDate: '2023-10-05 12:43:35',
-        registrationDate: '2023-10-05 12:43:35',
-        registrationAddress: 'Nisantasi Istanbul',
-        ip: '85.34.78.112',
-        city: 'Istanbul',
+        lastLoginDate: new Date().toISOString().slice(0, 19).replace('T', ' '),
+        registrationDate: new Date().toISOString().slice(0, 19).replace('T', ' '),
+        registrationAddress: data.shopLocation?.address || 'Istanbul',
+        ip: data.ip || '85.34.78.112',
+        city: data.shopLocation?.city || 'Istanbul',
         country: 'Turkey',
-        zipCode: '34732'
+        zipCode: '34000'
       },
       shippingAddress: {
         contactName: data.buyer.name,
-        city: 'Istanbul',
+        city: data.shopLocation?.city || 'Istanbul',
         country: 'Turkey',
-        address: 'Nisantasi Istanbul',
-        zipCode: '34732'
+        address: data.shopLocation?.address || 'Istanbul',
+        zipCode: '34000'
       },
       billingAddress: {
         contactName: data.buyer.name,
-        city: 'Istanbul',
+        city: data.shopLocation?.city || 'Istanbul',
         country: 'Turkey',
-        address: 'Nisantasi Istanbul',
-        zipCode: '34732'
+        address: data.shopLocation?.address || 'Istanbul',
+        zipCode: '34000'
       },
       basketItems: [
         {
@@ -141,7 +146,7 @@ export class PaymentService implements IPaymentService {
 
     // 3. iyzico Ödemesini Başlat (Development Bypass for Testing)
     if (process.env.NODE_ENV === "development" && (process.env.IYZICO_API_KEY === "sandbox-api-key" || !process.env.IYZICO_API_KEY)) {
-      console.log("💰 [DEV MODE] Simulating successful payment for booking:", data.bookingId);
+      logger.info({ bookingId: data.bookingId }, "payment_simulate_success_dev");
       const paymentId = `MOCK_TX_${Date.now()}`;
       try {
         await prisma.paymentLog.create({
@@ -272,10 +277,10 @@ export class PaymentService implements IPaymentService {
         })
       ]);
 
-      console.log(`[Webhook Success] Booking ${conversationId} confirmed via Webhook.`);
+      logger.info({ bookingId: conversationId }, "payment_webhook_confirmed");
       return { success: true, message: "Confirmed" };
     } catch (error) {
-      console.error(`[Webhook Error] DB Update failed for ${conversationId}:`, error);
+      logger.error({ conversationId, error }, `[Webhook Error] DB Update failed`);
       throw error; // Üst katmanda 500 dönmesi için (iyzico tekrar denesin)
     }
   }
@@ -296,7 +301,7 @@ export class PaymentService implements IPaymentService {
 
     // 2. Geliştirme Modu Bypass
     if (process.env.NODE_ENV === "development" && (!process.env.IYZICO_API_KEY || process.env.IYZICO_API_KEY === "sandbox-api-key")) {
-      console.log("💰 [DEV MODE] Simulating successful refund for booking:", bookingId);
+      logger.info({ bookingId }, "payment_refund_simulate_success_dev");
       return { status: "success", amount };
     }
 
@@ -307,7 +312,7 @@ export class PaymentService implements IPaymentService {
       paymentTransactionId: paymentLog.transactionId,
       price: amount.toString(),
       currency: Iyzipay.CURRENCY.TRY,
-      ip: '85.34.78.112'
+      ip: '127.0.0.1' // Refund calls are server-to-server internal
     };
 
     const result = (await withTimeout(

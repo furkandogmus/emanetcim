@@ -113,9 +113,6 @@ export default function AdminBlogEditClient({ post, locale: currentLocale }: Adm
                 className="w-full px-6 py-6 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-orange-500/10 focus:bg-white transition-all min-h-[500px] font-medium leading-relaxed"
                 placeholder="Yazı içeriğini buraya yazın..."
               />
-              <p className="mt-2 text-[10px] text-gray-400 px-1 uppercase tracking-widest">
-                Şu an düz metin/HTML desteklenmektedir. Yakında zengin editör eklenecek.
-              </p>
             </div>
           </div>
         </div>

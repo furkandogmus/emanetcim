@@ -28,7 +28,7 @@ export class NotificationService implements INotificationService {
       let errorDetail: string | null = null;
 
       if (resendKey && to.includes("@")) {
-        const from = process.env.RESEND_FROM || "BagajPark <onboarding@resend.dev>";
+        const from = process.env.RESEND_FROM || "BagajPark <info@bagajpark.com>";
         const r = await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {

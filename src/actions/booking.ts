@@ -16,6 +16,7 @@ import { computeAuthoritativeCheckoutTotals } from "@/lib/booking-server-price";
 import { getPricingRules } from "@/lib/platform-settings";
 import { moneyToNumber } from "@/lib/money";
 import type { PrismaClient } from "@prisma/client";
+import { headers } from "next/headers";
 
 /** İnteraktif transaction istemcisi (Prisma.TransactionClient ile uyumlu). */
 type PrismaTransactionClient = Omit<
@@ -153,6 +154,10 @@ export async function createBookingAction(data: CreateBookingInput) {
     return { success: false as const, error: "Rezervasyon oluşturulamadı." };
   }
 
+  // Production Hardening: Real IP and Shop Location
+  const headerList = await headers();
+  const forwardedFor = headerList.get("x-forwarded-for");
+  const ip = forwardedFor ? forwardedFor.split(",")[0] : "127.0.0.1";
   const subMerchantPrice = computeSubMerchantShare(totalPrice);
 
   try {
@@ -167,6 +172,11 @@ export async function createBookingAction(data: CreateBookingInput) {
         name: session.user.name || "Misafir",
         email: session.user.email || "guest@bagajpark.local",
         phone: (session.user as { phone?: string }).phone,
+      },
+      ip,
+      shopLocation: {
+        city: "Istanbul",
+        address: shop.address || "Istanbul",
       },
     });
 

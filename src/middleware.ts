@@ -23,10 +23,6 @@ const authProxy = auth((req) => {
   const isLoggedIn = !!req.auth;
   const userRole = req.auth?.user?.role;
 
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`[Proxy] Path: ${pathname} | LoggedIn: ${isLoggedIn} | Role: ${userRole}`);
-  }
-
   // 1. Static Asset Bypass (Fast-path)
 
   if (
