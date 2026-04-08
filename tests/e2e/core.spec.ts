@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Emanetçi Core Flows', () => {
+test.describe('BagajPark Core Flows', () => {
 
   test('should load the landing page and show the hero section', async ({ page }) => {
     // Navigate to TR locale specifically

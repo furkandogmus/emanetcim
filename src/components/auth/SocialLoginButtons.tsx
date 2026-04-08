@@ -53,7 +53,7 @@ export default function SocialLoginButtons() {
          {isDemoOpen && (
            <div className="grid grid-cols-3 gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
               <button 
-                onClick={() => handleDemoLogin("admin@emanetci.com")}
+                onClick={() => handleDemoLogin("admin@bagajpark.com")}
                 className="bg-orange-50 hover:bg-orange-100 p-4 rounded-2xl flex flex-col items-center gap-2 transition-all group"
               >
                 <ShieldCheck size={20} className="text-orange-600" />

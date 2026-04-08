@@ -1,6 +1,6 @@
-// Emanetçi Service Worker — PWA ikon/manifest; sayfa ve Next.js iç yollarına müdahale etme.
+// BagajPark Service Worker — PWA ikon/manifest; sayfa ve Next.js iç yollarına müdahale etme.
 // (ngrok ara sayfası / RSC / OAuth için navigasyon ve _next cache'lenmez.)
-const CACHE_NAME = 'emanetci-v4';
+const CACHE_NAME = 'bagajpark-v4';
 const ASSETS_TO_CACHE = ['/manifest.json', '/icons/icon-192x192.png', '/icons/icon-512x512.png'];
 
 self.addEventListener('install', (event) => {

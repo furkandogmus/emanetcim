@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Emanetçi Production Hardening & PWA E2E Tests', () => {
+test.describe('BagajPark Production Hardening & PWA E2E Tests', () => {
 
   // 1. Güvenlik & Middleware (Auth Redirects)
   test('Middleware: should redirect unauthenticated users to login with callbackUrl', async ({ page }) => {
@@ -26,7 +26,7 @@ test.describe('Emanetçi Production Hardening & PWA E2E Tests', () => {
     const response = await page.goto('/manifest.json');
     expect(response?.ok()).toBeTruthy();
     const manifest = await response?.json();
-    expect(manifest.short_name).toBe('Emanetçi');
+    expect(manifest.short_name).toBe('BagajPark');
   });
 
   test('PWA: sw.js (Service Worker) should be accessible', async ({ page }) => {

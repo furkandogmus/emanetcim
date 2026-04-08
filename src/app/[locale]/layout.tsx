@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://bagajpark.com"),
   title: "BagajPark | Valizini Güvenle Bırak, Özgürce Gez",
   description: "Türkiye'nin en yaygın ve güvenilir emanet noktası ağı. Valizini esnafımıza bırak, şehri özgürce keşfet.",
-  keywords: ["valiz emanet", "bagaj bırakma", "istanbul luggage storage", "emanetçi", "emanet noktası", "güvenli bagaj", "esnaf emanet"],
+  keywords: ["valiz emanet", "bagaj bırakma", "istanbul luggage storage", "bagajpark", "emanet noktası", "güvenli bagaj", "esnaf emanet"],
   authors: [{ name: "BagajPark", url: "https://bagajpark.com" }],
   openGraph: {
     type: "website",

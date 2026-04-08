@@ -4,7 +4,7 @@ import type { PricingRules } from '@/lib/pricing-rules';
 import { DEFAULT_PRICING_RULES } from '@/lib/pricing-rules';
 
 /**
- * PricingService - Emanetçi Fiyatlandırma ve İade Motoru
+ * PricingService - BagajPark Fiyatlandırma ve İade Motoru
  * Hem rezervasyon tutarını hem de erken teslimat iadelerini hesaplar.
  */
 export class PricingService {

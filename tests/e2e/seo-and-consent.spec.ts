@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 /** `CookieConsent` bileşeni ile aynı anahtar — e2e bağımsız kalsın diye burada tekrarlanır. */
-const COOKIE_CONSENT_STORAGE_KEY = "emanetci-cookie-consent";
+const COOKIE_CONSENT_STORAGE_KEY = "bagajpark-cookie-consent";
 
 test.describe("SEO: robots ve sitemap", () => {
   test("robots.txt: sitemap adresi ve temel disallow kuralları", async ({

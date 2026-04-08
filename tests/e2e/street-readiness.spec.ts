@@ -4,7 +4,7 @@ import { test, expect } from '@playwright/test';
  * Sokak senaryosu: misafir arama → checkout → (demo) ödeme başarısı.
  * Partner check-in/out QR + kamera gerektirdiği için ayrı manuel / cihaz testi önerilir.
  */
-test.describe('Emanetçi: guest booking smoke', () => {
+test.describe('BagajPark: guest booking smoke', () => {
   test('Search → checkout → payment success', async ({ page }) => {
     await page.goto('/tr');
     await expect(page.locator('h1')).toContainText(/Güvenle Bırak|Valizini/i);

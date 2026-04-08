@@ -42,7 +42,7 @@ export default function Footer() {
                 <MessageCircle size={18} />
               </Link>
               <a
-                href="mailto:destek@emanetci.com"
+                href="mailto:destek@bagajpark.com"
                 className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-orange-50 hover:text-orange-600 transition-all"
                 aria-label={t("ariaEmail")}
               >

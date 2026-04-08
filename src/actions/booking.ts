@@ -161,7 +161,7 @@ export async function createBookingAction(data: CreateBookingInput) {
       buyer: {
         id: session.user.id,
         name: session.user.name || "Misafir",
-        email: session.user.email || "guest@emanetci.local",
+        email: session.user.email || "guest@bagajpark.local",
         phone: (session.user as { phone?: string }).phone,
       },
     });

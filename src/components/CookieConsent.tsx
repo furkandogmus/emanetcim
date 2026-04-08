@@ -5,13 +5,13 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { Cookie } from "lucide-react";
 
-export const COOKIE_CONSENT_STORAGE_KEY = "emanetci-cookie-consent";
+export const COOKIE_CONSENT_STORAGE_KEY = "bagajpark-cookie-consent";
 
 export type CookieConsentScope = "all" | "essential";
 
 declare global {
   interface WindowEventMap {
-    "emanetci:cookie-consent": CustomEvent<{ scope: CookieConsentScope }>;
+    "bagajpark:cookie-consent": CustomEvent<{ scope: CookieConsentScope }>;
   }
 }
 
@@ -39,7 +39,7 @@ export default function CookieConsent() {
     }
     setVisible(false);
     window.dispatchEvent(
-      new CustomEvent("emanetci:cookie-consent", { detail: { scope } }),
+      new CustomEvent("bagajpark:cookie-consent", { detail: { scope } }),
     );
   }, []);
 

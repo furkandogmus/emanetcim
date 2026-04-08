@@ -18,7 +18,7 @@ const logger = pino({
       : undefined,
   base: {
     env: process.env.NODE_ENV,
-    service: 'emanetci',
+    service: 'bagajpark',
     version,
   },
   redact: [

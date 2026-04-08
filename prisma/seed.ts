@@ -7,7 +7,7 @@ import { hashPassword } from '../src/lib/auth-password';
 export const SEED_GALATA_SHOP_ID = 'e2e00000-0000-4000-8000-000000000001';
 
 /**
- * Seed Script - Emanetçi Test Verileri
+ * Seed Script - BagajPark Test Verileri
  */
 async function main() {
   console.log('Seedleme başlatılıyor...');
@@ -84,7 +84,7 @@ async function main() {
     create: {
       id: SEED_GALATA_SHOP_ID,
       ownerId: partner.id,
-      name: 'Emanetçi Test Noktası (Galata)',
+      name: 'BagajPark Test Noktası (Galata)',
       address: 'Galata Kulesi Sk. No:12, Beyoğlu, İstanbul',
       latitude: 41.0256,
       longitude: 28.9741,
