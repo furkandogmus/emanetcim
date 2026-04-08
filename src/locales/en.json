@@ -161,6 +161,13 @@
     "qrPending": "The QR code is created after payment is completed.",
     "qrAlt": "Booking QR",
     "guestDefaultName": "Guest",
+    "bookingCodeLabel": "Booking code",
+    "cityFallback": "Istanbul",
+    "searchTitle": "{query} Nearby Storage Points",
+    "searchDescription": "Find secure and insured luggage storage locations in the {query} area."
+  },
+  "Admin": {
+    "dashboardTitle": "BagajPark Admin Center",
     "totalBookings": "Total bookings",
     "pendingShops": "Pending shop approvals",
     "dailyRevenue": "Revenue (paid)",
