@@ -17,7 +17,7 @@ export const sendVerificationEmail = async (email: string, token: string) => {
     subject: "E-postanızı Doğrulayın",
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #ea580c;">BagajPark'ye Hoş Geldiniz!</h1>
+        <h1 style="color: #ea580c;">BagajPark'a Hoş Geldiniz!</h1>
         <p>Hesabınızı doğrulamak için lütfen aşağıdaki butona tıklayın:</p>
         <a href="${confirmLink}" 
            style="display: inline-block; background-color: #ea580c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
