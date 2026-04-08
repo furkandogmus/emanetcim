@@ -21,8 +21,33 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://bagajpark.com"),
   title: "Emanetçi | Valizini Güvenle Bırak, Özgürce Gez",
   description: "Türkiye'nin en yaygın ve güvenilir emanet noktası ağı. Valizini esnafımıza bırak, şehri özgürce keşfet.",
+  keywords: ["valiz emanet", "bagaj bırakma", "istanbul luggage storage", "emanetçi", "emanet noktası", "güvenli bagaj", "esnaf emanet"],
+  authors: [{ name: "Emanetçi", url: "https://bagajpark.com" }],
+  openGraph: {
+    type: "website",
+    locale: "tr_TR",
+    url: "https://bagajpark.com",
+    siteName: "Emanetçi",
+    title: "Emanetçi | Valizini Güvenle Bırak, Özgürce Gez",
+    description: "Türkiye'nin en yaygın ve güvenilir emanet noktası ağı.",
+    images: [
+      {
+        url: "/icons/icon-512x512.png",
+        width: 512,
+        height: 512,
+        alt: "Emanetçi - Güvenli Bagaj Ağı",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Emanetçi | Valizini Güvenle Bırak",
+    description: "Türkiye'nin emanet noktası ağı.",
+    images: ["/icons/icon-512x512.png"],
+  },
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -59,12 +84,47 @@ export default async function RootLayout({
 
   const messages = await getMessages();
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Emanetçi",
+    "url": "https://bagajpark.com",
+    "description": "Türkiye'nin en yaygın ve güvenilir emanet noktası ağı.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://bagajpark.com/search?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  };
+
+  const orgLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Emanetçi",
+    "url": "https://bagajpark.com",
+    "logo": "https://bagajpark.com/icons/icon-512x512.png",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+90-542-241-55-97",
+      "contactType": "customer service",
+      "availableLanguage": ["Turkish", "English"]
+    }
+  };
+
   return (
     <html lang={locale} suppressHydrationWarning>
       <body
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} bg-gray-50 antialiased selection:bg-orange-100 selection:text-orange-900`}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }}
+        />
         <NextIntlClientProvider messages={messages}>
           <Providers>
             <PWARegister />
