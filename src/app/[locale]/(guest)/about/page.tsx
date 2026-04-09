@@ -60,7 +60,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
               {t("whyUs")}
             </h2>
             <p className="text-4xl font-black text-gray-900 tracking-tighter">
-              Bizi biz yapan değerlerimiz
+              {t("ourValues")}
             </p>
           </div>
 
@@ -95,10 +95,10 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
         <div className="max-w-7xl mx-auto bg-gray-900 rounded-[4rem] p-12 md:p-24 text-center overflow-hidden relative">
           <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 to-transparent pointer-events-none" />
           <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-8 relative z-10">
-            Yüklerinizden kurtulup şehri özgürce <br /> keşfetmeye hazır mısınız?
+            {t("ctaTitle")}
           </h2>
           <Link href="/search" className="inline-flex h-16 items-center px-12 bg-orange-600 hover:bg-orange-700 text-white rounded-2xl font-black text-lg transition-all active:scale-95 relative z-10 shadow-xl shadow-orange-900/40">
-            Hemen Emanet Noktası Bul
+            {t("ctaButton")}
           </Link>
         </div>
       </section>

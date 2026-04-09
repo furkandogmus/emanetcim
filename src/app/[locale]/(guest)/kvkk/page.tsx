@@ -51,11 +51,9 @@ export default async function KvkkPage({ params }: { params: Promise<{ locale: s
             })}
           </div>
 
-          <div className="mt-20 p-12 bg-gray-900 rounded-[3rem] text-center">
-            <h3 className="text-xl font-black text-white mb-4">Veri Haklarınız İçin Bize Ulaşın</h3>
-            <p className="text-gray-400 text-sm font-bold mb-8">
-              KVKK kapsamındaki taleplerinizi ve veri silme isteklerinizi e-posta yoluyla iletebilirsiniz.
-            </p>
+          <div className="mt-20 p-12 bg-gray-900 rounded-[3rem] text-center text-white">
+            <h3 className="text-xl font-black mb-4">{t("contactTitle")}</h3>
+            <p className="text-gray-400 font-bold mb-8">{t("contactBody")}</p>
             <a href="mailto:kvkk@bagajpark.com" className="inline-flex h-14 items-center px-10 bg-orange-600 hover:bg-orange-700 text-white rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-xl shadow-orange-900/20">
               kvkk@bagajpark.com
             </a>

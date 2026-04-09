@@ -1,9 +1,10 @@
-"use client";
-
 import { motion } from 'framer-motion';
+import { useTranslations } from "next-intl";
 
 export default function Loading() {
-  return (
+   const t = useTranslations("Common");
+
+   return (
     <div className="fixed inset-0 z-[100] bg-white/60 backdrop-blur-md flex flex-col items-center justify-center p-12">
       <div className="relative flex flex-col items-center gap-12 max-w-sm animate-in fade-in duration-500">
         
@@ -27,7 +28,7 @@ export default function Loading() {
         </div>
 
         <div className="flex flex-col gap-3 text-center">
-           <h2 className="text-sm font-black uppercase tracking-widest text-gray-900 animate-pulse">Hazırlanıyor...</h2>
+           <h2 className="text-sm font-black uppercase tracking-widest text-gray-900 animate-pulse">{t("loading")}</h2>
            <div className="h-1 w-48 bg-gray-50 rounded-full overflow-hidden">
               <motion.div 
                 initial={{ x: "-100%" }}

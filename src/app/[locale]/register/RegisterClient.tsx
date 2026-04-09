@@ -23,6 +23,7 @@ type RegisterType = 'GUEST' | 'PARTNER';
 
 export default function RegisterPage() {
   const t = useTranslations('Auth');
+  const tCommon = useTranslations('Common');
   const [activeTab, setActiveTab] = useState<RegisterType>('GUEST');
   
   const [isPending, setIsPending] = useState(false);
@@ -120,10 +121,7 @@ export default function RegisterPage() {
               activeTab === 'GUEST' ? "bg-white text-orange-600 shadow-sm" : "text-gray-400 hover:text-gray-600"
             }`}
           >
-            {t('demoGuest').replace(' Demo', '').replace(' Girişi', '').replace(' Misafir', 'Misafir')}
-            {/* Note: I'll use roleGuest from UserNav instead if available, but for now I'll just adjust. 
-                Wait, I have roleGuest in UserNav. Let's use that. */}
-            {/* Re-thinking: Better to use the specific keys I'll add if needed, or use existing role keys. */}
+            {tCommon('demoMisafir')}
           </button>
           <button
             onClick={() => setActiveTab('PARTNER')}
@@ -131,8 +129,7 @@ export default function RegisterPage() {
               activeTab === 'PARTNER' ? "bg-white text-orange-600 shadow-sm" : "text-gray-400 hover:text-gray-600"
             }`}
           >
-            {/* Let's use simple strings for tabs, or get them from a shared place. */}
-            Esnaf
+            {tCommon('demoEsnaf')}
           </button>
         </div>
         {/* Wait, let's just use the keys I should've checked... */}

@@ -9,8 +9,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "Guest" });
   return {
-    title: t("blogTitle") || "BagajPark Blog | Seyahat İpuçları ve Bavul Emanet Rehberi",
-    description: t("blogDescription") || "Seyahat ederken yüklerinden kurtulmanın yolları, İstanbul rehberi ve bagaj güvenliği hakkında her şey.",
+    title: t("blogTitle"),
+    description: t("blogDescription"),
   };
 }
 
@@ -40,7 +40,7 @@ export default async function BlogListPage({
             Bagaj<span className="text-orange-600">Park</span> Blog
           </h1>
           <p className="text-lg md:text-xl font-bold text-gray-400 max-w-2xl mx-auto leading-relaxed">
-            {t("blogTagline") || "Seyahatlerinizi kolaylaştıracak ipuçları, şehir rehberleri ve bavul emanetine dair her şey burada."}
+            {t("blogTagline")}
           </p>
         </div>
       </section>
@@ -50,7 +50,7 @@ export default async function BlogListPage({
         <div className="max-w-7xl mx-auto">
           {posts.length === 0 ? (
             <div className="text-center py-20 bg-gray-50 rounded-[3rem] border border-dashed border-gray-200">
-              <p className="text-gray-400 font-bold uppercase tracking-widest">{t("noPostsFound") || "Henüz yazı paylaşılmadı."}</p>
+              <p className="text-gray-400 font-bold uppercase tracking-widest">{t("noPostsFound")}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -74,7 +74,7 @@ export default async function BlogListPage({
                       </div>
                     )}
                     <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-orange-600 border border-white/20">
-                      {post.locale === "tr" ? "Seyahat" : "Travel"}
+                      {t("blogCategoryTravel")}
                     </div>
                   </div>
 
@@ -90,7 +90,7 @@ export default async function BlogListPage({
                       {post.excerpt || post.content.substring(0, 150).replace(/<[^>]*>/g, "")}
                     </p>
                     <div className="mt-auto flex items-center gap-1 text-xs font-black uppercase tracking-widest text-gray-900 group-hover:gap-2 transition-all">
-                      {t("readMore") || "Devamını Oku"} <ChevronRight size={16} className="text-orange-600" />
+                      {t("readMore")} <ChevronRight size={16} className="text-orange-600" />
                     </div>
                   </div>
                 </Link>

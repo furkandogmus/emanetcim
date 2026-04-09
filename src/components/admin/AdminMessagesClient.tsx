@@ -142,14 +142,14 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-3 mb-1">
                           <span className={`text-sm ${msg.isRead ? "font-bold text-gray-900" : "font-black text-gray-900"}`}>
-                            {msg.from || "İsimsiz"}
+                            {msg.from || t("anonymous")}
                           </span>
                           {!msg.isRead && (
                             <span className="w-2 h-2 rounded-full bg-orange-500"></span>
                           )}
                         </div>
                         <p className={`text-sm truncate ${msg.isRead ? "text-gray-500 font-medium" : "text-gray-900 font-bold"}`}>
-                          {msg.subject || "(Konu Yok)"}
+                          {msg.subject || t("noSubject")}
                         </p>
                         <p className="text-xs text-gray-400 font-medium mt-1 truncate">
                           {(msg.text || "").substring(0, 100)}...
@@ -160,7 +160,7 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
                     <div className="flex items-center justify-between md:justify-end gap-6 md:w-48 flex-shrink-0">
                       <div className="text-xs font-bold text-gray-400 flex items-center gap-1.5">
                         <Clock size={12} />
-                        {new Date(msg.createdAt).toLocaleDateString("tr-TR", { month: "short", day: "numeric", hour: "2-digit", minute:"2-digit" })}
+                        {new Date(msg.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute:"2-digit" })}
                       </div>
                       
                       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -203,13 +203,13 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
                               <div className="flex justify-between items-start">
                                 <div>
                                   <p className="font-bold text-gray-900">{msg.from}</p>
-                                  <p className="text-xs text-gray-500 mt-0.5">Alıcı: <span className="font-mono">{msg.to}</span></p>
+                                  <p className="text-xs text-gray-500 mt-0.5">{t("receiverPrefix")} <span className="font-mono">{msg.to}</span></p>
                                 </div>
                                 <a 
                                   href={`mailto:${msg.from}?subject=RE: ${msg.subject}`}
                                   className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-orange-600 transition-colors"
                                 >
-                                  <Reply size={14} /> Cevapla
+                                  <Reply size={14} /> {t("replyLabel")}
                                 </a>
                               </div>
                             </div>
@@ -217,12 +217,12 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
                           
                           <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
                             <h3 className="text-lg font-black text-gray-900 mb-6 pb-6 border-b border-gray-50 break-words">
-                              {msg.subject || "(Konu Yok)"}
+                              {msg.subject || t("noSubject")}
                             </h3>
                             <div className="prose prose-sm prose-orange max-w-none prose-p:leading-relaxed text-gray-700 whitespace-pre-wrap">
                               {msg.text || msg.html || (
                                 <div className="space-y-4">
-                                  <span className="italic text-gray-400">İçerik otomatik olarak ayrıştırılamadı. Lütfen aşağıdaki ham veriyi kontrol edin.</span>
+                                  <span className="italic text-gray-400">{t("contentParseError")}</span>
                                 </div>
                               )}
                             </div>
@@ -234,7 +234,7 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
                                     <span className="w-6 h-6 flex items-center justify-center rounded-lg bg-gray-50 group-hover:bg-orange-50 transition-colors">
                                       {'{ }'}
                                     </span>
-                                    Ham Veriyi Görüntüle (Raw Payload)
+                                    {t("viewRawData")}
                                   </summary>
                                   <div className="mt-4 p-6 bg-gray-950 text-orange-400 rounded-3xl font-mono text-[10px] leading-relaxed overflow-x-auto border border-gray-800 shadow-inner">
                                     <pre className="whitespace-pre-wrap break-all">

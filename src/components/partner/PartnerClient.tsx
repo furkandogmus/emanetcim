@@ -693,7 +693,12 @@ export default function PartnerClient({
                                 : "bg-orange-50 text-orange-500"
                         }`}
                       >
-                        {booking.status}
+                        {booking.status === "CHECKED_OUT" && t("statusCheckedOut")}
+                        {booking.status === "CANCELLED" && t("statusCancelled")}
+                        {booking.status === "CHECKED_IN" && t("statusCheckedIn")}
+                        {booking.status === "PAID" && t("statusPaid")}
+                        {booking.status === "PENDING" && t("statusPending")}
+                        {!["CHECKED_OUT", "CANCELLED", "CHECKED_IN", "PAID", "PENDING"].includes(booking.status) && booking.status}
                       </div>
                     </div>
 

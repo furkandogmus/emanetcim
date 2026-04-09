@@ -7,8 +7,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "Guest" });
   return {
-    title: t("searchTitle") || "Emanet Noktası Ara",
-    description: t("searchDescription") || "Sana en yakın BagajPark emanet noktalarını bul ve valizini güvenle bırak.",
+    title: t("searchTitle"),
+    description: t("searchDescription"),
   };
 }
 

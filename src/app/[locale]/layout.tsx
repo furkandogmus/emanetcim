@@ -20,50 +20,51 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
-export const metadata: Metadata = {
-  metadataBase: new URL("https://bagajpark.com"),
-  title: {
-    template: "%s | BagajPark",
-    default: "BagajPark | Valizini Güvenle Bırak, Özgürce Gez",
-  },
-  description: "Türkiye'nin en yaygın ve güvenilir yerel emanet ağı. Valizini güvenli noktalara bırak, şehri yüklerin olmadan keşfet.",
-  keywords: ["valiz emanet", "bagaj bırakma", "istanbul luggage storage", "bagajpark", "emanet noktası", "güvenli bagaj", "esnaf emanet"],
-  alternates: {
-    canonical: "/",
-  },
-  authors: [{ name: "BagajPark", url: "https://bagajpark.com" }],
-  openGraph: {
-    type: "website",
-    locale: "tr_TR",
-    url: "https://bagajpark.com",
-    siteName: "BagajPark",
-    title: "BagajPark | Valizini Güvenle Bırak, Özgürce Gez",
-    description: "Türkiye'nin en yaygın ve güvenilir emanet noktası ağı.",
-    images: [
-      {
-        url: "/icons/icon-512x512.png",
-        width: 512,
-        height: 512,
-        alt: "BagajPark - Güvenli Bagaj Ağı",
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "SEO" });
+
+  return {
+    metadataBase: new URL("https://bagajpark.com"),
+    title: {
+      template: "%s | BagajPark",
+      default: t("title"),
+    },
+    description: t("description"),
+    keywords: t("keywords").split(",").map(k => k.trim()),
+    alternates: {
+      canonical: "/",
+      languages: {
+        "tr": "/tr",
+        "en": "/en",
       },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "BagajPark | Valizini Güvenle Bırak",
-    description: "Türkiye'nin emanet noktası ağı.",
-    images: ["/icons/icon-512x512.png"],
-  },
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "BagajPark",
-  },
-  icons: {
-    apple: "/icons/icon-192x192.png",
-  },
-};
+    },
+    authors: [{ name: "BagajPark", url: "https://bagajpark.com" }],
+    openGraph: {
+      type: "website",
+      locale: locale === "tr" ? "tr_TR" : "en_US",
+      url: `https://bagajpark.com/${locale}`,
+      siteName: "BagajPark",
+      title: t("ogTitle"),
+      description: t("ogDescription"),
+      images: [
+        {
+          url: "/icons/icon-512x512.png",
+          width: 512,
+          height: 512,
+          alt: "BagajPark",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: t("title"),
+      description: t("description"),
+      images: ["/icons/icon-512x512.png"],
+    },
+    manifest: "/manifest.json",
+  };
+}
 
 import {NextIntlClientProvider} from 'next-intl';
 import {getMessages} from 'next-intl/server';
@@ -89,6 +90,7 @@ export default async function RootLayout({
     notFound();
   }
 
+  const tSEO = await getTranslations({ locale, namespace: "SEO" });
   const messages = await getMessages();
 
   const jsonLd = {
@@ -96,7 +98,7 @@ export default async function RootLayout({
     "@type": "WebSite",
     "name": "BagajPark",
     "url": "https://bagajpark.com",
-    "description": "Türkiye'nin en yaygın ve güvenilir emanet noktası ağı.",
+    "description": tSEO("description"),
     "potentialAction": {
       "@type": "SearchAction",
       "target": "https://bagajpark.com/search?q={search_term_string}",
