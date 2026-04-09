@@ -67,7 +67,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 import {NextIntlClientProvider} from 'next-intl';
-import {getMessages} from 'next-intl/server';
+import {getMessages, getTranslations} from 'next-intl/server';
 import {notFound} from 'next/navigation';
 import {routing} from '@/i18n/routing';
 import PWARegister from '@/components/PWARegister';

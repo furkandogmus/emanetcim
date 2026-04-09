@@ -189,6 +189,7 @@
     "blogSubtitle": "Travel guides and luggage tips for Istanbul and beyond.",
     "backToBlog": "Back to Blog",
     "blogCategory": "GUIDE",
+    "blogCategoryTravel": "TRAVEL",
     "editorLabel": "BagajPark Editor",
     "ctaTitle": "Start Exploring Today!",
     "ctaDescription": "Leave your luggage at BagajPark's secure shops and explore the city free from your burdens.",
@@ -196,7 +197,12 @@
     "howItWorks": "How It Works?",
     "blogTagline": "Tips to ease your travels, city guides, and everything about luggage storage is here.",
     "noPostsFound": "No posts shared yet.",
-    "readMore": "Read More"
+    "readMore": "Read More",
+    "away": "{distance} m away",
+    "insured": "INSURED",
+    "day": "DAY",
+    "open247": "24/7",
+    "restroom": "WC"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -259,6 +265,8 @@
     "sealAssignmentCount": "Total",
     "sealNoAssignments": "No seals assigned.",
     "sealInvalidRange": "Invalid range.",
+    "sealTo": "End No",
+    "shopColumn": "Shop",
     "sealBulkCreated": "{count} seals created.",
     "sealAssigned": "{count} seals assigned.",
     "sealSelectShop": "Select shop.",
@@ -412,7 +420,13 @@
     "seoTipBody": "Use keywords and headings.",
     "fieldPlaceholderTitle": "Title...",
     "fieldPlaceholderContent": "Content...",
-    "validationRequired": "Fill all fields."
+    "validationRequired": "Fill all fields.",
+    "rating": "Rating",
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "shops": "Shops",
+    "bookings": "Bookings",
+    "delete": "Delete"
   },
   "Auth": {
     "loginTitle": "Sign in to BagajPark",
@@ -698,15 +712,6 @@
   },
   "Review": {
     "placeholder": "Your thoughts on the shop and service..."
-  },
-  "Admin": {
-    "dashboard": "Dashboard",
-    "users": "Users",
-    "shops": "Shops",
-    "bookings": "Bookings",
-    "approve": "Approve",
-    "reject": "Reject",
-    "delete": "Delete"
   },
   "AdminStatus": {
     "title": "Platform Technical Audit",

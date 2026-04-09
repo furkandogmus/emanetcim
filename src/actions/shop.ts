@@ -28,7 +28,14 @@ export async function updateShopSettingsAction(
 
   if (!session?.user?.id) throw new Error("Errors.authRequired");
 
-  if (!shop || shop.ownerId !== session.user.id) {
+  const shop = await prisma.shop.findUnique({
+    where: { id: shopId },
+    select: { ownerId: true },
+  });
+
+  if (!shop) throw new Error("Errors.shopNotFound");
+
+  if (shop.ownerId !== session.user.id) {
     if (session.user.role !== "ADMIN") throw new Error("Errors.unauthorized");
   }
 

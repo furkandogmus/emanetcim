@@ -209,7 +209,7 @@ export default function AdminSealInventoryClient({ sealCounts, shops, assignedBa
           <table className="w-full text-left">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Dükkan</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">{t("shopColumn")}</th>
                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">{t("sealRange")}</th>
                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">{t("sealAssignmentCount")}</th>
               </tr>

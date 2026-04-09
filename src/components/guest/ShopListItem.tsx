@@ -1,4 +1,5 @@
 import { MapPin, Star, Shield } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface ShopListItemProps {
   name: string;
@@ -13,6 +14,7 @@ interface ShopListItemProps {
  * Minimalist, fiyat ve güven odaklı tasarım.
  */
 export default function ShopListItem({ name, rating, price, distance, onClick }: ShopListItemProps) {
+  const t = useTranslations('Guest');
   return (
     <div 
       data-testid="shop-list-item"
@@ -35,17 +37,17 @@ export default function ShopListItem({ name, rating, price, distance, onClick }:
 
         <div className="flex items-center gap-2 text-xs text-gray-400 font-medium">
           <MapPin size={12} />
-          <span>{distance} m uzaklıkta</span>
+          <span>{t("away", { distance })}</span>
         </div>
 
         <div className="mt-2 flex justify-between items-baseline">
           <div className="flex items-center gap-1 text-[10px] text-green-600 font-bold uppercase tracking-wider">
             <Shield size={10} />
-            SİGORTALI
+            {t("insured")}
           </div>
           <div className="text-right">
             <span className="text-xl font-black text-gray-900">₺{price}</span>
-            <span className="text-[10px] text-gray-400 font-bold uppercase ml-1">/ gÜN</span>
+            <span className="text-[10px] text-gray-400 font-bold uppercase ml-1">/ {t("day")}</span>
           </div>
         </div>
       </div>

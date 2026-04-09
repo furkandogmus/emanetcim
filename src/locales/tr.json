@@ -190,7 +190,20 @@
     "blogTagline": "Seyahatlerinizi kolaylaştıracak ipuçları, şehir rehberleri ve bakül emanetine dair her şey burada.",
     "noPostsFound": "Henüz yazı paylaşılmadı.",
     "readMore": "Devamını Oku",
-    "blogCategoryTravel": "Seyahat"
+    "blogCategoryTravel": "Seyahat",
+    "blogSubtitle": "İstanbul ve ötesi için seyahat rehberleri ve bagaj ipuçları.",
+    "backToBlog": "Blog'a Dön",
+    "blogCategory": "REHBER",
+    "editorLabel": "BagajPark Editörü",
+    "ctaTitle": "Keşfetmeye Bugün Başlayın!",
+    "ctaDescription": "Valizlerinizi BagajPark'ın güvenli dükkanlarına bırakın ve yüklerinizden kurtulmuş olarak şehri keşfedin.",
+    "findShop": "Emanet Noktası Bul",
+    "howItWorks": "Nasıl Çalışır?",
+    "away": "{distance} m uzakta",
+    "insured": "SİGORTALI",
+    "day": "GÜN",
+    "open247": "7/24",
+    "restroom": "WC"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Yönetim Masası",
@@ -253,6 +266,8 @@
     "sealAssignmentCount": "Toplam",
     "sealNoAssignments": "Henüz atanmış mühür bulunmuyor.",
     "sealInvalidRange": "Geçerli başlangıç ve adet girin.",
+    "sealTo": "Bitiş No",
+    "shopColumn": "Dükkan",
     "sealBulkCreated": "{count} yeni mühür kaydı oluşturuldu (atlananlar zaten vardı).",
     "sealAssigned": "{count} mühür dükkana atandı.",
     "sealSelectShop": "Dükkan seçin.",
@@ -415,7 +430,8 @@
     "fieldLanguage": "DİL",
     "fieldPlaceholderSlug": "yazi-linki",
     "seoTip": "SEO İpucu",
-    "seoDescription": "Yazı içeriğinde anahtar kelimeleri kalın yaparak ve alt başlıklar kullanarak Google'da daha üstte yer alabiliriz."
+    "seoDescription": "Yazı içeriğinde anahtar kelimeleri kalın yaparak ve alt başlıklar kullanarak Google'da daha üstte yer alabiliriz.",
+    "rating": "Puan"
   },
   "Auth": {
     "loginTitle": "BagajPark'a Giriş Yap",

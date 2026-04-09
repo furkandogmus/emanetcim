@@ -133,7 +133,7 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
                           </span>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">{t("rating") || "Puan"}</span>
+                          <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">{t("rating")}</span>
                           <span className="font-bold text-gray-700 flex items-center gap-1">
                             <Star size={14} className="text-yellow-500 fill-yellow-500" />
                             {shop.rating.toFixed(1)}
