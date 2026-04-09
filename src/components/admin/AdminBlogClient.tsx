@@ -59,10 +59,10 @@ export default function AdminBlogClient({ posts: initialPosts }: AdminBlogClient
           </Link>
           <h1 className="text-4xl font-black tracking-tighter text-gray-900 flex items-center gap-3">
             <FileText className="text-orange-600" />
-            {t("blogManagement") || "Blog Yönetimi"}
+            {t("blogManagement")}
           </h1>
           <p className="text-xs font-bold text-gray-400 mt-2 uppercase tracking-widest">
-            {posts.length} {t("totalPosts") || "Toplam Yazı"}
+            {posts.length} {t("totalPosts")}
           </p>
         </div>
 
@@ -151,7 +151,7 @@ export default function AdminBlogClient({ posts: initialPosts }: AdminBlogClient
               {filteredPosts.length === 0 && (
                 <tr>
                   <td colSpan={4} className="px-8 py-20 text-center text-gray-400 font-bold">
-                    {t("noPostsFound") || "Henüz hiç blog yazısı bulunamadı."}
+                    {t("noPostsFound")}
                   </td>
                 </tr>
               )}

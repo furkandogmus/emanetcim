@@ -1,4 +1,4 @@
-import { setRequestLocale } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
 import { redirect, notFound } from "next/navigation";
 import prisma from "@/lib/db";
@@ -11,6 +11,7 @@ export default async function DisputePage({
 }) {
   const { locale, id } = await params;
   setRequestLocale(locale);
+  const t = await getTranslations("Dispute");
 
   const session = await auth();
   if (!session?.user?.id) {
@@ -29,8 +30,8 @@ export default async function DisputePage({
   if (booking.dispute) {
     return (
       <div className="min-h-screen bg-gray-50 p-6 max-w-lg mx-auto">
-        <h1 className="text-xl font-black">Kayıt durumu</h1>
-        <p className="mt-4 text-sm text-gray-600">Durum: {booking.dispute.status}</p>
+        <h1 className="text-xl font-black">{t("statusTitle")}</h1>
+        <p className="mt-4 text-sm text-gray-600">{t("statusLabel")}: {booking.dispute.status}</p>
         <p className="mt-2 text-sm">{booking.dispute.description}</p>
       </div>
     );

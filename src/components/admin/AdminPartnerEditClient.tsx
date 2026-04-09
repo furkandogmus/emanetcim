@@ -71,7 +71,7 @@ export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientP
     setLoading(true);
     try {
       await updateShopAction(shop.id, formData);
-      toast.success(t("shopUpdatedSuccess") || "Dükkan güncellendi.");
+      toast.success(t("shopUpdatedSuccess"));
       router.refresh();
     } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : String(error));
@@ -118,7 +118,7 @@ export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientP
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-4">{t("pricePerDayLabel") || "Günlük Fiyat (₺)"}</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-4">{t("pricePerDayLabel")}</label>
                   <div className="relative">
                     <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
                     <input
@@ -145,7 +145,7 @@ export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientP
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-4">{t("latitude") || "Enlem (Lat)"}</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-4">{t("latitude")}</label>
                   <input
                     type="number"
                     step="any"
@@ -156,7 +156,7 @@ export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientP
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-4">{t("longitude") || "Boylam (Lng)"}</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-4">{t("longitude")}</label>
                   <input
                     type="number"
                     step="any"
@@ -210,7 +210,7 @@ export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientP
           <section className="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-sm">
              <h2 className="text-lg font-black tracking-tight mb-8 flex items-center gap-2">
                <User size={20} className="text-gray-400" />
-               {t("ownerDetails") || "Esnaf Bilgileri"}
+               {t("ownerDetails")}
              </h2>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-6 bg-gray-50 rounded-3xl flex items-center gap-4">
@@ -246,7 +246,7 @@ export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientP
               <div className="flex flex-col gap-4">
                 {shop.reviews.length === 0 ? (
                   <p className="text-xs font-bold text-gray-400 text-center py-10 uppercase tracking-widest bg-gray-50 rounded-3xl">
-                    {t("noReviewsYet") || "Henüz yorum yok."}
+                    {t("noReviewsYet")}
                   </p>
                 ) : (
                   shop.reviews.map((review) => (
@@ -259,10 +259,10 @@ export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientP
                           <button 
                             className="p-1.5 text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
                             onClick={async () => {
-                               if(confirm(t("confirmDeleteReview") || "Yorumu silmek istediğinize emin misiniz?")) {
+                               if(confirm(t("confirmDeleteReview"))) {
                                  try {
                                    await deleteReviewAction(review.id);
-                                   toast.success(t("reviewDeletedSuccess") || "Yorum silindi.");
+                                   toast.success(t("reviewDeletedSuccess"));
                                    router.refresh();
                                  } catch(err: unknown) {
                                    toast.error(err instanceof Error ? err.message : String(err));
@@ -286,7 +286,7 @@ export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientP
            </section>
 
            <section className="bg-orange-600 rounded-[2.5rem] p-8 text-white shadow-xl shadow-orange-100">
-              <p className="text-[10px] font-black uppercase tracking-widest text-orange-200 mb-2">{t("totalEarnings") || "Hizmet Skoru"}</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-orange-200 mb-2">{t("totalEarnings")}</p>
               <div className="flex items-center gap-3 mb-6">
                 <div className="text-5xl font-black tracking-tighter">{shop.rating.toFixed(1)}</div>
                 <StarRating rating={Math.round(shop.rating)} size={32} />
@@ -299,7 +299,7 @@ export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientP
                 />
               </div>
               <p className="text-xs font-bold text-orange-100 leading-relaxed">
-                {shop._count.bookings} {t("bookingsCountLabel") || "toplam emanet işlemi üzerinden hesaplanmıştır."}
+                {shop._count.bookings} {t("bookingsCountLabel")}
               </p>
            </section>
         </div>

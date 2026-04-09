@@ -355,7 +355,32 @@
     "messagesFilterAll": "Tümü",
     "messagesFilterUnread": "Okunmamış",
     "messageMarkedReadInfo": "Mesaj okundu olarak işaretlendi.",
-    "messageDeletedInfo": "Mesaj başarıyla silindi."
+    "messageDeletedInfo": "Mesaj başarıyla silindi.",
+    "blogManagement": "Blog Yönetimi",
+    "totalPosts": "toplam yazı",
+    "searchPostsPlaceholder": "Yazı başlığı veya slug ara...",
+    "newPost": "YENİ YAZI",
+    "editPost": "Yazıyı Düzenle",
+    "saveChanges": "DEĞİŞİKLİKLERİ KAYDET",
+    "postDetails": "Yazı Detayları",
+    "published": "YAYINDA",
+    "draft": "TASLAK",
+    "postDeletedSuccess": "Yazı başarıyla silindi.",
+    "postUpdatedSuccess": "Yazı güncellendi.",
+    "postCreatedSuccess": "Yazı oluşturuldu.",
+    "backToBlog": "Blog listesine dön",
+    "fieldTitle": "BAŞLIK",
+    "fieldContent": "İÇERİK (HTML/Markdown)",
+    "fieldSlug": "SLUG (URL YOLU)",
+    "fieldLocale": "DİL",
+    "fieldCoverImage": "KAPAK GÖRSELİ URL",
+    "fieldPublish": "YAYINLA",
+    "fieldKeepDraft": "TASLAK OLARAK TUT",
+    "seoTipTitle": "SEO İpucu",
+    "seoTipBody": "Yazı içeriğinde anahtar kelimeleri kullanmak ve alt başlıklar eklemek Google sıralamasını iyileştirebilir.",
+    "fieldPlaceholderTitle": "Yazı başlığını girin...",
+    "fieldPlaceholderContent": "Yazı içeriğini buraya yazın...",
+    "validationRequired": "Lütfen zorunlu alanları doldurun."
   },
   "Auth": {
     "loginTitle": "BagajPark.a Giriş Yap",
@@ -566,5 +591,18 @@
     "linksIntro": "Ayrıntılar:",
     "privacy": "Gizlilik Politikası",
     "kvkk": "KVKK Aydınlatma"
+  },
+  "Dispute": {
+    "title": "Şikayet / İtiraz",
+    "reasonLabel": "Sebep",
+    "reasonDamage": "Hasar",
+    "reasonTheft": "Kayıp / Hırsızlık",
+    "reasonOther": "Diğer",
+    "descriptionLabel": "Açıklama",
+    "descriptionPlaceholder": "Detaylı açıklama yazın.",
+    "submitting": "Gönderiliyor...",
+    "submit": "Gönder",
+    "statusTitle": "Kayıt Durumu",
+    "statusLabel": "Durum"
   }
 }

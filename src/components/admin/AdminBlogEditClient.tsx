@@ -36,22 +36,21 @@ export default function AdminBlogEditClient({ post, locale: currentLocale }: Adm
     locale: post?.locale || currentLocale,
     isPublished: post?.isPublished || false,
   });
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title || !formData.slug || !formData.content) {
-      toast.error("Lütfen zorunlu alanları doldurun.");
+      toast.error(t("validationRequired"));
       return;
     }
 
     setLoading(true);
     try {
       await upsertBlogPostAction(formData);
-      toast.success(post ? "Yazı güncellendi." : "Yazı oluşturuldu.");
+      toast.success(post ? t("postUpdatedSuccess") : t("postCreatedSuccess"));
       router.push("/admin/blog");
       router.refresh();
     } catch {
-      toast.error("Bir hata oluştu.");
+      toast.error(t("errorTitle"));
     } finally {
       setLoading(false);
     }
@@ -94,24 +93,24 @@ export default function AdminBlogEditClient({ post, locale: currentLocale }: Adm
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-6">
             <div>
-              <label className="block text-[10px] uppercase tracking-widest text-gray-400 mb-2 px-1">BAŞLIK</label>
+              <label className="block text-[10px] uppercase tracking-widest text-gray-400 mb-2 px-1">{t("fieldTitle")}</label>
               <input
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 onBlur={!formData.slug ? generateSlug : undefined}
                 className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-orange-500/10 focus:bg-white transition-all text-lg font-black placeholder:text-gray-300"
-                placeholder="Yazı başlığını girin..."
+                placeholder={t("fieldPlaceholderTitle")}
               />
             </div>
 
             <div>
-              <label className="block text-[10px] uppercase tracking-widest text-gray-400 mb-2 px-1">İÇERİK (HTML/Markdown)</label>
+              <label className="block text-[10px] uppercase tracking-widest text-gray-400 mb-2 px-1">{t("fieldContent")}</label>
               <textarea
                 value={formData.content}
                 onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                 className="w-full px-6 py-6 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-orange-500/10 focus:bg-white transition-all min-h-[500px] font-medium leading-relaxed"
-                placeholder="Yazı içeriğini buraya yazın..."
+                placeholder={t("fieldPlaceholderContent")}
               />
             </div>
           </div>
@@ -175,7 +174,7 @@ export default function AdminBlogEditClient({ post, locale: currentLocale }: Adm
                   onChange={(e) => setFormData({ ...formData, isPublished: e.target.checked })}
                 />
                 <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 group-hover:text-gray-900 transition-colors">
-                  {formData.isPublished ? "YAYINLA" : "TASLAK OLARAK TUT"}
+                  {formData.isPublished ? t("fieldPublish") : t("fieldKeepDraft")}
                 </span>
               </label>
             </div>

@@ -355,7 +355,32 @@
     "messagesFilterAll": "All",
     "messagesFilterUnread": "Unread",
     "messageMarkedReadInfo": "Message marked as read.",
-    "messageDeletedInfo": "Message deleted successfully."
+    "messageDeletedInfo": "Message deleted successfully.",
+    "blogManagement": "Blog Management",
+    "totalPosts": "total posts",
+    "searchPostsPlaceholder": "Search post title or slug...",
+    "newPost": "NEW POST",
+    "editPost": "Edit Post",
+    "saveChanges": "SAVE CHANGES",
+    "postDetails": "Post Details",
+    "published": "PUBLISHED",
+    "draft": "DRAFT",
+    "postDeletedSuccess": "Post deleted successfully.",
+    "postUpdatedSuccess": "Post updated successfully.",
+    "postCreatedSuccess": "Post created successfully.",
+    "backToBlog": "Back to blog list",
+    "fieldTitle": "TITLE",
+    "fieldContent": "CONTENT (HTML/Markdown)",
+    "fieldSlug": "SLUG (URL PATH)",
+    "fieldLocale": "LANGUAGE",
+    "fieldCoverImage": "COVER IMAGE URL",
+    "fieldPublish": "PUBLISH",
+    "fieldKeepDraft": "KEEP AS DRAFT",
+    "seoTipTitle": "SEO Tip",
+    "seoTipBody": "Using keywords in the content and adding headings can help this post rank higher in search results.",
+    "fieldPlaceholderTitle": "Enter post title...",
+    "fieldPlaceholderContent": "Write post content here...",
+    "validationRequired": "Please fill in all required fields."
   },
   "Auth": {
     "loginTitle": "Sign in to BagajPark",
@@ -566,5 +591,18 @@
     "linksIntro": "Learn more:",
     "privacy": "Privacy policy",
     "kvkk": "Privacy notice (KVKK)"
+  },
+  "Dispute": {
+    "title": "Dispute / Complaint",
+    "reasonLabel": "Reason",
+    "reasonDamage": "Damage",
+    "reasonTheft": "Loss / Theft",
+    "reasonOther": "Other",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Provide a detailed description of the issue.",
+    "submitting": "Sending...",
+    "submit": "Submit",
+    "statusTitle": "Dispute Status",
+    "statusLabel": "Status"
   }
 }
