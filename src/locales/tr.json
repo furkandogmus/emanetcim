@@ -16,7 +16,9 @@
     "notFoundTitle": "KAYBOLDUN!",
     "notFoundDescription": "Aradığın emanet noktası burası değil gibi görünüyor. Belki de henüz keşfedilmemiştir?",
     "notFoundBackHome": "ANASAYFAYA DÖN",
-    "emailVerificationRequiredBanner": "E-posta adresiniz henüz doğrulanmamış. Lütfen gelen kutunuzu kontrol edin."
+    "emailVerificationRequiredBanner": "E-posta adresiniz henüz doğrulanmamış. Lütfen gelen kutunuzu kontrol edin.",
+    "resendEmailSuccess": "Doğrulama e-postası başarıyla gönderildi.",
+    "resendEmailCta": "TEKRAR GÖNDER"
   },
   "SEO": {
     "title": "BagajPark | Valizini Güvenle Bırak, Özgürce Gez",
@@ -496,7 +498,16 @@
     "registerSuccessPartnerDesc": "Başvurun inceleniyor.",
     "phonePlaceholder": "Telefon (05XX...)",
     "registerSubmitPartner": "Başvuruyu Tamamla",
-    "registerSubmitGuest": "Hesap Oluştur"
+    "registerSubmitGuest": "Hesap Oluştur",
+    "verifyEmailTitle": "Hesabınız Doğrulandı!",
+    "verifyEmailSuccess": "E-posta adresiniz başarıyla doğrulandı. Artık BagajPark'ı özgürce kullanmaya başlayabilirsiniz.",
+    "verifyEmailGoToLogin": "Giriş Yap",
+    "verifyEmailErrorTitle": "Doğrulama Hatası",
+    "verifyEmailBackToLogin": "Geri Dön",
+    "verifyEmailInvalidToken": "Geçersiz doğrulama anahtarı.",
+    "verifyEmailTokenNotFound": "Doğrulama anahtarı bulunamadı.",
+    "verifyEmailTokenExpired": "Doğrulama anahtarının süresi dolmuş.",
+    "verifyEmailUserNotFound": "Kullanıcı bulunamadı."
   },
   "UserNav": {
     "signIn": "Giriş yap",

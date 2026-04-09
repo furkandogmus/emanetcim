@@ -2,12 +2,12 @@
 
 import { useTranslations } from 'next-intl';
 import { signIn } from 'next-auth/react';
-import Link from 'next/link';
+import { Link } from '@/i18n/routing';
 import { useSearchParams } from 'next/navigation';
 import { useMemo, useState, useEffect } from 'react';
 import { sanitizeAuthCallbackUrl } from '@/lib/auth-callback-url';
 import { authErrorMessage } from '@/lib/auth-error-message';
-import { Package, ShieldCheck, Globe, Loader2, Store, Shield, Mail, Lock, ChevronDown } from 'lucide-react';
+import { Package, ShieldCheck, Globe, Loader2, Store, Shield, Mail, Lock, ChevronDown, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /** Seed ile aynı varsayılan; `NEXT_PUBLIC_DEMO_PASSWORD` ile yerelde override edilebilir. */
@@ -19,6 +19,7 @@ const DEMO_PASSWORD =
 
 export default function LoginPage() {
   const t = useTranslations('Auth');
+  const tCommon = useTranslations('Common');
   const searchParams = useSearchParams();
   const rawCallback = searchParams.get('callbackUrl');
   const oauthErrorCode = searchParams.get('error');
@@ -89,6 +90,11 @@ export default function LoginPage() {
       setCredError(t('invalidCredentials'));
       setIsLoggingIn(null);
     }
+  };
+
+  const handleDemoLogin = async (email: string) => {
+    setIsLoggingIn(email);
+    await signIn("credentials", { email, password: DEMO_PASSWORD, callbackUrl: "/" });
   };
 
   const busy = !!isLoggingIn;

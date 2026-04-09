@@ -1,14 +1,17 @@
-import { useTranslations } from 'next-intl';
-import { Search, MapPin, ShieldCheck, Clock } from 'lucide-react';
-import { Link } from '@/i18n/routing';
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Search, MapPin, ShieldCheck, Clock, Store, User, Shield } from "lucide-react";
+import { Link } from "@/i18n/routing";
 
 /**
  * Guest Landing Page - Turist Karşılama Sayfası
  * Minimalist, güven veren ve hızlı aksiyon odaklı tasarım.
  */
-export default function GuestPage() {
-  const t = useTranslations('Guest');
-  const common = useTranslations('Common');
+export default async function GuestPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
+  const t = await getTranslations("Guest");
+  const common = await getTranslations("Common");
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-900">

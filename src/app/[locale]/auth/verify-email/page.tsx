@@ -1,6 +1,6 @@
 import prisma from "@/lib/db";
 import { CheckCircle2, XCircle } from 'lucide-react';
-import Link from 'next/link';
+import { Link } from "@/i18n/routing";
 import { getTranslations } from "next-intl/server";
 
 interface VerifyEmailPageProps {
@@ -61,7 +61,7 @@ export default async function VerifyEmailPage({ searchParams, params }: VerifyEm
           {t("verifyEmailSuccess")}
         </p>
         <Link 
-          href={`/${locale}/login`}
+          href="/login"
           className="w-full h-12 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-bold text-sm transition-all flex items-center justify-center"
         >
           {t("verifyEmailGoToLogin")}
@@ -83,7 +83,7 @@ function ErrorState({ message, locale, tAuth }: { message: string, locale: strin
           {message}
         </p>
         <Link 
-          href={`/${locale}/login`}
+          href="/login"
           className="w-full h-12 border-2 border-gray-100 rounded-xl font-bold text-sm text-gray-600 hover:border-orange-200 transition-all flex items-center justify-center"
         >
           {tAuth("verifyEmailBackToLogin")}

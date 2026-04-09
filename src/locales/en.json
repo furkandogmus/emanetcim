@@ -16,7 +16,9 @@
     "notFoundTitle": "YOU ARE LOST!",
     "notFoundDescription": "It seems the storage spot you are looking for is not here. Maybe it hasn't been discovered yet?",
     "notFoundBackHome": "BACK TO HOME",
-    "emailVerificationRequiredBanner": "Your email address has not been verified yet. Please check your inbox."
+    "emailVerificationRequiredBanner": "Your email address has not been verified yet. Please check your inbox.",
+    "resendEmailSuccess": "Verification email sent successfully.",
+    "resendEmailCta": "RESEND NOW"
   },
   "SEO": {
     "title": "BagajPark | Leave Your Luggage Safely, Travel Freely",
@@ -491,7 +493,16 @@
     "registerSuccessPartnerDesc": "Application being reviewed.",
     "phonePlaceholder": "Phone (+905XX...)",
     "registerSubmitPartner": "Complete Application",
-    "registerSubmitGuest": "Create Account"
+    "registerSubmitGuest": "Create Account",
+    "verifyEmailTitle": "Email Verified!",
+    "verifyEmailSuccess": "Your email has been successfully verified. You can now start using BagajPark freely.",
+    "verifyEmailGoToLogin": "Sign In",
+    "verifyEmailErrorTitle": "Verification Error",
+    "verifyEmailBackToLogin": "Go Back",
+    "verifyEmailInvalidToken": "Invalid verification token.",
+    "verifyEmailTokenNotFound": "Verification token not found.",
+    "verifyEmailTokenExpired": "Verification token has expired.",
+    "verifyEmailUserNotFound": "User not found."
   },
   "UserNav": {
     "signIn": "Sign in",

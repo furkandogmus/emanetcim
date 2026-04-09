@@ -10,6 +10,7 @@ import { useTranslations } from "next-intl";
  */
 export default function SocialLoginButtons() {
   const t = useTranslations("Auth");
+  const tCommon = useTranslations("Common");
   const [isDemoOpen, setIsDemoOpen] = useState(false);
 
   const handleDemoLogin = (email: string) => {
@@ -57,7 +58,7 @@ export default function SocialLoginButtons() {
                 className="bg-orange-50 hover:bg-orange-100 p-4 rounded-2xl flex flex-col items-center gap-2 transition-all group"
               >
                 <ShieldCheck size={20} className="text-orange-600" />
-                <span className="text-[10px] font-black text-orange-900">ADMIN</span>
+                <span className="text-[10px] font-black text-orange-900">{tCommon("demoAdmin")}</span>
               </button>
               
               <button 
@@ -65,7 +66,7 @@ export default function SocialLoginButtons() {
                 className="bg-blue-50 hover:bg-blue-100 p-4 rounded-2xl flex flex-col items-center gap-2 transition-all group"
               >
                 <Store size={20} className="text-blue-600" />
-                <span className="text-[10px] font-black text-blue-900">ESNAF</span>
+                <span className="text-[10px] font-black text-blue-900">{tCommon("demoEsnaf")}</span>
               </button>
 
               <button 
@@ -73,7 +74,7 @@ export default function SocialLoginButtons() {
                 className="bg-green-50 hover:bg-green-100 p-4 rounded-2xl flex flex-col items-center gap-2 transition-all group"
               >
                 <User size={20} className="text-green-600" />
-                <span className="text-[10px] font-black text-green-900">MİSAFİR</span>
+                <span className="text-[10px] font-black text-green-900">{tCommon("demoMisafir")}</span>
               </button>
            </div>
          )}

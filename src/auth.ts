@@ -29,10 +29,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         session.user.role = token.role || Role.GUEST;
         session.user.id = token.sub || "";
+        session.user.emailVerified = token.emailVerified as Date | null;
       }
       return session;
     },
-    async jwt({ token, user }: { token: JWT; user?: User }) {
+    async jwt({ token, user, trigger, session }: { token: JWT; user?: User; trigger?: string; session?: any }) {
       if (user) {
         const dbUser = await prisma.user.findUnique({
           where: { id: user.id },
@@ -48,7 +49,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         } else {
           token.role = dbUser?.role || Role.GUEST;
         }
+        token.emailVerified = dbUser?.emailVerified || null;
       }
+      
+      // Handle manual updates (e.g. from useSession().update())
+      if (trigger === "update" && session?.user) {
+        if (session.user.emailVerified) token.emailVerified = session.user.emailVerified;
+      }
+
       return token;
     },
   },
