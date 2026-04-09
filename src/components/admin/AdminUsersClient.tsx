@@ -11,11 +11,12 @@ import {
   ArrowLeft,
   Activity,
   ShieldCheck,
-  ShieldX
+  ShieldX,
+  ShieldPlus
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { motion, AnimatePresence } from "framer-motion";
-import { toggleUserBanAction, deleteUserAction, resendVerificationEmailAction, blockIpAction } from "@/actions/admin-management";
+import { toggleUserBanAction, deleteUserAction, resendVerificationEmailAction, blockIpAction, updateUserRoleAction } from "@/actions/admin-management";
 import { toast } from "sonner";
 import { Role } from "@prisma/client";
 
@@ -78,6 +79,20 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
       await deleteUserAction(id);
       setUsers(prev => prev.filter(u => u.id !== id));
       toast.success(t("userDeleted"));
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : String(error));
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  const handleMakeAdmin = async (id: string) => {
+    if (!confirm(t("confirmMakeAdmin"))) return;
+    setLoadingId(id);
+    try {
+      await updateUserRoleAction(id, Role.ADMIN);
+      setUsers(prev => prev.map(u => u.id === id ? { ...u, role: Role.ADMIN } : u));
+      toast.success(t("roleUpdatedSuccess"));
     } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : String(error));
     } finally {
@@ -239,6 +254,16 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
                             title={t("resendVerification")}
                           >
                             <Mail size={18} />
+                          </button>
+                        )}
+                        {user.role !== Role.ADMIN && (
+                          <button
+                            onClick={() => handleMakeAdmin(user.id)}
+                            disabled={loadingId === user.id}
+                            className="p-3 bg-purple-50 hover:bg-purple-100 text-purple-600 rounded-xl transition-all"
+                            title={t("makeAdmin")}
+                          >
+                            <ShieldPlus size={18} />
                           </button>
                         )}
                         <button

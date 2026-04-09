@@ -23,6 +23,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
   ...authConfig,
+  events: {
+    async linkAccount({ user, account }) {
+      if (account.type === "oauth") {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { emailVerified: new Date() },
+        });
+      }
+    },
+  },
   callbacks: {
     ...authConfig.callbacks,
     async session({ session, token }: { session: Session; token: JWT }) {

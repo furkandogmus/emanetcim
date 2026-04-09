@@ -35,6 +35,27 @@ export async function toggleUserBanAction(userId: string, isBanned: boolean) {
 }
 
 /**
+ * Kullanıcı rolünü güncelle (Örn: GUEST -> ADMIN)
+ */
+export async function updateUserRoleAction(userId: string, newRole: Role) {
+  await ensureAdmin();
+
+  // Kendi rolünü değiştirmeyi engelle (Güvenlik için)
+  const session = await auth();
+  if (session?.user?.id === userId) {
+    throw new Error("Errors.unauthorized");
+  }
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { role: newRole },
+  });
+
+  revalidatePath("/admin/users");
+  return { success: true };
+}
+
+/**
  * Kullanıcıyı tamamen sil (Cascade silme ile ilişkili kayıtlar da silinir)
  */
 export async function deleteUserAction(userId: string) {
