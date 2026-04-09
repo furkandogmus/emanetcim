@@ -69,7 +69,7 @@ export default function SocialLoginButtons() {
               </button>
 
               <button 
-                onClick={() => handleDemoLogin("misafir@örnek.com")}
+                onClick={() => handleDemoLogin("guest@example.com")}
                 className="bg-green-50 hover:bg-green-100 p-4 rounded-2xl flex flex-col items-center gap-2 transition-all group"
               >
                 <User size={20} className="text-green-600" />

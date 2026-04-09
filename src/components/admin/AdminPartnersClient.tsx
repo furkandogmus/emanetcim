@@ -63,7 +63,7 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
             {t("shopManagement")}
           </h1>
           <p className="text-xs font-bold text-gray-400 mt-2 uppercase tracking-widest">
-            {initialShops.length} {t("totalShops") || "Toplam Esnaf"}
+            {initialShops.length} {t("activePartners")}
           </p>
         </div>
 
@@ -72,7 +72,7 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
           <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-600 transition-colors" size={20} />
           <input
             type="text"
-            placeholder={t("searchShopsPlaceholder") || "Esnaf, dükkan veya telefon ara..."}
+            placeholder={t("messagesSearchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="relative w-full pl-14 pr-6 py-5 bg-white border border-gray-100 rounded-2xl shadow-sm focus:outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all font-bold text-sm"
@@ -107,7 +107,7 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
                         <p className="font-bold text-gray-900">{shop.name}</p>
                         <p className="text-xs text-gray-400 font-medium truncate max-w-[200px]">{shop.address}</p>
                         <p className="text-[10px] font-black text-orange-600 uppercase tracking-widest">
-                          ₺{Number(shop.pricePerDay || 0)} / {t("day") || "Gün"}
+                          ₺{Number(shop.pricePerDay || 0)} / {t("day")}
                         </p>
                       </div>
                     </td>
@@ -126,7 +126,7 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-4">
                         <div className="flex flex-col">
-                          <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">{t("bookings") || "Emanet"}</span>
+                          <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">{t("bookings")}</span>
                           <span className="font-bold text-gray-700 flex items-center gap-1">
                             <ShoppingBag size={14} />
                             {shop._count.bookings}
@@ -146,7 +146,7 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
                         shop.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                       }`}>
                         {shop.isActive ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
-                        {shop.isActive ? t("active") : t("inactive") || "Pasif"}
+                        {shop.isActive ? t("active") : t("inactive")}
                       </div>
                     </td>
                     <td className="px-8 py-6 text-right">

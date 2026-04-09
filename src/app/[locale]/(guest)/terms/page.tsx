@@ -29,7 +29,7 @@ export default async function TermsPage({ params }: { params: Promise<{ locale: 
           <div className="flex items-start gap-4 p-8 bg-gray-50 rounded-3xl border border-gray-100 mb-16">
             <Scale className="text-gray-400 shrink-0" size={24} />
             <p className="text-gray-500 text-sm font-bold leading-relaxed m-0 italic">
-              &quot;BagajPark platformunu kullanarak bu kuralları kabul etmiş sayılırsınız. Lütfen dikkatle okuyunuz.&quot;
+              &quot;{t("intro")}&quot;
             </p>
           </div>
 
@@ -58,7 +58,12 @@ export default async function TermsPage({ params }: { params: Promise<{ locale: 
 
         <div className="mt-24 pt-12 border-t border-gray-100 text-center">
           <p className="text-gray-400 font-bold text-sm">
-            Kurallar hakkında sorunuz mu var? <Link href="/contact" className="text-orange-600 hover:underline">Destek ekibimizle</Link> iletişime geçin.
+            {t("footerText").split("Contact our support team")[0]}
+            {t("footerText").includes("içime geçin") ? (
+              <>Kurallar hakkında sorunuz mu var? <Link href="/contact" className="text-orange-600 hover:underline">Destek ekibimizle</Link> iletişime geçin.</>
+            ) : (
+              <>Have a question about the rules? <Link href="/contact" className="text-orange-600 hover:underline">Contact our support team</Link>.</>
+            )}
           </p>
         </div>
       </main>

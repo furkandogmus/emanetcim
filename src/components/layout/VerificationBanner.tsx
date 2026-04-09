@@ -25,9 +25,9 @@ export default function VerificationBanner() {
     try {
       const result = await resendVerificationAction();
       if (result.success) {
-        toast.success(t("resendEmailSuccess") || "Doğrulama e-postası tekrar gönderildi.");
+        toast.success(t("resendEmailSuccess"));
       } else {
-        toast.error(result.error);
+        toast.error(t("errorTitle"));
       }
     } catch {
       toast.error(t("errorTitle"));
@@ -41,7 +41,7 @@ export default function VerificationBanner() {
       <div className="flex items-center gap-2">
         <AlertCircle size={18} className="shrink-0" />
         <p className="text-[10px] md:text-xs font-black uppercase tracking-widest text-center">
-          {t("emailVerificationRequiredBanner") || "E-posta adresiniz henüz doğrulanmamış."}
+          {t("emailVerificationRequiredBanner")}
         </p>
       </div>
 
@@ -51,7 +51,7 @@ export default function VerificationBanner() {
         className="flex items-center gap-2 bg-white text-orange-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-orange-50 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shrink-0"
       >
         <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-        {t("resendEmailCta") || "TEKRAR GÖNDER"}
+        {t("resendEmailCta")}
       </button>
     </div>
   );

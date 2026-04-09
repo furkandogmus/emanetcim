@@ -71,7 +71,7 @@ export default function AdminBlogClient({ posts: initialPosts }: AdminBlogClient
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-600 transition-colors" size={20} />
             <input
               type="text"
-              placeholder={t("searchPostsPlaceholder") || "Yazı başlığı veya slug ara..."}
+              placeholder={t("searchPostsPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-14 pr-6 py-4 bg-white border border-gray-100 rounded-2xl shadow-sm focus:outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all font-bold text-sm"
@@ -82,7 +82,7 @@ export default function AdminBlogClient({ posts: initialPosts }: AdminBlogClient
             className="w-full sm:w-auto flex items-center justify-center gap-2 bg-orange-600 text-white px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-orange-700 transition-all shadow-lg shadow-orange-200 active:scale-95"
           >
             <Plus size={18} />
-            {t("newPost") || "YENİ YAZI"}
+            {t("newPost")}
           </Link>
         </div>
       </header>
@@ -92,10 +92,10 @@ export default function AdminBlogClient({ posts: initialPosts }: AdminBlogClient
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50/50 border-b border-gray-100">
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">{t("postDetails") || "Yazı Detayları"}</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">{t("locale") || "Dil"}</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">{t("status") || "Durum"}</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">{t("actions") || "İşlemler"}</th>
+                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">{t("postDetails")}</th>
+                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">{t("fieldLocale")}</th>
+                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">{t("status")}</th>
+                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">{t("actions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -125,7 +125,7 @@ export default function AdminBlogClient({ posts: initialPosts }: AdminBlogClient
                         post.isPublished ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
                       }`}>
                         {post.isPublished ? <Eye size={12} /> : <EyeOff size={12} />}
-                        {post.isPublished ? (t("published") || "YAYINDA") : (t("draft") || "TASLAK")}
+                        {post.isPublished ? t("published") : t("draft")}
                       </div>
                     </td>
                     <td className="px-8 py-6 text-right">

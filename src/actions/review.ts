@@ -18,23 +18,23 @@ export async function addReviewAction(data: {
   const session = await auth();
 
   if (!session?.user?.id || session.user.id !== data.guestId) {
-    throw new Error("Bu işlemi yapmaya yetkiniz yok.");
+    throw new Error("Errors.unauthorized");
   }
 
   if (data.rating < 1 || data.rating > 5) {
-    return { success: false, error: "Puan 1 ile 5 arasında olmalıdır." };
+    return { success: false, error: "Errors.invalidData" };
   }
 
   const booking = await prisma.booking.findUnique({
     where: { id: data.bookingId },
   });
   if (!booking || booking.guestId !== session.user.id) {
-    return { success: false, error: "Rezervasyon bulunamadı veya yetkisiz." };
+    return { success: false, error: "Errors.unauthorized" };
   }
   if (booking.status !== "CHECKED_OUT") {
     return {
       success: false,
-      error: "Yorum yalnızca teslim tamamlandıktan sonra yapılabilir.",
+      error: "Errors.reviewNotReady",
     };
   }
 
@@ -49,8 +49,8 @@ export async function addReviewAction(data: {
     const err = error as { code?: string };
     console.error("addReviewAction Error:", error);
     if (err.code === "P2002") {
-      return { success: false, error: "Bu rezervasyon için zaten bir yorum yapılmış." };
+      return { success: false, error: "Errors.duplicateReview" };
     }
-    return { success: false, error: "Yorum kaydedilirken bir hata oluştu." };
+    return { success: false, error: "Errors.generic" };
   }
 }

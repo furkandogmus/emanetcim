@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { X, Loader2, Send } from 'lucide-react';
 import { addReviewAction } from '@/actions/review';
 import StarRating from '@/components/common/StarRating';
@@ -21,6 +22,7 @@ interface ReviewFormProps {
 export default function ReviewForm({ 
   bookingId, guestId, shopId, shopName, onClose, onSuccess 
 }: ReviewFormProps) {
+  const t = useTranslations();
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -42,7 +44,7 @@ export default function ReviewForm({
     if (res.success) {
       onSuccess();
     } else {
-      alert(res.error || "Yorum kaydedilemedi.");
+      alert(res.error || t("Review.error"));
     }
   };
 
@@ -62,7 +64,7 @@ export default function ReviewForm({
         <div className="text-center">
            <h3 className="text-2xl font-black tracking-tighter mb-2">{shopName.toLowerCase()}</h3>
            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest leading-relaxed px-4">
-             Deneyiminizi 1-5 yıldız arasında puanlayarak diğer gezginlere rehber olun.
+             {t("Review.subtitle")}
            </p>
         </div>
 
@@ -81,7 +83,7 @@ export default function ReviewForm({
            <textarea
              value={comment}
              onChange={(e) => setComment(e.target.value)}
-             placeholder="Dükkan ve hizmet hakkındaki düşünceleriniz..."
+             placeholder={t("Review.placeholder")}
              className="w-full bg-gray-50 border-2 border-transparent focus:border-orange-500 rounded-[2rem] p-6 text-sm font-medium outline-none min-h-[120px] transition-all resize-none"
            />
 
@@ -91,7 +93,7 @@ export default function ReviewForm({
              className="w-full h-20 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-100 disabled:text-gray-300 rounded-[2rem] text-white font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 active:scale-95 transition-all shadow-xl shadow-orange-100"
            >
              {isSubmitting ? <Loader2 size={24} className="animate-spin" /> : <Send size={20} />}
-             DEĞERLENDİRMEYİ GÖNDER
+             {t("Review.submit")}
            </button>
         </form>
       </div>

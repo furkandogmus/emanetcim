@@ -14,12 +14,11 @@ export async function resendVerificationAction() {
   const session = await auth();
 
   if (!session?.user?.email) {
-    return { success: false, error: "Oturum açmanız gerekiyor." };
+    return { success: false, error: "Errors.authRequired" };
   }
 
-  // Zaten doğrulanmışsa gerek yok
   if (session.user.emailVerified) {
-    return { success: false, error: "E-postanız zaten doğrulanmış." };
+    return { success: false, error: "Errors.generic" };
   }
 
   // Rate limit: Aynı IP'den 1 dakikada sadece 1 kez link istenebilir
@@ -27,7 +26,7 @@ export async function resendVerificationAction() {
   const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   
   if (!(await rateLimit(`resend_email:${ip}`, 1, 60 * 1000))) {
-    return { success: false, error: "Lütfen yeni bir link istemeden önce 1 dakika bekleyin." };
+    return { success: false, error: "Errors.tooManyRequests" };
   }
 
   try {
@@ -38,6 +37,6 @@ export async function resendVerificationAction() {
     return { success: true };
   } catch (error) {
     console.error("[resendVerificationAction]", error);
-    return { success: false, error: "E-posta gönderilirken bir hata oluştu." };
+    return { success: false, error: "Errors.generic" };
   }
 }

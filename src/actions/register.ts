@@ -29,7 +29,7 @@ const partnerSchema = z.object({
 export async function registerGuestAction(data: unknown) {
   const parsed = guestSchema.safeParse(data);
   if (!parsed.success) {
-    return { success: false as const, error: "Geçersiz form verisi." };
+    return { success: false as const, error: "Errors.invalidData" };
   }
 
   const h = await headers();
@@ -40,19 +40,19 @@ export async function registerGuestAction(data: unknown) {
   if (!(await rateLimit(`register_guest:${ip}`, 8, 60 * 60 * 1000))) {
     return {
       success: false as const,
-      error: "Çok fazla kayıt denemesi. Lütfen daha sonra tekrar deneyin.",
+      error: "Errors.tooManyRequests",
     };
   }
 
   const email = parsed.data.email.trim().toLowerCase();
   
   if (isDisposableEmail(email)) {
-    return { success: false as const, error: "Geçici e-posta adresleri güvenlik nedeniyle kabul edilmemektedir." };
+    return { success: false as const, error: "Errors.invalidEmail" };
   }
 
   const exists = await prisma.user.findUnique({ where: { email } });
   if (exists) {
-    return { success: false as const, error: "Bu e-posta adresi zaten kayıtlı." };
+    return { success: false as const, error: "Errors.emailAlreadyRegistered" };
   }
 
   const passwordHash = await hashPassword(parsed.data.password);
@@ -77,7 +77,7 @@ export async function registerGuestAction(data: unknown) {
 export async function registerPartnerApplicationAction(data: unknown) {
   const parsed = partnerSchema.safeParse(data);
   if (!parsed.success) {
-    return { success: false as const, error: "Geçersiz form verisi." };
+    return { success: false as const, error: "Errors.invalidData" };
   }
 
   const h = await headers();
@@ -88,25 +88,25 @@ export async function registerPartnerApplicationAction(data: unknown) {
   if (!(await rateLimit(`register_partner:${ip}`, 5, 60 * 60 * 1000))) {
     return {
       success: false as const,
-      error: "Çok fazla başvuru denemesi. Lütfen daha sonra tekrar deneyin.",
+      error: "Errors.tooManyRequests",
     };
   }
 
   const email = parsed.data.email?.trim().toLowerCase() || null;
   if (email) {
     if (isDisposableEmail(email)) {
-      return { success: false as const, error: "Geçici e-posta adresleri güvenlik nedeniyle kabul edilmemektedir." };
+      return { success: false as const, error: "Errors.invalidEmail" };
     }
     const exists = await prisma.user.findUnique({ where: { email } });
     if (exists) {
-      return { success: false as const, error: "Bu e-posta adresi zaten kayıtlı." };
+      return { success: false as const, error: "Errors.emailAlreadyRegistered" };
     }
   }
 
   const phone = parsed.data.phone.trim();
   const phoneExists = await prisma.user.findUnique({ where: { phone } });
   if (phoneExists) {
-    return { success: false as const, error: "Bu telefon numarası zaten kayıtlı." };
+    return { success: false as const, error: "Errors.phoneAlreadyRegistered" };
   }
 
   const passwordHash = await hashPassword(parsed.data.password);

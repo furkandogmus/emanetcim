@@ -21,7 +21,7 @@ type BlogPostFormData = {
 export async function upsertBlogPostAction(formData: BlogPostFormData) {
   const session = await auth();
   if (session?.user?.role !== "ADMIN") {
-    throw new Error("Yetkisiz işlem.");
+    throw new Error("Errors.notAuthorizedAdmin");
   }
 
   const { id, title, slug, content, excerpt, coverImage, locale, isPublished } = formData;
@@ -58,7 +58,7 @@ export async function upsertBlogPostAction(formData: BlogPostFormData) {
 export async function deleteBlogPostAction(id: string) {
   const session = await auth();
   if (session?.user?.role !== "ADMIN") {
-    throw new Error("Yetkisiz işlem.");
+    throw new Error("Errors.notAuthorizedAdmin");
   }
 
   await prisma.blogPost.delete({
@@ -76,7 +76,7 @@ export async function deleteBlogPostAction(id: string) {
 export async function getAllBlogPostsAction() {
   const session = await auth();
   if (session?.user?.role !== "ADMIN") {
-    throw new Error("Yetkisiz işlem.");
+    throw new Error("Errors.notAuthorizedAdmin");
   }
 
   return await prisma.blogPost.findMany({

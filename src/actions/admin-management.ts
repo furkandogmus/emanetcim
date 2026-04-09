@@ -14,7 +14,7 @@ import { getLocale } from "next-intl/server";
 async function ensureAdmin() {
   const session = await auth();
   if (!session?.user || session.user.role !== Role.ADMIN) {
-    throw new Error("Yetkisiz işlem: Sadece yöneticiler bu işlemi gerçekleştirebilir.");
+    throw new Error("Errors.notAuthorizedAdmin");
   }
   return session;
 }
@@ -43,7 +43,7 @@ export async function deleteUserAction(userId: string) {
   // Kendi hesabını siliyorsa engelle
   const session = await auth();
   if (session?.user?.id === userId) {
-    throw new Error("Kendi hesabınızı silemezsiniz.");
+    throw new Error("Errors.unauthorized");
   }
 
   await prisma.user.delete({

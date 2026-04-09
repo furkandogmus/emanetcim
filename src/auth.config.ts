@@ -6,8 +6,8 @@ import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
 
 const loginSchema = z.object({
-  emailOrPhone: z.string().min(1, "E-posta veya Telefon gereklidir"),
-  password: z.string().min(1, "Şifre gereklidir"),
+  emailOrPhone: z.string().min(1, "Errors.invalidData"),
+  password: z.string().min(1, "Errors.authRequired"),
 });
 
 export const authConfig: NextAuthConfig = {
@@ -31,7 +31,7 @@ export const authConfig: NextAuthConfig = {
 
         // Rate limit kontrolü
         if (!(await rateLimit(`login:${emailOrPhone.toLowerCase()}`, 10, 60 * 60 * 1000))) {
-          throw new Error("TooManyRequests");
+          throw new Error("Errors.tooManyRequests");
         }
 
         const { default: prisma } = await import("@/lib/db");

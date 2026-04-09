@@ -70,12 +70,12 @@ export default function AdminBlogEditClient({ post, locale: currentLocale }: Adm
       <header className="mb-10 max-w-5xl mx-auto">
         <Link href="/admin/blog" className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors mb-4 group">
           <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-          <span className="text-xs font-black uppercase tracking-widest">{t("blogManagement") || "Blog Listesine Dön"}</span>
+          <span className="text-xs font-black uppercase tracking-widest">{t("blogManagement")}</span>
         </Link>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <h1 className="text-4xl font-black tracking-tighter text-gray-900 flex items-center gap-3">
             <Edit3 size={32} className="text-orange-600" />
-            {post ? (t("editPost") || "Yazıyı Düzenle") : (t("newPost") || "Yeni Yazı")}
+            {post ? t("editPost") : t("newPost")}
           </h1>
           <button
             onClick={handleSubmit}
@@ -83,7 +83,7 @@ export default function AdminBlogEditClient({ post, locale: currentLocale }: Adm
             className="flex items-center justify-center gap-2 bg-gray-900 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-orange-600 transition-all shadow-lg active:scale-95 disabled:opacity-50"
           >
             {loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={18} />}
-            {t("saveChanges") || "YAZIYI KAYDET"}
+            {t("saveChanges")}
           </button>
         </div>
       </header>
@@ -120,7 +120,7 @@ export default function AdminBlogEditClient({ post, locale: currentLocale }: Adm
         <div className="space-y-6">
           <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-6">
             <div>
-              <label className="block text-[10px] uppercase tracking-widest text-gray-400 mb-2 px-1">SLUG (URL YOLU)</label>
+              <label className="block text-[10px] uppercase tracking-widest text-gray-400 mb-2 px-1">{t("fieldSlug")}</label>
               <div className="relative">
                 <LinkIcon size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
@@ -128,13 +128,13 @@ export default function AdminBlogEditClient({ post, locale: currentLocale }: Adm
                   value={formData.slug}
                   onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                   className="w-full pl-10 pr-4 py-3 bg-gray-50 border-none rounded-xl text-xs font-bold"
-                  placeholder="yazi-linki"
+                  placeholder={t("fieldPlaceholderSlug")}
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-[10px] uppercase tracking-widest text-gray-400 mb-2 px-1">DİL</label>
+              <label className="block text-[10px] uppercase tracking-widest text-gray-400 mb-2 px-1">{t("fieldLanguage")}</label>
               <div className="relative">
                 <Globe size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                 <select
@@ -149,7 +149,7 @@ export default function AdminBlogEditClient({ post, locale: currentLocale }: Adm
             </div>
 
             <div>
-              <label className="block text-[10px] uppercase tracking-widest text-gray-400 mb-2 px-1">KAPAK GÖRSELİ URL</label>
+              <label className="block text-[10px] uppercase tracking-widest text-gray-400 mb-2 px-1">{t("fieldCoverImage")}</label>
               <div className="relative">
                 <ImageIcon size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
@@ -157,7 +157,7 @@ export default function AdminBlogEditClient({ post, locale: currentLocale }: Adm
                   value={formData.coverImage}
                   onChange={(e) => setFormData({ ...formData, coverImage: e.target.value })}
                   className="w-full pl-10 pr-4 py-3 bg-gray-50 border-none rounded-xl text-xs font-bold"
-                  placeholder="https://gorsel-linki.jpg"
+                  placeholder="https://image-link.jpg"
                 />
               </div>
             </div>
@@ -183,9 +183,9 @@ export default function AdminBlogEditClient({ post, locale: currentLocale }: Adm
           <div className="bg-orange-50 p-6 rounded-[2rem] border border-orange-100 italic text-[11px] text-orange-600 font-bold leading-relaxed">
             <div className="flex items-center gap-2 mb-2 not-italic">
               <CheckCircle2 size={16} />
-              <span className="font-black uppercase tracking-widest">SEO İpucu</span>
+              <span className="font-black uppercase tracking-widest">{t("seoTip")}</span>
             </div>
-            Yazı içeriğinde anahtar kelimeleri (valiz emanet, bagaj saklama vb.) kalın yaparak ve alt başlıklar kullanarak Google&apos;da daha üstte yer alabiliriz.
+            {t("seoDescription")}
           </div>
         </div>
       </form>

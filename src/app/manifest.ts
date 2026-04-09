@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "BagajPark | Valizini Güvenle Bırak",
+    name: "BagajPark",
     short_name: "BagajPark",
-    description: "Türkiye'nin en yaygın ve güvenilir yerel emanet ağı.",
+    description: "Luggage storage network in Turkey.",
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",

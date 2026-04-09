@@ -406,7 +406,16 @@
     "seoTipBody": "Başlıkları ve anahtar kelimeleri unutmayın.",
     "fieldPlaceholderTitle": "Başlık...",
     "fieldPlaceholderContent": "İçerik...",
-    "validationRequired": "Tüm alanları doldurun."
+    "validationRequired": "Tüm alanları doldurun.",
+    "dashboard": "Yönetim Paneli",
+    "users": "Kullanıcılar",
+    "shops": "Dükkanlar",
+    "bookings": "Rezervasyonlar",
+    "delete": "Sil",
+    "fieldLanguage": "DİL",
+    "fieldPlaceholderSlug": "yazi-linki",
+    "seoTip": "SEO İpucu",
+    "seoDescription": "Yazı içeriğinde anahtar kelimeleri kalın yaparak ve alt başlıklar kullanarak Google'da daha üstte yer alabiliriz."
   },
   "Auth": {
     "loginTitle": "BagajPark'a Giriş Yap",
@@ -601,7 +610,9 @@
     "q5": "5. Muhur",
     "a5": "Muhurleme zorunludur.",
     "q6": "6. Degisiklik",
-    "a6": "BagajPark kurallari degistirme hakkini sakli tutar."
+    "a6": "BagajPark kurallari degistirme hakkini sakli tutar.",
+    "intro": "BagajPark platformunu kullanarak bu kuralları kabul etmiş sayılırsınız. Lütfen dikkatle okuyunuz.",
+    "footerText": "Kurallar hakkında sorunuz mu var? Destek ekibimizle iletişime geçin."
   },
   "Privacy": {
     "title": "Gizlilik Politikasi",
@@ -659,5 +670,66 @@
     "submit": "Gonder",
     "statusTitle": "Durum",
     "statusLabel": "Durum"
+  },
+  "Errors": {
+    "authRequired": "Oturum açmanız gerekiyor.",
+    "verifyEmailRequired": "Lütfen rezervasyon yapabilmek için önce e-posta adresinizi doğrulayın.",
+    "unauthorized": "Bu işlemi yapmaya yetkiniz yok.",
+    "shopNotFound": "Dükkan bulunamadı.",
+    "bookingNotFound": "Rezervasyon bulunamadı.",
+    "insufficientCapacity": "Bu tarih aralığında dükkan kapasitesi yetersiz.",
+    "paymentFailed": "Ödeme başarısız veya reddedildi.",
+    "invalidData": "Geçersiz form verisi.",
+    "duplicateReview": "Bu rezervasyon için zaten bir yorum yapılmış.",
+    "duplicateDispute": "Bu rezervasyon için zaten bir şikayet kaydı var.",
+    "generic": "Bilinmeyen bir hata oluştu.",
+    "tooManyRequests": "Çok fazla deneme. Lütfen daha sonra tekrar deneyin.",
+    "invalidEmail": "Geçersiz e-posta adresi.",
+    "emailAlreadyRegistered": "Bu e-posta adresi zaten kayıtlı.",
+    "phoneAlreadyRegistered": "Bu telefon numarası zaten kayıtlı.",
+    "notAuthorizedAdmin": "Yetkisiz işlem: Sadece yöneticiler bu işlemi gerçekleştirebilir.",
+    "notAuthorizedPartner": "Yetkisiz işlem: Sadece esnaflar bu işlemi gerçekleştirebilir.",
+    "disputeNotReady": "Şikayet yalnızca valiz alındıktan veya teslim edildikten sonra açılabilir.",
+    "reviewNotReady": "Yorum yalnızca teslim tamamlandıktan sonra yapılabilir."
+  },
+  "Emails": {
+    "verificationSubject": "E-postanızı Doğrulayın",
+    "resetPasswordSubject": "Şifrenizi Sıfırlayın",
+    "bookingConfirmedSubject": "BagajPark: Rezervasyonunuz Onaylandı! 🎒",
+    "checkInSubject": "Valiziniz Güvende! 🔒",
+    "checkInBody": "Valiziniz teslim alındı.",
+    "checkOutSubject": "İyi Yolculuklar! 👋",
+    "checkOutBody": "Valiziniz size teslim edildi."
+  },
+  "Review": {
+    "placeholder": "Dükkan ve hizmet hakkındaki düşünceleriniz...",
+    "title": "DEĞERLENDİR",
+    "subtitle": "Deneyiminizi 1-5 yıldız arasında puanlayarak diğer gezginlere rehber olun.",
+    "submit": "DEĞERLENDİRMEYİ GÖNDER",
+    "success": "Yorumunuz başarıyla kaydedildi.",
+    "error": "Yorum kaydedilemedi."
+  },
+  "AdminStatus": {
+    "title": "Platform Teknik Denetim",
+    "subtitle": "Sistem Durumu ve Entegrasyon Raporu",
+    "database": "Veritabanı",
+    "payment": "Ödeme Sistemi",
+    "email": "E-posta Servisi",
+    "sms": "SMS Geçidi",
+    "resources": "Sunucu Kaynakları",
+    "logic": "Uygulama Mantığı",
+    "online": "ONLAYN",
+    "error": "HATA",
+    "warning": "UYARI",
+    "ok": "TAMAM",
+    "missing": "Eksik",
+    "active": "Aktif",
+    "failed": "Başarısız",
+    "installed": "Yüklü",
+    "available": "Mevcut",
+    "undefined": "Tanımlanmamış",
+    "healthScore": "Genel Sağlık Puanı",
+    "healthDesc": "Tüm kritik servisler kontrol edildi.",
+    "noCriticalError": "Kritik Hata Yok"
   }
 }

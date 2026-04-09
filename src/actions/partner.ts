@@ -8,6 +8,7 @@ import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { verifyQrToken } from "@/lib/qr-token";
 import type { SealAssignmentInput } from "@/services/SealService";
 import { normalizeTrGsm10 } from "@/lib/netgsm";
+import { getLocale } from "next-intl/server";
 
 function revalidatePartnerPaths() {
   revalidatePathAllLocales("/partner");
@@ -22,10 +23,10 @@ export async function getPartnerBookingPreviewAction(raw: string) {
   const session = await auth();
 
   if (!session?.user?.id) {
-    return { success: false as const, error: "Oturum açmanız gerekiyor." };
+    return { success: false as const, error: "Errors.authRequired" };
   }
   if (session.user.role !== "PARTNER" && session.user.role !== "ADMIN") {
-    return { success: false as const, error: "Bu işlem için esnaf yetkisi gerekir." };
+    return { success: false as const, error: "Errors.notAuthorizedPartner" };
   }
 
   let bookingId = raw.trim();
@@ -38,7 +39,7 @@ export async function getPartnerBookingPreviewAction(raw: string) {
   });
 
   if (!booking) {
-    return { success: false as const, error: "Rezervasyon bulunamadı." };
+    return { success: false as const, error: "Errors.bookingNotFound" };
   }
 
   if (
@@ -47,7 +48,7 @@ export async function getPartnerBookingPreviewAction(raw: string) {
   ) {
     return {
       success: false as const,
-      error: "Bu rezervasyon sizin dükkanınıza ait değil.",
+      error: "Errors.unauthorized",
     };
   }
 
@@ -73,10 +74,10 @@ export async function getPartnerBookingPreviewAction(raw: string) {
 export async function getPartnerBookingSealsAction(bookingIdRaw: string) {
   const session = await auth();
   if (!session?.user?.id) {
-    return { success: false as const, error: "Oturum açmanız gerekiyor." };
+    return { success: false as const, error: "Errors.authRequired" };
   }
   if (session.user.role !== "PARTNER" && session.user.role !== "ADMIN") {
-    return { success: false as const, error: "Bu işlem için esnaf yetkisi gerekir." };
+    return { success: false as const, error: "Errors.notAuthorizedPartner" };
   }
 
   let bookingId = bookingIdRaw.trim();
@@ -88,16 +89,10 @@ export async function getPartnerBookingSealsAction(bookingIdRaw: string) {
     include: { shop: true },
   });
   if (!booking) {
-    return { success: false as const, error: "Rezervasyon bulunamadı." };
+    return { success: false as const, error: "Errors.bookingNotFound" };
   }
-  if (
-    session.user.role === "PARTNER" &&
-    booking.shop.ownerId !== session.user.id
-  ) {
-    return {
-      success: false as const,
-      error: "Bu rezervasyon sizin dükkanınıza ait değil.",
-    };
+  if (booking.shop.ownerId !== session.user.id && session.user.role !== "ADMIN") {
+    return { success: false as const, error: "Errors.unauthorized" };
   }
 
   const seals = await prisma.bookingSeal.findMany({
@@ -149,7 +144,7 @@ export async function checkInAction(
   if (!booking) {
     return {
       success: false as const,
-      error: "Rezervasyon bulunamadı.",
+      error: "Errors.bookingNotFound",
       code: "NOT_FOUND" as const,
     };
   }
@@ -157,7 +152,7 @@ export async function checkInAction(
   if (session.user.role === "PARTNER" && booking.shop.ownerId !== session.user.id) {
     return {
       success: false as const,
-      error: "Bu rezervasyon sizin dükkanınıza ait değil.",
+      error: "Errors.unauthorized",
       code: "FORBIDDEN" as const,
     };
   }
@@ -174,7 +169,8 @@ export async function checkInAction(
       include: { guest: true },
     });
     if (b?.guest?.email) {
-      await notificationService.notifyCheckIn(b.guest.email, b.id);
+      const locale = await getLocale();
+      await notificationService.notifyCheckIn(b.guest.email, b.id, locale);
     }
 
     revalidatePartnerPaths();
@@ -209,14 +205,14 @@ export async function checkOutAction(qrTokenOrBookingId: string) {
   if (!booking) {
     return {
       success: false as const,
-      error: "Rezervasyon bulunamadı.",
+      error: "Errors.bookingNotFound",
       code: "NOT_FOUND" as const,
     };
   }
   if (session.user.role === "PARTNER" && booking.shop.ownerId !== session.user.id) {
     return {
       success: false as const,
-      error: "Bu rezervasyon sizin dükkanınıza ait değil.",
+      error: "Errors.unauthorized",
       code: "FORBIDDEN" as const,
     };
   }
@@ -229,7 +225,8 @@ export async function checkOutAction(qrTokenOrBookingId: string) {
       include: { guest: true },
     });
     if (updated?.guest?.email) {
-      await notificationService.notifyCheckOut(updated.guest.email, updated.id);
+      const locale = await getLocale();
+      await notificationService.notifyCheckOut(updated.guest.email, updated.id, locale);
     }
 
     revalidatePartnerPaths();
@@ -249,10 +246,10 @@ export async function checkOutAction(qrTokenOrBookingId: string) {
 export async function updatePartnerPhoneAction(phone: string) {
   const session = await auth();
   if (!session?.user?.id) {
-    return { success: false as const, error: "Oturum gerekli." };
+    return { success: false as const, error: "Errors.authRequired" };
   }
   if (session.user.role !== "PARTNER" && session.user.role !== "ADMIN") {
-    return { success: false as const, error: "Yetkisiz." };
+    return { success: false as const, error: "Errors.notAuthorizedPartner" };
   }
 
   const trimmed = phone.trim();
@@ -260,7 +257,7 @@ export async function updatePartnerPhoneAction(phone: string) {
   if (trimmed && !normalized) {
     return {
       success: false as const,
-      error: "Geçerli bir Türkiye GSM numarası girin (örn. 5xx xxx xx xx).",
+      error: "Errors.invalidData",
     };
   }
 
@@ -277,7 +274,7 @@ export async function updatePartnerPhoneAction(phone: string) {
     if (code === "P2002") {
       return {
         success: false as const,
-        error: "Bu numara başka bir hesaba bağlı.",
+        error: "Errors.phoneAlreadyRegistered",
       };
     }
     throw e;

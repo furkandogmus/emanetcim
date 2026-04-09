@@ -26,17 +26,15 @@ export async function updateShopSettingsAction(
 ) {
   const session = await auth();
 
-  if (!session?.user?.id) throw new Error("Unauthorized");
+  if (!session?.user?.id) throw new Error("Errors.authRequired");
 
-  const shop = await prisma.shop.findUnique({ where: { id: shopId } });
   if (!shop || shop.ownerId !== session.user.id) {
-    if (session.user.role !== "ADMIN") throw new Error("Unauthorized");
+    if (session.user.role !== "ADMIN") throw new Error("Errors.unauthorized");
   }
 
   const parsed = shopSettingsSchema.safeParse(data);
   if (!parsed.success) {
-    const first = parsed.error.flatten().formErrors[0] ?? "Geçersiz veri.";
-    throw new Error(first);
+    throw new Error("Errors.invalidData");
   }
 
   if (parsed.data.pricePerDay !== undefined) {
@@ -44,7 +42,7 @@ export async function updateShopSettingsAction(
     const minPrice = Math.round(rules.defaultPricePerDay / 2);
     const maxPrice = rules.defaultPricePerDay * 2;
     if (parsed.data.pricePerDay < minPrice || parsed.data.pricePerDay > maxPrice) {
-      throw new Error(`Birim fiyat ${minPrice}₺ ile ${maxPrice}₺ arasında olmalıdır.`);
+      throw new Error("Errors.invalidData");
     }
   }
 

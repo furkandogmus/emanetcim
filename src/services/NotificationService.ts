@@ -179,12 +179,25 @@ export class NotificationService implements INotificationService {
   /**
    * Misafir: yalnızca e-posta (SMS gönderilmez).
    */
-  async notifyBookingSuccess(emailOrPlaceholder: string, bookingId: string, totalPrice: number): Promise<void> {
-    const subject = "BagajPark: Rezervasyonunuz Onaylandı! 🎒";
-    const body = `Merhaba, ${bookingId} numaralı rezervasyonunuz başarıyla tamamlandı. \n\nToplam Tutar: ₺${totalPrice}\nBiletiniz: /bookings/${bookingId}`;
+  async notifyBookingSuccess(emailOrPlaceholder: string, bookingId: string, totalPrice: number, locale: string = "tr"): Promise<void> {
+    const content = {
+      tr: {
+        subject: "BagajPark: Rezervasyonunuz Onaylandı! 🎒",
+        body: `Merhaba, ${bookingId} numaralı rezervasyonunuz başarıyla tamamlandı. \n\nToplam Tutar: ₺${totalPrice}\nBiletiniz: /bookings/${bookingId}`
+      },
+      en: {
+        subject: "BagajPark: Booking Confirmed! 🎒",
+        body: `Hello, your booking ${bookingId} has been successfully completed. \n\nTotal Price: ₺${totalPrice}\nYour Ticket: /bookings/${bookingId}`
+      }
+    }[locale] || {
+      tr: {
+        subject: "BagajPark: Rezervasyonunuz Onaylandı! 🎒",
+        body: `Merhaba, ${bookingId} numaralı rezervasyonunuz başarıyla tamamlandı. \n\nToplam Tutar: ₺${totalPrice}\nBiletiniz: /bookings/${bookingId}`
+      }
+    }.tr;
 
     if (emailOrPlaceholder.includes("@")) {
-      await this.sendEmail(emailOrPlaceholder, subject, body, bookingId);
+      await this.sendEmail(emailOrPlaceholder, content.subject, content.body, bookingId);
     }
   }
 
@@ -241,15 +254,25 @@ export class NotificationService implements INotificationService {
     }
   }
 
-  async notifyCheckIn(email: string, bookingId: string): Promise<void> {
+  async notifyCheckIn(email: string, bookingId: string, locale: string = "tr"): Promise<void> {
+    const content = {
+      tr: { subject: "Valiziniz Güvende! 🔒", body: "Valiziniz teslim alındı." },
+      en: { subject: "Your Luggage is Safe! 🔒", body: "Your luggage has been received." }
+    }[locale] || { tr: { subject: "Valiziniz Güvende! 🔒", body: "Valiziniz teslim alındı." } }.tr;
+
     if (email.includes("@")) {
-      await this.sendEmail(email, "Valiziniz Güvende! 🔒", "Valiziniz teslim alındı.", bookingId);
+      await this.sendEmail(email, content.subject, content.body, bookingId);
     }
   }
 
-  async notifyCheckOut(email: string, bookingId: string): Promise<void> {
+  async notifyCheckOut(email: string, bookingId: string, locale: string = "tr"): Promise<void> {
+    const content = {
+      tr: { subject: "İyi Yolculuklar! 👋", body: "Valiziniz size teslim edildi." },
+      en: { subject: "Safe Travels! 👋", body: "Your luggage has been delivered to you." }
+    }[locale] || { tr: { subject: "İyi Yolculuklar! 👋", body: "Valiziniz size teslim edildi." } }.tr;
+
     if (email.includes("@")) {
-      await this.sendEmail(email, "İyi Yolculuklar! 👋", "Valiziniz size teslim edildi.", bookingId);
+      await this.sendEmail(email, content.subject, content.body, bookingId);
     }
   }
 }

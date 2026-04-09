@@ -12,24 +12,24 @@ export async function createDisputeAction(input: {
 }) {
   const session = await auth();
   if (!session?.user?.id) {
-    return { success: false as const, error: "Oturum gerekli." };
+    return { success: false as const, error: "Errors.authRequired" };
   }
 
   const booking = await prisma.booking.findUnique({ where: { id: input.bookingId } });
   if (!booking || booking.guestId !== session.user.id) {
-    return { success: false as const, error: "Rezervasyon bulunamadı veya yetkisiz." };
+    return { success: false as const, error: "Errors.unauthorized" };
   }
 
   if (booking.status !== "CHECKED_IN" && booking.status !== "CHECKED_OUT") {
     return {
       success: false as const,
-      error: "Şikayet yalnızca valiz dükkana alındıktan veya teslim edildikten sonra açılabilir.",
+      error: "Errors.disputeNotReady",
     };
   }
 
   const existing = await prisma.dispute.findUnique({ where: { bookingId: input.bookingId } });
   if (existing) {
-    return { success: false as const, error: "Bu rezervasyon için zaten bir kayıt var." };
+    return { success: false as const, error: "Errors.duplicateDispute" };
   }
 
   await prisma.dispute.create({
@@ -60,7 +60,7 @@ export async function updateDisputeStatusAction(
 ) {
   const session = await auth();
   if (session?.user?.role !== "ADMIN") {
-    return { success: false as const, error: "Yetkisiz." };
+    return { success: false as const, error: "Errors.unauthorized" };
   }
 
   await prisma.dispute.update({

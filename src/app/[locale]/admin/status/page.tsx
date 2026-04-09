@@ -1,11 +1,12 @@
 import prisma from "@/lib/db";
-import { setRequestLocale } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Server, Database, Mail, ShieldCheck, Smartphone, Cpu, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 
 
 export default async function AdminStatusPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const t = await getTranslations("AdminStatus");
 
   // Checks
   const dbHealth = await prisma.$queryRaw`SELECT 1`.then(() => true).catch(() => false);
@@ -29,76 +30,82 @@ export default async function AdminStatusPage({ params }: { params: Promise<{ lo
   return (
     <div className="min-h-screen bg-gray-50 p-10 font-sans">
       <header className="mb-12">
-        <h1 className="text-4xl font-black tracking-tighter text-gray-900 mb-2">Platform Teknik Denetim</h1>
-        <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Sistem Durumu ve Entegrasyon Raporu</p>
+        <h1 className="text-4xl font-black tracking-tighter text-gray-900 mb-2">{t("title")}</h1>
+        <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">{t("subtitle")}</p>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {/* DB Card */}
         <StatusCard 
-          title="Veritabanı"
+          title={t("database")}
           subtitle="PostgreSQL / Prisma"
           icon={<Database size={24} />}
           status={dbHealth ? 'success' : 'error'}
-          details={[`Veri Kaynağı: ${envStatus.db ? 'OK' : 'Eksik'}`, `Bağlantı: ${dbHealth ? 'Aktif' : 'Başarısız'}`]}
+          details={[`${t("database")}: ${envStatus.db ? t("ok") : t("missing")}`, `Connect: ${dbHealth ? t("active") : t("failed")}`]}
+          tLabels={{ online: t("online"), error: t("error"), warning: t("warning") }}
         />
 
         {/* Payment Card */}
         <StatusCard 
-          title="Ödeme Sistemi"
+          title={t("payment")}
           subtitle="iyzico Marketplace"
           icon={<ShieldCheck size={24} />}
           status={envStatus.iyzico ? 'success' : 'error'}
-          details={[`API Key: ${envStatus.iyzico ? 'Yüklü' : 'Eksik'}`, `Environment: ${envStatus.production ? 'Production' : 'Sandbox'}`]}
+          details={[`API Key: ${envStatus.iyzico ? t("installed") : t("missing")}`, `Environment: ${envStatus.production ? 'Production' : 'Sandbox'}`]}
+          tLabels={{ online: t("online"), error: t("error"), warning: t("warning") }}
         />
 
         {/* Mail Card */}
         <StatusCard 
-          title="E-posta Servisi"
+          title={t("email")}
           subtitle="Resend API"
           icon={<Mail size={24} />}
           status={envStatus.resend ? 'success' : 'error'}
-          details={[`API Key: ${envStatus.resend ? 'Mevcut' : 'Tanımlanmamış'}`, `Gönderici: ${process.env.RESEND_FROM || 'Varsayılan'}`]}
+          details={[`API Key: ${envStatus.resend ? t("available") : t("undefined")}`, `From: ${process.env.RESEND_FROM || 'Default'}`]}
+          tLabels={{ online: t("online"), error: t("error"), warning: t("warning") }}
         />
 
         {/* SMS Card */}
         <StatusCard 
-          title="SMS Gateway"
+          title={t("sms")}
           subtitle="Netgsm"
           icon={<Smartphone size={24} />}
           status={envStatus.netgsm ? 'success' : 'warning'}
-          details={[`Kimlik Bilgileri: ${envStatus.netgsm ? 'OK' : 'Yüklü Değil'}`, "Modül: Auth & Notification"]}
+          details={[`Credentials: ${envStatus.netgsm ? t("ok") : t("missing")}`, "Module: Auth & Notification"]}
+          tLabels={{ online: t("online"), error: t("error"), warning: t("warning") }}
         />
 
         {/* Server Info */}
         <StatusCard 
-          title="Sunucu Kaynakları"
+          title={t("resources")}
           subtitle="Vercel Ops"
           icon={<Server size={24} />}
           status="success"
-          details={[`Bellek: ${systemInfo.memory}`, `Node: ${systemInfo.node}`, `Platform: ${systemInfo.os}`]}
+          details={[`Memory: ${systemInfo.memory}`, `Node: ${systemInfo.node}`, `Platform: ${systemInfo.os}`]}
+          tLabels={{ online: t("online"), error: t("error"), warning: t("warning") }}
         />
 
         {/* Logic / Version */}
         <StatusCard 
-          title="Uygulama Mantığı"
+          title={t("logic")}
           subtitle="Next.js Runtime"
           icon={<Cpu size={24} />}
           status="success"
-          details={[`Sürüm: ${systemInfo.next}`, `Mod: ${envStatus.production ? 'PRODUCTION' : 'DEVELOPMENT'}`, `Auth Secret: ${envStatus.auth ? 'Güvende' : 'RİSKLİ'}`]}
+          details={[`Version: ${systemInfo.next}`, `Mode: ${envStatus.production ? 'PRODUCTION' : 'DEVELOPMENT'}`, `Auth Secret: ${envStatus.auth ? 'OK' : 'RISKY'}`]}
+          tLabels={{ online: t("online"), error: t("error"), warning: t("warning") }}
         />
       </div>
 
       <footer className="mt-16 pt-8 border-t border-gray-200">
         <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 flex items-center justify-between shadow-sm">
           <div>
-            <h4 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-1">Genel Sağlık Puanı</h4>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Tüm kritik servisler kontrol edildi.</p>
+            <h4 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-1">{t("healthScore")}</h4>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t("healthDesc")}</p>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
               <p className="text-2xl font-black text-green-600 tracking-tighter">100 / 100</p>
-              <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Kritik Hata Yok</p>
+              <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">{t("noCriticalError")}</p>
             </div>
             <div className="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center text-green-600">
               <CheckCircle2 size={24} />
@@ -110,12 +117,13 @@ export default async function AdminStatusPage({ params }: { params: Promise<{ lo
   );
 }
 
-function StatusCard({ title, subtitle, icon, status, details }: { 
+function StatusCard({ title, subtitle, icon, status, details, tLabels }: { 
   title: string; 
   subtitle: string; 
   icon: React.ReactNode; 
   status: 'success' | 'error' | 'warning';
   details: string[];
+  tLabels: { online: string; error: string; warning: string; };
 }) {
   const colors = {
     success: "bg-green-50 text-green-600 border-green-100",
@@ -139,7 +147,7 @@ function StatusCard({ title, subtitle, icon, status, details }: {
         </div>
         <div className={`flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${colors[status]}`}>
           <StatusIcon size={12} />
-          {status === 'success' ? 'ONLAYN' : status === 'error' ? 'HATA' : 'UYARI'}
+          {status === 'success' ? tLabels.online : status === 'error' ? tLabels.error : tLabels.warning}
         </div>
       </div>
       

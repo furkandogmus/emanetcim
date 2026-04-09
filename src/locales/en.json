@@ -605,7 +605,9 @@
     "q5": "5. Sealing",
     "a5": "Sealing is mandatory at drop-off.",
     "q6": "6. Changes",
-    "a6": "BagajPark reserves right to change rules."
+    "a6": "BagajPark reserves the right to change the terms of service and pricing policy without prior notice.",
+    "intro": "By using the BagajPark platform, you are deemed to have accepted these rules. Please read carefully.",
+    "footerText": "Have a question about the rules? Contact our support team."
   },
   "Privacy": {
     "title": "Privacy Policy",
@@ -663,5 +665,70 @@
     "submit": "Submit",
     "statusTitle": "Status",
     "statusLabel": "Status"
+  },
+  "Errors": {
+    "authRequired": "Session required.",
+    "verifyEmailRequired": "Please verify your email address before booking.",
+    "unauthorized": "You are not authorized for this action.",
+    "shopNotFound": "Shop not found.",
+    "bookingNotFound": "Booking not found.",
+    "insufficientCapacity": "Insufficient shop capacity for these dates.",
+    "paymentFailed": "Payment failed or rejected.",
+    "invalidData": "Invalid form data.",
+    "duplicateReview": "A review has already been submitted for this booking.",
+    "duplicateDispute": "A dispute has already been recorded for this booking.",
+    "generic": "An unknown error occurred.",
+    "tooManyRequests": "Too many attempts. Please try again later.",
+    "invalidEmail": "Invalid email address.",
+    "emailAlreadyRegistered": "This email address is already registered.",
+    "phoneAlreadyRegistered": "This phone number is already registered.",
+    "notAuthorizedAdmin": "Unauthorized: Only administrators can perform this action.",
+    "notAuthorizedPartner": "Unauthorized: Only partners can perform this action.",
+    "disputeNotReady": "Disputes can only be opened after the luggage is dropped off or delivered.",
+    "reviewNotReady": "Reviews can only be made after the delivery is complete."
+  },
+  "Emails": {
+    "verificationSubject": "Verify Your Email",
+    "resetPasswordSubject": "Reset Your Password",
+    "bookingConfirmedSubject": "BagajPark: Booking Confirmed! 🎒",
+    "checkInSubject": "Your Luggage is Safe! 🔒",
+    "checkInBody": "Your luggage has been received.",
+    "checkOutSubject": "Safe Travels! 👋",
+    "checkOutBody": "Your luggage has been delivered to you."
+  },
+  "Review": {
+    "placeholder": "Your thoughts on the shop and service..."
+  },
+  "Admin": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "shops": "Shops",
+    "bookings": "Bookings",
+    "approve": "Approve",
+    "reject": "Reject",
+    "delete": "Delete"
+  },
+  "AdminStatus": {
+    "title": "Platform Technical Audit",
+    "subtitle": "System Status and Integration Report",
+    "database": "Database",
+    "payment": "Payment System",
+    "email": "Email Service",
+    "sms": "SMS Gateway",
+    "resources": "Server Resources",
+    "logic": "Application Logic",
+    "online": "ONLINE",
+    "error": "ERROR",
+    "warning": "WARNING",
+    "ok": "OK",
+    "missing": "Missing",
+    "active": "Active",
+    "failed": "Failed",
+    "installed": "Installed",
+    "available": "Available",
+    "undefined": "Undefined",
+    "healthScore": "General Health Score",
+    "healthDesc": "All critical services checked.",
+    "noCriticalError": "No Critical Errors"
   }
 }

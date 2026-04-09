@@ -17,6 +17,7 @@ import { getPricingRules } from "@/lib/platform-settings";
 import { moneyToNumber } from "@/lib/money";
 import type { PrismaClient } from "@prisma/client";
 import { headers } from "next/headers";
+import { getLocale } from "next-intl/server";
 
 /** İnteraktif transaction istemcisi (Prisma.TransactionClient ile uyumlu). */
 type PrismaTransactionClient = Omit<
@@ -51,11 +52,11 @@ export async function createBookingAction(data: CreateBookingInput) {
   const session = await auth();
 
   if (!session?.user?.id) {
-    return { success: false as const, error: "Oturum açmanız gerekiyor." };
+    return { success: false as const, error: "Errors.authRequired" };
   }
 
   if (!session.user.emailVerified && session.user.role !== "ADMIN") {
-    return { success: false as const, error: "Lütfen rezervasyon yapabilmek için önce e-posta adresinizi doğrulayın." };
+    return { success: false as const, error: "Errors.verifyEmailRequired" };
   }
 
   const shop = await prisma.shop.findUnique({
@@ -63,7 +64,7 @@ export async function createBookingAction(data: CreateBookingInput) {
     include: { owner: { select: { phone: true } } },
   });
   if (!shop) {
-    return { success: false as const, error: "Dükkan bulunamadı." };
+    return { success: false as const, error: "Errors.shopNotFound" };
   }
   if (!shop.subMerchantKey) {
     return { success: false as const, error: "Bu dükkan için ödeme (subMerchant) yapılandırması eksik." };
@@ -86,7 +87,7 @@ export async function createBookingAction(data: CreateBookingInput) {
   if (authTotals.subtotalBeforeCoupon <= 0) {
     return {
       success: false as const,
-      error: "Geçerli bir hizmet tutarı için en az bir valiz ve tarih seçin.",
+      error: "Errors.invalidData",
     };
   }
 
@@ -151,7 +152,7 @@ export async function createBookingAction(data: CreateBookingInput) {
       return { success: false as const, error: e.message };
     }
     console.error("createInitialBooking", e);
-    return { success: false as const, error: "Rezervasyon oluşturulamadı." };
+    return { success: false as const, error: "Errors.generic" };
   }
 
   // Production Hardening: Real IP and Shop Location
@@ -182,7 +183,7 @@ export async function createBookingAction(data: CreateBookingInput) {
 
     if (!isPaymentSuccess(paymentResult.status)) {
       await prisma.booking.delete({ where: { id: booking.id } }).catch(() => {});
-      return { success: false as const, error: "Ödeme başarısız veya reddedildi." };
+      return { success: false as const, error: "Errors.paymentFailed" };
     }
 
     await prisma.$transaction(async (tx: PrismaTransactionClient) => {
@@ -206,11 +207,13 @@ export async function createBookingAction(data: CreateBookingInput) {
 
     const fresh = await prisma.booking.findUnique({ where: { id: booking.id } });
 
+    const locale = await getLocale();
     void notificationService
       .notifyBookingSuccess(
         session.user.email || session.user.id,
         booking.id,
-        totalPrice
+        totalPrice,
+        locale
       )
       .catch(() => {});
 
@@ -233,7 +236,7 @@ export async function createBookingAction(data: CreateBookingInput) {
   } catch (e: unknown) {
     console.error("payment flow", e);
     await prisma.booking.delete({ where: { id: booking.id } }).catch(() => {});
-    return { success: false as const, error: "Ödeme sırasında hata oluştu." };
+    return { success: false as const, error: "Errors.paymentFailed" };
   }
 }
 
@@ -241,17 +244,17 @@ export async function cancelBookingAction(bookingId: string) {
   const session = await auth();
 
   if (!session?.user?.id) {
-    throw new Error("Oturum açmanız gerekiyor.");
+    throw new Error("Errors.authRequired");
   }
 
   const booking = await bookingService.getBookingDetails(bookingId);
 
   if (!booking) {
-    return { success: false, error: "Rezervasyon bulunamadı." };
+    return { success: false, error: "Errors.bookingNotFound" };
   }
 
   if (booking.guestId !== session.user.id && session.user.role !== "ADMIN") {
-    return { success: false, error: "Bu işlem için yetkiniz yok." };
+    return { success: false, error: "Errors.unauthorized" };
   }
 
   try {
