@@ -148,11 +148,11 @@ export default function CheckoutClient({
       checkInTime,
       checkOutTime,
       cardInfo: {
-        cardHolderName: cardHolder,
-        cardNumber: cardNumber.replace(/\s/g, ""),
-        expireMonth: expMonth || "12",
-        expireYear: expYear ? `20${expYear}` : "2025",
-        cvc: cvv,
+        cardHolderName: "REQUEST_FLOW",
+        cardNumber: "0000000000000000",
+        expireMonth: "12",
+        expireYear: "2099",
+        cvc: "000",
       },
       couponCode: couponCode.trim() || undefined,
     });
@@ -207,9 +207,9 @@ export default function CheckoutClient({
           </div>
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-black tracking-tight">
-              {t("bookingSuccess")}
+              {t("requestSent")}
             </h1>
-            <p className="text-green-50/80 font-medium">{t("showToPartner")}</p>
+            <p className="text-green-50/80 font-medium">{t("requestSentSub")}</p>
           </div>
 
           <div className="bg-white text-gray-900 rounded-[2.5rem] p-10 w-full shadow-2xl relative overflow-hidden">
@@ -478,6 +478,22 @@ export default function CheckoutClient({
 
             <section className="flex flex-col gap-6">
               <h3 className="text-xs font-black uppercase text-gray-400">
+                {t("checkoutReviewTitle")}
+              </h3>
+              <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100 flex flex-col gap-4">
+                 <div className="flex justify-between">
+                    <span className="text-sm font-bold text-gray-400">{t("totalBags")}</span>
+                    <span className="text-sm font-black">{totalBags}</span>
+                 </div>
+                 <div className="flex justify-between">
+                    <span className="text-sm font-bold text-gray-400">{t("stayDuration")}</span>
+                    <span className="text-sm font-black">{numberOfDays} {t("daysUnit")}</span>
+                 </div>
+              </div>
+            </section>
+
+            <section className="flex flex-col gap-6">
+              <h3 className="text-xs font-black uppercase text-gray-400">
                 {t("checkoutCardDetails")}
               </h3>
 
@@ -603,9 +619,9 @@ export default function CheckoutClient({
               {isProcessing ? (
                 <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
               ) : (
-                <CreditCard size={20} />
+                <CheckCircle2 size={20} />
               )}
-              {t("payAndBook")}
+              {t("sendRequest")}
             </button>
           )}
         </div>

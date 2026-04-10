@@ -141,6 +141,42 @@ export class SealService {
   }
 
   /**
+   * Dükkanın stoğundaki (ASSIGNED) en küçük seri numaralı N mühürü getirir.
+   */
+  async getNextAvailableSeals(shopId: string, count: number) {
+    return await prisma.seal.findMany({
+      where: {
+        shopId,
+        status: "ASSIGNED",
+      },
+      orderBy: { serialNumber: "asc" },
+      take: count,
+    });
+  }
+
+  /**
+   * Bir mühürü FAULTY olarak işaretler ve kullanımdan çıkarır.
+   */
+  async markSealAsFaulty(serialNumber: number, shopId: string): Promise<void> {
+    const seal = await prisma.seal.findUnique({
+      where: { serialNumber },
+    });
+    
+    if (!seal || seal.shopId !== shopId) {
+      throw new Error("seal_not_owned_by_shop");
+    }
+
+    if (seal.status === "IN_USE" || seal.status === "RETURNED") {
+       throw new Error("seal_already_processed");
+    }
+
+    await prisma.seal.update({
+      where: { serialNumber },
+      data: { status: "FAULTY" },
+    });
+  }
+
+  /**
    * Check-out: BookingSeal kayıtlarındaki mühürleri RETURNED yap.
    */
   async applyCheckOutReturnSealsWithinTx(tx: Tx, bookingId: string): Promise<void> {

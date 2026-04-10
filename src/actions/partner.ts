@@ -9,6 +9,8 @@ import { verifyQrToken } from "@/lib/qr-token";
 import type { SealAssignmentInput } from "@/services/SealService";
 import { normalizeTrGsm10 } from "@/lib/netgsm";
 import { getLocale } from "next-intl/server";
+import { sealService } from "@/services/SealService";
+import { BookingStatus } from "@prisma/client";
 
 function revalidatePartnerPaths() {
   revalidatePathAllLocales("/partner");
@@ -282,4 +284,103 @@ export async function updatePartnerPhoneAction(phone: string) {
 
   revalidatePartnerPaths();
   return { success: true as const };
+}
+
+/**
+ * Rezervasyon talebini onayla.
+ */
+export async function approveBookingAction(bookingId: string) {
+  const session = await auth();
+  if (session?.user?.role !== "PARTNER" && session?.user?.role !== "ADMIN") {
+    return { success: false as const, error: "Errors.authRequired" };
+  }
+
+  try {
+    const booking = await prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: { shop: true },
+    });
+
+    if (!booking) return { success: false as const, error: "Errors.bookingNotFound" };
+    if (session.user.role === "PARTNER" && booking.shop.ownerId !== session.user.id) {
+       return { success: false as const, error: "Errors.unauthorized" };
+    }
+
+    // Durumu APPROVED yapıyoruz (Veya doğrudan PAID/PENDING_PAYMENT kurgulanabilir)
+    await prisma.booking.update({
+      where: { id: bookingId },
+      data: { status: BookingStatus.APPROVED },
+    });
+
+    revalidatePartnerPaths();
+    return { success: true as const };
+  } catch (err) {
+    return { success: false as const, error: "Errors.generic" };
+  }
+}
+
+/**
+ * Rezervasyon talebini reddet.
+ */
+export async function rejectBookingAction(bookingId: string) {
+  const session = await auth();
+  if (session?.user?.role !== "PARTNER" && session?.user?.role !== "ADMIN") {
+    return { success: false as const, error: "Errors.authRequired" };
+  }
+
+  try {
+    const booking = await prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: { shop: true },
+    });
+
+    if (!booking) return { success: false as const, error: "Errors.bookingNotFound" };
+    if (session.user.role === "PARTNER" && booking.shop.ownerId !== session.user.id) {
+       return { success: false as const, error: "Errors.unauthorized" };
+    }
+
+    await prisma.booking.update({
+      where: { id: bookingId },
+      data: { status: BookingStatus.CANCELLED },
+    });
+
+    revalidatePartnerPaths();
+    return { success: true as const };
+  } catch (err) {
+    return { success: false as const, error: "Errors.generic" };
+  }
+}
+
+/**
+ * Sıradaki uygun mühürleri getirir (Otomatik mühürleme için).
+ */
+export async function getNextAvailableSealsAction(shopId: string, count: number) {
+  const session = await auth();
+  if (session?.user?.role !== "PARTNER" && session?.user?.role !== "ADMIN") {
+    return { success: false as const, error: "Errors.authRequired" };
+  }
+
+  const seals = await sealService.getNextAvailableSeals(shopId, count);
+  return {
+    success: true as const,
+    seals: seals.map(s => ({ sealNumber: s.serialNumber })),
+  };
+}
+
+/**
+ * Bir mührü hatalı olarak işaretler ve stoktan düşer.
+ */
+export async function reportFaultySealAction(serialNumber: number, shopId: string) {
+  const session = await auth();
+  if (session?.user?.role !== "PARTNER" && session?.user?.role !== "ADMIN") {
+    return { success: false as const, error: "Errors.authRequired" };
+  }
+
+  try {
+    await sealService.markSealAsFaulty(serialNumber, shopId);
+    return { success: true as const };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Errors.generic";
+    return { success: false as const, error: msg };
+  }
 }

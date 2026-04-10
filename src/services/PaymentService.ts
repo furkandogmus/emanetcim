@@ -46,6 +46,13 @@ export interface IPaymentService {
   refundPayment(bookingId: string, amount: number): Promise<PaymentSdkResult>;
   /** Ödeme logu SUCCESS iken booking hâlâ PENDING kalan tutarsızlıkları düzeltir (webhook gecikmesi vb.). */
   reconcileStalePaymentBookings(): Promise<{ fixed: number; bookingIds: string[] }>;
+  updateSubMerchant(data: {
+    subMerchantKey: string;
+    name: string;
+    address: string;
+    email: string;
+    phone: string;
+  }): Promise<PaymentSdkResult>;
 }
 
 /**
@@ -373,6 +380,47 @@ export class PaymentService implements IPaymentService {
       logger.info({ bookingId: b.id }, 'finance_reconcile_pending_to_paid');
     }
     return { fixed: stuck.length, bookingIds };
+  }
+
+  /**
+   * iyzico Alt-Üye Güncelleme
+   */
+  async updateSubMerchant(data: {
+    subMerchantKey: string;
+    name: string;
+    address: string;
+    email: string;
+    phone: string;
+  }): Promise<PaymentSdkResult> {
+    const request = {
+      locale: Iyzipay.LOCALE.TR,
+      subMerchantKey: data.subMerchantKey,
+      name: data.name,
+      address: data.address,
+      contactEmail: data.email,
+      contactPhoneNumber: data.phone,
+      // Bazı zorunlu alanlar modelde eksikse varsayılan veya mevcut değerler kullanılmalı
+      city: "Istanbul",
+      country: "Turkey",
+    };
+
+    if (process.env.NODE_ENV === "development" && (!process.env.IYZICO_API_KEY || process.env.IYZICO_API_KEY === "sandbox-api-key")) {
+      logger.info({ subMerchantKey: data.subMerchantKey }, "payment_submerchant_update_simulate_success_dev");
+      return { status: "success" };
+    }
+
+    return new Promise<PaymentSdkResult>((resolve) => {
+      iyzipay.subMerchant.update(request, (err: unknown, res: unknown) => {
+        if (err) {
+          resolve({
+            status: 'failure',
+            errorMessage: err instanceof Error ? err.message : String(err),
+          });
+        } else {
+          resolve(res as PaymentSdkResult);
+        }
+      });
+    });
   }
 }
 

@@ -81,8 +81,9 @@ const authProxy = auth((req) => {
   // Kritik: Rota kontrolünü yaparken dil önekini temizleyelim
   const pathWithoutLocale = isLocaleTr ? pathname.replace('/tr', '') : isLocaleEn ? pathname.replace('/en', '') : pathname;
   
-  const isAdminPath = pathWithoutLocale.startsWith('/admin');
-  const isPartnerPath = pathWithoutLocale.startsWith('/partner');
+  const isAdminPath = pathWithoutLocale.startsWith('/admin') || pathWithoutLocale.startsWith('/api/admin');
+  const isPartnerPath = pathWithoutLocale.startsWith('/partner') || pathWithoutLocale.startsWith('/api/partner');
+  const isInternalApiPath = pathWithoutLocale.startsWith('/api/internal');
 
   if (isAdminPath || isPartnerPath) {
     if (!isLoggedIn) {
@@ -104,6 +105,12 @@ const authProxy = auth((req) => {
     }
   }
 
+  // 5. Internal API Protection (Cron/Jobs) - This is usually handled by secrets,
+  // but we can add an extra layer if no secret is present.
+  if (isInternalApiPath && !isLoggedIn && !req.headers.get("authorization") && !req.headers.get("x-cron-secret")) {
+    return new NextResponse(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+  }
+
   return response;
 
 });
@@ -118,7 +125,7 @@ export { proxy as middleware };
 export const config = {
   // Matcher for i18n and Auth (Excluding static assets strictly)
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|sw.js|manifest.json|icons/).*)',
+    '/((?!_next/static|_next/image|favicon.ico|sw.js|manifest.json|icons/).*)',
     '/',
     '/(tr|en)/:path*'
   ]

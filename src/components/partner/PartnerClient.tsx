@@ -24,6 +24,10 @@ import {
   checkOutAction,
   getPartnerBookingPreviewAction,
   getPartnerBookingSealsAction,
+  approveBookingAction,
+  rejectBookingAction,
+  reportFaultySealAction,
+  getNextAvailableSealsAction,
 } from "@/actions/partner";
 import type { PartnerBookingListItem } from "@/services/BookingService";
 
@@ -76,7 +80,7 @@ export default function PartnerClient({
   const router = useRouter();
   const pathname = usePathname();
 
-  const [activeTab, setActiveTab] = useState<"PANEL" | "AYARLAR" | "GECMIS">(
+  const [activeTab, setActiveTab] = useState<"PANEL" | "TALEPLER" | "GECMIS" | "AYARLAR">(
     "PANEL"
   );
   const [isScanning, setIsScanning] = useState(false);
@@ -142,6 +146,71 @@ export default function PartnerClient({
     },
     [t]
   );
+
+  const handleApprove = async (id: string) => {
+    setIsProcessing(true);
+    const res = await approveBookingAction(id);
+    setIsProcessing(false);
+    if (res.success) {
+      setSuccessBanner(t("approvedSuccess"));
+      setTimeout(() => setSuccessBanner(null), 3000);
+      router.refresh();
+    } else {
+      alert(res.error);
+    }
+  };
+
+  const handleReject = async (id: string) => {
+    if (!confirm(t("confirmReject"))) return;
+    setIsProcessing(true);
+    const res = await rejectBookingAction(id);
+    setIsProcessing(false);
+    if (res.success) {
+      router.refresh();
+    } else {
+      alert(res.error);
+    }
+  };
+
+  // Otomatik mühür atama için mühürleri tazele
+  const refreshAutoSeals = useCallback(async (bId: string, count: number) => {
+    const res = await getNextAvailableSealsAction(shopId, count);
+    if (res.success) {
+      const slots = buildBagSlots(
+        scanResult?.bagCountS || 0,
+        scanResult?.bagCountM || 0,
+        scanResult?.bagCountXl || 0
+      );
+      setSealRows(slots.map((s, i) => ({
+        ...s,
+        sealNumber: res.seals[i].sealNumber
+      })));
+    }
+  }, [shopId, scanResult]); // Removed t as well (useTranslations results are stable enough or can be omitted)
+
+  useEffect(() => {
+    if (scanResult && scanResult.totalBags > 0 && sealRows.length === 0) {
+      void refreshAutoSeals(scanResult.id, scanResult.totalBags);
+    }
+  }, [scanResult, sealRows.length, refreshAutoSeals]);
+
+  const markFaultyAtRow = async (rowIdx: number) => {
+    if (!sealRows[rowIdx]) return;
+    const sn = sealRows[rowIdx].sealNumber;
+    setFaultySealNumbers((prev) => [...prev, sn]);
+    
+    // Sunucu tarafında mühürü hatalı işaretle
+    const res = await reportFaultySealAction(sn, shopId);
+    if (!res.success) {
+      alert(res.error);
+      return;
+    }
+
+    // Mühürleri yeniden çek (Sıradakiler gelsin)
+    if (scanResult) {
+      await refreshAutoSeals(scanResult.id, scanResult.totalBags);
+    }
+  };
 
   const executeCheckout = useCallback(
     async (bookingId: string): Promise<boolean> => {
@@ -274,19 +343,6 @@ export default function PartnerClient({
     setFaultySealNumbers([]);
   }, [firstSealInput]);
 
-  const markFaultyAtRow = (rowIdx: number) => {
-    if (!sealRows[rowIdx]) return;
-    setFaultySealNumbers((prev) => [...prev, sealRows[rowIdx].sealNumber]);
-    setSealRows((prev) => {
-      const next = prev.map((r) => ({ ...r }));
-      for (let j = rowIdx; j < next.length; j++) {
-        next[j].sealNumber =
-          j === rowIdx ? next[j].sealNumber + 1 : next[j - 1].sealNumber + 1;
-      }
-      return next;
-    });
-  };
-
   const handleScanResult = (result: string) => {
     void applyPreviewForCheckIn(result, true);
   };
@@ -397,18 +453,11 @@ export default function PartnerClient({
                 <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
                   {t("sealAssignmentsTitle")}
                 </p>
-                <label className="flex flex-col gap-2">
-                  <span className="text-xs font-bold text-gray-500">
-                    {t("firstSealNumber")}
-                  </span>
-                  <input
-                    type="number"
-                    className="bg-white border border-gray-200 rounded-2xl px-4 py-3 font-black text-lg"
-                    value={firstSealInput}
-                    onChange={(e) => setFirstSealInput(e.target.value)}
-                    placeholder="e.g. 1001"
-                  />
-                </label>
+                <div className="flex flex-col gap-2">
+                  <p className="text-xs font-bold text-gray-500">
+                    {t("automaticSealNotice")}
+                  </p>
+                </div>
                 <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
                   {sealRows.map((row, idx) => (
                     <div
@@ -484,14 +533,10 @@ export default function PartnerClient({
               disabled={
                 isProcessing ||
                 isPhotoLoading ||
-                (scanResult.totalBags > 0 &&
-                  (sealRows.length !== scanResult.totalBags ||
-                    !firstSealInput.trim()))
+                (scanResult.totalBags > 0 && sealRows.length !== scanResult.totalBags)
               }
               className={`w-full h-20 rounded-[2rem] font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 active:scale-95 transition-all shadow-2xl ${
-                scanResult.totalBags === 0 ||
-                (sealRows.length === scanResult.totalBags &&
-                  !!firstSealInput.trim())
+                !(isProcessing || isPhotoLoading || (scanResult.totalBags > 0 && sealRows.length !== scanResult.totalBags))
                   ? "bg-orange-600 text-white hover:bg-orange-700 shadow-orange-200/50"
                   : "bg-gray-100 text-gray-300 cursor-not-allowed grayscale"
               }`}
@@ -693,12 +738,12 @@ export default function PartnerClient({
                                 : "bg-orange-50 text-orange-500"
                         }`}
                       >
-                        {booking.status === "CHECKED_OUT" && t("statusCheckedOut")}
-                        {booking.status === "CANCELLED" && t("statusCancelled")}
-                        {booking.status === "CHECKED_IN" && t("statusCheckedIn")}
-                        {booking.status === "PAID" && t("statusPaid")}
-                        {booking.status === "PENDING" && t("statusPending")}
-                        {!["CHECKED_OUT", "CANCELLED", "CHECKED_IN", "PAID", "PENDING"].includes(booking.status) && booking.status}
+                        {(booking.status as string) === "CHECKED_OUT" && t("statusCheckedOut")}
+                        {(booking.status as string) === "CANCELLED" && t("statusCancelled")}
+                        {(booking.status as string) === "CHECKED_IN" && t("statusCheckedIn")}
+                        {(booking.status as string) === "PAID" && t("statusPaid")}
+                        {(booking.status as string) === "PENDING" && t("statusPending")}
+                        {!["CHECKED_OUT", "CANCELLED", "CHECKED_IN", "PAID", "PENDING"].includes(booking.status as string) && booking.status}
                       </div>
                     </div>
 
@@ -708,7 +753,7 @@ export default function PartnerClient({
                           {t("netEarningsShort")}
                         </p>
                         <p className="font-black text-xl text-gray-900">
-                          {booking.status === "CANCELLED"
+                          {(booking.status as string) === "CANCELLED"
                             ? "0"
                             : Math.round(
                                 moneyToNumber(booking.totalPrice) *
@@ -731,7 +776,7 @@ export default function PartnerClient({
                       </div>
                     </div>
 
-                    {booking.status === "CHECKED_IN" && (
+                    {(booking.status as string) === "CHECKED_IN" && (
                       <button
                         type="button"
                         disabled={checkingOutId === booking.id}
@@ -749,6 +794,65 @@ export default function PartnerClient({
                     <div className="absolute top-0 right-0 w-32 h-32 bg-gray-50 rounded-bl-[4rem] -z-0 translate-x-8 -translate-y-8 opacity-0 group-hover:opacity-100 transition-all"></div>
                   </div>
                 ))
+            )}
+          </div>
+        </main>
+      )}
+
+      {activeTab === "TALEPLER" && (
+        <main className="flex-1 flex flex-col gap-6 animate-in slide-in-from-right-4 duration-500">
+           <header className="flex items-center justify-between">
+            <h2 className="text-xl font-black tracking-tight uppercase tracking-widest">
+              {t("incomingRequests")}
+            </h2>
+          </header>
+
+          <div className="flex flex-col gap-4 pb-32">
+            {bookings.filter(b => (b.status as string) === "WAITING_APPROVAL").length === 0 ? (
+               <div className="bg-white p-12 rounded-[2.5rem] border border-gray-100 text-center opacity-50 flex flex-col items-center gap-4">
+                <Package size={48} strokeWidth={1} />
+                <p className="font-bold">{t("noRequestsYet")}</p>
+              </div>
+            ) : (
+              bookings.filter(b => (b.status as string) === "WAITING_APPROVAL").map(booking => (
+                <div key={booking.id} className="bg-white p-6 rounded-[2.5rem] border-2 border-orange-100 shadow-xl flex flex-col gap-6">
+                   <div className="flex justify-between items-start">
+                      <div className="flex gap-4 items-center">
+                        <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-600">
+                          <Luggage size={24} />
+                        </div>
+                        <div>
+                          <h3 className="font-black text-gray-900 tracking-tight">
+                            {booking.guest?.name || "Misafir"}
+                          </h3>
+                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                            {new Date(booking.checkInTime).toLocaleDateString(dateLocale)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                         <p className="text-lg font-black text-gray-900">₺{moneyToNumber(booking.totalPrice)}</p>
+                         <p className="text-[10px] text-gray-400 font-bold uppercase">{booking.bagCountS + booking.bagCountM + booking.bagCountXl} {t("bagCountUnit")}</p>
+                      </div>
+                   </div>
+                   <div className="flex gap-3">
+                      <button 
+                        onClick={() => handleReject(booking.id)}
+                        disabled={isProcessing}
+                        className="flex-1 py-3 rounded-xl bg-gray-100 text-gray-500 font-black text-xs uppercase"
+                      >
+                        {t("reject")}
+                      </button>
+                      <button 
+                         onClick={() => handleApprove(booking.id)}
+                         disabled={isProcessing}
+                         className="flex-1 py-3 rounded-xl bg-orange-600 text-white font-black text-xs uppercase shadow-lg shadow-orange-100"
+                      >
+                         {t("approve")}
+                      </button>
+                   </div>
+                </div>
+              ))
             )}
           </div>
         </main>
@@ -776,6 +880,16 @@ export default function PartnerClient({
           className={`p-3 rounded-2xl transition-all ${activeTab === "PANEL" ? "bg-orange-100 text-orange-600" : "text-gray-400 hover:text-gray-600"}`}
         >
           <Home size={24} />
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("TALEPLER")}
+          className={`p-3 rounded-2xl transition-all relative ${activeTab === "TALEPLER" ? "bg-orange-100 text-orange-600" : "text-gray-400 hover:text-gray-600"}`}
+        >
+          <Luggage size={24} />
+          {bookings.filter(b => (b.status as string) === "WAITING_APPROVAL").length > 0 && (
+            <span className="absolute top-2 right-2 w-3 h-3 bg-red-600 rounded-full border-2 border-white"></span>
+          )}
         </button>
         <button
           type="button"

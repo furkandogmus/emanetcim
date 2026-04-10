@@ -98,7 +98,14 @@
     "smsNotifyPhoneHint": "Yeni ödeme alındığında Netgsm ile bu numaraya kısa mesaj gider. Misafirlere SMS gönderilmez.",
     "noShopTitle": "Henüz Kayıtlı Dükkanınız Yok",
     "noShopDesc": "İşletmenizi sisteme kaydetmek için admin onayı bekliyor olabilirsiniz.",
-    "backToPanel": "Panele dön"
+    "backToPanel": "Panele dön",
+    "automaticSealNotice": "Sistem dükkan stoğundaki sıradaki mühürleri atamıştır. Bozuk mühür varsa 'Bozuk' olarak işaretleyebilirsiniz.",
+    "incomingRequests": "Gelen Talepler",
+    "noRequestsYet": "Henüz talep bulunmuyor.",
+    "reject": "REDDET",
+    "approve": "ONAYLA",
+    "approvedSuccess": "Talep onaylandı!",
+    "confirmReject": "Bu talebi reddetmek istediğinize emin misiniz?"
   },
   "Guest": {
     "heroTitle": "Valizini Güvenle Bırak, Özgürce Gez",
@@ -155,6 +162,10 @@
     "checkoutCvvPlaceholder": "CVV",
     "checkoutSelectBagsHint": "En az bir valiz seçin.",
     "checkoutUnexpectedError": "Beklenmedik bir hata oluştu.",
+    "requestSent": "Talebiniz Esnafa Gönderildi!",
+    "requestSentSub": "Esnaf onayladığında bildirim alacaksınız. Ardından ödemeyi yapabilirsiniz.",
+    "checkoutReviewTitle": "Rezervasyon Özeti",
+    "sendRequest": "TALEP GÖNDER",
     "bookingSuccess": "Rezervasyon Başarılı!",
     "showToPartner": "Lütfen aşağıdaki QR kodu dükkan sahibine gösterin.",
     "myBookings": "Rezervasyonlarım",

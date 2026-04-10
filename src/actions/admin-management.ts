@@ -4,6 +4,8 @@ import prisma from "@/lib/db";
 import { auth } from "@/auth";
 import { Role } from "@prisma/client";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
+import { paymentService } from "@/services/PaymentService";
+import logger from "@/lib/logger";
 import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
 import { getLocale } from "next-intl/server";
@@ -148,7 +150,7 @@ export async function updateShopAction(shopId: string, data: {
 }) {
   await ensureAdmin();
 
-  await prisma.shop.update({
+  const shop = await prisma.shop.update({
     where: { id: shopId },
     data: {
       name: data.name,
@@ -159,7 +161,24 @@ export async function updateShopAction(shopId: string, data: {
       pricePerDay: data.pricePerDay,
       isActive: data.isActive,
     },
+    include: { owner: true },
   });
+
+  // Iyzico Sub-Merchant Sync (Sadece anahtar varsa)
+  if (shop.subMerchantKey && (data.name || data.address)) {
+    try {
+      await paymentService.updateSubMerchant({
+        subMerchantKey: shop.subMerchantKey,
+        name: data.name || shop.name,
+        address: data.address || shop.address || "Istanbul",
+        email: shop.owner.email || "partner@bagajpark.local",
+        phone: shop.owner.phone || "+905000000000",
+      });
+    } catch (error) {
+      logger.error({ shopId, error }, "iyzico_submerchant_sync_failed");
+      // Not: Ödeme servisi hatası ana işlemi bozmasın diye try-catch içindeyiz.
+    }
+  }
 
   revalidatePathAllLocales(`/admin/partners/${shopId}`);
   revalidatePathAllLocales("/admin/partners");

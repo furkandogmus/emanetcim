@@ -98,7 +98,14 @@
     "smsNotifyPhoneHint": "When a new booking is paid, Netgsm sends a short SMS to this number.",
     "noShopTitle": "No Shop Registered Yet",
     "noShopDesc": "Your shop may be awaiting admin approval.",
-    "backToPanel": "Back to panel"
+    "backToPanel": "Back to panel",
+    "automaticSealNotice": "The system has assigned the next serial numbers from the shop's stock. You can mark any seal as 'Faulty' if needed.",
+    "incomingRequests": "Incoming Requests",
+    "noRequestsYet": "No requests yet.",
+    "reject": "REJECT",
+    "approve": "APPROVE",
+    "approvedSuccess": "Request approved!",
+    "confirmReject": "Are you sure you want to reject this request?"
   },
   "Guest": {
     "heroTitle": "Drop Your Bags, Explore Freely",
@@ -155,6 +162,10 @@
     "checkoutCvvPlaceholder": "CVV",
     "checkoutSelectBagsHint": "Select at least one bag.",
     "checkoutUnexpectedError": "Something went wrong.",
+    "requestSent": "Request Sent to Shop!",
+    "requestSentSub": "We'll notify you when the shop approves. You can then proceed with the payment.",
+    "checkoutReviewTitle": "Booking Review",
+    "sendRequest": "SEND REQUEST",
     "bookingSuccess": "Booking Successful!",
     "showToPartner": "Please show the QR code below to the shop owner.",
     "myBookings": "My Bookings",
