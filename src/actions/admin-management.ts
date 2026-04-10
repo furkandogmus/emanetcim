@@ -230,31 +230,3 @@ export async function unblockIpAction(ip: string) {
   return { success: true };
 }
 
-/**
- * Gelen Mesajı okundu olarak işaretle
- */
-export async function markMessageAsReadAction(messageId: string) {
-  await ensureAdmin();
-
-  await prisma.contactMessage.update({
-    where: { id: messageId },
-    data: { isRead: true },
-  });
-
-  // revalidatePath: istemci zaten state güncelliyor; RSC yeniden render + Prisma JSON
-  // serileştirmesi üretimde gereksiz hata riski. Liste tutarlılığı tek sekme için yeterli.
-  return { success: true };
-}
-
-/**
- * Gelen Mesajı sil
- */
-export async function deleteMessageAction(messageId: string) {
-  await ensureAdmin();
-
-  await prisma.contactMessage.delete({
-    where: { id: messageId },
-  });
-
-  return { success: true };
-}
