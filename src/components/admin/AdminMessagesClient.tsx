@@ -8,15 +8,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { markMessageAsReadAction, deleteMessageAction } from "@/actions/admin-management";
 import { toast } from "sonner";
 
-import { ContactMessage } from "@prisma/client";
+import type { ContactMessageDTO } from "@/lib/contact-message-dto";
 
 interface AdminMessagesClientProps {
-  messages: ContactMessage[];
+  messages: ContactMessageDTO[];
 }
 
 export default function AdminMessagesClient({ messages: initialMessages }: AdminMessagesClientProps) {
   const t = useTranslations("Admin");
-  const [messages, setMessages] = useState<ContactMessage[]>(initialMessages);
+  const [messages, setMessages] = useState<ContactMessageDTO[]>(initialMessages);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"ALL" | "UNREAD">("ALL");
   const [loadingId, setLoadingId] = useState<string | null>(null);
@@ -162,7 +162,12 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
                     <div className="flex items-center justify-between md:justify-end gap-6 md:w-48 flex-shrink-0">
                       <div className="text-xs font-bold text-gray-400 flex items-center gap-1.5">
                         <Clock size={12} />
-                        {new Date(msg.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute:"2-digit" })}
+                        {new Date(msg.createdAt).toLocaleDateString(undefined, {
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </div>
                       
                       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -207,8 +212,8 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
                                   <p className="font-bold text-gray-900">{msg.from}</p>
                                   <p className="text-xs text-gray-500 mt-0.5">{t("receiverPrefix")} <span className="font-mono">{msg.to}</span></p>
                                 </div>
-                                <a 
-                                  href={`mailto:${msg.from}?subject=RE: ${msg.subject}`}
+                                <a
+                                  href={`mailto:${encodeURIComponent(msg.from)}?subject=${encodeURIComponent(`RE: ${msg.subject ?? ""}`)}`}
                                   className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-orange-600 transition-colors"
                                 >
                                   <Reply size={14} /> {t("replyLabel")}
@@ -222,14 +227,16 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
                               {msg.subject || t("noSubject")}
                             </h3>
                             <div className="prose prose-sm prose-orange max-w-none prose-p:leading-relaxed text-gray-700 whitespace-pre-wrap">
-                              {msg.text || msg.html || (
+                              {msg.text || msg.html ? (
+                                <>{msg.text || msg.html}</>
+                              ) : (
                                 <div className="space-y-4">
                                   <span className="italic text-gray-400">{t("contentParseError")}</span>
                                 </div>
                               )}
                             </div>
-                            
-                            {msg.raw && (
+
+                            {msg.raw != null ? (
                               <div className="mt-8 border-t border-gray-50 pt-8">
                                 <details className="group">
                                   <summary className="cursor-pointer flex items-center gap-2 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-orange-600 transition-colors">
@@ -245,7 +252,7 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
                                   </div>
                                 </details>
                               </div>
-                            )}
+                            ) : null}
                           </div>
                         </div>
                       </motion.div>

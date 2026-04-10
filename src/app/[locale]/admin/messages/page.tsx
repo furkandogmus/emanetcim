@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { Role } from "@prisma/client";
 import { redirect } from "@/i18n/routing";
 import prisma from "@/lib/db";
+import { toContactMessageDTOList } from "@/lib/contact-message-dto";
 import AdminMessagesClient from "@/components/admin/AdminMessagesClient";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -24,9 +25,9 @@ export default async function AdminMessagesPage({
     redirect({ href: "/login", locale });
   }
 
-  const messages = await prisma.contactMessage.findMany({
+  const rows = await prisma.contactMessage.findMany({
     orderBy: { createdAt: "desc" },
   });
 
-  return <AdminMessagesClient messages={messages} />;
+  return <AdminMessagesClient messages={toContactMessageDTOList(rows)} />;
 }
