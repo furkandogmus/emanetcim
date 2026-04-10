@@ -70,21 +70,12 @@ export const authConfig: NextAuthConfig = {
       if (account?.provider !== "credentials") {
         const { default: prisma } = await import("@/lib/db");
         
-        // Google/OAuth ile girenler zaten e-postasını doğrulamış sayılır.
         const existingUser = await prisma.user.findUnique({
           where: { email: user.email! },
         });
 
         if (existingUser && (existingUser as PrismaUser).isBanned) {
           return false;
-        }
-
-        // Eğer e-posta doğrulanmamışsa, şimdi doğrulanmış sayıyoruz.
-        if (existingUser && !existingUser.emailVerified) {
-          await prisma.user.update({
-            where: { id: existingUser.id },
-            data: { emailVerified: new Date() },
-          });
         }
       }
       return true;

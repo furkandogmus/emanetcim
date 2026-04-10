@@ -1,6 +1,6 @@
 import "@/lib/auth-public-url";
 import NextAuth from "next-auth";
-import type { Session, User } from "next-auth";
+import type { Session, User, Account } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { Role } from "@prisma/client";
@@ -44,23 +44,38 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return session;
     },
-    async jwt({ token, user, trigger, session }: { token: JWT; user?: User; trigger?: string; session?: { user?: { emailVerified?: Date | string | null } } }) {
+    async jwt({ token, user, account, trigger, session }: { token: JWT; user?: User; account?: Account | null; trigger?: string; session?: { user?: { emailVerified?: Date | string | null } } }) {
       if (user) {
+        // İlk giriş anı veya oturum yenilenmesi
         const dbUser = await prisma.user.findUnique({
           where: { id: user.id },
         });
 
+        if (!dbUser) return token;
+
         const emailLower = (user.email ?? "").toLowerCase();
-        if (adminEmailSet.has(emailLower) && dbUser?.role !== Role.ADMIN) {
+        if (adminEmailSet.has(emailLower) && dbUser.role !== Role.ADMIN) {
           await prisma.user.update({
             where: { id: user.id },
             data: { role: Role.ADMIN },
           });
           token.role = Role.ADMIN;
         } else {
-          token.role = dbUser?.role || Role.GUEST;
+          token.role = dbUser.role || Role.GUEST;
         }
-        token.emailVerified = dbUser?.emailVerified || null;
+
+        // Sosyal girişlerde (Google/Apple) e-postayı otomatik doğrula (DB + Token)
+        if (account && account.provider !== "credentials") {
+          if (!dbUser.emailVerified) {
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { emailVerified: new Date() },
+            });
+          }
+          token.emailVerified = new Date();
+        } else {
+          token.emailVerified = dbUser.emailVerified || null;
+        }
       }
       
       // Handle manual updates (e.g. from useSession().update())
