@@ -41,7 +41,7 @@ export function rateLimitLocalMemory(
 
 let upstash: Redis | null | undefined;
 
-function getUpstashRedis(): Redis | null {
+export function getUpstashRedis(): Redis | null {
   if (upstash !== undefined) return upstash;
   const url = process.env.UPSTASH_REDIS_REST_URL?.trim();
   const token = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();

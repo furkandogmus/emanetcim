@@ -518,6 +518,7 @@
     "verifyEmailBackToLogin": "Geri Dön",
     "verifyEmailInvalidToken": "Geçersiz doğrulama anahtarı.",
     "verifyEmailTokenNotFound": "Doğrulama anahtarı bulunamadı.",
+    "contactSupportHelp": "Eğer e-posta hala ulaşmadıysa, lütfen info@bagajpark.com adresinden bizimle iletişime geçin.",
     "verifyEmailTokenExpired": "Doğrulama anahtarının süresi dolmuş.",
     "verifyEmailUserNotFound": "Kullanıcı bulunamadı."
   },
@@ -732,7 +733,9 @@
     "notAuthorizedAdmin": "Yetkisiz işlem: Sadece yöneticiler bu işlemi gerçekleştirebilir.",
     "notAuthorizedPartner": "Yetkisiz işlem: Sadece esnaflar bu işlemi gerçekleştirebilir.",
     "disputeNotReady": "Şikayet yalnızca valiz alındıktan veya teslim edildikten sonra açılabilir.",
-    "reviewNotReady": "Yorum yalnızca teslim tamamlandıktan sonra yapılabilir."
+    "reviewNotReady": "Yorum yalnızca teslim tamamlandıktan sonra yapılabilir.",
+    "verificationCooldown": "Yeni bir e-posta göndermek için {seconds} saniye beklemeniz gerekiyor.",
+    "maxVerificationAttempts": "Çok fazla deneme yaptınız. Lütfen destek ekibimizle iletişime geçin."
   },
   "Emails": {
     "verificationSubject": "E-postanızı Doğrulayın",

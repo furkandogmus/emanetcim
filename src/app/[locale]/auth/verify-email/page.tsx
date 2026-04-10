@@ -16,42 +16,47 @@ export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageP
     return <ErrorState message={t("verifyEmailInvalidToken")} tAuth={t} />;
   }
 
-  // Token'ı bul
-  const existingToken = await prisma.verificationToken.findUnique({
-    where: { token },
-  });
-
-  if (!existingToken) {
-    return <ErrorState message={t("verifyEmailTokenNotFound")} tAuth={t} />;
-  }
-
-  const hasExpired = new Date(existingToken.expires) < new Date();
-  if (hasExpired) {
-    return <ErrorState message={t("verifyEmailTokenExpired")} tAuth={t} />;
-  }
-
-  // Kullanıcıyı bul ve doğrula
-  const existingUser = await prisma.user.findUnique({
-    where: { email: existingToken.identifier },
-  });
-
-  if (!existingUser) {
-    return <ErrorState message={t("verifyEmailUserNotFound")} tAuth={t} />;
-  }
-
-  await prisma.$transaction([
-    prisma.user.update({
-      where: { id: existingUser.id },
-      data: { emailVerified: new Date(), email: existingToken.identifier },
-    }),
-    prisma.verificationToken.delete({
+  try {
+    // Token'ı bul
+    const existingToken = await prisma.verificationToken.findUnique({
       where: { token },
-    }),
-  ]);
+    });
 
-  // Revalidate layout to hide verification banner
-  const { revalidatePath } = await import("next/cache");
-  revalidatePath("/", "layout");
+    if (!existingToken) {
+      return <ErrorState message={t("verifyEmailTokenNotFound")} tAuth={t} />;
+    }
+
+    const hasExpired = new Date(existingToken.expires) < new Date();
+    if (hasExpired) {
+      return <ErrorState message={t("verifyEmailTokenExpired")} tAuth={t} />;
+    }
+
+    // Kullanıcıyı bul ve doğrula
+    const existingUser = await prisma.user.findUnique({
+      where: { email: existingToken.identifier },
+    });
+
+    if (!existingUser) {
+      return <ErrorState message={t("verifyEmailUserNotFound")} tAuth={t} />;
+    }
+
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: existingUser.id },
+        data: { emailVerified: new Date(), email: existingToken.identifier },
+      }),
+      prisma.verificationToken.delete({
+        where: { token },
+      }),
+    ]);
+
+    // Revalidate layout to hide verification banner
+    const { revalidatePath } = await import("next/cache");
+    revalidatePath("/", "layout");
+  } catch (error) {
+    console.error("VerifyEmailPage Error:", error);
+    return <ErrorState message={t("verifyEmailErrorTitle")} tAuth={t} />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 font-sans">

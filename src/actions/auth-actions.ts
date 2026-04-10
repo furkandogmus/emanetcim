@@ -3,8 +3,6 @@
 import { auth } from "@/auth";
 import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
-import { rateLimit } from "@/lib/rate-limit";
-import { headers } from "next/headers";
 import { getLocale } from "next-intl/server";
 
 /**
@@ -21,18 +19,28 @@ export async function resendVerificationAction() {
     return { success: false, error: "Errors.generic" };
   }
 
-  // Rate limit: Aynı IP'den 1 dakikada sadece 1 kez link istenebilir
-  const h = await headers();
-  const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-  
-  if (!(await rateLimit(`resend_email:${ip}`, 1, 60 * 1000))) {
-    return { success: false, error: "Errors.tooManyRequests" };
+  // Exponential Backoff: 3dk, 6dk ve Destek fall-back
+  const { getVerificationBackoff, recordVerificationAttempt } = await import("@/lib/verification-backoff");
+  const backoff = await getVerificationBackoff(session.user.email);
+
+  if (!backoff.canResend) {
+    if (backoff.maxReached) {
+      return { success: false, error: "Errors.maxVerificationAttempts" };
+    }
+    return { 
+      success: false, 
+      error: "Errors.verificationCooldown", 
+      metadata: { waitSeconds: backoff.waitSeconds } 
+    };
   }
 
   try {
     const locale = await getLocale();
     const verificationToken = await generateVerificationToken(session.user.email);
     await sendVerificationEmail(session.user.email, verificationToken.token, locale);
+    
+    // Denemeyi kaydet (count artır)
+    await recordVerificationAttempt(session.user.email);
     
     return { success: true };
   } catch (error) {
