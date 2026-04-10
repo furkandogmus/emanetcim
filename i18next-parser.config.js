@@ -1,4 +1,4 @@
-export default {
+const config = {
   locales: ["en", "tr"],
   output: "src/locales/$LOCALE.json",
   input: ["src/**/*.{js,jsx,ts,tsx}"],
@@ -9,4 +9,6 @@ export default {
   },
   keySeparator: ".",
   namespaceSeparator: ":",
-}
+};
+
+export default config;
