@@ -58,12 +58,10 @@ export default async function TermsPage({ params }: { params: Promise<{ locale: 
 
         <div className="mt-24 pt-12 border-t border-gray-100 text-center">
           <p className="text-gray-400 font-bold text-sm">
-            {t("footerText").split("Contact our support team")[0]}
-            {t("footerText").includes("içime geçin") ? (
-              <>Kurallar hakkında sorunuz mu var? <Link href="/contact" className="text-orange-600 hover:underline">Destek ekibimizle</Link> iletişime geçin.</>
-            ) : (
-              <>Have a question about the rules? <Link href="/contact" className="text-orange-600 hover:underline">Contact our support team</Link>.</>
-            )}
+            {t("footerQuestion")}{" "}
+            <Link href="/contact" className="text-orange-600 hover:underline">
+              {t("footerContact")}
+            </Link>
           </p>
         </div>
       </main>

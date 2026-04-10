@@ -23,6 +23,8 @@ export const viewport: Viewport = {
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "SEO" });
+  const { setRequestLocale } = await import("next-intl/server");
+  setRequestLocale(locale);
 
   return {
     metadataBase: new URL("https://bagajpark.com"),
@@ -85,6 +87,8 @@ export default async function RootLayout({
   params: Promise<{locale: string}>;
 }) {
   const {locale} = await params;
+  const { setRequestLocale } = await import("next-intl/server");
+  setRequestLocale(locale);
 
   if (!routing.locales.includes(locale as (typeof routing.locales)[number])) {
     notFound();

@@ -68,5 +68,6 @@ export async function updateDisputeStatusAction(
     data: { status, adminNote: adminNote ?? undefined },
   });
   revalidatePathAllLocales("/admin");
+  revalidatePathAllLocales("/bookings");
   return { success: true as const };
 }

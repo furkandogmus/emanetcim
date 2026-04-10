@@ -8,13 +8,12 @@ interface VerifyEmailPageProps {
   params: Promise<{ locale: string }>;
 }
 
-export default async function VerifyEmailPage({ searchParams, params }: VerifyEmailPageProps) {
+export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageProps) {
   const { token } = await searchParams;
-  const { locale } = await params;
   const t = await getTranslations("Auth");
 
   if (!token) {
-    return <ErrorState message={t("verifyEmailInvalidToken")} locale={locale} tAuth={t} />;
+    return <ErrorState message={t("verifyEmailInvalidToken")} tAuth={t} />;
   }
 
   // Token'ı bul
@@ -23,12 +22,12 @@ export default async function VerifyEmailPage({ searchParams, params }: VerifyEm
   });
 
   if (!existingToken) {
-    return <ErrorState message={t("verifyEmailTokenNotFound")} locale={locale} tAuth={t} />;
+    return <ErrorState message={t("verifyEmailTokenNotFound")} tAuth={t} />;
   }
 
   const hasExpired = new Date(existingToken.expires) < new Date();
   if (hasExpired) {
-    return <ErrorState message={t("verifyEmailTokenExpired")} locale={locale} tAuth={t} />;
+    return <ErrorState message={t("verifyEmailTokenExpired")} tAuth={t} />;
   }
 
   // Kullanıcıyı bul ve doğrula
@@ -37,7 +36,7 @@ export default async function VerifyEmailPage({ searchParams, params }: VerifyEm
   });
 
   if (!existingUser) {
-    return <ErrorState message={t("verifyEmailUserNotFound")} locale={locale} tAuth={t} />;
+    return <ErrorState message={t("verifyEmailUserNotFound")} tAuth={t} />;
   }
 
   await prisma.$transaction([
@@ -49,6 +48,10 @@ export default async function VerifyEmailPage({ searchParams, params }: VerifyEm
       where: { token },
     }),
   ]);
+
+  // Revalidate layout to hide verification banner
+  const { revalidatePath } = await import("next/cache");
+  revalidatePath("/", "layout");
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 font-sans">
@@ -71,7 +74,7 @@ export default async function VerifyEmailPage({ searchParams, params }: VerifyEm
   );
 }
 
-function ErrorState({ message, locale, tAuth }: { message: string, locale: string, tAuth: any }) {
+function ErrorState({ message, tAuth }: { message: string, tAuth: (key: string) => string }) {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 font-sans">
       <div className="w-full max-w-md bg-white rounded-[2.5rem] p-10 shadow-xl shadow-gray-200/50 border border-gray-100 text-center">

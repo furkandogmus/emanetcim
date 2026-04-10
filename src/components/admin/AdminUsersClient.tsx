@@ -139,10 +139,10 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
             onChange={(e) => setRoleFilter(e.target.value)}
             className="px-4 py-4 bg-white border border-gray-100 rounded-2xl text-xs font-black uppercase tracking-widest text-gray-500 hover:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
           >
-            <option value="ALL">Tüm Roller</option>
-            <option value="ADMIN">Admin</option>
-            <option value="PARTNER">Esnaf</option>
-            <option value="GUEST">Misafir</option>
+            <option value="ALL">{t("userRole_ALL")}</option>
+            <option value="ADMIN">{t("userRole_ADMIN")}</option>
+            <option value="PARTNER">{t("userRole_PARTNER")}</option>
+            <option value="GUEST">{t("userRole_GUEST")}</option>
           </select>
 
           <select
@@ -150,10 +150,10 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-4 py-4 bg-white border border-gray-100 rounded-2xl text-xs font-black uppercase tracking-widest text-gray-500 hover:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
           >
-            <option value="ALL">Tüm Durumlar</option>
-            <option value="ACTIVE">Aktif (Doğrulanmış)</option>
-            <option value="UNVERIFIED">Doğrulanmamış</option>
-            <option value="BANNED">Banlı</option>
+            <option value="ALL">{t("userStatus_ALL")}</option>
+            <option value="ACTIVE">{t("userStatus_ACTIVE")}</option>
+            <option value="UNVERIFIED">{t("userStatus_UNVERIFIED")}</option>
+            <option value="BANNED">{t("userStatus_BANNED")}</option>
           </select>
 
           <div className="relative w-full sm:w-64">

@@ -8,13 +8,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { markMessageAsReadAction, deleteMessageAction } from "@/actions/admin-management";
 import { toast } from "sonner";
 
+import { ContactMessage } from "@prisma/client";
+
 interface AdminMessagesClientProps {
-  messages: any[]; // Prisma tipiyle çalışma sırasındaki uyuşmazlığı gidermek için esnek tip
+  messages: ContactMessage[];
 }
 
 export default function AdminMessagesClient({ messages: initialMessages }: AdminMessagesClientProps) {
   const t = useTranslations("Admin");
-  const [messages, setMessages] = useState<any[]>(initialMessages);
+  const [messages, setMessages] = useState<ContactMessage[]>(initialMessages);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"ALL" | "UNREAD">("ALL");
   const [loadingId, setLoadingId] = useState<string | null>(null);

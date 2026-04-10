@@ -3,7 +3,7 @@
 import prisma from "@/lib/db";
 import { auth } from "@/auth";
 import { Role } from "@prisma/client";
-import { revalidatePath } from "next/cache";
+import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
 import { getLocale } from "next-intl/server";
@@ -30,7 +30,7 @@ export async function toggleUserBanAction(userId: string, isBanned: boolean) {
     data: { isBanned },
   });
 
-  revalidatePath("/admin/users");
+  revalidatePathAllLocales("/admin/users");
   return { success: true };
 }
 
@@ -51,7 +51,7 @@ export async function updateUserRoleAction(userId: string, newRole: Role) {
     data: { role: newRole },
   });
 
-  revalidatePath("/admin/users");
+  revalidatePathAllLocales("/admin/users");
   return { success: true };
 }
 
@@ -71,8 +71,8 @@ export async function deleteUserAction(userId: string) {
     where: { id: userId },
   });
 
-  revalidatePath("/admin/users");
-  revalidatePath("/admin/partners");
+  revalidatePathAllLocales("/admin/users");
+  revalidatePathAllLocales("/admin/partners");
   return { success: true };
 }
 
@@ -100,8 +100,8 @@ export async function approveShopAction(shopId: string) {
     data: { isActive: true },
   });
 
-  revalidatePath("/admin/applications");
-  revalidatePath("/admin/partners");
+  revalidatePathAllLocales("/admin/applications");
+  revalidatePathAllLocales("/admin/partners");
   return { success: true };
 }
 
@@ -115,7 +115,7 @@ export async function rejectShopAction(shopId: string) {
     where: { id: shopId },
   });
 
-  revalidatePath("/admin/applications");
+  revalidatePathAllLocales("/admin/applications");
   return { success: true };
 }
 
@@ -129,8 +129,8 @@ export async function deleteShopAction(shopId: string) {
     where: { id: shopId },
   });
 
-  revalidatePath("/admin/partners");
-  revalidatePath("/admin/applications");
+  revalidatePathAllLocales("/admin/partners");
+  revalidatePathAllLocales("/admin/applications");
   return { success: true };
 }
 
@@ -161,9 +161,9 @@ export async function updateShopAction(shopId: string, data: {
     },
   });
 
-  revalidatePath(`/admin/partners/${shopId}`);
-  revalidatePath("/admin/partners");
-  revalidatePath("/search"); // Arama sonuçlarındaki fiyat/konum değişikliği için
+  revalidatePathAllLocales(`/admin/partners/${shopId}`);
+  revalidatePathAllLocales("/admin/partners");
+  revalidatePathAllLocales("/search"); // Arama sonuçlarındaki fiyat/konum değişikliği için
   return { success: true };
 }
 
@@ -178,8 +178,8 @@ export async function deleteReviewAction(reviewId: string) {
     select: { shopId: true },
   });
 
-  revalidatePath(`/admin/partners/${review.shopId}/edit`);
-  revalidatePath("/search");
+  revalidatePathAllLocales(`/admin/partners/${review.shopId}/edit`);
+  revalidatePathAllLocales("/search");
   return { success: true };
 }
 
@@ -222,7 +222,7 @@ export async function markMessageAsReadAction(messageId: string) {
     data: { isRead: true },
   });
 
-  revalidatePath("/admin/messages");
+  revalidatePathAllLocales("/admin/messages");
   return { success: true };
 }
 
@@ -236,6 +236,6 @@ export async function deleteMessageAction(messageId: string) {
     where: { id: messageId },
   });
 
-  revalidatePath("/admin/messages");
+  revalidatePathAllLocales("/admin/messages");
   return { success: true };
 }

@@ -58,9 +58,9 @@ export async function POST(req: Request) {
         } else if (fullEmail?.error) {
           fetchErrorMsg = JSON.stringify(fullEmail.error);
         }
-      } catch (fetchError: any) {
+      } catch (fetchError: unknown) {
         console.error("[Resend Webhook Fetch Error]", fetchError);
-        fetchErrorMsg = fetchError.message || String(fetchError);
+        fetchErrorMsg = fetchError instanceof Error ? fetchError.message : String(fetchError);
       }
     }
 
@@ -78,19 +78,20 @@ export async function POST(req: Request) {
 
     await prisma.contactMessage.create({
       data: {
-        from: from || "unknown",
-        to: toAddress,
-        subject: subject || "No Subject",
+        from: (from as string) || "unknown",
+        to: toAddress as string,
+        subject: (subject as string) || "No Subject",
         text: typeof text === "string" ? text : JSON.stringify(text),
         html: typeof html === "string" ? html : JSON.stringify(html),
-        raw: body || {}, // Tam payload'u her zaman saklıyoruz
+        raw: (body as object) || {}, // Tam payload'u her zaman saklıyoruz
         isRead: false,
       },
     });
 
     return NextResponse.json({ success: true }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[Resend Webhook Error]", error);
-    return NextResponse.json({ error: "Internal Server Error", details: error?.message }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Internal Server Error";
+    return NextResponse.json({ error: "Internal Server Error", details: message }, { status: 500 });
   }
 }

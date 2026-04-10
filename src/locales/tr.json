@@ -353,6 +353,14 @@
     "banUser": "Banla",
     "deleteUser": "Kullanıcıyı Sil",
     "noUsersFound": "Aranan kriterde kullanıcı bulunamadı.",
+    "userRole_ALL": "Tüm Roller",
+    "userRole_ADMIN": "Admin",
+    "userRole_PARTNER": "Esnaf",
+    "userRole_GUEST": "Misafir",
+    "userStatus_ALL": "Tüm Durumlar",
+    "userStatus_ACTIVE": "Aktif (Doğrulanmış)",
+    "userStatus_UNVERIFIED": "Doğrulanmamış",
+    "userStatus_BANNED": "Banlı",
     "makeAdmin": "Admin Yap",
     "confirmMakeAdmin": "Bu kullanıcıyı admin yapmak istediğinize emin misiniz? Bu işlem geri alınamaz bir yetki sağlar.",
     "roleUpdatedSuccess": "Kullanıcı rolü başarıyla güncellendi.",
@@ -642,7 +650,8 @@
     "q6": "6. Degisiklik",
     "a6": "BagajPark kurallari degistirme hakkini sakli tutar.",
     "intro": "BagajPark platformunu kullanarak bu kuralları kabul etmiş sayılırsınız. Lütfen dikkatle okuyunuz.",
-    "footerText": "Kurallar hakkında sorunuz mu var? Destek ekibimizle iletişime geçin."
+    "footerQuestion": "Kurallar hakkında sorunuz mu var?",
+    "footerContact": "Destek ekibimizle iletişime geçin."
   },
   "Privacy": {
     "title": "Gizlilik Politikasi",
@@ -660,7 +669,9 @@
     "q5": "Saklama",
     "a5": "Uyelik suresince.",
     "q6": "Guvenlik",
-    "a6": "Düzenli testler."
+    "a6": "Düzenli testler.",
+    "footerTitle": "Gizlilik Sorularınız İçin",
+    "footerBody": "Veri işleme süreçlerimizle ilgili her türlü sorunuz için bize ulaşın."
   },
   "FAQ": {
     "title": "S.S.S.",

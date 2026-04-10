@@ -61,8 +61,8 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
         </div>
 
         <div className="mt-20 p-12 bg-gray-900 rounded-[3rem] text-center text-white">
-          <h3 className="text-xl font-black mb-4">Gizlilik Sorularınız İçin</h3>
-          <p className="text-gray-400 font-bold mb-8">Veri işleme süreçlerimizle ilgili her türlü sorunuz için bize ulaşın.</p>
+          <h3 className="text-xl font-black mb-4">{t("footerTitle")}</h3>
+          <p className="text-gray-400 font-bold mb-8">{t("footerBody")}</p>
           <a href="mailto:privacy@bagajpark.com" className="inline-flex h-14 items-center px-10 bg-orange-600 hover:bg-orange-700 text-white rounded-2xl font-black text-sm uppercase tracking-widest transition-all">
             privacy@bagajpark.com
           </a>

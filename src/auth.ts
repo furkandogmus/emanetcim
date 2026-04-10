@@ -39,11 +39,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         session.user.role = token.role || Role.GUEST;
         session.user.id = token.sub || "";
-        session.user.emailVerified = token.emailVerified as Date | null;
+        // JWT serileştirmesinde Tarih stringleşebilir, istemci tarafı için Date nesnesi olduğundan emin oluyoruz.
+        session.user.emailVerified = token.emailVerified ? new Date(token.emailVerified as string) : null;
       }
       return session;
     },
-    async jwt({ token, user, trigger, session }: { token: JWT; user?: User; trigger?: string; session?: any }) {
+    async jwt({ token, user, trigger, session }: { token: JWT; user?: User; trigger?: string; session?: { user?: { emailVerified?: Date | string | null } } }) {
       if (user) {
         const dbUser = await prisma.user.findUnique({
           where: { id: user.id },

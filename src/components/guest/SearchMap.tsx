@@ -30,39 +30,64 @@ export default function SearchMap({
 }: SearchMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
+  const markersRef = useRef<maplibregl.Marker[]>([]);
   const selectRef = useRef(onSelectShop);
 
   useEffect(() => {
     selectRef.current = onSelectShop;
   }, [onSelectShop]);
 
+  const initialCenter = useRef<[number, number]>([userLng, userLat]);
+
+  // Haritayı bir kez oluştur
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
     const map = new maplibregl.Map({
       container: containerRef.current,
       style: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
-      center: [userLng, userLat],
+      center: initialCenter.current,
       zoom: 13,
     });
 
     map.addControl(new maplibregl.NavigationControl(), "top-right");
     mapRef.current = map;
 
+    // container boyutu değişirse haritayı güncelle
+    const resizeObserver = new ResizeObserver(() => map.resize());
+    resizeObserver.observe(containerRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+      map.remove();
+      mapRef.current = null;
+    };
+  }, []); // Artık lint hatası vermez
+
+  // Shop'lar değiştikçe marker'ları güncelle
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    // Eskileri temizle
+    markersRef.current.forEach(m => m.remove());
+    markersRef.current = [];
+
     const valid = shops.filter((s) => s.latitude != null && s.longitude != null);
 
     valid.forEach((shop) => {
       const el = document.createElement("div");
       el.className =
-        "w-8 h-8 rounded-full bg-orange-600 border-2 border-white shadow-lg flex items-center justify-center text-[10px] font-black text-white cursor-pointer";
+        "w-8 h-8 rounded-full bg-orange-600 border-2 border-white shadow-lg flex items-center justify-center text-[10px] font-black text-white cursor-pointer hover:scale-110 hover:bg-orange-700 transition-all";
       el.textContent = "₺";
       el.title = shop.name;
 
-      new maplibregl.Marker({ element: el })
+      const marker = new maplibregl.Marker({ element: el })
         .setLngLat([shop.longitude!, shop.latitude!])
         .addTo(map);
 
       el.addEventListener("click", () => selectRef.current?.(shop.id));
+      markersRef.current.push(marker);
     });
 
     if (valid.length > 0) {
@@ -71,14 +96,9 @@ export default function SearchMap({
         [valid[0].longitude!, valid[0].latitude!]
       );
       valid.forEach((s) => b.extend([s.longitude!, s.latitude!]));
-      map.fitBounds(b, { padding: 48, maxZoom: 15 });
+      map.fitBounds(b, { padding: 80, maxZoom: 15, duration: 800 });
     }
-
-    return () => {
-      map.remove();
-      mapRef.current = null;
-    };
-  }, [shops, userLat, userLng]);
+  }, [shops]);
 
   return <div ref={containerRef} className="absolute inset-0 w-full h-full min-h-[240px]" />;
 }

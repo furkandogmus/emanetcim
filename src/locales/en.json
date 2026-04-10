@@ -352,6 +352,14 @@
     "banUser": "Ban",
     "deleteUser": "Delete User",
     "noUsersFound": "No users found matching the criteria.",
+    "userRole_ALL": "All Roles",
+    "userRole_ADMIN": "Admin",
+    "userRole_PARTNER": "Partner",
+    "userRole_GUEST": "Guest",
+    "userStatus_ALL": "All Statuses",
+    "userStatus_ACTIVE": "Active (Verified)",
+    "userStatus_UNVERIFIED": "Unverified",
+    "userStatus_BANNED": "Banned",
     "makeAdmin": "Make Admin",
     "confirmMakeAdmin": "Are you sure you want to promote this user to admin? This provides irreversible authority.",
     "roleUpdatedSuccess": "User role updated successfully.",
@@ -635,7 +643,8 @@
     "q6": "6. Changes",
     "a6": "BagajPark reserves the right to change the terms of service and pricing policy without prior notice.",
     "intro": "By using the BagajPark platform, you are deemed to have accepted these rules. Please read carefully.",
-    "footerText": "Have a question about the rules? Contact our support team."
+    "footerQuestion": "Have a question about the rules?",
+    "footerContact": "Contact our support team."
   },
   "Privacy": {
     "title": "Privacy Policy",
@@ -653,7 +662,9 @@
     "q5": "Retention",
     "a5": "Duration of membership.",
     "q6": "Security",
-    "a6": "Regular testing."
+    "a6": "Regular testing.",
+    "footerTitle": "For Privacy Questions",
+    "footerBody": "Contact us for any questions regarding our data processing."
   },
   "FAQ": {
     "title": "F.A.Q.",

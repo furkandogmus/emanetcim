@@ -1,5 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Search, MapPin, ShieldCheck, Clock, Store, User, Shield } from "lucide-react";
+import { Search, MapPin, ShieldCheck, Clock } from "lucide-react";
 import { Link } from "@/i18n/routing";
 
 /**
