@@ -205,7 +205,8 @@
     "insured": "SİGORTALI",
     "day": "GÜN",
     "open247": "7/24",
-    "restroom": "WC"
+    "restroom": "WC",
+    "getDirections": "Yol Tarifi"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Yönetim Masası",

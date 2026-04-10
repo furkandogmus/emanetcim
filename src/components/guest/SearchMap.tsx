@@ -41,13 +41,34 @@ export default function SearchMap({
 
   // Haritayı bir kez oluştur
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) return;
-
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: "https://tiles.openfreemap.org/styles/liberty",
+      style: {
+        version: 8,
+        sources: {
+          "osm-tiles": {
+            type: "raster",
+            tiles: [
+              "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+              "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
+              "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            ],
+            tileSize: 256,
+            attribution: "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors",
+          },
+        },
+        layers: [
+          {
+            id: "osm-tiles-layer",
+            type: "raster",
+            source: "osm-tiles",
+            minzoom: 0,
+            maxzoom: 19,
+          },
+        ],
+      },
       center: initialCenter.current,
-      zoom: 13,
+      zoom: 15,
     });
 
     map.addControl(new maplibregl.NavigationControl(), "top-right");

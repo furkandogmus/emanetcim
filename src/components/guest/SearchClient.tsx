@@ -177,6 +177,8 @@ export default function SearchClient({ initialShops, allShops }: SearchClientPro
                       rating={shop.rating || 0}
                       price={shop.pricePerDay?.toString() || "50"}
                       distance={shop.distanceKm != null ? Math.round(shop.distanceKm * 1000).toString() : "—"}
+                      lat={shop.latitude ?? undefined}
+                      lng={shop.longitude ?? undefined}
                       onClick={() => router.push(`/checkout/${shop.id}`)}
                     />
                   </motion.div>

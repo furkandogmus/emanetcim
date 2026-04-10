@@ -8,6 +8,8 @@ interface ShopListItemProps {
   rating: number;
   price: string;
   distance: string;
+  lat?: number;
+  lng?: number;
   onClick?: () => void;
 }
 
@@ -15,7 +17,7 @@ interface ShopListItemProps {
  * ShopListItem - Misafir Arama Sonucu Kartı
  * Minimalist, fiyat ve güven odaklı tasarım.
  */
-export default function ShopListItem({ name, rating, price, distance, onClick }: ShopListItemProps) {
+export default function ShopListItem({ name, rating, price, distance, lat, lng, onClick }: ShopListItemProps) {
   const t = useTranslations('Guest');
   return (
     <div 
@@ -42,14 +44,29 @@ export default function ShopListItem({ name, rating, price, distance, onClick }:
           <span>{t("away", { distance })}</span>
         </div>
 
-        <div className="mt-2 flex justify-between items-baseline">
+        <div className="mt-3 flex justify-between items-center">
           <div className="flex items-center gap-1 text-[10px] text-green-600 font-bold uppercase tracking-wider">
             <Shield size={10} />
             {t("insured")}
           </div>
-          <div className="text-right">
-            <span className="text-xl font-black text-gray-900">₺{price}</span>
-            <span className="text-[10px] text-gray-400 font-bold uppercase ml-1">/ {t("day")}</span>
+          
+          <div className="flex items-center gap-3">
+            {lat && lng && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
+                }}
+                className="p-2 bg-gray-50 hover:bg-orange-50 text-gray-400 hover:text-orange-600 rounded-xl transition-all"
+                title={t("getDirections")}
+              >
+                <MapPin size={16} />
+              </button>
+            )}
+            <div className="text-right">
+              <span className="text-xl font-black text-gray-900">₺{price}</span>
+              <span className="text-[10px] text-gray-400 font-bold uppercase ml-1">/ {t("day")}</span>
+            </div>
           </div>
         </div>
       </div>
