@@ -30,9 +30,12 @@ export class NotificationService implements INotificationService {
         if (!r.ok) {
           const err = await r.text();
           logger.error({ err, status: r.status }, "[Notification] Resend API error");
-        } else {
-          logger.info({ to, subject }, "[Notification] Email sent via Resend");
+          await prisma.notificationLog.create({
+            data: { bookingId, type: "EMAIL", recipient: to, subject, content: body, status: "FAILED" },
+          });
+          return false;
         }
+        logger.info({ to, subject }, "[Notification] Email sent via Resend");
       } else {
         logger.info({ to, subject }, "[Notification] Email (log only — set RESEND_API_KEY for delivery)");
       }

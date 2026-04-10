@@ -27,7 +27,9 @@ export class ReviewService {
     });
 
     // 2. Dükkanın Ortalama Puanını Yeniden Hesapla (Async/Background)
-    this.updateShopAverageRating(data.shopId);
+    void this.updateShopAverageRating(data.shopId).catch((err) =>
+      console.error('[ReviewService] updateShopAverageRating failed:', err)
+    );
 
     return review;
   }
