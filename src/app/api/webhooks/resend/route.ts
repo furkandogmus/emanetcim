@@ -1,9 +1,54 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
-import { Resend } from "resend";
+import type { Resend } from "resend";
+import { Resend as ResendCtor } from "resend";
 import { normalizeInboundSubjectLine } from "@/lib/reply-subject";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
+/** Inbound gövde için art arda bekleme + birkaç deneme (self-hosted / Vercel Pro uyumu). */
+export const maxDuration = 60;
+
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+/**
+ * Webhook yalnızca metadata verir; gövde için receiving.get gerekir.
+ * Resend bazen 404 / geçici hata döner — birkaç deneme (artarak bekleme).
+ */
+async function fetchInboundBodyWithRetry(
+  resend: Resend,
+  emailId: string,
+): Promise<{ text: string; html: string; lastError: string }> {
+  const waitBeforeAttemptMs = [2000, 5000, 10000, 20000];
+  let lastError = "";
+
+  for (let i = 0; i < waitBeforeAttemptMs.length; i++) {
+    await sleep(waitBeforeAttemptMs[i]);
+    try {
+      const fullEmail = await resend.emails.receiving.get(emailId);
+      const d = fullEmail?.data as
+        | { text?: string; html?: string; body?: string }
+        | undefined;
+
+      if (d) {
+        const t = (d.text ?? d.body ?? "").trim();
+        const h = (d.html ?? "").trim();
+        if (t || h) {
+          return { text: t, html: h, lastError: "" };
+        }
+      }
+      if (fullEmail?.error) {
+        lastError = JSON.stringify(fullEmail.error);
+      } else {
+        lastError = "empty_data";
+      }
+    } catch (e: unknown) {
+      lastError = e instanceof Error ? e.message : String(e);
+      console.error("[Resend receiving.get]", { attempt: i + 1, emailId, err: e });
+    }
+  }
+
+  return { text: "", html: "", lastError };
+}
 
 /** Konu bazen yalnızca data.subject değil headers / üst gövdede gelir (yanıtlar, Exchange). */
 function extractInboundSubject(
@@ -29,7 +74,7 @@ function extractInboundSubject(
 function getResendClient(): Resend | null {
   const key = process.env.RESEND_API_KEY?.trim();
   if (!key) return null;
-  return new Resend(key);
+  return new ResendCtor(key);
 }
 
 export async function POST(req: Request) {
@@ -80,38 +125,48 @@ export async function POST(req: Request) {
       if (!resend) {
         fetchErrorMsg = "RESEND_API_KEY not configured; cannot fetch email by id";
       } else {
-        try {
-          // Resend webhook'u çok hızlı tetikliyor, email henüz API'ye yansımamış (404) olabilir.
-          // 3 saniye (3000ms) bekleyip öyle çekmeyi deneyelim (Race condition çözümü).
-          await new Promise((resolve) => setTimeout(resolve, 3000));
-
-          const fullEmail = await resend.emails.receiving.get(email_id);
-          if (fullEmail?.data) {
-            text = fullEmail.data.text || text;
-            html = fullEmail.data.html || html;
-          } else if (fullEmail?.error) {
-            fetchErrorMsg = JSON.stringify(fullEmail.error);
-          }
-        } catch (fetchError: unknown) {
-          console.error("[Resend Webhook Fetch Error]", fetchError);
-          fetchErrorMsg = fetchError instanceof Error ? fetchError.message : String(fetchError);
-        }
+        const fetched = await fetchInboundBodyWithRetry(resend, email_id as string);
+        text = fetched.text;
+        html = fetched.html;
+        fetchErrorMsg = fetched.lastError;
       }
     }
 
-    // Eğer hala hiçbir içerik yoksa, tüm body'yi text olarak kaydedelim ki admin ne geldiğini görebilsin
+    // Gövde yoksa: admin panelinde okunaklı özet (tam ham JSON yerine)
     if (!text && !html) {
-      const headLine = subject
-        ? `Konu: ${subject}\nKonu (Re/yanıt zinciri) webhookta mevcut; gövde Resend API'de henüz okunamadı.\n\n`
-        : "";
+      const fromStr = typeof from === "string" ? from : "unknown";
+      const toStr = Array.isArray(to) ? to.join(", ") : String(to ?? "unknown");
+      const msgId =
+        typeof (data as { message_id?: string }).message_id === "string"
+          ? (data as { message_id: string }).message_id
+          : "";
+
       if (fetchAttempted) {
-        text =
-          `Gelen ileti (gövde API’den alınamadı).\n${headLine}Hata: ${fetchErrorMsg}\n\nHam veri:\n` +
-          JSON.stringify(body, null, 2);
+        text = [
+          "İleti gövdesi Resend API üzerinden (receiving) alınamadı; birkaç kez yeniden denendi.",
+          "Yanıtlar için gövde genelde API’de metadata’dan sonra hazır olur — yine de 404 alınıyorsa Resend panelinden veya destekten doğrulayın.",
+          "",
+          `Kimden: ${fromStr}`,
+          `Kime: ${toStr}`,
+          subject ? `Konu: ${subject}` : "",
+          msgId ? `Message-ID: ${msgId}` : "",
+          typeof email_id === "string" ? `email_id: ${email_id}` : "",
+          "",
+          fetchErrorMsg ? `Son API yanıtı: ${fetchErrorMsg}` : "",
+        ]
+          .filter(Boolean)
+          .join("\n");
       } else {
-        text =
-          `[Otomatik Yakalama] İçerik bulunamadı (email_id yok).\n${headLine}` +
-          JSON.stringify(body, null, 2);
+        text = [
+          "İçerik yok (email_id gelmedi); yalnızca webhook özeti:",
+          "",
+          `Kimden: ${fromStr}`,
+          `Kime: ${toStr}`,
+          subject ? `Konu: ${subject}` : "",
+          JSON.stringify(body, null, 2),
+        ]
+          .filter(Boolean)
+          .join("\n");
       }
     }
 
