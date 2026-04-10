@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Next.js Dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "Vitest UI",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "test:ui"],
+      "port": 51204
+    },
+    {
+      "name": "Docker Stack (Postgres + Nginx)",
+      "runtimeExecutable": "docker",
+      "runtimeArgs": ["compose", "up", "--build"],
+      "port": 80
+    }
+  ]
+}

@@ -25,16 +25,12 @@ describe('BookingService', () => {
       id: 'booking-123',
       guestId: 'guest-1',
       shopId: 'shop-1',
-      qrCodeToken: 'temp_x',
-      status: 'PENDING',
-    } as never);
-    vi.mocked(prisma.booking.update).mockResolvedValue({
-      id: 'booking-123',
       qrCodeToken: 'signed-jwt-token',
+      status: 'PENDING',
     } as never);
   });
 
-  it('should create a booking with signed QR token', async () => {
+  it('should create a booking with signed QR token in a single atomic write', async () => {
     const result = await service.createInitialBooking({
       guestId: 'guest-1',
       shopId: 'shop-1',
@@ -46,8 +42,12 @@ describe('BookingService', () => {
       checkOutTime: new Date(),
     });
 
+    // Real JWT is generated before the DB write and stored in a single create call.
     expect(result.qrCodeToken).toBe('signed-jwt-token');
-    expect(prisma.booking.create).toHaveBeenCalled();
-    expect(prisma.booking.update).toHaveBeenCalled();
+    expect(prisma.booking.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ qrCodeToken: 'signed-jwt-token' }) })
+    );
+    // No second update call — the token is set atomically at creation time.
+    expect(prisma.booking.update).not.toHaveBeenCalled();
   });
 });
