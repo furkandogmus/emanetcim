@@ -45,7 +45,7 @@ export default function SearchMap({
 
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+      style: "https://tiles.openfreemap.org/styles/liberty",
       center: initialCenter.current,
       zoom: 13,
     });
