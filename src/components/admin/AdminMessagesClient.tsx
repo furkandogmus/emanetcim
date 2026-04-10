@@ -235,24 +235,6 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
                                 </div>
                               )}
                             </div>
-
-                            {msg.raw != null ? (
-                              <div className="mt-8 border-t border-gray-50 pt-8">
-                                <details className="group">
-                                  <summary className="cursor-pointer flex items-center gap-2 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-orange-600 transition-colors">
-                                    <span className="w-6 h-6 flex items-center justify-center rounded-lg bg-gray-50 group-hover:bg-orange-50 transition-colors">
-                                      {'{ }'}
-                                    </span>
-                                    {t("viewRawData")}
-                                  </summary>
-                                  <div className="mt-4 p-6 bg-gray-950 text-orange-400 rounded-3xl font-mono text-[10px] leading-relaxed overflow-x-auto border border-gray-800 shadow-inner">
-                                    <pre className="whitespace-pre-wrap break-all">
-                                      {JSON.stringify(msg.raw, null, 2)}
-                                    </pre>
-                                  </div>
-                                </details>
-                              </div>
-                            ) : null}
                           </div>
                         </div>
                       </motion.div>
