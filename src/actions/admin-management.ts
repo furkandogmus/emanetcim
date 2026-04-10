@@ -241,7 +241,8 @@ export async function markMessageAsReadAction(messageId: string) {
     data: { isRead: true },
   });
 
-  revalidatePathAllLocales("/admin/messages");
+  // revalidatePath: istemci zaten state güncelliyor; RSC yeniden render + Prisma JSON
+  // serileştirmesi üretimde gereksiz hata riski. Liste tutarlılığı tek sekme için yeterli.
   return { success: true };
 }
 
@@ -255,6 +256,5 @@ export async function deleteMessageAction(messageId: string) {
     where: { id: messageId },
   });
 
-  revalidatePathAllLocales("/admin/messages");
   return { success: true };
 }
