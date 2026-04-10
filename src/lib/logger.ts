@@ -18,7 +18,7 @@ const logger = pino({
       : undefined,
   base: {
     env: process.env.NODE_ENV,
-    service: 'bagajpark',
+    service: process.env.OBSERVABILITY_SERVICE_NAME || 'bagajpark',
     version,
   },
   redact: [

@@ -4,7 +4,12 @@ import { Resend } from "resend";
 
 export const dynamic = 'force-dynamic';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+/** Build / env anahtarı yokken modül yüklemesinde patlamamak için gecikmeli oluşturulur. */
+function getResendClient(): Resend | null {
+  const key = process.env.RESEND_API_KEY?.trim();
+  if (!key) return null;
+  return new Resend(key);
+}
 
 export async function POST(req: Request) {
   try {
@@ -46,21 +51,26 @@ export async function POST(req: Request) {
 
     if ((!text && !html) && email_id) {
       fetchAttempted = true;
-      try {
-        // Resend webhook'u çok hızlı tetikliyor, email henüz API'ye yansımamış (404) olabilir. 
-        // 3 saniye (3000ms) bekleyip öyle çekmeyi deneyelim (Race condition çözümü).
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        
-        const fullEmail = await resend.emails.receiving.get(email_id);
-        if (fullEmail?.data) {
-          text = fullEmail.data.text || text;
-          html = fullEmail.data.html || html;
-        } else if (fullEmail?.error) {
-          fetchErrorMsg = JSON.stringify(fullEmail.error);
+      const resend = getResendClient();
+      if (!resend) {
+        fetchErrorMsg = "RESEND_API_KEY not configured; cannot fetch email by id";
+      } else {
+        try {
+          // Resend webhook'u çok hızlı tetikliyor, email henüz API'ye yansımamış (404) olabilir.
+          // 3 saniye (3000ms) bekleyip öyle çekmeyi deneyelim (Race condition çözümü).
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+
+          const fullEmail = await resend.emails.receiving.get(email_id);
+          if (fullEmail?.data) {
+            text = fullEmail.data.text || text;
+            html = fullEmail.data.html || html;
+          } else if (fullEmail?.error) {
+            fetchErrorMsg = JSON.stringify(fullEmail.error);
+          }
+        } catch (fetchError: unknown) {
+          console.error("[Resend Webhook Fetch Error]", fetchError);
+          fetchErrorMsg = fetchError instanceof Error ? fetchError.message : String(fetchError);
         }
-      } catch (fetchError: unknown) {
-        console.error("[Resend Webhook Fetch Error]", fetchError);
-        fetchErrorMsg = fetchError instanceof Error ? fetchError.message : String(fetchError);
       }
     }
 

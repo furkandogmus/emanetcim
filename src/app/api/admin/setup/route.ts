@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Role } from "@prisma/client";
 import prisma from "@/lib/db";
 import { hashPassword } from "@/lib/auth-password";
+import { isRateLimited } from "@/lib/internal-api-guard";
 
 /**
  * POST /api/admin/setup
@@ -28,6 +29,10 @@ export async function POST(req: NextRequest) {
       { error: "Setup endpoint disabled. Set ADMIN_SETUP_KEY to enable." },
       { status: 403 }
     );
+  }
+
+  if (await isRateLimited(req, "admin_setup", 10, 900_000)) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 
   let body: { setupKey?: string; email?: string; password?: string; name?: string; role?: string };

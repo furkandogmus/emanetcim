@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { paymentService } from "@/services/PaymentService";
 import logger from "@/lib/logger";
+import { isRateLimited } from "@/lib/internal-api-guard";
 
 /**
  * Cron / harici job: booking PENDING + PaymentLog SUCCESS tutarsızlıklarını düzeltir.
@@ -21,6 +22,10 @@ export async function POST(req: NextRequest) {
   const headerSecret = req.headers.get("x-cron-secret");
   if (bearer !== secret && headerSecret !== secret) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (await isRateLimited(req, "internal_reconcile", 30, 60_000)) {
+    return NextResponse.json({ ok: false, error: "Too many requests" }, { status: 429 });
   }
 
   try {

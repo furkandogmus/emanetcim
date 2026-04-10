@@ -26,15 +26,6 @@ describe.skipIf(!runFinanceIntegration)("finance reconcile integration", () => {
     const ps = await import("@/services/PaymentService");
     prisma = db.default;
     paymentService = ps.paymentService;
-
-    // CI: migrate deploy her zaman bu commit’te olmayabilir veya sıra kaçabilir.
-    // Şema ile DB’yi hizala (User.isBanned / lastIp — prisma/schema.prisma).
-    if (runFinanceIntegration) {
-      await prisma.$executeRawUnsafe(`
-        ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "isBanned" BOOLEAN NOT NULL DEFAULT false;
-        ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "lastIp" TEXT;
-      `);
-    }
   });
 
   afterAll(async () => {

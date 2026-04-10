@@ -3,6 +3,7 @@ import { paymentService } from "@/services/PaymentService";
 import { verifyIyzicoWebhookSignatureV3 } from "@/lib/iyzico-webhook";
 import logger from "@/lib/logger";
 import { rateLimit } from "@/lib/rate-limit";
+import { isPaymentsEnabled } from "@/lib/feature-flags";
 
 /**
  * iyzico Payment Webhook Handler
@@ -19,6 +20,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { status: "Error", message: "Too many requests" },
         { status: 429 }
+      );
+    }
+
+    if (!isPaymentsEnabled()) {
+      return NextResponse.json(
+        { status: "Error", message: "Payments disabled" },
+        { status: 503 }
       );
     }
 

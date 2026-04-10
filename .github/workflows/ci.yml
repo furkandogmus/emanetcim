@@ -38,6 +38,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
       - name: Prisma migrate (CI DB)
         run: npx prisma migrate deploy
 
@@ -50,3 +56,7 @@ jobs:
         run: npm run build
         env:
           AUTH_SECRET: ci-build-placeholder-not-for-production
+          CI: "true"
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
+          IYZICO_API_KEY: ci-placeholder-not-for-production
+          IYZICO_SECRET_KEY: ci-placeholder-not-for-production
