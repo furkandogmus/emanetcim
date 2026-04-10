@@ -13,15 +13,7 @@ import { getPricingRules } from "@/lib/platform-settings";
 import { moneyToNumber } from "@/lib/money";
 import { BookingStatus } from "@prisma/client";
 import { headers } from "next/headers";
-import { getLocale } from "next-intl/server";
 import { rateLimit } from "@/lib/rate-limit";
-
-/** İnteraktif transaction istemcisi. */
-import type { Prisma } from "@prisma/client";
-type PrismaTransactionClient = Omit<
-  Prisma.TransactionClient,
-  "$connect" | "$disconnect" | "$on" | "$transaction" | "$extends" | "$use"
->;
 
 export type CreateBookingInput = {
   shopId: string;
@@ -82,7 +74,6 @@ export async function createBookingAction(data: CreateBookingInput) {
   );
 
   let totalPrice = authTotals.subtotalBeforeCoupon;
-  let couponId: string | undefined;
 
   if (data.couponCode) {
     const coupon = await prisma.coupon.findUnique({
@@ -110,7 +101,6 @@ export async function createBookingAction(data: CreateBookingInput) {
           Math.round((totalPrice - moneyToNumber(coupon.discount)) * 100) / 100
         );
       }
-      couponId = coupon.id;
     }
   }
 
@@ -135,8 +125,6 @@ export async function createBookingAction(data: CreateBookingInput) {
       data: { status: BookingStatus.WAITING_APPROVAL },
     });
 
-    const locale = await getLocale();
-    
     // Esnafa bildirim gönder (Yeni Talep)
     void notificationService
       .notifyPartnerAndAdminsForNewPaidBooking({

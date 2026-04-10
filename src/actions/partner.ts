@@ -314,7 +314,7 @@ export async function approveBookingAction(bookingId: string) {
 
     revalidatePartnerPaths();
     return { success: true as const };
-  } catch (err) {
+  } catch {
     return { success: false as const, error: "Errors.generic" };
   }
 }
@@ -346,7 +346,7 @@ export async function rejectBookingAction(bookingId: string) {
 
     revalidatePartnerPaths();
     return { success: true as const };
-  } catch (err) {
+  } catch {
     return { success: false as const, error: "Errors.generic" };
   }
 }

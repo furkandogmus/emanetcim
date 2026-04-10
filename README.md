@@ -17,7 +17,7 @@ Next.js tabanlı Emanetçi uygulaması (PostgreSQL, Prisma, Auth.js, iyzico).
 
 **Yol haritası / commit disiplini:** [Üretim backlog](docs/PRODUCTION_BACKLOG.md) · [Commit mesajları ve geçmiş](docs/GIT_COMMIT_GUIDE.md)
 
-CI: `main` / `develop` push ve PR’da **migrate deploy**, **lint**, **typecheck**, **npm audit (high+)**, **test** (Postgres ile integration dahil) ve **build** (GitHub Actions).
+CI: `main` / `develop` push ve PR’da **migrate deploy**, **lint**, **typecheck**, **test** (Postgres ile integration dahil) ve **build** (GitHub Actions). Bağımlılık taraması için yerelde `npm audit` kullanın.
 
 **Dallar:** günlük işler için `develop` + `feature/...`; ayrıntı [`docs/BRANCHING.md`](docs/BRANCHING.md). Yerel `npm run dev` hangi dalda olursanız olun aynı hızda çalışır.
 
