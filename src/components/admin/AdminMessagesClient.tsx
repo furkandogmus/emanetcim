@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
 import type { ContactMessageDTO } from "@/lib/contact-message-dto";
+import { replySubjectForMailto } from "@/lib/reply-subject";
 
 interface AdminMessagesClientProps {
   messages: ContactMessageDTO[];
@@ -226,7 +227,7 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
                                   <p className="text-xs text-gray-500 mt-0.5">{t("receiverPrefix")} <span className="font-mono">{msg.to}</span></p>
                                 </div>
                                 <a
-                                  href={`mailto:${encodeURIComponent(msg.from)}?subject=${encodeURIComponent(`RE: ${msg.subject ?? ""}`)}`}
+                                  href={`mailto:${encodeURIComponent(msg.from)}?subject=${encodeURIComponent(replySubjectForMailto(msg.subject))}`}
                                   className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-orange-600 transition-colors"
                                 >
                                   <Reply size={14} /> {t("replyLabel")}

@@ -1,8 +1,29 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { Resend } from "resend";
+import { normalizeInboundSubjectLine } from "@/lib/reply-subject";
 
 export const dynamic = 'force-dynamic';
+
+/** Konu bazen yalnızca data.subject değil headers / üst gövdede gelir (yanıtlar, Exchange). */
+function extractInboundSubject(
+  body: Record<string, unknown>,
+  data: Record<string, unknown>,
+): string {
+  const direct = data.subject ?? body.subject;
+  if (typeof direct === "string" && direct.trim()) {
+    return normalizeInboundSubjectLine(direct);
+  }
+  const headers = data.headers ?? body.headers;
+  if (headers && typeof headers === "object") {
+    const h = headers as Record<string, unknown>;
+    const sub = h.Subject ?? h.subject;
+    if (typeof sub === "string" && sub.trim()) {
+      return normalizeInboundSubjectLine(sub);
+    }
+  }
+  return "";
+}
 
 /** Build / env anahtarı yokken modül yüklemesinde patlamamak için gecikmeli oluşturulur. */
 function getResendClient(): Resend | null {
@@ -35,8 +56,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Ignored event type: " + body.type }, { status: 200 });
     }
 
-    const { from, to, subject, email_id } = data;
-    
+    const { from, to, email_id } = data;
+    const subject = extractInboundSubject(
+      body as Record<string, unknown>,
+      data as Record<string, unknown>,
+    );
+
     // Başlangıç değerleri (webhook içinden gelenler)
     let text = data.text || data.content?.text || data.body || data.snippet || "";
     let html = data.html || data.content?.html || "";
@@ -76,10 +101,17 @@ export async function POST(req: Request) {
 
     // Eğer hala hiçbir içerik yoksa, tüm body'yi text olarak kaydedelim ki admin ne geldiğini görebilsin
     if (!text && !html) {
+      const headLine = subject
+        ? `Konu: ${subject}\nKonu (Re/yanıt zinciri) webhookta mevcut; gövde Resend API'de henüz okunamadı.\n\n`
+        : "";
       if (fetchAttempted) {
-         text = `[Otomatik Yakalama] İçerik bulunamadı. API ile çekme denendi ancak başarısız oldu veya içerik dömedi.\nHata: ${fetchErrorMsg}\n\nHam Veri:\n` + JSON.stringify(body, null, 2);
+        text =
+          `Gelen ileti (gövde API’den alınamadı).\n${headLine}Hata: ${fetchErrorMsg}\n\nHam veri:\n` +
+          JSON.stringify(body, null, 2);
       } else {
-         text = "[Otomatik Yakalama] İçerik bulunamadı (email_id yok). Ham Veri:\n" + JSON.stringify(body, null, 2);
+        text =
+          `[Otomatik Yakalama] İçerik bulunamadı (email_id yok).\n${headLine}` +
+          JSON.stringify(body, null, 2);
       }
     }
 
@@ -90,7 +122,7 @@ export async function POST(req: Request) {
       data: {
         from: (from as string) || "unknown",
         to: toAddress as string,
-        subject: (subject as string) || "No Subject",
+        subject: subject || "No Subject",
         text: typeof text === "string" ? text : JSON.stringify(text),
         html: typeof html === "string" ? html : JSON.stringify(html),
         raw: (body as object) || {}, // Tam payload'u her zaman saklıyoruz
