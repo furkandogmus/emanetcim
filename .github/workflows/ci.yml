@@ -9,6 +9,24 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
+
     steps:
       - uses: actions/checkout@v4
 
@@ -19,18 +37,16 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-        env:
-          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
 
-      # next lint kaldırıldı (Next 16); eslint kullanılıyor. Kod tabanındaki uyarılar giderilene kadar
-      # yerelde: npm run lint
-      - name: Unit tests
+      - name: Prisma migrate (CI DB)
+        run: npx prisma migrate deploy
+
+      - name: Unit + integration tests
         run: npm run test
         env:
-          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
+          CI: true
 
       - name: Build
         run: npm run build
         env:
-          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
           AUTH_SECRET: ci-build-placeholder-not-for-production
