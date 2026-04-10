@@ -41,6 +41,8 @@ export default function SearchMap({
 
   // Haritayı bir kez oluştur
   useEffect(() => {
+    if (!containerRef.current || mapRef.current) return;
+
     const map = new maplibregl.Map({
       container: containerRef.current,
       style: {
