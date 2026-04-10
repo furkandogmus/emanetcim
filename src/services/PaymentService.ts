@@ -1,4 +1,4 @@
-import { iyzipay } from "@/lib/iyzipay";
+import { iyzipay, assertIyzicoKeys } from "@/lib/iyzipay";
 import Iyzipay from 'iyzipay';
 import prisma from '@/lib/db';
 import { isPaymentSuccess } from '@/lib/payment-status';
@@ -26,6 +26,7 @@ export class PaymentService implements IPaymentService {
     card: any;
     buyer: any;
   }): Promise<any> {
+    assertIyzicoKeys();
     // 1. İdempolans Kontrolü (Duplicate Payment Prevention)
     const existingLog = await prisma.paymentLog.findFirst({
       where: { bookingId: data.bookingId, status: "SUCCESS" }
@@ -197,6 +198,7 @@ export class PaymentService implements IPaymentService {
    * Misafir iptalleri (UC_M_07) için parayı iyzico üzerinden geri gönderir.
    */
   async refundPayment(bookingId: string, amount: number): Promise<any> {
+    assertIyzicoKeys();
     // 1. Orijinal ödeme kaydını bul (Transaction ID gerekiyor)
     const paymentLog = await prisma.paymentLog.findFirst({
       where: { bookingId, status: "SUCCESS" }
