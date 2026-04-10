@@ -15,7 +15,7 @@ const intlMiddleware = createMiddleware(routing);
 
 /**
  * Next.js 16+ Proxy — Auth.js v5, next-intl & Security Hardening
- * Named export `proxy` matches the file convention (see Next.js proxy docs).
+ * Dosya: `src/proxy.ts` (`middleware.ts` yerine).
  */
 const authProxy = auth((req) => {
   const { nextUrl } = req;
@@ -119,9 +119,6 @@ export function proxy(request: NextRequest) {
   return (authProxy as (r: NextRequest) => ReturnType<typeof authProxy>)(request);
 }
 
-/** Next.js 16: `middleware` adı `proxy.ts` içinde tanımlanır (ayrı `middleware.ts` dosyası kullanılmaz). */
-export { proxy as middleware };
-
 export const config = {
   // Matcher for i18n and Auth (Excluding static assets strictly)
   matcher: [
@@ -130,5 +127,3 @@ export const config = {
     '/(tr|en)/:path*'
   ]
 };
-
-
