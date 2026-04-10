@@ -40,7 +40,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.role = token.role || Role.GUEST;
         session.user.id = token.sub || "";
         // JWT serileştirmesinde Tarih stringleşebilir, istemci tarafı için Date nesnesi olduğundan emin oluyoruz.
-        session.user.emailVerified = token.emailVerified ? new Date(token.emailVerified as string) : null;
+        session.user.emailVerified = token.emailVerified ? new Date(token.emailVerified as unknown as string) : null;
       }
       return session;
     },
@@ -65,7 +65,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       
       // Handle manual updates (e.g. from useSession().update())
       if (trigger === "update" && session?.user) {
-        if (session.user.emailVerified) token.emailVerified = session.user.emailVerified;
+        if (session.user.emailVerified) token.emailVerified = new Date(session.user.emailVerified as string);
       }
 
       return token;
