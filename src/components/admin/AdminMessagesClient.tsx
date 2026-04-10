@@ -5,7 +5,6 @@ import { useState } from "react";
 import { Mail, MailOpen, Trash2, Search, ArrowLeft, Inbox, Clock, User, Reply } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { motion, AnimatePresence } from "framer-motion";
-import { markMessageAsReadAction, deleteMessageAction } from "@/actions/admin-management";
 import { toast } from "sonner";
 
 import type { ContactMessageDTO } from "@/lib/contact-message-dto";
@@ -38,7 +37,14 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
     if (e) e.stopPropagation();
     setLoadingId(id);
     try {
-      await markMessageAsReadAction(id);
+      const res = await fetch(`/api/admin/messages/${encodeURIComponent(id)}`, {
+        method: "PATCH",
+        credentials: "include",
+      });
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(data.error || res.statusText);
+      }
       setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, isRead: true } : m)));
       toast.success(t("messageMarkedReadInfo"));
     } catch (error: unknown) {
@@ -52,7 +58,14 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
     if (e) e.stopPropagation();
     setLoadingId(id);
     try {
-      await deleteMessageAction(id);
+      const res = await fetch(`/api/admin/messages/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(data.error || res.statusText);
+      }
       setMessages((prev) => prev.filter((m) => m.id !== id));
       toast.success(t("messageDeletedInfo"));
     } catch (error: unknown) {
