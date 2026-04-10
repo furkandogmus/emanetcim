@@ -41,8 +41,18 @@ export class BookingService implements IBookingService {
     const shop = await prisma.shop.findUnique({ where: { id: data.shopId } });
     const unitPrice = data.unitPrice || shop?.pricePerDay || 50;
 
+    // Generate a temporary ID to build the QR token before the DB write so we
+    // can store the real JWT in a single atomic create (no temp token lingering).
+    const tempId = crypto.randomUUID();
+    const qrCodeToken = await createQrToken({
+      bookingId: tempId,
+      guestId: data.guestId,
+      shopId: data.shopId,
+    });
+
     const booking = await prisma.booking.create({
       data: {
+        id: tempId,
         guestId: data.guestId,
         shopId: data.shopId,
         totalPrice: data.totalPrice,
@@ -52,21 +62,12 @@ export class BookingService implements IBookingService {
         checkInTime: data.checkInTime,
         checkOutTime: data.checkOutTime,
         unitPrice,
-        qrCodeToken: `temp_${crypto.randomUUID()}`,
+        qrCodeToken,
         status: 'PENDING',
       },
     });
 
-    const qrCodeToken = await createQrToken({
-      bookingId: booking.id,
-      guestId: data.guestId,
-      shopId: data.shopId,
-    });
-
-    return prisma.booking.update({
-      where: { id: booking.id },
-      data: { qrCodeToken },
-    });
+    return booking;
   }
 
   /**
@@ -166,6 +167,11 @@ export class BookingService implements IBookingService {
 
         if (!isRefundSuccess(refundResult.status)) {
           console.error('Early check-out refund failed:', refundResult);
+          return {
+            ok: false,
+            code: 'REFUND_FAILED',
+            message: 'Erken teslimat iadesi işlenemedi. Lütfen tekrar deneyin.',
+          };
         }
       }
 
@@ -250,12 +256,18 @@ export class BookingService implements IBookingService {
       if (booking.status === 'PAID') {
         const refundAmount = Math.max(0, booking.totalPrice - 20); // 20 TL Sabit Kesinti
         const { paymentService } = await import('./PaymentService');
-        await paymentService.refundPayment(bookingId, refundAmount);
+        const refundResult = await paymentService.refundPayment(bookingId, refundAmount);
+        if (!isRefundSuccess(refundResult.status)) {
+          console.error('BookingService::cancelBooking refund failed:', refundResult);
+          return false;
+        }
       }
 
-      await prisma.booking.update({
-        where: { id: bookingId },
-        data: { status: 'CANCELLED' }
+      await prisma.$transaction(async (tx) => {
+        await tx.booking.update({
+          where: { id: bookingId },
+          data: { status: 'CANCELLED' },
+        });
       });
 
       return true;

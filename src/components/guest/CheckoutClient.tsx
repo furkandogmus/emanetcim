@@ -54,8 +54,11 @@ export default function CheckoutClient({ shopId, shopName, shopAddress, pricePer
     setIsProcessing(true);
     setError(null);
 
-    const [expMonth, expYear] = expiry.split('/');
-    
+    const [expMonth, expYearRaw] = expiry.split('/');
+    // Normalize year: strip non-digits, take last 2 digits, prefix with "20"
+    const expYearDigits = (expYearRaw ?? '').replace(/\D/g, '').slice(-2);
+    const expireYear = expYearDigits.length === 2 ? `20${expYearDigits}` : new Date().getFullYear().toString();
+
     const result = await createBookingAction({
       shopId,
       bagCountS: bagS,
@@ -69,7 +72,7 @@ export default function CheckoutClient({ shopId, shopName, shopAddress, pricePer
         cardHolderName: cardHolder,
         cardNumber: cardNumber.replace(/\s/g, ''),
         expireMonth: expMonth || "12",
-        expireYear: expYear ? `20${expYear}` : "2025",
+        expireYear,
         cvc: cvv
       },
       couponCode: couponCode.trim() || undefined,

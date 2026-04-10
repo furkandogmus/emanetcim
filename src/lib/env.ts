@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const serverSchema = z.object({
-  DATABASE_URL: z.string().min(1).optional(),
+  DATABASE_URL: z.string().min(1),
   AUTH_SECRET: z.string().min(1).optional(),
   NODE_ENV: z.enum(["development", "production", "test"]).optional(),
   IYZICO_API_KEY: z.string().optional(),
@@ -28,4 +28,6 @@ export function requireProdSecrets(): void {
   if (process.env.NODE_ENV !== "production") return;
   const e = getServerEnv();
   if (!e.AUTH_SECRET) throw new Error("AUTH_SECRET is required in production");
+  if (!e.IYZICO_API_KEY) throw new Error("IYZICO_API_KEY is required in production");
+  if (!e.IYZICO_SECRET_KEY) throw new Error("IYZICO_SECRET_KEY is required in production");
 }

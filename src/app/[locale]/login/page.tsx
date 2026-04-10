@@ -68,8 +68,8 @@ export default function LoginPage() {
         </div>
 
         <div className="w-full grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <button 
-            onClick={() => signIn('credentials', { email: 'misafir@örnek.com', callbackUrl: '/tr/bookings' })}
+          <button
+            onClick={() => signIn('credentials', { email: 'misafir@örnek.com', password: process.env.NEXT_PUBLIC_DEMO_PASSWORD ?? 'Demo123!', callbackUrl: '/tr/bookings' })}
             className="group p-4 border border-green-50 rounded-2xl bg-green-50/30 hover:bg-green-50 transition-all flex flex-col items-center gap-2 text-center"
           >
             <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform">
@@ -78,8 +78,8 @@ export default function LoginPage() {
             <span className="text-[10px] font-black text-green-800 uppercase tracking-widest">Misafir Demo</span>
           </button>
 
-          <button 
-            onClick={() => signIn('credentials', { email: 'galata@shop.com', callbackUrl: '/tr/partner' })}
+          <button
+            onClick={() => signIn('credentials', { email: 'galata@shop.com', password: process.env.NEXT_PUBLIC_DEMO_PASSWORD ?? 'Demo123!', callbackUrl: '/tr/partner' })}
             className="group p-4 border border-blue-50 rounded-2xl bg-blue-50/30 hover:bg-blue-50 transition-all flex flex-col items-center gap-2 text-center"
           >
             <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
@@ -88,8 +88,8 @@ export default function LoginPage() {
             <span className="text-[10px] font-black text-blue-800 uppercase tracking-widest">Esnaf Girişi</span>
           </button>
 
-          <button 
-            onClick={() => signIn('credentials', { email: 'admin@emanetci.com', callbackUrl: '/tr/admin' })}
+          <button
+            onClick={() => signIn('credentials', { email: 'admin@emanetci.com', password: process.env.NEXT_PUBLIC_DEMO_PASSWORD ?? 'Demo123!', callbackUrl: '/tr/admin' })}
             className="group p-4 border border-purple-50 rounded-2xl bg-purple-50/30 hover:bg-purple-50 transition-all flex flex-col items-center gap-2 text-center"
           >
             <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform">

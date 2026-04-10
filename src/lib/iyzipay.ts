@@ -9,10 +9,13 @@ const iyzicoUri =
   process.env.IYZICO_BASE_URL ||
   'https://sandbox-api.iyzipay.com';
 
+if (process.env.NODE_ENV === 'production') {
+  if (!process.env.IYZICO_API_KEY) throw new Error('IYZICO_API_KEY is required in production');
+  if (!process.env.IYZICO_SECRET_KEY) throw new Error('IYZICO_SECRET_KEY is required in production');
+}
+
 export const iyzipay = new Iyzipay({
-  apiKey: process.env.IYZICO_API_KEY || 'sandbox-api-key',
-  secretKey: process.env.IYZICO_SECRET_KEY || 'sandbox-secret-key',
+  apiKey: process.env.IYZICO_API_KEY ?? 'sandbox-api-key',
+  secretKey: process.env.IYZICO_SECRET_KEY ?? 'sandbox-secret-key',
   uri: iyzicoUri,
 });
-
-export default Iyzipay;
