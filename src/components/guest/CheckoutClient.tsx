@@ -113,28 +113,32 @@ export default function CheckoutClient({
 
   const handlePayment = async () => {
     const strippedCard = cardNumber.replace(/\s/g, "");
-    const [expMonth, expYear] = expiry.split("/");
-    
+    const [expMonth, expYearRaw] = expiry.split("/");
+
     if (
-      !cardHolder.trim() || 
-      strippedCard.length < 16 || 
-      !expMonth || 
-      !expYear || 
-      expYear.length !== 2 || 
+      !cardHolder.trim() ||
+      strippedCard.length < 16 ||
+      !expMonth ||
+      !expYearRaw ||
+      expYearRaw.replace(/\D/g, "").length < 2 ||
       cvv.length < 3
     ) {
       setError(t("checkoutCardValidationError"));
       return;
     }
 
+    const expYearDigits = (expYearRaw ?? "").replace(/\D/g, "").slice(-2);
+    const expireYear =
+      expYearDigits.length === 2
+        ? `20${expYearDigits}`
+        : new Date().getFullYear().toString();
+
     setIsProcessing(true);
     setError(null);
 
-
-
     const checkInTime = new Date();
     const checkOutTime = new Date(
-      checkInTime.getTime() + numberOfDays * 24 * 60 * 60 * 1000
+      checkInTime.getTime() + numberOfDays * 24 * 60 * 60 * 1000,
     );
 
     const result = await createBookingAction({
@@ -148,11 +152,11 @@ export default function CheckoutClient({
       checkInTime,
       checkOutTime,
       cardInfo: {
-        cardHolderName: "REQUEST_FLOW",
-        cardNumber: "0000000000000000",
-        expireMonth: "12",
-        expireYear: "2099",
-        cvc: "000",
+        cardHolderName: cardHolder,
+        cardNumber: strippedCard,
+        expireMonth: expMonth || "12",
+        expireYear,
+        cvc: cvv,
       },
       couponCode: couponCode.trim() || undefined,
     });

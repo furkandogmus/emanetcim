@@ -53,7 +53,7 @@ export function requireProdSecrets(): void {
   }
   if (e.AUTH_SECRET.trim().length < 32) {
     throw new Error(
-      "AUTH_SECRET must be at least 32 characters in production"
+      "AUTH_SECRET must be at least 32 characters in production",
     );
   }
   if (!e.DATABASE_URL?.trim()) {
@@ -85,14 +85,14 @@ export function requireProdSecrets(): void {
       isPlaceholderIyzico(e.IYZICO_SECRET_KEY))
   ) {
     throw new Error(
-      "IYZICO_API_KEY / IYZICO_SECRET_KEY must not use placeholder values in production"
+      "IYZICO_API_KEY / IYZICO_SECRET_KEY must not use placeholder values in production",
     );
   }
   const upstashUrl = e.UPSTASH_REDIS_REST_URL?.trim();
   const upstashToken = e.UPSTASH_REDIS_REST_TOKEN?.trim();
   if ((upstashUrl && !upstashToken) || (!upstashUrl && upstashToken)) {
     throw new Error(
-      "UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN must both be set or both omitted"
+      "UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN must both be set or both omitted",
     );
   }
 }
