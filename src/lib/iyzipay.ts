@@ -1,29 +1,31 @@
-import Iyzipay from 'iyzipay';
+import Iyzipay from "iyzipay";
 
 /**
  * iyzipay - SDK Yapılandırması
- * Production'da IYZICO_* yoksa modül yüklenirken hata verir (requireProdSecrets ile uyumlu).
+ * Üretim anahtarları modül yüklenirken doğrulanmaz; ödeme çağrılarından önce
+ * `assertIyzicoKeys()` ile kontrol edilir (next build placeholder ile kırılmaz).
  */
 const iyzicoUri =
   process.env.IYZICO_BASE_URL ||
   process.env.IYZICO_URI ||
-  'https://sandbox-api.iyzipay.com';
+  "https://sandbox-api.iyzipay.com";
 
-const apiKey = process.env.IYZICO_API_KEY?.trim();
-const secretKey = process.env.IYZICO_SECRET_KEY?.trim();
-
-if (process.env.NODE_ENV === 'production') {
-  if (!apiKey || !secretKey) {
+export function assertIyzicoKeys(): void {
+  if (process.env.NODE_ENV !== "production") return;
+  const k = process.env.IYZICO_API_KEY?.trim();
+  const s = process.env.IYZICO_SECRET_KEY?.trim();
+  if (!k || !s) {
     throw new Error(
-      'IYZICO_API_KEY and IYZICO_SECRET_KEY are required in production (see src/lib/iyzipay.ts)'
+      "IYZICO_API_KEY and IYZICO_SECRET_KEY are required in production (see src/lib/iyzipay.ts)",
     );
   }
 }
 
+const apiKey = process.env.IYZICO_API_KEY?.trim() ?? "sandbox-api-key";
+const secretKey = process.env.IYZICO_SECRET_KEY?.trim() ?? "sandbox-secret-key";
+
 export const iyzipay = new Iyzipay({
-  apiKey: apiKey || 'sandbox-api-key',
-  secretKey: secretKey || 'sandbox-secret-key',
+  apiKey,
+  secretKey,
   uri: iyzicoUri,
 });
-
-export default Iyzipay;

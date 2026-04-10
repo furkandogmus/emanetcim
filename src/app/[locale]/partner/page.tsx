@@ -32,14 +32,13 @@ export default async function PartnerPage({
   const initialCheckoutBookingId = sp.checkoutBooking?.trim() || undefined;
 
   const session = await auth();
+  const role = session?.user?.role;
 
-  if (!session?.user?.id || session.user.role !== "PARTNER") {
-    if (session?.user?.role !== "ADMIN") {
-      redirect(`/${locale}/login?callbackUrl=/${locale}/partner`);
-    }
+  if (!session?.user?.id || (role !== "PARTNER" && role !== "ADMIN")) {
+    redirect(`/${locale}/login?callbackUrl=/${locale}/partner`);
   }
 
-  const shops = await shopService.getShopsByOwner(session!.user.id);
+  const shops = await shopService.getShopsByOwner(session.user.id);
   const activeShop = shops[0];
 
   if (!activeShop) {
