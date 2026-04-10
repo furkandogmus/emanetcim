@@ -1,10 +1,21 @@
 import { Resend } from "resend";
 import logger from "@/lib/logger";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResendClient(): Resend | null {
+  const key = process.env.RESEND_API_KEY?.trim();
+  if (!key) return null;
+  return new Resend(key);
+}
+
 const domain = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 export const sendVerificationEmail = async (email: string, token: string, locale: string = "tr") => {
+  const resend = getResendClient();
+  if (!resend) {
+    logger.warn({}, "mail_verification_skipped_no_resend_key");
+    return;
+  }
+
   const confirmLink = `${domain}/${locale}/auth/verify-email?token=${token}`;
 
   const content = {
@@ -63,6 +74,12 @@ export const sendVerificationEmail = async (email: string, token: string, locale
 };
 
 export const sendPasswordResetEmail = async (email: string, token: string, locale: string = "tr") => {
+  const resend = getResendClient();
+  if (!resend) {
+    logger.warn({}, "mail_password_reset_skipped_no_resend_key");
+    return;
+  }
+
   const resetLink = `${domain}/${locale}/auth/new-password?token=${token}`;
 
   const content = {

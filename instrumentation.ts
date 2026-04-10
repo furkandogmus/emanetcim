@@ -8,10 +8,16 @@ export async function register() {
     requireProdSecrets();
     if (process.env.SENTRY_DSN?.trim()) {
       const Sentry = await import("@sentry/node");
+      const release =
+        process.env.APP_VERSION?.trim() ||
+        process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) ||
+        process.env.npm_package_version;
       Sentry.init({
         dsn: process.env.SENTRY_DSN,
         environment: process.env.NODE_ENV,
         tracesSampleRate: Number(process.env.SENTRY_TRACES_SAMPLE_RATE) || 0.05,
+        ...(release ? { release } : {}),
+        serverName: process.env.OBSERVABILITY_SERVICE_NAME || "bagajpark",
       });
     }
   }

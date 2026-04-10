@@ -6,6 +6,7 @@ import { isPaymentSuccess } from '@/lib/payment-status';
 import { moneyToNumber } from '@/lib/money';
 import logger from '@/lib/logger';
 import { withTimeout } from '@/lib/async-timeout';
+import { isPaymentsEnabled } from '@/lib/feature-flags';
 
 const IYZICO_OP_TIMEOUT_MS = Number(process.env.IYZICO_HTTP_TIMEOUT_MS) || 45_000;
 
@@ -83,6 +84,12 @@ export class PaymentService implements IPaymentService {
   async initializeMarketplacePayment(
     data: MarketplacePaymentInput
   ): Promise<PaymentSdkResult> {
+    if (!isPaymentsEnabled()) {
+      return {
+        status: 'failure',
+        errorMessage: 'Payments disabled (PAYMENTS_ENABLED=false).',
+      };
+    }
     assertIyzicoKeys();
     await this.acquirePaymentLock(data.bookingId);
     try {
@@ -237,6 +244,9 @@ export class PaymentService implements IPaymentService {
     merchantId?: string;
     hash?: string;
   }): Promise<{ success: boolean; message: string }> {
+    if (!isPaymentsEnabled()) {
+      return { success: false, message: 'Payments disabled (PAYMENTS_ENABLED=false)' };
+    }
     const { status, paymentId, conversationId } = payload;
 
     // 1. Durum Kontrolü (Sadece başarılı ödemeleri işle)
@@ -298,6 +308,12 @@ export class PaymentService implements IPaymentService {
    * Misafir iptalleri (UC_M_07) için parayı iyzico üzerinden geri gönderir.
    */
   async refundPayment(bookingId: string, amount: number): Promise<PaymentSdkResult> {
+    if (!isPaymentsEnabled()) {
+      return {
+        status: 'failure',
+        errorMessage: 'Payments disabled (PAYMENTS_ENABLED=false).',
+      };
+    }
     assertIyzicoKeys();
     // 1. Orijinal ödeme kaydını bul (Transaction ID gerekiyor)
     const paymentLog = await prisma.paymentLog.findFirst({
@@ -394,6 +410,13 @@ export class PaymentService implements IPaymentService {
     email: string;
     phone: string;
   }): Promise<PaymentSdkResult> {
+    if (!isPaymentsEnabled()) {
+      return {
+        status: 'failure',
+        errorMessage: 'Payments disabled (PAYMENTS_ENABLED=false).',
+      };
+    }
+    assertIyzicoKeys();
     const request = {
       locale: Iyzipay.LOCALE.TR,
       subMerchantKey: data.subMerchantKey,

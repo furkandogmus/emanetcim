@@ -4,6 +4,8 @@ const serverSchema = z.object({
   DATABASE_URL: z.string().min(1).optional(),
   AUTH_SECRET: z.string().min(1).optional(),
   NODE_ENV: z.enum(["development", "production", "test"]).optional(),
+  /** `false` iken ödeme/iade/webhook işlenmez; üretimde IYZICO zorunluluğu da kalkar. */
+  PAYMENTS_ENABLED: z.string().optional(),
   IYZICO_API_KEY: z.string().optional(),
   IYZICO_SECRET_KEY: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
@@ -13,6 +15,11 @@ const serverSchema = z.object({
   UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
   SENTRY_DSN: z.string().optional(),
   SENTRY_TRACES_SAMPLE_RATE: z.string().optional(),
+  DATABASE_SSL: z.string().optional(),
+  PG_POOL_MAX: z.string().optional(),
+  LOG_LEVEL: z.string().optional(),
+  APP_VERSION: z.string().optional(),
+  OBSERVABILITY_SERVICE_NAME: z.string().optional(),
 });
 
 export type ServerEnv = z.infer<typeof serverSchema>;
@@ -59,6 +66,7 @@ export function requireProdSecrets(): void {
   if (!e.DATABASE_URL?.trim()) {
     throw new Error("DATABASE_URL is required in production");
   }
+  const paymentsDisabled = process.env.PAYMENTS_ENABLED?.trim() === "false";
   const hasGoogleOAuth =
     process.env.GOOGLE_CLIENT_ID?.trim() &&
     process.env.GOOGLE_CLIENT_SECRET?.trim();
@@ -72,21 +80,23 @@ export function requireProdSecrets(): void {
       "AUTH_PUBLIC_HOST is required in production when OAuth providers are configured",
     );
   }
-  if (!e.IYZICO_API_KEY?.trim()) {
-    throw new Error("IYZICO_API_KEY is required in production");
-  }
-  if (!e.IYZICO_SECRET_KEY?.trim()) {
-    throw new Error("IYZICO_SECRET_KEY is required in production");
-  }
-  // GitHub Actions vb. CI ortamında kasıtlı placeholder anahtarlar kullanılabilir.
-  if (
-    process.env.CI !== "true" &&
-    (isPlaceholderIyzico(e.IYZICO_API_KEY) ||
-      isPlaceholderIyzico(e.IYZICO_SECRET_KEY))
-  ) {
-    throw new Error(
-      "IYZICO_API_KEY / IYZICO_SECRET_KEY must not use placeholder values in production",
-    );
+  if (!paymentsDisabled) {
+    if (!e.IYZICO_API_KEY?.trim()) {
+      throw new Error("IYZICO_API_KEY is required in production when payments are enabled");
+    }
+    if (!e.IYZICO_SECRET_KEY?.trim()) {
+      throw new Error("IYZICO_SECRET_KEY is required in production when payments are enabled");
+    }
+    // GitHub Actions vb. CI ortamında kasıtlı placeholder anahtarlar kullanılabilir.
+    if (
+      process.env.CI !== "true" &&
+      (isPlaceholderIyzico(e.IYZICO_API_KEY) ||
+        isPlaceholderIyzico(e.IYZICO_SECRET_KEY))
+    ) {
+      throw new Error(
+        "IYZICO_API_KEY / IYZICO_SECRET_KEY must not use placeholder values in production",
+      );
+    }
   }
   const upstashUrl = e.UPSTASH_REDIS_REST_URL?.trim();
   const upstashToken = e.UPSTASH_REDIS_REST_TOKEN?.trim();
