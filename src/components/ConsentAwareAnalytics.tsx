@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { COOKIE_CONSENT_STORAGE_KEY } from "@/components/CookieConsent";
+import { COOKIE_CONSENT_STORAGE_KEY } from "@/lib/cookie-consent-storage-key";
 
 /**
  * Yalnızca çerez onayı `all` iken Plausible yükler (NEXT_PUBLIC_PLAUSIBLE_DOMAIN).

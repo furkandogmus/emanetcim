@@ -10,11 +10,16 @@ import {
   Sparkles,
   ExternalLink,
 } from "lucide-react";
+import { useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { roundedSlotPrices } from "@/lib/bag-pricing";
 import type { PricingRules } from "@/lib/pricing-rules";
 import { dateLocaleForUiLocale } from "@/lib/date-locale";
+import {
+  PLAUSIBLE_EVENTS,
+  trackPlausibleEvent,
+} from "@/lib/plausible-events";
 
 export type ShopDetailClientShop = {
   id: string;
@@ -62,6 +67,10 @@ export default function ShopDetailClient({
     : shop.openingTime && shop.closingTime
       ? `${shop.openingTime} – ${shop.closingTime}`
       : "—";
+
+  useEffect(() => {
+    trackPlausibleEvent(PLAUSIBLE_EVENTS.ShopViewed, { shopId: shop.id });
+  }, [shop.id]);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-28">

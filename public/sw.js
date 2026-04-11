@@ -1,7 +1,12 @@
 // BagajPark Service Worker — PWA ikon/manifest; sayfa ve Next.js iç yollarına müdahale etme.
 // (ngrok ara sayfası / RSC / OAuth için navigasyon ve _next cache'lenmez.)
-const CACHE_NAME = 'bagajpark-v5';
-const ASSETS_TO_CACHE = ['/manifest.json', '/icons/icon-192x192.png', '/icons/icon-512x512.png'];
+const CACHE_NAME = 'bagajpark-v6';
+const ASSETS_TO_CACHE = [
+  '/manifest.json',
+  '/offline.html',
+  '/icons/icon-192x192.png',
+  '/icons/icon-512x512.png',
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -76,9 +81,19 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Tüm doküman geçişleri: yalnızca ağ (HTML/ngrok/Auth.js için önbellek yok)
+  // Doküman: ağ önce; kopunca önbellekteki offline sayfası (RSC / _next önbelleklenmez)
   if (event.request.mode === 'navigate') {
-    event.respondWith(fetch(event.request));
+    event.respondWith(
+      fetch(event.request).catch(() =>
+        caches.match('/offline.html').then((cached) => {
+          if (cached) return cached;
+          return new Response('Offline', {
+            status: 503,
+            headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+          });
+        }),
+      ),
+    );
     return;
   }
 

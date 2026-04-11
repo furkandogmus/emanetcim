@@ -19,6 +19,10 @@ import type { ShopSearchHit } from "@/services/ShopService";
 import { parseDatetimeLocal, toDatetimeLocalValue } from "@/lib/datetime-local";
 import { refreshSearchShopsAction } from "@/actions/search-shops";
 import { toast } from "sonner";
+import {
+  PLAUSIBLE_EVENTS,
+  trackPlausibleEvent,
+} from "@/lib/plausible-events";
 
 type Tab = "nearby" | "all";
 
@@ -93,6 +97,11 @@ export default function SearchClient({
       if (res.ok) {
         setNearbyList(res.nearby as ShopSearchHit[]);
         setAllList(res.all as ShopSearchHit[]);
+        trackPlausibleEvent(PLAUSIBLE_EVENTS.SearchSubmitted, {
+          nearbyCount: (res.nearby as ShopSearchHit[]).length,
+          allCount: (res.all as ShopSearchHit[]).length,
+          bags: requestedBags,
+        });
       } else if (res.error?.startsWith("Errors.")) {
         toast.error(tErr(res.error.slice(7) as never));
       } else {

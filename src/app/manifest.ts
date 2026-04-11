@@ -1,10 +1,14 @@
 import type { MetadataRoute } from "next";
+import { routing } from "@/i18n/routing";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "BagajPark",
     short_name: "BagajPark",
-    description: "Luggage storage network in Turkey.",
+    description:
+      "Türkiye ve seçili şehirlerde valiz saklama — güvenli rezervasyon. Luggage storage in Turkey and selected cities.",
+    lang: routing.defaultLocale,
+    dir: "ltr",
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",
