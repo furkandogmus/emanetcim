@@ -4,6 +4,7 @@ import { Link } from "@/i18n/routing";
 import { auth } from "@/auth";
 import prisma from "@/lib/db";
 import { dateLocaleForUiLocale } from "@/lib/date-locale";
+import { guestBookingStatusMessageKey } from "@/lib/booking-status-i18n";
 
 /**
  * Partner Bookings / History Page - Esnaf Takvimi
@@ -48,6 +49,9 @@ export default async function PartnerBookingsPage({
 
   const timeLocale = dateLocaleForUiLocale(locale);
 
+  const fmtDt = (d: Date) =>
+    d.toLocaleString(timeLocale, { dateStyle: "short", timeStyle: "short" });
+
   const tasks = dbBookings.map((b) => {
     const totalBags = b.bagCountS + b.bagCountM + b.bagCountXl;
     let listStatus = "pending";
@@ -59,7 +63,7 @@ export default async function PartnerBookingsPage({
       bookingId: b.id,
       shortRef: "EMN-" + b.id.substring(0, 6).toUpperCase(),
       customer: b.guest?.name || tGuest("guestDefaultName"),
-      time: `${b.checkInTime.toLocaleTimeString(timeLocale, { hour: "2-digit", minute: "2-digit" })} — ${t("checkInWord")}`,
+      scheduleLine: `${fmtDt(b.checkInTime)} — ${t("checkInWord")} · ${fmtDt(b.checkOutTime)} — ${t("partnerBookingsCheckOut")}`,
       listStatus,
       bookingStatus: b.status,
       bags: `${totalBags} ${tGuest("bagsUnit")}`,
@@ -99,7 +103,10 @@ export default async function PartnerBookingsPage({
                   <div>
                     <h3 className="font-bold text-gray-900">{task.customer}</h3>
                     <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                      {task.time} • {task.shortRef}
+                      {task.shortRef}
+                    </p>
+                    <p className="mt-1 text-xs font-medium leading-snug text-gray-500">
+                      {task.scheduleLine}
                     </p>
                   </div>
                 </div>
@@ -120,10 +127,42 @@ export default async function PartnerBookingsPage({
                 <div className="flex items-center gap-2 text-[10px] font-black uppercase text-gray-400">
                   <Clock size={14} />
                   <span>
-                    {tGuest("status")}: {task.bookingStatus}
+                    {tGuest("status")}:{" "}
+                    {(() => {
+                      const sk = guestBookingStatusMessageKey(task.bookingStatus);
+                      return sk ? tGuest(sk) : task.bookingStatus;
+                    })()}
                   </span>
                 </div>
               </div>
+
+              {task.bookingStatus === "WAITING_APPROVAL" && (
+                <div className="flex flex-col gap-2">
+                  <p className="rounded-2xl bg-orange-50 px-3 py-3 text-center text-xs font-bold text-orange-800">
+                    {t("partnerBookingAwaitingApprovalHint")}
+                  </p>
+                  <Link
+                    href="/partner"
+                    className="w-full rounded-2xl bg-orange-600 py-4 text-center text-xs font-black uppercase tracking-widest text-white transition-colors hover:bg-orange-700"
+                  >
+                    {t("partnerBookingsOpenPanel")}
+                  </Link>
+                </div>
+              )}
+
+              {(task.bookingStatus === "PENDING" || task.bookingStatus === "APPROVED") && (
+                <div className="flex flex-col gap-2">
+                  <p className="rounded-2xl bg-amber-50 px-3 py-3 text-center text-xs font-bold text-amber-800">
+                    {t("partnerBookingAwaitGuestPaymentHint")}
+                  </p>
+                  <Link
+                    href="/partner"
+                    className="w-full rounded-2xl border border-amber-200 bg-white py-4 text-center text-xs font-black uppercase tracking-widest text-amber-900 transition-colors hover:bg-amber-50"
+                  >
+                    {t("partnerBookingsOpenPanel")}
+                  </Link>
+                </div>
+              )}
 
               {task.bookingStatus === "PAID" && (
                 <Link
@@ -143,11 +182,6 @@ export default async function PartnerBookingsPage({
                 </Link>
               )}
 
-              {task.bookingStatus === "PENDING" && (
-                <p className="text-center text-xs font-bold text-amber-600 bg-amber-50 py-3 rounded-2xl">
-                  {t("paymentPendingNoCheckIn")}
-                </p>
-              )}
             </div>
           ))
         )}

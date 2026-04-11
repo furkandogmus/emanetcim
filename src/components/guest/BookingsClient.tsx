@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, Calendar, MapPin, Clock, QrCode } from 'lucide-react';
 import { Link, useRouter } from '@/i18n/routing';
 import { moneyToNumber } from '@/lib/money';
+import { formatTryCurrency } from '@/lib/currency';
+import { guestBookingStatusMessageKey } from '@/lib/booking-status-i18n';
 import { toast } from 'sonner';
 import ReviewForm from './ReviewForm';
 import CancellationPolicy from '@/components/guest/CancellationPolicy';
@@ -72,7 +74,14 @@ export default function BookingsClient({
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      <header className="bg-white p-6 sticky top-0 z-10 border-b border-gray-100">
+      <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-gray-100 bg-white p-6">
+        <Link
+          href="/search"
+          className="rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-orange-600"
+          aria-label={t('findShops')}
+        >
+          <MapPin size={22} aria-hidden />
+        </Link>
         <h1 className="text-2xl font-black text-gray-900">{t('myBookings')}</h1>
       </header>
 
@@ -105,7 +114,10 @@ export default function BookingsClient({
                     booking.status as string
                   )}`}
                 >
-                  {booking.status}
+                  {(() => {
+                    const k = guestBookingStatusMessageKey(booking.status as string);
+                    return k ? t(k as never) : (booking.status as string);
+                  })()}
                 </div>
               </div>
 
@@ -134,7 +146,7 @@ export default function BookingsClient({
                 <div className="flex flex-col">
                   <div className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">{t('totalAmount')}</div>
                   <div className="text-xl font-black text-gray-900 tracking-tighter">
-                    ₺{moneyToNumber(booking.totalPrice)}
+                    {formatTryCurrency(moneyToNumber(booking.totalPrice), locale)}
                   </div>
                 </div>
                 
