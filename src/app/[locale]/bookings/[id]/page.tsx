@@ -10,6 +10,7 @@ import BookingQrDisplay from "@/components/guest/BookingQrDisplay";
 import { moneyToNumber } from "@/lib/money";
 import { getPricingRules } from "@/lib/platform-settings";
 import BookingDetailModifySection from "@/components/guest/BookingDetailModifySection";
+import BookingStripeReturnSync from "@/components/guest/BookingStripeReturnSync";
 import type { Metadata } from "next";
 import { dateLocaleForUiLocale } from "@/lib/date-locale";
 
@@ -30,12 +31,22 @@ export async function generateMetadata({
  * Booking Detail Page - Rezervasyon Detayı (Server Component)
  * Responsive, minimalist and print-friendly design using plain Tailwind.
  */
-export default async function BookingDetailPage({ 
-  params 
-}: { 
-  params: Promise<{ locale: string, id: string }> 
+export default async function BookingDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string; id: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { locale, id } = await params;
+  const sp = searchParams ? await searchParams : {};
+  const paymentIntentRaw = sp["payment_intent"];
+  const redirectStatusRaw = sp["redirect_status"];
+  const paymentIntentId =
+    typeof paymentIntentRaw === "string" ? paymentIntentRaw : undefined;
+  const redirectStatus =
+    typeof redirectStatusRaw === "string" ? redirectStatusRaw : undefined;
+
   setRequestLocale(locale);
   const session = await auth();
   const t = await getTranslations("Guest");
@@ -69,7 +80,14 @@ export default async function BookingDetailPage({
   return (
     <div className="min-h-screen bg-gray-50 pt-32 pb-20 px-6 font-sans">
       <div className="max-w-md mx-auto flex flex-col gap-6">
-        
+        {paymentIntentId ? (
+          <BookingStripeReturnSync
+            bookingId={id}
+            paymentIntentId={paymentIntentId}
+            redirectStatus={redirectStatus}
+          />
+        ) : null}
+
         {/* Status header */}
         <div className="flex flex-col items-center text-center gap-2 mb-4">
           {isPaidFlow ? (

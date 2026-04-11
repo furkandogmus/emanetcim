@@ -323,7 +323,9 @@
     "payBookingError_invalid_amount": "Geçersiz tutar.",
     "payBookingError_stripe_no_client_secret": "Ödeme oturumu başlatılamadı (Stripe).",
     "payBookingError_stripe_error": "Stripe hatası. Daha sonra deneyin.",
-    "payBookingErrorUnknown": "Bir sorun oluştu. Tekrar deneyin veya destekle iletişime geçin."
+    "payBookingErrorUnknown": "Bir sorun oluştu. Tekrar deneyin veya destekle iletişime geçin.",
+    "payBookingReturnSyncing": "Ödemeniz onaylanıyor…",
+    "payBookingReturnFailed": "Ödeme onaylanamadı. Rezervasyon durumunu kontrol edin veya tekrar deneyin."
   },
   "Admin": {
     "dashboardTitle": "BagajPark Yönetim Masası",
