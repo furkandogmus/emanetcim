@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { ShieldCheck, MapPin, Globe, MessageCircle, Heart } from "lucide-react";
+import { STORAGE_CITIES } from "@/lib/storage-cities";
 
 /**
  * Footer - Kurumsal Bilgi ve Navigasyon Çubuğu
@@ -10,6 +11,7 @@ import { ShieldCheck, MapPin, Globe, MessageCircle, Heart } from "lucide-react";
 export default function Footer() {
   const t = useTranslations("Footer");
   const tCommon = useTranslations("Common");
+  const tCity = useTranslations("CityStorage");
   const currentYear = new Date().getFullYear();
 
   return (
@@ -114,6 +116,23 @@ export default function Footer() {
               <div className="w-10 h-6 bg-gray-400 rounded"></div>
               <div className="w-10 h-6 bg-gray-400 rounded"></div>
             </div>
+          </div>
+        </div>
+
+        <div className="mb-16 pb-16 border-b border-gray-100">
+          <h4 className="text-xs font-black uppercase tracking-widest text-gray-900 mb-4">
+            {t("citiesTitle")}
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {STORAGE_CITIES.map((c) => (
+              <Link
+                key={c.slug}
+                href={`/luggage-storage/${c.slug}`}
+                className="rounded-full border border-gray-100 bg-gray-50 px-3 py-1.5 text-xs font-bold text-gray-600 transition hover:border-orange-200 hover:bg-white hover:text-orange-600"
+              >
+                {tCity(`${c.slug}.label`)}
+              </Link>
+            ))}
           </div>
         </div>
 

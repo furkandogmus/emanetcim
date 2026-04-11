@@ -72,6 +72,7 @@ import {NextIntlClientProvider} from 'next-intl';
 import {getMessages, getTranslations} from 'next-intl/server';
 import {notFound} from 'next/navigation';
 import {routing} from '@/i18n/routing';
+import { getSiteBaseUrl } from "@/lib/site-urls";
 import PWARegister from '@/components/PWARegister';
 import { Providers } from "@/components/Providers";
 import Header from "@/components/layout/Header";
@@ -96,26 +97,30 @@ export default async function RootLayout({
 
   const tSEO = await getTranslations({ locale, namespace: "SEO" });
   const messages = await getMessages();
+  const base = getSiteBaseUrl();
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "BagajPark",
-    "url": "https://bagajpark.com",
+    "url": `${base}/${locale}`,
     "description": tSEO("description"),
     "potentialAction": {
       "@type": "SearchAction",
-      "target": "https://bagajpark.com/search?q={search_term_string}",
-      "query-input": "required name=search_term_string"
-    }
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": `${base}/${locale}/search?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
   };
 
   const orgLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "BagajPark",
-    "url": "https://bagajpark.com",
-    "logo": "https://bagajpark.com/icons/icon-512x512.png",
+    "url": base,
+    "logo": `${base}/icons/icon-512x512.png`,
     "contactPoint": {
       "@type": "ContactPoint",
       "telephone": "+90-542-241-55-97",

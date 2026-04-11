@@ -1,9 +1,27 @@
-import { setRequestLocale } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { shopService } from '@/services/ShopService';
 import CheckoutClient from '@/components/guest/CheckoutClient';
 import { moneyToNumber } from '@/lib/money';
 import { getPricingRules } from '@/lib/platform-settings';
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; shopId: string }>;
+}): Promise<Metadata> {
+  const { locale, shopId } = await params;
+  const shop = await shopService.getShopDetails(shopId);
+  if (!shop) {
+    return { title: "Checkout" };
+  }
+  const t = await getTranslations({ locale, namespace: "Guest" });
+  return {
+    title: t("checkoutPageTitle", { shopName: shop.name }),
+    robots: { index: false, follow: true },
+  };
+}
 
 /**
  * Checkout Page - Rezervasyon ve Ödeme Sayfası (Server Component)

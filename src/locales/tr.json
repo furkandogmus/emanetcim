@@ -138,7 +138,10 @@
     "trustStatStays": "Tamamlanan depolama",
     "trustStatReviews": "Misafir yorumu",
     "trustStatAvgRating": "Ortalama puan",
+    "cityHubTitle": "Popüler şehirler",
+    "cityHubIntro": "Valiz emanet rehberi ve haritada yakın dükkanlar.",
     "checkout": "Ödeme ve Onay",
+    "checkoutPageTitle": "{shopName} — Ödeme",
     "selectBags": "Valiz Sayısını Seçin",
     "stayDuration": "Depolama süresi",
     "checkoutCheckInLabel": "Teslim (check-in)",
@@ -233,6 +236,8 @@
     "cityFallback": "İstanbul",
     "searchTitle": "{query} Yakınındaki Emanet Noktaları",
     "searchDescription": "{query} bölgesinde güvenli ve sigortalı valiz depolama alanlarını bulun.",
+    "searchTitleBrowse": "Emanet noktası ara | Harita",
+    "searchDescriptionBrowse": "Yakınınızdaki güvenli ve sigortalı valiz emanet noktalarını haritada bulun, tarih ve müsaitliğe göre filtreleyin.",
     "blogTitle": "BagajPark Blog | Seyahat İpuçları ve Bavul Emanet Rehberi",
     "blogDescription": "Seyahat ederken yüklerinden kurtulmanın yolları, İstanbul rehberi ve bagaj güvenliği hakkında her şey.",
     "blogTagline": "Seyahatlerinizi kolaylaştıracak ipuçları, şehir rehberleri ve bakül emanetine dair her şey burada.",
@@ -655,7 +660,8 @@
     "ariaHome": "Ana sayfa",
     "ariaContact": "İletişim",
     "ariaEmail": "E-posta",
-    "corporate": "Kurumsal"
+    "corporate": "Kurumsal",
+    "citiesTitle": "Popüler şehirler"
   },
   "Contact": {
     "title": "Bize Ulaşın",
@@ -818,6 +824,7 @@
   },
   "CityStorage": {
     "istanbul": {
+      "label": "İstanbul",
       "metaTitle": "İstanbul valiz emanet | BagajPark",
       "metaDescription": "İstanbul’da güvenli valiz ve bagaj emanet noktaları. Turistik bölgelere yakın depolama; online rezervasyon.",
       "headline": "İstanbul’da valiz emanet",
@@ -826,6 +833,7 @@
       "cta": "İstanbul’da dükkanları aç"
     },
     "ankara": {
+      "label": "Ankara",
       "metaTitle": "Ankara valiz emanet | BagajPark",
       "metaDescription": "Ankara’da güvenli bagaj bırakma ve valiz emanet. Müzeler ve kent merkezine yakın noktalar.",
       "headline": "Ankara’da valiz emanet",
@@ -834,6 +842,7 @@
       "cta": "Ankara’da dükkanları aç"
     },
     "izmir": {
+      "label": "İzmir",
       "metaTitle": "İzmir valiz emanet | BagajPark",
       "metaDescription": "İzmir’de valiz emanet ve bagaj depolama. Konak, Alsancak ve sahil hattına yakın güvenli noktalar.",
       "headline": "İzmir’de valiz emanet",
@@ -842,6 +851,7 @@
       "cta": "İzmir’de dükkanları aç"
     },
     "antalya": {
+      "label": "Antalya",
       "metaTitle": "Antalya valiz emanet | BagajPark",
       "metaDescription": "Antalya’da turistler için valiz emanet. Kaleiçi ve plaj bölgelerine yakın bagaj depolama.",
       "headline": "Antalya’da valiz emanet",
@@ -850,6 +860,7 @@
       "cta": "Antalya’da dükkanları aç"
     },
     "bodrum": {
+      "label": "Bodrum",
       "metaTitle": "Bodrum valiz emanet | BagajPark",
       "metaDescription": "Bodrum’da güvenli bagaj ve valiz emanet. Marina ve plaj çevresi için pratik depolama.",
       "headline": "Bodrum’da valiz emanet",
@@ -858,6 +869,7 @@
       "cta": "Bodrum’da dükkanları aç"
     },
     "cappadocia": {
+      "label": "Kapadokya",
       "metaTitle": "Kapadokya valiz emanet | BagajPark",
       "metaDescription": "Kapadokya’da balon ve vadiler arasında valiz emanet. Göreme ve Ürgüp çevresi için bagaj depolama.",
       "headline": "Kapadokya’da valiz emanet",
