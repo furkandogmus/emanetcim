@@ -233,6 +233,7 @@ export default function BookingsClient({
 
       {modifyBooking && (
         <BookingModifyModal
+          key={modifyBooking.id}
           booking={modifyBooking}
           pricingRules={pricingRules}
           onClose={() => setModifyBooking(null)}

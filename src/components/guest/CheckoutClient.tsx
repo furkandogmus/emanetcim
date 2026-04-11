@@ -64,17 +64,14 @@ export default function CheckoutClient({
   const [bagM, setBagM] = useState(1);
   const [bagXl, setBagXl] = useState(0);
 
-  const [checkInLocal, setCheckInLocal] = useState("");
-  const [checkOutLocal, setCheckOutLocal] = useState("");
-  const [datesReady, setDatesReady] = useState(false);
-
-  useEffect(() => {
+  const [checkInLocal, setCheckInLocal] = useState(() =>
+    toDatetimeLocalValue(new Date()),
+  );
+  const [checkOutLocal, setCheckOutLocal] = useState(() => {
     const now = new Date();
     const defaultOut = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-    setCheckInLocal(toDatetimeLocalValue(now));
-    setCheckOutLocal(toDatetimeLocalValue(defaultOut));
-    setDatesReady(true);
-  }, []);
+    return toDatetimeLocalValue(defaultOut);
+  });
 
   useEffect(() => {
     trackPlausibleEvent(PLAUSIBLE_EVENTS.CheckoutStarted, { shopId });
@@ -83,7 +80,6 @@ export default function CheckoutClient({
   const checkInDate = parseDatetimeLocal(checkInLocal);
   const checkOutDate = parseDatetimeLocal(checkOutLocal);
   const windowOk =
-    datesReady &&
     checkInDate !== null &&
     checkOutDate !== null &&
     validateBookingStayWindow(checkInDate, checkOutDate, pricingRules);
@@ -232,7 +228,6 @@ export default function CheckoutClient({
   const goNext = () => {
     setError(null);
     if (step === 1) {
-      if (!datesReady) return;
       if (!windowOk) {
         setError(
           t("checkoutDatesInvalid", { max: pricingRules.maxStayDays })
@@ -447,11 +442,9 @@ export default function CheckoutClient({
             </div>
 
             <section className="flex flex-col gap-3" data-testid="checkout-stay-days">
-              {datesReady ? (
-                <span data-testid="checkout-dates-ready" className="sr-only">
-                  ready
-                </span>
-              ) : null}
+              <span data-testid="checkout-dates-ready" className="sr-only">
+                ready
+              </span>
               <h2 className="text-sm font-black uppercase tracking-widest text-gray-900">
                 {t("stayDuration")}
               </h2>
@@ -514,7 +507,7 @@ export default function CheckoutClient({
                 </p>
               </div>
               <p className="text-xs text-gray-400 leading-relaxed">{t("stayDaysHint")}</p>
-              {datesReady && !windowOk ? (
+              {!windowOk ? (
                 <p
                   data-testid="checkout-dates-error"
                   className="text-xs font-bold text-orange-600"
@@ -771,7 +764,7 @@ export default function CheckoutClient({
               data-testid="checkout-footer-primary"
               onClick={goNext}
               disabled={
-                step === 1 && (!datesReady || !windowOk || totalPrice === 0)
+                step === 1 && (!windowOk || totalPrice === 0)
               }
               className="flex-1 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-200 disabled:cursor-not-allowed text-white py-4 rounded-3xl font-black text-sm uppercase tracking-wider transition-all active:scale-[0.98] shadow-xl shadow-gray-200"
             >

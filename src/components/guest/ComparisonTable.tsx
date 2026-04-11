@@ -2,15 +2,14 @@
 
 import { useTranslations } from "next-intl";
 
-const ROW_KEYS = [
-  "comparisonPrice",
-  "comparisonFlex",
-  "comparisonInsurance",
-  "comparisonNetwork",
-  "comparisonHours",
-] as const;
+type ComparisonRowKey =
+  | "comparisonPrice"
+  | "comparisonFlex"
+  | "comparisonInsurance"
+  | "comparisonNetwork"
+  | "comparisonHours";
 
-const ROWS: { key: (typeof ROW_KEYS)[number]; us: "yes" | "partial" }[] = [
+const ROWS: { key: ComparisonRowKey; us: "yes" | "partial" }[] = [
   { key: "comparisonPrice", us: "yes" },
   { key: "comparisonFlex", us: "yes" },
   { key: "comparisonInsurance", us: "yes" },

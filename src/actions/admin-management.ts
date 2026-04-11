@@ -327,14 +327,14 @@ export async function unblockIpAction(ip: string) {
   return { success: true };
 }
 
-const chargebackStatuses = ["OPEN", "WON", "LOST"] as const;
+type PaymentChargebackStatus = "OPEN" | "WON" | "LOST";
 
 /**
  * Ödeme kaydı için chargeback durumu (admin).
  */
 export async function setPaymentChargebackStatusAction(
   bookingId: string,
-  status: (typeof chargebackStatuses)[number] | null,
+  status: PaymentChargebackStatus | null,
   note?: string | null,
 ) {
   const session = await ensureAdmin();
