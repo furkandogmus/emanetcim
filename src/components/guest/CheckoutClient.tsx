@@ -28,6 +28,10 @@ import {
 } from "@/lib/booking-server-price";
 import { parseDatetimeLocal, toDatetimeLocalValue } from "@/lib/datetime-local";
 import type { PricingRules } from "@/lib/pricing-rules";
+import {
+  PLAUSIBLE_EVENTS,
+  trackPlausibleEvent,
+} from "@/lib/plausible-events";
 
 const STEPS = 3 as const;
 
@@ -71,6 +75,10 @@ export default function CheckoutClient({
     setCheckOutLocal(toDatetimeLocalValue(defaultOut));
     setDatesReady(true);
   }, []);
+
+  useEffect(() => {
+    trackPlausibleEvent(PLAUSIBLE_EVENTS.CheckoutStarted, { shopId });
+  }, [shopId]);
 
   const checkInDate = parseDatetimeLocal(checkInLocal);
   const checkOutDate = parseDatetimeLocal(checkOutLocal);
@@ -199,6 +207,11 @@ export default function CheckoutClient({
 
     if (result.success && result.bookingId) {
       setBookingId(result.bookingId);
+      trackPlausibleEvent(PLAUSIBLE_EVENTS.BookingCreated, { shopId });
+      trackPlausibleEvent(PLAUSIBLE_EVENTS.PaymentSucceeded, {
+        gateway: "iyzico",
+        shopId,
+      });
       if ("qrCodeToken" in result && result.qrCodeToken) {
         QRCode.toDataURL(result.qrCodeToken, { width: 220, margin: 2 })
           .then(setQrDataUrl)
@@ -293,6 +306,25 @@ export default function CheckoutClient({
             </div>
           </div>
 
+          <p className="flex flex-wrap items-center justify-center gap-2 text-sm text-white/80">
+            <span>{t("checkoutSupportIntro")}</span>
+            <Link
+              href="/faq"
+              className="font-bold text-white underline underline-offset-4 hover:text-white"
+            >
+              {t("checkoutSupportFaq")}
+            </Link>
+            <span aria-hidden className="text-white/50">
+              ·
+            </span>
+            <Link
+              href="/contact"
+              className="font-bold text-white underline underline-offset-4 hover:text-white"
+            >
+              {t("checkoutSupportContact")}
+            </Link>
+          </p>
+
           <Link
             href="/bookings"
             className="text-white/60 text-sm font-bold uppercase tracking-widest hover:text-white transition-colors underline underline-offset-8"
@@ -316,6 +348,25 @@ export default function CheckoutClient({
           </Link>
           <h1 className="text-xl font-black tracking-tight">{t("checkout")}</h1>
         </div>
+
+        <p className="flex flex-wrap items-center justify-center gap-2 text-xs text-gray-500">
+          <span>{t("checkoutSupportIntro")}</span>
+          <Link
+            href="/faq"
+            className="font-bold text-orange-600 hover:underline"
+          >
+            {t("checkoutSupportFaq")}
+          </Link>
+          <span aria-hidden className="text-gray-300">
+            ·
+          </span>
+          <Link
+            href="/contact"
+            className="font-bold text-orange-600 hover:underline"
+          >
+            {t("checkoutSupportContact")}
+          </Link>
+        </p>
 
         <nav
           className="flex items-center max-w-md mx-auto w-full px-1"

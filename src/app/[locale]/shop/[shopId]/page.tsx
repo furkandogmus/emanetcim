@@ -8,6 +8,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { buildShopLocalBusinessJsonLd } from "@/lib/shop-json-ld";
+import { buildBreadcrumbJsonLd } from "@/lib/breadcrumb-json-ld";
 import { routing } from "@/i18n/routing";
 
 export async function generateMetadata({
@@ -59,6 +60,12 @@ export default async function ShopDetailPage({
   const pricingRules = await getPricingRules();
 
   const jsonLd = buildShopLocalBusinessJsonLd(shop, locale);
+  const tCommon = await getTranslations({ locale, namespace: "Common" });
+  const breadcrumbLd = buildBreadcrumbJsonLd([
+    { name: tCommon("mobileNavHome"), path: `/${locale}` },
+    { name: tCommon("mobileNavSearch"), path: `/${locale}/search` },
+    { name: shop.name, path: `/${locale}/shop/${shop.id}` },
+  ]);
 
   const clientShop = {
     id: shop.id,
@@ -88,6 +95,10 @@ export default async function ShopDetailPage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       <ShopDetailClient
         shop={clientShop}

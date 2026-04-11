@@ -4,8 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { Cookie } from "lucide-react";
+import { COOKIE_CONSENT_STORAGE_KEY } from "@/lib/cookie-consent-storage-key";
 
-export const COOKIE_CONSENT_STORAGE_KEY = "bagajpark-cookie-consent";
+export { COOKIE_CONSENT_STORAGE_KEY };
 
 export type CookieConsentScope = "all" | "essential";
 

@@ -2,6 +2,10 @@
 
 import { useMemo, useState, type FormEvent } from "react";
 import {
+  PLAUSIBLE_EVENTS,
+  trackPlausibleEvent,
+} from "@/lib/plausible-events";
+import {
   loadStripe,
   type StripeExpressCheckoutElementConfirmEvent,
   type StripeExpressCheckoutElementReadyEvent,
@@ -83,6 +87,10 @@ function PayForm({
     if (paymentIntent?.status === "succeeded") {
       const fin = await finalizeStripeBookingPaymentAction(paymentIntent.id);
       if (fin.ok) {
+        trackPlausibleEvent(PLAUSIBLE_EVENTS.PaymentSucceeded, {
+          gateway: "stripe",
+          bookingId,
+        });
         router.push(`/bookings/${bookingId}`);
         router.refresh();
         return "navigated";
@@ -239,6 +247,24 @@ export default function BookingStripePayClient({
       <div>
         <h1 className="text-2xl font-black text-gray-900">{t("payBookingTitle")}</h1>
         <p className="mt-2 text-sm font-medium text-gray-500">{t("payBookingSubtitle")}</p>
+        <p className="mt-4 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+          <span>{t("checkoutSupportIntro")}</span>
+          <Link
+            href="/faq"
+            className="font-bold text-orange-600 hover:underline"
+          >
+            {t("checkoutSupportFaq")}
+          </Link>
+          <span aria-hidden className="text-gray-300">
+            ·
+          </span>
+          <Link
+            href="/contact"
+            className="font-bold text-orange-600 hover:underline"
+          >
+            {t("checkoutSupportContact")}
+          </Link>
+        </p>
       </div>
       <Elements stripe={stripePromise} options={elementsOptions}>
         <PayForm bookingId={bookingId} clientSecret={clientSecret} />

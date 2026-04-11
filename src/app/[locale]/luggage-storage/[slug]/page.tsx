@@ -8,6 +8,7 @@ import { getStorageCity, STORAGE_CITIES } from "@/lib/storage-cities";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { routing } from "@/i18n/routing";
 import { buildCityStorageJsonLd } from "@/lib/city-storage-json-ld";
+import { buildBreadcrumbJsonLd } from "@/lib/breadcrumb-json-ld";
 
 export function generateStaticParams() {
   return STORAGE_CITIES.map((c) => ({ slug: c.slug }));
@@ -74,6 +75,13 @@ export default async function CityLuggageStoragePage({
     description: t(`${slug}.metaDescription`),
     siteName: appName,
   });
+  const breadcrumbLd = buildBreadcrumbJsonLd([
+    { name: tCommon("mobileNavHome"), path: `/${locale}` },
+    {
+      name: t(`${slug}.headline`),
+      path: `/${locale}/luggage-storage/${slug}`,
+    },
+  ]);
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
@@ -91,6 +99,10 @@ export default async function CityLuggageStoragePage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
 
       <article className="mx-auto max-w-3xl px-6 py-12 md:py-16">

@@ -31,6 +31,15 @@ test.describe("SEO: robots ve sitemap", () => {
     expect(text).toContain("/de/luggage-storage/berlin");
     expect(text).toContain("/tr/become-partner");
   });
+
+  test("luggage-storage şehir sayfasında BreadcrumbList JSON-LD", async ({
+    request,
+  }) => {
+    const res = await request.get("/tr/luggage-storage/istanbul");
+    expect(res.ok()).toBeTruthy();
+    const html = await res.text();
+    expect(html).toContain("BreadcrumbList");
+  });
 });
 
 test.describe("Çerez onayı banner", () => {
