@@ -338,7 +338,7 @@ export default function PartnerClient({
   useEffect(() => {
     if (!scanResult) return;
     setCheckInPhase(scanResult.totalBags > 0 ? "photo" : "review");
-  }, [scanResult?.id]);
+  }, [scanResult]);
 
   useEffect(() => {
     if (!scanResult || scanResult.totalBags === 0 || checkInPhase !== "photo") return;
@@ -346,7 +346,7 @@ export default function PartnerClient({
       checkInPhotoAnchorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
     return () => cancelAnimationFrame(id);
-  }, [scanResult?.id, checkInPhase, scanResult]);
+  }, [scanResult, checkInPhase]);
 
   const handleScanResult = (result: string) => {
     void applyPreviewForCheckIn(result, true);

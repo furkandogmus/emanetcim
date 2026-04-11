@@ -89,7 +89,10 @@ async function startWithCamera(
 export default function QRScanner({ onResult, onClose }: QRScannerProps) {
   const html5Ref = useRef<Html5Qrcode | null>(null);
   const onResultRef = useRef(onResult);
-  onResultRef.current = onResult;
+
+  useLayoutEffect(() => {
+    onResultRef.current = onResult;
+  }, [onResult]);
 
   const [phase, setPhase] = useState<Phase>("starting");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -177,8 +180,12 @@ export default function QRScanner({ onResult, onClose }: QRScannerProps) {
   }, [stopAndClear]);
 
   useLayoutEffect(() => {
-    void runStart();
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (!cancelled) void runStart();
+    });
     return () => {
+      cancelled = true;
       runIdRef.current += 1;
       void stopAndClear();
       html5Ref.current = null;

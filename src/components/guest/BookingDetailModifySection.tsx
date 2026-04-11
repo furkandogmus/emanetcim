@@ -36,6 +36,7 @@ export default function BookingDetailModifySection({
       </button>
       {open ? (
         <BookingModifyModal
+          key={booking.id}
           booking={booking}
           pricingRules={pricingRules}
           onClose={() => setOpen(false)}

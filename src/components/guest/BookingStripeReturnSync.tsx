@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { finalizeStripeBookingPaymentAction } from "@/actions/stripe-booking-payment";
@@ -22,15 +22,13 @@ export default function BookingStripeReturnSync({
 }: Props) {
   const t = useTranslations("Guest");
   const router = useRouter();
-  const [failed, setFailed] = useState(false);
+  const redirectFailed =
+    redirectStatus === "failed" || redirectStatus === "canceled";
 
   useEffect(() => {
     if (!paymentIntentId) return;
 
-    if (redirectStatus === "failed" || redirectStatus === "canceled") {
-      setFailed(true);
-      return;
-    }
+    if (redirectFailed) return;
 
     let cancelled = false;
 
@@ -44,13 +42,13 @@ export default function BookingStripeReturnSync({
     return () => {
       cancelled = true;
     };
-  }, [bookingId, paymentIntentId, redirectStatus, router]);
+  }, [bookingId, paymentIntentId, redirectFailed, router]);
 
   if (!paymentIntentId) {
     return null;
   }
 
-  if (failed) {
+  if (redirectFailed) {
     return (
       <div
         role="alert"

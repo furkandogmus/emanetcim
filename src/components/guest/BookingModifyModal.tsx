@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { X, Calendar } from "lucide-react";
 import BagSelector from "@/components/guest/BagSelector";
@@ -53,22 +53,18 @@ export default function BookingModifyModal({
   const [bagS, setBagS] = useState(booking.bagCountS);
   const [bagM, setBagM] = useState(booking.bagCountM);
   const [bagXl, setBagXl] = useState(booking.bagCountXl);
-  const [checkInLocal, setCheckInLocal] = useState("");
-  const [checkOutLocal, setCheckOutLocal] = useState("");
-  const [ready, setReady] = useState(false);
+  const [checkInLocal, setCheckInLocal] = useState(() =>
+    toDatetimeLocalValue(new Date(booking.checkInTime)),
+  );
+  const [checkOutLocal, setCheckOutLocal] = useState(() =>
+    toDatetimeLocalValue(new Date(booking.checkOutTime)),
+  );
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-
-  useEffect(() => {
-    setCheckInLocal(toDatetimeLocalValue(new Date(booking.checkInTime)));
-    setCheckOutLocal(toDatetimeLocalValue(new Date(booking.checkOutTime)));
-    setReady(true);
-  }, [booking]);
 
   const checkInDate = parseDatetimeLocal(checkInLocal);
   const checkOutDate = parseDatetimeLocal(checkOutLocal);
   const windowOk =
-    ready &&
     checkInDate !== null &&
     checkOutDate !== null &&
     validateBookingStayWindow(checkInDate, checkOutDate, pricingRules);
@@ -252,7 +248,7 @@ export default function BookingModifyModal({
             ) : null}
           </div>
 
-          {ready && !windowOk ? (
+          {!windowOk ? (
             <p className="text-xs font-bold text-orange-600">
               {t("checkoutDatesInvalid", { max: pricingRules.maxStayDays })}
             </p>
@@ -276,7 +272,6 @@ export default function BookingModifyModal({
             onClick={() => void handleSubmit()}
             disabled={
               saving ||
-              !ready ||
               !windowOk ||
               bagS + bagM + bagXl < 1 ||
               (booking.status === "PAID" && delta > 0.005)
