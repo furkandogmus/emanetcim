@@ -958,7 +958,8 @@
     "disputeNotReady": "Reklamację można złożyć po złożeniu lub wydaniu bagażu.",
     "reviewNotReady": "Opinię można dodać po zakończeniu wydania.",
     "verificationCooldown": "Poczekaj {seconds} sekund przed wysłaniem kolejnego e-maila.",
-    "maxVerificationAttempts": "Zbyt wiele prób. Skontaktuj się z naszym zespołem wsparcia."
+    "maxVerificationAttempts": "Zbyt wiele prób. Skontaktuj się z naszym zespołem wsparcia.",
+    "invalidTrPhone": "Podaj prawidłowy turecki numer komórkowy (10 cyfr, zaczyna się od 5)."
   },
   "Emails": {
     "verificationSubject": "Potwierdź swój e-mail",

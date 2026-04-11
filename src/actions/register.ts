@@ -10,6 +10,7 @@ import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
 import { isDisposableEmail } from "@/lib/disposable-emails";
 import { getLocale } from "next-intl/server";
+import { normalizeTrGsm10 } from "@/lib/netgsm";
 
 const guestSchema = z.object({
   email: z.string().email(),
@@ -20,7 +21,7 @@ const guestSchema = z.object({
 const partnerSchema = z.object({
   name: z.string().min(2),
   email: z.string().email().optional().or(z.literal("")),
-  phone: z.string().min(10, "Telefon numarası en az 10 karakter olmalıdır"),
+  phone: z.string().min(1),
   password: z.string().min(6),
   shopName: z.string().min(2).max(200),
   shopAddress: z.string().min(5).max(500),
@@ -103,8 +104,11 @@ export async function registerPartnerApplicationAction(data: unknown) {
     }
   }
 
-  const phone = parsed.data.phone.trim();
-  const phoneExists = await prisma.user.findUnique({ where: { phone } });
+  const phoneNorm = normalizeTrGsm10(parsed.data.phone);
+  if (!phoneNorm) {
+    return { success: false as const, error: "Errors.invalidTrPhone" };
+  }
+  const phoneExists = await prisma.user.findUnique({ where: { phone: phoneNorm } });
   if (phoneExists) {
     return { success: false as const, error: "Errors.phoneAlreadyRegistered" };
   }
@@ -117,7 +121,7 @@ export async function registerPartnerApplicationAction(data: unknown) {
         email: email || null,
         emailVerified: email ? new Date() : null,
         name: parsed.data.name.trim(),
-        phone: phone,
+        phone: phoneNorm,
         role: Role.PARTNER,
         passwordHash,
         lastIp: ip,

@@ -259,7 +259,7 @@ export async function updatePartnerPhoneAction(phone: string) {
   if (trimmed && !normalized) {
     return {
       success: false as const,
-      error: "Errors.invalidData",
+      error: "Errors.invalidTrPhone",
     };
   }
 

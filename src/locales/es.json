@@ -958,7 +958,8 @@
     "disputeNotReady": "Las disputas solo se pueden abrir después de que se haya dejado o entregado el equipaje.",
     "reviewNotReady": "Las revisiones sólo se pueden realizar una vez completada la entrega.",
     "verificationCooldown": "Please wait {seconds} seconds before sending another email.",
-    "maxVerificationAttempts": "Too many attempts. Please contact our support team."
+    "maxVerificationAttempts": "Too many attempts. Please contact our support team.",
+    "invalidTrPhone": "Introduce un móvil turco válido (10 dígitos que empiezan por 5)."
   },
   "Emails": {
     "verificationSubject": "Verifique su correo electrónico",

@@ -958,7 +958,8 @@
     "disputeNotReady": "Streitigkeiten können erst eröffnet werden, nachdem das Gepäck aufgegeben oder geliefert wurde.",
     "reviewNotReady": "Bewertungen können erst nach Abschluss der Lieferung abgegeben werden.",
     "verificationCooldown": "Please wait {seconds} seconds before sending another email.",
-    "maxVerificationAttempts": "Too many attempts. Please contact our support team."
+    "maxVerificationAttempts": "Too many attempts. Please contact our support team.",
+    "invalidTrPhone": "Geben Sie eine gültige türkische Mobilnummer ein (10 Ziffern, beginnend mit 5)."
   },
   "Emails": {
     "verificationSubject": "Bestätigen Sie Ihre E-Mail",

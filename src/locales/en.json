@@ -958,7 +958,8 @@
     "disputeNotReady": "Disputes can only be opened after the luggage is dropped off or delivered.",
     "reviewNotReady": "Reviews can only be made after the delivery is complete.",
     "verificationCooldown": "Please wait {seconds} seconds before sending another email.",
-    "maxVerificationAttempts": "Too many attempts. Please contact our support team."
+    "maxVerificationAttempts": "Too many attempts. Please contact our support team.",
+    "invalidTrPhone": "Enter a valid Turkish mobile number (10 digits starting with 5, e.g. 05xx or +90 5xx)."
   },
   "Emails": {
     "verificationSubject": "Verify Your Email",
