@@ -1,6 +1,8 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import type { Metadata } from "next";
+import { getSiteBaseUrl } from "@/lib/site-urls";
+import { alternatesForPath } from "@/lib/seo-alternates";
 import { Building2, Users } from "lucide-react";
 
 export async function generateMetadata({
@@ -10,7 +12,20 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "MarketingHotels" });
-  return { title: t("metaTitle") };
+  const base = getSiteBaseUrl();
+  const title = t("metaTitle");
+  const description = t("heroSubtitle");
+  return {
+    title,
+    description,
+    alternates: alternatesForPath(locale, "/hotels"),
+    openGraph: {
+      title,
+      description,
+      url: `${base}/${locale}/hotels`,
+      type: "website",
+    },
+  };
 }
 
 export default async function HotelsPage({

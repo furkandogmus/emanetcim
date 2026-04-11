@@ -1,6 +1,26 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Heart, Target, Rocket, Users, ShieldCheck, Zap } from "lucide-react";
 import { Link } from "@/i18n/routing";
+import type { Metadata } from "next";
+import { alternatesForPath } from "@/lib/seo-alternates";
+import { getGuestStaticSeo } from "@/lib/guest-static-seo";
+import { getSiteBaseUrl } from "@/lib/site-urls";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const { title, description } = getGuestStaticSeo(locale, "about");
+  const base = getSiteBaseUrl();
+  return {
+    title,
+    description,
+    alternates: alternatesForPath(locale, "/about"),
+    openGraph: { title, description, url: `${base}/${locale}/about` },
+  };
+}
 
 export default async function AboutPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;

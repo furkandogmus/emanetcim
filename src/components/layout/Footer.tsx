@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { ShieldCheck, MapPin, Globe, MessageCircle, Heart } from "lucide-react";
 import { STORAGE_CITIES } from "@/lib/storage-cities";
+import { useSession } from "next-auth/react";
 
 /**
  * Footer - Kurumsal Bilgi ve Navigasyon Çubuğu
@@ -12,6 +13,9 @@ export default function Footer() {
   const t = useTranslations("Footer");
   const tCommon = useTranslations("Common");
   const tCity = useTranslations("CityStorage");
+  const { data: session } = useSession();
+  const hideGuestBookingNav =
+    session?.user?.role === "PARTNER" || session?.user?.role === "ADMIN";
   const currentYear = new Date().getFullYear();
 
   return (
@@ -77,11 +81,13 @@ export default function Footer() {
           <div>
             <h4 className="text-xs font-black uppercase tracking-widest text-gray-900 mb-6">{t("corporate")}</h4>
             <ul className="flex flex-col gap-4 text-sm font-bold text-gray-400">
-              <li>
-                <Link href="/partners" className="hover:text-orange-600 transition-colors">
-                  {t("becomePartner")}
-                </Link>
-              </li>
+              {!hideGuestBookingNav && (
+                <li>
+                  <Link href="/partners" className="hover:text-orange-600 transition-colors">
+                    {t("becomePartner")}
+                  </Link>
+                </li>
+              )}
               <li>
                 <Link href="/terms" className="hover:text-orange-600 transition-colors">
                   {t("terms")}
@@ -122,30 +128,32 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mb-16 pb-16 border-b border-gray-100">
-          <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-            <h4 className="text-xs font-black uppercase tracking-widest text-gray-900">
-              {t("citiesTitle")}
-            </h4>
-            <Link
-              href="/luggage-storage"
-              className="text-[10px] font-black uppercase tracking-widest text-orange-600 hover:underline"
-            >
-              {t("citiesViewAll")}
-            </Link>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {STORAGE_CITIES.map((c) => (
+        {!hideGuestBookingNav && (
+          <div className="mb-16 pb-16 border-b border-gray-100">
+            <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+              <h4 className="text-xs font-black uppercase tracking-widest text-gray-900">
+                {t("citiesTitle")}
+              </h4>
               <Link
-                key={c.slug}
-                href={`/luggage-storage/${c.slug}`}
-                className="rounded-full border border-gray-100 bg-gray-50 px-3 py-1.5 text-xs font-bold text-gray-600 transition hover:border-orange-200 hover:bg-white hover:text-orange-600"
+                href="/luggage-storage"
+                className="text-[10px] font-black uppercase tracking-widest text-orange-600 hover:underline"
               >
-                {tCity(`${c.slug}.label`)}
+                {t("citiesViewAll")}
               </Link>
-            ))}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {STORAGE_CITIES.map((c) => (
+                <Link
+                  key={c.slug}
+                  href={`/luggage-storage/${c.slug}`}
+                  className="rounded-full border border-gray-100 bg-gray-50 px-3 py-1.5 text-xs font-bold text-gray-600 transition hover:border-orange-200 hover:bg-white hover:text-orange-600"
+                >
+                  {tCity(`${c.slug}.label`)}
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="pt-10 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-xs font-bold text-gray-400">

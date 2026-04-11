@@ -2,6 +2,26 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import LoginClient from "./LoginClient";
 import { setRequestLocale } from "next-intl/server";
+import type { Metadata } from "next";
+import { alternatesForPath } from "@/lib/seo-alternates";
+import { getGuestStaticSeo } from "@/lib/guest-static-seo";
+import { getSiteBaseUrl } from "@/lib/site-urls";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const { title, description } = getGuestStaticSeo(locale, "login");
+  const base = getSiteBaseUrl();
+  return {
+    title,
+    description,
+    alternates: alternatesForPath(locale, "/login"),
+    openGraph: { title, description, url: `${base}/${locale}/login` },
+  };
+}
 
 export default async function LoginPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;

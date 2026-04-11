@@ -14,13 +14,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = getSiteBaseUrl();
 
   // 1. Statik Lokalize Sayfalar
-  const staticPages = buildLocalizedUrls().map(({ url, path }) => {
+  const staticPages = buildLocalizedUrls().map(({ url, path, locale }) => {
     const isHome = path === "";
+    const homePriority = locale === routing.defaultLocale ? 1 : 0.92;
     return {
       url,
       lastModified: now,
       changeFrequency: isHome ? "daily" : "weekly",
-      priority: isHome ? 1 : path === "/search" ? 0.9 : 0.7,
+      priority: isHome ? homePriority : path === "/search" ? 0.9 : 0.7,
     } satisfies MetadataRoute.Sitemap[number];
   });
 

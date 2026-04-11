@@ -4,12 +4,12 @@ import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
 });
 
 export const viewport: Viewport = {
@@ -33,13 +33,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       default: t("title"),
     },
     description: t("description"),
-    keywords: t("keywords").split(",").map(k => k.trim()),
-    alternates: {
-      canonical: "/",
-      languages: Object.fromEntries(
-        routing.locales.map((loc) => [loc, `/${loc}`]),
-      ),
-    },
+    keywords: t("keywords").split(",").map((k) => k.trim()),
     authors: [{ name: "BagajPark", url: "https://bagajpark.com" }],
     openGraph: {
       type: "website",
@@ -70,7 +64,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 import {NextIntlClientProvider} from 'next-intl';
 import {getMessages, getTranslations} from 'next-intl/server';
 import {notFound} from 'next/navigation';
-import {routing} from '@/i18n/routing';
+import { routing } from "@/i18n/routing";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { openGraphLocaleForUiLocale } from "@/lib/i18n-open-graph";
 import PWARegister from '@/components/PWARegister';
@@ -101,11 +95,13 @@ export default async function RootLayout({
   const messages = await getMessages();
   const base = getSiteBaseUrl();
 
+  const htmlLang = locale === "zh" ? "zh-Hans" : locale;
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "BagajPark",
     "url": `${base}/${locale}`,
+    "inLanguage": htmlLang,
     "description": tSEO("description"),
     "potentialAction": {
       "@type": "SearchAction",
@@ -123,12 +119,16 @@ export default async function RootLayout({
     "name": "BagajPark",
     "url": base,
     "logo": `${base}/icons/icon-512x512.png`,
-    "contactPoint": {
+    "areaServed": {
+      "@type": "Country",
+      name: "Turkey",
+    },
+    contactPoint: {
       "@type": "ContactPoint",
-      "telephone": "+90-542-241-55-97",
-      "contactType": "customer service",
-      "availableLanguage": ["Turkish", "English"]
-    }
+      telephone: "+90-542-241-55-97",
+      contactType: "customer service",
+      availableLanguage: ["Turkish", "English"],
+    },
   };
 
   return (

@@ -7,8 +7,24 @@ import { STORAGE_CITIES } from "@/lib/storage-cities";
 import TestimonialCarousel from "@/components/guest/TestimonialCarousel";
 import ComparisonTable from "@/components/guest/ComparisonTable";
 import BagProtection from "@/components/guest/BagProtection";
+import type { Metadata } from "next";
+import { getSiteBaseUrl } from "@/lib/site-urls";
+import { alternatesForPath } from "@/lib/seo-alternates";
 
 export const revalidate = 120;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const base = getSiteBaseUrl();
+  return {
+    alternates: alternatesForPath(locale, ""),
+    openGraph: { url: `${base}/${locale}` },
+  };
+}
 
 /**
  * Guest Landing Page - Turist Karşılama Sayfası

@@ -7,7 +7,8 @@ import {
   SEARCH_NEARBY_RADIUS_KM,
   defaultSearchStayWindow,
 } from '@/lib/search-defaults';
-import { getSiteBaseUrl } from '@/lib/site-urls';
+import { getSiteBaseUrl } from "@/lib/site-urls";
+import { alternatesForPath } from "@/lib/seo-alternates";
 
 function parseCenter(
   latRaw: string | undefined,
@@ -42,13 +43,15 @@ export async function generateMetadata({
   const description = q
     ? t("searchDescription", { query: q })
     : t("searchDescriptionBrowse");
+  const searchCanonical = `${base}/${locale}/search`;
   return {
     title,
     description,
+    alternates: alternatesForPath(locale, "/search"),
     openGraph: {
       title,
       description,
-      url: `${base}/${locale}/search${q ? `?q=${encodeURIComponent(q)}` : ""}`,
+      url: searchCanonical,
     },
   };
 }

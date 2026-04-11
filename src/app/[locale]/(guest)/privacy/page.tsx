@@ -1,5 +1,25 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Lock, ShieldCheck } from "lucide-react";
+import type { Metadata } from "next";
+import { alternatesForPath } from "@/lib/seo-alternates";
+import { getGuestStaticSeo } from "@/lib/guest-static-seo";
+import { getSiteBaseUrl } from "@/lib/site-urls";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const { title, description } = getGuestStaticSeo(locale, "privacy");
+  const base = getSiteBaseUrl();
+  return {
+    title,
+    description,
+    alternates: alternatesForPath(locale, "/privacy"),
+    openGraph: { title, description, url: `${base}/${locale}/privacy` },
+  };
+}
 
 export default async function PrivacyPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;

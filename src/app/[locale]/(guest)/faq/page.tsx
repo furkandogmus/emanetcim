@@ -2,6 +2,26 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ChevronRight, ShieldCheck } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { buildFaqPageJsonLd } from "@/lib/faq-json-ld";
+import type { Metadata } from "next";
+import { alternatesForPath } from "@/lib/seo-alternates";
+import { getGuestStaticSeo } from "@/lib/guest-static-seo";
+import { getSiteBaseUrl } from "@/lib/site-urls";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const { title, description } = getGuestStaticSeo(locale, "faq");
+  const base = getSiteBaseUrl();
+  return {
+    title,
+    description,
+    alternates: alternatesForPath(locale, "/faq"),
+    openGraph: { title, description, url: `${base}/${locale}/faq` },
+  };
+}
 
 export default async function FaqPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
