@@ -4,6 +4,7 @@ import { routing } from "@/i18n/routing";
 export const SITEMAP_PATHS: readonly string[] = [
   "",
   "/search",
+  "/blog",
   "/about",
   "/contact",
   "/faq",
@@ -12,6 +13,7 @@ export const SITEMAP_PATHS: readonly string[] = [
   "/terms",
   "/kvkk",
   "/login",
+  "/register",
 ];
 
 export function getSiteBaseUrl(): string {

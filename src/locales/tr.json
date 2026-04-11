@@ -816,6 +816,56 @@
     "success": "Yorumunuz başarıyla kaydedildi.",
     "error": "Yorum kaydedilemedi."
   },
+  "CityStorage": {
+    "istanbul": {
+      "metaTitle": "İstanbul valiz emanet | BagajPark",
+      "metaDescription": "İstanbul’da güvenli valiz ve bagaj emanet noktaları. Turistik bölgelere yakın depolama; online rezervasyon.",
+      "headline": "İstanbul’da valiz emanet",
+      "intro": "Tarihi yarımada, Galata ve çevresinde güvenilir emanet noktalarımızla valizinizi bırakın, şehri yüklerin olmadan keşfedin.",
+      "searchQuery": "Galata",
+      "cta": "İstanbul’da dükkanları aç"
+    },
+    "ankara": {
+      "metaTitle": "Ankara valiz emanet | BagajPark",
+      "metaDescription": "Ankara’da güvenli bagaj bırakma ve valiz emanet. Müzeler ve kent merkezine yakın noktalar.",
+      "headline": "Ankara’da valiz emanet",
+      "intro": "Kızılay, Çankaya ve merkez hatları üzerinde emanet noktalarımızı haritada görün; tarihi ve iş bölgelerinde pratik depolama.",
+      "searchQuery": "Kızılay",
+      "cta": "Ankara’da dükkanları aç"
+    },
+    "izmir": {
+      "metaTitle": "İzmir valiz emanet | BagajPark",
+      "metaDescription": "İzmir’de valiz emanet ve bagaj depolama. Konak, Alsancak ve sahil hattına yakın güvenli noktalar.",
+      "headline": "İzmir’de valiz emanet",
+      "intro": "Sahil ve kordon çevresinde gezerken valizinizi güvenle bırakın; uygun noktaları haritada keşfedin.",
+      "searchQuery": "Konak",
+      "cta": "İzmir’de dükkanları aç"
+    },
+    "antalya": {
+      "metaTitle": "Antalya valiz emanet | BagajPark",
+      "metaDescription": "Antalya’da turistler için valiz emanet. Kaleiçi ve plaj bölgelerine yakın bagaj depolama.",
+      "headline": "Antalya’da valiz emanet",
+      "intro": "Deniz tatili ve şehir turu arasında valizinizi emanet edin; çıkış saatlerinizi rahatça yönetin.",
+      "searchQuery": "Kaleiçi",
+      "cta": "Antalya’da dükkanları aç"
+    },
+    "bodrum": {
+      "metaTitle": "Bodrum valiz emanet | BagajPark",
+      "metaDescription": "Bodrum’da güvenli bagaj ve valiz emanet. Marina ve plaj çevresi için pratik depolama.",
+      "headline": "Bodrum’da valiz emanet",
+      "intro": "Tekne turu veya gece hayatı öncesi valizinizi güvenli noktalara bırakın; rezervasyonunuzu online yapın.",
+      "searchQuery": "Marina",
+      "cta": "Bodrum’da dükkanları aç"
+    },
+    "cappadocia": {
+      "metaTitle": "Kapadokya valiz emanet | BagajPark",
+      "metaDescription": "Kapadokya’da balon ve vadiler arasında valiz emanet. Göreme ve Ürgüp çevresi için bagaj depolama.",
+      "headline": "Kapadokya’da valiz emanet",
+      "intro": "Gün doğumu turları ve yürüyüşler için valizinizi hafifletin; bölgedeki emanet noktalarımızı haritada bulun.",
+      "searchQuery": "Göreme",
+      "cta": "Kapadokya’da dükkanları aç"
+    }
+  },
   "AdminStatus": {
     "title": "Platform Teknik Denetim",
     "subtitle": "Sistem Durumu ve Entegrasyon Raporu",

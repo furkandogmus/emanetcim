@@ -23,6 +23,10 @@ test.describe("SEO: robots ve sitemap", () => {
     expect(text).toContain("http://localhost:3000/en");
     expect(text).toContain("/tr/search");
     expect(text).toContain("/en/search");
+    expect(text).toContain("/tr/blog");
+    expect(text).toContain("/en/register");
+    expect(text).toContain("/tr/luggage-storage/istanbul");
+    expect(text).toContain("/en/luggage-storage/istanbul");
   });
 });
 

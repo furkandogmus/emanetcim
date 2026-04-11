@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { buildLocalizedUrls, getSiteBaseUrl } from "@/lib/site-urls";
 import prisma from "@/lib/db";
 import { routing } from "@/i18n/routing";
+import { STORAGE_CITIES } from "@/lib/storage-cities";
 
 export const dynamic = 'force-dynamic';
 
@@ -23,6 +24,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     } satisfies MetadataRoute.Sitemap[number];
   });
 
+  const cityStorageEntries: MetadataRoute.Sitemap = [];
+  for (const locale of routing.locales) {
+    for (const c of STORAGE_CITIES) {
+      cityStorageEntries.push({
+        url: `${base}/${locale}/luggage-storage/${c.slug}`,
+        lastModified: now,
+        changeFrequency: "weekly",
+        priority: 0.75,
+      });
+    }
+  }
+
   const shopEntries: MetadataRoute.Sitemap = [];
   try {
     // 2. Dinamik Dükkan Sayfaları (Checkout Akışı)
@@ -34,10 +47,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     for (const shop of shops) {
       for (const locale of routing.locales) {
         shopEntries.push({
+          url: `${base}/${locale}/shop/${shop.id}`,
+          lastModified: shop.updatedAt,
+          changeFrequency: "weekly",
+          priority: 0.68,
+        });
+        shopEntries.push({
           url: `${base}/${locale}/checkout/${shop.id}`,
           lastModified: shop.updatedAt,
           changeFrequency: "weekly",
-          priority: 0.6,
+          priority: 0.52,
         });
       }
     }
@@ -64,5 +83,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("Sitemap generation error (Blog):", error);
   }
 
-  return [...staticPages, ...shopEntries, ...blogEntries];
+  return [...staticPages, ...cityStorageEntries, ...shopEntries, ...blogEntries];
 }

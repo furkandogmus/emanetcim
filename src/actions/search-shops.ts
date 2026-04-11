@@ -12,6 +12,8 @@ export async function refreshSearchShopsAction(input: {
   checkInIso: string;
   checkOutIso: string;
   requestedBags: number;
+  centerLat?: number;
+  centerLng?: number;
 }) {
   const rules = await getPricingRules();
   const checkIn = new Date(input.checkInIso);
@@ -23,18 +25,27 @@ export async function refreshSearchShopsAction(input: {
 
   const bags = Math.max(1, Math.floor(Number(input.requestedBags) || 1));
 
+  const lat =
+    input.centerLat != null && Number.isFinite(input.centerLat)
+      ? input.centerLat
+      : SEARCH_DEFAULT_CENTER.lat;
+  const lng =
+    input.centerLng != null && Number.isFinite(input.centerLng)
+      ? input.centerLng
+      : SEARCH_DEFAULT_CENTER.lng;
+
   const [nearby, all] = await Promise.all([
     shopService.findShopsForSearch({
-      centerLat: SEARCH_DEFAULT_CENTER.lat,
-      centerLng: SEARCH_DEFAULT_CENTER.lng,
+      centerLat: lat,
+      centerLng: lng,
       radiusKm: SEARCH_NEARBY_RADIUS_KM,
       checkIn,
       checkOut,
       requestedBags: bags,
     }),
     shopService.findShopsForSearch({
-      centerLat: SEARCH_DEFAULT_CENTER.lat,
-      centerLng: SEARCH_DEFAULT_CENTER.lng,
+      centerLat: lat,
+      centerLng: lng,
       radiusKm: null,
       checkIn,
       checkOut,

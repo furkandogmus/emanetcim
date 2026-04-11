@@ -6,6 +6,7 @@ import { getPricingRules } from "@/lib/platform-settings";
 import { moneyToNumber } from "@/lib/money";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { getSiteBaseUrl } from "@/lib/site-urls";
 
 export async function generateMetadata({
   params,
@@ -18,9 +19,13 @@ export async function generateMetadata({
   if (!shop || !shop.isActive) {
     return { title: t("shopDetailNotFoundTitle") };
   }
+  const base = getSiteBaseUrl();
   return {
     title: `${shop.name} — ${t("shopDetailTitleSuffix")}`,
     description: shop.address ?? t("shopDetailMetaFallback"),
+    alternates: {
+      canonical: `${base}/${locale}/shop/${shopId}`,
+    },
   };
 }
 
