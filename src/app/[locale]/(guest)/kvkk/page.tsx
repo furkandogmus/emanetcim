@@ -1,5 +1,25 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ShieldAlert, Fingerprint } from "lucide-react";
+import type { Metadata } from "next";
+import { alternatesForPath } from "@/lib/seo-alternates";
+import { getGuestStaticSeo } from "@/lib/guest-static-seo";
+import { getSiteBaseUrl } from "@/lib/site-urls";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const { title, description } = getGuestStaticSeo(locale, "kvkk");
+  const base = getSiteBaseUrl();
+  return {
+    title,
+    description,
+    alternates: alternatesForPath(locale, "/kvkk"),
+    openGraph: { title, description, url: `${base}/${locale}/kvkk` },
+  };
+}
 
 export default async function KvkkPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;

@@ -1,16 +1,28 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import prisma from "@/lib/db";
 import { Link } from "@/i18n/routing";
-import { Metadata } from "next";
+import type { Metadata } from "next";
+import { getSiteBaseUrl } from "@/lib/site-urls";
+import { alternatesForPath } from "@/lib/seo-alternates";
 import { Clock, User, ChevronRight } from "lucide-react";
 import Image from "next/image";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "Guest" });
+  const base = getSiteBaseUrl();
+  const title = t("blogTitle");
+  const description = t("blogDescription");
   return {
-    title: t("blogTitle"),
-    description: t("blogDescription"),
+    title,
+    description,
+    alternates: alternatesForPath(locale, "/blog"),
+    openGraph: {
+      title,
+      description,
+      url: `${base}/${locale}/blog`,
+      type: "website",
+    },
   };
 }
 

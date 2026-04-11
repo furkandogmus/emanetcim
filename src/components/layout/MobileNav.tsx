@@ -1,15 +1,53 @@
 "use client";
 
-import { Home, MapPin, CalendarDays } from "lucide-react";
+import {
+  Home,
+  MapPin,
+  CalendarDays,
+  Store,
+  LayoutDashboard,
+  Shield,
+} from "lucide-react";
 import { Link, usePathname } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import clsx from "clsx";
+import { useSession } from "next-auth/react";
+import type { LucideIcon } from "lucide-react";
 
-const items = [
-  { href: "/", labelKey: "mobileNavHome" as const, Icon: Home },
-  { href: "/search", labelKey: "mobileNavSearch" as const, Icon: MapPin },
-  { href: "/bookings", labelKey: "mobileNavBookings" as const, Icon: CalendarDays },
-];
+type MobileNavItem = {
+  href: string;
+  labelKey:
+    | "mobileNavHome"
+    | "mobileNavSearch"
+    | "mobileNavBookings"
+    | "mobileNavPartnerPanel"
+    | "mobileNavPartnerList"
+    | "mobileNavAdminPanel"
+    | "mobileNavAdminDashboard";
+  Icon: LucideIcon;
+};
+
+function navItemsForRole(role: string | undefined): MobileNavItem[] {
+  if (role === "PARTNER") {
+    return [
+      { href: "/", labelKey: "mobileNavHome", Icon: Home },
+      { href: "/partner", labelKey: "mobileNavPartnerPanel", Icon: Store },
+      { href: "/partner/bookings", labelKey: "mobileNavPartnerList", Icon: CalendarDays },
+    ];
+  }
+  if (role === "ADMIN") {
+    return [
+      { href: "/", labelKey: "mobileNavHome", Icon: Home },
+      { href: "/admin", labelKey: "mobileNavAdminPanel", Icon: Shield },
+      { href: "/admin/dashboard", labelKey: "mobileNavAdminDashboard", Icon: LayoutDashboard },
+    ];
+  }
+  return [
+    { href: "/", labelKey: "mobileNavHome", Icon: Home },
+    { href: "/search", labelKey: "mobileNavSearch", Icon: MapPin },
+    { href: "/bookings", labelKey: "mobileNavBookings", Icon: CalendarDays },
+  ];
+}
 
 function pathMatchesHref(pathname: string | null, href: string): boolean {
   const p = pathname ?? "";
@@ -22,6 +60,8 @@ function pathMatchesHref(pathname: string | null, href: string): boolean {
 export default function MobileNav() {
   const pathname = usePathname();
   const t = useTranslations("Common");
+  const { data: session } = useSession();
+  const items = navItemsForRole(session?.user?.role);
 
   if ((pathname ?? "").includes("/login")) return null;
 

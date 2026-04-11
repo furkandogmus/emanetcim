@@ -22,20 +22,24 @@
     "mobileNavHome": "Ana sayfa",
     "mobileNavSearch": "Ara",
     "mobileNavBookings": "Rezervasyonlar",
+    "mobileNavPartnerPanel": "Dükkan",
+    "mobileNavPartnerList": "Liste",
+    "mobileNavAdminPanel": "Panel",
+    "mobileNavAdminDashboard": "Özet",
     "pwaInstallTitle": "BagajPark’ı yükle",
     "pwaInstallBody": "Ana ekrana ekleyerek daha hızlı erişin.",
     "pwaInstallCta": "Yükle",
     "pwaInstallDismiss": "Şimdi değil"
   },
   "SEO": {
-    "title": "BagajPark | Valizini Güvenle Bırak, Özgürce Gez",
-    "description": "Türkiye'nin en yaygın ve güvenilir yerel emanet ağı. Valizini güvenli noktalara bırak, şehri yüklerin olmadan keşfet.",
-    "keywords": "valiz emanet, bagaj bırakma, istanbul luggage storage, bagajpark, emanet noktası, güvenli bagaj, esnaf emanet",
-    "ogTitle": "BagajPark - Güvenli Bagaj Ağı",
-    "ogDescription": "Sana en yakın BagajPark dükkanını bul ve valizini güvenle bırak.",
+    "title": "BagajPark | Valiz Saklama ve Güvenli Bagaj Emaneti",
+    "description": "Türkiye genelinde yerel esnafla valiz saklama ve bagaj emanet. İstanbul, Ankara, İzmir ve tatil bölgelerinde haritadan nokta seç, online öde, mühürlü teslim. Havalimanı ve otel çıkışına alternatif güvenli bagaj bırakma.",
+    "keywords": "valiz saklama, bagaj emanet, valiz bırakma, istanbul valiz emanet, bagaj bırakma yeri, güvenli bagaj saklama, emanet dolabı, turistik bölge valiz, bagajpark, esnaf emanet noktası, günlük bagaj",
+    "ogTitle": "BagajPark — Türkiye’nin Valiz Saklama Ağı",
+    "ogDescription": "Yakınındaki emanet noktasını bul; valizini güvenle bırak, şehri rahat gez. Online rezervasyon ve şeffaf fiyat.",
     "manifestName": "BagajPark | Valizini Güvenle Bırak",
     "manifestShortName": "BagajPark",
-    "manifestDescription": "Türkiye'nin en yaygın yerel emanet noktası ağı."
+    "manifestDescription": "Yerel esnafla güvenli valiz saklama ve bagaj emanet; haritadan nokta seç, online öde."
   },
   "Partner": {
     "scanQr": "MÜHÜRLE VE EMANET AL",

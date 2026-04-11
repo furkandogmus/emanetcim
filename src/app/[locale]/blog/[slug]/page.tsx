@@ -1,22 +1,30 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import prisma from "@/lib/db";
 import { Link } from "@/i18n/routing";
-import { Metadata } from "next";
+import type { Metadata } from "next";
+import { getSiteBaseUrl } from "@/lib/site-urls";
 import { Clock, User, ArrowLeft, Share2 } from "lucide-react";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; slug: string }> }): Promise<Metadata> {
-  const { slug } = await params;
+  const { locale, slug } = await params;
   const post = await prisma.blogPost.findUnique({ where: { slug } });
-  
+
   if (!post) return { title: "Not Found" };
 
+  const base = getSiteBaseUrl();
+  const description = post.excerpt || post.content.substring(0, 160).replace(/<[^>]*>/g, "");
+  const canonical = `${base}/${locale}/blog/${slug}`;
   return {
     title: post.title,
-    description: post.excerpt || post.content.substring(0, 160).replace(/<[^>]*>/g, ""),
+    description,
+    alternates: { canonical },
     openGraph: {
       type: "article",
+      title: post.title,
+      description,
+      url: canonical,
       images: post.coverImage ? [post.coverImage] : [],
       publishedTime: post.createdAt.toISOString(),
       authors: [post.authorName],
