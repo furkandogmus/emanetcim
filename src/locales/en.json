@@ -138,7 +138,10 @@
     "trustStatStays": "Completed storage sessions",
     "trustStatReviews": "Guest reviews",
     "trustStatAvgRating": "Average rating",
+    "cityHubTitle": "Popular cities",
+    "cityHubIntro": "Luggage storage guides and nearby shops on the map.",
     "checkout": "Checkout & Confirm",
+    "checkoutPageTitle": "{shopName} — Checkout",
     "selectBags": "Select Number of Bags",
     "stayDuration": "Storage duration",
     "checkoutCheckInLabel": "Drop-off (check-in)",
@@ -233,6 +236,8 @@
     "cityFallback": "Istanbul",
     "searchTitle": "{query} Nearby Storage Points",
     "searchDescription": "Find secure and insured luggage storage locations in the {query} area.",
+    "searchTitleBrowse": "Find luggage storage | Map",
+    "searchDescriptionBrowse": "Discover nearby secure, insured luggage storage on the map; filter by dates and availability.",
     "blogTitle": "BagajPark Blog",
     "blogSubtitle": "Travel guides and luggage tips for Istanbul and beyond.",
     "backToBlog": "Back to Blog",
@@ -649,7 +654,8 @@
     "ariaHome": "Home",
     "ariaContact": "Contact",
     "ariaEmail": "Email",
-    "corporate": "Corporate"
+    "corporate": "Corporate",
+    "citiesTitle": "Popular cities"
   },
   "Contact": {
     "title": "Contact Us",
@@ -803,6 +809,7 @@
   },
   "CityStorage": {
     "istanbul": {
+      "label": "Istanbul",
       "metaTitle": "Luggage storage Istanbul | BagajPark",
       "metaDescription": "Secure luggage storage in Istanbul near top sights. Book online and explore the city hands-free.",
       "headline": "Luggage storage in Istanbul",
@@ -811,6 +818,7 @@
       "cta": "Open shops in Istanbul"
     },
     "ankara": {
+      "label": "Ankara",
       "metaTitle": "Luggage storage Ankara | BagajPark",
       "metaDescription": "Safe baggage storage in Ankara near museums and the city centre. Simple online booking.",
       "headline": "Luggage storage in Ankara",
@@ -819,6 +827,7 @@
       "cta": "Open shops in Ankara"
     },
     "izmir": {
+      "label": "Izmir",
       "metaTitle": "Luggage storage Izmir | BagajPark",
       "metaDescription": "Luggage storage in Izmir near Konak, Alsancak and the waterfront. Travel lighter along the coast.",
       "headline": "Luggage storage in Izmir",
@@ -827,6 +836,7 @@
       "cta": "Open shops in Izmir"
     },
     "antalya": {
+      "label": "Antalya",
       "metaTitle": "Luggage storage Antalya | BagajPark",
       "metaDescription": "Tourist-friendly luggage storage in Antalya near Kaleiçi and beaches. Book in a few taps.",
       "headline": "Luggage storage in Antalya",
@@ -835,6 +845,7 @@
       "cta": "Open shops in Antalya"
     },
     "bodrum": {
+      "label": "Bodrum",
       "metaTitle": "Luggage storage Bodrum | BagajPark",
       "metaDescription": "Secure bag storage in Bodrum near the marina and beaches for boats, nights out and day trips.",
       "headline": "Luggage storage in Bodrum",
@@ -843,6 +854,7 @@
       "cta": "Open shops in Bodrum"
     },
     "cappadocia": {
+      "label": "Cappadocia",
       "metaTitle": "Luggage storage Cappadocia | BagajPark",
       "metaDescription": "Luggage storage in Cappadocia for balloon rides and valley hikes around Göreme and Ürgüp.",
       "headline": "Luggage storage in Cappadocia",

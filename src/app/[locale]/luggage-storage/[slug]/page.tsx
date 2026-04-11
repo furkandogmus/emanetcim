@@ -6,6 +6,7 @@ import type { Metadata } from "next";
 import { MapPin, Search } from "lucide-react";
 import { getStorageCity, STORAGE_CITIES } from "@/lib/storage-cities";
 import { getSiteBaseUrl } from "@/lib/site-urls";
+import { routing } from "@/i18n/routing";
 
 export function generateStaticParams() {
   return STORAGE_CITIES.map((c) => ({ slug: c.slug }));
@@ -26,6 +27,11 @@ export async function generateMetadata({
     description: t(`${slug}.metaDescription`),
     alternates: {
       canonical: `${base}/${locale}/luggage-storage/${slug}`,
+      languages: {
+        tr: `${base}/tr/luggage-storage/${slug}`,
+        en: `${base}/en/luggage-storage/${slug}`,
+        "x-default": `${base}/${routing.defaultLocale}/luggage-storage/${slug}`,
+      },
     },
   };
 }

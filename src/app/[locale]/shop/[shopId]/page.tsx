@@ -7,6 +7,7 @@ import { moneyToNumber } from "@/lib/money";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getSiteBaseUrl } from "@/lib/site-urls";
+import { buildShopLocalBusinessJsonLd } from "@/lib/shop-json-ld";
 
 export async function generateMetadata({
   params,
@@ -20,11 +21,18 @@ export async function generateMetadata({
     return { title: t("shopDetailNotFoundTitle") };
   }
   const base = getSiteBaseUrl();
+  const title = `${shop.name} — ${t("shopDetailTitleSuffix")}`;
+  const description = shop.address ?? t("shopDetailMetaFallback");
+  const canonical = `${base}/${locale}/shop/${shopId}`;
   return {
-    title: `${shop.name} — ${t("shopDetailTitleSuffix")}`,
-    description: shop.address ?? t("shopDetailMetaFallback"),
-    alternates: {
-      canonical: `${base}/${locale}/shop/${shopId}`,
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+      type: "website",
     },
   };
 }
@@ -43,6 +51,8 @@ export default async function ShopDetailPage({
   }
 
   const pricingRules = await getPricingRules();
+
+  const jsonLd = buildShopLocalBusinessJsonLd(shop, locale);
 
   const clientShop = {
     id: shop.id,
@@ -68,9 +78,15 @@ export default async function ShopDetailPage({
   };
 
   return (
-    <ShopDetailClient
-      shop={clientShop}
-      pricingRules={JSON.parse(JSON.stringify(pricingRules))}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <ShopDetailClient
+        shop={clientShop}
+        pricingRules={JSON.parse(JSON.stringify(pricingRules))}
+      />
+    </>
   );
 }

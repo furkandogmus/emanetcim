@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Search, MapPin, ShieldCheck, Clock, Star } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { getGuestLandingStats } from "@/lib/guest-landing-stats";
+import { STORAGE_CITIES } from "@/lib/storage-cities";
 
 export const revalidate = 120;
 
@@ -15,6 +16,7 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
 
   const t = await getTranslations("Guest");
   const common = await getTranslations("Common");
+  const tCity = await getTranslations("CityStorage");
   const stats = await getGuestLandingStats();
   const nf = new Intl.NumberFormat(locale === "tr" ? "tr-TR" : "en-US");
 
@@ -101,6 +103,34 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
             <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-gray-400">
               {t("trustStatAvgRating")}
             </p>
+          </div>
+        </div>
+      </section>
+
+      <section
+        className="border-y border-gray-100 bg-gray-50/90 py-14 px-6"
+        aria-labelledby="city-hub-heading"
+      >
+        <div className="mx-auto max-w-5xl">
+          <h2
+            id="city-hub-heading"
+            className="text-center text-xs font-black uppercase tracking-[0.2em] text-gray-400"
+          >
+            {t("cityHubTitle")}
+          </h2>
+          <p className="mx-auto mt-2 max-w-md text-center text-sm text-gray-500">
+            {t("cityHubIntro")}
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-2 md:gap-3">
+            {STORAGE_CITIES.map((c) => (
+              <Link
+                key={c.slug}
+                href={`/luggage-storage/${c.slug}`}
+                className="rounded-full border border-gray-200 bg-white px-4 py-2.5 text-sm font-bold text-gray-800 shadow-sm transition hover:border-orange-200 hover:text-orange-600"
+              >
+                {tCity(`${c.slug}.label`)}
+              </Link>
+            ))}
           </div>
         </div>
       </section>

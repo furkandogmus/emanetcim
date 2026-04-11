@@ -7,6 +7,7 @@ import {
   SEARCH_NEARBY_RADIUS_KM,
   defaultSearchStayWindow,
 } from '@/lib/search-defaults';
+import { getSiteBaseUrl } from '@/lib/site-urls';
 
 function parseCenter(
   latRaw: string | undefined,
@@ -23,12 +24,32 @@ function parseCenter(
   return { lat, lng };
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ q?: string }>;
+}): Promise<Metadata> {
   const { locale } = await params;
+  const sp = await searchParams;
+  const q = (sp.q ?? "").trim();
   const t = await getTranslations({ locale, namespace: "Guest" });
+  const base = getSiteBaseUrl();
+  const title = q
+    ? t("searchTitle", { query: q })
+    : t("searchTitleBrowse");
+  const description = q
+    ? t("searchDescription", { query: q })
+    : t("searchDescriptionBrowse");
   return {
-    title: t("searchTitle", { query: "" }),
-    description: t("searchDescription", { query: "" }),
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `${base}/${locale}/search${q ? `?q=${encodeURIComponent(q)}` : ""}`,
+    },
   };
 }
 
