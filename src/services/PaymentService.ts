@@ -10,6 +10,7 @@ import { isPaymentsEnabled } from '@/lib/feature-flags';
 import { getPaymentGateway, isStripePaymentIntentId } from '@/lib/payment-gateway';
 import { tryAmountToStripeMinorUnits } from '@/lib/currency';
 import { assertStripeKeys, getStripe } from '@/lib/stripe';
+import { recordMetric } from '@/lib/metrics';
 
 const IYZICO_OP_TIMEOUT_MS = Number(process.env.IYZICO_HTTP_TIMEOUT_MS) || 45_000;
 
@@ -553,6 +554,10 @@ export class PaymentService implements IPaymentService {
       bookingIds.push(b.id);
       logger.info({ bookingId: b.id }, 'finance_reconcile_pending_or_approved_to_paid');
     }
+    recordMetric('reconcile_payments_complete', {
+      fixed: stuck.length,
+      sampleBookingIds: bookingIds.slice(0, 25),
+    });
     return { fixed: stuck.length, bookingIds };
   }
 

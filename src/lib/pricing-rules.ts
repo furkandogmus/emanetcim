@@ -11,6 +11,8 @@ export type PricingRules = {
   defaultShopCapacity: number;
   defaultPricePerDay: number;
   bagMultipliers: { S: number; M: number; XL: number };
+  /** YYYY-MM-DD — bu günlere denk gelen konaklama pencereleri reddedilir. */
+  platformHolidayDates: string[];
 };
 
 /** Kod/seed ile uyumlu tek kaynak varsayılan (DB satırı yoksa fallback). */
@@ -23,4 +25,5 @@ export const DEFAULT_PRICING_RULES: PricingRules = {
   defaultShopCapacity: 10,
   defaultPricePerDay: 50,
   bagMultipliers: { S: 0.8, M: 1.0, XL: 1.5 },
+  platformHolidayDates: [],
 };

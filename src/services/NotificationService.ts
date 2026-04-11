@@ -111,8 +111,56 @@ export class NotificationService implements INotificationService {
    * Push bildirim gönderimi
    */
   async sendPush(userId: string, title: string, message: string, bookingId?: string): Promise<boolean> {
+    const publicKey = process.env.VAPID_PUBLIC_KEY?.trim();
+    const privateKey = process.env.VAPID_PRIVATE_KEY?.trim();
+    const contact =
+      process.env.VAPID_CONTACT_EMAIL?.trim() || "mailto:support@bagajpark.com";
+
     try {
-      logger.info({ userId, title }, "[Notification] Push Sent Simulation");
+      const subs = await prisma.pushSubscription.findMany({
+        where: { userId },
+      });
+
+      if (publicKey && privateKey && subs.length > 0) {
+        const webpush = (await import("web-push")).default;
+        webpush.setVapidDetails(contact, publicKey, privateKey);
+        const payload = JSON.stringify({ title, body: message, bookingId });
+        let anyOk = false;
+        for (const s of subs) {
+          try {
+            await webpush.sendNotification(
+              {
+                endpoint: s.endpoint,
+                keys: { p256dh: s.p256dh, auth: s.auth },
+              },
+              payload,
+            );
+            anyOk = true;
+          } catch (err: unknown) {
+            const status = (err as { statusCode?: number })?.statusCode;
+            if (status === 404 || status === 410) {
+              await prisma.pushSubscription.deleteMany({
+                where: { id: s.id },
+              });
+            }
+            logger.warn({ err, userId, subId: s.id }, "push_send_failed");
+          }
+        }
+        await prisma.notificationLog.create({
+          data: {
+            bookingId,
+            type: "PUSH",
+            recipient: userId,
+            subject: title,
+            content: message,
+            status: anyOk ? "SENT" : "FAILED",
+            error: anyOk ? null : "all_subscriptions_failed",
+          },
+        });
+        return anyOk;
+      }
+
+      logger.info({ userId, title }, "notification_push_simulation_or_no_subscribers");
 
       await prisma.notificationLog.create({
         data: {
@@ -130,6 +178,20 @@ export class NotificationService implements INotificationService {
       logger.error({ error }, "[Notification] Push Failed");
       return false;
     }
+  }
+
+  /**
+   * Misafir: `GUEST_SMS_BOOKING_NOTIFICATIONS=true` iken yeni talep SMS’i (Netgsm).
+   */
+  async notifyGuestBookingRequestSms(
+    phoneE164OrTr10: string,
+    bookingId: string,
+    shopName: string,
+  ): Promise<void> {
+    if (process.env.GUEST_SMS_BOOKING_NOTIFICATIONS !== "true") return;
+    const shortId = bookingId.replace(/-/g, "").slice(0, 8);
+    const msg = `BagajPark: Talebiniz alindi — ${shopName}. Ref: ${shortId}`;
+    await this.sendSms(phoneE164OrTr10, msg, bookingId);
   }
 
   /**

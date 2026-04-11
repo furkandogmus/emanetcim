@@ -306,11 +306,21 @@ export async function approveBookingAction(bookingId: string) {
        return { success: false as const, error: "Errors.unauthorized" };
     }
 
-    // Durumu APPROVED yapıyoruz (Veya doğrudan PAID/PENDING_PAYMENT kurgulanabilir)
-    await prisma.booking.update({
-      where: { id: bookingId },
-      data: { status: BookingStatus.APPROVED },
+    const updated = await prisma.booking.updateMany({
+      where: {
+        id: bookingId,
+        shopId: booking.shopId,
+        status: BookingStatus.WAITING_APPROVAL,
+      },
+      data: {
+        status: BookingStatus.APPROVED,
+        bookingRowVersion: { increment: 1 },
+      },
     });
+
+    if (updated.count !== 1) {
+      return { success: false as const, error: "Errors.bookingStateConflict" };
+    }
 
     revalidatePartnerPaths();
     return { success: true as const };

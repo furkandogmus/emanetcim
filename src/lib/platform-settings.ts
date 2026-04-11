@@ -1,5 +1,6 @@
 import prisma from "@/lib/db";
 import { moneyToNumber } from "@/lib/money";
+import { parsePlatformHolidayDates } from "@/lib/booking-holidays";
 import {
   DEFAULT_PRICING_RULES,
   type PricingRules,
@@ -19,6 +20,7 @@ function mapRow(row: {
   bagMultiplierS: unknown;
   bagMultiplierM: unknown;
   bagMultiplierXl: unknown;
+  platformHolidayDates?: unknown;
 }): PricingRules {
   return {
     maxStayDays: row.maxStayDays,
@@ -33,6 +35,7 @@ function mapRow(row: {
       M: moneyToNumber(row.bagMultiplierM),
       XL: moneyToNumber(row.bagMultiplierXl),
     },
+    platformHolidayDates: parsePlatformHolidayDates(row.platformHolidayDates),
   };
 }
 
@@ -46,7 +49,7 @@ export async function getPricingRules(): Promise<PricingRules> {
   const row = await prisma.platformSettings.findUnique({
     where: { id: "default" },
   });
-  const rules = row ? mapRow(row) : DEFAULT_PRICING_RULES;
+  const rules: PricingRules = row ? mapRow(row) : { ...DEFAULT_PRICING_RULES };
   cache = { rules, at: Date.now() };
   return rules;
 }

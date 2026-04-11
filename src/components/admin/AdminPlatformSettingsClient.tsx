@@ -17,7 +17,16 @@ export type PlatformSettingsFormValues = {
   bagMultiplierS: number;
   bagMultiplierM: number;
   bagMultiplierXl: number;
+  /** YYYY-MM-DD satır veya virgülle */
+  holidayDatesRaw: string;
 };
+
+function parseHolidayDatesRaw(raw: string): string[] {
+  return raw
+    .split(/[\n,;\s]+/)
+    .map((s) => s.trim())
+    .filter((s) => /^\d{4}-\d{2}-\d{2}$/.test(s));
+}
 
 function Field({
   label,
@@ -64,7 +73,20 @@ export default function AdminPlatformSettingsClient({
 
   const submit = () => {
     startTransition(async () => {
-      const res = await updatePlatformSettingsAction(form);
+      const platformHolidayDates = parseHolidayDatesRaw(form.holidayDatesRaw);
+      const res = await updatePlatformSettingsAction({
+        maxStayDays: form.maxStayDays,
+        maxBagsPerSlot: form.maxBagsPerSlot,
+        insuranceFeeTry: form.insuranceFeeTry,
+        earlyRefundRatio: form.earlyRefundRatio,
+        cancelFixedFeeTry: form.cancelFixedFeeTry,
+        defaultShopCapacity: form.defaultShopCapacity,
+        defaultPricePerDay: form.defaultPricePerDay,
+        bagMultiplierS: form.bagMultiplierS,
+        bagMultiplierM: form.bagMultiplierM,
+        bagMultiplierXl: form.bagMultiplierXl,
+        platformHolidayDates,
+      });
       if (!res.success) {
         toast.error(t("platformSettingsInvalid"));
         return;
@@ -133,6 +155,19 @@ export default function AdminPlatformSettingsClient({
           onChange={(v) => patch({ bagMultiplierXl: v })}
           step="0.0001"
         />
+        <label className="flex flex-col gap-1 md:col-span-2">
+          <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+            {t("platformSettingsHolidayDates")}
+          </span>
+          <textarea
+            className="min-h-[100px] rounded-xl border border-gray-200 px-4 py-3 text-sm font-mono text-gray-900"
+            value={form.holidayDatesRaw}
+            onChange={(e) => patch({ holidayDatesRaw: e.target.value })}
+            placeholder="2025-01-01&#10;2025-12-25"
+            spellCheck={false}
+          />
+          <span className="text-[10px] text-gray-400">{t("platformSettingsHolidayDatesHint")}</span>
+        </label>
       </div>
 
       <button

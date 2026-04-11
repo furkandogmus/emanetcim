@@ -484,6 +484,8 @@
     "platformSettingsBagS": "Small (S) Multiplier",
     "platformSettingsBagM": "Medium/Large (M/L) Multiplier",
     "platformSettingsBagXl": "Extra Large (XL) Multiplier",
+    "platformSettingsHolidayDates": "Platform holiday dates (YYYY-MM-DD)",
+    "platformSettingsHolidayDatesHint": "One date per line or comma-separated. Stays overlapping these calendar days are rejected.",
     "platformSettingsSave": "SAVE",
     "platformSettingsSaved": "Settings saved.",
     "platformSettingsInvalid": "Invalid values.",
@@ -709,7 +711,36 @@
     "navAdminPanel": "Admin panel",
     "navPartnerPanel": "Shop panel",
     "navBookings": "My bookings",
+    "navPrivacyData": "Data & privacy",
     "signOut": "Sign out"
+  },
+  "AccountPrivacy": {
+    "pageTitle": "Data & privacy",
+    "pageIntro": "Export your data or anonymize your account (KVKK / GDPR-style self-service).",
+    "back": "Back to bookings",
+    "guestOnly": "This page is for guest accounts only.",
+    "exportTitle": "Export data",
+    "exportDesc": "Download a JSON file with key data linked to your account.",
+    "exportButton": "Download",
+    "deleteTitle": "Anonymize account",
+    "deleteDesc": "If you have no active bookings, personal data is removed; some records may be retained where the law requires.",
+    "deleteButton": "Close account",
+    "errors": {
+      "activeBookings": "You have active bookings; close them before deleting your account.",
+      "authRequired": "Please sign in.",
+      "unauthorized": "You are not allowed to do this.",
+      "generic": "Something went wrong."
+    }
+  },
+  "WebPush": {
+    "title": "Push notifications",
+    "description": "Allow browser notifications for booking updates (optional).",
+    "enable": "Enable notifications",
+    "unsupported": "This browser or device does not support push.",
+    "invalidSubscription": "Could not create a subscription.",
+    "saveFailed": "Could not save on the server.",
+    "enabled": "Notifications enabled.",
+    "permissionDenied": "Permission denied or an error occurred."
   },
   "About": {
     "badge": "OUR STORY",
@@ -940,6 +971,9 @@
     "bookingNotFound": "Booking not found.",
     "insufficientCapacity": "Insufficient shop capacity for these dates.",
     "invalidBookingDates": "Booking dates are invalid or outside allowed duration.",
+    "bookingIncludesPlatformHoliday": "Your stay overlaps a platform holiday; please choose different dates.",
+    "bookingStateConflict": "Booking state changed; refresh the page and try again.",
+    "accountDeleteActiveBookings": "You cannot close your account while you have active bookings.",
     "modificationNotAllowed": "This booking can’t be edited.",
     "modificationRefundFailed": "Refund failed; your booking was not changed.",
     "modificationPriceIncrease": "You can’t increase the price on a paid booking. Cancel and book again.",

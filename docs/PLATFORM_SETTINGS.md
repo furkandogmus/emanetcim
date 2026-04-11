@@ -4,7 +4,7 @@ Tek kaynak: Prisma `PlatformSettings` (`id = "default"`), okuma için [`getPrici
 
 ## Yönetim arayüzü
 
-Admin: **`/admin/platform-settings`** — tüm sayısal kurallar form üzerinden güncellenir.
+Admin: **`/admin/platform-settings`** — tüm sayısal kurallar ve **platform tatil günleri** (`YYYY-MM-DD` listesi, JSON) form üzerinden güncellenir. Bu günlere denk gelen konaklama pencereleri yeni rezervasyonda reddedilir (`BOOKING_CALENDAR_TIMEZONE`, varsayılan `Europe/Istanbul`).
 
 ## Önbellek
 

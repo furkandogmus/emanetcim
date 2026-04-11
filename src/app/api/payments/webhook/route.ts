@@ -4,6 +4,12 @@ import { verifyIyzicoWebhookSignatureV3 } from "@/lib/iyzico-webhook";
 import logger from "@/lib/logger";
 import { rateLimit } from "@/lib/rate-limit";
 import { isPaymentsEnabled } from "@/lib/feature-flags";
+import {
+  claimPaymentWebhookEvent,
+  iyzicoWebhookDedupKey,
+  isPaymentWebhookProcessed,
+} from "@/lib/payment-webhook-dedup";
+import { recordMetric } from "@/lib/metrics";
 
 /**
  * iyzico Payment Webhook Handler
@@ -12,6 +18,7 @@ import { isPaymentsEnabled } from "@/lib/feature-flags";
  */
 export async function POST(req: NextRequest) {
   try {
+    recordMetric("webhook_received_total", { channel: "iyzico" });
     const ip =
       req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
       req.headers.get("x-real-ip") ||
@@ -45,6 +52,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!verifyIyzicoWebhookSignatureV3(body, sigV3)) {
+      recordMetric("webhook_signature_failures", { channel: "iyzico" });
       return NextResponse.json(
         { status: "Error", message: "Invalid signature" },
         { status: 401 }
@@ -85,9 +93,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const dedupKey = iyzicoWebhookDedupKey(body);
+    if (await isPaymentWebhookProcessed(dedupKey)) {
+      return NextResponse.json(
+        { status: "OK", message: "Duplicate event ignored", duplicate: true },
+        { status: 200 },
+      );
+    }
+
     const result = await paymentService.processWebhook(payload);
 
     if (result.success) {
+      await claimPaymentWebhookEvent({
+        provider: "iyzico",
+        dedupKey,
+        paymentId: payload.paymentId || null,
+        conversationId: payload.conversationId,
+      });
       return NextResponse.json({ status: "OK", message: result.message }, { status: 200 });
     } else {
       return NextResponse.json({ status: "Ignored", message: result.message }, { status: 200 });

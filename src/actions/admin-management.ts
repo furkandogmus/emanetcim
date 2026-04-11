@@ -9,6 +9,8 @@ import logger from "@/lib/logger";
 import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
 import { getLocale } from "next-intl/server";
+import { headers } from "next/headers";
+import { writeAuditLog } from "@/lib/audit-log";
 
 /**
  * Admin koruması sağlayan yardımcı fonksiyon
@@ -21,15 +23,34 @@ async function ensureAdmin() {
   return session;
 }
 
+async function clientIp(): Promise<string | null> {
+  const h = await headers();
+  return (
+    h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    h.get("x-real-ip") ||
+    null
+  );
+}
+
 /**
  * Kullanıcıyı banla veya banını kaldır
  */
 export async function toggleUserBanAction(userId: string, isBanned: boolean) {
-  await ensureAdmin();
+  const session = await ensureAdmin();
 
   await prisma.user.update({
     where: { id: userId },
     data: { isBanned },
+  });
+
+  writeAuditLog({
+    actorUserId: session.user.id ?? null,
+    actorRole: "ADMIN",
+    action: "user.ban_toggle",
+    entityType: "User",
+    entityId: userId,
+    metadata: { isBanned },
+    ip: await clientIp(),
   });
 
   revalidatePathAllLocales("/admin/users");
@@ -40,10 +61,9 @@ export async function toggleUserBanAction(userId: string, isBanned: boolean) {
  * Kullanıcı rolünü güncelle (Örn: GUEST -> ADMIN)
  */
 export async function updateUserRoleAction(userId: string, newRole: Role) {
-  await ensureAdmin();
+  const session = await ensureAdmin();
 
   // Kendi rolünü değiştirmeyi engelle (Güvenlik için)
-  const session = await auth();
   if (session?.user?.id === userId) {
     throw new Error("Errors.unauthorized");
   }
@@ -51,6 +71,16 @@ export async function updateUserRoleAction(userId: string, newRole: Role) {
   await prisma.user.update({
     where: { id: userId },
     data: { role: newRole },
+  });
+
+  writeAuditLog({
+    actorUserId: session.user.id ?? null,
+    actorRole: "ADMIN",
+    action: "user.role_update",
+    entityType: "User",
+    entityId: userId,
+    metadata: { newRole },
+    ip: await clientIp(),
   });
 
   revalidatePathAllLocales("/admin/users");
@@ -64,10 +94,9 @@ const DELETE_USER_BLOCKED_CODE = "ADMIN_DELETE_USER_HAS_RELATIONS";
  * Kullanıcıyı tamamen sil (Cascade silme ile ilişkili kayıtlar da silinir)
  */
 export async function deleteUserAction(userId: string) {
-  await ensureAdmin();
+  const session = await ensureAdmin();
 
   // Kendi hesabını siliyorsa engelle
-  const session = await auth();
   if (session?.user?.id === userId) {
     throw new Error("Errors.unauthorized");
   }
@@ -75,6 +104,14 @@ export async function deleteUserAction(userId: string) {
   try {
     await prisma.user.delete({
       where: { id: userId },
+    });
+    writeAuditLog({
+      actorUserId: session.user.id ?? null,
+      actorRole: "ADMIN",
+      action: "user.delete",
+      entityType: "User",
+      entityId: userId,
+      ip: await clientIp(),
     });
   } catch (e) {
     if (
@@ -109,11 +146,20 @@ export async function resendVerificationEmailAction(email: string) {
  * Esnaf (Shop) onaylama
  */
 export async function approveShopAction(shopId: string) {
-  await ensureAdmin();
+  const session = await ensureAdmin();
 
   await prisma.shop.update({
     where: { id: shopId },
     data: { isActive: true },
+  });
+
+  writeAuditLog({
+    actorUserId: session.user.id ?? null,
+    actorRole: "ADMIN",
+    action: "shop.approve_application",
+    entityType: "Shop",
+    entityId: shopId,
+    ip: await clientIp(),
   });
 
   revalidatePathAllLocales("/admin/applications");
@@ -279,5 +325,45 @@ export async function unblockIpAction(ip: string) {
   });
 
   return { success: true };
+}
+
+const chargebackStatuses = ["OPEN", "WON", "LOST"] as const;
+
+/**
+ * Ödeme kaydı için chargeback durumu (admin).
+ */
+export async function setPaymentChargebackStatusAction(
+  bookingId: string,
+  status: (typeof chargebackStatuses)[number] | null,
+  note?: string | null,
+) {
+  const session = await ensureAdmin();
+
+  const log = await prisma.paymentLog.findUnique({
+    where: { bookingId },
+  });
+  if (!log) {
+    return { success: false as const, error: "payment_log_not_found" as const };
+  }
+
+  await prisma.paymentLog.update({
+    where: { id: log.id },
+    data: {
+      chargebackStatus: status,
+      chargebackNote: note?.trim() || null,
+    },
+  });
+
+  writeAuditLog({
+    actorUserId: session.user.id ?? null,
+    actorRole: "ADMIN",
+    action: "payment.chargeback_update",
+    entityType: "PaymentLog",
+    entityId: log.id,
+    metadata: { bookingId, status, note: note ?? null },
+    ip: await clientIp(),
+  });
+
+  return { success: true as const };
 }
 

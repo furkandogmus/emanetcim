@@ -2,7 +2,7 @@
 
 import { signOut, useSession } from 'next-auth/react';
 import type { LucideIcon } from 'lucide-react';
-import { User, LogOut, Shield, Store, ChevronDown } from 'lucide-react';
+import { User, LogOut, Shield, Store, ChevronDown, Fingerprint } from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from '@/i18n/routing';
@@ -75,6 +75,17 @@ export default function UserNav() {
                 <Icon size={18} />
                 {session?.user?.role === 'ADMIN' ? t('navAdminPanel') : session?.user?.role === 'PARTNER' ? t('navPartnerPanel') : t('navBookings')}
               </Link>
+
+              {session?.user?.role === 'GUEST' ? (
+                <Link
+                  href="/account/privacy"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-3 w-full p-4 hover:bg-gray-50 rounded-2xl transition-colors text-sm font-bold text-gray-700 cursor-pointer"
+                >
+                  <Fingerprint size={18} />
+                  {t('navPrivacyData')}
+                </Link>
+              ) : null}
               
               <button 
                 onClick={() => signOut()}

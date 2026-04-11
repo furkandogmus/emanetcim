@@ -18,6 +18,11 @@
 
 Önerilen zamanlama: her 1–5 dakikada bir (cron, Kubernetes CronJob, Vercel Cron vb.).
 
+## CSV dışa aktarma (operasyon)
+
+- **Uç:** `GET /api/internal/finance-export?days=90` — `Authorization: Bearer <CRON_SECRET>` veya `x-cron-secret: <CRON_SECRET>`.
+- **Çıktı:** Rezervasyon özeti + ödeme durumu + `chargebackStatus` (varsa).
+
 ## iyzico çağrıları
 
 - `initializeMarketplacePayment` ve `refundPayment` içindeki iyzico SDK çağrıları `withTimeout` ile sarılıdır (varsayılan **45s**, `IYZICO_HTTP_TIMEOUT_MS` ile değiştirilebilir).
