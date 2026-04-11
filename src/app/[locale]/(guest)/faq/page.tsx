@@ -1,14 +1,25 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ChevronRight, ShieldCheck } from "lucide-react";
 import { Link } from "@/i18n/routing";
+import { buildFaqPageJsonLd } from "@/lib/faq-json-ld";
 
 export default async function FaqPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("FAQ");
 
+  const faqItems = [1, 2, 3, 4].map((idx) => ({
+    question: t(`q${idx}` as "q1"),
+    answer: t(`a${idx}` as "a1"),
+  }));
+  const faqJsonLd = buildFaqPageJsonLd(faqItems);
+
   return (
     <div className="min-h-screen bg-gray-50/50">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <header className="py-24 px-6 bg-white border-b border-gray-100 text-center">
         <h1 className="text-5xl font-black text-gray-900 tracking-tighter mb-4">
           {t("title")}
@@ -56,12 +67,12 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
               <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-blue-600 shadow-sm">
                 <ShieldCheck size={32} />
               </div>
-              <h3 className="text-xl font-black text-gray-900">Mağaza ortağımız olmak çok kolay!</h3>
+              <h3 className="text-xl font-black text-gray-900">{t("partnerPitchTitle")}</h3>
               <p className="text-sm text-gray-500 font-bold leading-relaxed px-4">
-                Atıl alanınızı gelire dönüştürmek için hemen başvurabilirsiniz. Sistemimizin esnaf tarafıyla ilgili tüm sorularınız için başvuru sayfamıza göz atın.
+                {t("partnerPitchBody")}
               </p>
               <Link href="/partners" className="h-12 flex items-center px-8 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-blue-200">
-                Partner Bilgi Paketi
+                {t("partnerPitchCta")}
               </Link>
             </div>
           </section>

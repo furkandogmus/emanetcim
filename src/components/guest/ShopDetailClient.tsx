@@ -14,6 +14,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { roundedSlotPrices } from "@/lib/bag-pricing";
 import type { PricingRules } from "@/lib/pricing-rules";
+import { dateLocaleForUiLocale } from "@/lib/date-locale";
 
 export type ShopDetailClientShop = {
   id: string;
@@ -48,7 +49,7 @@ export default function ShopDetailClient({
 }: ShopDetailClientProps) {
   const t = useTranslations("Guest");
   const locale = useLocale();
-  const dateLocale = locale === "tr" ? "tr-TR" : "en-US";
+  const dateLocale = dateLocaleForUiLocale(locale);
   const slot = roundedSlotPrices(shop.pricePerDay, pricingRules);
   const rating = shop.rating ?? 0;
   const mapsUrl =

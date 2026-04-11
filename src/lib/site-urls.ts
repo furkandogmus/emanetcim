@@ -14,6 +14,8 @@ export const SITEMAP_PATHS: readonly string[] = [
   "/kvkk",
   "/login",
   "/register",
+  "/become-partner",
+  "/hotels",
 ];
 
 export function getSiteBaseUrl(): string {

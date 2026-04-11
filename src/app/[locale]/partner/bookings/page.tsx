@@ -3,6 +3,7 @@ import { ChevronLeft, Package, Clock, CheckCircle2, Phone } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { auth } from "@/auth";
 import prisma from "@/lib/db";
+import { dateLocaleForUiLocale } from "@/lib/date-locale";
 
 /**
  * Partner Bookings / History Page - Esnaf Takvimi
@@ -45,7 +46,7 @@ export default async function PartnerBookingsPage({
     orderBy: { checkInTime: "asc" },
   });
 
-  const timeLocale = locale === "tr" ? "tr-TR" : "en-US";
+  const timeLocale = dateLocaleForUiLocale(locale);
 
   const tasks = dbBookings.map((b) => {
     const totalBags = b.bagCountS + b.bagCountM + b.bagCountXl;

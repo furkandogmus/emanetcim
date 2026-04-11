@@ -1,9 +1,23 @@
-import { setRequestLocale } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { auth } from '@/auth';
 import { bookingService } from '@/services/BookingService';
 import BookingsClient from '@/components/guest/BookingsClient';
 import { getPricingRules } from '@/lib/platform-settings';
 import { redirect } from 'next/navigation';
+import type { Metadata } from 'next';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Guest" });
+  return {
+    title: t("myBookings"),
+    robots: { index: false, follow: false },
+  };
+}
 
 /**
  * Guest Bookings Page - Rezervasyonlarım (Server Component)

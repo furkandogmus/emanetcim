@@ -140,6 +140,24 @@
     "trustStatAvgRating": "Ortalama puan",
     "cityHubTitle": "Popüler şehirler",
     "cityHubIntro": "Valiz emanet rehberi ve haritada yakın dükkanlar.",
+    "testimonialsTitle": "Gezginler ne diyor?",
+    "testimonialsSubtitle": "Tamamlanan rezervasyonlardan gerçek yorumlar.",
+    "bagProtectionBadge": "Koruma",
+    "bagProtectionTitle": "Valizleriniz anlaşmalı güvence altında",
+    "bagProtectionBody": "Platform koşullarında tanımlı tavan ile desteklenir; ödeme özetinde ayrıntıları görürsünüz.",
+    "comparisonTitle": "Neden BagajPark?",
+    "comparisonSubtitle": "Havalimanı dolapları ve dağınık çözümlere karşı.",
+    "comparisonColFeature": "Özellik",
+    "comparisonColUs": "BagajPark",
+    "comparisonColOther": "Dolap / diğer",
+    "comparisonPrice": "Şeffaf günlük fiyat",
+    "comparisonFlex": "Esnek süre ve saat",
+    "comparisonInsurance": "Anlaşmalı güvence",
+    "comparisonNetwork": "Yerel esnaf ağı",
+    "comparisonHours": "Gerçek çalışma saatleri",
+    "comparisonYes": "Evet",
+    "comparisonPartial": "Dükkan bazlı",
+    "comparisonLimited": "Kısıtlı",
     "checkout": "Ödeme ve Onay",
     "checkoutPageTitle": "{shopName} — Ödeme",
     "selectBags": "Valiz Sayısını Seçin",
@@ -196,6 +214,7 @@
     "bookingSuccess": "Rezervasyon Başarılı!",
     "showToPartner": "Lütfen aşağıdaki QR kodu dükkan sahibine gösterin.",
     "myBookings": "Rezervasyonlarım",
+    "bookingDetailMetaTitle": "Rezervasyon detayı",
     "noBookingsTitle": "Henüz bir rezervasyonunuz bulunmuyor.",
     "noBookingsDesc": "Rezervasyon yaparak valizlerinizi şehrin her noktasında güvenle bırakabilirsiniz.",
     "exploreShops": "Keşfetmeye Başla",
@@ -743,6 +762,9 @@
     "subtitle": "Merak ettikleriniz.",
     "guestTitle": "Gezginler",
     "partnerTitle": "Esnaflar",
+    "partnerPitchTitle": "Mağaza ortağımız olmak çok kolay",
+    "partnerPitchBody": "Atıl alanınızı gelire dönüştürün; başvuru ve komisyon yapımız hakkında bilgi alın.",
+    "partnerPitchCta": "Esnaf bilgi paketi",
     "q1": "Guvende mi?",
     "a1": "Evet, sigortali.",
     "q2": "Iptal?",
@@ -755,6 +777,31 @@
     "ctaSubtitle": "7/24 yaninizdayiz.",
     "ctaButton": "Destek"
   },
+  "MarketingBecomePartner": {
+    "metaTitle": "Esnaf olun | BagajPark",
+    "heroTitle": "Dükkanınızı valiz emanet noktası yapın",
+    "heroSubtitle": "Ek gelir ve yeni müşteri trafiği; dijital rezervasyon ve ödeme altyapısı.",
+    "b1Title": "Ek gelir",
+    "b1Body": "Boş köşeyi dönüştürün; doluluk ve tahsilatları panelden izleyin.",
+    "b2Title": "Operasyon kolaylığı",
+    "b2Body": "Rezervasyon, QR ve iade süreçleri tek panelde.",
+    "b3Title": "Görünürlük",
+    "b3Body": "Arama, harita ve şehir sayfalarında yer alın.",
+    "calcTitle": "Kazanç tahmini",
+    "calcBody": "Kapasite ve doluluk varsayımlarına göre örnek hesap için ortak ekibimizle görüşün.",
+    "ctaPrimary": "Başvuru sayfasına git",
+    "ctaSecondary": "Genel ortaklık bilgisi"
+  },
+  "MarketingHotels": {
+    "metaTitle": "Oteller için BagajPark",
+    "heroTitle": "Konuklarınız için güvenli bagaj",
+    "heroSubtitle": "Check-out sonrası ve gezinti öncesi depolama ile resepsiyon yükünü azaltın.",
+    "b1Title": "Yüksek kapasite",
+    "b1Body": "Grup ve sezon dönemlerine uygun planlama.",
+    "b2Title": "Kurumsal süreç",
+    "b2Body": "Sözleşme, komisyon ve raporlama ile uyumlu onboarding.",
+    "cta": "Otel iş birliği için iletişim"
+  },
   "CookieConsent": {
     "bannerTitle": "Cerezler",
     "bannerText": "Siteyi calistirmak icin gereklidir.",
@@ -765,6 +812,7 @@
     "kvkk": "KVKK"
   },
   "Dispute": {
+    "metaTitle": "Şikayet bildir",
     "title": "Sikayet",
     "reasonLabel": "Sebep",
     "reasonDamage": "Hasar",
@@ -876,6 +924,60 @@
       "intro": "Gün doğumu turları ve yürüyüşler için valizinizi hafifletin; bölgedeki emanet noktalarımızı haritada bulun.",
       "searchQuery": "Göreme",
       "cta": "Kapadokya’da dükkanları aç"
+    },
+    "berlin": {
+      "label": "Berlin",
+      "metaTitle": "Berlin valiz emanet | BagajPark",
+      "metaDescription": "Berlin’de güvenli bagaj bırakma: Hauptbahnhof ve turistik bölgelere yakın emanet noktaları.",
+      "headline": "Berlin’de valiz emanet",
+      "intro": "Müzeler, Brandenburg Kapısı ve gece hayası arasında valizinizi güvenli noktalara bırakın; haritada yakın dükkanları görün.",
+      "searchQuery": "Hauptbahnhof",
+      "cta": "Berlin’de dükkanları aç"
+    },
+    "paris": {
+      "label": "Paris",
+      "metaTitle": "Paris valiz emanet | BagajPark",
+      "metaDescription": "Paris’te Louvre, Gare du Nord ve merkez hatlarında güvenli luggage storage.",
+      "headline": "Paris’te valiz emanet",
+      "intro": "Tren istasyonları ve müzeler çevresinde pratik depolama; online rezervasyon ile saatlerinizi planlayın.",
+      "searchQuery": "Gare du Nord",
+      "cta": "Paris’te dükkanları aç"
+    },
+    "barcelona": {
+      "label": "Barselona",
+      "metaTitle": "Barselona valiz emanet | BagajPark",
+      "metaDescription": "Barselona’da Sagrada Família ve sahil çizgisine yakın bagaj emanet noktaları.",
+      "headline": "Barselona’da valiz emanet",
+      "intro": "La Rambla ve plaj günleri için valizinizi bırakın; müsait noktaları haritada keşfedin.",
+      "searchQuery": "Sagrada",
+      "cta": "Barselona’da dükkanları aç"
+    },
+    "rome": {
+      "label": "Roma",
+      "metaTitle": "Roma valiz emanet | BagajPark",
+      "metaDescription": "Roma’da Termini ve tarihi merkezde güvenli valiz depolama.",
+      "headline": "Roma’da valiz emanet",
+      "intro": "Kolezyum ve Vatikan turları öncesi valizinizi hafifletin; güvenilir emanet noktalarımızı kullanın.",
+      "searchQuery": "Termini",
+      "cta": "Roma’da dükkanları aç"
+    },
+    "amsterdam": {
+      "label": "Amsterdam",
+      "metaTitle": "Amsterdam valiz emanet | BagajPark",
+      "metaDescription": "Amsterdam’da merkez istasyon ve kanallar çevresinde luggage storage.",
+      "headline": "Amsterdam’da valiz emanet",
+      "intro": "Müze ve bisiklet turları için pratik bagaj bırakma; haritadan en yakın noktayı seçin.",
+      "searchQuery": "Centraal",
+      "cta": "Amsterdam’da dükkanları aç"
+    },
+    "london": {
+      "label": "Londra",
+      "metaTitle": "Londra valiz emanet | BagajPark",
+      "metaDescription": "Londra’da Kings Cross ve West End’e yakın güvenli bagaj emanet.",
+      "headline": "Londra’da valiz emanet",
+      "intro": "Müze ve tiyatro günlerinde valizinizi güvenle saklayın; esnek saatlerle rezervasyon yapın.",
+      "searchQuery": "Kings Cross",
+      "cta": "Londra’da dükkanları aç"
     }
   },
   "AdminStatus": {

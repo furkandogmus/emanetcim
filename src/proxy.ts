@@ -13,6 +13,19 @@ const { auth } = NextAuth({
 
 const intlMiddleware = createMiddleware(routing);
 
+function stripLocalePrefix(pathname: string): { locale: string; barePath: string } {
+  for (const loc of routing.locales) {
+    const prefix = `/${loc}`;
+    if (pathname === prefix || pathname.startsWith(`${prefix}/`)) {
+      return {
+        locale: loc,
+        barePath: pathname.slice(prefix.length) || "/",
+      };
+    }
+  }
+  return { locale: routing.defaultLocale, barePath: pathname };
+}
+
 /**
  * Next.js 16+ Proxy — Auth.js v5, next-intl & Security Hardening
  * Dosya: `src/proxy.ts` (`middleware.ts` yerine).
@@ -40,7 +53,11 @@ const authProxy = auth((req) => {
   // Auth.js pages.signIn locale öneki olmadan "/login" döner — next-intl'den önce locale ekle
   if (pathname === '/login' || pathname === '/auth/error') {
     const cookieLocale = req.cookies.get('NEXT_LOCALE')?.value;
-    const locale = cookieLocale === 'en' ? 'en' : 'tr';
+    const locale = routing.locales.includes(
+      cookieLocale as (typeof routing.locales)[number],
+    )
+      ? cookieLocale!
+      : routing.defaultLocale;
     const url = nextUrl.clone();
     url.pathname = `/${locale}${pathname}`;
     return NextResponse.redirect(url);
@@ -75,32 +92,31 @@ const authProxy = auth((req) => {
   response.headers.set('Referrer-Policy', 'origin-when-cross-origin');
 
   // 4. Protection Logic (Manually detect localized protected paths)
-  const isLocaleTr = pathname.startsWith('/tr');
-  const isLocaleEn = pathname.startsWith('/en');
-  
-  // Kritik: Rota kontrolünü yaparken dil önekini temizleyelim
-  const pathWithoutLocale = isLocaleTr ? pathname.replace('/tr', '') : isLocaleEn ? pathname.replace('/en', '') : pathname;
-  
-  const isAdminPath = pathWithoutLocale.startsWith('/admin') || pathWithoutLocale.startsWith('/api/admin');
-  const isPartnerPath = pathWithoutLocale.startsWith('/partner') || pathWithoutLocale.startsWith('/api/partner');
-  const isInternalApiPath = pathWithoutLocale.startsWith('/api/internal');
+  const { locale: pathLocale, barePath: pathWithoutLocale } =
+    stripLocalePrefix(pathname);
+
+  const isAdminPath =
+    pathWithoutLocale.startsWith("/admin") ||
+    pathWithoutLocale.startsWith("/api/admin");
+  const isPartnerPath =
+    pathWithoutLocale.startsWith("/partner") ||
+    pathWithoutLocale.startsWith("/api/partner");
+  const isInternalApiPath = pathWithoutLocale.startsWith("/api/internal");
 
   if (isAdminPath || isPartnerPath) {
     if (!isLoggedIn) {
-      const locale = isLocaleTr ? 'tr' : (isLocaleEn ? 'en' : 'tr');
-      const loginUrl = new URL(`/${locale}/login`, nextUrl);
-      loginUrl.searchParams.set('callbackUrl', nextUrl.pathname + nextUrl.search);
+      const loginUrl = new URL(`/${pathLocale}/login`, nextUrl);
+      loginUrl.searchParams.set("callbackUrl", nextUrl.pathname + nextUrl.search);
       return NextResponse.redirect(loginUrl);
     }
 
-    // Role-based Access Control
-    if (isAdminPath && userRole !== 'ADMIN') {
-      const homeUrl = new URL(isLocaleTr ? '/tr' : (isLocaleEn ? '/en' : '/tr'), nextUrl);
+    if (isAdminPath && userRole !== "ADMIN") {
+      const homeUrl = new URL(`/${pathLocale}`, nextUrl);
       return NextResponse.redirect(homeUrl);
     }
-    
-    if (isPartnerPath && userRole !== 'PARTNER' && userRole !== 'ADMIN') {
-      const homeUrl = new URL(isLocaleTr ? '/tr' : (isLocaleEn ? '/en' : '/tr'), nextUrl);
+
+    if (isPartnerPath && userRole !== "PARTNER" && userRole !== "ADMIN") {
+      const homeUrl = new URL(`/${pathLocale}`, nextUrl);
       return NextResponse.redirect(homeUrl);
     }
   }
@@ -124,6 +140,6 @@ export const config = {
   matcher: [
     '/((?!_next/static|_next/image|favicon.ico|sw.js|manifest.json|icons/).*)',
     '/',
-    '/(tr|en)/:path*'
-  ]
+    '/(tr|en|de|fr|es|it|zh|ja|ar|ko|ru|fa|bg|pl)/:path*',
+  ],
 };

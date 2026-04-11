@@ -14,6 +14,7 @@ import BookingModifyModal, {
 } from '@/components/guest/BookingModifyModal';
 import type { GuestBookingListItem } from '@/services/BookingService';
 import type { PricingRules } from '@/lib/pricing-rules';
+import { dateLocaleForUiLocale } from '@/lib/date-locale';
 
 interface BookingsClientProps {
   bookings: GuestBookingListItem[];
@@ -27,7 +28,7 @@ export default function BookingsClient({ bookings, pricingRules }: BookingsClien
   const t = useTranslations('Guest');
   const tErr = useTranslations('Errors');
   const locale = useLocale();
-  const dateLocale = locale === 'tr' ? 'tr-TR' : 'en-US';
+  const dateLocale = dateLocaleForUiLocale(locale);
   const router = useRouter();
   const [reviewBooking, setReviewBooking] = useState<GuestBookingListItem | null>(null);
   const [modifyBooking, setModifyBooking] = useState<GuestBookingListItem | null>(null);
