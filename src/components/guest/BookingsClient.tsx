@@ -19,12 +19,29 @@ import { dateLocaleForUiLocale } from '@/lib/date-locale';
 interface BookingsClientProps {
   bookings: GuestBookingListItem[];
   pricingRules: PricingRules;
+  /** PAYMENT_GATEWAY=stripe + Stripe anahtarları tanımlıysa onay sonrası ödeme linki gösterilir. */
+  stripeCheckoutEnabled?: boolean;
 }
 
 /**
  * BookingsClient - Client-side animations and list display.
  */
-export default function BookingsClient({ bookings, pricingRules }: BookingsClientProps) {
+function statusBadgeClass(status: string): string {
+  if (status === "PAID") return "bg-green-100 text-green-700";
+  if (status === "CHECKED_IN") return "bg-blue-100 text-blue-700";
+  if (status === "CHECKED_OUT") return "bg-slate-100 text-slate-700";
+  if (status === "APPROVED") return "bg-amber-100 text-amber-800";
+  if (status === "WAITING_APPROVAL") return "bg-orange-100 text-orange-800";
+  if (status === "PENDING") return "bg-yellow-100 text-yellow-800";
+  if (status === "CANCELLED") return "bg-gray-200 text-gray-600";
+  return "bg-gray-100 text-gray-600";
+}
+
+export default function BookingsClient({
+  bookings,
+  pricingRules,
+  stripeCheckoutEnabled = false,
+}: BookingsClientProps) {
   const t = useTranslations('Guest');
   const tErr = useTranslations('Errors');
   const locale = useLocale();
@@ -83,10 +100,11 @@ export default function BookingsClient({ bookings, pricingRules }: BookingsClien
                     </div>
                   </div>
                 </div>
-                <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${
-                  booking.status === 'PAID' ? 'bg-green-100 text-green-700' : 
-                  booking.status === 'CHECKED_IN' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'
-                }`}>
+                <div
+                  className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${statusBadgeClass(
+                    booking.status as string
+                  )}`}
+                >
                   {booking.status}
                 </div>
               </div>
@@ -121,6 +139,15 @@ export default function BookingsClient({ bookings, pricingRules }: BookingsClien
                 </div>
                 
                 <div className="flex gap-2 flex-wrap justify-end">
+                  {stripeCheckoutEnabled &&
+                    (booking.status === "APPROVED" || booking.status === "PENDING") && (
+                      <Link
+                        href={`/bookings/${booking.id}/pay`}
+                        className="px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-widest bg-orange-600 text-white hover:bg-orange-700 transition-colors shadow-md shadow-orange-200"
+                      >
+                        {t("payBookingOpenCta")}
+                      </Link>
+                    )}
                   {canGuestModifyBooking(booking.status) && (
                     <button
                       type="button"

@@ -14,6 +14,8 @@ const serverSchema = z.object({
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SIGNING_SECRET: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  /** Stripe.js (Payment Element); yalnızca istemci — `NEXT_PUBLIC_` öneki zorunlu. */
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().optional(),
   CRON_SECRET: z.string().optional(),
   UPSTASH_REDIS_REST_URL: z.string().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().optional(),

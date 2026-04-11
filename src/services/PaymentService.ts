@@ -327,7 +327,7 @@ export class PaymentService implements IPaymentService {
     if (booking.status === "PAID" || booking.status === "CHECKED_IN") {
       return { success: true, message: "Already processed" };
     }
-    if (booking.status !== "PENDING") {
+    if (booking.status !== "PENDING" && booking.status !== "APPROVED") {
       return {
         success: false,
         message: "Webhook ignored: booking not awaiting payment",
@@ -539,7 +539,7 @@ export class PaymentService implements IPaymentService {
   }> {
     const stuck = await prisma.booking.findMany({
       where: {
-        status: 'PENDING',
+        status: { in: ['PENDING', 'APPROVED'] },
         paymentLogs: { some: { status: 'SUCCESS' } },
       },
       select: { id: true },
@@ -551,9 +551,77 @@ export class PaymentService implements IPaymentService {
         data: { status: 'PAID' },
       });
       bookingIds.push(b.id);
-      logger.info({ bookingId: b.id }, 'finance_reconcile_pending_to_paid');
+      logger.info({ bookingId: b.id }, 'finance_reconcile_pending_or_approved_to_paid');
     }
     return { fixed: stuck.length, bookingIds };
+  }
+
+  /**
+   * Misafir: esnaf onayı (APPROVED) veya ödeme bekleyen (PENDING) rezervasyon için Stripe PaymentIntent.
+   * Payment Element + Apple Pay / Google Pay (Stripe Dashboard ayarına bağlı).
+   */
+  async createStripePaymentIntentForGuestBooking(params: {
+    bookingId: string;
+    guestId: string;
+  }): Promise<
+    | { ok: true; clientSecret: string; paymentIntentId: string }
+    | { ok: false; errorCode: string }
+  > {
+    if (!isPaymentsEnabled()) {
+      return { ok: false, errorCode: "payments_disabled" };
+    }
+    if (getPaymentGateway() !== "stripe") {
+      return { ok: false, errorCode: "gateway_not_stripe" };
+    }
+    if (!process.env.STRIPE_SECRET_KEY?.trim()) {
+      return { ok: false, errorCode: "stripe_not_configured" };
+    }
+
+    const booking = await prisma.booking.findUnique({
+      where: { id: params.bookingId },
+    });
+
+    if (!booking || booking.guestId !== params.guestId) {
+      return { ok: false, errorCode: "booking_not_found" };
+    }
+
+    if (booking.status !== "APPROVED" && booking.status !== "PENDING") {
+      return { ok: false, errorCode: "invalid_booking_status" };
+    }
+
+    const existingLog = await prisma.paymentLog.findUnique({
+      where: { bookingId: params.bookingId },
+    });
+    if (existingLog?.status === "SUCCESS") {
+      return { ok: false, errorCode: "already_paid" };
+    }
+
+    const amountTry = moneyToNumber(booking.totalPrice);
+    if (!Number.isFinite(amountTry) || amountTry <= 0) {
+      return { ok: false, errorCode: "invalid_amount" };
+    }
+
+    try {
+      assertStripeKeys();
+      const stripe = getStripe();
+      const pi = await stripe.paymentIntents.create({
+        amount: tryAmountToStripeMinorUnits(amountTry),
+        currency: "try",
+        metadata: { bookingId: booking.id },
+        automatic_payment_methods: { enabled: true },
+      });
+      const cs = pi.client_secret;
+      if (!cs) {
+        return { ok: false, errorCode: "stripe_no_client_secret" };
+      }
+      return { ok: true, clientSecret: cs, paymentIntentId: pi.id };
+    } catch (error: unknown) {
+      logger.error(
+        { err: error, bookingId: params.bookingId },
+        "stripe_booking_pi_create_failed"
+      );
+      return { ok: false, errorCode: "stripe_error" };
+    }
   }
 
   /**

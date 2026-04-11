@@ -5,6 +5,7 @@ import BookingsClient from '@/components/guest/BookingsClient';
 import { getPricingRules } from '@/lib/platform-settings';
 import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
+import { isStripeGuestCheckoutEnabled } from '@/lib/stripe-checkout';
 
 export async function generateMetadata({
   params,
@@ -42,6 +43,7 @@ export default async function BookingsPage({ params }: { params: Promise<{ local
     <BookingsClient
       bookings={JSON.parse(JSON.stringify(bookings))}
       pricingRules={JSON.parse(JSON.stringify(pricingRules))}
+      stripeCheckoutEnabled={isStripeGuestCheckoutEnabled()}
     />
   );
 }
