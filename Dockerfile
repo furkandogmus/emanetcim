@@ -45,6 +45,9 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/node_modules/dotenv ./node_modules/dotenv
 # Next standalone bazen @swc/helpers izini düşürür (reactCompiler); runtime için gerekli
 COPY --from=builder /app/node_modules/@swc ./node_modules/@swc
+# next.config serverExternalPackages: Next trace tam ağacı kopyalamaz; iyzipay ctor fs.readdirSync(lib/resources) kullanır
+COPY --from=builder /app/node_modules/iyzipay ./node_modules/iyzipay
+COPY --from=builder /app/node_modules/@netgsm ./node_modules/@netgsm
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
