@@ -24,6 +24,8 @@ const { mockTx, mockPrisma, mockRefundPayment } = vi.hoisted(() => {
       findMany: vi.fn(),
       findUnique: vi.fn(),
     },
+    coupon: { create: vi.fn() },
+    paymentLog: { findFirst: vi.fn() },
     $executeRawUnsafe: vi.fn().mockResolvedValue(undefined),
   };
   return {
@@ -63,6 +65,9 @@ describe("BookingService", () => {
   beforeEach(() => {
     vi.mocked(mockRefundPayment).mockReset();
     vi.mocked(mockTx.booking.update).mockClear();
+    vi.mocked(mockTx.booking.findUnique).mockReset();
+    vi.mocked(mockTx.paymentLog.findFirst).mockResolvedValue(null);
+    vi.mocked(mockTx.coupon.create).mockReset();
     vi.mocked(mockTx.shop.findUnique).mockResolvedValue({
       id: "shop-1",
       pricePerDay: 50,
@@ -106,6 +111,7 @@ describe("BookingService", () => {
       status: "PENDING",
       totalPrice: 100,
       insuranceFee: 15,
+      checkInTime: new Date(Date.now() + 48 * 60 * 60 * 1000),
     } as never);
     vi.mocked(mockTx.booking.update).mockResolvedValue({} as never);
 
@@ -118,20 +124,72 @@ describe("BookingService", () => {
     expect(mockRefundPayment).not.toHaveBeenCalled();
   });
 
-  it("cancelBooking: PAID refund success then CANCELLED", async () => {
+  it("cancelBooking: PAID refund success then CANCELLED (≥24h → full)", async () => {
     vi.mocked(mockTx.booking.findUnique).mockResolvedValue({
       id: "b2",
       status: "PAID",
       totalPrice: 100,
       insuranceFee: 15,
+      checkInTime: new Date(Date.now() + 48 * 60 * 60 * 1000),
+    } as never);
+    vi.mocked(mockTx.paymentLog.findFirst).mockResolvedValue({
+      id: "pl1",
+      status: "SUCCESS",
     } as never);
     mockRefundPayment.mockResolvedValue({ status: "success" });
     vi.mocked(mockTx.booking.update).mockResolvedValue({} as never);
 
     const r = await service.cancelBooking("b2");
-    expect(r).toEqual({ ok: true });
-    expect(mockRefundPayment).toHaveBeenCalled();
+    expect(r).toEqual({ ok: true, creditCode: undefined });
+    expect(mockRefundPayment).toHaveBeenCalledWith("b2", 100, undefined);
     expect(mockTx.booking.update).toHaveBeenCalled();
+  });
+
+  it("cancelBooking: PAID partial tier (1–24h) refunds 50%", async () => {
+    vi.mocked(mockTx.booking.findUnique).mockResolvedValue({
+      id: "b2p",
+      status: "PAID",
+      totalPrice: 100,
+      insuranceFee: 15,
+      checkInTime: new Date(Date.now() + 12 * 60 * 60 * 1000),
+    } as never);
+    vi.mocked(mockTx.paymentLog.findFirst).mockResolvedValue({
+      id: "pl1",
+      status: "SUCCESS",
+    } as never);
+    mockRefundPayment.mockResolvedValue({ status: "success" });
+    vi.mocked(mockTx.booking.update).mockResolvedValue({} as never);
+
+    const r = await service.cancelBooking("b2p");
+    expect(r).toEqual({ ok: true, creditCode: undefined });
+    expect(mockRefundPayment).toHaveBeenCalledWith("b2p", 50, {
+      keepPaymentLogSuccess: true,
+    });
+  });
+
+  it("cancelBooking: PAID credit tier (<1h) creates coupon, no card refund", async () => {
+    vi.mocked(mockTx.booking.findUnique).mockResolvedValue({
+      id: "b2c",
+      status: "PAID",
+      totalPrice: 100,
+      insuranceFee: 15,
+      checkInTime: new Date(Date.now() + 30 * 60 * 1000),
+    } as never);
+    vi.mocked(mockTx.paymentLog.findFirst).mockResolvedValue({
+      id: "pl1",
+      status: "SUCCESS",
+    } as never);
+    vi.mocked(mockTx.coupon.create).mockResolvedValue({ code: "EMTEST" } as never);
+    vi.mocked(mockTx.booking.update).mockResolvedValue({} as never);
+
+    const r = await service.cancelBooking("b2c");
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.creditCode).toBeDefined();
+      expect(r.creditCode).toMatch(/^EM[A-Z0-9]+$/);
+    }
+    expect(mockRefundPayment).not.toHaveBeenCalled();
+    expect(mockTx.coupon.create).toHaveBeenCalled();
   });
 
   it("cancelBooking: PAID refund failure does not cancel", async () => {
@@ -140,6 +198,11 @@ describe("BookingService", () => {
       status: "PAID",
       totalPrice: 100,
       insuranceFee: 15,
+      checkInTime: new Date(Date.now() + 48 * 60 * 60 * 1000),
+    } as never);
+    vi.mocked(mockTx.paymentLog.findFirst).mockResolvedValue({
+      id: "pl1",
+      status: "SUCCESS",
     } as never);
     mockRefundPayment.mockResolvedValue({ status: "failure" });
 

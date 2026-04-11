@@ -6,6 +6,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import PrintButton from "@/components/guest/PrintButton";
 import BookingQrDisplay from "@/components/guest/BookingQrDisplay";
 import { moneyToNumber } from "@/lib/money";
+import { getPricingRules } from "@/lib/platform-settings";
+import BookingDetailModifySection from "@/components/guest/BookingDetailModifySection";
 
 
 /**
@@ -27,7 +29,10 @@ export default async function BookingDetailPage({
     redirect(`/${locale}/login?callbackUrl=/${locale}/bookings/${id}`);
   }
 
-  const booking = await bookingService.getBookingDetails(id);
+  const [booking, pricingRules] = await Promise.all([
+    bookingService.getBookingDetails(id),
+    getPricingRules(),
+  ]);
 
   const isAdmin = session?.user?.role === 'ADMIN';
   const isOwner = booking?.guestId === session?.user?.id;
@@ -96,6 +101,26 @@ export default async function BookingDetailPage({
               <span className="font-black text-lg">₺{moneyToNumber(booking.totalPrice)}</span>
            </div>
         </div>
+
+        <BookingDetailModifySection
+          booking={JSON.parse(
+            JSON.stringify({
+              id: booking.id,
+              bagCountS: booking.bagCountS,
+              bagCountM: booking.bagCountM,
+              bagCountXl: booking.bagCountXl,
+              checkInTime: booking.checkInTime,
+              checkOutTime: booking.checkOutTime,
+              totalPrice: booking.totalPrice,
+              status: booking.status,
+              shop: {
+                name: booking.shop.name,
+                pricePerDay: booking.shop.pricePerDay,
+              },
+            })
+          )}
+          pricingRules={JSON.parse(JSON.stringify(pricingRules))}
+        />
 
         <PrintButton label={t('downloadReceipt')} />
       </div>

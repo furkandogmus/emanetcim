@@ -31,5 +31,19 @@ export type CancelBookingErrorCode =
   | "UNKNOWN";
 
 export type CancelBookingResult =
-  | { ok: true }
+  | { ok: true; creditCode?: string }
   | { ok: false; code: CancelBookingErrorCode; message: string };
+
+export type ModifyBookingErrorCode =
+  | "NOT_FOUND"
+  | "UNAUTHORIZED"
+  | "INVALID_STATUS"
+  | "INVALID_DATES"
+  | "CAPACITY"
+  | "REFUND_FAILED"
+  | "PRICE_INCREASE"
+  | "UNKNOWN";
+
+export type ModifyBookingResult =
+  | { ok: true }
+  | { ok: false; code: ModifyBookingErrorCode; message: string };

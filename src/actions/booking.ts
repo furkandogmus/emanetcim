@@ -8,12 +8,19 @@ import {
 import { notificationService } from "@/services/NotificationService";
 import prisma from "@/lib/db";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
-import { computeAuthoritativeCheckoutTotals } from "@/lib/booking-server-price";
+import {
+  computeAuthoritativeCheckoutTotals,
+  validateBookingStayWindow,
+} from "@/lib/booking-server-price";
 import { getPricingRules } from "@/lib/platform-settings";
 import { moneyToNumber } from "@/lib/money";
 import { BookingStatus } from "@prisma/client";
 import { headers } from "next/headers";
 import { rateLimit } from "@/lib/rate-limit";
+import type {
+  CancelBookingErrorCode,
+  ModifyBookingErrorCode,
+} from "@/types/partner-booking";
 
 export type CreateBookingInput = {
   shopId: string;
@@ -61,6 +68,16 @@ export async function createBookingAction(data: CreateBookingInput) {
 
   if (!shop || !shop.isActive) {
     return { success: false as const, error: "Errors.shopNotFound" };
+  }
+
+  if (
+    !validateBookingStayWindow(
+      new Date(data.checkInTime),
+      new Date(data.checkOutTime),
+      pricingRules
+    )
+  ) {
+    return { success: false as const, error: "Errors.invalidBookingDates" };
   }
 
   const authTotals = computeAuthoritativeCheckoutTotals(
@@ -153,6 +170,64 @@ export async function createBookingAction(data: CreateBookingInput) {
   }
 }
 
+export type ModifyBookingActionInput = {
+  bookingId: string;
+  checkInTime: Date;
+  checkOutTime: Date;
+  bagCountS: number;
+  bagCountM: number;
+  bagCountXl: number;
+};
+
+const CANCEL_ERROR_TO_KEY: Record<CancelBookingErrorCode, string> = {
+  NOT_FOUND: "Errors.bookingNotFound",
+  INVALID_STATUS: "Errors.modificationNotAllowed",
+  REFUND_FAILED: "Errors.cancelRefundFailed",
+  UNKNOWN: "Errors.generic",
+};
+
+const MODIFY_ERROR_TO_KEY: Record<ModifyBookingErrorCode, string> = {
+  NOT_FOUND: "Errors.bookingNotFound",
+  UNAUTHORIZED: "Errors.unauthorized",
+  INVALID_STATUS: "Errors.modificationNotAllowed",
+  INVALID_DATES: "Errors.invalidBookingDates",
+  CAPACITY: "Errors.insufficientCapacity",
+  REFUND_FAILED: "Errors.modificationRefundFailed",
+  PRICE_INCREASE: "Errors.modificationPriceIncrease",
+  UNKNOWN: "Errors.generic",
+};
+
+export async function modifyBookingAction(data: ModifyBookingActionInput) {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { success: false as const, error: "Errors.authRequired" };
+  }
+
+  const result = await bookingService.modifyBooking(
+    data.bookingId,
+    session.user.id,
+    {
+      checkInTime: new Date(data.checkInTime),
+      checkOutTime: new Date(data.checkOutTime),
+      bagCountS: data.bagCountS,
+      bagCountM: data.bagCountM,
+      bagCountXl: data.bagCountXl,
+    }
+  );
+
+  if (result.ok) {
+    revalidatePathAllLocales("/bookings");
+    revalidatePathAllLocales(`/bookings/${data.bookingId}`);
+    return { success: true as const };
+  }
+
+  return {
+    success: false as const,
+    error: MODIFY_ERROR_TO_KEY[result.code] ?? "Errors.generic",
+  };
+}
+
 export async function cancelBookingAction(bookingId: string) {
   const session = await auth();
 
@@ -176,11 +251,17 @@ export async function cancelBookingAction(bookingId: string) {
     if (result.ok) {
       revalidatePathAllLocales("/bookings");
       revalidatePathAllLocales("/admin");
-      return { success: true };
+      return {
+        success: true as const,
+        creditCode: result.creditCode,
+      };
     }
-    return { success: false, error: result.message };
+    return {
+      success: false as const,
+      error: CANCEL_ERROR_TO_KEY[result.code] ?? "Errors.generic",
+    };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Bilinmeyen bir hata oluştu.";
-    return { success: false, error: message };
+    return { success: false as const, error: message };
   }
 }

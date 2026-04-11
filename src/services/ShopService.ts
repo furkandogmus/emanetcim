@@ -1,16 +1,47 @@
 import type { Prisma, Shop } from '@prisma/client';
 import prisma from '@/lib/db';
-import { distanceKm } from '@/lib/geo';
 import { moneyToNumber } from '@/lib/money';
+import { getActiveShopsOrderedByDistanceKm } from '@/lib/shop-distance-postgis';
+import { totalBagCount } from '@/lib/bag-pricing';
+import { isShopOpenAt } from '@/lib/shop-hours';
 
 export type ShopWithDistance = Omit<Shop, 'pricePerDay'> & {
   pricePerDay: number;
   distanceKm: number;
 };
 
+/** Arama: seçilen pencerede kalan valiz kapasitesi (tahmini). */
+export type ShopSearchHit = ShopWithDistance & {
+  bagsAvailable: number;
+};
+
+const BOOKING_STATUSES_FOR_CAPACITY = [
+  'WAITING_APPROVAL',
+  'APPROVED',
+  'PENDING',
+  'PAID',
+  'CHECKED_IN',
+] as const;
+
 export type ShopWithOwner = Prisma.ShopGetPayload<{
   include: { owner: true };
 }>;
+
+export type ShopPublicDetail = Prisma.ShopGetPayload<{
+  include: {
+    reviews: { include: { guest: { select: { name: true } } } };
+  };
+}>;
+
+export type FindShopsForSearchOptions = {
+  centerLat: number;
+  centerLng: number;
+  /** null = tüm Türkiye listesi (mesafeye göre sıralı), sayı = yarıçap km */
+  radiusKm: number | null;
+  checkIn: Date;
+  checkOut: Date;
+  requestedBags: number;
+};
 
 export interface IShopService {
   findNearby(
@@ -21,7 +52,11 @@ export interface IShopService {
     limit?: number
   ): Promise<ShopWithDistance[]>;
   getAllActive(latitude: number, longitude: number): Promise<ShopWithDistance[]>;
+  /** Tarih aralığı + valiz sayısına göre müsait dükkanlar (kapasite + çalışma saati). */
+  findShopsForSearch(options: FindShopsForSearchOptions): Promise<ShopSearchHit[]>;
   getShopDetails(shopId: string): Promise<Shop | null>;
+  /** Misafir detay sayfası: aktif dükkan + son yorumlar */
+  getShopPublicDetail(shopId: string): Promise<ShopPublicDetail | null>;
   getPendingShops(): Promise<ShopWithOwner[]>;
   approveShop(shopId: string): Promise<boolean>;
   getShopsByOwner(ownerId: string): Promise<Shop[]>;
@@ -39,21 +74,19 @@ export class ShopService implements IShopService {
     limit: number = 10
   ): Promise<ShopWithDistance[]> {
     try {
-      const shops = await prisma.shop.findMany({
-        where: { isActive: true },
-      });
-      const withDist = shops
-        .filter((s) => s.latitude != null && s.longitude != null)
-        .map((s) => ({
-          ...s,
-          pricePerDay: moneyToNumber(s.pricePerDay),
-          distanceKm: distanceKm(latitude, longitude, s.latitude!, s.longitude!),
-        }))
-        .filter((s) => s.distanceKm <= radiusInKm)
-        .sort((a, b) => a.distanceKm - b.distanceKm);
-
       const skip = (page - 1) * limit;
-      return withDist.slice(skip, skip + limit);
+      const pairs = await getActiveShopsOrderedByDistanceKm({
+        centerLat: latitude,
+        centerLng: longitude,
+        radiusKm: radiusInKm,
+        skip,
+        take: limit,
+      });
+      return pairs.map(({ shop, distanceKm }) => ({
+        ...shop,
+        pricePerDay: moneyToNumber(shop.pricePerDay),
+        distanceKm,
+      }));
     } catch (error) {
       console.error('ShopService::findNearby Error:', error);
       return [];
@@ -65,19 +98,100 @@ export class ShopService implements IShopService {
     longitude: number
   ): Promise<ShopWithDistance[]> {
     try {
-      const shops = await prisma.shop.findMany({
-        where: { isActive: true },
+      const pairs = await getActiveShopsOrderedByDistanceKm({
+        centerLat: latitude,
+        centerLng: longitude,
+        radiusKm: null,
+        take: null,
       });
-      return shops
-        .filter((s) => s.latitude != null && s.longitude != null)
-        .map((s) => ({
-          ...s,
-          pricePerDay: moneyToNumber(s.pricePerDay),
-          distanceKm: distanceKm(latitude, longitude, s.latitude!, s.longitude!),
-        }))
-        .sort((a, b) => a.distanceKm - b.distanceKm);
+      return pairs.map(({ shop, distanceKm }) => ({
+        ...shop,
+        pricePerDay: moneyToNumber(shop.pricePerDay),
+        distanceKm,
+      }));
     } catch (error) {
       console.error('ShopService::getAllActive Error:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Çakışan rezervasyonlardaki valiz adetlerini toplu hesaplar; kapasite ve çalışma saatine göre süzer.
+   */
+  async findShopsForSearch(
+    options: FindShopsForSearchOptions
+  ): Promise<ShopSearchHit[]> {
+    const {
+      centerLat,
+      centerLng,
+      radiusKm,
+      checkIn,
+      checkOut,
+      requestedBags,
+    } = options;
+    const bags = Math.max(1, Math.floor(requestedBags));
+
+    try {
+      const pairs = await getActiveShopsOrderedByDistanceKm({
+        centerLat,
+        centerLng,
+        radiusKm,
+        take: null,
+      });
+
+      const withDist: ShopWithDistance[] = pairs.map(({ shop, distanceKm }) => ({
+        ...shop,
+        pricePerDay: moneyToNumber(shop.pricePerDay),
+        distanceKm,
+      }));
+
+      if (withDist.length === 0) return [];
+
+      const shopIds = withDist.map((s) => s.id);
+
+      const overlapping = await prisma.booking.findMany({
+        where: {
+          shopId: { in: shopIds },
+          status: { in: [...BOOKING_STATUSES_FOR_CAPACITY] },
+          AND: [
+            { checkInTime: { lt: checkOut } },
+            { checkOutTime: { gt: checkIn } },
+          ],
+        },
+        select: {
+          shopId: true,
+          bagCountS: true,
+          bagCountM: true,
+          bagCountXl: true,
+        },
+      });
+
+      const usedByShop = new Map<string, number>();
+      for (const b of overlapping) {
+        const n =
+          totalBagCount(b.bagCountS, b.bagCountM, b.bagCountXl);
+        usedByShop.set(b.shopId, (usedByShop.get(b.shopId) ?? 0) + n);
+      }
+
+      const hits: ShopSearchHit[] = [];
+
+      for (const shop of withDist) {
+        const used = usedByShop.get(shop.id) ?? 0;
+        const bagsAvailable = Math.max(0, shop.capacity - used);
+        if (bagsAvailable < bags) continue;
+
+        const openOk =
+          shop.open247 ||
+          (isShopOpenAt(shop.openingTime, shop.closingTime, checkIn) &&
+            isShopOpenAt(shop.openingTime, shop.closingTime, checkOut));
+        if (!openOk) continue;
+
+        hits.push({ ...shop, bagsAvailable });
+      }
+
+      return hits;
+    } catch (error) {
+      console.error('ShopService::findShopsForSearch Error:', error);
       return [];
     }
   }
@@ -85,6 +199,21 @@ export class ShopService implements IShopService {
   async getShopDetails(shopId: string): Promise<Shop | null> {
     return await prisma.shop.findUnique({
       where: { id: shopId }
+    });
+  }
+
+  async getShopPublicDetail(shopId: string): Promise<ShopPublicDetail | null> {
+    return prisma.shop.findFirst({
+      where: { id: shopId, isActive: true },
+      include: {
+        reviews: {
+          orderBy: { createdAt: 'desc' },
+          take: 40,
+          include: {
+            guest: { select: { name: true } },
+          },
+        },
+      },
     });
   }
 

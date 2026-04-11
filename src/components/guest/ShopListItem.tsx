@@ -10,6 +10,8 @@ interface ShopListItemProps {
   distance: string;
   lat?: number;
   lng?: number;
+  /** Seçilen tarih aralığında kalan tahmini kapasite (valiz adedi) */
+  bagsAvailable?: number;
   onClick?: () => void;
 }
 
@@ -17,7 +19,16 @@ interface ShopListItemProps {
  * ShopListItem - Misafir Arama Sonucu Kartı
  * Minimalist, fiyat ve güven odaklı tasarım.
  */
-export default function ShopListItem({ name, rating, price, distance, lat, lng, onClick }: ShopListItemProps) {
+export default function ShopListItem({
+  name,
+  rating,
+  price,
+  distance,
+  lat,
+  lng,
+  bagsAvailable,
+  onClick,
+}: ShopListItemProps) {
   const t = useTranslations('Guest');
   return (
     <div 
@@ -39,9 +50,16 @@ export default function ShopListItem({ name, rating, price, distance, lat, lng, 
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-gray-400 font-medium">
-          <MapPin size={12} />
-          <span>{t("away", { distance })}</span>
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-400 font-medium">
+          <span className="inline-flex items-center gap-1">
+            <MapPin size={12} />
+            {t("away", { distance })}
+          </span>
+          {bagsAvailable != null ? (
+            <span className="text-[10px] font-black uppercase tracking-tight text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
+              {t("searchBagsAvailable", { count: bagsAvailable })}
+            </span>
+          ) : null}
         </div>
 
         <div className="mt-3 flex justify-between items-center">

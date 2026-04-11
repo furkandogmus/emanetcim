@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import QRCode from "qrcode";
 import {
@@ -13,8 +13,6 @@ import {
   Calendar,
   Lock,
   User,
-  Minus,
-  Plus,
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import BagSelector from "@/components/guest/BagSelector";
@@ -24,6 +22,11 @@ import {
   computeServiceTotalForStay,
   roundedSlotPrices,
 } from "@/lib/bag-pricing";
+import {
+  computeStayDaysFromWindow,
+  validateBookingStayWindow,
+} from "@/lib/booking-server-price";
+import { parseDatetimeLocal, toDatetimeLocalValue } from "@/lib/datetime-local";
 import type { PricingRules } from "@/lib/pricing-rules";
 
 const STEPS = 3 as const;
@@ -44,6 +47,7 @@ export default function CheckoutClient({
   pricingRules,
 }: CheckoutClientProps) {
   const t = useTranslations("Guest");
+  const tErr = useTranslations("Errors");
 
   const slot = roundedSlotPrices(pricePerDay, pricingRules);
   const priceS = slot.s;
@@ -55,7 +59,32 @@ export default function CheckoutClient({
   const [bagS, setBagS] = useState(0);
   const [bagM, setBagM] = useState(1);
   const [bagXl, setBagXl] = useState(0);
-  const [numberOfDays, setNumberOfDays] = useState(1);
+
+  const [checkInLocal, setCheckInLocal] = useState("");
+  const [checkOutLocal, setCheckOutLocal] = useState("");
+  const [datesReady, setDatesReady] = useState(false);
+
+  useEffect(() => {
+    const now = new Date();
+    const defaultOut = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    setCheckInLocal(toDatetimeLocalValue(now));
+    setCheckOutLocal(toDatetimeLocalValue(defaultOut));
+    setDatesReady(true);
+  }, []);
+
+  const checkInDate = parseDatetimeLocal(checkInLocal);
+  const checkOutDate = parseDatetimeLocal(checkOutLocal);
+  const windowOk =
+    datesReady &&
+    checkInDate !== null &&
+    checkOutDate !== null &&
+    validateBookingStayWindow(checkInDate, checkOutDate, pricingRules);
+
+  const billableDays =
+    checkInDate && checkOutDate
+      ? computeStayDaysFromWindow(checkInDate, checkOutDate, pricingRules)
+      : 1;
+  const displayBillableDays = windowOk ? billableDays : null;
 
   const [cardHolder, setCardHolder] = useState("");
   const [cardNumber, setCardNumber] = useState("");
@@ -76,14 +105,17 @@ export default function CheckoutClient({
     bagXl,
     pricingRules
   );
-  const totalPrice = computeServiceTotalForStay(
-    pricePerDay,
-    bagS,
-    bagM,
-    bagXl,
-    numberOfDays,
-    pricingRules
-  );
+  const totalPrice =
+    windowOk && checkInDate && checkOutDate
+      ? computeServiceTotalForStay(
+          pricePerDay,
+          bagS,
+          bagM,
+          bagXl,
+          billableDays,
+          pricingRules
+        )
+      : 0;
   const insuranceFee = totalPrice > 0 ? pricingRules.insuranceFeeTry : 0;
   const grandTotal = totalPrice + insuranceFee;
 
@@ -133,13 +165,15 @@ export default function CheckoutClient({
         ? `20${expYearDigits}`
         : new Date().getFullYear().toString();
 
+    if (!checkInDate || !checkOutDate || !windowOk) {
+      setError(
+        t("checkoutDatesInvalid", { max: pricingRules.maxStayDays })
+      );
+      return;
+    }
+
     setIsProcessing(true);
     setError(null);
-
-    const checkInTime = new Date();
-    const checkOutTime = new Date(
-      checkInTime.getTime() + numberOfDays * 24 * 60 * 60 * 1000,
-    );
 
     const result = await createBookingAction({
       shopId,
@@ -149,8 +183,8 @@ export default function CheckoutClient({
       unitPrice: pricePerDay,
       totalPrice: grandTotal,
       insuranceFee,
-      checkInTime,
-      checkOutTime,
+      checkInTime: checkInDate,
+      checkOutTime: checkOutDate,
       cardInfo: {
         cardHolderName: cardHolder,
         cardNumber: strippedCard,
@@ -172,13 +206,26 @@ export default function CheckoutClient({
       }
       setIsSuccess(true);
     } else {
-      setError(result.error || t("checkoutUnexpectedError"));
+      const code = result.error;
+      if (code?.startsWith("Errors.")) {
+        const key = code.slice(7);
+        setError(tErr(key as never));
+      } else {
+        setError(code || t("checkoutUnexpectedError"));
+      }
     }
   };
 
   const goNext = () => {
     setError(null);
     if (step === 1) {
+      if (!datesReady) return;
+      if (!windowOk) {
+        setError(
+          t("checkoutDatesInvalid", { max: pricingRules.maxStayDays })
+        );
+        return;
+      }
       if (totalPrice === 0 || totalBags === 0) {
         setError(t("checkoutSelectBagsHint"));
         return;
@@ -349,57 +396,83 @@ export default function CheckoutClient({
             </div>
 
             <section className="flex flex-col gap-3" data-testid="checkout-stay-days">
+              {datesReady ? (
+                <span data-testid="checkout-dates-ready" className="sr-only">
+                  ready
+                </span>
+              ) : null}
               <h2 className="text-sm font-black uppercase tracking-widest text-gray-900">
                 {t("stayDuration")}
               </h2>
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100 group hover:border-orange-200 transition-all">
-                <div className="flex items-center gap-4">
-                  <div className="bg-white p-3 rounded-xl shadow-sm text-gray-400 group-hover:text-orange-600 transition-colors">
-                    <Calendar size={24} strokeWidth={1.5} />
-                  </div>
-                  <div>
-                    <p className="font-bold text-gray-900 text-sm">
-                      {numberOfDays} {t("daysUnit")}
-                    </p>
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                      {t("dailyRate", { amount: dailyLine })}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <button
-                    type="button"
-                    data-testid="checkout-stay-days-decrease"
-                    onClick={() => setNumberOfDays((d) => Math.max(1, d - 1))}
-                    disabled={numberOfDays <= 1}
-                    aria-label="Decrease days"
-                    className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-900 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 shadow-sm"
-                  >
-                    <Minus size={18} />
-                  </button>
-                  <span
-                    data-testid="checkout-stay-days-value"
-                    className="w-8 text-center font-black text-lg text-gray-900"
-                  >
-                    {numberOfDays}
+              <div className="flex flex-col gap-3">
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                    {t("checkoutCheckInLabel")}
                   </span>
-                  <button
-                    type="button"
-                    data-testid="checkout-stay-days-increase"
-                    onClick={() =>
-                      setNumberOfDays((d) =>
-                        Math.min(pricingRules.maxStayDays, d + 1)
-                      )
-                    }
-                    disabled={numberOfDays >= pricingRules.maxStayDays}
-                    aria-label="Increase days"
-                    className="w-10 h-10 rounded-full bg-orange-600 flex items-center justify-center text-white hover:bg-orange-700 transition-all active:scale-95 shadow-md shadow-orange-200 disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    <Plus size={18} />
-                  </button>
+                  <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-100 focus-within:border-orange-200 transition-colors">
+                    <Calendar
+                      size={20}
+                      strokeWidth={1.5}
+                      className="text-gray-400 shrink-0"
+                      aria-hidden
+                    />
+                    <input
+                      type="datetime-local"
+                      data-testid="checkout-checkin"
+                      value={checkInLocal}
+                      onChange={(e) => setCheckInLocal(e.target.value)}
+                      className="w-full bg-transparent text-sm font-semibold outline-none min-h-[44px]"
+                    />
+                  </div>
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                    {t("checkoutCheckOutLabel")}
+                  </span>
+                  <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-100 focus-within:border-orange-200 transition-colors">
+                    <Calendar
+                      size={20}
+                      strokeWidth={1.5}
+                      className="text-gray-400 shrink-0"
+                      aria-hidden
+                    />
+                    <input
+                      type="datetime-local"
+                      data-testid="checkout-checkout"
+                      value={checkOutLocal}
+                      onChange={(e) => setCheckOutLocal(e.target.value)}
+                      className="w-full bg-transparent text-sm font-semibold outline-none min-h-[44px]"
+                    />
+                  </div>
+                </label>
+              </div>
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                <div>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                    {t("checkoutBillableDaysLabel")}
+                  </p>
+                  <p className="font-black text-lg text-gray-900 mt-0.5">
+                    <span data-testid="checkout-stay-days-value">
+                      {displayBillableDays ?? "—"}
+                    </span>{" "}
+                    {t("daysUnit")}
+                  </p>
                 </div>
+                <p className="text-[10px] text-gray-400 font-bold text-right max-w-[55%] leading-relaxed">
+                  {t("dailyRate", { amount: dailyLine })}
+                </p>
               </div>
               <p className="text-xs text-gray-400 leading-relaxed">{t("stayDaysHint")}</p>
+              {datesReady && !windowOk ? (
+                <p
+                  data-testid="checkout-dates-error"
+                  className="text-xs font-bold text-orange-600"
+                >
+                  {t("checkoutDatesInvalid", {
+                    max: pricingRules.maxStayDays,
+                  })}
+                </p>
+              ) : null}
             </section>
 
             <section className="flex flex-col gap-2">
@@ -443,9 +516,9 @@ export default function CheckoutClient({
                   <span className="text-gray-400 font-medium">
                     {t("checkoutServiceFee")}
                   </span>
-                  {numberOfDays > 1 && (
+                  {billableDays > 1 && (
                     <span className="text-[10px] text-gray-400">
-                      ₺{dailyLine} × {numberOfDays} {t("daysUnit")}
+                      ₺{dailyLine} × {billableDays} {t("daysUnit")}
                     </span>
                   )}
                 </div>
@@ -489,9 +562,18 @@ export default function CheckoutClient({
                     <span className="text-sm font-bold text-gray-400">{t("totalBags")}</span>
                     <span className="text-sm font-black">{totalBags}</span>
                  </div>
-                 <div className="flex justify-between">
-                    <span className="text-sm font-bold text-gray-400">{t("stayDuration")}</span>
-                    <span className="text-sm font-black">{numberOfDays} {t("daysUnit")}</span>
+                 <div className="flex justify-between gap-4">
+                    <span className="text-sm font-bold text-gray-400 shrink-0">
+                      {t("stayDuration")}
+                    </span>
+                    <span className="text-sm font-black text-right">
+                      {checkInLocal && checkOutLocal
+                        ? `${checkInLocal.replace("T", " ")} → ${checkOutLocal.replace("T", " ")}`
+                        : "—"}
+                      <span className="block text-[10px] font-bold text-gray-400 mt-1">
+                        {billableDays} {t("daysUnit")}
+                      </span>
+                    </span>
                  </div>
               </div>
             </section>
@@ -607,7 +689,9 @@ export default function CheckoutClient({
               type="button"
               data-testid="checkout-footer-primary"
               onClick={goNext}
-              disabled={step === 1 && totalPrice === 0}
+              disabled={
+                step === 1 && (!datesReady || !windowOk || totalPrice === 0)
+              }
               className="flex-1 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-200 disabled:cursor-not-allowed text-white py-4 rounded-3xl font-black text-sm uppercase tracking-wider transition-all active:scale-[0.98] shadow-xl shadow-gray-200"
             >
               {step === 1 ? t("checkoutContinue") : t("checkoutToPayment")}

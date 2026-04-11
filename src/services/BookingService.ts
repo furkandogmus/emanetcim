@@ -14,6 +14,14 @@ export type CreateInitialBookingInput = {
   insuranceFee?: number;
 };
 
+export type ModifyBookingInput = {
+  checkInTime: Date;
+  checkOutTime: Date;
+  bagCountS: number;
+  bagCountM: number;
+  bagCountXl: number;
+};
+
 export type BookingWithGuestShop = Prisma.BookingGetPayload<{
   include: { guest: true; shop: true };
 }>;
@@ -41,7 +49,16 @@ import type {
   PartnerCheckInResult,
   PartnerCheckOutResult,
   CancelBookingResult,
+  ModifyBookingResult,
 } from '@/types/partner-booking';
+import {
+  computeAuthoritativeCheckoutTotals,
+  validateBookingStayWindow,
+} from '@/lib/booking-server-price';
+import {
+  estimatePaidRefundForTier,
+  getCancellationTier,
+} from '@/lib/cancellation-policy';
 
 type TxClient = Omit<
   Prisma.TransactionClient,
@@ -74,6 +91,11 @@ export interface IBookingService {
   getBookingDetails(id: string): Promise<BookingWithShopGuestDetails | null>;
   cancelBooking(bookingId: string): Promise<CancelBookingResult>;
   markAsPaid(bookingId: string): Promise<void>;
+  modifyBooking(
+    bookingId: string,
+    guestId: string,
+    input: ModifyBookingInput
+  ): Promise<ModifyBookingResult>;
 }
 
 /**
@@ -116,7 +138,8 @@ export class BookingService implements IBookingService {
           data.shopId,
           data.checkInTime,
           data.checkOutTime,
-          newBags
+          newBags,
+          undefined
         );
 
         const booking = await tx.booking.create({
@@ -157,12 +180,22 @@ export class BookingService implements IBookingService {
     shopId: string,
     checkInTime: Date,
     checkOutTime: Date,
-    newBags: number
+    newBags: number,
+    excludeBookingId?: string
   ): Promise<void> {
     const overlapping = await tx.booking.findMany({
       where: {
         shopId,
-        status: { in: ['PENDING', 'PAID', 'CHECKED_IN'] },
+        ...(excludeBookingId ? { id: { not: excludeBookingId } } : {}),
+        status: {
+          in: [
+            'WAITING_APPROVAL',
+            'APPROVED',
+            'PENDING',
+            'PAID',
+            'CHECKED_IN',
+          ],
+        },
         AND: [
           { checkInTime: { lt: checkOutTime } },
           { checkOutTime: { gt: checkInTime } },
@@ -460,8 +493,41 @@ export class BookingService implements IBookingService {
   }
 
   /**
+   * Tek kullanımlı indirim kuponu = “platform kredisi” (check-in’e &lt;1 saat kala nakit iade yok).
+   */
+  private async issueCancellationCreditCoupon(amountTry: number): Promise<string> {
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const code = `EM${crypto.randomUUID().replace(/-/g, '').slice(0, 12).toUpperCase()}`;
+      try {
+        await prisma.coupon.create({
+          data: {
+            code,
+            discount: Math.round(amountTry * 100) / 100,
+            isPercent: false,
+            maxUses: 1,
+            usedCount: 0,
+            isActive: true,
+            expiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+          },
+        });
+        return code;
+      } catch (e) {
+        if (
+          e instanceof Prisma.PrismaClientKnownRequestError &&
+          e.code === 'P2002'
+        ) {
+          continue;
+        }
+        throw e;
+      }
+    }
+    throw new Error('credit_coupon_generation_failed');
+  }
+
+  /**
    * Rezervasyon İptali ve İade Süreci
-   * PAID iken iade başarısızsa rezervasyon CANCELLED yapılmaz (finansal tutarlılık).
+   * Kademe: ≥24s check-in → tam kart iadesi; ≥1s → %50 kart iadesi; &lt;1s veya geçmiş check-in → kartsız, tek kullanımlı kupon (tutar kadar).
+   * Ödeme alınmışsa iade başarısızsa rezervasyon CANCELLED yapılmaz.
    */
   async cancelBooking(bookingId: string): Promise<CancelBookingResult> {
     const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
@@ -481,21 +547,52 @@ export class BookingService implements IBookingService {
       };
     }
 
+    const hasCapturedPayment = await prisma.paymentLog.findFirst({
+      where: { bookingId, status: 'SUCCESS' },
+    });
+    const treatAsPaidRefund =
+      booking.status === 'PAID' || !!hasCapturedPayment;
+
     try {
-      const rules = await getPricingRules();
-      if (booking.status === 'PAID') {
-        const insuranceFee = moneyToNumber(booking.insuranceFee);
-        const serviceBase = Math.max(0, moneyToNumber(booking.totalPrice) - insuranceFee);
-        const refundAmount = Math.max(
-          0,
-          serviceBase - rules.cancelFixedFeeTry
+      let creditCode: string | undefined;
+
+      if (treatAsPaidRefund) {
+        const checkIn = new Date(booking.checkInTime);
+        const tier = getCancellationTier(checkIn);
+        const totalPaid = moneyToNumber(booking.totalPrice);
+        const { cardRefund, isCreditOnly } = estimatePaidRefundForTier(
+          totalPaid,
+          tier
         );
+
         const { paymentService } = await import('@/services/PaymentService');
-        if (refundAmount > 0) {
-          const refundResult = await paymentService.refundPayment(bookingId, refundAmount);
+
+        if (isCreditOnly) {
+          if (totalPaid > 0) {
+            try {
+              creditCode = await this.issueCancellationCreditCoupon(totalPaid);
+            } catch (e) {
+              logger.error(
+                { err: e, bookingId },
+                'cancelBooking_credit_coupon_failed',
+              );
+              return {
+                ok: false,
+                code: 'UNKNOWN',
+                message: 'Kupon oluşturulamadı; iptal tamamlanamadı.',
+              };
+            }
+          }
+        } else if (cardRefund > 0) {
+          const partialRefund = cardRefund + 0.02 < totalPaid;
+          const refundResult = await paymentService.refundPayment(
+            bookingId,
+            cardRefund,
+            partialRefund ? { keepPaymentLogSuccess: true } : undefined
+          );
           if (!isRefundSuccess(refundResult?.status)) {
             logger.error(
-              { bookingId, refundAmount, status: refundResult?.status },
+              { bookingId, cardRefund, status: refundResult?.status },
               'cancelBooking_refund_failed',
             );
             return {
@@ -513,13 +610,198 @@ export class BookingService implements IBookingService {
         data: { status: 'CANCELLED' },
       });
 
-      return { ok: true };
+      return { ok: true, creditCode };
     } catch (error) {
       logger.error({ err: error, bookingId }, 'BookingService::cancelBooking');
       return {
         ok: false,
         code: 'UNKNOWN',
         message: 'İptal sırasında beklenmeyen bir hata oluştu.',
+      };
+    }
+  }
+
+  /**
+   * Misafir rezervasyonunu günceller (tarih / valiz sayıları).
+   * Ödeme alınmışsa tutar düşüşünde kısmi iade; tutar artışı desteklenmez (iptal + yeniden rezervasyon).
+   */
+  async modifyBooking(
+    bookingId: string,
+    guestId: string,
+    input: ModifyBookingInput
+  ): Promise<ModifyBookingResult> {
+    const rules = await getPricingRules();
+
+    if (
+      !validateBookingStayWindow(
+        input.checkInTime,
+        input.checkOutTime,
+        rules
+      )
+    ) {
+      return {
+        ok: false,
+        code: 'INVALID_DATES',
+        message: 'Geçersiz tarih aralığı.',
+      };
+    }
+
+    const booking = await prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: { shop: true },
+    });
+
+    if (!booking) {
+      return {
+        ok: false,
+        code: 'NOT_FOUND',
+        message: 'Rezervasyon bulunamadı.',
+      };
+    }
+    if (booking.guestId !== guestId) {
+      return {
+        ok: false,
+        code: 'UNAUTHORIZED',
+        message: 'Bu rezervasyonu düzenleyemezsiniz.',
+      };
+    }
+
+    if (
+      booking.status === 'CHECKED_IN' ||
+      booking.status === 'CHECKED_OUT' ||
+      booking.status === 'CANCELLED'
+    ) {
+      return {
+        ok: false,
+        code: 'INVALID_STATUS',
+        message: 'Bu rezervasyon düzenlenemez.',
+      };
+    }
+
+    const hasCapturedPayment = await prisma.paymentLog.findFirst({
+      where: { bookingId, status: 'SUCCESS' },
+    });
+    const isPaidLike =
+      booking.status === 'PAID' || !!hasCapturedPayment;
+
+    const unitPrice = moneyToNumber(booking.shop.pricePerDay);
+    const authTotals = computeAuthoritativeCheckoutTotals(
+      unitPrice,
+      input.bagCountS,
+      input.bagCountM,
+      input.bagCountXl,
+      input.checkInTime,
+      input.checkOutTime,
+      rules
+    );
+    const bagTotal =
+      authTotals.bagCountS +
+      authTotals.bagCountM +
+      authTotals.bagCountXl;
+    if (bagTotal < 1) {
+      return {
+        ok: false,
+        code: 'INVALID_STATUS',
+        message: 'En az bir valiz seçilmelidir.',
+      };
+    }
+    const newTotal = authTotals.subtotalBeforeCoupon;
+    const oldTotal = moneyToNumber(booking.totalPrice);
+
+    if (isPaidLike && newTotal > oldTotal + 0.005) {
+      return {
+        ok: false,
+        code: 'PRICE_INCREASE',
+        message:
+          'Ödeme alınmış rezervasyonda tutar artırılamaz. İptal edip yeniden rezervasyon oluşturabilirsiniz.',
+      };
+    }
+
+    const refundDue =
+      isPaidLike && newTotal < oldTotal - 0.005
+        ? Math.round((oldTotal - newTotal) * 100) / 100
+        : 0;
+
+    if (refundDue > 0) {
+      const { paymentService } = await import('@/services/PaymentService');
+      const refundResult = await paymentService.refundPayment(
+        bookingId,
+        refundDue,
+        { keepPaymentLogSuccess: true }
+      );
+      if (!isRefundSuccess(refundResult.status)) {
+        logger.error(
+          { bookingId, refundDue, status: refundResult.status },
+          'modifyBooking_refund_failed',
+        );
+        return {
+          ok: false,
+          code: 'REFUND_FAILED',
+          message:
+            'İade tamamlanamadı; rezervasyon değiştirilmedi. Lütfen tekrar deneyin.',
+        };
+      }
+    }
+
+    try {
+      await prisma.$transaction(
+        async (tx) => {
+          await tx.$executeRawUnsafe(
+            `SELECT 1 FROM "Shop" WHERE id = $1::uuid FOR UPDATE`,
+            booking.shopId
+          );
+          const shop = await tx.shop.findUnique({
+            where: { id: booking.shopId },
+          });
+          if (!shop) {
+            throw new Error('Shop missing');
+          }
+
+          const newBags = totalBagCount(
+            input.bagCountS,
+            input.bagCountM,
+            input.bagCountXl
+          );
+          await this.assertCapacityTx(
+            tx,
+            shop,
+            booking.shopId,
+            input.checkInTime,
+            input.checkOutTime,
+            newBags,
+            bookingId
+          );
+
+          await tx.booking.update({
+            where: { id: bookingId },
+            data: {
+              checkInTime: input.checkInTime,
+              checkOutTime: input.checkOutTime,
+              bagCountS: authTotals.bagCountS,
+              bagCountM: authTotals.bagCountM,
+              bagCountXl: authTotals.bagCountXl,
+              unitPrice: authTotals.unitPrice,
+              insuranceFee: authTotals.insuranceFee,
+              totalPrice: newTotal,
+            },
+          });
+        },
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
+      );
+      return { ok: true };
+    } catch (error) {
+      if (error instanceof BookingCapacityExceededError) {
+        return {
+          ok: false,
+          code: 'CAPACITY',
+          message: error.message,
+        };
+      }
+      logger.error({ err: error, bookingId }, 'BookingService::modifyBooking');
+      return {
+        ok: false,
+        code: 'UNKNOWN',
+        message: 'Düzenleme sırasında beklenmeyen bir hata oluştu.',
       };
     }
   }

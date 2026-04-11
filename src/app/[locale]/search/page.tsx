@@ -2,6 +2,11 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { shopService } from '@/services/ShopService';
 import SearchClient from '@/components/guest/SearchClient';
 import type { Metadata } from 'next';
+import {
+  SEARCH_DEFAULT_CENTER,
+  SEARCH_NEARBY_RADIUS_KM,
+  defaultSearchStayWindow,
+} from '@/lib/search-defaults';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -12,9 +17,6 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   };
 }
 
-const ISTANBUL_CENTER = { lat: 41.0256, lng: 28.9741 };
-const NEARBY_RADIUS_KM = 10;
-
 /**
  * Guest Search Page - Harita Tabanlı Arama Ekranı (Server Component)
  */
@@ -22,11 +24,34 @@ export default async function SearchPage({ params }: { params: Promise<{ locale:
   const { locale } = await params;
   setRequestLocale(locale);
 
+  const { checkIn, checkOut } = defaultSearchStayWindow();
+
   const [nearbyShops, allShops] = await Promise.all([
-    shopService.findNearby(ISTANBUL_CENTER.lat, ISTANBUL_CENTER.lng, NEARBY_RADIUS_KM),
-    shopService.getAllActive(ISTANBUL_CENTER.lat, ISTANBUL_CENTER.lng),
+    shopService.findShopsForSearch({
+      centerLat: SEARCH_DEFAULT_CENTER.lat,
+      centerLng: SEARCH_DEFAULT_CENTER.lng,
+      radiusKm: SEARCH_NEARBY_RADIUS_KM,
+      checkIn,
+      checkOut,
+      requestedBags: 1,
+    }),
+    shopService.findShopsForSearch({
+      centerLat: SEARCH_DEFAULT_CENTER.lat,
+      centerLng: SEARCH_DEFAULT_CENTER.lng,
+      radiusKm: null,
+      checkIn,
+      checkOut,
+      requestedBags: 1,
+    }),
   ]);
 
-  return <SearchClient initialShops={nearbyShops} allShops={allShops} />;
+  return (
+    <SearchClient
+      initialNearby={JSON.parse(JSON.stringify(nearbyShops))}
+      initialAll={JSON.parse(JSON.stringify(allShops))}
+      defaultCheckInIso={checkIn.toISOString()}
+      defaultCheckOutIso={checkOut.toISOString()}
+    />
+  );
 }
 
