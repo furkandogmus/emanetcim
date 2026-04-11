@@ -16,6 +16,7 @@ export const SITEMAP_PATHS: readonly string[] = [
   "/register",
   "/become-partner",
   "/hotels",
+  "/luggage-storage",
 ];
 
 export function getSiteBaseUrl(): string {

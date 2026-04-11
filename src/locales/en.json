@@ -18,7 +18,14 @@
     "notFoundBackHome": "BACK TO HOME",
     "emailVerificationRequiredBanner": "Your email address has not been verified yet. Please check your inbox.",
     "resendEmailSuccess": "Verification email sent successfully.",
-    "resendEmailCta": "RESEND NOW"
+    "resendEmailCta": "RESEND NOW",
+    "mobileNavHome": "Home",
+    "mobileNavSearch": "Search",
+    "mobileNavBookings": "Bookings",
+    "pwaInstallTitle": "Install BagajPark",
+    "pwaInstallBody": "Add to your home screen for quicker access.",
+    "pwaInstallCta": "Install",
+    "pwaInstallDismiss": "Not now"
   },
   "SEO": {
     "title": "BagajPark | Leave Your Luggage Safely, Travel Freely",
@@ -978,7 +985,11 @@
       "intro": "Theatre and museum days made easier—book flexible storage with local partners.",
       "searchQuery": "Kings Cross",
       "cta": "Open shops in London"
-    }
+    },
+    "indexMetaTitle": "Luggage storage cities | BagajPark",
+    "indexMetaDescription": "Find secure luggage storage in major cities. Open the map and book a trusted shop near you.",
+    "indexHeadline": "Luggage storage by city",
+    "indexIntro": "Choose a city to see local landing pages and jump straight into the map with the right area pre-focused."
   },
   "AdminStatus": {
     "title": "Platform Technical Audit",

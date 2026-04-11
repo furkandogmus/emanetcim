@@ -18,7 +18,14 @@
     "notFoundBackHome": "ホームに戻る",
     "emailVerificationRequiredBanner": "あなたのメールアドレスはまだ認証されていません。受信箱をご確認ください。",
     "resendEmailSuccess": "確認メールが正常に送信されました。",
-    "resendEmailCta": "今すぐ再送信"
+    "resendEmailCta": "今すぐ再送信",
+    "mobileNavHome": "ホーム",
+    "mobileNavSearch": "検索",
+    "mobileNavBookings": "予約",
+    "pwaInstallTitle": "BagajParkをインストール",
+    "pwaInstallBody": "ホーム画面に追加してすぐに開けます。",
+    "pwaInstallCta": "インストール",
+    "pwaInstallDismiss": "あとで"
   },
   "SEO": {
     "title": "バガジパーク |荷物を安全に預けて、自由に旅行しましょう",
@@ -978,7 +985,11 @@
       "intro": "劇場や美術館の公演をより簡単に、地元のパートナーと柔軟な保管場所を予約できます。",
       "searchQuery": "キングスクロス",
       "cta": "ロンドンにショップをオープン"
-    }
+    },
+    "indexMetaTitle": "都市別の手荷物預かり | BagajPark",
+    "indexMetaDescription": "主要都市で安心の荷物預かり。地図を開いて近くの店舗を予約。",
+    "indexHeadline": "都市から選ぶ手荷物預かり",
+    "indexIntro": "都市を選ぶとローカルページから、適切なエリアに寄った地図検索へ進めます。"
   },
   "AdminStatus": {
     "title": "Platform Technical Audit",

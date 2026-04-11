@@ -18,7 +18,14 @@
     "notFoundBackHome": "Torna alla home",
     "emailVerificationRequiredBanner": "Il tuo indirizzo email non è stato ancora verificato. Per favore controlla la tua casella di posta.",
     "resendEmailSuccess": "E-mail di verifica inviata con successo.",
-    "resendEmailCta": "REINVIA ORA"
+    "resendEmailCta": "REINVIA ORA",
+    "mobileNavHome": "Home",
+    "mobileNavSearch": "Cerca",
+    "mobileNavBookings": "Prenotazioni",
+    "pwaInstallTitle": "Installa BagajPark",
+    "pwaInstallBody": "Aggiungi alla schermata home per un accesso più veloce.",
+    "pwaInstallCta": "Installa",
+    "pwaInstallDismiss": "Non ora"
   },
   "SEO": {
     "title": "BagajPark | Lascia i tuoi bagagli in tutta sicurezza, viaggia in libertà",
@@ -978,7 +985,11 @@
       "intro": "Le giornate al teatro e ai musei sono diventate più semplici: prenota un deposito flessibile con i partner locali.",
       "searchQuery": "Re Croce",
       "cta": "Negozi aperti a Londra"
-    }
+    },
+    "indexMetaTitle": "Deposito bagagli per città | BagajPark",
+    "indexMetaDescription": "Trova deposito bagagli sicuro nelle principali città. Apri la mappa e prenota un negozio affidabile vicino a te.",
+    "indexHeadline": "Deposito bagagli per città",
+    "indexIntro": "Scegli una città per la pagina locale e passa alla mappa già centrata sulla zona giusta."
   },
   "AdminStatus": {
     "title": "Platform Technical Audit",

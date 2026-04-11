@@ -18,7 +18,14 @@
     "notFoundBackHome": "ZURÜCK NACH HAUSE",
     "emailVerificationRequiredBanner": "Ihre E-Mail-Adresse wurde noch nicht bestätigt. Bitte überprüfen Sie Ihren Posteingang.",
     "resendEmailSuccess": "Bestätigungs-E-Mail erfolgreich gesendet.",
-    "resendEmailCta": "JETZT ERNEUT SENDEN"
+    "resendEmailCta": "JETZT ERNEUT SENDEN",
+    "mobileNavHome": "Start",
+    "mobileNavSearch": "Suche",
+    "mobileNavBookings": "Buchungen",
+    "pwaInstallTitle": "BagajPark installieren",
+    "pwaInstallBody": "Zum Startbildschirm hinzufügen für schnelleren Zugriff.",
+    "pwaInstallCta": "Installieren",
+    "pwaInstallDismiss": "Später"
   },
   "SEO": {
     "title": "BagajPark | Lassen Sie Ihr Gepäck sicher und reisen Sie frei",
@@ -978,7 +985,11 @@
       "intro": "Theater- und Museumstage werden einfacher – buchen Sie flexible Lagermöglichkeiten bei lokalen Partnern.",
       "searchQuery": "Kings Cross",
       "cta": "Eröffnen Sie Geschäfte in London"
-    }
+    },
+    "indexMetaTitle": "Gepäckaufbewahrung nach Städten | BagajPark",
+    "indexMetaDescription": "Sichere Gepäckaufbewahrung in großen Städten. Karte öffnen und vertrauenswürdigen Shop buchen.",
+    "indexHeadline": "Gepäckaufbewahrung nach Stadt",
+    "indexIntro": "Stadt wählen, lokale Seite öffnen und direkt mit passender Kartenmitte suchen."
   },
   "AdminStatus": {
     "title": "Platform Technical Audit",

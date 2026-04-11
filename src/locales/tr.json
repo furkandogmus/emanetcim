@@ -18,7 +18,14 @@
     "notFoundBackHome": "ANASAYFAYA DÖN",
     "emailVerificationRequiredBanner": "E-posta adresiniz henüz doğrulanmamış. Lütfen gelen kutunuzu kontrol edin.",
     "resendEmailSuccess": "Doğrulama e-postası başarıyla gönderildi.",
-    "resendEmailCta": "TEKRAR GÖNDER"
+    "resendEmailCta": "TEKRAR GÖNDER",
+    "mobileNavHome": "Ana sayfa",
+    "mobileNavSearch": "Ara",
+    "mobileNavBookings": "Rezervasyonlar",
+    "pwaInstallTitle": "BagajPark’ı yükle",
+    "pwaInstallBody": "Ana ekrana ekleyerek daha hızlı erişin.",
+    "pwaInstallCta": "Yükle",
+    "pwaInstallDismiss": "Şimdi değil"
   },
   "SEO": {
     "title": "BagajPark | Valizini Güvenle Bırak, Özgürce Gez",
@@ -978,7 +985,11 @@
       "intro": "Müze ve tiyatro günlerinde valizinizi güvenle saklayın; esnek saatlerle rezervasyon yapın.",
       "searchQuery": "Kings Cross",
       "cta": "Londra’da dükkanları aç"
-    }
+    },
+    "indexMetaTitle": "Şehirlere göre valiz emanet | BagajPark",
+    "indexMetaDescription": "Büyük şehirlerde güvenli bagaj bırakma noktaları. Haritayı aç, yakınındaki dükkanı seç.",
+    "indexHeadline": "Şehirlere göre emanet",
+    "indexIntro": "Bir şehir seç; yerel sayfadan haritada doğru bölgeyle aramaya geç."
   },
   "AdminStatus": {
     "title": "Platform Teknik Denetim",
