@@ -7,6 +7,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-cert
 COPY package.json package-lock.json ./
 RUN npm install --ignore-scripts
 
+# Standalone node_modules eksik kalıyor (serverExternalPackages: iyzipay, @netgsm, pg…); runtime için sadece prod bağımlılıkları
+FROM deps AS prod_modules
+WORKDIR /app
+RUN npm prune --omit=dev
+
 FROM node:20-bookworm-slim AS builder
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates \
@@ -42,12 +47,11 @@ RUN npm install -g prisma@7.7.0 && npm cache clean --force
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/node_modules/dotenv ./node_modules/dotenv
-# Next standalone bazen @swc/helpers izini düşürür (reactCompiler); runtime için gerekli
-COPY --from=builder /app/node_modules/@swc ./node_modules/@swc
-# next.config serverExternalPackages: Next trace tam ağacı kopyalamaz; iyzipay ctor fs.readdirSync(lib/resources) kullanır
-COPY --from=builder /app/node_modules/iyzipay ./node_modules/iyzipay
-COPY --from=builder /app/node_modules/@netgsm ./node_modules/@netgsm
+# Standalone trace: iyzipay → postman-request ve tüm alt ağaç eksik kalabiliyor; tam prod node_modules ile üzerine yaz
+COPY --from=prod_modules /app/node_modules ./node_modules
+# deps aşamasında --ignore-scripts: Prisma client yalnızca builder'da generate edilir
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
