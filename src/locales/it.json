@@ -57,6 +57,7 @@
     "partnerBookingsOpenPanel": "Apri pannello negozio",
     "partnerBookingAwaitingApprovalHint": "Questa richiesta va approvata o rifiutata nel pannello.",
     "partnerBookingAwaitGuestPaymentHint": "In attesa del pagamento dell’ospite — riceverai un SMS quando avrà pagato.",
+    "partnerBookingApprovedCheckInHint": "Approvato — l’ospite può pagare online; se paga in negozio, fai check-in con QR qui sotto.",
     "partnerBookingsCheckOut": "Ritiro",
     "partnerBookingsFilterAll": "Tutte",
     "partnerBookingsFilterAction": "Richiede azione",

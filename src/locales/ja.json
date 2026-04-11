@@ -57,6 +57,7 @@
     "partnerBookingsOpenPanel": "Open shop panel",
     "partnerBookingAwaitingApprovalHint": "This request needs your approval in the shop panel.",
     "partnerBookingAwaitGuestPaymentHint": "Waiting for the guest to pay — you’ll get an SMS when it’s paid.",
+    "partnerBookingApprovedCheckInHint": "Approved — the guest can pay online, or check them in with QR if payment is at the shop.",
     "partnerBookingsCheckOut": "Pick-up",
     "partnerBookingsFilterAll": "All",
     "partnerBookingsFilterAction": "Needs you",

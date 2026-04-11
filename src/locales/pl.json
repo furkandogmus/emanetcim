@@ -57,6 +57,7 @@
     "partnerBookingsOpenPanel": "Otwórz panel punktu",
     "partnerBookingAwaitingApprovalHint": "Ta prośba wymaga zatwierdzenia lub odrzucenia w panelu.",
     "partnerBookingAwaitGuestPaymentHint": "Oczekiwanie na płatność gościa — SMS po opłaceniu.",
+    "partnerBookingApprovedCheckInHint": "Zatwierdzone — gość może zapłacić online; przy płatności w punkcie zrób check-in kodem QR poniżej.",
     "partnerBookingsCheckOut": "Odbiór",
     "partnerBookingsFilterAll": "Wszystkie",
     "partnerBookingsFilterAction": "Wymaga działania",
