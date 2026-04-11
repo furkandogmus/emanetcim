@@ -7,12 +7,12 @@ import {
   Store,
   LayoutDashboard,
   Shield,
+  type LucideIcon,
 } from "lucide-react";
 import { Link, usePathname } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import clsx from "clsx";
 import { useSession } from "next-auth/react";
-import type { LucideIcon } from "lucide-react";
 
 type MobileNavItem = {
   href: string;
