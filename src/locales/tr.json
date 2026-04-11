@@ -486,6 +486,7 @@
     "userBanned": "Kullanıcı banlandı.",
     "confirmDeleteUser": "Kullanıcıyı silmek istediğinize emin misiniz?",
     "userDeleted": "Kullanıcı başarıyla silindi.",
+    "deleteUserBlockedByRelations": "Bu kullanıcı silinemiyor: bağlı dükkan, rezervasyon veya başka kayıt var. Önce ilişkili kayıtları kaldırın.",
     "resendSuccess": "Doğrulama e-postası tekrar gönderildi.",
     "ipBlockedSuccess": "IP adresi engellendi.",
     "backToDashboard": "PANELE DÖN",
