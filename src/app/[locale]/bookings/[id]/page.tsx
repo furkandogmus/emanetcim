@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { bookingService } from "@/services/BookingService";
 import { notFound, redirect } from "next/navigation";
-import { Calendar, Package, MapPin, CheckCircle2, Clock, CreditCard } from "lucide-react";
+import { Calendar, Package, MapPin, CheckCircle2, Clock, CreditCard, ChevronLeft } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { isStripeGuestCheckoutEnabled } from "@/lib/stripe-checkout";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -13,6 +13,7 @@ import BookingDetailModifySection from "@/components/guest/BookingDetailModifySe
 import BookingStripeReturnSync from "@/components/guest/BookingStripeReturnSync";
 import type { Metadata } from "next";
 import { dateLocaleForUiLocale } from "@/lib/date-locale";
+import { formatTryCurrency } from "@/lib/currency";
 
 export async function generateMetadata({
   params,
@@ -80,6 +81,13 @@ export default async function BookingDetailPage({
   return (
     <div className="min-h-screen bg-gray-50 pt-32 pb-20 px-6 font-sans">
       <div className="max-w-md mx-auto flex flex-col gap-6">
+        <Link
+          href="/bookings"
+          className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-orange-600"
+        >
+          <ChevronLeft size={16} aria-hidden />
+          {t("backToBookings")}
+        </Link>
         {paymentIntentId ? (
           <BookingStripeReturnSync
             bookingId={id}
@@ -187,7 +195,9 @@ export default async function BookingDetailPage({
                  <Package size={20} />
                  <span className="font-bold">{booking.bagCountS + booking.bagCountM + booking.bagCountXl} {t("bagsUnit")}</span>
               </div>
-              <span className="font-black text-lg">₺{moneyToNumber(booking.totalPrice)}</span>
+              <span className="font-black text-lg">
+                {formatTryCurrency(moneyToNumber(booking.totalPrice), locale)}
+              </span>
            </div>
         </div>
 
