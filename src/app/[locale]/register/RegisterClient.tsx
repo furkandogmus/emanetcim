@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { registerGuestAction, registerPartnerApplicationAction } from '@/actions/register';
+import { normalizeTrGsm10 } from '@/lib/netgsm';
 import { 
   Package, 
   ShieldCheck, 
@@ -24,6 +25,7 @@ type RegisterType = 'GUEST' | 'PARTNER';
 export default function RegisterPage() {
   const t = useTranslations('Auth');
   const tCommon = useTranslations('Common');
+  const tErrors = useTranslations('Errors');
   const [activeTab, setActiveTab] = useState<RegisterType>('GUEST');
   
   const [isPending, setIsPending] = useState(false);
@@ -44,6 +46,15 @@ export default function RegisterPage() {
     shopAddress: '',
   });
 
+  const translateServerError = (code: string | undefined) => {
+    if (!code) return t('authErrorGeneric');
+    if (code.startsWith('Errors.')) {
+      const key = code.slice('Errors.'.length);
+      return tErrors(key as Parameters<typeof tErrors>[0]);
+    }
+    return code;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsPending(true);
@@ -53,11 +64,15 @@ export default function RegisterPage() {
       if (activeTab === 'GUEST') {
         const res = await registerGuestAction(guestData);
         if (res.success) setSuccess(true);
-        else setError(res.error || t('authErrorGeneric'));
+        else setError(translateServerError(res.error));
       } else {
+        if (!normalizeTrGsm10(partnerData.phone)) {
+          setError(tErrors('invalidTrPhone'));
+          return;
+        }
         const res = await registerPartnerApplicationAction(partnerData);
         if (res.success) setSuccess(true);
-        else setError(res.error || t('authErrorGeneric'));
+        else setError(translateServerError(res.error));
       }
     } catch {
       setError(t('authErrorGeneric'));

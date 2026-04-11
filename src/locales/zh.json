@@ -958,7 +958,8 @@
     "disputeNotReady": "只有在行李托运或交付后才能提出争议。",
     "reviewNotReady": "发货完成后才能进行评论。",
     "verificationCooldown": "Please wait {seconds} seconds before sending another email.",
-    "maxVerificationAttempts": "Too many attempts. Please contact our support team."
+    "maxVerificationAttempts": "Too many attempts. Please contact our support team.",
+    "invalidTrPhone": "请输入有效的土耳其手机号（10 位数字，以 5 开头）。"
   },
   "Emails": {
     "verificationSubject": "验证您的电子邮件",

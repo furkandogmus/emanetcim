@@ -26,6 +26,12 @@ export function normalizeTrGsm10(
   return null;
 }
 
+/** Boş / sadece boşluk geçerli (silme); doluysa TR GSM olmalı */
+export function isValidPartnerTrPhone(input: string | null | undefined): boolean {
+  if (!input?.trim()) return true;
+  return normalizeTrGsm10(input) !== null;
+}
+
 /** NETGSM_ADMIN_PHONES=5xxxxxxxxx,5yyyyyyyyy */
 export function parseAdminGsmNumbers(): string[] {
   const raw = process.env.NETGSM_ADMIN_PHONES?.trim();

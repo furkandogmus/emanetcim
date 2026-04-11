@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Clock, Loader2, Luggage, Settings, CheckCircle, Phone } from "lucide-react";
 import { updateShopSettingsAction } from "@/actions/shop";
 import { updatePartnerPhoneAction } from "@/actions/partner";
+import { isValidPartnerTrPhone } from "@/lib/netgsm";
 
 type Props = {
   shopId: string;
@@ -32,6 +33,7 @@ export default function PartnerShopSettingsForm({
   initialPhone = "",
 }: Props) {
   const t = useTranslations("Partner");
+  const tErrors = useTranslations("Errors");
   const router = useRouter();
   const [capacity, setCapacity] = useState(initialCapacity);
   const [openingTime, setOpeningTime] = useState(initialOpening);
@@ -64,6 +66,11 @@ export default function PartnerShopSettingsForm({
     setIsUpdating(true);
     setSaved(false);
     setPhoneError(null);
+    if (!isValidPartnerTrPhone(partnerPhone)) {
+      setPhoneError(tErrors("invalidTrPhone"));
+      setIsUpdating(false);
+      return;
+    }
     try {
       await updateShopSettingsAction(shopId, {
         capacity,
@@ -73,7 +80,12 @@ export default function PartnerShopSettingsForm({
       });
       const phoneRes = await updatePartnerPhoneAction(partnerPhone);
       if (!phoneRes.success) {
-        setPhoneError(phoneRes.error);
+        const code = phoneRes.error;
+        setPhoneError(
+          code?.startsWith("Errors.")
+            ? tErrors(code.slice("Errors.".length) as Parameters<typeof tErrors>[0])
+            : (code ?? tErrors("generic"))
+        );
         return;
       }
       router.refresh();

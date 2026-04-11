@@ -958,7 +958,8 @@
     "disputeNotReady": "يمكن الاعتراض بعد تسليم أو استلام الأمتعة.",
     "reviewNotReady": "التقييم متاح بعد اكتمال التسليم.",
     "verificationCooldown": "Please wait {seconds} seconds before sending another email.",
-    "maxVerificationAttempts": "Too many attempts. Please contact our support team."
+    "maxVerificationAttempts": "Too many attempts. Please contact our support team.",
+    "invalidTrPhone": "أدخل رقم جوال تركي صالحًا (10 أرقام تبدأ بـ 5)."
   },
   "Emails": {
     "verificationSubject": "أكّد بريدك الإلكتروني",

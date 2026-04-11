@@ -958,7 +958,8 @@
     "disputeNotReady": "Şikayet yalnızca valiz alındıktan veya teslim edildikten sonra açılabilir.",
     "reviewNotReady": "Yorum yalnızca teslim tamamlandıktan sonra yapılabilir.",
     "verificationCooldown": "Yeni bir e-posta göndermek için {seconds} saniye beklemeniz gerekiyor.",
-    "maxVerificationAttempts": "Çok fazla deneme yaptınız. Lütfen destek ekibimizle iletişime geçin."
+    "maxVerificationAttempts": "Çok fazla deneme yaptınız. Lütfen destek ekibimizle iletişime geçin.",
+    "invalidTrPhone": "Geçerli bir Türkiye cep telefonu girin (10 hane, 5 ile başlar; örn. 05xx veya +90 5xx)."
   },
   "Emails": {
     "verificationSubject": "E-postanızı Doğrulayın",

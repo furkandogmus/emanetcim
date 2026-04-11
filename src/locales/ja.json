@@ -958,7 +958,8 @@
     "disputeNotReady": "紛争は、荷物が降ろされるか配達された後にのみ開始できます。",
     "reviewNotReady": "レビューは納品完了後にのみ可能です。",
     "verificationCooldown": "Please wait {seconds} seconds before sending another email.",
-    "maxVerificationAttempts": "Too many attempts. Please contact our support team."
+    "maxVerificationAttempts": "Too many attempts. Please contact our support team.",
+    "invalidTrPhone": "有効なトルコの携帯番号を入力してください（5で始まる10桁）。"
   },
   "Emails": {
     "verificationSubject": "メールアドレスを確認してください",
