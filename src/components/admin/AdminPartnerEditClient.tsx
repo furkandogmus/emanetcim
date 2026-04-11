@@ -39,7 +39,7 @@ interface AdminPartnerEditClientProps {
       id: string;
       rating: number;
       comment: string | null;
-      createdAt: Date;
+      createdAt: Date | string;
       guest: {
         name: string | null;
       };
@@ -54,6 +54,8 @@ export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientP
   const t = useTranslations("Admin");
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const ratingDisplay = Number(shop.rating);
+  const ratingSafe = Number.isFinite(ratingDisplay) ? ratingDisplay : 0;
   
   // Form State
   const [formData, setFormData] = useState({
@@ -288,14 +290,14 @@ export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientP
            <section className="bg-orange-600 rounded-[2.5rem] p-8 text-white shadow-xl shadow-orange-100">
               <p className="text-[10px] font-black uppercase tracking-widest text-orange-200 mb-2">{t("totalEarnings")}</p>
               <div className="flex items-center gap-3 mb-6">
-                <div className="text-5xl font-black tracking-tighter">{shop.rating.toFixed(1)}</div>
-                <StarRating rating={Math.round(shop.rating)} size={32} />
+                <div className="text-5xl font-black tracking-tighter">{ratingSafe.toFixed(1)}</div>
+                <StarRating rating={Math.round(ratingSafe)} size={32} />
               </div>
               <div className="w-full bg-white/20 h-1 rounded-full mb-4 overflow-hidden">
                 <motion.div 
                    className="h-full bg-white"
                    initial={{ width: 0 }}
-                   animate={{ width: `${(shop.rating / 5) * 100}%` }}
+                   animate={{ width: `${(ratingSafe / 5) * 100}%` }}
                 />
               </div>
               <p className="text-xs font-bold text-orange-100 leading-relaxed">

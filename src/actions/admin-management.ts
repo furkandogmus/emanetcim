@@ -2,7 +2,7 @@
 
 import prisma from "@/lib/db";
 import { auth } from "@/auth";
-import { Role } from "@prisma/client";
+import { Prisma, Role } from "@prisma/client";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { paymentService } from "@/services/PaymentService";
 import logger from "@/lib/logger";
@@ -150,15 +150,47 @@ export async function updateShopAction(shopId: string, data: {
 }) {
   await ensureAdmin();
 
+  if (data.name !== undefined && !String(data.name).trim()) {
+    throw new Error("Errors.invalidData");
+  }
+
+  const lat =
+    data.latitude === undefined
+      ? undefined
+      : typeof data.latitude === "number" && Number.isFinite(data.latitude)
+        ? data.latitude
+        : null;
+  const lng =
+    data.longitude === undefined
+      ? undefined
+      : typeof data.longitude === "number" && Number.isFinite(data.longitude)
+        ? data.longitude
+        : null;
+
+  if (
+    data.capacity !== undefined &&
+    (!Number.isInteger(data.capacity) || data.capacity < 1 || data.capacity > 100_000)
+  ) {
+    throw new Error("Errors.invalidData");
+  }
+
+  let pricePerDay: Prisma.Decimal | undefined;
+  if (data.pricePerDay !== undefined) {
+    if (!Number.isFinite(data.pricePerDay) || data.pricePerDay < 1 || data.pricePerDay > 1_000_000) {
+      throw new Error("Errors.invalidData");
+    }
+    pricePerDay = new Prisma.Decimal(data.pricePerDay);
+  }
+
   const shop = await prisma.shop.update({
     where: { id: shopId },
     data: {
       name: data.name,
       address: data.address,
-      latitude: data.latitude,
-      longitude: data.longitude,
+      latitude: lat,
+      longitude: lng,
       capacity: data.capacity,
-      pricePerDay: data.pricePerDay,
+      pricePerDay,
       isActive: data.isActive,
     },
     include: { owner: true },
@@ -180,9 +212,14 @@ export async function updateShopAction(shopId: string, data: {
     }
   }
 
-  revalidatePathAllLocales(`/admin/partners/${shopId}`);
-  revalidatePathAllLocales("/admin/partners");
-  revalidatePathAllLocales("/search"); // Arama sonuçlarındaki fiyat/konum değişikliği için
+  try {
+    revalidatePathAllLocales(`/admin/partners/${shopId}/edit`);
+    revalidatePathAllLocales(`/admin/partners/${shopId}`);
+    revalidatePathAllLocales("/admin/partners");
+    revalidatePathAllLocales("/search");
+  } catch (e) {
+    logger.error({ shopId, err: e }, "revalidate_after_shop_update_failed");
+  }
   return { success: true };
 }
 
