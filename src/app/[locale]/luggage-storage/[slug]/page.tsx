@@ -7,6 +7,7 @@ import { MapPin, Search } from "lucide-react";
 import { getStorageCity, STORAGE_CITIES } from "@/lib/storage-cities";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { routing } from "@/i18n/routing";
+import { buildCityStorageJsonLd } from "@/lib/city-storage-json-ld";
 
 export function generateStaticParams() {
   return STORAGE_CITIES.map((c) => ({ slug: c.slug }));
@@ -22,16 +23,30 @@ export async function generateMetadata({
   if (!city) return {};
   const t = await getTranslations({ locale, namespace: "CityStorage" });
   const base = getSiteBaseUrl();
+  const canonical = `${base}/${locale}/luggage-storage/${slug}`;
+  const title = t(`${slug}.metaTitle`);
+  const description = t(`${slug}.metaDescription`);
   return {
-    title: t(`${slug}.metaTitle`),
-    description: t(`${slug}.metaDescription`),
+    title,
+    description,
     alternates: {
-      canonical: `${base}/${locale}/luggage-storage/${slug}`,
-      languages: {
-        tr: `${base}/tr/luggage-storage/${slug}`,
-        en: `${base}/en/luggage-storage/${slug}`,
-        "x-default": `${base}/${routing.defaultLocale}/luggage-storage/${slug}`,
-      },
+      canonical,
+      languages: Object.fromEntries([
+        ...routing.locales.map((loc) => [
+          loc,
+          `${base}/${loc}/luggage-storage/${slug}`,
+        ] as const),
+        [
+          "x-default",
+          `${base}/${routing.defaultLocale}/luggage-storage/${slug}`,
+        ] as const,
+      ]),
+    },
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+      type: "website",
     },
   };
 }
@@ -52,6 +67,14 @@ export default async function CityLuggageStoragePage({
   const q = encodeURIComponent(t(`${slug}.searchQuery`));
   const searchHref = `/search?q=${q}&lat=${city.lat}&lng=${city.lng}`;
 
+  const jsonLd = buildCityStorageJsonLd({
+    locale,
+    slug,
+    pageName: t(`${slug}.headline`),
+    description: t(`${slug}.metaDescription`),
+    siteName: appName,
+  });
+
   return (
     <div className="min-h-screen bg-white text-gray-900">
       <header className="border-b border-gray-100 bg-gray-50/80">
@@ -64,6 +87,11 @@ export default async function CityLuggageStoragePage({
           </Link>
         </div>
       </header>
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
       <article className="mx-auto max-w-3xl px-6 py-12 md:py-16">
         <p className="mb-3 inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-orange-600">

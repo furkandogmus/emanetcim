@@ -3,6 +3,20 @@ import { auth } from "@/auth";
 import { redirect, notFound } from "next/navigation";
 import prisma from "@/lib/db";
 import DisputeForm from "@/components/guest/DisputeForm";
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; id: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Dispute" });
+  return {
+    title: t("metaTitle"),
+    robots: { index: false, follow: false },
+  };
+}
 
 export default async function DisputePage({
   params,

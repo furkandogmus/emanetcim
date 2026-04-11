@@ -8,7 +8,21 @@ import BookingQrDisplay from "@/components/guest/BookingQrDisplay";
 import { moneyToNumber } from "@/lib/money";
 import { getPricingRules } from "@/lib/platform-settings";
 import BookingDetailModifySection from "@/components/guest/BookingDetailModifySection";
+import type { Metadata } from "next";
+import { dateLocaleForUiLocale } from "@/lib/date-locale";
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; id: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Guest" });
+  return {
+    title: t("bookingDetailMetaTitle"),
+    robots: { index: false, follow: false },
+  };
+}
 
 /**
  * Booking Detail Page - Rezervasyon Detayı (Server Component)
@@ -23,7 +37,7 @@ export default async function BookingDetailPage({
   setRequestLocale(locale);
   const session = await auth();
   const t = await getTranslations("Guest");
-  const dateLocale = locale === "tr" ? "tr-TR" : "en-US";
+  const dateLocale = dateLocaleForUiLocale(locale);
 
   if (!session?.user?.id) {
     redirect(`/${locale}/login?callbackUrl=/${locale}/bookings/${id}`);

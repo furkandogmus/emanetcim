@@ -3,6 +3,59 @@
 import { useEffect, useState } from "react";
 import tr from "@/locales/tr.json";
 import en from "@/locales/en.json";
+import de from "@/locales/de.json";
+import fr from "@/locales/fr.json";
+import es from "@/locales/es.json";
+import it from "@/locales/it.json";
+import zh from "@/locales/zh.json";
+import ja from "@/locales/ja.json";
+import ar from "@/locales/ar.json";
+import ko from "@/locales/ko.json";
+import ru from "@/locales/ru.json";
+import fa from "@/locales/fa.json";
+import bg from "@/locales/bg.json";
+import pl from "@/locales/pl.json";
+import { deepMergeMessages } from "@/i18n/merge-messages";
+
+const UI_LOCALES = [
+  "tr",
+  "en",
+  "de",
+  "fr",
+  "es",
+  "it",
+  "zh",
+  "ja",
+  "ar",
+  "ko",
+  "ru",
+  "fa",
+  "bg",
+  "pl",
+] as const;
+
+type UiLocale = (typeof UI_LOCALES)[number];
+
+function pathLocale(pathname: string): UiLocale {
+  const seg = pathname.split("/").filter(Boolean)[0];
+  return UI_LOCALES.includes(seg as UiLocale) ? (seg as UiLocale) : "tr";
+}
+
+function commonForLocale(locale: UiLocale) {
+  if (locale === "tr") return tr.Common;
+  if (locale === "en") return en.Common;
+  const overlay = { de, fr, es, it, zh, ja, ar, ko, ru, fa, bg, pl }[locale];
+  const merged = deepMergeMessages(
+    en as Record<string, unknown>,
+    overlay as Record<string, unknown>
+  ) as typeof en;
+  return merged.Common;
+}
+
+function htmlLang(locale: UiLocale): string {
+  if (locale === "zh") return "zh-Hans";
+  return locale;
+}
 
 /**
  * Kök hata sınırı — layout hatalarında devreye girer (NextIntlProvider yok; path + JSON ile dil).
@@ -15,19 +68,22 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  const [locale] = useState<"tr" | "en">(() => {
+  const [locale] = useState<UiLocale>(() => {
     if (typeof window === "undefined") return "tr";
-    return window.location.pathname.startsWith("/en") ? "en" : "tr";
+    return pathLocale(window.location.pathname);
   });
 
   useEffect(() => {
     console.error("[global-error]", error);
   }, [error]);
 
-  const c = locale === "en" ? en.Common : tr.Common;
+  const c = commonForLocale(locale);
 
   return (
-    <html lang={locale}>
+    <html
+      lang={htmlLang(locale)}
+      dir={locale === "ar" || locale === "fa" ? "rtl" : "ltr"}
+    >
       <body className="min-h-screen flex flex-col items-center justify-center gap-6 bg-gray-50 p-8 font-sans">
         <h1 className="text-2xl font-black text-gray-900">{c.errorTitle}</h1>
         <p className="text-sm text-gray-600 text-center max-w-md">{c.errorDescription}</p>

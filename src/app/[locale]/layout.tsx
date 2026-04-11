@@ -36,15 +36,14 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     keywords: t("keywords").split(",").map(k => k.trim()),
     alternates: {
       canonical: "/",
-      languages: {
-        "tr": "/tr",
-        "en": "/en",
-      },
+      languages: Object.fromEntries(
+        routing.locales.map((loc) => [loc, `/${loc}`]),
+      ),
     },
     authors: [{ name: "BagajPark", url: "https://bagajpark.com" }],
     openGraph: {
       type: "website",
-      locale: locale === "tr" ? "tr_TR" : "en_US",
+      locale: openGraphLocaleForUiLocale(locale),
       url: `https://bagajpark.com/${locale}`,
       siteName: "BagajPark",
       title: t("ogTitle"),
@@ -73,6 +72,7 @@ import {getMessages, getTranslations} from 'next-intl/server';
 import {notFound} from 'next/navigation';
 import {routing} from '@/i18n/routing';
 import { getSiteBaseUrl } from "@/lib/site-urls";
+import { openGraphLocaleForUiLocale } from "@/lib/i18n-open-graph";
 import PWARegister from '@/components/PWARegister';
 import { Providers } from "@/components/Providers";
 import Header from "@/components/layout/Header";
@@ -130,7 +130,11 @@ export default async function RootLayout({
   };
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html
+      lang={locale === "zh" ? "zh-Hans" : locale}
+      dir={locale === "ar" || locale === "fa" ? "rtl" : "ltr"}
+      suppressHydrationWarning
+    >
       <body
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} bg-gray-50 antialiased selection:bg-orange-100 selection:text-orange-900`}

@@ -8,6 +8,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { buildShopLocalBusinessJsonLd } from "@/lib/shop-json-ld";
+import { routing } from "@/i18n/routing";
 
 export async function generateMetadata({
   params,
@@ -24,10 +25,15 @@ export async function generateMetadata({
   const title = `${shop.name} — ${t("shopDetailTitleSuffix")}`;
   const description = shop.address ?? t("shopDetailMetaFallback");
   const canonical = `${base}/${locale}/shop/${shopId}`;
+  const languages: Record<string, string> = {};
+  for (const loc of routing.locales) {
+    languages[loc] = `${base}/${loc}/shop/${shopId}`;
+  }
+  languages["x-default"] = `${base}/${routing.defaultLocale}/shop/${shopId}`;
   return {
     title,
     description,
-    alternates: { canonical },
+    alternates: { canonical, languages },
     openGraph: {
       title,
       description,

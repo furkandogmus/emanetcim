@@ -2,7 +2,11 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Search, MapPin, ShieldCheck, Clock, Star } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { getGuestLandingStats } from "@/lib/guest-landing-stats";
+import { getHomeTestimonials } from "@/lib/home-testimonials";
 import { STORAGE_CITIES } from "@/lib/storage-cities";
+import TestimonialCarousel from "@/components/guest/TestimonialCarousel";
+import ComparisonTable from "@/components/guest/ComparisonTable";
+import BagProtection from "@/components/guest/BagProtection";
 
 export const revalidate = 120;
 
@@ -17,8 +21,19 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
   const t = await getTranslations("Guest");
   const common = await getTranslations("Common");
   const tCity = await getTranslations("CityStorage");
-  const stats = await getGuestLandingStats();
-  const nf = new Intl.NumberFormat(locale === "tr" ? "tr-TR" : "en-US");
+  const [stats, testimonials] = await Promise.all([
+    getGuestLandingStats(),
+    getHomeTestimonials(14),
+  ]);
+  const nfLocale: Record<string, string> = {
+    tr: "tr-TR",
+    en: "en-US",
+    de: "de-DE",
+    fr: "fr-FR",
+    es: "es-ES",
+    it: "it-IT",
+  };
+  const nf = new Intl.NumberFormat(nfLocale[locale] ?? "en-US");
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-900">
@@ -135,6 +150,10 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
         </div>
       </section>
 
+      <div className="mx-auto max-w-3xl px-6 pb-4">
+        <BagProtection variant="landing" />
+      </div>
+
       {/* Trust Features - Minimalist Icons */}
       <section className="py-20 px-6 max-w-5xl mx-auto w-full grid grid-cols-1 md:grid-cols-3 gap-12 text-center text-sm">
         <div className="flex flex-col items-center gap-4">
@@ -166,6 +185,8 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
         </div>
       </section>
 
+      <TestimonialCarousel items={testimonials} />
+      <ComparisonTable />
     </div>
   );
 }

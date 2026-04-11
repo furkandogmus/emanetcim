@@ -30,6 +30,7 @@ import {
   getNextAvailableSealsAction,
 } from "@/actions/partner";
 import type { PartnerBookingListItem } from "@/services/BookingService";
+import { dateLocaleForUiLocale } from "@/lib/date-locale";
 
 function buildBagSlots(s: number, m: number, xl: number) {
   const out: { bagIndex: number; bagSize: string }[] = [];
@@ -76,7 +77,7 @@ export default function PartnerClient({
 }: PartnerClientProps) {
   const t = useTranslations("Partner");
   const locale = useLocale();
-  const dateLocale = locale === "tr" ? "tr-TR" : "en-US";
+  const dateLocale = dateLocaleForUiLocale(locale);
   const router = useRouter();
   const pathname = usePathname();
 

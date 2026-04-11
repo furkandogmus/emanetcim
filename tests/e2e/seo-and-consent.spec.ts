@@ -21,12 +21,15 @@ test.describe("SEO: robots ve sitemap", () => {
     const text = await res.text();
     expect(text).toContain("http://localhost:3000/tr");
     expect(text).toContain("http://localhost:3000/en");
+    expect(text).toContain("http://localhost:3000/de");
     expect(text).toContain("/tr/search");
     expect(text).toContain("/en/search");
     expect(text).toContain("/tr/blog");
     expect(text).toContain("/en/register");
     expect(text).toContain("/tr/luggage-storage/istanbul");
     expect(text).toContain("/en/luggage-storage/istanbul");
+    expect(text).toContain("/de/luggage-storage/berlin");
+    expect(text).toContain("/tr/become-partner");
   });
 });
 

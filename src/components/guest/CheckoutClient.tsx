@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import QRCode from "qrcode";
 import {
   ChevronLeft,
-  ShieldCheck,
   CreditCard,
   CheckCircle2,
   QrCode,
@@ -16,6 +15,7 @@ import {
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import BagSelector from "@/components/guest/BagSelector";
+import BagProtection from "@/components/guest/BagProtection";
 import { createBookingAction } from "@/actions/booking";
 import {
   computeDailyBagLineTotal,
@@ -496,19 +496,7 @@ export default function CheckoutClient({
               {t("checkoutStep2Title")}
             </h2>
 
-            <div className="bg-green-50 border border-green-100 p-5 rounded-3xl flex items-start gap-4">
-              <div className="bg-green-600 p-2 rounded-xl text-white shrink-0">
-                <ShieldCheck size={24} />
-              </div>
-              <div>
-                <h4 className="font-bold text-green-900 text-sm">
-                  {t("insuranceIncluded")}
-                </h4>
-                <p className="text-green-700 text-xs leading-relaxed mt-1">
-                  {t("checkoutInsuranceDetailBody")}
-                </p>
-              </div>
-            </div>
+            <BagProtection variant="checkout" />
 
             <section className="flex flex-col gap-4">
               <div className="flex justify-between items-start text-sm">

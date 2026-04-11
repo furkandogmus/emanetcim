@@ -25,6 +25,9 @@ test-results/
 # Cursor / Claude yerel çalışma ağaçları (iç içe repo eklenmesin)
 .claude/
 
+# i18n overlay build cache (scripts/build-locale-overlays.py)
+scripts/.translate-cache.json
+
 # misc
 .DS_Store
 *.pem

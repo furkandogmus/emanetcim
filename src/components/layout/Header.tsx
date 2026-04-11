@@ -2,6 +2,7 @@
 
 import { Link } from "@/i18n/routing";
 import UserNav from "./UserNav";
+import LocaleSwitcher from "./LocaleSwitcher";
 import { usePathname } from "next/navigation";
 
 export default function Header() {
@@ -21,13 +22,26 @@ export default function Header() {
         BagajPark
       </Link>
       
-      <div className="flex items-center gap-4 sm:gap-8">
+      <div className="flex items-center gap-3 sm:gap-6">
+        <Link
+          href="/become-partner"
+          className="hidden md:block text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-orange-600 transition-all"
+        >
+          Partner
+        </Link>
+        <Link
+          href="/hotels"
+          className="hidden md:block text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-orange-600 transition-all"
+        >
+          Hotels
+        </Link>
         <Link 
           href="/blog" 
           className="hidden sm:block text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-orange-600 hover:scale-105 transition-all"
         >
           BLOG
         </Link>
+        <LocaleSwitcher />
         <UserNav />
       </div>
     </header>
