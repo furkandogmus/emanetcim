@@ -44,13 +44,20 @@ export default async function AdminPartnerEditPage({
     notFound();
   }
 
-  // Decimal alanları number’a çeviriyoruz (build hatası ve serileştirme için)
-  const serializedShop = {
-    ...shop,
-    pricePerDay: Number(shop.pricePerDay),
-    rating: shop.rating || 0,
-    latitude: shop.latitude || null,
-    longitude: shop.longitude || null,
+  // Flight / Client: Prisma Decimal, Date vb. düz JSON’a indir (üretimde RSC serileştirme hatası önlenir)
+  const serializedShop = JSON.parse(
+    JSON.stringify({
+      ...shop,
+      pricePerDay: Number(shop.pricePerDay),
+      rating: shop.rating ?? 0,
+      latitude: shop.latitude ?? null,
+      longitude: shop.longitude ?? null,
+    })
+  ) as typeof shop & {
+    pricePerDay: number;
+    rating: number;
+    latitude: number | null;
+    longitude: number | null;
   };
 
   return <AdminPartnerEditClient shop={serializedShop} />;

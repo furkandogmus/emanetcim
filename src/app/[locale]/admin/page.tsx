@@ -60,17 +60,6 @@ export default async function AdminDashboard({
   const totalBookings = await prisma.booking.count();
   const activePartnersCount = await prisma.shop.count({ where: { isActive: true } });
 
-  const activeShopsRaw = await prisma.shop.findMany({
-    where: { isActive: true },
-    take: 5,
-    orderBy: { createdAt: "desc" },
-    include: { _count: { select: { bookings: true } } },
-  });
-  const activeShops = activeShopsRaw.map((s) => ({
-    ...s,
-    pricePerDay: moneyToNumber(s.pricePerDay),
-  }));
-
   const revenueData = await prisma.booking.aggregate({
     where: { status: { in: [...PAID_STATUSES] } },
     _sum: { totalPrice: true },
@@ -135,6 +124,6 @@ export default async function AdminDashboard({
   };
 
   return (
-    <AdminDashboardClient stats={stats} activeShops={activeShops} chartData={chartData} />
+    <AdminDashboardClient stats={stats} chartData={chartData} />
   );
 }

@@ -5,7 +5,6 @@ import {
   Briefcase,
   Wallet,
   MapPin,
-  ChevronRight,
   Package,
   Store,
   ArrowRight,
@@ -20,16 +19,6 @@ import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
-
-type AdminShopRow = {
-  id: string;
-  name: string;
-  address?: string | null;
-  isActive: boolean;
-  capacity: number;
-  pricePerDay: number;
-  _count?: { bookings: number };
-};
 
 const AnalyticsChart = dynamic(
   () => import("@/components/admin/AnalyticsChart"),
@@ -55,13 +44,11 @@ interface AdminDashboardClientProps {
       partners: string;
     };
   };
-  activeShops: AdminShopRow[];
   chartData: ChartRow[];
 }
 
 export default function AdminDashboardClient({
   stats,
-  activeShops,
   chartData,
 }: AdminDashboardClientProps) {
   const t = useTranslations("Admin");
@@ -179,43 +166,6 @@ export default function AdminDashboardClient({
                 </div>
                 <ArrowRight className="text-gray-300 group-hover:translate-x-1 transition-transform" size={20} />
               </Link>
-              {activeShops.map((shop, i) => (
-                <div
-                  key={shop.id || i}
-                  className="flex items-center justify-between p-4 hover:bg-gray-50 rounded-2xl transition-colors group"
-                >
-                  <div className="flex items-center gap-4">
-                    <div
-                      className={`w-2 h-2 rounded-full ${shop.isActive ? "bg-green-500" : "bg-gray-300"}`}
-                    ></div>
-                    <div>
-                      <p className="text-sm font-bold text-gray-900">{shop.name}</p>
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                        {shop.address?.substring(0, 30) || t("defaultCityFallback")}...
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-6">
-                    <div className="text-right">
-                      <p className="text-xs font-black text-gray-900">
-                        {shop._count?.bookings || 0} / {shop.capacity || 20}
-                      </p>
-                      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
-                        {t("occupancy")}
-                      </p>
-                    </div>
-                    <ChevronRight
-                      size={16}
-                      className="text-gray-300 group-hover:text-gray-600 transition-colors"
-                    />
-                  </div>
-                </div>
-              ))}
-              {activeShops.length === 0 && (
-                <p className="text-center py-10 text-xs font-bold text-gray-400 uppercase tracking-widest">
-                  {t("noActivePartners")}
-                </p>
-              )}
             </div>
           </div>
         </div>
