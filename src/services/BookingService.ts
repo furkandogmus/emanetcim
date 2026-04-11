@@ -114,7 +114,7 @@ export class BookingService implements IBookingService {
           throw new Error('Dükkan bulunamadı.');
         }
         await tx.$executeRawUnsafe(
-          `SELECT 1 FROM "Shop" WHERE id = $1::uuid FOR UPDATE`,
+          `SELECT 1 FROM "Shop" WHERE id = $1 FOR UPDATE`,
           data.shopId
         );
 
@@ -747,7 +747,7 @@ export class BookingService implements IBookingService {
       await prisma.$transaction(
         async (tx) => {
           await tx.$executeRawUnsafe(
-            `SELECT 1 FROM "Shop" WHERE id = $1::uuid FOR UPDATE`,
+            `SELECT 1 FROM "Shop" WHERE id = $1 FOR UPDATE`,
             booking.shopId
           );
           const shop = await tx.shop.findUnique({
