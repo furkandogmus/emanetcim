@@ -27,7 +27,11 @@ export type BookingWithGuestShop = Prisma.BookingGetPayload<{
 }>;
 
 export type BookingWithShopGuestDetails = Prisma.BookingGetPayload<{
-  include: { shop: true; guest: true };
+  include: {
+    shop: true;
+    guest: true;
+    seals: { orderBy: { bagIndex: "asc" } };
+  };
 }>;
 
 export type GuestBookingListItem = Prisma.BookingGetPayload<{
@@ -472,7 +476,11 @@ export class BookingService implements IBookingService {
   async getBookingDetails(id: string): Promise<BookingWithShopGuestDetails | null> {
     return await prisma.booking.findUnique({
       where: { id },
-      include: { shop: true, guest: true }
+      include: {
+        shop: true,
+        guest: true,
+        seals: { orderBy: { bagIndex: "asc" } },
+      },
     });
   }
 

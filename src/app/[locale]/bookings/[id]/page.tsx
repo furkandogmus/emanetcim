@@ -1,7 +1,16 @@
 import { auth } from "@/auth";
 import { bookingService } from "@/services/BookingService";
 import { notFound, redirect } from "next/navigation";
-import { Calendar, Package, MapPin, CheckCircle2, Clock, CreditCard, ChevronLeft } from "lucide-react";
+import {
+  Calendar,
+  Package,
+  MapPin,
+  CheckCircle2,
+  Clock,
+  CreditCard,
+  ChevronLeft,
+  Hash,
+} from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { isStripeGuestCheckoutEnabled } from "@/lib/stripe-checkout";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -200,6 +209,40 @@ export default async function BookingDetailPage({
               </span>
            </div>
         </div>
+
+        {booking.seals && booking.seals.length > 0 ? (
+          <div className="flex flex-col gap-4 rounded-[2.5rem] border border-orange-100 bg-orange-50/40 p-8 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-orange-700">
+                <Hash size={22} aria-hidden />
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-orange-800/80">
+                  {t("guestSealNumbersTitle")}
+                </p>
+                <p className="text-xs font-medium text-gray-600">{t("guestSealNumbersHint")}</p>
+              </div>
+            </div>
+            <ul className="flex flex-col gap-2">
+              {booking.seals.map((s) => (
+                <li
+                  key={s.id}
+                  className="flex items-center justify-between rounded-2xl border border-orange-100/80 bg-white px-4 py-3 text-sm"
+                >
+                  <span className="font-bold text-gray-800">
+                    {t("guestSealRow", {
+                      index: s.bagIndex,
+                      size: s.bagSize,
+                    })}
+                  </span>
+                  <span className="font-mono text-base font-black text-orange-600 tabular-nums">
+                    #{s.sealNumber}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
 
         <BookingDetailModifySection
           booking={JSON.parse(
