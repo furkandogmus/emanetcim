@@ -8,6 +8,8 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { invalidatePricingRulesCache } from "@/lib/platform-settings";
 import { sealService } from "@/services/SealService";
+import { headers } from "next/headers";
+import { writeAuditLog } from "@/lib/audit-log";
 
 function revalidateAdmin() {
   revalidatePathAllLocales("/admin");
@@ -28,6 +30,10 @@ const platformSettingsUpdateSchema = z.object({
   bagMultiplierS: z.number().min(0).max(20),
   bagMultiplierM: z.number().min(0).max(20),
   bagMultiplierXl: z.number().min(0).max(20),
+  platformHolidayDates: z
+    .array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/))
+    .max(366)
+    .default([]),
 });
 
 export async function updatePlatformSettingsAction(data: unknown) {
@@ -40,6 +46,9 @@ export async function updatePlatformSettingsAction(data: unknown) {
     return { success: false as const, error: "invalid_data" as const };
   }
   const d = parsed.data;
+  const holidayJson =
+    d.platformHolidayDates.length > 0 ? d.platformHolidayDates : Prisma.JsonNull;
+
   await prisma.platformSettings.upsert({
     where: { id: "default" },
     create: {
@@ -54,6 +63,7 @@ export async function updatePlatformSettingsAction(data: unknown) {
       bagMultiplierS: new Prisma.Decimal(d.bagMultiplierS),
       bagMultiplierM: new Prisma.Decimal(d.bagMultiplierM),
       bagMultiplierXl: new Prisma.Decimal(d.bagMultiplierXl),
+      platformHolidayDates: holidayJson,
     },
     update: {
       maxStayDays: d.maxStayDays,
@@ -66,9 +76,22 @@ export async function updatePlatformSettingsAction(data: unknown) {
       bagMultiplierS: new Prisma.Decimal(d.bagMultiplierS),
       bagMultiplierM: new Prisma.Decimal(d.bagMultiplierM),
       bagMultiplierXl: new Prisma.Decimal(d.bagMultiplierXl),
+      platformHolidayDates: holidayJson,
     },
   });
   invalidatePricingRulesCache();
+  const h = await headers();
+  writeAuditLog({
+    actorUserId: session.user.id ?? null,
+    actorRole: session.user.role ?? "ADMIN",
+    action: "platform_settings.update",
+    entityType: "PlatformSettings",
+    entityId: "default",
+    ip:
+      h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      h.get("x-real-ip") ||
+      null,
+  });
   revalidatePathAllLocales("/admin/platform-settings");
   revalidatePathAllLocales("/admin");
   return { success: true as const };
@@ -84,6 +107,18 @@ export async function approveShopAction(shopId: string) {
   const success = await shopService.approveShop(shopId);
 
   if (success) {
+    const h = await headers();
+    writeAuditLog({
+      actorUserId: session.user.id ?? null,
+      actorRole: session.user.role ?? "ADMIN",
+      action: "shop.approve",
+      entityType: "Shop",
+      entityId: shopId,
+      ip:
+        h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+        h.get("x-real-ip") ||
+        null,
+    });
     revalidateAdmin();
   }
 

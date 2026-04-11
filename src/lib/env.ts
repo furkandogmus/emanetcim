@@ -19,6 +19,14 @@ const serverSchema = z.object({
   CRON_SECRET: z.string().optional(),
   UPSTASH_REDIS_REST_URL: z.string().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+  /** production: true iken Upstash Redis zorunlu (çoklu instance rate limit). */
+  REQUIRE_DISTRIBUTED_RATE_LIMIT: z.string().optional(),
+  BOOKING_CALENDAR_TIMEZONE: z.string().optional(),
+  LEGAL_TERMS_VERSION: z.string().optional(),
+  LEGAL_PRIVACY_VERSION: z.string().optional(),
+  VAPID_PUBLIC_KEY: z.string().optional(),
+  VAPID_PRIVATE_KEY: z.string().optional(),
+  ENABLE_HSTS_HEADERS: z.string().optional(),
   SENTRY_DSN: z.string().optional(),
   SENTRY_TRACES_SAMPLE_RATE: z.string().optional(),
   DATABASE_SSL: z.string().optional(),
@@ -125,6 +133,14 @@ export function requireProdSecrets(): void {
   if ((upstashUrl && !upstashToken) || (!upstashUrl && upstashToken)) {
     throw new Error(
       "UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN must both be set or both omitted",
+    );
+  }
+  if (
+    process.env.REQUIRE_DISTRIBUTED_RATE_LIMIT?.trim() === "true" &&
+    (!upstashUrl || !upstashToken)
+  ) {
+    throw new Error(
+      "REQUIRE_DISTRIBUTED_RATE_LIMIT=true requires UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN in production",
     );
   }
 }

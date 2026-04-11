@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
+import { getUpstashRedis } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -12,10 +13,34 @@ export async function GET() {
   try {
     await prisma.$queryRaw`SELECT 1`;
 
+    let redis: "ok" | "error" | "not_configured" = "not_configured";
+    const redisClient = getUpstashRedis();
+    if (redisClient) {
+      try {
+        const pong = await redisClient.ping();
+        redis = pong === "PONG" ? "ok" : "error";
+      } catch {
+        redis = "error";
+      }
+    }
+
+    const rateLimitMode =
+      process.env.NODE_ENV === "production" && !redisClient
+        ? "in_memory_fallback"
+        : redisClient
+          ? "upstash"
+          : "in_memory_dev";
+
     return NextResponse.json(
       {
         status: "UP",
-        checks: { database: "ok" },
+        checks: {
+          database: "ok",
+          redis,
+          rateLimitMode,
+          distributedRateLimitRequired:
+            process.env.REQUIRE_DISTRIBUTED_RATE_LIMIT === "true",
+        },
         timestamp: new Date().toISOString(),
         env: process.env.NODE_ENV,
       },

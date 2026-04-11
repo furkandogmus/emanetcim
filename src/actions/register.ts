@@ -11,6 +11,11 @@ import { sendVerificationEmail } from "@/lib/mail";
 import { isDisposableEmail } from "@/lib/disposable-emails";
 import { getLocale } from "next-intl/server";
 import { normalizeTrGsm10 } from "@/lib/netgsm";
+import {
+  LEGAL_DOC_PRIVACY,
+  LEGAL_DOC_TERMS,
+  getLegalDocumentVersion,
+} from "@/lib/legal-versions";
 
 const guestSchema = z.object({
   email: z.string().email(),
@@ -64,6 +69,20 @@ export async function registerGuestAction(data: unknown) {
       role: Role.GUEST,
       passwordHash,
       lastIp: ip,
+      legalAcceptances: {
+        create: [
+          {
+            documentKey: LEGAL_DOC_TERMS,
+            version: getLegalDocumentVersion(LEGAL_DOC_TERMS),
+            ip,
+          },
+          {
+            documentKey: LEGAL_DOC_PRIVACY,
+            version: getLegalDocumentVersion(LEGAL_DOC_PRIVACY),
+            ip,
+          },
+        ],
+      },
     },
   });
 
@@ -125,6 +144,20 @@ export async function registerPartnerApplicationAction(data: unknown) {
         role: Role.PARTNER,
         passwordHash,
         lastIp: ip,
+        legalAcceptances: {
+          create: [
+            {
+              documentKey: LEGAL_DOC_TERMS,
+              version: getLegalDocumentVersion(LEGAL_DOC_TERMS),
+              ip,
+            },
+            {
+              documentKey: LEGAL_DOC_PRIVACY,
+              version: getLegalDocumentVersion(LEGAL_DOC_PRIVACY),
+              ip,
+            },
+          ],
+        },
       },
     });
 

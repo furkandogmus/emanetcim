@@ -11,6 +11,7 @@ const { mockGetPricingRules } = vi.hoisted(() => ({
     defaultShopCapacity: 10,
     defaultPricePerDay: 50,
     bagMultipliers: { S: 0.8, M: 1.0, XL: 1.5 },
+    platformHolidayDates: [],
   }),
 }));
 

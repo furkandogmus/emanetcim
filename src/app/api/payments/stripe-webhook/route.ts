@@ -6,6 +6,11 @@ import { rateLimit } from "@/lib/rate-limit";
 import { isPaymentsEnabled } from "@/lib/feature-flags";
 import { getPaymentGateway } from "@/lib/payment-gateway";
 import { getStripeWebhookSigningSecret, getStripe } from "@/lib/stripe";
+import {
+  claimPaymentWebhookEvent,
+  isPaymentWebhookProcessed,
+} from "@/lib/payment-webhook-dedup";
+import { recordMetric } from "@/lib/metrics";
 
 export const runtime = "nodejs";
 
@@ -15,6 +20,7 @@ export const runtime = "nodejs";
  */
 export async function POST(req: NextRequest) {
   try {
+    recordMetric("webhook_received_total", { channel: "stripe" });
     const ip =
       req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
       req.headers.get("x-real-ip") ||
@@ -50,12 +56,21 @@ export async function POST(req: NextRequest) {
       );
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
+      recordMetric("webhook_signature_failures", { channel: "stripe" });
       logger.warn({ err: msg }, "stripe_webhook_signature_invalid");
       return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
     }
 
     if (event.type === "payment_intent.succeeded") {
       const pi = event.data.object as Stripe.PaymentIntent;
+      const stripeDedupKey = `stripe:event:${event.id}`;
+      if (await isPaymentWebhookProcessed(stripeDedupKey)) {
+        return NextResponse.json({
+          received: true,
+          duplicate: true,
+          message: "Duplicate Stripe event ignored",
+        });
+      }
       logger.info(
         {
           event: "stripe_webhook_payment_intent_succeeded",
@@ -70,6 +85,12 @@ export async function POST(req: NextRequest) {
         metadata: pi.metadata ?? undefined,
       });
       if (result.success) {
+        await claimPaymentWebhookEvent({
+          provider: "stripe",
+          dedupKey: stripeDedupKey,
+          paymentId: pi.id,
+          conversationId: pi.metadata?.bookingId ?? null,
+        });
         return NextResponse.json({ received: true, message: result.message });
       }
       return NextResponse.json({ received: true, ignored: result.message });

@@ -71,9 +71,11 @@ model User {
   sessions Session[]
 
   // Uygulama İlişkileri
-  shops    Shop[] // Eğer rolü PARTNER ise
-  bookings Booking[] // Eğer rolü GUEST ise
-  reviews  Review[] // Misafir olarak yaptığı yorumlar
+  shops             Shop[] // Eğer rolü PARTNER ise
+  bookings          Booking[] // Eğer rolü GUEST ise
+  reviews           Review[] // Misafir olarak yaptığı yorumlar
+  legalAcceptances  LegalAcceptance[]
+  pushSubscriptions PushSubscription[]
 
   @@index([email])
 }
@@ -173,6 +175,8 @@ model Booking {
   sealPhotoUrl String? // Esnafın çekmek zorunda olduğu mühür fotoğrafı
   lateFeeApplied Decimal @db.Decimal(12, 2) @default(0)
   pendingBagRevision Json? // { bagCountS, bagCountM, bagCountXl, extraAmount } partner revizyon talebi
+  /// Eşzamanlı durum geçişleri için optimistic sürüm (onay vb. updateMany ile artırılır).
+  bookingRowVersion Int @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -200,6 +204,9 @@ model PaymentLog {
   amount         Decimal @db.Decimal(12, 2)
   status         PaymentStatus @default(SUCCESS)
   splitCompleted Boolean       @default(false) // Esnafa para yattı mı?
+  /// İyzico/Stripe chargeback incelemesi: OPEN | WON | LOST | null
+  chargebackStatus String?
+  chargebackNote   String?    @db.Text
 
   createdAt DateTime @default(now())
 
@@ -347,8 +354,64 @@ model PlatformSettings {
   bagMultiplierS      Decimal @db.Decimal(6, 4) @default(0.8)
   bagMultiplierM      Decimal @db.Decimal(6, 4) @default(1.0)
   bagMultiplierXl     Decimal @db.Decimal(6, 4) @default(1.5)
+  /// Platform genelinde rezervasyona kapalı takvim günleri (YYYY-MM-DD JSON dizisi).
+  platformHolidayDates Json?
 
   updatedAt DateTime @updatedAt
+}
+
+model ProcessedPaymentWebhook {
+  id             String   @id @default(cuid())
+  provider       String
+  dedupKey       String   @unique
+  paymentId      String?
+  conversationId String?
+  createdAt      DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorUserId String?
+  actorRole   String
+  action      String
+  entityType  String?
+  entityId    String?
+  metadata    Json?
+  ip          String?
+  createdAt   DateTime @default(now())
+
+  @@index([actorUserId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+model LegalAcceptance {
+  id          String   @id @default(cuid())
+  userId      String
+  documentKey String
+  version     String
+  acceptedAt  DateTime @default(now())
+  ip          String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([documentKey])
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model BlockedIp {

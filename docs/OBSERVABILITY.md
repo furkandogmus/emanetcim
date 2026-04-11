@@ -40,7 +40,8 @@ Kök [`src/app/global-error.tsx`](../src/app/global-error.tsx) beklenmeyen istem
 | Metrik | Kaynak |
 |--------|--------|
 | `payment_init_total` / `payment_init_errors` | `PaymentService.initializeMarketplacePayment` |
-| `webhook_received_total` / `webhook_signature_failures` | `/api/payments/webhook` |
+| `webhook_received_total` / `webhook_signature_failures` | `/api/payments/webhook`, `/api/payments/stripe-webhook` (`recordMetric`) |
+| `payment_webhook_duplicate_ignored` | Tekrarlayan iyzico/Stripe olayları (`payment-webhook-dedup`) |
 | `reconcile_fixed_bookings` | `reconcileStalePaymentBookings` |
 | `notification_send_errors` | `NotificationService` |
 

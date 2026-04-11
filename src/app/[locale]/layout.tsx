@@ -1,6 +1,21 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages, getTranslations } from "next-intl/server";
+import { notFound } from "next/navigation";
+import { routing } from "@/i18n/routing";
+import { getSiteBaseUrl } from "@/lib/site-urls";
+import { openGraphLocaleForUiLocale } from "@/lib/i18n-open-graph";
+import PWARegister from "@/components/PWARegister";
+import PWAInstallBanner from "@/components/PWAInstallBanner";
+import { Providers } from "@/components/Providers";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import MobileNav from "@/components/layout/MobileNav";
+import CookieConsent from "@/components/CookieConsent";
+import ConsentAwareAnalytics from "@/components/ConsentAwareAnalytics";
+import VerificationBanner from "@/components/layout/VerificationBanner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,19 +41,27 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { setRequestLocale } = await import("next-intl/server");
   setRequestLocale(locale);
 
+  const baseUrl = getSiteBaseUrl();
+  let metadataBase: URL;
+  try {
+    metadataBase = new URL(baseUrl);
+  } catch {
+    metadataBase = new URL("https://bagajpark.com");
+  }
+
   return {
-    metadataBase: new URL("https://bagajpark.com"),
+    metadataBase,
     title: {
       template: "%s | BagajPark",
       default: t("title"),
     },
     description: t("description"),
     keywords: t("keywords").split(",").map((k) => k.trim()),
-    authors: [{ name: "BagajPark", url: "https://bagajpark.com" }],
+    authors: [{ name: "BagajPark", url: baseUrl }],
     openGraph: {
       type: "website",
       locale: openGraphLocaleForUiLocale(locale),
-      url: `https://bagajpark.com/${locale}`,
+      url: `${baseUrl.replace(/\/$/, "")}/${locale}`,
       siteName: "BagajPark",
       title: t("ogTitle"),
       description: t("ogDescription"),
@@ -53,28 +76,13 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     },
     twitter: {
       card: "summary_large_image",
-      title: t("title"),
-      description: t("description"),
-      images: ["/icons/icon-512x512.png"],
+      title: t("ogTitle"),
+      description: t("ogDescription"),
+      images: [`${baseUrl.replace(/\/$/, "")}/icons/icon-512x512.png`],
     },
     manifest: "/manifest.json",
   };
 }
-
-import {NextIntlClientProvider} from 'next-intl';
-import {getMessages, getTranslations} from 'next-intl/server';
-import {notFound} from 'next/navigation';
-import { routing } from "@/i18n/routing";
-import { getSiteBaseUrl } from "@/lib/site-urls";
-import { openGraphLocaleForUiLocale } from "@/lib/i18n-open-graph";
-import PWARegister from '@/components/PWARegister';
-import PWAInstallBanner from "@/components/PWAInstallBanner";
-import { Providers } from "@/components/Providers";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
-import MobileNav from "@/components/layout/MobileNav";
-import CookieConsent from "@/components/CookieConsent";
-import VerificationBanner from "@/components/layout/VerificationBanner";
 
 export default async function RootLayout({
   children,
@@ -161,6 +169,7 @@ export default async function RootLayout({
             <PWAInstallBanner />
             <MobileNav />
             <CookieConsent />
+            <ConsentAwareAnalytics />
           </Providers>
         </NextIntlClientProvider>
       </body>

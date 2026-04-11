@@ -12,6 +12,7 @@ import {
   computeAuthoritativeCheckoutTotals,
   validateBookingStayWindow,
 } from "@/lib/booking-server-price";
+import { bookingTouchesPlatformHoliday } from "@/lib/booking-holidays";
 import { getPricingRules } from "@/lib/platform-settings";
 import { moneyToNumber } from "@/lib/money";
 import { BookingStatus } from "@prisma/client";
@@ -78,6 +79,19 @@ export async function createBookingAction(data: CreateBookingInput) {
     )
   ) {
     return { success: false as const, error: "Errors.invalidBookingDates" };
+  }
+
+  if (
+    bookingTouchesPlatformHoliday(
+      new Date(data.checkInTime),
+      new Date(data.checkOutTime),
+      pricingRules.platformHolidayDates,
+    )
+  ) {
+    return {
+      success: false as const,
+      error: "Errors.bookingIncludesPlatformHoliday",
+    };
   }
 
   const authTotals = computeAuthoritativeCheckoutTotals(
@@ -152,6 +166,20 @@ export async function createBookingAction(data: CreateBookingInput) {
       })
       .catch(() => {});
 
+    const guestPhone = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { phone: true },
+    });
+    if (guestPhone?.phone) {
+      void notificationService
+        .notifyGuestBookingRequestSms(
+          guestPhone.phone,
+          booking.id,
+          shop.name,
+        )
+        .catch(() => {});
+    }
+
     revalidatePathAllLocales("/bookings");
     revalidatePathAllLocales("/search");
 
@@ -202,6 +230,19 @@ export async function modifyBookingAction(data: ModifyBookingActionInput) {
 
   if (!session?.user?.id) {
     return { success: false as const, error: "Errors.authRequired" };
+  }
+
+  const pricingRules = await getPricingRules();
+  const cin = new Date(data.checkInTime);
+  const cout = new Date(data.checkOutTime);
+  if (!validateBookingStayWindow(cin, cout, pricingRules)) {
+    return { success: false as const, error: "Errors.invalidBookingDates" };
+  }
+  if (bookingTouchesPlatformHoliday(cin, cout, pricingRules.platformHolidayDates)) {
+    return {
+      success: false as const,
+      error: "Errors.bookingIncludesPlatformHoliday",
+    };
   }
 
   const result = await bookingService.modifyBooking(

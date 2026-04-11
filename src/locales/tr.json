@@ -484,6 +484,8 @@
     "platformSettingsBagS": "Küçük (S) Valiz Çarpanı",
     "platformSettingsBagM": "Orta/Büyük (M/L) Valiz Çarpanı",
     "platformSettingsBagXl": "Ekstra Büyük (XL) Valiz Çarpanı",
+    "platformSettingsHolidayDates": "Platform tatil günleri (YYYY-MM-DD)",
+    "platformSettingsHolidayDatesHint": "Her satıra bir gün veya virgülle ayırın. Bu günlere denk gelen konaklama pencereleri reddedilir.",
     "platformSettingsSave": "KAYDET",
     "platformSettingsSaved": "Ayarlar kaydedildi.",
     "platformSettingsInvalid": "Geçersiz değerler.",
@@ -709,7 +711,36 @@
     "navAdminPanel": "Yönetim Paneli",
     "navPartnerPanel": "Mağaza Paneli",
     "navBookings": "Rezervasyonlarım",
+    "navPrivacyData": "Veri ve gizlilik",
     "signOut": "Çıkış Yap"
+  },
+  "AccountPrivacy": {
+    "pageTitle": "Veri ve gizlilik",
+    "pageIntro": "KVKK kapsamında verilerinizi dışa aktarabilir veya hesabınızı anonimleştirebilirsiniz.",
+    "back": "Rezervasyonlara dön",
+    "guestOnly": "Bu sayfa yalnızca misafir hesapları içindir.",
+    "exportTitle": "Veri dışa aktarma",
+    "exportDesc": "Hesabınızla ilişkili temel verileri JSON olarak indirin.",
+    "exportButton": "İndir",
+    "deleteTitle": "Hesabı anonimleştir",
+    "deleteDesc": "Aktif rezervasyonunuz yoksa kişisel verileriniz silinir; geçmiş kayıtlar yasal zorunluluklar için tutulabilir.",
+    "deleteButton": "Hesabı kapat",
+    "errors": {
+      "activeBookings": "Aktif rezervasyonunuz varken hesap kapatılamaz.",
+      "authRequired": "Oturum açmanız gerekiyor.",
+      "unauthorized": "Bu işlem için yetkiniz yok.",
+      "generic": "İşlem tamamlanamadı."
+    }
+  },
+  "WebPush": {
+    "title": "Anlık bildirimler",
+    "description": "Rezervasyon güncellemeleri için tarayıcı bildirimlerine izin verin (isteğe bağlı).",
+    "enable": "Bildirimleri aç",
+    "unsupported": "Bu cihaz veya tarayıcı push desteklemiyor.",
+    "invalidSubscription": "Abonelik oluşturulamadı.",
+    "saveFailed": "Sunucuya kaydedilemedi.",
+    "enabled": "Bildirimler etkinleştirildi.",
+    "permissionDenied": "İzin verilmedi veya bir hata oluştu."
   },
   "About": {
     "badge": "HİKAYEMİZ",
@@ -940,6 +971,9 @@
     "bookingNotFound": "Rezervasyon bulunamadı.",
     "insufficientCapacity": "Bu tarih aralığında dükkan kapasitesi yetersiz.",
     "invalidBookingDates": "Rezervasyon tarihleri geçersiz veya izin verilen sürenin dışında.",
+    "bookingIncludesPlatformHoliday": "Seçilen tarihler platform tatil günleriyle çakışıyor; lütfen başka bir aralık seçin.",
+    "bookingStateConflict": "Rezervasyon durumu değişti; sayfayı yenileyip tekrar deneyin.",
+    "accountDeleteActiveBookings": "Aktif rezervasyon varken hesap kapatılamaz.",
     "modificationNotAllowed": "Bu rezervasyon düzenlenemez.",
     "modificationRefundFailed": "İade tamamlanamadı; değişiklik uygulanmadı.",
     "modificationPriceIncrease": "Ödeme alınmış rezervasyonda tutar artırılamaz. İptal edip yeniden rezervasyon oluşturun.",

@@ -1,6 +1,6 @@
 // BagajPark Service Worker — PWA ikon/manifest; sayfa ve Next.js iç yollarına müdahale etme.
 // (ngrok ara sayfası / RSC / OAuth için navigasyon ve _next cache'lenmez.)
-const CACHE_NAME = 'bagajpark-v4';
+const CACHE_NAME = 'bagajpark-v5';
 const ASSETS_TO_CACHE = ['/manifest.json', '/icons/icon-192x192.png', '/icons/icon-512x512.png'];
 
 self.addEventListener('install', (event) => {
@@ -19,6 +19,30 @@ self.addEventListener('install', (event) => {
     })
   );
   self.skipWaiting();
+});
+
+self.addEventListener('push', (event) => {
+  let payload = { title: 'BagajPark', body: '' };
+  try {
+    if (event.data) {
+      const j = event.data.json();
+      if (j && typeof j === 'object') {
+        payload = {
+          title: typeof j.title === 'string' ? j.title : payload.title,
+          body: typeof j.body === 'string' ? j.body : '',
+        };
+      }
+    }
+  } catch {
+    /* raw text */
+  }
+  event.waitUntil(
+    self.registration.showNotification(payload.title, {
+      body: payload.body,
+      icon: '/icons/icon-192x192.png',
+      badge: '/icons/icon-192x192.png',
+    }),
+  );
 });
 
 self.addEventListener('activate', (event) => {

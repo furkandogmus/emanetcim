@@ -5,6 +5,7 @@ import prisma from "@/lib/db";
 import { moneyToNumber } from "@/lib/money";
 import AdminPlatformSettingsClient from "@/components/admin/AdminPlatformSettingsClient";
 import { DEFAULT_PRICING_RULES } from "@/lib/pricing-rules";
+import { parsePlatformHolidayDates } from "@/lib/booking-holidays";
 
 export default async function AdminPlatformSettingsPage({
   params,
@@ -32,6 +33,9 @@ export default async function AdminPlatformSettingsPage({
         bagMultiplierS: moneyToNumber(row.bagMultiplierS),
         bagMultiplierM: moneyToNumber(row.bagMultiplierM),
         bagMultiplierXl: moneyToNumber(row.bagMultiplierXl),
+        holidayDatesRaw: parsePlatformHolidayDates(row.platformHolidayDates).join(
+          "\n",
+        ),
       }
     : {
         maxStayDays: DEFAULT_PRICING_RULES.maxStayDays,
@@ -44,6 +48,7 @@ export default async function AdminPlatformSettingsPage({
         bagMultiplierS: DEFAULT_PRICING_RULES.bagMultipliers.S,
         bagMultiplierM: DEFAULT_PRICING_RULES.bagMultipliers.M,
         bagMultiplierXl: DEFAULT_PRICING_RULES.bagMultipliers.XL,
+        holidayDatesRaw: "",
       };
 
   const updatedAtLabel = row?.updatedAt
