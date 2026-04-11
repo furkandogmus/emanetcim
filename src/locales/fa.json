@@ -18,7 +18,14 @@
     "notFoundBackHome": "بازگشت به خانه",
     "emailVerificationRequiredBanner": "ایمیل شما هنوز تأیید نشده است. صندوق ورودی را بررسی کنید.",
     "resendEmailSuccess": "ایمیل تأیید دوباره ارسال شد.",
-    "resendEmailCta": "ارسال مجدد"
+    "resendEmailCta": "ارسال مجدد",
+    "mobileNavHome": "خانه",
+    "mobileNavSearch": "جستجو",
+    "mobileNavBookings": "رزروها",
+    "pwaInstallTitle": "نصب BagajPark",
+    "pwaInstallBody": "برای دسترسی سریع‌تر به صفحهٔ اصلی اضافه کنید.",
+    "pwaInstallCta": "نصب",
+    "pwaInstallDismiss": "بعداً"
   },
   "SEO": {
     "title": "BagajPark | چمدان امن، سفر آزاد",
@@ -978,7 +985,11 @@
       "intro": "تئاتر و موزه راحت‌تر — نگهداری انعطاف‌پذیر با شرکای محلی.",
       "searchQuery": "Kings Cross",
       "cta": "فروشگاه‌های لندن"
-    }
+    },
+    "indexMetaTitle": "نگهداری چمدان به تفکیک شهر | BagajPark",
+    "indexMetaDescription": "در شهرهای بزرگ، نگهداری امن چمدان پیدا کنید. نقشه را باز کنید و نزدیک‌ترین فروشگاه را رزرو کنید.",
+    "indexHeadline": "نگهداری چمدان بر پایهٔ شهر",
+    "indexIntro": "شهر را انتخاب کنید تا به صفحهٔ محلی بروید و جستجو با مرکز درست نقشه شروع شود."
   },
   "AdminStatus": {
     "title": "ممیزی فنی پلتفرم",

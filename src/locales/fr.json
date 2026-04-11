@@ -18,7 +18,14 @@
     "notFoundBackHome": "RETOUR À LA MAISON",
     "emailVerificationRequiredBanner": "Votre adresse e-mail n'a pas encore été vérifiée. Veuillez vérifier votre boîte de réception.",
     "resendEmailSuccess": "E-mail de vérification envoyé avec succès.",
-    "resendEmailCta": "RENVOYER MAINTENANT"
+    "resendEmailCta": "RENVOYER MAINTENANT",
+    "mobileNavHome": "Accueil",
+    "mobileNavSearch": "Rechercher",
+    "mobileNavBookings": "Réservations",
+    "pwaInstallTitle": "Installer BagajPark",
+    "pwaInstallBody": "Ajoutez à l’écran d’accueil pour un accès plus rapide.",
+    "pwaInstallCta": "Installer",
+    "pwaInstallDismiss": "Plus tard"
   },
   "SEO": {
     "title": "Parc Bagaj | Laissez vos bagages en toute sécurité, voyagez librement",
@@ -978,7 +985,11 @@
       "intro": "Les journées au théâtre et aux musées sont facilitées : réservez un espace de stockage flexible auprès de partenaires locaux.",
       "searchQuery": "Croix des Rois",
       "cta": "Boutiques ouvertes à Londres"
-    }
+    },
+    "indexMetaTitle": "Consigne à bagages par ville | BagajPark",
+    "indexMetaDescription": "Trouvez une consigne sécurisée dans les grandes villes. Ouvrez la carte et réservez un commerce de confiance près de vous.",
+    "indexHeadline": "Consigne par ville",
+    "indexIntro": "Choisissez une ville pour accéder à la page locale et lancer la carte au bon endroit."
   },
   "AdminStatus": {
     "title": "Platform Technical Audit",

@@ -7,6 +7,9 @@ import { moneyToNumber } from '@/lib/money';
 import logger from '@/lib/logger';
 import { withTimeout } from '@/lib/async-timeout';
 import { isPaymentsEnabled } from '@/lib/feature-flags';
+import { getPaymentGateway, isStripePaymentIntentId } from '@/lib/payment-gateway';
+import { tryAmountToStripeMinorUnits } from '@/lib/currency';
+import { assertStripeKeys, getStripe } from '@/lib/stripe';
 
 const IYZICO_OP_TIMEOUT_MS = Number(process.env.IYZICO_HTTP_TIMEOUT_MS) || 45_000;
 
@@ -93,6 +96,9 @@ export class PaymentService implements IPaymentService {
         status: 'failure',
         errorMessage: 'Payments disabled (PAYMENTS_ENABLED=false).',
       };
+    }
+    if (getPaymentGateway() === 'stripe') {
+      return this.initializeStripeMarketplacePayment(data);
     }
     assertIyzicoKeys();
     await this.acquirePaymentLock(data.bookingId);
@@ -237,6 +243,146 @@ export class PaymentService implements IPaymentService {
   }
 
   /**
+   * Stripe PaymentIntent: istemci (Stripe.js) ile onaylanır; başarı webhook ile kesinleşir.
+   * Connect / bölünmüş ödeme için ileride `application_fee_amount` + `transfer_data` eklenebilir.
+   */
+  private async initializeStripeMarketplacePayment(
+    data: MarketplacePaymentInput
+  ): Promise<PaymentSdkResult> {
+    await this.acquirePaymentLock(data.bookingId);
+    try {
+      const existingLog = await prisma.paymentLog.findUnique({
+        where: { bookingId: data.bookingId },
+      });
+
+      if (existingLog?.status === "SUCCESS") {
+        return { status: "success", message: "Already processed.", gateway: "stripe" };
+      }
+
+      if (
+        process.env.NODE_ENV === "development" &&
+        !process.env.STRIPE_SECRET_KEY?.trim()
+      ) {
+        logger.info({ bookingId: data.bookingId }, "stripe_payment_simulate_success_dev");
+        const paymentId = `pi_dev_${Date.now()}`;
+        try {
+          await prisma.paymentLog.create({
+            data: {
+              bookingId: data.bookingId,
+              transactionId: paymentId,
+              amount: data.totalPrice,
+              status: "SUCCESS",
+            },
+          });
+        } catch (e) {
+          if (
+            e instanceof Prisma.PrismaClientKnownRequestError &&
+            e.code === "P2002"
+          ) {
+            logger.warn({ bookingId: data.bookingId }, "stripe_payment_init_duplicate_row");
+            return { status: "success", message: "Already processed.", gateway: "stripe" };
+          }
+          throw e;
+        }
+        return {
+          status: "success",
+          paymentIntentId: paymentId,
+          gateway: "stripe",
+        };
+      }
+
+      assertStripeKeys();
+      const stripe = getStripe();
+      const pi = await stripe.paymentIntents.create({
+        amount: tryAmountToStripeMinorUnits(data.totalPrice),
+        currency: "try",
+        metadata: { bookingId: data.bookingId },
+        automatic_payment_methods: { enabled: true },
+      });
+
+      return {
+        status: "requires_confirmation",
+        gateway: "stripe",
+        clientSecret: pi.client_secret ?? undefined,
+        paymentIntentId: pi.id,
+      };
+    } finally {
+      await this.releasePaymentLock(data.bookingId);
+    }
+  }
+
+  private async confirmPaidBookingAfterSuccessfulCharge(
+    bookingId: string,
+    externalPaymentId: string
+  ): Promise<{ success: boolean; message: string }> {
+    const booking = await prisma.booking.findUnique({
+      where: { id: bookingId },
+    });
+
+    if (!booking) {
+      console.error(`[Webhook Error] Booking not found: ${bookingId}`);
+      return { success: false, message: "Booking not found" };
+    }
+
+    if (booking.status === "PAID" || booking.status === "CHECKED_IN") {
+      return { success: true, message: "Already processed" };
+    }
+    if (booking.status !== "PENDING") {
+      return {
+        success: false,
+        message: "Webhook ignored: booking not awaiting payment",
+      };
+    }
+
+    try {
+      await prisma.$transaction([
+        prisma.booking.update({
+          where: { id: bookingId },
+          data: { status: "PAID" },
+        }),
+        prisma.paymentLog.upsert({
+          where: { transactionId: externalPaymentId },
+          update: { status: "SUCCESS" },
+          create: {
+            bookingId,
+            transactionId: externalPaymentId,
+            amount: moneyToNumber(booking.totalPrice),
+            status: "SUCCESS",
+            splitCompleted: true,
+          },
+        }),
+      ]);
+
+      logger.info({ bookingId }, "payment_webhook_confirmed");
+      return { success: true, message: "Confirmed" };
+    } catch (error) {
+      logger.error({ bookingId, error }, `[Webhook Error] DB Update failed`);
+      throw error;
+    }
+  }
+
+  /**
+   * Stripe dashboard / webhook: `payment_intent.succeeded`
+   */
+  async confirmStripePaymentIntentSucceeded(payload: {
+    id: string;
+    status: string;
+    metadata?: Record<string, string> | null;
+  }): Promise<{ success: boolean; message: string }> {
+    if (!isPaymentsEnabled()) {
+      return { success: false, message: "Payments disabled (PAYMENTS_ENABLED=false)" };
+    }
+    if (payload.status !== "succeeded") {
+      return { success: false, message: "Stripe intent not succeeded" };
+    }
+    const bookingId = payload.metadata?.bookingId?.trim();
+    if (!bookingId) {
+      return { success: false, message: "Missing bookingId in PaymentIntent metadata" };
+    }
+    return this.confirmPaidBookingAfterSuccessfulCharge(bookingId, payload.id);
+  }
+
+  /**
    * iyzico Webhook (Callback) İşleyicisi
    * Asenkron ödeme onaylarını (Bankadan bağımsız) doğrular ve işler.
    */
@@ -253,58 +399,15 @@ export class PaymentService implements IPaymentService {
     }
     const { status, paymentId, conversationId } = payload;
 
-    // 1. Durum Kontrolü (Sadece başarılı ödemeleri işle)
     if (!isPaymentSuccess(status)) {
       return { success: false, message: "Webhook ignored: status not success" };
     }
 
-    // 2. Rezervasyonu bul
-    const booking = await prisma.booking.findUnique({
-      where: { id: conversationId }
-    });
-
-    if (!booking) {
-      console.error(`[Webhook Error] Booking not found: ${conversationId}`);
-      return { success: false, message: "Booking not found" };
+    if (!paymentId?.trim()) {
+      return { success: false, message: "Missing payment id" };
     }
 
-    // 3. İdempolans ve terminal durumlar (webhook yalnızca PENDING -> PAID)
-    if (booking.status === 'PAID' || booking.status === 'CHECKED_IN') {
-      return { success: true, message: "Already processed" };
-    }
-    if (booking.status !== 'PENDING') {
-      return {
-        success: false,
-        message: "Webhook ignored: booking not awaiting payment",
-      };
-    }
-
-    // 4. Onay İşlemi (Transaction içinde)
-    try {
-      await prisma.$transaction([
-        prisma.booking.update({
-          where: { id: conversationId },
-          data: { status: 'PAID' }
-        }),
-        prisma.paymentLog.upsert({
-          where: { transactionId: paymentId },
-          update: { status: 'SUCCESS' },
-          create: {
-            bookingId: conversationId,
-            transactionId: paymentId,
-            amount: moneyToNumber(booking.totalPrice),
-            status: 'SUCCESS',
-            splitCompleted: true
-          }
-        })
-      ]);
-
-      logger.info({ bookingId: conversationId }, "payment_webhook_confirmed");
-      return { success: true, message: "Confirmed" };
-    } catch (error) {
-      logger.error({ conversationId, error }, `[Webhook Error] DB Update failed`);
-      throw error; // Üst katmanda 500 dönmesi için (iyzico tekrar denesin)
-    }
+    return this.confirmPaidBookingAfterSuccessfulCharge(conversationId, paymentId);
   }
 
   /**
@@ -322,7 +425,6 @@ export class PaymentService implements IPaymentService {
         errorMessage: 'Payments disabled (PAYMENTS_ENABLED=false).',
       };
     }
-    assertIyzicoKeys();
     // 1. Orijinal ödeme kaydını bul (Transaction ID gerekiyor)
     const paymentLog = await prisma.paymentLog.findFirst({
       where: { bookingId, status: "SUCCESS" }
@@ -331,6 +433,52 @@ export class PaymentService implements IPaymentService {
     if (!paymentLog || !paymentLog.transactionId) {
       throw new Error(`Refund failed: Original payment not found for booking ${bookingId}`);
     }
+
+    const txId = paymentLog.transactionId;
+
+    if (isStripePaymentIntentId(txId)) {
+      if (
+        process.env.NODE_ENV === "development" &&
+        txId.startsWith("pi_dev_")
+      ) {
+        logger.info({ bookingId }, "stripe_refund_simulate_success_dev");
+        if (!options?.keepPaymentLogSuccess) {
+          await prisma.paymentLog.update({
+            where: { id: paymentLog.id },
+            data: { status: "REFUNDED" },
+          });
+        }
+        return { status: "success", amount };
+      }
+
+      assertStripeKeys();
+      const stripe = getStripe();
+      const refundParams: { payment_intent: string; amount?: number } = {
+        payment_intent: txId,
+      };
+      if (amount > 0) {
+        refundParams.amount = tryAmountToStripeMinorUnits(amount);
+      }
+      const refund = await stripe.refunds.create(refundParams);
+
+      if (refund.status === "failed" || refund.status === "canceled") {
+        return {
+          status: "failure",
+          errorMessage: refund.failure_reason ?? "Stripe refund failed",
+        };
+      }
+
+      if (!options?.keepPaymentLogSuccess) {
+        await prisma.paymentLog.update({
+          where: { id: paymentLog.id },
+          data: { status: "REFUNDED" },
+        });
+      }
+
+      return { status: "success", amount, refundId: refund.id };
+    }
+
+    assertIyzicoKeys();
 
     // 2. Geliştirme Modu Bypass
     if (process.env.NODE_ENV === "development" && (!process.env.IYZICO_API_KEY || process.env.IYZICO_API_KEY === "sandbox-api-key")) {
@@ -422,6 +570,13 @@ export class PaymentService implements IPaymentService {
       return {
         status: 'failure',
         errorMessage: 'Payments disabled (PAYMENTS_ENABLED=false).',
+      };
+    }
+    if (getPaymentGateway() === "stripe") {
+      return {
+        status: "failure",
+        errorMessage:
+          "Sub-merchant updates apply to iyzico marketplace only (PAYMENT_GATEWAY=iyzico).",
       };
     }
     assertIyzicoKeys();

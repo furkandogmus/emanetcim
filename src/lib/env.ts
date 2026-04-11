@@ -10,6 +10,10 @@ const serverSchema = z.object({
   IYZICO_SECRET_KEY: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
   IYZICO_WEBHOOK_SECRET: z.string().optional(),
+  PAYMENT_GATEWAY: z.string().optional(),
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SIGNING_SECRET: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
   CRON_SECRET: z.string().optional(),
   UPSTASH_REDIS_REST_URL: z.string().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
@@ -81,21 +85,37 @@ export function requireProdSecrets(): void {
     );
   }
   if (!paymentsDisabled) {
-    if (!e.IYZICO_API_KEY?.trim()) {
-      throw new Error("IYZICO_API_KEY is required in production when payments are enabled");
-    }
-    if (!e.IYZICO_SECRET_KEY?.trim()) {
-      throw new Error("IYZICO_SECRET_KEY is required in production when payments are enabled");
-    }
-    // GitHub Actions vb. CI ortamında kasıtlı placeholder anahtarlar kullanılabilir.
-    if (
-      process.env.CI !== "true" &&
-      (isPlaceholderIyzico(e.IYZICO_API_KEY) ||
-        isPlaceholderIyzico(e.IYZICO_SECRET_KEY))
-    ) {
-      throw new Error(
-        "IYZICO_API_KEY / IYZICO_SECRET_KEY must not use placeholder values in production",
-      );
+    const gateway = process.env.PAYMENT_GATEWAY?.trim().toLowerCase() || "iyzico";
+    if (gateway === "stripe") {
+      if (!e.STRIPE_SECRET_KEY?.trim()) {
+        throw new Error(
+          "STRIPE_SECRET_KEY is required in production when payments are enabled and PAYMENT_GATEWAY=stripe"
+        );
+      }
+      const wh =
+        e.STRIPE_WEBHOOK_SIGNING_SECRET?.trim() || e.STRIPE_WEBHOOK_SECRET?.trim();
+      if (!wh) {
+        throw new Error(
+          "STRIPE_WEBHOOK_SIGNING_SECRET (or STRIPE_WEBHOOK_SECRET) is required in production when PAYMENT_GATEWAY=stripe"
+        );
+      }
+    } else {
+      if (!e.IYZICO_API_KEY?.trim()) {
+        throw new Error("IYZICO_API_KEY is required in production when payments are enabled");
+      }
+      if (!e.IYZICO_SECRET_KEY?.trim()) {
+        throw new Error("IYZICO_SECRET_KEY is required in production when payments are enabled");
+      }
+      // GitHub Actions vb. CI ortamında kasıtlı placeholder anahtarlar kullanılabilir.
+      if (
+        process.env.CI !== "true" &&
+        (isPlaceholderIyzico(e.IYZICO_API_KEY) ||
+          isPlaceholderIyzico(e.IYZICO_SECRET_KEY))
+      ) {
+        throw new Error(
+          "IYZICO_API_KEY / IYZICO_SECRET_KEY must not use placeholder values in production",
+        );
+      }
     }
   }
   const upstashUrl = e.UPSTASH_REDIS_REST_URL?.trim();

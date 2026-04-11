@@ -18,7 +18,14 @@
     "notFoundBackHome": "На главную",
     "emailVerificationRequiredBanner": "Электронная почта ещё не подтверждена. Проверьте входящие.",
     "resendEmailSuccess": "Письмо для подтверждения отправлено.",
-    "resendEmailCta": "Отправить снова"
+    "resendEmailCta": "Отправить снова",
+    "mobileNavHome": "Главная",
+    "mobileNavSearch": "Поиск",
+    "mobileNavBookings": "Брони",
+    "pwaInstallTitle": "Установить BagajPark",
+    "pwaInstallBody": "Добавьте на главный экран для быстрого доступа.",
+    "pwaInstallCta": "Установить",
+    "pwaInstallDismiss": "Не сейчас"
   },
   "SEO": {
     "title": "BagajPark | Оставьте багаж в безопасности, путешествуйте свободно",
@@ -978,7 +985,11 @@
       "intro": "Театры и музеи проще — гибкое хранение у локальных партнёров.",
       "searchQuery": "Kings Cross",
       "cta": "Магазины в Лондоне"
-    }
+    },
+    "indexMetaTitle": "Камеры хранения по городам | BagajPark",
+    "indexMetaDescription": "Надёжное хранение багажа в крупных городах. Откройте карту и забронируйте проверенную точку рядом.",
+    "indexHeadline": "Хранение багажа по городам",
+    "indexIntro": "Выберите город — локальная страница откроет карту с нужным районом."
   },
   "AdminStatus": {
     "title": "Технический аудит платформы",

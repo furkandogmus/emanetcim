@@ -74,9 +74,11 @@ import {routing} from '@/i18n/routing';
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { openGraphLocaleForUiLocale } from "@/lib/i18n-open-graph";
 import PWARegister from '@/components/PWARegister';
+import PWAInstallBanner from "@/components/PWAInstallBanner";
 import { Providers } from "@/components/Providers";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import MobileNav from "@/components/layout/MobileNav";
 import CookieConsent from "@/components/CookieConsent";
 import VerificationBanner from "@/components/layout/VerificationBanner";
 
@@ -152,10 +154,12 @@ export default async function RootLayout({
             <PWARegister />
             <VerificationBanner />
             <Header />
-            <main className="min-h-screen">
+            <main className="min-h-screen pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
               {children}
             </main>
             <Footer />
+            <PWAInstallBanner />
+            <MobileNav />
             <CookieConsent />
           </Providers>
         </NextIntlClientProvider>

@@ -18,7 +18,14 @@
     "notFoundBackHome": "返回首页",
     "emailVerificationRequiredBanner": "您的电子邮件地址尚未得到验证。请检查您的收件箱。",
     "resendEmailSuccess": "验证邮件发送成功。",
-    "resendEmailCta": "立即重新发送"
+    "resendEmailCta": "立即重新发送",
+    "mobileNavHome": "首页",
+    "mobileNavSearch": "搜索",
+    "mobileNavBookings": "预订",
+    "pwaInstallTitle": "安装 BagajPark",
+    "pwaInstallBody": "添加到主屏幕，打开更快。",
+    "pwaInstallCta": "安装",
+    "pwaInstallDismiss": "暂不"
   },
   "SEO": {
     "title": "BagajPark |安全寄存行李，自由出行",
@@ -978,7 +985,11 @@
       "intro": "剧院和博物馆日变得更加轻松 - 与当地合作伙伴预订灵活的存储空间。",
       "searchQuery": "国王十字区",
       "cta": "在伦敦开设商店"
-    }
+    },
+    "indexMetaTitle": "各城市行李寄存 | BagajPark",
+    "indexMetaDescription": "在主要城市找到安全的行李寄存。打开地图，预订附近的可信门店。",
+    "indexHeadline": "按城市查找寄存",
+    "indexIntro": "选择城市进入本地页面，并以合适的地图中心开始搜索。"
   },
   "AdminStatus": {
     "title": "Platform Technical Audit",

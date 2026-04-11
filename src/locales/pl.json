@@ -18,7 +18,14 @@
     "notFoundBackHome": "Strona główna",
     "emailVerificationRequiredBanner": "Twój adres e-mail nie został jeszcze potwierdzony. Sprawdź skrzynkę.",
     "resendEmailSuccess": "E-mail weryfikacyjny został wysłany.",
-    "resendEmailCta": "Wyślij ponownie"
+    "resendEmailCta": "Wyślij ponownie",
+    "mobileNavHome": "Start",
+    "mobileNavSearch": "Szukaj",
+    "mobileNavBookings": "Rezerwacje",
+    "pwaInstallTitle": "Zainstaluj BagajPark",
+    "pwaInstallBody": "Dodaj do ekranu głównego, by szybciej wracać.",
+    "pwaInstallCta": "Zainstaluj",
+    "pwaInstallDismiss": "Później"
   },
   "SEO": {
     "title": "BagajPark | Zostaw bagaż bezpiecznie, podróżuj swobodnie",
@@ -978,7 +985,11 @@
       "intro": "Teatr i muzea łatwiej — elastyczne przechowywanie u lokalnych partnerów.",
       "searchQuery": "Kings Cross",
       "cta": "Otwórz sklepy w Londynie"
-    }
+    },
+    "indexMetaTitle": "Przechowalnia bagażu — miasta | BagajPark",
+    "indexMetaDescription": "Bezpieczne przechowanie bagażu w dużych miastach. Otwórz mapę i zarezerwuj zaufany punkt.",
+    "indexHeadline": "Przechowalnia według miasta",
+    "indexIntro": "Wybierz miasto, przejdź na stronę lokalną i wyszukaj na mapie z dobrym centrum."
   },
   "AdminStatus": {
     "title": "Audyt techniczny platformy",

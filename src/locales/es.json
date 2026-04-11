@@ -18,7 +18,14 @@
     "notFoundBackHome": "Volver al inicio",
     "emailVerificationRequiredBanner": "Su dirección de correo electrónico aún no ha sido verificada. Por favor revisa tu bandeja de entrada.",
     "resendEmailSuccess": "Correo electrónico de verificación enviado correctamente.",
-    "resendEmailCta": "REENVIAR AHORA"
+    "resendEmailCta": "REENVIAR AHORA",
+    "mobileNavHome": "Inicio",
+    "mobileNavSearch": "Buscar",
+    "mobileNavBookings": "Reservas",
+    "pwaInstallTitle": "Instalar BagajPark",
+    "pwaInstallBody": "Añade a la pantalla de inicio para acceder más rápido.",
+    "pwaInstallCta": "Instalar",
+    "pwaInstallDismiss": "Ahora no"
   },
   "SEO": {
     "title": "BagajPark | Deja tu equipaje con seguridad, viaja libremente",
@@ -978,7 +985,11 @@
       "intro": "Los días de teatro y museo son más fáciles: reserve almacenamiento flexible con socios locales.",
       "searchQuery": "Cruz de Reyes",
       "cta": "Tiendas abiertas en Londres"
-    }
+    },
+    "indexMetaTitle": "Consigna de equipaje por ciudad | BagajPark",
+    "indexMetaDescription": "Encuentra consigna segura en grandes ciudades. Abre el mapa y reserva una tienda de confianza cerca.",
+    "indexHeadline": "Consigna por ciudad",
+    "indexIntro": "Elige una ciudad para ver la página local y abrir el mapa centrado en la zona adecuada."
   },
   "AdminStatus": {
     "title": "Platform Technical Audit",

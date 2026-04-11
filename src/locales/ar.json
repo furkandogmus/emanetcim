@@ -18,7 +18,14 @@
     "notFoundBackHome": "العودة إلى الرئيسية",
     "emailVerificationRequiredBanner": "لم يتم تأكيد بريدك الإلكتروني بعد. يرجى مراجعة صندوق الوارد.",
     "resendEmailSuccess": "تم إرسال رسالة التأكيد بنجاح.",
-    "resendEmailCta": "إعادة الإرسال الآن"
+    "resendEmailCta": "إعادة الإرسال الآن",
+    "mobileNavHome": "الرئيسية",
+    "mobileNavSearch": "بحث",
+    "mobileNavBookings": "الحجوزات",
+    "pwaInstallTitle": "ثبّت BagajPark",
+    "pwaInstallBody": "أضفه إلى الشاشة الرئيسية للوصول الأسرع.",
+    "pwaInstallCta": "تثبيت",
+    "pwaInstallDismiss": "ليس الآن"
   },
   "SEO": {
     "title": "BagajPark | اترك أمتعتك بأمان وسافر بحرية",
@@ -978,7 +985,11 @@
       "intro": "أيام المسارح والمتاحف أسهل — احجز تخزينًا مرنًا مع شركاء محليين.",
       "searchQuery": "King's Cross",
       "cta": "افتح متجرًا في لندن"
-    }
+    },
+    "indexMetaTitle": "تخزين الأمتعة حسب المدن | BagajPark",
+    "indexMetaDescription": "اعثر على تخزين آمن في المدن الكبرى. افتح الخريطة واحجز متجرًا موثوقًا قريبًا.",
+    "indexHeadline": "تخزين الأمتعة حسب المدينة",
+    "indexIntro": "اختر مدينة للانتقال إلى الصفحة المحلية وفتح الخريطة بمركز مناسب."
   },
   "AdminStatus": {
     "title": "Platform Technical Audit",

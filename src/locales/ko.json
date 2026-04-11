@@ -18,7 +18,14 @@
     "notFoundBackHome": "홈으로",
     "emailVerificationRequiredBanner": "이메일 인증이 아직 완료되지 않았습니다. 받은편지함을 확인해 주세요.",
     "resendEmailSuccess": "인증 메일을 다시 보냈습니다.",
-    "resendEmailCta": "다시 보내기"
+    "resendEmailCta": "다시 보내기",
+    "mobileNavHome": "홈",
+    "mobileNavSearch": "검색",
+    "mobileNavBookings": "예약",
+    "pwaInstallTitle": "BagajPark 설치",
+    "pwaInstallBody": "홈 화면에 추가해 더 빠르게 이용하세요.",
+    "pwaInstallCta": "설치",
+    "pwaInstallDismiss": "나중에"
   },
   "SEO": {
     "title": "BagajPark | 짐은 안전하게, 여행은 자유롭게",
@@ -978,7 +985,11 @@
       "intro": "뮤지컬·박물관 일정을 편하게 — 현지 파트너와 유연 보관.",
       "searchQuery": "Kings Cross",
       "cta": "런던 매장 보기"
-    }
+    },
+    "indexMetaTitle": "도시별 수하물 보관 | BagajPark",
+    "indexMetaDescription": "주요 도시에서 안전한 수하물 보관. 지도를 열고 가까운 매장을 예약하세요.",
+    "indexHeadline": "도시별 보관 장소",
+    "indexIntro": "도시를 고르면 지역 페이지로 이동해 지도가 알맞게 맞춰집니다."
   },
   "AdminStatus": {
     "title": "플랫폼 기술 감사",
