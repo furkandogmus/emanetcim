@@ -21,8 +21,9 @@ export function assertIyzicoKeys(): void {
   }
 }
 
-const apiKey = process.env.IYZICO_API_KEY?.trim() ?? "sandbox-api-key";
-const secretKey = process.env.IYZICO_SECRET_KEY?.trim() ?? "sandbox-secret-key";
+// Boş string (ör. docker .env'te IYZICO_API_KEY=) ?? ile yedeklenmez; Iyzipay ctor modül yüklenirken hata verir.
+const apiKey = process.env.IYZICO_API_KEY?.trim() || "sandbox-api-key";
+const secretKey = process.env.IYZICO_SECRET_KEY?.trim() || "sandbox-secret-key";
 
 export const iyzipay = new Iyzipay({
   apiKey,
