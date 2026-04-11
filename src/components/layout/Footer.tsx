@@ -110,6 +110,9 @@ export default function Footer() {
                 <span className="text-xs font-black text-gray-900">{t("sslProtection")}</span>
               </div>
               <p className="text-[10px] font-bold text-gray-400">{t("paymentsIyzico")}</p>
+              <p className="mt-2 text-[10px] font-medium leading-relaxed text-gray-500">
+                {t("paymentsNote")}
+              </p>
             </div>
             <div className="flex gap-4 mt-6 opacity-30 grayscale contrast-125">
               <div className="w-10 h-6 bg-gray-400 rounded"></div>
@@ -120,9 +123,17 @@ export default function Footer() {
         </div>
 
         <div className="mb-16 pb-16 border-b border-gray-100">
-          <h4 className="text-xs font-black uppercase tracking-widest text-gray-900 mb-4">
-            {t("citiesTitle")}
-          </h4>
+          <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+            <h4 className="text-xs font-black uppercase tracking-widest text-gray-900">
+              {t("citiesTitle")}
+            </h4>
+            <Link
+              href="/luggage-storage"
+              className="text-[10px] font-black uppercase tracking-widest text-orange-600 hover:underline"
+            >
+              {t("citiesViewAll")}
+            </Link>
+          </div>
           <div className="flex flex-wrap gap-2">
             {STORAGE_CITIES.map((c) => (
               <Link
