@@ -206,6 +206,15 @@ export default function LoginPage() {
                   />
                 </div>
 
+                <div className="flex justify-end">
+                  <Link
+                    href="/auth/forgot-password"
+                    className="text-[11px] font-bold uppercase tracking-widest text-orange-600 hover:text-orange-700"
+                  >
+                    {t("forgotPasswordLink")}
+                  </Link>
+                </div>
+
                 {/* Hata */}
                 {credError && (
                   <p className="text-xs text-red-500 font-semibold text-center">{credError}</p>
