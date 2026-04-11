@@ -8,7 +8,13 @@ import {
 } from "@/lib/netgsm";
 
 export interface INotificationService {
-  sendEmail(to: string, subject: string, body: string, bookingId?: string): Promise<boolean>;
+  sendEmail(
+    to: string,
+    subject: string,
+    body: string,
+    bookingId?: string,
+    html?: string,
+  ): Promise<boolean>;
   sendSms(to: string, message: string, bookingId?: string): Promise<boolean>;
   sendPush(userId: string, title: string, message: string, bookingId?: string): Promise<boolean>;
 }
@@ -21,7 +27,13 @@ export class NotificationService implements INotificationService {
   /**
    * E-posta gönderimi
    */
-  async sendEmail(to: string, subject: string, body: string, bookingId?: string): Promise<boolean> {
+  async sendEmail(
+    to: string,
+    subject: string,
+    body: string,
+    bookingId?: string,
+    html?: string,
+  ): Promise<boolean> {
     try {
       const resendKey = process.env.RESEND_API_KEY;
       let status: "SENT" | "FAILED" | "SKIPPED" = "SKIPPED";
@@ -35,7 +47,13 @@ export class NotificationService implements INotificationService {
             Authorization: `Bearer ${resendKey}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ from, to: [to], subject, text: body }),
+          body: JSON.stringify({
+            from,
+            to: [to],
+            subject,
+            text: body,
+            ...(html ? { html } : {}),
+          }),
         });
         if (!r.ok) {
           errorDetail = await r.text();
@@ -255,13 +273,59 @@ export class NotificationService implements INotificationService {
   }
 
   async notifyCheckIn(email: string, bookingId: string, locale: string = "tr"): Promise<void> {
-    const content = {
-      tr: { subject: "Valiziniz Güvende! 🔒", body: "Valiziniz teslim alındı." },
-      en: { subject: "Your Luggage is Safe! 🔒", body: "Your luggage has been received." }
-    }[locale] || { tr: { subject: "Valiziniz Güvende! 🔒", body: "Valiziniz teslim alındı." } }.tr;
+    const content =
+      {
+        tr: { subject: "Valiziniz Güvende! 🔒", body: "Valiziniz teslim alındı." },
+        en: { subject: "Your Luggage is Safe! 🔒", body: "Your luggage has been received." },
+      }[locale] || { tr: { subject: "Valiziniz Güvende! 🔒", body: "Valiziniz teslim alındı." } }.tr;
+
+    const sealLangTr = locale === "tr";
+    const escapeHtml = (s: string) =>
+      s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+    let seals: { sealNumber: number; bagIndex: number; bagSize: string }[] = [];
+    try {
+      seals = await prisma.bookingSeal.findMany({
+        where: { bookingId },
+        orderBy: { bagIndex: "asc" },
+        select: { sealNumber: true, bagIndex: true, bagSize: true },
+      });
+    } catch (err) {
+      logger.error({ err, bookingId }, "notifyCheckIn_seals_load_failed");
+    }
+
+    let textBody = content.body;
+    let htmlBody: string | undefined;
+    if (seals.length > 0) {
+      if (sealLangTr) {
+        const lines = seals
+          .map((s) => `• Valiz ${s.bagIndex} (${s.bagSize}): mühür #${s.sealNumber}`)
+          .join("\n");
+        textBody += `\n\nAtanan mühür seri numaraları:\n${lines}\n\nCheck-in sırasında kaydedildi. Teslim alırken valizlerinizle karşılaştırın.`;
+        const items = seals
+          .map(
+            (s) =>
+              `<li>Valiz ${s.bagIndex} (${escapeHtml(s.bagSize)}): <strong>#${s.sealNumber}</strong></li>`,
+          )
+          .join("");
+        htmlBody = `<p>${escapeHtml(content.body)}</p><p><strong>Atanan mühür seri numaraları:</strong></p><ul>${items}</ul><p style="font-size:13px;color:#555">Check-in sırasında kaydedildi. Teslim alırken valizlerinizle karşılaştırın.</p>`;
+      } else {
+        const lines = seals
+          .map((s) => `• Bag ${s.bagIndex} (${s.bagSize}): seal #${s.sealNumber}`)
+          .join("\n");
+        textBody += `\n\nSeal serial numbers assigned:\n${lines}\n\nRecorded at check-in. Use these to match your bags at pick-up.`;
+        const items = seals
+          .map(
+            (s) =>
+              `<li>Bag ${s.bagIndex} (${escapeHtml(s.bagSize)}): <strong>#${s.sealNumber}</strong></li>`,
+          )
+          .join("");
+        htmlBody = `<p>${escapeHtml(content.body)}</p><p><strong>Seal serial numbers assigned:</strong></p><ul>${items}</ul><p style="font-size:13px;color:#555">Recorded at check-in. Use these to match your bags at pick-up.</p>`;
+      }
+    }
 
     if (email.includes("@")) {
-      await this.sendEmail(email, content.subject, content.body, bookingId);
+      await this.sendEmail(email, content.subject, textBody, bookingId, htmlBody);
     }
   }
 
