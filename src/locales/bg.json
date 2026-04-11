@@ -258,6 +258,7 @@
     "searchTitleBrowse": "Намери съхранение на багаж | Карта",
     "searchDescriptionBrowse": "Открийте близки точки на картата; филтрирайте по дати и наличност.",
     "blogTitle": "Блог BagajPark",
+    "blogDescription": "По-леко пътуване, гидове за Истанбул и всичко за безопасността на багажа.",
     "blogSubtitle": "Пътеводители и съвети за багаж за Истанбул и отвъд.",
     "backToBlog": "Към блога",
     "blogCategory": "РЪКОВОДСТВО",
@@ -516,6 +517,10 @@
     "fieldPlaceholderTitle": "Заглавие...",
     "fieldPlaceholderContent": "Съдържание...",
     "validationRequired": "Попълнете всички полета.",
+    "fieldLanguage": "ЕЗИК",
+    "fieldPlaceholderSlug": "slug-na-publikaciyata",
+    "seoTip": "SEO съвет",
+    "seoDescription": "Удебелявайте ключови думи и използвайте подзаглавия в текста на публикацията, за да се класирате по-добре в Google.",
     "rating": "Оценка",
     "dashboard": "Табло",
     "users": "Потребители",
@@ -595,7 +600,8 @@
     "verifyEmailInvalidToken": "Невалиден токен за потвърждение.",
     "verifyEmailTokenNotFound": "Токенът не е намерен.",
     "verifyEmailTokenExpired": "Токенът е изтекъл.",
-    "verifyEmailUserNotFound": "Потребителят не е намерен."
+    "verifyEmailUserNotFound": "Потребителят не е намерен.",
+    "contactSupportHelp": "Ако имейлът все още не е пристигнал, пишете ни на info@bagajpark.com."
   },
   "UserNav": {
     "signIn": "Вход",
@@ -708,7 +714,9 @@
     "q4": "4. Събиране",
     "a4": "Дигитални форми и бисквитки.",
     "q5": "5. Права",
-    "a5": "Право на информация и изтриване."
+    "a5": "Право на информация и изтриване.",
+    "contactTitle": "Свържете се с нас относно правата ви върху данните",
+    "contactBody": "Можете да изпращате заявки по GDPR и за изтриване на данни по имейл."
   },
   "Terms": {
     "title": "Условия за ползване",
@@ -841,7 +849,9 @@
     "notAuthorizedAdmin": "Само администратори.",
     "notAuthorizedPartner": "Само партньори.",
     "disputeNotReady": "Спорът е възможен след оставяне или предаване на багажа.",
-    "reviewNotReady": "Отзив е възможен след завършено предаване."
+    "reviewNotReady": "Отзив е възможен след завършено предаване.",
+    "verificationCooldown": "Изчакайте {seconds} секунди преди да изпратите друг имейл.",
+    "maxVerificationAttempts": "Твърде много опити. Свържете се с нашия екип за поддръжка."
   },
   "Emails": {
     "verificationSubject": "Потвърдете имейла си",
@@ -853,7 +863,12 @@
     "checkOutBody": "Багажът ви е предаден."
   },
   "Review": {
-    "placeholder": "Мнение за магазина и услугата..."
+    "placeholder": "Мнение за магазина и услугата...",
+    "title": "ОЦЕНКА",
+    "subtitle": "Оценете преживяването от 1 до 5 звезди, за да помогнете на други пътешественици.",
+    "submit": "ИЗПРАТИ ОТЗИВ",
+    "success": "Отзивът ви е записан.",
+    "error": "Не успяхме да запишем отзива."
   },
   "CityStorage": {
     "istanbul": {

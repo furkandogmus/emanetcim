@@ -258,6 +258,7 @@
     "searchTitleBrowse": "پیدا کردن نگهداری چمدان | نقشه",
     "searchDescriptionBrowse": "روی نقشه نقاط امن و بیمه‌شده را پیدا کنید؛ با تاریخ و ظرفیت فیلتر کنید.",
     "blogTitle": "وبلاگ BagajPark",
+    "blogDescription": "سفر راحت‌تر، راهنمای استانبول و همه‌چیز درباره امن نگه داشتن چمدان.",
     "blogSubtitle": "راهنمای سفر و نکات چمدان برای استانبول و بیشتر.",
     "backToBlog": "بازگشت به وبلاگ",
     "blogCategory": "راهنما",
@@ -516,6 +517,10 @@
     "fieldPlaceholderTitle": "عنوان...",
     "fieldPlaceholderContent": "محتوا...",
     "validationRequired": "همه فیلدها را پر کنید.",
+    "fieldLanguage": "زبان",
+    "fieldPlaceholderSlug": "slug-url-post",
+    "seoTip": "نکته سئو",
+    "seoDescription": "کلمات کلیدی را برجسته کنید و در متن پست از زیرعنوان‌ها استفاده کنید تا در گوگل بهتر دیده شوید.",
     "rating": "امتیاز",
     "dashboard": "داشبورد",
     "users": "کاربران",
@@ -595,7 +600,8 @@
     "verifyEmailInvalidToken": "توکن تأیید نامعتبر.",
     "verifyEmailTokenNotFound": "توکن تأیید یافت نشد.",
     "verifyEmailTokenExpired": "توکن تأیید منقضی شده.",
-    "verifyEmailUserNotFound": "کاربر یافت نشد."
+    "verifyEmailUserNotFound": "کاربر یافت نشد.",
+    "contactSupportHelp": "اگر هنوز ایمیل را نگرفته‌اید، با info@bagajpark.com تماس بگیرید."
   },
   "UserNav": {
     "signIn": "ورود",
@@ -708,7 +714,9 @@
     "q4": "۴. جمع‌آوری",
     "a4": "فرم‌های دیجیتال و کوکی.",
     "q5": "۵. حقوق",
-    "a5": "حق اطلاع و حذف."
+    "a5": "حق اطلاع و حذف.",
+    "contactTitle": "تماس با ما درباره حقوق داده شما",
+    "contactBody": "می‌توانید درخواست‌های مرتبط با GDPR و حذف داده را از طریق ایمیل ارسال کنید."
   },
   "Terms": {
     "title": "شرایط استفاده",
@@ -841,7 +849,9 @@
     "notAuthorizedAdmin": "فقط مدیران.",
     "notAuthorizedPartner": "فقط شرکا.",
     "disputeNotReady": "اختلاف پس از تحویل دادن یا گرفتن چمدان قابل باز شدن است.",
-    "reviewNotReady": "نظر فقط پس از تکمیل تحویل ممکن است."
+    "reviewNotReady": "نظر فقط پس از تکمیل تحویل ممکن است.",
+    "verificationCooldown": "لطفاً {seconds} ثانیه صبر کنید قبل از ارسال ایمیل دیگر.",
+    "maxVerificationAttempts": "تلاش‌ها بیش از حد است. لطفاً با تیم پشتیبانی تماس بگیرید."
   },
   "Emails": {
     "verificationSubject": "ایمیل خود را تأیید کنید",
@@ -853,7 +863,12 @@
     "checkOutBody": "چمدان به شما تحویل داده شد."
   },
   "Review": {
-    "placeholder": "نظر شما درباره فروشگاه و سرویس..."
+    "placeholder": "نظر شما درباره فروشگاه و سرویس...",
+    "title": "امتیازدهی",
+    "subtitle": "تجربه خود را از ۱ تا ۵ ستاره امتیاز دهید تا به دیگر مسافران کمک شود.",
+    "submit": "ارسال نظر",
+    "success": "نظر شما ذخیره شد.",
+    "error": "ذخیره نظر ممکن نشد."
   },
   "CityStorage": {
     "istanbul": {
