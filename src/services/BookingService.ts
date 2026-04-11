@@ -286,26 +286,7 @@ export class BookingService implements IBookingService {
       }
 
       await prisma.$transaction(async (tx) => {
-        let finalAssignments = sealPayload?.sealAssignments || [];
-
-        // Otomatik mühür atama (Eğer assignments gelmediyse veya eksikse)
-        if (bags > 0 && finalAssignments.length < bags) {
-          const available = await sealService.getNextAvailableSeals(existing.shopId, bags);
-          if (available.length < bags) {
-            throw new Error(`Dükkan mühür stoğu yetersiz (mevcut: ${available.length}, gereken: ${bags}).`);
-          }
-          
-          const slots: ('S' | 'M' | 'XL')[] = [];
-          for (let i = 0; i < existing.bagCountS; i++) slots.push('S');
-          for (let i = 0; i < existing.bagCountM; i++) slots.push('M');
-          for (let i = 0; i < existing.bagCountXl; i++) slots.push('XL');
-
-          finalAssignments = available.map((s, idx) => ({
-            sealNumber: s.serialNumber,
-            bagIndex: idx + 1,
-            bagSize: slots[idx],
-          }));
-        }
+        const finalAssignments = sealPayload?.sealAssignments ?? [];
 
         if (bags > 0) {
           await sealService.applyCheckInWithinTx(tx, {
