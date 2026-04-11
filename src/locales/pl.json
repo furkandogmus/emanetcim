@@ -258,6 +258,7 @@
     "searchTitleBrowse": "Znajdź przechowalnię | Mapa",
     "searchDescriptionBrowse": "Bezpieczne przechowywanie na mapie; filtruj po datach i dostępności.",
     "blogTitle": "Blog BagajPark",
+    "blogDescription": "Lżejsze podróżowanie, przewodniki po Stambule i wszystko o bezpiecznym przechowywaniu bagażu.",
     "blogSubtitle": "Przewodniki i porady bagażowe — Stambuł i więcej.",
     "backToBlog": "Wróć do bloga",
     "blogCategory": "PORADNIK",
@@ -516,6 +517,10 @@
     "fieldPlaceholderTitle": "Tytuł...",
     "fieldPlaceholderContent": "Treść...",
     "validationRequired": "Wypełnij wszystkie pola.",
+    "fieldLanguage": "JĘZYK",
+    "fieldPlaceholderSlug": "slug-adresu-wpisu",
+    "seoTip": "Wskazówka SEO",
+    "seoDescription": "Pogrubiaj słowa kluczowe i używaj podnagłówków w treści wpisu, aby lepiej wypozycjonować się w Google.",
     "rating": "Ocena",
     "dashboard": "Pulpit",
     "users": "Użytkownicy",
@@ -595,7 +600,8 @@
     "verifyEmailInvalidToken": "Nieprawidłowy token weryfikacyjny.",
     "verifyEmailTokenNotFound": "Nie znaleziono tokenu.",
     "verifyEmailTokenExpired": "Token wygasł.",
-    "verifyEmailUserNotFound": "Nie znaleziono użytkownika."
+    "verifyEmailUserNotFound": "Nie znaleziono użytkownika.",
+    "contactSupportHelp": "Jeśli e-mail nadal nie dotarł, napisz na info@bagajpark.com."
   },
   "UserNav": {
     "signIn": "Zaloguj się",
@@ -708,7 +714,9 @@
     "q4": "4. Zbieranie",
     "a4": "Formularze cyfrowe i pliki cookie.",
     "q5": "5. Prawa",
-    "a5": "Prawo do informacji i usunięcia danych."
+    "a5": "Prawo do informacji i usunięcia danych.",
+    "contactTitle": "Skontaktuj się z nami w sprawie swoich praw do danych",
+    "contactBody": "Prośby związane z RODO i usunięciem danych możesz przesłać e-mailem."
   },
   "Terms": {
     "title": "Warunki użytkowania",
@@ -841,7 +849,9 @@
     "notAuthorizedAdmin": "Brak uprawnień: tylko administratorzy.",
     "notAuthorizedPartner": "Brak uprawnień: tylko partnerzy.",
     "disputeNotReady": "Reklamację można złożyć po złożeniu lub wydaniu bagażu.",
-    "reviewNotReady": "Opinię można dodać po zakończeniu wydania."
+    "reviewNotReady": "Opinię można dodać po zakończeniu wydania.",
+    "verificationCooldown": "Poczekaj {seconds} sekund przed wysłaniem kolejnego e-maila.",
+    "maxVerificationAttempts": "Zbyt wiele prób. Skontaktuj się z naszym zespołem wsparcia."
   },
   "Emails": {
     "verificationSubject": "Potwierdź swój e-mail",
@@ -853,7 +863,12 @@
     "checkOutBody": "Twój bagaż został Ci wydany."
   },
   "Review": {
-    "placeholder": "Twoja opinia o sklepie i usłudze..."
+    "placeholder": "Twoja opinia o sklepie i usłudze...",
+    "title": "OCEŃ",
+    "subtitle": "Oceń swoje doświadczenie w skali 1–5 gwiazdek, aby pomóc innym podróżnym.",
+    "submit": "WYŚLIJ OPINIĘ",
+    "success": "Twoja opinia została zapisana.",
+    "error": "Nie udało się zapisać opinii."
   },
   "CityStorage": {
     "istanbul": {

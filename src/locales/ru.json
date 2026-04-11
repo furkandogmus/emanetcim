@@ -258,6 +258,7 @@
     "searchTitleBrowse": "Найти хранение багажа | Карта",
     "searchDescriptionBrowse": "Найдите хранение на карте; фильтр по датам и доступности.",
     "blogTitle": "Блог BagajPark",
+    "blogDescription": "Путешествуйте легче: гиды по Стамбулу и всё о безопасном хранении багажа.",
     "blogSubtitle": "Гиды и советы по багажу — Стамбул и не только.",
     "backToBlog": "К блогу",
     "blogCategory": "ГИД",
@@ -516,6 +517,10 @@
     "fieldPlaceholderTitle": "Заголовок...",
     "fieldPlaceholderContent": "Текст...",
     "validationRequired": "Заполните все поля.",
+    "fieldLanguage": "ЯЗЫК",
+    "fieldPlaceholderSlug": "slug-zapisi",
+    "seoTip": "Подсказка по SEO",
+    "seoDescription": "Выделяйте ключевые слова и используйте подзаголовки в тексте поста, чтобы лучше ранжироваться в Google.",
     "rating": "Оценка",
     "dashboard": "Панель",
     "users": "Пользователи",
@@ -595,7 +600,8 @@
     "verifyEmailInvalidToken": "Неверный токен.",
     "verifyEmailTokenNotFound": "Токен не найден.",
     "verifyEmailTokenExpired": "Токен истёк.",
-    "verifyEmailUserNotFound": "Пользователь не найден."
+    "verifyEmailUserNotFound": "Пользователь не найден.",
+    "contactSupportHelp": "Если письмо так и не пришло, напишите нам на info@bagajpark.com."
   },
   "UserNav": {
     "signIn": "Войти",
@@ -708,7 +714,9 @@
     "q4": "4. Сбор",
     "a4": "Формы и cookie.",
     "q5": "5. Права",
-    "a5": "Право на информацию и удаление."
+    "a5": "Право на информацию и удаление.",
+    "contactTitle": "Свяжитесь с нами по вопросам прав на данные",
+    "contactBody": "Запросы по GDPR и удалению данных можно направить по электронной почте."
   },
   "Terms": {
     "title": "Условия использования",
@@ -841,7 +849,9 @@
     "notAuthorizedAdmin": "Только администраторы.",
     "notAuthorizedPartner": "Только партнёры.",
     "disputeNotReady": "Спор можно открыть после сдачи или выдачи багажа.",
-    "reviewNotReady": "Отзыв можно оставить после завершения выдачи."
+    "reviewNotReady": "Отзыв можно оставить после завершения выдачи.",
+    "verificationCooldown": "Подождите {seconds} секунд перед отправкой следующего письма.",
+    "maxVerificationAttempts": "Слишком много попыток. Обратитесь в службу поддержки."
   },
   "Emails": {
     "verificationSubject": "Подтвердите e-mail",
@@ -853,7 +863,12 @@
     "checkOutBody": "Багаж выдан вам."
   },
   "Review": {
-    "placeholder": "Ваш отзыв о магазине и сервисе..."
+    "placeholder": "Ваш отзыв о магазине и сервисе...",
+    "title": "ОЦЕНКА",
+    "subtitle": "Оцените опыт от 1 до 5 звёзд, чтобы помочь другим путешественникам.",
+    "submit": "ОТПРАВИТЬ ОТЗЫВ",
+    "success": "Ваш отзыв сохранён.",
+    "error": "Не удалось сохранить отзыв."
   },
   "CityStorage": {
     "istanbul": {

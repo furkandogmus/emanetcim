@@ -258,6 +258,7 @@
     "searchTitleBrowse": "Find luggage storage | Map",
     "searchDescriptionBrowse": "Discover nearby secure, insured luggage storage on the map; filter by dates and availability.",
     "blogTitle": "BagajPark Blog",
+    "blogDescription": "Travel lighter, Istanbul guides, and everything about keeping your luggage safe.",
     "blogSubtitle": "Travel guides and luggage tips for Istanbul and beyond.",
     "backToBlog": "Back to Blog",
     "blogCategory": "GUIDE",
@@ -516,6 +517,10 @@
     "fieldPlaceholderTitle": "Title...",
     "fieldPlaceholderContent": "Content...",
     "validationRequired": "Fill all fields.",
+    "fieldLanguage": "LANGUAGE",
+    "fieldPlaceholderSlug": "post-url-slug",
+    "seoTip": "SEO tip",
+    "seoDescription": "Bold keywords and use subheadings in the post body to rank better in Google.",
     "rating": "Rating",
     "dashboard": "Dashboard",
     "users": "Users",
@@ -595,7 +600,8 @@
     "verifyEmailInvalidToken": "Invalid verification token.",
     "verifyEmailTokenNotFound": "Verification token not found.",
     "verifyEmailTokenExpired": "Verification token has expired.",
-    "verifyEmailUserNotFound": "User not found."
+    "verifyEmailUserNotFound": "User not found.",
+    "contactSupportHelp": "If the email still hasn’t arrived, contact us at info@bagajpark.com."
   },
   "UserNav": {
     "signIn": "Sign in",
@@ -708,7 +714,9 @@
     "q4": "4. Collection",
     "a4": "Digital forms and cookies.",
     "q5": "5. Rights",
-    "a5": "Right to information and deletion."
+    "a5": "Right to information and deletion.",
+    "contactTitle": "Contact us about your data rights",
+    "contactBody": "You can send GDPR-related requests and data deletion requests by email."
   },
   "Terms": {
     "title": "Terms of Use",
@@ -841,7 +849,9 @@
     "notAuthorizedAdmin": "Unauthorized: Only administrators can perform this action.",
     "notAuthorizedPartner": "Unauthorized: Only partners can perform this action.",
     "disputeNotReady": "Disputes can only be opened after the luggage is dropped off or delivered.",
-    "reviewNotReady": "Reviews can only be made after the delivery is complete."
+    "reviewNotReady": "Reviews can only be made after the delivery is complete.",
+    "verificationCooldown": "Please wait {seconds} seconds before sending another email.",
+    "maxVerificationAttempts": "Too many attempts. Please contact our support team."
   },
   "Emails": {
     "verificationSubject": "Verify Your Email",
@@ -853,7 +863,12 @@
     "checkOutBody": "Your luggage has been delivered to you."
   },
   "Review": {
-    "placeholder": "Your thoughts on the shop and service..."
+    "placeholder": "Your thoughts on the shop and service...",
+    "title": "RATE",
+    "subtitle": "Rate your experience from 1–5 stars to help other travelers.",
+    "submit": "SUBMIT REVIEW",
+    "success": "Your review was saved.",
+    "error": "Could not save your review."
   },
   "CityStorage": {
     "istanbul": {
