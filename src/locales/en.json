@@ -801,6 +801,56 @@
   "Review": {
     "placeholder": "Your thoughts on the shop and service..."
   },
+  "CityStorage": {
+    "istanbul": {
+      "metaTitle": "Luggage storage Istanbul | BagajPark",
+      "metaDescription": "Secure luggage storage in Istanbul near top sights. Book online and explore the city hands-free.",
+      "headline": "Luggage storage in Istanbul",
+      "intro": "Drop your bags at trusted shops around Galata, Sultanahmet and tourist hubs—then enjoy the city without dragging suitcases.",
+      "searchQuery": "Galata Tower",
+      "cta": "Open shops in Istanbul"
+    },
+    "ankara": {
+      "metaTitle": "Luggage storage Ankara | BagajPark",
+      "metaDescription": "Safe baggage storage in Ankara near museums and the city centre. Simple online booking.",
+      "headline": "Luggage storage in Ankara",
+      "intro": "Find storage points around Kızılay and central corridors on the map; handy for museums and business districts.",
+      "searchQuery": "Kızılay",
+      "cta": "Open shops in Ankara"
+    },
+    "izmir": {
+      "metaTitle": "Luggage storage Izmir | BagajPark",
+      "metaDescription": "Luggage storage in Izmir near Konak, Alsancak and the waterfront. Travel lighter along the coast.",
+      "headline": "Luggage storage in Izmir",
+      "intro": "Stroll the waterfront without heavy bags; discover nearby storage on the map.",
+      "searchQuery": "Konak",
+      "cta": "Open shops in Izmir"
+    },
+    "antalya": {
+      "metaTitle": "Luggage storage Antalya | BagajPark",
+      "metaDescription": "Tourist-friendly luggage storage in Antalya near Kaleiçi and beaches. Book in a few taps.",
+      "headline": "Luggage storage in Antalya",
+      "intro": "Between beach time and old town walks, store your bags safely and manage late check-outs with ease.",
+      "searchQuery": "Kaleiçi",
+      "cta": "Open shops in Antalya"
+    },
+    "bodrum": {
+      "metaTitle": "Luggage storage Bodrum | BagajPark",
+      "metaDescription": "Secure bag storage in Bodrum near the marina and beaches for boats, nights out and day trips.",
+      "headline": "Luggage storage in Bodrum",
+      "intro": "Before a boat trip or a night out, leave luggage at vetted shops and book online.",
+      "searchQuery": "Marina",
+      "cta": "Open shops in Bodrum"
+    },
+    "cappadocia": {
+      "metaTitle": "Luggage storage Cappadocia | BagajPark",
+      "metaDescription": "Luggage storage in Cappadocia for balloon rides and valley hikes around Göreme and Ürgüp.",
+      "headline": "Luggage storage in Cappadocia",
+      "intro": "Travel light for sunrise tours and hikes; find storage points in the region on the map.",
+      "searchQuery": "Göreme",
+      "cta": "Open shops in Cappadocia"
+    }
+  },
   "AdminStatus": {
     "title": "Platform Technical Audit",
     "subtitle": "System Status and Integration Report",

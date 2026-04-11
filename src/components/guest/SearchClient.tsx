@@ -29,6 +29,10 @@ interface SearchClientProps {
   initialAll: ShopSearchHit[];
   defaultCheckInIso: string;
   defaultCheckOutIso: string;
+  /** URL ?q= ile şehir sayfalarından gelen metin filtresi */
+  initialSearchQuery?: string;
+  /** URL ?lat=&lng= veya şehir sayfası; yakın liste ve yenileme merkezi */
+  searchCenter: { lat: number; lng: number };
 }
 
 /**
@@ -39,11 +43,13 @@ export default function SearchClient({
   initialAll,
   defaultCheckInIso,
   defaultCheckOutIso,
+  initialSearchQuery = "",
+  searchCenter,
 }: SearchClientProps) {
   const t = useTranslations("Guest");
   const tErr = useTranslations("Errors");
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [minRating, setMinRating] = useState(0);
   const [maxPrice, setMaxPrice] = useState(500);
   const [open247Only, setOpen247Only] = useState(false);
@@ -66,6 +72,10 @@ export default function SearchClient({
   }, [defaultCheckInIso, defaultCheckOutIso]);
 
   useEffect(() => {
+    setSearchQuery(initialSearchQuery);
+  }, [initialSearchQuery]);
+
+  useEffect(() => {
     if (!datesReady || !filterDirty) return;
 
     const checkIn = parseDatetimeLocal(checkInLocal);
@@ -77,6 +87,8 @@ export default function SearchClient({
         checkInIso: checkIn.toISOString(),
         checkOutIso: checkOut.toISOString(),
         requestedBags,
+        centerLat: searchCenter.lat,
+        centerLng: searchCenter.lng,
       });
       if (res.ok) {
         setNearbyList(res.nearby as ShopSearchHit[]);
@@ -97,6 +109,8 @@ export default function SearchClient({
     requestedBags,
     tErr,
     t,
+    searchCenter.lat,
+    searchCenter.lng,
   ]);
 
   const onSelectShop = useCallback(
