@@ -15,8 +15,6 @@ import ru from "@/locales/ru.json";
 import fa from "@/locales/fa.json";
 import bg from "@/locales/bg.json";
 import pl from "@/locales/pl.json";
-import { deepMergeMessages } from "@/i18n/merge-messages";
-
 const UI_LOCALES = [
   "tr",
   "en",
@@ -41,15 +39,25 @@ function pathLocale(pathname: string): UiLocale {
   return UI_LOCALES.includes(seg as UiLocale) ? (seg as UiLocale) : "tr";
 }
 
+const localeBundles = {
+  tr,
+  en,
+  de,
+  fr,
+  es,
+  it,
+  zh,
+  ja,
+  ar,
+  ko,
+  ru,
+  fa,
+  bg,
+  pl,
+} as const;
+
 function commonForLocale(locale: UiLocale) {
-  if (locale === "tr") return tr.Common;
-  if (locale === "en") return en.Common;
-  const overlay = { de, fr, es, it, zh, ja, ar, ko, ru, fa, bg, pl }[locale];
-  const merged = deepMergeMessages(
-    en as Record<string, unknown>,
-    overlay as Record<string, unknown>
-  ) as typeof en;
-  return merged.Common;
+  return localeBundles[locale].Common;
 }
 
 function htmlLang(locale: UiLocale): string {
