@@ -1,4 +1,5 @@
 import type { Prisma, Shop } from '@prisma/client';
+import { Role } from '@prisma/client';
 import prisma from '@/lib/db';
 import { moneyToNumber } from '@/lib/money';
 import { getActiveShopsOrderedByDistanceKm } from '@/lib/shop-distance-postgis';
@@ -226,9 +227,27 @@ export class ShopService implements IShopService {
 
   async approveShop(shopId: string): Promise<boolean> {
     try {
-      await prisma.shop.update({
+      const shop = await prisma.shop.findUnique({
         where: { id: shopId },
-        data: { isActive: true }
+        select: { ownerId: true },
+      });
+      if (!shop) return false;
+
+      await prisma.$transaction(async (tx) => {
+        await tx.shop.update({
+          where: { id: shopId },
+          data: { isActive: true },
+        });
+        // Eski kayıtlar: esnaf e-postası doğrulanmamış olabilir; onayla birlikte “operasyonel” say.
+        await tx.user.updateMany({
+          where: {
+            id: shop.ownerId,
+            role: Role.PARTNER,
+            email: { not: null },
+            emailVerified: null,
+          },
+          data: { emailVerified: new Date() },
+        });
       });
       return true;
     } catch (error) {

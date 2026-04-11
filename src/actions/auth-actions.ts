@@ -19,6 +19,10 @@ export async function resendVerificationAction() {
     return { success: false, error: "Errors.generic" };
   }
 
+  if (session.user.role === "PARTNER") {
+    return { success: false, error: "Errors.generic" };
+  }
+
   // Exponential Backoff: 3dk, 6dk ve Destek fall-back
   const { getVerificationBackoff, recordVerificationAttempt } = await import("@/lib/verification-backoff");
   const backoff = await getVerificationBackoff(session.user.email);

@@ -63,7 +63,14 @@ export default function MobileNav() {
   const { data: session } = useSession();
   const items = navItemsForRole(session?.user?.role);
 
-  if ((pathname ?? "").includes("/login")) return null;
+  const p = pathname ?? "";
+  if (p.includes("/login")) return null;
+
+  // /partner ana panel: PartnerClient kendi sekme çubuğunu kullanır; çift alt bar olmasın.
+  const normalized = p.replace(/\/$/, "") || "/";
+  if (session?.user?.role === "PARTNER" && normalized === "/partner") {
+    return null;
+  }
 
   return (
     <nav
