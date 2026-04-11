@@ -123,7 +123,8 @@ export default function PartnerClient({
           alert(preview.error);
           return;
         }
-        if (preview.status !== "PAID") {
+        // BookingService.checkIn: PAID veya APPROVED (onay sonrası dükkanda ödeme / QR ile teslim alma)
+        if (preview.status !== "PAID" && preview.status !== "APPROVED") {
           alert(t("checkInNotReady", { status: preview.status }));
           return;
         }

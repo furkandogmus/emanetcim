@@ -37,7 +37,7 @@ export default function PartnerBookingActionLinks({
     );
   }
 
-  if (status === "PENDING" || status === "APPROVED") {
+  if (status === "PENDING") {
     return (
       <div className="flex flex-col gap-2">
         <p className="rounded-2xl bg-amber-50 px-3 py-3 text-center text-xs font-bold text-amber-800">
@@ -53,14 +53,21 @@ export default function PartnerBookingActionLinks({
     );
   }
 
-  if (status === "PAID") {
+  if (status === "PAID" || status === "APPROVED") {
     return (
-      <Link
-        href={`/partner?booking=${bookingId}`}
-        className="block w-full rounded-2xl bg-orange-600 py-4 text-center text-xs font-black uppercase tracking-widest text-white transition-colors hover:bg-orange-700"
-      >
-        {t("customerArrivedCheckIn")}
-      </Link>
+      <div className="flex flex-col gap-2">
+        {status === "APPROVED" && (
+          <p className="rounded-2xl bg-amber-50 px-3 py-3 text-center text-xs font-bold text-amber-800">
+            {t("partnerBookingApprovedCheckInHint")}
+          </p>
+        )}
+        <Link
+          href={`/partner?booking=${bookingId}`}
+          className="block w-full rounded-2xl bg-orange-600 py-4 text-center text-xs font-black uppercase tracking-widest text-white transition-colors hover:bg-orange-700"
+        >
+          {t("customerArrivedCheckIn")}
+        </Link>
+      </div>
     );
   }
 

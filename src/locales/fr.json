@@ -57,6 +57,7 @@
     "partnerBookingsOpenPanel": "Ouvrir le panneau boutique",
     "partnerBookingAwaitingApprovalHint": "Cette demande doit être approuvée ou refusée dans le panneau.",
     "partnerBookingAwaitGuestPaymentHint": "En attente du paiement du client — vous recevrez un SMS une fois payé.",
+    "partnerBookingApprovedCheckInHint": "Approuvé — le client peut payer en ligne ; paiement sur place : enregistrement par QR ci-dessous.",
     "partnerBookingsCheckOut": "Retrait",
     "partnerBookingsFilterAll": "Tout",
     "partnerBookingsFilterAction": "Action requise",

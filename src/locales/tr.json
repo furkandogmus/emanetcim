@@ -57,6 +57,7 @@
     "partnerBookingsOpenPanel": "Dükkan panelini aç",
     "partnerBookingAwaitingApprovalHint": "Bu talep panelden onay veya red bekliyor.",
     "partnerBookingAwaitGuestPaymentHint": "Misafir ödemesini bekliyorsunuz — ödendiğinde SMS gelir.",
+    "partnerBookingApprovedCheckInHint": "Onaylandı — misafir online ödeyebilir; ödeme dükkandaysa aşağıdan QR ile check-in yapın.",
     "partnerBookingsCheckOut": "Alış",
     "partnerBookingsFilterAll": "Tümü",
     "partnerBookingsFilterAction": "Senden aksiyon",

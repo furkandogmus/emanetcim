@@ -57,6 +57,7 @@
     "partnerBookingsOpenPanel": "Shop-Panel öffnen",
     "partnerBookingAwaitingApprovalHint": "Diese Anfrage muss im Shop-Panel genehmigt oder abgelehnt werden.",
     "partnerBookingAwaitGuestPaymentHint": "Warten auf Zahlung des Gastes — Sie erhalten eine SMS, sobald bezahlt wurde.",
+    "partnerBookingApprovedCheckInHint": "Genehmigt — der Gast kann online zahlen; bei Zahlung vor Ort Check-in per QR.",
     "partnerBookingsCheckOut": "Abholung",
     "partnerBookingsFilterAll": "Alle",
     "partnerBookingsFilterAction": "Handlung nötig",
