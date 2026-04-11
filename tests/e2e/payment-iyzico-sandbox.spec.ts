@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+import { waitForCheckoutDatesReady } from './helpers/checkout';
+import { openCheckoutFromSearchList } from './helpers/search-to-checkout';
 import {
   IYZICO_SANDBOX_ERRORS,
   IYZICO_SANDBOX_SUCCESS,
@@ -29,8 +31,8 @@ test.describe('iyzico sandbox — gerçek API (yerel .env)', () => {
     await page.getByRole('button', { name: 'Misafir Demo' }).first().click();
     await expect(page).toHaveURL(/\/tr\/bookings/, { timeout: 20_000 });
     await page.goto('/tr/search');
-    await page.getByTestId('shop-list-item').first().click();
-    await expect(page).toHaveURL(/\/tr\/checkout\//);
+    await openCheckoutFromSearchList(page);
+    await waitForCheckoutDatesReady(page);
     await page.getByTestId('checkout-footer-primary').click();
     await page.getByTestId('checkout-footer-primary').click();
   }

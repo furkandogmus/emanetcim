@@ -1,6 +1,9 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Search, MapPin, ShieldCheck, Clock } from "lucide-react";
+import { Search, MapPin, ShieldCheck, Clock, Star } from "lucide-react";
 import { Link } from "@/i18n/routing";
+import { getGuestLandingStats } from "@/lib/guest-landing-stats";
+
+export const revalidate = 120;
 
 /**
  * Guest Landing Page - Turist Karşılama Sayfası
@@ -12,6 +15,8 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
 
   const t = await getTranslations("Guest");
   const common = await getTranslations("Common");
+  const stats = await getGuestLandingStats();
+  const nf = new Intl.NumberFormat(locale === "tr" ? "tr-TR" : "en-US");
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-900">
@@ -48,6 +53,57 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
           </Link>
         </div>
       </header>
+
+      {/* Live trust metrics */}
+      <section
+        className="border-y border-gray-100 bg-white py-10 px-6"
+        aria-label={t("trustStatsAria")}
+      >
+        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-6 text-center">
+          <div>
+            <p className="text-2xl md:text-3xl font-black tabular-nums text-gray-900">
+              {nf.format(stats.activeLocations)}
+            </p>
+            <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-gray-400">
+              {t("trustStatLocations")}
+            </p>
+          </div>
+          <div>
+            <p className="text-2xl md:text-3xl font-black tabular-nums text-gray-900">
+              {nf.format(stats.completedStays)}
+            </p>
+            <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-gray-400">
+              {t("trustStatStays")}
+            </p>
+          </div>
+          <div>
+            <p className="text-2xl md:text-3xl font-black tabular-nums text-gray-900">
+              {nf.format(stats.reviewCount)}
+            </p>
+            <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-gray-400">
+              {t("trustStatReviews")}
+            </p>
+          </div>
+          <div>
+            <p className="text-2xl md:text-3xl font-black tabular-nums text-gray-900 inline-flex items-center gap-1">
+              {stats.averageRating != null && stats.reviewCount > 0 ? (
+                <>
+                  {stats.averageRating.toFixed(1)}
+                  <Star
+                    className="inline h-7 w-7 md:h-8 md:w-8 text-orange-500 fill-orange-500"
+                    aria-hidden
+                  />
+                </>
+              ) : (
+                <span className="text-gray-300">—</span>
+              )}
+            </p>
+            <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-gray-400">
+              {t("trustStatAvgRating")}
+            </p>
+          </div>
+        </div>
+      </section>
 
       {/* Trust Features - Minimalist Icons */}
       <section className="py-20 px-6 max-w-5xl mx-auto w-full grid grid-cols-1 md:grid-cols-3 gap-12 text-center text-sm">

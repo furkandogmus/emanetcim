@@ -8,21 +8,31 @@ import { Link, useRouter } from '@/i18n/routing';
 import { moneyToNumber } from '@/lib/money';
 import { toast } from 'sonner';
 import ReviewForm from './ReviewForm';
+import CancellationPolicy from '@/components/guest/CancellationPolicy';
+import BookingModifyModal, {
+  canGuestModifyBooking,
+} from '@/components/guest/BookingModifyModal';
 import type { GuestBookingListItem } from '@/services/BookingService';
+import type { PricingRules } from '@/lib/pricing-rules';
 
 interface BookingsClientProps {
   bookings: GuestBookingListItem[];
+  pricingRules: PricingRules;
 }
 
 /**
  * BookingsClient - Client-side animations and list display.
  */
-export default function BookingsClient({ bookings }: BookingsClientProps) {
+export default function BookingsClient({ bookings, pricingRules }: BookingsClientProps) {
   const t = useTranslations('Guest');
+  const tErr = useTranslations('Errors');
   const locale = useLocale();
   const dateLocale = locale === 'tr' ? 'tr-TR' : 'en-US';
   const router = useRouter();
   const [reviewBooking, setReviewBooking] = useState<GuestBookingListItem | null>(null);
+  const [modifyBooking, setModifyBooking] = useState<GuestBookingListItem | null>(null);
+  const [cancelModalBooking, setCancelModalBooking] = useState<GuestBookingListItem | null>(null);
+  const [cancelSubmitting, setCancelSubmitting] = useState(false);
 
   if (bookings.length === 0) {
     return (
@@ -109,24 +119,23 @@ export default function BookingsClient({ bookings }: BookingsClientProps) {
                   </div>
                 </div>
                 
-                <div className="flex gap-2">
-                  {(booking.status === 'PAID' || booking.status === 'PENDING') && (
-                    <button 
-                      onClick={async () => {
-                        const refundAmount = Math.max(0, moneyToNumber(booking.totalPrice) - 20);
-                        if (confirm(booking.status === 'PAID'
-                          ? t('confirmCancelPaid', { amount: refundAmount })
-                          : t('confirmCancelPending'))) {
-                          const { cancelBookingAction } = await import('@/actions/booking');
-                          const res = await cancelBookingAction(booking.id);
-                          if (res.success) {
-                            toast.success(t('cancelSuccess'));
-                            router.refresh();
-                          } else {
-                            toast.error(res.error || t('cancelError'));
-                          }
-                        }
-                      }}
+                <div className="flex gap-2 flex-wrap justify-end">
+                  {canGuestModifyBooking(booking.status) && (
+                    <button
+                      type="button"
+                      onClick={() => setModifyBooking(booking)}
+                      className="px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-widest text-gray-800 hover:bg-gray-100 transition-colors border border-gray-200"
+                    >
+                      {t('modifyBooking')}
+                    </button>
+                  )}
+                  {(booking.status === 'PAID' ||
+                    booking.status === 'PENDING' ||
+                    booking.status === 'WAITING_APPROVAL' ||
+                    booking.status === 'APPROVED') && (
+                    <button
+                      type="button"
+                      onClick={() => setCancelModalBooking(booking)}
                       className="px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-widest text-red-500 hover:bg-red-50 transition-colors border border-red-100"
                     >
                       {t('cancelBooking')}
@@ -180,6 +189,86 @@ export default function BookingsClient({ bookings }: BookingsClientProps) {
             router.refresh();
           }}
         />
+      )}
+
+      {modifyBooking && (
+        <BookingModifyModal
+          booking={modifyBooking}
+          pricingRules={pricingRules}
+          onClose={() => setModifyBooking(null)}
+          onSuccess={() => {
+            setModifyBooking(null);
+            toast.success(t('modifySuccess'));
+            router.refresh();
+          }}
+        />
+      )}
+
+      {cancelModalBooking && (
+        <div
+          className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="cancel-dialog-title"
+        >
+          <div className="bg-white w-full sm:max-w-md sm:rounded-3xl rounded-t-3xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
+            <div className="p-6 flex flex-col gap-4">
+              <h2
+                id="cancel-dialog-title"
+                className="text-lg font-black text-gray-900"
+              >
+                {t('cancelDialogTitle')}
+              </h2>
+              <CancellationPolicy
+                checkInTime={cancelModalBooking.checkInTime}
+                showRefundEstimate={cancelModalBooking.status === 'PAID'}
+                totalPaidTry={moneyToNumber(cancelModalBooking.totalPrice)}
+              />
+            </div>
+            <div className="sticky bottom-0 flex gap-3 p-4 border-t border-gray-100 bg-white">
+              <button
+                type="button"
+                onClick={() => setCancelModalBooking(null)}
+                className="flex-1 py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider bg-gray-100 text-gray-800"
+              >
+                {t('modifyCancel')}
+              </button>
+              <button
+                type="button"
+                disabled={cancelSubmitting}
+                onClick={async () => {
+                  const b = cancelModalBooking;
+                  if (!b) return;
+                  setCancelSubmitting(true);
+                  const { cancelBookingAction } = await import('@/actions/booking');
+                  const res = await cancelBookingAction(b.id);
+                  setCancelSubmitting(false);
+                  if (res.success) {
+                    setCancelModalBooking(null);
+                    if (res.creditCode) {
+                      toast.success(
+                        t('cancelSuccessCredit', { code: res.creditCode })
+                      );
+                    } else {
+                      toast.success(t('cancelSuccess'));
+                    }
+                    router.refresh();
+                  } else {
+                    const msg = res.error;
+                    if (msg?.startsWith('Errors.')) {
+                      toast.error(tErr(msg.slice(7) as never));
+                    } else {
+                      toast.error(msg || t('cancelError'));
+                    }
+                  }
+                }}
+                className="flex-1 py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider bg-red-600 text-white disabled:opacity-50"
+              >
+                {cancelSubmitting ? '…' : t('cancelConfirmAction')}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

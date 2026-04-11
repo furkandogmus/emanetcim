@@ -44,7 +44,11 @@ export type PaymentSdkResult = Record<string, unknown>;
 
 export interface IPaymentService {
   initializeMarketplacePayment(data: MarketplacePaymentInput): Promise<PaymentSdkResult>;
-  refundPayment(bookingId: string, amount: number): Promise<PaymentSdkResult>;
+  refundPayment(
+    bookingId: string,
+    amount: number,
+    options?: { keepPaymentLogSuccess?: boolean }
+  ): Promise<PaymentSdkResult>;
   /** Ödeme logu SUCCESS iken booking hâlâ PENDING kalan tutarsızlıkları düzeltir (webhook gecikmesi vb.). */
   reconcileStalePaymentBookings(): Promise<{ fixed: number; bookingIds: string[] }>;
   updateSubMerchant(data: {
@@ -307,7 +311,11 @@ export class PaymentService implements IPaymentService {
    * iyzico İade (Refund) İşlemi
    * Misafir iptalleri (UC_M_07) için parayı iyzico üzerinden geri gönderir.
    */
-  async refundPayment(bookingId: string, amount: number): Promise<PaymentSdkResult> {
+  async refundPayment(
+    bookingId: string,
+    amount: number,
+    options?: { keepPaymentLogSuccess?: boolean }
+  ): Promise<PaymentSdkResult> {
     if (!isPaymentsEnabled()) {
       return {
         status: 'failure',
@@ -362,8 +370,8 @@ export class PaymentService implements IPaymentService {
       'iyzico_refund_create'
     )) as PaymentSdkResult;
 
-    // 4. Logla
-    if (isPaymentSuccess(result.status)) {
+    // 4. Logla (kısmi iade: örn. rezervasyon düzenleme — kayıt SUCCESS kalır, tekrar iade mümkün)
+    if (isPaymentSuccess(result.status) && !options?.keepPaymentLogSuccess) {
       await prisma.paymentLog.update({
         where: { id: paymentLog.id },
         data: { status: "REFUNDED" }

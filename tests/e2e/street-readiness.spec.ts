@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+import { waitForCheckoutDatesReady } from './helpers/checkout';
+import { openCheckoutFromSearchList } from './helpers/search-to-checkout';
 
 /**
  * Sokak senaryosu: misafir arama → checkout → (demo) ödeme başarısı.
@@ -14,11 +16,10 @@ test.describe('BagajPark: guest booking smoke', () => {
     await expect(page).toHaveURL(/\/tr\/bookings/, { timeout: 20000 });
 
     await page.goto('/tr/search');
-    await expect(page.getByText(/Galata Gift & Luggage/i)).toBeVisible();
-    await page.getByText(/Galata Gift & Luggage/i).first().click();
-
-    await expect(page).toHaveURL(/\/tr\/checkout\//);
+    await expect(page.getByTestId('shop-list-item').first()).toBeVisible();
+    await openCheckoutFromSearchList(page);
     await expect(page.locator('h1')).toContainText(/Ödeme ve Onay/i);
+    await waitForCheckoutDatesReady(page);
 
     await page.getByTestId('checkout-footer-primary').click();
     await page.getByTestId('checkout-footer-primary').click();

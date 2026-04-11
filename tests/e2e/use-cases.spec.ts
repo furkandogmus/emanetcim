@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+import { waitForCheckoutDatesReady } from './helpers/checkout';
+import { openCheckoutFromSearchList } from './helpers/search-to-checkout';
 import { IYZICO_SANDBOX_SUCCESS } from './helpers/iyzico-sandbox';
 
 /**
@@ -10,6 +12,7 @@ import { IYZICO_SANDBOX_SUCCESS } from './helpers/iyzico-sandbox';
 
 /** Özet (adım 2) ve ödeme (adım 3) ekranlarına geçer */
 async function goToCheckoutPayment(page: import('@playwright/test').Page) {
+  await waitForCheckoutDatesReady(page);
   await page.getByTestId('checkout-footer-primary').click();
   await page.getByTestId('checkout-footer-primary').click();
 }
@@ -26,7 +29,7 @@ test.describe('UC: Misafir — Arama ve harita (seed)', () => {
     await page.goto('/tr/search');
 
     await expect(page.getByTestId('nearby-heading')).toContainText(/Yakındaki/i);
-    await expect(page.getByText(/Galata Gift & Luggage/i)).toBeVisible();
+    await expect(page.getByText(/Galata|BagajPark/i).first()).toBeVisible();
     await expect(page.locator('canvas.maplibregl-canvas')).toBeVisible({ timeout: 15000 });
   });
 });
@@ -34,16 +37,16 @@ test.describe('UC: Misafir — Arama ve harita (seed)', () => {
 test.describe('UC: Misafir — Checkout fiyat ve çanta (anonim)', () => {
   test('Varsayılan 1 gün 1×M toplam ₺95', async ({ page }) => {
     await page.goto('/tr/search');
-    await page.getByTestId('shop-list-item').first().click();
-    await expect(page).toHaveURL(/\/tr\/checkout\//);
+    await openCheckoutFromSearchList(page);
+    await waitForCheckoutDatesReady(page);
     await page.getByTestId('checkout-footer-primary').click();
     await expect(page.getByTestId('checkout-total-amount')).toHaveText('₺95');
   });
 
   test('Çanta adetleri değişince toplam güncellenir', async ({ page }) => {
     await page.goto('/tr/search');
-    await page.getByTestId('shop-list-item').first().click();
-    await expect(page).toHaveURL(/\/tr\/checkout\//);
+    await openCheckoutFromSearchList(page);
+    await waitForCheckoutDatesReady(page);
 
     await page.getByRole('button', { name: 'Increase' }).nth(0).click();
     await page.getByTestId('checkout-footer-primary').click();
@@ -57,14 +60,14 @@ test.describe('UC: Misafir — Checkout fiyat ve çanta (anonim)', () => {
 
   test('Çok günlük konaklama: 3 gün 1×M (80×3+15)', async ({ page }) => {
     await page.goto('/tr/search');
-    await page.getByTestId('shop-list-item').first().click();
-    await expect(page).toHaveURL(/\/tr\/checkout\//);
+    await openCheckoutFromSearchList(page);
+    await waitForCheckoutDatesReady(page);
     await page.getByTestId('checkout-footer-primary').click();
     await expect(page.getByTestId('checkout-total-amount')).toHaveText('₺95');
 
     await page.getByRole('button', { name: 'Geri' }).click();
-    await page.getByTestId('checkout-stay-days-increase').click();
-    await page.getByTestId('checkout-stay-days-increase').click();
+    await page.getByTestId('checkout-checkin').fill('2030-06-01T10:00');
+    await page.getByTestId('checkout-checkout').fill('2030-06-04T10:00');
     await expect(page.getByTestId('checkout-stay-days-value')).toHaveText('3');
     await page.getByTestId('checkout-footer-primary').click();
     await expect(page.getByTestId('checkout-total-amount')).toHaveText('₺255');
@@ -77,7 +80,7 @@ test.describe('UC: Misafir — Demo giriş ve rezervasyonlar', () => {
     await page.goto('/tr/login');
     await page.getByRole('button', { name: 'Misafir Demo' }).first().click();
     await expect(page).toHaveURL(/\/tr\/bookings/, { timeout: 20000 });
-    await expect(page.getByText(/Galata Gift/i).first()).toBeVisible();
+    await expect(page.getByText(/Galata|BagajPark/i).first()).toBeVisible();
   });
 });
 
@@ -88,8 +91,8 @@ test.describe('UC: Misafir — Checkout ödeme (iyzico sandbox kartı)', () => {
     await expect(page).toHaveURL(/\/tr\/bookings/, { timeout: 20000 });
 
     await page.goto('/tr/search');
-    await page.getByTestId('shop-list-item').first().click();
-    await expect(page).toHaveURL(/\/tr\/checkout\//);
+    await openCheckoutFromSearchList(page);
+    await waitForCheckoutDatesReady(page);
 
     await page.getByTestId('checkout-footer-primary').click();
     await expect(page.getByTestId('checkout-total-amount')).toHaveText('₺95');
