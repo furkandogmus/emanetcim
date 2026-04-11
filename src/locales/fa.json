@@ -486,6 +486,7 @@
     "userBanned": "مسدود شد.",
     "confirmDeleteUser": "این کاربر حذف شود؟",
     "userDeleted": "کاربر حذف شد.",
+    "deleteUserBlockedByRelations": "این کاربر تا وقتی فروشگاه، رزرو یا رکورد مرتبط دارد قابل حذف نیست. ابتدا آن‌ها را حذف کنید.",
     "resendSuccess": "ایمیل تأیید دوباره ارسال شد.",
     "ipBlockedSuccess": "IP مسدود شد.",
     "backToDashboard": "بازگشت به داشبورد",

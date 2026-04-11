@@ -486,6 +486,7 @@
     "userBanned": "Zbanowano.",
     "confirmDeleteUser": "Usunąć tego użytkownika?",
     "userDeleted": "Użytkownik usunięty.",
+    "deleteUserBlockedByRelations": "Nie można usunąć użytkownika, dopóki ma powiązany sklep, rezerwacje lub inne rekordy. Najpierw je usuń.",
     "resendSuccess": "Wysłano ponownie e-mail weryfikacyjny.",
     "ipBlockedSuccess": "Adres IP zablokowany.",
     "backToDashboard": "POWRÓT DO PULPITU",

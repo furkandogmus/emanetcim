@@ -486,6 +486,7 @@
     "userBanned": "Banned.",
     "confirmDeleteUser": "Delete this user?",
     "userDeleted": "User deleted.",
+    "deleteUserBlockedByRelations": "This user cannot be deleted while they still have a shop, bookings, or other linked records. Remove those first.",
     "resendSuccess": "Verification email resent.",
     "ipBlockedSuccess": "IP address blocked.",
     "backToDashboard": "BACK TO DASHBOARD",

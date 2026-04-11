@@ -57,6 +57,9 @@ export async function updateUserRoleAction(userId: string, newRole: Role) {
   return { success: true };
 }
 
+/** İstemci: AdminUsersClient toast eşlemesi */
+const DELETE_USER_BLOCKED_CODE = "ADMIN_DELETE_USER_HAS_RELATIONS";
+
 /**
  * Kullanıcıyı tamamen sil (Cascade silme ile ilişkili kayıtlar da silinir)
  */
@@ -69,9 +72,20 @@ export async function deleteUserAction(userId: string) {
     throw new Error("Errors.unauthorized");
   }
 
-  await prisma.user.delete({
-    where: { id: userId },
-  });
+  try {
+    await prisma.user.delete({
+      where: { id: userId },
+    });
+  } catch (e) {
+    if (
+      e instanceof Prisma.PrismaClientKnownRequestError &&
+      e.code === "P2003"
+    ) {
+      logger.warn({ userId, meta: e.meta }, "admin_delete_user_fk_blocked");
+      throw new Error(DELETE_USER_BLOCKED_CODE);
+    }
+    throw e;
+  }
 
   revalidatePathAllLocales("/admin/users");
   revalidatePathAllLocales("/admin/partners");

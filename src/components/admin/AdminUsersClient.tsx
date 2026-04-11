@@ -17,6 +17,9 @@ import {
 import { Link } from "@/i18n/routing";
 import { motion, AnimatePresence } from "framer-motion";
 import { toggleUserBanAction, deleteUserAction, resendVerificationEmailAction, blockIpAction, updateUserRoleAction } from "@/actions/admin-management";
+
+/** admin-management deleteUserAction ile aynı (FK / RESTRICT) */
+const ADMIN_DELETE_USER_HAS_RELATIONS = "ADMIN_DELETE_USER_HAS_RELATIONS";
 import { toast } from "sonner";
 import { Role } from "@prisma/client";
 
@@ -80,7 +83,12 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
       setUsers(prev => prev.filter(u => u.id !== id));
       toast.success(t("userDeleted"));
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : String(error));
+      const msg = error instanceof Error ? error.message : String(error);
+      if (msg === ADMIN_DELETE_USER_HAS_RELATIONS) {
+        toast.error(t("deleteUserBlockedByRelations"));
+      } else {
+        toast.error(msg);
+      }
     } finally {
       setLoadingId(null);
     }
