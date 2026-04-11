@@ -19,8 +19,13 @@ export default function VerificationBanner() {
   const [cooldown, setCooldown] = useState<number | null>(null);
   const [isMaxAttempts, setIsMaxAttempts] = useState(false);
 
-  // Kullanıcı giriş yapmamışsa, zaten doğrulanmışsa veya YÖNETİCİ ise hiçbir şey gösterme
-  if (!session?.user || session.user.emailVerified || session.user.role === "ADMIN") {
+  // Misafir dışı roller: admin/onaylı esnaf için banner yok (esnafı biz sistemden aktif ediyoruz).
+  if (
+    !session?.user ||
+    session.user.emailVerified ||
+    session.user.role === "ADMIN" ||
+    session.user.role === "PARTNER"
+  ) {
     return null;
   }
 

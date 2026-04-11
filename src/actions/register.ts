@@ -115,6 +115,7 @@ export async function registerPartnerApplicationAction(data: unknown) {
     const user = await tx.user.create({
       data: {
         email: email || null,
+        emailVerified: email ? new Date() : null,
         name: parsed.data.name.trim(),
         phone: phone,
         role: Role.PARTNER,
@@ -131,13 +132,6 @@ export async function registerPartnerApplicationAction(data: unknown) {
         isActive: false, // Admin onayı bekleyecek
       },
     });
-
-    // Sadece e-posta girilmişse doğrulama gönder
-    if (user.email) {
-      const locale = await getLocale();
-      const verificationToken = await generateVerificationToken(user.email);
-      await sendVerificationEmail(user.email, verificationToken.token, locale);
-    }
   });
 
   return { success: true as const };
