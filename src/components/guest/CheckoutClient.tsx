@@ -498,6 +498,25 @@ export default function CheckoutClient({
 
             <BagProtection variant="checkout" />
 
+            <section
+              className="rounded-2xl border border-gray-100 bg-gray-50/90 p-4 text-xs leading-relaxed text-gray-600"
+              aria-labelledby="checkout-policy-callout"
+            >
+              <p
+                id="checkout-policy-callout"
+                className="text-[10px] font-black uppercase tracking-widest text-gray-400"
+              >
+                {t("checkoutPolicyCalloutTitle")}
+              </p>
+              <p className="mt-2">{t("checkoutPolicyCalloutBody")}</p>
+              <Link
+                href="/faq"
+                className="mt-3 inline-block text-[11px] font-black uppercase tracking-wider text-orange-600 hover:underline"
+              >
+                {t("checkoutFaqLink")}
+              </Link>
+            </section>
+
             <section className="flex flex-col gap-4">
               <div className="flex justify-between items-start text-sm">
                 <div className="flex flex-col gap-0.5">
@@ -540,6 +559,29 @@ export default function CheckoutClient({
             <h2 className="text-sm font-black uppercase tracking-widest text-gray-900">
               {t("checkoutStep3Title")}
             </h2>
+
+            <p className="text-xs leading-relaxed text-gray-500">
+              {t("checkoutPaymentMethodsNote")}
+            </p>
+
+            <section
+              className="rounded-2xl border border-gray-100 bg-gray-50/90 p-4 text-xs leading-relaxed text-gray-600"
+              aria-labelledby="checkout-policy-callout-pay"
+            >
+              <p
+                id="checkout-policy-callout-pay"
+                className="text-[10px] font-black uppercase tracking-widest text-gray-400"
+              >
+                {t("checkoutPolicyCalloutTitle")}
+              </p>
+              <p className="mt-2">{t("checkoutPolicyCalloutBody")}</p>
+              <Link
+                href="/faq"
+                className="mt-3 inline-block text-[11px] font-black uppercase tracking-wider text-orange-600 hover:underline"
+              >
+                {t("checkoutFaqLink")}
+              </Link>
+            </section>
 
             <section className="flex flex-col gap-6">
               <h3 className="text-xs font-black uppercase text-gray-400">

@@ -8,7 +8,8 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
   setRequestLocale(locale);
   const t = await getTranslations("FAQ");
 
-  const faqItems = [1, 2, 3, 4].map((idx) => ({
+  const guestFaqIds = [1, 2, 3, 4, 5, 6, 7, 8] as const;
+  const faqItems = guestFaqIds.map((idx) => ({
     question: t(`q${idx}` as "q1"),
     answer: t(`a${idx}` as "a1"),
   }));
@@ -37,7 +38,7 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
               {t("guestTitle")}
             </h2>
             <div className="flex flex-col gap-4">
-              {[1, 2, 3, 4].map((idx) => {
+              {guestFaqIds.map((idx) => {
                 const qKey = `q${idx}`;
                 const aKey = `a${idx}`;
                 return (

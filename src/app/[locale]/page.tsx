@@ -147,6 +147,14 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
               </Link>
             ))}
           </div>
+          <p className="mt-8 text-center">
+            <Link
+              href="/luggage-storage"
+              className="text-sm font-black uppercase tracking-widest text-orange-600 underline-offset-4 hover:underline"
+            >
+              {t("cityHubViewAll")}
+            </Link>
+          </p>
         </div>
       </section>
 
