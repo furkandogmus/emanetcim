@@ -204,10 +204,6 @@ export default function CheckoutClient({
     if (result.success && result.bookingId) {
       setBookingId(result.bookingId);
       trackPlausibleEvent(PLAUSIBLE_EVENTS.BookingCreated, { shopId });
-      trackPlausibleEvent(PLAUSIBLE_EVENTS.PaymentSucceeded, {
-        gateway: "iyzico",
-        shopId,
-      });
       if ("qrCodeToken" in result && result.qrCodeToken) {
         QRCode.toDataURL(result.qrCodeToken, { width: 220, margin: 2 })
           .then(setQrDataUrl)
@@ -606,6 +602,9 @@ export default function CheckoutClient({
 
             <p className="text-xs leading-relaxed text-gray-500">
               {t("checkoutPaymentMethodsNote")}
+            </p>
+            <p className="text-xs font-semibold leading-relaxed text-orange-800/90">
+              {t("checkoutPaymentAfterApprovalNote")}
             </p>
 
             <section

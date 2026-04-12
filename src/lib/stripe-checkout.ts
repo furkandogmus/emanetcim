@@ -27,7 +27,10 @@ export function stripeElementsLocaleFromAppLocale(
   return map[key] ?? "en";
 }
 
-/** Misafir rezervasyon ödemesi (Payment Element) için Stripe + publishable key hazır mı? */
+/**
+ * Misafir rezervasyon ödemesi (Payment Element) için Stripe + publishable key hazır mı?
+ * PAYMENT_GATEWAY=stripe olmalı; aksi halde iyzico akışı kullanılır.
+ */
 export function isStripeGuestCheckoutEnabled(): boolean {
   return (
     getPaymentGateway() === "stripe" &&

@@ -18,6 +18,17 @@ async function main() {
     update: {},
   });
 
+  await prisma.featureFlag.upsert({
+    where: { key: 'payments_enabled' },
+    create: {
+      key: 'payments_enabled',
+      enabled: true,
+      rolloutPct: 100,
+      description: 'iyzico/Stripe init, webhooks, refunds',
+    },
+    update: {},
+  });
+
   /** Login sayfası ile aynı: `NEXT_PUBLIC_DEMO_PASSWORD` yoksa `Demo123!` (DEMO_PASSWORD tek başına istemcide yok). */
   const demoPassword =
     typeof process.env.NEXT_PUBLIC_DEMO_PASSWORD === 'string' &&

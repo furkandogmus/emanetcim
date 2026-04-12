@@ -21,8 +21,8 @@ import { dateLocaleForUiLocale } from '@/lib/date-locale';
 interface BookingsClientProps {
   bookings: GuestBookingListItem[];
   pricingRules: PricingRules;
-  /** PAYMENT_GATEWAY=stripe + Stripe anahtarları tanımlıysa onay sonrası ödeme linki gösterilir. */
-  stripeCheckoutEnabled?: boolean;
+  /** iyzico veya Stripe ile /bookings/[id]/pay açıksa onay sonrası ödeme linki. */
+  onlinePayEnabled?: boolean;
 }
 
 /**
@@ -42,7 +42,7 @@ function statusBadgeClass(status: string): string {
 export default function BookingsClient({
   bookings,
   pricingRules,
-  stripeCheckoutEnabled = false,
+  onlinePayEnabled = false,
 }: BookingsClientProps) {
   const t = useTranslations('Guest');
   const tErr = useTranslations('Errors');
@@ -151,7 +151,7 @@ export default function BookingsClient({
                 </div>
                 
                 <div className="flex gap-2 flex-wrap justify-end">
-                  {stripeCheckoutEnabled &&
+                  {onlinePayEnabled &&
                     (booking.status === "APPROVED" || booking.status === "PENDING") && (
                       <Link
                         href={`/bookings/${booking.id}/pay`}

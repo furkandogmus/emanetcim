@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
 
-    if (!isPaymentsEnabled()) {
+    if (!(await isPaymentsEnabled())) {
       return NextResponse.json({ error: "Payments disabled" }, { status: 503 });
     }
 

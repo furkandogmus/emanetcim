@@ -341,6 +341,23 @@ model Campaign {
 }
 
 /// Tek satır platform iş kuralları (panelden güncellenebilir).
+/// Runtime feature toggles (admin UI + optional env kill switch for payments).
+model FeatureFlag {
+  id     String @id @default(cuid())
+  key    String @unique
+  enabled Boolean @default(true)
+  /// 0–100; applied when userId is present. Backend paths without userId skip rollout (webhooks stay consistent).
+  rolloutPct Int @default(100)
+  /// Non-empty JSON string[] = allowlist for identified users only; empty/null = no allowlist restriction.
+  allowedUserIds Json?
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+}
+
 model PlatformSettings {
   id String @id @default("default")
 
