@@ -77,7 +77,27 @@ model User {
   legalAcceptances  LegalAcceptance[]
   pushSubscriptions PushSubscription[]
 
+  adminRoleChangeTargets   AdminRoleChangeRequest[] @relation("AdminRoleChangeTarget")
+  adminRoleChangeRequested AdminRoleChangeRequest[] @relation("AdminRoleChangeRequester")
+
   @@index([email])
+}
+
+/// Admin ↔ admin rol değişikliği: çoklu admin varken ikinci onay; tek adminde anında uygulanır.
+model AdminRoleChangeRequest {
+  id                  String @id @default(cuid())
+  targetUserId        String @unique
+  previousRole        Role
+  requestedRole       Role
+  requestedByUserId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  targetUser  User @relation("AdminRoleChangeTarget", fields: [targetUserId], references: [id], onDelete: Cascade)
+  requestedBy User @relation("AdminRoleChangeRequester", fields: [requestedByUserId], references: [id], onDelete: Cascade)
+
+  @@index([requestedByUserId])
 }
 
 model Account {

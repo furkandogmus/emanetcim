@@ -65,8 +65,12 @@ export default function AdminApplicationsClient({ applications: initialApps }: A
     if (!confirm(t("rejectConfirm"))) return;
     setLoadingId(id);
     try {
-      await rejectShopAction(id);
-      setApps(prev => prev.filter(a => a.id !== id));
+      const res = await rejectShopAction(id);
+      if (!res.success) {
+        toast.error(t("shopDeleteBlockedByRelations"));
+        return;
+      }
+      setApps((prev) => prev.filter((a) => a.id !== id));
       toast.success(t("rejectSuccess"));
     } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : String(error));

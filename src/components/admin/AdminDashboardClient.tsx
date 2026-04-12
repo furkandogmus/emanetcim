@@ -15,6 +15,7 @@ import {
   Zap,
   TrendingUp,
   Flag,
+  UserCog,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
@@ -46,11 +47,13 @@ interface AdminDashboardClientProps {
     };
   };
   chartData: ChartRow[];
+  pendingRoleApprovals: number;
 }
 
 export default function AdminDashboardClient({
   stats,
   chartData,
+  pendingRoleApprovals,
 }: AdminDashboardClientProps) {
   const t = useTranslations("Admin");
 
@@ -226,6 +229,24 @@ export default function AdminDashboardClient({
               >
                 <Flag size={18} className="opacity-40" />
                 {t("featureFlagsNav")}
+              </Link>
+              <Link
+                href="/admin/role-approvals"
+                className={`w-full py-4 px-6 rounded-2xl text-sm font-bold transition-all text-left flex items-center justify-between gap-3 ${
+                  pendingRoleApprovals > 0
+                    ? "bg-orange-600/90 hover:bg-orange-600 text-white"
+                    : "bg-white/10 hover:bg-white/20"
+                }`}
+              >
+                <span className="flex items-center gap-3">
+                  <UserCog size={18} className={pendingRoleApprovals > 0 ? "" : "opacity-40"} />
+                  {t("roleApprovalsNav")}
+                </span>
+                {pendingRoleApprovals > 0 ? (
+                  <span className="min-w-[1.5rem] rounded-lg bg-white/20 px-2 py-0.5 text-center text-[10px] font-black">
+                    {pendingRoleApprovals}
+                  </span>
+                ) : null}
               </Link>
               <Link
                 href="/admin/messages"

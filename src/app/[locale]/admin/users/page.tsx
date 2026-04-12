@@ -1,6 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import prisma from "@/lib/db";
 import AdminUsersClient from "@/components/admin/AdminUsersClient";
+import { auth } from "@/auth";
 
 export default async function AdminUsersPage({
   params,
@@ -10,20 +11,31 @@ export default async function AdminUsersPage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  // Tüm kullanıcıları çekiyoruz
-  const users = await prisma.user.findMany({
-    orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      isBanned: true,
-      lastIp: true,
-      emailVerified: true,
-      createdAt: true,
-    },
-  });
+  const session = await auth();
 
-  return <AdminUsersClient users={users} />;
+  // Tüm kullanıcıları çekiyoruz
+  const [users, pendingRoleApprovalCount] = await Promise.all([
+    prisma.user.findMany({
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        isBanned: true,
+        lastIp: true,
+        emailVerified: true,
+        createdAt: true,
+      },
+    }),
+    prisma.adminRoleChangeRequest.count(),
+  ]);
+
+  return (
+    <AdminUsersClient
+      users={users}
+      currentAdminId={session?.user?.id ?? ""}
+      pendingRoleApprovalCount={pendingRoleApprovalCount}
+    />
+  );
 }

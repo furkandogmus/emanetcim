@@ -81,6 +81,7 @@ export default async function AdminDashboard({
     shopsWeek,
     shopsPrev,
     chartData,
+    pendingRoleApprovals,
   ] = await Promise.all([
     prisma.booking.count({ where: { createdAt: { gte: start7 } } }),
     prisma.booking.count({
@@ -105,6 +106,7 @@ export default async function AdminDashboard({
       where: { createdAt: { gte: start14, lt: start7 } },
     }),
     getDailyChartData(),
+    prisma.adminRoleChangeRequest.count(),
   ]);
 
   const stats = {
@@ -124,6 +126,10 @@ export default async function AdminDashboard({
   };
 
   return (
-    <AdminDashboardClient stats={stats} chartData={chartData} />
+    <AdminDashboardClient
+      stats={stats}
+      chartData={chartData}
+      pendingRoleApprovals={pendingRoleApprovals}
+    />
   );
 }
