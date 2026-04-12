@@ -1,0 +1,50 @@
+# ============================================================
+# Stress Test Docker Compose — Monitoring Stack
+# ============================================================
+# Stress test sırasında metrikleri izlemek için:
+#   docker compose -f tests/stress/docker-compose.stress.yml up -d
+#
+# Erişim:
+#   Grafana:    http://localhost:3001 (admin/admin)
+#   Prometheus: http://localhost:9090
+#   cAdvisor:   http://localhost:8080
+# ============================================================
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.54.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_DEFAULT_THEME: dark
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    ports:
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    privileged: true
+
+  node-exporter:
+    image: prom/node-exporter:v1.8.2
+    ports:
+      - "9100:9100"
+    pid: host
+
+volumes:
+  grafana_data:
