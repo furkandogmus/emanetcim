@@ -12,7 +12,7 @@ import {
   Hash,
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
-import { isStripeGuestCheckoutEnabled } from "@/lib/stripe-checkout";
+import { isGuestOnlinePayEnabled } from "@/lib/guest-payment";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import PrintButton from "@/components/guest/PrintButton";
 import BookingQrDisplay from "@/components/guest/BookingQrDisplay";
@@ -85,7 +85,9 @@ export default async function BookingDetailPage({
   const waitingShop = booking.status === "WAITING_APPROVAL";
   const needsPayment =
     booking.status === "APPROVED" || booking.status === "PENDING";
-  const stripePay = isStripeGuestCheckoutEnabled();
+  const onlinePay = await isGuestOnlinePayEnabled({
+    userId: session.user.id,
+  });
 
   return (
     <div className="min-h-screen bg-gray-50 pt-32 pb-20 px-6 font-sans">
@@ -130,7 +132,7 @@ export default async function BookingDetailPage({
               </div>
               <h1 className="text-2xl font-black text-gray-900">{t("bookingDetailPaymentNeededTitle")}</h1>
               <p className="text-gray-500 text-sm font-medium px-8">{t("bookingDetailPaymentNeededSub")}</p>
-              {stripePay ? (
+              {onlinePay ? (
                 <Link
                   href={`/bookings/${id}/pay`}
                   className="mt-4 inline-flex items-center justify-center rounded-2xl bg-orange-600 px-8 py-4 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-orange-200 hover:bg-orange-700"
@@ -138,7 +140,9 @@ export default async function BookingDetailPage({
                   {t("payBookingOpenCta")}
                 </Link>
               ) : (
-                <p className="mt-4 text-xs font-medium text-gray-500 px-4">{t("bookingDetailPaymentNoStripeNote")}</p>
+                <p className="mt-4 text-xs font-medium text-gray-500 px-4">
+                  {t("bookingDetailPaymentUnavailableNote")}
+                </p>
               )}
             </>
           ) : (

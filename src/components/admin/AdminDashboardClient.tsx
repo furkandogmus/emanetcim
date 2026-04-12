@@ -13,7 +13,8 @@ import {
   MessageSquare,
   Settings,
   Zap,
-  TrendingUp
+  TrendingUp,
+  Flag,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
@@ -218,6 +219,13 @@ export default function AdminDashboardClient({
               >
                 <Settings size={18} className="opacity-40" />
                 {t("platformSettingsNav")}
+              </Link>
+              <Link
+                href="/admin/feature-flags"
+                className="w-full py-4 px-6 bg-white/10 rounded-2xl text-sm font-bold hover:bg-white/20 transition-all text-left flex items-center gap-3"
+              >
+                <Flag size={18} className="opacity-40" />
+                {t("featureFlagsNav")}
               </Link>
               <Link
                 href="/admin/messages"

@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!isPaymentsEnabled()) {
+    if (!(await isPaymentsEnabled())) {
       return NextResponse.json(
         { status: "Error", message: "Payments disabled" },
         { status: 503 }

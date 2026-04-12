@@ -5,10 +5,16 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { paymentService } from "@/services/PaymentService";
 import { isStripeGuestCheckoutEnabled } from "@/lib/stripe-checkout";
+import {
+  isGuestOnlinePayEnabled,
+  isIyzicoGuestPayEnabled,
+} from "@/lib/guest-payment";
 import BookingStripePayClient from "@/components/guest/BookingStripePayClient";
+import BookingIyzicoPayClient from "@/components/guest/BookingIyzicoPayClient";
 import { Link } from "@/i18n/routing";
 import { headers } from "next/headers";
 import { rateLimit } from "@/lib/rate-limit";
+import { moneyToNumber } from "@/lib/money";
 
 export async function generateMetadata({
   params,
@@ -36,12 +42,9 @@ export default async function BookingPayPage({
     redirect(`/${locale}/login?callbackUrl=/${locale}/bookings/${id}/pay`);
   }
 
-  if (!isStripeGuestCheckoutEnabled()) {
-    redirect(`/${locale}/bookings/${id}`);
-  }
-
-  const pk = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim();
-  if (!pk) {
+  if (
+    !(await isGuestOnlinePayEnabled({ userId: session.user.id }))
+  ) {
     redirect(`/${locale}/bookings/${id}`);
   }
 
@@ -61,8 +64,8 @@ export default async function BookingPayPage({
     "unknown";
   const guestId = session.user.id;
   if (
-    !(await rateLimit(`stripe_pi_guest:${guestId}`, 40, 60 * 60 * 1000)) ||
-    !(await rateLimit(`stripe_pi_ip:${ip}`, 80, 60 * 60 * 1000))
+    !(await rateLimit(`booking_pay_guest:${guestId}`, 40, 60 * 60 * 1000)) ||
+    !(await rateLimit(`booking_pay_ip:${ip}`, 80, 60 * 60 * 1000))
   ) {
     const t = await getTranslations("Guest");
     return (
@@ -80,12 +83,32 @@ export default async function BookingPayPage({
     );
   }
 
+  const t = await getTranslations("Guest");
+
+  if (await isIyzicoGuestPayEnabled({ userId: session.user.id })) {
+    const totalTry = moneyToNumber(booking.totalPrice);
+    return (
+      <BookingIyzicoPayClient
+        bookingId={id}
+        shopName={booking.shop.name}
+        totalTry={totalTry}
+      />
+    );
+  }
+
+  if (!isStripeGuestCheckoutEnabled()) {
+    redirect(`/${locale}/bookings/${id}`);
+  }
+
+  const pk = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim();
+  if (!pk) {
+    redirect(`/${locale}/bookings/${id}`);
+  }
+
   const intent = await paymentService.createStripePaymentIntentForGuestBooking({
     bookingId: id,
     guestId: session.user.id,
   });
-
-  const t = await getTranslations("Guest");
 
   if (!intent.ok) {
     const code = intent.errorCode;

@@ -17,6 +17,7 @@ function revalidateAdmin() {
   revalidatePathAllLocales("/admin/seals");
   revalidatePathAllLocales("/admin/campaigns");
   revalidatePathAllLocales("/admin/platform-settings");
+  revalidatePathAllLocales("/admin/feature-flags");
 }
 
 const platformSettingsUpdateSchema = z.object({

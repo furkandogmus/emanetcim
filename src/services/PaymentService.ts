@@ -85,6 +85,41 @@ export class PaymentService implements IPaymentService {
     );
   }
 
+  /** iyzico anında başarı: ödeme kaydı + APPROVED/PENDING → PAID (webhook ile idempotent). */
+  private async persistSuccessfulIyzicoCharge(
+    bookingId: string,
+    totalPrice: number,
+    paymentId: string | undefined
+  ): Promise<void> {
+    const txId =
+      typeof paymentId === "string" && paymentId.trim()
+        ? paymentId.trim()
+        : `iyz_${bookingId}_${Date.now()}`;
+    await prisma.$transaction(async (tx) => {
+      await tx.paymentLog.upsert({
+        where: { bookingId },
+        create: {
+          bookingId,
+          transactionId: txId,
+          amount: totalPrice,
+          status: "SUCCESS",
+        },
+        update: {
+          transactionId: txId,
+          amount: totalPrice,
+          status: "SUCCESS",
+        },
+      });
+      await tx.booking.updateMany({
+        where: {
+          id: bookingId,
+          status: { in: ["APPROVED", "PENDING"] },
+        },
+        data: { status: "PAID" },
+      });
+    });
+  }
+
   /**
    * Bölünmüş ödemeyi (Marketplace Payment) başlatır.
    * "Idempotency": Aynı bookingId için mükerrer işlem yapılmasını engeller.
@@ -92,10 +127,17 @@ export class PaymentService implements IPaymentService {
   async initializeMarketplacePayment(
     data: MarketplacePaymentInput
   ): Promise<PaymentSdkResult> {
-    if (!isPaymentsEnabled()) {
+    const bookingForFlag = await prisma.booking.findUnique({
+      where: { id: data.bookingId },
+      select: { guestId: true },
+    });
+    if (!bookingForFlag) {
+      return { status: "failure", errorMessage: "Booking not found." };
+    }
+    if (!(await isPaymentsEnabled({ userId: bookingForFlag.guestId }))) {
       return {
-        status: 'failure',
-        errorMessage: 'Payments disabled (PAYMENTS_ENABLED=false).',
+        status: "failure",
+        errorMessage: "Payments are temporarily disabled.",
       };
     }
     if (getPaymentGateway() === 'stripe') {
@@ -175,18 +217,15 @@ export class PaymentService implements IPaymentService {
       logger.info({ bookingId: data.bookingId }, "payment_simulate_success_dev");
       const paymentId = `MOCK_TX_${Date.now()}`;
       try {
-        await prisma.paymentLog.create({
-          data: {
-            bookingId: data.bookingId,
-            transactionId: paymentId,
-            amount: data.totalPrice,
-            status: "SUCCESS",
-          },
-        });
+        await this.persistSuccessfulIyzicoCharge(
+          data.bookingId,
+          data.totalPrice,
+          paymentId
+        );
       } catch (e) {
-        if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-          logger.warn({ bookingId: data.bookingId }, 'payment_init_duplicate_row');
-          return { status: 'success', message: 'Already processed.' };
+        if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+          logger.warn({ bookingId: data.bookingId }, "payment_init_duplicate_row");
+          return { status: "success", message: "Already processed." };
         }
         throw e;
       }
@@ -215,23 +254,22 @@ export class PaymentService implements IPaymentService {
       'iyzico_payment_create'
     )) as PaymentSdkResult;
 
-    // 2. İşlemi Logla
     if (isPaymentSuccess(result.status)) {
       try {
         const paymentId =
-          typeof result.paymentId === 'string' ? result.paymentId : undefined;
-        await prisma.paymentLog.create({
-          data: {
-            bookingId: data.bookingId,
-            transactionId: paymentId,
-            amount: data.totalPrice,
-            status: "SUCCESS"
-          }
-        });
+          typeof result.paymentId === "string" ? result.paymentId : undefined;
+        await this.persistSuccessfulIyzicoCharge(
+          data.bookingId,
+          data.totalPrice,
+          paymentId
+        );
       } catch (e) {
-        if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-          logger.warn({ bookingId: data.bookingId }, 'payment_init_duplicate_row_after_iyzico');
-          return { status: 'success', message: 'Already processed.' };
+        if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+          logger.warn(
+            { bookingId: data.bookingId },
+            "payment_init_duplicate_row_after_iyzico"
+          );
+          return { status: "success", message: "Already processed." };
         }
         throw e;
       }
@@ -370,8 +408,8 @@ export class PaymentService implements IPaymentService {
     status: string;
     metadata?: Record<string, string> | null;
   }): Promise<{ success: boolean; message: string }> {
-    if (!isPaymentsEnabled()) {
-      return { success: false, message: "Payments disabled (PAYMENTS_ENABLED=false)" };
+    if (!(await isPaymentsEnabled())) {
+      return { success: false, message: "Payments disabled" };
     }
     if (payload.status !== "succeeded") {
       return { success: false, message: "Stripe intent not succeeded" };
@@ -395,8 +433,8 @@ export class PaymentService implements IPaymentService {
     merchantId?: string;
     hash?: string;
   }): Promise<{ success: boolean; message: string }> {
-    if (!isPaymentsEnabled()) {
-      return { success: false, message: 'Payments disabled (PAYMENTS_ENABLED=false)' };
+    if (!(await isPaymentsEnabled())) {
+      return { success: false, message: "Payments disabled" };
     }
     const { status, paymentId, conversationId } = payload;
 
@@ -420,10 +458,10 @@ export class PaymentService implements IPaymentService {
     amount: number,
     options?: { keepPaymentLogSuccess?: boolean }
   ): Promise<PaymentSdkResult> {
-    if (!isPaymentsEnabled()) {
+    if (!(await isPaymentsEnabled())) {
       return {
-        status: 'failure',
-        errorMessage: 'Payments disabled (PAYMENTS_ENABLED=false).',
+        status: "failure",
+        errorMessage: "Payments are temporarily disabled.",
       };
     }
     // 1. Orijinal ödeme kaydını bul (Transaction ID gerekiyor)
@@ -572,7 +610,7 @@ export class PaymentService implements IPaymentService {
     | { ok: true; clientSecret: string; paymentIntentId: string }
     | { ok: false; errorCode: string }
   > {
-    if (!isPaymentsEnabled()) {
+    if (!(await isPaymentsEnabled({ userId: params.guestId }))) {
       return { ok: false, errorCode: "payments_disabled" };
     }
     if (getPaymentGateway() !== "stripe") {
@@ -639,10 +677,10 @@ export class PaymentService implements IPaymentService {
     email: string;
     phone: string;
   }): Promise<PaymentSdkResult> {
-    if (!isPaymentsEnabled()) {
+    if (!(await isPaymentsEnabled())) {
       return {
-        status: 'failure',
-        errorMessage: 'Payments disabled (PAYMENTS_ENABLED=false).',
+        status: "failure",
+        errorMessage: "Payments are temporarily disabled.",
       };
     }
     if (getPaymentGateway() === "stripe") {
