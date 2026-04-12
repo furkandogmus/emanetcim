@@ -280,25 +280,117 @@ export class NotificationService implements INotificationService {
    * Misafir: yalnızca e-posta (SMS gönderilmez).
    */
   async notifyBookingSuccess(emailOrPlaceholder: string, bookingId: string, totalPrice: number, locale: string = "tr"): Promise<void> {
+    const domain = process.env.NEXT_PUBLIC_APP_URL || "https://bagajpark.com";
+    const bookingUrl = `${domain}/${locale}/bookings/${bookingId}`;
+    const shortId = bookingId.replace(/-/g, "").slice(0, 8);
+    const priceFormatted = Number(totalPrice).toFixed(2);
+
     const content = {
       tr: {
-        subject: "BagajPark: Rezervasyonunuz Onaylandı! 🎒",
-        body: `Merhaba, ${bookingId} numaralı rezervasyonunuz başarıyla tamamlandı. \n\nToplam Tutar: ₺${totalPrice}\nBiletiniz: /bookings/${bookingId}`
+        subject: "BagajPark: Ödemeniz Alındı! 🎒",
+        body: `Merhaba,\n\nÖdemeniz başarıyla alındı. Rezervasyonunuz onaylandı!\n\nReferans: ${shortId}\nToplam Tutar: ₺${priceFormatted}\n\nBiletinizi görmek için: ${bookingUrl}`,
+        html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
+          <h2 style="color:#ea580c">Ödemeniz Alındı! 🎒</h2>
+          <p>Ödemeniz başarıyla alındı. Rezervasyonunuz onaylandı!</p>
+          <table style="width:100%;border-collapse:collapse;margin:16px 0">
+            <tr><td style="padding:8px;color:#6b7280">Referans</td><td style="padding:8px;font-weight:bold">${shortId}</td></tr>
+            <tr style="background:#f9fafb"><td style="padding:8px;color:#6b7280">Toplam Tutar</td><td style="padding:8px;font-weight:bold">₺${priceFormatted}</td></tr>
+          </table>
+          <a href="${bookingUrl}" style="display:inline-block;background:#ea580c;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;margin:16px 0">Biletimi Görüntüle</a>
+          <p style="font-size:13px;color:#6b7280;margin-top:24px">BagajPark — Güvenli Bagaj Emaneti</p>
+        </div>`,
       },
       en: {
-        subject: "BagajPark: Booking Confirmed! 🎒",
-        body: `Hello, your booking ${bookingId} has been successfully completed. \n\nTotal Price: ₺${totalPrice}\nYour Ticket: /bookings/${bookingId}`
-      }
-    }[locale] || {
-      tr: {
-        subject: "BagajPark: Rezervasyonunuz Onaylandı! 🎒",
-        body: `Merhaba, ${bookingId} numaralı rezervasyonunuz başarıyla tamamlandı. \n\nToplam Tutar: ₺${totalPrice}\nBiletiniz: /bookings/${bookingId}`
-      }
-    }.tr;
+        subject: "BagajPark: Payment Confirmed! 🎒",
+        body: `Hello,\n\nYour payment has been received and your booking is confirmed!\n\nReference: ${shortId}\nTotal: ₺${priceFormatted}\n\nView your ticket: ${bookingUrl}`,
+        html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
+          <h2 style="color:#ea580c">Payment Confirmed! 🎒</h2>
+          <p>Your payment has been received and your booking is confirmed!</p>
+          <table style="width:100%;border-collapse:collapse;margin:16px 0">
+            <tr><td style="padding:8px;color:#6b7280">Reference</td><td style="padding:8px;font-weight:bold">${shortId}</td></tr>
+            <tr style="background:#f9fafb"><td style="padding:8px;color:#6b7280">Total</td><td style="padding:8px;font-weight:bold">₺${priceFormatted}</td></tr>
+          </table>
+          <a href="${bookingUrl}" style="display:inline-block;background:#ea580c;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;margin:16px 0">View My Ticket</a>
+          <p style="font-size:13px;color:#6b7280;margin-top:24px">BagajPark — Secure Luggage Storage</p>
+        </div>`,
+      },
+    }[locale] ?? {
+      subject: "BagajPark: Ödemeniz Alındı! 🎒",
+      body: `Referans: ${shortId} — ₺${priceFormatted}. Bilet: ${bookingUrl}`,
+      html: undefined as string | undefined,
+    };
 
     if (emailOrPlaceholder.includes("@")) {
-      await this.sendEmail(emailOrPlaceholder, content.subject, content.body, bookingId);
+      await this.sendEmail(emailOrPlaceholder, content.subject, content.body, bookingId, content.html);
     }
+  }
+
+  /**
+   * Partner rezervasyonu onayladığında misafire e-posta: "Ödeme yapabilirsiniz."
+   */
+  async notifyBookingApproved(email: string, bookingId: string, shopName: string, locale: string = "tr"): Promise<void> {
+    if (!email.includes("@")) return;
+    const domain = process.env.NEXT_PUBLIC_APP_URL || "https://bagajpark.com";
+    const payUrl = `${domain}/${locale}/bookings/${bookingId}/pay`;
+    const shortId = bookingId.replace(/-/g, "").slice(0, 8);
+
+    const content = {
+      tr: {
+        subject: "BagajPark: Talebiniz Onaylandı — Ödeme Yapın 🎒",
+        body: `Merhaba,\n\n${shopName} mağazası rezervasyon talebinizi onayladı!\n\nÖdemenizi tamamlamak için lütfen aşağıdaki bağlantıyı kullanın:\n${payUrl}\n\nReferans: ${shortId}`,
+        html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
+          <h2 style="color:#ea580c">Talebiniz Onaylandı! 🎒</h2>
+          <p><strong>${shopName}</strong> rezervasyon talebinizi onayladı. Rezervasyonunuzu tamamlamak için ödeme yapın.</p>
+          <a href="${payUrl}" style="display:inline-block;background:#ea580c;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;margin:16px 0">Ödemeyi Tamamla</a>
+          <p style="font-size:13px;color:#6b7280">Referans: ${shortId}</p>
+        </div>`,
+      },
+      en: {
+        subject: "BagajPark: Request Approved — Complete Payment 🎒",
+        body: `Hello,\n\n${shopName} has approved your booking request!\n\nPlease complete your payment at: ${payUrl}\n\nReference: ${shortId}`,
+        html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
+          <h2 style="color:#ea580c">Request Approved! 🎒</h2>
+          <p><strong>${shopName}</strong> has approved your booking request. Complete your payment to confirm.</p>
+          <a href="${payUrl}" style="display:inline-block;background:#ea580c;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;margin:16px 0">Complete Payment</a>
+          <p style="font-size:13px;color:#6b7280">Reference: ${shortId}</p>
+        </div>`,
+      },
+    }[locale] ?? { subject: "BagajPark: Onaylandı", body: `Ödeme: ${payUrl}`, html: undefined as string | undefined };
+
+    await this.sendEmail(email, content.subject, content.body, bookingId, content.html);
+  }
+
+  /**
+   * Rezervasyon iptal/reddedildiğinde misafire e-posta.
+   */
+  async notifyBookingCancelled(email: string, bookingId: string, shopName: string, locale: string = "tr"): Promise<void> {
+    if (!email.includes("@")) return;
+    const shortId = bookingId.replace(/-/g, "").slice(0, 8);
+
+    const content = {
+      tr: {
+        subject: "BagajPark: Rezervasyon Talebi Reddedildi",
+        body: `Merhaba,\n\n${shopName} mağazasına yaptığınız rezervasyon talebi (Ref: ${shortId}) ne yazık ki reddedildi.\n\nBagajpark.com üzerinden başka mağazalara göz atabilirsiniz.`,
+        html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
+          <h2 style="color:#6b7280">Rezervasyon Talebi Reddedildi</h2>
+          <p><strong>${shopName}</strong> mağazasına yaptığınız talep maalesef reddedildi.</p>
+          <p>Diğer mağazaları keşfetmek için <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://bagajpark.com"}/${locale}/search" style="color:#ea580c">buraya tıklayın</a>.</p>
+          <p style="font-size:13px;color:#6b7280">Referans: ${shortId}</p>
+        </div>`,
+      },
+      en: {
+        subject: "BagajPark: Booking Request Declined",
+        body: `Hello,\n\nYour booking request to ${shopName} (Ref: ${shortId}) was unfortunately declined.\n\nYou can browse other locations on bagajpark.com.`,
+        html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
+          <h2 style="color:#6b7280">Booking Request Declined</h2>
+          <p>Your request to <strong>${shopName}</strong> was unfortunately declined.</p>
+          <p>Browse other locations <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://bagajpark.com"}/${locale}/search" style="color:#ea580c">here</a>.</p>
+          <p style="font-size:13px;color:#6b7280">Reference: ${shortId}</p>
+        </div>`,
+      },
+    }[locale] ?? { subject: "BagajPark: İptal", body: `Ref: ${shortId}`, html: undefined as string | undefined };
+
+    await this.sendEmail(email, content.subject, content.body, bookingId, content.html);
   }
 
   /**

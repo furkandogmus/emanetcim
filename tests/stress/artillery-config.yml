@@ -1,0 +1,172 @@
+# ============================================================
+# Artillery Stress Test — BagajPark / Emanetçi
+# ============================================================
+# k6 alternatifi — Node.js tabanlı, daha kolay kurulum
+#
+# Kullanım:
+#   npx artillery run tests/stress/artillery-config.yml
+#   npx artillery run tests/stress/artillery-config.yml --target http://178.104.144.3
+#   npx artillery run tests/stress/artillery-config.yml -e spike
+#
+# Ortam değişkeni ile:
+#   ARTILLERY_TARGET=https://bagajpark.com npx artillery run tests/stress/artillery-config.yml
+# ============================================================
+
+config:
+  target: "{{ $processEnvironment.ARTILLERY_TARGET || 'https://bagajpark.com' }}"
+  phases:
+    # Smoke: 10 kullanıcı/saniye — 1 dakika
+    - name: "Smoke Test (10 VU)"
+      duration: 60
+      arrivalRate: 10
+      maxVusers: 10
+
+  environments:
+    load:
+      phases:
+        - name: "Ramp Up"
+          duration: 60
+          arrivalRate: 5
+          rampTo: 50
+        - name: "Sustain 100 VU"
+          duration: 180
+          arrivalRate: 50
+          maxVusers: 100
+        - name: "Ramp Down"
+          duration: 60
+          arrivalRate: 50
+          rampTo: 5
+
+    stress:
+      phases:
+        - name: "Ramp to 500"
+          duration: 120
+          arrivalRate: 10
+          rampTo: 200
+        - name: "Ramp to 1000"
+          duration: 180
+          arrivalRate: 200
+          rampTo: 500
+          maxVusers: 1000
+        - name: "Sustain 1000"
+          duration: 180
+          arrivalRate: 500
+          maxVusers: 1000
+
+    spike:
+      phases:
+        - name: "Warm Up"
+          duration: 30
+          arrivalRate: 10
+        - name: "SPIKE to 10000"
+          duration: 60
+          arrivalRate: 10
+          rampTo: 5000
+          maxVusers: 10000
+        - name: "Sustain Spike"
+          duration: 180
+          arrivalRate: 5000
+          maxVusers: 10000
+
+    breakpoint:
+      phases:
+        - name: "Escalate"
+          duration: 120
+          arrivalRate: 100
+          rampTo: 5000
+        - name: "Push Limit"
+          duration: 300
+          arrivalRate: 5000
+          rampTo: 50000
+          maxVusers: 100000
+
+  plugins:
+    expect: {}
+    metrics-by-endpoint: {}
+
+  ensure:
+    thresholds:
+      - http.response_time.p95: 3000
+      - http.response_time.p99: 5000
+
+  defaults:
+    headers:
+      User-Agent: "artillery-stress-test/1.0"
+      Accept: "application/json, text/html"
+
+scenarios:
+  # Senaryo 1: Sağlık kontrolü
+  - name: "Health Check"
+    weight: 20
+    flow:
+      - get:
+          url: "/api/health/live"
+          expect:
+            - statusCode: 200
+
+  # Senaryo 2: Ana sayfa gezinme
+  - name: "Browse Homepage"
+    weight: 30
+    flow:
+      - get:
+          url: "/tr"
+          headers:
+            Accept: "text/html"
+          expect:
+            - statusCode:
+                - 200
+                - 301
+                - 302
+      - think: 2
+      - get:
+          url: "/tr/faq"
+          headers:
+            Accept: "text/html"
+      - think: 1
+      - get:
+          url: "/tr/contact"
+          headers:
+            Accept: "text/html"
+
+  # Senaryo 3: Readiness + DB bağlantısı
+  - name: "Readiness Check"
+    weight: 15
+    flow:
+      - get:
+          url: "/api/health"
+          expect:
+            - statusCode: 200
+            - hasProperty: "body.checks.database"
+
+  # Senaryo 4: Kayıt akışı simülasyonu
+  - name: "Registration Flow"
+    weight: 20
+    flow:
+      - get:
+          url: "/tr/auth/register"
+          headers:
+            Accept: "text/html"
+      - think: 3
+      - get:
+          url: "/api/auth/csrf"
+      - think: 1
+      - post:
+          url: "/api/auth/callback/credentials"
+          headers:
+            Content-Type: "application/x-www-form-urlencoded"
+          body: "email=stress_{{ $randomString() }}@test.bagajpark.com&password=StressTest123!"
+          followRedirect: false
+
+  # Senaryo 5: Statik sayfalar
+  - name: "Static Pages"
+    weight: 15
+    flow:
+      - get:
+          url: "/tr/privacy"
+          headers:
+            Accept: "text/html"
+      - think: 2
+      - get:
+          url: "/tr/terms"
+          headers:
+            Accept: "text/html"

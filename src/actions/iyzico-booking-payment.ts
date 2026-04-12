@@ -12,6 +12,7 @@ import { getPaymentGateway } from "@/lib/payment-gateway";
 import { isPaymentSuccess } from "@/lib/payment-status";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { notificationService } from "@/services/NotificationService";
+import { getLocale } from "next-intl/server";
 import { z } from "zod";
 
 const cardSchema = z.object({
@@ -141,6 +142,7 @@ export async function payBookingWithIyzicoAction(raw: unknown): Promise<
   });
 
   if (isPaymentSuccess(result.status)) {
+    // Partner + admin SMS
     void notificationService
       .notifyPartnerAndAdminsForNewPaidBooking({
         bookingId,
@@ -149,6 +151,14 @@ export async function payBookingWithIyzicoAction(raw: unknown): Promise<
         totalPrice,
       })
       .catch(() => {});
+
+    // Misafire ödeme onay e-postası
+    if (buyerEmail) {
+      const locale = await getLocale().catch(() => "tr");
+      void notificationService
+        .notifyBookingSuccess(buyerEmail, bookingId, totalPrice, locale)
+        .catch(() => {});
+    }
 
     revalidatePathAllLocales("/bookings");
     revalidatePathAllLocales(`/bookings/${bookingId}`);

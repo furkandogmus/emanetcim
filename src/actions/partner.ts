@@ -12,6 +12,7 @@ import { getLocale } from "next-intl/server";
 import { sealService } from "@/services/SealService";
 import { BookingStatus, Prisma } from "@prisma/client";
 import { z } from "zod";
+import logger from "@/lib/logger";
 
 function revalidatePartnerPaths() {
   revalidatePathAllLocales("/partner");
@@ -324,6 +325,18 @@ export async function approveBookingAction(bookingId: string) {
       return { success: false as const, error: "Errors.bookingStateConflict" };
     }
 
+    // Misafire "Onaylandı, ödeme yapabilirsiniz" e-postası
+    const guestInfo = await prisma.booking.findUnique({
+      where: { id: bookingId },
+      select: { guest: { select: { email: true } }, shop: { select: { name: true } } },
+    });
+    if (guestInfo?.guest?.email) {
+      const locale = await getLocale();
+      void notificationService
+        .notifyBookingApproved(guestInfo.guest.email, bookingId, guestInfo.shop.name, locale)
+        .catch((err) => logger.error({ err, bookingId }, "notify_booking_approved_failed"));
+    }
+
     revalidatePartnerPaths();
     return { success: true as const };
   } catch {
@@ -343,7 +356,7 @@ export async function rejectBookingAction(bookingId: string) {
   try {
     const booking = await prisma.booking.findUnique({
       where: { id: bookingId },
-      include: { shop: true },
+      include: { shop: true, guest: { select: { email: true } } },
     });
 
     if (!booking) return { success: false as const, error: "Errors.bookingNotFound" };
@@ -355,6 +368,14 @@ export async function rejectBookingAction(bookingId: string) {
       where: { id: bookingId },
       data: { status: BookingStatus.CANCELLED },
     });
+
+    // Misafire "Reddedildi" e-postası
+    if (booking.guest?.email) {
+      const locale = await getLocale();
+      void notificationService
+        .notifyBookingCancelled(booking.guest.email, bookingId, booking.shop.name, locale)
+        .catch((err) => logger.error({ err, bookingId }, "notify_booking_cancelled_failed"));
+    }
 
     revalidatePartnerPaths();
     return { success: true as const };
