@@ -12,14 +12,20 @@ import {
   Activity,
   ShieldCheck,
   ShieldX,
-  ShieldPlus
+  ShieldPlus,
+  Store,
+  User as UserIcon,
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { motion, AnimatePresence } from "framer-motion";
-import { toggleUserBanAction, deleteUserAction, resendVerificationEmailAction, blockIpAction, updateUserRoleAction } from "@/actions/admin-management";
-
-/** admin-management deleteUserAction ile aynı (FK / RESTRICT) */
-const ADMIN_DELETE_USER_HAS_RELATIONS = "ADMIN_DELETE_USER_HAS_RELATIONS";
+import {
+  toggleUserBanAction,
+  deleteUserAction,
+  resendVerificationEmailAction,
+  blockIpAction,
+  submitAdminRoleChangeAction,
+  DELETE_USER_BLOCKED_CODE,
+} from "@/actions/admin-management";
 import { toast } from "sonner";
 import { Role } from "@prisma/client";
 
@@ -36,10 +42,34 @@ interface User {
 
 interface AdminUsersClientProps {
   users: User[]; // DB'den gelen ham liste
+  currentAdminId: string;
+  pendingRoleApprovalCount: number;
 }
 
-export default function AdminUsersClient({ users: initialUsers }: AdminUsersClientProps) {
+function roleChangeToastError(t: (key: string) => string, code: string): string {
+  switch (code) {
+    case "unauthorized":
+      return t("roleChangeErrorUnauthorized");
+    case "not_found":
+      return t("roleChangeErrorNotFound");
+    case "same_role":
+      return t("roleChangeErrorSameRole");
+    case "pending_exists":
+      return t("roleChangeErrorPendingExists");
+    case "cannot_demote_sole_admin":
+      return t("roleChangeErrorCannotDemoteSoleAdmin");
+    default:
+      return code;
+  }
+}
+
+export default function AdminUsersClient({
+  users: initialUsers,
+  currentAdminId,
+  pendingRoleApprovalCount,
+}: AdminUsersClientProps) {
   const t = useTranslations("Admin");
+  const tErrors = useTranslations("Errors");
   const [users, setUsers] = useState<User[]>(initialUsers);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
@@ -79,16 +109,42 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
     if (!confirm(t("confirmDeleteUser"))) return;
     setLoadingId(id);
     try {
-      await deleteUserAction(id);
-      setUsers(prev => prev.filter(u => u.id !== id));
+      const res = await deleteUserAction(id);
+      if (!res.ok) {
+        if (res.error === DELETE_USER_BLOCKED_CODE) {
+          toast.error(t("deleteUserBlockedByRelations"));
+        } else {
+          toast.error(tErrors("unauthorized"));
+        }
+        return;
+      }
+      setUsers((prev) => prev.filter((u) => u.id !== id));
       toast.success(t("userDeleted"));
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : String(error);
-      if (msg === ADMIN_DELETE_USER_HAS_RELATIONS) {
-        toast.error(t("deleteUserBlockedByRelations"));
-      } else {
-        toast.error(msg);
+      toast.error(error instanceof Error ? error.message : String(error));
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  const applyRoleChangeResult = async (id: string, newRole: Role) => {
+    setLoadingId(id);
+    try {
+      const res = await submitAdminRoleChangeAction(id, newRole);
+      if (!res.ok) {
+        toast.error(roleChangeToastError(t, res.error));
+        return;
       }
+      if ("pendingApproval" in res && res.pendingApproval) {
+        toast.success(t("roleChangePendingSecondAdmin"));
+        return;
+      }
+      setUsers((prev) =>
+        prev.map((u) => (u.id === id ? { ...u, role: newRole } : u)),
+      );
+      toast.success(t("roleChangeApplied"));
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : String(error));
     } finally {
       setLoadingId(null);
     }
@@ -96,16 +152,17 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
 
   const handleMakeAdmin = async (id: string) => {
     if (!confirm(t("confirmMakeAdmin"))) return;
-    setLoadingId(id);
-    try {
-      await updateUserRoleAction(id, Role.ADMIN);
-      setUsers(prev => prev.map(u => u.id === id ? { ...u, role: Role.ADMIN } : u));
-      toast.success(t("roleUpdatedSuccess"));
-    } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : String(error));
-    } finally {
-      setLoadingId(null);
-    }
+    await applyRoleChangeResult(id, Role.ADMIN);
+  };
+
+  const handleDemoteToPartner = async (id: string) => {
+    if (!confirm(t("confirmDemoteAdminPartner"))) return;
+    await applyRoleChangeResult(id, Role.PARTNER);
+  };
+
+  const handleDemoteToGuest = async (id: string) => {
+    if (!confirm(t("confirmDemoteAdminGuest"))) return;
+    await applyRoleChangeResult(id, Role.GUEST);
   };
 
   const handleResendMail = async (email: string) => {
@@ -176,6 +233,20 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
           </div>
         </div>
       </header>
+
+      {pendingRoleApprovalCount > 0 ? (
+        <div className="mb-6 rounded-2xl border border-orange-200 bg-orange-50 px-6 py-4 text-sm font-bold text-orange-900 flex flex-wrap items-center justify-between gap-3">
+          <span>
+            {t("roleApprovalsPendingBanner", { count: pendingRoleApprovalCount })}
+          </span>
+          <Link
+            href="/admin/role-approvals"
+            className="text-[10px] font-black uppercase tracking-widest text-orange-700 hover:underline"
+          >
+            {t("roleApprovalsNav")}
+          </Link>
+        </div>
+      ) : null}
 
       <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
@@ -274,6 +345,29 @@ export default function AdminUsersClient({ users: initialUsers }: AdminUsersClie
                             <ShieldPlus size={18} />
                           </button>
                         )}
+                        {user.role === Role.ADMIN &&
+                          user.id !== currentAdminId && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => handleDemoteToPartner(user.id)}
+                                disabled={loadingId === user.id}
+                                className="p-3 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl transition-all"
+                                title={t("demoteToPartner")}
+                              >
+                                <Store size={18} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDemoteToGuest(user.id)}
+                                disabled={loadingId === user.id}
+                                className="p-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all"
+                                title={t("demoteToGuest")}
+                              >
+                                <UserIcon size={18} />
+                              </button>
+                            </>
+                          )}
                         <button
                           onClick={() => handleToggleBan(user.id, user.isBanned)}
                           disabled={loadingId === user.id}
