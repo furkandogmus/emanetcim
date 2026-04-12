@@ -364,6 +364,7 @@
     "payBookingError_invalid_amount": "Nieprawidłowa kwota.",
     "payBookingError_stripe_no_client_secret": "Nie można rozpocząć płatności (Stripe).",
     "payBookingError_stripe_error": "Błąd Stripe. Spróbuj później.",
+    "payBookingError_rate_limited": "Za dużo prób płatności. Odczekaj chwilę i spróbuj ponownie.",
     "payBookingErrorUnknown": "Coś poszło nie tak. Spróbuj ponownie lub skontaktuj się z pomocą.",
     "payBookingReturnSyncing": "Potwierdzanie płatności…",
     "payBookingReturnFailed": "Nie udało się potwierdzić płatności. Sprawdź status lub spróbuj ponownie."

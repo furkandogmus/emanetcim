@@ -364,6 +364,7 @@
     "payBookingError_invalid_amount": "Ungültiger Betrag.",
     "payBookingError_stripe_no_client_secret": "Checkout konnte nicht gestartet werden (Stripe).",
     "payBookingError_stripe_error": "Stripe-Fehler. Bitte später erneut versuchen.",
+    "payBookingError_rate_limited": "Zu viele Zahlungsversuche. Bitte warten Sie und versuchen Sie es erneut.",
     "payBookingErrorUnknown": "Etwas ist schiefgelaufen. Bitte erneut versuchen oder den Support kontaktieren.",
     "payBookingReturnSyncing": "Zahlung wird bestätigt…",
     "payBookingReturnFailed": "Die Zahlung konnte nicht bestätigt werden. Prüfen Sie den Buchungsstatus oder versuchen Sie es erneut."

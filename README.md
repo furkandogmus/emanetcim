@@ -1,6 +1,6 @@
-# emanetcim
+# BagajPark (Emanetçi)
 
-Next.js tabanlı Emanetçi uygulaması (PostgreSQL, Prisma, Auth.js, iyzico).
+Next.js tabanlı bagaj emanet / depolama pazar yeri (PostgreSQL, Prisma, Auth.js, iyzico). Ürün adı **BagajPark**; depo kodu ve paket adı `bagajpark`.
 
 | | |
 |--|--|

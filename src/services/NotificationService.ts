@@ -40,7 +40,10 @@ export class NotificationService implements INotificationService {
       let errorDetail: string | null = null;
 
       if (resendKey && to.includes("@")) {
-        const from = process.env.RESEND_FROM || "BagajPark <info@bagajpark.com>";
+        const from =
+          process.env.EMAIL_FROM?.trim() ||
+          process.env.RESEND_FROM?.trim() ||
+          "BagajPark <info@bagajpark.com>";
         const r = await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
@@ -66,11 +69,18 @@ export class NotificationService implements INotificationService {
           status = "SENT";
           logger.info({ to, subject, bookingId }, "notification_email_sent");
         }
-      } else {
-        logger.info(
-          { to, subject, bookingId },
-          "notification_email_skipped_no_resend",
-        );
+      } else if (to.includes("@")) {
+        if (process.env.NODE_ENV === "production") {
+          logger.warn(
+            { to, subject, bookingId },
+            "notification_email_missing_resend_in_production",
+          );
+        } else {
+          logger.info(
+            { to, subject, bookingId },
+            "notification_email_skipped_no_resend",
+          );
+        }
       }
 
       await prisma.notificationLog.create({
@@ -160,7 +170,16 @@ export class NotificationService implements INotificationService {
         return anyOk;
       }
 
-      logger.info({ userId, title }, "notification_push_simulation_or_no_subscribers");
+      const skipReason =
+        !publicKey || !privateKey
+          ? "vapid_not_configured"
+          : subs.length === 0
+            ? "no_subscriptions"
+            : "unknown";
+      logger.info(
+        { userId, title, skipReason },
+        "notification_push_skipped",
+      );
 
       await prisma.notificationLog.create({
         data: {
@@ -169,11 +188,12 @@ export class NotificationService implements INotificationService {
           recipient: userId,
           subject: title,
           content: message,
-          status: "SENT",
+          status: "SKIPPED",
+          error: skipReason,
         },
       });
 
-      return true;
+      return false;
     } catch (error) {
       logger.error({ error }, "[Notification] Push Failed");
       return false;

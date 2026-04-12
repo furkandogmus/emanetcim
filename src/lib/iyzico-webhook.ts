@@ -12,13 +12,18 @@ import crypto from "crypto";
  * HPP (Checkout Form / PWI vb.) — token içeren bildirimler
  * message = secretKey + iyziEventType + iyziPaymentId + token + paymentConversationId + status
  */
+/** iyzico bazı bildirimlerde yalnızca `conversationId` gönderir; imza bu alanla da hesaplanabilir. */
+function paymentConversationIdForV3(body: Record<string, unknown>): string {
+  return String(body.paymentConversationId ?? body.conversationId ?? "");
+}
+
 function buildV3MessageDirect(
   secretKey: string,
   body: Record<string, unknown>
 ): string {
   const iyziEventType = String(body.iyziEventType ?? "");
   const paymentId = String(body.paymentId ?? body.iyziPaymentId ?? "");
-  const paymentConversationId = String(body.paymentConversationId ?? "");
+  const paymentConversationId = paymentConversationIdForV3(body);
   const status = String(body.status ?? "");
   return secretKey + iyziEventType + paymentId + paymentConversationId + status;
 }
@@ -30,7 +35,7 @@ function buildV3MessageHpp(
   const iyziEventType = String(body.iyziEventType ?? "");
   const iyziPaymentId = String(body.iyziPaymentId ?? "");
   const token = String(body.token ?? "");
-  const paymentConversationId = String(body.paymentConversationId ?? "");
+  const paymentConversationId = paymentConversationIdForV3(body);
   const status = String(body.status ?? "");
   return secretKey + iyziEventType + iyziPaymentId + token + paymentConversationId + status;
 }

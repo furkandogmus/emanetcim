@@ -6,6 +6,10 @@ import type { Metadata } from "next";
 import { alternatesForPath } from "@/lib/seo-alternates";
 import { getGuestStaticSeo } from "@/lib/guest-static-seo";
 import { getSiteBaseUrl } from "@/lib/site-urls";
+import {
+  isAppleOAuthConfigured,
+  isAuthDemoUiEnabled,
+} from "@/lib/auth-providers";
 
 export async function generateMetadata({
   params,
@@ -34,5 +38,10 @@ export default async function LoginPage({ params }: { params: Promise<{ locale: 
     redirect(`/${locale}/search`);
   }
 
-  return <LoginClient />;
+  return (
+    <LoginClient
+      showAppleSignIn={isAppleOAuthConfigured()}
+      showDemoShortcuts={isAuthDemoUiEnabled()}
+    />
+  );
 }

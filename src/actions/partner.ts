@@ -10,7 +10,8 @@ import type { SealAssignmentInput } from "@/services/SealService";
 import { normalizeTrGsm10 } from "@/lib/netgsm";
 import { getLocale } from "next-intl/server";
 import { sealService } from "@/services/SealService";
-import { BookingStatus } from "@prisma/client";
+import { BookingStatus, Prisma } from "@prisma/client";
+import { z } from "zod";
 
 function revalidatePartnerPaths() {
   revalidatePathAllLocales("/partner");
@@ -67,6 +68,7 @@ export async function getPartnerBookingPreviewAction(raw: string) {
     bagCountXl: booking.bagCountXl,
     totalBags: total,
     status: booking.status,
+    pendingBagRevision: booking.pendingBagRevision,
   };
 }
 
@@ -393,4 +395,104 @@ export async function reportFaultySealAction(serialNumber: number, shopId: strin
     const msg = err instanceof Error ? err.message : "Errors.generic";
     return { success: false as const, error: msg };
   }
+}
+
+const pendingBagRevisionBodySchema = z.object({
+  bookingId: z.string().uuid(),
+  bagCountS: z.number().int().min(0).max(500),
+  bagCountM: z.number().int().min(0).max(500),
+  bagCountXl: z.number().int().min(0).max(500),
+  extraAmount: z.number().min(0).max(1_000_000),
+});
+
+/**
+ * Gerçek valiz sayısı / boyutu rezervasyondan farklıysa kayıt (ek ücret tahsilatı ayrı süreç).
+ * PAID veya CHECKED_IN rezervasyonlarda güncellenebilir.
+ */
+export async function setPendingBagRevisionAction(raw: unknown) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false as const, error: "Errors.authRequired" };
+  }
+  if (session.user.role !== "PARTNER" && session.user.role !== "ADMIN") {
+    return { success: false as const, error: "Errors.notAuthorizedPartner" };
+  }
+
+  const parsed = pendingBagRevisionBodySchema.safeParse(raw);
+  if (!parsed.success) {
+    return { success: false as const, error: "Errors.invalidData" };
+  }
+  const { bookingId, bagCountS, bagCountM, bagCountXl, extraAmount } =
+    parsed.data;
+
+  const booking = await prisma.booking.findUnique({
+    where: { id: bookingId },
+    include: { shop: true },
+  });
+  if (!booking) {
+    return { success: false as const, error: "Errors.bookingNotFound" };
+  }
+  if (
+    session.user.role === "PARTNER" &&
+    booking.shop.ownerId !== session.user.id
+  ) {
+    return { success: false as const, error: "Errors.unauthorized" };
+  }
+  if (booking.status !== "PAID" && booking.status !== "CHECKED_IN") {
+    return { success: false as const, error: "Errors.invalidData" };
+  }
+
+  const total = bagCountS + bagCountM + bagCountXl;
+  if (total < 1) {
+    return { success: false as const, error: "Errors.invalidData" };
+  }
+
+  await prisma.booking.update({
+    where: { id: bookingId },
+    data: {
+      pendingBagRevision: {
+        bagCountS,
+        bagCountM,
+        bagCountXl,
+        extraAmount,
+        recordedAt: new Date().toISOString(),
+      } as Prisma.InputJsonValue,
+    },
+  });
+
+  revalidatePartnerPaths();
+  return { success: true as const };
+}
+
+/** Revizyon kaydını siler (misafir ek ücreti ödedikten / anlaşma sonrası). */
+export async function clearPendingBagRevisionAction(bookingId: string) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false as const, error: "Errors.authRequired" };
+  }
+  if (session.user.role !== "PARTNER" && session.user.role !== "ADMIN") {
+    return { success: false as const, error: "Errors.notAuthorizedPartner" };
+  }
+
+  const booking = await prisma.booking.findUnique({
+    where: { id: bookingId },
+    include: { shop: true },
+  });
+  if (!booking) {
+    return { success: false as const, error: "Errors.bookingNotFound" };
+  }
+  if (
+    session.user.role === "PARTNER" &&
+    booking.shop.ownerId !== session.user.id
+  ) {
+    return { success: false as const, error: "Errors.unauthorized" };
+  }
+
+  await prisma.booking.update({
+    where: { id: bookingId },
+    data: { pendingBagRevision: Prisma.JsonNull },
+  });
+
+  revalidatePartnerPaths();
+  return { success: true as const };
 }

@@ -7,7 +7,7 @@ import { useSearchParams } from 'next/navigation';
 import { useMemo, useState, useEffect } from 'react';
 import { sanitizeAuthCallbackUrl } from '@/lib/auth-callback-url';
 import { authErrorMessage } from '@/lib/auth-error-message';
-import { Package, ShieldCheck, Globe, Loader2, Store, Shield, Mail, Lock, ChevronDown } from 'lucide-react';
+import { Package, ShieldCheck, Globe, Loader2, Store, Shield, Mail, Lock, ChevronDown, Apple } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /** Seed ile aynı varsayılan; `NEXT_PUBLIC_DEMO_PASSWORD` ile yerelde override edilebilir. */
@@ -17,7 +17,15 @@ const DEMO_PASSWORD =
     ? process.env.NEXT_PUBLIC_DEMO_PASSWORD
     : "Demo123!";
 
-export default function LoginPage() {
+type LoginClientProps = {
+  showAppleSignIn?: boolean;
+  showDemoShortcuts?: boolean;
+};
+
+export default function LoginPage({
+  showAppleSignIn = false,
+  showDemoShortcuts = false,
+}: LoginClientProps) {
   const t = useTranslations('Auth');
   const searchParams = useSearchParams();
   const rawCallback = searchParams.get('callbackUrl');
@@ -130,16 +138,31 @@ export default function LoginPage() {
             <span className="font-bold text-gray-900">{t('continueWithGoogle')}</span>
           </button>
 
-          {/* Apple — yakında */}
-          <div className="relative">
-            <div className="w-full h-14 bg-gray-100 rounded-2xl flex items-center justify-center gap-3 cursor-not-allowed opacity-50 select-none">
-              <Package size={20} className="text-gray-400" />
-              <span className="font-bold text-gray-400">{t('continueWithApple')}</span>
+          {showAppleSignIn ? (
+            <button
+              type="button"
+              onClick={() => handleOAuth('apple')}
+              disabled={busy}
+              className="w-full h-14 bg-gray-900 border-2 border-gray-900 rounded-2xl flex items-center justify-center gap-3 hover:bg-black transition-all active:scale-95 group disabled:opacity-50"
+            >
+              {isLoggingIn === 'apple' ? (
+                <Loader2 size={20} className="animate-spin text-white" />
+              ) : (
+                <Apple size={20} className="text-white shrink-0" fill="currentColor" />
+              )}
+              <span className="font-bold text-white">{t('continueWithApple')}</span>
+            </button>
+          ) : (
+            <div className="relative">
+              <div className="w-full h-14 bg-gray-100 rounded-2xl flex items-center justify-center gap-3 cursor-not-allowed opacity-50 select-none">
+                <Package size={20} className="text-gray-400" />
+                <span className="font-bold text-gray-400">{t('continueWithApple')}</span>
+              </div>
+              <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full shadow">
+                {t('comingSoon')}
+              </span>
             </div>
-            <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full shadow">
-              {t('comingSoon')}
-            </span>
-          </div>
+          )}
 
           {/* Divider */}
           <div className="flex items-center gap-3 my-1">
@@ -235,8 +258,7 @@ export default function LoginPage() {
           </AnimatePresence>
         </div>
 
-        {/* Demo mod — sadece dev */}
-        {process.env.NODE_ENV !== "production" && (
+        {showDemoShortcuts && (
           <>
             <div className="w-full flex items-center gap-3 my-6">
               <div className="flex-1 h-px bg-gray-100" />
@@ -247,7 +269,13 @@ export default function LoginPage() {
             <div className="w-full grid grid-cols-1 sm:grid-cols-3 gap-3">
               <button
                 type="button"
-                onClick={() => signIn("credentials", { email: "misafir@test.com", password: DEMO_PASSWORD, callbackUrl: "/bookings" })}
+                onClick={() =>
+                  signIn("credentials", {
+                    emailOrPhone: "misafir@test.com",
+                    password: DEMO_PASSWORD,
+                    callbackUrl: "/bookings",
+                  })
+                }
                 className="group p-4 border border-green-50 rounded-2xl bg-green-50/30 hover:bg-green-50 transition-all flex flex-col items-center gap-2 text-center"
               >
                 <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform">
@@ -258,7 +286,13 @@ export default function LoginPage() {
 
               <button
                 type="button"
-                onClick={() => signIn("credentials", { email: "esnaf@test.com", password: DEMO_PASSWORD, callbackUrl: "/partner" })}
+                onClick={() =>
+                  signIn("credentials", {
+                    emailOrPhone: "esnaf@test.com",
+                    password: DEMO_PASSWORD,
+                    callbackUrl: "/partner",
+                  })
+                }
                 className="group p-4 border border-blue-50 rounded-2xl bg-blue-50/30 hover:bg-blue-50 transition-all flex flex-col items-center gap-2 text-center"
               >
                 <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
@@ -269,7 +303,13 @@ export default function LoginPage() {
 
               <button
                 type="button"
-                onClick={() => signIn("credentials", { email: "admin@test.com", password: DEMO_PASSWORD, callbackUrl: "/admin" })}
+                onClick={() =>
+                  signIn("credentials", {
+                    emailOrPhone: "admin@test.com",
+                    password: DEMO_PASSWORD,
+                    callbackUrl: "/admin",
+                  })
+                }
                 className="group p-4 border border-purple-50 rounded-2xl bg-purple-50/30 hover:bg-purple-50 transition-all flex flex-col items-center gap-2 text-center"
               >
                 <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform">

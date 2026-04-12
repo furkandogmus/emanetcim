@@ -40,6 +40,32 @@ describe("iyzico X-IYZ-SIGNATURE-V3 (Direct Format)", () => {
     vi.unstubAllEnvs();
   });
 
+  it("Direct: conversationId is accepted as paymentConversationId for signing", () => {
+    const secretKey = "skey";
+    const bodyWithConv = {
+      iyziEventType: "PAYMENT_API",
+      paymentId: "p1",
+      conversationId: "booking-uuid",
+      status: "SUCCESS",
+    };
+    const bodyWithPayConv = {
+      iyziEventType: "PAYMENT_API",
+      paymentId: "p1",
+      paymentConversationId: "booking-uuid",
+      status: "SUCCESS",
+    };
+    const hex = computeIyzicoWebhookSignatureV3Hex(bodyWithPayConv, secretKey);
+    const prev = process.env.IYZICO_SECRET_KEY;
+    process.env.IYZICO_SECRET_KEY = secretKey;
+    try {
+      expect(computeIyzicoWebhookSignatureV3Hex(bodyWithConv, secretKey)).toBe(hex);
+      expect(verifyIyzicoWebhookSignatureV3(bodyWithConv, hex)).toBe(true);
+    } finally {
+      if (prev === undefined) delete process.env.IYZICO_SECRET_KEY;
+      else process.env.IYZICO_SECRET_KEY = prev;
+    }
+  });
+
   it("HPP: uses token branch when token is non-empty", () => {
     const secretKey = "sec";
     const body = {

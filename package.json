@@ -1,6 +1,7 @@
 {
   "name": "bagajpark",
   "version": "0.1.0",
+  "description": "BagajPark (Emanetçi) — Turkey-focused luggage storage marketplace (Next.js, iyzico, partners & seals).",
   "private": true,
   "engines": {
     "node": ">=22.0.0"

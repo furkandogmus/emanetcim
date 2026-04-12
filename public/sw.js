@@ -1,6 +1,6 @@
 // BagajPark Service Worker — PWA ikon/manifest; sayfa ve Next.js iç yollarına müdahale etme.
 // (ngrok ara sayfası / RSC / OAuth için navigasyon ve _next cache'lenmez.)
-const CACHE_NAME = 'bagajpark-v6';
+const CACHE_NAME = 'bagajpark-v7';
 const ASSETS_TO_CACHE = [
   '/manifest.json',
   '/offline.html',

@@ -364,6 +364,7 @@
     "payBookingError_invalid_amount": "Invalid payment amount.",
     "payBookingError_stripe_no_client_secret": "Could not start checkout (Stripe).",
     "payBookingError_stripe_error": "Stripe error. Try again later.",
+    "payBookingError_rate_limited": "Too many payment attempts. Please wait before trying again.",
     "payBookingErrorUnknown": "Something went wrong. Try again or contact support.",
     "payBookingReturnSyncing": "Confirming your payment…",
     "payBookingReturnFailed": "We couldn’t confirm the payment. Check your booking status or try again."
