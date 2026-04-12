@@ -1,9 +1,15 @@
 {
   "name": "BagajPark Luggage Storage",
   "short_name": "BagajPark",
-  "description": "Valizini Güvenle Bırak, Özgürce Gez",
+  "description": "BagajPark (Emanetçi) — valizini güvenle bırak, özgürce gez.",
+  "lang": "tr",
+  "dir": "ltr",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "categories": ["travel", "business"],
   "background_color": "#ffffff",
   "theme_color": "#ea580c",
   "icons": [

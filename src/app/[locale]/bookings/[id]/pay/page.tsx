@@ -7,6 +7,8 @@ import { paymentService } from "@/services/PaymentService";
 import { isStripeGuestCheckoutEnabled } from "@/lib/stripe-checkout";
 import BookingStripePayClient from "@/components/guest/BookingStripePayClient";
 import { Link } from "@/i18n/routing";
+import { headers } from "next/headers";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function generateMetadata({
   params,
@@ -50,6 +52,32 @@ export default async function BookingPayPage({
 
   if (booking.status !== "APPROVED" && booking.status !== "PENDING") {
     redirect(`/${locale}/bookings/${id}`);
+  }
+
+  const hdrs = await headers();
+  const ip =
+    hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    hdrs.get("x-real-ip") ||
+    "unknown";
+  const guestId = session.user.id;
+  if (
+    !(await rateLimit(`stripe_pi_guest:${guestId}`, 40, 60 * 60 * 1000)) ||
+    !(await rateLimit(`stripe_pi_ip:${ip}`, 80, 60 * 60 * 1000))
+  ) {
+    const t = await getTranslations("Guest");
+    return (
+      <div className="mx-auto flex min-h-screen max-w-md flex-col gap-6 px-6 pt-28 pb-20">
+        <p className="text-sm font-bold text-red-600">
+          {t("payBookingError_rate_limited")}
+        </p>
+        <Link
+          href={`/bookings/${id}`}
+          className="text-center text-sm font-black uppercase tracking-widest text-orange-600 hover:underline"
+        >
+          {t("payBookingBack")}
+        </Link>
+      </div>
+    );
   }
 
   const intent = await paymentService.createStripePaymentIntentForGuestBooking({

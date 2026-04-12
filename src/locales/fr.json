@@ -364,6 +364,7 @@
     "payBookingError_invalid_amount": "Montant invalide.",
     "payBookingError_stripe_no_client_secret": "Impossible de démarrer le paiement (Stripe).",
     "payBookingError_stripe_error": "Erreur Stripe. Réessayez plus tard.",
+    "payBookingError_rate_limited": "Trop de tentatives de paiement. Veuillez patienter avant de réessayer.",
     "payBookingErrorUnknown": "Une erreur s’est produite. Réessayez ou contactez le support.",
     "payBookingReturnSyncing": "Confirmation du paiement…",
     "payBookingReturnFailed": "Le paiement n’a pas pu être confirmé. Vérifiez le statut ou réessayez."

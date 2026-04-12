@@ -364,6 +364,7 @@
     "payBookingError_invalid_amount": "Importe no válido.",
     "payBookingError_stripe_no_client_secret": "No se pudo iniciar el pago (Stripe).",
     "payBookingError_stripe_error": "Error de Stripe. Inténtalo más tarde.",
+    "payBookingError_rate_limited": "Demasiados intentos de pago. Espera un momento antes de volver a intentarlo.",
     "payBookingErrorUnknown": "Algo salió mal. Inténtalo de nuevo o contacta soporte.",
     "payBookingReturnSyncing": "Confirmando el pago…",
     "payBookingReturnFailed": "No se pudo confirmar el pago. Revisa el estado o inténtalo de nuevo."

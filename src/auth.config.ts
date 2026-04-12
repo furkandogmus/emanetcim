@@ -1,9 +1,11 @@
 import type { NextAuthConfig } from "next-auth";
+import Apple from "next-auth/providers/apple";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import { Role, User as PrismaUser } from "@prisma/client";
 import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
+import { isAppleOAuthConfigured } from "@/lib/auth-providers";
 
 const loginSchema = z.object({
   emailOrPhone: z.string().min(1, "Errors.invalidData"),
@@ -17,6 +19,15 @@ export const authConfig: NextAuthConfig = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       allowDangerousEmailAccountLinking: true,
     }),
+    ...(isAppleOAuthConfigured()
+      ? [
+          Apple({
+            clientId: process.env.APPLE_ID!,
+            clientSecret: process.env.APPLE_SECRET!,
+            allowDangerousEmailAccountLinking: true,
+          }),
+        ]
+      : []),
     Credentials({
       name: "credentials",
       credentials: {

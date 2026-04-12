@@ -380,8 +380,27 @@ export class BookingService implements IBookingService {
     try {
       const now = new Date();
 
-      // 1. Erken Teslimat İadesi Hesabı (UC_E_06_EXTRA)
       const pricingRules = await getPricingRules();
+
+      // Geç teslim alma: planlanan check-out + 15 dk sonrası → platform iptal sabit ücreti tutarında kayıt (tahsilat ayrı süreç)
+      const scheduledEnd = new Date(booking.checkOutTime);
+      const graceMs = 15 * 60 * 1000;
+      const lateMs = now.getTime() - scheduledEnd.getTime();
+      const lateFeeTry =
+        lateMs > graceMs ? pricingRules.cancelFixedFeeTry : 0;
+      if (lateFeeTry > 0) {
+        logger.info(
+          {
+            bookingId,
+            lateFeeTry,
+            scheduledEnd: scheduledEnd.toISOString(),
+            checkoutAt: now.toISOString(),
+          },
+          "booking_checkout_late_pickup_fee",
+        );
+      }
+
+      // 1. Erken Teslimat İadesi Hesabı (UC_E_06_EXTRA)
       const { pricingService } = await import('./PricingService');
       const refundAmount = pricingService.calculateEarlyRefund(
         booking,
@@ -415,6 +434,8 @@ export class BookingService implements IBookingService {
           data: {
             status: 'CHECKED_OUT',
             checkOutTime: now,
+            lateFeeApplied: new Prisma.Decimal(lateFeeTry),
+            pendingBagRevision: Prisma.JsonNull,
             updatedAt: now,
           },
         });

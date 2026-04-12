@@ -81,6 +81,14 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       images: [`${baseUrl.replace(/\/$/, "")}/icons/icon-512x512.png`],
     },
     manifest: "/manifest.json",
+    appleWebApp: {
+      capable: true,
+      title: "BagajPark",
+      statusBarStyle: "default",
+    },
+    formatDetection: {
+      telephone: false,
+    },
   };
 }
 
@@ -125,6 +133,7 @@ export default async function RootLayout({
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "BagajPark",
+    "alternateName": ["Emanetçi", "emanetcim"],
     "url": base,
     "logo": `${base}/icons/icon-512x512.png`,
     "areaServed": {
