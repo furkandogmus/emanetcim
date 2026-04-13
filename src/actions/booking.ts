@@ -61,6 +61,11 @@ export async function createBookingAction(data: CreateBookingInput) {
     return { success: false as const, error: "Errors.authRequired" };
   }
 
+  // Per-user rate limit (IP spoofing'e karşı ek koruma)
+  if (!(await rateLimit(`booking_create_user:${session.user.id}`, 5, 5 * 60 * 1000))) {
+    return { success: false as const, error: "Errors.tooManyRequests" };
+  }
+
   const pricingRules = await getPricingRules();
   const shop = await prisma.shop.findUnique({
     where: { id: data.shopId },
