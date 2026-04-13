@@ -117,7 +117,7 @@ services:
       IYZICO_WEBHOOK_REQUIRE_SIGNATURE: ${IYZICO_WEBHOOK_REQUIRE_SIGNATURE:-}
       CRON_SECRET: ${CRON_SECRET:-}
       # Upstash cloud credentials (öncelikli); boşsa local SRH proxy kullanılır
-      UPSTASH_REDIS_REST_URL: ${UPSTASH_REDIS_REST_URL:-http://srh:8079}
+      UPSTASH_REDIS_REST_URL: ${UPSTASH_REDIS_REST_URL:-http://srh:80}
       UPSTASH_REDIS_REST_TOKEN: ${UPSTASH_REDIS_REST_TOKEN:-${SRH_TOKEN:-bagajpark-srh-secret}}
       # Crisp canlı destek widget
       NEXT_PUBLIC_CRISP_WEBSITE_ID: ${NEXT_PUBLIC_CRISP_WEBSITE_ID:-}
