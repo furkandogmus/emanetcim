@@ -41,6 +41,7 @@ export type CreateBookingInput = {
     cvc: string;
   };
   couponCode?: string;
+  referralCode?: string;
 };
 
 /**
@@ -140,6 +141,24 @@ export async function createBookingAction(data: CreateBookingInput) {
     }
   }
 
+  // Referans kodu indirimi (kupon ile birlikte uygulanmaz, ikincisi işlenmez)
+  let referralDiscountAmount = 0;
+  let appliedReferralCode: string | undefined;
+  if (data.referralCode && !data.couponCode) {
+    const codeUpper = data.referralCode.trim().toUpperCase();
+    const referrer = await prisma.user.findUnique({
+      where: { referralCode: codeUpper },
+      select: { id: true },
+    });
+    // Kendi kodunu kullanamaz
+    if (referrer && referrer.id !== session.user.id) {
+      const discountPct = Number(process.env.REFERRAL_DISCOUNT_PCT ?? "5");
+      referralDiscountAmount = Math.round(totalPrice * (discountPct / 100) * 100) / 100;
+      totalPrice = Math.max(0, Math.round((totalPrice - referralDiscountAmount) * 100) / 100);
+      appliedReferralCode = codeUpper;
+    }
+  }
+
   let booking;
   try {
     booking = await bookingService.createInitialBooking({
@@ -153,6 +172,8 @@ export async function createBookingAction(data: CreateBookingInput) {
       checkOutTime: data.checkOutTime,
       unitPrice: authTotals.unitPrice,
       insuranceFee: authTotals.insuranceFee,
+      referralDiscountAmount,
+      referredByCode: appliedReferralCode,
     });
 
     // Durumu WAITING_APPROVAL yapıyoruz (Talep aşaması)

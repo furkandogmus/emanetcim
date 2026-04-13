@@ -2,7 +2,16 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { ArrowLeft, TrendingUp, Wallet, Receipt } from "lucide-react";
+import { ArrowLeft, TrendingUp, Wallet, Receipt, Clock, Star, BarChart3, RefreshCw } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+} from "recharts";
 
 interface Booking {
   id: string;
@@ -21,6 +30,11 @@ interface MonthSummary {
   count: number;
 }
 
+interface PeakHour {
+  hour: string;
+  count: number;
+}
+
 interface Props {
   shopName: string;
   merchantRatio: number;
@@ -28,6 +42,10 @@ interface Props {
   totalNet: number;
   monthly: MonthSummary[];
   bookings: Booking[];
+  peakHoursData: PeakHour[];
+  avgStayHours: number;
+  conversionRate: number;
+  avgRating: number;
 }
 
 function fmt(n: number) {
@@ -47,9 +65,16 @@ export default function PartnerEarningsClient({
   totalNet,
   monthly,
   bookings,
+  peakHoursData,
+  avgStayHours,
+  conversionRate,
+  avgRating,
 }: Props) {
   const t = useTranslations("Partner");
   const commissionPct = Math.round((1 - merchantRatio) * 100);
+
+  // Only show hours with any activity for cleaner chart
+  const activePeakHours = peakHoursData.filter((h) => h.count > 0);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -87,6 +112,27 @@ export default function PartnerEarningsClient({
           </div>
         </div>
 
+        {/* Analytics mini-stats */}
+        <div className="grid grid-cols-3 gap-3">
+          <div className="bg-white rounded-2xl p-3 border border-gray-100 shadow-sm text-center">
+            <Clock className="w-4 h-4 text-blue-400 mx-auto mb-1" />
+            <p className="text-lg font-black text-gray-900">{avgStayHours}s</p>
+            <p className="text-xs text-gray-400">Ort. Süre</p>
+          </div>
+          <div className="bg-white rounded-2xl p-3 border border-gray-100 shadow-sm text-center">
+            <RefreshCw className="w-4 h-4 text-purple-400 mx-auto mb-1" />
+            <p className="text-lg font-black text-gray-900">%{conversionRate}</p>
+            <p className="text-xs text-gray-400">Dönüşüm</p>
+          </div>
+          <div className="bg-white rounded-2xl p-3 border border-gray-100 shadow-sm text-center">
+            <Star className="w-4 h-4 text-amber-400 mx-auto mb-1" />
+            <p className="text-lg font-black text-gray-900">
+              {avgRating > 0 ? avgRating.toFixed(1) : "—"}
+            </p>
+            <p className="text-xs text-gray-400">Puan</p>
+          </div>
+        </div>
+
         {/* Commission info */}
         <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 flex items-start gap-3">
           <Receipt className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
@@ -102,6 +148,30 @@ export default function PartnerEarningsClient({
             <div className="px-4 py-3 border-b border-gray-100">
               <h2 className="font-bold text-gray-900">Aylık Özet</h2>
             </div>
+            <div className="px-4 pt-4 pb-2">
+              <ResponsiveContainer width="100%" height={160}>
+                <BarChart data={monthly.slice(0, 6).reverse()} barSize={28}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+                  <XAxis
+                    dataKey="month"
+                    tickFormatter={(v) => {
+                      const [, m] = v.split("-");
+                      return `${m}.ay`;
+                    }}
+                    tick={{ fontSize: 11, fill: "#9ca3af" }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis hide />
+                  <Tooltip
+                    formatter={(v) => [`${fmt(Number(v))} ₺`, "Net"]}
+                    labelFormatter={(l) => fmtMonth(l as string)}
+                    contentStyle={{ borderRadius: 12, border: "1px solid #e5e7eb", fontSize: 12 }}
+                  />
+                  <Bar dataKey="netTotal" fill="#10b981" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
             <div className="divide-y divide-gray-50">
               {monthly.map((m) => (
                 <div key={m.month} className="px-4 py-3 flex items-center justify-between">
@@ -115,6 +185,36 @@ export default function PartnerEarningsClient({
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Peak hours chart */}
+        {activePeakHours.length > 0 && (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-gray-400" />
+              <h2 className="font-bold text-gray-900">Check-in Saatleri</h2>
+            </div>
+            <div className="px-4 pt-4 pb-2">
+              <ResponsiveContainer width="100%" height={140}>
+                <BarChart data={peakHoursData} barSize={8}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+                  <XAxis
+                    dataKey="hour"
+                    tick={{ fontSize: 10, fill: "#9ca3af" }}
+                    axisLine={false}
+                    tickLine={false}
+                    interval={3}
+                  />
+                  <YAxis hide />
+                  <Tooltip
+                    formatter={(v) => [`${v} rezervasyon`, ""]}
+                    contentStyle={{ borderRadius: 12, border: "1px solid #e5e7eb", fontSize: 12 }}
+                  />
+                  <Bar dataKey="count" fill="#f97316" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
         )}
