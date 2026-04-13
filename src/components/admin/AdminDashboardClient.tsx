@@ -16,6 +16,7 @@ import {
   TrendingUp,
   Flag,
   UserCog,
+  Scale,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
@@ -247,6 +248,13 @@ export default function AdminDashboardClient({
                     {pendingRoleApprovals}
                   </span>
                 ) : null}
+              </Link>
+              <Link
+                href="/admin/disputes"
+                className="w-full py-4 px-6 bg-white/10 rounded-2xl text-sm font-bold hover:bg-white/20 transition-all text-left flex items-center gap-3"
+              >
+                <Scale size={18} className="opacity-40" />
+                {t("disputesNav")}
               </Link>
               <Link
                 href="/admin/messages"

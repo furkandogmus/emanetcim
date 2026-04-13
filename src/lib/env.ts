@@ -77,6 +77,15 @@ export function requireProdSecrets(): void {
       "AUTH_SECRET must be at least 32 characters in production",
     );
   }
+  const authLower = e.AUTH_SECRET.toLowerCase();
+  if (
+    authLower.includes("docker-dev-change-me") ||
+    authLower.includes("change-me-use-openssl")
+  ) {
+    throw new Error(
+      "AUTH_SECRET must not use the default docker-compose placeholder in production",
+    );
+  }
   if (!e.DATABASE_URL?.trim()) {
     throw new Error("DATABASE_URL is required in production");
   }

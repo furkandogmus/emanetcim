@@ -15,6 +15,7 @@ import {
   isPrismaForeignKeyViolation,
   isPrismaUniqueViolation,
 } from "@/lib/prisma-errors";
+import { DELETE_USER_BLOCKED_CODE } from "@/lib/admin/constants";
 
 /**
  * Admin koruması sağlayan yardımcı fonksiyon
@@ -352,9 +353,6 @@ export async function cancelAdminRoleChangeAction(
   revalidatePathAllLocales("/admin");
   return { ok: true };
 }
-
-/** İstemci: AdminUsersClient toast eşlemesi */
-export const DELETE_USER_BLOCKED_CODE = "ADMIN_DELETE_USER_HAS_RELATIONS";
 
 export type DeleteUserActionResult =
   | { ok: true }

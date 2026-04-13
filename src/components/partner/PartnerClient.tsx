@@ -737,12 +737,20 @@ export default function PartnerClient({
             {t("partnerPanelActive")}
           </p>
         </div>
-        <Link
-          href="/partner/bookings"
-          className="text-[10px] font-black uppercase tracking-widest text-orange-600 hover:text-orange-700 whitespace-nowrap pt-2"
-        >
-          {t("listCalendar")}
-        </Link>
+        <div className="flex flex-col items-end gap-2 pt-2">
+          <Link
+            href="/partner/earnings"
+            className="text-[10px] font-black uppercase tracking-widest text-orange-600 hover:text-orange-700 whitespace-nowrap"
+          >
+            {t("earnings")}
+          </Link>
+          <Link
+            href="/partner/bookings"
+            className="text-[10px] font-black uppercase tracking-widest text-orange-600 hover:text-orange-700 whitespace-nowrap"
+          >
+            {t("listCalendar")}
+          </Link>
+        </div>
       </header>
 
       {activeTab === "PANEL" && (

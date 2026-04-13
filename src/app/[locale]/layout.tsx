@@ -15,6 +15,7 @@ import Footer from "@/components/layout/Footer";
 import MobileNav from "@/components/layout/MobileNav";
 import CookieConsent from "@/components/CookieConsent";
 import ConsentAwareAnalytics from "@/components/ConsentAwareAnalytics";
+import SentryClientInit from "@/components/SentryClientInit";
 import VerificationBanner from "@/components/layout/VerificationBanner";
 
 const geistSans = Geist({
@@ -178,6 +179,7 @@ export default async function RootLayout({
             <PWAInstallBanner />
             <MobileNav />
             <CookieConsent />
+            <SentryClientInit />
             <ConsentAwareAnalytics />
           </Providers>
         </NextIntlClientProvider>

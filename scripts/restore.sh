@@ -55,7 +55,7 @@ compose() {
 }
 
 if [[ "${FORCE:-0}" != "1" ]]; then
-  echo "DİKKAT: Bu işlem mevcut 'emanetci' veritabanını yedekteki içerikle değiştirir."
+  echo "DİKKAT: Bu işlem mevcut Postgres veritabanını (compose POSTGRES_DB) yedekteki içerikle değiştirir."
   echo "Yedek: $BACKUP_FILE"
   read -r -p "Devam etmek istiyor musunuz? [y/N] " reply
   if [[ ! "${reply:-}" =~ ^[yY]$ ]]; then
@@ -66,21 +66,14 @@ fi
 
 echo "==> postgres çalışıyor mu kontrol"
 compose up -d postgres
-compose exec postgres pg_isready -U emanetci -d emanetci
+compose exec postgres sh -c 'pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
 
 echo "==> web durduruluyor (bağlantı çakışmasını önlemek için)"
 compose stop web || true
 
 echo "==> pg_restore (stdin)"
-cat "$BACKUP_FILE" | compose exec -T postgres pg_restore \
-  -U emanetci \
-  -d emanetci \
-  --clean \
-  --if-exists \
-  --no-owner \
-  --no-acl \
-  --verbose \
-  -
+cat "$BACKUP_FILE" | compose exec -T postgres sh -c \
+  'pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" --clean --if-exists --no-owner --no-acl --verbose -' \
 
 echo "==> web başlatılıyor"
 compose up -d web
