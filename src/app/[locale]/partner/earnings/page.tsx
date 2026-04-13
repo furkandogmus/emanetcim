@@ -22,29 +22,32 @@ export default async function PartnerEarningsPage({
 
   const shop = await prisma.shop.findFirst({
     where: { ownerId: session.user.id },
-    select: { id: true, name: true },
+    select: { id: true, name: true, rating: true },
   });
 
   if (!shop) {
     redirect(`/${locale}/partner`);
   }
 
-  const bookings = await prisma.booking.findMany({
-    where: {
-      shopId: shop.id,
-      status: { in: ["PAID", "CHECKED_IN", "CHECKED_OUT"] },
-    },
-    select: {
-      id: true,
-      totalPrice: true,
-      checkInTime: true,
-      checkOutTime: true,
-      status: true,
-      createdAt: true,
-      guest: { select: { name: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const [bookings, allRequests] = await Promise.all([
+    prisma.booking.findMany({
+      where: {
+        shopId: shop.id,
+        status: { in: ["PAID", "CHECKED_IN", "CHECKED_OUT"] },
+      },
+      select: {
+        id: true,
+        totalPrice: true,
+        checkInTime: true,
+        checkOutTime: true,
+        status: true,
+        createdAt: true,
+        guest: { select: { name: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.booking.count({ where: { shopId: shop.id } }),
+  ]);
 
   const merchantRatio = getMerchantShareRatio();
 
@@ -75,6 +78,31 @@ export default async function PartnerEarningsPage({
   );
   const totalNet = Math.round(totalGross * merchantRatio * 100) / 100;
 
+  // Peak hours: group check-in hours (0-23)
+  const peakHours: Record<number, number> = {};
+  for (const b of bookings) {
+    const h = new Date(b.checkInTime).getHours();
+    peakHours[h] = (peakHours[h] ?? 0) + 1;
+  }
+  const peakHoursData = Array.from({ length: 24 }, (_, h) => ({
+    hour: `${String(h).padStart(2, "0")}:00`,
+    count: peakHours[h] ?? 0,
+  }));
+
+  // Avg stay duration (hours)
+  const avgStayHours =
+    bookings.length > 0
+      ? Math.round(
+          bookings.reduce((s, b) => {
+            const ms = new Date(b.checkOutTime).getTime() - new Date(b.checkInTime).getTime();
+            return s + ms / 3_600_000;
+          }, 0) / bookings.length
+        )
+      : 0;
+
+  // Conversion rate: paid bookings / all requests
+  const conversionRate = allRequests > 0 ? Math.round((bookings.length / allRequests) * 100) : 0;
+
   const serializedBookings = bookings.map((b) => ({
     ...b,
     totalPrice: moneyToNumber(b.totalPrice),
@@ -91,6 +119,10 @@ export default async function PartnerEarningsPage({
       totalNet={totalNet}
       monthly={monthly}
       bookings={serializedBookings}
+      peakHoursData={peakHoursData}
+      avgStayHours={avgStayHours}
+      conversionRate={conversionRate}
+      avgRating={shop.rating ?? 0}
     />
   );
 }

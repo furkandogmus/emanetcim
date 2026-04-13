@@ -12,6 +12,8 @@ export type CreateInitialBookingInput = {
   checkOutTime: Date;
   unitPrice?: number;
   insuranceFee?: number;
+  referralDiscountAmount?: number;
+  referredByCode?: string;
 };
 
 export type ModifyBookingInput = {
@@ -146,12 +148,19 @@ export class BookingService implements IBookingService {
           undefined
         );
 
+        const referralDiscountAmount =
+          typeof data.referralDiscountAmount === 'number' && Number.isFinite(data.referralDiscountAmount)
+            ? Math.max(0, data.referralDiscountAmount)
+            : 0;
+
         const booking = await tx.booking.create({
           data: {
             guestId: data.guestId,
             shopId: data.shopId,
             totalPrice: data.totalPrice,
             insuranceFee,
+            referralDiscountAmount,
+            referredByCode: data.referredByCode ?? null,
             bagCountS: data.bagCountS,
             bagCountM: data.bagCountM,
             bagCountXl: data.bagCountXl,

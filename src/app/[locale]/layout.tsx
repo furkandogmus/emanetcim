@@ -15,6 +15,7 @@ import Footer from "@/components/layout/Footer";
 import MobileNav from "@/components/layout/MobileNav";
 import CookieConsent from "@/components/CookieConsent";
 import ConsentAwareAnalytics from "@/components/ConsentAwareAnalytics";
+import CrispChat from "@/components/CrispChat";
 import SentryClientInit from "@/components/SentryClientInit";
 import VerificationBanner from "@/components/layout/VerificationBanner";
 
@@ -181,6 +182,7 @@ export default async function RootLayout({
             <CookieConsent />
             <SentryClientInit />
             <ConsentAwareAnalytics />
+            <CrispChat />
           </Providers>
         </NextIntlClientProvider>
       </body>

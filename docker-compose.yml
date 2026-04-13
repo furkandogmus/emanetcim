@@ -1,4 +1,47 @@
 services:
+  redis:
+    image: redis:7-alpine
+    command: redis-server --save "" --appendonly no --maxmemory 64mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+    deploy:
+      resources:
+        limits:
+          memory: 96m
+        reservations:
+          memory: 16m
+
+  # Upstash-compatible Redis REST proxy (serverless-redis-http)
+  # @upstash/redis client'ı bu proxy üzerinden local Redis'e bağlanır.
+  srh:
+    image: hiett/serverless-redis-http:latest
+    environment:
+      SRH_MODE: env
+      SRH_TOKEN: ${SRH_TOKEN:-bagajpark-srh-secret}
+      SRH_CONNECTION_STRING: "redis://redis:6379"
+    depends_on:
+      redis:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+        reservations:
+          memory: 8m
+
   postgres:
     image: postgis/postgis:16-3.4-alpine
     environment:
@@ -73,8 +116,19 @@ services:
       IYZICO_WEBHOOK_SECRET: ${IYZICO_WEBHOOK_SECRET:-}
       IYZICO_WEBHOOK_REQUIRE_SIGNATURE: ${IYZICO_WEBHOOK_REQUIRE_SIGNATURE:-}
       CRON_SECRET: ${CRON_SECRET:-}
-      UPSTASH_REDIS_REST_URL: ${UPSTASH_REDIS_REST_URL:-}
-      UPSTASH_REDIS_REST_TOKEN: ${UPSTASH_REDIS_REST_TOKEN:-}
+      # Upstash cloud credentials (öncelikli); boşsa local SRH proxy kullanılır
+      UPSTASH_REDIS_REST_URL: ${UPSTASH_REDIS_REST_URL:-http://srh:8079}
+      UPSTASH_REDIS_REST_TOKEN: ${UPSTASH_REDIS_REST_TOKEN:-${SRH_TOKEN:-bagajpark-srh-secret}}
+      # Crisp canlı destek widget
+      NEXT_PUBLIC_CRISP_WEBSITE_ID: ${NEXT_PUBLIC_CRISP_WEBSITE_ID:-}
+      # Stripe Connect
+      STRIPE_CLIENT_ID: ${STRIPE_CLIENT_ID:-}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:-}
+      STRIPE_WEBHOOK_SIGNING_SECRET: ${STRIPE_WEBHOOK_SIGNING_SECRET:-}
+      # Referans sistemi
+      REFERRAL_DISCOUNT_PCT: ${REFERRAL_DISCOUNT_PCT:-5}
+      NEXT_PUBLIC_REFERRAL_DISCOUNT_PCT: ${NEXT_PUBLIC_REFERRAL_DISCOUNT_PCT:-5}
       SENTRY_DSN: ${SENTRY_DSN:-}
       NEXT_PUBLIC_SENTRY_DSN: ${NEXT_PUBLIC_SENTRY_DSN:-}
       SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-}
@@ -90,6 +144,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      srh:
+        condition: service_started
     healthcheck:
       test:
         [

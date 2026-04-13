@@ -62,6 +62,8 @@ model User {
   passwordHash  String?
   isBanned      Boolean   @default(false)
   lastIp        String?
+  /// Referans kodu: misafire verilebilir, yeni rezervasyonda indirim sağlar
+  referralCode  String?   @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -193,6 +195,10 @@ model Booking {
   totalPrice Decimal @db.Decimal(12, 2) @default(0)
   /// Sigorta / güvence ücreti (iptal ve erken iade hesaplarında hariç tutulur)
   insuranceFee Decimal @db.Decimal(12, 2) @default(0)
+  /// Referans kodu ile uygulanan indirim miktarı (TRY)
+  referralDiscountAmount Decimal @db.Decimal(12, 2) @default(0)
+  /// Rezervasyonda kullanılan referans kodu (varsa)
+  referredByCode String?
 
   qrCodeToken  String? @unique // Güvenli şifrelenmiş QR verisi
   sealPhotoUrl String? // Esnafın çekmek zorunda olduğu mühür fotoğrafı
