@@ -255,3 +255,52 @@ export async function toggleCampaignActiveAction(id: string, isActive: boolean) 
   revalidatePathAllLocales("/admin/campaigns");
   return { success: true as const };
 }
+
+const VALID_CHARGEBACK_STATUSES = ["OPEN", "WON", "LOST"] as const;
+type ChargebackStatus = (typeof VALID_CHARGEBACK_STATUSES)[number];
+
+/**
+ * Admin: ödeme işlemi için chargeback durumunu günceller.
+ * chargebackStatus: OPEN | WON | LOST
+ */
+export async function updateChargebackAction(params: {
+  bookingId: string;
+  chargebackStatus: ChargebackStatus;
+  chargebackNote?: string;
+}) {
+  const session = await auth();
+  if (session?.user?.role !== "ADMIN") throw new Error("Unauthorized");
+
+  if (!VALID_CHARGEBACK_STATUSES.includes(params.chargebackStatus)) {
+    return { success: false as const, error: "invalid_status" };
+  }
+
+  const updated = await prisma.paymentLog.updateMany({
+    where: { bookingId: params.bookingId },
+    data: {
+      chargebackStatus: params.chargebackStatus,
+      chargebackNote: params.chargebackNote?.trim() ?? null,
+    },
+  });
+
+  if (updated.count === 0) {
+    return { success: false as const, error: "payment_log_not_found" };
+  }
+
+  const h = await headers();
+  writeAuditLog({
+    actorUserId: session.user.id ?? null,
+    actorRole: session.user.role ?? "ADMIN",
+    action: "chargeback.update",
+    entityType: "PaymentLog",
+    entityId: params.bookingId,
+    metadata: { chargebackStatus: params.chargebackStatus },
+    ip:
+      h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      h.get("x-real-ip") ||
+      null,
+  });
+
+  revalidatePathAllLocales("/admin/disputes");
+  return { success: true as const };
+}

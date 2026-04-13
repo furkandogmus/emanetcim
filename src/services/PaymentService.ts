@@ -11,6 +11,8 @@ import { getPaymentGateway, isStripePaymentIntentId } from '@/lib/payment-gatewa
 import { tryAmountToStripeMinorUnits } from '@/lib/currency';
 import { assertStripeKeys, getStripe } from '@/lib/stripe';
 import { recordMetric } from '@/lib/metrics';
+import { computeSubMerchantShare } from '@/lib/platform-split';
+import { notificationService } from '@/services/NotificationService';
 
 const IYZICO_OP_TIMEOUT_MS = Number(process.env.IYZICO_HTTP_TIMEOUT_MS) || 45_000;
 
@@ -332,12 +334,38 @@ export class PaymentService implements IPaymentService {
 
       assertStripeKeys();
       const stripe = getStripe();
-      const pi = await stripe.paymentIntents.create({
+
+      // Stripe Connect: subMerchantPrice üzerinden platform komisyonu hesapla.
+      // shop.stripeAccountId yoksa Stripe Connect kullanılmaz (iyzico'ya geç veya Shop'a alan ekle).
+      const bookingForShop = await prisma.booking.findUnique({
+        where: { id: data.bookingId },
+        select: { shopId: true },
+      }).catch(() => null);
+      const shop = bookingForShop?.shopId
+        ? await prisma.shop.findUnique({
+            where: { id: bookingForShop.shopId },
+            select: { stripeAccountId: true },
+          }).catch(() => null)
+        : null;
+
+      const subMerchantPrice = computeSubMerchantShare(data.totalPrice);
+      const platformFee = Math.round((data.totalPrice - subMerchantPrice) * 100); // kuruş
+
+      const piParams: Parameters<typeof stripe.paymentIntents.create>[0] = {
         amount: tryAmountToStripeMinorUnits(data.totalPrice),
         currency: "try",
         metadata: { bookingId: data.bookingId },
         automatic_payment_methods: { enabled: true },
-      });
+      };
+
+      if (shop?.stripeAccountId) {
+        piParams.application_fee_amount = platformFee;
+        piParams.transfer_data = { destination: shop.stripeAccountId };
+      } else {
+        logger.warn({ bookingId: data.bookingId }, "stripe_connect_skipped_no_stripe_account_id");
+      }
+
+      const pi = await stripe.paymentIntents.create(piParams);
 
       return {
         status: "requires_confirmation",
@@ -374,6 +402,11 @@ export class PaymentService implements IPaymentService {
     }
 
     try {
+      const fullBooking = await prisma.booking.findUnique({
+        where: { id: bookingId },
+        include: { guest: true, shop: { include: { owner: true } } },
+      });
+
       await prisma.$transaction([
         prisma.booking.update({
           where: { id: bookingId },
@@ -391,6 +424,25 @@ export class PaymentService implements IPaymentService {
           },
         }),
       ]);
+
+      // Webhook yoluyla ödeme onaylandığında bildirimleri gönder
+      if (fullBooking) {
+        const guestEmail = fullBooking.guest?.email;
+        const totalPrice = moneyToNumber(fullBooking.totalPrice);
+        if (guestEmail) {
+          void notificationService
+            .notifyBookingSuccess(guestEmail, bookingId, totalPrice)
+            .catch((e) => logger.warn({ err: e, bookingId }, "webhook_notify_guest_email_failed"));
+        }
+        void notificationService
+          .notifyPartnerAndAdminsForNewPaidBooking({
+            bookingId,
+            shopName: fullBooking.shop?.name ?? "Dükkan",
+            partnerPhone: fullBooking.shop?.owner?.phone,
+            totalPrice,
+          })
+          .catch((e) => logger.warn({ err: e, bookingId }, "webhook_notify_partner_sms_failed"));
+      }
 
       logger.info({ bookingId }, "payment_webhook_confirmed");
       return { success: true, message: "Confirmed" };
@@ -581,7 +633,7 @@ export class PaymentService implements IPaymentService {
         status: { in: ['PENDING', 'APPROVED'] },
         paymentLogs: { some: { status: 'SUCCESS' } },
       },
-      select: { id: true },
+      include: { guest: true, shop: { include: { owner: true } } },
     });
     const bookingIds: string[] = [];
     for (const b of stuck) {
@@ -591,6 +643,23 @@ export class PaymentService implements IPaymentService {
       });
       bookingIds.push(b.id);
       logger.info({ bookingId: b.id }, 'finance_reconcile_pending_or_approved_to_paid');
+
+      // Bildirim: misafir ve esnaf geç de olsa haberdar edilsin
+      const guestEmail = b.guest?.email;
+      const totalPrice = moneyToNumber(b.totalPrice);
+      if (guestEmail) {
+        void notificationService
+          .notifyBookingSuccess(guestEmail, b.id, totalPrice)
+          .catch((e) => logger.warn({ err: e, bookingId: b.id }, 'reconcile_notify_guest_failed'));
+      }
+      void notificationService
+        .notifyPartnerAndAdminsForNewPaidBooking({
+          bookingId: b.id,
+          shopName: b.shop?.name ?? 'Dükkan',
+          partnerPhone: b.shop?.owner?.phone,
+          totalPrice,
+        })
+        .catch((e) => logger.warn({ err: e, bookingId: b.id }, 'reconcile_notify_partner_failed'));
     }
     recordMetric('reconcile_payments_complete', {
       fixed: stuck.length,

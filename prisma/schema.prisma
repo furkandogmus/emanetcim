@@ -153,6 +153,9 @@ model Shop {
   subMerchantKey  String? @unique
   subMerchantType String? // PERSONAL, PRIVATE_COMPANY, LIMITED_OR_JOINT_STOCK_COMPANY
 
+  // Stripe Connect (EU ödemeleri için)
+  stripeAccountId String? @unique // Stripe Connect connected account ID
+
   // Çalışma Saatleri (Örn: "09:00", "20:00")
   openingTime String? @default("09:00")
   closingTime String? @default("20:00")
