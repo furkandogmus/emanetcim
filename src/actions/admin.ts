@@ -19,6 +19,7 @@ function revalidateAdmin() {
   revalidatePathAllLocales("/admin/platform-settings");
   revalidatePathAllLocales("/admin/feature-flags");
   revalidatePathAllLocales("/admin/role-approvals");
+  revalidatePathAllLocales("/admin/disputes");
 }
 
 const platformSettingsUpdateSchema = z.object({

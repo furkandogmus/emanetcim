@@ -39,13 +39,9 @@ compose() {
 
 mkdir -p "$BACKUP_DIR"
 
-echo "==> postgres: $NAME.dump (özel format, pg_restore ile uyumlu)"
-compose exec -T postgres pg_dump \
-  -U emanetci \
-  -d emanetci \
-  -Fc \
-  --no-owner \
-  --no-acl \
+echo "==> postgres: $NAME.dump (konteyner içi POSTGRES_USER / POSTGRES_DB ile)"
+compose exec -T postgres sh -c \
+  'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc --no-owner --no-acl' \
   >"$BACKUP_DIR/${NAME}.dump"
 
 echo "==> boyut: $(du -h "$BACKUP_DIR/${NAME}.dump" | cut -f1)"

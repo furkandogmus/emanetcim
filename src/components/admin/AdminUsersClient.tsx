@@ -24,8 +24,8 @@ import {
   resendVerificationEmailAction,
   blockIpAction,
   submitAdminRoleChangeAction,
-  DELETE_USER_BLOCKED_CODE,
 } from "@/actions/admin-management";
+import { DELETE_USER_BLOCKED_CODE } from "@/lib/admin/constants";
 import { toast } from "sonner";
 import { Role } from "@prisma/client";
 

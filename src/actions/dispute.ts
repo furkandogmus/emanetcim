@@ -4,6 +4,14 @@ import { auth } from "@/auth";
 import prisma from "@/lib/db";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { notificationService } from "@/services/NotificationService";
+import { z } from "zod";
+
+const disputeStatusSchema = z.enum([
+  "OPEN",
+  "IN_REVIEW",
+  "RESOLVED",
+  "CLOSED",
+]);
 
 export async function createDisputeAction(input: {
   bookingId: string;
@@ -50,6 +58,7 @@ export async function createDisputeAction(input: {
 
   revalidatePathAllLocales("/bookings");
   revalidatePathAllLocales("/admin");
+  revalidatePathAllLocales("/admin/disputes");
   return { success: true as const };
 }
 
@@ -62,12 +71,17 @@ export async function updateDisputeStatusAction(
   if (session?.user?.role !== "ADMIN") {
     return { success: false as const, error: "Errors.unauthorized" };
   }
+  const parsed = disputeStatusSchema.safeParse(status);
+  if (!parsed.success) {
+    return { success: false as const, error: "Errors.invalidData" };
+  }
 
   await prisma.dispute.update({
     where: { id: disputeId },
-    data: { status, adminNote: adminNote ?? undefined },
+    data: { status: parsed.data, adminNote: adminNote?.trim() || null },
   });
   revalidatePathAllLocales("/admin");
+  revalidatePathAllLocales("/admin/disputes");
   revalidatePathAllLocales("/bookings");
   return { success: true as const };
 }
