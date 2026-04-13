@@ -5,6 +5,8 @@ import { moneyToNumber } from '@/lib/money';
 import { getActiveShopsOrderedByDistanceKm } from '@/lib/shop-distance-postgis';
 import { totalBagCount } from '@/lib/bag-pricing';
 import { isShopOpenAt } from '@/lib/shop-hours';
+import { notificationService } from '@/services/NotificationService';
+import logger from '@/lib/logger';
 
 export type ShopWithDistance = Omit<Shop, 'pricePerDay'> & {
   pricePerDay: number;
@@ -229,7 +231,7 @@ export class ShopService implements IShopService {
     try {
       const shop = await prisma.shop.findUnique({
         where: { id: shopId },
-        select: { ownerId: true },
+        include: { owner: true },
       });
       if (!shop) return false;
 
@@ -249,9 +251,36 @@ export class ShopService implements IShopService {
           data: { emailVerified: new Date() },
         });
       });
+
+      // Partner'a onay bildirimi gönder
+      const partnerEmail = shop.owner?.email;
+      const partnerPhone = shop.owner?.phone;
+      const domain = process.env.NEXT_PUBLIC_APP_URL || 'https://bagajpark.com';
+      if (partnerEmail) {
+        void notificationService.sendEmail(
+          partnerEmail,
+          'BagajPark: Başvurunuz Onaylandı! 🎉',
+          `Merhaba ${shop.owner?.name ?? 'Esnaf'},\n\n${shop.name} mağazanız BagajPark platformuna kabul edildi!\n\nHemen giriş yaparak rezervasyonları yönetebilirsiniz:\n${domain}/tr/partner`,
+          undefined,
+          `<div style=”font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px”>
+            <h2 style=”color:#ea580c”>Başvurunuz Onaylandı! 🎉</h2>
+            <p>Merhaba <strong>${shop.owner?.name ?? 'Esnaf'}</strong>,</p>
+            <p><strong>${shop.name}</strong> mağazanız BagajPark platformuna kabul edildi. Artık rezervasyon almaya başlayabilirsiniz!</p>
+            <a href=”${domain}/tr/partner” style=”display:inline-block;background:#ea580c;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;margin:16px 0”>Partner Panelime Git</a>
+            <p style=”font-size:13px;color:#6b7280;margin-top:24px”>BagajPark — Güvenli Bagaj Emaneti</p>
+          </div>`
+        ).catch((e) => logger.warn({ err: e, shopId }, 'shop_approval_email_failed'));
+      }
+      if (partnerPhone) {
+        void notificationService.sendSms(
+          partnerPhone,
+          `BagajPark: ${shop.name} mağazanız onaylandı! Hemen giriş yapın: ${domain}/tr/partner`
+        ).catch((e) => logger.warn({ err: e, shopId }, 'shop_approval_sms_failed'));
+      }
+
       return true;
     } catch (error) {
-      console.error('ShopService::approveShop Error:', error);
+      logger.error({ err: error, shopId }, 'ShopService::approveShop error');
       return false;
     }
   }
