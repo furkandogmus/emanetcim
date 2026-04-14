@@ -95,7 +95,7 @@ export default async function PartnerSettingsPage({
           <section className="bg-white rounded-2xl border border-gray-100 p-6">
             <h2 className="text-base font-bold text-gray-900 mb-1">Stripe Ödemeleri (Avrupa)</h2>
             <p className="text-sm text-gray-500 mb-4">
-              Avrupa'daki misafirlerden ödeme alabilmek için Stripe hesabınızı bağlayın.
+              Avrupa&apos;daki misafirlerden ödeme alabilmek için Stripe hesabınızı bağlayın.
             </p>
 
             {stripeConnectedNow && (
@@ -118,6 +118,7 @@ export default async function PartnerSettingsPage({
                 <span className="ml-auto text-gray-400 font-mono text-xs">{shop.stripeAccountId}</span>
               </div>
             ) : (
+              // eslint-disable-next-line @next/next/no-html-link-for-pages
               <a
                 href="/api/stripe/connect/authorize"
                 className="inline-flex items-center gap-2 bg-[#635BFF] text-white font-semibold text-sm px-4 py-2 rounded-lg hover:bg-[#4f47e3] transition-colors"
