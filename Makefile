@@ -1,4 +1,4 @@
-.PHONY: help dev build test lint typecheck migrate seed logs deploy status clean backup reconcile
+.PHONY: help dev build test lint typecheck migrate seed logs deploy status clean backup reconcile seal-forecast
 
 # Varsayılan hedef
 help:
@@ -140,3 +140,12 @@ tail-logs:
 
 health:
 	@curl -sf $(APP_URL)/api/health/live | python3 -m json.tool
+
+seal-forecast:
+	@CRON_SECRET=$$(ssh $(SSH_HOST) -p $(SSH_PORT) "grep CRON_SECRET /root/emanetci/.env | cut -d= -f2-" 2>/dev/null); \
+	if [ -z "$$CRON_SECRET" ]; then \
+		echo "❌ CRON_SECRET alınamadı"; exit 1; \
+	fi; \
+	echo "→ Mühür stok tahmini tetikleniyor..."; \
+	curl -sf -X POST $(APP_URL)/api/internal/seal-forecast \
+		-H "Authorization: Bearer $$CRON_SECRET" | python3 -m json.tool

@@ -96,6 +96,13 @@ export default async function AdminSealsPage({ params }: { params: Promise<{ loc
                </div>
                {req.status === 'PENDING' ? (
                  <SealShipButton requestId={req.id} />
+               ) : req.status === 'SHIPPED' ? (
+                 <div className="flex flex-col items-end gap-1">
+                   <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Kargoda</span>
+                   {req.trackingNumber && (
+                     <span className="text-xs font-mono text-gray-500">{req.trackingNumber}</span>
+                   )}
+                 </div>
                ) : (
                  <div className="text-green-500">
                    <CheckCircle2 size={20} />

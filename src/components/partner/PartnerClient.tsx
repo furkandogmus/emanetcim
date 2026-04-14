@@ -750,6 +750,12 @@ export default function PartnerClient({
           >
             {t("listCalendar")}
           </Link>
+          <Link
+            href="/partner/seals"
+            className="text-[10px] font-black uppercase tracking-widest text-orange-600 hover:text-orange-700 whitespace-nowrap"
+          >
+            Mühürler
+          </Link>
         </div>
       </header>
 
