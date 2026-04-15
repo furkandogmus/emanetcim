@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { ShieldCheck, CircleCheck, Wrench, SearchCheck } from "lucide-react";
+import { alternatesForPath } from "@/lib/seo-alternates";
+import { buildFaqJsonLd } from "@/lib/faq-json-ld";
 
 const copy = {
   tr: {
@@ -86,6 +88,17 @@ export async function generateMetadata({
   return {
     title: c.title,
     description: c.subtitle,
+    alternates: alternatesForPath(locale, "/insurance"),
+    openGraph: {
+      title: c.title,
+      description: c.subtitle,
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: c.title,
+      description: c.subtitle,
+    },
   };
 }
 
@@ -97,9 +110,54 @@ export default async function InsurancePage({
   const { locale } = await params;
   setRequestLocale(locale);
   const c = byLocale(locale);
+  const faqItems =
+    locale === "tr"
+      ? [
+          {
+            question: "Bagaj güvencesi hangi durumda devreye girer?",
+            answer:
+              "Platform kurallarında belirtilen şartlar karşılandığında, doğrulama süreci sonrası ilgili koruma akışı uygulanır.",
+          },
+          {
+            question: "Olay bildirimini nasıl yaparım?",
+            answer:
+              "Rezervasyon detayındaki şikayet/dispute akışını başlatarak fotoğraf, mühür bilgisi ve açıklama ekleyebilirsiniz.",
+          },
+          {
+            question: "Koruma tutarı nasıl belirlenir?",
+            answer:
+              "Uygun olaylarda değerlendirme sonucu çanta başına tanımlı üst limit dahilinde işlem yapılır.",
+          },
+        ]
+      : [
+          {
+            question: "When does storage protection apply?",
+            answer:
+              "Protection flow applies when eligibility criteria in platform terms are met and verification is completed.",
+          },
+          {
+            question: "How can I report an incident?",
+            answer:
+              "Open a dispute from booking details and submit photos, seal information, and a clear description.",
+          },
+          {
+            question: "How is protection amount determined?",
+            answer:
+              "For eligible incidents, review outcome is handled within the per-bag protection limit defined by platform policy.",
+          },
+        ];
+  const faqJsonLd = buildFaqJsonLd({
+    locale,
+    path: "/insurance",
+    items: faqItems,
+  });
 
   return (
     <div className="min-h-screen bg-[#f5f6fb]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <section className="mx-auto max-w-6xl px-6 pt-14 pb-16 grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
         <div>
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
