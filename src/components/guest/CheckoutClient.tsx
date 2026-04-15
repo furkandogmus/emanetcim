@@ -1,7 +1,8 @@
 "use client";
 
 import { Fragment, useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useRef } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import QRCode from "qrcode";
 import {
   ChevronLeft,
@@ -52,6 +53,9 @@ export default function CheckoutClient({
 }: CheckoutClientProps) {
   const t = useTranslations("Guest");
   const tErr = useTranslations("Errors");
+  const locale = useLocale();
+  const checkInInputRef = useRef<HTMLInputElement>(null);
+  const checkOutInputRef = useRef<HTMLInputElement>(null);
 
   const slot = roundedSlotPrices(pricePerDay, pricingRules);
   const priceS = slot.s;
@@ -252,6 +256,28 @@ export default function CheckoutClient({
     t("checkoutStep2Short"),
     t("checkoutStep3Short"),
   ];
+  const openNativePicker = (input: HTMLInputElement | null) => {
+    if (!input) return;
+    input.focus();
+    if ("showPicker" in input) {
+      try {
+        input.showPicker();
+      } catch {
+        // Fallback for browsers not supporting showPicker reliably.
+      }
+    }
+  };
+  const formatDateTimeDisplay = (raw: string) => {
+    const parsed = parseDatetimeLocal(raw);
+    if (!parsed) return raw;
+    return new Intl.DateTimeFormat(locale, {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(parsed);
+  };
 
   if (isSuccess) {
     return (
@@ -444,24 +470,46 @@ export default function CheckoutClient({
               <h2 className="text-sm font-black uppercase tracking-widest text-gray-900">
                 {t("stayDuration")}
               </h2>
+              <p className="text-[11px] text-gray-400 leading-relaxed">
+                {locale === "tr"
+                  ? "Esnaf müsaitlik kontrolü seçtiğiniz bırakış/alış saatlerine göre yapılır."
+                  : "Partner availability is checked against your selected drop-off and pick-up times."}
+              </p>
               <div className="flex flex-col gap-3">
                 <label className="flex flex-col gap-1.5">
                   <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
                     {t("checkoutCheckInLabel")}
                   </span>
-                  <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-100 focus-within:border-orange-200 transition-colors">
+                  <div
+                    className="relative flex items-center gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-100 focus-within:border-orange-200 transition-colors cursor-pointer"
+                    onClick={() => openNativePicker(checkInInputRef.current)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        openNativePicker(checkInInputRef.current);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={t("checkoutCheckInLabel")}
+                  >
                     <Calendar
                       size={20}
                       strokeWidth={1.5}
                       className="text-gray-400 shrink-0"
                       aria-hidden
                     />
+                    <span className="w-full bg-transparent text-sm font-semibold text-gray-900 min-h-[44px] flex items-center">
+                      {formatDateTimeDisplay(checkInLocal)}
+                    </span>
                     <input
+                      ref={checkInInputRef}
                       type="datetime-local"
+                      step={1800}
                       data-testid="checkout-checkin"
                       value={checkInLocal}
                       onChange={(e) => setCheckInLocal(e.target.value)}
-                      className="w-full bg-transparent text-sm font-semibold outline-none min-h-[44px]"
+                      className="absolute inset-0 opacity-0 cursor-pointer"
                     />
                   </div>
                 </label>
@@ -469,19 +517,36 @@ export default function CheckoutClient({
                   <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
                     {t("checkoutCheckOutLabel")}
                   </span>
-                  <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-100 focus-within:border-orange-200 transition-colors">
+                  <div
+                    className="relative flex items-center gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-100 focus-within:border-orange-200 transition-colors cursor-pointer"
+                    onClick={() => openNativePicker(checkOutInputRef.current)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        openNativePicker(checkOutInputRef.current);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={t("checkoutCheckOutLabel")}
+                  >
                     <Calendar
                       size={20}
                       strokeWidth={1.5}
                       className="text-gray-400 shrink-0"
                       aria-hidden
                     />
+                    <span className="w-full bg-transparent text-sm font-semibold text-gray-900 min-h-[44px] flex items-center">
+                      {formatDateTimeDisplay(checkOutLocal)}
+                    </span>
                     <input
+                      ref={checkOutInputRef}
                       type="datetime-local"
+                      step={1800}
                       data-testid="checkout-checkout"
                       value={checkOutLocal}
                       onChange={(e) => setCheckOutLocal(e.target.value)}
-                      className="w-full bg-transparent text-sm font-semibold outline-none min-h-[44px]"
+                      className="absolute inset-0 opacity-0 cursor-pointer"
                     />
                   </div>
                 </label>
