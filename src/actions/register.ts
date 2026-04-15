@@ -32,6 +32,8 @@ const partnerSchema = z.object({
   shopAddress: z.string().min(5).max(500),
   shopCity: z.string().max(100).optional(),
   shopDistrict: z.string().max(100).optional(),
+  shopLatitude: z.number().min(-90).max(90).nullable().optional(),
+  shopLongitude: z.number().min(-180).max(180).nullable().optional(),
 });
 
 export async function registerGuestAction(data: unknown) {
@@ -169,6 +171,8 @@ export async function registerPartnerApplicationAction(data: unknown) {
         address: parsed.data.shopAddress.trim(),
         city: parsed.data.shopCity?.trim() || null,
         district: parsed.data.shopDistrict?.trim() || null,
+        latitude: parsed.data.shopLatitude ?? null,
+        longitude: parsed.data.shopLongitude ?? null,
         ownerId: user.id,
         isActive: false, // Admin onayı bekleyecek
       },

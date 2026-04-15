@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { registerGuestAction, registerPartnerApplicationAction } from '@/actions/register';
 import { normalizeTrGsm10 } from '@/lib/netgsm';
-import { getCityNames, getDistricts } from '@/lib/tr-cities';
+import dynamic from 'next/dynamic';
 import {
   Package,
   ShieldCheck,
@@ -14,21 +14,30 @@ import {
   ChevronRight,
   Phone,
   Store,
-  MapPin,
   CheckCircle2
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
 
+const LocationPicker = dynamic(() => import('@/components/partner/LocationPicker'), { ssr: false });
+
 type RegisterType = 'GUEST' | 'PARTNER';
+
+interface LocationState {
+  address: string;
+  city: string;
+  district: string;
+  latitude: number | null;
+  longitude: number | null;
+}
 
 export default function RegisterPage() {
   const t = useTranslations('Auth');
   const tCommon = useTranslations('Common');
   const tErrors = useTranslations('Errors');
   const [activeTab, setActiveTab] = useState<RegisterType>('GUEST');
-  
+
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -44,13 +53,15 @@ export default function RegisterPage() {
     phone: '',
     password: '',
     shopName: '',
-    shopAddress: '',
-    shopCity: '',
-    shopDistrict: '',
   });
 
-  const cities = getCityNames();
-  const districts = getDistricts(partnerData.shopCity);
+  const [shopLocation, setShopLocation] = useState<LocationState>({
+    address: '',
+    city: '',
+    district: '',
+    latitude: null,
+    longitude: null,
+  });
 
   const translateServerError = (code: string | undefined) => {
     if (!code) return t('authErrorGeneric');
@@ -76,7 +87,24 @@ export default function RegisterPage() {
           setError(tErrors('invalidTrPhone'));
           return;
         }
-        const res = await registerPartnerApplicationAction(partnerData);
+        if (!shopLocation.city) {
+          setError('Lütfen şehir seçin.');
+          return;
+        }
+        const fullAddress = [
+          shopLocation.address,
+          shopLocation.district,
+          shopLocation.city,
+        ].filter(Boolean).join(', ');
+
+        const res = await registerPartnerApplicationAction({
+          ...partnerData,
+          shopAddress: fullAddress || shopLocation.city,
+          shopCity: shopLocation.city,
+          shopDistrict: shopLocation.district,
+          shopLatitude: shopLocation.latitude,
+          shopLongitude: shopLocation.longitude,
+        });
         if (res.success) setSuccess(true);
         else setError(translateServerError(res.error));
       }
@@ -90,7 +118,7 @@ export default function RegisterPage() {
   if (success) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 font-sans">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           className="w-full max-w-md bg-white rounded-[2.5rem] p-10 shadow-xl shadow-gray-200/50 border border-gray-100 text-center"
@@ -100,12 +128,12 @@ export default function RegisterPage() {
           </div>
           <h1 className="text-2xl font-black text-gray-900 mb-4">{t('registerSuccessTitle')}</h1>
           <p className="text-gray-500 text-sm font-medium mb-8 leading-relaxed">
-            {activeTab === 'GUEST' 
+            {activeTab === 'GUEST'
               ? t('registerSuccessGuestDesc')
               : t('registerSuccessPartnerDesc')
             }
           </p>
-          <Link 
+          <Link
             href="/login"
             className="inline-flex items-center justify-center gap-2 text-sm font-bold text-orange-600 hover:text-orange-700 transition-colors"
           >
@@ -127,7 +155,6 @@ export default function RegisterPage() {
           <div className="w-16 h-16 bg-orange-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-orange-200">
             <Package size={32} className="text-white" />
           </div>
-
           <h1 className="text-2xl font-black text-gray-900 mb-2">{t('registerTitle')}</h1>
           <p className="text-gray-400 text-sm font-medium text-center leading-relaxed">
             {t('registerSubtitle')}
@@ -153,9 +180,9 @@ export default function RegisterPage() {
             {tCommon('demoEsnaf')}
           </button>
         </div>
-        {/* Wait, let's just use the keys I should've checked... */}
 
         <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
+          {/* Ad Soyad */}
           <div className="relative">
             <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
             <input
@@ -163,14 +190,15 @@ export default function RegisterPage() {
               placeholder={t('fullName')}
               required
               value={activeTab === 'GUEST' ? guestData.name : partnerData.name}
-              onChange={(e) => activeTab === 'GUEST' 
-                ? setGuestData({...guestData, name: e.target.value})
-                : setPartnerData({...partnerData, name: e.target.value})
+              onChange={(e) => activeTab === 'GUEST'
+                ? setGuestData({ ...guestData, name: e.target.value })
+                : setPartnerData({ ...partnerData, name: e.target.value })
               }
               className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 focus:outline-none focus:border-orange-300 transition"
             />
           </div>
 
+          {/* E-posta (misafir) / Telefon (esnaf) */}
           {activeTab === 'GUEST' ? (
             <div className="relative">
               <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
@@ -197,6 +225,7 @@ export default function RegisterPage() {
             </div>
           )}
 
+          {/* Şifre */}
           <div className="relative">
             <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
             <input
@@ -213,12 +242,14 @@ export default function RegisterPage() {
             />
           </div>
 
+          {/* Esnaf-only alanlar */}
           {activeTab === 'PARTNER' && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               className="flex flex-col gap-4 overflow-hidden"
             >
+              {/* İşyeri adı */}
               <div className="relative">
                 <Store size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
                 <input
@@ -230,51 +261,13 @@ export default function RegisterPage() {
                   className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 focus:outline-none focus:border-orange-300 transition"
                 />
               </div>
-              {/* Şehir + İlçe */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="relative">
-                  <select
-                    value={partnerData.shopCity}
-                    required
-                    onChange={(e) =>
-                      setPartnerData({ ...partnerData, shopCity: e.target.value, shopDistrict: '' })
-                    }
-                    className="w-full h-12 pl-4 pr-3 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 focus:outline-none focus:border-orange-300 transition appearance-none bg-white"
-                  >
-                    <option value="">İl seçin…</option>
-                    {cities.map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="relative">
-                  <select
-                    value={partnerData.shopDistrict}
-                    required
-                    disabled={!partnerData.shopCity}
-                    onChange={(e) =>
-                      setPartnerData({ ...partnerData, shopDistrict: e.target.value })
-                    }
-                    className="w-full h-12 pl-4 pr-3 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 focus:outline-none focus:border-orange-300 transition appearance-none bg-white disabled:opacity-40"
-                  >
-                    <option value="">İlçe seçin…</option>
-                    {districts.map((d) => (
-                      <option key={d} value={d}>{d}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              {/* Açık adres */}
-              <div className="relative">
-                <MapPin size={16} className="absolute left-4 top-4 text-gray-300 pointer-events-none" />
-                <textarea
-                  placeholder={t('shopAddress')}
-                  required
-                  rows={2}
-                  value={partnerData.shopAddress}
-                  onChange={(e) => setPartnerData({ ...partnerData, shopAddress: e.target.value })}
-                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 focus:outline-none focus:border-orange-300 transition resize-none"
-                />
+
+              {/* Konum Seçici */}
+              <div className="border-2 border-gray-100 rounded-2xl p-4">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">
+                  İşyeri Konumu
+                </p>
+                <LocationPicker value={shopLocation} onChange={setShopLocation} />
               </div>
             </motion.div>
           )}
@@ -288,13 +281,16 @@ export default function RegisterPage() {
             disabled={isPending}
             className="w-full h-12 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-bold text-sm transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-60 mt-4"
           >
-            {isPending ? <Loader2 size={16} className="animate-spin" /> : (activeTab === 'PARTNER' ? t('registerSubmitPartner') : t('registerSubmitGuest'))}
+            {isPending
+              ? <Loader2 size={16} className="animate-spin" />
+              : (activeTab === 'PARTNER' ? t('registerSubmitPartner') : t('registerSubmitGuest'))
+            }
           </button>
         </form>
 
         <div className="mt-8 pt-8 border-t border-gray-50 w-full text-center">
           <p className="text-sm text-gray-400 font-medium">
-            {t('alreadyHaveAccount')} {' '}
+            {t('alreadyHaveAccount')}{' '}
             <Link href="/login" className="text-orange-600 font-bold hover:underline">{t('signInEmail')}</Link>
           </p>
         </div>
