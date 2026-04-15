@@ -30,6 +30,8 @@ const partnerSchema = z.object({
   password: z.string().min(6),
   shopName: z.string().min(2).max(200),
   shopAddress: z.string().min(5).max(500),
+  shopCity: z.string().max(100).optional(),
+  shopDistrict: z.string().max(100).optional(),
 });
 
 export async function registerGuestAction(data: unknown) {
@@ -165,6 +167,8 @@ export async function registerPartnerApplicationAction(data: unknown) {
       data: {
         name: parsed.data.shopName.trim(),
         address: parsed.data.shopAddress.trim(),
+        city: parsed.data.shopCity?.trim() || null,
+        district: parsed.data.shopDistrict?.trim() || null,
         ownerId: user.id,
         isActive: false, // Admin onayı bekleyecek
       },
