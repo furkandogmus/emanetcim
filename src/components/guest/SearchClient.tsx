@@ -458,8 +458,9 @@ export default function SearchClient({
 
         <div className="flex-1 h-[34svh] md:h-full bg-gray-100 relative order-1 md:order-2 overflow-hidden min-h-[220px]">
           <SearchMap
-            key={filteredShops.map((s) => s.id).join("_")}
             shops={filteredShops}
+            userLat={dynamicCenter.lat}
+            userLng={dynamicCenter.lng}
             onSelectShop={onSelectShop}
           />
         </div>

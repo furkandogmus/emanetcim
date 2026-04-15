@@ -87,6 +87,26 @@ export default function SearchMap({
     };
   }, []); // Artık lint hatası vermez
 
+  // Dışarıdan gelen merkez değiştiğinde haritayı hedefe taşı.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const current = map.getCenter();
+    const epsilon = 0.0001;
+    if (
+      Math.abs(current.lat - userLat) < epsilon &&
+      Math.abs(current.lng - userLng) < epsilon
+    ) {
+      return;
+    }
+    map.flyTo({
+      center: [userLng, userLat],
+      zoom: Math.max(map.getZoom(), 12),
+      duration: 700,
+      essential: true,
+    });
+  }, [userLat, userLng]);
+
   // Shop'lar değiştikçe marker'ları güncelle
   useEffect(() => {
     const map = mapRef.current;
@@ -120,8 +140,16 @@ export default function SearchMap({
       );
       valid.forEach((s) => b.extend([s.longitude!, s.latitude!]));
       map.fitBounds(b, { padding: 80, maxZoom: 15, duration: 800 });
+    } else {
+      // Sonuç yoksa yine de kullanıcının aradığı merkeze dön.
+      map.flyTo({
+        center: [userLng, userLat],
+        zoom: 12,
+        duration: 700,
+        essential: true,
+      });
     }
-  }, [shops]);
+  }, [shops, userLat, userLng]);
 
   return <div ref={containerRef} className="absolute inset-0 w-full h-full min-h-[240px]" />;
 }
