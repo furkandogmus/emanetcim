@@ -67,6 +67,7 @@ export default function MobileNav() {
     p.includes("/register") ||
     p.includes("/auth/") ||
     p.includes("/checkout/") ||
+    p.includes("/shop/") ||
     p.includes("/admin/") ||
     p.includes("/partner/")
   ) {

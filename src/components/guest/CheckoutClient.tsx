@@ -382,7 +382,7 @@ export default function CheckoutClient({
                     {done ? <CheckCircle2 size={18} /> : n}
                   </div>
                   <span
-                    className={`text-[9px] font-black uppercase tracking-tighter text-center truncate w-full ${
+                    className={`text-[10px] font-black uppercase tracking-tighter text-center truncate w-full ${
                       active ? "text-orange-600" : "text-gray-400"
                     }`}
                   >
@@ -402,7 +402,7 @@ export default function CheckoutClient({
         </nav>
       </header>
 
-      <main className="flex-1 max-w-2xl mx-auto w-full p-6 flex flex-col gap-8 pb-40">
+      <main className="flex-1 max-w-2xl mx-auto w-full p-4 sm:p-6 flex flex-col gap-8 pb-36 sm:pb-40">
         {step === 1 && (
           <>
             <div>
@@ -740,7 +740,7 @@ export default function CheckoutClient({
         )}
       </main>
 
-      <footer className="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-2xl w-full p-6 pb-safe bg-white/90 backdrop-blur-xl border-t border-gray-50 flex flex-col gap-3 z-20">
+      <footer className="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-2xl w-full p-4 sm:p-6 pb-safe bg-white/90 backdrop-blur-xl border-t border-gray-50 flex flex-col gap-3 z-20">
         {step === 1 && error && (
           <div className="ui-state ui-state-error flex items-center gap-2 rounded-xl">
             <AlertCircle size={14} />
