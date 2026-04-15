@@ -142,6 +142,8 @@ model Shop {
   ownerId   String
   name      String
   address   String?
+  city      String? // İl (şehir)
+  district  String? // İlçe
   latitude  Float?
   longitude Float?
   capacity  Int     @default(10) // Günlük maksimum valiz sayısı
