@@ -138,7 +138,21 @@
     "reject": "REDDET",
     "approve": "ONAYLA",
     "approvedSuccess": "Talep onaylandı!",
-    "confirmReject": "Bu talebi reddetmek istediğinize emin misiniz?"
+    "confirmReject": "Bu talebi reddetmek istediğinize emin misiniz?",
+    "locationLocateMe": "Konumumu Bul",
+    "locationDetecting": "Konum alınıyor…",
+    "locationResolvingAddress": "Adres tespit ediliyor…",
+    "locationHintTapMap": "Butona bas veya haritaya tıkla",
+    "locationDetectedTitle": "Konum Tespit Edildi",
+    "locationReset": "Konumu sıfırla",
+    "locationStreetPlaceholder": "Cadde / Sokak",
+    "locationNeighborhoodPlaceholder": "Mahalle",
+    "locationBuildingNoPlaceholder": "Bina No",
+    "locationDoorNoPlaceholder": "Daire No",
+    "locationPostalCodePlaceholder": "Posta Kodu",
+    "locationBrowserUnsupported": "Tarayıcınız konum desteklemiyor.",
+    "locationGenericError": "Konum alınamadı, tekrar deneyin.",
+    "actionCancelled": "İşlem iptal edildi."
   },
   "Guest": {
     "heroTitle": "Valizini Güvenle Bırak, Özgürce Gez",

@@ -19,6 +19,7 @@ import { updateShopAction, deleteReviewAction } from "@/actions/admin-management
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import StarRating from "@/components/common/StarRating";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 
 interface AdminPartnerEditClientProps {
   shop: {
@@ -52,8 +53,10 @@ interface AdminPartnerEditClientProps {
 
 export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientProps) {
   const t = useTranslations("Admin");
+  const tCommon = useTranslations("Common");
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [pendingReviewDeleteId, setPendingReviewDeleteId] = useState<string | null>(null);
   const ratingDisplay = Number(shop.rating);
   const ratingSafe = Number.isFinite(ratingDisplay) ? ratingDisplay : 0;
   
@@ -82,7 +85,21 @@ export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientP
     }
   };
 
+  const confirmDeleteReview = async () => {
+    if (!pendingReviewDeleteId) return;
+    try {
+      await deleteReviewAction(pendingReviewDeleteId);
+      toast.success(t("reviewDeletedSuccess"));
+      router.refresh();
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : String(err));
+    } finally {
+      setPendingReviewDeleteId(null);
+    }
+  };
+
   return (
+    <>
     <div className="min-h-screen bg-gray-50 p-6 md:p-10">
       <header className="mb-10">
         <Link href="/admin/partners" className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors mb-4 group">
@@ -260,17 +277,7 @@ export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientP
                           </div>
                           <button 
                             className="p-1.5 text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                            onClick={async () => {
-                               if(confirm(t("confirmDeleteReview"))) {
-                                 try {
-                                   await deleteReviewAction(review.id);
-                                   toast.success(t("reviewDeletedSuccess"));
-                                   router.refresh();
-                                 } catch(err: unknown) {
-                                   toast.error(err instanceof Error ? err.message : String(err));
-                                 }
-                               }
-                            }}
+                            onClick={() => setPendingReviewDeleteId(review.id)}
                           >
                              <Trash2 size={14} />
                           </button>
@@ -307,5 +314,14 @@ export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientP
         </div>
       </div>
     </div>
+    <ConfirmDialog
+      open={pendingReviewDeleteId !== null}
+      message={t("confirmDeleteReview")}
+      confirmLabel={t("delete")}
+      cancelLabel={tCommon("cancel")}
+      onCancel={() => setPendingReviewDeleteId(null)}
+      onConfirm={() => void confirmDeleteReview()}
+    />
+    </>
   );
 }

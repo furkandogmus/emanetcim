@@ -19,6 +19,7 @@ import {
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 
 type Camp = {
   id: string;
@@ -46,6 +47,7 @@ export default function AdminCampaignsClient({
   const [pending, startTransition] = useTransition();
   const [campaigns, setCampaigns] = useState(initialCampaigns);
   const [editing, setEditing] = useState<Camp | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     setCampaigns(initialCampaigns);
@@ -100,10 +102,15 @@ export default function AdminCampaignsClient({
   };
 
   const handleDelete = (id: string) => {
-    if (!confirm(t("campaignDeleteConfirm"))) return;
+    setPendingDeleteId(id);
+  };
+
+  const confirmDelete = () => {
+    if (!pendingDeleteId) return;
     startTransition(async () => {
-      await deleteCampaignAction(id);
+      await deleteCampaignAction(pendingDeleteId);
       toast.success(t("campaignDeleted"));
+      setPendingDeleteId(null);
       router.refresh();
     });
   };
@@ -285,6 +292,14 @@ export default function AdminCampaignsClient({
           </div>
         ))}
       </div>
+      <ConfirmDialog
+        open={pendingDeleteId !== null}
+        message={t("campaignDeleteConfirm")}
+        confirmLabel={t("delete")}
+        cancelLabel={tCommon("cancel")}
+        onCancel={() => setPendingDeleteId(null)}
+        onConfirm={confirmDelete}
+      />
     </>
   );
 }

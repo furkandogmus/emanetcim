@@ -18,6 +18,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { deleteBlogPostAction } from "@/actions/blog-actions";
 import { toast } from "sonner";
 import { BlogPost } from "@prisma/client";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 
 interface AdminBlogClientProps {
   posts: BlogPost[];
@@ -25,9 +26,11 @@ interface AdminBlogClientProps {
 
 export default function AdminBlogClient({ posts: initialPosts }: AdminBlogClientProps) {
   const t = useTranslations("Admin");
+  const tCommon = useTranslations("Common");
   const [posts, setPosts] = useState<BlogPost[]>(initialPosts);
   const [search, setSearch] = useState("");
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const filteredPosts = posts.filter(post => 
     post.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -35,17 +38,21 @@ export default function AdminBlogClient({ posts: initialPosts }: AdminBlogClient
   );
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t("confirmDelete") || "Bu yazıyı silmek istediğinize emin misiniz?")) return;
-    
-    setLoadingId(id);
+    setPendingDeleteId(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDeleteId) return;
+    setLoadingId(pendingDeleteId);
     try {
-      await deleteBlogPostAction(id);
-      setPosts(prev => prev.filter(p => p.id !== id));
+      await deleteBlogPostAction(pendingDeleteId);
+      setPosts(prev => prev.filter(p => p.id !== pendingDeleteId));
       toast.success(t("postDeletedSuccess") || "Yazı başarıyla silindi.");
     } catch {
       toast.error(t("errorTitle") || "Bir hata oluştu.");
     } finally {
       setLoadingId(null);
+      setPendingDeleteId(null);
     }
   };
 
@@ -159,6 +166,14 @@ export default function AdminBlogClient({ posts: initialPosts }: AdminBlogClient
           </table>
         </div>
       </div>
+      <ConfirmDialog
+        open={pendingDeleteId !== null}
+        message={t("confirmDelete") || "Bu yazıyı silmek istediğinize emin misiniz?"}
+        confirmLabel={t("delete")}
+        cancelLabel={tCommon("cancel")}
+        onCancel={() => setPendingDeleteId(null)}
+        onConfirm={() => void confirmDelete()}
+      />
     </div>
   );
 }

@@ -17,6 +17,7 @@ import { Link } from "@/i18n/routing";
 import { motion, AnimatePresence } from "framer-motion";
 import { approveShopAction, rejectShopAction } from "@/actions/admin-management";
 import { toast } from "sonner";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 
 interface Application {
   id: string;
@@ -37,9 +38,16 @@ interface AdminApplicationsClientProps {
 
 export default function AdminApplicationsClient({ applications: initialApps }: AdminApplicationsClientProps) {
   const t = useTranslations("Admin");
+  const tCommon = useTranslations("Common");
   const [apps, setApps] = useState<Application[]>(initialApps);
   const [search, setSearch] = useState("");
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [confirmState, setConfirmState] = useState<{
+    open: boolean;
+    message: string;
+    confirmLabel: string;
+    onConfirm: null | (() => void);
+  }>({ open: false, message: "", confirmLabel: "", onConfirm: null });
 
   const filteredApps = apps.filter(app => 
     app.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -48,35 +56,47 @@ export default function AdminApplicationsClient({ applications: initialApps }: A
   );
 
   const handleApprove = async (id: string) => {
-    if (!confirm(t("approveConfirm"))) return;
-    setLoadingId(id);
-    try {
-      await approveShopAction(id);
-      setApps(prev => prev.filter(a => a.id !== id));
-      toast.success(t("approveSuccess"));
-    } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : String(error));
-    } finally {
-      setLoadingId(null);
-    }
+    setConfirmState({
+      open: true,
+      message: t("approveConfirm"),
+      confirmLabel: t("approve"),
+      onConfirm: async () => {
+        setLoadingId(id);
+        try {
+          await approveShopAction(id);
+          setApps(prev => prev.filter(a => a.id !== id));
+          toast.success(t("approveSuccess"));
+        } catch (error: unknown) {
+          toast.error(error instanceof Error ? error.message : String(error));
+        } finally {
+          setLoadingId(null);
+        }
+      },
+    });
   };
 
   const handleReject = async (id: string) => {
-    if (!confirm(t("rejectConfirm"))) return;
-    setLoadingId(id);
-    try {
-      const res = await rejectShopAction(id);
-      if (!res.success) {
-        toast.error(t("shopDeleteBlockedByRelations"));
-        return;
-      }
-      setApps((prev) => prev.filter((a) => a.id !== id));
-      toast.success(t("rejectSuccess"));
-    } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : String(error));
-    } finally {
-      setLoadingId(null);
-    }
+    setConfirmState({
+      open: true,
+      message: t("rejectConfirm"),
+      confirmLabel: t("reject"),
+      onConfirm: async () => {
+        setLoadingId(id);
+        try {
+          const res = await rejectShopAction(id);
+          if (!res.success) {
+            toast.error(t("shopDeleteBlockedByRelations"));
+            return;
+          }
+          setApps((prev) => prev.filter((a) => a.id !== id));
+          toast.success(t("rejectSuccess"));
+        } catch (error: unknown) {
+          toast.error(error instanceof Error ? error.message : String(error));
+        } finally {
+          setLoadingId(null);
+        }
+      },
+    });
   };
 
   return (
@@ -195,6 +215,20 @@ export default function AdminApplicationsClient({ applications: initialApps }: A
           )}
         </div>
       </div>
+      <ConfirmDialog
+        open={confirmState.open}
+        message={confirmState.message}
+        confirmLabel={confirmState.confirmLabel}
+        cancelLabel={tCommon("cancel")}
+        onCancel={() =>
+          setConfirmState({ open: false, message: "", confirmLabel: "", onConfirm: null })
+        }
+        onConfirm={() => {
+          const fn = confirmState.onConfirm;
+          setConfirmState({ open: false, message: "", confirmLabel: "", onConfirm: null });
+          if (fn) void fn();
+        }}
+      />
     </div>
   );
 }
