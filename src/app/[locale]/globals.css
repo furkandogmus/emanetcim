@@ -465,6 +465,100 @@
     padding: 0;
   }
 
+  /* ── Spacing + layout primitives ── */
+  .ui-section { padding: clamp(1rem, 2.2vw, 1.5rem); }
+  .ui-stack-sm { display: flex; flex-direction: column; gap: 0.5rem; }
+  .ui-stack-md { display: flex; flex-direction: column; gap: 0.875rem; }
+  .ui-stack-lg { display: flex; flex-direction: column; gap: 1.25rem; }
+
+  /* ── Typography primitives ── */
+  .ui-kicker {
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 800;
+    color: hsl(25 6% 52%);
+  }
+  .ui-heading-lg {
+    font-size: clamp(1.25rem, 1rem + 0.9vw, 1.75rem);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    font-weight: 900;
+    color: hsl(20 14% 11%);
+  }
+  .ui-heading-md {
+    font-size: clamp(1.05rem, 0.95rem + 0.35vw, 1.25rem);
+    line-height: 1.3;
+    letter-spacing: -0.015em;
+    font-weight: 800;
+    color: hsl(20 14% 11%);
+  }
+  .ui-body-sm {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: hsl(25 6% 52%);
+    font-weight: 500;
+  }
+
+  /* ── Surface primitives ── */
+  .ui-card {
+    background: hsl(0 0% 100%);
+    border: 1px solid hsl(30 8% 90%);
+    border-radius: 1.5rem;
+    box-shadow: 0 3px 10px -6px hsl(20 14% 11% / .16);
+  }
+  .ui-card-soft {
+    background: hsl(30 20% 98%);
+    border: 1px solid hsl(30 8% 90%);
+    border-radius: 1.25rem;
+  }
+
+  /* ── Form primitives ── */
+  .ui-field {
+    width: 100%;
+    min-height: 2.75rem;
+    border-radius: 0.95rem;
+    border: 1px solid hsl(30 8% 90%);
+    background: hsl(30 10% 97%);
+    padding: 0.75rem 0.95rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: hsl(20 14% 18%);
+    outline: none;
+    transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+  }
+  .ui-field:focus {
+    background: hsl(0 0% 100%);
+    border-color: hsl(21 90% 48%);
+    box-shadow: 0 0 0 3px hsl(21 90% 48% / .12);
+  }
+  .ui-field::placeholder { color: hsl(25 6% 60%); }
+
+  /* ── Unified states ── */
+  .ui-state {
+    border-radius: 1rem;
+    padding: 0.75rem 0.875rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.45;
+    border: 1px solid transparent;
+  }
+  .ui-state-empty {
+    background: hsl(30 20% 98%);
+    color: hsl(25 6% 45%);
+    border-color: hsl(30 8% 90%);
+  }
+  .ui-state-error {
+    background: hsl(0 85% 97%);
+    color: hsl(0 72% 42%);
+    border-color: hsl(0 80% 90%);
+  }
+  .ui-state-success {
+    background: hsl(160 60% 96%);
+    color: hsl(160 84% 28%);
+    border-color: hsl(160 45% 84%);
+  }
+
   /* ── Input/Form primitives ── */
   .input-brand {
     width: 100%;

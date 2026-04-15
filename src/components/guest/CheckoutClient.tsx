@@ -730,7 +730,7 @@ export default function CheckoutClient({
             {error && (
               <div
                 data-testid="checkout-payment-error"
-                className="bg-red-50 text-red-600 p-4 rounded-2xl text-xs font-bold flex items-center gap-2 border border-red-100 animate-in fade-in slide-in-from-bottom-2"
+                className="ui-state ui-state-error flex items-center gap-2 rounded-2xl animate-in fade-in slide-in-from-bottom-2"
               >
                 <AlertCircle size={16} />
                 {error}
@@ -742,7 +742,7 @@ export default function CheckoutClient({
 
       <footer className="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-2xl w-full p-6 pb-safe bg-white/90 backdrop-blur-xl border-t border-gray-50 flex flex-col gap-3 z-20">
         {step === 1 && error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-xl text-xs font-bold flex items-center gap-2 border border-red-100">
+          <div className="ui-state ui-state-error flex items-center gap-2 rounded-xl">
             <AlertCircle size={14} />
             {error}
           </div>

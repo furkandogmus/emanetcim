@@ -29,13 +29,13 @@ export default function DisputeForm({
   };
 
   return (
-    <div className="max-w-lg mx-auto bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
-      <h1 className="text-xl font-black text-gray-900">{t("title")}</h1>
-      <p className="text-sm text-gray-500 mt-1">{shopName}</p>
+    <div className="ui-card max-w-lg mx-auto rounded-3xl p-8">
+      <h1 className="ui-heading-md">{t("title")}</h1>
+      <p className="ui-body-sm mt-1">{shopName}</p>
 
-      <label className="block mt-6 text-xs font-bold uppercase text-gray-400">{t("reasonLabel")}</label>
+      <label className="ui-kicker block mt-6">{t("reasonLabel")}</label>
       <select
-        className="mt-2 w-full border border-gray-200 rounded-xl p-3 text-sm"
+        className="ui-field mt-2"
         value={reason}
         onChange={(e) => setReason(e.target.value as typeof reason)}
       >
@@ -44,21 +44,21 @@ export default function DisputeForm({
         <option value="OTHER">{t("reasonOther")}</option>
       </select>
 
-      <label className="block mt-4 text-xs font-bold uppercase text-gray-400">{t("descriptionLabel")}</label>
+      <label className="ui-kicker block mt-4">{t("descriptionLabel")}</label>
       <textarea
-        className="mt-2 w-full border border-gray-200 rounded-xl p-3 text-sm min-h-[120px]"
+        className="ui-field mt-2 min-h-[120px]"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         placeholder={t("descriptionPlaceholder")}
       />
 
-      {err && <p className="text-red-600 text-sm mt-2">{err}</p>}
+      {err && <p className="ui-state ui-state-error mt-2">{err}</p>}
 
       <button
         type="button"
         disabled={loading || description.length < 10}
         onClick={submit}
-        className="mt-6 w-full bg-orange-600 text-white py-4 rounded-2xl font-black disabled:opacity-50"
+        className="btn-ui btn-ui-lg btn-ui-primary mt-6 w-full rounded-2xl"
       >
         {loading ? t("submitting") : t("submit")}
       </button>
