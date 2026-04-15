@@ -740,7 +740,7 @@ export default function CheckoutClient({
         )}
       </main>
 
-      <footer className="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-2xl w-full p-6 bg-white/90 backdrop-blur-xl border-t border-gray-50 flex flex-col gap-3 z-20">
+      <footer className="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-2xl w-full p-6 pb-safe bg-white/90 backdrop-blur-xl border-t border-gray-50 flex flex-col gap-3 z-20">
         {step === 1 && error && (
           <div className="bg-red-50 text-red-600 p-3 rounded-xl text-xs font-bold flex items-center gap-2 border border-red-100">
             <AlertCircle size={14} />
@@ -752,7 +752,7 @@ export default function CheckoutClient({
             <button
               type="button"
               onClick={goBack}
-              className="flex-1 py-4 rounded-3xl font-black text-sm uppercase tracking-wider bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors"
+              className="btn-ui btn-ui-lg btn-ui-ghost flex-1 rounded-3xl"
             >
               {t("checkoutBack")}
             </button>
@@ -765,7 +765,7 @@ export default function CheckoutClient({
               disabled={
                 step === 1 && (!windowOk || totalPrice === 0)
               }
-              className="flex-1 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-200 disabled:cursor-not-allowed text-white py-4 rounded-3xl font-black text-sm uppercase tracking-wider transition-all active:scale-[0.98] shadow-xl shadow-gray-200"
+              className="btn-ui btn-ui-lg btn-ui-primary flex-1 rounded-3xl bg-gray-900 hover:bg-gray-800 shadow-xl shadow-gray-200"
             >
               {step === 1 ? t("checkoutContinue") : t("checkoutToPayment")}
             </button>
@@ -775,7 +775,7 @@ export default function CheckoutClient({
               data-testid="checkout-footer-primary"
               onClick={() => void handlePayment()}
               disabled={totalPrice === 0 || isProcessing}
-              className="flex-1 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-200 disabled:cursor-not-allowed text-white py-5 rounded-3xl font-black flex items-center justify-center gap-3 transition-all active:scale-[0.98] shadow-xl shadow-gray-200"
+              className="btn-ui btn-ui-lg btn-ui-primary flex-1 rounded-3xl bg-gray-900 hover:bg-gray-800 shadow-xl shadow-gray-200"
             >
               {isProcessing ? (
                 <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>

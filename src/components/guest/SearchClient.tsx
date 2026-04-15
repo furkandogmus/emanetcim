@@ -153,7 +153,7 @@ export default function SearchClient({
         <div className="flex items-center gap-3 mb-3">
           <Link
             href="/"
-            className="w-10 h-10 flex items-center justify-center bg-gray-50 hover:bg-gray-100 rounded-full transition-all active:scale-95"
+            className="btn-ui btn-ui-md btn-ui-ghost btn-ui-icon rounded-full"
           >
             <ChevronLeft size={22} className="text-gray-900" />
           </Link>
@@ -360,7 +360,7 @@ export default function SearchClient({
                 <button
                   type="button"
                   onClick={() => setActiveTab("all")}
-                  className="mt-2 text-xs font-black text-orange-600 uppercase tracking-wider hover:underline"
+                  className="btn-ui btn-ui-sm btn-ui-secondary mt-2"
                 >
                   {t("allShops")} →
                 </button>

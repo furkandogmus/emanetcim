@@ -898,7 +898,7 @@ export default function PartnerClient({
                         type="button"
                         disabled={checkingOutId === booking.id}
                         onClick={() => void handleCheckoutFromList(booking.id)}
-                        className="w-full bg-gray-900 text-white py-4 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-black transition-colors disabled:opacity-50"
+                        className="btn-ui btn-ui-lg btn-ui-primary w-full rounded-2xl bg-gray-900 hover:bg-black"
                       >
                         {checkingOutId === booking.id ? (
                           <Loader2 className="inline animate-spin w-5 h-5" />
@@ -956,14 +956,14 @@ export default function PartnerClient({
                       <button 
                         onClick={() => handleReject(booking.id)}
                         disabled={isProcessing}
-                        className="flex-1 py-3 rounded-xl bg-gray-100 text-gray-500 font-black text-xs uppercase"
+                        className="btn-ui btn-ui-md btn-ui-ghost flex-1 rounded-xl"
                       >
                         {t("reject")}
                       </button>
                       <button 
                          onClick={() => handleApprove(booking.id)}
                          disabled={isProcessing}
-                         className="flex-1 py-3 rounded-xl bg-orange-600 text-white font-black text-xs uppercase shadow-lg shadow-orange-100"
+                         className="btn-ui btn-ui-md btn-ui-primary flex-1 rounded-xl"
                       >
                          {t("approve")}
                       </button>

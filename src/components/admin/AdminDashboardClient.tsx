@@ -183,7 +183,7 @@ export default function AdminDashboardClient({
             <div className="flex flex-col gap-4">
               <Link
                 href="/admin/applications"
-                className="w-full py-4 px-6 bg-white/10 rounded-2xl text-sm font-bold hover:bg-white/20 transition-all text-left flex items-center justify-between group"
+                className="w-full min-h-[3rem] px-5 bg-white/10 rounded-2xl text-xs font-black uppercase tracking-wider hover:bg-white/20 transition-all text-left flex items-center justify-between group"
               >
                 <span className="flex items-center gap-3">
                   <Package size={18} className="opacity-40" />
@@ -195,21 +195,21 @@ export default function AdminDashboardClient({
               </Link>
               <Link
                 href="/admin/seals"
-                className="w-full py-4 px-6 bg-white/10 rounded-2xl text-sm font-bold hover:bg-white/20 transition-all text-left flex items-center gap-3"
+                className="w-full min-h-[3rem] px-5 bg-white/10 rounded-2xl text-xs font-black uppercase tracking-wider hover:bg-white/20 transition-all text-left flex items-center gap-3"
               >
                 <Zap size={18} className="opacity-40" />
                 {t("sealRequests")}
               </Link>
               <Link
                 href="/admin/campaigns"
-                className="w-full py-4 px-6 bg-white/10 rounded-2xl text-sm font-bold hover:bg-white/20 transition-all text-left flex items-center gap-3"
+                className="w-full min-h-[3rem] px-5 bg-white/10 rounded-2xl text-xs font-black uppercase tracking-wider hover:bg-white/20 transition-all text-left flex items-center gap-3"
               >
                 <TrendingUp size={18} className="opacity-40" />
                 {t("createCampaign")}
               </Link>
               <Link
                 href="/admin/status"
-                className="w-full py-4 px-6 bg-orange-600 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all text-left flex items-center justify-between group shadow-lg shadow-orange-900/40"
+                className="w-full min-h-[3rem] px-5 bg-orange-600 rounded-2xl text-xs font-black uppercase tracking-widest transition-all text-left flex items-center justify-between group shadow-lg shadow-orange-900/40"
               >
                 <span className="flex items-center gap-3">
                   <Activity size={18} />
@@ -219,21 +219,21 @@ export default function AdminDashboardClient({
               </Link>
               <Link
                 href="/admin/platform-settings"
-                className="w-full py-4 px-6 bg-white/10 rounded-2xl text-sm font-bold hover:bg-white/20 transition-all text-left flex items-center gap-3"
+                className="w-full min-h-[3rem] px-5 bg-white/10 rounded-2xl text-xs font-black uppercase tracking-wider hover:bg-white/20 transition-all text-left flex items-center gap-3"
               >
                 <Settings size={18} className="opacity-40" />
                 {t("platformSettingsNav")}
               </Link>
               <Link
                 href="/admin/feature-flags"
-                className="w-full py-4 px-6 bg-white/10 rounded-2xl text-sm font-bold hover:bg-white/20 transition-all text-left flex items-center gap-3"
+                className="w-full min-h-[3rem] px-5 bg-white/10 rounded-2xl text-xs font-black uppercase tracking-wider hover:bg-white/20 transition-all text-left flex items-center gap-3"
               >
                 <Flag size={18} className="opacity-40" />
                 {t("featureFlagsNav")}
               </Link>
               <Link
                 href="/admin/role-approvals"
-                className={`w-full py-4 px-6 rounded-2xl text-sm font-bold transition-all text-left flex items-center justify-between gap-3 ${
+                className={`w-full min-h-[3rem] px-5 rounded-2xl text-xs font-black uppercase tracking-wider transition-all text-left flex items-center justify-between gap-3 ${
                   pendingRoleApprovals > 0
                     ? "bg-orange-600/90 hover:bg-orange-600 text-white"
                     : "bg-white/10 hover:bg-white/20"
@@ -251,14 +251,14 @@ export default function AdminDashboardClient({
               </Link>
               <Link
                 href="/admin/disputes"
-                className="w-full py-4 px-6 bg-white/10 rounded-2xl text-sm font-bold hover:bg-white/20 transition-all text-left flex items-center gap-3"
+                className="w-full min-h-[3rem] px-5 bg-white/10 rounded-2xl text-xs font-black uppercase tracking-wider hover:bg-white/20 transition-all text-left flex items-center gap-3"
               >
                 <Scale size={18} className="opacity-40" />
                 {t("disputesNav")}
               </Link>
               <Link
                 href="/admin/messages"
-                className="w-full py-4 px-6 bg-white/10 rounded-2xl text-sm font-bold hover:bg-white/20 transition-all text-left flex items-center gap-3"
+                className="w-full min-h-[3rem] px-5 bg-white/10 rounded-2xl text-xs font-black uppercase tracking-wider hover:bg-white/20 transition-all text-left flex items-center gap-3"
               >
                 <MessageSquare size={18} className="opacity-40" />
                 {t("messagesTitle")}

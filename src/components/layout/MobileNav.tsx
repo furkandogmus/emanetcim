@@ -62,7 +62,17 @@ export default function MobileNav() {
   const items = navItemsForRole(session?.user?.role);
 
   const p = pathname ?? "";
-  if (p.includes("/login")) return null;
+  if (
+    p.includes("/login") ||
+    p.includes("/register") ||
+    p.includes("/auth/") ||
+    p.includes("/checkout/") ||
+    p.includes("/bookings/") ||
+    p.includes("/admin/") ||
+    p.includes("/partner/")
+  ) {
+    return null;
+  }
 
   const normalized = p.replace(/\/$/, "") || "/";
   if (session?.user?.role === "PARTNER" && normalized === "/partner") return null;
@@ -81,6 +91,7 @@ export default function MobileNav() {
               <li key={href} className="flex min-w-0 flex-1">
                 <Link
                   href={href}
+                  aria-current={active ? "page" : undefined}
                   className="flex w-full flex-col items-center gap-1 rounded-2xl py-2 px-1 transition-all duration-200 active:scale-90"
                 >
                   {/* Icon pill */}

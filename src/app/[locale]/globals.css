@@ -401,6 +401,70 @@
   }
   .btn-secondary:active { transform: scale(0.97); }
 
+  /* ── Standardized app button system ── */
+  .btn-ui {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease, transform 140ms ease;
+    border: 1px solid transparent;
+  }
+  .btn-ui:active { transform: scale(0.98); }
+  .btn-ui:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .btn-ui-sm { min-height: 2.25rem; padding: 0.5rem 0.875rem; font-size: 0.625rem; }
+  .btn-ui-md { min-height: 2.75rem; padding: 0.75rem 1rem; font-size: 0.6875rem; }
+  .btn-ui-lg { min-height: 3.25rem; padding: 0.875rem 1.25rem; font-size: 0.75rem; }
+
+  .btn-ui-primary {
+    background: hsl(21 90% 48%);
+    color: hsl(0 0% 100%);
+    box-shadow: 0 8px 18px -8px hsl(21 90% 48% / .55);
+  }
+  .btn-ui-primary:hover { background: hsl(21 86% 42%); }
+
+  .btn-ui-secondary {
+    background: hsl(0 0% 100%);
+    color: hsl(20 14% 22%);
+    border-color: hsl(30 8% 88%);
+  }
+  .btn-ui-secondary:hover {
+    background: hsl(30 10% 96%);
+    border-color: hsl(30 8% 82%);
+  }
+
+  .btn-ui-ghost {
+    background: hsl(30 10% 96%);
+    color: hsl(24 8% 35%);
+  }
+  .btn-ui-ghost:hover { background: hsl(30 10% 92%); }
+
+  .btn-ui-danger {
+    background: hsl(0 84% 96%);
+    color: hsl(0 74% 42%);
+    border-color: hsl(0 78% 90%);
+  }
+  .btn-ui-danger:hover {
+    background: hsl(0 84% 93%);
+    border-color: hsl(0 74% 84%);
+  }
+
+  .btn-ui-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.875rem;
+    padding: 0;
+  }
+
   /* ── Input/Form primitives ── */
   .input-brand {
     width: 100%;
