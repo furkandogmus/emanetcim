@@ -64,7 +64,7 @@ export default function BookingsClient({
         <p className="text-gray-500 max-w-xs mb-8 font-medium">{t('noBookingsDesc')}</p>
         <Link 
           href="/search" 
-          className="bg-orange-600 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-orange-200 hover:bg-orange-700 active:scale-95 transition-all"
+          className="btn-ui btn-ui-lg btn-ui-primary rounded-2xl"
         >
           {t('exploreShops')}
         </Link>
@@ -155,7 +155,7 @@ export default function BookingsClient({
                     (booking.status === "APPROVED" || booking.status === "PENDING") && (
                       <Link
                         href={`/bookings/${booking.id}/pay`}
-                        className="px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-widest bg-orange-600 text-white hover:bg-orange-700 transition-colors shadow-md shadow-orange-200"
+                        className="btn-ui btn-ui-md btn-ui-primary rounded-2xl"
                       >
                         {t("payBookingOpenCta")}
                       </Link>
@@ -164,7 +164,7 @@ export default function BookingsClient({
                     <button
                       type="button"
                       onClick={() => setModifyBooking(booking)}
-                      className="px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-widest text-gray-800 hover:bg-gray-100 transition-colors border border-gray-200"
+                      className="btn-ui btn-ui-md btn-ui-secondary rounded-2xl"
                     >
                       {t('modifyBooking')}
                     </button>
@@ -176,7 +176,7 @@ export default function BookingsClient({
                     <button
                       type="button"
                       onClick={() => setCancelModalBooking(booking)}
-                      className="px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-widest text-red-500 hover:bg-red-50 transition-colors border border-red-100"
+                      className="btn-ui btn-ui-md btn-ui-danger rounded-2xl"
                     >
                       {t('cancelBooking')}
                     </button>
@@ -185,7 +185,7 @@ export default function BookingsClient({
                   {booking.status === 'CHECKED_OUT' && (
                     <button 
                       onClick={() => setReviewBooking(booking)}
-                      className="px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-widest text-orange-600 hover:bg-orange-50 transition-colors border border-orange-100"
+                      className="btn-ui btn-ui-md btn-ui-secondary rounded-2xl text-orange-600 border-orange-100 hover:bg-orange-50"
                     >
                       {t('evaluate')}
                     </button>
@@ -194,7 +194,7 @@ export default function BookingsClient({
                   {booking.status === 'CHECKED_OUT' && !booking.dispute && (
                     <Link
                       href={`/bookings/${booking.id}/dispute`}
-                      className="px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-widest text-gray-600 hover:bg-gray-100 border border-gray-200"
+                      className="btn-ui btn-ui-md btn-ui-secondary rounded-2xl text-gray-600"
                     >
                       {t('complaint')}
                     </Link>
@@ -203,7 +203,7 @@ export default function BookingsClient({
                   {booking.status !== 'CANCELLED' && (
                     <Link 
                       href={`/bookings/${booking.id}`}
-                      className="flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-[1.25rem] text-xs font-black uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-gray-200 active:scale-95"
+                      className="btn-ui btn-ui-md btn-ui-primary rounded-[1.25rem] bg-gray-900 hover:bg-black shadow-xl shadow-gray-200"
                     >
                       <QrCode size={16} strokeWidth={2.5} />
                       {t('showQR')}
@@ -270,7 +270,7 @@ export default function BookingsClient({
               <button
                 type="button"
                 onClick={() => setCancelModalBooking(null)}
-                className="flex-1 py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider bg-gray-100 text-gray-800"
+                className="btn-ui btn-ui-md btn-ui-ghost flex-1 rounded-2xl"
               >
                 {t('modifyCancel')}
               </button>
@@ -303,7 +303,7 @@ export default function BookingsClient({
                     }
                   }
                 }}
-                className="flex-1 py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider bg-red-600 text-white disabled:opacity-50"
+                className="btn-ui btn-ui-md btn-ui-danger flex-1 rounded-2xl bg-red-600 text-white hover:bg-red-700"
               >
                 {cancelSubmitting ? '…' : t('cancelConfirmAction')}
               </button>

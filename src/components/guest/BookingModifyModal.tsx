@@ -149,7 +149,7 @@ export default function BookingModifyModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-100 text-gray-500"
+            className="btn-ui btn-ui-sm btn-ui-ghost btn-ui-icon rounded-full text-gray-500"
             aria-label="Close"
           >
             <X size={22} />
@@ -263,7 +263,7 @@ export default function BookingModifyModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider bg-gray-100 text-gray-800"
+            className="btn-ui btn-ui-md btn-ui-ghost flex-1 rounded-2xl"
           >
             {t("modifyCancel")}
           </button>
@@ -276,7 +276,7 @@ export default function BookingModifyModal({
               bagS + bagM + bagXl < 1 ||
               (booking.status === "PAID" && delta > 0.005)
             }
-            className="flex-1 py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider bg-gray-900 text-white disabled:opacity-40"
+            className="btn-ui btn-ui-md btn-ui-primary flex-1 rounded-2xl bg-gray-900 hover:bg-black text-white"
           >
             {saving ? "…" : t("modifySave")}
           </button>

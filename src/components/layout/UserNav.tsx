@@ -3,7 +3,7 @@
 import { signOut, useSession } from 'next-auth/react';
 import type { LucideIcon } from 'lucide-react';
 import { User, LogOut, Shield, Store, ChevronDown, Fingerprint } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
@@ -12,13 +12,32 @@ export default function UserNav() {
   const t = useTranslations('UserNav');
   const { data: session, status } = useSession();
   const [isOpen, setIsOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handlePointerDown = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsOpen(false);
+    };
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleEsc);
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleEsc);
+    };
+  }, [isOpen]);
 
   if (status === 'loading') return <div className="w-8 h-8 rounded-full bg-gray-100 animate-pulse" />;
   if (status === 'unauthenticated') {
     return (
       <Link 
         href="/login" 
-        className="text-xs font-black uppercase tracking-widest bg-orange-600 text-white px-6 py-3 rounded-full hover:bg-orange-700 transition-all shadow-lg shadow-orange-100 active:scale-95"
+        className="btn-ui btn-ui-md btn-ui-primary rounded-full"
       >
         {t('signIn')}
       </Link>
@@ -35,9 +54,12 @@ export default function UserNav() {
   const Icon = currentRole.icon;
 
   return (
-    <div className="relative">
+    <div className="relative" ref={menuRef}>
       <button 
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+        aria-haspopup="menu"
         className="flex items-center gap-3 bg-white border border-gray-100 p-2 pr-4 rounded-full shadow-sm hover:shadow-md transition-all active:scale-95"
       >
         <div className="w-8 h-8 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center font-bold text-sm">
@@ -56,6 +78,7 @@ export default function UserNav() {
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
+            role="menu"
             className="absolute right-0 mt-3 w-56 bg-white rounded-[2rem] shadow-2xl border border-gray-100 overflow-hidden z-[100]"
           >
             <div className="p-6 border-b border-gray-100 bg-gray-50/50">
@@ -70,6 +93,7 @@ export default function UserNav() {
               <Link 
                 href={session?.user?.role === 'PARTNER' ? '/partner' : session?.user?.role === 'ADMIN' ? '/admin' : '/bookings'}
                 onClick={() => setIsOpen(false)}
+                role="menuitem"
                 className="flex items-center gap-3 w-full p-4 hover:bg-gray-50 rounded-2xl transition-colors text-sm font-bold text-gray-700 cursor-pointer"
               >
                 <Icon size={18} />
@@ -80,6 +104,7 @@ export default function UserNav() {
                 <Link
                   href="/account/privacy"
                   onClick={() => setIsOpen(false)}
+                  role="menuitem"
                   className="flex items-center gap-3 w-full p-4 hover:bg-gray-50 rounded-2xl transition-colors text-sm font-bold text-gray-700 cursor-pointer"
                 >
                   <Fingerprint size={18} />
@@ -88,6 +113,8 @@ export default function UserNav() {
               ) : null}
               
               <button 
+                type="button"
+                role="menuitem"
                 onClick={() => signOut()}
                 className="flex items-center gap-3 w-full p-4 hover:bg-red-50 rounded-2xl transition-colors text-sm font-bold text-red-600"
               >

@@ -71,11 +71,12 @@ export default function ShopListItem({
           <div className="flex items-center gap-3">
             {lat && lng && (
               <button
+                type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
                 }}
-                className="p-2 bg-gray-50 hover:bg-orange-50 text-gray-400 hover:text-orange-600 rounded-xl transition-all"
+                className="btn-ui btn-ui-sm btn-ui-icon bg-gray-50 hover:bg-orange-50 text-gray-400 hover:text-orange-600"
                 title={t("getDirections")}
               >
                 <MapPin size={16} />

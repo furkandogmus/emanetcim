@@ -75,6 +75,7 @@ export default function AdminUsersClient({
   const [roleFilter, setRoleFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const iconBtnBase = "btn-ui btn-ui-md btn-ui-icon";
 
   const filteredUsers = users.filter(u => {
     const searchLower = search.toLowerCase();
@@ -91,6 +92,9 @@ export default function AdminUsersClient({
 
     return matchSearch && matchRole && matchStatus;
   });
+
+  const hasActiveFilters =
+    search.trim().length > 0 || roleFilter !== "ALL" || statusFilter !== "ALL";
 
   const handleToggleBan = async (id: string, currentBan: boolean) => {
     setLoadingId(id);
@@ -224,15 +228,34 @@ export default function AdminUsersClient({
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
-              type="text"
+              type="search"
               placeholder={t("searchUsersPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-12 pr-6 py-4 bg-white border border-gray-100 rounded-2xl w-full sm:w-64 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-bold text-sm"
             />
           </div>
+          {hasActiveFilters ? (
+            <button
+              type="button"
+              onClick={() => {
+                setSearch("");
+                setRoleFilter("ALL");
+                setStatusFilter("ALL");
+              }}
+              className="btn-ui btn-ui-md btn-ui-ghost"
+            >
+              Clear
+            </button>
+          ) : null}
         </div>
       </header>
+
+      <div className="mb-5 flex items-center justify-between">
+        <p className="text-xs font-black uppercase tracking-widest text-gray-400">
+          {filteredUsers.length} / {users.length} users
+        </p>
+      </div>
 
       {pendingRoleApprovalCount > 0 ? (
         <div className="mb-6 rounded-2xl border border-orange-200 bg-orange-50 px-6 py-4 text-sm font-bold text-orange-900 flex flex-wrap items-center justify-between gap-3">
@@ -248,7 +271,7 @@ export default function AdminUsersClient({
         </div>
       ) : null}
 
-      <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden hidden lg:block">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -329,7 +352,7 @@ export default function AdminUsersClient({
                         {!user.emailVerified && user.email && (
                           <button
                             onClick={() => handleResendMail(user.email!)}
-                            className="p-3 bg-gray-50 hover:bg-orange-50 text-gray-400 hover:text-orange-600 rounded-xl transition-all"
+                            className={`${iconBtnBase} bg-gray-50 hover:bg-orange-50 text-gray-400 hover:text-orange-600`}
                             title={t("resendVerification")}
                           >
                             <Mail size={18} />
@@ -339,7 +362,7 @@ export default function AdminUsersClient({
                           <button
                             onClick={() => handleMakeAdmin(user.id)}
                             disabled={loadingId === user.id}
-                            className="p-3 bg-purple-50 hover:bg-purple-100 text-purple-600 rounded-xl transition-all"
+                            className={`${iconBtnBase} bg-purple-50 hover:bg-purple-100 text-purple-600`}
                             title={t("makeAdmin")}
                           >
                             <ShieldPlus size={18} />
@@ -352,7 +375,7 @@ export default function AdminUsersClient({
                                 type="button"
                                 onClick={() => handleDemoteToPartner(user.id)}
                                 disabled={loadingId === user.id}
-                                className="p-3 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl transition-all"
+                                className={`${iconBtnBase} bg-blue-50 hover:bg-blue-100 text-blue-600`}
                                 title={t("demoteToPartner")}
                               >
                                 <Store size={18} />
@@ -361,7 +384,7 @@ export default function AdminUsersClient({
                                 type="button"
                                 onClick={() => handleDemoteToGuest(user.id)}
                                 disabled={loadingId === user.id}
-                                className="p-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all"
+                                className={`${iconBtnBase} bg-gray-100 hover:bg-gray-200 text-gray-700`}
                                 title={t("demoteToGuest")}
                               >
                                 <UserIcon size={18} />
@@ -371,7 +394,7 @@ export default function AdminUsersClient({
                         <button
                           onClick={() => handleToggleBan(user.id, user.isBanned)}
                           disabled={loadingId === user.id}
-                          className={`p-3 rounded-xl transition-all ${
+                          className={`${iconBtnBase} ${
                             user.isBanned 
                               ? "bg-green-50 text-green-600 hover:bg-green-100" 
                               : "bg-red-50 text-red-600 hover:bg-red-100"
@@ -383,7 +406,7 @@ export default function AdminUsersClient({
                         <button
                           onClick={() => handleDelete(user.id)}
                           disabled={loadingId === user.id}
-                          className="p-3 bg-gray-50 hover:bg-red-50 text-gray-400 hover:text-red-600 rounded-xl transition-all"
+                          className={`${iconBtnBase} bg-gray-50 hover:bg-red-50 text-gray-400 hover:text-red-600`}
                           title={t("deleteUser")}
                         >
                           <Trash2 size={18} />
@@ -401,6 +424,146 @@ export default function AdminUsersClient({
             </div>
           )}
         </div>
+      </div>
+
+      <div className="lg:hidden space-y-3">
+        <AnimatePresence>
+          {filteredUsers.map((user) => (
+            <motion.article
+              key={user.id}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 4 }}
+              className="rounded-3xl border border-gray-100 bg-white p-4 shadow-sm"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-sm ${user.isBanned ? "bg-red-50 text-red-600" : "bg-gray-50 text-gray-900"}`}>
+                    {user.name?.[0]?.toUpperCase() || "?"}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-bold text-gray-900 truncate">{user.name || "N/A"}</p>
+                    <p className="text-xs text-gray-400 font-bold truncate">{user.email}</p>
+                  </div>
+                </div>
+                <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
+                  user.role === Role.ADMIN ? "bg-purple-50 text-purple-600" :
+                  user.role === Role.PARTNER ? "bg-blue-50 text-blue-600" : "bg-gray-100 text-gray-600"
+                }`}>
+                  {user.role}
+                </span>
+              </div>
+
+              <div className="mt-3 flex items-center justify-between gap-2">
+                <span className="text-xs font-mono text-gray-500 font-bold truncate">{user.lastIp || "—"}</span>
+                {user.lastIp ? (
+                  <button
+                    type="button"
+                    onClick={() => handleBlockIp(user.lastIp!)}
+                    className="btn-ui btn-ui-sm btn-ui-icon bg-gray-50 text-gray-500 hover:text-red-500 hover:bg-red-50"
+                    title={t("blockThisIp")}
+                  >
+                    <ShieldX size={14} />
+                  </button>
+                ) : null}
+              </div>
+
+              <div className="mt-3 flex flex-wrap gap-2">
+                {user.isBanned ? (
+                  <span className="inline-flex items-center gap-1.5 text-red-600 text-[10px] font-black uppercase tracking-widest">
+                    <ShieldX size={12} />
+                    {t("banned")}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 text-green-600 text-[10px] font-black uppercase tracking-widest">
+                    <ShieldCheck size={12} />
+                    {t("active")}
+                  </span>
+                )}
+                {!user.emailVerified ? (
+                  <span className="inline-flex items-center gap-1.5 text-orange-500 text-[10px] font-black uppercase tracking-widest">
+                    <Activity size={12} className="animate-pulse" />
+                    {t("unverified")}
+                  </span>
+                ) : null}
+              </div>
+
+              <div className="mt-4 grid grid-cols-4 gap-2">
+                {!user.emailVerified && user.email && (
+                  <button
+                    type="button"
+                    onClick={() => handleResendMail(user.email!)}
+                    className={`${iconBtnBase} bg-gray-50 hover:bg-orange-50 text-gray-400 hover:text-orange-600`}
+                    title={t("resendVerification")}
+                  >
+                    <Mail size={18} />
+                  </button>
+                )}
+                {user.role !== Role.ADMIN && (
+                  <button
+                    type="button"
+                    onClick={() => handleMakeAdmin(user.id)}
+                    disabled={loadingId === user.id}
+                    className={`${iconBtnBase} bg-purple-50 hover:bg-purple-100 text-purple-600`}
+                    title={t("makeAdmin")}
+                  >
+                    <ShieldPlus size={18} />
+                  </button>
+                )}
+                {user.role === Role.ADMIN &&
+                  user.id !== currentAdminId && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => handleDemoteToPartner(user.id)}
+                        disabled={loadingId === user.id}
+                        className={`${iconBtnBase} bg-blue-50 hover:bg-blue-100 text-blue-600`}
+                        title={t("demoteToPartner")}
+                      >
+                        <Store size={18} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDemoteToGuest(user.id)}
+                        disabled={loadingId === user.id}
+                        className={`${iconBtnBase} bg-gray-100 hover:bg-gray-200 text-gray-700`}
+                        title={t("demoteToGuest")}
+                      >
+                        <UserIcon size={18} />
+                      </button>
+                    </>
+                  )}
+                <button
+                  type="button"
+                  onClick={() => handleToggleBan(user.id, user.isBanned)}
+                  disabled={loadingId === user.id}
+                  className={`${iconBtnBase} ${
+                    user.isBanned
+                      ? "bg-green-50 text-green-600 hover:bg-green-100"
+                      : "bg-red-50 text-red-600 hover:bg-red-100"
+                  }`}
+                  title={user.isBanned ? t("unbanUser") : t("banUser")}
+                >
+                  {user.isBanned ? <UserCheck size={18} /> : <ShieldAlert size={18} />}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDelete(user.id)}
+                  disabled={loadingId === user.id}
+                  className={`${iconBtnBase} bg-gray-50 hover:bg-red-50 text-gray-400 hover:text-red-600`}
+                  title={t("deleteUser")}
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
+            </motion.article>
+          ))}
+        </AnimatePresence>
+        {filteredUsers.length === 0 && (
+          <div className="py-14 text-center bg-white rounded-3xl border border-gray-100">
+            <p className="text-xs font-black uppercase tracking-widest text-gray-400">{t("noUsersFound")}</p>
+          </div>
+        )}
       </div>
     </div>
   );
