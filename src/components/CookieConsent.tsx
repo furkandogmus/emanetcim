@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
+import { usePathname } from "next/navigation";
 import { Cookie } from "lucide-react";
 import { COOKIE_CONSENT_STORAGE_KEY } from "@/lib/cookie-consent-storage-key";
 
@@ -18,6 +19,7 @@ declare global {
 
 export default function CookieConsent() {
   const t = useTranslations("CookieConsent");
+  const pathname = usePathname();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -44,14 +46,22 @@ export default function CookieConsent() {
     );
   }, []);
 
-  if (!visible) return null;
+  const p = pathname ?? "";
+  const hideOnCriticalFlow =
+    p.includes("/checkout/") ||
+    p.includes("/shop/") ||
+    p.includes("/login") ||
+    p.includes("/register") ||
+    p.includes("/auth/");
+
+  if (!visible || hideOnCriticalFlow) return null;
 
   return (
     <div
       role="dialog"
       aria-labelledby="cookie-consent-title"
       data-testid="cookie-consent-banner"
-      className="fixed bottom-0 left-0 right-0 z-[100] border-t border-gray-200 bg-white/95 p-4 shadow-[0_-8px_30px_rgba(0,0,0,0.08)] backdrop-blur-md md:p-6"
+      className="fixed left-0 right-0 z-[100] border-t border-gray-200 bg-white/95 p-4 shadow-[0_-8px_30px_rgba(0,0,0,0.08)] backdrop-blur-md md:bottom-0 md:p-6 bottom-[calc(5rem+env(safe-area-inset-bottom))]"
     >
       <div className="mx-auto flex max-w-7xl flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex gap-3">

@@ -215,12 +215,20 @@ export default function BookingsClient({
           </div>
 
           <div className="mt-4">
-            <Link
-              href={`/bookings/${featuredBooking.id}`}
-              className="btn-ui btn-ui-lg btn-ui-primary w-full rounded-2xl"
-            >
-              {t('showQR')}
-            </Link>
+            <div className="grid grid-cols-2 gap-3">
+              <Link
+                href={`/bookings/${featuredBooking.id}`}
+                className="btn-ui btn-ui-lg btn-ui-primary w-full rounded-2xl"
+              >
+                {t('showQR')}
+              </Link>
+              <Link
+                href={`/bookings/${featuredBooking.id}`}
+                className="btn-ui btn-ui-lg btn-ui-secondary w-full rounded-2xl"
+              >
+                {t('backToBookings')}
+              </Link>
+            </div>
           </div>
         </article>
 

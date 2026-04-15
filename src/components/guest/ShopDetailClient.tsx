@@ -125,10 +125,10 @@ export default function ShopDetailClient({
           </div>
           <div className="absolute inset-x-4 -bottom-12 z-10 rounded-[1.75rem] bg-white p-5 shadow-2xl shadow-gray-300/60">
             <div className="flex items-start justify-between gap-3">
-              <h1 className="text-[1.9rem] leading-[1.05] font-black text-gray-900">
+              <h1 className="min-w-0 flex-1 break-words text-[1.65rem] sm:text-[1.9rem] leading-[1.05] font-black text-gray-900">
                 {shop.name}
               </h1>
-              <div className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-700">
+              <div className="shrink-0 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-700">
                 <Star size={12} fill="currentColor" />
                 {rating.toFixed(1)}
               </div>
@@ -137,10 +137,10 @@ export default function ShopDetailClient({
               <MapPin size={14} /> {shop.address?.split(",")[0] || t("cityFallback")}
             </p>
             <div className="mt-4 grid grid-cols-2 gap-2">
-              <span className="rounded-xl bg-indigo-50 px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-indigo-700">
+              <span className="rounded-xl bg-indigo-50 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-indigo-700">
                 {mobileCopy.verifiedPartner}
               </span>
-              <span className="rounded-xl bg-emerald-50 px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-emerald-700">
+              <span className="rounded-xl bg-emerald-50 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-emerald-700">
                 {mobileCopy.insuredStorage}
               </span>
             </div>
@@ -205,7 +205,7 @@ export default function ShopDetailClient({
         <div className="fixed inset-x-0 bottom-0 z-20 border-t border-gray-100 bg-white/95 px-4 pb-5 pt-3 backdrop-blur-xl">
           <div className="mx-auto flex max-w-lg items-center gap-3">
             <div className="flex-1">
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">{mobileCopy.totalForDay}</p>
+              <p className="text-xs font-black uppercase tracking-widest text-gray-400">{mobileCopy.totalForDay}</p>
               <p className="text-3xl font-black text-gray-900">
                 {mobileTwoBagTotal} <span className="text-base text-gray-500">{mobileCopy.perDay}</span>
               </p>

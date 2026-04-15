@@ -19,6 +19,7 @@ import type { ShopSearchHit } from "@/services/ShopService";
 import { parseDatetimeLocal, toDatetimeLocalValue } from "@/lib/datetime-local";
 import { refreshSearchShopsAction } from "@/actions/search-shops";
 import { toast } from "sonner";
+import { STORAGE_CITIES } from "@/lib/storage-cities";
 import {
   PLAUSIBLE_EVENTS,
   trackPlausibleEvent,
@@ -68,6 +69,7 @@ export default function SearchClient({
   const [datesReady, setDatesReady] = useState(false);
   const [requestedBags, setRequestedBags] = useState(1);
   const [filterDirty, setFilterDirty] = useState(false);
+  const [dynamicCenter, setDynamicCenter] = useState(searchCenter);
 
   useEffect(() => {
     setCheckInLocal(toDatetimeLocalValue(new Date(defaultCheckInIso)));
@@ -91,8 +93,8 @@ export default function SearchClient({
         checkInIso: checkIn.toISOString(),
         checkOutIso: checkOut.toISOString(),
         requestedBags,
-        centerLat: searchCenter.lat,
-        centerLng: searchCenter.lng,
+        centerLat: dynamicCenter.lat,
+        centerLng: dynamicCenter.lng,
       });
       if (res.ok) {
         setNearbyList(res.nearby as ShopSearchHit[]);
@@ -118,9 +120,41 @@ export default function SearchClient({
     requestedBags,
     tErr,
     t,
-    searchCenter.lat,
-    searchCenter.lng,
+    dynamicCenter.lat,
+    dynamicCenter.lng,
   ]);
+
+  useEffect(() => {
+    const normalize = (v: string) =>
+      v
+        .toLocaleLowerCase("tr")
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "")
+        .trim();
+    const q = normalize(searchQuery);
+    if (q.length < 3) return;
+
+    const matchedCity = STORAGE_CITIES.find((city) => {
+      const slug = normalize(city.slug.replace(/-/g, " "));
+      if (q === slug) return true;
+      if (q.includes(slug)) return true;
+      // Popular Turkish aliases for city typing.
+      if (city.slug === "ankara" && (q === "ankara" || q.includes("ankara")))
+        return true;
+      if (city.slug === "istanbul" && (q === "istanbul" || q.includes("istanbul")))
+        return true;
+      if (city.slug === "izmir" && (q === "izmir" || q.includes("izmir")))
+        return true;
+      return false;
+    });
+    if (!matchedCity) return;
+
+    setDynamicCenter((prev) => {
+      if (prev.lat === matchedCity.lat && prev.lng === matchedCity.lng) return prev;
+      setFilterDirty(true);
+      return { lat: matchedCity.lat, lng: matchedCity.lng };
+    });
+  }, [searchQuery]);
 
   const onSelectShop = useCallback(
     (id: string) => {
@@ -148,8 +182,8 @@ export default function SearchClient({
   const markFiltersDirty = () => setFilterDirty(true);
 
   return (
-    <div className="flex flex-col h-screen bg-white font-sans selection:bg-orange-100">
-      <header className="px-4 pt-4 pb-3 border-b border-gray-100 bg-white/80 backdrop-blur-xl z-20 sticky top-0 max-h-[55vh] overflow-y-auto md:max-h-none">
+    <div className="flex flex-col min-h-[100svh] bg-white font-sans selection:bg-orange-100">
+      <header className="px-4 pt-4 pb-3 border-b border-gray-100 bg-white/80 backdrop-blur-xl z-20 sticky top-0 max-h-[52svh] overflow-y-auto md:max-h-none">
         <div className="flex items-center gap-3 mb-3">
           <Link
             href="/"
@@ -185,12 +219,12 @@ export default function SearchClient({
             className="mb-3 space-y-2 rounded-2xl border border-gray-100 bg-gray-50/80 p-3"
             data-testid="search-stay-filters"
           >
-            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+            <p className="text-xs font-black uppercase tracking-widest text-gray-400">
               {t("searchStayWindow")}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <label className="flex flex-col gap-1">
-                <span className="text-[9px] font-bold text-gray-400 uppercase">
+                <span className="text-xs font-bold text-gray-400 uppercase">
                   {t("searchCheckIn")}
                 </span>
                 <div className="flex items-center gap-2 rounded-xl bg-white border border-gray-100 px-2 py-1.5">
@@ -208,7 +242,7 @@ export default function SearchClient({
                 </div>
               </label>
               <label className="flex flex-col gap-1">
-                <span className="text-[9px] font-bold text-gray-400 uppercase">
+                <span className="text-xs font-bold text-gray-400 uppercase">
                   {t("searchCheckOut")}
                 </span>
                 <div className="flex items-center gap-2 rounded-xl bg-white border border-gray-100 px-2 py-1.5">
@@ -227,7 +261,7 @@ export default function SearchClient({
               </label>
             </div>
             <div className="flex items-center justify-between gap-3 pt-1">
-              <span className="text-[9px] font-bold text-gray-400 uppercase">
+              <span className="text-xs font-bold text-gray-400 uppercase">
                 {t("searchBagCount")}
               </span>
               <div className="flex items-center gap-3">
@@ -338,7 +372,7 @@ export default function SearchClient({
       </header>
 
       <main className="flex-1 flex flex-col md:flex-row overflow-hidden relative min-h-0">
-        <div className="w-full md:w-1/3 lg:w-1/4 h-1/2 md:h-full overflow-y-auto p-4 flex flex-col gap-4 bg-gray-50/50 border-r border-gray-100 order-2 md:order-1">
+        <div className="w-full md:w-1/3 lg:w-1/4 h-auto md:h-full overflow-y-auto p-4 flex flex-col gap-4 bg-gray-50/50 border-r border-gray-100 order-2 md:order-1 min-h-0">
           <div className="flex justify-between items-center px-1 mb-2">
             <h2
               data-testid="nearby-heading"
@@ -398,7 +432,7 @@ export default function SearchClient({
           )}
         </div>
 
-        <div className="flex-1 h-1/2 md:h-full bg-gray-100 relative order-1 md:order-2 overflow-hidden min-h-0">
+        <div className="flex-1 h-[34svh] md:h-full bg-gray-100 relative order-1 md:order-2 overflow-hidden min-h-[220px]">
           <SearchMap
             key={filteredShops.map((s) => s.id).join("_")}
             shops={filteredShops}
