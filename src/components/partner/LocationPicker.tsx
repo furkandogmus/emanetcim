@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Navigation, Loader2, MapPin, CheckCircle2 } from "lucide-react";
 import { TR_CITIES } from "@/lib/tr-cities";
+import { useTranslations } from "next-intl";
 
 export interface LocationValue {
   address: string;
@@ -16,6 +17,14 @@ interface Props {
   value: LocationValue;
   onChange: (val: LocationValue) => void;
 }
+
+type AddressParts = {
+  street: string;
+  neighborhood: string;
+  buildingNo: string;
+  doorNo: string;
+  postalCode: string;
+};
 
 const TR_CENTER = { lat: 39.0, lng: 35.0 };
 
@@ -67,7 +76,58 @@ async function reverseGeocode(lat: number, lng: number): Promise<Partial<Locatio
   return { city, district, address, latitude: lat, longitude: lng };
 }
 
+function parseAddressParts(address: string): AddressParts {
+  if (!address) {
+    return { street: "", neighborhood: "", buildingNo: "", doorNo: "", postalCode: "" };
+  }
+  const trimmed = address.trim();
+  const postalMatch = trimmed.match(/\b\d{5}\b/);
+  const postalCode = postalMatch?.[0] ?? "";
+  const withoutPostal = postalCode
+    ? trimmed.replace(new RegExp(`\\b${postalCode}\\b`), "").trim()
+    : trimmed;
+
+  const doorMatch = withoutPostal.match(/\bDaire[:\s-]*([A-Za-z0-9/-]+)\b/i);
+  const doorNo = doorMatch?.[1] ?? "";
+  const withoutDoor = doorMatch
+    ? withoutPostal.replace(doorMatch[0], "").trim()
+    : withoutPostal;
+
+  const aptMatch = withoutDoor.match(/\bNo[:\s-]*([A-Za-z0-9/-]+)\b/i);
+  if (aptMatch) {
+    const body = withoutDoor.replace(aptMatch[0], "").trim();
+    return {
+      street: body,
+      neighborhood: "",
+      buildingNo: aptMatch[1] ?? "",
+      doorNo,
+      postalCode,
+    };
+  }
+
+  const tokens = trimmed.split(/\s+/);
+  const last = tokens[tokens.length - 1] ?? "";
+  const buildingNo = /^\d+[A-Za-z/-]*$/.test(last) ? last : "";
+  const body = buildingNo ? tokens.slice(0, -1).join(" ") : trimmed;
+  return { street: body, neighborhood: "", buildingNo, doorNo, postalCode };
+}
+
+function composeAddress(parts: AddressParts): string {
+  const normalizedPostal = parts.postalCode.replace(/\D/g, "").slice(0, 5);
+  return [
+    parts.street.trim(),
+    parts.neighborhood.trim(),
+    parts.buildingNo.trim() ? `No:${parts.buildingNo.trim()}` : "",
+    parts.doorNo.trim() ? `Daire:${parts.doorNo.trim()}` : "",
+    normalizedPostal,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+}
+
 export default function LocationPicker({ value, onChange }: Props) {
+  const t = useTranslations("Partner");
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<import("maplibre-gl").Map | null>(null);
   const markerRef = useRef<import("maplibre-gl").Marker | null>(null);
@@ -78,6 +138,13 @@ export default function LocationPicker({ value, onChange }: Props) {
   const [geocoding, setGeocoding] = useState(false);
   const [locError, setLocError] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(!!value.latitude);
+  const [addressParts, setAddressParts] = useState<AddressParts>(() =>
+    parseAddressParts(value.address)
+  );
+
+  useEffect(() => {
+    setAddressParts(parseAddressParts(value.address));
+  }, [value.address]);
 
   /* ── Marker yardımcısı ── */
   const placeMarker = useCallback(
@@ -113,7 +180,16 @@ export default function LocationPicker({ value, onChange }: Props) {
         setGeocoding(true);
         try {
           const geo = await reverseGeocode(pos.lat, pos.lng);
-          onChangeRef.current({ address: "", city: "", district: "", ...geo, latitude: pos.lat, longitude: pos.lng });
+          const initialParts = parseAddressParts(geo.address ?? "");
+          setAddressParts(initialParts);
+          onChangeRef.current({
+            address: composeAddress(initialParts),
+            city: "",
+            district: "",
+            ...geo,
+            latitude: pos.lat,
+            longitude: pos.lng,
+          });
           setConfirmed(true);
         } finally {
           setGeocoding(false);
@@ -166,7 +242,16 @@ export default function LocationPicker({ value, onChange }: Props) {
         setGeocoding(true);
         try {
           const geo = await reverseGeocode(lat, lng);
-          onChangeRef.current({ address: "", city: "", district: "", ...geo, latitude: lat, longitude: lng });
+          const initialParts = parseAddressParts(geo.address ?? "");
+          setAddressParts(initialParts);
+          onChangeRef.current({
+            address: composeAddress(initialParts),
+            city: "",
+            district: "",
+            ...geo,
+            latitude: lat,
+            longitude: lng,
+          });
           setConfirmed(true);
         } finally {
           setGeocoding(false);
@@ -207,7 +292,7 @@ export default function LocationPicker({ value, onChange }: Props) {
   /* ── GPS ── */
   const handleLocateMe = useCallback(() => {
     if (!navigator.geolocation) {
-      setLocError("Tarayıcınız konum desteklemiyor.");
+      setLocError(t("locationBrowserUnsupported"));
       return;
     }
     setLocating(true);
@@ -218,7 +303,16 @@ export default function LocationPicker({ value, onChange }: Props) {
         setGeocoding(true);
         try {
           const geo = await reverseGeocode(lat, lng);
-          onChangeRef.current({ address: "", city: "", district: "", ...geo, latitude: lat, longitude: lng });
+          const initialParts = parseAddressParts(geo.address ?? "");
+          setAddressParts(initialParts);
+          onChangeRef.current({
+            address: composeAddress(initialParts),
+            city: "",
+            district: "",
+            ...geo,
+            latitude: lat,
+            longitude: lng,
+          });
           setConfirmed(true);
         } catch {
           onChangeRef.current({ address: "", city: "", district: "", latitude: lat, longitude: lng });
@@ -231,14 +325,14 @@ export default function LocationPicker({ value, onChange }: Props) {
       (err) => {
         setLocError(
           err.code === 1
-            ? "Konum izni reddedildi. Tarayıcı ayarlarından izin verin."
-            : "Konum alınamadı, tekrar deneyin."
+            ? null
+            : t("locationGenericError")
         );
         setLocating(false);
       },
       { enableHighAccuracy: true, timeout: 12_000 }
     );
-  }, []);
+  }, [t]);
 
   const isLoading = locating || geocoding;
 
@@ -258,7 +352,11 @@ export default function LocationPicker({ value, onChange }: Props) {
         ) : (
           <Navigation size={20} />
         )}
-        {locating ? "Konum alınıyor…" : geocoding ? "Adres tespit ediliyor…" : "Konumumu Bul"}
+        {locating
+          ? t("locationDetecting")
+          : geocoding
+            ? t("locationResolvingAddress")
+            : t("locationLocateMe")}
       </button>
 
       {locError && (
@@ -275,7 +373,7 @@ export default function LocationPicker({ value, onChange }: Props) {
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl px-4 py-3 flex flex-col items-center gap-1 shadow-sm">
               <MapPin size={22} className="text-orange-400" />
               <p className="text-xs text-gray-500 font-semibold">
-                Butona bas veya haritaya tıkla
+                {t("locationHintTapMap")}
               </p>
             </div>
           </div>
@@ -286,7 +384,7 @@ export default function LocationPicker({ value, onChange }: Props) {
           <div className="absolute inset-0 flex items-center justify-center bg-black/10 backdrop-blur-[1px]">
             <div className="bg-white rounded-2xl px-4 py-3 flex items-center gap-2 shadow-lg">
               <Loader2 size={16} className="animate-spin text-orange-500" />
-              <span className="text-xs font-bold text-gray-700">Adres tespit ediliyor…</span>
+              <span className="text-xs font-bold text-gray-700">{t("locationResolvingAddress")}</span>
             </div>
           </div>
         )}
@@ -298,7 +396,7 @@ export default function LocationPicker({ value, onChange }: Props) {
           <div className="flex items-center gap-2">
             <CheckCircle2 size={15} className="text-orange-500 shrink-0" />
             <span className="text-[11px] font-black text-orange-600 uppercase tracking-widest">
-              Konum Tespit Edildi
+              {t("locationDetectedTitle")}
             </span>
           </div>
 
@@ -321,6 +419,74 @@ export default function LocationPicker({ value, onChange }: Props) {
             </p>
           )}
 
+          <div className="mt-1 grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <input
+              type="text"
+              value={addressParts.street}
+              onChange={(e) => {
+                const next = { ...addressParts, street: e.target.value };
+                setAddressParts(next);
+                onChangeRef.current({ ...value, address: composeAddress(next) });
+              }}
+              placeholder="Cadde / Sokak"
+              aria-label={t("locationStreetPlaceholder")}
+              className="ui-field min-h-[2.4rem] bg-white"
+            />
+            <input
+              type="text"
+              value={addressParts.neighborhood}
+              onChange={(e) => {
+                const next = { ...addressParts, neighborhood: e.target.value };
+                setAddressParts(next);
+                onChangeRef.current({ ...value, address: composeAddress(next) });
+              }}
+              placeholder="Mahalle"
+              aria-label={t("locationNeighborhoodPlaceholder")}
+              className="ui-field min-h-[2.4rem] bg-white"
+            />
+            <input
+              type="text"
+              value={addressParts.buildingNo}
+              onChange={(e) => {
+                const next = { ...addressParts, buildingNo: e.target.value };
+                setAddressParts(next);
+                onChangeRef.current({ ...value, address: composeAddress(next) });
+              }}
+              placeholder="Bina No"
+              aria-label={t("locationBuildingNoPlaceholder")}
+              className="ui-field min-h-[2.4rem] bg-white"
+            />
+          </div>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <input
+              type="text"
+              value={addressParts.doorNo}
+              onChange={(e) => {
+                const next = { ...addressParts, doorNo: e.target.value };
+                setAddressParts(next);
+                onChangeRef.current({ ...value, address: composeAddress(next) });
+              }}
+              placeholder="Daire No"
+              aria-label={t("locationDoorNoPlaceholder")}
+              className="ui-field min-h-[2.4rem] bg-white"
+            />
+            <input
+              type="text"
+              inputMode="numeric"
+              maxLength={5}
+              value={addressParts.postalCode}
+              onChange={(e) => {
+                const onlyDigits = e.target.value.replace(/\D/g, "").slice(0, 5);
+                const next = { ...addressParts, postalCode: onlyDigits };
+                setAddressParts(next);
+                onChangeRef.current({ ...value, address: composeAddress(next) });
+              }}
+              placeholder="Posta Kodu"
+              aria-label={t("locationPostalCodePlaceholder")}
+              className="ui-field min-h-[2.4rem] bg-white"
+            />
+          </div>
+
           <p className="text-[10px] text-gray-400 font-mono">
             {value.latitude.toFixed(5)}, {value.longitude!.toFixed(5)}
           </p>
@@ -329,6 +495,13 @@ export default function LocationPicker({ value, onChange }: Props) {
             type="button"
             onClick={() => {
               onChange({ address: "", city: "", district: "", latitude: null, longitude: null });
+              setAddressParts({
+                street: "",
+                neighborhood: "",
+                buildingNo: "",
+                doorNo: "",
+                postalCode: "",
+              });
               setConfirmed(false);
               markerRef.current?.remove();
               markerRef.current = null;
@@ -336,7 +509,7 @@ export default function LocationPicker({ value, onChange }: Props) {
             }}
             className="text-[11px] text-gray-400 hover:text-red-500 font-semibold mt-1 self-start transition-colors"
           >
-            Konumu sıfırla
+            {t("locationReset")}
           </button>
         </div>
       )}

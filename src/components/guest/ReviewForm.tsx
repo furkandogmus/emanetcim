@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { X, Loader2, Send } from 'lucide-react';
 import { addReviewAction } from '@/actions/review';
 import StarRating from '@/components/common/StarRating';
+import { toast } from "sonner";
 
 interface ReviewFormProps {
   bookingId: string;
@@ -44,7 +45,7 @@ export default function ReviewForm({
     if (res.success) {
       onSuccess();
     } else {
-      alert(res.error || t("Review.error"));
+      toast.error(res.error || t("Review.error"));
     }
   };
 

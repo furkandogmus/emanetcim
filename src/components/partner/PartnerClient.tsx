@@ -17,6 +17,7 @@ import {
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { moneyToNumber } from "@/lib/money";
+import { toast } from "sonner";
 import QRScanner from "@/components/partner/QRScanner";
 import PartnerShopSettingsForm from "@/components/partner/PartnerShopSettingsForm";
 import {
@@ -115,6 +116,22 @@ export default function PartnerClient({
   /** Çok valizli check-in: önce mühür fotoğrafı, sonra numara özeti + onay. */
   const [checkInPhase, setCheckInPhase] = useState<"photo" | "review">("photo");
   const checkInPhotoAnchorRef = useRef<HTMLDivElement>(null);
+  const [confirmState, setConfirmState] = useState<{
+    open: boolean;
+    message: string;
+    onConfirm: null | (() => void);
+  }>({ open: false, message: "", onConfirm: null });
+
+  const showError = useCallback(
+    (message?: string | null) => {
+      toast.error(message || t("checkInFailed"));
+    },
+    [t]
+  );
+
+  const askConfirm = useCallback((message: string, onConfirm: () => void) => {
+    setConfirmState({ open: true, message, onConfirm });
+  }, []);
 
   const applyPreviewForCheckIn = useCallback(
     async (raw: string, closeScanner: boolean) => {
@@ -122,12 +139,12 @@ export default function PartnerClient({
       try {
         const preview = await getPartnerBookingPreviewAction(raw);
         if (!preview.success) {
-          alert(preview.error);
+          showError(preview.error);
           return;
         }
         // BookingService.checkIn: PAID veya APPROVED (onay sonrası dükkanda ödeme / QR ile teslim alma)
         if (preview.status !== "PAID" && preview.status !== "APPROVED") {
-          alert(t("checkInNotReady", { status: preview.status }));
+          showError(t("checkInNotReady", { status: preview.status }));
           return;
         }
         if (closeScanner) setIsScanning(false);
@@ -147,7 +164,7 @@ export default function PartnerClient({
         setPreviewLoading(false);
       }
     },
-    [t]
+    [showError, t]
   );
 
   const handleApprove = async (id: string) => {
@@ -159,20 +176,21 @@ export default function PartnerClient({
       setTimeout(() => setSuccessBanner(null), 3000);
       router.refresh();
     } else {
-      alert(res.error);
+      showError(res.error);
     }
   };
 
   const handleReject = async (id: string) => {
-    if (!confirm(t("confirmReject"))) return;
-    setIsProcessing(true);
-    const res = await rejectBookingAction(id);
-    setIsProcessing(false);
-    if (res.success) {
-      router.refresh();
-    } else {
-      alert(res.error);
-    }
+    askConfirm(t("confirmReject"), async () => {
+      setIsProcessing(true);
+      const res = await rejectBookingAction(id);
+      setIsProcessing(false);
+      if (res.success) {
+        router.refresh();
+      } else {
+        showError(res.error);
+      }
+    });
   };
 
   // Otomatik mühür atama için mühürleri tazele
@@ -186,7 +204,7 @@ export default function PartnerClient({
       );
       if (res.seals.length < count) {
         setSealRows([]);
-        alert(t("checkInFailed"));
+        showError(t("checkInFailed"));
         return;
       }
       setSealRows(
@@ -197,9 +215,9 @@ export default function PartnerClient({
       );
     } else {
       setSealRows([]);
-      alert(res.error);
+      showError(res.error);
     }
-  }, [shopId, scanResult, t]);
+  }, [shopId, scanResult, showError, t]);
 
   useEffect(() => {
     if (scanResult && scanResult.totalBags > 0 && sealRows.length === 0) {
@@ -215,7 +233,7 @@ export default function PartnerClient({
     // Sunucu tarafında mühürü hatalı işaretle
     const res = await reportFaultySealAction(sn, shopId);
     if (!res.success) {
-      alert(res.error);
+      showError(res.error);
       return;
     }
 
@@ -237,28 +255,26 @@ export default function PartnerClient({
           router.refresh();
           return true;
         }
-        alert(result.error || t("checkoutFailed"));
+        showError(result.error || t("checkoutFailed"));
         return false;
       } finally {
         setCheckingOutId(null);
       }
     },
-    [pathname, router, t]
+    [pathname, router, showError, t]
   );
 
   const openCheckoutFlow = useCallback(
     async (bookingId: string, onCancelConfirm?: () => void) => {
       const res = await getPartnerBookingSealsAction(bookingId);
       if (!res.success) {
-        alert(res.error);
+        showError(res.error);
         return;
       }
       if (res.seals.length === 0) {
-        if (!confirm(t("confirmCheckout"))) {
-          onCancelConfirm?.();
-          return;
-        }
-        await executeCheckout(bookingId);
+        askConfirm(t("confirmCheckout"), async () => {
+          await executeCheckout(bookingId);
+        });
         return;
       }
       setCheckoutOpen({ bookingId, seals: res.seals });
@@ -268,7 +284,7 @@ export default function PartnerClient({
       }
       setSealConfirmChecks(init);
     },
-    [executeCheckout, t]
+    [askConfirm, executeCheckout, showError, t]
   );
 
   const confirmCheckoutWithSeals = async () => {
@@ -277,7 +293,7 @@ export default function PartnerClient({
       (s) => sealConfirmChecks[s.sealNumber]
     );
     if (!allOk) {
-      alert(t("checkoutSealConfirmEach"));
+      showError(t("checkoutSealConfirmEach"));
       return;
     }
     const id = checkoutOpen.bookingId;
@@ -293,11 +309,11 @@ export default function PartnerClient({
       try {
         const preview = await getPartnerBookingPreviewAction(bookingId);
         if (!preview.success) {
-          alert(preview.error);
+          showError(preview.error);
           return;
         }
         if (preview.status !== "CHECKED_IN") {
-          alert(t("checkoutNotReady", { status: preview.status }));
+          showError(t("checkoutNotReady", { status: preview.status }));
           return;
         }
         await openCheckoutFlow(bookingId, () => router.replace(pathname));
@@ -305,7 +321,7 @@ export default function PartnerClient({
         setPreviewLoading(false);
       }
     },
-    [openCheckoutFlow, pathname, router, t]
+    [openCheckoutFlow, pathname, router, showError, t]
   );
 
   useEffect(() => {
@@ -370,12 +386,12 @@ export default function PartnerClient({
     const tb = scanResult.totalBags;
     if (tb > 0) {
       if (!sealPhoto) {
-        alert(t("takeSealPhotoAlert"));
+        showError(t("takeSealPhotoAlert"));
         setCheckInPhase("photo");
         return;
       }
       if (sealRows.length !== tb) {
-        alert(t("checkInFailed"));
+        showError(t("checkInFailed"));
         return;
       }
     }
@@ -399,7 +415,7 @@ export default function PartnerClient({
       setTimeout(() => setSuccessBanner(null), 3000);
       router.refresh();
     } else {
-      alert(result.error || t("checkInFailed"));
+      showError(result.error || t("checkInFailed"));
     }
   };
 
@@ -494,7 +510,7 @@ export default function PartnerClient({
                   type="button"
                   onClick={() => {
                     if (!sealPhoto) {
-                      alert(t("takeSealPhotoAlert"));
+                        showError(t("takeSealPhotoAlert"));
                       return;
                     }
                     setCheckInPhase("review");
@@ -712,6 +728,34 @@ export default function PartnerClient({
                 ) : (
                   t("confirmCheckoutSeals")
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmState.open && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 backdrop-blur-sm p-4">
+          <div className="ui-card w-full max-w-sm p-6 flex flex-col gap-4">
+            <p className="text-sm font-semibold text-gray-700 leading-relaxed">{confirmState.message}</p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setConfirmState({ open: false, message: "", onConfirm: null })}
+                className="btn-ui btn-ui-md btn-ui-ghost flex-1"
+              >
+                {t("checkoutCancel")}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const fn = confirmState.onConfirm;
+                  setConfirmState({ open: false, message: "", onConfirm: null });
+                  if (fn) void fn();
+                }}
+                className="btn-ui btn-ui-md btn-ui-primary flex-1"
+              >
+                {t("approve")}
               </button>
             </div>
           </div>

@@ -28,6 +28,7 @@ import {
 import { DELETE_USER_BLOCKED_CODE } from "@/lib/admin/constants";
 import { toast } from "sonner";
 import { Role } from "@prisma/client";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 
 interface User {
   id: string;
@@ -69,12 +70,19 @@ export default function AdminUsersClient({
   pendingRoleApprovalCount,
 }: AdminUsersClientProps) {
   const t = useTranslations("Admin");
+  const tCommon = useTranslations("Common");
   const tErrors = useTranslations("Errors");
   const [users, setUsers] = useState<User[]>(initialUsers);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [confirmState, setConfirmState] = useState<{
+    open: boolean;
+    message: string;
+    confirmLabel: string;
+    onConfirm: null | (() => void | Promise<void>);
+  }>({ open: false, message: "", confirmLabel: "", onConfirm: null });
   const iconBtnBase = "btn-ui btn-ui-md btn-ui-icon";
 
   const filteredUsers = users.filter(u => {
@@ -110,25 +118,31 @@ export default function AdminUsersClient({
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t("confirmDeleteUser"))) return;
-    setLoadingId(id);
-    try {
-      const res = await deleteUserAction(id);
-      if (!res.ok) {
-        if (res.error === DELETE_USER_BLOCKED_CODE) {
-          toast.error(t("deleteUserBlockedByRelations"));
-        } else {
-          toast.error(tErrors("unauthorized"));
+    setConfirmState({
+      open: true,
+      message: t("confirmDeleteUser"),
+      confirmLabel: t("delete"),
+      onConfirm: async () => {
+        setLoadingId(id);
+        try {
+          const res = await deleteUserAction(id);
+          if (!res.ok) {
+            if (res.error === DELETE_USER_BLOCKED_CODE) {
+              toast.error(t("deleteUserBlockedByRelations"));
+            } else {
+              toast.error(tErrors("unauthorized"));
+            }
+            return;
+          }
+          setUsers((prev) => prev.filter((u) => u.id !== id));
+          toast.success(t("userDeleted"));
+        } catch (error: unknown) {
+          toast.error(error instanceof Error ? error.message : String(error));
+        } finally {
+          setLoadingId(null);
         }
-        return;
-      }
-      setUsers((prev) => prev.filter((u) => u.id !== id));
-      toast.success(t("userDeleted"));
-    } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : String(error));
-    } finally {
-      setLoadingId(null);
-    }
+      },
+    });
   };
 
   const applyRoleChangeResult = async (id: string, newRole: Role) => {
@@ -155,18 +169,30 @@ export default function AdminUsersClient({
   };
 
   const handleMakeAdmin = async (id: string) => {
-    if (!confirm(t("confirmMakeAdmin"))) return;
-    await applyRoleChangeResult(id, Role.ADMIN);
+    setConfirmState({
+      open: true,
+      message: t("confirmMakeAdmin"),
+      confirmLabel: t("makeAdmin"),
+      onConfirm: async () => applyRoleChangeResult(id, Role.ADMIN),
+    });
   };
 
   const handleDemoteToPartner = async (id: string) => {
-    if (!confirm(t("confirmDemoteAdminPartner"))) return;
-    await applyRoleChangeResult(id, Role.PARTNER);
+    setConfirmState({
+      open: true,
+      message: t("confirmDemoteAdminPartner"),
+      confirmLabel: t("demoteToPartner"),
+      onConfirm: async () => applyRoleChangeResult(id, Role.PARTNER),
+    });
   };
 
   const handleDemoteToGuest = async (id: string) => {
-    if (!confirm(t("confirmDemoteAdminGuest"))) return;
-    await applyRoleChangeResult(id, Role.GUEST);
+    setConfirmState({
+      open: true,
+      message: t("confirmDemoteAdminGuest"),
+      confirmLabel: t("demoteToGuest"),
+      onConfirm: async () => applyRoleChangeResult(id, Role.GUEST),
+    });
   };
 
   const handleResendMail = async (email: string) => {
@@ -189,6 +215,7 @@ export default function AdminUsersClient({
   };
 
   return (
+    <>
     <div className="min-h-screen bg-gray-50 p-6 md:p-10">
       <header className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
@@ -566,5 +593,20 @@ export default function AdminUsersClient({
         )}
       </div>
     </div>
+    <ConfirmDialog
+      open={confirmState.open}
+      message={confirmState.message}
+      confirmLabel={confirmState.confirmLabel}
+      cancelLabel={tCommon("cancel")}
+      onCancel={() =>
+        setConfirmState({ open: false, message: "", confirmLabel: "", onConfirm: null })
+      }
+      onConfirm={() => {
+        const fn = confirmState.onConfirm;
+        setConfirmState({ open: false, message: "", confirmLabel: "", onConfirm: null });
+        if (fn) void fn();
+      }}
+    />
+    </>
   );
 }

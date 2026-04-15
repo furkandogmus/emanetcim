@@ -7,6 +7,7 @@ import {
   assignSealsToShopAction,
   bulkCreateSealsAction,
 } from "@/actions/admin";
+import { toast } from "sonner";
 
 type ShopOption = { id: string; name: string; isActive: boolean };
 
@@ -41,19 +42,19 @@ export default function AdminSealInventoryClient({ sealCounts, shops, assignedBa
     const a = parseInt(fromCreate, 10);
     const b = parseInt(toCreate, 10);
     if (!Number.isFinite(a) || !Number.isFinite(b)) {
-      alert(t("sealInvalidRange"));
+      toast.error(t("sealInvalidRange"));
       return;
     }
     setCreating(true);
     try {
       const res = await bulkCreateSealsAction(a, b);
       if (res.success) {
-        alert(t("sealBulkCreated", { count: res.created }));
+        toast.success(t("sealBulkCreated", { count: res.created }));
         setFromCreate("");
         setToCreate("");
         window.location.reload();
       } else {
-        alert(res.error);
+        toast.error(res.error);
       }
     } finally {
       setCreating(false);
@@ -62,13 +63,13 @@ export default function AdminSealInventoryClient({ sealCounts, shops, assignedBa
 
   const handleAssign = async () => {
     if (!shopId) {
-      alert(t("sealSelectShop"));
+      toast.error(t("sealSelectShop"));
       return;
     }
     const start = parseInt(fromAssign, 10);
     const count = parseInt(countAssign, 10);
     if (!Number.isFinite(start) || !Number.isFinite(count) || count <= 0) {
-      alert(t("sealInvalidRange"));
+      toast.error(t("sealInvalidRange"));
       return;
     }
     
@@ -79,12 +80,12 @@ export default function AdminSealInventoryClient({ sealCounts, shops, assignedBa
     try {
       const res = await assignSealsToShopAction(shopId, start, end);
       if (res.success) {
-        alert(t("sealAssigned", { count: res.updated }));
+        toast.success(t("sealAssigned", { count: res.updated }));
         setFromAssign("");
         setCountAssign("");
         window.location.reload();
       } else {
-        alert(res.error);
+        toast.error(res.error);
       }
     } finally {
       setAssigning(false);
