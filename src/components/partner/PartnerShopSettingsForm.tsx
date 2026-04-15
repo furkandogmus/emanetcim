@@ -136,7 +136,7 @@ export default function PartnerShopSettingsForm({
         <div className="flex flex-col gap-4">
           {/* Kapasite */}
           <div>
-            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">
+            <label className="ui-kicker mb-2 block">
               {t("capacity")}
             </label>
             <div className="flex items-center gap-4">
@@ -146,14 +146,14 @@ export default function PartnerShopSettingsForm({
                 data-testid="partner-settings-capacity"
                 value={capacity}
                 onChange={(e) => setCapacity(parseInt(e.target.value, 10) || 0)}
-                className="flex-1 bg-gray-50 p-4 rounded-2xl font-bold outline-none border border-transparent focus:border-orange-500 transition-all"
+                className="ui-field flex-1 rounded-2xl"
               />
             </div>
           </div>
 
           {/* Günlük fiyat */}
           <div>
-            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">
+            <label className="ui-kicker mb-2 block">
               {t("dailyPrice")}
             </label>
             <div className="flex items-center gap-4">
@@ -167,15 +167,15 @@ export default function PartnerShopSettingsForm({
                 max={maxPrice}
                 step={1}
                 onChange={(e) => handlePriceChange(parseFloat(e.target.value) || 0)}
-                className={`flex-1 bg-gray-50 p-4 rounded-2xl font-bold outline-none border transition-all ${
-                  priceError ? "border-red-400 bg-red-50" : "border-transparent focus:border-orange-500"
+                className={`ui-field flex-1 rounded-2xl ${
+                  priceError ? "border-red-400 bg-red-50" : ""
                 }`}
               />
             </div>
             {priceError ? (
-              <p className="text-xs text-red-500 font-semibold mt-1.5">{priceError}</p>
+              <p className="ui-state ui-state-error mt-1.5">{priceError}</p>
             ) : (
-              <p className="text-xs text-gray-400 font-medium mt-1.5">
+              <p className="ui-body-sm mt-1.5">
                 {t("priceRangeHint", { min: minPrice, max: maxPrice })}
               </p>
             )}
@@ -183,7 +183,7 @@ export default function PartnerShopSettingsForm({
 
           {/* SMS telefon */}
           <div>
-            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">
+            <label className="ui-kicker mb-2 block">
               {t("smsNotifyPhone")}
             </label>
             <div className="flex items-center gap-4">
@@ -195,19 +195,19 @@ export default function PartnerShopSettingsForm({
                 placeholder="5xx xxx xx xx"
                 value={partnerPhone}
                 onChange={(e) => setPartnerPhone(e.target.value)}
-                className="flex-1 bg-gray-50 p-4 rounded-2xl font-bold outline-none border border-transparent focus:border-orange-500 transition-all"
+                className="ui-field flex-1 rounded-2xl"
               />
             </div>
-            <p className="text-xs text-gray-400 font-medium mt-1.5">{t("smsNotifyPhoneHint")}</p>
+            <p className="ui-body-sm mt-1.5">{t("smsNotifyPhoneHint")}</p>
             {phoneError ? (
-              <p className="text-xs text-red-500 font-semibold mt-1.5">{phoneError}</p>
+              <p className="ui-state ui-state-error mt-1.5">{phoneError}</p>
             ) : null}
           </div>
 
           {/* Çalışma saatleri */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">
+              <label className="ui-kicker mb-2 block">
                 {t("openingTime")}
               </label>
               <div className="flex items-center gap-4">
@@ -216,13 +216,13 @@ export default function PartnerShopSettingsForm({
                   type="text"
                   value={openingTime}
                   onChange={(e) => setOpeningTime(e.target.value)}
-                  className="w-full bg-gray-50 p-4 rounded-2xl font-bold outline-none border border-transparent focus:border-orange-500 transition-all text-center"
+                  className="ui-field w-full rounded-2xl text-center"
                   placeholder="09:00"
                 />
               </div>
             </div>
             <div>
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">
+              <label className="ui-kicker mb-2 block">
                 {t("closingTime")}
               </label>
               <div className="flex items-center gap-4">
@@ -231,7 +231,7 @@ export default function PartnerShopSettingsForm({
                   type="text"
                   value={closingTime}
                   onChange={(e) => setClosingTime(e.target.value)}
-                  className="w-full bg-gray-50 p-4 rounded-2xl font-bold outline-none border border-transparent focus:border-orange-500 transition-all text-center"
+                  className="ui-field w-full rounded-2xl text-center"
                   placeholder="20:00"
                 />
               </div>
@@ -249,7 +249,7 @@ export default function PartnerShopSettingsForm({
         </div>
 
         {saved && (
-          <div className="flex items-center gap-2 text-green-600 bg-green-50 border border-green-100 rounded-2xl px-4 py-3 text-sm font-bold">
+          <div className="ui-state ui-state-success flex items-center gap-2 rounded-2xl px-4 py-3">
             <CheckCircle size={16} />
             {t("settingsSaved")}
           </div>
@@ -259,7 +259,7 @@ export default function PartnerShopSettingsForm({
           type="button"
           onClick={handleSave}
           disabled={isUpdating || !!priceError}
-          className="w-full bg-orange-600 hover:bg-orange-700 py-5 rounded-[2rem] text-white font-black shadow-xl shadow-orange-100 flex items-center justify-center gap-3 transition-all active:scale-95 disabled:opacity-60"
+          className="btn-ui btn-ui-lg btn-ui-primary w-full rounded-[2rem] gap-3"
         >
           {isUpdating ? (
             <Loader2 size={24} className="animate-spin" />

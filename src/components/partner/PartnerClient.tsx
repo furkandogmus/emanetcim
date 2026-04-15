@@ -811,7 +811,7 @@ export default function PartnerClient({
 
           <div className="flex flex-col gap-4 pb-32">
             {bookings.length === 0 ? (
-              <div className="bg-white p-12 rounded-[2.5rem] border border-gray-100 text-center opacity-50 flex flex-col items-center gap-4">
+              <div className="ui-state ui-state-empty p-12 rounded-[2.5rem] text-center flex flex-col items-center gap-4">
                 <Package size={48} strokeWidth={1} />
                 <p className="font-bold">{t("noTransactionsYet")}</p>
               </div>
@@ -926,7 +926,7 @@ export default function PartnerClient({
 
           <div className="flex flex-col gap-4 pb-32">
             {bookings.filter(b => (b.status as string) === "WAITING_APPROVAL").length === 0 ? (
-               <div className="bg-white p-12 rounded-[2.5rem] border border-gray-100 text-center opacity-50 flex flex-col items-center gap-4">
+               <div className="ui-state ui-state-empty p-12 rounded-[2.5rem] text-center flex flex-col items-center gap-4">
                 <Package size={48} strokeWidth={1} />
                 <p className="font-bold">{t("noRequestsYet")}</p>
               </div>

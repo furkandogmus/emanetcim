@@ -55,15 +55,16 @@ export default function ReviewForm({
         <div className="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-bl-[4rem] -z-10 translate-x-8 -translate-y-8"></div>
         
         <button 
+          type="button"
           onClick={onClose} 
-          className="absolute top-6 right-6 p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+          className="btn-ui btn-ui-sm btn-ui-ghost btn-ui-icon absolute top-6 right-6 rounded-full"
         >
           <X size={20} />
         </button>
 
         <div className="text-center">
-           <h3 className="text-2xl font-black tracking-tighter mb-2">{shopName.toLowerCase()}</h3>
-           <p className="text-xs font-bold text-gray-400 uppercase tracking-widest leading-relaxed px-4">
+          <h3 className="ui-heading-lg mb-2">{shopName.toLowerCase()}</h3>
+          <p className="ui-kicker leading-relaxed px-4">
              {t("Review.subtitle")}
            </p>
         </div>
@@ -84,13 +85,13 @@ export default function ReviewForm({
              value={comment}
              onChange={(e) => setComment(e.target.value)}
              placeholder={t("Review.placeholder")}
-             className="w-full bg-gray-50 border-2 border-transparent focus:border-orange-500 rounded-[2rem] p-6 text-sm font-medium outline-none min-h-[120px] transition-all resize-none"
+             className="ui-field min-h-[120px] rounded-[2rem] p-6 resize-none"
            />
 
            <button
              type="submit"
              disabled={isSubmitting}
-             className="w-full h-20 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-100 disabled:text-gray-300 rounded-[2rem] text-white font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 active:scale-95 transition-all shadow-xl shadow-orange-100"
+             className="btn-ui btn-ui-lg btn-ui-primary w-full h-20 rounded-[2rem] gap-3"
            >
              {isSubmitting ? <Loader2 size={24} className="animate-spin" /> : <Send size={20} />}
              {t("Review.submit")}
