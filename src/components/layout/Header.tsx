@@ -56,17 +56,23 @@ export default function Header() {
       </Link>
 
       {/* Nav + Actions */}
-      <div className="flex items-center gap-3 sm:gap-5">
+      <div className="flex items-center gap-2 sm:gap-5 min-w-0">
         {!hideGuestBookingNav && (
-          <>
+          <div className="hidden md:flex items-center gap-5">
             <NavLink href="/search">{navCopy.explore}</NavLink>
             <NavLink href="/partners">{navCopy.partner}</NavLink>
             <NavLink href="/insurance">{navCopy.insurance}</NavLink>
-          </>
+          </div>
         )}
-        <NavLink href="/blog">{navCopy.blog}</NavLink>
-        <LocaleSwitcher />
-        <UserNav />
+        <div className="hidden md:flex">
+          <NavLink href="/blog">{navCopy.blog}</NavLink>
+        </div>
+        <div className="shrink-0">
+          <LocaleSwitcher />
+        </div>
+        <div className="shrink-0">
+          <UserNav />
+        </div>
       </div>
     </header>
   );
