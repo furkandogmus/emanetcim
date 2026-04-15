@@ -121,7 +121,7 @@ export default function SearchMap({
     valid.forEach((shop) => {
       const el = document.createElement("div");
       el.className =
-        "w-8 h-8 rounded-full bg-orange-600 border-2 border-white shadow-lg flex items-center justify-center text-[10px] font-black text-white cursor-pointer hover:scale-110 hover:bg-orange-700 transition-all";
+        "w-8 h-8 rounded-full bg-orange-600 border-2 border-white shadow-lg flex items-center justify-center text-[10px] font-black text-white cursor-pointer hover:bg-orange-700 transition-colors";
       el.textContent = "₺";
       el.title = shop.name;
 
