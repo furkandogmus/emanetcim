@@ -10,6 +10,7 @@ import BagProtection from "@/components/guest/BagProtection";
 import type { Metadata } from "next";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { alternatesForPath } from "@/lib/seo-alternates";
+import { buildFaqJsonLd } from "@/lib/faq-json-ld";
 
 export const revalidate = 120;
 
@@ -20,9 +21,24 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const base = getSiteBaseUrl();
+  const t = await getTranslations({ locale, namespace: "Guest" });
+  const title = locale === "tr" ? "Bagaj Emanet ve Valiz Depolama" : "Luggage Storage and Bag Drop";
+  const description = t("heroSubtitle");
   return {
+    title,
+    description,
     alternates: alternatesForPath(locale, ""),
-    openGraph: { url: `${base}/${locale}` },
+    openGraph: {
+      url: `${base}/${locale}`,
+      title,
+      description,
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
   };
 }
 
@@ -50,9 +66,118 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
     it: "it-IT",
   };
   const nf = new Intl.NumberFormat(nfLocale[locale] ?? "en-US");
+  const faqItems =
+    locale === "tr"
+      ? [
+          {
+            question: "Bagaj emanet rezervasyonu ne kadar sürer?",
+            answer:
+              "Tarih ve valiz adedini seçtikten sonra uygun noktayı seçip rezervasyonu genellikle birkaç dakika içinde tamamlayabilirsiniz.",
+          },
+          {
+            question: "Bagaj emanet fiyatı nasıl belirleniyor?",
+            answer:
+              "Toplam tutar valiz adedi, süre ve platform kurallarına göre hesaplanır; ödeme adımında net şekilde gösterilir.",
+          },
+          {
+            question: "Hangi şehirlerde hizmet var?",
+            answer:
+              "İstanbul, Ankara, İzmir ve diğer popüler şehirler dahil olmak üzere şehir sayfalarından aktif noktaları görebilirsiniz.",
+          },
+        ]
+      : [
+          {
+            question: "How long does luggage storage booking take?",
+            answer:
+              "After selecting your dates and bag count, you can typically complete booking in just a few minutes.",
+          },
+          {
+            question: "How is luggage storage pricing calculated?",
+            answer:
+              "Total price is based on bag count, duration, and platform rules, and is shown clearly during checkout.",
+          },
+          {
+            question: "Which cities are available?",
+            answer:
+              "You can browse active storage points from city pages including Istanbul, Ankara, Izmir, and other major destinations.",
+          },
+        ];
+  const faqJsonLd = buildFaqJsonLd({
+    locale,
+    path: "",
+    items: faqItems,
+  });
+  const editorialCopy =
+    locale === "tr"
+      ? {
+          visualTitle: "Şehri Özgürce Yaşa",
+          visualBody:
+            "Uçuş öncesi, otel check-in beklerken veya günlük şehir turunda valiz taşımadan hareket edin.",
+          visualCards: [
+            {
+              title: "Havalimanı ve terminal sonrası konfor",
+              text: "Varıştan sonra en yakın noktaya bırak, günü valizsiz geçir.",
+              image:
+                "https://images.unsplash.com/photo-1527631746610-bca00a040d60?auto=format&fit=crop&w=1200&q=80",
+            },
+            {
+              title: "Tarihi bölgelerde kolay dolaşım",
+              text: "Müze, çarşı ve merkez rotalarında ağırlık taşımadan gez.",
+              image:
+                "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1200&q=80",
+            },
+            {
+              title: "İş seyahatlerinde hızlı teslim-al",
+              text: "Toplantı aralarında güvenli teslim, hızlı geri alma deneyimi.",
+              image:
+                "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1200&q=80",
+            },
+          ],
+          seoTitle: "Bagaj Emanet Hizmeti Hakkında",
+          seoParagraphs: [
+            "BagajPark, Türkiye genelinde yaygın emanet noktalarıyla valiz depolama sürecini dijitalleştirir. Kullanıcılar konuma göre en yakın noktaları görür, tarih aralığına uygun müsaitliği kontrol eder ve rezervasyonunu birkaç adımda tamamlar.",
+            "Platform, güven sinyallerini görünür hale getirir: doğrulanmış partner noktaları, süreç kayıtları ve politika tabanlı koruma akışı. Bu yapı özellikle turistler, aktarma yolcuları ve otel check-in saatini bekleyen kullanıcılar için yüksek fayda sağlar.",
+            "Luggage storage, bagaj emanet, valiz depolama ve şehir içi kısa süreli emanet gibi arama niyetlerine uygun olarak; sayfa yapısı hızlı keşif, net fiyat, güven ve mobil kullanılabilirlik ekseninde optimize edilmiştir.",
+          ],
+        }
+      : {
+          visualTitle: "Move Through the City, Hands-Free",
+          visualBody:
+            "Before check-in, after arrival, or during a full-day city walk, store your luggage and move freely.",
+          visualCards: [
+            {
+              title: "Comfort right after airport transfer",
+              text: "Drop your bags at a nearby point and start your day immediately.",
+              image:
+                "https://images.unsplash.com/photo-1527631746610-bca00a040d60?auto=format&fit=crop&w=1200&q=80",
+            },
+            {
+              title: "Easier sightseeing in dense city zones",
+              text: "Explore museums and historic districts without carrying weight.",
+              image:
+                "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1200&q=80",
+            },
+            {
+              title: "Fast drop-off for business travelers",
+              text: "Store safely between meetings and pick up when needed.",
+              image:
+                "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1200&q=80",
+            },
+          ],
+          seoTitle: "About Our Luggage Storage Experience",
+          seoParagraphs: [
+            "BagajPark digitizes luggage storage with verified local partner points across major Turkish cities. Guests can discover nearby locations, check date-based availability, and complete booking in minutes.",
+            "The product is designed around trust and speed: visible partner verification, process records, and policy-based protection flows. This helps tourists, transfer passengers, and early-arrival guests stay mobile.",
+            "For intent clusters such as luggage storage, baggage storage near me, and short-term bag drop, the page structure is optimized for discoverability, transparent pricing, and mobile-first conversion.",
+          ],
+        };
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-900">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       {/* Hero Section */}
       <header className="relative pt-32 pb-20 px-6 flex flex-col items-center text-center bg-gray-50 overflow-hidden">
         {/* Subtle Background Pattern */}
@@ -174,6 +299,33 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
         </div>
       </section>
 
+      <section className="mx-auto w-full max-w-6xl px-6 py-16">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-black tracking-tight text-gray-900 md:text-4xl">
+            {editorialCopy.visualTitle}
+          </h2>
+          <p className="mt-3 text-base text-gray-500">{editorialCopy.visualBody}</p>
+        </div>
+        <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">
+          {editorialCopy.visualCards.map((card) => (
+            <article
+              key={card.title}
+              className="overflow-hidden rounded-[1.5rem] border border-gray-100 bg-white shadow-sm"
+            >
+              <div
+                className="h-44 w-full bg-cover bg-center"
+                style={{ backgroundImage: `url(${card.image})` }}
+                aria-hidden
+              />
+              <div className="p-4">
+                <h3 className="text-sm font-black text-gray-900">{card.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-gray-500">{card.text}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <div className="mx-auto max-w-3xl px-6 pb-4">
         <BagProtection variant="landing" />
       </div>
@@ -205,6 +357,19 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
           <div>
             <h4 className="font-bold mb-1">{t('trustSupportTitle')}</h4>
             <p className="text-gray-500 leading-relaxed">{t('trustSupportBody')}</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto w-full max-w-4xl px-6 pb-16">
+        <div className="rounded-[1.75rem] border border-gray-100 bg-white p-6 md:p-8">
+          <h2 className="text-2xl font-black tracking-tight text-gray-900">
+            {editorialCopy.seoTitle}
+          </h2>
+          <div className="mt-4 space-y-4 text-sm leading-relaxed text-gray-600">
+            {editorialCopy.seoParagraphs.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
           </div>
         </div>
       </section>
