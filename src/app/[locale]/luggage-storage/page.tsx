@@ -7,6 +7,7 @@ import { STORAGE_CITIES } from "@/lib/storage-cities";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { routing } from "@/i18n/routing";
 import { buildFaqJsonLd } from "@/lib/faq-json-ld";
+import { buildItemListJsonLd, buildWebPageJsonLd } from "@/lib/page-json-ld";
 
 export async function generateMetadata({
   params,
@@ -54,52 +55,56 @@ export default async function LuggageStorageIndexPage({
   setRequestLocale(locale);
   const t = await getTranslations("CityStorage");
   const tCommon = await getTranslations("Common");
-  const localeCopy =
-    locale === "tr"
-      ? {
-          whyTitle: "Şehir Bazlı Bagaj Emanet Rehberi",
-          whyBody:
-            "Her şehir için özel hazırlanmış sayfalarda popüler bölgeler, arama niyetleri ve hızlı rezervasyon akışı tek noktada sunulur.",
-          faqTitle: "Sık Sorulan Sorular",
-          faqs: [
-            {
-              q: "Hangi şehirde emanet noktası olduğunu nasıl görürüm?",
-              a: "Listeden şehir seçerek ilgili şehir sayfasına geçebilir ve aramayı o lokasyona odaklı başlatabilirsiniz.",
-            },
-            {
-              q: "Şehir sayfasından aramaya geçince merkez otomatik ayarlanır mı?",
-              a: "Evet. Şehir sayfasındaki aksiyon butonları aramayı o şehrin merkez koordinatlarıyla başlatır.",
-            },
-            {
-              q: "Şehir bazlı sayfalar SEO için neden önemli?",
-              a: "Yerel arama niyetlerini (ör. Ankara bagaj emanet) doğrudan karşılayarak organik görünürlüğü ve dönüşüm olasılığını artırır.",
-            },
-          ],
-        }
-      : {
-          whyTitle: "City-Based Luggage Storage Guide",
-          whyBody:
-            "Each city page is optimized for local search intent, nearby discovery, and a quick transition into booking flow.",
-          faqTitle: "Frequently Asked Questions",
-          faqs: [
-            {
-              q: "How can I check which cities are available?",
-              a: "Select a city from the list to open its dedicated page and start a location-focused search.",
-            },
-            {
-              q: "Does search center update automatically from city pages?",
-              a: "Yes. City page CTAs open search with that city's center coordinates pre-focused.",
-            },
-            {
-              q: "Why are city pages important for SEO?",
-              a: "They match local intent queries directly (for example, 'luggage storage Ankara') and improve organic discoverability and conversions.",
-            },
-          ],
-        };
+  const msg = (key: string, fallback: string) => {
+    const tx = t as unknown as { has?: (k: string) => boolean };
+    if (typeof tx.has === "function" && tx.has(key)) return t(key as never);
+    return fallback;
+  };
+  const faqs = [
+    {
+      q: msg("indexFaq1Q", "How can I check which cities are available?"),
+      a: msg(
+        "indexFaq1A",
+        "Select a city from the list to open its dedicated page and start a location-focused search.",
+      ),
+    },
+    {
+      q: msg(
+        "indexFaq2Q",
+        "Does search center update automatically from city pages?",
+      ),
+      a: msg(
+        "indexFaq2A",
+        "Yes. City page CTAs open search with that city's center coordinates pre-focused.",
+      ),
+    },
+    {
+      q: msg("indexFaq3Q", "Why are city pages important for SEO?"),
+      a: msg(
+        "indexFaq3A",
+        "They match local intent queries directly and improve organic discoverability and conversions.",
+      ),
+    },
+  ];
   const faqJsonLd = buildFaqJsonLd({
     locale,
     path: "/luggage-storage",
-    items: localeCopy.faqs.map((f) => ({ question: f.q, answer: f.a })),
+    items: faqs.map((f) => ({ question: f.q, answer: f.a })),
+  });
+  const webPageJsonLd = buildWebPageJsonLd({
+    locale,
+    path: "/luggage-storage",
+    title: t("indexMetaTitle"),
+    description: t("indexMetaDescription"),
+  });
+  const cityItemListJsonLd = buildItemListJsonLd({
+    locale,
+    path: "/luggage-storage",
+    itemNamePrefix: t("indexHeadline"),
+    items: STORAGE_CITIES.map((city) => ({
+      name: t(`${city.slug}.label`),
+      urlPath: `/luggage-storage/${city.slug}`,
+    })),
   });
 
   return (
@@ -107,6 +112,14 @@ export default async function LuggageStorageIndexPage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(cityItemListJsonLd) }}
       />
       <header className="border-b border-gray-100 bg-gray-50/80">
         <div className="mx-auto flex max-w-3xl items-center gap-3 px-6 py-4">
@@ -151,14 +164,23 @@ export default async function LuggageStorageIndexPage({
         </ul>
 
         <section className="mt-12 rounded-[1.5rem] border border-gray-100 bg-gray-50 p-6">
-          <h2 className="text-xl font-black text-gray-900">{localeCopy.whyTitle}</h2>
-          <p className="mt-3 text-sm leading-relaxed text-gray-600">{localeCopy.whyBody}</p>
+          <h2 className="text-xl font-black text-gray-900">
+            {msg("indexWhyTitle", "City-Based Luggage Storage Guide")}
+          </h2>
+          <p className="mt-3 text-sm leading-relaxed text-gray-600">
+            {msg(
+              "indexWhyBody",
+              "Each city page is optimized for local search intent, nearby discovery, and a quick transition into booking flow.",
+            )}
+          </p>
         </section>
 
         <section className="mt-6 rounded-[1.5rem] border border-gray-100 bg-white p-6">
-          <h2 className="text-xl font-black text-gray-900">{localeCopy.faqTitle}</h2>
+          <h2 className="text-xl font-black text-gray-900">
+            {msg("indexFaqTitle", "Frequently Asked Questions")}
+          </h2>
           <div className="mt-4 space-y-4">
-            {localeCopy.faqs.map((faq) => (
+            {faqs.map((faq) => (
               <article key={faq.q} className="rounded-xl border border-gray-100 p-4">
                 <h3 className="text-sm font-black text-gray-900">{faq.q}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-gray-600">{faq.a}</p>
