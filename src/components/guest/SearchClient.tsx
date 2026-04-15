@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import {
   Search as SearchIcon,
@@ -18,6 +19,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { ShopSearchHit } from "@/services/ShopService";
 import { parseDatetimeLocal, toDatetimeLocalValue } from "@/lib/datetime-local";
 import { refreshSearchShopsAction } from "@/actions/search-shops";
+import { geocodeSearchCenterAction } from "@/actions/geocode-search-center";
 import { toast } from "sonner";
 import { STORAGE_CITIES } from "@/lib/storage-cities";
 import {
@@ -53,6 +55,7 @@ export default function SearchClient({
 }: SearchClientProps) {
   const t = useTranslations("Guest");
   const tErr = useTranslations("Errors");
+  const locale = useLocale();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [minRating, setMinRating] = useState(0);
@@ -70,6 +73,7 @@ export default function SearchClient({
   const [requestedBags, setRequestedBags] = useState(1);
   const [filterDirty, setFilterDirty] = useState(false);
   const [dynamicCenter, setDynamicCenter] = useState(searchCenter);
+  const [resolvedPlaceLabel, setResolvedPlaceLabel] = useState<string | null>(null);
 
   useEffect(() => {
     setCheckInLocal(toDatetimeLocalValue(new Date(defaultCheckInIso)));
@@ -132,29 +136,44 @@ export default function SearchClient({
         .replace(/\p{Diacritic}/gu, "")
         .trim();
     const q = normalize(searchQuery);
-    if (q.length < 3) return;
+    if (q.length < 3) {
+      setResolvedPlaceLabel(null);
+      return;
+    }
+    let cancelled = false;
+    const timer = window.setTimeout(async () => {
+      const geocoded = await geocodeSearchCenterAction(searchQuery, locale);
+      if (cancelled) return;
 
-    const matchedCity = STORAGE_CITIES.find((city) => {
-      const slug = normalize(city.slug.replace(/-/g, " "));
-      if (q === slug) return true;
-      if (q.includes(slug)) return true;
-      // Popular Turkish aliases for city typing.
-      if (city.slug === "ankara" && (q === "ankara" || q.includes("ankara")))
-        return true;
-      if (city.slug === "istanbul" && (q === "istanbul" || q.includes("istanbul")))
-        return true;
-      if (city.slug === "izmir" && (q === "izmir" || q.includes("izmir")))
-        return true;
-      return false;
-    });
-    if (!matchedCity) return;
+      if (geocoded.ok) {
+        setDynamicCenter((prev) => {
+          if (prev.lat === geocoded.lat && prev.lng === geocoded.lng) return prev;
+          setFilterDirty(true);
+          return { lat: geocoded.lat, lng: geocoded.lng };
+        });
+        setResolvedPlaceLabel(geocoded.label);
+        return;
+      }
 
-    setDynamicCenter((prev) => {
-      if (prev.lat === matchedCity.lat && prev.lng === matchedCity.lng) return prev;
-      setFilterDirty(true);
-      return { lat: matchedCity.lat, lng: matchedCity.lng };
-    });
-  }, [searchQuery]);
+      // Fallback: known city centers if geocoding fails/rate-limits.
+      const matchedCity = STORAGE_CITIES.find((city) => {
+        const slug = normalize(city.slug.replace(/-/g, " "));
+        return q === slug || q.includes(slug);
+      });
+      if (!matchedCity) return;
+      setDynamicCenter((prev) => {
+        if (prev.lat === matchedCity.lat && prev.lng === matchedCity.lng) return prev;
+        setFilterDirty(true);
+        return { lat: matchedCity.lat, lng: matchedCity.lng };
+      });
+      setResolvedPlaceLabel(matchedCity.slug);
+    }, 450);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [searchQuery, locale]);
 
   const onSelectShop = useCallback(
     (id: string) => {
@@ -197,6 +216,11 @@ export default function SearchClient({
             </h1>
           </div>
         </div>
+        {resolvedPlaceLabel ? (
+          <p className="mb-2 text-xs font-semibold text-gray-500 truncate">
+            {resolvedPlaceLabel}
+          </p>
+        ) : null}
 
         <div className="relative group mb-3">
           <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
