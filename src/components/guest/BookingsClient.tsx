@@ -28,6 +28,7 @@ import BookingModifyModal, {
 import type { GuestBookingListItem } from '@/services/BookingService';
 import type { PricingRules } from '@/lib/pricing-rules';
 import { dateLocaleForUiLocale } from '@/lib/date-locale';
+import { signOut } from 'next-auth/react';
 
 interface BookingsClientProps {
   bookings: GuestBookingListItem[];
@@ -127,13 +128,13 @@ export default function BookingsClient({
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-gray-100 bg-white p-4 md:p-6">
-        <button
-          type="button"
+        <Link
+          href="/"
           className="md:hidden rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-100"
-          aria-label={t('backToBookings')}
+          aria-label={tCommon('mobileNavHome')}
         >
           <Menu size={20} aria-hidden />
-        </button>
+        </Link>
         <Link
           href="/search"
           className="rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-orange-600 hidden md:inline-flex"
@@ -264,7 +265,13 @@ export default function BookingsClient({
             <span className="font-bold text-gray-900">{mobileCopy.helpCenter}</span>
             <ChevronRight size={16} className="ml-auto text-gray-300" />
           </Link>
-          <div className="px-2 pt-2 text-xs font-bold text-gray-400">{tUserNav('signOut')}</div>
+          <button
+            type="button"
+            onClick={() => void signOut({ callbackUrl: `/${locale}` })}
+            className="w-full text-left px-2 pt-2 text-xs font-bold text-red-600"
+          >
+            {tUserNav('signOut')}
+          </button>
         </section>
       </main>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { ShieldCheck, MapPin, Globe, MessageCircle, Heart } from "lucide-react";
 import { STORAGE_CITIES } from "@/lib/storage-cities";
@@ -13,10 +13,12 @@ export default function Footer() {
   const t = useTranslations("Footer");
   const tCommon = useTranslations("Common");
   const tCity = useTranslations("CityStorage");
+  const locale = useLocale();
   const { data: session } = useSession();
   const hideGuestBookingNav =
     session?.user?.role === "PARTNER" || session?.user?.role === "ADMIN";
   const currentYear = new Date().getFullYear();
+  const insuranceLabel = locale === "tr" ? "Sigorta" : "Insurance";
 
   return (
     <footer className="bg-white border-t border-gray-100 pt-20 pb-10 max-md:pb-28 px-6 font-sans overflow-hidden">
@@ -77,7 +79,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/insurance" className="hover:text-orange-600 transition-colors">
-                  Insurance
+                  {insuranceLabel}
                 </Link>
               </li>
             </ul>

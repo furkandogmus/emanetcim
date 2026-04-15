@@ -6,6 +6,7 @@ import LocaleSwitcher from "./LocaleSwitcher";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Package } from "lucide-react";
+import { useLocale } from "next-intl";
 
 function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
   const pathname = usePathname();
@@ -27,10 +28,15 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
 
 export default function Header() {
   const pathname = usePathname();
+  const locale = useLocale();
   const { data: session } = useSession();
   const role = session?.user?.role;
   const hideGuestBookingNav = role === "PARTNER" || role === "ADMIN";
   const logoHref = role === "PARTNER" ? "/partner" : role === "ADMIN" ? "/admin" : "/";
+  const navCopy =
+    locale === "tr"
+      ? { explore: "Keşfet", partner: "Partner", insurance: "Sigorta", blog: "Blog" }
+      : { explore: "Explore", partner: "Partners", insurance: "Insurance", blog: "Blog" };
 
   if (pathname?.includes("/login")) return null;
 
@@ -53,12 +59,12 @@ export default function Header() {
       <div className="flex items-center gap-3 sm:gap-5">
         {!hideGuestBookingNav && (
           <>
-            <NavLink href="/search">Explore</NavLink>
-            <NavLink href="/partners">Partner</NavLink>
-            <NavLink href="/insurance">Insurance</NavLink>
+            <NavLink href="/search">{navCopy.explore}</NavLink>
+            <NavLink href="/partners">{navCopy.partner}</NavLink>
+            <NavLink href="/insurance">{navCopy.insurance}</NavLink>
           </>
         )}
-        <NavLink href="/blog">Blog</NavLink>
+        <NavLink href="/blog">{navCopy.blog}</NavLink>
         <LocaleSwitcher />
         <UserNav />
       </div>
