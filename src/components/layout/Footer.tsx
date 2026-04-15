@@ -75,6 +75,11 @@ export default function Footer() {
                   {t("faq")}
                 </Link>
               </li>
+              <li>
+                <Link href="/insurance" className="hover:text-orange-600 transition-colors">
+                  Insurance
+                </Link>
+              </li>
             </ul>
           </div>
 

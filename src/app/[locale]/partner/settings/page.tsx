@@ -123,9 +123,8 @@ export default async function PartnerSettingsPage({
                 <span className="ml-auto text-gray-400 font-mono text-xs">{shop.stripeAccountId}</span>
               </div>
             ) : (
-              // eslint-disable-next-line @next/next/no-html-link-for-pages
               <a
-                href="/api/stripe/connect/authorize"
+                href={`/api/stripe/connect/authorize?locale=${locale}`}
                 className="inline-flex items-center gap-2 bg-[#635BFF] text-white font-semibold text-sm px-4 py-2 rounded-lg hover:bg-[#4f47e3] transition-colors"
               >
                 <ExternalLink size={15} />

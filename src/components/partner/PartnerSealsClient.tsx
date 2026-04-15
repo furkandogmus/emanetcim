@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import {
   ArrowLeft,
   Shield,
@@ -42,22 +43,22 @@ interface Props {
   requests: SealRequestRow[];
 }
 
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({ status, t }: { status: string; t: (key: string) => string }) {
   if (status === "PENDING")
     return (
       <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-orange-600 bg-orange-50 px-2 py-1 rounded-lg">
-        <Clock size={10} /> Bekliyor
+        <Clock size={10} /> {t("sealsStatusPending")}
       </span>
     );
   if (status === "SHIPPED")
     return (
       <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">
-        <Truck size={10} /> Kargoda
+        <Truck size={10} /> {t("sealsStatusShipped")}
       </span>
     );
   return (
     <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-green-600 bg-green-50 px-2 py-1 rounded-lg">
-      <CheckCircle2 size={10} /> Teslim Edildi
+      <CheckCircle2 size={10} /> {t("sealsStatusDelivered")}
     </span>
   );
 }
@@ -70,6 +71,7 @@ export default function PartnerSealsClient({
   returnedCount,
   requests,
 }: Props) {
+  const t = useTranslations("Partner");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [requestQty, setRequestQty] = useState("20");
@@ -90,11 +92,11 @@ export default function PartnerSealsClient({
     startTransition(async () => {
       const res = await requestSealsAction(qty);
       if (res.success) {
-        showFeedback(`${qty} adet mühür talebi oluşturuldu. Admin onayını bekleyiniz.`, true);
+        showFeedback(t("sealsRequestCreated", { count: qty }), true);
         setShowRequestForm(false);
         router.refresh();
       } else {
-        showFeedback(res.error ?? "Bir hata oluştu.", false);
+        showFeedback(res.error ?? t("sealsGenericError"), false);
       }
     });
   };
@@ -103,10 +105,10 @@ export default function PartnerSealsClient({
     startTransition(async () => {
       const res = await confirmSealDeliveryAction(requestId);
       if (res.success) {
-        showFeedback("Teslimat onaylandı! Mühürler stoğunuza eklendi.", true);
+        showFeedback(t("sealsDeliveryConfirmed"), true);
         router.refresh();
       } else {
-        showFeedback(res.error ?? "Bir hata oluştu.", false);
+        showFeedback(res.error ?? t("sealsGenericError"), false);
       }
     });
   };
@@ -115,10 +117,10 @@ export default function PartnerSealsClient({
     startTransition(async () => {
       const res = await recycleReturnedSealsAction(shopId);
       if (res.success) {
-        showFeedback(`${res.recycled} iade mühür tekrar kullanıma alındı.`, true);
+        showFeedback(t("sealsRecycled", { count: res.recycled }), true);
         router.refresh();
       } else {
-        showFeedback(res.error ?? "Bir hata oluştu.", false);
+        showFeedback(res.error ?? t("sealsGenericError"), false);
       }
     });
   };
@@ -130,7 +132,7 @@ export default function PartnerSealsClient({
           <ArrowLeft size={20} />
         </Link>
         <div>
-          <h1 className="text-lg font-black text-gray-900">Mühür Yönetimi</h1>
+          <h1 className="text-lg font-black text-gray-900">{t("sealsTitle")}</h1>
           <p className="text-xs text-gray-400">{shopName}</p>
         </div>
       </header>
@@ -154,7 +156,10 @@ export default function PartnerSealsClient({
           <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 flex items-center gap-3">
             <AlertTriangle size={18} className="text-amber-500 shrink-0" />
             <p className="text-sm text-amber-800 font-semibold">
-              Düşük stok! Yalnızca <strong>{assignedCount}</strong> kullanılabilir mühürünüz var. Lütfen talep açın.
+              {t.rich("sealsLowStockWarning", {
+                count: assignedCount,
+                strong: (chunks) => <strong>{chunks}</strong>,
+              })}
             </p>
           </div>
         )}
@@ -164,17 +169,17 @@ export default function PartnerSealsClient({
           <div className="bg-white rounded-2xl border border-gray-100 p-4 text-center">
             <Shield size={18} className="text-green-500 mx-auto mb-1" />
             <p className="text-2xl font-black text-gray-900">{assignedCount}</p>
-            <p className="text-xs text-gray-400 mt-0.5">Hazır</p>
+            <p className="text-xs text-gray-400 mt-0.5">{t("sealsStockReady")}</p>
           </div>
           <div className="bg-white rounded-2xl border border-gray-100 p-4 text-center">
             <Package size={18} className="text-orange-400 mx-auto mb-1" />
             <p className="text-2xl font-black text-gray-900">{inUseCount}</p>
-            <p className="text-xs text-gray-400 mt-0.5">Kullanımda</p>
+            <p className="text-xs text-gray-400 mt-0.5">{t("sealsStockInUse")}</p>
           </div>
           <div className="bg-white rounded-2xl border border-gray-100 p-4 text-center">
             <RefreshCw size={18} className="text-blue-400 mx-auto mb-1" />
             <p className="text-2xl font-black text-gray-900">{returnedCount}</p>
-            <p className="text-xs text-gray-400 mt-0.5">İade</p>
+            <p className="text-xs text-gray-400 mt-0.5">{t("sealsStockReturned")}</p>
           </div>
         </div>
 
@@ -186,21 +191,21 @@ export default function PartnerSealsClient({
             className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-sm py-3 rounded-2xl border border-blue-100 transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
           >
             <RefreshCw size={16} />
-            {returnedCount} İade Mühürü Tekrar Kullanıma Al
+            {t("sealsRecycleCta", { count: returnedCount })}
           </button>
         )}
 
         {/* Request new seals */}
         <div className="bg-white rounded-2xl border border-gray-100 p-5">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-bold text-gray-900 text-sm">Mühür Talebi</h2>
+            <h2 className="font-bold text-gray-900 text-sm">{t("sealsRequestTitle")}</h2>
             {!showRequestForm && (
               <button
                 onClick={() => setShowRequestForm(true)}
                 className="flex items-center gap-1.5 text-xs font-bold text-orange-600 hover:text-orange-700"
               >
                 <Plus size={14} />
-                Yeni Talep
+                {t("sealsNewRequest")}
               </button>
             )}
           </div>
@@ -214,14 +219,14 @@ export default function PartnerSealsClient({
                 min={1}
                 max={500}
                 className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-                placeholder="Adet"
+                placeholder={t("sealsQuantityPlaceholder")}
               />
               <button
                 onClick={handleRequestSeals}
                 disabled={isPending}
                 className="bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm px-4 py-2 rounded-xl transition-colors disabled:opacity-60"
               >
-                {isPending ? "…" : "Talep Et"}
+                {isPending ? t("processing") : t("sealsRequestSubmit")}
               </button>
               <button
                 onClick={() => setShowRequestForm(false)}
@@ -234,7 +239,9 @@ export default function PartnerSealsClient({
 
           {!showRequestForm && (
             <p className="text-xs text-gray-400">
-              Mühür stoğunuz azaldığında buradan talep açabilirsiniz. Sistem {totalUsable < 15 ? "otomatik talep açmış olabilir — " : ""}admin onayından sonra kargoya verilir.
+              {t("sealsRequestHint", {
+                auto: totalUsable < 15 ? `${t("sealsAutoRequestPrefix")} ` : "",
+              })}
             </p>
           )}
         </div>
@@ -243,7 +250,7 @@ export default function PartnerSealsClient({
         {requests.length > 0 && (
           <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
             <div className="px-5 py-3 border-b border-gray-50">
-              <h2 className="font-bold text-gray-900 text-sm">Talep Geçmişi</h2>
+              <h2 className="font-bold text-gray-900 text-sm">{t("sealsHistoryTitle")}</h2>
             </div>
             <div className="divide-y divide-gray-50">
               {requests.map((req) => (
@@ -252,27 +259,27 @@ export default function PartnerSealsClient({
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-bold text-gray-900">
-                          {req.quantity} adet
+                          {t("sealsQuantityLabel", { count: req.quantity })}
                         </span>
                         {req.autoGenerated && (
                           <span className="text-[9px] font-black uppercase tracking-widest text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded">
-                            Otomatik
+                            {t("sealsAutoBadge")}
                           </span>
                         )}
                       </div>
                       <p className="text-xs text-gray-400 mt-0.5">
-                        {new Date(req.createdAt).toLocaleDateString("tr-TR")}
+                        {new Date(req.createdAt).toLocaleDateString()}
                       </p>
                     </div>
-                    <StatusBadge status={req.status} />
+                    <StatusBadge status={req.status} t={t} />
                   </div>
 
                   {req.status === "SHIPPED" && req.trackingNumber && (
                     <div className="bg-blue-50 rounded-xl px-3 py-2 mt-2 text-xs text-blue-700">
-                      <p className="font-bold">Takip No: {req.trackingNumber}</p>
+                      <p className="font-bold">{t("sealsTrackingNo", { tracking: req.trackingNumber })}</p>
                       {req.serialFrom && req.serialTo && (
                         <p className="mt-0.5">
-                          Seri: {req.serialFrom} – {req.serialTo}
+                          {t("sealsSerialRange", { from: req.serialFrom, to: req.serialTo })}
                         </p>
                       )}
                       {req.adminNote && (
@@ -283,7 +290,7 @@ export default function PartnerSealsClient({
 
                   {req.status === "DELIVERED" && req.serialFrom && req.serialTo && (
                     <div className="bg-green-50 rounded-xl px-3 py-2 mt-2 text-xs text-green-700">
-                      Seri: {req.serialFrom} – {req.serialTo}
+                      {t("sealsSerialRange", { from: req.serialFrom, to: req.serialTo })}
                     </div>
                   )}
 
@@ -294,7 +301,7 @@ export default function PartnerSealsClient({
                       className="mt-3 w-full bg-green-500 hover:bg-green-600 text-white font-bold text-xs py-2.5 rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-1.5"
                     >
                       <CheckCircle2 size={14} />
-                      Teslim Aldım — Stoğa Ekle
+                      {t("sealsConfirmDelivery")}
                     </button>
                   )}
                 </div>
@@ -305,7 +312,7 @@ export default function PartnerSealsClient({
 
         {requests.length === 0 && (
           <p className="text-center text-sm text-gray-400 py-6">
-            Henüz mühür talebiniz yok.
+            {t("sealsNoRequests")}
           </p>
         )}
       </main>

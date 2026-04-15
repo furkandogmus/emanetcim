@@ -2,7 +2,6 @@ import { setRequestLocale } from "next-intl/server";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/db";
-import { sealService } from "@/services/SealService";
 import PartnerSealsClient from "@/components/partner/PartnerSealsClient";
 
 export default async function PartnerSealsPage({

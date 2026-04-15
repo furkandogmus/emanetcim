@@ -265,7 +265,7 @@ export default function PartnerClient({
   );
 
   const openCheckoutFlow = useCallback(
-    async (bookingId: string, onCancelConfirm?: () => void) => {
+    async (bookingId: string) => {
       const res = await getPartnerBookingSealsAction(bookingId);
       if (!res.success) {
         showError(res.error);
@@ -316,12 +316,12 @@ export default function PartnerClient({
           showError(t("checkoutNotReady", { status: preview.status }));
           return;
         }
-        await openCheckoutFlow(bookingId, () => router.replace(pathname));
+        await openCheckoutFlow(bookingId);
       } finally {
         setPreviewLoading(false);
       }
     },
-    [openCheckoutFlow, pathname, router, showError, t]
+    [openCheckoutFlow, showError, t]
   );
 
   useEffect(() => {

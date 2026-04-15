@@ -64,6 +64,14 @@ async function redisRateLimit(
 ): Promise<boolean> {
   const redis = getUpstashRedis();
   if (!redis) {
+    const canFallbackToMemory =
+      process.env.NODE_ENV !== "production" ||
+      process.env.REQUIRE_DISTRIBUTED_RATE_LIMIT?.trim() === "false";
+    if (!canFallbackToMemory) {
+      throw new Error(
+        "Distributed rate limit is required in production. Configure Upstash or set REQUIRE_DISTRIBUTED_RATE_LIMIT=false explicitly.",
+      );
+    }
     return rateLimitLocalMemory(key, max, windowMs);
   }
   const now = Date.now();
