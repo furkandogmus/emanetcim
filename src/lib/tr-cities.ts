@@ -92,9 +92,32 @@ export const TR_CITIES: TrCity[] = [
   { name: "Zonguldak", districts: ["Alaplı","Çaycuma","Devrek","Ereğli","Gökçebey","Kilimli","Kozlu","Merkez"] },
 ];
 
-export const getCityNames = (): string[] => TR_CITIES.map((c) => c.name);
+/** TÜİK 2023 nüfus sıralamasına göre ilk 10 kalabalık il */
+const CROWDED_FIRST: string[] = [
+  "İstanbul",
+  "Ankara",
+  "İzmir",
+  "Bursa",
+  "Antalya",
+  "Adana",
+  "Konya",
+  "Gaziantep",
+  "Şanlıurfa",
+  "Kocaeli",
+];
+
+/**
+ * İl listesini döner: önce 10 kalabalık il, sonra geri kalanlar alfabetik.
+ */
+export const getCityNames = (): string[] => {
+  const crowded = CROWDED_FIRST.filter((n) => TR_CITIES.some((c) => c.name === n));
+  const rest = TR_CITIES.map((c) => c.name)
+    .filter((n) => !CROWDED_FIRST.includes(n))
+    .sort((a, b) => a.localeCompare(b, "tr"));
+  return [...crowded, ...rest];
+};
 
 export const getDistricts = (cityName: string): string[] => {
   const city = TR_CITIES.find((c) => c.name === cityName);
-  return city ? city.districts : [];
+  return city ? [...city.districts].sort((a, b) => a.localeCompare(b, "tr")) : [];
 };
