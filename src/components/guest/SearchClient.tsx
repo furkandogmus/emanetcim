@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import {
   Search as SearchIcon,
   ChevronLeft,
@@ -74,6 +74,8 @@ export default function SearchClient({
   const [filterDirty, setFilterDirty] = useState(false);
   const [dynamicCenter, setDynamicCenter] = useState(searchCenter);
   const [resolvedPlaceLabel, setResolvedPlaceLabel] = useState<string | null>(null);
+  const checkInInputRef = useRef<HTMLInputElement>(null);
+  const checkOutInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setCheckInLocal(toDatetimeLocalValue(new Date(defaultCheckInIso)));
@@ -199,6 +201,28 @@ export default function SearchClient({
   }, [searchQuery, sourceShops, minRating, maxPrice, open247Only, hasRestroom]);
 
   const markFiltersDirty = () => setFilterDirty(true);
+  const openNativePicker = (input: HTMLInputElement | null) => {
+    if (!input) return;
+    input.focus();
+    if ("showPicker" in input) {
+      try {
+        input.showPicker();
+      } catch {
+        // Safari can throw on showPicker; focus is enough fallback.
+      }
+    }
+  };
+  const formatDateTimeDisplay = (raw: string) => {
+    const parsed = parseDatetimeLocal(raw);
+    if (!parsed) return raw;
+    return new Intl.DateTimeFormat(locale, {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(parsed);
+  };
 
   return (
     <div className="flex flex-col min-h-[100svh] bg-white font-sans selection:bg-orange-100">
@@ -246,22 +270,44 @@ export default function SearchClient({
             <p className="text-xs font-black uppercase tracking-widest text-gray-400">
               {t("searchStayWindow")}
             </p>
+            <p className="text-[11px] text-gray-400">
+              {locale === "tr"
+                ? "Seçtiğiniz bırakış/alış saatlerine göre sadece müsait noktalar listelenir."
+                : "Only locations available for your selected drop-off/pick-up times are listed."}
+            </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <label className="flex flex-col gap-1">
                 <span className="text-xs font-bold text-gray-400 uppercase">
                   {t("searchCheckIn")}
                 </span>
-                <div className="flex items-center gap-2 rounded-xl bg-white border border-gray-100 px-2 py-1.5">
+                <div
+                  className="relative flex items-center gap-2 rounded-xl bg-white border border-gray-100 px-2 py-2 cursor-pointer"
+                  onClick={() => openNativePicker(checkInInputRef.current)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      openNativePicker(checkInInputRef.current);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={t("searchCheckIn")}
+                >
                   <Calendar size={14} className="text-gray-400 shrink-0" />
+                  <span className="w-full text-xs font-semibold text-gray-800 min-h-[32px] flex items-center">
+                    {formatDateTimeDisplay(checkInLocal)}
+                  </span>
                   <input
+                    ref={checkInInputRef}
                     type="datetime-local"
+                    step={1800}
                     data-testid="search-checkin"
                     value={checkInLocal}
                     onChange={(e) => {
                       setCheckInLocal(e.target.value);
                       markFiltersDirty();
                     }}
-                    className="w-full text-xs font-semibold bg-transparent outline-none min-h-[40px]"
+                    className="absolute inset-0 opacity-0 cursor-pointer"
                   />
                 </div>
               </label>
@@ -269,17 +315,34 @@ export default function SearchClient({
                 <span className="text-xs font-bold text-gray-400 uppercase">
                   {t("searchCheckOut")}
                 </span>
-                <div className="flex items-center gap-2 rounded-xl bg-white border border-gray-100 px-2 py-1.5">
+                <div
+                  className="relative flex items-center gap-2 rounded-xl bg-white border border-gray-100 px-2 py-2 cursor-pointer"
+                  onClick={() => openNativePicker(checkOutInputRef.current)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      openNativePicker(checkOutInputRef.current);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={t("searchCheckOut")}
+                >
                   <Calendar size={14} className="text-gray-400 shrink-0" />
+                  <span className="w-full text-xs font-semibold text-gray-800 min-h-[32px] flex items-center">
+                    {formatDateTimeDisplay(checkOutLocal)}
+                  </span>
                   <input
+                    ref={checkOutInputRef}
                     type="datetime-local"
+                    step={1800}
                     data-testid="search-checkout"
                     value={checkOutLocal}
                     onChange={(e) => {
                       setCheckOutLocal(e.target.value);
                       markFiltersDirty();
                     }}
-                    className="w-full text-xs font-semibold bg-transparent outline-none min-h-[40px]"
+                    className="absolute inset-0 opacity-0 cursor-pointer"
                   />
                 </div>
               </label>
