@@ -86,6 +86,11 @@ export default async function PartnerSettingsPage({
           initialOpening={shop.openingTime || "09:00"}
           initialClosing={shop.closingTime || "20:00"}
           initialPricePerDay={moneyToNumber(shop.pricePerDay) || marketPrice}
+          initialAddress={shop.address ?? ""}
+          initialCity={shop.city ?? ""}
+          initialDistrict={shop.district ?? ""}
+          initialLatitude={shop.latitude ?? null}
+          initialLongitude={shop.longitude ?? null}
           marketPrice={marketPrice}
           initialPhone={ownerPhoneRow?.phone ?? ""}
         />

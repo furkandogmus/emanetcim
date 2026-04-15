@@ -3,10 +3,13 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { Clock, Loader2, Luggage, Settings, CheckCircle, Phone } from "lucide-react";
+import { Clock, Loader2, Luggage, Settings, CheckCircle, Phone, MapPin } from "lucide-react";
 import { updateShopSettingsAction } from "@/actions/shop";
 import { updatePartnerPhoneAction } from "@/actions/partner";
 import { isValidPartnerTrPhone } from "@/lib/netgsm";
+import dynamic from "next/dynamic";
+
+const LocationPicker = dynamic(() => import("./LocationPicker"), { ssr: false });
 
 type Props = {
   shopId: string;
@@ -20,6 +23,12 @@ type Props = {
   compact?: boolean;
   /** Netgsm: yeni rezervasyon SMS — dükkan sahibi GSM */
   initialPhone?: string;
+  /** Adres bilgileri */
+  initialAddress?: string;
+  initialCity?: string;
+  initialDistrict?: string;
+  initialLatitude?: number | null;
+  initialLongitude?: number | null;
 };
 
 export default function PartnerShopSettingsForm({
@@ -31,6 +40,11 @@ export default function PartnerShopSettingsForm({
   marketPrice,
   compact = false,
   initialPhone = "",
+  initialAddress = "",
+  initialCity = "",
+  initialDistrict = "",
+  initialLatitude = null,
+  initialLongitude = null,
 }: Props) {
   const t = useTranslations("Partner");
   const tErrors = useTranslations("Errors");
@@ -40,6 +54,13 @@ export default function PartnerShopSettingsForm({
   const [closingTime, setClosingTime] = useState(initialClosing);
   const [pricePerDay, setPricePerDay] = useState(initialPricePerDay);
   const [partnerPhone, setPartnerPhone] = useState(initialPhone);
+  const [location, setLocation] = useState({
+    address: initialAddress,
+    city: initialCity,
+    district: initialDistrict,
+    latitude: initialLatitude,
+    longitude: initialLongitude,
+  });
   const [isUpdating, setIsUpdating] = useState(false);
   const [saved, setSaved] = useState(false);
   const [priceError, setPriceError] = useState<string | null>(null);
@@ -77,6 +98,11 @@ export default function PartnerShopSettingsForm({
         openingTime,
         closingTime,
         pricePerDay,
+        address: location.address || undefined,
+        city: location.city || undefined,
+        district: location.district || undefined,
+        latitude: location.latitude,
+        longitude: location.longitude,
       });
       const phoneRes = await updatePartnerPhoneAction(partnerPhone);
       if (!phoneRes.success) {
@@ -108,6 +134,7 @@ export default function PartnerShopSettingsForm({
 
       <div className={wrap}>
         <div className="flex flex-col gap-4">
+          {/* Kapasite */}
           <div>
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">
               {t("capacity")}
@@ -124,6 +151,7 @@ export default function PartnerShopSettingsForm({
             </div>
           </div>
 
+          {/* Günlük fiyat */}
           <div>
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">
               {t("dailyPrice")}
@@ -153,6 +181,7 @@ export default function PartnerShopSettingsForm({
             )}
           </div>
 
+          {/* SMS telefon */}
           <div>
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">
               {t("smsNotifyPhone")}
@@ -175,6 +204,7 @@ export default function PartnerShopSettingsForm({
             ) : null}
           </div>
 
+          {/* Çalışma saatleri */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 block">
@@ -206,6 +236,15 @@ export default function PartnerShopSettingsForm({
                 />
               </div>
             </div>
+          </div>
+
+          {/* ── Konum / Adres bölümü ── */}
+          <div className="pt-2 border-t border-gray-100">
+            <div className="flex items-center gap-2 mb-4">
+              <MapPin size={16} className="text-orange-500" />
+              <span className="text-sm font-black text-gray-700">Konum & Adres</span>
+            </div>
+            <LocationPicker value={location} onChange={setLocation} />
           </div>
         </div>
 

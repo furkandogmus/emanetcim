@@ -13,6 +13,11 @@ const shopSettingsSchema = z.object({
   openingTime: z.string().regex(hm, "Saat HH:mm olmalıdır.").optional(),
   closingTime: z.string().regex(hm, "Saat HH:mm olmalıdır.").optional(),
   pricePerDay: z.number().min(0).max(1_000_000).optional(),
+  address: z.string().max(500).optional(),
+  city: z.string().max(100).optional(),
+  district: z.string().max(100).optional(),
+  latitude: z.number().min(-90).max(90).nullable().optional(),
+  longitude: z.number().min(-180).max(180).nullable().optional(),
 });
 
 export async function updateShopSettingsAction(
@@ -22,6 +27,11 @@ export async function updateShopSettingsAction(
     openingTime?: string;
     closingTime?: string;
     pricePerDay?: number;
+    address?: string;
+    city?: string;
+    district?: string;
+    latitude?: number | null;
+    longitude?: number | null;
   }
 ) {
   const session = await auth();
