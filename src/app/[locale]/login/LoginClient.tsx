@@ -102,11 +102,11 @@ export default function LoginPage({
   const busy = !!isLoggingIn;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 font-sans">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 sm:p-6 font-sans overflow-x-hidden">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md bg-white rounded-[2.5rem] p-10 shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col items-center"
+        className="w-full max-w-md max-w-[calc(100vw-1rem)] bg-white rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-10 shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col items-center"
       >
         {/* Logo */}
         <div className="w-16 h-16 bg-orange-600 rounded-2xl flex items-center justify-center mb-8 shadow-lg shadow-orange-200">
