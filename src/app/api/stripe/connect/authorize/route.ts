@@ -10,9 +10,12 @@ export const dynamic = "force-dynamic";
  * Stripe Express onboarding URL'si oluşturur ve redirect eder.
  */
 export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const requestedLocale = searchParams.get("locale")?.trim().toLowerCase();
+  const locale = requestedLocale && /^[a-z]{2}$/.test(requestedLocale) ? requestedLocale : "tr";
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.redirect(new URL("/tr/login", req.url));
+    return NextResponse.redirect(new URL(`/${locale}/login`, req.url));
   }
   if (session.user.role !== "PARTNER" && session.user.role !== "ADMIN") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -28,8 +31,10 @@ export async function GET(req: Request) {
     );
   }
 
-  // state = userId — callback'te CSRF doğrulaması için
-  const state = Buffer.from(session.user.id).toString("base64url");
+  // state = { uid, loc } — callback'te CSRF + locale doğrulaması için
+  const state = Buffer.from(
+    JSON.stringify({ uid: session.user.id, loc: locale }),
+  ).toString("base64url");
   const redirectUri = `${baseUrl}/api/stripe/connect/callback`;
 
   const params = new URLSearchParams({

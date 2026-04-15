@@ -19,7 +19,7 @@ const serverSchema = z.object({
   CRON_SECRET: z.string().optional(),
   UPSTASH_REDIS_REST_URL: z.string().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
-  /** production: true iken Upstash Redis zorunlu (çoklu instance rate limit). */
+  /** production'da varsayılan: Upstash Redis zorunlu. false ise fallback'e izin verir. */
   REQUIRE_DISTRIBUTED_RATE_LIMIT: z.string().optional(),
   BOOKING_CALENDAR_TIMEZONE: z.string().optional(),
   LEGAL_TERMS_VERSION: z.string().optional(),
@@ -144,12 +144,11 @@ export function requireProdSecrets(): void {
       "UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN must both be set or both omitted",
     );
   }
-  if (
-    process.env.REQUIRE_DISTRIBUTED_RATE_LIMIT?.trim() === "true" &&
-    (!upstashUrl || !upstashToken)
-  ) {
+  const requireDistributedRateLimit =
+    process.env.REQUIRE_DISTRIBUTED_RATE_LIMIT?.trim() !== "false";
+  if (requireDistributedRateLimit && (!upstashUrl || !upstashToken)) {
     throw new Error(
-      "REQUIRE_DISTRIBUTED_RATE_LIMIT=true requires UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN in production",
+      "Distributed rate limit is required in production. Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN or explicitly set REQUIRE_DISTRIBUTED_RATE_LIMIT=false",
     );
   }
 }

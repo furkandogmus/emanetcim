@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import prisma from "@/lib/db";
 import type { Resend } from "resend";
 import { Resend as ResendCtor } from "resend";
@@ -77,24 +78,54 @@ function getResendClient(): Resend | null {
   return new ResendCtor(key);
 }
 
+function extractWebhookSignature(req: Request): string | null {
+  const auth = req.headers.get("authorization");
+  if (auth?.startsWith("Bearer ")) return auth.slice(7).trim();
+  return (
+    req.headers.get("x-resend-signature")?.trim() ||
+    req.headers.get("x-webhook-signature")?.trim() ||
+    null
+  );
+}
+
+function verifyWebhookSignature(rawBody: string, signature: string, secret: string): boolean {
+  const provided = signature.replace(/^sha256=/i, "").trim();
+  if (!provided) return false;
+  const expected = createHmac("sha256", secret).update(rawBody).digest("hex");
+  const a = Buffer.from(expected);
+  const b = Buffer.from(provided);
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
+}
+
 export async function POST(req: Request) {
   try {
-    const { searchParams } = new URL(req.url);
-    const token = searchParams.get("token");
-
-    // Basit Güvenlik Kontrolü (Eğer env'de tanımlıysa)
-    if (process.env.RESEND_WEBHOOK_SECRET && token !== process.env.RESEND_WEBHOOK_SECRET) {
+    const secret = process.env.RESEND_WEBHOOK_SECRET?.trim();
+    if (!secret) {
+      return NextResponse.json(
+        { error: "Webhook misconfigured: RESEND_WEBHOOK_SECRET is required." },
+        { status: 503 },
+      );
+    }
+    const rawBody = await req.text();
+    const signature = extractWebhookSignature(req);
+    if (!signature || !verifyWebhookSignature(rawBody, signature, secret)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await req.json();
+    let body: Record<string, unknown>;
+    try {
+      body = JSON.parse(rawBody) as Record<string, unknown>;
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
+    }
 
     /**
      * Resend Hibrit Webhook İşleme (Flat vs Nested)
      * Bazı eventler { type, data: { ... } } formatında, Inbound olanlar ise düz { from, subject, text } formatında gelir.
      */
-    const isNested = !!body.data && typeof body.data === 'object';
-    const data = isNested ? body.data : body;
+    const isNested = !!body.data && typeof body.data === "object";
+    const data = (isNested ? body.data : body) as Record<string, unknown>;
     
     // Inbound e-postalarda type olmayabilir, bu yüzden sadece body.type kontrolü yapmak riskli.
     if (isNested && body.type && body.type !== "email.received") {
@@ -108,8 +139,12 @@ export async function POST(req: Request) {
     );
 
     // Başlangıç değerleri (webhook içinden gelenler)
-    let text = data.text || data.content?.text || data.body || data.snippet || "";
-    let html = data.html || data.content?.html || "";
+    const content =
+      data.content && typeof data.content === "object"
+        ? (data.content as Record<string, unknown>)
+        : undefined;
+    let text = data.text ?? content?.text ?? data.body ?? data.snippet ?? "";
+    let html = data.html ?? content?.html ?? "";
 
     /**
      * EĞER İÇERİK BOŞ VE email_id VARSA:

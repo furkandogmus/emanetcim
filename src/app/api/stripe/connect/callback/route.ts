@@ -17,8 +17,7 @@ export async function GET(req: Request) {
   const state = searchParams.get("state");
   const error = searchParams.get("error");
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.trim() || "https://bagajpark.com";
-
-  const locale = "tr";
+  let locale = "tr";
   const settingsUrl = `${baseUrl}/${locale}/partner/settings`;
 
   if (error) {
@@ -32,21 +31,32 @@ export async function GET(req: Request) {
     return NextResponse.redirect(`${settingsUrl}?stripe_error=invalid_request`);
   }
 
-  // CSRF: state = base64url(userId)
+  // CSRF: state = base64url({ uid, loc }) ; geriye dönük uyumluluk için düz userId de desteklenir.
   let stateUserId: string;
   try {
-    stateUserId = Buffer.from(state, "base64url").toString("utf8");
+    const decoded = Buffer.from(state, "base64url").toString("utf8");
+    if (decoded.startsWith("{")) {
+      const parsed = JSON.parse(decoded) as { uid?: string; loc?: string };
+      stateUserId = String(parsed.uid ?? "");
+      if (parsed.loc && /^[a-z]{2}$/i.test(parsed.loc)) {
+        locale = parsed.loc.toLowerCase();
+      }
+    } else {
+      stateUserId = decoded;
+    }
   } catch {
     return NextResponse.redirect(`${settingsUrl}?stripe_error=invalid_state`);
   }
 
+  const localizedSettingsUrl = `${baseUrl}/${locale}/partner/settings`;
+
   if (stateUserId !== session.user.id) {
-    return NextResponse.redirect(`${settingsUrl}?stripe_error=state_mismatch`);
+    return NextResponse.redirect(`${localizedSettingsUrl}?stripe_error=state_mismatch`);
   }
 
   const secretKey = process.env.STRIPE_SECRET_KEY?.trim();
   if (!secretKey) {
-    return NextResponse.redirect(`${settingsUrl}?stripe_error=not_configured`);
+    return NextResponse.redirect(`${localizedSettingsUrl}?stripe_error=not_configured`);
   }
 
   try {
@@ -67,7 +77,7 @@ export async function GET(req: Request) {
       where: { ownerId: session.user.id },
     });
     if (!shop) {
-      return NextResponse.redirect(`${settingsUrl}?stripe_error=no_shop`);
+      return NextResponse.redirect(`${localizedSettingsUrl}?stripe_error=no_shop`);
     }
 
     await prisma.shop.update({
@@ -76,9 +86,9 @@ export async function GET(req: Request) {
     });
 
     logger.info({ shopId: shop.id, stripeAccountId }, "stripe_connect_linked");
-    return NextResponse.redirect(`${settingsUrl}?stripe_connected=1`);
+    return NextResponse.redirect(`${localizedSettingsUrl}?stripe_connected=1`);
   } catch (err) {
     logger.error({ err }, "stripe_connect_callback_error");
-    return NextResponse.redirect(`${settingsUrl}?stripe_error=oauth_failed`);
+    return NextResponse.redirect(`${localizedSettingsUrl}?stripe_error=oauth_failed`);
   }
 }

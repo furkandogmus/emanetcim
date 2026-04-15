@@ -9,7 +9,8 @@ import { isRateLimited } from "@/lib/internal-api-guard";
  *
  * Production ortamında ilk admin / partner / guest hesabı oluşturur.
  * Koruma: `ADMIN_SETUP_KEY` env değişkeni `setupKey` body alanıyla eşleşmeli.
- * `ADMIN_SETUP_KEY` yoksa endpoint tamamen kapalıdır.
+ * `ADMIN_SETUP_ENABLED=true` ve `ADMIN_SETUP_KEY` birlikte verilmedikçe endpoint kapalıdır.
+ * Varsayılan olarak ilk ADMIN oluşturulduktan sonra endpoint tekrar çalışmaz.
  *
  * Body:
  *   { setupKey, email, password, name?, role? }
@@ -23,10 +24,14 @@ import { isRateLimited } from "@/lib/internal-api-guard";
  *   500 – DB hatası
  */
 export async function POST(req: NextRequest) {
-  const setupKey = process.env.ADMIN_SETUP_KEY;
-  if (!setupKey) {
+  const setupEnabled = process.env.ADMIN_SETUP_ENABLED?.trim() === "true";
+  const setupKey = process.env.ADMIN_SETUP_KEY?.trim();
+  if (!setupEnabled || !setupKey) {
     return NextResponse.json(
-      { error: "Setup endpoint disabled. Set ADMIN_SETUP_KEY to enable." },
+      {
+        error:
+          "Setup endpoint disabled. Set ADMIN_SETUP_ENABLED=true and ADMIN_SETUP_KEY for temporary bootstrap.",
+      },
       { status: 403 }
     );
   }
@@ -50,6 +55,23 @@ export async function POST(req: NextRequest) {
 
   if (!email || !password) {
     return NextResponse.json({ error: "email and password are required." }, { status: 400 });
+  }
+
+  const allowReseed = process.env.ADMIN_SETUP_ALLOW_RESEED?.trim() === "true";
+  if (!allowReseed) {
+    const existingAdmin = await prisma.user.findFirst({
+      where: { role: Role.ADMIN },
+      select: { id: true },
+    });
+    if (existingAdmin) {
+      return NextResponse.json(
+        {
+          error:
+            "Setup endpoint locked because an admin already exists. Use ADMIN_SETUP_ALLOW_RESEED=true only for controlled recovery.",
+        },
+        { status: 403 },
+      );
+    }
   }
 
   const validRoles = [Role.ADMIN, Role.PARTNER, Role.GUEST];
@@ -92,6 +114,11 @@ export async function POST(req: NextRequest) {
 
 /** GET /api/admin/setup — endpoint durumunu döndürür (key göstermez). */
 export async function GET() {
-  const enabled = !!process.env.ADMIN_SETUP_KEY;
-  return NextResponse.json({ enabled, usage: enabled ? "POST with { setupKey, email, password, role? }" : "disabled" });
+  const enabled =
+    process.env.ADMIN_SETUP_ENABLED?.trim() === "true" &&
+    !!process.env.ADMIN_SETUP_KEY?.trim();
+  return NextResponse.json({
+    enabled,
+    usage: enabled ? "POST with { setupKey, email, password, role? }" : "disabled",
+  });
 }

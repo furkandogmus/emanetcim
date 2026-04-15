@@ -53,8 +53,9 @@ export default function Header() {
       <div className="flex items-center gap-3 sm:gap-5">
         {!hideGuestBookingNav && (
           <>
+            <NavLink href="/search">Explore</NavLink>
             <NavLink href="/partners">Partner</NavLink>
-            <NavLink href="/hotels">Hotels</NavLink>
+            <NavLink href="/insurance">Insurance</NavLink>
           </>
         )}
         <NavLink href="/blog">Blog</NavLink>

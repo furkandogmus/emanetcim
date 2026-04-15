@@ -25,11 +25,9 @@ import { randomString, randomIntBetween } from "https://jslib.k6.io/k6-utils/1.4
 const errorRate = new Rate("error_rate");
 const registerDuration = new Trend("register_duration", true);
 const shopSearchDuration = new Trend("shop_search_duration", true);
-const bookingDuration = new Trend("booking_create_duration", true);
 const healthDuration = new Trend("health_check_duration", true);
 const pageLoadDuration = new Trend("page_load_duration", true);
 const totalRegistrations = new Counter("total_registrations");
-const totalBookings = new Counter("total_bookings");
 
 // ── Config ──────────────────────────────────────────────────
 const BASE_URL = __ENV.BASE_URL || "https://bagajpark.com";
@@ -128,7 +126,7 @@ function getHeaders(csrfToken) {
 
 // ── Test Scenarios ──────────────────────────────────────────
 
-export default function () {
+function runStressScenario() {
   const user = generateUser();
 
   // 1. Health Check
@@ -181,12 +179,6 @@ export default function () {
 
     // Next.js server action'ları doğrudan çağırmak yerine
     // auth endpoint üzerinden register simüle ediyoruz
-    const payload = JSON.stringify({
-      email: user.email,
-      password: user.password,
-      name: user.name,
-    });
-
     const res = http.post(`${BASE_URL}/api/auth/csrf`, null, {
       headers: getHeaders(),
     });
@@ -258,3 +250,5 @@ export default function () {
 
   sleep(randomIntBetween(1, 2));
 }
+
+export default runStressScenario;
