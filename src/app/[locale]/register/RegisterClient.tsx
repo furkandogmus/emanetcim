@@ -3,16 +3,17 @@
 import { useState } from 'react';
 import { registerGuestAction, registerPartnerApplicationAction } from '@/actions/register';
 import { normalizeTrGsm10 } from '@/lib/netgsm';
-import { 
-  Package, 
-  ShieldCheck, 
-  Loader2, 
-  Mail, 
-  Lock, 
-  User, 
-  ChevronRight, 
-  Phone, 
-  Store, 
+import { getCityNames, getDistricts } from '@/lib/tr-cities';
+import {
+  Package,
+  ShieldCheck,
+  Loader2,
+  Mail,
+  Lock,
+  User,
+  ChevronRight,
+  Phone,
+  Store,
   MapPin,
   CheckCircle2
 } from 'lucide-react';
@@ -44,7 +45,12 @@ export default function RegisterPage() {
     password: '',
     shopName: '',
     shopAddress: '',
+    shopCity: '',
+    shopDistrict: '',
   });
+
+  const cities = getCityNames();
+  const districts = getDistricts(partnerData.shopCity);
 
   const translateServerError = (code: string | undefined) => {
     if (!code) return t('authErrorGeneric');
@@ -224,15 +230,50 @@ export default function RegisterPage() {
                   className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 focus:outline-none focus:border-orange-300 transition"
                 />
               </div>
+              {/* Şehir + İlçe */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="relative">
+                  <select
+                    value={partnerData.shopCity}
+                    required
+                    onChange={(e) =>
+                      setPartnerData({ ...partnerData, shopCity: e.target.value, shopDistrict: '' })
+                    }
+                    className="w-full h-12 pl-4 pr-3 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 focus:outline-none focus:border-orange-300 transition appearance-none bg-white"
+                  >
+                    <option value="">İl seçin…</option>
+                    {cities.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="relative">
+                  <select
+                    value={partnerData.shopDistrict}
+                    required
+                    disabled={!partnerData.shopCity}
+                    onChange={(e) =>
+                      setPartnerData({ ...partnerData, shopDistrict: e.target.value })
+                    }
+                    className="w-full h-12 pl-4 pr-3 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 focus:outline-none focus:border-orange-300 transition appearance-none bg-white disabled:opacity-40"
+                  >
+                    <option value="">İlçe seçin…</option>
+                    {districts.map((d) => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              {/* Açık adres */}
               <div className="relative">
                 <MapPin size={16} className="absolute left-4 top-4 text-gray-300 pointer-events-none" />
                 <textarea
                   placeholder={t('shopAddress')}
                   required
-                  rows={3}
+                  rows={2}
                   value={partnerData.shopAddress}
                   onChange={(e) => setPartnerData({ ...partnerData, shopAddress: e.target.value })}
-                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 focus:outline-none focus:border-orange-300 transition min-h-[80px]"
+                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 focus:outline-none focus:border-orange-300 transition resize-none"
                 />
               </div>
             </motion.div>
