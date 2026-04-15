@@ -11,6 +11,7 @@ import type { Metadata } from "next";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { alternatesForPath } from "@/lib/seo-alternates";
 import { buildFaqJsonLd } from "@/lib/faq-json-ld";
+import { buildItemListJsonLd, buildWebPageJsonLd } from "@/lib/page-json-ld";
 
 export const revalidate = 120;
 
@@ -51,6 +52,11 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
   setRequestLocale(locale);
 
   const t = await getTranslations("Guest");
+  const msg = (key: string, fallback: string) => {
+    const tx = t as unknown as { has?: (k: string) => boolean };
+    if (typeof tx.has === "function" && tx.has(key)) return t(key as never);
+    return fallback;
+  };
   const common = await getTranslations("Common");
   const tCity = await getTranslations("CityStorage");
   const [stats, testimonials] = await Promise.all([
@@ -66,46 +72,48 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
     it: "it-IT",
   };
   const nf = new Intl.NumberFormat(nfLocale[locale] ?? "en-US");
-  const faqItems =
-    locale === "tr"
-      ? [
-          {
-            question: "Bagaj emanet rezervasyonu ne kadar sürer?",
-            answer:
-              "Tarih ve valiz adedini seçtikten sonra uygun noktayı seçip rezervasyonu genellikle birkaç dakika içinde tamamlayabilirsiniz.",
-          },
-          {
-            question: "Bagaj emanet fiyatı nasıl belirleniyor?",
-            answer:
-              "Toplam tutar valiz adedi, süre ve platform kurallarına göre hesaplanır; ödeme adımında net şekilde gösterilir.",
-          },
-          {
-            question: "Hangi şehirlerde hizmet var?",
-            answer:
-              "İstanbul, Ankara, İzmir ve diğer popüler şehirler dahil olmak üzere şehir sayfalarından aktif noktaları görebilirsiniz.",
-          },
-        ]
-      : [
-          {
-            question: "How long does luggage storage booking take?",
-            answer:
-              "After selecting your dates and bag count, you can typically complete booking in just a few minutes.",
-          },
-          {
-            question: "How is luggage storage pricing calculated?",
-            answer:
-              "Total price is based on bag count, duration, and platform rules, and is shown clearly during checkout.",
-          },
-          {
-            question: "Which cities are available?",
-            answer:
-              "You can browse active storage points from city pages including Istanbul, Ankara, Izmir, and other major destinations.",
-          },
-        ];
+  const faqItems = [
+    {
+      question: msg("homeFaq1Q", "How long does luggage storage booking take?"),
+      answer: msg(
+        "homeFaq1A",
+        "After selecting your dates and bag count, you can typically complete booking in just a few minutes.",
+      ),
+    },
+    {
+      question: msg("homeFaq2Q", "How is luggage storage pricing calculated?"),
+      answer: msg(
+        "homeFaq2A",
+        "Total price is based on bag count, duration, and platform rules, and is shown clearly during checkout.",
+      ),
+    },
+    {
+      question: msg("homeFaq3Q", "Which cities are available?"),
+      answer: msg(
+        "homeFaq3A",
+        "You can browse active storage points from city pages including Istanbul, Ankara, Izmir, and other major destinations.",
+      ),
+    },
+  ];
   const faqJsonLd = buildFaqJsonLd({
     locale,
     path: "",
     items: faqItems,
+  });
+  const webPageJsonLd = buildWebPageJsonLd({
+    locale,
+    path: "",
+    title: locale === "tr" ? "Bagaj Emanet ve Valiz Depolama" : "Luggage Storage and Bag Drop",
+    description: t("heroSubtitle"),
+  });
+  const cityItemListJsonLd = buildItemListJsonLd({
+    locale,
+    path: "",
+    itemNamePrefix: t("cityHubTitle"),
+    items: STORAGE_CITIES.map((city) => ({
+      name: tCity(`${city.slug}.label`),
+      urlPath: `/luggage-storage/${city.slug}`,
+    })),
   });
   const editorialCopy =
     locale === "tr"
@@ -177,6 +185,14 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(cityItemListJsonLd) }}
       />
       {/* Hero Section */}
       <header className="relative pt-32 pb-20 px-6 flex flex-col items-center text-center bg-gray-50 overflow-hidden">
