@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 import { Loader2, X } from "lucide-react";
 
@@ -23,9 +23,11 @@ async function startWithCamera(
   onDecoded: (text: string) => void,
   onFrameFail: () => void
 ): Promise<void> {
-  const cameras = await Html5Qrcode.getCameras();
-  if (cameras.length === 0) {
-    throw new Error("NO_CAMERAS");
+  let cameras: { id: string; label: string }[] = [];
+  try {
+    cameras = await Html5Qrcode.getCameras();
+  } catch {
+    cameras = [];
   }
 
   const tryOrder = [
@@ -35,25 +37,27 @@ async function startWithCamera(
   const tried = new Set<string>();
   let lastErr: unknown;
 
-  for (const cam of tryOrder) {
-    if (tried.has(cam.id)) continue;
-    tried.add(cam.id);
-    try {
-      await h.start(cam.id, { ...SCAN_CONFIG }, onDecoded, onFrameFail);
-      return;
-    } catch (e) {
-      lastErr = e;
-      if (h.isScanning) {
+  if (cameras.length > 0) {
+    for (const cam of tryOrder) {
+      if (tried.has(cam.id)) continue;
+      tried.add(cam.id);
+      try {
+        await h.start(cam.id, { ...SCAN_CONFIG }, onDecoded, onFrameFail);
+        return;
+      } catch (e) {
+        lastErr = e;
+        if (h.isScanning) {
+          try {
+            await h.stop();
+          } catch {
+            /* ignore */
+          }
+        }
         try {
-          await h.stop();
+          h.clear();
         } catch {
           /* ignore */
         }
-      }
-      try {
-        h.clear();
-      } catch {
-        /* ignore */
       }
     }
   }
@@ -90,7 +94,7 @@ export default function QRScanner({ onResult, onClose }: QRScannerProps) {
   const html5Ref = useRef<Html5Qrcode | null>(null);
   const onResultRef = useRef(onResult);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     onResultRef.current = onResult;
   }, [onResult]);
 
@@ -115,7 +119,7 @@ export default function QRScanner({ onResult, onClose }: QRScannerProps) {
     }
   }, []);
 
-  const runStart = useCallback(async () => {
+  const runStart = useCallback(async (userInitiated = false) => {
     const id = ++runIdRef.current;
     setPhase("starting");
     setErrorMessage(null);
@@ -145,6 +149,19 @@ export default function QRScanner({ onResult, onClose }: QRScannerProps) {
     const onFrameFail = () => {};
 
     try {
+      // Some mobile browsers require user interaction before camera access.
+      if (userInitiated && navigator.mediaDevices?.getUserMedia) {
+        try {
+          const warmup = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "environment" },
+            audio: false,
+          });
+          warmup.getTracks().forEach((t) => t.stop());
+        } catch {
+          // Ignore warm-up failures and continue with html5-qrcode flow.
+        }
+      }
+
       await startWithCamera(h, onDecoded, onFrameFail);
       if (id !== runIdRef.current) return;
       setPhase("scanning");
@@ -179,7 +196,7 @@ export default function QRScanner({ onResult, onClose }: QRScannerProps) {
     }
   }, [stopAndClear]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     let cancelled = false;
     queueMicrotask(() => {
       if (!cancelled) void runStart();
@@ -231,7 +248,7 @@ export default function QRScanner({ onResult, onClose }: QRScannerProps) {
               )}
               <button
                 type="button"
-                onClick={() => void runStart()}
+                onClick={() => void runStart(true)}
                 className="w-full rounded-2xl bg-orange-600 py-4 text-sm font-black uppercase tracking-widest text-white transition-colors hover:bg-orange-700"
               >
                 Kamerayı başlat
