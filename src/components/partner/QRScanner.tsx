@@ -20,6 +20,7 @@ interface QRScannerProps {
 
 async function startWithCamera(
   h: Html5Qrcode,
+  preferredDeviceId: string | null,
   onDecoded: (text: string) => void,
   onFrameFail: () => void
 ): Promise<void> {
@@ -30,7 +31,11 @@ async function startWithCamera(
     cameras = [];
   }
 
+  const preferred = preferredDeviceId
+    ? cameras.find((c) => c.id === preferredDeviceId)
+    : null;
   const tryOrder = [
+    ...(preferred ? [preferred] : []),
     ...cameras.filter((c) => /back|rear|environment|arka/i.test(c.label)),
     ...cameras,
   ];
@@ -148,6 +153,7 @@ export default function QRScanner({ onResult, onClose }: QRScannerProps) {
     };
     const onFrameFail = () => {};
 
+    let preferredDeviceId: string | null = null;
     try {
       // Some mobile browsers require user interaction before camera access.
       if (userInitiated && navigator.mediaDevices?.getUserMedia) {
@@ -156,13 +162,14 @@ export default function QRScanner({ onResult, onClose }: QRScannerProps) {
             video: { facingMode: "environment" },
             audio: false,
           });
+          preferredDeviceId = warmup.getVideoTracks()[0]?.getSettings().deviceId ?? null;
           warmup.getTracks().forEach((t) => t.stop());
         } catch {
           // Ignore warm-up failures and continue with html5-qrcode flow.
         }
       }
 
-      await startWithCamera(h, onDecoded, onFrameFail);
+      await startWithCamera(h, preferredDeviceId, onDecoded, onFrameFail);
       if (id !== runIdRef.current) return;
       setPhase("scanning");
     } catch (e) {
@@ -170,10 +177,17 @@ export default function QRScanner({ onResult, onClose }: QRScannerProps) {
       console.error("QR camera start failed", e);
       const name =
         e && typeof e === "object" && "name" in e ? String((e as Error).name) : "";
+      const message = e instanceof Error ? e.message : String(e);
       const isPermission =
         name === "NotAllowedError" ||
         name === "PermissionDeniedError" ||
-        (e instanceof Error && /not allowed|permission|denied/i.test(e.message));
+        /not allowed|permission|denied/i.test(message);
+      const isInsecureContext =
+        typeof window !== "undefined" &&
+        !window.isSecureContext &&
+        window.location.hostname !== "localhost";
+      const isNoCamera =
+        name === "NotFoundError" || /no camera|not found|requested device not found/i.test(message);
 
       try {
         h.clear();
@@ -182,15 +196,18 @@ export default function QRScanner({ onResult, onClose }: QRScannerProps) {
       }
       html5Ref.current = null;
 
-      if (isPermission || name === "NotFoundError") {
+      if (isInsecureContext) {
+        setPhase("error");
+        setErrorMessage("Kamera için HTTPS gerekli. Lütfen güvenli bağlantı (https) kullanın.");
+      } else if (isPermission || isNoCamera) {
         setPhase("needTap");
         setErrorMessage(
-          "Kamera izni gerekli. Aşağıdaki düğmeye dokunarak tekrar deneyin."
+          "Kamera izni/erişimi başarısız. Tarayıcıdan kamera iznini kontrol edip tekrar deneyin."
         );
       } else {
         setPhase("error");
         setErrorMessage(
-          "Kamera açılamadı. Bağlantıyı kontrol edip tekrar deneyin."
+          "Kamera açılamadı. Başka bir uygulama kamerayı kullanıyorsa kapatıp tekrar deneyin."
         );
       }
     }
