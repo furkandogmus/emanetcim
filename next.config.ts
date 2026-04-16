@@ -25,7 +25,7 @@ const securityHeaders = [
   },
   {
     key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=(self)",
+    value: "camera=(self), microphone=(), geolocation=(self)",
   },
   {
     key: "Content-Security-Policy",
@@ -33,7 +33,7 @@ const securityHeaders = [
       "default-src 'self'",
       // NOTE: Next.js runtime injects inline bootstrap scripts/styles.
       // Keep unsafe-inline in production until nonce/hash CSP is implemented app-wide.
-      "script-src 'self' 'unsafe-inline' https://js.stripe.com https://plausible.io",
+      "script-src 'self' 'unsafe-inline' https://js.stripe.com https://plausible.io https://static.cloudflareinsights.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data: https://fonts.gstatic.com",
