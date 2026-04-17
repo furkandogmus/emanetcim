@@ -1,7 +1,10 @@
 /**
  * @vitest-environment node
  */
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
+
+// Override global db mock from setup.tsx — this integration test needs real Prisma
+vi.unmock("@/lib/db");
 import { Role, BookingStatus, PaymentStatus } from "@prisma/client";
 import { Prisma } from "@prisma/client";
 
