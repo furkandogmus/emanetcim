@@ -40,6 +40,7 @@ async function runSealForecast(req: NextRequest): Promise<NextResponse> {
     const alerts: string[] = [];
     let autoRequests = 0;
     let processed = 0;
+    let detailedAlerts: string[] = [];
 
     for (const shop of shops) {
       try {
@@ -72,30 +73,36 @@ async function runSealForecast(req: NextRequest): Promise<NextResponse> {
           });
           autoRequests++;
 
-          const alertMsg = `Dükkkan: ${shop.name} | ASSIGNED: ${assignedCount} < reorder ${reorderPoint} | Talep: ${newQuantity} adet`;
+          const alertMsg = `Dükkan: ${shop.name} | ASSIGNED: ${assignedCount} < reorder ${reorderPoint} | Talep: ${newQuantity} adet`;
           alerts.push(alertMsg);
+          detailedAlerts.push(
+            `- ${shop.name}: ${assignedCount}/${reorderPoint} stok. ${newQuantity} mühür talep edildi. (7 günlük tahmin: ${predictedDemand})`
+          );
 
           logger.info(
             { shopId: shop.id, shopName: shop.name, assignedCount, reorderPoint },
             "seal_forecast_auto_request_created"
           );
-
-          // Admin email + SMS
-          const adminEmail = process.env.ADMIN_EMAIL?.trim();
-          const emailSubject = `BagajPark [Admin]: Düşük Mühür Stoku — ${shop.name}`;
-          const emailBody = `Otomatik Mühür Talebi Oluşturuldu\n\nDükkan: ${shop.name}\nMevcut ASSIGNED mühür: ${assignedCount}\nTetikleyici eşik: ${reorderPoint}\nTalep edilen miktar: ${newQuantity}\nTahmin edilen 7 günlük talep: ${predictedDemand}\n\nAdmin panelinden onaylayın: https://bagajpark.com/tr/admin/seals`;
-
-          if (adminEmail) {
-            await notificationService.sendEmail(adminEmail, emailSubject, emailBody);
-          }
-
-          for (const adminPhone of parseAdminGsmNumbers()) {
-            const sms = `BagajPark [Admin]: ${shop.name} düşük mühür stoku (${assignedCount}/${reorderPoint}). Otomatik talep oluşturuldu.`;
-            await notificationService.sendSms(adminPhone, sms);
-          }
         }
       } catch (shopErr) {
         logger.error({ err: shopErr, shopId: shop.id }, "seal_forecast_shop_error");
+      }
+    }
+
+    // BUG-16: Send summary notification instead of triggering per shop
+    if (autoRequests > 0) {
+      const adminEmail = process.env.ADMIN_EMAIL?.trim();
+      const summaryText = detailedAlerts.join("\n");
+
+      if (adminEmail) {
+        const emailSubject = `BagajPark [Admin]: ${autoRequests} Dükkan için Otomatik Mühür Talebi`;
+        const emailBody = `Aşağıdaki dükkanlar için düşük mühür stoku nedeniyle otomatik talepler oluşturuldu:\n\n${summaryText}\n\nAdmin panelinden onaylayın: https://bagajpark.com/tr/admin/seals`;
+        await notificationService.sendEmail(adminEmail, emailSubject, emailBody).catch(e => logger.error({ err: e }, "seal_forecast_email_summary_failed"));
+      }
+
+      for (const adminPhone of parseAdminGsmNumbers()) {
+        const sms = `BagajPark: ${autoRequests} dükkan için mühür talebi açıldı. Detaylar email ile gönderildi.`;
+        await notificationService.sendSms(adminPhone, sms).catch(e => logger.error({ err: e }, "seal_forecast_sms_summary_failed"));
       }
     }
 

@@ -534,10 +534,13 @@ export class PaymentService implements IPaymentService {
       ) {
         logger.info({ bookingId }, "stripe_refund_simulate_success_dev");
         if (!options?.keepPaymentLogSuccess) {
-          await prisma.paymentLog.update({
-            where: { id: paymentLog.id },
-            data: { status: "REFUNDED" },
-          });
+          const isFullRefund = amount >= moneyToNumber(paymentLog.amount);
+          if (isFullRefund) {
+            await prisma.paymentLog.update({
+              where: { id: paymentLog.id },
+              data: { status: "REFUNDED" },
+            });
+          }
         }
         return { status: "success", amount };
       }
@@ -560,10 +563,13 @@ export class PaymentService implements IPaymentService {
       }
 
       if (!options?.keepPaymentLogSuccess) {
-        await prisma.paymentLog.update({
-          where: { id: paymentLog.id },
-          data: { status: "REFUNDED" },
-        });
+        const isFullRefund = amount >= moneyToNumber(paymentLog.amount);
+        if (isFullRefund) {
+          await prisma.paymentLog.update({
+            where: { id: paymentLog.id },
+            data: { status: "REFUNDED" },
+          });
+        }
       }
 
       return { status: "success", amount, refundId: refund.id };
@@ -611,10 +617,13 @@ export class PaymentService implements IPaymentService {
 
     // 4. Logla (kısmi iade: örn. rezervasyon düzenleme — kayıt SUCCESS kalır, tekrar iade mümkün)
     if (isPaymentSuccess(result.status) && !options?.keepPaymentLogSuccess) {
-      await prisma.paymentLog.update({
-        where: { id: paymentLog.id },
-        data: { status: "REFUNDED" }
-      });
+      const isFullRefund = amount >= moneyToNumber(paymentLog.amount);
+      if (isFullRefund) {
+        await prisma.paymentLog.update({
+          where: { id: paymentLog.id },
+          data: { status: "REFUNDED" }
+        });
+      }
     }
 
     return result;

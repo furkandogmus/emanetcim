@@ -209,6 +209,17 @@ export class BookingService implements IBookingService {
             'CHECKED_IN',
           ],
         },
+        OR: [
+          // PAID ve CHECKED_IN her zaman sayılır
+          { status: { in: ['PAID', 'CHECKED_IN'] } },
+          // WAITING, APPROVED, PENDING ise sadece "taze" ise (check-in saati geçmemiş veya son 24 saat içinde)
+          {
+            AND: [
+              { status: { in: ['WAITING_APPROVAL', 'APPROVED', 'PENDING'] } },
+              { checkInTime: { gt: new Date(Date.now() - 24 * 60 * 60 * 1000) } }
+            ]
+          }
+        ],
         AND: [
           { checkInTime: { lt: checkOutTime } },
           { checkOutTime: { gt: checkInTime } },

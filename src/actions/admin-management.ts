@@ -621,12 +621,19 @@ export async function deleteReviewAction(reviewId: string) {
 export async function blockIpAction(ip: string, reason?: string) {
   await ensureAdmin();
 
+  // BUG-18: IP formatı doğrulanmalıdır
+  const ipParsed = z.string().ip().safeParse(ip?.trim());
+  if (!ipParsed.success) {
+    return { success: false, error: "invalid_ip_format" };
+  }
+
   await prisma.blockedIp.upsert({
-    where: { ip },
-    update: { reason },
-    create: { ip, reason },
+    where: { ip: ipParsed.data },
+    update: { reason: reason?.trim() || null },
+    create: { ip: ipParsed.data, reason: reason?.trim() || null },
   });
 
+  revalidatePathAllLocales("/admin/settings");
   return { success: true };
 }
 

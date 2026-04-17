@@ -18,6 +18,7 @@ import { moneyToNumber } from "@/lib/money";
 import { BookingStatus } from "@prisma/client";
 import { headers } from "next/headers";
 import { rateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/get-ip";
 import type {
   CancelBookingErrorCode,
   ModifyBookingErrorCode,
@@ -50,7 +51,7 @@ export type CreateBookingInput = {
  */
 export async function createBookingAction(data: CreateBookingInput) {
   const h = await headers();
-  const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || "unknown";
+  const ip = await getClientIp();
 
   if (!(await rateLimit(`booking_create:${ip}`, 10, 10 * 60 * 1000))) {
     return { success: false as const, error: "Errors.tooManyRequests" };
