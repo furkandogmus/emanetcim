@@ -8,7 +8,7 @@ export type { PricingRules };
 /**
  * Merkezi valiz fiyat çarpanları — `PricingRules` ile DB ayarlarından beslenir.
  */
-export function roundedSlotPrices(
+export function preciseSlotPrices(
   pricePerDay: number,
   rules: PricingRules = DEFAULT_PRICING_RULES
 ) {
@@ -16,14 +16,28 @@ export function roundedSlotPrices(
     ? pricePerDay
     : rules.defaultPricePerDay;
   const m = rules.bagMultipliers;
+  // BUG-19: Ara yuvarlama kaldırıldı, hassasiyet korunuyor.
   return {
-    s: Math.round(base * m.S),
-    m: Math.round(base * m.M),
-    xl: Math.round(base * m.XL),
+    s: base * m.S,
+    m: base * m.M,
+    xl: base * m.XL,
   };
 }
 
-/** Bir günlük hizmet satırı (sigorta hariç), checkout ile aynı yuvarlama. */
+/** UI bileşenleri için tam sayıya yuvarlanmış fiyatlar. */
+export function roundedSlotPrices(
+  pricePerDay: number,
+  rules: PricingRules = DEFAULT_PRICING_RULES
+) {
+  const p = preciseSlotPrices(pricePerDay, rules);
+  return {
+    s: Math.round(p.s),
+    m: Math.round(p.m),
+    xl: Math.round(p.xl),
+  };
+}
+
+/** Bir günlük hizmet satırı (sigorta hariç). */
 export function computeDailyBagLineTotal(
   pricePerDay: number,
   bagCountS: number,
@@ -31,7 +45,7 @@ export function computeDailyBagLineTotal(
   bagCountXl: number,
   rules: PricingRules = DEFAULT_PRICING_RULES
 ): number {
-  const p = roundedSlotPrices(pricePerDay, rules);
+  const p = preciseSlotPrices(pricePerDay, rules);
   return bagCountS * p.s + bagCountM * p.m + bagCountXl * p.xl;
 }
 
@@ -43,7 +57,7 @@ export function totalBagCount(
   return bagCountS + bagCountM + bagCountXl;
 }
 
-/** Günlük hizmet satırı × gün sayısı (checkout ile aynı yuvarlama). */
+/** Günlük hizmet satırı × gün sayısı. Tam gün kuralı (ceil) uygulanır. */
 export function computeServiceTotalForStay(
   pricePerDay: number,
   bagCountS: number,
@@ -59,9 +73,10 @@ export function computeServiceTotalForStay(
     bagCountXl,
     rules
   );
+  // BUG-19: Her zaman yukarı yuvarla (1.1 gün = 2 gün)
   const days = Math.max(
     1,
-    Math.min(rules.maxStayDays, Math.floor(numberOfDays))
+    Math.min(rules.maxStayDays, Math.ceil(numberOfDays))
   );
   return Math.round(daily * days * 100) / 100;
 }

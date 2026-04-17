@@ -113,6 +113,12 @@ export function getGuestStaticSeo(
   locale: string,
   key: GuestStaticSeoKey,
 ): { title: string; description: string } {
-  if (locale === "tr") return TR[key];
+  // BUG-20: Diğer 12 dil için EN fallback
+  const set = locale === "tr" ? TR : EN;
+  const result = set[key];
+  
+  if (result) return result;
+  
+  // Eğer dilde anahtar yoksa (örn: yeni eklenen bir sayfa) her zaman EN'e dön
   return EN[key];
 }

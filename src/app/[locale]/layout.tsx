@@ -18,6 +18,7 @@ import ConsentAwareAnalytics from "@/components/ConsentAwareAnalytics";
 import CrispChat from "@/components/CrispChat";
 import SentryClientInit from "@/components/SentryClientInit";
 import VerificationBanner from "@/components/layout/VerificationBanner";
+import { config } from "@/lib/config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -132,17 +133,17 @@ export default async function RootLayout({
   const orgLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    "name": "BagajPark",
-    "alternateName": ["Emanetçi", "emanetcim"],
+    "name": config.branding.name,
+    "alternateName": config.branding.alternateNames,
     "url": base,
-    "logo": `${base}/icons/icon-512x512.png`,
+    "logo": `${base}${config.branding.logo}`,
     "areaServed": {
       "@type": "Country",
       name: "Turkey",
     },
     contactPoint: {
       "@type": "ContactPoint",
-      telephone: "+90-542-241-55-97",
+      telephone: config.contact.phone,
       contactType: "customer service",
       availableLanguage: ["Turkish", "English"],
     },

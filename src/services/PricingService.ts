@@ -15,6 +15,7 @@ export class PricingService {
    * @param pricePerDay Dükkanın günlük birim fiyatı
    */
   calculateTotal(totalBags: number, days: number, pricePerDay: number): number {
+    // BUG-19: bag-pricing.ts ile uyumlu ceil ve yuvarlama mantığı.
     const calculatedDays = Math.max(1, Math.ceil(days));
     const total = totalBags * calculatedDays * pricePerDay;
     return Math.round(total * 100) / 100;

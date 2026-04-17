@@ -30,6 +30,18 @@ export const config = {
   
   database: {
     url: process.env.DATABASE_URL,
+  },
+  
+  contact: {
+    phone: process.env.NEXT_PUBLIC_CONTACT_PHONE || "+90-542-241-55-97",
+    email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "destek@bagajpark.com",
+    whatsapp: "https://wa.me/905422415597",
+  },
+
+  branding: {
+    name: "BagajPark",
+    alternateNames: ["Emanetçi", "emanetcim"],
+    logo: "/icons/icon-512x512.png",
   }
 };
 

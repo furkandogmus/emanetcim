@@ -10,6 +10,7 @@ import {
   isPaymentWebhookProcessed,
 } from "@/lib/payment-webhook-dedup";
 import { recordMetric } from "@/lib/metrics";
+import { getClientIp } from "@/lib/get-ip";
 
 /**
  * iyzico Payment Webhook Handler
@@ -19,10 +20,7 @@ import { recordMetric } from "@/lib/metrics";
 export async function POST(req: NextRequest) {
   try {
     recordMetric("webhook_received_total", { channel: "iyzico" });
-    const ip =
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      req.headers.get("x-real-ip") ||
-      "unknown";
+    const ip = await getClientIp(req);
     if (!(await rateLimit(`webhook:${ip}`, 120, 60_000))) {
       return NextResponse.json(
         { status: "Error", message: "Too many requests" },

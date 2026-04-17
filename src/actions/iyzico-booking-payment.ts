@@ -14,6 +14,7 @@ import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { notificationService } from "@/services/NotificationService";
 import { getLocale } from "next-intl/server";
 import { z } from "zod";
+import { getClientIp } from "@/lib/get-ip";
 
 const cardSchema = z.object({
   cardHolderName: z.string().min(2).max(120),
@@ -50,11 +51,7 @@ export async function payBookingWithIyzicoAction(raw: unknown): Promise<
     return { success: false, errorKey: "payBookingErrorUnknown" };
   }
 
-  const h = await headers();
-  const ip =
-    h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    h.get("x-real-ip") ||
-    "unknown";
+  const ip = await getClientIp();
 
   if (
     !(await rateLimit(`iyzico_pay_guest:${session.user.id}`, 25, 60 * 60 * 1000)) ||
