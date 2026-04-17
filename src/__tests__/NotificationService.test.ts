@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NotificationService } from "../services/NotificationService";
 
@@ -43,7 +44,7 @@ describe("NotificationService", () => {
 
   describe("sendEmail", () => {
     it("should call resend API and log the notification", async () => {
-      (global.fetch as unknown).mockResolvedValue({
+      (global.fetch as any).mockResolvedValue({
         ok: true,
         status: 200,
       });
@@ -69,7 +70,7 @@ describe("NotificationService", () => {
     });
 
     it("should return false and log FAILED if fetch fails", async () => {
-      (global.fetch as unknown).mockResolvedValue({
+      (global.fetch as any).mockResolvedValue({
         ok: false,
         status: 500,
         text: () => Promise.resolve("Error message"),
@@ -120,7 +121,7 @@ describe("NotificationService", () => {
 
   describe("notifyCheckIn", () => {
     it("should include seal numbers in the email if they exist", async () => {
-      (global.fetch as unknown).mockResolvedValue({ ok: true });
+      (global.fetch as any).mockResolvedValue({ ok: true });
       mockPrisma.bookingSeal.findMany.mockResolvedValue([
         { sealNumber: 1234, bagIndex: 1, bagSize: "M" },
       ]);

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @vitest-environment jsdom
  */
@@ -17,7 +18,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@/i18n/routing", () => ({
-  Link: ({ children, href }: unknown) => <a href={href}>{children}</a>,
+  Link: ({ children, href }: any) => <a href={href}>{children}</a>,
 }));
 
 vi.mock("@/actions/register", () => ({
@@ -27,7 +28,7 @@ vi.mock("@/actions/register", () => ({
 
 // Mock LocationPicker as it uses maplibre which is hard to test in jsdom
 vi.mock("@/components/partner/LocationPicker", () => ({
-  default: ({ onChange }: unknown) => (
+  default: ({ onChange }: any) => (
     <div data-testid="location-picker">
       <button onClick={() => onChange({ city: "Istanbul", district: "Besiktas", address: "Main St", latitude: 1, longitude: 1 })}>
         Select Location

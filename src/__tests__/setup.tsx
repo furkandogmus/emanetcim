@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import "@testing-library/jest-dom";
 import { vi } from "vitest";
 
@@ -18,7 +19,7 @@ vi.mock("next-intl", () => ({
 // Mock next-auth
 vi.mock("next-auth/react", () => ({
   useSession: vi.fn(() => ({ data: null, status: "unauthenticated" })),
-  SessionProvider: ({ children }: unknown) => <>{children}</>,
+  SessionProvider: ({ children }: any) => <>{children}</>,
 }));
 
 vi.mock("next-auth", () => ({
@@ -30,7 +31,7 @@ vi.mock("next-auth", () => ({
 // Mock framer-motion (Next.js 16/15 often uses it)
 vi.mock("framer-motion", () => ({
   motion: {
-    div: ({ children, ...props }: unknown) => <div {...props}>{children}</div>,
+    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
   },
-  AnimatePresence: ({ children }: unknown) => <>{children}</>,
+  AnimatePresence: ({ children }: any) => <>{children}</>,
 }));
