@@ -172,7 +172,7 @@ model Shop {
   updatedAt DateTime @updatedAt
 
 
-  owner    User      @relation(fields: [ownerId], references: [id])
+  owner    User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   bookings Booking[]
   reviews  Review[]
   sealRequests SealRequest[]
@@ -216,8 +216,8 @@ model Booking {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  guest       User         @relation(fields: [guestId], references: [id])
-  shop        Shop         @relation(fields: [shopId], references: [id])
+  guest       User         @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  shop        Shop         @relation(fields: [shopId], references: [id], onDelete: Cascade)
   paymentLogs PaymentLog[]
   notificationLogs NotificationLog[]
   review      Review?
@@ -245,7 +245,7 @@ model PaymentLog {
 
   createdAt DateTime @default(now())
 
-  booking Booking @relation(fields: [bookingId], references: [id])
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
   @@index([status])
   @@index([splitCompleted])
@@ -264,7 +264,7 @@ model NotificationLog {
 
   createdAt DateTime @default(now())
 
-  booking   Booking? @relation(fields: [bookingId], references: [id])
+  booking   Booking? @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
   @@index([bookingId])
   @@index([recipient])
@@ -280,9 +280,9 @@ model Review {
   
   createdAt DateTime @default(now())
 
-  booking Booking @relation(fields: [bookingId], references: [id])
-  guest   User    @relation(fields: [guestId], references: [id])
-  shop    Shop    @relation(fields: [shopId], references: [id])
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  guest   User    @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  shop    Shop    @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
   @@index([shopId])
   @@index([guestId])
@@ -316,7 +316,7 @@ model Dispute {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  booking   Booking  @relation(fields: [bookingId], references: [id])
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 }
 
 /// Fiziksel mühür stoku (seri numarası = PK)
