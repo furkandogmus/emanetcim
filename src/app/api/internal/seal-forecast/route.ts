@@ -40,7 +40,7 @@ async function runSealForecast(req: NextRequest): Promise<NextResponse> {
     const alerts: string[] = [];
     let autoRequests = 0;
     let processed = 0;
-    let detailedAlerts: string[] = [];
+    const detailedAlerts: string[] = [];
 
     for (const shop of shops) {
       try {

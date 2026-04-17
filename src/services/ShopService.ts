@@ -3,7 +3,7 @@ import { Role } from '@prisma/client';
 import prisma from '@/lib/db';
 import { moneyToNumber } from '@/lib/money';
 import { getActiveShopsOrderedByDistanceKm } from '@/lib/shop-distance-postgis';
-import { totalBagCount } from '@/lib/bag-pricing';
+
 import { isShopOpenAt } from '@/lib/shop-hours';
 import { notificationService } from '@/services/NotificationService';
 import logger from '@/lib/logger';

@@ -50,7 +50,7 @@ export type CreateBookingInput = {
  * Artık doğrudan ödeme alınmıyor, esnaf onayına (WAITING_APPROVAL) düşüyor.
  */
 export async function createBookingAction(data: CreateBookingInput) {
-  const h = await headers();
+  await headers();
   const ip = await getClientIp();
 
   if (!(await rateLimit(`booking_create:${ip}`, 10, 10 * 60 * 1000))) {

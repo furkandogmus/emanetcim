@@ -221,13 +221,7 @@ export default function LocationPicker({ value, onChange }: Props) {
   const [geocoding, setGeocoding] = useState(false);
   const [locError, setLocError] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(!!value.latitude);
-  const [addressParts, setAddressParts] = useState<AddressParts>(() =>
-    parseAddressParts(value.address)
-  );
 
-  useEffect(() => {
-    setAddressParts(parseAddressParts(value.address));
-  }, [value.address]);
 
   /* ── Marker yardımcısı ── */
   const placeMarker = useCallback(
@@ -264,7 +258,7 @@ export default function LocationPicker({ value, onChange }: Props) {
         try {
           const geo = await reverseGeocode(pos.lat, pos.lng);
           const initialParts = geo.parts;
-          setAddressParts(initialParts);
+
           onChangeRef.current({
             address: composeAddress(initialParts),
             city: "",
@@ -326,7 +320,7 @@ export default function LocationPicker({ value, onChange }: Props) {
         try {
           const geo = await reverseGeocode(lat, lng);
           const initialParts = geo.parts;
-          setAddressParts(initialParts);
+
           onChangeRef.current({
             address: composeAddress(initialParts),
             city: "",
@@ -387,7 +381,7 @@ export default function LocationPicker({ value, onChange }: Props) {
         try {
           const geo = await reverseGeocode(lat, lng);
           const initialParts = geo.parts;
-          setAddressParts(initialParts);
+
           onChangeRef.current({
             address: composeAddress(initialParts),
             city: "",
@@ -512,12 +506,7 @@ export default function LocationPicker({ value, onChange }: Props) {
             type="button"
             onClick={() => {
               onChange({ address: "", city: "", district: "", latitude: null, longitude: null });
-              setAddressParts({
-                street: "",
-                neighborhood: "",
-                buildingNo: "",
-                doorNo: "",
-              });
+
               setConfirmed(false);
               markerRef.current?.remove();
               markerRef.current = null;

@@ -21,7 +21,7 @@ const { mockPrisma, mockAuth, mockBookingService, mockSealService } = vi.hoisted
       },
       review: { create: vi.fn() },
       user: { findUnique: vi.fn() },
-      $transaction: vi.fn((fn: any) => {
+      $transaction: vi.fn((fn: unknown) => {
         if (typeof fn === "function") return fn(mockPrisma);
         return Promise.all(fn);
       }),
@@ -77,7 +77,7 @@ vi.mock("@/lib/platform-settings", () => ({
     platformHolidayDates: [],
   }),
 }));
-vi.mock("@/lib/money", () => ({ moneyToNumber: (v: any) => Number(v) || 0 }));
+vi.mock("@/lib/money", () => ({ moneyToNumber: (v: unknown) => Number(v) || 0 }));
 vi.mock("@/lib/rate-limit", () => ({ rateLimit: vi.fn().mockResolvedValue(true) }));
 vi.mock("next/headers", () => ({
   headers: vi.fn().mockResolvedValue({

@@ -2,7 +2,6 @@ import { test, expect } from '@playwright/test';
 import { waitForCheckoutDatesReady } from './helpers/checkout';
 import { openCheckoutFromSearchList } from './helpers/search-to-checkout';
 import { IYZICO_SANDBOX_SUCCESS } from './helpers/iyzico-sandbox';
-import { Role } from '@prisma/client';
 
 export const TEST_USER_PHONE = '+905556667788';
 
@@ -51,7 +50,7 @@ test.describe('E2E Full Workflow: GUEST -> BOOKING -> PAYMENT -> CHECKIN -> CHEC
     const bookingIdElement = page.getByText(/Rezervasyon ID:|RESERVASYON ID:/i).locator('..');
     const bookingText = await bookingIdElement.innerText();
     const matchId = bookingText.match(/[a-f0-9-]{36}/i);
-    let bookingId = matchId ? matchId[0] : "";
+    const bookingId = matchId ? matchId[0] : "";
     expect(bookingId).toMatch(/^[a-f0-9-]+$/);
 
     // Logout guest
