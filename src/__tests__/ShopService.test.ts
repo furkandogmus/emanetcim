@@ -13,6 +13,7 @@ const { mockPrisma, mockGetActiveShops } = vi.hoisted(() => {
       },
       booking: {
         findMany: vi.fn(),
+        groupBy: vi.fn(),
         count: vi.fn(),
       },
       user: {
@@ -65,7 +66,7 @@ describe("ShopService", () => {
           distanceKm: 1,
         },
       ]);
-      mockPrisma.booking.findMany.mockResolvedValue([]);
+      mockPrisma.booking.groupBy.mockResolvedValue([]);
 
       const hits = await service.findShopsForSearch({
         centerLat: 41,
@@ -95,7 +96,7 @@ describe("ShopService", () => {
           distanceKm: 1,
         },
       ]);
-      mockPrisma.booking.findMany.mockResolvedValue([]);
+      mockPrisma.booking.groupBy.mockResolvedValue([]);
 
       const hits = await service.findShopsForSearch({
         centerLat: 41,
@@ -127,8 +128,11 @@ describe("ShopService", () => {
       ]);
 
       // Overlapping bookings use 4 slots
-      mockPrisma.booking.findMany.mockResolvedValue([
-        { shopId: "shop-full", bagCountS: 2, bagCountM: 2, bagCountXl: 0 },
+      mockPrisma.booking.groupBy.mockResolvedValue([
+        {
+          shopId: "shop-full",
+          _sum: { bagCountS: 2, bagCountM: 2, bagCountXl: 0 },
+        },
       ]);
 
       // Requesting 2 more bags -> Total 6 > Capacity 5

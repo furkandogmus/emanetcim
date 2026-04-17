@@ -118,22 +118,25 @@ export async function confirmSealDeliveryAction(
       return { success: false, error: "request_not_shipped" };
     }
 
-    await prisma.sealRequest.update({
-      where: { id: requestId },
-      data: { status: "DELIVERED", updatedAt: new Date() },
-    });
+    // BUG-11: Status güncellemesi ve mühür ataması tek transaction içinde
+    await prisma.$transaction(async (tx) => {
+      await tx.sealRequest.update({
+        where: { id: requestId },
+        data: { status: "DELIVERED", updatedAt: new Date() },
+      });
 
-    // Assign seals if serial range is recorded
-    if (
-      sealRequest.serialFrom !== null &&
-      sealRequest.serialTo !== null
-    ) {
-      await sealService.assignSealsToShop(
-        sealRequest.shopId,
-        sealRequest.serialFrom,
-        sealRequest.serialTo
-      );
-    }
+      // Assign seals if serial range is recorded
+      if (
+        sealRequest.serialFrom !== null &&
+        sealRequest.serialTo !== null
+      ) {
+        await sealService.assignSealsToShop(
+          sealRequest.shopId,
+          sealRequest.serialFrom,
+          sealRequest.serialTo
+        );
+      }
+    });
 
     revalidatePathAllLocales("/admin/seals");
     revalidatePathAllLocales("/partner/seals");
@@ -146,6 +149,7 @@ export async function confirmSealDeliveryAction(
 // ─── Partner: mühür talebi aç ────────────────────────────────────────────────
 
 export async function requestSealsAction(
+  shopId: string,
   quantity: number
 ): Promise<{ success: boolean; requestId?: string; error?: string }> {
   const session = await auth();
@@ -160,8 +164,12 @@ export async function requestSealsAction(
   }
 
   try {
+    // BUG-09: shopId explicit alınıyor, sahiplik doğrulanıyor
     const shop = await prisma.shop.findFirst({
-      where: { ownerId: session.user.id },
+      where: {
+        id: shopId,
+        ...(session.user.role === "PARTNER" ? { ownerId: session.user.id } : {}),
+      },
       select: { id: true, name: true },
     });
 

@@ -219,27 +219,33 @@ export class SealService {
    * Returns: recycled count
    */
   async recycleReturnedSeals(shopId: string, count?: number): Promise<number> {
-    const where: Parameters<typeof prisma.seal.updateMany>[0]["where"] = {
-      shopId,
-      status: "RETURNED",
-    };
-    if (count !== undefined) {
-      // updateMany doesn't support take, so we fetch IDs first
-      const seals = await prisma.seal.findMany({
-        where,
-        select: { serialNumber: true },
-        take: count,
-        orderBy: { serialNumber: "asc" },
-      });
-      if (seals.length === 0) return 0;
-      const result = await prisma.seal.updateMany({
-        where: { serialNumber: { in: seals.map((s) => s.serialNumber) } },
-        data: { status: "ASSIGNED" },
-      });
+    return await prisma.$transaction(async (tx) => {
+      const where: Prisma.SealWhereInput = {
+        shopId,
+        status: "RETURNED",
+      };
+      
+      if (count !== undefined) {
+        // Fetch IDs within transaction
+        const seals = await tx.seal.findMany({
+          where,
+          select: { serialNumber: true },
+          take: count,
+          orderBy: { serialNumber: "asc" },
+        });
+        
+        if (seals.length === 0) return 0;
+        
+        const result = await tx.seal.updateMany({
+          where: { serialNumber: { in: seals.map((s) => s.serialNumber) } },
+          data: { status: "ASSIGNED" },
+        });
+        return result.count;
+      }
+      
+      const result = await tx.seal.updateMany({ where, data: { status: "ASSIGNED" } });
       return result.count;
-    }
-    const result = await prisma.seal.updateMany({ where, data: { status: "ASSIGNED" } });
-    return result.count;
+    });
   }
 
   /**

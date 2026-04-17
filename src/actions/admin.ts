@@ -191,6 +191,22 @@ export async function assignSealsToShopAction(
   }
 }
 
+const createCampaignSchema = z.object({
+  name: z.string().min(1).max(200).trim(),
+  message: z.string().max(1000).optional(),
+  discountPercent: z.number().min(0).max(100).optional(),
+  isActive: z.boolean().optional(),
+  endsAt: z.date().nullable().optional(),
+});
+
+const updateCampaignSchema = z.object({
+  name: z.string().min(1).max(200).trim().optional(),
+  message: z.string().max(1000).nullable().optional(),
+  discountPercent: z.number().min(0).max(100).nullable().optional(),
+  isActive: z.boolean().optional(),
+  endsAt: z.date().nullable().optional(),
+});
+
 export async function createCampaignAction(data: {
   name: string;
   message?: string;
@@ -201,13 +217,19 @@ export async function createCampaignAction(data: {
   const session = await auth();
   if (session?.user?.role !== "ADMIN") throw new Error("Unauthorized");
 
+  const parsed = createCampaignSchema.safeParse(data);
+  if (!parsed.success) {
+    return { success: false as const, error: "invalid_data" as const };
+  }
+  const d = parsed.data;
+
   await prisma.campaign.create({
     data: {
-      name: data.name.trim(),
-      message: data.message?.trim() || null,
-      discountPercent: data.discountPercent ?? null,
-      isActive: data.isActive ?? true,
-      endsAt: data.endsAt ?? null,
+      name: d.name,
+      message: d.message?.trim() || null,
+      discountPercent: d.discountPercent ?? null,
+      isActive: d.isActive ?? true,
+      endsAt: d.endsAt ?? null,
     },
   });
   revalidatePathAllLocales("/admin/campaigns");
@@ -227,9 +249,14 @@ export async function updateCampaignAction(
   const session = await auth();
   if (session?.user?.role !== "ADMIN") throw new Error("Unauthorized");
 
+  const parsed = updateCampaignSchema.safeParse(data);
+  if (!parsed.success) {
+    return { success: false as const, error: "invalid_data" as const };
+  }
+
   await prisma.campaign.update({
     where: { id },
-    data,
+    data: parsed.data,
   });
   revalidatePathAllLocales("/admin/campaigns");
   return { success: true as const };

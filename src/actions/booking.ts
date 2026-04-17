@@ -112,6 +112,7 @@ export async function createBookingAction(data: CreateBookingInput) {
 
   let totalPrice = authTotals.subtotalBeforeCoupon;
 
+  let appliedCouponId: string | undefined;
   if (data.couponCode) {
     const coupon = await prisma.coupon.findUnique({
       where: { code: data.couponCode },
@@ -138,6 +139,7 @@ export async function createBookingAction(data: CreateBookingInput) {
           Math.round((totalPrice - moneyToNumber(coupon.discount)) * 100) / 100
         );
       }
+      appliedCouponId = coupon.id;
     }
   }
 
@@ -157,6 +159,12 @@ export async function createBookingAction(data: CreateBookingInput) {
       totalPrice = Math.max(0, Math.round((totalPrice - referralDiscountAmount) * 100) / 100);
       appliedReferralCode = codeUpper;
     }
+  }
+
+  // Sıfır valizle rezervasyon oluşturulamaz
+  const totalBags = authTotals.bagCountS + authTotals.bagCountM + authTotals.bagCountXl;
+  if (totalBags < 1) {
+    return { success: false as const, error: "Errors.invalidData" };
   }
 
   let booking;
@@ -204,6 +212,14 @@ export async function createBookingAction(data: CreateBookingInput) {
           shop.name,
         )
         .catch(() => {});
+    }
+
+    // Kupon kullanıldıysa usedCount artır (atomik)
+    if (appliedCouponId) {
+      await prisma.coupon.update({
+        where: { id: appliedCouponId },
+        data: { usedCount: { increment: 1 } },
+      }).catch(() => {}); // booking zaten oluştu, kupon sayacı hatayla durmamalı
     }
 
     revalidatePathAllLocales("/bookings");

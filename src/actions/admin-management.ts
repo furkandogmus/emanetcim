@@ -3,6 +3,7 @@
 import prisma from "@/lib/db";
 import { auth } from "@/auth";
 import { Prisma, Role } from "@prisma/client";
+import { z } from "zod";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { paymentService } from "@/services/PaymentService";
 import logger from "@/lib/logger";
@@ -406,9 +407,15 @@ export async function deleteUserAction(
 export async function resendVerificationEmailAction(email: string) {
   await ensureAdmin();
 
+  // BUG-08: E-posta formatı doğrulanmadan token üretilebiliyordu
+  const emailParsed = z.string().email().max(320).safeParse(email?.trim());
+  if (!emailParsed.success) {
+    return { success: false as const, error: "invalid_email" };
+  }
+
   const locale = await getLocale();
-  const verificationToken = await generateVerificationToken(email);
-  await sendVerificationEmail(email, verificationToken.token, locale);
+  const verificationToken = await generateVerificationToken(emailParsed.data);
+  await sendVerificationEmail(emailParsed.data, verificationToken.token, locale);
 
   return { success: true };
 }
@@ -591,6 +598,16 @@ export async function deleteReviewAction(reviewId: string) {
   const review = await prisma.review.delete({
     where: { id: reviewId },
     select: { shopId: true },
+  });
+
+  // BUG-10: Yorum silindiğinde dükkan ortalama puanı güncellenmeli
+  const aggregations = await prisma.review.aggregate({
+    where: { shopId: review.shopId },
+    _avg: { rating: true },
+  });
+  await prisma.shop.update({
+    where: { id: review.shopId },
+    data: { rating: aggregations._avg.rating ?? 0 },
   });
 
   revalidatePathAllLocales(`/admin/partners/${review.shopId}/edit`);
