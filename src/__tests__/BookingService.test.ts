@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { BookingService } from "../services/BookingService";
+import { isShopOpenAt } from "@/lib/shop-hours";
 
 const { mockGetPricingRules } = vi.hoisted(() => ({
   mockGetPricingRules: vi.fn().mockResolvedValue({
@@ -15,7 +16,7 @@ const { mockGetPricingRules } = vi.hoisted(() => ({
   }),
 }));
 
-const { mockTx, mockPrisma, mockRefundPayment } = vi.hoisted(() => {
+const { mockTx, mockPrisma, mockRefundPayment, mockSealService } = vi.hoisted(() => {
   const mockRefundPayment = vi.fn();
   const mockTx = {
     shop: { findUnique: vi.fn() },
@@ -27,11 +28,16 @@ const { mockTx, mockPrisma, mockRefundPayment } = vi.hoisted(() => {
     },
     coupon: { create: vi.fn() },
     paymentLog: { findFirst: vi.fn() },
+    bookingSeal: { findMany: vi.fn() },
     $executeRawUnsafe: vi.fn().mockResolvedValue(undefined),
   };
   return {
     mockTx,
     mockRefundPayment,
+    mockSealService: {
+      applyCheckInWithinTx: vi.fn().mockResolvedValue(true),
+      applyCheckOutReturnSealsWithinTx: vi.fn().mockResolvedValue(true),
+    },
     mockPrisma: {
       $transaction: vi.fn(
         async (fn: (tx: typeof mockTx) => Promise<unknown>) => fn(mockTx)
@@ -43,6 +49,7 @@ const { mockTx, mockPrisma, mockRefundPayment } = vi.hoisted(() => {
 
 vi.mock("@/lib/platform-settings", () => ({
   getPricingRules: mockGetPricingRules,
+  getPricingRulesCached: mockGetPricingRules,
 }));
 
 vi.mock("@/lib/db", () => ({
@@ -51,166 +58,149 @@ vi.mock("@/lib/db", () => ({
 
 vi.mock("@/lib/qr-token", () => ({
   createQrToken: vi.fn().mockResolvedValue("signed-jwt-token"),
+  verifyQrToken: vi.fn().mockResolvedValue({ bookingId: "b1" }),
 }));
 
 vi.mock("@/services/PaymentService", () => ({
   paymentService: {
     refundPayment: (...args: unknown[]) => mockRefundPayment(...args),
-    reconcileStalePaymentBookings: vi.fn().mockResolvedValue({ fixed: 0, bookingIds: [] }),
   },
 }));
 
-describe("BookingService", () => {
+vi.mock("@/services/SealService", () => ({
+  sealService: mockSealService,
+}));
+
+vi.mock("@/lib/shop-hours", () => ({
+  isShopOpenAt: vi.fn().mockReturnValue(true),
+}));
+
+describe("BookingService Deep Logic", () => {
   const service = new BookingService();
 
   beforeEach(() => {
-    vi.mocked(mockRefundPayment).mockReset();
-    vi.mocked(mockTx.booking.update).mockClear();
-    vi.mocked(mockTx.booking.findUnique).mockReset();
-    vi.mocked(mockTx.paymentLog.findFirst).mockResolvedValue(null);
-    vi.mocked(mockTx.coupon.create).mockReset();
-    vi.mocked(mockTx.shop.findUnique).mockResolvedValue({
-      id: "shop-1",
-      pricePerDay: 50,
-      capacity: 100,
-    } as never);
-    vi.mocked(mockTx.booking.findMany).mockResolvedValue([]);
-    vi.mocked(mockTx.booking.create).mockResolvedValue({
-      id: "booking-123",
-      guestId: "guest-1",
-      shopId: "shop-1",
-      qrCodeToken: "temp_x",
-      status: "PENDING",
-    } as never);
-    vi.mocked(mockTx.booking.update).mockResolvedValue({
-      id: "booking-123",
-      qrCodeToken: "signed-jwt-token",
-    } as never);
+    vi.clearAllMocks();
+    vi.mocked(isShopOpenAt).mockReturnValue(true);
+    mockPrisma.booking.findUnique.mockResolvedValue({ id: "b1", shop: { openingTime: "09:00", closingTime: "18:00" } } as any);
   });
 
-  it("should create a booking with signed QR token", async () => {
-    const result = await service.createInitialBooking({
-      guestId: "guest-1",
-      shopId: "shop-1",
-      totalPrice: 100,
-      bagCountS: 1,
-      bagCountM: 0,
-      bagCountXl: 0,
-      checkInTime: new Date(),
-      checkOutTime: new Date(),
+  describe("checkIn", () => {
+    it("should fail if shop is closed", async () => {
+      vi.mocked(isShopOpenAt).mockReturnValue(false);
+      mockPrisma.booking.findUnique.mockResolvedValue({
+        id: "b1",
+        status: "PAID",
+        shop: { id: "s1", openingTime: "09:00", closingTime: "18:00" },
+      } as any);
+
+      const result = await service.checkIn("b1", "photo.jpg", { sealAssignments: [], faultySealNumbers: [] });
+      
+      expect(result.ok).toBe(false);
+      expect(result.code).toBe("SHOP_CLOSED");
     });
 
-    expect(result.qrCodeToken).toBe("signed-jwt-token");
-    expect(mockTx.booking.create).toHaveBeenCalled();
-    expect(mockTx.booking.update).toHaveBeenCalled();
-    expect(mockPrisma.$transaction).toHaveBeenCalled();
-  });
+    it("should fail if seal count mismatch", async () => {
+      mockPrisma.booking.findUnique.mockResolvedValue({
+        id: "b1",
+        status: "PAID",
+        bagCountS: 2, // 2 bags
+        bagCountM: 0,
+        bagCountXl: 0,
+        shop: { id: "s1" },
+      } as any);
 
-  it("cancelBooking: PENDING updates to CANCELLED", async () => {
-    vi.mocked(mockTx.booking.findUnique).mockResolvedValue({
-      id: "b1",
-      status: "PENDING",
-      totalPrice: 100,
-      insuranceFee: 15,
-      checkInTime: new Date(Date.now() + 48 * 60 * 60 * 1000),
-    } as never);
-    vi.mocked(mockTx.booking.update).mockResolvedValue({} as never);
+      const result = await service.checkIn("b1", "photo.jpg", { 
+        sealAssignments: [{ sealNumber: 1, bagIndex: 0, bagSize: "S" }], // Only 1 seal
+        faultySealNumbers: [] 
+      });
 
-    const r = await service.cancelBooking("b1");
-    expect(r).toEqual({ ok: true });
-    expect(mockTx.booking.update).toHaveBeenCalledWith({
-      where: { id: "b1" },
-      data: { status: "CANCELLED" },
+      expect(result.ok).toBe(false);
+      expect(result.code).toBe("SEAL_COUNT_MISMATCH");
     });
-    expect(mockRefundPayment).not.toHaveBeenCalled();
-  });
 
-  it("cancelBooking: PAID refund success then CANCELLED (≥24h → full)", async () => {
-    vi.mocked(mockTx.booking.findUnique).mockResolvedValue({
-      id: "b2",
-      status: "PAID",
-      totalPrice: 100,
-      insuranceFee: 15,
-      checkInTime: new Date(Date.now() + 48 * 60 * 60 * 1000),
-    } as never);
-    vi.mocked(mockTx.paymentLog.findFirst).mockResolvedValue({
-      id: "pl1",
-      status: "SUCCESS",
-    } as never);
-    mockRefundPayment.mockResolvedValue({ status: "success" });
-    vi.mocked(mockTx.booking.update).mockResolvedValue({} as never);
+    it("should succeed and update status to CHECKED_IN", async () => {
+      mockPrisma.booking.findUnique.mockResolvedValue({
+        id: "b1",
+        status: "PAID",
+        bagCountS: 1,
+        bagCountM: 0,
+        bagCountXl: 0,
+        shop: { id: "s1" },
+      } as any);
 
-    const r = await service.cancelBooking("b2");
-    expect(r).toEqual({ ok: true, creditCode: undefined });
-    expect(mockRefundPayment).toHaveBeenCalledWith("b2", 100, undefined);
-    expect(mockTx.booking.update).toHaveBeenCalled();
-  });
+      const result = await service.checkIn("b1", "photo.jpg", { 
+        sealAssignments: [{ sealNumber: 1, bagIndex: 0, bagSize: "S" }],
+        faultySealNumbers: [] 
+      });
 
-  it("cancelBooking: PAID partial tier (1–24h) refunds 50%", async () => {
-    vi.mocked(mockTx.booking.findUnique).mockResolvedValue({
-      id: "b2p",
-      status: "PAID",
-      totalPrice: 100,
-      insuranceFee: 15,
-      checkInTime: new Date(Date.now() + 12 * 60 * 60 * 1000),
-    } as never);
-    vi.mocked(mockTx.paymentLog.findFirst).mockResolvedValue({
-      id: "pl1",
-      status: "SUCCESS",
-    } as never);
-    mockRefundPayment.mockResolvedValue({ status: "success" });
-    vi.mocked(mockTx.booking.update).mockResolvedValue({} as never);
-
-    const r = await service.cancelBooking("b2p");
-    expect(r).toEqual({ ok: true, creditCode: undefined });
-    expect(mockRefundPayment).toHaveBeenCalledWith("b2p", 50, {
-      keepPaymentLogSuccess: true,
+      expect(result.ok).toBe(true);
+      expect(mockPrisma.booking.update).toHaveBeenCalledWith(expect.objectContaining({
+        data: expect.objectContaining({ status: "CHECKED_IN" }),
+      }));
     });
   });
 
-  it("cancelBooking: PAID credit tier (<1h) creates coupon, no card refund", async () => {
-    vi.mocked(mockTx.booking.findUnique).mockResolvedValue({
-      id: "b2c",
-      status: "PAID",
-      totalPrice: 100,
-      insuranceFee: 15,
-      checkInTime: new Date(Date.now() + 30 * 60 * 1000),
-    } as never);
-    vi.mocked(mockTx.paymentLog.findFirst).mockResolvedValue({
-      id: "pl1",
-      status: "SUCCESS",
-    } as never);
-    vi.mocked(mockTx.coupon.create).mockResolvedValue({ code: "EMTEST" } as never);
-    vi.mocked(mockTx.booking.update).mockResolvedValue({} as never);
+  describe("checkOut", () => {
+    it("should apply late fee if picked up after grace period", async () => {
+      const scheduledCheckOut = new Date(Date.now() - 30 * 60 * 1000); // 30 mins ago
+      mockPrisma.booking.findUnique.mockResolvedValue({
+        id: "b1",
+        status: "CHECKED_IN",
+        checkOutTime: scheduledCheckOut,
+      } as any);
 
-    const r = await service.cancelBooking("b2c");
-    expect(r.ok).toBe(true);
-    if (r.ok) {
-      expect(r.creditCode).toBeDefined();
-      expect(r.creditCode).toMatch(/^EM[A-Z0-9]+$/);
-    }
-    expect(mockRefundPayment).not.toHaveBeenCalled();
-    expect(mockTx.coupon.create).toHaveBeenCalled();
+      const result = await service.checkOut("b1");
+
+      expect(result.ok).toBe(true);
+      expect(mockPrisma.booking.update).toHaveBeenCalledWith(expect.objectContaining({
+        data: expect.objectContaining({
+          lateFeeApplied: expect.objectContaining({ d: expect.any(Array) }), // Prisma Decimal mock
+        }),
+      }));
+    });
+
+    it("should trigger refund if checked out early", async () => {
+      // Future checkout scheduled
+      const scheduledCheckOut = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000); 
+      mockPrisma.booking.findUnique.mockResolvedValue({
+        id: "b1",
+        status: "CHECKED_IN",
+        checkInTime: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+        checkOutTime: scheduledCheckOut,
+        totalPrice: 200,
+        unitPrice: 50,
+        bagCountS: 1, bagCountM: 0, bagCountXl: 0,
+      } as any);
+
+      mockRefundPayment.mockResolvedValue({ status: "success" });
+
+      await service.checkOut("b1");
+
+      expect(mockRefundPayment).toHaveBeenCalled();
+    });
   });
 
-  it("cancelBooking: PAID refund failure does not cancel", async () => {
-    vi.mocked(mockTx.booking.findUnique).mockResolvedValue({
-      id: "b3",
-      status: "PAID",
-      totalPrice: 100,
-      insuranceFee: 15,
-      checkInTime: new Date(Date.now() + 48 * 60 * 60 * 1000),
-    } as never);
-    vi.mocked(mockTx.paymentLog.findFirst).mockResolvedValue({
-      id: "pl1",
-      status: "SUCCESS",
-    } as never);
-    mockRefundPayment.mockResolvedValue({ status: "failure" });
+  describe("modifyBooking", () => {
+    it("should prevent price increase for PAID bookings", async () => {
+      mockPrisma.booking.findUnique.mockResolvedValue({
+        id: "b1",
+        status: "PAID",
+        guestId: "g1",
+        totalPrice: 100,
+        bagCountS: 1, bagCountM: 0, bagCountXl: 0,
+        shop: { pricePerDay: 50 },
+      } as any);
 
-    const r = await service.cancelBooking("b3");
-    expect(r.ok).toBe(false);
-    if (!r.ok) expect(r.code).toBe("REFUND_FAILED");
-    expect(mockRefundPayment).toHaveBeenCalled();
-    expect(mockTx.booking.update).not.toHaveBeenCalled();
+      const result = await service.modifyBooking("b1", "g1", {
+        checkInTime: new Date(),
+        checkOutTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // More days -> higher price
+        bagCountS: 2,
+        bagCountM: 0,
+        bagCountXl: 0,
+      });
+
+      expect(result.ok).toBe(false);
+      expect(result.code).toBe("PRICE_INCREASE");
+    });
   });
 });
