@@ -359,11 +359,12 @@ export type DeleteUserActionResult =
   | { ok: true }
   | {
       ok: false;
-      error: typeof DELETE_USER_BLOCKED_CODE | "unauthorized";
+      error: typeof DELETE_USER_BLOCKED_CODE | "unauthorized" | "HAS_ACTIVE_BOOKING";
     };
 
 /**
- * Kullanıcıyı tamamen sil. İlişkili rezervasyon vb. varsa FK (P2003 / PG 23503) — silinmez.
+ * Kullanıcıyı tamamen sil. Tüm ilişkiler Cascade delete ile silinir.
+ * Aktif bir rezervasyon (WAITING_APPROVAL, PENDING, PAID, vb.) var ise silinemez.
  * Dönüş değeri kullanılır; beklenen hatalar için throw edilmez (server action digest önlenir).
  */
 export async function deleteUserAction(
@@ -373,6 +374,22 @@ export async function deleteUserAction(
 
   if (session?.user?.id === userId) {
     return { ok: false, error: "unauthorized" };
+  }
+
+  // Aktif rezervasyon kontrolü
+  const activeBooking = await prisma.booking.findFirst({
+    where: {
+      status: { in: ["WAITING_APPROVAL", "APPROVED", "PENDING", "PAID", "CHECKED_IN"] },
+      OR: [
+        { guestId: userId },
+        { shop: { ownerId: userId } }
+      ]
+    }
+  });
+
+  if (activeBooking) {
+    logger.warn({ userId, bookingId: activeBooking.id }, "admin_delete_user_blocked_active_booking");
+    return { ok: false, error: "HAS_ACTIVE_BOOKING" };
   }
 
   try {
