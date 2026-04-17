@@ -127,6 +127,7 @@ describe("BookingService Deep Logic", () => {
         bagCountS: 1,
         bagCountM: 0,
         bagCountXl: 0,
+        bookingRowVersion: 0,
         shop: { id: "s1" },
       } as any);
 
@@ -136,7 +137,7 @@ describe("BookingService Deep Logic", () => {
       });
 
       expect(result.ok).toBe(true);
-      expect(mockPrisma.booking.update).toHaveBeenCalledWith(expect.objectContaining({
+      expect(mockTx.booking.updateMany).toHaveBeenCalledWith(expect.objectContaining({
         data: expect.objectContaining({ status: "CHECKED_IN" }),
       }));
     });
@@ -154,7 +155,7 @@ describe("BookingService Deep Logic", () => {
       const result = await service.checkOut("b1");
 
       expect(result.ok).toBe(true);
-      expect(mockPrisma.booking.update).toHaveBeenCalledWith(expect.objectContaining({
+      expect(mockTx.booking.updateMany).toHaveBeenCalledWith(expect.objectContaining({
         data: expect.objectContaining({
           lateFeeApplied: expect.objectContaining({ d: expect.any(Array) }), // Prisma Decimal mock
         }),
