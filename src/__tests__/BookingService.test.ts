@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { BookingService } from "../services/BookingService";
 import { isShopOpenAt } from "@/lib/shop-hours";
@@ -40,7 +41,7 @@ const { mockTx, mockPrisma, mockRefundPayment, mockSealService } = vi.hoisted(()
     },
     mockPrisma: {
       $transaction: vi.fn(
-        async (fn: (tx: typeof mockTx) => Promise<unknown>) => fn(mockTx)
+        async (fn: (tx: typeof mockTx) => Promise<any>) => fn(mockTx)
       ),
       ...mockTx,
     },
@@ -63,7 +64,7 @@ vi.mock("@/lib/qr-token", () => ({
 
 vi.mock("@/services/PaymentService", () => ({
   paymentService: {
-    refundPayment: (...args: unknown[]) => mockRefundPayment(...args),
+    refundPayment: (...args: any[]) => mockRefundPayment(...args),
   },
 }));
 
@@ -81,7 +82,7 @@ describe("BookingService Deep Logic", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(isShopOpenAt).mockReturnValue(true);
-    mockPrisma.booking.findUnique.mockResolvedValue({ id: "b1", shop: { openingTime: "09:00", closingTime: "18:00" } } as unknown);
+    mockPrisma.booking.findUnique.mockResolvedValue({ id: "b1", shop: { openingTime: "09:00", closingTime: "18:00" } } as any);
   });
 
   describe("checkIn", () => {
@@ -91,12 +92,12 @@ describe("BookingService Deep Logic", () => {
         id: "b1",
         status: "PAID",
         shop: { id: "s1", openingTime: "09:00", closingTime: "18:00" },
-      } as unknown);
+      } as any);
 
       const result = await service.checkIn("b1", "photo.jpg", { sealAssignments: [], faultySealNumbers: [] });
       
       expect(result.ok).toBe(false);
-      expect(result.code).toBe("SHOP_CLOSED");
+      expect((result as any).code).toBe("SHOP_CLOSED");
     });
 
     it("should fail if seal count mismatch", async () => {
@@ -107,7 +108,7 @@ describe("BookingService Deep Logic", () => {
         bagCountM: 0,
         bagCountXl: 0,
         shop: { id: "s1" },
-      } as unknown);
+      } as any);
 
       const result = await service.checkIn("b1", "photo.jpg", { 
         sealAssignments: [{ sealNumber: 1, bagIndex: 0, bagSize: "S" }], // Only 1 seal
@@ -115,7 +116,7 @@ describe("BookingService Deep Logic", () => {
       });
 
       expect(result.ok).toBe(false);
-      expect(result.code).toBe("SEAL_COUNT_MISMATCH");
+      expect((result as any).code).toBe("SEAL_COUNT_MISMATCH");
     });
 
     it("should succeed and update status to CHECKED_IN", async () => {
@@ -126,7 +127,7 @@ describe("BookingService Deep Logic", () => {
         bagCountM: 0,
         bagCountXl: 0,
         shop: { id: "s1" },
-      } as unknown);
+      } as any);
 
       const result = await service.checkIn("b1", "photo.jpg", { 
         sealAssignments: [{ sealNumber: 1, bagIndex: 0, bagSize: "S" }],
@@ -147,7 +148,7 @@ describe("BookingService Deep Logic", () => {
         id: "b1",
         status: "CHECKED_IN",
         checkOutTime: scheduledCheckOut,
-      } as unknown);
+      } as any);
 
       const result = await service.checkOut("b1");
 
@@ -170,7 +171,7 @@ describe("BookingService Deep Logic", () => {
         totalPrice: 200,
         unitPrice: 50,
         bagCountS: 1, bagCountM: 0, bagCountXl: 0,
-      } as unknown);
+      } as any);
 
       mockRefundPayment.mockResolvedValue({ status: "success" });
 
@@ -189,7 +190,7 @@ describe("BookingService Deep Logic", () => {
         totalPrice: 100,
         bagCountS: 1, bagCountM: 0, bagCountXl: 0,
         shop: { pricePerDay: 50 },
-      } as unknown);
+      } as any);
 
       const result = await service.modifyBooking("b1", "g1", {
         checkInTime: new Date(),
@@ -200,7 +201,7 @@ describe("BookingService Deep Logic", () => {
       });
 
       expect(result.ok).toBe(false);
-      expect(result.code).toBe("PRICE_INCREASE");
+      expect((result as any).code).toBe("PRICE_INCREASE");
     });
   });
 });
