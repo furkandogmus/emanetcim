@@ -48,31 +48,89 @@ function matchDistrict(cityName: string, raw: string): string {
   return hit ?? raw;
 }
 
-/** Nominatim reverse geocoding → LocationValue */
-async function reverseGeocode(lat: number, lng: number): Promise<Partial<LocationValue>> {
+function sanitizePart(input: string | undefined): string {
+  return (input ?? "").replace(/\s+/g, " ").trim();
+}
+
+function buildAddressPartsFromNominatimAddress(a: Record<string, unknown>): AddressParts {
+  const rawRoad = sanitizePart(typeof a.road === "string" ? a.road : "");
+  const rawNeighbourhood = sanitizePart(
+    typeof a.neighbourhood === "string"
+      ? a.neighbourhood
+      : typeof a.suburb === "string"
+        ? a.suburb
+        : ""
+  );
+  const rawHouseNumber = sanitizePart(
+    typeof a.house_number === "string" ? a.house_number : ""
+  );
+
+  const neighborhood = rawNeighbourhood
+    .replace(/\bmahallesi\b/gi, "")
+    .trim();
+  const street = rawRoad;
+
+  return {
+    street,
+    neighborhood,
+    buildingNo: rawHouseNumber,
+    doorNo: "",
+  };
+}
+
+/** Nominatim reverse geocoding → LocationValue + AddressParts */
+async function reverseGeocode(
+  lat: number,
+  lng: number
+): Promise<{ location: Partial<LocationValue>; parts: AddressParts }> {
   const res = await fetch(
     `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1&accept-language=tr`,
     { headers: { "User-Agent": "emanetci-app/1.0" } }
   );
-  if (!res.ok) return {};
+  if (!res.ok) {
+    return {
+      location: { latitude: lat, longitude: lng },
+      parts: { street: "", neighborhood: "", buildingNo: "", doorNo: "" },
+    };
+  }
   const data = await res.json();
-  const a = data.address ?? {};
+  const a = (data.address ?? {}) as Record<string, unknown>;
 
   // TR: state = il, county/town/city_district = ilçe
-  const rawCity = a.state || a.province || a.city || "";
-  const rawDistrict = a.county || a.city_district || a.town || a.city || "";
+  const rawCity = sanitizePart(
+    typeof a.state === "string"
+      ? a.state
+      : typeof a.province === "string"
+        ? a.province
+        : typeof a.city === "string"
+          ? a.city
+          : ""
+  );
+  const rawDistrict = sanitizePart(
+    typeof a.county === "string"
+      ? a.county
+      : typeof a.city_district === "string"
+        ? a.city_district
+        : typeof a.town === "string"
+          ? a.town
+          : typeof a.city === "string"
+            ? a.city
+            : ""
+  );
 
   const city = matchCity(rawCity);
   const district = matchDistrict(city, rawDistrict);
 
-  const addressParts = [
-    a.road,
-    a.neighbourhood || a.suburb,
-    a.house_number,
-  ].filter(Boolean);
-  const address = addressParts.join(" ") || a.display_name || "";
+  const parts = buildAddressPartsFromNominatimAddress(a);
+  const fallbackAddress =
+    typeof data.display_name === "string" ? data.display_name : "";
+  const composed = composeAddress(parts);
+  const address = composed || fallbackAddress;
 
-  return { city, district, address, latitude: lat, longitude: lng };
+  return {
+    location: { city, district, address, latitude: lat, longitude: lng },
+    parts,
+  };
 }
 
 function parseAddressParts(address: string): AddressParts {
@@ -107,9 +165,16 @@ function parseAddressParts(address: string): AddressParts {
     .replace(/\s+/g, " ")
     .trim();
 
+  const cleanedNeighborhood = neighborhoodSeg
+    .replace(/\bmahallesi\b/gi, "")
+    .trim();
+
+  // "Mustafa Kemal Mahallesi" gibi adreslerde sokak boş kalsın, mahalle dolsun.
+  const streetLooksLikeNeighborhood = /\bmahallesi\b/i.test(street);
+
   return {
-    street,
-    neighborhood: neighborhoodSeg,
+    street: streetLooksLikeNeighborhood ? "" : street,
+    neighborhood: cleanedNeighborhood || (streetLooksLikeNeighborhood ? street.replace(/\bmahallesi\b/gi, "").trim() : ""),
     buildingNo,
     doorNo,
   };
@@ -181,13 +246,13 @@ export default function LocationPicker({ value, onChange }: Props) {
         setGeocoding(true);
         try {
           const geo = await reverseGeocode(pos.lat, pos.lng);
-          const initialParts = parseAddressParts(geo.address ?? "");
+          const initialParts = geo.parts;
           setAddressParts(initialParts);
           onChangeRef.current({
             address: composeAddress(initialParts),
             city: "",
             district: "",
-            ...geo,
+            ...geo.location,
             latitude: pos.lat,
             longitude: pos.lng,
           });
@@ -243,13 +308,13 @@ export default function LocationPicker({ value, onChange }: Props) {
         setGeocoding(true);
         try {
           const geo = await reverseGeocode(lat, lng);
-          const initialParts = parseAddressParts(geo.address ?? "");
+          const initialParts = geo.parts;
           setAddressParts(initialParts);
           onChangeRef.current({
             address: composeAddress(initialParts),
             city: "",
             district: "",
-            ...geo,
+            ...geo.location,
             latitude: lat,
             longitude: lng,
           });
@@ -304,13 +369,13 @@ export default function LocationPicker({ value, onChange }: Props) {
         setGeocoding(true);
         try {
           const geo = await reverseGeocode(lat, lng);
-          const initialParts = parseAddressParts(geo.address ?? "");
+          const initialParts = geo.parts;
           setAddressParts(initialParts);
           onChangeRef.current({
             address: composeAddress(initialParts),
             city: "",
             district: "",
-            ...geo,
+            ...geo.location,
             latitude: lat,
             longitude: lng,
           });
