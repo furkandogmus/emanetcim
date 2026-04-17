@@ -376,20 +376,48 @@ export async function deleteUserAction(
     return { ok: false, error: "unauthorized" };
   }
 
-  // Aktif rezervasyon kontrolü
-  const activeBooking = await prisma.booking.findFirst({
-    where: {
-      status: { in: ["WAITING_APPROVAL", "APPROVED", "PENDING", "PAID", "CHECKED_IN"] },
-      OR: [
-        { guestId: userId },
-        { shop: { ownerId: userId } }
-      ]
-    }
+  // Kullanıcıyı bul
+  const userToDelete = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { isBanned: true }
   });
 
-  if (activeBooking) {
-    logger.warn({ userId, bookingId: activeBooking.id }, "admin_delete_user_blocked_active_booking");
-    return { ok: false, error: "HAS_ACTIVE_BOOKING" };
+  if (!userToDelete) {
+    return { ok: true }; // Zaten yok
+  }
+
+  const activeStatuses: any[] = ["WAITING_APPROVAL", "APPROVED", "PENDING", "PAID", "CHECKED_IN"];
+
+  if (userToDelete.isBanned) {
+    // Banlıysa: Bekleyen veya aktif rezervasyonları zorla iptal et, sonra sil
+    await prisma.booking.updateMany({
+      where: {
+        status: { in: activeStatuses },
+        OR: [
+          { guestId: userId },
+          { shop: { ownerId: userId } }
+        ]
+      },
+      data: {
+        status: "CANCELLED"
+      }
+    });
+  } else {
+    // Normal kullanıcı: Aktif rezervasyon kontrolü (silmeyi engelle)
+    const activeBooking = await prisma.booking.findFirst({
+      where: {
+        status: { in: activeStatuses },
+        OR: [
+          { guestId: userId },
+          { shop: { ownerId: userId } }
+        ]
+      }
+    });
+
+    if (activeBooking) {
+      logger.warn({ userId, bookingId: activeBooking.id }, "admin_delete_user_blocked_active_booking");
+      return { ok: false, error: "HAS_ACTIVE_BOOKING" };
+    }
   }
 
   try {
