@@ -879,7 +879,9 @@
     "emailAddress": "destek@bagajpark.com",
     "opsTitle": "Operacje",
     "opsAddress": "Stambuł, TR",
-    "opsBadge": "SIEDZIBA"
+    "opsBadge": "SIEDZIBA",
+    "success": "Twoja wiadomość została odebrana. Wkrótce odpiszemy.",
+    "error": "Nie udało się wysłać wiadomości. Spróbuj ponownie."
   },
   "KVKK": {
     "badge": "ZAUFANIE",

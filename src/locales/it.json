@@ -879,7 +879,9 @@
     "emailAddress": "destek@bagajpark.com",
     "opsTitle": "Operazioni",
     "opsAddress": "Istanbul, TR",
-    "opsBadge": "DIREZIONE"
+    "opsBadge": "DIREZIONE",
+    "success": "Il tuo messaggio è stato ricevuto. Ti risponderemo presto.",
+    "error": "Invio del messaggio non riuscito. Riprova."
   },
   "KVKK": {
     "badge": "FIDUCIA",

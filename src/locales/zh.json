@@ -879,7 +879,9 @@
     "emailAddress": "destek@bagajpark.com",
     "opsTitle": "运营",
     "opsAddress": "土耳其伊斯坦布尔",
-    "opsBadge": "总公司"
+    "opsBadge": "总公司",
+    "success": "您的消息已收到。我们会尽快回复您。",
+    "error": "发送消息失败，请重试。"
   },
   "KVKK": {
     "badge": "相信",
