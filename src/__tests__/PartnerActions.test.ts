@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { setPendingBagRevisionAction, updatePartnerPhoneAction } from "../actions/partner";
-import { BookingStatus } from "@prisma/client";
 
 const { mockPrisma, mockAuth } = vi.hoisted(() => {
   return {

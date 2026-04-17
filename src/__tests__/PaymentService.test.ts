@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { PaymentService } from "../services/PaymentService";
-import { isPaymentSuccess } from "@/lib/payment-status";
 
 const { mockPrisma, mockNotification, mockFeatureFlags } = vi.hoisted(() => {
   return {
@@ -126,7 +125,6 @@ describe("PaymentService Deep Logic", () => {
 
     it("should correctly handle Stripe simulation in dev mode", async () => {
       // simulate dev mode
-      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
       (process.env as any).NODE_ENV = "development";
       
       mockPrisma.paymentLog.findFirst.mockResolvedValue({
