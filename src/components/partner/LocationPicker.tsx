@@ -23,7 +23,6 @@ type AddressParts = {
   neighborhood: string;
   buildingNo: string;
   doorNo: string;
-  postalCode: string;
 };
 
 const TR_CENTER = { lat: 39.0, lng: 35.0 };
@@ -78,48 +77,50 @@ async function reverseGeocode(lat: number, lng: number): Promise<Partial<Locatio
 
 function parseAddressParts(address: string): AddressParts {
   if (!address) {
-    return { street: "", neighborhood: "", buildingNo: "", doorNo: "", postalCode: "" };
+    return { street: "", neighborhood: "", buildingNo: "", doorNo: "" };
   }
-  const trimmed = address.trim();
-  const postalMatch = trimmed.match(/\b\d{5}\b/);
-  const postalCode = postalMatch?.[0] ?? "";
-  const withoutPostal = postalCode
-    ? trimmed.replace(new RegExp(`\\b${postalCode}\\b`), "").trim()
-    : trimmed;
+
+  // Geocoder bazen posta kodunu "0 5 9 8 0" gibi boşluklu dönebilir.
+  // Bu numerik blokları temizleyip kalan kısmı parse ediyoruz.
+  const compact = address.trim().replace(/\s+/g, " ");
+  const withoutPostal = compact
+    .replace(/\b\d(?:\s+\d){4}\b/g, "")
+    .replace(/\b\d{5}\b/g, "")
+    .trim();
+
+  const segments = withoutPostal
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const primary = segments[0] ?? withoutPostal;
+  const neighborhoodSeg =
+    segments.find((s) => /mahallesi?/i.test(s)) ?? "";
 
   const doorMatch = withoutPostal.match(/\bDaire[:\s-]*([A-Za-z0-9/-]+)\b/i);
   const doorNo = doorMatch?.[1] ?? "";
-  const withoutDoor = doorMatch
-    ? withoutPostal.replace(doorMatch[0], "").trim()
-    : withoutPostal;
+  const noDoor = doorMatch ? withoutPostal.replace(doorMatch[0], " ").trim() : withoutPostal;
 
-  const aptMatch = withoutDoor.match(/\bNo[:\s-]*([A-Za-z0-9/-]+)\b/i);
-  if (aptMatch) {
-    const body = withoutDoor.replace(aptMatch[0], "").trim();
-    return {
-      street: body,
-      neighborhood: "",
-      buildingNo: aptMatch[1] ?? "",
-      doorNo,
-      postalCode,
-    };
-  }
+  const noMatch = noDoor.match(/\bNo[:\s-]*([A-Za-z0-9/-]+)\b/i);
+  const buildingNo = noMatch?.[1] ?? "";
+  const street = (noMatch ? primary.replace(noMatch[0], " ") : primary)
+    .replace(/\bDaire[:\s-]*[A-Za-z0-9/-]+\b/i, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
-  const tokens = trimmed.split(/\s+/);
-  const last = tokens[tokens.length - 1] ?? "";
-  const buildingNo = /^\d+[A-Za-z/-]*$/.test(last) ? last : "";
-  const body = buildingNo ? tokens.slice(0, -1).join(" ") : trimmed;
-  return { street: body, neighborhood: "", buildingNo, doorNo, postalCode };
+  return {
+    street,
+    neighborhood: neighborhoodSeg,
+    buildingNo,
+    doorNo,
+  };
 }
 
 function composeAddress(parts: AddressParts): string {
-  const normalizedPostal = parts.postalCode.replace(/\D/g, "").slice(0, 5);
   return [
     parts.street.trim(),
     parts.neighborhood.trim(),
     parts.buildingNo.trim() ? `No:${parts.buildingNo.trim()}` : "",
     parts.doorNo.trim() ? `Daire:${parts.doorNo.trim()}` : "",
-    normalizedPostal,
   ]
     .filter(Boolean)
     .join(" ")
@@ -457,7 +458,7 @@ export default function LocationPicker({ value, onChange }: Props) {
               className="ui-field min-h-[2.4rem] bg-white"
             />
           </div>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-1">
             <input
               type="text"
               value={addressParts.doorNo}
@@ -468,21 +469,6 @@ export default function LocationPicker({ value, onChange }: Props) {
               }}
               placeholder="Daire No"
               aria-label={t("locationDoorNoPlaceholder")}
-              className="ui-field min-h-[2.4rem] bg-white"
-            />
-            <input
-              type="text"
-              inputMode="numeric"
-              maxLength={5}
-              value={addressParts.postalCode}
-              onChange={(e) => {
-                const onlyDigits = e.target.value.replace(/\D/g, "").slice(0, 5);
-                const next = { ...addressParts, postalCode: onlyDigits };
-                setAddressParts(next);
-                onChangeRef.current({ ...value, address: composeAddress(next) });
-              }}
-              placeholder="Posta Kodu"
-              aria-label={t("locationPostalCodePlaceholder")}
               className="ui-field min-h-[2.4rem] bg-white"
             />
           </div>
@@ -500,7 +486,6 @@ export default function LocationPicker({ value, onChange }: Props) {
                 neighborhood: "",
                 buildingNo: "",
                 doorNo: "",
-                postalCode: "",
               });
               setConfirmed(false);
               markerRef.current?.remove();

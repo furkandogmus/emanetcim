@@ -26,7 +26,10 @@ const guestSchema = z.object({
 const partnerSchema = z.object({
   name: z.string().min(2),
   email: z.string().email().optional().or(z.literal("")),
-  phone: z.string().min(1),
+  phone: z
+    .string()
+    .trim()
+    .regex(/^05\d{2}\s\d{3}\s\d{2}\s\d{2}$/, "Errors.invalidTrPhone"),
   password: z.string().min(6),
   shopName: z.string().min(2).max(200),
   shopAddress: z.string().min(5).max(500),
