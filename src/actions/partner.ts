@@ -364,6 +364,11 @@ export async function rejectBookingAction(bookingId: string) {
        return { success: false as const, error: "Errors.unauthorized" };
     }
 
+    // Sadece onay bekleyen talepler reddedilebilir
+    if (booking.status !== BookingStatus.WAITING_APPROVAL) {
+      return { success: false as const, error: "Errors.bookingStateConflict" };
+    }
+
     await prisma.booking.update({
       where: { id: bookingId },
       data: { status: BookingStatus.CANCELLED },
@@ -391,6 +396,17 @@ export async function getNextAvailableSealsAction(shopId: string, count: number)
   const session = await auth();
   if (session?.user?.role !== "PARTNER" && session?.user?.role !== "ADMIN") {
     return { success: false as const, error: "Errors.authRequired" };
+  }
+
+  // Sahiplik kontrolü: esnaf sadece kendi dükkanının mühürlerini görebilir
+  if (session.user.role === "PARTNER") {
+    const shop = await prisma.shop.findUnique({
+      where: { id: shopId },
+      select: { ownerId: true },
+    });
+    if (!shop || shop.ownerId !== session.user.id) {
+      return { success: false as const, error: "Errors.unauthorized" };
+    }
   }
 
   const seals = await sealService.getNextAvailableSeals(shopId, count);

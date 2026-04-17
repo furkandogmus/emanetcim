@@ -152,7 +152,8 @@ export class ShopService implements IShopService {
 
       const shopIds = withDist.map((s) => s.id);
 
-      const overlapping = await prisma.booking.findMany({
+      const aggregations = await prisma.booking.groupBy({
+        by: ['shopId'],
         where: {
           shopId: { in: shopIds },
           status: { in: [...BOOKING_STATUSES_FOR_CAPACITY] },
@@ -161,20 +162,21 @@ export class ShopService implements IShopService {
             { checkOutTime: { gt: checkIn } },
           ],
         },
-        select: {
-          shopId: true,
+        _sum: {
           bagCountS: true,
           bagCountM: true,
           bagCountXl: true,
         },
       });
-
-      const usedByShop = new Map<string, number>();
-      for (const b of overlapping) {
-        const n =
-          totalBagCount(b.bagCountS, b.bagCountM, b.bagCountXl);
-        usedByShop.set(b.shopId, (usedByShop.get(b.shopId) ?? 0) + n);
-      }
+ 
+       const usedByShop = new Map<string, number>();
+       for (const agg of aggregations) {
+         const n = 
+           (agg._sum.bagCountS || 0) + 
+           (agg._sum.bagCountM || 0) + 
+           (agg._sum.bagCountXl || 0);
+         usedByShop.set(agg.shopId, n);
+       }
 
       const hits: ShopSearchHit[] = [];
 

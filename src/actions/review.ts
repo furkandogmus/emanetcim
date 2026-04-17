@@ -21,7 +21,7 @@ export async function addReviewAction(data: {
     throw new Error("Errors.unauthorized");
   }
 
-  if (data.rating < 1 || data.rating > 5) {
+  if (!Number.isInteger(data.rating) || data.rating < 1 || data.rating > 5) {
     return { success: false, error: "Errors.invalidData" };
   }
 

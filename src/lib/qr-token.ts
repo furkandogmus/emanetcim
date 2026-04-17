@@ -10,13 +10,26 @@ export type QrPayload = {
   bookingId: string;
   guestId: string;
   shopId: string;
+  /** Rezervasyon check-out zamanı (IMPROVEMENT-01: dinamik token süresi için) */
+  checkOutTime?: string;
 };
 
 export async function createQrToken(payload: QrPayload): Promise<string> {
+  // IMPROVEMENT-01: Checkout + 24 saat buffer; yoksa 72 saat
+  const checkOutMs = payload.checkOutTime
+    ? new Date(payload.checkOutTime).getTime()
+    : 0;
+  const minExpiry = Date.now() + 48 * 60 * 60 * 1000;
+  const targetExpiry = Math.max(
+    checkOutMs + 24 * 60 * 60 * 1000,
+    minExpiry
+  );
+  const expirySeconds = Math.ceil((targetExpiry - Date.now()) / 1000);
+
   return new SignJWT({ ...payload })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("48h")
+    .setExpirationTime(`${expirySeconds}s`)
     .sign(getSecret());
 }
 

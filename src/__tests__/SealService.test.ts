@@ -13,6 +13,10 @@ const { mockPrisma } = vi.hoisted(() => {
         groupBy: vi.fn(),
         count: vi.fn(),
       },
+      $transaction: vi.fn((fn) => {
+        if (typeof fn === 'function') return fn(mockPrisma);
+        return Promise.all(fn);
+      }),
       booking: {
         findMany: vi.fn(),
       },

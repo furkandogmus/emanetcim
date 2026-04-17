@@ -417,25 +417,34 @@ export class BookingService implements IBookingService {
         pricingRules
       );
 
+      // BUG-06 FIX: İade başarısız olsa da checkout tamamlanmalı.
+      // Misafir valizi teslim aldı; sistemi CHECKED_IN'de bırakmak operasyonel kilitlenmeye yol açar.
+      // Başarısız iade tutarı failedRefundAmount alanına kaydedilip reconcile edilir.
+      let failedRefundAmount = 0;
       if (refundAmount > 0) {
         const { paymentService } = await import('@/services/PaymentService');
-        const refundResult = await paymentService.refundPayment(
-          bookingId,
-          refundAmount
-        );
-
-        if (!isRefundSuccess(refundResult.status)) {
-          console.error('Early check-out refund failed:', refundResult);
-          return {
-            ok: false,
-            code: 'REFUND_FAILED',
-            message:
-              'Erken teslimat iadesi şu an tamamlanamadı. Lütfen tekrar deneyin veya destek ile iletişime geçin.',
-          };
+        try {
+          const refundResult = await paymentService.refundPayment(
+            bookingId,
+            refundAmount
+          );
+          if (!isRefundSuccess(refundResult.status)) {
+            logger.warn(
+              { bookingId, refundAmount, refundResult },
+              'booking_early_checkout_refund_failed_proceeding'
+            );
+            failedRefundAmount = refundAmount;
+          }
+        } catch (refundError) {
+          logger.error(
+            { bookingId, refundAmount, err: refundError },
+            'booking_early_checkout_refund_exception_proceeding'
+          );
+          failedRefundAmount = refundAmount;
         }
       }
 
-      // 2. Mühürleri iade + statüyü CHECKED_OUT yap
+      // 2. Mühürleri iade + statüyü CHECKED_OUT yap (her durumda tamamlanır)
       await prisma.$transaction(async (tx) => {
         await sealService.applyCheckOutReturnSealsWithinTx(tx, bookingId);
         await tx.booking.update({
@@ -446,11 +455,20 @@ export class BookingService implements IBookingService {
             lateFeeApplied: new Prisma.Decimal(lateFeeTry),
             pendingBagRevision: Prisma.JsonNull,
             updatedAt: now,
+            // İade başarısız olduysa reconcile için kayıt
+            ...(failedRefundAmount > 0
+              ? { failedRefundAmount: new Prisma.Decimal(failedRefundAmount) }
+              : {}),
           },
         });
       });
 
-      return { ok: true };
+      return {
+        ok: true,
+        ...(failedRefundAmount > 0
+          ? { refundPending: true, refundAmount: failedRefundAmount }
+          : {}),
+      };
     } catch (error) {
       console.error('BookingService::checkOut Error:', error);
       return {

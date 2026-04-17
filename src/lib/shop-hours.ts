@@ -13,11 +13,23 @@ export function isShopOpenAt(
   closingTime: string | null | undefined,
   at: Date
 ): boolean {
+  // Sunucunun saati ne olursa olsun Türkiye saatini (UTC+3) baz alıyoruz.
+  const istanbulTime = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/Istanbul",
+    hour: "numeric",
+    minute: "numeric",
+    hour12: false,
+  }).format(at);
+
+  const [h, m] = istanbulTime.split(":").map(Number);
+  const mins = h * 60 + m;
+
   const open = parseHm(openingTime) ?? { h: 0, m: 0 };
   const close = parseHm(closingTime) ?? { h: 23, m: 59 };
-  const mins = at.getHours() * 60 + at.getMinutes();
+  
   const start = open.h * 60 + open.m;
   const end = close.h * 60 + close.m;
+  
   if (start <= end) return mins >= start && mins <= end;
   // gece sarkan (ör. 22:00–02:00)
   return mins >= start || mins <= end;
