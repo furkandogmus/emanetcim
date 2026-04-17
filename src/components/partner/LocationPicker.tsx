@@ -502,58 +502,7 @@ export default function LocationPicker({ value, onChange }: Props) {
             </p>
           )}
 
-          <div className="mt-1 grid grid-cols-1 gap-2 sm:grid-cols-3">
-            <input
-              type="text"
-              value={addressParts.street}
-              onChange={(e) => {
-                const next = { ...addressParts, street: e.target.value };
-                setAddressParts(next);
-                onChangeRef.current({ ...value, address: composeAddress(next) });
-              }}
-              placeholder="Cadde / Sokak"
-              aria-label={t("locationStreetPlaceholder")}
-              className="ui-field min-h-[2.4rem] bg-white"
-            />
-            <input
-              type="text"
-              value={addressParts.neighborhood}
-              onChange={(e) => {
-                const next = { ...addressParts, neighborhood: e.target.value };
-                setAddressParts(next);
-                onChangeRef.current({ ...value, address: composeAddress(next) });
-              }}
-              placeholder="Mahalle"
-              aria-label={t("locationNeighborhoodPlaceholder")}
-              className="ui-field min-h-[2.4rem] bg-white"
-            />
-            <input
-              type="text"
-              value={addressParts.buildingNo}
-              onChange={(e) => {
-                const next = { ...addressParts, buildingNo: e.target.value };
-                setAddressParts(next);
-                onChangeRef.current({ ...value, address: composeAddress(next) });
-              }}
-              placeholder="Bina No"
-              aria-label={t("locationBuildingNoPlaceholder")}
-              className="ui-field min-h-[2.4rem] bg-white"
-            />
-          </div>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-1">
-            <input
-              type="text"
-              value={addressParts.doorNo}
-              onChange={(e) => {
-                const next = { ...addressParts, doorNo: e.target.value };
-                setAddressParts(next);
-                onChangeRef.current({ ...value, address: composeAddress(next) });
-              }}
-              placeholder="Daire No"
-              aria-label={t("locationDoorNoPlaceholder")}
-              className="ui-field min-h-[2.4rem] bg-white"
-            />
-          </div>
+
 
           <p className="text-[10px] text-gray-400 font-mono">
             {value.latitude.toFixed(5)}, {value.longitude!.toFixed(5)}

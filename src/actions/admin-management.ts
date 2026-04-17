@@ -621,8 +621,9 @@ export async function deleteReviewAction(reviewId: string) {
 export async function blockIpAction(ip: string, reason?: string) {
   await ensureAdmin();
 
-  // BUG-18: IP formatı doğrulanmalıdır
-  const ipParsed = z.string().ip().safeParse(ip?.trim());
+  // BUG-18: IP formatı doğrulanmalıdır (Zod uyumluluğu için regex kullanıldı)
+  const ipSchema = z.string().min(7).max(45).regex(/^[a-fA-F0-9:.]+$/);
+  const ipParsed = ipSchema.safeParse(ip?.trim());
   if (!ipParsed.success) {
     return { success: false, error: "invalid_ip_format" };
   }
