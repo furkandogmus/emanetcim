@@ -32,6 +32,23 @@ interface LocationState {
   longitude: number | null;
 }
 
+function formatTrMobileInput(input: string): string {
+  const digits = input.replace(/\D/g, "").slice(0, 11);
+  let normalized = digits;
+
+  // Keep the number in 0XXXXXXXXXX shape while user types.
+  if (!normalized.startsWith("0") && normalized.length > 0) {
+    normalized = `0${normalized}`.slice(0, 11);
+  }
+
+  const p1 = normalized.slice(0, 4);
+  const p2 = normalized.slice(4, 7);
+  const p3 = normalized.slice(7, 9);
+  const p4 = normalized.slice(9, 11);
+
+  return [p1, p2, p3, p4].filter(Boolean).join(" ");
+}
+
 export default function RegisterPage() {
   const t = useTranslations('Auth');
   const tCommon = useTranslations('Common');
@@ -83,6 +100,11 @@ export default function RegisterPage() {
         if (res.success) setSuccess(true);
         else setError(translateServerError(res.error));
       } else {
+        const strictPhonePattern = /^05\d{2}\s\d{3}\s\d{2}\s\d{2}$/;
+        if (!strictPhonePattern.test(partnerData.phone)) {
+          setError(tErrors('invalidTrPhone'));
+          return;
+        }
         if (!normalizeTrGsm10(partnerData.phone)) {
           setError(tErrors('invalidTrPhone'));
           return;
@@ -219,7 +241,15 @@ export default function RegisterPage() {
                 placeholder={t('phonePlaceholder')}
                 required
                 value={partnerData.phone}
-                onChange={(e) => setPartnerData({ ...partnerData, phone: e.target.value })}
+                onChange={(e) =>
+                  setPartnerData({
+                    ...partnerData,
+                    phone: formatTrMobileInput(e.target.value),
+                  })
+                }
+                inputMode="numeric"
+                autoComplete="tel-national"
+                maxLength={14}
                 className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 focus:outline-none focus:border-orange-300 transition"
               />
             </div>

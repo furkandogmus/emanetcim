@@ -796,7 +796,7 @@
     "registerSuccessTitle": "Harika!",
     "registerSuccessGuestDesc": "Link e-postana gönderildi.",
     "registerSuccessPartnerDesc": "Başvurun inceleniyor.",
-    "phonePlaceholder": "Telefon (05XX...)",
+    "phonePlaceholder": "Telefon (05xx xxx xx xx)",
     "registerSubmitPartner": "Başvuruyu Tamamla",
     "registerSubmitGuest": "Hesap Oluştur",
     "verifyEmailTitle": "Hesabınız Doğrulandı!",
@@ -1121,7 +1121,7 @@
     "reviewNotReady": "Yorum yalnızca teslim tamamlandıktan sonra yapılabilir.",
     "verificationCooldown": "Yeni bir e-posta göndermek için {seconds} saniye beklemeniz gerekiyor.",
     "maxVerificationAttempts": "Çok fazla deneme yaptınız. Lütfen destek ekibimizle iletişime geçin.",
-    "invalidTrPhone": "Geçerli bir Türkiye cep telefonu girin (10 hane, 5 ile başlar; örn. 05xx veya +90 5xx)."
+    "invalidTrPhone": "Telefon numarası 05xx xxx xx xx formatında olmalıdır."
   },
   "Emails": {
     "verificationSubject": "E-postanızı Doğrulayın",
