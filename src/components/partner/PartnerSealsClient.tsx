@@ -90,7 +90,7 @@ export default function PartnerSealsClient({
     const qty = parseInt(requestQty, 10);
     if (!qty || qty < 1) return;
     startTransition(async () => {
-      const res = await requestSealsAction(qty);
+      const res = await requestSealsAction(shopId, qty);
       if (res.success) {
         showFeedback(t("sealsRequestCreated", { count: qty }), true);
         setShowRequestForm(false);

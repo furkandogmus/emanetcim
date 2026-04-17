@@ -317,14 +317,22 @@ export class BookingService implements IBookingService {
             sealPhotoUrl,
           });
         }
-        await tx.booking.update({
-          where: { id: bookingId },
+        const updateResult = await tx.booking.updateMany({
+          where: { 
+            id: bookingId,
+            bookingRowVersion: existing.bookingRowVersion,
+          },
           data: {
             status: 'CHECKED_IN',
             ...(sealPhotoUrl != null ? { sealPhotoUrl } : {}),
+            bookingRowVersion: { increment: 1 },
             updatedAt: new Date(),
           },
         });
+
+        if (updateResult.count === 0) {
+          throw new Error("Concurrency conflict: Rezervasyon başka bir işlem tarafından güncellendi.");
+        }
       });
       return { ok: true };
     } catch (error) {
@@ -458,13 +466,14 @@ export class BookingService implements IBookingService {
       // 2. Mühürleri iade + statüyü CHECKED_OUT yap (her durumda tamamlanır)
       await prisma.$transaction(async (tx) => {
         await sealService.applyCheckOutReturnSealsWithinTx(tx, bookingId);
-        await tx.booking.update({
-          where: { id: bookingId },
+        const updateResult = await tx.booking.updateMany({
+          where: { id: bookingId, bookingRowVersion: booking.bookingRowVersion },
           data: {
             status: 'CHECKED_OUT',
             checkOutTime: now,
             lateFeeApplied: new Prisma.Decimal(lateFeeTry),
             pendingBagRevision: Prisma.JsonNull,
+            bookingRowVersion: { increment: 1 },
             updatedAt: now,
             // İade başarısız olduysa reconcile için kayıt
             ...(failedRefundAmount > 0
@@ -472,6 +481,9 @@ export class BookingService implements IBookingService {
               : {}),
           },
         });
+        if (updateResult.count === 0) {
+          throw new Error("Concurrency conflict: Rezervasyon başka bir işlem tarafından güncellendi.");
+        }
       });
 
       return {
