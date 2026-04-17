@@ -24,6 +24,7 @@ const { mockTx, mockPrisma, mockRefundPayment, mockSealService } = vi.hoisted(()
     booking: {
       create: vi.fn(),
       update: vi.fn(),
+      updateMany: vi.fn().mockResolvedValue({ count: 1 }),
       findMany: vi.fn(),
       findUnique: vi.fn(),
     },
