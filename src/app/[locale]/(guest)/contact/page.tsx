@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 import { alternatesForPath } from "@/lib/seo-alternates";
 import { getGuestStaticSeo } from "@/lib/guest-static-seo";
 import { getSiteBaseUrl } from "@/lib/site-urls";
-import { MessageCircle, Mail, MapPin, Send, MessageSquare } from "lucide-react";
+import { MessageCircle, Mail, MapPin, MessageSquare } from "lucide-react";
+import ContactFormClient from "@/components/ContactFormClient";
 
 export async function generateMetadata({
   params,
@@ -95,30 +96,18 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
           </div>
 
           {/* Form */}
-          <div className="bg-white rounded-[4rem] p-12 border border-gray-100 shadow-2xl shadow-gray-200/50 order-1 lg:order-2">
-            <h2 className="text-3xl font-black text-gray-900 mb-8 tracking-tight">{t("formTitle")}</h2>
-            <form className="flex flex-col gap-6">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">{t("name")}</label>
-                <input required type="text" className="w-full h-14 px-6 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-orange-500/10 focus:bg-white transition-all font-bold" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">{t("email")}</label>
-                <input required type="email" className="w-full h-14 px-6 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-orange-500/10 focus:bg-white transition-all font-bold" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">{t("message")}</label>
-                <textarea required rows={4} className="w-full p-6 bg-gray-50 border-none rounded-[2rem] focus:ring-4 focus:ring-orange-500/10 focus:bg-white transition-all font-bold resize-none" />
-              </div>
-              <button disabled className="h-16 w-full bg-gray-900 hover:bg-orange-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-2 group">
-                <Send size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                {t("send")}
-              </button>
-              <p className="text-[10px] text-gray-400 text-center font-bold uppercase tracking-wider mt-2">
-                Genelde 2 saat içinde yanıt veriyoruz.
-              </p>
-            </form>
-          </div>
+          <ContactFormClient
+            labels={{
+              formTitle: t("formTitle"),
+              name: t("name"),
+              email: t("email"),
+              message: t("message"),
+              send: t("send"),
+              success: t("success"),
+              error: t("error"),
+            }}
+            responseNote="Genelde 2 saat içinde yanıt veriyoruz."
+          />
         </div>
       </main>
     </div>

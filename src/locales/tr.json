@@ -956,7 +956,9 @@
     "emailAddress": "destek@bagajpark.com",
     "opsTitle": "Operasyon",
     "opsAddress": "İstanbul, TR",
-    "opsBadge": "MERKEZ"
+    "opsBadge": "MERKEZ",
+    "success": "Mesajınız alındı, en kısa sürede yanıt vereceğiz.",
+    "error": "Mesaj gönderilirken bir hata oluştu. Lütfen tekrar deneyin."
   },
   "KVKK": {
     "badge": "GÜVEN",
