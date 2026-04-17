@@ -8,7 +8,7 @@ import { useSession } from "next-auth/react";
 
 describe("VerificationBanner", () => {
   it("should render null if session is not available", () => {
-    vi.mocked(useSession).mockReturnValue({ data: null, status: "unauthenticated" } as any);
+    vi.mocked(useSession).mockReturnValue({ data: null, status: "unauthenticated" } as unknown);
     const { container } = render(<VerificationBanner />);
     expect(container).toBeEmptyDOMElement();
   });
@@ -17,7 +17,7 @@ describe("VerificationBanner", () => {
     vi.mocked(useSession).mockReturnValue({
       data: { user: { emailVerified: new Date(), role: "GUEST" } },
       status: "authenticated",
-    } as any);
+    } as unknown);
     const { container } = render(<VerificationBanner />);
     expect(container).toBeEmptyDOMElement();
   });
@@ -26,7 +26,7 @@ describe("VerificationBanner", () => {
     vi.mocked(useSession).mockReturnValue({
       data: { user: { emailVerified: null, role: "GUEST" } },
       status: "authenticated",
-    } as any);
+    } as unknown);
     
     render(<VerificationBanner />);
     
@@ -39,7 +39,7 @@ describe("VerificationBanner", () => {
     vi.mocked(useSession).mockReturnValue({
       data: { user: { emailVerified: null, role: "ADMIN" } },
       status: "authenticated",
-    } as any);
+    } as unknown);
     const { container } = render(<VerificationBanner />);
     expect(container).toBeEmptyDOMElement();
   });
