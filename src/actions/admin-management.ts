@@ -2,7 +2,7 @@
 
 import prisma from "@/lib/db";
 import { auth } from "@/auth";
-import { Prisma, Role } from "@prisma/client";
+import { BookingStatus, Prisma, Role } from "@prisma/client";
 import { z } from "zod";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { paymentService } from "@/services/PaymentService";
@@ -386,7 +386,7 @@ export async function deleteUserAction(
     return { ok: true }; // Zaten yok
   }
 
-  const activeStatuses: any[] = ["WAITING_APPROVAL", "APPROVED", "PENDING", "PAID", "CHECKED_IN"];
+  const activeStatuses: BookingStatus[] = ["WAITING_APPROVAL", "APPROVED", "PENDING", "PAID", "CHECKED_IN"];
 
   if (userToDelete.isBanned) {
     // Banlıysa: Bekleyen veya aktif rezervasyonları zorla iptal et, sonra sil
