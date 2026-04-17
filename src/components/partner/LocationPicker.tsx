@@ -48,11 +48,11 @@ function matchDistrict(cityName: string, raw: string): string {
   return hit ?? raw;
 }
 
-function sanitizePart(input: string | undefined): string {
+export function sanitizePart(input: string | undefined): string {
   return (input ?? "").replace(/\s+/g, " ").trim();
 }
 
-function buildAddressPartsFromNominatimAddress(a: Record<string, unknown>): AddressParts {
+export function buildAddressPartsFromNominatimAddress(a: Record<string, unknown>): AddressParts {
   const rawRoad = sanitizePart(typeof a.road === "string" ? a.road : "");
   const rawNeighbourhood = sanitizePart(
     typeof a.neighbourhood === "string"
@@ -133,7 +133,7 @@ async function reverseGeocode(
   };
 }
 
-function parseAddressParts(address: string): AddressParts {
+export function parseAddressParts(address: string): AddressParts {
   if (!address) {
     return { street: "", neighborhood: "", buildingNo: "", doorNo: "" };
   }
@@ -151,8 +151,10 @@ function parseAddressParts(address: string): AddressParts {
     .map((s) => s.trim())
     .filter(Boolean);
   const primary = segments[0] ?? withoutPostal;
-  const neighborhoodSeg =
-    segments.find((s) => /mahallesi?/i.test(s)) ?? "";
+  const neighborhoodMatch = withoutPostal.match(
+    /([A-Za-zÇĞİÖŞÜçğıöşü0-9]+(?:\s+[A-Za-zÇĞİÖŞÜçğıöşü0-9]+)?)\s+Mahallesi\b/i
+  );
+  const neighborhoodSeg = neighborhoodMatch?.[1] ?? "";
 
   const doorMatch = withoutPostal.match(/\bDaire[:\s-]*([A-Za-z0-9/-]+)\b/i);
   const doorNo = doorMatch?.[1] ?? "";
@@ -160,27 +162,42 @@ function parseAddressParts(address: string): AddressParts {
 
   const noMatch = noDoor.match(/\bNo[:\s-]*([A-Za-z0-9/-]+)\b/i);
   const buildingNo = noMatch?.[1] ?? "";
-  const street = (noMatch ? primary.replace(noMatch[0], " ") : primary)
+  let street = (noMatch ? primary.replace(noMatch[0], " ") : primary)
     .replace(/\bDaire[:\s-]*[A-Za-z0-9/-]+\b/i, " ")
     .replace(/\s+/g, " ")
     .trim();
 
   const cleanedNeighborhood = neighborhoodSeg
+    .replace(/\b(sokak|sokağı|cadde|caddesi|bulvarı|sk\.?)\b/gi, "")
     .replace(/\bmahallesi\b/gi, "")
+    .replace(/\s+/g, " ")
     .trim();
 
-  // "Mustafa Kemal Mahallesi" gibi adreslerde sokak boş kalsın, mahalle dolsun.
-  const streetLooksLikeNeighborhood = /\bmahallesi\b/i.test(street);
+  let inlineNeighborhood = "";
+  if (/\bmahallesi\b/i.test(street)) {
+    const beforeMahalle = street.replace(/\bmahallesi\b.*/i, "").trim();
+    const hasRoadHint = /\b(sokak|sokağı|cadde|caddesi|bulvarı|sk\.?)\b/i.test(
+      beforeMahalle
+    );
+    if (hasRoadHint) {
+      const words = beforeMahalle.split(/\s+/);
+      inlineNeighborhood = words.pop() ?? "";
+      street = words.join(" ").trim();
+    } else {
+      inlineNeighborhood = beforeMahalle;
+      street = "";
+    }
+  }
 
   return {
-    street: streetLooksLikeNeighborhood ? "" : street,
-    neighborhood: cleanedNeighborhood || (streetLooksLikeNeighborhood ? street.replace(/\bmahallesi\b/gi, "").trim() : ""),
+    street,
+    neighborhood: cleanedNeighborhood || inlineNeighborhood,
     buildingNo,
     doorNo,
   };
 }
 
-function composeAddress(parts: AddressParts): string {
+export function composeAddress(parts: AddressParts): string {
   return [
     parts.street.trim(),
     parts.neighborhood.trim(),
