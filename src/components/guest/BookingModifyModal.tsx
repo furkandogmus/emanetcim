@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { X, Calendar } from "lucide-react";
+import { X } from "lucide-react";
+import DateTimePicker from "@/components/ui/DateTimePicker";
 import BagSelector from "@/components/guest/BagSelector";
 import { modifyBookingAction } from "@/actions/booking";
 import {
@@ -166,13 +167,11 @@ export default function BookingModifyModal({
               <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
                 {t("checkoutCheckInLabel")}
               </span>
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-100">
-                <Calendar size={18} className="text-gray-400 shrink-0" />
-                <input
-                  type="datetime-local"
+              <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100">
+                <DateTimePicker
                   value={checkInLocal}
-                  onChange={(e) => setCheckInLocal(e.target.value)}
-                  className="w-full bg-transparent text-sm font-semibold outline-none min-h-[44px]"
+                  onChange={setCheckInLocal}
+                  ariaLabel={t("checkoutCheckInLabel")}
                 />
               </div>
             </label>
@@ -180,13 +179,12 @@ export default function BookingModifyModal({
               <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
                 {t("checkoutCheckOutLabel")}
               </span>
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-100">
-                <Calendar size={18} className="text-gray-400 shrink-0" />
-                <input
-                  type="datetime-local"
+              <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100">
+                <DateTimePicker
                   value={checkOutLocal}
-                  onChange={(e) => setCheckOutLocal(e.target.value)}
-                  className="w-full bg-transparent text-sm font-semibold outline-none min-h-[44px]"
+                  onChange={setCheckOutLocal}
+                  ariaLabel={t("checkoutCheckOutLabel")}
+                  minDate={parseDatetimeLocal(checkInLocal) ?? undefined}
                 />
               </div>
             </label>
