@@ -9,6 +9,8 @@ import {
   MapPin,
   Minus,
   Plus,
+  X as CloseIcon,
+  SlidersHorizontal,
 } from "lucide-react";
 import DateTimePicker from "@/components/ui/DateTimePicker";
 import { Link } from "@/i18n/routing";
@@ -74,6 +76,7 @@ export default function SearchClient({
   const [filterDirty, setFilterDirty] = useState(false);
   const [dynamicCenter, setDynamicCenter] = useState(searchCenter);
   const [resolvedPlaceLabel, setResolvedPlaceLabel] = useState<string | null>(null);
+  const [panelOpen, setPanelOpen] = useState(true);
   useEffect(() => {
     setCheckInLocal(toDatetimeLocalValue(new Date(defaultCheckInIso)));
     setCheckOutLocal(toDatetimeLocalValue(new Date(defaultCheckOutIso)));
@@ -200,8 +203,40 @@ export default function SearchClient({
   const markFiltersDirty = () => setFilterDirty(true);
 
   return (
-    <div className="flex flex-col min-h-[100svh] bg-white font-sans selection:bg-orange-100">
-      <header className="px-4 pt-4 pb-3 border-b border-gray-100 bg-white/80 backdrop-blur-xl z-20 sticky top-0 max-h-[52svh] overflow-y-auto md:max-h-none">
+    <div className="relative h-[100svh] w-full overflow-hidden bg-white font-sans selection:bg-orange-100">
+      <div className="absolute inset-0 z-0">
+        <SearchMap
+          shops={filteredShops}
+          userLat={dynamicCenter.lat}
+          userLng={dynamicCenter.lng}
+          onSelectShop={onSelectShop}
+        />
+      </div>
+
+      {!panelOpen ? (
+        <button
+          type="button"
+          onClick={() => setPanelOpen(true)}
+          aria-label="Open search panel"
+          className="md:hidden absolute top-4 left-4 z-20 h-12 px-4 rounded-full bg-white shadow-lg border border-gray-100 flex items-center gap-2 font-black text-xs uppercase tracking-widest text-gray-900"
+        >
+          <SlidersHorizontal size={16} className="text-orange-600" />
+          {filteredShops.length}
+        </button>
+      ) : null}
+
+      <aside
+        className={`absolute left-0 top-0 z-10 h-full w-full md:w-[420px] max-w-full bg-white/95 backdrop-blur-xl shadow-2xl md:shadow-[8px_0_24px_-12px_rgba(0,0,0,0.25)] flex flex-col border-r border-gray-100 transition-transform duration-300 ${panelOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
+      >
+        <button
+          type="button"
+          onClick={() => setPanelOpen(false)}
+          aria-label="Close panel"
+          className="md:hidden absolute top-3 right-3 z-30 h-9 w-9 rounded-full bg-white shadow border border-gray-100 flex items-center justify-center"
+        >
+          <CloseIcon size={18} className="text-gray-900" />
+        </button>
+      <header className="px-4 pt-4 pb-3 border-b border-gray-100 bg-white/80 backdrop-blur-xl z-20 shrink-0">
         <div className="flex items-center gap-3 mb-3">
           <Link
             href="/"
@@ -398,8 +433,7 @@ export default function SearchClient({
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col md:flex-row overflow-hidden relative min-h-0 md:h-[calc(100svh-11.5rem)] md:min-h-[36rem]">
-        <div className="w-full md:w-1/3 lg:w-1/4 h-auto md:h-full overflow-y-auto p-4 flex flex-col gap-4 bg-gray-50/50 border-r border-gray-100 order-2 md:order-1 min-h-[42svh] md:min-h-0">
+      <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 bg-gray-50/50">
           <div className="flex justify-between items-center px-1 mb-2">
             <h2
               data-testid="nearby-heading"
@@ -459,15 +493,7 @@ export default function SearchClient({
           )}
         </div>
 
-        <div className="flex-1 h-[40svh] md:h-full bg-gray-100 relative order-1 md:order-2 overflow-hidden min-h-[280px] md:min-h-0 rounded-2xl md:rounded-none border border-gray-100 md:border-0">
-          <SearchMap
-            shops={filteredShops}
-            userLat={dynamicCenter.lat}
-            userLng={dynamicCenter.lng}
-            onSelectShop={onSelectShop}
-          />
-        </div>
-      </main>
+      </aside>
     </div>
   );
 }

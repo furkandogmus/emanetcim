@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type ReactNode,
 } from "react";
 import { DayPicker } from "react-day-picker";
@@ -83,7 +84,7 @@ export default function DateTimePicker({
   ariaLabel,
   placeholder,
   minDate,
-  stepMinutes = 30,
+  stepMinutes = 20,
   className,
   icon,
   iconSize = 18,
@@ -101,11 +102,13 @@ export default function DateTimePicker({
 
   const currentTime = useMemo(() => {
     if (!parsed) return timeOptions[0] ?? "00:00";
-    const h = String(parsed.getHours()).padStart(2, "0");
-    const m = String(parsed.getMinutes()).padStart(2, "0");
-    const snapped = `${h}:${m}`;
-    return timeOptions.includes(snapped) ? snapped : snapped;
-  }, [parsed, timeOptions]);
+    const totalMin = parsed.getHours() * 60 + parsed.getMinutes();
+    const snappedMin =
+      (Math.round(totalMin / stepMinutes) * stepMinutes) % (24 * 60);
+    const h = Math.floor(snappedMin / 60);
+    const m = snappedMin % 60;
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+  }, [parsed, timeOptions, stepMinutes]);
 
   const display = useMemo(() => {
     if (!parsed) return placeholder ?? "";
@@ -188,7 +191,7 @@ export default function DateTimePicker({
         aria-label={ariaLabel}
         aria-haspopup="dialog"
         aria-expanded={open}
-        className="w-full flex items-center gap-2 text-left bg-transparent outline-none relative"
+        className="w-full flex items-center gap-2 text-left bg-transparent outline-none relative rounded-lg focus-visible:ring-2 focus-visible:ring-orange-500/40 transition-colors"
       >
         {icon ?? (
           <Calendar
@@ -207,7 +210,18 @@ export default function DateTimePicker({
       {open ? (
         <div
           role="dialog"
-          className="absolute left-0 top-full z-50 mt-2 w-[min(320px,92vw)] rounded-2xl border border-gray-100 bg-white shadow-2xl p-3"
+          className="absolute left-0 top-full z-50 mt-2 w-[min(340px,94vw)] rounded-2xl border border-gray-100 bg-white shadow-2xl p-3"
+          style={
+            {
+              "--rdp-accent-color": "#ea580c",
+              "--rdp-accent-background-color": "#fff7ed",
+              "--rdp-day_button-border-radius": "9999px",
+              "--rdp-selected-border": "2px solid #ea580c",
+              "--rdp-today-color": "#ea580c",
+              "--rdp-day-height": "38px",
+              "--rdp-day-width": "38px",
+            } as CSSProperties
+          }
         >
           <DayPicker
             mode="single"
@@ -218,7 +232,7 @@ export default function DateTimePicker({
             disabled={minDate ? { before: minDate } : undefined}
             defaultMonth={parsed ?? minDate ?? new Date()}
             showOutsideDays
-            className="rdp-emanet"
+            className="rdp-emanet mx-auto"
           />
           <div className="mt-2 flex items-center gap-2 border-t border-gray-100 pt-3">
             <Clock size={16} className="text-gray-400 shrink-0" aria-hidden />
