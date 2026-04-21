@@ -54,7 +54,7 @@ export default async function PartnerBookingsPage({
   }
 
   if (role !== "PARTNER" && role !== "ADMIN") {
-    redirect(`/${locale}/login?callbackUrl=/${locale}/partner/bookings`);
+    redirect(`/${locale}/bookings`);
   }
 
   const sp = (await searchParams) ?? {};

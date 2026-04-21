@@ -51,7 +51,7 @@ export default async function PartnerBookingDetailPage({
     redirect(`/${locale}/login?callbackUrl=/${locale}/partner/bookings/${id}`);
   }
   if (role !== "PARTNER" && role !== "ADMIN") {
-    redirect(`/${locale}/login?callbackUrl=/${locale}/partner/bookings/${id}`);
+    redirect(`/${locale}/bookings`);
   }
 
   const booking = await prisma.booking.findFirst({
