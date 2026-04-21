@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:hive/hive.dart';
 
 import '../config/env.dart';
 
@@ -9,21 +11,28 @@ final tokenStoreProvider = Provider<TokenStore>((ref) => TokenStore());
 class TokenStore {
   static const _access = 'access_token';
   static const _refresh = 'refresh_token';
+  static const _hiveKey = 'hive_encryption_key';
+  
   final _storage = const FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
   );
 
-  Future<String?> readAccessToken() => _storage.read(key: _access);
-  Future<String?> readRefreshToken() => _storage.read(key: _refresh);
-
-  Future<void> save({required String access, required String refresh}) async {
-    await _storage.write(key: _access, value: access);
-    await _storage.write(key: _refresh, value: refresh);
+  Future<List<int>?> getHiveKey() async {
+    String? keyStr = await _storage.read(key: _hiveKey);
+    if (keyStr == null) {
+      final key = Hive.generateSecureKey();
+      await _storage.write(key: _hiveKey, value: base64UrlEncode(key));
+      return key;
+    }
+    return base64Url.decode(keyStr);
   }
 
+  Future<String?> readAccessToken() => _storage.read(key: _access);
+...
   Future<void> clear() async {
     await _storage.delete(key: _access);
     await _storage.delete(key: _refresh);
+    // We DON'T delete _hiveKey on logout, otherwise we lose access to offline data
   }
 
   Future<bool> refresh(Dio dio) async {

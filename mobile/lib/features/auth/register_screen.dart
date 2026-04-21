@@ -71,7 +71,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   prefixIcon: const Icon(Icons.person_outline_rounded),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                 ),
-                validator: (v) => (v?.length ?? 0) < 3 ? 'auth.name_error'.tr() : null,
+                validator: (v) {
+                  if (v == null || v.isEmpty) return 'auth.name_error'.tr();
+                  if (v.length < 3) return 'auth.name_error'.tr();
+                  if (!RegExp(r"^[a-zA-ZçÇğĞıİöÖşŞüÜ\s]+$").hasMatch(v)) return 'auth.name_invalid_error'.tr();
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
               
@@ -83,7 +88,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                 ),
                 keyboardType: TextInputType.emailAddress,
-                validator: (v) => (v?.contains('@') ?? false) ? null : 'auth.email_error'.tr(),
+                validator: (v) {
+                  if (v == null || v.isEmpty) return 'auth.email_error'.tr();
+                  final emailRegex = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
+                  if (!emailRegex.hasMatch(v)) return 'auth.email_error'.tr();
+                  return null;
+                },
               ),
               
               const SizedBox(height: 24),

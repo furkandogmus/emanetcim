@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
@@ -22,9 +23,16 @@ final dioProvider = Provider<Dio>((ref) {
     },
     onError: (err, handler) async {
       if (err.response?.statusCode == 401) {
+        final options = err.requestOptions;
+        // Security: Prevent infinite retry loops
+        if (options.headers.containsKey('X-Retry')) {
+          return handler.next(err);
+        }
+        
         final ok = await store.refresh(dio);
         if (ok) {
-          final clone = await dio.fetch(err.requestOptions);
+          options.headers['X-Retry'] = '1';
+          final clone = await dio.fetch(options);
           return handler.resolve(clone);
         }
       }
@@ -32,13 +40,15 @@ final dioProvider = Provider<Dio>((ref) {
     },
   ));
 
-  dio.interceptors.add(PrettyDioLogger(
-    requestHeader: false,
-    requestBody: true,
-    responseBody: false,
-    error: true,
-    compact: true,
-  ));
+  if (kDebugMode) {
+    dio.interceptors.add(PrettyDioLogger(
+      requestHeader: false,
+      requestBody: true,
+      responseBody: false,
+      error: true,
+      compact: true,
+    ));
+  }
 
   return dio;
 });

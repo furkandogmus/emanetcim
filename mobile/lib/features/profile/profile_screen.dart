@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,7 +17,7 @@ class ProfileScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Hesabım', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        title: Text('profile.title'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
@@ -104,8 +105,8 @@ class ProfileScreen extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Arkadaşlarını Davet Et', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                          Text('Her davet için ₺20 indirim kazan!', style: GoogleFonts.outfit(color: Colors.grey.shade400, fontSize: 12)),
+                          Text('profile.referral_title'.tr(), style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                          Text('profile.referral_hint'.tr(), style: GoogleFonts.outfit(color: Colors.grey.shade400, fontSize: 12)),
                         ],
                       ),
                     ),
@@ -126,10 +127,10 @@ class ProfileScreen extends ConsumerWidget {
                         onPressed: () {
                           Clipboard.setData(ClipboardData(text: user?.referralCode ?? 'BP-WELCOME'));
                           HapticFeedback.mediumImpact();
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Referans kodu kopyalandı!')));
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Referans kodu kopyalandı!')));
                         },
                         icon: const Icon(Icons.copy_rounded, size: 18, color: Color(0xFFF97316)),
-                        label: Text('KOPYALA', style: GoogleFonts.outfit(color: const Color(0xFFF97316), fontWeight: FontWeight.bold, fontSize: 12)),
+                        label: Text('profile.copy'.tr(), style: GoogleFonts.outfit(color: const Color(0xFFF97316), fontWeight: FontWeight.bold, fontSize: 12)),
                       ),
                     ],
                   ),
@@ -141,7 +142,7 @@ class ProfileScreen extends ConsumerWidget {
           
           // Menu Section
           Text(
-            'HESAP AYARLARI',
+            'profile.settings'.tr(),
             style: GoogleFonts.outfit(
               fontSize: 12,
               fontWeight: FontWeight.bold,
@@ -150,14 +151,14 @@ class ProfileScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
-          _menuItem(Icons.person_outline_rounded, 'Profilimi Düzenle', onTap: () => _showEditProfile(context, user)),
-          _menuItem(Icons.notifications_none_rounded, 'Bildirimler', onTap: () => _showInfo(context, 'Bildirimler', 'Bildirim ayarlarınız çok yakında burada olacak!')),
-          _menuItem(Icons.payment_rounded, 'Ödeme Yöntemlerim', onTap: () => _showInfo(context, 'Ödeme Yöntemleri', 'Kayıtlı kartlarınızın yönetimi bir sonraki güncellemede eklenecektir.')),
+          _menuItem(Icons.person_outline_rounded, 'profile.edit_profile'.tr(), onTap: () => _showEditProfile(context, user)),
+          _menuItem(Icons.notifications_none_rounded, 'profile.notifications'.tr(), onTap: () => _showInfo(context, 'profile.notifications'.tr(), 'Bildirim ayarlarınız çok yakında burada olacak!')),
+          _menuItem(Icons.payment_rounded, 'profile.payments'.tr(), onTap: () => _showInfo(context, 'profile.payments'.tr(), 'Kayıtlı kartlarınızın yönetimi bir sonraki güncellemede eklenecektir.')),
           
           const SizedBox(height: 32),
           
           Text(
-            'DESTEK & HAKKINDA',
+            'profile.support'.tr(),
             style: GoogleFonts.outfit(
               fontSize: 12,
               fontWeight: FontWeight.bold,
@@ -166,9 +167,9 @@ class ProfileScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
-          _menuItem(Icons.help_outline_rounded, 'Yardım Merkezi', onTap: () => _showLegal(context, 'Yardım Merkezi', 'BagajPark hakkında her türlü sorunuz için destek@bagajpark.com adresinden bize ulaşabilirsiniz.')),
-          _menuItem(Icons.info_outline_rounded, 'Uygulama Hakkında', onTap: () => _showLegal(context, 'Uygulama Hakkında', 'BagajPark v1.0.0\nSeyahatlerinizi kolaylaştıran dijital emanet ağı.')),
-          _menuItem(Icons.privacy_tip_outlined, 'Gizlilik Politikası', onTap: () => _showLegal(context, 'Gizlilik Politikası', 'Verileriniz BagajPark güvencesiyle uçtan uca korunmaktadır...')),
+          _menuItem(Icons.help_outline_rounded, 'profile.help_center'.tr(), onTap: () => _showLegal(context, 'profile.help_center'.tr(), 'BagajPark hakkında her türlü sorunuz için destek@bagajpark.com adresinden bize ulaşabilirsiniz.')),
+          _menuItem(Icons.info_outline_rounded, 'profile.about'.tr(), onTap: () => _showLegal(context, 'profile.about'.tr(), 'BagajPark v1.0.0\nSeyahatlerinizi kolaylaştıran dijital emanet ağı.')),
+          _menuItem(Icons.privacy_tip_outlined, 'profile.privacy'.tr(), onTap: () => _showLegal(context, 'profile.privacy'.tr(), 'Verileriniz BagajPark güvencesiyle uçtan uca korunmaktadır...')),
           
           const SizedBox(height: 48),
           
@@ -176,7 +177,7 @@ class ProfileScreen extends ConsumerWidget {
           OutlinedButton.icon(
             onPressed: () => _confirmLogout(context, ref),
             icon: const Icon(Icons.logout_rounded, size: 20),
-            label: const Text('Çıkış Yap'),
+            label: Text('profile.logout'.tr()),
             style: OutlinedButton.styleFrom(
               foregroundColor: Colors.redAccent,
               side: const BorderSide(color: Colors.redAccent, width: 1.5),
@@ -191,7 +192,7 @@ class ProfileScreen extends ConsumerWidget {
           TextButton(
             onPressed: () => _showDeleteAccount(context, ref),
             child: Text(
-              'Hesabımı Kalıcı Olarak Sil',
+              'profile.delete_account'.tr(),
               style: GoogleFonts.outfit(
                 color: Colors.grey.shade400,
                 fontSize: 13,
@@ -250,16 +251,16 @@ class ProfileScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Çıkış Yap', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        title: Text('profile.logout'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
         content: Text('Hesabınızdan çıkış yapmak istediğinize emin misiniz?', style: GoogleFonts.outfit()),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('İptal')),
+          TextButton(onPressed: () => Navigator.pop(context), child: Text('common.cancel'.tr())),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               ref.read(authControllerProvider.notifier).logout();
             },
-            child: const Text('Çıkış Yap', style: TextStyle(color: Colors.redAccent)),
+            child: Text('profile.logout'.tr(), style: const TextStyle(color: Colors.redAccent)),
           ),
         ],
       ),
@@ -270,20 +271,20 @@ class ProfileScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Hesabı Sil', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: Colors.redAccent)),
+        title: Text('profile.delete_account'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: Colors.redAccent)),
         content: Text(
           'Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz ve tüm rezervasyon verileriniz kalıcı olarak silinecektir.',
           style: GoogleFonts.outfit(),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('İptal')),
+          TextButton(onPressed: () => Navigator.pop(context), child: Text('common.cancel'.tr())),
           TextButton(
             onPressed: () {
               // In prod, call API to delete account
               Navigator.pop(context);
               ref.read(authControllerProvider.notifier).logout();
             },
-            child: const Text('KALICI OLARAK SİL', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+            child: Text('common.confirm'.tr(), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -294,7 +295,7 @@ class ProfileScreen extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      useRootNavigator: true, // Navigasyon barının üzerine çıkmasını sağlar
+      useRootNavigator: true, 
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 24, right: 24, top: 24),
@@ -302,20 +303,20 @@ class ProfileScreen extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Profili Düzenle', style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text('profile.edit_profile'.tr(), style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 24),
             TextField(
-              decoration: InputDecoration(labelText: 'Ad Soyad', border: OutlineInputBorder(borderRadius: BorderRadius.circular(16))),
+              decoration: InputDecoration(labelText: 'auth.name_label'.tr(), border: OutlineInputBorder(borderRadius: BorderRadius.circular(16))),
               controller: TextEditingController(text: user?.name),
             ),
             const SizedBox(height: 16),
             TextField(
-              decoration: InputDecoration(labelText: 'E-posta', border: OutlineInputBorder(borderRadius: BorderRadius.circular(16))),
+              decoration: InputDecoration(labelText: 'auth.email'.tr(), border: OutlineInputBorder(borderRadius: BorderRadius.circular(16))),
               controller: TextEditingController(text: user?.email),
               readOnly: true,
             ),
             const SizedBox(height: 24),
-            FilledButton(onPressed: () => Navigator.pop(context), child: const Text('Güncelle')),
+            FilledButton(onPressed: () => Navigator.pop(context), child: Text('common.confirm'.tr())),
             const SizedBox(height: 40),
           ],
         ),
@@ -329,7 +330,7 @@ class ProfileScreen extends ConsumerWidget {
       builder: (context) => AlertDialog(
         title: Text(title, style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
         content: Text(msg, style: GoogleFonts.outfit()),
-        actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Tamam'))],
+        actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text('common.confirm'.tr()))],
       ),
     );
   }

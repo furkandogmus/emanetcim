@@ -10,6 +10,8 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'app/app.dart';
 import 'core/config/env.dart';
+import 'core/auth/token_store.dart';
+import 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
@@ -20,6 +22,21 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
   await Hive.initFlutter();
+  
+  // Encryption for Hive (Security Hardening)
+  final tokenStore = TokenStore();
+  final hiveKey = await tokenStore.getHiveKey();
+  await Hive.openBox('pending_sync_actions', encryptionCipher: HiveAesCipher(hiveKey!));
+
+  try {
+    final isRooted = await FlutterJailbreakDetection.jailbroken;
+    final isDeveloperMode = await FlutterJailbreakDetection.developerMode;
+    if (isRooted) {
+      debugPrint('WARNING: Device is jailbroken/rooted!');
+    }
+  } catch (e) {
+    debugPrint('Security check error: $e');
+  }
 
   if (Env.firebaseEnabled) {
     await Firebase.initializeApp();
