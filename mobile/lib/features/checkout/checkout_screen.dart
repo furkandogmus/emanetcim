@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -76,16 +77,16 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       context.go('/booking/$bookingId');
     } on StripeException catch (e) {
       if (e.error.code != FailureCode.Canceled) {
-        if (mounted) _toast('Ödeme hatası: ${e.error.localizedMessage}');
+        if (mounted) _toast('common.error'.tr() + ': ${e.error.localizedMessage}');
       }
     } catch (e) {
       if (!mounted) return;
-      String msg = 'Bir hata oluştu';
+      String msg = 'common.error'.tr();
       if (e is DioException) {
         final errCode = e.response?.data['error'];
-        if (errCode == 'no_bags') msg = 'Lütfen en az bir valiz seçin.';
-        if (errCode == 'shop_not_found') msg = 'Dükkan bulunamadı veya kapalı.';
-        if (errCode == 'gateway_not_configured') msg = 'Bu dükkan şu an ödeme alamıyor.';
+        if (errCode == 'no_bags') msg = 'checkout.error_no_bags'.tr();
+        if (errCode == 'shop_not_found') msg = 'checkout.error_shop_closed'.tr();
+        if (errCode == 'gateway_not_configured') msg = 'checkout.error_payment'.tr();
       }
       _toast(msg);
     } finally {
@@ -108,11 +109,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   Widget build(BuildContext context) {
     final shopAsync = ref.watch(shopProvider(widget.shopId));
     final fmt = DateFormat('dd MMM, HH:mm');
-    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Rezervasyon Tamamla', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        title: Text('checkout.title'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -126,47 +126,38 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 20,
-                    offset: const Offset(0, 4),
-                  ),
+                  BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 20, offset: const Offset(0, 4)),
                 ],
               ),
               child: Column(
                 children: [
-                  _dateRow('Giriş', _checkIn, () => _pickDate(true), Icons.login_rounded, Colors.green),
+                  _dateRow('checkout.check_in'.tr(), _checkIn, () => _pickDate(true), Icons.login_rounded, Colors.green),
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 12),
                     child: Divider(height: 1),
                   ),
-                  _dateRow('Çıkış', _checkOut, () => _pickDate(false), Icons.logout_rounded, Colors.redAccent),
+                  _dateRow('checkout.check_out'.tr(), _checkOut, () => _pickDate(false), Icons.logout_rounded, Colors.redAccent),
                 ],
               ),
             ),
             
             const SizedBox(height: 32),
             Text(
-              'VALİZLERİNİZİ SEÇİN',
-              style: GoogleFonts.outfit(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey.shade500,
-                letterSpacing: 1.2,
-              ),
+              'checkout.bags_title'.tr().toUpperCase(),
+              style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey.shade500, letterSpacing: 1.2),
             ),
             const SizedBox(height: 16),
             
-            _bagCounter('Küçük (S)', 'Sırt çantası veya kabin boy', _s, (v) => setState(() => _s = v), Icons.backpack_outlined),
-            _bagCounter('Orta (M)', 'Standart boy valiz', _m, (v) => setState(() => _m = v), Icons.luggage_outlined),
-            _bagCounter('Büyük (XL)', 'Büyük boy veya spor ekipmanı', _xl, (v) => setState(() => _xl = v), Icons.work_outline_rounded),
+            _bagCounter('checkout.bag_s'.tr(), 'checkout.bag_s_hint'.tr(), _s, (v) => setState(() => _s = v), Icons.backpack_outlined),
+            _bagCounter('checkout.bag_m'.tr(), 'checkout.bag_m_hint'.tr(), _m, (v) => setState(() => _m = v), Icons.luggage_outlined),
+            _bagCounter('checkout.bag_xl'.tr(), 'checkout.bag_xl_hint'.tr(), _xl, (v) => setState(() => _xl = v), Icons.work_outline_rounded),
             
             const SizedBox(height: 40),
             
             // Payment Summary
             shopAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => const Text('Fiyat hesaplanamadı'),
+              error: (e, _) => Text('common.error'.tr()),
               data: (shop) {
                 final days = _checkOut.difference(_checkIn).inDays + 1;
                 final bagTotal = (_s * 0.8 + _m * 1.0 + _xl * 1.5) * shop.pricePerDay * days;
@@ -181,11 +172,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   ),
                   child: Column(
                     children: [
-                      _summaryRow('Valiz Ücreti ($days Gün)', '₺${bagTotal.toStringAsFixed(2)}'),
+                      _summaryRow('checkout.summary_bags'.tr(args: [days.toString()]), '₺${bagTotal.toStringAsFixed(2)}'),
                       const SizedBox(height: 12),
-                      _summaryRow('Sigorta & Güvence Bedeli', '₺${insuranceFee.toStringAsFixed(2)}'),
+                      _summaryRow('checkout.insurance_fee'.tr(), '₺${insuranceFee.toStringAsFixed(2)}'),
                       const SizedBox(height: 12),
-                      _summaryRow('Hizmet Bedeli', 'Dahil', valueColor: Colors.greenAccent),
+                      _summaryRow('checkout.service_fee'.tr(), 'checkout.included'.tr(), valueColor: Colors.greenAccent),
                       const Padding(
                         padding: EdgeInsets.symmetric(vertical: 16),
                         child: Divider(color: Colors.white24, height: 1),
@@ -193,7 +184,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('TOPLAM', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                          Text('checkout.total'.tr().toUpperCase(), style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
                           Text('₺${grandTotal.toStringAsFixed(2)}', style: GoogleFonts.outfit(color: const Color(0xFFF97316), fontWeight: FontWeight.bold, fontSize: 24)),
                         ],
                       ),
@@ -212,7 +203,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                 const Icon(Icons.security_rounded, size: 20),
                                 const SizedBox(width: 12),
                                 Text(
-                                  'Ödemeyi Yap',
+                                  'checkout.pay_button'.tr(),
                                   style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
                                 ),
                               ],
@@ -225,7 +216,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                           Icon(Icons.lock_outline_rounded, size: 14, color: Colors.grey.shade500),
                           const SizedBox(width: 4),
                           Text(
-                            'Güvenli 256-bit SSL Ödeme',
+                            'checkout.secure_payment'.tr(),
                             style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey.shade500),
                           ),
                         ],

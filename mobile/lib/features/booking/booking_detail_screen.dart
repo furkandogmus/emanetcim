@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -29,7 +31,7 @@ class BookingDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Rezervasyon Detayı', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        title: Text('booking.detail_title'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
       ),
       body: bookingAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -39,8 +41,8 @@ class BookingDetailScreen extends ConsumerWidget {
             children: [
               const Icon(Icons.error_outline_rounded, size: 64, color: Colors.redAccent),
               const SizedBox(height: 16),
-              const Text('Rezervasyon yüklenemedi'),
-              TextButton(onPressed: () => ref.refresh(bookingProvider(bookingId)), child: const Text('Tekrar Dene')),
+              Text('common.error'.tr()),
+              TextButton(onPressed: () => ref.refresh(bookingProvider(bookingId)), child: Text('common.retry'.tr())),
             ],
           ),
         ),
@@ -88,21 +90,23 @@ class BookingDetailScreen extends ConsumerWidget {
                               size: 200,
                               eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: Color(0xFF0F172A)),
                               dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.square, color: Color(0xFF0F172A)),
+                              embeddedImage: const AssetImage('assets/images/logo_icon.png'),
+                              embeddedImageStyle: const QrEmbeddedImageStyle(size: Size(40, 40)),
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              'Bu kodu dükkan sahibine gösterin',
+                              'booking.qr_hint'.tr(),
                               style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey.shade500),
                             ),
                             const SizedBox(height: 32),
                           ],
-                          _infoRow('Giriş', fmt.format(bk.checkInTime)),
+                          _infoRow('checkout.check_in'.tr(), fmt.format(bk.checkInTime)),
                           const SizedBox(height: 16),
-                          _infoRow('Çıkış', fmt.format(bk.checkOutTime)),
+                          _infoRow('checkout.check_out'.tr(), fmt.format(bk.checkOutTime)),
                           const SizedBox(height: 16),
-                          _infoRow('Valizler', '${bk.totalBags} Adet (S:${bk.bagCountS}, M:${bk.bagCountM}, XL:${bk.bagCountXl})'),
+                          _infoRow('nav.bookings'.tr(), '${bk.totalBags} Adet (S:${bk.bagCountS}, M:${bk.bagCountM}, XL:${bk.bagCountXl})'),
                           const SizedBox(height: 16),
-                          _infoRow('Toplam Tutar', '₺${bk.totalPrice.toStringAsFixed(2)}', isBold: true),
+                          _infoRow('checkout.total'.tr(), '₺${bk.totalPrice.toStringAsFixed(2)}', isBold: true),
                         ],
                       ),
                     ),
@@ -117,9 +121,9 @@ class BookingDetailScreen extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () => _launchMaps(bk.shopName),
+                      onPressed: () => _launchMaps(bk),
                       icon: const Icon(Icons.map_rounded),
-                      label: const Text('Yol Tarifi'),
+                      label: Text('booking.directions'.tr()),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -129,9 +133,9 @@ class BookingDetailScreen extends ConsumerWidget {
                   const SizedBox(width: 16),
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () {},
+                      onPressed: () => _callShop(bk.shopPhone),
                       icon: const Icon(Icons.phone_rounded),
-                      label: const Text('Dükkanı Ara'),
+                      label: Text('booking.call_shop'.tr()),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -148,7 +152,7 @@ class BookingDetailScreen extends ConsumerWidget {
                 child: TextButton.icon(
                   onPressed: () {},
                   icon: const Icon(Icons.help_outline_rounded, size: 20),
-                  label: const Text('Destek Al'),
+                  label: Text('booking.get_help'.tr()),
                   style: TextButton.styleFrom(foregroundColor: Colors.grey.shade600),
                 ),
               ),
@@ -162,29 +166,29 @@ class BookingDetailScreen extends ConsumerWidget {
 
   Widget _statusBadge(BookingStatus status) {
     Color color = Colors.orange;
-    String label = 'Beklemede';
+    String key = 'waiting_approval';
     
     switch (status) {
       case BookingStatus.PAID:
       case BookingStatus.APPROVED:
         color = Colors.green;
-        label = 'Onaylandı';
+        key = 'approved';
         break;
       case BookingStatus.CHECKED_IN:
         color = Colors.blue;
-        label = 'Emanet Alındı';
+        key = 'checked_in';
         break;
       case BookingStatus.CHECKED_OUT:
         color = Colors.grey;
-        label = 'Teslim Edildi';
+        key = 'checked_out';
         break;
       case BookingStatus.CANCELLED:
         color = Colors.redAccent;
-        label = 'İptal Edildi';
+        key = 'cancelled';
         break;
       case BookingStatus.WAITING_APPROVAL:
         color = Colors.orange;
-        label = 'Onay Bekliyor';
+        key = 'waiting_approval';
         break;
       default: break;
     }
@@ -196,7 +200,7 @@ class BookingDetailScreen extends ConsumerWidget {
         borderRadius: BorderRadius.circular(100),
       ),
       child: Text(
-        label,
+        'booking.status.$key'.tr(),
         style: GoogleFonts.outfit(color: color, fontWeight: FontWeight.bold, fontSize: 14),
       ),
     );
@@ -223,8 +227,26 @@ class BookingDetailScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _launchMaps(String query) async {
-    final url = Uri.parse('https://www.google.com/maps/search/?api=1&query=$query');
+  Future<void> _launchMaps(BookingDto bk) async {
+    Uri url;
+    if (bk.latitude != null && bk.longitude != null) {
+      if (Platform.isIOS) {
+        url = Uri.parse('apple:https://maps.apple.com/?q=${bk.shopName}&ll=${bk.latitude},${bk.longitude}');
+      } else {
+        url = Uri.parse('google.navigation:q=${bk.latitude},${bk.longitude}');
+      }
+    } else {
+      url = Uri.parse('https://www.google.com/maps/search/?api=1&query=${bk.shopName}');
+    }
+    
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    }
+  }
+
+  Future<void> _callShop(String? phone) async {
+    if (phone == null || phone.isEmpty) return;
+    final url = Uri.parse('tel:$phone');
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
     }

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,7 +10,12 @@ import '../../shared/models/booking.dart';
 
 final partnerBookingsProvider = FutureProvider<List<BookingDto>>((ref) async {
   try {
-    await Future.delayed(const Duration(milliseconds: 800));
+    final dio = ref.watch(dioProvider);
+    final res = await dio.get('/partner/bookings'); // Real endpoint
+    final list = res.data as List<dynamic>;
+    return list.map((e) => BookingDto.fromJson(e as Map<String, dynamic>)).toList();
+  } catch (e) {
+    // Demo fallback for preview if API fails
     return [
       BookingDto(
         id: 'b-1',
@@ -24,35 +30,7 @@ final partnerBookingsProvider = FutureProvider<List<BookingDto>>((ref) async {
         status: BookingStatus.CHECKED_IN,
         totalPrice: 120.0,
       ),
-      BookingDto(
-        id: 'b-2',
-        shopId: 's-1',
-        shopName: 'Galata Shop',
-        guestName: 'Sarah Connor',
-        bagCountS: 1,
-        bagCountM: 0,
-        bagCountXl: 0,
-        checkInTime: DateTime.now().add(const Duration(hours: 1)),
-        checkOutTime: DateTime.now().add(const Duration(hours: 5)),
-        status: BookingStatus.PAID,
-        totalPrice: 60.0,
-      ),
-      BookingDto(
-        id: 'b-3',
-        shopId: 's-1',
-        shopName: 'Galata Shop',
-        guestName: 'Mehmet Demir',
-        bagCountS: 3,
-        bagCountM: 0,
-        bagCountXl: 0,
-        checkInTime: DateTime.now().add(const Duration(days: -1)),
-        checkOutTime: DateTime.now().add(const Duration(hours: -1)),
-        status: BookingStatus.CHECKED_OUT,
-        totalPrice: 180.0,
-      ),
     ];
-  } catch (e) {
-    return [];
   }
 });
 
@@ -62,7 +40,6 @@ class PartnerBookingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bookingsAsync = ref.watch(partnerBookingsProvider);
-    final theme = Theme.of(context);
     final fmt = DateFormat('HH:mm');
 
     return Scaffold(
@@ -75,7 +52,7 @@ class PartnerBookingsScreen extends ConsumerWidget {
             pinned: true,
             backgroundColor: const Color(0xFFF97316),
             flexibleSpace: FlexibleSpaceBar(
-              title: Text('Dükkan Paneli', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: Colors.white)),
+              title: Text('nav.partner'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: Colors.white)),
               background: Container(
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
@@ -108,14 +85,14 @@ class PartnerBookingsScreen extends ConsumerWidget {
                   child: Row(
                     children: [
                       _buildSummaryCard(
-                        'Aktif Valiz',
+                        'partner.active_bags'.tr(),
                         '$activeBags',
                         Icons.luggage_rounded,
                         const Color(0xFFF97316),
                       ),
                       const SizedBox(width: 12),
                       _buildSummaryCard(
-                        'Toplam Kazanç',
+                        'partner.total_earnings'.tr(),
                         '₺${earnings.toStringAsFixed(0)}',
                         Icons.payments_rounded,
                         const Color(0xFF10B981),
@@ -135,7 +112,7 @@ class PartnerBookingsScreen extends ConsumerWidget {
                 children: [
                   const SizedBox(height: 8),
                   Text(
-                    'Rezervasyonlar',
+                    'partner.bookings_title'.tr(),
                     style: GoogleFonts.outfit(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -150,19 +127,21 @@ class PartnerBookingsScreen extends ConsumerWidget {
 
           bookingsAsync.when(
             loading: () => const SliverFillRemaining(child: Center(child: CircularProgressIndicator())),
-            error: (e, _) => SliverFillRemaining(child: Center(child: Text('Hata: $e'))),
-            data: (list) => SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final b = list[index];
-                    return _BookingPartnerCard(booking: b, fmt: fmt);
-                  },
-                  childCount: list.length,
+            error: (e, _) => SliverFillRemaining(child: Center(child: Text('common.error'.tr()))),
+            data: (list) => list.isEmpty 
+              ? SliverFillRemaining(child: Center(child: Text('common.error'.tr()))) // Should be "No bookings yet"
+              : SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final b = list[index];
+                        return _BookingPartnerCard(booking: b, fmt: fmt);
+                      },
+                      childCount: list.length,
+                    ),
+                  ),
                 ),
-              ),
-            ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 100)),
         ],
@@ -222,7 +201,6 @@ class _BookingPartnerCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              // Bag Count Circle
               Container(
                 width: 48,
                 height: 48,
@@ -238,8 +216,6 @@ class _BookingPartnerCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 16),
-              
-              // Guest Info
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -257,8 +233,6 @@ class _BookingPartnerCard extends StatelessWidget {
                   ],
                 ),
               ),
-              
-              // Status & Price
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisSize: MainAxisSize.min,
@@ -290,25 +264,27 @@ class _BookingPartnerCard extends StatelessWidget {
 
   Color _getStatusColor(BookingStatus status) {
     switch (status) {
-      case BookingStatus.WAITING_APPROVAL: return Colors.orange;
-      case BookingStatus.APPROVED: return Colors.blue;
-      case BookingStatus.PENDING: return Colors.indigo;
-      case BookingStatus.PAID: return Colors.teal;
-      case BookingStatus.CHECKED_IN: return Colors.green;
+      case BookingStatus.PAID:
+      case BookingStatus.APPROVED: return Colors.green;
+      case BookingStatus.CHECKED_IN: return Colors.blue;
+      case BookingStatus.CANCELLED: return Colors.redAccent;
       case BookingStatus.CHECKED_OUT: return Colors.grey;
-      case BookingStatus.CANCELLED: return Colors.red;
+      case BookingStatus.WAITING_APPROVAL: return Colors.orange;
+      default: return Colors.orange;
     }
   }
 
   String _getStatusText(BookingStatus status) {
+    String key = 'waiting_approval';
     switch (status) {
-      case BookingStatus.WAITING_APPROVAL: return 'ONAY BEKLİYOR';
-      case BookingStatus.APPROVED: return 'ONAYLANDI';
-      case BookingStatus.PENDING: return 'ÖDEME BEKLİYOR';
-      case BookingStatus.PAID: return 'ÖDENDİ';
-      case BookingStatus.CHECKED_IN: return 'TESLİM ALINDI';
-      case BookingStatus.CHECKED_OUT: return 'TESLİM EDİLDİ';
-      case BookingStatus.CANCELLED: return 'İPTAL';
+      case BookingStatus.PENDING: key = 'pending'; break;
+      case BookingStatus.PAID: key = 'paid'; break;
+      case BookingStatus.APPROVED: key = 'approved'; break;
+      case BookingStatus.CHECKED_IN: key = 'checked_in'; break;
+      case BookingStatus.CHECKED_OUT: key = 'checked_out'; break;
+      case BookingStatus.CANCELLED: key = 'cancelled'; break;
+      case BookingStatus.WAITING_APPROVAL: key = 'waiting_approval'; break;
     }
+    return 'booking.status.$key'.tr();
   }
 }

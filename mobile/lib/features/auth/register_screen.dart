@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,13 +26,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     
     setState(() => _busy = true);
     try {
-      // Kayıt işlemi için de OTP akışını başlatıyoruz
       await ref.read(authControllerProvider.notifier).requestOtp(_emailController.text);
       if (mounted) {
         context.push('/auth/otp?email=${_emailController.text}&name=${_nameController.text}');
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Hata: $e')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('common.error'.tr() + ': $e')));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -43,7 +43,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Kayıt Ol', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        title: Text('auth.register'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
       ),
       body: SingleChildScrollView(
@@ -54,12 +54,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Aramıza Hoş Geldin! 👋',
+                'auth.register_welcome'.tr(),
                 style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
-                'Valizlerini güvenle emanet etmek için hemen hesabını oluştur.',
+                'auth.register_hint'.tr(),
                 style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
               ),
               const SizedBox(height: 32),
@@ -67,23 +67,23 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  labelText: 'Ad Soyad',
+                  labelText: 'auth.name_label'.tr(),
                   prefixIcon: const Icon(Icons.person_outline_rounded),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                 ),
-                validator: (v) => (v?.length ?? 0) < 3 ? 'Lütfen adınızı giriniz' : null,
+                validator: (v) => (v?.length ?? 0) < 3 ? 'auth.name_error'.tr() : null,
               ),
               const SizedBox(height: 16),
               
               TextFormField(
                 controller: _emailController,
                 decoration: InputDecoration(
-                  labelText: 'E-posta',
+                  labelText: 'auth.email'.tr(),
                   prefixIcon: const Icon(Icons.email_outlined),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                 ),
                 keyboardType: TextInputType.emailAddress,
-                validator: (v) => (v?.contains('@') ?? false) ? null : 'Geçerli bir e-posta giriniz',
+                validator: (v) => (v?.contains('@') ?? false) ? null : 'auth.email_error'.tr(),
               ),
               
               const SizedBox(height: 24),
@@ -102,17 +102,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     child: GestureDetector(
                       onTap: () {
                         HapticFeedback.lightImpact();
-                        _showLegalModal(context, 'Kullanım Koşulları & KVKK', 'BagajPark olarak verilerinizi 6698 sayılı KVKK kapsamında titizlikle koruyoruz. Uygulamamızı kullanarak valizlerinizi güvenli noktalarımıza emanet edebilir, ödemelerinizi uçtan uca şifreli altyapımızla gerçekleştirebilirsiniz...');
+                        _showLegalModal(
+                          context, 
+                          'auth.terms_service'.tr() + ' & KVKK', 
+                          'BagajPark olarak verilerinizi 6698 sayılı KVKK kapsamında titizlikle koruyoruz...'
+                        );
                       },
                       child: Text.rich(
                         TextSpan(
-                          text: 'Kullanım Koşullarını',
+                          text: 'auth.terms_service'.tr(),
                           style: const TextStyle(decoration: TextDecoration.underline),
                           children: [
-                            const TextSpan(text: ' ve ', style: TextStyle(decoration: TextDecoration.none)),
-                            const TextSpan(
-                              text: 'KVKK Aydınlatma Metnini',
-                              style: TextStyle(color: Color(0xFFF97316), fontWeight: FontWeight.bold, decoration: TextDecoration.underline),
+                            TextSpan(text: ' ' + 'auth.or'.tr() + ' ', style: const TextStyle(decoration: TextDecoration.none)),
+                            TextSpan(
+                              text: 'auth.privacy_policy'.tr(),
+                              style: const TextStyle(color: Color(0xFFF97316), fontWeight: FontWeight.bold, decoration: TextDecoration.underline),
                             ),
                             const TextSpan(text: ' okudum, onaylıyorum.', style: TextStyle(decoration: TextDecoration.none)),
                           ],
@@ -129,8 +133,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               FilledButton(
                 onPressed: (_busy || !_kvkkAccepted) ? null : _register,
                 child: _busy 
-                  ? const CircularProgressIndicator(color: Colors.white) 
-                  : const Text('Kayıt Ol ve Kod Gönder'),
+                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) 
+                  : Text('auth.register_button'.tr()),
               ),
             ],
           ),
@@ -157,7 +161,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             FilledButton(
               onPressed: () => Navigator.pop(context),
               style: FilledButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
-              child: const Text('Anladım'),
+              child: Text('common.confirm'.tr()),
             ),
             const SizedBox(height: 24),
           ],

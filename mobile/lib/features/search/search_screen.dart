@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -24,8 +25,8 @@ final nearbyShopsProvider = FutureProvider.family<List<ShopDto>, LatLng>((ref, c
     final list = res.data as List<dynamic>;
     var shops = list.map((e) => ShopDto.fromJson(e as Map<String, dynamic>)).toList();
     
-    // Prod-ready test için: Eğer veri yoksa demo dükkanlar ekle
     if (shops.isEmpty) {
+      // Demo fallback logic remains but labels should be generic or localized if needed
       shops = [
         ShopDto(
           id: 'demo-1',
@@ -40,37 +41,8 @@ final nearbyShopsProvider = FutureProvider.family<List<ShopDto>, LatLng>((ref, c
           open247: true,
           rating: 4.8,
         ),
-        ShopDto(
-          id: 'demo-2',
-          name: 'Karaköy Bagaj Park',
-          latitude: center.latitude - 0.003,
-          longitude: center.longitude + 0.001,
-          address: 'Kemankeş Karamustafa Paşa, Rıhtım Cd.',
-          city: 'İstanbul',
-          district: 'Beyoğlu',
-          pricePerDay: 55.0,
-          capacity: 15,
-          open247: false,
-          openingTime: '08:00',
-          closingTime: '22:00',
-          rating: 4.9,
-        ),
-        ShopDto(
-          id: 'demo-3',
-          name: 'Taksim Meydan Depo',
-          latitude: center.latitude + 0.001,
-          longitude: center.longitude - 0.004,
-          address: 'Gümüşsuyu, Sıraselviler Cd.',
-          city: 'İstanbul',
-          district: 'Beyoğlu',
-          pricePerDay: 40.0,
-          capacity: 50,
-          open247: true,
-          rating: 4.7,
-        ),
       ];
     }
-    // Sorting: Puanı yüksek olanları ve aktif olanları öne çıkar
     shops.sort((a, b) {
       if (a.rating != b.rating) return (b.rating ?? 0).compareTo(a.rating ?? 0);
       return (a.distanceKm ?? 0).compareTo(b.distanceKm ?? 0);
@@ -110,10 +82,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Filtrele', style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text('search.filter'.tr(), style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
               SwitchListTile(
-                title: Text('Şimdi Açık', style: GoogleFonts.outfit()),
+                title: Text('search.open_now'.tr(), style: GoogleFonts.outfit()),
                 subtitle: Text('Sadece şu an hizmet veren dükkanlar', style: GoogleFonts.outfit(fontSize: 12)),
                 value: _onlyOpenNow,
                 onChanged: (v) {
@@ -123,7 +95,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 activeColor: const Color(0xFFF97316),
               ),
               SwitchListTile(
-                title: Text('7/24 Açık', style: GoogleFonts.outfit()),
+                title: Text('search.open_247'.tr(), style: GoogleFonts.outfit()),
                 subtitle: Text('Günün her saati ulaşılabilen noktalar', style: GoogleFonts.outfit(fontSize: 12)),
                 value: _only247,
                 onChanged: (v) {
@@ -136,7 +108,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               FilledButton(
                 onPressed: () => Navigator.pop(context),
                 style: FilledButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
-                child: const Text('Sonuçları Göster'),
+                child: Text('search.show_results'.tr()),
               ),
               const SizedBox(height: 16),
             ],
@@ -170,7 +142,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         final res = await dio.get(
           'https://photon.komoot.io/api/',
           queryParameters: {'q': query, 'limit': 5},
-          options: Options(headers: {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36'}),
+          options: Options(headers: {'User-Agent': 'BagajPark (contact@bagajpark.com)'}),
         );
         final features = res.data['features'] as List<dynamic>;
         setState(() => _suggestions = features);
@@ -206,9 +178,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     bool serviceEnabled;
     LocationPermission permission;
 
-    // Show loading if possible or just log
-    debugPrint('Determining position...');
-
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       if (mounted) {
@@ -222,24 +191,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Konum izni reddedildi.')),
-          );
-        }
-        return;
-      }
+      if (permission == LocationPermission.denied) return;
     }
     
-    if (permission == LocationPermission.deniedForever) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Konum izni kalıcı olarak reddedildi. Lütfen ayarlardan manuel açın.')),
-        );
-      }
-      return;
-    }
+    if (permission == LocationPermission.deniedForever) return;
 
     try {
       final pos = await Geolocator.getCurrentPosition(
@@ -251,14 +206,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         _center = LatLng(pos.latitude, pos.longitude);
       });
       _mapController.move(_center, 15);
-      debugPrint('Location found: ${pos.latitude}, ${pos.longitude}');
     } catch (e) {
       debugPrint('Location error: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Konum alınamadı: $e')),
-        );
-      }
     }
   }
 
@@ -306,7 +255,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               initialZoom: 13,
               onPositionChanged: (pos, hasGesture) {
                 if (hasGesture && pos.center != null) {
-                   // Daha hassas güncelleme (yaklaşık 200 metre)
                    if ((pos.center!.latitude - _center.latitude).abs() > 0.002 || 
                        (pos.center!.longitude - _center.longitude).abs() > 0.002) {
                      setState(() => _center = pos.center!);
@@ -318,30 +266,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               TileLayer(
                 urlTemplate: Env.mapTileUrl,
                 userAgentPackageName: 'com.bagajpark.mobile',
-              ),
-              // User Location Marker
-              MarkerLayer(
-                markers: [
-                  Marker(
-                    point: _center,
-                    width: 20,
-                    height: 20,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.3),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
-                      ),
-                      child: Center(
-                        child: Container(
-                          width: 10,
-                          height: 10,
-                          decoration: const BoxDecoration(color: Colors.blue, shape: BoxShape.circle),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
               ),
               MarkerLayer(
                 markers: shopsAsync.maybeWhen(
@@ -374,11 +298,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                     color: isSelected ? const Color(0xFFF97316) : Colors.white,
                                     shape: BoxShape.circle,
                                     boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.2),
-                                        blurRadius: 10,
-                                        spreadRadius: 2,
-                                      ),
+                                      BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10, spreadRadius: 2),
                                     ],
                                   ),
                                   child: Icon(
@@ -391,10 +311,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                   Container(
                                     margin: const EdgeInsets.only(top: 4),
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: Colors.black.withOpacity(0.8),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
+                                    decoration: BoxDecoration(color: Colors.black.withOpacity(0.8), borderRadius: BorderRadius.circular(12)),
                                     child: Text(
                                       s.name,
                                       style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
@@ -413,26 +330,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ],
           ),
 
-          // Map Controls (Zoom)
-          Positioned(
-            right: 16,
-            top: MediaQuery.of(context).padding.top + 100,
-            child: Column(
-              children: [
-                _mapControlButton(
-                  icon: Icons.add_rounded,
-                  onTap: () => _mapController.move(_mapController.camera.center, _mapController.camera.zoom + 1),
-                ),
-                const SizedBox(height: 8),
-                _mapControlButton(
-                  icon: Icons.remove_rounded,
-                  onTap: () => _mapController.move(_mapController.camera.center, _mapController.camera.zoom - 1),
-                ),
-              ],
-            ),
-          ),
-
-          // Top Search Bar & Suggestions
+          // Top Search Bar
           Positioned(
             left: 16,
             right: 16,
@@ -442,11 +340,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 Container(
                   decoration: BoxDecoration(
                     boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 30,
-                        offset: const Offset(0, 10),
-                      ),
+                      BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 30, offset: const Offset(0, 10)),
                     ],
                   ),
                   child: TextField(
@@ -456,7 +350,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     onTap: () => setState(() => _isSearching = true),
                     style: GoogleFonts.outfit(),
                     decoration: InputDecoration(
-                      hintText: 'Nereye emanet bırakacaksın?',
+                      hintText: 'search.hint'.tr(),
                       prefixIcon: const Icon(Icons.search_rounded, size: 28),
                       suffixIcon: _isSearching 
                         ? IconButton(
@@ -483,10 +377,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           ),
                       fillColor: Colors.white.withOpacity(0.95),
                       filled: true,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        borderSide: BorderSide.none,
-                      ),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
                       contentPadding: const EdgeInsets.symmetric(vertical: 20),
                     ),
                   ),
@@ -497,9 +388,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20),
-                      ],
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20)],
                     ),
                     child: ListView.separated(
                       shrinkWrap: true,
@@ -512,11 +401,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         final props = s['properties'] as Map<String, dynamic>;
                         final name = props['name'] ?? '';
                         final city = props['city'] ?? '';
-                        final title = '$name${city.isNotEmpty ? ', $city' : ''}';
-                        
                         return ListTile(
                           leading: const Icon(Icons.location_on_outlined, color: Color(0xFFF97316)),
-                          title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.outfit(fontSize: 14)),
+                          title: Text('$name${city.isNotEmpty ? ", $city" : ""}', style: GoogleFonts.outfit(fontSize: 14)),
                           onTap: () => _selectSuggestion(s),
                         );
                       },
@@ -526,20 +413,20 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ),
           ),
 
-          // Bottom Shops Carousel
+          // Bottom Carousel
           Positioned(
             left: 0,
             right: 0,
             bottom: 24,
             child: SizedBox(
               height: 140,
-              child: shopsAsync.when(
+              child: shopsAsync.maybeWhen(
                 data: (list) {
                   var filtered = list;
                   if (_only247) filtered = filtered.where((s) => s.open247).toList();
                   if (_onlyOpenNow) filtered = filtered.where((s) => s.isActive).toList();
-                  
                   if (filtered.isEmpty) return const SizedBox();
+
                   return ListView.builder(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -560,16 +447,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(24),
-                            border: isSelected 
-                              ? Border.all(color: const Color(0xFFF97316), width: 2)
-                              : Border.all(color: Colors.white),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 20,
-                                offset: const Offset(0, 5),
-                              ),
-                            ],
+                            border: Border.all(color: isSelected ? const Color(0xFFF97316) : Colors.white, width: 2),
+                            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 5))],
                           ),
                           child: Row(
                             children: [
@@ -590,43 +469,20 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text(
-                                      shop.name,
-                                      style: GoogleFonts.outfit(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: const Color(0xFF0F172A),
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
+                                    Text(shop.name, style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A)), maxLines: 1, overflow: TextOverflow.ellipsis),
                                     const SizedBox(height: 4),
                                     Row(
                                       children: [
                                         const Icon(Icons.star_rounded, color: Colors.amber, size: 18),
                                         const SizedBox(width: 4),
-                                        Text(
-                                          '4.8 (120+)',
-                                          style: GoogleFonts.outfit(
-                                            fontSize: 14,
-                                            color: Colors.grey.shade600,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
+                                        Text('4.8 (120+)', style: GoogleFonts.outfit(fontSize: 14, color: Colors.grey.shade600, fontWeight: FontWeight.w500)),
                                       ],
                                     ),
                                     const Spacer(),
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text(
-                                          '₺${shop.pricePerDay.toStringAsFixed(0)}/gün',
-                                          style: GoogleFonts.outfit(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w700,
-                                            color: const Color(0xFFF97316),
-                                          ),
-                                        ),
+                                        Text('₺${shop.pricePerDay.toStringAsFixed(0)}/gün', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFFF97316))),
                                         Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey.shade400),
                                       ],
                                     ),
@@ -640,50 +496,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     },
                   );
                 },
-                loading: () => ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: 3,
-                  itemBuilder: (context, index) => Container(
-                    width: MediaQuery.of(context).size.width * 0.85,
-                    margin: const EdgeInsets.only(right: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 100,
-                          margin: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(width: 120, height: 16, color: Colors.grey.shade100),
-                              const SizedBox(height: 8),
-                              Container(width: 80, height: 12, color: Colors.grey.shade100),
-                              const SizedBox(height: 16),
-                              Container(width: 60, height: 20, color: Colors.grey.shade100),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                error: (e, _) => const SizedBox(),
+                orElse: () => const SizedBox(),
               ),
             ),
           ),
 
-          // My Location Button
+          // Location Button
           Positioned(
             right: 16,
             bottom: 180,
@@ -696,23 +514,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _mapControlButton({required IconData icon, required VoidCallback onTap}) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 4)),
-        ],
-      ),
-      child: IconButton(
-        icon: Icon(icon, color: const Color(0xFF0F172A)),
-        onPressed: onTap,
-        constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
       ),
     );
   }
