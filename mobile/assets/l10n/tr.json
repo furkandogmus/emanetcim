@@ -49,6 +49,30 @@
     "location_service_disabled": "Konum servisleri kapalı. Lütfen ayarlardan açın.",
     "day_unit": "/gün"
   },
+  "notifications": {
+    "title": "Bildirimler",
+    "empty": "Henüz bildiriminiz yok.",
+    "mark_all_read": "Tümünü okundu işaretle",
+    "types": {
+      "booking": "Rezervasyon Güncellemesi",
+      "payment": "Ödeme Başarılı",
+      "info": "Bilgilendirme",
+      "shop": "Dükkan Başvurusu",
+      "campaign": "Kampanya"
+    }
+  },
+  "admin": {
+    "dashboard": "Yönetim Paneli",
+    "total_bookings": "Toplam Rezervasyon",
+    "total_revenue": "Toplam Ciro",
+    "active_partners": "Aktif Esnaf",
+    "pending_apps": "Bekleyen Başvurular",
+    "quick_actions": "Hızlı İşlemler",
+    "approve_shops": "Dükkan Onayları",
+    "system_status": "Sistem Durumu",
+    "active": "Aktif",
+    "live_analytics": "Canlı Analitik"
+  },
   "checkout": {
     "title": "Rezervasyon Tamamla",
     "check_in": "Teslimat",

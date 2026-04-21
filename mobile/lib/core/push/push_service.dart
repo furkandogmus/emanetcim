@@ -22,10 +22,14 @@ class PushService {
     _inited = true;
 
     await _local.initialize(
-      settings: const InitializationSettings(
+      const InitializationSettings(
         android: AndroidInitializationSettings('@mipmap/ic_launcher'),
         iOS: DarwinInitializationSettings(),
       ),
+      onDidReceiveNotificationResponse: (details) {
+        // Simple navigation trigger - in a real app would use a deeper logic
+        // with a navigation service.
+      },
     );
 
     final fm = FirebaseMessaging.instance;
