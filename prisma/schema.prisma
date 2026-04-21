@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,111 +6,64 @@ datasource db {
   provider = "postgresql"
 }
 
-// ----------------------------------------------------------------------------
-// ENUMS
-// ----------------------------------------------------------------------------
-
-enum Role {
-  GUEST
-  PARTNER
-  ADMIN
-}
-
-enum BookingStatus {
-  WAITING_APPROVAL // Esnaf onayı bekleniyor
-  APPROVED // Onaylandı, ödeme veya check-in bekleniyor
-  PENDING // Ödeme bekleniyor
-  PAID // Ödendi, müşteri bekleniyor
-  CHECKED_IN // Valiz dükkanda
-  CHECKED_OUT // Valiz teslim edildi
-  CANCELLED // İptal edildi
-}
-
-enum PaymentStatus {
-  SUCCESS
-  REFUNDED
-  FAILED
-}
-
-enum SealStatus {
-  STOCK // Depoda, dükkan atanmamış
-  ASSIGNED // Dükkana verildi, kullanıma hazır
-  IN_USE // Check-in ile valizde
-  RETURNED // Check-out ile iade
-  FAULTY // Bozuk / hatalı raporlandı
-}
-
-// ----------------------------------------------------------------------------
-// MODELS
-// ----------------------------------------------------------------------------
-
 model User {
-  id            String    @id @default(uuid())
-  role          Role      @default(GUEST)
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  phone         String?   @unique
-  name          String?
+  id                       String                   @id @default(uuid())
+  role                     Role                     @default(GUEST)
+  email                    String?                  @unique
+  emailVerified            DateTime?
+  image                    String?
+  phone                    String?                  @unique
+  name                     String?
   /// bcrypt hash; OAuth-only kullanıcılarda null
-  passwordHash  String?
-  isBanned      Boolean   @default(false)
-  lastIp        String?
+  passwordHash             String?
+  isBanned                 Boolean                  @default(false)
+  lastIp                   String?
+  createdAt                DateTime                 @default(now())
+  updatedAt                DateTime                 @updatedAt
   /// Referans kodu: misafire verilebilir, yeni rezervasyonda indirim sağlar
-  referralCode  String?   @unique
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Auth.js İlişkileri
-  accounts Account[]
-  sessions Session[]
-
-  // Uygulama İlişkileri
-  shops             Shop[] // Eğer rolü PARTNER ise
-  bookings          Booking[] // Eğer rolü GUEST ise
-  reviews           Review[] // Misafir olarak yaptığı yorumlar
-  legalAcceptances  LegalAcceptance[]
-  pushSubscriptions PushSubscription[]
-
-  adminRoleChangeTargets   AdminRoleChangeRequest[] @relation("AdminRoleChangeTarget")
+  referralCode             String?                  @unique
+  accounts                 Account[]
   adminRoleChangeRequested AdminRoleChangeRequest[] @relation("AdminRoleChangeRequester")
+  adminRoleChangeTargets   AdminRoleChangeRequest?  @relation("AdminRoleChangeTarget")
+  bookings                 Booking[]
+  legalAcceptances         LegalAcceptance[]
+  pushSubscriptions        PushSubscription[]
+  reviews                  Review[]
+  sessions                 Session[]
+  shops                    Shop[]
 
   @@index([email])
 }
 
 /// Admin ↔ admin rol değişikliği: çoklu admin varken ikinci onay; tek adminde anında uygulanır.
 model AdminRoleChangeRequest {
-  id                  String @id @default(cuid())
-  targetUserId        String @unique
-  previousRole        Role
-  requestedRole       Role
+  id                String   @id @default(cuid())
+  targetUserId      String   @unique
+  previousRole      Role
+  requestedRole     Role
   requestedByUserId String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  targetUser  User @relation("AdminRoleChangeTarget", fields: [targetUserId], references: [id], onDelete: Cascade)
-  requestedBy User @relation("AdminRoleChangeRequester", fields: [requestedByUserId], references: [id], onDelete: Cascade)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  requestedBy       User     @relation("AdminRoleChangeRequester", fields: [requestedByUserId], references: [id], onDelete: Cascade)
+  targetUser        User     @relation("AdminRoleChangeTarget", fields: [targetUserId], references: [id], onDelete: Cascade)
 
   @@index([requestedByUserId])
 }
 
 model Account {
-  id                 String  @id @default(uuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?  @db.Text
-  session_state      String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String  @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -138,45 +85,34 @@ model VerificationToken {
 }
 
 model Shop {
-  id        String  @id @default(uuid())
-  ownerId   String
-  name      String
-  address   String?
-  city      String? // İl (şehir)
-  district  String? // İlçe
-  latitude  Float?
-  longitude Float?
-  capacity  Int     @default(10) // Günlük maksimum valiz sayısı
-  isActive  Boolean @default(false)
-  rating    Float?  @default(0.0)
-  pricePerDay Decimal @db.Decimal(12, 2) @default(50) // Günlük valiz başı ücret (TRY)
-  hasRestroom Boolean @default(false)
-  open247     Boolean @default(false)
-
-  // iyzico Marketplace Alanları
-  subMerchantKey  String? @unique
-  subMerchantType String? // PERSONAL, PRIVATE_COMPANY, LIMITED_OR_JOINT_STOCK_COMPANY
-
-  // Stripe Connect (EU ödemeleri için)
-  stripeAccountId String? @unique // Stripe Connect connected account ID
-
-  // Çalışma Saatleri (Örn: "09:00", "20:00")
-  openingTime String? @default("09:00")
-  closingTime String? @default("20:00")
-
-  // Mühür lojistik ayarları
-  sealReorderPoint Int @default(15)  // bu noktanın altına düşünce otomatik talep aç
-  sealLeadTimeDays Int @default(3)   // kargo teslim süresi (gün), tahmin için kullanılır
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-
-  owner    User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  bookings Booking[]
-  reviews  Review[]
-  sealRequests SealRequest[]
-  seals        Seal[]
+  id               String        @id @default(uuid())
+  ownerId          String
+  name             String
+  address          String?
+  latitude         Float?
+  longitude        Float?
+  capacity         Int           @default(10)
+  isActive         Boolean       @default(false)
+  rating           Float?        @default(0.0)
+  pricePerDay      Decimal       @default(50) @db.Decimal(12, 2)
+  hasRestroom      Boolean       @default(false)
+  open247          Boolean       @default(false)
+  subMerchantKey   String?       @unique
+  subMerchantType  String?
+  openingTime      String?       @default("09:00")
+  closingTime      String?       @default("20:00")
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  city             String?
+  district         String?
+  sealLeadTimeDays Int           @default(3)
+  sealReorderPoint Int           @default(15)
+  stripeAccountId  String?       @unique
+  bookings         Booking[]
+  reviews          Review[]
+  seals            Seal[]
+  sealRequests     SealRequest[]
+  owner            User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   @@index([ownerId])
   @@index([isActive])
@@ -184,45 +120,38 @@ model Shop {
 }
 
 model Booking {
-  id      String @id @default(uuid())
-  guestId String
-  shopId  String
-
-  status BookingStatus @default(PENDING)
-
-  checkInTime  DateTime
-  checkOutTime DateTime
-
-  bagCountS  Int @default(0)
-  bagCountM  Int @default(0)
-  bagCountXl Int @default(0)
-
-  unitPrice  Decimal @db.Decimal(12, 2) @default(50) // Rezervasyon anındaki birim fiyat (TRY)
-  totalPrice Decimal @db.Decimal(12, 2) @default(0)
+  id                     String            @id @default(uuid())
+  guestId                String
+  shopId                 String
+  status                 BookingStatus     @default(PENDING)
+  checkInTime            DateTime
+  checkOutTime           DateTime
+  bagCountS              Int               @default(0)
+  bagCountM              Int               @default(0)
+  bagCountXl             Int               @default(0)
+  unitPrice              Decimal           @default(50) @db.Decimal(12, 2)
+  totalPrice             Decimal           @default(0) @db.Decimal(12, 2)
   /// Sigorta / güvence ücreti (iptal ve erken iade hesaplarında hariç tutulur)
-  insuranceFee Decimal @db.Decimal(12, 2) @default(0)
-  /// Referans kodu ile uygulanan indirim miktarı (TRY)
-  referralDiscountAmount Decimal @db.Decimal(12, 2) @default(0)
-  /// Rezervasyonda kullanılan referans kodu (varsa)
-  referredByCode String?
-
-  qrCodeToken  String? @unique // Güvenli şifrelenmiş QR verisi
-  sealPhotoUrl String? // Esnafın çekmek zorunda olduğu mühür fotoğrafı
-  lateFeeApplied Decimal @db.Decimal(12, 2) @default(0)
-  pendingBagRevision Json? // { bagCountS, bagCountM, bagCountXl, extraAmount } partner revizyon talebi
+  insuranceFee           Decimal           @default(0) @db.Decimal(12, 2)
+  qrCodeToken            String?           @unique
+  sealPhotoUrl           String?
+  lateFeeApplied         Decimal           @default(0) @db.Decimal(12, 2)
+  pendingBagRevision     Json?
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
   /// Eşzamanlı durum geçişleri için optimistic sürüm (onay vb. updateMany ile artırılır).
-  bookingRowVersion Int @default(0)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  guest       User         @relation(fields: [guestId], references: [id], onDelete: Cascade)
-  shop        Shop         @relation(fields: [shopId], references: [id], onDelete: Cascade)
-  paymentLogs PaymentLog[]
-  notificationLogs NotificationLog[]
-  review      Review?
-  dispute     Dispute?
-  seals       BookingSeal[]
+  bookingRowVersion      Int               @default(0)
+  /// Referans kodu ile uygulanan indirim miktarı (TRY)
+  referralDiscountAmount Decimal           @default(0) @db.Decimal(12, 2)
+  /// Rezervasyonda kullanılan referans kodu (varsa)
+  referredByCode         String?
+  guest                  User              @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  shop                   Shop              @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  seals                  BookingSeal[]
+  dispute                Dispute?
+  notificationLogs       NotificationLog[]
+  paymentLogs            PaymentLog?
+  review                 Review?
 
   @@index([guestId])
   @@index([shopId])
@@ -232,20 +161,17 @@ model Booking {
 }
 
 model PaymentLog {
-  id        String @id @default(uuid())
-  bookingId String @unique // Rezervasyon başına tek ödeme kaydı (yarış / çifte tahsilat önleme)
-
-  transactionId  String?       @unique // iyzico tarafındaki referans numarası
-  amount         Decimal @db.Decimal(12, 2)
-  status         PaymentStatus @default(SUCCESS)
-  splitCompleted Boolean       @default(false) // Esnafa para yattı mı?
+  id               String        @id @default(uuid())
+  bookingId        String        @unique
+  transactionId    String?       @unique
+  amount           Decimal       @db.Decimal(12, 2)
+  status           PaymentStatus @default(SUCCESS)
+  splitCompleted   Boolean       @default(false)
+  createdAt        DateTime      @default(now())
+  chargebackNote   String?
   /// İyzico/Stripe chargeback incelemesi: OPEN | WON | LOST | null
   chargebackStatus String?
-  chargebackNote   String?    @db.Text
-
-  createdAt DateTime @default(now())
-
-  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  booking          Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
   @@index([status])
   @@index([splitCompleted])
@@ -255,15 +181,13 @@ model PaymentLog {
 model NotificationLog {
   id        String   @id @default(uuid())
   bookingId String?
-  type      String   // EMAIL, SMS, PUSH
+  type      String
   recipient String
   subject   String?
   content   String
-  status    String   @default("SENT") // SENT, FAILED
+  status    String   @default("SENT")
   error     String?
-
   createdAt DateTime @default(now())
-
   booking   Booking? @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
   @@index([bookingId])
@@ -276,58 +200,52 @@ model Review {
   guestId   String
   shopId    String
   rating    Int      @default(5)
-  comment   String?  @db.Text
-  
+  comment   String?
   createdAt DateTime @default(now())
-
-  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  guest   User    @relation(fields: [guestId], references: [id], onDelete: Cascade)
-  shop    Shop    @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  guest     User     @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
   @@index([shopId])
   @@index([guestId])
 }
 
 model Coupon {
-  id        String   @id @default(uuid())
-  code      String   @unique
-  discount  Decimal @db.Decimal(12, 2) // Yüzde veya sabit TL indirimi
-  isPercent Boolean  @default(true)
-  minPrice  Decimal? @db.Decimal(12, 2) @default(0)
-  maxUses   Int?     @default(100)
-  usedCount Int      @default(0)
+  id        String    @id @default(uuid())
+  code      String    @unique
+  discount  Decimal   @db.Decimal(12, 2)
+  isPercent Boolean   @default(true)
+  minPrice  Decimal?  @default(0) @db.Decimal(12, 2)
+  maxUses   Int?      @default(100)
+  usedCount Int       @default(0)
   expiresAt DateTime?
-
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
 
   @@index([isActive])
   @@index([expiresAt])
 }
 
 model Dispute {
-  id        String   @id @default(uuid())
-  bookingId String   @unique
-  reason    String   // DAMAGE, THEFT, OTHER
-  description String @db.Text
-  status    String   @default("OPEN") // OPEN, IN_REVIEW, RESOLVED, CLOSED
-  adminNote String?  @db.Text
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  id          String   @id @default(uuid())
+  bookingId   String   @unique
+  reason      String
+  description String
+  status      String   @default("OPEN")
+  adminNote   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  booking     Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 }
 
 /// Fiziksel mühür stoku (seri numarası = PK)
 model Seal {
-  serialNumber Int        @id
+  serialNumber Int           @id
   shopId       String?
-  status       SealStatus @default(STOCK)
+  status       SealStatus    @default(STOCK)
   assignedAt   DateTime?
-
-  shop         Shop?          @relation(fields: [shopId], references: [id], onDelete: SetNull)
   bookingSeals BookingSeal[]
+  shop         Shop?         @relation(fields: [shopId], references: [id])
 
   @@index([shopId])
   @@index([status])
@@ -342,82 +260,75 @@ model BookingSeal {
   bagSize    String
   photoUrl   String?
   createdAt  DateTime @default(now())
-
-  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  seal    Seal    @relation(fields: [sealNumber], references: [serialNumber])
+  booking    Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  seal       Seal     @relation(fields: [sealNumber], references: [serialNumber])
 
   @@unique([bookingId, bagIndex])
   @@index([sealNumber])
 }
 
 model SealRequest {
-  id        String   @id @default(uuid())
-  shopId    String
-  quantity  Int
-  status    String   @default("PENDING") // PENDING, SHIPPED, DELIVERED
-
-  trackingNumber String?         // kargo takip numarası
-  adminNote      String?  @db.Text
-  serialFrom     Int?             // gönderilen seri başlangıcı
-  serialTo       Int?             // gönderilen seri sonu
-  autoGenerated  Boolean @default(false) // sistem tarafından mı açıldı
-  requestedBy    String?          // userId (partner) ya da "system"
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  shop Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  id             String   @id @default(uuid())
+  shopId         String
+  quantity       Int
+  status         String   @default("PENDING")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  adminNote      String?
+  autoGenerated  Boolean  @default(false)
+  requestedBy    String?
+  serialFrom     Int?
+  serialTo       Int?
+  trackingNumber String?
+  shop           Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
   @@index([shopId])
   @@index([status])
 }
 
 model Campaign {
-  id              String   @id @default(uuid())
+  id              String    @id @default(uuid())
   name            String
   message         String?
-  discountPercent Decimal? @db.Decimal(5, 2)
-  isActive        Boolean  @default(true)
+  discountPercent Decimal?  @db.Decimal(5, 2)
+  isActive        Boolean   @default(true)
   startsAt        DateTime?
   endsAt          DateTime?
-  createdAt       DateTime @default(now())
+  createdAt       DateTime  @default(now())
 }
 
 /// Tek satır platform iş kuralları (panelden güncellenebilir).
 /// Runtime feature toggles (admin UI + optional env kill switch for payments).
 model FeatureFlag {
-  id     String @id @default(cuid())
-  key    String @unique
-  enabled Boolean @default(true)
+  id             String   @id @default(cuid())
+  key            String   @unique
+  enabled        Boolean  @default(true)
   /// 0–100; applied when userId is present. Backend paths without userId skip rollout (webhooks stay consistent).
-  rolloutPct Int @default(100)
+  rolloutPct     Int      @default(100)
   /// Non-empty JSON string[] = allowlist for identified users only; empty/null = no allowlist restriction.
   allowedUserIds Json?
-  description String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  description    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([key])
 }
 
 model PlatformSettings {
-  id String @id @default("default")
-
-  maxStayDays         Int     @default(30)
-  maxBagsPerSlot      Int     @default(50)
-  insuranceFeeTry     Decimal @db.Decimal(12, 2) @default(15)
-  earlyRefundRatio    Decimal @db.Decimal(6, 4) @default(0.9)
-  cancelFixedFeeTry   Decimal @db.Decimal(12, 2) @default(20)
-  defaultShopCapacity Int     @default(10)
-  defaultPricePerDay  Decimal @db.Decimal(12, 2) @default(50)
-  bagMultiplierS      Decimal @db.Decimal(6, 4) @default(0.8)
-  bagMultiplierM      Decimal @db.Decimal(6, 4) @default(1.0)
-  bagMultiplierXl     Decimal @db.Decimal(6, 4) @default(1.5)
+  id                   String   @id @default("default")
+  maxStayDays          Int      @default(30)
+  maxBagsPerSlot       Int      @default(50)
+  insuranceFeeTry      Decimal  @default(15) @db.Decimal(12, 2)
+  earlyRefundRatio     Decimal  @default(0.9) @db.Decimal(6, 4)
+  cancelFixedFeeTry    Decimal  @default(20) @db.Decimal(12, 2)
+  defaultShopCapacity  Int      @default(10)
+  defaultPricePerDay   Decimal  @default(50) @db.Decimal(12, 2)
+  bagMultiplierS       Decimal  @default(0.8) @db.Decimal(6, 4)
+  bagMultiplierM       Decimal  @default(1.0) @db.Decimal(6, 4)
+  bagMultiplierXl      Decimal  @default(1.5) @db.Decimal(6, 4)
+  updatedAt            DateTime @updatedAt
   /// Platform genelinde rezervasyona kapalı takvim günleri (YYYY-MM-DD JSON dizisi).
   platformHolidayDates Json?
-
-  updatedAt DateTime @updatedAt
 }
 
 model ProcessedPaymentWebhook {
@@ -454,8 +365,7 @@ model LegalAcceptance {
   version     String
   acceptedAt  DateTime @default(now())
   ip          String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([documentKey])
@@ -468,8 +378,7 @@ model PushSubscription {
   p256dh    String
   auth      String
   createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
@@ -488,24 +397,53 @@ model ContactMessage {
   text      String?
   html      String?
   isRead    Boolean  @default(false)
-  raw       Json?
   createdAt DateTime @default(now())
+  raw       Json?
 }
 
 model BlogPost {
   id          String   @id @default(uuid())
-  locale      String   // "tr" veya "en"
+  locale      String
   slug        String   @unique
   title       String
-  content     String   @db.Text
-  excerpt     String?  @db.Text
+  content     String
+  excerpt     String?
   coverImage  String?
   authorName  String   @default("BagajPark Ekibi")
   isPublished Boolean  @default(false)
-
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([locale])
   @@index([isPublished])
+}
+
+enum Role {
+  GUEST
+  PARTNER
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  PAID
+  CHECKED_IN
+  CHECKED_OUT
+  CANCELLED
+  WAITING_APPROVAL
+  APPROVED
+}
+
+enum PaymentStatus {
+  SUCCESS
+  REFUNDED
+  FAILED
+}
+
+enum SealStatus {
+  STOCK
+  ASSIGNED
+  IN_USE
+  RETURNED
+  FAULTY
 }

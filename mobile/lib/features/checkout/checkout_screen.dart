@@ -1,0 +1,344 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+
+import '../../core/api/api_client.dart';
+import '../../shared/models/shop.dart';
+import '../search/shop_detail_screen.dart';
+
+class CheckoutScreen extends ConsumerStatefulWidget {
+  const CheckoutScreen({super.key, required this.shopId});
+  final String shopId;
+  @override
+  ConsumerState<CheckoutScreen> createState() => _CheckoutScreenState();
+}
+
+class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
+  DateTime _checkIn = DateTime.now().add(const Duration(hours: 1));
+  DateTime _checkOut = DateTime.now().add(const Duration(hours: 4));
+  int _s = 0;
+  int _m = 1;
+  int _xl = 0;
+  bool _busy = false;
+
+  int get _total => _s + _m + _xl;
+
+  Future<void> _pickDate(bool isCheckIn) async {
+    final init = isCheckIn ? _checkIn : _checkOut;
+    final d = await showDatePicker(
+      context: context,
+      initialDate: init,
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 90)),
+    );
+    if (d == null) return;
+    final t = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(init));
+    if (t == null) return;
+    setState(() {
+      final dt = DateTime(d.year, d.month, d.day, t.hour, t.minute);
+      if (isCheckIn) {
+        _checkIn = dt;
+      } else {
+        _checkOut = dt;
+      }
+    });
+  }
+
+  Future<void> _pay() async {
+    if (_total == 0) return;
+    setState(() => _busy = true);
+    try {
+      final dio = ref.read(dioProvider);
+      final res = await dio.post('/checkout/intent', data: {
+        'shopId': widget.shopId,
+        'checkInTime': _checkIn.toUtc().toIso8601String(),
+        'checkOutTime': _checkOut.toUtc().toIso8601String(),
+        'bagCountS': _s,
+        'bagCountM': _m,
+        'bagCountXl': _xl,
+      });
+      final clientSecret = res.data['clientSecret'] as String;
+      final bookingId = res.data['bookingId'] as String;
+
+      await Stripe.instance.initPaymentSheet(
+        paymentSheetParameters: SetupPaymentSheetParameters(
+          paymentIntentClientSecret: clientSecret,
+          merchantDisplayName: 'BagajPark',
+          style: ThemeMode.system,
+        ),
+      );
+      await Stripe.instance.presentPaymentSheet();
+      if (!mounted) return;
+      context.go('/booking/$bookingId');
+    } on StripeException catch (e) {
+      if (e.error.code != FailureCode.Canceled) {
+        if (mounted) _toast('Ödeme hatası: ${e.error.localizedMessage}');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      String msg = 'Bir hata oluştu';
+      if (e is DioException) {
+        final errCode = e.response?.data['error'];
+        if (errCode == 'no_bags') msg = 'Lütfen en az bir valiz seçin.';
+        if (errCode == 'shop_not_found') msg = 'Dükkan bulunamadı veya kapalı.';
+        if (errCode == 'gateway_not_configured') msg = 'Bu dükkan şu an ödeme alamıyor.';
+      }
+      _toast(msg);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  void _toast(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        backgroundColor: Colors.redAccent,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final shopAsync = ref.watch(shopProvider(widget.shopId));
+    final fmt = DateFormat('dd MMM, HH:mm');
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Rezervasyon Tamamla', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Date Picker Card
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 20,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  _dateRow('Giriş', _checkIn, () => _pickDate(true), Icons.login_rounded, Colors.green),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: Divider(height: 1),
+                  ),
+                  _dateRow('Çıkış', _checkOut, () => _pickDate(false), Icons.logout_rounded, Colors.redAccent),
+                ],
+              ),
+            ),
+            
+            const SizedBox(height: 32),
+            Text(
+              'VALİZLERİNİZİ SEÇİN',
+              style: GoogleFonts.outfit(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade500,
+                letterSpacing: 1.2,
+              ),
+            ),
+            const SizedBox(height: 16),
+            
+            _bagCounter('Küçük (S)', 'Sırt çantası veya kabin boy', _s, (v) => setState(() => _s = v), Icons.backpack_outlined),
+            _bagCounter('Orta (M)', 'Standart boy valiz', _m, (v) => setState(() => _m = v), Icons.luggage_outlined),
+            _bagCounter('Büyük (XL)', 'Büyük boy veya spor ekipmanı', _xl, (v) => setState(() => _xl = v), Icons.work_outline_rounded),
+            
+            const SizedBox(height: 40),
+            
+            // Payment Summary
+            shopAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => const Text('Fiyat hesaplanamadı'),
+              data: (shop) {
+                final days = _checkOut.difference(_checkIn).inDays + 1;
+                final bagTotal = (_s * 0.8 + _m * 1.0 + _xl * 1.5) * shop.pricePerDay * days;
+                const insuranceFee = 15.0;
+                final grandTotal = bagTotal > 0 ? bagTotal + insuranceFee : 0.0;
+
+                return Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0F172A),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Column(
+                    children: [
+                      _summaryRow('Valiz Ücreti ($days Gün)', '₺${bagTotal.toStringAsFixed(2)}'),
+                      const SizedBox(height: 12),
+                      _summaryRow('Sigorta & Güvence Bedeli', '₺${insuranceFee.toStringAsFixed(2)}'),
+                      const SizedBox(height: 12),
+                      _summaryRow('Hizmet Bedeli', 'Dahil', valueColor: Colors.greenAccent),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Divider(color: Colors.white24, height: 1),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('TOPLAM', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                          Text('₺${grandTotal.toStringAsFixed(2)}', style: GoogleFonts.outfit(color: const Color(0xFFF97316), fontWeight: FontWeight.bold, fontSize: 24)),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      FilledButton(
+                        onPressed: _busy || _total == 0 ? null : _pay,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xFFF97316),
+                          minimumSize: const Size(double.infinity, 60),
+                        ),
+                        child: _busy 
+                          ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) 
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.security_rounded, size: 20),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'Ödemeyi Yap',
+                                  style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.lock_outline_rounded, size: 14, color: Colors.grey.shade500),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Güvenli 256-bit SSL Ödeme',
+                            style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey.shade500),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 40),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _dateRow(String label, DateTime dt, VoidCallback onTap, IconData icon, Color iconColor) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: iconColor, size: 22),
+            ),
+            const SizedBox(width: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey.shade500)),
+                Text(
+                  DateFormat('dd MMMM, HH:mm').format(dt),
+                  style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A)),
+                ),
+              ],
+            ),
+            const Spacer(),
+            Icon(Icons.calendar_month_rounded, size: 20, color: Colors.grey.shade300),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _bagCounter(String label, String subtitle, int value, ValueChanged<int> onChanged, IconData icon) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: value > 0 ? const Color(0xFFF97316).withOpacity(0.3) : Colors.grey.shade100),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: value > 0 ? const Color(0xFFF97316) : Colors.grey.shade400, size: 28),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: const Color(0xFF0F172A))),
+                Text(subtitle, style: GoogleFonts.outfit(fontSize: 11, color: Colors.grey.shade500)),
+              ],
+            ),
+          ),
+          Row(
+            children: [
+              _counterBtn(Icons.remove, () => onChanged((value - 1).clamp(0, 20))),
+              SizedBox(
+                width: 40,
+                child: Text(
+                  '$value',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+              _counterBtn(Icons.add, () => onChanged((value + 1).clamp(0, 20))),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _counterBtn(IconData icon, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, size: 18, color: const Color(0xFF0F172A)),
+      ),
+    );
+  }
+
+  Widget _summaryRow(String label, String value, {Color? valueColor}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: GoogleFonts.outfit(color: Colors.grey.shade400, fontSize: 14)),
+        Text(value, style: GoogleFonts.outfit(color: valueColor ?? Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+      ],
+    );
+  }
+}
