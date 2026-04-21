@@ -1,0 +1,24 @@
+{
+  "nav": {
+    "search": "Ara",
+    "bookings": "Rezervasyonlarım",
+    "partner": "İşletme",
+    "profile": "Profil"
+  },
+  "auth": {
+    "login": "Giriş Yap",
+    "welcome": "Hoş Geldiniz",
+    "email": "E-posta Adresi",
+    "send_code": "Kod Gönder",
+    "verify": "Doğrula",
+    "otp_sent": "Kod {} adresine gönderildi",
+    "code": "Doğrulama Kodu",
+    "resend": "Tekrar Gönder"
+  },
+  "common": {
+    "error": "Bir hata oluştu",
+    "loading": "Yükleniyor...",
+    "confirm": "Onayla",
+    "cancel": "İptal"
+  }
+}

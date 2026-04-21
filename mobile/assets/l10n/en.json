@@ -1,0 +1,24 @@
+{
+  "nav": {
+    "search": "Search",
+    "bookings": "My Bookings",
+    "partner": "Partner",
+    "profile": "Profile"
+  },
+  "auth": {
+    "login": "Login",
+    "welcome": "Welcome",
+    "email": "Email Address",
+    "send_code": "Send Code",
+    "verify": "Verify",
+    "otp_sent": "Code sent to {}",
+    "code": "Verification Code",
+    "resend": "Resend Code"
+  },
+  "common": {
+    "error": "An error occurred",
+    "loading": "Loading...",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  }
+}
