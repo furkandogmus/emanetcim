@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -12,23 +13,93 @@ class HomeShell extends ConsumerWidget {
   const HomeShell({super.key, required this.child});
   final Widget child;
 
-  int _indexFor(String loc, bool isPartner) {
-    if (loc.startsWith('/bookings')) return 1;
-    if (loc.startsWith('/partner')) return 2;
-    if (loc.startsWith('/profile')) return isPartner ? 3 : 2;
-    return 0;
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final role = ref.watch(authControllerProvider).session?.role;
-    final isPartner = role == UserRole.PARTNER;
+    final role = ref.watch(authControllerProvider).session?.role ?? UserRole.GUEST;
     final loc = GoRouterState.of(context).matchedLocation;
-    final idx = _indexFor(loc, isPartner);
-    final theme = Theme.of(context);
+
+    List<_TabItem> tabs = [];
+
+    if (role == UserRole.ADMIN) {
+      tabs = [
+        _TabItem(
+          icon: Icons.dashboard_outlined,
+          activeIcon: Icons.dashboard_rounded,
+          label: 'admin.dashboard'.tr(),
+          path: '/admin',
+        ),
+        _TabItem(
+          icon: Icons.notifications_none_rounded,
+          activeIcon: Icons.notifications_rounded,
+          label: 'notifications.title'.tr(),
+          path: '/notifications',
+        ),
+        _TabItem(
+          icon: Icons.person_outline_rounded,
+          activeIcon: Icons.person_rounded,
+          label: 'nav.profile'.tr(),
+          path: '/profile',
+        ),
+      ];
+    } else if (role == UserRole.PARTNER) {
+      tabs = [
+        _TabItem(
+          icon: Icons.luggage_outlined,
+          activeIcon: Icons.luggage,
+          label: 'nav.bookings'.tr(),
+          path: '/partner',
+        ),
+        _TabItem(
+          icon: Icons.qr_code_scanner_rounded,
+          activeIcon: Icons.qr_code_scanner_rounded,
+          label: 'nav.scan'.tr(),
+          path: '/partner/scan',
+          isFab: true,
+        ),
+        _TabItem(
+          icon: Icons.notifications_none_rounded,
+          activeIcon: Icons.notifications_rounded,
+          label: 'notifications.title'.tr(),
+          path: '/notifications',
+        ),
+        _TabItem(
+          icon: Icons.person_outline_rounded,
+          activeIcon: Icons.person_rounded,
+          label: 'nav.profile'.tr(),
+          path: '/profile',
+        ),
+      ];
+    } else {
+      tabs = [
+        _TabItem(
+          icon: Icons.explore_outlined,
+          activeIcon: Icons.explore,
+          label: 'nav.search'.tr(),
+          path: '/',
+        ),
+        _TabItem(
+          icon: Icons.luggage_outlined,
+          activeIcon: Icons.luggage,
+          label: 'nav.bookings'.tr(),
+          path: '/bookings',
+        ),
+        _TabItem(
+          icon: Icons.notifications_none_rounded,
+          activeIcon: Icons.notifications_rounded,
+          label: 'notifications.title'.tr(),
+          path: '/notifications',
+        ),
+        _TabItem(
+          icon: Icons.person_outline_rounded,
+          activeIcon: Icons.person_rounded,
+          label: 'nav.profile'.tr(),
+          path: '/profile',
+        ),
+      ];
+    }
 
     return Scaffold(
-      extendBody: true, // Floating nav bar için önemli
+      extendBody: true,
       body: child,
       bottomNavigationBar: Container(
         margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
@@ -37,11 +108,7 @@ class HomeShell extends ConsumerWidget {
           color: Colors.white.withOpacity(0.9),
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 30,
-              offset: const Offset(0, 10),
-            ),
+            BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 30, offset: const Offset(0, 10)),
           ],
         ),
         child: ClipRRect(
@@ -50,46 +117,18 @@ class HomeShell extends ConsumerWidget {
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                if (!isPartner) ...[
-                  _NavItem(
-                    icon: Icons.explore_outlined,
-                    activeIcon: Icons.explore,
-                    label: 'nav.search'.tr(),
-                    isSelected: idx == 0,
-                    onTap: () => context.go('/'),
-                  ),
-                  _NavItem(
-                    icon: Icons.luggage_outlined,
-                    activeIcon: Icons.luggage,
-                    label: 'nav.bookings'.tr(),
-                    isSelected: idx == 1,
-                    onTap: () => context.go('/bookings'),
-                  ),
-                ] else ...[
-                  _NavItem(
-                    icon: Icons.dashboard_outlined,
-                    activeIcon: Icons.dashboard_rounded,
-                    label: 'nav.partner'.tr(),
-                    isSelected: idx == 2,
-                    onTap: () => context.go('/partner'),
-                  ),
-                  _NavItem(
-                    icon: Icons.qr_code_scanner_rounded,
-                    activeIcon: Icons.qr_code_scanner_rounded,
-                    label: 'nav.scan'.tr(),
-                    isSelected: false,
-                    onTap: () => context.push('/partner/scan'),
-                  ),
-                ],
-                _NavItem(
-                  icon: Icons.person_outline_rounded,
-                  activeIcon: Icons.person_rounded,
-                  label: 'nav.profile'.tr(),
-                  isSelected: isPartner ? idx == 3 : idx == 2,
-                  onTap: () => context.go('/profile'),
-                ),
-              ],
+              children: tabs.map((t) => _NavItem(
+                item: t,
+                isSelected: loc == t.path,
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  if (t.isFab) {
+                    context.push(t.path);
+                  } else {
+                    context.go(t.path);
+                  }
+                },
+              )).toList(),
             ),
           ),
         ),
@@ -98,41 +137,52 @@ class HomeShell extends ConsumerWidget {
   }
 }
 
-class _NavItem extends StatelessWidget {
-  const _NavItem({
+class _TabItem {
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+  final String path;
+  final bool isFab;
+
+  _TabItem({
     required this.icon,
     required this.activeIcon,
     required this.label,
+    required this.path,
+    this.isFab = false,
+  });
+}
+
+class _NavItem extends StatelessWidget {
+  const _NavItem({
+    required this.item,
     required this.isSelected,
     required this.onTap,
   });
 
-  final IconData icon;
-  final IconData activeIcon;
-  final String label;
+  final _TabItem item;
   final bool isSelected;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              isSelected ? activeIcon : icon,
+              isSelected ? item.activeIcon : item.icon,
               color: isSelected ? const Color(0xFFF97316) : Colors.grey.shade400,
               size: 26,
             ),
             const SizedBox(height: 4),
             Text(
-              label,
+              item.label,
               style: GoogleFonts.outfit(
                 fontSize: 10,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,

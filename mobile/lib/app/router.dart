@@ -9,6 +9,8 @@ import '../features/booking/booking_detail_screen.dart';
 import '../features/booking/my_bookings_screen.dart';
 import '../features/checkout/checkout_screen.dart';
 import '../features/home/home_shell.dart';
+import '../features/admin/admin_dashboard_screen.dart';
+import '../features/notifications/notifications_screen.dart';
 import '../features/partner/partner_bookings_screen.dart';
 import '../features/partner/partner_booking_detail_screen.dart';
 import '../features/partner/partner_scan_screen.dart';
@@ -26,16 +28,23 @@ final routerProvider = Provider<GoRouter>((ref) {
       final loggedIn = auth.session != null;
       final loggingIn = state.matchedLocation.startsWith('/auth');
       final isPartnerRoute = state.matchedLocation.startsWith('/partner');
-      final isPartner = auth.session?.role == UserRole.PARTNER;
+      final isAdminRoute = state.matchedLocation.startsWith('/admin');
+      final role = auth.session?.role;
 
       if (!loggedIn && !loggingIn) return '/auth/login';
       
       if (loggedIn) {
-        if (loggingIn) return isPartner ? '/partner' : '/';
+        if (loggingIn) {
+          if (role == UserRole.ADMIN) return '/admin';
+          if (role == UserRole.PARTNER) return '/partner';
+          return '/';
+        }
         
         // Security: Prevent cross-role access
-        if (isPartner && !isPartnerRoute && state.matchedLocation == '/') return '/partner';
-        if (!isPartner && isPartnerRoute) return '/';
+        if (role == UserRole.ADMIN && !isAdminRoute && state.matchedLocation == '/') return '/admin';
+        if (role == UserRole.PARTNER && !isPartnerRoute && state.matchedLocation == '/') return '/partner';
+        if (role == UserRole.GUEST && (isPartnerRoute || isAdminRoute)) return '/';
+        if (role == UserRole.PARTNER && isAdminRoute) return '/partner';
       }
       return null;
     },
@@ -49,8 +58,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(path: '/', builder: (_, __) => const SearchScreen()),
           GoRoute(path: '/bookings', builder: (_, __) => const MyBookingsScreen()),
+          GoRoute(path: '/notifications', builder: (_, __) => const NotificationsScreen()),
           GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
           GoRoute(path: '/partner', builder: (_, __) => const PartnerBookingsScreen()),
+          GoRoute(path: '/admin', builder: (_, __) => const AdminDashboardScreen()),
         ],
       ),
 
