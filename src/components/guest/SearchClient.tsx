@@ -84,6 +84,12 @@ export default function SearchClient({
   }, [defaultCheckInIso, defaultCheckOutIso]);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(max-width: 767px)");
+    if (mq.matches) setPanelOpen(false);
+  }, []);
+
+  useEffect(() => {
     setSearchQuery(initialSearchQuery);
   }, [initialSearchQuery]);
 
