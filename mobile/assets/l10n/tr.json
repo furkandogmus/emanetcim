@@ -115,7 +115,9 @@
     "success_checkout": "Valizler misafire başarıyla teslim edildi!",
     "active_bags": "Aktif Valiz",
     "total_earnings": "Toplam Kazanç",
-    "bookings_title": "Rezervasyonlar"
+    "bookings_title": "Rezervasyonlar",
+    "seal_info": "Mühür Bilgisi",
+    "scan_hint": "Misafirin QR kodunu veya mühür barkodunu bu alana hizalayın"
   },
   "profile": {
     "title": "Hesabım",
