@@ -6,7 +6,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/api/api_client.dart';
+import '../../core/sync/sync_service.dart';
 import '../../shared/models/booking.dart';
+import 'package:dio/dio.dart';
 import '../booking/booking_detail_screen.dart';
 
 class PartnerBookingDetailScreen extends ConsumerStatefulWidget {
@@ -60,7 +62,22 @@ class _PartnerBookingDetailScreenState extends ConsumerState<PartnerBookingDetai
         ref.invalidate(bookingProvider(b.id));
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('common.error'.tr() + ': $e')));
+      if (e is DioException && (e.type == DioExceptionType.connectionError || e.type == DioExceptionType.connectionTimeout)) {
+        // Offline mode fallback
+        final syncService = ref.read(syncServiceProvider);
+        await syncService.addAction(SyncActionType.checkIn, b.id, {'sealAssignments': assignments});
+        if (mounted) {
+          HapticFeedback.mediumImpact();
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('partner.offline_saved'.tr()),
+            backgroundColor: Colors.orange,
+          ));
+          // Mock local update or just pop
+          Navigator.pop(context);
+        }
+      } else {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('common.error'.tr() + ': $e')));
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -78,7 +95,21 @@ class _PartnerBookingDetailScreenState extends ConsumerState<PartnerBookingDetai
         ref.invalidate(bookingProvider(b.id));
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('common.error'.tr() + ': $e')));
+      if (e is DioException && (e.type == DioExceptionType.connectionError || e.type == DioExceptionType.connectionTimeout)) {
+        // Offline mode fallback
+        final syncService = ref.read(syncServiceProvider);
+        await syncService.addAction(SyncActionType.checkOut, b.id);
+        if (mounted) {
+          HapticFeedback.mediumImpact();
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('partner.offline_saved'.tr()),
+            backgroundColor: Colors.orange,
+          ));
+          Navigator.pop(context);
+        }
+      } else {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('common.error'.tr() + ': $e')));
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }

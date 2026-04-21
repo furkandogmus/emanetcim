@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:screen_protector/screen_protector.dart';
 import '../../core/auth/auth_controller.dart';
 
 class OtpScreen extends ConsumerStatefulWidget {
@@ -23,6 +24,18 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   void initState() {
     super.initState();
     _startTimer();
+    _protectScreen();
+  }
+
+  Future<void> _protectScreen() async {
+    await ScreenProtector.preventScreenshotOn();
+    await ScreenProtector.backgroundColorOn(Colors.black);
+  }
+
+  @override
+  void dispose() {
+    ScreenProtector.preventScreenshotOff();
+    super.dispose();
   }
 
   void _startTimer() {

@@ -6,16 +6,16 @@ import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
+import '../../core/auth/auth_controller.dart';
 import '../../shared/models/booking.dart';
 
 final partnerBookingsProvider = FutureProvider<List<BookingDto>>((ref) async {
   try {
     final dio = ref.watch(dioProvider);
-    final res = await dio.get('/partner/bookings'); // Real endpoint
+    final res = await dio.get('/partner/bookings'); 
     final list = res.data as List<dynamic>;
     return list.map((e) => BookingDto.fromJson(e as Map<String, dynamic>)).toList();
   } catch (e) {
-    // Demo fallback for preview if API fails
     return [
       BookingDto(
         id: 'b-1',
@@ -34,11 +34,58 @@ final partnerBookingsProvider = FutureProvider<List<BookingDto>>((ref) async {
   }
 });
 
-class PartnerBookingsScreen extends ConsumerWidget {
+class PartnerBookingsScreen extends ConsumerStatefulWidget {
   const PartnerBookingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PartnerBookingsScreen> createState() => _PartnerBookingsScreenState();
+}
+
+class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
+  
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkDemoMode();
+    });
+  }
+
+  void _checkDemoMode() {
+    final isDemo = ref.read(authControllerProvider).isDemo;
+    if (isDemo) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          title: Row(
+            children: [
+              const Icon(Icons.science_rounded, color: Color(0xFFF97316)),
+              const SizedBox(width: 12),
+              Text('partner.demo_welcome_title'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+            ],
+          ),
+          content: Text(
+            'partner.demo_welcome_msg'.tr(),
+            style: GoogleFonts.outfit(),
+          ),
+          actions: [
+            FilledButton(
+              onPressed: () => Navigator.pop(context),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFFF97316),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: Text('common.confirm'.tr()),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final bookingsAsync = ref.watch(partnerBookingsProvider);
     final fmt = DateFormat('HH:mm');
 
@@ -129,7 +176,7 @@ class PartnerBookingsScreen extends ConsumerWidget {
             loading: () => const SliverFillRemaining(child: Center(child: CircularProgressIndicator())),
             error: (e, _) => SliverFillRemaining(child: Center(child: Text('common.error'.tr()))),
             data: (list) => list.isEmpty 
-              ? SliverFillRemaining(child: Center(child: Text('common.error'.tr()))) // Should be "No bookings yet"
+              ? SliverFillRemaining(child: Center(child: Text('partner.no_bookings'.tr())))
               : SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   sliver: SliverList(

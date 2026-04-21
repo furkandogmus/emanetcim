@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:screen_protector/screen_protector.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/api/api_client.dart';
@@ -19,14 +20,35 @@ final bookingProvider = FutureProvider.family<BookingDto, String>((ref, id) asyn
   }
 });
 
-class BookingDetailScreen extends ConsumerWidget {
+class BookingDetailScreen extends ConsumerStatefulWidget {
   const BookingDetailScreen({super.key, required this.bookingId});
   final String bookingId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final bookingAsync = ref.watch(bookingProvider(bookingId));
-    final theme = Theme.of(context);
+  ConsumerState<BookingDetailScreen> createState() => _BookingDetailScreenState();
+}
+
+class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _protectScreen();
+  }
+
+  Future<void> _protectScreen() async {
+    await ScreenProtector.preventScreenshotOn();
+    await ScreenProtector.backgroundColorOn(Colors.black);
+  }
+
+  @override
+  void dispose() {
+    ScreenProtector.preventScreenshotOff();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bookingAsync = ref.watch(bookingProvider(widget.bookingId));
     final fmt = DateFormat('dd MMMM yyyy, HH:mm');
 
     return Scaffold(
@@ -42,7 +64,7 @@ class BookingDetailScreen extends ConsumerWidget {
               const Icon(Icons.error_outline_rounded, size: 64, color: Colors.redAccent),
               const SizedBox(height: 16),
               Text('common.error'.tr()),
-              TextButton(onPressed: () => ref.refresh(bookingProvider(bookingId)), child: Text('common.retry'.tr())),
+              TextButton(onPressed: () => ref.refresh(bookingProvider(widget.bookingId)), child: Text('common.retry'.tr())),
             ],
           ),
         ),

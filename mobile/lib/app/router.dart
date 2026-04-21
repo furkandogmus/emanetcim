@@ -25,9 +25,17 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final loggedIn = auth.session != null;
       final loggingIn = state.matchedLocation.startsWith('/auth');
+      final isPartnerRoute = state.matchedLocation.startsWith('/partner');
+      final isPartner = auth.session?.role == UserRole.PARTNER;
+
       if (!loggedIn && !loggingIn) return '/auth/login';
-      if (loggedIn && loggingIn) {
-        return auth.session?.role == UserRole.PARTNER ? '/partner' : '/';
+      
+      if (loggedIn) {
+        if (loggingIn) return isPartner ? '/partner' : '/';
+        
+        // Security: Prevent cross-role access
+        if (isPartner && !isPartnerRoute && state.matchedLocation == '/') return '/partner';
+        if (!isPartner && isPartnerRoute) return '/';
       }
       return null;
     },

@@ -10,11 +10,13 @@ import 'token_store.dart';
 class AuthState {
   final UserDto? session;
   final bool loading;
-  const AuthState({this.session, this.loading = false});
+  final bool isDemo;
+  const AuthState({this.session, this.loading = false, this.isDemo = false});
 
-  AuthState copyWith({UserDto? session, bool? loading, bool clearSession = false}) => AuthState(
+  AuthState copyWith({UserDto? session, bool? loading, bool? isDemo, bool clearSession = false}) => AuthState(
         session: clearSession ? null : (session ?? this.session),
         loading: loading ?? this.loading,
+        isDemo: isDemo ?? this.isDemo,
       );
 }
 
@@ -81,6 +83,7 @@ class AuthController extends Notifier<AuthState> {
 
   Future<void> skipLogin() async {
     state = state.copyWith(
+      isDemo: true,
       session: const UserDto(
         id: 'demo-user',
         email: 'demo@bagajpark.com',
@@ -92,6 +95,7 @@ class AuthController extends Notifier<AuthState> {
 
   Future<void> skipLoginAsPartner() async {
     state = state.copyWith(
+      isDemo: true,
       session: const UserDto(
         id: 'demo-partner',
         email: 'esnaf@bagajpark.com',

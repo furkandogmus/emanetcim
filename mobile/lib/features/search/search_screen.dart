@@ -26,7 +26,6 @@ final nearbyShopsProvider = FutureProvider.family<List<ShopDto>, LatLng>((ref, c
     var shops = list.map((e) => ShopDto.fromJson(e as Map<String, dynamic>)).toList();
     
     if (shops.isEmpty) {
-      // Demo fallback logic remains but labels should be generic or localized if needed
       shops = [
         ShopDto(
           id: 'demo-1',
@@ -86,7 +85,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               const SizedBox(height: 16),
               SwitchListTile(
                 title: Text('search.open_now'.tr(), style: GoogleFonts.outfit()),
-                subtitle: Text('Sadece şu an hizmet veren dükkanlar', style: GoogleFonts.outfit(fontSize: 12)),
+                subtitle: Text('search.open_now_hint'.tr(), style: GoogleFonts.outfit(fontSize: 12)),
                 value: _onlyOpenNow,
                 onChanged: (v) {
                   setState(() => _onlyOpenNow = v);
@@ -96,7 +95,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ),
               SwitchListTile(
                 title: Text('search.open_247'.tr(), style: GoogleFonts.outfit()),
-                subtitle: Text('Günün her saati ulaşılabilen noktalar', style: GoogleFonts.outfit(fontSize: 12)),
+                subtitle: Text('search.open_247_hint'.tr(), style: GoogleFonts.outfit(fontSize: 12)),
                 value: _only247,
                 onChanged: (v) {
                   setState(() => _only247 = v);
@@ -182,7 +181,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     if (!serviceEnabled) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Konum servisleri kapalı. Lütfen ayarlardan açın.')),
+          SnackBar(content: Text('search.location_service_disabled'.tr())),
         );
       }
       return;
@@ -241,13 +240,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final shopsAsync = ref.watch(nearbyShopsProvider(_center));
 
     return Scaffold(
       body: Stack(
         children: [
-          // Map Background
           FlutterMap(
             mapController: _mapController,
             options: MapOptions(
@@ -330,7 +327,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ],
           ),
 
-          // Top Search Bar
           Positioned(
             left: 16,
             right: 16,
@@ -413,7 +409,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ),
           ),
 
-          // Bottom Carousel
           Positioned(
             left: 0,
             right: 0,
@@ -435,10 +430,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       final shop = filtered[index];
                       final isSelected = _selectedShopIndex == index;
                       return GestureDetector(
-                        onTap: () {
-                          setState(() => _selectedShopIndex = index);
-                          _mapController.move(LatLng(shop.latitude!, shop.longitude!), 14);
-                        },
+                        onTap: () => context.push('/shop/${shop.id}'),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
                           width: MediaQuery.of(context).size.width * 0.85,
@@ -475,14 +467,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                       children: [
                                         const Icon(Icons.star_rounded, color: Colors.amber, size: 18),
                                         const SizedBox(width: 4),
-                                        Text('4.8 (120+)', style: GoogleFonts.outfit(fontSize: 14, color: Colors.grey.shade600, fontWeight: FontWeight.w500)),
+                                        Text('${shop.rating} (120+)', style: GoogleFonts.outfit(fontSize: 14, color: Colors.grey.shade600, fontWeight: FontWeight.w500)),
                                       ],
                                     ),
                                     const Spacer(),
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text('₺${shop.pricePerDay.toStringAsFixed(0)}/gün', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFFF97316))),
+                                        Text('₺${shop.pricePerDay.toStringAsFixed(0)}${'search.day_unit'.tr()}', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFFF97316))),
                                         Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey.shade400),
                                       ],
                                     ),
@@ -501,7 +493,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ),
           ),
 
-          // Location Button
           Positioned(
             right: 16,
             bottom: 180,
