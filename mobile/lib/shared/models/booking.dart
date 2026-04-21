@@ -30,6 +30,9 @@ abstract class BookingDto with _$BookingDto {
     required BookingStatus status,
     String? qrCodeToken,
     String? guestName,
+    double? latitude,
+    double? longitude,
+    String? shopPhone,
   }) = _BookingDto;
 
   factory BookingDto.fromJson(Map<String, dynamic> json) => _$BookingDtoFromJson(json);

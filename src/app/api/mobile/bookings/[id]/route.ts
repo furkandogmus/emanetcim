@@ -29,6 +29,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     status: b.status,
     qrCodeToken: b.qrCodeToken,
     guestName: b.guest.name,
+    latitude: b.shop.latitude,
+    longitude: b.shop.longitude,
+    shopPhone: b.shop.phone,
     seals: b.seals.map((s) => ({
       sealNumber: s.sealNumber,
       bagIndex: s.bagIndex,

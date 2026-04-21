@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,7 +36,7 @@ class _PartnerBookingDetailScreenState extends ConsumerState<PartnerBookingDetai
       if (val == null) {
         HapticFeedback.vibrate();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Lütfen tüm mühür numaralarını doğru bir şekilde girin.')),
+          SnackBar(content: Text('common.error'.tr())),
         );
         return;
       }
@@ -55,11 +56,11 @@ class _PartnerBookingDetailScreenState extends ConsumerState<PartnerBookingDetai
       });
       if (mounted) {
         HapticFeedback.heavyImpact();
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Valizler başarıyla teslim alındı!')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('partner.success_checkin'.tr())));
         ref.invalidate(bookingProvider(b.id));
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Hata: $e')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('common.error'.tr() + ': $e')));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -73,11 +74,11 @@ class _PartnerBookingDetailScreenState extends ConsumerState<PartnerBookingDetai
       await dio.post('/bookings/${b.id}/check-out');
       if (mounted) {
         HapticFeedback.heavyImpact();
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Valizler misafire başarıyla teslim edildi!')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('partner.success_checkout'.tr())));
         ref.invalidate(bookingProvider(b.id));
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Hata: $e')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('common.error'.tr() + ': $e')));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -99,12 +100,12 @@ class _PartnerBookingDetailScreenState extends ConsumerState<PartnerBookingDetai
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: Text('İşlem Detayı', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        title: Text('nav.partner'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: bAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Bir hata oluştu: $e')),
+        error: (e, _) => Center(child: Text('common.error'.tr())),
         data: (b) {
           _initControllers(b);
           final statusColor = _statusColor(b.status);
@@ -158,9 +159,9 @@ class _PartnerBookingDetailScreenState extends ConsumerState<PartnerBookingDetai
               // Times Section
               Row(
                 children: [
-                  _timeCard('Teslimat', fmt.format(b.checkInTime), Icons.login_rounded, Colors.blue),
+                  _timeCard('checkout.check_in'.tr(), fmt.format(b.checkInTime), Icons.login_rounded, Colors.blue),
                   const SizedBox(width: 12),
-                  _timeCard('Teslim Alım', fmt.format(b.checkOutTime), Icons.logout_rounded, Colors.teal),
+                  _timeCard('checkout.check_out'.tr(), fmt.format(b.checkOutTime), Icons.logout_rounded, Colors.teal),
                 ],
               ),
               
@@ -168,7 +169,7 @@ class _PartnerBookingDetailScreenState extends ConsumerState<PartnerBookingDetai
               
               // Bags Info
               Text(
-                'VALİZ DETAYLARI',
+                'checkout.bags_title'.tr(),
                 style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey.shade500, letterSpacing: 1.1),
               ),
               const SizedBox(height: 12),
@@ -193,7 +194,7 @@ class _PartnerBookingDetailScreenState extends ConsumerState<PartnerBookingDetai
               // Operational Area
               if (b.status == BookingStatus.PAID || b.status == BookingStatus.APPROVED) ...[
                 Text(
-                  'MÜHÜR ATAMALARI',
+                  'partner.check_in_button'.tr().toUpperCase(),
                   style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey.shade500, letterSpacing: 1.1),
                 ),
                 const SizedBox(height: 12),
@@ -204,8 +205,8 @@ class _PartnerBookingDetailScreenState extends ConsumerState<PartnerBookingDetai
                       controller: _sealControllers[i],
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                        labelText: '${i + 1}. Valiz Mühür Numarası',
-                        hintText: 'Örn: 12345',
+                        labelText: 'partner.seal_hint'.tr(args: [(i + 1).toString()]),
+                        hintText: 'partner.seal_placeholder'.tr(),
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
@@ -220,7 +221,7 @@ class _PartnerBookingDetailScreenState extends ConsumerState<PartnerBookingDetai
                   child: FilledButton.icon(
                     onPressed: _busy ? null : () => _checkIn(b),
                     icon: _busy ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Icon(Icons.check_circle_rounded),
-                    label: const Text('Valizleri Teslim Al (Check-in)'),
+                    label: Text('partner.check_in_button'.tr()),
                     style: FilledButton.styleFrom(
                       backgroundColor: const Color(0xFF10B981),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -236,7 +237,7 @@ class _PartnerBookingDetailScreenState extends ConsumerState<PartnerBookingDetai
                   child: FilledButton.icon(
                     onPressed: _busy ? null : () => _checkOut(b),
                     icon: _busy ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Icon(Icons.exit_to_app_rounded),
-                    label: const Text('Valizleri Teslim Et (Check-out)'),
+                    label: Text('partner.check_out_button'.tr()),
                     style: FilledButton.styleFrom(
                       backgroundColor: const Color(0xFF3B82F6),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -290,15 +291,17 @@ class _PartnerBookingDetailScreenState extends ConsumerState<PartnerBookingDetai
   }
 
   String _statusLabel(BookingStatus status) {
+    String key = 'waiting_approval';
     switch (status) {
-      case BookingStatus.PENDING: return 'ÖDEME BEKLİYOR';
-      case BookingStatus.PAID: return 'ÖDENDİ';
-      case BookingStatus.APPROVED: return 'ONAYLANDI';
-      case BookingStatus.CHECKED_IN: return 'EMANET ALINDI';
-      case BookingStatus.CHECKED_OUT: return 'TESLİM EDİLDİ';
-      case BookingStatus.CANCELLED: return 'İPTAL EDİLDİ';
-      case BookingStatus.WAITING_APPROVAL: return 'ONAY BEKLİYOR';
+      case BookingStatus.PENDING: key = 'pending'; break;
+      case BookingStatus.PAID: key = 'paid'; break;
+      case BookingStatus.APPROVED: key = 'approved'; break;
+      case BookingStatus.CHECKED_IN: key = 'checked_in'; break;
+      case BookingStatus.CHECKED_OUT: key = 'checked_out'; break;
+      case BookingStatus.CANCELLED: key = 'cancelled'; break;
+      case BookingStatus.WAITING_APPROVAL: key = 'waiting_approval'; break;
     }
+    return 'booking.status.$key'.tr();
   }
 
   Color _statusColor(BookingStatus status) {

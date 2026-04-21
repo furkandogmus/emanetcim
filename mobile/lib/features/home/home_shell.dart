@@ -70,14 +70,14 @@ class HomeShell extends ConsumerWidget {
                   _NavItem(
                     icon: Icons.dashboard_outlined,
                     activeIcon: Icons.dashboard_rounded,
-                    label: 'Dashboard',
+                    label: 'nav.partner'.tr(),
                     isSelected: idx == 2,
                     onTap: () => context.go('/partner'),
                   ),
                   _NavItem(
                     icon: Icons.qr_code_scanner_rounded,
                     activeIcon: Icons.qr_code_scanner_rounded,
-                    label: 'QR Tarat',
+                    label: 'nav.scan'.tr(),
                     isSelected: false,
                     onTap: () => context.push('/partner/scan'),
                   ),

@@ -70,31 +70,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  bool _kvkkAccepted = false;
-
-  void _showLegal(String title, String content) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        expand: false,
-        builder: (_, scroll) => Padding(
-          padding: const EdgeInsets.all(24),
-          child: ListView(
-            controller: scroll,
-            children: [
-              Text(title, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              Text(content, style: GoogleFonts.outfit(height: 1.6)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -155,7 +130,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Emanetiniz güvende, vaktiniz size kalsın.',
+                      'auth.register_hint'.tr(), // Reuse hint or add a generic tagline
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: Colors.grey.shade600,
                         letterSpacing: 0.2,
@@ -182,11 +157,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text('Hesabın yok mu?', style: GoogleFonts.outfit(color: Colors.grey.shade600)),
+                                Text('auth.no_account'.tr(), style: GoogleFonts.outfit(color: Colors.grey.shade600)),
                                 TextButton(
                                   onPressed: () => context.push('/auth/register'),
                                   child: Text(
-                                    'Kayıt Ol',
+                                    'auth.register'.tr(),
                                     style: GoogleFonts.outfit(
                                       color: const Color(0xFFF97316),
                                       fontWeight: FontWeight.bold,
@@ -206,11 +181,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 hintText: 'auth.email'.tr(),
                                 prefixIcon: const Icon(Icons.alternate_email_rounded),
                               ),
-                              validator: (v) => _isValidEmail(v ?? '') ? null : 'Geçerli bir e-posta giriniz',
+                              validator: (v) => _isValidEmail(v ?? '') ? null : 'auth.email_error'.tr(),
                             ),
                             const SizedBox(height: 24),
                             FilledButton(
-                              onPressed: _busy ? _requestOtp : _requestOtp,
+                              onPressed: _busy ? null : _requestOtp,
                               child: _busy
                                   ? const SizedBox(
                                       height: 20,
@@ -236,7 +211,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
-                            'veya'.tr(),
+                            'auth.or'.tr(),
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: Colors.grey.shade500,
                               fontWeight: FontWeight.w600,
@@ -257,7 +232,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         height: 24,
                         errorBuilder: (context, error, stackTrace) => const Icon(Icons.login),
                       ),
-                      label: const Text('Google ile devam et'),
+                      label: Text('auth.google'.tr()),
                     ),
                     
                     if (Platform.isIOS || Platform.isMacOS) ...[
@@ -265,7 +240,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       OutlinedButton.icon(
                       onPressed: _busy ? null : _apple,
                         icon: const Icon(Icons.apple, size: 28),
-                        label: const Text('Apple ile devam et'),
+                        label: Text('auth.apple'.tr()),
                         style: OutlinedButton.styleFrom(
                           backgroundColor: Colors.black,
                           foregroundColor: Colors.white,
@@ -277,7 +252,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     TextButton(
                       onPressed: () => ref.read(authControllerProvider.notifier).skipLogin(),
                       child: Text(
-                        'Misafir Demo Modu',
+                        'auth.demo_guest'.tr(),
                         style: GoogleFonts.outfit(
                           color: Colors.grey.shade600,
                           fontWeight: FontWeight.w600,
@@ -289,7 +264,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     TextButton(
                       onPressed: () => ref.read(authControllerProvider.notifier).skipLoginAsPartner(),
                       child: Text(
-                        'Esnaf Paneli Demosu',
+                        'auth.demo_partner'.tr(),
                         style: GoogleFonts.outfit(
                           color: const Color(0xFFF97316),
                           fontWeight: FontWeight.w600,
