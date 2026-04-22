@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 import { randomInt } from "crypto";
 
 // TODO: production — rate limit + email send via Resend + Redis store

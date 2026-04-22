@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 import { signAccessToken, signRefreshToken, verifyMobileToken } from "@/lib/mobile-auth";
 
 const schema = z.object({ refreshToken: z.string() });

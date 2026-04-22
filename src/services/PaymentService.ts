@@ -640,7 +640,7 @@ export class PaymentService implements IPaymentService {
     const stuck = await prisma.booking.findMany({
       where: {
         status: { in: ['PENDING', 'APPROVED'] },
-        paymentLogs: { some: { status: 'SUCCESS' } },
+        paymentLogs: { status: 'SUCCESS' },
       },
       include: { guest: true, shop: { include: { owner: true } } },
     });
