@@ -4,70 +4,75 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'admin_controller.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
   const AdminDashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final statsAsync = ref.watch(adminStatsProvider);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        title: Text(
-          'admin.dashboard'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+    return statsAsync.when(
+      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      error: (err, stack) => Scaffold(body: Center(child: Text('Hata: $err'))),
+      data: (stats) => Scaffold(
+        backgroundColor: const Color(0xFFF8FAFC),
+        appBar: AppBar(
+          title: Text(
+            'admin.dashboard'.tr(),
+            style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          ),
+          actions: [
+            IconButton(
+              onPressed: () => ref.refresh(adminStatsProvider),
+              icon: const Icon(Icons.refresh_rounded),
+            ),
+          ],
         ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.notifications_none_rounded),
-          ),
-        ],
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          // Stats Grid
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-            childAspectRatio: 1.3,
-            children: [
-              _statCard(
-                context,
-                'admin.total_bookings'.tr(),
-                '1,248',
-                Icons.work_rounded,
-                const Color(0xFF0F172A),
-              ),
-              _statCard(
-                context,
-                'admin.total_revenue'.tr(),
-                '₺42,500',
-                Icons.account_balance_wallet_rounded,
-                const Color(0xFFF97316),
-                isOrange: true,
-              ),
-              _statCard(
-                context,
-                'admin.active_partners'.tr(),
-                '84',
-                Icons.store_rounded,
-                const Color(0xFF3B82F6),
-              ),
-              _statCard(
-                context,
-                'admin.pending_apps'.tr(),
-                '12',
-                Icons.pending_actions_rounded,
-                const Color(0xFFEF4444),
-              ),
-            ],
-          ),
+        body: ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            // Stats Grid
+            GridView.count(
+              crossAxisCount: 2,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              childAspectRatio: 1.3,
+              children: [
+                _statCard(
+                  context,
+                  'admin.total_bookings'.tr(),
+                  stats['totalBookings'].toString(),
+                  Icons.work_rounded,
+                  const Color(0xFF0F172A),
+                ),
+                _statCard(
+                  context,
+                  'admin.total_revenue'.tr(),
+                  '₺${stats['totalRevenue']}',
+                  Icons.account_balance_wallet_rounded,
+                  const Color(0xFFF97316),
+                  isOrange: true,
+                ),
+                _statCard(
+                  context,
+                  'admin.active_partners'.tr(),
+                  stats['totalPartners'].toString(),
+                  Icons.store_rounded,
+                  const Color(0xFF3B82F6),
+                ),
+                _statCard(
+                  context,
+                  'admin.pending_apps'.tr(),
+                  stats['pendingApplications'].toString(),
+                  Icons.pending_actions_rounded,
+                  const Color(0xFFEF4444),
+                ),
+              ],
+            ),
 
           const SizedBox(height: 32),
 
