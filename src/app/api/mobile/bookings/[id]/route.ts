@@ -31,7 +31,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     guestName: b.guest.name,
     latitude: b.shop.latitude,
     longitude: b.shop.longitude,
-    shopPhone: b.shop.phone,
+    shopPhone: b.shop.owner.phone ?? "",
     seals: b.seals.map((s) => ({
       sealNumber: s.sealNumber,
       bagIndex: s.bagIndex,
