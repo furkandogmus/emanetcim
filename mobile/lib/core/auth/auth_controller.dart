@@ -46,17 +46,26 @@ class AuthController extends Notifier<AuthState> {
     }
   }
 
-  Future<void> requestOtp(String email) async {
+  Future<void> requestOtp(String identity) async {
     state = state.copyWith(loading: true);
     final dio = ref.read(dioProvider);
-    await dio.post('/auth/otp', data: {'email': email});
+    // Determine if identity is email or phone
+    final isEmail = identity.contains('@');
+    final data = isEmail ? {'email': identity} : {'phone': identity.replaceAll(RegExp(r'\D'), '')};
+    
+    await dio.post('/auth/otp', data: data);
     state = state.copyWith(loading: false);
   }
 
-  Future<void> verifyOtp(String email, String code) async {
+  Future<void> verifyOtp(String identity, String code) async {
     state = state.copyWith(loading: true);
     final dio = ref.read(dioProvider);
-    final res = await dio.post('/auth/session', data: {'email': email, 'code': code});
+    final isEmail = identity.contains('@');
+    final data = isEmail 
+      ? {'email': identity, 'code': code} 
+      : {'phone': identity.replaceAll(RegExp(r'\D'), ''), 'code': code};
+      
+    final res = await dio.post('/auth/session', data: data);
     await _completeSession(res.data as Map<String, dynamic>);
   }
 

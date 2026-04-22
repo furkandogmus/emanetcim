@@ -8,8 +8,8 @@ import 'package:screen_protector/screen_protector.dart';
 import '../../core/auth/auth_controller.dart';
 
 class OtpScreen extends ConsumerStatefulWidget {
-  const OtpScreen({super.key, required this.email});
-  final String email;
+  const OtpScreen({super.key, required this.identity});
+  final String identity;
   @override
   ConsumerState<OtpScreen> createState() => _OtpScreenState();
 }
@@ -56,7 +56,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   Future<void> _resend() async {
     setState(() => _busy = true);
     try {
-      await ref.read(authControllerProvider.notifier).requestOtp(widget.email);
+      await ref.read(authControllerProvider.notifier).requestOtp(widget.identity);
       _startTimer();
     } catch (e) {
       if (mounted) {
@@ -77,7 +77,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     if (_code.text.length < 6) return;
     setState(() => _busy = true);
     try {
-      await ref.read(authControllerProvider.notifier).verifyOtp(widget.email, _code.text.trim());
+      await ref.read(authControllerProvider.notifier).verifyOtp(widget.identity, _code.text.trim());
       if (!mounted) return;
       context.go('/');
     } catch (e) {
@@ -98,6 +98,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isEmail = widget.identity.contains('@');
 
     return Scaffold(
       appBar: AppBar(
@@ -125,10 +126,10 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Icon(
-                  Icons.mark_email_read_outlined,
+                Icon(
+                  isEmail ? Icons.mark_email_read_outlined : Icons.phonelink_ring_rounded,
                   size: 64,
-                  color: Color(0xFFF97316),
+                  color: const Color(0xFFF97316),
                 ),
                 const SizedBox(height: 32),
                 Text(
@@ -138,7 +139,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'auth.otp_sent'.tr(args: [widget.email]),
+                  'auth.otp_sent'.tr(args: [widget.identity]),
                   style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
                   textAlign: TextAlign.center,
                 ),

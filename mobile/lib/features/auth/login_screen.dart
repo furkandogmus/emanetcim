@@ -14,7 +14,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final _email = TextEditingController();
+  final _identity = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _busy = false;
 
@@ -22,13 +22,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
+  bool _isValidPhone(String phone) {
+    // Basic Turkish phone validation: 05xx xxx xx xx or 5xx xxx xx xx
+    final clean = phone.replaceAll(RegExp(r'\D'), '');
+    return (clean.length == 10 && clean.startsWith('5')) || 
+           (clean.length == 11 && clean.startsWith('05'));
+  }
+
+  bool _isValid(String v) {
+    return _isValidEmail(v) || _isValidPhone(v);
+  }
+
   Future<void> _requestOtp() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _busy = true);
     try {
-      await ref.read(authControllerProvider.notifier).requestOtp(_email.text.trim());
+      final input = _identity.text.trim();
+      await ref.read(authControllerProvider.notifier).requestOtp(input);
       if (!mounted) return;
-      context.push('/auth/otp?email=${Uri.encodeComponent(_email.text.trim())}');
+      context.push('/auth/otp?email=${Uri.encodeComponent(input)}');
     } catch (e) {
       _toast('$e');
     } finally {
@@ -130,7 +142,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'auth.register_hint'.tr(), // Reuse hint or add a generic tagline
+                      'auth.register_hint'.tr(),
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: Colors.grey.shade600,
                         letterSpacing: 0.2,
@@ -174,14 +186,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             const Divider(),
                             const SizedBox(height: 24),
                             TextFormField(
-                              controller: _email,
+                              controller: _identity,
                               keyboardType: TextInputType.emailAddress,
                               style: GoogleFonts.outfit(),
                               decoration: InputDecoration(
-                                hintText: 'auth.email'.tr(),
-                                prefixIcon: const Icon(Icons.alternate_email_rounded),
+                                hintText: 'auth.email_or_phone'.tr(),
+                                prefixIcon: const Icon(Icons.person_outline_rounded),
+                                helperText: 'Örn: 05xx xxx xx xx veya e-posta',
+                                helperStyle: const TextStyle(fontSize: 10),
                               ),
-                              validator: (v) => _isValidEmail(v ?? '') ? null : 'auth.email_error'.tr(),
+                              validator: (v) => _isValid(v ?? '') ? null : 'auth.invalid_identity'.tr(),
                             ),
                             const SizedBox(height: 24),
                             FilledButton(
