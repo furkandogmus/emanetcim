@@ -106,7 +106,7 @@ class AdminDashboardScreen extends ConsumerWidget {
             'admin.approve_shops'.tr(),
             '12 yeni dükkan başvurusu',
             const Color(0xFFF97316),
-            onTap: () {},
+            onTap: () => context.push('/admin/applications'),
           ),
           _actionTile(
             Icons.health_and_safety_rounded,
