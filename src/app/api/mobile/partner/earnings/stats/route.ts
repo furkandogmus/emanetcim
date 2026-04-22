@@ -38,14 +38,23 @@ export async function GET() {
     .filter((b) => b.createdAt >= today)
     .reduce((sum, b) => sum + Number(b.totalPrice), 0);
 
-  // For now, pending is just a placeholder or could be logic for split status
+  // Fetch history (last 10)
+  const history = allPaidBookings
+    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+    .slice(0, 10)
+    .map(b => ({
+      date: b.createdAt.toISOString().slice(5, 10).replace('-', ' '), // e.g. "04 22"
+      amount: Number(b.totalPrice),
+      status: 'PAID'
+    }));
+
   const pendingEarnings = 0; 
 
   return NextResponse.json({
     totalBalance: totalEarnings,
     todayEarnings,
     pendingPayout: pendingEarnings,
-    history: [], // For now empty to avoid crashes if UI expects list
+    history,
     currency: "TRY",
   });
 }
