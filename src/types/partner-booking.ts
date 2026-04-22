@@ -1,3 +1,5 @@
+import { Prisma } from "@prisma/client";
+
 export type PartnerCheckInErrorCode =
   | "NOT_FOUND"
   | "INVALID_STATUS"
@@ -21,7 +23,7 @@ export type PartnerCheckInResult =
   | { ok: false; code: PartnerCheckInErrorCode; message: string };
 
 export type PartnerCheckOutResult =
-  | { ok: true }
+  | { ok: true; refundPending?: boolean; refundAmount?: number }
   | { ok: false; code: PartnerCheckOutErrorCode; message: string };
 
 export type CancelBookingErrorCode =
@@ -29,6 +31,14 @@ export type CancelBookingErrorCode =
   | "INVALID_STATUS"
   | "REFUND_FAILED"
   | "UNKNOWN";
+
+export type BookingWithShopGuestDetails = Prisma.BookingGetPayload<{
+  include: {
+    shop: { include: { owner: true } };
+    guest: true;
+    seals: { orderBy: { bagIndex: "asc" } };
+  };
+}>;
 
 export type CancelBookingResult =
   | { ok: true; creditCode?: string }

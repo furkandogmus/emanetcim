@@ -28,15 +28,8 @@ export type BookingWithGuestShop = Prisma.BookingGetPayload<{
   include: { guest: true; shop: true };
 }>;
 
-export type BookingWithShopGuestDetails = Prisma.BookingGetPayload<{
-  include: {
-    shop: true;
-    guest: true;
-    seals: { orderBy: { bagIndex: "asc" } };
-  };
-}>;
 
-export type GuestBookingListItem = Prisma.BookingGetPayload<{
+ export type GuestBookingListItem = Prisma.BookingGetPayload<{
   include: { shop: true; dispute: true };
 }>;
 
@@ -51,11 +44,12 @@ import { totalBagCount } from '@/lib/bag-pricing';
 import { sealService, type SealAssignmentInput } from '@/services/SealService';
 import { getPricingRules } from '@/lib/platform-settings';
 import { moneyToNumber } from '@/lib/money';
-import type {
+import {
   PartnerCheckInResult,
   PartnerCheckOutResult,
   CancelBookingResult,
   ModifyBookingResult,
+  BookingWithShopGuestDetails,
 } from '@/types/partner-booking';
 import {
   computeAuthoritativeCheckoutTotals,
@@ -529,7 +523,7 @@ export class BookingService implements IBookingService {
     return await prisma.booking.findUnique({
       where: { id },
       include: {
-        shop: true,
+        shop: { include: { owner: true } },
         guest: true,
         seals: { orderBy: { bagIndex: "asc" } },
       },
