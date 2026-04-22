@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
@@ -38,7 +39,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                 context,
                 'admin.total_bookings'.tr(),
                 '1,248',
-                Icons.briefcase_rounded,
+                Icons.work_rounded,
                 const Color(0xFF0F172A),
               ),
               _statCard(

@@ -29,7 +29,6 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
   Future<void> _protectScreen() async {
     await ScreenProtector.preventScreenshotOn();
-    await ScreenProtector.backgroundColorOn(Colors.black);
   }
 
   @override
