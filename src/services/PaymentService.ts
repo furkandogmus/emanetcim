@@ -649,6 +649,7 @@ export class PaymentService implements IPaymentService {
       },
     });
     const bookingIds: string[] = [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     for (const b of stuck as any[]) {
       await prisma.booking.update({
         where: { id: b.id },

@@ -44,9 +44,23 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     if (t == null) return;
     setState(() {
       final dt = DateTime(d.year, d.month, d.day, t.hour, t.minute);
+      final now = DateTime.now();
+
+      if (dt.isBefore(now)) {
+        _toast('Geçmiş bir zaman seçemezsiniz');
+        return;
+      }
+
       if (isCheckIn) {
+        if (dt.isAfter(_checkOut)) {
+          _checkOut = dt.add(const Duration(hours: 2));
+        }
         _checkIn = dt;
       } else {
+        if (dt.isBefore(_checkIn)) {
+          _toast('Çıkış saati girişten önce olamaz');
+          return;
+        }
         _checkOut = dt;
       }
     });

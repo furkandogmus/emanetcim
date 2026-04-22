@@ -50,6 +50,7 @@ export async function GET(req: NextRequest) {
     "chargebackStatus",
   ].join(",");
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const lines = (rows as any[]).map((b) => {
     const pl = b.paymentLog;
     return [
