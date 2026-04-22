@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
   const rows = await prisma.booking.findMany({
     where: { createdAt: { gte: since } },
     include: {
-      paymentLogs: true,
+      paymentLog: true,
       shop: { select: { name: true } },
     },
     orderBy: { createdAt: "desc" },
@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
   ].join(",");
 
   const lines = rows.map((b) => {
-    const pl = b.paymentLogs;
+    const pl = b.paymentLog;
     return [
       b.id,
       b.createdAt.toISOString(),
