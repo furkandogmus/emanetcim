@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
     "chargebackStatus",
   ].join(",");
 
-  const lines = rows.map((b) => {
+  const lines = (rows as any[]).map((b) => {
     const pl = b.paymentLog;
     return [
       b.id,

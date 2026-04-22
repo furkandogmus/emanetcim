@@ -15,7 +15,7 @@ export async function GET() {
       _sum: { totalPrice: true },
     }),
     prisma.shop.count(),
-    prisma.shop.count({ where: { status: "PENDING" } }), // Adjusted to schema
+    prisma.shop.count({ where: { isActive: false } }), // Using isActive: false for pending
   ]);
 
   return NextResponse.json({

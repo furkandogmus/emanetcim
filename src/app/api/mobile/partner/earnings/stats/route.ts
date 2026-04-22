@@ -21,7 +21,7 @@ export async function GET() {
     where: {
       shopId: shop.id,
       status: { in: ["PAID", "CHECKED_IN", "CHECKED_OUT"] },
-      paymentLog: { status: "SUCCESS" },
+      paymentLog: { is: { status: "SUCCESS" } },
     },
     select: { totalPrice: true, createdAt: true },
   });

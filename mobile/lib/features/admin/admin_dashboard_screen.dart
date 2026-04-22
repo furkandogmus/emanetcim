@@ -74,86 +74,87 @@ class AdminDashboardScreen extends ConsumerWidget {
               ],
             ),
 
-          const SizedBox(height: 32),
+            const SizedBox(height: 32),
 
-          // Live Analytics Placeholder
-          Text(
-            'admin.live_analytics'.tr().toUpperCase(),
-            style: GoogleFonts.outfit(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey.shade500,
-              letterSpacing: 1.1,
+            // Live Analytics Placeholder
+            Text(
+              'admin.live_analytics'.tr().toUpperCase(),
+              style: GoogleFonts.outfit(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade500,
+                letterSpacing: 1.1,
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            height: 200,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 20,
-                ),
-              ],
-            ),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.analytics_rounded,
-                    size: 48,
-                    color: Colors.grey,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Grafikler yakında burada olacak',
-                    style: GoogleFonts.outfit(color: Colors.grey),
+            const SizedBox(height: 12),
+            Container(
+              height: 200,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 20,
                   ),
                 ],
               ),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.analytics_rounded,
+                      size: 48,
+                      color: Colors.grey,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Grafikler yakında burada olacak',
+                      style: GoogleFonts.outfit(color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
 
-          const SizedBox(height: 32),
+            const SizedBox(height: 32),
 
-          // Quick Actions
-          Text(
-            'admin.quick_actions'.tr().toUpperCase(),
-            style: GoogleFonts.outfit(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey.shade500,
-              letterSpacing: 1.1,
+            // Quick Actions
+            Text(
+              'admin.quick_actions'.tr().toUpperCase(),
+              style: GoogleFonts.outfit(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade500,
+                letterSpacing: 1.1,
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          _actionTile(
-            Icons.verified_user_rounded,
-            'admin.approve_shops'.tr(),
-            '12 yeni dükkan başvurusu',
-            const Color(0xFFF97316),
-            onTap: () => context.push('/admin/applications'),
-          ),
-          _actionTile(
-            Icons.health_and_safety_rounded,
-            'admin.system_status'.tr(),
-            'Tüm sistemler aktif',
-            const Color(0xFF10B981),
-            isPulse: true,
-            onTap: () {},
-          ),
-          _actionTile(
-            Icons.message_rounded,
-            'Destek Mesajları',
-            '5 okunmamış mesaj',
-            const Color(0xFF3B82F6),
-            onTap: () {},
-          ),
-        ],
+            const SizedBox(height: 12),
+            _actionTile(
+              Icons.verified_user_rounded,
+              'admin.approve_shops'.tr(),
+              '12 yeni dükkan başvurusu',
+              const Color(0xFFF97316),
+              onTap: () => context.push('/admin/applications'),
+            ),
+            _actionTile(
+              Icons.health_and_safety_rounded,
+              'admin.system_status'.tr(),
+              'Tüm sistemler aktif',
+              const Color(0xFF10B981),
+              isPulse: true,
+              onTap: () {},
+            ),
+            _actionTile(
+              Icons.message_rounded,
+              'Destek Mesajları',
+              '5 okunmamış mesaj',
+              const Color(0xFF3B82F6),
+              onTap: () {},
+            ),
+          ],
+        ),
       ),
     );
   }
