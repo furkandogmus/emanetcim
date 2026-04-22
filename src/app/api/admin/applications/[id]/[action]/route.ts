@@ -4,14 +4,14 @@ import { getMobileSession } from "@/lib/mobile-auth";
 
 export async function POST(
   req: Request,
-  { params }: { params: { id: string; action: string } }
+  { params }: { params: Promise<{ id: string; action: string }> }
 ) {
   const session = await getMobileSession();
   if (!session || session.role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id, action } = params;
+  const { id, action } = await params;
 
   if (action === "approve") {
     await prisma.shop.update({
