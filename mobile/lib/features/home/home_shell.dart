@@ -15,12 +15,13 @@ class HomeShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final role = ref.watch(authControllerProvider).session?.role ?? UserRole.GUEST;
+    final role =
+        ref.watch(authControllerProvider).session?.role ?? UserRole.guest;
     final loc = GoRouterState.of(context).matchedLocation;
 
     List<_TabItem> tabs = [];
 
-    if (role == UserRole.ADMIN) {
+    if (role == UserRole.admin) {
       tabs = [
         _TabItem(
           icon: Icons.dashboard_outlined,
@@ -41,7 +42,7 @@ class HomeShell extends ConsumerWidget {
           path: '/profile',
         ),
       ];
-    } else if (role == UserRole.PARTNER) {
+    } else if (role == UserRole.partner) {
       tabs = [
         _TabItem(
           icon: Icons.luggage_outlined,
@@ -105,10 +106,14 @@ class HomeShell extends ConsumerWidget {
         margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
         height: 72,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.9),
+          color: Colors.white.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 30, offset: const Offset(0, 10)),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 30,
+              offset: const Offset(0, 10),
+            ),
           ],
         ),
         child: ClipRRect(
@@ -117,18 +122,22 @@ class HomeShell extends ConsumerWidget {
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: tabs.map((t) => _NavItem(
-                item: t,
-                isSelected: loc == t.path,
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  if (t.isFab) {
-                    context.push(t.path);
-                  } else {
-                    context.go(t.path);
-                  }
-                },
-              )).toList(),
+              children: tabs
+                  .map(
+                    (t) => _NavItem(
+                      item: t,
+                      isSelected: loc == t.path,
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        if (t.isFab) {
+                          context.push(t.path);
+                        } else {
+                          context.go(t.path);
+                        }
+                      },
+                    ),
+                  )
+                  .toList(),
             ),
           ),
         ),
@@ -177,7 +186,9 @@ class _NavItem extends StatelessWidget {
           children: [
             Icon(
               isSelected ? item.activeIcon : item.icon,
-              color: isSelected ? const Color(0xFFF97316) : Colors.grey.shade400,
+              color: isSelected
+                  ? const Color(0xFFF97316)
+                  : Colors.grey.shade400,
               size: 26,
             ),
             const SizedBox(height: 4),
@@ -186,7 +197,9 @@ class _NavItem extends StatelessWidget {
               style: GoogleFonts.outfit(
                 fontSize: 10,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                color: isSelected ? const Color(0xFFF97316) : Colors.grey.shade400,
+                color: isSelected
+                    ? const Color(0xFFF97316)
+                    : Colors.grey.shade400,
               ),
             ),
           ],

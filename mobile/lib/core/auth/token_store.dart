@@ -12,9 +12,11 @@ class TokenStore {
   static const _access = 'access_token';
   static const _refresh = 'refresh_token';
   static const _hiveKey = 'hive_encryption_key';
-  
+
   final _storage = const FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+    aOptions: AndroidOptions(
+      resetOnError: true,
+    ),
   );
 
   Future<List<int>?> getHiveKey() async {
@@ -34,6 +36,7 @@ class TokenStore {
     await _storage.write(key: _access, value: access);
     await _storage.write(key: _refresh, value: refresh);
   }
+
   Future<void> clear() async {
     await _storage.delete(key: _access);
     await _storage.delete(key: _refresh);
@@ -44,10 +47,9 @@ class TokenStore {
     final rt = await readRefreshToken();
     if (rt == null) return false;
     try {
-      final res = await Dio(BaseOptions(baseUrl: Env.apiBaseUrl)).post(
-        '/auth/refresh',
-        data: {'refreshToken': rt},
-      );
+      final res = await Dio(
+        BaseOptions(baseUrl: Env.apiBaseUrl),
+      ).post('/auth/refresh', data: {'refreshToken': rt});
       await save(
         access: res.data['accessToken'] as String,
         refresh: res.data['refreshToken'] as String,

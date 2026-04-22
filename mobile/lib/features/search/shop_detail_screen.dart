@@ -22,7 +22,6 @@ class ShopDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final shopAsync = ref.watch(shopProvider(shopId));
-    final theme = Theme.of(context);
 
     return Scaffold(
       body: shopAsync.when(
@@ -31,10 +30,17 @@ class ShopDetailScreen extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline_rounded, size: 64, color: Colors.redAccent),
+              const Icon(
+                Icons.error_outline_rounded,
+                size: 64,
+                color: Colors.redAccent,
+              ),
               const SizedBox(height: 16),
               const Text('Dükkan yüklenirken bir hata oluştu'),
-              TextButton(onPressed: () => context.pop(), child: const Text('Geri Dön')),
+              TextButton(
+                onPressed: () => context.pop(),
+                child: const Text('Geri Dön'),
+              ),
             ],
           ),
         ),
@@ -49,19 +55,27 @@ class ShopDetailScreen extends ConsumerWidget {
                   leading: Padding(
                     padding: const EdgeInsets.only(left: 8),
                     child: CircleAvatar(
-                      backgroundColor: Colors.white.withOpacity(0.9),
+                      backgroundColor: Colors.white.withValues(alpha: 0.9),
                       child: IconButton(
                         onPressed: () => context.pop(),
-                        icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: Colors.black),
+                        icon: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          size: 20,
+                          color: Colors.black,
+                        ),
                       ),
                     ),
                   ),
                   actions: [
                     CircleAvatar(
-                      backgroundColor: Colors.white.withOpacity(0.9),
+                      backgroundColor: Colors.white.withValues(alpha: 0.9),
                       child: IconButton(
                         onPressed: () {},
-                        icon: const Icon(Icons.share_rounded, size: 20, color: Colors.black),
+                        icon: const Icon(
+                          Icons.share_rounded,
+                          size: 20,
+                          color: Colors.black,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -76,13 +90,15 @@ class ShopDetailScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                
+
                 SliverToBoxAdapter(
                   child: Container(
                     padding: const EdgeInsets.all(24),
                     decoration: const BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(32),
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,14 +117,21 @@ class ShopDetailScreen extends ConsumerWidget {
                               ),
                             ),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.orange.shade50,
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.star_rounded, color: Colors.amber, size: 20),
+                                  const Icon(
+                                    Icons.star_rounded,
+                                    color: Colors.amber,
+                                    size: 20,
+                                  ),
                                   const SizedBox(width: 4),
                                   Text(
                                     s.rating?.toStringAsFixed(1) ?? 'N/A',
@@ -125,30 +148,50 @@ class ShopDetailScreen extends ConsumerWidget {
                         const SizedBox(height: 8),
                         Row(
                           children: [
-                            const Icon(Icons.location_on_rounded, size: 16, color: Colors.grey),
+                            const Icon(
+                              Icons.location_on_rounded,
+                              size: 16,
+                              color: Colors.grey,
+                            ),
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
                                 '${s.address ?? ''}, ${s.district ?? ''} / ${s.city ?? ''}',
-                                style: GoogleFonts.outfit(color: Colors.grey.shade600),
+                                style: GoogleFonts.outfit(
+                                  color: Colors.grey.shade600,
+                                ),
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 32),
-                        
+
                         // Info Grid
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            _infoItem(Icons.access_time_rounded, 'Çalışma Saatleri', s.open247 ? '7/24 Açık' : '${s.openingTime} - ${s.closingTime}'),
-                            _infoItem(Icons.luggage_rounded, 'Kapasite', '${s.capacity} Valiz'),
-                            _infoItem(Icons.verified_user_rounded, 'Güvenlik', 'Üst Düzey'),
+                            _infoItem(
+                              Icons.access_time_rounded,
+                              'Çalışma Saatleri',
+                              s.open247
+                                  ? '7/24 Açık'
+                                  : '${s.openingTime} - ${s.closingTime}',
+                            ),
+                            _infoItem(
+                              Icons.luggage_rounded,
+                              'Kapasite',
+                              '${s.capacity} Valiz',
+                            ),
+                            _infoItem(
+                              Icons.verified_user_rounded,
+                              'Güvenlik',
+                              'Üst Düzey',
+                            ),
                           ],
                         ),
-                        
+
                         const SizedBox(height: 40),
-                        
+
                         Text(
                           'Dükkan Hakkında',
                           style: GoogleFonts.outfit(
@@ -166,9 +209,9 @@ class ShopDetailScreen extends ConsumerWidget {
                             height: 1.6,
                           ),
                         ),
-                        
+
                         const SizedBox(height: 40),
-                        
+
                         Text(
                           'Hizmetler',
                           style: GoogleFonts.outfit(
@@ -178,12 +221,22 @@ class ShopDetailScreen extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        _amenityItem(Icons.videocam_rounded, '7/24 Kamera İzleme'),
-                        _amenityItem(Icons.security_rounded, 'Sigortalı Emanet'),
-                        if (s.hasRestroom) _amenityItem(Icons.wc_rounded, 'Ücretsiz Tuvalet / Lavabo'),
+                        _amenityItem(
+                          Icons.videocam_rounded,
+                          '7/24 Kamera İzleme',
+                        ),
+                        _amenityItem(
+                          Icons.security_rounded,
+                          'Sigortalı Emanet',
+                        ),
+                        if (s.hasRestroom)
+                          _amenityItem(
+                            Icons.wc_rounded,
+                            'Ücretsiz Tuvalet / Lavabo',
+                          ),
                         _amenityItem(Icons.wifi_rounded, 'Ücretsiz Wi-Fi'),
                         _amenityItem(Icons.accessible_rounded, 'Kolay Erişim'),
-                        
+
                         const SizedBox(height: 100), // Buton için boşluk
                       ],
                     ),
@@ -191,7 +244,7 @@ class ShopDetailScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            
+
             // Bottom Action Bar
             Positioned(
               left: 0,
@@ -203,7 +256,7 @@ class ShopDetailScreen extends ConsumerWidget {
                   color: Colors.white,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 20,
                       offset: const Offset(0, -10),
                     ),
@@ -260,13 +313,20 @@ class ShopDetailScreen extends ConsumerWidget {
           const SizedBox(height: 8),
           Text(
             label,
-            style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey.shade500),
+            style: GoogleFonts.outfit(
+              fontSize: 12,
+              color: Colors.grey.shade500,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
           Text(
             value,
-            style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A)),
+            style: GoogleFonts.outfit(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF0F172A),
+            ),
             textAlign: TextAlign.center,
           ),
         ],
@@ -290,7 +350,10 @@ class ShopDetailScreen extends ConsumerWidget {
           const SizedBox(width: 12),
           Text(
             label,
-            style: GoogleFonts.outfit(fontSize: 15, color: Colors.grey.shade700),
+            style: GoogleFonts.outfit(
+              fontSize: 15,
+              color: Colors.grey.shade700,
+            ),
           ),
         ],
       ),

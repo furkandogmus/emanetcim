@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/sync/sync_service.dart';
@@ -16,10 +15,12 @@ class PartnerBookingDetailScreen extends ConsumerStatefulWidget {
   final String bookingId;
 
   @override
-  ConsumerState<PartnerBookingDetailScreen> createState() => _PartnerBookingDetailScreenState();
+  ConsumerState<PartnerBookingDetailScreen> createState() =>
+      _PartnerBookingDetailScreenState();
 }
 
-class _PartnerBookingDetailScreenState extends ConsumerState<PartnerBookingDetailScreen> {
+class _PartnerBookingDetailScreenState
+    extends ConsumerState<PartnerBookingDetailScreen> {
   final List<TextEditingController> _sealControllers = [];
   bool _busy = false;
 
@@ -37,15 +38,17 @@ class _PartnerBookingDetailScreenState extends ConsumerState<PartnerBookingDetai
       final val = int.tryParse(_sealControllers[i].text);
       if (val == null) {
         HapticFeedback.vibrate();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('common.error'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('common.error'.tr())));
         return;
       }
       assignments.add({
         'sealNumber': val,
         'bagIndex': i,
-        'bagSize': i < b.bagCountS ? 'S' : (i < b.bagCountS + b.bagCountM ? 'M' : 'XL'),
+        'bagSize': i < b.bagCountS
+            ? 'S'
+            : (i < b.bagCountS + b.bagCountM ? 'M' : 'XL'),
       });
     }
 
@@ -53,30 +56,43 @@ class _PartnerBookingDetailScreenState extends ConsumerState<PartnerBookingDetai
     HapticFeedback.mediumImpact();
     try {
       final dio = ref.read(dioProvider);
-      await dio.post('/bookings/${b.id}/check-in', data: {
-        'sealAssignments': assignments,
-      });
+      await dio.post(
+        '/bookings/${b.id}/check-in',
+        data: {'sealAssignments': assignments},
+      );
       if (mounted) {
         HapticFeedback.heavyImpact();
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('partner.success_checkin'.tr())));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('partner.success_checkin'.tr())));
         ref.invalidate(bookingProvider(b.id));
       }
     } catch (e) {
-      if (e is DioException && (e.type == DioExceptionType.connectionError || e.type == DioExceptionType.connectionTimeout)) {
+      if (e is DioException &&
+          (e.type == DioExceptionType.connectionError ||
+              e.type == DioExceptionType.connectionTimeout)) {
         // Offline mode fallback
         final syncService = ref.read(syncServiceProvider);
-        await syncService.addAction(SyncActionType.checkIn, b.id, {'sealAssignments': assignments});
+        await syncService.addAction(SyncActionType.checkIn, b.id, {
+          'sealAssignments': assignments,
+        });
         if (mounted) {
           HapticFeedback.mediumImpact();
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('partner.offline_saved'.tr()),
-            backgroundColor: Colors.orange,
-          ));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('partner.offline_saved'.tr()),
+              backgroundColor: Colors.orange,
+            ),
+          );
           // Mock local update or just pop
           Navigator.pop(context);
         }
       } else {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('common.error'.tr() + ': $e')));
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('${'common.error'.tr()}: $e')));
+        }
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -91,24 +107,34 @@ class _PartnerBookingDetailScreenState extends ConsumerState<PartnerBookingDetai
       await dio.post('/bookings/${b.id}/check-out');
       if (mounted) {
         HapticFeedback.heavyImpact();
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('partner.success_checkout'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('partner.success_checkout'.tr())),
+        );
         ref.invalidate(bookingProvider(b.id));
       }
     } catch (e) {
-      if (e is DioException && (e.type == DioExceptionType.connectionError || e.type == DioExceptionType.connectionTimeout)) {
+      if (e is DioException &&
+          (e.type == DioExceptionType.connectionError ||
+              e.type == DioExceptionType.connectionTimeout)) {
         // Offline mode fallback
         final syncService = ref.read(syncServiceProvider);
         await syncService.addAction(SyncActionType.checkOut, b.id);
         if (mounted) {
           HapticFeedback.mediumImpact();
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('partner.offline_saved'.tr()),
-            backgroundColor: Colors.orange,
-          ));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('partner.offline_saved'.tr()),
+              backgroundColor: Colors.orange,
+            ),
+          );
           Navigator.pop(context);
         }
       } else {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('common.error'.tr() + ': $e')));
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('${'common.error'.tr()}: $e')));
+        }
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -131,7 +157,10 @@ class _PartnerBookingDetailScreenState extends ConsumerState<PartnerBookingDetai
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: Text('nav.partner'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        title: Text(
+          'nav.partner'.tr(),
+          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
       ),
       body: bAsync.when(
@@ -140,7 +169,7 @@ class _PartnerBookingDetailScreenState extends ConsumerState<PartnerBookingDetai
         data: (b) {
           _initControllers(b);
           final statusColor = _statusColor(b.status);
-          
+
           return ListView(
             padding: const EdgeInsets.all(20),
             children: [
@@ -151,57 +180,90 @@ class _PartnerBookingDetailScreenState extends ConsumerState<PartnerBookingDetai
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
-                    BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 20, offset: const Offset(0, 4)),
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 20,
+                      offset: const Offset(0, 4),
+                    ),
                   ],
                 ),
                 child: Column(
                   children: [
                     CircleAvatar(
                       radius: 35,
-                      backgroundColor: const Color(0xFFF97316).withOpacity(0.1),
+                      backgroundColor: const Color(0xFFF97316).withValues(alpha: 0.1),
                       child: Text(
                         b.guestName?.substring(0, 1).toUpperCase() ?? 'G',
-                        style: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.bold, color: const Color(0xFFF97316)),
+                        style: GoogleFonts.outfit(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFFF97316),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
                     Text(
                       b.guestName ?? 'Misafir',
-                      style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold),
+                      style: GoogleFonts.outfit(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
-                        color: statusColor.withOpacity(0.1),
+                        color: statusColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(100),
                       ),
                       child: Text(
                         _statusLabel(b.status),
-                        style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: statusColor),
+                        style: GoogleFonts.outfit(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: statusColor,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Times Section
               Row(
                 children: [
-                  _timeCard('checkout.check_in'.tr(), fmt.format(b.checkInTime), Icons.login_rounded, Colors.blue),
+                  _timeCard(
+                    'checkout.check_in'.tr(),
+                    fmt.format(b.checkInTime),
+                    Icons.login_rounded,
+                    Colors.blue,
+                  ),
                   const SizedBox(width: 12),
-                  _timeCard('checkout.check_out'.tr(), fmt.format(b.checkOutTime), Icons.logout_rounded, Colors.teal),
+                  _timeCard(
+                    'checkout.check_out'.tr(),
+                    fmt.format(b.checkOutTime),
+                    Icons.logout_rounded,
+                    Colors.teal,
+                  ),
                 ],
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Bags Info
               Text(
                 'checkout.bags_title'.tr(),
-                style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey.shade500, letterSpacing: 1.1),
+                style: GoogleFonts.outfit(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade500,
+                  letterSpacing: 1.1,
+                ),
               ),
               const SizedBox(height: 12),
               Container(
@@ -219,14 +281,20 @@ class _PartnerBookingDetailScreenState extends ConsumerState<PartnerBookingDetai
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Operational Area
-              if (b.status == BookingStatus.PAID || b.status == BookingStatus.APPROVED) ...[
+              if (b.status == BookingStatus.paid ||
+                  b.status == BookingStatus.approved) ...[
                 Text(
                   'partner.check_in_button'.tr().toUpperCase(),
-                  style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey.shade500, letterSpacing: 1.1),
+                  style: GoogleFonts.outfit(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade500,
+                    letterSpacing: 1.1,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 for (int i = 0; i < b.totalBags; i++)
@@ -236,12 +304,20 @@ class _PartnerBookingDetailScreenState extends ConsumerState<PartnerBookingDetai
                       controller: _sealControllers[i],
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                        labelText: 'partner.seal_hint'.tr(args: [(i + 1).toString()]),
+                        labelText: 'partner.seal_hint'.tr(
+                          args: [(i + 1).toString()],
+                        ),
                         hintText: 'partner.seal_placeholder'.tr(),
                         filled: true,
                         fillColor: Colors.white,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 16,
+                        ),
                       ),
                     ),
                   ),
@@ -251,32 +327,54 @@ class _PartnerBookingDetailScreenState extends ConsumerState<PartnerBookingDetai
                   height: 56,
                   child: FilledButton.icon(
                     onPressed: _busy ? null : () => _checkIn(b),
-                    icon: _busy ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Icon(Icons.check_circle_rounded),
+                    icon: _busy
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Icon(Icons.check_circle_rounded),
                     label: Text('partner.check_in_button'.tr()),
                     style: FilledButton.styleFrom(
                       backgroundColor: const Color(0xFF10B981),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
                   ),
                 ),
               ],
-              
-              if (b.status == BookingStatus.CHECKED_IN) ...[
+
+              if (b.status == BookingStatus.checkedIn) ...[
                 SizedBox(
                   width: double.infinity,
                   height: 56,
                   child: FilledButton.icon(
                     onPressed: _busy ? null : () => _checkOut(b),
-                    icon: _busy ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Icon(Icons.exit_to_app_rounded),
+                    icon: _busy
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Icon(Icons.exit_to_app_rounded),
                     label: Text('partner.check_out_button'.tr()),
                     style: FilledButton.styleFrom(
                       backgroundColor: const Color(0xFF3B82F6),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
                   ),
                 ),
               ],
-              
+
               const SizedBox(height: 40),
             ],
           );
@@ -300,11 +398,23 @@ class _PartnerBookingDetailScreenState extends ConsumerState<PartnerBookingDetai
               children: [
                 Icon(icon, size: 14, color: color),
                 const SizedBox(width: 6),
-                Text(label, style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey.shade600)),
+                Text(
+                  label,
+                  style: GoogleFonts.outfit(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 8),
-            Text(time, style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.bold)),
+            Text(
+              time,
+              style: GoogleFonts.outfit(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
       ),
@@ -314,9 +424,23 @@ class _PartnerBookingDetailScreenState extends ConsumerState<PartnerBookingDetai
   Widget _bagInfo(String size, int count) {
     return Column(
       children: [
-        Text(size, style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+        Text(
+          size,
+          style: GoogleFonts.outfit(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey,
+          ),
+        ),
         const SizedBox(height: 4),
-        Text('$count', style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A))),
+        Text(
+          '$count',
+          style: GoogleFonts.outfit(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF0F172A),
+          ),
+        ),
       ],
     );
   }
@@ -324,26 +448,46 @@ class _PartnerBookingDetailScreenState extends ConsumerState<PartnerBookingDetai
   String _statusLabel(BookingStatus status) {
     String key = 'waiting_approval';
     switch (status) {
-      case BookingStatus.PENDING: key = 'pending'; break;
-      case BookingStatus.PAID: key = 'paid'; break;
-      case BookingStatus.APPROVED: key = 'approved'; break;
-      case BookingStatus.CHECKED_IN: key = 'checked_in'; break;
-      case BookingStatus.CHECKED_OUT: key = 'checked_out'; break;
-      case BookingStatus.CANCELLED: key = 'cancelled'; break;
-      case BookingStatus.WAITING_APPROVAL: key = 'waiting_approval'; break;
+      case BookingStatus.pending:
+        key = 'pending';
+        break;
+      case BookingStatus.paid:
+        key = 'paid';
+        break;
+      case BookingStatus.approved:
+        key = 'approved';
+        break;
+      case BookingStatus.checkedIn:
+        key = 'checked_in';
+        break;
+      case BookingStatus.checkedOut:
+        key = 'checked_out';
+        break;
+      case BookingStatus.cancelled:
+        key = 'cancelled';
+        break;
+      case BookingStatus.waitingApproval:
+        key = 'waiting_approval';
+        break;
     }
     return 'booking.status.$key'.tr();
   }
 
   Color _statusColor(BookingStatus status) {
     switch (status) {
-      case BookingStatus.PAID:
-      case BookingStatus.APPROVED: return Colors.green;
-      case BookingStatus.CHECKED_IN: return Colors.blue;
-      case BookingStatus.CANCELLED: return Colors.redAccent;
-      case BookingStatus.CHECKED_OUT: return Colors.grey;
-      case BookingStatus.WAITING_APPROVAL: return Colors.orange;
-      default: return Colors.orange;
+      case BookingStatus.paid:
+      case BookingStatus.approved:
+        return Colors.green;
+      case BookingStatus.checkedIn:
+        return Colors.blue;
+      case BookingStatus.cancelled:
+        return Colors.redAccent;
+      case BookingStatus.checkedOut:
+        return Colors.grey;
+      case BookingStatus.waitingApproval:
+        return Colors.orange;
+      default:
+        return Colors.orange;
     }
   }
 }

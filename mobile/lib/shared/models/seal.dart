@@ -3,7 +3,18 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'seal.freezed.dart';
 part 'seal.g.dart';
 
-enum SealStatus { STOCK, ASSIGNED, IN_USE, RETURNED, FAULTY }
+enum SealStatus {
+  @JsonValue("STOCK")
+  stock,
+  @JsonValue("ASSIGNED")
+  assigned,
+  @JsonValue("IN_USE")
+  inUse,
+  @JsonValue("RETURNED")
+  returned,
+  @JsonValue("FAULTY")
+  faulty,
+}
 
 @freezed
 abstract class SealDto with _$SealDto {
@@ -14,5 +25,6 @@ abstract class SealDto with _$SealDto {
     DateTime? assignedAt,
   }) = _SealDto;
 
-  factory SealDto.fromJson(Map<String, dynamic> json) => _$SealDtoFromJson(json);
+  factory SealDto.fromJson(Map<String, dynamic> json) =>
+      _$SealDtoFromJson(json);
 }

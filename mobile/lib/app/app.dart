@@ -16,7 +16,8 @@ class BagajParkApp extends ConsumerStatefulWidget {
   ConsumerState<BagajParkApp> createState() => _BagajParkAppState();
 }
 
-class _BagajParkAppState extends ConsumerState<BagajParkApp> with WidgetsBindingObserver {
+class _BagajParkAppState extends ConsumerState<BagajParkApp>
+    with WidgetsBindingObserver {
   bool _isInBackground = false;
 
   @override
@@ -34,12 +35,14 @@ class _BagajParkAppState extends ConsumerState<BagajParkApp> with WidgetsBinding
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     setState(() {
-      _isInBackground = state == AppLifecycleState.inactive || state == AppLifecycleState.paused;
+      _isInBackground =
+          state == AppLifecycleState.inactive ||
+          state == AppLifecycleState.paused;
     });
   }
 
   void _updateScreenProtection(UserDto? user) {
-    if (user?.role == UserRole.PARTNER) {
+    if (user?.role == UserRole.partner) {
       ScreenProtector.preventScreenshotOn();
     } else {
       // Per-screen protection will turn this back on if needed
@@ -51,7 +54,7 @@ class _BagajParkAppState extends ConsumerState<BagajParkApp> with WidgetsBinding
   Widget build(BuildContext context) {
     final auth = ref.watch(authControllerProvider);
     final router = ref.watch(routerProvider);
-    
+
     // Security Hardening: Global protection for Partners
     _updateScreenProtection(auth.session);
 
@@ -73,18 +76,22 @@ class _BagajParkAppState extends ConsumerState<BagajParkApp> with WidgetsBinding
       builder: (context, child) {
         return Stack(
           children: [
-            if (child != null) child,
+            ?child,
             if (_isInBackground)
               Positioned.fill(
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                   child: Container(
-                    color: const Color(0xFFF97316).withOpacity(0.1),
+                    color: const Color(0xFFF97316).withValues(alpha: 0.1),
                     child: Center(
                       child: Image.asset(
-                        'assets/images/logo_white.png', 
-                        width: 120, 
-                        errorBuilder: (_, __, ___) => const Icon(Icons.luggage_rounded, size: 80, color: Color(0xFFF97316)),
+                        'assets/images/logo_white.png',
+                        width: 120,
+                        errorBuilder: (_, _, _) => const Icon(
+                          Icons.luggage_rounded,
+                          size: 80,
+                          color: Color(0xFFF97316),
+                        ),
                       ),
                     ),
                   ),

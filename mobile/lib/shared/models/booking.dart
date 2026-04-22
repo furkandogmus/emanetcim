@@ -4,16 +4,30 @@ part 'booking.freezed.dart';
 part 'booking.g.dart';
 
 enum BookingStatus {
-  WAITING_APPROVAL,
-  APPROVED,
-  PENDING,
-  PAID,
-  CHECKED_IN,
-  CHECKED_OUT,
-  CANCELLED,
+  @JsonValue("WAITING_APPROVAL")
+  waitingApproval,
+  @JsonValue("APPROVED")
+  approved,
+  @JsonValue("PENDING")
+  pending,
+  @JsonValue("PAID")
+  paid,
+  @JsonValue("CHECKED_IN")
+  checkedIn,
+  @JsonValue("CHECKED_OUT")
+  checkedOut,
+  @JsonValue("CANCELLED")
+  cancelled,
 }
 
-enum PaymentStatus { SUCCESS, REFUNDED, FAILED }
+enum PaymentStatus {
+  @JsonValue("SUCCESS")
+  success,
+  @JsonValue("REFUNDED")
+  refunded,
+  @JsonValue("FAILED")
+  failed,
+}
 
 @freezed
 abstract class BookingDto with _$BookingDto {
@@ -35,7 +49,8 @@ abstract class BookingDto with _$BookingDto {
     String? shopPhone,
   }) = _BookingDto;
 
-  factory BookingDto.fromJson(Map<String, dynamic> json) => _$BookingDtoFromJson(json);
+  factory BookingDto.fromJson(Map<String, dynamic> json) =>
+      _$BookingDtoFromJson(json);
 }
 
 extension BookingDtoX on BookingDto {

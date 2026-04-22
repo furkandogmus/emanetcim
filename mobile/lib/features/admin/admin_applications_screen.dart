@@ -9,10 +9,12 @@ class AdminApplicationsScreen extends ConsumerStatefulWidget {
   const AdminApplicationsScreen({super.key});
 
   @override
-  ConsumerState<AdminApplicationsScreen> createState() => _AdminApplicationsScreenState();
+  ConsumerState<AdminApplicationsScreen> createState() =>
+      _AdminApplicationsScreenState();
 }
 
-class _AdminApplicationsScreenState extends ConsumerState<AdminApplicationsScreen> {
+class _AdminApplicationsScreenState
+    extends ConsumerState<AdminApplicationsScreen> {
   bool _loading = true;
   List<dynamic> _apps = [];
 
@@ -38,15 +40,19 @@ class _AdminApplicationsScreenState extends ConsumerState<AdminApplicationsScree
             'name': 'Galata Souvenirs',
             'address': 'Bereketzade, Galata Kulesi Sk. No:12',
             'owner': {'name': 'Mehmet Yılmaz', 'phone': '0532 123 45 67'},
-            'createdAt': DateTime.now().subtract(const Duration(days: 2)).toIso8601String(),
+            'createdAt': DateTime.now()
+                .subtract(const Duration(days: 2))
+                .toIso8601String(),
           },
           {
             'id': '2',
             'name': 'Karaköy Coffee Hub',
             'address': 'Kemankeş Karamustafa Paşa, No:44',
             'owner': {'name': 'Ayşe Demir', 'phone': '0544 987 65 43'},
-            'createdAt': DateTime.now().subtract(const Duration(hours: 5)).toIso8601String(),
-          }
+            'createdAt': DateTime.now()
+                .subtract(const Duration(hours: 5))
+                .toIso8601String(),
+          },
         ];
         _loading = false;
       });
@@ -56,24 +62,40 @@ class _AdminApplicationsScreenState extends ConsumerState<AdminApplicationsScree
   Future<void> _process(String id, bool approve) async {
     try {
       final dio = ref.read(dioProvider);
-      await dio.post('/admin/applications/$id/${approve ? 'approve' : 'reject'}');
+      await dio.post(
+        '/admin/applications/$id/${approve ? 'approve' : 'reject'}',
+      );
       _fetchApps();
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Hata: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Hata: $e')));
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    if (_loading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: Text('admin.approve_shops'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        title: Text(
+          'admin.approve_shops'.tr(),
+          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+        ),
       ),
       body: _apps.isEmpty
-          ? Center(child: Text('Bekleyen başvuru bulunmuyor.', style: GoogleFonts.outfit(color: Colors.grey)))
+          ? Center(
+              child: Text(
+                'Bekleyen başvuru bulunmuyor.',
+                style: GoogleFonts.outfit(color: Colors.grey),
+              ),
+            )
           : ListView.builder(
               padding: const EdgeInsets.all(20),
               itemCount: _apps.length,
@@ -89,7 +111,9 @@ class _AdminApplicationsScreenState extends ConsumerState<AdminApplicationsScree
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -98,16 +122,34 @@ class _AdminApplicationsScreenState extends ConsumerState<AdminApplicationsScree
             children: [
               Container(
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(color: Colors.orange.shade50, borderRadius: BorderRadius.circular(16)),
-                child: const Icon(Icons.store_rounded, color: Color(0xFFF97316)),
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade50,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(
+                  Icons.store_rounded,
+                  color: Color(0xFFF97316),
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(app['name'], style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 18)),
-                    Text(app['address'], style: GoogleFonts.outfit(color: Colors.grey, fontSize: 13)),
+                    Text(
+                      app['name'],
+                      style: GoogleFonts.outfit(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                    Text(
+                      app['address'],
+                      style: GoogleFonts.outfit(
+                        color: Colors.grey,
+                        fontSize: 13,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -117,7 +159,10 @@ class _AdminApplicationsScreenState extends ConsumerState<AdminApplicationsScree
           _infoRow(Icons.person_outline_rounded, app['owner']['name']),
           const SizedBox(height: 8),
           _infoRow(Icons.phone_outlined, app['owner']['phone']),
-          const Padding(padding: EdgeInsets.symmetric(vertical: 20), child: Divider()),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 20),
+            child: Divider(),
+          ),
           Row(
             children: [
               Expanded(
@@ -127,7 +172,9 @@ class _AdminApplicationsScreenState extends ConsumerState<AdminApplicationsScree
                     foregroundColor: Colors.redAccent,
                     side: const BorderSide(color: Colors.redAccent),
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
                   child: const Text('Reddet'),
                 ),
@@ -139,7 +186,9 @@ class _AdminApplicationsScreenState extends ConsumerState<AdminApplicationsScree
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFF10B981),
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
                   child: const Text('Onayla'),
                 ),
@@ -156,7 +205,10 @@ class _AdminApplicationsScreenState extends ConsumerState<AdminApplicationsScree
       children: [
         Icon(icon, size: 16, color: Colors.grey.shade400),
         const SizedBox(width: 8),
-        Text(text, style: GoogleFonts.outfit(fontSize: 14, color: Colors.grey.shade600)),
+        Text(
+          text,
+          style: GoogleFonts.outfit(fontSize: 14, color: Colors.grey.shade600),
+        ),
       ],
     );
   }

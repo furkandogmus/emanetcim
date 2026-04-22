@@ -9,7 +9,8 @@ class PartnerEarningsScreen extends ConsumerStatefulWidget {
   const PartnerEarningsScreen({super.key});
 
   @override
-  ConsumerState<PartnerEarningsScreen> createState() => _PartnerEarningsScreenState();
+  ConsumerState<PartnerEarningsScreen> createState() =>
+      _PartnerEarningsScreenState();
 }
 
 class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
@@ -41,7 +42,7 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
             {'date': '21 Nis', 'amount': 450.0, 'status': 'PAID'},
             {'date': '20 Nis', 'amount': 380.0, 'status': 'PAID'},
             {'date': '19 Nis', 'amount': 520.0, 'status': 'PAID'},
-          ]
+          ],
         };
         _loading = false;
       });
@@ -50,8 +51,6 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     if (_loading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
@@ -59,7 +58,10 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: Text('partner.earnings'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        title: Text(
+          'partner.earnings'.tr(),
+          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(20),
@@ -74,38 +76,70 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(32),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 10))],
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
             ),
             child: Column(
               children: [
-                Text('partner.total_balance'.tr(), style: GoogleFonts.outfit(color: Colors.white70, fontSize: 14)),
+                Text(
+                  'partner.total_balance'.tr(),
+                  style: GoogleFonts.outfit(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  ),
+                ),
                 const SizedBox(height: 8),
-                Text('₺${_stats['totalBalance']}', style: GoogleFonts.outfit(color: Colors.white, fontSize: 40, fontWeight: FontWeight.bold)),
+                Text(
+                  '₺${_stats['totalBalance']}',
+                  style: GoogleFonts.outfit(
+                    color: Colors.white,
+                    fontSize: 40,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _statSubItem('partner.today'.tr(), '₺${_stats['todayEarnings']}', Colors.greenAccent),
+                    _statSubItem(
+                      'partner.today'.tr(),
+                      '₺${_stats['todayEarnings']}',
+                      Colors.greenAccent,
+                    ),
                     Container(width: 1, height: 30, color: Colors.white10),
-                    _statSubItem('partner.pending'.tr(), '₺${_stats['pendingPayout']}', Colors.orangeAccent),
+                    _statSubItem(
+                      'partner.pending'.tr(),
+                      '₺${_stats['pendingPayout']}',
+                      Colors.orangeAccent,
+                    ),
                   ],
                 ),
               ],
             ),
           ),
-          
+
           const SizedBox(height: 32),
-          
+
           Text(
             'partner.payment_history'.tr().toUpperCase(),
-            style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey.shade500, letterSpacing: 1.1),
+            style: GoogleFonts.outfit(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey.shade500,
+              letterSpacing: 1.1,
+            ),
           ),
           const SizedBox(height: 16),
-          
+
           ...(_stats['history'] as List).map((item) => _historyTile(item)),
-          
+
           const SizedBox(height: 32),
-          
+
           // Stripe Info Callout
           Container(
             padding: const EdgeInsets.all(20),
@@ -121,7 +155,11 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
                 Expanded(
                   child: Text(
                     'Kazançlarınız her Pazartesi günü otomatik olarak Stripe hesabınıza aktarılır.',
-                    style: GoogleFonts.outfit(color: Colors.blue.shade800, fontSize: 13, height: 1.4),
+                    style: GoogleFonts.outfit(
+                      color: Colors.blue.shade800,
+                      fontSize: 13,
+                      height: 1.4,
+                    ),
                   ),
                 ),
               ],
@@ -135,9 +173,19 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
   Widget _statSubItem(String label, String value, Color color) {
     return Column(
       children: [
-        Text(label, style: GoogleFonts.outfit(color: Colors.white38, fontSize: 11)),
+        Text(
+          label,
+          style: GoogleFonts.outfit(color: Colors.white38, fontSize: 11),
+        ),
         const SizedBox(height: 4),
-        Text(value, style: GoogleFonts.outfit(color: color, fontSize: 16, fontWeight: FontWeight.bold)),
+        Text(
+          value,
+          style: GoogleFonts.outfit(
+            color: color,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ],
     );
   }
@@ -149,26 +197,51 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.01), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.01), blurRadius: 10),
+        ],
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: Colors.green.shade50, shape: BoxShape.circle),
-            child: const Icon(Icons.arrow_downward_rounded, color: Colors.green, size: 20),
+            decoration: BoxDecoration(
+              color: Colors.green.shade50,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.arrow_downward_rounded,
+              color: Colors.green,
+              size: 20,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Ödeme Yapıldı', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 15)),
-                Text(item['date'], style: GoogleFonts.outfit(color: Colors.grey, fontSize: 12)),
+                Text(
+                  'Ödeme Yapıldı',
+                  style: GoogleFonts.outfit(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+                Text(
+                  item['date'],
+                  style: GoogleFonts.outfit(color: Colors.grey, fontSize: 12),
+                ),
               ],
             ),
           ),
-          Text('+₺${item['amount']}', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.green)),
+          Text(
+            '+₺${item['amount']}',
+            style: GoogleFonts.outfit(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Colors.green,
+            ),
+          ),
         ],
       ),
     );

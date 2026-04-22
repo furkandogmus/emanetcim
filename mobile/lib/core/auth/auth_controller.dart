@@ -1,4 +1,3 @@
-import 'dart:io' show Platform;
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -13,14 +12,21 @@ class AuthState {
   final bool isDemo;
   const AuthState({this.session, this.loading = false, this.isDemo = false});
 
-  AuthState copyWith({UserDto? session, bool? loading, bool? isDemo, bool clearSession = false}) => AuthState(
-        session: clearSession ? null : (session ?? this.session),
-        loading: loading ?? this.loading,
-        isDemo: isDemo ?? this.isDemo,
-      );
+  AuthState copyWith({
+    UserDto? session,
+    bool? loading,
+    bool? isDemo,
+    bool clearSession = false,
+  }) => AuthState(
+    session: clearSession ? null : (session ?? this.session),
+    loading: loading ?? this.loading,
+    isDemo: isDemo ?? this.isDemo,
+  );
 }
 
-final authControllerProvider = NotifierProvider<AuthController, AuthState>(AuthController.new);
+final authControllerProvider = NotifierProvider<AuthController, AuthState>(
+  AuthController.new,
+);
 
 class AuthController extends Notifier<AuthState> {
   @override
@@ -36,7 +42,9 @@ class AuthController extends Notifier<AuthState> {
     try {
       final dio = ref.read(dioProvider);
       final res = await dio.get('/auth/me');
-      state = state.copyWith(session: UserDto.fromJson(res.data as Map<String, dynamic>));
+      state = state.copyWith(
+        session: UserDto.fromJson(res.data as Map<String, dynamic>),
+      );
       // Push init on bootstrap
       try {
         await ref.read(pushServiceProvider).init();
@@ -51,8 +59,10 @@ class AuthController extends Notifier<AuthState> {
     final dio = ref.read(dioProvider);
     // Determine if identity is email or phone
     final isEmail = identity.contains('@');
-    final data = isEmail ? {'email': identity} : {'phone': identity.replaceAll(RegExp(r'\D'), '')};
-    
+    final data = isEmail
+        ? {'email': identity}
+        : {'phone': identity.replaceAll(RegExp(r'\D'), '')};
+
     await dio.post('/auth/otp', data: data);
     state = state.copyWith(loading: false);
   }
@@ -61,16 +71,18 @@ class AuthController extends Notifier<AuthState> {
     state = state.copyWith(loading: true);
     final dio = ref.read(dioProvider);
     final isEmail = identity.contains('@');
-    final data = isEmail 
-      ? {'email': identity, 'code': code} 
-      : {'phone': identity.replaceAll(RegExp(r'\D'), ''), 'code': code};
-      
+    final data = isEmail
+        ? {'email': identity, 'code': code}
+        : {'phone': identity.replaceAll(RegExp(r'\D'), ''), 'code': code};
+
     final res = await dio.post('/auth/session', data: data);
     await _completeSession(res.data as Map<String, dynamic>);
   }
 
   Future<void> _completeSession(Map<String, dynamic> data) async {
-    await ref.read(tokenStoreProvider).save(
+    await ref
+        .read(tokenStoreProvider)
+        .save(
           access: data['accessToken'] as String,
           refresh: data['refreshToken'] as String,
         );
@@ -97,7 +109,7 @@ class AuthController extends Notifier<AuthState> {
         id: 'demo-user',
         email: 'demo@bagajpark.com',
         name: 'Demo Kullanıcı',
-        role: UserRole.GUEST,
+        role: UserRole.guest,
       ),
     );
   }
@@ -109,7 +121,7 @@ class AuthController extends Notifier<AuthState> {
         id: 'demo-partner',
         email: 'esnaf@bagajpark.com',
         name: 'Galata Esnafı',
-        role: UserRole.PARTNER,
+        role: UserRole.partner,
       ),
     );
   }

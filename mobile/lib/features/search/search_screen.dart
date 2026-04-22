@@ -14,17 +14,25 @@ import '../../core/api/api_client.dart';
 import '../../core/config/env.dart';
 import '../../shared/models/shop.dart';
 
-final nearbyShopsProvider = FutureProvider.family<List<ShopDto>, LatLng>((ref, center) async {
+final nearbyShopsProvider = FutureProvider.family<List<ShopDto>, LatLng>((
+  ref,
+  center,
+) async {
   try {
     final dio = ref.watch(dioProvider);
-    final res = await dio.get('/shops/nearby', queryParameters: {
-      'lat': center.latitude,
-      'lng': center.longitude,
-      'r': 5000,
-    });
+    final res = await dio.get(
+      '/shops/nearby',
+      queryParameters: {
+        'lat': center.latitude,
+        'lng': center.longitude,
+        'r': 5000,
+      },
+    );
     final list = res.data as List<dynamic>;
-    var shops = list.map((e) => ShopDto.fromJson(e as Map<String, dynamic>)).toList();
-    
+    var shops = list
+        .map((e) => ShopDto.fromJson(e as Map<String, dynamic>))
+        .toList();
+
     if (shops.isEmpty) {
       shops = [
         ShopDto(
@@ -73,7 +81,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   void _showFilterSheet() {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (context) => StatefulBuilder(
         builder: (context, setSheetState) => Padding(
           padding: const EdgeInsets.all(24),
@@ -81,32 +91,52 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('search.filter'.tr(), style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text(
+                'search.filter'.tr(),
+                style: GoogleFonts.outfit(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               const SizedBox(height: 16),
               SwitchListTile(
-                title: Text('search.open_now'.tr(), style: GoogleFonts.outfit()),
-                subtitle: Text('search.open_now_hint'.tr(), style: GoogleFonts.outfit(fontSize: 12)),
+                title: Text(
+                  'search.open_now'.tr(),
+                  style: GoogleFonts.outfit(),
+                ),
+                subtitle: Text(
+                  'search.open_now_hint'.tr(),
+                  style: GoogleFonts.outfit(fontSize: 12),
+                ),
                 value: _onlyOpenNow,
                 onChanged: (v) {
                   setState(() => _onlyOpenNow = v);
                   setSheetState(() => _onlyOpenNow = v);
                 },
-                activeColor: const Color(0xFFF97316),
+                activeThumbColor: const Color(0xFFF97316),
               ),
               SwitchListTile(
-                title: Text('search.open_247'.tr(), style: GoogleFonts.outfit()),
-                subtitle: Text('search.open_247_hint'.tr(), style: GoogleFonts.outfit(fontSize: 12)),
+                title: Text(
+                  'search.open_247'.tr(),
+                  style: GoogleFonts.outfit(),
+                ),
+                subtitle: Text(
+                  'search.open_247_hint'.tr(),
+                  style: GoogleFonts.outfit(fontSize: 12),
+                ),
                 value: _only247,
                 onChanged: (v) {
                   setState(() => _only247 = v);
                   setSheetState(() => _only247 = v);
                 },
-                activeColor: const Color(0xFFF97316),
+                activeThumbColor: const Color(0xFFF97316),
               ),
               const SizedBox(height: 24),
               FilledButton(
                 onPressed: () => Navigator.pop(context),
-                style: FilledButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 50),
+                ),
                 child: Text('search.show_results'.tr()),
               ),
               const SizedBox(height: 16),
@@ -141,7 +171,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         final res = await dio.get(
           'https://photon.komoot.io/api/',
           queryParameters: {'q': query, 'limit': 5},
-          options: Options(headers: {'User-Agent': 'BagajPark (contact@bagajpark.com)'}),
+          options: Options(
+            headers: {'User-Agent': 'BagajPark (contact@bagajpark.com)'},
+          ),
         );
         final features = res.data['features'] as List<dynamic>;
         setState(() => _suggestions = features);
@@ -156,19 +188,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final lat = coords[1] as double;
     final lng = coords[0] as double;
     final newCenter = LatLng(lat, lng);
-    
+
     final props = suggestion['properties'] as Map<String, dynamic>;
     final name = props['name'] ?? '';
     final city = props['city'] ?? '';
     final displayName = '$name${city.isNotEmpty ? ', $city' : ''}';
-    
+
     setState(() {
       _center = newCenter;
       _suggestions = [];
       _isSearching = false;
       _searchController.text = displayName;
     });
-    
+
     _mapController.move(newCenter, 14);
     FocusScope.of(context).unfocus();
   }
@@ -192,17 +224,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) return;
     }
-    
+
     if (permission == LocationPermission.deniedForever) return;
 
     try {
-      final pos = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-        timeLimit: const Duration(seconds: 10),
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10),
+        ),
       );
       if (!mounted) return;
       setState(() {
-        _center = LatLng(pos.latitude, pos.longitude);
+        _center = LatLng(position.latitude, position.longitude);
       });
       _mapController.move(_center, 15);
     } catch (e) {
@@ -217,7 +251,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       final res = await dio.get(
         'https://photon.komoot.io/api/',
         queryParameters: {'q': query, 'limit': 1},
-        options: Options(headers: {'User-Agent': 'BagajPark (contact@bagajpark.com)'}),
+        options: Options(
+          headers: {'User-Agent': 'BagajPark (contact@bagajpark.com)'},
+        ),
       );
       final features = res.data['features'] as List<dynamic>;
       if (features.isNotEmpty) {
@@ -226,7 +262,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         final lat = coords[1] as double;
         final lng = coords[0] as double;
         final newCenter = LatLng(lat, lng);
-        
+
         setState(() {
           _center = newCenter;
           _isSearching = false;
@@ -251,11 +287,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               initialCenter: _center,
               initialZoom: 13,
               onPositionChanged: (pos, hasGesture) {
-                if (hasGesture && pos.center != null) {
-                   if ((pos.center!.latitude - _center.latitude).abs() > 0.002 || 
-                       (pos.center!.longitude - _center.longitude).abs() > 0.002) {
-                     setState(() => _center = pos.center!);
-                   }
+                if (hasGesture) {
+                  if ((pos.center.latitude - _center.latitude).abs() > 0.002 ||
+                      (pos.center.longitude - _center.longitude).abs() >
+                          0.002) {
+                    setState(() => _center = pos.center);
+                  }
                 }
               },
             ),
@@ -268,9 +305,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 markers: shopsAsync.maybeWhen(
                   data: (list) {
                     var filtered = list;
-                    if (_only247) filtered = filtered.where((s) => s.open247).toList();
-                    if (_onlyOpenNow) filtered = filtered.where((s) => s.isActive).toList();
-                    
+                    if (_only247) {
+                      filtered = filtered.where((s) => s.open247).toList();
+                    }
+                    if (_onlyOpenNow) {
+                      filtered = filtered.where((s) => s.isActive).toList();
+                    }
+
                     return filtered.asMap().entries.map((entry) {
                       final index = entry.key;
                       final s = entry.value;
@@ -283,7 +324,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           onTap: () {
                             HapticFeedback.lightImpact();
                             setState(() => _selectedShopIndex = index);
-                            _mapController.move(LatLng(s.latitude!, s.longitude!), 14);
+                            _mapController.move(
+                              LatLng(s.latitude!, s.longitude!),
+                              14,
+                            );
                           },
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 300),
@@ -292,26 +336,44 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                 Container(
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: isSelected ? const Color(0xFFF97316) : Colors.white,
+                                    color: isSelected
+                                        ? const Color(0xFFF97316)
+                                        : Colors.white,
                                     shape: BoxShape.circle,
                                     boxShadow: [
-                                      BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10, spreadRadius: 2),
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: 0.2),
+                                        blurRadius: 10,
+                                        spreadRadius: 2,
+                                      ),
                                     ],
                                   ),
                                   child: Icon(
                                     Icons.shopping_bag,
-                                    color: isSelected ? Colors.white : const Color(0xFFF97316),
+                                    color: isSelected
+                                        ? Colors.white
+                                        : const Color(0xFFF97316),
                                     size: isSelected ? 32 : 24,
                                   ),
                                 ),
                                 if (isSelected)
                                   Container(
                                     margin: const EdgeInsets.only(top: 4),
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(color: Colors.black.withOpacity(0.8), borderRadius: BorderRadius.circular(12)),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withValues(alpha: 0.8),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
                                     child: Text(
                                       s.name,
-                                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                               ],
@@ -336,7 +398,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 Container(
                   decoration: BoxDecoration(
                     boxShadow: [
-                      BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 30, offset: const Offset(0, 10)),
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 30,
+                        offset: const Offset(0, 10),
+                      ),
                     ],
                   ),
                   child: TextField(
@@ -348,32 +414,41 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     decoration: InputDecoration(
                       hintText: 'search.hint'.tr(),
                       prefixIcon: const Icon(Icons.search_rounded, size: 28),
-                      suffixIcon: _isSearching 
-                        ? IconButton(
-                            icon: const Icon(Icons.close_rounded),
-                            onPressed: () {
-                              setState(() {
-                                _isSearching = false;
-                                _suggestions = [];
-                                _searchController.clear();
-                              });
-                              FocusScope.of(context).unfocus();
-                            },
-                          )
-                        : GestureDetector(
-                            onTap: _showFilterSheet,
-                            child: Container(
-                              margin: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: (_onlyOpenNow || _only247) ? const Color(0xFF0F172A) : const Color(0xFFF97316),
-                                shape: BoxShape.circle,
+                      suffixIcon: _isSearching
+                          ? IconButton(
+                              icon: const Icon(Icons.close_rounded),
+                              onPressed: () {
+                                setState(() {
+                                  _isSearching = false;
+                                  _suggestions = [];
+                                  _searchController.clear();
+                                });
+                                FocusScope.of(context).unfocus();
+                              },
+                            )
+                          : GestureDetector(
+                              onTap: _showFilterSheet,
+                              child: Container(
+                                margin: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: (_onlyOpenNow || _only247)
+                                      ? const Color(0xFF0F172A)
+                                      : const Color(0xFFF97316),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.tune_rounded,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
                               ),
-                              child: const Icon(Icons.tune_rounded, color: Colors.white, size: 20),
                             ),
-                          ),
-                      fillColor: Colors.white.withOpacity(0.95),
+                      fillColor: Colors.white.withValues(alpha: 0.95),
                       filled: true,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: BorderSide.none,
+                      ),
                       contentPadding: const EdgeInsets.symmetric(vertical: 20),
                     ),
                   ),
@@ -384,22 +459,33 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20)],
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 20,
+                        ),
+                      ],
                     ),
                     child: ListView.separated(
                       shrinkWrap: true,
                       padding: EdgeInsets.zero,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: _suggestions.length,
-                      separatorBuilder: (_, __) => const Divider(height: 1),
+                      separatorBuilder: (_, _) => const Divider(height: 1),
                       itemBuilder: (context, index) {
                         final s = _suggestions[index];
                         final props = s['properties'] as Map<String, dynamic>;
                         final name = props['name'] ?? '';
                         final city = props['city'] ?? '';
                         return ListTile(
-                          leading: const Icon(Icons.location_on_outlined, color: Color(0xFFF97316)),
-                          title: Text('$name${city.isNotEmpty ? ", $city" : ""}', style: GoogleFonts.outfit(fontSize: 14)),
+                          leading: const Icon(
+                            Icons.location_on_outlined,
+                            color: Color(0xFFF97316),
+                          ),
+                          title: Text(
+                            '$name${city.isNotEmpty ? ", $city" : ""}',
+                            style: GoogleFonts.outfit(fontSize: 14),
+                          ),
                           onTap: () => _selectSuggestion(s),
                         );
                       },
@@ -418,8 +504,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               child: shopsAsync.maybeWhen(
                 data: (list) {
                   var filtered = list;
-                  if (_only247) filtered = filtered.where((s) => s.open247).toList();
-                  if (_onlyOpenNow) filtered = filtered.where((s) => s.isActive).toList();
+                  if (_only247) {
+                    filtered = filtered.where((s) => s.open247).toList();
+                  }
+                  if (_onlyOpenNow) {
+                    filtered = filtered.where((s) => s.isActive).toList();
+                  }
                   if (filtered.isEmpty) return const SizedBox();
 
                   return ListView.builder(
@@ -439,8 +529,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: isSelected ? const Color(0xFFF97316) : Colors.white, width: 2),
-                            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 5))],
+                            border: Border.all(
+                              color: isSelected
+                                  ? const Color(0xFFF97316)
+                                  : Colors.white,
+                              width: 2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.1),
+                                blurRadius: 20,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
                           ),
                           child: Row(
                             children: [
@@ -450,7 +551,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                   color: Colors.orange.shade50,
                                   borderRadius: BorderRadius.circular(16),
                                   image: const DecorationImage(
-                                    image: NetworkImage('https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=300&auto=format&fit=crop'),
+                                    image: NetworkImage(
+                                      'https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=300&auto=format&fit=crop',
+                                    ),
                                     fit: BoxFit.cover,
                                   ),
                                 ),
@@ -461,21 +564,53 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text(shop.name, style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A)), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                    Text(
+                                      shop.name,
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: const Color(0xFF0F172A),
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                     const SizedBox(height: 4),
                                     Row(
                                       children: [
-                                        const Icon(Icons.star_rounded, color: Colors.amber, size: 18),
+                                        const Icon(
+                                          Icons.star_rounded,
+                                          color: Colors.amber,
+                                          size: 18,
+                                        ),
                                         const SizedBox(width: 4),
-                                        Text('${shop.rating} (120+)', style: GoogleFonts.outfit(fontSize: 14, color: Colors.grey.shade600, fontWeight: FontWeight.w500)),
+                                        Text(
+                                          '${shop.rating} (120+)',
+                                          style: GoogleFonts.outfit(
+                                            fontSize: 14,
+                                            color: Colors.grey.shade600,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
                                       ],
                                     ),
                                     const Spacer(),
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text('₺${shop.pricePerDay.toStringAsFixed(0)}${'search.day_unit'.tr()}', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFFF97316))),
-                                        Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey.shade400),
+                                        Text(
+                                          '₺${shop.pricePerDay.toStringAsFixed(0)}${'search.day_unit'.tr()}',
+                                          style: GoogleFonts.outfit(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w700,
+                                            color: const Color(0xFFF97316),
+                                          ),
+                                        ),
+                                        Icon(
+                                          Icons.arrow_forward_ios_rounded,
+                                          size: 16,
+                                          color: Colors.grey.shade400,
+                                        ),
                                       ],
                                     ),
                                   ],
@@ -500,7 +635,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               onPressed: _determinePosition,
               backgroundColor: Colors.white,
               foregroundColor: const Color(0xFFF97316),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
               child: const Icon(Icons.my_location_rounded),
             ),
           ),

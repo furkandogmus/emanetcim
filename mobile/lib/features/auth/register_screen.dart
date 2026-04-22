@@ -27,22 +27,28 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   bool _isValidPhone(String phone) {
     final clean = phone.replaceAll(RegExp(r'\D'), '');
-    return (clean.length == 10 && clean.startsWith('5')) || 
-           (clean.length == 11 && clean.startsWith('05'));
+    return (clean.length == 10 && clean.startsWith('5')) ||
+        (clean.length == 11 && clean.startsWith('05'));
   }
 
   Future<void> _register() async {
     if (!_formKey.currentState!.validate() || !_kvkkAccepted) return;
-    
+
     setState(() => _busy = true);
     try {
       final identity = _identityController.text.trim();
       await ref.read(authControllerProvider.notifier).requestOtp(identity);
       if (mounted) {
-        context.push('/auth/otp?identity=${Uri.encodeComponent(identity)}&name=${Uri.encodeComponent(_nameController.text)}');
+        context.push(
+          '/auth/otp?identity=${Uri.encodeComponent(identity)}&name=${Uri.encodeComponent(_nameController.text)}',
+        );
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('common.error'.tr() + ': $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('${'common.error'.tr()}: $e')));
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -54,7 +60,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('auth.register'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        title: Text(
+          'auth.register'.tr(),
+          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.transparent,
       ),
       body: SingleChildScrollView(
@@ -66,38 +75,48 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             children: [
               Text(
                 'auth.register_welcome'.tr(),
-                style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 'auth.register_hint'.tr(),
-                style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey.shade600,
+                ),
               ),
               const SizedBox(height: 32),
-              
+
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
                   labelText: 'auth.name_label'.tr(),
                   prefixIcon: const Icon(Icons.person_outline_rounded),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
                 validator: (v) {
                   if (v == null || v.isEmpty) return 'auth.name_error'.tr();
                   if (v.length < 3) return 'auth.name_error'.tr();
-                  if (!RegExp(r"^[a-zA-ZçÇğĞıİöÖşŞüÜ\s]+$").hasMatch(v)) return 'auth.name_invalid_error'.tr();
+                  if (!RegExp(r"^[a-zA-ZçÇğĞıİöÖşŞüÜ\s]+$").hasMatch(v)) {
+                    return 'auth.name_invalid_error'.tr();
+                  }
                   return null;
                 },
               ),
               const SizedBox(height: 16),
-              
+
               TextFormField(
                 controller: _identityController,
                 decoration: InputDecoration(
                   labelText: 'auth.email_or_phone'.tr(),
                   prefixIcon: const Icon(Icons.mail_outline_rounded),
                   hintText: 'E-posta veya 05xx xxx xx xx',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
                 keyboardType: TextInputType.emailAddress,
                 validator: (v) {
@@ -107,9 +126,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   return 'auth.invalid_identity'.tr();
                 },
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               Row(
                 children: [
                   Checkbox(
@@ -125,22 +144,36 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       onTap: () {
                         HapticFeedback.lightImpact();
                         _showLegalModal(
-                          context, 
-                          'auth.terms_service'.tr() + ' & KVKK', 
-                          'BagajPark olarak verilerinizi 6698 sayılı KVKK kapsamında titizlikle koruyoruz...'
+                          context,
+                          '${'auth.terms_service'.tr()} & KVKK',
+                          'BagajPark olarak verilerinizi 6698 sayılı KVKK kapsamında titizlikle koruyoruz...',
                         );
                       },
                       child: Text.rich(
                         TextSpan(
                           text: 'auth.terms_service'.tr(),
-                          style: const TextStyle(decoration: TextDecoration.underline),
+                          style: const TextStyle(
+                            decoration: TextDecoration.underline,
+                          ),
                           children: [
-                            TextSpan(text: ' ' + 'auth.or'.tr() + ' ', style: const TextStyle(decoration: TextDecoration.none)),
+                            TextSpan(
+                              text: ' ${'auth.or'.tr()} ',
+                              style: const TextStyle(
+                                decoration: TextDecoration.none,
+                              ),
+                            ),
                             TextSpan(
                               text: 'auth.privacy_policy'.tr(),
-                              style: const TextStyle(color: Color(0xFFF97316), fontWeight: FontWeight.bold, decoration: TextDecoration.underline),
+                              style: const TextStyle(
+                                color: Color(0xFFF97316),
+                                fontWeight: FontWeight.bold,
+                                decoration: TextDecoration.underline,
+                              ),
                             ),
-                            const TextSpan(text: ' okudum, onaylıyorum.', style: TextStyle(decoration: TextDecoration.none)),
+                            const TextSpan(
+                              text: ' okudum, onaylıyorum.',
+                              style: TextStyle(decoration: TextDecoration.none),
+                            ),
                           ],
                         ),
                         style: theme.textTheme.bodySmall,
@@ -149,14 +182,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               FilledButton(
                 onPressed: (_busy || !_kvkkAccepted) ? null : _register,
-                child: _busy 
-                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) 
-                  : Text('auth.register_button'.tr()),
+                child: _busy
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : Text('auth.register_button'.tr()),
               ),
             ],
           ),
@@ -176,13 +216,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text(
+              title,
+              style: GoogleFonts.outfit(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: 16),
             Text(content, style: GoogleFonts.outfit(height: 1.6)),
             const SizedBox(height: 32),
             FilledButton(
               onPressed: () => Navigator.pop(context),
-              style: FilledButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(double.infinity, 50),
+              ),
               child: Text('common.confirm'.tr()),
             ),
             const SizedBox(height: 24),

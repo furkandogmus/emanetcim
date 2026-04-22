@@ -36,7 +36,7 @@ export const options = {
   },
 };
 
-export default function () {
+export default function loadTest() {
   const params = HOST_HEADER ? {
     headers: {
       'Host': HOST_HEADER,

@@ -3,7 +3,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:screen_protector/screen_protector.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -11,7 +10,10 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/api/api_client.dart';
 import '../../shared/models/booking.dart';
 
-final bookingProvider = FutureProvider.family<BookingDto, String>((ref, id) async {
+final bookingProvider = FutureProvider.family<BookingDto, String>((
+  ref,
+  id,
+) async {
   try {
     final res = await ref.watch(dioProvider).get('/bookings/$id');
     return BookingDto.fromJson(res.data as Map<String, dynamic>);
@@ -25,7 +27,8 @@ class BookingDetailScreen extends ConsumerStatefulWidget {
   final String bookingId;
 
   @override
-  ConsumerState<BookingDetailScreen> createState() => _BookingDetailScreenState();
+  ConsumerState<BookingDetailScreen> createState() =>
+      _BookingDetailScreenState();
 }
 
 class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
@@ -52,7 +55,10 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('booking.detail_title'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        title: Text(
+          'booking.detail_title'.tr(),
+          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+        ),
       ),
       body: bookingAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -60,10 +66,17 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline_rounded, size: 64, color: Colors.redAccent),
+              const Icon(
+                Icons.error_outline_rounded,
+                size: 64,
+                color: Colors.redAccent,
+              ),
               const SizedBox(height: 16),
               Text('common.error'.tr()),
-              TextButton(onPressed: () => ref.refresh(bookingProvider(widget.bookingId)), child: Text('common.retry'.tr())),
+              TextButton(
+                onPressed: () => ref.refresh(bookingProvider(widget.bookingId)),
+                child: Text('common.retry'.tr()),
+              ),
             ],
           ),
         ),
@@ -78,7 +91,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.06),
+                      color: Colors.black.withValues(alpha: 0.06),
                       blurRadius: 30,
                       offset: const Offset(0, 10),
                     ),
@@ -92,7 +105,10 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                         children: [
                           Text(
                             bk.shopName,
-                            style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold),
+                            style: GoogleFonts.outfit(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 8),
@@ -109,34 +125,60 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                             QrImageView(
                               data: bk.qrCodeToken!,
                               size: 200,
-                              eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: Color(0xFF0F172A)),
-                              dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.square, color: Color(0xFF0F172A)),
-                              embeddedImage: const AssetImage('assets/images/logo_icon.png'),
-                              embeddedImageStyle: const QrEmbeddedImageStyle(size: Size(40, 40)),
+                              eyeStyle: const QrEyeStyle(
+                                eyeShape: QrEyeShape.square,
+                                color: Color(0xFF0F172A),
+                              ),
+                              dataModuleStyle: const QrDataModuleStyle(
+                                dataModuleShape: QrDataModuleShape.square,
+                                color: Color(0xFF0F172A),
+                              ),
+                              embeddedImage: const AssetImage(
+                                'assets/images/logo_icon.png',
+                              ),
+                              embeddedImageStyle: const QrEmbeddedImageStyle(
+                                size: Size(40, 40),
+                              ),
                             ),
                             const SizedBox(height: 16),
                             Text(
                               'booking.qr_hint'.tr(),
-                              style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey.shade500),
+                              style: GoogleFonts.outfit(
+                                fontSize: 12,
+                                color: Colors.grey.shade500,
+                              ),
                             ),
                             const SizedBox(height: 32),
                           ],
-                          _infoRow('checkout.check_in'.tr(), fmt.format(bk.checkInTime)),
+                          _infoRow(
+                            'checkout.check_in'.tr(),
+                            fmt.format(bk.checkInTime),
+                          ),
                           const SizedBox(height: 16),
-                          _infoRow('checkout.check_out'.tr(), fmt.format(bk.checkOutTime)),
+                          _infoRow(
+                            'checkout.check_out'.tr(),
+                            fmt.format(bk.checkOutTime),
+                          ),
                           const SizedBox(height: 16),
-                          _infoRow('nav.bookings'.tr(), '${bk.totalBags} Adet (S:${bk.bagCountS}, M:${bk.bagCountM}, XL:${bk.bagCountXl})'),
+                          _infoRow(
+                            'nav.bookings'.tr(),
+                            '${bk.totalBags} Adet (S:${bk.bagCountS}, M:${bk.bagCountM}, XL:${bk.bagCountXl})',
+                          ),
                           const SizedBox(height: 16),
-                          _infoRow('checkout.total'.tr(), '₺${bk.totalPrice.toStringAsFixed(2)}', isBold: true),
+                          _infoRow(
+                            'checkout.total'.tr(),
+                            '₺${bk.totalPrice.toStringAsFixed(2)}',
+                            isBold: true,
+                          ),
                         ],
                       ),
                     ),
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Action Buttons
               Row(
                 children: [
@@ -147,7 +189,9 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                       label: Text('booking.directions'.tr()),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                       ),
                     ),
                   ),
@@ -159,22 +203,26 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                       label: Text('booking.call_shop'.tr()),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               SizedBox(
                 width: double.infinity,
                 child: TextButton.icon(
                   onPressed: () {},
                   icon: const Icon(Icons.help_outline_rounded, size: 20),
                   label: Text('booking.get_help'.tr()),
-                  style: TextButton.styleFrom(foregroundColor: Colors.grey.shade600),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.grey.shade600,
+                  ),
                 ),
               ),
               const SizedBox(height: 40),
@@ -188,41 +236,46 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
   Widget _statusBadge(BookingStatus status) {
     Color color = Colors.orange;
     String key = 'waiting_approval';
-    
+
     switch (status) {
-      case BookingStatus.PAID:
-      case BookingStatus.APPROVED:
+      case BookingStatus.paid:
+      case BookingStatus.approved:
         color = Colors.green;
         key = 'approved';
         break;
-      case BookingStatus.CHECKED_IN:
+      case BookingStatus.checkedIn:
         color = Colors.blue;
         key = 'checked_in';
         break;
-      case BookingStatus.CHECKED_OUT:
+      case BookingStatus.checkedOut:
         color = Colors.grey;
         key = 'checked_out';
         break;
-      case BookingStatus.CANCELLED:
+      case BookingStatus.cancelled:
         color = Colors.redAccent;
         key = 'cancelled';
         break;
-      case BookingStatus.WAITING_APPROVAL:
+      case BookingStatus.waitingApproval:
         color = Colors.orange;
         key = 'waiting_approval';
         break;
-      default: break;
+      default:
+        break;
     }
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(100),
       ),
       child: Text(
         'booking.status.$key'.tr(),
-        style: GoogleFonts.outfit(color: color, fontWeight: FontWeight.bold, fontSize: 14),
+        style: GoogleFonts.outfit(
+          color: color,
+          fontWeight: FontWeight.bold,
+          fontSize: 14,
+        ),
       ),
     );
   }
@@ -252,14 +305,18 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
     Uri url;
     if (bk.latitude != null && bk.longitude != null) {
       if (Platform.isIOS) {
-        url = Uri.parse('apple:https://maps.apple.com/?q=${bk.shopName}&ll=${bk.latitude},${bk.longitude}');
+        url = Uri.parse(
+          'apple:https://maps.apple.com/?q=${bk.shopName}&ll=${bk.latitude},${bk.longitude}',
+        );
       } else {
         url = Uri.parse('google.navigation:q=${bk.latitude},${bk.longitude}');
       }
     } else {
-      url = Uri.parse('https://www.google.com/maps/search/?api=1&query=${bk.shopName}');
+      url = Uri.parse(
+        'https://www.google.com/maps/search/?api=1&query=${bk.shopName}',
+      );
     }
-    
+
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
     }

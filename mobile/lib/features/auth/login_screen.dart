@@ -25,8 +25,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _isValidPhone(String phone) {
     // Basic Turkish phone validation: 05xx xxx xx xx or 5xx xxx xx xx
     final clean = phone.replaceAll(RegExp(r'\D'), '');
-    return (clean.length == 10 && clean.startsWith('5')) || 
-           (clean.length == 11 && clean.startsWith('05'));
+    return (clean.length == 10 && clean.startsWith('5')) ||
+        (clean.length == 11 && clean.startsWith('05'));
   }
 
   bool _isValid(String v) {
@@ -93,9 +93,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              theme.colorScheme.background,
-              Colors.orange.shade50.withOpacity(0.5),
-              theme.colorScheme.background,
+              theme.colorScheme.surface,
+              Colors.orange.shade50.withValues(alpha: 0.5),
+              theme.colorScheme.surface,
             ],
           ),
         ),
@@ -119,7 +119,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.orange.withOpacity(0.1),
+                              color: Colors.orange.withValues(alpha: 0.1),
                               blurRadius: 40,
                               spreadRadius: 10,
                             ),
@@ -150,7 +150,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 48),
-                    
+
                     // Login Card
                     Card(
                       elevation: 0,
@@ -169,9 +169,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text('auth.no_account'.tr(), style: GoogleFonts.outfit(color: Colors.grey.shade600)),
+                                Text(
+                                  'auth.no_account'.tr(),
+                                  style: GoogleFonts.outfit(
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
                                 TextButton(
-                                  onPressed: () => context.push('/auth/register'),
+                                  onPressed: () =>
+                                      context.push('/auth/register'),
                                   child: Text(
                                     'auth.register'.tr(),
                                     style: GoogleFonts.outfit(
@@ -191,11 +197,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               style: GoogleFonts.outfit(),
                               decoration: InputDecoration(
                                 hintText: 'auth.email_or_phone'.tr(),
-                                prefixIcon: const Icon(Icons.person_outline_rounded),
+                                prefixIcon: const Icon(
+                                  Icons.person_outline_rounded,
+                                ),
                                 helperText: 'Örn: 05xx xxx xx xx veya e-posta',
                                 helperStyle: const TextStyle(fontSize: 10),
                               ),
-                              validator: (v) => _isValid(v ?? '') ? null : 'auth.invalid_identity'.tr(),
+                              validator: (v) => _isValid(v ?? '')
+                                  ? null
+                                  : 'auth.invalid_identity'.tr(),
                             ),
                             const SizedBox(height: 24),
                             FilledButton(
@@ -215,9 +225,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                     ),
-                    
+
                     const SizedBox(height: 40),
-                    
+
                     // Divider
                     Row(
                       children: [
@@ -235,24 +245,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         const Expanded(child: Divider(thickness: 1)),
                       ],
                     ),
-                    
+
                     const SizedBox(height: 40),
-                    
+
                     // Social Logins
                     OutlinedButton.icon(
                       onPressed: _busy ? null : _google,
                       icon: Image.network(
                         'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_Color_Icon.svg/1024px-Google_Color_Icon.svg.png',
                         height: 24,
-                        errorBuilder: (context, error, stackTrace) => const Icon(Icons.login),
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(Icons.login),
                       ),
                       label: Text('auth.google'.tr()),
                     ),
-                    
+
                     if (Platform.isIOS || Platform.isMacOS) ...[
                       const SizedBox(height: 16),
                       OutlinedButton.icon(
-                      onPressed: _busy ? null : _apple,
+                        onPressed: _busy ? null : _apple,
                         icon: const Icon(Icons.apple, size: 28),
                         label: Text('auth.apple'.tr()),
                         style: OutlinedButton.styleFrom(
@@ -264,7 +275,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ],
                     const SizedBox(height: 24),
                     TextButton(
-                      onPressed: () => ref.read(authControllerProvider.notifier).skipLogin(),
+                      onPressed: () =>
+                          ref.read(authControllerProvider.notifier).skipLogin(),
                       child: Text(
                         'auth.demo_guest'.tr(),
                         style: GoogleFonts.outfit(
@@ -276,7 +288,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const SizedBox(height: 8),
                     TextButton(
-                      onPressed: () => ref.read(authControllerProvider.notifier).skipLoginAsPartner(),
+                      onPressed: () => ref
+                          .read(authControllerProvider.notifier)
+                          .skipLoginAsPartner(),
                       child: Text(
                         'auth.demo_partner'.tr(),
                         style: GoogleFonts.outfit(
