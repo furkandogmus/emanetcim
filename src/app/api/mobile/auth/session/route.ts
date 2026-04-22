@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 import { signAccessToken, signRefreshToken } from "@/lib/mobile-auth";
 
 const schema = z.object({ email: z.string().email(), code: z.string().length(6) });
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   await prisma.verificationToken.delete({ where: { identifier_token: { identifier, token: code } } });
 
   let user = await prisma.user.findUnique({ where: { email } });
-  user ??= await prisma.user.create({ data: { email, role: "CUSTOMER" } });
+  user ??= await prisma.user.create({ data: { email, role: "GUEST" } });
 
   const access = await signAccessToken(user.id, user.role);
   const refresh = await signRefreshToken(user.id, user.role);

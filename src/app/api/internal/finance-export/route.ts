@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
   ].join(",");
 
   const lines = rows.map((b) => {
-    const pl = b.paymentLogs[0];
+    const pl = b.paymentLogs;
     return [
       b.id,
       b.createdAt.toISOString(),

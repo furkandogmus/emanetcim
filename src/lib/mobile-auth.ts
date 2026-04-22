@@ -1,7 +1,7 @@
 import { jwtVerify, SignJWT } from "jose";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { prisma } from "./db";
+import prisma from "./db";
 import type { Role } from "@prisma/client";
 
 const secret = () => {
