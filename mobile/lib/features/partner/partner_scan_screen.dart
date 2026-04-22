@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
@@ -85,17 +86,16 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
       body: Stack(
         children: [
           MobileScanner(onDetect: _onDetect),
-          // Custom Overlay
-          Container(
-            decoration: ShapeDecoration(
-              shape: QrScannerOverlayShape(
-                borderColor: const Color(0xFFF97316),
-                borderRadius: 20,
-                borderLength: 30,
-                borderWidth: 10,
-                cutOutSize: MediaQuery.of(context).size.width * 0.7,
-              ),
+          // Custom Overlay using CustomPaint instead of ShapeBorder
+          CustomPaint(
+            painter: ScannerOverlayPainter(
+              borderColor: const Color(0xFFF97316),
+              borderRadius: 20,
+              borderLength: 30,
+              borderWidth: 8,
+              cutOutSize: MediaQuery.of(context).size.width * 0.7,
             ),
+            child: const SizedBox.expand(),
           ),
           // Back Button & UI
           SafeArea(
@@ -134,55 +134,39 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
   }
 }
 
-// Simple helper for QR overlay (If not available in package, we can define one)
-class QrScannerOverlayShape extends ShapeBorder {
+class ScannerOverlayPainter extends CustomPainter {
   final Color borderColor;
   final double borderWidth;
   final double borderRadius;
   final double borderLength;
   final double cutOutSize;
 
-  const QrScannerOverlayShape({
-    this.borderColor = Colors.white,
-    this.borderWidth = 10,
-    this.borderRadius = 0,
-    this.borderLength = 40,
-    this.cutOutSize = 250,
+  ScannerOverlayPainter({
+    required this.borderColor,
+    required this.borderWidth,
+    required this.borderRadius,
+    required this.borderLength,
+    required this.cutOutSize,
   });
 
   @override
-  EdgeInsetsGeometry get dimensions => const EdgeInsets.all(10);
-
-  @override
-  Path getInnerPath(Rect rect, {TextDirection? textDirection}) => Path();
-
-  @override
-  Path getOuterPath(Rect rect, {TextDirection? textDirection}) => Path();
-
-  @override
-  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
-    final width = rect.width;
-    final height = rect.height;
-    final borderOffset = borderWidth / 2;
-    final double _borderRadius = borderRadius;
-    final double _borderLength = borderLength;
-    final double _cutOutSize = cutOutSize;
-
+  void paint(Canvas canvas, Size size) {
     final backgroundPaint = Paint()
       ..color = Colors.black.withOpacity(0.5)
       ..style = PaintingStyle.fill;
 
     final cutOutRect = Rect.fromCenter(
-      center: Offset(width / 2, height / 2),
-      width: _cutOutSize,
-      height: _cutOutSize,
+      center: Offset(size.width / 2, size.height / 2),
+      width: cutOutSize,
+      height: cutOutSize,
     );
 
+    // Draw background with hole
     canvas.drawPath(
       Path.combine(
         PathOperation.difference,
-        Path()..addRect(rect),
-        Path()..addRRect(RRect.fromRectAndRadius(cutOutRect, Radius.circular(_borderRadius))),
+        Path()..addRect(Rect.fromLTWH(0, 0, size.width, size.height)),
+        Path()..addRRect(RRect.fromRectAndRadius(cutOutRect, Radius.circular(borderRadius))),
       ),
       backgroundPaint,
     );
@@ -195,35 +179,29 @@ class QrScannerOverlayShape extends ShapeBorder {
 
     final path = Path()
       // Top left
-      ..moveTo(cutOutRect.left, cutOutRect.top + _borderLength)
-      ..lineTo(cutOutRect.left, cutOutRect.top + _borderRadius)
-      ..arcToPoint(Offset(cutOutRect.left + _borderRadius, cutOutRect.top), radius: Radius.circular(_borderRadius))
-      ..lineTo(cutOutRect.left + _borderLength, cutOutRect.top)
+      ..moveTo(cutOutRect.left, cutOutRect.top + borderLength)
+      ..lineTo(cutOutRect.left, cutOutRect.top + borderRadius)
+      ..arcToPoint(Offset(cutOutRect.left + borderRadius, cutOutRect.top), radius: Radius.circular(borderRadius))
+      ..lineTo(cutOutRect.left + borderLength, cutOutRect.top)
       // Top right
-      ..moveTo(cutOutRect.right - _borderLength, cutOutRect.top)
-      ..lineTo(cutOutRect.right - _borderRadius, cutOutRect.top)
-      ..arcToPoint(Offset(cutOutRect.right, cutOutRect.top + _borderRadius), radius: Radius.circular(_borderRadius))
-      ..lineTo(cutOutRect.right, cutOutRect.top + _borderLength)
+      ..moveTo(cutOutRect.right - borderLength, cutOutRect.top)
+      ..lineTo(cutOutRect.right - borderRadius, cutOutRect.top)
+      ..arcToPoint(Offset(cutOutRect.right, cutOutRect.top + borderRadius), radius: Radius.circular(borderRadius))
+      ..lineTo(cutOutRect.right, cutOutRect.top + borderLength)
       // Bottom left
-      ..moveTo(cutOutRect.left, cutOutRect.bottom - _borderLength)
-      ..lineTo(cutOutRect.left, cutOutRect.bottom - _borderRadius)
-      ..arcToPoint(Offset(cutOutRect.left + _borderRadius, cutOutRect.bottom), radius: Radius.circular(_borderRadius))
-      ..lineTo(cutOutRect.left + _borderLength, cutOutRect.bottom)
+      ..moveTo(cutOutRect.left, cutOutRect.bottom - borderLength)
+      ..lineTo(cutOutRect.left, cutOutRect.bottom - borderRadius)
+      ..arcToPoint(Offset(cutOutRect.left + borderRadius, cutOutRect.bottom), radius: Radius.circular(borderRadius))
+      ..lineTo(cutOutRect.left + borderLength, cutOutRect.bottom)
       // Bottom right
-      ..moveTo(cutOutRect.right - _borderLength, cutOutRect.bottom)
-      ..lineTo(cutOutRect.right - _borderRadius, cutOutRect.bottom)
-      ..arcToPoint(Offset(cutOutRect.right, cutOutRect.bottom - _borderRadius), radius: Radius.circular(_borderRadius))
-      ..lineTo(cutOutRect.right, cutOutRect.bottom - _borderLength);
+      ..moveTo(cutOutRect.right - borderLength, cutOutRect.bottom)
+      ..lineTo(cutOutRect.right - borderRadius, cutOutRect.bottom)
+      ..arcToPoint(Offset(cutOutRect.right, cutOutRect.bottom - borderRadius), radius: Radius.circular(borderRadius))
+      ..lineTo(cutOutRect.right, cutOutRect.bottom - borderLength);
 
     canvas.drawPath(path, borderPaint);
   }
 
   @override
-  ShapeBorder scale(double t) => QrScannerOverlayShape(
-        borderColor: borderColor,
-        borderWidth: borderWidth,
-        borderRadius: borderRadius,
-        borderLength: borderLength,
-        cutOutSize: cutOutSize,
-      );
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

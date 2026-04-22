@@ -37,7 +37,6 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
 
   Future<void> _protectScreen() async {
     await ScreenProtector.preventScreenshotOn();
-    await ScreenProtector.backgroundColorOn(Colors.black);
   }
 
   @override
