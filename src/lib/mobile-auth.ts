@@ -65,3 +65,25 @@ export function requireRole(user: { role: Role }, roles: Role[]) {
   }
   return null;
 }
+
+export async function getMobileSession() {
+  const { headers } = await import("next/headers");
+  const h = await headers();
+  const authHeader = h.get("authorization");
+  
+  if (!authHeader?.startsWith("Bearer ")) {
+    return null;
+  }
+
+  const token = authHeader.slice(7);
+  try {
+    const claims = await verifyMobileToken(token);
+    if (claims.type !== "access") return null;
+    return {
+      userId: claims.sub,
+      role: claims.role,
+    };
+  } catch {
+    return null;
+  }
+}

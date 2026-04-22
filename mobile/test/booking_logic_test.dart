@@ -4,12 +4,12 @@ import 'package:bagajpark/shared/models/booking.dart';
 void main() {
   group('Booking Logic Tests', () {
     test('Calculate total bags correctly', () {
-      const booking = BookingDto(
+      final booking = BookingDto(
         id: '1',
         shopId: 's1',
         shopName: 'Shop',
-        checkInTime: null,
-        checkOutTime: null,
+        checkInTime: DateTime.now(),
+        checkOutTime: DateTime.now().add(const Duration(hours: 4)),
         bagCountS: 2,
         bagCountM: 3,
         bagCountXl: 1,
