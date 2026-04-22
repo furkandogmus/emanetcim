@@ -10,7 +10,9 @@ import '../../shared/models/booking.dart';
 final myBookingsProvider = FutureProvider<List<BookingDto>>((ref) async {
   try {
     final res = await ref.watch(dioProvider).get('/bookings/me');
-    return (res.data as List).map((e) => BookingDto.fromJson(e as Map<String, dynamic>)).toList();
+    return (res.data as List)
+        .map((e) => BookingDto.fromJson(e as Map<String, dynamic>))
+        .toList();
   } catch (e) {
     return [];
   }
@@ -27,7 +29,10 @@ class MyBookingsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Rezervasyonlarım', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        title: Text(
+          'Rezervasyonlarım',
+          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+        ),
         actions: [
           IconButton(
             onPressed: () => ref.refresh(myBookingsProvider.future),
@@ -41,7 +46,11 @@ class MyBookingsScreen extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline_rounded, size: 64, color: Colors.redAccent),
+              const Icon(
+                Icons.error_outline_rounded,
+                size: 64,
+                color: Colors.redAccent,
+              ),
               const SizedBox(height: 16),
               Text('Bir hata oluştu', style: theme.textTheme.headlineSmall),
               TextButton(
@@ -63,17 +72,25 @@ class MyBookingsScreen extends ConsumerWidget {
                       color: Colors.orange.shade50,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.luggage_outlined, size: 80, color: Color(0xFFF97316)),
+                    child: const Icon(
+                      Icons.luggage_outlined,
+                      size: 80,
+                      color: Color(0xFFF97316),
+                    ),
                   ),
                   const SizedBox(height: 24),
                   Text(
                     'Henüz rezervasyonun yok',
-                    style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Seyahatine başlamak için bir dükkan bul!',
-                    style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: Colors.grey.shade600,
+                    ),
                   ),
                   const SizedBox(height: 32),
                   FilledButton.icon(
@@ -94,7 +111,7 @@ class MyBookingsScreen extends ConsumerWidget {
               itemBuilder: (context, i) {
                 final b = list[i];
                 final statusColor = _statusColor(b.status);
-                
+
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 20),
                   child: GestureDetector(
@@ -105,7 +122,7 @@ class MyBookingsScreen extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
+                            color: Colors.black.withValues(alpha: 0.04),
                             blurRadius: 20,
                             offset: const Offset(0, 4),
                           ),
@@ -116,14 +133,22 @@ class MyBookingsScreen extends ConsumerWidget {
                         child: Column(
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                              color: statusColor.withOpacity(0.08),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 12,
+                              ),
+                              color: statusColor.withValues(alpha: 0.08),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Row(
                                     children: [
-                                      Icon(Icons.calendar_today_rounded, size: 14, color: statusColor),
+                                      Icon(
+                                        Icons.calendar_today_rounded,
+                                        size: 14,
+                                        color: statusColor,
+                                      ),
                                       const SizedBox(width: 8),
                                       Text(
                                         'ID: #${b.id.substring(b.id.length - 6).toUpperCase()}',
@@ -136,7 +161,10 @@ class MyBookingsScreen extends ConsumerWidget {
                                     ],
                                   ),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: statusColor,
                                       borderRadius: BorderRadius.circular(100),
@@ -164,12 +192,16 @@ class MyBookingsScreen extends ConsumerWidget {
                                       color: Colors.orange.shade50,
                                       borderRadius: BorderRadius.circular(16),
                                     ),
-                                    child: const Icon(Icons.storefront_rounded, color: Color(0xFFF97316)),
+                                    child: const Icon(
+                                      Icons.storefront_rounded,
+                                      color: Color(0xFFF97316),
+                                    ),
                                   ),
                                   const SizedBox(width: 16),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           b.shopName,
@@ -195,13 +227,21 @@ class MyBookingsScreen extends ConsumerWidget {
                             ),
                             const Divider(height: 1, indent: 20, endIndent: 20),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 16,
+                              ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Row(
                                     children: [
-                                      const Icon(Icons.luggage_rounded, size: 18, color: Colors.grey),
+                                      const Icon(
+                                        Icons.luggage_rounded,
+                                        size: 18,
+                                        color: Colors.grey,
+                                      ),
                                       const SizedBox(width: 8),
                                       Text(
                                         '${b.totalBags} Valiz',
@@ -239,28 +279,35 @@ class MyBookingsScreen extends ConsumerWidget {
 
   String _statusLabel(BookingStatus status) {
     switch (status) {
-      case BookingStatus.PENDING: return 'Beklemede';
-      case BookingStatus.PAID: return 'Ödendi';
-      case BookingStatus.APPROVED: return 'Onaylandı';
-      case BookingStatus.CHECKED_IN: return 'Emanet Alındı';
-      case BookingStatus.CHECKED_OUT: return 'Teslim Edildi';
-      case BookingStatus.CANCELLED: return 'İptal Edildi';
-      case BookingStatus.WAITING_APPROVAL: return 'Onay Bekliyor';
+      case BookingStatus.pending:
+        return 'Beklemede';
+      case BookingStatus.paid:
+        return 'Ödendi';
+      case BookingStatus.approved:
+        return 'Onaylandı';
+      case BookingStatus.checkedIn:
+        return 'Emanet Alındı';
+      case BookingStatus.checkedOut:
+        return 'Teslim Edildi';
+      case BookingStatus.cancelled:
+        return 'İptal Edildi';
+      case BookingStatus.waitingApproval:
+        return 'Onay Bekliyor';
     }
   }
 
   Color _statusColor(BookingStatus status) {
     switch (status) {
-      case BookingStatus.PAID:
-      case BookingStatus.APPROVED:
+      case BookingStatus.paid:
+      case BookingStatus.approved:
         return Colors.green;
-      case BookingStatus.CHECKED_IN:
+      case BookingStatus.checkedIn:
         return Colors.blue;
-      case BookingStatus.CANCELLED:
+      case BookingStatus.cancelled:
         return Colors.redAccent;
-      case BookingStatus.CHECKED_OUT:
+      case BookingStatus.checkedOut:
         return Colors.grey;
-      case BookingStatus.WAITING_APPROVAL:
+      case BookingStatus.waitingApproval:
         return Colors.orange;
       default:
         return Colors.orange;

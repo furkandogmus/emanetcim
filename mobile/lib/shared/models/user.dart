@@ -3,7 +3,14 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'user.freezed.dart';
 part 'user.g.dart';
 
-enum UserRole { GUEST, PARTNER, ADMIN }
+enum UserRole {
+  @JsonValue("GUEST")
+  guest,
+  @JsonValue("PARTNER")
+  partner,
+  @JsonValue("ADMIN")
+  admin,
+}
 
 @freezed
 abstract class UserDto with _$UserDto {
@@ -17,5 +24,6 @@ abstract class UserDto with _$UserDto {
     String? referralCode,
   }) = _UserDto;
 
-  factory UserDto.fromJson(Map<String, dynamic> json) => _$UserDtoFromJson(json);
+  factory UserDto.fromJson(Map<String, dynamic> json) =>
+      _$UserDtoFromJson(json);
 }

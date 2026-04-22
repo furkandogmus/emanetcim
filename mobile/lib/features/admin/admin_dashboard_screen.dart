@@ -10,12 +10,14 @@ class AdminDashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: Text('admin.dashboard'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        title: Text(
+          'admin.dashboard'.tr(),
+          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+        ),
         actions: [
           IconButton(
             onPressed: () {},
@@ -66,13 +68,18 @@ class AdminDashboardScreen extends ConsumerWidget {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 32),
-          
+
           // Live Analytics Placeholder
           Text(
             'admin.live_analytics'.tr().toUpperCase(),
-            style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey.shade500, letterSpacing: 1.1),
+            style: GoogleFonts.outfit(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey.shade500,
+              letterSpacing: 1.1,
+            ),
           ),
           const SizedBox(height: 12),
           Container(
@@ -80,26 +87,43 @@ class AdminDashboardScreen extends ConsumerWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(24),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 20)],
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 20,
+                ),
+              ],
             ),
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.analytics_rounded, size: 48, color: Colors.grey),
+                  const Icon(
+                    Icons.analytics_rounded,
+                    size: 48,
+                    color: Colors.grey,
+                  ),
                   const SizedBox(height: 8),
-                  Text('Grafikler yakında burada olacak', style: GoogleFonts.outfit(color: Colors.grey)),
+                  Text(
+                    'Grafikler yakında burada olacak',
+                    style: GoogleFonts.outfit(color: Colors.grey),
+                  ),
                 ],
               ),
             ),
           ),
-          
+
           const SizedBox(height: 32),
-          
+
           // Quick Actions
           Text(
             'admin.quick_actions'.tr().toUpperCase(),
-            style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey.shade500, letterSpacing: 1.1),
+            style: GoogleFonts.outfit(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey.shade500,
+              letterSpacing: 1.1,
+            ),
           ),
           const SizedBox(height: 12),
           _actionTile(
@@ -129,13 +153,22 @@ class AdminDashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _statCard(BuildContext context, String title, String value, IconData icon, Color color, {bool isOrange = false}) {
+  Widget _statCard(
+    BuildContext context,
+    String title,
+    String value,
+    IconData icon,
+    Color color, {
+    bool isOrange = false,
+  }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,14 +176,32 @@ class AdminDashboardScreen extends ConsumerWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Icon(icon, color: color, size: 20),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(value, style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A))),
-              Text(title, style: GoogleFonts.outfit(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.grey.shade500, letterSpacing: 0.5)),
+              Text(
+                value,
+                style: GoogleFonts.outfit(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF0F172A),
+                ),
+              ),
+              Text(
+                title,
+                style: GoogleFonts.outfit(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade500,
+                  letterSpacing: 0.5,
+                ),
+              ),
             ],
           ),
         ],
@@ -158,7 +209,14 @@ class AdminDashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _actionTile(IconData icon, String title, String subtitle, Color color, {bool isPulse = false, VoidCallback? onTap}) {
+  Widget _actionTile(
+    IconData icon,
+    String title,
+    String subtitle,
+    Color color, {
+    bool isPulse = false,
+    VoidCallback? onTap,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
@@ -171,14 +229,34 @@ class AdminDashboardScreen extends ConsumerWidget {
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: Container(
           padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(16)),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: Icon(icon, color: color),
         ),
-        title: Text(title, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16)),
-        subtitle: Text(subtitle, style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey.shade600)),
-        trailing: isPulse 
-          ? Container(width: 8, height: 8, decoration: const BoxDecoration(color: Color(0xFF10B981), shape: BoxShape.circle))
-          : const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
+        title: Text(
+          title,
+          style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey.shade600),
+        ),
+        trailing: isPulse
+            ? Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF10B981),
+                  shape: BoxShape.circle,
+                ),
+              )
+            : const Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 14,
+                color: Colors.grey,
+              ),
       ),
     );
   }

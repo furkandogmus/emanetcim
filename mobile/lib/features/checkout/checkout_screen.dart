@@ -5,10 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 
 import '../../core/api/api_client.dart';
-import '../../shared/models/shop.dart';
 import '../search/shop_detail_screen.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
@@ -38,7 +36,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       lastDate: DateTime.now().add(const Duration(days: 90)),
     );
     if (d == null) return;
-    final t = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(init));
+    if (!mounted) return;
+    final t = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(init),
+    );
     if (t == null) return;
     setState(() {
       final dt = DateTime(d.year, d.month, d.day, t.hour, t.minute);
@@ -55,15 +57,18 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     setState(() => _busy = true);
     try {
       final dio = ref.read(dioProvider);
-      final res = await dio.post('/checkout/intent', data: {
-        'shopId': widget.shopId,
-        'checkInTime': _checkIn.toUtc().toIso8601String(),
-        'checkOutTime': _checkOut.toUtc().toIso8601String(),
-        'bagCountS': _s,
-        'bagCountM': _m,
-        'bagCountXl': _xl,
-        'couponCode': _coupon.text.trim(),
-      });
+      final res = await dio.post(
+        '/checkout/intent',
+        data: {
+          'shopId': widget.shopId,
+          'checkInTime': _checkIn.toUtc().toIso8601String(),
+          'checkOutTime': _checkOut.toUtc().toIso8601String(),
+          'bagCountS': _s,
+          'bagCountM': _m,
+          'bagCountXl': _xl,
+          'couponCode': _coupon.text.trim(),
+        },
+      );
       final clientSecret = res.data['clientSecret'] as String;
       final bookingId = res.data['bookingId'] as String;
 
@@ -79,7 +84,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       context.go('/booking/$bookingId');
     } on StripeException catch (e) {
       if (e.error.code != FailureCode.Canceled) {
-        if (mounted) _toast('common.error'.tr() + ': ${e.error.localizedMessage}');
+        if (mounted) {
+          _toast('${'common.error'.tr()}: ${e.error.localizedMessage}');
+        }
       }
     } catch (e) {
       if (!mounted) return;
@@ -87,8 +94,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       if (e is DioException) {
         final errCode = e.response?.data['error'];
         if (errCode == 'no_bags') msg = 'checkout.error_no_bags'.tr();
-        if (errCode == 'shop_not_found') msg = 'checkout.error_shop_closed'.tr();
-        if (errCode == 'gateway_not_configured') msg = 'checkout.error_payment'.tr();
+        if (errCode == 'shop_not_found') {
+          msg = 'checkout.error_shop_closed'.tr();
+        }
+        if (errCode == 'gateway_not_configured') {
+          msg = 'checkout.error_payment'.tr();
+        }
       }
       _toast(msg);
     } finally {
@@ -110,11 +121,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   @override
   Widget build(BuildContext context) {
     final shopAsync = ref.watch(shopProvider(widget.shopId));
-    final fmt = DateFormat('dd MMM, HH:mm');
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('checkout.title'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        title: Text(
+          'checkout.title'.tr(),
+          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -128,36 +141,79 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 20, offset: const Offset(0, 4)),
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 20,
+                    offset: const Offset(0, 4),
+                  ),
                 ],
               ),
               child: Column(
                 children: [
-                  _dateRow('checkout.check_in'.tr(), _checkIn, () => _pickDate(true), Icons.login_rounded, Colors.green),
+                  _dateRow(
+                    'checkout.check_in'.tr(),
+                    _checkIn,
+                    () => _pickDate(true),
+                    Icons.login_rounded,
+                    Colors.green,
+                  ),
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 12),
                     child: Divider(height: 1),
                   ),
-                  _dateRow('checkout.check_out'.tr(), _checkOut, () => _pickDate(false), Icons.logout_rounded, Colors.redAccent),
+                  _dateRow(
+                    'checkout.check_out'.tr(),
+                    _checkOut,
+                    () => _pickDate(false),
+                    Icons.logout_rounded,
+                    Colors.redAccent,
+                  ),
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 32),
             Text(
               'checkout.bags_title'.tr().toUpperCase(),
-              style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey.shade500, letterSpacing: 1.2),
+              style: GoogleFonts.outfit(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade500,
+                letterSpacing: 1.2,
+              ),
             ),
             const SizedBox(height: 16),
-            
-            _bagCounter('checkout.bag_s'.tr(), 'checkout.bag_s_hint'.tr(), _s, (v) => setState(() => _s = v), Icons.backpack_outlined),
-            _bagCounter('checkout.bag_m'.tr(), 'checkout.bag_m_hint'.tr(), _m, (v) => setState(() => _m = v), Icons.luggage_outlined),
-            _bagCounter('checkout.bag_xl'.tr(), 'checkout.bag_xl_hint'.tr(), _xl, (v) => setState(() => _xl = v), Icons.work_outline_rounded),
-            
+
+            _bagCounter(
+              'checkout.bag_s'.tr(),
+              'checkout.bag_s_hint'.tr(),
+              _s,
+              (v) => setState(() => _s = v),
+              Icons.backpack_outlined,
+            ),
+            _bagCounter(
+              'checkout.bag_m'.tr(),
+              'checkout.bag_m_hint'.tr(),
+              _m,
+              (v) => setState(() => _m = v),
+              Icons.luggage_outlined,
+            ),
+            _bagCounter(
+              'checkout.bag_xl'.tr(),
+              'checkout.bag_xl_hint'.tr(),
+              _xl,
+              (v) => setState(() => _xl = v),
+              Icons.work_outline_rounded,
+            ),
+
             const SizedBox(height: 24),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade200)),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
               child: TextField(
                 controller: _coupon,
                 decoration: InputDecoration(
@@ -168,16 +224,17 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 style: GoogleFonts.outfit(fontSize: 14),
               ),
             ),
-            
+
             const SizedBox(height: 40),
-            
+
             // Payment Summary
             shopAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Text('common.error'.tr()),
               data: (shop) {
                 final days = _checkOut.difference(_checkIn).inDays + 1;
-                final bagTotal = (_s * 0.8 + _m * 1.0 + _xl * 1.5) * shop.pricePerDay * days;
+                final bagTotal =
+                    (_s * 0.8 + _m * 1.0 + _xl * 1.5) * shop.pricePerDay * days;
                 const insuranceFee = 15.0;
                 final grandTotal = bagTotal > 0 ? bagTotal + insuranceFee : 0.0;
 
@@ -189,11 +246,21 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   ),
                   child: Column(
                     children: [
-                      _summaryRow('checkout.summary_bags'.tr(args: [days.toString()]), '₺${bagTotal.toStringAsFixed(2)}'),
+                      _summaryRow(
+                        'checkout.summary_bags'.tr(args: [days.toString()]),
+                        '₺${bagTotal.toStringAsFixed(2)}',
+                      ),
                       const SizedBox(height: 12),
-                      _summaryRow('checkout.insurance_fee'.tr(), '₺${insuranceFee.toStringAsFixed(2)}'),
+                      _summaryRow(
+                        'checkout.insurance_fee'.tr(),
+                        '₺${insuranceFee.toStringAsFixed(2)}',
+                      ),
                       const SizedBox(height: 12),
-                      _summaryRow('checkout.service_fee'.tr(), 'checkout.included'.tr(), valueColor: Colors.greenAccent),
+                      _summaryRow(
+                        'checkout.service_fee'.tr(),
+                        'checkout.included'.tr(),
+                        valueColor: Colors.greenAccent,
+                      ),
                       const Padding(
                         padding: EdgeInsets.symmetric(vertical: 16),
                         child: Divider(color: Colors.white24, height: 1),
@@ -201,8 +268,22 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('checkout.total'.tr().toUpperCase(), style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
-                          Text('₺${grandTotal.toStringAsFixed(2)}', style: GoogleFonts.outfit(color: const Color(0xFFF97316), fontWeight: FontWeight.bold, fontSize: 24)),
+                          Text(
+                            'checkout.total'.tr().toUpperCase(),
+                            style: GoogleFonts.outfit(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                          Text(
+                            '₺${grandTotal.toStringAsFixed(2)}',
+                            style: GoogleFonts.outfit(
+                              color: const Color(0xFFF97316),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 24,
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 24),
@@ -212,29 +293,46 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                           backgroundColor: const Color(0xFFF97316),
                           minimumSize: const Size(double.infinity, 60),
                         ),
-                        child: _busy 
-                          ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) 
-                          : Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(Icons.security_rounded, size: 20),
-                                const SizedBox(width: 12),
-                                Text(
-                                  'checkout.pay_button'.tr(),
-                                  style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
+                        child: _busy
+                            ? const SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
                                 ),
-                              ],
-                            ),
+                              )
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Icons.security_rounded, size: 20),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    'checkout.pay_button'.tr(),
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
                       ),
                       const SizedBox(height: 12),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.lock_outline_rounded, size: 14, color: Colors.grey.shade500),
+                          Icon(
+                            Icons.lock_outline_rounded,
+                            size: 14,
+                            color: Colors.grey.shade500,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             'checkout.secure_payment'.tr(),
-                            style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey.shade500),
+                            style: GoogleFonts.outfit(
+                              fontSize: 12,
+                              color: Colors.grey.shade500,
+                            ),
                           ),
                         ],
                       ),
@@ -250,7 +348,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     );
   }
 
-  Widget _dateRow(String label, DateTime dt, VoidCallback onTap, IconData icon, Color iconColor) {
+  Widget _dateRow(
+    String label,
+    DateTime dt,
+    VoidCallback onTap,
+    IconData icon,
+    Color iconColor,
+  ) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -261,7 +365,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.1),
+                color: iconColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: iconColor, size: 22),
@@ -270,52 +374,98 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey.shade500)),
+                Text(
+                  label,
+                  style: GoogleFonts.outfit(
+                    fontSize: 12,
+                    color: Colors.grey.shade500,
+                  ),
+                ),
                 Text(
                   DateFormat('dd MMMM, HH:mm').format(dt),
-                  style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A)),
+                  style: GoogleFonts.outfit(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF0F172A),
+                  ),
                 ),
               ],
             ),
             const Spacer(),
-            Icon(Icons.calendar_month_rounded, size: 20, color: Colors.grey.shade300),
+            Icon(
+              Icons.calendar_month_rounded,
+              size: 20,
+              color: Colors.grey.shade300,
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _bagCounter(String label, String subtitle, int value, ValueChanged<int> onChanged, IconData icon) {
+  Widget _bagCounter(
+    String label,
+    String subtitle,
+    int value,
+    ValueChanged<int> onChanged,
+    IconData icon,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: value > 0 ? const Color(0xFFF97316).withOpacity(0.3) : Colors.grey.shade100),
+        border: Border.all(
+          color: value > 0
+              ? const Color(0xFFF97316).withValues(alpha: 0.3)
+              : Colors.grey.shade100,
+        ),
       ),
       child: Row(
         children: [
-          Icon(icon, color: value > 0 ? const Color(0xFFF97316) : Colors.grey.shade400, size: 28),
+          Icon(
+            icon,
+            color: value > 0 ? const Color(0xFFF97316) : Colors.grey.shade400,
+            size: 28,
+          ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: const Color(0xFF0F172A))),
-                Text(subtitle, style: GoogleFonts.outfit(fontSize: 11, color: Colors.grey.shade500)),
+                Text(
+                  label,
+                  style: GoogleFonts.outfit(
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF0F172A),
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: GoogleFonts.outfit(
+                    fontSize: 11,
+                    color: Colors.grey.shade500,
+                  ),
+                ),
               ],
             ),
           ),
           Row(
             children: [
-              _counterBtn(Icons.remove, () => onChanged((value - 1).clamp(0, 20))),
+              _counterBtn(
+                Icons.remove,
+                () => onChanged((value - 1).clamp(0, 20)),
+              ),
               SizedBox(
                 width: 40,
                 child: Text(
                   '$value',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: GoogleFonts.outfit(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               _counterBtn(Icons.add, () => onChanged((value + 1).clamp(0, 20))),
@@ -344,8 +494,18 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: GoogleFonts.outfit(color: Colors.grey.shade400, fontSize: 14)),
-        Text(value, style: GoogleFonts.outfit(color: valueColor ?? Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+        Text(
+          label,
+          style: GoogleFonts.outfit(color: Colors.grey.shade400, fontSize: 14),
+        ),
+        Text(
+          value,
+          style: GoogleFonts.outfit(
+            color: valueColor ?? Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
       ],
     );
   }

@@ -21,7 +21,7 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
     if (_handled) return;
     final code = cap.barcodes.firstOrNull?.rawValue;
     if (code == null) return;
-    
+
     _handled = true;
     HapticFeedback.mediumImpact();
 
@@ -39,7 +39,9 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
     } catch (e) {
       if (!mounted) return;
       HapticFeedback.vibrate();
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('common.error'.tr() + ': $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('${'common.error'.tr()}: $e')));
       _handled = false;
     }
   }
@@ -49,7 +51,10 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('partner.seal_info'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        title: Text(
+          'partner.seal_info'.tr(),
+          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,8 +67,14 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('common.confirm'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: const Color(0xFFF97316))),
-          )
+            child: Text(
+              'common.confirm'.tr(),
+              style: GoogleFonts.outfit(
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFFF97316),
+              ),
+            ),
+          ),
         ],
       ),
     ).then((_) => _handled = false);
@@ -107,12 +118,19 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+                        icon: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          color: Colors.white,
+                        ),
                         onPressed: () => Navigator.pop(context),
                       ),
                       Text(
                         'nav.scan'.tr(),
-                        style: GoogleFonts.outfit(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(width: 48), // Spacer
                     ],
@@ -121,7 +139,10 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
                   Text(
                     'partner.scan_hint'.tr(),
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.outfit(color: Colors.white70, fontSize: 14),
+                    style: GoogleFonts.outfit(
+                      color: Colors.white70,
+                      fontSize: 14,
+                    ),
                   ),
                   const SizedBox(height: 60),
                 ],
@@ -152,7 +173,7 @@ class ScannerOverlayPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final backgroundPaint = Paint()
-      ..color = Colors.black.withOpacity(0.5)
+      ..color = Colors.black.withValues(alpha: 0.5)
       ..style = PaintingStyle.fill;
 
     final cutOutRect = Rect.fromCenter(
@@ -166,7 +187,9 @@ class ScannerOverlayPainter extends CustomPainter {
       Path.combine(
         PathOperation.difference,
         Path()..addRect(Rect.fromLTWH(0, 0, size.width, size.height)),
-        Path()..addRRect(RRect.fromRectAndRadius(cutOutRect, Radius.circular(borderRadius))),
+        Path()..addRRect(
+          RRect.fromRectAndRadius(cutOutRect, Radius.circular(borderRadius)),
+        ),
       ),
       backgroundPaint,
     );
@@ -181,22 +204,34 @@ class ScannerOverlayPainter extends CustomPainter {
       // Top left
       ..moveTo(cutOutRect.left, cutOutRect.top + borderLength)
       ..lineTo(cutOutRect.left, cutOutRect.top + borderRadius)
-      ..arcToPoint(Offset(cutOutRect.left + borderRadius, cutOutRect.top), radius: Radius.circular(borderRadius))
+      ..arcToPoint(
+        Offset(cutOutRect.left + borderRadius, cutOutRect.top),
+        radius: Radius.circular(borderRadius),
+      )
       ..lineTo(cutOutRect.left + borderLength, cutOutRect.top)
       // Top right
       ..moveTo(cutOutRect.right - borderLength, cutOutRect.top)
       ..lineTo(cutOutRect.right - borderRadius, cutOutRect.top)
-      ..arcToPoint(Offset(cutOutRect.right, cutOutRect.top + borderRadius), radius: Radius.circular(borderRadius))
+      ..arcToPoint(
+        Offset(cutOutRect.right, cutOutRect.top + borderRadius),
+        radius: Radius.circular(borderRadius),
+      )
       ..lineTo(cutOutRect.right, cutOutRect.top + borderLength)
       // Bottom left
       ..moveTo(cutOutRect.left, cutOutRect.bottom - borderLength)
       ..lineTo(cutOutRect.left, cutOutRect.bottom - borderRadius)
-      ..arcToPoint(Offset(cutOutRect.left + borderRadius, cutOutRect.bottom), radius: Radius.circular(borderRadius))
+      ..arcToPoint(
+        Offset(cutOutRect.left + borderRadius, cutOutRect.bottom),
+        radius: Radius.circular(borderRadius),
+      )
       ..lineTo(cutOutRect.left + borderLength, cutOutRect.bottom)
       // Bottom right
       ..moveTo(cutOutRect.right - borderLength, cutOutRect.bottom)
       ..lineTo(cutOutRect.right - borderRadius, cutOutRect.bottom)
-      ..arcToPoint(Offset(cutOutRect.right, cutOutRect.bottom - borderRadius), radius: Radius.circular(borderRadius))
+      ..arcToPoint(
+        Offset(cutOutRect.right, cutOutRect.bottom - borderRadius),
+        radius: Radius.circular(borderRadius),
+      )
       ..lineTo(cutOutRect.right, cutOutRect.bottom - borderLength);
 
     canvas.drawPath(path, borderPaint);

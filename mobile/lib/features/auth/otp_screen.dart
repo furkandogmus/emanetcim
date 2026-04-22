@@ -55,7 +55,9 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   Future<void> _resend() async {
     setState(() => _busy = true);
     try {
-      await ref.read(authControllerProvider.notifier).requestOtp(widget.identity);
+      await ref
+          .read(authControllerProvider.notifier)
+          .requestOtp(widget.identity);
       _startTimer();
     } catch (e) {
       if (mounted) {
@@ -63,7 +65,9 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
           SnackBar(
             content: Text('$e'),
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
       }
@@ -76,7 +80,9 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     if (_code.text.length < 6) return;
     setState(() => _busy = true);
     try {
-      await ref.read(authControllerProvider.notifier).verifyOtp(widget.identity, _code.text.trim());
+      await ref
+          .read(authControllerProvider.notifier)
+          .verifyOtp(widget.identity, _code.text.trim());
       if (!mounted) return;
       context.go('/');
     } catch (e) {
@@ -85,7 +91,9 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
         SnackBar(
           content: const Text('Hatalı kod girdiniz.'),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -113,9 +121,9 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              theme.colorScheme.background,
-              Colors.orange.shade50.withOpacity(0.3),
-              theme.colorScheme.background,
+              theme.colorScheme.surface,
+              Colors.orange.shade50.withValues(alpha: 0.3),
+              theme.colorScheme.surface,
             ],
           ),
         ),
@@ -126,7 +134,9 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Icon(
-                  isEmail ? Icons.mark_email_read_outlined : Icons.phonelink_ring_rounded,
+                  isEmail
+                      ? Icons.mark_email_read_outlined
+                      : Icons.phonelink_ring_rounded,
                   size: 64,
                   color: const Color(0xFFF97316),
                 ),
@@ -139,11 +149,13 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                 const SizedBox(height: 12),
                 Text(
                   'auth.otp_sent'.tr(args: [widget.identity]),
-                  style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey.shade600,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 48),
-                
+
                 Card(
                   elevation: 0,
                   color: Colors.white,
@@ -177,23 +189,34 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                         ),
                         const SizedBox(height: 32),
                         FilledButton(
-                          onPressed: _busy || _code.text.length < 6 ? null : _verify,
-                          child: _busy 
-                            ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) 
-                            : Text('auth.verify'.tr()),
+                          onPressed: _busy || _code.text.length < 6
+                              ? null
+                              : _verify,
+                          child: _busy
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Text('auth.verify'.tr()),
                         ),
                       ],
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 TextButton.icon(
                   onPressed: _canResend && !_busy ? _resend : null,
                   icon: const Icon(Icons.refresh_rounded, size: 20),
                   label: Text(
-                    _canResend ? 'Kodu tekrar gönder' : 'Tekrar gönder (${_timerCount}s)',
+                    _canResend
+                        ? 'Kodu tekrar gönder'
+                        : 'Tekrar gönder (${_timerCount}s)',
                     style: GoogleFonts.outfit(fontWeight: FontWeight.w600),
                   ),
                 ),

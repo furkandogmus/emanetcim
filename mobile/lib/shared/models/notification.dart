@@ -9,7 +9,7 @@ enum NotificationType {
   paymentSuccess,
   shopApplication,
   dispute,
-  campaign
+  campaign,
 }
 
 @freezed
@@ -25,5 +25,6 @@ abstract class NotificationDto with _$NotificationDto {
     Map<String, dynamic>? data,
   }) = _NotificationDto;
 
-  factory NotificationDto.fromJson(Map<String, dynamic> json) => _$NotificationDtoFromJson(json);
+  factory NotificationDto.fromJson(Map<String, dynamic> json) =>
+      _$NotificationDtoFromJson(json);
 }

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,22 +26,22 @@ class SyncAction {
   });
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'userId': userId,
-        'type': type.index,
-        'bookingId': bookingId,
-        'data': data,
-        'timestamp': timestamp.toIso8601String(),
-      };
+    'id': id,
+    'userId': userId,
+    'type': type.index,
+    'bookingId': bookingId,
+    'data': data,
+    'timestamp': timestamp.toIso8601String(),
+  };
 
   factory SyncAction.fromJson(Map<String, dynamic> json) => SyncAction(
-        id: json['id'] as String,
-        userId: json['userId'] as String? ?? 'unknown',
-        type: SyncActionType.values[json['type'] as int],
-        bookingId: json['bookingId'] as String,
-        data: json['data'] as Map<String, dynamic>?,
-        timestamp: DateTime.parse(json['timestamp'] as String),
-      );
+    id: json['id'] as String,
+    userId: json['userId'] as String? ?? 'unknown',
+    type: SyncActionType.values[json['type'] as int],
+    bookingId: json['bookingId'] as String,
+    data: json['data'] as Map<String, dynamic>?,
+    timestamp: DateTime.parse(json['timestamp'] as String),
+  );
 }
 
 final syncServiceProvider = Provider((ref) {
@@ -78,10 +77,16 @@ class SyncService {
   Box get _box => Hive.box(_boxName);
 
   List<SyncAction> get pendingActions {
-    return _box.values.map((e) => SyncAction.fromJson(Map<String, dynamic>.from(e))).toList();
+    return _box.values
+        .map((e) => SyncAction.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
   }
 
-  Future<void> addAction(SyncActionType type, String bookingId, [Map<String, dynamic>? data]) async {
+  Future<void> addAction(
+    SyncActionType type,
+    String bookingId, [
+    Map<String, dynamic>? data,
+  ]) async {
     final userId = _ref.read(authControllerProvider).session?.id ?? 'guest';
     final action = SyncAction(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -98,13 +103,15 @@ class SyncService {
 
   Future<void> sync() async {
     if (_isSyncing) return;
-    
+
     final currentUser = _ref.read(authControllerProvider).session;
     if (currentUser == null) return;
 
     final allActions = pendingActions;
-    final actions = allActions.where((a) => a.userId == currentUser.id).toList();
-    
+    final actions = allActions
+        .where((a) => a.userId == currentUser.id)
+        .toList();
+
     if (actions.isEmpty) return;
 
     _isSyncing = true;
@@ -114,7 +121,10 @@ class SyncService {
       for (final action in actions) {
         try {
           if (action.type == SyncActionType.checkIn) {
-            await dio.post('/bookings/${action.bookingId}/check-in', data: action.data);
+            await dio.post(
+              '/bookings/${action.bookingId}/check-in',
+              data: action.data,
+            );
           } else {
             await dio.post('/bookings/${action.bookingId}/check-out');
           }

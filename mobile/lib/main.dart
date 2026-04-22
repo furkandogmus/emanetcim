@@ -22,15 +22,18 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
   await Hive.initFlutter();
-  
+
   // Encryption for Hive (Security Hardening)
   final tokenStore = TokenStore();
   final hiveKey = await tokenStore.getHiveKey();
-  await Hive.openBox('pending_sync_actions', encryptionCipher: HiveAesCipher(hiveKey!));
+  await Hive.openBox(
+    'pending_sync_actions',
+    encryptionCipher: HiveAesCipher(hiveKey!),
+  );
 
   try {
     final isRooted = await FlutterJailbreakDetection.jailbroken;
-    final isDeveloperMode = await FlutterJailbreakDetection.developerMode;
+    // logger.i('App initialized');
     if (isRooted) {
       debugPrint('WARNING: Device is jailbroken/rooted!');
     }

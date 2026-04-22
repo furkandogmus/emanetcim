@@ -29,7 +29,6 @@ ThemeData buildLightTheme() {
       primary: _brandOrange,
       secondary: _brandOrangeDark,
       surface: Colors.white,
-      background: _bgLight,
     ),
     scaffoldBackgroundColor: _bgLight,
     textTheme: textTheme,
@@ -64,7 +63,10 @@ ThemeData buildLightTheme() {
         borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-      hintStyle: GoogleFonts.outfit(color: Colors.grey.shade400, fontWeight: FontWeight.w400),
+      hintStyle: GoogleFonts.outfit(
+        color: Colors.grey.shade400,
+        fontWeight: FontWeight.w400,
+      ),
       prefixIconColor: _brandOrange,
     ),
     cardTheme: CardThemeData(
@@ -73,7 +75,7 @@ ThemeData buildLightTheme() {
         borderRadius: BorderRadius.circular(24),
         side: BorderSide(color: Colors.grey.shade100, width: 1),
       ),
-      color: Colors.white,
+      surfaceTintColor: Colors.white,
       clipBehavior: Clip.antiAlias,
     ),
     filledButtonTheme: FilledButtonThemeData(
@@ -83,7 +85,11 @@ ThemeData buildLightTheme() {
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-        textStyle: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w600, letterSpacing: 0.5),
+        textStyle: GoogleFonts.outfit(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.5,
+        ),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
@@ -92,7 +98,10 @@ ThemeData buildLightTheme() {
         side: BorderSide(color: Colors.grey.shade200, width: 1.5),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        textStyle: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w500),
+        textStyle: GoogleFonts.outfit(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     ),
   );

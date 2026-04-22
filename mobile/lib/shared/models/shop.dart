@@ -25,5 +25,6 @@ abstract class ShopDto with _$ShopDto {
     int? bagsAvailable,
   }) = _ShopDto;
 
-  factory ShopDto.fromJson(Map<String, dynamic> json) => _$ShopDtoFromJson(json);
+  factory ShopDto.fromJson(Map<String, dynamic> json) =>
+      _$ShopDtoFromJson(json);
 }

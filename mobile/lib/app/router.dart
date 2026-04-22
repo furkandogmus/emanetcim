@@ -34,48 +34,111 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isAdminRoute = state.matchedLocation.startsWith('/admin');
       final role = auth.session?.role;
 
-      if (!loggedIn && !loggingIn) return '/auth/login';
-      
+      if (!loggedIn && !loggingIn) {
+        return '/auth/login';
+      }
+ 
       if (loggedIn) {
         if (loggingIn) {
-          if (role == UserRole.ADMIN) return '/admin';
-          if (role == UserRole.PARTNER) return '/partner';
+          if (role == UserRole.admin) return '/admin';
+          if (role == UserRole.partner) return '/partner';
           return '/';
         }
-        
+ 
         // Security: Prevent cross-role access
-        if (role == UserRole.ADMIN && !isAdminRoute && state.matchedLocation == '/') return '/admin';
-        if (role == UserRole.PARTNER && !isPartnerRoute && state.matchedLocation == '/') return '/partner';
-        if (role == UserRole.GUEST && (isPartnerRoute || isAdminRoute)) return '/';
-        if (role == UserRole.PARTNER && isAdminRoute) return '/partner';
+        if (role == UserRole.admin &&
+            !isAdminRoute &&
+            state.matchedLocation == '/') {
+          return '/admin';
+        }
+        if (role == UserRole.partner &&
+            !isPartnerRoute &&
+            state.matchedLocation == '/') {
+          return '/partner';
+        }
+        if (role == UserRole.guest && (isPartnerRoute || isAdminRoute)) {
+          return '/';
+        }
+        if (role == UserRole.partner && isAdminRoute) {
+          return '/partner';
+        }
       }
       return null;
     },
     routes: [
-      GoRoute(path: '/auth/login', builder: (_, __) => const LoginScreen()),
-      GoRoute(path: '/auth/register', builder: (_, __) => const RegisterScreen()),
-      GoRoute(path: '/auth/otp', builder: (_, s) => OtpScreen(identity: s.uri.queryParameters['email'] ?? s.uri.queryParameters['identity'] ?? '')),
+      GoRoute(path: '/auth/login', builder: (_, _) => const LoginScreen()),
+      GoRoute(
+        path: '/auth/register',
+        builder: (_, _) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: '/auth/otp',
+        builder: (_, s) => OtpScreen(
+          identity:
+              s.uri.queryParameters['email'] ??
+              s.uri.queryParameters['identity'] ??
+              '',
+        ),
+      ),
 
       ShellRoute(
-        builder: (_, __, child) => HomeShell(child: child),
+        builder: (_, _, child) => HomeShell(child: child),
         routes: [
-          GoRoute(path: '/', builder: (_, __) => const SearchScreen()),
-          GoRoute(path: '/bookings', builder: (_, __) => const MyBookingsScreen()),
-          GoRoute(path: '/notifications', builder: (_, __) => const NotificationsScreen()),
-          GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
-          GoRoute(path: '/partner', builder: (_, __) => const PartnerBookingsScreen()),
-          GoRoute(path: '/admin', builder: (_, __) => const AdminDashboardScreen()),
-          GoRoute(path: '/admin/applications', builder: (_, __) => const AdminApplicationsScreen()),
+          GoRoute(path: '/', builder: (_, _) => const SearchScreen()),
+          GoRoute(
+            path: '/bookings',
+            builder: (_, _) => const MyBookingsScreen(),
+          ),
+          GoRoute(
+            path: '/notifications',
+            builder: (_, _) => const NotificationsScreen(),
+          ),
+          GoRoute(path: '/profile', builder: (_, _) => const ProfileScreen()),
+          GoRoute(
+            path: '/partner',
+            builder: (_, _) => const PartnerBookingsScreen(),
+          ),
+          GoRoute(
+            path: '/admin',
+            builder: (_, _) => const AdminDashboardScreen(),
+          ),
+          GoRoute(
+            path: '/admin/applications',
+            builder: (_, _) => const AdminApplicationsScreen(),
+          ),
         ],
       ),
 
-      GoRoute(path: '/shop/:id', builder: (_, s) => ShopDetailScreen(shopId: s.pathParameters['id']!)),
-      GoRoute(path: '/booking/:id', builder: (_, s) => BookingDetailScreen(bookingId: s.pathParameters['id']!)),
-      GoRoute(path: '/partner/booking/:id', builder: (_, s) => PartnerBookingDetailScreen(bookingId: s.pathParameters['id']!)),
-      GoRoute(path: '/partner/earnings', builder: (_, __) => const PartnerEarningsScreen()),
-      GoRoute(path: '/partner/settings', builder: (_, __) => const PartnerSettingsScreen()),
-      GoRoute(path: '/checkout/:shopId', builder: (_, s) => CheckoutScreen(shopId: s.pathParameters['shopId']!)),
-      GoRoute(path: '/partner/scan', builder: (_, __) => const PartnerScanScreen()),
+      GoRoute(
+        path: '/shop/:id',
+        builder: (_, s) => ShopDetailScreen(shopId: s.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/booking/:id',
+        builder: (_, s) =>
+            BookingDetailScreen(bookingId: s.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/partner/booking/:id',
+        builder: (_, s) =>
+            PartnerBookingDetailScreen(bookingId: s.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/partner/earnings',
+        builder: (_, _) => const PartnerEarningsScreen(),
+      ),
+      GoRoute(
+        path: '/partner/settings',
+        builder: (_, _) => const PartnerSettingsScreen(),
+      ),
+      GoRoute(
+        path: '/checkout/:shopId',
+        builder: (_, s) => CheckoutScreen(shopId: s.pathParameters['shopId']!),
+      ),
+      GoRoute(
+        path: '/partner/scan',
+        builder: (_, _) => const PartnerScanScreen(),
+      ),
     ],
   );
 });
