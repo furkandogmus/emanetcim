@@ -92,10 +92,11 @@ class NotificationsScreen extends ConsumerWidget {
   }
 
   Widget _notificationTile(BuildContext context, NotificationDto n) {
-
     return Container(
       decoration: BoxDecoration(
-        color: n.isRead ? Colors.white : Colors.orange.shade50.withValues(alpha: 0.5),
+        color: n.isRead
+            ? Colors.white
+            : Colors.orange.shade50.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: n.isRead
@@ -103,7 +104,10 @@ class NotificationsScreen extends ConsumerWidget {
               : const Color(0xFFF97316).withValues(alpha: 0.2),
         ),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+          ),
         ],
       ),
       child: ListTile(

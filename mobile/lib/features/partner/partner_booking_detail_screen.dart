@@ -191,7 +191,9 @@ class _PartnerBookingDetailScreenState
                   children: [
                     CircleAvatar(
                       radius: 35,
-                      backgroundColor: const Color(0xFFF97316).withValues(alpha: 0.1),
+                      backgroundColor: const Color(
+                        0xFFF97316,
+                      ).withValues(alpha: 0.1),
                       child: Text(
                         b.guestName?.substring(0, 1).toUpperCase() ?? 'G',
                         style: GoogleFonts.outfit(

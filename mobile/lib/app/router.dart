@@ -37,14 +37,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (!loggedIn && !loggingIn) {
         return '/auth/login';
       }
- 
+
       if (loggedIn) {
         if (loggingIn) {
           if (role == UserRole.admin) return '/admin';
           if (role == UserRole.partner) return '/partner';
           return '/';
         }
- 
+
         // Security: Prevent cross-role access
         if (role == UserRole.admin &&
             !isAdminRoute &&

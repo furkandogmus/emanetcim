@@ -14,10 +14,13 @@ void main() {
       };
 
       final user = UserDto.fromJson(json);
-      
+
       expect(user.id, 'user-1');
       expect(user.role, UserRole.guest);
-      expect(user.toJson()['role'], 'GUEST'); // Should serialize back to backend format
+      expect(
+        user.toJson()['role'],
+        'GUEST',
+      ); // Should serialize back to backend format
     });
 
     test('BookingDto JSON serialization', () {
@@ -43,10 +46,7 @@ void main() {
     });
 
     test('SealStatus JSON serialization', () {
-      final json = {
-        'serialNumber': 12345,
-        'status': 'IN_USE',
-      };
+      final json = {'serialNumber': 12345, 'status': 'IN_USE'};
 
       final seal = SealDto.fromJson(json);
 
