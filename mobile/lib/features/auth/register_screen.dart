@@ -17,18 +17,29 @@ class RegisterScreen extends ConsumerStatefulWidget {
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
+  final _identityController = TextEditingController(); // Can be email or phone
   bool _kvkkAccepted = false;
   bool _busy = false;
+
+  bool _isValidEmail(String email) {
+    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
+  }
+
+  bool _isValidPhone(String phone) {
+    final clean = phone.replaceAll(RegExp(r'\D'), '');
+    return (clean.length == 10 && clean.startsWith('5')) || 
+           (clean.length == 11 && clean.startsWith('05'));
+  }
 
   Future<void> _register() async {
     if (!_formKey.currentState!.validate() || !_kvkkAccepted) return;
     
     setState(() => _busy = true);
     try {
-      await ref.read(authControllerProvider.notifier).requestOtp(_emailController.text);
+      final identity = _identityController.text.trim();
+      await ref.read(authControllerProvider.notifier).requestOtp(identity);
       if (mounted) {
-        context.push('/auth/otp?email=${_emailController.text}&name=${_nameController.text}');
+        context.push('/auth/otp?identity=${Uri.encodeComponent(identity)}&name=${Uri.encodeComponent(_nameController.text)}');
       }
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('common.error'.tr() + ': $e')));
@@ -81,18 +92,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               const SizedBox(height: 16),
               
               TextFormField(
-                controller: _emailController,
+                controller: _identityController,
                 decoration: InputDecoration(
-                  labelText: 'auth.email'.tr(),
-                  prefixIcon: const Icon(Icons.email_outlined),
+                  labelText: 'auth.email_or_phone'.tr(),
+                  prefixIcon: const Icon(Icons.mail_outline_rounded),
+                  hintText: 'E-posta veya 05xx xxx xx xx',
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                 ),
                 keyboardType: TextInputType.emailAddress,
                 validator: (v) {
-                  if (v == null || v.isEmpty) return 'auth.email_error'.tr();
-                  final emailRegex = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
-                  if (!emailRegex.hasMatch(v)) return 'auth.email_error'.tr();
-                  return null;
+                  final input = v ?? '';
+                  if (input.isEmpty) return 'auth.invalid_identity'.tr();
+                  if (_isValidEmail(input) || _isValidPhone(input)) return null;
+                  return 'auth.invalid_identity'.tr();
                 },
               ),
               

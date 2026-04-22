@@ -51,7 +51,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(path: '/auth/login', builder: (_, __) => const LoginScreen()),
       GoRoute(path: '/auth/register', builder: (_, __) => const RegisterScreen()),
-      GoRoute(path: '/auth/otp', builder: (_, s) => OtpScreen(email: s.uri.queryParameters['email'] ?? '')),
+      GoRoute(path: '/auth/otp', builder: (_, s) => OtpScreen(identity: s.uri.queryParameters['email'] ?? s.uri.queryParameters['identity'] ?? '')),
 
       ShellRoute(
         builder: (_, __, child) => HomeShell(child: child),
