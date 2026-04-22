@@ -92,6 +92,7 @@
     "total": "Toplam",
     "pay_button": "Ödemeyi Yap",
     "secure_payment": "Güvenli 256-bit SSL Ödeme",
+    "coupon_placeholder": "İndirim Kuponu (Opsiyonel)",
     "error_no_bags": "Lütfen en az bir valiz seçin.",
     "error_shop_closed": "Dükkan bulunamadı veya kapalı.",
     "error_payment": "Bu dükkan şu an ödeme alamıyor."

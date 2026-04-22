@@ -10,8 +10,11 @@ import '../features/booking/my_bookings_screen.dart';
 import '../features/checkout/checkout_screen.dart';
 import '../features/home/home_shell.dart';
 import '../features/admin/admin_dashboard_screen.dart';
+import '../features/admin/admin_applications_screen.dart';
 import '../features/notifications/notifications_screen.dart';
 import '../features/partner/partner_bookings_screen.dart';
+import '../features/partner/partner_earnings_screen.dart';
+import '../features/partner/partner_settings_screen.dart';
 import '../features/partner/partner_booking_detail_screen.dart';
 import '../features/partner/partner_scan_screen.dart';
 import '../shared/models/user.dart';
@@ -62,12 +65,15 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
           GoRoute(path: '/partner', builder: (_, __) => const PartnerBookingsScreen()),
           GoRoute(path: '/admin', builder: (_, __) => const AdminDashboardScreen()),
+          GoRoute(path: '/admin/applications', builder: (_, __) => const AdminApplicationsScreen()),
         ],
       ),
 
       GoRoute(path: '/shop/:id', builder: (_, s) => ShopDetailScreen(shopId: s.pathParameters['id']!)),
       GoRoute(path: '/booking/:id', builder: (_, s) => BookingDetailScreen(bookingId: s.pathParameters['id']!)),
       GoRoute(path: '/partner/booking/:id', builder: (_, s) => PartnerBookingDetailScreen(bookingId: s.pathParameters['id']!)),
+      GoRoute(path: '/partner/earnings', builder: (_, __) => const PartnerEarningsScreen()),
+      GoRoute(path: '/partner/settings', builder: (_, __) => const PartnerSettingsScreen()),
       GoRoute(path: '/checkout/:shopId', builder: (_, s) => CheckoutScreen(shopId: s.pathParameters['shopId']!)),
       GoRoute(path: '/partner/scan', builder: (_, __) => const PartnerScanScreen()),
     ],

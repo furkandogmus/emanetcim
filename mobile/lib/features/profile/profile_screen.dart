@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/auth/auth_controller.dart';
@@ -14,8 +15,10 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authControllerProvider).session;
     final theme = Theme.of(context);
+    final isPartner = user?.role == UserRole.PARTNER;
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: Text('profile.title'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
       ),
@@ -55,121 +58,35 @@ class ProfileScreen extends ConsumerWidget {
                   user?.email ?? '',
                   style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
                 ),
-                const SizedBox(height: 24),
-                if (user?.role != UserRole.PARTNER)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                    child: Text(
-                      'Bireysel Kullanıcı',
-                      style: GoogleFonts.outfit(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue.shade700,
-                      ),
-                    ),
-                  ),
               ],
             ),
           ),
           
           const SizedBox(height: 32),
-          // Referral Card
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 10)),
-              ],
-            ),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(color: Colors.white.withOpacity(0.1), shape: BoxShape.circle),
-                      child: const Icon(Icons.card_giftcard_rounded, color: Color(0xFFF97316), size: 24),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('profile.referral_title'.tr(), style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                          Text('profile.referral_hint'.tr(), style: GoogleFonts.outfit(color: Colors.grey.shade400, fontSize: 12)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white12)),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        user?.referralCode ?? 'BP-WELCOME',
-                        style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: 2),
-                      ),
-                      TextButton.icon(
-                        onPressed: () {
-                          Clipboard.setData(ClipboardData(text: user?.referralCode ?? 'BP-WELCOME'));
-                          HapticFeedback.mediumImpact();
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Referans kodu kopyalandı!')));
-                        },
-                        icon: const Icon(Icons.copy_rounded, size: 18, color: Color(0xFFF97316)),
-                        label: Text('profile.copy'.tr(), style: GoogleFonts.outfit(color: const Color(0xFFF97316), fontWeight: FontWeight.bold, fontSize: 12)),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 40),
+
+          if (isPartner) ...[
+            _sectionHeader('partner.management'.tr()),
+            _menuItem(Icons.payments_rounded, 'partner.earnings'.tr(), onTap: () => context.push('/partner/earnings')),
+            _menuItem(Icons.settings_suggest_rounded, 'partner.settings'.tr(), onTap: () => context.push('/partner/settings')),
+            const SizedBox(height: 24),
+          ],
+
+          // Referral Card (Only for Guests)
+          if (!isPartner) ...[
+            _referralCard(user),
+            const SizedBox(height: 32),
+          ],
           
           // Menu Section
-          Text(
-            'profile.settings'.tr(),
-            style: GoogleFonts.outfit(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey.shade500,
-              letterSpacing: 1.2,
-            ),
-          ),
-          const SizedBox(height: 16),
+          _sectionHeader('profile.settings'.tr()),
           _menuItem(Icons.person_outline_rounded, 'profile.edit_profile'.tr(), onTap: () => _showEditProfile(context, user)),
-          _menuItem(Icons.notifications_none_rounded, 'profile.notifications'.tr(), onTap: () => _showInfo(context, 'profile.notifications'.tr(), 'Bildirim ayarlarınız çok yakında burada olacak!')),
-          _menuItem(Icons.payment_rounded, 'profile.payments'.tr(), onTap: () => _showInfo(context, 'profile.payments'.tr(), 'Kayıtlı kartlarınızın yönetimi bir sonraki güncellemede eklenecektir.')),
+          _menuItem(Icons.notifications_none_rounded, 'profile.notifications'.tr(), onTap: () => _showInfo(context, 'profile.notifications'.tr(), 'Bildirim ayarlarınız yakında burada.')),
           
           const SizedBox(height: 32),
           
-          Text(
-            'profile.support'.tr(),
-            style: GoogleFonts.outfit(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey.shade500,
-              letterSpacing: 1.2,
-            ),
-          ),
-          const SizedBox(height: 16),
-          _menuItem(Icons.help_outline_rounded, 'profile.help_center'.tr(), onTap: () => _showLegal(context, 'profile.help_center'.tr(), 'BagajPark hakkında her türlü sorunuz için destek@bagajpark.com adresinden bize ulaşabilirsiniz.')),
-          _menuItem(Icons.info_outline_rounded, 'profile.about'.tr(), onTap: () => _showLegal(context, 'profile.about'.tr(), 'BagajPark v1.0.0\nSeyahatlerinizi kolaylaştıran dijital emanet ağı.')),
-          _menuItem(Icons.privacy_tip_outlined, 'profile.privacy'.tr(), onTap: () => _showLegal(context, 'profile.privacy'.tr(), 'Verileriniz BagajPark güvencesiyle uçtan uca korunmaktadır...')),
+          _sectionHeader('profile.support'.tr()),
+          _menuItem(Icons.help_outline_rounded, 'profile.help_center'.tr(), onTap: () => _showLegal(context, 'profile.help_center'.tr(), 'destek@bagajpark.com')),
+          _menuItem(Icons.info_outline_rounded, 'profile.about'.tr(), onTap: () => _showLegal(context, 'profile.about'.tr(), 'BagajPark v1.0.0')),
           
           const SizedBox(height: 48),
           
@@ -205,12 +122,64 @@ class ProfileScreen extends ConsumerWidget {
           
           Center(
             child: Text(
-              'Versiyon 1.0.0 (Build 1)',
+              'Versiyon 1.0.0',
               style: GoogleFonts.outfit(fontSize: 11, color: Colors.grey.shade400),
             ),
           ),
           
-          const SizedBox(height: 100), // Nav bar için boşluk
+          const SizedBox(height: 100),
+        ],
+      ),
+    );
+  }
+
+  Widget _sectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12, left: 4),
+      child: Text(
+        title.toUpperCase(),
+        style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey.shade500, letterSpacing: 1.2),
+      ),
+    );
+  }
+
+  Widget _referralCard(UserDto? user) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(colors: [Color(0xFF0F172A), Color(0xFF1E293B)]),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(padding: const EdgeInsets.all(10), decoration: const BoxDecoration(color: Colors.white10, shape: BoxShape.circle), child: const Icon(Icons.card_giftcard_rounded, color: Color(0xFFF97316), size: 24)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text('profile.referral_title'.tr(), style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text('profile.referral_hint'.tr(), style: GoogleFonts.outfit(color: Colors.grey.shade400, fontSize: 12)),
+                ]),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white12)),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(user?.referralCode ?? 'BP-WELCOME', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: 2)),
+                TextButton.icon(
+                  onPressed: () => Clipboard.setData(ClipboardData(text: user?.referralCode ?? 'BP-WELCOME')),
+                  icon: const Icon(Icons.copy_rounded, size: 18, color: Color(0xFFF97316)),
+                  label: Text('profile.copy'.tr(), style: GoogleFonts.outfit(color: const Color(0xFFF97316), fontWeight: FontWeight.bold, fontSize: 12)),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -218,27 +187,13 @@ class ProfileScreen extends ConsumerWidget {
 
   Widget _menuItem(IconData icon, String title, {required VoidCallback onTap}) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 8),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade50,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, color: const Color(0xFF0F172A), size: 22),
-        ),
-        title: Text(
-          title,
-          style: GoogleFonts.outfit(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: const Color(0xFF0F172A),
-          ),
-        ),
-        trailing: Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey.shade400),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        tileColor: Colors.white,
+        leading: Icon(icon, color: const Color(0xFF0F172A), size: 22),
+        title: Text(title, style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w500, color: const Color(0xFF0F172A))),
+        trailing: Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey.shade300),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         onTap: () {
           HapticFeedback.lightImpact();
           onTap();
@@ -255,13 +210,7 @@ class ProfileScreen extends ConsumerWidget {
         content: Text('Hesabınızdan çıkış yapmak istediğinize emin misiniz?', style: GoogleFonts.outfit()),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: Text('common.cancel'.tr())),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ref.read(authControllerProvider.notifier).logout();
-            },
-            child: Text('profile.logout'.tr(), style: const TextStyle(color: Colors.redAccent)),
-          ),
+          TextButton(onPressed: () { Navigator.pop(context); ref.read(authControllerProvider.notifier).logout(); }, child: Text('profile.logout'.tr(), style: const TextStyle(color: Colors.redAccent))),
         ],
       ),
     );
@@ -272,20 +221,10 @@ class ProfileScreen extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('profile.delete_account'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: Colors.redAccent)),
-        content: Text(
-          'Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz ve tüm rezervasyon verileriniz kalıcı olarak silinecektir.',
-          style: GoogleFonts.outfit(),
-        ),
+        content: Text('Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.', style: GoogleFonts.outfit()),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: Text('common.cancel'.tr())),
-          TextButton(
-            onPressed: () {
-              // In prod, call API to delete account
-              Navigator.pop(context);
-              ref.read(authControllerProvider.notifier).logout();
-            },
-            child: Text('common.confirm'.tr(), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
-          ),
+          TextButton(onPressed: () { Navigator.pop(context); ref.read(authControllerProvider.notifier).logout(); }, child: Text('common.confirm'.tr(), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold))),
         ],
       ),
     );
@@ -295,31 +234,17 @@ class ProfileScreen extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      useRootNavigator: true, 
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 24, right: 24, top: 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text('profile.edit_profile'.tr(), style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 24),
-            TextField(
-              decoration: InputDecoration(labelText: 'auth.name_label'.tr(), border: OutlineInputBorder(borderRadius: BorderRadius.circular(16))),
-              controller: TextEditingController(text: user?.name),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              decoration: InputDecoration(labelText: 'auth.email'.tr(), border: OutlineInputBorder(borderRadius: BorderRadius.circular(16))),
-              controller: TextEditingController(text: user?.email),
-              readOnly: true,
-            ),
-            const SizedBox(height: 24),
-            FilledButton(onPressed: () => Navigator.pop(context), child: Text('common.confirm'.tr())),
-            const SizedBox(height: 40),
-          ],
-        ),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Text('profile.edit_profile'.tr(), style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 24),
+          TextField(decoration: InputDecoration(labelText: 'auth.name_label'.tr(), border: OutlineInputBorder(borderRadius: BorderRadius.circular(16))), controller: TextEditingController(text: user?.name)),
+          const SizedBox(height: 24),
+          FilledButton(onPressed: () => Navigator.pop(context), child: Text('common.confirm'.tr())),
+          const SizedBox(height: 40),
+        ]),
       ),
     );
   }
@@ -339,21 +264,17 @@ class ProfileScreen extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      useRootNavigator: true,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) => DraggableScrollableSheet(
         initialChildSize: 0.7,
         expand: false,
         builder: (_, scroll) => Padding(
           padding: const EdgeInsets.all(24),
-          child: ListView(
-            controller: scroll,
-            children: [
-              Text(title, style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              Text(content, style: GoogleFonts.outfit(height: 1.6)),
-            ],
-          ),
+          child: ListView(controller: scroll, children: [
+            Text(title, style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            Text(content, style: GoogleFonts.outfit(height: 1.6)),
+          ]),
         ),
       ),
     );

@@ -24,6 +24,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   int _s = 0;
   int _m = 1;
   int _xl = 0;
+  final _coupon = TextEditingController();
   bool _busy = false;
 
   int get _total => _s + _m + _xl;
@@ -61,6 +62,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         'bagCountS': _s,
         'bagCountM': _m,
         'bagCountXl': _xl,
+        'couponCode': _coupon.text.trim(),
       });
       final clientSecret = res.data['clientSecret'] as String;
       final bookingId = res.data['bookingId'] as String;
@@ -151,6 +153,21 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             _bagCounter('checkout.bag_s'.tr(), 'checkout.bag_s_hint'.tr(), _s, (v) => setState(() => _s = v), Icons.backpack_outlined),
             _bagCounter('checkout.bag_m'.tr(), 'checkout.bag_m_hint'.tr(), _m, (v) => setState(() => _m = v), Icons.luggage_outlined),
             _bagCounter('checkout.bag_xl'.tr(), 'checkout.bag_xl_hint'.tr(), _xl, (v) => setState(() => _xl = v), Icons.work_outline_rounded),
+            
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade200)),
+              child: TextField(
+                controller: _coupon,
+                decoration: InputDecoration(
+                  hintText: 'checkout.coupon_placeholder'.tr(),
+                  border: InputBorder.none,
+                  prefixIcon: const Icon(Icons.local_offer_outlined, size: 20),
+                ),
+                style: GoogleFonts.outfit(fontSize: 14),
+              ),
+            ),
             
             const SizedBox(height: 40),
             
