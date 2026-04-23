@@ -14,72 +14,72 @@ dependencies:
     sdk: flutter
 
   # State + routing
-  flutter_riverpod: ^3.1.0
-  riverpod_annotation: ^4.0.0
-  go_router: ^17.2.2
+  flutter_riverpod: 3.1.0
+  riverpod_annotation: 4.0.0
+  go_router: 17.2.2
 
   # Networking
-  dio: ^5.7.0
-  retrofit: ^4.9.2
-  pretty_dio_logger: ^1.4.0
+  dio: 5.9.2
+  retrofit: 4.9.2
+  pretty_dio_logger: 1.4.0
 
   # Storage
-  flutter_secure_storage: ^10.0.0
-  hive: ^2.2.3
-  hive_flutter: ^1.1.0
-  shared_preferences: ^2.3.2
+  flutter_secure_storage: 10.0.0
+  hive: 2.2.3
+  hive_flutter: 1.1.0
+  shared_preferences: 2.5.5
 
   # Auth
-  google_sign_in: ^7.2.0
-  sign_in_with_apple: ^7.0.1
+  google_sign_in: 7.2.0
+  sign_in_with_apple: 7.0.1
 
   # Payments
-  flutter_stripe: ^12.6.0
+  flutter_stripe: 12.6.0
 
   # Maps + location
-  flutter_map: ^8.3.0
-  latlong2: ^0.9.1
-  geolocator: ^14.0.2
+  flutter_map: 8.3.0
+  latlong2: 0.9.1
+  geolocator: 14.0.2
 
   # QR
-  mobile_scanner: ^7.2.0
-  qr_flutter: ^4.1.0
+  mobile_scanner: 7.2.0
+  qr_flutter: 4.1.0
 
   # Push
-  firebase_core: ^4.7.0
-  firebase_messaging: ^16.2.0
-  flutter_local_notifications: ^21.0.0
+  firebase_core: 4.7.0
+  firebase_messaging: 16.2.0
+  flutter_local_notifications: 21.0.0
 
   # Models
-  freezed_annotation: ^3.1.0
-  json_annotation: ^4.9.0
+  freezed_annotation: 3.1.0
+  json_annotation: 4.9.0
 
   # Utils
-  intl: ^0.20.2
-  easy_localization: ^3.0.7
-  cached_network_image: ^3.4.1
-  url_launcher: ^6.3.1
-  package_info_plus: ^9.0.1
-  sentry_flutter: ^9.19.0
+  intl: 0.20.2
+  easy_localization: 3.0.8
+  cached_network_image: 3.4.1
+  url_launcher: 6.3.1
+  package_info_plus: 9.0.1
+  sentry_flutter: 9.19.0
   flutter_jailbreak_detection:
     git:
       url: https://github.com/pdurasie-ecovery/flutter_jailbreak_detection.git
       ref: add-namespace
-  google_fonts: ^8.0.2
-  connectivity_plus: ^7.1.1
-  screen_protector: ^1.5.1
+  google_fonts: 8.0.2
+  connectivity_plus: 7.1.1
+  screen_protector: 1.5.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^6.0.0
-  build_runner: ^2.4.13
-  freezed: ^3.2.3
-  json_serializable: ^6.8.0
-  retrofit_generator: ^10.2.1
-  riverpod_generator: ^4.0.0+1
-  custom_lint: ^0.8.1
-  riverpod_lint: ^3.1.0
+  flutter_lints: 6.0.0
+  build_runner: 2.14.0
+  freezed: 3.2.3
+  json_serializable: 6.11.2
+  retrofit_generator: 10.2.1
+  riverpod_generator: 4.0.0+1
+  custom_lint: 0.8.1
+  riverpod_lint: 3.1.0
 
 flutter:
   uses-material-design: true
