@@ -20,7 +20,8 @@ describe("Admin Application Logic", () => {
 
   it("should fetch only inactive shops", async () => {
     const mockShops = [{ id: "1", name: "Shop 1", isActive: false }];
-    vi.mocked(prisma.shop.findMany).mockResolvedValue(mockShops);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.mocked(prisma.shop.findMany).mockResolvedValue(mockShops as any);
 
     const result = await prisma.shop.findMany({ where: { isActive: false } });
     
