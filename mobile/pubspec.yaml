@@ -61,7 +61,10 @@ dependencies:
   url_launcher: ^6.3.1
   package_info_plus: ^9.0.1
   sentry_flutter: ^8.9.0
-  flutter_jailbreak_detection: ^1.10.0
+  flutter_jailbreak_detection:
+    git:
+      url: https://github.com/pdurasie-ecovery/flutter_jailbreak_detection.git
+      ref: add-namespace
   google_fonts: ^8.0.2
   connectivity_plus: ^7.1.1
   screen_protector: ^1.5.1
