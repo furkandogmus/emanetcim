@@ -15,7 +15,7 @@ void main() {
         ],
       );
       addTearDown(container.dispose);
-      
+
       final state = container.read(authControllerProvider);
 
       expect(state.session, isNull);
@@ -30,7 +30,7 @@ void main() {
         ],
       );
       addTearDown(container.dispose);
-      
+
       final controller = container.read(authControllerProvider.notifier);
 
       expect(container.read(authControllerProvider).isDemo, false);
