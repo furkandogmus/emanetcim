@@ -32,7 +32,8 @@ void main() {
         status: BookingStatus.paid,
       );
 
-      final totalBags = booking.bagCountS + booking.bagCountM + booking.bagCountXl;
+      final totalBags =
+          booking.bagCountS + booking.bagCountM + booking.bagCountXl;
       expect(totalBags, 6);
     });
   });

@@ -5,9 +5,9 @@ void main() {
     test('Successful API mock response parsing', () async {
       final mockResponse = {
         'status': 'success',
-        'data': {'id': '123', 'name': 'Test Shop'}
+        'data': {'id': '123', 'name': 'Test Shop'},
       };
-      
+
       expect(mockResponse['status'], 'success');
       expect((mockResponse['data'] as Map)['id'], '123');
     });
@@ -15,9 +15,9 @@ void main() {
     test('Error response handling logic', () {
       final errorResponse = {
         'error': 'Unauthorized',
-        'message': 'Token expired'
+        'message': 'Token expired',
       };
-      
+
       expect(errorResponse.containsKey('error'), isTrue);
     });
   });

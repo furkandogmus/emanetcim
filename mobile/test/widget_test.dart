@@ -17,9 +17,7 @@ void main() {
     // We skip pumpAndSettle to avoid timeout from animations/localization
     await tester.pumpWidget(
       const ProviderScope(
-        child: MaterialApp(
-          home: Scaffold(body: Text('BagajPark')),
-        ),
+        child: MaterialApp(home: Scaffold(body: Text('BagajPark'))),
       ),
     );
 

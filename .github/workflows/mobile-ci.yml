@@ -54,12 +54,23 @@ jobs:
 
   build-ios:
     name: Build iOS
-    runs-on: macos-latest
+    runs-on: macos-15
     defaults:
       run:
         working-directory: mobile
     steps:
       - uses: actions/checkout@v4
+
+      - name: Select Xcode version
+        run: |
+          # Find the latest available Xcode 26.x
+          XCODE_PATH=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          if [ -z "$XCODE_PATH" ]; then
+            XCODE_PATH=$(ls -d /Applications/Xcode.app 2>/dev/null)
+          fi
+          echo "Using Xcode at: $XCODE_PATH"
+          sudo xcode-select -s "$XCODE_PATH/Contents/Developer"
+          xcodebuild -version
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
