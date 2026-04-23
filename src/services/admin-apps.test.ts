@@ -20,7 +20,7 @@ describe("Admin Application Logic", () => {
 
   it("should fetch only inactive shops", async () => {
     const mockShops = [{ id: "1", name: "Shop 1", isActive: false }];
-    (prisma.shop.findMany as any).mockResolvedValue(mockShops);
+    vi.mocked(prisma.shop.findMany).mockResolvedValue(mockShops);
 
     const result = await prisma.shop.findMany({ where: { isActive: false } });
     
