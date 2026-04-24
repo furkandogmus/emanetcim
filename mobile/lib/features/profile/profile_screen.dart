@@ -105,7 +105,7 @@ class ProfileScreen extends ConsumerWidget {
             onTap: () => _showInfo(
               context,
               'profile.notifications'.tr(),
-              'Bildirim ayarlarınız yakında burada.',
+              'Tüm bildirimleriniz ve kampanya duyuruları burada listelenir. Şu an için aktif bir bildiriminiz bulunmuyor.',
             ),
           ),
 

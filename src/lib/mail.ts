@@ -136,3 +136,61 @@ export const sendPasswordResetEmail = async (email: string, token: string, local
     logger.error({ error, email }, "password_reset_email_exception");
   }
 };
+
+export const sendMobileOtp = async (email: string, code: string, locale: string = "tr") => {
+  const resend = getResendClient();
+  if (!resend) {
+    logger.warn({ email }, "mobile_otp_mail_skipped_no_resend_key");
+    return;
+  }
+
+  const content = {
+    tr: {
+      subject: "Giriş Kodunuz",
+      title: "Giriş Yapmak İçin Kodunuz",
+      text: "BagajPark mobil uygulamasına giriş yapmak için kullanacağınız onay kodu:",
+      footer: "Bu kod 5 dakika içinde geçerliliğini yitirecektir."
+    },
+    en: {
+      subject: "Your Login Code",
+      title: "Your Login Code",
+      text: "Here is your verification code to log in to the BagajPark mobile app:",
+      footer: "This code will expire in 5 minutes."
+    }
+  }[locale] || {
+    tr: {
+      subject: "Giriş Kodunuz",
+      title: "Giriş Yapmak İçin Kodunuz",
+      text: "BagajPark mobil uygulamasına giriş yapmak için kullanacağınız onay kodu:",
+      footer: "Bu kod 5 dakika içinde geçerliliğini yitirecektir."
+    }
+  }.tr;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: process.env.RESEND_FROM || "BagajPark <info@bagajpark.com>",
+      to: email,
+      subject: content.subject,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 12px;">
+          <h1 style="color: #ea580c;">${content.title}</h1>
+          <p style="color: #374151; font-size: 16px;">${content.text}</p>
+          <div style="background-color: #f8fafc; padding: 20px; text-align: center; border-radius: 8px; margin: 24px 0;">
+            <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #0f172a;">${code}</span>
+          </div>
+          <p style="font-size: 0.875rem; color: #6b7280; text-align: center;">
+            ${content.footer}
+          </p>
+        </div>
+      `,
+    });
+
+    if (error) {
+      logger.error({ error, email }, "mobile_otp_mail_error");
+    } else {
+      logger.info({ email, id: data?.id }, "mobile_otp_mail_sent");
+    }
+  } catch (error) {
+    logger.error({ error, email }, "mobile_otp_mail_exception");
+  }
+};

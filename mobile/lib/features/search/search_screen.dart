@@ -33,27 +33,6 @@ final nearbyShopsProvider = FutureProvider.family<List<ShopDto>, LatLng>((
         .map((e) => ShopDto.fromJson(e as Map<String, dynamic>))
         .toList();
 
-    if (shops.isEmpty) {
-      shops = [
-        ShopDto(
-          id: 'demo-1',
-          name: 'Galata Emanet Noktası',
-          latitude: center.latitude + 0.002,
-          longitude: center.longitude + 0.002,
-          address: 'Bereketzade, Galata Kulesi Sk.',
-          city: 'İstanbul',
-          district: 'Beyoğlu',
-          pricePerDay: 45.0,
-          capacity: 20,
-          open247: true,
-          rating: 4.8,
-        ),
-      ];
-    }
-    shops.sort((a, b) {
-      if (a.rating != b.rating) return (b.rating ?? 0).compareTo(a.rating ?? 0);
-      return (a.distanceKm ?? 0).compareTo(b.distanceKm ?? 0);
-    });
     return shops;
   } catch (e) {
     return [];
