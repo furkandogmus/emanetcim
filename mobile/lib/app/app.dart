@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../core/auth/auth_controller.dart';
+import '../core/services/deep_link_service.dart';
 import '../core/sync/sync_service.dart';
 import '../shared/models/user.dart';
 import 'package:screen_protector/screen_protector.dart';
@@ -38,6 +39,12 @@ class _BagajParkAppState extends ConsumerState<BagajParkApp>
           ref.read(syncServiceProvider).sync();
         }
       }
+    });
+
+    // Deep Link Init
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(deepLinkServiceProvider).init();
+      ref.read(syncServiceProvider).sync();
     });
   }
 
@@ -73,11 +80,6 @@ class _BagajParkAppState extends ConsumerState<BagajParkApp>
 
     // Security Hardening: Global protection for Partners
     _updateScreenProtection(auth.session);
-
-    // Trigger offline sync on app start
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(syncServiceProvider).sync();
-    });
 
     return MaterialApp.router(
       title: 'BagajPark',

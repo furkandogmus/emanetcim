@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/auth/auth_controller.dart';
+import '../../core/services/haptic_service.dart';
+import '../../core/services/share_service.dart';
 import '../../shared/models/user.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -121,7 +123,10 @@ class ProfileScreen extends ConsumerWidget {
           ],
 
           // Referral Card (Only for Guests)
-          if (!isPartner) ...[_referralCard(user), const SizedBox(height: 32)],
+          if (!isPartner) ...[
+            _referralCard(context, ref, user),
+            const SizedBox(height: 32)
+          ],
 
           // Menu Section
           _sectionHeader('profile.settings'.tr()),
@@ -234,7 +239,7 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _referralCard(UserDto? user) {
+  Widget _referralCard(BuildContext context, WidgetRef ref, UserDto? user) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -305,9 +310,12 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                 ),
                 TextButton.icon(
-                  onPressed: () => Clipboard.setData(
-                    ClipboardData(text: user?.referralCode ?? 'BP-WELCOME'),
-                  ),
+                  onPressed: () {
+                    ref.read(hapticServiceProvider).light();
+                    Clipboard.setData(
+                      ClipboardData(text: user?.referralCode ?? 'BP-WELCOME'),
+                    );
+                  },
                   icon: const Icon(
                     Icons.copy_rounded,
                     size: 18,
@@ -320,6 +328,17 @@ class ProfileScreen extends ConsumerWidget {
                       fontWeight: FontWeight.bold,
                       fontSize: 12,
                     ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    ref.read(hapticServiceProvider).selection();
+                    ref.read(shareServiceProvider).shareApp();
+                  },
+                  icon: const Icon(
+                    Icons.share_rounded,
+                    size: 18,
+                    color: Colors.white70,
                   ),
                 ),
               ],
