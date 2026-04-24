@@ -25,8 +25,10 @@ class HomeScreen extends ConsumerWidget {
             backgroundColor: Colors.white,
             elevation: 0,
             flexibleSpace: FlexibleSpaceBar(
-              titlePadding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              titlePadding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 16,
+              ),
               title: Text(
                 user?.name != null
                     ? 'home.greeting'.tr(args: [user!.name!.split(' ')[0]])
@@ -90,7 +92,9 @@ class HomeScreen extends ConsumerWidget {
                             backgroundColor: Colors.white,
                             foregroundColor: const Color(0xFFF97316),
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 12),
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -111,10 +115,22 @@ class HomeScreen extends ConsumerWidget {
                     child: ListView(
                       scrollDirection: Axis.horizontal,
                       children: [
-                        _cityCard('İstanbul', 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?q=80&w=400&auto=format&fit=crop'),
-                        _cityCard('Ankara', 'https://images.unsplash.com/photo-1621259182978-fbf93132d53d?q=80&w=400&auto=format&fit=crop'),
-                        _cityCard('İzmir', 'https://images.unsplash.com/photo-1596464875936-398327918f3a?q=80&w=400&auto=format&fit=crop'),
-                        _cityCard('Antalya', 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?q=80&w=400&auto=format&fit=crop'),
+                        _cityCard(
+                          'İstanbul',
+                          'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?q=80&w=400&auto=format&fit=crop',
+                        ),
+                        _cityCard(
+                          'Ankara',
+                          'https://images.unsplash.com/photo-1621259182978-fbf93132d53d?q=80&w=400&auto=format&fit=crop',
+                        ),
+                        _cityCard(
+                          'İzmir',
+                          'https://images.unsplash.com/photo-1596464875936-398327918f3a?q=80&w=400&auto=format&fit=crop',
+                        ),
+                        _cityCard(
+                          'Antalya',
+                          'https://images.unsplash.com/photo-1542051841857-5f90071e7989?q=80&w=400&auto=format&fit=crop',
+                        ),
                       ],
                     ),
                   ),
@@ -171,8 +187,11 @@ class HomeScreen extends ConsumerWidget {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.shield_outlined,
-                            size: 40, color: Colors.blue.shade700),
+                        Icon(
+                          Icons.shield_outlined,
+                          size: 40,
+                          color: Colors.blue.shade700,
+                        ),
                         const SizedBox(width: 16),
                         Expanded(
                           child: Column(
@@ -249,7 +268,12 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildStep(BuildContext context, IconData icon, String title, String desc) {
+  Widget _buildStep(
+    BuildContext context,
+    IconData icon,
+    String title,
+    String desc,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 24),
       child: Row(

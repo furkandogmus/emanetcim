@@ -36,8 +36,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isAdminRoute = state.matchedLocation.startsWith('/admin');
       final role = auth.session?.role;
 
-      if (!auth.onboardingDone &&
-          state.matchedLocation != '/onboarding') {
+      if (!auth.onboardingDone && state.matchedLocation != '/onboarding') {
         return '/onboarding';
       }
 
@@ -73,10 +72,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(
-        path: '/onboarding',
-        builder: (_, _) => const OnboardingScreen(),
-      ),
+      GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingScreen()),
       GoRoute(path: '/auth/login', builder: (_, _) => const LoginScreen()),
       GoRoute(
         path: '/auth/register',

@@ -312,9 +312,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             ],
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF97316).withValues(alpha: 0.1),
+                              color: const Color(
+                                0xFFF97316,
+                              ).withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(
@@ -353,7 +358,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             : Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Icon(Icons.shield_check_rounded, size: 22),
+                                  const Icon(
+                                    Icons.shield_check_rounded,
+                                    size: 22,
+                                  ),
                                   const SizedBox(width: 12),
                                   Text(
                                     'checkout.pay_button'.tr(),
