@@ -320,6 +320,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ),
       ),
     );
+  }
+
   Widget _buildStep(
     BuildContext context,
     IconData icon,
