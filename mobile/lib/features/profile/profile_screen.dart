@@ -65,7 +65,11 @@ class ProfileScreen extends ConsumerWidget {
                           color: Color(0xFFF97316),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.camera_alt_rounded, size: 16, color: Colors.white),
+                        child: const Icon(
+                          Icons.camera_alt_rounded,
+                          size: 16,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ],

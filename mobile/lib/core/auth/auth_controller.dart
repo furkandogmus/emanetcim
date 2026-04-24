@@ -25,13 +25,12 @@ class AuthState {
     bool? isDemo,
     bool? onboardingDone,
     bool clearSession = false,
-  }) =>
-      AuthState(
-        session: clearSession ? null : (session ?? this.session),
-        loading: loading ?? this.loading,
-        isDemo: isDemo ?? this.isDemo,
-        onboardingDone: onboardingDone ?? this.onboardingDone,
-      );
+  }) => AuthState(
+    session: clearSession ? null : (session ?? this.session),
+    loading: loading ?? this.loading,
+    isDemo: isDemo ?? this.isDemo,
+    onboardingDone: onboardingDone ?? this.onboardingDone,
+  );
 }
 
 final authControllerProvider = NotifierProvider<AuthController, AuthState>(

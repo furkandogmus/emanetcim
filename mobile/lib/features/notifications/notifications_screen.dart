@@ -107,7 +107,9 @@ class NotificationsScreen extends ConsumerWidget {
           ),
         ],
         border: Border.all(
-          color: n.isRead ? Colors.grey.shade100 : const Color(0xFFF97316).withValues(alpha: 0.1),
+          color: n.isRead
+              ? Colors.grey.shade100
+              : const Color(0xFFF97316).withValues(alpha: 0.1),
           width: 1.5,
         ),
       ),

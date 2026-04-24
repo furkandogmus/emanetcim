@@ -215,26 +215,43 @@ class ShopDetailScreen extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(24),
                             color: Colors.grey.shade100,
                             image: const DecorationImage(
-                              image: NetworkImage('https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?q=80&w=800&auto=format&fit=crop'),
+                              image: NetworkImage(
+                                'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?q=80&w=800&auto=format&fit=crop',
+                              ),
                               fit: BoxFit.cover,
                             ),
                           ),
                           child: Center(
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(12),
-                                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10)],
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.1),
+                                    blurRadius: 10,
+                                  ),
+                                ],
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.map_rounded, size: 18, color: Color(0xFFF97316)),
+                                  const Icon(
+                                    Icons.map_rounded,
+                                    size: 18,
+                                    color: Color(0xFFF97316),
+                                  ),
                                   const SizedBox(width: 8),
                                   Text(
                                     'Haritada Gör',
-                                    style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 13),
+                                    style: GoogleFonts.outfit(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -252,7 +269,8 @@ class ShopDetailScreen extends ConsumerWidget {
                           children: [
                             _amenityChip(Icons.videocam_rounded, '7/24 Kamera'),
                             _amenityChip(Icons.security_rounded, 'Sigorta'),
-                            if (s.hasRestroom) _amenityChip(Icons.wc_rounded, 'Tuvalet'),
+                            if (s.hasRestroom)
+                              _amenityChip(Icons.wc_rounded, 'Tuvalet'),
                             _amenityChip(Icons.wifi_rounded, 'Wi-Fi'),
                             _amenityChip(Icons.accessible_rounded, 'Erişim'),
                           ],
@@ -262,8 +280,16 @@ class ShopDetailScreen extends ConsumerWidget {
 
                         _sectionHeader('Değerlendirmeler'),
                         const SizedBox(height: 16),
-                        _reviewItem('Ahmet Y.', 5, 'Çok merkezi bir konumda, teslimat çok hızlıydı. Güvenle bırakabilirsiniz.'),
-                        _reviewItem('Sarah M.', 4, 'Very friendly staff and easy to find. Highly recommended!'),
+                        _reviewItem(
+                          'Ahmet Y.',
+                          5,
+                          'Çok merkezi bir konumda, teslimat çok hızlıydı. Güvenle bırakabilirsiniz.',
+                        ),
+                        _reviewItem(
+                          'Sarah M.',
+                          4,
+                          'Very friendly staff and easy to find. Highly recommended!',
+                        ),
 
                         const SizedBox(height: 120), // Bottom bar space
                       ],

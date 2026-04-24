@@ -20,19 +20,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     OnboardingData(
       title: 'onboarding.step1.title',
       desc: 'onboarding.step1.desc',
-      image: 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?q=80&w=800&auto=format&fit=crop',
+      image:
+          'https://images.unsplash.com/photo-1542051841857-5f90071e7989?q=80&w=800&auto=format&fit=crop',
       color: const Color(0xFFF97316),
     ),
     OnboardingData(
       title: 'onboarding.step2.title',
       desc: 'onboarding.step2.desc',
-      image: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=800&auto=format&fit=crop',
+      image:
+          'https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=800&auto=format&fit=crop',
       color: const Color(0xFF3B82F6),
     ),
     OnboardingData(
       title: 'onboarding.step3.title',
       desc: 'onboarding.step3.desc',
-      image: 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?q=80&w=800&auto=format&fit=crop',
+      image:
+          'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?q=80&w=800&auto=format&fit=crop',
       color: const Color(0xFF10B981),
     ),
   ];
@@ -66,7 +69,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
                 child: SafeArea(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 60),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 40,
+                      vertical: 60,
+                    ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -113,7 +119,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       height: 6,
                       width: _currentPage == idx ? 24 : 6,
                       decoration: BoxDecoration(
-                        color: _currentPage == idx ? const Color(0xFFF97316) : Colors.white24,
+                        color: _currentPage == idx
+                            ? const Color(0xFFF97316)
+                            : Colors.white24,
                         borderRadius: BorderRadius.circular(3),
                       ),
                     ),
@@ -125,8 +133,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFF97316),
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 16,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       elevation: 0,
                     ),
                     child: Text(
@@ -140,7 +153,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       duration: const Duration(milliseconds: 500),
                       curve: Curves.easeInOut,
                     ),
-                    icon: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 32),
+                    icon: const Icon(
+                      Icons.arrow_forward_rounded,
+                      color: Colors.white,
+                      size: 32,
+                    ),
                   ),
               ],
             ),
@@ -152,7 +169,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               onPressed: _completeOnboarding,
               child: Text(
                 'auth.skip'.tr(),
-                style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold),
+                style: GoogleFonts.outfit(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
