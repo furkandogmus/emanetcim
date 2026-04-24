@@ -358,10 +358,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             : Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Icon(
-                                    Icons.security_rounded,
-                                    size: 22,
-                                  ),
+                                  const Icon(Icons.security_rounded, size: 22),
                                   const SizedBox(width: 12),
                                   Text(
                                     'checkout.pay_button'.tr(),
