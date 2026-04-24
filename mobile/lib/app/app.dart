@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:ui';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../core/auth/auth_controller.dart';
 import '../core/sync/sync_service.dart';
@@ -19,16 +22,29 @@ class BagajParkApp extends ConsumerStatefulWidget {
 class _BagajParkAppState extends ConsumerState<BagajParkApp>
     with WidgetsBindingObserver {
   bool _isInBackground = false;
+  bool _isOffline = false;
+  StreamSubscription? _connectivitySub;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    _connectivitySub = Connectivity().onConnectivityChanged.listen((results) {
+      final isOffline = results.every((r) => r == ConnectivityResult.none);
+      if (mounted) {
+        setState(() => _isOffline = isOffline);
+        if (!isOffline) {
+          ref.read(syncServiceProvider).sync();
+        }
+      }
+    });
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _connectivitySub?.cancel();
     super.dispose();
   }
 
@@ -76,7 +92,36 @@ class _BagajParkAppState extends ConsumerState<BagajParkApp>
       builder: (context, child) {
         return Stack(
           children: [
-            ?child,
+            if (child != null) child,
+            if (_isOffline)
+              Positioned(
+                top: MediaQuery.of(context).padding.top,
+                left: 0,
+                right: 0,
+                child: Material(
+                  color: Colors.transparent,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    color: Colors.redAccent.withValues(alpha: 0.9),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.wifi_off_rounded,
+                            color: Colors.white, size: 16),
+                        const SizedBox(width: 8),
+                        Text(
+                          'common.no_internet'.tr(),
+                          style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             if (_isInBackground)
               Positioned.fill(
                 child: BackdropFilter(

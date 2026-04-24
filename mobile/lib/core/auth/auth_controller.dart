@@ -149,4 +149,18 @@ class AuthController extends Notifier<AuthState> {
     await ref.read(tokenStoreProvider).clear();
     state = state.copyWith(clearSession: true);
   }
+
+  Future<bool> requestAccountDeletion() async {
+    state = state.copyWith(loading: true);
+    try {
+      final dio = ref.read(dioProvider);
+      await dio.post('/account/delete');
+      await logout();
+      state = state.copyWith(loading: false);
+      return true;
+    } catch (e) {
+      state = state.copyWith(loading: false);
+      return false;
+    }
+  }
 }

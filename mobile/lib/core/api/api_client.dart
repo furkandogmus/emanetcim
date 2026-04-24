@@ -44,6 +44,29 @@ final dioProvider = Provider<Dio>((ref) {
     ),
   );
 
+  // Simple In-Memory Cache Interceptor for performance
+  final Map<String, Response> cache = {};
+  dio.interceptors.add(
+    InterceptorsWrapper(
+      onRequest: (options, handler) {
+        if (options.method == 'GET') {
+          final key = options.uri.toString();
+          if (cache.containsKey(key)) {
+            return handler.resolve(cache[key]!);
+          }
+        }
+        handler.next(options);
+      },
+      onResponse: (response, handler) {
+        if (response.requestOptions.method == 'GET') {
+          final key = response.requestOptions.uri.toString();
+          cache[key] = response;
+        }
+        handler.next(response);
+      },
+    ),
+  );
+
   if (kDebugMode) {
     dio.interceptors.add(
       PrettyDioLogger(

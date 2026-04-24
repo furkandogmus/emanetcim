@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../core/auth/auth_controller.dart';
 import '../../shared/widgets/how_it_works_sheet.dart';
@@ -34,20 +35,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return _isValidEmail(v) || _isValidPhone(v);
   }
 
-  Future<void> _requestOtp() async {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() => _busy = true);
-    try {
-      final input = _identity.text.trim();
-      await ref.read(authControllerProvider.notifier).requestOtp(input);
-      if (!mounted) return;
-      context.push('/auth/otp?email=${Uri.encodeComponent(input)}');
-    } catch (e) {
-      _toast('$e');
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
 
   Future<void> _google() async {
     setState(() => _busy = true);
@@ -252,11 +239,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     // Social Logins
                     OutlinedButton.icon(
                       onPressed: _busy ? null : _google,
-                      icon: Image.network(
-                        'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_Color_Icon.svg/1024px-Google_Color_Icon.svg.png',
+                      icon: CachedNetworkImage(
+                        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_Color_Icon.svg/1024px-Google_Color_Icon.svg.png',
                         height: 24,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Icon(Icons.login),
+                        placeholder: (context, url) => const Icon(Icons.login, size: 24),
+                        errorWidget: (context, url, error) => const Icon(Icons.login),
                       ),
                       label: Text('auth.google'.tr()),
                     ),
@@ -319,58 +306,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildStep(
-    BuildContext context,
-    IconData icon,
-    String title,
-    String desc,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 24),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                ),
-              ],
-            ),
-            child: Icon(icon, color: const Color(0xFFF97316)),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.outfit(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                Text(
-                  desc,
-                  style: GoogleFonts.outfit(
-                    color: Colors.grey.shade600,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

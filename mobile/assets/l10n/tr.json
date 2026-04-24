@@ -82,6 +82,7 @@
     "insurance": "Sigortalı Emanet",
     "book_now": "Hemen Rezervasyon Yap",
     "location_service_disabled": "Konum servisleri kapalı. Lütfen ayarlardan açın.",
+    "location_denied": "Konum izni verilmedi. Yakındaki dükkanları görmek için lütfen ayarlardan izin verin.",
     "day_unit": "/gün"
   },
   "notifications": {
@@ -194,8 +195,12 @@
     "help_center": "Yardım Merkezi",
     "about": "Uygulama Hakkında",
     "privacy": "Gizlilik Politikası",
+    "terms_of_service": "Kullanım Koşulları",
     "logout": "Çıkış Yap",
-    "delete_account": "Hesabımı Kalıcı Olarak Sil",
+    "delete_account": "Hesabımı Sil",
+    "delete_account_confirm": "Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz ve tüm verileriniz silinir.",
+    "delete_account_success": "Hesap silme talebiniz alındı. 7 gün içinde hesabınız kalıcı olarak silinecektir.",
+    "delete_account_error": "Hesap silme talebi iletilemedi. Lütfen aktif rezervasyonunuz olmadığını kontrol edin.",
     "referral_title": "Arkadaşlarını Davet Et",
     "referral_hint": "Her davet için ₺20 indirim kazan!",
     "copy": "KOPYALA"
@@ -228,7 +233,8 @@
     "save": "Kaydet",
     "back": "Geri",
     "next": "İleri",
-    "done": "Bitti"
+    "done": "Bitti",
+    "no_internet": "Bağlantı Yok - Bazı işlemler gecikebilir"
   },
   "tutorial": {
     "guest": {

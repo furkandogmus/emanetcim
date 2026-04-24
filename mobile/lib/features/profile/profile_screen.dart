@@ -153,6 +153,16 @@ class ProfileScreen extends ConsumerWidget {
             ),
           ),
           _menuItem(
+            Icons.privacy_tip_outlined,
+            'profile.privacy'.tr(),
+            onTap: () => _showLegal(context, 'profile.privacy'.tr(), _privacyPolicyText),
+          ),
+          _menuItem(
+            Icons.gavel_rounded,
+            'profile.terms_of_service'.tr(),
+            onTap: () => _showLegal(context, 'profile.terms_of_service'.tr(), _termsOfServiceText),
+          ),
+          _menuItem(
             Icons.info_outline_rounded,
             'profile.about'.tr(),
             onTap: () =>
@@ -392,7 +402,7 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ),
         content: Text(
-          'Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
+          'profile.delete_account_confirm'.tr(),
           style: GoogleFonts.outfit(),
         ),
         actions: [
@@ -401,9 +411,24 @@ class ProfileScreen extends ConsumerWidget {
             child: Text('common.cancel'.tr()),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              ref.read(authControllerProvider.notifier).logout();
+              final success = await ref
+                  .read(authControllerProvider.notifier)
+                  .requestAccountDeletion();
+
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      success
+                          ? 'profile.delete_account_success'.tr()
+                          : 'profile.delete_account_error'.tr(),
+                    ),
+                    backgroundColor: success ? Colors.green : Colors.redAccent,
+                  ),
+                );
+              }
             },
             child: Text(
               'common.confirm'.tr(),
@@ -538,4 +563,31 @@ class ProfileScreen extends ConsumerWidget {
       ),
     );
   }
+
+  static const String _privacyPolicyText = '''
+BagajPark olarak gizliliğinize önem veriyoruz. Bu metin, verilerinizin nasıl toplandığını ve kullanıldığını açıklar.
+
+1. Toplanan Veriler
+Hizmetimizi sunabilmek için adınız, e-posta adresiniz, telefon numaranız ve konum bilginiz gibi temel bilgileri topluyoruz.
+
+2. Verilerin Kullanımı
+Verileriniz sadece rezervasyon işlemlerini gerçekleştirmek, güvenliği sağlamak ve size bildirim göndermek amacıyla kullanılır.
+
+3. Üçüncü Taraflar
+Verileriniz yasal zorunluluklar dışında üçüncü taraflarla paylaşılmaz. Ödeme işlemleri güvenli aracı kurumlar üzerinden yürütülür.
+''';
+
+  static const String _termsOfServiceText = '''
+BagajPark Kullanım Koşulları
+
+1. Hizmet Tanımı
+BagajPark, eşyalarınızı güvenli noktalarda (esnaflarda) geçici olarak saklamanıza olanak sağlayan bir platformdur.
+
+2. Sorumluluklar
+- Esnaf, kendisine teslim edilen eşyayı güvenli bir şekilde saklamakla yükümlüdür.
+- Kullanıcı, yasaklı madde (yanıcı, patlayıcı, yasa dışı vb.) teslim etmemeyi taahhüt eder.
+
+3. İptal ve İade
+Rezervasyon saatinden önce yapılan iptallerde tam iade yapılır. Süre başladıktan sonra iade yapılmaz.
+''';
 }

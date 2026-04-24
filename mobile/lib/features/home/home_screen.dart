@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../core/auth/auth_controller.dart';
 import '../../shared/widgets/how_it_works_sheet.dart';
@@ -137,47 +138,53 @@ class HomeScreen extends ConsumerWidget {
                   const SizedBox(height: 40),
 
                   // How it works
-                  GestureDetector(
-                    onTap: () => _showHowItWorks(context),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _sectionHeader('home.how_it_works'.tr()),
-                        Text(
-                          'Detayları Gör',
-                          style: GoogleFonts.outfit(
-                            fontSize: 12,
-                            color: const Color(0xFFF97316),
-                            fontWeight: FontWeight.bold,
+                  RepaintBoundary(
+                    child: GestureDetector(
+                      onTap: () => _showHowItWorks(context),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _sectionHeader('home.how_it_works'.tr()),
+                              Text(
+                                'Detayları Gör',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 12,
+                                  color: const Color(0xFFF97316),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 20),
+                          _buildStep(
+                            context,
+                            Icons.search_rounded,
+                            'home.step1.title'.tr(),
+                            'home.step1.desc'.tr(),
+                          ),
+                          _buildStep(
+                            context,
+                            Icons.qr_code_rounded,
+                            'home.step2.title'.tr(),
+                            'home.step2.desc'.tr(),
+                          ),
+                          _buildStep(
+                            context,
+                            Icons.lock_outline_rounded,
+                            'home.step3.title'.tr(),
+                            'home.step3.desc'.tr(),
+                          ),
+                          _buildStep(
+                            context,
+                            Icons.explore_rounded,
+                            'home.step4.title'.tr(),
+                            'home.step4.desc'.tr(),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  _buildStep(
-                    context,
-                    Icons.search_rounded,
-                    'home.step1.title'.tr(),
-                    'home.step1.desc'.tr(),
-                  ),
-                  _buildStep(
-                    context,
-                    Icons.qr_code_rounded,
-                    'home.step2.title'.tr(),
-                    'home.step2.desc'.tr(),
-                  ),
-                  _buildStep(
-                    context,
-                    Icons.lock_outline_rounded,
-                    'home.step3.title'.tr(),
-                    'home.step3.desc'.tr(),
-                  ),
-                  _buildStep(
-                    context,
-                    Icons.explore_rounded,
-                    'home.step4.title'.tr(),
-                    'home.step4.desc'.tr(),
                   ),
 
                   const SizedBox(height: 40),
@@ -190,36 +197,38 @@ class HomeScreen extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(color: Colors.blue.shade100),
                     ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.shield_outlined,
-                          size: 40,
-                          color: Colors.blue.shade700,
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'home.safety_title'.tr(),
-                                style: GoogleFonts.outfit(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue.shade900,
-                                ),
-                              ),
-                              Text(
-                                'home.safety_desc'.tr(),
-                                style: GoogleFonts.outfit(
-                                  fontSize: 12,
-                                  color: Colors.blue.shade700,
-                                ),
-                              ),
-                            ],
+                    child: RepaintBoundary(
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.shield_outlined,
+                            size: 40,
+                            color: Colors.blue.shade700,
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'home.safety_title'.tr(),
+                                  style: GoogleFonts.outfit(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.blue.shade900,
+                                  ),
+                                ),
+                                Text(
+                                  'home.safety_desc'.tr(),
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 12,
+                                    color: Colors.blue.shade700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 120),
@@ -250,29 +259,87 @@ class HomeScreen extends ConsumerWidget {
         width: 140,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          image: DecorationImage(
-            image: NetworkImage(imageUrl),
-            fit: BoxFit.cover,
-            colorFilter: ColorFilter.mode(
-              Colors.black.withValues(alpha: 0.3),
-              BlendMode.darken,
-            ),
-          ),
         ),
-        child: Center(
-          child: Text(
-            name,
-            style: GoogleFonts.outfit(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              CachedNetworkImage(
+                imageUrl: imageUrl,
+                fit: BoxFit.cover,
+                placeholder: (context, url) =>
+                    Container(color: Colors.grey.shade100),
+                errorWidget: (context, url, error) => const Icon(Icons.error),
+              ),
+              Container(
+                color: Colors.black.withValues(alpha: 0.3),
+              ),
+              Center(
+                child: Text(
+                  name,
+                  style: GoogleFonts.outfit(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
+  Widget _buildStep(
+    BuildContext context,
+    IconData icon,
+    String title,
+    String desc,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF97316).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(icon, color: const Color(0xFFF97316), size: 24),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.outfit(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: const Color(0xFF0F172A),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  desc,
+                  style: GoogleFonts.outfit(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   void _showHowItWorks(BuildContext context) {
     showModalBottomSheet(

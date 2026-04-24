@@ -3,17 +3,30 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../core/api/api_client.dart';
 import '../../shared/models/booking.dart';
 
 final myBookingsProvider = FutureProvider<List<BookingDto>>((ref) async {
+  final box = Hive.box('my_bookings_cache');
   try {
     final res = await ref.watch(dioProvider).get('/bookings/me');
-    return (res.data as List)
+    final list = res.data as List;
+    final bookings = list
         .map((e) => BookingDto.fromJson(e as Map<String, dynamic>))
         .toList();
+    
+    // Update cache
+    await box.put('list', list);
+    return bookings;
   } catch (e) {
+    final cached = box.get('list');
+    if (cached != null) {
+      return (cached as List)
+          .map((e) => BookingDto.fromJson(Map<String, dynamic>.from(e)))
+          .toList();
+    }
     return [];
   }
 });

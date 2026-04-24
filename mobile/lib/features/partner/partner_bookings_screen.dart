@@ -3,34 +3,48 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/auth/auth_controller.dart';
 import '../../shared/models/booking.dart';
-import '../../shared/widgets/how_it_works_sheet.dart';
 
 final partnerBookingsProvider = FutureProvider<List<BookingDto>>((ref) async {
+  final box = Hive.box('partner_bookings_cache');
   try {
     final dio = ref.watch(dioProvider);
     final res = await dio.get('/partner/bookings');
     final list = res.data as List<dynamic>;
-    return list
+    final bookings = list
         .map((e) => BookingDto.fromJson(e as Map<String, dynamic>))
         .toList();
+
+    // Cache the raw list for offline use
+    await box.put('list', list);
+    return bookings;
   } catch (e) {
+    // If offline, try to return cached data
+    final cached = box.get('list');
+    if (cached != null) {
+      return (cached as List<dynamic>)
+          .map((e) => BookingDto.fromJson(Map<String, dynamic>.from(e)))
+          .toList();
+    }
+
+    // Demo/Fallback data
     return [
       BookingDto(
-        id: 'b-1',
+        id: 'b-demo-1',
         shopId: 's-1',
-        shopName: 'Galata Shop',
-        guestName: 'Ahmet Yılmaz',
-        bagCountS: 2,
-        bagCountM: 0,
+        shopName: 'Emanetçi Galata (Demo)',
+        guestName: 'Örnek Misafir',
+        bagCountS: 1,
+        bagCountM: 1,
         bagCountXl: 0,
-        checkInTime: DateTime.now().add(const Duration(hours: -2)),
-        checkOutTime: DateTime.now().add(const Duration(hours: 4)),
+        checkInTime: DateTime.now().add(const Duration(hours: -1)),
+        checkOutTime: DateTime.now().add(const Duration(hours: 3)),
         status: BookingStatus.checkedIn,
-        totalPrice: 120.0,
+        totalPrice: 150.0,
       ),
     ];
   }
@@ -350,6 +364,49 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
     );
   }
 
+  Widget _tutorialStep(IconData icon, String title, String desc) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF97316).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(icon, color: const Color(0xFFF97316), size: 24),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.outfit(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF0F172A),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  desc,
+                  style: GoogleFonts.outfit(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _BookingPartnerCard extends StatelessWidget {
