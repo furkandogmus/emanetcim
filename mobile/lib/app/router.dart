@@ -12,6 +12,7 @@ import '../features/home/home_shell.dart';
 import '../features/admin/admin_dashboard_screen.dart';
 import '../features/admin/admin_applications_screen.dart';
 import '../features/notifications/notifications_screen.dart';
+import '../features/onboarding/onboarding_screen.dart';
 import '../features/partner/partner_bookings_screen.dart';
 import '../features/partner/partner_earnings_screen.dart';
 import '../features/partner/partner_settings_screen.dart';
@@ -35,7 +36,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isAdminRoute = state.matchedLocation.startsWith('/admin');
       final role = auth.session?.role;
 
-      if (!loggedIn && !loggingIn) {
+      if (!auth.onboardingDone &&
+          state.matchedLocation != '/onboarding') {
+        return '/onboarding';
+      }
+
+      if (!loggedIn && !loggingIn && state.matchedLocation != '/onboarding') {
         return '/auth/login';
       }
 
@@ -67,6 +73,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/onboarding',
+        builder: (_, _) => const OnboardingScreen(),
+      ),
       GoRoute(path: '/auth/login', builder: (_, _) => const LoginScreen()),
       GoRoute(
         path: '/auth/register',

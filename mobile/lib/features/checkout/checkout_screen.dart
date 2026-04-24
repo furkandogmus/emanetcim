@@ -253,10 +253,17 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 final grandTotal = bagTotal > 0 ? bagTotal + insuranceFee : 0.0;
 
                 return Container(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(28),
                   decoration: BoxDecoration(
                     color: const Color(0xFF0F172A),
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(32),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF0F172A).withValues(alpha: 0.2),
+                        blurRadius: 30,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
                   ),
                   child: Column(
                     children: [
@@ -264,48 +271,75 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         'checkout.summary_bags'.tr(args: [days.toString()]),
                         '₺${bagTotal.toStringAsFixed(2)}',
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
                       _summaryRow(
                         'checkout.insurance_fee'.tr(),
                         '₺${insuranceFee.toStringAsFixed(2)}',
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
                       _summaryRow(
                         'checkout.service_fee'.tr(),
                         'checkout.included'.tr(),
-                        valueColor: Colors.greenAccent,
+                        valueColor: const Color(0xFF10B981),
                       ),
                       const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        child: Divider(color: Colors.white24, height: 1),
+                        padding: EdgeInsets.symmetric(vertical: 24),
+                        child: Divider(color: Colors.white12, height: 1),
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'checkout.total'.tr().toUpperCase(),
-                            style: GoogleFonts.outfit(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'checkout.total'.tr().toUpperCase(),
+                                style: GoogleFonts.outfit(
+                                  color: Colors.white.withValues(alpha: 0.6),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                              Text(
+                                '₺${grandTotal.toStringAsFixed(2)}',
+                                style: GoogleFonts.outfit(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 32,
+                                ),
+                              ),
+                            ],
                           ),
-                          Text(
-                            '₺${grandTotal.toStringAsFixed(2)}',
-                            style: GoogleFonts.outfit(
-                              color: const Color(0xFFF97316),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 24,
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF97316).withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              'BAGAJPARK',
+                              style: GoogleFonts.outfit(
+                                color: const Color(0xFFF97316),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 10,
+                                letterSpacing: 1,
+                              ),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 32),
                       FilledButton(
                         onPressed: _busy || _total == 0 ? null : _pay,
                         style: FilledButton.styleFrom(
                           backgroundColor: const Color(0xFFF97316),
-                          minimumSize: const Size(double.infinity, 60),
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size(double.infinity, 64),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          elevation: 0,
                         ),
                         child: _busy
                             ? const SizedBox(
@@ -319,7 +353,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             : Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Icon(Icons.security_rounded, size: 20),
+                                  const Icon(Icons.shield_check_rounded, size: 22),
                                   const SizedBox(width: 12),
                                   Text(
                                     'checkout.pay_button'.tr(),
@@ -331,21 +365,22 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                 ],
                               ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            Icons.lock_outline_rounded,
+                            Icons.verified_user_rounded,
                             size: 14,
-                            color: Colors.grey.shade500,
+                            color: Colors.grey.shade600,
                           ),
-                          const SizedBox(width: 4),
+                          const SizedBox(width: 6),
                           Text(
                             'checkout.secure_payment'.tr(),
                             style: GoogleFonts.outfit(
-                              fontSize: 12,
-                              color: Colors.grey.shade500,
+                              fontSize: 11,
+                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],

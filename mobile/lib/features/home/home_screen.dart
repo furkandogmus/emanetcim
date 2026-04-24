@@ -122,25 +122,41 @@ class HomeScreen extends ConsumerWidget {
                   const SizedBox(height: 40),
 
                   // How it works
-                  _sectionHeader('home.how_it_works'.tr()),
+                  GestureDetector(
+                    onTap: () => _showHowItWorks(context),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _sectionHeader('home.how_it_works'.tr()),
+                        Text(
+                          'Detayları Gör',
+                          style: GoogleFonts.outfit(
+                            fontSize: 12,
+                            color: const Color(0xFFF97316),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: 20),
                   _buildStep(
                     context,
                     Icons.search_rounded,
-                    'home.step_1_title'.tr(),
-                    'home.step_1_desc'.tr(),
+                    'home.step1.title'.tr(),
+                    'home.step1.desc'.tr(),
                   ),
                   _buildStep(
                     context,
                     Icons.qr_code_rounded,
-                    'home.step_2_title'.tr(),
-                    'home.step_2_desc'.tr(),
+                    'home.step2.title'.tr(),
+                    'home.step2.desc'.tr(),
                   ),
                   _buildStep(
                     context,
                     Icons.explore_rounded,
-                    'home.step_3_title'.tr(),
-                    'home.step_3_desc'.tr(),
+                    'home.step3.title'.tr(),
+                    'home.step3.desc'.tr(),
                   ),
 
                   const SizedBox(height: 40),
@@ -276,6 +292,79 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  void _showHowItWorks(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'home.how_it_works'.tr(),
+              style: GoogleFonts.outfit(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF0F172A),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            _buildStep(
+              context,
+              Icons.search_rounded,
+              'home.step1.title'.tr(),
+              'home.step1.desc'.tr(),
+            ),
+            _buildStep(
+              context,
+              Icons.qr_code_rounded,
+              'home.step2.title'.tr(),
+              'home.step2.desc'.tr(),
+            ),
+            _buildStep(
+              context,
+              Icons.explore_rounded,
+              'home.step3.title'.tr(),
+              'home.step3.desc'.tr(),
+            ),
+            const SizedBox(height: 24),
+            FilledButton(
+              onPressed: () => Navigator.pop(context),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFFF97316),
+                minimumSize: const Size(double.infinity, 56),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              child: Text(
+                'common.done'.tr(),
+                style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
