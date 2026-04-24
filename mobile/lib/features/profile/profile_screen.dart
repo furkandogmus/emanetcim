@@ -141,7 +141,7 @@ class ProfileScreen extends ConsumerWidget {
             onTap: () => _showInfo(
               context,
               'profile.notifications'.tr(),
-              'Tüm bildirimleriniz ve kampanya duyuruları burada listelenir. Şu an için aktif bir bildiriminiz bulunmuyor.',
+              'profile.notifications_empty'.tr(),
             ),
           ),
 
@@ -215,7 +215,7 @@ class ProfileScreen extends ConsumerWidget {
 
           Center(
             child: Text(
-              'Versiyon 1.0.0',
+              'profile.version'.tr(args: ['1.0.0']),
               style: GoogleFonts.outfit(
                 fontSize: 11,
                 color: Colors.grey.shade400,
@@ -320,6 +320,9 @@ class ProfileScreen extends ConsumerWidget {
                     Clipboard.setData(
                       ClipboardData(text: user?.referralCode ?? 'BP-WELCOME'),
                     );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('profile.copied'.tr())),
+                    );
                   },
                   icon: const Icon(
                     Icons.copy_rounded,
@@ -391,7 +394,7 @@ class ProfileScreen extends ConsumerWidget {
           style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
         ),
         content: Text(
-          'Hesabınızdan çıkış yapmak istediğinize emin misiniz?',
+          'profile.logout_confirm'.tr(),
           style: GoogleFonts.outfit(),
         ),
         actions: [
@@ -468,47 +471,71 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   void _showEditProfile(BuildContext context, UserDto? user) {
+    final nameController = TextEditingController(text: user?.name);
+    bool isSaving = false;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-          left: 24,
-          right: 24,
-          top: 24,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'profile.edit_profile'.tr(),
-              style: GoogleFonts.outfit(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 24),
-            TextField(
-              decoration: InputDecoration(
-                labelText: 'auth.name_label'.tr(),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 24,
+            right: 24,
+            top: 24,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'profile.edit_profile'.tr(),
+                style: GoogleFonts.outfit(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              controller: TextEditingController(text: user?.name),
-            ),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('common.confirm'.tr()),
-            ),
-            const SizedBox(height: 40),
-          ],
+              const SizedBox(height: 24),
+              TextField(
+                decoration: InputDecoration(
+                  labelText: 'auth.name_label'.tr(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                controller: nameController,
+              ),
+              const SizedBox(height: 24),
+              FilledButton(
+                onPressed: isSaving ? null : () async {
+                  setModalState(() => isSaving = true);
+                  try {
+                    // Temporary mock update logic, assuming API /account exists
+                    // final dio = ref.read(dioProvider);
+                    // await dio.put('/account', data: {'name': nameController.text});
+                    await Future.delayed(const Duration(seconds: 1)); // Mock Network Call
+                    if (context.mounted) Navigator.pop(context);
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('${'common.error'.tr()}: $e'))
+                      );
+                    }
+                  } finally {
+                    if (context.mounted) setModalState(() => isSaving = false);
+                  }
+                },
+                child: isSaving
+                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    : Text('common.confirm'.tr()),
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
         ),
       ),
     );

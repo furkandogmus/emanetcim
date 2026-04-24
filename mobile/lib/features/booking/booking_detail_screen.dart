@@ -134,7 +134,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                                 color: Color(0xFF0F172A),
                               ),
                               embeddedImage: const AssetImage(
-                                'assets/images/logo_icon.png',
+                                'assets/images/logo.png',
                               ),
                               embeddedImageStyle: const QrEmbeddedImageStyle(
                                 size: Size(40, 40),
@@ -306,7 +306,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
     if (bk.latitude != null && bk.longitude != null) {
       if (Platform.isIOS) {
         url = Uri.parse(
-          'apple:https://maps.apple.com/?q=${bk.shopName}&ll=${bk.latitude},${bk.longitude}',
+          'https://maps.apple.com/?q=${bk.shopName}&ll=${bk.latitude},${bk.longitude}',
         );
       } else {
         url = Uri.parse('google.navigation:q=${bk.latitude},${bk.longitude}');

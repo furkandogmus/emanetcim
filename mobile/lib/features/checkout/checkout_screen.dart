@@ -34,7 +34,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final d = await showDatePicker(
       context: context,
       initialDate: init,
-      firstDate: DateTime.now(),
+      firstDate: DateTime.now().subtract(const Duration(days: 1)),
       lastDate: DateTime.now().add(const Duration(days: 90)),
     );
     if (d == null) return;
@@ -49,7 +49,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       final now = DateTime.now();
 
       if (dt.isBefore(now)) {
-        _toast('Geçmiş bir zaman seçemezsiniz');
+        _toast('checkout.error_past_time'.tr());
         return;
       }
 
@@ -60,7 +60,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         _checkIn = dt;
       } else {
         if (dt.isBefore(_checkIn)) {
-          _toast('Çıkış saati girişten önce olamaz');
+          _toast('checkout.error_checkout_before_checkin'.tr());
           return;
         }
         _checkOut = dt;

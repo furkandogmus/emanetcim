@@ -28,13 +28,24 @@ Future<void> main() async {
 
   // Encryption for Hive (Security Hardening)
   final tokenStore = TokenStore();
-  final hiveKey = await tokenStore.getHiveKey();
-  await Hive.openBox(
-    'pending_sync_actions',
-    encryptionCipher: HiveAesCipher(hiveKey!),
-  );
-  await Hive.openBox('partner_bookings_cache');
-  await Hive.openBox('my_bookings_cache');
+  List<int>? hiveKey;
+  try {
+    hiveKey = await tokenStore.getHiveKey();
+  } catch (e) {
+    debugPrint('Hive Key error: $e');
+  }
+
+  if (hiveKey != null) {
+    final cipher = HiveAesCipher(hiveKey);
+    await Hive.openBox('pending_sync_actions', encryptionCipher: cipher);
+    await Hive.openBox('partner_bookings_cache', encryptionCipher: cipher);
+    await Hive.openBox('my_bookings_cache', encryptionCipher: cipher);
+  } else {
+    // Fallback if secure storage fails completely (e.g. some emulators)
+    await Hive.openBox('pending_sync_actions');
+    await Hive.openBox('partner_bookings_cache');
+    await Hive.openBox('my_bookings_cache');
+  }
 
   bool isRooted = false;
   try {
