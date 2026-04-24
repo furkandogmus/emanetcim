@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
+import '../../core/auth/auth_controller.dart';
 import '../../shared/models/shop.dart';
 
 class PartnerSettingsScreen extends ConsumerStatefulWidget {

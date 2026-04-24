@@ -1,4 +1,3 @@
-import 'dart:io' show Platform;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -10,6 +9,8 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 import 'app/app.dart';
 import 'core/config/env.dart';
 import 'core/auth/token_store.dart';
+import 'features/security/root_warning_screen.dart';
+import 'shared/widgets/global_error_widget.dart';
 import 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart';
 
 @pragma('vm:entry-point')
@@ -22,6 +23,9 @@ Future<void> main() async {
   await EasyLocalization.ensureInitialized();
   await Hive.initFlutter();
 
+  // Global Error Handling
+  ErrorWidget.builder = (details) => GlobalErrorWidget(details: details);
+
   // Encryption for Hive (Security Hardening)
   final tokenStore = TokenStore();
   final hiveKey = await tokenStore.getHiveKey();
@@ -29,13 +33,12 @@ Future<void> main() async {
     'pending_sync_actions',
     encryptionCipher: HiveAesCipher(hiveKey!),
   );
+  await Hive.openBox('partner_bookings_cache');
+  await Hive.openBox('my_bookings_cache');
 
+  bool isRooted = false;
   try {
-    final isRooted = await FlutterJailbreakDetection.jailbroken;
-    // logger.i('App initialized');
-    if (isRooted) {
-      debugPrint('WARNING: Device is jailbroken/rooted!');
-    }
+    isRooted = await FlutterJailbreakDetection.jailbroken;
   } catch (e) {
     debugPrint('Security check error: $e');
   }
@@ -45,18 +48,22 @@ Future<void> main() async {
     FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
   }
 
+  final app = EasyLocalization(
+    supportedLocales: const [Locale('tr'), Locale('en')],
+    path: 'assets/l10n',
+    fallbackLocale: const Locale('tr'),
+    child: const ProviderScope(child: BagajParkApp()),
+  );
+
   await SentryFlutter.init(
     (options) {
       options.dsn = Env.sentryDsn;
       options.tracesSampleRate = 0.2;
     },
     appRunner: () => runApp(
-      EasyLocalization(
-        supportedLocales: const [Locale('tr'), Locale('en')],
-        path: 'assets/l10n',
-        fallbackLocale: const Locale('tr'),
-        child: const ProviderScope(child: BagajParkApp()),
-      ),
+      isRooted
+          ? RootWarningScreen(onContinue: () => runApp(app))
+          : app,
     ),
   );
 }

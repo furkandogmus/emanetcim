@@ -82,6 +82,7 @@
     "insurance": "Insured Storage",
     "book_now": "Book Now",
     "location_service_disabled": "Location services disabled. Please enable in settings.",
+    "location_denied": "Location access denied. Please enable in app settings to see nearby shops.",
     "day_unit": "/day"
   },
   "notifications": {
@@ -194,8 +195,12 @@
     "help_center": "Help Center",
     "about": "About App",
     "privacy": "Privacy Policy",
+    "terms_of_service": "Terms of Service",
     "logout": "Logout",
-    "delete_account": "Delete Account Permanently",
+    "delete_account": "Delete Account",
+    "delete_account_confirm": "Are you sure you want to delete your account? This action is irreversible and all your data will be permanently removed.",
+    "delete_account_success": "Account deletion request received. Your account will be permanently deleted within 7 days.",
+    "delete_account_error": "Could not submit deletion request. Please ensure you have no active bookings.",
     "referral_title": "Invite Friends",
     "referral_hint": "Earn ₺20 discount for each invite!",
     "copy": "COPY"
@@ -228,7 +233,8 @@
     "save": "Save",
     "back": "Back",
     "next": "Next",
-    "done": "Done"
+    "done": "Done",
+    "no_internet": "No Connection - Some actions may be delayed"
   },
   "tutorial": {
     "guest": {
