@@ -379,64 +379,314 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) => Container(
+      builder: (context) => const _HowItWorksSheet(),
+    );
+  }
+
+  void _showOtpSheet(String identity) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      isDismissible: false,
+      enableDrag: false,
+      builder: (context) => _OtpBottomSheet(identity: identity),
+    );
+  }
+
+  Future<void> _requestOtp() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _busy = true);
+    try {
+      final input = _identity.text.trim();
+      await ref.read(authControllerProvider.notifier).requestOtp(input);
+      if (!mounted) return;
+      _showOtpSheet(input);
+    } catch (e) {
+      _toast('$e');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+}
+
+class _HowItWorksSheet extends StatefulWidget {
+  const _HowItWorksSheet();
+  @override
+  State<_HowItWorksSheet> createState() => _HowItWorksSheetState();
+}
+
+class _HowItWorksSheetState extends State<_HowItWorksSheet> {
+  final _controller = PageController();
+  int _currentPage = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.75,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      child: Column(
+        children: [
+          const SizedBox(height: 12),
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          Expanded(
+            child: PageView(
+              controller: _controller,
+              onPageChanged: (v) => setState(() => _currentPage = v),
+              children: [
+                _tutorialPage(
+                  Icons.search_rounded,
+                  'home.step1.title'.tr(),
+                  'home.step1.desc'.tr(),
+                  const Color(0xFFF97316),
+                ),
+                _tutorialPage(
+                  Icons.qr_code_rounded,
+                  'home.step2.title'.tr(),
+                  'home.step2.desc'.tr(),
+                  const Color(0xFF10B981),
+                ),
+                _tutorialPage(
+                  Icons.lock_outline_rounded,
+                  'home.step3.title'.tr(),
+                  'home.step3.desc'.tr(),
+                  const Color(0xFF3B82F6),
+                ),
+                _tutorialPage(
+                  Icons.explore_rounded,
+                  'home.step4.title'.tr(),
+                  'home.step4.desc'.tr(),
+                  const Color(0xFF8B5CF6),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Row(
+              children: [
+                Row(
+                  children: List.generate(4, (index) {
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      margin: const EdgeInsets.only(right: 8),
+                      width: _currentPage == index ? 24 : 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: _currentPage == index
+                            ? const Color(0xFFF97316)
+                            : Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    );
+                  }),
+                ),
+                const Spacer(),
+                FilledButton(
+                  onPressed: () {
+                    if (_currentPage < 3) {
+                      _controller.nextPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    } else {
+                      Navigator.pop(context);
+                    }
+                  },
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFFF97316),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: Text(_currentPage < 3 ? 'Devam Et' : 'Başlayalım!'),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _tutorialPage(IconData icon, String title, String desc, Color color) {
+    return Padding(
+      padding: const EdgeInsets.all(40.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 80, color: color),
+          ),
+          const SizedBox(height: 48),
+          Text(
+            title,
+            style: GoogleFonts.outfit(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF0F172A),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            desc,
+            style: GoogleFonts.outfit(
+              fontSize: 16,
+              color: Colors.grey.shade600,
+              height: 1.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OtpBottomSheet extends ConsumerStatefulWidget {
+  const _OtpBottomSheet({required this.identity});
+  final String identity;
+
+  @override
+  ConsumerState<_OtpBottomSheet> createState() => _OtpBottomSheetState();
+}
+
+class _OtpBottomSheetState extends ConsumerState<_OtpBottomSheet> {
+  final _code = TextEditingController();
+  bool _busy = false;
+  int _timerCount = 60;
+  bool _canResend = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _canResend = false;
+    _timerCount = 60;
+    Future.doWhile(() async {
+      await Future.delayed(const Duration(seconds: 1));
+      if (!mounted) return false;
+      setState(() => _timerCount--);
+      if (_timerCount <= 0) {
+        setState(() => _canResend = true);
+        return false;
+      }
+      return true;
+    });
+  }
+
+  Future<void> _verify() async {
+    if (_code.text.length < 6) return;
+    setState(() => _busy = true);
+    try {
+      await ref
+          .read(authControllerProvider.notifier)
+          .verifyOtp(widget.identity, _code.text.trim());
+      if (!mounted) return;
+      context.go('/');
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Hatalı kod girdiniz.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Container(
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
         ),
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 40),
+        padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(2),
+            Row(
+              children: [
+                Text(
+                  'Kodunuzu Girin',
+                  style: GoogleFonts.outfit(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
+                const Spacer(),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close),
+                ),
+              ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 8),
             Text(
-              'home.how_it_works'.tr(),
-              style: GoogleFonts.outfit(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF0F172A),
-              ),
-              textAlign: TextAlign.center,
+              'auth.otp_sent'.tr(args: [widget.identity]),
+              style: GoogleFonts.outfit(color: Colors.grey),
             ),
             const SizedBox(height: 32),
-            _buildStep(
-              context,
-              Icons.search_rounded,
-              'home.step1.title'.tr(),
-              'home.step1.desc'.tr(),
+            TextField(
+              controller: _code,
+              autofocus: true,
+              keyboardType: TextInputType.number,
+              maxLength: 6,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.outfit(
+                fontSize: 32,
+                letterSpacing: 8,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFFF97316),
+              ),
+              decoration: InputDecoration(
+                counterText: '',
+                hintText: '0 0 0 0 0 0',
+                hintStyle: GoogleFonts.outfit(
+                  color: Colors.grey.shade200,
+                  letterSpacing: 8,
+                ),
+                filled: true,
+                fillColor: Colors.grey.shade50,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              onChanged: (v) {
+                if (v.length == 6) _verify();
+              },
             ),
-            _buildStep(
-              context,
-              Icons.qr_code_rounded,
-              'home.step2.title'.tr(),
-              'home.step2.desc'.tr(),
-            ),
-            _buildStep(
-              context,
-              Icons.lock_outline_rounded,
-              'home.step3.title'.tr(),
-              'home.step3.desc'.tr(),
-            ),
-            _buildStep(
-              context,
-              Icons.explore_rounded,
-              'home.step4.title'.tr(),
-              'home.step4.desc'.tr(),
-            ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
             FilledButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: _busy || _code.text.length < 6 ? null : _verify,
               style: FilledButton.styleFrom(
                 backgroundColor: const Color(0xFFF97316),
                 minimumSize: const Size(double.infinity, 56),
@@ -444,9 +694,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
+              child: _busy
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : Text('auth.verify'.tr()),
+            ),
+            const SizedBox(height: 16),
+            TextButton(
+              onPressed: _canResend ? () => Navigator.pop(context) : null,
               child: Text(
-                'common.done'.tr(),
-                style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+                _canResend
+                    ? 'Kodu tekrar gönder'
+                    : 'Tekrar gönder (${_timerCount}s)',
               ),
             ),
           ],
