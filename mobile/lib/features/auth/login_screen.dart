@@ -35,7 +35,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return _isValidEmail(v) || _isValidPhone(v);
   }
 
-
   Future<void> _google() async {
     setState(() => _busy = true);
     try {
@@ -240,10 +239,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     OutlinedButton.icon(
                       onPressed: _busy ? null : _google,
                       icon: CachedNetworkImage(
-                        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_Color_Icon.svg/1024px-Google_Color_Icon.svg.png',
+                        imageUrl:
+                            'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_Color_Icon.svg/1024px-Google_Color_Icon.svg.png',
                         height: 24,
-                        placeholder: (context, url) => const Icon(Icons.login, size: 24),
-                        errorWidget: (context, url, error) => const Icon(Icons.login),
+                        placeholder: (context, url) =>
+                            const Icon(Icons.login, size: 24),
+                        errorWidget: (context, url, error) =>
+                            const Icon(Icons.login),
                       ),
                       label: Text('auth.google'.tr()),
                     ),
@@ -345,7 +347,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 }
-
 
 class _OtpBottomSheet extends ConsumerStatefulWidget {
   const _OtpBottomSheet({required this.identity});

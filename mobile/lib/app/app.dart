@@ -108,8 +108,11 @@ class _BagajParkAppState extends ConsumerState<BagajParkApp>
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.wifi_off_rounded,
-                            color: Colors.white, size: 16),
+                        const Icon(
+                          Icons.wifi_off_rounded,
+                          color: Colors.white,
+                          size: 16,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           'common.no_internet'.tr(),

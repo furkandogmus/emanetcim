@@ -214,9 +214,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
     if (permission == LocationPermission.deniedForever) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('search.location_denied'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('search.location_denied'.tr())));
       }
       return;
     }
@@ -277,117 +277,118 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         children: [
           RepaintBoundary(
             child: FlutterMap(
-                mapController: _mapController,
-                options: MapOptions(
-                  initialCenter: _center,
-                  initialZoom: 13,
-                  onPositionChanged: (pos, hasGesture) {
-                    if (hasGesture) {
-                      if ((pos.center.latitude - _center.latitude).abs() > 0.002 ||
-                          (pos.center.longitude - _center.longitude).abs() >
-                              0.002) {
-                        setState(() => _center = pos.center);
-                      }
+              mapController: _mapController,
+              options: MapOptions(
+                initialCenter: _center,
+                initialZoom: 13,
+                onPositionChanged: (pos, hasGesture) {
+                  if (hasGesture) {
+                    if ((pos.center.latitude - _center.latitude).abs() >
+                            0.002 ||
+                        (pos.center.longitude - _center.longitude).abs() >
+                            0.002) {
+                      setState(() => _center = pos.center);
                     }
-                  },
+                  }
+                },
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate: Env.mapTileUrl,
+                  userAgentPackageName: 'com.bagajpark.mobile',
                 ),
-                children: [
-                  TileLayer(
-                    urlTemplate: Env.mapTileUrl,
-                    userAgentPackageName: 'com.bagajpark.mobile',
-                  ),
-                  MarkerLayer(
-                    markers: shopsAsync.maybeWhen(
-                      data: (list) {
-                        var filtered = list;
-                        if (_only247) {
-                          filtered = filtered.where((s) => s.open247).toList();
-                        }
-                        if (_onlyOpenNow) {
-                          filtered = filtered.where((s) => s.isActive).toList();
-                        }
+                MarkerLayer(
+                  markers: shopsAsync.maybeWhen(
+                    data: (list) {
+                      var filtered = list;
+                      if (_only247) {
+                        filtered = filtered.where((s) => s.open247).toList();
+                      }
+                      if (_onlyOpenNow) {
+                        filtered = filtered.where((s) => s.isActive).toList();
+                      }
 
-                        return filtered.asMap().entries.map((entry) {
-                          final index = entry.key;
-                          final s = entry.value;
-                          final isSelected = _selectedShopIndex == index;
-                          return Marker(
-                            point: LatLng(s.latitude!, s.longitude!),
-                            width: isSelected ? 120 : 60,
-                            height: isSelected ? 120 : 60,
-                            child: GestureDetector(
-                              onTap: () {
-                                HapticFeedback.lightImpact();
-                                setState(() => _selectedShopIndex = index);
-                                _mapController.move(
-                                  LatLng(s.latitude!, s.longitude!),
-                                  14,
-                                );
-                              },
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 300),
-                                child: Column(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: isSelected
-                                            ? const Color(0xFFF97316)
-                                            : Colors.white,
-                                        shape: BoxShape.circle,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withValues(
-                                              alpha: 0.2,
-                                            ),
-                                            blurRadius: 10,
-                                            spreadRadius: 2,
+                      return filtered.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final s = entry.value;
+                        final isSelected = _selectedShopIndex == index;
+                        return Marker(
+                          point: LatLng(s.latitude!, s.longitude!),
+                          width: isSelected ? 120 : 60,
+                          height: isSelected ? 120 : 60,
+                          child: GestureDetector(
+                            onTap: () {
+                              HapticFeedback.lightImpact();
+                              setState(() => _selectedShopIndex = index);
+                              _mapController.move(
+                                LatLng(s.latitude!, s.longitude!),
+                                14,
+                              );
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              child: Column(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: isSelected
+                                          ? const Color(0xFFF97316)
+                                          : Colors.white,
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(
+                                            alpha: 0.2,
                                           ),
-                                        ],
+                                          blurRadius: 10,
+                                          spreadRadius: 2,
+                                        ),
+                                      ],
+                                    ),
+                                    child: Icon(
+                                      Icons.shopping_bag,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : const Color(0xFFF97316),
+                                      size: isSelected ? 32 : 24,
+                                    ),
+                                  ),
+                                  if (isSelected)
+                                    Container(
+                                      margin: const EdgeInsets.only(top: 4),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
                                       ),
-                                      child: Icon(
-                                        Icons.shopping_bag,
-                                        color: isSelected
-                                            ? Colors.white
-                                            : const Color(0xFFF97316),
-                                        size: isSelected ? 32 : 24,
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withValues(
+                                          alpha: 0.8,
+                                        ),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        s.name,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ),
-                                    if (isSelected)
-                                      Container(
-                                        margin: const EdgeInsets.only(top: 4),
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 4,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.black.withValues(
-                                            alpha: 0.8,
-                                          ),
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        child: Text(
-                                          s.name,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                  ],
-                                ),
+                                ],
                               ),
                             ),
-                          );
-                        }).toList();
-                      },
-                      orElse: () => [],
-                    ),
+                          ),
+                        );
+                      }).toList();
+                    },
+                    orElse: () => [],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
 
           Positioned(
             left: 16,

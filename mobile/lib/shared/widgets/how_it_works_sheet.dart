@@ -54,19 +54,25 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
               onPageChanged: (v) => setState(() => _currentPage = v),
               children: [
                 _tutorialPage(
-                  isGuest ? Icons.search_rounded : Icons.qr_code_scanner_rounded,
+                  isGuest
+                      ? Icons.search_rounded
+                      : Icons.qr_code_scanner_rounded,
                   '$prefix.step1.title'.tr(),
                   '$prefix.step1.desc'.tr(),
                   const Color(0xFFF97316),
                 ),
                 _tutorialPage(
-                  isGuest ? Icons.event_available_rounded : Icons.task_alt_rounded,
+                  isGuest
+                      ? Icons.event_available_rounded
+                      : Icons.task_alt_rounded,
                   '$prefix.step2.title'.tr(),
                   '$prefix.step2.desc'.tr(),
                   const Color(0xFF10B981),
                 ),
                 _tutorialPage(
-                  isGuest ? Icons.qr_code_2_rounded : Icons.lock_outline_rounded,
+                  isGuest
+                      ? Icons.qr_code_2_rounded
+                      : Icons.lock_outline_rounded,
                   '$prefix.step3.title'.tr(),
                   '$prefix.step3.desc'.tr(),
                   const Color(0xFF3B82F6),

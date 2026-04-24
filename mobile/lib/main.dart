@@ -61,9 +61,7 @@ Future<void> main() async {
       options.tracesSampleRate = 0.2;
     },
     appRunner: () => runApp(
-      isRooted
-          ? RootWarningScreen(onContinue: () => runApp(app))
-          : app,
+      isRooted ? RootWarningScreen(onContinue: () => runApp(app)) : app,
     ),
   );
 }

@@ -257,9 +257,7 @@ class HomeScreen extends ConsumerWidget {
       padding: const EdgeInsets.only(right: 16),
       child: Container(
         width: 140,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(20),
           child: Stack(
@@ -272,9 +270,7 @@ class HomeScreen extends ConsumerWidget {
                     Container(color: Colors.grey.shade100),
                 errorWidget: (context, url, error) => const Icon(Icons.error),
               ),
-              Container(
-                color: Colors.black.withValues(alpha: 0.3),
-              ),
+              Container(color: Colors.black.withValues(alpha: 0.3)),
               Center(
                 child: Text(
                   name,
