@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { BookingStatus, Role } from "@prisma/client";
 import { writeAuditLog } from "@/lib/audit-log";
-import { verifyMobileToken } from "@/lib/mobile-auth";
+import { getMobileSession } from "@/lib/mobile-auth";
 
 const ACTIVE_BOOKING_STATUSES: BookingStatus[] = [
   BookingStatus.WAITING_APPROVAL,
@@ -13,10 +13,11 @@ const ACTIVE_BOOKING_STATUSES: BookingStatus[] = [
 ];
 
 export async function POST(req: NextRequest) {
-  const userId = await verifyMobileToken(req);
-  if (!userId) {
+  const session = await getMobileSession();
+  if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const userId = session.userId;
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
