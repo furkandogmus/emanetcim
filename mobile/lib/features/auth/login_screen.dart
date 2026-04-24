@@ -394,8 +394,8 @@ class _OtpBottomSheetState extends ConsumerState<_OtpBottomSheet> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Hatalı kod girdiniz.'),
+        const SnackBar(
+          content: Text('Hatalı kod girdiniz.'),
           backgroundColor: Colors.redAccent,
         ),
       );

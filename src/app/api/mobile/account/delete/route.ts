@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { BookingStatus, Role } from "@prisma/client";
 import { writeAuditLog } from "@/lib/audit-log";
-import { verifyMobileToken } from "@/lib/auth/mobile-auth";
+import { verifyMobileToken } from "@/lib/mobile-auth";
 
 const ACTIVE_BOOKING_STATUSES: BookingStatus[] = [
   BookingStatus.WAITING_APPROVAL,

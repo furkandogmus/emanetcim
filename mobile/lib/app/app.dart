@@ -94,7 +94,7 @@ class _BagajParkAppState extends ConsumerState<BagajParkApp>
       builder: (context, child) {
         return Stack(
           children: [
-            if (child != null) child,
+            child ?? const SizedBox.shrink(),
             if (_isOffline)
               Positioned(
                 top: MediaQuery.of(context).padding.top,
