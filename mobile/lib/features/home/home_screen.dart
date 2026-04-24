@@ -25,9 +25,12 @@ class HomeScreen extends ConsumerWidget {
             backgroundColor: Colors.white,
             elevation: 0,
             flexibleSpace: FlexibleSpaceBar(
-              titlePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              titlePadding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               title: Text(
-                'Merhaba, ${user?.name?.split(' ')[0] ?? 'Misafir'} 👋',
+                user?.name != null
+                    ? 'home.greeting'.tr(args: [user!.name!.split(' ')[0]])
+                    : 'home.greeting_guest'.tr(),
                 style: GoogleFonts.outfit(
                   color: const Color(0xFF0F172A),
                   fontWeight: FontWeight.bold,
@@ -38,7 +41,7 @@ class HomeScreen extends ConsumerWidget {
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -65,7 +68,7 @@ class HomeScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Valizlerinizi Güvenle Emanet Edin',
+                          'home.hero_title'.tr(),
                           style: GoogleFonts.outfit(
                             color: Colors.white,
                             fontSize: 24,
@@ -74,7 +77,7 @@ class HomeScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Şehri özgürce gezmeniz için en yakın dükkanı bulun.',
+                          'home.hero_subtitle'.tr(),
                           style: GoogleFonts.outfit(
                             color: Colors.white.withValues(alpha: 0.9),
                             fontSize: 14,
@@ -86,13 +89,32 @@ class HomeScreen extends ConsumerWidget {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
                             foregroundColor: const Color(0xFFF97316),
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: const Text('Emanet Noktası Bul'),
+                          child: Text('home.hero_cta'.tr()),
                         ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // Popular Cities
+                  _sectionHeader('home.popular_cities'.tr()),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    height: 120,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        _cityCard('İstanbul', 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?q=80&w=400&auto=format&fit=crop'),
+                        _cityCard('Ankara', 'https://images.unsplash.com/photo-1621259182978-fbf93132d53d?q=80&w=400&auto=format&fit=crop'),
+                        _cityCard('İzmir', 'https://images.unsplash.com/photo-1596464875936-398327918f3a?q=80&w=400&auto=format&fit=crop'),
+                        _cityCard('Antalya', 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?q=80&w=400&auto=format&fit=crop'),
                       ],
                     ),
                   ),
@@ -100,32 +122,25 @@ class HomeScreen extends ConsumerWidget {
                   const SizedBox(height: 40),
 
                   // How it works
-                  Text(
-                    'Nasıl Çalışır?',
-                    style: GoogleFonts.outfit(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF0F172A),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+                  _sectionHeader('home.how_it_works'.tr()),
+                  const SizedBox(height: 20),
                   _buildStep(
                     context,
                     Icons.search_rounded,
-                    'Dükkan Bul',
-                    'Size en yakın güvenilir noktayı haritadan seçin.',
+                    'home.step_1_title'.tr(),
+                    'home.step_1_desc'.tr(),
                   ),
                   _buildStep(
                     context,
                     Icons.qr_code_rounded,
-                    'Bırak ve Mühürle',
-                    'Valizinizi teslim edin, QR kodu okutun ve mührü takın.',
+                    'home.step_2_title'.tr(),
+                    'home.step_2_desc'.tr(),
                   ),
                   _buildStep(
                     context,
                     Icons.explore_rounded,
-                    'Şehri Keşfet',
-                    'Ellerin serbest, BagajPark güvencesiyle gezmeye başla.',
+                    'home.step_3_title'.tr(),
+                    'home.step_3_desc'.tr(),
                   ),
 
                   const SizedBox(height: 40),
@@ -140,21 +155,22 @@ class HomeScreen extends ConsumerWidget {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.shield_outlined, size: 40, color: Colors.blue.shade700),
+                        Icon(Icons.shield_outlined,
+                            size: 40, color: Colors.blue.shade700),
                         const SizedBox(width: 16),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Her Valiz Sigortalı',
+                                'home.safety_title'.tr(),
                                 style: GoogleFonts.outfit(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.blue.shade900,
                                 ),
                               ),
                               Text(
-                                'BagajPark ile yaptığın her rezervasyon ₺10.000\'ye kadar koruma altındadır.',
+                                'home.safety_desc'.tr(),
                                 style: GoogleFonts.outfit(
                                   fontSize: 12,
                                   color: Colors.blue.shade700,
@@ -166,12 +182,53 @@ class HomeScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 100),
+                  const SizedBox(height: 120),
                 ],
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _sectionHeader(String title) {
+    return Text(
+      title,
+      style: GoogleFonts.outfit(
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+        color: const Color(0xFF0F172A),
+      ),
+    );
+  }
+
+  Widget _cityCard(String name, String imageUrl) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 16),
+      child: Container(
+        width: 140,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          image: DecorationImage(
+            image: NetworkImage(imageUrl),
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+              Colors.black.withValues(alpha: 0.3),
+              BlendMode.darken,
+            ),
+          ),
+        ),
+        child: Center(
+          child: Text(
+            name,
+            style: GoogleFonts.outfit(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+        ),
       ),
     );
   }

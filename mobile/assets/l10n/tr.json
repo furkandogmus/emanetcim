@@ -148,12 +148,34 @@
     "referral_hint": "Her davet için ₺20 indirim kazan!",
     "copy": "KOPYALA"
   },
+  "home": {
+    "greeting": "Merhaba, {} 👋",
+    "greeting_guest": "Merhaba, Misafir 👋",
+    "hero_title": "Valizlerini Güvenle Emanet Edin",
+    "hero_subtitle": "Şehri özgürce gezmeniz için en yakın dükkanı bulun.",
+    "hero_cta": "Emanet Noktası Bul",
+    "how_it_works": "Nasıl Çalışır?",
+    "step_1_title": "Dükkan Bul",
+    "step_1_desc": "Size en yakın güvenilir noktayı haritadan seçin.",
+    "step_2_title": "Bırak ve Mühürle",
+    "step_2_desc": "Valizinizi teslim edin, QR kodu okutun ve mührü takın.",
+    "step_3_title": "Şehri Keşfet",
+    "step_3_desc": "Ellerin serbest, BagajPark güvencesiyle gezmeye başla.",
+    "safety_title": "Her Valiz Sigortalı",
+    "safety_desc": "BagajPark ile yaptığın her rezervasyon ₺10.000'ye kadar koruma altındadır.",
+    "popular_cities": "Popüler Şehirler",
+    "featured_shops": "Öne Çıkan Noktalar"
+  },
   "common": {
     "error": "Bir hata oluştu",
     "loading": "Yükleniyor...",
     "confirm": "Onayla",
     "cancel": "İptal",
     "retry": "Tekrar Dene",
-    "success": "Başarılı"
+    "success": "Başarılı",
+    "save": "Kaydet",
+    "back": "Geri",
+    "next": "İleri",
+    "done": "Bitti"
   }
 }

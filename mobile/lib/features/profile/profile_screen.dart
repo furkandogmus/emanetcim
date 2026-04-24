@@ -32,27 +32,43 @@ class ProfileScreen extends ConsumerWidget {
           Center(
             child: Column(
               children: [
-                Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF97316).withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: const Color(0xFFF97316),
-                      width: 2,
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      user?.name?.substring(0, 1).toUpperCase() ?? '?',
-                      style: GoogleFonts.outfit(
-                        fontSize: 40,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFFF97316),
+                Stack(
+                  children: [
+                    Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF97316).withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: const Color(0xFFF97316),
+                          width: 2,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          user?.name?.substring(0, 1).toUpperCase() ?? '?',
+                          style: GoogleFonts.outfit(
+                            fontSize: 40,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFFF97316),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                    Positioned(
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFF97316),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.camera_alt_rounded, size: 16, color: Colors.white),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -70,6 +86,17 @@ class ProfileScreen extends ConsumerWidget {
                 ),
               ],
             ),
+          ),
+
+          const SizedBox(height: 32),
+
+          // Stats Section
+          Row(
+            children: [
+              _statItem('0', 'Rezervasyon'),
+              _statItem('₺0', 'Tasarruf'),
+              _statItem('0', 'Favori'),
+            ],
           ),
 
           const SizedBox(height: 32),
@@ -480,6 +507,30 @@ class ProfileScreen extends ConsumerWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _statItem(String value, String label) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: GoogleFonts.outfit(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF0F172A),
+            ),
+          ),
+          Text(
+            label,
+            style: GoogleFonts.outfit(
+              fontSize: 12,
+              color: Colors.grey.shade500,
+            ),
+          ),
+        ],
       ),
     );
   }
