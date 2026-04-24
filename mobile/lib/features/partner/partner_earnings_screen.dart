@@ -154,7 +154,7 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
-                    'Kazançlarınız her Pazartesi günü otomatik olarak Stripe hesabınıza aktarılır.',
+                    'partner.payout_info'.tr(),
                     style: GoogleFonts.outfit(
                       color: Colors.blue.shade800,
                       fontSize: 13,
@@ -224,7 +224,7 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Ödeme Yapıldı',
+                  'partner.paid_status'.tr(),
                   style: GoogleFonts.outfit(
                     fontWeight: FontWeight.bold,
                     fontSize: 15,

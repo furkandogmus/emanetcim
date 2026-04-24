@@ -32,6 +32,19 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
   }
 
   Future<void> _fetchShop() async {
+    final isDemo = ref.read(authControllerProvider).isDemo;
+    if (isDemo) {
+      setState(() {
+        _name = TextEditingController(text: 'BagajPark Galata Center');
+        _capacity = TextEditingController(text: '15');
+        _price = TextEditingController(text: '75.0');
+        _opening = TextEditingController(text: '08:00');
+        _closing = TextEditingController(text: '23:00');
+        _loading = false;
+      });
+      return;
+    }
+
     try {
       final dio = ref.read(dioProvider);
       final res = await dio.get('/partner/shop');
@@ -48,7 +61,7 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Hata: $e')));
+        ).showSnackBar(SnackBar(content: Text('${'common.error'.tr()}: $e')));
       }
     }
   }
@@ -56,6 +69,19 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _busy = true);
+
+    final isDemo = ref.read(authControllerProvider).isDemo;
+    if (isDemo) {
+      await Future.delayed(const Duration(seconds: 1));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('partner.settings_updated'.tr())),
+        );
+        setState(() => _busy = false);
+      }
+      return;
+    }
+
     try {
       final dio = ref.read(dioProvider);
       await dio.put(
@@ -70,14 +96,14 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Ayarlar başarıyla güncellendi.')),
+          SnackBar(content: Text('partner.settings_updated'.tr())),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Hata: $e')));
+        ).showSnackBar(SnackBar(content: Text('${'common.error'.tr()}: $e')));
       }
     } finally {
       if (mounted) setState(() => _busy = false);

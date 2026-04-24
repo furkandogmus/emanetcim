@@ -165,7 +165,24 @@
     "offline_saved": "No internet. Action saved and will sync automatically.",
     "demo_welcome_title": "Partner Panel Demo",
     "demo_welcome_msg": "Welcome! You are in demo mode. Here you can scan guest QR codes, perform check-ins/check-outs, and track your shop's earnings. All features are open for testing!",
-    "no_bookings": "No bookings yet"
+    "no_bookings": "No bookings yet",
+    "earnings": "My Earnings",
+    "settings": "Shop Settings",
+    "total_balance": "Total Balance",
+    "today": "Today",
+    "pending": "Pending",
+    "payment_history": "Payment History",
+    "payout_info": "Your earnings are automatically transferred to your defined bank account every Monday.",
+    "paid_status": "Payment Made",
+    "shop_details": "Shop Details",
+    "shop_name": "Shop Name",
+    "capacity": "Capacity (Bags)",
+    "daily_price": "Daily Price",
+    "working_hours": "Working Hours",
+    "opening": "Opening",
+    "closing": "Closing",
+    "settings_updated": "Settings updated successfully.",
+    "required": "Required"
   },
   "profile": {
     "title": "My Account",
@@ -212,5 +229,19 @@
     "back": "Back",
     "next": "Next",
     "done": "Done"
+  },
+  "tutorial": {
+    "guest": {
+      "step1": { "title": "Find", "desc": "Select the closest BagajPark spot from the map." },
+      "step2": { "title": "Book", "desc": "Set the date and number of bags, and book securely." },
+      "step3": { "title": "Drop-off", "desc": "Go to the spot, scan the QR code, and leave your bags." },
+      "step4": { "title": "Enjoy", "desc": "Leave your sealed bags and explore the city freely." }
+    },
+    "partner": {
+      "step1": { "title": "Scan QR", "desc": "Scan the QR code shown by the guest." },
+      "step2": { "title": "Receive Bags", "desc": "Confirm the number of bags and receive them." },
+      "step3": { "title": "Seal", "desc": "Attach the security seal and enter its number." },
+      "step4": { "title": "Earn", "desc": "Earn instantly once the process is complete." }
+    }
   }
 }
