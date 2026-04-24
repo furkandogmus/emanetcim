@@ -294,6 +294,8 @@ class HomeScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
   void _showHowItWorks(BuildContext context) {
     showModalBottomSheet(
       context: context,
