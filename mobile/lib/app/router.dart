@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 
 import '../core/auth/auth_controller.dart';
 import '../features/auth/login_screen.dart';
-import '../features/auth/otp_screen.dart';
 import '../features/auth/register_screen.dart';
 import '../features/booking/booking_detail_screen.dart';
 import '../features/booking/my_bookings_screen.dart';
@@ -77,15 +76,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/auth/register',
         builder: (_, _) => const RegisterScreen(),
-      ),
-      GoRoute(
-        path: '/auth/otp',
-        builder: (_, s) => OtpScreen(
-          identity:
-              s.uri.queryParameters['email'] ??
-              s.uri.queryParameters['identity'] ??
-              '',
-        ),
       ),
 
       ShellRoute(
