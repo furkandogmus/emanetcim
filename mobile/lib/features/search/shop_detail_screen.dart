@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
+import '../../core/services/haptic_service.dart';
+import '../../core/services/share_service.dart';
 import '../../shared/models/shop.dart';
 
 final shopProvider = FutureProvider.family<ShopDto, String>((ref, id) async {
@@ -57,7 +59,10 @@ class ShopDetailScreen extends ConsumerWidget {
                     child: CircleAvatar(
                       backgroundColor: Colors.white.withValues(alpha: 0.9),
                       child: IconButton(
-                        onPressed: () => context.pop(),
+                        onPressed: () {
+                          ref.read(hapticServiceProvider).light();
+                          context.pop();
+                        },
                         icon: const Icon(
                           Icons.arrow_back_ios_new_rounded,
                           size: 20,
@@ -70,7 +75,14 @@ class ShopDetailScreen extends ConsumerWidget {
                     CircleAvatar(
                       backgroundColor: Colors.white.withValues(alpha: 0.9),
                       child: IconButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          ref.read(hapticServiceProvider).selection();
+                          ref.read(shareServiceProvider).shareShop(
+                                id: s.id,
+                                name: s.name,
+                                address: s.address ?? '',
+                              );
+                        },
                         icon: const Icon(
                           Icons.share_rounded,
                           size: 20,
@@ -345,7 +357,10 @@ class ShopDetailScreen extends ConsumerWidget {
                     Expanded(
                       flex: 2,
                       child: FilledButton(
-                        onPressed: () => context.push('/checkout/${s.id}'),
+                        onPressed: () {
+                          ref.read(hapticServiceProvider).medium();
+                          context.push('/checkout/${s.id}');
+                        },
                         child: const Text('Rezervasyon Yap'),
                       ),
                     ),

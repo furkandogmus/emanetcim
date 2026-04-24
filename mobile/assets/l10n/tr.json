@@ -249,5 +249,10 @@
       "step3": { "title": "Mühürle", "desc": "Güvenlik mührünü valize tak ve numarasını gir." },
       "step4": { "title": "Kazan", "desc": "İşlem tamamlandığında kazancın hesabına geçsin." }
     }
+  },
+  "share": {
+    "shop_message": "BagajPark ile valizlerimi güvenle {} dükkanına emanet ettim ({}). Sen de şehri özgürce gezmek için uygulamayı kullanabilirsin: {}",
+    "shop_subject": "{} Emanet Noktası",
+    "app_message": "Valizlerle gezmeye son! BagajPark ile sana en yakın dükkana valizlerini güvenle bırakabilirsin. Hemen indir: {}"
   }
 }

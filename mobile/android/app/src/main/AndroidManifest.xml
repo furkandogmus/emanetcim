@@ -36,6 +36,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="bagajpark" />
+                <data android:scheme="https" android:host="bagajpark.com" />
                 <data android:scheme="https" android:host="emanetci.app" />
             </intent-filter>
         </activity>

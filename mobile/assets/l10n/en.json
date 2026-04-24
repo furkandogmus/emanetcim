@@ -249,5 +249,10 @@
       "step3": { "title": "Seal", "desc": "Attach the security seal and enter its number." },
       "step4": { "title": "Earn", "desc": "Earn instantly once the process is complete." }
     }
+  },
+  "share": {
+    "shop_message": "I safely left my bags at {} with BagajPark ({}). You can also use the app to explore the city freely: {}",
+    "shop_subject": "{} Storage Point",
+    "app_message": "Stop traveling with bags! With BagajPark, you can safely leave your bags at the nearest shop. Download now: {}"
   }
 }

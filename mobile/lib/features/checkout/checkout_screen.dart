@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
+import '../../core/services/haptic_service.dart';
+import '../../core/services/review_service.dart';
 import '../search/shop_detail_screen.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
@@ -27,6 +29,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   int get _total => _s + _m + _xl;
 
   Future<void> _pickDate(bool isCheckIn) async {
+    ref.read(hapticServiceProvider).selection();
     final init = isCheckIn ? _checkIn : _checkOut;
     final d = await showDatePicker(
       context: context,
@@ -67,6 +70,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   Future<void> _pay() async {
     if (_total == 0) return;
+    ref.read(hapticServiceProvider).medium();
     setState(() => _busy = true);
     try {
       final dio = ref.read(dioProvider);
@@ -86,6 +90,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
       // Stripe kaldırıldığı için direkt onay sayfasına yönlendiriyoruz.
       if (!mounted) return;
+      ref.read(hapticServiceProvider).success();
+      ref.read(reviewServiceProvider).requestReview();
       context.go('/booking/$bookingId');
     } catch (e) {
       if (!mounted) return;
@@ -517,7 +523,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   Widget _counterBtn(IconData icon, VoidCallback onTap) {
     return InkWell(
-      onTap: onTap,
+      onTap: () {
+        ref.read(hapticServiceProvider).selection();
+        onTap();
+      },
       child: Container(
         padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
