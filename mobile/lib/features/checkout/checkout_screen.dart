@@ -359,7 +359,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   const Icon(
-                                    Icons.shield_check_rounded,
+                                    Icons.security_rounded,
                                     size: 22,
                                   ),
                                   const SizedBox(width: 12),
