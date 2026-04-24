@@ -9,11 +9,11 @@ class ReviewService {
 
   Future<void> requestReview() async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     // Don't ask too often
     final lastAsk = prefs.getInt('last_review_ask') ?? 0;
     final now = DateTime.now().millisecondsSinceEpoch;
-    
+
     // Wait at least 30 days between asks
     if (now - lastAsk < 30 * 24 * 60 * 60 * 1000) return;
 

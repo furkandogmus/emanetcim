@@ -77,7 +77,9 @@ class ShopDetailScreen extends ConsumerWidget {
                       child: IconButton(
                         onPressed: () {
                           ref.read(hapticServiceProvider).selection();
-                          ref.read(shareServiceProvider).shareShop(
+                          ref
+                              .read(shareServiceProvider)
+                              .shareShop(
                                 id: s.id,
                                 name: s.name,
                                 address: s.address ?? '',

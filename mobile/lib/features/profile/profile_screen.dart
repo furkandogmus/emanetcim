@@ -125,7 +125,7 @@ class ProfileScreen extends ConsumerWidget {
           // Referral Card (Only for Guests)
           if (!isPartner) ...[
             _referralCard(context, ref, user),
-            const SizedBox(height: 32)
+            const SizedBox(height: 32),
           ],
 
           // Menu Section
@@ -160,12 +160,17 @@ class ProfileScreen extends ConsumerWidget {
           _menuItem(
             Icons.privacy_tip_outlined,
             'profile.privacy'.tr(),
-            onTap: () => _showLegal(context, 'profile.privacy'.tr(), _privacyPolicyText),
+            onTap: () =>
+                _showLegal(context, 'profile.privacy'.tr(), _privacyPolicyText),
           ),
           _menuItem(
             Icons.gavel_rounded,
             'profile.terms_of_service'.tr(),
-            onTap: () => _showLegal(context, 'profile.terms_of_service'.tr(), _termsOfServiceText),
+            onTap: () => _showLegal(
+              context,
+              'profile.terms_of_service'.tr(),
+              _termsOfServiceText,
+            ),
           ),
           _menuItem(
             Icons.info_outline_rounded,

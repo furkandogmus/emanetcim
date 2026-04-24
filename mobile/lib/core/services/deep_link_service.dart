@@ -34,7 +34,7 @@ class DeepLinkService {
     }
 
     final router = _ref.read(routerProvider);
-    
+
     // Normalize path (handle bagajpark://scheme)
     String targetPath = path;
     if (uri.scheme == 'bagajpark') {

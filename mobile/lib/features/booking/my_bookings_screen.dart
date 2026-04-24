@@ -16,7 +16,7 @@ final myBookingsProvider = FutureProvider<List<BookingDto>>((ref) async {
     final bookings = list
         .map((e) => BookingDto.fromJson(e as Map<String, dynamic>))
         .toList();
-    
+
     // Update cache
     await box.put('list', list);
     return bookings;
