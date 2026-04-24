@@ -4,7 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../auth/auth_controller.dart';
 import '../../app/router.dart';
 
-final deepLinkServiceProvider = Provider((ref) => DeepLinkService(ref));
+final deepLinkServiceProvider = Provider((ref) {
+  final service = DeepLinkService(ref);
+  ref.onDispose(() => service.dispose());
+  return service;
+});
 
 class DeepLinkService {
   final Ref _ref;

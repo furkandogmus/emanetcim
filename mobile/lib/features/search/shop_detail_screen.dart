@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -38,18 +39,25 @@ class ShopDetailScreen extends ConsumerWidget {
                 color: Colors.redAccent,
               ),
               const SizedBox(height: 16),
-              const Text('Dükkan yüklenirken bir hata oluştu'),
+              const Text('shop.error_loading').tr(),
               TextButton(
                 onPressed: () => context.pop(),
-                child: const Text('Geri Dön'),
+                child: const Text('common.back').tr(),
               ),
             ],
           ),
         ),
         data: (s) => Stack(
           children: [
-            CustomScrollView(
-              slivers: [
+            RefreshIndicator(
+              onRefresh: () async {
+                ref.read(hapticServiceProvider).light();
+                return ref.refresh(shopProvider(shopId).future);
+              },
+              color: const Color(0xFFF97316),
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
                 // Spectacular Parallax Header
                 SliverAppBar(
                   expandedHeight: 300,
@@ -186,30 +194,30 @@ class ShopDetailScreen extends ConsumerWidget {
                           children: [
                             _infoItem(
                               Icons.access_time_rounded,
-                              'Çalışma Saatleri',
+                              'shop.hours'.tr(),
                               s.open247
-                                  ? '7/24 Açık'
+                                  ? 'search.open_247'.tr()
                                   : '${s.openingTime} - ${s.closingTime}',
                             ),
                             _infoItem(
                               Icons.luggage_rounded,
-                              'Kapasite',
-                              '${s.capacity} Valiz',
+                              'shop.capacity'.tr(),
+                              'shop.capacity_val'.tr(args: [s.capacity.toString()]),
                             ),
                             _infoItem(
                               Icons.verified_user_rounded,
-                              'Güvenlik',
-                              'Üst Düzey',
+                              'shop.security'.tr(),
+                              'shop.security_high'.tr(),
                             ),
                           ],
                         ),
 
                         const SizedBox(height: 40),
 
-                        _sectionHeader('Dükkan Hakkında'),
+                        _sectionHeader('shop.about'.tr()),
                         const SizedBox(height: 12),
                         Text(
-                          'Bu dükkan BagajPark güvencesiyle valizlerinizi güvenle emanet edebileceğiniz, merkezi konumda ve kamera sistemiyle korunan bir noktadır. Siz şehri keşfederken valizleriniz mühürlü ve sigortalı olarak bekler.',
+                          'shop.about_desc'.tr(),
                           style: GoogleFonts.outfit(
                             fontSize: 15,
                             color: Colors.grey.shade600,
@@ -220,7 +228,7 @@ class ShopDetailScreen extends ConsumerWidget {
                         const SizedBox(height: 32),
 
                         // Map Preview
-                        _sectionHeader('Konum'),
+                        _sectionHeader('shop.location'.tr()),
                         const SizedBox(height: 16),
                         Container(
                           height: 180,
@@ -261,7 +269,7 @@ class ShopDetailScreen extends ConsumerWidget {
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    'Haritada Gör',
+                                    'shop.view_on_map'.tr(),
                                     style: GoogleFonts.outfit(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 13,
@@ -275,16 +283,16 @@ class ShopDetailScreen extends ConsumerWidget {
 
                         const SizedBox(height: 40),
 
-                        _sectionHeader('Hizmetler'),
+                        _sectionHeader('shop.amenities'.tr()),
                         const SizedBox(height: 16),
                         Wrap(
                           spacing: 12,
                           runSpacing: 12,
                           children: [
-                            _amenityChip(Icons.videocam_rounded, '7/24 Kamera'),
-                            _amenityChip(Icons.security_rounded, 'Sigorta'),
+                            _amenityChip(Icons.videocam_rounded, 'search.camera'.tr()),
+                            _amenityChip(Icons.security_rounded, 'search.insurance'.tr()),
                             if (s.hasRestroom)
-                              _amenityChip(Icons.wc_rounded, 'Tuvalet'),
+                              _amenityChip(Icons.wc_rounded, 'search.restroom'.tr()),
                             _amenityChip(Icons.wifi_rounded, 'Wi-Fi'),
                             _amenityChip(Icons.accessible_rounded, 'Erişim'),
                           ],
@@ -292,7 +300,7 @@ class ShopDetailScreen extends ConsumerWidget {
 
                         const SizedBox(height: 40),
 
-                        _sectionHeader('Değerlendirmeler'),
+                        _sectionHeader('shop.reviews'.tr()),
                         const SizedBox(height: 16),
                         _reviewItem(
                           'Ahmet Y.',
@@ -312,6 +320,7 @@ class ShopDetailScreen extends ConsumerWidget {
                 ),
               ],
             ),
+          ),
 
             // Bottom Action Bar
             Positioned(
@@ -338,7 +347,7 @@ class ShopDetailScreen extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Toplam Tutar',
+                            'shop.total_amount'.tr(),
                             style: GoogleFonts.outfit(
                               fontSize: 14,
                               color: Colors.grey.shade600,
@@ -363,7 +372,7 @@ class ShopDetailScreen extends ConsumerWidget {
                           ref.read(hapticServiceProvider).medium();
                           context.push('/checkout/${s.id}');
                         },
-                        child: const Text('Rezervasyon Yap'),
+                        child: Text('search.book_now'.tr()),
                       ),
                     ),
                   ],

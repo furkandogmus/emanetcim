@@ -44,15 +44,29 @@ final dioProvider = Provider<Dio>((ref) {
     ),
   );
 
-  // Simple In-Memory Cache Interceptor for performance
-  final Map<String, Response> cache = {};
+  // Simple In-Memory Cache Interceptor with TTL and Size Limit
+  final Map<String, _CacheEntry> cache = {};
+  const cacheTtl = Duration(minutes: 5);
+  const maxCacheSize = 100;
+
   dio.interceptors.add(
     InterceptorsWrapper(
       onRequest: (options, handler) {
         if (options.method == 'GET') {
+          // Allow bypassing cache with a custom header
+          if (options.headers.containsKey('X-Refresh')) {
+            options.headers.remove('X-Refresh');
+            return handler.next(options);
+          }
+
           final key = options.uri.toString();
           if (cache.containsKey(key)) {
-            return handler.resolve(cache[key]!);
+            final entry = cache[key]!;
+            if (DateTime.now().difference(entry.timestamp) < cacheTtl) {
+              return handler.resolve(entry.response);
+            } else {
+              cache.remove(key);
+            }
           }
         }
         handler.next(options);
@@ -60,7 +74,16 @@ final dioProvider = Provider<Dio>((ref) {
       onResponse: (response, handler) {
         if (response.requestOptions.method == 'GET') {
           final key = response.requestOptions.uri.toString();
-          cache[key] = response;
+          
+          // Limit cache size - remove oldest entry if full
+          if (cache.length >= maxCacheSize) {
+            cache.remove(cache.keys.first);
+          }
+          
+          cache[key] = _CacheEntry(
+            response: response,
+            timestamp: DateTime.now(),
+          );
         }
         handler.next(response);
       },
@@ -81,3 +104,10 @@ final dioProvider = Provider<Dio>((ref) {
 
   return dio;
 });
+
+class _CacheEntry {
+  final Response response;
+  final DateTime timestamp;
+
+  _CacheEntry({required this.response, required this.timestamp});
+}

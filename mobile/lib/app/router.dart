@@ -1,9 +1,11 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/auth/auth_controller.dart';
 import '../features/auth/login_screen.dart';
 import '../features/auth/register_screen.dart';
+import '../features/auth/otp_screen.dart';
 import '../features/booking/booking_detail_screen.dart';
 import '../features/booking/my_bookings_screen.dart';
 import '../features/checkout/checkout_screen.dart';
@@ -24,11 +26,13 @@ import '../features/search/search_screen.dart';
 import '../features/search/shop_detail_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final auth = ref.watch(authControllerProvider);
+  final notifier = ref.watch(routerNotifierProvider);
 
   return GoRouter(
     initialLocation: '/',
+    refreshListenable: notifier,
     redirect: (context, state) {
+      final auth = ref.read(authControllerProvider);
       final loggedIn = auth.session != null;
       final loggingIn = state.matchedLocation.startsWith('/auth');
       final isPartnerRoute = state.matchedLocation.startsWith('/partner');
@@ -77,6 +81,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/auth/register',
         builder: (_, _) => const RegisterScreen(),
       ),
+      GoRoute(
+        path: '/auth/otp',
+        builder: (_, s) {
+          final identity = s.uri.queryParameters['identity'] ?? '';
+          final name = s.uri.queryParameters['name'];
+          return OtpScreen(identity: identity, name: name);
+        },
+      ),
 
       ShellRoute(
         builder: (_, _, child) => HomeShell(child: child),
@@ -106,7 +118,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-
       GoRoute(
         path: '/shop/:id',
         builder: (_, s) => ShopDetailScreen(shopId: s.pathParameters['id']!),
@@ -140,3 +151,16 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+final routerNotifierProvider = Provider<RouterNotifier>((ref) {
+  final notifier = RouterNotifier(ref);
+  ref.onDispose(notifier.dispose);
+  return notifier;
+});
+
+class RouterNotifier extends ChangeNotifier {
+  final Ref _ref;
+  RouterNotifier(this._ref) {
+    _ref.listen(authControllerProvider, (previous, next) => notifyListeners());
+  }
+}

@@ -47,7 +47,10 @@
     "skip": "Atla",
     "send_code": "Kod Gönder",
     "verify": "Doğrula",
+    "verify_title": "Doğrulama",
+    "verify_button": "Doğrula",
     "otp_sent": "Kod {} adresine gönderildi",
+    "otp_error": "Doğrulama kodu hatalı",
     "code": "Doğrulama Kodu",
     "resend": "Tekrar Gönder",
     "register": "Kayıt Ol",
@@ -67,6 +70,21 @@
     "terms_service": "Kullanım Koşulları'nı",
     "privacy_policy": "Gizlilik Politikası'nı",
     "register_button": "Kayıt Ol ve Kod Gönder"
+  },
+  "shop": {
+    "error_loading": "Dükkan yüklenirken bir hata oluştu",
+    "hours": "Çalışma Saatleri",
+    "capacity": "Kapasite",
+    "capacity_val": "{} Valiz",
+    "security": "Güvenlik",
+    "security_high": "Üst Düzey",
+    "about": "Dükkan Hakkında",
+    "about_desc": "Bu dükkan BagajPark güvencesiyle valizlerinizi güvenle emanet edebileceğiniz, merkezi konumda ve kamera sistemiyle korunan bir noktadır. Siz şehri keşfederken valizleriniz mühürlü ve sigortalı olarak bekler.",
+    "location": "Konum",
+    "view_on_map": "Haritada Gör",
+    "amenities": "Hizmetler",
+    "reviews": "Değerlendirmeler",
+    "total_amount": "Toplam Tutar"
   },
   "search": {
     "hint": "Nereye emanet bırakacaksın?",
@@ -131,7 +149,9 @@
     "coupon_placeholder": "İndirim Kuponu (Opsiyonel)",
     "error_no_bags": "Lütfen en az bir valiz seçin.",
     "error_shop_closed": "Dükkan bulunamadı veya kapalı.",
-    "error_payment": "Bu dükkan şu an ödeme alamıyor."
+    "error_payment": "Bu dükkan şu an ödeme alamıyor.",
+    "error_past_time": "Geçmiş bir zaman seçemezsiniz",
+    "error_checkout_before_checkin": "Çıkış saati girişten önce olamaz"
   },
   "booking": {
     "detail_title": "Rezervasyon Detayı",
@@ -203,7 +223,11 @@
     "delete_account_error": "Hesap silme talebi iletilemedi. Lütfen aktif rezervasyonunuz olmadığını kontrol edin.",
     "referral_title": "Arkadaşlarını Davet Et",
     "referral_hint": "Her davet için ₺20 indirim kazan!",
-    "copy": "KOPYALA"
+    "copy": "KOPYALA",
+    "copied": "Kopyalandı!",
+    "notifications_empty": "Tüm bildirimleriniz ve kampanya duyuruları burada listelenir. Şu an için aktif bir bildiriminiz bulunmuyor.",
+    "version": "Versiyon {}",
+    "logout_confirm": "Hesabınızdan çıkış yapmak istediğinize emin misiniz?"
   },
   "home": {
     "greeting": "Merhaba, {} 👋",

@@ -47,7 +47,10 @@
     "skip": "Skip",
     "send_code": "Send Code",
     "verify": "Verify",
+    "verify_title": "Verification",
+    "verify_button": "Verify",
     "otp_sent": "Code sent to {}",
+    "otp_error": "Invalid verification code",
     "code": "Verification Code",
     "resend": "Resend",
     "register": "Register",
@@ -67,6 +70,21 @@
     "terms_service": "Terms of Service",
     "privacy_policy": "Privacy Policy",
     "register_button": "Register and Send Code"
+  },
+  "shop": {
+    "error_loading": "An error occurred while loading the shop",
+    "hours": "Working Hours",
+    "capacity": "Capacity",
+    "capacity_val": "{} Bags",
+    "security": "Security",
+    "security_high": "High Level",
+    "about": "About the Shop",
+    "about_desc": "This shop is a centrally located and CCTV-monitored point where you can safely entrust your luggage with BagajPark assurance. Your luggage waits sealed and insured while you explore the city.",
+    "location": "Location",
+    "view_on_map": "View on Map",
+    "amenities": "Amenities",
+    "reviews": "Reviews",
+    "total_amount": "Total Amount"
   },
   "search": {
     "hint": "Where will you drop your luggage?",
@@ -131,7 +149,9 @@
     "coupon_placeholder": "Coupon Code (Optional)",
     "error_no_bags": "Please select at least one bag.",
     "error_shop_closed": "Shop not found or closed.",
-    "error_payment": "This shop cannot accept payments right now."
+    "error_payment": "This shop cannot accept payments right now.",
+    "error_past_time": "You cannot select a past time",
+    "error_checkout_before_checkin": "Check-out time cannot be before check-in"
   },
   "booking": {
     "detail_title": "Booking Details",
@@ -203,7 +223,11 @@
     "delete_account_error": "Could not submit deletion request. Please ensure you have no active bookings.",
     "referral_title": "Invite Friends",
     "referral_hint": "Earn ₺20 discount for each invite!",
-    "copy": "COPY"
+    "copy": "COPY",
+    "copied": "Copied!",
+    "notifications_empty": "All your notifications and campaign announcements are listed here. You currently have no active notifications.",
+    "version": "Version {}",
+    "logout_confirm": "Are you sure you want to log out of your account?"
   },
   "home": {
     "greeting": "Hello, {} 👋",

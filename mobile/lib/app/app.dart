@@ -35,9 +35,6 @@ class _BagajParkAppState extends ConsumerState<BagajParkApp>
       final isOffline = results.every((r) => r == ConnectivityResult.none);
       if (mounted) {
         setState(() => _isOffline = isOffline);
-        if (!isOffline) {
-          ref.read(syncServiceProvider).sync();
-        }
       }
     });
 
@@ -75,11 +72,11 @@ class _BagajParkAppState extends ConsumerState<BagajParkApp>
 
   @override
   Widget build(BuildContext context) {
-    final auth = ref.watch(authControllerProvider);
-    final router = ref.watch(routerProvider);
+    ref.listen(authControllerProvider, (previous, current) {
+      _updateScreenProtection(current.session);
+    });
 
-    // Security Hardening: Global protection for Partners
-    _updateScreenProtection(auth.session);
+    final router = ref.watch(routerProvider);
 
     return MaterialApp.router(
       title: 'BagajPark',

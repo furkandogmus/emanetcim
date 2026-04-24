@@ -15,10 +15,29 @@ import '../../core/api/api_client.dart';
 import '../../core/config/env.dart';
 import '../../shared/models/shop.dart';
 
-final nearbyShopsProvider = FutureProvider.family<List<ShopDto>, LatLng>((
-  ref,
-  center,
-) async {
+final geocodingDioProvider = Provider<Dio>((ref) {
+  return Dio(
+    BaseOptions(
+      connectTimeout: const Duration(seconds: 5),
+      receiveTimeout: const Duration(seconds: 5),
+    ),
+  );
+});
+
+class DebouncedLocationNotifier extends Notifier<LatLng?> {
+  @override
+  LatLng? build() => null;
+  void updateLocation(LatLng center) => state = center;
+}
+
+final debouncedLocationProvider =
+    NotifierProvider<DebouncedLocationNotifier, LatLng?>(
+        DebouncedLocationNotifier.new);
+
+final nearbyShopsProvider = FutureProvider<List<ShopDto>>((ref) async {
+  final center = ref.watch(debouncedLocationProvider);
+  if (center == null) return [];
+
   try {
     final dio = ref.watch(dioProvider);
     final res = await dio.get(
@@ -30,11 +49,9 @@ final nearbyShopsProvider = FutureProvider.family<List<ShopDto>, LatLng>((
       },
     );
     final list = res.data as List<dynamic>;
-    var shops = list
+    return list
         .map((e) => ShopDto.fromJson(e as Map<String, dynamic>))
         .toList();
-
-    return shops;
   } catch (e) {
     return [];
   }
@@ -127,15 +144,30 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 
+  Timer? _locationDebounce;
+
+  void _onMapMoved(LatLng center) {
+    if (_locationDebounce?.isActive ?? false) _locationDebounce?.cancel();
+    _locationDebounce = Timer(const Duration(milliseconds: 600), () {
+      if (mounted) {
+        ref.read(debouncedLocationProvider.notifier).updateLocation(center);
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     _determinePosition();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _onMapMoved(_center);
+    });
   }
 
   @override
   void dispose() {
     _debounce?.cancel();
+    _locationDebounce?.cancel();
     super.dispose();
   }
 
@@ -147,7 +179,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         return;
       }
       try {
-        final dio = ref.read(dioProvider);
+        final dio = ref.read(geocodingDioProvider);
         final res = await dio.get(
           'https://photon.komoot.io/api/',
           queryParameters: {'q': query, 'limit': 5},
@@ -241,7 +273,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Future<void> _searchAddress(String query) async {
     if (query.isEmpty) return;
     try {
-      final dio = ref.read(dioProvider);
+      final dio = ref.read(geocodingDioProvider);
       final res = await dio.get(
         'https://photon.komoot.io/api/',
         queryParameters: {'q': query, 'limit': 1},
@@ -270,7 +302,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final shopsAsync = ref.watch(nearbyShopsProvider(_center));
+    final shopsAsync = ref.watch(nearbyShopsProvider);
 
     return Scaffold(
       body: Stack(
@@ -283,11 +315,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 initialZoom: 13,
                 onPositionChanged: (pos, hasGesture) {
                   if (hasGesture) {
-                    if ((pos.center.latitude - _center.latitude).abs() >
+                    final posCenter = pos.center;
+                    if ((posCenter.latitude - _center.latitude).abs() >
                             0.002 ||
-                        (pos.center.longitude - _center.longitude).abs() >
+                        (posCenter.longitude - _center.longitude).abs() >
                             0.002) {
-                      setState(() => _center = pos.center);
+                      setState(() => _center = posCenter);
+                      _onMapMoved(posCenter);
                     }
                   }
                 },

@@ -47,6 +47,7 @@ class SyncAction {
 final syncServiceProvider = Provider((ref) {
   final service = SyncService(ref);
   service.init();
+  ref.onDispose(() => service.dispose());
   return service;
 });
 
