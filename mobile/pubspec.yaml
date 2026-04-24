@@ -33,9 +33,6 @@ dependencies:
   google_sign_in: 7.2.0
   sign_in_with_apple: 7.0.1
 
-  # Payments
-  flutter_stripe: 12.6.0
-
   # Maps + location
   flutter_map: 8.3.0
   latlong2: 0.9.1

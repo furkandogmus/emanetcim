@@ -6,12 +6,11 @@
 
 # Services/Plugins that use reflection or native callbacks
 -keep class com.google.firebase.** { *; }
--keep class com.stripe.android.** { *; }
 -keep class com.easy_localization.** { *; }
 
-# Don't warn about missing references in these heavy SDKs
+# Don't warn about missing references
 -dontwarn com.google.firebase.**
--dontwarn com.stripe.**
+-dontwarn com.google.android.play.core.**
 -dontwarn androidx.window.layout.SidecarHelper
 -dontwarn androidx.window.sidecar.SidecarInterface
 -dontwarn androidx.window.sidecar.SidecarDeviceState
