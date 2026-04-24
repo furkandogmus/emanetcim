@@ -38,6 +38,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?q=80&w=800&auto=format&fit=crop',
       color: const Color(0xFF10B981),
     ),
+    OnboardingData(
+      title: 'onboarding.step4.title',
+      desc: 'onboarding.step4.desc',
+      image:
+          'https://images.unsplash.com/photo-1551524164-687a5591103e?q=80&w=800&auto=format&fit=crop',
+      color: const Color(0xFF8B5CF6),
+    ),
   ];
 
   Future<void> _completeOnboarding() async {
