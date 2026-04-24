@@ -23,6 +23,11 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.identity.isEmpty) {
+        context.go('/auth/login');
+      }
+    });
     _startTimer();
     _protectScreen();
   }
@@ -171,17 +176,30 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                           textAlign: TextAlign.center,
                           style: GoogleFonts.outfit(
                             fontSize: 32,
-                            letterSpacing: 12,
+                            letterSpacing: 8,
                             fontWeight: FontWeight.bold,
                             color: const Color(0xFFF97316),
                           ),
                           decoration: InputDecoration(
                             counterText: '',
-                            hintText: '000000',
+                            hintText: '0 0 0 0 0 0',
                             hintStyle: GoogleFonts.outfit(
-                              color: Colors.grey.shade200,
-                              letterSpacing: 12,
+                              color: Colors.grey.shade300,
+                              letterSpacing: 8,
                             ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(color: Colors.grey.shade200),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFF97316),
+                                width: 2,
+                              ),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey.shade50,
                           ),
                           onChanged: (v) {
                             if (v.length == 6) _verify();
@@ -220,6 +238,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                     style: GoogleFonts.outfit(fontWeight: FontWeight.w600),
                   ),
                 ),
+                const SizedBox(height: 120),
               ],
             ),
           ),
