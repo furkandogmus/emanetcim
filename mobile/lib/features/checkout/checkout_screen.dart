@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -83,25 +82,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           'couponCode': _coupon.text.trim(),
         },
       );
-      final clientSecret = res.data['clientSecret'] as String;
       final bookingId = res.data['bookingId'] as String;
 
-      await Stripe.instance.initPaymentSheet(
-        paymentSheetParameters: SetupPaymentSheetParameters(
-          paymentIntentClientSecret: clientSecret,
-          merchantDisplayName: 'BagajPark',
-          style: ThemeMode.system,
-        ),
-      );
-      await Stripe.instance.presentPaymentSheet();
+      // Stripe kaldırıldığı için direkt onay sayfasına yönlendiriyoruz.
       if (!mounted) return;
       context.go('/booking/$bookingId');
-    } on StripeException catch (e) {
-      if (e.error.code != FailureCode.Canceled) {
-        if (mounted) {
-          _toast('${'common.error'.tr()}: ${e.error.localizedMessage}');
-        }
-      }
     } catch (e) {
       if (!mounted) return;
       String msg = 'common.error'.tr();
