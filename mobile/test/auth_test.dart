@@ -3,10 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bagajpark/core/auth/auth_controller.dart';
 import 'package:bagajpark/core/auth/token_store.dart';
 import 'package:bagajpark/core/api/api_client.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   group('Auth Controller Tests', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
     test('Initial state is unauthenticated', () {
       final container = ProviderContainer(
         overrides: [
