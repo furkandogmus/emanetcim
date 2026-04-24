@@ -63,6 +63,8 @@ export interface IShopService {
   getPendingShops(): Promise<ShopWithOwner[]>;
   approveShop(shopId: string): Promise<boolean>;
   getShopsByOwner(ownerId: string): Promise<Shop[]>;
+  getShopByOwner(ownerId: string): Promise<Shop | null>;
+  updateShop(shopId: string, data: Partial<Shop>): Promise<Shop>;
 }
 
 /**
@@ -316,6 +318,19 @@ export class ShopService implements IShopService {
     return await prisma.shop.findMany({
       where: { ownerId },
       orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async getShopByOwner(ownerId: string): Promise<Shop | null> {
+    return await prisma.shop.findFirst({
+      where: { ownerId },
+    });
+  }
+
+  async updateShop(shopId: string, data: Partial<Shop>): Promise<Shop> {
+    return await prisma.shop.update({
+      where: { id: shopId },
+      data,
     });
   }
 }

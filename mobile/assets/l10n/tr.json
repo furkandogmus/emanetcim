@@ -165,7 +165,24 @@
     "offline_saved": "İnternet bağlantısı yok. İşlem kaydedildi ve bağlantı geldiğinde otomatik gönderilecek.",
     "demo_welcome_title": "Esnaf Paneli Demosu",
     "demo_welcome_msg": "Hoş geldiniz! Şu an demo modundasınız. Burada misafirlerin QR kodlarını taratabilir, valiz teslim alıp (Check-in) teslim edebilir (Check-out) ve dükkanınızın kazancını takip edebilirsiniz. Tüm özellikler denemeniz için açık!",
-    "no_bookings": "Henüz rezervasyon bulunmuyor"
+    "no_bookings": "Henüz rezervasyon bulunmuyor",
+    "earnings": "Kazançlarım",
+    "settings": "Dükkan Ayarları",
+    "total_balance": "Toplam Bakiye",
+    "today": "Bugün",
+    "pending": "Beklemede",
+    "payment_history": "Ödeme Geçmişi",
+    "payout_info": "Kazançlarınız her Pazartesi günü otomatik olarak tanımlı banka hesabınıza aktarılır.",
+    "paid_status": "Ödeme Yapıldı",
+    "shop_details": "Dükkan Detayları",
+    "shop_name": "Dükkan Adı",
+    "capacity": "Kapasite (Valiz)",
+    "daily_price": "Günlük Fiyat",
+    "working_hours": "Çalışma Saatleri",
+    "opening": "Açılış",
+    "closing": "Kapanış",
+    "settings_updated": "Ayarlar başarıyla güncellendi.",
+    "required": "Gerekli"
   },
   "profile": {
     "title": "Hesabım",
@@ -212,5 +229,19 @@
     "back": "Geri",
     "next": "İleri",
     "done": "Bitti"
+  },
+  "tutorial": {
+    "guest": {
+      "step1": { "title": "Bul", "desc": "Haritadan sana en yakın BagajPark noktasını seç." },
+      "step2": { "title": "Rezerve Et", "desc": "Tarih ve valiz sayısını belirle, güvenle ayır." },
+      "step3": { "title": "Teslim Et", "desc": "Noktaya git, QR kodu okut ve valizini bırak." },
+      "step4": { "title": "Keyfini Çıkar", "desc": "Mühürlü valizini bırak, şehri özgürce gez." }
+    },
+    "partner": {
+      "step1": { "title": "QR Tarat", "desc": "Müşterinin gösterdiği QR kodu uygulamadan tarat." },
+      "step2": { "title": "Valizleri Al", "desc": "Gelen valiz sayısını onayla ve teslim al." },
+      "step3": { "title": "Mühürle", "desc": "Güvenlik mührünü valize tak ve numarasını gir." },
+      "step4": { "title": "Kazan", "desc": "İşlem tamamlandığında kazancın hesabına geçsin." }
+    }
   }
 }

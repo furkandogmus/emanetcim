@@ -2,8 +2,11 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+enum HowItWorksMode { guest, partner }
+
 class HowItWorksSheet extends StatefulWidget {
-  const HowItWorksSheet({super.key});
+  const HowItWorksSheet({super.key, this.mode = HowItWorksMode.guest});
+  final HowItWorksMode mode;
 
   @override
   State<HowItWorksSheet> createState() => _HowItWorksSheetState();
@@ -15,6 +18,9 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final isGuest = widget.mode == HowItWorksMode.guest;
+    final prefix = isGuest ? 'tutorial.guest' : 'tutorial.partner';
+
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
       decoration: const BoxDecoration(
@@ -32,33 +38,43 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
+          const SizedBox(height: 16),
+          Text(
+            isGuest ? 'Misafir Rehberi' : 'Esnaf Rehberi',
+            style: GoogleFonts.outfit(
+              color: Colors.grey.shade400,
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+              letterSpacing: 1.2,
+            ),
+          ),
           Expanded(
             child: PageView(
               controller: _controller,
               onPageChanged: (v) => setState(() => _currentPage = v),
               children: [
                 _tutorialPage(
-                  Icons.search_rounded,
-                  'home.step1.title'.tr(),
-                  'home.step1.desc'.tr(),
+                  isGuest ? Icons.search_rounded : Icons.qr_code_scanner_rounded,
+                  '$prefix.step1.title'.tr(),
+                  '$prefix.step1.desc'.tr(),
                   const Color(0xFFF97316),
                 ),
                 _tutorialPage(
-                  Icons.qr_code_rounded,
-                  'home.step2.title'.tr(),
-                  'home.step2.desc'.tr(),
+                  isGuest ? Icons.event_available_rounded : Icons.task_alt_rounded,
+                  '$prefix.step2.title'.tr(),
+                  '$prefix.step2.desc'.tr(),
                   const Color(0xFF10B981),
                 ),
                 _tutorialPage(
-                  Icons.lock_outline_rounded,
-                  'home.step3.title'.tr(),
-                  'home.step3.desc'.tr(),
+                  isGuest ? Icons.qr_code_2_rounded : Icons.lock_outline_rounded,
+                  '$prefix.step3.title'.tr(),
+                  '$prefix.step3.desc'.tr(),
                   const Color(0xFF3B82F6),
                 ),
                 _tutorialPage(
-                  Icons.explore_rounded,
-                  'home.step4.title'.tr(),
-                  'home.step4.desc'.tr(),
+                  isGuest ? Icons.explore_rounded : Icons.payments_outlined,
+                  '$prefix.step4.title'.tr(),
+                  '$prefix.step4.desc'.tr(),
                   const Color(0xFF8B5CF6),
                 ),
               ],
@@ -114,7 +130,7 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
 
   Widget _tutorialPage(IconData icon, String title, String desc, Color color) {
     return Padding(
-      padding: const EdgeInsets.all(40.0),
+      padding: const EdgeInsets.symmetric(horizontal: 40.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
