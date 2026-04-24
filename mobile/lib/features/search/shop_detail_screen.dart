@@ -192,14 +192,7 @@ class ShopDetailScreen extends ConsumerWidget {
 
                         const SizedBox(height: 40),
 
-                        Text(
-                          'Dükkan Hakkında',
-                          style: GoogleFonts.outfit(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF0F172A),
-                          ),
-                        ),
+                        _sectionHeader('Dükkan Hakkında'),
                         const SizedBox(height: 12),
                         Text(
                           'Bu dükkan BagajPark güvencesiyle valizlerinizi güvenle emanet edebileceğiniz, merkezi konumda ve kamera sistemiyle korunan bir noktadır. Siz şehri keşfederken valizleriniz mühürlü ve sigortalı olarak bekler.',
@@ -210,34 +203,69 @@ class ShopDetailScreen extends ConsumerWidget {
                           ),
                         ),
 
+                        const SizedBox(height: 32),
+
+                        // Map Preview
+                        _sectionHeader('Konum'),
+                        const SizedBox(height: 16),
+                        Container(
+                          height: 180,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(24),
+                            color: Colors.grey.shade100,
+                            image: const DecorationImage(
+                              image: NetworkImage('https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?q=80&w=800&auto=format&fit=crop'),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          child: Center(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10)],
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.map_rounded, size: 18, color: Color(0xFFF97316)),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Haritada Gör',
+                                    style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 13),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+
                         const SizedBox(height: 40),
 
-                        Text(
-                          'Hizmetler',
-                          style: GoogleFonts.outfit(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF0F172A),
-                          ),
-                        ),
+                        _sectionHeader('Hizmetler'),
                         const SizedBox(height: 16),
-                        _amenityItem(
-                          Icons.videocam_rounded,
-                          '7/24 Kamera İzleme',
+                        Wrap(
+                          spacing: 12,
+                          runSpacing: 12,
+                          children: [
+                            _amenityChip(Icons.videocam_rounded, '7/24 Kamera'),
+                            _amenityChip(Icons.security_rounded, 'Sigorta'),
+                            if (s.hasRestroom) _amenityChip(Icons.wc_rounded, 'Tuvalet'),
+                            _amenityChip(Icons.wifi_rounded, 'Wi-Fi'),
+                            _amenityChip(Icons.accessible_rounded, 'Erişim'),
+                          ],
                         ),
-                        _amenityItem(
-                          Icons.security_rounded,
-                          'Sigortalı Emanet',
-                        ),
-                        if (s.hasRestroom)
-                          _amenityItem(
-                            Icons.wc_rounded,
-                            'Ücretsiz Tuvalet / Lavabo',
-                          ),
-                        _amenityItem(Icons.wifi_rounded, 'Ücretsiz Wi-Fi'),
-                        _amenityItem(Icons.accessible_rounded, 'Kolay Erişim'),
 
-                        const SizedBox(height: 100), // Buton için boşluk
+                        const SizedBox(height: 40),
+
+                        _sectionHeader('Değerlendirmeler'),
+                        const SizedBox(height: 16),
+                        _reviewItem('Ahmet Y.', 5, 'Çok merkezi bir konumda, teslimat çok hızlıydı. Güvenle bırakabilirsiniz.'),
+                        _reviewItem('Sarah M.', 4, 'Very friendly staff and easy to find. Highly recommended!'),
+
+                        const SizedBox(height: 120), // Bottom bar space
                       ],
                     ),
                   ),
@@ -305,6 +333,17 @@ class ShopDetailScreen extends ConsumerWidget {
     );
   }
 
+  Widget _sectionHeader(String title) {
+    return Text(
+      title,
+      style: GoogleFonts.outfit(
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+        color: const Color(0xFF0F172A),
+      ),
+    );
+  }
+
   Widget _infoItem(IconData icon, String label, String value) {
     return Expanded(
       child: Column(
@@ -334,28 +373,84 @@ class ShopDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _amenityItem(IconData icon, String label) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, size: 18, color: const Color(0xFF0F172A)),
+  Widget _amenityChip(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade100),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-          const SizedBox(width: 12),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18, color: const Color(0xFFF97316)),
+          const SizedBox(width: 8),
           Text(
             label,
             style: GoogleFonts.outfit(
-              fontSize: 15,
-              color: Colors.grey.shade700,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF0F172A),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _reviewItem(String name, int rating, String comment) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  name,
+                  style: GoogleFonts.outfit(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+                Row(
+                  children: List.generate(
+                    5,
+                    (i) => Icon(
+                      Icons.star_rounded,
+                      size: 16,
+                      color: i < rating ? Colors.amber : Colors.grey.shade300,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              comment,
+              style: GoogleFonts.outfit(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+                height: 1.4,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
