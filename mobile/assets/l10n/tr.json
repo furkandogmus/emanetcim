@@ -8,16 +8,20 @@
   },
   "onboarding": {
     "step1": {
-      "title": "En Yakın Noktayı Bul",
-      "desc": "Yüzlerce güvenilir BagajPark ortağı arasından size en yakın olanı saniyeler içinde bulun."
+      "title": "Noktanı Bul ve Ayır",
+      "desc": "Haritadan sana en yakın BagajPark noktasını seç ve saniyeler içinde rezervasyonunu yap."
     },
     "step2": {
-      "title": "Güvenle Teslim Et",
-      "desc": "Valizini teslim et, QR kodu okut ve güvenlik mührünü tak. Her şey kontrol altında."
+      "title": "Teslim Et ve QR Okut",
+      "desc": "Dükkana gittiğinde valizini teslim et ve görevlinin gösterdiği QR kodu uygulamadan okut."
     },
     "step3": {
-      "title": "Şehrin Tadını Çıkar",
-      "desc": "Ellerin serbest, valizlerin sigortalı. Artık şehri keşfetmek için hiçbir engel yok!"
+      "title": "Mühürle ve Güvenceye Al",
+      "desc": "Valizine güvenlik mührünü tak, mühür numarasını dükkan sahibine ilet ve huzurla ayrıl."
+    },
+    "step4": {
+      "title": "Şehri Özgürce Gez",
+      "desc": "Ellerin serbest, valizlerin sigortalı! İstediğin zaman geri gelip valizini teslim alabilirsin."
     },
     "partner": {
       "step1": {

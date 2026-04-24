@@ -168,9 +168,15 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   _buildStep(
                     context,
-                    Icons.explore_rounded,
+                    Icons.lock_outline_rounded,
                     'home.step3.title'.tr(),
                     'home.step3.desc'.tr(),
+                  ),
+                  _buildStep(
+                    context,
+                    Icons.explore_rounded,
+                    'home.step4.title'.tr(),
+                    'home.step4.desc'.tr(),
                   ),
 
                   const SizedBox(height: 40),
@@ -368,9 +374,15 @@ class HomeScreen extends ConsumerWidget {
             ),
             _buildStep(
               context,
-              Icons.explore_rounded,
+              Icons.lock_outline_rounded,
               'home.step3.title'.tr(),
               'home.step3.desc'.tr(),
+            ),
+            _buildStep(
+              context,
+              Icons.explore_rounded,
+              'home.step4.title'.tr(),
+              'home.step4.desc'.tr(),
             ),
             const SizedBox(height: 24),
             FilledButton(

@@ -2,23 +2,215 @@
   "nav": {
     "search": "Search",
     "bookings": "My Bookings",
-    "partner": "Partner",
+    "partner": "Partner Panel",
+    "scan": "Scan QR",
     "profile": "Profile"
+  },
+  "onboarding": {
+    "step1": {
+      "title": "Find & Book",
+      "desc": "Select the closest BagajPark spot from the map and book in seconds."
+    },
+    "step2": {
+      "title": "Drop & Scan QR",
+      "desc": "Go to the shop, deliver your luggage, and scan the QR code provided by the partner."
+    },
+    "step3": {
+      "title": "Seal & Secure",
+      "desc": "Attach the security seal to your bag, provide the seal number to the partner, and leave with peace of mind."
+    },
+    "step4": {
+      "title": "Explore Hands-Free",
+      "desc": "Your bags are insured and hands-free! Come back anytime to pick up your luggage."
+    },
+    "partner": {
+      "step1": {
+        "title": "Confirm Booking",
+        "desc": "Scan the QR code when the guest arrives and check the booking details."
+      },
+      "step2": {
+        "title": "Seal and Receive",
+        "desc": "Attach the security seal to the luggage, enter the seal number into the system, and place it in the secure area."
+      },
+      "step3": {
+        "title": "Deliver and Earn",
+        "desc": "Scan the QR again when the guest comes to pick up, deliver the luggage, and see your earnings instantly."
+      }
+    }
   },
   "auth": {
     "login": "Login",
     "welcome": "Welcome",
     "email": "Email Address",
+    "email_or_phone": "Email or Phone",
+    "invalid_identity": "Enter a valid email or phone",
+    "skip": "Skip",
     "send_code": "Send Code",
     "verify": "Verify",
     "otp_sent": "Code sent to {}",
     "code": "Verification Code",
-    "resend": "Resend Code"
+    "resend": "Resend",
+    "register": "Register",
+    "no_account": "Don't have an account?",
+    "or": "or",
+    "google": "Continue with Google",
+    "apple": "Continue with Apple",
+    "demo_guest": "Guest Demo Mode",
+    "demo_partner": "Partner Panel Demo",
+    "register_welcome": "Welcome to our community! 👋",
+    "register_hint": "Create your account now to safely store your luggage.",
+    "name_label": "Full Name",
+    "name_error": "Please enter your name",
+    "name_invalid_error": "Name should only contain letters and spaces",
+    "email_error": "Enter a valid email",
+    "terms_text": "By registering, you agree to our {} and {}.",
+    "terms_service": "Terms of Service",
+    "privacy_policy": "Privacy Policy",
+    "register_button": "Register and Send Code"
+  },
+  "search": {
+    "hint": "Where will you drop your luggage?",
+    "filter": "Filter",
+    "open_now": "Open Now",
+    "open_now_hint": "Only shops serving right now",
+    "open_247": "Open 24/7",
+    "open_247_hint": "Points accessible at any hour",
+    "show_results": "Show Results",
+    "amenities": "Amenities",
+    "restroom": "Free Restroom / Toilet",
+    "camera": "24/7 CCTV Monitoring",
+    "insurance": "Insured Storage",
+    "book_now": "Book Now",
+    "location_service_disabled": "Location services disabled. Please enable in settings.",
+    "day_unit": "/day"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications yet.",
+    "mark_all_read": "Mark all as read",
+    "types": {
+      "booking": "Booking Update",
+      "payment": "Payment Successful",
+      "info": "Information",
+      "shop": "Shop Application",
+      "campaign": "Campaign"
+    }
+  },
+  "admin": {
+    "dashboard": "Admin Dashboard",
+    "total_bookings": "Total Bookings",
+    "total_revenue": "Total Revenue",
+    "active_partners": "Active Partners",
+    "pending_apps": "Pending Apps",
+    "quick_actions": "Quick Actions",
+    "approve_shops": "Approve Shops",
+    "system_status": "System Status",
+    "active": "Active",
+    "live_analytics": "Live Analytics"
+  },
+  "checkout": {
+    "title": "Complete Booking",
+    "check_in": "Drop-off",
+    "check_out": "Pick-up",
+    "bags_title": "Select Your Bags",
+    "bag_s": "Small (S)",
+    "bag_s_hint": "Backpack or cabin size",
+    "bag_m": "Medium (M)",
+    "bag_m_hint": "Standard suitcase",
+    "bag_xl": "Extra Large (XL)",
+    "bag_xl_hint": "Large suitcase or sports gear",
+    "summary": "PAYMENT SUMMARY",
+    "summary_bags": "Baggage Fee ({} Days)",
+    "insurance_fee": "Insurance & Protection Fee",
+    "service_fee": "Service Fee",
+    "included": "Included",
+    "total": "Total",
+    "pay_button": "Pay Now",
+    "secure_payment": "Secure 256-bit SSL Payment",
+    "coupon_placeholder": "Coupon Code (Optional)",
+    "error_no_bags": "Please select at least one bag.",
+    "error_shop_closed": "Shop not found or closed.",
+    "error_payment": "This shop cannot accept payments right now."
+  },
+  "booking": {
+    "detail_title": "Booking Details",
+    "qr_hint": "Show this code to the shop owner",
+    "directions": "Directions",
+    "call_shop": "Call Shop",
+    "get_help": "Get Help",
+    "status": {
+      "waiting_approval": "Waiting Approval",
+      "approved": "Approved",
+      "paid": "Paid",
+      "checked_in": "Checked In",
+      "checked_out": "Checked Out",
+      "cancelled": "Cancelled"
+    }
+  },
+  "partner": {
+    "dashboard": "Shop Panel",
+    "active_bags": "Active Bags",
+    "total_earnings": "Total Earnings",
+    "bookings": "Bookings",
+    "scan_qr": "Scan QR",
+    "check_in_button": "Check-in Luggage",
+    "check_out_button": "Check-out Luggage",
+    "seal_hint": "Seal Number for Bag {}",
+    "seal_placeholder": "e.g. 12345",
+    "success_checkin": "Luggage successfully checked in!",
+    "success_checkout": "Luggage successfully delivered to guest!",
+    "bookings_title": "Bookings",
+    "seal_info": "Seal Info",
+    "scan_hint": "Align guest's QR or seal barcode here",
+    "offline_saved": "No internet. Action saved and will sync automatically.",
+    "demo_welcome_title": "Partner Panel Demo",
+    "demo_welcome_msg": "Welcome! You are in demo mode. Here you can scan guest QR codes, perform check-ins/check-outs, and track your shop's earnings. All features are open for testing!",
+    "no_bookings": "No bookings yet"
+  },
+  "profile": {
+    "title": "My Account",
+    "settings": "ACCOUNT SETTINGS",
+    "edit_profile": "Edit Profile",
+    "notifications": "Notifications",
+    "payments": "My Payment Methods",
+    "support": "SUPPORT & ABOUT",
+    "help_center": "Help Center",
+    "about": "About App",
+    "privacy": "Privacy Policy",
+    "logout": "Logout",
+    "delete_account": "Delete Account Permanently",
+    "referral_title": "Invite Friends",
+    "referral_hint": "Earn ₺20 discount for each invite!",
+    "copy": "COPY"
+  },
+  "home": {
+    "greeting": "Hello, {} 👋",
+    "greeting_guest": "Hello, Guest 👋",
+    "hero_title": "Store Your Luggage Safely",
+    "hero_subtitle": "Find the nearest shop to explore the city freely.",
+    "hero_cta": "Find Storage Spot",
+    "how_it_works": "How It Works?",
+    "step_1_title": "Find a Shop",
+    "step_1_desc": "Select the closest trusted spot from the map.",
+    "step_2_title": "Drop and Seal",
+    "step_2_desc": "Deliver your bag, scan the QR code, and attach the seal.",
+    "step_3_title": "Explore the City",
+    "step_3_desc": "Hands-free, enjoy your trip with BagajPark protection.",
+    "safety_title": "Every Bag Is Insured",
+    "safety_desc": "Every booking with BagajPark is protected up to ₺10,000.",
+    "popular_cities": "Popular Cities",
+    "featured_shops": "Featured Spots"
   },
   "common": {
     "error": "An error occurred",
     "loading": "Loading...",
     "confirm": "Confirm",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "retry": "Retry",
+    "success": "Success",
+    "save": "Save",
+    "back": "Back",
+    "next": "Next",
+    "done": "Done"
   }
 }
