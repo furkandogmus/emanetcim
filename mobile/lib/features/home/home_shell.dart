@@ -73,10 +73,16 @@ class HomeShell extends ConsumerWidget {
     } else {
       tabs = [
         _TabItem(
-          icon: Icons.explore_outlined,
-          activeIcon: Icons.explore,
-          label: 'nav.search'.tr(),
+          icon: Icons.home_outlined,
+          activeIcon: Icons.home_rounded,
+          label: 'nav.home'.tr(),
           path: '/',
+        ),
+        _TabItem(
+          icon: Icons.search_outlined,
+          activeIcon: Icons.search_rounded,
+          label: 'nav.search'.tr(),
+          path: '/search',
         ),
         _TabItem(
           icon: Icons.luggage_outlined,

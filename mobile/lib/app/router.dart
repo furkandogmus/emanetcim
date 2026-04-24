@@ -18,6 +18,7 @@ import '../features/partner/partner_settings_screen.dart';
 import '../features/partner/partner_booking_detail_screen.dart';
 import '../features/partner/partner_scan_screen.dart';
 import '../shared/models/user.dart';
+import '../features/home/home_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/search/search_screen.dart';
 import '../features/search/shop_detail_screen.dart';
@@ -84,7 +85,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (_, _, child) => HomeShell(child: child),
         routes: [
-          GoRoute(path: '/', builder: (_, _) => const SearchScreen()),
+          GoRoute(path: '/', builder: (_, _) => const HomeScreen()),
+          GoRoute(path: '/search', builder: (_, _) => const SearchScreen()),
           GoRoute(
             path: '/bookings',
             builder: (_, _) => const MyBookingsScreen(),

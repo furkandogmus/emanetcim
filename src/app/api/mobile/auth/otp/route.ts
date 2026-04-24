@@ -2,31 +2,53 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
 import { randomInt } from "crypto";
+import { sendMobileOtp } from "@/lib/mail";
+import { normalizeTrGsm10 } from "@/lib/netgsm";
 
-// TODO: production — rate limit + email send via Resend + Redis store
-const schema = z.object({ email: z.string().email() });
+const schema = z.union([
+  z.object({ email: z.string().email() }),
+  z.object({ phone: z.string().min(10) }),
+]);
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);
-  if (!parsed.success) return NextResponse.json({ error: "invalid" }, { status: 400 });
+  if (!parsed.success) {
+    return NextResponse.json({ error: "invalid_input" }, { status: 400 });
+  }
 
-  const { email } = parsed.data;
+  const data = parsed.data;
+  const isEmail = "email" in data;
+  const rawIdentity = isEmail ? data.email : data.phone;
+  const normalizedIdentity = isEmail ? rawIdentity.toLowerCase() : normalizeTrGsm10(rawIdentity);
+
+  if (!normalizedIdentity) {
+    return NextResponse.json({ error: "invalid_format" }, { status: 400 });
+  }
+
   const code = String(randomInt(100000, 999999));
+  const identifier = `mobile:${normalizedIdentity}`;
 
   await prisma.verificationToken.upsert({
-    where: { identifier_token: { identifier: `mobile:${email}`, token: code } },
+    where: { identifier_token: { identifier, token: code } },
     update: { expires: new Date(Date.now() + 5 * 60_000) },
     create: {
-      identifier: `mobile:${email}`,
+      identifier,
       token: code,
       expires: new Date(Date.now() + 5 * 60_000),
     },
   });
 
-  // TODO: send email. dev mode: log code.
+  if (isEmail) {
+    await sendMobileOtp(normalizedIdentity, code);
+  } else {
+    // TODO: Implement sendNetgsmRestSms when ready
+    console.log(`[mobile-otp-sms-mock] ${normalizedIdentity} => ${code}`);
+  }
+
+  // Dev mode log
   if (process.env.NODE_ENV !== "production") {
-    console.log(`[mobile-otp] ${email} => ${code}`);
+    console.log(`[mobile-otp] ${normalizedIdentity} => ${code}`);
   }
 
   return NextResponse.json({ ok: true });
