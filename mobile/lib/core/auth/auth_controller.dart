@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
 import '../api/api_client.dart';
 import '../push/push_service.dart';
 import '../../shared/models/user.dart';
@@ -10,18 +11,27 @@ class AuthState {
   final UserDto? session;
   final bool loading;
   final bool isDemo;
-  const AuthState({this.session, this.loading = false, this.isDemo = false});
+  final bool onboardingDone;
+  const AuthState({
+    this.session,
+    this.loading = false,
+    this.isDemo = false,
+    this.onboardingDone = false,
+  });
 
   AuthState copyWith({
     UserDto? session,
     bool? loading,
     bool? isDemo,
+    bool? onboardingDone,
     bool clearSession = false,
-  }) => AuthState(
-    session: clearSession ? null : (session ?? this.session),
-    loading: loading ?? this.loading,
-    isDemo: isDemo ?? this.isDemo,
-  );
+  }) =>
+      AuthState(
+        session: clearSession ? null : (session ?? this.session),
+        loading: loading ?? this.loading,
+        isDemo: isDemo ?? this.isDemo,
+        onboardingDone: onboardingDone ?? this.onboardingDone,
+      );
 }
 
 final authControllerProvider = NotifierProvider<AuthController, AuthState>(
@@ -36,6 +46,10 @@ class AuthController extends Notifier<AuthState> {
   }
 
   Future<void> _bootstrap() async {
+    final prefs = await SharedPreferences.getInstance();
+    final onboardingDone = prefs.getBool('onboarding_done') ?? false;
+    state = state.copyWith(onboardingDone: onboardingDone);
+
     final store = ref.read(tokenStoreProvider);
     final token = await store.readAccessToken();
     if (token == null) return;
@@ -52,6 +66,12 @@ class AuthController extends Notifier<AuthState> {
     } on DioException {
       await store.clear();
     }
+  }
+
+  Future<void> setOnboardingDone() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboarding_done', true);
+    state = state.copyWith(onboardingDone: true);
   }
 
   Future<void> requestOtp(String identity) async {

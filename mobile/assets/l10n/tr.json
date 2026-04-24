@@ -6,10 +6,41 @@
     "scan": "QR Tarat",
     "profile": "Profil"
   },
+  "onboarding": {
+    "step1": {
+      "title": "En Yakın Noktayı Bul",
+      "desc": "Yüzlerce güvenilir BagajPark ortağı arasından size en yakın olanı saniyeler içinde bulun."
+    },
+    "step2": {
+      "title": "Güvenle Teslim Et",
+      "desc": "Valizini teslim et, QR kodu okut ve güvenlik mührünü tak. Her şey kontrol altında."
+    },
+    "step3": {
+      "title": "Şehrin Tadını Çıkar",
+      "desc": "Ellerin serbest, valizlerin sigortalı. Artık şehri keşfetmek için hiçbir engel yok!"
+    },
+    "partner": {
+      "step1": {
+        "title": "Rezervasyonu Onayla",
+        "desc": "Misafir geldiğinde QR kodunu taratın ve rezervasyon detaylarını kontrol edin."
+      },
+      "step2": {
+        "title": "Mühürle ve Teslim Al",
+        "desc": "Valize güvenlik mührünü takın, mühür numarasını sisteme girin ve güvenli alana yerleştirin."
+      },
+      "step3": {
+        "title": "Teslim Et ve Kazan",
+        "desc": "Misafir valizini almaya geldiğinde tekrar QR okutun ve valizi teslim ederek kazancınızı anında görün."
+      }
+    }
+  },
   "auth": {
     "login": "Giriş Yap",
     "welcome": "Hoş Geldiniz",
     "email": "E-posta Adresi",
+    "email_or_phone": "E-posta veya Telefon",
+    "invalid_identity": "Geçerli bir e-posta veya telefon giriniz",
+    "skip": "Atla",
     "send_code": "Kod Gönder",
     "verify": "Doğrula",
     "otp_sent": "Kod {} adresine gönderildi",
