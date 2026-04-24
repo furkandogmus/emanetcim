@@ -1,16 +1,17 @@
-# Flutter Wrapper
--keep class io.flutter.app.** { *; }
+# Flutter core
+-keep class io.flutter.embedding.** { *; }
 -keep class io.flutter.plugin.** { *; }
--keep class io.flutter.util.** { *; }
+-keep class io.flutter.util.ViewUtils { *; }
 -keep class io.flutter.view.** { *; }
--keep class io.flutter.** { *; }
--keep class io.flutter.plugins.** { *; }
 
-# Firebase
+# Services/Plugins that use reflection or native callbacks
 -keep class com.google.firebase.** { *; }
-
-# Stripe
--keep class com.stripe.** { *; }
-
-# Localization / Easy Localization
+-keep class com.stripe.android.** { *; }
 -keep class com.easy_localization.** { *; }
+
+# Don't warn about missing references in these heavy SDKs
+-dontwarn com.google.firebase.**
+-dontwarn com.stripe.**
+-dontwarn androidx.window.layout.SidecarHelper
+-dontwarn androidx.window.sidecar.SidecarInterface
+-dontwarn androidx.window.sidecar.SidecarDeviceState
