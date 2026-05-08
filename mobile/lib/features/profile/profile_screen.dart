@@ -88,7 +88,7 @@ class ProfileScreen extends ConsumerWidget {
                 Text(
                   user?.email ?? '',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey.shade600,
+                    color: const Color(0xFF424242),
                   ),
                 ),
               ],
@@ -208,7 +208,7 @@ class ProfileScreen extends ConsumerWidget {
             child: Text(
               'profile.delete_account'.tr(),
               style: GoogleFonts.outfit(
-                color: Colors.grey.shade400,
+                color: const Color(0xFF757575),
                 fontSize: 13,
                 decoration: TextDecoration.underline,
               ),
@@ -222,7 +222,7 @@ class ProfileScreen extends ConsumerWidget {
               'profile.version'.tr(args: ['1.0.0']),
               style: GoogleFonts.outfit(
                 fontSize: 11,
-                color: Colors.grey.shade400,
+                color: const Color(0xFF757575),
               ),
             ),
           ),
@@ -241,7 +241,7 @@ class ProfileScreen extends ConsumerWidget {
         style: GoogleFonts.outfit(
           fontSize: 12,
           fontWeight: FontWeight.bold,
-          color: Colors.grey.shade500,
+          color: const Color(0xFF616161),
           letterSpacing: 1.2,
         ),
       ),
@@ -289,7 +289,7 @@ class ProfileScreen extends ConsumerWidget {
                     Text(
                       'profile.referral_hint'.tr(),
                       style: GoogleFonts.outfit(
-                        color: Colors.grey.shade400,
+                        color: const Color(0xFF757575),
                         fontSize: 12,
                       ),
                     ),
@@ -637,7 +637,7 @@ class ProfileScreen extends ConsumerWidget {
             label,
             style: GoogleFonts.outfit(
               fontSize: 12,
-              color: Colors.grey.shade500,
+              color: const Color(0xFF616161),
             ),
           ),
         ],

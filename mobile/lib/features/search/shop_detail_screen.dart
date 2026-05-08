@@ -168,14 +168,14 @@ class ShopDetailScreen extends ConsumerWidget {
                               const Icon(
                                 Icons.location_on_rounded,
                                 size: 16,
-                                color: Colors.grey,
+                                color: Color(0xFF616161),
                               ),
                               const SizedBox(width: 4),
                               Expanded(
                                 child: Text(
                                   '${s.address ?? ''}, ${s.district ?? ''} / ${s.city ?? ''}',
                                   style: GoogleFonts.outfit(
-                                    color: Colors.grey.shade600,
+                                    color: const Color(0xFF424242),
                                   ),
                                 ),
                               ),
@@ -217,7 +217,7 @@ class ShopDetailScreen extends ConsumerWidget {
                             'shop.about_desc'.tr(),
                             style: GoogleFonts.outfit(
                               fontSize: 15,
-                              color: Colors.grey.shade600,
+                              color: const Color(0xFF424242),
                               height: 1.6,
                             ),
                           ),
@@ -358,7 +358,7 @@ class ShopDetailScreen extends ConsumerWidget {
                             'shop.total_amount'.tr(),
                             style: GoogleFonts.outfit(
                               fontSize: 14,
-                              color: Colors.grey.shade600,
+                              color: const Color(0xFF424242),
                             ),
                           ),
                           Text(
@@ -414,7 +414,7 @@ class ShopDetailScreen extends ConsumerWidget {
             label,
             style: GoogleFonts.outfit(
               fontSize: 12,
-              color: Colors.grey.shade500,
+              color: const Color(0xFF616161),
             ),
             textAlign: TextAlign.center,
           ),
@@ -505,7 +505,7 @@ class ShopDetailScreen extends ConsumerWidget {
               comment,
               style: GoogleFonts.outfit(
                 fontSize: 14,
-                color: Colors.grey.shade600,
+                color: const Color(0xFF424242),
                 height: 1.4,
               ),
             ),

@@ -107,7 +107,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
             const SizedBox(height: 8),
             Text(
               'auth.otp_sent'.tr(args: [widget.identity]),
-              style: GoogleFonts.outfit(color: Colors.grey),
+              style: GoogleFonts.outfit(color: const Color(0xFF616161)),
             ),
             const SizedBox(height: 48),
             if (!_usePassword)

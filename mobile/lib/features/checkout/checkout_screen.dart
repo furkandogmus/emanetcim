@@ -204,7 +204,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               style: GoogleFonts.outfit(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
-                color: Colors.grey.shade500,
+                color: const Color(0xFF616161),
                 letterSpacing: 1.2,
               ),
             ),
@@ -386,17 +386,17 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.verified_user_rounded,
                             size: 14,
-                            color: Colors.grey.shade600,
+                            color: Color(0xFF424242),
                           ),
                           const SizedBox(width: 6),
                           Text(
                             'checkout.secure_payment'.tr(),
                             style: GoogleFonts.outfit(
                               fontSize: 11,
-                              color: Colors.grey.shade600,
+                              color: const Color(0xFF424242),
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -444,7 +444,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   label,
                   style: GoogleFonts.outfit(
                     fontSize: 12,
-                    color: Colors.grey.shade500,
+                    color: const Color(0xFF616161),
                   ),
                 ),
                 Text(
@@ -492,7 +492,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         children: [
           Icon(
             icon,
-            color: value > 0 ? AppColors.brandOrange : Colors.grey.shade400,
+            color: value > 0 ? AppColors.brandOrange : const Color(0xFF757575),
             size: 28,
           ),
           const SizedBox(width: 16),
@@ -511,7 +511,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   subtitle,
                   style: GoogleFonts.outfit(
                     fontSize: 11,
-                    color: Colors.grey.shade500,
+                    color: const Color(0xFF616161),
                   ),
                 ),
               ],
@@ -565,7 +565,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.outfit(color: Colors.grey.shade400, fontSize: 14),
+          style: GoogleFonts.outfit(
+            color: const Color(0xFF757575),
+            fontSize: 14,
+          ),
         ),
         Text(
           value,

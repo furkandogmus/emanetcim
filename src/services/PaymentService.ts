@@ -527,6 +527,24 @@ export class PaymentService implements IPaymentService {
 
     const txId = paymentLog.transactionId;
 
+    // QA bypass: payments created via MOBILE_PAYMENT_BYPASS have no real
+    // gateway txn behind them, so simulate a refund instead of calling
+    // Stripe/iyzico (which would fail). Mark the log REFUNDED on full
+    // refund so reconciliation stays consistent.
+    if (txId.startsWith("bypass_")) {
+      logger.warn({ bookingId, amount }, "mobile_refund_bypassed");
+      if (!options?.keepPaymentLogSuccess) {
+        const isFullRefund = amount >= moneyToNumber(paymentLog.amount);
+        if (isFullRefund) {
+          await prisma.paymentLog.update({
+            where: { id: paymentLog.id },
+            data: { status: "REFUNDED" },
+          });
+        }
+      }
+      return { status: "success", amount };
+    }
+
     if (isStripePaymentIntentId(txId)) {
       if (
         process.env.NODE_ENV === "development" &&

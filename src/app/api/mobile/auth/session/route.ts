@@ -67,12 +67,9 @@ export async function POST(req: Request) {
       });
     }
   } else if (password) {
-    console.log("[AuthSession] Password login attempt for:", normalizedIdentity);
     user = isEmail
       ? await prisma.user.findUnique({ where: { email: normalizedIdentity } })
       : await prisma.user.findUnique({ where: { phone: normalizedIdentity } });
-
-    console.log("[AuthSession] User found:", user ? "yes" : "no", "hasPassword:", user?.passwordHash ? "yes" : "no");
 
     if (!user || !user.passwordHash) {
       return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
@@ -80,7 +77,6 @@ export async function POST(req: Request) {
 
     const { verifyPassword } = await import("@/lib/auth-password");
     const isValid = await verifyPassword(password, user.passwordHash);
-    console.log("[AuthSession] Password valid:", isValid);
     if (!isValid) {
       return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
     }

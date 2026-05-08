@@ -92,7 +92,7 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: GoogleFonts.outfit(color: Colors.grey.shade600)),
+        Text(label, style: GoogleFonts.outfit(color: const Color(0xFF424242))),
         Text(value, style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
       ],
     );

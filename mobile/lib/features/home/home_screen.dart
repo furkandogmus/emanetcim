@@ -345,7 +345,7 @@ class HomeScreen extends ConsumerWidget {
                   desc,
                   style: GoogleFonts.outfit(
                     fontSize: 14,
-                    color: Colors.grey.shade600,
+                    color: const Color(0xFF424242),
                     height: 1.4,
                   ),
                 ),

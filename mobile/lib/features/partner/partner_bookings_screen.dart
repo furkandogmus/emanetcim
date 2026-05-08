@@ -8,6 +8,7 @@ import '../../core/repositories/booking_repository.dart';
 import '../../shared/models/booking.dart';
 import '../../shared/utils/app_colors.dart';
 import '../../shared/utils/booking_helpers.dart';
+import '../../shared/widgets/how_it_works_sheet.dart';
 import '../../shared/widgets/skeleton.dart';
 
 final partnerBookingsProvider = FutureProvider<List<BookingDto>>((ref) async {
@@ -226,7 +227,7 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
               title,
               style: GoogleFonts.outfit(
                 fontSize: 12,
-                color: Colors.grey.shade600,
+                color: const Color(0xFF424242),
               ),
             ),
           ],
@@ -240,114 +241,7 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-        ),
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 40),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'home.how_it_works'.tr(),
-              style: GoogleFonts.outfit(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textDark,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
-            _tutorialStep(
-              Icons.qr_code_scanner_rounded,
-              'partner.step1.title'.tr(),
-              'partner.step1.desc'.tr(),
-            ),
-            _tutorialStep(
-              Icons.verified_user_rounded,
-              'partner.step2.title'.tr(),
-              'partner.step2.desc'.tr(),
-            ),
-            _tutorialStep(
-              Icons.payments_rounded,
-              'partner.step3.title'.tr(),
-              'partner.step3.desc'.tr(),
-            ),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: () => Navigator.pop(context),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.brandOrange,
-                minimumSize: const Size(double.infinity, 56),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              child: Text(
-                'common.done'.tr(),
-                style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _tutorialStep(IconData icon, String title, String desc) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 24),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.brandOrange.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(icon, color: AppColors.brandOrange, size: 24),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.outfit(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textDark,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  desc,
-                  style: GoogleFonts.outfit(
-                    fontSize: 14,
-                    color: Colors.grey.shade600,
-                    height: 1.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+      builder: (context) => const HowItWorksSheet(mode: HowItWorksMode.partner),
     );
   }
 }
@@ -418,7 +312,7 @@ class _BookingPartnerCard extends StatelessWidget {
                       '${fmt.format(booking.checkInTime)} - ${fmt.format(booking.checkOutTime)}',
                       style: GoogleFonts.outfit(
                         fontSize: 13,
-                        color: Colors.grey.shade600,
+                        color: const Color(0xFF424242),
                       ),
                     ),
                   ],

@@ -98,7 +98,7 @@ class _AdminApplicationsScreenState
           ? Center(
               child: Text(
                 'Bekleyen başvuru bulunmuyor.',
-                style: GoogleFonts.outfit(color: Colors.grey),
+                style: GoogleFonts.outfit(color: const Color(0xFF616161)),
               ),
             )
           : ListView.builder(
@@ -154,7 +154,7 @@ class _AdminApplicationsScreenState
                     Text(
                       app['address'],
                       style: GoogleFonts.outfit(
-                        color: Colors.grey,
+                        color: const Color(0xFF616161),
                         fontSize: 13,
                       ),
                     ),
@@ -211,11 +211,14 @@ class _AdminApplicationsScreenState
   Widget _infoRow(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: Colors.grey.shade400),
+        Icon(icon, size: 16, color: const Color(0xFF757575)),
         const SizedBox(width: 8),
         Text(
           text,
-          style: GoogleFonts.outfit(fontSize: 14, color: Colors.grey.shade600),
+          style: GoogleFonts.outfit(
+            fontSize: 14,
+            color: const Color(0xFF424242),
+          ),
         ),
       ],
     );

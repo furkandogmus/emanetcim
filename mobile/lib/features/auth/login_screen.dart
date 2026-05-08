@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../core/api/api_client.dart';
 import '../../core/auth/auth_controller.dart';
 import '../../core/services/haptic_service.dart';
 import '../../shared/utils/app_colors.dart';
@@ -75,85 +76,119 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
-      body: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              theme.colorScheme.surface,
-              Colors.orange.shade50.withValues(alpha: 0.5),
-              theme.colorScheme.surface,
-            ],
+      body: Stack(
+        children: [
+          // Background gradients
+          Positioned(
+            top: -100,
+            left: -100,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.brandOrange.withValues(alpha: 0.15),
+              ),
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: 10),
-                    // Logo Section
-                    Center(
-                      child: Container(
-                        padding: const EdgeInsets.all(20),
+          Positioned(
+            bottom: -50,
+            right: -50,
+            child: Container(
+              width: 250,
+              height: 250,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.amber.withValues(alpha: 0.1),
+              ),
+            ),
+          ),
+          // Main content
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 40,
+                ),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Logo Section
+                      Center(
+                        child: Container(
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.brandOrange.withValues(
+                                  alpha: 0.15,
+                                ),
+                                blurRadius: 40,
+                                spreadRadius: 5,
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.shopping_bag_outlined,
+                            size: 56,
+                            color: AppColors.brandOrange,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'BagajPark',
+                        style: GoogleFonts.outfit(
+                          fontSize: 36,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textDark,
+                          letterSpacing: -1,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'auth.register_hint'.tr(),
+                        style: GoogleFonts.outfit(
+                          fontSize: 14,
+                          color: const Color(0xFF424242),
+                          letterSpacing: 0.2,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 32),
+
+                      // Login Card
+                      Container(
+                        padding: const EdgeInsets.all(28),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          shape: BoxShape.circle,
+                          borderRadius: BorderRadius.circular(32),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.orange.withValues(alpha: 0.1),
-                              blurRadius: 40,
-                              spreadRadius: 10,
+                              color: AppColors.textDark.withValues(alpha: 0.04),
+                              blurRadius: 30,
+                              offset: const Offset(0, 10),
                             ),
                           ],
                         ),
-                        child: const Icon(
-                          Icons.shopping_bag_outlined,
-                          size: 48,
-                          color: AppColors.brandOrange,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'BagajPark',
-                      style: theme.textTheme.displayLarge?.copyWith(
-                        color: AppColors.brandOrange,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'auth.register_hint'.tr(),
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey.shade600,
-                        letterSpacing: 0.2,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Login Card
-                    Card(
-                      elevation: 0,
-                      color: Colors.white,
-                      child: Padding(
-                        padding: const EdgeInsets.all(24.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Text(
                               'auth.welcome'.tr(),
-                              style: theme.textTheme.headlineMedium,
+                              style: GoogleFonts.outfit(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textDark,
+                              ),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 12),
@@ -163,15 +198,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 Text(
                                   'auth.no_account'.tr(),
                                   style: GoogleFonts.outfit(
-                                    color: Colors.grey.shade600,
+                                    fontSize: 13,
+                                    color: const Color(0xFF424242),
                                   ),
                                 ),
                                 TextButton(
                                   onPressed: () =>
                                       context.push('/auth/register'),
+                                  style: TextButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                    ),
+                                    minimumSize: Size.zero,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                  ),
                                   child: Text(
                                     'auth.register'.tr(),
                                     style: GoogleFonts.outfit(
+                                      fontSize: 13,
                                       color: AppColors.brandOrange,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -179,28 +224,37 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 8),
-                            const Divider(),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 24),
                             TextFormField(
                               controller: _identity,
                               keyboardType: TextInputType.emailAddress,
-                              style: GoogleFonts.outfit(),
+                              style: GoogleFonts.outfit(
+                                fontWeight: FontWeight.w600,
+                              ),
                               decoration: InputDecoration(
                                 hintText: 'auth.email_or_phone'.tr(),
                                 prefixIcon: const Icon(
                                   Icons.person_outline_rounded,
                                 ),
                                 helperText: 'auth.identity_hint'.tr(),
-                                helperStyle: const TextStyle(fontSize: 10),
+                                helperStyle: GoogleFonts.outfit(
+                                  fontSize: 11,
+                                  color: const Color(0xFF616161),
+                                ),
                               ),
                               validator: (v) => _isValid(v ?? '')
                                   ? null
                                   : 'auth.invalid_identity'.tr(),
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 20),
                             FilledButton(
                               onPressed: _busy ? null : _requestOtp,
+                              style: FilledButton.styleFrom(
+                                minimumSize: const Size(double.infinity, 56),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
                               child: _busy
                                   ? const SizedBox(
                                       height: 20,
@@ -210,85 +264,121 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                         color: Colors.white,
                                       ),
                                     )
-                                  : Text('auth.send_code'.tr()),
+                                  : Text(
+                                      'auth.send_code'.tr(),
+                                      style: GoogleFonts.outfit(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                             ),
                           ],
                         ),
                       ),
-                    ),
 
-                    const SizedBox(height: 16),
+                      const SizedBox(height: 24),
 
-                    // Divider
-                    Row(
-                      children: [
-                        const Expanded(child: Divider(thickness: 1)),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            'auth.or'.tr(),
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: Colors.grey.shade500,
+                      // Divider
+                      Row(
+                        children: [
+                          const Expanded(
+                            child: Divider(
+                              thickness: 1,
+                              color: Color(0xFFE7E5E4),
+                            ),
+                          ), // gray-200
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Text(
+                              'auth.or'.tr(),
+                              style: GoogleFonts.outfit(
+                                fontSize: 12,
+                                color: const Color(0xFF616161),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          const Expanded(
+                            child: Divider(
+                              thickness: 1,
+                              color: Color(0xFFE7E5E4),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Social Logins
+                      OutlinedButton.icon(
+                        onPressed: _busy ? null : _google,
+                        icon: CachedNetworkImage(
+                          imageUrl:
+                              'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_Color_Icon.svg/1024px-Google_Color_Icon.svg.png',
+                          height: 20,
+                          placeholder: (context, url) =>
+                              const Icon(Icons.login, size: 20),
+                          errorWidget: (context, url, error) =>
+                              const Icon(Icons.login),
+                        ),
+                        label: Text(
+                          'auth.google'.tr(),
+                          style: GoogleFonts.outfit(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                      ),
+
+                      if (Platform.isIOS || Platform.isMacOS) ...[
+                        const SizedBox(height: 12),
+                        OutlinedButton.icon(
+                          onPressed: _busy ? null : _apple,
+                          icon: const Icon(Icons.apple, size: 24),
+                          label: Text(
+                            'auth.apple'.tr(),
+                            style: GoogleFonts.outfit(
                               fontWeight: FontWeight.w600,
                             ),
                           ),
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: Colors.black,
+                            foregroundColor: Colors.white,
+                            side: BorderSide.none,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
                         ),
-                        const Expanded(child: Divider(thickness: 1)),
                       ],
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Social Logins
-                    OutlinedButton.icon(
-                      onPressed: _busy ? null : _google,
-                      icon: CachedNetworkImage(
-                        imageUrl:
-                            'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_Color_Icon.svg/1024px-Google_Color_Icon.svg.png',
-                        height: 24,
-                        placeholder: (context, url) =>
-                            const Icon(Icons.login, size: 24),
-                        errorWidget: (context, url, error) =>
-                            const Icon(Icons.login),
-                      ),
-                      label: Text('auth.google'.tr()),
-                    ),
-
-                    if (Platform.isIOS || Platform.isMacOS) ...[
-                      const SizedBox(height: 10),
-                      OutlinedButton.icon(
-                        onPressed: _busy ? null : _apple,
-                        icon: const Icon(Icons.apple, size: 28),
-                        label: Text('auth.apple'.tr()),
-                        style: OutlinedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          foregroundColor: Colors.white,
-                          side: BorderSide.none,
+                      const SizedBox(height: 20),
+                      TextButton.icon(
+                        onPressed: () {
+                          ref.read(hapticServiceProvider).selection();
+                          _showHowItWorks(context);
+                        },
+                        icon: const Icon(Icons.info_outline_rounded, size: 20),
+                        label: Text(
+                          'home.how_it_works'.tr(),
+                          style: GoogleFonts.outfit(
+                            color: AppColors.brandOrange,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
+                      const SizedBox(height: 20),
                     ],
-                    const SizedBox(height: 10),
-                    TextButton.icon(
-                      onPressed: () {
-                        ref.read(hapticServiceProvider).selection();
-                        _showHowItWorks(context);
-                      },
-                      icon: const Icon(Icons.info_outline_rounded, size: 20),
-                      label: Text(
-                        'home.how_it_works'.tr(),
-                        style: GoogleFonts.outfit(
-                          color: AppColors.brandOrange,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -417,6 +507,35 @@ class _OtpBottomSheetState extends ConsumerState<_OtpBottomSheet> {
     }
   }
 
+  Future<void> _forgotPassword() async {
+    final email = widget.identity.trim();
+    if (!email.contains('@')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('auth.forgot_password_email_only'.tr())),
+      );
+      return;
+    }
+    setState(() => _busy = true);
+    try {
+      final dio = ref.read(dioProvider);
+      await dio.post(
+        '/auth/password-reset/request',
+        data: {'email': email, 'locale': context.locale.languageCode},
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('auth.forgot_password_sent'.tr())));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('auth.forgot_password_sent'.tr())));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -452,7 +571,7 @@ class _OtpBottomSheetState extends ConsumerState<_OtpBottomSheet> {
             const SizedBox(height: 8),
             Text(
               'auth.otp_sent'.tr(args: [widget.identity]),
-              style: GoogleFonts.outfit(color: Colors.grey),
+              style: GoogleFonts.outfit(color: const Color(0xFF616161)),
             ),
             const SizedBox(height: 32),
             if (!_usePassword)
@@ -542,6 +661,11 @@ class _OtpBottomSheetState extends ConsumerState<_OtpBottomSheet> {
                     : 'Şifre ile Giriş Yap'.tr(),
               ),
             ),
+            if (_usePassword)
+              TextButton(
+                onPressed: _busy ? null : _forgotPassword,
+                child: Text('auth.forgot_password'.tr()),
+              ),
             const SizedBox(height: 16),
             TextButton(
               onPressed: _canResend ? () => Navigator.pop(context) : null,

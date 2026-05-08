@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-const _brandOrange = Color(0xFFF97316);
-const _brandOrangeDark = Color(0xFFEA580C);
+const _brandOrange = Color(0xFFEA580C); // Web's main color (#ea580c)
+const _brandOrangeDark = Color(0xFFC2430A); // Web's brand-700 (#c2430a)
 const _bgLight = Color(0xFFF8FAFC);
 const _textDark = Color(0xFF0F172A);
 
@@ -45,14 +45,14 @@ ThemeData buildLightTheme() {
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: Colors.white,
+      fillColor: const Color(0xFFF5F5F4), // Warm gray (gray-100)
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: Colors.grey.shade100, width: 1.5),
+        borderSide: BorderSide.none,
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
@@ -64,10 +64,14 @@ ThemeData buildLightTheme() {
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       hintStyle: GoogleFonts.outfit(
-        color: Colors.grey.shade400,
+        color: const Color(0xFF616161),
         fontWeight: FontWeight.w400,
       ),
       prefixIconColor: _brandOrange,
+      labelStyle: GoogleFonts.outfit(
+        color: const Color(0xFF616161),
+        fontWeight: FontWeight.w500,
+      ),
     ),
     cardTheme: CardThemeData(
       elevation: 0,

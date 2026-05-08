@@ -130,7 +130,7 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
             style: GoogleFonts.outfit(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              color: Colors.grey.shade500,
+              color: const Color(0xFF616161),
               letterSpacing: 1.1,
             ),
           ),
@@ -234,7 +234,10 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
                 ),
                 Text(
                   item['date'],
-                  style: GoogleFonts.outfit(color: Colors.grey, fontSize: 12),
+                  style: GoogleFonts.outfit(
+                    color: const Color(0xFF616161),
+                    fontSize: 12,
+                  ),
                 ),
               ],
             ),

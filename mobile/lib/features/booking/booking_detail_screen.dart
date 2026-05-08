@@ -1,3 +1,4 @@
+import 'dart:async' show Timer;
 import 'dart:io' show Platform;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -31,10 +32,16 @@ class BookingDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
+  Timer? _pollingTimer;
+
   @override
   void initState() {
     super.initState();
     _protectScreen();
+    // Poll every 10 seconds for live status updates
+    _pollingTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      ref.invalidate(bookingProvider(widget.bookingId));
+    });
   }
 
   Future<void> _protectScreen() async {
@@ -43,6 +50,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
 
   @override
   void dispose() {
+    _pollingTimer?.cancel();
     ScreenProtector.preventScreenshotOff();
     super.dispose();
   }
@@ -60,6 +68,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
         ),
       ),
       body: bookingAsync.when(
+        skipLoadingOnReload: true,
         loading: _buildSkeleton,
         error: (e, _) => Center(
           child: Column(
@@ -144,7 +153,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                               'booking.qr_hint'.tr(),
                               style: GoogleFonts.outfit(
                                 fontSize: 12,
-                                color: Colors.grey.shade500,
+                                color: const Color(0xFF616161),
                               ),
                             ),
                             const SizedBox(height: 32),
@@ -220,7 +229,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                   icon: const Icon(Icons.help_outline_rounded, size: 20),
                   label: Text('booking.get_help'.tr()),
                   style: TextButton.styleFrom(
-                    foregroundColor: Colors.grey.shade600,
+                    foregroundColor: const Color(0xFF424242),
                   ),
                 ),
               ),
@@ -257,7 +266,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: GoogleFonts.outfit(color: Colors.grey.shade500)),
+        Text(label, style: GoogleFonts.outfit(color: const Color(0xFF616161))),
         const SizedBox(width: 16),
         Expanded(
           child: Text(
