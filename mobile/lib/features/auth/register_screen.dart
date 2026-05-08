@@ -1,9 +1,10 @@
+import 'dart:async' show unawaited;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/auth/auth_controller.dart';
 
@@ -39,8 +40,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       final identity = _identityController.text.trim();
       await ref.read(authControllerProvider.notifier).requestOtp(identity);
       if (mounted) {
-        context.push(
-          '/auth/otp?identity=${Uri.encodeComponent(identity)}&name=${Uri.encodeComponent(_nameController.text)}',
+        unawaited(
+          context.push(
+            '/auth/otp?identity=${Uri.encodeComponent(identity)}&name=${Uri.encodeComponent(_nameController.text)}',
+          ),
         );
       }
     } catch (e) {
@@ -100,7 +103,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 validator: (v) {
                   if (v == null || v.isEmpty) return 'auth.name_error'.tr();
                   if (v.length < 3) return 'auth.name_error'.tr();
-                  if (!RegExp(r"^[a-zA-ZçÇğĞıİöÖşŞüÜ\s]+$").hasMatch(v)) {
+                  if (!RegExp(r'^[a-zA-ZçÇğĞıİöÖşŞüÜ\s]+$').hasMatch(v)) {
                     return 'auth.name_invalid_error'.tr();
                   }
                   return null;
@@ -134,7 +137,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   Checkbox(
                     value: _kvkkAccepted,
                     onChanged: (v) {
-                      HapticFeedback.lightImpact();
+                      unawaited(HapticFeedback.lightImpact());
                       setState(() => _kvkkAccepted = v ?? false);
                     },
                     activeColor: const Color(0xFFF97316),
@@ -142,7 +145,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   Expanded(
                     child: GestureDetector(
                       onTap: () {
-                        HapticFeedback.lightImpact();
+                        unawaited(HapticFeedback.lightImpact());
                         _showLegalModal(
                           context,
                           '${'auth.terms_service'.tr()} & KVKK',

@@ -136,7 +136,9 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
           ),
           const SizedBox(height: 16),
 
-          ...(_stats['history'] as List).map((item) => _historyTile(item)),
+          ...(_stats['history'] as List).map(
+            (e) => _historyTile(e as Map<String, dynamic>),
+          ),
 
           const SizedBox(height: 32),
 

@@ -73,7 +73,7 @@ ThemeData buildLightTheme() {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),
-        side: BorderSide(color: Colors.grey.shade100, width: 1),
+        side: BorderSide(color: Colors.grey.shade100),
       ),
       surfaceTintColor: Colors.white,
       clipBehavior: Clip.antiAlias,

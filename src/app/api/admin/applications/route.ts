@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getMobileSession } from "@/lib/mobile-auth";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   const session = await getMobileSession();
   if (!session || session.role !== "ADMIN") {

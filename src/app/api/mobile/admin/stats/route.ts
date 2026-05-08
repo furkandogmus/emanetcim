@@ -8,7 +8,7 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const [totalBookings, totalRevenueResult, totalPartners, pendingApps] = await Promise.all([
+  const [totalBookings, totalRevenueResult, totalPartners, pendingApps, unreadMessages] = await Promise.all([
     prisma.booking.count(),
     prisma.booking.aggregate({
       where: { status: { in: ["PAID", "CHECKED_IN", "CHECKED_OUT"] } },
@@ -16,6 +16,7 @@ export async function GET() {
     }),
     prisma.shop.count(),
     prisma.shop.count({ where: { isActive: false } }), // Using isActive: false for pending
+    prisma.contactMessage.count({ where: { isRead: false } }),
   ]);
 
   return NextResponse.json({
@@ -23,5 +24,6 @@ export async function GET() {
     totalRevenue: Number(totalRevenueResult._sum.totalPrice || 0),
     totalPartners,
     pendingApplications: pendingApps,
+    unreadMessages,
   });
 }

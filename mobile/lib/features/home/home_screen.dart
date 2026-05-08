@@ -1,11 +1,13 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../core/auth/auth_controller.dart';
+import '../../core/services/analytics_service.dart';
+import '../../shared/utils/app_colors.dart';
 import '../../shared/widgets/how_it_works_sheet.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -13,9 +15,13 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Analytics
+    ref.read(analyticsServiceProvider).logScreenView('Home');
+
     final user = ref.watch(authControllerProvider).session;
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
@@ -34,7 +40,7 @@ class HomeScreen extends ConsumerWidget {
                     ? 'home.greeting'.tr(args: [user!.name!.split(' ')[0]])
                     : 'home.greeting_guest'.tr(),
                 style: GoogleFonts.outfit(
-                  color: const Color(0xFF0F172A),
+                  color: AppColors.textDark,
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
                 ),
@@ -53,14 +59,17 @@ class HomeScreen extends ConsumerWidget {
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [Color(0xFFF97316), Color(0xFFEA580C)],
+                        colors: [
+                          AppColors.brandOrange,
+                          AppColors.brandOrangeDark,
+                        ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFF97316).withValues(alpha: 0.3),
+                          color: AppColors.brandOrange.withValues(alpha: 0.3),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -90,7 +99,7 @@ class HomeScreen extends ConsumerWidget {
                           onPressed: () => context.push('/search'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
-                            foregroundColor: const Color(0xFFF97316),
+                            foregroundColor: AppColors.brandOrange,
                             padding: const EdgeInsets.symmetric(
                               horizontal: 24,
                               vertical: 12,
@@ -125,7 +134,7 @@ class HomeScreen extends ConsumerWidget {
                         ),
                         _cityCard(
                           'İzmir',
-                          'https://images.unsplash.com/photo-1596464875936-398327918f3a?q=80&w=400&auto=format&fit=crop',
+                          'https://images.unsplash.com/photo-1605333396915-47ed6b68a00e?q=80&w=400&auto=format&fit=crop',
                         ),
                         _cityCard(
                           'Antalya',
@@ -148,10 +157,10 @@ class HomeScreen extends ConsumerWidget {
                             children: [
                               _sectionHeader('home.how_it_works'.tr()),
                               Text(
-                                'Detayları Gör',
+                                'common.see_details'.tr(),
                                 style: GoogleFonts.outfit(
                                   fontSize: 12,
-                                  color: const Color(0xFFF97316),
+                                  color: AppColors.brandOrange,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -247,7 +256,7 @@ class HomeScreen extends ConsumerWidget {
       style: GoogleFonts.outfit(
         fontSize: 20,
         fontWeight: FontWeight.bold,
-        color: const Color(0xFF0F172A),
+        color: AppColors.textDark,
       ),
     );
   }
@@ -270,7 +279,18 @@ class HomeScreen extends ConsumerWidget {
                     Container(color: Colors.grey.shade100),
                 errorWidget: (context, url, error) => const Icon(Icons.error),
               ),
-              Container(color: Colors.black.withValues(alpha: 0.3)),
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.5),
+                    ],
+                  ),
+                ),
+              ),
               Center(
                 child: Text(
                   name,
@@ -302,10 +322,10 @@ class HomeScreen extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFFF97316).withValues(alpha: 0.1),
+              color: AppColors.brandOrange.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Icon(icon, color: const Color(0xFFF97316), size: 24),
+            child: Icon(icon, color: AppColors.brandOrange, size: 24),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -317,7 +337,7 @@ class HomeScreen extends ConsumerWidget {
                   style: GoogleFonts.outfit(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
-                    color: const Color(0xFF0F172A),
+                    color: AppColors.textDark,
                   ),
                 ),
                 const SizedBox(height: 4),

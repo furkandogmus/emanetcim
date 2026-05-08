@@ -81,9 +81,13 @@ dev_dependencies:
   riverpod_generator: 4.0.0+1
   custom_lint: 0.8.1
   riverpod_lint: 3.1.0
+  network_image_mock: ^2.1.1
+  mocktail: ^1.0.5
 
 flutter:
   uses-material-design: true
   assets:
-    - assets/images/
-    - assets/l10n/
+    - assets/images/logo.png
+    - assets/images/logo_white.png
+    - assets/l10n/en.json
+    - assets/l10n/tr.json

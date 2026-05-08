@@ -6,18 +6,11 @@ class Env {
 
   static const String stripePublishableKey = String.fromEnvironment(
     'STRIPE_PK',
-    defaultValue: '',
   );
 
-  static const String sentryDsn = String.fromEnvironment(
-    'SENTRY_DSN',
-    defaultValue: '',
-  );
+  static const String sentryDsn = String.fromEnvironment('SENTRY_DSN');
 
-  static const bool firebaseEnabled = bool.fromEnvironment(
-    'FIREBASE_ENABLED',
-    defaultValue: false,
-  );
+  static const bool firebaseEnabled = bool.fromEnvironment('FIREBASE_ENABLED');
 
   static const String mapTileUrl = String.fromEnvironment(
     'MAP_TILE_URL',

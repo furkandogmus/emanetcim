@@ -67,15 +67,18 @@ describe("SealService Deep Logic", () => {
 
   describe("assignSealsToShop", () => {
     it("should assign STOCK seals to a specific shop", async () => {
-      mockPrisma.seal.updateMany.mockResolvedValue({ count: 10 });
-      const result = await service.assignSealsToShop("shop-1", 1000, 1009);
+      mockPrisma.seal.findMany.mockResolvedValue([
+        { serialNumber: 1000 },
+        { serialNumber: 1001 },
+      ]);
+      mockPrisma.seal.updateMany.mockResolvedValue({ count: 2 });
       
-      expect(result.updated).toBe(10);
+      const result = await service.assignSealsToShop("shop-1", 2);
+      
+      expect(result.updated).toBe(2);
       expect(mockPrisma.seal.updateMany).toHaveBeenCalledWith(expect.objectContaining({
         where: {
-          serialNumber: { gte: 1000, lte: 1009 },
-          status: "STOCK",
-          shopId: null,
+          serialNumber: { in: [1000, 1001] },
         },
         data: expect.objectContaining({
           shopId: "shop-1",

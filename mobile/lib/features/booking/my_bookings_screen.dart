@@ -1,34 +1,17 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
-import '../../core/api/api_client.dart';
+import '../../core/repositories/booking_repository.dart';
 import '../../shared/models/booking.dart';
+import '../../shared/utils/app_colors.dart';
+import '../../shared/utils/booking_helpers.dart';
 
 final myBookingsProvider = FutureProvider<List<BookingDto>>((ref) async {
-  final box = Hive.box('my_bookings_cache');
-  try {
-    final res = await ref.watch(dioProvider).get('/bookings/me');
-    final list = res.data as List;
-    final bookings = list
-        .map((e) => BookingDto.fromJson(e as Map<String, dynamic>))
-        .toList();
-
-    // Update cache
-    await box.put('list', list);
-    return bookings;
-  } catch (e) {
-    final cached = box.get('list');
-    if (cached != null) {
-      return (cached as List)
-          .map((e) => BookingDto.fromJson(Map<String, dynamic>.from(e)))
-          .toList();
-    }
-    return [];
-  }
+  final result = await ref.watch(bookingRepositoryProvider).getMyBookings();
+  return result.fold((data) => data, (error) => throw Exception(error));
 });
 
 class MyBookingsScreen extends ConsumerWidget {
@@ -43,7 +26,7 @@ class MyBookingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Rezervasyonlarım',
+          'nav.bookings'.tr(),
           style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
         ),
         actions: [
@@ -65,10 +48,10 @@ class MyBookingsScreen extends ConsumerWidget {
                 color: Colors.redAccent,
               ),
               const SizedBox(height: 16),
-              Text('Bir hata oluştu', style: theme.textTheme.headlineSmall),
+              Text('common.error'.tr(), style: theme.textTheme.headlineSmall),
               TextButton(
                 onPressed: () => ref.refresh(myBookingsProvider.future),
-                child: const Text('Tekrar Dene'),
+                child: Text('common.try_again'.tr()),
               ),
             ],
           ),
@@ -88,19 +71,19 @@ class MyBookingsScreen extends ConsumerWidget {
                     child: const Icon(
                       Icons.luggage_outlined,
                       size: 80,
-                      color: Color(0xFFF97316),
+                      color: AppColors.brandOrange,
                     ),
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'Henüz rezervasyonun yok',
+                    'booking.no_bookings'.tr(),
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Seyahatine başlamak için bir dükkan bul!',
+                    'booking.no_bookings_desc'.tr(),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: Colors.grey.shade600,
                     ),
@@ -109,7 +92,7 @@ class MyBookingsScreen extends ConsumerWidget {
                   FilledButton.icon(
                     onPressed: () => context.go('/'),
                     icon: const Icon(Icons.search_rounded),
-                    label: const Text('Keşfetmeye Başla'),
+                    label: Text('booking.start_exploring'.tr()),
                   ),
                 ],
               ),
@@ -123,13 +106,13 @@ class MyBookingsScreen extends ConsumerWidget {
               itemCount: list.length,
               itemBuilder: (context, i) {
                 final b = list[i];
-                final statusColor = _statusColor(b.status);
+                final statusColor = bookingStatusColor(b.status);
 
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 20),
                   child: GestureDetector(
                     onTap: () => context.push('/booking/${b.id}'),
-                    child: Container(
+                    child: DecoratedBox(
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(24),
@@ -183,7 +166,7 @@ class MyBookingsScreen extends ConsumerWidget {
                                       borderRadius: BorderRadius.circular(100),
                                     ),
                                     child: Text(
-                                      _statusLabel(b.status),
+                                      bookingStatusLabel(b.status),
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 10,
@@ -207,7 +190,7 @@ class MyBookingsScreen extends ConsumerWidget {
                                     ),
                                     child: const Icon(
                                       Icons.storefront_rounded,
-                                      color: Color(0xFFF97316),
+                                      color: AppColors.brandOrange,
                                     ),
                                   ),
                                   const SizedBox(width: 16),
@@ -257,7 +240,7 @@ class MyBookingsScreen extends ConsumerWidget {
                                       ),
                                       const SizedBox(width: 8),
                                       Text(
-                                        '${b.totalBags} Valiz',
+                                        '${b.totalBags} ${'checkout.bag_s'.tr()}',
                                         style: GoogleFonts.outfit(
                                           fontWeight: FontWeight.w600,
                                           color: const Color(0xFF0F172A),
@@ -270,7 +253,7 @@ class MyBookingsScreen extends ConsumerWidget {
                                     style: GoogleFonts.outfit(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
-                                      color: const Color(0xFFF97316),
+                                      color: AppColors.brandOrange,
                                     ),
                                   ),
                                 ],
@@ -288,42 +271,5 @@ class MyBookingsScreen extends ConsumerWidget {
         },
       ),
     );
-  }
-
-  String _statusLabel(BookingStatus status) {
-    switch (status) {
-      case BookingStatus.pending:
-        return 'Beklemede';
-      case BookingStatus.paid:
-        return 'Ödendi';
-      case BookingStatus.approved:
-        return 'Onaylandı';
-      case BookingStatus.checkedIn:
-        return 'Emanet Alındı';
-      case BookingStatus.checkedOut:
-        return 'Teslim Edildi';
-      case BookingStatus.cancelled:
-        return 'İptal Edildi';
-      case BookingStatus.waitingApproval:
-        return 'Onay Bekliyor';
-    }
-  }
-
-  Color _statusColor(BookingStatus status) {
-    switch (status) {
-      case BookingStatus.paid:
-      case BookingStatus.approved:
-        return Colors.green;
-      case BookingStatus.checkedIn:
-        return Colors.blue;
-      case BookingStatus.cancelled:
-        return Colors.redAccent;
-      case BookingStatus.checkedOut:
-        return Colors.grey;
-      case BookingStatus.waitingApproval:
-        return Colors.orange;
-      default:
-        return Colors.orange;
-    }
   }
 }

@@ -1,5 +1,6 @@
 {
   "nav": {
+    "home": "Home",
     "search": "Search",
     "bookings": "My Bookings",
     "partner": "Partner Panel",
@@ -58,8 +59,6 @@
     "or": "or",
     "google": "Continue with Google",
     "apple": "Continue with Apple",
-    "demo_guest": "Guest Demo Mode",
-    "demo_partner": "Partner Panel Demo",
     "register_welcome": "Welcome to our community! 👋",
     "register_hint": "Create your account now to safely store your luggage.",
     "name_label": "Full Name",
@@ -69,7 +68,11 @@
     "terms_text": "By registering, you agree to our {} and {}.",
     "terms_service": "Terms of Service",
     "privacy_policy": "Privacy Policy",
-    "register_button": "Register and Send Code"
+    "register_button": "Register and Send Code",
+    "enter_code": "Enter Your Code",
+    "resend_code": "Resend Code",
+    "resend_wait": "Resend ({}s)",
+    "identity_hint": "e.g. 5xx xxx xx xx or email"
   },
   "shop": {
     "error_loading": "An error occurred while loading the shop",
@@ -125,7 +128,11 @@
     "approve_shops": "Approve Shops",
     "system_status": "System Status",
     "active": "Active",
-    "live_analytics": "Live Analytics"
+    "live_analytics": "Live Analytics",
+    "new_shop_apps": "{} new shop applications",
+    "all_systems_active": "All systems active",
+    "support_messages": "Support Messages",
+    "unread_messages": "{} unread messages"
   },
   "checkout": {
     "title": "Complete Booking",
@@ -166,7 +173,10 @@
       "checked_in": "Checked In",
       "checked_out": "Checked Out",
       "cancelled": "Cancelled"
-    }
+    },
+    "no_bookings": "You have no bookings yet",
+    "no_bookings_desc": "Find a shop to start your journey!",
+    "start_exploring": "Start Exploring"
   },
   "partner": {
     "dashboard": "Shop Panel",
@@ -184,8 +194,7 @@
     "seal_info": "Seal Info",
     "scan_hint": "Align guest's QR or seal barcode here",
     "offline_saved": "No internet. Action saved and will sync automatically.",
-    "demo_welcome_title": "Partner Panel Demo",
-    "demo_welcome_msg": "Welcome! You are in demo mode. Here you can scan guest QR codes, perform check-ins/check-outs, and track your shop's earnings. All features are open for testing!",
+    "no_bookings": "No bookings yet",
     "no_bookings": "No bookings yet",
     "earnings": "My Earnings",
     "settings": "Shop Settings",
@@ -227,7 +236,13 @@
     "copied": "Copied!",
     "notifications_empty": "All your notifications and campaign announcements are listed here. You currently have no active notifications.",
     "version": "Version {}",
-    "logout_confirm": "Are you sure you want to log out of your account?"
+    "logout_confirm": "Are you sure you want to log out of your account?",
+    "default_name": "User",
+    "stats_bookings": "Bookings",
+    "stats_savings": "Savings",
+    "stats_favorites": "Favorites",
+    "privacy_content": "At BagajPark, we value your privacy. This text explains how your data is collected and used.\n\n1. Collected Data\nTo provide our service, we collect basic information such as your name, email address, phone number, and location information.\n\n2. Use of Data\nYour data is used only for processing bookings, ensuring security, and sending you notifications.\n\n3. Third Parties\nYour data is not shared with third parties except for legal obligations. Payment transactions are carried out through secure intermediary institutions.",
+    "terms_content": "BagajPark Terms of Service\n\n1. Service Description\nBagajPark is a platform that allows you to temporarily store your belongings at secure points (shops).\n\n2. Responsibilities\n- The shop owner is obliged to store the delivered belongings securely.\n- The user undertakes not to deliver prohibited substances (flammable, explosive, illegal, etc.).\n- The user is responsible for picking up their luggage on time.\n\n3. Cancellation and Refund\nFull refund is made for cancellations made before the booking time. No refund is made after the period has started."
   },
   "home": {
     "greeting": "Hello, {} 👋",
@@ -236,12 +251,22 @@
     "hero_subtitle": "Find the nearest shop to explore the city freely.",
     "hero_cta": "Find Storage Spot",
     "how_it_works": "How It Works?",
-    "step_1_title": "Find a Shop",
-    "step_1_desc": "Select the closest trusted spot from the map.",
-    "step_2_title": "Drop and Seal",
-    "step_2_desc": "Deliver your bag, scan the QR code, and attach the seal.",
-    "step_3_title": "Explore the City",
-    "step_3_desc": "Hands-free, enjoy your trip with BagajPark protection.",
+    "step1": {
+      "title": "Find a Shop",
+      "desc": "Select the closest trusted spot from the map."
+    },
+    "step2": {
+      "title": "Drop and Seal",
+      "desc": "Deliver your bag, scan the QR code, and attach the seal."
+    },
+    "step3": {
+      "title": "Explore the City",
+      "desc": "Hands-free, enjoy your trip with BagajPark protection."
+    },
+    "step4": {
+      "title": "Secure Pick-up",
+      "desc": "Come back anytime and pick up your bag with its seal intact."
+    },
     "safety_title": "Every Bag Is Insured",
     "safety_desc": "Every booking with BagajPark is protected up to ₺10,000.",
     "popular_cities": "Popular Cities",
@@ -255,9 +280,11 @@
     "retry": "Retry",
     "success": "Success",
     "save": "Save",
+    "see_details": "See Details",
     "back": "Back",
     "next": "Next",
     "done": "Done",
+    "try_again": "Try Again",
     "no_internet": "No Connection - Some actions may be delayed"
   },
   "tutorial": {

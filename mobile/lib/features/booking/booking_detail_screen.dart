@@ -7,23 +7,22 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:screen_protector/screen_protector.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../core/api/api_client.dart';
+import '../../core/repositories/booking_repository.dart';
 import '../../shared/models/booking.dart';
+import '../../shared/utils/app_colors.dart';
+import '../../shared/utils/booking_helpers.dart';
+import '../../shared/widgets/skeleton.dart';
 
 final bookingProvider = FutureProvider.family<BookingDto, String>((
   ref,
   id,
 ) async {
-  try {
-    final res = await ref.watch(dioProvider).get('/bookings/$id');
-    return BookingDto.fromJson(res.data as Map<String, dynamic>);
-  } catch (e) {
-    rethrow;
-  }
+  final result = await ref.watch(bookingRepositoryProvider).getById(id);
+  return result.fold((data) => data, (error) => throw Exception(error));
 });
 
 class BookingDetailScreen extends ConsumerStatefulWidget {
-  const BookingDetailScreen({super.key, required this.bookingId});
+  const BookingDetailScreen({required this.bookingId, super.key});
   final String bookingId;
 
   @override
@@ -61,7 +60,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
         ),
       ),
       body: bookingAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: _buildSkeleton,
         error: (e, _) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -85,7 +84,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
           child: Column(
             children: [
               // Ticket Design
-              Container(
+              DecoratedBox(
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(24),
@@ -127,11 +126,11 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                               size: 200,
                               eyeStyle: const QrEyeStyle(
                                 eyeShape: QrEyeShape.square,
-                                color: Color(0xFF0F172A),
+                                color: AppColors.textDark,
                               ),
                               dataModuleStyle: const QrDataModuleStyle(
                                 dataModuleShape: QrDataModuleShape.square,
-                                color: Color(0xFF0F172A),
+                                color: AppColors.textDark,
                               ),
                               embeddedImage: const AssetImage(
                                 'assets/images/logo.png',
@@ -234,34 +233,8 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
   }
 
   Widget _statusBadge(BookingStatus status) {
-    Color color = Colors.orange;
-    String key = 'waiting_approval';
-
-    switch (status) {
-      case BookingStatus.paid:
-      case BookingStatus.approved:
-        color = Colors.green;
-        key = 'approved';
-        break;
-      case BookingStatus.checkedIn:
-        color = Colors.blue;
-        key = 'checked_in';
-        break;
-      case BookingStatus.checkedOut:
-        color = Colors.grey;
-        key = 'checked_out';
-        break;
-      case BookingStatus.cancelled:
-        color = Colors.redAccent;
-        key = 'cancelled';
-        break;
-      case BookingStatus.waitingApproval:
-        color = Colors.orange;
-        key = 'waiting_approval';
-        break;
-      default:
-        break;
-    }
+    final color = bookingStatusColor(status);
+    final label = bookingStatusLabel(status);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -270,7 +243,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
         borderRadius: BorderRadius.circular(100),
       ),
       child: Text(
-        'booking.status.$key'.tr(),
+        label,
         style: GoogleFonts.outfit(
           color: color,
           fontWeight: FontWeight.bold,
@@ -293,7 +266,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
             style: GoogleFonts.outfit(
               fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
               fontSize: isBold ? 16 : 14,
-              color: const Color(0xFF0F172A),
+              color: AppColors.textDark,
             ),
           ),
         ),
@@ -328,6 +301,25 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
     }
+  }
+
+  Widget _buildSkeleton() {
+    return const SingleChildScrollView(
+      padding: EdgeInsets.all(24),
+      child: Column(
+        children: [
+          Skeleton(height: 400, width: double.infinity, borderRadius: 24),
+          SizedBox(height: 32),
+          Row(
+            children: [
+              Expanded(child: Skeleton(height: 56, borderRadius: 16)),
+              SizedBox(width: 16),
+              Expanded(child: Skeleton(height: 56, borderRadius: 16)),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 

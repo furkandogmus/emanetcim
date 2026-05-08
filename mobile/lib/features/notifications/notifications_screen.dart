@@ -3,43 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+import '../../core/services/haptic_service.dart';
+import '../../core/services/notification_service.dart';
 import '../../shared/models/notification.dart';
+import '../../shared/utils/app_colors.dart';
 
 class NotificationsScreen extends ConsumerWidget {
   const NotificationsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Mock data for now, would come from a provider
-    final List<NotificationDto> mockNotifications = [
-      NotificationDto(
-        id: '1',
-        title: 'Ödeme Başarılı',
-        body:
-            'Rezervasyon ödemeniz başarıyla alındı. Valizlerinizi teslim edebilirsiniz.',
-        type: NotificationType.paymentSuccess,
-        createdAt: DateTime.now().subtract(const Duration(minutes: 5)),
-        isRead: false,
-      ),
-      NotificationDto(
-        id: '2',
-        title: 'Dükkan Onaylandı',
-        body:
-            'Dükkan başvurunuz yönetici tarafından onaylandı. Artık müşteri kabul edebilirsiniz.',
-        type: NotificationType.shopApplication,
-        createdAt: DateTime.now().subtract(const Duration(hours: 2)),
-        isRead: true,
-      ),
-      NotificationDto(
-        id: '3',
-        title: 'Yeni Kampanya!',
-        body:
-            'İstanbul genelinde tüm emanet noktalarında %20 indirim fırsatını kaçırmayın.',
-        type: NotificationType.campaign,
-        createdAt: DateTime.now().subtract(const Duration(days: 1)),
-        isRead: false,
-      ),
-    ];
+    final notifications = ref.watch(notificationProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -49,42 +24,58 @@ class NotificationsScreen extends ConsumerWidget {
           style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
         ),
         actions: [
-          TextButton(
-            onPressed: () {},
-            child: Text(
-              'notifications.mark_all_read'.tr(),
-              style: GoogleFonts.outfit(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
+          if (notifications.isNotEmpty)
+            TextButton(
+              onPressed: () {
+                ref.read(hapticServiceProvider).success();
+                ref.read(notificationProvider.notifier).markAllAsRead();
+              },
+              child: Text(
+                'notifications.mark_all_read'.tr(),
+                style: GoogleFonts.outfit(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.brandOrange,
+                ),
               ),
             ),
-          ),
         ],
       ),
-      body: mockNotifications.isEmpty
+      body: notifications.isEmpty
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
-                    Icons.notifications_off_outlined,
-                    size: 64,
-                    color: Colors.grey,
+                  Container(
+                    padding: const EdgeInsets.all(32),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withValues(alpha: 0.05),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.notifications_off_outlined,
+                      size: 64,
+                      color: Colors.grey,
+                    ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
                   Text(
                     'notifications.empty'.tr(),
-                    style: GoogleFonts.outfit(color: Colors.grey),
+                    style: GoogleFonts.outfit(
+                      color: Colors.grey.shade500,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),
             )
           : ListView.separated(
               padding: const EdgeInsets.all(20),
-              itemCount: mockNotifications.length,
+              itemCount: notifications.length,
               separatorBuilder: (_, _) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
-                final n = mockNotifications[index];
+                final n = notifications[index];
                 return _notificationTile(context, n);
               },
             ),
@@ -116,9 +107,7 @@ class NotificationsScreen extends ConsumerWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {
-            HapticFeedback.lightImpact();
-          },
+          onTap: HapticFeedback.lightImpact,
           borderRadius: BorderRadius.circular(24),
           child: Padding(
             padding: const EdgeInsets.all(20),

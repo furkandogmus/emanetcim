@@ -174,15 +174,14 @@ export async function bulkCreateSealsAction(fromSerial: number, toSerial: number
 
 export async function assignSealsToShopAction(
   shopId: string,
-  fromSerial: number,
-  toSerial: number
+  count: number
 ) {
   const session = await auth();
   if (session?.user?.role !== "ADMIN") {
     throw new Error("Unauthorized");
   }
   try {
-    const { updated } = await sealService.assignSealsToShop(shopId, fromSerial, toSerial);
+    const { updated } = await sealService.assignSealsToShop(shopId, count);
     revalidatePathAllLocales("/admin/seals");
     return { success: true as const, updated };
   } catch (e) {

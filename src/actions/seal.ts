@@ -11,8 +11,9 @@ import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 export async function shipSealRequestAction(params: {
   requestId: string;
   trackingNumber: string;
-  serialFrom: number;
-  serialTo: number;
+  quantity?: number;
+  serialFrom?: number;
+  serialTo?: number;
   adminNote?: string;
 }): Promise<{ success: boolean; error?: string }> {
   const session = await auth();
@@ -20,17 +21,20 @@ export async function shipSealRequestAction(params: {
     return { success: false, error: "unauthorized" };
   }
 
-  const { requestId, trackingNumber, serialFrom, serialTo, adminNote } = params;
+  const { requestId, trackingNumber, quantity, serialFrom, serialTo, adminNote } = params;
 
   if (!trackingNumber?.trim()) {
     return { success: false, error: "tracking_number_required" };
   }
-  if (
-    !Number.isInteger(serialFrom) ||
-    !Number.isInteger(serialTo) ||
-    serialFrom > serialTo
-  ) {
-    return { success: false, error: "invalid_serial_range" };
+
+  if (serialFrom !== undefined && serialTo !== undefined) {
+    if (
+      !Number.isInteger(serialFrom) ||
+      !Number.isInteger(serialTo) ||
+      serialFrom > serialTo
+    ) {
+      return { success: false, error: "invalid_serial_range" };
+    }
   }
 
   try {
@@ -55,8 +59,9 @@ export async function shipSealRequestAction(params: {
       data: {
         status: "SHIPPED",
         trackingNumber: trackingNumber.trim(),
-        serialFrom,
-        serialTo,
+        quantity: quantity !== undefined ? quantity : undefined,
+        serialFrom: serialFrom ?? null,
+        serialTo: serialTo ?? null,
         adminNote: adminNote?.trim() || null,
         updatedAt: new Date(),
       },
@@ -114,7 +119,7 @@ export async function confirmSealDeliveryAction(
       return { success: false, error: "unauthorized" };
     }
 
-    if (sealRequest.status !== "SHIPPED") {
+    if (sealRequest.status !== "SHIPPED" && sealRequest.status !== "DELIVERED") {
       return { success: false, error: "request_not_shipped" };
     }
 
@@ -125,16 +130,39 @@ export async function confirmSealDeliveryAction(
         data: { status: "DELIVERED", updatedAt: new Date() },
       });
 
-      // Assign seals if serial range is recorded
-      if (
-        sealRequest.serialFrom !== null &&
-        sealRequest.serialTo !== null
-      ) {
-        await sealService.assignSealsToShop(
-          sealRequest.shopId,
-          sealRequest.serialFrom,
-          sealRequest.serialTo
-        );
+      if (sealRequest.serialFrom && sealRequest.serialTo) {
+        await tx.seal.updateMany({
+          where: {
+            serialNumber: {
+              gte: sealRequest.serialFrom,
+              lte: sealRequest.serialTo,
+            },
+            status: "STOCK",
+          },
+          data: {
+            shopId: sealRequest.shopId,
+            status: "ASSIGNED",
+            assignedAt: new Date(),
+          },
+        });
+      } else {
+        const seals = await tx.seal.findMany({
+          where: { status: "STOCK", shopId: null },
+          orderBy: { serialNumber: "asc" },
+          take: sealRequest.quantity,
+          select: { serialNumber: true },
+        });
+
+        if (seals.length > 0) {
+          await tx.seal.updateMany({
+            where: { serialNumber: { in: seals.map((s) => s.serialNumber) } },
+            data: {
+              shopId: sealRequest.shopId,
+              status: "ASSIGNED",
+              assignedAt: new Date(),
+            },
+          });
+        }
       }
     });
 

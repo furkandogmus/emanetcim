@@ -3,51 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
-import '../../core/api/api_client.dart';
-import '../../core/auth/auth_controller.dart';
+import '../../core/repositories/booking_repository.dart';
 import '../../shared/models/booking.dart';
+import '../../shared/utils/app_colors.dart';
+import '../../shared/utils/booking_helpers.dart';
+import '../../shared/widgets/skeleton.dart';
 
 final partnerBookingsProvider = FutureProvider<List<BookingDto>>((ref) async {
-  final box = Hive.box('partner_bookings_cache');
-  try {
-    final dio = ref.watch(dioProvider);
-    final res = await dio.get('/partner/bookings');
-    final list = res.data as List<dynamic>;
-    final bookings = list
-        .map((e) => BookingDto.fromJson(e as Map<String, dynamic>))
-        .toList();
-
-    // Cache the raw list for offline use
-    await box.put('list', list);
-    return bookings;
-  } catch (e) {
-    // If offline, try to return cached data
-    final cached = box.get('list');
-    if (cached != null) {
-      return (cached as List<dynamic>)
-          .map((e) => BookingDto.fromJson(Map<String, dynamic>.from(e)))
-          .toList();
-    }
-
-    // Demo/Fallback data
-    return [
-      BookingDto(
-        id: 'b-demo-1',
-        shopId: 's-1',
-        shopName: 'Emanetçi Galata (Demo)',
-        guestName: 'Örnek Misafir',
-        bagCountS: 1,
-        bagCountM: 1,
-        bagCountXl: 0,
-        checkInTime: DateTime.now().add(const Duration(hours: -1)),
-        checkOutTime: DateTime.now().add(const Duration(hours: 3)),
-        status: BookingStatus.checkedIn,
-        totalPrice: 150.0,
-      ),
-    ];
-  }
+  final result = await ref
+      .watch(bookingRepositoryProvider)
+      .getPartnerBookings();
+  return result.fold((data) => data, (error) => throw Exception(error));
 });
 
 class PartnerBookingsScreen extends ConsumerStatefulWidget {
@@ -62,49 +29,6 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkDemoMode();
-    });
-  }
-
-  void _checkDemoMode() {
-    final isDemo = ref.read(authControllerProvider).isDemo;
-    if (isDemo) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          title: Row(
-            children: [
-              const Icon(Icons.science_rounded, color: Color(0xFFF97316)),
-              const SizedBox(width: 12),
-              Text(
-                'partner.demo_welcome_title'.tr(),
-                style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          content: Text(
-            'partner.demo_welcome_msg'.tr(),
-            style: GoogleFonts.outfit(),
-          ),
-          actions: [
-            FilledButton(
-              onPressed: () => Navigator.pop(context),
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFFF97316),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: Text('common.confirm'.tr()),
-            ),
-          ],
-        ),
-      );
-    }
   }
 
   @override
@@ -113,14 +37,14 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
     final fmt = DateFormat('HH:mm');
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.bgLight,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
             expandedHeight: 140,
             floating: true,
             pinned: true,
-            backgroundColor: const Color(0xFFF97316),
+            backgroundColor: AppColors.brandOrange,
             flexibleSpace: FlexibleSpaceBar(
               title: Text(
                 'nav.partner'.tr(),
@@ -132,7 +56,7 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
               background: Container(
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Color(0xFFF97316), Color(0xFFEA580C)],
+                    colors: [AppColors.brandOrange, AppColors.brandOrangeDark],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -160,8 +84,18 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
           ),
 
           bookingsAsync.when(
-            loading: () =>
-                const SliverToBoxAdapter(child: LinearProgressIndicator()),
+            loading: () => const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Expanded(child: Skeleton(height: 100, borderRadius: 20)),
+                    SizedBox(width: 12),
+                    Expanded(child: Skeleton(height: 100, borderRadius: 20)),
+                  ],
+                ),
+              ),
+            ),
             error: (e, _) => const SliverToBoxAdapter(child: SizedBox()),
             data: (list) {
               final activeBags = list
@@ -180,14 +114,14 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
                         'partner.active_bags'.tr(),
                         '$activeBags',
                         Icons.luggage_rounded,
-                        const Color(0xFFF97316),
+                        AppColors.brandOrange,
                       ),
                       const SizedBox(width: 12),
                       _buildSummaryCard(
                         'partner.total_earnings'.tr(),
                         '₺${earnings.toStringAsFixed(0)}',
                         Icons.payments_rounded,
-                        const Color(0xFF10B981),
+                        AppColors.success,
                       ),
                     ],
                   ),
@@ -208,7 +142,7 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
                     style: GoogleFonts.outfit(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: const Color(0xFF0F172A),
+                      color: AppColors.textDark,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -218,8 +152,17 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
           ),
 
           bookingsAsync.when(
-            loading: () => const SliverFillRemaining(
-              child: Center(child: CircularProgressIndicator()),
+            loading: () => SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) => const Padding(
+                    padding: EdgeInsets.only(bottom: 12),
+                    child: Skeleton(height: 80, borderRadius: 16),
+                  ),
+                  childCount: 5,
+                ),
+              ),
             ),
             error: (e, _) => SliverFillRemaining(
               child: Center(child: Text('common.error'.tr())),
@@ -323,7 +266,7 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
               style: GoogleFonts.outfit(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: const Color(0xFF0F172A),
+                color: AppColors.textDark,
               ),
               textAlign: TextAlign.center,
             ),
@@ -347,7 +290,7 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
             FilledButton(
               onPressed: () => Navigator.pop(context),
               style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFFF97316),
+                backgroundColor: AppColors.brandOrange,
                 minimumSize: const Size(double.infinity, 56),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -373,10 +316,10 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFFF97316).withValues(alpha: 0.1),
+              color: AppColors.brandOrange.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Icon(icon, color: const Color(0xFFF97316), size: 24),
+            child: Icon(icon, color: AppColors.brandOrange, size: 24),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -388,7 +331,7 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
                   style: GoogleFonts.outfit(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xFF0F172A),
+                    color: AppColors.textDark,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -417,7 +360,7 @@ class _BookingPartnerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = _getStatusColor(booking.status);
+    final statusColor = bookingStatusColor(booking.status);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -444,7 +387,7 @@ class _BookingPartnerCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF97316).withValues(alpha: 0.1),
+                  color: AppColors.brandOrange.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Center(
@@ -452,7 +395,7 @@ class _BookingPartnerCard extends StatelessWidget {
                     '${booking.totalBags}',
                     style: GoogleFonts.outfit(
                       fontWeight: FontWeight.bold,
-                      color: const Color(0xFFF97316),
+                      color: AppColors.brandOrange,
                     ),
                   ),
                 ),
@@ -495,7 +438,7 @@ class _BookingPartnerCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      _getStatusText(booking.status),
+                      bookingStatusLabel(booking.status),
                       style: GoogleFonts.outfit(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
@@ -518,51 +461,5 @@ class _BookingPartnerCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Color _getStatusColor(BookingStatus status) {
-    switch (status) {
-      case BookingStatus.paid:
-      case BookingStatus.approved:
-        return Colors.green;
-      case BookingStatus.checkedIn:
-        return Colors.blue;
-      case BookingStatus.cancelled:
-        return Colors.redAccent;
-      case BookingStatus.checkedOut:
-        return Colors.grey;
-      case BookingStatus.waitingApproval:
-        return Colors.orange;
-      default:
-        return Colors.orange;
-    }
-  }
-
-  String _getStatusText(BookingStatus status) {
-    String key = 'waiting_approval';
-    switch (status) {
-      case BookingStatus.pending:
-        key = 'pending';
-        break;
-      case BookingStatus.paid:
-        key = 'paid';
-        break;
-      case BookingStatus.approved:
-        key = 'approved';
-        break;
-      case BookingStatus.checkedIn:
-        key = 'checked_in';
-        break;
-      case BookingStatus.checkedOut:
-        key = 'checked_out';
-        break;
-      case BookingStatus.cancelled:
-        key = 'cancelled';
-        break;
-      case BookingStatus.waitingApproval:
-        key = 'waiting_approval';
-        break;
-    }
-    return 'booking.status.$key'.tr();
   }
 }

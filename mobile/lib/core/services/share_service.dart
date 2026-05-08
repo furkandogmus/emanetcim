@@ -1,6 +1,6 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:easy_localization/easy_localization.dart';
 
 final shareServiceProvider = Provider((ref) => ShareService());
 

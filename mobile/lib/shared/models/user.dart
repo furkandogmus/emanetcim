@@ -4,11 +4,11 @@ part 'user.freezed.dart';
 part 'user.g.dart';
 
 enum UserRole {
-  @JsonValue("GUEST")
+  @JsonValue('GUEST')
   guest,
-  @JsonValue("PARTNER")
+  @JsonValue('PARTNER')
   partner,
-  @JsonValue("ADMIN")
+  @JsonValue('ADMIN')
   admin,
 }
 
@@ -16,10 +16,10 @@ enum UserRole {
 abstract class UserDto with _$UserDto {
   const factory UserDto({
     required String id,
+    required UserRole role,
     String? email,
     String? name,
     String? phone,
-    required UserRole role,
     String? avatarUrl,
     String? referralCode,
   }) = _UserDto;

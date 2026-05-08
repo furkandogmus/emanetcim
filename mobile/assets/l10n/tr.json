@@ -1,5 +1,6 @@
 {
   "nav": {
+    "home": "Ana Sayfa",
     "search": "Ara",
     "bookings": "Rezervasyonlarım",
     "partner": "İşlem Paneli",
@@ -58,8 +59,6 @@
     "or": "veya",
     "google": "Google ile devam et",
     "apple": "Apple ile devam et",
-    "demo_guest": "Misafir Demo Modu",
-    "demo_partner": "Esnaf Paneli Demosu",
     "register_welcome": "Aramıza Hoş Geldin! 👋",
     "register_hint": "Valizlerini güvenle emanet etmek için hemen hesabını oluştur.",
     "name_label": "Ad Soyad",
@@ -69,7 +68,11 @@
     "terms_text": "Kayıt olarak {} ve {} kabul etmiş sayılırsınız.",
     "terms_service": "Kullanım Koşulları'nı",
     "privacy_policy": "Gizlilik Politikası'nı",
-    "register_button": "Kayıt Ol ve Kod Gönder"
+    "register_button": "Kayıt Ol ve Kod Gönder",
+    "enter_code": "Kodunuzu Girin",
+    "resend_code": "Kodu tekrar gönder",
+    "resend_wait": "Tekrar gönder ({}s)",
+    "identity_hint": "Örn: 05xx xxx xx xx veya e-posta"
   },
   "shop": {
     "error_loading": "Dükkan yüklenirken bir hata oluştu",
@@ -125,7 +128,11 @@
     "approve_shops": "Dükkan Onayları",
     "system_status": "Sistem Durumu",
     "active": "Aktif",
-    "live_analytics": "Canlı Analitik"
+    "live_analytics": "Canlı Analitik",
+    "new_shop_apps": "{} yeni dükkan başvurusu",
+    "all_systems_active": "Tüm sistemler aktif",
+    "support_messages": "Destek Mesajları",
+    "unread_messages": "{} okunmamış mesaj"
   },
   "checkout": {
     "title": "Rezervasyon Tamamla",
@@ -166,7 +173,10 @@
       "checked_in": "Emanet Alındı",
       "checked_out": "Teslim Edildi",
       "cancelled": "İptal Edildi"
-    }
+    },
+    "no_bookings": "Henüz rezervasyonun yok",
+    "no_bookings_desc": "Seyahatine başlamak için bir dükkan bul!",
+    "start_exploring": "Keşfetmeye Başla"
   },
   "partner": {
     "dashboard": "Dükkan Paneli",
@@ -184,8 +194,7 @@
     "seal_info": "Mühür Bilgisi",
     "scan_hint": "Misafirin QR kodunu veya mühür barkodunu bu alana hizalayın",
     "offline_saved": "İnternet bağlantısı yok. İşlem kaydedildi ve bağlantı geldiğinde otomatik gönderilecek.",
-    "demo_welcome_title": "Esnaf Paneli Demosu",
-    "demo_welcome_msg": "Hoş geldiniz! Şu an demo modundasınız. Burada misafirlerin QR kodlarını taratabilir, valiz teslim alıp (Check-in) teslim edebilir (Check-out) ve dükkanınızın kazancını takip edebilirsiniz. Tüm özellikler denemeniz için açık!",
+    "no_bookings": "Henüz rezervasyon bulunmuyor",
     "no_bookings": "Henüz rezervasyon bulunmuyor",
     "earnings": "Kazançlarım",
     "settings": "Dükkan Ayarları",
@@ -227,7 +236,13 @@
     "copied": "Kopyalandı!",
     "notifications_empty": "Tüm bildirimleriniz ve kampanya duyuruları burada listelenir. Şu an için aktif bir bildiriminiz bulunmuyor.",
     "version": "Versiyon {}",
-    "logout_confirm": "Hesabınızdan çıkış yapmak istediğinize emin misiniz?"
+    "default_name": "Kullanıcı",
+    "stats_bookings": "Rezervasyon",
+    "stats_savings": "Tasarruf",
+    "stats_favorites": "Favori",
+    "logout_confirm": "Hesabınızdan çıkış yapmak istediğinize emin misiniz?",
+    "privacy_content": "BagajPark olarak gizliliğinize önem veriyoruz. Bu metin, verilerinizin nasıl toplandığını ve kullanıldığını açıklar.\n\n1. Toplanan Veriler\nHizmetimizi sunabilmek için adınız, e-posta adresiniz, telefon numaranız ve konum bilginiz gibi temel bilgileri topluyoruz.\n\n2. Verilerin Kullanımı\nVerileriniz sadece rezervasyon işlemlerini gerçekleştirmek, güvenliği sağlamak ve size bildirim göndermek amacıyla kullanılır.\n\n3. Üçüncü Taraflar\nVerileriniz yasal zorunluluklar dışında üçüncü taraflarla paylaşılmaz. Ödeme işlemleri güvenli aracı kurumlar üzerinden yürütülür.",
+    "terms_content": "BagajPark Kullanım Koşulları\n\n1. Hizmet Tanımı\nBagajPark, eşyalarınızı güvenli noktalarda (esnaflarda) geçici olarak saklamanıza olanak sağlayan bir platformdur.\n\n2. Sorumluluklar\n- Esnaf, kendisine teslim edilen eşyayı güvenli bir şekilde saklamakla yükümlüdür.\n- Kullanıcı, yasaklı madde (yanıcı, patlayıcı, yasa dışı vb.) teslim etmemeyi taahhüt eder.\n\n3. İptal ve İade\nRezervasyon saatinden önce yapılan iptallerde tam iade yapılır. Süre başladıktan sonra iade yapılmaz."
   },
   "home": {
     "greeting": "Merhaba, {} 👋",
@@ -236,12 +251,22 @@
     "hero_subtitle": "Şehri özgürce gezmeniz için en yakın dükkanı bulun.",
     "hero_cta": "Emanet Noktası Bul",
     "how_it_works": "Nasıl Çalışır?",
-    "step_1_title": "Dükkan Bul",
-    "step_1_desc": "Size en yakın güvenilir noktayı haritadan seçin.",
-    "step_2_title": "Bırak ve Mühürle",
-    "step_2_desc": "Valizinizi teslim edin, QR kodu okutun ve mührü takın.",
-    "step_3_title": "Şehri Keşfet",
-    "step_3_desc": "Ellerin serbest, BagajPark güvencesiyle gezmeye başla.",
+    "step1": {
+      "title": "Dükkan Bul",
+      "desc": "Size en yakın güvenilir noktayı haritadan seçin."
+    },
+    "step2": {
+      "title": "Bırak ve Mühürle",
+      "desc": "Valizinizi teslim edin, QR kodu okutun ve mührü takın."
+    },
+    "step3": {
+      "title": "Şehri Keşfet",
+      "desc": "Ellerin serbest, BagajPark güvencesiyle gezmeye başla."
+    },
+    "step4": {
+      "title": "Güvenle Teslim Al",
+      "desc": "İstediğin zaman geri gel ve valizini mühürlü şekilde teslim al."
+    },
     "safety_title": "Her Valiz Sigortalı",
     "safety_desc": "BagajPark ile yaptığın her rezervasyon ₺10.000'ye kadar koruma altındadır.",
     "popular_cities": "Popüler Şehirler",
@@ -255,9 +280,11 @@
     "retry": "Tekrar Dene",
     "success": "Başarılı",
     "save": "Kaydet",
+    "see_details": "Detayları Gör",
     "back": "Geri",
     "next": "İleri",
     "done": "Bitti",
+    "try_again": "Tekrar Dene",
     "no_internet": "Bağlantı Yok - Bazı işlemler gecikebilir"
   },
   "tutorial": {

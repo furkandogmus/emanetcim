@@ -1,34 +1,32 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../shared/models/user.dart';
 import '../api/api_client.dart';
 import '../push/push_service.dart';
-import '../../shared/models/user.dart';
 import 'token_store.dart';
 
 class AuthState {
   final UserDto? session;
   final bool loading;
-  final bool isDemo;
   final bool onboardingDone;
   const AuthState({
     this.session,
     this.loading = false,
-    this.isDemo = false,
     this.onboardingDone = false,
   });
 
   AuthState copyWith({
     UserDto? session,
     bool? loading,
-    bool? isDemo,
     bool? onboardingDone,
     bool clearSession = false,
   }) => AuthState(
     session: clearSession ? null : (session ?? this.session),
     loading: loading ?? this.loading,
-    isDemo: isDemo ?? this.isDemo,
     onboardingDone: onboardingDone ?? this.onboardingDone,
   );
 }
@@ -49,6 +47,12 @@ class AuthController extends Notifier<AuthState> {
     final onboardingDone = prefs.getBool('onboarding_done') ?? false;
     state = state.copyWith(onboardingDone: onboardingDone);
 
+    try {
+      await GoogleSignIn.instance.initialize();
+    } catch (e) {
+      debugPrint('GoogleSignIn initialization failed: $e');
+    }
+
     final store = ref.read(tokenStoreProvider);
     final token = await store.readAccessToken();
     if (token == null) return;
@@ -61,7 +65,10 @@ class AuthController extends Notifier<AuthState> {
       // Push init on bootstrap
       try {
         await ref.read(pushServiceProvider).init();
-      } catch (_) {}
+      } catch (e, st) {
+        debugPrint('Failed to init push service on bootstrap: $e\n$st');
+        // TODO: Log to Crashlytics / Sentry
+      }
     } on DioException {
       await store.clear();
     }
@@ -98,6 +105,21 @@ class AuthController extends Notifier<AuthState> {
     await _completeSession(res.data as Map<String, dynamic>);
   }
 
+  Future<void> loginWithPassword(String identity, String password) async {
+    state = state.copyWith(loading: true);
+    final dio = ref.read(dioProvider);
+    final isEmail = identity.contains('@');
+    final data = isEmail
+        ? {'email': identity, 'password': password}
+        : {
+            'phone': identity.replaceAll(RegExp(r'\D'), ''),
+            'password': password,
+          };
+
+    final res = await dio.post('/auth/session', data: data);
+    await _completeSession(res.data as Map<String, dynamic>);
+  }
+
   Future<void> _completeSession(Map<String, dynamic> data) async {
     await ref
         .read(tokenStoreProvider)
@@ -110,39 +132,37 @@ class AuthController extends Notifier<AuthState> {
     // Push kayıt: login sonrası FCM token backend'e gönder
     try {
       await ref.read(pushServiceProvider).init();
-    } catch (_) {}
+    } catch (e, st) {
+      debugPrint('Failed to init push service after login: $e\n$st');
+      // TODO: Log to Crashlytics / Sentry
+    }
   }
 
   Future<void> signInWithGoogle() async {
-    throw UnsupportedError('Google login macOS üzerinde şu an devre dışı.');
+    state = state.copyWith(loading: true);
+    try {
+      final account = await GoogleSignIn.instance.authenticate(
+        scopeHint: ['email', 'profile'],
+      );
+
+      final auth = account.authentication;
+      final idToken = auth.idToken;
+
+      if (idToken == null) {
+        throw Exception('Google login failed: No ID Token');
+      }
+
+      final dio = ref.read(dioProvider);
+      final res = await dio.post('/auth/google', data: {'idToken': idToken});
+      await _completeSession(res.data as Map<String, dynamic>);
+    } catch (e) {
+      state = state.copyWith(loading: false);
+      rethrow;
+    }
   }
 
   Future<void> signInWithApple() async {
     throw UnsupportedError('Apple login macOS üzerinde şu an devre dışı.');
-  }
-
-  Future<void> skipLogin() async {
-    state = state.copyWith(
-      isDemo: true,
-      session: const UserDto(
-        id: 'demo-user',
-        email: 'demo@bagajpark.com',
-        name: 'Demo Kullanıcı',
-        role: UserRole.guest,
-      ),
-    );
-  }
-
-  Future<void> skipLoginAsPartner() async {
-    state = state.copyWith(
-      isDemo: true,
-      session: const UserDto(
-        id: 'demo-partner',
-        email: 'esnaf@bagajpark.com',
-        name: 'Galata Esnafı',
-        role: UserRole.partner,
-      ),
-    );
   }
 
   Future<void> logout() async {

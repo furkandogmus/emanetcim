@@ -1,7 +1,7 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:bagajpark/shared/models/user.dart';
 import 'package:bagajpark/shared/models/booking.dart';
 import 'package:bagajpark/shared/models/seal.dart';
+import 'package:bagajpark/shared/models/user.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Model Serialization Tests', () {

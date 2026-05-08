@@ -1,9 +1,11 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import '../../core/auth/auth_controller.dart';
+import '../../shared/utils/app_colors.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -22,28 +24,28 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       desc: 'onboarding.step1.desc',
       image:
           'https://images.unsplash.com/photo-1542051841857-5f90071e7989?q=80&w=800&auto=format&fit=crop',
-      color: const Color(0xFFF97316),
+      color: AppColors.brandOrange,
     ),
     OnboardingData(
       title: 'onboarding.step2.title',
       desc: 'onboarding.step2.desc',
       image:
           'https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=800&auto=format&fit=crop',
-      color: const Color(0xFF3B82F6),
+      color: AppColors.info,
     ),
     OnboardingData(
       title: 'onboarding.step3.title',
       desc: 'onboarding.step3.desc',
       image:
           'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?q=80&w=800&auto=format&fit=crop',
-      color: const Color(0xFF10B981),
+      color: AppColors.success,
     ),
     OnboardingData(
       title: 'onboarding.step4.title',
       desc: 'onboarding.step4.desc',
       image:
           'https://images.unsplash.com/photo-1551524164-687a5591103e?q=80&w=800&auto=format&fit=crop',
-      color: const Color(0xFF8B5CF6),
+      color: AppColors.brandOrangeDark,
     ),
   ];
 
@@ -63,7 +65,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             onPageChanged: (idx) => setState(() => _currentPage = idx),
             itemBuilder: (context, idx) {
               final p = _pages[idx];
-              return Container(
+              return DecoratedBox(
                 decoration: BoxDecoration(
                   image: DecorationImage(
                     image: NetworkImage(p.image),
@@ -127,7 +129,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       width: _currentPage == idx ? 24 : 6,
                       decoration: BoxDecoration(
                         color: _currentPage == idx
-                            ? const Color(0xFFF97316)
+                            ? AppColors.brandOrange
                             : Colors.white24,
                         borderRadius: BorderRadius.circular(3),
                       ),
@@ -138,7 +140,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   ElevatedButton(
                     onPressed: _completeOnboarding,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFF97316),
+                      backgroundColor: AppColors.brandOrange,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 32,

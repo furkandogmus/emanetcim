@@ -26,7 +26,6 @@ class ReviewService {
   Future<void> openStore() async {
     await _inAppReview.openStoreListing(
       appStoreId: '6470000000', // Replace with real Apple App Store ID later
-      microsoftStoreId: null,
     );
   }
 }

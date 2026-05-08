@@ -1,17 +1,19 @@
-import 'package:easy_localization/easy_localization.dart';
+import 'dart:async' show unawaited;
 import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
+import '../../core/repositories/shop_repository.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/services/review_service.dart';
-import '../search/shop_detail_screen.dart';
+import '../../shared/utils/app_colors.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
-  const CheckoutScreen({super.key, required this.shopId});
+  const CheckoutScreen({required this.shopId, super.key});
   final String shopId;
   @override
   ConsumerState<CheckoutScreen> createState() => _CheckoutScreenState();
@@ -29,7 +31,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   int get _total => _s + _m + _xl;
 
   Future<void> _pickDate(bool isCheckIn) async {
-    ref.read(hapticServiceProvider).selection();
+    unawaited(ref.read(hapticServiceProvider).selection());
     final init = isCheckIn ? _checkIn : _checkOut;
     final d = await showDatePicker(
       context: context,
@@ -70,7 +72,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   Future<void> _pay() async {
     if (_total == 0) return;
-    ref.read(hapticServiceProvider).medium();
+    unawaited(ref.read(hapticServiceProvider).medium());
     setState(() => _busy = true);
     try {
       final dio = ref.read(dioProvider);
@@ -90,12 +92,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
       // Stripe kaldırıldığı için direkt onay sayfasına yönlendiriyoruz.
       if (!mounted) return;
-      ref.read(hapticServiceProvider).success();
-      ref.read(reviewServiceProvider).requestReview();
+      unawaited(ref.read(hapticServiceProvider).success());
+      unawaited(ref.read(reviewServiceProvider).requestReview());
       context.go('/booking/$bookingId');
     } catch (e) {
       if (!mounted) return;
-      String msg = 'common.error'.tr();
+      var msg = 'common.error'.tr();
       if (e is DioException) {
         final errCode = e.response?.data['error'];
         if (errCode == 'no_bags') msg = 'checkout.error_no_bags'.tr();
@@ -246,11 +248,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 return Container(
                   padding: const EdgeInsets.all(28),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0F172A),
+                    color: AppColors.textDark,
                     borderRadius: BorderRadius.circular(32),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF0F172A).withValues(alpha: 0.2),
+                        color: AppColors.textDark.withValues(alpha: 0.2),
                         blurRadius: 30,
                         offset: const Offset(0, 10),
                       ),
@@ -308,15 +310,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(
-                                0xFFF97316,
-                              ).withValues(alpha: 0.1),
+                              color: AppColors.brandOrange.withValues(
+                                alpha: 0.1,
+                              ),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(
                               'BAGAJPARK',
                               style: GoogleFonts.outfit(
-                                color: const Color(0xFFF97316),
+                                color: AppColors.brandOrange,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 10,
                                 letterSpacing: 1,
@@ -329,7 +331,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       FilledButton(
                         onPressed: _busy || _total == 0 ? null : _pay,
                         style: FilledButton.styleFrom(
-                          backgroundColor: const Color(0xFFF97316),
+                          backgroundColor: AppColors.brandOrange,
                           foregroundColor: Colors.white,
                           minimumSize: const Size(double.infinity, 64),
                           shape: RoundedRectangleBorder(
@@ -431,7 +433,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   style: GoogleFonts.outfit(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xFF0F172A),
+                    color: AppColors.textDark,
                   ),
                 ),
               ],
@@ -463,7 +465,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: value > 0
-              ? const Color(0xFFF97316).withValues(alpha: 0.3)
+              ? AppColors.brandOrange.withValues(alpha: 0.3)
               : Colors.grey.shade100,
         ),
       ),
@@ -471,7 +473,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         children: [
           Icon(
             icon,
-            color: value > 0 ? const Color(0xFFF97316) : Colors.grey.shade400,
+            color: value > 0 ? AppColors.brandOrange : Colors.grey.shade400,
             size: 28,
           ),
           const SizedBox(width: 16),
@@ -483,7 +485,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   label,
                   style: GoogleFonts.outfit(
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xFF0F172A),
+                    color: AppColors.textDark,
                   ),
                 ),
                 Text(
@@ -524,7 +526,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   Widget _counterBtn(IconData icon, VoidCallback onTap) {
     return InkWell(
       onTap: () {
-        ref.read(hapticServiceProvider).selection();
+        unawaited(ref.read(hapticServiceProvider).selection());
         onTap();
       },
       child: Container(
@@ -533,7 +535,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           color: Colors.grey.shade100,
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, size: 18, color: const Color(0xFF0F172A)),
+        child: Icon(icon, size: 18, color: AppColors.textDark),
       ),
     );
   }

@@ -79,9 +79,7 @@ export type CheckInSealPayload = {
 
 export interface IBookingService {
   checkIn(
-    bookingId: string,
-    sealPhotoUrl: string | null,
-    sealPayload?: CheckInSealPayload
+    bookingId: string
   ): Promise<PartnerCheckInResult>;
   checkOut(bookingId: string): Promise<PartnerCheckOutResult>;
   getBookingByToken(token: string): Promise<BookingWithGuestShop | null>;
@@ -240,9 +238,7 @@ export class BookingService implements IBookingService {
    * En az bir valiz varsa mühür atamaları zorunludur (platform stokundan ASSIGNED mühürler).
    */
   async checkIn(
-    bookingId: string,
-    sealPhotoUrl: string | null,
-    sealPayload?: CheckInSealPayload
+    bookingId: string
   ): Promise<PartnerCheckInResult> {
     try {
       const existing = await prisma.booking.findUnique({
@@ -279,38 +275,7 @@ export class BookingService implements IBookingService {
         };
       }
 
-      const bags = totalBagCount(
-        existing.bagCountS,
-        existing.bagCountM,
-        existing.bagCountXl
-      );
-
-      if (bags > 0) {
-        if (
-          !sealPayload?.sealAssignments?.length ||
-          sealPayload.sealAssignments.length !== bags
-        ) {
-          return {
-            ok: false,
-            code: 'SEAL_COUNT_MISMATCH',
-            message:
-              'Her valiz için kayıtlı bir mühür numarası gerekir. Atamaları kontrol edin.',
-          };
-        }
-      }
-
       await prisma.$transaction(async (tx) => {
-        const finalAssignments = sealPayload?.sealAssignments ?? [];
-
-        if (bags > 0) {
-          await sealService.applyCheckInWithinTx(tx, {
-            shopId: existing.shopId,
-            bookingId,
-            assignments: finalAssignments,
-            faultySealNumbers: sealPayload?.faultySealNumbers ?? [],
-            sealPhotoUrl,
-          });
-        }
         const updateResult = await tx.booking.updateMany({
           where: { 
             id: bookingId,
@@ -318,7 +283,6 @@ export class BookingService implements IBookingService {
           },
           data: {
             status: 'CHECKED_IN',
-            ...(sealPhotoUrl != null ? { sealPhotoUrl } : {}),
             bookingRowVersion: { increment: 1 },
             updatedAt: new Date(),
           },

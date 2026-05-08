@@ -1,3 +1,4 @@
+import 'dart:async' show unawaited;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,7 +7,8 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-import '../../core/api/api_client.dart';
+import '../../core/repositories/seal_repository.dart';
+import '../../shared/utils/app_colors.dart';
 
 class PartnerScanScreen extends ConsumerStatefulWidget {
   const PartnerScanScreen({super.key});
@@ -23,25 +25,31 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
     if (code == null) return;
 
     _handled = true;
-    HapticFeedback.mediumImpact();
+    unawaited(HapticFeedback.mediumImpact());
 
     try {
-      final dio = ref.read(dioProvider);
-      final res = await dio.post('/seals/scan', data: {'code': code});
+      final repo = ref.read(sealRepositoryProvider);
+      final result = await repo.scan(code);
       if (!mounted) return;
 
-      final data = res.data as Map<String, dynamic>;
-      if (data['type'] == 'booking') {
-        context.push('/partner/booking/${data['id']}');
-      } else if (data['type'] == 'seal') {
-        _showSealInfo(data);
-      }
+      result.when(
+        onSuccess: (data) {
+          if (data['type'] == 'booking') {
+            context.push('/partner/booking/${data['id']}');
+          } else if (data['type'] == 'seal') {
+            _showSealInfo(data);
+          }
+        },
+        onFailure: (msg) {
+          unawaited(HapticFeedback.vibrate());
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('${'common.error'.tr()}: $msg')),
+          );
+          _handled = false;
+        },
+      );
     } catch (e) {
       if (!mounted) return;
-      HapticFeedback.vibrate();
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('${'common.error'.tr()}: $e')));
       _handled = false;
     }
   }
@@ -71,7 +79,7 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
               'common.confirm'.tr(),
               style: GoogleFonts.outfit(
                 fontWeight: FontWeight.bold,
-                color: const Color(0xFFF97316),
+                color: AppColors.brandOrange,
               ),
             ),
           ),
@@ -100,7 +108,7 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
           // Custom Overlay using CustomPaint instead of ShapeBorder
           CustomPaint(
             painter: ScannerOverlayPainter(
-              borderColor: const Color(0xFFF97316),
+              borderColor: AppColors.brandOrange,
               borderRadius: 20,
               borderLength: 30,
               borderWidth: 8,

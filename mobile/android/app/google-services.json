@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "804340540166",
+    "project_id": "bagajpark-android",
+    "storage_bucket": "bagajpark-android.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:804340540166:android:d58663dea5c32d3bcf7487",
+        "android_client_info": {
+          "package_name": "com.bagajpark.bagajpark"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAlziYKlQ3BVCDwgJuTqsTkwNKSjzweFiM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

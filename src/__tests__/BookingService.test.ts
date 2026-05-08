@@ -95,29 +95,10 @@ describe("BookingService Deep Logic", () => {
         shop: { id: "s1", openingTime: "09:00", closingTime: "18:00" },
       } as any);
 
-      const result = await service.checkIn("b1", "photo.jpg", { sealAssignments: [], faultySealNumbers: [] });
+      const result = await service.checkIn("b1");
       
       expect(result.ok).toBe(false);
       expect((result as any).code).toBe("SHOP_CLOSED");
-    });
-
-    it("should fail if seal count mismatch", async () => {
-      mockPrisma.booking.findUnique.mockResolvedValue({
-        id: "b1",
-        status: "PAID",
-        bagCountS: 2, // 2 bags
-        bagCountM: 0,
-        bagCountXl: 0,
-        shop: { id: "s1" },
-      } as any);
-
-      const result = await service.checkIn("b1", "photo.jpg", { 
-        sealAssignments: [{ sealNumber: 1, bagIndex: 0, bagSize: "S" }], // Only 1 seal
-        faultySealNumbers: [] 
-      });
-
-      expect(result.ok).toBe(false);
-      expect((result as any).code).toBe("SEAL_COUNT_MISMATCH");
     });
 
     it("should succeed and update status to CHECKED_IN", async () => {
@@ -131,10 +112,7 @@ describe("BookingService Deep Logic", () => {
         shop: { id: "s1" },
       } as any);
 
-      const result = await service.checkIn("b1", "photo.jpg", { 
-        sealAssignments: [{ sealNumber: 1, bagIndex: 0, bagSize: "S" }],
-        faultySealNumbers: [] 
-      });
+      const result = await service.checkIn("b1");
 
       expect(result.ok).toBe(true);
       expect(mockTx.booking.updateMany).toHaveBeenCalledWith(expect.objectContaining({

@@ -6,7 +6,6 @@ import { notificationService } from "@/services/NotificationService";
 import prisma from "@/lib/db";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { verifyQrToken } from "@/lib/qr-token";
-import type { SealAssignmentInput } from "@/services/SealService";
 import { normalizeTrGsm10 } from "@/lib/netgsm";
 import { getLocale } from "next-intl/server";
 import { sealService } from "@/services/SealService";
@@ -125,12 +124,7 @@ export async function getPartnerBookingSealsAction(bookingIdRaw: string) {
  * checkInAction - QR JWT veya ham token / booking id ile check-in.
  */
 export async function checkInAction(
-  qrTokenOrBookingId: string,
-  sealPhotoUrl: string | null,
-  sealPayload: {
-    sealAssignments: SealAssignmentInput[];
-    faultySealNumbers: number[];
-  }
+  qrTokenOrBookingId: string
 ) {
   const session = await auth();
 
@@ -163,9 +157,7 @@ export async function checkInAction(
   }
 
   const result = await bookingService.checkIn(
-    bookingId,
-    sealPhotoUrl,
-    sealPayload
+    bookingId
   );
 
   if (result.ok) {

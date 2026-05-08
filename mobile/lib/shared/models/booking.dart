@@ -4,28 +4,28 @@ part 'booking.freezed.dart';
 part 'booking.g.dart';
 
 enum BookingStatus {
-  @JsonValue("WAITING_APPROVAL")
+  @JsonValue('WAITING_APPROVAL')
   waitingApproval,
-  @JsonValue("APPROVED")
+  @JsonValue('APPROVED')
   approved,
-  @JsonValue("PENDING")
+  @JsonValue('PENDING')
   pending,
-  @JsonValue("PAID")
+  @JsonValue('PAID')
   paid,
-  @JsonValue("CHECKED_IN")
+  @JsonValue('CHECKED_IN')
   checkedIn,
-  @JsonValue("CHECKED_OUT")
+  @JsonValue('CHECKED_OUT')
   checkedOut,
-  @JsonValue("CANCELLED")
+  @JsonValue('CANCELLED')
   cancelled,
 }
 
 enum PaymentStatus {
-  @JsonValue("SUCCESS")
+  @JsonValue('SUCCESS')
   success,
-  @JsonValue("REFUNDED")
+  @JsonValue('REFUNDED')
   refunded,
-  @JsonValue("FAILED")
+  @JsonValue('FAILED')
   failed,
 }
 

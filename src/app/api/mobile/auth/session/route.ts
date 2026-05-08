@@ -7,7 +7,16 @@ import { normalizeTrGsm10 } from "@/lib/netgsm";
 const schema = z.union([
   z.object({ email: z.string().email(), code: z.string().length(6) }),
   z.object({ phone: z.string().min(10), code: z.string().length(6) }),
+  z.object({ email: z.string().email(), password: z.string().min(1) }),
+  z.object({ phone: z.string().min(10), password: z.string().min(1) }),
 ]);
+
+type AuthRequestBody = {
+  email?: string;
+  phone?: string;
+  code?: string;
+  password?: string;
+};
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
@@ -16,44 +25,67 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "invalid_input" }, { status: 400 });
   }
 
-  const data = parsed.data;
+  const data = parsed.data as AuthRequestBody;
   const isEmail = "email" in data;
   const rawIdentity = isEmail ? data.email : data.phone;
-  const normalizedIdentity = isEmail ? rawIdentity.toLowerCase() : normalizeTrGsm10(rawIdentity);
+  const normalizedIdentity = isEmail ? rawIdentity!.toLowerCase() : normalizeTrGsm10(rawIdentity!);
 
   if (!normalizedIdentity) {
     return NextResponse.json({ error: "invalid_format" }, { status: 400 });
   }
 
-  const { code } = data;
+  const { code, password } = data;
   const identifier = `mobile:${normalizedIdentity}`;
 
-  const token = await prisma.verificationToken.findUnique({
-    where: { identifier_token: { identifier, token: code } },
-  });
+  let user;
 
-  if (!token || token.expires < new Date()) {
-    return NextResponse.json({ error: "invalid_code" }, { status: 401 });
-  }
-
-  await prisma.verificationToken.delete({
-    where: { identifier_token: { identifier, token: code } },
-  });
-
-  // Find or create user
-  let user = isEmail
-    ? await prisma.user.findUnique({ where: { email: normalizedIdentity } })
-    : await prisma.user.findUnique({ where: { phone: normalizedIdentity } });
-
-  if (!user) {
-    user = await prisma.user.create({
-      data: {
-        email: isEmail ? normalizedIdentity : null,
-        phone: !isEmail ? normalizedIdentity : null,
-        role: "GUEST",
-        name: isEmail ? normalizedIdentity.split("@")[0] : `User ${normalizedIdentity.slice(-4)}`,
-      },
+  if (code) {
+    const token = await prisma.verificationToken.findUnique({
+      where: { identifier_token: { identifier, token: code } },
     });
+
+    if (!token || token.expires < new Date()) {
+      return NextResponse.json({ error: "invalid_code" }, { status: 401 });
+    }
+
+    await prisma.verificationToken.delete({
+      where: { identifier_token: { identifier, token: code } },
+    });
+
+    user = isEmail
+      ? await prisma.user.findUnique({ where: { email: normalizedIdentity } })
+      : await prisma.user.findUnique({ where: { phone: normalizedIdentity } });
+
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          email: isEmail ? normalizedIdentity : null,
+          phone: !isEmail ? normalizedIdentity : null,
+          role: "GUEST",
+          name: isEmail ? normalizedIdentity.split("@")[0] : `User ${normalizedIdentity.slice(-4)}`,
+        },
+      });
+    }
+  } else if (password) {
+    console.log("[AuthSession] Password login attempt for:", normalizedIdentity);
+    user = isEmail
+      ? await prisma.user.findUnique({ where: { email: normalizedIdentity } })
+      : await prisma.user.findUnique({ where: { phone: normalizedIdentity } });
+
+    console.log("[AuthSession] User found:", user ? "yes" : "no", "hasPassword:", user?.passwordHash ? "yes" : "no");
+
+    if (!user || !user.passwordHash) {
+      return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
+    }
+
+    const { verifyPassword } = await import("@/lib/auth-password");
+    const isValid = await verifyPassword(password, user.passwordHash);
+    console.log("[AuthSession] Password valid:", isValid);
+    if (!isValid) {
+      return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
+    }
+  } else {
+    return NextResponse.json({ error: "invalid_input" }, { status: 400 });
   }
 
   const access = await signAccessToken(user.id, user.role);

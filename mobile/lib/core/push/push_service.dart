@@ -8,7 +8,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../api/api_client.dart';
 import '../config/env.dart';
 
-final pushServiceProvider = Provider<PushService>((ref) => PushService(ref));
+final pushServiceProvider = Provider<PushService>(PushService.new);
 
 class PushService {
   PushService(this.ref);
@@ -34,7 +34,7 @@ class PushService {
     );
 
     final fm = FirebaseMessaging.instance;
-    await fm.requestPermission(alert: true, badge: true, sound: true);
+    await fm.requestPermission();
 
     FirebaseMessaging.onMessage.listen(_onForeground);
     fm.onTokenRefresh.listen(_register);
