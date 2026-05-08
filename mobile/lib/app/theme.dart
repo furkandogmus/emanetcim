@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../shared/utils/app_colors.dart';
 
 const _brandOrange = Color(0xFFEA580C); // Web's main color (#ea580c)
 const _brandOrangeDark = Color(0xFFC2430A); // Web's brand-700 (#c2430a)
@@ -64,12 +65,12 @@ ThemeData buildLightTheme() {
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       hintStyle: GoogleFonts.outfit(
-        color: const Color(0xFF616161),
+        color: AppColors.placeholder,
         fontWeight: FontWeight.w400,
       ),
       prefixIconColor: _brandOrange,
       labelStyle: GoogleFonts.outfit(
-        color: const Color(0xFF616161),
+        color: AppColors.textSecondary,
         fontWeight: FontWeight.w500,
       ),
     ),
