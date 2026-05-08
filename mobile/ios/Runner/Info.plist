@@ -91,5 +91,16 @@
 	</array>
 	<key>FlutterDeepLinkingEnabled</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+		<string>fetch</string>
+	</array>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Mühür arızası bildirirken fotoğraf eklemek için galeri erişimine ihtiyaç duyuyoruz.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Rezervasyon onayını galerinize kaydedebilmemiz için izninize ihtiyacımız var.</string>
 </dict>
 </plist>
