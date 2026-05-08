@@ -1,19 +1,19 @@
 import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:dio/dio.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
-import '../../core/api/api_client.dart';
-import '../../core/config/env.dart';
+import '../../core/repositories/shop_repository.dart';
+import '../../core/services/analytics_service.dart';
+import '../../core/services/location_service.dart';
 import '../../shared/models/shop.dart';
+import '../../shared/utils/app_colors.dart';
+import 'widgets/search_map.dart';
+import 'widgets/shop_preview_card.dart';
 
 final geocodingDioProvider = Provider<Dio>((ref) {
   return Dio(
@@ -32,26 +32,18 @@ class DebouncedLocationNotifier extends Notifier<LatLng?> {
 
 final debouncedLocationProvider =
     NotifierProvider<DebouncedLocationNotifier, LatLng?>(
-        DebouncedLocationNotifier.new);
+      DebouncedLocationNotifier.new,
+    );
 
 final nearbyShopsProvider = FutureProvider<List<ShopDto>>((ref) async {
   final center = ref.watch(debouncedLocationProvider);
   if (center == null) return [];
 
   try {
-    final dio = ref.watch(dioProvider);
-    final res = await dio.get(
-      '/shops/nearby',
-      queryParameters: {
-        'lat': center.latitude,
-        'lng': center.longitude,
-        'r': 5000,
-      },
-    );
-    final list = res.data as List<dynamic>;
-    return list
-        .map((e) => ShopDto.fromJson(e as Map<String, dynamic>))
-        .toList();
+    final result = await ref
+        .watch(shopRepositoryProvider)
+        .getNearby(lat: center.latitude, lng: center.longitude);
+    return result.fold((data) => data, (error) => []);
   } catch (e) {
     return [];
   }
@@ -70,7 +62,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   int _selectedShopIndex = -1;
   List<dynamic> _suggestions = [];
-  bool _isSearching = false;
   bool _onlyOpenNow = false;
   bool _only247 = false;
   Timer? _debounce;
@@ -110,7 +101,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   setState(() => _onlyOpenNow = v);
                   setSheetState(() => _onlyOpenNow = v);
                 },
-                activeThumbColor: const Color(0xFFF97316),
+                activeThumbColor: AppColors.brandOrange,
               ),
               SwitchListTile(
                 title: Text(
@@ -126,7 +117,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   setState(() => _only247 = v);
                   setSheetState(() => _only247 = v);
                 },
-                activeThumbColor: const Color(0xFFF97316),
+                activeThumbColor: AppColors.brandOrange,
               ),
               const SizedBox(height: 24),
               FilledButton(
@@ -209,7 +200,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     setState(() {
       _center = newCenter;
       _suggestions = [];
-      _isSearching = false;
       _searchController.text = displayName;
     });
 
@@ -218,33 +208,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Future<void> _determinePosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('search.location_service_disabled'.tr())),
-        );
-      }
-      return;
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('search.location_denied'.tr())),
-          );
-        }
-        return;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
+    final pos = await ref.read(locationServiceProvider).getCurrentPosition();
+    if (pos == null) {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
@@ -253,176 +218,51 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       return;
     }
 
-    try {
-      final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-          timeLimit: Duration(seconds: 10),
-        ),
-      );
-      if (!mounted) return;
-      setState(() {
-        _center = LatLng(position.latitude, position.longitude);
-      });
-      _mapController.move(_center, 15);
-    } catch (e) {
-      debugPrint('Location error: $e');
-    }
-  }
-
-  Future<void> _searchAddress(String query) async {
-    if (query.isEmpty) return;
-    try {
-      final dio = ref.read(geocodingDioProvider);
-      final res = await dio.get(
-        'https://photon.komoot.io/api/',
-        queryParameters: {'q': query, 'limit': 1},
-        options: Options(
-          headers: {'User-Agent': 'BagajPark (contact@bagajpark.com)'},
-        ),
-      );
-      final features = res.data['features'] as List<dynamic>;
-      if (features.isNotEmpty) {
-        final first = features[0];
-        final coords = first['geometry']['coordinates'] as List<dynamic>;
-        final lat = coords[1] as double;
-        final lng = coords[0] as double;
-        final newCenter = LatLng(lat, lng);
-
-        setState(() {
-          _center = newCenter;
-          _isSearching = false;
-        });
-        _mapController.move(newCenter, 14);
-      }
-    } catch (e) {
-      debugPrint('Geocoding error: $e');
-    }
+    if (!mounted) return;
+    final newCenter = LatLng(pos.latitude, pos.longitude);
+    setState(() => _center = newCenter);
+    _mapController.move(newCenter, 15);
+    ref.read(debouncedLocationProvider.notifier).updateLocation(newCenter);
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.read(analyticsServiceProvider).logScreenView('Search');
+
     final shopsAsync = ref.watch(nearbyShopsProvider);
 
     return Scaffold(
       body: Stack(
         children: [
-          RepaintBoundary(
-            child: FlutterMap(
-              mapController: _mapController,
-              options: MapOptions(
-                initialCenter: _center,
-                initialZoom: 13,
-                onPositionChanged: (pos, hasGesture) {
-                  if (hasGesture) {
-                    final posCenter = pos.center;
-                    if ((posCenter.latitude - _center.latitude).abs() >
-                            0.002 ||
-                        (posCenter.longitude - _center.longitude).abs() >
-                            0.002) {
-                      setState(() => _center = posCenter);
-                      _onMapMoved(posCenter);
-                    }
-                  }
-                },
-              ),
-              children: [
-                TileLayer(
-                  urlTemplate: Env.mapTileUrl,
-                  userAgentPackageName: 'com.bagajpark.mobile',
-                ),
-                MarkerLayer(
-                  markers: shopsAsync.maybeWhen(
-                    data: (list) {
-                      var filtered = list;
-                      if (_only247) {
-                        filtered = filtered.where((s) => s.open247).toList();
-                      }
-                      if (_onlyOpenNow) {
-                        filtered = filtered.where((s) => s.isActive).toList();
-                      }
+          Builder(
+            builder: (context) {
+              final list = shopsAsync.maybeWhen(
+                data: (d) => d,
+                orElse: () => <ShopDto>[],
+              );
+              var filtered = list;
+              if (_only247) {
+                filtered = filtered.where((s) => s.open247).toList();
+              }
+              if (_onlyOpenNow) {
+                filtered = filtered.where((s) => s.isActive).toList();
+              }
 
-                      return filtered.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final s = entry.value;
-                        final isSelected = _selectedShopIndex == index;
-                        return Marker(
-                          point: LatLng(s.latitude!, s.longitude!),
-                          width: isSelected ? 120 : 60,
-                          height: isSelected ? 120 : 60,
-                          child: GestureDetector(
-                            onTap: () {
-                              HapticFeedback.lightImpact();
-                              setState(() => _selectedShopIndex = index);
-                              _mapController.move(
-                                LatLng(s.latitude!, s.longitude!),
-                                14,
-                              );
-                            },
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 300),
-                              child: Column(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: isSelected
-                                          ? const Color(0xFFF97316)
-                                          : Colors.white,
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(
-                                            alpha: 0.2,
-                                          ),
-                                          blurRadius: 10,
-                                          spreadRadius: 2,
-                                        ),
-                                      ],
-                                    ),
-                                    child: Icon(
-                                      Icons.shopping_bag,
-                                      color: isSelected
-                                          ? Colors.white
-                                          : const Color(0xFFF97316),
-                                      size: isSelected ? 32 : 24,
-                                    ),
-                                  ),
-                                  if (isSelected)
-                                    Container(
-                                      margin: const EdgeInsets.only(top: 4),
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.black.withValues(
-                                          alpha: 0.8,
-                                        ),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Text(
-                                        s.name,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList();
-                    },
-                    orElse: () => [],
-                  ),
-                ),
-              ],
-            ),
+              return SearchMap(
+                mapController: _mapController,
+                shops: filtered,
+                selectedShopIndex: _selectedShopIndex,
+                center: _center,
+                onShopSelected: (index) {
+                  setState(() => _selectedShopIndex = index);
+                },
+                onPositionChanged: _onMapMoved,
+              );
+            },
           ),
+          if (shopsAsync.isLoading &&
+              shopsAsync.maybeWhen(data: (d) => d, orElse: () => null) == null)
+            const Center(child: CircularProgressIndicator()),
 
           Positioned(
             left: 16,
@@ -430,61 +270,59 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             top: MediaQuery.of(context).padding.top + 16,
             child: Column(
               children: [
-                Container(
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
-                        blurRadius: 30,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: TextField(
-                    controller: _searchController,
-                    onChanged: _fetchSuggestions,
-                    onSubmitted: (v) => _searchAddress(v),
-                    onTap: () => setState(() => _isSearching = true),
-                    style: GoogleFonts.outfit(),
-                    decoration: InputDecoration(
-                      hintText: 'search.hint'.tr(),
-                      prefixIcon: const Icon(Icons.search_rounded, size: 28),
-                      suffixIcon: _isSearching
-                          ? IconButton(
-                              icon: const Icon(Icons.close_rounded),
-                              onPressed: () {
-                                setState(() {
-                                  _isSearching = false;
-                                  _suggestions = [];
+                Semantics(
+                  label: 'Search for luggage storage locations',
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.08),
+                          blurRadius: 30,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: TextField(
+                      controller: _searchController,
+                      onChanged: _fetchSuggestions,
+                      decoration: InputDecoration(
+                        hintText: 'search.hint'.tr(),
+                        prefixIcon: const Icon(Icons.search_rounded),
+                        suffixIcon: _searchController.text.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.close_rounded),
+                                onPressed: () {
                                   _searchController.clear();
-                                });
-                                FocusScope.of(context).unfocus();
-                              },
-                            )
-                          : GestureDetector(
-                              onTap: _showFilterSheet,
-                              child: Container(
-                                margin: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: (_onlyOpenNow || _only247)
-                                      ? const Color(0xFF0F172A)
-                                      : const Color(0xFFF97316),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.tune_rounded,
-                                  color: Colors.white,
-                                  size: 20,
+                                  setState(() => _suggestions = []);
+                                },
+                              )
+                            : GestureDetector(
+                                onTap: _showFilterSheet,
+                                child: Container(
+                                  margin: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: (_onlyOpenNow || _only247)
+                                        ? AppColors.textDark
+                                        : AppColors.brandOrange,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.tune_rounded,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
                                 ),
                               ),
-                            ),
-                      fillColor: Colors.white.withValues(alpha: 0.95),
-                      filled: true,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        borderSide: BorderSide.none,
+                        fillColor: Colors.white.withValues(alpha: 0.95),
+                        filled: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 20,
+                        ),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 20),
                     ),
                   ),
                 ),
@@ -515,7 +353,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         return ListTile(
                           leading: const Icon(
                             Icons.location_on_outlined,
-                            color: Color(0xFFF97316),
+                            color: AppColors.brandOrange,
                           ),
                           title: Text(
                             '$name${city.isNotEmpty ? ", $city" : ""}',
@@ -554,110 +392,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     itemBuilder: (context, index) {
                       final shop = filtered[index];
                       final isSelected = _selectedShopIndex == index;
-                      return GestureDetector(
-                        onTap: () => context.push('/shop/${shop.id}'),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          width: MediaQuery.of(context).size.width * 0.85,
-                          margin: const EdgeInsets.only(right: 16),
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(
-                              color: isSelected
-                                  ? const Color(0xFFF97316)
-                                  : Colors.white,
-                              width: 2,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.1),
-                                blurRadius: 20,
-                                offset: const Offset(0, 5),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 100,
-                                decoration: BoxDecoration(
-                                  color: Colors.orange.shade50,
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(16),
-                                  child: CachedNetworkImage(
-                                    imageUrl:
-                                        'https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=300&auto=format&fit=crop',
-                                    fit: BoxFit.cover,
-                                    placeholder: (context, url) =>
-                                        Container(color: Colors.grey.shade100),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      shop.name,
-                                      style: GoogleFonts.outfit(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: const Color(0xFF0F172A),
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Row(
-                                      children: [
-                                        const Icon(
-                                          Icons.star_rounded,
-                                          color: Colors.amber,
-                                          size: 18,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          '${shop.rating} (120+)',
-                                          style: GoogleFonts.outfit(
-                                            fontSize: 14,
-                                            color: Colors.grey.shade600,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const Spacer(),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          '₺${shop.pricePerDay.toStringAsFixed(0)}${'search.day_unit'.tr()}',
-                                          style: GoogleFonts.outfit(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w700,
-                                            color: const Color(0xFFF97316),
-                                          ),
-                                        ),
-                                        Icon(
-                                          Icons.arrow_forward_ios_rounded,
-                                          size: 16,
-                                          color: Colors.grey.shade400,
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                      return ShopPreviewCard(
+                        shop: shop,
+                        isSelected: isSelected,
                       );
                     },
                   );
@@ -673,7 +410,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             child: FloatingActionButton.small(
               onPressed: _determinePosition,
               backgroundColor: Colors.white,
-              foregroundColor: const Color(0xFFF97316),
+              foregroundColor: AppColors.brandOrange,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24),
               ),

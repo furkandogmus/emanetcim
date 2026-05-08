@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class GlobalErrorWidget extends StatelessWidget {
-  const GlobalErrorWidget({super.key, required this.details});
+  const GlobalErrorWidget({required this.details, super.key});
   final FlutterErrorDetails details;
 
   @override

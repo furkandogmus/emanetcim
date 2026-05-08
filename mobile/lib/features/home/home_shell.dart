@@ -8,9 +8,10 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/auth/auth_controller.dart';
 import '../../shared/models/user.dart';
+import '../../shared/utils/app_colors.dart';
 
 class HomeShell extends ConsumerWidget {
-  const HomeShell({super.key, required this.child});
+  const HomeShell({required this.child, super.key});
   final Widget child;
 
   @override
@@ -19,7 +20,7 @@ class HomeShell extends ConsumerWidget {
         ref.watch(authControllerProvider).session?.role ?? UserRole.guest;
     final loc = GoRouterState.of(context).matchedLocation;
 
-    List<_TabItem> tabs = [];
+    var tabs = <_TabItem>[];
 
     if (role == UserRole.admin) {
       tabs = [
@@ -106,6 +107,7 @@ class HomeShell extends ConsumerWidget {
     }
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
       extendBody: true,
       body: child,
       bottomNavigationBar: Container(
@@ -192,9 +194,7 @@ class _NavItem extends StatelessWidget {
           children: [
             Icon(
               isSelected ? item.activeIcon : item.icon,
-              color: isSelected
-                  ? const Color(0xFFF97316)
-                  : Colors.grey.shade400,
+              color: isSelected ? AppColors.brandOrange : Colors.grey.shade400,
               size: 26,
             ),
             const SizedBox(height: 4),
@@ -204,7 +204,7 @@ class _NavItem extends StatelessWidget {
                 fontSize: 10,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                 color: isSelected
-                    ? const Color(0xFFF97316)
+                    ? AppColors.brandOrange
                     : Colors.grey.shade400,
               ),
             ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class RootWarningScreen extends StatelessWidget {
-  const RootWarningScreen({super.key, required this.onContinue});
+  const RootWarningScreen({required this.onContinue, super.key});
 
   final VoidCallback onContinue;
 

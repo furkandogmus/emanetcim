@@ -74,5 +74,3 @@ next-env.d.ts
 /mobile/**/GeneratedPluginRegistrant.*
 /mobile/**/*.g.dart
 /mobile/**/*.freezed.dart
-/mobile/ios/Runner/GoogleService-Info.plist
-/mobile/android/app/google-services.json

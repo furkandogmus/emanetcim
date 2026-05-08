@@ -32,10 +32,7 @@ export async function POST(
     return NextResponse.json({ error: "invalid_body", issues: parsed.error.issues }, { status: 400 });
   }
 
-  const result = await bookingService.checkIn(id, parsed.data.sealPhotoUrl ?? null, {
-    sealAssignments: parsed.data.sealAssignments ?? [],
-    faultySealNumbers: parsed.data.faultySealNumbers ?? [],
-  });
+  const result = await bookingService.checkIn(id);
 
   if (!result.ok) {
     return NextResponse.json({ error: result.code, message: result.message }, { status: 400 });

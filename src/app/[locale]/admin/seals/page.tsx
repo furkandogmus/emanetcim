@@ -95,7 +95,7 @@ export default async function AdminSealsPage({ params }: { params: Promise<{ loc
                   <p className="text-[10px] font-bold text-gray-300">{req.createdAt.toISOString().slice(0, 10)}</p>
                </div>
                {req.status === 'PENDING' ? (
-                 <SealShipButton requestId={req.id} />
+                 <SealShipButton requestId={req.id} requestedQuantity={req.quantity} />
                ) : req.status === 'SHIPPED' ? (
                  <div className="flex flex-col items-end gap-1">
                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Kargoda</span>

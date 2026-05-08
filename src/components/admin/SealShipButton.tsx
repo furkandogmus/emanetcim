@@ -6,15 +6,14 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
-export default function SealShipButton({ requestId }: { requestId: string }) {
+export default function SealShipButton({ requestId, requestedQuantity }: { requestId: string, requestedQuantity: number }) {
   const t = useTranslations("Admin");
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
   const [open, setOpen] = useState(false);
   const [trackingNumber, setTrackingNumber] = useState("");
-  const [serialFrom, setSerialFrom] = useState("");
-  const [serialTo, setSerialTo] = useState("");
+  const [quantity, setQuantity] = useState(requestedQuantity.toString());
   const [adminNote, setAdminNote] = useState("");
 
   function handleOpen() {
@@ -25,29 +24,19 @@ export default function SealShipButton({ requestId }: { requestId: string }) {
     if (pending) return;
     setOpen(false);
     setTrackingNumber("");
-    setSerialFrom("");
-    setSerialTo("");
     setAdminNote("");
   }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const from = parseInt(serialFrom, 10);
-    const to = parseInt(serialTo, 10);
     if (!trackingNumber.trim()) {
       toast.error("Kargo takip numarası zorunlu");
       return;
     }
-    if (!serialFrom || isNaN(from)) {
-      toast.error("Seri başlangıcı zorunlu");
-      return;
-    }
-    if (!serialTo || isNaN(to)) {
-      toast.error("Seri bitişi zorunlu");
-      return;
-    }
-    if (from > to) {
-      toast.error("Seri başlangıcı bitiş değerinden büyük olamaz");
+
+    const qty = parseInt(quantity, 10);
+    if (isNaN(qty) || qty <= 0) {
+      toast.error("Geçerli bir adet giriniz");
       return;
     }
 
@@ -55,8 +44,7 @@ export default function SealShipButton({ requestId }: { requestId: string }) {
       const result = await shipSealRequestAction({
         requestId,
         trackingNumber: trackingNumber.trim(),
-        serialFrom: from,
-        serialTo: to,
+        quantity: qty,
         adminNote: adminNote.trim() || undefined,
       });
       if (result.success) {
@@ -104,34 +92,21 @@ export default function SealShipButton({ requestId }: { requestId: string }) {
                 />
               </div>
 
-              <div className="flex gap-3">
-                <div className="flex flex-col gap-1 flex-1">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">
-                    Seri Başlangıcı <span className="text-orange-600">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    value={serialFrom}
-                    onChange={(e) => setSerialFrom(e.target.value)}
-                    placeholder="1001"
-                    required
-                    className="border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
-                </div>
-                <div className="flex flex-col gap-1 flex-1">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">
-                    Seri Bitişi <span className="text-orange-600">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    value={serialTo}
-                    onChange={(e) => setSerialTo(e.target.value)}
-                    placeholder="1050"
-                    required
-                    className="border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
-                </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+                  Gönderilen Adet <span className="text-orange-600">*</span>
+                </label>
+                <input
+                  type="number"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  placeholder="200"
+                  required
+                  className="border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
               </div>
+
+
 
               <div className="flex flex-col gap-1">
                 <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">

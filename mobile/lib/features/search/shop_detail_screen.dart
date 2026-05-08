@@ -1,25 +1,18 @@
+import 'dart:async' show unawaited;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../core/api/api_client.dart';
+import '../../core/repositories/shop_repository.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/services/share_service.dart';
-import '../../shared/models/shop.dart';
-
-final shopProvider = FutureProvider.family<ShopDto, String>((ref, id) async {
-  try {
-    final res = await ref.watch(dioProvider).get('/shops/$id');
-    return ShopDto.fromJson(res.data as Map<String, dynamic>);
-  } catch (e) {
-    rethrow;
-  }
-});
+import '../../shared/utils/app_colors.dart';
+import '../../shared/widgets/skeleton.dart';
 
 class ShopDetailScreen extends ConsumerWidget {
-  const ShopDetailScreen({super.key, required this.shopId});
+  const ShopDetailScreen({required this.shopId, super.key});
   final String shopId;
 
   @override
@@ -28,7 +21,7 @@ class ShopDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       body: shopAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: _buildSkeleton,
         error: (e, _) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -51,276 +44,291 @@ class ShopDetailScreen extends ConsumerWidget {
           children: [
             RefreshIndicator(
               onRefresh: () async {
-                ref.read(hapticServiceProvider).light();
+                unawaited(ref.read(hapticServiceProvider).light());
                 return ref.refresh(shopProvider(shopId).future);
               },
-              color: const Color(0xFFF97316),
+              color: AppColors.brandOrange,
               child: CustomScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
-                // Spectacular Parallax Header
-                SliverAppBar(
-                  expandedHeight: 300,
-                  pinned: true,
-                  leading: Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: CircleAvatar(
-                      backgroundColor: Colors.white.withValues(alpha: 0.9),
-                      child: IconButton(
-                        onPressed: () {
-                          ref.read(hapticServiceProvider).light();
-                          context.pop();
-                        },
-                        icon: const Icon(
-                          Icons.arrow_back_ios_new_rounded,
-                          size: 20,
-                          color: Colors.black,
+                  // Spectacular Parallax Header
+                  SliverAppBar(
+                    expandedHeight: 300,
+                    pinned: true,
+                    leading: Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: CircleAvatar(
+                        backgroundColor: Colors.white.withValues(alpha: 0.9),
+                        child: IconButton(
+                          onPressed: () {
+                            unawaited(ref.read(hapticServiceProvider).light());
+                            context.pop();
+                          },
+                          icon: const Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            size: 20,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+                    actions: [
+                      CircleAvatar(
+                        backgroundColor: Colors.white.withValues(alpha: 0.9),
+                        child: IconButton(
+                          onPressed: () {
+                            unawaited(
+                              ref.read(hapticServiceProvider).selection(),
+                            );
+                            ref
+                                .read(shareServiceProvider)
+                                .shareShop(
+                                  id: s.id,
+                                  name: s.name,
+                                  address: s.address ?? '',
+                                );
+                          },
+                          icon: const Icon(
+                            Icons.share_rounded,
+                            size: 20,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                    ],
+                    flexibleSpace: FlexibleSpaceBar(
+                      background: Hero(
+                        tag: 'shop-${s.id}',
+                        child: Image.network(
+                          'https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=800&auto=format&fit=crop',
+                          fit: BoxFit.cover,
                         ),
                       ),
                     ),
                   ),
-                  actions: [
-                    CircleAvatar(
-                      backgroundColor: Colors.white.withValues(alpha: 0.9),
-                      child: IconButton(
-                        onPressed: () {
-                          ref.read(hapticServiceProvider).selection();
-                          ref
-                              .read(shareServiceProvider)
-                              .shareShop(
-                                id: s.id,
-                                name: s.name,
-                                address: s.address ?? '',
-                              );
-                        },
-                        icon: const Icon(
-                          Icons.share_rounded,
-                          size: 20,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                  ],
-                  flexibleSpace: FlexibleSpaceBar(
-                    background: Hero(
-                      tag: 'shop-${s.id}',
-                      child: Image.network(
-                        'https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=800&auto=format&fit=crop',
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                ),
 
-                SliverToBoxAdapter(
-                  child: Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(32),
+                  SliverToBoxAdapter(
+                    child: Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(32),
+                        ),
                       ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                s.name,
-                                style: GoogleFonts.outfit(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF0F172A),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  s.name,
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.textDark,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.orange.shade50,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.star_rounded,
+                                      color: Colors.amber,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      s.rating?.toStringAsFixed(1) ?? 'N/A',
+                                      style: GoogleFonts.outfit(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.brandOrange,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.location_on_rounded,
+                                size: 16,
+                                color: Colors.grey,
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  '${s.address ?? ''}, ${s.district ?? ''} / ${s.city ?? ''}',
+                                  style: GoogleFonts.outfit(
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 32),
+
+                          // Info Grid
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _infoItem(
+                                Icons.access_time_rounded,
+                                'shop.hours'.tr(),
+                                s.open247
+                                    ? 'search.open_247'.tr()
+                                    : '${s.openingTime} - ${s.closingTime}',
+                              ),
+                              _infoItem(
+                                Icons.luggage_rounded,
+                                'shop.capacity'.tr(),
+                                'shop.capacity_val'.tr(
+                                  args: [s.capacity.toString()],
+                                ),
+                              ),
+                              _infoItem(
+                                Icons.verified_user_rounded,
+                                'shop.security'.tr(),
+                                'shop.security_high'.tr(),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 40),
+
+                          _sectionHeader('shop.about'.tr()),
+                          const SizedBox(height: 12),
+                          Text(
+                            'shop.about_desc'.tr(),
+                            style: GoogleFonts.outfit(
+                              fontSize: 15,
+                              color: Colors.grey.shade600,
+                              height: 1.6,
+                            ),
+                          ),
+
+                          const SizedBox(height: 32),
+
+                          // Map Preview
+                          _sectionHeader('shop.location'.tr()),
+                          const SizedBox(height: 16),
+                          Container(
+                            height: 180,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(24),
+                              color: Colors.grey.shade100,
+                              image: const DecorationImage(
+                                image: NetworkImage(
+                                  'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?q=80&w=800&auto=format&fit=crop',
+                                ),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            child: Center(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.1,
+                                      ),
+                                      blurRadius: 10,
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.map_rounded,
+                                      size: 18,
+                                      color: AppColors.brandOrange,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'shop.view_on_map'.tr(),
+                                      style: GoogleFonts.outfit(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
+                          ),
+
+                          const SizedBox(height: 40),
+
+                          _sectionHeader('shop.amenities'.tr()),
+                          const SizedBox(height: 16),
+                          Wrap(
+                            spacing: 12,
+                            runSpacing: 12,
+                            children: [
+                              _amenityChip(
+                                Icons.videocam_rounded,
+                                'search.camera'.tr(),
                               ),
-                              decoration: BoxDecoration(
-                                color: Colors.orange.shade50,
-                                borderRadius: BorderRadius.circular(12),
+                              _amenityChip(
+                                Icons.security_rounded,
+                                'search.insurance'.tr(),
                               ),
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.star_rounded,
-                                    color: Colors.amber,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    s.rating?.toStringAsFixed(1) ?? 'N/A',
-                                    style: GoogleFonts.outfit(
-                                      fontWeight: FontWeight.bold,
-                                      color: const Color(0xFFF97316),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.location_on_rounded,
-                              size: 16,
-                              color: Colors.grey,
-                            ),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                '${s.address ?? ''}, ${s.district ?? ''} / ${s.city ?? ''}',
-                                style: GoogleFonts.outfit(
-                                  color: Colors.grey.shade600,
+                              if (s.hasRestroom)
+                                _amenityChip(
+                                  Icons.wc_rounded,
+                                  'search.restroom'.tr(),
                                 ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 32),
-
-                        // Info Grid
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            _infoItem(
-                              Icons.access_time_rounded,
-                              'shop.hours'.tr(),
-                              s.open247
-                                  ? 'search.open_247'.tr()
-                                  : '${s.openingTime} - ${s.closingTime}',
-                            ),
-                            _infoItem(
-                              Icons.luggage_rounded,
-                              'shop.capacity'.tr(),
-                              'shop.capacity_val'.tr(args: [s.capacity.toString()]),
-                            ),
-                            _infoItem(
-                              Icons.verified_user_rounded,
-                              'shop.security'.tr(),
-                              'shop.security_high'.tr(),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 40),
-
-                        _sectionHeader('shop.about'.tr()),
-                        const SizedBox(height: 12),
-                        Text(
-                          'shop.about_desc'.tr(),
-                          style: GoogleFonts.outfit(
-                            fontSize: 15,
-                            color: Colors.grey.shade600,
-                            height: 1.6,
+                              _amenityChip(Icons.wifi_rounded, 'Wi-Fi'),
+                              _amenityChip(Icons.accessible_rounded, 'Erişim'),
+                            ],
                           ),
-                        ),
 
-                        const SizedBox(height: 32),
+                          const SizedBox(height: 40),
 
-                        // Map Preview
-                        _sectionHeader('shop.location'.tr()),
-                        const SizedBox(height: 16),
-                        Container(
-                          height: 180,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(24),
-                            color: Colors.grey.shade100,
-                            image: const DecorationImage(
-                              image: NetworkImage(
-                                'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?q=80&w=800&auto=format&fit=crop',
-                              ),
-                              fit: BoxFit.cover,
-                            ),
+                          _sectionHeader('shop.reviews'.tr()),
+                          const SizedBox(height: 16),
+                          _reviewItem(
+                            'Ahmet Y.',
+                            5,
+                            'Çok merkezi bir konumda, teslimat çok hızlıydı. Güvenle bırakabilirsiniz.',
                           ),
-                          child: Center(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.1),
-                                    blurRadius: 10,
-                                  ),
-                                ],
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.map_rounded,
-                                    size: 18,
-                                    color: Color(0xFFF97316),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'shop.view_on_map'.tr(),
-                                    style: GoogleFonts.outfit(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                          _reviewItem(
+                            'Sarah M.',
+                            4,
+                            'Very friendly staff and easy to find. Highly recommended!',
                           ),
-                        ),
 
-                        const SizedBox(height: 40),
-
-                        _sectionHeader('shop.amenities'.tr()),
-                        const SizedBox(height: 16),
-                        Wrap(
-                          spacing: 12,
-                          runSpacing: 12,
-                          children: [
-                            _amenityChip(Icons.videocam_rounded, 'search.camera'.tr()),
-                            _amenityChip(Icons.security_rounded, 'search.insurance'.tr()),
-                            if (s.hasRestroom)
-                              _amenityChip(Icons.wc_rounded, 'search.restroom'.tr()),
-                            _amenityChip(Icons.wifi_rounded, 'Wi-Fi'),
-                            _amenityChip(Icons.accessible_rounded, 'Erişim'),
-                          ],
-                        ),
-
-                        const SizedBox(height: 40),
-
-                        _sectionHeader('shop.reviews'.tr()),
-                        const SizedBox(height: 16),
-                        _reviewItem(
-                          'Ahmet Y.',
-                          5,
-                          'Çok merkezi bir konumda, teslimat çok hızlıydı. Güvenle bırakabilirsiniz.',
-                        ),
-                        _reviewItem(
-                          'Sarah M.',
-                          4,
-                          'Very friendly staff and easy to find. Highly recommended!',
-                        ),
-
-                        const SizedBox(height: 120), // Bottom bar space
-                      ],
+                          const SizedBox(height: 120), // Bottom bar space
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
 
             // Bottom Action Bar
             Positioned(
@@ -358,7 +366,7 @@ class ShopDetailScreen extends ConsumerWidget {
                             style: GoogleFonts.outfit(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
-                              color: const Color(0xFFF97316),
+                              color: AppColors.brandOrange,
                             ),
                           ),
                         ],
@@ -369,7 +377,7 @@ class ShopDetailScreen extends ConsumerWidget {
                       flex: 2,
                       child: FilledButton(
                         onPressed: () {
-                          ref.read(hapticServiceProvider).medium();
+                          unawaited(ref.read(hapticServiceProvider).medium());
                           context.push('/checkout/${s.id}');
                         },
                         child: Text('search.book_now'.tr()),
@@ -391,7 +399,7 @@ class ShopDetailScreen extends ConsumerWidget {
       style: GoogleFonts.outfit(
         fontSize: 20,
         fontWeight: FontWeight.bold,
-        color: const Color(0xFF0F172A),
+        color: AppColors.textDark,
       ),
     );
   }
@@ -400,7 +408,7 @@ class ShopDetailScreen extends ConsumerWidget {
     return Expanded(
       child: Column(
         children: [
-          Icon(icon, color: const Color(0xFFF97316), size: 28),
+          Icon(icon, color: AppColors.brandOrange, size: 28),
           const SizedBox(height: 8),
           Text(
             label,
@@ -416,7 +424,7 @@ class ShopDetailScreen extends ConsumerWidget {
             style: GoogleFonts.outfit(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFF0F172A),
+              color: AppColors.textDark,
             ),
             textAlign: TextAlign.center,
           ),
@@ -443,14 +451,14 @@ class ShopDetailScreen extends ConsumerWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 18, color: const Color(0xFFF97316)),
+          Icon(icon, size: 18, color: AppColors.brandOrange),
           const SizedBox(width: 8),
           Text(
             label,
             style: GoogleFonts.outfit(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF0F172A),
+              color: AppColors.textDark,
             ),
           ),
         ],
@@ -503,6 +511,47 @@ class ShopDetailScreen extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSkeleton() {
+    return const SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Skeleton(height: 300, width: double.infinity, borderRadius: 0),
+          Padding(
+            padding: EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Skeleton(height: 32, width: 200),
+                    Skeleton(height: 32, width: 60),
+                  ],
+                ),
+                SizedBox(height: 16),
+                Skeleton(height: 16, width: 250),
+                SizedBox(height: 32),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Skeleton(height: 60, width: 100),
+                    Skeleton(height: 60, width: 100),
+                    Skeleton(height: 60, width: 100),
+                  ],
+                ),
+                SizedBox(height: 40),
+                Skeleton(height: 24, width: 150),
+                SizedBox(height: 16),
+                Skeleton(height: 100, width: double.infinity),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

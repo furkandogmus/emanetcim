@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
@@ -39,13 +39,63 @@ final dioProvider = Provider<Dio>((ref) {
             return handler.resolve(clone);
           }
         }
+
+        // Automatic retry for 5xx errors or network failures (timeouts)
+        final isNetworkError =
+            err.type == DioExceptionType.connectionTimeout ||
+            err.type == DioExceptionType.sendTimeout ||
+            err.type == DioExceptionType.receiveTimeout ||
+            err.type == DioExceptionType.connectionError;
+
+        final isServerError =
+            err.response != null && err.response!.statusCode! >= 500;
+
+        if (isNetworkError || isServerError) {
+          final options = err.requestOptions;
+          final int retries = options.extra['retries'] ?? 0;
+          if (retries < 2) {
+            options.extra['retries'] = retries + 1;
+            // Exponential backoff (1s, 2s)
+            await Future.delayed(Duration(milliseconds: 1000 * (retries + 1)));
+            try {
+              final clone = await dio.fetch(options);
+              return handler.resolve(clone);
+            } catch (e) {
+              return handler.next(err);
+            }
+          }
+        }
+
         handler.next(err);
       },
     ),
   );
 
+  // Performance Interceptor - track slow API calls
+  dio.interceptors.add(
+    InterceptorsWrapper(
+      onRequest: (options, handler) {
+        options.extra['startTime'] = DateTime.now().millisecondsSinceEpoch;
+        handler.next(options);
+      },
+      onResponse: (response, handler) {
+        final startTime = response.requestOptions.extra['startTime'] as int?;
+        if (startTime != null) {
+          final endTime = DateTime.now().millisecondsSinceEpoch;
+          final duration = endTime - startTime;
+          if (duration > 2000) {
+            debugPrint(
+              '⚠️ SLOW API: ${response.requestOptions.path} took ${duration}ms',
+            );
+          }
+        }
+        handler.next(response);
+      },
+    ),
+  );
+
   // Simple In-Memory Cache Interceptor with TTL and Size Limit
-  final Map<String, _CacheEntry> cache = {};
+  final cache = <String, _CacheEntry>{};
   const cacheTtl = Duration(minutes: 5);
   const maxCacheSize = 100;
 
@@ -74,12 +124,12 @@ final dioProvider = Provider<Dio>((ref) {
       onResponse: (response, handler) {
         if (response.requestOptions.method == 'GET') {
           final key = response.requestOptions.uri.toString();
-          
+
           // Limit cache size - remove oldest entry if full
           if (cache.length >= maxCacheSize) {
             cache.remove(cache.keys.first);
           }
-          
+
           cache[key] = _CacheEntry(
             response: response,
             timestamp: DateTime.now(),
@@ -92,13 +142,7 @@ final dioProvider = Provider<Dio>((ref) {
 
   if (kDebugMode) {
     dio.interceptors.add(
-      PrettyDioLogger(
-        requestHeader: false,
-        requestBody: true,
-        responseBody: false,
-        error: true,
-        compact: true,
-      ),
+      PrettyDioLogger(requestBody: true, responseBody: false),
     );
   }
 

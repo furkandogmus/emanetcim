@@ -13,12 +13,10 @@ class TokenStore {
   static const _refresh = 'refresh_token';
   static const _hiveKey = 'hive_encryption_key';
 
-  final _storage = const FlutterSecureStorage(
-    aOptions: AndroidOptions(resetOnError: true),
-  );
+  final _storage = const FlutterSecureStorage();
 
   Future<List<int>?> getHiveKey() async {
-    String? keyStr = await _storage.read(key: _hiveKey);
+    final keyStr = await _storage.read(key: _hiveKey);
     if (keyStr == null) {
       final key = Hive.generateSecureKey();
       await _storage.write(key: _hiveKey, value: base64UrlEncode(key));

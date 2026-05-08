@@ -42,18 +42,30 @@ export class SealService {
 
   async assignSealsToShop(
     shopId: string,
-    fromSerial: number,
-    toSerial: number
+    count: number
   ): Promise<{ updated: number }> {
-    if (fromSerial > toSerial) {
-      throw new Error("invalid_range");
+    if (count <= 0) {
+      throw new Error("invalid_count");
     }
     const now = new Date();
-    const result = await prisma.seal.updateMany({
+    
+    const seals = await prisma.seal.findMany({
       where: {
-        serialNumber: { gte: fromSerial, lte: toSerial },
         status: "STOCK",
         shopId: null,
+      },
+      orderBy: { serialNumber: "asc" },
+      take: count,
+      select: { serialNumber: true },
+    });
+
+    if (seals.length === 0) {
+      return { updated: 0 };
+    }
+
+    const result = await prisma.seal.updateMany({
+      where: {
+        serialNumber: { in: seals.map((s) => s.serialNumber) },
       },
       data: {
         shopId,

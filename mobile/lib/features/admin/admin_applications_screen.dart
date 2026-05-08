@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
+import '../../core/config/env.dart';
+import '../../core/utils/error_handler.dart';
 
 class AdminApplicationsScreen extends ConsumerStatefulWidget {
   const AdminApplicationsScreen({super.key});
@@ -27,33 +29,25 @@ class _AdminApplicationsScreenState
   Future<void> _fetchApps() async {
     try {
       final dio = ref.read(dioProvider);
-      final res = await dio.get('/admin/applications');
+      final url =
+          '${Env.apiBaseUrl.replaceAll('/api/mobile', '')}/api/admin/applications';
+      final res = await dio.get(url);
       setState(() {
         _apps = res.data as List<dynamic>;
         _loading = false;
       });
     } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              getErrorMessage(e, fallback: 'Başvurular yüklenemedi'),
+            ),
+          ),
+        );
+      }
       setState(() {
-        _apps = [
-          {
-            'id': '1',
-            'name': 'Galata Souvenirs',
-            'address': 'Bereketzade, Galata Kulesi Sk. No:12',
-            'owner': {'name': 'Mehmet Yılmaz', 'phone': '0532 123 45 67'},
-            'createdAt': DateTime.now()
-                .subtract(const Duration(days: 2))
-                .toIso8601String(),
-          },
-          {
-            'id': '2',
-            'name': 'Karaköy Coffee Hub',
-            'address': 'Kemankeş Karamustafa Paşa, No:44',
-            'owner': {'name': 'Ayşe Demir', 'phone': '0544 987 65 43'},
-            'createdAt': DateTime.now()
-                .subtract(const Duration(hours: 5))
-                .toIso8601String(),
-          },
-        ];
+        _apps = [];
         _loading = false;
       });
     }
@@ -62,15 +56,26 @@ class _AdminApplicationsScreenState
   Future<void> _process(String id, bool approve) async {
     try {
       final dio = ref.read(dioProvider);
-      await dio.post(
-        '/admin/applications/$id/${approve ? 'approve' : 'reject'}',
-      );
-      _fetchApps();
-    } catch (e) {
+      final url =
+          '${Env.apiBaseUrl.replaceAll('/api/mobile', '')}/api/admin/applications/$id/${approve ? 'approve' : 'reject'}';
+      debugPrint('Admin Action: $url');
+      await dio.post(url);
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Hata: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(approve ? 'Başvuru onaylandı' : 'Başvuru reddedildi'),
+          ),
+        );
+      }
+      await _fetchApps();
+    } catch (e) {
+      debugPrint('Admin Action Error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(getErrorMessage(e, fallback: 'İşlem başarısız oldu')),
+          ),
+        );
       }
     }
   }

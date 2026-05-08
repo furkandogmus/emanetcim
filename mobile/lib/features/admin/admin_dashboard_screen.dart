@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/auth/auth_controller.dart';
 import 'admin_controller.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
@@ -25,6 +26,10 @@ class AdminDashboardScreen extends ConsumerWidget {
             style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
           ),
           actions: [
+            IconButton(
+              onPressed: () => _confirmLogout(context, ref),
+              icon: const Icon(Icons.logout_rounded, color: Colors.redAccent),
+            ),
             IconButton(
               onPressed: () => ref.refresh(adminStatsProvider),
               icon: const Icon(Icons.refresh_rounded),
@@ -135,25 +140,30 @@ class AdminDashboardScreen extends ConsumerWidget {
             _actionTile(
               Icons.verified_user_rounded,
               'admin.approve_shops'.tr(),
-              '12 yeni dükkan başvurusu',
+              'admin.new_shop_apps'.tr(
+                args: [stats['pendingApplications'].toString()],
+              ),
               const Color(0xFFF97316),
               onTap: () => context.push('/admin/applications'),
             ),
             _actionTile(
               Icons.health_and_safety_rounded,
               'admin.system_status'.tr(),
-              'Tüm sistemler aktif',
+              'admin.all_systems_active'.tr(),
               const Color(0xFF10B981),
               isPulse: true,
               onTap: () {},
             ),
             _actionTile(
               Icons.message_rounded,
-              'Destek Mesajları',
-              '5 okunmamış mesaj',
+              'admin.support_messages'.tr(),
+              'admin.unread_messages'.tr(
+                args: [stats['unreadMessages']?.toString() ?? '0'],
+              ),
               const Color(0xFF3B82F6),
-              onTap: () {},
+              onTap: () => context.push('/admin/messages'),
             ),
+            const SizedBox(height: 100),
           ],
         ),
       ),
@@ -267,6 +277,38 @@ class AdminDashboardScreen extends ConsumerWidget {
                 size: 14,
                 color: Colors.grey,
               ),
+      ),
+    );
+  }
+
+  void _confirmLogout(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          'profile.logout'.tr(),
+          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'profile.logout_confirm'.tr(),
+          style: GoogleFonts.outfit(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('common.cancel'.tr()),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ref.read(authControllerProvider.notifier).logout();
+            },
+            child: Text(
+              'profile.logout'.tr(),
+              style: const TextStyle(color: Colors.redAccent),
+            ),
+          ),
+        ],
       ),
     );
   }

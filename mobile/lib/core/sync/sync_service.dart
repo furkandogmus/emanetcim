@@ -21,8 +21,8 @@ class SyncAction {
     required this.userId,
     required this.type,
     required this.bookingId,
-    this.data,
     required this.timestamp,
+    this.data,
   });
 
   Map<String, dynamic> toJson() => {
@@ -45,9 +45,8 @@ class SyncAction {
 }
 
 final syncServiceProvider = Provider((ref) {
-  final service = SyncService(ref);
-  service.init();
-  ref.onDispose(() => service.dispose());
+  final service = SyncService(ref)..init();
+  ref.onDispose(service.dispose);
   return service;
 });
 
@@ -99,7 +98,7 @@ class SyncService {
     );
     await _box.put(action.id, action.toJson());
     debugPrint('Offline action added for user $userId: ${action.type}');
-    sync();
+    unawaited(sync());
   }
 
   Future<void> sync() async {

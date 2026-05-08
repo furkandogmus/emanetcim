@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
-import '../../core/auth/auth_controller.dart';
 import '../../shared/models/shop.dart';
+import '../../shared/utils/app_colors.dart';
 
 class PartnerSettingsScreen extends ConsumerStatefulWidget {
   const PartnerSettingsScreen({super.key});
@@ -19,6 +19,7 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _busy = false;
   bool _loading = true;
+  int _sealCount = 0;
 
   late TextEditingController _name;
   late TextEditingController _capacity;
@@ -33,29 +34,18 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
   }
 
   Future<void> _fetchShop() async {
-    final isDemo = ref.read(authControllerProvider).isDemo;
-    if (isDemo) {
-      setState(() {
-        _name = TextEditingController(text: 'BagajPark Galata Center');
-        _capacity = TextEditingController(text: '15');
-        _price = TextEditingController(text: '75.0');
-        _opening = TextEditingController(text: '08:00');
-        _closing = TextEditingController(text: '23:00');
-        _loading = false;
-      });
-      return;
-    }
-
     try {
       final dio = ref.read(dioProvider);
       final res = await dio.get('/partner/shop');
       final shop = ShopDto.fromJson(res.data as Map<String, dynamic>);
+      final sealCount = res.data['sealCount'] as int? ?? 0;
       setState(() {
         _name = TextEditingController(text: shop.name);
         _capacity = TextEditingController(text: shop.capacity.toString());
         _price = TextEditingController(text: shop.pricePerDay.toString());
         _opening = TextEditingController(text: shop.openingTime ?? '09:00');
         _closing = TextEditingController(text: shop.closingTime ?? '20:00');
+        _sealCount = sealCount;
         _loading = false;
       });
     } catch (e) {
@@ -70,19 +60,6 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _busy = true);
-
-    final isDemo = ref.read(authControllerProvider).isDemo;
-    if (isDemo) {
-      await Future.delayed(const Duration(seconds: 1));
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('partner.settings_updated'.tr())),
-        );
-        setState(() => _busy = false);
-      }
-      return;
-    }
-
     try {
       final dio = ref.read(dioProvider);
       await dio.put(
@@ -118,7 +95,7 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.bgLight,
       appBar: AppBar(
         title: Text(
           'partner.settings'.tr(),
@@ -152,6 +129,61 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              _sectionHeader('MÜHÜR BİLGİSİ'),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.02),
+                      blurRadius: 10,
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.brandOrange.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Icon(
+                        Icons.shield_rounded,
+                        color: AppColors.brandOrange,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Kalan Mühür Adedi',
+                            style: GoogleFonts.outfit(
+                              fontSize: 14,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '$_sealCount Adet',
+                            style: GoogleFonts.outfit(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textDark,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
               _sectionHeader('partner.shop_details'.tr()),
               _inputField('partner.shop_name'.tr(), _name, Icons.store_rounded),
               const SizedBox(height: 16),
@@ -201,7 +233,7 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
               FilledButton(
                 onPressed: _busy ? null : _save,
                 style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF0F172A),
+                  backgroundColor: AppColors.textDark,
                   minimumSize: const Size(double.infinity, 60),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18),
@@ -243,7 +275,7 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
     IconData icon, {
     bool isNumber = false,
   }) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),

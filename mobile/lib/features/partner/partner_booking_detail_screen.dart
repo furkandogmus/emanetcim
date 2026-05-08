@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,11 +9,10 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/api/api_client.dart';
 import '../../core/sync/sync_service.dart';
 import '../../shared/models/booking.dart';
-import 'package:dio/dio.dart';
 import '../booking/booking_detail_screen.dart';
 
 class PartnerBookingDetailScreen extends ConsumerStatefulWidget {
-  const PartnerBookingDetailScreen({super.key, required this.bookingId});
+  const PartnerBookingDetailScreen({required this.bookingId, super.key});
   final String bookingId;
 
   @override
@@ -27,41 +28,22 @@ class _PartnerBookingDetailScreenState
   void _initControllers(BookingDto b) {
     if (_sealControllers.length == b.totalBags) return;
     _sealControllers.clear();
-    for (int i = 0; i < b.totalBags; i++) {
+    for (var i = 0; i < b.totalBags; i++) {
       _sealControllers.add(TextEditingController());
     }
   }
 
   Future<void> _checkIn(BookingDto b) async {
-    final assignments = [];
-    for (int i = 0; i < _sealControllers.length; i++) {
-      final val = int.tryParse(_sealControllers[i].text);
-      if (val == null) {
-        HapticFeedback.vibrate();
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('common.error'.tr())));
-        return;
-      }
-      assignments.add({
-        'sealNumber': val,
-        'bagIndex': i,
-        'bagSize': i < b.bagCountS
-            ? 'S'
-            : (i < b.bagCountS + b.bagCountM ? 'M' : 'XL'),
-      });
-    }
-
     setState(() => _busy = true);
-    HapticFeedback.mediumImpact();
+    unawaited(HapticFeedback.mediumImpact());
     try {
       final dio = ref.read(dioProvider);
       await dio.post(
         '/bookings/${b.id}/check-in',
-        data: {'sealAssignments': assignments},
+        data: {'sealAssignments': []},
       );
       if (mounted) {
-        HapticFeedback.heavyImpact();
+        unawaited(HapticFeedback.heavyImpact());
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('partner.success_checkin'.tr())));
@@ -74,10 +56,10 @@ class _PartnerBookingDetailScreenState
         // Offline mode fallback
         final syncService = ref.read(syncServiceProvider);
         await syncService.addAction(SyncActionType.checkIn, b.id, {
-          'sealAssignments': assignments,
+          'sealAssignments': [],
         });
         if (mounted) {
-          HapticFeedback.mediumImpact();
+          unawaited(HapticFeedback.mediumImpact());
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('partner.offline_saved'.tr()),
@@ -101,12 +83,12 @@ class _PartnerBookingDetailScreenState
 
   Future<void> _checkOut(BookingDto b) async {
     setState(() => _busy = true);
-    HapticFeedback.mediumImpact();
+    unawaited(HapticFeedback.mediumImpact());
     try {
       final dio = ref.read(dioProvider);
       await dio.post('/bookings/${b.id}/check-out');
       if (mounted) {
-        HapticFeedback.heavyImpact();
+        unawaited(HapticFeedback.heavyImpact());
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('partner.success_checkout'.tr())),
         );
@@ -120,7 +102,7 @@ class _PartnerBookingDetailScreenState
         final syncService = ref.read(syncServiceProvider);
         await syncService.addAction(SyncActionType.checkOut, b.id);
         if (mounted) {
-          HapticFeedback.mediumImpact();
+          unawaited(HapticFeedback.mediumImpact());
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('partner.offline_saved'.tr()),
@@ -289,40 +271,6 @@ class _PartnerBookingDetailScreenState
               // Operational Area
               if (b.status == BookingStatus.paid ||
                   b.status == BookingStatus.approved) ...[
-                Text(
-                  'partner.check_in_button'.tr().toUpperCase(),
-                  style: GoogleFonts.outfit(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey.shade500,
-                    letterSpacing: 1.1,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                for (int i = 0; i < b.totalBags; i++)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: TextField(
-                      controller: _sealControllers[i],
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'partner.seal_hint'.tr(
-                          args: [(i + 1).toString()],
-                        ),
-                        hintText: 'partner.seal_placeholder'.tr(),
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide.none,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 16,
-                        ),
-                      ),
-                    ),
-                  ),
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
@@ -448,7 +396,7 @@ class _PartnerBookingDetailScreenState
   }
 
   String _statusLabel(BookingStatus status) {
-    String key = 'waiting_approval';
+    var key = 'waiting_approval';
     switch (status) {
       case BookingStatus.pending:
         key = 'pending';

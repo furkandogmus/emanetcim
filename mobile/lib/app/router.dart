@@ -3,27 +3,28 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/auth/auth_controller.dart';
+import '../features/admin/admin_applications_screen.dart';
+import '../features/admin/admin_dashboard_screen.dart';
+import '../features/admin/admin_messages_screen.dart';
 import '../features/auth/login_screen.dart';
-import '../features/auth/register_screen.dart';
 import '../features/auth/otp_screen.dart';
+import '../features/auth/register_screen.dart';
 import '../features/booking/booking_detail_screen.dart';
 import '../features/booking/my_bookings_screen.dart';
 import '../features/checkout/checkout_screen.dart';
+import '../features/home/home_screen.dart';
 import '../features/home/home_shell.dart';
-import '../features/admin/admin_dashboard_screen.dart';
-import '../features/admin/admin_applications_screen.dart';
 import '../features/notifications/notifications_screen.dart';
 import '../features/onboarding/onboarding_screen.dart';
+import '../features/partner/partner_booking_detail_screen.dart';
 import '../features/partner/partner_bookings_screen.dart';
 import '../features/partner/partner_earnings_screen.dart';
-import '../features/partner/partner_settings_screen.dart';
-import '../features/partner/partner_booking_detail_screen.dart';
 import '../features/partner/partner_scan_screen.dart';
-import '../shared/models/user.dart';
-import '../features/home/home_screen.dart';
+import '../features/partner/partner_settings_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/search/search_screen.dart';
 import '../features/search/shop_detail_screen.dart';
+import '../shared/models/user.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final notifier = ref.watch(routerNotifierProvider);
@@ -115,6 +116,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/admin/applications',
             builder: (_, _) => const AdminApplicationsScreen(),
+          ),
+          GoRoute(
+            path: '/admin/messages',
+            builder: (_, _) => const AdminMessagesScreen(),
           ),
         ],
       ),

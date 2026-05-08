@@ -1,12 +1,16 @@
+import 'dart:async' show unawaited;
 import 'dart:io' show Platform;
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../core/auth/auth_controller.dart';
+import '../../core/services/haptic_service.dart';
+import '../../shared/utils/app_colors.dart';
 import '../../shared/widgets/how_it_works_sheet.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -74,7 +78,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      body: Container(
+      body: DecoratedBox(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -96,7 +100,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 10),
                     // Logo Section
                     Center(
                       child: Container(
@@ -115,19 +119,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         child: const Icon(
                           Icons.shopping_bag_outlined,
                           size: 48,
-                          color: Color(0xFFF97316),
+                          color: AppColors.brandOrange,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 10),
                     Text(
                       'BagajPark',
                       style: theme.textTheme.displayLarge?.copyWith(
-                        color: const Color(0xFFF97316),
+                        color: AppColors.brandOrange,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     Text(
                       'auth.register_hint'.tr(),
                       style: theme.textTheme.bodyMedium?.copyWith(
@@ -136,7 +140,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 48),
+                    const SizedBox(height: 16),
 
                     // Login Card
                     Card(
@@ -152,7 +156,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               style: theme.textTheme.headlineMedium,
                               textAlign: TextAlign.center,
                             ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 12),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -168,16 +172,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   child: Text(
                                     'auth.register'.tr(),
                                     style: GoogleFonts.outfit(
-                                      color: const Color(0xFFF97316),
+                                      color: AppColors.brandOrange,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 8),
                             const Divider(),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 12),
                             TextFormField(
                               controller: _identity,
                               keyboardType: TextInputType.emailAddress,
@@ -187,14 +191,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 prefixIcon: const Icon(
                                   Icons.person_outline_rounded,
                                 ),
-                                helperText: 'Örn: 05xx xxx xx xx veya e-posta',
+                                helperText: 'auth.identity_hint'.tr(),
                                 helperStyle: const TextStyle(fontSize: 10),
                               ),
                               validator: (v) => _isValid(v ?? '')
                                   ? null
                                   : 'auth.invalid_identity'.tr(),
                             ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 12),
                             FilledButton(
                               onPressed: _busy ? null : _requestOtp,
                               child: _busy
@@ -213,7 +217,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 16),
 
                     // Divider
                     Row(
@@ -233,7 +237,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ],
                     ),
 
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 16),
 
                     // Social Logins
                     OutlinedButton.icon(
@@ -251,7 +255,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
 
                     if (Platform.isIOS || Platform.isMacOS) ...[
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 10),
                       OutlinedButton.icon(
                         onPressed: _busy ? null : _apple,
                         icon: const Icon(Icons.apple, size: 28),
@@ -263,45 +267,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                     ],
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 10),
                     TextButton.icon(
-                      onPressed: () => _showHowItWorks(context),
+                      onPressed: () {
+                        ref.read(hapticServiceProvider).selection();
+                        _showHowItWorks(context);
+                      },
                       icon: const Icon(Icons.info_outline_rounded, size: 20),
                       label: Text(
                         'home.how_it_works'.tr(),
                         style: GoogleFonts.outfit(
-                          color: const Color(0xFFF97316),
+                          color: AppColors.brandOrange,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 24),
-                    TextButton(
-                      onPressed: () =>
-                          ref.read(authControllerProvider.notifier).skipLogin(),
-                      child: Text(
-                        'auth.demo_guest'.tr(),
-                        style: GoogleFonts.outfit(
-                          color: Colors.grey.shade600,
-                          fontWeight: FontWeight.w600,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: () => ref
-                          .read(authControllerProvider.notifier)
-                          .skipLoginAsPartner(),
-                      child: Text(
-                        'auth.demo_partner'.tr(),
-                        style: GoogleFonts.outfit(
-                          color: const Color(0xFFF97316),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
@@ -333,6 +314,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _requestOtp() async {
+    unawaited(ref.read(hapticServiceProvider).light());
     if (!_formKey.currentState!.validate()) return;
     setState(() => _busy = true);
     try {
@@ -358,6 +340,8 @@ class _OtpBottomSheet extends ConsumerStatefulWidget {
 
 class _OtpBottomSheetState extends ConsumerState<_OtpBottomSheet> {
   final _code = TextEditingController();
+  final _password = TextEditingController();
+  bool _usePassword = false;
   bool _busy = false;
   int _timerCount = 60;
   bool _canResend = false;
@@ -384,19 +368,47 @@ class _OtpBottomSheetState extends ConsumerState<_OtpBottomSheet> {
   }
 
   Future<void> _verify() async {
+    unawaited(ref.read(hapticServiceProvider).light());
     if (_code.text.length < 6) return;
     setState(() => _busy = true);
     try {
       await ref
           .read(authControllerProvider.notifier)
           .verifyOtp(widget.identity, _code.text.trim());
+      unawaited(ref.read(hapticServiceProvider).success());
       if (!mounted) return;
       context.go('/');
     } catch (e) {
+      unawaited(ref.read(hapticServiceProvider).error());
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Hatalı kod girdiniz.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _verifyWithPassword() async {
+    unawaited(ref.read(hapticServiceProvider).light());
+    if (_password.text.isEmpty) return;
+    setState(() => _busy = true);
+    try {
+      await ref
+          .read(authControllerProvider.notifier)
+          .loginWithPassword(widget.identity, _password.text.trim());
+      unawaited(ref.read(hapticServiceProvider).success());
+      if (!mounted) return;
+      context.go('/');
+    } catch (e) {
+      unawaited(ref.read(hapticServiceProvider).error());
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Hatalı şifre girdiniz.'),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -424,7 +436,7 @@ class _OtpBottomSheetState extends ConsumerState<_OtpBottomSheet> {
             Row(
               children: [
                 Text(
-                  'Kodunuzu Girin',
+                  'auth.enter_code'.tr(),
                   style: GoogleFonts.outfit(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -443,41 +455,67 @@ class _OtpBottomSheetState extends ConsumerState<_OtpBottomSheet> {
               style: GoogleFonts.outfit(color: Colors.grey),
             ),
             const SizedBox(height: 32),
-            TextField(
-              controller: _code,
-              autofocus: true,
-              keyboardType: TextInputType.number,
-              maxLength: 6,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.outfit(
-                fontSize: 32,
-                letterSpacing: 8,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFFF97316),
-              ),
-              decoration: InputDecoration(
-                counterText: '',
-                hintText: '0 0 0 0 0 0',
-                hintStyle: GoogleFonts.outfit(
-                  color: Colors.grey.shade200,
+            if (!_usePassword)
+              TextField(
+                controller: _code,
+                autofocus: true,
+                keyboardType: TextInputType.number,
+                maxLength: 6,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.outfit(
+                  fontSize: 32,
                   letterSpacing: 8,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.brandOrange,
                 ),
-                filled: true,
-                fillColor: Colors.grey.shade50,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
+                decoration: InputDecoration(
+                  counterText: '',
+                  hintText: '0 0 0 0 0 0',
+                  hintStyle: GoogleFonts.outfit(
+                    color: Colors.grey.shade200,
+                    letterSpacing: 8,
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey.shade50,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+                onChanged: (v) {
+                  if (v.length == 6) _verify();
+                },
+              )
+            else
+              TextField(
+                controller: _password,
+                autofocus: true,
+                obscureText: true,
+                style: GoogleFonts.outfit(fontSize: 18),
+                decoration: InputDecoration(
+                  hintText: 'Şifre'.tr(),
+                  filled: true,
+                  fillColor: Colors.grey.shade50,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
                 ),
               ),
-              onChanged: (v) {
-                if (v.length == 6) _verify();
-              },
-            ),
             const SizedBox(height: 32),
             FilledButton(
-              onPressed: _busy || _code.text.length < 6 ? null : _verify,
+              onPressed:
+                  _busy ||
+                      (!_usePassword && _code.text.length < 6) ||
+                      (_usePassword && _password.text.isEmpty)
+                  ? null
+                  : (_usePassword ? _verifyWithPassword : _verify),
               style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFFF97316),
+                backgroundColor: AppColors.brandOrange,
                 minimumSize: const Size(double.infinity, 56),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -485,15 +523,26 @@ class _OtpBottomSheetState extends ConsumerState<_OtpBottomSheet> {
               ),
               child: _busy
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : Text('auth.verify'.tr()),
+                  : Text(_usePassword ? 'Giriş Yap'.tr() : 'auth.verify'.tr()),
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: () {
+                setState(() => _usePassword = !_usePassword);
+              },
+              child: Text(
+                _usePassword
+                    ? 'Kod ile Giriş Yap'.tr()
+                    : 'Şifre ile Giriş Yap'.tr(),
+              ),
             ),
             const SizedBox(height: 16),
             TextButton(
               onPressed: _canResend ? () => Navigator.pop(context) : null,
               child: Text(
                 _canResend
-                    ? 'Kodu tekrar gönder'
-                    : 'Tekrar gönder (${_timerCount}s)',
+                    ? 'auth.resend_code'.tr()
+                    : 'auth.resend_wait'.tr(args: [_timerCount.toString()]),
               ),
             ),
           ],

@@ -1,16 +1,18 @@
 import 'dart:async';
 import 'dart:ui';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:screen_protector/screen_protector.dart';
 
 import '../core/auth/auth_controller.dart';
 import '../core/services/deep_link_service.dart';
 import '../core/sync/sync_service.dart';
 import '../shared/models/user.dart';
-import 'package:screen_protector/screen_protector.dart';
+import '../shared/utils/app_colors.dart';
 import 'router.dart';
 import 'theme.dart';
 
@@ -83,7 +85,6 @@ class _BagajParkAppState extends ConsumerState<BagajParkApp>
       debugShowCheckedModeBanner: false,
       theme: buildLightTheme(),
       darkTheme: buildDarkTheme(),
-      themeMode: ThemeMode.system,
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
       locale: context.locale,
@@ -129,7 +130,7 @@ class _BagajParkAppState extends ConsumerState<BagajParkApp>
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                   child: Container(
-                    color: const Color(0xFFF97316).withValues(alpha: 0.1),
+                    color: AppColors.brandOrange.withValues(alpha: 0.1),
                     child: Center(
                       child: Image.asset(
                         'assets/images/logo_white.png',
@@ -137,7 +138,7 @@ class _BagajParkAppState extends ConsumerState<BagajParkApp>
                         errorBuilder: (_, _, _) => const Icon(
                           Icons.luggage_rounded,
                           size: 80,
-                          color: Color(0xFFF97316),
+                          color: AppColors.brandOrange,
                         ),
                       ),
                     ),

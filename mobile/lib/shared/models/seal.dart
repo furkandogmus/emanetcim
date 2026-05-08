@@ -4,15 +4,15 @@ part 'seal.freezed.dart';
 part 'seal.g.dart';
 
 enum SealStatus {
-  @JsonValue("STOCK")
+  @JsonValue('STOCK')
   stock,
-  @JsonValue("ASSIGNED")
+  @JsonValue('ASSIGNED')
   assigned,
-  @JsonValue("IN_USE")
+  @JsonValue('IN_USE')
   inUse,
-  @JsonValue("RETURNED")
+  @JsonValue('RETURNED')
   returned,
-  @JsonValue("FAULTY")
+  @JsonValue('FAULTY')
   faulty,
 }
 

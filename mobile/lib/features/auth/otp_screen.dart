@@ -7,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/auth/auth_controller.dart';
 
 class OtpScreen extends ConsumerStatefulWidget {
-  const OtpScreen({super.key, required this.identity, this.name});
+  const OtpScreen({required this.identity, super.key, this.name});
   final String identity;
   final String? name; // For registration
 
@@ -17,9 +17,11 @@ class OtpScreen extends ConsumerStatefulWidget {
 
 class _OtpScreenState extends ConsumerState<OtpScreen> {
   final _code = TextEditingController();
+  final _password = TextEditingController();
   bool _busy = false;
   int _timerCount = 60;
   bool _canResend = false;
+  bool _usePassword = false;
 
   @override
   void initState() {
@@ -64,6 +66,28 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     }
   }
 
+  Future<void> _verifyWithPassword() async {
+    if (_password.text.isEmpty) return;
+    setState(() => _busy = true);
+    try {
+      await ref
+          .read(authControllerProvider.notifier)
+          .loginWithPassword(widget.identity, _password.text.trim());
+      if (!mounted) return;
+      context.go('/');
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('auth.otp_error'.tr()),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,39 +110,65 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
               style: GoogleFonts.outfit(color: Colors.grey),
             ),
             const SizedBox(height: 48),
-            TextField(
-              controller: _code,
-              autofocus: true,
-              keyboardType: TextInputType.number,
-              maxLength: 6,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.outfit(
-                fontSize: 32,
-                letterSpacing: 8,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFFF97316),
-              ),
-              decoration: InputDecoration(
-                counterText: '',
-                hintText: '0 0 0 0 0 0',
-                hintStyle: GoogleFonts.outfit(
-                  color: Colors.grey.shade200,
+            if (!_usePassword)
+              TextField(
+                controller: _code,
+                autofocus: true,
+                keyboardType: TextInputType.number,
+                maxLength: 6,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.outfit(
+                  fontSize: 32,
                   letterSpacing: 8,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFFF97316),
                 ),
-                filled: true,
-                fillColor: Colors.grey.shade50,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
+                decoration: InputDecoration(
+                  counterText: '',
+                  hintText: '0 0 0 0 0 0',
+                  hintStyle: GoogleFonts.outfit(
+                    color: Colors.grey.shade200,
+                    letterSpacing: 8,
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey.shade50,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+                onChanged: (v) {
+                  if (v.length == 6) _verify();
+                },
+              )
+            else
+              TextField(
+                controller: _password,
+                autofocus: true,
+                obscureText: true,
+                style: GoogleFonts.outfit(fontSize: 18),
+                decoration: InputDecoration(
+                  hintText: 'Şifre'.tr(),
+                  filled: true,
+                  fillColor: Colors.grey.shade50,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
                 ),
               ),
-              onChanged: (v) {
-                if (v.length == 6) _verify();
-              },
-            ),
             const SizedBox(height: 32),
             FilledButton(
-              onPressed: _busy || _code.text.length < 6 ? null : _verify,
+              onPressed:
+                  _busy ||
+                      (!_usePassword && _code.text.length < 6) ||
+                      (_usePassword && _password.text.isEmpty)
+                  ? null
+                  : (_usePassword ? _verifyWithPassword : _verify),
               child: _busy
                   ? const SizedBox(
                       height: 20,
@@ -128,7 +178,11 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                         color: Colors.white,
                       ),
                     )
-                  : Text('auth.verify_button'.tr()),
+                  : Text(
+                      _usePassword
+                          ? 'Giriş Yap'.tr()
+                          : 'auth.verify_button'.tr(),
+                    ),
             ),
             const SizedBox(height: 16),
             TextButton(
@@ -137,6 +191,17 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                 _canResend
                     ? 'auth.resend'.tr()
                     : '${'auth.resend'.tr()} (${_timerCount}s)',
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: () {
+                setState(() => _usePassword = !_usePassword);
+              },
+              child: Text(
+                _usePassword
+                    ? 'Kod ile Giriş Yap'.tr()
+                    : 'Şifre ile Giriş Yap'.tr(),
               ),
             ),
           ],

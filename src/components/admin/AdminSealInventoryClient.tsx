@@ -32,7 +32,6 @@ export default function AdminSealInventoryClient({ sealCounts, shops, assignedBa
   const [creating, setCreating] = useState(false);
 
   const [shopId, setShopId] = useState(shops[0]?.id ?? "");
-  const [fromAssign, setFromAssign] = useState("");
   const [countAssign, setCountAssign] = useState("");
   const [assigning, setAssigning] = useState(false);
 
@@ -66,22 +65,17 @@ export default function AdminSealInventoryClient({ sealCounts, shops, assignedBa
       toast.error(t("sealSelectShop"));
       return;
     }
-    const start = parseInt(fromAssign, 10);
     const count = parseInt(countAssign, 10);
-    if (!Number.isFinite(start) || !Number.isFinite(count) || count <= 0) {
+    if (!Number.isFinite(count) || count <= 0) {
       toast.error(t("sealInvalidRange"));
       return;
     }
-    
-    // Bitiş seri nosu hesaplama (Örn: 1000'den başla, 100 adet -> 1099'da bit)
-    const end = start + count - 1;
 
     setAssigning(true);
     try {
-      const res = await assignSealsToShopAction(shopId, start, end);
+      const res = await assignSealsToShopAction(shopId, count);
       if (res.success) {
         toast.success(t("sealAssigned", { count: res.updated }));
-        setFromAssign("");
         setCountAssign("");
         window.location.reload();
       } else {
@@ -168,16 +162,6 @@ export default function AdminSealInventoryClient({ sealCounts, shops, assignedBa
           </select>
           <div className="flex flex-wrap gap-3 items-end">
             <label className="flex flex-col gap-1 text-xs font-bold text-gray-400 uppercase">
-              {t("sealFrom")}
-              <input
-                type="number"
-                className="bg-gray-50 rounded-xl px-4 py-3 font-black text-gray-900 w-28"
-                placeholder="1000"
-                value={fromAssign}
-                onChange={(e) => setFromAssign(e.target.value)}
-              />
-            </label>
-            <label className="flex flex-col gap-1 text-xs font-bold text-gray-400 uppercase">
               {t("sealCountLabel")}
               <input
                 type="number"
@@ -211,7 +195,6 @@ export default function AdminSealInventoryClient({ sealCounts, shops, assignedBa
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">{t("shopColumn")}</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">{t("sealRange")}</th>
                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">{t("sealAssignmentCount")}</th>
               </tr>
             </thead>
@@ -221,11 +204,6 @@ export default function AdminSealInventoryClient({ sealCounts, shops, assignedBa
                   <tr key={`${batch.shopId}-${idx}`} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-5">
                       <p className="font-bold text-gray-900">{batch.shopName}</p>
-                    </td>
-                    <td className="px-6 py-5">
-                      <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-lg font-mono text-xs font-bold">
-                        {batch.fromSerial} — {batch.toSerial}
-                      </span>
                     </td>
                     <td className="px-6 py-5 text-right">
                       <p className="font-black text-gray-900">{batch.count}</p>

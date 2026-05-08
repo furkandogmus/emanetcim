@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter, usePathname } from "next/navigation";
 import {
@@ -14,7 +14,7 @@ import {
   BarChart3,
   Luggage,
 } from "lucide-react";
-import Image from "next/image";
+
 import { Link } from "@/i18n/routing";
 import { moneyToNumber } from "@/lib/money";
 import { toast } from "sonner";
@@ -24,23 +24,13 @@ import {
   checkInAction,
   checkOutAction,
   getPartnerBookingPreviewAction,
-  getPartnerBookingSealsAction,
   approveBookingAction,
   rejectBookingAction,
-  reportFaultySealAction,
-  getNextAvailableSealsAction,
 } from "@/actions/partner";
 import type { PartnerBookingListItem } from "@/services/BookingService";
 import { dateLocaleForUiLocale } from "@/lib/date-locale";
 
-function buildBagSlots(s: number, m: number, xl: number) {
-  const out: { bagIndex: number; bagSize: string }[] = [];
-  let idx = 1;
-  for (let i = 0; i < s; i++) out.push({ bagIndex: idx++, bagSize: "S" });
-  for (let i = 0; i < m; i++) out.push({ bagIndex: idx++, bagSize: "M" });
-  for (let i = 0; i < xl; i++) out.push({ bagIndex: idx++, bagSize: "XL" });
-  return out;
-}
+
 
 interface PartnerClientProps {
   shopId: string;
@@ -86,8 +76,6 @@ export default function PartnerClient({
     "PANEL"
   );
   const [isScanning, setIsScanning] = useState(false);
-  const [sealPhoto, setSealPhoto] = useState<string | null>(null);
-  const [isPhotoLoading, setIsPhotoLoading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [scanResult, setScanResult] = useState<{
     id: string;
@@ -98,24 +86,11 @@ export default function PartnerClient({
     bagCountXl: number;
     totalBags: number;
   } | null>(null);
-  const [sealRows, setSealRows] = useState<
-    { bagIndex: number; bagSize: string; sealNumber: number }[]
-  >([]);
-  const [faultySealNumbers, setFaultySealNumbers] = useState<number[]>([]);
-  const [checkoutOpen, setCheckoutOpen] = useState<{
-    bookingId: string;
-    seals: { sealNumber: number; bagIndex: number; bagSize: string }[];
-  } | null>(null);
-  const [sealConfirmChecks, setSealConfirmChecks] = useState<
-    Record<number, boolean>
-  >({});
   const [successBanner, setSuccessBanner] = useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [checkingOutId, setCheckingOutId] = useState<string | null>(null);
   const [urlHandled, setUrlHandled] = useState(false);
-  /** Çok valizli check-in: önce mühür fotoğrafı, sonra numara özeti + onay. */
-  const [checkInPhase, setCheckInPhase] = useState<"photo" | "review">("photo");
-  const checkInPhotoAnchorRef = useRef<HTMLDivElement>(null);
+
   const [confirmState, setConfirmState] = useState<{
     open: boolean;
     message: string;
@@ -157,9 +132,6 @@ export default function PartnerClient({
           bagCountXl: preview.bagCountXl,
           totalBags: preview.totalBags,
         });
-        setSealPhoto(null);
-        setFaultySealNumbers([]);
-        setSealRows([]);
       } finally {
         setPreviewLoading(false);
       }
@@ -193,55 +165,7 @@ export default function PartnerClient({
     });
   };
 
-  // Otomatik mühür atama için mühürleri tazele
-  const refreshAutoSeals = useCallback(async (_bookingId: string, count: number) => {
-    const res = await getNextAvailableSealsAction(shopId, count);
-    if (res.success) {
-      const slots = buildBagSlots(
-        scanResult?.bagCountS || 0,
-        scanResult?.bagCountM || 0,
-        scanResult?.bagCountXl || 0
-      );
-      if (res.seals.length < count) {
-        setSealRows([]);
-        showError(t("checkInFailed"));
-        return;
-      }
-      setSealRows(
-        slots.map((s, i) => ({
-          ...s,
-          sealNumber: res.seals[i].sealNumber,
-        })),
-      );
-    } else {
-      setSealRows([]);
-      showError(res.error);
-    }
-  }, [shopId, scanResult, showError, t]);
 
-  useEffect(() => {
-    if (scanResult && scanResult.totalBags > 0 && sealRows.length === 0) {
-      void refreshAutoSeals(scanResult.id, scanResult.totalBags);
-    }
-  }, [scanResult, sealRows.length, refreshAutoSeals]);
-
-  const markFaultyAtRow = async (rowIdx: number) => {
-    if (!sealRows[rowIdx]) return;
-    const sn = sealRows[rowIdx].sealNumber;
-    setFaultySealNumbers((prev) => [...prev, sn]);
-    
-    // Sunucu tarafında mühürü hatalı işaretle
-    const res = await reportFaultySealAction(sn, shopId);
-    if (!res.success) {
-      showError(res.error);
-      return;
-    }
-
-    // Mühürleri yeniden çek (Sıradakiler gelsin)
-    if (scanResult) {
-      await refreshAutoSeals(scanResult.id, scanResult.totalBags);
-    }
-  };
 
   const executeCheckout = useCallback(
     async (bookingId: string): Promise<boolean> => {
@@ -266,42 +190,14 @@ export default function PartnerClient({
 
   const openCheckoutFlow = useCallback(
     async (bookingId: string) => {
-      const res = await getPartnerBookingSealsAction(bookingId);
-      if (!res.success) {
-        showError(res.error);
-        return;
-      }
-      if (res.seals.length === 0) {
-        askConfirm(t("confirmCheckout"), async () => {
-          await executeCheckout(bookingId);
-        });
-        return;
-      }
-      setCheckoutOpen({ bookingId, seals: res.seals });
-      const init: Record<number, boolean> = {};
-      for (const s of res.seals) {
-        init[s.sealNumber] = false;
-      }
-      setSealConfirmChecks(init);
+      askConfirm(t("confirmCheckout"), async () => {
+        await executeCheckout(bookingId);
+      });
     },
-    [askConfirm, executeCheckout, showError, t]
+    [askConfirm, executeCheckout, t]
   );
 
-  const confirmCheckoutWithSeals = async () => {
-    if (!checkoutOpen) return;
-    const allOk = checkoutOpen.seals.every(
-      (s) => sealConfirmChecks[s.sealNumber]
-    );
-    if (!allOk) {
-      showError(t("checkoutSealConfirmEach"));
-      return;
-    }
-    const id = checkoutOpen.bookingId;
-    const ok = await executeCheckout(id);
-    if (ok) {
-      setCheckoutOpen(null);
-    }
-  };
+
 
   const runCheckoutFromUrl = useCallback(
     async (bookingId: string) => {
@@ -345,73 +241,21 @@ export default function PartnerClient({
     runCheckoutFromUrl,
   ]);
 
-  useEffect(() => {
-    if (!scanResult || scanResult.totalBags <= 0) {
-      setSealRows([]);
-    }
-  }, [scanResult]);
 
-  useEffect(() => {
-    if (!scanResult) return;
-    setCheckInPhase(scanResult.totalBags > 0 ? "photo" : "review");
-  }, [scanResult]);
-
-  useEffect(() => {
-    if (!scanResult || scanResult.totalBags === 0 || checkInPhase !== "photo") return;
-    const id = requestAnimationFrame(() => {
-      checkInPhotoAnchorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-    return () => cancelAnimationFrame(id);
-  }, [scanResult, checkInPhase]);
 
   const handleScanResult = (result: string) => {
     void applyPreviewForCheckIn(result, true);
   };
 
-  const handlePhotoCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setIsPhotoLoading(true);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSealPhoto(reader.result as string);
-        setIsPhotoLoading(false);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const handleCheckIn = async () => {
     if (!scanResult) return;
-    const tb = scanResult.totalBags;
-    if (tb > 0) {
-      if (!sealPhoto) {
-        showError(t("takeSealPhotoAlert"));
-        setCheckInPhase("photo");
-        return;
-      }
-      if (sealRows.length !== tb) {
-        showError(t("checkInFailed"));
-        return;
-      }
-    }
     setIsProcessing(true);
-    const result = await checkInAction(scanResult.id, sealPhoto, {
-      sealAssignments: sealRows.map((r) => ({
-        sealNumber: r.sealNumber,
-        bagIndex: r.bagIndex,
-        bagSize: r.bagSize,
-      })),
-      faultySealNumbers,
-    });
+    const result = await checkInAction(scanResult.id);
     setIsProcessing(false);
 
     if (result.success) {
       setSuccessBanner(t("checkInSuccess"));
       setScanResult(null);
-      setSealPhoto(null);
-      setSealRows([]);
-      setFaultySealNumbers([]);
       setTimeout(() => setSuccessBanner(null), 3000);
       router.refresh();
     } else {
@@ -454,85 +298,6 @@ export default function PartnerClient({
               <X size={20} />
             </button>
 
-            {scanResult.totalBags > 0 && checkInPhase === "photo" ? (
-              <>
-                <div ref={checkInPhotoAnchorRef} className="flex flex-col gap-2">
-                  <p className="text-center text-[10px] font-black uppercase tracking-[0.25em] text-orange-600">
-                    {t("partnerCheckInStepPhotoKicker")}
-                  </p>
-                  <h3 className="text-center text-xl font-black tracking-tight text-gray-900">
-                    {t("partnerCheckInStepPhotoTitle")}
-                  </h3>
-                  <p className="text-center text-sm font-medium text-gray-500">
-                    {t("partnerCheckInStepPhotoHint")}
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-4">
-                  <label className="group flex min-h-[220px] w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-[2rem] border-4 border-dashed border-orange-100 bg-orange-50/40 transition-all hover:border-orange-200">
-                    {sealPhoto ? (
-                      <div className="relative h-56 w-full">
-                        <Image
-                          src={sealPhoto}
-                          alt={t("sealPhotoAlt")}
-                          fill
-                          unoptimized
-                          className="object-cover ring-2 ring-orange-100"
-                          sizes="(max-width: 768px) 100vw, 480px"
-                        />
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center gap-4 py-6">
-                        <div className="rounded-full bg-white p-6 text-orange-500 shadow-md transition-colors group-hover:text-orange-600">
-                          <Camera size={40} strokeWidth={1.25} />
-                        </div>
-                        <span className="px-4 text-center text-xs font-black uppercase tracking-widest text-gray-500">
-                          {t("takeSealPhotoLabel")}
-                        </span>
-                      </div>
-                    )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      capture="environment"
-                      onChange={handlePhotoCapture}
-                      className="hidden"
-                    />
-                  </label>
-                  {isPhotoLoading && (
-                    <p className="text-center text-[10px] font-black uppercase text-orange-600 animate-pulse">
-                      {t("processing")}
-                    </p>
-                  )}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!sealPhoto) {
-                        showError(t("takeSealPhotoAlert"));
-                      return;
-                    }
-                    setCheckInPhase("review");
-                  }}
-                  disabled={isPhotoLoading}
-                  className="flex h-16 w-full items-center justify-center gap-2 rounded-[2rem] bg-orange-600 text-sm font-black uppercase tracking-widest text-white shadow-lg shadow-orange-200/50 transition-all hover:bg-orange-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
-                >
-                  {t("partnerCheckInContinueToSeals")}
-                </button>
-              </>
-            ) : (
-              <>
-                {scanResult.totalBags > 0 ? (
-                  <button
-                    type="button"
-                    onClick={() => setCheckInPhase("photo")}
-                    className="self-start text-left text-[10px] font-black uppercase tracking-widest text-orange-600 hover:underline"
-                  >
-                    ← {t("partnerCheckInRetakePhoto")}
-                  </button>
-                ) : null}
-
                 <div className="flex items-center gap-6">
                   <div className="rounded-[2rem] bg-orange-100 p-5 text-orange-600 ring-4 ring-orange-50 shadow-inner">
                     <Package size={32} />
@@ -547,113 +312,12 @@ export default function PartnerClient({
                   </div>
                 </div>
 
-                {scanResult.totalBags > 0 && sealPhoto ? (
-                  <div className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-3">
-                    <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl">
-                      <Image
-                        src={sealPhoto}
-                        alt=""
-                        fill
-                        unoptimized
-                        className="object-cover"
-                        sizes="56px"
-                      />
-                    </div>
-                    <p className="text-xs font-bold text-gray-600">{t("sealPhotoAlt")}</p>
-                  </div>
-                ) : null}
-
-                {scanResult.totalBags > 0 ? (
-                  <div className="flex flex-col gap-4 rounded-3xl border border-gray-100 bg-gray-50/80 p-5">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-                      {t("sealAssignmentsTitle")}
-                    </p>
-                    <p className="text-xs font-bold text-gray-500">{t("automaticSealNotice")}</p>
-                    <div className="flex max-h-48 flex-col gap-2 overflow-y-auto">
-                      {sealRows.map((row, idx) => (
-                        <div
-                          key={`${row.bagIndex}-${idx}`}
-                          className="flex items-center justify-between gap-2 rounded-2xl border border-gray-100 bg-white px-4 py-3"
-                        >
-                          <span className="text-sm font-bold">
-                            {t("sealRowLabel", {
-                              index: row.bagIndex,
-                              size: row.bagSize,
-                            })}
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono font-black text-orange-600">
-                              {t("sealNumberShort")}
-                              {row.sealNumber}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => markFaultyAtRow(idx)}
-                              className="rounded-lg bg-red-50 px-2 py-1 text-[10px] font-black uppercase text-red-600 hover:bg-red-100"
-                            >
-                              {t("markSealFaulty")}
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-4">
-                    <label className="group flex min-h-[140px] w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-[2.5rem] border-4 border-dashed border-gray-100 bg-gray-50 transition-all hover:border-orange-200">
-                      {sealPhoto ? (
-                        <div className="relative h-40 w-full">
-                          <Image
-                            src={sealPhoto}
-                            alt={t("sealPhotoAlt")}
-                            fill
-                            unoptimized
-                            className="rounded-[2rem] object-cover shadow-xl ring-2 ring-gray-100"
-                            sizes="(max-width: 768px) 100vw, 480px"
-                          />
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center gap-3 py-4">
-                          <div className="rounded-full bg-white p-4 text-gray-400 shadow-sm group-hover:text-orange-600">
-                            <Camera size={28} />
-                          </div>
-                          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
-                            {t("takeSealPhotoLabel")}
-                          </span>
-                        </div>
-                      )}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        capture="environment"
-                        onChange={handlePhotoCapture}
-                        className="hidden"
-                      />
-                    </label>
-                    {isPhotoLoading ? (
-                      <p className="text-center text-[10px] font-black uppercase text-orange-600 animate-pulse">
-                        {t("processing")}
-                      </p>
-                    ) : null}
-                  </div>
-                )}
-
                 <button
                   type="button"
                   onClick={() => void handleCheckIn()}
-                  disabled={
-                    isProcessing ||
-                    isPhotoLoading ||
-                    (scanResult.totalBags > 0 &&
-                      (sealRows.length !== scanResult.totalBags || !sealPhoto))
-                  }
+                  disabled={isProcessing}
                   className={`flex h-20 w-full items-center justify-center gap-3 rounded-[2rem] text-sm font-black uppercase tracking-widest shadow-2xl transition-all active:scale-95 ${
-                    !(
-                      isProcessing ||
-                      isPhotoLoading ||
-                      (scanResult.totalBags > 0 &&
-                        (sealRows.length !== scanResult.totalBags || !sealPhoto))
-                    )
+                    !isProcessing
                       ? "bg-orange-600 text-white shadow-orange-200/50 hover:bg-orange-700"
                       : "cursor-not-allowed bg-gray-100 text-gray-300 grayscale"
                   }`}
@@ -665,71 +329,6 @@ export default function PartnerClient({
                   )}
                   {t("sealAndStart")}
                 </button>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
-      {checkoutOpen && (
-        <div className="fixed inset-0 z-[55] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-[2rem] w-full max-w-md p-8 shadow-2xl border border-gray-100 flex flex-col gap-6">
-            <h3 className="font-black text-xl text-gray-900">
-              {t("checkoutSealsTitle")}
-            </h3>
-            <p className="text-sm text-gray-500">{t("checkoutSealConfirmEach")}</p>
-            <ul className="flex flex-col gap-3 max-h-64 overflow-y-auto">
-              {checkoutOpen.seals.map((s) => (
-                <li
-                  key={`${s.bagIndex}-${s.sealNumber}`}
-                  className="flex items-center justify-between gap-3 bg-gray-50 rounded-xl px-4 py-3"
-                >
-                  <span className="text-sm font-bold text-gray-700">
-                    {t("sealRowLabel", { index: s.bagIndex, size: s.bagSize })}{" "}
-                    · {t("sealNumberShort")}
-                    {s.sealNumber}
-                  </span>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={sealConfirmChecks[s.sealNumber] ?? false}
-                      onChange={(e) =>
-                        setSealConfirmChecks((prev) => ({
-                          ...prev,
-                          [s.sealNumber]: e.target.checked,
-                        }))
-                      }
-                      className="w-5 h-5 accent-orange-600"
-                    />
-                  </label>
-                </li>
-              ))}
-            </ul>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setCheckoutOpen(null)}
-                className="flex-1 py-4 rounded-2xl bg-gray-100 font-black text-sm uppercase"
-              >
-                {t("checkoutCancel")}
-              </button>
-              <button
-                type="button"
-                disabled={
-                  !checkoutOpen.seals.every(
-                    (s) => sealConfirmChecks[s.sealNumber]
-                  ) || checkingOutId === checkoutOpen.bookingId
-                }
-                onClick={() => void confirmCheckoutWithSeals()}
-                className="flex-1 py-4 rounded-2xl bg-gray-900 text-white font-black text-sm uppercase disabled:opacity-40"
-              >
-                {checkingOutId === checkoutOpen.bookingId ? (
-                  <Loader2 className="inline animate-spin w-5 h-5" />
-                ) : (
-                  t("confirmCheckoutSeals")
-                )}
-              </button>
-            </div>
           </div>
         </div>
       )}

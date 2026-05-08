@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 import { shopService } from "@/services/ShopService";
+import prisma from "@/lib/db";
 
 export async function GET(req: NextRequest) {
   const auth = await requireMobileUser(req);
@@ -15,7 +16,15 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Shop not found" }, { status: 404 });
   }
 
-  return NextResponse.json(shop);
+  const sealCount = await prisma.seal.count({
+    where: { shopId: shop.id, status: "ASSIGNED" }
+  });
+
+  return NextResponse.json({
+    ...shop,
+    pricePerDay: Number(shop.pricePerDay),
+    sealCount,
+  });
 }
 
 export async function PUT(req: NextRequest) {

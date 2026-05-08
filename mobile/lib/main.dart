@@ -2,16 +2,17 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'app/app.dart';
-import 'core/config/env.dart';
 import 'core/auth/token_store.dart';
+import 'core/config/env.dart';
+import 'core/services/logger_service.dart';
 import 'features/security/root_warning_screen.dart';
 import 'shared/widgets/global_error_widget.dart';
-import 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
@@ -26,13 +27,27 @@ Future<void> main() async {
   // Global Error Handling
   ErrorWidget.builder = (details) => GlobalErrorWidget(details: details);
 
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    Logger.e(
+      'Flutter Error: ${details.exception}',
+      details.exception,
+      details.stack,
+    );
+  };
+
+  WidgetsBinding.instance.platformDispatcher.onError = (error, stack) {
+    Logger.e('Async Error: $error', error, stack);
+    return true;
+  };
+
   // Encryption for Hive (Security Hardening)
   final tokenStore = TokenStore();
   List<int>? hiveKey;
   try {
     hiveKey = await tokenStore.getHiveKey();
   } catch (e) {
-    debugPrint('Hive Key error: $e');
+    Logger.e('Hive Key error', e);
   }
 
   if (hiveKey != null) {
@@ -47,11 +62,11 @@ Future<void> main() async {
     await Hive.openBox('my_bookings_cache');
   }
 
-  bool isRooted = false;
+  var isRooted = false;
   try {
     isRooted = await FlutterJailbreakDetection.jailbroken;
   } catch (e) {
-    debugPrint('Security check error: $e');
+    Logger.w('Security check error', e);
   }
 
   if (Env.firebaseEnabled) {
@@ -68,8 +83,9 @@ Future<void> main() async {
 
   await SentryFlutter.init(
     (options) {
-      options.dsn = Env.sentryDsn;
-      options.tracesSampleRate = 0.2;
+      options
+        ..dsn = Env.sentryDsn
+        ..tracesSampleRate = 0.2;
     },
     appRunner: () => runApp(
       isRooted ? RootWarningScreen(onContinue: () => runApp(app)) : app,

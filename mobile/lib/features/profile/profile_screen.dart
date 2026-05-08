@@ -9,6 +9,7 @@ import '../../core/auth/auth_controller.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/services/share_service.dart';
 import '../../shared/models/user.dart';
+import '../../shared/utils/app_colors.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -40,10 +41,10 @@ class ProfileScreen extends ConsumerWidget {
                       width: 100,
                       height: 100,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF97316).withValues(alpha: 0.1),
+                        color: AppColors.brandOrange.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: const Color(0xFFF97316),
+                          color: AppColors.brandOrange,
                           width: 2,
                         ),
                       ),
@@ -53,7 +54,7 @@ class ProfileScreen extends ConsumerWidget {
                           style: GoogleFonts.outfit(
                             fontSize: 40,
                             fontWeight: FontWeight.bold,
-                            color: const Color(0xFFF97316),
+                            color: AppColors.brandOrange,
                           ),
                         ),
                       ),
@@ -64,7 +65,7 @@ class ProfileScreen extends ConsumerWidget {
                       child: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: const BoxDecoration(
-                          color: Color(0xFFF97316),
+                          color: AppColors.brandOrange,
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
@@ -78,7 +79,7 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  user?.name ?? 'Kullanıcı',
+                  user?.name ?? 'profile.default_name'.tr(),
                   style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -99,9 +100,9 @@ class ProfileScreen extends ConsumerWidget {
           // Stats Section
           Row(
             children: [
-              _statItem('0', 'Rezervasyon'),
-              _statItem('₺0', 'Tasarruf'),
-              _statItem('0', 'Favori'),
+              _statItem('0', 'profile.stats_bookings'.tr()),
+              _statItem('₺0', 'profile.stats_savings'.tr()),
+              _statItem('0', 'profile.stats_favorites'.tr()),
             ],
           ),
 
@@ -160,8 +161,11 @@ class ProfileScreen extends ConsumerWidget {
           _menuItem(
             Icons.privacy_tip_outlined,
             'profile.privacy'.tr(),
-            onTap: () =>
-                _showLegal(context, 'profile.privacy'.tr(), _privacyPolicyText),
+            onTap: () => _showLegal(
+              context,
+              'profile.privacy'.tr(),
+              'profile.privacy_content'.tr(),
+            ),
           ),
           _menuItem(
             Icons.gavel_rounded,
@@ -169,7 +173,7 @@ class ProfileScreen extends ConsumerWidget {
             onTap: () => _showLegal(
               context,
               'profile.terms_of_service'.tr(),
-              _termsOfServiceText,
+              'profile.terms_content'.tr(),
             ),
           ),
           _menuItem(
@@ -249,7 +253,7 @@ class ProfileScreen extends ConsumerWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+          colors: [AppColors.textDark, Color(0xFF1E293B)],
         ),
         borderRadius: BorderRadius.circular(24),
       ),
@@ -265,7 +269,7 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 child: const Icon(
                   Icons.card_giftcard_rounded,
-                  color: Color(0xFFF97316),
+                  color: AppColors.brandOrange,
                   size: 24,
                 ),
               ),
@@ -303,17 +307,20 @@ class ProfileScreen extends ConsumerWidget {
               border: Border.all(color: Colors.white12),
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  user?.referralCode ?? 'BP-WELCOME',
-                  style: GoogleFonts.outfit(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                    letterSpacing: 2,
+                Flexible(
+                  child: Text(
+                    user?.referralCode ?? 'BP-WELCOME',
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      letterSpacing: 1,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                const SizedBox(width: 8),
                 TextButton.icon(
                   onPressed: () {
                     ref.read(hapticServiceProvider).light();
@@ -326,18 +333,24 @@ class ProfileScreen extends ConsumerWidget {
                   },
                   icon: const Icon(
                     Icons.copy_rounded,
-                    size: 18,
-                    color: Color(0xFFF97316),
+                    size: 16,
+                    color: AppColors.brandOrange,
                   ),
                   label: Text(
                     'profile.copy'.tr(),
                     style: GoogleFonts.outfit(
-                      color: const Color(0xFFF97316),
+                      color: AppColors.brandOrange,
                       fontWeight: FontWeight.bold,
-                      fontSize: 12,
+                      fontSize: 11,
                     ),
                   ),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
                 ),
+                const SizedBox(width: 4),
                 IconButton(
                   onPressed: () {
                     ref.read(hapticServiceProvider).selection();
@@ -348,6 +361,8 @@ class ProfileScreen extends ConsumerWidget {
                     size: 18,
                     color: Colors.white70,
                   ),
+                  constraints: const BoxConstraints(),
+                  padding: const EdgeInsets.all(8),
                 ),
               ],
             ),
@@ -362,13 +377,13 @@ class ProfileScreen extends ConsumerWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         tileColor: Colors.white,
-        leading: Icon(icon, color: const Color(0xFF0F172A), size: 22),
+        leading: Icon(icon, color: AppColors.textDark, size: 22),
         title: Text(
           title,
           style: GoogleFonts.outfit(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF0F172A),
+            color: AppColors.textDark,
           ),
         ),
         trailing: Icon(
@@ -472,7 +487,7 @@ class ProfileScreen extends ConsumerWidget {
 
   void _showEditProfile(BuildContext context, UserDto? user) {
     final nameController = TextEditingController(text: user?.name);
-    bool isSaving = false;
+    var isSaving = false;
 
     showModalBottomSheet(
       context: context,
@@ -511,26 +526,41 @@ class ProfileScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 24),
               FilledButton(
-                onPressed: isSaving ? null : () async {
-                  setModalState(() => isSaving = true);
-                  try {
-                    // Temporary mock update logic, assuming API /account exists
-                    // final dio = ref.read(dioProvider);
-                    // await dio.put('/account', data: {'name': nameController.text});
-                    await Future.delayed(const Duration(seconds: 1)); // Mock Network Call
-                    if (context.mounted) Navigator.pop(context);
-                  } catch (e) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('${'common.error'.tr()}: $e'))
-                      );
-                    }
-                  } finally {
-                    if (context.mounted) setModalState(() => isSaving = false);
-                  }
-                },
+                onPressed: isSaving
+                    ? null
+                    : () async {
+                        setModalState(() => isSaving = true);
+                        try {
+                          // Temporary mock update logic, assuming API /account exists
+                          // final dio = ref.read(dioProvider);
+                          // await dio.put('/account', data: {'name': nameController.text});
+                          await Future.delayed(
+                            const Duration(seconds: 1),
+                          ); // Mock Network Call
+                          if (context.mounted) Navigator.pop(context);
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('${'common.error'.tr()}: $e'),
+                              ),
+                            );
+                          }
+                        } finally {
+                          if (context.mounted) {
+                            setModalState(() => isSaving = false);
+                          }
+                        }
+                      },
                 child: isSaving
-                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
                     : Text('common.confirm'.tr()),
               ),
               const SizedBox(height: 40),
@@ -600,7 +630,7 @@ class ProfileScreen extends ConsumerWidget {
             style: GoogleFonts.outfit(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFF0F172A),
+              color: AppColors.textDark,
             ),
           ),
           Text(
@@ -614,31 +644,4 @@ class ProfileScreen extends ConsumerWidget {
       ),
     );
   }
-
-  static const String _privacyPolicyText = '''
-BagajPark olarak gizliliğinize önem veriyoruz. Bu metin, verilerinizin nasıl toplandığını ve kullanıldığını açıklar.
-
-1. Toplanan Veriler
-Hizmetimizi sunabilmek için adınız, e-posta adresiniz, telefon numaranız ve konum bilginiz gibi temel bilgileri topluyoruz.
-
-2. Verilerin Kullanımı
-Verileriniz sadece rezervasyon işlemlerini gerçekleştirmek, güvenliği sağlamak ve size bildirim göndermek amacıyla kullanılır.
-
-3. Üçüncü Taraflar
-Verileriniz yasal zorunluluklar dışında üçüncü taraflarla paylaşılmaz. Ödeme işlemleri güvenli aracı kurumlar üzerinden yürütülür.
-''';
-
-  static const String _termsOfServiceText = '''
-BagajPark Kullanım Koşulları
-
-1. Hizmet Tanımı
-BagajPark, eşyalarınızı güvenli noktalarda (esnaflarda) geçici olarak saklamanıza olanak sağlayan bir platformdur.
-
-2. Sorumluluklar
-- Esnaf, kendisine teslim edilen eşyayı güvenli bir şekilde saklamakla yükümlüdür.
-- Kullanıcı, yasaklı madde (yanıcı, patlayıcı, yasa dışı vb.) teslim etmemeyi taahhüt eder.
-
-3. İptal ve İade
-Rezervasyon saatinden önce yapılan iptallerde tam iade yapılır. Süre başladıktan sonra iade yapılmaz.
-''';
 }

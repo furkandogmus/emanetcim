@@ -1,12 +1,14 @@
 import 'dart:async';
+
 import 'package:app_links/app_links.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../auth/auth_controller.dart';
+
 import '../../app/router.dart';
+import '../auth/auth_controller.dart';
 
 final deepLinkServiceProvider = Provider((ref) {
   final service = DeepLinkService(ref);
-  ref.onDispose(() => service.dispose());
+  ref.onDispose(service.dispose);
   return service;
 });
 
@@ -18,9 +20,7 @@ class DeepLinkService {
   DeepLinkService(this._ref);
 
   void init() {
-    _sub = _appLinks.uriLinkStream.listen((uri) {
-      _handleUri(uri);
-    });
+    _sub = _appLinks.uriLinkStream.listen(_handleUri);
 
     // Check for initial link
     _appLinks.getInitialLink().then((uri) {
@@ -40,7 +40,7 @@ class DeepLinkService {
     final router = _ref.read(routerProvider);
 
     // Normalize path (handle bagajpark://scheme)
-    String targetPath = path;
+    var targetPath = path;
     if (uri.scheme == 'bagajpark') {
       targetPath = '/$path'.replaceAll('//', '/');
     }
