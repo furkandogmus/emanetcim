@@ -112,6 +112,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
             const SizedBox(height: 48),
             if (!_usePassword)
               TextField(
+                key: const ValueKey('otp_code_field'),
                 controller: _code,
                 autofocus: true,
                 keyboardType: TextInputType.number,
@@ -143,6 +144,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
               )
             else
               TextField(
+                key: const ValueKey('otp_password_field'),
                 controller: _password,
                 autofocus: true,
                 obscureText: true,
@@ -199,6 +201,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
             const SizedBox(height: 8),
             TextButton(
               onPressed: () {
+                FocusManager.instance.primaryFocus?.unfocus();
                 setState(() => _usePassword = !_usePassword);
               },
               child: Text(
