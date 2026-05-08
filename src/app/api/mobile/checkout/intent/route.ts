@@ -6,6 +6,9 @@ import { bookingService } from "@/services/BookingService";
 import { paymentService } from "@/services/PaymentService";
 import { computeAuthoritativeCheckoutTotals } from "@/lib/booking-server-price";
 import { getPricingRules } from "@/lib/platform-settings";
+import { getPaymentGateway } from "@/lib/payment-gateway";
+import { isPaymentsEnabled } from "@/lib/feature-flags";
+import logger from "@/lib/logger";
 import prisma from "@/lib/db";
 
 const schema = z.object({
@@ -16,6 +19,24 @@ const schema = z.object({
   bagCountM: z.number().int().min(0).max(20),
   bagCountXl: z.number().int().min(0).max(20),
 });
+
+/**
+ * Dev/test bypass: when MOBILE_PAYMENT_BYPASS=true, skip the real payment
+ * provider, mark the booking PAID directly, and let the mobile client walk
+ * through downstream flows (booking detail, partner check-in, etc.).
+ *
+ * Hard guard: refuse to bypass in production unless an explicit prod flag
+ * is also set. This stays opt-in twice so a stray env doesn't ship a free
+ * checkout to real users.
+ */
+function isPaymentBypassEnabled(): boolean {
+  const bypass = process.env.MOBILE_PAYMENT_BYPASS === "true";
+  if (!bypass) return false;
+  if (process.env.NODE_ENV === "production") {
+    return process.env.MOBILE_PAYMENT_BYPASS_ALLOW_PROD === "true";
+  }
+  return true;
+}
 
 /**
  * Mobile birleşik checkout: booking oluştur + Stripe PaymentIntent döndür.
@@ -35,6 +56,23 @@ export async function POST(req: NextRequest) {
 
   if (bagCountS + bagCountM + bagCountXl === 0) {
     return NextResponse.json({ error: "no_bags" }, { status: 400 });
+  }
+
+  const bypass = isPaymentBypassEnabled();
+
+  // When real payments are required, validate gateway + keys BEFORE creating
+  // the booking. Otherwise we'd persist an orphan PENDING row and the UI
+  // would wrongly show success without a real charge.
+  if (!bypass) {
+    if (!(await isPaymentsEnabled({ userId: auth.user.id }))) {
+      return NextResponse.json({ error: "payments_disabled" }, { status: 503 });
+    }
+    if (getPaymentGateway() !== "stripe") {
+      return NextResponse.json({ error: "gateway_not_stripe" }, { status: 503 });
+    }
+    if (!process.env.STRIPE_SECRET_KEY?.trim()) {
+      return NextResponse.json({ error: "stripe_not_configured" }, { status: 503 });
+    }
   }
 
   const shop = await prisma.shop.findUnique({ where: { id: shopId } });
@@ -64,6 +102,39 @@ export async function POST(req: NextRequest) {
     checkOutTime,
   });
 
+  if (bypass) {
+    const txId = `bypass_${booking.id}_${Date.now()}`;
+    await prisma.$transaction(async (tx) => {
+      await tx.paymentLog.upsert({
+        where: { bookingId: booking.id },
+        create: {
+          bookingId: booking.id,
+          transactionId: txId,
+          amount: totals.subtotalBeforeCoupon,
+          status: "SUCCESS",
+        },
+        update: {
+          transactionId: txId,
+          amount: totals.subtotalBeforeCoupon,
+          status: "SUCCESS",
+        },
+      });
+      await tx.booking.update({
+        where: { id: booking.id },
+        data: { status: "PAID" },
+      });
+    });
+    logger.warn(
+      { bookingId: booking.id, guestId: auth.user.id, amount: totals.subtotalBeforeCoupon },
+      "mobile_checkout_payment_bypassed",
+    );
+    return NextResponse.json({
+      bookingId: booking.id,
+      bypassed: true,
+      totalPrice: totals.subtotalBeforeCoupon,
+    });
+  }
+
   await prisma.booking.update({ where: { id: booking.id }, data: { status: "PENDING" } });
 
   const intent = await paymentService.createStripePaymentIntentForGuestBooking({
@@ -72,7 +143,10 @@ export async function POST(req: NextRequest) {
   });
 
   if (!intent.ok) {
-    return NextResponse.json({ error: intent.errorCode }, { status: 400 });
+    // Roll back orphan booking so DB does not accumulate fake-pending rows.
+    await prisma.booking.delete({ where: { id: booking.id } }).catch(() => {});
+    const status = intent.errorCode === "stripe_error" ? 502 : 503;
+    return NextResponse.json({ error: intent.errorCode }, { status });
   }
 
   return NextResponse.json({

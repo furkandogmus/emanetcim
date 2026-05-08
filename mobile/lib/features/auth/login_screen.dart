@@ -491,6 +491,9 @@ class _OtpBottomSheetState extends ConsumerState<_OtpBottomSheet> {
                 controller: _password,
                 autofocus: true,
                 obscureText: true,
+                keyboardType: TextInputType.visiblePassword,
+                enableSuggestions: false,
+                autocorrect: false,
                 style: GoogleFonts.outfit(fontSize: 18),
                 decoration: InputDecoration(
                   hintText: 'Şifre'.tr(),

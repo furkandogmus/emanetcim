@@ -88,9 +88,19 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           'couponCode': _coupon.text.trim(),
         },
       );
-      final bookingId = res.data['bookingId'] as String;
+      final bookingId = res.data['bookingId'] as String?;
+      final clientSecret = res.data['clientSecret'] as String?;
+      final bypassed = res.data['bypassed'] == true;
 
-      // Stripe kaldırıldığı için direkt onay sayfasına yönlendiriyoruz.
+      // Real Stripe path requires a clientSecret to confirm. The dev/test
+      // bypass path returns bypassed:true with no clientSecret and the
+      // booking already marked PAID server-side, so downstream flows can
+      // be exercised without a live gateway.
+      if (bookingId == null || (!bypassed && clientSecret == null)) {
+        _toast('checkout.error_payment'.tr());
+        return;
+      }
+
       if (!mounted) return;
       unawaited(ref.read(hapticServiceProvider).success());
       unawaited(ref.read(reviewServiceProvider).requestReview());
@@ -104,7 +114,16 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         if (errCode == 'shop_not_found') {
           msg = 'checkout.error_shop_closed'.tr();
         }
-        if (errCode == 'gateway_not_configured') {
+        const paymentErrors = {
+          'gateway_not_configured',
+          'payments_disabled',
+          'gateway_not_stripe',
+          'stripe_not_configured',
+          'stripe_no_client_secret',
+          'stripe_error',
+          'invalid_amount',
+        };
+        if (paymentErrors.contains(errCode)) {
           msg = 'checkout.error_payment'.tr();
         }
       }
