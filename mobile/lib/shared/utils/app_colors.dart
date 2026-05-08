@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 /// Centralized brand color constants.
 /// Replaces 126+ hardcoded Color(0xFFF97316) instances.
 abstract final class AppColors {
-  static const brandOrange = Color(0xFFF97316);
-  static const brandOrangeDark = Color(0xFFEA580C);
-  static const brandOrangeLight = Color(0xFFFED7AA);
+  static const brandOrange = Color(0xFFEA580C); // Web's main color (#ea580c)
+  static const brandOrangeDark = Color(0xFFC2430A); // Web's brand-700 (#c2430a)
+  static const brandOrangeLight = Color(
+    0xFFF89563,
+  ); // Web's brand-300 (#f89563)
   static const textDark = Color(0xFF0F172A);
   static const bgLight = Color(0xFFF8FAFC);
   static const success = Color(0xFF10B981);

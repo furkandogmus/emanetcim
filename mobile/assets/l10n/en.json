@@ -72,7 +72,10 @@
     "enter_code": "Enter Your Code",
     "resend_code": "Resend Code",
     "resend_wait": "Resend ({}s)",
-    "identity_hint": "e.g. 5xx xxx xx xx or email"
+    "identity_hint": "e.g. 5xx xxx xx xx or email",
+    "forgot_password": "Forgot password",
+    "forgot_password_email_only": "Password reset is available only with email.",
+    "forgot_password_sent": "If your account exists, a reset link has been sent to your email."
   },
   "shop": {
     "error_loading": "An error occurred while loading the shop",

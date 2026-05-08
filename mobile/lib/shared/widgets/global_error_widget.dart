@@ -41,7 +41,7 @@ class GlobalErrorWidget extends StatelessWidget {
               textAlign: TextAlign.center,
               style: GoogleFonts.outfit(
                 fontSize: 15,
-                color: Colors.grey.shade600,
+                color: const Color(0xFF424242),
                 height: 1.5,
               ),
             ),

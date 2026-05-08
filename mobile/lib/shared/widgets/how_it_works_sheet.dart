@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../utils/app_colors.dart';
 
 enum HowItWorksMode { guest, partner }
 
@@ -42,7 +43,7 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
           Text(
             isGuest ? 'Misafir Rehberi' : 'Esnaf Rehberi',
             style: GoogleFonts.outfit(
-              color: Colors.grey.shade400,
+              color: const Color(0xFF757575),
               fontWeight: FontWeight.w600,
               fontSize: 12,
               letterSpacing: 1.2,
@@ -59,7 +60,7 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
                       : Icons.qr_code_scanner_rounded,
                   '$prefix.step1.title'.tr(),
                   '$prefix.step1.desc'.tr(),
-                  const Color(0xFFF97316),
+                  AppColors.brandOrange,
                 ),
                 _tutorialPage(
                   isGuest
@@ -99,7 +100,7 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
                       height: 8,
                       decoration: BoxDecoration(
                         color: _currentPage == index
-                            ? const Color(0xFFF97316)
+                            ? AppColors.brandOrange
                             : Colors.grey.shade200,
                         borderRadius: BorderRadius.circular(4),
                       ),
@@ -119,7 +120,7 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
                     }
                   },
                   style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFFF97316),
+                    backgroundColor: AppColors.brandOrange,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -163,7 +164,7 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
             desc,
             style: GoogleFonts.outfit(
               fontSize: 16,
-              color: Colors.grey.shade600,
+              color: const Color(0xFF424242),
               height: 1.5,
             ),
             textAlign: TextAlign.center,

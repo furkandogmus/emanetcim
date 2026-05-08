@@ -72,7 +72,10 @@
     "enter_code": "Kodunuzu Girin",
     "resend_code": "Kodu tekrar gönder",
     "resend_wait": "Tekrar gönder ({}s)",
-    "identity_hint": "Örn: 05xx xxx xx xx veya e-posta"
+    "identity_hint": "Örn: 05xx xxx xx xx veya e-posta",
+    "forgot_password": "Şifremi unuttum",
+    "forgot_password_email_only": "Şifre sıfırlama yalnızca e-posta ile mümkündür.",
+    "forgot_password_sent": "Eğer hesabınız varsa sıfırlama bağlantısı e-postanıza gönderildi."
   },
   "shop": {
     "error_loading": "Dükkan yüklenirken bir hata oluştu",

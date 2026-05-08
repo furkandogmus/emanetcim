@@ -85,7 +85,7 @@ class MyBookingsScreen extends ConsumerWidget {
                   Text(
                     'booking.no_bookings_desc'.tr(),
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey.shade600,
+                      color: const Color(0xFF424242),
                     ),
                   ),
                   const SizedBox(height: 32),
@@ -212,7 +212,7 @@ class MyBookingsScreen extends ConsumerWidget {
                                           '${fmt.format(b.checkInTime)} → ${fmt.format(b.checkOutTime)}',
                                           style: GoogleFonts.outfit(
                                             fontSize: 13,
-                                            color: Colors.grey.shade600,
+                                            color: const Color(0xFF424242),
                                           ),
                                         ),
                                       ],
@@ -236,7 +236,7 @@ class MyBookingsScreen extends ConsumerWidget {
                                       const Icon(
                                         Icons.luggage_rounded,
                                         size: 18,
-                                        color: Colors.grey,
+                                        color: Color(0xFF616161),
                                       ),
                                       const SizedBox(width: 8),
                                       Text(

@@ -55,14 +55,14 @@ class NotificationsScreen extends ConsumerWidget {
                     child: const Icon(
                       Icons.notifications_off_outlined,
                       size: 64,
-                      color: Colors.grey,
+                      color: Color(0xFF616161),
                     ),
                   ),
                   const SizedBox(height: 24),
                   Text(
                     'notifications.empty'.tr(),
                     style: GoogleFonts.outfit(
-                      color: Colors.grey.shade500,
+                      color: const Color(0xFF616161),
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                     ),
@@ -92,7 +92,7 @@ class NotificationsScreen extends ConsumerWidget {
           BoxShadow(
             color: n.isRead
                 ? Colors.black.withValues(alpha: 0.02)
-                : const Color(0xFFF97316).withValues(alpha: 0.05),
+                : AppColors.brandOrange.withValues(alpha: 0.05),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
@@ -100,7 +100,7 @@ class NotificationsScreen extends ConsumerWidget {
         border: Border.all(
           color: n.isRead
               ? Colors.grey.shade100
-              : const Color(0xFFF97316).withValues(alpha: 0.1),
+              : AppColors.brandOrange.withValues(alpha: 0.1),
           width: 1.5,
         ),
       ),
@@ -149,7 +149,7 @@ class NotificationsScreen extends ConsumerWidget {
                               width: 8,
                               height: 8,
                               decoration: const BoxDecoration(
-                                color: Color(0xFFF97316),
+                                color: AppColors.brandOrange,
                                 shape: BoxShape.circle,
                               ),
                             ),
@@ -160,7 +160,7 @@ class NotificationsScreen extends ConsumerWidget {
                         n.body,
                         style: GoogleFonts.outfit(
                           fontSize: 14,
-                          color: Colors.grey.shade600,
+                          color: const Color(0xFF424242),
                           height: 1.5,
                         ),
                       ),
@@ -169,7 +169,7 @@ class NotificationsScreen extends ConsumerWidget {
                         _formatTime(n.createdAt),
                         style: GoogleFonts.outfit(
                           fontSize: 12,
-                          color: Colors.grey.shade400,
+                          color: const Color(0xFF757575),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -208,7 +208,7 @@ class NotificationsScreen extends ConsumerWidget {
       case NotificationType.paymentSuccess:
         return const Color(0xFF10B981);
       case NotificationType.shopApplication:
-        return const Color(0xFFF97316);
+        return AppColors.brandOrange;
       case NotificationType.campaign:
         return const Color(0xFF8B5CF6);
       case NotificationType.dispute:

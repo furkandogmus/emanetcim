@@ -89,7 +89,7 @@ class ShopPreviewCard extends StatelessWidget {
                         '${shop.rating} (120+)',
                         style: GoogleFonts.outfit(
                           fontSize: 14,
-                          color: Colors.grey.shade600,
+                          color: const Color(0xFF424242),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -107,10 +107,10 @@ class ShopPreviewCard extends StatelessWidget {
                           color: AppColors.brandOrange,
                         ),
                       ),
-                      Icon(
+                      const Icon(
                         Icons.arrow_forward_ios_rounded,
                         size: 16,
-                        color: Colors.grey.shade400,
+                        color: Color(0xFF757575),
                       ),
                     ],
                   ),

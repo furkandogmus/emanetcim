@@ -165,7 +165,7 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
                             'Kalan Mühür Adedi',
                             style: GoogleFonts.outfit(
                               fontSize: 14,
-                              color: Colors.grey.shade600,
+                              color: const Color(0xFF424242),
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -256,14 +256,14 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
 
   Widget _sectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16, left: 4),
+      padding: const EdgeInsets.only(bottom: 12, left: 4),
       child: Text(
         title.toUpperCase(),
         style: GoogleFonts.outfit(
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          color: Colors.grey.shade500,
-          letterSpacing: 1.1,
+          fontSize: 13,
+          fontWeight: FontWeight.w800,
+          color: AppColors.textDark,
+          letterSpacing: 1.2,
         ),
       ),
     );

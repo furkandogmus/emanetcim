@@ -87,12 +87,15 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                   const Icon(
                     Icons.message_rounded,
                     size: 48,
-                    color: Colors.grey,
+                    color: Color(0xFF616161),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Henüz mesaj yok',
-                    style: GoogleFonts.outfit(color: Colors.grey, fontSize: 16),
+                    style: GoogleFonts.outfit(
+                      color: const Color(0xFF616161),
+                      fontSize: 16,
+                    ),
                   ),
                 ],
               ),
@@ -151,7 +154,7 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                           'Kimden: ${msg['from'] ?? 'Bilinmiyor'}',
                           style: GoogleFonts.outfit(
                             fontSize: 12,
-                            color: Colors.grey.shade600,
+                            color: const Color(0xFF424242),
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -159,7 +162,7 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                           formattedDate,
                           style: GoogleFonts.outfit(
                             fontSize: 11,
-                            color: Colors.grey.shade400,
+                            color: const Color(0xFF757575),
                           ),
                         ),
                       ],
@@ -212,7 +215,7 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
               const SizedBox(height: 8),
               Text(
                 'Kimden: ${msg['from'] ?? 'Bilinmiyor'}',
-                style: GoogleFonts.outfit(color: Colors.grey.shade600),
+                style: GoogleFonts.outfit(color: const Color(0xFF424242)),
               ),
               const SizedBox(height: 16),
               const Divider(),

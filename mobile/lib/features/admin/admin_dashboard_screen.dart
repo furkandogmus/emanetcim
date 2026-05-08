@@ -88,7 +88,7 @@ class AdminDashboardScreen extends ConsumerWidget {
               style: GoogleFonts.outfit(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
-                color: Colors.grey.shade500,
+                color: const Color(0xFF616161),
                 letterSpacing: 1.1,
               ),
             ),
@@ -112,12 +112,12 @@ class AdminDashboardScreen extends ConsumerWidget {
                     const Icon(
                       Icons.analytics_rounded,
                       size: 48,
-                      color: Colors.grey,
+                      color: Color(0xFF616161),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Grafikler yakında burada olacak',
-                      style: GoogleFonts.outfit(color: Colors.grey),
+                      style: GoogleFonts.outfit(color: const Color(0xFF616161)),
                     ),
                   ],
                 ),
@@ -132,7 +132,7 @@ class AdminDashboardScreen extends ConsumerWidget {
               style: GoogleFonts.outfit(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
-                color: Colors.grey.shade500,
+                color: const Color(0xFF616161),
                 letterSpacing: 1.1,
               ),
             ),
@@ -218,7 +218,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                 style: GoogleFonts.outfit(
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade500,
+                  color: const Color(0xFF616161),
                   letterSpacing: 0.5,
                 ),
               ),
@@ -261,7 +261,10 @@ class AdminDashboardScreen extends ConsumerWidget {
         ),
         subtitle: Text(
           subtitle,
-          style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey.shade600),
+          style: GoogleFonts.outfit(
+            fontSize: 12,
+            color: const Color(0xFF424242),
+          ),
         ),
         trailing: isPulse
             ? Container(
@@ -275,7 +278,7 @@ class AdminDashboardScreen extends ConsumerWidget {
             : const Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 14,
-                color: Colors.grey,
+                color: Color(0xFF616161),
               ),
       ),
     );

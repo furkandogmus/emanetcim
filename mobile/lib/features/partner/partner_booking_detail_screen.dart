@@ -1,4 +1,5 @@
-import 'dart:async' show unawaited;
+import 'dart:async' show Timer, unawaited;
+
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/api/api_client.dart';
 import '../../core/sync/sync_service.dart';
 import '../../shared/models/booking.dart';
+import '../../shared/utils/app_colors.dart';
 import '../booking/booking_detail_screen.dart';
 
 class PartnerBookingDetailScreen extends ConsumerStatefulWidget {
@@ -22,15 +24,22 @@ class PartnerBookingDetailScreen extends ConsumerStatefulWidget {
 
 class _PartnerBookingDetailScreenState
     extends ConsumerState<PartnerBookingDetailScreen> {
-  final List<TextEditingController> _sealControllers = [];
   bool _busy = false;
+  Timer? _pollingTimer;
 
-  void _initControllers(BookingDto b) {
-    if (_sealControllers.length == b.totalBags) return;
-    _sealControllers.clear();
-    for (var i = 0; i < b.totalBags; i++) {
-      _sealControllers.add(TextEditingController());
-    }
+  @override
+  void initState() {
+    super.initState();
+    // Poll every 10 seconds for live status updates
+    _pollingTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      ref.invalidate(bookingProvider(widget.bookingId));
+    });
+  }
+
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _checkIn(BookingDto b) async {
@@ -38,10 +47,7 @@ class _PartnerBookingDetailScreenState
     unawaited(HapticFeedback.mediumImpact());
     try {
       final dio = ref.read(dioProvider);
-      await dio.post(
-        '/bookings/${b.id}/check-in',
-        data: {'sealAssignments': []},
-      );
+      await dio.post('/bookings/${b.id}/check-in');
       if (mounted) {
         unawaited(HapticFeedback.heavyImpact());
         ScaffoldMessenger.of(
@@ -55,9 +61,7 @@ class _PartnerBookingDetailScreenState
               e.type == DioExceptionType.connectionTimeout)) {
         // Offline mode fallback
         final syncService = ref.read(syncServiceProvider);
-        await syncService.addAction(SyncActionType.checkIn, b.id, {
-          'sealAssignments': [],
-        });
+        await syncService.addAction(SyncActionType.checkIn, b.id, {});
         if (mounted) {
           unawaited(HapticFeedback.mediumImpact());
           ScaffoldMessenger.of(context).showSnackBar(
@@ -124,14 +128,6 @@ class _PartnerBookingDetailScreenState
   }
 
   @override
-  void dispose() {
-    for (var c in _sealControllers) {
-      c.dispose();
-    }
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final bAsync = ref.watch(bookingProvider(widget.bookingId));
     final fmt = DateFormat('dd MMM, HH:mm');
@@ -146,10 +142,10 @@ class _PartnerBookingDetailScreenState
         centerTitle: true,
       ),
       body: bAsync.when(
+        skipLoadingOnReload: true,
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('common.error'.tr())),
         data: (b) {
-          _initControllers(b);
           final statusColor = _statusColor(b.status);
 
           return ListView(
@@ -173,15 +169,15 @@ class _PartnerBookingDetailScreenState
                   children: [
                     CircleAvatar(
                       radius: 35,
-                      backgroundColor: const Color(
-                        0xFFF97316,
-                      ).withValues(alpha: 0.1),
+                      backgroundColor: AppColors.brandOrange.withValues(
+                        alpha: 0.1,
+                      ),
                       child: Text(
                         b.guestName?.substring(0, 1).toUpperCase() ?? 'G',
                         style: GoogleFonts.outfit(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFFF97316),
+                          color: AppColors.brandOrange,
                         ),
                       ),
                     ),
@@ -245,7 +241,7 @@ class _PartnerBookingDetailScreenState
                 style: GoogleFonts.outfit(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: Colors.grey.shade500,
+                  color: const Color(0xFF616161),
                   letterSpacing: 1.1,
                 ),
               ),
@@ -352,7 +348,7 @@ class _PartnerBookingDetailScreenState
                   label,
                   style: GoogleFonts.outfit(
                     fontSize: 12,
-                    color: Colors.grey.shade600,
+                    color: const Color(0xFF424242),
                   ),
                 ),
               ],
@@ -379,7 +375,7 @@ class _PartnerBookingDetailScreenState
           style: GoogleFonts.outfit(
             fontSize: 12,
             fontWeight: FontWeight.bold,
-            color: Colors.grey,
+            color: const Color(0xFF616161),
           ),
         ),
         const SizedBox(height: 4),

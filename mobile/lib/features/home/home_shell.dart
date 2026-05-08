@@ -194,7 +194,9 @@ class _NavItem extends StatelessWidget {
           children: [
             Icon(
               isSelected ? item.activeIcon : item.icon,
-              color: isSelected ? AppColors.brandOrange : Colors.grey.shade400,
+              color: isSelected
+                  ? AppColors.brandOrange
+                  : const Color(0xFF757575),
               size: 26,
             ),
             const SizedBox(height: 4),
@@ -205,7 +207,7 @@ class _NavItem extends StatelessWidget {
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                 color: isSelected
                     ? AppColors.brandOrange
-                    : Colors.grey.shade400,
+                    : const Color(0xFF757575),
               ),
             ),
           ],
