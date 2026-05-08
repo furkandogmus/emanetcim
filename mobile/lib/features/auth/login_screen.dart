@@ -457,6 +457,7 @@ class _OtpBottomSheetState extends ConsumerState<_OtpBottomSheet> {
             const SizedBox(height: 32),
             if (!_usePassword)
               TextField(
+                key: const ValueKey('login_code_field'),
                 controller: _code,
                 autofocus: true,
                 keyboardType: TextInputType.number,
@@ -488,6 +489,7 @@ class _OtpBottomSheetState extends ConsumerState<_OtpBottomSheet> {
               )
             else
               TextField(
+                key: const ValueKey('login_password_field'),
                 controller: _password,
                 autofocus: true,
                 obscureText: true,
@@ -531,6 +533,7 @@ class _OtpBottomSheetState extends ConsumerState<_OtpBottomSheet> {
             const SizedBox(height: 8),
             TextButton(
               onPressed: () {
+                FocusManager.instance.primaryFocus?.unfocus();
                 setState(() => _usePassword = !_usePassword);
               },
               child: Text(
