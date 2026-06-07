@@ -110,7 +110,7 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
             <Link href="/contact" className="h-14 flex items-center px-10 bg-white text-gray-900 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-orange-600 hover:text-white transition-all">
               {t("ctaButton")}
             </Link>
-            <a href="https://wa.me/905422415597" target="_blank" className="h-14 flex items-center px-10 bg-green-500/10 text-green-500 border border-green-500/30 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-green-500 hover:text-white transition-all">
+            <a href="https://wa.me/905422415597" target="_blank" rel="noopener noreferrer" className="h-14 flex items-center px-10 bg-green-500/10 text-green-500 border border-green-500/30 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-green-500 hover:text-white transition-all">
               WHATSAPP DESTEK
             </a>
           </div>

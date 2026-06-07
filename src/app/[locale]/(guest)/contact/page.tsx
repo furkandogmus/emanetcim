@@ -55,7 +55,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
                 <div className="flex-1">
                   <h3 className="text-xl font-black text-gray-900 mb-1">{t("whatsappTitle")}</h3>
                   <p className="text-gray-400 font-bold text-sm mb-6">{t("whatsappSubtitle")}</p>
-                  <a href="https://wa.me/905422415597" target="_blank" className="h-12 inline-flex items-center px-8 bg-green-500 hover:bg-green-600 text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-green-100">
+                  <a href="https://wa.me/905422415597" target="_blank" rel="noopener noreferrer" className="h-12 inline-flex items-center px-8 bg-green-500 hover:bg-green-600 text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-green-100">
                     {t("whatsappCta")}
                   </a>
                 </div>

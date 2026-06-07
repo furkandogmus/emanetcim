@@ -47,7 +47,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ local
             <Link href="/register?role=PARTNER" className="h-16 inline-flex items-center px-12 bg-white text-blue-600 rounded-2xl font-black text-lg transition-all active:scale-95 shadow-xl shadow-blue-900/20">
               {t("heroCta")}
             </Link>
-            <a href="https://wa.me/905422415597" target="_blank" className="h-16 inline-flex items-center px-10 bg-blue-500 text-white border border-blue-400/30 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-blue-400 transition-all">
+            <a href="https://wa.me/905422415597" target="_blank" rel="noopener noreferrer" className="h-16 inline-flex items-center px-10 bg-blue-500 text-white border border-blue-400/30 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-blue-400 transition-all">
               Bize Ulaşın
             </a>
           </div>
