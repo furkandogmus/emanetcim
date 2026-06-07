@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
@@ -23,11 +23,7 @@ import { config } from "@/lib/config";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin", "latin-ext"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin", "latin-ext"],
+  display: "swap",
 });
 
 export const viewport: Viewport = {
@@ -68,9 +64,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       description: t("ogDescription"),
       images: [
         {
-          url: "/icons/icon-512x512.png",
-          width: 512,
-          height: 512,
+          url: "/og-image.png",
+          width: 1200,
+          height: 630,
           alt: "BagajPark",
         },
       ],
@@ -79,7 +75,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       card: "summary_large_image",
       title: t("ogTitle"),
       description: t("ogDescription"),
-      images: [`${baseUrl.replace(/\/$/, "")}/icons/icon-512x512.png`],
+      images: [`${baseUrl.replace(/\/$/, "")}/og-image.png`],
     },
     manifest: "/manifest.json",
     appleWebApp: {
@@ -157,7 +153,7 @@ export default async function RootLayout({
     >
       <body
         suppressHydrationWarning
-        className={`${geistSans.variable} ${geistMono.variable} bg-gray-50 antialiased selection:bg-orange-100 selection:text-orange-900`}
+        className={`${geistSans.variable} bg-gray-50 antialiased selection:bg-orange-100 selection:text-orange-900`}
       >
         <script
           type="application/ld+json"

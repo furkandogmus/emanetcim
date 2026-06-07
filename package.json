@@ -100,5 +100,13 @@
   },
   "overrides": {
     "@swc/helpers": "0.5.21"
-  }
+  },
+  "browserslist": [
+    "chrome >= 109",
+    "edge >= 109",
+    "firefox >= 115",
+    "safari >= 16",
+    "ios_saf >= 16",
+    "not dead"
+  ]
 }
