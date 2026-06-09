@@ -53,6 +53,11 @@ export default function Header() {
         <span className="text-lg font-black tracking-tight text-gray-900 group-hover:text-orange-600 transition-colors duration-200">
           BagajPark
         </span>
+        {process.env.NEXT_PUBLIC_BETA_BADGE === "true" && (
+          <span className="rounded-md bg-orange-100 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-orange-700">
+            Beta
+          </span>
+        )}
       </Link>
 
       {/* Nav + Actions */}

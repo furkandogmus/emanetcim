@@ -13,6 +13,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   const base = getSiteBaseUrl();
 
+  // Çok dilli girdiler için hreflang alternatifleri (x-default = varsayılan dil)
+  const languagesForPath = (path: string) =>
+    Object.fromEntries([
+      ...routing.locales.map((loc) => [loc, `${base}/${loc}${path}`] as const),
+      ["x-default", `${base}/${routing.defaultLocale}${path}`] as const,
+    ]);
+
   // 1. Statik Lokalize Sayfalar
   const staticPages = buildLocalizedUrls().map(({ url, path, locale }) => {
     const isHome = path === "";
@@ -22,6 +29,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: now,
       changeFrequency: isHome ? "daily" : "weekly",
       priority: isHome ? homePriority : path === "/search" ? 0.9 : 0.7,
+      alternates: { languages: languagesForPath(path) },
     } satisfies MetadataRoute.Sitemap[number];
   });
 
@@ -33,6 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: now,
         changeFrequency: "weekly",
         priority: 0.75,
+        alternates: { languages: languagesForPath(`/luggage-storage/${c.slug}`) },
       });
     }
   }
@@ -52,12 +61,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           lastModified: shop.updatedAt,
           changeFrequency: "weekly",
           priority: 0.68,
-        });
-        shopEntries.push({
-          url: `${base}/${locale}/checkout/${shop.id}`,
-          lastModified: shop.updatedAt,
-          changeFrequency: "weekly",
-          priority: 0.52,
+          alternates: { languages: languagesForPath(`/shop/${shop.id}`) },
         });
       }
     }

@@ -77,6 +77,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       description: t("ogDescription"),
       images: [`${baseUrl.replace(/\/$/, "")}/og-image.png`],
     },
+    verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+      ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
+      : undefined,
     manifest: "/manifest.json",
     appleWebApp: {
       capable: true,
