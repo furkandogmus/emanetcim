@@ -33,11 +33,13 @@ const securityHeaders = [
       "default-src 'self'",
       // NOTE: Next.js runtime injects inline bootstrap scripts/styles.
       // Keep unsafe-inline in production until nonce/hash CSP is implemented app-wide.
-      "script-src 'self' 'unsafe-inline' https://js.stripe.com https://plausible.io https://static.cloudflareinsights.com",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "script-src 'self' 'unsafe-inline' https://js.stripe.com https://plausible.io https://static.cloudflareinsights.com https://client.crisp.chat",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://client.crisp.chat",
       "img-src 'self' data: blob: https:",
-      "font-src 'self' data: https://fonts.gstatic.com",
+      "font-src 'self' data: https://fonts.gstatic.com https://client.crisp.chat",
       "connect-src 'self' https: wss:",
+      // MapLibre GL blob: üzerinden web worker üretir; yoksa /search haritası CSP'ye takılır.
+      "worker-src 'self' blob:",
       "frame-src https://js.stripe.com https://hooks.stripe.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
