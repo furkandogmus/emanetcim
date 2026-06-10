@@ -57,6 +57,22 @@ export default function Footer() {
                 <Heart size={18} />
               </a>
             </div>
+            
+            <div className="mt-8">
+              <a
+                href="https://www.producthunt.com/products/bagaj-emanet-ve-valiz-depolama?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-bagaj-emanet-ve-valiz-depolama"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block hover:opacity-90 transition-opacity"
+              >
+                <img
+                  alt="Bagaj Emanet ve Valiz Depolama - Drop Your Bags, Explore Freely | Product Hunt"
+                  width="250"
+                  height="54"
+                  src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1168828&theme=light&t=1781124802196"
+                />
+              </a>
+            </div>
           </div>
 
           <div>
