@@ -42,6 +42,7 @@ interface CheckoutClientProps {
   shopAddress: string;
   pricePerDay: number;
   pricingRules: PricingRules;
+  paymentsEnabled?: boolean;
 }
 
 export default function CheckoutClient({
@@ -50,6 +51,7 @@ export default function CheckoutClient({
   shopAddress,
   pricePerDay,
   pricingRules,
+  paymentsEnabled = true,
 }: CheckoutClientProps) {
   const t = useTranslations("Guest");
   const tErr = useTranslations("Errors");
@@ -149,26 +151,38 @@ export default function CheckoutClient({
   };
 
   const handlePayment = async () => {
-    const strippedCard = cardNumber.replace(/\s/g, "");
-    const [expMonth, expYearRaw] = expiry.split("/");
+    let cardHolderName = cardHolder;
+    let cardNumberStripped = cardNumber.replace(/\s/g, "");
+    let expMonth = "";
+    let expireYear = "";
+    let cvc = cvv;
 
-    if (
-      !cardHolder.trim() ||
-      strippedCard.length < 16 ||
-      !expMonth ||
-      !expYearRaw ||
-      expYearRaw.replace(/\D/g, "").length < 2 ||
-      cvv.length < 3
-    ) {
-      setError(t("checkoutCardValidationError"));
-      return;
+    if (paymentsEnabled) {
+      const [expiryMonth, expYearRaw] = expiry.split("/");
+      if (
+        !cardHolder.trim() ||
+        cardNumberStripped.length < 16 ||
+        !expiryMonth ||
+        !expYearRaw ||
+        expYearRaw.replace(/\D/g, "").length < 2 ||
+        cvv.length < 3
+      ) {
+        setError(t("checkoutCardValidationError"));
+        return;
+      }
+      expMonth = expiryMonth;
+      const expYearDigits = (expYearRaw ?? "").replace(/\D/g, "").slice(-2);
+      expireYear =
+        expYearDigits.length === 2
+          ? `20${expYearDigits}`
+          : new Date().getFullYear().toString();
+    } else {
+      cardHolderName = "Beta Guest";
+      cardNumberStripped = "1111222233334444";
+      expMonth = "12";
+      expireYear = "2030";
+      cvc = "123";
     }
-
-    const expYearDigits = (expYearRaw ?? "").replace(/\D/g, "").slice(-2);
-    const expireYear =
-      expYearDigits.length === 2
-        ? `20${expYearDigits}`
-        : new Date().getFullYear().toString();
 
     if (!checkInDate || !checkOutDate || !windowOk) {
       setError(
@@ -191,11 +205,11 @@ export default function CheckoutClient({
       checkInTime: checkInDate,
       checkOutTime: checkOutDate,
       cardInfo: {
-        cardHolderName: cardHolder,
-        cardNumber: strippedCard,
+        cardHolderName,
+        cardNumber: cardNumberStripped,
         expireMonth: expMonth || "12",
         expireYear,
-        cvc: cvv,
+        cvc,
       },
       couponCode: couponCode.trim() || undefined,
     });
@@ -251,7 +265,7 @@ export default function CheckoutClient({
   const stepLabels = [
     t("checkoutStep1Short"),
     t("checkoutStep2Short"),
-    t("checkoutStep3Short"),
+    paymentsEnabled ? t("checkoutStep3Short") : (locale === "tr" ? "Onay" : "Approval"),
   ];
   if (isSuccess) {
     return (
@@ -591,15 +605,30 @@ export default function CheckoutClient({
         {step === 3 && (
           <>
             <h2 className="text-sm font-black uppercase tracking-widest text-gray-900">
-              {t("checkoutStep3Title")}
+              {paymentsEnabled ? t("checkoutStep3Title") : (locale === "tr" ? "Rezervasyon Onayı" : "Booking Approval")}
             </h2>
 
-            <p className="text-xs leading-relaxed text-gray-500">
-              {t("checkoutPaymentMethodsNote")}
-            </p>
-            <p className="text-xs font-semibold leading-relaxed text-orange-800/90">
-              {t("checkoutPaymentAfterApprovalNote")}
-            </p>
+            {paymentsEnabled ? (
+              <>
+                <p className="text-xs leading-relaxed text-gray-500">
+                  {t("checkoutPaymentMethodsNote")}
+                </p>
+                <p className="text-xs font-semibold leading-relaxed text-orange-800/90">
+                  {t("checkoutPaymentAfterApprovalNote")}
+                </p>
+              </>
+            ) : (
+              <div className="bg-orange-50 border border-orange-100 p-6 rounded-3xl flex flex-col gap-3">
+                <p className="text-sm font-black text-orange-800">
+                  {locale === "tr" ? "Beta Dönemi: Ücretsiz Rezervasyon" : "Beta Period: Free Reservation"}
+                </p>
+                <p className="text-xs leading-relaxed text-orange-700 font-medium">
+                  {locale === "tr"
+                    ? "Beta sürecinde online ödeme alınmamaktadır. Rezervasyon talebiniz onaylandıktan sonra depolama bedelini dükkanda elden nakit olarak veya esnafın POS cihazı üzerinden ödeyebilirsiniz."
+                    : "Online payment is disabled during the beta period. After your reservation request is approved, you can pay the storage fee in cash or via the merchant's POS device directly at the shop."}
+                </p>
+              </div>
+            )}
 
             <section
               className="rounded-2xl border border-gray-100 bg-gray-50/90 p-4 text-xs leading-relaxed text-gray-600"
@@ -645,79 +674,83 @@ export default function CheckoutClient({
               </div>
             </section>
 
-            <section className="flex flex-col gap-6">
-              <h3 className="text-xs font-black uppercase text-gray-400">
-                {t("checkoutCardDetails")}
-              </h3>
+            {paymentsEnabled && (
+              <section className="flex flex-col gap-6">
+                <h3 className="text-xs font-black uppercase text-gray-400">
+                  {t("checkoutCardDetails")}
+                </h3>
 
-              <div className="flex flex-col gap-4">
-                <div className="relative">
-                  <User
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"
-                    size={18}
-                  />
-                  <input
-                    type="text"
-                    placeholder={t("checkoutCardHolderPlaceholder")}
-                    value={cardHolder}
-                    onChange={(e) => setCardHolder(e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-100 p-4 pl-12 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-orange-500 outline-none transition-all"
-                  />
-                </div>
-
-                <div className="relative">
-                  <CreditCard
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"
-                    size={18}
-                  />
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    placeholder={t("checkoutCardNumberPlaceholder")}
-                    maxLength={19}
-                    value={cardNumber}
-                    onChange={handleCardNumberChange}
-                    className="w-full bg-gray-50 border border-gray-100 p-4 pl-12 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-orange-500 outline-none transition-all"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-4">
                   <div className="relative">
-                    <Calendar
+                    <User
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"
+                      size={18}
+                    />
+                    <input
+                      type="text"
+                      placeholder={t("checkoutCardHolderPlaceholder")}
+                      value={cardHolder}
+                      onChange={(e) => setCardHolder(e.target.value)}
+                      className="w-full bg-gray-50 border border-gray-100 p-4 pl-12 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-orange-500 outline-none transition-all"
+                    />
+                  </div>
+
+                  <div className="relative">
+                    <CreditCard
                       className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"
                       size={18}
                     />
                     <input
                       type="text"
                       inputMode="numeric"
-                      placeholder={t("checkoutExpiryPlaceholder")}
-                      maxLength={5}
-                      value={expiry}
-                      onChange={handleExpiryChange}
+                      placeholder={t("checkoutCardNumberPlaceholder")}
+                      maxLength={19}
+                      value={cardNumber}
+                      onChange={handleCardNumberChange}
                       className="w-full bg-gray-50 border border-gray-100 p-4 pl-12 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-orange-500 outline-none transition-all"
                     />
                   </div>
-                  <div className="relative">
-                    <Lock
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"
-                      size={18}
-                    />
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      placeholder={t("checkoutCvvPlaceholder")}
-                      maxLength={4}
-                      value={cvv}
-                      onChange={handleCvvChange}
-                      className="w-full bg-gray-50 border border-gray-100 p-4 pl-12 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-orange-500 outline-none transition-all"
-                    />
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="relative">
+                      <Calendar
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"
+                        size={18}
+                      />
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        placeholder={t("checkoutExpiryPlaceholder")}
+                        maxLength={5}
+                        value={expiry}
+                        onChange={handleExpiryChange}
+                        className="w-full bg-gray-50 border border-gray-100 p-4 pl-12 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-orange-500 outline-none transition-all"
+                      />
+                    </div>
+                    <div className="relative">
+                      <Lock
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"
+                        size={18}
+                      />
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        placeholder={t("checkoutCvvPlaceholder")}
+                        maxLength={4}
+                        value={cvv}
+                        onChange={handleCvvChange}
+                        className="w-full bg-gray-50 border border-gray-100 p-4 pl-12 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-orange-500 outline-none transition-all"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </section>
+              </section>
+            )}
 
             <div className="flex justify-between items-baseline bg-gray-50 rounded-2xl px-4 py-3">
-              <span className="text-sm font-bold text-gray-600">{t("total")}</span>
+              <span className="text-sm font-bold text-gray-600">
+                {paymentsEnabled ? t("total") : (locale === "tr" ? "Tahmini Tutar" : "Estimated Total")}
+              </span>
               <span className="text-xl font-black text-orange-600">₺{grandTotal}</span>
             </div>
 

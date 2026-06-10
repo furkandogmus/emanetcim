@@ -3,6 +3,7 @@ import { shopService } from '@/services/ShopService';
 import CheckoutClient from '@/components/guest/CheckoutClient';
 import { moneyToNumber } from '@/lib/money';
 import { getPricingRules } from '@/lib/platform-settings';
+import { isPaymentsEnabled } from '@/lib/feature-flags';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 
@@ -38,6 +39,7 @@ export default async function CheckoutPage({ params }: { params: Promise<{ local
   }
 
   const pricingRules = await getPricingRules();
+  const paymentsEnabled = await isPaymentsEnabled();
 
   return (
     <CheckoutClient 
@@ -46,6 +48,7 @@ export default async function CheckoutPage({ params }: { params: Promise<{ local
       shopAddress={shop.address || "Istanbul"} 
       pricePerDay={moneyToNumber(shop.pricePerDay) || pricingRules.defaultPricePerDay}
       pricingRules={pricingRules}
+      paymentsEnabled={paymentsEnabled}
     />
   );
 }
