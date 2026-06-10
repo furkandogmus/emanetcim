@@ -7,6 +7,7 @@ import { Clock, User, ArrowLeft, Share2 } from "lucide-react";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ensureDefaultBlogPosts } from "@/lib/blog-initializer";
+import { alternatesForPath } from "@/lib/seo-alternates";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; slug: string }> }): Promise<Metadata> {
   const { locale, slug } = await params;
@@ -25,7 +26,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return {
     title: post.title,
     description,
-    alternates: { canonical },
+    alternates: alternatesForPath(locale, `/blog/${slug}`),
     openGraph: {
       type: "article",
       title: post.title,
