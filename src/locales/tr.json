@@ -941,6 +941,14 @@
     "paymentsNote": "Kart ile iyzico (güvenli). Nakit yok. Cüzdan ödemeleri (Apple/Google Pay, PayPal) Stripe ile planlanıyor.",
     "sitemap": "Site Haritası"
   },
+  "PartnerPromo": {
+    "badge": "Lansmana Özel",
+    "title": "Esnafımız Olmak İster misiniz?",
+    "description": "Boş alanınızı güvenli bir valiz depolama noktasına dönüştürün, ek gelir elde etmeye başlayın.",
+    "offer": "İlk 100 esnafa ilk 3 ay boyunca %0 komisyon!",
+    "cta": "Esnaf Başvurusu Yap",
+    "close": "Kapat"
+  },
   "Contact": {
     "title": "Bize Ulaşın",
     "subtitle": "Sorularınız için yanınızdayız.",
