@@ -3,16 +3,25 @@ import prisma from "@/lib/db";
 
 /** E-posta doğrulama tokenlarından ayrı tutmak için (verify-email ham e-posta kullanır). */
 export const PASSWORD_RESET_IDENTIFIER_PREFIX = "password-reset:";
+/** Telefon tabanlı şifre sıfırlama identifier öneki */
+export const PASSWORD_RESET_PHONE_PREFIX = "password-reset:phone:";
 
 export function passwordResetIdentifier(email: string): string {
   return `${PASSWORD_RESET_IDENTIFIER_PREFIX}${email.trim().toLowerCase()}`;
 }
 
+export function passwordResetPhoneIdentifier(phone: string): string {
+  return `${PASSWORD_RESET_PHONE_PREFIX}${phone}`;
+}
+
+export function isPhoneResetIdentifier(identifier: string): boolean {
+  return identifier.startsWith(PASSWORD_RESET_PHONE_PREFIX);
+}
+
 /**
- * Şifre sıfırlama tokenı: 1 saat geçerli, aynı e-posta için önceki sıfırlama tokenı silinir.
+ * 1 saat geçerli token oluşturur. Aynı identifier için önceki token varsa silinir.
  */
-export async function generatePasswordResetToken(email: string) {
-  const identifier = passwordResetIdentifier(email);
+async function createToken(identifier: string) {
   const token = crypto.randomUUID();
   const expires = new Date(Date.now() + 60 * 60 * 1000);
 
@@ -28,4 +37,18 @@ export async function generatePasswordResetToken(email: string) {
   return prisma.verificationToken.create({
     data: { identifier, token, expires },
   });
+}
+
+/**
+ * E-posta ile şifre sıfırlama tokenı.
+ */
+export async function generatePasswordResetToken(email: string) {
+  return createToken(passwordResetIdentifier(email));
+}
+
+/**
+ * Telefon ile şifre sıfırlama tokenı (admin-initiated).
+ */
+export async function generatePasswordResetTokenByPhone(phone: string) {
+  return createToken(passwordResetPhoneIdentifier(phone));
 }

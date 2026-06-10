@@ -4,6 +4,17 @@ import { auth } from "@/auth";
 import prisma from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
+function sanitizeHtml(html: string): string {
+  return html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/\bon\w+\s*=\s*"[^"]*"/gi, '')
+    .replace(/\bon\w+\s*=\s*'[^']*'/gi, '')
+    .replace(/\bon\w+\s*=\s*[^\s>]+/gi, '')
+    .replace(/href\s*=\s*"\s*javascript\s*:/gi, 'href="#"')
+    .replace(/href\s*=\s*'\s*javascript\s*:/gi, "href='#'")
+    .replace(/href\s*=\s*javascript\s*:/gi, 'href="#"');
+}
+
 type BlogPostFormData = {
   id?: string;
   title: string;
@@ -21,10 +32,11 @@ type BlogPostFormData = {
 export async function upsertBlogPostAction(formData: BlogPostFormData) {
   const session = await auth();
   if (session?.user?.role !== "ADMIN") {
-    throw new Error("Errors.notAuthorizedAdmin");
+    return { success: false, error: "Errors.notAuthorizedAdmin" };
   }
 
-  const { id, title, slug, content, excerpt, coverImage, locale, isPublished } = formData;
+  const { id, title, slug, excerpt, coverImage, locale, isPublished } = formData;
+  const content = sanitizeHtml(formData.content);
 
   const data = {
     title,
@@ -58,7 +70,7 @@ export async function upsertBlogPostAction(formData: BlogPostFormData) {
 export async function deleteBlogPostAction(id: string) {
   const session = await auth();
   if (session?.user?.role !== "ADMIN") {
-    throw new Error("Errors.notAuthorizedAdmin");
+    return { success: false, error: "Errors.notAuthorizedAdmin" };
   }
 
   await prisma.blogPost.delete({
@@ -76,7 +88,7 @@ export async function deleteBlogPostAction(id: string) {
 export async function getAllBlogPostsAction() {
   const session = await auth();
   if (session?.user?.role !== "ADMIN") {
-    throw new Error("Errors.notAuthorizedAdmin");
+    return [];
   }
 
   return await prisma.blogPost.findMany({

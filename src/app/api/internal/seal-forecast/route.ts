@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
-import { sealService } from "@/services/SealService";
 import { notificationService } from "@/services/NotificationService";
 import { parseAdminGsmNumbers } from "@/lib/netgsm";
 import logger from "@/lib/logger";
@@ -37,6 +36,40 @@ async function runSealForecast(req: NextRequest): Promise<NextResponse> {
       },
     });
 
+    if (shops.length === 0) {
+      return NextResponse.json({ ok: true, processed: 0, alerts: [], autoRequests: 0 });
+    }
+
+    const shopIds = shops.map(s => s.id);
+
+    const [assignedCounts, pendingRequests, upcomingBookings] = await Promise.all([
+      prisma.seal.groupBy({
+        by: ['shopId'],
+        where: { shopId: { in: shopIds }, status: "ASSIGNED" },
+        _count: true,
+      }),
+      prisma.sealRequest.groupBy({
+        by: ['shopId'],
+        where: { shopId: { in: shopIds }, status: "PENDING" },
+        _count: true,
+      }),
+      prisma.booking.findMany({
+        where: {
+          shopId: { in: shopIds },
+          status: { in: ["APPROVED", "PAID", "CHECKED_IN"] },
+          checkInTime: { gte: new Date(), lte: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
+        },
+        select: { shopId: true, bagCountS: true, bagCountM: true, bagCountXl: true },
+      }),
+    ]);
+
+    const assignedMap = new Map(assignedCounts.map(g => [g.shopId, g._count]));
+    const pendingMap = new Map(pendingRequests.map(g => [g.shopId, g._count]));
+    const demandMap = new Map<string, number>();
+    for (const b of upcomingBookings) {
+      demandMap.set(b.shopId, (demandMap.get(b.shopId) ?? 0) + b.bagCountS + b.bagCountM + b.bagCountXl);
+    }
+
     const alerts: string[] = [];
     let autoRequests = 0;
     let processed = 0;
@@ -45,15 +78,9 @@ async function runSealForecast(req: NextRequest): Promise<NextResponse> {
     for (const shop of shops) {
       try {
         const reorderPoint = shop.sealReorderPoint ?? 15;
-
-        const [assignedCount, predictedDemand, existingPending] =
-          await Promise.all([
-            prisma.seal.count({ where: { shopId: shop.id, status: "ASSIGNED" } }),
-            sealService.predictSealDemand(shop.id, 7),
-            prisma.sealRequest.count({
-              where: { shopId: shop.id, status: "PENDING" },
-            }),
-          ]);
+        const assignedCount = assignedMap.get(shop.id) ?? 0;
+        const existingPending = pendingMap.get(shop.id) ?? 0;
+        const predictedDemand = demandMap.get(shop.id) ?? 0;
 
         processed++;
 

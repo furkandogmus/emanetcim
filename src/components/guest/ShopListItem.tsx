@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin, Star, Shield } from 'lucide-react';
+import { MapPin, Star, Shield, Timer } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 interface ShopListItemProps {
@@ -12,6 +12,8 @@ interface ShopListItemProps {
   lng?: number;
   /** Seçilen tarih aralığında kalan tahmini kapasite (valiz adedi) */
   bagsAvailable?: number;
+  isVerified?: boolean;
+  responseTimeMinutes?: number | null;
   onClick?: () => void;
 }
 
@@ -27,6 +29,8 @@ export default function ShopListItem({
   lat,
   lng,
   bagsAvailable,
+  isVerified,
+  responseTimeMinutes,
   onClick,
 }: ShopListItemProps) {
   const t = useTranslations('Guest');
@@ -63,9 +67,23 @@ export default function ShopListItem({
         </div>
 
         <div className="mt-3 flex justify-between items-center">
-          <div className="flex items-center gap-1 text-[10px] text-green-600 font-bold uppercase tracking-wider">
-            <Shield size={10} />
-            {t("insured")}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 text-[10px] text-green-600 font-bold uppercase tracking-wider">
+              <Shield size={10} />
+              {t("insured")}
+            </div>
+            {isVerified && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded-md">
+                <Shield size={10} />
+                Doğr.
+              </span>
+            )}
+            {responseTimeMinutes != null && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-md">
+                <Timer size={10} />
+                ≤{responseTimeMinutes}dk
+              </span>
+            )}
           </div>
           
           <div className="flex items-center gap-3">

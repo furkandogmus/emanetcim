@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { 
   Store, 
   Search, 
@@ -12,10 +12,16 @@ import {
   Star,
   ShoppingBag,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  KeyRound,
+  Copy,
+  Check,
+  X,
+  Loader2
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { motion, AnimatePresence } from "framer-motion";
+import { adminInitiatePartnerPasswordResetAction } from "@/actions/partner-password-reset";
 
 interface Shop {
   id: string;
@@ -43,6 +49,11 @@ interface AdminPartnersClientProps {
 export default function AdminPartnersClient({ shops: initialShops }: AdminPartnersClientProps) {
   const t = useTranslations("Admin");
   const [search, setSearch] = useState("");
+
+  const [resetTarget, setResetTarget] = useState<{ id: string; name: string; phone: string | null } | null>(null);
+  const [resetResult, setResetResult] = useState<{ ok: true; resetUrl: string } | { ok: false; error: string } | null>(null);
+  const [resetPending, startResetTransition] = useTransition();
+  const [copied, setCopied] = useState(false);
 
   const filteredShops = initialShops.filter(shop => 
     shop.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -150,12 +161,22 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
                       </div>
                     </td>
                     <td className="px-8 py-6 text-right">
-                      <Link
-                        href={`/admin/partners/${shop.id}/edit`}
-                        className="p-2.5 bg-gray-50 hover:bg-orange-50 text-gray-400 hover:text-orange-600 rounded-xl transition-all inline-flex items-center justify-center group/btn shadow-sm"
-                      >
-                        <Edit3 size={18} className="group-hover/btn:scale-110 transition-transform" />
-                      </Link>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setResetTarget({ id: shop.id, name: shop.owner.name || shop.name, phone: shop.owner.phone })}
+                          className="p-2.5 bg-gray-50 hover:bg-orange-50 text-gray-400 hover:text-orange-600 rounded-xl transition-all inline-flex items-center justify-center group/btn shadow-sm"
+                          title={t("resetPassword")}
+                        >
+                          <KeyRound size={18} className="group-hover/btn:scale-110 transition-transform" />
+                        </button>
+                        <Link
+                          href={`/admin/partners/${shop.id}/edit`}
+                          className="p-2.5 bg-gray-50 hover:bg-orange-50 text-gray-400 hover:text-orange-600 rounded-xl transition-all inline-flex items-center justify-center group/btn shadow-sm"
+                        >
+                          <Edit3 size={18} className="group-hover/btn:scale-110 transition-transform" />
+                        </Link>
+                      </div>
                     </td>
                   </motion.tr>
                 ))}
@@ -164,6 +185,120 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
           </table>
         </div>
       </div>
+      {/* Şifre sıfırlama modalı */}
+      <AnimatePresence>
+        {resetTarget && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+            onClick={() => { setResetTarget(null); setResetResult(null); }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-lg rounded-[2rem] bg-white p-8 shadow-2xl"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-black text-gray-900">{t("resetPassword")}</h2>
+                <button
+                  type="button"
+                  onClick={() => { setResetTarget(null); setResetResult(null); }}
+                  className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {!resetResult ? (
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-6">
+                    {t("resetPasswordConfirm", { name: resetTarget.name, phone: resetTarget.phone || "-" })}
+                  </p>
+                  <div className="flex gap-3 justify-end">
+                    <button
+                      type="button"
+                      onClick={() => { setResetTarget(null); setResetResult(null); }}
+                      className="px-5 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-colors"
+                    >
+                      {t("resetCancel")}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={resetPending || !resetTarget.phone}
+                      onClick={() => {
+                        if (!resetTarget.phone) return;
+                        startResetTransition(async () => {
+                          const res = await adminInitiatePartnerPasswordResetAction(resetTarget.phone!);
+                          setResetResult(res);
+                        });
+                      }}
+                      className="px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 transition-colors disabled:opacity-50 inline-flex items-center gap-2"
+                    >
+                      {resetPending ? (
+                        <><Loader2 size={16} className="animate-spin" /> {t("generating")}</>
+                      ) : (
+                        <><KeyRound size={16} /> {t("generateResetLink")}</>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              ) : resetResult.ok ? (
+                <div>
+                  <div className="flex items-center gap-2 mb-4 text-green-700">
+                    <CheckCircle2 size={20} />
+                    <span className="text-sm font-bold">{t("resetLinkGenerated")}</span>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      readOnly
+                      value={resetResult.resetUrl}
+                      className="w-full pr-12 pl-4 py-3 rounded-xl border-2 border-gray-100 bg-gray-50 text-sm font-medium text-gray-700 focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(resetResult.resetUrl);
+                        setCopied(true);
+                        setTimeout(() => setCopied(false), 2000);
+                      }}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg hover:bg-gray-200 text-gray-500 transition-colors"
+                    >
+                      {copied ? <Check size={18} className="text-green-600" /> : <Copy size={18} />}
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setResetTarget(null); setResetResult(null); setCopied(false); }}
+                    className="mt-6 w-full px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 transition-colors"
+                  >
+                    {t("resetDone")}
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <div className="flex items-center gap-2 mb-4 text-red-600">
+                    <AlertCircle size={20} />
+                    <span className="text-sm font-bold">{t("resetError")}</span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-6">{resetResult.error}</p>
+                  <button
+                    type="button"
+                    onClick={() => { setResetTarget(null); setResetResult(null); }}
+                    className="w-full px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 transition-colors"
+                  >
+                    {t("resetClose")}
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

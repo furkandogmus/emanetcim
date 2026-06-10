@@ -63,7 +63,8 @@ export class ReviewService {
           select: { name: true, image: true }
         }
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      take: 50,
     });
   }
 }

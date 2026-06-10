@@ -18,6 +18,10 @@ const { mockPrisma, mockNotification, mockFeatureFlags } = vi.hoisted(() => {
         update: vi.fn(),
         create: vi.fn(),
       },
+      bookingEvent: {
+        create: vi.fn(),
+        findMany: vi.fn(),
+      },
       $transaction: vi.fn((fn) => {
         if (typeof fn === 'function') return fn(mockPrisma);
         return Promise.all(fn);
@@ -109,8 +113,9 @@ describe("PaymentService Deep Logic", () => {
       const result = await service.reconcileStalePaymentBookings();
 
       expect(result.fixed).toBe(2);
-      expect(mockPrisma.booking.update).toHaveBeenCalledTimes(2);
-      expect(mockPrisma.booking.update).toHaveBeenCalledWith(expect.objectContaining({
+      expect(mockPrisma.booking.updateMany).toHaveBeenCalledTimes(1);
+      expect(mockPrisma.booking.updateMany).toHaveBeenCalledWith(expect.objectContaining({
+        where: { id: { in: ["stuck1", "stuck2"] } },
         data: { status: "PAID" },
       }));
     });

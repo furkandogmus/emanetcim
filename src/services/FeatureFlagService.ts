@@ -5,7 +5,7 @@ import {
   type KnownFeatureFlagKey,
 } from "@/lib/feature-flag-keys";
 
-const TTL_MS = 5000;
+const TTL_MS = 60_000;
 
 export type FeatureFlagContext = {
   userId?: string;

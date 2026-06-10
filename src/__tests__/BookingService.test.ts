@@ -31,6 +31,7 @@ const { mockTx, mockPrisma, mockRefundPayment, mockSealService } = vi.hoisted(()
     coupon: { create: vi.fn() },
     paymentLog: { findFirst: vi.fn() },
     bookingSeal: { findMany: vi.fn() },
+    bookingEvent: { create: vi.fn(), findMany: vi.fn() },
     $executeRawUnsafe: vi.fn().mockResolvedValue(undefined),
   };
   return {

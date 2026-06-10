@@ -21,6 +21,7 @@ import {
   PLAUSIBLE_EVENTS,
   trackPlausibleEvent,
 } from "@/lib/plausible-events";
+import { TrustBadges } from "@/components/common/TrustBadge";
 
 export type ShopDetailClientShop = {
   id: string;
@@ -35,6 +36,8 @@ export type ShopDetailClientShop = {
   open247: boolean;
   openingTime: string | null;
   closingTime: string | null;
+  isVerified: boolean;
+  responseTimeMinutes: number | null;
   reviews: Array<{
     id: string;
     rating: number;
@@ -136,7 +139,10 @@ export default function ShopDetailClient({
             <p className="mt-2 text-sm text-gray-500 flex items-center gap-1.5">
               <MapPin size={14} /> {shop.address?.split(",")[0] || t("cityFallback")}
             </p>
-            <div className="mt-4 grid grid-cols-2 gap-2">
+            <div className="mt-3 flex items-center gap-2">
+              <TrustBadges isVerified={shop.isVerified} responseTimeMinutes={shop.responseTimeMinutes} />
+            </div>
+            <div className="mt-3 grid grid-cols-2 gap-2">
               <span className="rounded-xl bg-indigo-50 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-indigo-700">
                 {mobileCopy.verifiedPartner}
               </span>

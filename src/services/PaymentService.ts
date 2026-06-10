@@ -13,6 +13,7 @@ import { assertStripeKeys, getStripe } from '@/lib/stripe';
 import { recordMetric } from '@/lib/metrics';
 import { computeSubMerchantShare } from '@/lib/platform-split';
 import { notificationService } from '@/services/NotificationService';
+import { bookingEventService } from '@/services/BookingEventService';
 
 const IYZICO_OP_TIMEOUT_MS = Number(process.env.IYZICO_HTTP_TIMEOUT_MS) || 45_000;
 
@@ -119,6 +120,12 @@ export class PaymentService implements IPaymentService {
         },
         data: { status: "PAID" },
       });
+    });
+
+    await bookingEventService.record({
+      bookingId,
+      event: "PAID",
+      metadata: { paymentId, totalPrice: moneyToNumber(totalPrice) },
     });
   }
 
@@ -444,6 +451,12 @@ export class PaymentService implements IPaymentService {
           .catch((e) => logger.warn({ err: e, bookingId }, "webhook_notify_partner_sms_failed"));
       }
 
+      await bookingEventService.record({
+        bookingId,
+        event: "PAID",
+        metadata: { gateway: "iyzico", externalPaymentId, totalPrice: moneyToNumber(booking.totalPrice) },
+      });
+
       logger.info({ bookingId }, "payment_webhook_confirmed");
       return { success: true, message: "Confirmed" };
     } catch (error) {
@@ -666,32 +679,38 @@ export class PaymentService implements IPaymentService {
         shop: { include: { owner: true } }
       },
     });
-    const bookingIds: string[] = [];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    for (const b of stuck as any[]) {
-      await prisma.booking.update({
-        where: { id: b.id },
+    const bookingIds = stuck.map((b) => b.id);
+    if (bookingIds.length > 0) {
+      await prisma.booking.updateMany({
+        where: { id: { in: bookingIds } },
         data: { status: 'PAID' },
       });
-      bookingIds.push(b.id);
-      logger.info({ bookingId: b.id }, 'finance_reconcile_pending_or_approved_to_paid');
 
-      // Bildirim: misafir ve esnaf geç de olsa haberdar edilsin
-      const guestEmail = b.guest?.email;
-      const totalPrice = moneyToNumber(b.totalPrice);
-      if (guestEmail) {
-        void notificationService
-          .notifyBookingSuccess(guestEmail, b.id, totalPrice)
-          .catch((e) => logger.warn({ err: e, bookingId: b.id }, 'reconcile_notify_guest_failed'));
-      }
-      void notificationService
-        .notifyPartnerAndAdminsForNewPaidBooking({
+      for (const b of stuck) {
+        logger.info({ bookingId: b.id }, 'finance_reconcile_pending_or_approved_to_paid');
+
+        bookingEventService.record({
           bookingId: b.id,
-          shopName: b.shop?.name ?? 'Dükkan',
-          partnerPhone: b.shop?.owner?.phone,
-          totalPrice,
-        })
-        .catch((e) => logger.warn({ err: e, bookingId: b.id }, 'reconcile_notify_partner_failed'));
+          event: "PAID",
+          metadata: { reconciled: true },
+        }).catch((err) => logger.error({ err, bookingId: b.id }, 'reconcile_event_failed'));
+
+        const guestEmail = b.guest?.email;
+        const totalPrice = moneyToNumber(b.totalPrice);
+        if (guestEmail) {
+          void notificationService
+            .notifyBookingSuccess(guestEmail, b.id, totalPrice)
+            .catch((e) => logger.warn({ err: e, bookingId: b.id }, 'reconcile_notify_guest_failed'));
+        }
+        void notificationService
+          .notifyPartnerAndAdminsForNewPaidBooking({
+            bookingId: b.id,
+            shopName: b.shop?.name ?? 'Dükkan',
+            partnerPhone: b.shop?.owner?.phone,
+            totalPrice,
+          })
+          .catch((e) => logger.warn({ err: e, bookingId: b.id }, 'reconcile_notify_partner_failed'));
+      }
     }
     recordMetric('reconcile_payments_complete', {
       fixed: stuck.length,

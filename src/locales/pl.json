@@ -138,7 +138,10 @@
     "reject": "Odrzuć",
     "approve": "Zatwierdź",
     "approvedSuccess": "Prośba zatwierdzona!",
-    "confirmReject": "Na pewno odrzucić tę prośbę?"
+    "confirmReject": "Na pewno odrzucić tę prośbę?",
+    "pagination": "Pagination",
+    "prevPage": "Previous",
+    "nextPage": "Next"
   },
   "Guest": {
     "heroTitle": "Zostaw torby, zwiedzaj swobodnie",
@@ -317,6 +320,9 @@
     "readMore": "Czytaj więcej",
     "away": "{distance} m stąd",
     "insured": "UBEZPIECZONE",
+    "verifiedBadge": "Verified",
+    "responseTimeFast": "Very fast",
+    "responseTimeMinutes": "≤{minutes} min",
     "day": "DZIEŃ",
     "open247": "24/7",
     "restroom": "Toaleta",
@@ -685,7 +691,16 @@
     "statusDisputeClosed": "Closed",
     "reasonDisputeDamage": "Damage",
     "reasonDisputeTheft": "Theft",
-    "reasonDisputeOther": "Other"
+    "reasonDisputeOther": "Other",
+    "resetPassword": "Reset Password",
+    "resetPasswordConfirm": "Create password reset link for {name} ({phone})?",
+    "generateResetLink": "Generate Link",
+    "generating": "Generating...",
+    "resetLinkGenerated": "Password reset link created:",
+    "resetError": "An error occurred.",
+    "resetCancel": "Cancel",
+    "resetDone": "Done",
+    "resetClose": "Close"
   },
   "Auth": {
     "loginTitle": "Zaloguj się do BagajPark",

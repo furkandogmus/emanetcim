@@ -7,7 +7,7 @@ import {
 } from "@/lib/pricing-rules";
 
 let cache: { rules: PricingRules; at: number } | null = null;
-const TTL_MS = 5000;
+const TTL_MS = 60_000;
 
 function mapRow(row: {
   maxStayDays: number;

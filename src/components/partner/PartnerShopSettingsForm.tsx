@@ -93,7 +93,7 @@ export default function PartnerShopSettingsForm({
       return;
     }
     try {
-      await updateShopSettingsAction(shopId, {
+      const shopRes = await updateShopSettingsAction(shopId, {
         capacity,
         openingTime,
         closingTime,
@@ -104,6 +104,10 @@ export default function PartnerShopSettingsForm({
         latitude: location.latitude,
         longitude: location.longitude,
       });
+      if (!shopRes.success) {
+        setPhoneError(shopRes.error ?? tErrors("generic"));
+        return;
+      }
       const phoneRes = await updatePartnerPhoneAction(partnerPhone);
       if (!phoneRes.success) {
         const code = phoneRes.error;
@@ -213,11 +217,10 @@ export default function PartnerShopSettingsForm({
               <div className="flex items-center gap-4">
                 <Clock size={20} className="text-gray-300" />
                 <input
-                  type="text"
+                  type="time"
                   value={openingTime}
                   onChange={(e) => setOpeningTime(e.target.value)}
                   className="ui-field w-full rounded-2xl text-center"
-                  placeholder="09:00"
                 />
               </div>
             </div>
@@ -228,11 +231,10 @@ export default function PartnerShopSettingsForm({
               <div className="flex items-center gap-4">
                 <Clock size={20} className="text-gray-300" />
                 <input
-                  type="text"
+                  type="time"
                   value={closingTime}
                   onChange={(e) => setClosingTime(e.target.value)}
                   className="ui-field w-full rounded-2xl text-center"
-                  placeholder="20:00"
                 />
               </div>
             </div>

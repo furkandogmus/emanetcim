@@ -45,7 +45,8 @@ export default function AdminBlogClient({ posts: initialPosts }: AdminBlogClient
     if (!pendingDeleteId) return;
     setLoadingId(pendingDeleteId);
     try {
-      await deleteBlogPostAction(pendingDeleteId);
+      const res = await deleteBlogPostAction(pendingDeleteId);
+      if (!res.success) { toast.error(res.error); return; }
       setPosts(prev => prev.filter(p => p.id !== pendingDeleteId));
       toast.success(t("postDeletedSuccess") || "Yazı başarıyla silindi.");
     } catch {

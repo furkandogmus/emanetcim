@@ -12,6 +12,7 @@ import { sealService } from "@/services/SealService";
 import { BookingStatus, Prisma } from "@prisma/client";
 import { z } from "zod";
 import logger from "@/lib/logger";
+import { bookingEventService } from "@/services/BookingEventService";
 
 function revalidatePartnerPaths() {
   revalidatePathAllLocales("/partner");
@@ -138,7 +139,7 @@ export async function checkInAction(
 
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId },
-    include: { shop: true },
+    include: { shop: true, guest: { select: { email: true } } },
   });
   if (!booking) {
     return {
@@ -156,18 +157,12 @@ export async function checkInAction(
     };
   }
 
-  const result = await bookingService.checkIn(
-    bookingId
-  );
+  const result = await bookingService.checkIn(bookingId);
 
   if (result.ok) {
-    const b = await prisma.booking.findUnique({
-      where: { id: bookingId },
-      include: { guest: true },
-    });
-    if (b?.guest?.email) {
+    if (booking.guest?.email) {
       const locale = await getLocale();
-      await notificationService.notifyCheckIn(b.guest.email, b.id, locale);
+      await notificationService.notifyCheckIn(booking.guest.email, booking.id, locale);
     }
 
     revalidatePartnerPaths();
@@ -197,7 +192,7 @@ export async function checkOutAction(qrTokenOrBookingId: string) {
 
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId },
-    include: { shop: true },
+    include: { shop: true, guest: { select: { email: true } } },
   });
   if (!booking) {
     return {
@@ -217,13 +212,9 @@ export async function checkOutAction(qrTokenOrBookingId: string) {
   const result = await bookingService.checkOut(bookingId);
 
   if (result.ok) {
-    const updated = await prisma.booking.findUnique({
-      where: { id: bookingId },
-      include: { guest: true },
-    });
-    if (updated?.guest?.email) {
+    if (booking.guest?.email) {
       const locale = await getLocale();
-      await notificationService.notifyCheckOut(updated.guest.email, updated.id, locale);
+      await notificationService.notifyCheckOut(booking.guest.email, booking.id, locale);
     }
 
     revalidatePartnerPaths();
@@ -293,7 +284,7 @@ export async function approveBookingAction(bookingId: string) {
   try {
     const booking = await prisma.booking.findUnique({
       where: { id: bookingId },
-      include: { shop: true },
+      include: { shop: true, guest: { select: { email: true } } },
     });
 
     if (!booking) return { success: false as const, error: "Errors.bookingNotFound" };
@@ -317,15 +308,17 @@ export async function approveBookingAction(bookingId: string) {
       return { success: false as const, error: "Errors.bookingStateConflict" };
     }
 
-    // Misafire "Onaylandı, ödeme yapabilirsiniz" e-postası
-    const guestInfo = await prisma.booking.findUnique({
-      where: { id: bookingId },
-      select: { guest: { select: { email: true } }, shop: { select: { name: true } } },
-    });
-    if (guestInfo?.guest?.email) {
+    void bookingEventService.record({
+      bookingId,
+      event: "APPROVED",
+      actorId: session.user.id,
+      actorRole: session.user.role as "PARTNER" | "ADMIN",
+    }).catch(() => {});
+
+    if (booking.guest?.email) {
       const locale = await getLocale();
       void notificationService
-        .notifyBookingApproved(guestInfo.guest.email, bookingId, guestInfo.shop.name, locale)
+        .notifyBookingApproved(booking.guest.email, bookingId, booking.shop.name, locale)
         .catch((err) => logger.error({ err, bookingId }, "notify_booking_approved_failed"));
     }
 
@@ -365,6 +358,14 @@ export async function rejectBookingAction(bookingId: string) {
       where: { id: bookingId },
       data: { status: BookingStatus.CANCELLED },
     });
+
+    void bookingEventService.record({
+      bookingId,
+      event: "CANCELLED",
+      actorId: session.user.id,
+      actorRole: session.user.role as "PARTNER" | "ADMIN",
+      metadata: { reason: "rejected_by_partner" },
+    }).catch(() => {});
 
     // Misafire "Reddedildi" e-postası
     if (booking.guest?.email) {

@@ -44,11 +44,15 @@ export const authConfig: NextAuthConfig = {
         }
 
         const { default: prisma } = await import("@/lib/db");
+        const phoneNorm = emailOrPhone.replace(/\D/g, "").replace(/^90|^0/, "");
         const user = await prisma.user.findFirst({
           where: {
             OR: [
               { email: { equals: emailOrPhone, mode: "insensitive" } },
-              { phone: emailOrPhone }
+              { phone: emailOrPhone },
+              ...(phoneNorm.length === 10 && phoneNorm.startsWith("5")
+                ? [{ phone: phoneNorm }]
+                : []),
             ]
           },
         });

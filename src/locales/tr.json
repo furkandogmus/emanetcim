@@ -64,7 +64,7 @@
     "partnerBookingApprovedCheckInHint": "Onaylandı — misafir online ödeyebilir; ödeme dükkandaysa aşağıdan QR ile check-in yapın.",
     "partnerBookingsCheckOut": "Alış",
     "partnerBookingsFilterAll": "Tümü",
-    "partnerBookingsFilterAction": "Senden aksiyon",
+    "partnerBookingsFilterAction": "Aksiyon gerektiren",
     "partnerBookingsFilterPayment": "Ödeme bekleyen",
     "partnerBookingsFilterDone": "Tamamlanan",
     "partnerBookingsFilterAria": "Rezervasyonları filtrele",
@@ -178,7 +178,10 @@
     "sealsTrackingNo": "Takip No: {tracking}",
     "sealsSerialRange": "Seri: {from} – {to}",
     "sealsConfirmDelivery": "Teslim Aldım — Stoğa Ekle",
-    "sealsNoRequests": "Henüz mühür talebiniz yok."
+    "sealsNoRequests": "Henüz mühür talebiniz yok.",
+    "pagination": "Sayfalama",
+    "prevPage": "Önceki",
+    "nextPage": "Sonraki"
   },
   "Guest": {
     "heroTitle": "Valizini Güvenle Bırak, Özgürce Gez",
@@ -363,6 +366,9 @@
     "howItWorks": "Nasıl Çalışır?",
     "away": "{distance} m uzakta",
     "insured": "SİGORTALI",
+    "verifiedBadge": "Doğrulanmış",
+    "responseTimeFast": "Çok hızlı",
+    "responseTimeMinutes": "≤{minutes} dk",
     "day": "GÜN",
     "open247": "7/24",
     "restroom": "WC",
@@ -738,7 +744,16 @@
     "statusDisputeClosed": "Kapandı",
     "reasonDisputeDamage": "Hasar",
     "reasonDisputeTheft": "Hırsızlık",
-    "reasonDisputeOther": "Diğer"
+    "reasonDisputeOther": "Diğer",
+    "resetPassword": "Şifre Sıfırla",
+    "resetPasswordConfirm": "{name} ({phone}) için şifre sıfırlama linki oluşturulacak. Onaylıyor musunuz?",
+    "generateResetLink": "Link Oluştur",
+    "generating": "Oluşturuluyor...",
+    "resetLinkGenerated": "Şifre sıfırlama linki oluşturuldu:",
+    "resetError": "Bir hata oluştu.",
+    "resetCancel": "İptal",
+    "resetDone": "Tamam",
+    "resetClose": "Kapat"
   },
   "Auth": {
     "loginTitle": "BagajPark'a Giriş Yap",

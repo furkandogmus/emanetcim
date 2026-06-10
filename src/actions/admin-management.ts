@@ -518,35 +518,6 @@ export async function rejectShopAction(
   return { success: true };
 }
 
-export type DeleteShopActionResult =
-  | { success: true }
-  | { success: false; error: "has_relations" };
-
-/**
- * Esnaf (Shop) sil
- */
-export async function deleteShopAction(
-  shopId: string,
-): Promise<DeleteShopActionResult> {
-  await ensureAdmin();
-
-  try {
-    await prisma.shop.delete({
-      where: { id: shopId },
-    });
-  } catch (e) {
-    if (isPrismaForeignKeyViolation(e)) {
-      logger.warn({ shopId, err: e }, "admin_delete_shop_fk_blocked");
-      return { success: false, error: "has_relations" };
-    }
-    throw e;
-  }
-
-  revalidatePathAllLocales("/admin/partners");
-  revalidatePathAllLocales("/admin/applications");
-  return { success: true };
-}
-
 /**
  * Esnaf (Shop) bilgilerini güncelle
  */
@@ -681,58 +652,5 @@ export async function blockIpAction(ip: string, reason?: string) {
 
   revalidatePathAllLocales("/admin/settings");
   return { success: true };
-}
-
-/**
- * IP bloğunu kaldır
- */
-export async function unblockIpAction(ip: string) {
-  await ensureAdmin();
-
-  await prisma.blockedIp.delete({
-    where: { ip },
-  });
-
-  return { success: true };
-}
-
-type PaymentChargebackStatus = "OPEN" | "WON" | "LOST";
-
-/**
- * Ödeme kaydı için chargeback durumu (admin).
- */
-export async function setPaymentChargebackStatusAction(
-  bookingId: string,
-  status: PaymentChargebackStatus | null,
-  note?: string | null,
-) {
-  const session = await ensureAdmin();
-
-  const log = await prisma.paymentLog.findUnique({
-    where: { bookingId },
-  });
-  if (!log) {
-    return { success: false as const, error: "payment_log_not_found" as const };
-  }
-
-  await prisma.paymentLog.update({
-    where: { id: log.id },
-    data: {
-      chargebackStatus: status,
-      chargebackNote: note?.trim() || null,
-    },
-  });
-
-  writeAuditLog({
-    actorUserId: session.user.id ?? null,
-    actorRole: "ADMIN",
-    action: "payment.chargeback_update",
-    entityType: "PaymentLog",
-    entityId: log.id,
-    metadata: { bookingId, status, note: note ?? null },
-    ip: await clientIp(),
-  });
-
-  return { success: true as const };
 }
 

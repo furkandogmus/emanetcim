@@ -45,7 +45,8 @@ export default function AdminBlogEditClient({ post, locale: currentLocale }: Adm
 
     setLoading(true);
     try {
-      await upsertBlogPostAction(formData);
+      const res = await upsertBlogPostAction(formData);
+      if (!res.success) { toast.error(res.error); return; }
       toast.success(post ? t("postUpdatedSuccess") : t("postCreatedSuccess"));
       router.push("/admin/blog");
       router.refresh();

@@ -19,25 +19,39 @@ function buildWeekOverWeekTrend(
 }
 
 async function getDailyChartData() {
+  const today = new Date();
+  today.setHours(23, 59, 59, 999);
+  const sevenDaysAgo = new Date(today);
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+  sevenDaysAgo.setHours(0, 0, 0, 0);
+
+  const bookings = await prisma.booking.findMany({
+    where: {
+      createdAt: { gte: sevenDaysAgo, lte: today },
+      status: { in: [...PAID_STATUSES] },
+    },
+    select: { createdAt: true, totalPrice: true },
+  });
+
+  const dayBuckets: Record<string, { total: number; count: number }> = {};
+  for (const b of bookings) {
+    const d = new Date(b.createdAt);
+    const key = `${d.getDate()}/${d.getMonth() + 1}`;
+    if (!dayBuckets[key]) dayBuckets[key] = { total: 0, count: 0 };
+    dayBuckets[key].total += moneyToNumber(b.totalPrice);
+    dayBuckets[key].count++;
+  }
+
   const out: { name: string; ciro: number; emanet: number }[] = [];
-  for (let i = 6; i >= 0; i--) {
-    const dayStart = new Date();
-    dayStart.setHours(0, 0, 0, 0);
-    dayStart.setDate(dayStart.getDate() - i);
-    const dayEnd = new Date(dayStart);
-    dayEnd.setDate(dayEnd.getDate() + 1);
-    const agg = await prisma.booking.aggregate({
-      where: {
-        createdAt: { gte: dayStart, lt: dayEnd },
-        status: { in: [...PAID_STATUSES] },
-      },
-      _sum: { totalPrice: true },
-      _count: true,
-    });
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(sevenDaysAgo);
+    d.setDate(d.getDate() + i);
+    const key = `${d.getDate()}/${d.getMonth() + 1}`;
+    const bucket = dayBuckets[key];
     out.push({
-      name: `${dayStart.getDate()}/${dayStart.getMonth() + 1}`,
-      ciro: Math.round(moneyToNumber(agg._sum.totalPrice ?? 0)),
-      emanet: agg._count,
+      name: key,
+      ciro: bucket ? Math.round(bucket.total) : 0,
+      emanet: bucket ? bucket.count : 0,
     });
   }
   return out;

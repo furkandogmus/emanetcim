@@ -114,40 +114,55 @@ export class SealService {
       }
     }
 
-    for (const sn of faultySealNumbers) {
-      const seal = await tx.seal.findUnique({ where: { serialNumber: sn } });
-      if (!seal || seal.shopId !== shopId || seal.status !== "ASSIGNED") {
-        throw new Error(`SEAL_FAULTY_INVALID:${sn}`);
+    if (faultySealNumbers.length > 0) {
+      const faultySeals = await tx.seal.findMany({
+        where: { serialNumber: { in: faultySealNumbers } },
+      });
+      for (const seal of faultySeals) {
+        if (seal.shopId !== shopId || seal.status !== "ASSIGNED") {
+          throw new Error(`SEAL_FAULTY_INVALID:${seal.serialNumber}`);
+        }
       }
-      await tx.seal.update({
-        where: { serialNumber: sn },
+      if (faultySeals.length !== faultySealNumbers.length) {
+        const found = new Set(faultySeals.map((s) => s.serialNumber));
+        const missing = faultySealNumbers.find((sn) => !found.has(sn));
+        throw new Error(`SEAL_FAULTY_INVALID:${missing}`);
+      }
+      await tx.seal.updateMany({
+        where: { serialNumber: { in: faultySealNumbers } },
         data: { status: "FAULTY" },
       });
     }
 
-    for (let i = 0; i < assignments.length; i++) {
-      const a = assignments[i];
-      const seal = await tx.seal.findUnique({
-        where: { serialNumber: a.sealNumber },
+    if (assignments.length > 0) {
+      const assignmentNumsArr = assignments.map((a) => a.sealNumber);
+      const existingSeals = await tx.seal.findMany({
+        where: { serialNumber: { in: assignmentNumsArr } },
       });
-      if (!seal || seal.shopId !== shopId) {
-        throw new Error(`SEAL_INVALID:${a.sealNumber}`);
+      const sealMap = new Map(existingSeals.map((s) => [s.serialNumber, s]));
+      for (const a of assignments) {
+        const seal = sealMap.get(a.sealNumber);
+        if (!seal || seal.shopId !== shopId) {
+          throw new Error(`SEAL_INVALID:${a.sealNumber}`);
+        }
+        if (seal.status !== "ASSIGNED") {
+          throw new Error(`SEAL_NOT_ASSIGNED:${a.sealNumber}`);
+        }
       }
-      if (seal.status !== "ASSIGNED") {
-        throw new Error(`SEAL_NOT_ASSIGNED:${a.sealNumber}`);
-      }
-      await tx.seal.update({
-        where: { serialNumber: a.sealNumber },
+
+      await tx.seal.updateMany({
+        where: { serialNumber: { in: assignmentNumsArr } },
         data: { status: "IN_USE" },
       });
-      await tx.bookingSeal.create({
-        data: {
+
+      await tx.bookingSeal.createMany({
+        data: assignments.map((a, i) => ({
           bookingId,
           sealNumber: a.sealNumber,
           bagIndex: a.bagIndex,
           bagSize: a.bagSize,
           photoUrl: i === 0 ? sealPhotoUrl : null,
-        },
+        })),
       });
     }
   }
@@ -196,9 +211,10 @@ export class SealService {
       where: { bookingId },
       select: { sealNumber: true },
     });
-    for (const row of rows) {
-      await tx.seal.update({
-        where: { serialNumber: row.sealNumber },
+    const serialNumbers = rows.map((r) => r.sealNumber);
+    if (serialNumbers.length > 0) {
+      await tx.seal.updateMany({
+        where: { serialNumber: { in: serialNumbers } },
         data: { status: "RETURNED" },
       });
     }
