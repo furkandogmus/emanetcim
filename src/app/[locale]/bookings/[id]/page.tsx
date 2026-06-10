@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { bookingService } from "@/services/BookingService";
+import prisma from "@/lib/db";
 import { notFound, redirect } from "next/navigation";
 import {
   Calendar,
@@ -67,7 +67,16 @@ export default async function BookingDetailPage({
   }
 
   const [booking, pricingRules] = await Promise.all([
-    bookingService.getBookingDetails(id),
+    prisma.booking.findUnique({
+      where: { id },
+      select: {
+        id: true, guestId: true, shopId: true, checkInTime: true, checkOutTime: true,
+        totalPrice: true, bagCountS: true, bagCountM: true, bagCountXl: true,
+        status: true, qrCodeToken: true, createdAt: true,
+        shop: { select: { name: true, pricePerDay: true } },
+        seals: { orderBy: { bagIndex: "asc" } },
+      },
+    }),
     getPricingRules(),
   ]);
 

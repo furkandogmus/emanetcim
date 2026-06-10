@@ -75,24 +75,16 @@ export default async function SearchPage({
 
   const { checkIn, checkOut } = defaultSearchStayWindow();
 
-  const [nearbyShops, allShops] = await Promise.all([
-    shopService.findShopsForSearch({
-      centerLat: center.lat,
-      centerLng: center.lng,
-      radiusKm: SEARCH_NEARBY_RADIUS_KM,
-      checkIn,
-      checkOut,
-      requestedBags: 1,
-    }),
-    shopService.findShopsForSearch({
-      centerLat: center.lat,
-      centerLng: center.lng,
-      radiusKm: null,
-      checkIn,
-      checkOut,
-      requestedBags: 1,
-    }),
-  ]);
+  const allShops = await shopService.findShopsForSearch({
+    centerLat: center.lat,
+    centerLng: center.lng,
+    radiusKm: null,
+    checkIn,
+    checkOut,
+    requestedBags: 1,
+  });
+
+  const nearbyShops = allShops.filter(s => s.distanceKm <= SEARCH_NEARBY_RADIUS_KM);
 
   return (
     <SearchClient
