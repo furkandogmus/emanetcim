@@ -126,6 +126,11 @@ export default function Footer() {
                   {t("kvkk")}
                 </Link>
               </li>
+              <li>
+                <a href="/sitemap.xml" className="hover:text-orange-600 transition-colors">
+                  {t("sitemap")}
+                </a>
+              </li>
             </ul>
           </div>
 
