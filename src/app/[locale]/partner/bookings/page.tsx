@@ -1,5 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import { ChevronLeft, Package, Clock, CheckCircle2, Phone } from "lucide-react";
+import { ChevronLeft, Package, Clock, CheckCircle2, Phone, ChevronRight } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { auth } from "@/auth";
 import prisma from "@/lib/db";
@@ -14,16 +14,18 @@ import PartnerBookingsFilterTabs from "@/components/partner/PartnerBookingsFilte
 import PartnerBookingActionLinks from "@/components/partner/PartnerBookingActionLinks";
 import { redirect } from "next/navigation";
 
+const PAGE_SIZE = 30;
+
 /**
  * Partner Bookings / History Page - Esnaf Takvimi
- * ?filter=all|action|payment|done
+ * ?filter=all|action|payment|done&page=1
  */
 export default async function PartnerBookingsPage({
   params,
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams?: Promise<{ filter?: string }>;
+  searchParams?: Promise<{ filter?: string; page?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -59,12 +61,22 @@ export default async function PartnerBookingsPage({
 
   const sp = (await searchParams) ?? {};
   const filter: PartnerBookingsFilter = parsePartnerBookingsFilter(sp.filter);
+  const page = Math.max(1, parseInt(sp.page ?? "1", 10) || 1);
 
-  const dbBookings = await prisma.booking.findMany({
-    where: { shop: { ownerId: userId } },
-    include: { guest: true },
-    orderBy: { checkInTime: "asc" },
-  });
+  const where = { shop: { ownerId: userId } };
+
+  const [totalCount, dbBookings] = await Promise.all([
+    prisma.booking.count({ where }),
+    prisma.booking.findMany({
+      where,
+      include: { guest: true },
+      orderBy: { checkInTime: "desc" },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    }),
+  ]);
+
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   const timeLocale = dateLocaleForUiLocale(locale);
 
@@ -90,15 +102,19 @@ export default async function PartnerBookingsPage({
     };
   });
 
-  const filteredTasks = tasks.filter((task) =>
-    bookingMatchesPartnerFilter(task.bookingStatus, filter)
-  );
-
   const filterLabels: Record<PartnerBookingsFilter, string> = {
     all: t("partnerBookingsFilterAll"),
     action: t("partnerBookingsFilterAction"),
     payment: t("partnerBookingsFilterPayment"),
     done: t("partnerBookingsFilterDone"),
+  };
+
+  const qs = (p: number) => {
+    const params = new URLSearchParams();
+    if (filter !== "all") params.set("filter", filter);
+    if (p > 1) params.set("page", String(p));
+    const q = params.toString();
+    return q ? `?${q}` : "";
   };
 
   return (
@@ -111,7 +127,7 @@ export default async function PartnerBookingsPage({
       </header>
 
       <main className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-6">
-        {tasks.length > 0 ? (
+        {totalCount > 0 ? (
           <PartnerBookingsFilterTabs
             current={filter}
             labels={filterLabels}
@@ -119,18 +135,18 @@ export default async function PartnerBookingsPage({
           />
         ) : null}
 
-        {tasks.length === 0 ? (
+        {totalCount === 0 ? (
           <div className="flex flex-col items-center rounded-3xl border border-gray-100 bg-white p-8 text-center text-gray-500 shadow-sm">
             <Package size={48} className="mb-4 text-gray-200" />
             <h3 className="font-bold text-gray-900">{t("noBookingsYet")}</h3>
             <p className="mt-1 text-sm">{t("noBookingsPartnerDesc")}</p>
           </div>
-        ) : filteredTasks.length === 0 ? (
+        ) : tasks.length === 0 ? (
           <div className="rounded-3xl border border-gray-100 bg-white p-8 text-center text-sm font-medium text-gray-500 shadow-sm">
             {t("partnerBookingsEmptyFilter")}
           </div>
         ) : (
-          filteredTasks.map((task) => (
+          tasks.map((task) => (
             <div
               key={task.bookingId}
               className="flex flex-col gap-6 rounded-3xl border border-gray-100 bg-white p-6 shadow-sm"
@@ -189,6 +205,41 @@ export default async function PartnerBookingsPage({
               <PartnerBookingActionLinks status={task.bookingStatus} bookingId={task.bookingId} />
             </div>
           ))
+        )}
+
+        {totalPages > 1 && (
+          <nav
+            className="flex items-center justify-center gap-4 pt-4"
+            aria-label={t("pagination")}
+          >
+            <Link
+              href={qs(page - 1)}
+              className={`inline-flex items-center gap-1 rounded-xl px-4 py-2 text-sm font-bold transition-colors ${
+                page <= 1
+                  ? "pointer-events-none text-gray-300"
+                  : "text-gray-600 hover:bg-gray-200"
+              }`}
+              aria-disabled={page <= 1}
+            >
+              <ChevronLeft size={16} />
+              {t("prevPage")}
+            </Link>
+            <span className="text-xs font-bold text-gray-400">
+              {page} / {totalPages}
+            </span>
+            <Link
+              href={qs(page + 1)}
+              className={`inline-flex items-center gap-1 rounded-xl px-4 py-2 text-sm font-bold transition-colors ${
+              page >= totalPages
+                  ? "pointer-events-none text-gray-300"
+                  : "text-gray-600 hover:bg-gray-200"
+              }`}
+              aria-disabled={page >= totalPages}
+            >
+              {t("nextPage")}
+              <ChevronRight size={16} />
+            </Link>
+          </nav>
         )}
       </main>
     </div>

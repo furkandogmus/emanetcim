@@ -67,6 +67,7 @@ model Account {
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {
@@ -75,6 +76,8 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model VerificationToken {
@@ -83,6 +86,7 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+  @@index([expires])
 }
 
 model Shop {
@@ -109,6 +113,10 @@ model Shop {
   sealLeadTimeDays Int           @default(3)
   sealReorderPoint Int           @default(15)
   stripeAccountId  String?       @unique
+  /// Doğrulanmış dükkan rozeti (güven & güvenilirlik)
+  isVerified       Boolean       @default(false)
+  /// Ortalama yanıt süresi (dakika cinsinden)
+  responseTimeMinutes Int?       @default(0)
   bookings         Booking[]
   reviews          Review[]
   seals            Seal[]
@@ -159,6 +167,11 @@ model Booking {
   @@index([status])
   @@index([checkInTime])
   @@index([checkOutTime])
+  @@index([createdAt])
+  @@index([shopId, status])
+  @@index([status, checkInTime])
+  @@index([status, checkOutTime])
+  @@index([guestId, status])
 }
 
 model PaymentLog {
@@ -250,6 +263,7 @@ model Seal {
 
   @@index([shopId])
   @@index([status])
+  @@index([shopId, status])
 }
 
 /// Rezervasyonda hangi mühür hangi valize takıldı
@@ -431,6 +445,21 @@ model BlogPost {
 
   @@index([locale])
   @@index([isPublished])
+}
+
+/// Append-only booking event log — booking'in tüm durum değişikliklerini kaydeder
+/// Dispute çözümlerinde booking yaşam döngüsünü kanıtlamak için kullanılır
+model BookingEvent {
+  id          String   @id @default(cuid())
+  bookingId   String
+  event       String   // CREATED, PAID, CHECKED_IN, CHECKED_OUT, CANCELLED, APPROVED, WAITING_APPROVAL, MODIFIED, DISPUTED, REFUNDED
+  actorId     String?  // kim yaptı (userId)
+  actorRole   Role?    // GUEST, PARTNER, ADMIN
+  metadata    Json?    // event-specific data (eski durum, yeni durum, tutar, vs.)
+  createdAt   DateTime @default(now())
+
+  @@index([bookingId])
+  @@index([bookingId, createdAt])
 }
 
 enum Role {

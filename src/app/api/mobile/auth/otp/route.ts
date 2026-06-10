@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
 import { randomInt } from "crypto";
+import logger from "@/lib/logger";
 import { sendMobileOtp } from "@/lib/mail";
-import { normalizeTrGsm10 } from "@/lib/netgsm";
+import { isNetgsmConfigured, normalizeTrGsm10, sendNetgsmRestSms } from "@/lib/netgsm";
 
 const schema = z.union([
   z.object({ email: z.string().email() }),
@@ -42,8 +43,17 @@ export async function POST(req: Request) {
   if (isEmail) {
     await sendMobileOtp(normalizedIdentity, code);
   } else {
-    // TODO: Implement sendNetgsmRestSms when ready
-    console.log(`[mobile-otp-sms-mock] ${normalizedIdentity} => ${code}`);
+    if (isNetgsmConfigured()) {
+      const smsResult = await sendNetgsmRestSms({
+        to10: normalizedIdentity,
+        message: `BagajPark giris kodunuz: ${code}. Kod 5 dakika gecerlidir.`,
+      });
+      if (!smsResult.ok) {
+        console.error(`[mobile-otp-sms-fail] ${normalizedIdentity} => ${smsResult.error}`);
+      }
+    } else {
+      logger.warn({ phone: normalizedIdentity }, "mobile_otp_sms_skipped_no_netgsm");
+    }
   }
 
   // Dev mode log

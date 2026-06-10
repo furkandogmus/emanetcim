@@ -107,7 +107,7 @@ export class ShopService implements IShopService {
         centerLat: latitude,
         centerLng: longitude,
         radiusKm: null,
-        take: null,
+        take: 100,
       });
       return pairs.map(({ shop, distanceKm }) => ({
         ...shop,
@@ -141,7 +141,7 @@ export class ShopService implements IShopService {
         centerLat,
         centerLng,
         radiusKm,
-        take: null,
+        take: 100,
       });
 
       const withDist: ShopWithDistance[] = pairs.map(({ shop, distanceKm }) => ({

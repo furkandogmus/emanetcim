@@ -30,11 +30,22 @@ export type BookingWithGuestShop = Prisma.BookingGetPayload<{
 
 
  export type GuestBookingListItem = Prisma.BookingGetPayload<{
-  include: { shop: true; dispute: true };
+  select: {
+    id: true; guestId: true; shopId: true; checkInTime: true; checkOutTime: true;
+    totalPrice: true; bagCountS: true; bagCountM: true; bagCountXl: true;
+    status: true; qrCodeToken: true; createdAt: true;
+    shop: { select: { name: true; address: true; pricePerDay: true } };
+    dispute: { select: { id: true } };
+  };
 }>;
 
 export type PartnerBookingListItem = Prisma.BookingGetPayload<{
-  include: { guest: true };
+  select: {
+    id: true; checkInTime: true; checkOutTime: true;
+    totalPrice: true; bagCountS: true; bagCountM: true; bagCountXl: true;
+    status: true; createdAt: true;
+    guest: { select: { name: true } };
+  };
 }>;
 import { createQrToken } from '@/lib/qr-token';
 import { isRefundSuccess } from '@/lib/payment-status';
@@ -55,6 +66,7 @@ import {
   computeAuthoritativeCheckoutTotals,
   validateBookingStayWindow,
 } from '@/lib/booking-server-price';
+import { bookingEventService } from '@/services/BookingEventService';
 import {
   estimatePaidRefundForTier,
   getCancellationTier,
@@ -105,7 +117,7 @@ export class BookingService implements IBookingService {
    */
   async createInitialBooking(data: CreateInitialBookingInput): Promise<Booking> {
     const rules = await getPricingRules();
-    return prisma.$transaction(
+    const booking = await prisma.$transaction(
       async (tx) => {
         const shop = await tx.shop.findUnique({ where: { id: data.shopId } });
         if (!shop) {
@@ -177,6 +189,22 @@ export class BookingService implements IBookingService {
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
     );
+
+    bookingEventService.record({
+      bookingId: booking.id,
+      event: "CREATED",
+      actorId: data.guestId,
+      actorRole: "GUEST",
+      metadata: {
+        shopId: data.shopId,
+        totalPrice: data.totalPrice,
+        bagCountS: data.bagCountS,
+        bagCountM: data.bagCountM,
+        bagCountXl: data.bagCountXl,
+      },
+    }).catch((err) => logger.error({ err, bookingId: booking.id }, "booking_event_created_failed"));
+
+    return booking;
   }
 
   private async assertCapacityTx(
@@ -292,6 +320,13 @@ export class BookingService implements IBookingService {
           throw new Error("Concurrency conflict: Rezervasyon başka bir işlem tarafından güncellendi.");
         }
       });
+
+      bookingEventService.record({
+        bookingId,
+        event: "CHECKED_IN",
+        metadata: { previousStatus: existing.status },
+      }).catch((err) => logger.error({ err, bookingId }, "booking_event_checked_in_failed"));
+
       return { ok: true };
     } catch (error) {
       console.error('BookingService::checkIn Error:', error);
@@ -444,6 +479,16 @@ export class BookingService implements IBookingService {
         }
       });
 
+      bookingEventService.record({
+        bookingId,
+        event: "CHECKED_OUT",
+        metadata: {
+          lateFeeApplied: lateFeeTry,
+          refundAmount: refundAmount > 0 ? refundAmount : undefined,
+          failedRefundAmount: failedRefundAmount > 0 ? failedRefundAmount : undefined,
+        },
+      }).catch((err) => logger.error({ err, bookingId }, "booking_event_checked_out_failed"));
+
       return {
         ok: true,
         ...(failedRefundAmount > 0
@@ -481,6 +526,11 @@ export class BookingService implements IBookingService {
       where: { id: bookingId },
       data: { status: 'PAID' }
     });
+
+    bookingEventService.record({
+      bookingId,
+      event: "PAID",
+    }).catch((err) => logger.error({ err, bookingId }, "booking_event_paid_failed"));
   }
 
   async getBookingDetails(id: string): Promise<BookingWithShopGuestDetails | null> {
@@ -497,7 +547,13 @@ export class BookingService implements IBookingService {
   async getUserBookings(userId: string): Promise<GuestBookingListItem[]> {
     return await prisma.booking.findMany({
       where: { guestId: userId },
-      include: { shop: true, dispute: true },
+      select: {
+        id: true, guestId: true, shopId: true, checkInTime: true, checkOutTime: true,
+        totalPrice: true, bagCountS: true, bagCountM: true, bagCountXl: true,
+        status: true, qrCodeToken: true, createdAt: true,
+        shop: { select: { name: true, address: true, pricePerDay: true } },
+        dispute: { select: { id: true } },
+      },
       orderBy: { createdAt: 'desc' }
     });
   }
@@ -505,7 +561,12 @@ export class BookingService implements IBookingService {
   async getPartnerBookings(shopId: string): Promise<PartnerBookingListItem[]> {
     return await prisma.booking.findMany({
       where: { shopId },
-      include: { guest: true },
+      select: {
+        id: true, checkInTime: true, checkOutTime: true,
+        totalPrice: true, bagCountS: true, bagCountM: true, bagCountXl: true,
+        status: true, createdAt: true,
+        guest: { select: { name: true } },
+      },
       orderBy: { createdAt: 'desc' }
     });
   }
@@ -627,6 +688,12 @@ export class BookingService implements IBookingService {
         where: { id: bookingId },
         data: { status: 'CANCELLED' },
       });
+
+      bookingEventService.record({
+        bookingId,
+        event: "CANCELLED",
+        metadata: { previousStatus: booking.status, hadPayment: treatAsPaidRefund, creditCode },
+      }).catch((err) => logger.error({ err, bookingId }, "booking_event_cancelled_failed"));
 
       return { ok: true, creditCode };
     } catch (error) {
@@ -806,6 +873,24 @@ export class BookingService implements IBookingService {
         },
         { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
       );
+
+      bookingEventService.record({
+        bookingId,
+        event: "MODIFIED",
+        actorId: guestId,
+        actorRole: "GUEST",
+        metadata: {
+          previousTotal: moneyToNumber(booking.totalPrice),
+          newTotal,
+          refundDue,
+          checkInTime: input.checkInTime,
+          checkOutTime: input.checkOutTime,
+          bagCountS: input.bagCountS,
+          bagCountM: input.bagCountM,
+          bagCountXl: input.bagCountXl,
+        },
+      }).catch((err) => logger.error({ err, bookingId }, "booking_event_modified_failed"));
+
       return { ok: true };
     } catch (error) {
       if (error instanceof BookingCapacityExceededError) {

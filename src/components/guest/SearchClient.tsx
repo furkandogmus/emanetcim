@@ -490,6 +490,8 @@ export default function SearchClient({
                       lat={shop.latitude ?? undefined}
                       lng={shop.longitude ?? undefined}
                       bagsAvailable={shop.bagsAvailable}
+                      isVerified={shop.isVerified}
+                      responseTimeMinutes={shop.responseTimeMinutes}
                       onClick={() => router.push(`/shop/${shop.id}`)}
                     />
                   </motion.div>

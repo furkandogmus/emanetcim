@@ -36,20 +36,14 @@ export default async function AdminCampaignsPage({
   const activeDiscountLabel =
     maxDiscount > 0 ? `${maxDiscount}%` : t("trendNone");
 
-  const topGroup = await prisma.booking.groupBy({
-    by: ["shopId"],
-    _count: { id: true },
-    orderBy: { _count: { id: "desc" } },
-    take: 1,
+  const topShop = await prisma.shop.findFirst({
+    where: { isActive: true, bookings: { some: {} } },
+    orderBy: { bookings: { _count: "desc" } },
+    select: { name: true, address: true },
   });
-  let topRegionLabel = t("noRegionData");
-  if (topGroup[0]) {
-    const shop = await prisma.shop.findUnique({
-      where: { id: topGroup[0].shopId },
-    });
-    topRegionLabel =
-      shop?.address?.split(",")[0]?.trim() || shop?.name || t("noRegionData");
-  }
+  const topRegionLabel = topShop
+    ? topShop.address?.split(",")[0]?.trim() || topShop.name
+    : t("noRegionData");
 
   const serialized = campaigns.map((c) => ({
     id: c.id,

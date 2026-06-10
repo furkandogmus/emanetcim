@@ -16,6 +16,7 @@ import { bookingTouchesPlatformHoliday } from "@/lib/booking-holidays";
 import { getPricingRules } from "@/lib/platform-settings";
 import { moneyToNumber } from "@/lib/money";
 import { BookingStatus } from "@prisma/client";
+import { bookingEventService } from "@/services/BookingEventService";
 import { headers } from "next/headers";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-ip";
@@ -190,6 +191,13 @@ export async function createBookingAction(data: CreateBookingInput) {
       where: { id: booking.id },
       data: { status: BookingStatus.WAITING_APPROVAL },
     });
+
+    void bookingEventService.record({
+      bookingId: booking.id,
+      event: "WAITING_APPROVAL",
+      actorId: session.user.id,
+      actorRole: "GUEST",
+    }).catch(() => {});
 
     // Esnafa bildirim gönder (Yeni Talep)
     void notificationService

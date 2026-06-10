@@ -15,25 +15,29 @@ export async function GET(req: NextRequest) {
     select: { id: true, name: true },
   });
 
-  const results = await Promise.all(
-    shops.map(async (shop) => {
-      const items = await bookingService.getPartnerBookings(shop.id);
-      return items.map((b) => ({
-        id: b.id,
-        shopId: shop.id,
-        shopName: shop.name,
-        checkInTime: b.checkInTime,
-        checkOutTime: b.checkOutTime,
-        bagCountS: b.bagCountS,
-        bagCountM: b.bagCountM,
-        bagCountXl: b.bagCountXl,
-        totalPrice: Number(b.totalPrice),
-        status: b.status,
-        qrCodeToken: b.qrCodeToken,
-        guestName: b.guest.name,
-      }));
-    }),
-  );
+  const shopIds = shops.map((s) => s.id);
+  const shopMap = new Map(shops.map((s) => [s.id, s.name]));
 
-  return NextResponse.json(results.flat());
+  const allBookings = await prisma.booking.findMany({
+    where: { shopId: { in: shopIds } },
+    include: { guest: { select: { name: true } } },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const results = allBookings.map((b) => ({
+    id: b.id,
+    shopId: b.shopId,
+    shopName: shopMap.get(b.shopId) ?? "",
+    checkInTime: b.checkInTime,
+    checkOutTime: b.checkOutTime,
+    bagCountS: b.bagCountS,
+    bagCountM: b.bagCountM,
+    bagCountXl: b.bagCountXl,
+    totalPrice: Number(b.totalPrice),
+    status: b.status,
+    qrCodeToken: b.qrCodeToken,
+    guestName: b.guest.name,
+  }));
+
+  return NextResponse.json(results);
 }

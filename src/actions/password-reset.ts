@@ -10,6 +10,8 @@ import { getLocale } from "next-intl/server";
 import {
   generatePasswordResetToken,
   PASSWORD_RESET_IDENTIFIER_PREFIX,
+  PASSWORD_RESET_PHONE_PREFIX,
+  isPhoneResetIdentifier,
 } from "@/lib/password-reset-token";
 
 async function clientIp(): Promise<string> {
@@ -98,11 +100,20 @@ export async function resetPasswordWithTokenAction(input: unknown) {
     return { ok: false as const, error: "expired" as const };
   }
 
-  const email = row.identifier.slice(PASSWORD_RESET_IDENTIFIER_PREFIX.length);
-  const user = await prisma.user.findUnique({
-    where: { email },
-    select: { id: true, passwordHash: true },
-  });
+  const user = await (async () => {
+    if (isPhoneResetIdentifier(row.identifier)) {
+      const phone = row.identifier.slice(PASSWORD_RESET_PHONE_PREFIX.length);
+      return prisma.user.findUnique({
+        where: { phone },
+        select: { id: true, passwordHash: true },
+      });
+    }
+    const email = row.identifier.slice(PASSWORD_RESET_IDENTIFIER_PREFIX.length);
+    return prisma.user.findUnique({
+      where: { email },
+      select: { id: true, passwordHash: true },
+    });
+  })();
 
   if (!user?.passwordHash) {
     return { ok: false as const, error: "invalid_token" as const };

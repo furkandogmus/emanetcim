@@ -14,6 +14,7 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
   return (
     <Link
       href={href}
+      aria-current={active ? "page" : undefined}
       className={`relative text-[10px] font-black uppercase tracking-widest transition-all duration-200 ${
         active ? "text-orange-600" : "text-gray-500 hover:text-gray-900"
       }`}
@@ -33,10 +34,10 @@ export default function Header() {
   const role = session?.user?.role;
   const hideGuestBookingNav = role === "PARTNER" || role === "ADMIN";
   const logoHref = role === "PARTNER" ? "/partner" : role === "ADMIN" ? "/admin" : "/";
-  const navCopy =
-    locale === "tr"
-      ? { explore: "Keşfet", partner: "Partner", insurance: "Sigorta", blog: "Blog" }
-      : { explore: "Explore", partner: "Partners", insurance: "Insurance", blog: "Blog" };
+  const isTr = locale === "tr";
+  const navCopy = isTr
+    ? { explore: "Keşfet", partner: "Partner", insurance: "Sigorta", blog: "Blog", navLabel: "Ana navigasyon", secondaryLabel: "İkincil navigasyon", logoLabel: "BagajPark ana sayfa" }
+    : { explore: "Explore", partner: "Partners", insurance: "Insurance", blog: "Blog", navLabel: "Main navigation", secondaryLabel: "Secondary navigation", logoLabel: "BagajPark home page" };
 
   if (pathname?.includes("/login")) return null;
 
@@ -45,10 +46,11 @@ export default function Header() {
       {/* Logo */}
       <Link
         href={logoHref}
+        aria-label={navCopy.logoLabel}
         className="flex items-center gap-2.5 group"
       >
         <div className="w-8 h-8 bg-brand-gradient rounded-xl flex items-center justify-center shadow-brand-sm group-hover:shadow-brand-md transition-all duration-200 group-active:scale-95">
-          <Package size={16} className="text-white" strokeWidth={2.5} />
+          <Package size={16} className="text-white" strokeWidth={2.5} aria-hidden="true" />
         </div>
         <span className="text-lg font-black tracking-tight text-gray-900 group-hover:text-orange-600 transition-colors duration-200">
           BagajPark
@@ -63,14 +65,14 @@ export default function Header() {
       {/* Nav + Actions */}
       <div className="flex items-center gap-2 sm:gap-5 min-w-0">
         {!hideGuestBookingNav && (
-          <div className="hidden md:flex items-center gap-5">
+          <nav aria-label={navCopy.navLabel} className="hidden md:flex items-center gap-5">
             <NavLink href="/search">{navCopy.explore}</NavLink>
             <NavLink href="/insurance">{navCopy.insurance}</NavLink>
-          </div>
+          </nav>
         )}
-        <div className="hidden md:flex">
+        <nav aria-label={navCopy.secondaryLabel} className="hidden md:flex">
           <NavLink href="/blog">{navCopy.blog}</NavLink>
-        </div>
+        </nav>
         <div className="shrink-0">
           <LocaleSwitcher />
         </div>

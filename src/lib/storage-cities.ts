@@ -13,25 +13,25 @@ export const STORAGE_CITIES = [
     slug: "ankara",
     lat: 39.9334,
     lng: 32.8597,
-    image: "https://images.unsplash.com/photo-1589882485526-7bc2b9a7061d?auto=format&fit=crop&w=1600&q=80"
+    image: "/images/cities/ankara.jpg"
   },
   {
     slug: "izmir",
     lat: 38.4237,
     lng: 27.1428,
-    image: "https://images.unsplash.com/photo-1601931818273-04ff53289069?auto=format&fit=crop&w=1600&q=80"
+    image: "/images/cities/izmir.jpg"
   },
   {
     slug: "antalya",
     lat: 36.8969,
     lng: 30.7133,
-    image: "https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=1600&q=80"
+    image: "/images/cities/antalya.jpg"
   },
   {
     slug: "bodrum",
     lat: 37.0344,
     lng: 27.4305,
-    image: "https://images.unsplash.com/photo-1599839446416-ca33eb1fbc40?auto=format&fit=crop&w=1600&q=80"
+    image: "/images/cities/bodrum.jpg"
   },
   {
     slug: "cappadocia",
@@ -67,7 +67,7 @@ export const STORAGE_CITIES = [
     slug: "amsterdam",
     lat: 52.3676,
     lng: 4.9041,
-    image: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1600&q=80"
+    image: "/images/cities/amsterdam.jpg"
   },
   {
     slug: "london",

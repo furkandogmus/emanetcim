@@ -138,7 +138,10 @@
     "reject": "ABLEHNEN",
     "approve": "GENEHMIGEN",
     "approvedSuccess": "Antrag genehmigt!",
-    "confirmReject": "Möchten Sie diese Anfrage wirklich ablehnen?"
+    "confirmReject": "Möchten Sie diese Anfrage wirklich ablehnen?",
+    "pagination": "Pagination",
+    "prevPage": "Previous",
+    "nextPage": "Next"
   },
   "Guest": {
     "heroTitle": "Lassen Sie Ihr Gepäck fallen und erkunden Sie es frei",
@@ -317,6 +320,9 @@
     "readMore": "Mehr lesen",
     "away": "{distance} m entfernt",
     "insured": "VERSICHERT",
+    "verifiedBadge": "Verified",
+    "responseTimeFast": "Very fast",
+    "responseTimeMinutes": "≤{minutes} min",
     "day": "TAG",
     "open247": "24/7",
     "restroom": "WC",
@@ -685,7 +691,16 @@
     "statusDisputeClosed": "Closed",
     "reasonDisputeDamage": "Damage",
     "reasonDisputeTheft": "Theft",
-    "reasonDisputeOther": "Other"
+    "reasonDisputeOther": "Other",
+    "resetPassword": "Reset Password",
+    "resetPasswordConfirm": "Create password reset link for {name} ({phone})?",
+    "generateResetLink": "Generate Link",
+    "generating": "Generating...",
+    "resetLinkGenerated": "Password reset link created:",
+    "resetError": "An error occurred.",
+    "resetCancel": "Cancel",
+    "resetDone": "Done",
+    "resetClose": "Close"
   },
   "Auth": {
     "loginTitle": "Melden Sie sich bei BagajPark an",

@@ -64,7 +64,7 @@
     "partnerBookingApprovedCheckInHint": "Approved — the guest can pay online, or check them in with QR if payment is at the shop.",
     "partnerBookingsCheckOut": "Pick-up",
     "partnerBookingsFilterAll": "All",
-    "partnerBookingsFilterAction": "Needs you",
+    "partnerBookingsFilterAction": "Needs action",
     "partnerBookingsFilterPayment": "Awaiting payment",
     "partnerBookingsFilterDone": "Completed",
     "partnerBookingsFilterAria": "Filter bookings",
@@ -138,7 +138,10 @@
     "reject": "拒否する",
     "approve": "承認する",
     "approvedSuccess": "リクエストが承認されました！",
-    "confirmReject": "このリクエストを拒否してもよろしいですか?"
+    "confirmReject": "このリクエストを拒否してもよろしいですか?",
+    "pagination": "Pagination",
+    "prevPage": "Previous",
+    "nextPage": "Next"
   },
   "Guest": {
     "heroTitle": "荷物を置いて、自由に探索しましょう",
@@ -317,6 +320,9 @@
     "readMore": "続きを読む",
     "away": "{distance}メートル離れています",
     "insured": "保険付き",
+    "verifiedBadge": "Verified",
+    "responseTimeFast": "Very fast",
+    "responseTimeMinutes": "≤{minutes} min",
     "day": "日",
     "open247": "24時間365日",
     "restroom": "トイレ",
@@ -685,7 +691,16 @@
     "statusDisputeClosed": "Closed",
     "reasonDisputeDamage": "Damage",
     "reasonDisputeTheft": "Theft",
-    "reasonDisputeOther": "Other"
+    "reasonDisputeOther": "Other",
+    "resetPassword": "Reset Password",
+    "resetPasswordConfirm": "Create password reset link for {name} ({phone})?",
+    "generateResetLink": "Generate Link",
+    "generating": "Generating...",
+    "resetLinkGenerated": "Password reset link created:",
+    "resetError": "An error occurred.",
+    "resetCancel": "Cancel",
+    "resetDone": "Done",
+    "resetClose": "Close"
   },
   "Auth": {
     "loginTitle": "バガジパークにサインインする",

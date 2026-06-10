@@ -37,6 +37,7 @@ export async function GET(req: NextRequest) {
       shop: { select: { name: true } },
     },
     orderBy: { createdAt: "desc" },
+    take: 10000,
   });
 
   const header = [

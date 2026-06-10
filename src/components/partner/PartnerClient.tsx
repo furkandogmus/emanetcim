@@ -397,7 +397,7 @@ export default function PartnerClient({
             href="/partner/seals"
             className="text-[10px] font-black uppercase tracking-widest text-orange-600 hover:text-orange-700 whitespace-nowrap"
           >
-            Mühürler
+            {t("sealsTitle")}
           </Link>
         </div>
       </header>

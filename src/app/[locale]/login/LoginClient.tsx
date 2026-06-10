@@ -112,12 +112,14 @@ export default function LoginPage({
 
   const renderCredentialsForm = () => (
     <>
-      {/* E-posta */}
+      {/* E-posta / Telefon */}
       <div className="relative">
         <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
         <input
-          type="text"
-          placeholder={t('emailOrPhone')}
+          type={activeTab === 'PARTNER' ? 'tel' : 'text'}
+          inputMode={activeTab === 'PARTNER' ? 'numeric' : 'text'}
+          autoComplete={activeTab === 'PARTNER' ? 'tel-national' : 'email'}
+          placeholder={activeTab === 'PARTNER' ? t('phonePlaceholder') : t('emailOrPhone')}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getMobileSession } from "@/lib/mobile-auth";
+import { BookingStatus, PaymentStatus } from "@prisma/client";
 
 export async function GET() {
   const session = await getMobileSession();
@@ -16,45 +17,49 @@ export async function GET() {
     return NextResponse.json({ error: "Shop not found" }, { status: 404 });
   }
 
-  // Calculate stats
-  const allPaidBookings = await prisma.booking.findMany({
-    where: {
-      shopId: shop.id,
-      status: { in: ["PAID", "CHECKED_IN", "CHECKED_OUT"] },
-      paymentLog: { is: { status: "SUCCESS" } },
-    },
-    select: { totalPrice: true, createdAt: true },
-  });
-
-  const totalEarnings = allPaidBookings.reduce(
-    (sum, b) => sum + Number(b.totalPrice),
-    0
-  );
-
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const todayEarnings = allPaidBookings
-    .filter((b) => b.createdAt >= today)
-    .reduce((sum, b) => sum + Number(b.totalPrice), 0);
+  const baseWhere = {
+    shopId: shop.id,
+    status: { in: [BookingStatus.PAID, BookingStatus.CHECKED_IN, BookingStatus.CHECKED_OUT] },
+    paymentLog: { is: { status: PaymentStatus.SUCCESS } },
+  };
 
-  // Fetch history (last 10)
-  const history = allPaidBookings
-    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-    .slice(0, 10)
-    .map(b => ({
-      date: b.createdAt.toISOString().slice(5, 10).replace('-', ' '), // e.g. "04 22"
-      amount: Number(b.totalPrice),
-      status: 'PAID'
-    }));
+  const [aggregateResult, todayResult, history] = await Promise.all([
+    // Tüm zamanların toplam cirosu
+    prisma.booking.aggregate({
+      where: baseWhere,
+      _sum: { totalPrice: true },
+    }),
+    // Bugünkü ciro — tam tarih filtresiyle, son 10 kayıt sınırı olmaksızın
+    prisma.booking.aggregate({
+      where: { ...baseWhere, createdAt: { gte: today } },
+      _sum: { totalPrice: true },
+    }),
+    // Son 10 işlem (geçmiş listesi için)
+    prisma.booking.findMany({
+      where: baseWhere,
+      select: { totalPrice: true, createdAt: true },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    }),
+  ]);
 
-  const pendingEarnings = 0; 
+  const totalEarnings = Number(aggregateResult._sum?.totalPrice ?? 0);
+  const todayEarnings = Number(todayResult._sum?.totalPrice ?? 0);
+
+  const formattedHistory = history.map((b) => ({
+    date: b.createdAt.toISOString().slice(5, 10).replace("-", " "),
+    amount: Number(b.totalPrice),
+    status: "PAID" as const,
+  }));
 
   return NextResponse.json({
     totalBalance: totalEarnings,
     todayEarnings,
-    pendingPayout: pendingEarnings,
-    history,
+    pendingPayout: 0,
+    history: formattedHistory,
     currency: "TRY",
   });
 }

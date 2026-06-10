@@ -36,22 +36,22 @@ export async function updateShopSettingsAction(
 ) {
   const session = await auth();
 
-  if (!session?.user?.id) throw new Error("Errors.authRequired");
+  if (!session?.user?.id) return { success: false, error: "Errors.authRequired" };
 
   const shop = await prisma.shop.findUnique({
     where: { id: shopId },
     select: { ownerId: true },
   });
 
-  if (!shop) throw new Error("Errors.shopNotFound");
+  if (!shop) return { success: false, error: "Errors.shopNotFound" };
 
   if (shop.ownerId !== session.user.id) {
-    if (session.user.role !== "ADMIN") throw new Error("Errors.unauthorized");
+    if (session.user.role !== "ADMIN") return { success: false, error: "Errors.unauthorized" };
   }
 
   const parsed = shopSettingsSchema.safeParse(data);
   if (!parsed.success) {
-    throw new Error("Errors.invalidData");
+    return { success: false, error: "Errors.invalidData" };
   }
 
   if (parsed.data.pricePerDay !== undefined) {
@@ -59,7 +59,7 @@ export async function updateShopSettingsAction(
     const minPrice = Math.round(rules.defaultPricePerDay / 2);
     const maxPrice = rules.defaultPricePerDay * 2;
     if (parsed.data.pricePerDay < minPrice || parsed.data.pricePerDay > maxPrice) {
-      throw new Error("Errors.invalidData");
+      return { success: false, error: "Errors.invalidData" };
     }
   }
 

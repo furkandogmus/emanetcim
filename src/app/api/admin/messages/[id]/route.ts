@@ -2,14 +2,27 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import prisma from "@/lib/db";
 
+function assertOrigin(req: Request): boolean {
+  const origin = req.headers.get("origin") ?? req.headers.get("referer") ?? "";
+  try {
+    const host = new URL(origin).host;
+    return host === req.headers.get("host") || host.endsWith(".vercel.app");
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Admin mesajlar: okundu işaretle (PATCH) / sil (DELETE).
  * Server Action yerine route handler: tıklanınca RSC otomatik yeniden çekilmesini önler.
  */
 export async function PATCH(
-  _req: Request,
+  req: Request,
   context: { params: Promise<{ id: string }> },
 ) {
+  if (!assertOrigin(req)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
   const session = await auth();
   if (session?.user?.role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -26,9 +39,12 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _req: Request,
+  req: Request,
   context: { params: Promise<{ id: string }> },
 ) {
+  if (!assertOrigin(req)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
   const session = await auth();
   if (session?.user?.role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
