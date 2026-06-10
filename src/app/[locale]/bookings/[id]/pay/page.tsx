@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { bookingService } from "@/services/BookingService";
+import prisma from "@/lib/db";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
@@ -48,7 +48,10 @@ export default async function BookingPayPage({
     redirect(`/${locale}/bookings/${id}`);
   }
 
-  const booking = await bookingService.getBookingDetails(id);
+  const booking = await prisma.booking.findUnique({
+    where: { id },
+    select: { guestId: true, status: true, totalPrice: true, shop: { select: { name: true } } },
+  });
   if (!booking || booking.guestId !== session.user.id) {
     notFound();
   }

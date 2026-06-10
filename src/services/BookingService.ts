@@ -294,7 +294,7 @@ export class BookingService implements IBookingService {
           new Date()
         )
       ) {
-        console.warn('BookingService::checkIn: dükkan kapalı saat aralığında');
+        logger.warn('BookingService::checkIn: dükkan kapalı saat aralığında');
         return {
           ok: false,
           code: 'SHOP_CLOSED',
@@ -329,7 +329,7 @@ export class BookingService implements IBookingService {
 
       return { ok: true };
     } catch (error) {
-      console.error('BookingService::checkIn Error:', error);
+      logger.error({ error }, 'BookingService::checkIn Error');
       const msg = error instanceof Error ? error.message : String(error);
       if (msg === 'duplicate_seal_in_assignments') {
         return {
@@ -496,7 +496,7 @@ export class BookingService implements IBookingService {
           : {}),
       };
     } catch (error) {
-      console.error('BookingService::checkOut Error:', error);
+      logger.error({ error }, 'BookingService::checkOut Error');
       return {
         ok: false,
         code: 'UNKNOWN',
@@ -554,7 +554,8 @@ export class BookingService implements IBookingService {
         shop: { select: { name: true, address: true, pricePerDay: true } },
         dispute: { select: { id: true } },
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      take: 50,
     });
   }
 
@@ -567,7 +568,8 @@ export class BookingService implements IBookingService {
         status: true, createdAt: true,
         guest: { select: { name: true } },
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      take: 100,
     });
   }
 
