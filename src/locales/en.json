@@ -380,6 +380,11 @@
     "shopDetailMetaFallback": "Secure luggage storage",
     "cityHubViewAll": "All city guides",
     "checkoutPolicyCalloutTitle": "Cancellation snapshot",
+    "totalBags": "Total bags",
+    "authModalTitle": "Sign In Required",
+    "authModalBody": "You need to log in to complete your reservation and proceed to the payment step.",
+    "authModalLogin": "Sign In",
+    "authModalRegister": "Sign Up",
     "checkoutPolicyCalloutBody": "24+ h before check-in: full card refund. 1–24 h before: 50% card refund. Under 1 h or after check-in: one-time discount code instead of card refund. Unpaid request: cancel anytime. See FAQ for details.",
     "checkoutPaymentMethodsNote": "Card payment via iyzico (secure). Cash is not accepted. Apple Pay / Google Pay / PayPal may be added with Stripe — we’ll announce when live.",
     "checkoutPaymentAfterApprovalNote": "Your card is only charged after the shop approves your request. You will complete payment on the next step or from “My bookings”.",
@@ -1157,7 +1162,7 @@
       "metaTitle": "Luggage storage Istanbul | BagajPark",
       "metaDescription": "Secure luggage storage in Istanbul near top sights. Book online and explore the city hands-free.",
       "headline": "Luggage storage in Istanbul",
-      "intro": "Drop your bags at trusted shops around Galata, Sultanahmet and tourist hubs—then enjoy the city without dragging suitcases.",
+      "intro": "Simplify your travel with our secure luggage storage points in key areas like the Historic Peninsula, Galata Tower, Istiklal Street, and Kadikoy. There is no need to carry heavy suitcases while visiting Hagia Sophia, Sultanahmet Square, or the Grand Bazaar. Leave your bags sealed with trusted local partners and enjoy the Bosphorus without any weight.",
       "searchQuery": "Galata Tower",
       "cta": "Open shops in Istanbul"
     },
@@ -1166,7 +1171,7 @@
       "metaTitle": "Luggage storage Ankara | BagajPark",
       "metaDescription": "Safe baggage storage in Ankara near museums and the city centre. Simple online booking.",
       "headline": "Luggage storage in Ankara",
-      "intro": "Find storage points around Kızılay and central corridors on the map; handy for museums and business districts.",
+      "intro": "Enjoy a comfortable trip to Ankara with storage locations around Kizilay, Tunali Hilmi, Cankaya, and the High-Speed Train Station (ATG). Free yourself of luggage while climbing the steep hills of Ankara Castle or exploring the Museum of Ancient Civilizations. Store your bags during business meetings or museum visits.",
       "searchQuery": "Kızılay",
       "cta": "Open shops in Ankara"
     },
@@ -1175,7 +1180,7 @@
       "metaTitle": "Luggage storage Izmir | BagajPark",
       "metaDescription": "Luggage storage in Izmir near Konak, Alsancak and the waterfront. Travel lighter along the coast.",
       "headline": "Luggage storage in Izmir",
-      "intro": "Stroll the waterfront without heavy bags; discover nearby storage on the map.",
+      "intro": "Leave your suitcase behind at our secure storage points in Izmir's most vibrant spots like Alsancak, Konak, Kordon, and Karsiyaka. Don't let heavy bags slow you down while exploring the historic Kemeralti Bazaar, the Clock Tower, or walking along the seaside.",
       "searchQuery": "Konak",
       "cta": "Open shops in Izmir"
     },
@@ -1184,7 +1189,7 @@
       "metaTitle": "Luggage storage Antalya | BagajPark",
       "metaDescription": "Tourist-friendly luggage storage in Antalya near Kaleiçi and beaches. Book in a few taps.",
       "headline": "Luggage storage in Antalya",
-      "intro": "Between beach time and old town walks, store your bags safely and manage late check-outs with ease.",
+      "intro": "End the luggage hassle while wandering the narrow streets of Kaleici (Old Town), visiting the historic Hadrian's Gate, or heading to the beach. Use BagajPark points to make the most of the gap between your check-out time and your flight.",
       "searchQuery": "Kaleiçi",
       "cta": "Open shops in Antalya"
     },
@@ -1193,7 +1198,7 @@
       "metaTitle": "Luggage storage Bodrum | BagajPark",
       "metaDescription": "Secure bag storage in Bodrum near the marina and beaches for boats, nights out and day trips.",
       "headline": "Luggage storage in Bodrum",
-      "intro": "Before a boat trip or a night out, leave luggage at vetted shops and book online.",
+      "intro": "Make your holiday easier with secure luggage storage near Bodrum Castle, the marina, popular beaches, and the main bus station. Leave your suitcases with our partners before joining boat tours or enjoying Bodrum's nightlife.",
       "searchQuery": "Marina",
       "cta": "Open shops in Bodrum"
     },
@@ -1202,7 +1207,7 @@
       "metaTitle": "Luggage storage Cappadocia | BagajPark",
       "metaDescription": "Luggage storage in Cappadocia for balloon rides and valley hikes around Göreme and Ürgüp.",
       "headline": "Luggage storage in Cappadocia",
-      "intro": "Travel light for sunrise tours and hikes; find storage points in the region on the map.",
+      "intro": "Explore the magical valleys of Cappadocia, Goreme, Urgup, Avanos, and Uchisar without carrying suitcases. Leave your heavy bags at a nearby partner before hiking through fairy chimneys or watching hot air balloons at sunrise.",
       "searchQuery": "Göreme",
       "cta": "Open shops in Cappadocia"
     },
@@ -1211,7 +1216,7 @@
       "metaTitle": "Luggage storage Berlin | BagajPark",
       "metaDescription": "Secure luggage storage in Berlin near Hauptbahnhof and top sights. Book online in minutes.",
       "headline": "Luggage storage in Berlin",
-      "intro": "Drop bags between museums, Brandenburg Gate and nightlife—find vetted shops on the map.",
+      "intro": "Find secure storage options near Museum Island, Brandenburg Gate, Alexanderplatz, and Berlin Central Station (Hauptbahnhof). Experience the city's rich history, museums, and nightlife completely hassle-free without dragging heavy suitcases.",
       "searchQuery": "Hauptbahnhof",
       "cta": "Open shops in Berlin"
     },
@@ -1220,7 +1225,7 @@
       "metaTitle": "Luggage storage Paris | BagajPark",
       "metaDescription": "Luggage storage in Paris near Gare du Nord, Louvre and central lines.",
       "headline": "Luggage storage in Paris",
-      "intro": "Storage around stations and museums with flexible hours; reserve your window online.",
+      "intro": "Store your baggage at our verified local partner shops near the Louvre, Eiffel Tower, Gare du Nord, and Gare de l'Est. Banish the luggage drag while dining in Parisian cafes, walking down historic avenues, or cruising down the Seine.",
       "searchQuery": "Gare du Nord",
       "cta": "Open shops in Paris"
     },
@@ -1229,7 +1234,7 @@
       "metaTitle": "Luggage storage Barcelona | BagajPark",
       "metaDescription": "Bag storage in Barcelona near Sagrada Família, beach and city centre.",
       "headline": "Luggage storage in Barcelona",
-      "intro": "Enjoy La Rambla and the coast hands-free; see availability on the map.",
+      "intro": "Discover local storage options near La Rambla, Sagrada Familia, Barcelona Cathedral, and the sunny beach zones. Enjoy your walk through the historic Gothic Quarter and along the seaside without dragging suitcases behind you.",
       "searchQuery": "Sagrada",
       "cta": "Open shops in Barcelona"
     },
@@ -1238,7 +1243,7 @@
       "metaTitle": "Luggage storage Rome | BagajPark",
       "metaDescription": "Luggage storage in Rome near Termini and the historic centre.",
       "headline": "Luggage storage in Rome",
-      "intro": "Lighten up before the Colosseum and Vatican walks; trusted local shops on the map.",
+      "intro": "Benefit from secure luggage storage near Termini Station, the Colosseum, the Vatican, and the Trevi Fountain. Don't carry suitcases up steep historic stairs or over cobblestones while you explore the ancient city.",
       "searchQuery": "Termini",
       "cta": "Open shops in Rome"
     },
@@ -1247,7 +1252,7 @@
       "metaTitle": "Luggage storage Amsterdam | BagajPark",
       "metaDescription": "Luggage storage in Amsterdam near Centraal and the canal ring.",
       "headline": "Luggage storage in Amsterdam",
-      "intro": "Museums and bike days without heavy bags; pick a nearby point on the map.",
+      "intro": "Explore Amsterdam Centraal, Dam Square, and the famous canal rings hands-free. Safely leave your large bags or backpacks with our partners while taking bike tours or visiting museums.",
       "searchQuery": "Centraal",
       "cta": "Open shops in Amsterdam"
     },
@@ -1256,7 +1261,7 @@
       "metaTitle": "Luggage storage London | BagajPark",
       "metaDescription": "Luggage storage in London near Kings Cross and the West End.",
       "headline": "Luggage storage in London",
-      "intro": "Theatre and museum days made easier—book flexible storage with local partners.",
+      "intro": "Find convenient bag storage solutions near Kings Cross Station, the British Museum, London Eye, and the West End theatre district. Save your energy and stay dry on rainy days by leaving your luggage with a local partner.",
       "searchQuery": "Kings Cross",
       "cta": "Open shops in London"
     },

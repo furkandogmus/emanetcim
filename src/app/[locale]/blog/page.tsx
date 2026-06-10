@@ -6,6 +6,7 @@ import { getSiteBaseUrl } from "@/lib/site-urls";
 import { alternatesForPath } from "@/lib/seo-alternates";
 import { Clock, User, ChevronRight } from "lucide-react";
 import Image from "next/image";
+import { ensureDefaultBlogPosts } from "@/lib/blog-initializer";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -35,13 +36,7 @@ export default async function BlogListPage({
   setRequestLocale(locale);
   const t = await getTranslations("Guest");
 
-  const posts = await prisma.blogPost.findMany({
-    where: { 
-      locale,
-      isPublished: true 
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const posts = await ensureDefaultBlogPosts(locale);
 
   return (
     <div className="min-h-screen bg-white">
