@@ -941,6 +941,14 @@
     "paymentsNote": "Cards via iyzico (secure). Cash not accepted. Wallets (Apple/Google Pay, PayPal) planned with Stripe.",
     "sitemap": "Sitemap"
   },
+  "PartnerPromo": {
+    "badge": "Launch Special",
+    "title": "Want to Become Our Partner?",
+    "description": "Turn your unused space into a secure luggage storage point and start earning extra income.",
+    "offer": "0% commission for the first 3 months for the first 100 partners!",
+    "cta": "Apply as Partner",
+    "close": "Close"
+  },
   "Contact": {
     "title": "Contact Us",
     "subtitle": "We are here for your questions.",

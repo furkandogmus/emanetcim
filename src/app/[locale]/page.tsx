@@ -7,6 +7,7 @@ import { STORAGE_CITIES } from "@/lib/storage-cities";
 import TestimonialCarousel from "@/components/guest/TestimonialCarousel";
 import ComparisonTable from "@/components/guest/ComparisonTable";
 import BagProtection from "@/components/guest/BagProtection";
+import PartnerPromoModal from "@/components/partner/PartnerPromoModal";
 import type { Metadata } from "next";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { alternatesForPath } from "@/lib/seo-alternates";
@@ -392,6 +393,7 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
 
       <TestimonialCarousel items={testimonials} />
       <ComparisonTable />
+      <PartnerPromoModal />
     </div>
   );
 }
