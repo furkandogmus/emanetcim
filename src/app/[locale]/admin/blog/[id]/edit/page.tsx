@@ -1,7 +1,8 @@
 import { setRequestLocale } from "next-intl/server";
+import { auth } from "@/auth";
+import { redirect, notFound } from "next/navigation";
 import AdminBlogEditClient from "@/components/admin/AdminBlogEditClient";
 import prisma from "@/lib/db";
-import { notFound } from "next/navigation";
 
 export default async function AdminBlogEditPage({
   params,
@@ -10,6 +11,11 @@ export default async function AdminBlogEditPage({
 }) {
   const { locale, id } = await params;
   setRequestLocale(locale);
+
+  const session = await auth();
+  if (!session?.user || session.user.role !== "ADMIN") {
+    redirect(`/${locale}/login`);
+  }
 
   const post = await prisma.blogPost.findUnique({
     where: { id },

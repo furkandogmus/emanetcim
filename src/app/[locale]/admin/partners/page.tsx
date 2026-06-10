@@ -1,4 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 import prisma from "@/lib/db";
 import AdminPartnersClient from "@/components/admin/AdminPartnersClient";
 
@@ -9,6 +11,11 @@ export default async function AdminPartnersPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+
+  const session = await auth();
+  if (!session?.user || session.user.role !== "ADMIN") {
+    redirect(`/${locale}/login`);
+  }
 
   // Tüm dükkanları çekiyoruz (aktif/pasif fark etmeksizin)
   const shops = await prisma.shop.findMany({

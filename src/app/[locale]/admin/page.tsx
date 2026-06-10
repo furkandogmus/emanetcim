@@ -1,4 +1,6 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 import { shopService } from "@/services/ShopService";
 import prisma from "@/lib/db";
 import { moneyToNumber } from "@/lib/money";
@@ -67,6 +69,11 @@ export default async function AdminDashboard({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+
+  const session = await auth();
+  if (!session?.user || session.user.role !== "ADMIN") {
+    redirect(`/${locale}/login`);
+  }
 
   const t = await getTranslations("Admin");
 

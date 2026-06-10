@@ -1,6 +1,8 @@
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { ChevronLeft, ShieldCheck, CheckCircle2, Download } from 'lucide-react';
 import Link from 'next/link';
+import { auth } from '@/auth';
+import { redirect } from 'next/navigation';
 import SealShipButton from '@/components/admin/SealShipButton';
 import AdminSealInventoryClient from '@/components/admin/AdminSealInventoryClient';
 import { Link as I18nLink } from '@/i18n/routing';
@@ -13,6 +15,11 @@ import { sealService } from '@/services/SealService';
 export default async function AdminSealsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
+
+  const session = await auth();
+  if (!session?.user || session.user.role !== "ADMIN") {
+    redirect(`/${locale}/login`);
+  }
 
   const t = await getTranslations('Admin');
 
