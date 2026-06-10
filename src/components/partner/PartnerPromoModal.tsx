@@ -84,7 +84,7 @@ export default function PartnerPromoModal() {
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3">
           <Link
-            href="/partners"
+            href="/register?role=partner"
             onClick={handleClose}
             className="flex-1 bg-orange-600 hover:bg-orange-700 text-white text-center py-4 px-6 rounded-2xl font-bold transition-all shadow-lg shadow-orange-200 hover:shadow-orange-300 flex items-center justify-center gap-2 group cursor-pointer"
           >
