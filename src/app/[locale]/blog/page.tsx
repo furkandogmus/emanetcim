@@ -1,5 +1,4 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import prisma from "@/lib/db";
 import { Link } from "@/i18n/routing";
 import type { Metadata } from "next";
 import { getSiteBaseUrl } from "@/lib/site-urls";

@@ -114,12 +114,14 @@ export default function CheckoutClient({
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (parsed.bagS !== undefined) setBagS(parsed.bagS);
-        if (parsed.bagM !== undefined) setBagM(parsed.bagM);
-        if (parsed.bagXl !== undefined) setBagXl(parsed.bagXl);
-        if (parsed.checkInLocal !== undefined) setCheckInLocal(parsed.checkInLocal);
-        if (parsed.checkOutLocal !== undefined) setCheckOutLocal(parsed.checkOutLocal);
-        if (parsed.couponCode !== undefined) setCouponCode(parsed.couponCode);
+        setTimeout(() => {
+          if (parsed.bagS !== undefined) setBagS(parsed.bagS);
+          if (parsed.bagM !== undefined) setBagM(parsed.bagM);
+          if (parsed.bagXl !== undefined) setBagXl(parsed.bagXl);
+          if (parsed.checkInLocal !== undefined) setCheckInLocal(parsed.checkInLocal);
+          if (parsed.checkOutLocal !== undefined) setCheckOutLocal(parsed.checkOutLocal);
+          if (parsed.couponCode !== undefined) setCouponCode(parsed.couponCode);
+        }, 0);
       } catch (e) {
         console.error("Failed to parse saved checkout draft", e);
       }
