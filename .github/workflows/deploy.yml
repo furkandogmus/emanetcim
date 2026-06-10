@@ -46,6 +46,8 @@ jobs:
       - name: Build and push Docker image
         id: build
         uses: docker/build-push-action@v6
+        env:
+          DOCKER_BUILD_SUMMARY: false
         with:
           context: .
           push: true
@@ -53,6 +55,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          provenance: false
+          sbom: false
           build-args: |
             DATABASE_URL=postgresql://bagajpark:bagajpark@localhost:5432/bagajpark?schema=public
             AUTH_SECRET=docker-build-placeholder-not-for-production
