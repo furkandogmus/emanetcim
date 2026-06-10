@@ -11,17 +11,15 @@ export default function PartnerPromoModal() {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
-    
-    // Check if user has already dismissed it
-    const dismissed = localStorage.getItem("bagajpark_partner_promo_dismissed");
-    if (!dismissed) {
-      // Show popup after 2 seconds for a smoother UX
-      const timer = setTimeout(() => {
+    // Show popup after 2 seconds for a smoother UX
+    const timer = setTimeout(() => {
+      setIsMounted(true);
+      const dismissed = localStorage.getItem("bagajpark_partner_promo_dismissed");
+      if (!dismissed) {
         setIsOpen(true);
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
+      }
+    }, 2000);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleClose = () => {
