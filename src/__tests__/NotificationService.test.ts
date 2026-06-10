@@ -15,6 +15,9 @@ const { mockPrisma } = vi.hoisted(() => {
       bookingSeal: {
         findMany: vi.fn(),
       },
+      booking: {
+        findUnique: vi.fn(),
+      },
     },
   };
 });
@@ -134,6 +137,46 @@ describe("NotificationService", () => {
           body: expect.stringContaining("mühür #1234"),
         })
       );
+    });
+  });
+
+  describe("notifyPartnerAndAdminsForNewPaidBooking", () => {
+    it("should send email to partner and admins", async () => {
+      (global.fetch as any).mockResolvedValue({ ok: true });
+      mockPrisma.booking.findUnique.mockResolvedValue({
+        status: "WAITING_APPROVAL",
+        shop: {
+          owner: {
+            email: "partner@example.com",
+          },
+        },
+      });
+      process.env.ADMIN_EMAILS = "admin1@example.com,admin2@example.com";
+
+      await service.notifyPartnerAndAdminsForNewPaidBooking({
+        bookingId: "booking-1",
+        shopName: "Test Shop",
+        partnerPhone: "5555555555",
+        totalPrice: 100,
+      });
+
+      // Should call fetch for partner email and both admin emails
+      expect(global.fetch).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe("notifyAdminsForDispute", () => {
+    it("should send email to admins", async () => {
+      (global.fetch as any).mockResolvedValue({ ok: true });
+      process.env.ADMIN_EMAILS = "admin1@example.com,admin2@example.com";
+
+      await service.notifyAdminsForDispute({
+        bookingId: "booking-1",
+        reason: "Baggage lost",
+      });
+
+      // Should call fetch for both admin emails
+      expect(global.fetch).toHaveBeenCalledTimes(2);
     });
   });
 });
