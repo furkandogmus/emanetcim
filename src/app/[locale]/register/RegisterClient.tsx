@@ -58,7 +58,7 @@ export default function RegisterPage() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const role = new URLSearchParams(window.location.search).get("role");
-      if (role === "partner") {
+      if (role?.toLowerCase() === "partner") {
         setActiveTab("PARTNER");
       }
     }
