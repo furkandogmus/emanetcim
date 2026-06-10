@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { registerGuestAction, registerPartnerApplicationAction } from '@/actions/register';
 import { normalizeTrGsm10 } from '@/lib/netgsm';
 import dynamic from 'next/dynamic';
@@ -54,6 +54,15 @@ export default function RegisterPage() {
   const tCommon = useTranslations('Common');
   const tErrors = useTranslations('Errors');
   const [activeTab, setActiveTab] = useState<RegisterType>('GUEST');
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const role = new URLSearchParams(window.location.search).get("role");
+      if (role === "partner") {
+        setActiveTab("PARTNER");
+      }
+    }
+  }, []);
 
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
