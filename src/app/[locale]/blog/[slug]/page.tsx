@@ -6,10 +6,16 @@ import { getSiteBaseUrl } from "@/lib/site-urls";
 import { Clock, User, ArrowLeft, Share2 } from "lucide-react";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { ensureDefaultBlogPosts } from "@/lib/blog-initializer";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; slug: string }> }): Promise<Metadata> {
   const { locale, slug } = await params;
-  const post = await prisma.blogPost.findUnique({ where: { slug, isPublished: true } });
+  let post = await prisma.blogPost.findUnique({ where: { slug, isPublished: true } });
+
+  if (!post) {
+    await ensureDefaultBlogPosts(locale);
+    post = await prisma.blogPost.findUnique({ where: { slug, isPublished: true } });
+  }
 
   if (!post) return { title: "Not Found" };
 
@@ -41,9 +47,16 @@ export default async function BlogDetailPage({
   setRequestLocale(locale);
   const t = await getTranslations("Guest");
 
-  const post = await prisma.blogPost.findUnique({
+  let post = await prisma.blogPost.findUnique({
     where: { slug, isPublished: true },
   });
+
+  if (!post) {
+    await ensureDefaultBlogPosts(locale);
+    post = await prisma.blogPost.findUnique({
+      where: { slug, isPublished: true },
+    });
+  }
 
   if (!post) {
     notFound();

@@ -133,7 +133,7 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
               title: "Tarihi bölgelerde kolay dolaşım",
               text: "Müze, çarşı ve merkez rotalarında ağırlık taşımadan gez.",
               image:
-                "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1200&q=80",
+                "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=1200&q=80",
             },
             {
               title: "İş seyahatlerinde hızlı teslim-al",
@@ -164,7 +164,7 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
               title: "Easier sightseeing in dense city zones",
               text: "Explore museums and historic districts without carrying weight.",
               image:
-                "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1200&q=80",
+                "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=1200&q=80",
             },
             {
               title: "Fast drop-off for business travelers",

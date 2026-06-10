@@ -6,6 +6,7 @@ import { getPricingRules } from '@/lib/platform-settings';
 import { isPaymentsEnabled } from '@/lib/feature-flags';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
+import { auth } from '@/auth';
 
 export async function generateMetadata({
   params,
@@ -31,15 +32,19 @@ export default async function CheckoutPage({ params }: { params: Promise<{ local
   const { locale, shopId } = await params;
   setRequestLocale(locale);
 
-  // Veritabanından dükkan bilgilerini çek
-  const shop = await shopService.getShopDetails(shopId);
+  // Veritabanından dükkan bilgilerini, oturumu ve ayarları paralel çek
+  const [shop, session, pricingRules, paymentsEnabled] = await Promise.all([
+    shopService.getShopDetails(shopId),
+    auth(),
+    getPricingRules(),
+    isPaymentsEnabled(),
+  ]);
 
   if (!shop) {
     notFound();
   }
 
-  const pricingRules = await getPricingRules();
-  const paymentsEnabled = await isPaymentsEnabled();
+  const isLoggedIn = !!session?.user?.id;
 
   return (
     <CheckoutClient 
@@ -49,6 +54,7 @@ export default async function CheckoutPage({ params }: { params: Promise<{ local
       pricePerDay={moneyToNumber(shop.pricePerDay) || pricingRules.defaultPricePerDay}
       pricingRules={pricingRules}
       paymentsEnabled={paymentsEnabled}
+      isLoggedIn={isLoggedIn}
     />
   );
 }

@@ -43,6 +43,7 @@ interface CheckoutClientProps {
   pricePerDay: number;
   pricingRules: PricingRules;
   paymentsEnabled?: boolean;
+  isLoggedIn?: boolean;
 }
 
 export default function CheckoutClient({
@@ -52,6 +53,7 @@ export default function CheckoutClient({
   pricePerDay,
   pricingRules,
   paymentsEnabled = true,
+  isLoggedIn = false,
 }: CheckoutClientProps) {
   const t = useTranslations("Guest");
   const tErr = useTranslations("Errors");
@@ -62,6 +64,7 @@ export default function CheckoutClient({
   const priceXl = slot.xl;
 
   const [step, setStep] = useState(1);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const [bagS, setBagS] = useState(0);
   const [bagM, setBagM] = useState(1);
@@ -104,6 +107,39 @@ export default function CheckoutClient({
   const [bookingId, setBookingId] = useState("");
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [couponCode, setCouponCode] = useState("");
+
+  // Restore draft from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(`bagajpark_checkout_draft_${shopId}`);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.bagS !== undefined) setBagS(parsed.bagS);
+        if (parsed.bagM !== undefined) setBagM(parsed.bagM);
+        if (parsed.bagXl !== undefined) setBagXl(parsed.bagXl);
+        if (parsed.checkInLocal !== undefined) setCheckInLocal(parsed.checkInLocal);
+        if (parsed.checkOutLocal !== undefined) setCheckOutLocal(parsed.checkOutLocal);
+        if (parsed.couponCode !== undefined) setCouponCode(parsed.couponCode);
+      } catch (e) {
+        console.error("Failed to parse saved checkout draft", e);
+      }
+    }
+  }, [shopId]);
+
+  // Save draft to localStorage when inputs change
+  useEffect(() => {
+    localStorage.setItem(
+      `bagajpark_checkout_draft_${shopId}`,
+      JSON.stringify({
+        bagS,
+        bagM,
+        bagXl,
+        checkInLocal,
+        checkOutLocal,
+        couponCode,
+      })
+    );
+  }, [shopId, bagS, bagM, bagXl, checkInLocal, checkOutLocal, couponCode]);
 
   const dailyLine = computeDailyBagLineTotal(
     pricePerDay,
@@ -151,6 +187,10 @@ export default function CheckoutClient({
   };
 
   const handlePayment = async () => {
+    if (!isLoggedIn) {
+      setShowAuthModal(true);
+      return;
+    }
     let cardHolderName = cardHolder;
     let cardNumberStripped = cardNumber.replace(/\s/g, "");
     let expMonth = "";
@@ -217,6 +257,7 @@ export default function CheckoutClient({
     setIsProcessing(false);
 
     if (result.success && result.bookingId) {
+      localStorage.removeItem(`bagajpark_checkout_draft_${shopId}`);
       setBookingId(result.bookingId);
       trackPlausibleEvent(PLAUSIBLE_EVENTS.BookingCreated, { shopId });
       if ("qrCodeToken" in result && result.qrCodeToken) {
@@ -253,6 +294,10 @@ export default function CheckoutClient({
       return;
     }
     if (step === 2) {
+      if (!isLoggedIn) {
+        setShowAuthModal(true);
+        return;
+      }
       setStep(3);
     }
   };
@@ -814,6 +859,49 @@ export default function CheckoutClient({
           )}
         </div>
       </footer>
+
+      {showAuthModal && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in" onClick={() => setShowAuthModal(false)}>
+          <div className="relative bg-white rounded-[2rem] shadow-2xl border border-gray-100 max-w-md w-full overflow-hidden p-8 animate-slide-up text-center" onClick={(e) => e.stopPropagation()}>
+            <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-orange-500 to-amber-500" />
+            
+            <button
+              onClick={() => setShowAuthModal(false)}
+              className="absolute top-6 right-6 text-gray-400 hover:text-gray-900 transition-colors p-1.5 rounded-full hover:bg-gray-50 cursor-pointer"
+              aria-label="Close"
+            >
+              <ChevronLeft size={20} className="rotate-180" />
+            </button>
+
+            <div className="mx-auto w-12 h-12 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center mb-6 border border-orange-100 shadow-md shadow-orange-50">
+              <User size={24} />
+            </div>
+
+            <h3 className="text-xl font-black text-gray-900 tracking-tight mb-3">
+              {t("authModalTitle")}
+            </h3>
+            
+            <p className="text-sm font-semibold text-gray-500 leading-relaxed mb-8">
+              {t("authModalBody")}
+            </p>
+
+            <div className="flex flex-col gap-3">
+              <Link
+                href={`/login?callbackUrl=/checkout/${shopId}`}
+                className="w-full bg-orange-600 hover:bg-orange-700 text-white py-4 px-6 rounded-2xl font-bold transition-all shadow-lg shadow-orange-200 hover:shadow-orange-300 text-center block cursor-pointer"
+              >
+                {t("authModalLogin")}
+              </Link>
+              <Link
+                href={`/register?callbackUrl=/checkout/${shopId}`}
+                className="w-full bg-gray-50 hover:bg-gray-100 text-gray-700 py-4 px-6 rounded-2xl font-bold transition-all text-center block cursor-pointer"
+              >
+                {t("authModalRegister")}
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
