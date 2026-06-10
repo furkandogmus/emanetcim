@@ -938,7 +938,8 @@
     "corporate": "Kurumsal",
     "citiesTitle": "Popüler şehirler",
     "citiesViewAll": "Tüm şehirler ve rehberler",
-    "paymentsNote": "Kart ile iyzico (güvenli). Nakit yok. Cüzdan ödemeleri (Apple/Google Pay, PayPal) Stripe ile planlanıyor."
+    "paymentsNote": "Kart ile iyzico (güvenli). Nakit yok. Cüzdan ödemeleri (Apple/Google Pay, PayPal) Stripe ile planlanıyor.",
+    "sitemap": "Site Haritası"
   },
   "Contact": {
     "title": "Bize Ulaşın",

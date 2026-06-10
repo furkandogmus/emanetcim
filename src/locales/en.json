@@ -938,7 +938,8 @@
     "corporate": "Corporate",
     "citiesTitle": "Popular cities",
     "citiesViewAll": "All cities & guides",
-    "paymentsNote": "Cards via iyzico (secure). Cash not accepted. Wallets (Apple/Google Pay, PayPal) planned with Stripe."
+    "paymentsNote": "Cards via iyzico (secure). Cash not accepted. Wallets (Apple/Google Pay, PayPal) planned with Stripe.",
+    "sitemap": "Sitemap"
   },
   "Contact": {
     "title": "Contact Us",
