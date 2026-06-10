@@ -1,11 +1,19 @@
 import prisma from "@/lib/db";
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 import { Server, Database, Mail, ShieldCheck, Smartphone, Cpu, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 
 
 export default async function AdminStatusPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
+
+  const session = await auth();
+  if (!session?.user || session.user.role !== "ADMIN") {
+    redirect(`/${locale}/login`);
+  }
+
   const t = await getTranslations("AdminStatus");
 
   // Checks

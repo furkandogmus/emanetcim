@@ -1,6 +1,8 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { ChevronLeft } from "lucide-react";
 import { Link } from "@/i18n/routing";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 import prisma from "@/lib/db";
 import { moneyToNumber } from "@/lib/money";
 import AdminPlatformSettingsClient from "@/components/admin/AdminPlatformSettingsClient";
@@ -14,6 +16,11 @@ export default async function AdminPlatformSettingsPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+
+  const session = await auth();
+  if (!session?.user || session.user.role !== "ADMIN") {
+    redirect(`/${locale}/login`);
+  }
 
   const t = await getTranslations("Admin");
 

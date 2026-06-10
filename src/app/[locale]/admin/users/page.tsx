@@ -2,6 +2,7 @@ import { setRequestLocale } from "next-intl/server";
 import prisma from "@/lib/db";
 import AdminUsersClient from "@/components/admin/AdminUsersClient";
 import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
 export default async function AdminUsersPage({
   params,
@@ -12,11 +13,15 @@ export default async function AdminUsersPage({
   setRequestLocale(locale);
 
   const session = await auth();
+  if (!session?.user || session.user.role !== "ADMIN") {
+    redirect(`/${locale}/login`);
+  }
 
-  // Tüm kullanıcıları çekiyoruz
+  // Son 200 kullanıcı (admin pagination için yeterli)
   const [users, pendingRoleApprovalCount] = await Promise.all([
     prisma.user.findMany({
       orderBy: { createdAt: "desc" },
+      take: 200,
       select: {
         id: true,
         name: true,

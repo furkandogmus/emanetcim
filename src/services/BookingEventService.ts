@@ -1,5 +1,5 @@
 import prisma from "@/lib/db";
-import type { Role } from "@prisma/client";
+import type { Role, Prisma } from "@prisma/client";
 
 export type BookingEventType =
   | "CREATED"
@@ -29,7 +29,7 @@ export class BookingEventService {
         event: params.event,
         actorId: params.actorId ?? null,
         actorRole: params.actorRole ?? null,
-        metadata: (params.metadata as any) ?? {},
+        metadata: (params.metadata ?? {}) as Prisma.InputJsonValue,
       },
     });
   }

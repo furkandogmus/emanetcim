@@ -1,6 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
+import { auth } from "@/auth";
+import { redirect, notFound } from "next/navigation";
 import prisma from "@/lib/db";
-import { notFound } from "next/navigation";
 import AdminPartnerEditClient from "@/components/admin/AdminPartnerEditClient";
 
 export default async function AdminPartnerEditPage({
@@ -10,6 +11,11 @@ export default async function AdminPartnerEditPage({
 }) {
   const { locale, id } = await params;
   setRequestLocale(locale);
+
+  const session = await auth();
+  if (!session?.user || session.user.role !== "ADMIN") {
+    redirect(`/${locale}/login`);
+  }
 
   // Dükkan detaylarını ve tüm yorumlarını çekiyoruz
   const shop = await prisma.shop.findUnique({

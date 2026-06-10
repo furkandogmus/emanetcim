@@ -6,7 +6,6 @@ import prisma from "@/lib/db";
 import { dateLocaleForUiLocale } from "@/lib/date-locale";
 import { guestBookingStatusMessageKey } from "@/lib/booking-status-i18n";
 import {
-  bookingMatchesPartnerFilter,
   parsePartnerBookingsFilter,
   type PartnerBookingsFilter,
 } from "@/lib/partner-bookings-filter";
