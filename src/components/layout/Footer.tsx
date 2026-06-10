@@ -65,6 +65,7 @@ export default function Footer() {
                 rel="noopener noreferrer"
                 className="inline-block hover:opacity-90 transition-opacity"
               >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   alt="Bagaj Emanet ve Valiz Depolama - Drop Your Bags, Explore Freely | Product Hunt"
                   width="250"
