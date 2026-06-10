@@ -394,7 +394,8 @@ export class NotificationService implements INotificationService {
   }
 
   /**
-   * Ödeme sonrası: esnafa (dükkan sahibi telefonu) + isteğe bağlı admin numaralarına SMS.
+   * Yeni bir ödeme yapıldığında veya yeni bir rezervasyon talebi alındığında esnafa ve adminlere bildirim gönderir.
+   * SMS (Netgsm) devre dışı olsa bile, e-posta ile bildirim göndererek çalışmayı sürdürür.
    */
   async notifyPartnerAndAdminsForNewPaidBooking(params: {
     bookingId: string;
@@ -402,14 +403,95 @@ export class NotificationService implements INotificationService {
     partnerPhone: string | null | undefined;
     totalPrice: number;
   }): Promise<void> {
+    const { bookingId, shopName, partnerPhone, totalPrice } = params;
+    const shortId = bookingId.replace(/-/g, "").slice(0, 8);
+
+    // Veritabanından rezervasyon durumunu ve partner e-posta adresini çekelim
+    let partnerEmail: string | null = null;
+    let isRequest = true; // WAITING_APPROVAL ise talep, PAID/APPROVED ise ödeme
+    try {
+      const b = await prisma.booking.findUnique({
+        where: { id: bookingId },
+        include: { shop: { include: { owner: true } } },
+      });
+      if (b) {
+        partnerEmail = b.shop?.owner?.email ?? null;
+        isRequest = b.status === "WAITING_APPROVAL";
+      }
+    } catch (err) {
+      logger.error({ err, bookingId }, "notifyPartnerAndAdmins_db_failed");
+    }
+
+    // 1. E-posta Bildirimi
+    const domain = process.env.NEXT_PUBLIC_APP_URL || "https://bagajpark.com";
+    const panelUrl = `${domain}/tr/partner`;
+    const priceFormatted = Number(totalPrice).toFixed(2);
+
+    let emailSubject = "";
+    let emailBody = "";
+    let emailHtml = "";
+
+    if (isRequest) {
+      // Yeni Rezervasyon Talebi (WAITING_APPROVAL)
+      emailSubject = `BagajPark: Yeni Rezervasyon Talebi! 🎒 (Kod: ${shortId})`;
+      emailBody = `Merhaba,\n\n${shopName} mağazanıza yeni bir rezervasyon talebi geldi!\n\nTutar: ₺${priceFormatted}\nReferans Kodu: ${shortId}\n\nTalebi onaylamak veya reddetmek için partner panelinize giriş yapın:\n${panelUrl}`;
+      emailHtml = `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
+        <h2 style="color:#ea580c">Yeni Rezervasyon Talebi! 🎒</h2>
+        <p><strong>${shopName}</strong> mağazanıza yeni bir rezervasyon talebi ulaştı. Onaylama veya reddetme işlemlerini gerçekleştirmek için lütfen partner panelinize giriş yapın.</p>
+        <table style="width:100%;border-collapse:collapse;margin:16px 0">
+          <tr><td style="padding:8px;color:#6b7280">Referans Kodu</td><td style="padding:8px;font-weight:bold">${shortId}</td></tr>
+          <tr style="background:#f9fafb"><td style="padding:8px;color:#6b7280">Toplam Tutar</td><td style="padding:8px;font-weight:bold">₺${priceFormatted}</td></tr>
+        </table>
+        <a href="${panelUrl}" style="display:inline-block;background:#ea580c;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;margin:16px 0">Partner Paneline Git</a>
+        <p style="font-size:13px;color:#6b7280;margin-top:24px">BagajPark — Esnaf Ortaklık Programı</p>
+      </div>`;
+    } else {
+      // Ödemesi Yapılmış Rezervasyon (PAID)
+      emailSubject = `BagajPark: Rezervasyon Ödemesi Tamamlandı! 💳 (Kod: ${shortId})`;
+      emailBody = `Merhaba,\n\n${shopName} mağazanıza ait rezervasyonun ödemesi tamamlandı!\n\nTutar: ₺${priceFormatted}\nReferans Kodu: ${shortId}\n\nDetayları görmek için partner panelinize giriş yapın:\n${panelUrl}`;
+      emailHtml = `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
+        <h2 style="color:#16a34a">Ödeme Tamamlandı! 💳</h2>
+        <p><strong>${shopName}</strong> mağazanıza ait rezervasyonun ödemesi başarıyla gerçekleştirildi. Müşteri bagajı teslim etmek üzere dükkanınıza gelecektir.</p>
+        <table style="width:100%;border-collapse:collapse;margin:16px 0">
+          <tr><td style="padding:8px;color:#6b7280">Referans Kodu</td><td style="padding:8px;font-weight:bold">${shortId}</td></tr>
+          <tr style="background:#f9fafb"><td style="padding:8px;color:#6b7280">Toplam Tutar</td><td style="padding:8px;font-weight:bold">₺${priceFormatted}</td></tr>
+        </table>
+        <a href="${panelUrl}" style="display:inline-block;background:#16a34a;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;margin:16px 0">Partner Paneline Git</a>
+        <p style="font-size:13px;color:#6b7280;margin-top:24px">BagajPark — Esnaf Ortaklık Programı</p>
+      </div>`;
+    }
+
+    // Esnafa e-posta gönder
+    if (partnerEmail && partnerEmail.includes("@")) {
+      void this.sendEmail(partnerEmail, emailSubject, emailBody, bookingId, emailHtml).catch((e) => {
+        logger.error({ err: e, partnerEmail, bookingId }, "notifyPartnerAndAdmins_partner_email_failed");
+      });
+    }
+
+    // Adminlere e-posta gönder
+    const adminEmails = (process.env.ADMIN_EMAILS ?? "")
+      .split(",")
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+    
+    for (const adminEmail of adminEmails) {
+      if (adminEmail.includes("@")) {
+        const adminSubject = `[Admin] ${emailSubject}`;
+        void this.sendEmail(adminEmail, adminSubject, emailBody, bookingId, emailHtml).catch((e) => {
+          logger.error({ err: e, adminEmail, bookingId }, "notifyPartnerAndAdmins_admin_email_failed");
+        });
+      }
+    }
+
+    // 2. SMS Bildirimi (Yalnızca Netgsm yapılandırılmışsa)
     if (!isNetgsmConfigured()) {
-      logger.debug({ bookingId: params.bookingId }, "netgsm_off_skipping_booking_sms");
+      logger.debug({ bookingId }, "netgsm_off_skipping_booking_sms");
       return;
     }
 
-    const { bookingId, shopName, partnerPhone, totalPrice } = params;
-    const shortId = bookingId.replace(/-/g, "").slice(0, 8);
-    const partnerMsg = `BagajPark: Yeni rezervasyon — ${shopName}. Kod: ${shortId} Tutar: ${Number(totalPrice).toFixed(2)} TL`;
+    const partnerMsg = isRequest
+      ? `BagajPark: Yeni rezervasyon talebi — ${shopName}. Kod: ${shortId} Tutar: ${priceFormatted} TL`
+      : `BagajPark: Rezervasyon odemesi tamamlandi — ${shopName}. Kod: ${shortId} Tutar: ${priceFormatted} TL`;
 
     const p = normalizeTrGsm10(partnerPhone ?? undefined);
     if (p) {
@@ -418,19 +500,49 @@ export class NotificationService implements INotificationService {
       logger.debug({ bookingId }, "partner_sms_skipped_no_phone");
     }
 
-    const adminMsg = `BagajPark [Admin]: Yeni ödeme — ${shopName}. ${shortId} ${Number(totalPrice).toFixed(2)} TL`;
+    const adminMsg = `BagajPark [Admin]: ${isRequest ? "Yeni talep" : "Yeni odeme"} — ${shopName}. ${shortId} ${priceFormatted} TL`;
     for (const adminNo of parseAdminGsmNumbers()) {
       await this.sendSms(adminNo, adminMsg, bookingId);
     }
   }
 
   /**
-   * Şikayet açıldığında yalnızca admin GSM listesine SMS.
+   * Şikayet açıldığında admin GSM listesine SMS ve tüm admin e-postalarına e-posta gönderir.
    */
   async notifyAdminsForDispute(params: {
     bookingId: string;
     reason: string;
   }): Promise<void> {
+    const { bookingId, reason } = params;
+    const shortId = bookingId.replace(/-/g, "").slice(0, 8);
+
+    // 1. E-posta Bildirimi
+    const adminEmails = (process.env.ADMIN_EMAILS ?? "")
+      .split(",")
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+
+    const emailSubject = `[Admin] BagajPark: Yeni Şikayet Bildirimi! ⚠️ (Rez: ${shortId})`;
+    const emailBody = `Merhaba,\n\nRezervasyon hakkında yeni bir şikayet açıldı.\n\nReferans Kodu: ${shortId}\nŞikayet Nedeni: ${reason}`;
+    const emailHtml = `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
+      <h2 style="color:#dc2626">Yeni Şikayet Bildirimi! ⚠️</h2>
+      <p>Bir rezervasyon için şikayet/itiraz oluşturulmuştur.</p>
+      <table style="width:100%;border-collapse:collapse;margin:16px 0">
+        <tr><td style="padding:8px;color:#6b7280">Referans Kodu</td><td style="padding:8px;font-weight:bold">${shortId}</td></tr>
+        <tr style="background:#f9fafb"><td style="padding:8px;color:#6b7280">Şikayet Nedeni</td><td style="padding:8px;font-weight:bold;color:#dc2626">${reason}</td></tr>
+      </table>
+      <p style="font-size:13px;color:#6b7280;margin-top:24px">BagajPark — Yönetim Masası</p>
+    </div>`;
+
+    for (const adminEmail of adminEmails) {
+      if (adminEmail.includes("@")) {
+        void this.sendEmail(adminEmail, emailSubject, emailBody, bookingId, emailHtml).catch((e) => {
+          logger.error({ err: e, adminEmail, bookingId }, "notifyAdminsForDispute_email_failed");
+        });
+      }
+    }
+
+    // 2. SMS Bildirimi (Yalnızca Netgsm yapılandırılmışsa)
     if (!isNetgsmConfigured()) {
       logger.debug({ bookingId: params.bookingId }, "netgsm_off_skipping_dispute_sms");
       return;
@@ -438,8 +550,6 @@ export class NotificationService implements INotificationService {
     const admins = parseAdminGsmNumbers();
     if (admins.length === 0) return;
 
-    const { bookingId, reason } = params;
-    const shortId = bookingId.replace(/-/g, "").slice(0, 8);
     const msg = `BagajPark [Admin]: Yeni şikayet (${reason}) — rez. ${shortId}`;
     for (const adminNo of admins) {
       await this.sendSms(adminNo, msg, bookingId);

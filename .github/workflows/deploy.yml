@@ -58,6 +58,7 @@ jobs:
             AUTH_SECRET=docker-build-placeholder-not-for-production
             IYZICO_API_KEY=docker-build-placeholder
             IYZICO_SECRET_KEY=docker-build-placeholder
+            NEXT_PUBLIC_BETA_BADGE=true
 
   deploy:
     name: Deploy to Production
