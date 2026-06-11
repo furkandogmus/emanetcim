@@ -134,6 +134,54 @@ class _PartnerBookingDetailScreenState
     }
   }
 
+  Future<void> _approveBooking(BookingDto b) async {
+    setState(() => _busy = true);
+    try {
+      final dio = ref.read(dioProvider);
+      await dio.post('/partner/bookings/${b.id}/approve');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('partner.approved'.tr())));
+        ref.invalidate(bookingProvider(b.id));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('common.error'.tr())));
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _rejectBooking(BookingDto b) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('partner.reject_title'.tr()),
+        content: Text('partner.reject_confirm'.tr()),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('common.cancel'.tr())),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text('partner.reject'.tr())),
+        ],
+      ),
+    );
+    if (confirm != true) return;
+    setState(() => _busy = true);
+    try {
+      final dio = ref.read(dioProvider);
+      await dio.post('/partner/bookings/${b.id}/reject');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('booking.cancelled'.tr())));
+        ref.invalidate(bookingProvider(b.id));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('common.error'.tr())));
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final bAsync = ref.watch(bookingProvider(widget.bookingId));
@@ -274,6 +322,43 @@ class _PartnerBookingDetailScreenState
               const SizedBox(height: 32),
 
               // Operational Area
+              if (b.status == BookingStatus.waitingApproval) ...[
+                Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: _busy ? null : () => _approveBooking(b),
+                        icon: _busy
+                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                            : const Icon(Icons.check_circle_rounded),
+                        label: Text('partner.approve'.tr()),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: _busy ? null : () => _rejectBooking(b),
+                        icon: _busy
+                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                            : const Icon(Icons.cancel_rounded),
+                        label: Text('partner.reject'.tr()),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Colors.redAccent,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+              ],
+
               if (b.status == BookingStatus.paid ||
                   b.status == BookingStatus.approved) ...[
                 const SizedBox(height: 16),

@@ -64,14 +64,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   List<dynamic> _suggestions = [];
   bool _onlyOpenNow = false;
   bool _only247 = false;
+  int _minRating = 0;
+  bool _hasRestroom = false;
+  bool _hasCctv = false;
+  bool _hasClimate = false;
+  bool _acceptsLarge = false;
+  String _sortBy = 'distance'; // distance | price | rating
   Timer? _debounce;
 
   void _showFilterSheet() {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) => StatefulBuilder(
         builder: (context, setSheetState) => Padding(
           padding: const EdgeInsets.all(24),
@@ -79,52 +84,45 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'search.filter'.tr(),
-                style: GoogleFonts.outfit(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              Text('search.filter'.tr(), style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
-              SwitchListTile(
-                title: Text(
-                  'search.open_now'.tr(),
-                  style: GoogleFonts.outfit(),
-                ),
-                subtitle: Text(
-                  'search.open_now_hint'.tr(),
-                  style: GoogleFonts.outfit(fontSize: 12),
-                ),
-                value: _onlyOpenNow,
-                onChanged: (v) {
-                  setState(() => _onlyOpenNow = v);
-                  setSheetState(() => _onlyOpenNow = v);
-                },
-                activeThumbColor: AppColors.brandOrange,
-              ),
-              SwitchListTile(
-                title: Text(
-                  'search.open_247'.tr(),
-                  style: GoogleFonts.outfit(),
-                ),
-                subtitle: Text(
-                  'search.open_247_hint'.tr(),
-                  style: GoogleFonts.outfit(fontSize: 12),
-                ),
-                value: _only247,
-                onChanged: (v) {
-                  setState(() => _only247 = v);
-                  setSheetState(() => _only247 = v);
-                },
-                activeThumbColor: AppColors.brandOrange,
-              ),
+
+              SwitchListTile(title: Text('search.open_now'.tr(), style: GoogleFonts.outfit()), subtitle: Text('search.open_now_hint'.tr(), style: GoogleFonts.outfit(fontSize: 12)), value: _onlyOpenNow,
+                onChanged: (v) { setState(() => _onlyOpenNow = v); setSheetState(() {}); }, activeThumbColor: AppColors.brandOrange),
+              SwitchListTile(title: Text('search.open_247'.tr(), style: GoogleFonts.outfit()), subtitle: Text('search.open_247_hint'.tr(), style: GoogleFonts.outfit(fontSize: 12)), value: _only247,
+                onChanged: (v) { setState(() => _only247 = v); setSheetState(() {}); }, activeThumbColor: AppColors.brandOrange),
+
+              const SizedBox(height: 8),
+              Text('search.sort_by'.tr(), style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold)),
+              Row(children: [
+                _filterChip('search.sort_distance'.tr(), _sortBy == 'distance', () { setState(() => _sortBy = 'distance'); setSheetState(() {}); }),
+                const SizedBox(width: 8),
+                _filterChip('search.sort_price'.tr(), _sortBy == 'price', () { setState(() => _sortBy = 'price'); setSheetState(() {}); }),
+                const SizedBox(width: 8),
+                _filterChip('search.sort_rating'.tr(), _sortBy == 'rating', () { setState(() => _sortBy = 'rating'); setSheetState(() {}); }),
+              ]),
+
+              const SizedBox(height: 12),
+              Text('search.amenities'.tr(), style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Wrap(spacing: 8, runSpacing: 8, children: [
+                _filterChip('search.restroom'.tr(), _hasRestroom, () { setState(() => _hasRestroom = !_hasRestroom); setSheetState(() {}); }),
+                _filterChip('search.camera'.tr(), _hasCctv, () { setState(() => _hasCctv = !_hasCctv); setSheetState(() {}); }),
+                _filterChip('search.climate'.tr(), _hasClimate, () { setState(() => _hasClimate = !_hasClimate); setSheetState(() {}); }),
+                _filterChip('search.large_items'.tr(), _acceptsLarge, () { setState(() => _acceptsLarge = !_acceptsLarge); setSheetState(() {}); }),
+              ]),
+
+              const SizedBox(height: 12),
+              Text('search.min_rating'.tr(), style: GoogleFonts.outfit(fontSize: 14)),
+              Row(children: List.generate(5, (i) => IconButton(
+                icon: Icon(i < _minRating ? Icons.star_rounded : Icons.star_outline_rounded, color: Colors.amber),
+                onPressed: () { setState(() => _minRating = i + 1 == _minRating ? i : i + 1); setSheetState(() {}); },
+              ))),
+
               const SizedBox(height: 24),
               FilledButton(
                 onPressed: () => Navigator.pop(context),
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                ),
+                style: FilledButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
                 child: Text('search.show_results'.tr()),
               ),
               const SizedBox(height: 16),
@@ -132,6 +130,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _filterChip(String label, bool selected, VoidCallback onTap) {
+    return FilterChip(
+      label: Text(label, style: GoogleFonts.outfit(fontSize: 13)),
+      selected: selected,
+      onSelected: (_) => onTap(),
+      selectedColor: AppColors.brandOrange.withValues(alpha: 0.15),
+      checkmarkColor: AppColors.brandOrange,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     );
   }
 
@@ -255,6 +264,26 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               }
               if (_onlyOpenNow) {
                 filtered = filtered.where((s) => s.isActive).toList();
+              }
+              if (_minRating > 0) {
+                filtered = filtered.where((s) => (s.rating ?? 0) >= _minRating).toList();
+              }
+              if (_hasRestroom) {
+                filtered = filtered.where((s) => s.hasRestroom).toList();
+              }
+              if (_hasCctv) {
+                filtered = filtered.where((s) => s.hasCctv).toList();
+              }
+              if (_hasClimate) {
+                filtered = filtered.where((s) => s.hasClimateControl).toList();
+              }
+              if (_acceptsLarge) {
+                filtered = filtered.where((s) => s.acceptsLargeItems).toList();
+              }
+              if (_sortBy == 'price') {
+                filtered = filtered..sort((a, b) => a.pricePerDay.compareTo(b.pricePerDay));
+              } else if (_sortBy == 'rating') {
+                filtered = filtered..sort((a, b) => -(a.rating ?? 0).compareTo(b.rating ?? 0));
               }
 
               return SearchMap(

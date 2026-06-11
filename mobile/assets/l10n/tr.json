@@ -3,39 +3,39 @@
     "home": "Ana Sayfa",
     "search": "Ara",
     "bookings": "Rezervasyonlarım",
-    "partner": "İşlem Paneli",
-    "scan": "QR Tarat",
+    "partner": "Esnaf Paneli",
+    "scan": "QR Tara",
     "profile": "Profil"
   },
   "onboarding": {
     "step1": {
-      "title": "Noktanı Bul ve Ayır",
-      "desc": "Haritadan sana en yakın BagajPark noktasını seç ve saniyeler içinde rezervasyonunu yap."
+      "title": "Bul & Rezerve Et",
+      "desc": "Haritadan sana en yakın BagajPark noktasını seç ve saniyeler içinde rezerve et."
     },
     "step2": {
-      "title": "Teslim Et ve QR Okut",
-      "desc": "Dükkana gittiğinde valizini teslim et ve görevlinin gösterdiği QR kodu uygulamadan okut."
+      "title": "Bırak & QR Okut",
+      "desc": "Dükkanına git, valizini emanet et ve partnerin verdiği QR kodu okut."
     },
     "step3": {
-      "title": "Mühürle ve Güvenceye Al",
-      "desc": "Valizine güvenlik mührünü tak, mühür numarasını dükkan sahibine ilet ve huzurla ayrıl."
+      "title": "Mühürle & Güvende Ol",
+      "desc": "Güvenlik mührünü valize tak, mühür numarasını partnerle paylaş ve içinden çıkar."
     },
     "step4": {
-      "title": "Şehri Özgürce Gez",
-      "desc": "Ellerin serbest, valizlerin sigortalı! İstediğin zaman geri gelip valizini teslim alabilirsin."
+      "title": "Özgürce Keşfet",
+      "desc": "Valizlerin sigortalı ve güvende! İstediğin zaman gelip teslim al."
     },
     "partner": {
       "step1": {
         "title": "Rezervasyonu Onayla",
-        "desc": "Misafir geldiğinde QR kodunu taratın ve rezervasyon detaylarını kontrol edin."
+        "desc": "Misafir geldiğinde QR kodunu tarat ve rezervasyon detaylarını kontrol et."
       },
       "step2": {
         "title": "Mühürle ve Teslim Al",
-        "desc": "Valize güvenlik mührünü takın, mühür numarasını sisteme girin ve güvenli alana yerleştirin."
+        "desc": "Güvenlik mührünü valize tak, mühür numarasını sisteme gir ve güvenli alana yerleştir."
       },
       "step3": {
         "title": "Teslim Et ve Kazan",
-        "desc": "Misafir valizini almaya geldiğinde tekrar QR okutun ve valizi teslim ederek kazancınızı anında görün."
+        "desc": "Misafir geri geldiğinde QR kodu tekrar okut, valizi teslim et ve kazancın anında yansısın."
       }
     }
   },
@@ -49,33 +49,36 @@
     "email_or_phone": "E-posta veya Telefon",
     "identity_hint": "E-posta adresinizi veya telefon numaranızı girin",
     "invalid_identity": "Geçersiz e-posta veya telefon numarası",
+    "send_code": "Kod Gönder",
     "or": "veya",
-    "google": "Google ile devam et",
-    "apple": "Apple ile devam et",
+    "google": "Google ile Devam Et",
+    "apple": "Apple ile Devam Et",
     "forgot_password": "Şifremi Unuttum",
     "forgot_password_email_only": "Şifre sıfırlama sadece e-posta adresi ile yapılabilir. Lütfen e-posta adresinizi girin.",
     "forgot_password_sent": "Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.",
     "forgot_password_enter_email": "Lütfen önce e-posta adresinizi girin.",
+    "enter_code": "Doğrulama Kodunu Girin",
     "verify": "Doğrula",
+    "verify_title": "Kodu Doğrula",
+    "verify_button": "Doğrula",
+    "resend_code": "Kodu Tekrar Gönder",
+    "resend": "Tekrar Gönder",
     "name_label": "Ad Soyad",
-    "name_error": "Geçerli bir ad girin",
-    "name_invalid_error": "Ad en az 2 karakter olmalı",
+    "name_error": "Lütfen geçerli bir isim girin",
+    "name_invalid_error": "İsim en az 2 karakter olmalıdır",
     "terms_service": "Kullanım Koşulları",
     "privacy_policy": "Gizlilik Politikası",
-    "invalid_code": "Hatalı kod girdiniz.",
-    "invalid_password": "Hatalı şifre girdiniz.",
+    "invalid_code": "Geçersiz kod girildi.",
+    "invalid_password": "Geçersiz şifre girildi.",
     "otp_resent": "Yeni kod gönderildi.",
+    "otp_send_failed": "Kod gönderilemedi, tekrar deneyin.",
+    "otp_error": "Doğrulama hatası oluştu.",
     "password": "Şifre",
     "password_login": "Şifre ile Giriş",
     "code_login": "Kod ile Giriş",
     "sign_in": "Giriş Yap",
     "skip": "Atla",
-    "account_exists": "Bu hesap zaten mevcut. Giriş yapmayı deneyin.",
-    "password_error": "Şifre en az 6 karakter olmalıdır",
-    "invalid_credentials": "E-posta/telefon veya şifre hatalı",
-    "too_many_attempts": "Çok fazla hatalı giriş. Lütfen daha sonra tekrar deneyin.",
-    "google_error": "Google ile giriş başarısız oldu",
-    "apple_error": "Apple ile giriş başarısız oldu"
+    "account_exists": "Bu hesap zaten mevcut. Giriş yapmayı deneyin."
   },
   "shop": {
     "error_loading": "Dükkan yüklenirken bir hata oluştu",
@@ -83,36 +86,49 @@
     "capacity": "Kapasite",
     "capacity_val": "{} Valiz",
     "security": "Güvenlik",
-    "security_high": "Üst Düzey",
+    "security_high": "Yüksek Seviye",
     "about": "Dükkan Hakkında",
-    "about_desc": "Bu dükkan BagajPark güvencesiyle valizlerinizi güvenle emanet edebileceğiniz, merkezi konumda ve kamera sistemiyle korunan bir noktadır. Siz şehri keşfederken valizleriniz mühürlü ve sigortalı olarak bekler.",
+    "about_desc": "Bu dükkan merkezi konumda ve CCTV gözetiminde olan, valizinizi BagajPark güvencesiyle emanet edebileceğiniz bir noktadır.",
     "location": "Konum",
-    "view_on_map": "Haritada Gör",
-    "amenities": "Hizmetler",
+    "view_on_map": "Haritada Göster",
+    "amenities": "Olanaklar",
     "reviews": "Değerlendirmeler",
-    "total_amount": "Toplam Tutar"
+    "total_amount": "Toplam Tutar",
+    "verified": "Doğrulanmış",
+    "no_reviews": "Henüz değerlendirme yapılmamış. İlk değerlendirmeyi sen yap!",
+    "rating_count": "{} değerlendirme",
+    "favorite": "Favorilere Ekle",
+    "unfavorite": "Favorilerden Çıkar"
   },
   "search": {
-    "hint": "Nereye emanet bırakacaksın?",
+    "hint": "Nerede valizini bırakmak istiyorsun?",
     "filter": "Filtrele",
     "open_now": "Şimdi Açık",
-    "open_now_hint": "Sadece şu an hizmet veren dükkanlar",
+    "open_now_hint": "Şu an hizmet veren noktalar",
     "open_247": "7/24 Açık",
-    "open_247_hint": "Günün her saati ulaşılabilen noktalar",
+    "open_247_hint": "Her saat erişilebilen noktalar",
     "show_results": "Sonuçları Göster",
-    "amenities": "İmkanlar",
-    "restroom": "Ücretsiz Tuvalet / Lavabo",
-    "camera": "7/24 Kamera İzleme",
-    "insurance": "Sigortalı Emanet",
-    "book_now": "Hemen Rezervasyon Yap",
-    "location_service_disabled": "Konum servisleri kapalı. Lütfen ayarlardan açın.",
-    "location_denied": "Konum izni verilmedi. Yakındaki dükkanları görmek için lütfen ayarlardan izin verin.",
-    "day_unit": "/gün"
+    "amenities": "Olanaklar",
+    "restroom": "Ücretsiz Tuvalet",
+    "camera": "7/24 CCTV Gözetim",
+    "insurance": "Sigortalı Saklama",
+    "day_unit": "/gün",
+    "min_rating": "Minimum Puan",
+    "max_price": "Maksimum Günlük Fiyat (₺)",
+    "sort_by": "Sıralama",
+    "sort_distance": "Mesafe (Yakın)",
+    "sort_price": "Fiyat (Düşük)",
+    "sort_rating": "Puan (Yüksek)",
+    "has_restroom": "Tuvalet Var",
+    "has_cctv": "CCTV Var",
+    "has_climate": "Klima Var",
+    "accepts_large": "Büyük Eşya Kabul Ediyor",
+    "clear_filters": "Filtreleri Temizle"
   },
   "notifications": {
     "title": "Bildirimler",
-    "empty": "Henüz bildiriminiz yok.",
-    "mark_all_read": "Tümünü okundu işaretle",
+    "empty": "Henüz bildirim yok.",
+    "mark_all_read": "Tümünü Okundu İşaretle",
     "types": {
       "booking": "Rezervasyon Güncellemesi",
       "payment": "Ödeme Başarılı",
@@ -141,19 +157,19 @@
     "live_analytics": "Canlı İstatistikler"
   },
   "checkout": {
-    "title": "Rezervasyon Tamamla",
-    "check_in": "Teslimat",
-    "check_out": "Teslim Alım",
-    "bags_title": "Valizlerinizi Seçin",
+    "title": "Rezervasyonu Tamamla",
+    "check_in": "Bırakma Tarihi",
+    "check_out": "Teslim Alma Tarihi",
+    "bags_title": "Valiz Seçimi",
     "bag_s": "Küçük (S)",
-    "bag_s_hint": "Sırt çantası veya kabin boy",
+    "bag_s_hint": "Sırt çantası veya kabin boyutu",
     "bag_m": "Orta (M)",
-    "bag_m_hint": "Standart boy valiz",
+    "bag_m_hint": "Standart bavul",
     "bag_xl": "Büyük (XL)",
-    "bag_xl_hint": "Büyük boy veya spor ekipmanı",
+    "bag_xl_hint": "Büyük bavul veya spor ekipmanı",
     "summary": "ÖDEME ÖZETİ",
     "summary_bags": "Valiz Ücreti ({} Gün)",
-    "insurance_fee": "Sigorta & Güvence Bedeli",
+    "insurance_fee": "Sigorta & Koruma Ücreti",
     "service_fee": "Hizmet Bedeli",
     "included": "Dahil",
     "total": "Toplam",
@@ -172,6 +188,29 @@
     "directions": "Yol Tarifi",
     "call_shop": "Dükkanı Ara",
     "get_help": "Destek Al",
+    "cancel": "İptal Et",
+    "cancel_confirm": "Bu rezervasyonu iptal etmek istediğinize emin misiniz?",
+    "cancel_success": "Rezervasyonunuz iptal edildi.",
+    "cancel_error": "İptal işlemi başarısız oldu.",
+    "modify": "Değiştir",
+    "modify_title": "Rezervasyonu Değiştir",
+    "dispute": "İtiraz Et",
+    "dispute_title": "İtiraz Oluştur",
+    "dispute_reason": "Sebep",
+    "dispute_damage": "Hasar",
+    "dispute_theft": "Hırsızlık",
+    "dispute_other": "Diğer",
+    "dispute_description": "Açıklama (en az 10 karakter)",
+    "dispute_submit": "İtiraz Gönder",
+    "dispute_success": "İtirazınız oluşturuldu.",
+    "dispute_error": "İtiraz oluşturulamadı.",
+    "review_title": "Değerlendirme Yap",
+    "review_rating_hint": "Bu dükkanı puanlayın",
+    "review_comment_hint": "Deneyiminizi paylaşın (opsiyonel)",
+    "review_submit": "Gönder",
+    "review_success": "Değerlendirmeniz kaydedildi!",
+    "review_error": "Değerlendirme kaydedilemedi.",
+    "review_duplicate": "Bu rezervasyonu zaten değerlendirdiniz.",
     "status": {
       "waiting_approval": "Onay Bekliyor",
       "approved": "Onaylandı",
@@ -182,7 +221,14 @@
     },
     "no_bookings": "Henüz rezervasyonun yok",
     "no_bookings_desc": "Seyahatine başlamak için bir dükkan bul!",
-    "start_exploring": "Keşfetmeye Başla"
+    "start_exploring": "Keşfetmeye Başla",
+    "approve": "Onayla",
+    "reject": "Reddet",
+    "approve_confirm": "Bu rezervasyonu onaylamak istediğinize emin misiniz?",
+    "reject_confirm": "Bu rezervasyonu reddetmek istediğinize emin misiniz?",
+    "approve_success": "Rezervasyon onaylandı.",
+    "reject_success": "Rezervasyon reddedildi.",
+    "seals": "Mühürler"
   },
   "partner": {
     "management": "Esnaf Yönetimi",
@@ -216,13 +262,21 @@
     "paid_status": "Ödeme Yapıldı",
     "shop_details": "Dükkan Detayları",
     "shop_name": "Dükkan Adı",
+    "address": "Adres",
+    "city": "Şehir",
+    "district": "İlçe",
+    "phone": "Telefon",
     "capacity": "Kapasite (Valiz)",
     "daily_price": "Günlük Fiyat",
     "working_hours": "Çalışma Saatleri",
     "opening": "Açılış",
     "closing": "Kapanış",
     "settings_updated": "Ayarlar başarıyla güncellendi.",
-    "required": "Gerekli"
+    "required": "Gerekli",
+    "filter_all": "Tümü",
+    "filter_waiting": "Onay Bekleyen",
+    "filter_active": "Aktif",
+    "filter_completed": "Tamamlandı"
   },
   "profile": {
     "title": "Hesabım",
@@ -268,7 +322,7 @@
     },
     "step2": {
       "title": "Bırak ve Mühürle",
-      "desc": "Valizinizi teslim edin, QR kodu okutun ve mührü takın."
+      "desc": "Valizini teslim et, QR kodu okut ve mührü tak."
     },
     "step3": {
       "title": "Şehri Keşfet",
@@ -276,7 +330,7 @@
     },
     "step4": {
       "title": "Güvenle Teslim Al",
-      "desc": "İstediğin zaman geri gel ve valizini mühürlü şekilde teslim al."
+      "desc": "İstediğin zaman geri gel ve valizini mühürden kontrol ederek teslim al."
     },
     "safety_title": "Her Valiz Sigortalı",
     "safety_desc": "BagajPark ile yaptığın her rezervasyon ₺10.000'ye kadar koruma altındadır.",
@@ -321,7 +375,7 @@
       },
       "step4": {
         "title": "Keyfini Çıkar",
-        "desc": "Mühürlü valizini bırak, şehri özgürce gez."
+        "desc": "Mühürlü valizlerini bırak, şehri özgürce gez."
       }
     },
     "partner": {

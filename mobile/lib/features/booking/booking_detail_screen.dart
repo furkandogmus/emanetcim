@@ -1,5 +1,6 @@
 import 'dart:async' show Timer;
 import 'dart:io' show Platform;
+import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +9,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:screen_protector/screen_protector.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/api/api_client.dart';
 import '../../core/repositories/booking_repository.dart';
 import '../../shared/models/booking.dart';
 import '../../shared/utils/app_colors.dart';
@@ -33,6 +35,8 @@ class BookingDetailScreen extends ConsumerStatefulWidget {
 
 class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
   Timer? _pollingTimer;
+  bool _cancelling = false;
+  bool _modifying = false;
 
   @override
   void initState() {
@@ -229,15 +233,82 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
 
               const SizedBox(height: 16),
 
+              // Cancel / Modify / Dispute / Review
+              if (bk.status == BookingStatus.approved || bk.status == BookingStatus.pending) ...[
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _cancelling ? null : () => _cancelBooking(bk),
+                        icon: _cancelling
+                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                            : const Icon(Icons.cancel_outlined, color: Colors.redAccent),
+                        label: Text('booking.cancel'.tr(), style: const TextStyle(color: Colors.redAccent)),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          side: const BorderSide(color: Colors.redAccent),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _modifying ? null : () => _modifyBooking(bk),
+                        icon: _modifying
+                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                            : const Icon(Icons.edit_outlined),
+                        label: Text('booking.modify'.tr()),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+              ],
+
+              if (bk.status == BookingStatus.checkedOut) ...[
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () => _showReviewSheet(bk),
+                    icon: const Icon(Icons.star_outline_rounded),
+                    label: Text('booking.rate_shop'.tr()),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
+
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => _showDisputeSheet(bk),
+                  icon: const Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                  label: Text('booking.file_dispute'.tr(), style: const TextStyle(color: Colors.orange)),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    side: const BorderSide(color: Colors.orange),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
               SizedBox(
                 width: double.infinity,
                 child: TextButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.help_outline_rounded, size: 20),
-                  label: Text('booking.get_help'.tr()),
-                  style: TextButton.styleFrom(
-                    foregroundColor: const Color(0xFF424242),
-                  ),
+                  onPressed: () => _showCancellationPolicy(context),
+                  icon: const Icon(Icons.info_outline_rounded, size: 20),
+                  label: Text('booking.cancellation_policy'.tr()),
+                  style: TextButton.styleFrom(foregroundColor: const Color(0xFF424242)),
                 ),
               ),
               const SizedBox(height: 40),
@@ -317,6 +388,248 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
     }
+  }
+
+  Future<void> _cancelBooking(BookingDto bk) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('booking.cancel_title'.tr()),
+        content: Text('booking.cancel_confirm'.tr()),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('common.cancel'.tr())),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text('booking.cancel'.tr())),
+        ],
+      ),
+    );
+    if (confirm != true) return;
+    setState(() => _cancelling = true);
+    try {
+      final dio = ref.read(dioProvider);
+      await dio.delete('/bookings/${bk.id}/cancel');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('booking.cancelled'.tr())));
+        ref.invalidate(bookingProvider(widget.bookingId));
+      }
+    } on DioException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.response?.data?['error'] ?? 'common.error'.tr())));
+      }
+    } finally {
+      if (mounted) setState(() => _cancelling = false);
+    }
+  }
+
+  Future<void> _modifyBooking(BookingDto bk) async {
+    final cinCtl = TextEditingController(text: bk.checkInTime.toIso8601String().substring(0, 16));
+    final coutCtl = TextEditingController(text: bk.checkOutTime.toIso8601String().substring(0, 16));
+    var s = bk.bagCountS;
+    var m = bk.bagCountM;
+    var xl = bk.bagCountXl;
+
+    final result = await showModalBottomSheet<Map<String, dynamic>>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheetState) => Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom, left: 24, right: 24, top: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('booking.modify_title'.tr(), style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 20),
+              TextField(controller: cinCtl, decoration: InputDecoration(labelText: 'checkout.check_in'.tr())),
+              const SizedBox(height: 12),
+              TextField(controller: coutCtl, decoration: InputDecoration(labelText: 'checkout.check_out'.tr())),
+              const SizedBox(height: 20),
+              Row(children: [
+                _bagStepper(ctx, 'S', s, (v) => setSheetState(() => s = v)),
+                const SizedBox(width: 12),
+                _bagStepper(ctx, 'M', m, (v) => setSheetState(() => m = v)),
+                const SizedBox(width: 12),
+                _bagStepper(ctx, 'XL', xl, (v) => setSheetState(() => xl = v)),
+              ]),
+              const SizedBox(height: 24),
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx, {'checkInTime': cinCtl.text, 'checkOutTime': coutCtl.text, 's': s, 'm': m, 'xl': xl}),
+                child: Text('booking.save_changes'.tr()),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (result == null) return;
+    setState(() => _modifying = true);
+    try {
+      final dio = ref.read(dioProvider);
+      await dio.put('/bookings/${bk.id}/modify', data: {
+        'checkInTime': DateTime.parse(result['checkInTime'] as String).toUtc().toIso8601String(),
+        'checkOutTime': DateTime.parse(result['checkOutTime'] as String).toUtc().toIso8601String(),
+        'bagCountS': result['s'], 'bagCountM': result['m'], 'bagCountXl': result['xl'],
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('booking.modified'.tr())));
+        ref.invalidate(bookingProvider(widget.bookingId));
+      }
+    } on DioException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.response?.data?['error'] ?? 'common.error'.tr())));
+      }
+    } finally {
+      if (mounted) setState(() => _modifying = false);
+    }
+  }
+
+  Widget _bagStepper(BuildContext ctx, String label, int val, void Function(int) onChanged) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(label, style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(icon: const Icon(Icons.remove_circle_outline), onPressed: val > 0 ? () => onChanged(val - 1) : null),
+              Text('$val', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
+              IconButton(icon: const Icon(Icons.add_circle_outline), onPressed: () => onChanged(val + 1)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showReviewSheet(BookingDto bk) async {
+    var rating = 5;
+    final commentCtl = TextEditingController();
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom, left: 24, right: 24, top: 24),
+        child: StatefulBuilder(
+          builder: (ctx, setSheetState) => Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('booking.rate_shop'.tr(), style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(5, (i) => IconButton(
+                  icon: Icon(i < rating ? Icons.star_rounded : Icons.star_outline_rounded, size: 40, color: Colors.amber),
+                  onPressed: () => setSheetState(() => rating = i + 1),
+                )),
+              ),
+              const SizedBox(height: 12),
+              TextField(controller: commentCtl, maxLines: 3, decoration: InputDecoration(labelText: 'booking.review_comment'.tr())),
+              const SizedBox(height: 20),
+              FilledButton(
+                onPressed: () async {
+                  try {
+                    final dio = ref.read(dioProvider);
+                    await dio.post('/reviews', data: {'bookingId': bk.id, 'rating': rating, 'comment': commentCtl.text});
+                    if (ctx.mounted) {
+                      Navigator.pop(ctx);
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('booking.review_submitted'.tr())));
+                    }
+                  } catch (_) {
+                    if (ctx.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('common.error'.tr())));
+                    }
+                  }
+                },
+                child: Text('booking.submit_review'.tr()),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showDisputeSheet(BookingDto bk) async {
+    final descCtl = TextEditingController();
+    var reason = 'DAMAGE';
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom, left: 24, right: 24, top: 24),
+        child: StatefulBuilder(
+          builder: (ctx, setSheetState) => Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('booking.dispute_title'.tr(), style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 20),
+              DropdownButtonFormField<String>(
+                value: reason,
+                items: const [DropdownMenuItem(value: 'DAMAGE', child: Text('Hasar')), DropdownMenuItem(value: 'THEFT', child: Text('Hırsızlık')), DropdownMenuItem(value: 'OTHER', child: Text('Diğer'))],
+                onChanged: (v) => setSheetState(() => reason = v ?? 'DAMAGE'),
+                decoration: const InputDecoration(labelText: 'booking.dispute_reason'),
+              ),
+              const SizedBox(height: 12),
+              TextField(controller: descCtl, maxLines: 4, decoration: InputDecoration(labelText: 'booking.dispute_description'.tr())),
+              const SizedBox(height: 20),
+              FilledButton(
+                onPressed: () async {
+                  if (descCtl.text.length < 10) return;
+                  try {
+                    final dio = ref.read(dioProvider);
+                    await dio.post('/disputes', data: {'bookingId': bk.id, 'reason': reason, 'description': descCtl.text});
+                    if (ctx.mounted) {
+                      Navigator.pop(ctx);
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('booking.dispute_submitted'.tr())));
+                    }
+                  } catch (_) {
+                    if (ctx.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('common.error'.tr())));
+                    }
+                  }
+                },
+                child: Text('booking.submit_dispute'.tr()),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showCancellationPolicy(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('booking.cancellation_policy'.tr(), style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            Text('booking.cancel_tier1'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+            Text('booking.cancel_tier1_desc'.tr()),
+            const SizedBox(height: 12),
+            Text('booking.cancel_tier2'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+            Text('booking.cancel_tier2_desc'.tr()),
+            const SizedBox(height: 12),
+            Text('booking.cancel_tier3'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+            Text('booking.cancel_tier3_desc'.tr()),
+            const SizedBox(height: 24),
+            FilledButton(onPressed: () => Navigator.pop(ctx), child: Text('common.close'.tr())),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildSkeleton() {
