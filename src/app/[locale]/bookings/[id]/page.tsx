@@ -16,6 +16,7 @@ import { isGuestOnlinePayEnabled } from "@/lib/guest-payment";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import PrintButton from "@/components/guest/PrintButton";
 import BookingQrDisplay from "@/components/guest/BookingQrDisplay";
+import BookingDetailActions from "@/components/guest/BookingDetailActions";
 import { moneyToNumber } from "@/lib/money";
 import { getPricingRules } from "@/lib/platform-settings";
 import BookingDetailModifySection from "@/components/guest/BookingDetailModifySection";
@@ -73,7 +74,7 @@ export default async function BookingDetailPage({
         id: true, guestId: true, shopId: true, checkInTime: true, checkOutTime: true,
         totalPrice: true, bagCountS: true, bagCountM: true, bagCountXl: true,
         status: true, qrCodeToken: true, createdAt: true,
-        shop: { select: { name: true, pricePerDay: true } },
+        shop: { select: { name: true, pricePerDay: true, address: true, owner: { select: { phone: true } } } },
         seals: { orderBy: { bagIndex: "asc" } },
       },
     }),
@@ -97,6 +98,8 @@ export default async function BookingDetailPage({
   const onlinePay = await isGuestOnlinePayEnabled({
     userId: session.user.id,
   });
+
+  const canCancel = ["PENDING", "APPROVED", "PAID"].includes(booking.status);
 
   return (
     <div className="min-h-screen bg-gray-50 pt-32 pb-20 px-6 font-sans">
@@ -283,6 +286,16 @@ export default async function BookingDetailPage({
             })
           )}
           pricingRules={JSON.parse(JSON.stringify(pricingRules))}
+        />
+
+        <BookingDetailActions
+          bookingId={booking.id}
+          canCancel={canCancel}
+          checkInIso={booking.checkInTime.toISOString()}
+          checkOutIso={booking.checkOutTime.toISOString()}
+          shopName={booking.shop.name}
+          shopAddress={booking.shop.address}
+          shopPhone={booking.shop.owner?.phone ?? null}
         />
 
         <PrintButton label={t('downloadReceipt')} />
