@@ -78,7 +78,20 @@
     "code_login": "Sign in with Code",
     "sign_in": "Sign In",
     "skip": "Skip",
-    "account_exists": "This account already exists. Try logging in."
+    "account_exists": "This account already exists. Try logging in.",
+    "apple_error": "Could not sign in with Apple.",
+    "google_error": "Could not sign in with Google.",
+    "invalid_credentials": "Invalid email or password.",
+    "password_error": "Password must be at least 6 characters.",
+    "too_many_attempts": "Too many attempts. Please wait.",
+    "verify_email_title": "Email Verification",
+    "verify_email_hint": "Please enter the 6-digit verification code or token sent to your email.",
+    "verify_email_success": "Email verified successfully!",
+    "verify_email_error": "Verification code is invalid or has expired.",
+    "reset_password_confirm_title": "Reset Password",
+    "reset_password_confirm_hint": "Please enter your new password.",
+    "reset_password_success": "Password updated successfully!",
+    "reset_password_error": "Failed to reset password. Please try again."
   },
   "shop": {
     "error_loading": "An error occurred while loading the shop",
@@ -123,7 +136,11 @@
     "has_cctv": "Has CCTV",
     "has_climate": "Has Climate Control",
     "accepts_large": "Accepts Large Items",
-    "clear_filters": "Clear Filters"
+    "clear_filters": "Clear Filters",
+    "book_now": "Book Now",
+    "climate": "Climate Control",
+    "large_items": "Accepts Large Items",
+    "location_denied": "Location access denied. Please enable in app settings to see nearby shops."
   },
   "notifications": {
     "title": "Notifications",
@@ -228,7 +245,21 @@
     "reject_confirm": "Are you sure you want to reject this booking?",
     "approve_success": "Booking approved.",
     "reject_success": "Booking rejected.",
-    "seals": "Seals"
+    "seals": "Seals",
+    "cancel_tier1": "Free Cancellation",
+    "cancel_tier1_desc": "Full refund if cancelled 48+ hours before check-in.",
+    "cancel_tier2": "50% Refund",
+    "cancel_tier2_desc": "50% refund if cancelled 24-48 hours before check-in.",
+    "cancel_tier3": "No Refund",
+    "cancel_tier3_desc": "No refund if cancelled less than 24 hours before check-in.",
+    "cancel_title": "Cancellation Policy",
+    "cancellation_policy": "Cancellation Policy",
+    "file_dispute": "File Dispute",
+    "modified": "Your booking has been updated.",
+    "rate_shop": "Rate This Shop",
+    "review_comment": "Your comment",
+    "submit_dispute": "Submit Dispute",
+    "submit_review": "Submit Review"
   },
   "partner": {
     "management": "Partner Management",
@@ -276,7 +307,19 @@
     "filter_all": "All",
     "filter_waiting": "Waiting",
     "filter_active": "Active",
-    "filter_completed": "Completed"
+    "filter_completed": "Completed",
+    "approve": "Approve",
+    "reject": "Reject",
+    "seals_management": "Seals Management",
+    "request_seals": "Request Seals",
+    "report_faulty_seal": "Report Faulty Seal",
+    "request_count": "Request Quantity",
+    "request_success": "Seal request created successfully.",
+    "report_faulty_success": "Faulty seal reported successfully.",
+    "serial_number_label": "Seal Serial Number",
+    "bag_revision_title": "Revise Bag Counts",
+    "bag_revision_success": "Bag counts revised successfully.",
+    "bag_revision_error": "Failed to revise bag counts."
   },
   "profile": {
     "title": "My Account",
@@ -357,7 +400,8 @@
     "no_internet": "No Connection - Some actions may be delayed",
     "error_404": "Data not found (404)",
     "error_timeout": "Connection timed out",
-    "error_server": "Server error"
+    "error_server": "Server error",
+    "close": "Close"
   },
   "tutorial": {
     "guest": {

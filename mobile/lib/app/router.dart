@@ -6,7 +6,9 @@ import '../core/auth/auth_controller.dart';
 import '../features/admin/admin_applications_screen.dart';
 import '../features/admin/admin_dashboard_screen.dart';
 import '../features/admin/admin_messages_screen.dart';
+import '../features/auth/email_verification_screen.dart';
 import '../features/auth/login_screen.dart';
+import '../features/auth/password_reset_confirm_screen.dart';
 import '../features/auth/register_screen.dart';
 import '../features/booking/booking_detail_screen.dart';
 import '../features/booking/my_bookings_screen.dart';
@@ -19,6 +21,7 @@ import '../features/partner/partner_booking_detail_screen.dart';
 import '../features/partner/partner_bookings_screen.dart';
 import '../features/partner/partner_earnings_screen.dart';
 import '../features/partner/partner_scan_screen.dart';
+import '../features/partner/partner_seals_screen.dart';
 import '../features/partner/partner_settings_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/search/search_screen.dart';
@@ -50,6 +53,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       }
 
       if (loggedIn) {
+        final emailVerified = auth.session?.emailVerified ?? true;
+        if (!emailVerified && state.matchedLocation != '/auth/verify-email') {
+          return '/auth/verify-email';
+        }
+
         if (loggingIn) {
           if (role == UserRole.admin) return '/admin';
           if (role == UserRole.partner) return '/partner';
@@ -81,6 +89,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/auth/register',
         builder: (_, _) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: '/auth/verify-email',
+        builder: (_, _) => const EmailVerificationScreen(),
+      ),
+      GoRoute(
+        path: '/auth/reset-password-confirm',
+        builder: (_, _) => const PasswordResetConfirmScreen(),
       ),
 
       ShellRoute(
@@ -122,12 +138,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/booking/:id',
         builder: (_, s) =>
-            BookingDetailScreen(bookingId: s.pathParameters['id']!),
+          BookingDetailScreen(bookingId: s.pathParameters['id']!),
       ),
       GoRoute(
         path: '/partner/booking/:id',
         builder: (_, s) =>
-            PartnerBookingDetailScreen(bookingId: s.pathParameters['id']!),
+          PartnerBookingDetailScreen(bookingId: s.pathParameters['id']!),
       ),
       GoRoute(
         path: '/partner/earnings',
@@ -136,6 +152,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/partner/settings',
         builder: (_, _) => const PartnerSettingsScreen(),
+      ),
+      GoRoute(
+        path: '/partner/seals',
+        builder: (_, _) => const PartnerSealsScreen(),
       ),
       GoRoute(
         path: '/checkout/:shopId',

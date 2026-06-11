@@ -14,6 +14,7 @@ export async function GET(req: NextRequest) {
     phone: u.phone,
     role: u.role,
     avatarUrl: u.image,
+    emailVerified: u.emailVerified !== null,
   });
 }
 

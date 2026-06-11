@@ -101,15 +101,6 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
             ),
             error: (e, _) => const SliverToBoxAdapter(child: SizedBox()),
             data: (list) {
-              var filtered = list;
-              if (_filter == 'waiting') {
-                filtered = list.where((b) => b.status == BookingStatus.waitingApproval).toList();
-              } else if (_filter == 'active') {
-                filtered = list.where((b) => b.status == BookingStatus.approved || b.status == BookingStatus.paid || b.status == BookingStatus.checkedIn).toList();
-              } else if (_filter == 'completed') {
-                filtered = list.where((b) => b.status == BookingStatus.checkedOut).toList();
-              }
-
               final activeBags = list
                   .where((b) => b.status == BookingStatus.checkedIn)
                   .fold(0, (sum, b) => sum + b.totalBags);
@@ -195,7 +186,19 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
             error: (e, _) => SliverFillRemaining(
               child: Center(child: Text('common.error'.tr())),
             ),
-            data: (list) => filtered.isEmpty
+            data: (list) {
+              List<BookingDto> filtered;
+              if (_filter == 'waiting') {
+                filtered = list.where((b) => b.status == BookingStatus.waitingApproval).toList();
+              } else if (_filter == 'active') {
+                filtered = list.where((b) => b.status == BookingStatus.approved || b.status == BookingStatus.paid || b.status == BookingStatus.checkedIn).toList();
+              } else if (_filter == 'completed') {
+                filtered = list.where((b) => b.status == BookingStatus.checkedOut).toList();
+              } else {
+                filtered = list;
+              }
+
+              return filtered.isEmpty
                 ? SliverFillRemaining(
                     child: Center(child: Text('partner.no_bookings'.tr())),
                   )
@@ -208,9 +211,10 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
                       delegate: SliverChildBuilderDelegate((context, index) {
                         final b = filtered[index];
                         return _BookingPartnerCard(booking: b, fmt: fmt);
-                      }, childCount: list.length),
+                      }, childCount: filtered.length),
                     ),
-                  ),
+                  );
+            },
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 100)),
         ],

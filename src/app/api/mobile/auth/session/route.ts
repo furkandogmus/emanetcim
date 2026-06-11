@@ -98,6 +98,7 @@ export async function POST(req: Request) {
       phone: user.phone,
       role: user.role,
       avatarUrl: user.image,
+      emailVerified: user.emailVerified !== null,
     },
   });
 }

@@ -194,6 +194,26 @@ class _PartnerBookingDetailScreenState
     }
   }
 
+  void _showBagRevisionSheet(BookingDto b) async {
+    final dio = ref.read(dioProvider);
+    final success = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _BagRevisionBottomSheet(booking: b, dio: dio),
+    );
+
+    if (success == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('partner.bag_revision_success'.tr()),
+          backgroundColor: Colors.green,
+        ),
+      );
+      ref.invalidate(bookingProvider(b.id));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final bAsync = ref.watch(bookingProvider(widget.bookingId));
@@ -427,6 +447,28 @@ class _PartnerBookingDetailScreenState
                 ),
               ],
 
+              if (b.status == BookingStatus.paid ||
+                  b.status == BookingStatus.approved ||
+                  b.status == BookingStatus.checkedIn) ...[
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: OutlinedButton.icon(
+                    onPressed: _busy ? null : () => _showBagRevisionSheet(b),
+                    icon: const Icon(Icons.edit_note_rounded),
+                    label: Text('partner.bag_revision_title'.tr()),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.brandOrange,
+                      side: const BorderSide(color: AppColors.brandOrange),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+
               const SizedBox(height: 40),
             ],
           );
@@ -541,5 +583,217 @@ class _PartnerBookingDetailScreenState
       default:
         return Colors.orange;
     }
+  }
+}
+
+class _BagRevisionBottomSheet extends StatefulWidget {
+  final BookingDto booking;
+  final Dio dio;
+
+  const _BagRevisionBottomSheet({
+    required this.booking,
+    required this.dio,
+  });
+
+  @override
+  State<_BagRevisionBottomSheet> createState() => _BagRevisionBottomSheetState();
+}
+
+class _BagRevisionBottomSheetState extends State<_BagRevisionBottomSheet> {
+  late int _bagCountS;
+  late int _bagCountM;
+  late int _bagCountXl;
+  bool _submitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _bagCountS = widget.booking.bagCountS;
+    _bagCountM = widget.booking.bagCountM;
+    _bagCountXl = widget.booking.bagCountXl;
+  }
+
+  Future<void> _submit() async {
+    final total = _bagCountS + _bagCountM + _bagCountXl;
+    if (total <= 0) {
+      return;
+    }
+
+    setState(() => _submitting = true);
+    try {
+      await widget.dio.post(
+        '/partner/bookings/${widget.booking.id}/bag-revision',
+        data: {
+          'bagCountS': _bagCountS,
+          'bagCountM': _bagCountM,
+          'bagCountXl': _bagCountXl,
+        },
+      );
+      if (mounted) {
+        Navigator.pop(context, true);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('partner.bag_revision_error'.tr())),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _submitting = false);
+      }
+    }
+  }
+
+  Widget _buildCounterRow(String label, String description, int val, ValueChanged<int> onChange) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.outfit(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textDark,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  description,
+                  style: GoogleFonts.outfit(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Row(
+            children: [
+              IconButton(
+                onPressed: val > 0 ? () => onChange(val - 1) : null,
+                icon: const Icon(Icons.remove_circle_outline, size: 28),
+                color: AppColors.brandOrange,
+              ),
+              SizedBox(
+                width: 40,
+                child: Text(
+                  '$val',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.outfit(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              IconButton(
+                onPressed: () => onChange(val + 1),
+                icon: const Icon(Icons.add_circle_outline, size: 28),
+                color: AppColors.brandOrange,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final total = _bagCountS + _bagCountM + _bagCountXl;
+    final isSaveDisabled = _submitting || total <= 0;
+
+    return Container(
+      padding: EdgeInsets.only(
+        left: 24,
+        right: 24,
+        top: 24,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'partner.bag_revision_title'.tr(),
+                  style: GoogleFonts.outfit(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close),
+                ),
+              ],
+            ),
+            const Divider(),
+            const SizedBox(height: 12),
+            _buildCounterRow(
+              'S (Small)',
+              'Cabins / Backpacks',
+              _bagCountS,
+              (v) => setState(() => _bagCountS = v),
+            ),
+            _buildCounterRow(
+              'M (Medium)',
+              'Medium Luggage',
+              _bagCountM,
+              (v) => setState(() => _bagCountM = v),
+            ),
+            _buildCounterRow(
+              'XL (Extra Large)',
+              'Large / Huge Luggage',
+              _bagCountXl,
+              (v) => setState(() => _bagCountXl = v),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: FilledButton(
+                onPressed: isSaveDisabled ? null : _submit,
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.brandOrange,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: _submitting
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2.5,
+                        ),
+                      )
+                    : Text(
+                        'common.save'.tr(),
+                        style: GoogleFonts.outfit(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

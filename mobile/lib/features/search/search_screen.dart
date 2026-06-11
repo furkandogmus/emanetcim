@@ -65,12 +65,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   bool _onlyOpenNow = false;
   bool _only247 = false;
   int _minRating = 0;
+  double _maxPrice = 0;
   bool _hasRestroom = false;
   bool _hasCctv = false;
   bool _hasClimate = false;
   bool _acceptsLarge = false;
   String _sortBy = 'distance'; // distance | price | rating
   Timer? _debounce;
+  final _maxPriceController = TextEditingController();
 
   void _showFilterSheet() {
     showModalBottomSheet(
@@ -123,7 +125,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               Text('search.max_price'.tr(), style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               TextField(
-                controller: TextEditingController(text: _maxPrice > 0 ? _maxPrice.toStringAsFixed(0) : ''),
+                controller: _maxPriceController,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   hintText: 'search.max_price'.tr(),
@@ -183,6 +185,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   void dispose() {
     _debounce?.cancel();
     _locationDebounce?.cancel();
+    _maxPriceController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 

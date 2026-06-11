@@ -7,18 +7,35 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/repositories/shop_repository.dart';
+import '../../core/services/favorites_service.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/services/share_service.dart';
 import '../../shared/utils/app_colors.dart';
 import '../../shared/widgets/skeleton.dart';
 
-class ShopDetailScreen extends ConsumerWidget {
+final shopReviewsProvider = FutureProvider.family<List<Map<String, dynamic>>, String>((ref, id) async {
+  final dio = ref.read(dioProvider);
+  try {
+    final res = await dio.get('/shops/$id/reviews');
+    return (res.data as List<dynamic>).map((e) => Map<String, dynamic>.from(e as Map)).toList();
+  } catch (_) {
+    return [];
+  }
+});
+
+class ShopDetailScreen extends ConsumerStatefulWidget {
   const ShopDetailScreen({required this.shopId, super.key});
   final String shopId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final shopAsync = ref.watch(shopProvider(shopId));
+  ConsumerState<ShopDetailScreen> createState() => _ShopDetailScreenState();
+}
+
+class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
+  @override
+  Widget build(BuildContext context) {
+    final shopAsync = ref.watch(shopProvider(widget.shopId));
+    final isFav = ref.watch(favoritesProvider).contains(widget.shopId);
 
     return Scaffold(
       body: shopAsync.when(
@@ -46,13 +63,12 @@ class ShopDetailScreen extends ConsumerWidget {
             RefreshIndicator(
               onRefresh: () async {
                 unawaited(ref.read(hapticServiceProvider).light());
-                return ref.refresh(shopProvider(shopId).future);
+                return ref.refresh(shopProvider(widget.shopId).future);
               },
               color: AppColors.brandOrange,
               child: CustomScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
-                  // Spectacular Parallax Header
                   SliverAppBar(
                     expandedHeight: 300,
                     pinned: true,
@@ -78,12 +94,8 @@ class ShopDetailScreen extends ConsumerWidget {
                         backgroundColor: Colors.white.withValues(alpha: 0.9),
                         child: IconButton(
                           onPressed: () {
-                            unawaited(
-                              ref.read(hapticServiceProvider).selection(),
-                            );
-                            ref
-                                .read(shareServiceProvider)
-                                .shareShop(
+                            unawaited(ref.read(hapticServiceProvider).selection());
+                            ref.read(shareServiceProvider).shareShop(
                                   id: s.id,
                                   name: s.name,
                                   address: s.address ?? '',
@@ -140,40 +152,72 @@ class ShopDetailScreen extends ConsumerWidget {
                                         ),
                                       ),
                                     ),
-                                    if (s.isVerified)
-                                      Padding(
-                                        padding: const EdgeInsets.only(left: 8),
-                                        child: Icon(Icons.verified_rounded, color: Colors.blue, size: 24),
+                                    if (s.isVerified) ...[
+                                      const SizedBox(width: 8),
+                                      Tooltip(
+                                        message: 'shop.verified'.tr(),
+                                        child: Icon(Icons.verified_rounded,
+                                            color: Colors.blue.shade700, size: 24),
                                       ),
+                                    ],
                                   ],
                                 ),
                               ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.orange.shade50,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.star_rounded,
-                                      color: Colors.amber,
-                                      size: 20,
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
                                     ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      s.rating?.toStringAsFixed(1) ?? 'N/A',
-                                      style: GoogleFonts.outfit(
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.brandOrange,
-                                      ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.orange.shade50,
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
-                                  ],
-                                ),
+                                    child: Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.star_rounded,
+                                          color: Colors.amber,
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          s.rating?.toStringAsFixed(1) ?? 'N/A',
+                                          style: GoogleFonts.outfit(
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.brandOrange,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  IconButton(
+                                    onPressed: () {
+                                      ref
+                                          .read(favoritesProvider.notifier)
+                                          .toggle(s.id);
+                                      final isNowFav = !isFav;
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            isNowFav
+                                                ? 'shop.favorite'.tr()
+                                                : 'shop.unfavorite'.tr(),
+                                          ),
+                                          duration: const Duration(seconds: 1),
+                                        ),
+                                      );
+                                    },
+                                    icon: Icon(
+                                      isFav
+                                          ? Icons.favorite_rounded
+                                          : Icons.favorite_outline_rounded,
+                                      color: isFav ? Colors.redAccent : Colors.grey,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -260,9 +304,7 @@ class ShopDetailScreen extends ConsumerWidget {
                                   borderRadius: BorderRadius.circular(12),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.1,
-                                      ),
+                                      color: Colors.black.withValues(alpha: 0.1),
                                       blurRadius: 10,
                                     ),
                                   ],
@@ -297,27 +339,149 @@ class ShopDetailScreen extends ConsumerWidget {
                             spacing: 12,
                             runSpacing: 12,
                             children: [
-                              if (s.hasCctv)
-                                _amenityChip(Icons.videocam_rounded, 'search.camera'.tr()),
-                              _amenityChip(Icons.security_rounded, 'search.insurance'.tr()),
+                              _amenityChip(
+                                Icons.videocam_rounded,
+                                'search.camera'.tr(),
+                              ),
+                              _amenityChip(
+                                Icons.security_rounded,
+                                'search.insurance'.tr(),
+                              ),
                               if (s.hasRestroom)
-                                _amenityChip(Icons.wc_rounded, 'search.restroom'.tr()),
+                                _amenityChip(
+                                  Icons.wc_rounded,
+                                  'search.restroom'.tr(),
+                                ),
                               if (s.hasClimateControl)
-                                _amenityChip(Icons.ac_unit_rounded, 'search.climate'.tr()),
+                                _amenityChip(
+                                  Icons.ac_unit_rounded,
+                                  'search.climate'.tr(),
+                                ),
                               if (s.acceptsLargeItems)
-                                _amenityChip(Icons.work_rounded, 'search.large_items'.tr()),
-                              if (s.open247)
-                                _amenityChip(Icons.access_time_rounded, 'search.open_247'.tr()),
+                                _amenityChip(
+                                  Icons.luggage_rounded,
+                                  'search.large_items'.tr(),
+                                ),
+                              _amenityChip(Icons.wifi_rounded, 'Wi-Fi'),
+                              _amenityChip(Icons.accessible_rounded, 'Erişim'),
                             ],
                           ),
 
                           const SizedBox(height: 40),
 
+                          // Reviews Section
                           _sectionHeader('shop.reviews'.tr()),
                           const SizedBox(height: 16),
-                          _ReviewsList(shopId: s.id),
+                          Consumer(builder: (context, ref, _) {
+                            final reviewsAsync =
+                                ref.watch(shopReviewsProvider(widget.shopId));
+                            return reviewsAsync.when(
+                              data: (reviews) {
+                                if (reviews.isEmpty) {
+                                  return Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(24),
+                                      child: Text(
+                                        'shop.no_reviews'.tr(),
+                                        style: const TextStyle(color: Colors.grey),
+                                      ),
+                                    ),
+                                  );
+                                }
+                                return Column(
+                                  children: reviews.take(5).map((review) {
+                                    final rating =
+                                        (review['rating'] as num?)?.toInt() ?? 0;
+                                    final userName =
+                                        (review['userName'] as String?) ??
+                                            'profile.guest'.tr();
+                                    final comment =
+                                        review['comment'] as String? ?? '';
+                                    return Container(
+                                      margin: const EdgeInsets.only(bottom: 12),
+                                      padding: const EdgeInsets.all(16),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade50,
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(
+                                            color: Colors.grey.shade100),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              CircleAvatar(
+                                                radius: 16,
+                                                backgroundColor: AppColors
+                                                    .brandOrange
+                                                    .withValues(alpha: 0.1),
+                                                child: Text(
+                                                  userName.isNotEmpty
+                                                      ? userName[0].toUpperCase()
+                                                      : '?',
+                                                  style: GoogleFonts.outfit(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: AppColors.brandOrange,
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Expanded(
+                                                child: Text(
+                                                  userName,
+                                                  style: GoogleFonts.outfit(
+                                                      fontWeight:
+                                                          FontWeight.w600),
+                                                ),
+                                              ),
+                                              Row(
+                                                children: List.generate(
+                                                  5,
+                                                  (i) => Icon(
+                                                    i < rating
+                                                        ? Icons.star_rounded
+                                                        : Icons
+                                                            .star_outline_rounded,
+                                                    size: 14,
+                                                    color: Colors.amber,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          if (comment.isNotEmpty) ...[
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              comment,
+                                              style: GoogleFonts.outfit(
+                                                fontSize: 13,
+                                                color: const Color(0xFF424242),
+                                              ),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                );
+                              },
+                              loading: () =>
+                                  const Center(child: CircularProgressIndicator()),
+                              error: (_, __) => Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(24),
+                                  child: Text(
+                                    'shop.no_reviews'.tr(),
+                                    style: const TextStyle(color: Colors.grey),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
 
-                          const SizedBox(height: 120), // Bottom bar space
+                          const SizedBox(height: 120),
                         ],
                       ),
                     ),
@@ -358,7 +522,7 @@ class ShopDetailScreen extends ConsumerWidget {
                             ),
                           ),
                           Text(
-                            '₺${s.pricePerDay.toStringAsFixed(2)} /gün',
+                            '\u20BA${s.pricePerDay.toStringAsFixed(2)} /g\u00fcn',
                             style: GoogleFonts.outfit(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
@@ -516,60 +680,6 @@ class ShopDetailScreen extends ConsumerWidget {
           ),
         ),
       ),
-
     );
   }
 }
-
-class _ReviewsList extends ConsumerWidget {
-  final String shopId;
-  const _ReviewsList({required this.shopId});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final reviewsAsync = ref.watch(_shopReviewsProvider(shopId));
-    return reviewsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, __) => Center(child: Text('shop.error_loading'.tr())),
-      data: (reviews) {
-        if (reviews.isEmpty) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Text('Henüz yorum bulunmuyor.', style: TextStyle(color: Colors.grey)),
-            ),
-          );
-        }
-        return Column(
-          children: reviews.map((r) => Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(color: const Color(0xFFF8FAFC), borderRadius: BorderRadius.circular(20)),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(r['name'] ?? '', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-                      Row(children: List.generate(5, (i) => Icon(Icons.star_rounded, size: 16, color: i < (r['rating'] as int? ?? 0) ? Colors.amber : Colors.grey.shade300))),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(r['comment'] ?? '', style: GoogleFonts.outfit(fontSize: 14, color: const Color(0xFF424242), height: 1.4)),
-                ],
-              ),
-            ),
-          )).toList(),
-        );
-      },
-    );
-  }
-}
-
-final _shopReviewsProvider = FutureProvider.family<List<Map<String, dynamic>>, String>((ref, shopId) async {
-  final dio = ref.read(dioProvider);
-  final res = await dio.get('/shops/$shopId/reviews');
-  return (res.data as List?)?.cast<Map<String, dynamic>>() ?? [];
-});

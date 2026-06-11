@@ -78,7 +78,20 @@
     "code_login": "Kod ile Giriş",
     "sign_in": "Giriş Yap",
     "skip": "Atla",
-    "account_exists": "Bu hesap zaten mevcut. Giriş yapmayı deneyin."
+    "account_exists": "Bu hesap zaten mevcut. Giriş yapmayı deneyin.",
+    "apple_error": "Apple ile giriş yapılamadı.",
+    "google_error": "Google ile giriş yapılamadı.",
+    "invalid_credentials": "E-posta veya şifre hatalı.",
+    "password_error": "Şifre en az 6 karakter olmalıdır.",
+    "too_many_attempts": "Çok fazla deneme. Lütfen bekleyin.",
+    "verify_email_title": "E-posta Doğrulama",
+    "verify_email_hint": "Lütfen e-posta adresinize gönderilen 6 haneli doğrulama kodunu veya token'ı girin.",
+    "verify_email_success": "E-postanız başarıyla doğrulandı!",
+    "verify_email_error": "Doğrulama kodu hatalı veya süresi dolmuş.",
+    "reset_password_confirm_title": "Yeni Şifre Belirle",
+    "reset_password_confirm_hint": "Lütfen yeni şifrenizi girin.",
+    "reset_password_success": "Şifreniz başarıyla güncellendi!",
+    "reset_password_error": "Şifre güncellenemedi. Lütfen tekrar deneyin."
   },
   "shop": {
     "error_loading": "Dükkan yüklenirken bir hata oluştu",
@@ -123,7 +136,11 @@
     "has_cctv": "CCTV Var",
     "has_climate": "Klima Var",
     "accepts_large": "Büyük Eşya Kabul Ediyor",
-    "clear_filters": "Filtreleri Temizle"
+    "clear_filters": "Filtreleri Temizle",
+    "book_now": "Şimdi Rezerve Et",
+    "climate": "Klima Var",
+    "large_items": "Büyük Eşya Kabul Ediyor",
+    "location_denied": "Konum izni reddedildi. Yakındaki dükkanları görmek için ayarlardan etkinleştirin."
   },
   "notifications": {
     "title": "Bildirimler",
@@ -228,7 +245,21 @@
     "reject_confirm": "Bu rezervasyonu reddetmek istediğinize emin misiniz?",
     "approve_success": "Rezervasyon onaylandı.",
     "reject_success": "Rezervasyon reddedildi.",
-    "seals": "Mühürler"
+    "seals": "Mühürler",
+    "cancel_tier1": "Ücretsiz İptal",
+    "cancel_tier1_desc": "48 saat veya daha uzun süre önce iptal ederseniz tam iade.",
+    "cancel_tier2": "%50 İade",
+    "cancel_tier2_desc": "24-48 saat önce iptal ederseniz %50 iade.",
+    "cancel_tier3": "İade Yok",
+    "cancel_tier3_desc": "24 saatten az süre önce iptal ederseniz iade yapılmaz.",
+    "cancel_title": "İptal Politikası",
+    "cancellation_policy": "İptal Politikası",
+    "file_dispute": "İtiraz Et",
+    "modified": "Rezervasyonunuz güncellendi.",
+    "rate_shop": "Dükkanı Değerlendir",
+    "review_comment": "Yorumunuz",
+    "submit_dispute": "İtiraz Gönder",
+    "submit_review": "Değerlendirmeyi Gönder"
   },
   "partner": {
     "management": "Esnaf Yönetimi",
@@ -276,7 +307,19 @@
     "filter_all": "Tümü",
     "filter_waiting": "Onay Bekleyen",
     "filter_active": "Aktif",
-    "filter_completed": "Tamamlandı"
+    "filter_completed": "Tamamlandı",
+    "approve": "Onayla",
+    "reject": "Reddet",
+    "seals_management": "Mühür Yönetimi",
+    "request_seals": "Mühür Talep Et",
+    "report_faulty_seal": "Arızalı Mühür Bildir",
+    "request_count": "Talep Adeti",
+    "request_success": "Mühür talebi başarıyla oluşturuldu.",
+    "report_faulty_success": "Arızalı mühür başarıyla bildirildi.",
+    "serial_number_label": "Mühür Seri Numarası",
+    "bag_revision_title": "Bagaj Sayılarını Revize Et",
+    "bag_revision_success": "Bagaj sayıları başarıyla revize edildi.",
+    "bag_revision_error": "Revizyon işlemi gerçekleştirilemedi."
   },
   "profile": {
     "title": "Hesabım",
@@ -357,7 +400,8 @@
     "no_internet": "Bağlantı Yok - Bazı işlemler gecikebilir",
     "error_404": "Aradığınız veri bulunamadı (404)",
     "error_timeout": "İnternet bağlantısı zaman aşımına uğradı",
-    "error_server": "Sunucu hatası oluştu"
+    "error_server": "Sunucu hatası oluştu",
+    "close": "Kapat"
   },
   "tutorial": {
     "guest": {

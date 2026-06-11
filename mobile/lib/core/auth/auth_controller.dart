@@ -76,6 +76,21 @@ class AuthController extends Notifier<AuthState> {
     }
   }
 
+  Future<void> refreshSession() async {
+    final store = ref.read(tokenStoreProvider);
+    final token = await store.readAccessToken();
+    if (token == null) return;
+    try {
+      final dio = ref.read(dioProvider);
+      final res = await dio.get('/auth/me');
+      state = state.copyWith(
+        session: UserDto.fromJson(res.data as Map<String, dynamic>),
+      );
+    } catch (e) {
+      debugPrint('Refresh session failed: $e');
+    }
+  }
+
   Future<void> setOnboardingDone() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('onboarding_done', true);

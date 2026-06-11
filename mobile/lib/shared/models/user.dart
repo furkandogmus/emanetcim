@@ -22,6 +22,7 @@ abstract class UserDto with _$UserDto {
     String? phone,
     String? avatarUrl,
     String? referralCode,
+    bool? emailVerified,
   }) = _UserDto;
 
   factory UserDto.fromJson(Map<String, dynamic> json) =>
