@@ -189,9 +189,16 @@ export default function SearchClient({
 
   const onSelectShop = useCallback(
     (id: string) => {
+      try {
+        sessionStorage.setItem("bagajpark_search_params", JSON.stringify({
+          checkIn: checkInLocal,
+          checkOut: checkOutLocal,
+          bags: requestedBags,
+        }));
+      } catch {}
       router.push(`/shop/${id}`);
     },
-    [router]
+    [router, checkInLocal, checkOutLocal, requestedBags]
   );
 
   const sourceShops = activeTab === "nearby" ? nearbyList : allList;
