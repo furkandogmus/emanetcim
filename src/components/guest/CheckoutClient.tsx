@@ -16,6 +16,8 @@ import {
 import { Link } from "@/i18n/routing";
 import BagSelector from "@/components/guest/BagSelector";
 import BagProtection from "@/components/guest/BagProtection";
+import BagSizeGuide from "@/components/guest/BagSizeGuide";
+import CheckoutWhatIsIncluded from "@/components/guest/CheckoutWhatIsIncluded";
 import { createBookingAction } from "@/actions/booking";
 import {
   computeDailyBagLineTotal,
@@ -603,6 +605,10 @@ export default function CheckoutClient({
               <span className="text-emerald-600 font-black text-base">✓</span>
               <span className="font-semibold">{t("freeCancellationNote")}</span>
             </div>
+
+            <CheckoutWhatIsIncluded />
+
+            <BagSizeGuide />
 
             <section
               className="rounded-2xl border border-gray-100 bg-gray-50/90 p-4 text-xs leading-relaxed text-gray-600"

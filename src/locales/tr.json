@@ -467,7 +467,21 @@
     "payBookingReturnFailed": "Ödeme onaylanamadı. Rezervasyon durumunu kontrol edin veya tekrar deneyin.",
     "filterCctv": "CCTV",
     "filterClimate": "Klima",
-    "filterLargeItems": "Büyük Eşya"
+    "filterLargeItems": "Büyük Eşya",
+    "checkoutWhatsIncluded": "Neler Dahil?",
+    "checkoutIncludedSeals": "Güvenlik Mührü",
+    "checkoutIncludedSealsDesc": "Her çantaya kurcalamaya karşı mühür",
+    "checkoutIncludedInsuranceDesc": "Çanta başı 5.000 TL koruma",
+    "checkoutIncludedFreeCancelDesc": "24 saat öncesine kadar ücretsiz iptal",
+    "checkoutIncludedSupport": "7/24 Destek",
+    "checkoutIncludedSupportDesc": "WhatsApp ve e-posta ile anında yardım",
+    "bagSizeGuide": "Valiz Boyut Rehberi",
+    "bagSizeS": "Küçük (S)",
+    "bagSizeSDesc": "Sırt çantası, el çantası (max 10kg)",
+    "bagSizeM": "Orta (M/L)",
+    "bagSizeMDesc": "Kabin boy valiz, spor çantası (max 20kg)",
+    "bagSizeXl": "Büyük (XL)",
+    "bagSizeXlDesc": "Kargo boy valiz (max 30kg, 100cm)"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Yönetim Masası",

@@ -414,7 +414,21 @@
     "checkoutGuestOr": "or",
     "filterCctv": "Vidéosurv.",
     "filterClimate": "Climatisé",
-    "filterLargeItems": "Grands objets"
+    "filterLargeItems": "Grands objets",
+    "checkoutWhatsIncluded": "Ce qui est inclus",
+    "checkoutIncludedSeals": "Sceaux de sécurité",
+    "checkoutIncludedSealsDesc": "Sceaux inviolables sur chaque sac",
+    "checkoutIncludedInsuranceDesc": "Protection 5.000 TL par sac",
+    "checkoutIncludedFreeCancelDesc": "Annulation gratuite jusqu'à 24h avant",
+    "checkoutIncludedSupport": "Support 24/7",
+    "checkoutIncludedSupportDesc": "Aide instantanée via WhatsApp & e-mail",
+    "bagSizeGuide": "Guide des tailles",
+    "bagSizeS": "Petit (S)",
+    "bagSizeSDesc": "Sac à dos, sac à main (max 10kg)",
+    "bagSizeM": "Moyen (M/L)",
+    "bagSizeMDesc": "Valise cabine, sac de sport (max 20kg)",
+    "bagSizeXl": "Grand (XL)",
+    "bagSizeXlDesc": "Grande valise (max 30kg, 100cm)"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

@@ -414,7 +414,21 @@
     "checkoutGuestOr": "or",
     "filterCctv": "كاميرا",
     "filterClimate": "مكيف",
-    "filterLargeItems": "أغراض كبيرة"
+    "filterLargeItems": "أغراض كبيرة",
+    "checkoutWhatsIncluded": "ما هو مشمول؟",
+    "checkoutIncludedSeals": "أختام أمان",
+    "checkoutIncludedSealsDesc": "أختام مضادة للعبث على كل حقيبة",
+    "checkoutIncludedInsuranceDesc": "حماية 5.000 ليرة لكل حقيبة",
+    "checkoutIncludedFreeCancelDesc": "إلغاء مجاني قبل 24 ساعة",
+    "checkoutIncludedSupport": "دعم 24/7",
+    "checkoutIncludedSupportDesc": "مساعدة فورية عبر واتساب والبريد",
+    "bagSizeGuide": "دليل أحجام الحقائب",
+    "bagSizeS": "صغير (S)",
+    "bagSizeSDesc": "حقيبة ظهر، حقيبة يد (10kg حد أقصى)",
+    "bagSizeM": "متوسط (M/L)",
+    "bagSizeMDesc": "حقيبة كابينة، حقيبة رياضية (20kg حد أقصى)",
+    "bagSizeXl": "كبير (XL)",
+    "bagSizeXlDesc": "حقيبة كبيرة (30kg حد أقصى، 100cm)"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

@@ -414,7 +414,21 @@
     "checkoutGuestOr": "or",
     "filterCctv": "CCTV",
     "filterClimate": "Klima",
-    "filterLargeItems": "Große Gegenstände"
+    "filterLargeItems": "Große Gegenstände",
+    "checkoutWhatsIncluded": "Was ist enthalten?",
+    "checkoutIncludedSeals": "Sicherheitssiegel",
+    "checkoutIncludedSealsDesc": "Manipulationssichere Siegel an jeder Tasche",
+    "checkoutIncludedInsuranceDesc": "5.000 TL Schutz pro Tasche",
+    "checkoutIncludedFreeCancelDesc": "Kostenlose Stornierung bis 24h vorher",
+    "checkoutIncludedSupport": "24/7 Support",
+    "checkoutIncludedSupportDesc": "Soforthilfe via WhatsApp & E-Mail",
+    "bagSizeGuide": "Gepäckgrößen-Guide",
+    "bagSizeS": "Klein (S)",
+    "bagSizeSDesc": "Rucksack, Handtasche (max 10kg)",
+    "bagSizeM": "Mittel (M/L)",
+    "bagSizeMDesc": "Handgepäckkoffer, Seesack (max 20kg)",
+    "bagSizeXl": "Groß (XL)",
+    "bagSizeXlDesc": "Großer Koffer (max 30kg, 100cm)"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

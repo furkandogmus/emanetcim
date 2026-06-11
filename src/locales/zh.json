@@ -414,7 +414,21 @@
     "checkoutGuestOr": "or",
     "filterCctv": "监控",
     "filterClimate": "空调",
-    "filterLargeItems": "大件物品"
+    "filterLargeItems": "大件物品",
+    "checkoutWhatsIncluded": "What's Included?",
+    "checkoutIncludedSeals": "Security Seals",
+    "checkoutIncludedSealsDesc": "Tamper-evident seals on every bag",
+    "checkoutIncludedInsuranceDesc": "5,000 TL protection per bag",
+    "checkoutIncludedFreeCancelDesc": "Free cancellation up to 24h before",
+    "checkoutIncludedSupport": "24/7 Support",
+    "checkoutIncludedSupportDesc": "Instant help via WhatsApp & email",
+    "bagSizeGuide": "Bag Size Guide",
+    "bagSizeS": "Small (S)",
+    "bagSizeSDesc": "Backpack, handbag (max 10kg)",
+    "bagSizeM": "Medium (M/L)",
+    "bagSizeMDesc": "Cabin bag, duffel (max 20kg)",
+    "bagSizeXl": "Large (XL)",
+    "bagSizeXlDesc": "Large suitcase (max 30kg, 100cm)"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

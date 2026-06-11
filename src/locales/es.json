@@ -414,7 +414,21 @@
     "checkoutGuestOr": "or",
     "filterCctv": "CCTV",
     "filterClimate": "Climatizado",
-    "filterLargeItems": "Artículos grandes"
+    "filterLargeItems": "Artículos grandes",
+    "checkoutWhatsIncluded": "¿Qué incluye?",
+    "checkoutIncludedSeals": "Sellos de seguridad",
+    "checkoutIncludedSealsDesc": "Sellos inviolables en cada bolsa",
+    "checkoutIncludedInsuranceDesc": "Protección de 5.000 TL por bolsa",
+    "checkoutIncludedFreeCancelDesc": "Cancelación gratuita hasta 24h antes",
+    "checkoutIncludedSupport": "Soporte 24/7",
+    "checkoutIncludedSupportDesc": "Ayuda instantánea por WhatsApp y email",
+    "bagSizeGuide": "Guía de tamaños",
+    "bagSizeS": "Pequeño (S)",
+    "bagSizeSDesc": "Mochila, bolso (max 10kg)",
+    "bagSizeM": "Mediano (M/L)",
+    "bagSizeMDesc": "Maleta de cabina, bolsa deportiva (max 20kg)",
+    "bagSizeXl": "Grande (XL)",
+    "bagSizeXlDesc": "Maleta grande (max 30kg, 100cm)"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

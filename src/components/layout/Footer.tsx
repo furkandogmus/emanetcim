@@ -123,6 +123,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/cancellation" className="hover:text-orange-600 transition-colors">
+                  {locale === "tr" ? "İptal Politikası" : "Cancellation"}
+                </Link>
+              </li>
+              <li>
                 <Link href="/kvkk" className="hover:text-orange-600 transition-colors">
                   {t("kvkk")}
                 </Link>

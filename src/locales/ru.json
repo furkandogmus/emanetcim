@@ -414,7 +414,21 @@
     "checkoutGuestOr": "or",
     "filterCctv": "Видео",
     "filterClimate": "Климат",
-    "filterLargeItems": "Крупные вещи"
+    "filterLargeItems": "Крупные вещи",
+    "checkoutWhatsIncluded": "Что включено?",
+    "checkoutIncludedSeals": "Пломбы безопасности",
+    "checkoutIncludedSealsDesc": "Защитные пломбы на каждой сумке",
+    "checkoutIncludedInsuranceDesc": "Защита 5.000 TL за сумку",
+    "checkoutIncludedFreeCancelDesc": "Бесплатная отмена за 24ч",
+    "checkoutIncludedSupport": "Поддержка 24/7",
+    "checkoutIncludedSupportDesc": "Помощь через WhatsApp и email",
+    "bagSizeGuide": "Размеры багажа",
+    "bagSizeS": "Маленький (S)",
+    "bagSizeSDesc": "Рюкзак, сумка (макс 10кг)",
+    "bagSizeM": "Средний (M/L)",
+    "bagSizeMDesc": "Ручная кладь, спортивная сумка (макс 20кг)",
+    "bagSizeXl": "Большой (XL)",
+    "bagSizeXlDesc": "Большой чемодан (макс 30кг, 100см)"
   },
   "Admin": {
     "dashboardTitle": "Центр администрирования BagajPark",
