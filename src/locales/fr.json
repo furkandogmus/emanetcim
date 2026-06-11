@@ -428,7 +428,14 @@
     "bagSizeM": "Moyen (M/L)",
     "bagSizeMDesc": "Valise cabine, sac de sport (max 20kg)",
     "bagSizeXl": "Grand (XL)",
-    "bagSizeXlDesc": "Grande valise (max 30kg, 100cm)"
+    "bagSizeXlDesc": "Grande valise (max 30kg, 100cm)",
+    "loyaltyRewardsTitle": "BagajPark Rewards",
+    "loyaltyRewardsBody": "Earn points on every booking, redeem for discounts. 1 TRY = 1 point, 100 points = 1 TRY off.",
+    "trustpilotRatingText": "Rated 4.8 / 5 by our guests",
+    "trustVerificationBadge": "Verified Reviews",
+    "appBannerTitle": "BagajPark on mobile!",
+    "appBannerBody": "Our app is coming soon to iOS and Android. Keep using the web for now.",
+    "appBannerCta": "Explore on Web"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

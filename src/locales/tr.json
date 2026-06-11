@@ -481,7 +481,14 @@
     "bagSizeM": "Orta (M/L)",
     "bagSizeMDesc": "Kabin boy valiz, spor çantası (max 20kg)",
     "bagSizeXl": "Büyük (XL)",
-    "bagSizeXlDesc": "Kargo boy valiz (max 30kg, 100cm)"
+    "bagSizeXlDesc": "Kargo boy valiz (max 30kg, 100cm)",
+    "loyaltyRewardsTitle": "BagajPark Rewards",
+    "loyaltyRewardsBody": "Her rezervasyonda puan kazan, indirim olarak kullan. 1 TL = 1 puan, 100 puan = 1 TL indirim.",
+    "trustpilotRatingText": "Misafirlerimizden 4.8 / 5 puan",
+    "trustVerificationBadge": "Doğrulanmış Yorumlar",
+    "appBannerTitle": "BagajPark mobilde!",
+    "appBannerBody": "Uygulamamız çok yakında iOS ve Android'de. Şimdilik web'den kullanmaya devam et.",
+    "appBannerCta": "Web'de Keşfet"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Yönetim Masası",

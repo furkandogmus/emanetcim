@@ -22,6 +22,8 @@ model User {
   updatedAt                DateTime                 @updatedAt
   /// Referans kodu: misafire verilebilir, yeni rezervasyonda indirim sağlar
   referralCode             String?                  @unique
+  /// Sadakat puanı — her 1 TL harcamada 1 puan, 100 puan = 1 TL indirim
+  loyaltyPoints            Int                      @default(0)
   accounts                 Account[]
   adminRoleChangeRequested AdminRoleChangeRequest[] @relation("AdminRoleChangeRequester")
   adminRoleChangeTargets   AdminRoleChangeRequest?  @relation("AdminRoleChangeTarget")
@@ -126,11 +128,23 @@ model Shop {
   reviews          Review[]
   seals            Seal[]
   sealRequests     SealRequest[]
+  images           ShopImage[]
   owner            User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   @@index([ownerId])
   @@index([isActive])
   @@index([latitude, longitude])
+}
+
+model ShopImage {
+  id        String   @id @default(uuid())
+  shopId    String
+  url       String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@index([shopId])
 }
 
 model Booking {

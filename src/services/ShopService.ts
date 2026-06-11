@@ -52,6 +52,7 @@ export interface IShopService {
   getShopDetails(shopId: string): Promise<Shop | null>;
   /** Misafir detay sayfası: aktif dükkan + son yorumlar */
   getShopPublicDetail(shopId: string): Promise<ShopPublicDetail | null>;
+  getShopImages(shopId: string): Promise<Array<{ id: string; url: string; order: number }>>;
   getPendingShops(): Promise<ShopWithOwner[]>;
   approveShop(shopId: string): Promise<boolean>;
   getShopsByOwner(ownerId: string): Promise<Shop[]>;
@@ -226,6 +227,13 @@ export class ShopService implements IShopService {
         },
       },
     });
+  }
+
+  async getShopImages(shopId: string) {
+    return prisma.$queryRawUnsafe<Array<{ id: string; url: string; order: number }>>(
+      `SELECT id, url, "order" FROM "ShopImage" WHERE "shopId" = $1 ORDER BY "order" ASC LIMIT 20`,
+      shopId
+    );
   }
 
   async getPendingShops(): Promise<ShopWithOwner[]> {

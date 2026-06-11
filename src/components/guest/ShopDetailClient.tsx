@@ -24,6 +24,7 @@ import {
 } from "@/lib/plausible-events";
 import { TrustBadges } from "@/components/common/TrustBadge";
 import FavoriteButton from "@/components/guest/FavoriteButton";
+import ShopGallery from "@/components/guest/ShopGallery";
 
 export type ShopDetailClientShop = {
   id: string;
@@ -51,6 +52,10 @@ export type ShopDetailClientShop = {
     comment: string | null;
     createdAt: string;
     authorLabel: string;
+  }>;
+  images: Array<{
+    id: string;
+    url: string;
   }>;
 };
 
@@ -134,14 +139,16 @@ export default function ShopDetailClient({
   return (
     <div className="min-h-screen bg-gray-50 pb-28">
       <div className="md:hidden">
-        <div className={`relative h-[360px] ${shop.image ? '' : 'bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 flex items-center justify-center'}`}>
-          {shop.image ? (
+        <div className={`relative h-[360px] ${shop.image || shop.images.length > 0 ? '' : 'bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 flex items-center justify-center'}`}>
+          {shop.images.length > 0 ? (
+            <ShopGallery images={shop.images} shopName={shop.name} />
+          ) : shop.image ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={shop.image} alt={shop.name} className="w-full h-full object-cover" />
           ) : (
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.25),transparent_50%)]" />
           )}
-          {!shop.image && (
+          {!shop.image && shop.images.length === 0 && (
             <div className="relative z-0 flex flex-col items-center gap-3 text-white/90">
               <Building2 size={80} strokeWidth={1} />
               <span className="text-6xl font-black tracking-tighter opacity-30">{shop.name.charAt(0).toUpperCase()}</span>
@@ -283,6 +290,9 @@ export default function ShopDetailClient({
       </div>
 
       <div className="hidden md:block">
+      {shop.images.length > 0 ? (
+        <ShopGallery images={shop.images} shopName={shop.name} />
+      ) : (
       <div className="relative h-48 sm:h-56 bg-gradient-to-br from-orange-500 via-orange-600 to-amber-700">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxIDAgNiAyLjY5IDYgNnMtMi42OSA2LTYgNi02LTIuNjktNi02IDIuNjktNiA2LTYiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iLjA4Ii8+PC9nPjwvc3ZnPg==')] opacity-40" />
         <div className="absolute top-4 left-4 z-10">
@@ -318,6 +328,7 @@ export default function ShopDetailClient({
           </div>
         </div>
       </div>
+      )}
 
       <main className="max-w-lg mx-auto px-4 -mt-4 relative z-[1] flex flex-col gap-4">
         <section className="bg-white rounded-3xl p-6 shadow-xl shadow-gray-200/50 border border-gray-100">

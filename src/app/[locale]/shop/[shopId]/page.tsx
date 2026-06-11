@@ -57,6 +57,8 @@ export default async function ShopDetailPage({
     notFound();
   }
 
+  const shopImages = await shopService.getShopImages(shopId).catch(() => []);
+
   const pricingRules = await getPricingRules();
 
   const jsonLd = buildShopLocalBusinessJsonLd(shop, locale);
@@ -94,6 +96,10 @@ export default async function ShopDetailPage({
       createdAt: r.createdAt.toISOString(),
       authorLabel:
         r.guest?.name?.trim()?.split(/\s+/)[0] ?? "",
+    })),
+    images: shopImages.map((img) => ({
+      id: img.id,
+      url: img.url,
     })),
   };
 

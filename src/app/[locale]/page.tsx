@@ -403,6 +403,50 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
         </div>
       </section>
 
+      {/* Rewards + Trust Section */}
+      <section className="py-16 px-6 max-w-5xl mx-auto w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="rounded-3xl bg-gradient-to-br from-amber-400 to-orange-500 p-8 text-white shadow-xl shadow-orange-200/50">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                <Star size={20} fill="currentColor" />
+              </div>
+              <h3 className="text-lg font-black">{t('loyaltyRewardsTitle')}</h3>
+            </div>
+            <p className="text-white/90 text-sm leading-relaxed mb-4">
+              {t('loyaltyRewardsBody')}
+            </p>
+            <Link href="/search" className="inline-flex items-center gap-2 rounded-xl bg-white/20 px-4 py-2 text-xs font-black uppercase tracking-wider hover:bg-white/30 transition-colors">
+              {t('bookNow')}
+            </Link>
+          </div>
+          <div className="rounded-3xl border border-gray-100 bg-white p-8 shadow-sm flex flex-col items-center justify-center text-center gap-3">
+            <div className="text-2xl font-black text-gray-900">★★★★★</div>
+            <p className="text-sm text-gray-500 font-medium">{t('trustpilotRatingText')}</p>
+            <div className="flex items-center gap-1 text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+              <ShieldCheck size={12} />
+              {t('trustVerificationBadge')}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* App Download Banner */}
+      <section className="py-16 px-6 max-w-5xl mx-auto w-full">
+        <div className="rounded-3xl bg-gray-900 p-8 md:p-10 flex flex-col md:flex-row items-center gap-6 shadow-xl">
+          <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shrink-0">
+            <Smartphone size={28} className="text-gray-900" />
+          </div>
+          <div className="flex-1 text-center md:text-left">
+            <h3 className="text-lg font-black text-white">{t('appBannerTitle')}</h3>
+            <p className="text-gray-400 text-sm mt-1">{t('appBannerBody')}</p>
+          </div>
+          <Link href="/search" className="inline-flex items-center gap-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-white px-6 py-3 font-black text-sm transition-colors shrink-0">
+            {t('appBannerCta')}
+          </Link>
+        </div>
+      </section>
+
       <section className="mx-auto w-full max-w-4xl px-6 pb-16">
         <div className="rounded-[1.75rem] border border-gray-100 bg-white p-6 md:p-8">
           <h2 className="text-2xl font-black tracking-tight text-gray-900">
