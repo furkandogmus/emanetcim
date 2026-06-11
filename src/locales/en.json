@@ -293,6 +293,7 @@
     "requestSentSub": "Pay at the shop when you drop off your bags.",
     "checkoutReviewTitle": "Booking Review",
     "sendRequest": "CONFIRM BOOKING",
+    "from": "from",
     "bookingSuccess": "Booking Successful!",
     "showToPartner": "Please show the QR code below to the shop owner.",
     "myBookings": "My Bookings",

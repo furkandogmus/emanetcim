@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin, Star, Shield, Timer } from 'lucide-react';
+import { Building2, MapPin, Star, Shield, Timer } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 interface ShopListItemProps {
@@ -41,8 +41,8 @@ export default function ShopListItem({
       className="bg-white border border-gray-100 rounded-3xl p-5 shadow-sm hover:shadow-md transition-all cursor-pointer flex gap-5 items-center group active:scale-[0.98]"
     >
       {/* Mini Image Placeholder */}
-      <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center text-gray-300">
-        <MapPin size={32} strokeWidth={1.5} />
+      <div className="w-20 h-20 bg-gradient-to-br from-orange-100 to-amber-50 rounded-2xl flex items-center justify-center text-orange-400 shrink-0">
+        <Building2 size={28} strokeWidth={1.5} />
       </div>
 
       <div className="flex-1 flex flex-col gap-1">
@@ -101,6 +101,7 @@ export default function ShopListItem({
               </button>
             )}
             <div className="text-right">
+              <span className="text-[10px] text-gray-400 font-bold uppercase block -mb-0.5">{t("from")}</span>
               <span className="text-xl font-black text-gray-900">₺{price}</span>
               <span className="text-[10px] text-gray-400 font-bold uppercase ml-1">/ {t("day")}</span>
             </div>
