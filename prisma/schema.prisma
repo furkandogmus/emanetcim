@@ -92,15 +92,20 @@ model VerificationToken {
 model Shop {
   id               String        @id @default(uuid())
   ownerId          String
-  name             String
-  address          String?
-  latitude         Float?
-  longitude        Float?
-  capacity         Int           @default(10)
-  isActive         Boolean       @default(false)
-  rating           Float?        @default(0.0)
-  pricePerDay      Decimal       @default(50) @db.Decimal(12, 2)
-  hasRestroom      Boolean       @default(false)
+  name              String
+  address           String?
+  image             String?
+  description       String?
+  latitude          Float?
+  longitude         Float?
+  capacity          Int           @default(10)
+  isActive          Boolean       @default(false)
+  rating            Float?        @default(0.0)
+  pricePerDay       Decimal       @default(50) @db.Decimal(12, 2)
+  hasRestroom       Boolean       @default(false)
+  hasCctv           Boolean       @default(false)
+  hasClimateControl Boolean       @default(false)
+  acceptsLargeItems Boolean       @default(false)
   open247          Boolean       @default(false)
   subMerchantKey   String?       @unique
   subMerchantType  String?

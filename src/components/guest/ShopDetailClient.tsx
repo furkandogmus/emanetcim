@@ -28,12 +28,17 @@ export type ShopDetailClientShop = {
   id: string;
   name: string;
   address: string | null;
+  image: string | null;
+  description: string | null;
   latitude: number | null;
   longitude: number | null;
   capacity: number;
   rating: number | null;
   pricePerDay: number;
   hasRestroom: boolean;
+  hasCctv: boolean;
+  hasClimateControl: boolean;
+  acceptsLargeItems: boolean;
   open247: boolean;
   openingTime: string | null;
   closingTime: string | null;
@@ -113,12 +118,19 @@ export default function ShopDetailClient({
   return (
     <div className="min-h-screen bg-gray-50 pb-28">
       <div className="md:hidden">
-        <div className="relative h-[360px] bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 flex items-center justify-center">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.25),transparent_50%)]" />
-          <div className="relative z-0 flex flex-col items-center gap-3 text-white/90">
-            <Building2 size={80} strokeWidth={1} />
-            <span className="text-6xl font-black tracking-tighter opacity-30">{shop.name.charAt(0).toUpperCase()}</span>
-          </div>
+        <div className={`relative h-[360px] ${shop.image ? '' : 'bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 flex items-center justify-center'}`}>
+          {shop.image ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={shop.image} alt={shop.name} className="w-full h-full object-cover" />
+          ) : (
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.25),transparent_50%)]" />
+          )}
+          {!shop.image && (
+            <div className="relative z-0 flex flex-col items-center gap-3 text-white/90">
+              <Building2 size={80} strokeWidth={1} />
+              <span className="text-6xl font-black tracking-tighter opacity-30">{shop.name.charAt(0).toUpperCase()}</span>
+            </div>
+          )}
           <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between">
             <Link
               href="/search"
@@ -162,20 +174,33 @@ export default function ShopDetailClient({
           <section>
             <h2 className="text-2xl font-black text-gray-900 mb-3">{mobileCopy.premiumAmenities}</h2>
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-3xl border border-gray-100 bg-white p-4">
-                <p className="text-xs font-black uppercase text-gray-500">{mobileCopy.cctv}</p>
-              </div>
-              <div className="rounded-3xl border border-gray-100 bg-white p-4">
-                <p className="text-xs font-black uppercase text-gray-500">{mobileCopy.climate}</p>
-              </div>
-              <div className="rounded-3xl border border-gray-100 bg-white p-4">
-                <p className="text-xs font-black uppercase text-gray-500">{mobileCopy.largeItems}</p>
-              </div>
+              {shop.hasCctv && (
+                <div className="rounded-3xl border border-gray-100 bg-white p-4">
+                  <p className="text-xs font-black uppercase text-gray-500">{mobileCopy.cctv}</p>
+                </div>
+              )}
+              {shop.hasClimateControl && (
+                <div className="rounded-3xl border border-gray-100 bg-white p-4">
+                  <p className="text-xs font-black uppercase text-gray-500">{mobileCopy.climate}</p>
+                </div>
+              )}
+              {shop.acceptsLargeItems && (
+                <div className="rounded-3xl border border-gray-100 bg-white p-4">
+                  <p className="text-xs font-black uppercase text-gray-500">{mobileCopy.largeItems}</p>
+                </div>
+              )}
               <div className="rounded-3xl border border-gray-100 bg-white p-4">
                 <p className="text-xs font-black uppercase text-gray-500">{mobileCopy.sealProvided}</p>
               </div>
             </div>
           </section>
+
+          {shop.description && (
+            <section className="rounded-[1.75rem] border border-gray-100 bg-white p-5">
+              <h2 className="text-xl font-black text-gray-900 mb-3">{t("shopDetailAbout")}</h2>
+              <p className="text-sm leading-relaxed text-gray-600">{shop.description}</p>
+            </section>
+          )}
 
           <section className="rounded-[1.75rem] border border-gray-100 bg-[#f2f4ff] p-5">
             <h2 className="text-xl font-black text-gray-900 mb-3">{t("shopDetailHours")}</h2>
