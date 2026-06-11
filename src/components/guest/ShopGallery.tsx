@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 interface Props {
@@ -20,10 +21,12 @@ export default function ShopGallery({ images, shopName }: Props) {
   return (
     <>
       <div className="relative w-full h-48 sm:h-56 rounded-2xl overflow-hidden bg-gray-100">
-        <img
+        <Image
           src={images[activeIndex].url}
           alt={`${shopName} ${activeIndex + 1}`}
-          className="w-full h-full object-cover cursor-pointer"
+          fill
+          unoptimized
+          className="object-cover cursor-pointer"
           onClick={() => setLightboxOpen(true)}
         />
         {images.length > 1 && (
@@ -62,9 +65,9 @@ export default function ShopGallery({ images, shopName }: Props) {
             <button
               key={img.id}
               onClick={() => setActiveIndex(i)}
-              className={`w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 transition-all ${i === activeIndex ? "border-orange-500" : "border-transparent opacity-60 hover:opacity-100"}`}
+              className={`relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 transition-all ${i === activeIndex ? "border-orange-500" : "border-transparent opacity-60 hover:opacity-100"}`}
             >
-              <img src={img.url} alt="" className="w-full h-full object-cover" />
+              <Image src={img.url} alt="" fill unoptimized className="object-cover" />
             </button>
           ))}
         </div>
@@ -77,16 +80,20 @@ export default function ShopGallery({ images, shopName }: Props) {
         >
           <button
             onClick={() => setLightboxOpen(false)}
-            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 text-white flex items-center justify-center hover:bg-white/30"
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 text-white flex items-center justify-center hover:bg-white/30 z-10"
           >
             <X size={20} />
           </button>
-          <img
-            src={images[activeIndex].url}
-            alt={shopName}
-            className="max-w-[90vw] max-h-[85vh] object-contain rounded-lg"
-            onClick={(e) => e.stopPropagation()}
-          />
+          <div className="relative w-[90vw] h-[85vh]">
+            <Image
+              src={images[activeIndex].url}
+              alt={shopName}
+              fill
+              unoptimized
+              className="object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
         </div>
       )}
     </>

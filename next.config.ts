@@ -51,7 +51,14 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   output: "standalone",
   reactCompiler: true,
-  // Prisma 7 ve Next.js 16 (Turbopack) uyumluluğu için gereklidir.
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+    ],
+  },
   serverExternalPackages: ["@prisma/client", "pg", "iyzipay", "@netgsm/sms"],
   async headers() {
     return [

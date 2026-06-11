@@ -59,7 +59,6 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
     if (typeof tx.has === "function" && tx.has(key)) return t(key as never);
     return fallback;
   };
-  const common = await getTranslations("Common");
   const tCity = await getTranslations("CityStorage");
   const [stats, testimonials] = await Promise.all([
     getGuestLandingStats(),

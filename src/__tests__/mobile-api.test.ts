@@ -31,11 +31,18 @@ vi.mock("@/lib/logger", () => ({
   default: { warn: vi.fn(), error: vi.fn(), info: vi.fn() },
 }));
 
-vi.mock("@/services/ShopService", () => ({
-  ShopService: class {
-    findNearby = vi.fn().mockResolvedValue([]);
-  },
-}));
+vi.mock("@/services/ShopService", () => {
+  const findNearby = vi.fn().mockResolvedValue([]);
+  const findShopsForSearch = vi.fn().mockResolvedValue([]);
+  const getShopImages = vi.fn().mockResolvedValue([]);
+  const shopService = { findNearby, findShopsForSearch, getShopImages };
+  return {
+    ShopService: class {
+      findNearby = findNearby;
+    },
+    shopService,
+  };
+});
 
 import prisma from "@/lib/db";
 import { isNetgsmConfigured } from "@/lib/netgsm";
