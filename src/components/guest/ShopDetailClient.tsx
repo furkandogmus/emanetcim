@@ -3,6 +3,7 @@
 import {
   ArrowLeft,
   MapPin,
+  Building2,
   Star,
   Shield,
   Clock,
@@ -77,7 +78,7 @@ export default function ShopDetailClient({
           bagajPark: "BagajPark",
           verifiedPartner: "Doğrulanmış Partner",
           insuredStorage: "Sigortalı Emanet",
-          premiumAmenities: "Premium Özellikler",
+          premiumAmenities: "Hizmet Özellikleri",
           cctv: "7/24 CCTV",
           climate: "İklim Kontrollü",
           largeItems: "Büyük Boy Uygun",
@@ -92,7 +93,7 @@ export default function ShopDetailClient({
           bagajPark: "BagajPark",
           verifiedPartner: "Verified Partner",
           insuredStorage: "Insured Storage",
-          premiumAmenities: "Premium Amenities",
+          premiumAmenities: "Services",
           cctv: "24/7 CCTV",
           climate: "Climate Control",
           largeItems: "Large Items OK",
@@ -103,7 +104,7 @@ export default function ShopDetailClient({
           totalForDay: "Total per day",
           perDay: "/day",
         };
-  const mobileTwoBagTotal = formatTryCurrency(slot.m * 2, locale);
+  const mobilePricePerBag = formatTryCurrency(slot.m, locale);
 
   useEffect(() => {
     trackPlausibleEvent(PLAUSIBLE_EVENTS.ShopViewed, { shopId: shop.id });
@@ -112,8 +113,12 @@ export default function ShopDetailClient({
   return (
     <div className="min-h-screen bg-gray-50 pb-28">
       <div className="md:hidden">
-        <div className="relative h-[360px] bg-gradient-to-br from-[#6b4c2f] via-[#7c5938] to-[#3f2d1b]">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.22),transparent_45%),radial-gradient(circle_at_80%_10%,rgba(255,255,255,0.14),transparent_35%)]" />
+        <div className="relative h-[360px] bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 flex items-center justify-center">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.25),transparent_50%)]" />
+          <div className="relative z-0 flex flex-col items-center gap-3 text-white/90">
+            <Building2 size={80} strokeWidth={1} />
+            <span className="text-6xl font-black tracking-tighter opacity-30">{shop.name.charAt(0).toUpperCase()}</span>
+          </div>
           <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between">
             <Link
               href="/search"
@@ -211,9 +216,9 @@ export default function ShopDetailClient({
         <div className="fixed inset-x-0 bottom-0 z-20 border-t border-gray-100 bg-white/95 px-4 pb-5 pt-3 backdrop-blur-xl">
           <div className="mx-auto flex max-w-lg items-center gap-3">
             <div className="flex-1">
-              <p className="text-xs font-black uppercase tracking-widest text-gray-400">{mobileCopy.totalForDay}</p>
+              <p className="text-xs font-black uppercase tracking-widest text-gray-400">{t("perBag")}</p>
               <p className="text-3xl font-black text-gray-900">
-                {mobileTwoBagTotal} <span className="text-base text-gray-500">{mobileCopy.perDay}</span>
+                ₺{mobilePricePerBag} <span className="text-base text-gray-500">{mobileCopy.perDay}</span>
               </p>
             </div>
             <Link
