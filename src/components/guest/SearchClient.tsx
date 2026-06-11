@@ -561,6 +561,7 @@ export default function SearchClient({
                     transition={{ delay: index * 0.05 }}
                   >
                     <ShopListItem
+                      id={shop.id}
                       name={shop.name}
                       rating={shop.rating || 0}
                       price={shop.pricePerDay?.toString() || "50"}
