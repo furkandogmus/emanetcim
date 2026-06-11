@@ -21,6 +21,39 @@ export async function PUT(req: NextRequest) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
 
+  const contentType = req.headers.get("content-type") || "";
+
+  if (contentType.includes("multipart/form-data")) {
+    const formData = await req.formData();
+    const file = formData.get("avatar") as File | null;
+    if (!file) {
+      return NextResponse.json({ error: "no_file" }, { status: 400 });
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      return NextResponse.json({ error: "file_too_large" }, { status: 400 });
+    }
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      return NextResponse.json({ error: "invalid_type" }, { status: 400 });
+    }
+
+    const arrayBuffer = await file.arrayBuffer();
+    const base64 = Buffer.from(arrayBuffer).toString("base64");
+    const dataUrl = `data:${file.type};base64,${base64}`;
+
+    const updated = await prisma.user.update({
+      where: { id: auth.user.id },
+      data: { image: dataUrl },
+    });
+
+    return NextResponse.json({
+      success: true,
+      avatarUrl: updated.image,
+    });
+  }
+
   const { name, phone } = await req.json();
   try {
     const data: Record<string, unknown> = {};

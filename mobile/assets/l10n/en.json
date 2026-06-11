@@ -43,7 +43,7 @@
     "welcome": "Welcome",
     "no_account": "Don't have an account?",
     "register": "Sign Up",
-    "register_hint": "Don't have an account?",
+    "register_hint": "Create an account to start using BagajPark.",
     "register_button": "Sign Up",
     "register_welcome": "Sign Up",
     "email_or_phone": "Email or Phone",
@@ -77,7 +77,9 @@
     "password_login": "Sign in with Password",
     "code_login": "Sign in with Code",
     "sign_in": "Sign In",
-    "skip": "Skip"
+    "skip": "Skip",
+    "account_exists": "This account already exists. Try logging in.",
+    "password_error": "Password must be at least 6 characters"
   },
   "shop": {
     "error_loading": "An error occurred while loading the shop",

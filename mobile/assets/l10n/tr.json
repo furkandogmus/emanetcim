@@ -43,7 +43,7 @@
     "welcome": "Hoş Geldiniz",
     "no_account": "Hesabınız yok mu?",
     "register": "Kayıt Ol",
-    "register_hint": "Hesabınız yok mu?",
+    "register_hint": "Hesap oluşturarak BagajPark'ın hizmetlerinden yararlanabilirsiniz.",
     "register_button": "Kayıt Ol",
     "register_welcome": "Kayıt Ol",
     "email_or_phone": "E-posta veya Telefon",
@@ -77,7 +77,9 @@
     "password_login": "Şifre ile Giriş",
     "code_login": "Kod ile Giriş",
     "sign_in": "Giriş Yap",
-    "skip": "Atla"
+    "skip": "Atla",
+    "account_exists": "Bu hesap zaten mevcut. Giriş yapmayı deneyin.",
+    "password_error": "Şifre en az 6 karakter olmalıdır"
   },
   "shop": {
     "error_loading": "Dükkan yüklenirken bir hata oluştu",
@@ -188,7 +190,7 @@
   },
   "partner": {
     "management": "Esnaf Yönetimi",
-  "dashboard": "Dükkan Paneli",
+    "dashboard": "Dükkan Paneli",
     "active_bags": "Aktif Valiz",
     "total_earnings": "Toplam Kazanç",
     "bookings": "Rezervasyonlar",

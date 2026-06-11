@@ -1,9 +1,12 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dio/dio.dart' show FormData, MultipartFile;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../core/auth/auth_controller.dart';
 import '../../core/services/haptic_service.dart';
@@ -18,11 +21,129 @@ final profileStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
   return res.data as Map<String, dynamic>;
 });
 
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  bool _uploading = false;
+
+  Future<void> _pickAndUploadAvatar() async {
+    if (_uploading) return;
+    final picker = ImagePicker();
+    final image = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 512,
+      maxHeight: 512,
+      imageQuality: 80,
+    );
+    if (image == null) return;
+
+    setState(() => _uploading = true);
+    try {
+      final dio = ref.read(dioProvider);
+      final formData = FormData.fromMap({
+        'avatar': await MultipartFile.fromFile(image.path, filename: image.name),
+      });
+      final res = await dio.put('/auth/me', data: formData);
+      final newAvatarUrl = res.data['avatarUrl'] as String?;
+      if (newAvatarUrl != null && mounted) {
+        ref.invalidate(authControllerProvider);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${'common.error'.tr()}: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _uploading = false);
+    }
+  }
+
+  Widget _buildAvatar(UserDto? user) {
+    final avatarUrl = user?.avatarUrl;
+    final initial = (user?.name != null && user!.name!.isNotEmpty)
+        ? user.name!.substring(0, 1).toUpperCase()
+        : '?';
+
+    return GestureDetector(
+      onTap: _pickAndUploadAvatar,
+      child: Stack(
+        children: [
+          Container(
+            width: 100,
+            height: 100,
+            decoration: BoxDecoration(
+              color: AppColors.brandOrange.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.brandOrange, width: 2),
+            ),
+            child: _uploading
+                ? const Center(
+                    child: SizedBox(
+                      width: 28,
+                      height: 28,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  )
+                : (avatarUrl != null && avatarUrl.isNotEmpty)
+                    ? ClipOval(
+                        child: CachedNetworkImage(
+                          imageUrl: avatarUrl,
+                          width: 96,
+                          height: 96,
+                          fit: BoxFit.cover,
+                          placeholder: (_, __) => Center(
+                            child: Text(initial, style: GoogleFonts.outfit(
+                              fontSize: 40,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.brandOrange,
+                            )),
+                          ),
+                          errorWidget: (_, __, ___) => Center(
+                            child: Text(initial, style: GoogleFonts.outfit(
+                              fontSize: 40,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.brandOrange,
+                            )),
+                          ),
+                        ),
+                      )
+                    : Center(
+                        child: Text(initial, style: GoogleFonts.outfit(
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.brandOrange,
+                        )),
+                      ),
+          ),
+          Positioned(
+            right: 0,
+            bottom: 0,
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: const BoxDecoration(
+                color: AppColors.brandOrange,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.camera_alt_rounded,
+                size: 16,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(authControllerProvider).session;
     final theme = Theme.of(context);
     final isPartner = user?.role == UserRole.partner;
@@ -42,50 +163,7 @@ class ProfileScreen extends ConsumerWidget {
           Center(
             child: Column(
               children: [
-                Stack(
-                  children: [
-                    Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        color: AppColors.brandOrange.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppColors.brandOrange,
-                          width: 2,
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          (user?.name != null && user!.name!.isNotEmpty)
-                              ? user.name!.substring(0, 1).toUpperCase()
-                              : '?',
-                          style: GoogleFonts.outfit(
-                            fontSize: 40,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.brandOrange,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      right: 0,
-                      bottom: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: const BoxDecoration(
-                          color: AppColors.brandOrange,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.camera_alt_rounded,
-                          size: 16,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                _buildAvatar(user),
                 const SizedBox(height: 16),
                 Text(
                   user?.name ?? 'profile.default_name'.tr(),

@@ -137,6 +137,10 @@ class AuthController extends Notifier<AuthState> {
     }
   }
 
+  Future<void> completeSession(Map<String, dynamic> data) async {
+    await _completeSession(data);
+  }
+
   Future<void> _completeSession(Map<String, dynamic> data) async {
     await ref
         .read(tokenStoreProvider)

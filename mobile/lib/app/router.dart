@@ -7,7 +7,6 @@ import '../features/admin/admin_applications_screen.dart';
 import '../features/admin/admin_dashboard_screen.dart';
 import '../features/admin/admin_messages_screen.dart';
 import '../features/auth/login_screen.dart';
-import '../features/auth/otp_screen.dart';
 import '../features/auth/register_screen.dart';
 import '../features/booking/booking_detail_screen.dart';
 import '../features/booking/my_bookings_screen.dart';
@@ -82,14 +81,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/auth/register',
         builder: (_, _) => const RegisterScreen(),
-      ),
-      GoRoute(
-        path: '/auth/otp',
-        builder: (_, s) {
-          final identity = s.uri.queryParameters['identity'] ?? '';
-          final name = s.uri.queryParameters['name'];
-          return OtpScreen(identity: identity, name: name);
-        },
       ),
 
       ShellRoute(

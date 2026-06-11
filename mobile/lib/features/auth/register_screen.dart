@@ -1,4 +1,5 @@
 import 'dart:async' show unawaited;
+import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../core/api/api_client.dart';
 import '../../core/auth/auth_controller.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -18,9 +20,11 @@ class RegisterScreen extends ConsumerStatefulWidget {
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _identityController = TextEditingController(); // Can be email or phone
+  final _identityController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _kvkkAccepted = false;
   bool _busy = false;
+  bool _obscure = true;
 
   bool _isValidEmail(String email) {
     return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
@@ -38,19 +42,39 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     setState(() => _busy = true);
     try {
       final identity = _identityController.text.trim();
-      await ref.read(authControllerProvider.notifier).requestOtp(identity);
+      final password = _passwordController.text.trim();
+      final name = _nameController.text.trim();
+      final isEmail = identity.contains('@');
+
+      final dio = ref.read(dioProvider);
+      final data = <String, dynamic>{
+        if (isEmail) 'email': identity else 'phone': identity.replaceAll(RegExp(r'\D'), ''),
+        'password': password,
+        if (name.isNotEmpty) 'name': name,
+      };
+
+      await dio.post('/auth/register', data: data);
+
+      await ref
+          .read(authControllerProvider.notifier)
+          .loginWithPassword(identity, password);
+
+      if (mounted) context.go('/');
+    } on DioException catch (e) {
       if (mounted) {
-        unawaited(
-          context.push(
-            '/auth/otp?identity=${Uri.encodeComponent(identity)}&name=${Uri.encodeComponent(_nameController.text)}',
-          ),
+        final err = e.response?.data?['error'];
+        final msg = err == 'account_exists'
+            ? 'auth.account_exists'.tr()
+            : 'common.error'.tr();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(msg)),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('${'common.error'.tr()}: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('common.error'.tr())),
+        );
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -127,6 +151,30 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   if (input.isEmpty) return 'auth.invalid_identity'.tr();
                   if (_isValidEmail(input) || _isValidPhone(input)) return null;
                   return 'auth.invalid_identity'.tr();
+                },
+              ),
+
+              const SizedBox(height: 16),
+
+              TextFormField(
+                controller: _passwordController,
+                obscureText: _obscure,
+                keyboardType: TextInputType.visiblePassword,
+                style: GoogleFonts.outfit(fontWeight: FontWeight.w600),
+                decoration: InputDecoration(
+                  labelText: 'auth.password'.tr(),
+                  prefixIcon: const Icon(Icons.lock_outline_rounded),
+                  suffixIcon: IconButton(
+                    icon: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                    onPressed: () => setState(() => _obscure = !_obscure),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                validator: (v) {
+                  if (v == null || v.length < 6) return 'auth.password_error'.tr();
+                  return null;
                 },
               ),
 
