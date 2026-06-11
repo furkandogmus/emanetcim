@@ -12,10 +12,10 @@ interface ShopListItemProps {
   distance: string;
   lat?: number;
   lng?: number;
-  /** Seçilen tarih aralığında kalan tahmini kapasite (valiz adedi) */
   bagsAvailable?: number;
   isVerified?: boolean;
   responseTimeMinutes?: number | null;
+  slotPrices?: { s: number; m: number; xl: number };
   onClick?: () => void;
 }
 
@@ -34,6 +34,7 @@ export default function ShopListItem({
   bagsAvailable,
   isVerified,
   responseTimeMinutes,
+  slotPrices,
   onClick,
 }: ShopListItemProps) {
   const t = useTranslations('Guest');
@@ -110,9 +111,21 @@ export default function ShopListItem({
               </button>
             )}
             <div className="text-right">
-              <span className="text-[10px] text-gray-400 font-bold uppercase block -mb-0.5">{t("from")}</span>
-              <span className="text-xl font-black text-gray-900">₺{price}</span>
-              <span className="text-[10px] text-gray-400 font-bold uppercase ml-1">/ {t("day")}</span>
+              {slotPrices ? (
+                <div className="flex items-center gap-1.5">
+                  <span className="flex flex-col items-center"><span className="text-[9px] text-gray-400 font-bold uppercase">S</span><span className="text-xs font-black text-gray-900">₺{slotPrices.s}</span></span>
+                  <span className="text-gray-300 text-xs">|</span>
+                  <span className="flex flex-col items-center bg-orange-50/50 rounded-lg px-1.5 py-0.5"><span className="text-[9px] text-orange-500 font-bold uppercase">M/L</span><span className="text-sm font-black text-orange-600">₺{slotPrices.m}</span></span>
+                  <span className="text-gray-300 text-xs">|</span>
+                  <span className="flex flex-col items-center"><span className="text-[9px] text-gray-400 font-bold uppercase">XL</span><span className="text-xs font-black text-gray-900">₺{slotPrices.xl}</span></span>
+                </div>
+              ) : (
+                <>
+                  <span className="text-[10px] text-gray-400 font-bold uppercase block -mb-0.5">{t("from")}</span>
+                  <span className="text-xl font-black text-gray-900">₺{price}</span>
+                  <span className="text-[10px] text-gray-400 font-bold uppercase ml-1">/ {t("day")}</span>
+                </>
+              )}
             </div>
           </div>
         </div>

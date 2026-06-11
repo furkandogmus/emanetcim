@@ -119,6 +119,10 @@ export class BookingService implements IBookingService {
    */
   async createInitialBooking(data: CreateInitialBookingInput): Promise<Booking> {
     const rules = await getPricingRules();
+
+    if (!validateBookingStayWindow(data.checkInTime, data.checkOutTime, rules)) {
+      throw new Error('Geçersiz rezervasyon tarihleri.');
+    }
     const booking = await prisma.$transaction(
       async (tx) => {
         const shop = await tx.shop.findUnique({ where: { id: data.shopId } });

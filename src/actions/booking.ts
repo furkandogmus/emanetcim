@@ -72,6 +72,15 @@ export async function createBookingAction(data: CreateBookingInput) {
     return { success: false as const, error: "Errors.guestContactRequired" };
   }
 
+  if (isGuest) {
+    if (data.guestEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.guestEmail)) {
+      return { success: false as const, error: "Errors.invalidEmail" };
+    }
+    if (data.guestPhone && data.guestPhone.trim().length < 10) {
+      return { success: false as const, error: "Errors.invalidPhone" };
+    }
+  }
+
   // Per-user rate limit (IP spoofing'e karşı ek koruma)
   if (userId && !(await rateLimit(`booking_create_user:${userId}`, 5, 5 * 60 * 1000))) {
     return { success: false as const, error: "Errors.tooManyRequests" };
@@ -329,7 +338,7 @@ export async function cancelBookingAction(bookingId: string) {
   const session = await auth();
 
   if (!session?.user?.id) {
-    throw new Error("Errors.authRequired");
+    return { success: false as const, error: "Errors.authRequired" };
   }
 
   const booking = await bookingService.getBookingDetails(bookingId);

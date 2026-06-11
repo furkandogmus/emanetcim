@@ -18,14 +18,6 @@ export type ShopSearchHit = ShopWithDistance & {
   bagsAvailable: number;
 };
 
-const BOOKING_STATUSES_FOR_CAPACITY = [
-  'WAITING_APPROVAL',
-  'APPROVED',
-  'PENDING',
-  'PAID',
-  'CHECKED_IN',
-] as const;
-
 export type ShopWithOwner = Prisma.ShopGetPayload<{
   include: { owner: true };
 }>;
@@ -154,14 +146,26 @@ export class ShopService implements IShopService {
 
       const shopIds = withDist.map((s) => s.id);
 
+      const now = new Date();
+      const staleThreshold = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+      const pendingStatuses = ['WAITING_APPROVAL', 'APPROVED', 'PENDING'] as const;
+      const reservedStatuses = ['PAID', 'CHECKED_IN'] as const;
+
       const aggregations = await prisma.booking.groupBy({
         by: ['shopId'],
         where: {
           shopId: { in: shopIds },
-          status: { in: [...BOOKING_STATUSES_FOR_CAPACITY] },
           AND: [
             { checkInTime: { lt: checkOut } },
             { checkOutTime: { gt: checkIn } },
+          ],
+          OR: [
+            { status: { in: [...reservedStatuses] } },
+            {
+              status: { in: [...pendingStatuses] },
+              checkInTime: { gt: staleThreshold },
+            },
           ],
         },
         _sum: {

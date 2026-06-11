@@ -66,6 +66,9 @@ export default function SearchClient({
   const [maxPrice, setMaxPrice] = useState(500);
   const [open247Only, setOpen247Only] = useState(false);
   const [hasRestroom, setHasRestroom] = useState(false);
+  const [hasCctv, setHasCctv] = useState(false);
+  const [hasClimateControlFilter, setHasClimateControlFilter] = useState(false);
+  const [acceptsLargeItemsFilter, setAcceptsLargeItemsFilter] = useState(false);
   const [sortBy, setSortBy] = useState<string>("distance");
   const [gpsLocating, setGpsLocating] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("nearby");
@@ -213,9 +216,13 @@ export default function SearchClient({
       const p = shop.pricePerDay ?? 50;
       const open = open247Only ? shop.open247 === true : true;
       const wc = hasRestroom ? shop.hasRestroom === true : true;
-      return matchText && r >= minRating && p <= maxPrice && open && wc;
+      const amenities = shop as unknown as { hasCctv?: boolean; hasClimateControl?: boolean; acceptsLargeItems?: boolean };
+      const cctv = hasCctv ? amenities.hasCctv === true : true;
+      const climate = hasClimateControlFilter ? amenities.hasClimateControl === true : true;
+      const large = acceptsLargeItemsFilter ? amenities.acceptsLargeItems === true : true;
+      return matchText && r >= minRating && p <= maxPrice && open && wc && cctv && climate && large;
     });
-  }, [searchQuery, sourceShops, minRating, maxPrice, open247Only, hasRestroom]);
+  }, [searchQuery, sourceShops, minRating, maxPrice, open247Only, hasRestroom, hasCctv, hasClimateControlFilter, acceptsLargeItemsFilter]);
 
   const markFiltersDirty = () => setFilterDirty(true);
 
@@ -518,6 +525,30 @@ export default function SearchClient({
             />
             WC
           </label>
+          <label className="flex items-center gap-1 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={hasCctv}
+              onChange={(e) => setHasCctv(e.target.checked)}
+            />
+            {t("filterCctv")}
+          </label>
+          <label className="flex items-center gap-1 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={hasClimateControlFilter}
+              onChange={(e) => setHasClimateControlFilter(e.target.checked)}
+            />
+            {t("filterClimate")}
+          </label>
+          <label className="flex items-center gap-1 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={acceptsLargeItemsFilter}
+              onChange={(e) => setAcceptsLargeItemsFilter(e.target.checked)}
+            />
+            {t("filterLargeItems")}
+          </label>
         </div>
       </header>
 
@@ -575,7 +606,8 @@ export default function SearchClient({
                       bagsAvailable={shop.bagsAvailable}
                       isVerified={shop.isVerified}
                       responseTimeMinutes={shop.responseTimeMinutes}
-                      onClick={() => router.push(`/shop/${shop.id}`)}
+                      slotPrices={(shop as unknown as { slotPrices?: { s: number; m: number; xl: number } }).slotPrices}
+                      onClick={() => onSelectShop(shop.id)}
                     />
                   </motion.div>
                 ))}

@@ -7,6 +7,9 @@ import {
   SEARCH_DEFAULT_CENTER,
   SEARCH_NEARBY_RADIUS_KM,
 } from "@/lib/search-defaults";
+import { rateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/get-ip";
+import { roundedSlotPrices } from "@/lib/bag-pricing";
 
 export async function refreshSearchShopsAction(input: {
   checkInIso: string;
@@ -15,6 +18,11 @@ export async function refreshSearchShopsAction(input: {
   centerLat?: number;
   centerLng?: number;
 }) {
+  const ip = await getClientIp();
+
+  if (!(await rateLimit(`search_refresh:${ip}`, 30, 60_000))) {
+    return { ok: false as const, error: "Errors.tooManyRequests" };
+  }
   const rules = await getPricingRules();
   const checkIn = new Date(input.checkInIso);
   const checkOut = new Date(input.checkOutIso);
@@ -53,9 +61,15 @@ export async function refreshSearchShopsAction(input: {
     }),
   ]);
 
+  const withSlots = (hits: { pricePerDay: number; [k: string]: unknown }[]) =>
+    hits.map((h) => ({
+      ...h,
+      slotPrices: roundedSlotPrices(h.pricePerDay, rules),
+    }));
+
   return {
     ok: true as const,
-    nearby: JSON.parse(JSON.stringify(nearby)) as unknown[],
-    all: JSON.parse(JSON.stringify(all)) as unknown[],
+    nearby: JSON.parse(JSON.stringify(withSlots(nearby))) as unknown[],
+    all: JSON.parse(JSON.stringify(withSlots(all))) as unknown[],
   };
 }

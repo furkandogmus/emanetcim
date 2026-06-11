@@ -5,6 +5,7 @@ import { randomInt } from "crypto";
 import logger from "@/lib/logger";
 import { sendMobileOtp } from "@/lib/mail";
 import { isNetgsmConfigured, normalizeTrGsm10, sendNetgsmRestSms } from "@/lib/netgsm";
+import { rateLimit } from "@/lib/rate-limit";
 
 const schema = z.union([
   z.object({ email: z.string().email() }),
@@ -25,6 +26,14 @@ export async function POST(req: Request) {
 
   if (!normalizedIdentity) {
     return NextResponse.json({ error: "invalid_format" }, { status: 400 });
+  }
+
+  const ip = req.headers.get("x-forwarded-for") ?? "unknown";
+  if (!(await rateLimit(`mobile_otp:${normalizedIdentity}`, 3, 2 * 60_000))) {
+    return NextResponse.json({ error: "too_many_otp_requests" }, { status: 429 });
+  }
+  if (!(await rateLimit(`mobile_otp_ip:${ip}`, 10, 5 * 60_000))) {
+    return NextResponse.json({ error: "too_many_requests" }, { status: 429 });
   }
 
   const code = String(randomInt(100000, 999999));

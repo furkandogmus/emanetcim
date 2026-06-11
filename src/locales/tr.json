@@ -199,7 +199,7 @@
     "searchBagsAvailable": "~{count} müsait",
     "searchRefreshError": "Liste yenilenemedi. Tarihleri kontrol edin.",
     "searchFreeCancelBadge": "Ücretsiz iptal",
-    "guaranteeBadge": "₺10.000 garanti",
+    "guaranteeBadge": "5.000 TL Garanti",
     "freeCancellationNote": "Check-in'den 24 saat öncesine kadar ücretsiz iptal",
     "distanceAway": "{km} km",
     "sortBy": "Sırala",
@@ -341,13 +341,13 @@
     "cancelSuccess": "Rezervasyonunuz başarıyla iptal edildi ve iade süreci başlatıldı.",
     "cancelError": "İptal sırasında hata oluştu.",
     "showQR": "QR GÖSTER",
-     "addToCalendar": "Takvime Ekle",
-     "luggageStorageAt": "Bagaj Muhafaza",
-     "bookingDetailCalendarDesc": "Rezervasyonunuzu takviminize ekleyin",
-     "cancelFailed": "İptal Başarısız",
-     "bookingCancelled": "Rezervasyon İptal Edildi",
-     "cancelBookingConfirm": "Bu rezervasyonu iptal etmek istediğinize emin misiniz?",
-     "downloadReceipt": "Makbuz İndir",
+    "addToCalendar": "Takvime Ekle",
+    "luggageStorageAt": "Bagaj Muhafaza",
+    "bookingDetailCalendarDesc": "Rezervasyonunuzu takviminize ekleyin",
+    "cancelFailed": "İptal Başarısız",
+    "bookingCancelled": "Rezervasyon İptal Edildi",
+    "cancelBookingConfirm": "Bu rezervasyonu iptal etmek istediğinize emin misiniz?",
+    "downloadReceipt": "Makbuz İndir",
     "checkIn": "Giriş",
     "checkOut": "Çıkış",
     "bagCount": "Valiz Sayısı",
@@ -464,7 +464,10 @@
     "payBookingError_iyzico_failed": "Ödeme reddedildi veya tamamlanamadı. Kartınızı kontrol edin veya tekrar deneyin.",
     "payBookingErrorUnknown": "Bir sorun oluştu. Tekrar deneyin veya destekle iletişime geçin.",
     "payBookingReturnSyncing": "Ödemeniz onaylanıyor…",
-    "payBookingReturnFailed": "Ödeme onaylanamadı. Rezervasyon durumunu kontrol edin veya tekrar deneyin."
+    "payBookingReturnFailed": "Ödeme onaylanamadı. Rezervasyon durumunu kontrol edin veya tekrar deneyin.",
+    "filterCctv": "CCTV",
+    "filterClimate": "Klima",
+    "filterLargeItems": "Büyük Eşya"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Yönetim Masası",
@@ -908,8 +911,8 @@
     "deleteButton": "Hesabı kapat",
     "errors": {
       "activeBookings": "Aktif rezervasyonunuz varken hesap kapatılamaz.",
-    "authRequired": "Oturum açmanız gerekiyor.",
-    "guestContactRequired": "Lütfen e-posta veya telefon girin",
+      "authRequired": "Oturum açmanız gerekiyor.",
+      "guestContactRequired": "Lütfen e-posta veya telefon girin",
       "unauthorized": "Bu işlem için yetkiniz yok.",
       "generic": "İşlem tamamlanamadı."
     }
