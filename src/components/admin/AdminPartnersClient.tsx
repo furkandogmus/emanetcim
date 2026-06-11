@@ -199,7 +199,7 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e: React.MouseEvent) => e.stopPropagation()}
               className="w-full max-w-lg rounded-[2rem] bg-white p-8 shadow-2xl"
             >
               <div className="flex items-center justify-between mb-6">
