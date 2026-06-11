@@ -154,9 +154,18 @@ class AuthController extends Notifier<AuthState> {
   Future<void> signInWithGoogle() async {
     state = state.copyWith(loading: true);
     try {
-      final account = await GoogleSignIn.instance.authenticate(
-        scopeHint: ['email', 'profile'],
-      );
+      GoogleSignInAccount account;
+      try {
+        account = await GoogleSignIn.instance.authenticate(
+          scopeHint: ['email', 'profile'],
+        );
+      } on GoogleSignInException catch (e) {
+        if (e.code == GoogleSignInExceptionCode.canceled) {
+          state = state.copyWith(loading: false);
+          return;
+        }
+        rethrow;
+      }
 
       final auth = account.authentication;
       final idToken = auth.idToken;
