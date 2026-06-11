@@ -30,10 +30,23 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
+  String? _normalizePhone(String phone) {
+    if (phone.trim().isEmpty) return null;
+    var d = phone.replaceAll(RegExp(r'\D'), '');
+    if (d.startsWith('90') && d.length >= 12) {
+      d = d.substring(2);
+    }
+    if (d.startsWith('0') && d.length == 11) {
+      d = d.substring(1);
+    }
+    if (d.length == 10 && d.startsWith('5')) {
+      return d;
+    }
+    return null;
+  }
+
   bool _isValidPhone(String phone) {
-    final clean = phone.replaceAll(RegExp(r'\D'), '');
-    return (clean.length == 10 && clean.startsWith('5')) ||
-        (clean.length == 11 && clean.startsWith('05'));
+    return _normalizePhone(phone) != null;
   }
 
   Future<void> _register() async {
@@ -45,10 +58,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       final password = _passwordController.text.trim();
       final name = _nameController.text.trim();
       final isEmail = identity.contains('@');
+      final cleanIdentity = isEmail ? identity : _normalizePhone(identity)!;
 
       final dio = ref.read(dioProvider);
       final data = <String, dynamic>{
-        if (isEmail) 'email': identity else 'phone': identity.replaceAll(RegExp(r'\D'), ''),
+        if (isEmail) 'email': cleanIdentity else 'phone': cleanIdentity,
         'password': password,
         if (name.isNotEmpty) 'name': name,
       };
@@ -227,16 +241,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                       const SizedBox(height: 32),
 
-                      FilledButton(
-                        onPressed: (_busy || !_kvkkAccepted) ? null : _register,
-                        style: FilledButton.styleFrom(
-                          minimumSize: Size(double.infinity, isTablet ? 64 : 56),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        ),
-                        child: _busy
-                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                            : Text('auth.register_button'.tr(), style: GoogleFonts.outfit(fontSize: isTablet ? 18 : 16)),
-                      ),
+FilledButton(
+  onPressed: (_busy || !_kvkkAccepted) ? null : _register,
+  style: FilledButton.styleFrom(
+    minimumSize: Size(double.infinity, isTablet ? 64 : 56),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+  ),
+  child: Semantics(
+    label: 'Kayıt Ol',
+    child: _busy
+        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+        : Text('auth.register_button'.tr(), style: GoogleFonts.outfit(fontSize: isTablet ? 18 : 16)),
+  ),
+),
                     ],
                   ),
                 ),

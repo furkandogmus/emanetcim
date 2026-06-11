@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "1034885764385-kjphmordguaig935mvi8ltqett1sa52s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bagajpark",
+            "certificate_hash": "dab7f04d3c2dd13a31a5d84950b84bfb742e7f3e"
+          }
+        },
+        {
           "client_id": "1034885764385-c5f4o8bo3ttdg193en2m5fabj8rja90l.apps.googleusercontent.com",
           "client_type": 3
         }

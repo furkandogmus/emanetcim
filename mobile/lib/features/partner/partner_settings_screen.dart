@@ -66,11 +66,41 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
     }
   }
 
+  String? _normalizePhone(String phone) {
+    if (phone.trim().isEmpty) return null;
+    var d = phone.replaceAll(RegExp(r'\D'), '');
+    if (d.startsWith('90') && d.length >= 12) {
+      d = d.substring(2);
+    }
+    if (d.startsWith('0') && d.length == 11) {
+      d = d.substring(1);
+    }
+    if (d.length == 10 && d.startsWith('5')) {
+      return d;
+    }
+    return null;
+  }
+
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _busy = true);
     try {
       final dio = ref.read(dioProvider);
+
+      if (_phone.text.isNotEmpty) {
+        final norm = _normalizePhone(_phone.text);
+        if (norm == null) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('auth.invalid_identity'.tr())),
+            );
+          }
+          setState(() => _busy = false);
+          return;
+        }
+        await dio.put('/partner/phone', data: {'phone': norm});
+      }
+
       await dio.put(
         '/partner/shop',
         data: {
@@ -84,9 +114,6 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
           'district': _district.text,
         },
       );
-      if (_phone.text.isNotEmpty) {
-        await dio.put('/partner/phone', data: {'phone': _phone.text});
-      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('partner.settings_updated'.tr())),

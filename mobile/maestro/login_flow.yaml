@@ -23,7 +23,7 @@ appId: com.bagajpark
 # Klavyeyi kapat ve butona tıkla
 - pressKey: Back
 - tapOn:
-    point: "50%,70%"
+    text: "Giriş Yap.*"
     optional: true
 
 # Ana sayfa

@@ -54,10 +54,10 @@ export async function requestPasswordResetAction(rawEmail: string) {
 
   const user = await prisma.user.findUnique({
     where: { email },
-    select: { id: true, email: true, passwordHash: true },
+    select: { id: true, email: true },
   });
 
-  if (!user?.email || !user.passwordHash) {
+  if (!user?.email) {
     return { ok: true as const };
   }
 
@@ -105,17 +105,17 @@ export async function resetPasswordWithTokenAction(input: unknown) {
       const phone = row.identifier.slice(PASSWORD_RESET_PHONE_PREFIX.length);
       return prisma.user.findUnique({
         where: { phone },
-        select: { id: true, passwordHash: true },
+        select: { id: true },
       });
     }
     const email = row.identifier.slice(PASSWORD_RESET_IDENTIFIER_PREFIX.length);
     return prisma.user.findUnique({
       where: { email },
-      select: { id: true, passwordHash: true },
+      select: { id: true },
     });
   })();
 
-  if (!user?.passwordHash) {
+  if (!user) {
     return { ok: false as const, error: "invalid_token" as const };
   }
 

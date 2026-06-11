@@ -72,17 +72,19 @@ describe("Password Reset Actions", () => {
       expect(mockMail).toHaveBeenCalledWith("user@test.com", "token123", "tr");
     });
 
-    it("should not send email for OAuth users (no passwordHash)", async () => {
+    it("should send email for OAuth users (no passwordHash)", async () => {
       mockPrisma.user.findUnique.mockResolvedValue({
         id: "oauth123",
         email: "oauth@test.com",
         passwordHash: null,
       });
+      mockPrisma.verificationToken.findFirst.mockResolvedValue(null);
+      mockPrisma.verificationToken.create.mockResolvedValue({ token: "token123" });
 
       const result = await requestPasswordResetAction("oauth@test.com");
       
       expect(result.ok).toBe(true);
-      expect(mockMail).not.toHaveBeenCalled();
+      expect(mockMail).toHaveBeenCalledWith("oauth@test.com", "token123", "tr");
     });
 
     it("should enforce rate limits", async () => {

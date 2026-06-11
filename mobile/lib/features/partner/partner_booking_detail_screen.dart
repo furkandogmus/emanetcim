@@ -32,9 +32,9 @@ class _PartnerBookingDetailScreenState
     super.initState();
     _pollingTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
       final current = ref.read(bookingProvider(widget.bookingId));
-      final terminalStatuses = {'CHECKED_OUT', 'CANCELLED'};
-      final isTerminal = current.asData?.value.status != null &&
-          terminalStatuses.contains(current.asData!.value.status);
+      final status = current.asData?.value.status;
+      final isTerminal = status == BookingStatus.checkedOut ||
+          status == BookingStatus.cancelled;
       if (isTerminal) {
         timer.cancel();
         return;

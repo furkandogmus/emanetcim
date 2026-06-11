@@ -52,9 +52,9 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
     _protectScreen();
     _pollingTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
       final current = ref.read(bookingProvider(widget.bookingId));
-      final terminalStatuses = {'CHECKED_OUT', 'CANCELLED'};
-      final isTerminal = current.asData?.value.status != null &&
-          terminalStatuses.contains(current.asData!.value.status);
+      final status = current.asData?.value.status;
+      final isTerminal = status == BookingStatus.checkedOut ||
+          status == BookingStatus.cancelled;
       if (isTerminal) {
         timer.cancel();
         return;
@@ -140,6 +140,43 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                           ),
                           const SizedBox(height: 8),
                           _statusBadge(bk.status),
+                          if (bk.status == BookingStatus.waitingApproval ||
+                              bk.status == BookingStatus.approved ||
+                              bk.status == BookingStatus.paid ||
+                              bk.status == BookingStatus.checkedIn) ...[
+                            const SizedBox(height: 16),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.shade50,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: Colors.orange.shade200),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.info_outline_rounded,
+                                    color: Colors.orange,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      'booking.pay_at_shop_desc'.tr(),
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.orange.shade900,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),

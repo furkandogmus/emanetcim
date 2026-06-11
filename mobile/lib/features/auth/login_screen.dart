@@ -32,10 +32,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
+  String? _normalizePhone(String phone) {
+    if (phone.trim().isEmpty) return null;
+    var d = phone.replaceAll(RegExp(r'\D'), '');
+    if (d.startsWith('90') && d.length >= 12) {
+      d = d.substring(2);
+    }
+    if (d.startsWith('0') && d.length == 11) {
+      d = d.substring(1);
+    }
+    if (d.length == 10 && d.startsWith('5')) {
+      return d;
+    }
+    return null;
+  }
+
   bool _isValidPhone(String phone) {
-    final clean = phone.replaceAll(RegExp(r'\D'), '');
-    return (clean.length == 10 && clean.startsWith('5')) ||
-        (clean.length == 11 && clean.startsWith('05'));
+    return _normalizePhone(phone) != null;
   }
 
   bool _isValid(String v) {
@@ -309,16 +322,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                         ),
                                       ),
                                       const SizedBox(height: 12),
-                                      FilledButton(
-                                        onPressed: _busy ? null : _login,
-                                        style: FilledButton.styleFrom(
-                                          minimumSize: Size(double.infinity, isTablet ? 64 : 56),
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                        ),
-                                        child: _busy
-                                            ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                                            : Text('auth.sign_in'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: isTablet ? 18 : 16)),
-                                      ),
+FilledButton(
+  onPressed: _busy ? null : _login,
+  style: FilledButton.styleFrom(
+    minimumSize: Size(double.infinity, isTablet ? 64 : 56),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+  ),
+  child: Semantics(
+    label: 'Giriş Yap',
+    child: _busy
+        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+        : Text('auth.sign_in'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: isTablet ? 18 : 16)),
+  ),
+),
                                     ],
                                   ),
                                 ),
@@ -364,14 +380,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   ),
                                 ],
                                 const SizedBox(height: 20),
-                                TextButton.icon(
-                                  onPressed: () {
-                                    ref.read(hapticServiceProvider).selection();
-                                    _showHowItWorks(context);
-                                  },
-                                  icon: const Icon(Icons.info_outline_rounded, size: 20),
-                                  label: Text('home.how_it_works'.tr(), style: GoogleFonts.outfit(color: AppColors.brandOrange, fontWeight: FontWeight.bold)),
-                                ),
+TextButton.icon(
+  onPressed: () {
+    ref.read(hapticServiceProvider).selection();
+    _showHowItWorks(context);
+  },
+  icon: const Icon(Icons.info_outline_rounded, size: 20),
+  label: Semantics(
+    label: 'Nasıl Çalışır?',
+    child: Text('home.how_it_works'.tr(), style: GoogleFonts.outfit(color: AppColors.brandOrange, fontWeight: FontWeight.bold)),
+  ),
+),
                                 const SizedBox(height: 20),
                               ],
                             ),

@@ -222,13 +222,15 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
     );
   }
 
-  Widget _buildSummaryCard(
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Expanded(
+Widget _buildSummaryCard(
+  String title,
+  String value,
+  IconData icon,
+  Color color,
+) {
+  return Expanded(
+    child: Semantics(
+      label: '$title $value',
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -264,8 +266,9 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   void _showHowItWorks(BuildContext context) {
     showModalBottomSheet(

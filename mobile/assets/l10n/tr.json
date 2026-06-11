@@ -171,7 +171,9 @@
     "quick_actions": "Hızlı İşlemler",
     "approve_shops": "Başvuruları Onayla",
     "support_messages": "Destek Mesajları",
-    "live_analytics": "Canlı İstatistikler"
+    "live_analytics": "Canlı İstatistikler",
+    "new_shop_apps": "Yeni Dükkan Başvuruları",
+    "unread_messages": "Okunmamış Mesajlar"
   },
   "checkout": {
     "title": "Rezervasyonu Tamamla",
@@ -205,6 +207,7 @@
     "directions": "Yol Tarifi",
     "call_shop": "Dükkanı Ara",
     "get_help": "Destek Al",
+    "pay_at_shop_desc": "Beta Sürümü: Lütfen depolama ücretini dükkana gittiğinizde esnafımıza elden (nakit veya IBAN ile) ödeyin.",
     "cancel": "İptal Et",
     "cancel_confirm": "Bu rezervasyonu iptal etmek istediğinize emin misiniz?",
     "cancel_success": "Rezervasyonunuz iptal edildi.",

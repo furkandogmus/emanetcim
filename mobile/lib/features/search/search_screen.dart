@@ -358,23 +358,26 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                   setState(() => _suggestions = []);
                                 },
                               )
-                            : GestureDetector(
-                                onTap: _showFilterSheet,
-                                child: Container(
-                                  margin: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: (_onlyOpenNow || _only247 || _maxPrice > 0)
-                                        ? AppColors.textDark
-                                        : AppColors.brandOrange,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.tune_rounded,
-                                    color: Colors.white,
-                                    size: 20,
-                                  ),
-                                ),
-                              ),
+: Semantics(
+  label: 'Filtrele',
+  child: GestureDetector(
+    onTap: _showFilterSheet,
+    child: Container(
+      margin: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: (_onlyOpenNow || _only247 || _maxPrice > 0)
+            ? AppColors.textDark
+            : AppColors.brandOrange,
+        shape: BoxShape.circle,
+      ),
+      child: const Icon(
+        Icons.tune_rounded,
+        color: Colors.white,
+        size: 20,
+      ),
+    ),
+  ),
+),
                         fillColor: Colors.white.withValues(alpha: 0.95),
                         filled: true,
                         border: OutlineInputBorder(

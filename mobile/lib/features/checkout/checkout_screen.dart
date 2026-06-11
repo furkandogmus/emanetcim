@@ -265,7 +265,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Text('common.error'.tr()),
               data: (shop) {
-                final days = _checkOut.difference(_checkIn).inDays + 1;
+                final ms = _checkOut.millisecondsSinceEpoch - _checkIn.millisecondsSinceEpoch;
+                final days = ms <= 0 ? 1 : (ms / (24 * 60 * 60 * 1000)).ceil().clamp(1, 30);
                 // BagajPark fiyatlandırması sunucu tarafında hesaplanır.
                 // Buradaki hesaplama yalnızca tahmini gösterim içindir.
                 // Kesin fiyat onay anında sunucudan alınır.

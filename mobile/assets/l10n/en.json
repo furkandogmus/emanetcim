@@ -171,7 +171,9 @@
     "quick_actions": "Quick Actions",
     "approve_shops": "Approve Shops",
     "support_messages": "Support Messages",
-    "live_analytics": "Live Analytics"
+    "live_analytics": "Live Analytics",
+    "new_shop_apps": "New Shop Applications",
+    "unread_messages": "Unread Messages"
   },
   "checkout": {
     "title": "Complete Booking",
@@ -205,6 +207,7 @@
     "directions": "Directions",
     "call_shop": "Call Shop",
     "get_help": "Get Help",
+    "pay_at_shop_desc": "Beta Version: Please pay the storage fee directly to the shop owner (cash or bank transfer).",
     "cancel": "Cancel Booking",
     "cancel_confirm": "Are you sure you want to cancel this booking?",
     "cancel_success": "Your booking has been cancelled.",

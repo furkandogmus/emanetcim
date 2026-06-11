@@ -102,10 +102,22 @@ class AuthController extends Notifier<AuthState> {
     try {
       final dio = ref.read(dioProvider);
       final isEmail = identity.contains('@');
+      String cleanIdentity = identity;
+      if (!isEmail) {
+        var d = identity.replaceAll(RegExp(r'\D'), '');
+        if (d.startsWith('90') && d.length >= 12) {
+          d = d.substring(2);
+        }
+        if (d.startsWith('0') && d.length == 11) {
+          d = d.substring(1);
+        }
+        cleanIdentity = d;
+      }
+
       final data = isEmail
           ? {'email': identity, 'password': password}
           : {
-              'phone': identity.replaceAll(RegExp(r'\D'), ''),
+              'phone': cleanIdentity,
               'password': password,
             };
 

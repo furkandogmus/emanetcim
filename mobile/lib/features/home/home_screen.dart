@@ -95,21 +95,24 @@ class HomeScreen extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: () => context.push('/search'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: AppColors.brandOrange,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 12,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: Text('home.hero_cta'.tr()),
-                        ),
+ElevatedButton(
+  onPressed: () => context.push('/search'),
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.white,
+    foregroundColor: AppColors.brandOrange,
+    padding: const EdgeInsets.symmetric(
+      horizontal: 24,
+      vertical: 12,
+    ),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+    ),
+  ),
+  child: Semantics(
+    label: 'Emanet Noktası Bul',
+    child: Text('home.hero_cta'.tr()),
+  ),
+),
                       ],
                     ),
                   ),
@@ -147,25 +150,27 @@ class HomeScreen extends ConsumerWidget {
                   const SizedBox(height: 40),
 
                   // How it works
-                  RepaintBoundary(
-                    child: GestureDetector(
-                      onTap: () => _showHowItWorks(context),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              _sectionHeader('home.how_it_works'.tr()),
-                              Text(
-                                'common.see_details'.tr(),
-                                style: GoogleFonts.outfit(
-                                  fontSize: 12,
-                                  color: AppColors.brandOrange,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
+RepaintBoundary(
+  child: Semantics(
+    label: 'Nasıl Çalışır?',
+    child: GestureDetector(
+      onTap: () => _showHowItWorks(context),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _sectionHeader('home.how_it_works'.tr()),
+              Text(
+                'common.see_details'.tr(),
+                style: GoogleFonts.outfit(
+                  fontSize: 12,
+                  color: AppColors.brandOrange,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
                           const SizedBox(height: 20),
                           _buildStep(
                             context,
@@ -185,18 +190,19 @@ class HomeScreen extends ConsumerWidget {
                             'home.step3.title'.tr(),
                             'home.step3.desc'.tr(),
                           ),
-                          _buildStep(
-                            context,
-                            Icons.explore_rounded,
-                            'home.step4.title'.tr(),
-                            'home.step4.desc'.tr(),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+_buildStep(
+  context,
+  Icons.explore_rounded,
+  'home.step4.title'.tr(),
+  'home.step4.desc'.tr(),
+),
+],
+),
+),
+),
+),
 
-                  const SizedBox(height: 40),
+const SizedBox(height: 40),
 
                   // Promotion Section
                   Container(
