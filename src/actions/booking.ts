@@ -20,6 +20,7 @@ import { bookingEventService } from "@/services/BookingEventService";
 import { headers } from "next/headers";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-ip";
+import { getLocale } from "next-intl/server";
 import type {
   CancelBookingErrorCode,
   ModifyBookingErrorCode,
@@ -198,6 +199,14 @@ export async function createBookingAction(data: CreateBookingInput) {
       actorId: session.user.id,
       actorRole: "GUEST",
     }).catch(() => {});
+
+    // Misafire onay e-postası
+    if (session.user.email) {
+      const locale = await getLocale();
+      void notificationService
+        .notifyBookingSuccess(session.user.email, booking.id, totalPrice, locale)
+        .catch(() => {});
+    }
 
     // Esnafa bildirim gönder (Yeni Rezervasyon)
     void notificationService
