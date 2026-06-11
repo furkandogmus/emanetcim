@@ -1,13 +1,15 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/services/favorites_service.dart';
 import '../../../shared/models/shop.dart';
 import '../../../shared/utils/app_colors.dart';
 
-class ShopPreviewCard extends StatelessWidget {
+class ShopPreviewCard extends ConsumerWidget {
   final ShopDto shop;
   final bool isSelected;
 
@@ -18,7 +20,8 @@ class ShopPreviewCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isFav = ref.watch(favoritesProvider).contains(shop.id);
     return GestureDetector(
       onTap: () => context.push('/shop/${shop.id}'),
       child: AnimatedContainer(
@@ -81,52 +84,42 @@ class ShopPreviewCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    shop.name,
-                    style: GoogleFonts.outfit(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textDark,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(
-                        Icons.star_rounded,
-                        color: Colors.amber,
-                        size: 18,
+                      Expanded(
+                        child: Text(
+                          shop.name,
+                          style: GoogleFonts.outfit(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textDark,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${shop.rating?.toStringAsFixed(1) ?? '-'}',
-                        style: GoogleFonts.outfit(
-                          fontSize: 14,
-                          color: const Color(0xFF424242),
-                          fontWeight: FontWeight.w500,
+                      GestureDetector(
+                        onTap: () => ref.read(favoritesProvider.notifier).toggle(shop.id),
+                        child: Icon(
+                          isFav ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
+                          size: 22,
+                          color: isFav ? Colors.redAccent : Colors.grey,
                         ),
                       ),
                     ],
                   ),
-                  const Spacer(),
+                  const SizedBox(height: 4),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        '₺${shop.pricePerDay.toStringAsFixed(0)}${'search.day_unit'.tr()}',
-                        style: GoogleFonts.outfit(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.brandOrange,
-                        ),
-                      ),
-                      const Icon(
-                        Icons.arrow_forward_ios_rounded,
-                        size: 16,
-                        color: Color(0xFF757575),
-                      ),
+                      const Icon(Icons.star_rounded, color: Colors.amber, size: 18),
+                      const SizedBox(width: 4),
+                      Text('${shop.rating?.toStringAsFixed(1) ?? '-'}',
+                        style: GoogleFonts.outfit(fontSize: 14, color: const Color(0xFF424242), fontWeight: FontWeight.w500)),
+                      if (shop.pricePerDay > 0) ...[
+                        const Spacer(),
+                        Text('₺${shop.pricePerDay.toStringAsFixed(0)}${'search.day_unit'.tr()}',
+                          style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.brandOrange)),
+                      ],
                     ],
                   ),
                 ],

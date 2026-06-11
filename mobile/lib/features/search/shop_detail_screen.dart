@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../core/api/api_client.dart';
 import '../../core/repositories/shop_repository.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/services/share_service.dart';
@@ -127,13 +128,24 @@ class ShopDetailScreen extends ConsumerWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Expanded(
-                                child: Text(
-                                  s.name,
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.textDark,
-                                  ),
+                                child: Row(
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        s.name,
+                                        style: GoogleFonts.outfit(
+                                          fontSize: 28,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.textDark,
+                                        ),
+                                      ),
+                                    ),
+                                    if (s.isVerified)
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 8),
+                                        child: Icon(Icons.verified_rounded, color: Colors.blue, size: 24),
+                                      ),
+                                  ],
                                 ),
                               ),
                               Container(
@@ -285,21 +297,17 @@ class ShopDetailScreen extends ConsumerWidget {
                             spacing: 12,
                             runSpacing: 12,
                             children: [
-                              _amenityChip(
-                                Icons.videocam_rounded,
-                                'search.camera'.tr(),
-                              ),
-                              _amenityChip(
-                                Icons.security_rounded,
-                                'search.insurance'.tr(),
-                              ),
+                              if (s.hasCctv)
+                                _amenityChip(Icons.videocam_rounded, 'search.camera'.tr()),
+                              _amenityChip(Icons.security_rounded, 'search.insurance'.tr()),
                               if (s.hasRestroom)
-                                _amenityChip(
-                                  Icons.wc_rounded,
-                                  'search.restroom'.tr(),
-                                ),
-                              _amenityChip(Icons.wifi_rounded, 'Wi-Fi'),
-                              _amenityChip(Icons.accessible_rounded, 'Erişim'),
+                                _amenityChip(Icons.wc_rounded, 'search.restroom'.tr()),
+                              if (s.hasClimateControl)
+                                _amenityChip(Icons.ac_unit_rounded, 'search.climate'.tr()),
+                              if (s.acceptsLargeItems)
+                                _amenityChip(Icons.work_rounded, 'search.large_items'.tr()),
+                              if (s.open247)
+                                _amenityChip(Icons.access_time_rounded, 'search.open_247'.tr()),
                             ],
                           ),
 
@@ -307,15 +315,7 @@ class ShopDetailScreen extends ConsumerWidget {
 
                           _sectionHeader('shop.reviews'.tr()),
                           const SizedBox(height: 16),
-                          Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(24),
-                              child: Text(
-                                'Henüz yorum bulunmuyor.',
-                                style: TextStyle(color: Colors.grey),
-                              ),
-                            ),
-                          ),
+                          _ReviewsList(shopId: s.id),
 
                           const SizedBox(height: 120), // Bottom bar space
                         ],
@@ -516,6 +516,60 @@ class ShopDetailScreen extends ConsumerWidget {
           ),
         ),
       ),
+
     );
   }
 }
+
+class _ReviewsList extends ConsumerWidget {
+  final String shopId;
+  const _ReviewsList({required this.shopId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final reviewsAsync = ref.watch(_shopReviewsProvider(shopId));
+    return reviewsAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, __) => Center(child: Text('shop.error_loading'.tr())),
+      data: (reviews) {
+        if (reviews.isEmpty) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text('Henüz yorum bulunmuyor.', style: TextStyle(color: Colors.grey)),
+            ),
+          );
+        }
+        return Column(
+          children: reviews.map((r) => Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(color: const Color(0xFFF8FAFC), borderRadius: BorderRadius.circular(20)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(r['name'] ?? '', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+                      Row(children: List.generate(5, (i) => Icon(Icons.star_rounded, size: 16, color: i < (r['rating'] as int? ?? 0) ? Colors.amber : Colors.grey.shade300))),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(r['comment'] ?? '', style: GoogleFonts.outfit(fontSize: 14, color: const Color(0xFF424242), height: 1.4)),
+                ],
+              ),
+            ),
+          )).toList(),
+        );
+      },
+    );
+  }
+}
+
+final _shopReviewsProvider = FutureProvider.family<List<Map<String, dynamic>>, String>((ref, shopId) async {
+  final dio = ref.read(dioProvider);
+  final res = await dio.get('/shops/$shopId/reviews');
+  return (res.data as List?)?.cast<Map<String, dynamic>>() ?? [];
+});

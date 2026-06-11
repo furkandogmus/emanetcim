@@ -24,6 +24,14 @@ final bookingProvider = FutureProvider.family<BookingDto, String>((
   return result.fold((data) => data, (error) => throw Exception(error));
 });
 
+final bookingSealsProvider = FutureProvider.family<List<Map<String, dynamic>>, String>((ref, id) async {
+  final dio = ref.read(dioProvider);
+  final res = await dio.get('/bookings/$id');
+  final data = res.data as Map<String, dynamic>;
+  final seals = data['seals'] as List<dynamic>? ?? [];
+  return seals.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+});
+
 class BookingDetailScreen extends ConsumerStatefulWidget {
   const BookingDetailScreen({required this.bookingId, super.key});
   final String bookingId;
