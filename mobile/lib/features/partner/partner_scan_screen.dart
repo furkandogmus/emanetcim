@@ -68,9 +68,9 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _infoRow('Serial:', '${data['serialNumber']}'),
+            _infoRow('Serial:', '${data.serialNumber}'),
             const SizedBox(height: 8),
-            _infoRow('Status:', '${data['status']}'),
+            _infoRow('Status:', '${data.status}'),
           ],
         ),
         actions: [

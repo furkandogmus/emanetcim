@@ -4,6 +4,7 @@ class SealScanResult {
   final String? bookingId;
   final String? status;
   final String? message;
+  final int? serialNumber;
 
   SealScanResult({
     required this.type,
@@ -11,6 +12,7 @@ class SealScanResult {
     this.bookingId,
     this.status,
     this.message,
+    this.serialNumber,
   });
 
   factory SealScanResult.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class SealScanResult {
       bookingId: json['bookingId'] as String?,
       status: json['status'] as String?,
       message: json['message'] as String?,
+      serialNumber: json['serialNumber'] as int?,
     );
   }
 }

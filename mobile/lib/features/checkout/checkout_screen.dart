@@ -101,10 +101,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       }
 
       // Sunucu fiyatı ile tutarsızlık uyarısı
-      if (serverTotal != null && grandTotal > 0) {
-        final diff = (grandTotal - serverTotal.toDouble()).abs();
+      if (serverTotal != null && _grandTotal > 0) {
+        final diff = (_grandTotal - serverTotal.toDouble()).abs();
         if (diff > 1) {
-          debugPrint('⚠️ Price mismatch: client=$grandTotal server=$serverTotal');
+          debugPrint('⚠️ Price mismatch: client=$_grandTotal server=$serverTotal');
         }
       }
 

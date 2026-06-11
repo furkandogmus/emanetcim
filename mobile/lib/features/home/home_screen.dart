@@ -125,19 +125,19 @@ class HomeScreen extends ConsumerWidget {
                       scrollDirection: Axis.horizontal,
                       children: [
                         _cityCard(
-                          'İstanbul',
+                          'home.city_istanbul'.tr(),
                           'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?q=80&w=400&auto=format&fit=crop',
                         ),
                         _cityCard(
-                          'Ankara',
+                          'home.city_ankara'.tr(),
                           'https://images.unsplash.com/photo-1621259182978-fbf93132d53d?q=80&w=400&auto=format&fit=crop',
                         ),
                         _cityCard(
-                          'İzmir',
+                          'home.city_izmir'.tr(),
                           'https://images.unsplash.com/photo-1605333396915-47ed6b68a00e?q=80&w=400&auto=format&fit=crop',
                         ),
                         _cityCard(
-                          'Antalya',
+                          'home.city_antalya'.tr(),
                           'https://images.unsplash.com/photo-1542051841857-5f90071e7989?q=80&w=400&auto=format&fit=crop',
                         ),
                       ],

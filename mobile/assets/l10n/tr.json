@@ -233,7 +233,11 @@
     "safety_title": "Her Valiz Sigortalı",
     "safety_desc": "BagajPark ile yaptığın her rezervasyon ₺10.000'ye kadar koruma altındadır.",
     "popular_cities": "Popüler Şehirler",
-    "featured_shops": "Öne Çıkan Noktalar"
+    "featured_shops": "Öne Çıkan Noktalar",
+    "city_istanbul": "İstanbul",
+    "city_ankara": "Ankara",
+    "city_izmir": "İzmir",
+    "city_antalya": "Antalya"
   },
   "common": {
     "error": "Bir hata oluştu",
@@ -248,7 +252,10 @@
     "next": "İleri",
     "done": "Bitti",
     "try_again": "Tekrar Dene",
-    "no_internet": "Bağlantı Yok - Bazı işlemler gecikebilir"
+    "no_internet": "Bağlantı Yok - Bazı işlemler gecikebilir",
+    "error_404": "Aradığınız veri bulunamadı (404)",
+    "error_timeout": "İnternet bağlantısı zaman aşımına uğradı",
+    "error_server": "Sunucu hatası oluştu"
   },
   "tutorial": {
     "guest": {

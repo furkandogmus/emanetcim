@@ -233,7 +233,11 @@
     "safety_title": "Every Bag Is Insured",
     "safety_desc": "Every booking with BagajPark is protected up to ₺10,000.",
     "popular_cities": "Popular Cities",
-    "featured_shops": "Featured Spots"
+    "featured_shops": "Featured Shops",
+    "city_istanbul": "Istanbul",
+    "city_ankara": "Ankara",
+    "city_izmir": "Izmir",
+    "city_antalya": "Antalya"
   },
   "common": {
     "error": "An error occurred",
@@ -248,7 +252,10 @@
     "next": "Next",
     "done": "Done",
     "try_again": "Try Again",
-    "no_internet": "No Connection - Some actions may be delayed"
+    "no_internet": "No Connection - Some actions may be delayed",
+    "error_404": "Data not found (404)",
+    "error_timeout": "Connection timed out",
+    "error_server": "Server error"
   },
   "tutorial": {
     "guest": {

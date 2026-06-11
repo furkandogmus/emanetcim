@@ -101,7 +101,7 @@ final dioProvider = Provider<Dio>((ref) {
 
   dio.interceptors.add(
     InterceptorsWrapper(
-      onRequest: (options, handler) {
+      onRequest: (options, handler) async {
         if (options.method == 'GET') {
           // Allow bypassing cache with a custom header
           if (options.headers.containsKey('X-Refresh')) {
@@ -111,7 +111,7 @@ final dioProvider = Provider<Dio>((ref) {
 
           final token = await store.readAccessToken();
           final tokenHash = token != null ? token.substring(token.length - 8) : '';
-          final key = '${tokenHash}:${options.uri.toString()}';
+          final key = '$tokenHash:${options.uri.toString()}';
           if (cache.containsKey(key)) {
             final entry = cache[key]!;
             if (DateTime.now().difference(entry.timestamp) < cacheTtl) {

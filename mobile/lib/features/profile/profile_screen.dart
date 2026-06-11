@@ -164,7 +164,7 @@ class ProfileScreen extends ConsumerWidget {
           _menuItem(
             Icons.person_outline_rounded,
             'profile.edit_profile'.tr(),
-            onTap: () => _showEditProfile(context, user),
+            onTap: () => _showEditProfile(context, ref, user),
           ),
           _menuItem(
             Icons.notifications_none_rounded,
@@ -515,7 +515,7 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  void _showEditProfile(BuildContext context, UserDto? user) {
+  void _showEditProfile(BuildContext context, WidgetRef ref, UserDto? user) {
     final nameController = TextEditingController(text: user?.name);
     var isSaving = false;
 
