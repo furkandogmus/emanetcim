@@ -1,18 +1,17 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 
 const STORAGE_KEY = "bagajpark_favorite_shops";
 
 export function useFavorites() {
-  const [favorites, setFavorites] = useState<string[]>([]);
-
-  useEffect(() => {
+  const [favorites, setFavorites] = useState<string[]>(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setFavorites(JSON.parse(raw));
+      if (raw) return JSON.parse(raw);
     } catch {}
-  }, []);
+    return [];
+  });
 
   const toggleFavorite = useCallback((shopId: string) => {
     setFavorites((prev) => {
