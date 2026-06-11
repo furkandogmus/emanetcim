@@ -67,8 +67,12 @@ Future<void> main() async {
   }
 
   if (Env.firebaseEnabled) {
-    await Firebase.initializeApp();
-    FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
+    try {
+      await Firebase.initializeApp();
+      FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
+    } catch (e) {
+      Logger.e('Firebase init failed', e);
+    }
   }
 
   final app = EasyLocalization(

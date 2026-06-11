@@ -10,7 +10,7 @@ class Env {
 
   static const String sentryDsn = String.fromEnvironment('SENTRY_DSN');
 
-  static const bool firebaseEnabled = bool.fromEnvironment('FIREBASE_ENABLED');
+  static const bool firebaseEnabled = bool.fromEnvironment('FIREBASE_ENABLED', defaultValue: true);
 
   static const String googleWebClientId = String.fromEnvironment(
     'GOOGLE_WEB_CLIENT_ID',

@@ -60,7 +60,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   LatLng _center = _istanbul;
   final MapController _mapController = MapController();
   final TextEditingController _searchController = TextEditingController();
-  int _selectedShopIndex = -1;
+  String? _selectedShopId;
   List<dynamic> _suggestions = [];
   bool _onlyOpenNow = false;
   bool _only247 = false;
@@ -208,21 +208,30 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Future<void> _determinePosition() async {
-    final pos = await ref.read(locationServiceProvider).getCurrentPosition();
-    if (pos == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('search.location_denied'.tr())));
+    try {
+      final pos = await ref.read(locationServiceProvider).getCurrentPosition();
+      if (pos == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('search.location_denied'.tr())),
+          );
+        }
+        return;
       }
-      return;
-    }
 
-    if (!mounted) return;
-    final newCenter = LatLng(pos.latitude, pos.longitude);
-    setState(() => _center = newCenter);
-    _mapController.move(newCenter, 15);
-    ref.read(debouncedLocationProvider.notifier).updateLocation(newCenter);
+      if (!mounted) return;
+      final newCenter = LatLng(pos.latitude, pos.longitude);
+      setState(() => _center = newCenter);
+      _mapController.move(newCenter, 15);
+      ref.read(debouncedLocationProvider.notifier).updateLocation(newCenter);
+    } catch (e) {
+      debugPrint('Location error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('search.location_denied'.tr())),
+        );
+      }
+    }
   }
 
   @override
@@ -251,10 +260,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               return SearchMap(
                 mapController: _mapController,
                 shops: filtered,
-                selectedShopIndex: _selectedShopIndex,
+                selectedShopIndex: filtered.indexWhere((s) => s.id == _selectedShopId),
                 center: _center,
                 onShopSelected: (index) {
-                  setState(() => _selectedShopIndex = index);
+                  if (index >= 0 && index < filtered.length) {
+                    setState(() => _selectedShopId = filtered[index].id);
+                  }
                 },
                 onPositionChanged: _onMapMoved,
               );
@@ -391,7 +402,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     itemCount: filtered.length,
                     itemBuilder: (context, index) {
                       final shop = filtered[index];
-                      final isSelected = _selectedShopIndex == index;
+                      final isSelected = shop.id == _selectedShopId;
                       return ShopPreviewCard(
                         shop: shop,
                         isSelected: isSelected,

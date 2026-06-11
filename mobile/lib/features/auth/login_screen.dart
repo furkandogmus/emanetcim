@@ -63,7 +63,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _busy = true);
     try {
       await ref.read(authControllerProvider.notifier).signInWithGoogle();
+      if (!mounted) return;
+      context.go('/');
     } catch (e) {
+      if (!mounted) return;
       _toast('$e');
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -74,7 +77,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _busy = true);
     try {
       await ref.read(authControllerProvider.notifier).signInWithApple();
+      if (!mounted) return;
+      context.go('/');
     } catch (e) {
+      if (!mounted) return;
       _toast('$e');
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -439,6 +445,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _forgotPassword() async {
     final input = _identity.text.trim();
+    if (input.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('auth.forgot_password_enter_email'.tr())),
+      );
+      return;
+    }
     if (input.contains('@')) {
       setState(() => _busy = true);
       try {
@@ -460,11 +472,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         if (mounted) setState(() => _busy = false);
       }
     } else {
-      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('auth.forgot_password_partner'.tr()),
-          duration: const Duration(seconds: 5),
+          content: Text('auth.forgot_password_email_only'.tr()),
+          duration: const Duration(seconds: 4),
         ),
       );
     }

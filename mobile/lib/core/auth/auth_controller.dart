@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../shared/models/user.dart';
 import '../api/api_client.dart';
@@ -96,7 +97,7 @@ class AuthController extends Notifier<AuthState> {
     }
   }
 
-  Future<void> verifyOtp(String identity, String code) async {
+  Future<void> verifyOtp(String identity, String code, {String? name}) async {
     state = state.copyWith(loading: true);
     try {
       final dio = ref.read(dioProvider);
@@ -104,6 +105,9 @@ class AuthController extends Notifier<AuthState> {
       final data = isEmail
           ? {'email': identity, 'code': code}
           : {'phone': identity.replaceAll(RegExp(r'\D'), ''), 'code': code};
+      if (name != null && name.isNotEmpty) {
+        data['name'] = name;
+      }
 
       final res = await dio.post('/auth/session', data: data);
       await _completeSession(res.data as Map<String, dynamic>);
@@ -160,15 +164,21 @@ class AuthController extends Notifier<AuthState> {
           scopeHint: ['email', 'profile'],
         );
       } on GoogleSignInException catch (e) {
+        debugPrint('GoogleSignInException: ${e.code}');
         if (e.code == GoogleSignInExceptionCode.canceled) {
           state = state.copyWith(loading: false);
           return;
         }
         rethrow;
+      } catch (e) {
+        debugPrint('GoogleSignIn unexpected error: $e');
+        rethrow;
       }
 
       final auth = account.authentication;
       final idToken = auth.idToken;
+
+      debugPrint('GoogleSignIn idToken present: ${idToken != null}, length: ${idToken?.length ?? 0}');
 
       if (idToken == null) {
         throw Exception('Google login failed: No ID Token');
@@ -186,8 +196,18 @@ class AuthController extends Notifier<AuthState> {
   Future<void> signInWithApple() async {
     state = state.copyWith(loading: true);
     try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
       final dio = ref.read(dioProvider);
-      final res = await dio.post('/auth/apple');
+      final res = await dio.post('/auth/apple', data: {
+        'identityToken': credential.identityToken,
+        'givenName': credential.givenName,
+        'familyName': credential.familyName,
+      });
       await _completeSession(res.data as Map<String, dynamic>);
     } catch (e) {
       state = state.copyWith(loading: false);

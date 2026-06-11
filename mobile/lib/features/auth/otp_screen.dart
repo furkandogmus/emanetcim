@@ -50,7 +50,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     try {
       await ref
           .read(authControllerProvider.notifier)
-          .verifyOtp(widget.identity, _code.text.trim());
+          .verifyOtp(widget.identity, _code.text.trim(), name: widget.name);
       if (!mounted) return;
       context.go('/');
     } catch (e) {
