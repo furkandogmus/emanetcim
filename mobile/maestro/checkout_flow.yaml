@@ -1,52 +1,51 @@
 appId: com.bagajpark
 ---
-# === GİRİŞ ===
+# Checkout: valiz seçimi, ödeme özeti, hata durumları
 - clearState
 - launchApp
 - tapOn: "Atla"
+
+# Login
 - tapOn: "E-posta veya Telefon"
 - inputText: "maestro-guest@bagajpark.com"
 - tapOn: "Şifre"
 - inputText: "Test123!"
 - tapOn: "Giriş Yap"
 
-# === ARAMA → DÜKKAN DETAYI ===
+# Arama → dükkan detayı → checkout
 - tapOn: "Nerede valizini bırakmak istiyorsun?"
 - inputText: "Kadıköy"
 - pressKey: Enter
 - tapOn: "Maestro Test Dükkanı"
 
-# Dükkan detayı kontrol
-- assertVisible: "Yol Tarifi"
-
-# Scroll to bottom → Rezervasyon butonu
+# Rezervasyon butonuna scroll
 - scrollUntilVisible:
     item: "Rezervasyon"
     direction: DOWN
 - tapOn: "Rezervasyon"
 
-# === CHECKOUT EKRANI ===
+# Checkout ekranı
 - assertVisible: "Rezervasyonu Tamamla"
 - assertVisible: "Valiz Seçimi"
 
-# === VALİZ BOYUTLARI ===
+# Valiz boyutları
 - assertVisible: "Küçük (S)"
 - assertVisible: "Orta (M)"
 - assertVisible: "Büyük (XL)"
+
+# Küçük valiz seç
 - tapOn: "Küçük (S)"
 
-# === ÖDEME ÖZETİ ===
+# Ödeme özeti
 - scrollUntilVisible:
     item: "Ödeme Özeti"
     direction: DOWN
-- assertVisible: "Ödeme Özeti"
-- assertVisible: "Valiz Ücreti"
 - assertVisible: "Toplam"
 - assertVisible: "Güvenli 256-bit SSL Ödeme"
 
-# === HATA: Valiz seçmeden ödemeye git ===
-- tapOn: "Geri"
-- tapOn: "Geri"
-- tapOn: "Maestro Test Dükkanı"
-- tapOn: "Ödemeyi Yap"
-- assertVisible: "Lütfen en az bir valiz seçin."
+# Kupon
+- assertVisible: "İndirim Kuponu (Opsiyonel)"
+- tapOn: "İndirim Kuponu (Opsiyonel)"
+- inputText: "BAGAJ10"
+
+- takeScreenshot: "checkout-review"

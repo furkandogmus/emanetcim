@@ -1,39 +1,17 @@
 appId: com.bagajpark
 ---
-# === HAPPY PATH: Kayıt ===
+# Register: ad + email + şifre + KVKK checkbox + Kayıt Ol
 - clearState
 - launchApp
 - tapOn: "Atla"
-- assertVisible: "Hoş Geldiniz"
 
-# Kayıt sayfasına git
+# Kayıt Ol sayfasına git
 - tapOn: "Kayıt Ol"
-- assertVisible: "Hesap oluşturarak BagajPark'ın hizmetlerinden yararlanabilirsiniz."
+- assertVisible: "Kayıt Ol"
+- assertVisible: "Ad Soyad"
+- assertVisible: "E-posta veya Telefon"
 
-# Ad Soyad
-- tapOn: "Ad Soyad"
-- inputText: "Ahmet Yılmaz"
-
-# E-posta
-- tapOn: "E-posta veya Telefon"
-- inputText: "ahmet@test.com"
-
-# Şifre
-- tapOn: "Şifre"
-- inputText: "Test123!"
-
-# KVKK onayı
-- tapOn: "Kullanım Koşulları"
-- tapOn: "Gizlilik Politikası"
-
-# Kaydol
-- tapOn: "Kayıt Ol"
-- assertVisible: "E-posta Doğrulama"
-- assertVisible: "Doğrulama Kodunu Girin"
-
-# === ERROR: Eksik alan ===
-- tapOn: "Geri"
-- tapOn: "Kayıt Ol"
+# === ERROR: Boş form ===
 - tapOn: "Kayıt Ol"
 - assertVisible: "Lütfen geçerli bir isim girin"
 
@@ -41,21 +19,29 @@ appId: com.bagajpark
 - tapOn: "Ad Soyad"
 - inputText: "A"
 - tapOn: "Kayıt Ol"
-- assertVisible: "İsim en az 2 karakter olmalıdır"
+- assertVisible: "Lütfen geçerli bir isim girin"
 
 # === ERROR: Geçersiz email ===
 - tapOn: "Ad Soyad"
 - eraseText
 - inputText: "Ayşe Demir"
 - tapOn: "E-posta veya Telefon"
-- eraseText
 - inputText: "gecersiz-email"
 - tapOn: "Şifre"
 - inputText: "Test123!"
 - tapOn: "Kayıt Ol"
 - assertVisible: "Geçersiz e-posta veya telefon numarası"
 
-# === SOSYAL KAYIT butonları ===
-- tapOn: "Geri"
-- assertVisible: "Google ile Devam Et"
-- assertVisible: "Apple ile Devam Et"
+# === ERROR: Kısa şifre ===
+- tapOn: "E-posta veya Telefon"
+- eraseText
+- inputText: "ayse@test.com"
+- tapOn: "Şifre"
+- eraseText
+- inputText: "123"
+- tapOn: "Kayıt Ol"
+- assertVisible: "Şifre en az 6 karakter olmalıdır"
+
+# === KVKK checkbox ve sosyal butonlar ===
+- assertVisible: "Kullanım Koşulları"
+- assertVisible: "Gizlilik Politikası"

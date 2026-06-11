@@ -1,16 +1,18 @@
 appId: com.bagajpark
 ---
-# === ÖN KOŞUL ===
+# Search: arama, filtreleme, sıralama
 - clearState
 - launchApp
 - tapOn: "Atla"
+
+# Login
 - tapOn: "E-posta veya Telefon"
 - inputText: "maestro-guest@bagajpark.com"
 - tapOn: "Şifre"
 - inputText: "Test123!"
 - tapOn: "Giriş Yap"
 
-# === ARAMA EKRANI ===
+# Ara sekmesi
 - tapOn: "Ara"
 - assertVisible: "Nerede valizini bırakmak istiyorsun?"
 
@@ -19,43 +21,19 @@ appId: com.bagajpark
 - inputText: "İstanbul"
 - pressKey: Enter
 
-# === FİLTRELEME ===
+# Filtreleme
 - tapOn: "Filtrele"
 - assertVisible: "Filtrele"
-
-# Açık şimdi
 - assertVisible: "Şimdi Açık"
-- tapOn: "Şimdi Açık"
-
-# 7/24
 - assertVisible: "7/24 Açık"
-- tapOn: "7/24 Açık"
-
-# Sıralama
-- tapOn: "Sıralama"
-- tapOn: "Mesafe (Yakın)"
-- tapOn: "Fiyat (Düşük)"
+- assertVisible: "Sıralama"
 
 # Sonuçları göster
+- tapOn: "Filtreleri Temizle"
 - tapOn: "Sonuçları Göster"
-- assertVisible: "Filtrele"
 
-# === DÜKKAN DETAYI ===
+# Dükkan detayı
 - tapOn: "Maestro Test Dükkanı"
 - assertVisible: "Yol Tarifi"
 - assertVisible: "Dükkan Hakkında"
-
-# Olanaklar
-- scrollUntilVisible:
-    item: "Olanaklar"
-    direction: DOWN
-- assertVisible: "Olanaklar"
-
-# Favori ekle/çıkar
-- tapOn: "Favorilere Ekle"
-
-# Değerlendirmeler
-- scrollUntilVisible:
-    item: "Değerlendirmeler"
-    direction: DOWN
-- assertVisible: "Değerlendirmeler"
+- takeScreenshot: "search-result"

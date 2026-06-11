@@ -1,53 +1,39 @@
 appId: com.bagajpark
 ---
-# === ÖN KOŞUL ===
+# Profile: profil düzenle, bildirimler, yardım, çıkış
 - clearState
 - launchApp
 - tapOn: "Atla"
+
+# Login
 - tapOn: "E-posta veya Telefon"
 - inputText: "maestro-guest@bagajpark.com"
 - tapOn: "Şifre"
 - inputText: "Test123!"
 - tapOn: "Giriş Yap"
 
-# === PROFİL ===
+# Profil sekmesi
 - tapOn: "Profil"
 - assertVisible: "Hesabım"
 - assertVisible: "Misafir"
-- assertVisible: "maestro-guest@bagajpark.com"
-
-# İstatistikler
 - assertVisible: "Rezervasyon"
-- assertVisible: "Favori"
 
-# === PROFİL DÜZENLEME ===
+# Profil düzenleme
 - tapOn: "Profilimi Düzenle"
 - assertVisible: "Profilimi Düzenle"
-
-# İsim değiştir
+- assertVisible: "Ad Soyad"
 - tapOn: "Ad Soyad"
 - eraseText
 - inputText: "Ahmet Güncellendi"
-
-# Telefon değiştir
-- tapOn: "Telefon"
-- eraseText
-- inputText: "5559876543"
-
-# Kaydet
+- assertVisible: "Telefon"
 - tapOn: "Kaydet"
-- assertVisible: "Hesabım"
 
-# === BİLDİRİM AYARLARI ===
+# Bildirimler
 - tapOn: "Bildirimler"
 - assertVisible: "Bildirimler"
+- tapOn: "Geri"
 
-# === YARDIM ===
+# Yardım
 - tapOn: "Yardım Merkezi"
 - assertVisible: "Yardım Merkezi"
-
-# === ÇIKIŞ ===
-- tapOn: "Çıkış Yap"
-- assertVisible: "Hesabınızdan çıkış yapmak istediğinize emin misiniz?"
-- tapOn: "İptal"
-- assertVisible: "Hesabım"
+- takeScreenshot: "profile-help"

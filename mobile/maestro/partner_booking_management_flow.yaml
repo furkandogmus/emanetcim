@@ -1,37 +1,38 @@
 appId: com.bagajpark
 ---
-# === GİRİŞ (PARTNER) ===
+# Partner Dashboard: filtreleme, kazanç, ayarlar
 - clearState
 - launchApp
 - tapOn: "Atla"
+
+# Partner girişi
 - tapOn: "E-posta veya Telefon"
 - inputText: "maestro-partner@bagajpark.com"
 - tapOn: "Şifre"
 - inputText: "Test123!"
 - tapOn: "Giriş Yap"
 
-# === DÜKKAN PANELİ ===
+# Dashboard
 - assertVisible: "Dükkan Paneli"
 - assertVisible: "Aktif Valiz"
 - assertVisible: "Toplam Kazanç"
 - takeScreenshot: "partner-dashboard"
 
-# === FİLTRELEME ===
+# Filtreleme
 - assertVisible: "Tümü"
 - assertVisible: "Onay Bekleyen"
 - assertVisible: "Aktif"
 - assertVisible: "Tamamlandı"
 - tapOn: "Onay Bekleyen"
 
-# === KAZANÇ ===
+# Kazanç
 - tapOn: "Kazançlarım"
 - assertVisible: "Kazançlarım"
 - assertVisible: "Toplam Bakiye"
-- assertVisible: "Bugün"
-- assertVisible: "Beklemede"
+- assertVisible: "Ödeme Geçmişi"
 - takeScreenshot: "partner-earnings"
 
-# === DÜKKAN AYARLARI ===
+# Dükkan Ayarları
 - tapOn: "Dükkan Ayarları"
 - assertVisible: "Dükkan Adı"
 - assertVisible: "Çalışma Saatleri"

@@ -17,14 +17,12 @@ flows:
 
 env:
   APP_ID: "com.bagajpark"
-  APP_NAME: "BagajPark"
   GUEST_EMAIL: "maestro-guest@bagajpark.com"
   GUEST_PASSWORD: "Test123!"
   PARTNER_EMAIL: "maestro-partner@bagajpark.com"
   PARTNER_PASSWORD: "Test123!"
   ADMIN_EMAIL: "maestro-admin@bagajpark.com"
   ADMIN_PASSWORD: "Test123!"
-  TEST_SHOP_NAME: "Maestro Test Dükkanı"
 
 executionOrder:
   continueOnFailure: false

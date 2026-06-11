@@ -1,36 +1,38 @@
 appId: com.bagajpark
 ---
-# === ONBOARDING TAM TUR ===
+# Onboarding 4 sayfa, ileri butonu ikon, son sayfada "Bitti"
 - clearState
 - launchApp
 
 # Sayfa 1
 - assertVisible: "Bul & Rezerve Et"
 - assertVisible: "Atla"
-- assertVisible: "İleri"
 
-# Sayfa 1 → 2
-- tapOn: "İleri"
+# Swipe → Sayfa 2
+- swipe:
+    direction: LEFT
+    duration: 400
 - assertVisible: "Bırak & QR Okut"
 
-# Sayfa 2 → 3
-- tapOn: "İleri"
+# Swipe → Sayfa 3
+- swipe:
+    direction: LEFT
+    duration: 400
 - assertVisible: "Mühürle & Güvende Ol"
 
-# Sayfa 3 → 4
-- tapOn: "İleri"
+# Swipe → Sayfa 4 (son)
+- swipe:
+    direction: LEFT
+    duration: 400
 - assertVisible: "Özgürce Keşfet"
-
-# Son sayfada "Bitti"
 - assertVisible: "Bitti"
 
-# === ATLA ===
-- tapOn: "Atla"
+# Bitti → Login
+- tapOn: "Bitti"
 - assertVisible: "Hoş Geldiniz"
 
-# === HIZLI GEÇ ===
-- tapOn: "İleri"
-- tapOn: "İleri"
-- tapOn: "İleri"
-- tapOn: "Bitti"
+# === TEKRAR ONBOARDING: Hemen Atla ===
+- stopApp
+- launchApp
+- tapOn: "Atla"
 - assertVisible: "Hoş Geldiniz"

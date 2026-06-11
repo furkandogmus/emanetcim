@@ -1,56 +1,57 @@
 appId: com.bagajpark
 ---
-# === HAPPY PATH: Kod ile giriş ===
+# Login: email + şifre + Giriş Yap. OTP flow yok.
 - clearState
 - launchApp
-
-# Onboarding'i geç
 - tapOn: "Atla"
+
+# Login ekranı
 - assertVisible: "Hoş Geldiniz"
+- assertVisible: "BagajPark"
+- assertVisible: "Kayıt Ol"
+- assertVisible: "Giriş Yap"
 
-# Email girip kod gönder
-- tapOn: "E-posta veya Telefon"
-- inputText: "maestro-guest@bagajpark.com"
-- tapOn: "Kod Gönder"
-
-# Doğrulama ekranı
-- assertVisible: "Doğrulama Kodunu Girin"
-- assertVisible: "Doğrula"
-- takeScreenshot: "login-verification-screen"
-
-# Geri dön
-- tapOn: "Geri"
-
-# === HAPPY PATH: Şifre ile giriş ===
+# === HAPPY PATH: Guest giriş ===
 - tapOn: "E-posta veya Telefon"
 - inputText: "maestro-guest@bagajpark.com"
 - tapOn: "Şifre"
 - inputText: "Test123!"
 - tapOn: "Giriş Yap"
+- assertVisible: "Nasıl Çalışır?"
+- takeScreenshot: "login-success-guest"
 
-# Giriş başarılı — ana sayfa
-- assertVisible: "Merhaba"
-- takeScreenshot: "login-success"
-
-# === SOYUT: Çıkış yap (temiz state) ===
+# Çıkış yap
 - tapOn: "Profil"
+- scrollUntilVisible:
+    item: "Çıkış Yap"
+    direction: DOWN
 - tapOn: "Çıkış Yap"
+- assertVisible: "Hesabınızdan çıkış yapmak istediğinize emin misiniz?"
 - tapOn: "Evet"
-- assertVisible: "Giriş Yap"
 
 # === ERROR PATH: Boş form ===
-- tapOn: "Kod Gönder"
+- assertVisible: "Hoş Geldiniz"
+- tapOn: "Giriş Yap"
 - assertVisible: "Geçersiz e-posta veya telefon numarası"
 
 # === ERROR PATH: Geçersiz email ===
 - tapOn: "E-posta veya Telefon"
 - inputText: "gecersiz-email"
-- tapOn: "Kod Gönder"
+- tapOn: "Şifre"
+- inputText: "Test123!"
+- tapOn: "Giriş Yap"
 - assertVisible: "Geçersiz e-posta veya telefon numarası"
 
 # === SOSYAL GİRİŞ butonları ===
 - assertVisible: "Google ile Devam Et"
 - assertVisible: "Apple ile Devam Et"
 
-# === Şifre sıfırlama linki ===
+# === NAVİGASYON: Şifremi Unuttum ===
 - assertVisible: "Şifremi Unuttum"
+
+# === NAVİGASYON: Kayıt Ol ===
+- assertVisible: "Kayıt Ol"
+- tapOn: "Kayıt Ol"
+- assertVisible: "Kayıt Ol"
+- assertVisible: "Ad Soyad"
+- tapOn: "Geri"

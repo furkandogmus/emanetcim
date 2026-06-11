@@ -1,16 +1,23 @@
 appId: com.bagajpark
 ---
-# === GİRİŞ (PARTNER) ===
+# Partner Seals: mühür talep et, arızalı bildir
 - clearState
 - launchApp
 - tapOn: "Atla"
+
+# Partner girişi
 - tapOn: "E-posta veya Telefon"
 - inputText: "maestro-partner@bagajpark.com"
 - tapOn: "Şifre"
 - inputText: "Test123!"
 - tapOn: "Giriş Yap"
 
-# === PROFİL → MÜHÜR YÖNETİMİ ===
+# Dashboard kontrolü
+- assertVisible: "Dükkan Paneli"
+- assertVisible: "Aktif Valiz"
+- assertVisible: "Toplam Kazanç"
+
+# Profil → Mühür Yönetimi
 - tapOn: "Profil"
 - scrollUntilVisible:
     item: "Mühür Yönetimi"
@@ -18,26 +25,25 @@ appId: com.bagajpark
 - tapOn: "Mühür Yönetimi"
 - assertVisible: "Mühür Yönetimi"
 
-# === HAPPY PATH: Mühür talep et ===
+# Mühür talep et
 - tapOn: "Talep Adeti"
 - eraseText
 - inputText: "20"
 - tapOn: "Mühür Talep Et"
 - assertVisible: "Mühür talebi başarıyla oluşturuldu."
 
-# === HAPPY PATH: Az adet talep ===
+# Az adet talep
 - tapOn: "Talep Adeti"
 - eraseText
 - inputText: "5"
 - tapOn: "Mühür Talep Et"
 - assertVisible: "Mühür talebi başarıyla oluşturuldu."
 
-# === HATA BİLDİRME ===
+# Arızalı mühür bildir
 - tapOn: "Arızalı Mühür Bildir"
 - assertVisible: "Mühür Seri Numarası"
 - inputText: "BP-2024-001"
 - tapOn: "Bildir"
 - assertVisible: "Arızalı mühür başarıyla bildirildi."
 
-# === EKRAN GÖRÜNTÜSÜ ===
 - takeScreenshot: "seal-management"
