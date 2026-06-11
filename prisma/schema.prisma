@@ -92,15 +92,20 @@ model VerificationToken {
 model Shop {
   id               String        @id @default(uuid())
   ownerId          String
-  name             String
-  address          String?
-  latitude         Float?
-  longitude        Float?
-  capacity         Int           @default(10)
-  isActive         Boolean       @default(false)
-  rating           Float?        @default(0.0)
-  pricePerDay      Decimal       @default(50) @db.Decimal(12, 2)
-  hasRestroom      Boolean       @default(false)
+  name              String
+  address           String?
+  image             String?
+  description       String?
+  latitude          Float?
+  longitude         Float?
+  capacity          Int           @default(10)
+  isActive          Boolean       @default(false)
+  rating            Float?        @default(0.0)
+  pricePerDay       Decimal       @default(50) @db.Decimal(12, 2)
+  hasRestroom       Boolean       @default(false)
+  hasCctv           Boolean       @default(false)
+  hasClimateControl Boolean       @default(false)
+  acceptsLargeItems Boolean       @default(false)
   open247          Boolean       @default(false)
   subMerchantKey   String?       @unique
   subMerchantType  String?
@@ -130,9 +135,13 @@ model Shop {
 
 model Booking {
   id                     String            @id @default(uuid())
-  guestId                String
+  guestId                String?
   shopId                 String
   status                 BookingStatus     @default(PENDING)
+  /// E-posta ile guest checkout (accountsız kullanıcılar için)
+  guestEmail             String?
+  /// Telefon ile guest checkout
+  guestPhone             String?
   checkInTime            DateTime
   checkOutTime           DateTime
   bagCountS              Int               @default(0)
@@ -154,7 +163,7 @@ model Booking {
   referralDiscountAmount Decimal           @default(0) @db.Decimal(12, 2)
   /// Rezervasyonda kullanılan referans kodu (varsa)
   referredByCode         String?
-  guest                  User              @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  guest                  User?             @relation(fields: [guestId], references: [id], onDelete: Cascade)
   shop                   Shop              @relation(fields: [shopId], references: [id], onDelete: Cascade)
   seals                  BookingSeal[]
   dispute                Dispute?

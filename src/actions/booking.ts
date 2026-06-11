@@ -45,6 +45,10 @@ export type CreateBookingInput = {
   };
   couponCode?: string;
   referralCode?: string;
+  /** Guest checkout: accountsız kullanıcılar için e-posta */
+  guestEmail?: string;
+  /** Guest checkout: accountsız kullanıcılar için telefon */
+  guestPhone?: string;
 };
 
 /**
@@ -60,13 +64,16 @@ export async function createBookingAction(data: CreateBookingInput) {
   }
 
   const session = await auth();
+  const userId = session?.user?.id;
+  const isGuest = !userId;
 
-  if (!session?.user?.id) {
-    return { success: false as const, error: "Errors.authRequired" };
+  // Guest checkout validation
+  if (isGuest && !data.guestEmail && !data.guestPhone) {
+    return { success: false as const, error: "Errors.guestContactRequired" };
   }
 
   // Per-user rate limit (IP spoofing'e karşı ek koruma)
-  if (!(await rateLimit(`booking_create_user:${session.user.id}`, 5, 5 * 60 * 1000))) {
+  if (userId && !(await rateLimit(`booking_create_user:${userId}`, 5, 5 * 60 * 1000))) {
     return { success: false as const, error: "Errors.tooManyRequests" };
   }
 
@@ -156,7 +163,7 @@ export async function createBookingAction(data: CreateBookingInput) {
       select: { id: true },
     });
     // Kendi kodunu kullanamaz
-    if (referrer && referrer.id !== session.user.id) {
+    if (referrer && referrer.id !== session?.user?.id) {
       const discountPct = Number(process.env.REFERRAL_DISCOUNT_PCT ?? "5");
       referralDiscountAmount = Math.round(totalPrice * (discountPct / 100) * 100) / 100;
       totalPrice = Math.max(0, Math.round((totalPrice - referralDiscountAmount) * 100) / 100);
@@ -173,7 +180,9 @@ export async function createBookingAction(data: CreateBookingInput) {
   let booking;
   try {
     booking = await bookingService.createInitialBooking({
-      guestId: session.user.id,
+      guestId: userId ?? null,
+      guestEmail: isGuest ? (data.guestEmail ?? null) : null,
+      guestPhone: isGuest ? (data.guestPhone ?? null) : null,
       shopId: data.shopId,
       totalPrice,
       bagCountS: data.bagCountS,
@@ -196,15 +205,16 @@ export async function createBookingAction(data: CreateBookingInput) {
     void bookingEventService.record({
       bookingId: booking.id,
       event: "APPROVED",
-      actorId: session.user.id,
+      actorId: session?.user?.id ?? "",
       actorRole: "GUEST",
     }).catch(() => {});
 
     // Misafire onay e-postası
-    if (session.user.email) {
+    const recipientEmail = session?.user?.email ?? data.guestEmail;
+    if (recipientEmail) {
       const locale = await getLocale();
       void notificationService
-        .notifyBookingSuccess(session.user.email, booking.id, totalPrice, locale)
+        .notifyBookingSuccess(recipientEmail, booking.id, totalPrice, locale)
         .catch(() => {});
     }
 

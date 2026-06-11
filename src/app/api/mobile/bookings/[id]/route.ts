@@ -28,7 +28,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     totalPrice: Number(b.totalPrice),
     status: b.status,
     qrCodeToken: b.qrCodeToken,
-    guestName: b.guest.name,
+    guestName: b.guest?.name ?? "",
     latitude: b.shop.latitude,
     longitude: b.shop.longitude,
     shopPhone: b.shop.owner.phone ?? "",

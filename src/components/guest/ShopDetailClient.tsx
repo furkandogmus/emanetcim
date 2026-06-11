@@ -11,7 +11,7 @@ import {
   Sparkles,
   ExternalLink,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { roundedSlotPrices } from "@/lib/bag-pricing";
@@ -23,17 +23,23 @@ import {
   trackPlausibleEvent,
 } from "@/lib/plausible-events";
 import { TrustBadges } from "@/components/common/TrustBadge";
+import FavoriteButton from "@/components/guest/FavoriteButton";
 
 export type ShopDetailClientShop = {
   id: string;
   name: string;
   address: string | null;
+  image: string | null;
+  description: string | null;
   latitude: number | null;
   longitude: number | null;
   capacity: number;
   rating: number | null;
   pricePerDay: number;
   hasRestroom: boolean;
+  hasCctv: boolean;
+  hasClimateControl: boolean;
+  acceptsLargeItems: boolean;
   open247: boolean;
   openingTime: string | null;
   closingTime: string | null;
@@ -106,19 +112,42 @@ export default function ShopDetailClient({
         };
   const mobilePricePerBag = formatTryCurrency(slot.m, locale);
 
+  const [checkoutParams, setCheckoutParams] = useState("");
+
   useEffect(() => {
     trackPlausibleEvent(PLAUSIBLE_EVENTS.ShopViewed, { shopId: shop.id });
   }, [shop.id]);
 
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("bagajpark_search_params");
+      if (raw) {
+        const p = JSON.parse(raw);
+        const params = new URLSearchParams();
+        if (p.checkIn) params.set("checkIn", p.checkIn);
+        if (p.checkOut) params.set("checkOut", p.checkOut);
+        if (p.bags) params.set("bags", p.bags);
+        setCheckoutParams("?" + params.toString());
+      }
+    } catch {}
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50 pb-28">
       <div className="md:hidden">
-        <div className="relative h-[360px] bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 flex items-center justify-center">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.25),transparent_50%)]" />
-          <div className="relative z-0 flex flex-col items-center gap-3 text-white/90">
-            <Building2 size={80} strokeWidth={1} />
-            <span className="text-6xl font-black tracking-tighter opacity-30">{shop.name.charAt(0).toUpperCase()}</span>
-          </div>
+        <div className={`relative h-[360px] ${shop.image ? '' : 'bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 flex items-center justify-center'}`}>
+          {shop.image ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={shop.image} alt={shop.name} className="w-full h-full object-cover" />
+          ) : (
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.25),transparent_50%)]" />
+          )}
+          {!shop.image && (
+            <div className="relative z-0 flex flex-col items-center gap-3 text-white/90">
+              <Building2 size={80} strokeWidth={1} />
+              <span className="text-6xl font-black tracking-tighter opacity-30">{shop.name.charAt(0).toUpperCase()}</span>
+            </div>
+          )}
           <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between">
             <Link
               href="/search"
@@ -136,7 +165,9 @@ export default function ShopDetailClient({
               <h1 className="min-w-0 flex-1 break-words text-[1.65rem] sm:text-[1.9rem] leading-[1.05] font-black text-gray-900">
                 {shop.name}
               </h1>
-              <div className="shrink-0 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-700">
+              <div className="shrink-0 flex items-center gap-2">
+                <FavoriteButton shopId={shop.id} />
+                <div className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-700">
                 <Star size={12} fill="currentColor" />
                 {rating.toFixed(1)}
               </div>
@@ -154,28 +185,48 @@ export default function ShopDetailClient({
               <span className="rounded-xl bg-emerald-50 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-emerald-700">
                 {mobileCopy.insuredStorage}
               </span>
+              <span className="rounded-xl bg-amber-50 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-amber-700">
+                {t("searchFreeCancelBadge")}
+              </span>
+              <span className="rounded-xl bg-rose-50 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-rose-700">
+                {t("guaranteeBadge")}
+              </span>
             </div>
           </div>
+        </div>
         </div>
 
         <main className="px-4 pt-16 space-y-5">
           <section>
             <h2 className="text-2xl font-black text-gray-900 mb-3">{mobileCopy.premiumAmenities}</h2>
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-3xl border border-gray-100 bg-white p-4">
-                <p className="text-xs font-black uppercase text-gray-500">{mobileCopy.cctv}</p>
-              </div>
-              <div className="rounded-3xl border border-gray-100 bg-white p-4">
-                <p className="text-xs font-black uppercase text-gray-500">{mobileCopy.climate}</p>
-              </div>
-              <div className="rounded-3xl border border-gray-100 bg-white p-4">
-                <p className="text-xs font-black uppercase text-gray-500">{mobileCopy.largeItems}</p>
-              </div>
+              {shop.hasCctv && (
+                <div className="rounded-3xl border border-gray-100 bg-white p-4">
+                  <p className="text-xs font-black uppercase text-gray-500">{mobileCopy.cctv}</p>
+                </div>
+              )}
+              {shop.hasClimateControl && (
+                <div className="rounded-3xl border border-gray-100 bg-white p-4">
+                  <p className="text-xs font-black uppercase text-gray-500">{mobileCopy.climate}</p>
+                </div>
+              )}
+              {shop.acceptsLargeItems && (
+                <div className="rounded-3xl border border-gray-100 bg-white p-4">
+                  <p className="text-xs font-black uppercase text-gray-500">{mobileCopy.largeItems}</p>
+                </div>
+              )}
               <div className="rounded-3xl border border-gray-100 bg-white p-4">
                 <p className="text-xs font-black uppercase text-gray-500">{mobileCopy.sealProvided}</p>
               </div>
             </div>
           </section>
+
+          {shop.description && (
+            <section className="rounded-[1.75rem] border border-gray-100 bg-white p-5">
+              <h2 className="text-xl font-black text-gray-900 mb-3">{t("shopDetailAbout")}</h2>
+              <p className="text-sm leading-relaxed text-gray-600">{shop.description}</p>
+            </section>
+          )}
 
           <section className="rounded-[1.75rem] border border-gray-100 bg-[#f2f4ff] p-5">
             <h2 className="text-xl font-black text-gray-900 mb-3">{t("shopDetailHours")}</h2>
@@ -222,7 +273,7 @@ export default function ShopDetailClient({
               </p>
             </div>
             <Link
-              href={`/checkout/${shop.id}`}
+              href={`/checkout/${shop.id}${checkoutParams}`}
               data-testid="shop-book-now-mobile"
               className="btn-ui btn-ui-lg btn-ui-primary rounded-2xl px-8"
             >
@@ -397,7 +448,7 @@ export default function ShopDetailClient({
       <div className="fixed bottom-0 left-0 right-0 p-4 pb-6 bg-white/95 backdrop-blur-xl border-t border-gray-100 z-20">
         <div className="max-w-lg mx-auto">
           <Link
-            href={`/checkout/${shop.id}`}
+            href={`/checkout/${shop.id}${checkoutParams}`}
             data-testid="shop-book-now"
             className="flex w-full items-center justify-center gap-2 py-4 rounded-2xl bg-orange-600 text-white text-sm font-black uppercase tracking-widest shadow-lg shadow-orange-200 hover:bg-orange-700 transition-colors active:scale-[0.99]"
           >

@@ -417,7 +417,7 @@ export default function BookingsClient({
       {reviewBooking && (
         <ReviewForm 
           bookingId={reviewBooking.id}
-          guestId={reviewBooking.guestId}
+          guestId={reviewBooking.guestId ?? ""}
           shopId={reviewBooking.shopId}
           shopName={reviewBooking.shop?.name || t('defaultShopName')}
           onClose={() => setReviewBooking(null)}

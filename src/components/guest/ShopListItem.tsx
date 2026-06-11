@@ -2,8 +2,10 @@
 
 import { Building2, MapPin, Star, Shield, Timer } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import FavoriteButton from '@/components/guest/FavoriteButton';
 
 interface ShopListItemProps {
+  id: string;
   name: string;
   rating: number;
   price: string;
@@ -22,6 +24,7 @@ interface ShopListItemProps {
  * Minimalist, fiyat ve güven odaklı tasarım.
  */
 export default function ShopListItem({
+  id,
   name,
   rating,
   price,
@@ -48,9 +51,12 @@ export default function ShopListItem({
       <div className="flex-1 flex flex-col gap-1">
         <div className="flex justify-between items-start">
           <h4 className="font-bold text-gray-900 group-hover:text-orange-600 transition-colors">{name}</h4>
-          <div className="flex items-center gap-1 text-xs font-bold bg-orange-50 text-orange-600 px-2 py-1 rounded-lg">
-            <Star size={12} fill="currentColor" />
-            {rating}
+          <div className="flex items-center gap-1">
+            <FavoriteButton shopId={id} className="!w-7 !h-7" />
+            <span className="flex items-center gap-1 text-xs font-bold bg-orange-50 text-orange-600 px-2 py-1 rounded-lg">
+              <Star size={12} fill="currentColor" />
+              {rating}
+            </span>
           </div>
         </div>
 
@@ -67,11 +73,14 @@ export default function ShopListItem({
         </div>
 
         <div className="mt-3 flex justify-between items-center">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <div className="flex items-center gap-1 text-[10px] text-green-600 font-bold uppercase tracking-wider">
               <Shield size={10} />
               {t("insured")}
             </div>
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-md">
+              {t("searchFreeCancelBadge")}
+            </span>
             {isVerified && (
               <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded-md">
                 <Shield size={10} />
