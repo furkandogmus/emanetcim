@@ -18,9 +18,11 @@ appId: com.bagajpark
 - inputText: "Test123!"
 - pressKey: Back
 - tapOn:
-    point: "50%,70%"
+    text: "Giriş Yap.*"
     optional: true
-- assertVisible: "Nasıl Çalışır?"
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible: "Ana Sayfa"
 
 # Popüler şehirler
 - assertVisible: "İstanbul"
