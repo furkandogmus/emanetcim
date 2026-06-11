@@ -35,7 +35,15 @@ export async function POST(req: Request) {
   const existing = normalizedEmail
     ? await prisma.user.findUnique({ where: { email: normalizedEmail } })
     : phone
-      ? await prisma.user.findUnique({ where: { phone } })
+      ? await prisma.user.findFirst({
+          where: {
+            OR: [
+              { phone },
+              { phone: `+90${phone}` },
+              { phone: `0${phone}` }
+            ]
+          }
+        })
       : null;
 
   if (existing) {

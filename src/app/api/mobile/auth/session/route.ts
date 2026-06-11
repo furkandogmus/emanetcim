@@ -51,7 +51,15 @@ export async function POST(req: Request) {
 
     user = isEmail
       ? await prisma.user.findUnique({ where: { email: normalizedIdentity } })
-      : await prisma.user.findUnique({ where: { phone: normalizedIdentity } });
+      : await prisma.user.findFirst({
+          where: {
+            OR: [
+              { phone: normalizedIdentity },
+              { phone: `+90${normalizedIdentity}` },
+              { phone: `0${normalizedIdentity}` }
+            ]
+          }
+        });
 
     if (!user) {
       user = await prisma.user.create({
@@ -70,7 +78,15 @@ export async function POST(req: Request) {
 
     user = isEmail
       ? await prisma.user.findUnique({ where: { email: normalizedIdentity } })
-      : await prisma.user.findUnique({ where: { phone: normalizedIdentity } });
+      : await prisma.user.findFirst({
+          where: {
+            OR: [
+              { phone: normalizedIdentity },
+              { phone: `+90${normalizedIdentity}` },
+              { phone: `0${normalizedIdentity}` }
+            ]
+          }
+        });
 
     if (!user || !user.passwordHash) {
       return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
