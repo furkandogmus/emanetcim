@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../shared/models/user.dart';
 import '../api/api_client.dart';
+import '../config/env.dart';
 import '../push/push_service.dart';
 import 'token_store.dart';
 
@@ -48,7 +49,9 @@ class AuthController extends Notifier<AuthState> {
     state = state.copyWith(onboardingDone: onboardingDone, loading: false);
 
     try {
-      await GoogleSignIn.instance.initialize();
+      await GoogleSignIn.instance.initialize(
+        serverClientId: Env.googleWebClientId,
+      );
     } catch (e) {
       debugPrint('GoogleSignIn initialization failed: $e');
     }

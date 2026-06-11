@@ -38,8 +38,8 @@ void main() {
 
       // Assert
       expect(result.isSuccess, true);
-      expect(result.data!['type'], 'booking');
-      expect(result.data!['id'], 'booking-123');
+      expect(result.data!.type, 'booking');
+      expect(result.data!.id, 'booking-123');
     });
 
     test('scan returns Failure on 404', () async {

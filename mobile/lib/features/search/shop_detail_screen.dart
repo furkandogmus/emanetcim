@@ -462,55 +462,6 @@ class ShopDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _reviewItem(String name, int rating, String comment) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF8FAFC),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  name,
-                  style: GoogleFonts.outfit(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
-                ),
-                Row(
-                  children: List.generate(
-                    5,
-                    (i) => Icon(
-                      Icons.star_rounded,
-                      size: 16,
-                      color: i < rating ? Colors.amber : Colors.grey.shade300,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              comment,
-              style: GoogleFonts.outfit(
-                fontSize: 14,
-                color: const Color(0xFF424242),
-                height: 1.4,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildSkeleton() {
     return const SingleChildScrollView(
       child: Column(

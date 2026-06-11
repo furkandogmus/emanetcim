@@ -43,7 +43,6 @@ android {
 
     defaultConfig {
         applicationId = "com.bagajpark"
-        // => Google Play Console'da com.bagajpark olarak kayıtlı olmalı
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

@@ -40,10 +40,44 @@
     }
   },
   "auth": {
+    "welcome": "Welcome",
+    "no_account": "Don't have an account?",
+    "register": "Sign Up",
+    "register_hint": "Don't have an account?",
+    "register_button": "Sign Up",
+    "register_welcome": "Sign Up",
+    "email_or_phone": "Email or Phone",
+    "identity_hint": "Enter your email address or phone number",
+    "invalid_identity": "Invalid email or phone number",
+    "send_code": "Send Code",
+    "or": "or",
+    "google": "Continue with Google",
+    "apple": "Continue with Apple",
+    "forgot_password": "Forgot Password",
+    "forgot_password_email_only": "Password reset is only supported via email.",
+    "forgot_password_sent": "Password reset link has been sent to your email.",
+    "forgot_password_partner": "For partner password reset, please contact us or ask your administrator for a reset link.",
+    "enter_code": "Enter Verification Code",
+    "verify": "Verify",
+    "verify_title": "Verify Code",
+    "verify_button": "Verify",
+    "resend_code": "Resend Code",
+    "resend": "Resend",
+    "name_label": "Full Name",
+    "name_error": "Please enter a valid name",
+    "name_invalid_error": "Name must be at least 2 characters",
+    "terms_service": "Terms of Service",
+    "privacy_policy": "Privacy Policy",
     "invalid_code": "Invalid code entered.",
     "invalid_password": "Invalid password entered.",
     "otp_resent": "New code sent.",
-    "otp_send_failed": "Failed to send code, try again."
+    "otp_send_failed": "Failed to send code, try again.",
+    "otp_error": "Verification error occurred.",
+    "password": "Password",
+    "password_login": "Sign in with Password",
+    "code_login": "Sign in with Code",
+    "sign_in": "Sign In",
+    "skip": "Skip"
   },
   "shop": {
     "error_loading": "An error occurred while loading the shop",
@@ -95,7 +129,18 @@
     "load_error": "Failed to load applications",
     "action_failed": "Operation failed",
     "messages_load_error": "Failed to load messages",
-    "messages_title": "Support Messages"
+    "messages_title": "Support Messages",
+    "dashboard": "Admin Dashboard",
+    "total_bookings": "Total Bookings",
+    "total_revenue": "Total Revenue",
+    "active_partners": "Active Partners",
+    "pending_apps": "Pending Applications",
+    "system_status": "System Status",
+    "all_systems_active": "All Systems Active",
+    "quick_actions": "Quick Actions",
+    "approve_shops": "Approve Shops",
+    "support_messages": "Support Messages",
+    "live_analytics": "Live Analytics"
   },
   "checkout": {
     "title": "Complete Booking",
@@ -142,6 +187,7 @@
     "start_exploring": "Start Exploring"
   },
   "partner": {
+    "management": "Partner Management",
     "dashboard": "Shop Panel",
     "active_bags": "Active Bags",
     "total_earnings": "Total Earnings",
@@ -174,7 +220,11 @@
     "opening": "Opening",
     "closing": "Closing",
     "settings_updated": "Settings updated successfully.",
-    "required": "Required"
+    "required": "Required",
+    "seal_serial": "Serial",
+    "seal_status": "Status",
+    "camera_required": "Camera access is required to scan QR codes",
+    "grant_camera": "Grant Camera Permission"
   },
   "profile": {
     "title": "My Account",

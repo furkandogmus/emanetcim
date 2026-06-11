@@ -22,15 +22,16 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _identity = TextEditingController();
+  final _password = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _busy = false;
+  bool _obscure = true;
 
   bool _isValidEmail(String email) {
     return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
   bool _isValidPhone(String phone) {
-    // Basic Turkish phone validation: 05xx xxx xx xx or 5xx xxx xx xx
     final clean = phone.replaceAll(RegExp(r'\D'), '');
     return (clean.length == 10 && clean.startsWith('5')) ||
         (clean.length == 11 && clean.startsWith('05'));
@@ -38,6 +39,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   bool _isValid(String v) {
     return _isValidEmail(v) || _isValidPhone(v);
+  }
+
+  Future<void> _login() async {
+    unawaited(ref.read(hapticServiceProvider).light());
+    if (!_formKey.currentState!.validate()) return;
+    if (_password.text.trim().isEmpty) return;
+    setState(() => _busy = true);
+    try {
+      await ref
+          .read(authControllerProvider.notifier)
+          .loginWithPassword(_identity.text.trim(), _password.text.trim());
+      if (!mounted) return;
+      context.go('/');
+    } catch (e) {
+      _toast('$e');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   Future<void> _google() async {
@@ -247,8 +266,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   : 'auth.invalid_identity'.tr(),
                             ),
                             const SizedBox(height: 20),
+                            TextFormField(
+                              controller: _password,
+                              obscureText: _obscure,
+                              keyboardType: TextInputType.visiblePassword,
+                              style: GoogleFonts.outfit(
+                                fontWeight: FontWeight.w600,
+                              ),
+                              decoration: InputDecoration(
+                                hintText: 'auth.password'.tr(),
+                                prefixIcon: const Icon(Icons.lock_outline_rounded),
+                                suffixIcon: IconButton(
+                                  icon: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                                  onPressed: () => setState(() => _obscure = !_obscure),
+                                ),
+                              ),
+                              onFieldSubmitted: (_) => _login(),
+                            ),
+                            const SizedBox(height: 8),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: _busy ? null : _forgotPassword,
+                                child: Text('auth.forgot_password'.tr(), style: GoogleFonts.outfit(fontSize: 13)),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
                             FilledButton(
-                              onPressed: _busy ? null : _requestOtp,
+                              onPressed: _busy ? null : _login,
                               style: FilledButton.styleFrom(
                                 minimumSize: const Size(double.infinity, 56),
                                 shape: RoundedRectangleBorder(
@@ -265,7 +310,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       ),
                                     )
                                   : Text(
-                                      'auth.send_code'.tr(),
+                                      'auth.sign_in'.tr(),
                                       style: GoogleFonts.outfit(
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -392,319 +437,36 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  void _showOtpSheet(String identity) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      isDismissible: false,
-      enableDrag: false,
-      builder: (context) => _OtpBottomSheet(identity: identity),
-    );
-  }
-
-  Future<void> _requestOtp() async {
-    unawaited(ref.read(hapticServiceProvider).light());
-    if (!_formKey.currentState!.validate()) return;
-    setState(() => _busy = true);
-    try {
-      final input = _identity.text.trim();
-      await ref.read(authControllerProvider.notifier).requestOtp(input);
-      if (!mounted) return;
-      _showOtpSheet(input);
-    } catch (e) {
-      _toast('$e');
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
-}
-
-class _OtpBottomSheet extends ConsumerStatefulWidget {
-  const _OtpBottomSheet({required this.identity});
-  final String identity;
-
-  @override
-  ConsumerState<_OtpBottomSheet> createState() => _OtpBottomSheetState();
-}
-
-class _OtpBottomSheetState extends ConsumerState<_OtpBottomSheet> {
-  final _code = TextEditingController();
-  final _password = TextEditingController();
-  bool _usePassword = false;
-  bool _busy = false;
-  int _timerCount = 60;
-  bool _canResend = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _startTimer();
-  }
-
-  void _startTimer() {
-    _canResend = false;
-    _timerCount = 60;
-    Future.doWhile(() async {
-      await Future.delayed(const Duration(seconds: 1));
-      if (!mounted) return false;
-      setState(() => _timerCount--);
-      if (_timerCount <= 0) {
-        setState(() => _canResend = true);
-        return false;
-      }
-      return true;
-    });
-  }
-
-  Future<void> _verify() async {
-    unawaited(ref.read(hapticServiceProvider).light());
-    if (_code.text.length < 6) return;
-    setState(() => _busy = true);
-    try {
-      await ref
-          .read(authControllerProvider.notifier)
-          .verifyOtp(widget.identity, _code.text.trim());
-      unawaited(ref.read(hapticServiceProvider).success());
-      if (!mounted) return;
-      context.go('/');
-    } catch (e) {
-      unawaited(ref.read(hapticServiceProvider).error());
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('auth.invalid_code'.tr()),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
-
-  Future<void> _verifyWithPassword() async {
-    unawaited(ref.read(hapticServiceProvider).light());
-    if (_password.text.isEmpty) return;
-    setState(() => _busy = true);
-    try {
-      await ref
-          .read(authControllerProvider.notifier)
-          .loginWithPassword(widget.identity, _password.text.trim());
-      unawaited(ref.read(hapticServiceProvider).success());
-      if (!mounted) return;
-      context.go('/');
-    } catch (e) {
-      unawaited(ref.read(hapticServiceProvider).error());
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('auth.invalid_password'.tr()),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }  Future<void> _resendOtp() async {
-    setState(() => _busy = true);
-    try {
-      final dio = ref.read(dioProvider);
-      final isEmail = widget.identity.contains('@');
-      await dio.post('/auth/otp', data: isEmail
-          ? {'email': widget.identity}
-          : {'phone': widget.identity});
-      _startTimer();
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('auth.otp_resent'.tr()),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('auth.invalid_code'.tr()),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
-
   Future<void> _forgotPassword() async {
-    final email = widget.identity.trim();
-    if (!email.contains('@')) {
+    final input = _identity.text.trim();
+    if (input.contains('@')) {
+      setState(() => _busy = true);
+      try {
+        final dio = ref.read(dioProvider);
+        await dio.post('/auth/password-reset/request', data: {
+          'email': input,
+          'locale': context.locale.languageCode,
+        });
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('auth.forgot_password_sent'.tr())),
+        );
+      } catch (_) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('auth.forgot_password_sent'.tr())),
+        );
+      } finally {
+        if (mounted) setState(() => _busy = false);
+      }
+    } else {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('auth.forgot_password_email_only'.tr())),
-      );
-      return;
-    }
-    setState(() => _busy = true);
-    try {
-      final dio = ref.read(dioProvider);
-      await dio.post(
-        '/auth/password-reset/request',
-        data: {'email': email, 'locale': context.locale.languageCode},
-      );
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('auth.forgot_password_sent'.tr())));
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('auth.forgot_password_sent'.tr())));
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      child: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+        SnackBar(
+          content: Text('auth.forgot_password_partner'.tr()),
+          duration: const Duration(seconds: 5),
         ),
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Text(
-                  'auth.enter_code'.tr(),
-                  style: GoogleFonts.outfit(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const Spacer(),
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'auth.otp_sent'.tr(args: [widget.identity]),
-              style: GoogleFonts.outfit(color: const Color(0xFF616161)),
-            ),
-            const SizedBox(height: 32),
-            if (!_usePassword)
-              TextField(
-                key: const ValueKey('login_code_field'),
-                controller: _code,
-                autofocus: true,
-                keyboardType: TextInputType.number,
-                maxLength: 6,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(
-                  fontSize: 32,
-                  letterSpacing: 8,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.brandOrange,
-                ),
-                decoration: InputDecoration(
-                  counterText: '',
-                  hintText: '0 0 0 0 0 0',
-                  hintStyle: GoogleFonts.outfit(
-                    color: Colors.grey.shade200,
-                    letterSpacing: 8,
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey.shade50,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-                onChanged: (v) {
-                  if (v.length == 6) _verify();
-                },
-              )
-            else
-              TextField(
-                key: const ValueKey('login_password_field'),
-                controller: _password,
-                autofocus: true,
-                obscureText: true,
-                keyboardType: TextInputType.visiblePassword,
-                enableSuggestions: false,
-                autocorrect: false,
-                style: GoogleFonts.outfit(fontSize: 18),
-                decoration: InputDecoration(
-                  hintText: 'Şifre'.tr(),
-                  filled: true,
-                  fillColor: Colors.grey.shade50,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
-                ),
-              ),
-            const SizedBox(height: 32),
-            FilledButton(
-              onPressed:
-                  _busy ||
-                      (!_usePassword && _code.text.length < 6) ||
-                      (_usePassword && _password.text.isEmpty)
-                  ? null
-                  : (_usePassword ? _verifyWithPassword : _verify),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.brandOrange,
-                minimumSize: const Size(double.infinity, 56),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              child: _busy
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : Text(_usePassword ? 'Giriş Yap'.tr() : 'auth.verify'.tr()),
-            ),
-            const SizedBox(height: 8),
-            TextButton(
-              onPressed: () {
-                FocusManager.instance.primaryFocus?.unfocus();
-                setState(() => _usePassword = !_usePassword);
-              },
-              child: Text(
-                _usePassword
-                    ? 'Kod ile Giriş Yap'.tr()
-                    : 'Şifre ile Giriş Yap'.tr(),
-              ),
-            ),
-            if (_usePassword)
-              TextButton(
-                onPressed: _busy ? null : _forgotPassword,
-                child: Text('auth.forgot_password'.tr()),
-              ),
-            const SizedBox(height: 16),
-            TextButton(
-              onPressed: _canResend ? _resendOtp : null,
-              child: Text(
-                _canResend
-                    ? 'auth.resend_code'.tr()
-                    : 'auth.resend_wait'.tr(args: [_timerCount.toString()]),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+      );
+    }
   }
 }
