@@ -1,0 +1,61 @@
+appId: com.bagajpark
+---
+# === ÖN KOŞUL ===
+- clearState
+- launchApp
+- tapOn: "Atla"
+- tapOn: "E-posta veya Telefon"
+- inputText: "maestro-guest@bagajpark.com"
+- tapOn: "Şifre"
+- inputText: "Test123!"
+- tapOn: "Giriş Yap"
+
+# === ARAMA EKRANI ===
+- tapOn: "Ara"
+- assertVisible: "Nerede valizini bırakmak istiyorsun?"
+
+# Metin araması
+- tapOn: "Nerede valizini bırakmak istiyorsun?"
+- inputText: "İstanbul"
+- pressKey: Enter
+
+# === FİLTRELEME ===
+- tapOn: "Filtrele"
+- assertVisible: "Filtrele"
+
+# Açık şimdi
+- assertVisible: "Şimdi Açık"
+- tapOn: "Şimdi Açık"
+
+# 7/24
+- assertVisible: "7/24 Açık"
+- tapOn: "7/24 Açık"
+
+# Sıralama
+- tapOn: "Sıralama"
+- tapOn: "Mesafe (Yakın)"
+- tapOn: "Fiyat (Düşük)"
+
+# Sonuçları göster
+- tapOn: "Sonuçları Göster"
+- assertVisible: "Filtrele"
+
+# === DÜKKAN DETAYI ===
+- tapOn: "Maestro Test Dükkanı"
+- assertVisible: "Yol Tarifi"
+- assertVisible: "Dükkan Hakkında"
+
+# Olanaklar
+- scrollUntilVisible:
+    item: "Olanaklar"
+    direction: DOWN
+- assertVisible: "Olanaklar"
+
+# Favori ekle/çıkar
+- tapOn: "Favorilere Ekle"
+
+# Değerlendirmeler
+- scrollUntilVisible:
+    item: "Değerlendirmeler"
+    direction: DOWN
+- assertVisible: "Değerlendirmeler"

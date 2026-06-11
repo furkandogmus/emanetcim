@@ -1,0 +1,53 @@
+appId: com.bagajpark
+---
+# === ÖN KOŞUL ===
+- clearState
+- launchApp
+- tapOn: "Atla"
+- tapOn: "E-posta veya Telefon"
+- inputText: "maestro-guest@bagajpark.com"
+- tapOn: "Şifre"
+- inputText: "Test123!"
+- tapOn: "Giriş Yap"
+
+# === PROFİL ===
+- tapOn: "Profil"
+- assertVisible: "Hesabım"
+- assertVisible: "Misafir"
+- assertVisible: "maestro-guest@bagajpark.com"
+
+# İstatistikler
+- assertVisible: "Rezervasyon"
+- assertVisible: "Favori"
+
+# === PROFİL DÜZENLEME ===
+- tapOn: "Profilimi Düzenle"
+- assertVisible: "Profilimi Düzenle"
+
+# İsim değiştir
+- tapOn: "Ad Soyad"
+- eraseText
+- inputText: "Ahmet Güncellendi"
+
+# Telefon değiştir
+- tapOn: "Telefon"
+- eraseText
+- inputText: "5559876543"
+
+# Kaydet
+- tapOn: "Kaydet"
+- assertVisible: "Hesabım"
+
+# === BİLDİRİM AYARLARI ===
+- tapOn: "Bildirimler"
+- assertVisible: "Bildirimler"
+
+# === YARDIM ===
+- tapOn: "Yardım Merkezi"
+- assertVisible: "Yardım Merkezi"
+
+# === ÇIKIŞ ===
+- tapOn: "Çıkış Yap"
+- assertVisible: "Hesabınızdan çıkış yapmak istediğinize emin misiniz?"
+- tapOn: "İptal"
+- assertVisible: "Hesabım"

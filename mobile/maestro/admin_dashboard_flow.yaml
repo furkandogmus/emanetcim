@@ -1,0 +1,25 @@
+appId: com.bagajpark
+---
+# === ÖN KOŞUL: Admin girişi ===
+- clearState
+- launchApp
+- tapOn: "Atla"
+- tapOn: "E-posta veya Telefon"
+- inputText: "maestro-admin@bagajpark.com"
+- tapOn: "Şifre"
+- inputText: "Test123!"
+- tapOn: "Giriş Yap"
+
+# === YÖNETİM PANELİ ===
+- assertVisible: "Yönetim Paneli"
+- assertVisible: "Toplam Rezervasyon"
+- assertVisible: "Toplam Gelir"
+- assertVisible: "Aktif Esnaf"
+- assertVisible: "Bekleyen Başvurular"
+- assertVisible: "Tüm Sistemler Aktif"
+- takeScreenshot: "admin-dashboard"
+
+# === HIZLI İŞLEMLER ===
+- assertVisible: "Başvuruları Onayla"
+- assertVisible: "Destek Mesajları"
+- assertVisible: "Canlı İstatistikler"

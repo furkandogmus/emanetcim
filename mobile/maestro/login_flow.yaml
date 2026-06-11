@@ -1,0 +1,56 @@
+appId: com.bagajpark
+---
+# === HAPPY PATH: Kod ile giriş ===
+- clearState
+- launchApp
+
+# Onboarding'i geç
+- tapOn: "Atla"
+- assertVisible: "Hoş Geldiniz"
+
+# Email girip kod gönder
+- tapOn: "E-posta veya Telefon"
+- inputText: "maestro-guest@bagajpark.com"
+- tapOn: "Kod Gönder"
+
+# Doğrulama ekranı
+- assertVisible: "Doğrulama Kodunu Girin"
+- assertVisible: "Doğrula"
+- takeScreenshot: "login-verification-screen"
+
+# Geri dön
+- tapOn: "Geri"
+
+# === HAPPY PATH: Şifre ile giriş ===
+- tapOn: "E-posta veya Telefon"
+- inputText: "maestro-guest@bagajpark.com"
+- tapOn: "Şifre"
+- inputText: "Test123!"
+- tapOn: "Giriş Yap"
+
+# Giriş başarılı — ana sayfa
+- assertVisible: "Merhaba"
+- takeScreenshot: "login-success"
+
+# === SOYUT: Çıkış yap (temiz state) ===
+- tapOn: "Profil"
+- tapOn: "Çıkış Yap"
+- tapOn: "Evet"
+- assertVisible: "Giriş Yap"
+
+# === ERROR PATH: Boş form ===
+- tapOn: "Kod Gönder"
+- assertVisible: "Geçersiz e-posta veya telefon numarası"
+
+# === ERROR PATH: Geçersiz email ===
+- tapOn: "E-posta veya Telefon"
+- inputText: "gecersiz-email"
+- tapOn: "Kod Gönder"
+- assertVisible: "Geçersiz e-posta veya telefon numarası"
+
+# === SOSYAL GİRİŞ butonları ===
+- assertVisible: "Google ile Devam Et"
+- assertVisible: "Apple ile Devam Et"
+
+# === Şifre sıfırlama linki ===
+- assertVisible: "Şifremi Unuttum"

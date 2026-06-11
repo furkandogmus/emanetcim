@@ -1,0 +1,52 @@
+appId: com.bagajpark
+---
+# === GİRİŞ ===
+- clearState
+- launchApp
+- tapOn: "Atla"
+- tapOn: "E-posta veya Telefon"
+- inputText: "maestro-guest@bagajpark.com"
+- tapOn: "Şifre"
+- inputText: "Test123!"
+- tapOn: "Giriş Yap"
+
+# === ARAMA → DÜKKAN DETAYI ===
+- tapOn: "Nerede valizini bırakmak istiyorsun?"
+- inputText: "Kadıköy"
+- pressKey: Enter
+- tapOn: "Maestro Test Dükkanı"
+
+# Dükkan detayı kontrol
+- assertVisible: "Yol Tarifi"
+
+# Scroll to bottom → Rezervasyon butonu
+- scrollUntilVisible:
+    item: "Rezervasyon"
+    direction: DOWN
+- tapOn: "Rezervasyon"
+
+# === CHECKOUT EKRANI ===
+- assertVisible: "Rezervasyonu Tamamla"
+- assertVisible: "Valiz Seçimi"
+
+# === VALİZ BOYUTLARI ===
+- assertVisible: "Küçük (S)"
+- assertVisible: "Orta (M)"
+- assertVisible: "Büyük (XL)"
+- tapOn: "Küçük (S)"
+
+# === ÖDEME ÖZETİ ===
+- scrollUntilVisible:
+    item: "Ödeme Özeti"
+    direction: DOWN
+- assertVisible: "Ödeme Özeti"
+- assertVisible: "Valiz Ücreti"
+- assertVisible: "Toplam"
+- assertVisible: "Güvenli 256-bit SSL Ödeme"
+
+# === HATA: Valiz seçmeden ödemeye git ===
+- tapOn: "Geri"
+- tapOn: "Geri"
+- tapOn: "Maestro Test Dükkanı"
+- tapOn: "Ödemeyi Yap"
+- assertVisible: "Lütfen en az bir valiz seçin."

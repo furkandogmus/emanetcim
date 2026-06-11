@@ -1,0 +1,44 @@
+appId: com.bagajpark
+---
+# === GİRİŞ ===
+- clearState
+- launchApp
+- tapOn: "Atla"
+- tapOn: "E-posta veya Telefon"
+- inputText: "maestro-guest@bagajpark.com"
+- tapOn: "Şifre"
+- inputText: "Test123!"
+- tapOn: "Giriş Yap"
+
+# === ANA SAYFA ===
+- assertVisible: "Nasıl Çalışır?"
+- assertVisible: "İstanbul"
+- assertVisible: "Ankara"
+
+# === ARAMA ===
+- tapOn: "Nerede valizini bırakmak istiyorsun?"
+- inputText: "Kadıköy"
+- pressKey: Enter
+
+# Sonuçlar
+- assertVisible: "Filtrele"
+
+# Dükkan adına tıkla → Dükkan Detayı
+- tapOn: "Maestro Test Dükkanı"
+- assertVisible: "Yol Tarifi"
+
+# Dükkan bilgilerini kontrol et
+- scrollUntilVisible:
+    item: "Değerlendirmeler"
+    direction: DOWN
+- assertVisible: "Çalışma Saatleri"
+- assertVisible: "Olanaklar"
+
+# Rezervasyon butonuna tıkla → Checkout
+- scrollUntilVisible:
+    item: "Ödemeyi Yap"
+    direction: UP
+- assertVisible: "Valiz Seçimi"
+- assertVisible: "Ödeme Özeti"
+- assertVisible: "Toplam"
+- takeScreenshot: "checkout-screen"

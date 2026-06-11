@@ -1,0 +1,39 @@
+# Maestro E2E Test Konfigürasyonu
+# https://maestro.mobile.dev
+
+flows:
+  - onboarding_flow.yaml
+  - login_flow.yaml
+  - register_flow.yaml
+  - password_reset_flow.yaml
+  - search_filter_flow.yaml
+  - checkout_flow.yaml
+  - booking_flow.yaml
+  - profile_flow.yaml
+  - partner_seals_flow.yaml
+  - partner_scan_flow.yaml
+  - partner_booking_management_flow.yaml
+  - admin_dashboard_flow.yaml
+
+env:
+  APP_ID: "com.bagajpark"
+  APP_NAME: "BagajPark"
+  GUEST_EMAIL: "maestro-guest@bagajpark.com"
+  GUEST_PASSWORD: "Test123!"
+  PARTNER_EMAIL: "maestro-partner@bagajpark.com"
+  PARTNER_PASSWORD: "Test123!"
+  ADMIN_EMAIL: "maestro-admin@bagajpark.com"
+  ADMIN_PASSWORD: "Test123!"
+  TEST_SHOP_NAME: "Maestro Test Dükkanı"
+
+executionOrder:
+  continueOnFailure: false
+
+onFlowStart:
+  - stopApp
+
+onFlowComplete:
+  - takeScreenshot: "flow-complete"
+
+onError:
+  - takeScreenshot: "flow-error"

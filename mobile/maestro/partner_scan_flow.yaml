@@ -1,0 +1,24 @@
+appId: com.bagajpark
+---
+# === GİRİŞ (PARTNER) ===
+- clearState
+- launchApp
+- tapOn: "Atla"
+- tapOn: "E-posta veya Telefon"
+- inputText: "maestro-partner@bagajpark.com"
+- tapOn: "Şifre"
+- inputText: "Test123!"
+- tapOn: "Giriş Yap"
+
+# === QR TARAMA EKRANI ===
+- tapOn: "QR Tara"
+- assertVisible: "Kamera erişimi gerekli"
+- assertVisible: "Kamera İznini Ver"
+
+# Kamera izni reddet
+- tapOn: "Kamera İznini Ver"
+- tapOn: "İzin Verme"
+
+# Kılavuz metni
+- assertVisible: "Misafirin QR kodunu veya mühür barkodunu bu alana hizalayın"
+- takeScreenshot: "partner-scan-screen"
