@@ -583,6 +583,11 @@ export default function CheckoutClient({
 
             <BagProtection variant="checkout" />
 
+            <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-xs leading-relaxed text-emerald-800 flex items-center gap-2">
+              <span className="text-emerald-600 font-black text-base">✓</span>
+              <span className="font-semibold">{t("freeCancellationNote")}</span>
+            </div>
+
             <section
               className="rounded-2xl border border-gray-100 bg-gray-50/90 p-4 text-xs leading-relaxed text-gray-600"
               aria-labelledby="checkout-policy-callout"
