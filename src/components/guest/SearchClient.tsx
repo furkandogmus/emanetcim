@@ -11,6 +11,8 @@ import {
   Plus,
   X as CloseIcon,
   SlidersHorizontal,
+  Crosshair,
+  ArrowUpDown,
 } from "lucide-react";
 import DateTimePicker from "@/components/ui/DateTimePicker";
 import { Link } from "@/i18n/routing";
@@ -64,6 +66,8 @@ export default function SearchClient({
   const [maxPrice, setMaxPrice] = useState(500);
   const [open247Only, setOpen247Only] = useState(false);
   const [hasRestroom, setHasRestroom] = useState(false);
+  const [sortBy, setSortBy] = useState<string>("distance");
+  const [gpsLocating, setGpsLocating] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("nearby");
 
   const [nearbyList, setNearbyList] = useState<ShopSearchHit[]>(initialNearby);
@@ -208,6 +212,47 @@ export default function SearchClient({
 
   const markFiltersDirty = () => setFilterDirty(true);
 
+  const handleUseMyLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error(t("searchGeolocationUnavailable"));
+      return;
+    }
+    setGpsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setDynamicCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setFilterDirty(true);
+        setGpsLocating(false);
+        toast.success(t("searchLocationUpdated"));
+      },
+      () => {
+        setGpsLocating(false);
+        toast.error(t("searchGeolocationDenied"));
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  const sortedShops = useMemo(() => {
+    const list = [...filteredShops];
+    switch (sortBy) {
+      case "price_asc":
+        list.sort((a, b) => (a.pricePerDay ?? 0) - (b.pricePerDay ?? 0));
+        break;
+      case "price_desc":
+        list.sort((a, b) => (b.pricePerDay ?? 0) - (a.pricePerDay ?? 0));
+        break;
+      case "rating":
+        list.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+        break;
+      case "distance":
+      default:
+        list.sort((a, b) => (a.distanceKm ?? 9999) - (b.distanceKm ?? 9999));
+        break;
+    }
+    return list;
+  }, [filteredShops, sortBy]);
+
   return (
     <div className="relative h-[100svh] w-full overflow-hidden bg-white font-sans selection:bg-orange-100">
       <div className="absolute inset-0 z-0">
@@ -262,21 +307,37 @@ export default function SearchClient({
           </p>
         ) : null}
 
-        <div className="relative group mb-3">
-          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-            <SearchIcon
-              size={18}
-              className="text-gray-400 group-focus-within:text-orange-600 transition-colors"
-            />
+          <div className="flex gap-2 mb-3">
+            <div className="relative group flex-1">
+              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                <SearchIcon
+                  size={18}
+                  className="text-gray-400 group-focus-within:text-orange-600 transition-colors"
+                />
+              </div>
+              <input
+                type="text"
+                placeholder={t("searchPlaceholder")}
+                className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-transparent focus:border-orange-500/30 focus:bg-white focus:ring-4 focus:ring-orange-500/5 rounded-2xl text-base font-semibold placeholder:text-gray-400 transition-all shadow-sm outline-none"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleUseMyLocation}
+              disabled={gpsLocating}
+              className="shrink-0 h-[52px] w-[52px] bg-gray-50 hover:bg-orange-50 border border-transparent hover:border-orange-200 rounded-2xl flex items-center justify-center text-gray-400 hover:text-orange-600 transition-all disabled:opacity-50"
+              title={t("useMyLocation")}
+              aria-label={t("useMyLocation")}
+            >
+              {gpsLocating ? (
+                <div className="w-5 h-5 border-2 border-gray-300 border-t-orange-600 rounded-full animate-spin" />
+              ) : (
+                <Crosshair size={20} />
+              )}
+            </button>
           </div>
-          <input
-            type="text"
-            placeholder={t("searchPlaceholder")}
-            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-transparent focus:border-orange-500/30 focus:bg-white focus:ring-4 focus:ring-orange-500/5 rounded-2xl text-base font-semibold placeholder:text-gray-400 transition-all shadow-sm outline-none"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
 
         {datesReady ? (
           <section
@@ -397,6 +458,20 @@ export default function SearchClient({
           </div>
         </div>
 
+        <div className="flex items-center gap-2 mb-2">
+          <ArrowUpDown size={14} className="text-gray-400 shrink-0" />
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="text-[10px] font-bold uppercase tracking-widest bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-gray-700 outline-none focus:border-orange-300"
+            aria-label={t("sortBy")}
+          >
+            <option value="distance">{t("sortByDistance")}</option>
+            <option value="price_asc">{t("sortByPriceLow")}</option>
+            <option value="price_desc">{t("sortByPriceHigh")}</option>
+            <option value="rating">{t("sortByRating")}</option>
+          </select>
+        </div>
         <div className="flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-widest">
           <label className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-lg">
             {t("filterMinRating")}
@@ -446,11 +521,11 @@ export default function SearchClient({
               className="text-sm font-black text-gray-900 uppercase tracking-widest"
             >
               {activeTab === "nearby" ? t("nearbyShops") : t("allShops")} (
-              {filteredShops.length})
+              {sortedShops.length})
             </h2>
           </div>
 
-          {filteredShops.length === 0 ? (
+          {sortedShops.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center gap-3">
               <MapPin size={40} className="text-gray-300" />
               <p className="text-sm font-bold text-gray-500">{t("noShopsFound")}</p>
@@ -470,7 +545,7 @@ export default function SearchClient({
           ) : (
             <div className="flex flex-col gap-3">
               <AnimatePresence mode="popLayout">
-                {filteredShops.map((shop, index) => (
+                {sortedShops.map((shop, index) => (
                   <motion.div
                     key={shop.id}
                     initial={{ opacity: 0, y: 10 }}
