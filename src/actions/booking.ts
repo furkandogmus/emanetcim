@@ -245,14 +245,11 @@ export async function createBookingAction(data: CreateBookingInput) {
       }).catch(() => {}); // booking zaten oluştu, kupon sayacı hatayla durmamalı
     }
 
-    // Sadakat puanı: her 1 TL harcamaya 1 puan (raw SQL — migration sonrası)
+    // Sadakat puanı: her 1 TL harcamaya 1 puan
     if (userId) {
       const earnedPoints = Math.floor(totalPrice);
       if (earnedPoints > 0) {
-        void prisma.$executeRawUnsafe(
-          `UPDATE "User" SET "loyaltyPoints" = "loyaltyPoints" + $1 WHERE id = $2`,
-          earnedPoints, userId
-        ).catch(() => {});
+        void prisma.$executeRaw`UPDATE "User" SET "loyaltyPoints" = "loyaltyPoints" + ${earnedPoints} WHERE id = ${userId}`.catch(() => {});
       }
     }
 

@@ -21,10 +21,10 @@ export async function GET(req: NextRequest) {
   if (!parsed.success) return NextResponse.json({ error: "invalid" }, { status: 400 });
   const { lat, lng, r, page, limit, checkIn, checkOut, bags } = parsed.data;
 
-  const rules = await getPricingRules();
   const radiusKm = r / 1000;
 
   if (checkIn && checkOut) {
+    const rules = await getPricingRules();
     const ci = new Date(checkIn);
     const co = new Date(checkOut);
     if (!validateBookingStayWindow(ci, co, rules)) {
