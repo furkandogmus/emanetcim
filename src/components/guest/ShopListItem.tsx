@@ -67,11 +67,14 @@ export default function ShopListItem({
         </div>
 
         <div className="mt-3 flex justify-between items-center">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <div className="flex items-center gap-1 text-[10px] text-green-600 font-bold uppercase tracking-wider">
               <Shield size={10} />
               {t("insured")}
             </div>
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-md">
+              {t("searchFreeCancelBadge")}
+            </span>
             {isVerified && (
               <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded-md">
                 <Shield size={10} />
