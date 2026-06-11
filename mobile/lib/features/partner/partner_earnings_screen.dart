@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
+import '../../shared/models/earnings_stats.dart';
 
 class PartnerEarningsScreen extends ConsumerStatefulWidget {
   const PartnerEarningsScreen({super.key});
@@ -15,7 +16,7 @@ class PartnerEarningsScreen extends ConsumerStatefulWidget {
 
 class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
   bool _loading = true;
-  Map<String, dynamic> _stats = {};
+  EarningsStats _stats = EarningsStats();
 
   @override
   void initState() {
@@ -28,22 +29,12 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
       final dio = ref.read(dioProvider);
       final res = await dio.get('/partner/earnings/stats');
       setState(() {
-        _stats = res.data as Map<String, dynamic>;
+        _stats = EarningsStats.fromJson(res.data as Map<String, dynamic>);
         _loading = false;
       });
     } catch (e) {
-      // Mock for now if API not ready to keep it sync-feel
       setState(() {
-        _stats = {
-          'totalBalance': 4250.0,
-          'todayEarnings': 320.0,
-          'pendingPayout': 1200.0,
-          'history': [
-            {'date': '21 Nis', 'amount': 450.0, 'status': 'PAID'},
-            {'date': '20 Nis', 'amount': 380.0, 'status': 'PAID'},
-            {'date': '19 Nis', 'amount': 520.0, 'status': 'PAID'},
-          ],
-        };
+        _stats = EarningsStats(error: e.toString());
         _loading = false;
       });
     }
@@ -95,7 +86,7 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '₺${_stats['totalBalance']}',
+                  '₺${_stats.totalBalance}',
                   style: GoogleFonts.outfit(
                     color: Colors.white,
                     fontSize: 40,
@@ -108,13 +99,13 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
                   children: [
                     _statSubItem(
                       'partner.today'.tr(),
-                      '₺${_stats['todayEarnings']}',
+                      '₺${_stats.todayEarnings}',
                       Colors.greenAccent,
                     ),
                     Container(width: 1, height: 30, color: Colors.white10),
                     _statSubItem(
                       'partner.pending'.tr(),
-                      '₺${_stats['pendingPayout']}',
+                      '₺${_stats.thisWeek}',
                       Colors.orangeAccent,
                     ),
                   ],
@@ -136,7 +127,7 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
           ),
           const SizedBox(height: 16),
 
-          ...(_stats['history'] as List).map(
+          ..._stats.history.map(
             (e) => _historyTile(e as Map<String, dynamic>),
           ),
 
