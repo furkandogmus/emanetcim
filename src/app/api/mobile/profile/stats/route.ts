@@ -9,23 +9,19 @@ export async function GET(req: NextRequest) {
 
   const userId = auth.user.id;
 
-  const [totalBookings, totalSpent, favoritesCount] = await Promise.all([
-    prisma.booking.count({
-      where: { guestId: userId, status: { not: "CANCELLED" } },
-    }),
+  const [totalBookings, completedBookings, totalSpent] = await Promise.all([
+    prisma.booking.count({ where: { guestId: userId } }),
+    prisma.booking.count({ where: { guestId: userId, status: "CHECKED_OUT" } }),
     prisma.booking.aggregate({
       where: { guestId: userId, status: { not: "CANCELLED" } },
       _sum: { totalPrice: true },
-    }),
-    prisma.booking.count({
-      where: { guestId: userId, status: { in: ["PAID", "CHECKED_IN", "CHECKED_OUT"] } },
     }),
   ]);
 
   return NextResponse.json({
     totalBookings,
-    totalSavings: Number(totalSpent._sum?.totalPrice ?? 0) * 0.15,
-    favoritesCount,
-    completedBookings: favoritesCount,
+    completedBookings,
+    totalSavings: 0,
+    totalSpent: Number(totalSpent._sum.totalPrice ?? 0),
   });
 }

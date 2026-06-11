@@ -178,6 +178,7 @@
   },
   "profile": {
     "title": "My Account",
+    "guest": "Guest",
     "settings": "ACCOUNT SETTINGS",
     "edit_profile": "Edit Profile",
     "notifications": "Notifications",

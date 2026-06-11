@@ -301,7 +301,7 @@ class _BookingPartnerCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      booking.guestName ?? 'Misafir',
+                      booking.guestName ?? 'profile.guest'.tr(),
                       style: GoogleFonts.outfit(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,

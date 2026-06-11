@@ -178,6 +178,7 @@
   },
   "profile": {
     "title": "Hesabım",
+    "guest": "Misafir",
     "settings": "HESAP AYARLARI",
     "edit_profile": "Profilimi Düzenle",
     "notifications": "Bildirimler",

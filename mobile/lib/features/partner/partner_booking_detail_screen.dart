@@ -192,7 +192,7 @@ class _PartnerBookingDetailScreenState
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      b.guestName ?? 'Misafir',
+                      b.guestName ?? 'profile.guest'.tr(),
                       style: GoogleFonts.outfit(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,

@@ -29,3 +29,7 @@ abstract class ShopDto with _$ShopDto {
   factory ShopDto.fromJson(Map<String, dynamic> json) =>
       _$ShopDtoFromJson(json);
 }
+
+String shopImageUrl(ShopDto shop) {
+  return shop.imageUrl ?? '';
+}
