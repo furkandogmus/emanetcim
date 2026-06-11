@@ -1,46 +1,46 @@
 import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import prisma from "@/lib/db";
-import { getMobileSession } from "@/lib/mobile-auth";
+import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 import { BookingStatus, PaymentStatus } from "@prisma/client";
 
-export async function GET() {
-  const session = await getMobileSession();
-  if (!session || session.role !== "PARTNER") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+export async function GET(req: NextRequest) {
+  const auth = await requireMobileUser(req);
+  if ("error" in auth) return auth.error;
+  const roleErr = requireRole(auth.user, ["PARTNER"]);
+  if (roleErr) return roleErr;
 
-  const shop = await prisma.shop.findFirst({
-    where: { ownerId: session.userId },
+  const shops = await prisma.shop.findMany({
+    where: { ownerId: auth.user.id, isActive: true },
+    select: { id: true },
   });
 
-  if (!shop) {
-    return NextResponse.json({ error: "Shop not found" }, { status: 404 });
+  if (shops.length === 0) {
+    return NextResponse.json({ error: "no_shops" }, { status: 404 });
   }
 
+  const shopIds = shops.map((s) => s.id);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
   const baseWhere = {
-    shopId: shop.id,
+    shopId: { in: shopIds },
     status: { in: [BookingStatus.PAID, BookingStatus.CHECKED_IN, BookingStatus.CHECKED_OUT] },
     paymentLog: { is: { status: PaymentStatus.SUCCESS } },
   };
 
   const [aggregateResult, todayResult, history] = await Promise.all([
-    // Tüm zamanların toplam cirosu
     prisma.booking.aggregate({
       where: baseWhere,
       _sum: { totalPrice: true },
     }),
-    // Bugünkü ciro — tam tarih filtresiyle, son 10 kayıt sınırı olmaksızın
     prisma.booking.aggregate({
       where: { ...baseWhere, createdAt: { gte: today } },
       _sum: { totalPrice: true },
     }),
-    // Son 10 işlem (geçmiş listesi için)
     prisma.booking.findMany({
       where: baseWhere,
-      select: { totalPrice: true, createdAt: true },
+      select: { totalPrice: true, createdAt: true, shopId: true },
       orderBy: { createdAt: "desc" },
       take: 10,
     }),
@@ -52,6 +52,7 @@ export async function GET() {
   const formattedHistory = history.map((b) => ({
     date: b.createdAt.toISOString().slice(5, 10).replace("-", " "),
     amount: Number(b.totalPrice),
+    shopId: b.shopId,
     status: "PAID" as const,
   }));
 
