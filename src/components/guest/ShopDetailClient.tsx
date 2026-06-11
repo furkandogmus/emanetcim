@@ -23,6 +23,7 @@ import {
   trackPlausibleEvent,
 } from "@/lib/plausible-events";
 import { TrustBadges } from "@/components/common/TrustBadge";
+import FavoriteButton from "@/components/guest/FavoriteButton";
 
 export type ShopDetailClientShop = {
   id: string;
@@ -164,7 +165,9 @@ export default function ShopDetailClient({
               <h1 className="min-w-0 flex-1 break-words text-[1.65rem] sm:text-[1.9rem] leading-[1.05] font-black text-gray-900">
                 {shop.name}
               </h1>
-              <div className="shrink-0 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-700">
+              <div className="shrink-0 flex items-center gap-2">
+                <FavoriteButton shopId={shop.id} />
+                <div className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-700">
                 <Star size={12} fill="currentColor" />
                 {rating.toFixed(1)}
               </div>
