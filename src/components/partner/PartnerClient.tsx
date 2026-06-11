@@ -13,6 +13,9 @@ import {
   Home,
   BarChart3,
   Luggage,
+  TrendingUp,
+  Calendar,
+  ShieldCheck,
 } from "lucide-react";
 
 import { Link } from "@/i18n/routing";
@@ -380,23 +383,26 @@ export default function PartnerClient({
             {t("partnerPanelActive")}
           </p>
         </div>
-        <div className="flex flex-col items-end gap-2 pt-2">
+        <div className="flex flex-col gap-2">
           <Link
             href="/partner/earnings"
-            className="text-[10px] font-black uppercase tracking-widest text-orange-600 hover:text-orange-700 whitespace-nowrap"
+            className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-orange-50 text-orange-700 hover:bg-orange-100 active:scale-[0.97] transition-all text-sm font-bold whitespace-nowrap"
           >
+            <TrendingUp size={18} />
             {t("earnings")}
           </Link>
           <Link
             href="/partner/bookings"
-            className="text-[10px] font-black uppercase tracking-widest text-orange-600 hover:text-orange-700 whitespace-nowrap"
+            className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-orange-50 text-orange-700 hover:bg-orange-100 active:scale-[0.97] transition-all text-sm font-bold whitespace-nowrap"
           >
+            <Calendar size={18} />
             {t("listCalendar")}
           </Link>
           <Link
             href="/partner/seals"
-            className="text-[10px] font-black uppercase tracking-widest text-orange-600 hover:text-orange-700 whitespace-nowrap"
+            className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-orange-50 text-orange-700 hover:bg-orange-100 active:scale-[0.97] transition-all text-sm font-bold whitespace-nowrap"
           >
+            <ShieldCheck size={18} />
             {t("sealsTitle")}
           </Link>
         </div>
