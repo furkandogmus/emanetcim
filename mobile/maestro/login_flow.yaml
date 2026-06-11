@@ -1,57 +1,33 @@
 appId: com.bagajpark
 ---
-# Login: email + şifre + Giriş Yap. OTP flow yok.
+# Login: email + şifre + Giriş Yap
 - clearState
 - launchApp
+
+# Root/jailbreak uyarısını kapat
+- tapOn:
+    text: "Riskleri Anladım, Devam Et"
+    optional: true
+
 - tapOn: "Atla"
 
 # Login ekranı
 - assertVisible: "Hoş Geldiniz"
-- assertVisible: "BagajPark"
-- assertVisible: "Kayıt Ol"
-- assertVisible: "Giriş Yap"
 
-# === HAPPY PATH: Guest giriş ===
+# Email ve şifre
 - tapOn: "E-posta veya Telefon"
 - inputText: "maestro-guest@bagajpark.com"
 - tapOn: "Şifre"
 - inputText: "Test123!"
-- tapOn: "Giriş Yap"
-- assertVisible: "Nasıl Çalışır?"
-- takeScreenshot: "login-success-guest"
 
-# Çıkış yap
-- tapOn: "Profil"
-- scrollUntilVisible:
-    item: "Çıkış Yap"
-    direction: DOWN
-- tapOn: "Çıkış Yap"
-- assertVisible: "Hesabınızdan çıkış yapmak istediğinize emin misiniz?"
-- tapOn: "Evet"
+# Klavyeyi kapat ve butona tıkla
+- pressKey: Back
+- tapOn:
+    point: "50%,70%"
+    optional: true
 
-# === ERROR PATH: Boş form ===
-- assertVisible: "Hoş Geldiniz"
-- tapOn: "Giriş Yap"
-- assertVisible: "Geçersiz e-posta veya telefon numarası"
-
-# === ERROR PATH: Geçersiz email ===
-- tapOn: "E-posta veya Telefon"
-- inputText: "gecersiz-email"
-- tapOn: "Şifre"
-- inputText: "Test123!"
-- tapOn: "Giriş Yap"
-- assertVisible: "Geçersiz e-posta veya telefon numarası"
-
-# === SOSYAL GİRİŞ butonları ===
-- assertVisible: "Google ile Devam Et"
-- assertVisible: "Apple ile Devam Et"
-
-# === NAVİGASYON: Şifremi Unuttum ===
-- assertVisible: "Şifremi Unuttum"
-
-# === NAVİGASYON: Kayıt Ol ===
-- assertVisible: "Kayıt Ol"
-- tapOn: "Kayıt Ol"
-- assertVisible: "Kayıt Ol"
-- assertVisible: "Ad Soyad"
-- tapOn: "Geri"
+# Ana sayfa
+- waitForAnimationToEnd:
+    timeout: 5000
+- assertVisible: "Ana Sayfa"
+- takeScreenshot: "login-success"

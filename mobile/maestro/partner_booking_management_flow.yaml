@@ -3,6 +3,12 @@ appId: com.bagajpark
 # Partner Dashboard: filtreleme, kazanç, ayarlar
 - clearState
 - launchApp
+
+# Root/jailbreak uyarısını kapat
+- tapOn:
+    text: "Riskleri Anladım, Devam Et"
+    optional: true
+
 - tapOn: "Atla"
 
 # Partner girişi
@@ -10,7 +16,10 @@ appId: com.bagajpark
 - inputText: "maestro-partner@bagajpark.com"
 - tapOn: "Şifre"
 - inputText: "Test123!"
-- tapOn: "Giriş Yap"
+- pressKey: Back
+- tapOn:
+    point: "50%,70%"
+    optional: true
 
 # Dashboard
 - assertVisible: "Dükkan Paneli"

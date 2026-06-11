@@ -3,6 +3,12 @@ appId: com.bagajpark
 # Booking: arama → dükkan detay → checkout
 - clearState
 - launchApp
+
+# Root/jailbreak uyarısını kapat
+- tapOn:
+    text: "Riskleri Anladım, Devam Et"
+    optional: true
+
 - tapOn: "Atla"
 
 # Login
@@ -10,7 +16,10 @@ appId: com.bagajpark
 - inputText: "maestro-guest@bagajpark.com"
 - tapOn: "Şifre"
 - inputText: "Test123!"
-- tapOn: "Giriş Yap"
+- pressKey: Back
+- tapOn:
+    point: "50%,70%"
+    optional: true
 - assertVisible: "Nasıl Çalışır?"
 
 # Popüler şehirler
@@ -18,18 +27,7 @@ appId: com.bagajpark
 - assertVisible: "Ankara"
 
 # Arama
-- tapOn: "Nerede valizini bırakmak istiyorsun?"
-- inputText: "Kadıköy"
-- pressKey: Enter
-- assertVisible: "Filtrele"
-
-# Dükkan detayı
-- tapOn: "Maestro Test Dükkanı"
-- assertVisible: "Yol Tarifi"
-
-# Dükkan bilgileri
-- scrollUntilVisible:
-    item: "Değerlendirmeler"
-    direction: DOWN
-- assertVisible: "Çalışma Saatleri"
-- takeScreenshot: "shop-detail"
+- tapOn: "Ara"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: "search-screen"

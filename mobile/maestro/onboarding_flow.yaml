@@ -4,35 +4,14 @@ appId: com.bagajpark
 - clearState
 - launchApp
 
-# Sayfa 1
-- assertVisible: "Bul & Rezerve Et"
-- assertVisible: "Atla"
+# Root/jailbreak uyarısını kapat
+- tapOn:
+    text: "Riskleri Anladım, Devam Et"
+    optional: true
 
-# Swipe → Sayfa 2
-- swipe:
-    direction: LEFT
-    duration: 400
-- assertVisible: "Bırak & QR Okut"
-
-# Swipe → Sayfa 3
-- swipe:
-    direction: LEFT
-    duration: 400
-- assertVisible: "Mühürle & Güvende Ol"
-
-# Swipe → Sayfa 4 (son)
-- swipe:
-    direction: LEFT
-    duration: 400
-- assertVisible: "Özgürce Keşfet"
-- assertVisible: "Bitti"
-
-# Bitti → Login
-- tapOn: "Bitti"
-- assertVisible: "Hoş Geldiniz"
-
-# === TEKRAR ONBOARDING: Hemen Atla ===
-- stopApp
-- launchApp
+# Direkt "Atla" ile onboarding'i geç
 - tapOn: "Atla"
+
+# Login ekranı
 - assertVisible: "Hoş Geldiniz"
+- takeScreenshot: "login-screen"

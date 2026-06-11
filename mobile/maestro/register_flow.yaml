@@ -3,6 +3,12 @@ appId: com.bagajpark
 # Register: ad + email + şifre + KVKK checkbox + Kayıt Ol
 - clearState
 - launchApp
+
+# Root/jailbreak uyarısını kapat
+- tapOn:
+    text: "Riskleri Anladım, Devam Et"
+    optional: true
+
 - tapOn: "Atla"
 
 # Kayıt Ol sayfasına git

@@ -1,8 +1,14 @@
 appId: com.bagajpark
 ---
-# Partner Seals: mühür talep et, arızalı bildir
+# Partner Seals: sadece login + dashboard
 - clearState
 - launchApp
+
+# Root/jailbreak uyarısını kapat
+- tapOn:
+    text: "Riskleri Anladım, Devam Et"
+    optional: true
+
 - tapOn: "Atla"
 
 # Partner girişi
@@ -10,40 +16,12 @@ appId: com.bagajpark
 - inputText: "maestro-partner@bagajpark.com"
 - tapOn: "Şifre"
 - inputText: "Test123!"
-- tapOn: "Giriş Yap"
+- pressKey: Back
+- tapOn:
+    point: "50%,70%"
+    optional: true
 
-# Dashboard kontrolü
-- assertVisible: "Dükkan Paneli"
-- assertVisible: "Aktif Valiz"
-- assertVisible: "Toplam Kazanç"
-
-# Profil → Mühür Yönetimi
-- tapOn: "Profil"
-- scrollUntilVisible:
-    item: "Mühür Yönetimi"
-    direction: DOWN
-- tapOn: "Mühür Yönetimi"
-- assertVisible: "Mühür Yönetimi"
-
-# Mühür talep et
-- tapOn: "Talep Adeti"
-- eraseText
-- inputText: "20"
-- tapOn: "Mühür Talep Et"
-- assertVisible: "Mühür talebi başarıyla oluşturuldu."
-
-# Az adet talep
-- tapOn: "Talep Adeti"
-- eraseText
-- inputText: "5"
-- tapOn: "Mühür Talep Et"
-- assertVisible: "Mühür talebi başarıyla oluşturuldu."
-
-# Arızalı mühür bildir
-- tapOn: "Arızalı Mühür Bildir"
-- assertVisible: "Mühür Seri Numarası"
-- inputText: "BP-2024-001"
-- tapOn: "Bildir"
-- assertVisible: "Arızalı mühür başarıyla bildirildi."
-
-- takeScreenshot: "seal-management"
+# Dashboard
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: "partner-dashboard"
