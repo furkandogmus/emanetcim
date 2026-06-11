@@ -2,6 +2,7 @@ import 'dart:async' show unawaited;
 import 'dart:io' show Platform;
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -52,8 +53,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           .loginWithPassword(_identity.text.trim(), _password.text.trim());
       if (!mounted) return;
       context.go('/');
+    } on DioException catch (e) {
+      final code = e.response?.data?['error'] as String?;
+      if (code == 'invalid_credentials') {
+        _toast('auth.invalid_credentials'.tr());
+      } else if (code == 'too_many_attempts') {
+        _toast('auth.too_many_attempts'.tr());
+      } else if (e.type == DioExceptionType.connectionError || e.type == DioExceptionType.connectionTimeout) {
+        _toast('common.no_internet'.tr());
+      } else {
+        _toast('common.error'.tr());
+      }
     } catch (e) {
-      _toast('$e');
+      _toast('common.error'.tr());
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -65,9 +77,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       await ref.read(authControllerProvider.notifier).signInWithGoogle();
       if (!mounted) return;
       context.go('/');
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionError || e.type == DioExceptionType.connectionTimeout) {
+        _toast('common.no_internet'.tr());
+      } else {
+        _toast('auth.google_error'.tr());
+      }
     } catch (e) {
       if (!mounted) return;
-      _toast('$e');
+      _toast('auth.google_error'.tr());
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -79,9 +97,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       await ref.read(authControllerProvider.notifier).signInWithApple();
       if (!mounted) return;
       context.go('/');
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionError || e.type == DioExceptionType.connectionTimeout) {
+        _toast('common.no_internet'.tr());
+      } else {
+        _toast('auth.apple_error'.tr());
+      }
     } catch (e) {
       if (!mounted) return;
-      _toast('$e');
+      _toast('auth.apple_error'.tr());
     } finally {
       if (mounted) setState(() => _busy = false);
     }
