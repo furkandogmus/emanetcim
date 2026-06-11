@@ -6,7 +6,7 @@ const DEFAULT_POSTS = [
     slug: "istanbul-valiz-emanet-rehberi",
     title: "İstanbul Seyahatinde Valiz Çilesine Son: Güvenli Emanet Rehberi",
     excerpt: "İstanbul sokaklarını valizlerinizi sürüklemeden, özgürce gezmeniz için en iyi emanet çözümlerini ve ipuçlarını derledik.",
-    coverImage: "https://images.unsplash.com/photo-1549877452-9c387954fbc2?auto=format&fit=crop&w=1200&q=80",
+    coverImage: "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=1200&q=80",
     authorName: "BagajPark Seyahat Editörü",
     isPublished: true,
     content: `
@@ -28,7 +28,7 @@ const DEFAULT_POSTS = [
     slug: "istanbul-luggage-storage-guide",
     title: "No More Suitcase Struggle in Istanbul: Secure Luggage Storage Guide",
     excerpt: "Discover the best options and tips for storing your luggage securely in Istanbul so you can explore the city hassle-free.",
-    coverImage: "https://images.unsplash.com/photo-1549877452-9c387954fbc2?auto=format&fit=crop&w=1200&q=80",
+    coverImage: "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=1200&q=80",
     authorName: "BagajPark Travel Editor",
     isPublished: true,
     content: `
