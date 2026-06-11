@@ -40,42 +40,10 @@
     }
   },
   "auth": {
-    "login": "Login",
-    "welcome": "Welcome",
-    "email": "Email Address",
-    "email_or_phone": "Email or Phone",
-    "invalid_identity": "Enter a valid email or phone",
-    "skip": "Skip",
-    "send_code": "Send Code",
-    "verify": "Verify",
-    "verify_title": "Verification",
-    "verify_button": "Verify",
-    "otp_sent": "Code sent to {}",
-    "otp_error": "Invalid verification code",
-    "code": "Verification Code",
-    "resend": "Resend",
-    "register": "Register",
-    "no_account": "Don't have an account?",
-    "or": "or",
-    "google": "Continue with Google",
-    "apple": "Continue with Apple",
-    "register_welcome": "Welcome to our community! 👋",
-    "register_hint": "Create your account now to safely store your luggage.",
-    "name_label": "Full Name",
-    "name_error": "Please enter your name",
-    "name_invalid_error": "Name should only contain letters and spaces",
-    "email_error": "Enter a valid email",
-    "terms_text": "By registering, you agree to our {} and {}.",
-    "terms_service": "Terms of Service",
-    "privacy_policy": "Privacy Policy",
-    "register_button": "Register and Send Code",
-    "enter_code": "Enter Your Code",
-    "resend_code": "Resend Code",
-    "resend_wait": "Resend ({}s)",
-    "identity_hint": "e.g. 5xx xxx xx xx or email",
-    "forgot_password": "Forgot password",
-    "forgot_password_email_only": "Password reset is available only with email.",
-    "forgot_password_sent": "If your account exists, a reset link has been sent to your email."
+    "invalid_code": "Invalid code entered.",
+    "invalid_password": "Invalid password entered.",
+    "otp_resent": "New code sent.",
+    "otp_send_failed": "Failed to send code, try again."
   },
   "shop": {
     "error_loading": "An error occurred while loading the shop",
@@ -122,20 +90,12 @@
     }
   },
   "admin": {
-    "dashboard": "Admin Dashboard",
-    "total_bookings": "Total Bookings",
-    "total_revenue": "Total Revenue",
-    "active_partners": "Active Partners",
-    "pending_apps": "Pending Apps",
-    "quick_actions": "Quick Actions",
-    "approve_shops": "Approve Shops",
-    "system_status": "System Status",
-    "active": "Active",
-    "live_analytics": "Live Analytics",
-    "new_shop_apps": "{} new shop applications",
-    "all_systems_active": "All systems active",
-    "support_messages": "Support Messages",
-    "unread_messages": "{} unread messages"
+    "approved": "Application approved",
+    "rejected": "Application rejected",
+    "load_error": "Failed to load applications",
+    "action_failed": "Operation failed",
+    "messages_load_error": "Failed to load messages",
+    "messages_title": "Support Messages"
   },
   "checkout": {
     "title": "Complete Booking",
@@ -197,7 +157,6 @@
     "seal_info": "Seal Info",
     "scan_hint": "Align guest's QR or seal barcode here",
     "offline_saved": "No internet. Action saved and will sync automatically.",
-    "no_bookings": "No bookings yet",
     "no_bookings": "No bookings yet",
     "earnings": "My Earnings",
     "settings": "Shop Settings",
@@ -292,16 +251,40 @@
   },
   "tutorial": {
     "guest": {
-      "step1": { "title": "Find", "desc": "Select the closest BagajPark spot from the map." },
-      "step2": { "title": "Book", "desc": "Set the date and number of bags, and book securely." },
-      "step3": { "title": "Drop-off", "desc": "Go to the spot, scan the QR code, and leave your bags." },
-      "step4": { "title": "Enjoy", "desc": "Leave your sealed bags and explore the city freely." }
+      "step1": {
+        "title": "Find",
+        "desc": "Select the closest BagajPark spot from the map."
+      },
+      "step2": {
+        "title": "Book",
+        "desc": "Set the date and number of bags, and book securely."
+      },
+      "step3": {
+        "title": "Drop-off",
+        "desc": "Go to the spot, scan the QR code, and leave your bags."
+      },
+      "step4": {
+        "title": "Enjoy",
+        "desc": "Leave your sealed bags and explore the city freely."
+      }
     },
     "partner": {
-      "step1": { "title": "Scan QR", "desc": "Scan the QR code shown by the guest." },
-      "step2": { "title": "Receive Bags", "desc": "Confirm the number of bags and receive them." },
-      "step3": { "title": "Seal", "desc": "Attach the security seal and enter its number." },
-      "step4": { "title": "Earn", "desc": "Earn instantly once the process is complete." }
+      "step1": {
+        "title": "Scan QR",
+        "desc": "Scan the QR code shown by the guest."
+      },
+      "step2": {
+        "title": "Receive Bags",
+        "desc": "Confirm the number of bags and receive them."
+      },
+      "step3": {
+        "title": "Seal",
+        "desc": "Attach the security seal and enter its number."
+      },
+      "step4": {
+        "title": "Earn",
+        "desc": "Earn instantly once the process is complete."
+      }
     }
   },
   "share": {

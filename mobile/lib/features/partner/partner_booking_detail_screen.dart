@@ -180,7 +180,9 @@ class _PartnerBookingDetailScreenState
                         alpha: 0.1,
                       ),
                       child: Text(
-                        b.guestName?.substring(0, 1).toUpperCase() ?? 'G',
+                        (b.guestName != null && b.guestName!.isNotEmpty)
+                            ? b.guestName!.substring(0, 1).toUpperCase()
+                            : 'G',
                         style: GoogleFonts.outfit(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,

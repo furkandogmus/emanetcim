@@ -10,6 +10,13 @@ import '../../core/services/haptic_service.dart';
 import '../../core/services/share_service.dart';
 import '../../shared/models/user.dart';
 import '../../shared/utils/app_colors.dart';
+import '../../core/api/api_client.dart';
+
+final profileStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+  final dio = ref.read(dioProvider);
+  final res = await dio.get('/profile/stats');
+  return res.data as Map<String, dynamic>;
+});
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -50,7 +57,9 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                       child: Center(
                         child: Text(
-                          user?.name?.substring(0, 1).toUpperCase() ?? '?',
+                          (user?.name != null && user!.name!.isNotEmpty)
+                              ? user.name!.substring(0, 1).toUpperCase()
+                              : '?',
                           style: GoogleFonts.outfit(
                             fontSize: 40,
                             fontWeight: FontWeight.bold,
@@ -98,12 +107,33 @@ class ProfileScreen extends ConsumerWidget {
           const SizedBox(height: 32),
 
           // Stats Section
-          Row(
-            children: [
-              _statItem('0', 'profile.stats_bookings'.tr()),
-              _statItem('₺0', 'profile.stats_savings'.tr()),
-              _statItem('0', 'profile.stats_favorites'.tr()),
-            ],
+          Consumer(
+            builder: (context, ref, child) {
+              final statsAsync = ref.watch(profileStatsProvider);
+              return statsAsync.when(
+                data: (stats) => Row(
+                  children: [
+                    _statItem('${stats['totalBookings'] ?? 0}', 'profile.stats_bookings'.tr()),
+                    _statItem('₺${stats['totalSavings'] ?? '0'}', 'profile.stats_savings'.tr()),
+                    _statItem('${stats['completedBookings'] ?? 0}', 'profile.stats_favorites'.tr()),
+                  ],
+                ),
+                loading: () => Row(
+                  children: [
+                    _statItem('...', 'profile.stats_bookings'.tr()),
+                    _statItem('...', 'profile.stats_savings'.tr()),
+                    _statItem('...', 'profile.stats_favorites'.tr()),
+                  ],
+                ),
+                error: (_, __) => Row(
+                  children: [
+                    _statItem('-', 'profile.stats_bookings'.tr()),
+                    _statItem('-', 'profile.stats_savings'.tr()),
+                    _statItem('-', 'profile.stats_favorites'.tr()),
+                  ],
+                ),
+              );
+            },
           ),
 
           const SizedBox(height: 32),
@@ -531,13 +561,12 @@ class ProfileScreen extends ConsumerWidget {
                     : () async {
                         setModalState(() => isSaving = true);
                         try {
-                          // Temporary mock update logic, assuming API /account exists
-                          // final dio = ref.read(dioProvider);
-                          // await dio.put('/account', data: {'name': nameController.text});
-                          await Future.delayed(
-                            const Duration(seconds: 1),
-                          ); // Mock Network Call
-                          if (context.mounted) Navigator.pop(context);
+                          final dio = ref.read(dioProvider);
+                          await dio.put('/auth/me', data: {'name': nameController.text});
+                          if (context.mounted) {
+                            ref.invalidate(authControllerProvider);
+                            Navigator.pop(context);
+                          }
                         } catch (e) {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(

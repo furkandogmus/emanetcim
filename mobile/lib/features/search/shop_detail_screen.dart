@@ -100,10 +100,13 @@ class ShopDetailScreen extends ConsumerWidget {
                     flexibleSpace: FlexibleSpaceBar(
                       background: Hero(
                         tag: 'shop-${s.id}',
-                        child: Image.network(
-                          'https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=800&auto=format&fit=crop',
-                          fit: BoxFit.cover,
-                        ),
+                        child: s.imageUrl != null
+                            ? Image.network(
+                                s.imageUrl!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => _shopPlaceholder(s.name),
+                              )
+                            : _shopPlaceholder(s.name),
                       ),
                     ),
                   ),
@@ -232,13 +235,7 @@ class ShopDetailScreen extends ConsumerWidget {
                             width: double.infinity,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(24),
-                              color: Colors.grey.shade100,
-                              image: const DecorationImage(
-                                image: NetworkImage(
-                                  'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?q=80&w=800&auto=format&fit=crop',
-                                ),
-                                fit: BoxFit.cover,
-                              ),
+                              color: Colors.grey.shade200,
                             ),
                             child: Center(
                               child: Container(
@@ -310,15 +307,14 @@ class ShopDetailScreen extends ConsumerWidget {
 
                           _sectionHeader('shop.reviews'.tr()),
                           const SizedBox(height: 16),
-                          _reviewItem(
-                            'Ahmet Y.',
-                            5,
-                            'Çok merkezi bir konumda, teslimat çok hızlıydı. Güvenle bırakabilirsiniz.',
-                          ),
-                          _reviewItem(
-                            'Sarah M.',
-                            4,
-                            'Very friendly staff and easy to find. Highly recommended!',
+                          Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(24),
+                              child: Text(
+                                'Henüz yorum bulunmuyor.',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ),
                           ),
 
                           const SizedBox(height: 120), // Bottom bar space
@@ -552,6 +548,22 @@ class ShopDetailScreen extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _shopPlaceholder(String name) {
+    return Container(
+      color: AppColors.brandOrange.withValues(alpha: 0.1),
+      child: Center(
+        child: Text(
+          name.isNotEmpty ? name.substring(0, 1).toUpperCase() : 'S',
+          style: GoogleFonts.outfit(
+            fontSize: 48,
+            fontWeight: FontWeight.bold,
+            color: AppColors.brandOrange,
+          ),
+        ),
       ),
     );
   }

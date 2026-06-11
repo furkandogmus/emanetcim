@@ -40,42 +40,10 @@
     }
   },
   "auth": {
-    "login": "Giriş Yap",
-    "welcome": "Hoş Geldiniz",
-    "email": "E-posta Adresi",
-    "email_or_phone": "E-posta veya Telefon",
-    "invalid_identity": "Geçerli bir e-posta veya telefon giriniz",
-    "skip": "Atla",
-    "send_code": "Kod Gönder",
-    "verify": "Doğrula",
-    "verify_title": "Doğrulama",
-    "verify_button": "Doğrula",
-    "otp_sent": "Kod {} adresine gönderildi",
-    "otp_error": "Doğrulama kodu hatalı",
-    "code": "Doğrulama Kodu",
-    "resend": "Tekrar Gönder",
-    "register": "Kayıt Ol",
-    "no_account": "Hesabın yok mu?",
-    "or": "veya",
-    "google": "Google ile devam et",
-    "apple": "Apple ile devam et",
-    "register_welcome": "Aramıza Hoş Geldin! 👋",
-    "register_hint": "Valizlerini güvenle emanet etmek için hemen hesabını oluştur.",
-    "name_label": "Ad Soyad",
-    "name_error": "Lütfen adınızı giriniz",
-    "name_invalid_error": "Ad sadece harf ve boşluk içermelidir",
-    "email_error": "Geçerli bir e-posta giriniz",
-    "terms_text": "Kayıt olarak {} ve {} kabul etmiş sayılırsınız.",
-    "terms_service": "Kullanım Koşulları'nı",
-    "privacy_policy": "Gizlilik Politikası'nı",
-    "register_button": "Kayıt Ol ve Kod Gönder",
-    "enter_code": "Kodunuzu Girin",
-    "resend_code": "Kodu tekrar gönder",
-    "resend_wait": "Tekrar gönder ({}s)",
-    "identity_hint": "Örn: 05xx xxx xx xx veya e-posta",
-    "forgot_password": "Şifremi unuttum",
-    "forgot_password_email_only": "Şifre sıfırlama yalnızca e-posta ile mümkündür.",
-    "forgot_password_sent": "Eğer hesabınız varsa sıfırlama bağlantısı e-postanıza gönderildi."
+    "invalid_code": "Hatalı kod girdiniz.",
+    "invalid_password": "Hatalı şifre girdiniz.",
+    "otp_resent": "Yeni kod gönderildi.",
+    "otp_send_failed": "Kod gönderilemedi, tekrar deneyin."
   },
   "shop": {
     "error_loading": "Dükkan yüklenirken bir hata oluştu",
@@ -122,20 +90,12 @@
     }
   },
   "admin": {
-    "dashboard": "Yönetim Paneli",
-    "total_bookings": "Toplam Rezervasyon",
-    "total_revenue": "Toplam Ciro",
-    "active_partners": "Aktif Esnaf",
-    "pending_apps": "Bekleyen Başvurular",
-    "quick_actions": "Hızlı İşlemler",
-    "approve_shops": "Dükkan Onayları",
-    "system_status": "Sistem Durumu",
-    "active": "Aktif",
-    "live_analytics": "Canlı Analitik",
-    "new_shop_apps": "{} yeni dükkan başvurusu",
-    "all_systems_active": "Tüm sistemler aktif",
-    "support_messages": "Destek Mesajları",
-    "unread_messages": "{} okunmamış mesaj"
+    "approved": "Başvuru onaylandı",
+    "rejected": "Başvuru reddedildi",
+    "load_error": "Başvurular yüklenemedi",
+    "action_failed": "İşlem başarısız oldu",
+    "messages_load_error": "Mesajlar yüklenemedi",
+    "messages_title": "Destek Mesajları"
   },
   "checkout": {
     "title": "Rezervasyon Tamamla",
@@ -197,7 +157,6 @@
     "seal_info": "Mühür Bilgisi",
     "scan_hint": "Misafirin QR kodunu veya mühür barkodunu bu alana hizalayın",
     "offline_saved": "İnternet bağlantısı yok. İşlem kaydedildi ve bağlantı geldiğinde otomatik gönderilecek.",
-    "no_bookings": "Henüz rezervasyon bulunmuyor",
     "no_bookings": "Henüz rezervasyon bulunmuyor",
     "earnings": "Kazançlarım",
     "settings": "Dükkan Ayarları",
@@ -292,16 +251,40 @@
   },
   "tutorial": {
     "guest": {
-      "step1": { "title": "Bul", "desc": "Haritadan sana en yakın BagajPark noktasını seç." },
-      "step2": { "title": "Rezerve Et", "desc": "Tarih ve valiz sayısını belirle, güvenle ayır." },
-      "step3": { "title": "Teslim Et", "desc": "Noktaya git, QR kodu okut ve valizini bırak." },
-      "step4": { "title": "Keyfini Çıkar", "desc": "Mühürlü valizini bırak, şehri özgürce gez." }
+      "step1": {
+        "title": "Bul",
+        "desc": "Haritadan sana en yakın BagajPark noktasını seç."
+      },
+      "step2": {
+        "title": "Rezerve Et",
+        "desc": "Tarih ve valiz sayısını belirle, güvenle ayır."
+      },
+      "step3": {
+        "title": "Teslim Et",
+        "desc": "Noktaya git, QR kodu okut ve valizini bırak."
+      },
+      "step4": {
+        "title": "Keyfini Çıkar",
+        "desc": "Mühürlü valizini bırak, şehri özgürce gez."
+      }
     },
     "partner": {
-      "step1": { "title": "QR Tarat", "desc": "Müşterinin gösterdiği QR kodu uygulamadan tarat." },
-      "step2": { "title": "Valizleri Al", "desc": "Gelen valiz sayısını onayla ve teslim al." },
-      "step3": { "title": "Mühürle", "desc": "Güvenlik mührünü valize tak ve numarasını gir." },
-      "step4": { "title": "Kazan", "desc": "İşlem tamamlandığında kazancın hesabına geçsin." }
+      "step1": {
+        "title": "QR Tarat",
+        "desc": "Müşterinin gösterdiği QR kodu uygulamadan tarat."
+      },
+      "step2": {
+        "title": "Valizleri Al",
+        "desc": "Gelen valiz sayısını onayla ve teslim al."
+      },
+      "step3": {
+        "title": "Mühürle",
+        "desc": "Güvenlik mührünü valize tak ve numarasını gir."
+      },
+      "step4": {
+        "title": "Kazan",
+        "desc": "İşlem tamamlandığında kazancın hesabına geçsin."
+      }
     }
   },
   "share": {

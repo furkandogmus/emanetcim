@@ -23,5 +23,6 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     open247: s.open247,
     hasRestroom: s.hasRestroom,
     isActive: s.isActive,
+    image: s.image,
   });
 }

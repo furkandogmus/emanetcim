@@ -472,8 +472,8 @@ class _OtpBottomSheetState extends ConsumerState<_OtpBottomSheet> {
       unawaited(ref.read(hapticServiceProvider).error());
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Hatalı kod girdiniz.'),
+        SnackBar(
+          content: Text('auth.invalid_code'.tr()),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -497,8 +497,8 @@ class _OtpBottomSheetState extends ConsumerState<_OtpBottomSheet> {
       unawaited(ref.read(hapticServiceProvider).error());
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Hatalı şifre girdiniz.'),
+        SnackBar(
+          content: Text('auth.invalid_password'.tr()),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -524,8 +524,8 @@ class _OtpBottomSheetState extends ConsumerState<_OtpBottomSheet> {
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Kod gönderilemedi, tekrar deneyin.'),
+        SnackBar(
+          content: Text('auth.invalid_code'.tr()),
           backgroundColor: Colors.redAccent,
         ),
       );

@@ -23,6 +23,7 @@ abstract class ShopDto with _$ShopDto {
     @Default(true) bool isActive,
     double? distanceKm,
     int? bagsAvailable,
+    @JsonKey(name: 'image') String? imageUrl,
   }) = _ShopDto;
 
   factory ShopDto.fromJson(Map<String, dynamic> json) =>

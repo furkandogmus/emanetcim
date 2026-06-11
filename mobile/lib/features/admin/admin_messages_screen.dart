@@ -37,7 +37,7 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(getErrorMessage(e, fallback: 'Mesajlar yüklenemedi')),
+            content: Text(getErrorMessage(e, fallback: 'admin.messages_load_error'.tr())),
           ),
         );
         setState(() => _loading = false);
@@ -62,7 +62,7 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: Text(
-          'Destek Mesajları',
+          'admin.messages_title'.tr(),
           style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
         ),
         actions: [

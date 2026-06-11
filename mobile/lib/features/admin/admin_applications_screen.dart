@@ -38,7 +38,7 @@ class _AdminApplicationsScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              getErrorMessage(e, fallback: 'Başvurular yüklenemedi'),
+              getErrorMessage(e, fallback: 'admin.load_error'.tr()),
             ),
           ),
         );
@@ -58,7 +58,7 @@ class _AdminApplicationsScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(approve ? 'Başvuru onaylandı' : 'Başvuru reddedildi'),
+            content: Text(approve ? 'admin.approved'.tr() : 'admin.rejected'.tr()),
           ),
         );
       }
@@ -68,7 +68,7 @@ class _AdminApplicationsScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(getErrorMessage(e, fallback: 'İşlem başarısız oldu')),
+            content: Text(getErrorMessage(e, fallback: 'admin.action_failed'.tr())),
           ),
         );
       }

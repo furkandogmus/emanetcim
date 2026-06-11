@@ -51,13 +51,28 @@ class ShopPreviewCard extends StatelessWidget {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: CachedNetworkImage(
-                  imageUrl:
-                      'https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=300&auto=format&fit=crop',
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) =>
-                      Container(color: Colors.grey.shade100),
-                ),
+                child: shop.imageUrl != null
+                    ? CachedNetworkImage(
+                        imageUrl: shop.imageUrl!,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) =>
+                            Container(color: Colors.grey.shade100),
+                      )
+                    : Container(
+                        color: AppColors.brandOrange.withValues(alpha: 0.1),
+                        child: Center(
+                          child: Text(
+                            shop.name.isNotEmpty
+                                ? shop.name.substring(0, 1).toUpperCase()
+                                : 'S',
+                            style: GoogleFonts.outfit(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.brandOrange,
+                            ),
+                          ),
+                        ),
+                      ),
               ),
             ),
             const SizedBox(width: 16),
