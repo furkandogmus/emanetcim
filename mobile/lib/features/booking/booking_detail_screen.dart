@@ -206,6 +206,58 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
 
               const SizedBox(height: 32),
 
+              // Seals Display
+              Consumer(builder: (context, ref, _) {
+                final sealsAsync = ref.watch(bookingSealsProvider(widget.bookingId));
+                return sealsAsync.when(
+                  data: (seals) {
+                    if (seals.isEmpty) return const SizedBox.shrink();
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'booking.seals'.tr(),
+                          style: GoogleFonts.outfit(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textDark,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        ...seals.map((seal) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Row(
+                            children: [
+                              Icon(Icons.shield_rounded, size: 18, color: AppColors.brandOrange),
+                              const SizedBox(width: 8),
+                              Text(
+                                '#${seal['sealNumber'] ?? ''}',
+                                style: GoogleFonts.outfit(fontWeight: FontWeight.w600),
+                              ),
+                              const SizedBox(width: 12),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: AppColors.brandOrange.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  '${seal['bagSize'] ?? ''} #${(seal['bagIndex'] ?? 0) + 1}',
+                                  style: GoogleFonts.outfit(fontSize: 12, color: AppColors.brandOrange),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )),
+                        const SizedBox(height: 24),
+                      ],
+                    );
+                  },
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
+                );
+              }),
+
               // Action Buttons
               Row(
                 children: [
@@ -242,40 +294,74 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
               const SizedBox(height: 16),
 
               // Cancel / Modify / Dispute / Review
-              if (bk.status == BookingStatus.approved || bk.status == BookingStatus.pending) ...[
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: _cancelling ? null : () => _cancelBooking(bk),
-                        icon: _cancelling
-                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                            : const Icon(Icons.cancel_outlined, color: Colors.redAccent),
-                        label: Text('booking.cancel'.tr(), style: const TextStyle(color: Colors.redAccent)),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          side: const BorderSide(color: Colors.redAccent),
+              if (bk.status == BookingStatus.waitingApproval || bk.status == BookingStatus.approved || bk.status == BookingStatus.paid) ...[
+                if (bk.status == BookingStatus.waitingApproval || bk.status == BookingStatus.approved)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: _cancelling ? null : () => _cancelBooking(bk),
+                          icon: _cancelling
+                              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                              : const Icon(Icons.cancel_outlined, color: Colors.redAccent),
+                          label: Text('booking.cancel'.tr(), style: const TextStyle(color: Colors.redAccent)),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            side: const BorderSide(color: Colors.redAccent),
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: _modifying ? null : () => _modifyBooking(bk),
-                        icon: _modifying
-                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                            : const Icon(Icons.edit_outlined),
-                        label: Text('booking.modify'.tr()),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: _modifying ? null : () => _modifyBooking(bk),
+                          icon: _modifying
+                              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                              : const Icon(Icons.edit_outlined),
+                          label: Text('booking.modify'.tr()),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          ),
                         ),
                       ),
+                    ],
+                  )
+                else
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: _cancelling ? null : () => _cancelBooking(bk),
+                      icon: _cancelling
+                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                          : const Icon(Icons.cancel_outlined, color: Colors.redAccent),
+                      label: Text('booking.cancel'.tr(), style: const TextStyle(color: Colors.redAccent)),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        side: const BorderSide(color: Colors.redAccent),
+                      ),
                     ),
-                  ],
-                ),
+                  ),
                 const SizedBox(height: 16),
+              ],
+
+              if (bk.status == BookingStatus.checkedIn || bk.status == BookingStatus.checkedOut) ...[
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () => _showDisputeSheet(bk),
+                    icon: const Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                    label: Text('booking.file_dispute'.tr(), style: const TextStyle(color: Colors.orange)),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      side: const BorderSide(color: Colors.orange),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
               ],
 
               if (bk.status == BookingStatus.checkedOut) ...[
@@ -293,20 +379,6 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                 ),
                 const SizedBox(height: 12),
               ],
-
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () => _showDisputeSheet(bk),
-                  icon: const Icon(Icons.warning_amber_rounded, color: Colors.orange),
-                  label: Text('booking.file_dispute'.tr(), style: const TextStyle(color: Colors.orange)),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    side: const BorderSide(color: Colors.orange),
-                  ),
-                ),
-              ),
 
               const SizedBox(height: 16),
 
@@ -416,7 +488,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
       final dio = ref.read(dioProvider);
       await dio.delete('/bookings/${bk.id}/cancel');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('booking.cancelled'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('booking.cancel_success'.tr())));
         ref.invalidate(bookingProvider(widget.bookingId));
       }
     } on DioException catch (e) {
@@ -429,8 +501,8 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
   }
 
   Future<void> _modifyBooking(BookingDto bk) async {
-    final cinCtl = TextEditingController(text: bk.checkInTime.toIso8601String().substring(0, 16));
-    final coutCtl = TextEditingController(text: bk.checkOutTime.toIso8601String().substring(0, 16));
+    DateTime? newCheckIn = bk.checkInTime;
+    DateTime? newCheckOut = bk.checkOutTime;
     var s = bk.bagCountS;
     var m = bk.bagCountM;
     var xl = bk.bagCountXl;
@@ -448,10 +520,35 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
             children: [
               Text('booking.modify_title'.tr(), style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
-              TextField(controller: cinCtl, decoration: InputDecoration(labelText: 'checkout.check_in'.tr())),
-              const SizedBox(height: 12),
-              TextField(controller: coutCtl, decoration: InputDecoration(labelText: 'checkout.check_out'.tr())),
-              const SizedBox(height: 20),
+              ListTile(
+                title: Text('checkout.check_in'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.w500)),
+                subtitle: Text(DateFormat('dd MMM yyyy, HH:mm').format(newCheckIn!), style: GoogleFonts.outfit(color: AppColors.brandOrange)),
+                trailing: const Icon(Icons.calendar_today_rounded, color: AppColors.brandOrange),
+                onTap: () async {
+                  final date = await showDatePicker(context: context, initialDate: newCheckIn, firstDate: DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 365)));
+                  if (date != null) {
+                    final time = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(newCheckIn!));
+                    if (time != null) {
+                      setSheetState(() => newCheckIn = DateTime(date.year, date.month, date.day, time.hour, time.minute));
+                    }
+                  }
+                },
+              ),
+              ListTile(
+                title: Text('checkout.check_out'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.w500)),
+                subtitle: Text(DateFormat('dd MMM yyyy, HH:mm').format(newCheckOut!), style: GoogleFonts.outfit(color: AppColors.brandOrange)),
+                trailing: const Icon(Icons.calendar_today_rounded, color: AppColors.brandOrange),
+                onTap: () async {
+                  final date = await showDatePicker(context: context, initialDate: newCheckOut, firstDate: newCheckIn ?? DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 365)));
+                  if (date != null) {
+                    final time = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(newCheckOut!));
+                    if (time != null) {
+                      setSheetState(() => newCheckOut = DateTime(date.year, date.month, date.day, time.hour, time.minute));
+                    }
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
               Row(children: [
                 _bagStepper(ctx, 'S', s, (v) => setSheetState(() => s = v)),
                 const SizedBox(width: 12),
@@ -461,8 +558,12 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
               ]),
               const SizedBox(height: 24),
               FilledButton(
-                onPressed: () => Navigator.pop(ctx, {'checkInTime': cinCtl.text, 'checkOutTime': coutCtl.text, 's': s, 'm': m, 'xl': xl}),
-                child: Text('booking.save_changes'.tr()),
+                onPressed: () => Navigator.pop(ctx, {
+                  'checkInTime': newCheckIn!.toUtc().toIso8601String(),
+                  'checkOutTime': newCheckOut!.toUtc().toIso8601String(),
+                  'bagCountS': s, 'bagCountM': m, 'bagCountXl': xl,
+                }),
+                child: Text('booking.modify'.tr()),
               ),
               const SizedBox(height: 16),
             ],
@@ -475,9 +576,9 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
     try {
       final dio = ref.read(dioProvider);
       await dio.put('/bookings/${bk.id}/modify', data: {
-        'checkInTime': DateTime.parse(result['checkInTime'] as String).toUtc().toIso8601String(),
-        'checkOutTime': DateTime.parse(result['checkOutTime'] as String).toUtc().toIso8601String(),
-        'bagCountS': result['s'], 'bagCountM': result['m'], 'bagCountXl': result['xl'],
+        'checkInTime': result['checkInTime'],
+        'checkOutTime': result['checkOutTime'],
+        'bagCountS': result['bagCountS'], 'bagCountM': result['bagCountM'], 'bagCountXl': result['bagCountXl'],
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('booking.modified'.tr())));
@@ -543,7 +644,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                     await dio.post('/reviews', data: {'bookingId': bk.id, 'rating': rating, 'comment': commentCtl.text});
                     if (ctx.mounted) {
                       Navigator.pop(ctx);
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('booking.review_submitted'.tr())));
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('booking.review_success'.tr())));
                     }
                   } catch (_) {
                     if (ctx.mounted) {
@@ -579,9 +680,13 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
               const SizedBox(height: 20),
               DropdownButtonFormField<String>(
                 value: reason,
-                items: const [DropdownMenuItem(value: 'DAMAGE', child: Text('Hasar')), DropdownMenuItem(value: 'THEFT', child: Text('Hırsızlık')), DropdownMenuItem(value: 'OTHER', child: Text('Diğer'))],
+                items: [
+                  DropdownMenuItem(value: 'DAMAGE', child: Text('booking.dispute_damage'.tr())),
+                  DropdownMenuItem(value: 'THEFT', child: Text('booking.dispute_theft'.tr())),
+                  DropdownMenuItem(value: 'OTHER', child: Text('booking.dispute_other'.tr())),
+                ],
                 onChanged: (v) => setSheetState(() => reason = v ?? 'DAMAGE'),
-                decoration: const InputDecoration(labelText: 'booking.dispute_reason'),
+                decoration: InputDecoration(labelText: 'booking.dispute_reason'.tr()),
               ),
               const SizedBox(height: 12),
               TextField(controller: descCtl, maxLines: 4, decoration: InputDecoration(labelText: 'booking.dispute_description'.tr())),
@@ -594,7 +699,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                     await dio.post('/disputes', data: {'bookingId': bk.id, 'reason': reason, 'description': descCtl.text});
                     if (ctx.mounted) {
                       Navigator.pop(ctx);
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('booking.dispute_submitted'.tr())));
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('booking.dispute_success'.tr())));
                     }
                   } catch (_) {
                     if (ctx.mounted) {

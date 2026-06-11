@@ -26,6 +26,10 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
   late TextEditingController _price;
   late TextEditingController _opening;
   late TextEditingController _closing;
+  late TextEditingController _address;
+  late TextEditingController _city;
+  late TextEditingController _district;
+  late TextEditingController _phone;
 
   @override
   void initState() {
@@ -45,6 +49,10 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
         _price = TextEditingController(text: shop.pricePerDay.toString());
         _opening = TextEditingController(text: shop.openingTime ?? '09:00');
         _closing = TextEditingController(text: shop.closingTime ?? '20:00');
+        _address = TextEditingController(text: shop.address ?? '');
+        _city = TextEditingController(text: shop.city ?? '');
+        _district = TextEditingController(text: shop.district ?? '');
+        _phone = TextEditingController(text: (res.data['phone'] ?? res.data['phoneNumber'] ?? '') as String);
         _sealCount = sealCount;
         _loading = false;
       });
@@ -70,8 +78,14 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
           'pricePerDay': double.parse(_price.text),
           'openingTime': _opening.text,
           'closingTime': _closing.text,
+          'address': _address.text,
+          'city': _city.text,
+          'district': _district.text,
         },
       );
+      if (_phone.text.isNotEmpty) {
+        await dio.put('/partner/phone', data: {'phone': _phone.text});
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('partner.settings_updated'.tr())),
@@ -229,6 +243,31 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
                   ),
                 ],
               ),
+              const SizedBox(height: 32),
+              _sectionHeader('partner.address'.tr()),
+              _inputField('partner.address'.tr(), _address, Icons.location_on_rounded),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _inputField(
+                      'partner.city'.tr(),
+                      _city,
+                      Icons.location_city_rounded,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _inputField(
+                      'partner.district'.tr(),
+                      _district,
+                      Icons.map_rounded,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _inputField('partner.phone'.tr(), _phone, Icons.phone_rounded),
               const SizedBox(height: 48),
               FilledButton(
                 onPressed: _busy ? null : _save,

@@ -39,7 +39,28 @@ export async function POST(req: Request) {
       : null;
 
   if (existing) {
-    return NextResponse.json({ error: "account_exists" }, { status: 409 });
+    // Hesap zaten var → giriş yap (şifre doğruysa)
+    if (existing.passwordHash) {
+      const { verifyPassword } = await import("@/lib/auth-password");
+      const valid = await verifyPassword(password, existing.passwordHash);
+      if (!valid) {
+        return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
+      }
+    }
+    const access = await signAccessToken(existing.id, existing.role);
+    const refresh = await signRefreshToken(existing.id, existing.role);
+    return NextResponse.json({
+      accessToken: access,
+      refreshToken: refresh,
+      user: {
+        id: existing.id,
+        email: existing.email,
+        name: existing.name,
+        phone: existing.phone,
+        role: existing.role,
+        avatarUrl: existing.image,
+      },
+    });
   }
 
   const passwordHash = await hashPassword(password);

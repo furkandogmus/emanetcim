@@ -119,6 +119,21 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 onPressed: () { setState(() => _minRating = i + 1 == _minRating ? i : i + 1); setSheetState(() {}); },
               ))),
 
+              const SizedBox(height: 12),
+              Text('search.max_price'.tr(), style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              TextField(
+                controller: TextEditingController(text: _maxPrice > 0 ? _maxPrice.toStringAsFixed(0) : ''),
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: 'search.max_price'.tr(),
+                  prefixText: '₺ ',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+                onChanged: (v) { setState(() => _maxPrice = double.tryParse(v) ?? 0); },
+              ),
+
               const SizedBox(height: 24),
               FilledButton(
                 onPressed: () => Navigator.pop(context),
@@ -280,6 +295,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               if (_acceptsLarge) {
                 filtered = filtered.where((s) => s.acceptsLargeItems).toList();
               }
+              if (_maxPrice > 0) {
+                filtered = filtered.where((s) => s.pricePerDay <= _maxPrice).toList();
+              }
               if (_sortBy == 'price') {
                 filtered = filtered..sort((a, b) => a.pricePerDay.compareTo(b.pricePerDay));
               } else if (_sortBy == 'rating') {
@@ -341,7 +359,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                 child: Container(
                                   margin: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: (_onlyOpenNow || _only247)
+                                    color: (_onlyOpenNow || _only247 || _maxPrice > 0)
                                         ? AppColors.textDark
                                         : AppColors.brandOrange,
                                     shape: BoxShape.circle,
@@ -422,6 +440,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   }
                   if (_onlyOpenNow) {
                     filtered = filtered.where((s) => s.isActive).toList();
+                  }
+                  if (_minRating > 0) {
+                    filtered = filtered.where((s) => (s.rating ?? 0) >= _minRating).toList();
+                  }
+                  if (_hasRestroom) {
+                    filtered = filtered.where((s) => s.hasRestroom).toList();
+                  }
+                  if (_hasCctv) {
+                    filtered = filtered.where((s) => s.hasCctv).toList();
+                  }
+                  if (_maxPrice > 0) {
+                    filtered = filtered.where((s) => s.pricePerDay <= _maxPrice).toList();
                   }
                   if (filtered.isEmpty) return const SizedBox();
 

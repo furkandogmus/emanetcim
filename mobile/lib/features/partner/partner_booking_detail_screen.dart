@@ -135,12 +135,24 @@ class _PartnerBookingDetailScreenState
   }
 
   Future<void> _approveBooking(BookingDto b) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('booking.approve'.tr()),
+        content: Text('booking.approve_confirm'.tr()),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('common.cancel'.tr())),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text('booking.approve'.tr())),
+        ],
+      ),
+    );
+    if (confirm != true) return;
     setState(() => _busy = true);
     try {
       final dio = ref.read(dioProvider);
       await dio.post('/partner/bookings/${b.id}/approve');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('partner.approved'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('booking.approve_success'.tr())));
         ref.invalidate(bookingProvider(b.id));
       }
     } catch (e) {
@@ -156,11 +168,11 @@ class _PartnerBookingDetailScreenState
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('partner.reject_title'.tr()),
-        content: Text('partner.reject_confirm'.tr()),
+        title: Text('booking.reject'.tr()),
+        content: Text('booking.reject_confirm'.tr()),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('common.cancel'.tr())),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text('partner.reject'.tr())),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text('booking.reject'.tr())),
         ],
       ),
     );
@@ -170,7 +182,7 @@ class _PartnerBookingDetailScreenState
       final dio = ref.read(dioProvider);
       await dio.post('/partner/bookings/${b.id}/reject');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('booking.cancelled'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('booking.reject_success'.tr())));
         ref.invalidate(bookingProvider(b.id));
       }
     } catch (e) {

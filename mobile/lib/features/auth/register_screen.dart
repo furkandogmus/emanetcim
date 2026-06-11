@@ -63,8 +63,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     } on DioException catch (e) {
       if (mounted) {
         final err = e.response?.data?['error'];
-        final msg = err == 'account_exists'
-            ? 'auth.account_exists'.tr()
+        final msg = err == 'invalid_credentials'
+            ? 'auth.invalid_credentials'.tr()
             : 'common.error'.tr();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(msg)),

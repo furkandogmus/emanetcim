@@ -27,6 +27,8 @@ class PartnerBookingsScreen extends ConsumerStatefulWidget {
 }
 
 class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
+  String _filter = 'all';
+
   @override
   void initState() {
     super.initState();
@@ -99,6 +101,15 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
             ),
             error: (e, _) => const SliverToBoxAdapter(child: SizedBox()),
             data: (list) {
+              var filtered = list;
+              if (_filter == 'waiting') {
+                filtered = list.where((b) => b.status == BookingStatus.waitingApproval).toList();
+              } else if (_filter == 'active') {
+                filtered = list.where((b) => b.status == BookingStatus.approved || b.status == BookingStatus.paid || b.status == BookingStatus.checkedIn).toList();
+              } else if (_filter == 'completed') {
+                filtered = list.where((b) => b.status == BookingStatus.checkedOut).toList();
+              }
+
               final activeBags = list
                   .where((b) => b.status == BookingStatus.checkedIn)
                   .fold(0, (sum, b) => sum + b.totalBags);
@@ -137,7 +148,23 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 40,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        _filterChip('partner.filter_all'.tr(), 'all'),
+                        const SizedBox(width: 8),
+                        _filterChip('partner.filter_waiting'.tr(), 'waiting'),
+                        const SizedBox(width: 8),
+                        _filterChip('partner.filter_active'.tr(), 'active'),
+                        const SizedBox(width: 8),
+                        _filterChip('partner.filter_completed'.tr(), 'completed'),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   Text(
                     'partner.bookings_title'.tr(),
                     style: GoogleFonts.outfit(
@@ -168,7 +195,7 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
             error: (e, _) => SliverFillRemaining(
               child: Center(child: Text('common.error'.tr())),
             ),
-            data: (list) => list.isEmpty
+            data: (list) => filtered.isEmpty
                 ? SliverFillRemaining(
                     child: Center(child: Text('partner.no_bookings'.tr())),
                   )
@@ -179,7 +206,7 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
                     ),
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate((context, index) {
-                        final b = list[index];
+                        final b = filtered[index];
                         return _BookingPartnerCard(booking: b, fmt: fmt);
                       }, childCount: list.length),
                     ),
@@ -242,6 +269,19 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) => const HowItWorksSheet(mode: HowItWorksMode.partner),
+    );
+  }
+
+  Widget _filterChip(String label, String value) {
+    final selected = _filter == value;
+    return ChoiceChip(
+      label: Text(label, style: GoogleFonts.outfit(fontSize: 13, fontWeight: selected ? FontWeight.bold : FontWeight.w500, color: selected ? Colors.white : AppColors.textDark)),
+      selected: selected,
+      onSelected: (_) => setState(() => _filter = value),
+      selectedColor: AppColors.brandOrange,
+      backgroundColor: Colors.white,
+      side: BorderSide(color: selected ? AppColors.brandOrange : Colors.grey.shade300),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     );
   }
 }
