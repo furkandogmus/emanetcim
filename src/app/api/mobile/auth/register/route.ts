@@ -25,8 +25,7 @@ export async function POST(req: Request) {
   }
 
   const { email, password, name } = parsed.data;
-  let phone = parsed.data.phone;
-  if (phone) phone = normalizeTrGsm10(phone);
+  const phone = parsed.data.phone ? normalizeTrGsm10(parsed.data.phone) ?? undefined : undefined;
   if (!phone && !email) {
     return NextResponse.json({ error: "invalid_input" }, { status: 400 });
   }

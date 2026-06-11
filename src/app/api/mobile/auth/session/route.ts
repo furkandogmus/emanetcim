@@ -76,10 +76,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
     }
 
-    if (!user.emailVerified) {
-      return NextResponse.json({ error: "email_not_verified" }, { status: 403 });
-    }
-
     const { verifyPassword } = await import("@/lib/auth-password");
     const isValid = await verifyPassword(password, user.passwordHash);
     if (!isValid) {
