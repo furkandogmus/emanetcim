@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,6 +15,7 @@ class TokenStore {
   static const _hiveKey = 'hive_encryption_key';
 
   final _storage = const FlutterSecureStorage();
+  Completer<bool>? _refreshCompleter;
 
   Future<List<int>?> getHiveKey() async {
     final keyStr = await _storage.read(key: _hiveKey);
@@ -36,13 +38,19 @@ class TokenStore {
   Future<void> clear() async {
     await _storage.delete(key: _access);
     await _storage.delete(key: _refresh);
-    // We DON'T delete _hiveKey on logout, otherwise we lose access to offline data
   }
 
   Future<bool> refresh(Dio dio) async {
-    final rt = await readRefreshToken();
-    if (rt == null) return false;
+    if (_refreshCompleter != null && !_refreshCompleter!.isCompleted) {
+      return _refreshCompleter!.future;
+    }
+    _refreshCompleter = Completer<bool>();
     try {
+      final rt = await readRefreshToken();
+      if (rt == null) {
+        _refreshCompleter!.complete(false);
+        return false;
+      }
       final res = await Dio(
         BaseOptions(baseUrl: Env.apiBaseUrl),
       ).post('/auth/refresh', data: {'refreshToken': rt});
@@ -50,10 +58,14 @@ class TokenStore {
         access: res.data['accessToken'] as String,
         refresh: res.data['refreshToken'] as String,
       );
+      _refreshCompleter!.complete(true);
       return true;
     } catch (_) {
       await clear();
+      _refreshCompleter!.complete(false);
       return false;
+    } finally {
+      _refreshCompleter = null;
     }
   }
 }

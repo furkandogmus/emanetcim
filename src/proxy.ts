@@ -43,6 +43,7 @@ const authProxy = auth((req) => {
     pathname.startsWith('/manifest.json') ||
     pathname.startsWith('/icons/') ||
     pathname.startsWith('/_next/') ||
+    pathname.startsWith('/monitoring') ||
     pathname === '/favicon.ico' ||
     pathname === '/sitemap.xml' ||
     pathname === '/robots.txt'
@@ -140,7 +141,7 @@ export function proxy(request: NextRequest) {
 export const config = {
   // Matcher for i18n and Auth (Excluding static assets strictly)
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|sw.js|manifest.json|icons/).*)',
+    '/((?!_next/static|_next/image|favicon.ico|sw.js|manifest.json|icons/|monitoring).*)',
     '/',
     '/(tr|en|de|fr|es|it|zh|ja|ar|ko|ru|fa|bg|pl)/:path*',
   ],

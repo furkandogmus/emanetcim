@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import * as Sentry from "@sentry/nextjs";
 import tr from "@/locales/tr.json";
 import en from "@/locales/en.json";
 import de from "@/locales/de.json";
@@ -82,7 +83,7 @@ export default function GlobalError({
   });
 
   useEffect(() => {
-    console.error("[global-error]", error);
+    Sentry.captureException(error);
   }, [error]);
 
   const c = commonForLocale(locale);

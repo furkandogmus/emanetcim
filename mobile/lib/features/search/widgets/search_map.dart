@@ -4,6 +4,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../core/config/env.dart';
 import '../../../shared/models/shop.dart';
 import '../../../shared/utils/app_colors.dart';
 
@@ -44,13 +45,18 @@ class SearchMap extends StatelessWidget {
         ),
         children: [
           TileLayer(
-            urlTemplate:
-                'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+            urlTemplate: Env.mapTileUrl,
             subdomains: const ['a', 'b', 'c', 'd'],
             userAgentPackageName: 'com.bagajpark.app',
           ),
           MarkerLayer(
-            markers: shops.asMap().entries.map((entry) {
+markers: shops
+                .asMap()
+                .entries
+                .where((entry) =>
+                    entry.value.latitude != null &&
+                    entry.value.longitude != null)
+                .map((entry) {
               final index = entry.key;
               final s = entry.value;
               final isSelected = selectedShopIndex == index;

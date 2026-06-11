@@ -101,7 +101,7 @@ class ShopPreviewCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        '${shop.rating} (120+)',
+                        '${shop.rating?.toStringAsFixed(1) ?? '-'}',
                         style: GoogleFonts.outfit(
                           fontSize: 14,
                           color: const Color(0xFF424242),

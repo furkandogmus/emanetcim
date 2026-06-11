@@ -38,14 +38,14 @@ final authControllerProvider = NotifierProvider<AuthController, AuthState>(
 class AuthController extends Notifier<AuthState> {
   @override
   AuthState build() {
-    _bootstrap();
-    return const AuthState();
+    Future.microtask(() => _bootstrap());
+    return const AuthState(loading: true);
   }
 
   Future<void> _bootstrap() async {
     final prefs = await SharedPreferences.getInstance();
     final onboardingDone = prefs.getBool('onboarding_done') ?? false;
-    state = state.copyWith(onboardingDone: onboardingDone);
+    state = state.copyWith(onboardingDone: onboardingDone, loading: false);
 
     try {
       await GoogleSignIn.instance.initialize();
@@ -62,12 +62,10 @@ class AuthController extends Notifier<AuthState> {
       state = state.copyWith(
         session: UserDto.fromJson(res.data as Map<String, dynamic>),
       );
-      // Push init on bootstrap
       try {
         await ref.read(pushServiceProvider).init();
       } catch (e, st) {
         debugPrint('Failed to init push service on bootstrap: $e\n$st');
-        // TODO: Log to Crashlytics / Sentry
       }
     } on DioException {
       await store.clear();
@@ -174,11 +172,20 @@ class AuthController extends Notifier<AuthState> {
   }
 
   Future<void> signInWithApple() async {
-    throw UnsupportedError('Apple login macOS üzerinde şu an devre dışı.');
+    state = state.copyWith(loading: true);
+    try {
+      final dio = ref.read(dioProvider);
+      final res = await dio.post('/auth/apple');
+      await _completeSession(res.data as Map<String, dynamic>);
+    } catch (e) {
+      state = state.copyWith(loading: false);
+      rethrow;
+    }
   }
 
   Future<void> logout() async {
     await ref.read(tokenStoreProvider).clear();
+    ref.invalidate(dioProvider);
     state = state.copyWith(clearSession: true, loading: false);
   }
 

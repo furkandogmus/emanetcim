@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../core/repositories/seal_repository.dart';
 import '../../shared/models/seal_scan_result.dart';
@@ -19,6 +20,32 @@ class PartnerScanScreen extends ConsumerStatefulWidget {
 
 class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
   bool _handled = false;
+  bool _cameraDenied = false;
+  MobileScannerController? _scannerController;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkPermission();
+  }
+
+  @override
+  void dispose() {
+    _scannerController?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _checkPermission() async {
+    final status = await Permission.camera.status;
+    if (status.isGranted) {
+      setState(() => _cameraDenied = false);
+    } else if (status.isDenied) {
+      final result = await Permission.camera.request();
+      setState(() => _cameraDenied = !result.isGranted);
+    } else {
+      setState(() => _cameraDenied = true);
+    }
+  }
 
   Future<void> _onDetect(BarcodeCapture cap) async {
     if (_handled) return;
@@ -68,9 +95,9 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _infoRow('Serial:', '${data.serialNumber}'),
+            _infoRow('partner.seal_serial'.tr(), '${data.serialNumber}'),
             const SizedBox(height: 8),
-            _infoRow('Status:', '${data.status}'),
+            _infoRow('partner.seal_status'.tr(), '${data.status}'),
           ],
         ),
         actions: [
@@ -103,63 +130,99 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          MobileScanner(onDetect: _onDetect),
-          // Custom Overlay using CustomPaint instead of ShapeBorder
-          CustomPaint(
-            painter: ScannerOverlayPainter(
-              borderColor: AppColors.brandOrange,
-              borderRadius: 20,
-              borderLength: 30,
-              borderWidth: 8,
-              cutOutSize: MediaQuery.of(context).size.width * 0.7,
-            ),
-            child: const SizedBox.expand(),
-          ),
-          // Back Button & UI
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        icon: const Icon(
-                          Icons.arrow_back_ios_new_rounded,
-                          color: Colors.white,
-                        ),
-                        onPressed: () => Navigator.pop(context),
+      body: _cameraDenied
+          ? SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.videocam_off, size: 64, color: Colors.white70),
+                    const SizedBox(height: 24),
+                    Text(
+                      'partner.camera_required'.tr(),
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.outfit(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
                       ),
-                      Text(
-                        'nav.scan'.tr(),
-                        style: GoogleFonts.outfit(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: _checkPermission,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.brandOrange,
                       ),
-                      const SizedBox(width: 48), // Spacer
-                    ],
+                      child: Text('partner.grant_camera'.tr()),
+                    ),
+                    const SizedBox(height: 12),
+                    TextButton(
+                      onPressed: () => context.pop(),
+                      child: Text(
+                        'common.back'.tr(),
+                        style: const TextStyle(color: Colors.white70),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : Stack(
+              children: [
+                MobileScanner(onDetect: _onDetect),
+                CustomPaint(
+                  painter: ScannerOverlayPainter(
+                    borderColor: AppColors.brandOrange,
+                    borderRadius: 20,
+                    borderLength: 30,
+                    borderWidth: 8,
+                    cutOutSize: MediaQuery.of(context).size.width * 0.7,
                   ),
-                  const Spacer(),
-                  Text(
-                    'partner.scan_hint'.tr(),
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.outfit(
-                      color: Colors.white70,
-                      fontSize: 14,
+                  child: const SizedBox.expand(),
+                ),
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            IconButton(
+                              icon: const Icon(
+                                Icons.arrow_back_ios_new_rounded,
+                                color: Colors.white,
+                              ),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                            Text(
+                              'nav.scan'.tr(),
+                              style: GoogleFonts.outfit(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(width: 48),
+                          ],
+                        ),
+                        const Spacer(),
+                        Text(
+                          'partner.scan_hint'.tr(),
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.outfit(
+                            color: Colors.white70,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 60),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 60),
-                ],
-              ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -191,7 +254,6 @@ class ScannerOverlayPainter extends CustomPainter {
       height: cutOutSize,
     );
 
-    // Draw background with hole
     canvas.drawPath(
       Path.combine(
         PathOperation.difference,
@@ -210,7 +272,6 @@ class ScannerOverlayPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     final path = Path()
-      // Top left
       ..moveTo(cutOutRect.left, cutOutRect.top + borderLength)
       ..lineTo(cutOutRect.left, cutOutRect.top + borderRadius)
       ..arcToPoint(
@@ -218,7 +279,6 @@ class ScannerOverlayPainter extends CustomPainter {
         radius: Radius.circular(borderRadius),
       )
       ..lineTo(cutOutRect.left + borderLength, cutOutRect.top)
-      // Top right
       ..moveTo(cutOutRect.right - borderLength, cutOutRect.top)
       ..lineTo(cutOutRect.right - borderRadius, cutOutRect.top)
       ..arcToPoint(
@@ -226,7 +286,6 @@ class ScannerOverlayPainter extends CustomPainter {
         radius: Radius.circular(borderRadius),
       )
       ..lineTo(cutOutRect.right, cutOutRect.top + borderLength)
-      // Bottom left
       ..moveTo(cutOutRect.left, cutOutRect.bottom - borderLength)
       ..lineTo(cutOutRect.left, cutOutRect.bottom - borderRadius)
       ..arcToPoint(
@@ -234,7 +293,6 @@ class ScannerOverlayPainter extends CustomPainter {
         radius: Radius.circular(borderRadius),
       )
       ..lineTo(cutOutRect.left + borderLength, cutOutRect.bottom)
-      // Bottom right
       ..moveTo(cutOutRect.right - borderLength, cutOutRect.bottom)
       ..lineTo(cutOutRect.right - borderRadius, cutOutRect.bottom)
       ..arcToPoint(

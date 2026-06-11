@@ -1,9 +1,8 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from 'next-intl/plugin';
-
+import { withSentryConfig } from "@sentry/nextjs";
 
 const withNextIntl = createNextIntlPlugin();
-
 
 const hstsHeader =
   process.env.ENABLE_HSTS_HEADERS === "true"
@@ -37,7 +36,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://client.crisp.chat",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data: https://fonts.gstatic.com https://client.crisp.chat",
-      "connect-src 'self' https: wss:",
+      "connect-src 'self' https: wss: https://o4511211308122112.ingest.de.sentry.io",
       // MapLibre GL blob: üzerinden web worker üretir; yoksa /search haritası CSP'ye takılır.
       "worker-src 'self' blob:",
       "frame-src https://js.stripe.com https://hooks.stripe.com",
@@ -70,5 +69,12 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withNextIntl(nextConfig);
+export default withSentryConfig(withNextIntl(nextConfig), {
+  org: process.env.SENTRY_ORG || "bagajpark",
+  project: process.env.SENTRY_PROJECT || "bagajpark-nextjs",
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  widenClientFileUpload: true,
+  tunnelRoute: "/monitoring",
+  silent: !process.env.CI,
+});
 

@@ -3,7 +3,6 @@ import { auth } from "@/auth";
 import { shopService } from "@/services/ShopService";
 import {
   bookingService,
-  type PartnerBookingListItem,
 } from "@/services/BookingService";
 import PartnerClient from "@/components/partner/PartnerClient";
 import { redirect } from "next/navigation";

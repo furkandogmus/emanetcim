@@ -40,6 +40,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isAdminRoute = state.matchedLocation.startsWith('/admin');
       final role = auth.session?.role;
 
+      if (auth.loading) return null;
+
       if (!auth.onboardingDone && state.matchedLocation != '/onboarding') {
         return '/onboarding';
       }
@@ -55,7 +57,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           return '/';
         }
 
-        // Security: Prevent cross-role access
         if (role == UserRole.admin &&
             !isAdminRoute &&
             state.matchedLocation == '/') {

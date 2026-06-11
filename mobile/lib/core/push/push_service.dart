@@ -3,8 +3,10 @@ import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+import '../../app/router.dart';
 import '../api/api_client.dart';
 import '../config/env.dart';
 
@@ -28,8 +30,9 @@ class PushService {
         iOS: DarwinInitializationSettings(),
       ),
       onDidReceiveNotificationResponse: (details) {
-        // Simple navigation trigger - in a real app would use a deeper logic
-        // with a navigation service.
+        final payload = details.payload;
+        if (payload == null) return;
+        _handleNotificationData(_parsePayload(payload));
       },
     );
 
@@ -37,10 +40,52 @@ class PushService {
     await fm.requestPermission();
 
     FirebaseMessaging.onMessage.listen(_onForeground);
+    FirebaseMessaging.onMessageOpenedApp.listen(_onBackgroundTap);
     fm.onTokenRefresh.listen(_register);
 
     final token = await fm.getToken();
     if (token != null) await _register(token);
+  }
+
+  void _handleNotificationData(Map<String, dynamic> data) {
+    final type = data['type'] as String?;
+    final id = data['id'] as String?;
+    if (type == null) return;
+
+    final router = _getRouter();
+    if (router == null) return;
+
+    switch (type) {
+      case 'booking':
+        if (id != null) router.push('/booking/$id');
+        break;
+      case 'partner_booking':
+        if (id != null) router.push('/partner/booking/$id');
+        break;
+    }
+  }
+
+  GoRouter? _getRouter() {
+    try {
+      return ref.read(routerProvider);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Map<String, dynamic> _parsePayload(String? payload) {
+    if (payload == null || payload.isEmpty) return {};
+    try {
+      final decoded = Uri.splitQueryString(payload);
+      return decoded;
+    } catch (_) {
+      return {};
+    }
+  }
+
+  Future<void> _onBackgroundTap(RemoteMessage msg) async {
+    final data = msg.data;
+    if (data.isNotEmpty) _handleNotificationData(data);
   }
 
   Future<void> _register(String token) async {
@@ -48,14 +93,11 @@ class PushService {
       final info = await PackageInfo.fromPlatform();
       await ref
           .read(dioProvider)
-          .post(
-            '/push/register',
-            data: {
-              'token': token,
-              'platform': Platform.isIOS ? 'ios' : 'android',
-              'appVersion': '${info.version}+${info.buildNumber}',
-            },
-          );
+          .post('/push/register', data: {
+            'token': token,
+            'platform': Platform.isIOS ? 'ios' : 'android',
+            'appVersion': '${info.version}+${info.buildNumber}',
+          });
     } on DioException {
       // Silently ignore — user may not be logged in yet
     }
@@ -64,6 +106,7 @@ class PushService {
   Future<void> _onForeground(RemoteMessage msg) async {
     final n = msg.notification;
     if (n == null) return;
+    final data = msg.data.isNotEmpty ? msg.data.toString() : null;
     await _local.show(
       id: msg.messageId.hashCode,
       title: n.title,
@@ -78,7 +121,7 @@ class PushService {
         ),
         iOS: DarwinNotificationDetails(),
       ),
-      payload: msg.data.toString(),
+      payload: data,
     );
   }
 }
