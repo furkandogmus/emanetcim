@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
         id: booking.id,
         status: booking.status,
         shopName: booking.shop.name,
-        guestName: booking.guest.name,
+        guestName: booking.guest?.name ?? "",
         checkInTime: booking.checkInTime,
         checkOutTime: booking.checkOutTime,
       });

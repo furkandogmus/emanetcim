@@ -295,6 +295,7 @@
     "checkoutReservationIdLabel": "Rezervasyon ID",
     "checkoutDeliveryPointLabel": "Teslimat noktası",
     "checkoutCardValidationError": "Lütfen tüm kart bilgilerini eksiksiz doldurun.",
+    "checkoutGuestContactRequired": "Lütfen e-posta veya telefon girin",
     "checkoutCardHolderPlaceholder": "Kart üzerindeki isim",
     "checkoutCardNumberPlaceholder": "0000 0000 0000 0000",
     "checkoutExpiryPlaceholder": "AA/YY",
@@ -417,6 +418,10 @@
     "authModalBody": "Rezervasyonunuzu tamamlamak ve ödeme adımına ilerlemek için üye girişi yapmanız gerekmektedir.",
     "authModalLogin": "Giriş Yap",
     "authModalRegister": "Kayıt Ol",
+    "checkoutGuestEmailPlaceholder": "E-posta adresiniz (isteğe bağlı)",
+    "checkoutGuestPhonePlaceholder": "Telefon numaranız (isteğe bağlı)",
+    "checkoutGuestContinue": "Misafir Olarak Devam Et",
+    "checkoutGuestOr": "veya",
     "checkoutPolicyCalloutBody": "Check-in’den 24+ saat önce: tam kart iadesi. 1–24 saat arası: %50 kart iadesi. 1 saatten az veya check-in sonrası: kart yerine tek kullanımlı kod. Ödeme yoksa: istediğiniz an iptal. Ayrıntı için SSS.",
     "checkoutPaymentMethodsNote": "Ödeme iyzico ile güvenli kart. Nakit yok. Apple Pay / Google Pay / PayPal, Stripe açıldığında — duyururuz.",
     "checkoutPaymentAfterApprovalNote": "Kartınız yalnızca dükkan talebinizi onayladıktan sonra tahsil edilir. Ödemeyi sonraki adımda veya “Rezervasyonlarım” üzerinden tamamlarsınız.",
@@ -903,7 +908,8 @@
     "deleteButton": "Hesabı kapat",
     "errors": {
       "activeBookings": "Aktif rezervasyonunuz varken hesap kapatılamaz.",
-      "authRequired": "Oturum açmanız gerekiyor.",
+    "authRequired": "Oturum açmanız gerekiyor.",
+    "guestContactRequired": "Lütfen e-posta veya telefon girin",
       "unauthorized": "Bu işlem için yetkiniz yok.",
       "generic": "İşlem tamamlanamadı."
     }
@@ -1152,6 +1158,7 @@
   },
   "Errors": {
     "authRequired": "Oturum açmanız gerekiyor.",
+    "guestContactRequired": "Lütfen e-posta veya telefon girin",
     "verifyEmailRequired": "Lütfen rezervasyon yapabilmek için önce e-posta adresinizi doğrulayın.",
     "unauthorized": "Bu işlemi yapmaya yetkiniz yok.",
     "shopNotFound": "Dükkan bulunamadı.",

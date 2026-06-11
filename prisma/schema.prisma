@@ -135,9 +135,13 @@ model Shop {
 
 model Booking {
   id                     String            @id @default(uuid())
-  guestId                String
+  guestId                String?
   shopId                 String
   status                 BookingStatus     @default(PENDING)
+  /// E-posta ile guest checkout (accountsız kullanıcılar için)
+  guestEmail             String?
+  /// Telefon ile guest checkout
+  guestPhone             String?
   checkInTime            DateTime
   checkOutTime           DateTime
   bagCountS              Int               @default(0)
@@ -159,7 +163,7 @@ model Booking {
   referralDiscountAmount Decimal           @default(0) @db.Decimal(12, 2)
   /// Rezervasyonda kullanılan referans kodu (varsa)
   referredByCode         String?
-  guest                  User              @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  guest                  User?             @relation(fields: [guestId], references: [id], onDelete: Cascade)
   shop                   Shop              @relation(fields: [shopId], references: [id], onDelete: Cascade)
   seals                  BookingSeal[]
   dispute                Dispute?

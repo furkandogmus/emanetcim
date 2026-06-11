@@ -143,7 +143,7 @@ export class PaymentService implements IPaymentService {
     if (!bookingForFlag) {
       return { status: "failure", errorMessage: "Booking not found." };
     }
-    if (!(await isPaymentsEnabled({ userId: bookingForFlag.guestId }))) {
+    if (!(await isPaymentsEnabled({ userId: bookingForFlag.guestId ?? undefined }))) {
       return {
         status: "failure",
         errorMessage: "Payments are temporarily disabled.",

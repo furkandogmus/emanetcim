@@ -249,6 +249,7 @@
     "checkoutReservationIdLabel": "予約ID",
     "checkoutDeliveryPointLabel": "乗車場所",
     "checkoutCardValidationError": "すべてのカードフィールドに入力してください。",
+    "checkoutGuestContactRequired": "Please enter email or phone",
     "checkoutCardHolderPlaceholder": "カードに記載されている名前",
     "checkoutCardNumberPlaceholder": "0000 0000 0000 0000",
     "checkoutExpiryPlaceholder": "YY/MM",
@@ -406,7 +407,11 @@
     "bookingDetailPaymentUnavailableNote": "Online payment is not available (payments off or keys missing). Contact support or the shop for payment instructions.",
     "payBookingError_iyzico_submerchant": "This shop is not ready to accept online payment yet. Please contact support.",
     "payBookingError_guest_email_required": "Add an email to your account before paying.",
-    "payBookingError_iyzico_failed": "Payment was declined or could not be completed. Check your card or try again."
+    "payBookingError_iyzico_failed": "Payment was declined or could not be completed. Check your card or try again.",
+    "checkoutGuestEmailPlaceholder": "Your email (optional)",
+    "checkoutGuestPhonePlaceholder": "Your phone (optional)",
+    "checkoutGuestContinue": "Continue as Guest",
+    "checkoutGuestOr": "or"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -1059,6 +1064,7 @@
   },
   "Errors": {
     "authRequired": "セッションが必要です。",
+    "guestContactRequired": "Please provide email or phone to continue",
     "verifyEmailRequired": "ご予約前にメールアドレスをご確認ください。",
     "unauthorized": "この操作を行う権限がありません。",
     "shopNotFound": "ショップが見つかりません。",

@@ -249,6 +249,7 @@
     "checkoutReservationIdLabel": "ID на резервация",
     "checkoutDeliveryPointLabel": "Място за вземане",
     "checkoutCardValidationError": "Попълнете всички полета на картата.",
+    "checkoutGuestContactRequired": "Please enter email or phone",
     "checkoutCardHolderPlaceholder": "Име на картата",
     "checkoutCardNumberPlaceholder": "0000 0000 0000 0000",
     "checkoutExpiryPlaceholder": "MM/YY",
@@ -406,7 +407,11 @@
     "bookingDetailPaymentUnavailableNote": "Online payment is not available (payments off or keys missing). Contact support or the shop for payment instructions.",
     "payBookingError_iyzico_submerchant": "This shop is not ready to accept online payment yet. Please contact support.",
     "payBookingError_guest_email_required": "Add an email to your account before paying.",
-    "payBookingError_iyzico_failed": "Payment was declined or could not be completed. Check your card or try again."
+    "payBookingError_iyzico_failed": "Payment was declined or could not be completed. Check your card or try again.",
+    "checkoutGuestEmailPlaceholder": "Your email (optional)",
+    "checkoutGuestPhonePlaceholder": "Your phone (optional)",
+    "checkoutGuestContinue": "Continue as Guest",
+    "checkoutGuestOr": "or"
   },
   "Admin": {
     "dashboardTitle": "Админ център BagajPark",
@@ -1059,6 +1064,7 @@
   },
   "Errors": {
     "authRequired": "Изисква се сесия.",
+    "guestContactRequired": "Please provide email or phone to continue",
     "verifyEmailRequired": "Потвърдете имейла преди резервация.",
     "unauthorized": "Нямате права за това действие.",
     "shopNotFound": "Магазинът не е намерен.",

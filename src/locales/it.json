@@ -249,6 +249,7 @@
     "checkoutReservationIdLabel": "ID della prenotazione",
     "checkoutDeliveryPointLabel": "Luogo di ritiro",
     "checkoutCardValidationError": "Si prega di compilare tutti i campi della carta.",
+    "checkoutGuestContactRequired": "Please enter email or phone",
     "checkoutCardHolderPlaceholder": "Nome sulla carta",
     "checkoutCardNumberPlaceholder": "0000 0000 0000 0000",
     "checkoutExpiryPlaceholder": "MM/AA",
@@ -406,7 +407,11 @@
     "bookingDetailPaymentUnavailableNote": "Online payment is not available (payments off or keys missing). Contact support or the shop for payment instructions.",
     "payBookingError_iyzico_submerchant": "This shop is not ready to accept online payment yet. Please contact support.",
     "payBookingError_guest_email_required": "Add an email to your account before paying.",
-    "payBookingError_iyzico_failed": "Payment was declined or could not be completed. Check your card or try again."
+    "payBookingError_iyzico_failed": "Payment was declined or could not be completed. Check your card or try again.",
+    "checkoutGuestEmailPlaceholder": "Your email (optional)",
+    "checkoutGuestPhonePlaceholder": "Your phone (optional)",
+    "checkoutGuestContinue": "Continue as Guest",
+    "checkoutGuestOr": "or"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -1059,6 +1064,7 @@
   },
   "Errors": {
     "authRequired": "Sessione richiesta.",
+    "guestContactRequired": "Please provide email or phone to continue",
     "verifyEmailRequired": "Verifica il tuo indirizzo email prima di prenotare.",
     "unauthorized": "Non sei autorizzato per questa azione.",
     "shopNotFound": "Negozio non trovato.",

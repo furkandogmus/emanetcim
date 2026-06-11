@@ -118,6 +118,8 @@ export default function CheckoutClient({
   const [bookingId, setBookingId] = useState("");
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [couponCode, setCouponCode] = useState("");
+  const [guestEmail, setGuestEmail] = useState("");
+  const [guestPhone, setGuestPhone] = useState("");
 
   // Restore draft from localStorage on mount
   useEffect(() => {
@@ -199,8 +201,8 @@ export default function CheckoutClient({
     setCvv(val.substring(0, 4));
   };
 
-  const handlePayment = async () => {
-    if (!isLoggedIn) {
+  const handlePayment = async (skipAuthCheck = false) => {
+    if (!isLoggedIn && !skipAuthCheck) {
       setShowAuthModal(true);
       return;
     }
@@ -253,6 +255,8 @@ export default function CheckoutClient({
           }
         : {}),
       couponCode: couponCode.trim() || undefined,
+      guestEmail: !isLoggedIn ? (guestEmail.trim() || undefined) : undefined,
+      guestPhone: !isLoggedIn ? (guestPhone.trim() || undefined) : undefined,
     });
 
     setIsProcessing(false);
@@ -302,7 +306,7 @@ export default function CheckoutClient({
       if (paymentsEnabled) {
         setStep(3);
       } else {
-        void handlePayment();
+        void handlePayment(true);
       }
     }
   };
@@ -890,14 +894,56 @@ export default function CheckoutClient({
               {t("authModalTitle")}
             </h3>
             
-            <p className="text-sm font-semibold text-gray-500 leading-relaxed mb-8">
+            <p className="text-sm font-semibold text-gray-500 leading-relaxed mb-6">
               {t("authModalBody")}
             </p>
 
+            {/* Guest Checkout Fields */}
+            <div className="flex flex-col gap-3 mb-6">
+              <input
+                type="email"
+                placeholder={t("checkoutGuestEmailPlaceholder")}
+                value={guestEmail}
+                onChange={(e) => setGuestEmail(e.target.value)}
+                className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-orange-500 outline-none transition-all"
+              />
+              <input
+                type="tel"
+                placeholder={t("checkoutGuestPhonePlaceholder")}
+                value={guestPhone}
+                onChange={(e) => setGuestPhone(e.target.value)}
+                className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-orange-500 outline-none transition-all"
+              />
+            </div>
+
             <div className="flex flex-col gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  const email = guestEmail.trim();
+                  const phone = guestPhone.trim();
+                  if (!email && !phone) {
+                    setError(t("checkoutGuestContactRequired"));
+                    return;
+                  }
+                  setShowAuthModal(false);
+                  void handlePayment(true);
+                }}
+                className="w-full bg-orange-600 hover:bg-orange-700 text-white py-4 px-6 rounded-2xl font-bold transition-all shadow-lg shadow-orange-200 hover:bg-orange-300 text-center block cursor-pointer"
+              >
+                {t("checkoutGuestContinue")}
+              </button>
+              <div className="relative my-2">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white px-3 text-gray-400 font-bold">{t("checkoutGuestOr")}</span>
+                </div>
+              </div>
               <Link
                 href={`/login?callbackUrl=/checkout/${shopId}`}
-                className="w-full bg-orange-600 hover:bg-orange-700 text-white py-4 px-6 rounded-2xl font-bold transition-all shadow-lg shadow-orange-200 hover:shadow-orange-300 text-center block cursor-pointer"
+                className="w-full bg-gray-50 hover:bg-gray-100 text-gray-700 py-4 px-6 rounded-2xl font-bold transition-all text-center block cursor-pointer"
               >
                 {t("authModalLogin")}
               </Link>

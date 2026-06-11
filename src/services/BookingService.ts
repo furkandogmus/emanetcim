@@ -2,7 +2,9 @@ import { Booking, Prisma } from '@prisma/client';
 import prisma from '@/lib/db';
 
 export type CreateInitialBookingInput = {
-  guestId: string;
+  guestId?: string | null;
+  guestEmail?: string | null;
+  guestPhone?: string | null;
   shopId: string;
   totalPrice: number;
   bagCountS: number;
@@ -159,7 +161,9 @@ export class BookingService implements IBookingService {
 
         const booking = await tx.booking.create({
           data: {
-            guestId: data.guestId,
+            guestId: data.guestId ?? null,
+            guestEmail: data.guestEmail ?? null,
+            guestPhone: data.guestPhone ?? null,
             shopId: data.shopId,
             totalPrice: data.totalPrice,
             insuranceFee,
@@ -178,7 +182,7 @@ export class BookingService implements IBookingService {
 
         const qrCodeToken = await createQrToken({
           bookingId: booking.id,
-          guestId: data.guestId,
+          guestId: data.guestId ?? booking.id,
           shopId: data.shopId,
         });
 
@@ -193,7 +197,7 @@ export class BookingService implements IBookingService {
     bookingEventService.record({
       bookingId: booking.id,
       event: "CREATED",
-      actorId: data.guestId,
+      actorId: data.guestId ?? "guest",
       actorRole: "GUEST",
       metadata: {
         shopId: data.shopId,

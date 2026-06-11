@@ -194,6 +194,7 @@ export default function ShopDetailClient({
             </div>
           </div>
         </div>
+        </div>
 
         <main className="px-4 pt-16 space-y-5">
           <section>
