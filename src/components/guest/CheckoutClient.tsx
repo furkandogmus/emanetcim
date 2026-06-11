@@ -34,7 +34,6 @@ import {
   trackPlausibleEvent,
 } from "@/lib/plausible-events";
 
-const STEPS = 3 as const;
 
 interface CheckoutClientProps {
   shopId: string;
@@ -193,13 +192,9 @@ export default function CheckoutClient({
       setShowAuthModal(true);
       return;
     }
-    let cardHolderName = cardHolder;
-    let cardNumberStripped = cardNumber.replace(/\s/g, "");
-    let expMonth = "";
-    let expireYear = "";
-    let cvc = cvv;
 
     if (paymentsEnabled) {
+      const cardNumberStripped = cardNumber.replace(/\s/g, "");
       const [expiryMonth, expYearRaw] = expiry.split("/");
       if (
         !cardHolder.trim() ||
@@ -212,18 +207,6 @@ export default function CheckoutClient({
         setError(t("checkoutCardValidationError"));
         return;
       }
-      expMonth = expiryMonth;
-      const expYearDigits = (expYearRaw ?? "").replace(/\D/g, "").slice(-2);
-      expireYear =
-        expYearDigits.length === 2
-          ? `20${expYearDigits}`
-          : new Date().getFullYear().toString();
-    } else {
-      cardHolderName = "Beta Guest";
-      cardNumberStripped = "1111222233334444";
-      expMonth = "12";
-      expireYear = "2030";
-      cvc = "123";
     }
 
     if (!checkInDate || !checkOutDate || !windowOk) {
@@ -246,13 +229,17 @@ export default function CheckoutClient({
       insuranceFee,
       checkInTime: checkInDate,
       checkOutTime: checkOutDate,
-      cardInfo: {
-        cardHolderName,
-        cardNumber: cardNumberStripped,
-        expireMonth: expMonth || "12",
-        expireYear,
-        cvc,
-      },
+      ...(paymentsEnabled
+        ? {
+            cardInfo: {
+              cardHolderName: cardHolder,
+              cardNumber: cardNumber.replace(/\s/g, ""),
+              expireMonth: expiry.split("/")[0] || "12",
+              expireYear: `20${(expiry.split("/")[1] ?? "").replace(/\D/g, "").slice(-2)}`,
+              cvc: cvv,
+            },
+          }
+        : {}),
       couponCode: couponCode.trim() || undefined,
     });
 
@@ -300,7 +287,11 @@ export default function CheckoutClient({
         setShowAuthModal(true);
         return;
       }
-      setStep(3);
+      if (paymentsEnabled) {
+        setStep(3);
+      } else {
+        void handlePayment();
+      }
     }
   };
 
@@ -309,11 +300,10 @@ export default function CheckoutClient({
     if (step > 1) setStep((s) => s - 1);
   };
 
-  const stepLabels = [
-    t("checkoutStep1Short"),
-    t("checkoutStep2Short"),
-    paymentsEnabled ? t("checkoutStep3Short") : (locale === "tr" ? "Onay" : "Approval"),
-  ];
+  const totalSteps = paymentsEnabled ? 3 : 2;
+  const stepLabels = paymentsEnabled
+    ? [t("checkoutStep1Short"), t("checkoutStep2Short"), t("checkoutStep3Short")]
+    : [t("checkoutStep1Short"), t("checkoutStep2Short")];
   if (isSuccess) {
     return (
       <div className="min-h-screen bg-green-600 flex items-center justify-center p-6 text-white text-center">
@@ -450,7 +440,7 @@ export default function CheckoutClient({
                     {label}
                   </span>
                 </div>
-                {i < STEPS - 1 && (
+                {i < totalSteps - 1 && (
                   <div
                     className={`h-0.5 flex-1 mb-6 rounded-full min-w-[8px] mx-0.5 ${
                       step > n ? "bg-green-500" : "bg-gray-200"
@@ -831,7 +821,7 @@ export default function CheckoutClient({
               {t("checkoutBack")}
             </button>
           )}
-          {step < 3 ? (
+          {step < totalSteps ? (
             <button
               type="button"
               data-testid="checkout-footer-primary"
@@ -841,7 +831,7 @@ export default function CheckoutClient({
               }
               className="btn-ui btn-ui-lg btn-ui-primary flex-1 rounded-3xl bg-gray-900 hover:bg-gray-800 shadow-xl shadow-gray-200"
             >
-              {step === 1 ? t("checkoutContinue") : t("checkoutToPayment")}
+              {step === 1 ? t("checkoutContinue") : (paymentsEnabled ? t("checkoutToPayment") : t("sendRequest"))}
             </button>
           ) : (
             <button

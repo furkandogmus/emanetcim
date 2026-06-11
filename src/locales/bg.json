@@ -361,6 +361,8 @@
     "bookingDetailPaymentNeededSub": "The shop approved your request. Complete payment to confirm your booking.",
     "bookingDetailPaymentNoStripeNote": "Stripe checkout is not enabled in this environment. Contact support or follow instructions from the shop to pay.",
     "bookingDetailQrAfterPayment": "Your drop-off QR code appears here after payment is completed.",
+    "bookingDetailPayAtShopTitle": "Booking confirmed!",
+    "bookingDetailPayAtShopSub": "Pay at the shop when you drop off your bags.",
     "payBookingError_payments_disabled": "Payments are disabled on the platform right now.",
     "payBookingError_gateway_not_stripe": "Stripe checkout is not enabled (set PAYMENT_GATEWAY=stripe and keys).",
     "payBookingError_stripe_not_configured": "Stripe is not configured (missing STRIPE_SECRET_KEY or publishable key).",

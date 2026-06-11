@@ -361,6 +361,8 @@
     "bookingDetailPaymentNeededSub": "La tienda aprobó tu solicitud. Completa el pago para confirmar la reserva.",
     "bookingDetailPaymentNoStripeNote": "Stripe no está activo en este entorno. Contacta soporte o paga según indique la tienda.",
     "bookingDetailQrAfterPayment": "Tu código QR para el depósito aparece aquí tras el pago.",
+    "bookingDetailPayAtShopTitle": "Booking confirmed!",
+    "bookingDetailPayAtShopSub": "Pay at the shop when you drop off your bags.",
     "payBookingError_payments_disabled": "Los pagos están desactivados en la plataforma.",
     "payBookingError_gateway_not_stripe": "Stripe no está activo (PAYMENT_GATEWAY=stripe y claves necesarias).",
     "payBookingError_stripe_not_configured": "Stripe no está configurado (falta clave secreta o publicable).",
