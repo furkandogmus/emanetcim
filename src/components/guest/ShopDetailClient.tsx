@@ -112,13 +112,11 @@ export default function ShopDetailClient({
         };
   const mobilePricePerBag = formatTryCurrency(slot.m, locale);
 
-  const [checkoutParams, setCheckoutParams] = useState("");
-
   useEffect(() => {
     trackPlausibleEvent(PLAUSIBLE_EVENTS.ShopViewed, { shopId: shop.id });
   }, [shop.id]);
 
-  useEffect(() => {
+  const [checkoutParams] = useState(() => {
     try {
       const raw = sessionStorage.getItem("bagajpark_search_params");
       if (raw) {
@@ -127,10 +125,11 @@ export default function ShopDetailClient({
         if (p.checkIn) params.set("checkIn", p.checkIn);
         if (p.checkOut) params.set("checkOut", p.checkOut);
         if (p.bags) params.set("bags", p.bags);
-        setCheckoutParams("?" + params.toString());
+        return "?" + params.toString();
       }
     } catch {}
-  }, []);
+    return "";
+  });
 
   return (
     <div className="min-h-screen bg-gray-50 pb-28">

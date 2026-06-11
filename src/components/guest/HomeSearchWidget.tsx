@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Search, Calendar, BaggageClaim } from "lucide-react";
+import { Search } from "lucide-react";
 import { useRouter } from "@/i18n/routing";
 import { toDatetimeLocalValue } from "@/lib/datetime-local";
 import DateTimePicker from "@/components/ui/DateTimePicker";
