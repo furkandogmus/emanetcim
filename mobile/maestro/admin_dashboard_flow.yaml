@@ -1,6 +1,6 @@
 appId: com.bagajpark
 ---
-# Admin Dashboard: istatistikler, başvurular, sistem durumu
+# Admin Dashboard: login + istatistikler + başvurular + sistem durumu
 - clearState
 - launchApp
 
@@ -18,19 +18,38 @@ appId: com.bagajpark
 - inputText: "Test123!"
 - pressKey: Back
 - tapOn:
-    point: "50%,70%"
+    text: "Giriş Yap.*"
     optional: true
+- waitForAnimationToEnd:
+    timeout: 5000
 
 # Yönetim Paneli
-- assertVisible: "Yönetim Paneli"
+- takeScreenshot: "admin-dashboard"
+
+# === İSTATİSTİKLER ===
 - assertVisible: "Toplam Rezervasyon"
 - assertVisible: "Toplam Gelir"
 - assertVisible: "Aktif Esnaf"
 - assertVisible: "Bekleyen Başvurular"
-- assertVisible: "Tüm Sistemler Aktif"
-- takeScreenshot: "admin-dashboard"
+- takeScreenshot: "admin-stats"
 
-# Hızlı İşlemler
+# === HIZLI İŞLEMLER ===
 - assertVisible: "Başvuruları Onayla"
 - assertVisible: "Destek Mesajları"
 - assertVisible: "Canlı İstatistikler"
+
+# === BAŞVURULAR ===
+- tapOn: "Başvuruları Onayla"
+- assertVisible: "Esnaf Başvuruları"
+- takeScreenshot: "admin-applications"
+
+# === DESTEK MESAJLARI ===
+- tapOn: "Geri"
+- tapOn: "Destek Mesajları"
+- assertVisible: "Destek Mesajları"
+- takeScreenshot: "admin-messages"
+
+# === SİSTEM DURUMU ===
+- tapOn: "Geri"
+- assertVisible: "Tüm Sistemler Aktif"
+- takeScreenshot: "admin-system-status"

@@ -1,6 +1,6 @@
 appId: com.bagajpark
 ---
-# Partner Seals: sadece login + dashboard
+# Partner Seals: login + dashboard + mühür yönetimi
 - clearState
 - launchApp
 
@@ -20,8 +20,59 @@ appId: com.bagajpark
 - tapOn:
     text: "Giriş Yap.*"
     optional: true
+- waitForAnimationToEnd:
+    timeout: 5000
 
 # Dashboard
-- waitForAnimationToEnd:
-    timeout: 3000
 - takeScreenshot: "partner-dashboard"
+
+# Filtreler
+- assertVisible: "Tümü"
+- assertVisible: "Onay Bekleyen"
+- assertVisible: "Aktif"
+- assertVisible: "Tamamlandı"
+
+# Onay bekleyen filtrele
+- tapOn: "Onay Bekleyen"
+- takeScreenshot: "partner-filtered"
+
+# === PROFİL → MÜHÜR YÖNETİMİ ===
+- tapOn: "Profil"
+- swipe:
+    direction: DOWN
+    duration: 500
+- tapOn: "Mühür Yönetimi"
+- assertVisible: "Mühür Yönetimi"
+- takeScreenshot: "seal-management"
+
+# === MÜHÜR TALEP ET ===
+- assertVisible: "Talep Adeti"
+- tapOn: "Talep Adeti"
+- eraseText
+- inputText: "20"
+- tapOn: "Mühür Talep Et"
+- assertVisible: "Mühür talebi başarıyla oluşturuldu."
+- takeScreenshot: "seal-request-success"
+
+# === AZ ADET TALEP ===
+- tapOn: "Talep Adeti"
+- eraseText
+- inputText: "5"
+- tapOn: "Mühür Talep Et"
+- assertVisible: "Mühür talebi başarıyla oluşturuldu."
+
+# === HATA: Sınır dışı değer ===
+- tapOn: "Talep Adeti"
+- eraseText
+- inputText: "150"
+- tapOn: "Mühür Talep Et"
+- assertVisible: "En fazla 100 mühür talep edebilirsiniz"
+- takeScreenshot: "seal-request-error"
+
+# === ARIZALI MÜHÜR BİLDİR ===
+- tapOn: "Arızalı Mühür Bildir"
+- assertVisible: "Mühür Seri Numarası"
+- inputText: "BP-2024-001"
+- tapOn: "Bildir"
+- assertVisible: "Arızalı mühür başarıyla bildirildi."
+- takeScreenshot: "seal-faulty-reported"

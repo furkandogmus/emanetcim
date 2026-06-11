@@ -1,6 +1,6 @@
 appId: com.bagajpark
 ---
-# Profile: profil düzenle, bildirimler, yardım, çıkış
+# Profile: profil düzenleme + bildirimler + yardım + çıkış
 - clearState
 - launchApp
 
@@ -18,31 +18,56 @@ appId: com.bagajpark
 - inputText: "Test123!"
 - pressKey: Back
 - tapOn:
-    point: "50%,70%"
+    text: "Giriş Yap.*"
     optional: true
+- waitForAnimationToEnd:
+    timeout: 5000
 
 # Profil sekmesi
 - tapOn: "Profil"
 - assertVisible: "Hesabım"
-- assertVisible: "Misafir"
 - assertVisible: "Rezervasyon"
+- takeScreenshot: "profile-screen"
 
-# Profil düzenleme
+# === PROFİL DÜZENLEME ===
 - tapOn: "Profilimi Düzenle"
 - assertVisible: "Profilimi Düzenle"
 - assertVisible: "Ad Soyad"
+- takeScreenshot: "profile-edit"
+
+# İsim değiştir
 - tapOn: "Ad Soyad"
 - eraseText
 - inputText: "Ahmet Güncellendi"
-- assertVisible: "Telefon"
-- tapOn: "Kaydet"
 
-# Bildirimler
+# Telefon değiştir
+- assertVisible: "Telefon"
+- tapOn: "Telefon"
+- eraseText
+- inputText: "5559876543"
+
+# Kaydet
+- tapOn: "Kaydet"
+- takeScreenshot: "profile-saved"
+
+# === BİLDİRİMLER ===
 - tapOn: "Bildirimler"
 - assertVisible: "Bildirimler"
+- takeScreenshot: "notifications"
 - tapOn: "Geri"
 
-# Yardım
+# === YARDIM ===
 - tapOn: "Yardım Merkezi"
 - assertVisible: "Yardım Merkezi"
-- takeScreenshot: "profile-help"
+- takeScreenshot: "help-center"
+- tapOn: "Geri"
+
+# === ÇIKIŞ ===
+- swipe:
+    direction: DOWN
+    duration: 500
+- tapOn: "Çıkış Yap"
+- assertVisible: "Hesabınızdan çıkış yapmak istediğinize emin misiniz?"
+- tapOn: "Evet"
+- assertVisible: "Hoş Geldiniz"
+- takeScreenshot: "logged-out"

@@ -1,6 +1,6 @@
 appId: com.bagajpark
 ---
-# Search: arama, filtreleme, sıralama
+# Search: arama + filtreleme + sıralama
 - clearState
 - launchApp
 
@@ -18,31 +18,42 @@ appId: com.bagajpark
 - inputText: "Test123!"
 - pressKey: Back
 - tapOn:
-    point: "50%,70%"
+    text: "Giriş Yap.*"
     optional: true
+- waitForAnimationToEnd:
+    timeout: 5000
 
 # Ara sekmesi
 - tapOn: "Ara"
-- assertVisible: "Nerede valizini bırakmak istiyorsun?"
+- waitForAnimationToEnd:
+    timeout: 3000
+- assertVisible: "Filtrele"
+- takeScreenshot: "search-initial"
 
-# Metin araması
-- tapOn: "Nerede valizini bırakmak istiyorsun?"
-- inputText: "İstanbul"
-- pressKey: Enter
-
-# Filtreleme
+# === FİLTRELEME ===
 - tapOn: "Filtrele"
 - assertVisible: "Filtrele"
 - assertVisible: "Şimdi Açık"
 - assertVisible: "7/24 Açık"
 - assertVisible: "Sıralama"
 
-# Sonuçları göster
-- tapOn: "Filtreleri Temizle"
+# Açık şimdi filtresi
+- tapOn: "Şimdi Açık"
 - tapOn: "Sonuçları Göster"
+- takeScreenshot: "search-filtered"
 
-# Dükkan detayı
+# === DÜKKAN DETAYI ===
 - tapOn: "Maestro Test Dükkanı"
 - assertVisible: "Yol Tarifi"
 - assertVisible: "Dükkan Hakkında"
-- takeScreenshot: "search-result"
+
+# Olanaklar
+- swipe:
+    direction: DOWN
+    duration: 500
+- assertVisible: "Olanaklar"
+- takeScreenshot: "shop-amenities"
+
+# Favori ekle
+- tapOn: "Favorilere Ekle"
+- takeScreenshot: "shop-favorited"

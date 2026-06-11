@@ -1,6 +1,6 @@
 appId: com.bagajpark
 ---
-# Booking: arama → dükkan detay → checkout
+# Booking: login → arama → dükkan detay → checkout
 - clearState
 - launchApp
 
@@ -22,14 +22,63 @@ appId: com.bagajpark
     optional: true
 - waitForAnimationToEnd:
     timeout: 5000
+
+# Ana sayfa
 - assertVisible: "Ana Sayfa"
+- takeScreenshot: "home-screen"
 
 # Popüler şehirler
 - assertVisible: "İstanbul"
 - assertVisible: "Ankara"
 
-# Arama
+# === ARAMA ===
 - tapOn: "Ara"
 - waitForAnimationToEnd:
     timeout: 3000
 - takeScreenshot: "search-screen"
+
+# Filtrele butonu
+- assertVisible: "Filtrele"
+
+# === DÜKKAN DETAYI ===
+- tapOn: "Maestro Test Dükkanı"
+- assertVisible: "Yol Tarifi"
+- assertVisible: "Dükkan Hakkında"
+- takeScreenshot: "shop-detail"
+
+# Dükkan bilgileri
+- swipe:
+    direction: DOWN
+    duration: 500
+- assertVisible: "Çalışma Saatleri"
+- assertVisible: "Olanaklar"
+
+# === CHECKOUT ===
+- swipe:
+    direction: UP
+    duration: 500
+- tapOn: "Rezervasyon"
+- assertVisible: "Rezervasyonu Tamamla"
+- assertVisible: "Valiz Seçimi"
+- takeScreenshot: "checkout-screen"
+
+# Valiz boyutları
+- assertVisible: "Küçük (S)"
+- assertVisible: "Orta (M)"
+- assertVisible: "Büyük (XL)"
+
+# Küçük valiz seç
+- tapOn: "Küçük (S)"
+
+# Ödeme özeti
+- swipe:
+    direction: DOWN
+    duration: 500
+- assertVisible: "Toplam"
+- assertVisible: "Güvenli 256-bit SSL Ödeme"
+
+# Kupon
+- assertVisible: "İndirim Kuponu (Opsiyonel)"
+- tapOn: "İndirim Kuponu (Opsiyonel)"
+- inputText: "BAGAJ10"
+- takeScreenshot: "checkout-review"

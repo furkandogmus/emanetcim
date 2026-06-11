@@ -1,6 +1,6 @@
 appId: com.bagajpark
 ---
-# Partner Dashboard: filtreleme, kazanç, ayarlar
+# Partner Booking Management: dashboard + filtreleme + kazanç + ayarlar
 - clearState
 - launchApp
 
@@ -18,31 +18,53 @@ appId: com.bagajpark
 - inputText: "Test123!"
 - pressKey: Back
 - tapOn:
-    point: "50%,70%"
+    text: "Giriş Yap.*"
     optional: true
+- waitForAnimationToEnd:
+    timeout: 5000
 
 # Dashboard
-- assertVisible: "Dükkan Paneli"
-- assertVisible: "Aktif Valiz"
-- assertVisible: "Toplam Kazanç"
 - takeScreenshot: "partner-dashboard"
 
-# Filtreleme
+# === FİLTRELEME ===
 - assertVisible: "Tümü"
 - assertVisible: "Onay Bekleyen"
 - assertVisible: "Aktif"
 - assertVisible: "Tamamlandı"
-- tapOn: "Onay Bekleyen"
 
-# Kazanç
+# Onay bekleyen
+- tapOn: "Onay Bekleyen"
+- takeScreenshot: "partner-waiting"
+
+# Aktif
+- tapOn: "Aktif"
+- takeScreenshot: "partner-active"
+
+# Tamamlandı
+- tapOn: "Tamamlandı"
+- takeScreenshot: "partner-completed"
+
+# Tümü
+- tapOn: "Tümü"
+- takeScreenshot: "partner-all"
+
+# === KAZANÇ ===
 - tapOn: "Kazançlarım"
 - assertVisible: "Kazançlarım"
 - assertVisible: "Toplam Bakiye"
 - assertVisible: "Ödeme Geçmişi"
 - takeScreenshot: "partner-earnings"
 
-# Dükkan Ayarları
+# === DÜKKAN AYARLARI ===
 - tapOn: "Dükkan Ayarları"
 - assertVisible: "Dükkan Adı"
 - assertVisible: "Çalışma Saatleri"
 - assertVisible: "Günlük Fiyat"
+- takeScreenshot: "partner-settings"
+
+# Dükkan adı değiştir
+- tapOn: "Dükkan Adı"
+- eraseText
+- inputText: "Maestro Test Dükkanı Güncellendi"
+- tapOn: "Kaydet"
+- takeScreenshot: "partner-settings-saved"

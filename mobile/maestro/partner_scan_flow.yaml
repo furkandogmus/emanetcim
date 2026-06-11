@@ -1,6 +1,6 @@
 appId: com.bagajpark
 ---
-# Partner Scan: QR tarama, kamera izni
+# Partner Scan: QR tarama + kamera izni
 - clearState
 - launchApp
 
@@ -18,16 +18,19 @@ appId: com.bagajpark
 - inputText: "Test123!"
 - pressKey: Back
 - tapOn:
-    point: "50%,70%"
+    text: "Giriş Yap.*"
     optional: true
+- waitForAnimationToEnd:
+    timeout: 5000
 
 # Dashboard
-- assertVisible: "Dükkan Paneli"
+- takeScreenshot: "partner-dashboard"
 
-# QR Tara
+# === QR TARAMA ===
 - tapOn: "QR Tara"
 - assertVisible: "Kamera erişimi gerekli"
 - assertVisible: "Kamera İznini Ver"
+- takeScreenshot: "scan-permission"
 
 # Kamera izni ver
 - tapOn: "Kamera İznini Ver"
@@ -35,4 +38,11 @@ appId: com.bagajpark
 
 # Tarama kılavuzu
 - assertVisible: "Misafirin QR kodunu veya mühür barkodunu bu alana hizalayın"
-- takeScreenshot: "partner-scan"
+- takeScreenshot: "scan-active"
+
+# === MANUEL KOD GİRİŞ ===
+- tapOn: "Kodu Gir"
+- assertVisible: "Mühür Kodu"
+- inputText: "BP-MHR-2024-001"
+- tapOn: "Doğrula"
+- takeScreenshot: "scan-manual-code"

@@ -1,6 +1,6 @@
 appId: com.bagajpark
 ---
-# Checkout: valiz seçimi, ödeme özeti, hata durumları
+# Checkout: valiz seçimi + ödeme + hata durumları
 - clearState
 - launchApp
 
@@ -18,43 +18,69 @@ appId: com.bagajpark
 - inputText: "Test123!"
 - pressKey: Back
 - tapOn:
-    point: "50%,70%"
+    text: "Giriş Yap.*"
     optional: true
+- waitForAnimationToEnd:
+    timeout: 5000
 
 # Arama → dükkan detayı → checkout
-- tapOn: "Nerede valizini bırakmak istiyorsun?"
-- inputText: "Kadıköy"
-- pressKey: Enter
+- tapOn: "Ara"
+- waitForAnimationToEnd:
+    timeout: 3000
 - tapOn: "Maestro Test Dükkanı"
 
 # Rezervasyon butonuna scroll
-- scrollUntilVisible:
-    item: "Rezervasyon"
+- swipe:
     direction: DOWN
+    duration: 500
 - tapOn: "Rezervasyon"
 
 # Checkout ekranı
 - assertVisible: "Rezervasyonu Tamamla"
 - assertVisible: "Valiz Seçimi"
+- takeScreenshot: "checkout-initial"
 
-# Valiz boyutları
+# === VALİZ BOYUTLARI ===
 - assertVisible: "Küçük (S)"
 - assertVisible: "Orta (M)"
 - assertVisible: "Büyük (XL)"
 
 # Küçük valiz seç
 - tapOn: "Küçük (S)"
+- takeScreenshot: "checkout-small-selected"
 
-# Ödeme özeti
-- scrollUntilVisible:
-    item: "Ödeme Özeti"
+# Orta valiz seç
+- tapOn: "Orta (M)"
+- takeScreenshot: "checkout-medium-selected"
+
+# Büyük valiz seç
+- tapOn: "Büyük (XL)"
+- takeScreenshot: "checkout-large-selected"
+
+# === ÖDEME ÖZETİ ===
+- swipe:
     direction: DOWN
+    duration: 500
 - assertVisible: "Toplam"
 - assertVisible: "Güvenli 256-bit SSL Ödeme"
+- takeScreenshot: "checkout-summary"
 
-# Kupon
+# === KUPON ===
 - assertVisible: "İndirim Kuponu (Opsiyonel)"
 - tapOn: "İndirim Kuponu (Opsiyonel)"
 - inputText: "BAGAJ10"
+- takeScreenshot: "checkout-coupon"
 
-- takeScreenshot: "checkout-review"
+# === HATA: Valiz seçmeden ödeme ===
+- tapOn: "Geri"
+- tapOn: "Geri"
+- tapOn: "Maestro Test Dükkanı"
+- swipe:
+    direction: DOWN
+    duration: 500
+- tapOn: "Rezervasyon"
+- tapOn:
+    text: "Ödemeyi Yap.*"
+    optional: true
+- assertVisible: "Lütfen en az bir valiz seçin."
+- takeScreenshot: "checkout-error-no-bags"

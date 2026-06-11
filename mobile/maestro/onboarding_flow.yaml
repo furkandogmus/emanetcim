@@ -1,6 +1,6 @@
 appId: com.bagajpark
 ---
-# Onboarding 4 sayfa, ileri butonu ikon, son sayfada "Bitti"
+# Onboarding: tam tur + atlama
 - clearState
 - launchApp
 
@@ -9,9 +9,37 @@ appId: com.bagajpark
     text: "Riskleri Anladım, Devam Et"
     optional: true
 
-# Direkt "Atla" ile onboarding'i geç
-- tapOn: "Atla"
+# Sayfa 1
+- assertVisible: "Bul & Rezerve Et"
+- assertVisible: "Atla"
 
-# Login ekranı
+# Sayfa 2'ye geç
+- swipe:
+    direction: LEFT
+    duration: 400
+- assertVisible: "Bırak & QR Okut"
+
+# Sayfa 3'e geç
+- swipe:
+    direction: LEFT
+    duration: 400
+- assertVisible: "Mühürle & Güvende Ol"
+
+# Sayfa 4'e geç (son)
+- swipe:
+    direction: LEFT
+    duration: 400
+- assertVisible: "Özgürce Keşfet"
+- assertVisible: "Bitti"
+
+# Bitti → Login
+- tapOn: "Bitti"
 - assertVisible: "Hoş Geldiniz"
-- takeScreenshot: "login-screen"
+- takeScreenshot: "onboarding-complete"
+
+# === TEKRAR: Atla testi ===
+- stopApp
+- launchApp
+- tapOn: "Atla"
+- assertVisible: "Hoş Geldiniz"
+- takeScreenshot: "onboarding-skip"
