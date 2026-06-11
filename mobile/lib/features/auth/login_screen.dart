@@ -334,7 +334,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
 
-                      if (Platform.isIOS || Platform.isMacOS) ...[
+                      if (Platform.isIOS) ...[
                         const SizedBox(height: 12),
                         OutlinedButton.icon(
                           onPressed: _busy ? null : _apple,

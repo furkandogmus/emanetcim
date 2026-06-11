@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
-import '../../core/config/env.dart';
 import '../../core/utils/error_handler.dart';
 import 'admin_controller.dart';
 
@@ -29,9 +28,7 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
   Future<void> _fetchMessages() async {
     try {
       final dio = ref.read(dioProvider);
-      final url =
-          '${Env.apiBaseUrl.replaceAll('/api/mobile', '')}/api/admin/messages';
-      final res = await dio.get(url);
+      final res = await dio.get('/admin/messages');
       setState(() {
         _messages = res.data as List<dynamic>;
         _loading = false;
@@ -51,9 +48,7 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
   Future<void> _markAsRead(String id) async {
     try {
       final dio = ref.read(dioProvider);
-      final url =
-          '${Env.apiBaseUrl.replaceAll('/api/mobile', '')}/api/admin/messages/$id';
-      await dio.patch(url);
+      await dio.patch('/admin/messages/$id');
       await _fetchMessages(); // Refresh list
       ref.invalidate(adminStatsProvider); // Refresh stats on dashboard
     } catch (e) {

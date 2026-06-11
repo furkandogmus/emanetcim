@@ -28,6 +28,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   int _xl = 0;
   final _coupon = TextEditingController();
   bool _busy = false;
+  double _grandTotal = 0;
 
   int get _total => _s + _m + _xl;
 
@@ -91,11 +92,20 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       );
       final bookingId = res.data['bookingId'] as String?;
       final clientSecret = res.data['clientSecret'] as String?;
+      final serverTotal = res.data['totalPrice'] as num?;
       final bypassed = kDebugMode && res.data['bypassed'] == true;
 
       if (bookingId == null || (!bypassed && clientSecret == null)) {
         _toast('checkout.error_payment'.tr());
         return;
+      }
+
+      // Sunucu fiyatı ile tutarsızlık uyarısı
+      if (serverTotal != null && grandTotal > 0) {
+        final diff = (grandTotal - serverTotal.toDouble()).abs();
+        if (diff > 1) {
+          debugPrint('⚠️ Price mismatch: client=$grandTotal server=$serverTotal');
+        }
       }
 
       if (!mounted) return;
@@ -256,10 +266,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               error: (e, _) => Text('common.error'.tr()),
               data: (shop) {
                 final days = _checkOut.difference(_checkIn).inDays + 1;
+                // BagajPark fiyatlandırması sunucu tarafında hesaplanır.
+                // Buradaki hesaplama yalnızca tahmini gösterim içindir.
+                // Kesin fiyat onay anında sunucudan alınır.
                 final bagTotal =
                     (_s * 0.8 + _m * 1.0 + _xl * 1.5) * shop.pricePerDay * days;
                 const insuranceFee = 15.0;
-                final grandTotal = bagTotal > 0 ? bagTotal + insuranceFee : 0.0;
+                _grandTotal = bagTotal > 0 ? bagTotal + insuranceFee : 0.0;
+                final grandTotal = _grandTotal;
 
                 return Container(
                   padding: const EdgeInsets.all(28),

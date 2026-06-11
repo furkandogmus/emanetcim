@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../core/repositories/seal_repository.dart';
+import '../../shared/models/seal_scan_result.dart';
 import '../../shared/utils/app_colors.dart';
 
 class PartnerScanScreen extends ConsumerStatefulWidget {
@@ -34,9 +35,9 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
 
       result.when(
         onSuccess: (data) {
-          if (data['type'] == 'booking') {
-            context.push('/partner/booking/${data['id']}');
-          } else if (data['type'] == 'seal') {
+          if (data.type == 'booking') {
+            context.push('/partner/booking/${data.id}');
+          } else if (data.type == 'seal') {
             _showSealInfo(data);
           }
         },
@@ -54,7 +55,7 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
     }
   }
 
-  void _showSealInfo(Map<String, dynamic> data) {
+  void _showSealInfo(SealScanResult data) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(

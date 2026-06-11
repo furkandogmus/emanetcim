@@ -1,35 +1,29 @@
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 import prisma from "@/lib/db";
-import { getMobileSession } from "@/lib/mobile-auth";
 
 export async function POST(
-  req: Request,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string; action: string }> }
 ) {
-  const session = await getMobileSession();
-  if (!session || session.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await requireMobileUser(req);
+  if ("error" in auth) return auth.error;
+  const forbid = requireRole(auth.user, ["ADMIN"]);
+  if (forbid) return forbid;
 
   const { id, action } = await params;
 
   if (action === "approve") {
-    await prisma.shop.update({
-      where: { id },
-      data: { isActive: true },
-    });
-  } else if (action === "reject") {
     const activeBookingCount = await prisma.booking.count({
       where: { shopId: id, status: { in: ["APPROVED", "PAID", "CHECKED_IN"] } },
     });
     if (activeBookingCount > 0) {
-      return NextResponse.json(
-        { error: "Shop has active bookings; cannot delete." },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: "Shop has active bookings; cannot delete." }, { status: 409 });
     }
+    await prisma.shop.update({ where: { id }, data: { isActive: true } });
+  } else if (action === "reject") {
     await prisma.shop.delete({ where: { id } });
-    // Cleanup: orphaned ASSIGNED seals → STOCK
     await prisma.seal.updateMany({
       where: { shopId: id, status: "ASSIGNED" },
       data: { status: "STOCK", shopId: null, assignedAt: null },

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../shared/models/seal_scan_result.dart';
 import '../api/api_client.dart';
 import '../utils/result.dart';
 
@@ -12,10 +13,10 @@ class SealRepository {
   final Dio _dio;
   SealRepository(this._dio);
 
-  Future<Result<Map<String, dynamic>>> scan(String code) async {
+  Future<Result<SealScanResult>> scan(String code) async {
     try {
       final res = await _dio.post('/seals/scan', data: {'code': code});
-      return Success(res.data as Map<String, dynamic>);
+      return Success(SealScanResult.fromJson(res.data as Map<String, dynamic>));
     } on DioException catch (e) {
       return Failure(e.message ?? 'Scan failed', e);
     } catch (e) {

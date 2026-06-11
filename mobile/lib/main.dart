@@ -56,10 +56,7 @@ Future<void> main() async {
     await Hive.openBox('partner_bookings_cache', encryptionCipher: cipher);
     await Hive.openBox('my_bookings_cache', encryptionCipher: cipher);
   } else {
-    // Fallback if secure storage fails completely (e.g. some emulators)
-    await Hive.openBox('pending_sync_actions');
-    await Hive.openBox('partner_bookings_cache');
-    await Hive.openBox('my_bookings_cache');
+    Logger.e('Hive encryption key unavailable; caching disabled. Data will not persist across restarts.');
   }
 
   var isRooted = false;

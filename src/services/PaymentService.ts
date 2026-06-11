@@ -185,7 +185,7 @@ export class PaymentService implements IPaymentService {
         surname: data.buyer.name.split(' ')[1] || 'User',
         gsmNumber: data.buyer.phone || '+905000000000',
         email: data.buyer.email,
-        identityNumber: '11111111111',
+        identityNumber: process.env.IYZICO_DEFAULT_IDENTITY || '11111111111',
         lastLoginDate: new Date().toISOString().slice(0, 19).replace('T', ' '),
         registrationDate: new Date().toISOString().slice(0, 19).replace('T', ' '),
         registrationAddress: data.shopLocation?.address || 'Istanbul',

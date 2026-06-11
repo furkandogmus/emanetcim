@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
-import '../../core/config/env.dart';
 import '../../core/utils/error_handler.dart';
 
 class AdminApplicationsScreen extends ConsumerStatefulWidget {
@@ -29,9 +28,7 @@ class _AdminApplicationsScreenState
   Future<void> _fetchApps() async {
     try {
       final dio = ref.read(dioProvider);
-      final url =
-          '${Env.apiBaseUrl.replaceAll('/api/mobile', '')}/api/admin/applications';
-      final res = await dio.get(url);
+      final res = await dio.get('/admin/applications');
       setState(() {
         _apps = res.data as List<dynamic>;
         _loading = false;
@@ -56,10 +53,8 @@ class _AdminApplicationsScreenState
   Future<void> _process(String id, bool approve) async {
     try {
       final dio = ref.read(dioProvider);
-      final url =
-          '${Env.apiBaseUrl.replaceAll('/api/mobile', '')}/api/admin/applications/$id/${approve ? 'approve' : 'reject'}';
-      debugPrint('Admin Action: $url');
-      await dio.post(url);
+      debugPrint('Admin Action: $id/${approve ? 'approve' : 'reject'}');
+      await dio.post('/admin/applications/$id/${approve ? 'approve' : 'reject'}');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

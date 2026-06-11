@@ -16,30 +16,42 @@ class DeepLinkService {
   final Ref _ref;
   final _appLinks = AppLinks();
   StreamSubscription? _sub;
+  Uri? _pendingLink;
+  bool _listening = false;
 
   DeepLinkService(this._ref);
 
   void init() {
-    _sub = _appLinks.uriLinkStream.listen(_handleUri);
+    _listening = true;
+    _sub = _appLinks.uriLinkStream.listen(_queueOrNavigate);
 
-    // Check for initial link
     _appLinks.getInitialLink().then((uri) {
-      if (uri != null) _handleUri(uri);
+      if (uri != null) _queueOrNavigate(uri);
+    });
+
+    // Auth state değiştiğinde bekleyen link'i işle
+    _ref.listen(authControllerProvider, (prev, next) {
+      if (_pendingLink != null && next.session != null) {
+        _navigate(_pendingLink!);
+        _pendingLink = null;
+      }
     });
   }
 
-  void _handleUri(Uri uri) {
-    final path = uri.path;
-
-    // Check if user is logged in before navigating to sensitive routes
+  void _queueOrNavigate(Uri uri) {
+    if (!_listening) return;
     final auth = _ref.read(authControllerProvider);
-    if (auth.session == null && !path.startsWith('/auth')) {
+    if (auth.session == null && !uri.path.startsWith('/auth')) {
+      _pendingLink = uri;
       return;
     }
+    _navigate(uri);
+  }
 
+  void _navigate(Uri uri) {
+    final path = uri.path;
     final router = _ref.read(routerProvider);
 
-    // Normalize path (handle bagajpark://scheme)
     var targetPath = path;
     if (uri.scheme == 'bagajpark') {
       targetPath = '/$path'.replaceAll('//', '/');
@@ -51,6 +63,7 @@ class DeepLinkService {
   }
 
   void dispose() {
+    _listening = false;
     _sub?.cancel();
   }
 }

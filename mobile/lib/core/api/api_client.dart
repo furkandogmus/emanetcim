@@ -109,7 +109,9 @@ final dioProvider = Provider<Dio>((ref) {
             return handler.next(options);
           }
 
-          final key = options.uri.toString();
+          final token = await store.readAccessToken();
+          final tokenHash = token != null ? token.substring(token.length - 8) : '';
+          final key = '${tokenHash}:${options.uri.toString()}';
           if (cache.containsKey(key)) {
             final entry = cache[key]!;
             if (DateTime.now().difference(entry.timestamp) < cacheTtl) {
@@ -121,9 +123,11 @@ final dioProvider = Provider<Dio>((ref) {
         }
         handler.next(options);
       },
-      onResponse: (response, handler) {
+      onResponse: (response, handler) async {
         if (response.requestOptions.method == 'GET') {
-          final key = response.requestOptions.uri.toString();
+          final token = await store.readAccessToken();
+          final tokenHash = token != null ? token.substring(token.length - 8) : '';
+          final key = '${tokenHash}:${response.requestOptions.uri.toString()}';
 
           // Limit cache size - remove oldest entry if full
           if (cache.length >= maxCacheSize) {
