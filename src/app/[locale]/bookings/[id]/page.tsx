@@ -91,16 +91,16 @@ export default async function BookingDetailPage({
     booking.status === "PAID" ||
     booking.status === "CHECKED_IN" ||
     booking.status === "CHECKED_OUT";
+  const confirmedAtShop = booking.status === "APPROVED";
   const waitingShop = booking.status === "WAITING_APPROVAL";
-  const needsPayment =
-    booking.status === "APPROVED" || booking.status === "PENDING";
+  const needsPayment = booking.status === "PENDING";
   const onlinePay = await isGuestOnlinePayEnabled({
     userId: session.user.id,
   });
 
   return (
     <div className="min-h-screen bg-gray-50 pt-32 pb-20 px-6 font-sans">
-      <div className="max-w-md mx-auto flex flex-col gap-6">
+      <div className="max-w-md mx-auto flex flex-col gap-6 print-area">
         <Link
           href="/bookings"
           className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-orange-600"
@@ -125,6 +125,14 @@ export default async function BookingDetailPage({
               </div>
               <h1 className="text-2xl font-black text-gray-900">{t("bookingSuccess")}</h1>
               <p className="text-gray-500 text-sm font-medium px-8">{t("showToPartner")}</p>
+            </>
+          ) : confirmedAtShop ? (
+            <>
+              <div className="w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mb-2">
+                <CheckCircle2 size={32} />
+              </div>
+              <h1 className="text-2xl font-black text-gray-900">{t("bookingDetailPayAtShopTitle")}</h1>
+              <p className="text-gray-500 text-sm font-medium px-8">{t("bookingDetailPayAtShopSub")}</p>
             </>
           ) : waitingShop ? (
             <>
@@ -164,8 +172,8 @@ export default async function BookingDetailPage({
           )}
         </div>
 
-        {/* QR & ID Card — ödeme tamamlanmış veya check-in akışı */}
-        {isPaidFlow ? (
+        {/* QR & ID Card */}
+        {(isPaidFlow || confirmedAtShop) ? (
         <div className="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col items-center gap-6">
            <BookingQrDisplay token={booking.qrCodeToken} />
            <div className="text-center">
