@@ -1,5 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Search, MapPin, ShieldCheck, Clock, Star } from "lucide-react";
+import { MapPin, ShieldCheck, Clock, Star, Smartphone, Map, QrCode } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { getGuestLandingStats } from "@/lib/guest-landing-stats";
 import { getHomeTestimonials } from "@/lib/home-testimonials";
@@ -8,6 +8,7 @@ import TestimonialCarousel from "@/components/guest/TestimonialCarousel";
 import ComparisonTable from "@/components/guest/ComparisonTable";
 import BagProtection from "@/components/guest/BagProtection";
 import PartnerPromoModal from "@/components/partner/PartnerPromoModal";
+import HomeSearchWidget from "@/components/guest/HomeSearchWidget";
 import type { Metadata } from "next";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { alternatesForPath } from "@/lib/seo-alternates";
@@ -210,24 +211,48 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
             {t('heroSubtitle')}
           </p>
 
-          {/* Minimalist Search Bar UI */}
-          <Link 
-            href="/search"
-            className="w-full max-w-lg mx-auto bg-white border border-gray-200 shadow-xl rounded-2xl p-2 flex items-center gap-3 hover:border-orange-200 transition-all group"
-          >
-            <div className="bg-orange-50 p-3 rounded-xl text-orange-600 group-hover:bg-orange-100 transition-colors">
-              <Search size={24} />
-            </div>
-            <div className="flex-1 text-left">
-              <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">{common('search')}</p>
-              <p className="text-gray-400 font-medium">{t('searchPlaceholder')}</p>
-            </div>
-            <div className="bg-orange-600 text-white px-5 py-3 rounded-xl font-bold hidden sm:block">
-              {t('findShops')}
-            </div>
-          </Link>
+          {/* Interactive Search Widget */}
+          <HomeSearchWidget />
         </div>
       </header>
+
+      {/* How It Works Section */}
+      <section className="py-16 px-6 bg-white" aria-label={t("howItWorks")}>
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 mb-2">
+            {t("howItWorks")}
+          </h2>
+          <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-14 h-14 bg-orange-50 border border-orange-100 rounded-2xl flex items-center justify-center text-orange-600 shadow-sm">
+                <Smartphone size={28} />
+              </div>
+              <h3 className="text-sm font-black text-gray-900">{msg("homeStep1Title", "Book Online")}</h3>
+              <p className="text-sm text-gray-500 leading-relaxed max-w-[220px]">
+                {msg("homeStep1Desc", "Choose your dates and bags, complete booking in seconds.")}
+              </p>
+            </div>
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-14 h-14 bg-orange-50 border border-orange-100 rounded-2xl flex items-center justify-center text-orange-600 shadow-sm">
+                <QrCode size={28} />
+              </div>
+              <h3 className="text-sm font-black text-gray-900">{msg("homeStep2Title", "Drop Off")}</h3>
+              <p className="text-sm text-gray-500 leading-relaxed max-w-[220px]">
+                {msg("homeStep2Desc", "Go to the shop and show your QR code. Bags are sealed and stored.")}
+              </p>
+            </div>
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-14 h-14 bg-orange-50 border border-orange-100 rounded-2xl flex items-center justify-center text-orange-600 shadow-sm">
+                <Map size={28} />
+              </div>
+              <h3 className="text-sm font-black text-gray-900">{msg("homeStep3Title", "Explore Free")}</h3>
+              <p className="text-sm text-gray-500 leading-relaxed max-w-[220px]">
+                {msg("homeStep3Desc", "Enjoy the city hands-free. Pick up your bags anytime before closing.")}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Live trust metrics */}
       <section
