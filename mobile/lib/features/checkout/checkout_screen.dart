@@ -1,6 +1,7 @@
 import 'dart:async' show unawaited;
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -90,12 +91,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       );
       final bookingId = res.data['bookingId'] as String?;
       final clientSecret = res.data['clientSecret'] as String?;
-      final bypassed = res.data['bypassed'] == true;
+      final bypassed = kDebugMode && res.data['bypassed'] == true;
 
-      // Real Stripe path requires a clientSecret to confirm. The dev/test
-      // bypass path returns bypassed:true with no clientSecret and the
-      // booking already marked PAID server-side, so downstream flows can
-      // be exercised without a live gateway.
       if (bookingId == null || (!bypassed && clientSecret == null)) {
         _toast('checkout.error_payment'.tr());
         return;

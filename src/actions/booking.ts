@@ -21,6 +21,7 @@ import { headers } from "next/headers";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-ip";
 import { getLocale } from "next-intl/server";
+import logger from "@/lib/logger";
 import type {
   CancelBookingErrorCode,
   ModifyBookingErrorCode,
@@ -173,7 +174,7 @@ export async function createBookingAction(data: CreateBookingInput) {
     });
     // Kendi kodunu kullanamaz
     if (referrer && referrer.id !== session?.user?.id) {
-      const discountPct = Number(process.env.REFERRAL_DISCOUNT_PCT ?? "5");
+      const discountPct = Math.min(50, Math.max(0, Number(process.env.REFERRAL_DISCOUNT_PCT ?? "5")));
       referralDiscountAmount = Math.round(totalPrice * (discountPct / 100) * 100) / 100;
       totalPrice = Math.max(0, Math.round((totalPrice - referralDiscountAmount) * 100) / 100);
       appliedReferralCode = codeUpper;
@@ -237,12 +238,24 @@ export async function createBookingAction(data: CreateBookingInput) {
       })
       .catch(() => {});
 
-    // Kupon kullanıldıysa usedCount artır (atomik)
+    // Kupon kullanıldıysa usedCount artır (atomik, race condition önlemi)
     if (appliedCouponId) {
-      await prisma.coupon.update({
-        where: { id: appliedCouponId },
-        data: { usedCount: { increment: 1 } },
-      }).catch(() => {}); // booking zaten oluştu, kupon sayacı hatayla durmamalı
+      const coupon = await prisma.coupon.findUnique({ where: { id: appliedCouponId } });
+      if (coupon && coupon.maxUses != null) {
+        const updateCount = await prisma.coupon.updateMany({
+          where: { id: appliedCouponId, usedCount: { lt: coupon.maxUses } },
+          data: { usedCount: { increment: 1 } },
+        });
+        if (updateCount.count === 0) {
+          // Kupon kotası doldu, booking zaten oluştu ama indirimsiz bırakılmalı
+          logger.warn({ couponId: appliedCouponId, bookingId: booking.id }, "coupon_quota_exceeded_after_booking");
+        }
+      } else if (coupon) {
+        await prisma.coupon.update({
+          where: { id: appliedCouponId },
+          data: { usedCount: { increment: 1 } },
+        });
+      }
     }
 
     // Sadakat puanı: her 1 TL harcamaya 1 puan

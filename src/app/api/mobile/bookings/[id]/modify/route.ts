@@ -1,7 +1,16 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { z } from "zod";
 import { requireMobileUser } from "@/lib/mobile-auth";
 import { bookingService } from "@/services/BookingService";
+
+const modifySchema = z.object({
+  checkInTime: z.string().min(1),
+  checkOutTime: z.string().min(1),
+  bagCountS: z.number().int().min(0).max(50).optional(),
+  bagCountM: z.number().int().min(0).max(50).optional(),
+  bagCountXl: z.number().int().min(0).max(50).optional(),
+});
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireMobileUser(req);
@@ -17,11 +26,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 
   const body = await req.json();
-  const { checkInTime, checkOutTime, bagCountS, bagCountM, bagCountXl } = body;
-
-  if (!checkInTime || !checkOutTime) {
-    return NextResponse.json({ error: "missing_dates" }, { status: 400 });
+  const parsed = modifySchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: "invalid_input", details: parsed.error.flatten() }, { status: 400 });
   }
+
+  const { checkInTime, checkOutTime, bagCountS, bagCountM, bagCountXl } = parsed.data;
 
   const result = await bookingService.modifyBooking(id, auth.user.id, {
     checkInTime: new Date(checkInTime),

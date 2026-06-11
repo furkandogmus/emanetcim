@@ -38,8 +38,15 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
   void initState() {
     super.initState();
     _protectScreen();
-    // Poll every 10 seconds for live status updates
     _pollingTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      final current = ref.read(bookingProvider(widget.bookingId));
+      final terminalStatuses = {'CHECKED_OUT', 'CANCELLED'};
+      final isTerminal = current.asData?.value.status != null &&
+          terminalStatuses.contains(current.asData!.value.status);
+      if (isTerminal) {
+        timer.cancel();
+        return;
+      }
       ref.invalidate(bookingProvider(widget.bookingId));
     });
   }

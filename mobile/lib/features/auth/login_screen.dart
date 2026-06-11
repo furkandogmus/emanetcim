@@ -505,6 +505,33 @@ class _OtpBottomSheetState extends ConsumerState<_OtpBottomSheet> {
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }  Future<void> _resendOtp() async {
+    setState(() => _busy = true);
+    try {
+      final dio = ref.read(dioProvider);
+      final isEmail = widget.identity.contains('@');
+      await dio.post('/auth/otp', data: isEmail
+          ? {'email': widget.identity}
+          : {'phone': widget.identity});
+      _startTimer();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('auth.otp_resent'.tr()),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Kod gönderilemedi, tekrar deneyin.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   Future<void> _forgotPassword() async {
@@ -668,7 +695,7 @@ class _OtpBottomSheetState extends ConsumerState<_OtpBottomSheet> {
               ),
             const SizedBox(height: 16),
             TextButton(
-              onPressed: _canResend ? () => Navigator.pop(context) : null,
+              onPressed: _canResend ? _resendOtp : null,
               child: Text(
                 _canResend
                     ? 'auth.resend_code'.tr()

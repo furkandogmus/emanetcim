@@ -40,10 +40,12 @@ export type MobileJwtClaims = {
   sub: string;
   role: Role;
   type: "access" | "refresh";
+  tv?: number; // tokenVersion
 };
 
 export async function signAccessToken(userId: string, role: Role) {
-  return new SignJWT({ role, type: "access" })
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { tokenVersion: true } });
+  return new SignJWT({ role, type: "access", tv: user?.tokenVersion ?? 0 })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(userId)
     .setIssuedAt()
@@ -52,7 +54,8 @@ export async function signAccessToken(userId: string, role: Role) {
 }
 
 export async function signRefreshToken(userId: string, role: Role) {
-  return new SignJWT({ role, type: "refresh" })
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { tokenVersion: true } });
+  return new SignJWT({ role, type: "refresh", tv: user?.tokenVersion ?? 0 })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(userId)
     .setIssuedAt()
@@ -77,6 +80,7 @@ export async function requireMobileUser(req: NextRequest) {
     const user = await prisma.user.findUnique({ where: { id: claims.sub } });
     if (!user) throw new Error("user not found");
     if (user.isBanned) throw new Error("user banned");
+    if (user.tokenVersion !== (claims.tv ?? 0)) throw new Error("token version mismatch");
     return { user } as const;
   } catch {
     return { error: NextResponse.json({ error: "unauthorized" }, { status: 401 }) } as const;
@@ -103,7 +107,10 @@ export async function getMobileSession() {
   try {
     const claims = await verifyMobileToken(token);
     if (claims.type !== "access") return null;
-    if (await isBannedCached(claims.sub)) return null;
+    const user = await prisma.user.findUnique({ where: { id: claims.sub }, select: { isBanned: true, tokenVersion: true } });
+    if (!user) return null;
+    if (user.isBanned) return null;
+    if (user.tokenVersion !== (claims.tv ?? 0)) return null;
     return {
       userId: claims.sub,
       role: claims.role,

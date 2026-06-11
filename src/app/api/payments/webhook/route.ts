@@ -114,8 +114,7 @@ export async function POST(req: NextRequest) {
     }
 
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : String(error);
     logger.error({ err: error }, "iyzico_webhook_critical");
-    return NextResponse.json({ status: "Error", message }, { status: 500 });
+    return NextResponse.json({ status: "Error", message: "Internal error" }, { status: 500 });
   }
 }

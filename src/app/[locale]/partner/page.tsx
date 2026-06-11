@@ -54,18 +54,15 @@ export default async function PartnerPage({
     );
   }
 
-  const [bookings, pricingRules, ownerPhoneRow] = (await Promise.all([
+  const [result, pricingRules, ownerPhoneRow] = await Promise.all([
     bookingService.getPartnerBookings(activeShop.id),
     getPricingRules(),
     prisma.user.findUnique({
       where: { id: session!.user.id },
       select: { phone: true },
     }),
-  ])) as [
-    PartnerBookingListItem[],
-    Awaited<ReturnType<typeof getPricingRules>>,
-    { phone: string | null } | null,
-  ];
+  ]);
+  const bookings = result.items;
   const activeCount = bookings.filter(
     (b) => b.status === "PAID" || b.status === "CHECKED_IN"
   ).length;

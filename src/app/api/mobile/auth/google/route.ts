@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import prisma from "@/lib/db";
 import { signAccessToken, signRefreshToken } from "@/lib/mobile-auth";
+import { rateLimit } from "@/lib/rate-limit";
 
 const GOOGLE_JWKS = createRemoteJWKSet(new URL("https://www.googleapis.com/oauth2/v3/certs"));
 
@@ -12,6 +13,10 @@ export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "invalid" }, { status: 400 });
+
+  if (!(await rateLimit(`mobile_google_auth`, 10, 60_000))) {
+    return NextResponse.json({ error: "too_many_attempts" }, { status: 429 });
+  }
 
   const iosClientId = process.env.GOOGLE_IOS_CLIENT_ID;
   const androidClientId = process.env.GOOGLE_ANDROID_CLIENT_ID;
@@ -32,9 +37,15 @@ export async function POST(req: Request) {
     const picture = typeof payload.picture === "string" ? payload.picture : null;
 
     let user = await prisma.user.findUnique({ where: { email } });
-    user ??= await prisma.user.create({
-      data: { email, name, image: picture, role: "GUEST", emailVerified: new Date() },
-    });
+    if (!user) {
+      user = await prisma.user.create({
+        data: { email, name, image: picture, role: "GUEST", emailVerified: new Date() },
+      });
+    }
+
+    if (user.isBanned) {
+      return NextResponse.json({ error: "account_banned" }, { status: 403 });
+    }
 
     const access = await signAccessToken(user.id, user.role);
     const refresh = await signRefreshToken(user.id, user.role);

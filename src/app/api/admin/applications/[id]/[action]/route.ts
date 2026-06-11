@@ -19,8 +19,15 @@ export async function POST(
       data: { isActive: true },
     });
   } else if (action === "reject") {
-    // For rejection, we can either delete or mark as rejected if we had a status field.
-    // Since we only have isActive, deleting is the cleanest if we don't want them in the list.
+    const activeBookingCount = await prisma.booking.count({
+      where: { shopId: id, status: { in: ["APPROVED", "PAID", "CHECKED_IN"] } },
+    });
+    if (activeBookingCount > 0) {
+      return NextResponse.json(
+        { error: "Shop has active bookings; cannot delete." },
+        { status: 409 }
+      );
+    }
     await prisma.shop.delete({ where: { id } });
   } else {
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });

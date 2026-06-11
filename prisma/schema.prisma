@@ -16,7 +16,9 @@ model User {
   name                     String?
   /// bcrypt hash; OAuth-only kullanıcılarda null
   passwordHash             String?
-  isBanned                 Boolean                  @default(false)
+  isBanned               Boolean           @default(false)
+  /// JWT token sürümü — şifre değişikliğinde artırılır, eski token'lar geçersiz olur
+  tokenVersion           Int               @default(0)
   lastIp                   String?
   createdAt                DateTime                 @default(now())
   updatedAt                DateTime                 @updatedAt
@@ -169,6 +171,8 @@ model Booking {
   sealPhotoUrl           String?
   lateFeeApplied         Decimal           @default(0) @db.Decimal(12, 2)
   pendingBagRevision     Json?
+  /// Erken teslimat iadesi başarısız olduysa reconcile için tutulan tutar
+  failedRefundAmount     Decimal?          @default(0) @db.Decimal(12, 2)
   createdAt              DateTime          @default(now())
   updatedAt              DateTime          @updatedAt
   /// Eşzamanlı durum geçişleri için optimistic sürüm (onay vb. updateMany ile artırılır).

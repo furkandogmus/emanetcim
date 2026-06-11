@@ -98,8 +98,8 @@ export interface IBookingService {
   checkOut(bookingId: string): Promise<PartnerCheckOutResult>;
   getBookingByToken(token: string): Promise<BookingWithGuestShop | null>;
   createInitialBooking(data: CreateInitialBookingInput): Promise<Booking>;
-  getUserBookings(userId: string): Promise<GuestBookingListItem[]>;
-  getPartnerBookings(shopId: string): Promise<PartnerBookingListItem[]>;
+  getUserBookings(userId: string, opts?: { page?: number; limit?: number }): Promise<{ items: GuestBookingListItem[]; total: number }>;
+  getPartnerBookings(shopId: string, opts?: { page?: number; limit?: number }): Promise<{ items: PartnerBookingListItem[]; total: number }>;
   getBookingDetails(id: string): Promise<BookingWithShopGuestDetails | null>;
   cancelBooking(bookingId: string): Promise<CancelBookingResult>;
   markAsPaid(bookingId: string): Promise<void>;
@@ -129,10 +129,7 @@ export class BookingService implements IBookingService {
         if (!shop) {
           throw new Error('Dükkan bulunamadı.');
         }
-        await tx.$executeRawUnsafe(
-          `SELECT 1 FROM "Shop" WHERE id = $1 FOR UPDATE`,
-          data.shopId
-        );
+        await tx.$executeRaw`SELECT 1 FROM "Shop" WHERE id = ${data.shopId} FOR UPDATE`;
 
         const unitPrice =
           typeof data.unitPrice === 'number' && Number.isFinite(data.unitPrice)
@@ -552,33 +549,49 @@ export class BookingService implements IBookingService {
     });
   }
 
-  async getUserBookings(userId: string): Promise<GuestBookingListItem[]> {
-    return await prisma.booking.findMany({
-      where: { guestId: userId },
-      select: {
-        id: true, guestId: true, shopId: true, checkInTime: true, checkOutTime: true,
-        totalPrice: true, bagCountS: true, bagCountM: true, bagCountXl: true,
-        status: true, qrCodeToken: true, createdAt: true,
-        shop: { select: { name: true, address: true, pricePerDay: true } },
-        dispute: { select: { id: true } },
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 50,
-    });
+  async getUserBookings(userId: string, opts?: { page?: number; limit?: number }): Promise<{ items: GuestBookingListItem[]; total: number }> {
+    const page = opts?.page ?? 1;
+    const limit = opts?.limit ?? 50;
+    const skip = (page - 1) * limit;
+    const [items, total] = await Promise.all([
+      prisma.booking.findMany({
+        where: { guestId: userId },
+        select: {
+          id: true, guestId: true, shopId: true, checkInTime: true, checkOutTime: true,
+          totalPrice: true, bagCountS: true, bagCountM: true, bagCountXl: true,
+          status: true, qrCodeToken: true, createdAt: true,
+          shop: { select: { name: true, address: true, pricePerDay: true } },
+          dispute: { select: { id: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.booking.count({ where: { guestId: userId } }),
+    ]);
+    return { items, total };
   }
 
-  async getPartnerBookings(shopId: string): Promise<PartnerBookingListItem[]> {
-    return await prisma.booking.findMany({
-      where: { shopId },
-      select: {
-        id: true, checkInTime: true, checkOutTime: true,
-        totalPrice: true, bagCountS: true, bagCountM: true, bagCountXl: true,
-        status: true, createdAt: true,
-        guest: { select: { name: true } },
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 100,
-    });
+  async getPartnerBookings(shopId: string, opts?: { page?: number; limit?: number }): Promise<{ items: PartnerBookingListItem[]; total: number }> {
+    const page = opts?.page ?? 1;
+    const limit = opts?.limit ?? 100;
+    const skip = (page - 1) * limit;
+    const [items, total] = await Promise.all([
+      prisma.booking.findMany({
+        where: { shopId },
+        select: {
+          id: true, checkInTime: true, checkOutTime: true,
+          totalPrice: true, bagCountS: true, bagCountM: true, bagCountXl: true,
+          status: true, createdAt: true,
+          guest: { select: { name: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.booking.count({ where: { shopId } }),
+    ]);
+    return { items, total };
   }
 
   /**
@@ -698,6 +711,16 @@ export class BookingService implements IBookingService {
         where: { id: bookingId },
         data: { status: 'CANCELLED' },
       });
+
+      // Sadakat puanlarını geri al
+      if (booking.guestId) {
+        const earnedPoints = Math.floor(moneyToNumber(booking.totalPrice));
+        if (earnedPoints > 0) {
+          prisma.$executeRaw`UPDATE "User" SET "loyaltyPoints" = GREATEST(0, "loyaltyPoints" - ${earnedPoints}) WHERE id = ${booking.guestId}`.catch((err) =>
+            logger.error({ err, bookingId, guestId: booking.guestId, earnedPoints }, "loyalty_points_decrement_failed")
+          );
+        }
+      }
 
       bookingEventService.record({
         bookingId,
@@ -841,10 +864,7 @@ export class BookingService implements IBookingService {
     try {
       await prisma.$transaction(
         async (tx) => {
-          await tx.$executeRawUnsafe(
-            `SELECT 1 FROM "Shop" WHERE id = $1 FOR UPDATE`,
-            booking.shopId
-          );
+          await tx.$executeRaw`SELECT 1 FROM "Shop" WHERE id = ${booking.shopId} FOR UPDATE`;
           const shop = await tx.shop.findUnique({
             where: { id: booking.shopId },
           });

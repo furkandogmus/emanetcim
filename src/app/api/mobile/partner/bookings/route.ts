@@ -9,6 +9,11 @@ export async function GET(req: NextRequest) {
   const forbid = requireRole(auth.user, ["PARTNER"]);
   if (forbid) return forbid;
 
+  const { searchParams } = new URL(req.url);
+  const page = Math.max(1, Number(searchParams.get("page")) || 1);
+  const limit = Math.min(100, Math.max(1, Number(searchParams.get("limit")) || 50));
+  const skip = (page - 1) * limit;
+
   const shops = await prisma.shop.findMany({
     where: { ownerId: auth.user.id },
     select: { id: true, name: true },
@@ -17,11 +22,16 @@ export async function GET(req: NextRequest) {
   const shopIds = shops.map((s) => s.id);
   const shopMap = new Map(shops.map((s) => [s.id, s.name]));
 
-  const allBookings = await prisma.booking.findMany({
-    where: { shopId: { in: shopIds } },
-    include: { guest: { select: { name: true } } },
-    orderBy: { createdAt: "desc" },
-  });
+  const [allBookings, total] = await Promise.all([
+    prisma.booking.findMany({
+      where: { shopId: { in: shopIds } },
+      include: { guest: { select: { name: true } } },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    }),
+    prisma.booking.count({ where: { shopId: { in: shopIds } } }),
+  ]);
 
   const results = allBookings.map((b) => ({
     id: b.id,
@@ -34,9 +44,8 @@ export async function GET(req: NextRequest) {
     bagCountXl: b.bagCountXl,
     totalPrice: Number(b.totalPrice),
     status: b.status,
-    qrCodeToken: b.qrCodeToken,
     guestName: b.guest?.name ?? "",
   }));
 
-  return NextResponse.json(results);
+  return NextResponse.json({ items: results, total, page, limit });
 }

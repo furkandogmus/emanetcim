@@ -82,42 +82,54 @@ class AuthController extends Notifier<AuthState> {
 
   Future<void> requestOtp(String identity) async {
     state = state.copyWith(loading: true);
-    final dio = ref.read(dioProvider);
-    // Determine if identity is email or phone
-    final isEmail = identity.contains('@');
-    final data = isEmail
-        ? {'email': identity}
-        : {'phone': identity.replaceAll(RegExp(r'\D'), '')};
+    try {
+      final dio = ref.read(dioProvider);
+      final isEmail = identity.contains('@');
+      final data = isEmail
+          ? {'email': identity}
+          : {'phone': identity.replaceAll(RegExp(r'\D'), '')};
 
-    await dio.post('/auth/otp', data: data);
-    state = state.copyWith(loading: false);
+      await dio.post('/auth/otp', data: data);
+    } finally {
+      state = state.copyWith(loading: false);
+    }
   }
 
   Future<void> verifyOtp(String identity, String code) async {
     state = state.copyWith(loading: true);
-    final dio = ref.read(dioProvider);
-    final isEmail = identity.contains('@');
-    final data = isEmail
-        ? {'email': identity, 'code': code}
-        : {'phone': identity.replaceAll(RegExp(r'\D'), ''), 'code': code};
+    try {
+      final dio = ref.read(dioProvider);
+      final isEmail = identity.contains('@');
+      final data = isEmail
+          ? {'email': identity, 'code': code}
+          : {'phone': identity.replaceAll(RegExp(r'\D'), ''), 'code': code};
 
-    final res = await dio.post('/auth/session', data: data);
-    await _completeSession(res.data as Map<String, dynamic>);
+      final res = await dio.post('/auth/session', data: data);
+      await _completeSession(res.data as Map<String, dynamic>);
+    } catch (e) {
+      state = state.copyWith(loading: false);
+      rethrow;
+    }
   }
 
   Future<void> loginWithPassword(String identity, String password) async {
     state = state.copyWith(loading: true);
-    final dio = ref.read(dioProvider);
-    final isEmail = identity.contains('@');
-    final data = isEmail
-        ? {'email': identity, 'password': password}
-        : {
-            'phone': identity.replaceAll(RegExp(r'\D'), ''),
-            'password': password,
-          };
+    try {
+      final dio = ref.read(dioProvider);
+      final isEmail = identity.contains('@');
+      final data = isEmail
+          ? {'email': identity, 'password': password}
+          : {
+              'phone': identity.replaceAll(RegExp(r'\D'), ''),
+              'password': password,
+            };
 
-    final res = await dio.post('/auth/session', data: data);
-    await _completeSession(res.data as Map<String, dynamic>);
+      final res = await dio.post('/auth/session', data: data);
+      await _completeSession(res.data as Map<String, dynamic>);
+    } catch (e) {
+      state = state.copyWith(loading: false);
+      rethrow;
+    }
   }
 
   Future<void> _completeSession(Map<String, dynamic> data) async {
@@ -167,7 +179,7 @@ class AuthController extends Notifier<AuthState> {
 
   Future<void> logout() async {
     await ref.read(tokenStoreProvider).clear();
-    state = state.copyWith(clearSession: true);
+    state = state.copyWith(clearSession: true, loading: false);
   }
 
   Future<bool> requestAccountDeletion() async {

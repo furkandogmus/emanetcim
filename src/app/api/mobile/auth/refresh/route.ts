@@ -15,6 +15,8 @@ export async function POST(req: Request) {
     if (claims.type !== "refresh") throw new Error("bad type");
     const user = await prisma.user.findUnique({ where: { id: claims.sub } });
     if (!user) throw new Error("user gone");
+    if (user.isBanned) throw new Error("user banned");
+    if (user.tokenVersion !== (claims.tv ?? 0)) throw new Error("token version mismatch");
 
     const access = await signAccessToken(user.id, user.role);
     const refresh = await signRefreshToken(user.id, user.role);

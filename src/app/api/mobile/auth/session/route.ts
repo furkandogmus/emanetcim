@@ -3,6 +3,7 @@ import { z } from "zod";
 import prisma from "@/lib/db";
 import { signAccessToken, signRefreshToken } from "@/lib/mobile-auth";
 import { normalizeTrGsm10 } from "@/lib/netgsm";
+import { rateLimit } from "@/lib/rate-limit";
 
 const schema = z.union([
   z.object({ email: z.string().email(), code: z.string().length(6) }),
@@ -40,17 +41,13 @@ export async function POST(req: Request) {
   let user;
 
   if (code) {
-    const token = await prisma.verificationToken.findUnique({
+    const token = await prisma.verificationToken.delete({
       where: { identifier_token: { identifier, token: code } },
-    });
+    }).catch(() => null);
 
     if (!token || token.expires < new Date()) {
       return NextResponse.json({ error: "invalid_code" }, { status: 401 });
     }
-
-    await prisma.verificationToken.delete({
-      where: { identifier_token: { identifier, token: code } },
-    });
 
     user = isEmail
       ? await prisma.user.findUnique({ where: { email: normalizedIdentity } })
@@ -67,12 +64,20 @@ export async function POST(req: Request) {
       });
     }
   } else if (password) {
+    if (!(await rateLimit(`mobile_pwd:${normalizedIdentity}`, 5, 15 * 60_000))) {
+      return NextResponse.json({ error: "too_many_attempts" }, { status: 429 });
+    }
+
     user = isEmail
       ? await prisma.user.findUnique({ where: { email: normalizedIdentity } })
       : await prisma.user.findUnique({ where: { phone: normalizedIdentity } });
 
     if (!user || !user.passwordHash) {
       return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
+    }
+
+    if (!user.emailVerified) {
+      return NextResponse.json({ error: "email_not_verified" }, { status: 403 });
     }
 
     const { verifyPassword } = await import("@/lib/auth-password");

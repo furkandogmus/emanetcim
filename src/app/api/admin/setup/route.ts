@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { Role } from "@prisma/client";
 import prisma from "@/lib/db";
@@ -49,7 +50,9 @@ export async function POST(req: NextRequest) {
 
   const { setupKey: providedKey, email, password, name, role } = body;
 
-  if (providedKey !== setupKey) {
+  const keyBuf = Buffer.from(setupKey);
+  const providedBuf = Buffer.from(providedKey ?? "");
+  if (keyBuf.length !== providedBuf.length || !crypto.timingSafeEqual(keyBuf, providedBuf)) {
     return NextResponse.json({ error: "Invalid setup key." }, { status: 401 });
   }
 

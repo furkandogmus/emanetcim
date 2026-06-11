@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import prisma from "@/lib/db";
 import { signAccessToken, signRefreshToken } from "@/lib/mobile-auth";
+import { rateLimit } from "@/lib/rate-limit";
 
 const APPLE_JWKS = createRemoteJWKSet(new URL("https://appleid.apple.com/auth/keys"));
 
@@ -19,6 +20,10 @@ export async function POST(req: Request) {
 
   const audience = process.env.APPLE_BUNDLE_ID; // e.g. com.bagajpark.mobile
   if (!audience) return NextResponse.json({ error: "apple_not_configured" }, { status: 500 });
+
+  if (!(await rateLimit(`mobile_apple_auth`, 10, 60_000))) {
+    return NextResponse.json({ error: "too_many_attempts" }, { status: 429 });
+  }
 
   try {
     const { payload } = await jwtVerify(parsed.data.identityToken, APPLE_JWKS, {
@@ -40,11 +45,16 @@ export async function POST(req: Request) {
     if (!user) {
       const fullName = [parsed.data.givenName, parsed.data.familyName].filter(Boolean).join(" ") || null;
       if (email) {
-        user = await prisma.user.findUnique({ where: { email } }) ?? undefined;
+        user = await prisma.user.upsert({
+          where: { email },
+          update: { name: fullName, emailVerified: email ? new Date() : null },
+          create: { email, name: fullName, role: "GUEST", emailVerified: email ? new Date() : null },
+        });
+      } else {
+        user = await prisma.user.create({
+          data: { email: null, name: fullName, role: "GUEST" },
+        });
       }
-      user ??= await prisma.user.create({
-        data: { email, name: fullName, role: "GUEST", emailVerified: email ? new Date() : null },
-      });
       await prisma.account.create({
         data: {
           userId: user.id,
@@ -53,6 +63,10 @@ export async function POST(req: Request) {
           providerAccountId: appleSub,
         },
       });
+    }
+
+    if (user.isBanned) {
+      return NextResponse.json({ error: "account_banned" }, { status: 403 });
     }
 
     const access = await signAccessToken(user.id, user.role);
