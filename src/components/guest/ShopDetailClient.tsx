@@ -11,7 +11,7 @@ import {
   Sparkles,
   ExternalLink,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { roundedSlotPrices } from "@/lib/bag-pricing";
@@ -111,9 +111,25 @@ export default function ShopDetailClient({
         };
   const mobilePricePerBag = formatTryCurrency(slot.m, locale);
 
+  const [checkoutParams, setCheckoutParams] = useState("");
+
   useEffect(() => {
     trackPlausibleEvent(PLAUSIBLE_EVENTS.ShopViewed, { shopId: shop.id });
   }, [shop.id]);
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("bagajpark_search_params");
+      if (raw) {
+        const p = JSON.parse(raw);
+        const params = new URLSearchParams();
+        if (p.checkIn) params.set("checkIn", p.checkIn);
+        if (p.checkOut) params.set("checkOut", p.checkOut);
+        if (p.bags) params.set("bags", p.bags);
+        setCheckoutParams("?" + params.toString());
+      }
+    } catch {}
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-28">
@@ -253,7 +269,7 @@ export default function ShopDetailClient({
               </p>
             </div>
             <Link
-              href={`/checkout/${shop.id}`}
+              href={`/checkout/${shop.id}${checkoutParams}`}
               data-testid="shop-book-now-mobile"
               className="btn-ui btn-ui-lg btn-ui-primary rounded-2xl px-8"
             >
@@ -428,7 +444,7 @@ export default function ShopDetailClient({
       <div className="fixed bottom-0 left-0 right-0 p-4 pb-6 bg-white/95 backdrop-blur-xl border-t border-gray-100 z-20">
         <div className="max-w-lg mx-auto">
           <Link
-            href={`/checkout/${shop.id}`}
+            href={`/checkout/${shop.id}${checkoutParams}`}
             data-testid="shop-book-now"
             className="flex w-full items-center justify-center gap-2 py-4 rounded-2xl bg-orange-600 text-white text-sm font-black uppercase tracking-widest shadow-lg shadow-orange-200 hover:bg-orange-700 transition-colors active:scale-[0.99]"
           >

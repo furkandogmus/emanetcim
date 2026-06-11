@@ -28,8 +28,15 @@ export async function generateMetadata({
 /**
  * Checkout Page - Rezervasyon ve Ödeme Sayfası (Server Component)
  */
-export default async function CheckoutPage({ params }: { params: Promise<{ locale: string, shopId: string }> }) {
+export default async function CheckoutPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string, shopId: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const { locale, shopId } = await params;
+  const sp = searchParams ? await searchParams : {};
   setRequestLocale(locale);
 
   // Veritabanından dükkan bilgilerini, oturumu ve ayarları paralel çek
@@ -45,6 +52,9 @@ export default async function CheckoutPage({ params }: { params: Promise<{ local
   }
 
   const isLoggedIn = !!session?.user?.id;
+  const checkInParam = typeof sp.checkIn === "string" ? sp.checkIn : undefined;
+  const checkOutParam = typeof sp.checkOut === "string" ? sp.checkOut : undefined;
+  const bagsParam = typeof sp.bags === "string" ? parseInt(sp.bags, 10) : undefined;
 
   return (
     <CheckoutClient 
@@ -55,6 +65,9 @@ export default async function CheckoutPage({ params }: { params: Promise<{ local
       pricingRules={pricingRules}
       paymentsEnabled={paymentsEnabled}
       isLoggedIn={isLoggedIn}
+      initialCheckIn={checkInParam}
+      initialCheckOut={checkOutParam}
+      initialBags={!isNaN(bagsParam ?? -1) ? bagsParam : undefined}
     />
   );
 }

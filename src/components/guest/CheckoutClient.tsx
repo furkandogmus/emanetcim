@@ -43,6 +43,9 @@ interface CheckoutClientProps {
   pricingRules: PricingRules;
   paymentsEnabled?: boolean;
   isLoggedIn?: boolean;
+  initialCheckIn?: string;
+  initialCheckOut?: string;
+  initialBags?: number;
 }
 
 export default function CheckoutClient({
@@ -53,6 +56,9 @@ export default function CheckoutClient({
   pricingRules,
   paymentsEnabled = true,
   isLoggedIn = false,
+  initialCheckIn,
+  initialCheckOut,
+  initialBags,
 }: CheckoutClientProps) {
   const t = useTranslations("Guest");
   const tErr = useTranslations("Errors");
@@ -66,13 +72,19 @@ export default function CheckoutClient({
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   const [bagS, setBagS] = useState(0);
-  const [bagM, setBagM] = useState(1);
+  const [bagM, setBagM] = useState(initialBags ?? 1);
   const [bagXl, setBagXl] = useState(0);
 
-  const [checkInLocal, setCheckInLocal] = useState(() =>
-    toDatetimeLocalValue(new Date()),
-  );
+  const [checkInLocal, setCheckInLocal] = useState(() => {
+    if (initialCheckIn && !isNaN(Date.parse(initialCheckIn))) {
+      return toDatetimeLocalValue(new Date(initialCheckIn));
+    }
+    return toDatetimeLocalValue(new Date());
+  });
   const [checkOutLocal, setCheckOutLocal] = useState(() => {
+    if (initialCheckOut && !isNaN(Date.parse(initialCheckOut))) {
+      return toDatetimeLocalValue(new Date(initialCheckOut));
+    }
     const now = new Date();
     const defaultOut = new Date(now.getTime() + 24 * 60 * 60 * 1000);
     return toDatetimeLocalValue(defaultOut);
