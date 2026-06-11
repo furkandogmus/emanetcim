@@ -249,6 +249,7 @@
     "checkoutReservationIdLabel": "예약 ID",
     "checkoutDeliveryPointLabel": "수령 장소",
     "checkoutCardValidationError": "카드 정보를 모두 입력해 주세요.",
+    "checkoutGuestContactRequired": "Please enter email or phone",
     "checkoutCardHolderPlaceholder": "카드 소유자 이름",
     "checkoutCardNumberPlaceholder": "0000 0000 0000 0000",
     "checkoutExpiryPlaceholder": "MM/YY",
@@ -406,7 +407,11 @@
     "bookingDetailPaymentUnavailableNote": "Online payment is not available (payments off or keys missing). Contact support or the shop for payment instructions.",
     "payBookingError_iyzico_submerchant": "This shop is not ready to accept online payment yet. Please contact support.",
     "payBookingError_guest_email_required": "Add an email to your account before paying.",
-    "payBookingError_iyzico_failed": "Payment was declined or could not be completed. Check your card or try again."
+    "payBookingError_iyzico_failed": "Payment was declined or could not be completed. Check your card or try again.",
+    "checkoutGuestEmailPlaceholder": "Your email (optional)",
+    "checkoutGuestPhonePlaceholder": "Your phone (optional)",
+    "checkoutGuestContinue": "Continue as Guest",
+    "checkoutGuestOr": "or"
   },
   "Admin": {
     "dashboardTitle": "BagajPark 관리 센터",
@@ -1059,6 +1064,7 @@
   },
   "Errors": {
     "authRequired": "세션이 필요합니다.",
+    "guestContactRequired": "Please provide email or phone to continue",
     "verifyEmailRequired": "예약 전 이메일을 인증해 주세요.",
     "unauthorized": "이 작업을 수행할 권한이 없습니다.",
     "shopNotFound": "매장을 찾을 수 없습니다.",

@@ -249,6 +249,7 @@
     "checkoutReservationIdLabel": "预订ID",
     "checkoutDeliveryPointLabel": "上车地点",
     "checkoutCardValidationError": "请填写所有卡字段。",
+    "checkoutGuestContactRequired": "Please enter email or phone",
     "checkoutCardHolderPlaceholder": "卡上的姓名",
     "checkoutCardNumberPlaceholder": "0000 0000 0000 0000",
     "checkoutExpiryPlaceholder": "月/年",
@@ -406,7 +407,11 @@
     "bookingDetailPaymentUnavailableNote": "Online payment is not available (payments off or keys missing). Contact support or the shop for payment instructions.",
     "payBookingError_iyzico_submerchant": "This shop is not ready to accept online payment yet. Please contact support.",
     "payBookingError_guest_email_required": "Add an email to your account before paying.",
-    "payBookingError_iyzico_failed": "Payment was declined or could not be completed. Check your card or try again."
+    "payBookingError_iyzico_failed": "Payment was declined or could not be completed. Check your card or try again.",
+    "checkoutGuestEmailPlaceholder": "Your email (optional)",
+    "checkoutGuestPhonePlaceholder": "Your phone (optional)",
+    "checkoutGuestContinue": "Continue as Guest",
+    "checkoutGuestOr": "or"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -1059,6 +1064,7 @@
   },
   "Errors": {
     "authRequired": "需要会话。",
+    "guestContactRequired": "Please provide email or phone to continue",
     "verifyEmailRequired": "请在预订前验证您的电子邮件地址。",
     "unauthorized": "您无权执行此操作。",
     "shopNotFound": "未找到商店。",
