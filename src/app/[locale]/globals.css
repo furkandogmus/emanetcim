@@ -699,3 +699,10 @@
   /* Smooth page transitions */
   main { animation: fade-in 0.3s var(--ease-out); }
 }
+
+@media print {
+  body * { visibility: hidden; }
+  body .print-area,
+  body .print-area * { visibility: visible; }
+  body .print-area { position: absolute; left: 0; top: 0; width: 100%; }
+}

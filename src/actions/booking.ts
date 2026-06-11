@@ -35,7 +35,7 @@ export type CreateBookingInput = {
   insuranceFee?: number;
   checkInTime: Date;
   checkOutTime: Date;
-  cardInfo: {
+  cardInfo?: {
     cardHolderName: string;
     cardNumber: string;
     expireMonth: string;
@@ -186,20 +186,20 @@ export async function createBookingAction(data: CreateBookingInput) {
       referredByCode: appliedReferralCode,
     });
 
-    // Durumu WAITING_APPROVAL yapıyoruz (Talep aşaması)
+    // Booking onaylandı (doğrudan APPROVED, esnaf onayı beklenmez)
     await prisma.booking.update({
       where: { id: booking.id },
-      data: { status: BookingStatus.WAITING_APPROVAL },
+      data: { status: BookingStatus.APPROVED },
     });
 
     void bookingEventService.record({
       bookingId: booking.id,
-      event: "WAITING_APPROVAL",
+      event: "APPROVED",
       actorId: session.user.id,
       actorRole: "GUEST",
     }).catch(() => {});
 
-    // Esnafa bildirim gönder (Yeni Talep)
+    // Esnafa bildirim gönder (Yeni Rezervasyon)
     void notificationService
       .notifyPartnerAndAdminsForNewPaidBooking({
         bookingId: booking.id,
@@ -208,20 +208,6 @@ export async function createBookingAction(data: CreateBookingInput) {
         totalPrice,
       })
       .catch(() => {});
-
-    const guestPhone = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { phone: true },
-    });
-    if (guestPhone?.phone) {
-      void notificationService
-        .notifyGuestBookingRequestSms(
-          guestPhone.phone,
-          booking.id,
-          shop.name,
-        )
-        .catch(() => {});
-    }
 
     // Kupon kullanıldıysa usedCount artır (atomik)
     if (appliedCouponId) {
@@ -238,7 +224,7 @@ export async function createBookingAction(data: CreateBookingInput) {
       success: true as const,
       bookingId: booking.id,
       qrCodeToken: booking.qrCodeToken,
-      status: "WAITING_APPROVAL",
+      status: "APPROVED",
     };
   } catch (e: unknown) {
     if (e instanceof BookingCapacityExceededError) {

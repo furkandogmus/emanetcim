@@ -361,6 +361,8 @@
     "bookingDetailPaymentNeededSub": "Der Shop hat Ihre Anfrage genehmigt. Schließen Sie die Zahlung ab, um die Buchung zu bestätigen.",
     "bookingDetailPaymentNoStripeNote": "Stripe-Checkout ist in dieser Umgebung nicht aktiv. Kontaktieren Sie den Support oder zahlen Sie nach Anweisung des Shops.",
     "bookingDetailQrAfterPayment": "Ihr Abgabe-QR-Code erscheint hier nach erfolgter Zahlung.",
+    "bookingDetailPayAtShopTitle": "Booking confirmed!",
+    "bookingDetailPayAtShopSub": "Pay at the shop when you drop off your bags.",
     "payBookingError_payments_disabled": "Zahlungen sind auf der Plattform derzeit deaktiviert.",
     "payBookingError_gateway_not_stripe": "Stripe-Checkout ist nicht aktiv (PAYMENT_GATEWAY=stripe und Schlüssel erforderlich).",
     "payBookingError_stripe_not_configured": "Stripe ist nicht konfiguriert (STRIPE_SECRET_KEY oder Publishable Key fehlt).",

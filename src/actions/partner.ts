@@ -349,8 +349,11 @@ export async function rejectBookingAction(bookingId: string) {
        return { success: false as const, error: "Errors.unauthorized" };
     }
 
-    // Sadece onay bekleyen talepler reddedilebilir
-    if (booking.status !== BookingStatus.WAITING_APPROVAL) {
+    // Partner sadece onay bekleyen talepleri reddedebilir; admin WAITING_APPROVAL veya APPROVED iptal edebilir
+    if (booking.status === BookingStatus.APPROVED && session.user.role !== "ADMIN") {
+      return { success: false as const, error: "Errors.unauthorized" };
+    }
+    if (booking.status !== BookingStatus.WAITING_APPROVAL && booking.status !== BookingStatus.APPROVED) {
       return { success: false as const, error: "Errors.bookingStateConflict" };
     }
 
@@ -364,7 +367,7 @@ export async function rejectBookingAction(bookingId: string) {
       event: "CANCELLED",
       actorId: session.user.id,
       actorRole: session.user.role as "PARTNER" | "ADMIN",
-      metadata: { reason: "rejected_by_partner" },
+      metadata: { reason: session.user.role === "ADMIN" ? "cancelled_by_admin" : "rejected_by_partner" },
     }).catch(() => {});
 
     // Misafire "Reddedildi" e-postası
