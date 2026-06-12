@@ -58,6 +58,7 @@ class SearchScreen extends ConsumerStatefulWidget {
 class _SearchScreenState extends ConsumerState<SearchScreen> {
   static const _istanbul = LatLng(41.0082, 28.9784);
   LatLng _center = _istanbul;
+  LatLng? _userLocation;
   final MapController _mapController = MapController();
   final TextEditingController _searchController = TextEditingController();
   String? _selectedShopId;
@@ -249,7 +250,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
       if (!mounted) return;
       final newCenter = LatLng(pos.latitude, pos.longitude);
-      setState(() => _center = newCenter);
+      setState(() {
+        _center = newCenter;
+        _userLocation = newCenter;
+      });
       _mapController.move(newCenter, 15);
       ref.read(debouncedLocationProvider.notifier).updateLocation(newCenter);
     } catch (e) {
@@ -313,6 +317,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 shops: filtered,
                 selectedShopIndex: filtered.indexWhere((s) => s.id == _selectedShopId),
                 center: _center,
+                userPosition: _userLocation,
                 onShopSelected: (index) {
                   if (index >= 0 && index < filtered.length) {
                     setState(() => _selectedShopId = filtered[index].id);
