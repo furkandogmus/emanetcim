@@ -47,11 +47,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Future<void> _loadBiometric() async {
     final biometric = ref.read(biometricServiceProvider);
-    debugPrint('🔐 Biometric: checking isAvailable...');
     final available = await biometric.isAvailable;
-    debugPrint('🔐 Biometric: isAvailable=$available');
     final enabled = await biometric.isEnabled;
-    debugPrint('🔐 Biometric: isEnabled=$enabled');
     if (mounted) {
       setState(() {
         _biometricAvailable = available;
@@ -678,17 +675,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Future<void> _handleBiometricToggle(bool val) async {
-    debugPrint('🔐 Biometric toggle: val=$val');
+Future<void> _handleBiometricToggle(bool val) async {
     setState(() => _biometricEnabled = val);
     try {
       if (val) {
-        debugPrint('🔐 Biometric: calling authenticate...');
         final ok = await ref.read(biometricServiceProvider).authenticate(
           reason: 'profile.biometric_reason'.tr(),
         );
-        debugPrint('🔐 Biometric: authenticate result=$ok');
-if (ok) {
+        if (ok) {
                   await ref.read(biometricServiceProvider).setEnabled(true);
                   final store = ref.read(tokenStoreProvider);
                   final rt = await store.readRefreshToken();
@@ -707,8 +701,7 @@ if (ok) {
                   await ref.read(tokenStoreProvider).removeBiometricAccount(user!.email!);
                 }
               }
-    } catch (e) {
-      debugPrint('🔐 Biometric error: $e');
+    } catch (_) {
       await ref.read(biometricServiceProvider).setEnabled(false);
       if (mounted) setState(() => _biometricEnabled = false);
     }
