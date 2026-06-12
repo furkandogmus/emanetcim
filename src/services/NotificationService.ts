@@ -287,11 +287,11 @@ export class NotificationService implements INotificationService {
 
     const content = {
       tr: {
-        subject: "BagajPark: Ödemeniz Alındı! 🎒",
-        body: `Merhaba,\n\nÖdemeniz başarıyla alındı. Rezervasyonunuz onaylandı!\n\nReferans: ${shortId}\nToplam Tutar: ₺${priceFormatted}\n\nBiletinizi görmek için: ${bookingUrl}`,
+        subject: "BagajPark: Rezervasyonunuz Oluşturuldu! 🎒",
+        body: `Merhaba,\n\nRezervasyonunuz başarıyla oluşturuldu!\n\nReferans: ${shortId}\nToplam Tutar: ₺${priceFormatted}\n\nÜcreti dükkana gittiğinizde ödeyebilirsiniz.\n\nBiletinizi görmek için: ${bookingUrl}`,
         html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
-          <h2 style="color:#ea580c">Ödemeniz Alındı! 🎒</h2>
-          <p>Ödemeniz başarıyla alındı. Rezervasyonunuz onaylandı!</p>
+          <h2 style="color:#ea580c">Rezervasyonunuz Oluşturuldu! 🎒</h2>
+          <p>Rezervasyonunuz başarıyla oluşturuldu. Ücreti dükkana gittiğinizde ödeyebilirsiniz.</p>
           <table style="width:100%;border-collapse:collapse;margin:16px 0">
             <tr><td style="padding:8px;color:#6b7280">Referans</td><td style="padding:8px;font-weight:bold">${shortId}</td></tr>
             <tr style="background:#f9fafb"><td style="padding:8px;color:#6b7280">Toplam Tutar</td><td style="padding:8px;font-weight:bold">₺${priceFormatted}</td></tr>
@@ -301,11 +301,11 @@ export class NotificationService implements INotificationService {
         </div>`,
       },
       en: {
-        subject: "BagajPark: Payment Confirmed! 🎒",
-        body: `Hello,\n\nYour payment has been received and your booking is confirmed!\n\nReference: ${shortId}\nTotal: ₺${priceFormatted}\n\nView your ticket: ${bookingUrl}`,
+        subject: "BagajPark: Booking Confirmed! 🎒",
+        body: `Hello,\n\nYour booking has been created!\n\nReference: ${shortId}\nTotal: ₺${priceFormatted}\n\nYou can pay at the shop when you arrive.\n\nView your ticket: ${bookingUrl}`,
         html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
-          <h2 style="color:#ea580c">Payment Confirmed! 🎒</h2>
-          <p>Your payment has been received and your booking is confirmed!</p>
+          <h2 style="color:#ea580c">Booking Confirmed! 🎒</h2>
+          <p>Your booking has been created. You can pay at the shop when you arrive.</p>
           <table style="width:100%;border-collapse:collapse;margin:16px 0">
             <tr><td style="padding:8px;color:#6b7280">Reference</td><td style="padding:8px;font-weight:bold">${shortId}</td></tr>
             <tr style="background:#f9fafb"><td style="padding:8px;color:#6b7280">Total</td><td style="padding:8px;font-weight:bold">₺${priceFormatted}</td></tr>
@@ -315,7 +315,7 @@ export class NotificationService implements INotificationService {
         </div>`,
       },
     }[locale] ?? {
-      subject: "BagajPark: Ödemeniz Alındı! 🎒",
+      subject: "BagajPark: Rezervasyonunuz Oluşturuldu! 🎒",
       body: `Referans: ${shortId} — ₺${priceFormatted}. Bilet: ${bookingUrl}`,
       html: undefined as string | undefined,
     };

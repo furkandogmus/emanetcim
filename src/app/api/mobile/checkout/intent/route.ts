@@ -10,6 +10,7 @@ import { getPaymentGateway } from "@/lib/payment-gateway";
 import { isPaymentsEnabled } from "@/lib/feature-flags";
 import logger from "@/lib/logger";
 import prisma from "@/lib/db";
+import { notificationService } from "@/services/NotificationService";
 
 const schema = z.object({
   shopId: z.string().uuid(),
@@ -128,6 +129,17 @@ export async function POST(req: NextRequest) {
       { bookingId: booking.id, guestId: auth.user.id, amount: totals.subtotalBeforeCoupon },
       "mobile_checkout_payment_bypassed",
     );
+
+    // Booking confirmation email
+    const guestEmail = auth.user.email;
+    if (guestEmail) {
+      void notificationService.notifyBookingSuccess(
+        guestEmail,
+        booking.id,
+        totals.subtotalBeforeCoupon,
+      );
+    }
+
     return NextResponse.json({
       bookingId: booking.id,
       bypassed: true,
