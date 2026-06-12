@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import prisma from "@/lib/db";
 import bcrypt from "bcryptjs";
+import { PASSWORD_RESET_IDENTIFIER_PREFIX } from "@/lib/password-reset-token";
 
 export async function POST(req: NextRequest) {
   const { token, password } = await req.json();
@@ -14,11 +15,11 @@ export async function POST(req: NextRequest) {
     where: { token, expires: { gt: new Date() } },
   });
 
-  if (!vt || !vt.identifier.startsWith("reset:")) {
+  if (!vt || !vt.identifier.startsWith(PASSWORD_RESET_IDENTIFIER_PREFIX)) {
     return NextResponse.json({ error: "invalid_or_expired_token" }, { status: 400 });
   }
 
-  const email = vt.identifier.slice(6);
+  const email = vt.identifier.slice(PASSWORD_RESET_IDENTIFIER_PREFIX.length);
   const user = await prisma.user.findFirst({ where: { email } });
   if (!user) return NextResponse.json({ error: "user_not_found" }, { status: 404 });
 
