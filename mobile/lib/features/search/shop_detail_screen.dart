@@ -15,12 +15,8 @@ import '../../shared/widgets/skeleton.dart';
 
 final shopReviewsProvider = FutureProvider.family<List<Map<String, dynamic>>, String>((ref, id) async {
   final dio = ref.read(dioProvider);
-  try {
-    final res = await dio.get('/shops/$id/reviews');
-    return (res.data as List<dynamic>).map((e) => Map<String, dynamic>.from(e as Map)).toList();
-  } catch (_) {
-    return [];
-  }
+  final res = await dio.get('/shops/$id/reviews');
+  return (res.data as List<dynamic>).map((e) => Map<String, dynamic>.from(e as Map)).toList();
 });
 
 class ShopDetailScreen extends ConsumerStatefulWidget {
@@ -117,6 +113,13 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                             ? Image.network(
                                 s.imageUrl!,
                                 fit: BoxFit.cover,
+                                loadingBuilder: (_, child, progress) {
+                                  if (progress == null) return child;
+                                  return Container(
+                                    color: Colors.grey.shade100,
+                                    child: const Center(child: CircularProgressIndicator()),
+                                  );
+                                },
                                 errorBuilder: (_, __, ___) => _shopPlaceholder(s.name),
                               )
                             : _shopPlaceholder(s.name),

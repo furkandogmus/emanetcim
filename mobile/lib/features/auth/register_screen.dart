@@ -26,6 +26,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   bool _busy = false;
   bool _obscure = true;
 
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _identityController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   bool _isValidEmail(String email) {
     return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
@@ -104,9 +112,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         title: Text('auth.register'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final isTablet = constraints.maxWidth > 600;
+      body: Builder(
+        builder: (ctx) {
+          final isTablet = MediaQuery.sizeOf(ctx).width > 600;
           return Center(
             child: SingleChildScrollView(
               padding: EdgeInsets.all(isTablet ? 48 : 24),
@@ -189,7 +197,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           if (v == null || v.length < 6) return 'auth.password_error'.tr();
                           return null;
                         },
+                        onChanged: (_) => setState(() {}),
                       ),
+
+                      if (_passwordController.text.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        _buildPasswordStrength(),
+                      ],
 
                       const SizedBox(height: 24),
 
@@ -299,4 +313,68 @@ FilledButton(
       ),
     );
   }
+
+  Widget _buildPasswordStrength() {
+    final pw = _passwordController.text;
+    final strength = _getPasswordStrength(pw);
+    final color = strength.color;
+    final label = strength.label;
+    final percent = strength.percent;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              '${'profile.password_strength'.tr()}: $label',
+              style: GoogleFonts.outfit(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(
+            value: percent,
+            backgroundColor: Colors.grey.shade200,
+            valueColor: AlwaysStoppedAnimation<Color>(color),
+            minHeight: 4,
+          ),
+        ),
+      ],
+    );
+  }
+
+  _StrengthResult _getPasswordStrength(String password) {
+    int score = 0;
+
+    if (password.length >= 8) score++;
+    if (password.length >= 12) score++;
+    if (RegExp(r'[A-Z]').hasMatch(password)) score++;
+    if (RegExp(r'[a-z]').hasMatch(password)) score++;
+    if (RegExp(r'[0-9]').hasMatch(password)) score++;
+    if (RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)) score++;
+
+    if (score <= 1) {
+      return _StrengthResult('profile.strength_weak'.tr(), Colors.redAccent, 0.25);
+    } else if (score <= 2) {
+      return _StrengthResult('profile.strength_fair'.tr(), Colors.orange, 0.5);
+    } else if (score <= 4) {
+      return _StrengthResult('profile.strength_good'.tr(), Colors.lightGreen, 0.75);
+    } else {
+      return _StrengthResult('profile.strength_strong'.tr(), Colors.green, 1.0);
+    }
+  }
+}
+
+class _StrengthResult {
+  final String label;
+  final Color color;
+  final double percent;
+  const _StrengthResult(this.label, this.color, this.percent);
 }

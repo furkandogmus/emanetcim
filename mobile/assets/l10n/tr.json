@@ -140,7 +140,8 @@
     "book_now": "Şimdi Rezerve Et",
     "climate": "Klima Var",
     "large_items": "Büyük Eşya Kabul Ediyor",
-    "location_denied": "Konum izni reddedildi. Yakındaki dükkanları görmek için ayarlardan etkinleştirin."
+    "location_denied": "Konum izni reddedildi. Yakındaki dükkanları görmek için ayarlardan etkinleştirin.",
+    "location_disabled": "Lütfen cihazınızın konum servisini (GPS) etkinleştirin."
   },
   "notifications": {
     "title": "Bildirimler",
@@ -173,7 +174,11 @@
     "support_messages": "Destek Mesajları",
     "live_analytics": "Canlı İstatistikler",
     "new_shop_apps": "Yeni Dükkan Başvuruları",
-    "unread_messages": "Okunmamış Mesajlar"
+    "unread_messages": "Okunmamış Mesajlar",
+    "reject": "Reddet",
+    "approve": "Onayla",
+    "no_messages": "Henüz mesaj yok",
+    "charts_coming_soon": "Grafikler yakında burada olacak"
   },
   "checkout": {
     "title": "Rezervasyonu Tamamla",
@@ -196,6 +201,7 @@
     "secure_payment": "Güvenli 256-bit SSL Ödeme",
     "coupon_placeholder": "İndirim Kuponu (Opsiyonel)",
     "error_no_bags": "Lütfen en az bir valiz seçin.",
+    "estimated": "Tahmini tutar, ödeme anında kesinleşir",
     "error_shop_closed": "Dükkan bulunamadı veya kapalı.",
     "error_payment": "Bu dükkan şu an ödeme alamıyor.",
     "error_past_time": "Geçmiş bir zaman seçemezsiniz",
@@ -234,7 +240,7 @@
     "status": {
       "waiting_approval": "Onay Bekliyor",
       "approved": "Onaylandı",
-      "paid": "Ödendi",
+      "paid": "Rezerve Edildi",
       "checked_in": "Emanet Alındı",
       "checked_out": "Teslim Edildi",
       "cancelled": "İptal Edildi"
@@ -352,6 +358,18 @@
     "stats_savings": "Tasarruf",
     "stats_favorites": "Favori",
     "logout_confirm": "Hesabınızdan çıkış yapmak istediğinize emin misiniz?",
+    "theme": "Tema",
+    "auto": "Sistem",
+    "dark_mode": "Karanlık Mod",
+    "light_mode": "Aydınlık Mod",
+    "password_strength": "Şifre Gücü",
+    "strength_weak": "Zayıf",
+    "strength_fair": "Orta",
+    "strength_good": "İyi",
+    "strength_strong": "Güçlü",
+    "biometric": "Biyometrik Giriş",
+    "biometric_desc": "Face ID / Parmak İzi ile hızlı giriş yapın",
+    "biometric_reason": "Hızlı giriş için kimliğinizi doğrulayın",
     "privacy_content": "BagajPark olarak gizliliğinize önem veriyoruz. Bu metin, verilerinizin nasıl toplandığını ve kullanıldığını açıklar.\n\n1. Toplanan Veriler\nHizmetimizi sunabilmek için adınız, e-posta adresiniz, telefon numaranız ve konum bilginiz gibi temel bilgileri topluyoruz.\n\n2. Verilerin Kullanımı\nVerileriniz sadece rezervasyon işlemlerini gerçekleştirmek, güvenliği sağlamak ve size bildirim göndermek amacıyla kullanılır.\n\n3. Üçüncü Taraflar\nVerileriniz yasal zorunluluklar dışında üçüncü taraflarla paylaşılmaz. Ödeme işlemleri güvenli aracı kurumlar üzerinden yürütülür.",
     "terms_content": "BagajPark Kullanım Koşulları\n\n1. Hizmet Tanımı\nBagajPark, eşyalarınızı güvenli noktalarda (esnaflarda) geçici olarak saklamanıza olanak sağlayan bir platformdur.\n\n2. Sorumluluklar\n- Esnaf, kendisine teslim edilen eşyayı güvenli bir şekilde saklamakla yükümlüdür.\n- Kullanıcı, yasaklı madde (yanıcı, patlayıcı, yasa dışı vb.) teslim etmemeyi taahhüt eder.\n\n3. İptal ve İade\nRezervasyon saatinden önce yapılan iptallerde tam iade yapılır. Süre başladıktan sonra iade yapılmaz."
   },
@@ -389,6 +407,8 @@
   },
   "common": {
     "error": "Bir hata oluştu",
+    "time_minutes": "{} dk önce",
+    "time_hours": "{} sa önce",
     "loading": "Yükleniyor...",
     "confirm": "Onayla",
     "cancel": "İptal",
@@ -448,5 +468,16 @@
     "shop_message": "BagajPark ile valizlerimi güvenle {} dükkanına emanet ettim ({}). Sen de şehri özgürce gezmek için uygulamayı kullanabilirsin: {}",
     "shop_subject": "{} Emanet Noktası",
     "app_message": "Valizlerle gezmeye son! BagajPark ile sana en yakın dükkana valizlerini güvenle bırakabilirsin. Hemen indir: {}"
+  },
+  "security": {
+    "warning_title": "Güvenlik Uyarısı",
+    "warning_desc": "Cihazınızda root/jailbreak tespit edildi. Bu durum ödeme işlemlerinizi ve verilerinizin güvenliğini tehlikeye atabilir.",
+    "accept_risk": "Riskleri Anladım, Devam Et",
+    "exit_app": "Uygulamadan Çık"
+  },
+  "fatal_error": {
+    "title": "Bir Şeyler Ters Gitti",
+    "desc": "Beklenmedik bir hata oluştu. Ekibimiz bilgilendirildi. Lütfen uygulamayı kapatıp tekrar açmayı deneyin.",
+    "refresh": "Yenile"
   }
 }

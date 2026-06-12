@@ -9,7 +9,7 @@ appId: com.bagajpark
     text: "Riskleri Anladım, Devam Et"
     optional: true
 
-- tapOn: "Atla"
+- tapOn: "Atla|Skip|auth.skip"
 
 # Login ekranı
 - assertVisible: "Hoş Geldiniz"
@@ -20,6 +20,7 @@ appId: com.bagajpark
 # === HAPPY PATH: Guest giriş ===
 - tapOn: "E-posta veya Telefon"
 - inputText: "maestro-guest@bagajpark.com"
+- pressKey: Back
 - tapOn: "Şifre"
 - inputText: "Test123!"
 - pressKey: Back
@@ -34,13 +35,13 @@ appId: com.bagajpark
 - takeScreenshot: "login-success"
 
 # === ÇIKIŞ YAP ===
-- tapOn: "Profil"
-- swipe:
-    direction: UP
-    duration: 500
+- tapOn: {point: "90%, 92%"}
+- scrollUntilVisible:
+    element: "Çıkış Yap"
+    direction: DOWN
 - tapOn: "Çıkış Yap"
 - assertVisible: "Hesabınızdan çıkış yapmak istediğinize emin misiniz?"
-- tapOn: "Evet"
+- tapOn: "Çıkış Yap"
 - assertVisible: "Hoş Geldiniz"
 
 # === ERROR: Boş form ===
@@ -48,8 +49,9 @@ appId: com.bagajpark
 - assertVisible: "Geçersiz e-posta veya telefon numarası"
 
 # === ERROR: Geçersiz email ===
-- tapOn: "E-posta veya Telefon"
+- tapOn: /Geçersiz e-posta veya telefon numarası|E-posta veya Telefon/
 - inputText: "gecersiz-email"
+- pressKey: Back
 - tapOn: "Şifre"
 - inputText: "Test123!"
 - pressKey: Back

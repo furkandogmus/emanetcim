@@ -23,6 +23,7 @@ appId: com.bagajpark
 - waitForAnimationToEnd:
     timeout: 5000
 
+# Konumu Kadıköy'e ayarla (adb emu geo fix 29.0255 40.9862 ile ayarlanmalı)
 # Ara sekmesi
 - tapOn: "Ara"
 - waitForAnimationToEnd:
@@ -43,6 +44,9 @@ appId: com.bagajpark
 - takeScreenshot: "search-filtered"
 
 # === DÜKKAN DETAYI ===
+- extendedWaitUntil:
+    visible: "Maestro"
+    timeout: 10000
 - tapOn: "Maestro Test Dükkanı"
 - assertVisible: "Yol Tarifi"
 - assertVisible: "Dükkan Hakkında"

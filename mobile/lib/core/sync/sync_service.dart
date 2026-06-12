@@ -137,6 +137,16 @@ class SyncService {
       }
     } finally {
       _isSyncing = false;
+      if (_box.values.any((v) {
+        final a = SyncAction.fromJson(v as Map<String, dynamic>);
+        return a.userId == currentUser.id;
+      })) {
+        Future.delayed(const Duration(seconds: 30), () {
+          if (_ref.read(authControllerProvider).session != null) {
+            unawaited(sync());
+          }
+        });
+      }
     }
   }
 }

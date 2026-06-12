@@ -38,6 +38,22 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
     _fetchShop();
   }
 
+  @override
+  void dispose() {
+    try {
+      _name.dispose();
+      _capacity.dispose();
+      _price.dispose();
+      _opening.dispose();
+      _closing.dispose();
+      _address.dispose();
+      _city.dispose();
+      _district.dispose();
+      _phone.dispose();
+    } catch (_) {}
+    super.dispose();
+  }
+
   Future<void> _fetchShop() async {
     try {
       final dio = ref.read(dioProvider);

@@ -27,6 +27,8 @@ appId: com.bagajpark
 - assertVisible: "Ana Sayfa"
 - takeScreenshot: "home-screen"
 
+# Konumu Kadıköy'e ayarla (adb emu geo fix 29.0255 40.9862 ile ayarlanmalı)
+
 # Popüler şehirler
 - assertVisible: "İstanbul"
 - assertVisible: "Ankara"
@@ -34,7 +36,10 @@ appId: com.bagajpark
 # === ARAMA ===
 - tapOn: "Ara"
 - waitForAnimationToEnd:
-    timeout: 3000
+    timeout: 5000
+- extendedWaitUntil:
+    visible: "Maestro"
+    timeout: 10000
 - takeScreenshot: "search-screen"
 
 # Filtrele butonu

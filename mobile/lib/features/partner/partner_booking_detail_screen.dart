@@ -12,6 +12,7 @@ import '../../core/sync/sync_service.dart';
 import '../../shared/models/booking.dart';
 import '../../shared/utils/app_colors.dart';
 import '../booking/booking_detail_screen.dart';
+import '../../shared/utils/booking_helpers.dart';
 
 class PartnerBookingDetailScreen extends ConsumerStatefulWidget {
   const PartnerBookingDetailScreen({required this.bookingId, super.key});
@@ -31,6 +32,10 @@ class _PartnerBookingDetailScreenState
   void initState() {
     super.initState();
     _pollingTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
       final current = ref.read(bookingProvider(widget.bookingId));
       final status = current.asData?.value.status;
       final isTerminal = status == BookingStatus.checkedOut ||
@@ -233,7 +238,7 @@ class _PartnerBookingDetailScreenState
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('common.error'.tr())),
         data: (b) {
-          final statusColor = _statusColor(b.status);
+          final statusColor = bookingStatusColor(b.status);
 
           return ListView(
             padding: const EdgeInsets.all(20),
@@ -289,7 +294,7 @@ class _PartnerBookingDetailScreenState
                         borderRadius: BorderRadius.circular(100),
                       ),
                       child: Text(
-                        _statusLabel(b.status),
+                        bookingStatusLabel(b.status),
                         style: GoogleFonts.outfit(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
@@ -358,31 +363,37 @@ class _PartnerBookingDetailScreenState
                 Row(
                   children: [
                     Expanded(
-                      child: FilledButton.icon(
-                        onPressed: _busy ? null : () => _approveBooking(b),
-                        icon: _busy
-                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                            : const Icon(Icons.check_circle_rounded),
-                        label: Text('partner.approve'.tr()),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      child: Semantics(
+                        label: 'Onayla',
+                        child: FilledButton.icon(
+                          onPressed: _busy ? null : () => _approveBooking(b),
+                          icon: _busy
+                              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                              : const Icon(Icons.check_circle_rounded),
+                          label: Text('partner.approve'.tr()),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          ),
                         ),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: FilledButton.icon(
-                        onPressed: _busy ? null : () => _rejectBooking(b),
-                        icon: _busy
-                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                            : const Icon(Icons.cancel_rounded),
-                        label: Text('partner.reject'.tr()),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: Colors.redAccent,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      child: Semantics(
+                        label: 'Reddet',
+                        child: FilledButton.icon(
+                          onPressed: _busy ? null : () => _rejectBooking(b),
+                          icon: _busy
+                              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                              : const Icon(Icons.cancel_rounded),
+                          label: Text('partner.reject'.tr()),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Colors.redAccent,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          ),
                         ),
                       ),
                     ),
@@ -397,23 +408,26 @@ class _PartnerBookingDetailScreenState
                 SizedBox(
                   width: double.infinity,
                   height: 56,
-                  child: FilledButton.icon(
-                    onPressed: _busy ? null : () => _checkIn(b),
-                    icon: _busy
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : const Icon(Icons.check_circle_rounded),
-                    label: Text('partner.check_in_button'.tr()),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFF10B981),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                  child: Semantics(
+                    label: 'Valizleri Teslim Al',
+                    child: FilledButton.icon(
+                      onPressed: _busy ? null : () => _checkIn(b),
+                      icon: _busy
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Icon(Icons.check_circle_rounded),
+                      label: Text('partner.check_in_button'.tr()),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF10B981),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                       ),
                     ),
                   ),
@@ -424,23 +438,26 @@ class _PartnerBookingDetailScreenState
                 SizedBox(
                   width: double.infinity,
                   height: 56,
-                  child: FilledButton.icon(
-                    onPressed: _busy ? null : () => _checkOut(b),
-                    icon: _busy
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : const Icon(Icons.exit_to_app_rounded),
-                    label: Text('partner.check_out_button'.tr()),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFF3B82F6),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                  child: Semantics(
+                    label: 'Valizleri Teslim Et',
+                    child: FilledButton.icon(
+                      onPressed: _busy ? null : () => _checkOut(b),
+                      icon: _busy
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Icon(Icons.exit_to_app_rounded),
+label: Text('partner.check_out_button'.tr()),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF3B82F6),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                       ),
                     ),
                   ),
@@ -537,52 +554,6 @@ class _PartnerBookingDetailScreenState
         ),
       ],
     );
-  }
-
-  String _statusLabel(BookingStatus status) {
-    var key = 'waiting_approval';
-    switch (status) {
-      case BookingStatus.pending:
-        key = 'pending';
-        break;
-      case BookingStatus.paid:
-        key = 'paid';
-        break;
-      case BookingStatus.approved:
-        key = 'approved';
-        break;
-      case BookingStatus.checkedIn:
-        key = 'checked_in';
-        break;
-      case BookingStatus.checkedOut:
-        key = 'checked_out';
-        break;
-      case BookingStatus.cancelled:
-        key = 'cancelled';
-        break;
-      case BookingStatus.waitingApproval:
-        key = 'waiting_approval';
-        break;
-    }
-    return 'booking.status.$key'.tr();
-  }
-
-  Color _statusColor(BookingStatus status) {
-    switch (status) {
-      case BookingStatus.paid:
-      case BookingStatus.approved:
-        return Colors.green;
-      case BookingStatus.checkedIn:
-        return Colors.blue;
-      case BookingStatus.cancelled:
-        return Colors.redAccent;
-      case BookingStatus.checkedOut:
-        return Colors.grey;
-      case BookingStatus.waitingApproval:
-        return Colors.orange;
-      default:
-        return Colors.orange;
-    }
   }
 }
 

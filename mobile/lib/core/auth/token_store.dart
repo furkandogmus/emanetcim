@@ -12,6 +12,7 @@ final tokenStoreProvider = Provider<TokenStore>((ref) => TokenStore());
 class TokenStore {
   static const _access = 'access_token';
   static const _refresh = 'refresh_token';
+  static const _biometricSessions = 'biometric_accounts';
   static const _hiveKey = 'hive_encryption_key';
 
   final _storage = const FlutterSecureStorage();
@@ -40,6 +41,32 @@ class TokenStore {
     await _storage.delete(key: _refresh);
   }
 
+  Future<void> saveBiometricAccount(String email, String refreshToken) async {
+    final accounts = await getBiometricAccounts();
+    accounts.removeWhere((a) => a['email'] == email);
+    accounts.add({'email': email, 'refreshToken': refreshToken});
+    // Keep max 5 accounts
+    if (accounts.length > 5) accounts.removeAt(0);
+    await _storage.write(key: _biometricSessions, value: jsonEncode(accounts));
+  }
+
+  Future<void> removeBiometricAccount(String email) async {
+    final accounts = await getBiometricAccounts();
+    accounts.removeWhere((a) => a['email'] == email);
+    await _storage.write(key: _biometricSessions, value: jsonEncode(accounts));
+  }
+
+  Future<List<Map<String, String>>> getBiometricAccounts() async {
+    final data = await _storage.read(key: _biometricSessions);
+    if (data == null) return [];
+    try {
+      final list = jsonDecode(data) as List<dynamic>;
+      return list.map((e) => Map<String, String>.from(e as Map)).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
   Future<bool> refresh(Dio dio) async {
     if (_refreshCompleter != null && !_refreshCompleter!.isCompleted) {
       return _refreshCompleter!.future;
@@ -52,7 +79,12 @@ class TokenStore {
         return false;
       }
       final res = await Dio(
-        BaseOptions(baseUrl: Env.apiBaseUrl),
+        BaseOptions(
+          baseUrl: Env.apiBaseUrl,
+          connectTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 20),
+          contentType: 'application/json',
+        ),
       ).post('/auth/refresh', data: {'refreshToken': rt});
       await save(
         access: res.data['accessToken'] as String,

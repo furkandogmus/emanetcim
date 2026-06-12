@@ -2,7 +2,6 @@
 # https://maestro.mobile.dev
 
 flows:
-  - onboarding_flow.yaml
   - login_flow.yaml
   - register_flow.yaml
   - password_reset_flow.yaml

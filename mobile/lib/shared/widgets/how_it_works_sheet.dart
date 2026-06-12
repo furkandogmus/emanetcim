@@ -18,6 +18,12 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
   int _currentPage = 0;
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isGuest = widget.mode == HowItWorksMode.guest;
     final prefix = isGuest ? 'tutorial.guest' : 'tutorial.partner';

@@ -6,6 +6,8 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>Bagaj teslimatı sırasında QR kodlarını ve mühürleri hızlıca tarayabilmeniz için kamera erişimine ihtiyaç duyuyoruz.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Hızlı ve güvenli giriş yapabilmeniz için Face ID kullanımına ihtiyaç duyuyoruz.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Size en yakın güvenli emanet noktalarını harita üzerinde gösterebilmek ve rota oluşturabilmek için konumunuza ihtiyaç duyuyoruz.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>

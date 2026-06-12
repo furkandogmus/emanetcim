@@ -10,13 +10,22 @@ import '../../core/services/analytics_service.dart';
 import '../../shared/utils/app_colors.dart';
 import '../../shared/widgets/how_it_works_sheet.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Analytics
-    ref.read(analyticsServiceProvider).logScreenView('Home');
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  bool _didLogScreen = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_didLogScreen) {
+      _didLogScreen = true;
+      ref.read(analyticsServiceProvider).logScreenView('Home');
+    }
 
     final user = ref.watch(authControllerProvider).session;
 

@@ -43,6 +43,7 @@ class _AdminApplicationsScreenState
           ),
         );
       }
+      if (!mounted) return;
       setState(() {
         _apps = [];
         _loading = false;
@@ -179,7 +180,7 @@ class _AdminApplicationsScreenState
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  child: const Text('Reddet'),
+                  child: Text('admin.reject'.tr()),
                 ),
               ),
               const SizedBox(width: 12),
@@ -193,7 +194,7 @@ class _AdminApplicationsScreenState
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  child: const Text('Onayla'),
+                  child: Text('admin.approve'.tr()),
                 ),
               ),
             ],

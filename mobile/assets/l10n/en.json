@@ -140,7 +140,8 @@
     "book_now": "Book Now",
     "climate": "Climate Control",
     "large_items": "Accepts Large Items",
-    "location_denied": "Location access denied. Please enable in app settings to see nearby shops."
+    "location_denied": "Location access denied. Please enable in app settings to see nearby shops.",
+    "location_disabled": "Please enable location services (GPS) on your device."
   },
   "notifications": {
     "title": "Notifications",
@@ -173,7 +174,11 @@
     "support_messages": "Support Messages",
     "live_analytics": "Live Analytics",
     "new_shop_apps": "New Shop Applications",
-    "unread_messages": "Unread Messages"
+    "unread_messages": "Unread Messages",
+    "reject": "Reject",
+    "approve": "Approve",
+    "no_messages": "No messages yet",
+    "charts_coming_soon": "Charts coming soon"
   },
   "checkout": {
     "title": "Complete Booking",
@@ -196,6 +201,7 @@
     "secure_payment": "Secure 256-bit SSL Payment",
     "coupon_placeholder": "Coupon Code (Optional)",
     "error_no_bags": "Please select at least one bag.",
+    "estimated": "Estimated total, confirmed at payment",
     "error_shop_closed": "Shop not found or closed.",
     "error_payment": "This shop cannot accept payments right now.",
     "error_past_time": "You cannot select a past time",
@@ -234,7 +240,7 @@
     "status": {
       "waiting_approval": "Waiting Approval",
       "approved": "Approved",
-      "paid": "Paid",
+      "paid": "Reserved",
       "checked_in": "Checked In",
       "checked_out": "Checked Out",
       "cancelled": "Cancelled"
@@ -352,6 +358,18 @@
     "stats_savings": "Savings",
     "stats_favorites": "Favorites",
     "logout_confirm": "Are you sure you want to log out of your account?",
+    "theme": "Theme",
+    "auto": "System",
+    "dark_mode": "Dark Mode",
+    "light_mode": "Light Mode",
+    "password_strength": "Password Strength",
+    "strength_weak": "Weak",
+    "strength_fair": "Fair",
+    "strength_good": "Good",
+    "strength_strong": "Strong",
+    "biometric": "Biometric Login",
+    "biometric_desc": "Quick login with Face ID / Fingerprint",
+    "biometric_reason": "Verify your identity for quick login",
     "privacy_content": "At BagajPark, we value your privacy. This text explains how your data is collected and used.\n\n1. Collected Data\nTo provide our services, we collect basic information such as your name, email address, phone number, and location information.\n\n2. Use of Data\nYour data is used only for processing bookings, ensuring security, and sending you notifications.\n\n3. Third Parties\nYour data is not shared with third parties except for legal obligations. Payment transactions are carried out through secure intermediary institutions.",
     "terms_content": "BagajPark Terms of Service\n\n1. Service Description\nBagajPark is a platform that allows you to temporarily store your belongings at secure points (shops).\n\n2. Responsibilities\n- The shop owner is obliged to store the delivered belongings securely.\n- The user undertakes not to deliver prohibited substances (flammable, explosive, illegal, etc.).\n- The user is responsible for picking up their luggage on time.\n\n3. Cancellation and Refund\nFull refund is made for cancellations made before the booking time. No refund is made after the period has started."
   },
@@ -389,6 +407,8 @@
   },
   "common": {
     "error": "An error occurred",
+    "time_minutes": "{} min ago",
+    "time_hours": "{} hr ago",
     "loading": "Loading...",
     "confirm": "Confirm",
     "cancel": "Cancel",
@@ -448,5 +468,16 @@
     "shop_message": "I safely left my bags at {} with BagajPark ({}). You can also use the app to explore the city freely: {}",
     "shop_subject": "{} Storage Point",
     "app_message": "Stop traveling with bags! With BagajPark, you can safely leave your bags at the nearest shop. Download now: {}"
+  },
+  "security": {
+    "warning_title": "Security Warning",
+    "warning_desc": "Root/jailbreak detected on your device. This may compromise payment transactions and data security.",
+    "accept_risk": "I Understand, Continue",
+    "exit_app": "Exit App"
+  },
+  "fatal_error": {
+    "title": "Something Went Wrong",
+    "desc": "An unexpected error occurred. Our team has been notified. Please close and reopen the app.",
+    "refresh": "Refresh"
   }
 }

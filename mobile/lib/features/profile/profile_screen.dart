@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:http_parser/http_parser.dart';
 
 import '../../core/auth/auth_controller.dart';
 import '../../core/services/haptic_service.dart';
@@ -14,6 +15,10 @@ import '../../core/services/share_service.dart';
 import '../../shared/models/user.dart';
 import '../../shared/utils/app_colors.dart';
 import '../../core/api/api_client.dart';
+import '../../core/config/theme_mode_provider.dart';
+import '../../core/auth/biometric_service.dart';
+import '../../core/auth/token_store.dart';
+import '../../core/push/notification_prefs.dart';
 
 final profileStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
   final dio = ref.read(dioProvider);
@@ -30,6 +35,31 @@ class ProfileScreen extends ConsumerStatefulWidget {
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _uploading = false;
+  bool _biometricAvailable = false;
+  bool _biometricEnabled = false;
+  bool _biometricLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBiometric();
+  }
+
+  Future<void> _loadBiometric() async {
+    final biometric = ref.read(biometricServiceProvider);
+    debugPrint('🔐 Biometric: checking isAvailable...');
+    final available = await biometric.isAvailable;
+    debugPrint('🔐 Biometric: isAvailable=$available');
+    final enabled = await biometric.isEnabled;
+    debugPrint('🔐 Biometric: isEnabled=$enabled');
+    if (mounted) {
+      setState(() {
+        _biometricAvailable = available;
+        _biometricEnabled = enabled;
+        _biometricLoaded = true;
+      });
+    }
+  }
 
   Future<void> _pickAndUploadAvatar() async {
     if (_uploading) return;
@@ -45,8 +75,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     setState(() => _uploading = true);
     try {
       final dio = ref.read(dioProvider);
+      final ext = image.name.split('.').last.toLowerCase();
+      String mimeType = 'image/jpeg';
+      if (ext == 'png') {
+        mimeType = 'image/png';
+      } else if (ext == 'webp') {
+        mimeType = 'image/webp';
+      }
+
       final formData = FormData.fromMap({
-        'avatar': await MultipartFile.fromFile(image.path, filename: image.name),
+        'avatar': await MultipartFile.fromFile(
+          image.path,
+          filename: image.name,
+          contentType: MediaType.parse(mimeType),
+        ),
       });
       final res = await dio.put('/auth/me', data: formData);
       final newAvatarUrl = res.data['avatarUrl'] as String?;
@@ -247,12 +289,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           _menuItem(
             Icons.notifications_none_rounded,
             'profile.notifications'.tr(),
-            onTap: () => _showInfo(
-              context,
-              'profile.notifications'.tr(),
-              'profile.notifications_empty'.tr(),
-            ),
+            onTap: () => _showNotificationPrefs(context),
           ),
+          const SizedBox(height: 8),
+          _themeToggle(context),
+          const SizedBox(height: 8),
+          _biometricToggle(context),
 
           const SizedBox(height: 32),
 
@@ -504,6 +546,231 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           HapticFeedback.lightImpact();
           onTap();
         },
+      ),
+    );
+  }
+
+  Widget _themeToggle(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        tileColor: Colors.white,
+        leading: Icon(
+          ref.watch(themeModeProvider) == ThemeMode.dark
+              ? Icons.dark_mode_rounded
+              : Icons.light_mode_rounded,
+          color: AppColors.textDark,
+          size: 22,
+        ),
+        title: Text(
+          'profile.theme'.tr(),
+          style: GoogleFonts.outfit(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: AppColors.textDark,
+          ),
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        onTap: () {
+          HapticFeedback.lightImpact();
+          _showThemePicker(context);
+        },
+      ),
+    );
+  }
+
+  void _showThemePicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'profile.theme'.tr(),
+                style: GoogleFonts.outfit(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 24),
+              ListTile(
+                leading: const Icon(Icons.phone_android_rounded),
+                title: Text('profile.auto'.tr()),
+                trailing: ref.watch(themeModeProvider) == ThemeMode.system
+                    ? const Icon(Icons.check, color: AppColors.brandOrange)
+                    : null,
+                onTap: () {
+                  ref.read(themeModeProvider.notifier).setMode(ThemeMode.system);
+                  Navigator.pop(ctx);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.light_mode_rounded),
+                title: Text('profile.light_mode'.tr()),
+                trailing: ref.watch(themeModeProvider) == ThemeMode.light
+                    ? const Icon(Icons.check, color: AppColors.brandOrange)
+                    : null,
+                onTap: () {
+                  ref.read(themeModeProvider.notifier).setMode(ThemeMode.light);
+                  Navigator.pop(ctx);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.dark_mode_rounded),
+                title: Text('profile.dark_mode'.tr()),
+                trailing: ref.watch(themeModeProvider) == ThemeMode.dark
+                    ? const Icon(Icons.check, color: AppColors.brandOrange)
+                    : null,
+                onTap: () {
+                  ref.read(themeModeProvider.notifier).setMode(ThemeMode.dark);
+                  Navigator.pop(ctx);
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _biometricToggle(BuildContext context) {
+    if (!_biometricLoaded || !_biometricAvailable) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        tileColor: Colors.white,
+        leading: const Icon(
+          Icons.fingerprint_rounded,
+          color: AppColors.textDark,
+          size: 22,
+        ),
+        title: Text(
+          'profile.biometric'.tr(),
+          style: GoogleFonts.outfit(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: AppColors.textDark,
+          ),
+        ),
+        subtitle: Text(
+          'profile.biometric_desc'.tr(),
+          style: GoogleFonts.outfit(
+            fontSize: 12,
+            color: const Color(0xFF616161),
+          ),
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        onTap: () => _handleBiometricToggle(!_biometricEnabled),
+        trailing: Switch(
+          value: _biometricEnabled,
+          activeColor: AppColors.brandOrange,
+          onChanged: _handleBiometricToggle,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleBiometricToggle(bool val) async {
+    debugPrint('🔐 Biometric toggle: val=$val');
+    setState(() => _biometricEnabled = val);
+    try {
+      if (val) {
+        debugPrint('🔐 Biometric: calling authenticate...');
+        final ok = await ref.read(biometricServiceProvider).authenticate(
+          reason: 'profile.biometric_reason'.tr(),
+        );
+        debugPrint('🔐 Biometric: authenticate result=$ok');
+if (ok) {
+                  await ref.read(biometricServiceProvider).setEnabled(true);
+                  final store = ref.read(tokenStoreProvider);
+                  final rt = await store.readRefreshToken();
+                  final user = ref.read(authControllerProvider).session;
+                  if (rt != null && user?.email != null) {
+                    await store.saveBiometricAccount(user!.email!, rt);
+                  }
+                } else {
+          await ref.read(biometricServiceProvider).setEnabled(false);
+          if (mounted) setState(() => _biometricEnabled = false);
+        }
+} else {
+                await ref.read(biometricServiceProvider).setEnabled(false);
+                final user = ref.read(authControllerProvider).session;
+                if (user?.email != null) {
+                  await ref.read(tokenStoreProvider).removeBiometricAccount(user!.email!);
+                }
+              }
+    } catch (e) {
+      debugPrint('🔐 Biometric error: $e');
+      await ref.read(biometricServiceProvider).setEnabled(false);
+      if (mounted) setState(() => _biometricEnabled = false);
+    }
+  }
+
+  void _showNotificationPrefs(BuildContext context) {
+    final prefs = ref.read(notificationPrefsProvider);
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'profile.notifications'.tr(),
+                style: GoogleFonts.outfit(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 24),
+              SwitchListTile(
+                title: Text('Rezervasyon Güncellemeleri'),
+                subtitle: Text(
+                  'Onay, check-in, check-out ve QR kod bildirimleri',
+                  style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),
+                ),
+                value: prefs.bookingUpdates,
+                activeColor: AppColors.brandOrange,
+                onChanged: (v) => ref.read(notificationPrefsProvider.notifier).setBookingUpdates(v),
+              ),
+              const Divider(),
+              SwitchListTile(
+                title: Text('Kampanya & İndirim'),
+                subtitle: Text(
+                  'Özel indirimler, kampanya duyuruları ve promosyon kodları',
+                  style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),
+                ),
+                value: prefs.promotions,
+                activeColor: AppColors.brandOrange,
+                onChanged: (v) => ref.read(notificationPrefsProvider.notifier).setPromotions(v),
+              ),
+              const Divider(),
+              SwitchListTile(
+                title: Text('Esnaf Uyarıları'),
+                subtitle: Text(
+                  'Yeni rezervasyon, mesaj ve acil durum bildirimleri',
+                  style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),
+                ),
+                value: prefs.partnerAlerts,
+                activeColor: AppColors.brandOrange,
+                onChanged: (v) => ref.read(notificationPrefsProvider.notifier).setPartnerAlerts(v),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
       ),
     );
   }

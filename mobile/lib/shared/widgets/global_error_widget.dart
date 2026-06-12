@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -28,7 +29,7 @@ class GlobalErrorWidget extends StatelessWidget {
             ),
             const SizedBox(height: 32),
             Text(
-              'Bir Şeyler Ters Gitti',
+              'fatal_error.title'.tr(),
               style: GoogleFonts.outfit(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -37,26 +38,12 @@ class GlobalErrorWidget extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Beklenmedik bir hata oluştu. Ekibimiz bilgilendirildi. Lütfen uygulamayı kapatıp tekrar açmayı deneyin.',
+              'fatal_error.desc'.tr(),
               textAlign: TextAlign.center,
               style: GoogleFonts.outfit(
                 fontSize: 15,
                 color: const Color(0xFF424242),
                 height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 48),
-            FilledButton.icon(
-              onPressed: () {
-                // In a real app, we might restart or just go back
-              },
-              icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Yenile'),
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF0F172A),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
               ),
             ),
           ],

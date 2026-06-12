@@ -40,8 +40,8 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
             content: Text(getErrorMessage(e, fallback: 'admin.messages_load_error'.tr())),
           ),
         );
-        setState(() => _loading = false);
       }
+      setState(() => _loading = false);
     }
   }
 
@@ -86,7 +86,7 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Henüz mesaj yok',
+                    'admin.no_messages'.tr(),
                     style: GoogleFonts.outfit(
                       color: const Color(0xFF616161),
                       fontSize: 16,

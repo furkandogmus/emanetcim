@@ -5,6 +5,7 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 import '../auth/token_store.dart';
 import '../config/env.dart';
+import 'ssl_pinning.dart';
 
 final dioProvider = Provider<Dio>((ref) {
   final store = ref.watch(tokenStoreProvider);
@@ -108,7 +109,8 @@ final dioProvider = Provider<Dio>((ref) {
           }
 
           final token = await store.readAccessToken();
-          final tokenHash = token != null ? token.substring(token.length - 8) : '';
+          if (token == null) return handler.next(options);
+          final tokenHash = token.substring(token.length - 8);
           final key = '$tokenHash:${options.uri.toString()}';
           if (cache.containsKey(key)) {
             final entry = cache[key]!;
@@ -124,7 +126,8 @@ final dioProvider = Provider<Dio>((ref) {
       onResponse: (response, handler) async {
         if (response.requestOptions.method == 'GET') {
           final token = await store.readAccessToken();
-          final tokenHash = token != null ? token.substring(token.length - 8) : '';
+          if (token == null) return handler.next(response);
+          final tokenHash = token.substring(token.length - 8);
           final key = '$tokenHash:${response.requestOptions.uri.toString()}';
 
           if (cache.length >= maxCacheSize) {
@@ -148,6 +151,8 @@ final dioProvider = Provider<Dio>((ref) {
       PrettyDioLogger(requestBody: true, responseBody: false),
     );
   }
+
+  SslPinning.apply(dio);
 
   return dio;
 });

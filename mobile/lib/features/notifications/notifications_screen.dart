@@ -221,8 +221,8 @@ class NotificationsScreen extends ConsumerWidget {
   String _formatTime(DateTime date) {
     final now = DateTime.now();
     final diff = now.difference(date);
-    if (diff.inMinutes < 60) return '${diff.inMinutes} dk önce';
-    if (diff.inHours < 24) return '${diff.inHours} sa önce';
+    if (diff.inMinutes < 60) return 'common.time_minutes'.tr(args: [diff.inMinutes.toString()]);
+    if (diff.inHours < 24) return 'common.time_hours'.tr(args: [diff.inHours.toString()]);
     return DateFormat('dd MMM, HH:mm').format(date);
   }
 }

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -25,7 +26,7 @@ class RootWarningScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 32),
                 Text(
-                  'Güvenlik Uyarısı',
+                  'security.warning_title'.tr(),
                   style: GoogleFonts.outfit(
                     color: Colors.white,
                     fontSize: 24,
@@ -34,7 +35,7 @@ class RootWarningScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Cihazınızda root/jailbreak tespit edildi. Bu durum ödeme işlemlerinizi ve verilerinizin güvenliğini tehlikeye atabilir.',
+                  'security.warning_desc'.tr(),
                   textAlign: TextAlign.center,
                   style: GoogleFonts.outfit(
                     color: Colors.white70,
@@ -53,7 +54,7 @@ class RootWarningScreen extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    'Riskleri Anladım, Devam Et',
+                    'security.accept_risk'.tr(),
                     style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -61,7 +62,7 @@ class RootWarningScreen extends StatelessWidget {
                 TextButton(
                   onPressed: () => Navigator.pop(context),
                   child: Text(
-                    'Uygulamadan Çık',
+                    'security.exit_app'.tr(),
                     style: GoogleFonts.outfit(color: Colors.white38),
                   ),
                 ),

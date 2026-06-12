@@ -9,6 +9,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../../app/router.dart';
 import '../api/api_client.dart';
 import '../config/env.dart';
+import 'notification_prefs.dart';
 
 final pushServiceProvider = Provider<PushService>(PushService.new);
 
@@ -98,14 +99,23 @@ class PushService {
             'platform': Platform.isIOS ? 'ios' : 'android',
             'appVersion': '${info.version}+${info.buildNumber}',
           });
-    } on DioException {
-      // Silently ignore — user may not be logged in yet
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) return;
+      // Retry on next token refresh
     }
   }
 
   Future<void> _onForeground(RemoteMessage msg) async {
     final n = msg.notification;
     if (n == null) return;
+
+    final prefs = ref.read(notificationPrefsProvider);
+    final type = msg.data['type'] as String?;
+
+    if (type == 'partner_booking' && !prefs.partnerAlerts) return;
+    if (type == 'booking' && !prefs.bookingUpdates) return;
+    if ((type == null || type == 'promo') && !prefs.promotions) return;
+
     final data = msg.data.isNotEmpty ? msg.data.toString() : null;
     await _local.show(
       id: msg.messageId.hashCode,

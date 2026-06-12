@@ -17,6 +17,8 @@ class SearchMap extends StatelessWidget {
     required this.center,
     required this.onPositionChanged,
     this.userPosition,
+    this.customPosition,
+    this.onTap,
     super.key,
   });
 
@@ -27,6 +29,8 @@ class SearchMap extends StatelessWidget {
   final LatLng center;
   final ValueChanged<LatLng> onPositionChanged;
   final LatLng? userPosition;
+  final LatLng? customPosition;
+  final ValueChanged<LatLng>? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +44,9 @@ class SearchMap extends StatelessWidget {
             if (hasGesture) {
               onPositionChanged(pos.center);
             }
+          },
+          onTap: (tapPosition, latLng) {
+            onTap?.call(latLng);
           },
           interactionOptions: const InteractionOptions(
             flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
@@ -91,6 +98,30 @@ class SearchMap extends StatelessWidget {
                           color: Colors.blue,
                           shape: BoxShape.circle,
                         ),
+                      ),
+                    ],
+                  ),
+                ),
+              if (customPosition != null)
+                Marker(
+                  point: customPosition!,
+                  width: 50,
+                  height: 50,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: Colors.redAccent.withValues(alpha: 0.25),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const Icon(
+                        Icons.location_on_rounded,
+                        color: Colors.redAccent,
+                        size: 36,
                       ),
                     ],
                   ),

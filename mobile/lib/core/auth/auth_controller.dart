@@ -9,7 +9,9 @@ import '../../shared/models/user.dart';
 import '../api/api_client.dart';
 import '../config/env.dart';
 import '../push/push_service.dart';
+import '../services/logger_service.dart';
 import 'token_store.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class AuthState {
   final UserDto? session;
@@ -147,7 +149,7 @@ class AuthController extends Notifier<AuthState> {
       await ref.read(pushServiceProvider).init();
     } catch (e, st) {
       debugPrint('Failed to init push service after login: $e\n$st');
-      // TODO: Log to Crashlytics / Sentry
+      Logger.e('Push service init failed', e, st);
     }
   }
 
@@ -214,7 +216,15 @@ class AuthController extends Notifier<AuthState> {
   Future<void> logout() async {
     await ref.read(tokenStoreProvider).clear();
     ref.invalidate(dioProvider);
+    _clearCaches();
     state = state.copyWith(clearSession: true, loading: false);
+  }
+
+  void _clearCaches() {
+    try {
+      Hive.box('my_bookings_cache').clear();
+      Hive.box('partner_bookings_cache').clear();
+    } catch (_) {}
   }
 
   Future<bool> requestAccountDeletion() async {

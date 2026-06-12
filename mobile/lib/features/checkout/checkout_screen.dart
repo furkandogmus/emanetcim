@@ -30,6 +30,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   bool _busy = false;
   double _grandTotal = 0;
 
+  @override
+  void dispose() {
+    _coupon.dispose();
+    super.dispose();
+  }
+
   int get _total => _s + _m + _xl;
 
   Future<void> _pickDate(bool isCheckIn) async {
@@ -102,9 +108,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
       // Sunucu fiyatı ile tutarsızlık uyarısı
       if (serverTotal != null && _grandTotal > 0) {
-        final diff = (_grandTotal - serverTotal.toDouble()).abs();
+        final server = serverTotal.toDouble();
+        final diff = (_grandTotal - server).abs();
         if (diff > 1) {
-          debugPrint('⚠️ Price mismatch: client=$_grandTotal server=$serverTotal');
+          debugPrint('⚠️ Price mismatch: client=$_grandTotal server=$server');
+          _grandTotal = server; // Sunucu fiyatı esas alınır
         }
       }
 
@@ -138,6 +146,93 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  void _showBagSizeGuide(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'checkout.bags_title'.tr(),
+                style: GoogleFonts.outfit(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
+              _bagSizeRow(
+                Icons.backpack_outlined,
+                'checkout.bag_s'.tr(),
+                '40×30×20 cm · Sırt Çantası / Kabin',
+                '0–7 kg',
+              ),
+              const Divider(height: 24),
+              _bagSizeRow(
+                Icons.luggage_outlined,
+                'checkout.bag_m'.tr(),
+                '65×45×25 cm · Standart Bavul',
+                '7–15 kg',
+              ),
+              const Divider(height: 24),
+              _bagSizeRow(
+                Icons.work_outline_rounded,
+                'checkout.bag_xl'.tr(),
+                '80×50×30 cm · Büyük Bavul / Spor',
+                '15–32 kg',
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _bagSizeRow(IconData icon, String label, String dims, String weight) {
+    return Row(
+      children: [
+        Icon(icon, size: 32, color: AppColors.brandOrange),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: GoogleFonts.outfit(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                dims,
+                style: GoogleFonts.outfit(
+                  fontSize: 13,
+                  color: const Color(0xFF616161),
+                ),
+              ),
+              Text(
+                weight,
+                style: GoogleFonts.outfit(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
   void _toast(String msg) {
@@ -206,14 +301,27 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             ),
 
             const SizedBox(height: 32),
-            Text(
-              'checkout.bags_title'.tr().toUpperCase(),
-              style: GoogleFonts.outfit(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF616161),
-                letterSpacing: 1.2,
-              ),
+            Row(
+              children: [
+                Text(
+                  'checkout.bags_title'.tr().toUpperCase(),
+                  style: GoogleFonts.outfit(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF616161),
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                InkWell(
+                  onTap: () => _showBagSizeGuide(context),
+                  child: Icon(
+                    Icons.help_outline_rounded,
+                    size: 16,
+                    color: Colors.grey.shade400,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
 
@@ -333,6 +441,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                   fontSize: 32,
                                 ),
                               ),
+                              Text(
+                                'checkout.estimated'.tr(),
+                                style: GoogleFonts.outfit(
+                                  color: Colors.white.withValues(alpha: 0.4),
+                                  fontSize: 11,
+                                ),
+                              ),
                             ],
                           ),
                           Container(
@@ -359,7 +474,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         ],
                       ),
                       const SizedBox(height: 32),
-                      FilledButton(
+                      Semantics(
+                        label: 'Ödemeyi Yap',
+                        child: FilledButton(
                         onPressed: _busy || _total == 0 ? null : _pay,
                         style: FilledButton.styleFrom(
                           backgroundColor: AppColors.brandOrange,
@@ -394,6 +511,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                 ],
                               ),
                       ),
+                    ),
                       const SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,

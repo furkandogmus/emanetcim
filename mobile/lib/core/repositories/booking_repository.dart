@@ -53,7 +53,13 @@ class BookingRepository {
     final box = _partnerBox;
     try {
       final res = await _dio.get('/partner/bookings');
-      final list = res.data as List<dynamic>;
+      final data = res.data;
+      final List<dynamic> list;
+      if (data is Map<String, dynamic> && data.containsKey('items')) {
+        list = data['items'] as List<dynamic>;
+      } else {
+        list = data as List<dynamic>;
+      }
       final bookings = list
           .map((e) => BookingDto.fromJson(e as Map<String, dynamic>))
           .toList();

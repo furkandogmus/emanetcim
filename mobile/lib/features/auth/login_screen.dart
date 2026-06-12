@@ -11,6 +11,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/auth/auth_controller.dart';
+import '../../core/auth/biometric_service.dart';
+import '../../core/auth/token_store.dart';
 import '../../core/services/haptic_service.dart';
 import '../../shared/utils/app_colors.dart';
 import '../../shared/widgets/how_it_works_sheet.dart';
@@ -27,6 +29,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _busy = false;
   bool _obscure = true;
+
+  @override
+  void dispose() {
+    _identity.dispose();
+    _password.dispose();
+    super.dispose();
+  }
 
   bool _isValidEmail(String email) {
     return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
@@ -139,9 +148,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final isTablet = constraints.maxWidth > 600;
+      body: Builder(
+        builder: (ctx) {
+          final isTablet = MediaQuery.sizeOf(ctx).width > 600;
           return Stack(
             children: [
               Positioned(
@@ -322,7 +331,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                         ),
                                       ),
                                       const SizedBox(height: 12),
-FilledButton(
+                                      _buildBiometricLogin(isTablet),
+                                      FilledButton(
   onPressed: _busy ? null : _login,
   style: FilledButton.styleFrom(
     minimumSize: Size(double.infinity, isTablet ? 64 : 56),
@@ -417,6 +427,130 @@ TextButton.icon(
     );
   }
 
+  Widget _buildBiometricLogin(bool isTablet) {
+    return FutureBuilder<List<Map<String, String>>>(
+      future: ref.read(tokenStoreProvider).getBiometricAccounts(),
+      builder: (ctx, snap) {
+        final accounts = snap.data ?? [];
+        if (accounts.isEmpty) return const SizedBox(height: 8);
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: OutlinedButton.icon(
+            onPressed: _busy ? null : () => _biometricLogin(accounts),
+            icon: const Icon(Icons.fingerprint_rounded),
+            label: Text.rich(
+              TextSpan(
+                text: '🔐 ',
+                children: [
+                  TextSpan(
+                    text: accounts.length == 1
+                        ? accounts.first['email']!
+                        : 'Biyometrik Giriş (${accounts.length})',
+                    style: GoogleFonts.outfit(
+                      fontSize: isTablet ? 17 : 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            style: OutlinedButton.styleFrom(
+              minimumSize: Size(double.infinity, isTablet ? 64 : 56),
+              foregroundColor: AppColors.brandOrange,
+              side: const BorderSide(color: AppColors.brandOrange),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _biometricLogin(List<Map<String, String>> accounts) async {
+    // Tek hesap varsa direkt giriş yap
+    if (accounts.length == 1) {
+      await _tryBiometricLogin(accounts.first);
+      return;
+    }
+
+    // Birden fazla hesap varsa seçim göster
+    final selected = await showModalBottomSheet<Map<String, String>>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Hesap Seçin',
+                style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              ...accounts.map((a) => ListTile(
+                    leading: const Icon(Icons.account_circle_rounded, size: 32),
+                    title: Text(a['email'] ?? '', style: GoogleFonts.outfit(fontWeight: FontWeight.w600)),
+                    trailing: const Icon(Icons.fingerprint_rounded, color: AppColors.brandOrange),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    onTap: () => Navigator.pop(ctx, a),
+                  )),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (selected != null) {
+      await _tryBiometricLogin(selected);
+    }
+  }
+
+  Future<void> _tryBiometricLogin(Map<String, String> account) async {
+    final biometric = ref.read(biometricServiceProvider);
+    final ok = await biometric.authenticate(
+      reason: 'profile.biometric_reason'.tr(),
+    );
+    if (!ok || !mounted) return;
+
+    setState(() => _busy = true);
+    try {
+      final refreshToken = account['refreshToken'];
+      if (refreshToken == null || refreshToken.isEmpty) {
+        if (mounted) setState(() => _busy = false);
+        return;
+      }
+
+      final dio = ref.read(dioProvider);
+      final res = await dio.post('/auth/refresh', data: {'refreshToken': refreshToken});
+      final newAccess = res.data['accessToken'] as String;
+      final newRefresh = res.data['refreshToken'] as String;
+
+      final store = ref.read(tokenStoreProvider);
+      await store.save(access: newAccess, refresh: newRefresh);
+      await store.saveBiometricAccount(account['email']!, newRefresh);
+
+      // Session verisini al
+      final me = await dio.get('/auth/me');
+      await ref.read(authControllerProvider.notifier).completeSession({
+        'accessToken': newAccess,
+        'refreshToken': newRefresh,
+        'user': me.data,
+      });
+    } on DioException {
+      if (mounted) {
+        setState(() => _busy = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('common.error'.tr())),
+        );
+      }
+    }
+  }
+
   Future<void> _forgotPassword() async {
     final input = _identity.text.trim();
     if (input.isEmpty) {
@@ -440,7 +574,7 @@ TextButton.icon(
       } catch (_) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('auth.forgot_password_sent'.tr())),
+          SnackBar(content: Text('common.error'.tr())),
         );
       } finally {
         if (mounted) setState(() => _busy = false);

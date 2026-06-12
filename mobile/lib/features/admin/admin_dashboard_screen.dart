@@ -116,7 +116,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Grafikler yakında burada olacak',
+                      'admin.charts_coming_soon'.tr(),
                       style: GoogleFonts.outfit(color: const Color(0xFF616161)),
                     ),
                   ],

@@ -17,7 +17,7 @@ class DeepLinkService {
   final _appLinks = AppLinks();
   StreamSubscription? _sub;
   Uri? _pendingLink;
-  bool _listening = false;
+  bool _listening = true;
 
   DeepLinkService(this._ref);
 

@@ -18,6 +18,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final PageController _controller = PageController();
   int _currentPage = 0;
 
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   final List<OnboardingData> _pages = [
     OnboardingData(
       title: 'onboarding.step1.title',

@@ -1,24 +1,25 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Centralized analytics service — allows switching between Firebase,
-/// Mixpanel, or Amplitude without changing UI code.
+import '../services/logger_service.dart';
+
 final analyticsServiceProvider = Provider<AnalyticsService>((ref) {
   return AnalyticsService();
 });
 
 class AnalyticsService {
   Future<void> logEvent(String name, {Map<String, dynamic>? parameters}) async {
-    debugPrint('Analytics Event: $name | Params: $parameters');
-    // TODO: Implement Firebase Analytics or Mixpanel
+    if (kDebugMode) debugPrint('📊 Analytics: $name | Params: $parameters');
+    Logger.i('Analytics: $name');
   }
 
   Future<void> logScreenView(String screenName) async {
-    debugPrint('Analytics Screen: $screenName');
-    // TODO: Implement Firebase Analytics
+    if (kDebugMode) debugPrint('📱 Screen: $screenName');
+    Logger.i('Screen view: $screenName');
   }
 
   Future<void> setUserIdentifier(String id) async {
-    debugPrint('Analytics User: $id');
+    if (kDebugMode) debugPrint('👤 User: $id');
+    Logger.i('User identified: $id');
   }
 }

@@ -51,6 +51,10 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
     super.initState();
     _protectScreen();
     _pollingTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
       final current = ref.read(bookingProvider(widget.bookingId));
       final status = current.asData?.value.status;
       final isTerminal = status == BookingStatus.checkedOut ||

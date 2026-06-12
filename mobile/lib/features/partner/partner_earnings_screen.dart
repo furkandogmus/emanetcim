@@ -28,11 +28,13 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
     try {
       final dio = ref.read(dioProvider);
       final res = await dio.get('/partner/earnings/stats');
+      if (!mounted) return;
       setState(() {
         _stats = EarningsStats.fromJson(res.data as Map<String, dynamic>);
         _loading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _stats = EarningsStats(error: e.toString());
         _loading = false;

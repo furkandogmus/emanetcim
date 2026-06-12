@@ -30,11 +30,6 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
   String _filter = 'all';
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final bookingsAsync = ref.watch(partnerBookingsProvider);
     final fmt = DateFormat('HH:mm');

@@ -1,0 +1,192 @@
+appId: com.bagajpark
+---
+# E2E: Full Rezervasyon Akışı
+# Guest rezervasyon oluşturur → Partner onaylar → Check-in → Check-out
+
+# ============================================
+# BÖLÜM 1: GUEST REZERVASYON OLUŞTURMA
+# ============================================
+
+- clearState
+- launchApp
+
+# Root/jailbreak uyarısını kapat
+- tapOn:
+    text: "Riskleri Anladım, Devam Et"
+    optional: true
+
+- tapOn: "Atla"
+
+# Guest login
+- tapOn: "E-posta veya Telefon"
+- inputText: "maestro-guest@bagajpark.com"
+- tapOn: "Şifre"
+- inputText: "Test123!"
+- pressKey: Back
+- tapOn:
+    text: "Giriş Yap.*"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Ana sayfa
+- assertVisible: "Ana Sayfa"
+- takeScreenshot: "e2e-01-home"
+
+# Arama sekmesine git
+- tapOn: "Ara"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: "e2e-02-search"
+
+# Dükkan ara ve bekle
+- extendedWaitUntil:
+    visible: "Maestro"
+    timeout: 10000
+
+- tapOn: "Maestro Test Dükkanı"
+- waitForAnimationToEnd:
+    timeout: 3000
+- assertVisible: "Yol Tarifi"
+- takeScreenshot: "e2e-03-shop-detail"
+
+# Rezervasyon yap (checkout'a git)
+- swipe:
+    direction: DOWN
+    duration: 500
+- tapOn:
+    text: "Rezervasyon.*"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Checkout ekranı
+- assertVisible: "Rezervasyonu Tamamla"
+- assertVisible: "Valiz Seçimi"
+- takeScreenshot: "e2e-04-checkout"
+
+# Default olarak 1 Orta valiz seçili, 1 Küçük ekle
+- tapOn: "Küçük (S)"
+- takeScreenshot: "e2e-05-bags-selected"
+
+# Ödeme özeti
+- swipe:
+    direction: DOWN
+    duration: 500
+- assertVisible: "Toplam"
+- takeScreenshot: "e2e-06-payment-summary"
+
+# Ödemeyi yap (debug mode'da bypass edilecek)
+- tapOn:
+    text: "Ödemeyi Yap.*"
+    optional: true
+
+# Rezervasyon oluşturulmasını bekle
+- extendedWaitUntil:
+    visible: "Rezervasyon Detayı"
+    timeout: 15000
+- takeScreenshot: "e2e-07-booking-confirmed"
+
+# ============================================
+# BÖLÜM 2: GUEST ÇIKIŞ + PARTNER GİRİŞ
+# ============================================
+
+# Guest çıkış yap
+- pressKey: Back
+- tapOn: "Profil"
+- swipe:
+    direction: DOWN
+    duration: 500
+- tapOn: "Çıkış Yap"
+- takeScreenshot: "e2e-08-logout-prompt"
+- tapOn: "Evet"
+- waitForAnimationToEnd:
+    timeout: 3000
+- assertVisible: "Hoş Geldiniz"
+- takeScreenshot: "e2e-09-logged-out"
+
+# Partner login
+- tapOn: "E-posta veya Telefon"
+- inputText: "maestro-partner@bagajpark.com"
+- tapOn: "Şifre"
+- inputText: "Test123!"
+- pressKey: Back
+- tapOn:
+    text: "Giriş Yap.*"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Partner dashboard
+- takeScreenshot: "e2e-10-partner-dashboard"
+
+# ============================================
+# BÖLÜM 3: PARTNER REZERVASYON ONAYLAMA
+# ============================================
+
+# Onay bekleyen rezervasyonları filtrele
+- tapOn: "Onay Bekleyen"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: "e2e-11-waiting-approval"
+
+# Rezervasyonu seç
+- tapOn: "Maestro.*"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: "e2e-12-booking-detail"
+
+# Onayla butonuna tıkla
+- tapOn: "Onayla"
+- assertVisible: "Bu rezervasyonu onaylamak istediğinize emin misiniz?"
+- tapOn: "Onayla"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: "e2e-13-booking-approved"
+
+# ============================================
+# BÖLÜM 4: PARTNER CHECK-IN
+# ============================================
+
+# Check-in butonuna tıkla
+- tapOn: "Valizleri Teslim Al.*"
+- takeScreenshot: "e2e-14-ready-for-checkin"
+
+# Check-in onay diyaloğu varsa kabul et
+- tapOn:
+    text: "Onayla"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: "e2e-15-checkin-complete"
+
+# ============================================
+# BÖLÜM 5: PARTNER CHECK-OUT
+# ============================================
+
+# Check-out butonuna tıkla
+- tapOn: "Valizleri Teslim Et.*"
+- takeScreenshot: "e2e-16-ready-for-checkout"
+
+# Check-out onay diyaloğu varsa kabul et
+- tapOn:
+    text: "Onayla"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: "e2e-17-checkout-complete"
+
+# ============================================
+# BÖLÜM 6: DOĞRULAMA
+# ============================================
+
+# Rezervasyonun tamamlandığını doğrula
+- swipe:
+    direction: UP
+    duration: 500
+- takeScreenshot: "e2e-18-booking-completed"
+
+# Geri dön ve dashboard'a git
+- pressKey: Back
+- tapOn: "Tümü"
+- takeScreenshot: "e2e-19-final-dashboard"

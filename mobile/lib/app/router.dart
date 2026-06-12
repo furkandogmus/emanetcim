@@ -54,8 +54,8 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       if (loggedIn) {
         final isGuest = role == UserRole.guest;
-        final emailVerified = auth.session?.emailVerified ?? true;
-        if (isGuest && !emailVerified && state.matchedLocation != '/auth/verify-email') {
+        final emailVerified = auth.session?.emailVerified;
+        if (isGuest && emailVerified == false && state.matchedLocation != '/auth/verify-email') {
           return '/auth/verify-email';
         }
 

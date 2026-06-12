@@ -6,6 +6,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:geolocator/geolocator.dart';
 
 import '../../core/repositories/shop_repository.dart';
 import '../../core/services/analytics_service.dart';
@@ -39,14 +40,13 @@ final nearbyShopsProvider = FutureProvider<List<ShopDto>>((ref) async {
   final center = ref.watch(debouncedLocationProvider);
   if (center == null) return [];
 
-  try {
-    final result = await ref
-        .watch(shopRepositoryProvider)
-        .getNearby(lat: center.latitude, lng: center.longitude);
-    return result.fold((data) => data, (error) => []);
-  } catch (e) {
-    return [];
-  }
+  final result = await ref
+      .watch(shopRepositoryProvider)
+      .getNearby(lat: center.latitude, lng: center.longitude);
+  return result.fold(
+    (data) => data,
+    (error) => throw Exception(error),
+  );
 });
 
 class SearchScreen extends ConsumerStatefulWidget {
@@ -59,10 +59,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   static const _istanbul = LatLng(41.0082, 28.9784);
   LatLng _center = _istanbul;
   LatLng? _userLocation;
+  LatLng? _customLocation;
+  bool _isLocating = false;
   final MapController _mapController = MapController();
   final TextEditingController _searchController = TextEditingController();
   String? _selectedShopId;
   List<dynamic> _suggestions = [];
+  bool _didLogScreen = false;
   bool _onlyOpenNow = false;
   bool _only247 = false;
   int _minRating = 0;
@@ -75,6 +78,24 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Timer? _debounce;
   final _maxPriceController = TextEditingController();
 
+  List<ShopDto> _applyFilters(List<ShopDto> list) {
+    var filtered = list;
+    if (_only247) filtered = filtered.where((s) => s.open247).toList();
+    if (_onlyOpenNow) filtered = filtered.where((s) => s.isActive).toList();
+    if (_minRating > 0) filtered = filtered.where((s) => (s.rating ?? 0) >= _minRating).toList();
+    if (_hasRestroom) filtered = filtered.where((s) => s.hasRestroom).toList();
+    if (_hasCctv) filtered = filtered.where((s) => s.hasCctv).toList();
+    if (_hasClimate) filtered = filtered.where((s) => s.hasClimateControl).toList();
+    if (_acceptsLarge) filtered = filtered.where((s) => s.acceptsLargeItems).toList();
+    if (_maxPrice > 0) filtered = filtered.where((s) => s.pricePerDay <= _maxPrice).toList();
+    if (_sortBy == 'price') {
+      filtered = filtered..sort((a, b) => a.pricePerDay.compareTo(b.pricePerDay));
+    } else if (_sortBy == 'rating') {
+      filtered = filtered..sort((a, b) => -(a.rating ?? 0).compareTo(b.rating ?? 0));
+    }
+    return filtered;
+  }
+
   void _showFilterSheet() {
     showModalBottomSheet(
       context: context,
@@ -82,69 +103,74 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) => StatefulBuilder(
         builder: (context, setSheetState) => Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('search.filter'.tr(), style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
+          padding: EdgeInsets.only(
+            top: 24,
+            left: 24,
+            right: 24,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('search.filter'.tr(), style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 16),
 
-              SwitchListTile(title: Text('search.open_now'.tr(), style: GoogleFonts.outfit()), subtitle: Text('search.open_now_hint'.tr(), style: GoogleFonts.outfit(fontSize: 12)), value: _onlyOpenNow,
-                onChanged: (v) { setState(() => _onlyOpenNow = v); setSheetState(() {}); }, activeThumbColor: AppColors.brandOrange),
-              SwitchListTile(title: Text('search.open_247'.tr(), style: GoogleFonts.outfit()), subtitle: Text('search.open_247_hint'.tr(), style: GoogleFonts.outfit(fontSize: 12)), value: _only247,
-                onChanged: (v) { setState(() => _only247 = v); setSheetState(() {}); }, activeThumbColor: AppColors.brandOrange),
+                SwitchListTile(title: Text('search.open_now'.tr(), style: GoogleFonts.outfit()), subtitle: Text('search.open_now_hint'.tr(), style: GoogleFonts.outfit(fontSize: 12)), value: _onlyOpenNow,
+                  onChanged: (v) { setState(() => _onlyOpenNow = v); setSheetState(() {}); }, activeThumbColor: AppColors.brandOrange),
+                SwitchListTile(title: Text('search.open_247'.tr(), style: GoogleFonts.outfit()), subtitle: Text('search.open_247_hint'.tr(), style: GoogleFonts.outfit(fontSize: 12)), value: _only247,
+                  onChanged: (v) { setState(() => _only247 = v); setSheetState(() {}); }, activeThumbColor: AppColors.brandOrange),
 
-              const SizedBox(height: 8),
-              Text('search.sort_by'.tr(), style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold)),
-              Row(children: [
-                _filterChip('search.sort_distance'.tr(), _sortBy == 'distance', () { setState(() => _sortBy = 'distance'); setSheetState(() {}); }),
-                const SizedBox(width: 8),
-                _filterChip('search.sort_price'.tr(), _sortBy == 'price', () { setState(() => _sortBy = 'price'); setSheetState(() {}); }),
-                const SizedBox(width: 8),
-                _filterChip('search.sort_rating'.tr(), _sortBy == 'rating', () { setState(() => _sortBy = 'rating'); setSheetState(() {}); }),
-              ]),
+                const SizedBox(height: 8),
+                Text('search.sort_by'.tr(), style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold)),
+                Wrap(spacing: 8, runSpacing: 8, children: [
+                  _filterChip('search.sort_distance'.tr(), _sortBy == 'distance', () { setState(() => _sortBy = 'distance'); setSheetState(() {}); }),
+                  _filterChip('search.sort_price'.tr(), _sortBy == 'price', () { setState(() => _sortBy = 'price'); setSheetState(() {}); }),
+                  _filterChip('search.sort_rating'.tr(), _sortBy == 'rating', () { setState(() => _sortBy = 'rating'); setSheetState(() {}); }),
+                ]),
 
-              const SizedBox(height: 12),
-              Text('search.amenities'.tr(), style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Wrap(spacing: 8, runSpacing: 8, children: [
-                _filterChip('search.restroom'.tr(), _hasRestroom, () { setState(() => _hasRestroom = !_hasRestroom); setSheetState(() {}); }),
-                _filterChip('search.camera'.tr(), _hasCctv, () { setState(() => _hasCctv = !_hasCctv); setSheetState(() {}); }),
-                _filterChip('search.climate'.tr(), _hasClimate, () { setState(() => _hasClimate = !_hasClimate); setSheetState(() {}); }),
-                _filterChip('search.large_items'.tr(), _acceptsLarge, () { setState(() => _acceptsLarge = !_acceptsLarge); setSheetState(() {}); }),
-              ]),
+                const SizedBox(height: 12),
+                Text('search.amenities'.tr(), style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                Wrap(spacing: 8, runSpacing: 8, children: [
+                  _filterChip('search.restroom'.tr(), _hasRestroom, () { setState(() => _hasRestroom = !_hasRestroom); setSheetState(() {}); }),
+                  _filterChip('search.camera'.tr(), _hasCctv, () { setState(() => _hasCctv = !_hasCctv); setSheetState(() {}); }),
+                  _filterChip('search.climate'.tr(), _hasClimate, () { setState(() => _hasClimate = !_hasClimate); setSheetState(() {}); }),
+                  _filterChip('search.large_items'.tr(), _acceptsLarge, () { setState(() => _acceptsLarge = !_acceptsLarge); setSheetState(() {}); }),
+                ]),
 
-              const SizedBox(height: 12),
-              Text('search.min_rating'.tr(), style: GoogleFonts.outfit(fontSize: 14)),
-              Row(children: List.generate(5, (i) => IconButton(
-                icon: Icon(i < _minRating ? Icons.star_rounded : Icons.star_outline_rounded, color: Colors.amber),
-                onPressed: () { setState(() => _minRating = i + 1 == _minRating ? i : i + 1); setSheetState(() {}); },
-              ))),
+                const SizedBox(height: 12),
+                Text('search.min_rating'.tr(), style: GoogleFonts.outfit(fontSize: 14)),
+                Row(children: List.generate(5, (i) => IconButton(
+                  icon: Icon(i < _minRating ? Icons.star_rounded : Icons.star_outline_rounded, color: Colors.amber),
+                  onPressed: () { setState(() => _minRating = i + 1 == _minRating ? i : i + 1); setSheetState(() {}); },
+                ))),
 
-              const SizedBox(height: 12),
-              Text('search.max_price'.tr(), style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _maxPriceController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: 'search.max_price'.tr(),
-                  prefixText: '₺ ',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                const SizedBox(height: 12),
+                Text('search.max_price'.tr(), style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _maxPriceController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    hintText: 'search.max_price'.tr(),
+                    prefixText: '₺ ',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
+                  onChanged: (v) { setState(() => _maxPrice = double.tryParse(v) ?? 0); },
                 ),
-                onChanged: (v) { setState(() => _maxPrice = double.tryParse(v) ?? 0); },
-              ),
 
-              const SizedBox(height: 24),
-              FilledButton(
-                onPressed: () => Navigator.pop(context),
-                style: FilledButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
-                child: Text('search.show_results'.tr()),
-              ),
-              const SizedBox(height: 16),
-            ],
+                const SizedBox(height: 24),
+                FilledButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: FilledButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
+                  child: Text('search.show_results'.tr()),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
           ),
         ),
       ),
@@ -228,16 +254,30 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
     setState(() {
       _center = newCenter;
+      _customLocation = newCenter;
       _suggestions = [];
       _searchController.text = displayName;
     });
 
     _mapController.move(newCenter, 14);
+    ref.read(debouncedLocationProvider.notifier).updateLocation(newCenter);
     FocusScope.of(context).unfocus();
   }
 
   Future<void> _determinePosition() async {
+    if (_isLocating) return;
+    setState(() => _isLocating = true);
     try {
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('search.location_disabled'.tr())),
+          );
+        }
+        return;
+      }
+
       final pos = await ref.read(locationServiceProvider).getCurrentPosition();
       if (pos == null) {
         if (mounted) {
@@ -253,6 +293,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       setState(() {
         _center = newCenter;
         _userLocation = newCenter;
+        _customLocation = null;
       });
       _mapController.move(newCenter, 15);
       ref.read(debouncedLocationProvider.notifier).updateLocation(newCenter);
@@ -263,12 +304,104 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           SnackBar(content: Text('search.location_denied'.tr())),
         );
       }
+    } finally {
+      if (mounted) {
+        setState(() => _isLocating = false);
+      }
     }
+  }
+
+  void _showAllShopsSheet(BuildContext context, List<ShopDto> shops) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        minChildSize: 0.4,
+        maxChildSize: 0.9,
+        expand: false,
+        builder: (context, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Row(
+                  children: [
+                    Text(
+                      'search.show_results'.tr(),
+                      style: GoogleFonts.outfit(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textDark,
+                      ),
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.brandOrange.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${shops.length} Nokta',
+                        style: GoogleFonts.outfit(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.brandOrange,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: ListView.builder(
+                  controller: scrollController,
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                  itemCount: shops.length,
+                  itemBuilder: (context, index) {
+                    final shop = shops[index];
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      child: ShopPreviewCard(
+                        shop: shop,
+                        isSelected: shop.id == _selectedShopId,
+                        isFullWidth: true,
+                        userLocation: _customLocation ?? _userLocation,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    ref.read(analyticsServiceProvider).logScreenView('Search');
+    if (!_didLogScreen) {
+      _didLogScreen = true;
+      ref.read(analyticsServiceProvider).logScreenView('Search');
+    }
 
     final shopsAsync = ref.watch(nearbyShopsProvider);
 
@@ -281,36 +414,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 data: (d) => d,
                 orElse: () => <ShopDto>[],
               );
-              var filtered = list;
-              if (_only247) {
-                filtered = filtered.where((s) => s.open247).toList();
-              }
-              if (_onlyOpenNow) {
-                filtered = filtered.where((s) => s.isActive).toList();
-              }
-              if (_minRating > 0) {
-                filtered = filtered.where((s) => (s.rating ?? 0) >= _minRating).toList();
-              }
-              if (_hasRestroom) {
-                filtered = filtered.where((s) => s.hasRestroom).toList();
-              }
-              if (_hasCctv) {
-                filtered = filtered.where((s) => s.hasCctv).toList();
-              }
-              if (_hasClimate) {
-                filtered = filtered.where((s) => s.hasClimateControl).toList();
-              }
-              if (_acceptsLarge) {
-                filtered = filtered.where((s) => s.acceptsLargeItems).toList();
-              }
-              if (_maxPrice > 0) {
-                filtered = filtered.where((s) => s.pricePerDay <= _maxPrice).toList();
-              }
-              if (_sortBy == 'price') {
-                filtered = filtered..sort((a, b) => a.pricePerDay.compareTo(b.pricePerDay));
-              } else if (_sortBy == 'rating') {
-                filtered = filtered..sort((a, b) => -(a.rating ?? 0).compareTo(b.rating ?? 0));
-              }
+              final filtered = _applyFilters(list);
 
               return SearchMap(
                 mapController: _mapController,
@@ -318,12 +422,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 selectedShopIndex: filtered.indexWhere((s) => s.id == _selectedShopId),
                 center: _center,
                 userPosition: _userLocation,
+                customPosition: _customLocation,
                 onShopSelected: (index) {
                   if (index >= 0 && index < filtered.length) {
                     setState(() => _selectedShopId = filtered[index].id);
                   }
                 },
                 onPositionChanged: _onMapMoved,
+                onTap: (latLng) {
+                  setState(() {
+                    _customLocation = latLng;
+                  });
+                  ref.read(debouncedLocationProvider.notifier).updateLocation(latLng);
+                },
               );
             },
           ),
@@ -355,34 +466,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       decoration: InputDecoration(
                         hintText: 'search.hint'.tr(),
                         prefixIcon: const Icon(Icons.search_rounded),
-                        suffixIcon: _searchController.text.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.close_rounded),
-                                onPressed: () {
-                                  _searchController.clear();
-                                  setState(() => _suggestions = []);
-                                },
-                              )
-: Semantics(
-  label: 'Filtrele',
-  child: GestureDetector(
-    onTap: _showFilterSheet,
-    child: Container(
-      margin: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: (_onlyOpenNow || _only247 || _maxPrice > 0)
-            ? AppColors.textDark
-            : AppColors.brandOrange,
-        shape: BoxShape.circle,
-      ),
-      child: const Icon(
-        Icons.tune_rounded,
-        color: Colors.white,
-        size: 20,
-      ),
-    ),
-  ),
-),
+                        suffixIcon: _SearchSuffixIcon(
+                          controller: _searchController,
+                          hasActiveFilter: _onlyOpenNow || _only247 || _maxPrice > 0,
+                          onClear: () {
+                            _searchController.clear();
+                            setState(() => _suggestions = []);
+                          },
+                          onFilter: _showFilterSheet,
+                        ),
                         fillColor: Colors.white.withValues(alpha: 0.95),
                         filled: true,
                         border: OutlineInputBorder(
@@ -441,44 +533,70 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           Positioned(
             left: 0,
             right: 0,
-            bottom: 24,
+            bottom: 104,
             child: SizedBox(
-              height: 140,
+              height: 180,
               child: shopsAsync.maybeWhen(
                 data: (list) {
-                  var filtered = list;
-                  if (_only247) {
-                    filtered = filtered.where((s) => s.open247).toList();
-                  }
-                  if (_onlyOpenNow) {
-                    filtered = filtered.where((s) => s.isActive).toList();
-                  }
-                  if (_minRating > 0) {
-                    filtered = filtered.where((s) => (s.rating ?? 0) >= _minRating).toList();
-                  }
-                  if (_hasRestroom) {
-                    filtered = filtered.where((s) => s.hasRestroom).toList();
-                  }
-                  if (_hasCctv) {
-                    filtered = filtered.where((s) => s.hasCctv).toList();
-                  }
-                  if (_maxPrice > 0) {
-                    filtered = filtered.where((s) => s.pricePerDay <= _maxPrice).toList();
-                  }
+                  final filtered = _applyFilters(list);
                   if (filtered.isEmpty) return const SizedBox();
 
-                  return ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: filtered.length,
-                    itemBuilder: (context, index) {
-                      final shop = filtered[index];
-                      final isSelected = shop.id == _selectedShopId;
-                      return ShopPreviewCard(
-                        shop: shop,
-                        isSelected: isSelected,
-                      );
+                  return GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onVerticalDragEnd: (details) {
+                      if (details.primaryVelocity != null && details.primaryVelocity! < -200) {
+                        _showAllShopsSheet(context, filtered);
+                      }
                     },
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Drag handle visual indicator
+                        GestureDetector(
+                          onTap: () => _showAllShopsSheet(context, filtered),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                            margin: const EdgeInsets.only(bottom: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.9),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 8,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Container(
+                              width: 36,
+                              height: 4,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade400,
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                          ),
+                        ),
+                        // Horizontal List
+                        Expanded(
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            itemCount: filtered.length,
+                            itemBuilder: (context, index) {
+                              final shop = filtered[index];
+                              final isSelected = shop.id == _selectedShopId;
+                              return ShopPreviewCard(
+                                shop: shop,
+                                isSelected: isSelected,
+                                userLocation: _customLocation ?? _userLocation,
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   );
                 },
                 orElse: () => const SizedBox(),
@@ -488,7 +606,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
           Positioned(
             right: 16,
-            bottom: 180,
+            bottom: 290,
             child: FloatingActionButton.small(
               onPressed: _determinePosition,
               backgroundColor: Colors.white,
@@ -496,11 +614,65 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24),
               ),
-              child: const Icon(Icons.my_location_rounded),
+              child: _isLocating
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.brandOrange,
+                        ),
+                      ),
+                    )
+                  : const Icon(Icons.my_location_rounded),
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _SearchSuffixIcon extends StatelessWidget {
+  const _SearchSuffixIcon({
+    required this.controller,
+    required this.hasActiveFilter,
+    required this.onClear,
+    required this.onFilter,
+  });
+
+  final TextEditingController controller;
+  final bool hasActiveFilter;
+  final VoidCallback onClear;
+  final VoidCallback onFilter;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: controller,
+      builder: (context, _) {
+        if (controller.text.isNotEmpty) {
+          return IconButton(
+            icon: const Icon(Icons.close_rounded),
+            onPressed: onClear,
+          );
+        }
+        return Semantics(
+          label: 'Filtrele',
+          child: GestureDetector(
+            onTap: onFilter,
+            child: Container(
+              margin: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: hasActiveFilter ? AppColors.textDark : AppColors.brandOrange,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.tune_rounded, color: Colors.white, size: 20),
+            ),
+          ),
+        );
+      },
     );
   }
 }
