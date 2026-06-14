@@ -47,18 +47,18 @@ RUN mkdir -p /home/nextjs && chown nextjs:nodejs /home/nextjs
 ENV HOME=/home/nextjs
 RUN npm install -g prisma@7.7.0 && npm cache clean --force
 
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
+COPY --chown=nextjs:nodejs --from=builder /app/public ./public
+COPY --chown=nextjs:nodejs --from=builder /app/.next/standalone ./
 # Standalone trace: iyzipay → postman-request ve tüm alt ağaç eksik kalabiliyor; tam prod node_modules ile üzerine yaz
-COPY --from=prod_modules /app/node_modules ./node_modules
+COPY --chown=nextjs:nodejs --from=prod_modules /app/node_modules ./node_modules
 # deps aşamasında --ignore-scripts: Prisma client yalnızca builder'da generate edilir
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
-COPY scripts/docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh && chown -R nextjs:nodejs /app
+COPY --chown=nextjs:nodejs --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --chown=nextjs:nodejs --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
+COPY --chown=nextjs:nodejs --from=builder /app/.next/static ./.next/static
+COPY --chown=nextjs:nodejs --from=builder /app/prisma ./prisma
+COPY --chown=nextjs:nodejs --from=builder /app/prisma.config.ts ./prisma.config.ts
+COPY --chown=nextjs:nodejs scripts/docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
 USER nextjs
 EXPOSE 3000
