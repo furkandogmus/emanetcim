@@ -19,14 +19,6 @@ Sunucu tarafında [`src/lib/logger.ts`](../src/lib/logger.ts) (Pino) kullanılı
 - `reconcile_payments_complete` — toplu reconcile job özeti
 - `request_error` — [`instrumentation.ts`](../instrumentation.ts) `onRequestError`
 
-## Hata izleme (Sentry)
-
-`SENTRY_DSN` tanımlıysa [`instrumentation.ts`](../instrumentation.ts) içinde `@sentry/node` başlatılır. Örnek ortam:
-
-```bash
-SENTRY_DSN="https://...@....ingest.sentry.io/..."
-```
-
 ## Global hata yüzeyi
 
 Kök [`src/app/global-error.tsx`](../src/app/global-error.tsx) beklenmeyen istemci hatalarında kullanıcıya “Tekrar dene” sunar.

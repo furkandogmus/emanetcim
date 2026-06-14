@@ -48,7 +48,6 @@ flutter run -d emulator-5554
 | Değişken | Açıklama |
 |----------|----------|
 | `API_BASE_URL` | Backend mobile API kökü (örn. `https://bagajpark.com/api/mobile`) |
-| `SENTRY_DSN` | Crash reporting |
 | `FIREBASE_ENABLED` | true ise push aktif |
 | `MAP_TILE_URL` | CARTO Voyager default |
 
@@ -76,7 +75,7 @@ npx prisma migrate dev --name mobile_push_token
 
 ```
 lib/
-├── main.dart          # entry, Sentry/Firebase init
+├── main.dart          # entry, Firebase init
 ├── app/               # router, theme
 ├── core/              # api, auth, config
 ├── features/          # auth, search, booking, checkout, qr, partner, profile

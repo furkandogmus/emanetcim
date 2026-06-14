@@ -33,7 +33,6 @@
 - Nginx health check returns 200 (`/api/health/live`)
 - `web`, `nginx`, `postgres`, `redis` containers healthy
 - Backup/restore procedure tested for database
-- Error tracking (Sentry or equivalent) receives server/client errors
 
 ## 6) Go-Live Gate
 - No critical/blocker bug in staging smoke

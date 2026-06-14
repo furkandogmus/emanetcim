@@ -16,8 +16,6 @@ const serverSchema = z.object({
   VAPID_PUBLIC_KEY: z.string().optional(),
   VAPID_PRIVATE_KEY: z.string().optional(),
   ENABLE_HSTS_HEADERS: z.string().optional(),
-  SENTRY_DSN: z.string().optional(),
-  SENTRY_TRACES_SAMPLE_RATE: z.string().optional(),
   DATABASE_SSL: z.string().optional(),
   PG_POOL_MAX: z.string().optional(),
   LOG_LEVEL: z.string().optional(),

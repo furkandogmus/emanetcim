@@ -42,8 +42,6 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
-# Sentry build plugin auth token
-.env.sentry-build-plugin
 # Sunucuda kopyalanır; git clean -fd ile silinmesin diye ignore (örn. docker-compose.env.example → docker-compose.env)
 docker-compose.env
 
