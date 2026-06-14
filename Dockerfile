@@ -43,7 +43,7 @@ ENV NODE_PATH=/usr/local/lib/node_modules
 RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates \
   && rm -rf /var/lib/apt/lists/*
 RUN groupadd --system --gid 1001 nodejs && useradd --system --uid 1001 --gid nodejs nextjs
-RUN mkdir -p /home/nextjs && chown nextjs:nodejs /home/nextjs
+RUN mkdir -p /home/nextjs && chown nextjs:nodejs /home/nextjs && chown nextjs:nodejs /app
 ENV HOME=/home/nextjs
 RUN npm install -g prisma@7.7.0 && npm cache clean --force
 
