@@ -90,6 +90,8 @@ services:
       AUTH_PUBLIC_HOST: ${AUTH_PUBLIC_HOST:-}
       NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL:-}
       NEXTAUTH_URL: ${NEXTAUTH_URL:-}
+      AUTH_URL: ${AUTH_URL:-}
+      DEBUG: ${DEBUG:-}
       PUBLIC_URL_PROTOCOL: ${PUBLIC_URL_PROTOCOL:-}
       DATABASE_URL: postgresql://${POSTGRES_USER:-bagajpark}:${POSTGRES_PASSWORD:-bagajpark}@postgres:5432/${POSTGRES_DB:-bagajpark}?schema=public
       NODE_ENV: production
