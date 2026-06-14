@@ -5,7 +5,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates \
   && rm -rf /var/lib/apt/lists/*
 COPY package.json package-lock.json ./
-RUN npm install --ignore-scripts
+RUN --mount=type=cache,target=/root/.npm npm install --ignore-scripts
 
 # Standalone node_modules eksik kalıyor (serverExternalPackages: iyzipay, @netgsm, pg…); runtime için sadece prod bağımlılıkları
 FROM deps AS prod_modules
@@ -29,7 +29,7 @@ ARG NEXT_PUBLIC_BETA_BADGE
 ENV NEXT_PUBLIC_BETA_BADGE=${NEXT_PUBLIC_BETA_BADGE}
 # next build (production) — requireProdSecrets + iyzipay modülü için placeholder (runtime compose ile değiştirilir)
 RUN npx prisma generate
-RUN npm run build
+RUN --mount=type=cache,target=/app/.next/cache npm run build
 
 FROM node:20-bookworm-slim AS runner
 WORKDIR /app
