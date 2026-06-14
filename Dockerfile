@@ -36,30 +36,24 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
-# HOSTNAME=0.0.0.0 kullanmayın: bazı ortamlarda istek URL’si 0.0.0.0:3000 olarak üretilip
-# Auth callbackUrl’e karışabiliyor. Standalone varsayılanı tüm arayüzlere dinlemeye yeter.
 # prisma.config.ts + global `prisma` CLI modül çözümlemesi
 ENV NODE_PATH=/usr/local/lib/node_modules
 RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates \
   && rm -rf /var/lib/apt/lists/*
-RUN groupadd --system --gid 1001 nodejs && useradd --system --uid 1001 --gid nodejs nextjs
-RUN mkdir -p /home/nextjs && chown nextjs:nodejs /home/nextjs && chown nextjs:nodejs /app
-ENV HOME=/home/nextjs
 RUN npm install -g prisma@7.7.0 && npm cache clean --force
 
-COPY --chown=nextjs:nodejs --from=builder /app/public ./public
-COPY --chown=nextjs:nodejs --from=builder /app/.next/standalone ./
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
 # Standalone trace: iyzipay → postman-request ve tüm alt ağaç eksik kalabiliyor; tam prod node_modules ile üzerine yaz
-COPY --chown=nextjs:nodejs --from=prod_modules /app/node_modules ./node_modules
+COPY --from=prod_modules /app/node_modules ./node_modules
 # deps aşamasında --ignore-scripts: Prisma client yalnızca builder'da generate edilir
-COPY --chown=nextjs:nodejs --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --chown=nextjs:nodejs --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
-COPY --chown=nextjs:nodejs --from=builder /app/.next/static ./.next/static
-COPY --chown=nextjs:nodejs --from=builder /app/prisma ./prisma
-COPY --chown=nextjs:nodejs --from=builder /app/prisma.config.ts ./prisma.config.ts
-COPY --chown=nextjs:nodejs scripts/docker-entrypoint.sh /docker-entrypoint.sh
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
+COPY scripts/docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
-USER nextjs
 EXPOSE 3000
 ENTRYPOINT ["/docker-entrypoint.sh"]
