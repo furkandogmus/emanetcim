@@ -65,3 +65,37 @@ Geliştirme yaparken iş kuralları ve mimari detaylar için şu dokümanları r
 2.  **Veritabanı Sorguları (N+1 Sorunu):** Prisma kullanırken döngüler içinde DB sorgusu atmaktan kaçının. `include` veya `select` kullanarak ilişkili verileri tek bir sorguyla çekin (örneğin esnaf kazanç/istatistik ekranları).
 3.  **Mobil API Koruması:** `api/mobile` altındaki tüm partner/esnaf endpoint'lerinde mutlaka `requireMobileUser` çağrılarak yetkilendirme ve aktiflik/ban kontrolü yapılmalıdır.
 4.  **Görsel ve Assetler:** Uygulamada rastgele dış kaynaktan stock fotoğraflar kullanılmamalıdır. Mümkün olduğunca yerel statik asset'ler tercih edilmelidir.
+
+---
+
+## 🖥️ Canlı Sunucu (Production Server) Bilgileri
+
+Uygulamanın canlı ortamı (production) aşağıdaki sunucu üzerinde barındırılmaktadır:
+
+*   **IP Adresi:** `178.104.144.3`
+*   **SSH Portu:** `12022`
+*   **Kullanıcı:** `root`
+*   **SSH Bağlantı Komutu:**
+    ```bash
+    ssh root@178.104.144.3 -p 12022
+    ```
+*   **Uygulama Dizini:** `/root/emanetci`
+*   **Hızlı Güncelleme Komutu (Sunucuda):**
+    ```bash
+    cd /root/emanetci && ./scripts/vm-update.sh
+    ```
+
+---
+
+## 🛠️ Spec-Driven Development (OpenSpec)
+
+Bu projede AI asistanlarıyla yapılan geliştirmelerin daha güvenilir, izlenebilir ve tutarlı olması için **OpenSpec** entegrasyonu bulunmaktadır.
+
+### OpenSpec Yapısı ve Komutlar
+Projeyi geliştiren AI asistanları (Cursor, Claude Code, Cline, Windsurf, Antigravity vb.) aşağıdaki slash komutları veya iş akışlarını kullanarak geliştirmeleri adım adım yürütebilir:
+
+*   **/opsx:propose** `<fikir/görev>`: Yeni bir geliştirme için `openspec/changes/<change-adi>/` altında teklif (proposal) ve görev listesi (tasks.md) şablonu oluşturur.
+*   **/opsx:apply**: Oluşturulan görev listesini sırayla uygular ve geliştirir.
+*   **/opsx:archive**: Geliştirme tamamlandıktan sonra yapılan değişiklikleri arşivler ve genel sistem spesifikasyonlarını günceller.
+
+Tüm OpenSpec dosyaları `openspec/` dizini altında tutulur ve Git üzerinden takip edilir.
