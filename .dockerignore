@@ -12,3 +12,8 @@ test-results
 coverage
 .vscode
 mobile
+marketing
+/*.png
+/*.mp4
+cookies.txt
+report.xml

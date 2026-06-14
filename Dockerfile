@@ -1,25 +1,20 @@
 # syntax=docker/dockerfile:1
 
-FROM node:20-bookworm-slim AS deps
-WORKDIR /app
+FROM node:22-bookworm-slim AS base
 RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates \
   && rm -rf /var/lib/apt/lists/*
+
+FROM base AS deps
+WORKDIR /app
 COPY package.json package-lock.json ./
-RUN --mount=type=cache,target=/root/.npm npm install --ignore-scripts
+RUN --mount=type=cache,id=bagajpark-deps,target=/root/.npm npm ci --ignore-scripts --no-audit --no-fund
 
-# Standalone node_modules eksik kalıyor (serverExternalPackages: iyzipay, @netgsm, pg…); runtime için sadece prod bağımlılıkları
-FROM deps AS prod_modules
+FROM base AS builder
 WORKDIR /app
-RUN npm prune --omit=dev
-
-FROM node:20-bookworm-slim AS builder
-WORKDIR /app
-RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates \
-  && rm -rf /var/lib/apt/lists/*
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY prisma ./prisma
+COPY prisma.config.ts ./
 ENV NEXT_TELEMETRY_DISABLED=1
-# build-time placeholders (runtime compose ile değiştirilir)
 ENV IYZICO_API_KEY=build_placeholder
 ENV IYZICO_SECRET_KEY=build_placeholder
 ENV DATABASE_URL="postgresql://postgres:postgres@localhost:5432/placeholder?schema=public"
@@ -27,31 +22,20 @@ ENV RESEND_API_KEY=build_placeholder
 ENV RESEND_WEBHOOK_SECRET=build_placeholder
 ARG NEXT_PUBLIC_BETA_BADGE
 ENV NEXT_PUBLIC_BETA_BADGE=${NEXT_PUBLIC_BETA_BADGE}
-# next build (production) — requireProdSecrets + iyzipay modülü için placeholder (runtime compose ile değiştirilir)
 RUN npx prisma generate
+COPY . .
 RUN --mount=type=cache,target=/app/.next/cache npm run build
 
-FROM node:20-bookworm-slim AS runner
+FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
-# prisma.config.ts + global `prisma` CLI modül çözümlemesi
-ENV NODE_PATH=/usr/local/lib/node_modules
-RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates \
-  && rm -rf /var/lib/apt/lists/*
-RUN npm install -g prisma@7.7.0 && npm cache clean --force
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
-# Standalone trace: iyzipay → postman-request ve tüm alt ağaç eksik kalabiliyor; tam prod node_modules ile üzerine yaz
-COPY --from=prod_modules /app/node_modules ./node_modules
-# deps aşamasında --ignore-scripts: Prisma client yalnızca builder'da generate edilir
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
+COPY --from=deps /app/node_modules/@netgsm/sms ./node_modules/@netgsm/sms
 COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY scripts/docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 

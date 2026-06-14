@@ -80,6 +80,7 @@ services:
 
   web:
     image: ghcr.io/furkandogmus/emanetcim:latest
+    build: .
     # Konteyner hostname’i yoksa Linux’ta rastgele id olur; log satırı için okunabilir isim.
     hostname: emanetci-web
     environment:
