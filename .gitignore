@@ -78,3 +78,7 @@ next-env.d.ts
 /mobile/**/GeneratedPluginRegistrant.*
 /mobile/**/*.g.dart
 /mobile/**/*.freezed.dart
+
+# Yerel pazarlama video çıktıları
+/marketing/assets/*.mp4
+/mobile/*.mp4

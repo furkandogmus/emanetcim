@@ -39,10 +39,8 @@ Sistemin bütünlüğünü test etmek için (zombie process olarak çalışan pl
 1. **Arama ve Listeleme:**
    - Anasayfadaki arama çubuğunu kullan.
    - Belirli bir lokasyonda sadece `isActive: true` ve kapasitesi boş olan dükkanlar gelmeli.
-2. **Rezervasyon Oluşturma & iyzico Ödeme Modülü:**
    - Bir dükkan seç, check-in ve check-out tarihlerini ayarla.
    - S/M/XL boyutlarında farklı valiz sayıları seç, dinamik fiyatlamayı kontrol et.
-   - iyzico Sandbox test kartlarıyla Checkout sayfasından ödeme yap.
    - Veritabanında `status = PAID` olduğunu doğrula.
 3. **Kapasite Valisyonu (Hata Testi):**
    - Kapasitesi 5 olan bir dükkana 6 valiz rezervasyon yapmayı dene. Sistemin "Kapasite dolu" hatası vermesi gerekiyor.

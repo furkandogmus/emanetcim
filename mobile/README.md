@@ -34,7 +34,6 @@ flutterfire configure --project=bagajpark
 ```bash
 # Dev (local API)
 flutter run --dart-define=API_BASE_URL=http://localhost:3000/api/mobile \
-            --dart-define=STRIPE_PK=pk_test_... \
             --dart-define=FIREBASE_ENABLED=false
 
 # iOS simulator
@@ -49,7 +48,6 @@ flutter run -d emulator-5554
 | Değişken | Açıklama |
 |----------|----------|
 | `API_BASE_URL` | Backend mobile API kökü (örn. `https://bagajpark.com/api/mobile`) |
-| `STRIPE_PK` | Stripe publishable key |
 | `SENTRY_DSN` | Crash reporting |
 | `FIREBASE_ENABLED` | true ise push aktif |
 | `MAP_TILE_URL` | CARTO Voyager default |
@@ -78,7 +76,7 @@ npx prisma migrate dev --name mobile_push_token
 
 ```
 lib/
-├── main.dart          # entry, Sentry/Stripe/Firebase init
+├── main.dart          # entry, Sentry/Firebase init
 ├── app/               # router, theme
 ├── core/              # api, auth, config
 ├── features/          # auth, search, booking, checkout, qr, partner, profile
@@ -90,8 +88,7 @@ lib/
 ```bash
 # iOS archive
 flutter build ipa --release \
-  --dart-define=API_BASE_URL=https://bagajpark.com/api/mobile \
-  --dart-define=STRIPE_PK=pk_live_...
+  --dart-define=API_BASE_URL=https://bagajpark.com/api/mobile
 
 # Android AAB
 flutter build appbundle --release \
@@ -116,7 +113,7 @@ Phase 1 — S1 + S2/S3 temel iş mantığı hazır.
 - `GET /api/mobile/bookings/me` — `BookingService.getUserBookings`
 - `GET /api/mobile/bookings/[id]`
 - `GET /api/mobile/partner/bookings` — tüm sahip olunan dükkanlar
-- `POST /api/mobile/checkout/intent` — booking + Stripe PaymentIntent
+- `POST /api/mobile/checkout/intent` — rezervasyon oluşturma ve onaylama
 - `POST /api/mobile/seals/scan` — QR (booking token veya seal serial)
 - `POST/DELETE /api/mobile/push/register` — FCM token kayıt
 
@@ -127,5 +124,4 @@ Phase 1 — S1 + S2/S3 temel iş mantığı hazır.
 - Firebase config (`GoogleService-Info.plist`, `google-services.json`)
 - iOS Info.plist: Sign in with Apple capability, `NSCameraUsageDescription` (QR), `NSLocationWhenInUseUsageDescription`
 - Android `AndroidManifest.xml`: CAMERA, INTERNET, ACCESS_FINE_LOCATION izinleri
-- Stripe Connect hesap onayı gerektiren dükkanlar için checkout/intent hata kodu `gateway_not_stripe` / `stripe_not_configured` dönebilir — mobilde UX ekle
 - Booking iptal + modify endpoint'leri (ileri sprint)

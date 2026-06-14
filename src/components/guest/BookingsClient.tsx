@@ -33,8 +33,6 @@ import { signOut } from 'next-auth/react';
 interface BookingsClientProps {
   bookings: GuestBookingListItem[];
   pricingRules: PricingRules;
-  /** iyzico veya Stripe ile /bookings/[id]/pay açıksa onay sonrası ödeme linki. */
-  onlinePayEnabled?: boolean;
 }
 
 /**
@@ -54,7 +52,6 @@ function statusBadgeClass(status: string): string {
 export default function BookingsClient({
   bookings,
   pricingRules,
-  onlinePayEnabled = false,
 }: BookingsClientProps) {
   const t = useTranslations('Guest');
   const tErr = useTranslations('Errors');
@@ -349,15 +346,6 @@ export default function BookingsClient({
                 </div>
                 
                 <div className="flex gap-2 flex-wrap justify-end">
-                  {onlinePayEnabled &&
-                    (booking.status === "APPROVED" || booking.status === "PENDING") && (
-                      <Link
-                        href={`/bookings/${booking.id}/pay`}
-                        className="btn-ui btn-ui-md btn-ui-primary rounded-2xl"
-                      >
-                        {t("payBookingOpenCta")}
-                      </Link>
-                    )}
                   {canGuestModifyBooking(booking.status) && (
                     <button
                       type="button"

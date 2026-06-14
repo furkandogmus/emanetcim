@@ -2,7 +2,7 @@ import prisma from "@/lib/db";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { Server, Database, Mail, ShieldCheck, Smartphone, Cpu, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { Server, Database, Mail, Smartphone, Cpu, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 
 
 export default async function AdminStatusPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -22,7 +22,6 @@ export default async function AdminStatusPage({ params }: { params: Promise<{ lo
   const envStatus = {
     resend: !!process.env.RESEND_API_KEY,
     netgsm: !!process.env.NETGSM_USER && !!process.env.NETGSM_PASS,
-    iyzico: !!process.env.IYZICO_API_KEY && !!process.env.IYZICO_SECRET_KEY,
     auth: !!process.env.AUTH_SECRET,
     db: !!process.env.DATABASE_URL,
     production: process.env.NODE_ENV === 'production'
@@ -50,16 +49,6 @@ export default async function AdminStatusPage({ params }: { params: Promise<{ lo
           icon={<Database size={24} />}
           status={dbHealth ? 'success' : 'error'}
           details={[`${t("database")}: ${envStatus.db ? t("ok") : t("missing")}`, `Connect: ${dbHealth ? t("active") : t("failed")}`]}
-          tLabels={{ online: t("online"), error: t("error"), warning: t("warning") }}
-        />
-
-        {/* Payment Card */}
-        <StatusCard 
-          title={t("payment")}
-          subtitle="iyzico Marketplace"
-          icon={<ShieldCheck size={24} />}
-          status={envStatus.iyzico ? 'success' : 'error'}
-          details={[`API Key: ${envStatus.iyzico ? t("installed") : t("missing")}`, `Environment: ${envStatus.production ? 'Production' : 'Sandbox'}`]}
           tLabels={{ online: t("online"), error: t("error"), warning: t("warning") }}
         />
 

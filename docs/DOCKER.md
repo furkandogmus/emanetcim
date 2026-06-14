@@ -58,7 +58,6 @@ cp docker-compose.env.example docker-compose.env
 docker compose --env-file docker-compose.env up -d --build
 ```
 
-iyzico, e-posta vb. için anahtarları compose ortamına veya `environment:` ile `web` servisine ekleyin (`.env.example` ile uyumlu isimler).
 
 ## Veritabanı şeması
 

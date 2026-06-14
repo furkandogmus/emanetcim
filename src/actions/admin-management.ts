@@ -5,7 +5,6 @@ import { auth } from "@/auth";
 import { BookingStatus, Prisma, Role } from "@prisma/client";
 import { z } from "zod";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
-import { paymentService } from "@/services/PaymentService";
 import logger from "@/lib/logger";
 import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
@@ -578,22 +577,6 @@ export async function updateShopAction(shopId: string, data: {
     include: { owner: true },
   });
 
-  // Iyzico Sub-Merchant Sync (Sadece anahtar varsa)
-  if (shop.subMerchantKey && (data.name || data.address)) {
-    try {
-      await paymentService.updateSubMerchant({
-        subMerchantKey: shop.subMerchantKey,
-        name: data.name || shop.name,
-        address: data.address || shop.address || "Istanbul",
-        email: shop.owner.email || "partner@bagajpark.local",
-        phone: shop.owner.phone || "+905000000000",
-      });
-    } catch (error) {
-      logger.error({ shopId, error }, "iyzico_submerchant_sync_failed");
-      // Not: Ödeme servisi hatası ana işlemi bozmasın diye try-catch içindeyiz.
-    }
-  }
-
   try {
     revalidatePathAllLocales(`/admin/partners/${shopId}/edit`);
     revalidatePathAllLocales(`/admin/partners/${shopId}`);
@@ -653,4 +636,3 @@ export async function blockIpAction(ip: string, reason?: string) {
   revalidatePathAllLocales("/admin/settings");
   return { success: true };
 }
-

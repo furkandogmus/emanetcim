@@ -34,7 +34,6 @@ NEXT_PUBLIC_APP_URL=http://emanetci.local
 AUTH_TRUST_HOST=true
 ```
 
-İhtiyaç varsa iyzico vb. anahtarları da aynı dosyaya ekleyin.
 
 ### 2.2 Çalıştır
 

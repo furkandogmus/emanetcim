@@ -4,7 +4,6 @@ Bu belge ürün vizyonunu sprintlere bölen çalışma çizelgesidir; uygulama d
 
 ## Sprint 0 — tamamlanan temel
 
-- Ödeme: iyzico birincil akış, onay sonrası ödeme, webhook / idempotency sertleştirmesi.
 - Güvenlik: rate limit, audit log, demo / OAuth güvenliği.
 - Bildirimler, mühür / bagaj revizyonu, marka ve PWA dokunuşları.
 

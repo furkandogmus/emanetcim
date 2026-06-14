@@ -18,17 +18,6 @@ async function main() {
     update: {},
   });
 
-  await prisma.featureFlag.upsert({
-    where: { key: 'payments_enabled' },
-    create: {
-      key: 'payments_enabled',
-      enabled: true,
-      rolloutPct: 100,
-      description: 'iyzico/Stripe init, webhooks, refunds',
-    },
-    update: {},
-  });
-
   /** Login sayfası ile aynı: `NEXT_PUBLIC_DEMO_PASSWORD` yoksa `Demo123!` (DEMO_PASSWORD tek başına istemcide yok). */
   const demoPassword =
     typeof process.env.NEXT_PUBLIC_DEMO_PASSWORD === 'string' &&
@@ -103,8 +92,6 @@ async function main() {
       isActive: true,
       rating: 5.0,
       pricePerDay: 80,
-      subMerchantKey: 'test-shop-123',
-      subMerchantType: 'PRIVATE_COMPANY',
       hasRestroom: true,
       open247: true,
       openingTime: '00:00',
@@ -113,9 +100,10 @@ async function main() {
   });
 
   const sultanahmetShop = await prisma.shop.upsert({
-    where: { subMerchantKey: 'sultan-456' },
+    where: { id: 'e2e00000-0000-4000-8000-000000000002' },
     update: { isActive: true },
     create: {
+      id: 'e2e00000-0000-4000-8000-000000000002',
       ownerId: partner.id,
       name: 'Sultanahmet Corner (Test)',
       address: 'Ayasofya Meydanı No:2, İstanbul',
@@ -125,8 +113,6 @@ async function main() {
       isActive: true,
       rating: 4.7,
       pricePerDay: 70,
-      subMerchantKey: 'sultan-456',
-      subMerchantType: 'PERSONAL',
     },
   });
 

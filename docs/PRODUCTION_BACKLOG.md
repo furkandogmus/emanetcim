@@ -10,7 +10,6 @@ Bu liste **tamamlanmış işleri değil**, üretime yaklaşırken ve sonrasında
 - [ ] **CSP / güvenlik başlıkları:** Nginx ve Next.js için tutarlı `Content-Security-Policy`, `HSTS`, `X-Frame-Options`, `Referrer-Policy`; raporlama endpoint’i.
 - [ ] **Rate limiting:** Dağıtımlı limit (Redis/Upstash); kritik aksiyonlar (ödeme, giriş, şifre sıfırlama) için ayrı kotalar.
 - [ ] **Auth hardening:** Session fixation, CSRF (form POST’lar), OAuth callback doğrulama, brute-force / account lockout politikası.
-- [ ] **Ödeme PCI sınırı:** Kart verisi uygulama sunucusuna hiç dokunmuyor mu denetimi; iyzico webhook imza doğrulaması ve idempotency.
 - [ ] **KVKK / GDPR:** Veri envanteri, saklama süreleri, silme/taşıma talepleri, DPA şablonları, alt işlemci listesi.
 - [ ] **Denetim izi:** Admin ve finans işlemleri için immutable audit log (kim, ne, ne zaman, önceki değer).
 - [ ] **Supply chain:** Bağımlılık güncellemeleri (Dependabot/Renovate), imzalı commit’ler, SBOM (Software Bill of Materials) çıktısı.
@@ -46,7 +45,6 @@ Bu liste **tamamlanmış işleri değil**, üretime yaklaşırken ve sonrasında
 
 - [ ] **Idempotency:** Ödeme ve rezervasyon oluşturma için istemci/taraf anahtarı ile tekrarlanabilir istekler.
 - [ ] **Kuyruk / outbox:** Kritik yan etkiler (e-posta, webhook, bildirim) için güvenilir teslimat ve yeniden deneme.
-- [ ] **Circuit breaker:** Dış servis (iyzico, e-posta) hatalarında degrade modu ve kullanıcı mesajları.
 - [ ] **Timeout ve retry politikası:** Tüm HTTP çıkışları için net sınırlar; jitter’lı exponential backoff.
 - [ ] **Ölü harf kuyruğu (DLQ):** İşlenemeyen mesajlar için inceleme ve yeniden oynatma; zehirli mesaj politikası.
 - [ ] **Ön plan / arka plan ayrımı:** Uzun süren işleri HTTP isteğinden ayırma; kullanıcıya “işleniyor” durumu.
@@ -100,7 +98,6 @@ Bu liste **tamamlanmış işleri değil**, üretime yaklaşırken ve sonrasında
 ## 9. Test stratejisi
 
 - [ ] **Piramit:** Unit → integration (DB) → e2e (kritik akışlar); flake azaltma ve paralel koşum.
-- [ ] **Sözleşme testleri:** Ödeme webhook payload’ları; iyzico sandbox senaryolarının genişletilmesi.
 - [ ] **Test verisi:** Deterministik factory’ler; prod benzeri anonim fixture’lar.
 - [ ] **Görünürlük / a11y otomasyonu:** axe veya eşdeğeri ile kritik sayfalar; Lighthouse CI veya Core Web Vitals bütçesi.
 - [ ] **Güvenlik testleri:** OWASP ZAP veya DAST (staging); bağımlılık tarama gate’i.
@@ -160,7 +157,6 @@ Bu liste **tamamlanmış işleri değil**, üretime yaklaşırken ve sonrasında
 
 - [ ] **Sürümleme:** Public API varsa `/v1` ve deprecation politikası; breaking change duyurusu.
 - [ ] **Giden webhook’lar:** Partner’a olay teslimi; imza, retry, idempotency anahtarı.
-- [ ] **Gelen entegrasyonlar:** iyzico dışında e-posta, SMS, harita; her biri için timeout ve sağlık kontrolü.
 - [ ] **Sandbox–prod paritesi:** Test ortamında üretimle aynı kod yolu; mock seviyesi dokümante.
 
 ---
@@ -226,7 +222,6 @@ Bu liste **tamamlanmış işleri değil**, üretime yaklaşırken ve sonrasında
 
 ## 23. Tedarik zinciri ve üçüncü taraflar
 
-- [ ] **SLA ve destek kanalları:** iyzico, barındırma, domain; kesinti iletişim listesi.
 - [ ] **Yedek sağlayıcı stratejisi:** Kritik entegrasyon için B planı (manuel süreç veya alternatif).
 - [ ] **Lisans uyumu:** NPM paketlerinin lisans uyumluluğu; copyleft risk analizi (kurumsal gereksinim halinde).
 

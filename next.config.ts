@@ -32,14 +32,13 @@ const securityHeaders = [
       "default-src 'self'",
       // NOTE: Next.js runtime injects inline bootstrap scripts/styles.
       // Keep unsafe-inline in production until nonce/hash CSP is implemented app-wide.
-      "script-src 'self' 'unsafe-inline' https://js.stripe.com https://plausible.io https://static.cloudflareinsights.com https://client.crisp.chat",
+      "script-src 'self' 'unsafe-inline' https://plausible.io https://static.cloudflareinsights.com https://client.crisp.chat",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://client.crisp.chat",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data: https://fonts.gstatic.com https://client.crisp.chat",
       "connect-src 'self' https: wss: https://o4511211308122112.ingest.de.sentry.io",
       // MapLibre GL blob: üzerinden web worker üretir; yoksa /search haritası CSP'ye takılır.
       "worker-src 'self' blob:",
-      "frame-src https://js.stripe.com https://hooks.stripe.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -53,9 +52,6 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   images: {
     remotePatterns: [
       {
@@ -64,7 +60,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  serverExternalPackages: ["@prisma/client", "pg", "iyzipay", "@netgsm/sms"],
+  serverExternalPackages: ["@prisma/client", "pg"],
   async headers() {
     return [
       {
@@ -75,12 +71,17 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(withNextIntl(nextConfig), {
-  org: process.env.SENTRY_ORG || "bagajpark",
-  project: process.env.SENTRY_PROJECT || "bagajpark-nextjs",
-  authToken: process.env.SENTRY_AUTH_TOKEN,
-  widenClientFileUpload: true,
-  tunnelRoute: "/monitoring",
-  silent: !process.env.CI,
-});
+const isSentryEnabled = !!process.env.SENTRY_AUTH_TOKEN;
 
+const exportedConfig = isSentryEnabled
+  ? withSentryConfig(withNextIntl(nextConfig), {
+      org: process.env.SENTRY_ORG || "bagajpark",
+      project: process.env.SENTRY_PROJECT || "bagajpark-nextjs",
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      widenClientFileUpload: true,
+      tunnelRoute: "/monitoring",
+      silent: !process.env.CI,
+    })
+  : withNextIntl(nextConfig);
+
+export default exportedConfig;

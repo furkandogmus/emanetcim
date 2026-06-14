@@ -50,7 +50,6 @@ export type PartnerBookingListItem = Prisma.BookingGetPayload<{
   };
 }>;
 import { createQrToken } from '@/lib/qr-token';
-import { isRefundSuccess } from '@/lib/payment-status';
 import logger from '@/lib/logger';
 import { isShopOpenAt } from '@/lib/shop-hours';
 import { totalBagCount } from '@/lib/bag-pricing';
@@ -69,10 +68,6 @@ import {
   validateBookingStayWindow,
 } from '@/lib/booking-server-price';
 import { bookingEventService } from '@/services/BookingEventService';
-import {
-  estimatePaidRefundForTier,
-  getCancellationTier,
-} from '@/lib/cancellation-policy';
 
 type TxClient = Omit<
   Prisma.TransactionClient,
@@ -434,31 +429,13 @@ export class BookingService implements IBookingService {
         pricingRules
       );
 
-      // BUG-06 FIX: İade başarısız olsa da checkout tamamlanmalı.
-      // Misafir valizi teslim aldı; sistemi CHECKED_IN'de bırakmak operasyonel kilitlenmeye yol açar.
-      // Başarısız iade tutarı failedRefundAmount alanına kaydedilip reconcile edilir.
-      let failedRefundAmount = 0;
+      // Harici ödeme sağlayıcısı yok; hesaplanan erken teslim tutarı manuel takip edilir.
+      const failedRefundAmount = refundAmount;
       if (refundAmount > 0) {
-        const { paymentService } = await import('@/services/PaymentService');
-        try {
-          const refundResult = await paymentService.refundPayment(
-            bookingId,
-            refundAmount
-          );
-          if (!isRefundSuccess(refundResult.status)) {
-            logger.warn(
-              { bookingId, refundAmount, refundResult },
-              'booking_early_checkout_refund_failed_proceeding'
-            );
-            failedRefundAmount = refundAmount;
-          }
-        } catch (refundError) {
-          logger.error(
-            { bookingId, refundAmount, err: refundError },
-            'booking_early_checkout_refund_exception_proceeding'
-          );
-          failedRefundAmount = refundAmount;
-        }
+        logger.info(
+          { bookingId, refundAmount },
+          'booking_early_checkout_refund_requires_manual_handling'
+        );
       }
 
       // 2. Mühürleri iade + statüyü CHECKED_OUT yap (her durumda tamamlanır)
@@ -652,58 +629,16 @@ export class BookingService implements IBookingService {
     const hasCapturedPayment = await prisma.paymentLog.findFirst({
       where: { bookingId, status: 'SUCCESS' },
     });
-    const treatAsPaidRefund =
+    const hadPayment =
       booking.status === 'PAID' || !!hasCapturedPayment;
 
     try {
       let creditCode: string | undefined;
 
-      if (treatAsPaidRefund) {
-        const checkIn = new Date(booking.checkInTime);
-        const tier = getCancellationTier(checkIn);
+      if (hadPayment) {
         const totalPaid = moneyToNumber(booking.totalPrice);
-        const { cardRefund, isCreditOnly } = estimatePaidRefundForTier(
-          totalPaid,
-          tier
-        );
-
-        const { paymentService } = await import('@/services/PaymentService');
-
-        if (isCreditOnly) {
-          if (totalPaid > 0) {
-            try {
-              creditCode = await this.issueCancellationCreditCoupon(totalPaid);
-            } catch (e) {
-              logger.error(
-                { err: e, bookingId },
-                'cancelBooking_credit_coupon_failed',
-              );
-              return {
-                ok: false,
-                code: 'UNKNOWN',
-                message: 'Kupon oluşturulamadı; iptal tamamlanamadı.',
-              };
-            }
-          }
-        } else if (cardRefund > 0) {
-          const partialRefund = cardRefund + 0.02 < totalPaid;
-          const refundResult = await paymentService.refundPayment(
-            bookingId,
-            cardRefund,
-            partialRefund ? { keepPaymentLogSuccess: true } : undefined
-          );
-          if (!isRefundSuccess(refundResult?.status)) {
-            logger.error(
-              { bookingId, cardRefund, status: refundResult?.status },
-              'cancelBooking_refund_failed',
-            );
-            return {
-              ok: false,
-              code: 'REFUND_FAILED',
-              message:
-                'İade şu an tamamlanamadı. Lütfen daha sonra tekrar deneyin veya destek ile iletişime geçin.',
-            };
-          }
+        if (totalPaid > 0) {
+          creditCode = await this.issueCancellationCreditCoupon(totalPaid);
         }
       }
 
@@ -725,7 +660,7 @@ export class BookingService implements IBookingService {
       bookingEventService.record({
         bookingId,
         event: "CANCELLED",
-        metadata: { previousStatus: booking.status, hadPayment: treatAsPaidRefund, creditCode },
+        metadata: { previousStatus: booking.status, hadPayment, creditCode },
       }).catch((err) => logger.error({ err, bookingId }, "booking_event_cancelled_failed"));
 
       return { ok: true, creditCode };
@@ -826,39 +761,13 @@ export class BookingService implements IBookingService {
     const newTotal = authTotals.subtotalBeforeCoupon;
     const oldTotal = moneyToNumber(booking.totalPrice);
 
-    if (isPaidLike && newTotal > oldTotal + 0.005) {
+    if (isPaidLike && Math.abs(newTotal - oldTotal) > 0.005) {
       return {
         ok: false,
         code: 'PRICE_INCREASE',
         message:
-          'Ödeme alınmış rezervasyonda tutar artırılamaz. İptal edip yeniden rezervasyon oluşturabilirsiniz.',
+          'Geçmiş ödeme kaydı bulunan rezervasyonun tutarı değiştirilemez.',
       };
-    }
-
-    const refundDue =
-      isPaidLike && newTotal < oldTotal - 0.005
-        ? Math.round((oldTotal - newTotal) * 100) / 100
-        : 0;
-
-    if (refundDue > 0) {
-      const { paymentService } = await import('@/services/PaymentService');
-      const refundResult = await paymentService.refundPayment(
-        bookingId,
-        refundDue,
-        { keepPaymentLogSuccess: true }
-      );
-      if (!isRefundSuccess(refundResult.status)) {
-        logger.error(
-          { bookingId, refundDue, status: refundResult.status },
-          'modifyBooking_refund_failed',
-        );
-        return {
-          ok: false,
-          code: 'REFUND_FAILED',
-          message:
-            'İade tamamlanamadı; rezervasyon değiştirilmedi. Lütfen tekrar deneyin.',
-        };
-      }
     }
 
     try {
@@ -912,7 +821,6 @@ export class BookingService implements IBookingService {
         metadata: {
           previousTotal: moneyToNumber(booking.totalPrice),
           newTotal,
-          refundDue,
           checkInTime: input.checkInTime,
           checkOutTime: input.checkOutTime,
           bagCountS: input.bagCountS,

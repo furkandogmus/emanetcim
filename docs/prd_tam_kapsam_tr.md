@@ -26,7 +26,6 @@
 
 ### 3.2. Rezervasyon ve Ödeme Süreci
 - **Boyut Bazlı Fiyatlandırma:** S (100 TL), M/L (200 TL), XL (350 TL) kademeli ücretlendirme.
-- **iyzico Entegrasyonu:** TROY kartlar dahil tüm kartlarla güvenli ödeme.
 - **Dijital Makbuz:** Rezervasyon onaylandığında oluşan hukuki geçerliliği olan belge.
 
 ---

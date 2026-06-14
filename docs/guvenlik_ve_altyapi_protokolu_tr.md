@@ -39,7 +39,6 @@ Bu doküman, platformun teknik güvenliğini, veri gizliliğini ve Cloudflare ta
 ## 🚨 3. Güvenlik Denetim Listesi (Checklist)
 - [ ] Production moduna geçerken `NODE_ENV=production` set edilmeli.
 - [ ] Cloudflare üzerinde "Always Use HTTPS" aktif edilmeli.
-- [ ] iyzico API anahtarları sadece sunucu tarafında (Server-side) saklanmalı ve istemciye (Client) asla sızdırılmamalı.
 - [ ] Veritabanı yedekleri günlük olarak şifreli şekilde alınmalı.
 
 ---

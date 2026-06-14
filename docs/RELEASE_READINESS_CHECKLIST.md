@@ -12,7 +12,6 @@
 ## 2) Critical Security/Operations
 - Rate limit smoke test (rapid page switches, auth, payment endpoints)
 - `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` present in production
-- Payment secrets (`IYZICO_*` and/or Stripe keys) validated
 - Webhook signature verification validated in production logs
 - No dev credentials or `.env` leaks in repository
 

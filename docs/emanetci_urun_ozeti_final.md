@@ -19,7 +19,6 @@ Bu doküman, "Emanetçi" platformunun tüm işleyişini, kurallarını ve teknik
 | Parametre | **Detay / Limit** | **Açıklama** |
 | :--- | :--- | :--- |
 | **Fiyatlandırma** | 60 - 80 TL / Günlük | Bölgeye göre dinamik ayarlanabilir. |
-| **Gelir Paylaşımı** | %50 Esnaf, %50 Platform | iyzico ve sigorta platform payından düşer. |
 | **Tazminat Limiti** | Valiz başına **5.000 TL** | Değerli eşya (altın, nakit) kapsam dışıdır. |
 | **Mühürleme** | Seri No'lu Plastik Mühür | Valiz fermuarları için zorunludur. |
 | **İptal Şartı** | Teslimata 1 saat kala | %100 kesintisiz iade hakkı. |
@@ -31,7 +30,6 @@ Bu doküman, "Emanetçi" platformunun tüm işleyişini, kurallarını ve teknik
 | Bileşen | **Seçilen Teknoloji** | **Amacı** |
 | :--- | :--- | :--- |
 | **Framework** | Next.js 15 (App Router) | Hız, SEO ve PWA (Mobil Uygulama benzeri web). |
-| **Ödeme** | iyzico Marketplace API | Otomatik komisyon dağıtımı ve güvenli tahsilat. |
 | **Harita** | Google Maps SDK | Lokasyon bazlı en yakın nokta gösterimi. |
 | **Güvenlik** | İmzalı QR (Signed JWT) | Sahteciliği önlemek için süreli QR kodlar. |
 

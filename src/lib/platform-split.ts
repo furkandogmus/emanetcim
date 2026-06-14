@@ -3,7 +3,7 @@ function clampCommissionRate(): number {
   return Number.isFinite(rate) ? Math.min(1, Math.max(0, rate)) : 0.5;
 }
 
-/** Esnaf payı (iyzico subMerchantPrice). Kalan platform komisyonu. */
+/** Esnaf payı. Kalan tutar platform komisyonudur. */
 export function computeSubMerchantShare(totalPrice: number): number {
   const clamped = clampCommissionRate();
   return Math.round(totalPrice * (1 - clamped) * 100) / 100;

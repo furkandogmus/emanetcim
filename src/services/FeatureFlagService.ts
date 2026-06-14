@@ -1,9 +1,5 @@
 import { Prisma } from "@prisma/client";
 import prisma from "@/lib/db";
-import {
-  FEATURE_FLAG_PAYMENTS_ENABLED,
-  type KnownFeatureFlagKey,
-} from "@/lib/feature-flag-keys";
 
 const TTL_MS = 60_000;
 
@@ -16,10 +12,6 @@ type FlagRow = {
   enabled: boolean;
   rolloutPct: number;
   allowedUserIds: Prisma.JsonValue | null;
-};
-
-const DEFAULT_WHEN_MISSING: Record<KnownFeatureFlagKey, boolean> = {
-  [FEATURE_FLAG_PAYMENTS_ENABLED]: true,
 };
 
 let cache: { map: Map<string, FlagRow>; at: number } | null = null;
@@ -76,7 +68,7 @@ async function loadMap(): Promise<Map<string, FlagRow>> {
 class FeatureFlagService {
   /**
    * Whether the flag is on for this context.
-   * Missing row: uses safe defaults per known key (payments_enabled → true).
+   * Missing flags are disabled by default.
    */
   async isEnabled(
     key: string,
@@ -84,12 +76,7 @@ class FeatureFlagService {
   ): Promise<boolean> {
     const map = await loadMap();
     const row = map.get(key);
-    if (!row) {
-      if (key === FEATURE_FLAG_PAYMENTS_ENABLED) {
-        return DEFAULT_WHEN_MISSING[FEATURE_FLAG_PAYMENTS_ENABLED];
-      }
-      return false;
-    }
+    if (!row) return false;
     if (!row.enabled) return false;
 
     const allow = parseAllowlist(row.allowedUserIds);

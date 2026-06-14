@@ -29,10 +29,7 @@ Aşağıdaki eşyaların sisteme dahil edilmesi KESİNLİKLE yasaktır:
 - **İşlenen Veriler:** Misafir telefon numarası, konum verisi, kredi kartı maskeli bilgisi.
 - **Açık Rıza:** Kullanıcı, ödeme yapmak ve konum bulmak için kişisel verisinin işlenmesine "Açık Rıza" verir.
 
-## 4. Ödeme Mevzuatı (TCMB & iyzico)
 
-- **Güvenli Ödeme:** 6493 Sayılı Kanun kapsamında yetkili olan iyzico aracılığıyla ödemeler alınır.
-- **Pazaryeri Modeli:** iyzico Marketplace API ile hak edişler anlık bölünür.
 
 ---
 *Hazırlayan: Antigravity AI - Hukuk & Operasyon Departmanı.*

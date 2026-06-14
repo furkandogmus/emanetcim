@@ -97,12 +97,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         },
       );
       final bookingId = res.data['bookingId'] as String?;
-      final clientSecret = res.data['clientSecret'] as String?;
       final serverTotal = res.data['totalPrice'] as num?;
-      final bypassed = kDebugMode && res.data['bypassed'] == true;
 
-      if (bookingId == null || (!bypassed && clientSecret == null)) {
-        _toast('checkout.error_payment'.tr());
+      if (bookingId == null) {
+        _toast('common.error'.tr());
         return;
       }
 
@@ -128,18 +126,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         if (errCode == 'no_bags') msg = 'checkout.error_no_bags'.tr();
         if (errCode == 'shop_not_found') {
           msg = 'checkout.error_shop_closed'.tr();
-        }
-        const paymentErrors = {
-          'gateway_not_configured',
-          'payments_disabled',
-          'gateway_not_stripe',
-          'stripe_not_configured',
-          'stripe_no_client_secret',
-          'stripe_error',
-          'invalid_amount',
-        };
-        if (paymentErrors.contains(errCode)) {
-          msg = 'checkout.error_payment'.tr();
         }
       }
       _toast(msg);
@@ -512,26 +498,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                               ),
                       ),
                     ),
-                      const SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.verified_user_rounded,
-                            size: 14,
-                            color: Color(0xFF424242),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'checkout.secure_payment'.tr(),
-                            style: GoogleFonts.outfit(
-                              fontSize: 11,
-                              color: const Color(0xFF424242),
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
                     ],
                   ),
                 );

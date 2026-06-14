@@ -1,6 +1,5 @@
 # Ölçekleme ve dağıtım: Self-hosted vs Vercel
 
-Bu proje **Next.js (App Router)**, **PostgreSQL**, **Prisma**, **Auth.js**, **iyzico** kullanıyor. Aşağıda iki tipik dağıtım ve ölçekleme yolu özetlenir.
 
 ---
 
@@ -39,7 +38,6 @@ Bu proje **Next.js (App Router)**, **PostgreSQL**, **Prisma**, **Auth.js**, **iy
 
 - `DATABASE_URL` (pooler’a işaret edebilir)
 - `AUTH_SECRET`, `AUTH_URL` (dış domain)
-- iyzico ve webhook URL’leri production domain ile
 
 **Docker Compose** ile aynı stack’i tek sunucuda denemek için: **`docs/DOCKER.md`** (Postgres + Next + **Nginx** reverse proxy).
 
@@ -97,7 +95,6 @@ Bu proje **Next.js (App Router)**, **PostgreSQL**, **Prisma**, **Auth.js**, **iy
 
 ## 4. Bu projeye özel notlar
 
-- **Ödeme (iyzico)**: Webhook’lar hızlı cevap vermeli; yoğunlukta **idempotent** işlem + gerekirse **arka planda** işleme (kuyruk).
 - **Auth**: JWT; çok instance’da **sticky session gerekmez**.
 - **Proxy** (`src/proxy.ts`): Vercel edge veya self-hosted’ta reverse proxy ile uyumlu; `matcher` ve locale prefix’leri koruyun.
 
@@ -160,7 +157,6 @@ Aşağıdaki boyutlandırma, **orta seviye pazarlama trafiği** (ani viral yok) 
 
 ### Bant genişliği ve dış servisler
 
-- **iyzico**: Ödeme anında dış API; sizin sunucunuzun ölçeği kadar değil, **timeout / retry** politikası önemli.
 - **Webhook**: Kısa cevap + idempotent iş; yoğunlukta **kuyruk** (ileride).
 
 ### 5 admin
@@ -242,7 +238,6 @@ Aşağıdaki öneriler, **sürekli orta–yüksek trafik** ve **haftalık kampan
 
 ### Ödeme ve webhook
 
-- **iyzico** limitleri ve **timeout** süreleri izlenmeli.
 - Webhook başına iş **idempotent**; yoğunlukta **kuyruk + worker** (Redis + BullMQ / benzeri) **100k bandında planlanabilir**.
 
 ### İzleme ve operasyon

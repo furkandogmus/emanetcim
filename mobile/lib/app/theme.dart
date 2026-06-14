@@ -33,6 +33,7 @@ ThemeData buildLightTheme() {
     ),
     scaffoldBackgroundColor: _bgLight,
     textTheme: textTheme,
+    splashFactory: InkSparkle.splashFactory,
     appBarTheme: AppBarTheme(
       backgroundColor: _bgLight,
       foregroundColor: _textDark,
@@ -77,8 +78,8 @@ ThemeData buildLightTheme() {
     cardTheme: CardThemeData(
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-        side: BorderSide(color: Colors.grey.shade100),
+        borderRadius: BorderRadius.circular(20),
+        side: const BorderSide(color: AppColors.border),
       ),
       surfaceTintColor: Colors.white,
       clipBehavior: Clip.antiAlias,
@@ -108,6 +109,45 @@ ThemeData buildLightTheme() {
           fontWeight: FontWeight.w500,
         ),
       ),
+    ),
+    navigationBarTheme: NavigationBarThemeData(
+      height: 72,
+      elevation: 0,
+      backgroundColor: Colors.white,
+      indicatorColor: _brandOrange.withValues(alpha: 0.12),
+      labelTextStyle: WidgetStateProperty.resolveWith(
+        (states) => GoogleFonts.outfit(
+          fontSize: 11,
+          fontWeight: states.contains(WidgetState.selected)
+              ? FontWeight.w700
+              : FontWeight.w500,
+          color: states.contains(WidgetState.selected)
+              ? _brandOrange
+              : AppColors.textSecondary,
+        ),
+      ),
+      iconTheme: WidgetStateProperty.resolveWith(
+        (states) => IconThemeData(
+          size: 24,
+          color: states.contains(WidgetState.selected)
+              ? _brandOrange
+              : AppColors.textSecondary,
+        ),
+      ),
+    ),
+    chipTheme: base.chipTheme.copyWith(
+      side: const BorderSide(color: AppColors.border),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.w500),
+    ),
+    bottomSheetTheme: const BottomSheetThemeData(
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.white,
+      showDragHandle: true,
+    ),
+    snackBarTheme: SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
     ),
   );
 }

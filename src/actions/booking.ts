@@ -37,13 +37,6 @@ export type CreateBookingInput = {
   insuranceFee?: number;
   checkInTime: Date;
   checkOutTime: Date;
-  cardInfo?: {
-    cardHolderName: string;
-    cardNumber: string;
-    expireMonth: string;
-    expireYear: string;
-    cvc: string;
-  };
   couponCode?: string;
   referralCode?: string;
   /** Guest checkout: accountsız kullanıcılar için e-posta */

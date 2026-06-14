@@ -63,12 +63,10 @@ Bu doküman, Web (Next.js) ve Mobil (Flutter) uygulamaları arasındaki özellik
 | 37 | Rezervasyon İptali | `cancelBookingAction` | `_cancelBooking` (API çağrısı) | **Eşit (Parity) [DÜZELTİLDİ]** | Mobilde rezervasyon iptal aksiyonu ve API entegrasyonu tamamlandı. |
 | 38 | Rezervasyon Düzenleme | `BookingModifyModal.tsx` | `_modifyBooking` | **Eşit (Parity) [DÜZELTİLDİ]** | Mobilde tarih ve çanta sayısı güncelleme arayüzü eklendi. |
 | 39 | Uyuşmazlık / Şikayet | `DisputeForm.tsx` | `_showDisputeSheet` | **Eşit (Parity) [DÜZELTİLDİ]** | Mobilde hasar/çalıntı şikayet formu eklendi. |
-| 40 | Onaylı Rezervasyonu Ödeme | `/bookings/[id]/pay/page.tsx` | *EKSİK* | **Fark (Gap)** | Sonradan ödemeli akış mobilde eksik; checkout'ta direkt ödeniyor. |
 | 41 | Makbuz / Fiş Yazdırma | `PrintButton.tsx` | *EKSİK* | **Fark (Gap)** | Mobilde fiş PDF veya yazdırma seçeneği bulunmuyor. |
 | 42 | Google Takvim Entegrasyonu | `BookingDetailActions.tsx` | *EKSİK* | **Fark (Gap)** | Mobilde takvime ekleme butonu bulunmuyor. |
 | 43 | Mühür Numaralarını Görme | Detay sayfasında mühür listesi | `bookingSealsProvider` | **Eşit (Parity) [DÜZELTİLDİ]** | Mobilde valizlere takılan mühür numaraları listeleniyor. |
 | 44 | İptal Politikası Gösterimi | `CancellationPolicy.tsx` | `_showCancellationPolicy` | **Eşit (Parity) [DÜZELTİLDİ]** | Mobilde iptal kuralları detay paneli açılıyor. |
-| 45 | Onay Sonrası Ödeme | `/bookings/[id]/pay` | *EKSİK* | **Fark (Gap)** | Web'deki onay bekleyen ödeme akışı mobilde bulunmuyor. |
 | 46 | Yorum ve Puan Gönderme | `ReviewForm.tsx` | `_showReviewSheet` | **Eşit (Parity) [DÜZELTİLDİ]** | Mağazayı değerlendirme ve yorum yazma formu mobilde aktif. |
 
 ### A5. Profil ve Hesap Ayarları (Profile & Account)
@@ -134,7 +132,6 @@ Bu doküman, Web (Next.js) ve Mobil (Flutter) uygulamaları arasındaki özellik
 | 85 | Mağaza Ayarları (Kapasite, Fiyat, Saat) | `/partner/settings/page.tsx` | `partner_settings_screen.dart` | **Eşit (Parity)** | Kapasite, fiyat ve çalışma saatleri mobilde güncellenebilir. |
 | 86 | Mağaza Konum Ayarları (Adres, İl, İlçe) | `PartnerShopSettingsForm` | `partner_settings_screen.dart` (`_address`, `_city`, `_district`) | **Eşit (Parity) [DÜZELTİLDİ]** | Adres, il ve ilçe alanları mobilden güncellenebiliyor. |
 | 87 | İletişim Telefonu Güncelleme | `PartnerShopSettingsForm` | `partner_settings_screen.dart` (`_phone`) | **Eşit (Parity) [DÜZELTİLDİ]** | Esnaf dükkan telefon numarasını mobilden de güncelleyebiliyor. |
-| 88 | Payout / Stripe Connect | Stripe Connect Entegrasyonu | *EKSİK* | **Fark (Gap)** | Hakediş banka hesabı bağlama akışı mobilde yoktur, web üzerinden yapılması gerekir. |
 | 89 | Sipariş Listesi Filtreleme | `/partner/bookings/page.tsx` | `partner_bookings_screen.dart` | **Eşit (Parity) [DÜZELTİLDİ]** | Mobilde 'Tümü', 'Bekleyen', 'Aktif', 'Tamamlanan' sekmeleri eklendi. |
 | 90 | Sipariş Onaylama / Reddetme | `PartnerBookingActionLinks` | `_approveBooking` / `_rejectBooking` | **Eşit (Parity) [DÜZELTİLDİ]** | Bekleyen rezervasyonlar mobilden onaylanabiliyor veya reddedilebiliyor. |
 | 91 | Sipariş Detayı (Müşteri İletişim) | `/partner/bookings/[id]` | `partner_booking_detail_screen.dart` | **Eşit (Parity)** | Müşteri adı ve detayları görüntülenebiliyor. |
@@ -174,7 +171,6 @@ Mobil uygulamada henüz yer almayan ve geliştirilmesi gereken öncelikli alanla
 
 ### 2. Esnaf Tarafındaki Öncelikli Eksiklikler (Partner Gaps):
 * **Mühür Siparişi Arayüzü (P1):** Esnaf yeni mühür talebinde bulunamıyor veya hatalı mühürleri mobilden bildiremiyor (API'leri hazır ancak mobil UI'ı yok).
-* **Stripe Connect Payout Entegrasyonu (P2):** Banka hesabı bağlama/ödeme alma ayarları sadece web üzerinden yapılıyor.
 * **Sipariş Revizyonu (P2):** Teslimat anında ek çanta ekleme/çıkarma işlemi mobilden yönetilemiyor (API'si hazır, mobil UI eksik).
 
 ### 3. Yönetici Tarafındaki Eksiklikler (Admin Gaps):

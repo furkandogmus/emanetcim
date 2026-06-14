@@ -7,12 +7,10 @@ import {
   MapPin,
   CheckCircle2,
   Clock,
-  CreditCard,
   ChevronLeft,
   Hash,
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
-import { isGuestOnlinePayEnabled } from "@/lib/guest-payment";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import PrintButton from "@/components/guest/PrintButton";
 import BookingQrDisplay from "@/components/guest/BookingQrDisplay";
@@ -20,7 +18,6 @@ import BookingDetailActions from "@/components/guest/BookingDetailActions";
 import { moneyToNumber } from "@/lib/money";
 import { getPricingRules } from "@/lib/platform-settings";
 import BookingDetailModifySection from "@/components/guest/BookingDetailModifySection";
-import BookingStripeReturnSync from "@/components/guest/BookingStripeReturnSync";
 import type { Metadata } from "next";
 import { dateLocaleForUiLocale } from "@/lib/date-locale";
 import { formatTryCurrency } from "@/lib/currency";
@@ -44,19 +41,10 @@ export async function generateMetadata({
  */
 export default async function BookingDetailPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ locale: string; id: string }>;
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { locale, id } = await params;
-  const sp = searchParams ? await searchParams : {};
-  const paymentIntentRaw = sp["payment_intent"];
-  const redirectStatusRaw = sp["redirect_status"];
-  const paymentIntentId =
-    typeof paymentIntentRaw === "string" ? paymentIntentRaw : undefined;
-  const redirectStatus =
-    typeof redirectStatusRaw === "string" ? redirectStatusRaw : undefined;
 
   setRequestLocale(locale);
   const session = await auth();
@@ -94,11 +82,6 @@ export default async function BookingDetailPage({
     booking.status === "CHECKED_OUT";
   const confirmedAtShop = booking.status === "APPROVED";
   const waitingShop = booking.status === "WAITING_APPROVAL";
-  const needsPayment = booking.status === "PENDING";
-  const onlinePay = await isGuestOnlinePayEnabled({
-    userId: session.user.id,
-  });
-
   const canCancel = ["PENDING", "APPROVED", "PAID"].includes(booking.status);
 
   return (
@@ -111,13 +94,6 @@ export default async function BookingDetailPage({
           <ChevronLeft size={16} aria-hidden />
           {t("backToBookings")}
         </Link>
-        {paymentIntentId ? (
-          <BookingStripeReturnSync
-            bookingId={id}
-            paymentIntentId={paymentIntentId}
-            redirectStatus={redirectStatus}
-          />
-        ) : null}
 
         {/* Status header */}
         <div className="flex flex-col items-center text-center gap-2 mb-4">
@@ -144,26 +120,6 @@ export default async function BookingDetailPage({
               </div>
               <h1 className="text-2xl font-black text-gray-900">{t("bookingDetailWaitingTitle")}</h1>
               <p className="text-gray-500 text-sm font-medium px-8">{t("requestSentSub")}</p>
-            </>
-          ) : needsPayment ? (
-            <>
-              <div className="w-16 h-16 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mb-2">
-                <CreditCard size={32} />
-              </div>
-              <h1 className="text-2xl font-black text-gray-900">{t("bookingDetailPaymentNeededTitle")}</h1>
-              <p className="text-gray-500 text-sm font-medium px-8">{t("bookingDetailPaymentNeededSub")}</p>
-              {onlinePay ? (
-                <Link
-                  href={`/bookings/${id}/pay`}
-                  className="mt-4 inline-flex items-center justify-center rounded-2xl bg-orange-600 px-8 py-4 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-orange-200 hover:bg-orange-700"
-                >
-                  {t("payBookingOpenCta")}
-                </Link>
-              ) : (
-                <p className="mt-4 text-xs font-medium text-gray-500 px-4">
-                  {t("bookingDetailPaymentUnavailableNote")}
-                </p>
-              )}
             </>
           ) : (
             <>
@@ -303,5 +259,3 @@ export default async function BookingDetailPage({
     </div>
   );
 }
-
-
