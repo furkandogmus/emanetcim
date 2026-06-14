@@ -1234,56 +1234,184 @@
     "istanbul": {
       "label": "İstanbul",
       "metaTitle": "İstanbul valiz emanet | BagajPark",
-      "metaDescription": "İstanbul’da güvenli valiz ve bagaj emanet noktaları. Turistik bölgelere yakın depolama; online rezervasyon.",
-      "headline": "İstanbul’da valiz emanet",
+      "metaDescription": "İstanbul'da güvenli valiz ve bagaj emanet noktaları. Sultanahmet, Taksim, Kadıköy'de online rezervasyonlu bagaj depolama. Bavulsuz gez!",
+      "headline": "İstanbul'da valiz emanet",
       "intro": "Tarihi Yarımada, Galata Kulesi, İstiklal Caddesi ve Kadıköy gibi hareketli bölgelerde yer alan güvenli emanet noktalarımız sayesinde seyahatinizi kolaylaştırın. Ayasofya, Sultanahmet ve Kapalıçarşı gezilerinizde veya vapur yolculuklarınızda ağır bavullarınızı taşımanıza gerek yok. BagajPark esnaflarına valizlerinizi mühürlü olarak teslim edin, İstanbul'un eşsiz manzarasını ve tarihi dokusunu bavulsuz keşfetmenin tadını çıkarın.",
       "searchQuery": "Galata",
-      "cta": "İstanbul’da dükkanları aç"
+      "cta": "İstanbul'da dükkanları aç",
+      "sections": [
+        {
+          "title": "İstanbul'un En Popüler Semtlerinde Valiz Emanet",
+          "body": "İstanbul Avrupa ve Anadolu yakası olmak üzere iki kıtaya yayılmış dev bir metropol. Her semtin kendine özgü bir karakteri ve gezilecek noktaları var. Sultanahmet'te Ayasofya, Yerebatan Sarnıcı ve Kapalıçarşı gibi tarihi yapıların yoğun olduğu bölgede valizlerinizi güvenle emanet edebilir, daracık tarihi sokaklarda özgürce dolaşabilirsiniz. Taksim ve İstiklal Caddesi'nde ise 19. yüzyıldan kalma binalar arasında alışveriş yaparken nostaljik tramvaya binerken yanınızda ağır bavullar taşımak zorunda değilsiniz. BagajPark noktalarımız bu yoğun bölgelere yürüme mesafesinde konumlanmıştır. Kadıköy ve Moda sahili gibi Anadolu yakası noktalarımız da feribot iskelelerine yakınlığıyla öne çıkar.",
+          "keywords": "Sultanahmet valiz emanet, Taksim bagaj depolama, İstiklal Caddesi emanet"
+        },
+        {
+          "title": "Check-Out Sonrası İstanbul'da Bavulsuz Gezmek",
+          "body": "Otelinizden çıkış yaptıktan sonra uçuş saatinize kadar geçen süre İstanbul'da en verimli şekilde değerlendirilebilir. Özellikle Sultanahmet bölgesindeki otellerden çıkış yapan turistler için BagajPark ideal bir çözüm sunuyor. Sabah kahvaltısının ardından valizlerinizi en yakın emanet noktasına bırakın, gün boyu Ayasofya, Topkapı Sarayı ve Kapalıçarşı'yı rahatça gezin. Akşam üzeri valizinizi alıp havalimanına gitmek için fazladan otelinize dönmek zorunda kalmazsınız. Bu sayede İstanbul'daki son gününüzü en verimli şekilde geçirebilirsiniz. Aynı şekilde Kruvaziyer limanından inen yolcular da valizlerini Karaköy veya Eminönü noktalarımıza bırakarak günübirlik İstanbul turu yapabilir.",
+          "keywords": "check-out sonrası valiz, otel çıkış bagaj emanet, son gün bavulsuz gezme"
+        },
+        {
+          "title": "Havalimanı Emanetine Alternatif: Şehir Merkezinde Bagaj Depolama",
+          "body": "İstanbul Havalimanı (IST) ve Sabiha Gökçen (SAW) havalimanlarında emanet ofisleri bulunsa da, şehir merkezine uzaklıkları nedeniyle sırf valiz bırakmak için havalimanına gitmek pratik değil. Havalimanı emanet ücretleri 2026 yılı itibarıyla küçük boy için 210 TL, büyük boy için 550 TL seviyesinde. BagajPark ile şehir merkezinde, otelinize veya gezi rotanıza yakın noktalarda çok daha uygun fiyatlarla bagaj depolayabilirsiniz. Sultanahmet, Taksim, Kadıköy veya Beşiktaş'taki noktalarımız sayesinde rotanızdan sapmadan valizlerinizi emanet edebilirsiniz. Ayrıca online rezervasyon sayesinde noktaya gittiğinizde beklemeden işlem yapabilirsiniz.",
+          "keywords": "İstanbul Havalimanı emanet ücreti, Sabiha Gökçen bagaj emanet, şehir merkezi valiz depolama"
+        }
+      ],
+      "tips": [
+        "Valizlerinizi mühürlü olarak teslim alıyoruz, güvenlik garanti altında",
+        "Online rezervasyon yaparak noktada beklemeden işlem yapabilirsiniz",
+        "Sigorta kapsamımız sayesinde eşyalarınız güvende",
+        "Rezervasyonunuzu son dakikaya kadar ücretsiz iptal edebilirsiniz",
+        "11 dil desteği ile uluslararası seyahat edenler için ideal"
+      ],
+      "nearbyPlaces": [
+        "Sultanahmet Meydanı",
+        "Ayasofya Camii",
+        "Kapalıçarşı",
+        "Galata Kulesi",
+        "İstiklal Caddesi",
+        "Kadıköy Moda Sahili",
+        "Eminönü ve Mısır Çarşısı",
+        "Ortaköy Meydanı"
+      ]
     },
     "ankara": {
       "label": "Ankara",
       "metaTitle": "Ankara valiz emanet | BagajPark",
-      "metaDescription": "Ankara’da güvenli bagaj bırakma ve valiz emanet. Müzeler ve kent merkezine yakın noktalar.",
-      "headline": "Ankara’da valiz emanet",
+      "metaDescription": "Ankara'da güvenli bagaj bırakma ve valiz emanet. Kızılay, Tunalı, ATG Garı çevresi. Online rezervasyonlu bagaj depolama.",
+      "headline": "Ankara'da valiz emanet",
       "intro": "Ankara seyahatlerinizde Kızılay, Tunalı Hilmi, Çankaya, Anıtkabir ve Ankara Yüksek Hızlı Tren Garı (ATG) çevresindeki emanet noktalarımızla konforunuzu artırın. Ankara Kalesi'nin yokuşlu sokaklarında veya Anadolu Medeniyetleri Müzesi gezilerinizde yüklerinizden arının. İş toplantılarınız veya müze gezileriniz sırasında bavullarınızı güvenli noktalara bırakıp başkenti özgürce dolaşın.",
       "searchQuery": "Kızılay",
-      "cta": "Ankara’da dükkanları aç"
+      "cta": "Ankara'da dükkanları aç",
+      "sections": [
+        {
+          "title": "Ankara Şehir Merkezinde Bagaj Emanet",
+          "body": "Ankara'ya YHT ile geldiğinizde ATG'den çıkıp doğrudan Kızılay'a geçmeden önce valizlerinizi emanet edebilirsiniz. Kızılay Meydanı ve çevresi, Ankara'nın en hareketli bölgesi olup alışveriş merkezleri, kafeler ve restoranlarla doludur. Tunalı Hilmi Caddesi'nde yürüyüş yaparken veya Kuğulu Park'ta dinlenirken yanınızda bavul taşımak yerine BagajPark noktalarımızı kullanabilirsiniz. Anıtkabir ziyareti öncesinde de valizlerinizi güvenle emanet edebilirsiniz.",
+          "keywords": "Ankara valiz emanet, Kızılay bagaj depolama, Ankara YHT garı emanet"
+        },
+        {
+          "title": "İş Seyahatlerinde Ankara'da Bagaj Çözümü",
+          "body": "Ankara'ya iş seyahati için geldiğinizde toplantı öncesi veya sonrası valizlerinizle uğraşmak zorunda değilsiniz. Çankaya, Söğütözü veya ODTÜ Teknokent gibi iş merkezlerine yakın noktalarımız sayesinde toplantılarınıza bavulsuz katılabilirsiniz. Gün sonunda valizinizi alıp doğrudan havalimanına veya tren garına gidebilirsiniz.",
+          "keywords": "Ankara iş seyahati bagaj, Çankaya valiz emanet"
+        }
+      ],
+      "tips": [
+        "Toplantı öncesi valizinizi bırakın, iş görüşmelerinize rahat katılın",
+        "YHT garına yakın noktalarımızla aktarma yaparken bagaj derdi yok"
+      ],
+      "nearbyPlaces": [
+        "Anıtkabir",
+        "Kızılay Meydanı",
+        "Ankara Kalesi",
+        "Kuğulu Park"
+      ]
     },
     "izmir": {
       "label": "İzmir",
       "metaTitle": "İzmir valiz emanet | BagajPark",
-      "metaDescription": "İzmir’de valiz emanet ve bagaj depolama. Konak, Alsancak ve sahil hattına yakın güvenli noktalar.",
-      "headline": "İzmir’de valiz emanet",
+      "metaDescription": "İzmir'de valiz emanet ve bagaj depolama. Konak, Alsancak, Kordon boyu. Online rezervasyonlu güvenli bagaj bırakma.",
+      "headline": "İzmir'de valiz emanet",
       "intro": "Alsancak, Konak, Kordon boyu ve Karşıyaka gibi İzmir'in en canlı noktalarında emanet noktalarımızla bavul yükünü geride bırakın. Saat Kulesi, tarihi Kemeraltı Çarşısı ve kordon boyunca yapacağınız yürüyüşlerde ağır çantalar seyahatinizi zorlaştırmasın. Bagajlarınızı güvenli dükkanlarımıza emanet edin ve boyoz eşliğinde kordon keyfi yaparken yüklerinizden kurtulun.",
       "searchQuery": "Konak",
-      "cta": "İzmir’de dükkanları aç"
+      "cta": "İzmir'de dükkanları aç",
+      "sections": [
+        {
+          "title": "İzmir Kordon'da Bavulsuz Gezinti",
+          "body": "İzmir denince akla gelen ilk yer Kordon'dur. Alsancak'tan Konak'a uzanan bu muhteşem sahil şeridinde yürürken valiz taşımak zorunda değilsiniz. Kemeraltı Çarşısı'nda alışveriş yaparken, tarihi Asansör'den İzmir manzarasını izlerken veya Kıbrıs Şehitleri Caddesi'nde kafelerde otururken BagajPark noktalarımız sayesinde elleriniz serbest olur. İzmir'e feribotla geldiğinizde de Konak İskelesi'ne yakın noktalarımız mevcut.",
+          "keywords": "İzmir Kordon valiz emanet, Alsancak bagaj depolama"
+        }
+      ],
+      "tips": [
+        "Kemeraltı'nda alışveriş öncesi valizinizi bırakın",
+        "Kordon'da yürüyüş yaparken elleriniz serbest kalsın"
+      ],
+      "nearbyPlaces": [
+        "Konak Meydanı",
+        "Kemeraltı Çarşısı",
+        "Asansör",
+        "Kordon Boyu",
+        "Alsancak"
+      ]
     },
     "antalya": {
       "label": "Antalya",
       "metaTitle": "Antalya valiz emanet | BagajPark",
-      "metaDescription": "Antalya’da turistler için valiz emanet. Kaleiçi ve plaj bölgelerine yakın bagaj depolama.",
-      "headline": "Antalya’da valiz emanet",
+      "metaDescription": "Antalya'da turistler için valiz emanet. Kaleiçi, Lara, Konyaaltı plaj bölgesi. Online rezervasyonlu bagaj depolama.",
+      "headline": "Antalya'da valiz emanet",
       "intro": "Kaleiçi'nin dar sokaklarında, tarihi Hadrian Kapısı (Üçkapılar) çevresinde, otogarda veya plaj bölgelerinde gezerken valiz taşıma derdine son verin. Deniz tatiliniz ile uçuş saatiniz arasındaki boş zamanı bavul taşımadan, rahatça plajlarda veya müzelerde değerlendirmek için BagajPark noktalarını kullanın.",
       "searchQuery": "Kaleiçi",
-      "cta": "Antalya’da dükkanları aç"
+      "cta": "Antalya'da dükkanları aç",
+      "sections": [
+        {
+          "title": "Antalya'da Plaj ile Uçuş Arasında Valiz Depolama",
+          "body": "Antalya tatilinin en zor anı, otelden çıkış yapıp uçağa kadar geçen süredir. Konyaaltı veya Lara plajlarında son bir kez denize girmek isterseniz valizlerinizi nereye bırakacağınız sorun olur. BagajPark sayesinde Kaleiçi veya plaj bölgelerine yakın noktalarımızda valizlerinizi emanet edebilir, son gününüzü bavulsuz geçirebilirsiniz. Hadrian Kapısı'nı gezmek, antik tiyatroyu görmek veya son bir Türk kahvesi içmek için elleriniz serbest kalır.",
+          "keywords": "Antalya valiz emanet, Kaleiçi bagaj depolama, plaj valiz bırakma"
+        }
+      ],
+      "tips": [
+        "Plaj sonrası valizinizi alıp havalimanına gidin",
+        "Kaleiçi'nde yürürken elleriniz serbest olsun"
+      ],
+      "nearbyPlaces": [
+        "Kaleiçi",
+        "Hadrian Kapısı",
+        "Konyaaltı Plajı",
+        "Lara Plajı",
+        "Antalya Havalimanı"
+      ]
     },
     "bodrum": {
       "label": "Bodrum",
       "metaTitle": "Bodrum valiz emanet | BagajPark",
-      "metaDescription": "Bodrum’da güvenli bagaj ve valiz emanet. Marina ve plaj çevresi için pratik depolama.",
-      "headline": "Bodrum’da valiz emanet",
+      "metaDescription": "Bodrum'da güvenli bagaj ve valiz emanet. Marina, plaj ve otogar çevresi için pratik depolama.",
+      "headline": "Bodrum'da valiz emanet",
       "intro": "Bodrum Kalesi, marina çevresi, popüler plajlar ve otogar yakınındaki emanet noktalarımızla tatilinizi kolaylaştırın. Tekne turlarına katılmadan önce veya gece kulüplerine gitmeden önce valizlerinizi dükkanlarımıza bırakın; çıkış saatleriniz ile seyahat saatleriniz arasındaki boşluğu bavul taşımadan, keyifle değerlendirin.",
       "searchQuery": "Marina",
-      "cta": "Bodrum’da dükkanları aç"
+      "cta": "Bodrum'da dükkanları aç",
+      "sections": [
+        {
+          "title": "Bodrum'da Tekne Turu Öncesi Valiz Emanet",
+          "body": "Bodrum'da tekne turlarına veya bot seferlerine katılmadan önce valizlerinizi emanet etmek isteyebilirsiniz. Marina çevresindeki noktalarımız sayesinde deniz keyfinize bavulsuz devam edebilirsiniz. Ayrıca Bodrum otogarına yakın noktalarımız, şehirlerarası yolculuk öncesi bagaj depolama için idealdir.",
+          "keywords": "Bodrum marina valiz emanet, Bodrum otogar bagaj"
+        }
+      ],
+      "tips": [
+        "Tekne turu öncesi valizinizi marina noktamıza bırakın",
+        "Gece kulübü öncesi bagaj derdinden kurtulun"
+      ],
+      "nearbyPlaces": [
+        "Bodrum Kalesi",
+        "Marina",
+        "Gümbet Plajı",
+        "Bitez",
+        "Yalıkavak"
+      ]
     },
     "cappadocia": {
       "label": "Kapadokya",
       "metaTitle": "Kapadokya valiz emanet | BagajPark",
-      "metaDescription": "Kapadokya’da balon ve vadiler arasında valiz emanet. Göreme ve Ürgüp çevresi için bagaj depolama.",
-      "headline": "Kapadokya’da valiz emanet",
+      "metaDescription": "Kapadokya'da balon ve vadiler arasında valiz emanet. Göreme, Ürgüp, Avanos çevresi için bagaj depolama.",
+      "headline": "Kapadokya'da valiz emanet",
       "intro": "Kapadokya'nın büyülü atmosferinde, Göreme, Ürgüp, Avanos ve Uçhisar bölgelerinde yürüyüş yaparken veya balon turlarını izlerken valiz taşımayın. Peribacaları ve yeraltı şehirleri arasındaki engebeli arazilerde yüklerinizi en yakın BagajPark noktasına bırakın; Kapadokya'nın vadilerini ve gün doğumu manzaralarını hafif ve özgürce keşfedin.",
       "searchQuery": "Göreme",
-      "cta": "Kapadokya’da dükkanları aç"
+      "cta": "Kapadokya'da dükkanları aç",
+      "sections": [
+        {
+          "title": "Kapadokya'da Balon Turu Öncesi Valiz Depolama",
+          "body": "Kapadokya'da gün doğumu sıcak hava balon turları, tatilin en önemli anıdır. Ancak konaklama yerinizden erken çıkmanız gerekebilir. BagajPark noktalarımız sayesinde valizlerinizi Göreme merkezde emanet edip balon turuna katılabilir, ardından vadilerde yürüyüş yapabilirsiniz. Güvercinlik Vadisi, Ihlara Vadisi veya Derinkuyu Yeraltı Şehri gibi noktaları bavulsuz keşfedin.",
+          "keywords": "Kapadokya valiz emanet, Göreme bagaj depolama, balon turu bagaj"
+        }
+      ],
+      "tips": [
+        "Balon turu öncesi valizinizi Göreme'de bırakın",
+        "Peribacaları arasında bavulsuz yürüyüş yapın"
+      ],
+      "nearbyPlaces": [
+        "Göreme Açık Hava Müzesi",
+        "Peribacaları",
+        "Uçhisar Kalesi",
+        "Derinkuyu",
+        "Avanos"
+      ]
     },
     "berlin": {
       "label": "Berlin",
