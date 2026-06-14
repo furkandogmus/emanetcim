@@ -1147,14 +1147,39 @@
     "ctaSecondary": "General partner program"
   },
   "MarketingHotels": {
-    "metaTitle": "BagajPark for hotels",
-    "heroTitle": "Luggage storage for your guests",
-    "heroSubtitle": "Reduce front-desk friction before flights and city walks.",
-    "b1Title": "Higher capacity",
-    "b1Body": "Suited to groups and peak checkout windows.",
-    "b2Title": "Enterprise-friendly",
-    "b2Body": "Contract, commission and reporting aligned to hotel ops.",
-    "cta": "Contact hotel partnerships"
+    "metaTitle": "BagajPark for Hotels | Luggage Storage Solution",
+    "heroTitle": "Solve your guests' checkout luggage problem",
+    "heroSubtitle": "With BagajPark, your guests can securely store luggage after checkout while you free up lobby space. Plus, you earn extra revenue.",
+    "b1Title": "Guest Satisfaction",
+    "b1Body": "Guests explore the city hands-free after checkout. Positive reviews, higher ratings.",
+    "b2Title": "Extra Revenue",
+    "b2Body": "10-20% commission per referral. Zero operational burden, passive income.",
+    "b3Title": "Operational Ease",
+    "b3Body": "No need for luggage rooms, staff or lockers. Everything is online.",
+    "b4Title": "11 Languages",
+    "b4Body": "International guests book in their native language. No translation hassle.",
+    "faqTitle": "Frequently Asked Questions",
+    "faqs": [
+      {
+        "q": "We don't have a luggage room, can we still work together?",
+        "a": "Yes! BagajPark points are nearby partner shops. Just direct your guests there."
+      },
+      {
+        "q": "What is the commission rate?",
+        "a": "Standard partnership 10%, premium 15-20%. Customized per hotel size."
+      },
+      {
+        "q": "How are guests directed?",
+        "a": "Via QR postcards at reception. Guest scans and sees the nearest point instantly."
+      },
+      {
+        "q": "Which cities do you serve?",
+        "a": "Active in Istanbul, Ankara, Izmir, Antalya, Bodrum, Cappadocia. New cities added monthly."
+      }
+    ],
+    "ctaTitle": "Add your hotel to BagajPark",
+    "ctaDescription": "Add your hotel to the BagajPark partner network with a 10-minute call. No setup fee.",
+    "cta": "Contact for hotel partnerships"
   },
   "CookieConsent": {
     "bannerTitle": "Cookies",

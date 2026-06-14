@@ -1148,13 +1148,38 @@
     "ctaSecondary": "Genel ortaklık bilgisi"
   },
   "MarketingHotels": {
-    "metaTitle": "Oteller için BagajPark",
-    "heroTitle": "Konuklarınız için güvenli bagaj",
-    "heroSubtitle": "Check-out sonrası ve gezinti öncesi depolama ile resepsiyon yükünü azaltın.",
-    "b1Title": "Yüksek kapasite",
-    "b1Body": "Grup ve sezon dönemlerine uygun planlama.",
-    "b2Title": "Kurumsal süreç",
-    "b2Body": "Sözleşme, komisyon ve raporlama ile uyumlu onboarding.",
+    "metaTitle": "Oteller için BagajPark | Valiz Emanet Çözümü",
+    "heroTitle": "Konuklarınızın check-out sorununu çözün",
+    "heroSubtitle": "BagajPark ile konuklarınız check-out sonrası valizlerini güvenle emanet edebilir, siz ön büronuzda bagaj biriktirmekten kurtulursunuz. Üstelik ek gelir elde edersiniz.",
+    "b1Title": "Misafir Memnuniyeti",
+    "b1Body": "Konuklar check-out sonrası valizleriyle sokakta kalmaz, şehri özgürce keşfeder. Geri bildirimler olumlu, puanlar yükselir.",
+    "b2Title": "Ek Gelir",
+    "b2Body": "Her yönlendirmede %10-20 komisyon. Sıfır operasyonel yük, pasif gelir.",
+    "b3Title": "Operasyonel Kolaylık",
+    "b3Body": "Bagaj odası, personel veya kilit dolabı ayırmanız gerekmez. Her şey online.",
+    "b4Title": "11 Dil Desteği",
+    "b4Body": "Uluslararası misafirleriniz anadillerinde rezervasyon yapabilir. Çeviri derdi yok.",
+    "faqTitle": "Sık Sorulan Sorular",
+    "faqs": [
+      {
+        "q": "Ot elimde bagaj odası yok, yine de çalışabilir miyiz?",
+        "a": "Evet! BagajPark noktaları otelinize yürüme mesafesindeki işletmelerdir. Misafirlerinizi yönlendirmeniz yeterli."
+      },
+      {
+        "q": "Komisyon oranı nedir?",
+        "a": "Standart ortaklıkta %10, premium ortaklıkta %15-20. Otel büyüklüğünüze göre özelleştirebiliriz."
+      },
+      {
+        "q": "Misafirler nasıl yönlendirilir?",
+        "a": "Resepsiyona bırakacağımız QR kartpostallar ile. Misafir okutur, anında en yakın noktayı görür."
+      },
+      {
+        "q": "Hangi şehirlerde hizmet veriyorsunuz?",
+        "a": "İstanbul, Ankara, İzmir, Antalya, Bodrum, Kapadokya'da aktifiz. Her ay yeni şehirler ekleniyor."
+      }
+    ],
+    "ctaTitle": "Otelinizi BagajPark'a ekleyin",
+    "ctaDescription": "10 dakikalık bir görüşme ile otelinizi BagajPark partner ağına ekleyelim. Hiçbir başlangıç ücreti yok.",
     "cta": "Otel iş birliği için iletişim"
   },
   "CookieConsent": {
