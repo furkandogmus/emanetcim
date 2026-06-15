@@ -491,7 +491,9 @@
     "bookingLookupFields": "E-posta ve rezervasyon ID gerekli.",
     "bookingNotFound": "Rezervasyon bulunamadı",
     "bookingLookupError": "Rezervasyon bulunamadı veya bilgiler eşleşmiyor.",
-    "duration": "Süre"
+    "duration": "Süre",
+    "showFilters": "Filtreleri Goster",
+    "hideFilters": "Filtreleri Gizle"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Yönetim Masası",

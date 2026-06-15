@@ -16,6 +16,8 @@ interface BottomSheetProps {
   showHandle?: boolean;
   /** Show close button */
   showClose?: boolean;
+  /** Show overlay backdrop. Set false for map+list split view */
+  showOverlay?: boolean;
 }
 
 export default function BottomSheet({
@@ -27,6 +29,7 @@ export default function BottomSheet({
   initialSnap = 1,
   showHandle = true,
   showClose = true,
+  showOverlay = true,
 }: BottomSheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
   const [currentSnap, setCurrentSnap] = useState(initialSnap);
@@ -106,13 +109,15 @@ export default function BottomSheet({
     <div
       className={`fixed inset-0 z-40 transition-opacity duration-300 ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
     >
-      <div
-        className="absolute inset-0 bg-black/30 backdrop-blur-[2px]"
-        onClick={onClose}
-      />
+      {showOverlay && (
+        <div
+          className="absolute inset-0 bg-black/30 backdrop-blur-[2px]"
+          onClick={onClose}
+        />
+      )}
       <div
         ref={sheetRef}
-        className="absolute bottom-0 left-0 right-0 z-10 bg-white rounded-t-[2rem] shadow-2xl flex flex-col transition-transform duration-300"
+        className={`absolute bottom-0 left-0 right-0 z-10 bg-white flex flex-col transition-transform duration-300 ${showOverlay ? "rounded-t-[2rem] shadow-2xl" : "rounded-t-[1.5rem] shadow-[0_-8px_30px_rgba(0,0,0,0.12)]"}`}
         style={{
           height: `var(--sheet-height, ${sheetHeight}vh)`,
           transform: open ? "translateY(0)" : "translateY(100%)",

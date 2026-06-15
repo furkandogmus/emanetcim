@@ -82,6 +82,7 @@ export default function SearchClient({
   const [checkOutLocal, setCheckOutLocal] = useState("");
   const [datesReady, setDatesReady] = useState(false);
   const [requestedBags, setRequestedBags] = useState(1);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [filterDirty, setFilterDirty] = useState(false);
   const [dynamicCenter, setDynamicCenter] = useState(searchCenter);
   const [resolvedPlaceLabel, setResolvedPlaceLabel] = useState<string | null>(null);
@@ -653,9 +654,10 @@ export default function SearchClient({
         open={panelOpen}
         onClose={() => setPanelOpen(false)}
         title={t("searchPlaceholder")}
-        snapPoints={[20, 55, 90]}
+        snapPoints={[15, 45, 88]}
         initialSnap={1}
         showClose={false}
+        showOverlay={false}
       >
         <header className="px-4 pt-2 pb-3 border-b border-gray-100 shrink-0">
           <div className="flex items-center gap-3 mb-3">
@@ -766,6 +768,17 @@ export default function SearchClient({
             </section>
           ) : null}
 
+          <button
+            type="button"
+            onClick={() => setFiltersOpen((v) => !v)}
+            className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gray-700 py-1.5"
+          >
+            <SlidersHorizontal size={12} />
+            {filtersOpen ? t("hideFilters") : t("showFilters")} ({sortedShops.length})
+          </button>
+
+          {filtersOpen && (
+            <>
           <div className="flex items-center gap-3 mb-3">
             <div className="flex bg-gray-100 rounded-xl p-1 flex-1">
               <button
@@ -815,6 +828,8 @@ export default function SearchClient({
             <label className="flex items-center gap-1 cursor-pointer"><input type="checkbox" checked={hasClimateControlFilter} onChange={(e) => setHasClimateControlFilter(e.target.checked)} />{t("filterClimate")}</label>
             <label className="flex items-center gap-1 cursor-pointer"><input type="checkbox" checked={acceptsLargeItemsFilter} onChange={(e) => setAcceptsLargeItemsFilter(e.target.checked)} />{t("filterLargeItems")}</label>
           </div>
+            </>
+          )}
         </header>
 
         <div ref={mobileListRef} className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 bg-gray-50/50">

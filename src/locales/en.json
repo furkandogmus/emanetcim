@@ -491,7 +491,9 @@
     "bookingLookupFields": "Email and booking ID are required.",
     "bookingNotFound": "Booking Not Found",
     "bookingLookupError": "Booking not found or information does not match.",
-    "duration": "Duration"
+    "duration": "Duration",
+    "showFilters": "Show Filters",
+    "hideFilters": "Hide Filters"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
