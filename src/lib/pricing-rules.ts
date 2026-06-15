@@ -19,9 +19,9 @@ export type PricingRules = {
 export const DEFAULT_PRICING_RULES: PricingRules = {
   maxStayDays: 30,
   maxBagsPerSlot: 50,
-  insuranceFeeTry: 15,
-  earlyRefundRatio: 0.9,
-  cancelFixedFeeTry: 20,
+  insuranceFeeTry: 0,
+  earlyRefundRatio: 1.0,
+  cancelFixedFeeTry: 0,
   defaultShopCapacity: 10,
   defaultPricePerDay: 50,
   bagMultipliers: { S: 1.0, M: 1.0, XL: 1.0 },

@@ -3,9 +3,7 @@
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import {
-  CANCEL_FULL_REFUND_MIN_HOURS,
-  CANCEL_PARTIAL_REFUND_FRACTION,
-  CANCEL_PARTIAL_REFUND_MIN_HOURS,
+  CANCEL_CREDIT_ONLY_MINUTES,
   estimatePaidRefundForTier,
   getCancellationTier,
 } from "@/lib/cancellation-policy";
@@ -13,15 +11,11 @@ import { moneyToNumber } from "@/lib/money";
 
 interface CancellationPolicyProps {
   checkInTime: string | Date;
-  /** Ödeme alınmış rezervasyonlar için tahmini iade satırı gösterilir */
   showRefundEstimate?: boolean;
   totalPaidTry?: number;
   className?: string;
 }
 
-/**
- * İptal öncesi kademeli politika özeti (check-in’e kalan süre).
- */
 export default function CancellationPolicy({
   checkInTime,
   showRefundEstimate = false,
@@ -35,8 +29,6 @@ export default function CancellationPolicy({
     () => estimatePaidRefundForTier(moneyToNumber(totalPaidTry), tier),
     [totalPaidTry, tier]
   );
-
-  const partialPercent = Math.round(CANCEL_PARTIAL_REFUND_FRACTION * 100);
 
   return (
     <div className={`text-left space-y-4 ${className}`}>
@@ -53,23 +45,7 @@ export default function CancellationPolicy({
         >
           <span className="font-black text-orange-600 shrink-0">1</span>
           <span>
-            {t("cancellationTierFull", { hours: CANCEL_FULL_REFUND_MIN_HOURS })}
-          </span>
-        </li>
-        <li
-          className={`flex gap-3 rounded-xl p-3 border ${
-            tier === "PARTIAL"
-              ? "border-orange-200 bg-orange-50/80"
-              : "border-gray-100 bg-gray-50/50"
-          }`}
-        >
-          <span className="font-black text-orange-600 shrink-0">2</span>
-          <span>
-            {t("cancellationTierPartial", {
-              minHours: CANCEL_PARTIAL_REFUND_MIN_HOURS,
-              maxHours: CANCEL_FULL_REFUND_MIN_HOURS,
-              percent: partialPercent,
-            })}
+            {t("cancellationTierFullSimple", { minutes: CANCEL_CREDIT_ONLY_MINUTES })}
           </span>
         </li>
         <li
@@ -79,11 +55,9 @@ export default function CancellationPolicy({
               : "border-gray-100 bg-gray-50/50"
           }`}
         >
-          <span className="font-black text-orange-600 shrink-0">3</span>
+          <span className="font-black text-orange-600 shrink-0">2</span>
           <span>
-            {t("cancellationTierCredit", {
-              minHours: CANCEL_PARTIAL_REFUND_MIN_HOURS,
-            })}
+            {t("cancellationTierCreditSimple", { minutes: CANCEL_CREDIT_ONLY_MINUTES })}
           </span>
         </li>
       </ul>
@@ -100,9 +74,6 @@ export default function CancellationPolicy({
             </p>
           )}
         </div>
-      ) : null}
-      {!showRefundEstimate ? (
-        <p className="text-xs text-gray-400">{t("cancellationUnpaidNote")}</p>
       ) : null}
     </div>
   );
