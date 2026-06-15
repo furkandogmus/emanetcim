@@ -483,7 +483,15 @@
     "appBannerBody": "Uygulamamız çok yakında iOS ve Android'de. Şimdilik web'den kullanmaya devam et.",
     "appBannerCta": "Web'de Keşfet",
     "cancellationTierFullSimple": "Teslimden en az {minutes} dakika once iptal: tam iade.",
-    "cancellationTierCreditSimple": "Teslime {minutes} dakikadan az kala: nakit yerine kredi."
+    "cancellationTierCreditSimple": "Teslime {minutes} dakikadan az kala: nakit yerine kredi.",
+    "manageBookingTitle": "Rezervasyon Yönetimi",
+    "manageBookingDesc": "Rezervasyon ID ve e-posta adresinizle rezervasyonunuzu görüntüleyin.",
+    "manageBookingCta": "Rezervasyonu Görüntüle",
+    "manageBookingFooter": "Yeni bir rezervasyon mu yapmak istiyorsunuz?",
+    "bookingLookupFields": "E-posta ve rezervasyon ID gerekli.",
+    "bookingNotFound": "Rezervasyon bulunamadı",
+    "bookingLookupError": "Rezervasyon bulunamadı veya bilgiler eşleşmiyor.",
+    "duration": "Süre"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Yönetim Masası",

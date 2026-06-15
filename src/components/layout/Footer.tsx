@@ -128,6 +128,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/bookings/lookup" className="hover:text-orange-600 transition-colors">
+                  {locale === "tr" ? "Rezervasyon Yönetimi" : "Manage Booking"}
+                </Link>
+              </li>
+              <li>
                 <Link href="/kvkk" className="hover:text-orange-600 transition-colors">
                   {t("kvkk")}
                 </Link>
