@@ -472,10 +472,8 @@ export default function BookingsClient({
                   setCancelSubmitting(false);
                   if (res.success) {
                     setCancelModalBooking(null);
-                    if (res.creditCode) {
-                      toast.success(
-                        t('cancelSuccessCredit', { code: res.creditCode })
-                      );
+                    if (res.fullRefund) {
+                      toast.success(t('cancelSuccessRefund'));
                     } else {
                       toast.success(t('cancelSuccess'));
                     }

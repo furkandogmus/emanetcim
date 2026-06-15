@@ -376,7 +376,7 @@ export async function cancelBookingAction(bookingId: string) {
       revalidatePathAllLocales("/admin");
       return {
         success: true as const,
-        creditCode: result.creditCode,
+        fullRefund: result.fullRefund,
       };
     }
     return {

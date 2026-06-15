@@ -19,7 +19,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   try {
     const result = await bookingService.cancelBooking(id);
     if (result.ok) {
-      return NextResponse.json({ success: true, creditCode: result.creditCode });
+      return NextResponse.json({ success: true, fullRefund: result.fullRefund });
     }
     return NextResponse.json({ error: "cancel_failed" }, { status: 400 });
   } catch {

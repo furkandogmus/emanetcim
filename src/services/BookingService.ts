@@ -745,12 +745,17 @@ export class BookingService implements IBookingService {
       booking.status === 'PAID' || !!hasCapturedPayment;
 
     try {
-      let creditCode: string | undefined;
-
+      // Bounce-style: full refund to original payment method
       if (hadPayment) {
         const totalPaid = moneyToNumber(booking.totalPrice);
         if (totalPaid > 0) {
-          creditCode = await this.issueCancellationCreditCoupon(totalPaid);
+          // Mark payment as refunded instead of issuing credit coupon
+          await prisma.paymentLog.updateMany({
+            where: { bookingId, status: 'SUCCESS' },
+            data: { status: 'REFUNDED' },
+          }).catch((err) =>
+            logger.error({ err, bookingId }, "payment_refund_mark_failed")
+          );
         }
       }
 
@@ -778,10 +783,10 @@ export class BookingService implements IBookingService {
       bookingEventService.record({
         bookingId,
         event: "CANCELLED",
-        metadata: { previousStatus: booking.status, hadPayment, creditCode },
+        metadata: { previousStatus: booking.status, hadPayment, fullRefund: true },
       }).catch((err) => logger.error({ err, bookingId }, "booking_event_cancelled_failed"));
 
-      return { ok: true, creditCode };
+      return { ok: true, fullRefund: hadPayment };
     } catch (error) {
       logger.error({ err: error, bookingId }, 'BookingService::cancelBooking');
       return {

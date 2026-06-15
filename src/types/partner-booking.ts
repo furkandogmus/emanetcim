@@ -41,7 +41,7 @@ export type BookingWithShopGuestDetails = Prisma.BookingGetPayload<{
 }>;
 
 export type CancelBookingResult =
-  | { ok: true; creditCode?: string }
+  | { ok: true; fullRefund?: boolean }
   | { ok: false; code: CancelBookingErrorCode; message: string };
 
 export type ModifyBookingErrorCode =

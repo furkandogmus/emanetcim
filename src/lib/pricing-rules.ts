@@ -24,6 +24,6 @@ export const DEFAULT_PRICING_RULES: PricingRules = {
   cancelFixedFeeTry: 20,
   defaultShopCapacity: 10,
   defaultPricePerDay: 50,
-  bagMultipliers: { S: 0.8, M: 1.0, XL: 1.5 },
+  bagMultipliers: { S: 1.0, M: 1.0, XL: 1.0 },
   platformHolidayDates: [],
 };
