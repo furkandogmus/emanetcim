@@ -182,10 +182,39 @@ export async function POST(req: Request) {
      */
     const isNested = !!body.data && typeof body.data === "object";
     const data = (isNested ? body.data : body) as Record<string, unknown>;
-    
-    // Inbound e-postalarda type olmayabilir, bu yüzden sadece body.type kontrolü yapmak riskli.
-    if (isNested && body.type && body.type !== "email.received") {
-      return NextResponse.json({ message: "Ignored event type: " + body.type }, { status: 200 });
+
+    // Handle email delivery tracking events (sent, delivered, bounced, complained)
+    if (isNested && body.type && typeof body.type === "string") {
+      const eventType = body.type as string;
+      if (["email.sent", "email.delivered", "email.bounced", "email.complained"].includes(eventType)) {
+        const emailId = data.email_id as string | undefined;
+        const emailTo = (data.to as string[])?.[0] || (data.to as string) || undefined;
+
+        // Update NotificationLog status
+        if (emailId) {
+          const newStatus = eventType === "email.sent" ? "SENT"
+            : eventType === "email.delivered" ? "DELIVERED"
+            : eventType === "email.bounced" ? "BOUNCED"
+            : "COMPLAINED";
+
+          await prisma.notificationLog.updateMany({
+            where: { recipient: emailTo ?? "" },
+            data: { status: newStatus },
+          });
+
+          // On bounce/complaint, mark future emails to this address as problematic
+          if (eventType === "email.bounced" || eventType === "email.complained") {
+            console.warn(`[Resend Webhook] ${eventType} for ${emailTo}, email_id: ${emailId}`);
+          }
+        }
+
+        return NextResponse.json({ message: `Event ${eventType} processed` }, { status: 200 });
+      }
+
+      // Inbound events or unknown: continue processing below
+      if (body.type !== "email.received") {
+        return NextResponse.json({ message: "Ignored event type: " + body.type }, { status: 200 });
+      }
     }
 
     const { from, to, email_id } = data;
