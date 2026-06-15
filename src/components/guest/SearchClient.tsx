@@ -464,7 +464,16 @@ export default function SearchClient({
               </div>
             </div>
           </section>
-        ) : null}
+          ) : null}
+
+        <button
+          type="button"
+          onClick={() => setFiltersOpen((v) => !v)}
+          className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gray-700 py-1"
+        >
+          <SlidersHorizontal size={12} />
+          {filtersOpen ? t("hideFilters") : t("showFilters")} ({sortedShops.length})
+        </button>
 
         <div className="flex items-center gap-3 mb-3">
           <div className="flex bg-gray-100 rounded-xl p-1 flex-1">
@@ -572,7 +581,7 @@ export default function SearchClient({
               {t("filterLargeItems")}
             </label>
           </div>
-        </header>
+      </header>
 
       <div ref={listRef} className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 bg-gray-50/50">
           {pullDistance > 0 && (
@@ -777,8 +786,6 @@ export default function SearchClient({
             {filtersOpen ? t("hideFilters") : t("showFilters")} ({sortedShops.length})
           </button>
 
-          {filtersOpen && (
-            <>
           <div className="flex items-center gap-3 mb-3">
             <div className="flex bg-gray-100 rounded-xl p-1 flex-1">
               <button
@@ -798,6 +805,8 @@ export default function SearchClient({
             </div>
           </div>
 
+          {filtersOpen && (
+            <>
           <div className="flex items-center gap-2 mb-2">
             <ArrowUpDown size={14} className="text-gray-400 shrink-0" />
             <select
