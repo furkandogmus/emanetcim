@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, MapPin, Star, Shield, Timer } from 'lucide-react';
+import { Building2, ChevronRight, MapPin, Star, Shield, Timer } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import FavoriteButton from '@/components/guest/FavoriteButton';
@@ -57,10 +57,12 @@ export default function ShopListItem({
           <h4 className="font-bold text-gray-900 group-hover:text-orange-600 transition-colors">{name}</h4>
           <div className="flex items-center gap-1">
             <FavoriteButton shopId={id} className="!w-7 !h-7" />
-            <span className="flex items-center gap-1 text-xs font-bold bg-orange-50 text-orange-600 px-2 py-1 rounded-lg">
-              <Star size={12} fill="currentColor" />
-              {rating}
-            </span>
+            {rating > 0 ? (
+              <span className="flex items-center gap-1 text-xs font-bold bg-orange-50 text-orange-600 px-2 py-1 rounded-lg">
+                <Star size={12} fill="currentColor" />
+                {rating}
+              </span>
+            ) : null}
           </div>
         </div>
 
@@ -91,7 +93,7 @@ export default function ShopListItem({
                 Doğr.
               </span>
             )}
-            {responseTimeMinutes != null && (
+            {responseTimeMinutes != null && responseTimeMinutes > 0 && (
               <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-md">
                 <Timer size={10} />
                 ≤{responseTimeMinutes}dk
@@ -100,6 +102,16 @@ export default function ShopListItem({
           </div>
           
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onClick?.();
+              }}
+              className="btn-ui btn-ui-sm bg-orange-600 text-white rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-wider hover:bg-orange-700 transition-colors shrink-0"
+            >
+              {t("bookNow")}
+            </button>
             {lat && lng && (
               <button
                 type="button"
@@ -107,7 +119,7 @@ export default function ShopListItem({
                   e.stopPropagation();
                   window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
                 }}
-                className="btn-ui btn-ui-sm btn-ui-icon bg-gray-50 hover:bg-orange-50 text-gray-400 hover:text-orange-600"
+                className="btn-ui btn-ui-sm btn-ui-icon bg-gray-50 hover:bg-orange-50 text-gray-400 hover:text-orange-600 shrink-0"
                 title={t("getDirections")}
               >
                 <MapPin size={16} />
@@ -131,6 +143,10 @@ export default function ShopListItem({
               )}
             </div>
           </div>
+        </div>
+        <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-3">
+          <span className="text-xs font-black text-orange-600">{t("bookNow")}</span>
+          <ChevronRight size={16} className="text-orange-500 transition-transform group-hover:translate-x-1" />
         </div>
       </div>
     </motion.div>

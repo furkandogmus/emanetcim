@@ -420,7 +420,9 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
             </Link>
           </div>
           <div className="rounded-3xl border border-gray-100 bg-white p-8 shadow-sm flex flex-col items-center justify-center text-center gap-3">
-            <div className="text-2xl font-black text-gray-900">★★★★★</div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+              <ShieldCheck size={24} />
+            </div>
             <p className="text-sm text-gray-500 font-medium">{t('trustpilotRatingText')}</p>
             <div className="flex items-center gap-1 text-[10px] text-gray-400 font-bold uppercase tracking-widest">
               <ShieldCheck size={12} />
@@ -465,4 +467,3 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
     </div>
   );
 }
-
