@@ -6,10 +6,39 @@ import { getActiveShopsOrderedByDistanceKm } from '@/lib/shop-distance-postgis';
 
 import { isShopOpenAt } from '@/lib/shop-hours';
 import { notificationService } from '@/services/NotificationService';
+import { getSlotAvailability } from '@/services/SlotService';
 import logger from '@/lib/logger';
 
-export type ShopWithDistance = Omit<Shop, 'pricePerDay'> & {
+export type ShopWithDistance = {
+  id: string;
+  ownerId: string;
+  name: string;
+  address: string | null;
+  image: string | null;
+  description: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  capacity: number;
+  isActive: boolean;
+  rating: number | null;
   pricePerDay: number;
+  pricePerHour: number;
+  hasRestroom: boolean;
+  hasCctv: boolean;
+  hasClimateControl: boolean;
+  acceptsLargeItems: boolean;
+  open247: boolean;
+  openingTime: string | null;
+  closingTime: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  city: string | null;
+  district: string | null;
+  sealLeadTimeDays: number;
+  sealReorderPoint: number;
+  isVerified: boolean;
+  responseTimeMinutes: number | null;
+  timezone: string | null;
   distanceKm: number;
 };
 
@@ -17,6 +46,41 @@ export type ShopWithDistance = Omit<Shop, 'pricePerDay'> & {
 export type ShopSearchHit = ShopWithDistance & {
   bagsAvailable: number;
 };
+
+function toShopWithDistance(shop: Shop, distanceKm: number): ShopWithDistance {
+  return {
+    id: shop.id,
+    ownerId: shop.ownerId,
+    name: shop.name,
+    address: shop.address,
+    image: shop.image,
+    description: shop.description,
+    latitude: shop.latitude,
+    longitude: shop.longitude,
+    capacity: shop.capacity,
+    isActive: shop.isActive,
+    rating: shop.rating,
+    pricePerDay: moneyToNumber(shop.pricePerDay),
+    pricePerHour: moneyToNumber(shop.pricePerHour ?? shop.pricePerDay),
+    hasRestroom: shop.hasRestroom,
+    hasCctv: shop.hasCctv,
+    hasClimateControl: shop.hasClimateControl,
+    acceptsLargeItems: shop.acceptsLargeItems,
+    open247: shop.open247,
+    openingTime: shop.openingTime,
+    closingTime: shop.closingTime,
+    createdAt: shop.createdAt,
+    updatedAt: shop.updatedAt,
+    city: shop.city,
+    district: shop.district,
+    sealLeadTimeDays: shop.sealLeadTimeDays,
+    sealReorderPoint: shop.sealReorderPoint,
+    isVerified: shop.isVerified,
+    responseTimeMinutes: shop.responseTimeMinutes,
+    timezone: shop.timezone ?? null,
+    distanceKm,
+  };
+}
 
 export type ShopWithOwner = Prisma.ShopGetPayload<{
   include: { owner: true };
@@ -80,11 +144,9 @@ export class ShopService implements IShopService {
         skip,
         take: limit,
       });
-      return pairs.map(({ shop, distanceKm }) => ({
-        ...shop,
-        pricePerDay: moneyToNumber(shop.pricePerDay),
-        distanceKm,
-      }));
+      return pairs.map(({ shop, distanceKm }) =>
+        toShopWithDistance(shop, distanceKm),
+      );
     } catch (error) {
       console.error('ShopService::findNearby Error:', error);
       return [];
@@ -102,11 +164,9 @@ export class ShopService implements IShopService {
         radiusKm: null,
         take: 100,
       });
-      return pairs.map(({ shop, distanceKm }) => ({
-        ...shop,
-        pricePerDay: moneyToNumber(shop.pricePerDay),
-        distanceKm,
-      }));
+      return pairs.map(({ shop, distanceKm }) =>
+        toShopWithDistance(shop, distanceKm),
+      );
     } catch (error) {
       console.error('ShopService::getAllActive Error:', error);
       return [];
@@ -130,78 +190,108 @@ export class ShopService implements IShopService {
     const bags = Math.max(1, Math.floor(requestedBags));
 
     try {
-      const pairs = await getActiveShopsOrderedByDistanceKm({
-        centerLat,
-        centerLng,
-        radiusKm,
-        take: 100,
-      });
+        const pairs = await getActiveShopsOrderedByDistanceKm({
+          centerLat,
+          centerLng,
+          radiusKm,
+          take: 100,
+        });
+        const shopMap = new Map(
+          pairs.map(({ shop }) => [shop.id, shop]),
+        );
 
-      const withDist: ShopWithDistance[] = pairs.map(({ shop, distanceKm }) => ({
-        ...shop,
-        pricePerDay: moneyToNumber(shop.pricePerDay),
-        distanceKm,
-      }));
+        const withDist: ShopWithDistance[] = pairs.map(({ shop, distanceKm }) =>
+          toShopWithDistance(shop, distanceKm),
+        );
 
-      if (withDist.length === 0) return [];
+        if (withDist.length === 0) return [];
 
-      const shopIds = withDist.map((s) => s.id);
+        const shopIds = withDist.map((s) => s.id);
 
-      const now = new Date();
-      const staleThreshold = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        // Try slot-based availability first (more accurate for short stays)
+        const stayHours = (checkOut.getTime() - checkIn.getTime()) / 3600000;
 
-      const pendingStatuses = ['WAITING_APPROVAL', 'APPROVED', 'PENDING'] as const;
-      const reservedStatuses = ['PAID', 'CHECKED_IN'] as const;
+        if (stayHours <= 48) {
+          const hits: ShopSearchHit[] = [];
+          for (const shop of withDist) {
+            try {
+              const slots = await getSlotAvailability(shop.id, checkIn, checkOut);
+              if (slots.length === 0) continue;
+              const availableCounts = slots.map((s: { available: number }) => s.available);
+              if (availableCounts.length === 0) continue;
+              const minAvailable = Math.min(...availableCounts);
+              if (minAvailable < bags) continue;
 
-      const aggregations = await prisma.booking.groupBy({
-        by: ['shopId'],
-        where: {
-          shopId: { in: shopIds },
-          AND: [
-            { checkInTime: { lt: checkOut } },
-            { checkOutTime: { gt: checkIn } },
-          ],
-          OR: [
-            { status: { in: [...reservedStatuses] } },
-            {
-              status: { in: [...pendingStatuses] },
-              checkInTime: { gt: staleThreshold },
-            },
-          ],
-        },
-        _sum: {
-          bagCountS: true,
-          bagCountM: true,
-          bagCountXl: true,
-        },
-      });
+              const openOk =
+                shop.open247 ||
+                (isShopOpenAt(shop.openingTime, shop.closingTime, checkIn) &&
+                  isShopOpenAt(shop.openingTime, shop.closingTime, checkOut));
+              if (!openOk) continue;
+
+              hits.push({ ...shop, bagsAvailable: minAvailable });
+            } catch {
+              // Fall through to legacy capacity check below
+            }
+          }
+          if (hits.length > 0) return hits;
+        }
+
+        // Legacy capacity check (fallback for long stays or when slots are unavailable)
+        const now = new Date();
+        const staleThreshold = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+        const pendingStatuses = ['WAITING_APPROVAL', 'APPROVED', 'PENDING'] as const;
+        const reservedStatuses = ['PAID', 'CHECKED_IN'] as const;
+
+        const aggregations = await prisma.booking.groupBy({
+          by: ['shopId'],
+          where: {
+            shopId: { in: shopIds },
+            AND: [
+              { checkInTime: { lt: checkOut } },
+              { checkOutTime: { gt: checkIn } },
+            ],
+            OR: [
+              { status: { in: [...reservedStatuses] } },
+              {
+                status: { in: [...pendingStatuses] },
+                checkInTime: { gt: staleThreshold },
+              },
+            ],
+          },
+          _sum: {
+            bagCountS: true,
+            bagCountM: true,
+            bagCountXl: true,
+          },
+        });
  
-       const usedByShop = new Map<string, number>();
-       for (const agg of aggregations) {
-         const n = 
-           (agg._sum.bagCountS || 0) + 
-           (agg._sum.bagCountM || 0) + 
-           (agg._sum.bagCountXl || 0);
-         usedByShop.set(agg.shopId, n);
-       }
+        const usedByShop = new Map<string, number>();
+        for (const agg of aggregations) {
+          const n = 
+            (agg._sum.bagCountS || 0) + 
+            (agg._sum.bagCountM || 0) + 
+            (agg._sum.bagCountXl || 0);
+          usedByShop.set(agg.shopId, n);
+        }
 
-      const hits: ShopSearchHit[] = [];
+        const hits: ShopSearchHit[] = [];
 
-      for (const shop of withDist) {
-        const used = usedByShop.get(shop.id) ?? 0;
-        const bagsAvailable = Math.max(0, shop.capacity - used);
-        if (bagsAvailable < bags) continue;
+        for (const shop of withDist) {
+          const used = usedByShop.get(shop.id) ?? 0;
+          const bagsAvailable = Math.max(0, shop.capacity - used);
+          if (bagsAvailable < bags) continue;
 
-        const openOk =
-          shop.open247 ||
-          (isShopOpenAt(shop.openingTime, shop.closingTime, checkIn) &&
-            isShopOpenAt(shop.openingTime, shop.closingTime, checkOut));
-        if (!openOk) continue;
+          const openOk =
+            shop.open247 ||
+            (isShopOpenAt(shop.openingTime, shop.closingTime, checkIn) &&
+              isShopOpenAt(shop.openingTime, shop.closingTime, checkOut));
+          if (!openOk) continue;
 
-        hits.push({ ...shop, bagsAvailable });
-      }
+          hits.push({ ...shop, bagsAvailable });
+        }
 
-      return hits;
+        return hits;
     } catch (error) {
       console.error('ShopService::findShopsForSearch Error:', error);
       return [];
