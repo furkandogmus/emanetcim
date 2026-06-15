@@ -36,6 +36,8 @@ import {
 import { useKeyboardAware } from "@/lib/hooks/useKeyboardAware";
 import { useShare } from "@/lib/hooks/useShare";
 import WebPushOptIn from "@/components/WebPushOptIn";
+import SlotAvailabilityGrid from "@/components/guest/SlotAvailabilityGrid";
+import { computeSlotBasedTotal } from "@/lib/bag-pricing";
 
 
 interface CheckoutClientProps {
@@ -67,6 +69,9 @@ export default function CheckoutClient({
   const { keyboardHeight } = useKeyboardAware();
   const { share } = useShare();
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+  const [selectedSlotCount, setSelectedSlotCount] = useState(0);
+  const [selectedSlotFrom, setSelectedSlotFrom] = useState<string | null>(null);
+  const [selectedSlotTo, setSelectedSlotTo] = useState<string | null>(null);
   const slot = roundedSlotPrices(pricePerDay, pricingRules);
   const priceS = slot.s;
   const priceM = slot.m;
@@ -176,6 +181,19 @@ export default function CheckoutClient({
   const insuranceFee = totalPrice > 0 ? pricingRules.insuranceFeeTry : 0;
   const grandTotal = totalPrice + insuranceFee;
 
+  // Slot-based pricing (when slots are selected)
+  const slotBasedTotal = selectedSlotCount > 0
+    ? computeSlotBasedTotal(
+        pricingRules.defaultPricePerDay,
+        selectedSlotCount,
+        bagS,
+        bagM,
+        bagXl,
+        pricingRules
+      )
+    : 0;
+  const displayTotal = slotBasedTotal > 0 ? slotBasedTotal : grandTotal;
+
   const totalBags = bagS + bagM + bagXl;
 
   const handleBooking = async (skipAuthCheck = false) => {
@@ -200,13 +218,14 @@ export default function CheckoutClient({
       bagCountM: bagM,
       bagCountXl: bagXl,
       unitPrice: pricePerDay,
-      totalPrice: grandTotal,
+      totalPrice: displayTotal,
       insuranceFee,
       checkInTime: checkInDate,
       checkOutTime: checkOutDate,
       couponCode: couponCode.trim() || undefined,
       guestEmail: !isLoggedIn ? (guestEmail.trim() || undefined) : undefined,
       guestPhone: !isLoggedIn ? (guestPhone.trim() || undefined) : undefined,
+      slotIds: selectedSlotCount > 0 ? [] : undefined,
     });
 
     setIsProcessing(false);
@@ -468,6 +487,22 @@ export default function CheckoutClient({
               <h2 className="text-sm font-black uppercase tracking-widest text-gray-900">
                 {t("stayDuration")}
               </h2>
+
+              {/* Slot-based time selection grid */}
+              <SlotAvailabilityGrid
+                shopId={shopId}
+                date={checkInDate ?? new Date()}
+                selectedBags={totalBags || 1}
+                onSelectRange={(from, to, count) => {
+                  setSelectedSlotCount(count);
+                  setSelectedSlotFrom(from);
+                  setSelectedSlotTo(to);
+                  // Sync date pickers with slot selection
+                  if (from) setCheckInLocal(from);
+                  if (to) setCheckOutLocal(to);
+                }}
+              />
+
               <p className="text-[11px] text-gray-400 leading-relaxed">
                 {locale === "tr"
                   ? "Esnaf müsaitlik kontrolü seçtiğiniz bırakış/alış saatlerine göre yapılır."
@@ -504,22 +539,41 @@ export default function CheckoutClient({
                   </div>
                 </label>
               </div>
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                <div>
-                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                    {t("checkoutBillableDaysLabel")}
-                  </p>
-                  <p className="font-black text-lg text-gray-900 mt-0.5">
-                    <span data-testid="checkout-stay-days-value">
-                      {displayBillableDays ?? "—"}
-                    </span>{" "}
-                    {t("daysUnit")}
+              {selectedSlotCount > 0 ? (
+                <div className="flex items-center justify-between p-4 bg-orange-50 rounded-2xl border border-orange-100">
+                  <div>
+                    <p className="text-[10px] text-orange-500 font-bold uppercase tracking-widest">
+                      {t("checkoutBillableDaysLabel")} (Slot)
+                    </p>
+                    <p className="font-black text-lg text-orange-900 mt-0.5">
+                      {selectedSlotCount} slot{" "}
+                      <span className="text-sm font-normal">
+                        ({selectedSlotCount * 0.5}h)
+                      </span>
+                    </p>
+                  </div>
+                  <p className="text-[10px] text-orange-500 font-bold text-right">
+                    ₺{slotBasedTotal}
                   </p>
                 </div>
-                <p className="text-[10px] text-gray-400 font-bold text-right max-w-[55%] leading-relaxed">
-                  {t("dailyRate", { amount: dailyLine })}
-                </p>
-              </div>
+              ) : (
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                  <div>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                      {t("checkoutBillableDaysLabel")}
+                    </p>
+                    <p className="font-black text-lg text-gray-900 mt-0.5">
+                      <span data-testid="checkout-stay-days-value">
+                        {displayBillableDays ?? "—"}
+                      </span>{" "}
+                      {t("daysUnit")}
+                    </p>
+                  </div>
+                  <p className="text-[10px] text-gray-400 font-bold text-right max-w-[55%] leading-relaxed">
+                    {t("dailyRate", { amount: dailyLine })}
+                  </p>
+                </div>
+              )}
               <p className="text-xs text-gray-400 leading-relaxed">{t("stayDaysHint")}</p>
               {!windowOk ? (
                 <p

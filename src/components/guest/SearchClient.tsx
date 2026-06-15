@@ -275,10 +275,13 @@ export default function SearchClient({
     const list = [...filteredShops];
     switch (sortBy) {
       case "price_asc":
-        list.sort((a, b) => (a.pricePerDay ?? 0) - (b.pricePerDay ?? 0));
+        list.sort((a, b) => (a.pricePerHour ?? a.pricePerDay ?? 0) - (b.pricePerHour ?? b.pricePerDay ?? 0));
         break;
       case "price_desc":
-        list.sort((a, b) => (b.pricePerDay ?? 0) - (a.pricePerDay ?? 0));
+        list.sort((a, b) => (b.pricePerHour ?? b.pricePerDay ?? 0) - (a.pricePerHour ?? a.pricePerDay ?? 0));
+        break;
+      case "hourly":
+        list.sort((a, b) => (a.pricePerHour ?? 0) - (b.pricePerHour ?? 0));
         break;
       case "rating":
         list.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
@@ -497,77 +500,78 @@ export default function SearchClient({
             className="text-[10px] font-bold uppercase tracking-widest bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-gray-700 outline-none focus:border-orange-300"
             aria-label={t("sortBy")}
           >
-            <option value="distance">{t("sortByDistance")}</option>
-            <option value="price_asc">{t("sortByPriceLow")}</option>
-            <option value="price_desc">{t("sortByPriceHigh")}</option>
-            <option value="rating">{t("sortByRating")}</option>
-          </select>
-        </div>
-        <div className="flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-widest">
-          <label className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-lg">
-            {t("filterMinRating")}
-            <input
-              type="number"
-              min={0}
-              max={5}
-              step={0.1}
-              className="w-12 bg-transparent border-none text-xs font-black"
-              value={minRating}
-              onChange={(e) => setMinRating(Number(e.target.value) || 0)}
-            />
-          </label>
-          <label className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-lg">
-            {t("filterMaxPrice")}
-            <input
-              type="number"
-              min={0}
-              className="w-14 bg-transparent border-none text-xs font-black"
-              value={maxPrice}
-              onChange={(e) => setMaxPrice(Number(e.target.value) || 500)}
-            />
-          </label>
-          <label className="flex items-center gap-1 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={open247Only}
-              onChange={(e) => setOpen247Only(e.target.checked)}
-            />
-            7/24
-          </label>
-          <label className="flex items-center gap-1 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={hasRestroom}
-              onChange={(e) => setHasRestroom(e.target.checked)}
-            />
-            WC
-          </label>
-          <label className="flex items-center gap-1 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={hasCctv}
-              onChange={(e) => setHasCctv(e.target.checked)}
-            />
-            {t("filterCctv")}
-          </label>
-          <label className="flex items-center gap-1 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={hasClimateControlFilter}
-              onChange={(e) => setHasClimateControlFilter(e.target.checked)}
-            />
-            {t("filterClimate")}
-          </label>
-          <label className="flex items-center gap-1 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={acceptsLargeItemsFilter}
-              onChange={(e) => setAcceptsLargeItemsFilter(e.target.checked)}
-            />
-            {t("filterLargeItems")}
-          </label>
-        </div>
-      </header>
+              <option value="distance">{t("sortByDistance")}</option>
+              <option value="price_asc">{t("sortByPriceLow")}</option>
+              <option value="price_desc">{t("sortByPriceHigh")}</option>
+              <option value="hourly">{t("sortByHourly")}</option>
+              <option value="rating">{t("sortByRating")}</option>
+            </select>
+          </div>
+          <div className="flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-widest">
+            <label className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-lg">
+              {t("filterMinRating")}
+              <input
+                type="number"
+                min={0}
+                max={5}
+                step={0.1}
+                className="w-12 bg-transparent border-none text-xs font-black"
+                value={minRating}
+                onChange={(e) => setMinRating(Number(e.target.value) || 0)}
+              />
+            </label>
+            <label className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-lg">
+              {t("filterMaxPrice")}
+              <input
+                type="number"
+                min={0}
+                className="w-14 bg-transparent border-none text-xs font-black"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(Number(e.target.value) || 500)}
+              />
+            </label>
+            <label className="flex items-center gap-1 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={open247Only}
+                onChange={(e) => setOpen247Only(e.target.checked)}
+              />
+              7/24
+            </label>
+            <label className="flex items-center gap-1 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={hasRestroom}
+                onChange={(e) => setHasRestroom(e.target.checked)}
+              />
+              WC
+            </label>
+            <label className="flex items-center gap-1 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={hasCctv}
+                onChange={(e) => setHasCctv(e.target.checked)}
+              />
+              {t("filterCctv")}
+            </label>
+            <label className="flex items-center gap-1 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={hasClimateControlFilter}
+                onChange={(e) => setHasClimateControlFilter(e.target.checked)}
+              />
+              {t("filterClimate")}
+            </label>
+            <label className="flex items-center gap-1 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={acceptsLargeItemsFilter}
+                onChange={(e) => setAcceptsLargeItemsFilter(e.target.checked)}
+              />
+              {t("filterLargeItems")}
+            </label>
+          </div>
+        </header>
 
       <div ref={listRef} className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 bg-gray-50/50">
           {pullDistance > 0 && (
@@ -792,6 +796,7 @@ export default function SearchClient({
               <option value="distance">{t("sortByDistance")}</option>
               <option value="price_asc">{t("sortByPriceLow")}</option>
               <option value="price_desc">{t("sortByPriceHigh")}</option>
+              <option value="hourly">{t("sortByHourly")}</option>
               <option value="rating">{t("sortByRating")}</option>
             </select>
           </div>
