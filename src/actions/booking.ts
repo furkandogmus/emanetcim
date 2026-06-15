@@ -43,6 +43,8 @@ export type CreateBookingInput = {
   guestEmail?: string;
   /** Guest checkout: accountsız kullanıcılar için telefon */
   guestPhone?: string;
+  /** Time-slot based: slot IDs to reserve */
+  slotIds?: string[];
 };
 
 /**
@@ -197,6 +199,7 @@ export async function createBookingAction(data: CreateBookingInput) {
       insuranceFee: authTotals.insuranceFee,
       referralDiscountAmount,
       referredByCode: appliedReferralCode,
+      slotIds: data.slotIds,
     });
 
     // Booking onaylandı (doğrudan APPROVED, esnaf onayı beklenmez)
