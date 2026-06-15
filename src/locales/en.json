@@ -1138,14 +1138,39 @@
     "ctaSecondary": "General partner program"
   },
   "MarketingHotels": {
-    "metaTitle": "BagajPark for hotels",
-    "heroTitle": "Luggage storage for your guests",
-    "heroSubtitle": "Reduce front-desk friction before flights and city walks.",
-    "b1Title": "Higher capacity",
-    "b1Body": "Suited to groups and peak checkout windows.",
-    "b2Title": "Enterprise-friendly",
-    "b2Body": "Contract, commission and reporting aligned to hotel ops.",
-    "cta": "Contact hotel partnerships"
+    "metaTitle": "BagajPark for Hotels | Luggage Storage Solution",
+    "heroTitle": "Solve your guests' checkout luggage problem",
+    "heroSubtitle": "With BagajPark, your guests can securely store luggage after checkout while you free up lobby space. Plus, you earn extra revenue.",
+    "b1Title": "Guest Satisfaction",
+    "b1Body": "Guests explore the city hands-free after checkout. Positive reviews, higher ratings.",
+    "b2Title": "Extra Revenue",
+    "b2Body": "10-20% commission per referral. Zero operational burden, passive income.",
+    "b3Title": "Operational Ease",
+    "b3Body": "No need for luggage rooms, staff or lockers. Everything is online.",
+    "b4Title": "11 Languages",
+    "b4Body": "International guests book in their native language. No translation hassle.",
+    "faqTitle": "Frequently Asked Questions",
+    "faqs": [
+      {
+        "q": "We don't have a luggage room, can we still work together?",
+        "a": "Yes! BagajPark points are nearby partner shops. Just direct your guests there."
+      },
+      {
+        "q": "What is the commission rate?",
+        "a": "Standard partnership 10%, premium 15-20%. Customized per hotel size."
+      },
+      {
+        "q": "How are guests directed?",
+        "a": "Via QR postcards at reception. Guest scans and sees the nearest point instantly."
+      },
+      {
+        "q": "Which cities do you serve?",
+        "a": "Active in Istanbul, Ankara, Izmir, Antalya, Bodrum, Cappadocia. New cities added monthly."
+      }
+    ],
+    "ctaTitle": "Add your hotel to BagajPark",
+    "ctaDescription": "Add your hotel to the BagajPark partner network with a 10-minute call. No setup fee.",
+    "cta": "Contact for hotel partnerships"
   },
   "CookieConsent": {
     "bannerTitle": "Cookies",
@@ -1224,56 +1249,185 @@
     "istanbul": {
       "label": "Istanbul",
       "metaTitle": "Luggage storage Istanbul | BagajPark",
-      "metaDescription": "Secure luggage storage in Istanbul near top sights. Book online and explore the city hands-free.",
+      "metaDescription": "Secure luggage storage in Istanbul near Sultanahmet, Taksim, Kadikoy. Book online and explore the city hands-free.",
       "headline": "Luggage storage in Istanbul",
       "intro": "Simplify your travel with our secure luggage storage points in key areas like the Historic Peninsula, Galata Tower, Istiklal Street, and Kadikoy. There is no need to carry heavy suitcases while visiting Hagia Sophia, Sultanahmet Square, or the Grand Bazaar. Leave your bags sealed with trusted local partners and enjoy the Bosphorus without any weight.",
       "searchQuery": "Galata Tower",
-      "cta": "Open shops in Istanbul"
+      "cta": "Open shops in Istanbul",
+      "sections": [
+        {
+          "title": "Luggage Storage in Istanbul's Most Popular Districts",
+          "body": "Istanbul is a vast metropolis spread across two continents, Europe and Asia, each district having its own unique character. In Sultanahmet, you can securely store your luggage while visiting Hagia Sophia, the Basilica Cistern, and the Grand Bazaar, then freely wander the narrow historic streets. Around Taksim and Istiklal Street, you don't need to carry heavy suitcases while shopping among 19th-century buildings or riding the famous nostalgic tram. Our BagajPark points are within walking distance of these busy areas. On the Asian side, our Kadikoy and Moda coast locations are conveniently close to ferry docks.",
+          "keywords": "Sultanahmet luggage storage, Taksim bag storage, Istiklal Street luggage"
+        },
+        {
+          "title": "Exploring Istanbul Baggage-Free After Check-Out",
+          "body": "The time between checking out of your hotel and your flight can be the most productive part of your Istanbul trip. BagajPark offers the perfect solution, especially for tourists checking out of hotels in the Sultanahmet area. After breakfast, drop your suitcases at the nearest storage point and spend the day visiting Hagia Sophia, Topkapi Palace, and the Grand Bazaar with ease. In the evening, pick up your luggage and head to the airport without returning to your hotel. Cruise ship passengers can also drop their luggage at our Karakoy or Eminonu points and enjoy a day trip in Istanbul.",
+          "keywords": "check-out luggage storage Istanbul, hotel checkout bag storage, last day baggage-free"
+        },
+        {
+          "title": "City Center Luggage Storage vs Airport Left Luggage",
+          "body": "While both Istanbul Airport (IST) and Sabiha Gokcen Airport (SAW) have left luggage offices, their distance from the city center makes them inconvenient just for dropping bags. Airport storage prices in 2026 start at 210 TL for small bags and 550 TL for large bags. With BagajPark, you can store your luggage at much more affordable rates at locations near your hotel or travel route in the city center. Our points in Sultanahmet, Taksim, Kadikoy, and Besiktas let you store your bags without deviating from your itinerary. Plus, online booking means no waiting when you arrive.",
+          "keywords": "Istanbul Airport luggage storage price, city center bag storage, IST left luggage alternative"
+        }
+      ],
+      "tips": [
+        "Your luggage is sealed with numbered security tags for safety",
+        "Book online to skip the queue at storage points",
+        "Your belongings are covered by insurance",
+        "Free cancellation until the last minute",
+        "11 language support for international travelers"
+      ],
+      "nearbyPlaces": [
+        "Sultanahmet Square",
+        "Hagia Sophia",
+        "Grand Bazaar",
+        "Galata Tower",
+        "Istiklal Street",
+        "Kadikoy Moda Coast",
+        "Spice Bazaar",
+        "Ortakoy Square"
+      ]
     },
     "ankara": {
       "label": "Ankara",
       "metaTitle": "Luggage storage Ankara | BagajPark",
-      "metaDescription": "Safe baggage storage in Ankara near museums and the city centre. Simple online booking.",
+      "metaDescription": "Safe baggage storage in Ankara near Kizilay, Tunali, ATG Train Station. Online booking for hands-free travel in the capital.",
       "headline": "Luggage storage in Ankara",
       "intro": "Enjoy a comfortable trip to Ankara with storage locations around Kizilay, Tunali Hilmi, Cankaya, and the High-Speed Train Station (ATG). Free yourself of luggage while climbing the steep hills of Ankara Castle or exploring the Museum of Ancient Civilizations. Store your bags during business meetings or museum visits.",
-      "searchQuery": "Kızılay",
-      "cta": "Open shops in Ankara"
+      "searchQuery": "Kizilay",
+      "cta": "Open shops in Ankara",
+      "sections": [
+        {
+          "title": "Bag Storage in Ankara City Center",
+          "body": "When arriving in Ankara via YHT high-speed train, you can store your luggage before heading to Kizilay. Kizilay Square and its surroundings are the most vibrant area of Ankara, filled with shopping malls, cafes, and restaurants. Use BagajPark points instead of carrying suitcases while strolling down Tunali Hilmi Street or relaxing at Kugulu Park. You can also securely store your luggage before visiting Anitkabir, Ataturk's Mausoleum.",
+          "keywords": "Ankara luggage storage, Kizilay bag storage, Ankara YHT station luggage"
+        },
+        {
+          "title": "Business Travel Luggage Solutions in Ankara",
+          "body": "When visiting Ankara for business, you don't have to deal with luggage before or after meetings. Our storage points near Cankaya, Sogutozu, and METU Technopolis business districts let you attend meetings hands-free. Pick up your luggage at the end of the day and head directly to the airport or train station.",
+          "keywords": "Ankara business trip luggage, Cankaya bag storage"
+        }
+      ],
+      "tips": [
+        "Drop your luggage before meetings and attend hands-free",
+        "YHT station nearby points for easy train connections"
+      ],
+      "nearbyPlaces": [
+        "Anitkabir",
+        "Kizilay Square",
+        "Ankara Castle",
+        "Kugulu Park",
+        "Museum of Anatolian Civilizations"
+      ]
     },
     "izmir": {
       "label": "Izmir",
       "metaTitle": "Luggage storage Izmir | BagajPark",
-      "metaDescription": "Luggage storage in Izmir near Konak, Alsancak and the waterfront. Travel lighter along the coast.",
+      "metaDescription": "Luggage storage in Izmir near Konak, Alsancak, Kordon waterfront. Book online for a hands-free coastal experience.",
       "headline": "Luggage storage in Izmir",
       "intro": "Leave your suitcase behind at our secure storage points in Izmir's most vibrant spots like Alsancak, Konak, Kordon, and Karsiyaka. Don't let heavy bags slow you down while exploring the historic Kemeralti Bazaar, the Clock Tower, or walking along the seaside.",
       "searchQuery": "Konak",
-      "cta": "Open shops in Izmir"
+      "cta": "Open shops in Izmir",
+      "sections": [
+        {
+          "title": "Baggage-Free Stroll Along Izmir's Kordon",
+          "body": "The Kordon coastline is the heart of Izmir. You don't have to carry luggage while walking along this magnificent shoreline from Alsancak to Konak. Whether shopping at Kemeralti Bazaar, enjoying the view from the historic Asansor, or sitting at cafes on Kibris Sehitleri Street, our BagajPark points keep your hands free. We also have locations near the Konak ferry dock for when you arrive by sea.",
+          "keywords": "Izmir Kordon luggage storage, Alsancak bag storage"
+        }
+      ],
+      "tips": [
+        "Store your bags before shopping at Kemeralti",
+        "Keep your hands free while walking the Kordon"
+      ],
+      "nearbyPlaces": [
+        "Konak Square",
+        "Kemeralti Bazaar",
+        "Asansor",
+        "Kordon Coastline",
+        "Alsancak"
+      ]
     },
     "antalya": {
       "label": "Antalya",
       "metaTitle": "Luggage storage Antalya | BagajPark",
-      "metaDescription": "Tourist-friendly luggage storage in Antalya near Kaleiçi and beaches. Book in a few taps.",
+      "metaDescription": "Tourist-friendly luggage storage in Antalya near Kaleici, Lara, Konyaalti beaches. Book in a few taps.",
       "headline": "Luggage storage in Antalya",
       "intro": "End the luggage hassle while wandering the narrow streets of Kaleici (Old Town), visiting the historic Hadrian's Gate, or heading to the beach. Use BagajPark points to make the most of the gap between your check-out time and your flight.",
-      "searchQuery": "Kaleiçi",
-      "cta": "Open shops in Antalya"
+      "searchQuery": "Kaleici",
+      "cta": "Open shops in Antalya",
+      "sections": [
+        {
+          "title": "Luggage Storage Between Beach and Flight in Antalya",
+          "body": "The hardest part of an Antalya holiday is the gap between hotel checkout and your flight. If you want one last swim at Konyaalti or Lara beaches, where do you leave your bags? With BagajPark, you can store your luggage at points near Kaleici or beach areas and enjoy your last day hands-free. Visit Hadrian's Gate, explore the ancient theater, or enjoy one last Turkish coffee without dragging your suitcase behind you.",
+          "keywords": "Antalya luggage storage, Kaleici bag storage, beach luggage deposit"
+        }
+      ],
+      "tips": [
+        "Store bags at Kaleici after your last beach day",
+        "Explore the Old Town hands-free"
+      ],
+      "nearbyPlaces": [
+        "Kaleici",
+        "Hadrian's Gate",
+        "Konyaalti Beach",
+        "Lara Beach",
+        "Antalya Airport"
+      ]
     },
     "bodrum": {
       "label": "Bodrum",
       "metaTitle": "Luggage storage Bodrum | BagajPark",
-      "metaDescription": "Secure bag storage in Bodrum near the marina and beaches for boats, nights out and day trips.",
+      "metaDescription": "Secure bag storage in Bodrum near the marina, beaches, and bus station for boat trips and day tours.",
       "headline": "Luggage storage in Bodrum",
       "intro": "Make your holiday easier with secure luggage storage near Bodrum Castle, the marina, popular beaches, and the main bus station. Leave your suitcases with our partners before joining boat tours or enjoying Bodrum's nightlife.",
       "searchQuery": "Marina",
-      "cta": "Open shops in Bodrum"
+      "cta": "Open shops in Bodrum",
+      "sections": [
+        {
+          "title": "Luggage Storage Before Boat Tours in Bodrum",
+          "body": "Before joining boat tours or ferry services in Bodrum, you may want to store your luggage. Our points near the marina let you enjoy the sea without bags. Our locations near the bus station are also ideal for storing luggage before intercity travel.",
+          "keywords": "Bodrum marina luggage storage, Bodrum bus station bag storage"
+        }
+      ],
+      "tips": [
+        "Leave your luggage at our marina point before boat tours",
+        "Free yourself from bags before nightlife"
+      ],
+      "nearbyPlaces": [
+        "Bodrum Castle",
+        "Marina",
+        "Gumbet Beach",
+        "Bitez",
+        "Yalikavak"
+      ]
     },
     "cappadocia": {
       "label": "Cappadocia",
       "metaTitle": "Luggage storage Cappadocia | BagajPark",
-      "metaDescription": "Luggage storage in Cappadocia for balloon rides and valley hikes around Göreme and Ürgüp.",
+      "metaDescription": "Luggage storage in Cappadocia for balloon rides and valley hikes around Göreme, Urgup, Avanos.",
       "headline": "Luggage storage in Cappadocia",
       "intro": "Explore the magical valleys of Cappadocia, Goreme, Urgup, Avanos, and Uchisar without carrying suitcases. Leave your heavy bags at a nearby partner before hiking through fairy chimneys or watching hot air balloons at sunrise.",
-      "searchQuery": "Göreme",
-      "cta": "Open shops in Cappadocia"
+      "searchQuery": "Goreme",
+      "cta": "Open shops in Cappadocia",
+      "sections": [
+        {
+          "title": "Luggage Storage Before Balloon Tours in Cappadocia",
+          "body": "Sunrise hot air balloon tours are the highlight of any Cappadocia trip but require an early departure from your accommodation. With BagajPark, you can store your luggage in Goreme center, join your balloon tour, then hike through the valleys hands-free. Explore Pigeon Valley, Ihlara Valley, or Derinkuyu Underground City without carrying your bags.",
+          "keywords": "Cappadocia luggage storage, Goreme bag storage, balloon tour luggage"
+        }
+      ],
+      "tips": [
+        "Store luggage in Goreme before your balloon tour",
+        "Hike through fairy chimneys hands-free"
+      ],
+      "nearbyPlaces": [
+        "Goreme Open Air Museum",
+        "Fairy Chimneys",
+        "Uchisar Castle",
+        "Derinkuyu",
+        "Avanos"
+      ]
     },
     "berlin": {
       "label": "Berlin",

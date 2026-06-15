@@ -137,7 +137,12 @@ export default async function CityLuggageStoragePage({
   });
   const q = encodeURIComponent(t(`${slug}.searchQuery`));
   const searchHref = `/search?q=${q}&lat=${city.lat}&lng=${city.lng}`;
+  const cityData = t.raw(`${slug}`) as Record<string, unknown> | undefined;
+  const sections = (cityData?.sections ?? []) as Array<{ title: string; body: string; keywords?: string }>;
+  const tips = (cityData?.tips ?? []) as string[];
+  const nearbyPlaces = (cityData?.nearbyPlaces ?? []) as string[];
 
+  // JSON-LD for Article SEO
   const jsonLd = buildCityStorageJsonLd({
     locale,
     slug,
@@ -240,6 +245,56 @@ export default async function CityLuggageStoragePage({
             ))}
           </div>
         </section>
+
+        {/* SEO Content Sections */}
+        {sections.length > 0 && (
+          <div className="mt-12 space-y-6">
+            {sections.map((section, idx) => (
+              <section key={idx} className="rounded-[1.5rem] border border-gray-100 bg-white p-6">
+                <h2 className="text-lg font-black text-gray-900">{section.title}</h2>
+                <p className="mt-3 text-sm leading-relaxed text-gray-600">{section.body}</p>
+                {section.keywords && (
+                  <p className="mt-3 text-[10px] font-bold uppercase tracking-widest text-gray-300">
+                    #{section.keywords}
+                  </p>
+                )}
+              </section>
+            ))}
+          </div>
+        )}
+
+        {/* Tips Section */}
+        {tips.length > 0 && (
+          <section className="mt-6 rounded-[1.5rem] border border-orange-100 bg-orange-50 p-6">
+            <h2 className="text-lg font-black text-gray-900 flex items-center gap-2">
+              <span className="text-orange-600">★</span> {locale === 'tr' ? 'BagajPark İpuçları' : 'BagajPark Tips'}
+            </h2>
+            <ul className="mt-4 space-y-2">
+              {tips.map((tip, idx) => (
+                <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
+                  <span className="text-orange-600 mt-0.5">✓</span>
+                  <span>{tip}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {/* Nearby Places */}
+        {nearbyPlaces.length > 0 && (
+          <section className="mt-6 rounded-[1.5rem] border border-gray-100 bg-white p-6">
+            <h2 className="text-lg font-black text-gray-900">
+              {locale === 'tr' ? 'Yakındaki Popüler Noktalar' : 'Nearby Popular Places'}
+            </h2>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {nearbyPlaces.map((place) => (
+                <span key={place} className="inline-flex items-center px-3 py-1.5 rounded-full bg-gray-100 text-xs font-bold text-gray-600">
+                  {place}
+                </span>
+              ))}
+            </div>
+          </section>
+        )}
       </article>
     </div>
   );
