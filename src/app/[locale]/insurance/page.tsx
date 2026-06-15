@@ -16,7 +16,7 @@ const copy = {
     coverageTitle: "Kapsam Özeti",
     coverageSubtitle:
       "Koşullar sağlandığında platform koruması devreye girer. Ayrıntılar kullanım şartlarında tanımlıdır.",
-    thresholdTitle: "Çanta Başına 5.000 TL",
+    thresholdTitle: "Çanta Başına 10.000 TL",
     thresholdBody:
       "Hasar veya kayıp bildirimlerinde süreç şartlara göre ilerler. Mühür ve teslim fotoğrafı kayıtları değerlendirmede kullanılır.",
     antiTheftTitle: "Hırsızlık ve Hasar Koruması",
@@ -49,7 +49,7 @@ const copy = {
     coverageTitle: "Comprehensive Coverage",
     coverageSubtitle:
       "When conditions are met, platform protection applies. Full details are defined in Terms.",
-    thresholdTitle: "5,000 TL Per Bag",
+    thresholdTitle: "10,000 TL Per Bag",
     thresholdBody:
       "Loss or damage reports are handled according to policy terms. Seal and drop-off records support validation.",
     antiTheftTitle: "Anti-Theft Protection",

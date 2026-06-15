@@ -33,14 +33,14 @@ export default async function BookingsPage({ params }: { params: Promise<{ local
   }
 
   // Veritabanından kullanıcının kendi rezervasyonlarını çek
-  const [bookings, pricingRules] = await Promise.all([
+  const [bookingResult, pricingRules] = await Promise.all([
     bookingService.getUserBookings(session.user.id),
     getPricingRules(),
   ]);
 
   return (
     <BookingsClient
-      bookings={JSON.parse(JSON.stringify(bookings))}
+      bookings={JSON.parse(JSON.stringify(bookingResult.items))}
       pricingRules={JSON.parse(JSON.stringify(pricingRules))}
     />
   );

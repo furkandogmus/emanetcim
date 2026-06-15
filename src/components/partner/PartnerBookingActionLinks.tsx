@@ -29,7 +29,7 @@ export default function PartnerBookingActionLinks({
         </p>
         <Link
           href="/partner"
-          className="w-full rounded-2xl bg-orange-600 py-4 text-center text-xs font-black uppercase tracking-widest text-white transition-colors hover:bg-orange-700"
+          className="w-full rounded-2xl bg-orange-600 px-4 py-3 text-center text-xs font-black text-white transition-colors hover:bg-orange-700"
         >
           {t("partnerBookingsOpenPanel")}
         </Link>
@@ -45,7 +45,7 @@ export default function PartnerBookingActionLinks({
         </p>
         <Link
           href="/partner"
-          className="w-full rounded-2xl border border-amber-200 bg-white py-4 text-center text-xs font-black uppercase tracking-widest text-amber-900 transition-colors hover:bg-amber-50"
+          className="w-full rounded-2xl border border-amber-200 bg-white px-4 py-3 text-center text-xs font-black text-amber-900 transition-colors hover:bg-amber-50"
         >
           {t("partnerBookingsOpenPanel")}
         </Link>
@@ -63,7 +63,7 @@ export default function PartnerBookingActionLinks({
         )}
         <Link
           href={`/partner?booking=${bookingId}`}
-          className="block w-full rounded-2xl bg-orange-600 py-4 text-center text-xs font-black uppercase tracking-widest text-white transition-colors hover:bg-orange-700"
+          className="block w-full rounded-2xl bg-orange-600 px-4 py-3 text-center text-xs font-black text-white transition-colors hover:bg-orange-700"
         >
           {t("customerArrivedCheckIn")}
         </Link>
@@ -75,7 +75,7 @@ export default function PartnerBookingActionLinks({
     return (
       <Link
         href={`/partner?checkoutBooking=${bookingId}`}
-        className="block w-full rounded-2xl bg-gray-900 py-4 text-center text-xs font-black uppercase tracking-widest text-white transition-colors hover:bg-black"
+        className="block w-full rounded-2xl bg-gray-900 px-4 py-3 text-center text-xs font-black text-white transition-colors hover:bg-black"
       >
         {t("handOverCheckout")}
       </Link>

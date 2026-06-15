@@ -50,8 +50,9 @@ const nextConfig: NextConfig = withPWA({
   dest: "public",
   disable: process.env.NODE_ENV === "development",
   register: true,
-  skipWaiting: true,
-  runtimeCaching: [
+  workboxOptions: {
+    skipWaiting: true,
+    runtimeCaching: [
     {
       urlPattern: /\/_next\/static\/(?:chunks|css|media)\/.*/i,
       handler: "CacheFirst",
@@ -104,7 +105,8 @@ const nextConfig: NextConfig = withPWA({
         expiration: { maxEntries: 32, maxAgeSeconds: 3600 },
       },
     },
-  ],
+    ],
+  },
 })({
   output: "standalone",
   reactCompiler: true,
