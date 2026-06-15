@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 import { bookingService } from "@/services/BookingService";
+import { notificationService } from "@/services/NotificationService";
 import prisma from "@/lib/db";
 
 export async function POST(
@@ -18,7 +19,7 @@ export async function POST(
 
   const booking = await prisma.booking.findUnique({
     where: { id },
-    select: { shop: { select: { ownerId: true } } },
+    select: { shop: { select: { ownerId: true } }, guestEmail: true },
   });
   if (!booking) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
@@ -31,6 +32,11 @@ export async function POST(
 
   if (!result.ok) {
     return NextResponse.json({ error: result.code, message: result.message }, { status: 400 });
+  }
+
+  // Send check-out notification to guest
+  if (booking.guestEmail) {
+    notificationService.notifyCheckOut(booking.guestEmail, id).catch(() => {});
   }
 
   return NextResponse.json({ 
