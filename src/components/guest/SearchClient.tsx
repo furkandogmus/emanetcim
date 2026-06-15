@@ -10,7 +10,6 @@ import {
   MapPin,
   Minus,
   Plus,
-  X as CloseIcon,
   SlidersHorizontal,
   Crosshair,
   ArrowUpDown,
@@ -662,131 +661,13 @@ export default function SearchClient({
       <BottomSheet
         open={panelOpen}
         onClose={() => setPanelOpen(false)}
-        title={t("searchPlaceholder")}
         snapPoints={[15, 45, 88]}
         initialSnap={1}
         showClose={false}
         showOverlay={false}
       >
         <header className="px-4 pt-2 pb-3 border-b border-gray-100 shrink-0">
-          <div className="flex items-center gap-3 mb-3">
-            <Link
-              href="/"
-              className="btn-ui btn-ui-md btn-ui-ghost btn-ui-icon rounded-full"
-            >
-              <ChevronLeft size={22} className="text-gray-900" />
-            </Link>
-            <div className="flex-1">
-              <h1 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">
-                {t("searchPlaceholder")}
-              </h1>
-            </div>
-          </div>
-          {resolvedPlaceLabel ? (
-            <p className="mb-2 text-xs font-semibold text-gray-500 truncate">
-              {resolvedPlaceLabel}
-            </p>
-          ) : null}
-
-          <div className="flex gap-2 mb-3">
-            <div className="relative group flex-1">
-              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                <SearchIcon
-                  size={18}
-                  className="text-gray-400 group-focus-within:text-orange-600 transition-colors"
-                />
-              </div>
-              <input
-                type="text"
-                placeholder={t("searchPlaceholder")}
-                className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-transparent focus:border-orange-500/30 focus:bg-white focus:ring-4 focus:ring-orange-500/5 rounded-2xl text-base font-semibold placeholder:text-gray-400 transition-all shadow-sm outline-none"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <button
-              type="button"
-              onClick={handleUseMyLocation}
-              disabled={gpsLocating}
-              className="shrink-0 h-[48px] w-[48px] bg-gray-50 hover:bg-orange-50 border border-transparent hover:border-orange-200 rounded-2xl flex items-center justify-center text-gray-400 hover:text-orange-600 transition-all disabled:opacity-50"
-              title={t("useMyLocation")}
-              aria-label={t("useMyLocation")}
-            >
-              {gpsLocating ? (
-                <div className="w-5 h-5 border-2 border-gray-300 border-t-orange-600 rounded-full animate-spin" />
-              ) : (
-                <Crosshair size={20} />
-              )}
-            </button>
-          </div>
-
-          {datesReady ? (
-            <section className="mb-3 space-y-2 rounded-2xl border border-gray-100 bg-gray-50/80 p-3">
-              <p className="text-xs font-black uppercase tracking-widest text-gray-400">
-                {t("searchStayWindow")}
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <label className="flex flex-col gap-1">
-                  <span className="text-xs font-bold text-gray-400 uppercase">{t("searchCheckIn")}</span>
-                  <div className="rounded-xl bg-white border border-gray-100 px-2 py-2">
-                    <DateTimePicker
-                      value={checkInLocal}
-                      onChange={(v) => { setCheckInLocal(v); markFiltersDirty(); }}
-                      testId="search-checkin"
-                      ariaLabel={t("searchCheckIn")}
-                      iconSize={14}
-                    />
-                  </div>
-                </label>
-                <label className="flex flex-col gap-1">
-                  <span className="text-xs font-bold text-gray-400 uppercase">{t("searchCheckOut")}</span>
-                  <div className="rounded-xl bg-white border border-gray-100 px-2 py-2">
-                    <DateTimePicker
-                      value={checkOutLocal}
-                      onChange={(v) => { setCheckOutLocal(v); markFiltersDirty(); }}
-                      testId="search-checkout"
-                      ariaLabel={t("searchCheckOut")}
-                      iconSize={14}
-                      minDate={parseDatetimeLocal(checkInLocal) ?? undefined}
-                    />
-                  </div>
-                </label>
-              </div>
-              <div className="flex items-center justify-between gap-3 pt-1">
-                <span className="text-xs font-bold text-gray-400 uppercase">{t("searchBagCount")}</span>
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => { setRequestedBags((n) => Math.max(1, n - 1)); markFiltersDirty(); }}
-                    disabled={requestedBags <= 1}
-                    className="w-9 h-9 rounded-full bg-white border border-gray-200 flex items-center justify-center disabled:opacity-30"
-                  >
-                    <Minus size={16} />
-                  </button>
-                  <span className="w-6 text-center font-black text-gray-900">{requestedBags}</span>
-                  <button
-                    type="button"
-                    onClick={() => { setRequestedBags((n) => Math.min(MAX_SEARCH_BAGS, n + 1)); markFiltersDirty(); }}
-                    disabled={requestedBags >= MAX_SEARCH_BAGS}
-                    className="w-9 h-9 rounded-full bg-orange-600 text-white flex items-center justify-center disabled:opacity-40"
-                  >
-                    <Plus size={16} />
-                  </button>
-                </div>
-              </div>
-            </section>
-          ) : null}
-
-          <button
-            type="button"
-            onClick={() => setFiltersOpen((v) => !v)}
-            className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gray-700 py-1.5"
-          >
-            <SlidersHorizontal size={12} />
-            {filtersOpen ? t("hideFilters") : t("showFilters")} ({sortedShops.length})
-          </button>
-
-          <div className="flex items-center gap-3 mb-3">
+          <div className="flex items-center gap-3">
             <div className="flex bg-gray-100 rounded-xl p-1 flex-1">
               <button
                 type="button"
@@ -804,41 +685,6 @@ export default function SearchClient({
               </button>
             </div>
           </div>
-
-          {filtersOpen && (
-            <>
-          <div className="flex items-center gap-2 mb-2">
-            <ArrowUpDown size={14} className="text-gray-400 shrink-0" />
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="text-[10px] font-bold uppercase tracking-widest bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-gray-700 outline-none focus:border-orange-300"
-              aria-label={t("sortBy")}
-            >
-              <option value="distance">{t("sortByDistance")}</option>
-              <option value="price_asc">{t("sortByPriceLow")}</option>
-              <option value="price_desc">{t("sortByPriceHigh")}</option>
-              <option value="hourly">{t("sortByHourly")}</option>
-              <option value="rating">{t("sortByRating")}</option>
-            </select>
-          </div>
-          <div className="flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-widest">
-            <label className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-lg">
-              {t("filterMinRating")}
-              <input type="number" min={0} max={5} step={0.1} className="w-12 bg-transparent border-none text-xs font-black" value={minRating} onChange={(e) => setMinRating(Number(e.target.value) || 0)} />
-            </label>
-            <label className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-lg">
-              {t("filterMaxPrice")}
-              <input type="number" min={0} className="w-14 bg-transparent border-none text-xs font-black" value={maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value) || 500)} />
-            </label>
-            <label className="flex items-center gap-1 cursor-pointer"><input type="checkbox" checked={open247Only} onChange={(e) => setOpen247Only(e.target.checked)} />7/24</label>
-            <label className="flex items-center gap-1 cursor-pointer"><input type="checkbox" checked={hasRestroom} onChange={(e) => setHasRestroom(e.target.checked)} />WC</label>
-            <label className="flex items-center gap-1 cursor-pointer"><input type="checkbox" checked={hasCctv} onChange={(e) => setHasCctv(e.target.checked)} />{t("filterCctv")}</label>
-            <label className="flex items-center gap-1 cursor-pointer"><input type="checkbox" checked={hasClimateControlFilter} onChange={(e) => setHasClimateControlFilter(e.target.checked)} />{t("filterClimate")}</label>
-            <label className="flex items-center gap-1 cursor-pointer"><input type="checkbox" checked={acceptsLargeItemsFilter} onChange={(e) => setAcceptsLargeItemsFilter(e.target.checked)} />{t("filterLargeItems")}</label>
-          </div>
-            </>
-          )}
         </header>
 
         <div ref={mobileListRef} className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 bg-gray-50/50">
@@ -851,11 +697,6 @@ export default function SearchClient({
               )}
             </div>
           )}
-          <div className="flex justify-between items-center px-1 mb-2">
-            <h2 className="text-sm font-black text-gray-900 uppercase tracking-widest">
-              {activeTab === "nearby" ? t("nearbyShops") : t("allShops")} ({sortedShops.length})
-            </h2>
-          </div>
 
           {sortedShops.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center gap-3">
