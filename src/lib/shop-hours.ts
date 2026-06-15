@@ -36,7 +36,11 @@ export function isShopOpenAt(
 
 /**
  * Check if shop is open across the full stay window.
- * Validates at least check-in, check-out, and midpoint.
+ * Validates check-in and check-out endpoints.
+ *
+ * Note: We intentionally do NOT require the midpoint of an overnight stay
+ * to fall inside opening hours. A guest can drop bags in the morning and
+ * pick them up the next morning while the shop is closed overnight.
  */
 export function isShopOpenForStay(
   openingTime: string | null | undefined,
@@ -48,13 +52,9 @@ export function isShopOpenForStay(
 ): boolean {
   if (open247) return true;
 
-  // Check endpoints
+  // Check endpoints only
   if (!isShopOpenAt(openingTime, closingTime, checkIn, timezone)) return false;
   if (!isShopOpenAt(openingTime, closingTime, checkOut, timezone)) return false;
-
-  // Check midpoint for overnight stays
-  const midpoint = new Date((checkIn.getTime() + checkOut.getTime()) / 2);
-  if (!isShopOpenAt(openingTime, closingTime, midpoint, timezone)) return false;
 
   return true;
 }
