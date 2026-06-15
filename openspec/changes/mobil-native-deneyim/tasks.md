@@ -63,16 +63,16 @@
 
 ## 9. Flutter - Platform Adaptive Widget'lar
 
-- [ ] 9.1 Add platform detection utility (iOS vs Android)
-- [ ] 9.2 Add Cupertino-style navigation for iOS
-- [ ] 9.3 Refactor bottom sheets to use platform-adaptive style
-- [ ] 9.4 Add iOS-style action sheets where applicable
+- [x] 9.1 Add platform detection utility (iOS vs Android) — created `platform_utils.dart` with `isIOS`/`isAndroid` getters
+- [ ] 9.2 Add Cupertino-style navigation for iOS — `platform_utils.dart` has `platformCupertinoRoute` helper; needs GoRouter integration
+- [x] 9.3 Refactor bottom sheets to use platform-adaptive style — `showAdaptiveBottomSheet` utility in `platform_utils.dart`
+- [x] 9.4 Add iOS-style action sheets where applicable — `showAdaptiveActionSheet` with `AdaptiveAction<T>` in `platform_utils.dart`
 
 ## 10. Flutter - Gesture İyileştirmeleri
 
-- [ ] 10.1 Add swipe-back gesture support to detail pages
-- [ ] 10.2 Enhance image gallery with pinch-to-zoom
-- [ ] 10.3 Add hero animation between search list and detail
+- [ ] 10.1 Add swipe-back gesture support to detail pages (use `PopScope` / `GestureDetector` on shop detail)
+- [ ] 10.2 Enhance image gallery with pinch-to-zoom (use `InteractiveViewer` widget)
+- [ ] 10.3 Add hero animation between search list and detail (use `Hero` widget on shop cards)
 
 ## 11. Test & Doğrulama
 

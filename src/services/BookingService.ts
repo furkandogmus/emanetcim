@@ -16,6 +16,8 @@ export type CreateInitialBookingInput = {
   insuranceFee?: number;
   referralDiscountAmount?: number;
   referredByCode?: string;
+  /** Time-slot based: if provided, slot IDs to reserve instead of datetime pair */
+  slotIds?: string[];
 };
 
 export type ModifyBookingInput = {
@@ -56,6 +58,7 @@ import { totalBagCount } from '@/lib/bag-pricing';
 import { sealService, type SealAssignmentInput } from '@/services/SealService';
 import { getPricingRules } from '@/lib/platform-settings';
 import { moneyToNumber } from '@/lib/money';
+import { reserveSlots, releaseSlots } from '@/services/SlotService';
 import {
   PartnerCheckInResult,
   PartnerCheckOutResult,
@@ -118,6 +121,15 @@ export class BookingService implements IBookingService {
     if (!validateBookingStayWindow(data.checkInTime, data.checkOutTime, rules)) {
       throw new Error('Geçersiz rezervasyon tarihleri.');
     }
+
+    const newBags = totalBagCount(data.bagCountS, data.bagCountM, data.bagCountXl);
+    
+    // Slot-based booking path
+    if (data.slotIds && data.slotIds.length > 0) {
+      return this.createSlotBooking(data, newBags, rules);
+    }
+
+    // Legacy datetime-pair path (backward compat)
     const booking = await prisma.$transaction(
       async (tx) => {
         const shop = await tx.shop.findUnique({ where: { id: data.shopId } });
@@ -135,11 +147,6 @@ export class BookingService implements IBookingService {
             ? Math.max(0, data.insuranceFee)
             : 0;
 
-        const newBags = totalBagCount(
-          data.bagCountS,
-          data.bagCountM,
-          data.bagCountXl
-        );
         await this.assertCapacityTx(
           tx,
           shop,
@@ -201,6 +208,108 @@ export class BookingService implements IBookingService {
         bagCountS: data.bagCountS,
         bagCountM: data.bagCountM,
         bagCountXl: data.bagCountXl,
+      },
+    }).catch((err) => logger.error({ err, bookingId: booking.id }, "booking_event_created_failed"));
+
+    return booking;
+  }
+
+  /**
+   * Slot-based booking: reserves specific time slots with per-slot capacity.
+   */
+  private async createSlotBooking(
+    data: CreateInitialBookingInput,
+    newBags: number,
+    rules: Awaited<ReturnType<typeof getPricingRules>>,
+  ): Promise<Booking> {
+    const booking = await prisma.$transaction(
+      async (tx) => {
+        const shop = await tx.shop.findUnique({ where: { id: data.shopId } });
+        if (!shop) throw new Error('Dükkan bulunamadı.');
+
+        const unitPrice =
+          typeof data.unitPrice === 'number' && Number.isFinite(data.unitPrice)
+            ? data.unitPrice
+            : moneyToNumber(shop.pricePerHour ?? shop.pricePerDay) || rules.defaultPricePerDay;
+        const insuranceFee =
+          typeof data.insuranceFee === 'number' && Number.isFinite(data.insuranceFee)
+            ? Math.max(0, data.insuranceFee)
+            : 0;
+
+        // Reserve slots via SlotService
+        const { checkInTime, checkOutTime } = await reserveSlots(
+          tx as Prisma.TransactionClient,
+          data.shopId,
+          data.checkInTime,
+          data.checkOutTime,
+          newBags,
+        );
+
+        // Create ReservationSlot entries
+        const slots = await tx.shopTimeSlot.findMany({
+          where: {
+            shopId: data.shopId,
+            startTime: { gte: data.checkInTime },
+            endTime: { lte: data.checkOutTime },
+            isActive: true,
+          },
+        });
+
+        const referralDiscountAmount =
+          typeof data.referralDiscountAmount === 'number' && Number.isFinite(data.referralDiscountAmount)
+            ? Math.max(0, data.referralDiscountAmount)
+            : 0;
+
+        const booking = await tx.booking.create({
+          data: {
+            guestId: data.guestId ?? null,
+            guestEmail: data.guestEmail ?? null,
+            guestPhone: data.guestPhone ?? null,
+            shopId: data.shopId,
+            totalPrice: data.totalPrice,
+            insuranceFee,
+            referralDiscountAmount,
+            referredByCode: data.referredByCode ?? null,
+            bagCountS: data.bagCountS,
+            bagCountM: data.bagCountM,
+            bagCountXl: data.bagCountXl,
+            checkInTime,
+            checkOutTime,
+            unitPrice,
+            qrCodeToken: `temp_${crypto.randomUUID()}`,
+            status: 'PENDING',
+            reservationSlots: {
+              create: slots.map((s) => ({
+                slotId: s.id,
+                bagCount: newBags,
+              })),
+            },
+          },
+        });
+
+        const qrCodeToken = await createQrToken({
+          bookingId: booking.id,
+          guestId: data.guestId ?? booking.id,
+          shopId: data.shopId,
+        });
+
+        return tx.booking.update({
+          where: { id: booking.id },
+          data: { qrCodeToken },
+        });
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
+    );
+
+    bookingEventService.record({
+      bookingId: booking.id,
+      event: "CREATED",
+      actorId: data.guestId ?? "guest",
+      actorRole: "GUEST",
+      metadata: {
+        shopId: data.shopId,
+        totalPrice: data.totalPrice,
+        slotBooking: true,
       },
     }).catch((err) => logger.error({ err, bookingId: booking.id }, "booking_event_created_failed"));
 
@@ -609,7 +718,10 @@ export class BookingService implements IBookingService {
    * Ödeme alınmışsa iade başarısızsa rezervasyon CANCELLED yapılmaz.
    */
   async cancelBooking(bookingId: string): Promise<CancelBookingResult> {
-    const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
+    const booking = await prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: { reservationSlots: true },
+    });
 
     if (!booking) {
       return { ok: false, code: 'NOT_FOUND', message: 'Rezervasyon bulunamadı.' };
@@ -642,9 +754,15 @@ export class BookingService implements IBookingService {
         }
       }
 
-      await prisma.booking.update({
-        where: { id: bookingId },
-        data: { status: 'CANCELLED' },
+      await prisma.$transaction(async (tx) => {
+        await tx.booking.update({
+          where: { id: bookingId },
+          data: { status: 'CANCELLED' },
+        });
+
+        if (booking.reservationSlots.length > 0) {
+          await tx.reservationSlot.deleteMany({ where: { bookingId } });
+        }
       });
 
       // Sadakat puanlarını geri al

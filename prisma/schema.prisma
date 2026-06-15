@@ -106,6 +106,8 @@ model Shop {
   isActive          Boolean       @default(false)
   rating            Float?        @default(0.0)
   pricePerDay       Decimal       @default(50) @db.Decimal(12, 2)
+  pricePerHour       Decimal       @default(10) @db.Decimal(12, 2)
+  timezone          String        @default("Europe/Istanbul")
   hasRestroom       Boolean       @default(false)
   hasCctv           Boolean       @default(false)
   hasClimateControl Boolean       @default(false)
@@ -128,6 +130,7 @@ model Shop {
   seals            Seal[]
   sealRequests     SealRequest[]
   images           ShopImage[]
+  timeSlots        ShopTimeSlot[]
   owner            User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   @@index([ownerId])
@@ -144,6 +147,36 @@ model ShopImage {
   shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
   @@index([shopId])
+}
+
+/// 30-minute bookable time slot per shop
+model ShopTimeSlot {
+  id        String   @id @default(cuid())
+  shopId    String
+  startTime DateTime // 2026-06-15T09:00:00Z
+  endTime   DateTime // 2026-06-15T09:30:00Z
+  capacity  Int      @default(10)
+  isActive  Boolean  @default(true)
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  reservations ReservationSlot[]
+
+  @@unique([shopId, startTime])
+  @@index([shopId, startTime, endTime])
+  @@index([startTime])
+}
+
+/// Links a booking to specific time slots
+model ReservationSlot {
+  id        String       @id @default(cuid())
+  bookingId String
+  slotId    String
+  bagCount  Int
+  booking   Booking      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  slot      ShopTimeSlot @relation(fields: [slotId], references: [id], onDelete: Cascade)
+
+  @@unique([bookingId, slotId])
+  @@index([slotId])
+  @@index([bookingId])
 }
 
 model Booking {
@@ -178,6 +211,7 @@ model Booking {
   referralDiscountAmount Decimal           @default(0) @db.Decimal(12, 2)
   /// Rezervasyonda kullanılan referans kodu (varsa)
   referredByCode         String?
+  reservationSlots       ReservationSlot[]
   guest                  User?             @relation(fields: [guestId], references: [id], onDelete: Cascade)
   shop                   Shop              @relation(fields: [shopId], references: [id], onDelete: Cascade)
   seals                  BookingSeal[]
