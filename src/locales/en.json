@@ -304,7 +304,7 @@
     "checkoutSelectBagsHint": "Select at least one bag.",
     "checkoutUnexpectedError": "Something went wrong.",
     "requestSent": "Booking Confirmed!",
-    "requestSentSub": "Pay at the shop when you drop off your bags.",
+    "requestSentSub": "Show this QR at the shop to drop off your bags.",
     "checkoutReviewTitle": "Booking Review",
     "sendRequest": "CONFIRM BOOKING",
     "from": "from",
