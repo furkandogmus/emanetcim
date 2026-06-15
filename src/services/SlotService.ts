@@ -42,7 +42,11 @@ export function operatingHoursToSlots(
   const [ch, cm] = (closingTime || "20:00").split(":").map(Number);
   const openMins = oh * 60 + om;
   const closeMins = ch * 60 + cm;
-  return Math.max(0, Math.ceil((closeMins - openMins) / SLOT_MINUTES));
+  // Overnight shops (close < open): e.g., bar 22:00-04:00
+  const totalMins = closeMins <= openMins
+    ? (closeMins + 24 * 60 - openMins)
+    : (closeMins - openMins);
+  return Math.max(0, Math.ceil(totalMins / SLOT_MINUTES));
 }
 
 async function shopTimeZone(shopId: string): Promise<string> {
@@ -62,7 +66,7 @@ export async function generateSlotsForShop(
     select: { id: true, open247: true, openingTime: true, closingTime: true, capacity: true, timezone: true },
   });
 
-  const tz = shop.timezone;
+  const tz = shop.timezone || "Europe/Istanbul";
   const slotsPerDay = operatingHoursToSlots(shop.openingTime, shop.closingTime, shop.open247);
   if (slotsPerDay === 0) return 0;
 
@@ -70,17 +74,35 @@ export async function generateSlotsForShop(
   const now = new Date();
 
   for (let dayOffset = 0; dayOffset < daysForward; dayOffset++) {
-    const dayBase = new Date(now.getTime() + dayOffset * 86400000);
-    const localStart = new Date(dayBase.toLocaleString("en-US", { timeZone: tz }));
-    const localDay = `${localStart.getFullYear()}-${String(localStart.getMonth() + 1).padStart(2, "0")}-${String(localStart.getDate()).padStart(2, "0")}`;
+    const dayStart = new Date(now);
+    dayStart.setDate(dayStart.getDate() + dayOffset);
+
+    // Get year-month-day in shop's timezone using Intl
+    const fmt = new Intl.DateTimeFormat("en-CA", {
+      timeZone: tz,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+    const localDay = fmt.format(dayStart); // "2026-06-15"
+
+    // Parse opening hour to get slot base in local time
+    const [oh, om] = (shop.openingTime || "09:00").split(":").map(Number);
+    const baseMins = oh * 60 + om;
 
     for (let slotIdx = 0; slotIdx < slotsPerDay; slotIdx++) {
-      const h = slotIdx * SLOT_MINUTES;
-      const localTime = `${localDay}T${String(Math.floor(h / 60)).padStart(2, "0")}:${String(h % 60).padStart(2, "0")}:00`;
-      const startUtc = new Date(localTime);
+      const slotStartMins = baseMins + slotIdx * SLOT_MINUTES;
+      const h = Math.floor(slotStartMins / 60) % 24;
+      const m = slotStartMins % 60;
 
+      // Construct ISO datetime string in shop timezone, then parse as UTC
+      const localIso = `${localDay}T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:00`;
+      const startUtc = new Date(localIso);
+
+      if (isNaN(startUtc.getTime())) continue;
       if (startUtc < now) continue;
 
+      // Handle overnight slots: if slot is in next calendar day
       const endUtc = new Date(startUtc.getTime() + MS_PER_SLOT);
 
       try {
@@ -192,6 +214,15 @@ export async function reserveSlots(
   const slotIds: string[] = slots.map((s: { id: string }) => s.id);
   const now = new Date();
   const cutoff = new Date(now.getTime() - 24 * 3600000);
+
+  // Lock slots to prevent race conditions
+  if (slots.length > 0) {
+    const slotIds = slots.map((s: { id: string }) => s.id);
+    await tx.$executeRawUnsafe(
+      `SELECT 1 FROM "ShopTimeSlot" WHERE id = ANY($1::text[]) FOR UPDATE`,
+      [slotIds],
+    );
+  }
 
   const existing = await tx.reservationSlot.groupBy({
     by: ["slotId"],
