@@ -396,9 +396,9 @@ model PlatformSettings {
   cancelFixedFeeTry    Decimal  @default(20) @db.Decimal(12, 2)
   defaultShopCapacity  Int      @default(10)
   defaultPricePerDay   Decimal  @default(50) @db.Decimal(12, 2)
-  bagMultiplierS       Decimal  @default(0.8) @db.Decimal(6, 4)
+  bagMultiplierS       Decimal  @default(1.0) @db.Decimal(6, 4)
   bagMultiplierM       Decimal  @default(1.0) @db.Decimal(6, 4)
-  bagMultiplierXl      Decimal  @default(1.5) @db.Decimal(6, 4)
+  bagMultiplierXl      Decimal  @default(1.0) @db.Decimal(6, 4)
   updatedAt            DateTime @updatedAt
   /// Platform genelinde rezervasyona kapalı takvim günleri (YYYY-MM-DD JSON dizisi).
   platformHolidayDates Json?
