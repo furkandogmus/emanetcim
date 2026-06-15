@@ -82,6 +82,7 @@ function extractWebhookSignature(req: Request): string | null {
   const auth = req.headers.get("authorization");
   if (auth?.startsWith("Bearer ")) return auth.slice(7).trim();
   return (
+    req.headers.get("svix-signature")?.trim() ||
     req.headers.get("x-resend-signature")?.trim() ||
     req.headers.get("x-webhook-signature")?.trim() ||
     null
