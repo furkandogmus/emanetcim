@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from 'next-intl/plugin';
+import withPWA from "@ducanh2912/next-pwa";
 
 const withNextIntl = createNextIntlPlugin();
 
@@ -45,7 +46,66 @@ const securityHeaders = [
   },
 ];
 
-const nextConfig: NextConfig = {
+const nextConfig: NextConfig = withPWA({
+  dest: "public",
+  disable: process.env.NODE_ENV === "development",
+  register: true,
+  skipWaiting: true,
+  runtimeCaching: [
+    {
+      urlPattern: /\/_next\/static\/(?:chunks|css|media)\/.*/i,
+      handler: "CacheFirst",
+      options: {
+        cacheName: "next-static",
+        expiration: { maxEntries: 64, maxAgeSeconds: 86400 * 30 },
+      },
+    },
+    {
+      urlPattern: /\/_next\/static\/.*/i,
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "next-other-static",
+        expiration: { maxEntries: 32, maxAgeSeconds: 86400 },
+      },
+    },
+    {
+      urlPattern: /\/icons\/.*/i,
+      handler: "CacheFirst",
+      options: {
+        cacheName: "app-icons",
+        expiration: { maxEntries: 16, maxAgeSeconds: 86400 * 60 },
+      },
+    },
+    {
+      urlPattern: /\/api\/mobile\/.*/i,
+      handler: "StaleWhileRevalidate",
+      options: {
+        cacheName: "mobile-api",
+        expiration: { maxEntries: 64, maxAgeSeconds: 86400 },
+      },
+    },
+    {
+      urlPattern: /\/api\/.*/i,
+      handler: "NetworkOnly",
+    },
+    {
+      urlPattern: /(?:\.(?:html?|json))$|^\/(?:(?:tr|en)\/)?(?:search|bookings|shop\/)/i,
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "pages",
+        expiration: { maxEntries: 32, maxAgeSeconds: 86400 },
+      },
+    },
+    {
+      urlPattern: /.*/i,
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "others",
+        expiration: { maxEntries: 32, maxAgeSeconds: 3600 },
+      },
+    },
+  ],
+})({
   output: "standalone",
   reactCompiler: true,
   typescript: {
@@ -68,6 +128,6 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-};
+});
 
 export default withNextIntl(nextConfig);

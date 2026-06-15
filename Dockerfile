@@ -32,7 +32,7 @@ ENV PORT=3000
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
-COPY --from=deps /app/node_modules/@netgsm/sms ./node_modules/@netgsm/sms
+COPY --from=deps /app/node_modules/@swc/helpers ./node_modules/@swc/helpers
 COPY --from=builder /app/.next/static ./.next/static
 COPY scripts/docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh

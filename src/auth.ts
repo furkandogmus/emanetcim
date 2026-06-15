@@ -84,6 +84,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (session.user.emailVerified) token.emailVerified = new Date(session.user.emailVerified as string);
       }
 
+      // Clear huge base64 images from picture field to prevent cookie overflow
+      if (token.picture && typeof token.picture === "string" && (token.picture.startsWith("data:") || token.picture.length > 1000)) {
+        token.picture = null;
+      }
+
       // DEBUG: Log the token keys and their sizes
       const sizes = Object.keys(token).map((k) => `${k}: ${JSON.stringify(token[k])?.length || 0}`);
       console.log("[auth][debug] Token keys sizes:", sizes.join(", "));

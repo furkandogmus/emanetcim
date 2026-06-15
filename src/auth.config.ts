@@ -2,7 +2,7 @@ import type { NextAuthConfig } from "next-auth";
 import Apple from "next-auth/providers/apple";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
-import { Role, User as PrismaUser } from "@prisma/client";
+import type { Role, User as PrismaUser } from "@prisma/client";
 import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
 import { isAppleOAuthConfigured } from "@/lib/auth-providers";
@@ -101,6 +101,10 @@ export const authConfig: NextAuthConfig = {
       }
       if (trigger === "update" && session) {
         token.name = session.user.name;
+      }
+      // Clear huge base64 images from picture field to prevent cookie overflow
+      if (token.picture && typeof token.picture === "string" && (token.picture.startsWith("data:") || token.picture.length > 1000)) {
+        token.picture = null;
       }
       return token;
     },

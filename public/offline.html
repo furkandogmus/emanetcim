@@ -1,57 +1,63 @@
 <!DOCTYPE html>
 <html lang="tr">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#ea580c" />
-    <title>Çevrimdışı — BagajPark</title>
-    <style>
-      body {
-        font-family: system-ui, sans-serif;
-        margin: 0;
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #fafafa;
-        color: #171717;
-        padding: 1.5rem;
-        text-align: center;
-      }
-      main {
-        max-width: 22rem;
-      }
-      h1 {
-        font-size: 1.25rem;
-        margin: 0 0 0.75rem;
-      }
-      p {
-        font-size: 0.875rem;
-        color: #525252;
-        margin: 0 0 1.25rem;
-        line-height: 1.5;
-      }
-      a {
-        display: inline-block;
-        background: #ea580c;
-        color: #fff;
-        text-decoration: none;
-        font-weight: 800;
-        font-size: 0.75rem;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        padding: 0.75rem 1.25rem;
-        border-radius: 0.75rem;
-      }
-    </style>
-  </head>
-  <body>
-    <main>
-      <h1>Bağlantı yok</h1>
-      <p>
-        İnternet bağlantınızı kontrol edip tekrar deneyin. No connection — check your network and try again.
-      </p>
-      <p><a href="/">Ana sayfa / Home</a></p>
-    </main>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BagajPark - Çevrimdışı</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #fafaf9;
+      color: #1c1917;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100svh;
+      padding: 24px;
+    }
+    .container {
+      text-align: center;
+      max-width: 340px;
+    }
+    .icon {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #ea580c 0%, #d97706 100%);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      box-shadow: 0 4px 14px -2px rgba(234,88,12,0.35);
+    }
+    .icon svg { width: 32px; height: 32px; fill: white; }
+    h1 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+    p { font-size: 14px; color: #78716c; line-height: 1.5; margin-bottom: 24px; }
+    .btn {
+      display: inline-block;
+      padding: 12px 28px;
+      background: #ea580c;
+      color: white;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: 0 4px 14px -2px rgba(234,88,12,0.35);
+      border: none;
+      cursor: pointer;
+    }
+    .btn:hover { background: #c2430a; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">
+      <svg viewBox="0 0 24 24"><path d="M3 3h18v2H3V3zm0 4h18v2H3V7zm0 4h18v2H3v-2zm0 4h18v2H3v-2zm0 4h18v2H3v-2z"/></svg>
+    </div>
+    <h1>Bağlantı Yok</h1>
+    <p>İnternet bağlantınızı kontrol edin ve tekrar deneyin. Rezervasyon bilgileriniz cihazınızda kayıtlı.</p>
+    <button class="btn" onclick="window.location.reload()">Tekrar Dene</button>
+  </div>
+</body>
 </html>

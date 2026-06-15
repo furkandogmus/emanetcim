@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
@@ -12,11 +12,43 @@ interface Props {
 export default function ShopGallery({ images, shopName }: Props) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [scale, setScale] = useState(1);
+  const lastDist = useRef(0);
+  const pinchZooming = useRef(false);
 
   if (images.length === 0) return null;
 
   const prev = () => setActiveIndex((i) => (i === 0 ? images.length - 1 : i - 1));
   const next = () => setActiveIndex((i) => (i === images.length - 1 ? 0 : i + 1));
+
+  const dist = (t: React.TouchEvent) => {
+    const dx = t.touches[0].clientX - t.touches[1].clientX;
+    const dy = t.touches[0].clientY - t.touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      pinchZooming.current = true;
+      lastDist.current = dist(e);
+    }
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!pinchZooming.current || e.touches.length < 2) return;
+    e.preventDefault();
+    const d = dist(e);
+    const delta = d / lastDist.current;
+    setScale((s) => Math.max(1, Math.min(5, s * delta)));
+    lastDist.current = d;
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    if (pinchZooming.current) {
+      pinchZooming.current = false;
+      setScale(1);
+    }
+  }, []);
 
   return (
     <>
@@ -75,8 +107,11 @@ export default function ShopGallery({ images, shopName }: Props) {
 
       {lightboxOpen && (
         <div
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center touch-pinch-zoom"
           onClick={() => setLightboxOpen(false)}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
           <button
             onClick={() => setLightboxOpen(false)}
@@ -84,16 +119,27 @@ export default function ShopGallery({ images, shopName }: Props) {
           >
             <X size={20} />
           </button>
-          <div className="relative w-[90vw] h-[85vh]">
+          <div
+            className="relative w-[90vw] h-[85vh] transition-transform duration-75"
+            style={{ transform: `scale(${scale})` }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <Image
               src={images[activeIndex].url}
               alt={shopName}
               fill
               unoptimized
               className="object-contain rounded-lg"
-              onClick={(e) => e.stopPropagation()}
             />
           </div>
+          {scale > 1 && (
+            <button
+              onClick={() => setScale(1)}
+              className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-white/20 text-white text-xs font-bold backdrop-blur-sm"
+            >
+              Reset Zoom
+            </button>
+          )}
         </div>
       )}
     </>

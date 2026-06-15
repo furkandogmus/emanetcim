@@ -33,6 +33,9 @@ import {
   PLAUSIBLE_EVENTS,
   trackPlausibleEvent,
 } from "@/lib/plausible-events";
+import { useKeyboardAware } from "@/lib/hooks/useKeyboardAware";
+import { useShare } from "@/lib/hooks/useShare";
+import WebPushOptIn from "@/components/WebPushOptIn";
 
 
 interface CheckoutClientProps {
@@ -61,6 +64,9 @@ export default function CheckoutClient({
   const t = useTranslations("Guest");
   const tErr = useTranslations("Errors");
   const locale = useLocale();
+  const { keyboardHeight } = useKeyboardAware();
+  const { share } = useShare();
+  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
   const slot = roundedSlotPrices(pricePerDay, pricingRules);
   const priceS = slot.s;
   const priceM = slot.m;
@@ -302,6 +308,10 @@ export default function CheckoutClient({
             </div>
           </div>
 
+          <div className="w-full max-w-sm">
+            <WebPushOptIn />
+          </div>
+
           <p className="flex flex-wrap items-center justify-center gap-2 text-sm text-white/80">
             <span>{t("checkoutSupportIntro")}</span>
             <Link
@@ -321,12 +331,21 @@ export default function CheckoutClient({
             </Link>
           </p>
 
-          <Link
-            href="/bookings"
-            className="text-white/60 text-sm font-bold uppercase tracking-widest hover:text-white transition-colors underline underline-offset-8"
-          >
-            {t("myBookings")}
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/bookings"
+              className="text-white/60 text-sm font-bold uppercase tracking-widest hover:text-white transition-colors underline underline-offset-8"
+            >
+              {t("myBookings")}
+            </Link>
+            <button
+              type="button"
+              onClick={() => share({ title: t("requestSent"), text: `${t("checkoutReservationIdLabel")}: ${bookingId.substring(0, 8).toUpperCase()} — ${shopName}`, url: shareUrl })}
+              className="text-white/60 text-sm font-bold uppercase tracking-widest hover:text-white transition-colors underline underline-offset-8"
+            >
+              {t("share")}
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -604,7 +623,7 @@ export default function CheckoutClient({
 
       </main>
 
-      <footer className="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-2xl w-full p-4 sm:p-6 pb-safe bg-white/90 backdrop-blur-xl border-t border-gray-50 flex flex-col gap-3 z-20">
+      <footer style={{ bottom: keyboardHeight }} className="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-2xl w-full p-4 sm:p-6 pb-[calc(env(safe-area-inset-bottom)+4.5rem)] bg-white/90 backdrop-blur-xl border-t border-gray-50 flex flex-col gap-3 z-20">
         {step === 1 && error && (
           <div className="ui-state ui-state-error flex items-center gap-2 rounded-xl">
             <AlertCircle size={14} />
@@ -681,17 +700,21 @@ export default function CheckoutClient({
             <div className="flex flex-col gap-3 mb-6">
               <input
                 type="email"
+                inputMode="email"
+                autoComplete="email"
                 placeholder={t("checkoutGuestEmailPlaceholder")}
                 value={guestEmail}
                 onChange={(e) => setGuestEmail(e.target.value)}
-                className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-orange-500 outline-none transition-all"
+                className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-[16px] font-medium focus:ring-2 focus:ring-orange-500 outline-none transition-all"
               />
               <input
                 type="tel"
+                inputMode="tel"
+                autoComplete="tel"
                 placeholder={t("checkoutGuestPhonePlaceholder")}
                 value={guestPhone}
                 onChange={(e) => setGuestPhone(e.target.value)}
-                className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-orange-500 outline-none transition-all"
+                className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-[16px] font-medium focus:ring-2 focus:ring-orange-500 outline-none transition-all"
               />
             </div>
 

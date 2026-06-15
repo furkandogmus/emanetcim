@@ -7,9 +7,10 @@ import {
   Store,
   LayoutDashboard,
   Shield,
+  ChevronLeft,
   type LucideIcon,
 } from "lucide-react";
-import { Link, usePathname } from "@/i18n/routing";
+import { Link, usePathname, useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import clsx from "clsx";
 import { useSession } from "next-auth/react";
@@ -57,17 +58,17 @@ function pathMatchesHref(pathname: string | null, href: string): boolean {
 
 export default function MobileNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const t = useTranslations("Common");
   const { data: session } = useSession();
   const items = navItemsForRole(session?.user?.role);
 
   const p = pathname ?? "";
+  const isDetailPage = p.includes("/shop/") || p.includes("/checkout/");
   if (
     p.includes("/login") ||
     p.includes("/register") ||
     p.includes("/auth/") ||
-    p.includes("/checkout/") ||
-    p.includes("/shop/") ||
     p.includes("/admin/") ||
     p.includes("/partner/")
   ) {
@@ -85,6 +86,22 @@ export default function MobileNav() {
       {/* Blur backdrop */}
       <div className="glass border-t border-gray-100/80">
         <ul className="mx-auto flex max-w-lg items-stretch justify-around gap-1 px-2 pt-2 pb-2">
+          {isDetailPage ? (
+            <li className="flex min-w-0 flex-1 max-w-[60px]">
+              <button
+                type="button"
+                onClick={() => router.back()}
+                className="flex w-full flex-col items-center gap-1 rounded-2xl py-2 px-1 transition-all duration-200 active:scale-90"
+              >
+                <div className="w-7 h-7 flex items-center justify-center rounded-xl hover:bg-gray-100 transition-all duration-200">
+                  <ChevronLeft className="h-4.5 w-4.5 text-gray-400" strokeWidth={2} aria-hidden />
+                </div>
+                <span className="truncate text-[9px] font-black uppercase tracking-widest text-gray-400">
+                  {t("mobileNavBack")}
+                </span>
+              </button>
+            </li>
+          ) : null}
           {items.map(({ href, labelKey, Icon }) => {
             const active = pathMatchesHref(pathname, href);
             return (

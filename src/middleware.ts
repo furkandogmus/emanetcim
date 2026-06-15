@@ -27,8 +27,8 @@ function stripLocalePrefix(pathname: string): { locale: string; barePath: string
 }
 
 /**
- * Next.js 16+ Proxy — Auth.js v5, next-intl & Security Hardening
- * Dosya: `src/proxy.ts` (`middleware.ts` yerine).
+ * Next.js 16+ Middleware — Auth.js v5, next-intl & Security Hardening
+ * Dosya: `src/middleware.ts`.
  */
 const authProxy = auth((req) => {
   const { nextUrl } = req;
@@ -134,7 +134,7 @@ const authProxy = auth((req) => {
 
 });
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   return (authProxy as (r: NextRequest) => ReturnType<typeof authProxy>)(request);
 }
 

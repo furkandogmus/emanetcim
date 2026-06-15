@@ -2,7 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { usePullToRefresh } from "@/lib/hooks/usePullToRefresh";
 import {
   Search as SearchIcon,
   ChevronLeft,
@@ -15,6 +16,7 @@ import {
   ArrowUpDown,
 } from "lucide-react";
 import DateTimePicker from "@/components/ui/DateTimePicker";
+import BottomSheet from "@/components/ui/BottomSheet";
 import { Link } from "@/i18n/routing";
 import { useRouter } from "@/i18n/routing";
 import ShopListItem from "@/components/guest/ShopListItem";
@@ -93,7 +95,7 @@ export default function SearchClient({
   useEffect(() => {
     if (typeof window === "undefined") return;
     const mq = window.matchMedia("(max-width: 767px)");
-    if (mq.matches) setPanelOpen(false);
+    if (mq.matches) setPanelOpen(true);
   }, []);
 
   useEffect(() => {
@@ -142,6 +144,28 @@ export default function SearchClient({
     dynamicCenter.lat,
     dynamicCenter.lng,
   ]);
+
+  const handleManualRefresh = useCallback(async () => {
+    const checkIn = parseDatetimeLocal(checkInLocal);
+    const checkOut = parseDatetimeLocal(checkOutLocal);
+    if (!checkIn || !checkOut) return;
+    const res = await refreshSearchShopsAction({
+      checkInIso: checkIn.toISOString(),
+      checkOutIso: checkOut.toISOString(),
+      requestedBags,
+      centerLat: dynamicCenter.lat,
+      centerLng: dynamicCenter.lng,
+    });
+    if (res.ok) {
+      setNearbyList(res.nearby as ShopSearchHit[]);
+      setAllList(res.all as ShopSearchHit[]);
+    }
+  }, [checkInLocal, checkOutLocal, requestedBags, dynamicCenter.lat, dynamicCenter.lng]);
+
+  const listRef = useRef<HTMLDivElement>(null);
+  const mobileListRef = useRef<HTMLDivElement>(null);
+  const { pullDistance, isRefreshing } = usePullToRefresh({ onRefresh: handleManualRefresh, containerRef: listRef });
+  const { pullDistance: mobilePullDistance, isRefreshing: mobileIsRefreshing } = usePullToRefresh({ onRefresh: handleManualRefresh, containerRef: mobileListRef });
 
   useEffect(() => {
     const normalize = (v: string) =>
@@ -283,24 +307,17 @@ export default function SearchClient({
           type="button"
           onClick={() => setPanelOpen(true)}
           aria-label="Open search panel"
-          className="md:hidden absolute top-4 left-4 z-20 h-12 px-4 rounded-full bg-white shadow-lg border border-gray-100 flex items-center gap-2 font-black text-xs uppercase tracking-widest text-gray-900"
+          className="md:hidden absolute top-4 left-4 z-20 h-12 px-5 rounded-full bg-white shadow-lg border border-gray-100 flex items-center gap-2 font-black text-xs uppercase tracking-widest text-gray-900 hover:bg-gray-50 active:scale-95 transition-all"
         >
           <SlidersHorizontal size={16} className="text-orange-600" />
           {filteredShops.length}
         </button>
       ) : null}
 
+      {/* Desktop: sidebar panel */}
       <aside
-        className={`absolute left-0 top-0 z-10 h-full w-full md:w-[420px] max-w-full bg-white/95 backdrop-blur-xl shadow-2xl md:shadow-[8px_0_24px_-12px_rgba(0,0,0,0.25)] flex flex-col border-r border-gray-100 transition-transform duration-300 ${panelOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
+        className={`hidden md:flex absolute left-0 top-0 z-10 h-full w-[420px] max-w-full bg-white/95 backdrop-blur-xl shadow-2xl shadow-[8px_0_24px_-12px_rgba(0,0,0,0.25)] flex-col border-r border-gray-100`}
       >
-        <button
-          type="button"
-          onClick={() => setPanelOpen(false)}
-          aria-label="Close panel"
-          className="md:hidden absolute top-3 right-3 z-30 h-9 w-9 rounded-full bg-white shadow border border-gray-100 flex items-center justify-center"
-        >
-          <CloseIcon size={18} className="text-gray-900" />
-        </button>
       <header className="px-4 pt-4 pb-3 border-b border-gray-100 bg-white/80 backdrop-blur-xl z-20 shrink-0">
         <div className="flex items-center gap-3 mb-3">
           <Link
@@ -552,7 +569,16 @@ export default function SearchClient({
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 bg-gray-50/50">
+      <div ref={listRef} className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 bg-gray-50/50">
+          {pullDistance > 0 && (
+            <div className="flex justify-center py-2" style={{ transform: `translateY(${pullDistance}px)`, opacity: Math.min(1, pullDistance / 60) }}>
+              {isRefreshing ? (
+                <div className="w-6 h-6 border-2 border-gray-300 border-t-orange-600 rounded-full animate-spin" />
+              ) : (
+                <ArrowUpDown size={20} className="text-orange-600 animate-bounce" />
+              )}
+            </div>
+          )}
           <div className="flex justify-between items-center px-1 mb-2">
             <h2
               data-testid="nearby-heading"
@@ -617,6 +643,231 @@ export default function SearchClient({
         </div>
 
       </aside>
+
+      {/* Mobile: bottom sheet */}
+      <BottomSheet
+        open={panelOpen}
+        onClose={() => setPanelOpen(false)}
+        title={t("searchPlaceholder")}
+        snapPoints={[20, 55, 90]}
+        initialSnap={1}
+        showClose={false}
+      >
+        <header className="px-4 pt-2 pb-3 border-b border-gray-100 shrink-0">
+          <div className="flex items-center gap-3 mb-3">
+            <Link
+              href="/"
+              className="btn-ui btn-ui-md btn-ui-ghost btn-ui-icon rounded-full"
+            >
+              <ChevronLeft size={22} className="text-gray-900" />
+            </Link>
+            <div className="flex-1">
+              <h1 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">
+                {t("searchPlaceholder")}
+              </h1>
+            </div>
+          </div>
+          {resolvedPlaceLabel ? (
+            <p className="mb-2 text-xs font-semibold text-gray-500 truncate">
+              {resolvedPlaceLabel}
+            </p>
+          ) : null}
+
+          <div className="flex gap-2 mb-3">
+            <div className="relative group flex-1">
+              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                <SearchIcon
+                  size={18}
+                  className="text-gray-400 group-focus-within:text-orange-600 transition-colors"
+                />
+              </div>
+              <input
+                type="text"
+                placeholder={t("searchPlaceholder")}
+                className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-transparent focus:border-orange-500/30 focus:bg-white focus:ring-4 focus:ring-orange-500/5 rounded-2xl text-base font-semibold placeholder:text-gray-400 transition-all shadow-sm outline-none"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleUseMyLocation}
+              disabled={gpsLocating}
+              className="shrink-0 h-[48px] w-[48px] bg-gray-50 hover:bg-orange-50 border border-transparent hover:border-orange-200 rounded-2xl flex items-center justify-center text-gray-400 hover:text-orange-600 transition-all disabled:opacity-50"
+              title={t("useMyLocation")}
+              aria-label={t("useMyLocation")}
+            >
+              {gpsLocating ? (
+                <div className="w-5 h-5 border-2 border-gray-300 border-t-orange-600 rounded-full animate-spin" />
+              ) : (
+                <Crosshair size={20} />
+              )}
+            </button>
+          </div>
+
+          {datesReady ? (
+            <section className="mb-3 space-y-2 rounded-2xl border border-gray-100 bg-gray-50/80 p-3">
+              <p className="text-xs font-black uppercase tracking-widest text-gray-400">
+                {t("searchStayWindow")}
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <label className="flex flex-col gap-1">
+                  <span className="text-xs font-bold text-gray-400 uppercase">{t("searchCheckIn")}</span>
+                  <div className="rounded-xl bg-white border border-gray-100 px-2 py-2">
+                    <DateTimePicker
+                      value={checkInLocal}
+                      onChange={(v) => { setCheckInLocal(v); markFiltersDirty(); }}
+                      testId="search-checkin"
+                      ariaLabel={t("searchCheckIn")}
+                      iconSize={14}
+                    />
+                  </div>
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className="text-xs font-bold text-gray-400 uppercase">{t("searchCheckOut")}</span>
+                  <div className="rounded-xl bg-white border border-gray-100 px-2 py-2">
+                    <DateTimePicker
+                      value={checkOutLocal}
+                      onChange={(v) => { setCheckOutLocal(v); markFiltersDirty(); }}
+                      testId="search-checkout"
+                      ariaLabel={t("searchCheckOut")}
+                      iconSize={14}
+                      minDate={parseDatetimeLocal(checkInLocal) ?? undefined}
+                    />
+                  </div>
+                </label>
+              </div>
+              <div className="flex items-center justify-between gap-3 pt-1">
+                <span className="text-xs font-bold text-gray-400 uppercase">{t("searchBagCount")}</span>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => { setRequestedBags((n) => Math.max(1, n - 1)); markFiltersDirty(); }}
+                    disabled={requestedBags <= 1}
+                    className="w-9 h-9 rounded-full bg-white border border-gray-200 flex items-center justify-center disabled:opacity-30"
+                  >
+                    <Minus size={16} />
+                  </button>
+                  <span className="w-6 text-center font-black text-gray-900">{requestedBags}</span>
+                  <button
+                    type="button"
+                    onClick={() => { setRequestedBags((n) => Math.min(MAX_SEARCH_BAGS, n + 1)); markFiltersDirty(); }}
+                    disabled={requestedBags >= MAX_SEARCH_BAGS}
+                    className="w-9 h-9 rounded-full bg-orange-600 text-white flex items-center justify-center disabled:opacity-40"
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
+              </div>
+            </section>
+          ) : null}
+
+          <div className="flex items-center gap-3 mb-3">
+            <div className="flex bg-gray-100 rounded-xl p-1 flex-1">
+              <button
+                type="button"
+                onClick={() => setActiveTab("nearby")}
+                className={`flex-1 py-2 px-3 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${activeTab === "nearby" ? "bg-white text-orange-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+              >
+                {t("nearbyShops")} ({nearbyList.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("all")}
+                className={`flex-1 py-2 px-3 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${activeTab === "all" ? "bg-white text-orange-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+              >
+                {t("allShops")} ({allList.length})
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 mb-2">
+            <ArrowUpDown size={14} className="text-gray-400 shrink-0" />
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="text-[10px] font-bold uppercase tracking-widest bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-gray-700 outline-none focus:border-orange-300"
+              aria-label={t("sortBy")}
+            >
+              <option value="distance">{t("sortByDistance")}</option>
+              <option value="price_asc">{t("sortByPriceLow")}</option>
+              <option value="price_desc">{t("sortByPriceHigh")}</option>
+              <option value="rating">{t("sortByRating")}</option>
+            </select>
+          </div>
+          <div className="flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-widest">
+            <label className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-lg">
+              {t("filterMinRating")}
+              <input type="number" min={0} max={5} step={0.1} className="w-12 bg-transparent border-none text-xs font-black" value={minRating} onChange={(e) => setMinRating(Number(e.target.value) || 0)} />
+            </label>
+            <label className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-lg">
+              {t("filterMaxPrice")}
+              <input type="number" min={0} className="w-14 bg-transparent border-none text-xs font-black" value={maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value) || 500)} />
+            </label>
+            <label className="flex items-center gap-1 cursor-pointer"><input type="checkbox" checked={open247Only} onChange={(e) => setOpen247Only(e.target.checked)} />7/24</label>
+            <label className="flex items-center gap-1 cursor-pointer"><input type="checkbox" checked={hasRestroom} onChange={(e) => setHasRestroom(e.target.checked)} />WC</label>
+            <label className="flex items-center gap-1 cursor-pointer"><input type="checkbox" checked={hasCctv} onChange={(e) => setHasCctv(e.target.checked)} />{t("filterCctv")}</label>
+            <label className="flex items-center gap-1 cursor-pointer"><input type="checkbox" checked={hasClimateControlFilter} onChange={(e) => setHasClimateControlFilter(e.target.checked)} />{t("filterClimate")}</label>
+            <label className="flex items-center gap-1 cursor-pointer"><input type="checkbox" checked={acceptsLargeItemsFilter} onChange={(e) => setAcceptsLargeItemsFilter(e.target.checked)} />{t("filterLargeItems")}</label>
+          </div>
+        </header>
+
+        <div ref={mobileListRef} className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 bg-gray-50/50">
+          {mobilePullDistance > 0 && (
+            <div className="flex justify-center py-2" style={{ transform: `translateY(${mobilePullDistance}px)`, opacity: Math.min(1, mobilePullDistance / 60) }}>
+              {mobileIsRefreshing ? (
+                <div className="w-6 h-6 border-2 border-gray-300 border-t-orange-600 rounded-full animate-spin" />
+              ) : (
+                <ArrowUpDown size={20} className="text-orange-600 animate-bounce" />
+              )}
+            </div>
+          )}
+          <div className="flex justify-between items-center px-1 mb-2">
+            <h2 className="text-sm font-black text-gray-900 uppercase tracking-widest">
+              {activeTab === "nearby" ? t("nearbyShops") : t("allShops")} ({sortedShops.length})
+            </h2>
+          </div>
+
+          {sortedShops.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center gap-3">
+              <MapPin size={40} className="text-gray-300" />
+              <p className="text-sm font-bold text-gray-500">{t("noShopsFound")}</p>
+              <p className="text-xs text-gray-400 max-w-[200px]">{t("noShopsFoundDesc")}</p>
+              {activeTab === "nearby" && allList.length > 0 && (
+                <button type="button" onClick={() => setActiveTab("all")} className="btn-ui btn-ui-sm btn-ui-secondary mt-2">
+                  {t("allShops")} →
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {sortedShops.map((shop, index) => (
+                <motion.div
+                  key={shop.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <ShopListItem
+                    id={shop.id}
+                    name={shop.name}
+                    rating={shop.rating || 0}
+                    price={shop.pricePerDay?.toString() || "50"}
+                    distance={shop.distanceKm != null ? Math.round(shop.distanceKm * 1000).toString() : "—"}
+                    lat={shop.latitude ?? undefined}
+                    lng={shop.longitude ?? undefined}
+                    bagsAvailable={shop.bagsAvailable}
+                    isVerified={shop.isVerified}
+                    responseTimeMinutes={shop.responseTimeMinutes}
+                    slotPrices={(shop as unknown as { slotPrices?: { s: number; m: number; xl: number } }).slotPrices}
+                    onClick={() => { onSelectShop(shop.id); setPanelOpen(false); }}
+                  />
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </div>
+      </BottomSheet>
     </div>
   );
 }
