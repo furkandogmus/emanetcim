@@ -274,7 +274,7 @@ export default function PartnerClient({
     Math.round(totalEarnings * merchantShareRatio * 100) / 100;
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50 text-gray-900 p-6 md:p-12 relative overflow-hidden font-sans">
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-gray-50 px-4 pb-32 pt-6 font-sans text-gray-900 sm:px-6 md:p-12 md:pb-36">
       <div className="absolute top-0 right-0 w-80 h-80 bg-orange-100/30 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2"></div>
 
       {isScanning && (
@@ -371,7 +371,7 @@ export default function PartnerClient({
         </div>
       )}
 
-      <header className="flex justify-between items-start mb-12 gap-4">
+      <header className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between md:mb-12">
         <div>
           <h1
             className="text-3xl font-black tracking-tighter text-gray-900 border-b-4 border-orange-500 pb-1 inline-block capitalize"
@@ -383,24 +383,24 @@ export default function PartnerClient({
             {t("partnerPanelActive")}
           </p>
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-col">
           <Link
             href="/partner/earnings"
-            className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-orange-50 text-orange-700 hover:bg-orange-100 active:scale-[0.97] transition-all text-sm font-bold whitespace-nowrap"
+            className="flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl bg-orange-50 px-2 py-2.5 text-center text-[10px] font-bold text-orange-700 transition-all hover:bg-orange-100 active:scale-[0.97] sm:flex-row sm:gap-3 sm:px-4 sm:text-sm"
           >
             <TrendingUp size={18} />
             {t("earnings")}
           </Link>
           <Link
             href="/partner/bookings"
-            className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-orange-50 text-orange-700 hover:bg-orange-100 active:scale-[0.97] transition-all text-sm font-bold whitespace-nowrap"
+            className="flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl bg-orange-50 px-2 py-2.5 text-center text-[10px] font-bold text-orange-700 transition-all hover:bg-orange-100 active:scale-[0.97] sm:flex-row sm:gap-3 sm:px-4 sm:text-sm"
           >
             <Calendar size={18} />
             {t("listCalendar")}
           </Link>
           <Link
             href="/partner/seals"
-            className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-orange-50 text-orange-700 hover:bg-orange-100 active:scale-[0.97] transition-all text-sm font-bold whitespace-nowrap"
+            className="flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl bg-orange-50 px-2 py-2.5 text-center text-[10px] font-bold text-orange-700 transition-all hover:bg-orange-100 active:scale-[0.97] sm:flex-row sm:gap-3 sm:px-4 sm:text-sm"
           >
             <ShieldCheck size={18} />
             {t("sealsTitle")}
@@ -409,33 +409,33 @@ export default function PartnerClient({
       </header>
 
       {activeTab === "PANEL" && (
-        <main className="flex-1 flex flex-col items-center justify-center gap-16 animate-in fade-in duration-500">
+        <main className="mx-auto grid w-full max-w-5xl flex-1 items-center gap-6 animate-in fade-in duration-500 md:grid-cols-[minmax(260px,0.9fr)_minmax(320px,1.1fr)] md:gap-10">
           <button
             type="button"
             onClick={() => setIsScanning(true)}
-            className="w-full max-w-sm aspect-square bg-gray-900 hover:bg-black active:scale-95 text-white rounded-[4rem] shadow-2xl flex flex-col items-center justify-center gap-8 transition-all group overflow-hidden"
+            className="group mx-auto flex aspect-square w-full max-w-[280px] flex-col items-center justify-center gap-5 overflow-hidden rounded-[2.5rem] bg-gray-900 text-white shadow-2xl transition-all hover:bg-black active:scale-95 sm:max-w-xs md:max-w-sm md:gap-8 md:rounded-[4rem]"
           >
             <div className="bg-white/10 p-8 rounded-full group-hover:scale-110 transition-transform">
-              <Camera size={72} strokeWidth={1} />
+              <Camera size={64} strokeWidth={1} />
             </div>
             <span className="text-2xl font-black tracking-tight px-8 text-center leading-tight">
               {t("newBagDropoff")}
             </span>
           </button>
 
-          <div className="grid grid-cols-2 gap-6 w-full max-w-md">
-            <div className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-xl shadow-gray-100/50 flex flex-col gap-1">
+          <div className="grid w-full grid-cols-2 gap-3 md:gap-6">
+            <div className="flex flex-col gap-1 rounded-[2rem] border border-gray-100 bg-white p-5 shadow-xl shadow-gray-100/50 md:rounded-[2.5rem] md:p-6">
               <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
                 {t("activeBookings")}
               </p>
-              <p className="text-4xl font-black text-gray-900">{activeCount}</p>
+              <p className="text-3xl font-black text-gray-900 md:text-4xl">{activeCount}</p>
             </div>
-            <div className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-xl shadow-gray-100/50 flex flex-col gap-1">
+            <div className="flex flex-col gap-1 rounded-[2rem] border border-gray-100 bg-white p-5 shadow-xl shadow-gray-100/50 md:rounded-[2.5rem] md:p-6">
               <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
                 {t("netEarnings")}
               </p>
               <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-black text-green-600">
+                <span className="text-3xl font-black text-green-600 md:text-4xl">
                   {netEarnings}
                 </span>
                 <span className="text-xs font-black text-green-600/60 uppercase">
@@ -639,10 +639,12 @@ export default function PartnerClient({
         </main>
       )}
 
-      <nav className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-2xl border border-gray-100 px-8 py-4 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] flex gap-12 z-20">
+      <nav className="fixed bottom-3 left-1/2 z-20 flex w-[calc(100%-1.5rem)] max-w-md -translate-x-1/2 justify-around gap-2 rounded-[2rem] border border-gray-100 bg-white/90 px-3 py-3 shadow-[0_20px_50px_rgba(0,0,0,0.1)] backdrop-blur-2xl sm:bottom-8 sm:w-auto sm:gap-8 sm:px-6 sm:py-4">
         <button
           type="button"
           onClick={() => setActiveTab("PANEL")}
+          aria-label={t("partnerPanelActive")}
+          title={t("partnerPanelActive")}
           className={`p-3 rounded-2xl transition-all ${activeTab === "PANEL" ? "bg-orange-100 text-orange-600" : "text-gray-400 hover:text-gray-600"}`}
         >
           <Home size={24} />
@@ -650,6 +652,8 @@ export default function PartnerClient({
         <button
           type="button"
           onClick={() => setActiveTab("TALEPLER")}
+          aria-label={t("incomingRequests")}
+          title={t("incomingRequests")}
           className={`p-3 rounded-2xl transition-all relative ${activeTab === "TALEPLER" ? "bg-orange-100 text-orange-600" : "text-gray-400 hover:text-gray-600"}`}
         >
           <Luggage size={24} />
@@ -660,6 +664,8 @@ export default function PartnerClient({
         <button
           type="button"
           onClick={() => setActiveTab("GECMIS")}
+          aria-label={t("transactionHistory")}
+          title={t("transactionHistory")}
           className={`p-3 rounded-2xl transition-all ${activeTab === "GECMIS" ? "bg-orange-100 text-orange-600" : "text-gray-400 hover:text-gray-600"}`}
         >
           <BarChart3 size={24} />
@@ -667,6 +673,8 @@ export default function PartnerClient({
         <button
           type="button"
           onClick={() => setActiveTab("AYARLAR")}
+          aria-label={t("settings")}
+          title={t("settings")}
           className={`p-3 rounded-2xl transition-all ${activeTab === "AYARLAR" ? "bg-orange-100 text-orange-600" : "text-gray-400 hover:text-gray-600"}`}
         >
           <Settings size={24} />

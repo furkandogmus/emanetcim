@@ -33,11 +33,25 @@ export default async function AdminStatusPage({ params }: { params: Promise<{ lo
     os: process.platform,
     memory: `${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB / ${Math.round(process.memoryUsage().heapTotal / 1024 / 1024)}MB`
   };
+  const checks = [
+    { ok: dbHealth && envStatus.db, weight: 35 },
+    { ok: envStatus.auth, weight: 25 },
+    { ok: envStatus.resend, weight: 20 },
+    { ok: envStatus.netgsm, weight: 20 },
+  ];
+  const healthScore = checks.reduce((score, check) => score + (check.ok ? check.weight : 0), 0);
+  const healthTone =
+    healthScore >= 90
+      ? { text: "text-green-600", bg: "bg-green-50", label: t("noCriticalError"), Icon: CheckCircle2 }
+      : healthScore >= 60
+        ? { text: "text-orange-600", bg: "bg-orange-50", label: t("warning"), Icon: AlertCircle }
+        : { text: "text-red-600", bg: "bg-red-50", label: t("error"), Icon: XCircle };
+  const HealthIcon = healthTone.Icon;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-10 font-sans">
-      <header className="mb-12">
-        <h1 className="text-4xl font-black tracking-tighter text-gray-900 mb-2">{t("title")}</h1>
+    <div className="min-h-screen bg-gray-50 px-4 py-24 font-sans sm:px-6 lg:p-10 lg:pt-32">
+      <header className="mb-8 lg:mb-12">
+        <h1 className="text-3xl font-black tracking-tighter text-gray-900 mb-2 sm:text-4xl">{t("title")}</h1>
         <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">{t("subtitle")}</p>
       </header>
 
@@ -93,19 +107,19 @@ export default async function AdminStatusPage({ params }: { params: Promise<{ lo
         />
       </div>
 
-      <footer className="mt-16 pt-8 border-t border-gray-200">
-        <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 flex items-center justify-between shadow-sm">
+      <footer className="mt-12 border-t border-gray-200 pt-8 lg:mt-16">
+        <div className="flex flex-col gap-6 rounded-[2rem] border border-gray-100 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-8">
           <div>
             <h4 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-1">{t("healthScore")}</h4>
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t("healthDesc")}</p>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="text-2xl font-black text-green-600 tracking-tighter">100 / 100</p>
-              <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">{t("noCriticalError")}</p>
+              <p className={`text-2xl font-black tracking-tighter ${healthTone.text}`}>{healthScore} / 100</p>
+              <p className={`text-[10px] font-black uppercase tracking-widest ${healthTone.text}`}>{healthTone.label}</p>
             </div>
-            <div className="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center text-green-600">
-              <CheckCircle2 size={24} />
+            <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${healthTone.bg} ${healthTone.text}`}>
+              <HealthIcon size={24} />
             </div>
           </div>
         </div>
@@ -137,7 +151,7 @@ function StatusCard({ title, subtitle, icon, status, details, tLabels }: {
   const StatusIcon = IconMap[status];
 
   return (
-    <div className="bg-white p-8 rounded-[3rem] border border-gray-100 shadow-sm transition-all hover:shadow-xl hover:shadow-gray-200/50">
+    <div className="rounded-[2rem] border border-gray-100 bg-white p-6 shadow-sm transition-all hover:shadow-xl hover:shadow-gray-200/50 sm:p-8 lg:rounded-[3rem]">
       <div className="flex items-center justify-between mb-8">
         <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${status === 'success' ? 'bg-gray-50 text-gray-900' : colors[status]}`}>
           {icon}

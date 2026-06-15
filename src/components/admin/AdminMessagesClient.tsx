@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { Mail, MailOpen, Trash2, Search, ArrowLeft, Inbox, Clock, User, Reply } from "lucide-react";
 import { Link } from "@/i18n/routing";
@@ -16,11 +16,17 @@ interface AdminMessagesClientProps {
 
 export default function AdminMessagesClient({ messages: initialMessages }: AdminMessagesClientProps) {
   const t = useTranslations("Admin");
+  const locale = useLocale();
   const [messages, setMessages] = useState<ContactMessageDTO[]>(initialMessages);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"ALL" | "UNREAD">("ALL");
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const bulkCopy =
+    locale === "tr"
+      ? { selected: "mesaj seçildi", selectAll: "Görünenleri seç", delete: "Seçilenleri sil", confirm: "Seçilen mesajlar kalıcı olarak silinsin mi?" }
+      : { selected: "messages selected", selectAll: "Select visible", delete: "Delete selected", confirm: "Permanently delete the selected messages?" };
 
   const filteredMessages = messages.filter((m) => {
     const searchLower = search.toLowerCase();
@@ -68,12 +74,58 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
         throw new Error(data.error || res.statusText);
       }
       setMessages((prev) => prev.filter((m) => m.id !== id));
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
       toast.success(t("messageDeletedInfo"));
     } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : String(error));
     } finally {
       setLoadingId(null);
     }
+  };
+
+  const handleBulkDelete = async () => {
+    const ids = [...selectedIds];
+    if (ids.length === 0 || !window.confirm(bulkCopy.confirm)) return;
+
+    setLoadingId("bulk");
+    try {
+      const res = await fetch("/api/admin/messages", {
+        method: "DELETE",
+        credentials: "include",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ ids }),
+      });
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(data.error || res.statusText);
+      }
+      setMessages((prev) => prev.filter((m) => !selectedIds.has(m.id)));
+      setSelectedIds(new Set());
+      toast.success(t("messageDeletedInfo"));
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : String(error));
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  const visibleIds = filteredMessages.map((message) => message.id);
+  const allVisibleSelected =
+    visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id));
+
+  const toggleSelectAll = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      visibleIds.forEach((id) => {
+        if (allVisibleSelected) next.delete(id);
+        else next.add(id);
+      });
+      return next;
+    });
   };
 
   const toggleExpand = (id: string) => {
@@ -125,6 +177,32 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
         </div>
       </header>
 
+      <div className="mb-4 flex min-h-12 flex-wrap items-center gap-3 rounded-2xl border border-gray-100 bg-white px-4 py-3 shadow-sm">
+        <label className="flex cursor-pointer items-center gap-2 text-xs font-black uppercase tracking-wider text-gray-500">
+          <input
+            type="checkbox"
+            checked={allVisibleSelected}
+            onChange={toggleSelectAll}
+            className="h-4 w-4 accent-orange-600"
+          />
+          {bulkCopy.selectAll}
+        </label>
+        <span className="text-xs font-bold text-gray-400">
+          {selectedIds.size} {bulkCopy.selected}
+        </span>
+        {selectedIds.size > 0 && (
+          <button
+            type="button"
+            onClick={() => void handleBulkDelete()}
+            disabled={loadingId === "bulk"}
+            className="ml-auto inline-flex items-center gap-2 rounded-xl bg-red-50 px-4 py-2 text-xs font-black text-red-700 transition-colors hover:bg-red-100"
+          >
+            <Trash2 size={15} />
+            {bulkCopy.delete}
+          </button>
+        )}
+      </div>
+
       <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden min-h-[500px]">
         {filteredMessages.length === 0 ? (
           <div className="py-32 flex flex-col items-center justify-center text-gray-400">
@@ -152,6 +230,21 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
                     className="p-6 md:px-8 cursor-pointer flex flex-col md:flex-row gap-4 md:items-center justify-between"
                   >
                     <div className="flex items-start gap-4 flex-1 min-w-0">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(msg.id)}
+                        onChange={() =>
+                          setSelectedIds((prev) => {
+                            const next = new Set(prev);
+                            if (next.has(msg.id)) next.delete(msg.id);
+                            else next.add(msg.id);
+                            return next;
+                          })
+                        }
+                        onClick={(e) => e.stopPropagation()}
+                        className="mt-1 h-4 w-4 shrink-0 accent-orange-600"
+                        aria-label={`${bulkCopy.selectAll}: ${msg.subject || t("noSubject")}`}
+                      />
                       <div className={`mt-1 flex-shrink-0 ${msg.isRead ? "text-gray-400" : "text-orange-600"}`}>
                         {msg.isRead ? <MailOpen size={20} /> : <Mail size={20} className="fill-orange-50" />}
                       </div>
@@ -184,7 +277,7 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
                         })}
                       </div>
                       
-                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-2 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100">
                         {!msg.isRead && (
                           <button
                             onClick={(e) => handleMarkAsRead(msg.id, e)}
