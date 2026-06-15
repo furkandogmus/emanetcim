@@ -78,18 +78,64 @@ function getResendClient(): Resend | null {
   return new ResendCtor(key);
 }
 
-function extractWebhookSignature(req: Request): string | null {
+function extractWebhookSignature(req: Request): { svixId: string; svixTs: string; signature: string } | null {
+  const svixId = req.headers.get("svix-id")?.trim();
+  const svixTs = req.headers.get("svix-timestamp")?.trim();
+  const sig = req.headers.get("svix-signature")?.trim();
+
+  if (svixId && svixTs && sig) {
+    return { svixId, svixTs, signature: sig };
+  }
+
+  // Fallback: legacy header formats
   const auth = req.headers.get("authorization");
-  if (auth?.startsWith("Bearer ")) return auth.slice(7).trim();
-  return (
-    req.headers.get("svix-signature")?.trim() ||
+  if (auth?.startsWith("Bearer ")) {
+    return { svixId: "", svixTs: "", signature: auth.slice(7).trim() };
+  }
+  const legacySig =
     req.headers.get("x-resend-signature")?.trim() ||
-    req.headers.get("x-webhook-signature")?.trim() ||
-    null
-  );
+    req.headers.get("x-webhook-signature")?.trim();
+  if (legacySig) return { svixId: "", svixTs: "", signature: legacySig };
+
+  return null;
 }
 
-function verifyWebhookSignature(rawBody: string, signature: string, secret: string): boolean {
+function verifySvixSignature(rawBody: string, svixId: string, svixTs: string, signature: string, secret: string): boolean {
+  // Strip whsec_ prefix and decode base64 key
+  const rawSecret = secret.startsWith("whsec_") ? secret.slice(6) : secret;
+  let secretBytes: Buffer;
+  try {
+    secretBytes = Buffer.from(rawSecret, "base64");
+  } catch {
+    secretBytes = Buffer.from(rawSecret);
+  }
+
+  // Svix format: signed_content = "${svix_id}.${svix_timestamp}.${body}"
+  const signedContent = `${svixId}.${svixTs}.${rawBody}`;
+  const expected = createHmac("sha256", secretBytes).update(signedContent).digest();
+  const expectedHex = expected.toString("hex");
+
+  // Signature comes as "v1,<base64_encoded_hmac>"
+  const parts = signature.split(",");
+  const provided = parts.length === 2 ? parts[1] : signature;
+
+  let providedBytes: Buffer;
+  try {
+    providedBytes = Buffer.from(provided, "base64");
+  } catch {
+    providedBytes = Buffer.from(provided);
+  }
+
+  // Compare signatures
+  const expectedHexFromProvided = providedBytes.toString("hex");
+  const a = Buffer.from(expectedHex);
+  const b = Buffer.from(expectedHexFromProvided);
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
+}
+
+// Legacy verification for non-Svix secrets
+function verifyLegacySignature(rawBody: string, signature: string, secret: string): boolean {
   const provided = signature.replace(/^sha256=/i, "").trim();
   if (!provided) return false;
   const expected = createHmac("sha256", secret).update(rawBody).digest("hex");
@@ -109,8 +155,17 @@ export async function POST(req: Request) {
       );
     }
     const rawBody = await req.text();
-    const signature = extractWebhookSignature(req);
-    if (!signature || !verifyWebhookSignature(rawBody, signature, secret)) {
+    const sigData = extractWebhookSignature(req);
+    if (!sigData) {
+      return NextResponse.json({ error: "Unauthorized: missing signature" }, { status: 401 });
+    }
+
+    // Try Svix verification first, then legacy
+    const isValid = sigData.svixId
+      ? verifySvixSignature(rawBody, sigData.svixId, sigData.svixTs, sigData.signature, secret)
+      : verifyLegacySignature(rawBody, sigData.signature, secret);
+
+    if (!isValid) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
