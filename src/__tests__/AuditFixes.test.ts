@@ -19,6 +19,7 @@ const { mockPrisma, mockAuth, mockBookingService, mockSealService } = vi.hoisted
       coupon: {
         findUnique: vi.fn(),
         update: vi.fn(),
+        updateMany: vi.fn(),
       },
       review: { create: vi.fn() },
       user: { findUnique: vi.fn() },
@@ -123,6 +124,7 @@ describe("Audit Fix #1: Coupon usedCount Increment", () => {
     mockPrisma.booking.update.mockResolvedValue({});
     mockPrisma.user.findUnique.mockResolvedValue(null);
     mockPrisma.coupon.update.mockResolvedValue({});
+    mockPrisma.coupon.updateMany.mockResolvedValue({ count: 1 });
 
     const { createBookingAction } = await import("@/actions/booking");
     const checkIn = new Date(Date.now() + 24 * 60 * 60 * 1000);
@@ -137,12 +139,11 @@ describe("Audit Fix #1: Coupon usedCount Increment", () => {
       totalPrice: 50,
       checkInTime: checkIn,
       checkOutTime: checkOut,
-      cardInfo: { cardHolderName: "Test", cardNumber: "1234", expireMonth: "01", expireYear: "2030", cvc: "123" },
       couponCode: "TEST10",
     });
 
-    expect(mockPrisma.coupon.update).toHaveBeenCalledWith({
-      where: { id: "coupon-1" },
+    expect(mockPrisma.coupon.updateMany).toHaveBeenCalledWith({
+      where: { id: "coupon-1", usedCount: { lt: 1 } },
       data: { usedCount: { increment: 1 } },
     });
   });
@@ -211,7 +212,6 @@ describe("Audit Fix #3: Zero-Bag Booking Prevention", () => {
       totalPrice: 0,
       checkInTime: checkIn,
       checkOutTime: checkOut,
-      cardInfo: { cardHolderName: "Test", cardNumber: "1234", expireMonth: "01", expireYear: "2030", cvc: "123" },
     });
 
     expect(result.success).toBe(false);

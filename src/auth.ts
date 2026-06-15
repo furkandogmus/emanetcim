@@ -23,6 +23,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
   ...authConfig,
+  debug: true,
   events: {
     async linkAccount({ user, account }) {
       if (account.type === "oauth") {
@@ -81,6 +82,29 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // Handle manual updates (e.g. from useSession().update())
       if (trigger === "update" && session?.user) {
         if (session.user.emailVerified) token.emailVerified = new Date(session.user.emailVerified as string);
+      }
+
+      // Clear huge base64 images from picture field to prevent cookie overflow
+      if (token.picture && typeof token.picture === "string" && (token.picture.startsWith("data:") || token.picture.length > 1000)) {
+        token.picture = null;
+      }
+
+      // DEBUG: Log the token keys and their sizes
+      const sizes = Object.keys(token).map((k) => `${k}: ${JSON.stringify(token[k])?.length || 0}`);
+      console.log("[auth][debug] Token keys sizes:", sizes.join(", "));
+      if (JSON.stringify(token).length > 4000) {
+        console.log("[auth][debug] Huge token detected, cleaning up unnecessary fields.");
+        // Clean up everything except the essential fields
+        const safeToken = {
+          name: token.name,
+          email: token.email,
+          picture: token.picture,
+          sub: token.sub,
+          id: token.id || token.sub,
+          role: token.role,
+          emailVerified: token.emailVerified,
+        };
+        return safeToken as JWT;
       }
 
       return token;

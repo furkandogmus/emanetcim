@@ -63,8 +63,6 @@ jobs:
           build-args: |
             DATABASE_URL=postgresql://bagajpark:bagajpark@localhost:5432/bagajpark?schema=public
             AUTH_SECRET=docker-build-placeholder-not-for-production
-            IYZICO_API_KEY=docker-build-placeholder
-            IYZICO_SECRET_KEY=docker-build-placeholder
             NEXT_PUBLIC_BETA_BADGE=true
 
   deploy:

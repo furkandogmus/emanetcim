@@ -1,6 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
-import { ChevronLeft, ExternalLink, CheckCircle2, AlertCircle } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { auth } from "@/auth";
 import { shopService } from "@/services/ShopService";
@@ -15,13 +15,10 @@ import prisma from "@/lib/db";
  */
 export default async function PartnerSettingsPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams?: Promise<Record<string, string>>;
 }) {
   const { locale } = await params;
-  const sp = searchParams ? await searchParams : {};
   setRequestLocale(locale);
 
   const t = await getTranslations("Partner");
@@ -46,10 +43,6 @@ export default async function PartnerSettingsPage({
   ]);
   const shop = shops[0];
   const marketPrice = pricingRules.defaultPricePerDay;
-  const stripeConnected = !!shop?.stripeAccountId;
-  const stripeConnectEnabled = !!process.env.STRIPE_CLIENT_ID;
-  const stripeConnectedNow = sp.stripe_connected === "1";
-  const stripeError = sp.stripe_error as string | undefined;
 
   if (!shop) {
     return (
@@ -94,45 +87,6 @@ export default async function PartnerSettingsPage({
           marketPrice={marketPrice}
           initialPhone={ownerPhoneRow?.phone ?? ""}
         />
-
-        {/* Stripe Connect */}
-        {stripeConnectEnabled && (
-          <section className="bg-white rounded-2xl border border-gray-100 p-6">
-            <h2 className="text-base font-bold text-gray-900 mb-1">Stripe Ödemeleri (Avrupa)</h2>
-            <p className="text-sm text-gray-500 mb-4">
-              Avrupa&apos;daki misafirlerden ödeme alabilmek için Stripe hesabınızı bağlayın.
-            </p>
-
-            {stripeConnectedNow && (
-              <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 rounded-lg px-3 py-2 mb-3">
-                <CheckCircle2 size={16} />
-                Stripe hesabınız başarıyla bağlandı!
-              </div>
-            )}
-            {stripeError && (
-              <div className="flex items-center gap-2 text-sm text-red-700 bg-red-50 rounded-lg px-3 py-2 mb-3">
-                <AlertCircle size={16} />
-                Stripe bağlantısı başarısız: {stripeError}
-              </div>
-            )}
-
-            {stripeConnected ? (
-              <div className="flex items-center gap-2 text-sm text-green-700">
-                <CheckCircle2 size={16} />
-                <span>Stripe hesabı bağlı</span>
-                <span className="ml-auto text-gray-400 font-mono text-xs">{shop.stripeAccountId}</span>
-              </div>
-            ) : (
-              <a
-                href={`/api/stripe/connect/authorize?locale=${locale}`}
-                className="inline-flex items-center gap-2 bg-[#635BFF] text-white font-semibold text-sm px-4 py-2 rounded-lg hover:bg-[#4f47e3] transition-colors"
-              >
-                <ExternalLink size={15} />
-                Stripe Hesabını Bağla
-              </a>
-            )}
-          </section>
-        )}
       </main>
     </div>
   );

@@ -325,37 +325,35 @@ export class NotificationService implements INotificationService {
     }
   }
 
-  /**
-   * Partner rezervasyonu onayladığında misafire e-posta: "Ödeme yapabilirsiniz."
-   */
+  /** Partner rezervasyonu onayladığında misafire onay e-postası gönderir. */
   async notifyBookingApproved(email: string, bookingId: string, shopName: string, locale: string = "tr"): Promise<void> {
     if (!email.includes("@")) return;
     const domain = process.env.NEXT_PUBLIC_APP_URL || "https://bagajpark.com";
-    const payUrl = `${domain}/${locale}/bookings/${bookingId}/pay`;
+    const bookingUrl = `${domain}/${locale}/bookings/${bookingId}`;
     const shortId = bookingId.replace(/-/g, "").slice(0, 8);
 
     const content = {
       tr: {
-        subject: "BagajPark: Talebiniz Onaylandı — Ödeme Yapın 🎒",
-        body: `Merhaba,\n\n${shopName} mağazası rezervasyon talebinizi onayladı!\n\nÖdemenizi tamamlamak için lütfen aşağıdaki bağlantıyı kullanın:\n${payUrl}\n\nReferans: ${shortId}`,
+        subject: "BagajPark: Talebiniz Onaylandı 🎒",
+        body: `Merhaba,\n\n${shopName} mağazası rezervasyon talebinizi onayladı!\n\nRezervasyon detayları: ${bookingUrl}\n\nReferans: ${shortId}`,
         html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
           <h2 style="color:#ea580c">Talebiniz Onaylandı! 🎒</h2>
-          <p><strong>${shopName}</strong> rezervasyon talebinizi onayladı. Rezervasyonunuzu tamamlamak için ödeme yapın.</p>
-          <a href="${payUrl}" style="display:inline-block;background:#ea580c;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;margin:16px 0">Ödemeyi Tamamla</a>
+          <p><strong>${shopName}</strong> rezervasyon talebinizi onayladı.</p>
+          <a href="${bookingUrl}" style="display:inline-block;background:#ea580c;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;margin:16px 0">Rezervasyonu Görüntüle</a>
           <p style="font-size:13px;color:#6b7280">Referans: ${shortId}</p>
         </div>`,
       },
       en: {
-        subject: "BagajPark: Request Approved — Complete Payment 🎒",
-        body: `Hello,\n\n${shopName} has approved your booking request!\n\nPlease complete your payment at: ${payUrl}\n\nReference: ${shortId}`,
+        subject: "BagajPark: Request Approved 🎒",
+        body: `Hello,\n\n${shopName} has approved your booking request!\n\nBooking details: ${bookingUrl}\n\nReference: ${shortId}`,
         html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
           <h2 style="color:#ea580c">Request Approved! 🎒</h2>
-          <p><strong>${shopName}</strong> has approved your booking request. Complete your payment to confirm.</p>
-          <a href="${payUrl}" style="display:inline-block;background:#ea580c;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;margin:16px 0">Complete Payment</a>
+          <p><strong>${shopName}</strong> has approved your booking request.</p>
+          <a href="${bookingUrl}" style="display:inline-block;background:#ea580c;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;margin:16px 0">View Booking</a>
           <p style="font-size:13px;color:#6b7280">Reference: ${shortId}</p>
         </div>`,
       },
-    }[locale] ?? { subject: "BagajPark: Onaylandı", body: `Ödeme: ${payUrl}`, html: undefined as string | undefined };
+    }[locale] ?? { subject: "BagajPark: Onaylandı", body: `Rezervasyon: ${bookingUrl}`, html: undefined as string | undefined };
 
     await this.sendEmail(email, content.subject, content.body, bookingId, content.html);
   }
@@ -394,7 +392,7 @@ export class NotificationService implements INotificationService {
   }
 
   /**
-   * Yeni bir ödeme yapıldığında veya yeni bir rezervasyon talebi alındığında esnafa ve adminlere bildirim gönderir.
+   * Yeni bir rezervasyon alındığında esnafa ve adminlere bildirim gönderir.
    * SMS (Netgsm) devre dışı olsa bile, e-posta ile bildirim göndererek çalışmayı sürdürür.
    */
   async notifyPartnerAndAdminsForNewPaidBooking(params: {
@@ -408,7 +406,7 @@ export class NotificationService implements INotificationService {
 
     // Veritabanından rezervasyon durumunu ve partner e-posta adresini çekelim
     let partnerEmail: string | null = null;
-    let isRequest = true; // WAITING_APPROVAL ise talep, PAID/APPROVED ise ödeme
+    let isRequest = true;
     try {
       const b = await prisma.booking.findUnique({
         where: { id: bookingId },
@@ -446,12 +444,11 @@ export class NotificationService implements INotificationService {
         <p style="font-size:13px;color:#6b7280;margin-top:24px">BagajPark — Esnaf Ortaklık Programı</p>
       </div>`;
     } else {
-      // Ödemesi Yapılmış Rezervasyon (PAID)
-      emailSubject = `BagajPark: Rezervasyon Ödemesi Tamamlandı! 💳 (Kod: ${shortId})`;
-      emailBody = `Merhaba,\n\n${shopName} mağazanıza ait rezervasyonun ödemesi tamamlandı!\n\nTutar: ₺${priceFormatted}\nReferans Kodu: ${shortId}\n\nDetayları görmek için partner panelinize giriş yapın:\n${panelUrl}`;
+      emailSubject = `BagajPark: Yeni Onaylı Rezervasyon! (Kod: ${shortId})`;
+      emailBody = `Merhaba,\n\n${shopName} mağazanıza yeni bir onaylı rezervasyon geldi!\n\nTutar: ₺${priceFormatted}\nReferans Kodu: ${shortId}\n\nDetayları görmek için partner panelinize giriş yapın:\n${panelUrl}`;
       emailHtml = `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
-        <h2 style="color:#16a34a">Ödeme Tamamlandı! 💳</h2>
-        <p><strong>${shopName}</strong> mağazanıza ait rezervasyonun ödemesi başarıyla gerçekleştirildi. Müşteri bagajı teslim etmek üzere dükkanınıza gelecektir.</p>
+        <h2 style="color:#16a34a">Yeni Onaylı Rezervasyon!</h2>
+        <p><strong>${shopName}</strong> mağazanıza yeni bir onaylı rezervasyon geldi. Müşteri bagajı teslim etmek üzere dükkanınıza gelecektir.</p>
         <table style="width:100%;border-collapse:collapse;margin:16px 0">
           <tr><td style="padding:8px;color:#6b7280">Referans Kodu</td><td style="padding:8px;font-weight:bold">${shortId}</td></tr>
           <tr style="background:#f9fafb"><td style="padding:8px;color:#6b7280">Toplam Tutar</td><td style="padding:8px;font-weight:bold">₺${priceFormatted}</td></tr>

@@ -17,8 +17,7 @@ const { mockGetPricingRules } = vi.hoisted(() => ({
   }),
 }));
 
-const { mockTx, mockPrisma, mockRefundPayment, mockSealService } = vi.hoisted(() => {
-  const mockRefundPayment = vi.fn();
+const { mockTx, mockPrisma, mockSealService } = vi.hoisted(() => {
   const mockTx = {
     shop: { findUnique: vi.fn() },
     booking: {
@@ -36,7 +35,6 @@ const { mockTx, mockPrisma, mockRefundPayment, mockSealService } = vi.hoisted(()
   };
   return {
     mockTx,
-    mockRefundPayment,
     mockSealService: {
       applyCheckInWithinTx: vi.fn().mockResolvedValue(true),
       applyCheckOutReturnSealsWithinTx: vi.fn().mockResolvedValue(true),
@@ -62,12 +60,6 @@ vi.mock("@/lib/db", () => ({
 vi.mock("@/lib/qr-token", () => ({
   createQrToken: vi.fn().mockResolvedValue("signed-jwt-token"),
   verifyQrToken: vi.fn().mockResolvedValue({ bookingId: "b1" }),
-}));
-
-vi.mock("@/services/PaymentService", () => ({
-  paymentService: {
-    refundPayment: (...args: any[]) => mockRefundPayment(...args),
-  },
 }));
 
 vi.mock("@/services/SealService", () => ({
@@ -141,7 +133,7 @@ describe("BookingService Deep Logic", () => {
       }));
     });
 
-    it("should trigger refund if checked out early", async () => {
+    it("should track manual refund amount if checked out early", async () => {
       // Future checkout scheduled
       const scheduledCheckOut = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000); 
       mockPrisma.booking.findUnique.mockResolvedValue({
@@ -154,11 +146,13 @@ describe("BookingService Deep Logic", () => {
         bagCountS: 1, bagCountM: 0, bagCountXl: 0,
       } as any);
 
-      mockRefundPayment.mockResolvedValue({ status: "success" });
-
       await service.checkOut("b1");
 
-      expect(mockRefundPayment).toHaveBeenCalled();
+      expect(mockTx.booking.updateMany).toHaveBeenCalledWith(expect.objectContaining({
+        data: expect.objectContaining({
+          failedRefundAmount: expect.anything(),
+        }),
+      }));
     });
   });
 

@@ -18,7 +18,6 @@ Bu dosya, projede geliştirme, hata ayıklama (debugging) veya kod analizi yapac
 *   **Framework:** Next.js 15+ / 16 (App Router, TypeScript)
 *   **Veritabanı ve ORM:** PostgreSQL, Prisma ORM
 *   **Kimlik Doğrulama:** Auth.js (NextAuth) (Web kullanıcıları) & Özel JWT + `isBanned` Önbellek Sistemi (Mobil esnaf API'si)
-*   **Ödeme Geçidi:** iyzico Marketplace API (Split Payment altyapısı ile komisyon dağıtımı)
 *   **SMS & OTP İletişimi:** Netgsm SMS API
 *   **Stil:** Vanilla CSS
 
@@ -30,7 +29,6 @@ Projeyle ilgili çalışırken bakılması gereken ana klasörler ve kritik dosy
 
 ### ⚙️ İş Mantığı (Core Services) ➡️ `src/services/`
 *   [BookingService.ts](file:///Users/furkan/emanetcim/src/services/BookingService.ts): Rezervasyon durumları, check-in, check-out ve iptal lojiği.
-*   [PaymentService.ts](file:///Users/furkan/emanetcim/src/services/PaymentService.ts): iyzico ödeme başlatma, 3D secure, iadeler ve pazaryeri esnaf kırılımları.
 *   [SealService.ts](file:///Users/furkan/emanetcim/src/services/SealService.ts): Bagajların teslim alınırken bağlandığı fiziksel mühür numaralarının ve kanıt fotoğraflarının (`photoUrl`) yönetimi.
 *   [NotificationService.ts](file:///Users/furkan/emanetcim/src/services/NotificationService.ts): Kullanıcılara ve esnafa giden SMS'ler, doğrulama kodları (OTP).
 *   [PricingService.ts](file:///Users/furkan/emanetcim/src/services/PricingService.ts): Boyut katsayıları ve gün sayısına göre dinamik sepet hesaplama.
@@ -39,7 +37,6 @@ Projeyle ilgili çalışırken bakılması gereken ana klasörler ve kritik dosy
 ### 🌐 API ve Yönlendirmeler ➡️ `src/app/api/`
 *   `api/mobile/`: Mobil uygulamaya (özellikle partner paneline) hizmet veren JWT korumalı endpoint'ler.
 *   `api/internal/`: Vercel cron veya internal servislerin tetiklediği hatırlatıcı ve istatistik API'leri.
-*   `api/payments/`: iyzico webhook ve callback süreçleri.
 
 ### 🛡️ Güvenlik ve Kimlik Doğrulama
 *   [mobile-auth.ts](file:///Users/furkan/emanetcim/src/lib/mobile-auth.ts): Mobil API istekleri için JWT doğrulama. Esnaf ban/yasaklanma kontrolleri için 30 saniyelik veritabanı önbellek mekanizması (`getMobileSession`) buradadır.
@@ -65,3 +62,37 @@ Geliştirme yaparken iş kuralları ve mimari detaylar için şu dokümanları r
 2.  **Veritabanı Sorguları (N+1 Sorunu):** Prisma kullanırken döngüler içinde DB sorgusu atmaktan kaçının. `include` veya `select` kullanarak ilişkili verileri tek bir sorguyla çekin (örneğin esnaf kazanç/istatistik ekranları).
 3.  **Mobil API Koruması:** `api/mobile` altındaki tüm partner/esnaf endpoint'lerinde mutlaka `requireMobileUser` çağrılarak yetkilendirme ve aktiflik/ban kontrolü yapılmalıdır.
 4.  **Görsel ve Assetler:** Uygulamada rastgele dış kaynaktan stock fotoğraflar kullanılmamalıdır. Mümkün olduğunca yerel statik asset'ler tercih edilmelidir.
+
+---
+
+## 🖥️ Canlı Sunucu (Production Server) Bilgileri
+
+Uygulamanın canlı ortamı (production) aşağıdaki sunucu üzerinde barındırılmaktadır:
+
+*   **IP Adresi:** `178.104.144.3`
+*   **SSH Portu:** `12022`
+*   **Kullanıcı:** `root`
+*   **SSH Bağlantı Komutu:**
+    ```bash
+    ssh root@178.104.144.3 -p 12022
+    ```
+*   **Uygulama Dizini:** `/root/emanetci`
+*   **Hızlı Güncelleme Komutu (Sunucuda):**
+    ```bash
+    cd /root/emanetci && ./scripts/vm-update.sh
+    ```
+
+---
+
+## 🛠️ Spec-Driven Development (OpenSpec)
+
+Bu projede AI asistanlarıyla yapılan geliştirmelerin daha güvenilir, izlenebilir ve tutarlı olması için **OpenSpec** entegrasyonu bulunmaktadır.
+
+### OpenSpec Yapısı ve Komutlar
+Projeyi geliştiren AI asistanları (Cursor, Claude Code, Cline, Windsurf, Antigravity vb.) aşağıdaki slash komutları veya iş akışlarını kullanarak geliştirmeleri adım adım yürütebilir:
+
+*   **/opsx:propose** `<fikir/görev>`: Yeni bir geliştirme için `openspec/changes/<change-adi>/` altında teklif (proposal) ve görev listesi (tasks.md) şablonu oluşturur.
+*   **/opsx:apply**: Oluşturulan görev listesini sırayla uygular ve geliştirir.
+*   **/opsx:archive**: Geliştirme tamamlandıktan sonra yapılan değişiklikleri arşivler ve genel sistem spesifikasyonlarını günceller.
+
+Tüm OpenSpec dosyaları `openspec/` dizini altında tutulur ve Git üzerinden takip edilir.

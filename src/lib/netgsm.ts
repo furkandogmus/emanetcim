@@ -48,42 +48,6 @@ export async function sendNetgsmRestSms(params: {
   to10: string;
   message: string;
 }): Promise<{ ok: boolean; jobId?: string; error?: string }> {
-  if (!isNetgsmConfigured()) {
-    return { ok: false, error: "netgsm_not_configured" };
-  }
-
-  const msgheader = process.env.NETGSM_MSGHEADER!.trim();
-  const text = params.message.replace(/\s+/g, " ").trim().slice(0, 900);
-
-  try {
-    const mod = await import("@netgsm/sms");
-    const Netgsm = mod.default;
-    const SendSmsErrorCode = mod.SendSmsErrorCode;
-
-    const netgsm = new Netgsm({
-      username: process.env.NETGSM_USERNAME!.trim(),
-      password: process.env.NETGSM_PASSWORD!.trim(),
-      appname: process.env.NETGSM_APPNAME?.trim() || undefined,
-    });
-
-    const res = await netgsm.sendRestSms({
-      msgheader,
-      encoding: "TR",
-      messages: [{ msg: text, no: params.to10 }],
-    });
-
-    const success =
-      res.code === SendSmsErrorCode.SUCCESS || String(res.code) === "00";
-    if (success) {
-      return { ok: true, jobId: res.jobid };
-    }
-    return {
-      ok: false,
-      error: `${res.code}: ${res.description ?? "netgsm_error"}`,
-    };
-  } catch (e) {
-    const errMsg = e instanceof Error ? e.message : String(e);
-    logger.error({ err: e }, "netgsm_send_exception");
-    return { ok: false, error: errMsg };
-  }
+  // SMS entegrasyonu geçici olarak devre dışı bırakıldı.
+  return { ok: false, error: "sms_disabled" };
 }

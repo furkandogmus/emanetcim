@@ -17,13 +17,11 @@ sequenceDiagram
     actor Misafir
     participant WebUI as Web Arayüzü
     participant BS as BookingService
-    participant PS as PaymentService (iyzico)
     participant NS as NotificationService (SMS)
     
     Misafir->>WebUI: Lokasyon ara, Esnafı seç
     Misafir->>WebUI: Çanta sayısı, boyut ve tarih gir
     WebUI->>BS: Rezervasyon taslağı oluştur (Draft)
-    WebUI->>PS: Ödeme başlat (iyzico API)
     Misafir->>PS: Kart bilgilerini gir (3D Secure)
     PS-->>WebUI: Ödeme Başarılı
     WebUI->>BS: Rezervasyon Statüsünü Güncelle (PAID)
@@ -99,13 +97,10 @@ sequenceDiagram
 *   **Giriş:** Arama çubuğuna yazılan şehir (İstanbul, Ankara vb.) veya GPS koordinatları.
 *   **İş Kuralları:** Aktif olmayan, kapasitesi dolu olan veya kapalı saatlerdeki esnaflar haritada gösterilmez.
 
-#### UC_M_02: Rezervasyon ve iyzico ile Ödeme
 *   **Açıklama:** Misafir tarih aralığı, çanta sayısı ve boyutlarını (S/M/L/XL) seçerek ödemesini tamamlar.
-*   **İş Kuralları:** `PricingService` üzerinden fiyat hesaplanır. Ödemeler iyzico 3D Secure aracılığıyla gerçekleşir. Rezervasyon tamamlandığında PNR ve dinamik bir JWT QR kodu üretilir.
 
 #### UC_M_03: İptal ve Kesintisiz İade
 *   **Açıklama:** Misafir planda değişiklik olduğunda rezervasyonunu iptal eder.
-*   **İş Kuralları:** Teslimat saatine 1 saat kalana kadar yapılan iptallerde `PaymentService` iyzico API'si üzerinden %100 kesintisiz para iadesini tetikler.
 
 #### UC_M_04: Esnaf Değerlendirme & Puanlama
 *   **Açıklama:** Misafir valizini aldıktan sonra deneyimini puanlar (1-5 yıldız) ve yorum yazar.
@@ -158,7 +153,6 @@ sequenceDiagram
 Uygulamanın çekirdek iş mantığı `src/services/` altındaki şu servisler tarafından yürütülmektedir:
 
 1.  **[BookingService](file:///Users/furkan/emanetcim/src/services/BookingService.ts):** Rezervasyon oluşturma, durum güncelleme, iptal kontrolü ve listeleme işlemlerini yürütür.
-2.  **[PaymentService](file:///Users/furkan/emanetcim/src/services/PaymentService.ts):** iyzico ödeme geçidi entegrasyonu, iade (refund) çağrıları ve komisyon dağıtım modellerini yönetir.
 3.  **[SealService](file:///Users/furkan/emanetcim/src/services/SealService.ts):** Fiziksel güvenlik mühürlerinin atanması, fotoğraf yükleme işlemleri ve güvenlik doğrulamalarını üstlenir.
 4.  **[NotificationService](file:///Users/furkan/emanetcim/src/services/NotificationService.ts):** Netgsm entegrasyonu ile SMS gönderimi, OTP doğrulama kodları ve durum değişiklik bildirimlerini koordine eder.
 5.  **[PricingService](file:///Users/furkan/emanetcim/src/services/PricingService.ts):** Valiz boyutu, gün sayısı ve platform ayarlarına göre dinamik sepet tutarını hesaplar.

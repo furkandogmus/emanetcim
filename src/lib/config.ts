@@ -14,16 +14,6 @@ export const config = {
     timeout: 10000,
   },
   
-  iyzico: {
-    apiKey: process.env.IYZICO_API_KEY,
-    secretKey: process.env.IYZICO_SECRET_KEY,
-    /** Tek kaynak: IYZICO_BASE_URL (iyzipay.ts ile aynı). */
-    baseUrl:
-      process.env.IYZICO_BASE_URL ||
-      process.env.IYZICO_URI ||
-      "https://sandbox-api.iyzipay.com",
-  },
-  
   auth: {
     secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
   },

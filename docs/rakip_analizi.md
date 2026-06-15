@@ -49,13 +49,11 @@ Türkiye, yoğun turizm potansiyeli ve iç göç/seyahat hareketliliği nedeniyl
 
 ### Yerel Girişimler (Örn: KeepBag)
 *   **Durum:** Türkiye genelinde turistik lokasyonlarda (Taksim, Kadıköy, Sirkeci, Alaçatı vb.) butik esnaflarla anlaşarak hizmet verirler.
-*   **Ödeme Sistemleri:** Yabancı turistler için Stripe/PayPal gibi küresel ödeme altyapıları gerekirken, yerel kullanıcılar için iyzico ve yerel kart taksitleri / Troy kart desteği kritiktir.
 
 ---
 
 ## 4. BagajPark (Emanetçi) İçin Stratejik Fırsatlar & Feature Karşılaştırması
 
-Projenizin teknik yapısını incelediğimizde (`PlatformSettings`, `SealService`, `iyzico`, `Netgsm SMS`), BagajPark'ın bu rekabette avantaj elde edebileceği kritik noktalar ve geliştirmesi gereken özellikler şunlardır:
 
 ### 1. Fiziksel Güvenlik ve "Mühür" (Seal) Sistemi (Mevcut & Güçlü Yön)
 *   *Durum:* Projenizde `SealService` ve fiziksel mühür yönetimi yapısı mevcut.
@@ -67,11 +65,9 @@ Projenizin teknik yapısını incelediğimizde (`PlatformSettings`, `SealService
 
 ### 3. Çoklu Dil ve Para Birimi Desteği (Kritik Gereksinim)
 *   *Durum:* Projede `[locale]` yapısı (i18n) kurulmuş durumda.
-*   *Öneri:* Türkiye'ye gelen yabancı turistler (Rusya, Avrupa, Ortadoğu ülkeleri) ana hedef kitledir. iyzico üzerinden dövizle (USD/EUR) ödeme alma ve uygulamanın İngilizce/Arapça/Rusça dil desteklerinin eksiksiz olması hayati önem taşır.
 
 ### 4. Esnaf (Partner) Dostu Panel ve Anında Hakediş/Ödeme (Ledger Sistemi)
 *   *Durum:* Projede partnerler için kazanç takip mekanizmaları (`earnings/stats`, `finance-export`) mevcut.
-*   *Öneri:* Esnafların platformda kalmasını sağlayan en önemli unsur, ödemelerin hızlı yapılmasıdır. iyzico'nun "Pazaryeri Çözümü" (Sub-merchant split payment) kullanılarak, kullanıcı ödeme yaptığında esnafın komisyonu anında esnafın banka hesabına, platform komisyonu ise BagajPark hesabına aktarılacak şekilde entegrasyon derinleştirilebilir. Bu, esnafın haftalık/aylık ödeme bekleme derdini çözer.
 
 ### 5. Sigorta ve "Güvence" Paketi
 *   *Durum:* `PlatformSettings` tablosunda sigorta çarpanları/ayarları bulunuyor.

@@ -16,7 +16,6 @@ Bu repo’da Cursor/ChatGPT vb. ile üretilen değişikliklerin tekrarlanabilir 
 ### Yeni özellik
 
 ```
-Bağlam: Next.js 16 App Router, Prisma 7, Auth.js, iyzico marketplace.
 Hedef: [tek cümle]
 Kısıtlar: [auth, locale, mobil]
 Dosyalar: [tahmini path]

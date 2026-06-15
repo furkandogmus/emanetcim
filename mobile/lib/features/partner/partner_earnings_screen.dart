@@ -135,7 +135,7 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
 
           const SizedBox(height: 32),
 
-          // Stripe Info Callout
+          // Payout information
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(

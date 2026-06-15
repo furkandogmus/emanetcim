@@ -7,7 +7,6 @@
 | `PENDING` | yok / `FAILED` | Ödeme bekleniyor veya başarısız |
 | `PENDING` | `SUCCESS` | **Tutarsızlık** — webhook gecikmesi; reconciliation `PAID` yapar |
 | `PAID`+ | `SUCCESS` | Normal |
-| iptal/iade akışları | `REFUNDED` / `FAILED` | `BookingService` + iyzico iade |
 
 ## Reconciliation
 
@@ -23,15 +22,8 @@
 - **Uç:** `GET /api/internal/finance-export?days=90` — `Authorization: Bearer <CRON_SECRET>` veya `x-cron-secret: <CRON_SECRET>`.
 - **Çıktı:** Rezervasyon özeti + ödeme durumu + `chargebackStatus` (varsa).
 
-## iyzico çağrıları
 
-- `initializeMarketplacePayment` ve `refundPayment` içindeki iyzico SDK çağrıları `withTimeout` ile sarılıdır (varsayılan **45s**, `IYZICO_HTTP_TIMEOUT_MS` ile değiştirilebilir).
 - Timeout durumunda hata loglanır; istemci tarafında yeniden deneme / kullanıcıya mesaj iş kurallarına bırakılır.
-
-## Webhook
-
-- `/api/payments/webhook` — imza doğrulama ve rate limit uygulanır.
-- Başarılı işlemden sonra booking ödeme durumu güncellenir; buna rağmen tutarsızlık kalırsa reconciliation devreye girer.
 
 ## Log alanları
 

@@ -4,6 +4,7 @@ analyzer:
   exclude:
     - "**/*.g.dart"
     - "**/*.freezed.dart"
+    - "build/**"
     - "lib/generated_plugin_registrant.dart"
   errors:
     todo: ignore

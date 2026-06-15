@@ -18,6 +18,8 @@ abstract final class AppColors {
   static const placeholder = Color(0xFF334155); // Slate 700 (Daha koyu)
 
   static const bgLight = Color(0xFFF8FAFC);
+  static const border = Color(0xFFE2E8F0);
+  static const surfaceMuted = Color(0xFFF1F5F9);
   static const success = Color(0xFF10B981);
   static const info = Color(0xFF3B82F6);
   static const bgCard = Colors.white;

@@ -1,14 +1,11 @@
-import 'dart:ui';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/auth/auth_controller.dart';
 import '../../shared/models/user.dart';
-import '../../shared/utils/app_colors.dart';
 
 class HomeShell extends ConsumerWidget {
   const HomeShell({required this.child, super.key});
@@ -110,47 +107,37 @@ class HomeShell extends ConsumerWidget {
       backgroundColor: const Color(0xFFF8FAFC),
       extendBody: true,
       body: child,
-      bottomNavigationBar: Container(
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-        height: 72,
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.9),
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 30,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: tabs
-                  .map(
-                    (t) => _NavItem(
-                      item: t,
-                      isSelected: loc == t.path,
-                      onTap: () {
-                        HapticFeedback.lightImpact();
-                        if (t.isFab) {
-                          context.push(t.path);
-                        } else {
-                          context.go(t.path);
-                        }
-                      },
-                    ),
-                  )
-                  .toList(),
-            ),
-          ),
-        ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _selectedIndex(tabs, loc),
+        onDestinationSelected: (index) {
+          HapticFeedback.lightImpact();
+          final tab = tabs[index];
+          if (tab.isFab) {
+            context.push(tab.path);
+          } else {
+            context.go(tab.path);
+          }
+        },
+        destinations: tabs
+            .map(
+              (tab) => NavigationDestination(
+                icon: Icon(tab.icon),
+                selectedIcon: Icon(tab.activeIcon),
+                label: tab.label,
+              ),
+            )
+            .toList(),
       ),
     );
+  }
+
+  int _selectedIndex(List<_TabItem> tabs, String location) {
+    final index = tabs.indexWhere(
+      (tab) => tab.path == '/'
+          ? location == '/'
+          : location == tab.path || location.startsWith('${tab.path}/'),
+    );
+    return index < 0 ? 0 : index;
   }
 }
 
@@ -168,51 +155,4 @@ class _TabItem {
     required this.path,
     this.isFab = false,
   });
-}
-
-class _NavItem extends StatelessWidget {
-  const _NavItem({
-    required this.item,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final _TabItem item;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              isSelected ? item.activeIcon : item.icon,
-              color: isSelected
-                  ? AppColors.brandOrange
-                  : const Color(0xFF757575),
-              size: 26,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              item.label,
-              style: GoogleFonts.outfit(
-                fontSize: 10,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                color: isSelected
-                    ? AppColors.brandOrange
-                    : const Color(0xFF757575),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

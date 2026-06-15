@@ -380,20 +380,6 @@ CREATE TABLE public."PlatformSettings" (
 
 
 --
--- Name: ProcessedPaymentWebhook; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public."ProcessedPaymentWebhook" (
-    id text NOT NULL,
-    provider text NOT NULL,
-    "dedupKey" text NOT NULL,
-    "paymentId" text,
-    "conversationId" text,
-    "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
-);
-
-
---
 -- Name: PushSubscription; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -483,13 +469,10 @@ CREATE TABLE public."Shop" (
     "pricePerDay" numeric(12,2) DEFAULT 50 NOT NULL,
     "hasRestroom" boolean DEFAULT false NOT NULL,
     open247 boolean DEFAULT false NOT NULL,
-    "subMerchantKey" text,
-    "subMerchantType" text,
     "openingTime" text DEFAULT '09:00'::text,
     "closingTime" text DEFAULT '20:00'::text,
     "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "updatedAt" timestamp(3) without time zone NOT NULL,
-    "stripeAccountId" text,
     "sealReorderPoint" integer DEFAULT 15 NOT NULL,
     "sealLeadTimeDays" integer DEFAULT 3 NOT NULL,
     city text,
@@ -685,14 +668,6 @@ ALTER TABLE ONLY public."PaymentLog"
 
 ALTER TABLE ONLY public."PlatformSettings"
     ADD CONSTRAINT "PlatformSettings_pkey" PRIMARY KEY (id);
-
-
---
--- Name: ProcessedPaymentWebhook ProcessedPaymentWebhook_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public."ProcessedPaymentWebhook"
-    ADD CONSTRAINT "ProcessedPaymentWebhook_pkey" PRIMARY KEY (id);
 
 
 --
@@ -1005,20 +980,6 @@ CREATE UNIQUE INDEX "PaymentLog_transactionId_key" ON public."PaymentLog" USING 
 
 
 --
--- Name: ProcessedPaymentWebhook_createdAt_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX "ProcessedPaymentWebhook_createdAt_idx" ON public."ProcessedPaymentWebhook" USING btree ("createdAt");
-
-
---
--- Name: ProcessedPaymentWebhook_dedupKey_key; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX "ProcessedPaymentWebhook_dedupKey_key" ON public."ProcessedPaymentWebhook" USING btree ("dedupKey");
-
-
---
 -- Name: PushSubscription_endpoint_key; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1131,19 +1092,6 @@ CREATE INDEX "Shop_ownerId_idx" ON public."Shop" USING btree ("ownerId");
 
 
 --
--- Name: Shop_stripeAccountId_key; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX "Shop_stripeAccountId_key" ON public."Shop" USING btree ("stripeAccountId");
-
-
---
--- Name: Shop_subMerchantKey_key; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX "Shop_subMerchantKey_key" ON public."Shop" USING btree ("subMerchantKey");
-
-
 --
 -- Name: User_email_idx; Type: INDEX; Schema: public; Owner: -
 --
@@ -1370,4 +1318,3 @@ ALTER TABLE ONLY public."Shop"
 --
 -- PostgreSQL database dump complete
 --
-

@@ -40,7 +40,7 @@ export function applyAuthPublicUrlFromEnv(): void {
   applied = true;
   const origin = getPublicAuthOrigin();
   if (!origin) return;
-  process.env.AUTH_URL = origin;
+  process.env.AUTH_URL = `${origin}/api/auth`;
   process.env.NEXTAUTH_URL = origin;
 }
 

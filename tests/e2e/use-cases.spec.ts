@@ -1,27 +1,17 @@
 import { test, expect } from '@playwright/test';
 import { waitForCheckoutDatesReady } from './helpers/checkout';
 import { openCheckoutFromSearchList } from './helpers/search-to-checkout';
-import { IYZICO_SANDBOX_SUCCESS } from './helpers/iyzico-sandbox';
 
 /**
  * Kullanım: `npx playwright test tests/e2e/use-cases.spec.ts -g "UC: Misafir"`
  *
- * iyzico sandbox kartları: https://docs.iyzico.com/en/add-ons/test-cards
- * Geliştirmede IYZICO_API_KEY yoksa veya `sandbox-api-key` ise ödeme simüle edilir (kart numarası önemsiz).
  */
 
-/** Özet (adım 2) ve ödeme (adım 3) ekranlarına geçer */
-async function goToCheckoutPayment(page: import('@playwright/test').Page) {
+/** Özeti geçip rezervasyonu onaylar. */
+async function confirmCheckout(page: import('@playwright/test').Page) {
   await waitForCheckoutDatesReady(page);
   await page.getByTestId('checkout-footer-primary').click();
   await page.getByTestId('checkout-footer-primary').click();
-}
-
-async function fillSandboxCard(page: import('@playwright/test').Page) {
-  await page.getByPlaceholder(/Kart üzerindeki isim|Name on card/i).fill('Test User');
-  await page.getByPlaceholder('0000 0000 0000 0000').fill(IYZICO_SANDBOX_SUCCESS.HALKBANK_MC_CREDIT);
-  await page.getByPlaceholder(/AA\/YY|MM\/YY/i).fill('12/30');
-  await page.getByPlaceholder('CVV').fill('123');
 }
 
 test.describe('UC: Misafir — Arama ve harita (seed)', () => {
@@ -84,8 +74,8 @@ test.describe('UC: Misafir — Demo giriş ve rezervasyonlar', () => {
   });
 });
 
-test.describe('UC: Misafir — Checkout ödeme (iyzico sandbox kartı)', () => {
-  test('Misafir demo → arama → ödeme → başarı sayfası', async ({ page }) => {
+test.describe('UC: Misafir — Rezervasyon oluşturma', () => {
+  test('Misafir demo → arama → onay → başarı sayfası', async ({ page }) => {
     await page.goto('/tr/login');
     await page.getByRole('button', { name: 'Misafir Demo' }).first().click();
     await expect(page).toHaveURL(/\/tr\/bookings/, { timeout: 20000 });
@@ -98,11 +88,7 @@ test.describe('UC: Misafir — Checkout ödeme (iyzico sandbox kartı)', () => {
     await expect(page.getByTestId('checkout-total-amount')).toHaveText('₺95');
     await page.getByRole('button', { name: 'Geri' }).click();
     await page.getByRole('button', { name: 'Increase' }).nth(1).click();
-    await goToCheckoutPayment(page);
-
-    await fillSandboxCard(page);
-
-    await page.getByTestId('checkout-footer-primary').click();
+    await confirmCheckout(page);
 
     await expect(page.getByRole('heading', { name: /Rezervasyon Başarılı/i })).toBeVisible({
       timeout: 20000,

@@ -2,6 +2,7 @@
 
 import { Building2, MapPin, Star, Shield, Timer } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { motion } from 'framer-motion';
 import FavoriteButton from '@/components/guest/FavoriteButton';
 
 interface ShopListItemProps {
@@ -39,10 +40,12 @@ export default function ShopListItem({
 }: ShopListItemProps) {
   const t = useTranslations('Guest');
   return (
-    <div 
+    <motion.div
       data-testid="shop-list-item"
       onClick={onClick}
-      className="bg-white border border-gray-100 rounded-3xl p-5 shadow-sm hover:shadow-md transition-all cursor-pointer flex gap-5 items-center group active:scale-[0.98]"
+      whileTap={{ scale: 0.97 }}
+      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      className="bg-white border border-gray-100 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow cursor-pointer flex gap-5 items-center group"
     >
       {/* Mini Image Placeholder */}
       <div className="w-20 h-20 bg-gradient-to-br from-orange-100 to-amber-50 rounded-2xl flex items-center justify-center text-orange-400 shrink-0">
@@ -130,6 +133,6 @@ export default function ShopListItem({
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -13,7 +13,10 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Link } from "@/i18n/routing";
+import { Link, useRouter } from "@/i18n/routing";
+import { useSwipeBack } from "@/lib/hooks/useSwipeBack";
+import { hapticMedium, hapticSuccess } from "@/lib/haptic";
+import { useShare } from "@/lib/hooks/useShare";
 import { roundedSlotPrices } from "@/lib/bag-pricing";
 import type { PricingRules } from "@/lib/pricing-rules";
 import { dateLocaleForUiLocale } from "@/lib/date-locale";
@@ -68,6 +71,7 @@ export default function ShopDetailClient({
   shop,
   pricingRules,
 }: ShopDetailClientProps) {
+  const router = useRouter();
   const t = useTranslations("Guest");
   const locale = useLocale();
   const dateLocale = dateLocaleForUiLocale(locale);
@@ -121,6 +125,11 @@ export default function ShopDetailClient({
     trackPlausibleEvent(PLAUSIBLE_EVENTS.ShopViewed, { shopId: shop.id });
   }, [shop.id]);
 
+  useSwipeBack({ onSwipeBack: () => router.push("/search") });
+
+  const { share } = useShare();
+  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+
   const [checkoutParams] = useState(() => {
     try {
       const raw = sessionStorage.getItem("bagajpark_search_params");
@@ -162,9 +171,18 @@ export default function ShopDetailClient({
               <ArrowLeft size={15} />
               {mobileCopy.bagajPark}
             </Link>
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-gray-900 shadow">
-              <MapPin size={16} />
-            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => share({ title: shop.name, text: `${shop.name} — BagajPark`, url: shareUrl })}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-gray-900 shadow active:scale-90 transition-transform"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+              </button>
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-gray-900 shadow">
+                <MapPin size={16} />
+              </span>
+            </div>
           </div>
           <div className="absolute inset-x-4 -bottom-12 z-10 rounded-[1.75rem] bg-white p-5 shadow-2xl shadow-gray-300/60">
             <div className="flex items-start justify-between gap-3">
@@ -281,7 +299,8 @@ export default function ShopDetailClient({
             <Link
               href={`/checkout/${shop.id}${checkoutParams}`}
               data-testid="shop-book-now-mobile"
-              className="btn-ui btn-ui-lg btn-ui-primary rounded-2xl px-8"
+              className="btn-ui btn-ui-lg btn-ui-primary rounded-2xl px-8 active:scale-[0.97] transition-transform"
+              onClick={() => hapticMedium()}
             >
               {t("bookNow")}
             </Link>
@@ -295,7 +314,7 @@ export default function ShopDetailClient({
       ) : (
       <div className="relative h-48 sm:h-56 bg-gradient-to-br from-orange-500 via-orange-600 to-amber-700">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxIDAgNiAyLjY5IDYgNnMtMi42OSA2LTYgNi02LTIuNjktNi02IDIuNjktNiA2LTYiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iLjA4Ii8+PC9nPjwvc3ZnPg==')] opacity-40" />
-        <div className="absolute top-4 left-4 z-10">
+        <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between">
           <Link
             href="/search"
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/95 text-gray-900 text-xs font-black uppercase tracking-wider shadow-lg hover:bg-white transition-colors"
@@ -303,6 +322,13 @@ export default function ShopDetailClient({
             <ArrowLeft size={16} />
             {t("shopDetailBackSearch")}
           </Link>
+          <button
+            type="button"
+            onClick={() => share({ title: shop.name, text: `${shop.name} — BagajPark`, url: shareUrl })}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-gray-900 shadow-lg hover:bg-white transition-colors active:scale-90"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          </button>
         </div>
         <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/50 to-transparent">
           <div className="flex items-start gap-3 text-white">
@@ -460,7 +486,8 @@ export default function ShopDetailClient({
           <Link
             href={`/checkout/${shop.id}${checkoutParams}`}
             data-testid="shop-book-now"
-            className="flex w-full items-center justify-center gap-2 py-4 rounded-2xl bg-orange-600 text-white text-sm font-black uppercase tracking-widest shadow-lg shadow-orange-200 hover:bg-orange-700 transition-colors active:scale-[0.99]"
+            className="flex w-full items-center justify-center gap-2 py-4 rounded-2xl bg-orange-600 text-white text-sm font-black uppercase tracking-widest shadow-lg shadow-orange-200 hover:bg-orange-700 transition-all active:scale-[0.97]"
+            onClick={() => hapticMedium()}
           >
             {t("shopDetailBookNow")}
           </Link>

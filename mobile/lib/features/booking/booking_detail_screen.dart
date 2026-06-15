@@ -145,9 +145,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                           const SizedBox(height: 8),
                           _statusBadge(bk.status),
                           if (bk.status == BookingStatus.waitingApproval ||
-                              bk.status == BookingStatus.approved ||
-                              bk.status == BookingStatus.paid ||
-                              bk.status == BookingStatus.checkedIn) ...[
+                              bk.status == BookingStatus.approved) ...[
                             const SizedBox(height: 16),
                             Container(
                               padding: const EdgeInsets.symmetric(
@@ -336,55 +334,38 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
 
               // Cancel / Modify / Dispute / Review
               if (bk.status == BookingStatus.waitingApproval || bk.status == BookingStatus.approved || bk.status == BookingStatus.paid) ...[
-                if (bk.status == BookingStatus.waitingApproval || bk.status == BookingStatus.approved)
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: _cancelling ? null : () => _cancelBooking(bk),
-                          icon: _cancelling
-                              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                              : const Icon(Icons.cancel_outlined, color: Colors.redAccent),
-                          label: Text('booking.cancel'.tr(), style: const TextStyle(color: Colors.redAccent)),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            side: const BorderSide(color: Colors.redAccent),
-                          ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _cancelling ? null : () => _cancelBooking(bk),
+                        icon: _cancelling
+                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                            : const Icon(Icons.cancel_outlined, color: Colors.redAccent),
+                        label: Text('booking.cancel'.tr(), style: const TextStyle(color: Colors.redAccent)),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          side: const BorderSide(color: Colors.redAccent),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: _modifying ? null : () => _modifyBooking(bk),
-                          icon: _modifying
-                              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                              : const Icon(Icons.edit_outlined),
-                          label: Text('booking.modify'.tr()),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                else
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: _cancelling ? null : () => _cancelBooking(bk),
-                      icon: _cancelling
-                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                          : const Icon(Icons.cancel_outlined, color: Colors.redAccent),
-                      label: Text('booking.cancel'.tr(), style: const TextStyle(color: Colors.redAccent)),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        side: const BorderSide(color: Colors.redAccent),
                       ),
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _modifying ? null : () => _modifyBooking(bk),
+                        icon: _modifying
+                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                            : const Icon(Icons.edit_outlined),
+                        label: Text('booking.modify'.tr()),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 16),
               ],
 

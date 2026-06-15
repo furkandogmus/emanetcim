@@ -20,7 +20,6 @@ Tek satır, küçük harfle tip; isteğe bağlı kapsam parantez içinde:
 ```text
 feat(admin): platform ayarları için varsayılan seed
 fix(booking): iptal sonrası tutar yuvarlama
-test(e2e): iyzico sandbox ödeme akışı
 ci: prisma migrate job ortam değişkenleri
 docs: backlog ve operasyon linkleri
 ```
@@ -76,7 +75,6 @@ Aşağıdaki hash’ler **yalnızca rebase sırasında kopyala-yapıştır refer
 | Hash (kısa) | Önerilen mesaj |
 |-------------|----------------|
 | `0383890` | `fix(booking): prisma migration, actions ve bag pricing testleri` |
-| `f3523ef` | `test(e2e): iyzico sandbox ve use-cases; eski e2e dosyalarını kaldır` |
 | `c9f42e0` | `fix(auth): login ve NextAuth ayarları; partner e2e uyumu` |
 | `ffe0151` | `feat(finance): money decimal migration; booking ve admin tutarları` |
 | `0f3a94d` | `feat(settings): platform_settings modeli, migration ve CI genişletmesi` |

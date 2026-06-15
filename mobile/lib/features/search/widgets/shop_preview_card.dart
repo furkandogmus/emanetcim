@@ -43,20 +43,21 @@ class ShopPreviewCard extends ConsumerWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         width: isFullWidth ? null : MediaQuery.of(context).size.width * 0.85,
+        constraints: const BoxConstraints(minHeight: 124),
         margin: isFullWidth ? EdgeInsets.zero : const EdgeInsets.only(right: 16),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? AppColors.brandOrange : Colors.white,
-            width: 2,
+            color: isSelected ? AppColors.brandOrange : AppColors.border,
+            width: isSelected ? 2 : 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 5),
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
@@ -64,6 +65,7 @@ class ShopPreviewCard extends ConsumerWidget {
           children: [
             Container(
               width: 100,
+              height: 100,
               decoration: BoxDecoration(
                 color: Colors.orange.shade50,
                 borderRadius: BorderRadius.circular(16),

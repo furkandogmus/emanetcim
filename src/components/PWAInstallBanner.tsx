@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Download, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useStandaloneMode } from "@/lib/hooks/useStandaloneMode";
 
 const DISMISS_KEY = "bagajpark-pwa-install-dismissed";
 
@@ -13,8 +14,11 @@ type BeforeInstallPromptEvent = Event & {
 
 export default function PWAInstallBanner() {
   const t = useTranslations("Common");
+  const { isStandalone } = useStandaloneMode();
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
+
+  if (isStandalone) return null;
 
   useEffect(() => {
     if (typeof window === "undefined") return;

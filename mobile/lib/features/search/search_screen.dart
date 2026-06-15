@@ -78,6 +78,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Timer? _debounce;
   final _maxPriceController = TextEditingController();
 
+  bool get _hasActiveFilters =>
+      _onlyOpenNow ||
+      _only247 ||
+      _minRating > 0 ||
+      _maxPrice > 0 ||
+      _hasRestroom ||
+      _hasCctv ||
+      _hasClimate ||
+      _acceptsLarge ||
+      _sortBy != 'distance';
+
   List<ShopDto> _applyFilters(List<ShopDto> list) {
     var filtered = list;
     if (_only247) filtered = filtered.where((s) => s.open247).toList();
@@ -468,7 +479,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         prefixIcon: const Icon(Icons.search_rounded),
                         suffixIcon: _SearchSuffixIcon(
                           controller: _searchController,
-                          hasActiveFilter: _onlyOpenNow || _only247 || _maxPrice > 0,
+                          hasActiveFilter: _hasActiveFilters,
                           onClear: () {
                             _searchController.clear();
                             setState(() => _suggestions = []);

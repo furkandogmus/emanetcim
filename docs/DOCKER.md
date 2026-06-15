@@ -58,11 +58,11 @@ cp docker-compose.env.example docker-compose.env
 docker compose --env-file docker-compose.env up -d --build
 ```
 
-iyzico, e-posta vb. için anahtarları compose ortamına veya `environment:` ile `web` servisine ekleyin (`.env.example` ile uyumlu isimler).
 
 ## Veritabanı şeması
 
-Projede migration klasörü yoksa konteyner her başlangıçta **`prisma db push`** ile şemayı senkronize eder. İleride `prisma migrate` kullanırsanız `prisma/migrations` dolu olduğunda entrypoint **`prisma migrate deploy`** çalıştırır (`scripts/docker-entrypoint.sh`).
+Web image'ı Prisma CLI içermez ve başlangıçta otomatik migration çalıştırmaz.
+Şema değişiklikleri deploy öncesinde ayrı bir migration adımıyla uygulanmalıdır.
 
 Eski volume farklı kullanıcı/şifreyle oluşturulduysa **P1000 (authentication failed)** görürsünüz; veriyi silmek kabul edilebilirse:
 
@@ -82,5 +82,4 @@ DATABASE_URL="postgresql://emanetci:emanetci@127.0.0.1:5433/emanetci?schema=publ
 ## Mimari notlar
 
 - `next.config.ts` içinde **`output: "standalone"`** — üretim imajı için gerekli.
-- `dotenv` **dependencies** içinde; `prisma.config.ts` hem yerelde hem konteynerde yüklenir.
-- Konteynerde `NODE_PATH=/usr/local/lib/node_modules` ile global **Prisma CLI**, `prisma db push` / `migrate deploy` sırasında `prisma/config` modülünü bulur.
+- Prisma CLI web runtime image'ına girmez.

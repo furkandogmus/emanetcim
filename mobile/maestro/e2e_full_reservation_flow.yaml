@@ -15,7 +15,9 @@ appId: com.bagajpark
     text: "Riskleri Anladım, Devam Et"
     optional: true
 
-- tapOn: "Atla"
+- tapOn:
+    text: "Atla"
+    optional: true
 
 # Guest login
 - tapOn: "E-posta veya Telefon"
@@ -30,18 +32,18 @@ appId: com.bagajpark
     timeout: 5000
 
 # Ana sayfa
-- assertVisible: "Ana Sayfa"
+- assertVisible: "Ana Sayfa.*"
 - takeScreenshot: "e2e-01-home"
 
 # Arama sekmesine git
-- tapOn: "Ara"
+- tapOn: "Ara.*"
 - waitForAnimationToEnd:
     timeout: 5000
 - takeScreenshot: "e2e-02-search"
 
 # Dükkan ara ve bekle
 - extendedWaitUntil:
-    visible: "Maestro"
+    visible: "Maestro Test Dükkanı"
     timeout: 10000
 
 - tapOn: "Maestro Test Dükkanı"
@@ -93,7 +95,7 @@ appId: com.bagajpark
 
 # Guest çıkış yap
 - pressKey: Back
-- tapOn: "Profil"
+- tapOn: "Profil.*"
 - swipe:
     direction: DOWN
     duration: 500
@@ -145,6 +147,14 @@ appId: com.bagajpark
 - takeScreenshot: "e2e-13-booking-approved"
 
 # ============================================
+# BÖLÜM 3b: APPROVED DURUMDA BAG REVISION
+# ============================================
+
+# Approved durumda bag revision butonu görünmeli
+- assertVisible: "Valiz Revizesi"
+- takeScreenshot: "e2e-13b-bag-revision-visible"
+
+# ============================================
 # BÖLÜM 4: PARTNER CHECK-IN
 # ============================================
 
@@ -159,6 +169,15 @@ appId: com.bagajpark
 - waitForAnimationToEnd:
     timeout: 5000
 - takeScreenshot: "e2e-15-checkin-complete"
+
+# ============================================
+# BÖLÜM 4b: CHECK-IN SONRASI BAG REVISION YOK
+# ============================================
+
+# Check-in sonrası bag revision butonu görünmemeli
+- assertNotVisible:
+    text: "Valiz Revizesi"
+- takeScreenshot: "e2e-15b-no-bag-revision-after-checkin"
 
 # ============================================
 # BÖLÜM 5: PARTNER CHECK-OUT

@@ -1,25 +1,17 @@
 import { test, expect } from '@playwright/test';
 import { waitForCheckoutDatesReady } from './helpers/checkout';
 import { openCheckoutFromSearchList } from './helpers/search-to-checkout';
-import { IYZICO_SANDBOX_SUCCESS } from './helpers/iyzico-sandbox';
 
 export const TEST_USER_PHONE = '+905556667788';
 
-/** Özet (adım 2) ve ödeme (adım 3) ekranlarına geçer */
-async function goToCheckoutPayment(page: import('@playwright/test').Page) {
+/** Özeti geçip rezervasyonu onaylar. */
+async function confirmCheckout(page: import('@playwright/test').Page) {
   await waitForCheckoutDatesReady(page);
   await page.getByTestId('checkout-footer-primary').click();
   await page.getByTestId('checkout-footer-primary').click();
 }
 
-async function fillSandboxCard(page: import('@playwright/test').Page) {
-  await page.getByPlaceholder(/Kart üzerindeki isim|Name on card/i).fill('Test User');
-  await page.getByPlaceholder('0000 0000 0000 0000').fill(IYZICO_SANDBOX_SUCCESS.HALKBANK_MC_CREDIT);
-  await page.getByPlaceholder(/AA\/YY|MM\/YY/i).fill('12/30');
-  await page.getByPlaceholder('CVV').fill('123');
-}
-
-test.describe('E2E Full Workflow: GUEST -> BOOKING -> PAYMENT -> CHECKIN -> CHECKOUT', () => {
+test.describe('E2E Full Workflow: GUEST -> BOOKING -> CHECKIN -> CHECKOUT', () => {
   // Use a slower timeout for complex end to end flows
   test.setTimeout(90000);
 
@@ -39,13 +31,9 @@ test.describe('E2E Full Workflow: GUEST -> BOOKING -> PAYMENT -> CHECKIN -> CHEC
     // 3. CHECKOUT
     await waitForCheckoutDatesReady(page);
     await page.getByRole('button', { name: 'Increase' }).nth(1).click(); // Add an M-sized bag
-    await goToCheckoutPayment(page);
+    await confirmCheckout(page);
 
-    // 4. PAYMENT (IYZICO)
-    await fillSandboxCard(page);
-    await page.getByTestId('checkout-footer-primary').click();
-
-    // 5. BOOKING COMPLETION & QR GATHERING
+    // 4. BOOKING COMPLETION & QR GATHERING
     await expect(page.getByRole('heading', { name: /Rezervasyon Başarılı/i })).toBeVisible({ timeout: 20000 });
     const bookingIdElement = page.getByText(/Rezervasyon ID:|RESERVASYON ID:/i).locator('..');
     const bookingText = await bookingIdElement.innerText();
@@ -57,12 +45,12 @@ test.describe('E2E Full Workflow: GUEST -> BOOKING -> PAYMENT -> CHECKIN -> CHEC
     await page.goto('/tr/settings');
     await page.getByRole('button', { name: /Çıkış Yap|Log Out/i }).click();
 
-    // 6. PARTNER LOGIN
+    // 5. PARTNER LOGIN
     await page.goto('/tr/login');
     await page.getByText('Esnaf Girişi').click();
     await expect(page).toHaveURL(/\/tr\/partner/, { timeout: 20000 });
 
-    // 7. PARTNER CHECK-IN 
+    // 6. PARTNER CHECK-IN
     await page.getByText('YENİ VALİZ TESLİM AL').click();
     // In a real environment, partner scans QR, resulting in a redirect to /partner/scan-qr?token=...
     // Since we don't have a QR scanner in playwright, we bypass to active booking list

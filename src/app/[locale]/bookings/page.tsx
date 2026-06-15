@@ -5,7 +5,6 @@ import BookingsClient from '@/components/guest/BookingsClient';
 import { getPricingRules } from '@/lib/platform-settings';
 import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
-import { isGuestOnlinePayEnabled } from '@/lib/guest-payment';
 
 export async function generateMetadata({
   params,
@@ -34,17 +33,15 @@ export default async function BookingsPage({ params }: { params: Promise<{ local
   }
 
   // Veritabanından kullanıcının kendi rezervasyonlarını çek
-  const [bookings, pricingRules, onlinePayEnabled] = await Promise.all([
+  const [bookings, pricingRules] = await Promise.all([
     bookingService.getUserBookings(session.user.id),
     getPricingRules(),
-    isGuestOnlinePayEnabled({ userId: session.user.id }),
   ]);
 
   return (
     <BookingsClient
       bookings={JSON.parse(JSON.stringify(bookings))}
       pricingRules={JSON.parse(JSON.stringify(pricingRules))}
-      onlinePayEnabled={onlinePayEnabled}
     />
   );
 }

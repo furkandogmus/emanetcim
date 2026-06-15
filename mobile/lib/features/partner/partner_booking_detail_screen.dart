@@ -465,8 +465,7 @@ label: Text('partner.check_out_button'.tr()),
               ],
 
               if (b.status == BookingStatus.paid ||
-                  b.status == BookingStatus.approved ||
-                  b.status == BookingStatus.checkedIn) ...[
+                  b.status == BookingStatus.approved) ...[
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
@@ -602,6 +601,13 @@ class _BagRevisionBottomSheetState extends State<_BagRevisionBottomSheet> {
       );
       if (mounted) {
         Navigator.pop(context, true);
+      }
+    } on DioException catch (e) {
+      if (mounted) {
+        final msg = e.response?.data?['error'] ?? 'partner.bag_revision_error'.tr();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(msg.toString())),
+        );
       }
     } catch (e) {
       if (mounted) {

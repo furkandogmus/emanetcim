@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,346 +27,76 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
 
     final user = ref.watch(authControllerProvider).session;
+    final firstName = user?.name?.trim().split(' ').first;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 120,
-            floating: true,
-            pinned: true,
-            backgroundColor: Colors.white,
-            elevation: 0,
-            flexibleSpace: FlexibleSpaceBar(
-              titlePadding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 16,
-              ),
-              title: Text(
-                user?.name != null
-                    ? 'home.greeting'.tr(args: [user!.name!.split(' ')[0]])
-                    : 'home.greeting_guest'.tr(),
-                style: GoogleFonts.outfit(
-                  color: AppColors.textDark,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                ),
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        bottom: false,
+        child: CustomScrollView(
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 120),
+              sliver: SliverList.list(
                 children: [
-                  // Hero Section
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          AppColors.brandOrange,
-                          AppColors.brandOrangeDark,
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.brandOrange.withValues(alpha: 0.3),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'home.hero_title'.tr(),
-                          style: GoogleFonts.outfit(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'home.hero_subtitle'.tr(),
-                          style: GoogleFonts.outfit(
-                            color: Colors.white.withValues(alpha: 0.9),
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-ElevatedButton(
-  onPressed: () => context.push('/search'),
-  style: ElevatedButton.styleFrom(
-    backgroundColor: Colors.white,
-    foregroundColor: AppColors.brandOrange,
-    padding: const EdgeInsets.symmetric(
-      horizontal: 24,
-      vertical: 12,
-    ),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
-    ),
-  ),
-  child: Semantics(
-    label: 'Emanet Noktası Bul',
-    child: Text('home.hero_cta'.tr()),
-  ),
-),
-                      ],
-                    ),
+                  _HomeHeader(
+                    greeting: firstName != null && firstName.isNotEmpty
+                        ? 'home.greeting'.tr(args: [firstName])
+                        : 'home.greeting_guest'.tr(),
                   ),
-
-                  const SizedBox(height: 32),
-
-                  // Popular Cities
-                  _sectionHeader('home.popular_cities'.tr()),
+                  const SizedBox(height: 24),
+                  _SearchHero(onTap: () => context.push('/search')),
                   const SizedBox(height: 16),
+                  const _TrustStrip(),
+                  const SizedBox(height: 32),
+                  _SectionHeader(title: 'home.popular_cities'.tr()),
+                  const SizedBox(height: 14),
                   SizedBox(
-                    height: 120,
+                    height: 106,
                     child: ListView(
                       scrollDirection: Axis.horizontal,
                       children: [
-                        _cityCard(
-                          'home.city_istanbul'.tr(),
-                          'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?q=80&w=400&auto=format&fit=crop',
+                        _CityCard(
+                          name: 'home.city_istanbul'.tr(),
+                          icon: Icons.mosque_rounded,
+                          color: const Color(0xFF2563EB),
+                          onTap: () => context.push('/search'),
                         ),
-                        _cityCard(
-                          'home.city_ankara'.tr(),
-                          'https://images.unsplash.com/photo-1621259182978-fbf93132d53d?q=80&w=400&auto=format&fit=crop',
+                        _CityCard(
+                          name: 'home.city_ankara'.tr(),
+                          icon: Icons.account_balance_rounded,
+                          color: const Color(0xFF7C3AED),
+                          onTap: () => context.push('/search'),
                         ),
-                        _cityCard(
-                          'home.city_izmir'.tr(),
-                          'https://images.unsplash.com/photo-1605333396915-47ed6b68a00e?q=80&w=400&auto=format&fit=crop',
+                        _CityCard(
+                          name: 'home.city_izmir'.tr(),
+                          icon: Icons.sailing_rounded,
+                          color: const Color(0xFF0891B2),
+                          onTap: () => context.push('/search'),
                         ),
-                        _cityCard(
-                          'home.city_antalya'.tr(),
-                          'https://images.unsplash.com/photo-1542051841857-5f90071e7989?q=80&w=400&auto=format&fit=crop',
+                        _CityCard(
+                          name: 'home.city_antalya'.tr(),
+                          icon: Icons.wb_sunny_rounded,
+                          color: const Color(0xFFD97706),
+                          onTap: () => context.push('/search'),
                         ),
                       ],
                     ),
                   ),
-
-                  const SizedBox(height: 40),
-
-                  // How it works
-RepaintBoundary(
-  child: Semantics(
-    label: 'Nasıl Çalışır?',
-    child: GestureDetector(
-      onTap: () => _showHowItWorks(context),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _sectionHeader('home.how_it_works'.tr()),
-              Text(
-                'common.see_details'.tr(),
-                style: GoogleFonts.outfit(
-                  fontSize: 12,
-                  color: AppColors.brandOrange,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-                          const SizedBox(height: 20),
-                          _buildStep(
-                            context,
-                            Icons.search_rounded,
-                            'home.step1.title'.tr(),
-                            'home.step1.desc'.tr(),
-                          ),
-                          _buildStep(
-                            context,
-                            Icons.qr_code_rounded,
-                            'home.step2.title'.tr(),
-                            'home.step2.desc'.tr(),
-                          ),
-                          _buildStep(
-                            context,
-                            Icons.lock_outline_rounded,
-                            'home.step3.title'.tr(),
-                            'home.step3.desc'.tr(),
-                          ),
-_buildStep(
-  context,
-  Icons.explore_rounded,
-  'home.step4.title'.tr(),
-  'home.step4.desc'.tr(),
-),
-],
-),
-),
-),
-),
-
-const SizedBox(height: 40),
-
-                  // Promotion Section
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: Colors.blue.shade100),
-                    ),
-                    child: RepaintBoundary(
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.shield_outlined,
-                            size: 40,
-                            color: Colors.blue.shade700,
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'home.safety_title'.tr(),
-                                  style: GoogleFonts.outfit(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.blue.shade900,
-                                  ),
-                                ),
-                                Text(
-                                  'home.safety_desc'.tr(),
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 12,
-                                    color: Colors.blue.shade700,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  const SizedBox(height: 32),
+                  _SectionHeader(
+                    title: 'home.how_it_works'.tr(),
+                    action: 'common.see_details'.tr(),
+                    onAction: () => _showHowItWorks(context),
                   ),
-                  const SizedBox(height: 120),
+                  const SizedBox(height: 14),
+                  _HowItWorksCard(onTap: () => _showHowItWorks(context)),
+                  const SizedBox(height: 20),
+                  _SafetyCard(onTap: () => _showHowItWorks(context)),
                 ],
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _sectionHeader(String title) {
-    return Text(
-      title,
-      style: GoogleFonts.outfit(
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-        color: AppColors.textDark,
-      ),
-    );
-  }
-
-  Widget _cityCard(String name, String imageUrl) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 16),
-      child: Container(
-        width: 140,
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              CachedNetworkImage(
-                imageUrl: imageUrl,
-                fit: BoxFit.cover,
-                placeholder: (context, url) =>
-                    Container(color: Colors.grey.shade100),
-                errorWidget: (context, url, error) => const Icon(Icons.error),
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withValues(alpha: 0.5),
-                    ],
-                  ),
-                ),
-              ),
-              Center(
-                child: Text(
-                  name,
-                  style: GoogleFonts.outfit(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-            ],
-          ),
+          ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildStep(
-    BuildContext context,
-    IconData icon,
-    String title,
-    String desc,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 24),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.brandOrange.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(icon, color: AppColors.brandOrange, size: 24),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.outfit(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: AppColors.textDark,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  desc,
-                  style: GoogleFonts.outfit(
-                    fontSize: 14,
-                    color: const Color(0xFF424242),
-                    height: 1.4,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -378,6 +107,410 @@ const SizedBox(height: 40),
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) => const HowItWorksSheet(),
+    );
+  }
+}
+
+class _HomeHeader extends StatelessWidget {
+  const _HomeHeader({required this.greeting});
+
+  final String greeting;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: AppColors.brandOrange,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: const Icon(Icons.luggage_rounded, color: Colors.white),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'BagajPark',
+                style: GoogleFonts.outfit(
+                  color: AppColors.brandOrange,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              Text(
+                greeting,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.outfit(
+                  color: AppColors.textDark,
+                  fontSize: 21,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SearchHero extends StatelessWidget {
+  const _SearchHero({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [AppColors.brandOrange, AppColors.brandOrangeDark],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.brandOrange.withValues(alpha: 0.24),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            right: -18,
+            top: -28,
+            child: Icon(
+              Icons.luggage_rounded,
+              size: 150,
+              color: Colors.white.withValues(alpha: 0.12),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'home.hero_title'.tr(),
+                style: GoogleFonts.outfit(
+                  color: Colors.white,
+                  fontSize: 27,
+                  height: 1.08,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.6,
+                ),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: 250,
+                child: Text(
+                  'home.hero_subtitle'.tr(),
+                  style: GoogleFonts.outfit(
+                    color: Colors.white.withValues(alpha: 0.9),
+                    fontSize: 14,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 22),
+              FilledButton.icon(
+                onPressed: onTap,
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: AppColors.brandOrangeDark,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 14,
+                  ),
+                ),
+                icon: const Icon(Icons.location_searching_rounded, size: 20),
+                label: Text('home.hero_cta'.tr()),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TrustStrip extends StatelessWidget {
+  const _TrustStrip();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      children: [
+        Expanded(
+          child: _TrustItem(
+            icon: Icons.verified_user_rounded,
+            label: 'Doğrulanmış',
+          ),
+        ),
+        SizedBox(width: 8),
+        Expanded(
+          child: _TrustItem(icon: Icons.lock_rounded, label: 'Mühürlü'),
+        ),
+        SizedBox(width: 8),
+        Expanded(
+          child: _TrustItem(icon: Icons.bolt_rounded, label: 'Hızlı'),
+        ),
+      ],
+    );
+  }
+}
+
+class _TrustItem extends StatelessWidget {
+  const _TrustItem({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 11),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 17, color: AppColors.brandOrange),
+          const SizedBox(width: 5),
+          Flexible(
+            child: Text(
+              label,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.outfit(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({
+    required this.title,
+    this.action,
+    this.onAction,
+  });
+
+  final String title;
+  final String? action;
+  final VoidCallback? onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            title,
+            style: GoogleFonts.outfit(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textDark,
+            ),
+          ),
+        ),
+        if (action != null)
+          TextButton(onPressed: onAction, child: Text(action!)),
+      ],
+    );
+  }
+}
+
+class _CityCard extends StatelessWidget {
+  const _CityCard({
+    required this.name,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  final String name;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 10),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Ink(
+          width: 112,
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.09),
+            border: Border.all(color: color.withValues(alpha: 0.18)),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Icon(icon, color: color, size: 28),
+              Text(
+                name,
+                style: GoogleFonts.outfit(
+                  color: AppColors.textDark,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HowItWorksCard extends StatelessWidget {
+  const _HowItWorksCard({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Ink(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: AppColors.border),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          children: [
+            _StepIcon(icon: Icons.search_rounded, number: '1'),
+            const Expanded(child: Divider(color: AppColors.border)),
+            _StepIcon(icon: Icons.qr_code_rounded, number: '2'),
+            const Expanded(child: Divider(color: AppColors.border)),
+            _StepIcon(icon: Icons.explore_rounded, number: '3'),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StepIcon extends StatelessWidget {
+  const _StepIcon({required this.icon, required this.number});
+
+  final IconData icon;
+  final String number;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: AppColors.brandOrange.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Icon(icon, color: AppColors.brandOrange),
+        ),
+        const SizedBox(height: 7),
+        Text(
+          number,
+          style: GoogleFonts.outfit(
+            color: AppColors.textSecondary,
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SafetyCard extends StatelessWidget {
+  const _SafetyCard({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Ink(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: const Color(0xFFEFF6FF),
+          border: Border.all(color: const Color(0xFFBFDBFE)),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Icon(
+                Icons.shield_rounded,
+                color: Color(0xFF2563EB),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'home.safety_title'.tr(),
+                    style: GoogleFonts.outfit(
+                      color: AppColors.textDark,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    'home.safety_desc'.tr(),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.outfit(
+                      color: const Color(0xFF1D4ED8),
+                      fontSize: 12,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded, color: Color(0xFF2563EB)),
+          ],
+        ),
+      ),
     );
   }
 }

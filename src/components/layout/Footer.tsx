@@ -149,10 +149,7 @@ export default function Footer() {
                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
                 <span className="text-xs font-black text-gray-900">{t("sslProtection")}</span>
               </div>
-              <p className="text-[10px] font-bold text-gray-400">{t("paymentsIyzico")}</p>
-              <p className="mt-2 text-[10px] font-medium leading-relaxed text-gray-500">
-                {t("paymentsNote")}
-              </p>
+              <p className="text-[10px] font-bold text-gray-400">{t("securityNote")}</p>
             </div>
             <div className="flex gap-4 mt-6 opacity-30 grayscale contrast-125">
               <div className="w-10 h-6 bg-gray-400 rounded"></div>

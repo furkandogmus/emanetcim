@@ -111,8 +111,6 @@ model Shop {
   hasClimateControl Boolean       @default(false)
   acceptsLargeItems Boolean       @default(false)
   open247          Boolean       @default(false)
-  subMerchantKey   String?       @unique
-  subMerchantType  String?
   openingTime      String?       @default("09:00")
   closingTime      String?       @default("20:00")
   createdAt        DateTime      @default(now())
@@ -121,7 +119,6 @@ model Shop {
   district         String?
   sealLeadTimeDays Int           @default(3)
   sealReorderPoint Int           @default(15)
-  stripeAccountId  String?       @unique
   /// Doğrulanmış dükkan rozeti (güven & güvenilirlik)
   isVerified       Boolean       @default(false)
   /// Ortalama yanıt süresi (dakika cinsinden)
@@ -210,7 +207,7 @@ model PaymentLog {
   splitCompleted   Boolean       @default(false)
   createdAt        DateTime      @default(now())
   chargebackNote   String?
-  /// İyzico/Stripe chargeback incelemesi: OPEN | WON | LOST | null
+  /// Chargeback incelemesi: OPEN | WON | LOST | null
   chargebackStatus String?
   booking          Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
@@ -371,17 +368,6 @@ model PlatformSettings {
   updatedAt            DateTime @updatedAt
   /// Platform genelinde rezervasyona kapalı takvim günleri (YYYY-MM-DD JSON dizisi).
   platformHolidayDates Json?
-}
-
-model ProcessedPaymentWebhook {
-  id             String   @id @default(cuid())
-  provider       String
-  dedupKey       String   @unique
-  paymentId      String?
-  conversationId String?
-  createdAt      DateTime @default(now())
-
-  @@index([createdAt])
 }
 
 model AuditLog {

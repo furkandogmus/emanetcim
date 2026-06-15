@@ -7,7 +7,6 @@ Sunucu tarafında [`src/lib/logger.ts`](../src/lib/logger.ts) (Pino) kullanılı
 | Alan | Açıklama |
 |------|----------|
 | `bookingId` | Rezervasyon UUID |
-| `paymentId` / `transactionId` | iyzico işlem referansı (varsa) |
 | `conversationId` / `paymentConversationId` | Ödeme konuşma / merchant ref |
 | `requestId` | HTTP `x-request-id` (edge/proxy ile) |
 | `err` | Hata nesnesi (Pino `err` serializer) |
@@ -19,15 +18,6 @@ Sunucu tarafında [`src/lib/logger.ts`](../src/lib/logger.ts) (Pino) kullanılı
 - `finance_reconcile_pending_to_paid` — reconciliation satırı düzeltildi
 - `reconcile_payments_complete` — toplu reconcile job özeti
 - `request_error` — [`instrumentation.ts`](../instrumentation.ts) `onRequestError`
-- `iyzico_*` / ödeme akışı — `PaymentService`, webhook route
-
-## Hata izleme (Sentry)
-
-`SENTRY_DSN` tanımlıysa [`instrumentation.ts`](../instrumentation.ts) içinde `@sentry/node` başlatılır. Örnek ortam:
-
-```bash
-SENTRY_DSN="https://...@....ingest.sentry.io/..."
-```
 
 ## Global hata yüzeyi
 
@@ -40,8 +30,6 @@ Kök [`src/app/global-error.tsx`](../src/app/global-error.tsx) beklenmeyen istem
 | Metrik | Kaynak |
 |--------|--------|
 | `payment_init_total` / `payment_init_errors` | `PaymentService.initializeMarketplacePayment` |
-| `webhook_received_total` / `webhook_signature_failures` | `/api/payments/webhook`, `/api/payments/stripe-webhook` (`recordMetric`) |
-| `payment_webhook_duplicate_ignored` | Tekrarlayan iyzico/Stripe olayları (`payment-webhook-dedup`) |
 | `reconcile_fixed_bookings` | `reconcileStalePaymentBookings` |
 | `notification_send_errors` | `NotificationService` |
 

@@ -1,5 +1,5 @@
 /**
- * Uzun süren dış API çağrılarını (iyzico vb.) sınırlamak için.
+ * Uzun süren dış API çağrılarını sınırlamak için.
  */
 export function withTimeout<T>(
   promise: Promise<T>,

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'app/app.dart';
 import 'core/auth/token_store.dart';
@@ -82,14 +81,7 @@ Future<void> main() async {
     child: const ProviderScope(child: BagajParkApp()),
   );
 
-  await SentryFlutter.init(
-    (options) {
-      options
-        ..dsn = Env.sentryDsn
-        ..tracesSampleRate = 0.2;
-    },
-    appRunner: () => runApp(
-      isRooted ? RootWarningScreen(onContinue: () => runApp(app)) : app,
-    ),
+  runApp(
+    isRooted ? RootWarningScreen(onContinue: () => runApp(app)) : app,
   );
 }

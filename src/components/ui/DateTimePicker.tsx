@@ -33,6 +33,7 @@ import {
   parseDatetimeLocal,
   toDatetimeLocalValue,
 } from "@/lib/datetime-local";
+import BottomSheet from "@/components/ui/BottomSheet";
 import "react-day-picker/style.css";
 
 const LOCALE_MAP: Record<string, DateFnsLocale> = {
@@ -93,6 +94,43 @@ export default function DateTimePicker({
   const dfLocale = LOCALE_MAP[locale] ?? enUS;
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(max-width: 767px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  const DATE_LABELS: Record<string, string> = {
+    tr: "Tarih Seç",
+    en: "Select Date",
+    de: "Datum wählen",
+    fr: "Choisir la date",
+    es: "Seleccionar fecha",
+    ar: "اختيار التاريخ",
+    bg: "Избор на дата",
+    fa: "انتخاب تاریخ",
+    it: "Seleziona data",
+    ja: "日付を選択",
+    ko: "날짜 선택",
+    pl: "Wybierz datę",
+    ru: "Выберите дату",
+    zh: "选择日期",
+  };
+
+  const TIME_LABELS: Record<string, string> = {
+    tr: "Saat Seç",
+    en: "Select Time",
+    de: "Uhrzeit wählen",
+    fr: "Choisir l'heure",
+  };
+
+  const dateLabel = DATE_LABELS[locale] || DATE_LABELS.en;
+  const timeLabel = TIME_LABELS[locale] || TIME_LABELS.en;
 
   const parsed = useMemo(() => parseDatetimeLocal(value), [value]);
   const timeOptions = useMemo(
@@ -207,7 +245,63 @@ export default function DateTimePicker({
         </span>
       </button>
 
-      {open ? (
+      {isMobile ? (
+        <BottomSheet
+          open={open}
+          onClose={() => setOpen(false)}
+          title={dateLabel}
+          snapPoints={[30, 70, 95]}
+          initialSnap={1}
+          showClose
+        >
+          <div className="px-2 py-2">
+            <DayPicker
+              mode="single"
+              selected={parsed ?? undefined}
+              onSelect={applyDate}
+              locale={dfLocale}
+              weekStartsOn={1}
+              disabled={minDate ? { before: minDate } : undefined}
+              defaultMonth={parsed ?? minDate ?? new Date()}
+              showOutsideDays
+              className="rdp-emanet mx-auto text-sm"
+            />
+          </div>
+          <div className="px-2 pb-2">
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 px-1">
+              {timeLabel}
+            </p>
+            <div className="flex gap-2 overflow-x-auto pb-2 px-1 no-scrollbar">
+              {timeOptions.map((t) => {
+                const selected = t === currentTime;
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => applyTime(t)}
+                    className={`shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all ${
+                      selected
+                        ? "bg-orange-600 text-white shadow-md"
+                        : "bg-gray-50 text-gray-700 border border-gray-200 hover:border-orange-300"
+                    }`}
+                  >
+                    {t}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div className="px-2 pb-3 flex gap-2">
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="flex-1 py-3 rounded-2xl bg-gray-900 text-white text-xs font-black uppercase tracking-wider"
+            >
+              OK
+            </button>
+          </div>
+        </BottomSheet>
+      ) : open ? (
         <div
           role="dialog"
           className="absolute left-0 top-full z-50 mt-2 w-[min(340px,94vw)] rounded-2xl border border-gray-100 bg-white shadow-2xl p-3"

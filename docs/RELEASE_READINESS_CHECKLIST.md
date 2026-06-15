@@ -12,7 +12,6 @@
 ## 2) Critical Security/Operations
 - Rate limit smoke test (rapid page switches, auth, payment endpoints)
 - `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` present in production
-- Payment secrets (`IYZICO_*` and/or Stripe keys) validated
 - Webhook signature verification validated in production logs
 - No dev credentials or `.env` leaks in repository
 
@@ -34,7 +33,6 @@
 - Nginx health check returns 200 (`/api/health/live`)
 - `web`, `nginx`, `postgres`, `redis` containers healthy
 - Backup/restore procedure tested for database
-- Error tracking (Sentry or equivalent) receives server/client errors
 
 ## 6) Go-Live Gate
 - No critical/blocker bug in staging smoke

@@ -4,12 +4,6 @@ class Env {
     defaultValue: 'https://bagajpark.com/api/mobile',
   );
 
-  static const String stripePublishableKey = String.fromEnvironment(
-    'STRIPE_PK',
-  );
-
-  static const String sentryDsn = String.fromEnvironment('SENTRY_DSN');
-
   static const bool firebaseEnabled = bool.fromEnvironment('FIREBASE_ENABLED', defaultValue: true);
 
   static const String googleWebClientId = String.fromEnvironment(
