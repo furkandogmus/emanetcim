@@ -17,6 +17,14 @@ export async function POST(
 
   const { id } = await params;
 
+  let sealPayload;
+  try {
+    const body = await req.json();
+    if (body?.sealAssignments) sealPayload = body;
+  } catch {
+    // No body or JSON parse error — just check-in without seals
+  }
+
   const booking = await prisma.booking.findUnique({
     where: { id },
     select: { shop: { select: { ownerId: true } }, guestEmail: true, guestId: true },
@@ -28,7 +36,7 @@ export async function POST(
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
-  const result = await bookingService.checkIn(id);
+  const result = await bookingService.checkIn(id, sealPayload);
 
   if (!result.ok) {
     return NextResponse.json({ error: result.code, message: result.message }, { status: 400 });

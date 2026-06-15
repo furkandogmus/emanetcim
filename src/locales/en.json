@@ -483,7 +483,15 @@
     "trustVerificationBadge": "Verified Reviews",
     "appBannerTitle": "BagajPark on mobile!",
     "appBannerBody": "Our app is coming soon to iOS and Android. Keep using the web for now.",
-    "appBannerCta": "Explore on Web"
+    "appBannerCta": "Explore on Web",
+    "manageBookingTitle": "Manage Booking",
+    "manageBookingDesc": "View your booking by entering your booking ID and email.",
+    "manageBookingCta": "View Booking",
+    "manageBookingFooter": "Want to make a new booking?",
+    "bookingLookupFields": "Email and booking ID are required.",
+    "bookingNotFound": "Booking Not Found",
+    "bookingLookupError": "Booking not found or information does not match.",
+    "duration": "Duration"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

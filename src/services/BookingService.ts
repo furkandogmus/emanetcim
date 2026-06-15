@@ -91,7 +91,8 @@ export type CheckInSealPayload = {
 
 export interface IBookingService {
   checkIn(
-    bookingId: string
+    bookingId: string,
+    seals?: CheckInSealPayload
   ): Promise<PartnerCheckInResult>;
   checkOut(bookingId: string): Promise<PartnerCheckOutResult>;
   getBookingByToken(token: string): Promise<BookingWithGuestShop | null>;
@@ -375,12 +376,13 @@ export class BookingService implements IBookingService {
    * En az bir valiz varsa mühür atamaları zorunludur (platform stokundan ASSIGNED mühürler).
    */
   async checkIn(
-    bookingId: string
+    bookingId: string,
+    seals?: CheckInSealPayload
   ): Promise<PartnerCheckInResult> {
     try {
       const existing = await prisma.booking.findUnique({
         where: { id: bookingId },
-        include: { shop: true },
+        include: { shop: true, seals: true },
       });
       if (!existing) {
         return {
@@ -427,6 +429,25 @@ export class BookingService implements IBookingService {
 
         if (updateResult.count === 0) {
           throw new Error("Concurrency conflict: Rezervasyon başka bir işlem tarafından güncellendi.");
+        }
+
+        // Process seal assignments if provided
+        if (seals?.sealAssignments?.length) {
+          for (const assignment of seals.sealAssignments) {
+            await tx.bookingSeal.create({
+              data: {
+                bookingId,
+                sealNumber: assignment.sealNumber,
+                bagIndex: assignment.bagIndex,
+                bagSize: assignment.bagSize,
+              },
+            });
+
+            await tx.seal.update({
+              where: { serialNumber: assignment.sealNumber },
+              data: { status: 'IN_USE' },
+            });
+          }
         }
       });
 
