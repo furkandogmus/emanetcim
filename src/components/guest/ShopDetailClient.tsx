@@ -15,7 +15,7 @@ import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
 import { useSwipeBack } from "@/lib/hooks/useSwipeBack";
-import { hapticMedium, hapticSuccess } from "@/lib/haptic";
+import { hapticMedium } from "@/lib/haptic";
 import { useShare } from "@/lib/hooks/useShare";
 import { roundedSlotPrices } from "@/lib/bag-pricing";
 import type { PricingRules } from "@/lib/pricing-rules";
@@ -191,10 +191,12 @@ export default function ShopDetailClient({
               </h1>
               <div className="shrink-0 flex items-center gap-2">
                 <FavoriteButton shopId={shop.id} />
+              {rating > 0 ? (
                 <div className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-700">
-                <Star size={12} fill="currentColor" />
-                {rating.toFixed(1)}
-              </div>
+                  <Star size={12} fill="currentColor" />
+                  {rating.toFixed(1)}
+                </div>
+              ) : null}
             </div>
             <p className="mt-2 text-sm text-gray-500 flex items-center gap-1.5">
               <MapPin size={14} /> {shop.address?.split(",")[0] || t("cityFallback")}
@@ -345,10 +347,12 @@ export default function ShopDetailClient({
                 </p>
               ) : null}
               <div className="flex items-center gap-2 mt-2">
-                <span className="inline-flex items-center gap-1 text-xs font-black bg-white/20 px-2 py-1 rounded-lg">
-                  <Star size={12} fill="currentColor" />
-                  {rating.toFixed(1)}
-                </span>
+                {rating > 0 ? (
+                  <span className="inline-flex items-center gap-1 text-xs font-black bg-white/20 px-2 py-1 rounded-lg">
+                    <Star size={12} fill="currentColor" />
+                    {rating.toFixed(1)}
+                  </span>
+                ) : null}
               </div>
             </div>
           </div>

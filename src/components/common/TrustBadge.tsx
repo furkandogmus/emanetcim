@@ -21,7 +21,7 @@ export function VerifiedBadge({ isVerified }: { isVerified: boolean }) {
 
 export function ResponseTimeBadge({ minutes }: { minutes: number | null }) {
   const t = useTranslations("Guest");
-  if (minutes == null) return null;
+  if (minutes == null || minutes <= 0) return null;
   const label = minutes < 1 ? t("responseTimeFast") : t("responseTimeMinutes", { minutes });
   return (
     <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">

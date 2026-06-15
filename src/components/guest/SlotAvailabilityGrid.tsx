@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import clsx from "clsx";
+import { useLocale } from "next-intl";
 
 interface SlotInfo {
   id: string;
@@ -34,6 +35,8 @@ export default function SlotAvailabilityGrid({
   initialFrom,
   initialTo,
 }: SlotAvailabilityGridProps) {
+  const locale = useLocale();
+  const isTr = locale === "tr";
   const [slots, setSlots] = useState<SlotInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -86,22 +89,20 @@ export default function SlotAvailabilityGrid({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <div className="w-6 h-6 border-2 border-gray-300 border-t-orange-600 rounded-full animate-spin" />
+      <div className="flex items-center justify-center py-4">
+        <div className="w-5 h-5 border-2 border-gray-300 border-t-orange-600 rounded-full animate-spin" />
       </div>
     );
   }
 
   if (error) {
-    return (
-      <div className="text-center py-4 text-sm text-red-500">{error}</div>
-    );
+    return <div className="text-center py-2 text-xs text-red-500">{error}</div>;
   }
 
   if (slots.length === 0) {
     return (
-      <div className="text-center py-4 text-sm text-gray-400">
-        No available slots for this date
+      <div className="text-center py-2 text-xs text-gray-400">
+        {isTr ? "Bu tarih için uygun saat bulunamadı" : "No available slots for this date"}
       </div>
     );
   }
@@ -112,15 +113,16 @@ export default function SlotAvailabilityGrid({
     return slotStart >= selectedStart && slotStart <= selectedEnd;
   };
 
+  const label = isTr ? "Müsait Saatler" : "Available Time Slots";
+  const bagLabel = isTr
+    ? `${selectedBags} bagaj seçildi`
+    : `${selectedBags} bag${selectedBags !== 1 ? "s" : ""} selected`;
+
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-          Available Time Slots
-        </p>
-        <p className="text-[10px] font-bold text-gray-400">
-          {selectedBags} bag{selectedBags !== 1 ? "s" : ""} selected
-        </p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">{label}</p>
+        <p className="text-[10px] font-bold text-gray-400">{bagLabel}</p>
       </div>
       <div className="flex gap-1.5 overflow-x-auto pb-2 no-scrollbar">
         {slots.map((slot) => {
@@ -144,10 +146,18 @@ export default function SlotAvailabilityGrid({
               <span className="text-[11px] font-bold leading-tight">
                 {formatSlotTime(slot.startTime)}
               </span>
-              <span className={clsx(
-                "text-[9px] font-bold",
-                selected ? "text-white/80" : slot.available >= 5 ? "text-emerald-600" : slot.available > 0 ? "text-amber-600" : "text-gray-300",
-              )}>
+              <span
+                className={clsx(
+                  "text-[9px] font-bold",
+                  selected
+                    ? "text-white/80"
+                    : slot.available >= 5
+                      ? "text-emerald-600"
+                      : slot.available > 0
+                        ? "text-amber-600"
+                        : "text-gray-300",
+                )}
+              >
                 {slot.available}
               </span>
             </button>
@@ -157,8 +167,8 @@ export default function SlotAvailabilityGrid({
       {selectedStart && selectedEnd && (
         <p className="mt-2 text-xs font-bold text-orange-600 text-center">
           {formatSlotTime(selectedStart)} → {formatSlotTime(selectedEnd)}
-          {" "}({slots.filter((s) => inSelectedRange(s.startTime)).length} slots,{" "}
-          {slots.filter((s) => inSelectedRange(s.startTime)).length * 0.5}h)
+          {" "}({slots.filter((s) => inSelectedRange(s.startTime)).length} {isTr ? "slot" : "slots"},{" "}
+          {slots.filter((s) => inSelectedRange(s.startTime)).length * 0.5}{isTr ? "sa" : "h"})
         </p>
       )}
     </div>

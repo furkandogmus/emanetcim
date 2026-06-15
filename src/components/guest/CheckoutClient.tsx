@@ -8,7 +8,7 @@ import {
   CheckCircle2,
   QrCode,
   AlertCircle,
-  Calendar,
+  MapPin,
   User,
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
@@ -37,9 +37,6 @@ import { useKeyboardAware } from "@/lib/hooks/useKeyboardAware";
 import { useShare } from "@/lib/hooks/useShare";
 import WebPushOptIn from "@/components/WebPushOptIn";
 import SlotAvailabilityGrid from "@/components/guest/SlotAvailabilityGrid";
-import { computeSlotBasedTotal } from "@/lib/bag-pricing";
-
-
 interface CheckoutClientProps {
   shopId: string;
   shopName: string;
@@ -70,8 +67,6 @@ export default function CheckoutClient({
   const { share } = useShare();
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
   const [selectedSlotCount, setSelectedSlotCount] = useState(0);
-  const [selectedSlotFrom, setSelectedSlotFrom] = useState<string | null>(null);
-  const [selectedSlotTo, setSelectedSlotTo] = useState<string | null>(null);
   const slot = roundedSlotPrices(pricePerDay, pricingRules);
   const priceS = slot.s;
   const priceM = slot.m;
@@ -181,19 +176,6 @@ export default function CheckoutClient({
   const insuranceFee = totalPrice > 0 ? pricingRules.insuranceFeeTry : 0;
   const grandTotal = totalPrice + insuranceFee;
 
-  // Slot-based pricing (when slots are selected)
-  const slotBasedTotal = selectedSlotCount > 0
-    ? computeSlotBasedTotal(
-        pricingRules.defaultPricePerDay,
-        selectedSlotCount,
-        bagS,
-        bagM,
-        bagXl,
-        pricingRules
-      )
-    : 0;
-  const displayTotal = slotBasedTotal > 0 ? slotBasedTotal : grandTotal;
-
   const totalBags = bagS + bagM + bagXl;
 
   const handleBooking = async (skipAuthCheck = false) => {
@@ -218,14 +200,13 @@ export default function CheckoutClient({
       bagCountM: bagM,
       bagCountXl: bagXl,
       unitPrice: pricePerDay,
-      totalPrice: displayTotal,
+      totalPrice: grandTotal,
       insuranceFee,
       checkInTime: checkInDate,
       checkOutTime: checkOutDate,
       couponCode: couponCode.trim() || undefined,
       guestEmail: !isLoggedIn ? (guestEmail.trim() || undefined) : undefined,
       guestPhone: !isLoggedIn ? (guestPhone.trim() || undefined) : undefined,
-      slotIds: selectedSlotCount > 0 ? [] : undefined,
     });
 
     setIsProcessing(false);
@@ -350,21 +331,35 @@ export default function CheckoutClient({
             </Link>
           </p>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(shopAddress)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-black text-green-700"
+            >
+              <MapPin size={16} />
+              {t("getDirections")}
+            </a>
+            <Link
+              href="/bookings/lookup"
+              className="rounded-xl border border-white/30 px-4 py-3 text-sm font-black text-white transition-colors hover:bg-white/10"
+            >
+              {locale === "tr" ? "Rezervasyonu Yönet" : "Manage Booking"}
+            </Link>
             <Link
               href="/bookings"
-              className="text-white/60 text-sm font-bold uppercase tracking-widest hover:text-white transition-colors underline underline-offset-8"
+              className="rounded-xl border border-white/30 px-4 py-3 text-sm font-black text-white transition-colors hover:bg-white/10"
             >
               {t("myBookings")}
             </Link>
-            <button
-              type="button"
-              onClick={() => share({ title: t("requestSent"), text: `${t("checkoutReservationIdLabel")}: ${bookingId.substring(0, 8).toUpperCase()} — ${shopName}`, url: shareUrl })}
-              className="text-white/60 text-sm font-bold uppercase tracking-widest hover:text-white transition-colors underline underline-offset-8"
-            >
-              {t("share")}
-            </button>
           </div>
+
+          <p className="text-xs text-white/50 max-w-[280px] text-center">
+            {locale === "tr"
+              ? "Teslim saatine kadar ücretsiz iptal edebilirsiniz."
+              : "Free cancellation until drop-off time."}
+          </p>
         </div>
       </div>
     );
@@ -481,108 +476,37 @@ export default function CheckoutClient({
             </div>
 
             <section className="flex flex-col gap-3" data-testid="checkout-stay-days">
-              <span data-testid="checkout-dates-ready" className="sr-only">
-                ready
-              </span>
               <h2 className="text-sm font-black uppercase tracking-widest text-gray-900">
                 {t("stayDuration")}
               </h2>
 
-              {/* Slot-based time selection grid */}
               <SlotAvailabilityGrid
                 shopId={shopId}
                 date={checkInDate ?? new Date()}
                 selectedBags={totalBags || 1}
                 onSelectRange={(from, to, count) => {
                   setSelectedSlotCount(count);
-                  setSelectedSlotFrom(from);
-                  setSelectedSlotTo(to);
-                  // Sync date pickers with slot selection
                   if (from) setCheckInLocal(from);
                   if (to) setCheckOutLocal(to);
                 }}
               />
 
-              <p className="text-[11px] text-gray-400 leading-relaxed">
-                {locale === "tr"
-                  ? "Esnaf müsaitlik kontrolü seçtiğiniz bırakış/alış saatlerine göre yapılır."
-                  : "Partner availability is checked against your selected drop-off and pick-up times."}
-              </p>
-              <div className="flex flex-col gap-3">
-                <label className="flex flex-col gap-1.5">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-                    {t("checkoutCheckInLabel")}
-                  </span>
-                  <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 focus-within:border-orange-200 transition-colors">
-                    <DateTimePicker
-                      value={checkInLocal}
-                      onChange={setCheckInLocal}
-                      testId="checkout-checkin"
-                      ariaLabel={t("checkoutCheckInLabel")}
-                      iconSize={20}
-                    />
-                  </div>
-                </label>
-                <label className="flex flex-col gap-1.5">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-                    {t("checkoutCheckOutLabel")}
-                  </span>
-                  <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 focus-within:border-orange-200 transition-colors">
-                    <DateTimePicker
-                      value={checkOutLocal}
-                      onChange={setCheckOutLocal}
-                      testId="checkout-checkout"
-                      ariaLabel={t("checkoutCheckOutLabel")}
-                      iconSize={20}
-                      minDate={parseDatetimeLocal(checkInLocal) ?? undefined}
-                    />
-                  </div>
-                </label>
-              </div>
-              {selectedSlotCount > 0 ? (
+              {selectedSlotCount > 0 && (
                 <div className="flex items-center justify-between p-4 bg-orange-50 rounded-2xl border border-orange-100">
                   <div>
-                    <p className="text-[10px] text-orange-500 font-bold uppercase tracking-widest">
-                      {t("checkoutBillableDaysLabel")} (Slot)
-                    </p>
-                    <p className="font-black text-lg text-orange-900 mt-0.5">
-                      {selectedSlotCount} slot{" "}
-                      <span className="text-sm font-normal">
-                        ({selectedSlotCount * 0.5}h)
-                      </span>
-                    </p>
-                  </div>
-                  <p className="text-[10px] text-orange-500 font-bold text-right">
-                    ₺{slotBasedTotal}
-                  </p>
-                </div>
-              ) : (
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                  <div>
                     <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                      {t("checkoutBillableDaysLabel")}
+                      {locale === "tr" ? "Seçilen Süre" : "Selected Duration"}
                     </p>
                     <p className="font-black text-lg text-gray-900 mt-0.5">
-                      <span data-testid="checkout-stay-days-value">
-                        {displayBillableDays ?? "—"}
-                      </span>{" "}
-                      {t("daysUnit")}
+                      {selectedSlotCount} {locale === "tr" ? "slot" : "slots"} ({selectedSlotCount * 0.5}{locale === "tr" ? "sa" : "h"})
                     </p>
                   </div>
-                  <p className="text-[10px] text-gray-400 font-bold text-right max-w-[55%] leading-relaxed">
-                    {t("dailyRate", { amount: dailyLine })}
-                  </p>
                 </div>
               )}
-              <p className="text-xs text-gray-400 leading-relaxed">{t("stayDaysHint")}</p>
+
               {!windowOk ? (
-                <p
-                  data-testid="checkout-dates-error"
-                  className="text-xs font-bold text-orange-600"
-                >
-                  {t("checkoutDatesInvalid", {
-                    max: pricingRules.maxStayDays,
-                  })}
+                <p className="text-xs font-bold text-orange-600">
+                  {t("checkoutDatesInvalid", { max: pricingRules.maxStayDays })}
                 </p>
               ) : null}
             </section>
@@ -743,15 +667,17 @@ export default function CheckoutClient({
             </div>
 
             <h3 className="text-xl font-black text-gray-900 tracking-tight mb-3">
-              {t("authModalTitle")}
+              {locale === "tr" ? "Üye olmadan devam et" : "Continue without account"}
             </h3>
             
             <p className="text-sm font-semibold text-gray-500 leading-relaxed mb-6">
-              {t("authModalBody")}
+              {locale === "tr"
+                ? "Rezervasyon bildirimleri için e-posta veya telefon yeterli."
+                : "Just an email or phone for booking notifications."}
             </p>
 
             {/* Guest Checkout Fields */}
-            <div className="flex flex-col gap-3 mb-6">
+            <div className="flex flex-col gap-3 mb-4">
               <input
                 type="email"
                 inputMode="email"
@@ -794,21 +720,25 @@ export default function CheckoutClient({
                   <div className="w-full border-t border-gray-200" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-3 text-gray-400 font-bold">{t("checkoutGuestOr")}</span>
+                  <span className="bg-white px-3 text-gray-400 font-bold">
+                    {locale === "tr" ? "veya hesabınla" : "or with account"}
+                  </span>
                 </div>
               </div>
-              <Link
-                href={`/login?callbackUrl=/checkout/${shopId}`}
-                className="w-full bg-gray-50 hover:bg-gray-100 text-gray-700 py-4 px-6 rounded-2xl font-bold transition-all text-center block cursor-pointer"
-              >
-                {t("authModalLogin")}
-              </Link>
-              <Link
-                href={`/register?callbackUrl=/checkout/${shopId}`}
-                className="w-full bg-gray-50 hover:bg-gray-100 text-gray-700 py-4 px-6 rounded-2xl font-bold transition-all text-center block cursor-pointer"
-              >
-                {t("authModalRegister")}
-              </Link>
+              <div className="flex gap-2">
+                <Link
+                  href={`/login?callbackUrl=/checkout/${shopId}`}
+                  className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 py-3 px-4 rounded-2xl font-bold text-xs text-center transition-all"
+                >
+                  {t("authModalLogin")}
+                </Link>
+                <Link
+                  href={`/register?callbackUrl=/checkout/${shopId}`}
+                  className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 py-3 px-4 rounded-2xl font-bold text-xs text-center transition-all"
+                >
+                  {t("authModalRegister")}
+                </Link>
+              </div>
             </div>
           </div>
         </div>
