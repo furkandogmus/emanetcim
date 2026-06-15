@@ -4,7 +4,7 @@ import prisma from '@/lib/db';
 import { moneyToNumber } from '@/lib/money';
 import { getActiveShopsOrderedByDistanceKm } from '@/lib/shop-distance-postgis';
 
-import { isShopOpenAt } from '@/lib/shop-hours';
+import { isShopOpenForStay } from '@/lib/shop-hours';
 import { notificationService } from '@/services/NotificationService';
 import { getSlotAvailability } from '@/services/SlotService';
 import logger from '@/lib/logger';
@@ -45,6 +45,7 @@ export type ShopWithDistance = {
 /** Arama: seçilen pencerede kalan valiz kapasitesi (tahmini). */
 export type ShopSearchHit = ShopWithDistance & {
   bagsAvailable: number;
+  _score?: number;
 };
 
 function toShopWithDistance(shop: Shop, distanceKm: number): ShopWithDistance {
@@ -222,18 +223,30 @@ export class ShopService implements IShopService {
               const minAvailable = Math.min(...availableCounts);
               if (minAvailable < bags) continue;
 
-              const openOk =
-                shop.open247 ||
-                (isShopOpenAt(shop.openingTime, shop.closingTime, checkIn) &&
-                  isShopOpenAt(shop.openingTime, shop.closingTime, checkOut));
+              const openOk = isShopOpenForStay(
+                shop.openingTime,
+                shop.closingTime,
+                shop.open247,
+                checkIn,
+                checkOut,
+                shop.timezone ?? "Europe/Istanbul",
+              );
               if (!openOk) continue;
 
-              hits.push({ ...shop, bagsAvailable: minAvailable });
+              const distScore = 1 - Math.min(1, shop.distanceKm / 20);
+              const ratingScore = (shop.rating ?? 3) / 5;
+              const availScore = Math.min(1, minAvailable / Math.max(10, shop.capacity));
+              const score = distScore * 0.5 + ratingScore * 0.3 + availScore * 0.2;
+
+              hits.push({ ...shop, bagsAvailable: minAvailable, _score: score });
             } catch {
-              // Fall through to legacy capacity check below
+              // Fall through
             }
           }
-          if (hits.length > 0) return hits;
+          if (hits.length > 0) {
+            hits.sort((a, b) => (b._score ?? 0) - (a._score ?? 0));
+            return hits;
+          }
         }
 
         // Legacy capacity check (fallback for long stays or when slots are unavailable)
@@ -282,15 +295,27 @@ export class ShopService implements IShopService {
           const bagsAvailable = Math.max(0, shop.capacity - used);
           if (bagsAvailable < bags) continue;
 
-          const openOk =
-            shop.open247 ||
-            (isShopOpenAt(shop.openingTime, shop.closingTime, checkIn) &&
-              isShopOpenAt(shop.openingTime, shop.closingTime, checkOut));
+          const openOk = isShopOpenForStay(
+            shop.openingTime,
+            shop.closingTime,
+            shop.open247,
+            checkIn,
+            checkOut,
+            shop.timezone ?? "Europe/Istanbul",
+          );
           if (!openOk) continue;
 
-          hits.push({ ...shop, bagsAvailable });
+          // Weighted score: 50% distance + 30% rating + 20% availability
+          const distScore = 1 - Math.min(1, shop.distanceKm / 20);
+          const ratingScore = (shop.rating ?? 3) / 5;
+          const availScore = Math.min(1, bagsAvailable / Math.max(10, shop.capacity));
+          const score = distScore * 0.5 + ratingScore * 0.3 + availScore * 0.2;
+
+          hits.push({ ...shop, bagsAvailable, _score: score });
         }
 
+        // Sort by weighted score (desc), then fallback to distance
+        hits.sort((a, b) => (b._score ?? 0) - (a._score ?? 0));
         return hits;
     } catch (error) {
       console.error('ShopService::findShopsForSearch Error:', error);
