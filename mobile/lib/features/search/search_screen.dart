@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
@@ -58,6 +59,7 @@ class SearchScreen extends ConsumerStatefulWidget {
 class _SearchScreenState extends ConsumerState<SearchScreen> {
   static const _istanbul = LatLng(41.0082, 28.9784);
   LatLng _center = _istanbul;
+  bool _centerInitialized = false;
   LatLng? _userLocation;
   LatLng? _customLocation;
   bool _isLocating = false;
@@ -409,6 +411,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_centerInitialized) {
+      _centerInitialized = true;
+      final extra = GoRouterState.of(context).extra;
+      if (extra is LatLng) {
+        _center = extra;
+        _onMapMoved(_center);
+      }
+    }
     if (!_didLogScreen) {
       _didLogScreen = true;
       ref.read(analyticsServiceProvider).logScreenView('Search');

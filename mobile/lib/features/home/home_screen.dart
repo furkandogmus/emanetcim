@@ -3,11 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../core/auth/auth_controller.dart';
 import '../../core/services/analytics_service.dart';
 import '../../shared/utils/app_colors.dart';
 import '../../shared/widgets/how_it_works_sheet.dart';
+
+const _cityCoords = {
+  'istanbul': LatLng(41.0082, 28.9784),
+  'ankara': LatLng(39.9334, 32.8597),
+  'izmir': LatLng(38.4192, 27.1287),
+  'antalya': LatLng(36.8969, 30.7133),
+};
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -59,25 +67,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           name: 'home.city_istanbul'.tr(),
                           icon: Icons.mosque_rounded,
                           color: const Color(0xFF2563EB),
-                          onTap: () => context.push('/search'),
+                          onTap: () => context.push('/search', extra: _cityCoords['istanbul']),
                         ),
                         _CityCard(
                           name: 'home.city_ankara'.tr(),
                           icon: Icons.account_balance_rounded,
                           color: const Color(0xFF7C3AED),
-                          onTap: () => context.push('/search'),
+                          onTap: () => context.push('/search', extra: _cityCoords['ankara']),
                         ),
                         _CityCard(
                           name: 'home.city_izmir'.tr(),
                           icon: Icons.sailing_rounded,
                           color: const Color(0xFF0891B2),
-                          onTap: () => context.push('/search'),
+                          onTap: () => context.push('/search', extra: _cityCoords['izmir']),
                         ),
                         _CityCard(
                           name: 'home.city_antalya'.tr(),
                           icon: Icons.wb_sunny_rounded,
                           color: const Color(0xFFD97706),
-                          onTap: () => context.push('/search'),
+                          onTap: () => context.push('/search', extra: _cityCoords['antalya']),
                         ),
                       ],
                     ),

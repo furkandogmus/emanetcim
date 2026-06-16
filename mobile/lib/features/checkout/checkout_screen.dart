@@ -54,6 +54,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       initialTime: TimeOfDay.fromDateTime(init),
     );
     if (t == null) return;
+    if (!mounted) return;
     setState(() {
       final dt = DateTime(d.year, d.month, d.day, t.hour, t.minute);
       final now = DateTime.now();

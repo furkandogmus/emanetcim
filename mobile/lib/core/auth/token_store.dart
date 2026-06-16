@@ -6,6 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive/hive.dart';
 
 import '../config/env.dart';
+import '../api/ssl_pinning.dart';
 
 final tokenStoreProvider = Provider<TokenStore>((ref) => TokenStore());
 
@@ -78,14 +79,16 @@ class TokenStore {
         _refreshCompleter!.complete(false);
         return false;
       }
-      final res = await Dio(
+      final refreshDio = Dio(
         BaseOptions(
           baseUrl: Env.apiBaseUrl,
           connectTimeout: const Duration(seconds: 10),
           receiveTimeout: const Duration(seconds: 20),
           contentType: 'application/json',
         ),
-      ).post('/auth/refresh', data: {'refreshToken': rt});
+      );
+      SslPinning.apply(refreshDio);
+      final res = await refreshDio.post('/auth/refresh', data: {'refreshToken': rt});
       await save(
         access: res.data['accessToken'] as String,
         refresh: res.data['refreshToken'] as String,

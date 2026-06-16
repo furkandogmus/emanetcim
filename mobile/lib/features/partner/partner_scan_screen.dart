@@ -61,18 +61,23 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
       if (!mounted) return;
 
       result.when(
-        onSuccess: (data) {
+        onSuccess: (data) async {
           if (data.type == 'booking') {
-            context.push('/partner/booking/${data.id}');
+            if (!mounted) return;
+            await context.push('/partner/booking/${data.id}');
+            if (mounted) _handled = false;
           } else if (data.type == 'seal') {
+            if (!mounted) return;
             _showSealInfo(data);
           }
         },
         onFailure: (msg) {
           unawaited(HapticFeedback.vibrate());
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('${'common.error'.tr()}: $msg')),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('${'common.error'.tr()}: $msg')),
+            );
+          }
           _handled = false;
         },
       );
@@ -113,7 +118,9 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
           ),
         ],
       ),
-    ).then((_) => _handled = false);
+    ).then((_) {
+      if (mounted) setState(() => _handled = false);
+    });
   }
 
   Widget _infoRow(String label, String value) {

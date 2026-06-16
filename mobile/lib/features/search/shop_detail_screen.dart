@@ -1,9 +1,11 @@
 import 'dart:async' show unawaited;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/repositories/shop_repository.dart';
@@ -289,50 +291,62 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                           // Map Preview
                           _sectionHeader('shop.location'.tr()),
                           const SizedBox(height: 16),
-                          Container(
-                            height: 180,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
+                          if (shop.latitude != null && shop.longitude != null)
+                            ClipRRect(
                               borderRadius: BorderRadius.circular(24),
-                              color: Colors.grey.shade200,
-                            ),
-                            child: Center(
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.1),
-                                      blurRadius: 10,
+                              child: SizedBox(
+                                height: 180,
+                                width: double.infinity,
+                                child: FlutterMap(
+                                  options: MapOptions(
+                                    initialCenter: LatLng(shop.latitude!, shop.longitude!),
+                                    initialZoom: 15.0,
+                                    interactionOptions: const InteractionOptions(
+                                      flags: InteractiveFlag.none,
                                     ),
-                                  ],
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
+                                  ),
                                   children: [
-                                    const Icon(
-                                      Icons.map_rounded,
-                                      size: 18,
-                                      color: AppColors.brandOrange,
+                                    TileLayer(
+                                      urlTemplate:
+                                          'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
+                                      userAgentPackageName: 'com.bagajpark.app',
                                     ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'shop.view_on_map'.tr(),
-                                      style: GoogleFonts.outfit(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 13,
-                                      ),
+                                    MarkerLayer(
+                                      markers: [
+                                        Marker(
+                                          point: LatLng(shop.latitude!, shop.longitude!),
+                                          width: 36,
+                                          height: 36,
+                                          child: const Icon(
+                                            Icons.location_on_rounded,
+                                            color: AppColors.brandOrange,
+                                            size: 36,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
                               ),
+                            )
+                          else
+                            Container(
+                              height: 180,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(24),
+                                color: Colors.grey.shade200,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'shop.no_location'.tr(),
+                                  style: GoogleFonts.outfit(
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
 
                           const SizedBox(height: 40),
 

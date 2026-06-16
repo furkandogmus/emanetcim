@@ -154,11 +154,123 @@ ThemeData buildLightTheme() {
 
 ThemeData buildDarkTheme() {
   final base = ThemeData.dark(useMaterial3: true);
+  final textTheme = GoogleFonts.outfitTextTheme(base.textTheme).copyWith(
+    displayLarge: GoogleFonts.outfit(
+      fontSize: 32,
+      fontWeight: FontWeight.w700,
+      letterSpacing: -0.5,
+    ),
+    headlineMedium: GoogleFonts.outfit(
+      fontSize: 24,
+      fontWeight: FontWeight.w600,
+      letterSpacing: -0.5,
+    ),
+  );
+
   return base.copyWith(
     colorScheme: ColorScheme.fromSeed(
       seedColor: _brandOrangeDark,
       brightness: Brightness.dark,
     ),
-    textTheme: GoogleFonts.outfitTextTheme(base.textTheme),
+    scaffoldBackgroundColor: const Color(0xFF121212),
+    textTheme: textTheme,
+    appBarTheme: AppBarTheme(
+      backgroundColor: const Color(0xFF121212),
+      elevation: 0,
+      centerTitle: true,
+      titleTextStyle: GoogleFonts.outfit(
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: const Color(0xFF2A2A2A),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: _brandOrange, width: 2),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+    ),
+    cardTheme: CardThemeData(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: const BorderSide(color: Color(0xFF333333)),
+      ),
+      clipBehavior: Clip.antiAlias,
+    ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        backgroundColor: _brandOrange,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+        textStyle: GoogleFonts.outfit(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.5,
+        ),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: Colors.white,
+        side: const BorderSide(color: Color(0xFF444444), width: 1.5),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        textStyle: GoogleFonts.outfit(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    ),
+    navigationBarTheme: NavigationBarThemeData(
+      height: 72,
+      elevation: 0,
+      backgroundColor: const Color(0xFF1E1E1E),
+      indicatorColor: _brandOrange.withValues(alpha: 0.2),
+      labelTextStyle: WidgetStateProperty.resolveWith(
+        (states) => GoogleFonts.outfit(
+          fontSize: 11,
+          fontWeight: states.contains(WidgetState.selected)
+              ? FontWeight.w700
+              : FontWeight.w500,
+          color: states.contains(WidgetState.selected)
+              ? _brandOrange
+              : Colors.grey,
+        ),
+      ),
+      iconTheme: WidgetStateProperty.resolveWith(
+        (states) => IconThemeData(
+          size: 24,
+          color: states.contains(WidgetState.selected)
+              ? _brandOrange
+              : Colors.grey,
+        ),
+      ),
+    ),
+    chipTheme: base.chipTheme.copyWith(
+      side: const BorderSide(color: Color(0xFF444444)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.w500),
+    ),
+    bottomSheetTheme: const BottomSheetThemeData(
+      backgroundColor: Color(0xFF1E1E1E),
+      showDragHandle: true,
+    ),
+    snackBarTheme: SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+    ),
   );
 }
