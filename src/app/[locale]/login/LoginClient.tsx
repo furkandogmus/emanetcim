@@ -59,7 +59,7 @@ export default function LoginPage({
   }, [rawCallback]);
 
   const [isLoggingIn, setIsLoggingIn] = useState<string | null>(null);
-  const [showEmailForm, setShowEmailForm] = useState(isPartnerCallback);
+  const [showEmailForm, setShowEmailForm] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [credError, setCredError] = useState('');
