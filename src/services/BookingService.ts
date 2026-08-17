@@ -735,8 +735,10 @@ export class BookingService implements IBookingService {
 
   /**
    * Rezervasyon İptali ve İade Süreci
-   * Kademe: ≥24s check-in → tam kart iadesi; ≥1s → %50 kart iadesi; &lt;1s veya geçmiş check-in → kartsız, tek kullanımlı kupon (tutar kadar).
-   * Ödeme alınmışsa iade başarısızsa rezervasyon CANCELLED yapılmaz.
+   *
+   * a82be7c'den beri kademe yok: ücretsiz iptal, ödeme alınmışsa tamamı
+   * orijinal ödeme yöntemine iade edilir (PaymentLog → REFUNDED). Kupon
+   * verilmez. Rezervasyon slotları ve kazanılan sadakat puanları geri alınır.
    */
   async cancelBooking(bookingId: string): Promise<CancelBookingResult> {
     const booking = await prisma.booking.findUnique({
@@ -787,7 +789,7 @@ export class BookingService implements IBookingService {
         });
 
         if (booking.reservationSlots.length > 0) {
-          await tx.reservationSlot.deleteMany({ where: { bookingId } });
+          await releaseSlots(tx, bookingId);
         }
       });
 

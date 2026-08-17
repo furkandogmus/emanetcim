@@ -1,8 +1,8 @@
 import prisma from "@/lib/db";
 import type { Prisma } from "@prisma/client";
+import { zonedWallClockToUtc } from "@/lib/timezone";
 
 export const SLOT_MINUTES = 30;
-const SLOTS_PER_HOUR = 60 / SLOT_MINUTES; // 2
 const MS_PER_SLOT = SLOT_MINUTES * 60 * 1000;
 
 export function slotDuration(start: Date, end: Date): number {
@@ -49,14 +49,6 @@ export function operatingHoursToSlots(
   return Math.max(0, Math.ceil(totalMins / SLOT_MINUTES));
 }
 
-async function shopTimeZone(shopId: string): Promise<string> {
-  const shop = await prisma.shop.findUniqueOrThrow({
-    where: { id: shopId },
-    select: { timezone: true },
-  });
-  return shop.timezone ?? "Europe/Istanbul";
-}
-
 export async function generateSlotsForShop(
   shopId: string,
   daysForward = 30,
@@ -95,9 +87,11 @@ export async function generateSlotsForShop(
       const h = Math.floor(slotStartMins / 60) % 24;
       const m = slotStartMins % 60;
 
-      // Construct ISO datetime string in shop timezone, then parse as UTC
-      const localIso = `${localDay}T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:00`;
-      const startUtc = new Date(localIso);
+      // Dükkanın duvar saatini gerçek UTC anına çevir.
+      // `new Date("2026-06-15T09:00:00")` offset'siz olduğu için sunucunun yerel
+      // saatinde yorumlanırdı; UTC container'da slotlar 3 saat kayıyordu.
+      const [ly, lm, ld] = localDay.split("-").map(Number);
+      const startUtc = zonedWallClockToUtc(ly, lm, ld, h, m, tz);
 
       if (isNaN(startUtc.getTime())) continue;
       if (startUtc < now) continue;

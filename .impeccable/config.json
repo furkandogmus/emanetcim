@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "bounce-easing",
+        "value": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "createdAt": "2026-08-17T20:57:27.275Z",
+        "reason": "Kasıtlı tasarım tokenı: globals.css'te --ease-spring adıyla, --ease-smooth/--ease-out ile birlikte animasyon tokenları bloğunda tanımlı. Canlı üründe global hareket dilini sormadan değiştirmiyorum."
+      }
+    ]
+  }
+}
