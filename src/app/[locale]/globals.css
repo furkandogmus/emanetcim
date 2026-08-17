@@ -347,14 +347,6 @@
     border: 1px solid hsl(30 8% 92%);
   }
 
-  /* ── Text gradients ── */
-  .text-brand-gradient {
-    background: linear-gradient(135deg, hsl(21 90% 45%) 0%, hsl(38 92% 42%) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
   /* ── Brand shadow utilities ── */
   .shadow-brand-sm { box-shadow: var(--shadow-brand-sm); }
   .shadow-brand-md { box-shadow: var(--shadow-brand-md); }

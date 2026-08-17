@@ -366,7 +366,7 @@ export default function PartnerClient({
 
       {successBanner && (
         <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[100] bg-green-600 text-white px-8 py-5 rounded-full shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-10">
-          <CheckCircle2 size={24} className="animate-bounce" />
+          <CheckCircle2 size={24} />
           <span className="font-black tracking-tight">{successBanner}</span>
         </div>
       )}
