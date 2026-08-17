@@ -80,3 +80,21 @@ next-env.d.ts
 # Yerel pazarlama video çıktıları
 /marketing/assets/*.mp4
 /mobile/*.mp4
+
+# impeccable (npx impeccable install) — her AI harness dizinine ~3.4MB'lık aynı
+# skill ağacını kopyalıyor. Yerel geliştirme aracı, ürün kodu değil; kurulumu
+# `npx impeccable install` ile tekrarlanabilir. Kural kararları .impeccable/config.json'da
+# tutulur ve o dosya commit'lenir.
+/.claude/skills/impeccable/
+/.cursor/skills/impeccable/
+/.cursor/agents/
+/.cursor/hooks.json
+/.agents/skills/impeccable/
+/.agent/skills/impeccable/
+/.github/skills/
+/.github/agents/
+/.github/hooks/
+/.codex/
+
+# Playwright MCP oturum artefaktları
+/.playwright-mcp/
