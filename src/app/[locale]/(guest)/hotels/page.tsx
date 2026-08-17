@@ -79,12 +79,9 @@ export default async function HotelsPage({
         <section className="mt-16">
           <h2 className="text-2xl font-black text-center mb-8">{t("faqTitle")}</h2>
           <div className="space-y-4">
-            {[
-              { q: t("faqs")[0].q, a: t("faqs")[0].a },
-              { q: t("faqs")[1].q, a: t("faqs")[1].a },
-              { q: t("faqs")[2].q, a: t("faqs")[2].a },
-              { q: t("faqs")[3].q, a: t("faqs")[3].a },
-            ].map((faq, idx) => (
+            {/* Yapısal mesaj: t() string döner, dizi için t.raw() gerekir.
+                Sabit index yerine map — locale'de daha az kayıt olsa çökmesin. */}
+            {(t.raw("faqs") as { q: string; a: string }[]).map((faq, idx) => (
               <details key={idx} className="rounded-2xl border border-gray-100 p-4 group">
                 <summary className="font-bold text-gray-900 cursor-pointer list-none flex items-center justify-between">
                   {faq.q}

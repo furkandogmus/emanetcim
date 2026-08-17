@@ -29,7 +29,8 @@
     "pwaInstallTitle": "安装 BagajPark",
     "pwaInstallBody": "添加到主屏幕，打开更快。",
     "pwaInstallCta": "安装",
-    "pwaInstallDismiss": "暂不"
+    "pwaInstallDismiss": "暂不",
+    "language": "语言"
   },
   "SEO": {
     "title": "BagajPark |安全寄存行李，自由出行",

@@ -81,11 +81,13 @@ export default function BottomSheet({
     sheetRef.current.style.removeProperty("--sheet-height");
   }, [snapPoints, currentSnap, onClose, snapTo]);
 
-  useEffect(() => {
-    if (!open) {
-      setCurrentSnap(initialSnap);
-    }
-  }, [open, initialSnap]);
+  // Kapanışta snap'i sıfırla. Effect + setState cascading render tetiklediği için
+  // React'in "prop değişiminde state'i render sırasında ayarla" deseni kullanılıyor.
+  const [wasOpen, setWasOpen] = useState(open);
+  if (wasOpen !== open) {
+    setWasOpen(open);
+    if (!open) setCurrentSnap(initialSnap);
+  }
 
   useEffect(() => {
     if (!open) return;

@@ -29,7 +29,8 @@
     "pwaInstallTitle": "ثبّت BagajPark",
     "pwaInstallBody": "أضفه إلى الشاشة الرئيسية للوصول الأسرع.",
     "pwaInstallCta": "تثبيت",
-    "pwaInstallDismiss": "ليس الآن"
+    "pwaInstallDismiss": "ليس الآن",
+    "language": "اللغة"
   },
   "SEO": {
     "title": "BagajPark | اترك أمتعتك بأمان وسافر بحرية",

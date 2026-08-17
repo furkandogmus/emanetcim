@@ -29,7 +29,8 @@
     "pwaInstallTitle": "Instalar BagajPark",
     "pwaInstallBody": "Añade a la pantalla de inicio para acceder más rápido.",
     "pwaInstallCta": "Instalar",
-    "pwaInstallDismiss": "Ahora no"
+    "pwaInstallDismiss": "Ahora no",
+    "language": "Idioma"
   },
   "SEO": {
     "title": "BagajPark | Deja tu equipaje con seguridad, viaja libremente",

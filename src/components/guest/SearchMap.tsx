@@ -120,11 +120,18 @@ export default function SearchMap({
     const valid = shops.filter((s) => s.latitude != null && s.longitude != null);
 
     valid.forEach((shop) => {
+      // Fiyat Prisma Decimal'inden gelebilir; Number'a çevirip biçimlendir.
+      const price = Number(shop.pricePerDay);
+      const priceLabel = Number.isFinite(price) && price > 0
+        ? `₺${Math.round(price)}`
+        : "₺";
+
       const el = document.createElement("div");
       el.className =
-        "w-8 h-8 rounded-full bg-orange-600 border-2 border-white shadow-lg flex items-center justify-center text-[10px] font-black text-white cursor-pointer hover:bg-orange-700 transition-colors";
-      el.textContent = "₺";
-      el.title = shop.name;
+        "h-8 min-w-8 px-2 rounded-full bg-orange-600 border-2 border-white shadow-lg flex items-center justify-center text-[11px] font-black text-white cursor-pointer hover:bg-orange-700 transition-colors whitespace-nowrap";
+      el.textContent = priceLabel;
+      el.title = priceLabel === "₺" ? shop.name : `${shop.name} — ${priceLabel}`;
+      el.setAttribute("aria-label", el.title);
 
       const marker = new maplibregl.Marker({ element: el })
         .setLngLat([shop.longitude!, shop.latitude!])

@@ -29,7 +29,8 @@
     "pwaInstallTitle": "Zainstaluj BagajPark",
     "pwaInstallBody": "Dodaj do ekranu głównego, by szybciej wracać.",
     "pwaInstallCta": "Zainstaluj",
-    "pwaInstallDismiss": "Później"
+    "pwaInstallDismiss": "Później",
+    "language": "Język"
   },
   "SEO": {
     "title": "BagajPark | Zostaw bagaż bezpiecznie, podróżuj swobodnie",

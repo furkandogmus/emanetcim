@@ -292,6 +292,86 @@ export default function SearchClient({
     return list;
   }, [filteredShops, sortBy]);
 
+  /**
+   * Sonuç listesi içeriği. Desktop sidebar ile mobil bottom sheet aynı listeyi
+   * paylaşır; `data-testid` yalnızca desktop kopyasında kalır, aksi halde iki
+   * kopya birlikte DOM'da olduğu için e2e `getByTestId` strict-mode'da patlar.
+   */
+  const renderResults = (variant: 'desktop' | 'mobile') => (
+    <>
+      {pullDistance > 0 && (
+        <div className="flex justify-center py-2" style={{ transform: `translateY(${pullDistance}px)`, opacity: Math.min(1, pullDistance / 60) }}>
+          {isRefreshing ? (
+            <div className="w-6 h-6 border-2 border-gray-300 border-t-orange-600 rounded-full animate-spin" />
+          ) : (
+            <ArrowUpDown size={20} className="text-orange-600" />
+          )}
+        </div>
+      )}
+      <div className="flex justify-between items-center px-1 mb-2">
+        <h2
+          {...(variant === 'desktop' ? { 'data-testid': 'nearby-heading' } : {})}
+          className="text-sm font-black text-gray-900 uppercase tracking-widest"
+        >
+          {activeTab === "nearby" ? t("nearbyShops") : t("allShops")} (
+          {sortedShops.length})
+        </h2>
+      </div>
+
+      {sortedShops.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 text-center gap-3">
+          <MapPin size={40} className="text-gray-300" />
+          <p className="text-sm font-bold text-gray-500">{t("noShopsFound")}</p>
+          <p className="text-xs text-gray-400 max-w-[200px]">
+            {t("noShopsFoundDesc")}
+          </p>
+          {activeTab === "nearby" && allList.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setActiveTab("all")}
+              className="btn-ui btn-ui-sm btn-ui-secondary mt-2"
+            >
+              {t("allShops")} →
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          <AnimatePresence mode="popLayout">
+            {sortedShops.map((shop, index) => (
+              <motion.div
+                key={shop.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <ShopListItem
+                  id={shop.id}
+                  name={shop.name}
+                  rating={shop.rating || 0}
+                  price={shop.pricePerDay?.toString() || "50"}
+                  distance={
+                    shop.distanceKm != null
+                      ? Math.round(shop.distanceKm * 1000).toString()
+                      : "—"
+                  }
+                  lat={shop.latitude ?? undefined}
+                  lng={shop.longitude ?? undefined}
+                  bagsAvailable={shop.bagsAvailable}
+                  isVerified={shop.isVerified}
+                  responseTimeMinutes={shop.responseTimeMinutes}
+                  slotPrices={(shop as unknown as { slotPrices?: { s: number; m: number; xl: number } }).slotPrices}
+                  onClick={() => onSelectShop(shop.id)}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      )}
+    </>
+  );
+
   return (
     <div className="relative h-[100svh] w-full overflow-hidden bg-white font-sans selection:bg-orange-100">
       <div className="absolute inset-0 z-0">
@@ -581,77 +661,8 @@ export default function SearchClient({
       </header>
 
       <div ref={listRef} className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 bg-gray-50/50">
-          {pullDistance > 0 && (
-            <div className="flex justify-center py-2" style={{ transform: `translateY(${pullDistance}px)`, opacity: Math.min(1, pullDistance / 60) }}>
-              {isRefreshing ? (
-                <div className="w-6 h-6 border-2 border-gray-300 border-t-orange-600 rounded-full animate-spin" />
-              ) : (
-                <ArrowUpDown size={20} className="text-orange-600 animate-bounce" />
-              )}
-            </div>
-          )}
-          <div className="flex justify-between items-center px-1 mb-2">
-            <h2
-              data-testid="nearby-heading"
-              className="text-sm font-black text-gray-900 uppercase tracking-widest"
-            >
-              {activeTab === "nearby" ? t("nearbyShops") : t("allShops")} (
-              {sortedShops.length})
-            </h2>
-          </div>
-
-          {sortedShops.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center gap-3">
-              <MapPin size={40} className="text-gray-300" />
-              <p className="text-sm font-bold text-gray-500">{t("noShopsFound")}</p>
-              <p className="text-xs text-gray-400 max-w-[200px]">
-                {t("noShopsFoundDesc")}
-              </p>
-              {activeTab === "nearby" && allList.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("all")}
-                  className="btn-ui btn-ui-sm btn-ui-secondary mt-2"
-                >
-                  {t("allShops")} →
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="flex flex-col gap-3">
-              <AnimatePresence mode="popLayout">
-                {sortedShops.map((shop, index) => (
-                  <motion.div
-                    key={shop.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    <ShopListItem
-                      id={shop.id}
-                      name={shop.name}
-                      rating={shop.rating || 0}
-                      price={shop.pricePerDay?.toString() || "50"}
-                      distance={
-                        shop.distanceKm != null
-                          ? Math.round(shop.distanceKm * 1000).toString()
-                          : "—"
-                      }
-                      lat={shop.latitude ?? undefined}
-                      lng={shop.longitude ?? undefined}
-                      bagsAvailable={shop.bagsAvailable}
-                      isVerified={shop.isVerified}
-                      responseTimeMinutes={shop.responseTimeMinutes}
-                      slotPrices={(shop as unknown as { slotPrices?: { s: number; m: number; xl: number } }).slotPrices}
-                      onClick={() => onSelectShop(shop.id)}
-                    />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-          )}
-        </div>
+        {renderResults('desktop')}
+      </div>
 
       </aside>
 
@@ -660,11 +671,14 @@ export default function SearchClient({
         <BottomSheet
           open={panelOpen}
           onClose={() => setPanelOpen(false)}
-          snapPoints={[18]}
+          snapPoints={[45, 90]}
           initialSnap={0}
           showClose={false}
           showOverlay={false}
         >
+          {/* BottomSheet children'ı flex column değil; sekmelerin sabit kalıp
+              yalnızca listenin kaydırılması için yüksekliği burada veriyoruz. */}
+          <div className="flex flex-col h-full">
           <header className="px-4 pt-2 pb-3 border-b border-gray-100 shrink-0">
             <div className="flex items-center gap-3">
               <div className="flex bg-gray-100 rounded-xl p-1 flex-1">
@@ -685,6 +699,11 @@ export default function SearchClient({
               </div>
             </div>
           </header>
+
+          <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 bg-gray-50/50">
+            {renderResults('mobile')}
+          </div>
+          </div>
         </BottomSheet>
       </div>
     </div>

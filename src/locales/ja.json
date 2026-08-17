@@ -29,7 +29,8 @@
     "pwaInstallTitle": "BagajParkをインストール",
     "pwaInstallBody": "ホーム画面に追加してすぐに開けます。",
     "pwaInstallCta": "インストール",
-    "pwaInstallDismiss": "あとで"
+    "pwaInstallDismiss": "あとで",
+    "language": "言語"
   },
   "SEO": {
     "title": "バガジパーク |荷物を安全に預けて、自由に旅行しましょう",

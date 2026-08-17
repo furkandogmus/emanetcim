@@ -29,7 +29,8 @@
     "pwaInstallTitle": "Инсталирай BagajPark",
     "pwaInstallBody": "Добави към началния екран за по-бърз достъп.",
     "pwaInstallCta": "Инсталирай",
-    "pwaInstallDismiss": "Не сега"
+    "pwaInstallDismiss": "Не сега",
+    "language": "Език"
   },
   "SEO": {
     "title": "BagajPark | Безопасен багаж, свободно пътуване",

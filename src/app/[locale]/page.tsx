@@ -253,56 +253,76 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
         </div>
       </section>
 
-      {/* Live trust metrics */}
-      <section
-        className="border-y border-gray-100 bg-white py-10 px-6"
-        aria-label={t("trustStatsAria")}
-      >
-        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-6 text-center">
-          <div>
-            <p className="text-2xl md:text-3xl font-black tabular-nums text-gray-900">
-              {nf.format(stats.activeLocations)}
-            </p>
-            <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-gray-400">
-              {t("trustStatLocations")}
-            </p>
-          </div>
-          <div>
-            <p className="text-2xl md:text-3xl font-black tabular-nums text-gray-900">
-              {nf.format(stats.completedStays)}
-            </p>
-            <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-gray-400">
-              {t("trustStatStays")}
-            </p>
-          </div>
-          <div>
-            <p className="text-2xl md:text-3xl font-black tabular-nums text-gray-900">
-              {nf.format(stats.reviewCount)}
-            </p>
-            <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-gray-400">
-              {t("trustStatReviews")}
-            </p>
-          </div>
-          <div>
-            <p className="text-2xl md:text-3xl font-black tabular-nums text-gray-900 inline-flex items-center gap-1">
-              {stats.averageRating != null && stats.reviewCount > 0 ? (
-                <>
-                  {stats.averageRating.toFixed(1)}
-                  <Star
-                    className="inline h-7 w-7 md:h-8 md:w-8 text-orange-500 fill-orange-500"
-                    aria-hidden
-                  />
-                </>
-              ) : (
-                <span className="text-gray-300">—</span>
-              )}
-            </p>
-            <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-gray-400">
-              {t("trustStatAvgRating")}
-            </p>
-          </div>
-        </div>
-      </section>
+      {/* Live trust metrics — yalnızca anlamlı değeri olan sayaçlar gösterilir.
+          Sıfır ("0 tamamlanan depolama", "— puan") güven vermek yerine kırıyor. */}
+      {(() => {
+        const tiles = [
+          {
+            key: 'locations',
+            show: stats.activeLocations > 0,
+            value: nf.format(stats.activeLocations),
+            label: t("trustStatLocations"),
+          },
+          {
+            key: 'stays',
+            show: stats.completedStays > 0,
+            value: nf.format(stats.completedStays),
+            label: t("trustStatStays"),
+          },
+          {
+            key: 'reviews',
+            show: stats.reviewCount > 0,
+            value: nf.format(stats.reviewCount),
+            label: t("trustStatReviews"),
+          },
+          {
+            key: 'rating',
+            show: stats.averageRating != null && stats.reviewCount > 0,
+            value: (
+              <span className="inline-flex items-center gap-1">
+                {stats.averageRating?.toFixed(1)}
+                <Star
+                  className="inline h-7 w-7 md:h-8 md:w-8 text-orange-500 fill-orange-500"
+                  aria-hidden
+                />
+              </span>
+            ),
+            label: t("trustStatAvgRating"),
+          },
+        ].filter((tile) => tile.show);
+
+        if (tiles.length === 0) return null;
+
+        return (
+          <section
+            className="border-y border-gray-100 bg-white py-10 px-6"
+            aria-label={t("trustStatsAria")}
+          >
+            <div
+              className={`max-w-5xl mx-auto grid gap-8 md:gap-6 text-center ${
+                tiles.length === 1
+                  ? 'grid-cols-1'
+                  : tiles.length === 2
+                    ? 'grid-cols-2'
+                    : tiles.length === 3
+                      ? 'grid-cols-3'
+                      : 'grid-cols-2 md:grid-cols-4'
+              }`}
+            >
+              {tiles.map((tile) => (
+                <div key={tile.key}>
+                  <p className="text-2xl md:text-3xl font-black tabular-nums text-gray-900">
+                    {tile.value}
+                  </p>
+                  <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                    {tile.label}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+      })()}
 
       <section
         className="border-y border-gray-100 bg-gray-50/90 py-14 px-6"

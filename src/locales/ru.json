@@ -29,7 +29,8 @@
     "pwaInstallTitle": "Установить BagajPark",
     "pwaInstallBody": "Добавьте на главный экран для быстрого доступа.",
     "pwaInstallCta": "Установить",
-    "pwaInstallDismiss": "Не сейчас"
+    "pwaInstallDismiss": "Не сейчас",
+    "language": "Язык"
   },
   "SEO": {
     "title": "BagajPark | Оставьте багаж в безопасности, путешествуйте свободно",

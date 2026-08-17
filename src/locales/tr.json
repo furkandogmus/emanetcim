@@ -29,7 +29,8 @@
     "pwaInstallTitle": "BagajPark’ı yükle",
     "pwaInstallBody": "Ana ekrana ekleyerek daha hızlı erişin.",
     "pwaInstallCta": "Yükle",
-    "pwaInstallDismiss": "Şimdi değil"
+    "pwaInstallDismiss": "Şimdi değil",
+    "language": "Dil"
   },
   "SEO": {
     "title": "BagajPark | Valiz Saklama ve Güvenli Bagaj Emaneti",
@@ -328,8 +329,8 @@
     "cancelDialogTitle": "Rezervasyonu iptal et",
     "cancelConfirmAction": "İptali onayla",
     "cancellationPolicyTitle": "İptal politikası",
-    "cancellationTierFull": "Check-in saatinden en az {hours} saat once iptal: tam iade.",
-    "cancellationTierPartial": "Check-in'e kalan sure {minHours}-{maxHours} saat: %{percent} iade.",
+    "cancellationTierFull": "Check-in saatinden en az {hours} saat önce iptal: tam iade.",
+    "cancellationTierPartial": "Check-in'e kalan süre {minHours}-{maxHours} saat: %{percent} iade.",
     "cancellationTierCredit": "{minutes} dakikadan az kala: nakit iade yok, kredi verilir.",
     "cancellationYourCase": "Bu rezervasyon için özet",
     "cancellationEstimateCard": "Kartınıza yaklaşık ₺{amount} iade edilir.",
@@ -482,7 +483,7 @@
     "appBannerTitle": "BagajPark mobilde!",
     "appBannerBody": "Uygulamamız çok yakında iOS ve Android'de. Şimdilik web'den kullanmaya devam et.",
     "appBannerCta": "Web'de Keşfet",
-    "cancellationTierFullSimple": "Teslimden en az {minutes} dakika once iptal: tam iade.",
+    "cancellationTierFullSimple": "Teslimden en az {minutes} dakika önce iptal: tam iade.",
     "cancellationTierCreditSimple": "Teslime {minutes} dakikadan az kala: nakit yerine kredi.",
     "manageBookingTitle": "Rezervasyon Yönetimi",
     "manageBookingDesc": "Rezervasyon ID ve e-posta adresinizle rezervasyonunuzu görüntüleyin.",
@@ -492,7 +493,7 @@
     "bookingNotFound": "Rezervasyon bulunamadı",
     "bookingLookupError": "Rezervasyon bulunamadı veya bilgiler eşleşmiyor.",
     "duration": "Süre",
-    "showFilters": "Filtreleri Goster",
+    "showFilters": "Filtreleri Göster",
     "hideFilters": "Filtreleri Gizle"
   },
   "Admin": {
@@ -1080,9 +1081,9 @@
     "q3": "3. Yasaklar",
     "a3": "Yanici ve yasadisi maddeler yasaktir.",
     "q4": "4. Iade",
-    "a4": "24 saat kala iptal hakki.",
-    "q5": "5. Muhur",
-    "a5": "Muhurleme zorunludur.",
+    "a4": "24 saat kala iptal hakkı.",
+    "q5": "5. Mühür",
+    "a5": "Mühürleme zorunludur.",
     "q6": "6. Degisiklik",
     "a6": "BagajPark kurallari degistirme hakkini sakli tutar.",
     "intro": "BagajPark platformunu kullanarak bu kuralları kabul etmiş sayılırsınız. Lütfen dikkatle okuyunuz.",
@@ -1167,7 +1168,7 @@
     "faqTitle": "Sık Sorulan Sorular",
     "faqs": [
       {
-        "q": "Ot elimde bagaj odası yok, yine de çalışabilir miyiz?",
+        "q": "Otelimde bagaj odası yok, yine de çalışabilir miyiz?",
         "a": "Evet! BagajPark noktaları otelinize yürüme mesafesindeki işletmelerdir. Misafirlerinizi yönlendirmeniz yeterli."
       },
       {
@@ -1188,8 +1189,8 @@
     "cta": "Otel iş birliği için iletişim"
   },
   "CookieConsent": {
-    "bannerTitle": "Cerezler",
-    "bannerText": "Siteyi calistirmak icin gereklidir.",
+    "bannerTitle": "Çerezler",
+    "bannerText": "Siteyi çalıştırmak için gereklidir.",
     "acceptAll": "Kabul et",
     "essentialOnly": "Sadece zorunlu",
     "linksIntro": "Detaylar:",
@@ -1205,8 +1206,8 @@
     "reasonOther": "Diger",
     "descriptionLabel": "Aciklama",
     "descriptionPlaceholder": "Detay...",
-    "submitting": "Gonderiliyor...",
-    "submit": "Gonder",
+    "submitting": "Gönderiliyor...",
+    "submit": "Gönder",
     "statusTitle": "Durum",
     "statusLabel": "Durum"
   },

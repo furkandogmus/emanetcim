@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/routing";
 import { routing } from "@/i18n/routing";
 
@@ -25,12 +25,13 @@ export default function LocaleSwitcher() {
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
+  const t = useTranslations("Common");
 
   return (
     <label className="flex items-center gap-1">
-      <span className="sr-only">Language</span>
+      <span className="sr-only">{t("language")}</span>
       <select
-        aria-label="Language"
+        aria-label={t("language")}
         value={locale}
         onChange={(e) => {
           router.replace(pathname, { locale: e.target.value });

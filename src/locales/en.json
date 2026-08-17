@@ -29,7 +29,8 @@
     "pwaInstallTitle": "Install BagajPark",
     "pwaInstallBody": "Add to your home screen for quicker access.",
     "pwaInstallCta": "Install",
-    "pwaInstallDismiss": "Not now"
+    "pwaInstallDismiss": "Not now",
+    "language": "Language"
   },
   "SEO": {
     "title": "BagajPark | Leave Your Luggage Safely, Travel Freely",

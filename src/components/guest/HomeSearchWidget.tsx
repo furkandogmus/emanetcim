@@ -5,17 +5,20 @@ import { useTranslations } from "next-intl";
 import { Search } from "lucide-react";
 import { useRouter } from "@/i18n/routing";
 import { toDatetimeLocalValue } from "@/lib/datetime-local";
+import { defaultSearchStayWindow } from "@/lib/search-defaults";
 import DateTimePicker from "@/components/ui/DateTimePicker";
 
 export default function HomeSearchWidget() {
   const t = useTranslations("Guest");
   const router = useRouter();
-  const [checkIn, setCheckIn] = useState(() => toDatetimeLocalValue(new Date()));
-  const [checkOut, setCheckOut] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 1);
-    return toDatetimeLocalValue(d);
-  });
+  // Arama sayfasıyla aynı varsayılanı kullan: "şimdi" verildiğinde dükkanların
+  // çoğu kapalı oluyor ve /search bu saati sessizce yarın 10:00'a çeviriyordu.
+  const [checkIn, setCheckIn] = useState(() =>
+    toDatetimeLocalValue(defaultSearchStayWindow().checkIn),
+  );
+  const [checkOut, setCheckOut] = useState(() =>
+    toDatetimeLocalValue(defaultSearchStayWindow().checkOut),
+  );
   const [bags, setBags] = useState(1);
 
   const handleSearch = () => {
@@ -70,7 +73,7 @@ export default function HomeSearchWidget() {
       <button
         type="button"
         onClick={handleSearch}
-        className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-xl font-black text-sm transition-all shadow-lg shadow-orange-200 hover:shadow-orange-300 flex items-center justify-center gap-2 cursor-pointer"
+        className="w-full sm:w-auto shrink-0 whitespace-nowrap bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-xl font-black text-sm transition-all shadow-lg shadow-orange-200 hover:shadow-orange-300 flex items-center justify-center gap-2 cursor-pointer"
       >
         <Search size={18} />
         {t("findShops")}

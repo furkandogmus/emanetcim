@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import { DayPicker } from "react-day-picker";
+import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
 import { useLocale } from "next-intl";
 import {
   ar,
@@ -94,16 +95,7 @@ export default function DateTimePicker({
   const dfLocale = LOCALE_MAP[locale] ?? enUS;
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const mq = window.matchMedia("(max-width: 767px)");
-    setIsMobile(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
+  const isMobile = useMediaQuery("(max-width: 767px)");
 
   const DATE_LABELS: Record<string, string> = {
     tr: "Tarih Seç",

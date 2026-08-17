@@ -29,7 +29,8 @@
     "pwaInstallTitle": "BagajPark installieren",
     "pwaInstallBody": "Zum Startbildschirm hinzufügen für schnelleren Zugriff.",
     "pwaInstallCta": "Installieren",
-    "pwaInstallDismiss": "Später"
+    "pwaInstallDismiss": "Später",
+    "language": "Sprache"
   },
   "SEO": {
     "title": "BagajPark | Lassen Sie Ihr Gepäck sicher und reisen Sie frei",
