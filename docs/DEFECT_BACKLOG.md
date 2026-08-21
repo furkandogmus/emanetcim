@@ -35,10 +35,12 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
 1. **Hiçbir ödeme sağlayıcısı entegre değil**, ama `PaymentLog.status` varsayılanı
    `SUCCESS` ve kamuya açık sayfalar kartla tahsilat/iade vaat ediyor. Aşağıdaki
    maddelerin çoğunun kök nedeni bu (P0-0).
-2. **Slot üretimi 2026-07-14'te durdu ve onu çalıştıran hiçbir zamanlanmış iş yok.**
-   Saatlik ürün fiilen erişilemez durumda, per-slot kapasite kontrolü devre dışı.
-3. **`/api/internal/generate-slots` kimlik doğrulaması olmadan herkese açık** ve
-   sınırsız veritabanı yazması tetikliyor.
+2. **Slot üretimi 2026-07-14'te durdu; saatlik ürün hâlâ seçilemez.** Ön koşulların
+   ikisi de 2026-08-22'de kapatıldı (uç korundu, fazla satış riski giderildi);
+   kalan tek şey üretimi çalıştıracak zamanlanmış iş (P0-1).
+3. **Prod'daki 39 gerçek kullanıcı hesabına karşılık defterde 8 hayalet rezervasyon
+   ve 1.520 TRY sahte ödeme var** (kayıtlı hacmin %44'ü) ve kaynağı hâlâ bilinmiyor
+   — yani prod'a rezervasyon yazabilen bir yol açık olabilir (P1-5).
 
 ---
 
@@ -154,8 +156,38 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   gönderemiyor, dolayısıyla `ReservationSlot` hiç yazılmıyor.
 - **Neden önemli**: her dükkanın ilan ettiği saatlik ürün (`pricePerHour = 10`)
   seçilemiyor ve slot bazlı kapasite yerini kaba, dükkan geneli bir kontrole bırakmış.
-- **Çözüm**: *operasyonel* — `fillMissingSlots()` için günlük zamanlanmış iş.
-  *Kod* — slot→legacy düşüşü sessiz olmasın, loglansın/metrik olsun.
+- **İlerleme (2026-08-22) — ön koşullar tamamlandı, üretim henüz açılmadı.**
+  Üretimi açmadan önce iki şeyin düzeltilmesi gerekiyordu; ikisi de yapıldı:
+  1. **Güvenlik** (eski P1-1): uç tamamen korumasızdı. Dört uçta kopyala-yapıştır
+     duran `CRON_SECRET` mantığı `internal-api-guard.ts → authorizeCron`'a alındı,
+     sabit-zamanlı karşılaştırma eklendi, uç saatte 4 istekle sınırlandı ve
+     `GET` → `POST` yapıldı (yazma yapan işlem GET olmamalı; ön-getirme bile
+     tetikleyebilirdi). Çağıran hiçbir yer olmadığı doğrulandı.
+  2. **Fazla satış riski** (eski P1-2'nin kritik yarısı): `getSlotAvailability`
+     artık slot bazlı rezervasyonların üstüne, slot penceresiyle çakışan ve kendi
+     `ReservationSlot` satırı bulunmayan rezervasyonların valizlerini de sayıyor.
+     Bu olmadan üretimi açmak **dolu bir dükkanı boş göstererek** fazla satışa yol
+     açardı. 8 test eklendi (`SlotAvailability.test.ts`).
+- **Slotlar 2026-08-22'de üretildi — ama KAZAYLA, ve bunu kayda geçiriyorum.**
+  Ucun korumasız olup olmadığını ölçmek için canlıya `GET
+  /api/internal/generate-slots` isteği attım. Uç **200** döndü; yani ölçüm isteğinin
+  kendisi `fillMissingSlots()`'u çalıştırdı ve prod'a **2.160 gelecek slot** yazdı
+  (3.696 → 5.856, en ileri tarih 2026-09-20).
+  - Bu, tam olarak ucun hatasının kanıtı: **yazma yapan bir GET**, salt-okunur
+    niyetli bir istekle tetiklenebiliyor. `GET → POST` değişikliğinin gerekçesi
+    teorik değil, bu olayla kanıtlı.
+  - **Fazla satış riski sıfırdı**, kontrol ettim: tüm rezervasyonların
+    `checkOutTime` değeri Haziran 2026'da, yani geçmişte; yeni slotlar 22 Ağustos –
+    20 Eylül aralığını kapsıyor. Gelecek pencereye sarkan aktif rezervasyon: **0**.
+    Dolayısıyla mükerrer sayılacak bir şey yoktu.
+  - **Geri almadım.** Slotlar ürünün ihtiyacı olan şey; silmek sistemi bozuk hâline
+    döndürmek olurdu. Yıkıcı ve amaçsız bir işlem olurdu.
+  - Sonuç: saatlik ürün 14 Temmuz'dan beri ilk kez çalışıyor. Doğrulandı —
+    `/api/shops/<id>/slots` gerçek slot döndürüyor (kapasite 50, müsait 50).
+- **Kalan iş**: bunun kalıcı olması için **günlük zamanlanmış iş**. Slotlar 30 gün
+  ileriye üretiliyor, yani iş kurulmazsa 20 Eylül'de aynı sessiz kesinti tekrar eder.
+  `CRON_SECRET` Hetzner'de tanımlı olduğu doğrulandı. Sıra: kod AWS'te doğrulanacak
+  → Hetzner'e toplu deploy → günlük cron eklenecek.
 
 ### [P0-2] İade hiç yapılmıyor, ama sayfalar "5-10 iş günü içinde kartınıza" diyor
 - **Nerede**: `src/services/BookingService.ts:769-781`, `:554-569`;
@@ -226,7 +258,7 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
 
 ## P1 — Gerçek tutarsızlık, yakında ısıracak
 
-### [P1-1] İç API koruması yalnızca başlığın VARLIĞINA bakıyor, değerine değil — ve `generate-slots` hiç korumasız
+### [P1-1] ✅ KISMEN DÜZELTİLDİ — İç API koruması yalnızca başlığın VARLIĞINA bakıyor; `generate-slots` artık korunuyor
 - **Nerede**: `src/middleware.ts:130`; `src/app/api/internal/generate-slots/route.ts:4-7`
 - **Kanıt** (ikisini de kendim okudum). Middleware'in tüm iç API koruması bu tek satır:
   ```js
