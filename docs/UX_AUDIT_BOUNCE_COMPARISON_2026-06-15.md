@@ -41,6 +41,35 @@ yukunu artiriyor.
     etkisi. Kesin kapatmak icin senkron izleme (Uptime Kuma, bkz.
     `[[hetzner-sertlestirme]]` Faz 4) gerekiyor — henuz kurulmadi.
 
+- [x] **Arama her iki sekmede de "Sonuc bulunamadi" gosteriyordu (gercek dukkanlar musait oldugu halde).**
+  - Gozlem: `/tr/search`, varsayilan tarih araligiyla (yarin 10:00 - +24 saat)
+    acildiginda hem `YAKINDAKI (0)` hem `TUM NOKTALAR (0)` gosteriyordu — 3 aktif,
+    musait dukkan varken.
+  - Kok neden: `isShopOpenForStay()`, check-in/check-out disinda emanet
+    suresinin **ortasinin** da dukkanin acik oldugu bir zamana denk gelmesini
+    istiyordu. Emanet bir "vale" hizmeti oldugu icin (valiz kilitli alanda
+    beklerken dukkanin fiziken acik kalmasi gerekmez) bu kontrol, 7/24 acik
+    olmayan (yani neredeyse tum) dukkanlari gece asan HER aramada eledi —
+    yani gercekte hemen hemen tum gercekci aramalarda.
+  - Ek bulgu: Bu fix `develop`'a Haziran 2026'da (`b7978a3`) dogrudan islenmis
+    ama `main`'e hic tasinmamis; GHCR image'i sadece `main` push'unda build
+    edildigi icin **canliya asla cikmamis** — git checkout'u "duzeltilmis"
+    gorunse de calisan image hala eski/bozuk kodu calistiriyordu. Ayrica
+    Hetzner cron'u (`update.sh`, 5 dk'da bir) sadece git SHA'ya bakiyordu; bir
+    CI build'i tam olarak bitmeden git SHA'lar esitlenirse (main->develop
+    merge + push ayni oturumda yapilirsa) cron image'i hic çekmeden "degisiklik
+    yok" diyip atlayabiliyordu — bu da bu spesifik fix'in ilk deploy denemesinde
+    gercekten yasandi.
+  - Kabul kriteri: Varsayilan arama tarihiyle `TUM NOKTALAR` ve `YAKINDAKI`
+    gercek, musait dukkanlari gosterir; check-in/check-out disindaki bir
+    "midpoint" kontrolu olmaz.
+  - Tamamlandi (2026-08-21): `src/lib/shop-hours.ts`'teki midpoint kontrolu
+    kaldirildi + regresyon testleri eklendi (`shop-hours.test.ts`); `main` ve
+    `develop` esitlendi; `scripts/update.sh` artik git SHA'dan bagimsiz olarak
+    calisan container'in image ID'sini GHCR'deki en guncel image ile
+    karsilastirip farkli oldugunda deploy ediyor (yarisi kaynagi kalici olarak
+    kapatildi). Canlida dogrulandi: `TUM NOKTALAR (3)`, `YAKINDAKI (1)`.
+
 - [x] **Masaustunde mobil bottom sheet'in render edilmesini engelle.**
   - Gozlem: 1280px masaustunde sol arama paneli ile bottom sheet ayni anda
     gorunuyor; sekmeler ve dukkan kartlari iki kez render ediliyor.
