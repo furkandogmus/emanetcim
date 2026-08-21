@@ -9,6 +9,7 @@ import ComparisonTable from "@/components/guest/ComparisonTable";
 import BagProtection from "@/components/guest/BagProtection";
 import PartnerPromoModal from "@/components/partner/PartnerPromoModal";
 import HomeSearchWidget from "@/components/guest/HomeSearchWidget";
+import { defaultStayWindowLocalValues } from "@/lib/datetime-local";
 import type { Metadata } from "next";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { alternatesForPath } from "@/lib/seo-alternates";
@@ -64,6 +65,10 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
     getGuestLandingStats(),
     getHomeTestimonials(14),
   ]);
+  // Arama kutusunun varsayilanlari burada, SUNUCUDA uretilir. Istemcide
+  // uretilirse sunucu (UTC) ile ziyaretcinin saat dilimi farkli metin verir ve
+  // hydration'da #418 metin uyusmazligi olusur.
+  const stayWindow = defaultStayWindowLocalValues();
   const nfLocale: Record<string, string> = {
     tr: "tr-TR",
     en: "en-US",
@@ -210,8 +215,12 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
             {t('heroSubtitle')}
           </p>
 
-          {/* Interactive Search Widget */}
-          <HomeSearchWidget />
+          {/* Interactive Search Widget — varsayilanlar burada, sunucuda uretilir;
+              istemcide `new Date()` cagirmak hydration uyusmazligi veriyordu. */}
+          <HomeSearchWidget
+            defaultCheckIn={stayWindow.checkIn}
+            defaultCheckOut={stayWindow.checkOut}
+          />
         </div>
       </header>
 

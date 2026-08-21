@@ -4,18 +4,31 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Search } from "lucide-react";
 import { useRouter } from "@/i18n/routing";
-import { toDatetimeLocalValue } from "@/lib/datetime-local";
 import DateTimePicker from "@/components/ui/DateTimePicker";
 
-export default function HomeSearchWidget() {
+type Props = {
+  /**
+   * Varsayılan bırakış/alış değerleri SUNUCUDA üretilip prop olarak geliyor.
+   *
+   * Neden: burada `new Date()` çağırmak sunucuda (konteyner UTC) ve istemcide
+   * (ziyaretçinin saat dilimi) farklı metin üretiyordu; bu değer input'un
+   * `value`'su olduğu için React hydration'da metin uyuşmazlığı (#418) veriyor ve
+   * ağacı istemcide baştan render ediyordu. Belirtisi ana sayfada titreme ve ilk
+   * dokunuşun kaybolmasıydı. Değeri tek bir yerde (sunucuda, sabit saat diliminde)
+   * üretmek uyuşmazlığı kaynağında bitiriyor.
+   */
+  defaultCheckIn: string;
+  defaultCheckOut: string;
+};
+
+export default function HomeSearchWidget({
+  defaultCheckIn,
+  defaultCheckOut,
+}: Props) {
   const t = useTranslations("Guest");
   const router = useRouter();
-  const [checkIn, setCheckIn] = useState(() => toDatetimeLocalValue(new Date()));
-  const [checkOut, setCheckOut] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 1);
-    return toDatetimeLocalValue(d);
-  });
+  const [checkIn, setCheckIn] = useState(defaultCheckIn);
+  const [checkOut, setCheckOut] = useState(defaultCheckOut);
   const [bags, setBags] = useState(1);
 
   const handleSearch = () => {
