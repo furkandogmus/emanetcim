@@ -179,14 +179,62 @@ hesap aşınca yenisine taşınma) SSH host secret'ı güncellemekten daha dayan
       güncel deploy'u yansıttı (`grep -c "restart: unless-stopped"` sunucuda 5 döndü).
       **CI/CD pipeline'ı gerçekten çalışıyor, statik AWS credential hiçbir yerde yok.**
 
-## 6. Sıradaki adımlar (henüz yapılmadı)
+## 6. AWS artık Hetzner'in önündeki doğrulama kapısı (2026-08-21, kullanıcı kararı)
 
-- [ ] 6.1 DNS'i test subdomain'inden ana domain'e (`bagajpark.com`) çevirmeden önce en az
+Kullanıcı talebi: *"hetzner'deki sunucuyu küçük şeylerde değiştirme, orada eğer büyük bi
+update olduysa ve aws'te sorun çıkmadıysa değiştirelim"*. Yani AWS artık deneysel bir
+paralel ortam değil, **canlıya çıkmadan önceki zorunlu doğrulama adımı**.
+
+- [x] 6.1 Hetzner'in her 5 dakikada çalışan otomatik deploy cron'u (`update.sh`) sunucuda
+      devre dışı bırakıldı — silinmedi, yorum satırı olarak duruyor ve neden kapatıldığı
+      cron'un içine yazıldı. Yedek: `/root/crontab.bak.20260821`. Diğer 4 cron işi
+      (yedekleme, ödeme reconciliation, disk temizliği, mühür tahmini) **dokunulmadı** —
+      doğrulandı: 5 aktif satır → 4 aktif satır.
+- [x] 6.2 Yeni akış `infra/aws/README.md`'nin en başına tablo halinde yazıldı, ki bir
+      sonraki oturum (veya başka biri) yanlışlıkla canlıya küçük bir değişiklik göndermesin:
+      `main`'e push → GHCR build → AWS'e otomatik deploy → aws-test'te doğrula → birikmiş
+      ve doğrulanmış bir set olunca Hetzner'de **elle** `sudo ./scripts/update.sh`.
+- [x] 6.3 Politikanın güvenlik şartı doğrulandı: AWS instance'ı **kendi** postgres
+      container'ını çalıştırıyor (`emanetci-postgres-1`, `127.0.0.1:5433->5432`) ve
+      `DATABASE_URL` compose servis adına (`postgres:5432`) bakıyor — yani aws-test'te
+      test etmek prod veritabanına dokunmuyor. Bu doğrulanmadan politika güvenli olmazdı.
+- [x] 6.4 **SSM deploy'u güvenilir hale getirildi.** `deploy.yml` gerçek bir push'ta
+      `Conflict. The container name "/<hash>_emanetci-web-1" is already in use` ile
+      patlıyordu: yarım kalmış bir `up -d` recreate'i, compose'un eski container'ı
+      `<hash>_<isim>` olarak yeniden adlandırmasından arta kalan bir kayıt bırakıyor ve
+      sonraki deploy aynı ada çarpıyor. `up -d` öncesine yalnızca bu artıkları silen bir
+      adım eklendi. Filtrenin canlı container'lara dokunmadığı AWS üzerinde salt-okunur
+      doğrulandı (eşleşen: 0; canlı 5 container etkilenmiyor). Sonraki push'ta pipeline
+      yeşile döndü.
+- [x] 6.5 Yanlış ilerleme göstergeleri düzeltildi: polling sayacı `[n/30]` → `[n/60]`
+      (döngü 60 kez dönüyor), timeout mesajı `150s` → `300s`.
+
+### Bu politikayı doğuran gerçek olay (kayda değer)
+
+Aynı gün, arama sonuçlarının **her aramada 0 dönmesine** sebep olan bir hata bulundu
+(`isShopOpenForStay` emanet süresinin *ortasında* da dükkanın açık olmasını istiyordu;
+7/24 olmayan tüm dükkanlar gece aşan her aramada eleniyordu). Bu fix'in Haziran 2026'da
+`develop`'a yazıldığı ama `main`'e hiç taşınmadığı, GHCR image'ı yalnızca `main` push'unda
+build edildiği için de **canlıya hiç çıkmadığı** ortaya çıktı: sunucudaki git checkout'u
+"düzeltilmiş" görünüyordu, çalışan image ise eski kodu servis ediyordu.
+
+Üstüne, `update.sh` yalnızca git SHA'ya bakıyordu; `main`→`develop` merge'i ile CI build'i
+aynı dakikalara denk gelince cron "değişiklik yok" deyip image'ı hiç çekmedi. `update.sh`
+artık git SHA'dan bağımsız olarak çalışan container'ın image ID'sini GHCR'deki güncel
+image ile karşılaştırıyor. Ders: **git SHA deploy edilmiş kodun kanıtı değil; image
+digest'i kanıttır.**
+
+## 7. Sıradaki adımlar (henüz yapılmadı)
+
+- [ ] 7.1 DNS'i test subdomain'inden ana domain'e (`bagajpark.com`) çevirmeden önce en az
       bir gün gözlemle (özellikle stop/start sonrası kendi kendine ayağa kalkma davranışını)
-- [ ] 6.2 Ana domain cutover + Hetzner'i durdur/kapat (kullanıcı kararı: maliyet nedeniyle
+- [ ] 7.2 Ana domain cutover + Hetzner'i durdur/kapat (kullanıcı kararı: maliyet nedeniyle
       devre dışı bırakılacak)
-- [ ] 6.3 `docker-compose.env`/nginx config'lerinin de S3/SSM üzerinden otomatik
+- [ ] 7.3 `docker-compose.env`/nginx config'lerinin de S3/SSM üzerinden otomatik
       dağıtılması (şu an sadece `docker-compose.yml` CI ile güncelleniyor, nginx conf ve
       `.env` hâlâ elle yönetiliyor)
-- [ ] 6.4 Elastic IP → DNS otomasyonu (Route53 veya Cloudflare API ile `stack` her
+- [ ] 7.4 Elastic IP → DNS otomasyonu (Route53 veya Cloudflare API ile `stack` her
       yeniden kurulduğunda DNS'in otomatik güncellenmesi)
+- [ ] 7.5 aws-test veritabanını periyodik olarak prod yedeğinden tazeleme yolu (şu an
+      bir noktada restore edilmiş; doğrulama kapısının anlamlı olması için verinin
+      prod'a benzer kalması gerekiyor)
