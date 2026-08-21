@@ -126,3 +126,67 @@
       Route53/Cloudflare API entegrasyonuyla otomatikleştirilebilir.
 - [ ] 4.3 (opsiyonel, henüz yapılmadı) Aynı kodu farklı bir `region` değişkeniyle tekrar
       `apply` ederek "hesaba/bölgeye özel hardcode yok" iddiasını ayrıca sına
+
+## 5. CI/CD: GitHub OIDC + SSM Run Command (statik key yok)
+
+Kullanıcı kararı (2026-08-21): AWS'de gerçek prod hedefi olunacak, CI/CD doğrudan oraya
+bağlanacak, Hetzner devre dışı bırakılacak (maliyet). SSH yerine bilinçli olarak **AWS SSM
+Run Command + GitHub OIDC** seçildi — hesap/instance değiştirme stratejisiyle (free-tier
+hesap aşınca yenisine taşınma) SSH host secret'ı güncellemekten daha dayanıklı.
+
+- [x] 5.1 `bootstrap/`'a eklendi: GitHub OIDC provider (bu hesapta 2026-07-15'ten beri
+      zaten VARDI — `resource` ile yeniden yaratmak `EntityAlreadyExists` verdi,
+      `data "aws_iam_openid_connect_provider"` ile referans alındı), `aws_iam_role.github_deploy`
+      (trust policy: OIDC sub claim `repo:${github_repo}:ref:refs/heads/${branch}` VE
+      `repo:${github_repo}:environment:production` — deploy job'da `environment: production`
+      tanımlı olduğu için GitHub'ın ürettiği sub claim ref-bazlı DEĞİL environment-bazlı
+      geliyor, bu format farkı "Not authorized to perform sts:AssumeRoleWithWebIdentity"
+      hatasıyla canlıda keşfedildi), `ssm:SendCommand` (tag `Project=bagajpark-aws-test`'e
+      scoped, instance ID'ye değil — `stack` yeniden kurulsa da role güncellenmez)
+- [x] 5.2 `stack/`'e eklendi: EC2 role'üne `AmazonSSMManagedInstanceCore` managed policy +
+      deploy-config S3 prefix'i için `s3:GetObject`
+- [x] 5.3 `.github/workflows/deploy.yml` yeniden yazıldı: SSH (`appleboy/ssh-action`) →
+      `aws-actions/configure-aws-credentials` (OIDC) + `aws s3 cp` (config yükle) +
+      `aws ssm send-command` (`docker compose pull/up` çalıştır) + polling ile sonuç
+      kontrolü. Repository **variables** (secret değil — hassas değil):
+      `AWS_DEPLOY_ROLE_ARN`, `AWS_REGION`, `AWS_DEPLOY_BUCKET`
+- [x] 5.4 **Kritik canlı bulgu — firewalld sshd'yi tamamen kesti** (2026-08-21): Bir
+      `terraform apply` sonrası (iam_instance_profile + user_data attribute güncellemesi,
+      AWS API'si bunu instance'ı STOP+START ederek uyguladı — `LaunchTime` değişti,
+      `reboot` değil gerçek bir stop/start) instance'a hiçbir şekilde SSH ile bağlanılamadı
+      ("Connection refused"). Kök neden: AL2023'te `firewalld` aktifti, varsayılan
+      `public` zone SADECE standart `ssh` servisini (port 22) izin veriyordu — 2222/80/443
+      hiçbiri firewalld seviyesinde izinli değildi (Security Group ağ seviyesinde izin
+      veriyordu ama host firewall engelliyordu). Teşhis SSH olmadan **SSM Run Command**
+      ile yapıldı (`systemctl status sshd`, `ss -tlnp`, `firewall-cmd --list-all`) — bu,
+      SSM pathway'inin kendisinin de bağımsız bir kanıtı oldu. Düzeltme: `firewalld`
+      devre dışı bırakıldı (SG zaten aynı portları filtreliyor, iki katmanlı firewall
+      gereksiz) — hem canlı instance'da (`systemctl disable --now firewalld`) hem
+      `cloud-init.sh.tftpl`'de kalıcı olarak.
+- [x] 5.5 **İkincil bulgu — firewalld'i durdurmak Docker'ın iptables zincirlerini bozdu**:
+      `docker compose up` sonrası `iptables: No chain/target/match by that name` hatası —
+      `systemctl restart docker` ile Docker kendi DOCKER chain'ini yeniden kurdu, sorun
+      çözüldü.
+- [x] 5.6 **Üçüncü bulgu — restart policy yoktu**: firewalld olayı sırasında instance
+      stop/start olduğunda konteynerler `Exited` durumda kaldı, otomatik kalkmadı
+      (`docker-compose.yml`'de `restart:` tanımlı değildi). `docker-compose.yml`'in TÜM
+      servislerine `restart: unless-stopped` eklendi (repo'ya commit edildi — bu hem
+      AWS hem Hetzner tarafını kapsar).
+- [x] 5.7 **Uçtan uca gerçek doğrulama** (2026-08-21, manuel rerun DEĞİL — gerçek bir
+      `git push`): `docker-compose.yml` restart-policy fix'i commit edilip `main`'e push
+      edildi → `Build & Deploy` workflow'u otomatik tetiklendi → build (2m26s) + SSM
+      deploy (54s) ikisi de yeşil → `https://aws-test.bagajpark.com/api/health/live`
+      güncel deploy'u yansıttı (`grep -c "restart: unless-stopped"` sunucuda 5 döndü).
+      **CI/CD pipeline'ı gerçekten çalışıyor, statik AWS credential hiçbir yerde yok.**
+
+## 6. Sıradaki adımlar (henüz yapılmadı)
+
+- [ ] 6.1 DNS'i test subdomain'inden ana domain'e (`bagajpark.com`) çevirmeden önce en az
+      bir gün gözlemle (özellikle stop/start sonrası kendi kendine ayağa kalkma davranışını)
+- [ ] 6.2 Ana domain cutover + Hetzner'i durdur/kapat (kullanıcı kararı: maliyet nedeniyle
+      devre dışı bırakılacak)
+- [ ] 6.3 `docker-compose.env`/nginx config'lerinin de S3/SSM üzerinden otomatik
+      dağıtılması (şu an sadece `docker-compose.yml` CI ile güncelleniyor, nginx conf ve
+      `.env` hâlâ elle yönetiliyor)
+- [ ] 6.4 Elastic IP → DNS otomasyonu (Route53 veya Cloudflare API ile `stack` her
+      yeniden kurulduğunda DNS'in otomatik güncellenmesi)
