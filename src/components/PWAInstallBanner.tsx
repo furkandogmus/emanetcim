@@ -59,7 +59,9 @@ export default function PWAInstallBanner() {
 
   return (
     <div
-      className="fixed z-[45] max-md:bottom-[calc(4.5rem+env(safe-area-inset-bottom))] max-md:left-3 max-md:right-3 md:bottom-4 md:right-4 md:left-auto md:max-w-sm"
+      // 2026-08-21: 4.5rem -> 6rem, ayni sebep CheckoutClient.tsx'teki footer'la ayni
+      // (mobil alt nav gercek yuksekligi ~80px, 4.5rem=72px yetersizdi)
+      className="fixed z-[45] max-md:bottom-[calc(6rem+env(safe-area-inset-bottom))] max-md:left-3 max-md:right-3 md:bottom-4 md:right-4 md:left-auto md:max-w-sm"
       role="dialog"
       aria-labelledby="pwa-install-title"
     >

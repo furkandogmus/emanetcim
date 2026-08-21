@@ -601,7 +601,10 @@ export default function CheckoutClient({
 
       </main>
 
-      <footer style={{ bottom: keyboardHeight }} className="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-2xl w-full p-4 sm:p-6 pb-[calc(env(safe-area-inset-bottom)+4.5rem)] bg-white/90 backdrop-blur-xl border-t border-gray-50 flex flex-col gap-3 z-20">
+      {/* 2026-08-21: pb 4.5rem (72px) mobil alt navigasyonun gercek yuksekliginden
+          (~80px, Playwright ile olculdu) kucuktu -> CTA nav'in ustune biniyordu
+          (UX_AUDIT_BOUNCE_COMPARISON P0). 6rem'e cikarildi, ~16px pay birakiyor. */}
+      <footer style={{ bottom: keyboardHeight }} className="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-2xl w-full p-4 sm:p-6 pb-[calc(env(safe-area-inset-bottom)+6rem)] bg-white/90 backdrop-blur-xl border-t border-gray-50 flex flex-col gap-3 z-20">
         {step === 1 && error && (
           <div className="ui-state ui-state-error flex items-center gap-2 rounded-xl">
             <AlertCircle size={14} />
