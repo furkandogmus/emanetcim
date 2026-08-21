@@ -65,3 +65,22 @@ variable "deploy_config_prefix" {
   type        = string
   default     = "deploy-config"
 }
+
+# --- Maliyet koruması ---
+# Projenin en sert kısıtı "AWS'e ekstra büyük maliyet çıkarmamak". Bunun tek gerçek
+# güvencesi, kredi bitmeden HABER ALMAK. AWS Budgets'ta ilk 2 bütçe ücretsiz.
+# E-posta bilinçli olarak varsayılansız: boş bırakılırsa bütçe kaynağı hiç
+# oluşturulmaz (count = 0), yani kimsenin adresi koda gömülmüş olmaz ve başka bir
+# free-tier hesaba taşırken yeniden düşünülmesi gerekir.
+
+variable "budget_alert_email" {
+  description = "Bütçe uyarılarının gideceği e-posta. BOŞ BIRAKILIRSA bütçe alarmı oluşturulmaz."
+  type        = string
+  default     = ""
+}
+
+variable "monthly_budget_usd" {
+  description = "Aylık tahmini/gerçekleşen harcama eşiği (USD). Eşiklerin yüzdeleri budget.tf içinde."
+  type        = number
+  default     = 25
+}
