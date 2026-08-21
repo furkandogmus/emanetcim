@@ -1,0 +1,207 @@
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
+data "aws_caller_identity" "current" {}
+
+# --- EC2 IAM role: SSM'den TLS materyalini kendi rolüyle çeker, statik AWS key
+# sunucuya asla konmaz. bootstrap/ kökündeki SSM parametrelerinin ARN'ı sadece isimlendirme
+# sözleşmesiyle (ssm_parameter_prefix) kuruluyor — state coupling yok, kasıtlı
+# ([[aws-paralel-ortam]] design.md "blast radius ayrımı").
+
+resource "aws_iam_role" "app" {
+  name = "${var.project_name}-app-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "ec2.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "app_ssm_read" {
+  name = "read-tls-ssm-parameters"
+  role = aws_iam_role.app.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = ["ssm:GetParameter"]
+        Resource = [
+          "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter${var.ssm_parameter_prefix}/cert",
+          "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter${var.ssm_parameter_prefix}/key",
+        ]
+      },
+      {
+        # SecureString varsayilan AWS-managed KMS anahtariyla (alias/aws/ssm) sifreli —
+        # decrypt icin bu da gerekli, sadece SSM servisi uzerinden kullanima izin verilir.
+        Effect   = "Allow"
+        Action   = ["kms:Decrypt"]
+        Resource = "*"
+        Condition = {
+          StringEquals = { "kms:ViaService" = "ssm.${var.region}.amazonaws.com" }
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_instance_profile" "app" {
+  name = "${var.project_name}-app-profile"
+  role = aws_iam_role.app.name
+}
+
+# SSM Agent'in "managed instance" olarak calisip Run Command alabilmesi icin gereken
+# AWS-managed policy (ssmmessages/ec2messages/ssm:UpdateInstanceInformation vb. — bunlar
+# resource-level desteklemiyor, custom policy yazmaya degmez).
+resource "aws_iam_role_policy_attachment" "app_ssm_core" {
+  role       = aws_iam_role.app.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+# CI'nin yukledigi docker-compose.yml'i cekebilmek icin.
+resource "aws_iam_role_policy" "app_deploy_config_read" {
+  name = "read-deploy-config"
+  role = aws_iam_role.app.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["s3:GetObject"]
+      Resource = "arn:aws:s3:::${var.deploy_config_bucket}/${var.deploy_config_prefix}/*"
+    }]
+  })
+}
+
+data "aws_ami" "al2023" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["al2023-ami-*-x86_64"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
+resource "aws_vpc" "main" {
+  cidr_block           = "10.20.0.0/16"
+  enable_dns_support   = true
+  enable_dns_hostnames = true
+
+  tags = { Name = "${var.project_name}-vpc" }
+}
+
+resource "aws_internet_gateway" "main" {
+  vpc_id = aws_vpc.main.id
+  tags   = { Name = "${var.project_name}-igw" }
+}
+
+resource "aws_subnet" "public" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.20.1.0/24"
+  availability_zone       = data.aws_availability_zones.available.names[0]
+  map_public_ip_on_launch = true
+
+  tags = { Name = "${var.project_name}-public" }
+}
+
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.main.id
+  }
+
+  tags = { Name = "${var.project_name}-public-rt" }
+}
+
+resource "aws_route_table_association" "public" {
+  subnet_id      = aws_subnet.public.id
+  route_table_id = aws_route_table.public.id
+}
+
+resource "aws_security_group" "web" {
+  name        = "${var.project_name}-web"
+  description = "80/443 herkese acik, SSH sadece allowed_ssh_cidr degerine acik"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description = "HTTP"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "HTTPS"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "SSH (custom port, kisitli CIDR)"
+    from_port   = var.ssh_port
+    to_port     = var.ssh_port
+    protocol    = "tcp"
+    cidr_blocks = [var.allowed_ssh_cidr]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = { Name = "${var.project_name}-web-sg" }
+}
+
+resource "aws_key_pair" "deployer" {
+  key_name   = "${var.project_name}-key"
+  public_key = file(pathexpand(var.ssh_public_key_path))
+}
+
+resource "aws_instance" "app" {
+  ami                    = data.aws_ami.al2023.id
+  instance_type          = var.instance_type
+  subnet_id              = aws_subnet.public.id
+  vpc_security_group_ids = [aws_security_group.web.id]
+  key_name               = aws_key_pair.deployer.key_name
+  iam_instance_profile   = aws_iam_instance_profile.app.name
+
+  root_block_device {
+    volume_size = var.root_volume_gb
+    volume_type = "gp3"
+  }
+
+  user_data = templatefile("${path.module}/cloud-init.sh.tftpl", {
+    ssh_port      = var.ssh_port
+    region        = var.region
+    ssm_cert_name = "${var.ssm_parameter_prefix}/cert"
+    ssm_key_name  = "${var.ssm_parameter_prefix}/key"
+  })
+
+  tags = { Name = "${var.project_name}-app" }
+}
+
+resource "aws_eip" "app" {
+  instance = aws_instance.app.id
+  domain   = "vpc"
+
+  tags = { Name = "${var.project_name}-eip" }
+}

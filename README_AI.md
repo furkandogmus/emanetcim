@@ -67,19 +67,20 @@ Geliştirme yaparken iş kuralları ve mimari detaylar için şu dokümanları r
 
 ## 🖥️ Canlı Sunucu (Production Server) Bilgileri
 
-Uygulamanın canlı ortamı (production) aşağıdaki sunucu üzerinde barındırılmaktadır:
+Sunucu adresi, port, kullanıcı ve uygulama dizini artık bu dosyada **tutulmuyor** —
+git'e commit edilen bir dosyada gerçek sunucu bilgisi bulunması güvenlik açısından
+sakıncalı (recon bilgisi). Bu bilgiler git'e girmeyen `ops/server.env` dosyasında
+tutulur (bkz. `ops/README.md`).
 
-*   **IP Adresi:** `178.104.144.3`
-*   **SSH Portu:** `12022`
-*   **Kullanıcı:** `root`
+*   **Bağlantı bilgisi:** `ops/server.env` içindeki `SSH_HOST` / `SSH_PORT` / `SSH_USER`
 *   **SSH Bağlantı Komutu:**
     ```bash
-    ssh root@178.104.144.3 -p 12022
+    source ops/server.env && ssh -i "$SSH_KEY_PATH" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST"
     ```
-*   **Uygulama Dizini:** `/root/emanetci`
+*   **Uygulama Dizini:** `ops/server.env` içindeki `APP_DIR`
 *   **Hızlı Güncelleme Komutu (Sunucuda):**
     ```bash
-    cd /root/emanetci && ./scripts/vm-update.sh
+    cd "$APP_DIR" && ./scripts/vm-update.sh
     ```
 
 ---

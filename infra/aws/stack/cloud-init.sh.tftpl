@@ -1,0 +1,64 @@
+#!/bin/bash
+# İlk boot kurulumu — Amazon Linux 2023. Hetzner denetiminde bulunan hatayı (fail2ban'in
+# yanlış portu koruması) burada day-1'den doğru kurarak tekrarlamamak icin ssh_port +
+# SELinux port label + fail2ban birlikte ayarlanir.
+set -e
+
+dnf update -y
+
+# --- Docker + Compose plugin ---
+dnf install -y docker
+systemctl enable --now docker
+usermod -aG docker ec2-user
+
+# Pinned surum yerine Docker'in kendi "latest" sembolik URL'i kullanilir (resmi kurulum
+# dokumantasyonundaki yontem) — boot script'inde 404 riskini pinlemekten daha az onemli
+# gorup, kurulumun ilk seferde basarili olmasini onceliklendirdik.
+mkdir -p /usr/local/lib/docker/cli-plugins
+curl -fsSL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64" \
+  -o /usr/local/lib/docker/cli-plugins/docker-compose
+chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+
+# --- SSH portunu degistir (SELinux label once, sshd restart sonra) ---
+dnf install -y policycoreutils-python-utils fail2ban git
+semanage port -a -t ssh_port_t -p tcp ${ssh_port} || true
+sed -i "s/^#\?Port .*/Port ${ssh_port}/" /etc/ssh/sshd_config
+systemctl restart sshd
+
+# --- fail2ban: dogru portu izlesin ---
+cat > /etc/fail2ban/jail.local <<EOF
+[sshd]
+enabled = true
+port = ${ssh_port}
+maxretry = 5
+bantime = 3600
+findtime = 600
+EOF
+systemctl enable --now fail2ban
+
+mkdir -p /opt/emanetci
+chown ec2-user:ec2-user /opt/emanetci
+
+# --- SSM Agent: AL2023'te varsayilan kurulu/etkin geliyor, guvenlik agi olarak yine de
+# acikca enable ediliyor (CI/CD SSM Run Command ile deploy edecek, bkz. [[aws-paralel-ortam]]) ---
+systemctl enable --now amazon-ssm-agent 2>/dev/null || true
+
+# --- TLS materyalini SSM'den cek (statik AWS key kullanilmiyor, instance'in kendi
+# IAM roluyle) — manuel scp bir daha gerekmiyor, bkz. [[aws-paralel-ortam]] design.md ---
+if ! command -v aws >/dev/null 2>&1; then
+  dnf install -y unzip
+  curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tmp/awscliv2.zip
+  unzip -q /tmp/awscliv2.zip -d /tmp
+  /tmp/aws/install
+  rm -rf /tmp/awscliv2.zip /tmp/aws
+fi
+
+mkdir -p /etc/ssl/cloudflare
+aws ssm get-parameter --name "${ssm_cert_name}" --with-decryption --region ${region} \
+  --query Parameter.Value --output text > /etc/ssl/cloudflare/aws-test.crt
+aws ssm get-parameter --name "${ssm_key_name}" --with-decryption --region ${region} \
+  --query Parameter.Value --output text > /etc/ssl/cloudflare/aws-test.key
+chmod 644 /etc/ssl/cloudflare/aws-test.crt
+chmod 600 /etc/ssl/cloudflare/aws-test.key
+
+echo "cloud-init tamam: $(date)" > /var/log/bagajpark-cloud-init-done

@@ -44,6 +44,8 @@ yarn-error.log*
 .env*
 # Sunucuda kopyalanır; git clean -fd ile silinmesin diye ignore (örn. docker-compose.env.example → docker-compose.env)
 docker-compose.env
+# Yerel ops credential deposu (sunucu SSH bilgisi vb.) — ops/server.env.example şablonu git'te kalır
+ops/server.env
 
 # vercel
 .vercel
@@ -80,3 +82,10 @@ next-env.d.ts
 # Yerel pazarlama video çıktıları
 /marketing/assets/*.mp4
 /mobile/*.mp4
+
+# Terraform (infra/aws) — state kaynak ID'leri içerir, asla commit edilmez
+# NOT: .terraform.lock.hcl BİLEREK commit edilir (pinned provider version, iac-quality)
+infra/**/.terraform/
+infra/**/*.tfstate
+infra/**/*.tfstate.backup
+infra/**/*.tfvars
