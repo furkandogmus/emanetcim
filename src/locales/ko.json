@@ -1032,7 +1032,7 @@
     "a8": "No. Only online card payments (and future wallet options) are accepted. This keeps a clear payment trail and aligns with platform protection rules."
   },
   "MarketingBecomePartner": {
-    "metaTitle": "파트너 되기 | BagajPark",
+    "metaTitle": "파트너 되기",
     "heroTitle": "매장을 짐 보관소로",
     "heroSubtitle": "온라인 예약·결제로 추가 수익과 방문객을 늘리세요.",
     "b1Title": "새 수익",
@@ -1129,7 +1129,7 @@
   "CityStorage": {
     "istanbul": {
       "label": "이스탄불",
-      "metaTitle": "이스탄불 짐 보관 | BagajPark",
+      "metaTitle": "이스탄불 짐 보관",
       "metaDescription": "주요 명소 근처 안전한 짐 보관. 온라인 예약으로 캐리어 없이 도시를 즐기세요.",
       "headline": "이스탄불 짐 보관",
       "intro": "갈라타, 술탄아흐메트 일대 검증된 매장에 맡기고 가볍게 관광하세요.",
@@ -1138,7 +1138,7 @@
     },
     "ankara": {
       "label": "앙카라",
-      "metaTitle": "앙카라 짐 보관 | BagajPark",
+      "metaTitle": "앙카라 짐 보관",
       "metaDescription": "박물관·시내 근처 안전 보관. 간편한 온라인 예약.",
       "headline": "앙카라 짐 보관",
       "intro": "Kızılay·중심가 지도에서 보관소를 찾아보세요.",
@@ -1147,7 +1147,7 @@
     },
     "izmir": {
       "label": "이즈미르",
-      "metaTitle": "이즈미르 짐 보관 | BagajPark",
+      "metaTitle": "이즈미르 짐 보관",
       "metaDescription": "Konak, Alsancak, 해안 근처 보관. 해안을 가볍게 둘러보세요.",
       "headline": "이즈미르 짐 보관",
       "intro": "무거운 가방 없이 산책 — 지도에서 근처 보관소를 확인하세요.",
@@ -1156,7 +1156,7 @@
     },
     "antalya": {
       "label": "안탈리아",
-      "metaTitle": "안탈리아 짐 보관 | BagajPark",
+      "metaTitle": "안탈리아 짐 보관",
       "metaDescription": "Kaleiçi·해변 근처 관광객 친화 보관. 몇 번의 탭으로 예약.",
       "headline": "안탈리아 짐 보관",
       "intro": "해변과 올드타운 사이, 안전 보관과 늦은 체크아웃에 유용합니다.",
@@ -1165,7 +1165,7 @@
     },
     "bodrum": {
       "label": "보드룸",
-      "metaTitle": "보드룸 짐 보관 | BagajPark",
+      "metaTitle": "보드룸 짐 보관",
       "metaDescription": "마리나·해변 근처 보트·야간·당일 여행용 안전 보관.",
       "headline": "보드룸 짐 보관",
       "intro": "출항·밤 외출 전 검증 매장에 맡기고 온라인 예약하세요.",
@@ -1174,7 +1174,7 @@
     },
     "cappadocia": {
       "label": "카파도키아",
-      "metaTitle": "카파도키아 짐 보관 | BagajPark",
+      "metaTitle": "카파도키아 짐 보관",
       "metaDescription": "열기구·Göreme·Ürgüp 계곡 하이킹을 위한 보관.",
       "headline": "카파도키아 짐 보관",
       "intro": "일출 투어·등산을 가볍게 — 지역 보관소를 지도에서 찾으세요.",
@@ -1183,7 +1183,7 @@
     },
     "berlin": {
       "label": "베를린",
-      "metaTitle": "베를린 짐 보관 | BagajPark",
+      "metaTitle": "베를린 짐 보관",
       "metaDescription": "Hauptbahnhof·명소 근처 안전 보관. 몇 분 만에 온라인 예약.",
       "headline": "베를린 짐 보관",
       "intro": "박물관·브란덴부르크 문·야경 사이 검증 매장을 지도에서.",
@@ -1192,7 +1192,7 @@
     },
     "paris": {
       "label": "파리",
-      "metaTitle": "파리 짐 보관 | BagajPark",
+      "metaTitle": "파리 짐 보관",
       "metaDescription": "Gare du Nord·루브르·지하철 근처 보관.",
       "headline": "파리 짐 보관",
       "intro": "역·박물관 근처 유연한 시간 — 온라인으로 슬롯 예약.",
@@ -1201,7 +1201,7 @@
     },
     "barcelona": {
       "label": "바르셀로나",
-      "metaTitle": "바르셀로나 짐 보관 | BagajPark",
+      "metaTitle": "바르셀로나 짐 보관",
       "metaDescription": "사그라다 파밀리아·해변·시내 근처 보관.",
       "headline": "바르셀로나 짐 보관",
       "intro": "라 람bla·해안을 가볍게 — 지도에서 가용성 확인.",
@@ -1210,7 +1210,7 @@
     },
     "rome": {
       "label": "로마",
-      "metaTitle": "로마 짐 보관 | BagajPark",
+      "metaTitle": "로마 짐 보관",
       "metaDescription": "Termini·역사 중심가 근처 보관.",
       "headline": "로마 짐 보관",
       "intro": "콜로세움·바티칸 산책 전 가볍게 — 지도의 신뢰 매장.",
@@ -1219,7 +1219,7 @@
     },
     "amsterdam": {
       "label": "암스테르담",
-      "metaTitle": "암스테르담 짐 보관 | BagajPark",
+      "metaTitle": "암스테르담 짐 보관",
       "metaDescription": "Centraal·운하 고리 근처 보관.",
       "headline": "암스테르담 짐 보관",
       "intro": "박물관·자전거 일정을 가볍게 — 지도에서 지점 선택.",
@@ -1228,14 +1228,14 @@
     },
     "london": {
       "label": "런던",
-      "metaTitle": "런던 짐 보관 | BagajPark",
+      "metaTitle": "런던 짐 보관",
       "metaDescription": "Kings Cross·웨스트엔드 근처 보관.",
       "headline": "런던 짐 보관",
       "intro": "뮤지컬·박물관 일정을 편하게 — 현지 파트너와 유연 보관.",
       "searchQuery": "Kings Cross",
       "cta": "런던 매장 보기"
     },
-    "indexMetaTitle": "도시별 수하물 보관 | BagajPark",
+    "indexMetaTitle": "도시별 수하물 보관",
     "indexMetaDescription": "주요 도시에서 안전한 수하물 보관. 지도를 열고 가까운 매장을 예약하세요.",
     "indexHeadline": "도시별 보관 장소",
     "indexIntro": "도시를 고르면 지역 페이지로 이동해 지도가 알맞게 맞춰집니다."

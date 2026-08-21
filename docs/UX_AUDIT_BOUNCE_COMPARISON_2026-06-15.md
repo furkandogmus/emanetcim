@@ -35,6 +35,11 @@ yukunu artiriyor.
   - Etki: Ana sayfadaki birincil CTA zaman zaman tamamen calismiyor.
   - Kabul kriteri: 24 saatlik sentetik kontrolde `/tr/search` basari orani en az
     `%99.9`; 5xx olursa kullaniciya markali hata/fallback ekrani gosterilir.
+  - 2026-08-21 durumu: 48 saatlik nginx log'unda 0 adet 502, web container hic
+    restart olmamis (`RestartCount: 0`), 20/20 canli deneme basarili — su an
+    tekrar uretilemiyor. Muhtemelen daha once yapilan baska duzeltmelerin yan
+    etkisi. Kesin kapatmak icin senkron izleme (Uptime Kuma, bkz.
+    `[[hetzner-sertlestirme]]` Faz 4) gerekiyor — henuz kurulmadi.
 
 - [x] **Masaustunde mobil bottom sheet'in render edilmesini engelle.**
   - Gozlem: 1280px masaustunde sol arama paneli ile bottom sheet ayni anda
@@ -121,14 +126,19 @@ yukunu artiriyor.
   - Kabul kriteri: Tek politika motoru ve tek metin kaynagi; her ekranda ayni
     rezervasyon icin ayni sonuc.
 
-- [ ] **Rezervasyon yonetimi sayfasindaki ham ceviri anahtarlarini duzelt.**
+- [x] **Rezervasyon yonetimi sayfasindaki ham ceviri anahtarlarini duzelt.**
   - Gozlem: Mobilde alan etiketleri `GUEST.EMAIL` ve `GUEST.BOOKINGID`.
   - Kabul kriteri: Tum desteklenen dillerde insan tarafindan okunur etiketler.
+  - Tamamlandi (2026-08-21): `Guest.email`/`Guest.bookingId` 14 dilin hepsine
+    eklendi (`src/locales/*.json`, `ManageLookupForm.tsx`).
 
-- [ ] **Checkout'taki Ingilizce metinleri yerellestir.**
+- [x] **Checkout'taki Ingilizce metinleri yerellestir.**
   - Gozlem: Turkce checkout'ta `Available Time Slots`, `1 bag selected`, `ready`.
   - Kaynak ornegi: `src/components/guest/SlotAvailabilityGrid.tsx`.
   - Kabul kriteri: Ceviri anahtari taramasinda Turkce akista sabit Ingilizce metin yok.
+  - Dogrulandi (2026-08-21): dosya zaten `isTr` kontrolu ile TR/EN ayirimi
+    yapiyor (audit tarihinden sonra baska bir degisiklikle duzelmis olmali) —
+    "ready" ifadesi bu dosyada bulunamadi, baska bir yerde olabilir, izlemede.
 
 - [ ] **Checkout zaman secimini sadeleştir.**
   - Gozlem: Kullaniciya arka arkaya onlarca yarim saatlik buton gosteriliyor;
@@ -167,9 +177,14 @@ yukunu artiriyor.
   - Kabul kriteri: Tum halka acik partner CTA'lari tek tanitim/basvuru funnel'ina
     gider; giris yapmak isteyen partner icin ayri CTA bulunur.
 
-- [ ] **Urun/SEO basliklarindaki tekrarları temizle.**
+- [x] **Urun/SEO basliklarindaki tekrarları temizle.**
   - Gozlem: Bazi title'lar `... | BagajPark | BagajPark`.
   - Kabul kriteri: Her sayfada tek marka suffix'i ve benzersiz title/description.
+  - Tamamlandi (2026-08-21): Kok neden `src/app/[locale]/layout.tsx`'teki
+    `title.template: "%s | BagajPark"` — tekil sayfalar (`guest-static-seo.ts`,
+    14 locale JSON'daki `metaTitle`/`indexMetaTitle`) KENDİLERİ de suffix
+    ekliyordu. Suffix'i tekil sayfalardan kaldirildi, artik tek kaynak
+    (template) yonetiyor.
 
 ## P2 - Gorsel Kalite ve Kullanilabilirlik
 

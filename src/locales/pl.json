@@ -1032,7 +1032,7 @@
     "a8": "Nie. Tylko płatność kartą online (w przyszłości portfele), dla przejrzystości i zasad ochrony platformy."
   },
   "MarketingBecomePartner": {
-    "metaTitle": "Zostań partnerem | BagajPark",
+    "metaTitle": "Zostań partnerem",
     "heroTitle": "Zamień sklep w przechowalnię bagażu",
     "heroSubtitle": "Dodatkowy przychód i ruch dzięki rezerwacjom i płatnościom online.",
     "b1Title": "Nowy przychód",
@@ -1129,7 +1129,7 @@
   "CityStorage": {
     "istanbul": {
       "label": "Stambuł",
-      "metaTitle": "Przechowalnia bagażu Stambuł | BagajPark",
+      "metaTitle": "Przechowalnia bagażu Stambuł",
       "metaDescription": "Bezpieczne przechowywanie bagażu w Stambule przy głównych atrakcjach. Rezerwuj online i zwiedzaj bez walizek.",
       "headline": "Przechowalnia bagażu w Stambule",
       "intro": "Zostaw torby w sprawdzonych sklepach przy Galacie, Sultanahmed i centrum turystycznym — zwiedzaj bez ciężaru.",
@@ -1138,7 +1138,7 @@
     },
     "ankara": {
       "label": "Ankara",
-      "metaTitle": "Przechowalnia bagażu Ankara | BagajPark",
+      "metaTitle": "Przechowalnia bagażu Ankara",
       "metaDescription": "Bezpieczne przechowywanie w Ankarze przy muzeach i centrum. Prosta rezerwacja online.",
       "headline": "Przechowalnia bagażu w Ankarze",
       "intro": "Punkty przy Kızılay i śródmieściu na mapie; wygodnie do muzeów i biznesu.",
@@ -1147,7 +1147,7 @@
     },
     "izmir": {
       "label": "Izmir",
-      "metaTitle": "Przechowalnia bagażu Izmir | BagajPark",
+      "metaTitle": "Przechowalnia bagażu Izmir",
       "metaDescription": "Przechowywanie w Izmirze przy Konak, Alsancak i nabrzeżu. Lżej wzdłuż wybrzeża.",
       "headline": "Przechowalnia bagażu w Izmirze",
       "intro": "Spaceruj przy morzu bez ciężkich toreb; znajdź punkt na mapie.",
@@ -1156,7 +1156,7 @@
     },
     "antalya": {
       "label": "Antalya",
-      "metaTitle": "Przechowalnia bagażu Antalya | BagajPark",
+      "metaTitle": "Przechowalnia bagażu Antalya",
       "metaDescription": "Przechowywanie dla turystów przy Kaleiçi i plażach w Antalyi. Rezerwacja w kilka kliknięć.",
       "headline": "Przechowalnia bagażu w Antalyi",
       "intro": "Między plażą a spacerem po starej mieścinie — bezpieczny bagaż i późne wymeldowanie.",
@@ -1165,7 +1165,7 @@
     },
     "bodrum": {
       "label": "Bodrum",
-      "metaTitle": "Przechowalnia bagażu Bodrum | BagajPark",
+      "metaTitle": "Przechowalnia bagażu Bodrum",
       "metaDescription": "Bezpieczne przechowywanie przy mariny i plażach w Bodrum na rejsy, wieczory i wycieczki.",
       "headline": "Przechowalnia bagażu w Bodrum",
       "intro": "Przed rejsem lub wieczorem w mieście zostaw bagaż w sprawdzonym sklepie — rezerwuj online.",
@@ -1174,7 +1174,7 @@
     },
     "cappadocia": {
       "label": "Kapadocja",
-      "metaTitle": "Przechowalnia bagażu Kapadocja | BagajPark",
+      "metaTitle": "Przechowalnia bagażu Kapadocja",
       "metaDescription": "Przechowywanie na loty balonem i wędrówki w dolinach Göreme i Ürgüp.",
       "headline": "Przechowalnia bagażu w Kapadocji",
       "intro": "Lekki plecak na wschód słońca i szlaki; punkty na mapie regionu.",
@@ -1183,7 +1183,7 @@
     },
     "berlin": {
       "label": "Berlin",
-      "metaTitle": "Przechowalnia bagażu Berlin | BagajPark",
+      "metaTitle": "Przechowalnia bagażu Berlin",
       "metaDescription": "Bezpieczne przechowywanie przy dworcu głównym i atrakcjach Berlina. Rezerwacja online w kilka minut.",
       "headline": "Przechowalnia bagażu w Berlinie",
       "intro": "Między muzeami, Bramą Brandenburską a nocnym życiem — sprawdzone sklepy na mapie.",
@@ -1192,7 +1192,7 @@
     },
     "paris": {
       "label": "Paryż",
-      "metaTitle": "Przechowalnia bagażu Paryż | BagajPark",
+      "metaTitle": "Przechowalnia bagażu Paryż",
       "metaDescription": "Przechowywanie przy Gare du Nord, Luwrze i liniach metra.",
       "headline": "Przechowalnia bagażu w Paryżu",
       "intro": "Przy dworcach i muzeach, elastyczne godziny; zarezerwuj slot online.",
@@ -1201,7 +1201,7 @@
     },
     "barcelona": {
       "label": "Barcelona",
-      "metaTitle": "Przechowalnia bagażu Barcelona | BagajPark",
+      "metaTitle": "Przechowalnia bagażu Barcelona",
       "metaDescription": "Przechowywanie przy Sagrada Família, plaży i centrum Barcelony.",
       "headline": "Przechowalnia bagażu w Barcelonie",
       "intro": "La Rambla i wybrzeże bez toreb; dostępność na mapie.",
@@ -1210,7 +1210,7 @@
     },
     "rome": {
       "label": "Rzym",
-      "metaTitle": "Przechowalnia bagażu Rzym | BagajPark",
+      "metaTitle": "Przechowalnia bagażu Rzym",
       "metaDescription": "Przechowywanie przy Termini i historycznym centrum Rzymu.",
       "headline": "Przechowalnia bagażu w Rzymie",
       "intro": "Lżej przed Koloseum i Watykanem — lokalne sklepy na mapie.",
@@ -1219,7 +1219,7 @@
     },
     "amsterdam": {
       "label": "Amsterdam",
-      "metaTitle": "Przechowalnia bagażu Amsterdam | BagajPark",
+      "metaTitle": "Przechowalnia bagażu Amsterdam",
       "metaDescription": "Przechowywanie przy Centraal i pierścieniu kanałów.",
       "headline": "Przechowalnia bagażu w Amsterdamie",
       "intro": "Muzea i rowery bez ciężkich toreb; wybierz punkt na mapie.",
@@ -1228,14 +1228,14 @@
     },
     "london": {
       "label": "Londyn",
-      "metaTitle": "Przechowalnia bagażu Londyn | BagajPark",
+      "metaTitle": "Przechowalnia bagażu Londyn",
       "metaDescription": "Przechowywanie przy Kings Cross i West Endzie.",
       "headline": "Przechowalnia bagażu w Londynie",
       "intro": "Teatr i muzea łatwiej — elastyczne przechowywanie u lokalnych partnerów.",
       "searchQuery": "Kings Cross",
       "cta": "Otwórz sklepy w Londynie"
     },
-    "indexMetaTitle": "Przechowalnia bagażu — miasta | BagajPark",
+    "indexMetaTitle": "Przechowalnia bagażu — miasta",
     "indexMetaDescription": "Bezpieczne przechowanie bagażu w dużych miastach. Otwórz mapę i zarezerwuj zaufany punkt.",
     "indexHeadline": "Przechowalnia według miasta",
     "indexIntro": "Wybierz miasto, przejdź na stronę lokalną i wyszukaj na mapie z dobrym centrum."

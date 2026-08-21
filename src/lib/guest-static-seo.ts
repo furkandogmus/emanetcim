@@ -15,47 +15,47 @@ export type GuestStaticSeoKey =
 
 const TR: Record<GuestStaticSeoKey, { title: string; description: string }> = {
   about: {
-    title: "Hakkımızda | BagajPark",
+    title: "Hakkımızda",
     description:
       "BagajPark nedir? Yerel esnaf ağıyla Türkiye’de güvenli valiz emanet ve bagaj bırakma. Misyonumuz, şehri valizensiz keşfetmenizi sağlamak.",
   },
   contact: {
-    title: "İletişim | BagajPark",
+    title: "İletişim",
     description:
       "BagajPark destek: sorularınız, rezervasyon ve operasyon için WhatsApp ve e-posta. 7/24 yanınızdayız.",
   },
   faq: {
-    title: "Sıkça Sorulan Sorular | BagajPark",
+    title: "Sıkça Sorulan Sorular",
     description:
       "Valiz emanet, iptal-iade, ödeme, mühürleme ve güvence hakkında SSS. BagajPark ile güvenli bagaj saklama.",
   },
   partners: {
-    title: "Esnaf Ortaklığı | BagajPark",
+    title: "Esnaf Ortaklığı",
     description:
       "Dükkanınızı valiz emanet noktası yapın; ek gelir ve dijital rezervasyon. BagajPark ortaklık modeli ve başvuru.",
   },
   privacy: {
-    title: "Gizlilik Politikası | BagajPark",
+    title: "Gizlilik Politikası",
     description:
       "Kişisel verilerinizin işlenmesi, çerezler ve paylaşım. BagajPark gizlilik taahhüdü.",
   },
   terms: {
-    title: "Kullanım Koşulları | BagajPark",
+    title: "Kullanım Koşulları",
     description:
       "BagajPark platform kullanım şartları, sorumluluk, iptal ve mühürleme kuralları.",
   },
   kvkk: {
-    title: "KVKK Aydınlatma Metni | BagajPark",
+    title: "KVKK Aydınlatma Metni",
     description:
       "6698 sayılı KVKK kapsamında veri işleme, haklarınız ve iletişim. BagajPark aydınlatma metni.",
   },
   login: {
-    title: "Giriş Yap | BagajPark",
+    title: "Giriş Yap",
     description:
       "Misafir veya esnaf hesabınızla BagajPark’a giriş yapın; rezervasyon ve panel erişimi.",
   },
   register: {
-    title: "Kayıt Ol | BagajPark",
+    title: "Kayıt Ol",
     description:
       "Gezgin olarak ücretsiz kayıt; yakınınızdaki emanet noktalarını bulun ve güvenle valiz bırakın.",
   },
@@ -63,47 +63,47 @@ const TR: Record<GuestStaticSeoKey, { title: string; description: string }> = {
 
 const EN: Record<GuestStaticSeoKey, { title: string; description: string }> = {
   about: {
-    title: "About Us | BagajPark",
+    title: "About Us",
     description:
       "BagajPark connects travelers with local shops for secure luggage storage across Turkey. Our mission: explore cities bag-free.",
   },
   contact: {
-    title: "Contact | BagajPark",
+    title: "Contact",
     description:
       "Reach BagajPark support via WhatsApp or email for bookings, partners, and operations. We are here to help.",
   },
   faq: {
-    title: "FAQ | BagajPark",
+    title: "FAQ",
     description:
       "Answers about luggage storage, cancellations, refunds, payments, sealing, and coverage. BagajPark guest FAQ.",
   },
   partners: {
-    title: "Partner With Us | BagajPark",
+    title: "Partner With Us",
     description:
       "Turn your shop into a luggage drop-off point. Extra revenue and digital bookings with the BagajPark partner program.",
   },
   privacy: {
-    title: "Privacy Policy | BagajPark",
+    title: "Privacy Policy",
     description:
       "How BagajPark processes personal data, cookies, and sharing. Our privacy commitment.",
   },
   terms: {
-    title: "Terms of Use | BagajPark",
+    title: "Terms of Use",
     description:
       "BagajPark platform terms, liability, cancellation rules, and sealing requirements.",
   },
   kvkk: {
-    title: "Privacy Notice (KVKK) | BagajPark",
+    title: "Privacy Notice (KVKK)",
     description:
       "Turkey KVKK disclosure: data processing, your rights, and how to contact BagajPark.",
   },
   login: {
-    title: "Sign In | BagajPark",
+    title: "Sign In",
     description:
       "Sign in to BagajPark as a guest or partner for bookings and dashboard access.",
   },
   register: {
-    title: "Create Account | BagajPark",
+    title: "Create Account",
     description:
       "Register as a guest to find nearby luggage storage and book secure bag drop-off in Turkey.",
   },

@@ -1032,7 +1032,7 @@
     "a8": "No. Only online card payments (and future wallet options) are accepted. This keeps a clear payment trail and aligns with platform protection rules."
   },
   "MarketingBecomePartner": {
-    "metaTitle": "كن شريكًا | BagajPark",
+    "metaTitle": "كن شريكًا",
     "heroTitle": "حوّل متجرك إلى نقطة تخزين أمتعة",
     "heroSubtitle": "دخل إضافي وزيارات عبر الحجز والدفع عبر الإنترنت.",
     "b1Title": "دخل جديد",
@@ -1138,7 +1138,7 @@
     },
     "ankara": {
       "label": "أنقرة",
-      "metaTitle": "تخزين أمتعة أنقرة | BagajPark",
+      "metaTitle": "تخزين أمتعة أنقرة",
       "metaDescription": "تخزين أمتعة آمن قرب المتاحف ووسط أنقرة. حجز بسيط عبر الإنترنت.",
       "headline": "تخزين أمتعة في أنقرة",
       "intro": "اعثر على نقاط التخزين حول كيزيلاي والممر المركزي على الخريطة؛ سهولة الوصول للمتاحف والأعمال.",
@@ -1147,7 +1147,7 @@
     },
     "izmir": {
       "label": "إزمير",
-      "metaTitle": "تخزين أمتعة إزمير | BagajPark",
+      "metaTitle": "تخزين أمتعة إزمير",
       "metaDescription": "تخزين أمتعة قرب كوناك وألصانجاك والواجهة البحرية في إزمير. تنقّل بخفة على الساحل.",
       "headline": "تخزين أمتعة في إزمير",
       "intro": "تمشَّ على الواجهة دون حقائب ثقيلة؛ اكتشف التخزين القريب على الخريطة.",
@@ -1201,7 +1201,7 @@
     },
     "barcelona": {
       "label": "برشلونة",
-      "metaTitle": "تخزين أمتعة برشلونة | BagajPark",
+      "metaTitle": "تخزين أمتعة برشلونة",
       "metaDescription": "تخزين أمتعة قرب ساجرادا فاميليا والشاطئ ووسط برشلونة.",
       "headline": "تخزين أمتعة في برشلونة",
       "intro": "استمتع برامبلا والساحل دون حقائب؛ راجع التوفر على الخريطة.",
@@ -1235,7 +1235,7 @@
       "searchQuery": "King's Cross",
       "cta": "افتح متجرًا في لندن"
     },
-    "indexMetaTitle": "تخزين الأمتعة حسب المدن | BagajPark",
+    "indexMetaTitle": "تخزين الأمتعة حسب المدن",
     "indexMetaDescription": "اعثر على تخزين آمن في المدن الكبرى. افتح الخريطة واحجز متجرًا موثوقًا قريبًا.",
     "indexHeadline": "تخزين الأمتعة حسب المدينة",
     "indexIntro": "اختر مدينة للانتقال إلى الصفحة المحلية وفتح الخريطة بمركز مناسب."
