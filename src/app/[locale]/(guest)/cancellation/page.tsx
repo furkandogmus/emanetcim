@@ -4,26 +4,29 @@ import { Link } from "@/i18n/routing";
 import { Clock, RefreshCw, CreditCard, ShieldCheck } from "lucide-react";
 import { alternatesForPath } from "@/lib/seo-alternates";
 
+// 2026-08-21: Tek politika motoru ile hizalandi — BookingService.cancelBooking()
+// check-in zamanina bakmaksizin HER ZAMAN tam iade uyguluyor ("Bounce-style: full
+// refund"). Onceki 3-katmanli metin (24s/1-24s/1s altinda kademeli iade) koddaki
+// gercek davranisla hic eslesmiyordu; audit'te (UX_AUDIT_BOUNCE_COMPARISON) bulundu.
 const copy = {
   tr: {
     title: "İptal ve İade Politikası",
-    subtitle:
-      "Esnek iptal, şeffaf iade. Son dakika değişikliklerinde bile koruma altındasınız.",
-    badge: "ESNEK İPTAL",
+    subtitle: "Check-in'e kadar her zaman ücretsiz iptal, her zaman tam iade.",
+    badge: "HER ZAMAN ÜCRETSİZ İPTAL",
     heroTitle: "Endişesiz",
     heroTitle2: "İptal",
-    tier1Title: "24 Saatten Fazla Kala",
+    tier1Title: "Check-in'e Kadar",
     tier1Badge: "Tam İade",
     tier1Desc:
-      "Check-in tarihinize 24 saatten fazla varsa, ödediğiniz tutarın tamamı kartınıza iade edilir.",
-    tier2Title: "1-24 Saat Kala",
-    tier2Badge: "Yarı İade",
+      "Check-in saatinize kadar istediğiniz an iptal edebilirsiniz; ödediğiniz tutarın tamamı kartınıza iade edilir. Gizli koşul yok.",
+    tier2Title: "Otomatik ve Hızlı",
+    tier2Badge: "Aracısız",
     tier2Desc:
-      "Check-in'e 1-24 saat kala iptallerde, ödediğiniz tutarın %50'si kartınıza iade edilir.",
-    tier3Title: "1 Saatten Az Kala",
-    tier3Badge: "Kredi",
+      "İptal talebiniz anında işleme alınır; onay için kimseyi beklemeniz gerekmez.",
+    tier3Title: "Hiçbir Ücret Yok",
+    tier3Badge: "Ek Masraf Yok",
     tier3Desc:
-      "Check-in'e 1 saatten az kala iptallerde ücret iadesi yapılmaz, ancak tutar bir sonraki rezervasyonunuzda kullanabileceğiniz kredi olarak hesabınıza tanımlanır.",
+      "İptal işleminde kesinti, ceza veya işlem ücreti uygulanmaz.",
     howToTitle: "Nasıl İptal Ederim?",
     howTo1: "Rezervasyonlarım sayfasına gidin",
     howTo2: "İptal etmek istediğiniz rezervasyonu bulun",
@@ -31,28 +34,27 @@ const copy = {
     howTo4: "İptal onayı otomatik olarak gerçekleşir",
     noteTitle: "Önemli Not",
     noteBody:
-      "İptal durumunda iade, ödeme yönteminize bağlı olarak 5-10 iş günü içinde hesabınıza yansır. Kredi tutarları 6 ay süreyle geçerlidir.",
+      "İptal durumunda iade, ödeme yönteminize bağlı olarak 5-10 iş günü içinde hesabınıza yansır.",
     cta: "Rezervasyon Yap",
   },
   en: {
     title: "Cancellation & Refund Policy",
-    subtitle:
-      "Flexible cancellation, transparent refunds. Protected even with last-minute changes.",
-    badge: "FLEXIBLE CANCEL",
+    subtitle: "Free cancellation, full refund, anytime before check-in.",
+    badge: "ALWAYS FREE TO CANCEL",
     heroTitle: "Worry-Free",
     heroTitle2: "Cancellation",
-    tier1Title: "More Than 24 Hours",
+    tier1Title: "Until Check-in",
     tier1Badge: "Full Refund",
     tier1Desc:
-      "If you cancel more than 24 hours before check-in, the full amount is refunded to your card.",
-    tier2Title: "1-24 Hours Before",
-    tier2Badge: "Partial Refund",
+      "Cancel anytime before your check-in time for a full refund to your card — no hidden conditions.",
+    tier2Title: "Automatic & Fast",
+    tier2Badge: "No Waiting",
     tier2Desc:
-      "Cancellations 1-24 hours before check-in receive a 50% refund to your card.",
-    tier3Title: "Less Than 1 Hour",
-    tier3Badge: "Credit",
+      "Your cancellation is processed instantly — no approval needed from anyone.",
+    tier3Title: "No Fees",
+    tier3Badge: "No Extra Cost",
     tier3Desc:
-      "Cancellations under 1 hour before check-in are not refunded in cash, but the amount is added as credit for your next booking.",
+      "No deductions, penalties, or processing fees on cancellation.",
     howToTitle: "How to Cancel?",
     howTo1: "Go to My Bookings page",
     howTo2: "Find the booking you want to cancel",
@@ -60,7 +62,7 @@ const copy = {
     howTo4: "Cancellation is confirmed automatically",
     noteTitle: "Important Note",
     noteBody:
-      "Refunds are processed within 5-10 business days depending on your payment method. Credits are valid for 6 months.",
+      "Refunds are processed within 5-10 business days depending on your payment method.",
     cta: "Book Now",
   },
 };

@@ -446,11 +446,7 @@ export default function BookingsClient({
               >
                 {t('cancelDialogTitle')}
               </h2>
-              <CancellationPolicy
-                checkInTime={cancelModalBooking.checkInTime}
-                showRefundEstimate={cancelModalBooking.status === 'PAID'}
-                totalPaidTry={moneyToNumber(cancelModalBooking.totalPrice)}
-              />
+              <CancellationPolicy />
             </div>
             <div className="sticky bottom-0 flex gap-3 p-4 border-t border-gray-100 bg-white">
               <button

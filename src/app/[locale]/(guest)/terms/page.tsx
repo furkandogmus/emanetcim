@@ -113,9 +113,9 @@ const SECTIONS: Section[] = [
   {
     title: "10. İPTAL VE ÜCRET İADESİ KOŞULLARI",
     paragraphs: [
-      "10.1. Rezervasyon İptali: Rezervasyon saatinden 24 saat öncesine kadar tam iade yapılır. Rezervasyon saatine 2 saatten az kala yapılan iptallerde tutarın %50'si kesilerek iade edilir. Rezervasyon saati geçtikten sonra iade yapılmaz.",
+      "10.1. Rezervasyon İptali: Kullanıcı, check-in (teslim) saatine kadar rezervasyonunu istediği an ücretsiz iptal edebilir; ödenen tutarın tamamı iade edilir. Herhangi bir kesinti veya ceza uygulanmaz.",
       "10.2. Hizmet Kusuru: İş Ortağının kapalı olması veya mühür bulunmaması gibi durumlarda bildirim yapılması şartıyla tam iade yapılır.",
-      "10.3. İade Yöntemi: İadeler yalnızca ödeme yapılan karta 3-10 iş günü içinde yansıtılır.",
+      "10.3. İade Yöntemi: İadeler yalnızca ödeme yapılan karta 5-10 iş günü içinde yansıtılır.",
       "10.4. Değişiklik: Rezervasyon değişikliklerinde oluşacak fiyat farkları tahsil edilir; daha düşük fiyatlı değişikliklerde fark iade edilmez (cüzdan bakiyesi olarak tanımlanabilir).",
     ],
   },
