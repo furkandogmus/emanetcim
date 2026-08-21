@@ -99,6 +99,7 @@ jobs:
               "set -e",
               "aws s3 cp s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/docker-compose.yml /opt/emanetci/docker-compose.yml",
               "cd /opt/emanetci",
+              "docker rm -f $(docker ps -aq --filter name=_emanetci-) 2>/dev/null || true",
               "docker compose --env-file docker-compose.env pull web --quiet",
               "docker compose --env-file docker-compose.env up -d --no-build",
               "docker compose --env-file docker-compose.env restart nginx",
@@ -111,7 +112,7 @@ jobs:
             sleep 5
             STATUS=$(aws ssm list-command-invocations --command-id "$COMMAND_ID" --details \
               --query "CommandInvocations[0].Status" --output text 2>/dev/null || echo "Pending")
-            echo "[$i/30] Status: $STATUS"
+            echo "[$i/60] Status: $STATUS"
             if [ "$STATUS" = "Success" ]; then
               echo "✅ Deploy tamamlandı: $(date)"
               exit 0
@@ -122,5 +123,5 @@ jobs:
               exit 1
             fi
           done
-          echo "❌ Timeout: komut 150s içinde tamamlanmadı"
+          echo "❌ Timeout: komut 300s içinde tamamlanmadı"
           exit 1
