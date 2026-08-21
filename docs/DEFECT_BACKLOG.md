@@ -17,12 +17,15 @@
 | Veri bütünlüğü + iş kuralları | ✅ tamamlandı | 5 P0, 11 P1, 7 P2 |
 | Ödeme entegrasyonu durumu | ✅ tamamlandı | **1 P0 (kök neden)** |
 | İç API / cron yetkilendirmesi | ✅ tamamlandı | 2 P1 |
-| Misafir rezervasyon akışı (UI) | ❌ yarım kaldı | ajan harcama limitinde öldü |
-| Misafir diğer sayfalar + auth | ❌ yarım kaldı | ajan harcama limitinde öldü |
-| Partner paneli | ❌ yarım kaldı | ajan harcama limitinde öldü |
-| Admin paneli | ❌ yarım kaldı | ajan harcama limitinde öldü |
-| Backend güvenlik/doğruluk | ❌ yarım kaldı | ajan harcama limitinde öldü |
-| i18n (14 dil) | ❌ yarım kaldı | ajan harcama limitinde öldü |
+| API rol/auth kapsaması (67 route) | ✅ tamamlandı | 0 yeni açık — bkz. "Doğrulanmış güvenli" |
+| i18n anahtar bütünlüğü (14 dil) | ✅ tamamlandı | 1 P1 (138 anahtar × 12 dil) |
+| Aralıklı 502 teşhisi | ✅ tamamlandı | 1 P1 — sebep uygulama değil, Cloudflare |
+| Misafir rezervasyon akışı (UI) | ❌ yapılmadı | ajan harcama limitinde öldü |
+| Misafir diğer sayfalar + auth (UI) | ❌ yapılmadı | ajan harcama limitinde öldü |
+| Partner paneli (UI + yetenek) | ❌ yapılmadı | ajan harcama limitinde öldü |
+| Admin paneli (UI + yetenek) | ❌ yapılmadı | ajan harcama limitinde öldü |
+| IDOR / kaynak sahipliği detayı | ❌ yapılmadı | rol kontrolü var, *sahiplik* kontrolü tek tek okunmadı |
+| i18n çeviri KALİTESİ | ❌ yapılmadı | eksik anahtar sayıldı, yanlış çeviri taranmadı |
 
 Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denetimini ve
 21-22 Ağustos'ta elle bulunan hataları içeriyor. Kalan 6 yüzey hâlâ taranmayı bekliyor.
@@ -300,6 +303,52 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
 - **Çözüm**: *operasyonel* — zamanlamanın tek kaynağı host seviyesinde olsun,
   başarısız/kaçırılan çalıştırma alarmıyla. `vercel.json` kayıt defteri değil.
 
+### [P1-12] 14 dilin 12'si aynı 138 çeviri anahtarını eksik; en az biri canlıda ham görünüyor
+- **Nerede**: `src/locales/*.json`
+- **Kanıt** (ölçüm — anahtarları düzleştirip Türkçe referansla karşılaştıran bir script
+  çalıştırdım):
+  | Diller | Anahtar | tr'de olup eksik |
+  |---|---|---|
+  | ar, bg, de, es, fa, fr, it, ja, ko, pl, ru, zh | 1192 | **138** |
+  | en | 1329 | 1 (`AccountPrivacy.errors.guestContactRequired`) |
+  | tr (referans) | 1330 | 0 |
+
+  138'in namespace dağılımı: `Partner` 40, `Guest` 27, `CityStorage` 27,
+  `AccountPrivacy` 15, `WebPush` 8, `MarketingHotels` 8, `PartnerPromo` 6,
+  `Errors` 3, `Admin` 2, `UserNav` 1, `Footer` 1.
+
+  Misafire görünen 31 anahtar arasında **ana sayfa SSS'inin tamamı** (`homeFaq1Q/A`,
+  `2Q/A`, `3Q/A`), arama filtreleri (`showFilters`, `hideFilters`, `sortByHourly`),
+  rezervasyon sorgulama/yönetme akışı (7 anahtar), dükkan detayı (`shopDetailAbout`)
+  ve giriş modalı (4 anahtar) var.
+
+  Canlı doğrulama (Playwright, gerçek sayfa): `/de` ve `/ar` ana sayfalarında
+  **`Footer.sitemap` ham anahtar olarak ekrana basılıyor**; `/tr` temiz.
+  Prod web container log'unda da aynı hata akıyor:
+  `Error: MISSING_MESSAGE: Footer.sitemap (ko)`, `Guest.showFilters (ar)`,
+  `Guest.sortByHourly (de)`.
+- **Neden önemli**: Türkçe dışındaki her dilde kullanıcı ya ham anahtar görüyor ya da
+  boş bir bölüm — turist odaklı bir üründe İngilizce dışı diller tam da hedef kitle.
+- **Çözüm**: *veri/içerik* — 138 anahtarı 12 dile çevir. Sonra *kod*: CI'a eksik
+  anahtar taraması ekle (bu script birebir bu iş için kullanılabilir), yoksa aynı
+  boşluk her yeni özellikte tekrar oluşur.
+
+### [P1-13] Aralıklı 502 Cloudflare kaynaklı, uygulama kaynaklı değil
+- **Nerede**: Cloudflare ↔ origin (Hetzner nginx)
+- **Kanıt**: Haziran denetiminde P0 olarak açılıp "tekrar üretilemiyor" diye açık
+  bırakılan 502'nin bir örneğini 2026-08-22'de yakaladım
+  (`/api/admin/setup` → 502). Hemen ardından: aynı uca 5 istek → 5×200; ana sayfa,
+  arama ve `/api/health`'e 20'şer istek → **60/60 200**. Kritik nokta: aynı pencerede
+  **nginx log'unda tek bir 502 veya upstream hatası yok**
+  (`docker compose logs nginx --since=30m | grep -iE "502|upstream"` → boş).
+- **Neden önemli**: nginx isteği hiç görmediyse 502'yi origin üretmemiştir — yani bu
+  bir uygulama çökmesi değil, Cloudflare'ın origin'e ulaşamadığı anlık bir kesinti.
+  Haziran'dan beri uygulama tarafında aranıyordu; yanlış yerde aranıyormuş.
+- **Çözüm**: *operasyonel* — Cloudflare tarafında origin health/error oranını izle
+  (Cloudflare Analytics → Errors by origin). Uygulama kodunda aranacak bir şey yok.
+  Kalıcı kapatmak için origin'e dışarıdan bağımsız bir uptime kontrolü gerekiyor
+  (bkz. `openspec/changes/hetzner-sertlestirme` Faz 4 — henüz kurulmadı).
+
 ---
 
 ## P2 — Düzeltilmeli ama acil değil
@@ -330,6 +379,28 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
 - **[P2-7] Bir dükkan `isVerified = true` ama hiçbir doğrulama yok; `responseTimeMinutes`
   platform genelinde 0** ve `src/` içinde bu kolonu yazan hiçbir kod yolu yok. İki
   güven rozeti de karşılıksız. *Kod* — gerçek veriden hesapla ya da gösterme.
+
+---
+
+## Doğrulanmış GÜVENLİ (tekrar denetlenmesin diye)
+
+Bunları kontrol ettim ve **doğru** çalışıyorlar; listede olmaları "bakıldı, sorun yok"
+demektir:
+
+- **Mobil API yetkilendirmesi sağlam.** 40 mobil ucun tamamı `requireMobileUser` /
+  `requireRole` kullanıyor; kullanmayanlar yalnızca auth uçlarının kendisi
+  (`login`, `register`, `otp`, `password-reset`, `refresh`, `verify-email`, OAuth) ve
+  bilinçli olarak genel olan okuma uçları (`shops/[id]`, `shops/nearby`,
+  `referrals/validate`). Doğru tasarım.
+- **`/api/admin/setup` iyi savunulmuş.** Varsayılan kapalı (`ADMIN_SETUP_ENABLED` +
+  `ADMIN_SETUP_KEY` birlikte gerekli), `crypto.timingSafeEqual` ile sabit-zamanlı
+  anahtar karşılaştırması, rate limit (15 dk'da 10), ve ilk ADMIN oluştuktan sonra
+  kendini kilitliyor. Canlıda `GET` ile durumu sorulduğunda anahtar sızdırmıyor.
+- **Sayfa/rol koruması middleware'de doğru.** `/admin` ve `/api/admin` yalnızca
+  `ADMIN`; `/partner` ve `/api/partner` yalnızca `PARTNER` veya `ADMIN`; giriş yapılmamışsa
+  locale'i koruyan bir login yönlendirmesi var. (İç API kısmı hariç — bkz. P1-1.)
+- **Ödeme tutarları kayıtlarla tutarlı.** Ödeme kaydı olan her rezervasyonda
+  `PaymentLog.amount = Booking.totalPrice`; uyuşmazlık sayısı 0.
 
 ---
 
