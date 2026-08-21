@@ -1,6 +1,7 @@
 services:
   redis:
     image: redis:7-alpine
+    restart: unless-stopped
     command: redis-server --save "" --appendonly no --maxmemory 64mb --maxmemory-policy allkeys-lru
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -23,6 +24,7 @@ services:
   # @upstash/redis client'ı bu proxy üzerinden local Redis'e bağlanır.
   srh:
     image: hiett/serverless-redis-http:latest
+    restart: unless-stopped
     environment:
       SRH_MODE: env
       SRH_TOKEN: ${SRH_TOKEN:-bagajpark-srh-secret}
@@ -44,6 +46,7 @@ services:
 
   postgres:
     image: postgis/postgis:16-3.4-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-bagajpark}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bagajpark}
@@ -80,6 +83,7 @@ services:
 
   web:
     image: ghcr.io/furkandogmus/emanetcim:latest
+    restart: unless-stopped
     build: .
     # Konteyner hostname’i yoksa Linux’ta rastgele id olur; log satırı için okunabilir isim.
     hostname: emanetci-web
@@ -163,6 +167,7 @@ services:
 
   nginx:
     image: nginx:1.27-alpine
+    restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"

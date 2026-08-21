@@ -6,6 +6,14 @@ set -e
 
 dnf update -y
 
+# --- firewalld: devre disi birak. AWS Security Group zaten ag seviyesinde 2222/80/443
+# disinda hicbir portu acmiyor; firewalld'in varsayilan "public" zone'u ise SADECE
+# standart "ssh" servisini (port 22) izin veriyor, 2222/80/443 hicbiri izinli degildi —
+# Docker'in interface/zone etkilesimiyle bir noktada bu aktif hale gelip sshd'ye disaridan
+# erisim "connection refused" ile tamamen kesildi (2026-08-21'de canli tespit edildi).
+# Iki katmanli firewall (SG + firewalld) bu kurulumda fayda saglamiyor, kaldiriliyor.
+systemctl disable --now firewalld 2>/dev/null || true
+
 # --- Docker + Compose plugin ---
 dnf install -y docker
 systemctl enable --now docker
