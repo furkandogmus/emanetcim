@@ -40,6 +40,12 @@ docker pull ghcr.io/furkandogmus/emanetcim:latest
 echo "[$(date)] Konteynerler yeniden baslatiliyor..."
 docker compose up -d --no-build
 
+# 4b. nginx'i yeniden baslat — web container yeniden olusturuldugunda (yeni image =
+# yeni docker network IP) nginx eski IP'yi cache'leyip 502 verebilir (AWS test
+# ortaminda 2026-08-21'de canlida yakalandi). Guvenlik agi olarak her deploy'da restart.
+echo "[$(date)] nginx yeniden baslatiliyor (stale upstream IP onlemi)..."
+docker compose restart nginx
+
 # 5. Temizlik
 echo "[$(date)] Kullanilmayan eski imajlar temizleniyor..."
 docker image prune -f
