@@ -22,9 +22,9 @@
 | Aralıklı 502 teşhisi | ✅ tamamlandı | 1 P1 — sebep uygulama değil, Cloudflare |
 | IDOR / kaynak sahipliği | ✅ tamamlandı | **1 P0 bulundu ve düzeltildi** |
 | Partner paneli (UI + yetenek) | ✅ tamamlandı | 1 P0 (düzeltildi) + 3 P1 |
-| Misafir rezervasyon akışı (UI) | ❌ yapılmadı | ajan harcama limitinde öldü |
+| Admin paneli (UI + yetenek) | ✅ tamamlandı | 2 P1 (biri düzeltildi) + 2 P2 |
+| Misafir rezervasyon akışı (UI) | ❌ yapılmadı | tek kalan yüzey |
 | Misafir diğer sayfalar + auth (UI) | ❌ yapılmadı | kısmen: giriş sayfası incelendi |
-| Admin paneli (UI + yetenek) | ❌ yapılmadı | sıradaki |
 | i18n çeviri KALİTESİ | ❌ yapılmadı | eksik anahtar sayıldı, yanlış çeviri taranmadı |
 
 Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denetimini ve
@@ -368,6 +368,69 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   eksik bir kontrol düzlemi.
 - **Çözüm**: *operasyonel* — zamanlamanın tek kaynağı host seviyesinde olsun,
   başarısız/kaçırılan çalıştırma alarmıyla. `vercel.json` kayıt defteri değil.
+
+### [P1-17] ✅ DÜZELTİLDİ — Admin panelinde tüm zamanların cirosu "Günlük Ciro" olarak gösteriliyordu
+- **Nerede**: `src/app/[locale]/admin/page.tsx:88,135`; `src/locales/tr.json`
+- **Kanıt**: Yönetim masasındaki kart **"GÜNLÜK CİRO ₺3.880"** derken, hemen yanındaki
+  "CANLI ANALİZ" grafiği aynı ekranda **"20/8 Ciro (₺): 0"** gösteriyordu. Kodda
+  hesap hiç tarih filtresi içermiyor ve değişkenin adı bile bunu söylüyor:
+  ```ts
+  const revenueData = await prisma.booking.aggregate({
+    where: { status: { in: [...PAID_STATUSES] } },   // <-- tarih filtresi YOK
+    _sum: { totalPrice: true },
+  });
+  const totalRevenue = moneyToNumber(...);
+  // ...
+  dailyRevenue: `₺${Math.round(totalRevenue).toLocaleString()}`   // <-- "gunluk" olarak sunuluyor
+  ```
+  Veritabanıyla birebir doğrulandı: `PAID/CHECKED_IN/CHECKED_OUT` durumundaki 13
+  rezervasyonun tüm zamanlar toplamı = **3.880,00**. Karşılaştırma için: tüm zamanlar
+  brüt 6.060, iptal hariç 5.620, ödeme kaydı 3.480, **bugün oluşan rezervasyon: hiç**.
+- **İlginç ayrıntı**: etiket **yalnızca Türkçe'de** yanlıştı. Diğer 13 dil çoktan
+  "Revenue (paid)" / "Приход (платен)" / "매출 (결제 완료)" diyor, yani "günlük"
+  demiyor. Yani bu bir çeviri sapması olarak başlamış.
+- **Neden önemli**: platformun tek başlık gelir metriği yanlış ölçeği gösteriyordu;
+  operatör günlük performansı takip ettiğini sanarak kümülatif bir sayıya bakıyordu.
+- **Çözüm (uygulandı, 2026-08-22)**: Türkçe etiket "Ciro (ödenen)" olarak diğer 13
+  dille anlam olarak hizalandı (günlük kırılım zaten yanındaki grafikte var).
+  Ayrıca burada `PAID_STATUSES` diye **üçüncü bir kopya durum tanımı** vardı; o da
+  `platform-split.ts` → `EARNING_BOOKING_STATUSES`'e bağlandı, böylece admin ile
+  esnaf artık aynı kümeyi sayıyor. Typecheck + lint + 109 test yeşil.
+
+### [P1-18] Admin gelen kutusu spam altında; 67 mesajın 57'si okunmamış
+- **Nerede**: `/tr/admin/messages`; `ContactMessage`
+- **Kanıt**: kutuda **67 mesaj var, 57'si okunmamış**. Ekran görüntüsündeki gönderenlerin
+  ezici çoğunluğu soğuk pazarlama/spam: `posta-recap@mail.instagram.com`,
+  `follow-suggestions@mail.instagram.com`, `product@hncoapps.app` ve benzerleri;
+  konular "Launch your product to early users", "Your product was upvoted",
+  "a permanent shelf for Bagaj Emanet ve Valiz Depolama" tarzında.
+- **Not — önceki denetim maddesi geçersiz**: Haziran denetimi "toplu işlem yok" diyordu;
+  kodu okudum, **toplu işlem var** (`selectedIds`, "Görünenleri seç", "Seçilenleri sil",
+  `window.confirm` onaylı). Yani araç mevcut. Eksik olan şey **spam sınıflandırma**:
+  operatörün her seferinde elle ayıklaması gerekiyor.
+- **Neden önemli**: gerçek bir misafir şikâyeti 57 okunmamış mesajın arasında kaybolur.
+  Destek kanalının kendisi çalışmıyor demektir.
+- **Çözüm**: *kod* — gönderen/konu bazlı basit bir spam işaretleme + varsayılan
+  "spam olmayanlar" görünümü; ya da iletişim formuna bot koruması (bu mesajların
+  form üzerinden mi yoksa doğrudan e-posta ile mi geldiği ayrıca doğrulanmalı).
+
+### [P2-8] Admin gelen kutusundaki toplu işlem metinleri i18n'i baypas ediyor
+- **Nerede**: `src/components/admin/AdminMessagesClient.tsx:26-29`
+- **Kanıt**: metinler bileşen içinde sabit bir tr/en üçlü operatörüyle yazılmış
+  (`bulkCopy = locale === "tr" ? {...} : {...}`), locale dosyalarından gelmiyor.
+  Sonuç: diğer 12 dilde toplu işlem arayüzü İngilizce çıkıyor.
+- **Çözüm**: *kod* — anahtarları `Admin` namespace'ine taşı.
+
+### [P2-9] Gelen kutusu satır aksiyonlarının erişilebilir adı yalnızca `title`
+- **Nerede**: `src/components/admin/AdminMessagesClient.tsx:282-297`
+- **Kanıt**: satır butonları `title={t("messagesMarkAsRead")}` / `title={t("messagesDelete")}`
+  kullanıyor, `aria-label` yok. `title` çoğu tarayıcıda erişilebilir ad olarak kabul
+  edilir, yani tamamen etiketsiz değiller — ama dokunmatik cihazda tooltip görünmez ve
+  ekran okuyucu desteği tutarsızdır.
+  > Not: ilk DOM taramamda bunları "124 etiketsiz buton" olarak saymıştım; yalnızca
+  > `innerText`/`aria-label` kontrol ettiğim için yanlış çıktı. Kodu okuyunca durum
+  > düzeltildi ve şiddet P2'ye indirildi.
+- **Çözüm**: *kod* — `aria-label` ekle (`title` kalabilir).
 
 ### [P1-14] Olmayan sayfalar HTTP 200 dönüyor (soft 404) — SEO'ya dayanan bir üründe ciddi
 - **Nerede**: uygulama genelinde; `src/app/[locale]/shop/[shopId]/page.tsx:57`

@@ -4,9 +4,16 @@ import { redirect } from "next/navigation";
 import { shopService } from "@/services/ShopService";
 import prisma from "@/lib/db";
 import { moneyToNumber } from "@/lib/money";
+import { EARNING_BOOKING_STATUSES } from "@/lib/platform-split";
 import AdminDashboardClient from "@/components/admin/AdminDashboardClient";
 
-const PAID_STATUSES = ["PAID", "CHECKED_IN", "CHECKED_OUT"] as const;
+/**
+ * Ciroya sayılan durumlar. Partner panelindekiyle AYNI küme olmak zorunda —
+ * yoksa admin ile esnaf farklı rakam görür. Tek doğru kaynak: platform-split.ts
+ * (2026-08-22'de partner panelinin iki ekranı tam bu yüzden 710 TL ve 490 TL
+ * gösteriyordu; bu üçüncü kopyaydı).
+ */
+const PAID_STATUSES = EARNING_BOOKING_STATUSES;
 
 function buildWeekOverWeekTrend(
   t: Awaited<ReturnType<typeof getTranslations>>,
