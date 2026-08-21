@@ -20,11 +20,11 @@
 | API rol/auth kapsaması (67 route) | ✅ tamamlandı | 0 yeni açık — bkz. "Doğrulanmış güvenli" |
 | i18n anahtar bütünlüğü (14 dil) | ✅ tamamlandı | 1 P1 (138 anahtar × 12 dil) |
 | Aralıklı 502 teşhisi | ✅ tamamlandı | 1 P1 — sebep uygulama değil, Cloudflare |
+| IDOR / kaynak sahipliği | ✅ tamamlandı | **1 P0 bulundu ve düzeltildi** |
+| Partner paneli (UI + yetenek) | ✅ tamamlandı | 1 P0 (düzeltildi) + 3 P1 |
 | Misafir rezervasyon akışı (UI) | ❌ yapılmadı | ajan harcama limitinde öldü |
-| Misafir diğer sayfalar + auth (UI) | ❌ yapılmadı | ajan harcama limitinde öldü |
-| Partner paneli (UI + yetenek) | ❌ yapılmadı | ajan harcama limitinde öldü |
-| Admin paneli (UI + yetenek) | ❌ yapılmadı | ajan harcama limitinde öldü |
-| IDOR / kaynak sahipliği detayı | ❌ yapılmadı | rol kontrolü var, *sahiplik* kontrolü tek tek okunmadı |
+| Misafir diğer sayfalar + auth (UI) | ❌ yapılmadı | kısmen: giriş sayfası incelendi |
+| Admin paneli (UI + yetenek) | ❌ yapılmadı | sıradaki |
 | i18n çeviri KALİTESİ | ❌ yapılmadı | eksik anahtar sayıldı, yanlış çeviri taranmadı |
 
 Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denetimini ve
@@ -100,6 +100,39 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   -- 151 | FAULTY | t
   -- 152 | FAULTY | t
   ```
+
+### [P0-7] ✅ DÜZELTİLDİ — Partner paneli aynı dükkan için iki farklı "NET HAKEDİŞ" gösteriyordu
+- **Nerede**: `src/app/[locale]/partner/page.tsx:68`;
+  `src/app/[locale]/partner/earnings/page.tsx:36`
+- **Kanıt** (canlıda test partner hesabıyla iki ekranı yan yana gördüm, sonra veritabanından sayıyla doğruladım):
+  | Ekran | Gösterdiği |
+  |---|---|
+  | `/tr/partner` (ana panel) | NET HAKEDİŞ **710 TL** |
+  | `/tr/partner/earnings` | NET HAKEDİŞ **490,00 TL** (brüt 980, "%50 size kalır") |
+
+  Kök neden: iki sayfa farklı rezervasyon kümesi sayıyordu. Kazanç sayfası yalnızca
+  `PAID/CHECKED_IN/CHECKED_OUT`; ana panel ise **`CANCELLED` dışındaki her şeyi**, yani
+  henüz **ödenmemiş** `APPROVED`/`WAITING_APPROVAL`/`PENDING` rezervasyonları da.
+  ```sql
+  -- Kadıköy Valiz Emanet
+  CHECKED_IN 2 -> 980.00 | APPROVED 1 -> 440.00
+  kazanc_sayfasi_brut = 980.00   (x0.5 -> 490)
+  ana_panel_brut      = 1420.00  (x0.5 -> 710)
+  ```
+  Fazladan 440 TL, onaylanmış ama parası alınmamış tek bir rezervasyon.
+- **Neden önemli**: esnaf, panelin ana ekranında ne kadar alacağı olduğunu göremiyor —
+  iki ekran iki farklı sayı veriyor ve büyük olan yanlış olanı. Bir pazar yerinde
+  esnafın parasına dair çelişki, düzeltilmesi en acil güven sorunudur.
+- **Çözüm (uygulandı, 2026-08-22)**: hakedişe sayılan durumlar tek doğru kaynağa
+  taşındı (`src/lib/platform-split.ts` → `EARNING_BOOKING_STATUSES` +
+  `countsTowardEarnings()`), iki sayfa da onu kullanıyor. Doğru tanım ödenmiş olandır:
+  onaylanmış ama parası alınmamış bir rezervasyon hakediş değildir. 6 maddelik
+  regresyon testi eklendi (`platform-split.test.ts`) — küme sessizce genişleyemez.
+  Typecheck + lint + 109 test yeşil.
+- **Not**: bu, P0-0'ı ortadan kaldırmıyor. Artık iki ekran aynı sayıyı gösteriyor, ama
+  o sayı hâlâ hiç tahsil edilmemiş paranın hakedişi. Ayrıca komisyon **%50** —
+  `PLATFORM_COMMISSION_RATE` varsayılanı 0.5 — bu bir hata değil ama bu kategoride
+  çok yüksek bir oran ve iş modeli kararı olarak ayrıca gözden geçirilmeli.
 
 ### [P0-1] Slot üretimi 37 gündür durdu; per-slot kapasite fiilen devre dışı
 - **Nerede**: `ShopTimeSlot`; `src/services/SlotService.ts:60,129`;
@@ -335,6 +368,64 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   eksik bir kontrol düzlemi.
 - **Çözüm**: *operasyonel* — zamanlamanın tek kaynağı host seviyesinde olsun,
   başarısız/kaçırılan çalıştırma alarmıyla. `vercel.json` kayıt defteri değil.
+
+### [P1-14] Olmayan sayfalar HTTP 200 dönüyor (soft 404) — SEO'ya dayanan bir üründe ciddi
+- **Nerede**: uygulama genelinde; `src/app/[locale]/shop/[shopId]/page.tsx:57`
+  (`notFound()` çağrılıyor ama durum kodu 404 olmuyor)
+- **Kanıt** (kendim ölçtüm):
+  | URL | Dönen kod | Beklenen |
+  |---|---|---|
+  | `/tr/boyle-bir-sayfa-yok` | **200** | 404 |
+  | `/tr/shop/00000000-0000-0000-0000-000000000000` | **200** | 404 |
+
+  İkincisi özellikle çarpıcı: dükkan sayfasının kodunda `if (!shop) notFound();`
+  açıkça var, yani "bulunamadı" sayfası doğru render ediliyor ama HTTP durumu 200
+  kalıyor. Kullanıcı doğru ekranı görüyor ("KAYBOLDUN!"), arama motoru ise sayfayı
+  geçerli sayıyor.
+- **Neden önemli**: ürün organik aramaya dayanıyor (şehir landing sayfaları, blog, her
+  dükkan için canonical/hreflang meta). Soft 404, Google'ın silinmiş dükkanları ve
+  uydurma URL'leri geçerli içerik olarak indekslemesine yol açar; bu hem indeks
+  kalitesini hem de gerçek sayfaların sıralamasını aşağı çeker.
+- **Çözüm**: *kod* — bir `not-found.tsx`'in gerçekten 404 ile servis edildiğini
+  doğrula. Bu genelde middleware'in isteği rewrite edip durum kodunu düşürmesinden
+  kaynaklanır; middleware'in `/tr/...` yollarını nasıl yeniden yazdığı ile
+  `notFound()`'un etkileşimi incelenmeli. Düzeltmeden sonra kontrol tek satır:
+  `curl -o /dev/null -w '%{http_code}' https://bagajpark.com/tr/yok-boyle-sayfa`.
+
+### [P1-15] Partner panelinde hydration hatası (React #418)
+- **Nerede**: `/tr/partner` (test partner hesabıyla giriş yapılmış oturumda)
+- **Kanıt**: sayfa yüklenirken konsola `Minified React error #418; args[]=text` düşüyor
+  — sunucunun ürettiği HTML ile istemcinin render'ı **metin içeriğinde** uyuşmuyor.
+  Playwright ile `pageerror` dinleyerek yakalandı.
+- **Neden önemli**: hydration uyuşmazlığı React'in o ağacı istemcide baştan render
+  etmesine yol açar; pratikte titreme, kaybolan/yanlış görünen değer ve tıklamanın
+  ilk seferde çalışmaması gibi belirtiler verir. Esnafın operasyonel ana ekranı
+  olduğu için etkisi görünenden büyük.
+- **Muhtemel sebep**: sunucu ve istemcide farklı sonuç veren bir tarih/saat ya da
+  para biçimlendirmesi (panelde her ikisi de var). Kesinleştirmek için üretim
+  build'inde unminified React ile tekrar üretmek gerekiyor.
+
+### [P1-16] Esnaf, e-posta ile "ESNAF" sekmesinden giriş yapamıyor
+- **Nerede**: `src/app/[locale]/login/LoginClient.tsx:121`
+- **Kanıt** (canlıda ölçtüm):
+  | Sekme | Input | Placeholder |
+  |---|---|---|
+  | MİSAFİR | `type=text`, `autocomplete=email` | "E-posta veya Telefon" |
+  | ESNAF | `type=tel`, `autocomplete=tel-national` | "Telefon (05xx xxx xx xx)" |
+
+  Yani ESNAF sekmesi **yalnızca telefon** kabul ediyor. Prod'da e-postayla kayıtlı bir
+  partner var ve o hesapla ESNAF sekmesinden giriş mümkün değil; MİSAFİR sekmesinden
+  e-posta + şifre ile giriş **çalışıyor** (test ettim, başarılı) ama ardından esnaf
+  paneline değil **misafir ana sayfasına** düşüyor.
+- **Neden önemli**: e-postayla kayıtlı bir esnaf, kendisi için etiketlenmiş sekmeden
+  giremiyor; çalışan yol "MİSAFİR" yazan sekme. Destek yükü ve terk sebebi.
+- **Bağlantı**: bu aynı zamanda P1-3'ü açıklıyor — esnaf girişi telefon tabanlı
+  tasarlanmış, o yüzden e-postasız 2 partner kaydı bir bozulma değil, tasarımın
+  sonucu. P1-3'te asıl hata olan şey duruyor: `approveShop`'un e-posta bildirimini
+  sessizce atlaması.
+- **Çözüm**: *kod* — ESNAF sekmesi de e-posta kabul etsin (girdiyi telefon/e-posta
+  olarak otomatik ayırt et), ve giriş sonrası rol bazlı yönlendirme yapılsın
+  (PARTNER → `/partner`).
 
 ### [P1-12] 14 dilin 12'si aynı 138 çeviri anahtarını eksik; en az biri canlıda ham görünüyor
 - **Nerede**: `src/locales/*.json`

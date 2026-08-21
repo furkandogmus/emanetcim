@@ -3,7 +3,10 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/db";
 import { moneyToNumber } from "@/lib/money";
-import { getMerchantShareRatio } from "@/lib/platform-split";
+import {
+  getMerchantShareRatio,
+  EARNING_BOOKING_STATUSES,
+} from "@/lib/platform-split";
 import PartnerEarningsClient from "@/components/partner/PartnerEarningsClient";
 
 export default async function PartnerEarningsPage({
@@ -33,7 +36,8 @@ export default async function PartnerEarningsPage({
     prisma.booking.findMany({
       where: {
         shopId: shop.id,
-        status: { in: ["PAID", "CHECKED_IN", "CHECKED_OUT"] },
+        // Ana panelle aynı tanım — tek doğru kaynak platform-split.ts'te.
+        status: { in: [...EARNING_BOOKING_STATUSES] },
       },
       select: {
         id: true,

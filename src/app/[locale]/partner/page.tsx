@@ -6,7 +6,7 @@ import {
 } from "@/services/BookingService";
 import PartnerClient from "@/components/partner/PartnerClient";
 import { redirect } from "next/navigation";
-import { getMerchantShareRatio } from "@/lib/platform-split";
+import { getMerchantShareRatio, countsTowardEarnings } from "@/lib/platform-split";
 import { moneyToNumber } from "@/lib/money";
 import { getPricingRules } from "@/lib/platform-settings";
 import prisma from "@/lib/db";
@@ -65,9 +65,12 @@ export default async function PartnerPage({
   const activeCount = bookings.filter(
     (b) => b.status === "PAID" || b.status === "CHECKED_IN"
   ).length;
+  // Kazanç sayfasıyla AYNI tanım (bkz. EARNING_BOOKING_STATUSES). Daha önce burada
+  // "CANCELLED olmayan her şey" sayılıyordu ve ödenmemiş rezervasyonlar da hakedişe
+  // giriyordu; iki ekran farklı net hakediş gösteriyordu.
   const totalEarnings = bookings.reduce(
     (sum, b) =>
-      sum + (b.status !== "CANCELLED" ? moneyToNumber(b.totalPrice) : 0),
+      sum + (countsTowardEarnings(b.status) ? moneyToNumber(b.totalPrice) : 0),
     0
   );
 
