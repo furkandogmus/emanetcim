@@ -24,6 +24,12 @@ export const DEFAULT_PRICING_RULES: PricingRules = {
   cancelFixedFeeTry: 0,
   defaultShopCapacity: 10,
   defaultPricePerDay: 50,
-  bagMultipliers: { S: 1.0, M: 1.0, XL: 1.0 },
+  // 2026-08-21: S/XL test dosyasindaki (bag-pricing.test.ts) beklentiyle hizalandi
+  // (0.8/1.5) — hepsi 1.0 olmasi boy bazli fiyat farklilastirmasinin hic calismadigi
+  // anlamina geliyordu. NOT: bu SADECE PlatformSettings'te "default" satiri yoksa
+  // devreye giren kod fallback'i — Hetzner/AWS'deki GERCEK satir hala 1.0/1.0/1.0
+  // (canli fiyatlandirma degismedi). O satiri degistirmek /admin/platform-settings
+  // uzerinden bilinçli bir is karari olarak yapilmali.
+  bagMultipliers: { S: 0.8, M: 1.0, XL: 1.5 },
   platformHolidayDates: [],
 };

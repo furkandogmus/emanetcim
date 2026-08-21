@@ -318,6 +318,8 @@
     "qrAlt": "予約QR",
     "guestDefaultName": "ゲスト",
     "bookingCodeLabel": "予約コード",
+    "email": "電子メール",
+    "bookingId": "予約コード",
     "cityFallback": "イスタンブール",
     "searchTitle": "{query} 近くの保管ポイント",
     "searchDescription": "{query} エリアにある安全で保険付きの荷物保管場所を見つけてください。",
@@ -1233,7 +1235,7 @@
       "searchQuery": "キングスクロス",
       "cta": "ロンドンにショップをオープン"
     },
-    "indexMetaTitle": "都市別の手荷物預かり | BagajPark",
+    "indexMetaTitle": "都市別の手荷物預かり",
     "indexMetaDescription": "主要都市で安心の荷物預かり。地図を開いて近くの店舗を予約。",
     "indexHeadline": "都市から選ぶ手荷物預かり",
     "indexIntro": "都市を選ぶとローカルページから、適切なエリアに寄った地図検索へ進めます。"

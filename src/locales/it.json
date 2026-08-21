@@ -318,6 +318,8 @@
     "qrAlt": "Prenotazione QR",
     "guestDefaultName": "Ospite",
     "bookingCodeLabel": "Codice di prenotazione",
+    "email": "E-mail",
+    "bookingId": "Codice di prenotazione",
     "cityFallback": "Istanbul",
     "searchTitle": "{query} Punti di stoccaggio vicini",
     "searchDescription": "Trova luoghi di deposito bagagli sicuri e assicurati nella zona {query}.",
@@ -1030,7 +1032,7 @@
     "a8": "No. Solo pagamento con carta online (e wallet in futuro), per tracciabilità e regole di protezione della piattaforma."
   },
   "MarketingBecomePartner": {
-    "metaTitle": "Diventa partner | BagajPark",
+    "metaTitle": "Diventa partner",
     "heroTitle": "Trasforma il tuo negozio in un deposito bagagli",
     "heroSubtitle": "Entrate extra e traffico pedonale con prenotazioni e pagamenti online.",
     "b1Title": "Nuove entrate",
@@ -1127,7 +1129,7 @@
   "CityStorage": {
     "istanbul": {
       "label": "Istanbul",
-      "metaTitle": "Deposito bagagli Istanbul | BagajPark",
+      "metaTitle": "Deposito bagagli Istanbul",
       "metaDescription": "Deposito bagagli sicuro a Istanbul vicino alle principali attrazioni. Prenota online ed esplora la città a mani libere.",
       "headline": "Deposito bagagli a Istanbul",
       "intro": "Lascia le valigie nei negozi fidati intorno a Galata, Sultanahmet e nei centri turistici, quindi goditi la città senza trascinare le valigie.",
@@ -1136,7 +1138,7 @@
     },
     "ankara": {
       "label": "Ankara",
-      "metaTitle": "Deposito bagagli Ankara | BagajPark",
+      "metaTitle": "Deposito bagagli Ankara",
       "metaDescription": "Deposito bagagli sicuro ad Ankara vicino ai musei e al centro città. Prenotazione online semplice.",
       "headline": "Deposito bagagli ad Ankara",
       "intro": "Trova i punti di deposito intorno a Kızılay e nei corridoi centrali sulla mappa; utile per musei e quartieri degli affari.",
@@ -1145,7 +1147,7 @@
     },
     "izmir": {
       "label": "Smirne",
-      "metaTitle": "Deposito bagagli Smirne | BagajPark",
+      "metaTitle": "Deposito bagagli Smirne",
       "metaDescription": "Deposito bagagli a Smirne vicino a Konak, Alsancak e al lungomare. Viaggia più leggero lungo la costa.",
       "headline": "Deposito bagagli a Smirne",
       "intro": "Passeggia sul lungomare senza borse pesanti; scoprire lo spazio di archiviazione nelle vicinanze sulla mappa.",
@@ -1154,7 +1156,7 @@
     },
     "antalya": {
       "label": "Antalya",
-      "metaTitle": "Deposito bagagli Antalya | BagajPark",
+      "metaTitle": "Deposito bagagli Antalya",
       "metaDescription": "Deposito bagagli per turisti ad Antalya vicino a Kaleiçi e alle spiagge. Prenota in pochi tap.",
       "headline": "Deposito bagagli ad Antalya",
       "intro": "Tra il tempo in spiaggia e le passeggiate nel centro storico, conserva le tue borse in modo sicuro e gestisci i check-out posticipati con facilità.",
@@ -1163,7 +1165,7 @@
     },
     "bodrum": {
       "label": "Bodrum",
-      "metaTitle": "Deposito bagagli Bodrum | BagajPark",
+      "metaTitle": "Deposito bagagli Bodrum",
       "metaDescription": "Deposito bagagli sicuro a Bodrum vicino al porto turistico e alle spiagge per barche, uscite serali e gite di un giorno.",
       "headline": "Deposito bagagli a Bodrum",
       "intro": "Prima di una gita in barca o di una serata fuori, lascia i bagagli presso negozi autorizzati e prenota online.",
@@ -1172,7 +1174,7 @@
     },
     "cappadocia": {
       "label": "Cappadocia",
-      "metaTitle": "Deposito bagagli Cappadocia | BagajPark",
+      "metaTitle": "Deposito bagagli Cappadocia",
       "metaDescription": "Deposito bagagli in Cappadocia per giri in mongolfiera ed escursioni nella valle intorno a Göreme e Ürgüp.",
       "headline": "Deposito bagagli in Cappadocia",
       "intro": "Viaggia leggero per tour ed escursioni all'alba; trova i punti di deposito nella regione sulla mappa.",
@@ -1181,7 +1183,7 @@
     },
     "berlin": {
       "label": "Berlino",
-      "metaTitle": "Deposito bagagli Berlino | BagajPark",
+      "metaTitle": "Deposito bagagli Berlino",
       "metaDescription": "Deposito bagagli sicuro a Berlino vicino alla Hauptbahnhof e alle principali attrazioni. Prenota online in pochi minuti.",
       "headline": "Deposito bagagli a Berlino",
       "intro": "Lascia le valigie tra i musei, la Porta di Brandeburgo e la vita notturna: trova i negozi selezionati sulla mappa.",
@@ -1190,7 +1192,7 @@
     },
     "paris": {
       "label": "Parigi",
-      "metaTitle": "Deposito bagagli Parigi | BagajPark",
+      "metaTitle": "Deposito bagagli Parigi",
       "metaDescription": "Deposito bagagli a Parigi vicino alla Gare du Nord, al Louvre e alle linee centrali.",
       "headline": "Deposito bagagli a Parigi",
       "intro": "Deposito attorno alle stazioni e ai musei con orari flessibili; prenota online la tua finestra.",
@@ -1199,7 +1201,7 @@
     },
     "barcelona": {
       "label": "Barcellona",
-      "metaTitle": "Deposito bagagli Barcellona | BagajPark",
+      "metaTitle": "Deposito bagagli Barcellona",
       "metaDescription": "Deposito borse a Barcellona vicino alla Sagrada Família, alla spiaggia e al centro città.",
       "headline": "Deposito bagagli a Barcellona",
       "intro": "Goditi La Rambla e la costa a mani libere; vedi disponibilità sulla mappa.",
@@ -1208,7 +1210,7 @@
     },
     "rome": {
       "label": "Roma",
-      "metaTitle": "Deposito bagagli Roma | BagajPark",
+      "metaTitle": "Deposito bagagli Roma",
       "metaDescription": "Deposito bagagli a Roma vicino Termini e al centro storico.",
       "headline": "Deposito bagagli a Roma",
       "intro": "Alleggerisciti prima delle passeggiate del Colosseo e del Vaticano; negozi locali fidati sulla mappa.",
@@ -1217,7 +1219,7 @@
     },
     "amsterdam": {
       "label": "Amsterdam",
-      "metaTitle": "Deposito bagagli Amsterdam | BagajPark",
+      "metaTitle": "Deposito bagagli Amsterdam",
       "metaDescription": "Deposito bagagli ad Amsterdam vicino al Centraal e alla circonvallazione dei canali.",
       "headline": "Deposito bagagli ad Amsterdam",
       "intro": "Musei e giornate in bici senza bagagli pesanti; scegli un punto vicino sulla mappa.",
@@ -1226,14 +1228,14 @@
     },
     "london": {
       "label": "Londra",
-      "metaTitle": "Deposito bagagli Londra | BagajPark",
+      "metaTitle": "Deposito bagagli Londra",
       "metaDescription": "Deposito bagagli a Londra vicino a Kings Cross e al West End.",
       "headline": "Deposito bagagli a Londra",
       "intro": "Le giornate al teatro e ai musei sono diventate più semplici: prenota un deposito flessibile con i partner locali.",
       "searchQuery": "Re Croce",
       "cta": "Negozi aperti a Londra"
     },
-    "indexMetaTitle": "Deposito bagagli per città | BagajPark",
+    "indexMetaTitle": "Deposito bagagli per città",
     "indexMetaDescription": "Trova deposito bagagli sicuro nelle principali città. Apri la mappa e prenota un negozio affidabile vicino a te.",
     "indexHeadline": "Deposito bagagli per città",
     "indexIntro": "Scegli una città per la pagina locale e passa alla mappa già centrata sulla zona giusta."

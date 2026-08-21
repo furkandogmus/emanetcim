@@ -18,8 +18,6 @@ export default function PWAInstallBanner() {
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
 
-  if (isStandalone) return null;
-
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
@@ -55,6 +53,8 @@ export default function PWAInstallBanner() {
     dismiss();
   }, [deferred, dismiss]);
 
+  // Erken return'ler hook'lardan SONRA — [[react-hooks/rules-of-hooks]].
+  if (isStandalone) return null;
   if (!visible || !deferred) return null;
 
   return (

@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type CSSProperties,
   type ReactNode,
 } from "react";
@@ -78,6 +79,22 @@ function buildTimeOptions(step: number): string[] {
   return out;
 }
 
+function subscribeIsMobile(onChange: () => void) {
+  if (typeof window === "undefined") return () => {};
+  const mq = window.matchMedia("(max-width: 767px)");
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+}
+
+function getIsMobileSnapshot() {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(max-width: 767px)").matches;
+}
+
+function getIsMobileServerSnapshot() {
+  return false;
+}
+
 export default function DateTimePicker({
   value,
   onChange,
@@ -94,16 +111,11 @@ export default function DateTimePicker({
   const dfLocale = LOCALE_MAP[locale] ?? enUS;
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const mq = window.matchMedia("(max-width: 767px)");
-    setIsMobile(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
+  const isMobile = useSyncExternalStore(
+    subscribeIsMobile,
+    getIsMobileSnapshot,
+    getIsMobileServerSnapshot,
+  );
 
   const DATE_LABELS: Record<string, string> = {
     tr: "Tarih Seç",

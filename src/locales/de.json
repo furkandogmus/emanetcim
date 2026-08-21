@@ -318,6 +318,8 @@
     "qrAlt": "Buchungs-QR",
     "guestDefaultName": "Gast",
     "bookingCodeLabel": "Buchungscode",
+    "email": "E-Mail",
+    "bookingId": "Buchungscode",
     "cityFallback": "Istanbul",
     "searchTitle": "{query} Speicherpunkte in der Nähe",
     "searchDescription": "Finden Sie sichere und versicherte Gepäckaufbewahrungsorte im {query}-Gebiet.",
@@ -1030,7 +1032,7 @@
     "a8": "Nein. Nur Online-Kartenzahlung (und künftig Wallet-Optionen). So bleibt eine klare Zahlungsspur und es passt zu den Plattform-Schutzregeln."
   },
   "MarketingBecomePartner": {
-    "metaTitle": "Werden Sie Partner | BagajPark",
+    "metaTitle": "Werden Sie Partner",
     "heroTitle": "Verwandeln Sie Ihren Laden in eine Gepäckaufbewahrung",
     "heroSubtitle": "Zusätzlicher Umsatz und Besucherverkehr durch Online-Buchungen und -Zahlungen.",
     "b1Title": "Neue Einnahmen",
@@ -1127,7 +1129,7 @@
   "CityStorage": {
     "istanbul": {
       "label": "Istanbul",
-      "metaTitle": "Gepäckaufbewahrung Istanbul | BagajPark",
+      "metaTitle": "Gepäckaufbewahrung Istanbul",
       "metaDescription": "Sichere Gepäckaufbewahrung in Istanbul in der Nähe der wichtigsten Sehenswürdigkeiten. Buchen Sie online und erkunden Sie die Stadt freihändig.",
       "headline": "Gepäckaufbewahrung in Istanbul",
       "intro": "Geben Sie Ihr Gepäck in vertrauenswürdigen Geschäften rund um Galata, Sultanahmet und in Touristenzentren ab – und genießen Sie dann die Stadt, ohne Koffer schleppen zu müssen.",
@@ -1136,7 +1138,7 @@
     },
     "ankara": {
       "label": "Ankara",
-      "metaTitle": "Gepäckaufbewahrung Ankara | BagajPark",
+      "metaTitle": "Gepäckaufbewahrung Ankara",
       "metaDescription": "Sichere Gepäckaufbewahrung in Ankara in der Nähe von Museen und dem Stadtzentrum. Einfache Online-Buchung.",
       "headline": "Gepäckaufbewahrung in Ankara",
       "intro": "Finden Sie Lagerplätze rund um Kızılay und zentrale Korridore auf der Karte. praktisch für Museen und Geschäftsviertel.",
@@ -1145,7 +1147,7 @@
     },
     "izmir": {
       "label": "Izmir",
-      "metaTitle": "Gepäckaufbewahrung Izmir | BagajPark",
+      "metaTitle": "Gepäckaufbewahrung Izmir",
       "metaDescription": "Gepäckaufbewahrung in Izmir in der Nähe von Konak, Alsancak und der Küste. Reisen Sie mit leichterem Gepäck entlang der Küste.",
       "headline": "Gepäckaufbewahrung in Izmir",
       "intro": "Schlendern Sie ohne schwere Taschen am Wasser entlang; Entdecken Sie nahe gelegene Lager auf der Karte.",
@@ -1154,7 +1156,7 @@
     },
     "antalya": {
       "label": "Antalya",
-      "metaTitle": "Gepäckaufbewahrung Antalya | BagajPark",
+      "metaTitle": "Gepäckaufbewahrung Antalya",
       "metaDescription": "Touristenfreundliche Gepäckaufbewahrung in Antalya in der Nähe von Kaleiçi und Stränden. Buchen Sie in wenigen Schritten.",
       "headline": "Gepäckaufbewahrung in Antalya",
       "intro": "Bewahren Sie Ihr Gepäck zwischen Strand- und Altstadtspaziergängen sicher auf und bewältigen Sie spätere Check-outs problemlos.",
@@ -1163,7 +1165,7 @@
     },
     "bodrum": {
       "label": "Bodrum",
-      "metaTitle": "Gepäckaufbewahrung Bodrum | BagajPark",
+      "metaTitle": "Gepäckaufbewahrung Bodrum",
       "metaDescription": "Sichere Gepäckaufbewahrung in Bodrum in der Nähe des Yachthafens und der Strände für Boote, Ausgehen und Tagesausflüge.",
       "headline": "Gepäckaufbewahrung in Bodrum",
       "intro": "Lassen Sie Ihr Gepäck vor einer Bootsfahrt oder einem Abend in geprüften Geschäften und buchen Sie online.",
@@ -1172,7 +1174,7 @@
     },
     "cappadocia": {
       "label": "Kappadokien",
-      "metaTitle": "Gepäckaufbewahrung Kappadokien | BagajPark",
+      "metaTitle": "Gepäckaufbewahrung Kappadokien",
       "metaDescription": "Gepäckaufbewahrung in Kappadokien für Ballonfahrten und Talwanderungen rund um Göreme und Ürgüp.",
       "headline": "Gepäckaufbewahrung in Kappadokien",
       "intro": "Reisen Sie mit leichtem Gepäck für Sonnenaufgangstouren und Wanderungen; Lagerplätze in der Region auf der Karte finden.",
@@ -1181,7 +1183,7 @@
     },
     "berlin": {
       "label": "Berlin",
-      "metaTitle": "Gepäckaufbewahrung Berlin | BagajPark",
+      "metaTitle": "Gepäckaufbewahrung Berlin",
       "metaDescription": "Sichere Gepäckaufbewahrung in Berlin in der Nähe des Hauptbahnhofs und der wichtigsten Sehenswürdigkeiten. Buchen Sie online in wenigen Minuten.",
       "headline": "Gepäckaufbewahrung in Berlin",
       "intro": "Geben Sie Ihr Gepäck zwischen Museen, dem Brandenburger Tor und dem Nachtleben ab – finden Sie geprüfte Geschäfte auf der Karte.",
@@ -1190,7 +1192,7 @@
     },
     "paris": {
       "label": "Paris",
-      "metaTitle": "Gepäckaufbewahrung Paris | BagajPark",
+      "metaTitle": "Gepäckaufbewahrung Paris",
       "metaDescription": "Gepäckaufbewahrung in Paris in der Nähe des Gare du Nord, des Louvre und der zentralen Linien.",
       "headline": "Gepäckaufbewahrung in Paris",
       "intro": "Lagerung rund um Bahnhöfe und Museen mit flexiblen Öffnungszeiten; Reservieren Sie Ihr Fenster online.",
@@ -1199,7 +1201,7 @@
     },
     "barcelona": {
       "label": "Barcelona",
-      "metaTitle": "Gepäckaufbewahrung Barcelona | BagajPark",
+      "metaTitle": "Gepäckaufbewahrung Barcelona",
       "metaDescription": "Gepäckaufbewahrung in Barcelona in der Nähe der Sagrada Família, des Strandes und des Stadtzentrums.",
       "headline": "Gepäckaufbewahrung in Barcelona",
       "intro": "Genießen Sie La Rambla und die Küste freihändig; Siehe Verfügbarkeit auf der Karte.",
@@ -1208,7 +1210,7 @@
     },
     "rome": {
       "label": "Rom",
-      "metaTitle": "Gepäckaufbewahrung Rom | BagajPark",
+      "metaTitle": "Gepäckaufbewahrung Rom",
       "metaDescription": "Gepäckaufbewahrung in Rom in der Nähe von Termini und dem historischen Zentrum.",
       "headline": "Gepäckaufbewahrung in Rom",
       "intro": "Machen Sie es sich bequem, bevor Sie zum Kolosseum und zum Vatikan gehen. vertrauenswürdige lokale Geschäfte auf der Karte.",
@@ -1217,7 +1219,7 @@
     },
     "amsterdam": {
       "label": "Amsterdam",
-      "metaTitle": "Gepäckaufbewahrung Amsterdam | BagajPark",
+      "metaTitle": "Gepäckaufbewahrung Amsterdam",
       "metaDescription": "Gepäckaufbewahrung in Amsterdam in der Nähe von Centraal und dem Grachtenring.",
       "headline": "Gepäckaufbewahrung in Amsterdam",
       "intro": "Museen und Fahrradtage ohne schwere Taschen; Wählen Sie einen nahegelegenen Punkt auf der Karte aus.",
@@ -1226,14 +1228,14 @@
     },
     "london": {
       "label": "London",
-      "metaTitle": "Gepäckaufbewahrung London | BagajPark",
+      "metaTitle": "Gepäckaufbewahrung London",
       "metaDescription": "Gepäckaufbewahrung in London in der Nähe von Kings Cross und dem West End.",
       "headline": "Gepäckaufbewahrung in London",
       "intro": "Theater- und Museumstage werden einfacher – buchen Sie flexible Lagermöglichkeiten bei lokalen Partnern.",
       "searchQuery": "Kings Cross",
       "cta": "Eröffnen Sie Geschäfte in London"
     },
-    "indexMetaTitle": "Gepäckaufbewahrung nach Städten | BagajPark",
+    "indexMetaTitle": "Gepäckaufbewahrung nach Städten",
     "indexMetaDescription": "Sichere Gepäckaufbewahrung in großen Städten. Karte öffnen und vertrauenswürdigen Shop buchen.",
     "indexHeadline": "Gepäckaufbewahrung nach Stadt",
     "indexIntro": "Stadt wählen, lokale Seite öffnen und direkt mit passender Kartenmitte suchen."

@@ -318,6 +318,8 @@
     "qrAlt": "Reserva QR",
     "guestDefaultName": "Invitado",
     "bookingCodeLabel": "código de reserva",
+    "email": "Correo electrónico",
+    "bookingId": "código de reserva",
     "cityFallback": "Estanbul",
     "searchTitle": "{query} Puntos de almacenamiento cercanos",
     "searchDescription": "Encuentre ubicaciones de almacenamiento de equipaje seguras y aseguradas en el área {query}.",
@@ -1030,7 +1032,7 @@
     "a8": "No. Solo pago con tarjeta online (y wallets en el futuro), para trazabilidad y las reglas de protección de la plataforma."
   },
   "MarketingBecomePartner": {
-    "metaTitle": "Conviértete en socio | BagajPark",
+    "metaTitle": "Conviértete en socio",
     "heroTitle": "Convierte tu tienda en consigna de equipaje",
     "heroSubtitle": "Ingresos adicionales y tráfico presencial con reservas y pagos en línea.",
     "b1Title": "Nuevos ingresos",
@@ -1127,7 +1129,7 @@
   "CityStorage": {
     "istanbul": {
       "label": "Estanbul",
-      "metaTitle": "Consigna de equipaje Estambul | BagajPark",
+      "metaTitle": "Consigna de equipaje Estambul",
       "metaDescription": "Almacenamiento seguro de equipaje en Estambul, cerca de los principales lugares de interés. Reserva online y explora la ciudad con las manos libres.",
       "headline": "Consigna de equipaje en Estambul",
       "intro": "Deje sus maletas en tiendas de confianza alrededor de Gálata, Sultanahmet y centros turísticos y luego disfrute de la ciudad sin arrastrar maletas.",
@@ -1136,7 +1138,7 @@
     },
     "ankara": {
       "label": "ankara",
-      "metaTitle": "Consigna de equipaje Ankara | BagajPark",
+      "metaTitle": "Consigna de equipaje Ankara",
       "metaDescription": "Almacenamiento seguro de equipaje en Ankara, cerca de los museos y del centro de la ciudad. Reserva online sencilla.",
       "headline": "Consigna de equipaje en Ankara",
       "intro": "Encuentre puntos de almacenamiento alrededor de Kızılay y corredores centrales en el mapa; Práctico para museos y distritos comerciales.",
@@ -1145,7 +1147,7 @@
     },
     "izmir": {
       "label": "Esmirna",
-      "metaTitle": "Consigna de equipaje Esmirna | BagajPark",
+      "metaTitle": "Consigna de equipaje Esmirna",
       "metaDescription": "Consigna de equipaje en Izmir, cerca de Konak, Alsancak y el paseo marítimo. Viaja más ligero por la costa.",
       "headline": "Consigna de equipaje en Esmirna",
       "intro": "Pasee por el paseo marítimo sin bolsas pesadas; Descubra el almacenamiento cercano en el mapa.",
@@ -1154,7 +1156,7 @@
     },
     "antalya": {
       "label": "Antalya",
-      "metaTitle": "Consigna de equipaje Antalya | BagajPark",
+      "metaTitle": "Consigna de equipaje Antalya",
       "metaDescription": "Consigna de equipaje para turistas en Antalya, cerca de Kaleiçi y las playas. Reserva con unos pocos toques.",
       "headline": "Consigna de equipaje en Antalya",
       "intro": "Entre el tiempo en la playa y los paseos por el casco antiguo, guarda tus maletas de forma segura y gestiona las salidas tardías con facilidad.",
@@ -1163,7 +1165,7 @@
     },
     "bodrum": {
       "label": "Bodrum",
-      "metaTitle": "Consigna de equipaje Bodrum | BagajPark",
+      "metaTitle": "Consigna de equipaje Bodrum",
       "metaDescription": "Almacenamiento seguro de bolsos en Bodrum, cerca del puerto deportivo y las playas, para barcos, salidas nocturnas y excursiones de un día.",
       "headline": "Consigna de equipaje en Bodrum",
       "intro": "Antes de un viaje en barco o una salida nocturna, deje el equipaje en tiendas autorizadas y reserve en línea.",
@@ -1172,7 +1174,7 @@
     },
     "cappadocia": {
       "label": "Capadocia",
-      "metaTitle": "Consigna de equipaje Capadocia | BagajPark",
+      "metaTitle": "Consigna de equipaje Capadocia",
       "metaDescription": "Almacenamiento de equipaje en Capadocia para paseos en globo y caminatas por los valles alrededor de Göreme y Ürgüp.",
       "headline": "Consigna de equipaje en Capadocia",
       "intro": "Viaje ligero para recorridos y caminatas al amanecer; Encuentre puntos de almacenamiento en la región en el mapa.",
@@ -1181,7 +1183,7 @@
     },
     "berlin": {
       "label": "Berlina",
-      "metaTitle": "Consigna de equipaje Berlín | BagajPark",
+      "metaTitle": "Consigna de equipaje Berlín",
       "metaDescription": "Consigna de equipaje segura en Berlín, cerca de Hauptbahnhof y de los principales lugares de interés. Reserva online en minutos.",
       "headline": "Consigna de equipaje en Berlín",
       "intro": "Deje sus maletas entre los museos, la Puerta de Brandenburgo y la vida nocturna: busque tiendas autorizadas en el mapa.",
@@ -1190,7 +1192,7 @@
     },
     "paris": {
       "label": "París",
-      "metaTitle": "Consigna de equipaje París | BagajPark",
+      "metaTitle": "Consigna de equipaje París",
       "metaDescription": "Consigna de equipaje en París cerca de Gare du Nord, Louvre y líneas centrales.",
       "headline": "Consigna de equipaje en París",
       "intro": "Almacenamiento alrededor de estaciones y museos con horarios flexibles; reserve su ventana en línea.",
@@ -1199,7 +1201,7 @@
     },
     "barcelona": {
       "label": "Barcelona",
-      "metaTitle": "Consigna equipaje Barcelona | BagajPark",
+      "metaTitle": "Consigna equipaje Barcelona",
       "metaDescription": "Almacenamiento de bolsos en Barcelona cerca de la Sagrada Familia, la playa y el centro de la ciudad.",
       "headline": "Consigna de equipaje en Barcelona",
       "intro": "Disfruta de La Rambla y la costa con las manos libres; ver disponibilidad en el mapa.",
@@ -1208,7 +1210,7 @@
     },
     "rome": {
       "label": "Roma",
-      "metaTitle": "Consigna de equipaje Roma | BagajPark",
+      "metaTitle": "Consigna de equipaje Roma",
       "metaDescription": "Consigna de equipaje en Roma cerca de Termini y del centro histórico.",
       "headline": "Consigna de equipaje en Roma",
       "intro": "Relájese antes de los paseos por el Coliseo y el Vaticano; tiendas locales de confianza en el mapa.",
@@ -1217,7 +1219,7 @@
     },
     "amsterdam": {
       "label": "Ámsterdam",
-      "metaTitle": "Consigna de equipaje Ámsterdam | BagajPark",
+      "metaTitle": "Consigna de equipaje Ámsterdam",
       "metaDescription": "Consigna de equipaje en Ámsterdam, cerca de Centraal y del anillo de canales.",
       "headline": "Consigna de equipaje en Ámsterdam",
       "intro": "Museos y jornadas en bicicleta sin bolsas pesadas; Elija un punto cercano en el mapa.",
@@ -1226,14 +1228,14 @@
     },
     "london": {
       "label": "Londres",
-      "metaTitle": "Consigna de equipaje Londres | BagajPark",
+      "metaTitle": "Consigna de equipaje Londres",
       "metaDescription": "Consigna de equipaje en Londres cerca de Kings Cross y el West End.",
       "headline": "Consigna de equipaje en Londres",
       "intro": "Los días de teatro y museo son más fáciles: reserve almacenamiento flexible con socios locales.",
       "searchQuery": "Cruz de Reyes",
       "cta": "Tiendas abiertas en Londres"
     },
-    "indexMetaTitle": "Consigna de equipaje por ciudad | BagajPark",
+    "indexMetaTitle": "Consigna de equipaje por ciudad",
     "indexMetaDescription": "Encuentra consigna segura en grandes ciudades. Abre el mapa y reserva una tienda de confianza cerca.",
     "indexHeadline": "Consigna por ciudad",
     "indexIntro": "Elige una ciudad para ver la página local y abrir el mapa centrado en la zona adecuada."

@@ -318,6 +318,8 @@
     "qrAlt": "Réservation QR",
     "guestDefaultName": "Invité",
     "bookingCodeLabel": "Code de réservation",
+    "email": "E-mail",
+    "bookingId": "Code de réservation",
     "cityFallback": "Istanbul",
     "searchTitle": "{query} Points de stockage à proximité",
     "searchDescription": "Trouvez des consignes à bagages sécurisées et assurées dans la zone {query}.",
@@ -1233,7 +1235,7 @@
       "searchQuery": "Croix des Rois",
       "cta": "Boutiques ouvertes à Londres"
     },
-    "indexMetaTitle": "Consigne à bagages par ville | BagajPark",
+    "indexMetaTitle": "Consigne à bagages par ville",
     "indexMetaDescription": "Trouvez une consigne sécurisée dans les grandes villes. Ouvrez la carte et réservez un commerce de confiance près de vous.",
     "indexHeadline": "Consigne par ville",
     "indexIntro": "Choisissez une ville pour accéder à la page locale et lancer la carte au bon endroit."

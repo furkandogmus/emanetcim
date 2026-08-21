@@ -66,38 +66,61 @@ jobs:
             NEXT_PUBLIC_BETA_BADGE=true
 
   deploy:
-    name: Deploy to Production
+    name: Deploy to AWS (SSM Run Command, OIDC — statik key yok)
     runs-on: ubuntu-latest
     needs: build-and-push
     environment: production
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
-      - name: Checkout code (for docker-compose.yml)
+      - name: Checkout code (docker-compose.yml için)
         uses: actions/checkout@v4
 
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1
+      - name: Configure AWS credentials (GitHub OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            set -e
-            cd /root/emanetci
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
 
-            # En güncel kodu çek (compose dosyası, nginx config vb.)
-            git fetch origin main
-            git reset --hard origin/main
+      - name: Deploy config'i S3'e yükle
+        run: |
+          aws s3 cp docker-compose.yml "s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/docker-compose.yml"
 
-            # GHCR'den yeni image'ı çek
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker pull ghcr.io/${{ github.repository }}:latest
+      - name: SSM Run Command ile deploy et
+        run: |
+          set -e
+          COMMAND_ID=$(aws ssm send-command \
+            --document-name "AWS-RunShellScript" \
+            --targets "Key=tag:Project,Values=bagajpark-aws-test" \
+            --comment "GitHub Actions deploy — ${{ github.sha }}" \
+            --parameters commands='[
+              "set -e",
+              "aws s3 cp s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/docker-compose.yml /opt/emanetci/docker-compose.yml",
+              "cd /opt/emanetci",
+              "docker compose --env-file docker-compose.env pull web --quiet",
+              "docker compose --env-file docker-compose.env up -d --no-build",
+              "docker compose --env-file docker-compose.env restart nginx",
+              "docker image prune -f"
+            ]' \
+            --query "Command.CommandId" --output text)
+          echo "Command ID: $COMMAND_ID"
 
-            # Konteynerleri yeniden başlat (build yok, sadece pull edilen image)
-            docker compose up -d --no-build
-
-            # Kullanılmayan eski image'ları temizle
-            docker image prune -f
-
-            echo "✅ Deploy tamamlandı: $(date)"
+          for i in $(seq 1 60); do
+            sleep 5
+            STATUS=$(aws ssm list-command-invocations --command-id "$COMMAND_ID" --details \
+              --query "CommandInvocations[0].Status" --output text 2>/dev/null || echo "Pending")
+            echo "[$i/30] Status: $STATUS"
+            if [ "$STATUS" = "Success" ]; then
+              echo "✅ Deploy tamamlandı: $(date)"
+              exit 0
+            elif [ "$STATUS" = "Failed" ] || [ "$STATUS" = "Cancelled" ] || [ "$STATUS" = "TimedOut" ]; then
+              echo "❌ Deploy başarısız: $STATUS"
+              aws ssm list-command-invocations --command-id "$COMMAND_ID" --details \
+                --query "CommandInvocations[0].CommandPlugins[0].Output" --output text
+              exit 1
+            fi
+          done
+          echo "❌ Timeout: komut 150s içinde tamamlanmadı"
+          exit 1
