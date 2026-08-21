@@ -14,7 +14,9 @@
 
 | Alan | Denetlendi mi | Sonuç |
 |---|---|---|
-| Veri bütünlüğü + iş kuralları | ✅ tamamlandı | **5 P0, 11 P1, 7 P2** |
+| Veri bütünlüğü + iş kuralları | ✅ tamamlandı | 5 P0, 11 P1, 7 P2 |
+| Ödeme entegrasyonu durumu | ✅ tamamlandı | **1 P0 (kök neden)** |
+| İç API / cron yetkilendirmesi | ✅ tamamlandı | 2 P1 |
 | Misafir rezervasyon akışı (UI) | ❌ yarım kaldı | ajan harcama limitinde öldü |
 | Misafir diğer sayfalar + auth | ❌ yarım kaldı | ajan harcama limitinde öldü |
 | Partner paneli | ❌ yarım kaldı | ajan harcama limitinde öldü |
@@ -155,21 +157,55 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
 
 ## P1 — Gerçek tutarsızlık, yakında ısıracak
 
-### [P1-1] `/api/internal/generate-slots` kimliksiz ve sınırsız yazma tetikliyor
-- **Nerede**: `src/app/api/internal/generate-slots/route.ts:4-7`
-- **Kanıt** (dosyayı kendim okudum, teyitli — handler'ın tamamı bu):
-  ```ts
-  export async function GET() {
-    const count = await fillMissingSlots();
-    return NextResponse.json({ ok: true, slotsGenerated: count });
+### [P1-1] İç API koruması yalnızca başlığın VARLIĞINA bakıyor, değerine değil — ve `generate-slots` hiç korumasız
+- **Nerede**: `src/middleware.ts:130`; `src/app/api/internal/generate-slots/route.ts:4-7`
+- **Kanıt** (ikisini de kendim okudum). Middleware'in tüm iç API koruması bu tek satır:
+  ```js
+  if (isInternalApiPath && !isLoggedIn && !req.headers.get("authorization")
+      && !req.headers.get("x-cron-secret")) {
+    return 401
   }
   ```
-  Auth yok, gizli başlık yok, rate limit yok. `fillMissingSlots` her aktif dükkan için
-  gün başına 30 dakikalık slot upsert ediyor; son tam çalışma 3.696 satır üretmiş.
-  Yol adının `/api/internal/` olması hiçbir şeyi zorlamıyor.
-- **Neden önemli**: isimsiz herhangi biri binlerce DB yazması tetikleyebilir.
-- **Çözüm**: *kod* — paylaşılan gizli başlık/cron imzası + rate limit. P0-1 için
-  eklenecek zamanlanmış işle birlikte yapılmalı.
+  Header'ların **değeri hiçbir yerde doğrulanmıyor**. Yani `Authorization: herhangi-bir-şey`
+  göndermek korumayı geçiyor; ayrıca **herhangi bir rolde giriş yapmış olmak** (düz bir
+  GUEST dahil) tek başına yeterli.
+  Uçların kendi kontrolleri sayıldığında tablo şu:
+  | Uç | Kendi gizli-anahtar kontrolü |
+  |---|---|
+  | `booking-reminders` | ✅ var |
+  | `cleanup` | ✅ var |
+  | `finance-export` | ✅ var |
+  | `seal-forecast` | ✅ var |
+  | **`generate-slots`** | ❌ **hiç yok** |
+  `generate-slots` handler'ının tamamı auth'suz `fillMissingSlots()` çağrısı; her aktif
+  dükkan için gün başına 30 dakikalık slot upsert ediyor (son tam çalışma 3.696 satır).
+- **Neden önemli**: gerçek savunma uçların kendi kontrolleri; middleware sahte bir
+  güvenlik hissi veriyor. `generate-slots`'ta o savunma da olmadığı için isimsiz
+  herhangi biri binlerce DB yazması tetikleyebilir.
+- **Çözüm**: *kod* — (a) `generate-slots`'a diğer dördündeki gizli-anahtar kontrolünü
+  ekle (P0-1 için kurulacak zamanlanmış işle birlikte), (b) middleware'deki
+  varlık-kontrolünü ya gerçek karşılaştırmaya çevir ya da tamamen kaldır — yanıltıcı
+  olmasın.
+
+### [P1-1b] Ödeme mutabakat cron'u 2 aydır var olmayan bir ucu çağırıyor (404)
+- **Nerede**: Hetzner crontab (15 dakikada bir); `vercel.json`; `src/app/api/internal/`
+- **Kanıt** (kendim doğruladım):
+  ```bash
+  find src/app/api -ipath "*reconcile*"     # (bos - boyle bir route yok)
+  curl -o /dev/null -w "%{http_code}" -X POST \
+       https://bagajpark.com/api/internal/reconcile-payments   # 404
+  ```
+  `/root/emanetci/reconcile.log`: 220KB, ama **son değişiklik 2026-06-14**. `curl -sf`
+  404'te sessizce çıktığı için o tarihten beri log'a hiçbir şey yazılmamış. Tarih,
+  `20260615000000_remove_payment_providers` migration'ıyla örtüşüyor: ödeme sağlayıcıları
+  sökülürken uç da silinmiş, iki ayrı yerdeki zamanlanmış iş geride bırakılmış.
+  Sonucu veride görünüyor: `PaymentLog.splitCompleted` → 12 kaydın tamamı `false`.
+- **Neden önemli**: partner hakedişi/ödeme paylaşımı iki aydır hiç çalışmıyor ve
+  hiçbir yerde hata üretmediği için kimse fark etmemiş. Ödeme entegrasyonu (P0-0)
+  yapıldığı anda bu sessiz boşluk doğrudan "partnere para gitmiyor"a dönüşür.
+- **Çözüm**: *operasyonel + kod* — ya ucu geri yaz ya da her iki zamanlanmış işi kaldır.
+  Hangisi olursa olsun: **404 dönen bir cron sessiz kalmamalı** — kaçırılan/başarısız
+  çalıştırma alarmı gerekiyor (`curl -f` + non-zero exit'te bildirim).
 
 ### [P1-2] `ReservationSlot` tamamen boş — 19 rezervasyona karşı 0 satır
 - **Nerede**: `ReservationSlot`; `src/services/BookingService.ts:130,246-256`
@@ -254,16 +290,15 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   hesaplanıyor, dolayısıyla çıkıştan sonra faturanın girdileri yeniden kurulamıyor.
 - **Çözüm**: *kod* — `checkedInAt`/`checkedOutAt` ekle; rezerve pencere değişmez olsun.
 
-### [P1-11] Repodaki tek cron, uygulamanın çalışmadığı platformu hedefliyor; hiçbir ödeme paylaşımı tamamlanmamış
-- **Kanıt**: `vercel.json` 15 dakikada bir `/api/internal/reconcile-payments`
-  tanımlıyor. Prod Hetzner'de `docker compose` ile çalışıyor; orada `vercel.json`
-  cron'unun hiçbir etkisi yok. `PaymentLog.splitCompleted` → 12 kaydın tamamı `false`.
-  > Not: Hetzner'in kendi crontab'ında `reconcile-payments`'ı çağıran bir satır **var**
-  > (15 dakikada bir curl). Yani bu madde "hiç çalışmıyor"dan çok "iki ayrı yerde iki
-  > farklı zamanlama tanımı var, hangisinin geçerli olduğu belirsiz" sorunudur —
-  > ama `splitCompleted` hepsi false olduğuna göre pratikte sonuç üretmiyor.
+### [P1-11] Zamanlanmış işlerin tek bir kayıt defteri yok
+- **Kanıt**: iş tanımları üç ayrı yere dağılmış ve hiçbiri diğerini bilmiyor:
+  `vercel.json` (uygulamanın çalışmadığı bir platform), Hetzner crontab'ı (gerçek
+  yürütücü), ve hiç var olmayan işler (slot üretimi — bkz. P0-1). Sonuç: bir iş
+  çalışmayı bıraktığında (P1-1b) veya hiç kurulmadığında (P0-1) kimse fark etmiyor.
+- **Neden önemli**: bu, P0-1 ve P1-1b'nin ortak kök nedeni — tek tek hatalar değil,
+  eksik bir kontrol düzlemi.
 - **Çözüm**: *operasyonel* — zamanlamanın tek kaynağı host seviyesinde olsun,
-  kaçırılan çalıştırma alarmıyla. `vercel.json` kayıt defteri değil.
+  başarısız/kaçırılan çalıştırma alarmıyla. `vercel.json` kayıt defteri değil.
 
 ---
 
