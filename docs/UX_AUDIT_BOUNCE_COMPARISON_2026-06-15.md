@@ -51,7 +51,7 @@ yukunu artiriyor.
   - Tamamlandi: Mobil bottom sheet `md` ve ustunde tamamen gizlendi; alt dukkan
     listesi kaldirilarak mobilde yalnizca sekmeler birakildi.
 
-- [ ] **Mobil checkout CTA ve alt navigasyon cakismasini duzelt.**
+- [x] **Mobil checkout CTA ve alt navigasyon cakismasini duzelt.**
   - Gozlem: `Devam` butonu, mobil alt navigasyonun ustune biniyor. Sol altta
     `Common.mobileNavBack` anahtari kirpilmis sekilde gorunuyor.
   - Etki: CTA ve navigasyon ayni dokunma alanini paylasiyor; geri aksiyonu
@@ -59,12 +59,21 @@ yukunu artiriyor.
   - Muhtemel alanlar: `MobileNav`, checkout footer/sticky CTA.
   - Kabul kriteri: Sticky CTA ile mobil nav arasinda en az `12px` bosluk ve safe
     area destegi; ham ceviri anahtari gorunmez.
+  - Tamamlandi (2026-08-21), Playwright ile canlida dogrulandi: CTA'nin alt
+    kenari nav'in ust kenarini ~8.4px asiyordu (footer `pb-4.5rem`=72px, nav
+    gercek yuksekligi ~80px) -> `pb-6rem`'e cikarildi (`CheckoutClient.tsx`,
+    ayni desen `PWAInstallBanner.tsx`'te de vardi, o da duzeltildi).
+    `Common.mobileNavBack` hic tanimlanmamis bir anahtidi — var olan
+    `Common.back`'e degistirildi (`MobileNav.tsx`). Yan bulgu: fransizca
+    `Common.back` = "Dos" (vucut sirti) yanlis ceviriydi, "Retour" yapildi.
 
-- [ ] **Checkout mobil acilisinda tarih secicinin kendiliginden acilmasini engelle.**
+- [x] **Checkout mobil acilisinda tarih secicinin kendiliginden acilmasini engelle.**
   - Gozlem: Checkout sayfasi mobilde yenilendiginde `Tarih Sec` bottom sheet'i
     DOM'da acik geliyor.
   - Etki: Kullanici valiz secimi adimindayken beklenmeyen modal ile karsilasiyor.
   - Kabul kriteri: Tarih secici yalnizca ilgili tarih alanina dokunuldugunda acilir.
+  - Dogrulandi (2026-08-21): Playwright ile canlida test edildi, tarih secici
+    varsayilan olarak KAPALI geliyor — bu madde audit'ten sonra duzelmis.
 
 ## P1 - Guven, Donusum ve Akis Tutarliligi
 

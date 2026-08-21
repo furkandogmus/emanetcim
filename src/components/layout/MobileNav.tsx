@@ -97,7 +97,7 @@ export default function MobileNav() {
                   <ChevronLeft className="h-4.5 w-4.5 text-gray-400" strokeWidth={2} aria-hidden />
                 </div>
                 <span className="truncate text-[9px] font-black uppercase tracking-widest text-gray-400">
-                  {t("mobileNavBack")}
+                  {t("back")}
                 </span>
               </button>
             </li>
