@@ -290,7 +290,9 @@ export default function ShopDetailClient({
           </section>
         </main>
 
-        <div className="fixed inset-x-0 bottom-0 z-20 border-t border-gray-100 bg-white/95 px-4 pb-5 pt-3 backdrop-blur-xl">
+        {/* pb: mobil alt nav (~80px) bu bar'in ustune biniyordu; CheckoutClient.tsx'teki
+            sticky footer ile ayni 6rem offset kullaniliyor. */}
+        <div className="fixed inset-x-0 bottom-0 z-20 border-t border-gray-100 bg-white/95 px-4 pb-[calc(env(safe-area-inset-bottom)+6rem)] pt-3 backdrop-blur-xl">
           <div className="mx-auto flex max-w-lg items-center gap-3">
             <div className="flex-1">
               <p className="text-xs font-black uppercase tracking-widest text-gray-400">{t("perBag")}</p>
