@@ -6,7 +6,7 @@ function assertOrigin(req: Request): boolean {
   const origin = req.headers.get("origin") ?? req.headers.get("referer") ?? "";
   try {
     const host = new URL(origin).host;
-    return host === req.headers.get("host") || host.endsWith(".vercel.app");
+    return host === req.headers.get("host");
   } catch {
     return false;
   }

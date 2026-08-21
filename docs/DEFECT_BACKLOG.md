@@ -308,13 +308,17 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   `/admin/partners` üzerinden senin yapman gerekiyor.
 
 ### [P1-5] 8 script rezervasyonu ve 1.520 TRY hayalet ödeme prod defterinde
-- **Nerede**: `Booking`, `PaymentLog`; repo kökünde `load-test.js`
+- **Nerede**: `Booking`, `PaymentLog`
 - **Kanıt**: 9 saniyelik pencerede, tek misafir, tek dükkan, hepsi `PAID` 190.00 olan
-  8 rezervasyon. `load-test.js` dosyasının repo kökünde durduğunu teyit ettim.
-  8 × 190 = **1.520 TRY**, kayıtlı 3.480 TRY hacminin %44'ü.
+  8 rezervasyon. 8 × 190 = **1.520 TRY**, kayıtlı 3.480 TRY hacminin %44'ü.
 - **Neden önemli**: gelir, dönüşüm ve doluluk rakamlarının tamamı yanlış.
-- **Çözüm**: *veri* — 8 rezervasyonu ve ödemelerini işaretle/temizle. Yük testi prod'a
-  gitmemeli.
+- **Kaynak henüz belirsiz**: ilk değerlendirmede bunu repo kökündeki `load-test.js`'e
+  atfetmiştim; **bu atıf yanlıştı.** Dosyayı okudum: yalnızca `/tr` ve `/tr/search`
+  GET'liyor, hiçbir POST/checkout/rezervasyon çağrısı yok ve varsayılan hedefi
+  `localhost:3000`. Yani bu 8 rezervasyonu o script üretmemiş. Gerçek kaynak
+  bilinmiyor — elle yapılmış bir test ya da başka bir script olabilir.
+- **Çözüm**: *veri* — 8 rezervasyonu ve ödemelerini işaretle/temizle. Ayrıca kaynağın
+  ne olduğu bulunmalı; prod'a rezervasyon yazabilen bir test yolu varsa kapatılmalı.
 
 ### [P1-6] 19 rezervasyonun 18'i çıkış saatini geçmiş halde açık; hiçbiri CHECKED_OUT olmamış
 - **Kanıt**: durum dağılımı `PAID 10 | APPROVED 5 | CHECKED_IN 3 | CANCELLED 1` —
@@ -358,6 +362,24 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
 - **Neden önemli**: gecikme ücreti ve erken iade ikisi de `checkOutTime`'dan
   hesaplanıyor, dolayısıyla çıkıştan sonra faturanın girdileri yeniden kurulamıyor.
 - **Çözüm**: *kod* — `checkedInAt`/`checkedOutAt` ekle; rezerve pencere değişmez olsun.
+
+### [P2-10] ✅ DÜZELTİLDİ — Admin mesaj mutasyonlarında `*.vercel.app` güvenilir origin sayılıyordu
+- **Nerede**: `src/app/api/admin/messages/route.ts:12`;
+  `src/app/api/admin/messages/[id]/route.ts:9`
+- **Kanıt**: CSRF için kullanılan `assertOrigin`, `.vercel.app` ile biten **her** host'u
+  kabul ediyordu:
+  ```ts
+  return host === req.headers.get("host") || host.endsWith(".vercel.app");
+  ```
+  Fonksiyon gerçekten kullanılıyor — 3 mutasyon handler'ında (`route.ts:41`,
+  `[id]/route.ts:23,45`). Uygulama Vercel'de çalışmıyor, dolayısıyla bu izin hiçbir
+  meşru amaca hizmet etmiyordu; herhangi biri `<herhangi-sey>.vercel.app` yayınlayıp
+  origin kontrolünü geçebilirdi.
+- **Şiddet neden P2**: NextAuth'un `SameSite=Lax` çerezi nedeniyle site-dışı bir POST'ta
+  oturum çerezi zaten gönderilmez, yani pratik sömürülebilirlik düşüktü. Ama origin
+  kontrolü tam olarak bu tür bir savunma katmanıdır ve gereksiz yere gevşetilmişti.
+- **Çözüm (uygulandı, 2026-08-22)**: `.vercel.app` izni kaldırıldı, kontrol yalnızca
+  gerçek host eşleşmesine bakıyor.
 
 ### [P1-11] Zamanlanmış işlerin tek bir kayıt defteri yok
 - **Kanıt**: iş tanımları üç ayrı yere dağılmış ve hiçbiri diğerini bilmiyor:

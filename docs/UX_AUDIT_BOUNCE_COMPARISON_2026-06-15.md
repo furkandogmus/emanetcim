@@ -1,5 +1,19 @@
 # BagajPark UX Audit ve Bounce Karsilastirmasi
 
+> **DURUM (2026-08-22): Bu doküman TARIHSEL kayittir, is kuyrugu DEGILDIR.**
+> Guncel ve kanitli is kuyrugu: **`docs/DEFECT_BACKLOG.md`**.
+>
+> Bu denetim 15 Haziran'da yapildi ve UX ile sinirliydi. Sinirlari:
+> - **Eksikti** — 21-22 Agustos'ta bulunan iki kritik hata (aramanin her sorguda 0
+>   sonuc dondurmesi; dukkan adinin dikey tek-harf sutunu olarak render edilmesi) ve
+>   odeme entegrasyonunun hic olmamasi bu dokumanda **hic yer almiyordu**.
+> - **Bazi maddeleri yanlisti** — asagida `KISMEN GECERSIZ` / `TESHIS EDILDI` olarak
+>   isaretlenenler. Bir maddenin burada acik gorunmesi, sorunun var oldugu anlamina
+>   gelmez; once DEFECT_BACKLOG.md'ye bakin.
+>
+> Burasi degistirilmiyor, cunku hangi seyin ne zaman ve neden dusunuldugunun kaydi
+> degerli. Yeni bulgular DEFECT_BACKLOG.md'ye yazilir.
+
 Tarih: 15 Haziran 2026  
 Incelenen ortam: `https://bagajpark.com`  
 Kapsam: Masaustu ve mobil; ana sayfa, arama, dukkan detayi, checkout, giris/kayit,
@@ -37,9 +51,15 @@ yukunu artiriyor.
     `%99.9`; 5xx olursa kullaniciya markali hata/fallback ekrani gosterilir.
   - 2026-08-21 durumu: 48 saatlik nginx log'unda 0 adet 502, web container hic
     restart olmamis (`RestartCount: 0`), 20/20 canli deneme basarili — su an
-    tekrar uretilemiyor. Muhtemelen daha once yapilan baska duzeltmelerin yan
-    etkisi. Kesin kapatmak icin senkron izleme (Uptime Kuma, bkz.
-    `[[hetzner-sertlestirme]]` Faz 4) gerekiyor — henuz kurulmadi.
+    tekrar uretilemiyor.
+  - **2026-08-22 — TESHIS EDILDI, madde yanlis yerde ariyordu.** 502'nin bir ornegi
+    yakalandi (`/api/admin/setup`). Ayni pencerede nginx log'unda TEK BIR 502 veya
+    upstream hatasi yok (`docker compose logs nginx --since=30m | grep -iE "502|upstream"`
+    → bos) ve hemen ardindan 60/60 kontrol istegi 200 dondu. nginx istegi hic
+    gormediyse cevabi origin uretmemistir: kaynak **Cloudflare ↔ origin** baglantisi,
+    uygulama degil. Iki aydir uygulama kodunda aranmasi bu yuzden sonuc vermedi.
+    Uygulama tarafinda yapilacak bir sey yok; gereken sey origin'e disaridan bagimsiz
+    bir uptime kontrolu. Guncel kayit: `docs/DEFECT_BACKLOG.md` → P1-13.
 
 - [x] **Arama her iki sekmede de "Sonuc bulunamadi" gosteriyordu (gercek dukkanlar musait oldugu halde).**
   - Gozlem: `/tr/search`, varsayilan tarih araligiyla (yarin 10:00 - +24 saat)
@@ -138,11 +158,15 @@ yukunu artiriyor.
   - Kabul kriteri: Durum, zaman ve bir sonraki aksiyon tek bakista anlasilir;
     birincil CTA kisa ve tek satirliktir.
 
-- [ ] **Admin gelen kutusuna spam ve toplu islem akisi ekle.**
+- [~] **Admin gelen kutusuna spam ve toplu islem akisi ekle.** — KISMEN GECERSIZ
   - Gozlem: Gelen kutusunun buyuk kismi SEO/satis spami; her kayitta yalnizca tek
     tek silme aksiyonu bulunuyor.
-  - Kabul kriteri: Coklu secim, spam olarak isaretleme, toplu silme, okunmamis ve
-    gercek destek talebi filtreleri bulunur.
+  - **2026-08-22 duzeltmesi**: "yalnizca tek tek silme aksiyonu" kismi ARTIK DOGRU
+    DEGIL — kod okundu, coklu secim ve toplu silme MEVCUT
+    (`AdminMessagesClient.tsx`: `selectedIds`, "Gorunenleri sec", "Secilenleri sil",
+    `window.confirm` onayli). Bu maddenin gecerli kalan kismi yalnizca **spam
+    siniflandirmasi**: 67 mesajin 57'si okunmamis ve cogu spam, operator her
+    seferinde elle ayikliyor. Guncel kayit: `docs/DEFECT_BACKLOG.md` → P1-18.
 
 - [ ] **Admin tablo aksiyonlarini metin/tooltip ve onay ile guclendir.**
   - Gozlem: Kullanici ve esnaf yonetimi ekranlarinda kritik aksiyonlar masaustunde
