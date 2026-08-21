@@ -68,6 +68,39 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   olmaktan çıkıp `PENDING` olmalı, aksi halde entegrasyondan sonra da sahte başarılı
   kayıtlar üretilmeye devam eder.
 
+### [P0-6] ✅ DÜZELTİLDİ — IDOR: herhangi bir partner tüm mühürleri arızalı yapıp platformda check-in'i durdurabiliyordu
+- **Nerede**: `src/app/api/mobile/partner/seals/report-faulty/route.ts`
+- **Kanıt** (zincirin tamamını kod okuyarak + DB'den doğruladım):
+  1. Uç, mührü **global olarak benzersiz** `serialNumber` ile buluyor ve hiçbir sahiplik
+     kontrolü olmadan `status: "FAULTY"` yazıyordu (ham `prisma.seal.update`).
+  2. `serialNumber` bir **integer** ve prod'da **1–2000 aralığında ardışık**
+     (`min 1 | max 2000 | 1301 kayıt`) — yani numara tahmin etmek gerekmiyor, sayarak
+     bulunuyor. Rate limit de yok.
+  3. `FAULTY` bir mühür check-in'de reddediliyor: `SealService.ts:122` mührün
+     `ASSIGNED` **ve** o dükkana ait olmasını şart koşuyor, aksi halde
+     `SEAL_FAULTY_INVALID` fırlatıyor.
+  → Sonuç: tek bir partner hesabı ~2000 istekle sistemdeki tüm mühürleri arızalı
+  işaretleyip **hiçbir partnerin check-in yapamamasına** yol açabilirdi. Mühürler aynı
+  zamanda anlaşmazlıklardaki fiziksel zilyetlik kanıtı olduğu için denetim izi de
+  bozulurdu.
+- **Asıl çarpıcı kısım**: doğru kod **zaten vardı** —
+  `SealService.markSealAsFaulty(serialNumber, shopId)` hem sahipliği
+  (`seal.shopId !== shopId` → `seal_not_owned_by_shop`) hem durumu (`IN_USE`/`RETURNED`
+  yeniden işaretlenemez) kontrol ediyor. Uç bu metodu hiç çağırmıyor, ham prisma ile
+  iki korumayı da atlıyordu.
+- **Çözüm (uygulandı, 2026-08-22)**: uç artık `confirm-delivery`'deki doğru kalıbı
+  izliyor — çağıran partnerin kendi dükkanını çözüp `markSealAsFaulty`'ye veriyor;
+  `serialNumber` integer olarak doğrulanıyor; `seal_not_owned_by_shop` → 404,
+  `seal_already_processed` → 409. Typecheck + lint + 103 test yeşil.
+- **İstismar kontrolü yapıldı — iz yok**: prod'daki 2 `FAULTY` mühür (151, 152)
+  ardışık ve **hiçbir dükkana atanmamış** (`shopId IS NULL`), yani başka bir dükkanın
+  envanterini hedef alan bir kullanım değil; test amaçlı işaretlenmiş görünüyor.
+  ```sql
+  SELECT "serialNumber", status, "shopId" IS NULL FROM "Seal" WHERE status='FAULTY';
+  -- 151 | FAULTY | t
+  -- 152 | FAULTY | t
+  ```
+
 ### [P0-1] Slot üretimi 37 gündür durdu; per-slot kapasite fiilen devre dışı
 - **Nerede**: `ShopTimeSlot`; `src/services/SlotService.ts:60,129`;
   `src/services/ShopService.ts:215-250`
