@@ -3,7 +3,34 @@
 Bağlı olduğu değişiklik önerisi: `openspec/changes/aws-paralel-ortam/` (Latest state +
 History orada — `tasks.md` gerçekte ne yapıldığının, hangi sırayla ve hangi hatalarla
 karşılaşıldığının kaydı). Bu dizin, Hetzner'de çalışan prod sunucuyu **etkilemeyen**,
-tamamen ayrı ve deneysel bir AWS ortamıdır: `https://aws-test.bagajpark.com`.
+tamamen ayrı bir AWS ortamıdır: `https://aws-test.bagajpark.com`.
+
+## Deploy politikası (2026-08-21'den itibaren geçerli)
+
+**AWS, Hetzner'in önündeki doğrulama kapısıdır. Hetzner (canlı `bagajpark.com`)
+küçük değişikliklerde GÜNCELLENMEZ.**
+
+| Ortam | Ne zaman güncellenir | Nasıl |
+|-------|----------------------|-------|
+| AWS (`aws-test.bagajpark.com`) | `main`'e her push'ta, otomatik | `.github/workflows/deploy.yml` → GitHub OIDC + SSM Run Command |
+| Hetzner (`bagajpark.com`, canlı) | **Sadece** biriktirilmiş, büyük ve AWS'te doğrulanmış bir güncelleme olduğunda, **elle** | `ssh hetzner "cd /root/emanetci && sudo ./scripts/update.sh"` |
+
+Hetzner'in her 5 dakikada çalışan otomatik deploy cron'u **2026-08-21'de kasıtlı olarak
+devre dışı bırakıldı** (crontab'da yorum satırı olarak duruyor; yedek:
+`/root/crontab.bak.20260821`). Sebep: her küçük düzeltmenin doğrudan canlıya inmesi
+istenmiyor. Cron'un diğer 4 işi (yedekleme, ödeme reconciliation, disk temizliği,
+mühür tahmini) çalışmaya devam ediyor — sadece uygulama deploy'u durduruldu.
+
+Sonuç olarak akış şu:
+
+```
+main'e push  →  GHCR image build  →  AWS'e otomatik deploy  →  aws-test'te doğrula
+             →  (birikmiş, büyük ve doğrulanmış bir set olunca) Hetzner'de elle update.sh
+```
+
+`scripts/update.sh` elle çalıştırıldığında git SHA'dan bağımsız olarak image digest'ini
+de karşılaştırır, yani CI build'i geciktiği için sessizce eski image'da kalma durumu
+oluşmaz (bu hata 2026-08-21'de gerçekten yaşandı, bkz. o commit'in mesajı).
 
 ## Neden iki kök var
 
