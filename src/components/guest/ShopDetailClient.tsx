@@ -197,6 +197,7 @@ export default function ShopDetailClient({
                   {rating.toFixed(1)}
                 </div>
               ) : null}
+              </div>
             </div>
             <p className="mt-2 text-sm text-gray-500 flex items-center gap-1.5">
               <MapPin size={14} /> {shop.address?.split(",")[0] || t("cityFallback")}
@@ -219,7 +220,6 @@ export default function ShopDetailClient({
               </span>
             </div>
           </div>
-        </div>
         </div>
 
         <main className="px-4 pt-16 space-y-5">
