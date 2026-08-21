@@ -1,80 +1,28 @@
 "use client";
 
-import { useMemo } from "react";
 import { useTranslations } from "next-intl";
-import {
-  CANCEL_CREDIT_ONLY_MINUTES,
-  estimatePaidRefundForTier,
-  getCancellationTier,
-} from "@/lib/cancellation-policy";
-import { moneyToNumber } from "@/lib/money";
 
 interface CancellationPolicyProps {
-  checkInTime: string | Date;
-  showRefundEstimate?: boolean;
-  totalPaidTry?: number;
   className?: string;
 }
 
-export default function CancellationPolicy({
-  checkInTime,
-  showRefundEstimate = false,
-  totalPaidTry = 0,
-  className = "",
-}: CancellationPolicyProps) {
+// 2026-08-21: Onceden check-in'e kalan sureye gore kademeli bir tahmin gosteriyordu
+// (lib/cancellation-policy.ts, "<1h -> credits only"), ama BookingService.cancelBooking()
+// bu kademeyi HIC uygulamiyor — kod her zaman tam nakit iade yapiyor ("Bounce-style: full
+// refund", ayni dosyada acik yorum). UI kullaniciya "kredi verilecek" derken gercekte tam
+// iade oluyordu. Tek dogru kaynak: her zaman tam iade. bkz. UX_AUDIT_BOUNCE_COMPARISON.
+export default function CancellationPolicy({ className = "" }: CancellationPolicyProps) {
   const t = useTranslations("Guest");
-  const checkIn = useMemo(() => new Date(checkInTime), [checkInTime]);
-  const tier = useMemo(() => getCancellationTier(checkIn), [checkIn]);
-  const estimate = useMemo(
-    () => estimatePaidRefundForTier(moneyToNumber(totalPaidTry), tier),
-    [totalPaidTry, tier]
-  );
 
   return (
     <div className={`text-left space-y-4 ${className}`}>
       <h3 className="text-sm font-black uppercase tracking-widest text-gray-900">
         {t("cancellationPolicyTitle")}
       </h3>
-      <ul className="space-y-3 text-sm text-gray-600 leading-relaxed">
-        <li
-          className={`flex gap-3 rounded-xl p-3 border ${
-            tier === "FULL"
-              ? "border-orange-200 bg-orange-50/80"
-              : "border-gray-100 bg-gray-50/50"
-          }`}
-        >
-          <span className="font-black text-orange-600 shrink-0">1</span>
-          <span>
-            {t("cancellationTierFullSimple", { minutes: CANCEL_CREDIT_ONLY_MINUTES })}
-          </span>
-        </li>
-        <li
-          className={`flex gap-3 rounded-xl p-3 border ${
-            tier === "CREDIT_ONLY"
-              ? "border-orange-200 bg-orange-50/80"
-              : "border-gray-100 bg-gray-50/50"
-          }`}
-        >
-          <span className="font-black text-orange-600 shrink-0">2</span>
-          <span>
-            {t("cancellationTierCreditSimple", { minutes: CANCEL_CREDIT_ONLY_MINUTES })}
-          </span>
-        </li>
-      </ul>
-      {showRefundEstimate && moneyToNumber(totalPaidTry) > 0 ? (
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 text-xs font-semibold text-gray-700 space-y-1">
-          <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-            {t("cancellationYourCase")}
-          </p>
-          {estimate.isCreditOnly ? (
-            <p>{t("cancellationEstimateCredit")}</p>
-          ) : (
-            <p>
-              {t("cancellationEstimateCard", { amount: estimate.cardRefund })}
-            </p>
-          )}
-        </div>
-      ) : null}
+      <div className="flex gap-3 rounded-xl p-3 border border-orange-200 bg-orange-50/80 text-sm text-gray-600 leading-relaxed">
+        <span className="font-black text-orange-600 shrink-0">✓</span>
+        <span>{t("cancellationTierFullSimple")}</span>
+      </div>
     </div>
   );
 }

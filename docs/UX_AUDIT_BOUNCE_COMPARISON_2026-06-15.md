@@ -117,7 +117,7 @@ yukunu artiriyor.
     `10.000 TL` karsiligina guncellendi.
   - Kaynak ornekleri: `src/app/[locale]/insurance/page.tsx`, `src/locales/*.json`.
 
-- [ ] **Iptal politikasindaki celiskileri gider.**
+- [x] **Iptal politikasindaki celiskileri gider.**
   - Gozlem: Ayni checkout ozetinde:
     - "teslim saatine kadar tam iade"
     - "24 saat oncesine kadar ucretsiz iptal"
@@ -125,6 +125,15 @@ yukunu artiriyor.
     mesajlari birlikte gorunuyor. Sartlar sayfasinda farkli bir zaman araligi var.
   - Kabul kriteri: Tek politika motoru ve tek metin kaynagi; her ekranda ayni
     rezervasyon icin ayni sonuc.
+  - Tamamlandi (2026-08-21): Kod incelemesi gercek kaynagi ortaya cikardi —
+    `BookingService.cancelBooking()` check-in zamanina BAKMAKSIZIN her zaman tam
+    nakit iade yapiyor ("Bounce-style: full refund", koddaki acik yorum).
+    `lib/cancellation-policy.ts` (kademeli "1 saat alti kredi" hesaplayan, ama
+    hicbir yerde gercek iptal akisina baglanmayan) modul + onu kullanan
+    `CancellationPolicy.tsx` UI bileseni SILINDI/sadelesti. FAQ (`FAQ.a2`, 14
+    dil), checkout callout (`checkoutPolicyCalloutBody`), iptal sayfasi
+    (`cancellation/page.tsx`) ve sozlesme (`terms/page.tsx` 10.1) tek mesaja
+    hizalandi: "check-in'e kadar her zaman ucretsiz iptal, tam iade".
 
 - [x] **Rezervasyon yonetimi sayfasindaki ham ceviri anahtarlarini duzelt.**
   - Gozlem: Mobilde alan etiketleri `GUEST.EMAIL` ve `GUEST.BOOKINGID`.
