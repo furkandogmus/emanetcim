@@ -367,6 +367,8 @@
     "qrAlt": "Rezervasyon QR",
     "guestDefaultName": "Misafir",
     "bookingCodeLabel": "Rezervasyon Kodu",
+    "email": "E-posta",
+    "bookingId": "Rezervasyon Kodu",
     "cityFallback": "İstanbul",
     "searchTitle": "{query} Yakınındaki Emanet Noktaları",
     "searchDescription": "{query} bölgesinde güvenli ve sigortalı valiz depolama alanlarını bulun.",

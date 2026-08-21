@@ -16,8 +16,6 @@ export default function ShopGallery({ images, shopName }: Props) {
   const lastDist = useRef(0);
   const pinchZooming = useRef(false);
 
-  if (images.length === 0) return null;
-
   const prev = () => setActiveIndex((i) => (i === 0 ? images.length - 1 : i - 1));
   const next = () => setActiveIndex((i) => (i === images.length - 1 ? 0 : i + 1));
 
@@ -49,6 +47,10 @@ export default function ShopGallery({ images, shopName }: Props) {
       setScale(1);
     }
   }, []);
+
+  // Erken return hook'lardan SONRA olmali — [[react-hooks/rules-of-hooks]]: hook cagri
+  // sirasi her render'da ayni olmak zorunda.
+  if (images.length === 0) return null;
 
   return (
     <>

@@ -318,6 +318,8 @@
     "qrAlt": "예약 QR",
     "guestDefaultName": "게스트",
     "bookingCodeLabel": "예약 코드",
+    "email": "이메일",
+    "bookingId": "예약 코드",
     "cityFallback": "Istanbul",
     "searchTitle": "{query} 근처 보관소",
     "searchDescription": "{query} 지역의 안전하고 보험 적용 짐 보관소를 찾으세요.",

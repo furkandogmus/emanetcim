@@ -33,6 +33,16 @@ export default function BottomSheet({
 }: BottomSheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
   const [currentSnap, setCurrentSnap] = useState(initialSnap);
+  // "open" prop degistiginde snap'i sifirlama — React'in onerdigi "render sirasinda
+  // state ayarlama" deseni (bir effect'te setState yerine): [[react-hooks/set-state-in-effect]]
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
+    if (!open) {
+      setCurrentSnap(initialSnap);
+    }
+  }
   const dragStartY = useRef(0);
   const dragStartSnap = useRef(initialSnap);
   const isDragging = useRef(false);
@@ -80,12 +90,6 @@ export default function BottomSheet({
     snapTo(closest);
     sheetRef.current.style.removeProperty("--sheet-height");
   }, [snapPoints, currentSnap, onClose, snapTo]);
-
-  useEffect(() => {
-    if (!open) {
-      setCurrentSnap(initialSnap);
-    }
-  }, [open, initialSnap]);
 
   useEffect(() => {
     if (!open) return;

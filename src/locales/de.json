@@ -318,6 +318,8 @@
     "qrAlt": "Buchungs-QR",
     "guestDefaultName": "Gast",
     "bookingCodeLabel": "Buchungscode",
+    "email": "E-Mail",
+    "bookingId": "Buchungscode",
     "cityFallback": "Istanbul",
     "searchTitle": "{query} Speicherpunkte in der Nähe",
     "searchDescription": "Finden Sie sichere und versicherte Gepäckaufbewahrungsorte im {query}-Gebiet.",

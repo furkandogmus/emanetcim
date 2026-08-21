@@ -109,9 +109,13 @@ const nextConfig: NextConfig = withPWA({
   },
 })({
   output: "standalone",
+  poweredByHeader: false,
   reactCompiler: true,
   typescript: {
-    ignoreBuildErrors: true,
+    // 2026-08-21: kaldırıldı — `npm run typecheck` 0 hata veriyordu (tek gerçek hata
+    // hotels/page.tsx'teki t()/t.raw() karışıklığıydı, ayrıca düzeltildi). Bu bayrak
+    // açıkken build tip hatalarını sessizce yutuyordu; tam da bu bug'ın prod'a
+    // gitmesine izin veren şey buydu.
   },
   images: {
     remotePatterns: [

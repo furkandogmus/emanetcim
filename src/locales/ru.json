@@ -318,6 +318,8 @@
     "qrAlt": "QR бронирования",
     "guestDefaultName": "Гость",
     "bookingCodeLabel": "Код бронирования",
+    "email": "E-mail",
+    "bookingId": "Код бронирования",
     "cityFallback": "Стамбул",
     "searchTitle": "Хранение багажа рядом с {query}",
     "searchDescription": "Безопасное застрахованное хранение багажа в районе {query}.",

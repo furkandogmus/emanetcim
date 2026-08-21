@@ -369,6 +369,8 @@
     "qrAlt": "Booking QR",
     "guestDefaultName": "Guest",
     "bookingCodeLabel": "Booking code",
+    "email": "Email",
+    "bookingId": "Booking code",
     "cityFallback": "Istanbul",
     "searchTitle": "{query} Nearby Storage Points",
     "searchDescription": "Find secure and insured luggage storage locations in the {query} area.",

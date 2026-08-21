@@ -318,6 +318,8 @@
     "qrAlt": "Prenotazione QR",
     "guestDefaultName": "Ospite",
     "bookingCodeLabel": "Codice di prenotazione",
+    "email": "E-mail",
+    "bookingId": "Codice di prenotazione",
     "cityFallback": "Istanbul",
     "searchTitle": "{query} Punti di stoccaggio vicini",
     "searchDescription": "Trova luoghi di deposito bagagli sicuri e assicurati nella zona {query}.",

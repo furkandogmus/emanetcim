@@ -318,6 +318,8 @@
     "qrAlt": "QR rezerwacji",
     "guestDefaultName": "Gość",
     "bookingCodeLabel": "Kod rezerwacji",
+    "email": "E-mail",
+    "bookingId": "Kod rezerwacji",
     "cityFallback": "Stambuł",
     "searchTitle": "Przechowalnia bagażu przy {query}",
     "searchDescription": "Bezpieczne i ubezpieczone przechowywanie bagażu w okolicy {query}.",

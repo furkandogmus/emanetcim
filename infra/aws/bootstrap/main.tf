@@ -96,8 +96,17 @@ resource "aws_iam_role" "github_deploy" {
         StringEquals = {
           "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
         }
+        # deploy.yml job'unda `environment: production` tanimli oldugu icin GitHub'in
+        # OIDC token "sub" claim'i "repo:...:ref:refs/heads/..." DEGIL,
+        # "repo:...:environment:production" formatinda geliyor — bu bir GitHub OIDC
+        # gotcha'si, 2026-08-21'de "Not authorized to perform
+        # sts:AssumeRoleWithWebIdentity" hatasiyla keşfedildi. Ikisini de kabul et,
+        # branch/environment tanimi ileride degisirse tekrar kirilmasin.
         StringLike = {
-          "token.actions.githubusercontent.com:sub" = "repo:${var.github_repo}:ref:refs/heads/${var.github_deploy_branch}"
+          "token.actions.githubusercontent.com:sub" = [
+            "repo:${var.github_repo}:ref:refs/heads/${var.github_deploy_branch}",
+            "repo:${var.github_repo}:environment:production",
+          ]
         }
       }
     }]

@@ -318,6 +318,8 @@
     "qrAlt": "Réservation QR",
     "guestDefaultName": "Invité",
     "bookingCodeLabel": "Code de réservation",
+    "email": "E-mail",
+    "bookingId": "Code de réservation",
     "cityFallback": "Istanbul",
     "searchTitle": "{query} Points de stockage à proximité",
     "searchDescription": "Trouvez des consignes à bagages sécurisées et assurées dans la zone {query}.",

@@ -32,9 +32,16 @@ ENV PORT=3000
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
-COPY --from=deps /app/node_modules/@swc/helpers ./node_modules/@swc/helpers
+# NOT: standalone'in kendi budanmış node_modules'ının üzerine builder'ın TAM node_modules'ı
+# kopyalanıyor — `prisma` CLI + `dotenv` (devDependencies, standalone tracer bunları
+# içermiyordu) olmadan `prisma migrate deploy` container içinde "datasource.url property
+# is required in your Prisma config file" hatasıyla SESSİZCE başarısız oluyordu
+# (entrypoint'teki `|| echo WARNING` bunu yutuyordu — hem Hetzner hem AWS'de tespit edildi,
+# 2026-08-21). Imaj büyüyor ama migration'ların gerçekten çalışması bundan daha önemli.
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY scripts/docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 

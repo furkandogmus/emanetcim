@@ -318,6 +318,8 @@
     "qrAlt": "رمز QR للحجز",
     "guestDefaultName": "ضيف",
     "bookingCodeLabel": "رمز الحجز",
+    "email": "البريد الإلكتروني",
+    "bookingId": "رمز الحجز",
     "cityFallback": "اسطنبول",
     "searchTitle": "تخزين أمتعة قرب {query}",
     "searchDescription": "اعثر على تخزين أمتعة آمن ومؤمّن في منطقة {query}.",

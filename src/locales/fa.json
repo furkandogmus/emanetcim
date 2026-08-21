@@ -318,6 +318,8 @@
     "qrAlt": "QR رزرو",
     "guestDefaultName": "مهمان",
     "bookingCodeLabel": "کد رزرو",
+    "email": "ایمیل",
+    "bookingId": "کد رزرو",
     "cityFallback": "Istanbul",
     "searchTitle": "نقاط ذخیره نزدیک {query}",
     "searchDescription": "نگهداری امن و بیمه‌شده چمدان در منطقه {query}.",

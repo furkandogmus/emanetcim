@@ -318,6 +318,8 @@
     "qrAlt": "Reserva QR",
     "guestDefaultName": "Invitado",
     "bookingCodeLabel": "código de reserva",
+    "email": "Correo electrónico",
+    "bookingId": "código de reserva",
     "cityFallback": "Estanbul",
     "searchTitle": "{query} Puntos de almacenamiento cercanos",
     "searchDescription": "Encuentre ubicaciones de almacenamiento de equipaje seguras y aseguradas en el área {query}.",

@@ -318,6 +318,8 @@
     "qrAlt": "预订二维码",
     "guestDefaultName": "客人",
     "bookingCodeLabel": "预订代码",
+    "email": "电子邮件",
+    "bookingId": "预订代码",
     "cityFallback": "伊斯坦布尔",
     "searchTitle": "{query} 附近储存点",
     "searchDescription": "在 {query} 区域寻找安全且有保险的行李寄存地点。",

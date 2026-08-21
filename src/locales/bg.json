@@ -318,6 +318,8 @@
     "qrAlt": "QR на резервация",
     "guestDefaultName": "Гост",
     "bookingCodeLabel": "Код на резервация",
+    "email": "Имейл",
+    "bookingId": "Код на резервация",
     "cityFallback": "Istanbul",
     "searchTitle": "Точки за съхранение близо до {query}",
     "searchDescription": "Сигурно застраховано съхранение на багаж в района {query}.",

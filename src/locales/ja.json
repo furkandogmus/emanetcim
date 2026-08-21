@@ -318,6 +318,8 @@
     "qrAlt": "予約QR",
     "guestDefaultName": "ゲスト",
     "bookingCodeLabel": "予約コード",
+    "email": "電子メール",
+    "bookingId": "予約コード",
     "cityFallback": "イスタンブール",
     "searchTitle": "{query} 近くの保管ポイント",
     "searchDescription": "{query} エリアにある安全で保険付きの荷物保管場所を見つけてください。",
