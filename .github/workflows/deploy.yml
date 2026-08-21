@@ -99,14 +99,15 @@ jobs:
               "set -e",
               "aws s3 cp s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/docker-compose.yml /opt/emanetci/docker-compose.yml",
               "cd /opt/emanetci",
-              "docker compose --env-file docker-compose.env pull web",
+              "docker compose --env-file docker-compose.env pull web --quiet",
               "docker compose --env-file docker-compose.env up -d --no-build",
+              "docker compose --env-file docker-compose.env restart nginx",
               "docker image prune -f"
             ]' \
             --query "Command.CommandId" --output text)
           echo "Command ID: $COMMAND_ID"
 
-          for i in $(seq 1 30); do
+          for i in $(seq 1 60); do
             sleep 5
             STATUS=$(aws ssm list-command-invocations --command-id "$COMMAND_ID" --details \
               --query "CommandInvocations[0].Status" --output text 2>/dev/null || echo "Pending")

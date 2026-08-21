@@ -40,7 +40,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 64m
+          # 2026-08-21: 64m sinirinda surekli OOM-kill (137) yasiyordu, canlida
+          # tespit edildi (docker stats: 63.46MiB/64MiB, %99+ kullanim).
+          memory: 128m
         reservations:
           memory: 8m
 
