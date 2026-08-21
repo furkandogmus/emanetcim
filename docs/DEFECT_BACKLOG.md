@@ -35,12 +35,12 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
 1. **Hiçbir ödeme sağlayıcısı entegre değil**, ama `PaymentLog.status` varsayılanı
    `SUCCESS` ve kamuya açık sayfalar kartla tahsilat/iade vaat ediyor. Aşağıdaki
    maddelerin çoğunun kök nedeni bu (P0-0).
-2. **Slot üretimi 2026-07-14'te durdu; saatlik ürün hâlâ seçilemez.** Ön koşulların
-   ikisi de 2026-08-22'de kapatıldı (uç korundu, fazla satış riski giderildi);
-   kalan tek şey üretimi çalıştıracak zamanlanmış iş (P0-1).
-3. **Prod'daki 39 gerçek kullanıcı hesabına karşılık defterde 8 hayalet rezervasyon
+2. **Prod'daki 39 gerçek kullanıcı hesabına karşılık defterde 8 hayalet rezervasyon
    ve 1.520 TRY sahte ödeme var** (kayıtlı hacmin %44'ü) ve kaynağı hâlâ bilinmiyor
    — yani prod'a rezervasyon yazabilen bir yol açık olabilir (P1-5).
+3. **19 rezervasyonun 18'i çıkış saatini geçmiş hâlde açık; hiçbiri hiç
+   `CHECKED_OUT` olmamış.** Üç müşterinin bavulu Haziran'dan beri "dükkanda"
+   görünüyor. Yaşam döngüsünün pratikte sonlanan bir durumu yok (P1-6).
 
 ---
 
@@ -136,7 +136,7 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   `PLATFORM_COMMISSION_RATE` varsayılanı 0.5 — bu bir hata değil ama bu kategoride
   çok yüksek bir oran ve iş modeli kararı olarak ayrıca gözden geçirilmeli.
 
-### [P0-1] Slot üretimi 37 gündür durdu; per-slot kapasite fiilen devre dışı
+### [P0-1] ✅ DÜZELTİLDİ — Slot üretimi 37 gün durmuştu; saatlik ürün seçilemiyordu
 - **Nerede**: `ShopTimeSlot`; `src/services/SlotService.ts:60,129`;
   `src/services/ShopService.ts:215-250`
 - **Kanıt** (bu sorguyu kendim de çalıştırdım, teyitli):
@@ -184,10 +184,22 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
     döndürmek olurdu. Yıkıcı ve amaçsız bir işlem olurdu.
   - Sonuç: saatlik ürün 14 Temmuz'dan beri ilk kez çalışıyor. Doğrulandı —
     `/api/shops/<id>/slots` gerçek slot döndürüyor (kapasite 50, müsait 50).
-- **Kalan iş**: bunun kalıcı olması için **günlük zamanlanmış iş**. Slotlar 30 gün
-  ileriye üretiliyor, yani iş kurulmazsa 20 Eylül'de aynı sessiz kesinti tekrar eder.
-  `CRON_SECRET` Hetzner'de tanımlı olduğu doğrulandı. Sıra: kod AWS'te doğrulanacak
-  → Hetzner'e toplu deploy → günlük cron eklenecek.
+- **✅ KAPANDI (2026-08-22)** — üç parça da tamamlandı:
+  1. Kod AWS'te doğrulandı (`GET` → 405, `POST` yetkisiz → 503 çünkü orada
+     `CRON_SECRET` yok; yani uç sır yoksa **kapalı kalıyor**), sonra Hetzner'e
+     toplu deploy edildi. Canlıda doğrulandı: `GET` → **405**, `POST` yetkisiz →
+     **401**. Yazma-via-GET deliği kapandı.
+  2. **Günlük cron kuruldu**: `17 4 * * * /root/emanetci/scripts/generate-slots.sh`.
+     Elle bir kez çalıştırılıp doğrulandı: `BASARILI (HTTP 200)
+     {"ok":true,"slotsGenerated":2160}`.
+  3. Sarmalayıcı script iki şeyi bilinçli yapıyor: **sırrı crontab'a yazmıyor**
+     (`CRON_SECRET` çalışma anında `.env`'den okunuyor, hiç stdout'a basılmıyor) ve
+     **`curl -sf` kullanmıyor** — `-sf` 404/401'de sessizce çıkar; ödeme mutabakat
+     cron'u tam bu yüzden 2 ay boyunca fark edilmedi. Script durum kodunu ve gövdeyi
+     log'a yazıyor, başarısızlıkta non-zero çıkıyor.
+- **Kalan tek boşluk**: cron'un *çalışmadığını* fark edecek bir uyarı yok. Script
+  başarısızlıkta non-zero çıkıyor ve log'a yazıyor, ama kimse log'a bakmıyorsa
+  sessiz kalır. Bağımsız bir uptime/heartbeat kontrolü hâlâ eksik (bkz. P1-13).
 
 ### [P0-2] İade hiç yapılmıyor, ama sayfalar "5-10 iş günü içinde kartınıza" diyor
 - **Nerede**: `src/services/BookingService.ts:769-781`, `:554-569`;
@@ -288,7 +300,7 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   varlık-kontrolünü ya gerçek karşılaştırmaya çevir ya da tamamen kaldır — yanıltıcı
   olmasın.
 
-### [P1-1b] Ödeme mutabakat cron'u 2 aydır var olmayan bir ucu çağırıyor (404)
+### [P1-1b] ✅ CRON DURDURULDU — Ödeme mutabakat cron'u 2 aydır var olmayan bir ucu çağırıyordu (404)
 - **Nerede**: Hetzner crontab (15 dakikada bir); `vercel.json`; `src/app/api/internal/`
 - **Kanıt** (kendim doğruladım):
   ```bash
@@ -304,9 +316,14 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
 - **Neden önemli**: partner hakedişi/ödeme paylaşımı iki aydır hiç çalışmıyor ve
   hiçbir yerde hata üretmediği için kimse fark etmemiş. Ödeme entegrasyonu (P0-0)
   yapıldığı anda bu sessiz boşluk doğrudan "partnere para gitmiyor"a dönüşür.
-- **Çözüm**: *operasyonel + kod* — ya ucu geri yaz ya da her iki zamanlanmış işi kaldır.
-  Hangisi olursa olsun: **404 dönen bir cron sessiz kalmamalı** — kaçırılan/başarısız
-  çalıştırma alarmı gerekiyor (`curl -f` + non-zero exit'te bildirim).
+- **Çözüm (kısmen uygulandı, 2026-08-22)**: `vercel.json` tamamen silindi ve
+  Hetzner crontab'ındaki satır, neden kapatıldığı yazılarak devre dışı bırakıldı
+  (yedek: `/root/crontab.bak.20260822`). Artık 15 dakikada bir boşa 404 alınmıyor.
+  **Uç hâlâ yok**: ödeme entegrasyonu (P0-0) yapıldığında hem uç geri yazılmalı hem
+  bu cron satırı açılmalı — crontab'daki yorumda bu not duruyor.
+  Ders yeni `generate-slots.sh` içine kodlandı: `curl -sf` kullanılmıyor, çünkü
+  404/401'de sessizce çıkıp hiçbir şey loglamamak bu hatanın 2 ay gizli kalmasının
+  tek sebebiydi.
 
 ### [P1-2] `ReservationSlot` tamamen boş — 19 rezervasyona karşı 0 satır
 - **Nerede**: `ReservationSlot`; `src/services/BookingService.ts:130,246-256`
