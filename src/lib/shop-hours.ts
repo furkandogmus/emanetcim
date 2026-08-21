@@ -35,12 +35,12 @@ export function isShopOpenAt(
 }
 
 /**
- * Check if shop is open across the full stay window.
- * Validates check-in and check-out endpoints.
- *
- * Note: We intentionally do NOT require the midpoint of an overnight stay
- * to fall inside opening hours. A guest can drop bags in the morning and
- * pick them up the next morning while the shop is closed overnight.
+ * Bagaj emaneti bir "vale" hizmetidir: dükkanın valizi teslim aldığı ve geri
+ * verdiği anlarda açık olması yeterli ve gereklidir. Emanet süresince (gece
+ * boyunca dahi) dükkanın fiziksen açık kalması gerekmez — valiz kilitli
+ * alanda bekler. Bu yüzden burada sadece check-in ve check-out anları
+ * kontrol edilir; bir "midpoint" kontrolü 7/24 açık olmayan (yani neredeyse
+ * tüm) dükkanları gece aşan her aramada elenmiş gösterirdi.
  */
 export function isShopOpenForStay(
   openingTime: string | null | undefined,
@@ -52,7 +52,6 @@ export function isShopOpenForStay(
 ): boolean {
   if (open247) return true;
 
-  // Check endpoints only
   if (!isShopOpenAt(openingTime, closingTime, checkIn, timezone)) return false;
   if (!isShopOpenAt(openingTime, closingTime, checkOut, timezone)) return false;
 

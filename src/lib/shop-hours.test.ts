@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { isShopOpenAt } from "./shop-hours";
+import { isShopOpenAt, isShopOpenForStay } from "./shop-hours";
 
 describe("isShopOpenAt Timezone Check", () => {
   it("should correctly identify opening hours in Turkey (UTC+3) regardless of UTC input", () => {
@@ -35,5 +35,25 @@ describe("isShopOpenAt Timezone Check", () => {
     // 18:00 UTC is 21:00 Istanbul (should be CLOSED)
     const atUtc18 = new Date("2026-04-17T18:00:00Z");
     expect(isShopOpenAt(openTime, closeTime, atUtc18)).toBe(false);
+  });
+});
+
+describe("isShopOpenForStay", () => {
+  it("allows an overnight stay when a non-24/7 shop is open at drop-off and pick-up, even though it is closed at midnight in between", () => {
+    // 09:00 - 20:00, Istanbul. Drop off today 13:00, pick up tomorrow 13:00 —
+    // the shop is closed overnight but the bag just sits there unattended.
+    const checkIn = new Date("2026-08-22T10:00:00Z"); // 13:00 Istanbul
+    const checkOut = new Date("2026-08-23T10:00:00Z"); // 13:00 Istanbul next day
+    expect(
+      isShopOpenForStay("09:00", "20:00", false, checkIn, checkOut),
+    ).toBe(true);
+  });
+
+  it("rejects a stay when the shop is closed at check-in or check-out", () => {
+    const checkIn = new Date("2026-08-22T04:00:00Z"); // 07:00 Istanbul, before 09:00 open
+    const checkOut = new Date("2026-08-23T10:00:00Z"); // 13:00 Istanbul
+    expect(
+      isShopOpenForStay("09:00", "20:00", false, checkIn, checkOut),
+    ).toBe(false);
   });
 });
