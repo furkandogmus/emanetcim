@@ -282,14 +282,11 @@
     "cancellationPolicyTitle": "Stornierungsbedingungen",
     "cancellationTierFull": "Stornierung mindestens {hours} Stunden vor dem Check-in: vollständige Rückerstattung auf Ihre Karte.",
     "cancellationTierPartial": "Wenn zwischen {minHours} und {maxHours} Stunden bis zum Check-in verbleiben: {percent} % werden Ihrer Karte gutgeschrieben.",
-    "cancellationTierCredit": "Weniger als {minHours} Stunde vor dem Check-in oder nach der Check-in-Zeit: keine Kartenrückerstattung – Sie erhalten einen einmaligen Rabattcode für den gezahlten Betrag (verwenden Sie ihn bei Ihrer nächsten Buchung).",
     "cancellationYourCase": "Ihre Buchung",
     "cancellationEstimateCard": "Etwa ₺{amount} werden Ihrer Karte gutgeschrieben.",
     "cancellationEstimateCredit": "Less than 60 minutes remain, so the refund is issued as BagajPark credits.",
     "cancellationUnpaidNote": "Wenn Sie die Zahlung nicht abgeschlossen haben, wird Ihnen nichts berechnet. die Anfrage wird einfach abgebrochen.",
-    "cancelSuccessCredit": "Abgesagt. Ihr Rabattcode: {code}",
     "confirmCancel": "Diese Buchung stornieren? Ihre Zahlung wird auf Ihre Karte zurückerstattet.",
-    "confirmCancelPaid": "Diese Buchung stornieren? Es fällt eine Servicegebühr von 20 TL an; ₺{amount} werden zurückerstattet.",
     "confirmCancelPending": "Diese Buchung stornieren? Ihre Zahlung wird storniert.",
     "cancelSuccess": "Ihre Buchung wurde storniert und der Rückerstattungsprozess hat begonnen.",
     "cancelError": "Beim Stornieren ist ein Fehler aufgetreten.",
@@ -428,7 +425,31 @@
     "trustVerificationBadge": "Verified Reviews",
     "appBannerTitle": "BagajPark on mobile!",
     "appBannerBody": "Our app is coming soon to iOS and Android. Keep using the web for now.",
-    "appBannerCta": "Explore on Web"
+    "appBannerCta": "Explore on Web",
+    "sortByHourly": "Stundentarif",
+    "homeFaq1Q": "Wie lange dauert eine Gepäckaufbewahrungs-Buchung?",
+    "homeFaq1A": "Nach Auswahl von Datum und Gepäckanzahl können Sie die Buchung in der Regel in wenigen Minuten abschließen.",
+    "homeFaq2Q": "Wie wird der Preis für die Gepäckaufbewahrung berechnet?",
+    "homeFaq2A": "Der Gesamtpreis richtet sich nach Gepäckanzahl, Dauer und Plattformregeln und wird beim Bezahlvorgang klar angezeigt.",
+    "homeFaq3Q": "In welchen Städten ist der Service verfügbar?",
+    "homeFaq3A": "Über die Städteseiten finden Sie aktive Standorte, darunter Istanbul, Ankara, Izmir und weitere beliebte Reiseziele.",
+    "from": "ab",
+    "cancelSuccessRefund": "Storniert. Der volle Betrag wird auf Ihr Zahlungsmittel zurückerstattet.",
+    "shopDetailAbout": "Über",
+    "totalBags": "Gepäckstücke insgesamt",
+    "authModalLogin": "Anmelden",
+    "authModalRegister": "Registrieren",
+    "cancellationTierFullSimple": "Kostenlose Stornierung mit voller Rückerstattung, jederzeit vor dem Check-in.",
+    "manageBookingTitle": "Buchung verwalten",
+    "manageBookingDesc": "Rufen Sie Ihre Buchung mit Buchungsnummer und E-Mail-Adresse auf.",
+    "manageBookingCta": "Buchung anzeigen",
+    "manageBookingFooter": "Möchten Sie eine neue Buchung vornehmen?",
+    "bookingLookupFields": "E-Mail-Adresse und Buchungsnummer sind erforderlich.",
+    "bookingNotFound": "Buchung nicht gefunden",
+    "bookingLookupError": "Buchung nicht gefunden oder die Angaben stimmen nicht überein.",
+    "duration": "Dauer",
+    "showFilters": "Filter anzeigen",
+    "hideFilters": "Filter ausblenden"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -854,7 +875,8 @@
     "navAdminPanel": "Admin-Panel",
     "navPartnerPanel": "Shop-Panel",
     "navBookings": "Meine Buchungen",
-    "signOut": "Abmelden"
+    "signOut": "Abmelden",
+    "navPrivacyData": "Daten & Datenschutz"
   },
   "About": {
     "badge": "UNSERE GESCHICHTE",
@@ -924,7 +946,8 @@
     "citiesTitle": "Beliebte Städte",
     "citiesViewAll": "Alle Städte & Guides",
     "paymentsNote": "Karten über service provider (sicher). Kein Bargeld. Wallets (Apple/Google Pay, PayPal) mit service provider geplant.",
-    "securityNote": "Reservations and personal data are protected with SSL."
+    "securityNote": "Reservations and personal data are protected with SSL.",
+    "sitemap": "Sitemap"
   },
   "Contact": {
     "title": "Kontaktieren Sie uns",
@@ -1107,7 +1130,10 @@
     "reviewNotReady": "Bewertungen können erst nach Abschluss der Lieferung abgegeben werden.",
     "verificationCooldown": "Please wait {seconds} seconds before sending another email.",
     "maxVerificationAttempts": "Too many attempts. Please contact our support team.",
-    "invalidTrPhone": "Geben Sie eine gültige türkische Mobilnummer ein (10 Ziffern, beginnend mit 5)."
+    "invalidTrPhone": "Geben Sie eine gültige türkische Mobilnummer ein (10 Ziffern, beginnend mit 5).",
+    "bookingIncludesPlatformHoliday": "Ihr Zeitraum fällt auf einen Plattform-Feiertag. Bitte wählen Sie andere Daten.",
+    "bookingStateConflict": "Der Buchungsstatus hat sich geändert. Bitte laden Sie die Seite neu und versuchen Sie es erneut.",
+    "accountDeleteActiveBookings": "Sie können Ihr Konto nicht schließen, solange Sie aktive Buchungen haben."
   },
   "Emails": {
     "verificationSubject": "Bestätigen Sie Ihre E-Mail",

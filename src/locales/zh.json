@@ -282,14 +282,11 @@
     "cancellationPolicyTitle": "取消政策",
     "cancellationTierFull": "入住前至少 {hours} 小时取消：全额退款至您的银行卡。",
     "cancellationTierPartial": "如果入住前还剩 {minHours} 至 {maxHours} 小时：{percent}% 将退还至您的卡中。",
-    "cancellationTierCredit": "入住前 {minHours} 小时内或入住后：不提供银行卡退款 — 您将获得支付金额的一次性折扣代码（在下次预订时使用）。",
     "cancellationYourCase": "您的预订",
     "cancellationEstimateCard": "大约₺{amount}将退还至您的卡中。",
     "cancellationEstimateCredit": "Less than 60 minutes remain, so the refund is issued as BagajPark credits.",
     "cancellationUnpaidNote": "如果您尚未完成付款，则不会收取任何费用；该请求被简单地取消。",
-    "cancelSuccessCredit": "取消。您的折扣码：{code}",
     "confirmCancel": "取消此预订吗？您的付款将退还至您的卡中。",
-    "confirmCancelPaid": "取消此预订吗？需支付 20 里拉的服务费； ₺{amount}将被退还。",
     "confirmCancelPending": "取消此预订吗？您的付款将作废。",
     "cancelSuccess": "您的预订已取消，退款流程已开始。",
     "cancelError": "取消时出了点问题。",
@@ -428,7 +425,31 @@
     "trustVerificationBadge": "Verified Reviews",
     "appBannerTitle": "BagajPark on mobile!",
     "appBannerBody": "Our app is coming soon to iOS and Android. Keep using the web for now.",
-    "appBannerCta": "Explore on Web"
+    "appBannerCta": "Explore on Web",
+    "sortByHourly": "每小时价格",
+    "homeFaq1Q": "行李寄存预订需要多长时间？",
+    "homeFaq1A": "选择日期和行李件数后，通常只需几分钟即可完成预订。",
+    "homeFaq2Q": "行李寄存的价格如何计算？",
+    "homeFaq2A": "总金额根据行李件数、时长和平台规则计算，并在结算时清晰显示。",
+    "homeFaq3Q": "哪些城市提供服务？",
+    "homeFaq3A": "您可以在城市页面查看可用的寄存点，包括伊斯坦布尔、安卡拉、伊兹密尔等热门目的地。",
+    "from": "起",
+    "cancelSuccessRefund": "已取消。全额款项将退回您的支付方式。",
+    "shopDetailAbout": "关于",
+    "totalBags": "行李总数",
+    "authModalLogin": "登录",
+    "authModalRegister": "注册",
+    "cancellationTierFullSimple": "寄存前可随时免费取消并全额退款。",
+    "manageBookingTitle": "管理预订",
+    "manageBookingDesc": "输入预订编号和电子邮箱即可查看您的预订。",
+    "manageBookingCta": "查看预订",
+    "manageBookingFooter": "想要新建预订吗？",
+    "bookingLookupFields": "电子邮箱和预订编号为必填项。",
+    "bookingNotFound": "未找到预订",
+    "bookingLookupError": "未找到预订或信息不匹配。",
+    "duration": "时长",
+    "showFilters": "显示筛选",
+    "hideFilters": "隐藏筛选"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -854,7 +875,8 @@
     "navAdminPanel": "管理面板",
     "navPartnerPanel": "店铺面板",
     "navBookings": "我的预订",
-    "signOut": "登出"
+    "signOut": "登出",
+    "navPrivacyData": "数据与隐私"
   },
   "About": {
     "badge": "我们的故事",
@@ -924,7 +946,8 @@
     "citiesTitle": "热门城市",
     "citiesViewAll": "All cities & guides",
     "paymentsNote": "Cards via service provider (secure). Cash not accepted. Wallets (Apple/Google Pay, PayPal) planned with service provider.",
-    "securityNote": "Reservations and personal data are protected with SSL."
+    "securityNote": "Reservations and personal data are protected with SSL.",
+    "sitemap": "网站地图"
   },
   "Contact": {
     "title": "联系我们",
@@ -1107,7 +1130,10 @@
     "reviewNotReady": "发货完成后才能进行评论。",
     "verificationCooldown": "Please wait {seconds} seconds before sending another email.",
     "maxVerificationAttempts": "Too many attempts. Please contact our support team.",
-    "invalidTrPhone": "请输入有效的土耳其手机号（10 位数字，以 5 开头）。"
+    "invalidTrPhone": "请输入有效的土耳其手机号（10 位数字，以 5 开头）。",
+    "bookingIncludesPlatformHoliday": "所选日期与平台休息日重叠，请选择其他日期。",
+    "bookingStateConflict": "预订状态已变更，请刷新页面后重试。",
+    "accountDeleteActiveBookings": "有进行中的预订时无法注销账户。"
   },
   "Emails": {
     "verificationSubject": "验证您的电子邮件",

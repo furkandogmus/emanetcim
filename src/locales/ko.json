@@ -282,14 +282,11 @@
     "cancellationPolicyTitle": "취소 정책",
     "cancellationTierFull": "체크인 최소 {hours}시간 전 취소: 카드 전액 환불.",
     "cancellationTierPartial": "체크인 전 {minHours}~{maxHours}시간 사이: 카드로 {percent}% 환불.",
-    "cancellationTierCredit": "체크인 {minHours}시간 미만이거나 체크인 시간 이후: 카드 환불 없음 — 결제액에 해당하는 일회용 할인 코드 제공(다음 예약에 사용).",
     "cancellationYourCase": "내 예약",
     "cancellationEstimateCard": "약 ₺{amount}이(가) 카드로 환불됩니다.",
     "cancellationEstimateCredit": "Less than 60 minutes remain, so the refund is issued as BagajPark credits.",
     "cancellationUnpaidNote": "결제를 완료하지 않았다면 청구 없이 요청만 취소됩니다.",
-    "cancelSuccessCredit": "취소되었습니다. 할인 코드: {code}",
     "confirmCancel": "이 예약을 취소할까요? 결제금이 카드로 환불됩니다.",
-    "confirmCancelPaid": "이 예약을 취소할까요? 20 TL 수수료가 적용되며 ₺{amount}이(가) 환불됩니다.",
     "confirmCancelPending": "이 예약을 취소할까요? 결제가 무효 처리됩니다.",
     "cancelSuccess": "예약이 취소되었고 환불이 시작되었습니다.",
     "cancelError": "취소 중 오류가 발생했습니다.",
@@ -428,7 +425,31 @@
     "trustVerificationBadge": "Verified Reviews",
     "appBannerTitle": "BagajPark on mobile!",
     "appBannerBody": "Our app is coming soon to iOS and Android. Keep using the web for now.",
-    "appBannerCta": "Explore on Web"
+    "appBannerCta": "Explore on Web",
+    "sortByHourly": "시간당 요금",
+    "homeFaq1Q": "수하물 보관 예약은 얼마나 걸리나요?",
+    "homeFaq1A": "날짜와 수하물 개수를 선택하면 보통 몇 분 안에 예약을 완료할 수 있습니다.",
+    "homeFaq2Q": "수하물 보관 요금은 어떻게 계산되나요?",
+    "homeFaq2A": "총 금액은 수하물 개수, 기간, 플랫폼 규정에 따라 산정되며 결제 단계에서 명확하게 표시됩니다.",
+    "homeFaq3Q": "어느 도시에서 이용할 수 있나요?",
+    "homeFaq3A": "이스탄불, 앙카라, 이즈미르 등 주요 도시 페이지에서 이용 가능한 보관 지점을 확인할 수 있습니다.",
+    "from": "부터",
+    "cancelSuccessRefund": "취소되었습니다. 전액이 결제 수단으로 환불됩니다.",
+    "shopDetailAbout": "소개",
+    "totalBags": "총 수하물",
+    "authModalLogin": "로그인",
+    "authModalRegister": "회원가입",
+    "cancellationTierFullSimple": "체크인 전에는 언제든 무료 취소, 전액 환불.",
+    "manageBookingTitle": "예약 관리",
+    "manageBookingDesc": "예약 번호와 이메일을 입력하여 예약을 확인하세요.",
+    "manageBookingCta": "예약 확인",
+    "manageBookingFooter": "새로 예약하시겠습니까?",
+    "bookingLookupFields": "이메일과 예약 번호는 필수입니다.",
+    "bookingNotFound": "예약을 찾을 수 없습니다",
+    "bookingLookupError": "예약을 찾을 수 없거나 정보가 일치하지 않습니다.",
+    "duration": "기간",
+    "showFilters": "필터 보기",
+    "hideFilters": "필터 숨기기"
   },
   "Admin": {
     "dashboardTitle": "BagajPark 관리 센터",
@@ -854,7 +875,8 @@
     "navAdminPanel": "관리자 패널",
     "navPartnerPanel": "매장 패널",
     "navBookings": "내 예약",
-    "signOut": "로그아웃"
+    "signOut": "로그아웃",
+    "navPrivacyData": "데이터 및 개인정보"
   },
   "About": {
     "badge": "우리 이야기",
@@ -924,7 +946,8 @@
     "citiesTitle": "인기 도시",
     "citiesViewAll": "All cities & guides",
     "paymentsNote": "Cards via service provider (secure). Cash not accepted. Wallets (Apple/Google Pay, PayPal) planned with service provider.",
-    "securityNote": "Reservations and personal data are protected with SSL."
+    "securityNote": "Reservations and personal data are protected with SSL.",
+    "sitemap": "사이트맵"
   },
   "Contact": {
     "title": "문의하기",
@@ -1107,7 +1130,10 @@
     "reviewNotReady": "인도가 완료된 후에만 리뷰를 남길 수 있습니다.",
     "verificationCooldown": "새 인증 메일을 다시 보내기 전까지 {seconds}초 기다려 주세요.",
     "maxVerificationAttempts": "시도 횟수가 너무 많습니다. 고객지원에 문의해 주세요.",
-    "invalidTrPhone": "유효한 터키 휴대전화 번호를 입력하세요(5로 시작하는 10자리)."
+    "invalidTrPhone": "유효한 터키 휴대전화 번호를 입력하세요(5로 시작하는 10자리).",
+    "bookingIncludesPlatformHoliday": "선택한 날짜가 플랫폼 휴무일과 겹칩니다. 다른 날짜를 선택해 주세요.",
+    "bookingStateConflict": "예약 상태가 변경되었습니다. 페이지를 새로 고침한 후 다시 시도해 주세요.",
+    "accountDeleteActiveBookings": "활성 예약이 있는 동안에는 계정을 삭제할 수 없습니다."
   },
   "Emails": {
     "verificationSubject": "이메일을 인증해 주세요",

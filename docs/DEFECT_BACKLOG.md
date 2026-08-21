@@ -512,7 +512,7 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   olarak otomatik ayırt et), ve giriş sonrası rol bazlı yönlendirme yapılsın
   (PARTNER → `/partner`).
 
-### [P1-12] 14 dilin 12'si aynı 138 çeviri anahtarını eksik; en az biri canlıda ham görünüyor
+### [P1-12] ✅ MİSAFİR TARAFI KAPATILDI — 14 dilin 12'si aynı 138 çeviri anahtarını eksikti
 - **Nerede**: `src/locales/*.json`
 - **Kanıt** (ölçüm — anahtarları düzleştirip Türkçe referansla karşılaştıran bir script
   çalıştırdım):
@@ -538,9 +538,28 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   `Guest.sortByHourly (de)`.
 - **Neden önemli**: Türkçe dışındaki her dilde kullanıcı ya ham anahtar görüyor ya da
   boş bir bölüm — turist odaklı bir üründe İngilizce dışı diller tam da hedef kitle.
-- **Çözüm**: *veri/içerik* — 138 anahtarı 12 dile çevir. Sonra *kod*: CI'a eksik
-  anahtar taraması ekle (bu script birebir bu iş için kullanılabilir), yoksa aynı
-  boşluk her yeni özellikte tekrar oluşur.
+- **Çözüm (2026-08-22 — misafir tarafı tamamlandı)**:
+  - Misafire görünen **29 anahtar 12 dile çevrildi** (348 çeviri): ana sayfa SSS'inin
+    tamamı, arama filtreleri, rezervasyon sorgulama/yönetme akışı, dükkan detayı,
+    giriş modalı, iptal politikası satırı, hata mesajları, `Footer.sitemap`.
+    Yeniden ölçüm: **12 dilde de misafire görünen eksik anahtar 0**.
+  - **6 ölü anahtar silindi** (14 dilden): `Guest.authModalTitle`, `Guest.authModalBody`
+    (hiç kullanılmıyor) ve `Guest.cancellationTierCreditSimple`,
+    `Guest.cancellationTierCredit`, `Guest.cancelSuccessCredit`,
+    `Guest.confirmCancelPaid` — bunlar kaldırılan "nakit yerine kredi" iptal
+    politikasının kalıntısıydı, yani sadece ölü değil güncel politikayla **çelişiyorlardı**.
+  - **CI koruması eklendi** (`src/locales/locales.test.ts`, 54 test): misafire görünen
+    namespace'lerde eksik anahtara sıfır tolerans; interpolasyon yer tutucularının
+    referansla aynı olması; anahtar tiplerinin (metin/dizi) diller arasında tutarlı
+    olması; fazladan anahtar olmaması; ve misafir dışı borç için **mandal** (106'dan
+    yükselemez).
+  - **Koruma yazıldığı anda 3 gerçek hata buldu**: `cancellationTierCredit` tr'de
+    `{minutes}` iken 13 dilde `{minHours}`; `cancelSuccessCredit` ve `confirmCancelPaid`
+    tr'de yer tutucusuz iken 12 dilde `{code}` / `{amount}` bekliyordu — yani o dillerde
+    çalışma zamanında hata verir ya da yanlış render ederdi. Üçü de ölü çıktı ve silindi.
+- **Kalan borç**: 12 dilde 106 anahtar (Partner 40, CityStorage 27, AccountPrivacy 15,
+  WebPush 8, MarketingHotels 8, PartnerPromo 6, Admin 2). Bunlar Türk esnaf/operatörün
+  kullandığı yüzeyler olduğu için pratik etkisi düşük; mandal yükselmesini engelliyor.
 
 ### [P1-13] Aralıklı 502 Cloudflare kaynaklı, uygulama kaynaklı değil
 - **Nerede**: Cloudflare ↔ origin (Hetzner nginx)

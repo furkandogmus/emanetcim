@@ -282,14 +282,11 @@
     "cancellationPolicyTitle": "Zasady anulowania",
     "cancellationTierFull": "Anuluj co najmniej {hours} godz. przed zameldowaniem: pełny zwrot na kartę.",
     "cancellationTierPartial": "Gdy przed zameldowaniem zostanie od {minHours} do {maxHours} godz.: {percent}% wraca na kartę.",
-    "cancellationTierCredit": "Mniej niż {minHours} godz. przed zameldowaniem lub po czasie zameldowania: brak zwrotu na kartę — otrzymasz jednorazowy kod rabatowy na zapłaconą kwotę (na kolejną rezerwację).",
     "cancellationYourCase": "Twoja rezerwacja",
     "cancellationEstimateCard": "Około ₺{amount} zostanie zwrócone na kartę.",
     "cancellationEstimateCredit": "Less than 60 minutes remain, so the refund is issued as BagajPark credits.",
     "cancellationUnpaidNote": "Jeśli nie dokończono płatności, nic nie jest pobierane; prośba jest po prostu anulowana.",
-    "cancelSuccessCredit": "Anulowano. Twój kod rabatowy: {code}",
     "confirmCancel": "Anulować tę rezerwację? Płatność wróci na kartę.",
-    "confirmCancelPaid": "Anulować tę rezerwację? Pobierana jest opłata serwisowa 20 TRY; zwracamy ₺{amount}.",
     "confirmCancelPending": "Anulować tę rezerwację? Płatność zostanie unieważniona.",
     "cancelSuccess": "Rezerwacja anulowana, zwrot w toku.",
     "cancelError": "Błąd podczas anulowania.",
@@ -428,7 +425,31 @@
     "trustVerificationBadge": "Verified Reviews",
     "appBannerTitle": "BagajPark on mobile!",
     "appBannerBody": "Our app is coming soon to iOS and Android. Keep using the web for now.",
-    "appBannerCta": "Explore on Web"
+    "appBannerCta": "Explore on Web",
+    "sortByHourly": "Stawka godzinowa",
+    "homeFaq1Q": "Ile czasu zajmuje rezerwacja przechowalni bagażu?",
+    "homeFaq1A": "Po wybraniu terminu i liczby bagaży rezerwację zwykle można ukończyć w ciągu kilku minut.",
+    "homeFaq2Q": "Jak obliczana jest cena przechowywania bagażu?",
+    "homeFaq2A": "Łączna cena zależy od liczby bagaży, czasu oraz zasad platformy i jest wyraźnie pokazywana przy płatności.",
+    "homeFaq3Q": "W których miastach usługa jest dostępna?",
+    "homeFaq3A": "Aktywne punkty znajdziesz na stronach miast, m.in. Stambułu, Ankary, Izmiru i innych popularnych kierunków.",
+    "from": "od",
+    "cancelSuccessRefund": "Anulowano. Pełna kwota zostanie zwrócona na Twoją metodę płatności.",
+    "shopDetailAbout": "O punkcie",
+    "totalBags": "Bagaże łącznie",
+    "authModalLogin": "Zaloguj się",
+    "authModalRegister": "Zarejestruj się",
+    "cancellationTierFullSimple": "Bezpłatne anulowanie i pełny zwrot w dowolnym momencie przed oddaniem bagażu.",
+    "manageBookingTitle": "Zarządzaj rezerwacją",
+    "manageBookingDesc": "Wyświetl rezerwację, podając numer rezerwacji i adres e-mail.",
+    "manageBookingCta": "Zobacz rezerwację",
+    "manageBookingFooter": "Chcesz dokonać nowej rezerwacji?",
+    "bookingLookupFields": "Adres e-mail i numer rezerwacji są wymagane.",
+    "bookingNotFound": "Nie znaleziono rezerwacji",
+    "bookingLookupError": "Nie znaleziono rezerwacji lub dane się nie zgadzają.",
+    "duration": "Czas",
+    "showFilters": "Pokaż filtry",
+    "hideFilters": "Ukryj filtry"
   },
   "Admin": {
     "dashboardTitle": "Centrum administracyjne BagajPark",
@@ -854,7 +875,8 @@
     "navAdminPanel": "Panel administratora",
     "navPartnerPanel": "Panel sklepu",
     "navBookings": "Moje rezerwacje",
-    "signOut": "Wyloguj się"
+    "signOut": "Wyloguj się",
+    "navPrivacyData": "Dane i prywatność"
   },
   "About": {
     "badge": "NASZA HISTORIA",
@@ -924,7 +946,8 @@
     "citiesTitle": "Popularne miasta",
     "citiesViewAll": "Wszystkie miasta i przewodniki",
     "paymentsNote": "Karty przez service provider (bezpiecznie). Bez gotówki. Portfele (Apple/Google Pay, PayPal) planowane ze service provider.",
-    "securityNote": "Reservations and personal data are protected with SSL."
+    "securityNote": "Reservations and personal data are protected with SSL.",
+    "sitemap": "Mapa strony"
   },
   "Contact": {
     "title": "Kontakt",
@@ -1107,7 +1130,10 @@
     "reviewNotReady": "Opinię można dodać po zakończeniu wydania.",
     "verificationCooldown": "Poczekaj {seconds} sekund przed wysłaniem kolejnego e-maila.",
     "maxVerificationAttempts": "Zbyt wiele prób. Skontaktuj się z naszym zespołem wsparcia.",
-    "invalidTrPhone": "Podaj prawidłowy turecki numer komórkowy (10 cyfr, zaczyna się od 5)."
+    "invalidTrPhone": "Podaj prawidłowy turecki numer komórkowy (10 cyfr, zaczyna się od 5).",
+    "bookingIncludesPlatformHoliday": "Wybrane terminy pokrywają się z dniem wolnym platformy; wybierz inne daty.",
+    "bookingStateConflict": "Status rezerwacji się zmienił; odśwież stronę i spróbuj ponownie.",
+    "accountDeleteActiveBookings": "Nie możesz zamknąć konta, dopóki masz aktywne rezerwacje."
   },
   "Emails": {
     "verificationSubject": "Potwierdź swój e-mail",

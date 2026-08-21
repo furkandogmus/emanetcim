@@ -282,14 +282,11 @@
     "cancellationPolicyTitle": "سياسة الإلغاء",
     "cancellationTierFull": "إلغاء قبل {hours} ساعة على الأقل من تسجيل الوصول: استرداد كامل إلى بطاقتك.",
     "cancellationTierPartial": "إذا بقي بين {minHours} و {maxHours} ساعة قبل تسجيل الوصول: يُسترد {percent}% إلى بطاقتك.",
-    "cancellationTierCredit": "خلال {minHours} ساعة قبل تسجيل الوصول أو بعده: لا استرداد للبطاقة — تحصل على رمز خصم لمرة واحدة بقيمة ما دفعته (للحجز التالي).",
     "cancellationYourCase": "حجزك",
     "cancellationEstimateCard": "يُسترد تقريبًا ₺{amount} إلى بطاقتك.",
     "cancellationEstimateCredit": "Less than 60 minutes remain, so the refund is issued as BagajPark credits.",
     "cancellationUnpaidNote": "إذا لم تكمل الدفع، لا تُفرض رسوم؛ يُلغى الطلب فقط.",
-    "cancelSuccessCredit": "تم الإلغاء. رمز الخصم: {code}",
     "confirmCancel": "إلغاء هذا الحجز؟ يُسترد دفعك إلى بطاقتك.",
-    "confirmCancelPaid": "إلغاء هذا الحجز؟ تُفرض رسوم خدمة 20 ليرة؛ يُسترد ₺{amount}.",
     "confirmCancelPending": "إلغاء هذا الحجز؟ يُلغى الدفع.",
     "cancelSuccess": "تم إلغاء حجزك وبدأت عملية الاسترداد.",
     "cancelError": "حدث خطأ أثناء الإلغاء.",
@@ -428,7 +425,31 @@
     "trustVerificationBadge": "Verified Reviews",
     "appBannerTitle": "BagajPark on mobile!",
     "appBannerBody": "Our app is coming soon to iOS and Android. Keep using the web for now.",
-    "appBannerCta": "Explore on Web"
+    "appBannerCta": "Explore on Web",
+    "sortByHourly": "السعر بالساعة",
+    "homeFaq1Q": "كم يستغرق حجز مكان لتخزين الأمتعة؟",
+    "homeFaq1A": "بعد اختيار التواريخ وعدد الحقائب، يمكنك عادةً إتمام الحجز في دقائق قليلة.",
+    "homeFaq2Q": "كيف يتم حساب سعر تخزين الأمتعة؟",
+    "homeFaq2A": "يعتمد المبلغ الإجمالي على عدد الحقائب والمدة وقواعد المنصة، ويظهر بوضوح عند الدفع.",
+    "homeFaq3Q": "في أي مدن تتوفر الخدمة؟",
+    "homeFaq3A": "يمكنك الاطلاع على النقاط النشطة من صفحات المدن، بما في ذلك إستنبول وأنقرة وإزمير ومدن شهيرة أخرى.",
+    "from": "يبدأ من",
+    "cancelSuccessRefund": "تم الإلغاء. سيُعاد المبلغ بالكامل إلى وسيلة الدفع الخاصة بك.",
+    "shopDetailAbout": "نبذة",
+    "totalBags": "إجمالي الحقائب",
+    "authModalLogin": "تسجيل الدخول",
+    "authModalRegister": "إنشاء حساب",
+    "cancellationTierFullSimple": "إلغاء مجاني واسترداد كامل في أي وقت قبل التسليم.",
+    "manageBookingTitle": "إدارة الحجز",
+    "manageBookingDesc": "اعرض حجزك بإدخال رقم الحجز والبريد الإلكتروني.",
+    "manageBookingCta": "عرض الحجز",
+    "manageBookingFooter": "هل تريد إجراء حجز جديد؟",
+    "bookingLookupFields": "البريد الإلكتروني ورقم الحجز مطلوبان.",
+    "bookingNotFound": "لم يتم العثور على الحجز",
+    "bookingLookupError": "لم يتم العثور على الحجز أو البيانات غير متطابقة.",
+    "duration": "المدة",
+    "showFilters": "إظهار عوامل التصفية",
+    "hideFilters": "إخفاء عوامل التصفية"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -854,7 +875,8 @@
     "navAdminPanel": "لوحة الإدارة",
     "navPartnerPanel": "لوحة المتجر",
     "navBookings": "حجوزاتي",
-    "signOut": "تسجيل الخروج"
+    "signOut": "تسجيل الخروج",
+    "navPrivacyData": "البيانات والخصوصية"
   },
   "About": {
     "badge": "قصتنا",
@@ -924,7 +946,8 @@
     "citiesTitle": "مدن شائعة",
     "citiesViewAll": "All cities & guides",
     "paymentsNote": "Cards via service provider (secure). Cash not accepted. Wallets (Apple/Google Pay, PayPal) planned with service provider.",
-    "securityNote": "Reservations and personal data are protected with SSL."
+    "securityNote": "Reservations and personal data are protected with SSL.",
+    "sitemap": "خريطة الموقع"
   },
   "Contact": {
     "title": "اتصل بنا",
@@ -1107,7 +1130,10 @@
     "reviewNotReady": "التقييم متاح بعد اكتمال التسليم.",
     "verificationCooldown": "Please wait {seconds} seconds before sending another email.",
     "maxVerificationAttempts": "Too many attempts. Please contact our support team.",
-    "invalidTrPhone": "أدخل رقم جوال تركي صالحًا (10 أرقام تبدأ بـ 5)."
+    "invalidTrPhone": "أدخل رقم جوال تركي صالحًا (10 أرقام تبدأ بـ 5).",
+    "bookingIncludesPlatformHoliday": "التواريخ المختارة تتوافق مع يوم عطلة في المنصة؛ يرجى اختيار تواريخ أخرى.",
+    "bookingStateConflict": "تغيّرت حالة الحجز؛ يرجى تحديث الصفحة والمحاولة مرة أخرى.",
+    "accountDeleteActiveBookings": "لا يمكنك إغلاق حسابك أثناء وجود حجوزات نشطة."
   },
   "Emails": {
     "verificationSubject": "أكّد بريدك الإلكتروني",

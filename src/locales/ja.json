@@ -282,14 +282,11 @@
     "cancellationPolicyTitle": "キャンセルポリシー",
     "cancellationTierFull": "チェックインの {hours} 時間前までにキャンセルすると、カードに全額返金されます。",
     "cancellationTierPartial": "チェックインまでに {minHours} ～ {maxHours} 時間ある場合: {percent}% がカードに返金されます。",
-    "cancellationTierCredit": "チェックインの {minHours} 時間前またはチェックイン時間後: カードへの返金はありません。支払った金額に対して 1 回限りの割引コードを受け取ります (次回の予約で使用します)。",
     "cancellationYourCase": "ご予約",
     "cancellationEstimateCard": "約₺{amount}がカードに返金されます。",
     "cancellationEstimateCredit": "Less than 60 minutes remain, so the refund is issued as BagajPark credits.",
     "cancellationUnpaidNote": "支払いが完了していない場合は何も請求されません。リクエストは単にキャンセルされます。",
-    "cancelSuccessCredit": "キャンセル。割引コード: {code}",
     "confirmCancel": "この予約をキャンセルしますか?お支払いはカードに返金されます。",
-    "confirmCancelPaid": "この予約をキャンセルしますか? 20 TL のサービス料が適用されます。 ₺{amount}が返金されます。",
     "confirmCancelPending": "この予約をキャンセルしますか?お支払いは無効となります。",
     "cancelSuccess": "ご予約はキャンセルされ、返金手続きが開始されました。",
     "cancelError": "キャンセル中に問題が発生しました。",
@@ -428,7 +425,31 @@
     "trustVerificationBadge": "Verified Reviews",
     "appBannerTitle": "BagajPark on mobile!",
     "appBannerBody": "Our app is coming soon to iOS and Android. Keep using the web for now.",
-    "appBannerCta": "Explore on Web"
+    "appBannerCta": "Explore on Web",
+    "sortByHourly": "1時間あたりの料金",
+    "homeFaq1Q": "荷物預かりの予約にはどのくらい時間がかかりますか？",
+    "homeFaq1A": "日付と荷物の個数を選択すれば、通常は数分で予約を完了できます。",
+    "homeFaq2Q": "荷物預かりの料金はどのように決まりますか？",
+    "homeFaq2A": "合計金額は荷物の個数、期間、プラットフォームの規定に基づいて算出され、お支払い時に明確に表示されます。",
+    "homeFaq3Q": "どの都市で利用できますか？",
+    "homeFaq3A": "イスタンブール、アンカラ、イズミルなど主要都市の都市ページから、利用可能な預かり場所をご覧いただけます。",
+    "from": "〜から",
+    "cancelSuccessRefund": "キャンセルが完了しました。全額がお支払い方法へ返金されます。",
+    "shopDetailAbout": "詳細",
+    "totalBags": "荷物の合計",
+    "authModalLogin": "ログイン",
+    "authModalRegister": "新規登録",
+    "cancellationTierFullSimple": "チェックイン前ならいつでも無料キャンセル・全額返金。",
+    "manageBookingTitle": "予約の管理",
+    "manageBookingDesc": "予約番号とメールアドレスを入力して予約を確認できます。",
+    "manageBookingCta": "予約を確認",
+    "manageBookingFooter": "新しく予約しますか？",
+    "bookingLookupFields": "メールアドレスと予約番号は必須です。",
+    "bookingNotFound": "予約が見つかりません",
+    "bookingLookupError": "予約が見つからない、または情報が一致しません。",
+    "duration": "期間",
+    "showFilters": "絞り込みを表示",
+    "hideFilters": "絞り込みを隠す"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -854,7 +875,8 @@
     "navAdminPanel": "管理者パネル",
     "navPartnerPanel": "ショップパネル",
     "navBookings": "私の予約",
-    "signOut": "サインアウト"
+    "signOut": "サインアウト",
+    "navPrivacyData": "データとプライバシー"
   },
   "About": {
     "badge": "私たちのストーリー",
@@ -924,7 +946,8 @@
     "citiesTitle": "人気の都市",
     "citiesViewAll": "All cities & guides",
     "paymentsNote": "Cards via service provider (secure). Cash not accepted. Wallets (Apple/Google Pay, PayPal) planned with service provider.",
-    "securityNote": "Reservations and personal data are protected with SSL."
+    "securityNote": "Reservations and personal data are protected with SSL.",
+    "sitemap": "サイトマップ"
   },
   "Contact": {
     "title": "お問い合わせ",
@@ -1107,7 +1130,10 @@
     "reviewNotReady": "レビューは納品完了後にのみ可能です。",
     "verificationCooldown": "Please wait {seconds} seconds before sending another email.",
     "maxVerificationAttempts": "Too many attempts. Please contact our support team.",
-    "invalidTrPhone": "有効なトルコの携帯番号を入力してください（5で始まる10桁）。"
+    "invalidTrPhone": "有効なトルコの携帯番号を入力してください（5で始まる10桁）。",
+    "bookingIncludesPlatformHoliday": "選択された日程はプラットフォームの休業日と重なっています。別の日程をお選びください。",
+    "bookingStateConflict": "予約の状態が変更されました。ページを再読み込みしてもう一度お試しください。",
+    "accountDeleteActiveBookings": "有効な予約がある間はアカウントを閉鎖できません。"
   },
   "Emails": {
     "verificationSubject": "メールアドレスを確認してください",

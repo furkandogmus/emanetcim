@@ -282,14 +282,11 @@
     "cancellationPolicyTitle": "Politica di cancellazione",
     "cancellationTierFull": "Cancella almeno {hours} ore prima del check-in: rimborso completo sulla tua carta.",
     "cancellationTierPartial": "Se rimangono tra {minHours} e {maxHours} ore prima del check-in: il {percent}% verrà rimborsato sulla tua carta.",
-    "cancellationTierCredit": "Meno di {minHours} ora prima del check-in o dopo l'orario del check-in: nessun rimborso sulla carta: riceverai un codice sconto una tantum per l'importo pagato (da utilizzare sulla tua prossima prenotazione).",
     "cancellationYourCase": "La tua prenotazione",
     "cancellationEstimateCard": "Circa ₺{amount} verranno rimborsati sulla tua carta.",
     "cancellationEstimateCredit": "Less than 60 minutes remain, so the refund is issued as BagajPark credits.",
     "cancellationUnpaidNote": "Se non hai completato il pagamento, non ti verrà addebitato nulla; la richiesta viene semplicemente annullata.",
-    "cancelSuccessCredit": "Annullato. Il tuo codice sconto: {code}",
     "confirmCancel": "Cancellare questa prenotazione? Il pagamento verrà rimborsato sulla tua carta.",
-    "confirmCancelPaid": "Cancellare questa prenotazione? Si applica una commissione di servizio di 20 TL; ₺{amount} verrà rimborsato.",
     "confirmCancelPending": "Cancellare questa prenotazione? Il tuo pagamento verrà annullato.",
     "cancelSuccess": "La tua prenotazione è stata cancellata e la procedura di rimborso è iniziata.",
     "cancelError": "Qualcosa è andato storto durante l'annullamento.",
@@ -428,7 +425,31 @@
     "trustVerificationBadge": "Verified Reviews",
     "appBannerTitle": "BagajPark on mobile!",
     "appBannerBody": "Our app is coming soon to iOS and Android. Keep using the web for now.",
-    "appBannerCta": "Explore on Web"
+    "appBannerCta": "Explore on Web",
+    "sortByHourly": "Tariffa oraria",
+    "homeFaq1Q": "Quanto tempo richiede una prenotazione del deposito bagagli?",
+    "homeFaq1A": "Dopo aver scelto le date e il numero di bagagli, di solito puoi completare la prenotazione in pochi minuti.",
+    "homeFaq2Q": "Come viene calcolato il prezzo del deposito bagagli?",
+    "homeFaq2A": "Il prezzo totale dipende dal numero di bagagli, dalla durata e dalle regole della piattaforma, ed è indicato chiaramente al momento del pagamento.",
+    "homeFaq3Q": "In quali città è disponibile il servizio?",
+    "homeFaq3A": "Puoi consultare i punti attivi dalle pagine delle città, tra cui Istanbul, Ankara, Smirne e altre destinazioni popolari.",
+    "from": "da",
+    "cancelSuccessRefund": "Annullato. L'intero importo sarà rimborsato sul tuo metodo di pagamento.",
+    "shopDetailAbout": "Informazioni",
+    "totalBags": "Bagagli totali",
+    "authModalLogin": "Accedi",
+    "authModalRegister": "Registrati",
+    "cancellationTierFullSimple": "Cancellazione gratuita e rimborso completo, in qualsiasi momento prima della consegna.",
+    "manageBookingTitle": "Gestisci prenotazione",
+    "manageBookingDesc": "Visualizza la tua prenotazione inserendo il numero di prenotazione e l'e-mail.",
+    "manageBookingCta": "Visualizza prenotazione",
+    "manageBookingFooter": "Vuoi effettuare una nuova prenotazione?",
+    "bookingLookupFields": "E-mail e numero di prenotazione sono obbligatori.",
+    "bookingNotFound": "Prenotazione non trovata",
+    "bookingLookupError": "Prenotazione non trovata o dati non corrispondenti.",
+    "duration": "Durata",
+    "showFilters": "Mostra filtri",
+    "hideFilters": "Nascondi filtri"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -854,7 +875,8 @@
     "navAdminPanel": "Pannello di amministrazione",
     "navPartnerPanel": "Pannello del negozio",
     "navBookings": "Le mie prenotazioni",
-    "signOut": "disconnessione"
+    "signOut": "disconnessione",
+    "navPrivacyData": "Dati e privacy"
   },
   "About": {
     "badge": "LA NOSTRA STORIA",
@@ -924,7 +946,8 @@
     "citiesTitle": "Città popolari",
     "citiesViewAll": "Tutte le città e le guide",
     "paymentsNote": "Carte tramite service provider (sicuro). Nessun contante. Wallet (Apple/Google Pay, PayPal) previsti con service provider.",
-    "securityNote": "Reservations and personal data are protected with SSL."
+    "securityNote": "Reservations and personal data are protected with SSL.",
+    "sitemap": "Mappa del sito"
   },
   "Contact": {
     "title": "Contattaci",
@@ -1107,7 +1130,10 @@
     "reviewNotReady": "Le revisioni possono essere effettuate solo dopo il completamento della consegna.",
     "verificationCooldown": "Please wait {seconds} seconds before sending another email.",
     "maxVerificationAttempts": "Too many attempts. Please contact our support team.",
-    "invalidTrPhone": "Inserisci un cellulare turco valido (10 cifre che iniziano con 5)."
+    "invalidTrPhone": "Inserisci un cellulare turco valido (10 cifre che iniziano con 5).",
+    "bookingIncludesPlatformHoliday": "Le date scelte coincidono con un giorno festivo della piattaforma; scegli date diverse.",
+    "bookingStateConflict": "Lo stato della prenotazione è cambiato; aggiorna la pagina e riprova.",
+    "accountDeleteActiveBookings": "Non puoi chiudere il tuo account se hai prenotazioni attive."
   },
   "Emails": {
     "verificationSubject": "Verifica la tua email",

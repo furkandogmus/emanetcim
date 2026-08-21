@@ -282,14 +282,11 @@
     "cancellationPolicyTitle": "سیاست لغو",
     "cancellationTierFull": "لغو حداقل {hours} ساعت قبل از ورود: بازپرداخت کامل به کارت.",
     "cancellationTierPartial": "اگر بین {minHours} و {maxHours} ساعت به ورود مانده: {percent}% به کارت بازمی‌گردد.",
-    "cancellationTierCredit": "کمتر از {minHours} ساعت قبل از ورود یا پس از زمان ورود: بدون بازپرداخت کارت — کد تخفیف یک‌بار مصرف به مبلغ پرداختی.",
     "cancellationYourCase": "رزرو شما",
     "cancellationEstimateCard": "حدود ₺{amount} به کارت بازگردانده می‌شود.",
     "cancellationEstimateCredit": "Less than 60 minutes remain, so the refund is issued as BagajPark credits.",
     "cancellationUnpaidNote": "اگر پرداخت نکرده‌اید، هزینه‌ای نیست؛ فقط درخواست لغو می‌شود.",
-    "cancelSuccessCredit": "لغوشد. کد تخفیف شما: {code}",
     "confirmCancel": "این رزرو لغو شود؟ پرداخت به کارت بازمی‌گردد.",
-    "confirmCancelPaid": "این رزرو لغو شود؟ ۲۰ لیر کارمزد؛ ₺{amount} بازپرداخت می‌شود.",
     "confirmCancelPending": "این رزرو لغو شود؟ پرداخت باطل می‌شود.",
     "cancelSuccess": "رزرو لغو شد و بازپرداخت آغاز شد.",
     "cancelError": "هنگام لغو خطایی رخ داد.",
@@ -428,7 +425,31 @@
     "trustVerificationBadge": "Verified Reviews",
     "appBannerTitle": "BagajPark on mobile!",
     "appBannerBody": "Our app is coming soon to iOS and Android. Keep using the web for now.",
-    "appBannerCta": "Explore on Web"
+    "appBannerCta": "Explore on Web",
+    "sortByHourly": "نرخ ساعتی",
+    "homeFaq1Q": "رزرو نگهداری چمدان چقدر طول می‌کشد؟",
+    "homeFaq1A": "پس از انتخاب تاریخ و تعداد چمدان، معمولاً می‌توانید رزرو را در چند دقیقه کامل کنید.",
+    "homeFaq2Q": "قیمت نگهداری چمدان چگونه محاسبه می‌شود؟",
+    "homeFaq2A": "مبلغ کل بر اساس تعداد چمدان، مدت زمان و قواعد پلتفرم محاسبه می‌شود و در مرحله پرداخت به‌روشنی نشان داده می‌شود.",
+    "homeFaq3Q": "این سرویس در چه شهرهایی موجود است؟",
+    "homeFaq3A": "می‌توانید نقاط فعال را از صفحات شهرها ببینید، از جمله استانبول، آنکارا، ازمیر و مقاصد محبوب دیگر.",
+    "from": "از",
+    "cancelSuccessRefund": "لغو شد. مبلغ به‌طور کامل به روش پرداخت شما بازگردانده می‌شود.",
+    "shopDetailAbout": "درباره",
+    "totalBags": "مجموع چمدان‌ها",
+    "authModalLogin": "ورود",
+    "authModalRegister": "ثبت‌نام",
+    "cancellationTierFullSimple": "لغو رایگان و بازگشت کامل وجه، در هر زمان پیش از تحویل.",
+    "manageBookingTitle": "مدیریت رزرو",
+    "manageBookingDesc": "با وارد کردن شماره رزرو و ایمیل، رزرو خود را ببینید.",
+    "manageBookingCta": "مشاهده رزرو",
+    "manageBookingFooter": "می‌خواهید رزرو جدیدی انجام دهید؟",
+    "bookingLookupFields": "ایمیل و شماره رزرو الزامی است.",
+    "bookingNotFound": "رزرو یافت نشد",
+    "bookingLookupError": "رزرو یافت نشد یا اطلاعات مطابقت ندارد.",
+    "duration": "مدت",
+    "showFilters": "نمایش فیلترها",
+    "hideFilters": "پنهان کردن فیلترها"
   },
   "Admin": {
     "dashboardTitle": "مرکز مدیریت BagajPark",
@@ -854,7 +875,8 @@
     "navAdminPanel": "پنل مدیریت",
     "navPartnerPanel": "پنل فروشگاه",
     "navBookings": "رزروهای من",
-    "signOut": "خروج"
+    "signOut": "خروج",
+    "navPrivacyData": "داده‌ها و حریم خصوصی"
   },
   "About": {
     "badge": "داستان ما",
@@ -924,7 +946,8 @@
     "citiesTitle": "شهرهای پرطرفدار",
     "citiesViewAll": "All cities & guides",
     "paymentsNote": "Cards via service provider (secure). Cash not accepted. Wallets (Apple/Google Pay, PayPal) planned with service provider.",
-    "securityNote": "Reservations and personal data are protected with SSL."
+    "securityNote": "Reservations and personal data are protected with SSL.",
+    "sitemap": "نقشه سایت"
   },
   "Contact": {
     "title": "تماس با ما",
@@ -1107,7 +1130,10 @@
     "reviewNotReady": "نظر فقط پس از تکمیل تحویل ممکن است.",
     "verificationCooldown": "لطفاً {seconds} ثانیه صبر کنید قبل از ارسال ایمیل دیگر.",
     "maxVerificationAttempts": "تلاش‌ها بیش از حد است. لطفاً با تیم پشتیبانی تماس بگیرید.",
-    "invalidTrPhone": "شماره موبایل معتبر ترکیه را وارد کنید (۱۰ رقم، شروع با ۵)."
+    "invalidTrPhone": "شماره موبایل معتبر ترکیه را وارد کنید (۱۰ رقم، شروع با ۵).",
+    "bookingIncludesPlatformHoliday": "تاریخ‌های انتخابی با روز تعطیل پلتفرم هم‌زمان است؛ لطفاً تاریخ دیگری انتخاب کنید.",
+    "bookingStateConflict": "وضعیت رزرو تغییر کرد؛ صفحه را بازخوانی کنید و دوباره تلاش کنید.",
+    "accountDeleteActiveBookings": "تا زمانی که رزرو فعال دارید نمی‌توانید حساب خود را ببندید."
   },
   "Emails": {
     "verificationSubject": "ایمیل خود را تأیید کنید",

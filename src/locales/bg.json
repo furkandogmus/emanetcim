@@ -282,14 +282,11 @@
     "cancellationPolicyTitle": "Политика за отмяна",
     "cancellationTierFull": "Отмяна поне {hours} часа преди приемане: пълно възстановяване на картата.",
     "cancellationTierPartial": "Ако остават между {minHours} и {maxHours} часа до приемане: {percent}% се възстановява на картата.",
-    "cancellationTierCredit": "Под {minHours} час преди приемане или след часа на приемане: без възстановяване на картата — еднократен код за отстъпка за платената сума.",
     "cancellationYourCase": "Вашата резервация",
     "cancellationEstimateCard": "Около ₺{amount} ще бъдат възстановени на картата.",
     "cancellationEstimateCredit": "Less than 60 minutes remain, so the refund is issued as BagajPark credits.",
     "cancellationUnpaidNote": "Ако не сте платили, няма таксуване; заявката просто се отменя.",
-    "cancelSuccessCredit": "Отменено. Вашият код: {code}",
     "confirmCancel": "Да се отмени резервацията? Плащането ще се възстанови на картата.",
-    "confirmCancelPaid": "Да се отмени? Такса 20 TL; ₺{amount} ще бъдат възстановени.",
     "confirmCancelPending": "Да се отмени? Плащането ще бъде анулирано.",
     "cancelSuccess": "Резервацията е отменена и започна възстановяване.",
     "cancelError": "Грешка при отмяна.",
@@ -428,7 +425,31 @@
     "trustVerificationBadge": "Verified Reviews",
     "appBannerTitle": "BagajPark on mobile!",
     "appBannerBody": "Our app is coming soon to iOS and Android. Keep using the web for now.",
-    "appBannerCta": "Explore on Web"
+    "appBannerCta": "Explore on Web",
+    "sortByHourly": "Часова тарифа",
+    "homeFaq1Q": "Колко време отнема резервацията за багажно помещение?",
+    "homeFaq1A": "След като изберете дати и брой багажи, обикновено можете да завършите резервацията за няколко минути.",
+    "homeFaq2Q": "Как се изчислява цената за съхранение на багаж?",
+    "homeFaq2A": "Общата сума зависи от броя багажи, продължителността и правилата на платформата и се показва ясно при плащане.",
+    "homeFaq3Q": "В кои градове е достъпна услугата?",
+    "homeFaq3A": "Можете да видите активните точки от страниците на градовете, включително Истанбул, Анкара, Измир и други популярни дестинации.",
+    "from": "от",
+    "cancelSuccessRefund": "Отменено. Пълната сума ще бъде възстановена по вашия платежен метод.",
+    "shopDetailAbout": "Информация",
+    "totalBags": "Общо багажи",
+    "authModalLogin": "Вход",
+    "authModalRegister": "Регистрация",
+    "cancellationTierFullSimple": "Безплатна отмяна и пълно възстановяване по всяко време преди предаването.",
+    "manageBookingTitle": "Управление на резервация",
+    "manageBookingDesc": "Вижте резервацията си, като въведете номер на резервация и имейл.",
+    "manageBookingCta": "Виж резервацията",
+    "manageBookingFooter": "Искате да направите нова резервация?",
+    "bookingLookupFields": "Имейлът и номерът на резервацията са задължителни.",
+    "bookingNotFound": "Резервацията не е намерена",
+    "bookingLookupError": "Резервацията не е намерена или данните не съвпадат.",
+    "duration": "Продължителност",
+    "showFilters": "Показване на филтрите",
+    "hideFilters": "Скриване на филтрите"
   },
   "Admin": {
     "dashboardTitle": "Админ център BagajPark",
@@ -854,7 +875,8 @@
     "navAdminPanel": "Админ панел",
     "navPartnerPanel": "Панел на магазин",
     "navBookings": "Моите резервации",
-    "signOut": "Изход"
+    "signOut": "Изход",
+    "navPrivacyData": "Данни и поверителност"
   },
   "About": {
     "badge": "НАШАТА ИСТОРИЯ",
@@ -924,7 +946,8 @@
     "citiesTitle": "Популярни градове",
     "citiesViewAll": "All cities & guides",
     "paymentsNote": "Cards via service provider (secure). Cash not accepted. Wallets (Apple/Google Pay, PayPal) planned with service provider.",
-    "securityNote": "Reservations and personal data are protected with SSL."
+    "securityNote": "Reservations and personal data are protected with SSL.",
+    "sitemap": "Карта на сайта"
   },
   "Contact": {
     "title": "Свържете се с нас",
@@ -1107,7 +1130,10 @@
     "reviewNotReady": "Отзив е възможен след завършено предаване.",
     "verificationCooldown": "Изчакайте {seconds} секунди преди да изпратите друг имейл.",
     "maxVerificationAttempts": "Твърде много опити. Свържете се с нашия екип за поддръжка.",
-    "invalidTrPhone": "Въведете валиден турски мобилен номер (10 цифри, започва с 5)."
+    "invalidTrPhone": "Въведете валиден турски мобилен номер (10 цифри, започва с 5).",
+    "bookingIncludesPlatformHoliday": "Избраните дати съвпадат с почивен ден на платформата; изберете други дати.",
+    "bookingStateConflict": "Статусът на резервацията се промени; презаредете страницата и опитайте отново.",
+    "accountDeleteActiveBookings": "Не можете да закриете акаунта си, докато имате активни резервации."
   },
   "Emails": {
     "verificationSubject": "Потвърдете имейла си",
