@@ -68,7 +68,9 @@ export default function Header() {
           <nav aria-label={navCopy.navLabel} className="hidden md:flex items-center gap-5">
             <NavLink href="/search">{navCopy.explore}</NavLink>
             <NavLink href="/insurance">{navCopy.insurance}</NavLink>
-            <Link href="/register" className="relative text-[10px] font-black uppercase tracking-widest text-orange-600 hover:text-orange-700 transition-all duration-200">{navCopy.becomePartner}</Link>
+            {/* 2026-08-21: /register (rolsuz) -> /partners — footer'daki "Esnafımız Olun" ile
+                aynı tek tanıtım/başvuru funnel'ına hizalandı, bkz. UX_AUDIT_BOUNCE_COMPARISON */}
+            <Link href="/partners" className="relative text-[10px] font-black uppercase tracking-widest text-orange-600 hover:text-orange-700 transition-all duration-200">{navCopy.becomePartner}</Link>
           </nav>
         )}
         <nav aria-label={navCopy.secondaryLabel} className="hidden md:flex">

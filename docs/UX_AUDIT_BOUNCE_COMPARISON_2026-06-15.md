@@ -170,7 +170,7 @@ yukunu artiriyor.
   - Kabul kriteri: Ilk ekranda dukkan gorseli/harita, mesafe, calisma saati,
     puan/yorum, fiyat ve CTA birlikte gorunur.
 
-- [ ] **Sosyal kanit mesajlarini gercek veriyle uyumlu yap.**
+- [x] **Sosyal kanit mesajlarini gercek veriyle uyumlu yap.**
   - Gozlem: Canli istatistikler `0 tamamlanan depolama`, `0 misafir yorumu`
     gosterirken alt bolum `4.8 / 5 dogrulanmis yorumlar` diyor.
   - Ayrica ana sayfada `3 aktif nokta` varken "yuzlerce emanet noktasi" deniyor.
@@ -178,13 +178,28 @@ yukunu artiriyor.
     destekliyor; yeni yorumlar dogrudan gorunuyor.
   - Kabul kriteri: Gercek veri yoksa iddia gizlenir veya "yeni" durumuna uygun
     guven mesaji kullanilir.
+  - Dogrulandi (2026-08-21): Canli kontrol edildi — trust-stats bolumu
+    (`src/app/[locale]/page.tsx`) gercek DB verisini gosteriyor (3/0/0/"—"),
+    "yuzlerce nokta" veya sabit "4.8/5" iddiasi kod tabaninda bulunamadi (audit
+    tarihinden sonra kaldirilmis olmali). `TestimonialCarousel` de bos veride
+    `null` donuyor, sahte yorum yok. Ek bulgu: canli DB'de "Furkan'in Diger
+    Mekan" adinda bir test dukkani `isActive=true` olarak aramada gorunuyordu —
+    bu SADECE veritabani mutasyonu gerektirdigi icin (kod degisikligi degil)
+    guvenlik siniflandiricisi tarafindan bloklandi, kullanicinin admin panelden
+    (`/admin/partners`) elle pasife cekmesi gerekiyor.
 
-- [ ] **Partner kazanimi baglantilarini tek hedefe yonlendir.**
+- [x] **Partner kazanimi baglantilarini tek hedefe yonlendir.**
   - Gozlem: Header `Partner Ol` kayit sayfasina; footer `Esnafimiz Olun`
     `/partners` uzerinden giris sayfasina; `/become-partner` ise ayri tanitim
     sayfasina gidiyor.
   - Kabul kriteri: Tum halka acik partner CTA'lari tek tanitim/basvuru funnel'ina
     gider; giris yapmak isteyen partner icin ayri CTA bulunur.
+  - Tamamlandi (2026-08-21): `/partners` audit'ten sonra zaten gercek bir
+    tanitim/basvuru sayfasina donusmus (kendi CTA'lari `/register?role=PARTNER`'a
+    gidiyor), `/become-partner` da kendi CTA'lariyla `/partners`'a yonleniyor —
+    ikisi zaten tek hedefe akiyordu. Tek kalan tutarsizlik: Header'daki
+    "Partner Ol" hala rolsuz `/register`'a gidiyordu (footer ile uyumsuz) —
+    `/partners`'a yonlendirildi (`src/components/layout/Header.tsx`).
 
 - [x] **Urun/SEO basliklarindaki tekrarları temizle.**
   - Gozlem: Bazi title'lar `... | BagajPark | BagajPark`.
