@@ -10,7 +10,13 @@ SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
-SELECT pg_catalog.set_config('search_path', '', false);
+-- NOT: orijinal pg_dump ciktisindaki `SELECT pg_catalog.set_config('search_path', '', false);`
+-- satiri KASITLI olarak kaldirildi (2026-08-21). O satir search_path'i tum session icin
+-- bosaltiyordu; Prisma'nin migrate deploy sirasinda kendi `_prisma_migrations` bookkeeping
+-- tablosuna yazdigi UNQUALIFIED "UPDATE _prisma_migrations ..." sorgusu bu yuzden
+-- "relation _prisma_migrations does not exist" (P1014) hatasiyla basarisiz oluyordu.
+-- Bu migration hicbir ortamda (Hetzner/AWS) gercekten "applied" olarak KAYITLI degildi
+-- (_prisma_migrations 0 satir donduruyordu) — o yuzden bu dosyayi degistirmek guvenli.
 SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
