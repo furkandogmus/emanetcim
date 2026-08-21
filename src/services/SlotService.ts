@@ -177,8 +177,56 @@ export async function getSlotAvailability(
     reservedMap.set(r.slotId, r._sum.bagCount ?? 0);
   }
 
+  /**
+   * ReservationSlot kaydı OLMAYAN rezervasyonlar da yer kaplar.
+   *
+   * Neden gerekli: slot üretimi 2026-07-14'te durduğu için rezervasyonlar aylarca
+   * "legacy" yoldan (dükkan geneli kapasite kontrolü) oluşturuldu ve hiç
+   * ReservationSlot satırı yazılmadı — prod'da 19 rezervasyona karşı 0 satır.
+   * Slot üretimi tekrar açıldığında bu rezervasyonlar per-slot sayımda görünmezdi,
+   * yani dolu bir dükkan boş görünüp FAZLA SATIŞ yapılabilirdi.
+   *
+   * Bu yüzden slot bazlı rezervasyonların üstüne, slot penceresiyle çakışan ve
+   * kendi ReservationSlot satırı bulunmayan rezervasyonların valizleri de eklenir.
+   * Kalıcı olarak doğru: yeni rezervasyonlar slot satırı yazdığı için burada
+   * mükerrer sayılmazlar.
+   */
+  const legacyBookings = await prisma.booking.findMany({
+    where: {
+      shopId,
+      reservationSlots: { none: {} },
+      checkInTime: { lt: to },
+      checkOutTime: { gt: from },
+      OR: [
+        { status: { in: ["PAID", "CHECKED_IN", "APPROVED"] } },
+        {
+          status: { in: ["WAITING_APPROVAL", "PENDING"] },
+          checkInTime: { gte: cutoff },
+        },
+      ],
+    },
+    select: {
+      checkInTime: true,
+      checkOutTime: true,
+      bagCountS: true,
+      bagCountM: true,
+      bagCountXl: true,
+    },
+  });
+
+  const legacyBagsFor = (slotStart: Date, slotEnd: Date): number => {
+    let n = 0;
+    for (const b of legacyBookings) {
+      if (b.checkInTime < slotEnd && b.checkOutTime > slotStart) {
+        n += (b.bagCountS ?? 0) + (b.bagCountM ?? 0) + (b.bagCountXl ?? 0);
+      }
+    }
+    return n;
+  };
+
   return slots.map((slot: { id: string; startTime: Date; endTime: Date; capacity: number }) => {
-    const reserved = reservedMap.get(slot.id) ?? 0;
+    const reserved =
+      (reservedMap.get(slot.id) ?? 0) + legacyBagsFor(slot.startTime, slot.endTime);
     return {
       id: slot.id,
       startTime: slot.startTime,
