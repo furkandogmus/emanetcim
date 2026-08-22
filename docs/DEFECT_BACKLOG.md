@@ -710,7 +710,7 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   `platform-split.ts` → `EARNING_BOOKING_STATUSES`'e bağlandı, böylece admin ile
   esnaf artık aynı kümeyi sayıyor. Typecheck + lint + 109 test yeşil.
 
-### [P1-18] Admin gelen kutusu spam altında; 67 mesajın 57'si okunmamış
+### [P1-18] ⚠️ KOD HAZIR, GEÇMİŞ MESAJLAR İÇİN İŞ ÇALIŞTIRILMALI — Admin gelen kutusu spam altında
 - **Nerede**: `/tr/admin/messages`; `ContactMessage`
 - **Kanıt**: kutuda **67 mesaj var, 57'si okunmamış**. Ekran görüntüsündeki gönderenlerin
   ezici çoğunluğu soğuk pazarlama/spam: `posta-recap@mail.instagram.com`,
@@ -723,9 +723,35 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   operatörün her seferinde elle ayıklaması gerekiyor.
 - **Neden önemli**: gerçek bir misafir şikâyeti 57 okunmamış mesajın arasında kaybolur.
   Destek kanalının kendisi çalışmıyor demektir.
-- **Çözüm**: *kod* — gönderen/konu bazlı basit bir spam işaretleme + varsayılan
-  "spam olmayanlar" görünümü; ya da iletişim formuna bot koruması (bu mesajların
-  form üzerinden mi yoksa doğrudan e-posta ile mi geldiği ayrıca doğrulanmalı).
+- **AÇIK SORU CEVAPLANDI (2026-08-22)**: bu mesajlar **form üzerinden gelmiyor.**
+  İletişim formu `subject`'i `"İletişim Formu: <ad>"` biçiminde yazıyor; spam
+  mesajların konusu farklı. Kaynak **Resend gelen-posta webhook'u**
+  (`src/app/api/webhooks/resend/route.ts`) — `destek@bagajpark.com`'a gelen her
+  e-posta `ContactMessage` oluyor. Yani **forma bot koruması eklemek yanlış çözüm
+  olurdu.**
+- **Mimari yanlış**: bir **destek kutusu** ile bir **e-posta çöplüğü** aynı şey
+  sanılmıştı. Kutu ne için olduğunu bilmiyordu.
+- **Çözüm (uygulandı, 2026-08-22)**:
+  - `src/lib/inbox-classifier.ts` — **dış servis yok, maliyet yok.** Standart
+    başlıklara dayanıyor, tahmine değil: `List-Unsubscribe` (RFC 2369 toplu posta
+    işareti; meşru pazarlama gönderileri bunu koyar), `Auto-Submitted` (RFC 3834),
+    `Precedence`, `X-Campaign-ID`, ayrıca gönderen yerel-adı kalıpları.
+  - **Varsayılan `SUPPORT`** — bilinçli olarak iyimser. Bir pazarlama e-postasının
+    destek kutusunda görünmesi can sıkıcıdır; gerçek bir müşteri şikâyetinin toplu
+    klasöre düşmesi kabul edilemez. Hata payı ucuz tarafa bırakıldı.
+  - Her iki yazıcı da (webhook + form) sınıflandırmadan geçiyor. Webhook **giriş
+    anında** sınıflandırıyor: sonradan yapmak, işin çözmesi gereken sorunu bir kez
+    daha üretmek olurdu.
+  - `/admin/messages` varsayılan görünümü **Destek**; seçicide kategori sayaçları
+    var. `UNCLASSIFIED` destek altında gösteriliyor — iş henüz çalışmamış olabilir
+    ve sınıfsız bir mesajı gizlemek gerçek bir şikâyeti görünmez kılma riski taşır.
+- **AÇIK KALAN — tek komut**: geçmiş 67 mesaj hâlâ `UNCLASSIFIED`.
+  `./scripts/call-internal-job.sh --job classify-inbox` — idempotent, tekrar
+  çalıştırmak zararsız. Ayrıntı: `scripts/README.md` → "Gelen kutusunu
+  sınıflandırma".
+- **Not**: sınıflandırma migrasyonda SQL ile yapılmadı. Kural `raw` JSON'undaki
+  başlıklara bakıyor; SQL'de yeniden yazmak kuralın **ikinci bir kopyası** olurdu
+  ve iki kopya ayrışırdı.
 
 ### [P1-19] İstemci bileşenleri hâlâ koşulsuz "kartınıza iade edilir" diyor
 - **Nerede**: `src/components/guest/BookingModifyModal.tsx:239` (`modifyRefundNote`);
