@@ -1346,5 +1346,10 @@
   },
   "Home": {
     "seoTitle": "Consigna de equipaje y depósito de maletas"
+  },
+  "AccountPrivacy": {
+    "deleteConfirmTitle": "Estás a punto de cerrar tu cuenta",
+    "deleteConfirmBody": "Esta acción no se puede deshacer. Tus datos personales se anonimizarán y se cerrará tu sesión.",
+    "deleteConfirmYes": "Sí, cerrar mi cuenta"
   }
 }

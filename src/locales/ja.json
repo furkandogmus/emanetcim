@@ -1346,5 +1346,10 @@
   },
   "Home": {
     "seoTitle": "荷物預かり・手荷物一時預け"
+  },
+  "AccountPrivacy": {
+    "deleteConfirmTitle": "アカウントを閉じようとしています",
+    "deleteConfirmBody": "この操作は取り消せません。個人データは匿名化され、ログアウトされます。",
+    "deleteConfirmYes": "はい、閉じます"
   }
 }

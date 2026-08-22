@@ -990,7 +990,10 @@
       "guestContactRequired": "Lütfen e-posta veya telefon girin",
       "unauthorized": "Bu işlem için yetkiniz yok.",
       "generic": "İşlem tamamlanamadı."
-    }
+    },
+    "deleteConfirmTitle": "Hesabınızı kapatmak üzeresiniz",
+    "deleteConfirmBody": "Bu işlem geri alınamaz. Kişisel verileriniz anonimleştirilir ve oturumunuz kapatılır.",
+    "deleteConfirmYes": "Evet, hesabımı kapat"
   },
   "WebPush": {
     "title": "Anlık bildirimler",

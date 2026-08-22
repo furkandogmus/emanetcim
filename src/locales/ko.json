@@ -1346,5 +1346,10 @@
   },
   "Home": {
     "seoTitle": "수하물 보관 및 짐 맡기기"
+  },
+  "AccountPrivacy": {
+    "deleteConfirmTitle": "계정을 닫으려고 합니다",
+    "deleteConfirmBody": "이 작업은 되돌릴 수 없습니다. 개인 데이터가 익명화되고 로그아웃됩니다.",
+    "deleteConfirmYes": "예, 계정을 닫습니다"
   }
 }

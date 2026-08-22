@@ -1346,5 +1346,10 @@
   },
   "Home": {
     "seoTitle": "行李寄存与托运点"
+  },
+  "AccountPrivacy": {
+    "deleteConfirmTitle": "您即将关闭账户",
+    "deleteConfirmBody": "此操作无法撤销。您的个人数据将被匿名化，并会退出登录。",
+    "deleteConfirmYes": "是的，关闭我的账户"
   }
 }

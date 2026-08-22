@@ -1346,5 +1346,10 @@
   },
   "Home": {
     "seoTitle": "Przechowalnia bagażu i nadawanie walizek"
+  },
+  "AccountPrivacy": {
+    "deleteConfirmTitle": "Zamierzasz zamknąć konto",
+    "deleteConfirmBody": "Tej operacji nie można cofnąć. Twoje dane osobowe zostaną zanonimizowane, a sesja zakończona.",
+    "deleteConfirmYes": "Tak, zamknij konto"
   }
 }

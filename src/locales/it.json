@@ -1346,5 +1346,10 @@
   },
   "Home": {
     "seoTitle": "Deposito bagagli e consegna valigie"
+  },
+  "AccountPrivacy": {
+    "deleteConfirmTitle": "Stai per chiudere il tuo account",
+    "deleteConfirmBody": "L'operazione non è reversibile. I tuoi dati personali saranno anonimizzati e verrai disconnesso.",
+    "deleteConfirmYes": "Sì, chiudi il mio account"
   }
 }

@@ -1346,5 +1346,10 @@
   },
   "Home": {
     "seoTitle": "Gepäckaufbewahrung und Gepäckabgabe"
+  },
+  "AccountPrivacy": {
+    "deleteConfirmTitle": "Sie sind dabei, Ihr Konto zu schließen",
+    "deleteConfirmBody": "Dies kann nicht rückgängig gemacht werden. Ihre personenbezogenen Daten werden anonymisiert und Sie werden abgemeldet.",
+    "deleteConfirmYes": "Ja, Konto schließen"
   }
 }

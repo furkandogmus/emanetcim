@@ -1346,5 +1346,10 @@
   },
   "Home": {
     "seoTitle": "Consigne à bagages et dépôt de valises"
+  },
+  "AccountPrivacy": {
+    "deleteConfirmTitle": "Vous allez fermer votre compte",
+    "deleteConfirmBody": "Cette action est irréversible. Vos données personnelles seront anonymisées et vous serez déconnecté.",
+    "deleteConfirmYes": "Oui, fermer mon compte"
   }
 }

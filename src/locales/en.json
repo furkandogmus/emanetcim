@@ -989,7 +989,10 @@
       "authRequired": "Please sign in.",
       "unauthorized": "You are not allowed to do this.",
       "generic": "Something went wrong."
-    }
+    },
+    "deleteConfirmTitle": "You are about to close your account",
+    "deleteConfirmBody": "This cannot be undone. Your personal data will be anonymised and you will be signed out.",
+    "deleteConfirmYes": "Yes, close my account"
   },
   "WebPush": {
     "title": "Push notifications",

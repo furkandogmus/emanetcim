@@ -5,18 +5,22 @@ import { signOut, useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { anonymizeGuestAccountAction } from "@/actions/account-privacy";
 import WebPushOptIn from "@/components/WebPushOptIn";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 
 export default function AccountPrivacyClient() {
   const t = useTranslations("AccountPrivacy");
+  const tCommon = useTranslations("Common");
   const { data: session } = useSession();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const exportData = () => {
     window.location.href = "/api/account/data-export";
   };
 
   const anonymize = () => {
+    setConfirmOpen(false);
     setError(null);
     startTransition(async () => {
       const r = await anonymizeGuestAccountAction();
@@ -62,15 +66,34 @@ export default function AccountPrivacyClient() {
         {error ? (
           <p className="mt-2 text-sm font-bold text-red-700">{error}</p>
         ) : null}
+        {/*
+          ONAY ADIMI.
+
+          Bu buton eskiden TEK TIKLA çalışıyordu: hesap anonimleştiriliyor ve
+          oturum kapatılıyordu — geri alınamaz bir işlem, onaysız. Kod tabanındaki
+          diğer tüm yıkıcı işlemlerde onay var (`ConfirmDialog` / `askConfirm`);
+          misafirin yapabileceği EN yıkıcı işlemde yoktu. Mobilde yanlış dokunuş
+          bunun için fazlasıyla kolay.
+        */}
         <button
           type="button"
           disabled={pending}
-          onClick={() => anonymize()}
+          onClick={() => setConfirmOpen(true)}
           className="mt-4 rounded-full bg-red-600 px-6 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-red-700 disabled:opacity-50"
         >
           {pending ? "…" : t("deleteButton")}
         </button>
       </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title={t("deleteConfirmTitle")}
+        message={t("deleteConfirmBody")}
+        confirmLabel={t("deleteConfirmYes")}
+        cancelLabel={tCommon("cancel")}
+        onConfirm={anonymize}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </div>
   );
 }
