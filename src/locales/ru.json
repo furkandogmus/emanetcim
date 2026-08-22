@@ -149,7 +149,10 @@
     "confirmReject": "Точно отклонить этот запрос?",
     "pagination": "Pagination",
     "prevPage": "Previous",
-    "nextPage": "Next"
+    "nextPage": "Next",
+    "overdueBadgeHours": "ожидает {hours} ч",
+    "overdueBadgeDays": "ожидает {days} дн.",
+    "overdueHint": "Если багаж выдан, завершите выдачу."
   },
   "Guest": {
     "heroTitle": "Оставьте сумки — гуляйте свободно",

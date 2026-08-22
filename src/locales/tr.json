@@ -189,7 +189,10 @@
     "sealsNoRequests": "Henüz mühür talebiniz yok.",
     "pagination": "Sayfalama",
     "prevPage": "Önceki",
-    "nextPage": "Sonraki"
+    "nextPage": "Sonraki",
+    "overdueBadgeHours": "{hours} saattir bekliyor",
+    "overdueBadgeDays": "{days} gündür bekliyor",
+    "overdueHint": "Bavul teslim edildiyse çıkış işlemini tamamlayın."
   },
   "Guest": {
     "heroTitle": "Valizini Güvenle Bırak, Özgürce Gez",

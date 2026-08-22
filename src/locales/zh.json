@@ -149,7 +149,10 @@
     "confirmReject": "您确定要拒绝此请求吗？",
     "pagination": "Pagination",
     "prevPage": "Previous",
-    "nextPage": "Next"
+    "nextPage": "Next",
+    "overdueBadgeHours": "已等待 {hours} 小时",
+    "overdueBadgeDays": "已等待 {days} 天",
+    "overdueHint": "如果行李已交还，请完成取件操作。"
   },
   "Guest": {
     "heroTitle": "放下行李，自由探索",

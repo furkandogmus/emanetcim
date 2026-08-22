@@ -149,7 +149,10 @@
     "confirmReject": "このリクエストを拒否してもよろしいですか?",
     "pagination": "Pagination",
     "prevPage": "Previous",
-    "nextPage": "Next"
+    "nextPage": "Next",
+    "overdueBadgeHours": "{hours}時間経過",
+    "overdueBadgeDays": "{days}日経過",
+    "overdueHint": "荷物をお渡し済みの場合は、受取処理を完了してください。"
   },
   "Guest": {
     "heroTitle": "荷物を置いて、自由に探索しましょう",

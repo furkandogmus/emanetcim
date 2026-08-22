@@ -149,7 +149,10 @@
     "confirmReject": "هل أنت متأكد أنك تريد رفض هذا الطلب؟",
     "pagination": "Pagination",
     "prevPage": "Previous",
-    "nextPage": "Next"
+    "nextPage": "Next",
+    "overdueBadgeHours": "في الانتظار {hours} ساعة",
+    "overdueBadgeDays": "في الانتظار {days} يوم",
+    "overdueHint": "إذا تم تسليم الحقيبة، أكمل عملية الاستلام."
   },
   "Guest": {
     "heroTitle": "اترك أمتعتك واستكشف بحرية",

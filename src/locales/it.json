@@ -149,7 +149,10 @@
     "confirmReject": "Sei sicuro di voler rifiutare questa richiesta?",
     "pagination": "Pagination",
     "prevPage": "Previous",
-    "nextPage": "Next"
+    "nextPage": "Next",
+    "overdueBadgeHours": "in attesa da {hours} h",
+    "overdueBadgeDays": "in attesa da {days} giorni",
+    "overdueHint": "Se il bagaglio è stato consegnato, completa il ritiro."
   },
   "Guest": {
     "heroTitle": "Lascia le valigie, esplora liberamente",

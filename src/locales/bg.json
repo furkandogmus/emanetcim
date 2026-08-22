@@ -149,7 +149,10 @@
     "confirmReject": "Сигурни ли сте, че искате да откажете тази заявка?",
     "pagination": "Pagination",
     "prevPage": "Previous",
-    "nextPage": "Next"
+    "nextPage": "Next",
+    "overdueBadgeHours": "чака {hours} ч",
+    "overdueBadgeDays": "чака {days} дни",
+    "overdueHint": "Ако багажът е предаден, завършете издаването."
   },
   "Guest": {
     "heroTitle": "Оставете багажа, разгледайте свободно",

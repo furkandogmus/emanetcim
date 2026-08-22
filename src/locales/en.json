@@ -189,7 +189,10 @@
     "sealsNoRequests": "You do not have any seal requests yet.",
     "pagination": "Pagination",
     "prevPage": "Previous",
-    "nextPage": "Next"
+    "nextPage": "Next",
+    "overdueBadgeHours": "waiting {hours}h",
+    "overdueBadgeDays": "waiting {days} days",
+    "overdueHint": "If the bag has been handed over, complete the check-out."
   },
   "Guest": {
     "heroTitle": "Drop Your Bags, Explore Freely",

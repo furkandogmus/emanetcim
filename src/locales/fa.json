@@ -149,7 +149,10 @@
     "confirmReject": "این درخواست رد شود؟",
     "pagination": "Pagination",
     "prevPage": "Previous",
-    "nextPage": "Next"
+    "nextPage": "Next",
+    "overdueBadgeHours": "{hours} ساعت در انتظار",
+    "overdueBadgeDays": "{days} روز در انتظار",
+    "overdueHint": "اگر چمدان تحویل داده شده، فرآیند خروج را کامل کنید."
   },
   "Guest": {
     "heroTitle": "چمدان را بسپارید، آزاد بگردید",

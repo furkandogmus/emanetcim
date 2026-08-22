@@ -149,7 +149,10 @@
     "confirmReject": "Möchten Sie diese Anfrage wirklich ablehnen?",
     "pagination": "Pagination",
     "prevPage": "Previous",
-    "nextPage": "Next"
+    "nextPage": "Next",
+    "overdueBadgeHours": "seit {hours} Std. offen",
+    "overdueBadgeDays": "seit {days} Tagen offen",
+    "overdueHint": "Wenn das Gepäck übergeben wurde, schließen Sie die Abholung ab."
   },
   "Guest": {
     "heroTitle": "Lassen Sie Ihr Gepäck fallen und erkunden Sie es frei",

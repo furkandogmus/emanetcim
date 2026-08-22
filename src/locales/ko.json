@@ -149,7 +149,10 @@
     "confirmReject": "이 요청을 거절하시겠습니까?",
     "pagination": "Pagination",
     "prevPage": "Previous",
-    "nextPage": "Next"
+    "nextPage": "Next",
+    "overdueBadgeHours": "{hours}시간 대기 중",
+    "overdueBadgeDays": "{days}일 대기 중",
+    "overdueHint": "짐을 전달했다면 수령 처리를 완료하세요."
   },
   "Guest": {
     "heroTitle": "짐 맡기고, 자유롭게 둘러보세요",

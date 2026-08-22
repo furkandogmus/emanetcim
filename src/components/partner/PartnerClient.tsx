@@ -33,6 +33,7 @@ import {
 import type { PartnerBookingListItem } from "@/services/BookingService";
 import { dateLocaleForUiLocale } from "@/lib/date-locale";
 import Money from "@/components/common/Money";
+import { computeOverdue } from "@/lib/overdue-display";
 
 
 
@@ -71,6 +72,17 @@ export default function PartnerClient({
   initialPhone = "",
 }: PartnerClientProps) {
   const t = useTranslations("Partner");
+  /**
+   * Gecikme hesabı için TEK referans an.
+   *
+   * Her çağrıda `new Date()` kullanmak React Compiler'ın saflık kuralını ihlal
+   * eder ve aynı listede satırdan satıra farklı "şimdi" değeri üretir.
+   */
+  const [nowRef] = useState(() => new Date());
+  const overdueOf = useCallback(
+    (checkOutTime: string | Date) => computeOverdue(checkOutTime, nowRef),
+    [nowRef],
+  );
   const locale = useLocale();
   const dateLocale = dateLocaleForUiLocale(locale);
   const router = useRouter();
@@ -546,6 +558,51 @@ export default function PartnerClient({
                         </p>
                       </div>
                     </div>
+
+                    {/*
+                      GECİKME ROZETİ.
+
+                      Çıkış butonu zaten vardı ve liste tarih filtresi taşımıyor —
+                      yani Haziran'dan kalan bir rezervasyon da ekranda duruyordu.
+                      Sorun görünürlük değil, AYIRT EDİLEBİLİRLİKTİ: o kayıt
+                      listede dünkü bir rezervasyondan hiçbir farkla görünmüyordu
+                      ve partnere "burada bekleyen bir iş var" diyen hiçbir sinyal
+                      yoktu. Prod'da 19 rezervasyonun 18'i böyle bekliyordu
+                      (P1-6 / P1-22).
+                    */}
+                    {(booking.status as string) === "CHECKED_IN" &&
+                    overdueOf(booking.checkOutTime).severity !== "none" ? (
+                      <div
+                        className={`mb-3 rounded-2xl px-4 py-3 ${
+                          overdueOf(booking.checkOutTime).severity === "critical"
+                            ? "bg-red-50 border border-red-200"
+                            : overdueOf(booking.checkOutTime).severity === "late"
+                              ? "bg-amber-50 border border-amber-200"
+                              : "bg-gray-50 border border-gray-200"
+                        }`}
+                      >
+                        <p
+                          className={`text-xs font-black ${
+                            overdueOf(booking.checkOutTime).severity === "critical"
+                              ? "text-red-700"
+                              : overdueOf(booking.checkOutTime).severity === "late"
+                                ? "text-amber-800"
+                                : "text-gray-600"
+                          }`}
+                        >
+                          {overdueOf(booking.checkOutTime).overdueDays >= 1
+                            ? t("overdueBadgeDays", {
+                                days: overdueOf(booking.checkOutTime).overdueDays,
+                              })
+                            : t("overdueBadgeHours", {
+                                hours: overdueOf(booking.checkOutTime).overdueHours,
+                              })}
+                        </p>
+                        <p className="mt-1 text-[11px] font-medium text-gray-500">
+                          {t("overdueHint")}
+                        </p>
+                      </div>
+                    ) : null}
 
                     {(booking.status as string) === "CHECKED_IN" && (
                       <button

@@ -149,7 +149,10 @@
     "confirmReject": "Na pewno odrzucić tę prośbę?",
     "pagination": "Pagination",
     "prevPage": "Previous",
-    "nextPage": "Next"
+    "nextPage": "Next",
+    "overdueBadgeHours": "czeka {hours} godz.",
+    "overdueBadgeDays": "czeka {days} dni",
+    "overdueHint": "Jeśli bagaż został wydany, zakończ odbiór."
   },
   "Guest": {
     "heroTitle": "Zostaw torby, zwiedzaj swobodnie",
