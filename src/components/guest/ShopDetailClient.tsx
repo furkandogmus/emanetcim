@@ -28,6 +28,7 @@ import {
 import { TrustBadges } from "@/components/common/TrustBadge";
 import FavoriteButton from "@/components/guest/FavoriteButton";
 import ShopGallery from "@/components/guest/ShopGallery";
+import { useCommerce } from "@/components/providers/CommerceProvider";
 
 export type ShopDetailClientShop = {
   id: string;
@@ -73,6 +74,8 @@ export default function ShopDetailClient({
 }: ShopDetailClientProps) {
   const router = useRouter();
   const t = useTranslations("Guest");
+  // Sigorta gerçekten var mı? Yapılandırmadan gelir, sabit değil (P1-20).
+  const { insuranceEnabled } = useCommerce();
   const locale = useLocale();
   const dateLocale = dateLocaleForUiLocale(locale);
   const slot = roundedSlotPrices(shop.pricePerDay, pricingRules);
@@ -209,9 +212,20 @@ export default function ShopDetailClient({
               <span className="rounded-xl bg-indigo-50 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-indigo-700">
                 {mobileCopy.verifiedPartner}
               </span>
-              <span className="rounded-xl bg-emerald-50 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-emerald-700">
-                {mobileCopy.insuredStorage}
-              </span>
+              {/*
+                SİGORTA ROZETİ YALNIZCA GERÇEKTEN SİGORTA VARSA.
+
+                2026-08-22'de canlı `insuranceFeeTry = 0` iken bu rozet
+                gösteriliyordu — karşılığı olmayan bir güvence vaadi. Bir bavul
+                kaybolduğunda platformun neye dayanarak ödeme yapacağı belirsizdi
+                (P1-20). Ücret belirlendiği an rozet kendiliğinden geri gelir;
+                hiçbir kod değişikliği gerekmez.
+              */}
+              {insuranceEnabled ? (
+                <span className="rounded-xl bg-emerald-50 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-emerald-700">
+                  {mobileCopy.insuredStorage}
+                </span>
+              ) : null}
               <span className="rounded-xl bg-amber-50 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-amber-700">
                 {t("searchFreeCancelBadge")}
               </span>

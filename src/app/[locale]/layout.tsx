@@ -18,6 +18,8 @@ import ConsentAwareAnalytics from "@/components/ConsentAwareAnalytics";
 import CrispChat from "@/components/CrispChat";
 import VerificationBanner from "@/components/layout/VerificationBanner";
 import { config } from "@/lib/config";
+import { resolveCommerceContext } from "@/lib/commerce-context";
+import { CommerceProvider } from "@/components/providers/CommerceProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -108,6 +110,8 @@ export default async function RootLayout({
 
   const tSEO = await getTranslations({ locale, namespace: "SEO" });
   const messages = await getMessages();
+  // Ödeme modu ve sigorta durumu: yapılandırmadan türer, sabit yazılmaz.
+  const commerce = await resolveCommerceContext();
   const base = getSiteBaseUrl();
 
   const htmlLang = locale === "zh" ? "zh-Hans" : locale;
@@ -166,6 +170,13 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }}
         />
         <NextIntlClientProvider messages={messages}>
+          {/*
+            Ticari vaatler (ödeme modu, sigorta) SUNUCUDA çözülüp istemciye
+            geçiriliyor. Public env ile ikinci bir doğruluk kaynağı yaratmak
+            bilerek reddedildi — bir metnin doğru olup olmadığı, hangi katmandan
+            bakıldığına göre değişmemeli (P1-19, P1-20).
+          */}
+          <CommerceProvider value={commerce}>
           <Providers>
             <PWARegister />
             <VerificationBanner />
@@ -186,6 +197,7 @@ export default async function RootLayout({
             <ConsentAwareAnalytics />
             <CrispChat />
           </Providers>
+          </CommerceProvider>
         </NextIntlClientProvider>
       </body>
     </html>

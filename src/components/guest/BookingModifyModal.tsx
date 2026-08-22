@@ -18,6 +18,7 @@ import { parseDatetimeLocal, toDatetimeLocalValue } from "@/lib/datetime-local";
 import type { PricingRules } from "@/lib/pricing-rules";
 import type { GuestBookingListItem } from "@/services/BookingService";
 import { moneyToNumber } from "@/lib/money";
+import { usePaymentCopyKey } from "@/components/providers/CommerceProvider";
 
 export type BookingModifyModalBooking = Pick<
   GuestBookingListItem,
@@ -47,6 +48,12 @@ export default function BookingModifyModal({
   onSuccess,
 }: BookingModifyModalProps) {
   const t = useTranslations("Guest");
+  /**
+   * Ödeme metni aktif sağlayıcıya göre seçilir. Bu satır eskiden koşulsuz
+   * "kartınıza iade edilir" diyordu; ödeme dükkanda alınırken bu yanlıştı
+   * (P1-19).
+   */
+  const payKey = usePaymentCopyKey();
   const tErr = useTranslations("Errors");
   const pricePerDay = moneyToNumber(booking.shop?.pricePerDay ?? 0);
   const slot = roundedSlotPrices(pricePerDay, pricingRules);
@@ -236,7 +243,7 @@ export default function BookingModifyModal({
             </div>
             {booking.status === "PAID" && delta < -0.005 ? (
               <p className="text-[10px] text-gray-500 leading-relaxed">
-                {t("modifyRefundNote")}
+                {t(payKey("modifyRefundNote"))}
               </p>
             ) : null}
             {booking.status === "PAID" && delta > 0.005 ? (
