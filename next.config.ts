@@ -77,14 +77,15 @@ const nextConfig: NextConfig = withPWA({
         expiration: { maxEntries: 16, maxAgeSeconds: 86400 * 60 },
       },
     },
-    {
-      urlPattern: /\/api\/mobile\/.*/i,
-      handler: "StaleWhileRevalidate",
-      options: {
-        cacheName: "mobile-api",
-        expiration: { maxEntries: 64, maxAgeSeconds: 86400 },
-      },
-    },
+    /**
+     * API yanitlari ASLA onbelleklenmez.
+     *
+     * Eskiden `/api/mobile/*` icin `StaleWhileRevalidate` vardi: Bearer
+     * token'li, kullaniciya OZEL yanitlar (rezervasyonlar, kazanc, profil)
+     * tarayici SW onbellegine yaziliyordu -- paylasilan cihazda bir
+     * kullanicinin verisi digerine gosterilebilirdi. Flutter SW kullanmadigi
+     * icin kuralin faydasi da yoktu; yalnizca risk (2026-08-22 incelemesi).
+     */
     {
       urlPattern: /\/api\/.*/i,
       handler: "NetworkOnly",
