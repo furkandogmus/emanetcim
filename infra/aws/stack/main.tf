@@ -65,6 +65,24 @@ resource "aws_iam_role_policy_attachment" "app_ssm_core" {
 }
 
 # CI'nin yukledigi docker-compose.yml'i cekebilmek icin.
+# Yedekler S3'e instance roluyle yazilir (scripts/backup-s3.sh). Hetzner'de
+# yedekler yalnizca sunucu diskindeydi; sunucu giderse yedek de giderdi.
+# Yalnizca `backups/` onekine PutObject -- deploy-config'e yazamaz, hicbir
+# seyi silemez/okuyamaz.
+resource "aws_iam_role_policy" "app_backup_write" {
+  name = "write-backups"
+  role = aws_iam_role.app.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["s3:PutObject"]
+      Resource = "arn:aws:s3:::${var.deploy_config_bucket}/backups/*"
+    }]
+  })
+}
+
 resource "aws_iam_role_policy" "app_deploy_config_read" {
   name = "read-deploy-config"
   role = aws_iam_role.app.id
