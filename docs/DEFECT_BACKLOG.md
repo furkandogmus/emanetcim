@@ -854,6 +854,37 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   bloke eder), envanter dağıtıldıktan sonra `true`. Bayrak olmadan bunu doğrudan
   zorunlu yapmak lansmanı riske atar.
 
+### [P0-8] ✅ KALDIRILDI — /insurance sayfası AXA'yı partner olarak gösteriyordu
+- **Nerede**: `src/app/[locale]/insurance/page.tsx` (kaldırılmadan önce satır 40 ve 73)
+- **Kanıt** (kodu okuyarak buldum): sayfanın alt kısmında bir "güven şeridi" olarak
+  şu dört isim render ediliyordu:
+  `["AXA Alliance", "SecureGate", "UrbanShield", "TravelClaim Grid"]`
+- **Neden P0**: **AXA gerçek ve tescilli bir sigorta markasıdır** ve ortada böyle bir
+  ortaklık yok. Diğer üçü de uydurma marka görünümünde. Halka açık ticari bir
+  sayfada, adı geçen üçüncü taraf hakkında yanlış beyandır — bu bir yazılım hatası
+  değil, **hukuki risktir** (yanıltıcı reklam; marka kullanımı). Lansmanda şirketi
+  gerçek bir soruna sokabilecek türden.
+- **Çözüm (uygulandı, 2026-08-22)**: şerit hem veri katmanından hem render'dan
+  kaldırıldı. Yerine bırakılan yorum, gerçek bir ortaklık kurulursa oraya
+  **sözleşmesi olan** tarafların yazılacağını, yer doldurmak için marka adı
+  yazılmayacağını söylüyor.
+- **Tüm kod tabanı tarandı**: başka yerde geçmiyor.
+
+### [P1-25] ⚠️ UYARI EKLENDİ, KARAR AÇIK — /insurance "çanta başına 10.000 TL" vaat ediyor, karşılığı yok
+- **Nerede**: `src/app/[locale]/insurance/page.tsx` — `thresholdTitle` üç yerde
+- **Kanıt**: sayfa "Çanta Başına 10.000 TL" güvence vaat ediyor; canlı
+  `PlatformSettings.insuranceFeeTry = 0`, yani karşılığı **toplanmıyor** ve arkasında
+  bir sigortacı yok (P1-20 ile aynı kök).
+- **Çözüm (uygulandı, 2026-08-22)**: güvence etkin değilken sayfanın başında açık bir
+  uyarı gösteriliyor (`resolveCommerceContext` → `insuranceEnabled`). Ücret
+  belirlendiği an uyarı **kendiliğinden** kaybolur.
+- **Sayfa bilerek KALDIRILMADI**: anlattığı **süreç** gerçek — mühürleme, teslim
+  kaydı ve anlaşmazlık akışı bugün de işliyor. Yalan olan kısım tutar vaadiydi.
+- **Yeni politika metni UYDURULMADI**: kapsam ve tutar kararları iş kararıdır
+  (P1-20); burada yalnızca mevcut durum olgusal olarak bildiriliyor.
+- **AÇIK KALAN**: sigorta gerçekten sunulacak mı? Sunulacaksa tutar bir poliçeye
+  bağlanmalı; sunulmayacaksa sayfa ve sözleşme 2.3 gözden geçirilmeli.
+
 ### [P1-24] ⚠️ ÖLÇÜLDÜ VE MANDALLANDI — 30 sabit iki dilli metin dalı; 12 dil İngilizce görüyor
 - **Nerede**: 13 dosya. En büyükleri `CheckoutClient` (8 dal), `Footer` (3),
   `luggage-storage/[slug]` (3), `[locale]/page.tsx` (3), `ShopDetailClient`
@@ -878,9 +909,20 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   - **Dükkan detay sayfası** (1 blok / 13 metin): huninin içindeki sayfa.
   - **30 → 19.** Tavan **gerçekte ulaşılan** yere kondu; mandal ancak dürüstse
     işe yarar.
-- **AÇIK KALAN**: 19 dal. Sırayla: `Footer` (3), `luggage-storage/[slug]` (3),
-  `cancellation` (2), `insurance` (2), kalanı tek tek. Hepsi misafir yüzeyi
-  olmadığı için P0 değil, ama her biri 12 dili geride bırakıyor.
+- **İkinci tur (2026-08-22)**: Header navigasyonu (7 metin — üçü **erişilebilirlik
+  etiketi**, yani 12 dilde ekran okuyucu İngilizce anons ediyordu), Footer (3),
+  arama ipucu, slot ızgarası (5 metin), sadakat rozeti (3 metin) taşındı.
+  **19 → 12.**
+- **BİLEREK TAŞINMADI — politika sayfaları**: `/insurance` (67 metin) ve
+  `/cancellation` (45 metin) toplam 112 sabit metin taşıyor, ama bunlar **iptal
+  politikası ve sigorta şartları**. Makine kalitesinde hukuki çeviri, İngilizce
+  bırakmaktan **daha risklidir**: yanlış çevrilmiş bir iade koşulu bağlayıcı bir
+  vaat hâline gelir. Bu metinler çevrilecekse insan eliyle çevrilmeli. Ayrıca
+  `/insurance`'ın geleceği P1-20/P1-25 kararına bağlı — karar verilmeden çevirmek
+  boşa iş olur.
+- **AÇIK KALAN**: 12 dal. `luggage-storage/[slug]` (3), `cancellation` (2),
+  `insurance` (2), `page.tsx` (1), `account` (1), `BookingsClient` (1), iki admin
+  sayfası (2).
 
 ### [P2-8] ✅ DÜZELTİLDİ — Admin gelen kutusundaki toplu işlem metinleri i18n'i baypas ediyordu
 - **Nerede**: `src/components/admin/AdminMessagesClient.tsx:26-29`
