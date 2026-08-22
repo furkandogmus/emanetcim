@@ -452,7 +452,26 @@
     "hideFilters": "隐藏筛选",
     "payBookingDividerOnsite": "您在门店付款",
     "cancellationEstimateCardOnsite": "将退还约 ₺{amount}；如果您尚未付款，则不会产生任何扣款。",
-    "modifyRefundNoteOnsite": "款项在门店收取，将按更新后的金额结算。"
+    "modifyRefundNoteOnsite": "款项在门店收取，将按更新后的金额结算。",
+    "checkoutManageBooking": "管理预订",
+    "checkoutFreeCancelUntilDropOff": "在寄存时间前可免费取消。",
+    "checkoutSelectedDuration": "所选时长",
+    "checkoutSlotUnit": "个时段",
+    "checkoutHourShort": "小时",
+    "checkoutContinueWithoutAccount": "无需账户继续",
+    "checkoutGuestContactHint": "预订通知只需邮箱或电话。",
+    "checkoutOrWithAccount": "或使用账户",
+    "shopVerifiedPartner": "认证合作商",
+    "shopInsuredStorage": "投保寄存",
+    "shopPremiumAmenities": "服务",
+    "shopCctv": "24/7 监控",
+    "shopClimate": "恒温控制",
+    "shopLargeItems": "可存大件",
+    "shopSealProvided": "提供封条",
+    "shopWeekDays": "周一至周五",
+    "shopWeekEnd": "周六至周日",
+    "shopSeeAll": "查看全部",
+    "shopPerDay": "/天"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -1305,5 +1324,8 @@
     "healthScore": "General Health Score",
     "healthDesc": "All critical services checked.",
     "noCriticalError": "No Critical Errors"
+  },
+  "Home": {
+    "seoTitle": "行李寄存与托运点"
   }
 }

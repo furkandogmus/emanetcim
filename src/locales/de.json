@@ -452,7 +452,26 @@
     "hideFilters": "Filter ausblenden",
     "payBookingDividerOnsite": "Sie zahlen im Geschäft",
     "cancellationEstimateCardOnsite": "Etwa ₺{amount} werden erstattet; wenn Sie noch nicht bezahlt haben, wird nichts abgebucht.",
-    "modifyRefundNoteOnsite": "Die Zahlung erfolgt im Geschäft und wird zum aktualisierten Betrag berechnet."
+    "modifyRefundNoteOnsite": "Die Zahlung erfolgt im Geschäft und wird zum aktualisierten Betrag berechnet.",
+    "checkoutManageBooking": "Buchung verwalten",
+    "checkoutFreeCancelUntilDropOff": "Kostenlose Stornierung bis zur Abgabezeit.",
+    "checkoutSelectedDuration": "Gewählte Dauer",
+    "checkoutSlotUnit": "Slots",
+    "checkoutHourShort": "Std",
+    "checkoutContinueWithoutAccount": "Ohne Konto fortfahren",
+    "checkoutGuestContactHint": "Für Buchungsbenachrichtigungen genügen E-Mail oder Telefon.",
+    "checkoutOrWithAccount": "oder mit Konto",
+    "shopVerifiedPartner": "Verifizierter Partner",
+    "shopInsuredStorage": "Versicherte Aufbewahrung",
+    "shopPremiumAmenities": "Leistungen",
+    "shopCctv": "24/7 Videoüberwachung",
+    "shopClimate": "Klimatisiert",
+    "shopLargeItems": "Große Gepäckstücke möglich",
+    "shopSealProvided": "Siegel inklusive",
+    "shopWeekDays": "Mo - Fr",
+    "shopWeekEnd": "Sa - So",
+    "shopSeeAll": "Alle ansehen",
+    "shopPerDay": "/Tag"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -1305,5 +1324,8 @@
     "healthScore": "General Health Score",
     "healthDesc": "All critical services checked.",
     "noCriticalError": "No Critical Errors"
+  },
+  "Home": {
+    "seoTitle": "Gepäckaufbewahrung und Gepäckabgabe"
   }
 }

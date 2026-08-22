@@ -452,7 +452,26 @@
     "hideFilters": "Nascondi filtri",
     "payBookingDividerOnsite": "Paghi in negozio",
     "cancellationEstimateCardOnsite": "Verranno rimborsati circa ₺{amount}; se non hai ancora pagato, non ti verrà addebitato nulla.",
-    "modifyRefundNoteOnsite": "Il pagamento avviene in negozio e sarà calcolato sull'importo aggiornato."
+    "modifyRefundNoteOnsite": "Il pagamento avviene in negozio e sarà calcolato sull'importo aggiornato.",
+    "checkoutManageBooking": "Gestisci prenotazione",
+    "checkoutFreeCancelUntilDropOff": "Cancellazione gratuita fino all'orario di consegna.",
+    "checkoutSelectedDuration": "Durata selezionata",
+    "checkoutSlotUnit": "fasce",
+    "checkoutHourShort": "h",
+    "checkoutContinueWithoutAccount": "Continua senza account",
+    "checkoutGuestContactHint": "Bastano un'email o un telefono per le notifiche di prenotazione.",
+    "checkoutOrWithAccount": "o con account",
+    "shopVerifiedPartner": "Partner verificato",
+    "shopInsuredStorage": "Deposito assicurato",
+    "shopPremiumAmenities": "Servizi",
+    "shopCctv": "Videosorveglianza 24/7",
+    "shopClimate": "Climatizzato",
+    "shopLargeItems": "Bagagli grandi ammessi",
+    "shopSealProvided": "Sigillo incluso",
+    "shopWeekDays": "Lun - Ven",
+    "shopWeekEnd": "Sab - Dom",
+    "shopSeeAll": "Vedi tutto",
+    "shopPerDay": "/giorno"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -1305,5 +1324,8 @@
     "healthScore": "General Health Score",
     "healthDesc": "All critical services checked.",
     "noCriticalError": "No Critical Errors"
+  },
+  "Home": {
+    "seoTitle": "Deposito bagagli e consegna valigie"
   }
 }

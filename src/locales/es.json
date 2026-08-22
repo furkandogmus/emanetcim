@@ -452,7 +452,26 @@
     "hideFilters": "Ocultar filtros",
     "payBookingDividerOnsite": "Pagas en el local",
     "cancellationEstimateCardOnsite": "Se reembolsarán unos ₺{amount}; si aún no has pagado, no se te cobrará nada.",
-    "modifyRefundNoteOnsite": "El pago se realiza en el local y se cobrará según el importe actualizado."
+    "modifyRefundNoteOnsite": "El pago se realiza en el local y se cobrará según el importe actualizado.",
+    "checkoutManageBooking": "Gestionar reserva",
+    "checkoutFreeCancelUntilDropOff": "Cancelación gratuita hasta la hora de entrega.",
+    "checkoutSelectedDuration": "Duración seleccionada",
+    "checkoutSlotUnit": "franjas",
+    "checkoutHourShort": "h",
+    "checkoutContinueWithoutAccount": "Continuar sin cuenta",
+    "checkoutGuestContactHint": "Basta un correo o teléfono para las notificaciones de reserva.",
+    "checkoutOrWithAccount": "o con cuenta",
+    "shopVerifiedPartner": "Socio verificado",
+    "shopInsuredStorage": "Custodia asegurada",
+    "shopPremiumAmenities": "Servicios",
+    "shopCctv": "CCTV 24/7",
+    "shopClimate": "Climatizado",
+    "shopLargeItems": "Admite objetos grandes",
+    "shopSealProvided": "Precinto incluido",
+    "shopWeekDays": "Lun - Vie",
+    "shopWeekEnd": "Sáb - Dom",
+    "shopSeeAll": "Ver todo",
+    "shopPerDay": "/día"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -1305,5 +1324,8 @@
     "healthScore": "General Health Score",
     "healthDesc": "All critical services checked.",
     "noCriticalError": "No Critical Errors"
+  },
+  "Home": {
+    "seoTitle": "Consigna de equipaje y depósito de maletas"
   }
 }

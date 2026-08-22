@@ -452,7 +452,26 @@
     "hideFilters": "پنهان کردن فیلترها",
     "payBookingDividerOnsite": "پرداخت در محل انجام می‌شود",
     "cancellationEstimateCardOnsite": "حدود ₺{amount} بازگردانده می‌شود؛ اگر هنوز پرداخت نکرده‌اید، مبلغی از شما کسر نمی‌شود.",
-    "modifyRefundNoteOnsite": "پرداخت در محل انجام می‌شود و بر اساس مبلغ به‌روزشده محاسبه خواهد شد."
+    "modifyRefundNoteOnsite": "پرداخت در محل انجام می‌شود و بر اساس مبلغ به‌روزشده محاسبه خواهد شد.",
+    "checkoutManageBooking": "مدیریت رزرو",
+    "checkoutFreeCancelUntilDropOff": "لغو رایگان تا زمان تحویل.",
+    "checkoutSelectedDuration": "مدت انتخاب‌شده",
+    "checkoutSlotUnit": "بازه",
+    "checkoutHourShort": "ساعت",
+    "checkoutContinueWithoutAccount": "ادامه بدون حساب کاربری",
+    "checkoutGuestContactHint": "برای اطلاع‌رسانی رزرو، ایمیل یا تلفن کافی است.",
+    "checkoutOrWithAccount": "یا با حساب کاربری",
+    "shopVerifiedPartner": "شریک تأییدشده",
+    "shopInsuredStorage": "نگهداری بیمه‌شده",
+    "shopPremiumAmenities": "خدمات",
+    "shopCctv": "دوربین مداربسته ۲۴/۷",
+    "shopClimate": "کنترل دما",
+    "shopLargeItems": "پذیرش بار بزرگ",
+    "shopSealProvided": "پلمب ارائه می‌شود",
+    "shopWeekDays": "دوشنبه تا جمعه",
+    "shopWeekEnd": "شنبه و یکشنبه",
+    "shopSeeAll": "مشاهده همه",
+    "shopPerDay": "/روز"
   },
   "Admin": {
     "dashboardTitle": "مرکز مدیریت BagajPark",
@@ -1305,5 +1324,8 @@
     "healthScore": "امتیاز سلامت کلی",
     "healthDesc": "همه سرویس‌های بحرانی بررسی شد.",
     "noCriticalError": "بدون خطای بحرانی"
+  },
+  "Home": {
+    "seoTitle": "نگهداری چمدان و تحویل بار"
   }
 }

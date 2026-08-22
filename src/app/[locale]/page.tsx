@@ -26,7 +26,14 @@ export async function generateMetadata({
   const { locale } = await params;
   const base = getSiteBaseUrl();
   const t = await getTranslations({ locale, namespace: "Guest" });
-  const title = locale === "tr" ? "Bagaj Emanet ve Valiz Depolama" : "Luggage Storage and Bag Drop";
+  const tHome = await getTranslations({ locale, namespace: "Home" });
+  /**
+   * SEO başlığı 14 dilde. Eskiden `locale === "tr" ? ... : ...` idi, yani ana sayfa
+   * 12 dilde İNGİLİZCE başlıkla indeksleniyordu — Almanca arayan biri için
+   * "Gepäckaufbewahrung" hiçbir yerde geçmiyordu. Ürün organik aramaya dayandığı
+   * için bu doğrudan görünürlük kaybı.
+   */
+  const title = tHome("seoTitle");
   const description = t("heroSubtitle");
   return {
     title,
@@ -61,6 +68,7 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
     return fallback;
   };
   const tCity = await getTranslations("CityStorage");
+  const tHome = await getTranslations("Home");
   const [stats, testimonials] = await Promise.all([
     getGuestLandingStats(),
     getHomeTestimonials(14),
@@ -109,7 +117,9 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
   const webPageJsonLd = buildWebPageJsonLd({
     locale,
     path: "",
-    title: locale === "tr" ? "Bagaj Emanet ve Valiz Depolama" : "Luggage Storage and Bag Drop",
+    // Ekrandaki/metadata'daki başlıkla AYNI kaynak — JSON-LD'ye başka bir şey
+    // vermek Google'a çelişkili sinyal göndermek olurdu.
+    title: tHome("seoTitle"),
     description: t("heroSubtitle"),
   });
   const cityItemListJsonLd = buildItemListJsonLd({

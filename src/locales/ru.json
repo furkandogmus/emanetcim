@@ -452,7 +452,26 @@
     "hideFilters": "Скрыть фильтры",
     "payBookingDividerOnsite": "Вы платите в пункте хранения",
     "cancellationEstimateCardOnsite": "Будет возвращено около ₺{amount}; если вы ещё не платили, с вас ничего не спишут.",
-    "modifyRefundNoteOnsite": "Оплата производится в пункте хранения по обновлённой сумме."
+    "modifyRefundNoteOnsite": "Оплата производится в пункте хранения по обновлённой сумме.",
+    "checkoutManageBooking": "Управление бронью",
+    "checkoutFreeCancelUntilDropOff": "Бесплатная отмена до времени сдачи багажа.",
+    "checkoutSelectedDuration": "Выбранная длительность",
+    "checkoutSlotUnit": "слотов",
+    "checkoutHourShort": "ч",
+    "checkoutContinueWithoutAccount": "Продолжить без аккаунта",
+    "checkoutGuestContactHint": "Для уведомлений о брони достаточно эл. почты или телефона.",
+    "checkoutOrWithAccount": "или с аккаунтом",
+    "shopVerifiedPartner": "Проверенный партнёр",
+    "shopInsuredStorage": "Застрахованное хранение",
+    "shopPremiumAmenities": "Услуги",
+    "shopCctv": "Видеонаблюдение 24/7",
+    "shopClimate": "Климат-контроль",
+    "shopLargeItems": "Крупногабаритные принимаются",
+    "shopSealProvided": "Пломба предоставляется",
+    "shopWeekDays": "Пн - Пт",
+    "shopWeekEnd": "Сб - Вс",
+    "shopSeeAll": "Смотреть все",
+    "shopPerDay": "/день"
   },
   "Admin": {
     "dashboardTitle": "Центр администрирования BagajPark",
@@ -1305,5 +1324,8 @@
     "healthScore": "Общий показатель состояния",
     "healthDesc": "Проверены все критичные сервисы.",
     "noCriticalError": "Критических ошибок нет"
+  },
+  "Home": {
+    "seoTitle": "Камера хранения багажа и приём вещей"
   }
 }

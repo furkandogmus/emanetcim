@@ -492,7 +492,26 @@
     "hideFilters": "Filtreleri Gizle",
     "payBookingDividerOnsite": "Ödemeyi dükkanda yaparsınız",
     "cancellationEstimateCardOnsite": "Yaklaşık ₺{amount} iade edilir; ödemeyi henüz yapmadıysanız tahsilat da yapılmaz.",
-    "modifyRefundNoteOnsite": "Ödeme dükkanda alınacak; güncel tutar üzerinden tahsil edilir."
+    "modifyRefundNoteOnsite": "Ödeme dükkanda alınacak; güncel tutar üzerinden tahsil edilir.",
+    "checkoutManageBooking": "Rezervasyonu Yönet",
+    "checkoutFreeCancelUntilDropOff": "Teslim saatine kadar ücretsiz iptal edebilirsiniz.",
+    "checkoutSelectedDuration": "Seçilen Süre",
+    "checkoutSlotUnit": "slot",
+    "checkoutHourShort": "sa",
+    "checkoutContinueWithoutAccount": "Üye olmadan devam et",
+    "checkoutGuestContactHint": "Rezervasyon bildirimleri için e-posta veya telefon yeterli.",
+    "checkoutOrWithAccount": "veya hesabınla",
+    "shopVerifiedPartner": "Doğrulanmış Partner",
+    "shopInsuredStorage": "Sigortalı Emanet",
+    "shopPremiumAmenities": "Hizmet Özellikleri",
+    "shopCctv": "7/24 CCTV",
+    "shopClimate": "İklim Kontrollü",
+    "shopLargeItems": "Büyük Boy Uygun",
+    "shopSealProvided": "Mühür Sağlanır",
+    "shopWeekDays": "Pzt - Cum",
+    "shopWeekEnd": "Cts - Paz",
+    "shopSeeAll": "Tümünü gör",
+    "shopPerDay": "/gün"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Yönetim Masası",
@@ -1546,5 +1565,8 @@
     "healthScore": "Genel Sağlık Puanı",
     "healthDesc": "Tüm kritik servisler kontrol edildi.",
     "noCriticalError": "Kritik Hata Yok"
+  },
+  "Home": {
+    "seoTitle": "Bagaj Emanet ve Valiz Depolama"
   }
 }

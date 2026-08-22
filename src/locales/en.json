@@ -492,7 +492,26 @@
     "hideFilters": "Hide Filters",
     "payBookingDividerOnsite": "You pay at the shop",
     "cancellationEstimateCardOnsite": "About ₺{amount} will be refunded; if you haven't paid yet, nothing will be charged.",
-    "modifyRefundNoteOnsite": "Payment is taken at the shop and will be charged at the updated amount."
+    "modifyRefundNoteOnsite": "Payment is taken at the shop and will be charged at the updated amount.",
+    "checkoutManageBooking": "Manage Booking",
+    "checkoutFreeCancelUntilDropOff": "Free cancellation until drop-off time.",
+    "checkoutSelectedDuration": "Selected Duration",
+    "checkoutSlotUnit": "slots",
+    "checkoutHourShort": "h",
+    "checkoutContinueWithoutAccount": "Continue without account",
+    "checkoutGuestContactHint": "Just an email or phone for booking notifications.",
+    "checkoutOrWithAccount": "or with account",
+    "shopVerifiedPartner": "Verified Partner",
+    "shopInsuredStorage": "Insured Storage",
+    "shopPremiumAmenities": "Services",
+    "shopCctv": "24/7 CCTV",
+    "shopClimate": "Climate Control",
+    "shopLargeItems": "Large Items OK",
+    "shopSealProvided": "Seal Provided",
+    "shopWeekDays": "Mon - Fri",
+    "shopWeekEnd": "Sat - Sun",
+    "shopSeeAll": "See all",
+    "shopPerDay": "/day"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -1546,5 +1565,8 @@
     "healthScore": "General Health Score",
     "healthDesc": "All critical services checked.",
     "noCriticalError": "No Critical Errors"
+  },
+  "Home": {
+    "seoTitle": "Luggage Storage and Bag Drop"
   }
 }

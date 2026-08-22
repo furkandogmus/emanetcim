@@ -345,7 +345,7 @@ export default function CheckoutClient({
               href="/bookings/lookup"
               className="rounded-xl border border-white/30 px-4 py-3 text-sm font-black text-white transition-colors hover:bg-white/10"
             >
-              {locale === "tr" ? "Rezervasyonu Yönet" : "Manage Booking"}
+              {t("checkoutManageBooking")}
             </Link>
             <Link
               href="/bookings"
@@ -356,9 +356,7 @@ export default function CheckoutClient({
           </div>
 
           <p className="text-xs text-white/50 max-w-[280px] text-center">
-            {locale === "tr"
-              ? "Teslim saatine kadar ücretsiz iptal edebilirsiniz."
-              : "Free cancellation until drop-off time."}
+            {t("checkoutFreeCancelUntilDropOff")}
           </p>
         </div>
       </div>
@@ -495,10 +493,10 @@ export default function CheckoutClient({
                 <div className="flex items-center justify-between p-4 bg-orange-50 rounded-2xl border border-orange-100">
                   <div>
                     <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                      {locale === "tr" ? "Seçilen Süre" : "Selected Duration"}
+                      {t("checkoutSelectedDuration")}
                     </p>
                     <p className="font-black text-lg text-gray-900 mt-0.5">
-                      {selectedSlotCount} {locale === "tr" ? "slot" : "slots"} ({selectedSlotCount * 0.5}{locale === "tr" ? "sa" : "h"})
+                      {selectedSlotCount} {t("checkoutSlotUnit")} ({selectedSlotCount * 0.5}{t("checkoutHourShort")})
                     </p>
                   </div>
                 </div>
@@ -670,13 +668,11 @@ export default function CheckoutClient({
             </div>
 
             <h3 className="text-xl font-black text-gray-900 tracking-tight mb-3">
-              {locale === "tr" ? "Üye olmadan devam et" : "Continue without account"}
+              {t("checkoutContinueWithoutAccount")}
             </h3>
             
             <p className="text-sm font-semibold text-gray-500 leading-relaxed mb-6">
-              {locale === "tr"
-                ? "Rezervasyon bildirimleri için e-posta veya telefon yeterli."
-                : "Just an email or phone for booking notifications."}
+              {t("checkoutGuestContactHint")}
             </p>
 
             {/* Guest Checkout Fields */}
@@ -724,7 +720,7 @@ export default function CheckoutClient({
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
                   <span className="bg-white px-3 text-gray-400 font-bold">
-                    {locale === "tr" ? "veya hesabınla" : "or with account"}
+                    {t("checkoutOrWithAccount")}
                   </span>
                 </div>
               </div>

@@ -452,7 +452,26 @@
     "hideFilters": "필터 숨기기",
     "payBookingDividerOnsite": "매장에서 결제합니다",
     "cancellationEstimateCardOnsite": "약 ₺{amount}이 환불됩니다. 아직 결제하지 않으셨다면 청구되지 않습니다.",
-    "modifyRefundNoteOnsite": "결제는 매장에서 진행되며 변경된 금액으로 청구됩니다."
+    "modifyRefundNoteOnsite": "결제는 매장에서 진행되며 변경된 금액으로 청구됩니다.",
+    "checkoutManageBooking": "예약 관리",
+    "checkoutFreeCancelUntilDropOff": "맡기는 시간 전까지 무료 취소 가능합니다.",
+    "checkoutSelectedDuration": "선택한 기간",
+    "checkoutSlotUnit": "슬롯",
+    "checkoutHourShort": "시간",
+    "checkoutContinueWithoutAccount": "계정 없이 계속",
+    "checkoutGuestContactHint": "예약 알림에는 이메일 또는 전화번호만 있으면 됩니다.",
+    "checkoutOrWithAccount": "또는 계정으로",
+    "shopVerifiedPartner": "인증 파트너",
+    "shopInsuredStorage": "보험 적용 보관",
+    "shopPremiumAmenities": "서비스",
+    "shopCctv": "24시간 CCTV",
+    "shopClimate": "온도 조절",
+    "shopLargeItems": "대형 물품 가능",
+    "shopSealProvided": "봉인 제공",
+    "shopWeekDays": "월 - 금",
+    "shopWeekEnd": "토 - 일",
+    "shopSeeAll": "모두 보기",
+    "shopPerDay": "/일"
   },
   "Admin": {
     "dashboardTitle": "BagajPark 관리 센터",
@@ -1305,5 +1324,8 @@
     "healthScore": "전반 건강 점수",
     "healthDesc": "핵심 서비스를 모두 점검했습니다.",
     "noCriticalError": "치명적 오류 없음"
+  },
+  "Home": {
+    "seoTitle": "수하물 보관 및 짐 맡기기"
   }
 }

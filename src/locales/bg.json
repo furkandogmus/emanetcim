@@ -452,7 +452,26 @@
     "hideFilters": "Скриване на филтрите",
     "payBookingDividerOnsite": "Плащате на място",
     "cancellationEstimateCardOnsite": "Ще бъдат възстановени около ₺{amount}; ако още не сте платили, няма да ви бъде удържано нищо.",
-    "modifyRefundNoteOnsite": "Плащането се извършва на място и ще бъде начислено по актуализираната сума."
+    "modifyRefundNoteOnsite": "Плащането се извършва на място и ще бъде начислено по актуализираната сума.",
+    "checkoutManageBooking": "Управление на резервацията",
+    "checkoutFreeCancelUntilDropOff": "Безплатна отмяна до часа на предаване.",
+    "checkoutSelectedDuration": "Избрана продължителност",
+    "checkoutSlotUnit": "слота",
+    "checkoutHourShort": "ч",
+    "checkoutContinueWithoutAccount": "Продължи без акаунт",
+    "checkoutGuestContactHint": "За известия за резервацията са достатъчни имейл или телефон.",
+    "checkoutOrWithAccount": "или с акаунт",
+    "shopVerifiedPartner": "Проверен партньор",
+    "shopInsuredStorage": "Застраховано съхранение",
+    "shopPremiumAmenities": "Услуги",
+    "shopCctv": "Видеонаблюдение 24/7",
+    "shopClimate": "Климатизирано",
+    "shopLargeItems": "Приема едрогабаритни",
+    "shopSealProvided": "Осигурена пломба",
+    "shopWeekDays": "Пон - Пет",
+    "shopWeekEnd": "Съб - Нед",
+    "shopSeeAll": "Виж всички",
+    "shopPerDay": "/ден"
   },
   "Admin": {
     "dashboardTitle": "Админ център BagajPark",
@@ -1305,5 +1324,8 @@
     "healthScore": "Общ показател за състояние",
     "healthDesc": "Проверени са всички критични услуги.",
     "noCriticalError": "Няма критични грешки"
+  },
+  "Home": {
+    "seoTitle": "Багажно отделение и оставяне на багаж"
   }
 }

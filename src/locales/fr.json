@@ -452,7 +452,26 @@
     "hideFilters": "Masquer les filtres",
     "payBookingDividerOnsite": "Vous payez sur place",
     "cancellationEstimateCardOnsite": "Environ ₺{amount} seront remboursés ; si vous n'avez pas encore payé, rien ne sera débité.",
-    "modifyRefundNoteOnsite": "Le paiement se fait sur place et sera calculé sur le montant mis à jour."
+    "modifyRefundNoteOnsite": "Le paiement se fait sur place et sera calculé sur le montant mis à jour.",
+    "checkoutManageBooking": "Gérer la réservation",
+    "checkoutFreeCancelUntilDropOff": "Annulation gratuite jusqu'à l'heure de dépôt.",
+    "checkoutSelectedDuration": "Durée sélectionnée",
+    "checkoutSlotUnit": "créneaux",
+    "checkoutHourShort": "h",
+    "checkoutContinueWithoutAccount": "Continuer sans compte",
+    "checkoutGuestContactHint": "Un e-mail ou un téléphone suffit pour les notifications de réservation.",
+    "checkoutOrWithAccount": "ou avec un compte",
+    "shopVerifiedPartner": "Partenaire vérifié",
+    "shopInsuredStorage": "Consigne assurée",
+    "shopPremiumAmenities": "Services",
+    "shopCctv": "Vidéosurveillance 24h/24",
+    "shopClimate": "Climatisé",
+    "shopLargeItems": "Grands bagages acceptés",
+    "shopSealProvided": "Scellé fourni",
+    "shopWeekDays": "Lun - Ven",
+    "shopWeekEnd": "Sam - Dim",
+    "shopSeeAll": "Tout voir",
+    "shopPerDay": "/jour"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -1305,5 +1324,8 @@
     "healthScore": "General Health Score",
     "healthDesc": "All critical services checked.",
     "noCriticalError": "No Critical Errors"
+  },
+  "Home": {
+    "seoTitle": "Consigne à bagages et dépôt de valises"
   }
 }

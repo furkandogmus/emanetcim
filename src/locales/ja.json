@@ -452,7 +452,26 @@
     "hideFilters": "絞り込みを隠す",
     "payBookingDividerOnsite": "お支払いは店舗で行います",
     "cancellationEstimateCardOnsite": "約 ₺{amount} が返金されます。まだお支払いでない場合は、請求は発生しません。",
-    "modifyRefundNoteOnsite": "お支払いは店舗で、更新後の金額にて承ります。"
+    "modifyRefundNoteOnsite": "お支払いは店舗で、更新後の金額にて承ります。",
+    "checkoutManageBooking": "予約を管理",
+    "checkoutFreeCancelUntilDropOff": "お預け時刻まで無料でキャンセルできます。",
+    "checkoutSelectedDuration": "選択した時間",
+    "checkoutSlotUnit": "枠",
+    "checkoutHourShort": "時間",
+    "checkoutContinueWithoutAccount": "アカウントなしで続ける",
+    "checkoutGuestContactHint": "予約通知にはメールまたは電話番号だけで十分です。",
+    "checkoutOrWithAccount": "またはアカウントで",
+    "shopVerifiedPartner": "認証パートナー",
+    "shopInsuredStorage": "保険付き預かり",
+    "shopPremiumAmenities": "サービス",
+    "shopCctv": "24時間監視カメラ",
+    "shopClimate": "空調完備",
+    "shopLargeItems": "大型荷物可",
+    "shopSealProvided": "封印シール提供",
+    "shopWeekDays": "月〜金",
+    "shopWeekEnd": "土〜日",
+    "shopSeeAll": "すべて見る",
+    "shopPerDay": "/日"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -1305,5 +1324,8 @@
     "healthScore": "General Health Score",
     "healthDesc": "All critical services checked.",
     "noCriticalError": "No Critical Errors"
+  },
+  "Home": {
+    "seoTitle": "荷物預かり・手荷物一時預け"
   }
 }

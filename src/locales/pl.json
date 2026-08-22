@@ -452,7 +452,26 @@
     "hideFilters": "Ukryj filtry",
     "payBookingDividerOnsite": "Płacisz w punkcie",
     "cancellationEstimateCardOnsite": "Zwrócone zostanie około ₺{amount}; jeśli jeszcze nie zapłaciłeś, nic nie zostanie pobrane.",
-    "modifyRefundNoteOnsite": "Płatność następuje w punkcie i zostanie naliczona według zaktualizowanej kwoty."
+    "modifyRefundNoteOnsite": "Płatność następuje w punkcie i zostanie naliczona według zaktualizowanej kwoty.",
+    "checkoutManageBooking": "Zarządzaj rezerwacją",
+    "checkoutFreeCancelUntilDropOff": "Bezpłatna anulacja do godziny nadania.",
+    "checkoutSelectedDuration": "Wybrany czas",
+    "checkoutSlotUnit": "sloty",
+    "checkoutHourShort": "godz",
+    "checkoutContinueWithoutAccount": "Kontynuuj bez konta",
+    "checkoutGuestContactHint": "Do powiadomień o rezerwacji wystarczy e-mail lub telefon.",
+    "checkoutOrWithAccount": "lub z kontem",
+    "shopVerifiedPartner": "Zweryfikowany partner",
+    "shopInsuredStorage": "Ubezpieczone przechowanie",
+    "shopPremiumAmenities": "Usługi",
+    "shopCctv": "Monitoring 24/7",
+    "shopClimate": "Klimatyzowane",
+    "shopLargeItems": "Duży bagaż OK",
+    "shopSealProvided": "Plomba w cenie",
+    "shopWeekDays": "Pon - Pt",
+    "shopWeekEnd": "Sob - Nd",
+    "shopSeeAll": "Zobacz wszystkie",
+    "shopPerDay": "/dzień"
   },
   "Admin": {
     "dashboardTitle": "Centrum administracyjne BagajPark",
@@ -1305,5 +1324,8 @@
     "healthScore": "Ogólny wskaźnik kondycji",
     "healthDesc": "Sprawdzono wszystkie krytyczne usługi.",
     "noCriticalError": "Brak krytycznych błędów"
+  },
+  "Home": {
+    "seoTitle": "Przechowalnia bagażu i nadawanie walizek"
   }
 }

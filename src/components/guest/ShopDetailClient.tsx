@@ -90,38 +90,28 @@ export default function ShopDetailClient({
     : shop.openingTime && shop.closingTime
       ? `${shop.openingTime} – ${shop.closingTime}`
       : "—";
-  const mobileCopy =
-    locale === "tr"
-      ? {
-          bagajPark: "BagajPark",
-          verifiedPartner: "Doğrulanmış Partner",
-          insuredStorage: "Sigortalı Emanet",
-          premiumAmenities: "Hizmet Özellikleri",
-          cctv: "7/24 CCTV",
-          climate: "İklim Kontrollü",
-          largeItems: "Büyük Boy Uygun",
-          sealProvided: "Mühür Sağlanır",
-          weekDays: "Pzt - Cum",
-          weekEnd: "Cts - Paz",
-          seeAll: "Tümünü gör",
-          totalForDay: "Günlük Toplam",
-          perDay: "/gün",
-        }
-      : {
-          bagajPark: "BagajPark",
-          verifiedPartner: "Verified Partner",
-          insuredStorage: "Insured Storage",
-          premiumAmenities: "Services",
-          cctv: "24/7 CCTV",
-          climate: "Climate Control",
-          largeItems: "Large Items OK",
-          sealProvided: "Seal Provided",
-          weekDays: "Mon - Fri",
-          weekEnd: "Sat - Sun",
-          seeAll: "See all",
-          totalForDay: "Total per day",
-          perDay: "/day",
-        };
+  /**
+   * Bu blok eskiden `locale === "tr" ? {...} : {...}` idi, yani dükkan detay
+   * sayfasındaki 13 metin diğer 12 dilde İNGİLİZCE çıkıyordu — üstelik bu sayfa
+   * dönüşüm hunisinin içinde. Turist odaklı bir üründe Türkçe dışı diller tam da
+   * hedef kitle.
+   *
+   * `bagajPark` bilerek çevrilmiyor: marka adı.
+   */
+  const mobileCopy = {
+    bagajPark: "BagajPark",
+    verifiedPartner: t("shopVerifiedPartner"),
+    insuredStorage: t("shopInsuredStorage"),
+    premiumAmenities: t("shopPremiumAmenities"),
+    cctv: t("shopCctv"),
+    climate: t("shopClimate"),
+    largeItems: t("shopLargeItems"),
+    sealProvided: t("shopSealProvided"),
+    weekDays: t("shopWeekDays"),
+    weekEnd: t("shopWeekEnd"),
+    seeAll: t("shopSeeAll"),
+    perDay: t("shopPerDay"),
+  };
   const mobilePricePerBag = formatTryCurrency(slot.m, locale);
 
   useEffect(() => {

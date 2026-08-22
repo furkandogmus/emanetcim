@@ -452,7 +452,26 @@
     "hideFilters": "إخفاء عوامل التصفية",
     "payBookingDividerOnsite": "تدفع في المحل",
     "cancellationEstimateCardOnsite": "سيتم رد حوالي ₺{amount}؛ وإذا لم تكن قد دفعت بعد، فلن يتم خصم أي مبلغ.",
-    "modifyRefundNoteOnsite": "يتم الدفع في المحل وسيُحتسب على المبلغ المحدَّث."
+    "modifyRefundNoteOnsite": "يتم الدفع في المحل وسيُحتسب على المبلغ المحدَّث.",
+    "checkoutManageBooking": "إدارة الحجز",
+    "checkoutFreeCancelUntilDropOff": "إلغاء مجاني حتى موعد الإيداع.",
+    "checkoutSelectedDuration": "المدة المحددة",
+    "checkoutSlotUnit": "فترات",
+    "checkoutHourShort": "س",
+    "checkoutContinueWithoutAccount": "المتابعة بدون حساب",
+    "checkoutGuestContactHint": "يكفي بريد إلكتروني أو هاتف لإشعارات الحجز.",
+    "checkoutOrWithAccount": "أو باستخدام حساب",
+    "shopVerifiedPartner": "شريك موثّق",
+    "shopInsuredStorage": "تخزين مؤمَّن",
+    "shopPremiumAmenities": "الخدمات",
+    "shopCctv": "مراقبة 24/7",
+    "shopClimate": "تحكم بالمناخ",
+    "shopLargeItems": "يقبل الأمتعة الكبيرة",
+    "shopSealProvided": "يتم توفير ختم",
+    "shopWeekDays": "الاثنين - الجمعة",
+    "shopWeekEnd": "السبت - الأحد",
+    "shopSeeAll": "عرض الكل",
+    "shopPerDay": "/يوم"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -1305,5 +1324,8 @@
     "healthScore": "General Health Score",
     "healthDesc": "All critical services checked.",
     "noCriticalError": "No Critical Errors"
+  },
+  "Home": {
+    "seoTitle": "حفظ الأمتعة وإيداع الحقائب"
   }
 }
