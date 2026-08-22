@@ -139,6 +139,6 @@ export const config = {
   matcher: [
     '/((?!_next/static|_next/image|favicon.ico|sw.js|manifest.json|icons/|monitoring).*)',
     '/',
-    '/(tr|en|de|fr|es|it|zh|ja|ar|ko|ru|fa|bg|pl)/:path*',
+    '/(tr|en|de|fr|ja|fa)/:path*',
   ],
 };

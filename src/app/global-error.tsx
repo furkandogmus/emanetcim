@@ -5,31 +5,15 @@ import tr from "@/locales/tr.json";
 import en from "@/locales/en.json";
 import de from "@/locales/de.json";
 import fr from "@/locales/fr.json";
-import es from "@/locales/es.json";
-import it from "@/locales/it.json";
-import zh from "@/locales/zh.json";
 import ja from "@/locales/ja.json";
-import ar from "@/locales/ar.json";
-import ko from "@/locales/ko.json";
-import ru from "@/locales/ru.json";
 import fa from "@/locales/fa.json";
-import bg from "@/locales/bg.json";
-import pl from "@/locales/pl.json";
 const UI_LOCALES = [
   "tr",
   "en",
   "de",
   "fr",
-  "es",
-  "it",
-  "zh",
   "ja",
-  "ar",
-  "ko",
-  "ru",
   "fa",
-  "bg",
-  "pl",
 ] as const;
 
 type UiLocale = (typeof UI_LOCALES)[number];
@@ -44,16 +28,8 @@ const localeBundles = {
   en,
   de,
   fr,
-  es,
-  it,
-  zh,
   ja,
-  ar,
-  ko,
-  ru,
   fa,
-  bg,
-  pl,
 } as const;
 
 function commonForLocale(locale: UiLocale) {
@@ -61,7 +37,6 @@ function commonForLocale(locale: UiLocale) {
 }
 
 function htmlLang(locale: UiLocale): string {
-  if (locale === "zh") return "zh-Hans";
   return locale;
 }
 
@@ -86,7 +61,7 @@ export default function GlobalError({
   return (
     <html
       lang={htmlLang(locale)}
-      dir={locale === "ar" || locale === "fa" ? "rtl" : "ltr"}
+      dir={locale === "fa" ? "rtl" : "ltr"}
     >
       <body className="min-h-screen flex flex-col items-center justify-center gap-6 bg-gray-50 p-8 font-sans">
         <h1 className="text-2xl font-black text-gray-900">{c.errorTitle}</h1>

@@ -9,16 +9,8 @@ const SHORT: Record<string, string> = {
   en: "EN",
   de: "DE",
   fr: "FR",
-  es: "ES",
-  it: "IT",
-  zh: "中文",
   ja: "日本語",
-  ar: "عربي",
-  ko: "한국어",
-  ru: "Рус",
   fa: "فارسی",
-  bg: "БГ",
-  pl: "PL",
 };
 
 export default function LocaleSwitcher() {

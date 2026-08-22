@@ -21,10 +21,7 @@ import { dateLocaleForUiLocale } from "@/lib/date-locale";
  */
 
 /** `src/i18n` yapılandırmasındaki desteklenen diller. */
-const SUPPORTED = [
-  "tr", "en", "de", "fr", "es", "it", "ru",
-  "ar", "fa", "zh", "ja", "ko", "pl", "bg",
-];
+const SUPPORTED = ["tr", "en", "de", "fr", "ja", "fa"];
 
 describe("dateLocaleForUiLocale", () => {
   it("desteklenen HİÇBİR dil sessizce en-US'e düşmüyor", () => {

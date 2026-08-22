@@ -19,16 +19,8 @@ const UI_LOCALE_TO_BCP47: Record<string, string> = {
   en: "en-US",
   de: "de-DE",
   fr: "fr-FR",
-  es: "es-ES",
-  it: "it-IT",
-  ru: "ru-RU",
-  ar: "ar",
   fa: "fa-IR",
-  zh: "zh-CN",
   ja: "ja-JP",
-  ko: "ko-KR",
-  pl: "pl-PL",
-  bg: "bg-BG",
 };
 
 export function dateLocaleForUiLocale(locale: string): string {

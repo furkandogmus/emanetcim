@@ -9,16 +9,8 @@ const LOCALES = [
   "en",
   "de",
   "fr",
-  "es",
-  "it",
-  "zh",
   "ja",
-  "ar",
-  "ko",
-  "ru",
   "fa",
-  "bg",
-  "pl",
 ];
 
 const paths = [

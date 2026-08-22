@@ -119,7 +119,7 @@ export default async function RootLayout({
   const commerce = resolveCommerceContext();
   const base = getSiteBaseUrl();
 
-  const htmlLang = locale === "zh" ? "zh-Hans" : locale;
+  const htmlLang = locale;
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -158,8 +158,8 @@ export default async function RootLayout({
 
   return (
     <html
-      lang={locale === "zh" ? "zh-Hans" : locale}
-      dir={locale === "ar" || locale === "fa" ? "rtl" : "ltr"}
+      lang={locale}
+      dir={locale === "fa" ? "rtl" : "ltr"}
       suppressHydrationWarning
     >
       <body

@@ -13,20 +13,12 @@ import {
 import { DayPicker } from "react-day-picker";
 import { useLocale } from "next-intl";
 import {
-  ar,
-  bg,
   de,
   enUS,
-  es,
   faIR,
   fr,
-  it,
   ja,
-  ko,
-  pl,
-  ru,
   tr,
-  zhCN,
   type Locale as DateFnsLocale,
 } from "date-fns/locale";
 import { Calendar, Clock } from "lucide-react";
@@ -35,20 +27,12 @@ import BottomSheet from "@/components/ui/BottomSheet";
 import "react-day-picker/style.css";
 
 const LOCALE_MAP: Record<string, DateFnsLocale> = {
-  ar,
-  bg,
   de,
   en: enUS,
-  es,
   fa: faIR,
   fr,
-  it,
   ja,
-  ko,
-  pl,
-  ru,
   tr,
-  zh: zhCN,
 };
 
 interface DateTimePickerProps {
