@@ -2,14 +2,13 @@
 
 Bu testler **PostgreSQL** üzerinde seed edilmiş veri bekler (ör. Galata dükkanı, demo kullanıcılar).
 
-Dosyalar: `use-cases.spec.ts` (senaryolar `UC:` ile gruplu), `workflow.spec.ts`, `core.spec.ts`, `street-readiness.spec.ts`, `production-hardening.spec.ts` (middleware, PWA).
+Dosyalar: `use-cases.spec.ts` (senaryolar `UC:` ile gruplu), `booking-lifecycle.spec.ts` (uçtan uca yaşam döngüsü), `core.spec.ts`, `admin-platform-settings.spec.ts`, `seo-and-consent.spec.ts`, `production-hardening.spec.ts` (proxy, PWA).
 
-**CI:** E2E şu an workflow’ta çalışmıyor; tamamı **yerelde** `npm run test:e2e` veya `npm run test:e2e:local` ile koşulur.
+**CI:** `.github/workflows/ci.yml` → `e2e` işi (Postgres + seed + slot üretimi + Chromium). Yerelde `npm run test:e2e`.
 
-**Durum (2026-08-22):** 34 testin 29'u geçiyor, 1'i atlandı. Kalan 4 (`booking-lifecycle` ×2,
-`street-readiness`, `workflow`) **kart ödeme dönemine** yazılmış — "Kart üzerindeki isim" alanı
-bekliyor; aktif sağlayıcı `manual` (dükkanda tahsilat) ve checkout slot ızgarasına geçti. Bu
-dördü yamayla değil, manuel tahsilat akışına göre yeniden yazılarak kurtarılır.
+**Durum (2026-08-23):** suite manuel tahsilat akışına göre yeniden yazıldı; `booking-lifecycle.spec.ts`
+misafir → rezervasyon → iptal ve esnaf → teslim al → teslim et akışlarını uçtan uca kapsar. Eski
+`street-readiness` ve `workflow` (kart ödeme dönemi) silindi. CI'da `e2e` işi çalışır.
 
 **Giriş limiti:** `login:<e-posta>` anahtarı saatte 10 deneme. Aynı dev sunucuda e2e'yi
 birkaç kez üst üste koşunca demo girişleri `tooManyRequests` ile düşer; sunucuyu yeniden

@@ -10,6 +10,19 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-08-23 — e2e yeniden yazımında bulunanlar
+
+- **P2 — Esnaf paneli yalnızca ilk dükkanı gösterir.** `partner/page.tsx` `shops[0]`'ı
+  `activeShop` alır; çok dükkanlı esnafın (seed'deki demo esnaf: Galata + Sultanahmet)
+  diğer dükkanındaki valizler "İşlem Geçmişi"nde görünmez. Check-in `?booking=`/QR ile
+  sahiplik üzerinden çalıştığı için valiz alınır ama listede bulunamaz → teslim edilemez.
+  Geçici yol: `?checkoutBooking=<id>`. Kalıcı: dükkan seçici ya da tüm dükkanların listesi.
+- **P2 — Geçmiş rozeti ham enum basıyordu** (`APPROVED`, `WAITING_APPROVAL`) → düzeltildi,
+  6 dilde `statusApproved`/`statusWaitingApproval` eklendi. `ja.statusPaid` "有料" (ücretli)
+  yanlış çeviriydi → 支払い済み.
+- **Gözlem:** dil değişiminde kısa süre iki `<h1>` DOM'da (geçiş animasyonu); arama
+  sayfasında masaüstü liste + mobil alt panel aynı anda DOM'da (çift `nearby-heading`).
+
 ## Son durum — 2026-08-22
 
 | Alan | Denetlendi mi | Sonuç |

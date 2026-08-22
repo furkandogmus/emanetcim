@@ -10,7 +10,7 @@ test.describe('BagajPark Core Flows', () => {
     await expect(page.locator('h1')).toContainText('Valizini Güvenle Bırak');
     
     // Check search button visibility
-    await expect(page.locator('text=Emanet Noktası Bul')).toBeVisible();
+    await expect(page.locator('text=Emanet Noktası Bul').first()).toBeVisible();
   });
 
   test('should switch language to English', async ({ page }) => {
@@ -20,7 +20,7 @@ test.describe('BagajPark Core Flows', () => {
     await page.goto('/en');
     
     // Check main title (EN)
-    await expect(page.locator('h1')).toContainText('Drop Your Bags');
+    await expect(page.getByRole('heading', { level: 1 }).first()).toContainText('Drop Your Bags');
   });
 
   test('should navigate to the search page when clicking the search bar', async ({ page }) => {

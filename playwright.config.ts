@@ -10,6 +10,7 @@ loadEnv({ path: '.env' });
  */
 export default defineConfig({
   testDir: './tests/e2e',
+  globalSetup: './tests/e2e/global-setup.ts',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -17,6 +18,9 @@ export default defineConfig({
   reporter: 'html',
   use: {
     baseURL: 'http://localhost:3000',
+    // PWA service worker'ı production build'de kayıt olur ve eski sayfa/RSC yanıtlarını
+    // önbellekten verebilir; testler her zaman sunucuyu görmeli.
+    serviceWorkers: 'block',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
@@ -31,7 +35,8 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npm run dev',
+    // CI: build zaten yapılmış, `next start` hem hızlı hem deterministik; yerelde dev.
+    command: process.env.CI ? 'npm run start' : 'npm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     stdout: 'pipe',
@@ -39,6 +44,8 @@ export default defineConfig({
     timeout: 120 * 1000,
     env: {
       ...process.env,
+      // Testler aynı IP'den onlarca istek üretir; gerçek limitler production dışında kapatılır.
+      E2E_DISABLE_RATE_LIMIT: 'true',
       // docker-compose.yml postgres (host 5433); .env yoksa veya yanlışsa E2E yine DB’ye bağlansın
       DATABASE_URL:
         process.env.DATABASE_URL ||

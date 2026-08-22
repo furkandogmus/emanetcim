@@ -196,7 +196,9 @@
     "nextPage": "Sonraki",
     "overdueBadgeHours": "{hours} saattir bekliyor",
     "overdueBadgeDays": "{days} gündür bekliyor",
-    "overdueHint": "Bavul teslim edildiyse çıkış işlemini tamamlayın."
+    "overdueHint": "Bavul teslim edildiyse çıkış işlemini tamamlayın.",
+    "statusApproved": "ONAYLANDI",
+    "statusWaitingApproval": "ONAY BEKLİYOR"
   },
   "Guest": {
     "heroTitle": "Valizini Güvenle Bırak, Özgürce Gez",

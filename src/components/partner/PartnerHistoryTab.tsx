@@ -91,7 +91,9 @@ export default function PartnerHistoryTab({
                     {(booking.status as string) === "CHECKED_IN" && t("statusCheckedIn")}
                     {(booking.status as string) === "PAID" && t("statusPaid")}
                     {(booking.status as string) === "PENDING" && t("statusPending")}
-                    {!["CHECKED_OUT", "CANCELLED", "CHECKED_IN", "PAID", "PENDING"].includes(booking.status as string) && booking.status}
+                    {(booking.status as string) === "APPROVED" && t("statusApproved")}
+                    {(booking.status as string) === "WAITING_APPROVAL" && t("statusWaitingApproval")}
+                    {!["CHECKED_OUT", "CANCELLED", "CHECKED_IN", "PAID", "PENDING", "APPROVED", "WAITING_APPROVAL"].includes(booking.status as string) && booking.status}
                   </div>
                 </div>
 

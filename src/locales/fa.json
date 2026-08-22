@@ -196,7 +196,9 @@
     "sealsTrackingNo": "کد رهگیری: {tracking}",
     "sealsSerialRange": "سریال: {from} – {to}",
     "sealsConfirmDelivery": "دریافت کردم — افزودن به موجودی",
-    "sealsNoRequests": "هنوز درخواست پلمبی ندارید."
+    "sealsNoRequests": "هنوز درخواست پلمبی ندارید.",
+    "statusApproved": "تأیید شد",
+    "statusWaitingApproval": "در انتظار تأیید"
   },
   "Guest": {
     "heroTitle": "چمدان را بسپارید، آزاد بگردید",

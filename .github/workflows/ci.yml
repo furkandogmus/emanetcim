@@ -74,3 +74,59 @@ jobs:
           AUTH_SECRET: ci-build-placeholder-not-for-production
           CI: "true"
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
+
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    needs: build
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    env:
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
+      AUTH_SECRET: ci-e2e-secret-not-for-production-0123456789
+      AUTH_TRUST_HOST: "true"
+      NEXT_PUBLIC_BASE_URL: http://localhost:3000
+      REDIS_URL: redis://localhost:6379
+      CRON_SECRET: ci-e2e-cron-secret
+      # Testler ayni IP'den onlarca istek uretir; gercek limitler production disinda kapatilir.
+      E2E_DISABLE_RATE_LIMIT: "true"
+      # Demo giris dugmeleri production build'de ancak bu bayrakla gorunur (build aninda gomulur).
+      NEXT_PUBLIC_ENABLE_AUTH_DEMO: "true"
+      CI: "true"
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npx prisma migrate deploy
+      - run: npx prisma db seed
+      - run: npx playwright install --with-deps chromium
+      # playwright.config.ts CI'da `npm run start` kullanir; build burada yapilir.
+      - run: npm run build
+      - run: npx playwright test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

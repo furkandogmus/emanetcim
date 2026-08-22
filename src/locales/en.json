@@ -196,7 +196,9 @@
     "nextPage": "Next",
     "overdueBadgeHours": "waiting {hours}h",
     "overdueBadgeDays": "waiting {days} days",
-    "overdueHint": "If the bag has been handed over, complete the check-out."
+    "overdueHint": "If the bag has been handed over, complete the check-out.",
+    "statusApproved": "APPROVED",
+    "statusWaitingApproval": "AWAITING APPROVAL"
   },
   "Guest": {
     "heroTitle": "Drop Your Bags, Explore Freely",

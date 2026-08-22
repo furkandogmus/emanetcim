@@ -196,7 +196,9 @@
     "sealsTrackingNo": "Sendungsnr.: {tracking}",
     "sealsSerialRange": "Serie: {from} – {to}",
     "sealsConfirmDelivery": "Erhalten — zum Bestand hinzufügen",
-    "sealsNoRequests": "Sie haben noch keine Siegelanfragen."
+    "sealsNoRequests": "Sie haben noch keine Siegelanfragen.",
+    "statusApproved": "BESTÄTIGT",
+    "statusWaitingApproval": "WARTET AUF FREIGABE"
   },
   "Guest": {
     "heroTitle": "Lassen Sie Ihr Gepäck fallen und erkunden Sie es frei",

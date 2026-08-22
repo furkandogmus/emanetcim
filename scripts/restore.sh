@@ -71,9 +71,14 @@ compose exec postgres sh -c 'pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
 echo "==> web durduruluyor (bağlantı çakışmasını önlemek için)"
 compose stop web || true
 
-echo "==> pg_restore (stdin)"
-cat "$BACKUP_FILE" | compose exec -T postgres sh -c \
-  'pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" --clean --if-exists --no-owner --no-acl --verbose -' \
+# Dosya konteynere KOPYALANIR, stdin kullanılmaz. Eski hâli `cat | exec -T ... -` idi:
+# SSH üzerinden (tty/stdin yokken) pg_restore "-" dosyasını bulamıyordu ve web durmuş
+# kalıyordu — 2026-08-22 Hetzner→AWS kesiminde canlıda yaşandı.
+echo "==> pg_restore (konteyner içi kopya)"
+compose cp "$BACKUP_FILE" postgres:/tmp/restore.dump
+compose exec -T postgres sh -c \
+  'pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" --clean --if-exists --no-owner --no-acl /tmp/restore.dump; rc=$?; rm -f /tmp/restore.dump; exit $rc' \
+  || echo "restore: pg_restore uyarı/hata verdi (extension gibi önemsiz olabilir), tablo sayılarını kontrol edin" >&2
 
 echo "==> web başlatılıyor"
 compose up -d web

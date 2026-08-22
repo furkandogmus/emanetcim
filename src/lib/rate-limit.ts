@@ -114,5 +114,16 @@ export async function rateLimit(
   max: number,
   windowMs: number
 ): Promise<boolean> {
+  /**
+   * E2E kaçışı — YALNIZCA production dışında. Playwright aynı IP'den 10 dakikada
+   * onlarca rezervasyon/giriş üretir; gerçek kullanıcı limitleri (10/10dk) testi
+   * ikinci koşuda sessizce düşürüyordu. Production'da bu bayrak okunmaz.
+   */
+  if (
+    process.env.NODE_ENV !== "production" &&
+    process.env.E2E_DISABLE_RATE_LIMIT?.trim() === "true"
+  ) {
+    return true;
+  }
   return redisRateLimit(key, max, windowMs);
 }

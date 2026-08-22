@@ -89,7 +89,7 @@
     "customerArrivedCheckIn": "お客様到着 — チェックイン (QR または確認)",
     "handOverCheckout": "お渡し（チェックアウト）",
     "paymentPendingNoCheckIn": "支払い保留中 — チェックインはまだ利用できません。",
-    "statusPaid": "有料",
+    "statusPaid": "支払い済み",
     "statusCheckedIn": "チェックインしました",
     "statusCheckedOut": "配達されました",
     "statusCancelled": "キャンセル",
@@ -196,7 +196,9 @@
     "sealsTrackingNo": "追跡番号: {tracking}",
     "sealsSerialRange": "シリアル: {from} – {to}",
     "sealsConfirmDelivery": "受け取りました — 在庫に追加",
-    "sealsNoRequests": "シール申請はまだありません。"
+    "sealsNoRequests": "シール申請はまだありません。",
+    "statusApproved": "承認済み",
+    "statusWaitingApproval": "承認待ち"
   },
   "Guest": {
     "heroTitle": "荷物を置いて、自由に探索しましょう",

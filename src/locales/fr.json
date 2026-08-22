@@ -196,7 +196,9 @@
     "sealsTrackingNo": "N° de suivi : {tracking}",
     "sealsSerialRange": "Série : {from} – {to}",
     "sealsConfirmDelivery": "Reçu — ajouter au stock",
-    "sealsNoRequests": "Vous n’avez pas encore de demande de scellés."
+    "sealsNoRequests": "Vous n’avez pas encore de demande de scellés.",
+    "statusApproved": "CONFIRMÉE",
+    "statusWaitingApproval": "EN ATTENTE D’APPROBATION"
   },
   "Guest": {
     "heroTitle": "Déposez vos bagages, explorez librement",

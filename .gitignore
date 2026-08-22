@@ -96,3 +96,7 @@ infra/**/*.tfvars
 /report.xml
 /mobile/*.txt
 /mobile/*.png
+
+# next-pwa build ciktisi (next build uretir; standalone imaja girer)
+/public/sw.js
+/public/workbox-*.js
