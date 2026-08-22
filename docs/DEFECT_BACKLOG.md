@@ -38,9 +38,13 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
    türüyor. Ayrıntı `docs/PAYMENTS.md`. **Kalan**: prod'daki 12 sahte `SUCCESS`
    satırı (kaynağı bilinmiyor, önce P1-5) ve istemci bileşenlerindeki kartlı metin
    (P1-19).
-2. **Prod'daki 39 gerçek kullanıcı hesabına karşılık defterde 8 hayalet rezervasyon
-   ve 1.520 TRY sahte ödeme var** (kayıtlı hacmin %44'ü) ve kaynağı hâlâ bilinmiyor
-   — yani prod'a rezervasyon yazabilen bir yol açık olabilir (P1-5).
+2. ~~8 hayalet rezervasyonun kaynağı bilinmiyor~~ → **KAYNAK BULUNDU (2026-08-22):
+   `prisma/seed.ts`, ortam koruması olmadan.** Bulunan şey bir veri hijyeni sorunu
+   değil, **güvenlik sorunu**: seed `admin@test.com` hesabını ADMIN rolüyle ve
+   bilinen parolayla **upsert** ediyordu — prod'da parola değiştirilse bile her
+   çalıştırmada geri geliyordu. Kapı eklendi ve çalıştırılarak doğrulandı.
+   **Kalan ve en acil iş: prod'daki demo hesapların parolalarını değiştirmek** —
+   kapı yenisini engelliyor, mevcudu değiştirmiyor (P1-5).
 3. **19 rezervasyonun 18'i çıkış saatini geçmiş hâlde açık; hiçbiri hiç
    `CHECKED_OUT` olmamış.** Üç müşterinin bavulu Haziran'dan beri "dükkanda"
    görünüyor. → **Tarama altyapısı kuruldu (2026-08-22)**: `OverdueBookingService`,
@@ -421,18 +425,32 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
 - **Not**: doğrulama backfill'indeki `email: { not: null }` filtresi **doğru** ve
   değiştirilmedi — var olmayan bir e-posta doğrulanamaz.
 
-### [P1-4] Test dükkanı canlı aramada, üstelik 5 rezervasyonu var
+### [P1-4] ⚠️ KOD HAZIR, İŞARETLEME BEKLİYOR — Test dükkanı canlı aramada, üstelik 5 rezervasyonu var
 - **Nerede**: `Shop` `131bcf6d-...` (`Furkan'ın Diğer Mekan`)
 - **Kanıt** (kendim gördüm): `isActive = t`, `isVerified = f`. Genel aramanın tek
   filtresi `isActive = true AND latitude IS NOT NULL`.
 - **Neden önemli**: Türkiye'de bulunabilen yalnızca üç dükkandan biri kişisel bir test
   kaydı ve gerçek partnerden ayırt edilemiyor.
-- **Çözüm**: *veri* — `isActive = false`. (Silinemez: `rejectPendingShop` rezervasyonu
-  olan dükkanı reddediyor.) Uzun vadede *kod* — `isTest` bayrağı.
-- **Not**: Bunu SQL ile kapatmayı denedim, güvenlik sınıflandırıcısı engelledi —
-  `/admin/partners` üzerinden senin yapman gerekiyor.
+- **ÖNCEKİ ÇÖZÜM ÖNERİSİ (`isActive = false`) YANLIŞTI**: dükkanın 5 rezervasyonu
+  var ve pasife almak esnaf akışlarını bozar. Doğru ayrım "aktif mi" değil,
+  **"gerçek mi"**.
+- **Çözüm (kod tarafı uygulandı, 2026-08-22)**:
+  - `Shop.isTest` eklendi. İşaretli dükkan kamuya açık arama, harita ve ana sayfa
+    istatistiklerinden düşer; **esnaf paneli ve mevcut rezervasyonlar etkilenmez.**
+  - `/admin/partners/<id>/edit` formuna açıklamalı bir anahtar eklendi (14 dilde);
+    değişiklik denetim log'una yazılıyor (`admin_shop_test_flag_changed`).
+  - **Filtre tek yere alındı** (`src/lib/public-shop-filter.ts`). Üç ayrı yerde
+    ayrı ayrı yazılmıştı ve hepsi yalnızca `isActive`'e bakıyordu; dördüncüsü
+    eklendiğinde biri kesin unutulurdu. Prisma nesnesi ve ham SQL iki biçimde
+    tutuluyor (PostGIS `where` kullanamıyor) ve testi **ikisinin ayrışmasını**
+    yakalıyor.
+  - Migrasyon mevcut dükkanları **bilerek işaretlemiyor**: hangi kaydın test olduğu
+    bir iş bilgisidir; isimden tahmin etmek gerçek bir dükkanı canlı aramadan
+    düşürebilirdi.
+- **AÇIK KALAN — 30 saniyelik iş**: `/admin/partners` → `Furkan'ın Diğer Mekan` →
+  düzenle → **Test kaydı** kutusunu işaretle. Artık SQL gerekmiyor.
 
-### [P1-5] 8 script rezervasyonu ve 1.520 TRY hayalet ödeme prod defterinde
+### [P1-5] ⚠️ KAYNAK BULUNDU VE KAPATILDI, VERİ TEMİZLİĞİ AÇIK — 8 script rezervasyonu ve 1.520 TRY hayalet ödeme prod defterinde
 - **Nerede**: `Booking`, `PaymentLog`
 - **Kanıt**: 9 saniyelik pencerede, tek misafir, tek dükkan, hepsi `PAID` 190.00 olan
   8 rezervasyon. 8 × 190 = **1.520 TRY**, kayıtlı 3.480 TRY hacminin %44'ü.
@@ -442,8 +460,36 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   GET'liyor, hiçbir POST/checkout/rezervasyon çağrısı yok ve varsayılan hedefi
   `localhost:3000`. Yani bu 8 rezervasyonu o script üretmemiş. Gerçek kaynak
   bilinmiyor — elle yapılmış bir test ya da başka bir script olabilir.
-- **Çözüm**: *veri* — 8 rezervasyonu ve ödemelerini işaretle/temizle. Ayrıca kaynağın
-  ne olduğu bulunmalı; prod'a rezervasyon yazabilen bir test yolu varsa kapatılmalı.
+- **KAYNAK BULUNDU (2026-08-22)** — izini şöyle sürdüm:
+  1. `markAsPaid`'in uygulamada **hiç çağıranı yok** (yalnızca arayüz tanımı ve kendi
+     gövdesi). Kamuya açık `createBookingAction` `APPROVED` yazıyor, `PAID` değil.
+  2. `PAID` yazan tek kod yolu `PaymentService.markCaptured` ve o da yalnızca
+     `markAsPaid` üzerinden erişilebilir. Yani **prod'daki `PAID` rezervasyonlar
+     uygulamadan gelmedi.**
+  3. `prisma/seed.ts` doğrudan `BookingStatus.PAID` yazıyordu ve **hiçbir ortam
+     koruması yoktu** — `DATABASE_URL` nereyi gösteriyorsa oraya.
+- **Bulunan şey beklenenden ağırdı — bu bir GÜVENLİK sorunu**: seed,
+  `admin@test.com` hesabını **ADMIN rolüyle** ve bilinen varsayılan parolayla
+  (`Demo123!`) **upsert** ediyordu. `update` bloğu `passwordHash` içerdiği için,
+  prod'da parola değiştirilmiş olsa bile **her seed çalıştırması onu bilinen değere
+  geri döndürüyordu**. Aynısı `esnaf@test.com` ve `misafir@test.com` için de.
+  Parola ayrıca stdout'a basılıyordu (deploy/CI log'larına düşer). Tek bir yanlış
+  terminalde `npm run db:seed` yazmak prod'a bilinen parolalı bir yönetici hesabı
+  kurmaya yetiyordu.
+- **Çözüm (uygulandı)**: `src/lib/seed-guard.ts` — `NODE_ENV=production` **veya**
+  uzak görünen `DATABASE_URL` seed'i durduruyor. `NODE_ENV`'e güvenmek yetmezdi:
+  seed genellikle `tsx` ile elle çalıştırılır ve `NODE_ENV` çoğu zaman tanımsızdır;
+  asıl tehlike yerel kabuktan uzak DB'ye bağlanmaktır. Kaçış yolu var ama kazara
+  basılamayacak kadar açık (`ALLOW_PRODUCTION_SEED=yes-i-really-mean-it`;
+  `1`/`true`/`yes` kabul edilmez). İki senaryo da **gerçekten çalıştırılarak**
+  doğrulandı — kapı DB'ye hiç bağlanmadan durduruyor. Seed artık parolayı basmıyor
+  ve `PAID` değil `PENDING` rezervasyon yaratıyor.
+- **AÇIK KALAN — ikisi de sizde**:
+  1. **Prod'daki demo hesapların parolaları değiştirilmeli.** `admin@test.com`,
+     `esnaf@test.com`, `misafir@test.com` hâlâ bilinen parolayı taşıyor olabilir.
+     Kapı yenisini engelliyor, **mevcudu değiştirmiyor**. Listedeki en acil iş budur.
+  2. 8 hayalet rezervasyon ve 1.520 TRY'lik ödeme kayıtları hâlâ defterde
+     (`provider='legacy_unverified'` damgalı). Temizlik kararı sizin.
 
 ### [P1-6] ⚠️ ALTYAPI KURULDU, VERİ KARARI + CRON BEKLİYOR — 19 rezervasyonun 18'i çıkış saatini geçmiş halde açık
 - **Kanıt**: durum dağılımı `PAID 10 | APPROVED 5 | CHECKED_IN 3 | CANCELLED 1` —
