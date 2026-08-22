@@ -19,6 +19,7 @@ import type { PricingRules } from "@/lib/pricing-rules";
 import type { GuestBookingListItem } from "@/services/BookingService";
 import { moneyToNumber } from "@/lib/money";
 import { usePaymentCopyKey } from "@/components/providers/CommerceProvider";
+import Money from "@/components/common/Money";
 
 export type BookingModifyModalBooking = Pick<
   GuestBookingListItem,
@@ -224,7 +225,7 @@ export default function BookingModifyModal({
           <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 text-sm space-y-2">
             <div className="flex justify-between">
               <span className="text-gray-500">{t("modifyPreviewNewTotal")}</span>
-              <span className="font-black">₺{previewGrand}</span>
+              <Money amount={previewGrand} className="font-black" />
             </div>
             <div className="flex justify-between text-xs">
               <span className="text-gray-400">{t("modifyPreviewDelta")}</span>
@@ -238,7 +239,7 @@ export default function BookingModifyModal({
                 }
               >
                 {delta > 0.005 ? "+" : ""}
-                ₺{delta}
+                <Money amount={delta} />
               </span>
             </div>
             {booking.status === "PAID" && delta < -0.005 ? (

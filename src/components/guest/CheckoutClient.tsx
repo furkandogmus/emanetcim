@@ -37,6 +37,8 @@ import { useKeyboardAware } from "@/lib/hooks/useKeyboardAware";
 import { useShare } from "@/lib/hooks/useShare";
 import WebPushOptIn from "@/components/WebPushOptIn";
 import SlotAvailabilityGrid from "@/components/guest/SlotAvailabilityGrid";
+import Money from "@/components/common/Money";
+import { formatDecimal } from "@/lib/currency";
 interface CheckoutClientProps {
   shopId: string;
   shopName: string;
@@ -496,7 +498,7 @@ export default function CheckoutClient({
                       {t("checkoutSelectedDuration")}
                     </p>
                     <p className="font-black text-lg text-gray-900 mt-0.5">
-                      {selectedSlotCount} {t("checkoutSlotUnit")} ({selectedSlotCount * 0.5}{t("checkoutHourShort")})
+                      {selectedSlotCount} {t("checkoutSlotUnit")} ({formatDecimal(selectedSlotCount * 0.5, locale)} {t("checkoutHourShort")})
                     </p>
                   </div>
                 </div>
@@ -568,19 +570,19 @@ export default function CheckoutClient({
                   </span>
                   {billableDays > 1 && (
                     <span className="text-[10px] text-gray-400">
-                      ₺{dailyLine} × {billableDays} {t("daysUnit")}
+                      <Money amount={dailyLine} /> × {billableDays} {t("daysUnit")}
                     </span>
                   )}
                 </div>
                 <span className="text-gray-900 font-bold" data-testid="checkout-service-total">
-                  ₺{totalPrice}
+                  <Money amount={totalPrice} />
                 </span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-gray-400 font-medium">
                   {t("checkoutInsuranceLine")}
                 </span>
-                <span className="text-gray-900 font-bold">₺{insuranceFee}</span>
+                <Money amount={insuranceFee} className="text-gray-900 font-bold" />
               </div>
               <div className="flex justify-between items-baseline pt-4 border-t border-gray-100">
                 <span className="text-lg font-black text-gray-900 uppercase tracking-tighter">
@@ -590,7 +592,7 @@ export default function CheckoutClient({
                   data-testid="checkout-total-amount"
                   className="text-3xl font-black text-orange-600 tracking-tighter"
                 >
-                  ₺{grandTotal}
+                  <Money amount={grandTotal} />
                 </span>
               </div>
             </section>

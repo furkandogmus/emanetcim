@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { 
   Store, 
@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import StarRating from "@/components/common/StarRating";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
+import { formatDecimal } from "@/lib/currency";
 
 interface AdminPartnerEditClientProps {
   shop: {
@@ -54,6 +55,7 @@ interface AdminPartnerEditClientProps {
 
 export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientProps) {
   const t = useTranslations("Admin");
+  const locale = useLocale();
   const tCommon = useTranslations("Common");
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -323,7 +325,7 @@ export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientP
            <section className="bg-orange-600 rounded-[2.5rem] p-8 text-white shadow-xl shadow-orange-100">
               <p className="text-[10px] font-black uppercase tracking-widest text-orange-200 mb-2">{t("totalEarnings")}</p>
               <div className="flex items-center gap-3 mb-6">
-                <div className="text-5xl font-black tracking-tighter">{ratingSafe.toFixed(1)}</div>
+                <div className="text-5xl font-black tracking-tighter">{formatDecimal(ratingSafe, locale)}</div>
                 <StarRating rating={Math.round(ratingSafe)} size={32} />
               </div>
               <div className="w-full bg-white/20 h-1 rounded-full mb-4 overflow-hidden">

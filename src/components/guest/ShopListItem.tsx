@@ -4,12 +4,14 @@ import { Building2, ChevronRight, MapPin, Star, Shield, Timer } from 'lucide-rea
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import FavoriteButton from '@/components/guest/FavoriteButton';
+import Money from "@/components/common/Money";
 
 interface ShopListItemProps {
   id: string;
   name: string;
   rating: number;
-  price: string;
+  /** Günlük fiyat (TRY). Sayı olarak taşınır — gösterim `Money` bileşeninin işi. */
+  price: number;
   distance: string;
   lat?: number;
   lng?: number;
@@ -128,16 +130,16 @@ export default function ShopListItem({
             <div className="text-right">
               {slotPrices ? (
                 <div className="flex items-center gap-1.5">
-                  <span className="flex flex-col items-center"><span className="text-[9px] text-gray-400 font-bold uppercase">S</span><span className="text-xs font-black text-gray-900">₺{slotPrices.s}</span></span>
+                  <span className="flex flex-col items-center"><span className="text-[9px] text-gray-400 font-bold uppercase">S</span><Money amount={slotPrices.s} compact className="text-xs font-black text-gray-900" /></span>
                   <span className="text-gray-300 text-xs">|</span>
-                  <span className="flex flex-col items-center bg-orange-50/50 rounded-lg px-1.5 py-0.5"><span className="text-[9px] text-orange-500 font-bold uppercase">M/L</span><span className="text-sm font-black text-orange-600">₺{slotPrices.m}</span></span>
+                  <span className="flex flex-col items-center bg-orange-50/50 rounded-lg px-1.5 py-0.5"><span className="text-[9px] text-orange-500 font-bold uppercase">M/L</span><Money amount={slotPrices.m} compact className="text-sm font-black text-orange-600" /></span>
                   <span className="text-gray-300 text-xs">|</span>
-                  <span className="flex flex-col items-center"><span className="text-[9px] text-gray-400 font-bold uppercase">XL</span><span className="text-xs font-black text-gray-900">₺{slotPrices.xl}</span></span>
+                  <span className="flex flex-col items-center"><span className="text-[9px] text-gray-400 font-bold uppercase">XL</span><Money amount={slotPrices.xl} compact className="text-xs font-black text-gray-900" /></span>
                 </div>
               ) : (
                 <>
                   <span className="text-[10px] text-gray-400 font-bold uppercase block -mb-0.5">{t("from")}</span>
-                  <span className="text-xl font-black text-gray-900">₺{price}</span>
+                  <Money amount={price} className="text-xl font-black text-gray-900" />
                   <span className="text-[10px] text-gray-400 font-bold uppercase ml-1">/ {t("day")}</span>
                 </>
               )}

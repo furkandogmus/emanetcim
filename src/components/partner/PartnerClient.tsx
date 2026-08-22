@@ -32,6 +32,7 @@ import {
 } from "@/actions/partner";
 import type { PartnerBookingListItem } from "@/services/BookingService";
 import { dateLocaleForUiLocale } from "@/lib/date-locale";
+import Money from "@/components/common/Money";
 
 
 
@@ -597,7 +598,7 @@ export default function PartnerClient({
                         </div>
                       </div>
                       <div className="text-right">
-                         <p className="text-lg font-black text-gray-900">₺{moneyToNumber(booking.totalPrice)}</p>
+                         <p className="text-lg font-black text-gray-900"><Money amount={moneyToNumber(booking.totalPrice)} /></p>
                          <p className="text-[10px] text-gray-400 font-bold uppercase">{booking.bagCountS + booking.bagCountM + booking.bagCountXl} {t("bagCountUnit")}</p>
                       </div>
                    </div>

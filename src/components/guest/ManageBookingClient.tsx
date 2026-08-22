@@ -6,6 +6,7 @@ import { useRouter } from "@/i18n/routing";
 import { Link } from "@/i18n/routing";
 import { toast } from "sonner";
 import { MapPin, Calendar, Clock, Package, Shield, XCircle } from "lucide-react";
+import Money from "@/components/common/Money";
 
 interface BookingInfo {
   id: string;
@@ -160,7 +161,7 @@ export default function ManageBookingClient({ initialToken }: { initialToken: st
               </div>
               <div className="flex justify-between items-center pt-2 border-t border-gray-100">
                 <span className="text-xs text-gray-400 font-bold uppercase">{t("total")}</span>
-                <span className="text-lg font-black text-gray-900">₺{booking.totalPrice}</span>
+                <Money amount={Number(booking.totalPrice)} className="text-lg font-black text-gray-900" />
               </div>
             </div>
 

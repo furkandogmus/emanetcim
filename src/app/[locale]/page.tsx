@@ -15,6 +15,7 @@ import { getSiteBaseUrl } from "@/lib/site-urls";
 import { alternatesForPath } from "@/lib/seo-alternates";
 import { buildFaqJsonLd } from "@/lib/faq-json-ld";
 import { buildItemListJsonLd, buildWebPageJsonLd } from "@/lib/page-json-ld";
+import { formatDecimal } from "@/lib/currency";
 
 export const revalidate = 120;
 
@@ -306,7 +307,7 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
             <p className="text-2xl md:text-3xl font-black tabular-nums text-gray-900 inline-flex items-center gap-1">
               {stats.averageRating != null && stats.reviewCount > 0 ? (
                 <>
-                  {stats.averageRating.toFixed(1)}
+                  {formatDecimal(stats.averageRating, locale)}
                   <Star
                     className="inline h-7 w-7 md:h-8 md:w-8 text-orange-500 fill-orange-500"
                     aria-hidden

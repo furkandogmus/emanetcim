@@ -20,7 +20,6 @@ import { useShare } from "@/lib/hooks/useShare";
 import { roundedSlotPrices } from "@/lib/bag-pricing";
 import type { PricingRules } from "@/lib/pricing-rules";
 import { dateLocaleForUiLocale } from "@/lib/date-locale";
-import { formatTryCurrency } from "@/lib/currency";
 import {
   PLAUSIBLE_EVENTS,
   trackPlausibleEvent,
@@ -29,6 +28,8 @@ import { TrustBadges } from "@/components/common/TrustBadge";
 import FavoriteButton from "@/components/guest/FavoriteButton";
 import ShopGallery from "@/components/guest/ShopGallery";
 import { useCommerce } from "@/components/providers/CommerceProvider";
+import Money from "@/components/common/Money";
+import { formatDecimal } from "@/lib/currency";
 
 export type ShopDetailClientShop = {
   id: string;
@@ -112,7 +113,6 @@ export default function ShopDetailClient({
     seeAll: t("shopSeeAll"),
     perDay: t("shopPerDay"),
   };
-  const mobilePricePerBag = formatTryCurrency(slot.m, locale);
 
   useEffect(() => {
     trackPlausibleEvent(PLAUSIBLE_EVENTS.ShopViewed, { shopId: shop.id });
@@ -187,7 +187,7 @@ export default function ShopDetailClient({
               {rating > 0 ? (
                 <div className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-700">
                   <Star size={12} fill="currentColor" />
-                  {rating.toFixed(1)}
+                  {formatDecimal(rating, locale)}
                 </div>
               ) : null}
               </div>
@@ -301,7 +301,13 @@ export default function ShopDetailClient({
             <div className="flex-1">
               <p className="text-xs font-black uppercase tracking-widest text-gray-400">{t("perBag")}</p>
               <p className="text-3xl font-black text-gray-900">
-                ₺{mobilePricePerBag} <span className="text-base text-gray-500">{mobileCopy.perDay}</span>
+                {/*
+                  ÇİFT PARA İŞARETİ HATASI DÜZELTİLDİ (2026-08-22).
+                  `mobilePricePerBag` zaten `formatTryCurrency` çıktısıydı ("₺50,00")
+                  ve başına bir `₺` daha ekleniyordu — yapışkan fiyat çubuğunda
+                  "₺₺50,00" yazıyordu.
+                */}
+                <Money amount={slot.m} /> <span className="text-base text-gray-500">{mobileCopy.perDay}</span>
               </p>
             </div>
             <Link
@@ -356,7 +362,7 @@ export default function ShopDetailClient({
                 {rating > 0 ? (
                   <span className="inline-flex items-center gap-1 text-xs font-black bg-white/20 px-2 py-1 rounded-lg">
                     <Star size={12} fill="currentColor" />
-                    {rating.toFixed(1)}
+                    {formatDecimal(rating, locale)}
                   </span>
                 ) : null}
               </div>
@@ -374,17 +380,17 @@ export default function ShopDetailClient({
           <div className="grid grid-cols-3 gap-3 text-center">
             <div className="rounded-2xl bg-gray-50 p-3 border border-gray-100">
               <p className="text-[9px] font-bold text-gray-400 uppercase">S</p>
-              <p className="text-lg font-black text-gray-900">₺{slot.s}</p>
+              <p className="text-lg font-black text-gray-900"><Money amount={slot.s} /></p>
             </div>
             <div className="rounded-2xl bg-orange-50 p-3 border border-orange-100">
               <p className="text-[9px] font-bold text-orange-600 uppercase">
                 M/L
               </p>
-              <p className="text-lg font-black text-orange-700">₺{slot.m}</p>
+              <p className="text-lg font-black text-orange-700"><Money amount={slot.m} /></p>
             </div>
             <div className="rounded-2xl bg-gray-50 p-3 border border-gray-100">
               <p className="text-[9px] font-bold text-gray-400 uppercase">XL</p>
-              <p className="text-lg font-black text-gray-900">₺{slot.xl}</p>
+              <p className="text-lg font-black text-gray-900"><Money amount={slot.xl} /></p>
             </div>
           </div>
           <p className="text-[10px] text-gray-400 mt-3 text-center">

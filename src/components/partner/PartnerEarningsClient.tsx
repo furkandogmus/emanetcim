@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { ArrowLeft, TrendingUp, Wallet, Receipt, Clock, Star, BarChart3, RefreshCw } from "lucide-react";
 import {
@@ -12,6 +12,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import { formatDecimal } from "@/lib/currency";
 
 interface Booking {
   id: string;
@@ -71,6 +72,7 @@ export default function PartnerEarningsClient({
   avgRating,
 }: Props) {
   const t = useTranslations("Partner");
+  const locale = useLocale();
   const commissionPct = Math.round((1 - merchantRatio) * 100);
 
   // Only show hours with any activity for cleaner chart
@@ -127,7 +129,7 @@ export default function PartnerEarningsClient({
           <div className="bg-white rounded-2xl p-3 border border-gray-100 shadow-sm text-center">
             <Star className="w-4 h-4 text-amber-400 mx-auto mb-1" />
             <p className="text-lg font-black text-gray-900">
-              {avgRating > 0 ? avgRating.toFixed(1) : "—"}
+              {avgRating > 0 ? formatDecimal(avgRating, locale) : "—"}
             </p>
             <p className="text-xs text-gray-400">Puan</p>
           </div>

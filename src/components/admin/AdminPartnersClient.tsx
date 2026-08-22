@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { 
   Store, 
@@ -22,6 +22,8 @@ import {
 import { Link } from "@/i18n/routing";
 import { motion, AnimatePresence } from "framer-motion";
 import { adminInitiatePartnerPasswordResetAction } from "@/actions/partner-password-reset";
+import Money from "@/components/common/Money";
+import { formatDecimal } from "@/lib/currency";
 
 interface Shop {
   id: string;
@@ -48,6 +50,7 @@ interface AdminPartnersClientProps {
 
 export default function AdminPartnersClient({ shops: initialShops }: AdminPartnersClientProps) {
   const t = useTranslations("Admin");
+  const locale = useLocale();
   const [search, setSearch] = useState("");
 
   const [resetTarget, setResetTarget] = useState<{ id: string; name: string; phone: string | null } | null>(null);
@@ -118,7 +121,7 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
                         <p className="font-bold text-gray-900">{shop.name}</p>
                         <p className="text-xs text-gray-400 font-medium truncate max-w-[200px]">{shop.address}</p>
                         <p className="text-[10px] font-black text-orange-600 uppercase tracking-widest">
-                          ₺{Number(shop.pricePerDay || 0)} / {t("day")}
+                          <Money amount={Number(shop.pricePerDay || 0)} /> / {t("day")}
                         </p>
                       </div>
                     </td>
@@ -147,7 +150,7 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
                           <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">{t("rating")}</span>
                           <span className="font-bold text-gray-700 flex items-center gap-1">
                             <Star size={14} className="text-yellow-500 fill-yellow-500" />
-                            {shop.rating.toFixed(1)}
+                            {formatDecimal(shop.rating, locale)}
                           </span>
                         </div>
                       </div>

@@ -630,7 +630,7 @@ export default function SearchClient({
                       id={shop.id}
                       name={shop.name}
                       rating={shop.rating || 0}
-                      price={shop.pricePerDay?.toString() || "50"}
+                      price={Number(shop.pricePerDay) || 50}
                       distance={
                         shop.distanceKm != null
                           ? Math.round(shop.distanceKm * 1000).toString()
