@@ -1,19 +1,31 @@
 # Hetzner → AWS kesim (cutover) runbook'u
 
-## Son durum — 2026-08-22
+## Son durum — 2026-08-23 00:25 (UTC+3)
 
-| Adım | Durum |
+**KESİM TAMAMLANDI. `bagajpark.com` AWS'te (`<ORIGIN_IP>`), gerçek veriyle.**
+
+| | |
 |---|---|
-| AWS instance `i-015afc0ebcbb989d5` (`c7i-flex.large`, eu-central-1, EIP `<ORIGIN_IP>`) | ✅ çalışıyor, `aws-test.bagajpark.com` üzerinde aynı stack |
-| Prod `.env` → AWS `/opt/emanetci/docker-compose.env.prod` | ✅ staged (aktif değil) |
-| Cloudflare origin sertifikası `bagajpark.{crt,key}` → `/etc/ssl/cloudflare/` | ✅ |
-| Prod nginx conf (`bagajpark.com` + `aws-test` blokları) → `default.conf.prod` | ✅ `nginx -t` geçti |
-| `public/` (11 dosya), `scripts/`, `crontab.prod` | ✅ staged |
-| `cronie` (AL2023'te yoktu) | ✅ kuruldu, `crond` aktif |
-| S3 yedek izni (`app_backup_write`) | ⏳ **terraform apply bekliyor** (aşağıda) |
-| Veri taşıma, env/nginx swap, DNS | ⏳ **kesim penceresi** (aşağıda) |
+| DNS | Cloudflare A kayıtları AWS EIP'de (Proxied) |
+| Veri | Hetzner dump `emanetci_20260822_211509` restore edildi; 19 rezervasyon / 39 kullanıcı / 3 dükkan birebir |
+| Migration | 10/10 uygulandı (`JobRun` ve eski `init_schema` kaydı elle çözüldü, aşağıda) |
+| Cron | `crontab.prod` kurulu (yedek 6 saat, slot, gecikme, mühür tahmini, prune) |
+| Yedek | `s3://bagajpark-backups-43403243/backups/` — ilk dump 00:21'de yüklendi |
+| Hetzner | sunucu açık, yalnızca `web` durmuş; **1 hafta geri alma penceresi**, sonra iptal |
+| Deploy | `main` push → AWS = **canlı deploy** |
 
-Prod DB: 21 MB, 19 rezervasyon, 39 kullanıcı, 3 dükkan (2026-08-22 20:37 UTC+3).
+### Kesimde yaşananlar (postmortem notu)
+- Plan "önce veri, sonra DNS" idi; DNS veri taşınmadan çevrildi ve Hetzner **sunucusu**
+  (yalnızca `web` değil) kapatıldı → ~10 dk boş veritabanıyla canlı, ardından 502.
+  Sunucu açılınca dump alınıp taşındı. Ders: kesim adımlarını tek kişi, sırayla, runbook'tan yürütür.
+- `scripts/restore.sh` SSH üzerinden (stdin yok) `pg_restore -` ile çalışmıyor; elle
+  `docker cp` + `pg_restore --clean --if-exists` yapıldı. Script düzeltilmeli.
+- Hetzner DB'de `JobRun` tablosu migration kaydı olmadan vardı (`db push` izi) ve repoda
+  olmayan eski bir başarısız `20260101000000_init_schema` satırı duruyordu → `migrate deploy`
+  P3009 ile durdu, web crash-loop. Çözüm: indeksler `IF NOT EXISTS`, eski satır silindi,
+  `prisma migrate resolve --applied 20260822120000_job_run_ledger`.
+- ioredis `lazyConnect`+`enableOfflineQueue:false` ilk komutu reddediyordu (provada
+  yakalandı, kesimden önce düzeltildi).
 
 ## ⚠️ Önce bilinmesi gereken
 
