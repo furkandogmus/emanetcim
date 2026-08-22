@@ -383,30 +383,67 @@ export class ShopService implements IShopService {
         });
       });
 
-      // Partner'a onay bildirimi gönder
+      /**
+       * Partner'a onay bildirimi.
+       *
+       * ESKİDEN SESSİZCE ATLANIYORDU: `if (partnerEmail)` koşulu, e-postası olmayan
+       * partner için hiçbir iz bırakmadan geçiliyordu. Prod'daki 3 PARTNER hesabının
+       * 2'sinin e-postası yok ve ikisi de canlı bir dükkan sahibi — yani onay
+       * maili hiç gitmedi ve kimse fark etmedi. SMS dalı çalıştığı için sorun
+       * görünmez kaldı (P1-3).
+       *
+       * Artık atlanan her kanal loglanıyor ve HİÇBİR kanal yoksa bu bir UYARI:
+       * onaylanmış ama ulaşılamayan bir partner operasyonel bir açıktır.
+       */
       const partnerEmail = shop.owner?.email;
       const partnerPhone = shop.owner?.phone;
+      const partnerName = shop.owner?.name ?? 'Esnaf';
       const domain = process.env.NEXT_PUBLIC_APP_URL || 'https://bagajpark.com';
+      const panelUrl = `${domain}/tr/partner`;
+
       if (partnerEmail) {
         void notificationService.sendEmail(
           partnerEmail,
           'BagajPark: Başvurunuz Onaylandı! 🎉',
-          `Merhaba ${shop.owner?.name ?? 'Esnaf'},\n\n${shop.name} mağazanız BagajPark platformuna kabul edildi!\n\nHemen giriş yaparak rezervasyonları yönetebilirsiniz:\n${domain}/tr/partner`,
+          `Merhaba ${partnerName},\n\n${shop.name} mağazanız BagajPark platformuna kabul edildi!\n\nHemen giriş yaparak rezervasyonları yönetebilirsiniz:\n${panelUrl}`,
           undefined,
-          `<div style=”font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px”>
-            <h2 style=”color:#ea580c”>Başvurunuz Onaylandı! 🎉</h2>
-            <p>Merhaba <strong>${shop.owner?.name ?? 'Esnaf'}</strong>,</p>
+          // Tırnaklar DÜZ olmalı: burada kıvrık tırnak (") kullanılıyordu, yani
+          // hiçbir `style`/`href` özniteliği geçerli değildi — e-posta stilsiz
+          // gidiyor ve buton bağlantısı çalışmıyordu.
+          `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
+            <h2 style="color:#ea580c">Başvurunuz Onaylandı! 🎉</h2>
+            <p>Merhaba <strong>${partnerName}</strong>,</p>
             <p><strong>${shop.name}</strong> mağazanız BagajPark platformuna kabul edildi. Artık rezervasyon almaya başlayabilirsiniz!</p>
-            <a href=”${domain}/tr/partner” style=”display:inline-block;background:#ea580c;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;margin:16px 0”>Partner Panelime Git</a>
-            <p style=”font-size:13px;color:#6b7280;margin-top:24px”>BagajPark — Güvenli Bagaj Emaneti</p>
+            <a href="${panelUrl}" style="display:inline-block;background:#ea580c;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;margin:16px 0">Partner Panelime Git</a>
+            <p style="font-size:13px;color:#6b7280;margin-top:24px">BagajPark — Güvenli Bagaj Emaneti</p>
           </div>`
         ).catch((e) => logger.warn({ err: e, shopId }, 'shop_approval_email_failed'));
+      } else {
+        logger.warn(
+          { shopId, ownerId: shop.ownerId },
+          'shop_approval_email_skipped_no_address',
+        );
       }
+
       if (partnerPhone) {
         void notificationService.sendSms(
           partnerPhone,
-          `BagajPark: ${shop.name} mağazanız onaylandı! Hemen giriş yapın: ${domain}/tr/partner`
+          `BagajPark: ${shop.name} mağazanız onaylandı! Hemen giriş yapın: ${panelUrl}`
         ).catch((e) => logger.warn({ err: e, shopId }, 'shop_approval_sms_failed'));
+      } else {
+        logger.warn(
+          { shopId, ownerId: shop.ownerId },
+          'shop_approval_sms_skipped_no_phone',
+        );
+      }
+
+      if (!partnerEmail && !partnerPhone) {
+        // Onaylanmış ama ulaşılamayan partner: dükkan rezervasyon almaya başlıyor
+        // ama sahibi bundan haberdar edilemiyor.
+        logger.error(
+          { shopId, ownerId: shop.ownerId },
+          'shop_approved_but_partner_unreachable',
+        );
       }
 
       return true;

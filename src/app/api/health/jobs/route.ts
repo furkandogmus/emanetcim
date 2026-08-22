@@ -3,6 +3,7 @@ import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 import { overdueBookingService } from "@/services/OverdueBookingService";
 import { sealIntegrityService } from "@/services/SealIntegrityService";
+import { partnerReachabilityService } from "@/services/PartnerReachabilityService";
 
 export const dynamic = "force-dynamic";
 
@@ -106,10 +107,20 @@ export async function GET() {
      */
     const sealIntegrity = await sealIntegrityService.check(now);
 
+    /**
+     * Partner ulaşılabilirliği.
+     *
+     * Ne e-postası ne telefonu olan partner, dükkanı rezervasyon aldığı hâlde
+     * kendisine ulaşılamayan partnerdir. `approveShop` bildirimi eskiden sessizce
+     * atlıyordu ve bu hiç görünmüyordu (P1-3).
+     */
+    const partnerReachability = await partnerReachabilityService.check(now);
+
     const healthy =
       slotGeneration.status !== "stale" &&
       overdueReconciliation.status !== "stale" &&
-      sealIntegrity.status !== "broken";
+      sealIntegrity.status !== "broken" &&
+      partnerReachability.status !== "broken";
 
     if (slotGeneration.status === "stale") {
       logger.warn(
@@ -140,7 +151,12 @@ export async function GET() {
     return NextResponse.json(
       {
         status: healthy ? "UP" : "DEGRADED",
-        checks: { slotGeneration, overdueReconciliation, sealIntegrity },
+        checks: {
+          slotGeneration,
+          overdueReconciliation,
+          sealIntegrity,
+          partnerReachability,
+        },
         context: { activeShopCount },
         timestamp: now.toISOString(),
       },
@@ -155,6 +171,7 @@ export async function GET() {
           slotGeneration: { status: "unknown" },
           overdueReconciliation: { status: "unknown" },
           sealIntegrity: { status: "unknown" },
+          partnerReachability: { status: "unknown" },
         },
         timestamp: new Date().toISOString(),
       },

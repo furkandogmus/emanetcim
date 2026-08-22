@@ -9,7 +9,17 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
  * kırmızı yanan bir sağlık kontrolü, hiç olmayandan daha kötüdür — kimse bakmaz.
  */
 
-const { mockPrisma, mockOverdueScan, mockSealCheck } = vi.hoisted(() => ({
+const { mockPrisma, mockOverdueScan, mockSealCheck, mockReachCheck } = vi.hoisted(() => ({
+  // Varsayilan: tum partnerlere ulasilabiliyor.
+  mockReachCheck: vi.fn().mockResolvedValue({
+    checkedAt: new Date().toISOString(),
+    totalPartners: 3,
+    unreachable: 0,
+    phoneOnly: 2,
+    emailOnly: 1,
+    unreachableWithActiveShop: 0,
+    status: "ok",
+  }),
   // Varsayilan: muhur envanteri saglam.
   mockSealCheck: vi.fn().mockResolvedValue({
     checkedAt: new Date().toISOString(),
@@ -43,6 +53,9 @@ vi.mock("@/services/OverdueBookingService", () => ({
 }));
 vi.mock("@/services/SealIntegrityService", () => ({
   sealIntegrityService: { check: mockSealCheck },
+}));
+vi.mock("@/services/PartnerReachabilityService", () => ({
+  partnerReachabilityService: { check: mockReachCheck },
 }));
 vi.mock("@/lib/logger", () => ({
   default: { warn: vi.fn(), error: vi.fn(), info: vi.fn() },
@@ -274,5 +287,53 @@ describe("GET /api/health/jobs — muhur envanteri butunlugu", () => {
     expect(body.checks.overdueReconciliation.status).toBe("ok");
     expect(body.checks.sealIntegrity.status).toBe("broken");
     expect(res.status).toBe(503);
+  });
+});
+
+describe("GET /api/health/jobs — partner ulasilabilirligi", () => {
+  beforeEach(() => {
+    setup({ horizonDays: 30, activeShops: 5 });
+  });
+
+  it("herkese ulasilabiliyorsa UP", async () => {
+    const res = await GET();
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.checks.partnerReachability.status).toBe("ok");
+  });
+
+  it("yalnizca telefonu olan partner SORUN DEGIL — esnaf girisi telefon tabanli", async () => {
+    // P1-16'da tespit edildi: e-postasiz partner bir bozulma degil, tasarimin
+    // sonucu. Alarm yalnizca HICBIR kanali olmayan icin calismali.
+    mockReachCheck.mockResolvedValueOnce({
+      totalPartners: 3,
+      unreachable: 0,
+      phoneOnly: 2,
+      emailOnly: 1,
+      unreachableWithActiveShop: 0,
+      status: "ok",
+    } as any);
+
+    const res = await GET();
+
+    expect(res.status).toBe(200);
+  });
+
+  it("hicbir kanali olmayan partner 503 verir", async () => {
+    mockReachCheck.mockResolvedValueOnce({
+      totalPartners: 3,
+      unreachable: 1,
+      phoneOnly: 1,
+      emailOnly: 1,
+      unreachableWithActiveShop: 1,
+      status: "broken",
+    } as any);
+
+    const res = await GET();
+    const body = await res.json();
+
+    expect(res.status).toBe(503);
+    expect(body.checks.partnerReachability.unreachableWithActiveShop).toBe(1);
   });
 });

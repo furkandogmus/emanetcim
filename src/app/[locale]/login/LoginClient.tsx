@@ -1,12 +1,13 @@
 "use client";
 
 import { useTranslations } from 'next-intl';
-import { signIn } from 'next-auth/react';
+import { signIn, getSession } from 'next-auth/react';
 import { Link } from '@/i18n/routing';
 import { useSearchParams } from 'next/navigation';
 import { useMemo, useState, useEffect } from 'react';
 import { sanitizeAuthCallbackUrl } from '@/lib/auth-callback-url';
 import { authErrorMessage } from '@/lib/auth-error-message';
+import { resolveLoginLanding } from '@/lib/auth-landing';
 import { Package, ShieldCheck, Globe, Loader2, Store, Shield, Mail, Lock, ChevronDown, Apple } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -99,8 +100,26 @@ export default function LoginPage({
           setCredError(t('invalidCredentials'));
         }
         setIsLoggingIn(null);
-      } else if (res?.url) {
-        window.location.href = res.url;
+      } else if (res?.ok) {
+        /**
+         * Varış noktası ROLDEN türer, sekmeden değil.
+         *
+         * Eskiden doğrudan `res.url`'e gidiliyordu; hedef belirtilmemişse bu ana
+         * sayfa demekti. Sonuç: e-postayla kayıtlı bir esnaf giriş yapıyor ama
+         * esnaf paneline değil misafir ana sayfasına düşüyordu (P1-16).
+         *
+         * Oturum burada okunuyor çünkü rol yalnızca giriş BAŞARILI olduktan sonra
+         * bilinir. Okunamazsa `callbackUrl`'e düşülür — yönlendirme bir kolaylık,
+         * girişin kendisi değil, o yüzden hata vermeye değmez.
+         */
+        let landing = callbackUrl;
+        try {
+          const session = await getSession();
+          landing = resolveLoginLanding(callbackUrl, session?.user?.role);
+        } catch {
+          // yut: aşağıda callbackUrl ile devam ediyoruz
+        }
+        window.location.href = landing;
       }
     } catch {
       setCredError(t('invalidCredentials'));
@@ -115,11 +134,21 @@ export default function LoginPage({
       {/* E-posta / Telefon */}
       <div className="relative">
         <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
+        {/*
+          HER İKİ SEKMEDE DE e-posta veya telefon kabul edilir.
+
+          Eskiden ESNAF sekmesi `type=tel` + `inputMode=numeric` idi, yani
+          e-postayla kayıtlı bir esnaf kendisi için etiketlenmiş sekmeden GİRİŞ
+          YAPAMIYORDU. Çalışan yol "MİSAFİR" yazan sekmeydi (P1-16). Oysa arkada
+          tek kimlik sistemi var: `auth.config.ts` → `authorize()` zaten e-posta
+          VE telefonu birlikte sorguluyor. Sekme, olmayan bir ayrımı taklit edip
+          çalışan bir yolu kapatıyordu; artık yalnızca görsel bir ipucu.
+        */}
         <input
-          type={activeTab === 'PARTNER' ? 'tel' : 'text'}
-          inputMode={activeTab === 'PARTNER' ? 'numeric' : 'text'}
-          autoComplete={activeTab === 'PARTNER' ? 'tel-national' : 'email'}
-          placeholder={activeTab === 'PARTNER' ? t('phonePlaceholder') : t('emailOrPhone')}
+          type="text"
+          inputMode="text"
+          autoComplete="username"
+          placeholder={t('emailOrPhone')}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
