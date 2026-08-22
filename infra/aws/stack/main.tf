@@ -89,11 +89,22 @@ resource "aws_iam_role_policy" "app_deploy_config_read" {
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [{
-      Effect   = "Allow"
-      Action   = ["s3:GetObject"]
-      Resource = "arn:aws:s3:::${var.deploy_config_bucket}/${var.deploy_config_prefix}/*"
-    }]
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["s3:GetObject"]
+        Resource = "arn:aws:s3:::${var.deploy_config_bucket}/${var.deploy_config_prefix}/*"
+      },
+      {
+        # `aws s3 sync` (public/ senkronu) onek listelemesi ister; yalnizca bu onek.
+        Effect   = "Allow"
+        Action   = ["s3:ListBucket"]
+        Resource = "arn:aws:s3:::${var.deploy_config_bucket}"
+        Condition = {
+          StringLike = { "s3:prefix" = ["${var.deploy_config_prefix}/*"] }
+        }
+      }
+    ]
   })
 }
 

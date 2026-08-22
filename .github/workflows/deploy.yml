@@ -84,9 +84,13 @@ jobs:
           role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Deploy config'i S3'e yükle
+      - name: Deploy config'i ve public/ dosyalarini S3'e yükle
+        # nginx `public/` dizinini sunucudaki /opt/emanetci/public'ten servis eder
+        # (try_files $uri @next); imajin icindeki kopya DEGIL. Senkronlanmazsa
+        # sw.js/manifest/ikonlar eski kalir (2026-08-23: eski service worker canlida kaldi).
         run: |
           aws s3 cp docker-compose.yml "s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/docker-compose.yml"
+          aws s3 sync public/ "s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/public/" --delete --only-show-errors
 
       - name: SSM Run Command ile deploy et
         run: |
@@ -98,6 +102,7 @@ jobs:
             --parameters commands='[
               "set -e",
               "aws s3 cp s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/docker-compose.yml /opt/emanetci/docker-compose.yml",
+              "aws s3 sync s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/public/ /opt/emanetci/public/ --delete --only-show-errors",
               "cd /opt/emanetci",
               "docker rm -f $(docker ps -aq --filter name=_emanetci-) 2>/dev/null || true",
               "docker compose --env-file docker-compose.env pull web --quiet",
