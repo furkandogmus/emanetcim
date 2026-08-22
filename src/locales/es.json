@@ -486,7 +486,8 @@
     "slotsNoneForDate": "No hay franjas disponibles para esta fecha",
     "slotsAvailableTitle": "Franjas disponibles",
     "slotsBagsSelected": "{count} maletas seleccionadas",
-    "timesInShopTimezone": "Los horarios están en la hora local del local (Estambul)."
+    "timesInShopTimezone": "Los horarios están en la hora local del local (Estambul).",
+    "checkoutProcessing": "Procesando…"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

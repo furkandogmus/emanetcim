@@ -486,7 +486,8 @@
     "slotsNoneForDate": "Brak dostępnych terminów w tym dniu",
     "slotsAvailableTitle": "Dostępne terminy",
     "slotsBagsSelected": "Wybrano {count} bagaży",
-    "timesInShopTimezone": "Godziny podane w czasie lokalnym punktu (Stambuł)."
+    "timesInShopTimezone": "Godziny podane w czasie lokalnym punktu (Stambuł).",
+    "checkoutProcessing": "Przetwarzanie…"
   },
   "Admin": {
     "dashboardTitle": "Centrum administracyjne BagajPark",

@@ -486,7 +486,8 @@
     "slotsNoneForDate": "이 날짜에 이용 가능한 시간이 없습니다",
     "slotsAvailableTitle": "이용 가능 시간",
     "slotsBagsSelected": "짐 {count}개 선택됨",
-    "timesInShopTimezone": "시간은 매장 현지 시간(이스탄불) 기준입니다."
+    "timesInShopTimezone": "시간은 매장 현지 시간(이스탄불) 기준입니다.",
+    "checkoutProcessing": "처리 중…"
   },
   "Admin": {
     "dashboardTitle": "BagajPark 관리 센터",

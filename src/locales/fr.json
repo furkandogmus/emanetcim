@@ -486,7 +486,8 @@
     "slotsNoneForDate": "Aucun créneau disponible pour cette date",
     "slotsAvailableTitle": "Créneaux disponibles",
     "slotsBagsSelected": "{count} bagages sélectionnés",
-    "timesInShopTimezone": "Les horaires sont à l'heure locale du commerce (Istanbul)."
+    "timesInShopTimezone": "Les horaires sont à l'heure locale du commerce (Istanbul).",
+    "checkoutProcessing": "Traitement…"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

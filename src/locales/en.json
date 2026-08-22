@@ -526,7 +526,8 @@
     "slotsNoneForDate": "No available slots for this date",
     "slotsAvailableTitle": "Available Time Slots",
     "slotsBagsSelected": "{count} bags selected",
-    "timesInShopTimezone": "Times are in the shop's local time (Istanbul)."
+    "timesInShopTimezone": "Times are in the shop's local time (Istanbul).",
+    "checkoutProcessing": "Processing…"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

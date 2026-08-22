@@ -486,7 +486,8 @@
     "slotsNoneForDate": "Für dieses Datum sind keine Zeitfenster verfügbar",
     "slotsAvailableTitle": "Verfügbare Zeitfenster",
     "slotsBagsSelected": "{count} Gepäckstücke ausgewählt",
-    "timesInShopTimezone": "Zeiten in der Ortszeit des Geschäfts (Istanbul)."
+    "timesInShopTimezone": "Zeiten in der Ortszeit des Geschäfts (Istanbul).",
+    "checkoutProcessing": "Wird verarbeitet…"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

@@ -486,7 +486,8 @@
     "slotsNoneForDate": "لا توجد فترات متاحة لهذا التاريخ",
     "slotsAvailableTitle": "الفترات المتاحة",
     "slotsBagsSelected": "تم اختيار {count} حقيبة",
-    "timesInShopTimezone": "الأوقات بالتوقيت المحلي للمحل (إسطنبول)."
+    "timesInShopTimezone": "الأوقات بالتوقيت المحلي للمحل (إسطنبول).",
+    "checkoutProcessing": "جارٍ المعالجة…"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

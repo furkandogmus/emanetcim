@@ -486,7 +486,8 @@
     "slotsNoneForDate": "该日期没有可用时段",
     "slotsAvailableTitle": "可用时段",
     "slotsBagsSelected": "已选择 {count} 件行李",
-    "timesInShopTimezone": "时间为门店当地时间（伊斯坦布尔）。"
+    "timesInShopTimezone": "时间为门店当地时间（伊斯坦布尔）。",
+    "checkoutProcessing": "处理中…"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

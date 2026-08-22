@@ -486,7 +486,8 @@
     "slotsNoneForDate": "برای این تاریخ بازهٔ خالی وجود ندارد",
     "slotsAvailableTitle": "بازه‌های خالی",
     "slotsBagsSelected": "{count} چمدان انتخاب شد",
-    "timesInShopTimezone": "ساعت‌ها به وقت محلی محل است (استانبول)."
+    "timesInShopTimezone": "ساعت‌ها به وقت محلی محل است (استانبول).",
+    "checkoutProcessing": "در حال پردازش…"
   },
   "Admin": {
     "dashboardTitle": "مرکز مدیریت BagajPark",

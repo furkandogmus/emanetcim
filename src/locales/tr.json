@@ -526,7 +526,8 @@
     "slotsNoneForDate": "Bu tarih için uygun saat bulunamadı",
     "slotsAvailableTitle": "Müsait Saatler",
     "slotsBagsSelected": "{count} bagaj seçildi",
-    "timesInShopTimezone": "Saatler dükkanın yerel saatiyle (İstanbul)."
+    "timesInShopTimezone": "Saatler dükkanın yerel saatiyle (İstanbul).",
+    "checkoutProcessing": "İşleniyor…"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Yönetim Masası",

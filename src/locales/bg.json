@@ -486,7 +486,8 @@
     "slotsNoneForDate": "Няма свободни часове за тази дата",
     "slotsAvailableTitle": "Свободни часове",
     "slotsBagsSelected": "Избрани {count} багажа",
-    "timesInShopTimezone": "Часовете са по местно време на обекта (Истанбул)."
+    "timesInShopTimezone": "Часовете са по местно време на обекта (Истанбул).",
+    "checkoutProcessing": "Обработва се…"
   },
   "Admin": {
     "dashboardTitle": "Админ център BagajPark",

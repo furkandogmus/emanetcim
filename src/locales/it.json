@@ -486,7 +486,8 @@
     "slotsNoneForDate": "Nessuna fascia disponibile per questa data",
     "slotsAvailableTitle": "Fasce orarie disponibili",
     "slotsBagsSelected": "{count} bagagli selezionati",
-    "timesInShopTimezone": "Gli orari sono nell'ora locale del negozio (Istanbul)."
+    "timesInShopTimezone": "Gli orari sono nell'ora locale del negozio (Istanbul).",
+    "checkoutProcessing": "Elaborazione…"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

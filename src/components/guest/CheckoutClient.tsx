@@ -646,7 +646,15 @@ export default function CheckoutClient({
               type="button"
               data-testid="checkout-footer-primary"
               onClick={() => void handleBooking()}
-              disabled={totalPrice === 0 || isProcessing}
+              /*
+                `!windowOk` de kontrol ediliyor: 1. adımdaki "devam" butonu bunu
+                kontrol ediyordu ama son gönder butonu etmiyordu. Kullanıcı son
+                adımda tarihi geçersiz bir aralığa çevirdiğinde buton etkin
+                görünüyor, tıklayınca hata veriyordu — akış "tıkla, reddedil"e
+                dönüyordu. Sunucu doğrulaması zaten vardı; sorun arayüzün yanlış
+                söylemesiydi.
+              */
+              disabled={totalPrice === 0 || isProcessing || !windowOk}
               className="btn-ui btn-ui-lg btn-ui-primary flex-1 rounded-3xl bg-gray-900 hover:bg-gray-800 shadow-xl shadow-gray-200"
             >
               {isProcessing ? (
@@ -707,9 +715,35 @@ export default function CheckoutClient({
               />
             </div>
 
+            {/*
+              HATA MODALIN İÇİNDE GÖSTERİLİYOR.
+
+              Eskiden `setError(...)` çağrılıyordu ama hata yalnızca modalın
+              ARKASINDAKİ sayfada render ediliyordu. Misafir iki alanı da boş
+              bırakıp "devam et"e bastığında ekranda hiçbir şey olmuyordu — arayüz
+              donmuş gibi görünüyor ve akış çıkmaza giriyordu.
+            */}
+            {error ? (
+              <p
+                role="alert"
+                className="mb-3 rounded-2xl bg-red-50 px-4 py-3 text-xs font-bold text-red-600"
+              >
+                {error}
+              </p>
+            ) : null}
+
             <div className="flex flex-col gap-3">
               <button
                 type="button"
+                /*
+                  ÇİFT GÖNDERİM KORUMASI.
+
+                  Bu buton `isProcessing`'i okumuyordu: misafir iki kez
+                  dokunduğunda İKİ REZERVASYON oluşuyordu. Dönüşüm yolunun tam
+                  ortasında, hem kapasiteyi hem tahsilatı ikiye katlayan bir hata.
+                  Alt taraftaki ana gönder butonunda koruma vardı, burada yoktu.
+                */
+                disabled={isProcessing}
                 onClick={() => {
                   const email = guestEmail.trim();
                   const phone = guestPhone.trim();
@@ -717,12 +751,19 @@ export default function CheckoutClient({
                     setError(t("checkoutGuestContactRequired"));
                     return;
                   }
+                  setError(null);
                   setShowAuthModal(false);
                   void handleBooking(true);
                 }}
-                className="w-full bg-orange-600 hover:bg-orange-700 text-white py-4 px-6 rounded-2xl font-bold transition-all shadow-lg shadow-orange-200 hover:bg-orange-300 text-center block cursor-pointer"
+                /*
+                  `hover:bg-orange-300` KALDIRILDI: aynı butonda
+                  `hover:bg-orange-700` ile ÇAKIŞIYORDU. Sonuncusu kazandığı için
+                  üzerine gelince buton açık turuncuya dönüyor ve beyaz yazı
+                  okunmaz hâle geliyordu.
+                */
+                className="w-full bg-orange-600 hover:bg-orange-700 disabled:opacity-60 disabled:cursor-not-allowed text-white py-4 px-6 rounded-2xl font-bold transition-all shadow-lg shadow-orange-200 text-center block cursor-pointer"
               >
-                {t("checkoutGuestContinue")}
+                {isProcessing ? t("checkoutProcessing") : t("checkoutGuestContinue")}
               </button>
               <div className="relative my-2">
                 <div className="absolute inset-0 flex items-center">

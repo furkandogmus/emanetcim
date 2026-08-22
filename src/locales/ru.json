@@ -486,7 +486,8 @@
     "slotsNoneForDate": "На эту дату нет доступных слотов",
     "slotsAvailableTitle": "Доступные слоты",
     "slotsBagsSelected": "Выбрано мест: {count}",
-    "timesInShopTimezone": "Время указано по местному времени пункта (Стамбул)."
+    "timesInShopTimezone": "Время указано по местному времени пункта (Стамбул).",
+    "checkoutProcessing": "Обработка…"
   },
   "Admin": {
     "dashboardTitle": "Центр администрирования BagajPark",

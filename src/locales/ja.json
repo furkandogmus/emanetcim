@@ -486,7 +486,8 @@
     "slotsNoneForDate": "この日に空き枠はありません",
     "slotsAvailableTitle": "空き時間枠",
     "slotsBagsSelected": "荷物 {count} 個を選択",
-    "timesInShopTimezone": "時刻は店舗の現地時間（イスタンブール）です。"
+    "timesInShopTimezone": "時刻は店舗の現地時間（イスタンブール）です。",
+    "checkoutProcessing": "処理中…"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
