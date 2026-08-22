@@ -482,8 +482,12 @@ export default function PartnerClient({
                         <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 group-hover:bg-orange-600 group-hover:text-white transition-all">
                           <Luggage size={24} />
                         </div>
-                        <div>
-                          <h3 className="font-black text-gray-900 tracking-tight">
+                        {/*
+                          `min-w-0` + `truncate`: uzun misafir adı kart düzenini
+                          bozuyordu (flex öğesi varsayılan `min-width: auto`).
+                        */}
+                        <div className="min-w-0">
+                          <h3 className="truncate font-black text-gray-900 tracking-tight">
                             {booking.guest?.name ||
                               t("guestFallback", { id: booking.id.slice(0, 4) })}
                           </h3>

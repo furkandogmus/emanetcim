@@ -118,7 +118,7 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
                   >
                     <td className="px-8 py-6">
                       <div className="flex flex-col gap-1">
-                        <p className="font-bold text-gray-900">{shop.name}</p>
+                        <p className="truncate max-w-[200px] font-bold text-gray-900">{shop.name}</p>
                         <p className="text-xs text-gray-400 font-medium truncate max-w-[200px]">{shop.address}</p>
                         <p className="text-[10px] font-black text-orange-600 uppercase tracking-widest">
                           <Money amount={Number(shop.pricePerDay || 0)} /> / {t("day")}

@@ -118,6 +118,54 @@ describe("ham para gösterimi kalmadı — mandal", () => {
   });
 });
 
+describe("ham puan gösterimi kalmadı — mandal", () => {
+  /**
+   * `rating.toFixed(1)` ve çıplak `{rating}` locale'i yok sayar: TR'de "4.5"
+   * yazar, oysa doğrusu "4,5". İlk taramada `ShopListItem` içindeki çıplak
+   * `{rating}` gözden kaçmıştı — bu test onu da kapsıyor.
+   */
+  function walk(dir: string, out: string[] = []): string[] {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      const p = path.join(dir, e.name);
+      if (e.isDirectory()) walk(p, out);
+      else if (e.name.endsWith(".tsx")) out.push(p);
+    }
+    return out;
+  }
+
+  /**
+   * KAPSAM DIŞI — coğrafi koordinatlar.
+   *
+   * Enlem/boylam evrensel olarak NOKTA ile yazılır ve kullanıcı bunları haritaya
+   * kopyalayıp yapıştırır. `41,02560` yazmak o kopyalamayı bozar. Kural para ve
+   * puan gibi **kullanıcıya sunulan ölçüler** içindir, teknik koordinatlar için
+   * değil.
+   */
+  const COORDINATE_EXCEPTIONS = ["src/components/partner/LocationPicker.tsx"];
+
+  it("hiçbir bileşende `.toFixed(` ile puan basılmıyor", () => {
+    const offenders: string[] = [];
+    for (const root of ["src/components", "src/app"]) {
+      const abs = path.join(process.cwd(), root);
+      if (!fs.existsSync(abs)) continue;
+      for (const file of walk(abs)) {
+        const src = fs
+          .readFileSync(file, "utf8")
+          .replace(/\/\*[\s\S]*?\*\//g, "")
+          .replace(/^\s*\/\/.*$/gm, "");
+        const rel = path.relative(process.cwd(), file);
+        if (COORDINATE_EXCEPTIONS.includes(rel)) continue;
+        if (/\{[^}]*\.toFixed\(/.test(src)) offenders.push(rel);
+      }
+    }
+    expect(
+      offenders,
+      `Bu dosyalar JSX'te \`.toFixed(\` kullanıyor; \`formatDecimal(x, locale)\` kullanın:\n` +
+        offenders.map((o) => `  ${o}`).join("\n"),
+    ).toEqual([]);
+  });
+});
+
 describe("formatTryCurrency sözleşmesi", () => {
   it("para birimi simgesini KENDİSİ ekler — çağıran eklememelidir", () => {
     expect(formatTryCurrency(50, "tr")).toContain("₺");

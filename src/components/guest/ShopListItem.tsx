@@ -1,10 +1,11 @@
 "use client";
 
 import { Building2, ChevronRight, MapPin, Star, Shield, Timer } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import FavoriteButton from '@/components/guest/FavoriteButton';
 import Money from "@/components/common/Money";
+import { formatDecimal } from "@/lib/currency";
 
 interface ShopListItemProps {
   id: string;
@@ -41,6 +42,7 @@ export default function ShopListItem({
   onClick,
 }: ShopListItemProps) {
   const t = useTranslations('Guest');
+  const locale = useLocale();
   return (
     <motion.div
       data-testid="shop-list-item"
@@ -54,15 +56,21 @@ export default function ShopListItem({
         <Building2 size={28} strokeWidth={1.5} />
       </div>
 
-      <div className="flex-1 flex flex-col gap-1">
-        <div className="flex justify-between items-start">
-          <h4 className="font-bold text-gray-900 group-hover:text-orange-600 transition-colors">{name}</h4>
-          <div className="flex items-center gap-1">
+      {/*
+        `min-w-0`: flex öğesi varsayılan olarak `min-width: auto` alır, yani uzun
+        bir dükkan adı KÜÇÜLMEZ ve sağdaki puan rozetini karttan dışarı iter.
+        Uzun isimler gerçek: "BagajPark Sultanahmet Emanet ve Valiz Depolama
+        Noktası" gibi bir ad bu kartı bozuyordu.
+      */}
+      <div className="min-w-0 flex-1 flex flex-col gap-1">
+        <div className="flex justify-between items-start gap-2">
+          <h4 className="min-w-0 truncate font-bold text-gray-900 group-hover:text-orange-600 transition-colors">{name}</h4>
+          <div className="shrink-0 flex items-center gap-1">
             <FavoriteButton shopId={id} className="!w-7 !h-7" />
             {rating > 0 ? (
               <span className="flex items-center gap-1 text-xs font-bold bg-orange-50 text-orange-600 px-2 py-1 rounded-lg">
                 <Star size={12} fill="currentColor" />
-                {rating}
+                {formatDecimal(rating, locale)}
               </span>
             ) : null}
           </div>
