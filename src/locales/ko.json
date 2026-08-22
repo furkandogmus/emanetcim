@@ -29,7 +29,15 @@
     "pwaInstallTitle": "BagajPark 설치",
     "pwaInstallBody": "홈 화면에 추가해 더 빠르게 이용하세요.",
     "pwaInstallCta": "설치",
-    "pwaInstallDismiss": "나중에"
+    "pwaInstallDismiss": "나중에",
+    "navExplore": "둘러보기",
+    "navBecomePartner": "파트너 되기",
+    "navInsurance": "보험",
+    "navMainLabel": "기본 탐색",
+    "navSecondaryLabel": "보조 탐색",
+    "navLogoLabel": "BagajPark 홈",
+    "footerCancellationPolicy": "취소 정책",
+    "footerManageBooking": "예약 관리"
   },
   "SEO": {
     "title": "BagajPark | 짐은 안전하게, 여행은 자유롭게",
@@ -471,7 +479,13 @@
     "shopWeekDays": "월 - 금",
     "shopWeekEnd": "토 - 일",
     "shopSeeAll": "모두 보기",
-    "shopPerDay": "/일"
+    "shopPerDay": "/일",
+    "loyaltyPoints": "포인트",
+    "loyaltyDiscount": "할인",
+    "searchOnlyAvailableHint": "선택하신 맡김/찾음 시간에 이용 가능한 지점만 표시됩니다.",
+    "slotsNoneForDate": "이 날짜에 이용 가능한 시간이 없습니다",
+    "slotsAvailableTitle": "이용 가능 시간",
+    "slotsBagsSelected": "짐 {count}개 선택됨"
   },
   "Admin": {
     "dashboardTitle": "BagajPark 관리 센터",

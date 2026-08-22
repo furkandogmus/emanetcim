@@ -24,16 +24,18 @@ const ROOTS = ["src/components", "src/app"];
 /**
  * Mevcut borç. Ölçüldü: 2026-08-22.
  *
- * Başlangıç 30'du; checkout hunisi (8), ana sayfa SEO başlığı (2) ve dükkan detay
- * sayfası (1 blok / 13 metin) taşınarak 19'a indi.
+ * Başlangıç 30'du. Taşınanlar: checkout hunisi (8), ana sayfa SEO başlığı (2),
+ * dükkan detay sayfası (1 blok / 13 metin), Header navigasyon + erişilebilirlik
+ * etiketleri (1 blok / 7 metin), Footer (3), arama ipucu (1), slot ızgarası
+ * (1 blok / 5 metin), sadakat rozeti (1 blok / 3 metin). → 12
  *
  * Borç kapatıldıkça bu sayıyı DÜŞÜRÜN. Yükseltmek, "yeni özellik 12 dilde
  * çalışmıyor" demenin başka bir yoludur.
  *
- * Kalan en büyükler: `Footer` (3), `luggage-storage/[slug]` (3),
- * `cancellation` (2), `insurance` (2).
+ * Kalan: `luggage-storage/[slug]` (3), `cancellation` (2), `insurance` (2),
+ * `page.tsx` (1), `account` (1), `BookingsClient` (1), iki admin sayfası (2).
  */
-const HARDCODED_COPY_CEILING = 19;
+const HARDCODED_COPY_CEILING = 12;
 
 /** Yorum satırları sayılmaz — yalnızca gerçek kod. */
 function stripComments(src: string): string {

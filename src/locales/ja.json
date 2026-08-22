@@ -29,7 +29,15 @@
     "pwaInstallTitle": "BagajParkをインストール",
     "pwaInstallBody": "ホーム画面に追加してすぐに開けます。",
     "pwaInstallCta": "インストール",
-    "pwaInstallDismiss": "あとで"
+    "pwaInstallDismiss": "あとで",
+    "navExplore": "さがす",
+    "navBecomePartner": "パートナーになる",
+    "navInsurance": "保険",
+    "navMainLabel": "メインナビゲーション",
+    "navSecondaryLabel": "サブナビゲーション",
+    "navLogoLabel": "BagajPark ホーム",
+    "footerCancellationPolicy": "キャンセル",
+    "footerManageBooking": "予約を管理"
   },
   "SEO": {
     "title": "バガジパーク |荷物を安全に預けて、自由に旅行しましょう",
@@ -471,7 +479,13 @@
     "shopWeekDays": "月〜金",
     "shopWeekEnd": "土〜日",
     "shopSeeAll": "すべて見る",
-    "shopPerDay": "/日"
+    "shopPerDay": "/日",
+    "loyaltyPoints": "ポイント",
+    "loyaltyDiscount": "割引",
+    "searchOnlyAvailableHint": "選択したお預け・お受取り時刻に利用できる場所のみ表示されます。",
+    "slotsNoneForDate": "この日に空き枠はありません",
+    "slotsAvailableTitle": "空き時間枠",
+    "slotsBagsSelected": "荷物 {count} 個を選択"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

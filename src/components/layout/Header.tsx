@@ -6,7 +6,7 @@ import LocaleSwitcher from "./LocaleSwitcher";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Package } from "lucide-react";
-import { useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 
 function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
   const pathname = usePathname();
@@ -29,15 +29,25 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
 
 export default function Header() {
   const pathname = usePathname();
-  const locale = useLocale();
+  const tCommon = useTranslations("Common");
   const { data: session } = useSession();
   const role = session?.user?.role;
   const hideGuestBookingNav = role === "PARTNER" || role === "ADMIN";
   const logoHref = role === "PARTNER" ? "/partner" : role === "ADMIN" ? "/admin" : "/";
-  const isTr = locale === "tr";
-  const navCopy = isTr
-    ? { explore: "Keşfet", becomePartner: "Partner Ol", insurance: "Sigorta", blog: "Blog", navLabel: "Ana navigasyon", secondaryLabel: "İkincil navigasyon", logoLabel: "BagajPark ana sayfa" }
-    : { explore: "Explore", becomePartner: "Become a Partner", insurance: "Insurance", blog: "Blog", navLabel: "Main navigation", secondaryLabel: "Secondary navigation", logoLabel: "BagajPark home page" };
+  /**
+   * Site geneli navigasyon metinleri — `navLabel`/`secondaryLabel`/`logoLabel`
+   * dahil. Bunlar ERİŞİLEBİLİRLİK etiketleri: sabit yazıldıklarında 12 dilde
+   * ekran okuyucu İngilizce anons ediyordu (P1-24). `blog` çevrilmiyor, uluslararası.
+   */
+  const navCopy = {
+    explore: tCommon("navExplore"),
+    becomePartner: tCommon("navBecomePartner"),
+    insurance: tCommon("navInsurance"),
+    blog: "Blog",
+    navLabel: tCommon("navMainLabel"),
+    secondaryLabel: tCommon("navSecondaryLabel"),
+    logoLabel: tCommon("navLogoLabel"),
+  };
 
   if (pathname?.includes("/login")) return null;
 

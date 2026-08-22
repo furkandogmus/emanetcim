@@ -29,7 +29,15 @@
     "pwaInstallTitle": "Installer BagajPark",
     "pwaInstallBody": "Ajoutez à l’écran d’accueil pour un accès plus rapide.",
     "pwaInstallCta": "Installer",
-    "pwaInstallDismiss": "Plus tard"
+    "pwaInstallDismiss": "Plus tard",
+    "navExplore": "Explorer",
+    "navBecomePartner": "Devenir partenaire",
+    "navInsurance": "Assurance",
+    "navMainLabel": "Navigation principale",
+    "navSecondaryLabel": "Navigation secondaire",
+    "navLogoLabel": "Page d'accueil BagajPark",
+    "footerCancellationPolicy": "Annulation",
+    "footerManageBooking": "Gérer la réservation"
   },
   "SEO": {
     "title": "Parc Bagaj | Laissez vos bagages en toute sécurité, voyagez librement",
@@ -471,7 +479,13 @@
     "shopWeekDays": "Lun - Ven",
     "shopWeekEnd": "Sam - Dim",
     "shopSeeAll": "Tout voir",
-    "shopPerDay": "/jour"
+    "shopPerDay": "/jour",
+    "loyaltyPoints": "pts",
+    "loyaltyDiscount": "de réduction",
+    "searchOnlyAvailableHint": "Seuls les points disponibles pour vos horaires de dépôt/retrait sont listés.",
+    "slotsNoneForDate": "Aucun créneau disponible pour cette date",
+    "slotsAvailableTitle": "Créneaux disponibles",
+    "slotsBagsSelected": "{count} bagages sélectionnés"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

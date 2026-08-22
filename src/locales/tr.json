@@ -29,7 +29,15 @@
     "pwaInstallTitle": "BagajPark’ı yükle",
     "pwaInstallBody": "Ana ekrana ekleyerek daha hızlı erişin.",
     "pwaInstallCta": "Yükle",
-    "pwaInstallDismiss": "Şimdi değil"
+    "pwaInstallDismiss": "Şimdi değil",
+    "navExplore": "Keşfet",
+    "navBecomePartner": "Partner Ol",
+    "navInsurance": "Sigorta",
+    "navMainLabel": "Ana navigasyon",
+    "navSecondaryLabel": "İkincil navigasyon",
+    "navLogoLabel": "BagajPark ana sayfa",
+    "footerCancellationPolicy": "İptal Politikası",
+    "footerManageBooking": "Rezervasyon Yönetimi"
   },
   "SEO": {
     "title": "BagajPark | Valiz Saklama ve Güvenli Bagaj Emaneti",
@@ -511,7 +519,13 @@
     "shopWeekDays": "Pzt - Cum",
     "shopWeekEnd": "Cts - Paz",
     "shopSeeAll": "Tümünü gör",
-    "shopPerDay": "/gün"
+    "shopPerDay": "/gün",
+    "loyaltyPoints": "puan",
+    "loyaltyDiscount": "indirim",
+    "searchOnlyAvailableHint": "Seçtiğiniz bırakış/alış saatlerine göre sadece müsait noktalar listelenir.",
+    "slotsNoneForDate": "Bu tarih için uygun saat bulunamadı",
+    "slotsAvailableTitle": "Müsait Saatler",
+    "slotsBagsSelected": "{count} bagaj seçildi"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Yönetim Masası",

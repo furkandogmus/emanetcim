@@ -29,7 +29,15 @@
     "pwaInstallTitle": "Install BagajPark",
     "pwaInstallBody": "Add to your home screen for quicker access.",
     "pwaInstallCta": "Install",
-    "pwaInstallDismiss": "Not now"
+    "pwaInstallDismiss": "Not now",
+    "navExplore": "Explore",
+    "navBecomePartner": "Become a Partner",
+    "navInsurance": "Insurance",
+    "navMainLabel": "Main navigation",
+    "navSecondaryLabel": "Secondary navigation",
+    "navLogoLabel": "BagajPark home page",
+    "footerCancellationPolicy": "Cancellation",
+    "footerManageBooking": "Manage Booking"
   },
   "SEO": {
     "title": "BagajPark | Leave Your Luggage Safely, Travel Freely",
@@ -511,7 +519,13 @@
     "shopWeekDays": "Mon - Fri",
     "shopWeekEnd": "Sat - Sun",
     "shopSeeAll": "See all",
-    "shopPerDay": "/day"
+    "shopPerDay": "/day",
+    "loyaltyPoints": "pts",
+    "loyaltyDiscount": "off",
+    "searchOnlyAvailableHint": "Only locations available for your selected drop-off/pick-up times are listed.",
+    "slotsNoneForDate": "No available slots for this date",
+    "slotsAvailableTitle": "Available Time Slots",
+    "slotsBagsSelected": "{count} bags selected"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

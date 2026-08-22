@@ -29,7 +29,15 @@
     "pwaInstallTitle": "ثبّت BagajPark",
     "pwaInstallBody": "أضفه إلى الشاشة الرئيسية للوصول الأسرع.",
     "pwaInstallCta": "تثبيت",
-    "pwaInstallDismiss": "ليس الآن"
+    "pwaInstallDismiss": "ليس الآن",
+    "navExplore": "استكشاف",
+    "navBecomePartner": "كن شريكًا",
+    "navInsurance": "التأمين",
+    "navMainLabel": "التنقل الرئيسي",
+    "navSecondaryLabel": "التنقل الثانوي",
+    "navLogoLabel": "الصفحة الرئيسية لـ BagajPark",
+    "footerCancellationPolicy": "الإلغاء",
+    "footerManageBooking": "إدارة الحجز"
   },
   "SEO": {
     "title": "BagajPark | اترك أمتعتك بأمان وسافر بحرية",
@@ -471,7 +479,13 @@
     "shopWeekDays": "الاثنين - الجمعة",
     "shopWeekEnd": "السبت - الأحد",
     "shopSeeAll": "عرض الكل",
-    "shopPerDay": "/يوم"
+    "shopPerDay": "/يوم",
+    "loyaltyPoints": "نقطة",
+    "loyaltyDiscount": "خصم",
+    "searchOnlyAvailableHint": "تُعرض فقط النقاط المتاحة في أوقات الإيداع/الاستلام التي اخترتها.",
+    "slotsNoneForDate": "لا توجد فترات متاحة لهذا التاريخ",
+    "slotsAvailableTitle": "الفترات المتاحة",
+    "slotsBagsSelected": "تم اختيار {count} حقيبة"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

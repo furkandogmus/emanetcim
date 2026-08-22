@@ -29,7 +29,15 @@
     "pwaInstallTitle": "安装 BagajPark",
     "pwaInstallBody": "添加到主屏幕，打开更快。",
     "pwaInstallCta": "安装",
-    "pwaInstallDismiss": "暂不"
+    "pwaInstallDismiss": "暂不",
+    "navExplore": "探索",
+    "navBecomePartner": "成为合作商",
+    "navInsurance": "保险",
+    "navMainLabel": "主导航",
+    "navSecondaryLabel": "次级导航",
+    "navLogoLabel": "BagajPark 首页",
+    "footerCancellationPolicy": "取消政策",
+    "footerManageBooking": "管理预订"
   },
   "SEO": {
     "title": "BagajPark |安全寄存行李，自由出行",
@@ -471,7 +479,13 @@
     "shopWeekDays": "周一至周五",
     "shopWeekEnd": "周六至周日",
     "shopSeeAll": "查看全部",
-    "shopPerDay": "/天"
+    "shopPerDay": "/天",
+    "loyaltyPoints": "积分",
+    "loyaltyDiscount": "折扣",
+    "searchOnlyAvailableHint": "仅显示在您所选存取时间内可用的地点。",
+    "slotsNoneForDate": "该日期没有可用时段",
+    "slotsAvailableTitle": "可用时段",
+    "slotsBagsSelected": "已选择 {count} 件行李"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

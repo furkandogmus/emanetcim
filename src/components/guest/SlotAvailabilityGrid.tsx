@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import clsx from "clsx";
-import { useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 
 interface SlotInfo {
   id: string;
@@ -35,8 +35,7 @@ export default function SlotAvailabilityGrid({
   initialFrom,
   initialTo,
 }: SlotAvailabilityGridProps) {
-  const locale = useLocale();
-  const isTr = locale === "tr";
+  const t = useTranslations("Guest");
   const [slots, setSlots] = useState<SlotInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -102,7 +101,7 @@ export default function SlotAvailabilityGrid({
   if (slots.length === 0) {
     return (
       <div className="text-center py-2 text-xs text-gray-400">
-        {isTr ? "Bu tarih için uygun saat bulunamadı" : "No available slots for this date"}
+        {t("slotsNoneForDate")}
       </div>
     );
   }
@@ -113,10 +112,8 @@ export default function SlotAvailabilityGrid({
     return slotStart >= selectedStart && slotStart <= selectedEnd;
   };
 
-  const label = isTr ? "Müsait Saatler" : "Available Time Slots";
-  const bagLabel = isTr
-    ? `${selectedBags} bagaj seçildi`
-    : `${selectedBags} bag${selectedBags !== 1 ? "s" : ""} selected`;
+  const label = t("slotsAvailableTitle");
+  const bagLabel = t("slotsBagsSelected", { count: selectedBags });
 
   return (
     <div>
@@ -167,8 +164,8 @@ export default function SlotAvailabilityGrid({
       {selectedStart && selectedEnd && (
         <p className="mt-2 text-xs font-bold text-orange-600 text-center">
           {formatSlotTime(selectedStart)} → {formatSlotTime(selectedEnd)}
-          {" "}({slots.filter((s) => inSelectedRange(s.startTime)).length} {isTr ? "slot" : "slots"},{" "}
-          {slots.filter((s) => inSelectedRange(s.startTime)).length * 0.5}{isTr ? "sa" : "h"})
+          {" "}({slots.filter((s) => inSelectedRange(s.startTime)).length} {t("checkoutSlotUnit")},{" "}
+          {slots.filter((s) => inSelectedRange(s.startTime)).length * 0.5}{t("checkoutHourShort")})
         </p>
       )}
     </div>

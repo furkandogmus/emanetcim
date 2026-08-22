@@ -29,7 +29,15 @@
     "pwaInstallTitle": "نصب BagajPark",
     "pwaInstallBody": "برای دسترسی سریع‌تر به صفحهٔ اصلی اضافه کنید.",
     "pwaInstallCta": "نصب",
-    "pwaInstallDismiss": "بعداً"
+    "pwaInstallDismiss": "بعداً",
+    "navExplore": "کاوش",
+    "navBecomePartner": "شریک شوید",
+    "navInsurance": "بیمه",
+    "navMainLabel": "ناوبری اصلی",
+    "navSecondaryLabel": "ناوبری فرعی",
+    "navLogoLabel": "صفحهٔ اصلی BagajPark",
+    "footerCancellationPolicy": "لغو",
+    "footerManageBooking": "مدیریت رزرو"
   },
   "SEO": {
     "title": "BagajPark | چمدان امن، سفر آزاد",
@@ -471,7 +479,13 @@
     "shopWeekDays": "دوشنبه تا جمعه",
     "shopWeekEnd": "شنبه و یکشنبه",
     "shopSeeAll": "مشاهده همه",
-    "shopPerDay": "/روز"
+    "shopPerDay": "/روز",
+    "loyaltyPoints": "امتیاز",
+    "loyaltyDiscount": "تخفیف",
+    "searchOnlyAvailableHint": "فقط نقاطی نمایش داده می‌شوند که در ساعات تحویل/دریافت انتخابی شما در دسترس‌اند.",
+    "slotsNoneForDate": "برای این تاریخ بازهٔ خالی وجود ندارد",
+    "slotsAvailableTitle": "بازه‌های خالی",
+    "slotsBagsSelected": "{count} چمدان انتخاب شد"
   },
   "Admin": {
     "dashboardTitle": "مرکز مدیریت BagajPark",

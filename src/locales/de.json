@@ -29,7 +29,15 @@
     "pwaInstallTitle": "BagajPark installieren",
     "pwaInstallBody": "Zum Startbildschirm hinzufügen für schnelleren Zugriff.",
     "pwaInstallCta": "Installieren",
-    "pwaInstallDismiss": "Später"
+    "pwaInstallDismiss": "Später",
+    "navExplore": "Entdecken",
+    "navBecomePartner": "Partner werden",
+    "navInsurance": "Versicherung",
+    "navMainLabel": "Hauptnavigation",
+    "navSecondaryLabel": "Sekundäre Navigation",
+    "navLogoLabel": "BagajPark Startseite",
+    "footerCancellationPolicy": "Stornierung",
+    "footerManageBooking": "Buchung verwalten"
   },
   "SEO": {
     "title": "BagajPark | Lassen Sie Ihr Gepäck sicher und reisen Sie frei",
@@ -471,7 +479,13 @@
     "shopWeekDays": "Mo - Fr",
     "shopWeekEnd": "Sa - So",
     "shopSeeAll": "Alle ansehen",
-    "shopPerDay": "/Tag"
+    "shopPerDay": "/Tag",
+    "loyaltyPoints": "Pkt",
+    "loyaltyDiscount": "Rabatt",
+    "searchOnlyAvailableHint": "Es werden nur Standorte angezeigt, die zu Ihren gewählten Abgabe-/Abholzeiten verfügbar sind.",
+    "slotsNoneForDate": "Für dieses Datum sind keine Zeitfenster verfügbar",
+    "slotsAvailableTitle": "Verfügbare Zeitfenster",
+    "slotsBagsSelected": "{count} Gepäckstücke ausgewählt"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

@@ -29,7 +29,15 @@
     "pwaInstallTitle": "Инсталирай BagajPark",
     "pwaInstallBody": "Добави към началния екран за по-бърз достъп.",
     "pwaInstallCta": "Инсталирай",
-    "pwaInstallDismiss": "Не сега"
+    "pwaInstallDismiss": "Не сега",
+    "navExplore": "Разгледай",
+    "navBecomePartner": "Стани партньор",
+    "navInsurance": "Застраховка",
+    "navMainLabel": "Основна навигация",
+    "navSecondaryLabel": "Второстепенна навигация",
+    "navLogoLabel": "Начална страница на BagajPark",
+    "footerCancellationPolicy": "Отмяна",
+    "footerManageBooking": "Управление на резервацията"
   },
   "SEO": {
     "title": "BagajPark | Безопасен багаж, свободно пътуване",
@@ -471,7 +479,13 @@
     "shopWeekDays": "Пон - Пет",
     "shopWeekEnd": "Съб - Нед",
     "shopSeeAll": "Виж всички",
-    "shopPerDay": "/ден"
+    "shopPerDay": "/ден",
+    "loyaltyPoints": "точки",
+    "loyaltyDiscount": "отстъпка",
+    "searchOnlyAvailableHint": "Показват се само пунктовете, достъпни в избраните от вас часове.",
+    "slotsNoneForDate": "Няма свободни часове за тази дата",
+    "slotsAvailableTitle": "Свободни часове",
+    "slotsBagsSelected": "Избрани {count} багажа"
   },
   "Admin": {
     "dashboardTitle": "Админ център BagajPark",

@@ -380,9 +380,7 @@ export default function SearchClient({
               {t("searchStayWindow")}
             </p>
             <p className="text-[11px] text-gray-400">
-              {locale === "tr"
-                ? "Seçtiğiniz bırakış/alış saatlerine göre sadece müsait noktalar listelenir."
-                : "Only locations available for your selected drop-off/pick-up times are listed."}
+              {t("searchOnlyAvailableHint")}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <label className="flex flex-col gap-1">

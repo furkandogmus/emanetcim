@@ -29,7 +29,15 @@
     "pwaInstallTitle": "Установить BagajPark",
     "pwaInstallBody": "Добавьте на главный экран для быстрого доступа.",
     "pwaInstallCta": "Установить",
-    "pwaInstallDismiss": "Не сейчас"
+    "pwaInstallDismiss": "Не сейчас",
+    "navExplore": "Обзор",
+    "navBecomePartner": "Стать партнёром",
+    "navInsurance": "Страхование",
+    "navMainLabel": "Основная навигация",
+    "navSecondaryLabel": "Дополнительная навигация",
+    "navLogoLabel": "Главная страница BagajPark",
+    "footerCancellationPolicy": "Отмена",
+    "footerManageBooking": "Управление бронью"
   },
   "SEO": {
     "title": "BagajPark | Оставьте багаж в безопасности, путешествуйте свободно",
@@ -471,7 +479,13 @@
     "shopWeekDays": "Пн - Пт",
     "shopWeekEnd": "Сб - Вс",
     "shopSeeAll": "Смотреть все",
-    "shopPerDay": "/день"
+    "shopPerDay": "/день",
+    "loyaltyPoints": "баллов",
+    "loyaltyDiscount": "скидка",
+    "searchOnlyAvailableHint": "Показаны только пункты, доступные в выбранное вами время сдачи и получения.",
+    "slotsNoneForDate": "На эту дату нет доступных слотов",
+    "slotsAvailableTitle": "Доступные слоты",
+    "slotsBagsSelected": "Выбрано мест: {count}"
   },
   "Admin": {
     "dashboardTitle": "Центр администрирования BagajPark",
