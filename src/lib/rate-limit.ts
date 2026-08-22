@@ -58,11 +58,16 @@ export function getRedis(): Redis | null {
     redisClient = null;
     return null;
   }
+  /**
+   * `lazyConnect` + `enableOfflineQueue: false` BİRLİKTE kullanılmaz: ilk komut
+   * bağlantı kurulmadan gelir ve anında reddedilir — canlıda `/api/health`
+   * `redis: error` dedi, giriş rate limit'i de aynı yoldan patlardı
+   * (2026-08-22 AWS provası). Bağlantı hemen açılır; kopukken komutlar kısa
+   * kuyrukta bekler, `maxRetriesPerRequest: 1` ile hızlı hata verir.
+   */
   redisClient = new Redis(url, {
-    // Redis düşükse istek kuyruğa yığılmasın; rate limit için hızlı hata daha iyi.
     maxRetriesPerRequest: 1,
-    enableOfflineQueue: false,
-    lazyConnect: true,
+    connectTimeout: 3_000,
   });
   redisClient.on("error", () => {
     /* bağlantı hataları çağıranın try/catch'inde ele alınır; süreç düşmesin */
