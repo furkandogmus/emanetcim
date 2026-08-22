@@ -356,6 +356,20 @@ model Dispute {
 }
 
 /// Fiziksel mühür stoku (seri numarası = PK)
+/// Fiziksel mühür envanteri.
+///
+/// DEĞİŞMEZ KURAL (DB kısıtı `Seal_ownership_matches_status` ile zorlanır):
+/// `STOCK` dışındaki her mühür bir dükkana ait olmak ZORUNDA; `STOCK` olan hiçbir
+/// mühür bir dükkana ait OLAMAZ.
+///
+/// Neden DB'de: 2026-08-22'de 1.277 mührün 1.247'si `ASSIGNED` ama `shopId` NULL'du
+/// — anlaşmazlıkta zilyetlik kanıtı olan envanterin %96'sı bir dükkanla
+/// eşleştirilemiyordu. Kaynak `SealRepository.updateStatus`'tu ama beş ayrı yer ham
+/// `seal.update*` çağırıyor; kuralın yeri koddan biri değil, veritabanıdır.
+///
+/// Kısıt `NOT VALID` eklendi (mevcut bozuk satırlar tolere edilir, yeni yazımlar
+/// edilmez). Onarım sonrası `VALIDATE CONSTRAINT` ile tamamlanır —
+/// bkz. `scripts/README.md`.
 model Seal {
   serialNumber Int           @id
   shopId       String?

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 import { overdueBookingService } from "@/services/OverdueBookingService";
+import { sealIntegrityService } from "@/services/SealIntegrityService";
 
 export const dynamic = "force-dynamic";
 
@@ -94,8 +95,21 @@ export async function GET() {
       criticalAfterHours: OVERDUE_CRITICAL_HOURS,
     };
 
+    /**
+     * Mühür envanteri bütünlüğü.
+     *
+     * Mühür, anlaşmazlıkta fiziksel zilyetliğin kanıtıdır. 2026-08-22'de 1.277
+     * mührün 1.247'si sahipsiz `ASSIGNED`'dı ve aylardır hiçbir yerde
+     * görünmüyordu (P1-7). DB kısıtı artık yeni bozuk satır oluşmasını engelliyor;
+     * bu kontrol eskilerin temizlenip temizlenmediğini ve kısıtın gerçekten
+     * tuttuğunu gösterir.
+     */
+    const sealIntegrity = await sealIntegrityService.check(now);
+
     const healthy =
-      slotGeneration.status !== "stale" && overdueReconciliation.status !== "stale";
+      slotGeneration.status !== "stale" &&
+      overdueReconciliation.status !== "stale" &&
+      sealIntegrity.status !== "broken";
 
     if (slotGeneration.status === "stale") {
       logger.warn(
@@ -113,10 +127,20 @@ export async function GET() {
       );
     }
 
+    if (sealIntegrity.status === "broken") {
+      logger.warn(
+        {
+          orphanedNonStock: sealIntegrity.orphanedNonStock,
+          stockWithShop: sealIntegrity.stockWithShop,
+        },
+        "health_jobs_seal_integrity_broken",
+      );
+    }
+
     return NextResponse.json(
       {
         status: healthy ? "UP" : "DEGRADED",
-        checks: { slotGeneration, overdueReconciliation },
+        checks: { slotGeneration, overdueReconciliation, sealIntegrity },
         context: { activeShopCount },
         timestamp: now.toISOString(),
       },
@@ -130,6 +154,7 @@ export async function GET() {
         checks: {
           slotGeneration: { status: "unknown" },
           overdueReconciliation: { status: "unknown" },
+          sealIntegrity: { status: "unknown" },
         },
         timestamp: new Date().toISOString(),
       },

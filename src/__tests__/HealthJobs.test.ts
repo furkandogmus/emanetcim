@@ -9,7 +9,17 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
  * kırmızı yanan bir sağlık kontrolü, hiç olmayandan daha kötüdür — kimse bakmaz.
  */
 
-const { mockPrisma, mockOverdueScan } = vi.hoisted(() => ({
+const { mockPrisma, mockOverdueScan, mockSealCheck } = vi.hoisted(() => ({
+  // Varsayilan: muhur envanteri saglam.
+  mockSealCheck: vi.fn().mockResolvedValue({
+    checkedAt: new Date().toISOString(),
+    orphanedNonStock: 0,
+    stockWithShop: 0,
+    total: 0,
+    byStatus: {},
+    checkedInWithoutSeals: 0,
+    status: "ok",
+  }),
   mockPrisma: {
     shopTimeSlot: { aggregate: vi.fn(), count: vi.fn() },
     shop: { count: vi.fn() },
@@ -30,6 +40,9 @@ const { mockPrisma, mockOverdueScan } = vi.hoisted(() => ({
 vi.mock("@/lib/db", () => ({ default: mockPrisma }));
 vi.mock("@/services/OverdueBookingService", () => ({
   overdueBookingService: { scan: mockOverdueScan },
+}));
+vi.mock("@/services/SealIntegrityService", () => ({
+  sealIntegrityService: { check: mockSealCheck },
 }));
 vi.mock("@/lib/logger", () => ({
   default: { warn: vi.fn(), error: vi.fn(), info: vi.fn() },
@@ -195,5 +208,71 @@ describe("GET /api/health/jobs — sure asimi mutabakati", () => {
     expect(mockOverdueScan).toHaveBeenCalledWith(
       expect.objectContaining({ recordEvents: false }),
     );
+  });
+});
+
+describe("GET /api/health/jobs — muhur envanteri butunlugu", () => {
+  beforeEach(() => {
+    setup({ horizonDays: 30, activeShops: 5 });
+  });
+
+  it("envanter saglamsa UP", async () => {
+    const res = await GET();
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.checks.sealIntegrity.status).toBe("ok");
+  });
+
+  it("2026-08-22'deki gercek durumu yakalar (1.247 sahipsiz ASSIGNED)", async () => {
+    mockSealCheck.mockResolvedValueOnce({
+      orphanedNonStock: 1247,
+      stockWithShop: 0,
+      total: 1301,
+      byStatus: { ASSIGNED: 1277, STOCK: 22, FAULTY: 2 },
+      checkedInWithoutSeals: 3,
+      status: "broken",
+    } as any);
+
+    const res = await GET();
+    const body = await res.json();
+
+    expect(res.status).toBe(503);
+    expect(body.status).toBe("DEGRADED");
+    expect(body.checks.sealIntegrity.orphanedNonStock).toBe(1247);
+  });
+
+  it("STOCK oldugu halde dukkana bagli muhur de bozukluktur", async () => {
+    mockSealCheck.mockResolvedValueOnce({
+      orphanedNonStock: 0,
+      stockWithShop: 4,
+      total: 100,
+      byStatus: {},
+      checkedInWithoutSeals: 0,
+      status: "broken",
+    } as any);
+
+    const res = await GET();
+
+    expect(res.status).toBe(503);
+  });
+
+  it("uc kontrolden biri bozuksa tumu DEGRADED — digerleri maskelemez", async () => {
+    mockSealCheck.mockResolvedValueOnce({
+      orphanedNonStock: 1,
+      stockWithShop: 0,
+      total: 1,
+      byStatus: {},
+      checkedInWithoutSeals: 0,
+      status: "broken",
+    } as any);
+
+    const res = await GET();
+    const body = await res.json();
+
+    expect(body.checks.slotGeneration.status).toBe("ok");
+    expect(body.checks.overdueReconciliation.status).toBe("ok");
+    expect(body.checks.sealIntegrity.status).toBe("broken");
+    expect(res.status).toBe(503);
   });
 });

@@ -13,8 +13,15 @@
 
 **Sağlık kontrolü:** `GET /api/health/jobs` — sır gerektirmez, sağlıksızsa **503**
 döner. Herhangi bir HTTP izleyici (UptimeRobot, Cloudflare health check, telefondan
-`curl`) bunu izleyebilir. İki sinyal ölçer: slot üretimi tazeliği ve en eski açık
-rezervasyonun yaşı.
+`curl`) bunu izleyebilir. **Üç** sinyal ölçer:
+
+| Kontrol | Neyi ölçer | `stale`/`broken` ne demek |
+|---|---|---|
+| `slotGeneration` | slot ufkunun tazeliği | üretim ~2 gündür çalışmamış |
+| `overdueReconciliation` | en eski açık rezervasyonun yaşı | 72 saati aşmış açık rezervasyon var |
+| `sealIntegrity` | mühür sahiplik değişmezi | sahipsiz `ASSIGNED` veya dükkanlı `STOCK` mühür var |
+
+Biri bozuksa diğerleri **maskelemez** — toplam durum `DEGRADED` olur.
 
 ---
 
@@ -137,3 +144,87 @@ DELETE FROM "BookingEvent" WHERE event = 'OVERDUE';
 ```
 
 `--help` her sarmalayıcıda çalışır.
+
+
+---
+
+## Mühür sahiplik onarımı (tek seferlik)
+
+`STOCK` dışında olup hiçbir dükkana ait olmayan mühürleri `STOCK`'a geri alır.
+
+**Neden gerekli:** 2026-08-22 denetiminde 1.277 mührün **1.247'si** `ASSIGNED` ama
+`shopId` NULL'du. `ASSIGNED` + sahipsiz bir mühür **anlamsız** bir durumdur: hiçbir
+dükkana atanmamış bir mühür "atanmış" olamaz. `STOCK`'a dönmesi bilgi kaybı değil,
+bilginin düzeltilmesidir. Mühür anlaşmazlıkta fiziksel zilyetliğin kanıtı olduğu
+için envanterin %96'sının eşleştirilememesi ciddi bir açıktı.
+
+**Yeni bozuk satır artık oluşamaz:** `Seal_ownership_matches_status` DB kısıtı
+`NOT VALID` olarak eklendi — mevcut satırlar tolere ediliyor, her yeni
+INSERT/UPDATE kontrol ediliyor. Bu adım eskileri temizler ve kısıtı tamamlar.
+
+### 1. Kuru çalışma — hiçbir şey değiştirmez
+
+```bash
+cd /root/emanetci
+./scripts/repair-seal-ownership.sh
+```
+
+Beklenen: mevcut durum tablosu, ardından
+
+```
+[...] INFO  Onarilacak satir sayisi: 1249
+[...] WARN  KURU CALISMA -- hicbir sey degistirilmedi.
+[...] WARN  Gercekten onarmak icin: repair-seal-ownership.sh --apply
+```
+
+> 1249 = 1.247 sahipsiz `ASSIGNED` + 2 sahipsiz `FAULTY` (151 ve 152 — P0-6
+> soruşturmasında test amaçlı işaretlendikleri doğrulanmıştı).
+
+### 2. Yedek al — **onarımdan önce zorunlu**
+
+```bash
+./scripts/backup.sh
+```
+
+### 3. Onar ve kısıtı doğrula — **ilk değiştiren adım**
+
+```bash
+./scripts/repair-seal-ownership.sh --apply --validate
+```
+
+Beklenen:
+
+```
+[...] INFO  Onariliyor (1249 satir -> STOCK)...
+[...] INFO  Onarim tamamlandi.
+[...] INFO  DB kisiti dogrulaniyor...
+[...] INFO  Kisit dogrulandi -- bundan sonra gecersiz satir DB seviyesinde imkansiz.
+```
+
+`VALIDATE CONSTRAINT` hata verirse onarım eksik kalmıştır: 1. adımı tekrar
+çalıştırıp kalan satırları görün. Kısıt `NOT VALID` hâlinde kalır, yani yeni
+yazımlar yine korunur — acil bir durum değildir.
+
+### 4. Doğrula
+
+```bash
+curl -s https://bagajpark.com/api/health/jobs | jq '.checks.sealIntegrity'
+```
+
+Beklenen: `"status": "ok"`, `"orphanedNonStock": 0`, `"stockWithShop": 0`.
+
+`checkedInWithoutSeals` alanı ayrı bir sorundur ve bu onarımla **düzelmez**:
+bavula hiç mühür kaydedilmemiş `CHECKED_IN` rezervasyon sayısını verir
+(2026-08-22'de 3). Bkz. `docs/DEFECT_BACKLOG.md` → P1-23.
+
+### Geri alma
+
+Onarım `assignedAt` alanını da `NULL` yapar, yani satır satır geri alınamaz.
+Geri dönüş yolu 2. adımdaki yedektir — bu yüzden zorunlu.
+
+Kısıt doğrulamasını geri almak (kısıtı `NOT VALID` hâline döndürmek) mümkün
+değildir; kısıtın tamamen kaldırılması gerekir:
+
+```sql
+ALTER TABLE "Seal" DROP CONSTRAINT "Seal_ownership_matches_status";
+```

@@ -36,7 +36,38 @@ export class SealRepository {
     });
   }
 
+  /**
+   * Mühür durumunu değiştirir ve SAHİPLİK DEĞİŞMEZİNİ korur.
+   *
+   * Eski hâli `shopId`'ye hiç dokunmadan herhangi bir durumu yazıyordu ve
+   * prod'daki 1.247 "sahipsiz ASSIGNED" mührün kaynağı buydu (P1-7). Artık:
+   *   - `STOCK`'a dönen mühür dükkandan çıkar (`shopId = null`).
+   *   - `STOCK` dışına çıkan mühür bir dükkana ait olmalı; değilse hata verir.
+   *
+   * DB'de aynı kural `Seal_ownership_matches_status` kısıtıyla da zorlanıyor —
+   * burası daha iyi bir hata mesajı için, tek savunma hattı değil.
+   */
   async updateStatus(serialNumber: number, status: SealStatus): Promise<Seal> {
+    if (status === 'STOCK') {
+      return prisma.seal.update({
+        where: { serialNumber },
+        data: { status, shopId: null, assignedAt: null },
+      });
+    }
+
+    const current = await prisma.seal.findUnique({
+      where: { serialNumber },
+      select: { shopId: true },
+    });
+    if (!current) {
+      throw new Error(`seal_not_found: ${serialNumber}`);
+    }
+    if (!current.shopId) {
+      throw new Error(
+        `seal_not_owned_by_shop: ${serialNumber} bir dükkana ait değilken ${status} yapılamaz`,
+      );
+    }
+
     return prisma.seal.update({
       where: { serialNumber },
       data: { status },
