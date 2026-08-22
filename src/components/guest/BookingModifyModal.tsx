@@ -29,6 +29,7 @@ import { moneyToNumber } from "@/lib/money";
 import { usePaymentCopyKey } from "@/components/providers/CommerceProvider";
 import Money from "@/components/common/Money";
 import { formatTryCurrency } from "@/lib/currency";
+import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
 
 export type BookingModifyModalBooking = Pick<
   GuestBookingListItem,
@@ -58,6 +59,8 @@ export default function BookingModifyModal({
   onSuccess,
 }: BookingModifyModalProps) {
   const t = useTranslations("Guest");
+  // Escape kapatır, arka plan kaydırması kilitlenir, odak geri verilir.
+  useModalBehavior({ open: true, onClose });
   const locale = useLocale();
   /**
    * Ödeme metni aktif sağlayıcıya göre seçilir. Bu satır eskiden koşulsuz

@@ -47,6 +47,7 @@ import WebPushOptIn from "@/components/WebPushOptIn";
 import SlotAvailabilityGrid from "@/components/guest/SlotAvailabilityGrid";
 import Money from "@/components/common/Money";
 import { formatDecimal, formatTryCurrency } from "@/lib/currency";
+import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
 interface CheckoutClientProps {
   shopId: string;
   shopName: string;
@@ -84,6 +85,14 @@ export default function CheckoutClient({
 
   const [step, setStep] = useState(1);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  /**
+   * Modal klavye davranışı: Escape kapatır, arka plan kaydırması kilitlenir,
+   * kapanınca odak açan öğeye döner. Bu modal dönüşüm yolunun ortasında.
+   */
+  useModalBehavior({
+    open: showAuthModal,
+    onClose: () => setShowAuthModal(false),
+  });
 
   const [bagS, setBagS] = useState(0);
   const [bagM, setBagM] = useState(initialBags ?? 1);
@@ -670,7 +679,13 @@ export default function CheckoutClient({
 
       {showAuthModal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in" onClick={() => setShowAuthModal(false)}>
-          <div className="relative bg-white rounded-[2rem] shadow-2xl border border-gray-100 max-w-md w-full overflow-hidden p-8 animate-slide-up text-center" onClick={(e) => e.stopPropagation()}>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={t("checkoutGuestContinue")}
+            className="relative bg-white rounded-[2rem] shadow-2xl border border-gray-100 max-w-md w-full overflow-hidden p-8 animate-slide-up text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-orange-500 to-amber-500" />
             
             <button
