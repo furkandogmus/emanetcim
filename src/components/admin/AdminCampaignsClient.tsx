@@ -72,13 +72,19 @@ export default function AdminCampaignsClient({
       return;
     }
     startTransition(async () => {
-      await createCampaignAction({
+      // Bu action da doğrulama başarısızlığında fırlatmıyor,
+      // `{ success: false, error: "invalid_data" }` dönüyor.
+      const res = await createCampaignAction({
         name: name.trim(),
         message: message.trim() || undefined,
         discountPercent: discount ? parseFloat(discount) : undefined,
         endsAt: endsAt ? new Date(endsAt) : null,
         isActive: true,
       });
+      if (!res?.success) {
+        toast.error(t("campaignCreateFailed"));
+        return;
+      }
       toast.success(t("campaignCreated"));
       resetForm();
       router.refresh();
@@ -88,13 +94,20 @@ export default function AdminCampaignsClient({
   const submitEdit = () => {
     if (!editing) return;
     startTransition(async () => {
-      await updateCampaignAction(editing.id, {
+      // `updateCampaignAction` başarısızlıkta fırlatmıyor, `{ success: false }`
+      // dönüyor. Kontrol edilmezse kaydedilmemiş bir değişiklik için
+      // "güncellendi" denir ve yönetici formu kapatır.
+      const res = await updateCampaignAction(editing.id, {
         name: name.trim(),
         message: message.trim() || null,
         discountPercent: discount ? parseFloat(discount) : null,
         endsAt: endsAt ? new Date(endsAt) : null,
         isActive: editing.isActive,
       });
+      if (!res?.success) {
+        toast.error(t("campaignUpdateFailed"));
+        return;
+      }
       toast.success(t("campaignUpdated"));
       resetForm();
       router.refresh();

@@ -197,7 +197,14 @@ export default function AdminUsersClient({
 
   const handleResendMail = async (email: string) => {
     try {
-      await resendVerificationEmailAction(email);
+      // Bu action da başarısızlıkta fırlatmıyor, `{ success: false }` dönüyor
+      // (ör. geçersiz e-posta). Kontrol edilmezse gönderilmemiş bir mail için
+      // "gönderildi" denir.
+      const res = await resendVerificationEmailAction(email);
+      if (!res.success) {
+        toast.error(t("resendFailed"));
+        return;
+      }
       toast.success(t("resendSuccess"));
     } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : String(error));
@@ -207,7 +214,22 @@ export default function AdminUsersClient({
   const handleBlockIp = async (ip: string) => {
     if (!ip) return;
     try {
-      await blockIpAction(ip, "Admin manually blocked this IP from user list.");
+      /**
+       * SONUÇ KONTROL EDİLİYOR.
+       *
+       * `blockIpAction` başarısızlıkta FIRLATMIYOR, `{ success: false }` dönüyor
+       * (ör. geçersiz IP biçimi). Yalnızca `catch` yazmak, hiçbir şey
+       * engellenmediği hâlde "IP engellendi" demek anlamına geliyordu —
+       * yöneticinin bir güvenlik denetimini yapılmış sanması.
+       */
+      const res = await blockIpAction(
+        ip,
+        "Admin manually blocked this IP from user list.",
+      );
+      if (!res.success) {
+        toast.error(t("ipBlockFailed"));
+        return;
+      }
       toast.warning(t("ipBlockedSuccess"));
     } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : String(error));

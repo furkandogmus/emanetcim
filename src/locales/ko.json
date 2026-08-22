@@ -822,7 +822,11 @@
     "messagesBulkSelected": "개 메시지 선택됨",
     "messagesBulkSelectAll": "표시된 항목 선택",
     "messagesBulkDelete": "선택 항목 삭제",
-    "messagesBulkConfirm": "선택한 메시지를 영구적으로 삭제할까요?"
+    "messagesBulkConfirm": "선택한 메시지를 영구적으로 삭제할까요?",
+    "ipBlockFailed": "IP를 차단하지 못했습니다. 형식을 확인하세요.",
+    "resendFailed": "인증 이메일을 보내지 못했습니다.",
+    "campaignUpdateFailed": "캠페인을 업데이트하지 못했습니다.",
+    "campaignCreateFailed": "캠페인을 생성하지 못했습니다."
   },
   "Auth": {
     "loginTitle": "BagajPark 로그인",

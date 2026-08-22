@@ -864,7 +864,11 @@
     "messagesBulkSelected": "mesaj seçildi",
     "messagesBulkSelectAll": "Görünenleri seç",
     "messagesBulkDelete": "Seçilenleri sil",
-    "messagesBulkConfirm": "Seçilen mesajlar kalıcı olarak silinsin mi?"
+    "messagesBulkConfirm": "Seçilen mesajlar kalıcı olarak silinsin mi?",
+    "ipBlockFailed": "IP engellenemedi. Biçimi kontrol edin.",
+    "resendFailed": "Doğrulama e-postası gönderilemedi.",
+    "campaignUpdateFailed": "Kampanya güncellenemedi.",
+    "campaignCreateFailed": "Kampanya oluşturulamadı."
   },
   "Auth": {
     "loginTitle": "BagajPark'a Giriş Yap",

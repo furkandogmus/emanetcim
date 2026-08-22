@@ -864,7 +864,11 @@
     "messagesBulkSelected": "messages selected",
     "messagesBulkSelectAll": "Select visible",
     "messagesBulkDelete": "Delete selected",
-    "messagesBulkConfirm": "Permanently delete the selected messages?"
+    "messagesBulkConfirm": "Permanently delete the selected messages?",
+    "ipBlockFailed": "Could not block the IP. Check the format.",
+    "resendFailed": "Could not send the verification email.",
+    "campaignUpdateFailed": "Could not update the campaign.",
+    "campaignCreateFailed": "Could not create the campaign."
   },
   "Auth": {
     "loginTitle": "Sign in to BagajPark",

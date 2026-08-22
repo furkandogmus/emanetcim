@@ -822,7 +822,11 @@
     "messagesBulkSelected": "mensajes seleccionados",
     "messagesBulkSelectAll": "Seleccionar visibles",
     "messagesBulkDelete": "Eliminar seleccionados",
-    "messagesBulkConfirm": "¿Eliminar permanentemente los mensajes seleccionados?"
+    "messagesBulkConfirm": "¿Eliminar permanentemente los mensajes seleccionados?",
+    "ipBlockFailed": "No se pudo bloquear la IP. Revisa el formato.",
+    "resendFailed": "No se pudo enviar el correo de verificación.",
+    "campaignUpdateFailed": "No se pudo actualizar la campaña.",
+    "campaignCreateFailed": "No se pudo crear la campaña."
   },
   "Auth": {
     "loginTitle": "Iniciar sesión en BagajPark",

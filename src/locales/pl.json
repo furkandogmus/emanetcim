@@ -822,7 +822,11 @@
     "messagesBulkSelected": "wiadomości zaznaczono",
     "messagesBulkSelectAll": "Zaznacz widoczne",
     "messagesBulkDelete": "Usuń zaznaczone",
-    "messagesBulkConfirm": "Trwale usunąć zaznaczone wiadomości?"
+    "messagesBulkConfirm": "Trwale usunąć zaznaczone wiadomości?",
+    "ipBlockFailed": "Nie udało się zablokować IP. Sprawdź format.",
+    "resendFailed": "Nie udało się wysłać e-maila weryfikacyjnego.",
+    "campaignUpdateFailed": "Nie udało się zaktualizować kampanii.",
+    "campaignCreateFailed": "Nie udało się utworzyć kampanii."
   },
   "Auth": {
     "loginTitle": "Zaloguj się do BagajPark",

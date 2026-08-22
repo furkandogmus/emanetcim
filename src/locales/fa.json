@@ -822,7 +822,11 @@
     "messagesBulkSelected": "پیام انتخاب شد",
     "messagesBulkSelectAll": "انتخاب موارد نمایش‌داده‌شده",
     "messagesBulkDelete": "حذف موارد انتخاب‌شده",
-    "messagesBulkConfirm": "پیام‌های انتخاب‌شده برای همیشه حذف شوند؟"
+    "messagesBulkConfirm": "پیام‌های انتخاب‌شده برای همیشه حذف شوند؟",
+    "ipBlockFailed": "مسدودسازی IP انجام نشد. قالب را بررسی کنید.",
+    "resendFailed": "ارسال ایمیل تأیید انجام نشد.",
+    "campaignUpdateFailed": "به‌روزرسانی کمپین انجام نشد.",
+    "campaignCreateFailed": "ایجاد کمپین انجام نشد."
   },
   "Auth": {
     "loginTitle": "ورود به BagajPark",

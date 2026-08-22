@@ -822,7 +822,11 @@
     "messagesBulkSelected": "сообщений выбрано",
     "messagesBulkSelectAll": "Выбрать видимые",
     "messagesBulkDelete": "Удалить выбранные",
-    "messagesBulkConfirm": "Удалить выбранные сообщения безвозвратно?"
+    "messagesBulkConfirm": "Удалить выбранные сообщения безвозвратно?",
+    "ipBlockFailed": "Не удалось заблокировать IP. Проверьте формат.",
+    "resendFailed": "Не удалось отправить письмо для подтверждения.",
+    "campaignUpdateFailed": "Не удалось обновить кампанию.",
+    "campaignCreateFailed": "Не удалось создать кампанию."
   },
   "Auth": {
     "loginTitle": "Вход в BagajPark",

@@ -822,7 +822,11 @@
     "messagesBulkSelected": "条消息已选择",
     "messagesBulkSelectAll": "选择可见项",
     "messagesBulkDelete": "删除所选",
-    "messagesBulkConfirm": "是否永久删除所选消息？"
+    "messagesBulkConfirm": "是否永久删除所选消息？",
+    "ipBlockFailed": "无法封禁该 IP，请检查格式。",
+    "resendFailed": "无法发送验证邮件。",
+    "campaignUpdateFailed": "无法更新此活动。",
+    "campaignCreateFailed": "无法创建此活动。"
   },
   "Auth": {
     "loginTitle": "登录巴加公园",
