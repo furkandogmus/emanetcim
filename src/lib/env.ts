@@ -6,9 +6,9 @@ const serverSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).optional(),
   RESEND_API_KEY: z.string().optional(),
   CRON_SECRET: z.string().optional(),
-  UPSTASH_REDIS_REST_URL: z.string().optional(),
-  UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
-  /** production'da varsayılan: Upstash Redis zorunlu. false ise fallback'e izin verir. */
+  /** `redis://host:6379` — rate limit için. Compose'da `redis://redis:6379`. */
+  REDIS_URL: z.string().optional(),
+  /** production'da varsayılan: Redis zorunlu. false ise in-memory fallback'e izin verir. */
   REQUIRE_DISTRIBUTED_RATE_LIMIT: z.string().optional(),
   BOOKING_CALENDAR_TIMEZONE: z.string().optional(),
   LEGAL_TERMS_VERSION: z.string().optional(),
@@ -79,18 +79,12 @@ export function requireProdSecrets(): void {
       "AUTH_PUBLIC_HOST is required in production when OAuth providers are configured",
     );
   }
-  const upstashUrl = e.UPSTASH_REDIS_REST_URL?.trim();
-  const upstashToken = e.UPSTASH_REDIS_REST_TOKEN?.trim();
-  if ((upstashUrl && !upstashToken) || (!upstashUrl && upstashToken)) {
-    throw new Error(
-      "UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN must both be set or both omitted",
-    );
-  }
+  const redisUrl = e.REDIS_URL?.trim();
   const requireDistributedRateLimit =
     process.env.REQUIRE_DISTRIBUTED_RATE_LIMIT?.trim() !== "false";
-  if (requireDistributedRateLimit && (!upstashUrl || !upstashToken)) {
+  if (requireDistributedRateLimit && !redisUrl) {
     throw new Error(
-      "Distributed rate limit is required in production. Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN or explicitly set REQUIRE_DISTRIBUTED_RATE_LIMIT=false",
+      "Distributed rate limit is required in production. Set REDIS_URL or explicitly set REQUIRE_DISTRIBUTED_RATE_LIMIT=false",
     );
   }
 }

@@ -1,4 +1,4 @@
-import { Redis } from "@upstash/redis";
+import Redis from "ioredis";
 
 const buckets = new Map<string, number[]>();
 
@@ -39,22 +39,39 @@ export function rateLimitLocalMemory(
   return true;
 }
 
-let upstash: Redis | null | undefined;
+let redisClient: Redis | null | undefined;
 
-export function getUpstashRedis(): Redis | null {
-  if (upstash !== undefined) return upstash;
-  const url = process.env.UPSTASH_REDIS_REST_URL?.trim();
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
-  if (!url || !token) {
-    upstash = null;
+/**
+ * `REDIS_URL` tanımlıysa doğrudan Redis bağlantısı (ioredis).
+ *
+ * NEDEN DEĞİŞTİ (2026-08-22): Redis'in tek kullanımı bu dosyadaki
+ * `INCR` + `PEXPIRE`. Buna rağmen istemci `@upstash/redis` idi ve kendi
+ * sunucumuzdaki Redis'e `serverless-redis-http` (srh) adlı bir HTTP vekili
+ * üzerinden bağlanıyordu — fazladan bir konteyner, fazladan bir ağ atlaması ve
+ * canlıda OOM-kill (137) yaşamış bir süreç, iki Redis komutu için.
+ * Upstash'e taşınma planı yok; olursa ioredis `rediss://` URL'siyle de çalışır.
+ */
+export function getRedis(): Redis | null {
+  if (redisClient !== undefined) return redisClient;
+  const url = process.env.REDIS_URL?.trim();
+  if (!url) {
+    redisClient = null;
     return null;
   }
-  upstash = new Redis({ url, token });
-  return upstash;
+  redisClient = new Redis(url, {
+    // Redis düşükse istek kuyruğa yığılmasın; rate limit için hızlı hata daha iyi.
+    maxRetriesPerRequest: 1,
+    enableOfflineQueue: false,
+    lazyConnect: true,
+  });
+  redisClient.on("error", () => {
+    /* bağlantı hataları çağıranın try/catch'inde ele alınır; süreç düşmesin */
+  });
+  return redisClient;
 }
 
 /**
- * Dağıtık rate limit: `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` tanımlıysa Upstash Redis kullanılır.
+ * Dağıtık rate limit: `REDIS_URL` tanımlıysa Redis kullanılır.
  * Aksi halde in-memory `rateLimitLocalMemory` ile düşer.
  */
 async function redisRateLimit(
@@ -62,14 +79,14 @@ async function redisRateLimit(
   max: number,
   windowMs: number
 ): Promise<boolean> {
-  const redis = getUpstashRedis();
+  const redis = getRedis();
   if (!redis) {
     const canFallbackToMemory =
       process.env.NODE_ENV !== "production" ||
       process.env.REQUIRE_DISTRIBUTED_RATE_LIMIT?.trim() === "false";
     if (!canFallbackToMemory) {
       throw new Error(
-        "Distributed rate limit is required in production. Configure Upstash or set REQUIRE_DISTRIBUTED_RATE_LIMIT=false explicitly.",
+        "Distributed rate limit is required in production. Set REDIS_URL or set REQUIRE_DISTRIBUTED_RATE_LIMIT=false explicitly.",
       );
     }
     return rateLimitLocalMemory(key, max, windowMs);
@@ -85,7 +102,7 @@ async function redisRateLimit(
 }
 
 /**
- * Rate limit (async). Üretimde çoklu instance için Upstash Redis env değişkenlerini ayarlayın.
+ * Rate limit (async). Üretimde `REDIS_URL` ayarlayın.
  */
 export async function rateLimit(
   key: string,

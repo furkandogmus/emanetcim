@@ -1,4 +1,4 @@
-import { getUpstashRedis } from "./rate-limit";
+import { getRedis } from "./rate-limit";
 
 const BACKOFF_KEY_PREFIX = "v_backoff:";
 const COOLDOWNS_SEC = [180, 360]; // 3dk, 6dk
@@ -13,7 +13,7 @@ interface BackoffState {
  * Kullanıcı için mevcut soğuma (cooldown) bilgisini döndürür.
  */
 export async function getVerificationBackoff(email: string) {
-  const redis = getUpstashRedis();
+  const redis = getRedis();
   const key = `${BACKOFF_KEY_PREFIX}${email.toLowerCase()}`;
 
   if (!redis) {
@@ -21,7 +21,8 @@ export async function getVerificationBackoff(email: string) {
     return { canResend: true, waitSeconds: 0, attempts: 0, maxReached: false };
   }
 
-  const state = await redis.get<BackoffState>(key);
+  const raw = await redis.get(key);
+  const state = raw ? (JSON.parse(raw) as BackoffState) : null;
   if (!state) {
     return { canResend: true, waitSeconds: 0, attempts: 0, maxReached: false };
   }
@@ -48,17 +49,18 @@ export async function getVerificationBackoff(email: string) {
  * Yeni bir deneme kaydedilir.
  */
 export async function recordVerificationAttempt(email: string) {
-  const redis = getUpstashRedis();
+  const redis = getRedis();
   const key = `${BACKOFF_KEY_PREFIX}${email.toLowerCase()}`;
 
   if (!redis) return;
 
-  const state = (await redis.get<BackoffState>(key)) || { count: 0, lastAttempt: 0 };
+  const raw = await redis.get(key);
+  const state: BackoffState = raw ? JSON.parse(raw) : { count: 0, lastAttempt: 0 };
   
   const newState: BackoffState = {
     count: state.count + 1,
     lastAttempt: Math.floor(Date.now() / 1000),
   };
 
-  await redis.set(key, newState, { ex: ATTEMPT_EXPIRY_SEC });
+  await redis.set(key, JSON.stringify(newState), "EX", ATTEMPT_EXPIRY_SEC);
 }

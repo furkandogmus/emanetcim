@@ -11,7 +11,7 @@
 
 ## 2) Critical Security/Operations
 - Rate limit smoke test (rapid page switches, auth, payment endpoints)
-- `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` present in production
+- `REDIS_URL` present in production (compose default `redis://redis:6379`)
 - Webhook signature verification validated in production logs
 - No dev credentials or `.env` leaks in repository
 

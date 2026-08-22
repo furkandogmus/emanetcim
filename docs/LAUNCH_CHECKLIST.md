@@ -27,7 +27,7 @@ Beta **ödemesiz** çıkar: `PAYMENTS_ENABLED=false` (env kill switch) + `NEXT_P
 - [ ] **Google Search Console:** Domain property aç → `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` env'ini doldur (meta tag desteği eklendi) → `sitemap.xml` gönder.
 - [ ] **Bing Webmaster Tools:** GSC'den içe aktar (5 dk).
 - [ ] **Plausible:** `NEXT_PUBLIC_PLAUSIBLE_DOMAIN=bagajpark.com`; `booking_paid`, `partner_apply` custom event hedefleri.
-- [ ] **Upstash rate limit:** `UPSTASH_REDIS_REST_*` + `REQUIRE_DISTRIBUTED_RATE_LIMIT=true` (login/ödeme brute-force koruması).
+- [ ] **Redis rate limit:** `REDIS_URL` (compose varsayılanı `redis://redis:6379`) + `REQUIRE_DISTRIBUTED_RATE_LIMIT=true` (login/ödeme brute-force koruması).
 - [ ] **Synthetic monitoring:** UptimeRobot vb. ile `/tr`, `/api/health` (varsa) ping + SSL süre uyarısı.
 
 ## C. İlk hafta (bloklamaz ama erken yapılmalı)
