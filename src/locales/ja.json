@@ -780,7 +780,11 @@
     "messagesCategorySupport": "サポート",
     "messagesCategoryBulk": "一括配信",
     "messagesCategoryAutomated": "自動",
-    "messagesCategoryAll": "すべて"
+    "messagesCategoryAll": "すべて",
+    "messagesBulkSelected": "件のメッセージを選択中",
+    "messagesBulkSelectAll": "表示中を選択",
+    "messagesBulkDelete": "選択したものを削除",
+    "messagesBulkConfirm": "選択したメッセージを完全に削除しますか？"
   },
   "Auth": {
     "loginTitle": "バガジパークにサインインする",

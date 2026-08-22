@@ -780,7 +780,11 @@
     "messagesCategorySupport": "Поддръжка",
     "messagesCategoryBulk": "Масови",
     "messagesCategoryAutomated": "Автоматични",
-    "messagesCategoryAll": "Всички"
+    "messagesCategoryAll": "Всички",
+    "messagesBulkSelected": "съобщения избрани",
+    "messagesBulkSelectAll": "Избери видимите",
+    "messagesBulkDelete": "Изтрий избраните",
+    "messagesBulkConfirm": "Да се изтрият ли избраните съобщения завинаги?"
   },
   "Auth": {
     "loginTitle": "Вход в BagajPark",

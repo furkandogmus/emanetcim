@@ -780,7 +780,11 @@
     "messagesCategorySupport": "지원",
     "messagesCategoryBulk": "대량 발송",
     "messagesCategoryAutomated": "자동",
-    "messagesCategoryAll": "전체"
+    "messagesCategoryAll": "전체",
+    "messagesBulkSelected": "개 메시지 선택됨",
+    "messagesBulkSelectAll": "표시된 항목 선택",
+    "messagesBulkDelete": "선택 항목 삭제",
+    "messagesBulkConfirm": "선택한 메시지를 영구적으로 삭제할까요?"
   },
   "Auth": {
     "loginTitle": "BagajPark 로그인",

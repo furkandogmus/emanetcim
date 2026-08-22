@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Mail, MailOpen, Trash2, Search, ArrowLeft, Inbox, Clock, User, Reply } from "lucide-react";
 import { Link } from "@/i18n/routing";
@@ -16,7 +16,6 @@ interface AdminMessagesClientProps {
 
 export default function AdminMessagesClient({ messages: initialMessages }: AdminMessagesClientProps) {
   const t = useTranslations("Admin");
-  const locale = useLocale();
   const [messages, setMessages] = useState<ContactMessageDTO[]>(initialMessages);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"ALL" | "UNREAD">("ALL");
@@ -32,10 +31,19 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const bulkCopy =
-    locale === "tr"
-      ? { selected: "mesaj seçildi", selectAll: "Görünenleri seç", delete: "Seçilenleri sil", confirm: "Seçilen mesajlar kalıcı olarak silinsin mi?" }
-      : { selected: "messages selected", selectAll: "Select visible", delete: "Delete selected", confirm: "Permanently delete the selected messages?" };
+  /**
+   * Toplu işlem metinleri artık `Admin` namespace'inden geliyor.
+   *
+   * Eskiden bileşen içinde sabit bir `locale === "tr" ? {...} : {...}` üçlüsüydü,
+   * yani diğer 12 dilde toplu işlem arayüzü İngilizce çıkıyordu (P2-8). Turist
+   * odaklı bir üründe Türkçe dışı diller tam da hedef kitle.
+   */
+  const bulkCopy = {
+    selected: t("messagesBulkSelected"),
+    selectAll: t("messagesBulkSelectAll"),
+    delete: t("messagesBulkDelete"),
+    confirm: t("messagesBulkConfirm"),
+  };
 
   /** Seçicide gösterilen sayaçlar. `UNCLASSIFIED` destek altında sayılır. */
   const categoryCounts = {
@@ -339,6 +347,10 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
                             disabled={loadingId === msg.id}
                             className="p-2 text-gray-400 hover:text-orange-600 rounded-lg hover:bg-orange-50 transition-colors"
                             title={t("messagesMarkAsRead")}
+                            // `title` tek başına erişilebilir ad olarak
+                            // güvenilmez: dokunmatik cihazda tooltip görünmez ve
+                            // ekran okuyucu desteği tutarsızdır (P2-9).
+                            aria-label={t("messagesMarkAsRead")}
                           >
                             <MailOpen size={16} />
                           </button>
@@ -348,6 +360,7 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
                           disabled={loadingId === msg.id}
                           className="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors"
                           title={t("messagesDelete")}
+                          aria-label={t("messagesDelete")}
                         >
                           <Trash2 size={16} />
                         </button>

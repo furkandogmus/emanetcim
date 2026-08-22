@@ -94,7 +94,8 @@ export type CheckInSealPayload = {
 export interface IBookingService {
   checkIn(
     bookingId: string,
-    seals?: CheckInSealPayload
+    seals?: CheckInSealPayload,
+    actor?: PaymentActor,
   ): Promise<PartnerCheckInResult>;
   checkOut(bookingId: string): Promise<PartnerCheckOutResult>;
   getBookingByToken(token: string): Promise<BookingWithGuestShop | null>;
@@ -411,7 +412,8 @@ export class BookingService implements IBookingService {
    */
   async checkIn(
     bookingId: string,
-    seals?: CheckInSealPayload
+    seals?: CheckInSealPayload,
+    actor?: PaymentActor,
   ): Promise<PartnerCheckInResult> {
     try {
       const existing = await prisma.booking.findUnique({
@@ -446,6 +448,69 @@ export class BookingService implements IBookingService {
           message:
             'Şu an dükkan kapalı görünüyor. Çalışma saatleri içinde tekrar deneyin.',
         };
+      }
+
+      /**
+       * ÖDEME KANITI OLMADAN BAVUL KABUL EDİLMEZ (P1-9).
+       *
+       * 2026-08-22'de prod'da 7 rezervasyon ödeme kaydı olmadan ilerlemişti;
+       * ikisinde bavul zaten dükkana teslim edilmişti. Kural yoktu.
+       *
+       * Doğru kural sağlayıcıya bağlıdır, sabit değil:
+       *   - Sağlayıcı ONLINE tahsil ediyorsa (`capturesOnline`), para check-in'den
+       *     ÖNCE alınmış olmalı. Alınmamışsa check-in reddedilir — misafir
+       *     ödemeden bavul bırakamaz.
+       *   - Sağlayıcı online tahsil ETMİYORSA (lansmandaki `manual`, yani dükkanda
+       *     tahsilat), check-in **tam olarak paranın el değiştirdiği andır**.
+       *     O yüzden burada tahsil ediliyor: niyet yoksa açılıyor, sonra
+       *     yakalanıyor. Esnafın "aldım" beyanı deftere ve denetim izine yazılıyor.
+       *
+       * SIRA ÖNEMLİ — önce tahsilat, sonra check-in. Aradaki bir çökme `PAID` +
+       * defter satırı bırakır ki bu GEÇERLİ bir durumdur (ödendi, henüz teslim
+       * alınmadı). Ters sıra ise `CHECKED_IN` ama ödemesiz bırakırdı — düzeltmeye
+       * çalıştığımız hatanın ta kendisi.
+       */
+      const alreadyCaptured = await paymentService.hasCapturedPayment(bookingId);
+      if (!alreadyCaptured) {
+        if (paymentService.capabilities.capturesOnline) {
+          return {
+            ok: false,
+            code: 'PAYMENT_REQUIRED',
+            message:
+              'Bu rezervasyonun ödemesi alınmamış. Ödeme tamamlanmadan bavul teslim alınamaz.',
+          };
+        }
+
+        const totalPrice = moneyToNumber(existing.totalPrice);
+        const intent = await paymentService.openIntent({
+          bookingId,
+          amount: totalPrice,
+          actor,
+        });
+        if (!intent.ok) {
+          logger.error(
+            { bookingId, code: intent.code, message: intent.message },
+            'checkin_payment_intent_failed',
+          );
+          return {
+            ok: false,
+            code: 'PAYMENT_REQUIRED',
+            message: 'Ödeme kaydı açılamadı; check-in tamamlanamıyor.',
+          };
+        }
+
+        const captured = await paymentService.markCaptured({ bookingId, actor });
+        if (!captured.ok) {
+          logger.error(
+            { bookingId, code: captured.code, message: captured.message },
+            'checkin_payment_capture_failed',
+          );
+          return {
+            ok: false,
+            code: 'PAYMENT_REQUIRED',
+            message: 'Tahsilat kaydedilemedi; check-in tamamlanamıyor.',
+          };
+        }
       }
 
       await prisma.$transaction(async (tx) => {

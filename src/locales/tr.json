@@ -822,7 +822,11 @@
     "messagesCategorySupport": "Destek",
     "messagesCategoryBulk": "Toplu",
     "messagesCategoryAutomated": "Otomatik",
-    "messagesCategoryAll": "Tümü"
+    "messagesCategoryAll": "Tümü",
+    "messagesBulkSelected": "mesaj seçildi",
+    "messagesBulkSelectAll": "Görünenleri seç",
+    "messagesBulkDelete": "Seçilenleri sil",
+    "messagesBulkConfirm": "Seçilen mesajlar kalıcı olarak silinsin mi?"
   },
   "Auth": {
     "loginTitle": "BagajPark'a Giriş Yap",

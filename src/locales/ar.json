@@ -780,7 +780,11 @@
     "messagesCategorySupport": "الدعم",
     "messagesCategoryBulk": "رسائل جماعية",
     "messagesCategoryAutomated": "تلقائية",
-    "messagesCategoryAll": "الكل"
+    "messagesCategoryAll": "الكل",
+    "messagesBulkSelected": "رسالة محددة",
+    "messagesBulkSelectAll": "تحديد المعروض",
+    "messagesBulkDelete": "حذف المحدد",
+    "messagesBulkConfirm": "هل تريد حذف الرسائل المحددة نهائيًا؟"
   },
   "Auth": {
     "loginTitle": "تسجيل الدخول إلى BagajPark",

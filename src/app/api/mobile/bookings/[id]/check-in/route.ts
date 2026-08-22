@@ -36,7 +36,11 @@ export async function POST(
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
-  const result = await bookingService.checkIn(id, sealPayload);
+  // Aktör: dükkanda tahsilat modunda check-in "parayı aldım" beyanıdır (P1-9).
+  const result = await bookingService.checkIn(id, sealPayload, {
+    id: auth.user.id,
+    role: auth.user.role,
+  });
 
   if (!result.ok) {
     return NextResponse.json({ error: result.code, message: result.message }, { status: 400 });

@@ -780,7 +780,11 @@
     "messagesCategorySupport": "支持",
     "messagesCategoryBulk": "群发",
     "messagesCategoryAutomated": "自动",
-    "messagesCategoryAll": "全部"
+    "messagesCategoryAll": "全部",
+    "messagesBulkSelected": "条消息已选择",
+    "messagesBulkSelectAll": "选择可见项",
+    "messagesBulkDelete": "删除所选",
+    "messagesBulkConfirm": "是否永久删除所选消息？"
   },
   "Auth": {
     "loginTitle": "登录巴加公园",

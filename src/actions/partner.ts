@@ -161,7 +161,12 @@ export async function checkInAction(
     };
   }
 
-  const result = await bookingService.checkIn(bookingId);
+  // Aktör kim: dükkanda tahsilat modunda check-in aynı zamanda "parayı aldım"
+  // beyanıdır ve bu denetim izine yazılır (P1-9).
+  const result = await bookingService.checkIn(bookingId, undefined, {
+    id: session.user.id,
+    role: session.user.role,
+  });
 
   if (result.ok) {
     if (booking.guest?.email) {

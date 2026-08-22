@@ -17,7 +17,15 @@ const { mockGetPricingRules } = vi.hoisted(() => ({
   }),
 }));
 
-const { mockTx, mockPrisma, mockSealService } = vi.hoisted(() => {
+const { mockTx, mockPrisma, mockSealService, mockPaymentService } = vi.hoisted(() => {
+  const mockPaymentService = {
+    capabilities: { id: "manual", capturesOnline: false, supportsCardRefund: false, supportsSplit: false },
+    hasCapturedPayment: vi.fn().mockResolvedValue(false),
+    openIntent: vi.fn().mockResolvedValue({ ok: true, value: { redirectUrl: null, status: "PENDING" } }),
+    markCaptured: vi.fn().mockResolvedValue({ ok: true, value: { transactionId: "t1" } }),
+    refund: vi.fn().mockResolvedValue({ ok: true, value: {} }),
+    cancelIntent: vi.fn().mockResolvedValue({ ok: true, value: undefined }),
+  };
   const mockTx = {
     shop: { findUnique: vi.fn() },
     booking: {
@@ -35,6 +43,7 @@ const { mockTx, mockPrisma, mockSealService } = vi.hoisted(() => {
   };
   return {
     mockTx,
+    mockPaymentService,
     mockSealService: {
       applyCheckInWithinTx: vi.fn().mockResolvedValue(true),
       applyCheckOutReturnSealsWithinTx: vi.fn().mockResolvedValue(true),
@@ -70,6 +79,14 @@ vi.mock("@/lib/shop-hours", () => ({
   isShopOpenAt: vi.fn().mockReturnValue(true),
 }));
 
+/**
+ * Ödeme defteri. Varsayılan: tahsilat YOK ve sağlayıcı online tahsil ETMİYOR
+ * (lansmandaki `manual`), yani check-in tahsilatı kendisi yapar (P1-9).
+ */
+vi.mock("@/services/PaymentService", () => ({
+  paymentService: mockPaymentService,
+}));
+
 describe("BookingService Deep Logic", () => {
   const service = new BookingService();
 
@@ -101,6 +118,7 @@ describe("BookingService Deep Logic", () => {
         bagCountS: 1,
         bagCountM: 0,
         bagCountXl: 0,
+        totalPrice: 100,
         bookingRowVersion: 0,
         shop: { id: "s1" },
       } as any);
@@ -111,6 +129,97 @@ describe("BookingService Deep Logic", () => {
       expect(mockTx.booking.updateMany).toHaveBeenCalledWith(expect.objectContaining({
         data: expect.objectContaining({ status: "CHECKED_IN" }),
       }));
+    });
+
+    /**
+     * P1-9: prod'da 7 rezervasyon ödeme kaydı olmadan ilerlemişti, ikisinde bavul
+     * zaten dükkana teslim edilmişti. Kural yoktu.
+     */
+    describe("ödeme kanıtı (P1-9)", () => {
+      const paidBooking = {
+        id: "b1",
+        status: "PAID",
+        bagCountS: 1,
+        bagCountM: 0,
+        bagCountXl: 0,
+        totalPrice: 100,
+        bookingRowVersion: 0,
+        shop: { id: "s1" },
+      };
+
+      it("dükkanda tahsilat modunda check-in TAHSİLATI KENDİSİ yapar", async () => {
+        mockPrisma.booking.findUnique.mockResolvedValue(paidBooking as any);
+        mockPaymentService.hasCapturedPayment.mockResolvedValue(false);
+
+        const result = await service.checkIn("b1");
+
+        expect(result.ok).toBe(true);
+        expect(mockPaymentService.openIntent).toHaveBeenCalledWith(
+          expect.objectContaining({ bookingId: "b1", amount: 100 }),
+        );
+        expect(mockPaymentService.markCaptured).toHaveBeenCalled();
+      });
+
+      it("tahsilat zaten yapılmışsa ikinci kez yapılmaz", async () => {
+        mockPrisma.booking.findUnique.mockResolvedValue(paidBooking as any);
+        mockPaymentService.hasCapturedPayment.mockResolvedValue(true);
+
+        const result = await service.checkIn("b1");
+
+        expect(result.ok).toBe(true);
+        expect(mockPaymentService.openIntent).not.toHaveBeenCalled();
+        expect(mockPaymentService.markCaptured).not.toHaveBeenCalled();
+      });
+
+      it("ONLINE tahsil eden sağlayıcıda ödemesiz check-in REDDEDİLİR", async () => {
+        // Misafir ödemeden bavul birakamaz.
+        mockPrisma.booking.findUnique.mockResolvedValue(paidBooking as any);
+        mockPaymentService.hasCapturedPayment.mockResolvedValue(false);
+        mockPaymentService.capabilities.capturesOnline = true;
+
+        const result = await service.checkIn("b1");
+
+        expect(result.ok).toBe(false);
+        expect((result as any).code).toBe("PAYMENT_REQUIRED");
+        expect(mockTx.booking.updateMany).not.toHaveBeenCalled();
+
+        mockPaymentService.capabilities.capturesOnline = false;
+      });
+
+      it("tahsilat kaydedilemezse BAVUL KABUL EDİLMEZ", async () => {
+        mockPrisma.booking.findUnique.mockResolvedValue(paidBooking as any);
+        mockPaymentService.hasCapturedPayment.mockResolvedValue(false);
+        mockPaymentService.markCaptured.mockResolvedValueOnce({
+          ok: false,
+          code: "NO_INTENT",
+          message: "x",
+        });
+
+        const result = await service.checkIn("b1");
+
+        expect(result.ok).toBe(false);
+        expect((result as any).code).toBe("PAYMENT_REQUIRED");
+        expect(mockTx.booking.updateMany).not.toHaveBeenCalled();
+      });
+
+      it("SIRA: tahsilat check-in'DEN ÖNCE — ters sıra P1-9'u yeniden üretirdi", async () => {
+        mockPrisma.booking.findUnique.mockResolvedValue(paidBooking as any);
+        mockPaymentService.hasCapturedPayment.mockResolvedValue(false);
+
+        const order: string[] = [];
+        mockPaymentService.markCaptured.mockImplementationOnce(async () => {
+          order.push("capture");
+          return { ok: true, value: { transactionId: "t1" } };
+        });
+        mockTx.booking.updateMany.mockImplementationOnce(async () => {
+          order.push("checkin");
+          return { count: 1 };
+        });
+
+        await service.checkIn("b1");
+
+        expect(order).toEqual(["capture", "checkin"]);
+      });
     });
   });
 

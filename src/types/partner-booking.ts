@@ -4,6 +4,14 @@ export type PartnerCheckInErrorCode =
   | "NOT_FOUND"
   | "INVALID_STATUS"
   | "SHOP_CLOSED"
+  /**
+   * Ödeme kanıtı yok ve tahsilat da yapılamadı.
+   *
+   * Online tahsil eden bir sağlayıcıda: misafir ödemeden bavul bırakamaz.
+   * Dükkanda tahsilat modunda: check-in paranın el değiştirdiği andır ve o kayıt
+   * yazılamadıysa bavul kabul edilmemelidir (P1-9).
+   */
+  | "PAYMENT_REQUIRED"
   | "SEAL_REQUIRED"
   | "SEAL_COUNT_MISMATCH"
   | "SEAL_INVALID"

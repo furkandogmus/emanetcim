@@ -822,7 +822,11 @@
     "messagesCategorySupport": "Support",
     "messagesCategoryBulk": "Bulk",
     "messagesCategoryAutomated": "Automated",
-    "messagesCategoryAll": "All"
+    "messagesCategoryAll": "All",
+    "messagesBulkSelected": "messages selected",
+    "messagesBulkSelectAll": "Select visible",
+    "messagesBulkDelete": "Delete selected",
+    "messagesBulkConfirm": "Permanently delete the selected messages?"
   },
   "Auth": {
     "loginTitle": "Sign in to BagajPark",

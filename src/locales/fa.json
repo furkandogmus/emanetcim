@@ -780,7 +780,11 @@
     "messagesCategorySupport": "پشتیبانی",
     "messagesCategoryBulk": "انبوه",
     "messagesCategoryAutomated": "خودکار",
-    "messagesCategoryAll": "همه"
+    "messagesCategoryAll": "همه",
+    "messagesBulkSelected": "پیام انتخاب شد",
+    "messagesBulkSelectAll": "انتخاب موارد نمایش‌داده‌شده",
+    "messagesBulkDelete": "حذف موارد انتخاب‌شده",
+    "messagesBulkConfirm": "پیام‌های انتخاب‌شده برای همیشه حذف شوند؟"
   },
   "Auth": {
     "loginTitle": "ورود به BagajPark",

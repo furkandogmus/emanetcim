@@ -780,7 +780,11 @@
     "messagesCategorySupport": "Soporte",
     "messagesCategoryBulk": "Masivos",
     "messagesCategoryAutomated": "Automáticos",
-    "messagesCategoryAll": "Todos"
+    "messagesCategoryAll": "Todos",
+    "messagesBulkSelected": "mensajes seleccionados",
+    "messagesBulkSelectAll": "Seleccionar visibles",
+    "messagesBulkDelete": "Eliminar seleccionados",
+    "messagesBulkConfirm": "¿Eliminar permanentemente los mensajes seleccionados?"
   },
   "Auth": {
     "loginTitle": "Iniciar sesión en BagajPark",
