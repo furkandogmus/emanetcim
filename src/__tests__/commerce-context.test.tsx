@@ -12,6 +12,7 @@ import {
   useCommerce,
   usePaymentCopyKey,
 } from "@/components/providers/CommerceProvider";
+import { isInsuranceEnabled } from "@/lib/commerce-context";
 
 /**
  * Ticari vaat bağlamı.
@@ -26,13 +27,11 @@ import {
  */
 
 function Probe() {
-  const { paymentCopyMode, insuranceEnabled, insuranceFeeTry } = useCommerce();
+  const { paymentCopyMode } = useCommerce();
   const k = usePaymentCopyKey();
   return (
     <div>
       <span data-testid="mode">{paymentCopyMode}</span>
-      <span data-testid="insurance">{String(insuranceEnabled)}</span>
-      <span data-testid="fee">{insuranceFeeTry}</span>
       <span data-testid="key">{k("modifyRefundNote")}</span>
     </div>
   );
@@ -43,18 +42,17 @@ describe("CommerceProvider", () => {
 
   it("SARMALAYICI YOKSA ihtiyatlı varsayılana düşer — vaat kazara ortaya çıkmaz", () => {
     // En kritik test: bir gelistirici saglayiciyi sarmalamayi unutursa, sistem
-    // "kartla odeme var, sigorta var" DEMEMELI.
+    // "kartla odeme var" DEMEMELI.
     render(<Probe />);
 
     expect(screen.getByTestId("mode").textContent).toBe("onsite");
-    expect(screen.getByTestId("insurance").textContent).toBe("false");
     expect(screen.getByTestId("key").textContent).toBe("modifyRefundNoteOnsite");
   });
 
   it("dükkanda tahsilat modunda Onsite anahtarı seçilir", () => {
     render(
       <CommerceProvider
-        value={{ paymentCopyMode: "onsite", insuranceEnabled: false, insuranceFeeTry: 0 }}
+        value={{ paymentCopyMode: "onsite" }}
       >
         <Probe />
       </CommerceProvider>,
@@ -67,26 +65,34 @@ describe("CommerceProvider", () => {
     // PSP entegre edildigi gun hicbir ceviri dosyasi elle degismez.
     render(
       <CommerceProvider
-        value={{ paymentCopyMode: "online", insuranceEnabled: true, insuranceFeeTry: 15 }}
+        value={{ paymentCopyMode: "online" }}
       >
         <Probe />
       </CommerceProvider>,
     );
 
     expect(screen.getByTestId("key").textContent).toBe("modifyRefundNote");
-    expect(screen.getByTestId("insurance").textContent).toBe("true");
-    expect(screen.getByTestId("fee").textContent).toBe("15");
   });
 
-  it("sigorta ücreti sıfırken insuranceEnabled false olmalı", () => {
-    render(
-      <CommerceProvider
-        value={{ paymentCopyMode: "onsite", insuranceEnabled: false, insuranceFeeTry: 0 }}
-      >
-        <Probe />
-      </CommerceProvider>,
-    );
+});
 
-    expect(screen.getByTestId("insurance").textContent).toBe("false");
+describe("isInsuranceEnabled", () => {
+  /**
+   * Sigorta durumu artık kök layout'tan DEĞİL, kuralları zaten elinde olan
+   * yüzeylerden türüyor. Sebep: layout'ta DB sorgusu hem her istekte bir tur
+   * demekti hem de `/about`, `/faq`, `/hotels` gibi tamamen içerik sayfalarının
+   * statik üretilmesini imkânsız kılıyordu.
+   */
+  it("ücret sıfırken KAPALI — karşılığı olmayan güvence vaadi verilmez", () => {
+    expect(isInsuranceEnabled({ insuranceFeeTry: 0 })).toBe(false);
+  });
+
+  it("ücret varsa açık", () => {
+    expect(isInsuranceEnabled({ insuranceFeeTry: 15 })).toBe(true);
+  });
+
+  it("negatif veya anlamsız değer KAPALI sayılır", () => {
+    expect(isInsuranceEnabled({ insuranceFeeTry: -5 })).toBe(false);
+    expect(isInsuranceEnabled({ insuranceFeeTry: NaN })).toBe(false);
   });
 });

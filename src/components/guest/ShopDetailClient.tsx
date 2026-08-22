@@ -27,7 +27,7 @@ import {
 import { TrustBadges } from "@/components/common/TrustBadge";
 import FavoriteButton from "@/components/guest/FavoriteButton";
 import ShopGallery from "@/components/guest/ShopGallery";
-import { useCommerce } from "@/components/providers/CommerceProvider";
+import { isInsuranceEnabled } from "@/lib/commerce-context";
 import Money from "@/components/common/Money";
 import { formatDecimal } from "@/lib/currency";
 
@@ -75,8 +75,11 @@ export default function ShopDetailClient({
 }: ShopDetailClientProps) {
   const router = useRouter();
   const t = useTranslations("Guest");
-  // Sigorta gerçekten var mı? Yapılandırmadan gelir, sabit değil (P1-20).
-  const { insuranceEnabled } = useCommerce();
+  /**
+   * Sigorta gerçekten var mı? Zaten elimizde olan `pricingRules`'tan türüyor —
+   * ayrı bir sorgu veya bağlam gerekmiyor (P1-20).
+   */
+  const insuranceEnabled = isInsuranceEnabled(pricingRules);
   const locale = useLocale();
   const dateLocale = dateLocaleForUiLocale(locale);
   const slot = roundedSlotPrices(shop.pricePerDay, pricingRules);

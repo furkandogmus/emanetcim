@@ -110,8 +110,13 @@ export default async function RootLayout({
 
   const tSEO = await getTranslations({ locale, namespace: "SEO" });
   const messages = await getMessages();
-  // Ödeme modu ve sigorta durumu: yapılandırmadan türer, sabit yazılmaz.
-  const commerce = await resolveCommerceContext();
+  /**
+   * Ödeme modu: ortam değişkeninden türer, VERİTABANINA DOKUNMAZ.
+   * Kök layout'un DB sorgusu yapması hem her istekte bir tur demekti hem de
+   * içerik sayfalarının statik üretilmesini engelliyordu — bkz.
+   * `src/lib/commerce-context.ts`.
+   */
+  const commerce = resolveCommerceContext();
   const base = getSiteBaseUrl();
 
   const htmlLang = locale === "zh" ? "zh-Hans" : locale;

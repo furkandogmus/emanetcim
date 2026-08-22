@@ -4,7 +4,8 @@ import { Link } from "@/i18n/routing";
 import { ShieldCheck, CircleCheck, Wrench, SearchCheck } from "lucide-react";
 import { alternatesForPath } from "@/lib/seo-alternates";
 import { buildFaqJsonLd } from "@/lib/faq-json-ld";
-import { resolveCommerceContext } from "@/lib/commerce-context";
+import { isInsuranceEnabled } from "@/lib/commerce-context";
+import { getPricingRules } from "@/lib/platform-settings";
 
 const copy = {
   tr: {
@@ -114,7 +115,8 @@ export default async function InsurancePage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { insuranceEnabled } = await resolveCommerceContext();
+  // Kurallar burada bir kez okunuyor; kök layout'un DB'ye dokunmasına gerek yok.
+  const insuranceEnabled = isInsuranceEnabled(await getPricingRules());
   const c = byLocale(locale);
   const faqItems =
     locale === "tr"

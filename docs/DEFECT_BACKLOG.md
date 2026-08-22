@@ -885,6 +885,37 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
 - **AÇIK KALAN**: sigorta gerçekten sunulacak mı? Sunulacaksa tutar bir poliçeye
   bağlanmalı; sunulmayacaksa sayfa ve sözleşme 2.3 gözden geçirilmeli.
 
+### [P1-26] ⚠️ ÖLÇÜLDÜ — 59 sayfanın 57'si dinamik; içerik sayfaları da her istekte sunucuda render ediliyor
+- **Kanıt** (`npm run build` çıktısından saydım): `○ 1 statik | ● 1 SSG | ƒ 57 dinamik`.
+  Dinamikler arasında `/about`, `/faq`, `/cancellation`, `/hotels`,
+  `/become-partner`, `/insurance` gibi **tamamen statik içerik** sayfaları var.
+- **Neden önemli — doğrudan maliyet**: her ziyaret sunucu CPU'su ve (layout DB'ye
+  dokunduğu için) bir veritabanı bağlantısı harcıyor. Statik/ISR üretim üçünü
+  birden kazandırır: sunucu maliyeti düşer, sayfa CDN'den gelir, hız doğrudan
+  arama sıralamasına yansır — ürün organik aramaya dayandığı için üçü de aynı
+  hedefe çalışıyor.
+- **Kök neden**: `[locale]` segmenti için `generateStaticParams` yok. Bu olmadan
+  Next hangi dillerin var olduğunu bilemez ve `[locale]/*` altındaki her sayfayı
+  istek başına render eder.
+- **Yapıldı (2026-08-22) — engelin yarısı kaldırıldı**: kök layout artık
+  **veritabanına dokunmuyor**. Ödeme modu ortam değişkeninden geliyor; sigorta
+  durumunu ona ihtiyacı olan iki yüzey kendi zaten yüklediği kurallardan türetiyor
+  (`isInsuranceEnabled`). Ayrıca `resolveCommerceContext` bir DB kesintisinde
+  siteyi düşürmüyor — ihtiyatlı varsayılana düşüyor.
+- **DENENDİ VE GERİ ALINDI**: `generateStaticParams` eklendi, DB okuyan 30 sayfa
+  `force-dynamic` işaretlendi, ama build yine kırıldı — `/hotels` gibi DB'ye hiç
+  dokunmayan bir sayfa bile prerender edilemedi. Doğrulanamayan bir değişikliği
+  bırakmak, kazanılacak maliyetten pahalıya mal olur: **hatalı sınıflandırılmış tek
+  bir sayfa deploy'u kırar.**
+- **AÇIK KALAN — gerçek bir veritabanıyla yapılmalı**: CI'da zaten Postgres servisi
+  var (`ci.yml`, integration testleri için). Doğru sıra: (1) build'i o servise
+  bağla, (2) `generateStaticParams` ekle, (3) prerender hatası veren her sayfayı
+  tek tek `force-dynamic` işaretle, (4) statik sayılan sayfa sayısının gerçekten
+  arttığını build çıktısından doğrula. Deploy iş akışı (`deploy.yml`) Docker
+  imajını yer tutucu `DATABASE_URL` ile kurduğu için orası da güncellenmeli.
+- **Beklenen kazanç**: içerik ve şehir landing sayfaları (~15-20 sayfa × 14 dil)
+  sunucuyu hiç meşgul etmez.
+
 ### [P1-24] ⚠️ ÖLÇÜLDÜ VE MANDALLANDI — 30 sabit iki dilli metin dalı; 12 dil İngilizce görüyor
 - **Nerede**: 13 dosya. En büyükleri `CheckoutClient` (8 dal), `Footer` (3),
   `luggage-storage/[slug]` (3), `[locale]/page.tsx` (3), `ShopDetailClient`

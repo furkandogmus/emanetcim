@@ -21,8 +21,6 @@ import { paymentCopyKey } from "@/lib/payment-copy";
  */
 const FALLBACK: CommerceContextValue = {
   paymentCopyMode: "onsite",
-  insuranceEnabled: false,
-  insuranceFeeTry: 0,
 };
 
 const CommerceContext = createContext<CommerceContextValue>(FALLBACK);
