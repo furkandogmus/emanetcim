@@ -51,6 +51,18 @@ jobs:
       - name: Prisma migrate (CI DB)
         run: npx prisma migrate deploy
 
+      # Migrasyonlarin urettigi sema, schema.prisma ile BIREBIR mi?
+      #
+      # NEDEN: sekiz migrasyon elle yazilmisti ve hicbiri gercek bir Postgres'e
+      # karsi denenmemisti. Denendiginde iki sapma cikti (PaymentLog.updatedAt
+      # varsayilani ve semada bildirilmemis bir Shop indeksi). Ikisi de deploy'u
+      # kirmazdi ama bir sonraki `migrate dev` calistiran kisiye aciklanamayan
+      # bir drift olarak cikardi.
+      - name: Migrasyon / sema sapma kontrolu
+        run: npm run db:verify -- --host localhost --port 5432 --user ci
+        env:
+          PGPASSWORD: ci
+
       - name: Unit + integration tests
         run: npm run test
         env:

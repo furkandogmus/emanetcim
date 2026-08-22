@@ -144,6 +144,9 @@ model Shop {
   @@index([ownerId])
   @@index([isActive])
   @@index([latitude, longitude])
+  /// Kamuya açık dükkan filtresi (`src/lib/public-shop-filter.ts`) her aramada
+  /// bu iki alana birlikte bakıyor.
+  @@index([isTest, isActive])
 }
 
 model ShopImage {

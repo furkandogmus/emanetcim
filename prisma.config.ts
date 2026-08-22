@@ -27,5 +27,18 @@ export default defineConfig({
   datasource: {
     // Prisma 7+ artık url'i buradan okuyor (schema.prisma yerine)
     url: datasourceUrl(),
+    /**
+     * `prisma migrate diff --from-migrations` ve `migrate dev` bunu ister.
+     *
+     * NEDEN EKLENDİ (2026-08-22): 8 migrasyon elle yazılmıştı ve hiçbiri gerçek
+     * bir Postgres'e karşı çalıştırılmamıştı. Gölge veritabanı tanımlı olmadığı
+     * için `migrate diff` çalıştırılamıyor, yani migrasyonların şemayla örtüşüp
+     * örtüşmediği ÖLÇÜLEMİYORDU. Ölçünce iki sapma çıktı.
+     *
+     * Tanımsızsa `undefined` kalır ve normal akış (`migrate deploy`, `generate`)
+     * etkilenmez — yalnızca doğrulama komutları bunu gerektirir.
+     * Kullanımı: `npm run db:verify`
+     */
+    shadowDatabaseUrl: process.env.SHADOW_DATABASE_URL,
   },
 });

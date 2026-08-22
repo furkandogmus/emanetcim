@@ -21,6 +21,12 @@ ALTER TABLE "PaymentLog"
   ADD COLUMN "refundedAt"     TIMESTAMP(3),
   ADD COLUMN "updatedAt"      TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
+-- Varsayilan YALNIZCA mevcut satirlari doldurmak icindi; kaldiriliyor.
+-- Prisma'nin `@updatedAt` alani degeri istemci tarafinda uretir ve sutunda bir
+-- DB varsayilani BEKLEMEZ. Birakilirsa sema ile migrasyon ayrisir:
+-- `prisma migrate diff` bunu "default changed" olarak raporluyordu.
+ALTER TABLE "PaymentLog" ALTER COLUMN "updatedAt" DROP DEFAULT;
+
 -- Bu migrasyondan ÖNCE var olan satırlar sağlayıcısı doğrulanmamış kayıtlardır.
 UPDATE "PaymentLog" SET "provider" = 'legacy_unverified';
 
