@@ -22,7 +22,8 @@ npm run test:e2e     # Playwright; dev sunucuyu kendisi kaldırır
 
 ## Mimari kurallar
 
-- **Yazma işlemleri yalnızca `src/services/`** üzerinden. `app/` ve `actions/`
+- **Yazma işlemleri yalnızca `src/services/`** üzerinden. Rezervasyon yaşam döngüsü
+  `src/services/booking/` (create, check-in, check-out, lifecycle); `BookingService` cephedir. `app/` ve `actions/`
   Prisma'yı okuma için doğrudan kullanabilir.
 - **Para yalnızca `PaymentService`** ile değişir; `PaymentLog` elle yazılmaz.
   Sağlayıcı port/adapter: `src/lib/payments/`. Tutarlar `Decimal`; istemciye
