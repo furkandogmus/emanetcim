@@ -218,6 +218,7 @@ export default function RegisterPage() {
             <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
             <input
               type="text"
+              aria-label={t('fullName')}
               placeholder={t('fullName')}
               required
               value={activeTab === 'GUEST' ? guestData.name : partnerData.name}
@@ -235,6 +236,7 @@ export default function RegisterPage() {
               <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
               <input
                 type="email"
+                aria-label={t('email')}
                 placeholder={t('email')}
                 required
                 value={guestData.email}
@@ -247,6 +249,7 @@ export default function RegisterPage() {
               <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
               <input
                 type="tel"
+                aria-label={t('phonePlaceholder')}
                 placeholder={t('phonePlaceholder')}
                 required
                 value={partnerData.phone}
@@ -269,6 +272,7 @@ export default function RegisterPage() {
             <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
             <input
               type="password"
+              aria-label={t('password')}
               placeholder={t('password')}
               required
               minLength={6}
@@ -293,6 +297,7 @@ export default function RegisterPage() {
                 <Store size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
                 <input
                   type="text"
+                  aria-label={t('shopName')}
                   placeholder={t('shopName')}
                   required
                   value={partnerData.shopName}

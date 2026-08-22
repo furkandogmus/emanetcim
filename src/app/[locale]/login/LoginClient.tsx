@@ -148,6 +148,7 @@ export default function LoginPage({
           type="text"
           inputMode="text"
           autoComplete="username"
+          aria-label={t('emailOrPhone')}
           placeholder={t('emailOrPhone')}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -163,6 +164,7 @@ export default function LoginPage({
         <input
           type="password"
           autoComplete="current-password"
+          aria-label={t('password')}
           placeholder={t('password')}
           value={password}
           onChange={(e) => setPassword(e.target.value)}

@@ -357,6 +357,7 @@ export default function SearchClient({
               </div>
               <input
                 type="text"
+                aria-label={t("searchPlaceholder")}
                 placeholder={t("searchPlaceholder")}
                 className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-transparent focus:border-orange-500/30 focus:bg-white focus:ring-4 focus:ring-orange-500/5 rounded-2xl text-base font-semibold placeholder:text-gray-400 transition-all shadow-sm outline-none"
                 value={searchQuery}

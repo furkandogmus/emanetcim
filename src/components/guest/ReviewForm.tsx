@@ -85,6 +85,7 @@ export default function ReviewForm({
            <textarea
              value={comment}
              onChange={(e) => setComment(e.target.value)}
+             aria-label={t("Review.placeholder")}
              placeholder={t("Review.placeholder")}
              className="ui-field min-h-[120px] rounded-[2rem] p-6 resize-none"
            />

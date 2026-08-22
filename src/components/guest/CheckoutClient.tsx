@@ -536,6 +536,7 @@ export default function CheckoutClient({
                 type="text"
                 value={couponCode}
                 onChange={(e) => setCouponCode(e.target.value)}
+                aria-label={t("checkoutCouponPlaceholder")}
                 placeholder={t("checkoutCouponPlaceholder")}
                 className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-sm font-semibold uppercase"
               />
@@ -714,6 +715,7 @@ export default function CheckoutClient({
                 type="email"
                 inputMode="email"
                 autoComplete="email"
+                aria-label={t("checkoutGuestEmailPlaceholder")}
                 placeholder={t("checkoutGuestEmailPlaceholder")}
                 value={guestEmail}
                 onChange={(e) => setGuestEmail(e.target.value)}
@@ -723,6 +725,7 @@ export default function CheckoutClient({
                 type="tel"
                 inputMode="tel"
                 autoComplete="tel"
+                aria-label={t("checkoutGuestPhonePlaceholder")}
                 placeholder={t("checkoutGuestPhonePlaceholder")}
                 value={guestPhone}
                 onChange={(e) => setGuestPhone(e.target.value)}

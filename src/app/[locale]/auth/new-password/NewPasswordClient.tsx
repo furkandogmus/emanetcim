@@ -100,6 +100,7 @@ export default function NewPasswordClient() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={busy || !token}
+                aria-label={t("newPasswordLabel")}
                 placeholder={t("newPasswordLabel")}
                 className="h-12 w-full rounded-xl border-2 border-gray-100 pl-10 pr-4 text-sm font-medium text-gray-800 placeholder-gray-300 transition focus:border-orange-300 focus:outline-none disabled:opacity-50"
               />
@@ -118,6 +119,7 @@ export default function NewPasswordClient() {
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
                 disabled={busy || !token}
+                aria-label={t("newPasswordConfirm")}
                 placeholder={t("newPasswordConfirm")}
                 className="h-12 w-full rounded-xl border-2 border-gray-100 pl-10 pr-4 text-sm font-medium text-gray-800 placeholder-gray-300 transition focus:border-orange-300 focus:outline-none disabled:opacity-50"
               />

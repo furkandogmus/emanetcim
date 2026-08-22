@@ -49,6 +49,7 @@ export default function DisputeForm({
         className="ui-field mt-2 min-h-[120px]"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
+        aria-label={t("descriptionPlaceholder")}
         placeholder={t("descriptionPlaceholder")}
       />
 

@@ -69,6 +69,7 @@ export default function ManageLookupForm() {
               type="text"
               value={bookingId}
               onChange={(e) => setBookingId(e.target.value)}
+              aria-label="ABC12345"
               placeholder="ABC12345"
               className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-sm font-mono font-bold uppercase"
               required
