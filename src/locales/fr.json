@@ -776,7 +776,11 @@
     "platformSettingsLatePickupFee": "Frais de retrait tardif (₺)",
     "platformSettingsLatePickupGrace": "Délai de tolérance (min)",
     "shopIsTest": "Enregistrement de test",
-    "shopIsTestHint": "Un commerce marqué n'apparaît ni dans la recherche, ni sur la carte, ni dans les statistiques. L'espace partenaire et les réservations existantes ne changent pas."
+    "shopIsTestHint": "Un commerce marqué n'apparaît ni dans la recherche, ni sur la carte, ni dans les statistiques. L'espace partenaire et les réservations existantes ne changent pas.",
+    "messagesCategorySupport": "Support",
+    "messagesCategoryBulk": "Envois groupés",
+    "messagesCategoryAutomated": "Automatique",
+    "messagesCategoryAll": "Tous"
   },
   "Auth": {
     "loginTitle": "Connectez-vous à BagajPark",

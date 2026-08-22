@@ -776,7 +776,11 @@
     "platformSettingsLatePickupFee": "رسوم الاستلام المتأخر (₺)",
     "platformSettingsLatePickupGrace": "مهلة التأخير (دقيقة)",
     "shopIsTest": "سجل اختباري",
-    "shopIsTestHint": "المحل المُعلَّم لا يظهر في البحث أو الخريطة أو الإحصاءات. لوحة الشريك والحجوزات الحالية لا تتأثر."
+    "shopIsTestHint": "المحل المُعلَّم لا يظهر في البحث أو الخريطة أو الإحصاءات. لوحة الشريك والحجوزات الحالية لا تتأثر.",
+    "messagesCategorySupport": "الدعم",
+    "messagesCategoryBulk": "رسائل جماعية",
+    "messagesCategoryAutomated": "تلقائية",
+    "messagesCategoryAll": "الكل"
   },
   "Auth": {
     "loginTitle": "تسجيل الدخول إلى BagajPark",

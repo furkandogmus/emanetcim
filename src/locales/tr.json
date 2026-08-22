@@ -818,7 +818,11 @@
     "platformSettingsLatePickupFee": "Geç teslim alma ücreti (₺)",
     "platformSettingsLatePickupGrace": "Gecikme toleransı (dk)",
     "shopIsTest": "Test kaydı",
-    "shopIsTestHint": "İşaretli dükkan aramada, haritada ve ana sayfa istatistiklerinde görünmez. Esnaf paneli ve mevcut rezervasyonlar etkilenmez."
+    "shopIsTestHint": "İşaretli dükkan aramada, haritada ve ana sayfa istatistiklerinde görünmez. Esnaf paneli ve mevcut rezervasyonlar etkilenmez.",
+    "messagesCategorySupport": "Destek",
+    "messagesCategoryBulk": "Toplu",
+    "messagesCategoryAutomated": "Otomatik",
+    "messagesCategoryAll": "Tümü"
   },
   "Auth": {
     "loginTitle": "BagajPark'a Giriş Yap",

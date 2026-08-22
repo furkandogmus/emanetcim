@@ -20,6 +20,15 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
   const [messages, setMessages] = useState<ContactMessageDTO[]>(initialMessages);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"ALL" | "UNREAD">("ALL");
+  /**
+   * Kategori görünümü. VARSAYILAN "SUPPORT" — kutu bir destek kanalıdır, e-posta
+   * çöplüğü değil. 2026-08-22'de 67 mesajın 57'si okunmamıştı ve ezici çoğunluğu
+   * soğuk pazarlamaydı; gerçek bir misafir şikâyeti aralarında kayboluyordu
+   * (P1-18). Diğerleri silinmiyor, yalnızca varsayılan görünümün dışında.
+   */
+  const [category, setCategory] = useState<"SUPPORT" | "BULK" | "AUTOMATED" | "ALL">(
+    "SUPPORT",
+  );
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -27,6 +36,15 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
     locale === "tr"
       ? { selected: "mesaj seçildi", selectAll: "Görünenleri seç", delete: "Seçilenleri sil", confirm: "Seçilen mesajlar kalıcı olarak silinsin mi?" }
       : { selected: "messages selected", selectAll: "Select visible", delete: "Delete selected", confirm: "Permanently delete the selected messages?" };
+
+  /** Seçicide gösterilen sayaçlar. `UNCLASSIFIED` destek altında sayılır. */
+  const categoryCounts = {
+    SUPPORT: messages.filter(
+      (m) => m.category === "SUPPORT" || m.category === "UNCLASSIFIED",
+    ).length,
+    BULK: messages.filter((m) => m.category === "BULK").length,
+    AUTOMATED: messages.filter((m) => m.category === "AUTOMATED").length,
+  };
 
   const filteredMessages = messages.filter((m) => {
     const searchLower = search.toLowerCase();
@@ -37,7 +55,18 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
 
     const matchFilter = filter === "ALL" || (filter === "UNREAD" && !m.isRead);
 
-    return matchSearch && matchFilter;
+    /**
+     * `UNCLASSIFIED` destek görünümünde GÖSTERİLİR.
+     *
+     * Sınıflandırma işi henüz çalışmamış olabilir; sınıfsız bir mesajı gizlemek,
+     * gerçek bir şikâyeti görünmez kılma riski taşır. Hata payı yine ucuz tarafta.
+     */
+    const matchCategory =
+      category === "ALL" ||
+      m.category === category ||
+      (category === "SUPPORT" && m.category === "UNCLASSIFIED");
+
+    return matchSearch && matchFilter && matchCategory;
   });
 
   const handleMarkAsRead = async (id: string, e?: React.MouseEvent) => {
@@ -155,6 +184,32 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+          {/*
+            Kategori seçici. Varsayılan DESTEK: kutu bir destek kanalıdır, gelen
+            e-postaların dökümü değil. Sayaçlar seçicinin üstünde ki operatör
+            "toplu klasörde ne birikiyor" sorusunu bakmadan cevaplayabilsin.
+          */}
+          <select
+            value={category}
+            onChange={(e) =>
+              setCategory(e.target.value as "SUPPORT" | "BULK" | "AUTOMATED" | "ALL")
+            }
+            className="px-4 py-4 bg-white border border-gray-100 rounded-2xl text-xs font-black uppercase tracking-widest text-gray-500 hover:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+          >
+            <option value="SUPPORT">
+              {t("messagesCategorySupport")} ({categoryCounts.SUPPORT})
+            </option>
+            <option value="BULK">
+              {t("messagesCategoryBulk")} ({categoryCounts.BULK})
+            </option>
+            <option value="AUTOMATED">
+              {t("messagesCategoryAutomated")} ({categoryCounts.AUTOMATED})
+            </option>
+            <option value="ALL">
+              {t("messagesCategoryAll")} ({messages.length})
+            </option>
+          </select>
+
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value as "ALL" | "UNREAD")}

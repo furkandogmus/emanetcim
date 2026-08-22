@@ -94,6 +94,15 @@ export const JOB_REGISTRY: readonly JobDefinition[] = [
     enforced: false,
   },
   {
+    name: "classify-inbox",
+    what: "Sınıflandırılmamış gelen kutusu mesajlarını destek/toplu/otomatik olarak ayırır.",
+    ifItStops:
+      "Soğuk pazarlama destek kutusunu doldurur ve gerçek bir misafir şikâyeti aralarında kaybolur. 2026-08-22'de 67 mesajın 57'si okunmamıştı.",
+    cron: "13 5 * * *",
+    maxStaleHours: 48,
+    enforced: false,
+  },
+  {
     name: "finance-export",
     what: "Finans/mutabakat verisini dışa aktarır.",
     ifItStops: "Mutabakat elle yapılmak zorunda kalır.",

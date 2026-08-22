@@ -776,7 +776,11 @@
     "platformSettingsLatePickupFee": "受取遅延料金 (₺)",
     "platformSettingsLatePickupGrace": "遅延猶予時間（分）",
     "shopIsTest": "テストレコード",
-    "shopIsTestHint": "マークされた店舗は検索・地図・トップページの統計に表示されません。パートナー画面と既存の予約には影響しません。"
+    "shopIsTestHint": "マークされた店舗は検索・地図・トップページの統計に表示されません。パートナー画面と既存の予約には影響しません。",
+    "messagesCategorySupport": "サポート",
+    "messagesCategoryBulk": "一括配信",
+    "messagesCategoryAutomated": "自動",
+    "messagesCategoryAll": "すべて"
   },
   "Auth": {
     "loginTitle": "バガジパークにサインインする",

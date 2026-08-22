@@ -4,6 +4,7 @@ import prisma from "@/lib/db";
 import type { Resend } from "resend";
 import { Resend as ResendCtor } from "resend";
 import { normalizeInboundSubjectLine } from "@/lib/reply-subject";
+import { classifyInboxMessage } from "@/lib/inbox-classifier";
 
 export const dynamic = "force-dynamic";
 /** Inbound gövde için art arda bekleme + birkaç deneme (self-hosted / Vercel Pro uyumu). */
@@ -293,6 +294,19 @@ export async function POST(req: Request) {
     // Resend gönderilen adresleri array olarak veriyor olabilir
     const toAddress = Array.isArray(to) ? to.join(", ") : (to || "unknown");
 
+    /**
+     * Giriş anında sınıflandırılıyor.
+     *
+     * Sonradan sınıflandırmak da mümkündü ama yanlış olurdu: mesaj kutuya
+     * sınıfsız düşerse operatör onu zaten görür ve iş, çözmesi gereken sorunu
+     * bir kez daha üretir (P1-18).
+     */
+    const classification = classifyInboxMessage({
+      from: (from as string) || "unknown",
+      subject: (subject as string) || null,
+      raw: body,
+    });
+
     await prisma.contactMessage.create({
       data: {
         from: (from as string) || "unknown",
@@ -302,6 +316,8 @@ export async function POST(req: Request) {
         html: typeof html === "string" ? html : JSON.stringify(html),
         raw: (body as object) || {}, // Tam payload'u her zaman saklıyoruz
         isRead: false,
+        category: classification.category,
+        categoryReason: classification.reason,
       },
     });
 

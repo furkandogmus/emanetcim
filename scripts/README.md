@@ -9,6 +9,7 @@
 | `booking-reminders` | `7 9 * * *` | — | ⚠️ kurulmadı |
 | `cleanup` | `23 3 * * *` | — | ⚠️ kurulmadı |
 | `seal-forecast` | `37 6 * * 1` | — | ⚠️ kurulmadı |
+| `classify-inbox` | `13 5 * * *` | — | ⚠️ kurulmadı |
 | `finance-export` | `53 2 * * *` | — | ⚠️ kurulmadı |
 
 > Bu tablonun kaynağı **`src/lib/jobs/registry.ts`**'tir. Elle güncellemeyin —
@@ -300,3 +301,37 @@ curl -s https://bagajpark.com/api/health/jobs | jq '.checks.scheduledJobs.jobs[]
 ```bash
 crontab /tmp/crontab.bak
 ```
+
+
+---
+
+## Gelen kutusunu sınıflandırma (tek seferlik + günlük)
+
+`destek@bagajpark.com`'a gelen her e-posta `ContactMessage` olarak yazılıyor.
+2026-08-22'de kutuda 67 mesaj vardı, **57'si okunmamış** ve ezici çoğunluğu soğuk
+pazarlamaydı — gerçek bir misafir şikâyeti bunların arasında kaybolur.
+
+Yeni mesajlar **giriş anında** sınıflandırılıyor. Geçmiş mesajlar için bu işi bir
+kez çalıştırın:
+
+```bash
+cd /root/emanetci
+./scripts/call-internal-job.sh --job classify-inbox
+```
+
+Beklenen:
+
+```
+[...] INFO  BASARILI (HTTP 200): {"ok":true,"classified":67,"byCategory":{"BULK":54,"SUPPORT":11,"AUTOMATED":2},"remaining":0,"moreToDo":false}
+```
+
+`moreToDo: true` görürseniz kutu tek partiye sığmamış demektir (parti 500) —
+`remaining` sıfırlanana kadar tekrar çalıştırın. İş **idempotenttir**: yalnızca
+`UNCLASSIFIED` satırlara dokunur, ikinci çalıştırma `classified: 0` döner.
+
+Sonra `/admin/messages` varsayılan olarak yalnızca **Destek** gösterir; seçicideki
+sayaçlar diğer kategorilerde ne biriktiğini bakmadan söyler.
+
+> Sınıflandırma migrasyonda SQL ile yapılmadı: kural `List-Unsubscribe` /
+> `Auto-Submitted` gibi başlıklara bakıyor ve o başlıklar `raw` JSON'unun içinde.
+> SQL'de yeniden yazmak, kuralın ikinci bir kopyası olurdu ve iki kopya ayrışırdı.

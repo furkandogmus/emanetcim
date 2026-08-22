@@ -13,6 +13,9 @@ export type ContactMessageDTO = {
   html: string | null;
   isRead: boolean;
   createdAt: string;
+  /** SUPPORT | BULK | AUTOMATED | UNCLASSIFIED */
+  category: string;
+  categoryReason: string | null;
 };
 
 export function toContactMessageDTOList(rows: ContactMessage[]): ContactMessageDTO[] {
@@ -25,5 +28,7 @@ export function toContactMessageDTOList(rows: ContactMessage[]): ContactMessageD
     html: m.html,
     isRead: m.isRead,
     createdAt: m.createdAt.toISOString(),
+    category: m.category,
+    categoryReason: m.categoryReason,
   }));
 }

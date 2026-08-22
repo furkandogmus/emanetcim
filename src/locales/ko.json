@@ -776,7 +776,11 @@
     "platformSettingsLatePickupFee": "지연 수령 수수료 (₺)",
     "platformSettingsLatePickupGrace": "지연 유예 시간(분)",
     "shopIsTest": "테스트 기록",
-    "shopIsTestHint": "표시된 매장은 검색, 지도, 홈 통계에 나타나지 않습니다. 파트너 패널과 기존 예약은 영향을 받지 않습니다."
+    "shopIsTestHint": "표시된 매장은 검색, 지도, 홈 통계에 나타나지 않습니다. 파트너 패널과 기존 예약은 영향을 받지 않습니다.",
+    "messagesCategorySupport": "지원",
+    "messagesCategoryBulk": "대량 발송",
+    "messagesCategoryAutomated": "자동",
+    "messagesCategoryAll": "전체"
   },
   "Auth": {
     "loginTitle": "BagajPark 로그인",

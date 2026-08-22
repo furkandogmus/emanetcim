@@ -776,7 +776,11 @@
     "platformSettingsLatePickupFee": "Opłata za późny odbiór (₺)",
     "platformSettingsLatePickupGrace": "Tolerancja opóźnienia (min)",
     "shopIsTest": "Wpis testowy",
-    "shopIsTestHint": "Oznaczony punkt nie pojawia się w wyszukiwarce, na mapie ani w statystykach. Panel partnera i istniejące rezerwacje pozostają bez zmian."
+    "shopIsTestHint": "Oznaczony punkt nie pojawia się w wyszukiwarce, na mapie ani w statystykach. Panel partnera i istniejące rezerwacje pozostają bez zmian.",
+    "messagesCategorySupport": "Wsparcie",
+    "messagesCategoryBulk": "Masowe",
+    "messagesCategoryAutomated": "Automatyczne",
+    "messagesCategoryAll": "Wszystkie"
   },
   "Auth": {
     "loginTitle": "Zaloguj się do BagajPark",

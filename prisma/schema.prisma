@@ -573,6 +573,7 @@ model BlockedIp {
   createdAt DateTime @default(now())
 }
 
+/// Gelen kutusu. İletişim formundan VE `destek@` adresine gelen e-postalardan dolar.
 model ContactMessage {
   id        String   @id @default(cuid())
   from      String
@@ -583,6 +584,16 @@ model ContactMessage {
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
   raw       Json?
+  /// SUPPORT | BULK | AUTOMATED | UNCLASSIFIED — `src/lib/inbox-classifier.ts`
+  ///
+  /// NEDEN: 2026-08-22'de kutuda 67 mesaj vardı, 57'si okunmamış ve ezici
+  /// çoğunluğu soğuk pazarlamaydı. Gerçek bir misafir şikâyeti bunların arasında
+  /// kaybolur — destek kanalının kendisi çalışmıyor demektir (P1-18).
+  category  String   @default("UNCLASSIFIED")
+  /// Kararı hangi sinyal verdi. Operatör "neden buraya düştü" diye sorabilmeli.
+  categoryReason String?
+
+  @@index([category, isRead, createdAt])
 }
 
 model BlogPost {

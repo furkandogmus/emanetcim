@@ -776,7 +776,11 @@
     "platformSettingsLatePickupFee": "Tariffa per ritiro in ritardo (₺)",
     "platformSettingsLatePickupGrace": "Tolleranza di ritardo (min)",
     "shopIsTest": "Record di test",
-    "shopIsTestHint": "Un negozio contrassegnato non appare nella ricerca, nella mappa né nelle statistiche. Il pannello partner e le prenotazioni esistenti non cambiano."
+    "shopIsTestHint": "Un negozio contrassegnato non appare nella ricerca, nella mappa né nelle statistiche. Il pannello partner e le prenotazioni esistenti non cambiano.",
+    "messagesCategorySupport": "Assistenza",
+    "messagesCategoryBulk": "Massivi",
+    "messagesCategoryAutomated": "Automatici",
+    "messagesCategoryAll": "Tutti"
   },
   "Auth": {
     "loginTitle": "Accedi a BagajPark",

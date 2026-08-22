@@ -776,7 +776,11 @@
     "platformSettingsLatePickupFee": "هزینه تحویل دیرهنگام (₺)",
     "platformSettingsLatePickupGrace": "مهلت تأخیر (دقیقه)",
     "shopIsTest": "رکورد آزمایشی",
-    "shopIsTestHint": "محل علامت‌گذاری‌شده در جست‌وجو، نقشه و آمار صفحهٔ اصلی دیده نمی‌شود. پنل شریک و رزروهای موجود تغییری نمی‌کنند."
+    "shopIsTestHint": "محل علامت‌گذاری‌شده در جست‌وجو، نقشه و آمار صفحهٔ اصلی دیده نمی‌شود. پنل شریک و رزروهای موجود تغییری نمی‌کنند.",
+    "messagesCategorySupport": "پشتیبانی",
+    "messagesCategoryBulk": "انبوه",
+    "messagesCategoryAutomated": "خودکار",
+    "messagesCategoryAll": "همه"
   },
   "Auth": {
     "loginTitle": "ورود به BagajPark",

@@ -46,6 +46,10 @@ export async function sendContactMessageAction(
         to: "destek@bagajpark.com",
         subject: `İletişim Formu: ${name}`,
         text: message,
+        // Form her zaman gerçek bir insandır; sınıflandırıcı da bu öneke bakar
+        // ama burada açıkça yazmak, ikisinin ayrışmasını engelliyor.
+        category: "SUPPORT",
+        categoryReason: "contact_form",
       },
     });
     return { status: "success" };
