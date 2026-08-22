@@ -26,6 +26,10 @@ vi.mock("next-auth", () => ({
   default: () => ({}),
   auth: vi.fn(),
   handlers: { GET: vi.fn(), POST: vi.fn() },
+  // `auth.config.ts` kodlu giriş hataları için bunu genişletir (tooManyRequests, UserBanned).
+  CredentialsSignin: class CredentialsSignin extends Error {
+    code = "credentials";
+  },
 }));
 
 // Mock framer-motion (Next.js 16/15 often uses it)

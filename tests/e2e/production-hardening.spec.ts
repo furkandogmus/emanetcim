@@ -47,11 +47,11 @@ test.describe('BagajPark Production Hardening & PWA E2E Tests', () => {
   test('i18n: should switch content language correctly', async ({ page }) => {
     // Turkish
     await page.goto('/tr/search');
-    await expect(page.getByTestId('nearby-heading')).toContainText(/Yakındaki/i);
+    await expect(page.getByTestId('nearby-heading').first()).toContainText(/Yakındaki/i);
     
     // English
     await page.goto('/en/search');
-    await expect(page.getByTestId('nearby-heading')).toContainText(/Nearby/i);
+    await expect(page.getByTestId('nearby-heading').first()).toContainText(/Nearby/i);
   });
 
   // 3. Kullanıcı Deneyimi (Custom 404 & i18n)

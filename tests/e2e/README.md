@@ -6,6 +6,15 @@ Dosyalar: `use-cases.spec.ts` (senaryolar `UC:` ile gruplu), `workflow.spec.ts`,
 
 **CI:** E2E şu an workflow’ta çalışmıyor; tamamı **yerelde** `npm run test:e2e` veya `npm run test:e2e:local` ile koşulur.
 
+**Durum (2026-08-22):** 34 testin 29'u geçiyor, 1'i atlandı. Kalan 4 (`booking-lifecycle` ×2,
+`street-readiness`, `workflow`) **kart ödeme dönemine** yazılmış — "Kart üzerindeki isim" alanı
+bekliyor; aktif sağlayıcı `manual` (dükkanda tahsilat) ve checkout slot ızgarasına geçti. Bu
+dördü yamayla değil, manuel tahsilat akışına göre yeniden yazılarak kurtarılır.
+
+**Giriş limiti:** `login:<e-posta>` anahtarı saatte 10 deneme. Aynı dev sunucuda e2e'yi
+birkaç kez üst üste koşunca demo girişleri `tooManyRequests` ile düşer; sunucuyu yeniden
+başlatın (bellek içi sayaç sıfırlanır) ya da `REDIS_URL` ile Redis'i `FLUSHALL` edin.
+
 ## Yerelde çalıştırma
 
 1. Veritabanını ayağa kaldırın ve şemayı uygulayın:

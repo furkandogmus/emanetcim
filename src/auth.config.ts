@@ -1,4 +1,4 @@
-import type { NextAuthConfig } from "next-auth";
+import { CredentialsSignin, type NextAuthConfig } from "next-auth";
 import Apple from "next-auth/providers/apple";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
@@ -6,6 +6,20 @@ import type { Role, User as PrismaUser } from "@prisma/client";
 import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
 import { isAppleOAuthConfigured } from "@/lib/auth-providers";
+
+/**
+ * `authorize` içinde düz `Error` fırlatmak Auth.js'te **CallbackRouteError**
+ * olur ve kullanıcı `/auth/error?error=Configuration` sayfasına düşer —
+ * "yapılandırma hatası" diye. Oysa sebep "çok fazla deneme" ya da "hesap
+ * askıda". `CredentialsSignin` alt sınıfı `code` taşır; giriş formu bunu
+ * okuyup doğru mesajı gösterir (2026-08-22 e2e koşusunda yakalandı).
+ */
+class TooManyAttemptsSignin extends CredentialsSignin {
+  code = "tooManyRequests";
+}
+class UserBannedSignin extends CredentialsSignin {
+  code = "UserBanned";
+}
 
 const loginSchema = z.object({
   emailOrPhone: z.string().min(1, "Errors.invalidData"),
@@ -40,7 +54,7 @@ export const authConfig: NextAuthConfig = {
 
         // Rate limit kontrolü
         if (!(await rateLimit(`login:${emailOrPhone.toLowerCase()}`, 10, 60 * 60 * 1000))) {
-          throw new Error("Errors.tooManyRequests");
+          throw new TooManyAttemptsSignin();
         }
 
         const { default: prisma } = await import("@/lib/db");
@@ -65,7 +79,7 @@ export const authConfig: NextAuthConfig = {
 
         // Ban kontrolü
         if ((user as PrismaUser).isBanned) {
-          throw new Error("UserBanned");
+          throw new UserBannedSignin();
         }
 
         return {

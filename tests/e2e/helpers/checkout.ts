@@ -1,8 +1,12 @@
 import type { Page } from "@playwright/test";
 
-/** CheckoutClient mounts default check-in/out after `useEffect` (client-only). */
+/**
+ * Checkout artık slot ızgarası kullanıyor; "tarihler hazır" sinyali konaklama
+ * bölümünün (`checkout-stay-days`) DOM'a gelmesidir. Eski `checkout-dates-ready`
+ * testid'i hiçbir bileşende yoktu — 8 e2e bu yüzden zaman aşımına düşüyordu.
+ */
 export async function waitForCheckoutDatesReady(page: Page) {
-  await page.getByTestId("checkout-dates-ready").waitFor({
+  await page.getByTestId("checkout-stay-days").waitFor({
     state: "attached",
     timeout: 15_000,
   });

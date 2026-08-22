@@ -18,7 +18,7 @@ test.describe('BagajPark: guest booking smoke', () => {
     await page.goto('/tr/search');
     await expect(page.getByTestId('shop-list-item').first()).toBeVisible();
     await openCheckoutFromSearchList(page);
-    await expect(page.locator('h1')).toContainText(/Ödeme ve Onay/i);
+    await expect(page.locator('h1')).toContainText(/(Ödeme|Rezervasyon) ve Onay/i);
     await waitForCheckoutDatesReady(page);
 
     await page.getByTestId('checkout-footer-primary').click();
@@ -31,7 +31,7 @@ test.describe('BagajPark: guest booking smoke', () => {
 
     await page.getByTestId('checkout-footer-primary').click();
 
-    await expect(page.getByRole('heading', { name: /Rezervasyon Başarılı/i })).toBeVisible({
+    await expect(page.getByRole('heading', { name: /Rezervasyon (Başarılı|Onaylandı)/i })).toBeVisible({
       timeout: 20000,
     });
 

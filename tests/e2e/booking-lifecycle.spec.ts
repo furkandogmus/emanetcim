@@ -11,7 +11,7 @@ test.describe("Booking Lifecycle E2E", () => {
     await expect(page).toHaveURL(/\/tr\/bookings/, { timeout: 20000 });
 
     await page.goto("/tr/search");
-    await expect(page.getByTestId("nearby-heading")).toContainText(/Yak\u0131ndaki/i);
+    await expect(page.getByTestId("nearby-heading").first()).toContainText(/Yak\u0131ndaki/i);
     await openCheckoutFromSearchList(page);
 
     await waitForCheckoutDatesReady(page);
@@ -20,7 +20,7 @@ test.describe("Booking Lifecycle E2E", () => {
     await page.getByTestId("checkout-footer-primary").click();
 
     await expect(
-      page.getByRole("heading", { name: /Rezervasyon Ba\u015far\u0131l\u0131/i }),
+      page.getByRole("heading", { name: /Rezervasyon (Ba\u015far\u0131l\u0131|Onayland\u0131)/i }),
     ).toBeVisible({ timeout: 20000 });
 
     const bookingUrl = page.url();
@@ -47,7 +47,7 @@ test.describe("Booking Lifecycle E2E", () => {
     await expect(page).toHaveURL(/\/tr\/bookings/, { timeout: 20000 });
 
     await page.goto("/tr/search");
-    await expect(page.getByTestId("nearby-heading")).toContainText(/Yak\u0131ndaki/i);
+    await expect(page.getByTestId("nearby-heading").first()).toContainText(/Yak\u0131ndaki/i);
     await openCheckoutFromSearchList(page);
 
     await waitForCheckoutDatesReady(page);
@@ -55,7 +55,7 @@ test.describe("Booking Lifecycle E2E", () => {
     await page.getByTestId("checkout-footer-primary").click();
 
     await expect(
-      page.getByRole("heading", { name: /Rezervasyon Ba\u015far\u0131l\u0131/i }),
+      page.getByRole("heading", { name: /Rezervasyon (Ba\u015far\u0131l\u0131|Onayland\u0131)/i }),
     ).toBeVisible({ timeout: 20000 });
 
     const bookingUrl = page.url();

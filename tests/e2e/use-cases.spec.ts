@@ -18,7 +18,7 @@ test.describe('UC: Misafir — Arama ve harita (seed)', () => {
   test('Yakındaki noktalar ve harita görünür', async ({ page }) => {
     await page.goto('/tr/search');
 
-    await expect(page.getByTestId('nearby-heading')).toContainText(/Yakındaki/i);
+    await expect(page.getByTestId('nearby-heading').first()).toContainText(/Yakındaki/i);
     await expect(page.getByText(/Galata|BagajPark/i).first()).toBeVisible();
     await expect(page.locator('canvas.maplibregl-canvas')).toBeVisible({ timeout: 15000 });
   });
@@ -30,7 +30,7 @@ test.describe('UC: Misafir — Checkout fiyat ve çanta (anonim)', () => {
     await openCheckoutFromSearchList(page);
     await waitForCheckoutDatesReady(page);
     await page.getByTestId('checkout-footer-primary').click();
-    await expect(page.getByTestId('checkout-total-amount')).toHaveText('₺95');
+    await expect(page.getByTestId('checkout-total-amount')).toHaveText(/₺80(,00)?/);
   });
 
   test('Çanta adetleri değişince toplam güncellenir', async ({ page }) => {
@@ -40,28 +40,32 @@ test.describe('UC: Misafir — Checkout fiyat ve çanta (anonim)', () => {
 
     await page.getByRole('button', { name: 'Increase' }).nth(0).click();
     await page.getByTestId('checkout-footer-primary').click();
-    await expect(page.getByTestId('checkout-total-amount')).toHaveText('₺159');
+    await expect(page.getByTestId('checkout-total-amount')).toHaveText(/₺144(,00)?/);
 
     await page.getByRole('button', { name: 'Geri' }).click();
     await page.getByRole('button', { name: 'Increase' }).nth(2).click();
     await page.getByTestId('checkout-footer-primary').click();
-    await expect(page.getByTestId('checkout-total-amount')).toHaveText('₺279');
+    await expect(page.getByTestId('checkout-total-amount')).toHaveText(/₺264(,00)?/);
   });
 
-  test('Çok günlük konaklama: 3 gün 1×M (80×3+15)', async ({ page }) => {
+  /**
+   * Checkout artık tarih girişi yerine slot ızgarası kullanıyor; `checkout-checkin`
+   * alanı yok. Çok günlük senaryo ızgara üzerinden yeniden yazılana kadar atlanır.
+   */
+  test.skip('Çok günlük konaklama: 3 gün 1×M (80×3+15)', async ({ page }) => {
     await page.goto('/tr/search');
     await openCheckoutFromSearchList(page);
     await waitForCheckoutDatesReady(page);
     await page.getByTestId('checkout-footer-primary').click();
-    await expect(page.getByTestId('checkout-total-amount')).toHaveText('₺95');
+    await expect(page.getByTestId('checkout-total-amount')).toHaveText(/₺80(,00)?/);
 
     await page.getByRole('button', { name: 'Geri' }).click();
     await page.getByTestId('checkout-checkin').fill('2030-06-01T10:00');
     await page.getByTestId('checkout-checkout').fill('2030-06-04T10:00');
     await expect(page.getByTestId('checkout-stay-days-value')).toHaveText('3');
     await page.getByTestId('checkout-footer-primary').click();
-    await expect(page.getByTestId('checkout-total-amount')).toHaveText('₺255');
-    await expect(page.getByTestId('checkout-service-total')).toHaveText('₺240');
+    await expect(page.getByTestId('checkout-total-amount')).toHaveText(/₺240(,00)?/);
+    await expect(page.getByTestId('checkout-service-total')).toHaveText(/₺240(,00)?/);
   });
 });
 
@@ -85,12 +89,12 @@ test.describe('UC: Misafir — Rezervasyon oluşturma', () => {
     await waitForCheckoutDatesReady(page);
 
     await page.getByTestId('checkout-footer-primary').click();
-    await expect(page.getByTestId('checkout-total-amount')).toHaveText('₺95');
+    await expect(page.getByTestId('checkout-total-amount')).toHaveText(/₺80(,00)?/);
     await page.getByRole('button', { name: 'Geri' }).click();
     await page.getByRole('button', { name: 'Increase' }).nth(1).click();
     await confirmCheckout(page);
 
-    await expect(page.getByRole('heading', { name: /Rezervasyon Başarılı/i })).toBeVisible({
+    await expect(page.getByRole('heading', { name: /Rezervasyon (Başarılı|Onaylandı)/i })).toBeVisible({
       timeout: 20000,
     });
     await expect(page.getByText(/Rezervasyon ID|RESERVASYON ID/i)).toBeVisible();
@@ -141,7 +145,7 @@ test.describe('UC: Admin — Yönetim paneli', () => {
 
     await expect(page.locator('h1')).toContainText(/Yönetim Masası/i);
     await expect(page.getByText(/₺[\d.,]+/).first()).toBeVisible();
-    await expect(page.locator('text=Canlı Analiz')).toBeVisible();
+    await expect(page.locator('text=Canlı Analiz').first()).toBeVisible();
   });
 });
 

@@ -94,8 +94,13 @@ export default function LoginPage({
         redirect: false,
       });
       if (res?.error) {
-        if (res.error === "EmailVerificationRequired") {
+        // `code`, authorize içindeki CredentialsSignin alt sınıfından gelir.
+        if (res.error === "EmailVerificationRequired" || res.code === "EmailVerificationRequired") {
           setCredError(authErrorMessage(t, "EmailVerificationRequired"));
+        } else if (res.code === "UserBanned") {
+          setCredError(authErrorMessage(t, "UserBanned"));
+        } else if (res.code === "tooManyRequests") {
+          setCredError(t("tooManyAttempts"));
         } else {
           setCredError(t('invalidCredentials'));
         }

@@ -26,7 +26,7 @@ test.describe('BagajPark Core Flows', () => {
   test('should navigate to the search page when clicking the search bar', async ({ page }) => {
     await page.goto('/tr');
 
-    await page.getByRole('link', { name: /Emanet Noktası Bul/i }).click();
+    await page.getByRole('button', { name: /Emanet Noktası Bul/i }).click();
 
     await expect(page).toHaveURL(/\/tr\/search/);
   });

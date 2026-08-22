@@ -969,7 +969,8 @@
     "newPasswordRateLimited": "Too many attempts. Try again later.",
     "newPasswordMismatch": "Passwords do not match.",
     "newPasswordInvalid": "Could not save password. Check your input.",
-    "contactSupportHelp": "If the email still hasn’t arrived, contact us at info@bagajpark.com."
+    "contactSupportHelp": "If the email still hasn’t arrived, contact us at info@bagajpark.com.",
+    "tooManyAttempts": "Too many attempts. Please try again in an hour."
   },
   "UserNav": {
     "signIn": "Sign in",

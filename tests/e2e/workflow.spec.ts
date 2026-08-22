@@ -25,7 +25,7 @@ test.describe('E2E Full Workflow: GUEST -> BOOKING -> CHECKIN -> CHECKOUT', () =
     // 2. SEARCH & SELECT SHOP
     await page.goto('/tr/search');
     // Pick the first shop in the nearby list
-    await expect(page.getByTestId('nearby-heading')).toContainText(/Yakındaki/i);
+    await expect(page.getByTestId('nearby-heading').first()).toContainText(/Yakındaki/i);
     await openCheckoutFromSearchList(page);
 
     // 3. CHECKOUT
@@ -34,7 +34,7 @@ test.describe('E2E Full Workflow: GUEST -> BOOKING -> CHECKIN -> CHECKOUT', () =
     await confirmCheckout(page);
 
     // 4. BOOKING COMPLETION & QR GATHERING
-    await expect(page.getByRole('heading', { name: /Rezervasyon Başarılı/i })).toBeVisible({ timeout: 20000 });
+    await expect(page.getByRole('heading', { name: /Rezervasyon (Başarılı|Onaylandı)/i })).toBeVisible({ timeout: 20000 });
     const bookingIdElement = page.getByText(/Rezervasyon ID:|RESERVASYON ID:/i).locator('..');
     const bookingText = await bookingIdElement.innerText();
     const matchId = bookingText.match(/[a-f0-9-]{36}/i);

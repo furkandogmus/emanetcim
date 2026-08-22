@@ -969,7 +969,8 @@
     "newPasswordExpired": "Bu bağlantının süresi doldu. Yeni bir sıfırlama isteği oluşturun.",
     "newPasswordRateLimited": "Çok fazla deneme yapıldı. Bir süre sonra tekrar deneyin.",
     "newPasswordMismatch": "Şifreler eşleşmiyor.",
-    "newPasswordInvalid": "Şifre kaydedilemedi. Bilgileri kontrol edin."
+    "newPasswordInvalid": "Şifre kaydedilemedi. Bilgileri kontrol edin.",
+    "tooManyAttempts": "Çok fazla deneme yaptınız. Lütfen bir saat sonra tekrar deneyin."
   },
   "UserNav": {
     "signIn": "Giriş yap",
