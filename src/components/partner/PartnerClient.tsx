@@ -808,7 +808,7 @@ export default function PartnerClient({
           <button
             type="button"
             onClick={() => setIsScanning(true)}
-            className="group mx-auto flex aspect-square w-full max-w-[280px] flex-col items-center justify-center gap-5 overflow-hidden rounded-[2.5rem] bg-gray-900 text-white shadow-2xl transition-all hover:bg-black active:scale-95 sm:max-w-xs md:max-w-sm md:gap-8 md:rounded-[4rem]"
+            className="group mx-auto flex aspect-square w-full max-w-[280px] flex-col items-center justify-center gap-5 overflow-hidden rounded-[2.5rem] bg-brand-gradient text-white shadow-brand-xl transition-all hover:brightness-105 active:scale-95 sm:max-w-xs md:max-w-sm md:gap-8 md:rounded-[4rem]"
           >
             <div className="bg-white/10 p-8 rounded-full group-hover:scale-110 transition-transform">
               <Camera size={64} strokeWidth={1} />
@@ -819,13 +819,13 @@ export default function PartnerClient({
           </button>
 
           <div className="grid w-full grid-cols-2 gap-3 md:gap-6">
-            <div className="flex flex-col gap-1 rounded-[2rem] border border-gray-100 bg-white p-5 shadow-xl shadow-gray-100/50 md:rounded-[2.5rem] md:p-6">
+            <div className="ui-card flex flex-col gap-1 p-5 md:rounded-[2.5rem] md:p-6">
               <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
                 {t("activeBookings")}
               </p>
               <p className="text-3xl font-black text-gray-900 md:text-4xl">{activeCount}</p>
             </div>
-            <div className="flex flex-col gap-1 rounded-[2rem] border border-gray-100 bg-white p-5 shadow-xl shadow-gray-100/50 md:rounded-[2.5rem] md:p-6">
+            <div className="ui-card flex flex-col gap-1 p-5 md:rounded-[2.5rem] md:p-6">
               <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
                 {t("netEarnings")}
               </p>

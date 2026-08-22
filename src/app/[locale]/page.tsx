@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { MapPin, ShieldCheck, Clock, Star, Smartphone, Map, QrCode } from "lucide-react";
 import { Link } from "@/i18n/routing";
@@ -212,10 +213,15 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
         dangerouslySetInnerHTML={{ __html: JSON.stringify(cityItemListJsonLd) }}
       />
       {/* Hero Section */}
-      <header className="relative pt-32 pb-20 px-6 flex flex-col items-center text-center bg-gray-50 overflow-hidden">
-        {/* Subtle Background Pattern */}
-        <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
-          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#ea580c_1px,transparent_1px)] [background-size:20px_20px]"></div>
+      <header className="relative overflow-hidden bg-gray-50 px-6 pt-28 pb-20 flex flex-col items-center text-center md:pt-32">
+        {/*
+          Sıcak ışık + nokta dokusu. Eski hâli düz gri zemin üzerinde tek başına
+          duran bir başlıktı; markanın turuncusu hero'da hiç görünmüyordu.
+        */}
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute -top-40 left-1/2 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,hsl(21_95%_60%/.22),transparent)] blur-2xl" />
+          <div className="absolute -right-24 top-24 h-72 w-72 rounded-full bg-[radial-gradient(closest-side,hsl(38_92%_55%/.18),transparent)] blur-2xl" />
+          <div className="absolute inset-0 opacity-[0.035] bg-[radial-gradient(#ea580c_1px,transparent_1px)] [background-size:20px_20px]" />
         </div>
 
         <div className="relative z-10 max-w-2xl">
@@ -273,56 +279,64 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
         </div>
       </section>
 
-      {/* Live trust metrics */}
-      <section
-        className="border-y border-gray-100 bg-white py-10 px-6"
-        aria-label={t("trustStatsAria")}
-      >
-        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-6 text-center">
-          <div>
-            <p className="text-2xl md:text-3xl font-black tabular-nums text-gray-900">
-              {nf.format(stats.activeLocations)}
-            </p>
-            <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-gray-400">
-              {t("trustStatLocations")}
-            </p>
-          </div>
-          <div>
-            <p className="text-2xl md:text-3xl font-black tabular-nums text-gray-900">
-              {nf.format(stats.completedStays)}
-            </p>
-            <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-gray-400">
-              {t("trustStatStays")}
-            </p>
-          </div>
-          <div>
-            <p className="text-2xl md:text-3xl font-black tabular-nums text-gray-900">
-              {nf.format(stats.reviewCount)}
-            </p>
-            <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-gray-400">
-              {t("trustStatReviews")}
-            </p>
-          </div>
-          <div>
-            <p className="text-2xl md:text-3xl font-black tabular-nums text-gray-900 inline-flex items-center gap-1">
-              {stats.averageRating != null && stats.reviewCount > 0 ? (
-                <>
-                  {formatDecimal(stats.averageRating, locale)}
-                  <Star
-                    className="inline h-7 w-7 md:h-8 md:w-8 text-orange-500 fill-orange-500"
-                    aria-hidden
-                  />
-                </>
-              ) : (
-                <span className="text-gray-300">—</span>
-              )}
-            </p>
-            <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-gray-400">
-              {t("trustStatAvgRating")}
-            </p>
-          </div>
-        </div>
-      </section>
+      {/*
+        Güven bandı — yalnızca söyleyecek bir şeyi varsa.
+
+        Lansmanda "0 tamamlanan depolama · 0 yorum · — puan" basıyordu: güven
+        vermesi gereken şerit tam tersini söylüyordu (2026-08-22 ekran
+        görüntüsü). Sıfır olan kutucuk gizlenir; iki kutucuktan az kalırsa
+        şerit hiç çizilmez.
+      */}
+      {(() => {
+        const tiles: { value: ReactNode; label: string }[] = [];
+        if (stats.activeLocations > 0) {
+          tiles.push({ value: nf.format(stats.activeLocations), label: t("trustStatLocations") });
+        }
+        if (stats.completedStays > 0) {
+          tiles.push({ value: nf.format(stats.completedStays), label: t("trustStatStays") });
+        }
+        if (stats.reviewCount > 0) {
+          tiles.push({ value: nf.format(stats.reviewCount), label: t("trustStatReviews") });
+        }
+        if (stats.averageRating != null && stats.reviewCount > 0) {
+          tiles.push({
+            value: (
+              <>
+                {formatDecimal(stats.averageRating, locale)}
+                <Star
+                  className="inline h-7 w-7 md:h-8 md:w-8 text-orange-500 fill-orange-500"
+                  aria-hidden
+                />
+              </>
+            ),
+            label: t("trustStatAvgRating"),
+          });
+        }
+        if (tiles.length < 2) return null;
+        return (
+          <section
+            className="border-y border-gray-100 bg-white py-10 px-6"
+            aria-label={t("trustStatsAria")}
+          >
+            <div
+              className={`max-w-5xl mx-auto grid grid-cols-2 gap-8 md:gap-6 text-center ${
+                tiles.length === 4 ? "md:grid-cols-4" : tiles.length === 3 ? "md:grid-cols-3" : "md:grid-cols-2"
+              }`}
+            >
+              {tiles.map((tile) => (
+                <div key={tile.label}>
+                  <p className="inline-flex items-center gap-1 text-2xl md:text-3xl font-black tabular-nums text-gray-900">
+                    {tile.value}
+                  </p>
+                  <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                    {tile.label}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+      })()}
 
       <section
         className="border-y border-gray-100 bg-gray-50/90 py-14 px-6"

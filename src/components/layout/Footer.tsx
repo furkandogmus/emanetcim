@@ -5,6 +5,28 @@ import { Link } from "@/i18n/routing";
 import { ShieldCheck, MapPin, Globe, MessageCircle, Heart } from "lucide-react";
 import { STORAGE_CITIES } from "@/lib/storage-cities";
 import { useSession } from "next-auth/react";
+import { usePathname } from "@/i18n/routing";
+
+/**
+ * Uygulama yüzeyleri: giriş/kayıt, panel, arama, ödeme, rezervasyon, hesap.
+ *
+ * Bu sayfalarda dört sütunlu pazarlama altbilgisi (şehir listesi, Product Hunt
+ * rozeti, sosyal ikonlar) içeriğin kendisinden BÜYÜK çıkıyordu — esnaf
+ * panelinde ekranın üçte ikisi altbilgiydi, giriş formu tepede küçücük
+ * kalıyordu (2026-08-22 ekran görüntüleri). Burada yalnızca ince bir yasal
+ * satır gösterilir; pazarlama altbilgisi pazarlama sayfalarında kalır.
+ */
+const APP_SURFACE_PREFIXES = [
+  "/partner",
+  "/admin",
+  "/login",
+  "/register",
+  "/auth",
+  "/checkout",
+  "/search",
+  "/bookings",
+  "/account",
+];
 
 /**
  * Footer - Kurumsal Bilgi ve Navigasyon Çubuğu
@@ -18,6 +40,25 @@ export default function Footer() {
     session?.user?.role === "PARTNER" || session?.user?.role === "ADMIN";
   const currentYear = new Date().getFullYear();
   const insuranceLabel = tCommon("navInsurance");
+  const pathname = usePathname();
+  const isAppSurface = APP_SURFACE_PREFIXES.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`),
+  );
+
+  if (isAppSurface) {
+    return (
+      <footer className="border-t border-gray-100 bg-white px-6 py-6 max-md:pb-28 font-sans">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 text-[11px] font-bold text-gray-400 sm:flex-row">
+          <p>© {currentYear} {tCommon("appName")}. {t("rights")}</p>
+          <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 uppercase tracking-widest">
+            <Link href="/terms" className="transition-colors hover:text-orange-600">{t("terms")}</Link>
+            <Link href="/privacy" className="transition-colors hover:text-orange-600">{t("privacy")}</Link>
+            <Link href="/contact" className="transition-colors hover:text-orange-600">{t("contact")}</Link>
+          </nav>
+        </div>
+      </footer>
+    );
+  }
 
   return (
     <footer className="bg-white border-t border-gray-100 pt-20 pb-10 max-md:pb-28 px-6 font-sans overflow-hidden">
@@ -154,11 +195,6 @@ export default function Footer() {
                 <span className="text-xs font-black text-gray-900">{t("sslProtection")}</span>
               </div>
               <p className="text-[10px] font-bold text-gray-400">{t("securityNote")}</p>
-            </div>
-            <div className="flex gap-4 mt-6 opacity-30 grayscale contrast-125">
-              <div className="w-10 h-6 bg-gray-400 rounded"></div>
-              <div className="w-10 h-6 bg-gray-400 rounded"></div>
-              <div className="w-10 h-6 bg-gray-400 rounded"></div>
             </div>
           </div>
         </div>
