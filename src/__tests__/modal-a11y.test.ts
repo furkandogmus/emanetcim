@@ -26,6 +26,9 @@ const NOT_MODALS = new Set([
   // Yönlendirme sırasındaki tam ekran yükleniyor göstergesi: odaklanılabilir
   // hiçbir öğesi yok, kullanıcı etkileşimi beklemiyor.
   "src/app/[locale]/loading.tsx",
+  // Tek katmanı QR önizlemesi yüklenirken gösterilen `role="status"` spinner'ı;
+  // modalların tamamı ayrı bileşenlere taşındı (CheckInDialog, CheckoutSealsDialog).
+  "src/components/partner/PartnerClient.tsx",
 ]);
 
 function walk(dir: string, out: string[] = []): string[] {
