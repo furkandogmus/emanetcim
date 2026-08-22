@@ -14,7 +14,7 @@
 
 | Alan | Denetlendi mi | Sonuç |
 |---|---|---|
-| Veri bütünlüğü + iş kuralları | ✅ tamamlandı | 5 P0, 11 P1, 7 P2 |
+| Veri bütünlüğü + iş kuralları | ✅ tamamlandı | 5 P0 (3'ünün mimarisi kapatıldı), 11 P1, 7 P2 |
 | Ödeme entegrasyonu durumu | ✅ tamamlandı | **1 P0 — mimarisi düzeltildi (`docs/PAYMENTS.md`)** |
 | İç API / cron yetkilendirmesi | ✅ tamamlandı | 2 P1 |
 | API rol/auth kapsaması (67 route) | ✅ tamamlandı | 0 yeni açık — bkz. "Doğrulanmış güvenli" |
@@ -253,7 +253,7 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   ya da *metin* — gerçek süreci yaz. İptal edilmiş rezervasyondaki `SUCCESS` ödeme
   bir *veri düzeltmesi* istiyor.
 
-### [P0-3] Valiz boyutu fiyat farkı canlıda ölü: S/M/XL üçü de ₺50
+### [P0-3] ⚠️ KOD TARAFI KAPATILDI, VERİ KARARI BEKLİYOR — Valiz boyutu fiyat farkı canlıda ölü: S/M/XL üçü de ₺50
 - **Nerede**: `PlatformSettings.bagMultiplier*`; `src/lib/pricing-rules.ts:33`;
   `src/lib/platform-settings.ts:45-55`; `src/components/guest/ShopDetailClient.tsx`
 - **Kanıt**: canlı satır `1.0000 | 1.0000 | 1.0000`. `getPricingRules()` kod
@@ -265,12 +265,18 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   > tamamlanmamış yarısı.
 - **Neden önemli**: ürün boyuta göre fiyatlandırma vaat ediyor, ama XL bavul küçük
   bavul fiyatı ödüyor.
-- **Çözüm**: *veri* — `/admin/platform-settings` üzerinden canlı satırı düzelt.
-  Gösterim ve tahsilat birbiriyle tutarlı (ikisi de aynı kuralı kullanıyor), sorun
-  ikisinin de ayrım yapmaması. Tekdüze fiyat bilinçliyse *kod* — üç özdeş fiyatı
-  göstermeyi bırak.
+- **Kod tarafı yapıldı (2026-08-22)**: hatanın kaynağı üç farklı doğruluk kaynağıydı
+  ve o kapatıldı. `schema.prisma` varsayılanları `DEFAULT_PRICING_RULES` ile hizalandı
+  (0.8/1.0/1.5) ve `src/__tests__/pricing-defaults.test.ts` 12 alanı tek tek
+  karşılaştırıp ayrışmayı CI'da kırmızı yakıyor. Ayrıca test, üç çarpanın gerçekten
+  farklı olmasını da şart koşuyor — hepsi 1.0 ise boy bazlı fiyat ölü demektir.
+- **AÇIK KALAN — bu bir İŞ KARARI, kod değil**: prod'daki canlı `default` satırı hâlâ
+  `1.0/1.0/1.0`. Migrasyon buna **bilerek dokunmadı**: canlı fiyatı bir migrasyonun
+  sessizce değiştirmesi kabul edilemez. `/admin/platform-settings` üzerinden ya
+  çarpanlar ayrıştırılmalı ya da tekdüze fiyat bilinçli bir karar olarak kabul edilip
+  dükkan detayında üç özdeş fiyat kutusu gösterilmekten vazgeçilmeli.
 
-### [P0-4] Canlı fiyat yapılandırması geçmiş tahsilatların hiçbirini üretemiyor; müşterilerin ödediği sigorta şimdi sıfır
+### [P0-4] ⚠️ MİMARİ KAPATILDI, SİGORTA KARARI BEKLİYOR — Canlı fiyat yapılandırması geçmiş tahsilatların hiçbirini üretemiyor
 - **Nerede**: `Booking.insuranceFee`; `PlatformSettings.insuranceFeeTry`;
   `src/lib/booking-server-price.ts:68`
 - **Kanıt**: 19 rezervasyonun tamamı `insuranceFee = 150.00` taşıyor, canlı ayar
@@ -280,11 +286,19 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   kapsamından bahsediyor.
 - **Neden önemli**: platform sigortalı emanet pazarlıyor ve geçmişte her rezervasyonda
   bunun için 150 TRY almış; şimdi hiçbir şey almıyor ama iddiayı sürdürüyor.
-- **Çözüm**: *karar + veri* — `insuranceFeeTry`'ı belirle ya da sigorta iddiasını
-  kaldır. *Kod* — rezervasyonun yanına kural sürümünü yaz ki geçmiş tahsilatlar
-  yeniden üretilebilir kalsın.
+- **Kod tarafı yapıldı (2026-08-22)**: `Booking.pricingSnapshot` eklendi. Rezervasyon
+  artık fiyatını üreten kural kümesinin anlık kopyasını (sürüm + zaman damgası)
+  taşıyor; yalnızca yaratılırken yazılıyor, sonra değişmiyor
+  (`src/lib/pricing-snapshot.ts`). Bundan sonra admin bir çarpanı değiştirse de geçmiş
+  tahsilatlar yeniden üretilebilir — anlaşmazlık, fatura ve iade için gereken şey buydu.
+  `readPricingSnapshot()` kopya yoksa `null` döner, bugünkü kuralları **uydurmaz**.
+- **AÇIK KALAN — bu bir İŞ KARARI**: mevcut 19 rezervasyonda kopya yok ve o kayıtlar
+  için hangi kuralın geçerli olduğu gerçekten bilinmiyor; geriye dönük doldurmak
+  yanlış olurdu. Ayrıca `insuranceFeeTry = 0` iken dükkan detayı hâlâ "Sigortalı
+  Emanet" rozeti gösteriyor ve sözleşme 2.3 sigortadan bahsediyor
+  (`ShopDetailClient.tsx:95`). Ya ücret belirlenmeli ya iddia kaldırılmalı. → **P1-20**
 
-### [P0-5] Geç teslim alma canlıda ücretsiz; gecikme ücreti iptal ücreti alanını ödünç alıyor
+### [P0-5] ✅ KOD DÜZELTİLDİ — Gecikme ücreti iptal ücreti alanını ödünç alıyordu
 - **Nerede**: `src/services/BookingService.ts:536-552`;
   `PlatformSettings.cancelFixedFeeTry`; `(guest)/terms/page.tsx:65,74,100`
 - **Kanıt**: `const lateFeeTry = lateMs > graceMs ? pricingRules.cancelFixedFeeTry : 0;`
@@ -293,8 +307,17 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   olarak bırakılmış. Sözleşme üç ayrı yerde tersini vaat ediyor (4.4, 5.3, 8.3:
   "otomatik olarak tahsil edilir").
 - **Neden önemli**: süreyi aşan müşterinin maliyetini partner üstleniyor.
-- **Çözüm**: *kod* — gecikmeye kendi ayarını ver (`latePickupFeeTry`), tahsilata bağla;
-  o zamana kadar *metin* — sözleşmeyi gerçeğe çek.
+- **Çözüm (uygulandı, 2026-08-22)**: gecikmenin kendi ayarları var —
+  `PlatformSettings.latePickupFeeTry` ve `latePickupGraceMin` (tolerans da artık
+  sabit 15 dk değil). `BookingService` bunları kullanıyor; admin panelinin tamamı
+  (form → server action → şema) bağlandı ve 14 dile etiket eklendi. Migrasyon
+  `latePickupFeeTry`'ı mevcut `cancelFixedFeeTry` değeriyle doldurdu, yani davranış
+  aynen korundu — yalnızca alanlar ayrıldı, artık bağımsız değiştirilebiliyorlar.
+- **AÇIK KALAN**: (a) canlı `latePickupFeeTry` hâlâ `0` — ücret belirlemek iş kararı;
+  (b) ücret **hâlâ tahsil edilmiyor**, yalnızca `lateFeeApplied` alanına ve log'a
+  yazılıyor. Tahsilat ödeme defterine bağlanmalı (`docs/PAYMENTS.md`); (c) sözleşme
+  üç yerde (4.4, 5.3, 8.3) "otomatik olarak tahsil edilir" diyor — (b) yapılana kadar
+  metin gerçeğe çekilmeli. → **P1-21**
 
 ---
 
@@ -529,6 +552,35 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
 - **Çözüm**: sunucu layout'unda `getPaymentCopyMode()` çözülüp bir React context ile
   istemciye verilmeli; `paymentCopyKey(key, modeFromContext)` çağrılmalı. Public env
   değişkeni ile ikinci bir doğruluk kaynağı **yaratılmamalı** — sağlayıcı tek kaynak.
+
+### [P1-20] "Sigortalı Emanet" rozeti gösteriliyor ama sigorta ücreti sıfır
+- **Nerede**: `src/components/guest/ShopDetailClient.tsx:95` (`insuredStorage`);
+  sözleşme 2.3; `PlatformSettings.insuranceFeeTry` canlıda `0.00`
+- **Kanıt**: P0-4 kapsamında ölçüldü — geçmiş 19 rezervasyonun tamamı
+  `insuranceFee = 150.00` taşıyor, canlı ayar `0.00`. Yeni bir rezervasyon **hiç**
+  sigorta satırı almıyor, ama rozet ve sözleşme maddesi yerinde duruyor.
+- **Neden P1**: para vaadi değil ama **güvence** vaadi, ve karşılığı yok. Bir bavul
+  kaybolduğunda platformun neye dayanarak ödeme yapacağı belirsiz.
+- **Çözüm — iki seçenek, karar sizin**: (a) `insuranceFeeTry` belirlenip gerçek bir
+  poliçeye/karşılığa bağlanır; (b) iddia kaldırılır. **Kod tarafı için doğru kalıp
+  ödeme metinlerindekiyle aynı**: rozet, `insuranceFeeTry > 0` olup olmadığından
+  türemeli — hardcoded olmamalı ki ayar değişince metin de kendiliğinden değişsin
+  (bkz. `src/lib/payment-copy.ts`).
+
+### [P1-21] Gecikme ücreti hesaplanıyor ama tahsil edilmiyor; sözleşme "otomatik tahsil edilir" diyor
+- **Nerede**: `src/services/BookingService.ts` (checkOut, gecikme bloğu);
+  `(guest)/terms/page.tsx:65,74,100`
+- **Kanıt**: P0-5 düzeltmesiyle gecikmenin artık kendi ayarı var
+  (`latePickupFeeTry`), ama hesaplanan tutar yalnızca `Booking.lateFeeApplied`
+  alanına ve log'a yazılıyor — hiçbir tahsilat yapılmıyor. Sözleşme üç ayrı yerde
+  (4.4, 5.3, 8.3) "otomatik olarak tahsil edilir" diyor.
+- **Neden P1**: süreyi aşan müşterinin maliyetini partner üstlenmeye devam ediyor;
+  ayrıca sözleşme metni gerçeği anlatmıyor.
+- **Bağımlı olduğu iş**: tahsilat, ödeme defterine bağlanmalı — `PaymentService`
+  üzerinden ek bir tahsilat kalemi. Şu an sağlayıcı `manual` (dükkanda tahsilat)
+  olduğu için pratikte esnafın çıkışta ek ücreti alması ve bunu panelden işaretlemesi
+  gerekiyor; o akış henüz yok. Ayrıntı: `docs/PAYMENTS.md`.
+- **O zamana kadar**: sözleşme metni gerçeğe çekilmeli.
 
 ### [P2-8] Admin gelen kutusundaki toplu işlem metinleri i18n'i baypas ediyor
 - **Nerede**: `src/components/admin/AdminMessagesClient.tsx:26-29`

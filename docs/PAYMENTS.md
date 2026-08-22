@@ -136,3 +136,22 @@ hedefledi:
 düzeltilmedi. Migrasyonun sessizce veri düzeltmesi yapması denetim izini bozardı ve
 bu satırların kaynağı hâlâ bilinmiyor (P1-5: prod'a rezervasyon yazabilen bir yol açık
 olabilir). Önce kaynak bulunmalı.
+
+---
+
+## Fiyatlandırma ile ilişkisi
+
+Ödeme defteri **ne kadar** tahsil edileceğini hesaplamaz; onu fiyatlandırma katmanı
+yapar ve sonucu rezervasyona yazar. İki taraf `Booking.pricingSnapshot` üzerinden
+buluşur: defter bir tutarı tahsil ederken o tutarın hangi kurallarla üretildiği
+rezervasyonun üstünde kayıtlıdır (`src/lib/pricing-snapshot.ts`).
+
+Bu ayrım bilinçli. `PlatformSettings` tek satırlık ve değişkendir; ödeme defteri ise
+değişmez bir kayıttır. Anlık kopya olmadan admin bir çarpanı değiştirdiği anda
+"bu 440 TRY nasıl hesaplandı" sorusunun cevabı kayboluyordu (P0-4).
+
+**Henüz bağlanmamış:** geç teslim alma ücreti (`latePickupFeeTry`) hesaplanıyor ve
+`Booking.lateFeeApplied` alanına yazılıyor, ama tahsilat defterden geçmiyor — ek
+tahsilat kalemi akışı yok. Sağlayıcı `manual` olduğu sürece bu pratikte esnafın
+çıkışta ek ücreti alıp panelden işaretlemesi demek; o ekran da yok.
+Bkz. `docs/DEFECT_BACKLOG.md` → P1-21.
