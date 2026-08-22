@@ -503,7 +503,7 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   > düzeltildi ve şiddet P2'ye indirildi.
 - **Çözüm**: *kod* — `aria-label` ekle (`title` kalabilir).
 
-### [P1-14] Olmayan sayfalar HTTP 200 dönüyor (soft 404) — SEO'ya dayanan bir üründe ciddi
+### [P2-11] Olmayan sayfalar HTTP 200 dönüyor (soft-404) — ama `noindex` zararı engelliyor
 - **Nerede**: uygulama genelinde; `src/app/[locale]/shop/[shopId]/page.tsx:57`
   (`notFound()` çağrılıyor ama durum kodu 404 olmuyor)
 - **Kanıt** (kendim ölçtüm):
@@ -516,15 +516,28 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   açıkça var, yani "bulunamadı" sayfası doğru render ediliyor ama HTTP durumu 200
   kalıyor. Kullanıcı doğru ekranı görüyor ("KAYBOLDUN!"), arama motoru ise sayfayı
   geçerli sayıyor.
-- **Neden önemli**: ürün organik aramaya dayanıyor (şehir landing sayfaları, blog, her
-  dükkan için canonical/hreflang meta). Soft 404, Google'ın silinmiş dükkanları ve
-  uydurma URL'leri geçerli içerik olarak indekslemesine yol açar; bu hem indeks
-  kalitesini hem de gerçek sayfaların sıralamasını aşağı çeker.
-- **Çözüm**: *kod* — bir `not-found.tsx`'in gerçekten 404 ile servis edildiğini
-  doğrula. Bu genelde middleware'in isteği rewrite edip durum kodunu düşürmesinden
-  kaynaklanır; middleware'in `/tr/...` yollarını nasıl yeniden yazdığı ile
-  `notFound()`'un etkileşimi incelenmeli. Düzeltmeden sonra kontrol tek satır:
-  `curl -o /dev/null -w '%{http_code}' https://bagajpark.com/tr/yok-boyle-sayfa`.
+- **ÖNEMLİ DÜZELTME (2026-08-22): bu maddenin şiddetini P1'den P2'ye indirdim ve
+  gerekçesini geri aldım.** Önce "Google uydurma URL'leri geçerli içerik olarak
+  indeksler" yazmıştım — **bu yanlıştı.** Ölçtüm: Next, `notFound()` durumunda
+  sayfaya `<meta name="robots" content="noindex"/>` enjekte ediyor; geçerli bir
+  sayfada bu etiket yok (ikisi karşılaştırıldı). Yani indeksleme zaten engelliyor.
+  Kalan sorun sadece durum kodunun ideal olmaması: tarama bütçesi boşa gidiyor ve
+  Google HTTP katmanında değil sayfayı render ederek anlıyor.
+- **Teşhis (ölçümle, tahminle değil)**: Cloudflare ve nginx elendi — container'ın
+  *içinden* `node fetch` ile sorulduğunda da 200 döndü, yani 200'ü Next'in kendisi
+  üretiyor. Sebep: catch-all route (`[locale]/[...slug]`) **eşleştiği için** Next
+  yanıtı başarılı sayıyor; `notFound()` çağrılıyor ama durum 200 kalıyor.
+- **Denenip BAŞARISIZ olan**: `export const dynamic = "force-dynamic"` — durum hâlâ
+  200 döndü, değişiklik geri alındı. Faydası olmayan ama statik optimizasyonu kapatan
+  bir satır taşımanın anlamı yok.
+- **Kök `app/not-found.tsx` eklenmedi**: ölçüldü, locale'siz yollar next-intl
+  middleware'i tarafından 307 ile `/tr/...`'e yönleniyor, yani o boundary pratikte
+  hiç erişilmiyor — ölü kod olurdu.
+- **Gerçek çözüm adayı**: catch-all dosyasını **silmek**. O zaman eşleşmeyen URL'ler
+  hiçbir route'a düşmez ve Next kendi 404'ünü doğru durum koduyla döner. Doğrulanması
+  gereken tek şey markalı "KAYBOLDUN!" ekranının korunup korunmadığı. `noindex` zaten
+  devrede olduğu için bu düşük öncelikli.
+- **Kontrol tek satır**: `curl -o /dev/null -w '%{http_code}' https://bagajpark.com/tr/yok-boyle-sayfa`
 
 ### [P1-15] Partner panelinde hydration hatası (React #418)
 - **Nerede**: `/tr/partner` (test partner hesabıyla giriş yapılmış oturumda)

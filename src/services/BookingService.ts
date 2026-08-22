@@ -71,6 +71,7 @@ import {
   validateBookingStayWindow,
 } from '@/lib/booking-server-price';
 import { bookingEventService } from '@/services/BookingEventService';
+import { paymentService, type PaymentActor } from '@/services/PaymentService';
 
 type TxClient = Omit<
   Prisma.TransactionClient,
@@ -633,16 +634,36 @@ export class BookingService implements IBookingService {
     });
   }
 
-  async markAsPaid(bookingId: string): Promise<void> {
-    await prisma.booking.update({
+  /**
+   * Rezervasyonu ödenmiş yapar — ARTIK DEFTER ÜZERİNDEN.
+   *
+   * Eski hâli rezervasyonu doğrudan `PAID` yazıyordu ve hiçbir `PaymentLog`
+   * satırı üretmiyordu; prod'da bu yüzden 7 tane "ödenmiş ama ödeme kaydı olmayan"
+   * rezervasyon oluştu (P1-9). Artık niyet yoksa açılıyor, sonra tahsilat
+   * işaretleniyor; ikisi de deftere ve denetim izine yazılıyor.
+   */
+  async markAsPaid(bookingId: string, actor?: PaymentActor): Promise<void> {
+    const booking = await prisma.booking.findUnique({
       where: { id: bookingId },
-      data: { status: 'PAID' }
+      select: { totalPrice: true },
     });
+    if (!booking) {
+      throw new Error(`markAsPaid: booking ${bookingId} not found`);
+    }
 
-    bookingEventService.record({
+    const intent = await paymentService.openIntent({
       bookingId,
-      event: "PAID",
-    }).catch((err) => logger.error({ err, bookingId }, "booking_event_paid_failed"));
+      amount: moneyToNumber(booking.totalPrice),
+      actor,
+    });
+    if (!intent.ok) {
+      throw new Error(`markAsPaid: ${intent.code} — ${intent.message}`);
+    }
+
+    const captured = await paymentService.markCaptured({ bookingId, actor });
+    if (!captured.ok) {
+      throw new Error(`markAsPaid: ${captured.code} — ${captured.message}`);
+    }
   }
 
   async getBookingDetails(id: string): Promise<BookingWithShopGuestDetails | null> {
@@ -766,18 +787,25 @@ export class BookingService implements IBookingService {
       booking.status === 'PAID' || !!hasCapturedPayment;
 
     try {
-      // Bounce-style: full refund to original payment method
+      // İade defter üzerinden. Ham `updateMany` kaldırıldı: kısmi iadeyi
+      // modelleyemiyordu, `refundedAmount` yazmıyordu ve denetim izi bırakmıyordu.
       if (hadPayment) {
-        const totalPaid = moneyToNumber(booking.totalPrice);
-        if (totalPaid > 0) {
-          // Mark payment as refunded instead of issuing credit coupon
-          await prisma.paymentLog.updateMany({
-            where: { bookingId, status: 'SUCCESS' },
-            data: { status: 'REFUNDED' },
-          }).catch((err) =>
-            logger.error({ err, bookingId }, "payment_refund_mark_failed")
+        const refunded = await paymentService.refund({
+          bookingId,
+          reason: 'booking_cancelled',
+        });
+        if (!refunded.ok && refunded.code !== 'NOTHING_TO_REFUND') {
+          logger.error(
+            { bookingId, code: refunded.code, message: refunded.message },
+            "payment_refund_mark_failed",
           );
         }
+      } else {
+        // Tahsilat olmadan iptal: açık kalmış niyeti kapat, defterde PENDING
+        // satır sürünmesin.
+        await paymentService
+          .cancelIntent({ bookingId })
+          .catch((err) => logger.error({ err, bookingId }, "payment_intent_cancel_failed"));
       }
 
       await prisma.$transaction(async (tx) => {

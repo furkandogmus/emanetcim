@@ -232,14 +232,35 @@ model Booking {
   @@index([guestId, status])
 }
 
+/// Rezervasyon başına tek ödeme defteri satırı.
+///
+/// Bu tablonun TEK yazıcısı `src/services/PaymentService.ts`'tir. Ham
+/// `prisma.paymentLog.update` çağrısı yapmayın: durum geçişleri orada
+/// doğrulanıyor ve her geçiş `BookingEvent`'e denetim izi bırakıyor.
 model PaymentLog {
   id               String        @id @default(uuid())
   bookingId        String        @unique
   transactionId    String?       @unique
+  /// Brüt tutar (rezervasyonun toplam bedeli).
   amount           Decimal       @db.Decimal(12, 2)
-  status           PaymentStatus @default(SUCCESS)
+  /// Bugüne kadar iade edilen toplam. `amount`'a eşitse durum REFUNDED olur.
+  refundedAmount   Decimal       @default(0) @db.Decimal(12, 2)
+  currency         String        @default("TRY")
+  /// Kaydı üreten sağlayıcı adı — `PaymentProvider.capabilities.id` ile aynı.
+  /// Lansmanda "manual" (dükkanda tahsilat); PSP entegrasyonu sonrası "iyzico" vb.
+  provider         String        @default("manual")
+  /// Sağlayıcının kendi işlem referansı.
+  providerRef      String?
+  /// Aynı niyetin iki kez açılmasını engeller.
+  idempotencyKey   String?       @unique
+  status           PaymentStatus @default(PENDING)
+  /// FAILED durumunda sağlayıcının verdiği sebep.
+  failureReason    String?
   splitCompleted   Boolean       @default(false)
+  capturedAt       DateTime?
+  refundedAt       DateTime?
   createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
   chargebackNote   String?
   /// Chargeback incelemesi: OPEN | WON | LOST | null
   chargebackStatus String?
@@ -248,6 +269,7 @@ model PaymentLog {
   @@index([status])
   @@index([splitCompleted])
   @@index([createdAt])
+  @@index([provider, status])
 }
 
 model NotificationLog {
@@ -525,10 +547,26 @@ enum BookingStatus {
   APPROVED
 }
 
+/// Ödeme defteri durumları.
+///
+/// `PENDING` VARSAYILANDIR ve öyle kalmalı. Önceki varsayılan `SUCCESS` idi; bu,
+/// hiçbir kart çekilmeden "başarılı" ödeme kaydı üretilmesine ve prod'da
+/// karşılığı olmayan 3.480 TRY'lik deftere yol açtı (2026-08-22 denetimi, P0-0).
 enum PaymentStatus {
+  /// Niyet açıldı, para henüz alınmadı.
+  PENDING
+  /// Kart provizyonu alındı ama tahsil edilmedi (3DS/auth-capture akışı).
+  AUTHORIZED
+  /// Para tahsil edildi.
   SUCCESS
-  REFUNDED
+  /// Sağlayıcı reddetti veya tahsilat yapılamadı.
   FAILED
+  /// Tamamı iade edildi.
+  REFUNDED
+  /// Bir kısmı iade edildi; `refundedAmount` ne kadarını söyler.
+  PARTIALLY_REFUNDED
+  /// Tahsilat yapılmadan niyet kapatıldı (rezervasyon iptali vb.).
+  CANCELLED
 }
 
 enum SealStatus {
