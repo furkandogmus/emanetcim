@@ -769,7 +769,7 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   başlıklara bakıyor; SQL'de yeniden yazmak kuralın **ikinci bir kopyası** olurdu
   ve iki kopya ayrışırdı.
 
-### [P1-19] İstemci bileşenleri hâlâ koşulsuz "kartınıza iade edilir" diyor
+### [P1-19] ✅ DÜZELTİLDİ — İstemci bileşenleri koşulsuz "kartınıza iade edilir" diyordu
 - **Nerede**: `src/components/guest/BookingModifyModal.tsx:239` (`modifyRefundNote`);
   ayrıca `Guest.cancellationEstimateCard` ve `Guest.payBookingDivider` anahtarları
 - **Kanıt**: P0-0 kapsamında sunucu tarafı metinler `getPaymentCopyMode()`'a bağlandı
@@ -780,11 +780,16 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   rezervasyon düzenleme modalinde görünüyor; kamuya açık FAQ ve JSON-LD düzeltildi.
 - **Hazır olan**: `*Onsite` çeviri anahtarları 14 dilde mevcut, `paymentCopyKey()`
   yardımcısı mod parametresi alabiliyor.
-- **Çözüm**: sunucu layout'unda `getPaymentCopyMode()` çözülüp bir React context ile
-  istemciye verilmeli; `paymentCopyKey(key, modeFromContext)` çağrılmalı. Public env
-  değişkeni ile ikinci bir doğruluk kaynağı **yaratılmamalı** — sağlayıcı tek kaynak.
+- **Çözüm (uygulandı, 2026-08-22)**: `src/lib/commerce-context.ts` +
+  `CommerceProvider`. Değer sunucuda çözülüp layout'tan istemciye geçiyor;
+  `BookingModifyModal` artık `usePaymentCopyKey()` kullanıyor. Public env ile ikinci
+  bir doğruluk kaynağı **yaratılmadı** — bir metnin doğru olup olmadığı, hangi
+  katmandan bakıldığına göre değişmemeli.
+- **Kritik ayrıntı**: sarmalayıcı unutulursa bağlam **ihtiyatlı** varsayılana düşer
+  (ödeme dükkanda, sigorta yok). Bir vaat, sarmalayıcı unutulduğu için ortaya
+  çıkmamalı — bu ayrıca test edildi.
 
-### [P1-20] "Sigortalı Emanet" rozeti gösteriliyor ama sigorta ücreti sıfır
+### [P1-20] ⚠️ KOD DÜZELTİLDİ, ÜCRET KARARI AÇIK — "Sigortalı Emanet" rozeti gösteriliyordu ama sigorta ücreti sıfır
 - **Nerede**: `src/components/guest/ShopDetailClient.tsx:95` (`insuredStorage`);
   sözleşme 2.3; `PlatformSettings.insuranceFeeTry` canlıda `0.00`
 - **Kanıt**: P0-4 kapsamında ölçüldü — geçmiş 19 rezervasyonun tamamı
@@ -792,11 +797,15 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   sigorta satırı almıyor, ama rozet ve sözleşme maddesi yerinde duruyor.
 - **Neden P1**: para vaadi değil ama **güvence** vaadi, ve karşılığı yok. Bir bavul
   kaybolduğunda platformun neye dayanarak ödeme yapacağı belirsiz.
-- **Çözüm — iki seçenek, karar sizin**: (a) `insuranceFeeTry` belirlenip gerçek bir
-  poliçeye/karşılığa bağlanır; (b) iddia kaldırılır. **Kod tarafı için doğru kalıp
-  ödeme metinlerindekiyle aynı**: rozet, `insuranceFeeTry > 0` olup olmadığından
-  türemeli — hardcoded olmamalı ki ayar değişince metin de kendiliğinden değişsin
-  (bkz. `src/lib/payment-copy.ts`).
+- **Çözüm (kod tarafı uygulandı, 2026-08-22)**: rozet artık `insuranceEnabled`
+  (`insuranceFeeTry > 0`) koşuluna bağlı — `CommerceProvider` üzerinden. Ücret
+  belirlendiği an rozet **kendiliğinden** geri gelir, hiçbir kod değişikliği
+  gerekmez. P1-19 ile aynı mekanizma; ikisi ayrı madde gibi duruyordu ama aynı hata
+  sınıfıydı.
+- **AÇIK KALAN — iş kararı**: `insuranceFeeTry` belirlenip gerçek bir
+  poliçeye/karşılığa bağlanacak mı, yoksa iddia tamamen kaldırılacak mı? Şu an rozet
+  görünmüyor, yani **yanlış bir vaat verilmiyor** — acil değil. Sözleşme 2.3'teki
+  sigorta maddesi de bu karara göre gözden geçirilmeli.
 
 ### [P1-21] Gecikme ücreti hesaplanıyor ama tahsil edilmiyor; sözleşme "otomatik tahsil edilir" diyor
 - **Nerede**: `src/services/BookingService.ts` (checkOut, gecikme bloğu);
