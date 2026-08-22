@@ -15,7 +15,7 @@
 | Alan | Denetlendi mi | Sonuç |
 |---|---|---|
 | Veri bütünlüğü + iş kuralları | ✅ tamamlandı | 5 P0, 11 P1, 7 P2 |
-| Ödeme entegrasyonu durumu | ✅ tamamlandı | **1 P0 (kök neden)** |
+| Ödeme entegrasyonu durumu | ✅ tamamlandı | **1 P0 — mimarisi düzeltildi (`docs/PAYMENTS.md`)** |
 | İç API / cron yetkilendirmesi | ✅ tamamlandı | 2 P1 |
 | API rol/auth kapsaması (67 route) | ✅ tamamlandı | 0 yeni açık — bkz. "Doğrulanmış güvenli" |
 | i18n anahtar bütünlüğü (14 dil) | ✅ tamamlandı | 1 P1 (138 anahtar × 12 dil) |
@@ -32,9 +32,12 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
 
 ### En acil üç şey
 
-1. **Hiçbir ödeme sağlayıcısı entegre değil**, ama `PaymentLog.status` varsayılanı
-   `SUCCESS` ve kamuya açık sayfalar kartla tahsilat/iade vaat ediyor. Aşağıdaki
-   maddelerin çoğunun kök nedeni bu (P0-0).
+1. ~~Hiçbir ödeme sağlayıcısı entegre değil, ama `PaymentLog.status` varsayılanı
+   `SUCCESS`~~ → **mimarisi düzeltildi (2026-08-22)**: sağlayıcı port/adapter,
+   `PaymentService` tek yazıcı, varsayılan `PENDING`, metin sağlayıcı yeteneğinden
+   türüyor. Ayrıntı `docs/PAYMENTS.md`. **Kalan**: prod'daki 12 sahte `SUCCESS`
+   satırı (kaynağı bilinmiyor, önce P1-5) ve istemci bileşenlerindeki kartlı metin
+   (P1-19).
 2. **Prod'daki 39 gerçek kullanıcı hesabına karşılık defterde 8 hayalet rezervasyon
    ve 1.520 TRY sahte ödeme var** (kayıtlı hacmin %44'ü) ve kaynağı hâlâ bilinmiyor
    — yani prod'a rezervasyon yazabilen bir yol açık olabilir (P1-5).
@@ -46,7 +49,7 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
 
 ## P0 — Para, güven veya erişilebilirlik doğrudan bozuk
 
-### [P0-0] Hiçbir ödeme sağlayıcısı entegre değil, ama sistem para almış gibi davranıyor
+### [P0-0] ✅ MİMARİ DÜZELTİLDİ — Hiçbir ödeme sağlayıcısı entegre değil, ama sistem para almış gibi davranıyordu
 - **Nerede**: `prisma/schema.prisma:240`; tüm `src/`
 - **Kanıt** (kendim doğruladım):
   ```bash
@@ -64,11 +67,38 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
 - **Bağlantılı maddeler**: P0-2 (iade vaadi), P0-4 (sigorta ücreti), P0-5 (gecikme
   tahsilatı), P1-5 (hayalet ödemeler), P1-9 (ödeme kaydı olmayan rezervasyonlar),
   P1-11 (`splitCompleted` hepsi false — partner ödemesi hiç yapılmamış).
-- **Çözüm**: iki aşamalı. **Kısa vade (lansmandan önce, kod değil metin):** kartla
-  ödeme/iade vaat eden tüm metinleri gerçek sürece çek. **Orta vade:** şahıs şirketi
-  kurulduktan sonra sağlayıcıyı entegre et; `PaymentStatus` varsayılanı `SUCCESS`
-  olmaktan çıkıp `PENDING` olmalı, aksi halde entegrasyondan sonra da sahte başarılı
-  kayıtlar üretilmeye devam eder.
+- **Çözüm (uygulandı, 2026-08-22)** — ayrıntı: `docs/PAYMENTS.md`.
+  Hatayı düzeltmek yerine tekrar edilmesini imkânsız kılmayı hedefledik:
+  1. **`PaymentProvider` port/adapter mimarisi** (`src/lib/payments/`). Lansman
+     adaptörü `ManualPaymentProvider` — **dükkanda tahsilat**. Bu bir eksiklik değil,
+     bilinçli karar: PSP komisyonu (~%2,5) ve entegrasyon/uyum işi lansmanda sıfır,
+     akış dürüst. Iyzico/PayTR gelince yeni adaptör dosyası eklenir, çağıran kod
+     değişmez.
+  2. **`PaymentService` defterin tek yazıcısı** (`src/services/PaymentService.ts`).
+     Durum geçiş tablosu, idempotent niyet açma, kısmi iade, her geçişte
+     `BookingEvent` denetim izi.
+  3. **`PaymentStatus` varsayılanı `PENDING`** (+ `AUTHORIZED`,
+     `PARTIALLY_REFUNDED`, `CANCELLED`). `PaymentLog`'a `provider`, `currency`,
+     `refundedAmount`, `idempotencyKey`, `providerRef`, `failureReason`,
+     `capturedAt`, `refundedAt`, `updatedAt`.
+  4. **`markAsPaid` artık defter üzerinden** ve tahsilat + rezervasyon durumu **tek
+     transaction'da** yazılıyor — "ödemesiz PAID" artık üretilemez (P1-9'un kök nedeni).
+  5. **Metin, kodun yeteneğinden türüyor** (`src/lib/payment-copy.ts`). FAQ'in a2/a3
+     cevapları ve JSON-LD artık `capabilities.capturesOnline`'a bakıyor; 14 dile
+     dükkanda-tahsilat metinleri eklendi. `PAYMENT_PROVIDER=iyzico` yazıldığı gün
+     kartlı metinler kendiliğinden geri gelir.
+
+  Typecheck temiz, lint 0 hata, 203 test yeşil (14 yeni ödeme testi).
+- **AÇIK KALAN — bilerek**:
+  - **Prod'daki 12 sahte `SUCCESS` satırı düzeltilmedi.** `provider='legacy_unverified'`
+    damgalandılar. Migrasyonun sessizce veri düzeltmesi yapması denetim izini bozardı
+    ve bu satırların kaynağı hâlâ bilinmiyor — önce P1-5 çözülmeli.
+  - **İstemci bileşenleri hâlâ koşulsuz kartlı metin kullanıyor**
+    (`BookingModifyModal` → `modifyRefundNote`, `cancellationEstimateCard`,
+    `payBookingDivider`). Çeviri anahtarları 14 dilde hazır; eksik olan sunucu
+    tarafındaki yeteneği istemciye taşıyan yol (context/provider). → **P1-19**
+  - Marketplace split sağlayıcıda ayrılmıyor; şu an tahsilat esnafın elinde olduğu
+    için platform komisyonu **esnaftan alacak**. → P1-11 ile birlikte ele alınmalı.
 
 ### [P0-6] ✅ DÜZELTİLDİ — IDOR: herhangi bir partner tüm mühürleri arızalı yapıp platformda check-in'i durdurabiliyordu
 - **Nerede**: `src/app/api/mobile/partner/seals/report-faulty/route.ts`
@@ -484,6 +514,21 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
 - **Çözüm**: *kod* — gönderen/konu bazlı basit bir spam işaretleme + varsayılan
   "spam olmayanlar" görünümü; ya da iletişim formuna bot koruması (bu mesajların
   form üzerinden mi yoksa doğrudan e-posta ile mi geldiği ayrıca doğrulanmalı).
+
+### [P1-19] İstemci bileşenleri hâlâ koşulsuz "kartınıza iade edilir" diyor
+- **Nerede**: `src/components/guest/BookingModifyModal.tsx:239` (`modifyRefundNote`);
+  ayrıca `Guest.cancellationEstimateCard` ve `Guest.payBookingDivider` anahtarları
+- **Kanıt**: P0-0 kapsamında sunucu tarafı metinler `getPaymentCopyMode()`'a bağlandı
+  (`src/lib/payment-copy.ts`), ama bu yardımcı `getPaymentProvider()` çağırdığı için
+  **yalnızca sunucuda** çalışıyor. İstemci bileşenleri hâlâ kartlı sürümü basıyor —
+  ödeme dükkanda alınırken misafire "kartınıza iade edilir" yazıyor.
+- **Neden P1**: para vaadi, ve yanlış. P0 değil çünkü yalnızca giriş yapmış misafirin
+  rezervasyon düzenleme modalinde görünüyor; kamuya açık FAQ ve JSON-LD düzeltildi.
+- **Hazır olan**: `*Onsite` çeviri anahtarları 14 dilde mevcut, `paymentCopyKey()`
+  yardımcısı mod parametresi alabiliyor.
+- **Çözüm**: sunucu layout'unda `getPaymentCopyMode()` çözülüp bir React context ile
+  istemciye verilmeli; `paymentCopyKey(key, modeFromContext)` çağrılmalı. Public env
+  değişkeni ile ikinci bir doğruluk kaynağı **yaratılmamalı** — sağlayıcı tek kaynak.
 
 ### [P2-8] Admin gelen kutusundaki toplu işlem metinleri i18n'i baypas ediyor
 - **Nerede**: `src/components/admin/AdminMessagesClient.tsx:26-29`

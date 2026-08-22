@@ -21,6 +21,12 @@ const serverSchema = z.object({
   LOG_LEVEL: z.string().optional(),
   APP_VERSION: z.string().optional(),
   OBSERVABILITY_SERVICE_NAME: z.string().optional(),
+  /**
+   * Aktif ödeme sağlayıcısı. Tanımsızsa "manual" (dükkanda tahsilat).
+   * Bilinmeyen bir değerde sistem sessizce manual'a düşmez, atar —
+   * bkz. `src/lib/payments/index.ts`. Ayrıntı: docs/PAYMENTS.md
+   */
+  PAYMENT_PROVIDER: z.string().optional(),
 });
 
 export type ServerEnv = z.infer<typeof serverSchema>;
