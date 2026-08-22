@@ -36,11 +36,11 @@ aws sts get-caller-identity --profile bagajpark --query Account --output text  #
 
 ```bash
 cd infra/aws/stack
-# NOT: allowed_ssh_cidr'a YENİ bir IP verirseniz plan instance'ın user_data'sını da
-# değiştirir ve EC2 dur-kalk yapar (aws-test kesintisi). Bu adımda boş bırakın:
-terraform plan  -var="allowed_ssh_cidr="
+terraform plan  -var="allowed_ssh_cidr=$(curl -s https://ifconfig.me)/32"
 # Beklenen: "Plan: 1 to add, 0 to change, 0 to destroy." (aws_iam_role_policy.app_backup_write)
-terraform apply -var="allowed_ssh_cidr="
+# "aws_instance.app will be updated in-place" GÖRÜRSENİZ DURUN: bu instance'ı dur-kalk
+# ettirir. user_data artık ignore_changes'ta; görünüyorsa main.tf'i kontrol edin.
+terraform apply -var="allowed_ssh_cidr=$(curl -s https://ifconfig.me)/32"
 ```
 
 Doğrulama (read-only, instance'ta):

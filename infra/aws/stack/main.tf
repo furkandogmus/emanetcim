@@ -215,6 +215,15 @@ resource "aws_instance" "app" {
   })
 
   tags = { Name = "${var.project_name}-app" }
+
+  # cloud-init yalnizca ILK acilista calisir; sablon sonradan degisince
+  # Terraform user_data'yi guncellemek icin instance'i DURDURUP ACAR (canli
+  # kesinti). Calisan bir prod instance'ta bunun hicbir faydasi yok: yeni
+  # sablon ancak yeni instance'ta anlam tasir. (2026-08-22: plan "1 to change"
+  # gosteriyordu, sebebi buydu.)
+  lifecycle {
+    ignore_changes = [user_data]
+  }
 }
 
 resource "aws_eip" "app" {
