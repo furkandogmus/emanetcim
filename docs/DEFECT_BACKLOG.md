@@ -603,15 +603,42 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
 - **Çözüm (uygulandı, 2026-08-22)**: `.vercel.app` izni kaldırıldı, kontrol yalnızca
   gerçek host eşleşmesine bakıyor.
 
-### [P1-11] Zamanlanmış işlerin tek bir kayıt defteri yok
+### [P1-11] ✅ KONTROL DÜZLEMİ KURULDU — Zamanlanmış işlerin tek bir kayıt defteri yoktu
 - **Kanıt**: iş tanımları üç ayrı yere dağılmış ve hiçbiri diğerini bilmiyor:
   `vercel.json` (uygulamanın çalışmadığı bir platform), Hetzner crontab'ı (gerçek
   yürütücü), ve hiç var olmayan işler (slot üretimi — bkz. P0-1). Sonuç: bir iş
   çalışmayı bıraktığında (P1-1b) veya hiç kurulmadığında (P0-1) kimse fark etmiyor.
 - **Neden önemli**: bu, P0-1 ve P1-1b'nin ortak kök nedeni — tek tek hatalar değil,
   eksik bir kontrol düzlemi.
-- **Çözüm**: *operasyonel* — zamanlamanın tek kaynağı host seviyesinde olsun,
-  başarısız/kaçırılan çalıştırma alarmıyla. `vercel.json` kayıt defteri değil.
+- **Kök sebep, tanıdan bir adım derinde**: bir işin **çalıştığını hiçbir yer
+  kaydetmiyordu**, dolayısıyla **çalışmadığını da kimse söyleyemiyordu.**
+- **Çözüm (uygulandı, 2026-08-22)**:
+  1. **`JobRun` tablosu** — her iç iş başlangıç/bitiş/süre/sonuç yazıyor.
+     `withJobRun()` sarmalayıcısı `generate-slots` ve `overdue-scan`'e bağlandı.
+     Defter yazımı işi **asla bozmaz**: kayıt başarısız olsa bile iş çalışır —
+     gözlemlenebilirlik katmanının gözlediği şeyi düşürmesi kabul edilemez.
+  2. **`src/lib/jobs/registry.ts`** — altı işin adı, ne yaptığı, **durursa ne
+     olacağı**, cron ifadesi, gecikme eşiği. `ifItStops` bilerek zorunlu: gerekçesi
+     yazılamayan bir iş ya gereksizdir ya da kimse ne yaptığını bilmiyordur.
+  3. **`/api/health/jobs` beşinci kontrolü.** Slot tazeliği eskiden slot ufkundan
+     *çıkarılıyordu* — zekice ama dolaylı, ve yalnızca o iş için. Defter ölçüyü
+     genelleştiriyor. Dolaylı ölçü kaldırılmadı: defter işin **çalıştığını**, slot
+     ufku işin **işe yaradığını** söyler; iş her gece başarıyla çalışıp hiç slot
+     üretmiyor olabilir.
+  4. **`scripts/emit-crontab.sh`** — crontab kayıt defterinden üretiliyor. Elle
+     yazmak, kayıt defteriyle gerçeğin ayrılmasının ta kendisiydi.
+  5. **`jobs-registry.test.ts`** — ayrışma CI'da kırmızı yanıyor: her uç kayıt
+     defterinde mi, kayıt defterindeki her işin ucu var mı (**ödeme mutabakat
+     cron'u tam olarak böyle 2 ay boyunca 404 aldı**), bildirilen script'ler
+     gerçekten var mı.
+- **Tasarım kararı**: yalnızca `enforced: true` işler `DEGRADED` üretir. Cron'u
+  kurulmamış bir iş "bozuk" değil **"beklemede"**dir; onu kırmızı saymak kalıcı
+  kırmızı bir sağlık kontrolü demektir — ve kalıcı kırmızı, kimsenin bakmadığı
+  kontroldür. Şu an yalnızca `generate-slots` enforced.
+- **AÇIK KALAN**: beş işin cron'u kurulu değil. `scripts/README.md` →
+  "Crontab'ı kayıt defterinden üretme". Kurulduktan ve ilk kez başarıyla
+  çalıştıktan sonra `registry.ts` içinde `enforced: true` yapılmalı.
+- **Not**: `vercel.json` zaten yok; bu tanının o kısmı artık geçersiz.
 
 ### [P1-17] ✅ DÜZELTİLDİ — Admin panelinde tüm zamanların cirosu "Günlük Ciro" olarak gösteriliyordu
 - **Nerede**: `src/app/[locale]/admin/page.tsx:88,135`; `src/locales/tr.json`
