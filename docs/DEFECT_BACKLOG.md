@@ -854,6 +854,34 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   bloke eder), envanter dağıtıldıktan sonra `true`. Bayrak olmadan bunu doğrudan
   zorunlu yapmak lansmanı riske atar.
 
+### [P1-24] ⚠️ ÖLÇÜLDÜ VE MANDALLANDI — 30 sabit iki dilli metin dalı; 12 dil İngilizce görüyor
+- **Nerede**: 13 dosya. En büyükleri `CheckoutClient` (8 dal), `Footer` (3),
+  `luggage-storage/[slug]` (3), `[locale]/page.tsx` (3), `ShopDetailClient`
+  (1 blok ama **26 metin**), `insurance` (2), `cancellation` (2)
+- **Kanıt** (kendim ölçtüm): `locale === "tr" ? {...} : {...}` kalıbı 30 yerde.
+  Bu metinler hiç çeviri dosyasına girmemiş, yani 14 dilin **12'sinde İngilizce**
+  çıkıyorlar.
+- **Bu, P2-8'in genel hâli.** P2-8 tek bir admin bileşenini işaret ediyordu; aynı
+  kalıp misafir yüzeylerinde de var ve orada çok daha pahalı.
+- **DENETİMİN KÖR NOKTASI**: `src/locales/locales.test.ts` çeviri bütünlüğünü
+  ölçüyor ama yalnızca **eksik anahtarları** sayabiliyor. **Hiç anahtar olmamış**
+  bir metni göremez — dolayısıyla o testin "106 eksik" demesi gerçek boşluğun
+  tamamı değildi.
+- **Yapıldı (2026-08-22)**:
+  - `src/__tests__/hardcoded-copy.test.ts` — **mandal**. Sabit dalları sayar,
+    tavanı aşarsa CI kırmızı yanar ve borcun hangi dosyada olduğunu yazar.
+  - **Checkout hunisi** (8 dal → 0): dönüşüm yolundaki en değerli yüzey.
+  - **Ana sayfa SEO başlığı** (2 dal → 0): `<title>` ve JSON-LD 12 dilde
+    İngilizceydi — Almanca arayan biri için "Gepäckaufbewahrung" hiçbir yerde
+    geçmiyordu. Ürün organik aramaya dayandığı için doğrudan görünürlük kaybı.
+    Metadata ile JSON-LD artık aynı kaynaktan.
+  - **Dükkan detay sayfası** (1 blok / 13 metin): huninin içindeki sayfa.
+  - **30 → 19.** Tavan **gerçekte ulaşılan** yere kondu; mandal ancak dürüstse
+    işe yarar.
+- **AÇIK KALAN**: 19 dal. Sırayla: `Footer` (3), `luggage-storage/[slug]` (3),
+  `cancellation` (2), `insurance` (2), kalanı tek tek. Hepsi misafir yüzeyi
+  olmadığı için P0 değil, ama her biri 12 dili geride bırakıyor.
+
 ### [P2-8] ✅ DÜZELTİLDİ — Admin gelen kutusundaki toplu işlem metinleri i18n'i baypas ediyordu
 - **Nerede**: `src/components/admin/AdminMessagesClient.tsx:26-29`
 - **Kanıt**: metinler bileşen içinde sabit bir tr/en üçlü operatörüyle yazılmış
