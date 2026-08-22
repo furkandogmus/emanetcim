@@ -485,6 +485,33 @@ model PlatformSettings {
   platformHolidayDates Json?
 }
 
+/// Zamanlanmış iş çalıştırma defteri.
+///
+/// NEDEN VAR: 2026-08-22 denetiminde iş tanımları üç ayrı yere dağılmıştı ve
+/// hiçbiri diğerini bilmiyordu. Sonuç iki kez ısırdı: slot üretimi 37 gün durdu
+/// (P0-1) ve ödeme mutabakat cron'u 2 ay boyunca 404 aldı (P1-1b) — ikisi de kimse
+/// fark etmeden. Bir işin çalıştığını hiçbir yer KAYDETMİYORDU, dolayısıyla
+/// çalışmadığını da kimse söyleyemiyordu.
+///
+/// Slot üretiminin tazeliği slot ufkundan çıkarılabiliyordu (30 gün ileriye yazıyor,
+/// her çalışmadığı gün ufuk 1 kısalıyor) ama bu zekice ve DOLAYLI bir ölçüydü;
+/// yalnızca o iş için çalışıyordu. Bu tablo ölçüyü genelleştirir.
+model JobRun {
+  id         String    @id @default(uuid())
+  /// `src/lib/jobs/registry.ts` içindeki iş adı.
+  job        String
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+  /// RUNNING | SUCCESS | FAILED
+  status     String    @default("RUNNING")
+  durationMs Int?
+  /// Başarısızlıkta sebep; başarıda işin kendi özeti (kaç satır üretildi vb.).
+  detail     Json?
+
+  @@index([job, startedAt])
+  @@index([job, status, finishedAt])
+}
+
 model AuditLog {
   id          String   @id @default(cuid())
   actorUserId String?

@@ -4,6 +4,7 @@ import logger from "@/lib/logger";
 import { overdueBookingService } from "@/services/OverdueBookingService";
 import { sealIntegrityService } from "@/services/SealIntegrityService";
 import { partnerReachabilityService } from "@/services/PartnerReachabilityService";
+import { jobHealthService } from "@/services/JobHealthService";
 
 export const dynamic = "force-dynamic";
 
@@ -116,11 +117,21 @@ export async function GET() {
      */
     const partnerReachability = await partnerReachabilityService.check(now);
 
+    /**
+     * İş çalıştırma defteri (P1-11).
+     *
+     * `slotGeneration` ile ÇAKIŞMIYOR, tamamlıyor: defter işin ÇALIŞTIĞINI söyler,
+     * slot ufku işin İŞE YARADIĞINI söyler. İş her gece başarıyla çalışıp hiç slot
+     * üretmiyor olabilir; ikisi farklı sorulardır.
+     */
+    const scheduledJobs = await jobHealthService.check(now);
+
     const healthy =
       slotGeneration.status !== "stale" &&
       overdueReconciliation.status !== "stale" &&
       sealIntegrity.status !== "broken" &&
-      partnerReachability.status !== "broken";
+      partnerReachability.status !== "broken" &&
+      scheduledJobs.status !== "stale";
 
     if (slotGeneration.status === "stale") {
       logger.warn(
@@ -156,6 +167,7 @@ export async function GET() {
           overdueReconciliation,
           sealIntegrity,
           partnerReachability,
+          scheduledJobs,
         },
         context: { activeShopCount },
         timestamp: now.toISOString(),
@@ -172,6 +184,7 @@ export async function GET() {
           overdueReconciliation: { status: "unknown" },
           sealIntegrity: { status: "unknown" },
           partnerReachability: { status: "unknown" },
+          scheduledJobs: { status: "unknown" },
         },
         timestamp: new Date().toISOString(),
       },

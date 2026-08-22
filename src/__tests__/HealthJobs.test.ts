@@ -9,7 +9,15 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
  * kırmızı yanan bir sağlık kontrolü, hiç olmayandan daha kötüdür — kimse bakmaz.
  */
 
-const { mockPrisma, mockOverdueScan, mockSealCheck, mockReachCheck } = vi.hoisted(() => ({
+const { mockPrisma, mockOverdueScan, mockSealCheck, mockReachCheck, mockJobHealth } = vi.hoisted(() => ({
+  // Varsayilan: tum enforced isler taze.
+  mockJobHealth: vi.fn().mockResolvedValue({
+    checkedAt: new Date().toISOString(),
+    jobs: [],
+    enforcedStale: 0,
+    neverRun: 0,
+    status: "ok",
+  }),
   // Varsayilan: tum partnerlere ulasilabiliyor.
   mockReachCheck: vi.fn().mockResolvedValue({
     checkedAt: new Date().toISOString(),
@@ -56,6 +64,9 @@ vi.mock("@/services/SealIntegrityService", () => ({
 }));
 vi.mock("@/services/PartnerReachabilityService", () => ({
   partnerReachabilityService: { check: mockReachCheck },
+}));
+vi.mock("@/services/JobHealthService", () => ({
+  jobHealthService: { check: mockJobHealth },
 }));
 vi.mock("@/lib/logger", () => ({
   default: { warn: vi.fn(), error: vi.fn(), info: vi.fn() },
@@ -335,5 +346,78 @@ describe("GET /api/health/jobs — partner ulasilabilirligi", () => {
 
     expect(res.status).toBe(503);
     expect(body.checks.partnerReachability.unreachableWithActiveShop).toBe(1);
+  });
+});
+
+describe("GET /api/health/jobs — is calistirma defteri", () => {
+  beforeEach(() => {
+    setup({ horizonDays: 30, activeShops: 5 });
+  });
+
+  it("tum enforced isler tazeyse UP", async () => {
+    const res = await GET();
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.checks.scheduledJobs.status).toBe("ok");
+  });
+
+  it("enforced bir is gecikmisse 503", async () => {
+    mockJobHealth.mockResolvedValueOnce({
+      jobs: [{ job: "generate-slots", enforced: true, status: "stale", hoursSinceSuccess: 900 }],
+      enforcedStale: 1,
+      neverRun: 0,
+      status: "stale",
+    } as any);
+
+    const res = await GET();
+    const body = await res.json();
+
+    expect(res.status).toBe(503);
+    expect(body.checks.scheduledJobs.enforcedStale).toBe(1);
+  });
+
+  it("cron'u KURULMAMIS is (enforced=false) alarm URETMEZ", async () => {
+    // Kurulmamis bir is "bozuk" degil "beklemede"dir. Onu kirmizi saymak kalici
+    // kirmizi bir saglik kontrolu demektir -- kimsenin bakmadigi kontrol.
+    mockJobHealth.mockResolvedValueOnce({
+      jobs: [
+        { job: "overdue-scan", enforced: false, status: "never_run", hoursSinceSuccess: null },
+      ],
+      enforcedStale: 0,
+      neverRun: 1,
+      status: "ok",
+    } as any);
+
+    const res = await GET();
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.checks.scheduledJobs.neverRun).toBe(1);
+  });
+
+  it("2026-07-14 kesintisini defterden de yakalar", async () => {
+    // Slot ufku olcusu bunu zaten yakaliyordu ama YALNIZCA o is icin. Defter
+    // olcuyu genellestirir: 37 gun = 888 saat.
+    mockJobHealth.mockResolvedValueOnce({
+      jobs: [
+        {
+          job: "generate-slots",
+          enforced: true,
+          status: "stale",
+          hoursSinceSuccess: 888,
+          maxStaleHours: 48,
+        },
+      ],
+      enforcedStale: 1,
+      neverRun: 0,
+      status: "stale",
+    } as any);
+
+    const res = await GET();
+    const body = await res.json();
+
+    expect(res.status).toBe(503);
+    expect(body.checks.scheduledJobs.jobs[0].hoursSinceSuccess).toBe(888);
   });
 });

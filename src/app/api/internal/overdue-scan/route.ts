@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { authorizeCron, isRateLimited } from "@/lib/internal-api-guard";
 import { overdueBookingService } from "@/services/OverdueBookingService";
 import logger from "@/lib/logger";
+import { withJobRun } from "@/lib/jobs/run-ledger";
 
 /**
  * POST /api/internal/overdue-scan — süre aşımı mutabakatı.
@@ -39,14 +40,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  try {
+  // Defter sarmalayıcısı: işin çalıştığı, süresi ve sonucu `JobRun`'a yazılır.
+  // Olmadan "iş çalışmıyor" tespit edilemez (P1-11).
+  const outcome = await withJobRun("overdue-scan", async () => {
     const report = await overdueBookingService.scan();
-    return NextResponse.json({ ok: true, ...report });
-  } catch (err) {
-    logger.error({ err }, "overdue_scan_failed");
-    return NextResponse.json(
-      { ok: false, error: err instanceof Error ? err.message : "unknown" },
-      { status: 500 },
-    );
+    return {
+      ok: true as const,
+      detail: {
+        overdueCount: report.overdueCount,
+        bagsInShopCount: report.bagsInShopCount,
+        eventsRecorded: report.eventsRecorded,
+        oldestOverdueHours: report.oldestOverdueHours,
+      },
+    };
+  });
+
+  if (!outcome.ok) {
+    logger.error({ error: outcome.error }, "overdue_scan_failed");
+    return NextResponse.json({ ok: false, error: outcome.error }, { status: 500 });
   }
+  return NextResponse.json({ ok: true, ...outcome.detail });
 }

@@ -2,18 +2,25 @@
 
 ## Son durum — 2026-08-22
 
-| İş | Script | Önerilen sıklık | Uç | Durum |
-|---|---|---|---|---|
-| Slot üretimi | `generate-slots.sh` | günlük | `POST /api/internal/generate-slots` | ✅ prod'da kurulu (`17 4 * * *`) |
-| Süre aşımı mutabakatı | `overdue-scan.sh` | günlük | `POST /api/internal/overdue-scan` | ⚠️ **kurulmadı** — aşağıdaki 3. adım |
-| DB temizliği | — | günlük | `POST /api/internal/cleanup` | ⚠️ sarmalayıcı yok, cron yok |
+| İş | Cron | Sarmalayıcı | Durum |
+|---|---|---|---|
+| `generate-slots` | `17 4 * * *` | `generate-slots.sh` | ✅ prod'da kurulu |
+| `overdue-scan` | `47 4 * * *` | `overdue-scan.sh` | ⚠️ **kurulmadı** |
+| `booking-reminders` | `7 9 * * *` | — | ⚠️ kurulmadı |
+| `cleanup` | `23 3 * * *` | — | ⚠️ kurulmadı |
+| `seal-forecast` | `37 6 * * 1` | — | ⚠️ kurulmadı |
+| `finance-export` | `53 2 * * *` | — | ⚠️ kurulmadı |
 
-Üçü de `call-internal-job.sh` üzerinden çalışır; iş adı ince sarmalayıcıda
+> Bu tablonun kaynağı **`src/lib/jobs/registry.ts`**'tir. Elle güncellemeyin —
+> `./scripts/emit-crontab.sh` çalıştırıp güncel hâli görün. Kayıt defterinin
+> gerçekle ayrışmasını `src/__tests__/jobs-registry.test.ts` CI'da kırmızı yakar.
+
+Hepsi `call-internal-job.sh` üzerinden çalışır; sarmalayıcısı olan işlerde iş adı
 **sabitlenir** ki crontab'a elle yanlış ad yazılamasın.
 
 **Sağlık kontrolü:** `GET /api/health/jobs` — sır gerektirmez, sağlıksızsa **503**
 döner. Herhangi bir HTTP izleyici (UptimeRobot, Cloudflare health check, telefondan
-`curl`) bunu izleyebilir. **Dört** sinyal ölçer:
+`curl`) bunu izleyebilir. **Beş** sinyal ölçer:
 
 | Kontrol | Neyi ölçer | `stale`/`broken` ne demek |
 |---|---|---|
@@ -21,6 +28,7 @@ döner. Herhangi bir HTTP izleyici (UptimeRobot, Cloudflare health check, telefo
 | `overdueReconciliation` | en eski açık rezervasyonun yaşı | 72 saati aşmış açık rezervasyon var |
 | `sealIntegrity` | mühür sahiplik değişmezi | sahipsiz `ASSIGNED` veya dükkanlı `STOCK` mühür var |
 | `partnerReachability` | partnerin ulaşılabilir kanalı | ne e-postası ne telefonu olan partner var |
+| `scheduledJobs` | işlerin son başarılı çalışması | `enforced` bir iş `maxStaleHours`'ı aşmış |
 
 Biri bozuksa diğerleri **maskelemez** — toplam durum `DEGRADED` olur.
 
@@ -228,4 +236,67 @@ değildir; kısıtın tamamen kaldırılması gerekir:
 
 ```sql
 ALTER TABLE "Seal" DROP CONSTRAINT "Seal_ownership_matches_status";
+```
+
+
+---
+
+## Crontab'ı kayıt defterinden üretme
+
+İş tanımlarının tek kaynağı **`src/lib/jobs/registry.ts`**'tir. Crontab'ı elle
+yazmak, kayıt defteriyle gerçeğin ayrılmasının ta kendisidir — slot üretiminin
+37 gün, ödeme mutabakat cron'unun 2 ay fark edilmeden durması bu yüzdendi (P1-11).
+
+### 1. Üretilecek satırları gör — hiçbir şey değiştirmez
+
+```bash
+cd /root/emanetci
+./scripts/emit-crontab.sh
+```
+
+Her iş için ne yaptığı, çalışmazsa ne olacağı ve cron satırı yazılır. `enforced`
+olmayan işlerde ayrıca bir not düşülür.
+
+### 2. Mevcut crontab'ı yedekle
+
+```bash
+crontab -l > /tmp/crontab.bak && wc -l /tmp/crontab.bak
+```
+
+### 3. Ekle — **ilk değiştiren adım**
+
+`emit-crontab.sh | crontab -` **kullanmayın**: mevcut crontab'ı ezer. Ekleyin:
+
+```bash
+(crontab -l; ./scripts/emit-crontab.sh 2>/dev/null) | crontab -
+```
+
+Doğrulama:
+
+```bash
+crontab -l | grep -c bagajpark-
+```
+
+Beklenen: kurduğunuz iş sayısı kadar satır.
+
+### 4. Bir iş gerçekten çalıştıktan sonra `enforced` yap
+
+Yeni kurulan bir iş kayıt defterinde `enforced: false`'tur. Bu bilinçli: cron'u
+kurulmamış bir iş **"bozuk" değil, "beklemede"dir** ve onu kırmızı saymak kalıcı
+kırmızı bir sağlık kontrolü demektir — kalıcı kırmızı, kimsenin bakmadığı
+kontroldür.
+
+İş ilk kez başarıyla çalıştıktan sonra:
+
+```bash
+curl -s https://bagajpark.com/api/health/jobs | jq '.checks.scheduledJobs.jobs[] | {job, lastSuccessAt, status}'
+```
+
+`lastSuccessAt` dolu görünen işler için `src/lib/jobs/registry.ts` içinde
+`enforced: true` yapın ve deploy edin. Artık o iş durursa sağlık kontrolü 503 döner.
+
+### Geri alma
+
+```bash
+crontab /tmp/crontab.bak
 ```

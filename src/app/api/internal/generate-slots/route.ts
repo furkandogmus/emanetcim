@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { fillMissingSlots } from "@/services/SlotService";
 import { authorizeCron, isRateLimited } from "@/lib/internal-api-guard";
 import logger from "@/lib/logger";
+import { withJobRun } from "@/lib/jobs/run-ledger";
 
 /**
  * POST /api/internal/generate-slots — aktif dükkanlar için ileri tarihli zaman
@@ -33,23 +34,25 @@ async function run(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ ok: false, error: "Too many requests" }, { status: 429 });
   }
 
-  try {
-    const started = Date.now();
+  // Defter sarmalayicisi: sure ve sonuc JobRun'a yaziliyor, ayrica elle
+  // Date.now() tutmaya gerek kalmiyor (P1-11).
+  const outcome = await withJobRun("generate-slots", async () => {
     const count = await fillMissingSlots();
-    logger.info(
-      { slotsGenerated: count, durationMs: Date.now() - started },
-      "generate_slots_completed",
-    );
-    return NextResponse.json({ ok: true, slotsGenerated: count });
-  } catch (error) {
-    // Sessizce yutmuyoruz: slot uretimi durursa saatlik urun secilemez hale
-    // gelir ve bu 2026-07-14'ten 2026-08-22'ye kadar 37 gun fark edilmedi.
-    logger.error({ err: error }, "generate_slots_failed");
-    return NextResponse.json(
-      { ok: false, error: "generate_slots_failed" },
-      { status: 500 },
-    );
+    return { ok: true as const, detail: { slotsGenerated: count } };
+  });
+
+  if (outcome.ok) {
+    logger.info({ slotsGenerated: outcome.detail?.slotsGenerated }, "generate_slots_completed");
+    return NextResponse.json({ ok: true, slotsGenerated: outcome.detail?.slotsGenerated });
   }
+
+  // Sessizce yutmuyoruz: slot uretimi durursa saatlik urun secilemez hale gelir
+  // ve bu 2026-07-14'ten 2026-08-22'ye kadar 37 gun fark edilmedi.
+  logger.error({ err: outcome.error }, "generate_slots_failed");
+  return NextResponse.json(
+    { ok: false, error: "generate_slots_failed" },
+    { status: 500 },
+  );
 }
 
 export async function POST(req: NextRequest) {
