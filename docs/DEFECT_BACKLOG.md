@@ -459,14 +459,33 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
 - **Not**: `/api/health/jobs` bu düzeltmeden sonra **503 dönecek** ve bu DOĞRUDUR —
   prod'da 18 açık gecikmiş rezervasyon var. Kontrolün çalıştığının kanıtıdır.
 
-### [P1-7] 1.277 mühür ASSIGNED, 1.247'si hiçbir dükkana bağlı değil
+### [P1-7] ⚠️ KURAL DB'YE YAZILDI, ONARIM BEKLİYOR — 1.277 mühür ASSIGNED, 1.247'si hiçbir dükkana bağlı değil
 - **Kanıt**: `ASSIGNED 1277 (1247 shopId NULL) | STOCK 22 | FAULTY 2`. Ayrıca
   `BookingSeal` boş — 3 CHECKED_IN rezervasyona rağmen hiçbir mühür bir bavula
   kaydedilmemiş.
 - **Neden önemli**: mühür envanteri anlaşmazlıklarda fiziksel zilyetlik kanıtı ve
   %96'sı bir dükkanla eşleştirilemiyor.
-- **Çözüm**: *veri* düzeltmesi + *kod*: durum `STOCK`tan çıktığında `shopId` zorunlu
-  olsun (DB check constraint).
+- **Kaynak bulundu**: `SealRepository.updateStatus(serialNumber, status)` herhangi
+  bir duruma `shopId`'ye **hiç dokunmadan** yazıyordu. Ama yalnızca onu düzeltmek
+  yetmezdi — beş ayrı yer ham `seal.update*` çağırıyor ve altıncısı yarın
+  eklenebilir. Değişmez kuralın yeri koddan biri değil, veritabanıdır.
+- **Yapıldı (2026-08-22)**:
+  - **DB kısıtı `Seal_ownership_matches_status`**: `STOCK` dışındaki her mühür bir
+    dükkana ait olmak zorunda; `STOCK` olan hiçbir mühür bir dükkana ait olamaz.
+    `NOT VALID` eklendi — mevcut bozuk satırlar tolere ediliyor, **her yeni
+    INSERT/UPDATE kontrol ediliyor**. Yani yeni bozuk satır artık oluşamaz.
+  - `SealRepository.updateStatus` değişmezi koruyor (daha iyi hata mesajı için;
+    tek savunma hattı DB kısıtı).
+  - `SealIntegrityService` + `/api/health/jobs` üçüncü kontrolü. Üç kontrolden biri
+    bozuksa diğerleri **maskelemiyor**.
+  - `scripts/repair-seal-ownership.sh` — **varsayılanı kuru çalışma**, `--apply`
+    olmadan hiçbir şey yazmaz. Runbook: `scripts/README.md`.
+- **AÇIK KALAN — onarım çalıştırılmadı**: 1.249 satır hâlâ bozuk (1.247 sahipsiz
+  `ASSIGNED` + 2 sahipsiz `FAULTY`). `scripts/README.md` → "Mühür sahiplik onarımı"
+  bölümü. Yedek zorunlu, çünkü onarım `assignedAt`'i de `NULL` yapıyor ve satır
+  satır geri alınamıyor. Onarımdan sonra `--validate` kısıtı tamamlar.
+- **Not**: `/api/health/jobs` bu düzeltmeden sonra da **503 dönecek** — envanter
+  hâlâ bozuk. Onarım koşulunca yeşile döner.
 
 ### [P1-8] Bir rezervasyonun toplamı kendi valiz sayısıyla çelişiyor
 - **Nerede**: `Booking` `3c98aa28-...`
@@ -630,6 +649,24 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   kılıyor ama sebebini çözmüyor.
 - **Sıradaki adım**: 3 açık `CHECKED_IN` rezervasyonun partnerine sorulması, sonra
   partner panelindeki çıkış ekranının denetlenmesi (denetlenmemiş yüzeylerden biri).
+
+### [P1-23] Mühür kaydı check-in'de isteğe bağlı; `BookingSeal` tamamen boş
+- **Nerede**: `src/services/BookingService.ts` — `if (seals?.sealAssignments?.length)`
+- **Kanıt**: prod'da `BookingSeal` tablosu **boş**, buna karşılık 3 `CHECKED_IN`
+  rezervasyon var. Yani üç bavul dükkanda ama hangi mühürle mühürlendikleri hiçbir
+  yerde kayıtlı değil. Kod check-in'i mühürsüz kabul ediyor — koşul isteğe bağlı.
+- **Neden P1**: mühür, ürünün temel güvence vaadi. Anlaşmazlıkta zincir şudur:
+  "bu bavul mühürlü teslim alındı, mühür numarası şu, çıkışta aynı mühür sağlamdı".
+  Mühür kaydı yoksa bu zincir kurulamaz ve platform hiçbir şey ispat edemez.
+  P1-7'den **ayrı** bir sorundur: o envanterin sahipliğiydi, bu envanterin
+  kullanımı.
+- **Ölçülebilir**: `GET /api/health/jobs` → `checks.sealIntegrity.checkedInWithoutSeals`
+  (2026-08-22'de 3).
+- **Çözüm — iki aşamalı, ikincisi iş kararı**: *kod* — `PlatformSettings`'e
+  `requireSealsOnCheckIn` eklenip check-in mühürsüz reddedilebilir. *Karar* —
+  lansmanda `false` bırakılmalı (esnafın elinde mühür yoksa check-in'i tamamen
+  bloke eder), envanter dağıtıldıktan sonra `true`. Bayrak olmadan bunu doğrudan
+  zorunlu yapmak lansmanı riske atar.
 
 ### [P2-8] Admin gelen kutusundaki toplu işlem metinleri i18n'i baypas ediyor
 - **Nerede**: `src/components/admin/AdminMessagesClient.tsx:26-29`
