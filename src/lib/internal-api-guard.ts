@@ -38,7 +38,7 @@ function secretsMatch(provided: string, expected: string): boolean {
  * slot üretimini tetikleyebiliyordu (2026-08-22 denetimi). Tek yere alındı ki
  * yeni bir iç uç eklemek korumayı unutmayı gerektirmesin.
  *
- * `middleware.ts` içindeki `/api/internal` kontrolü yalnızca başlığın VARLIĞINA
+ * `proxy.ts` içindeki `/api/internal` kontrolü yalnızca başlığın VARLIĞINA
  * bakar, değerine bakmaz — yani gerçek savunma burasıdır, orası değil.
  *
  * Dönen değer: `null` = yetkili. Aksi halde döndürülecek hata durumu.

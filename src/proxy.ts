@@ -27,8 +27,14 @@ function stripLocalePrefix(pathname: string): { locale: string; barePath: string
 }
 
 /**
- * Next.js 16+ Middleware — Auth.js v5, next-intl & Security Hardening
- * Dosya: `src/middleware.ts`.
+ * Next.js 16 Proxy (eski adiyla middleware) — Auth.js v5 + next-intl + rol korumasi.
+ *
+ * `middleware.ts` Next 16'da kullanimdan kaldirildi; dosya ve disa aktarilan
+ * fonksiyon `proxy` oldu (2026-08-22). Davranis ayni.
+ *
+ * Guvenlik basliklari BURADA DEGIL, `next.config.ts` `headers()` icinde: ayni
+ * basliklar iki yerde set ediliyordu ve biri (`X-XSS-Protection`) artik
+ * tarayicilarin yok saydigi, OWASP'in "koymayin" dedigi bir baslikti.
  */
 const authProxy = auth((req) => {
   const { nextUrl } = req;
@@ -84,17 +90,7 @@ const authProxy = auth((req) => {
     return response;
   }
 
-  // 3. Security Headers
-  response.headers.set('X-DNS-Prefetch-Control', 'on');
-  if (process.env.ENABLE_HSTS_HEADERS === 'true') {
-    response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
-  }
-  response.headers.set('X-XSS-Protection', '1; mode=block');
-  response.headers.set('X-Frame-Options', 'DENY');
-  response.headers.set('X-Content-Type-Options', 'nosniff');
-  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-
-  // 4. Protection Logic (Manually detect localized protected paths)
+  // 3. Protection Logic (Manually detect localized protected paths)
   const { locale: pathLocale, barePath: pathWithoutLocale } =
     stripLocalePrefix(pathname);
 
@@ -124,7 +120,7 @@ const authProxy = auth((req) => {
     }
   }
 
-  // 5. Internal API Protection (Cron/Jobs) - This is usually handled by secrets,
+  // 4. Internal API Protection (Cron/Jobs) - This is usually handled by secrets,
   // but we can add an extra layer if no secret is present.
   if (isInternalApiPath && !isLoggedIn && !req.headers.get("authorization") && !req.headers.get("x-cron-secret")) {
     return new NextResponse(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { 'Content-Type': 'application/json' } });
@@ -134,7 +130,7 @@ const authProxy = auth((req) => {
 
 });
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   return (authProxy as (r: NextRequest) => ReturnType<typeof authProxy>)(request);
 }
 
