@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useCallback, useState, useTransition } from "react";
 import { shipSealRequestAction } from "@/actions/seal";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
 
 export default function SealShipButton({ requestId, requestedQuantity }: { requestId: string, requestedQuantity: number }) {
   const t = useTranslations("Admin");
@@ -19,6 +20,9 @@ export default function SealShipButton({ requestId, requestedQuantity }: { reque
   function handleOpen() {
     setOpen(true);
   }
+
+  const closeModal = useCallback(() => setOpen(false), []);
+  useModalBehavior({ open, onClose: closeModal });
 
   function handleClose() {
     if (pending) return;
@@ -74,8 +78,15 @@ export default function SealShipButton({ requestId, requestedQuantity }: { reque
             if (e.target === e.currentTarget) handleClose();
           }}
         >
-          <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md flex flex-col gap-5">
-            <h2 className="text-xl font-black text-gray-900">Kargo Bilgisi Gir</h2>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="seal-ship-title"
+            className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md flex flex-col gap-5"
+          >
+            <h2 id="seal-ship-title" className="text-xl font-black text-gray-900">
+              Kargo Bilgisi Gir
+            </h2>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">

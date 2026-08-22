@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -29,6 +29,7 @@ import type { GuestBookingListItem } from '@/services/BookingService';
 import type { PricingRules } from '@/lib/pricing-rules';
 import { dateLocaleForUiLocale } from '@/lib/date-locale';
 import { signOut } from 'next-auth/react';
+import { useModalBehavior } from '@/lib/hooks/useModalBehavior';
 
 interface BookingsClientProps {
   bookings: GuestBookingListItem[];
@@ -64,6 +65,22 @@ export default function BookingsClient({
   const [modifyBooking, setModifyBooking] = useState<GuestBookingListItem | null>(null);
   const [cancelModalBooking, setCancelModalBooking] = useState<GuestBookingListItem | null>(null);
   const [cancelSubmitting, setCancelSubmitting] = useState(false);
+
+  /**
+   * İptal kutusu `role="dialog"` taşıyordu ama Escape'i işlemiyordu — yarım
+   * bir sözleşme, çünkü ekran okuyucuya iletişim kutusu olduğu söylenip
+   * kapatma yolu verilmiyordu. Gönderim sürerken kapanmaz: kullanıcı iptalin
+   * geçip geçmediğini bilmeden ekranı kaybetmemeli.
+   */
+  const closeCancelModal = useCallback(() => {
+    if (cancelSubmitting) return;
+    setCancelModalBooking(null);
+  }, [cancelSubmitting]);
+
+  useModalBehavior({
+    open: cancelModalBooking !== null,
+    onClose: closeCancelModal,
+  });
   const isPastBooking = (status: string) =>
     status === 'CHECKED_OUT' || status === 'CANCELLED';
   const upcomingBookings = bookings.filter((b) => !isPastBooking(b.status));
@@ -451,7 +468,7 @@ export default function BookingsClient({
             <div className="sticky bottom-0 flex gap-3 p-4 border-t border-gray-100 bg-white">
               <button
                 type="button"
-                onClick={() => setCancelModalBooking(null)}
+                onClick={closeCancelModal}
                 className="btn-ui btn-ui-md btn-ui-ghost flex-1 rounded-2xl"
               >
                 {t('modifyCancel')}

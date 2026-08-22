@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { X, Store, Percent, Sparkles, ArrowRight } from "lucide-react";
+import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
 
 export default function PartnerPromoModal() {
   const t = useTranslations("PartnerPromo");
@@ -23,10 +24,13 @@ export default function PartnerPromoModal() {
   }, []);
 
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     localStorage.setItem("bagajpark_partner_promo_dismissed", "true");
     setIsOpen(false);
-  };
+  }, []);
+
+  // Davetsiz acilan bir katman Escape ile kapanabilmeli — kullanici onu istemedi.
+  useModalBehavior({ open: isMounted && isOpen, onClose: handleClose });
 
   if (!isMounted || !isOpen) return null;
 
@@ -36,6 +40,9 @@ export default function PartnerPromoModal() {
       onClick={handleClose}
     >
       <div 
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="partner-promo-title"
         className="relative bg-white rounded-[2rem] shadow-2xl border border-gray-100 max-w-lg w-full overflow-hidden p-8 md:p-10 animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
@@ -63,7 +70,10 @@ export default function PartnerPromoModal() {
             <Store size={24} />
           </div>
           <div>
-            <h3 className="text-xl md:text-2xl font-black text-gray-900 tracking-tight leading-snug">
+            <h3
+              id="partner-promo-title"
+              className="text-xl md:text-2xl font-black text-gray-900 tracking-tight leading-snug"
+            >
               {t("title")}
             </h3>
             <p className="mt-2 text-sm text-gray-500 leading-relaxed font-semibold">

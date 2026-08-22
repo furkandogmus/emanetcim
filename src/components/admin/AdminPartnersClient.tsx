@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useState, useTransition } from "react";
+import { useCallback, useState, useTransition } from "react";
 import { 
   Store, 
   Search, 
@@ -22,6 +22,7 @@ import {
 import { Link } from "@/i18n/routing";
 import { motion, AnimatePresence } from "framer-motion";
 import { adminInitiatePartnerPasswordResetAction } from "@/actions/partner-password-reset";
+import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
 import Money from "@/components/common/Money";
 import { formatDecimal } from "@/lib/currency";
 
@@ -57,6 +58,20 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
   const [resetResult, setResetResult] = useState<{ ok: true; resetUrl: string } | { ok: false; error: string } | null>(null);
   const [resetPending, startResetTransition] = useTransition();
   const [copied, setCopied] = useState(false);
+
+  /**
+   * Kapatma TEK yerde. Daha once dort ayri satir ici kapatici vardi ve ucu
+   * `copied`'i sifirlamiyordu: kutu kapanip yeniden acildiginda hala
+   * "kopyalandi" durumunda geliyordu — yeni sifirlama baglantisi kopyalanmis
+   * gibi gorunuyordu. Escape de hicbirini tetiklemiyordu.
+   */
+  const closeResetModal = useCallback(() => {
+    setResetTarget(null);
+    setResetResult(null);
+    setCopied(false);
+  }, []);
+
+  useModalBehavior({ open: resetTarget !== null, onClose: closeResetModal });
 
   const filteredShops = initialShops.filter(shop => 
     shop.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -196,9 +211,12 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-            onClick={() => { setResetTarget(null); setResetResult(null); }}
+            onClick={closeResetModal}
           >
             <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="admin-reset-password-title"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
@@ -206,10 +224,15 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
               className="w-full max-w-lg rounded-[2rem] bg-white p-8 shadow-2xl"
             >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-black text-gray-900">{t("resetPassword")}</h2>
+                <h2
+                  id="admin-reset-password-title"
+                  className="text-lg font-black text-gray-900"
+                >
+                  {t("resetPassword")}
+                </h2>
                 <button
                   type="button"
-                  onClick={() => { setResetTarget(null); setResetResult(null); }}
+                  onClick={closeResetModal}
                   className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors"
                 >
                   <X size={20} />
@@ -224,7 +247,7 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
                   <div className="flex gap-3 justify-end">
                     <button
                       type="button"
-                      onClick={() => { setResetTarget(null); setResetResult(null); }}
+                      onClick={closeResetModal}
                       className="px-5 py-2.5 rounded-xl text-sm font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-colors"
                     >
                       {t("resetCancel")}
@@ -276,7 +299,7 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
                   </div>
                   <button
                     type="button"
-                    onClick={() => { setResetTarget(null); setResetResult(null); setCopied(false); }}
+                    onClick={closeResetModal}
                     className="mt-6 w-full px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 transition-colors"
                   >
                     {t("resetDone")}
@@ -291,7 +314,7 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
                   <p className="text-sm text-gray-600 mb-6">{resetResult.error}</p>
                   <button
                     type="button"
-                    onClick={() => { setResetTarget(null); setResetResult(null); }}
+                    onClick={closeResetModal}
                     className="w-full px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 transition-colors"
                   >
                     {t("resetClose")}

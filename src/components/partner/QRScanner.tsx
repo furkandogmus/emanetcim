@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Html5Qrcode } from "html5-qrcode";
 import { Loader2, X } from "lucide-react";
+import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
 
 const READER_ID = "partner-qr-reader";
 
@@ -96,6 +98,15 @@ async function startWithCamera(
 }
 
 export default function QRScanner({ onResult, onClose }: QRScannerProps) {
+  const tCommon = useTranslations("Common");
+
+  /**
+   * Kamera katmani tam ekrani kapliyor ve Escape ile kapanmiyordu — kamera
+   * izni reddedilmis bir klavye kullanicisi icin cikissiz bir ekran.
+   * Kapat dugmesinin adi da sabit Turkce yazilmisti; urun 14 dil destekliyor.
+   */
+  useModalBehavior({ open: true, onClose });
+
   const html5Ref = useRef<Html5Qrcode | null>(null);
   const onResultRef = useRef(onResult);
 
@@ -228,18 +239,26 @@ export default function QRScanner({ onResult, onClose }: QRScannerProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="qr-scanner-title"
+        className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl"
+      >
         <button
           type="button"
           onClick={onClose}
           className="absolute right-4 top-4 z-[60] rounded-full bg-gray-100 p-2 transition-colors hover:bg-gray-200"
-          aria-label="Kapat"
+          aria-label={tCommon("close")}
         >
           <X size={24} className="text-gray-900" />
         </button>
 
         <div className="p-8">
-          <h2 className="mb-2 text-center text-xl font-bold text-gray-900">
+          <h2
+            id="qr-scanner-title"
+            className="mb-2 text-center text-xl font-bold text-gray-900"
+          >
             QR Kodu Okutun
           </h2>
           <p className="mb-6 text-center text-sm text-gray-500">
