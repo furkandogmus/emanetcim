@@ -9,6 +9,7 @@
 | Cloudflare origin sertifikası `bagajpark.{crt,key}` → `/etc/ssl/cloudflare/` | ✅ |
 | Prod nginx conf (`bagajpark.com` + `aws-test` blokları) → `default.conf.prod` | ✅ `nginx -t` geçti |
 | `public/` (11 dosya), `scripts/`, `crontab.prod` | ✅ staged |
+| `cronie` (AL2023'te yoktu) | ✅ kuruldu, `crond` aktif |
 | S3 yedek izni (`app_backup_write`) | ⏳ **terraform apply bekliyor** (aşağıda) |
 | Veri taşıma, env/nginx swap, DNS | ⏳ **kesim penceresi** (aşağıda) |
 
@@ -36,7 +37,8 @@ aws sts get-caller-identity --profile bagajpark --query Account --output text  #
 ```bash
 cd infra/aws/stack
 terraform plan  -var="allowed_ssh_cidr=$(curl -s https://ifconfig.me)/32"
-# Beklenen: "Plan: 1 to add, 0 to change, 0 to destroy." (aws_iam_role_policy.app_backup_write)
+# Beklenen: "Plan: 1 to add, 1 to change, 0 to destroy." — add: app_backup_write,
+# change: security group SSH CIDR (kendi IP'niz önceki apply'dan farklıysa; beklenen)
 terraform apply -var="allowed_ssh_cidr=$(curl -s https://ifconfig.me)/32"
 ```
 
