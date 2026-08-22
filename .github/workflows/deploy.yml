@@ -90,7 +90,9 @@ jobs:
         # sw.js/manifest/ikonlar eski kalir (2026-08-23: eski service worker canlida kaldi).
         run: |
           aws s3 cp docker-compose.yml "s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/docker-compose.yml"
-          aws s3 sync public/ "s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/public/" --delete --only-show-errors
+          # `sync` s3:ListBucket ister; github-deploy rolunde yalnizca PutObject var.
+          # `cp --recursive` listeleme yapmaz. Sunucu tarafi `sync --delete` ile aynalar.
+          aws s3 cp public/ "s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/public/" --recursive --only-show-errors
 
       - name: SSM Run Command ile deploy et
         run: |
