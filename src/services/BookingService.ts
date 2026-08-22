@@ -57,6 +57,7 @@ import { isShopOpenAt } from '@/lib/shop-hours';
 import { totalBagCount } from '@/lib/bag-pricing';
 import { sealService, type SealAssignmentInput } from '@/services/SealService';
 import { getPricingRules } from '@/lib/platform-settings';
+import { toPricingSnapshot } from '@/lib/pricing-snapshot';
 import { moneyToNumber } from '@/lib/money';
 import { reserveSlots, releaseSlots } from '@/services/SlotService';
 import {
@@ -180,6 +181,7 @@ export class BookingService implements IBookingService {
             checkInTime: data.checkInTime,
             checkOutTime: data.checkOutTime,
             unitPrice,
+            pricingSnapshot: toPricingSnapshot(rules),
             qrCodeToken: `temp_${crypto.randomUUID()}`,
             status: 'PENDING',
           },
@@ -278,6 +280,7 @@ export class BookingService implements IBookingService {
             checkInTime,
             checkOutTime,
             unitPrice,
+            pricingSnapshot: toPricingSnapshot(rules),
             qrCodeToken: `temp_${crypto.randomUUID()}`,
             status: 'PENDING',
             reservationSlots: {
@@ -534,12 +537,21 @@ export class BookingService implements IBookingService {
 
       const pricingRules = await getPricingRules();
 
-      // Geç teslim alma: planlanan check-out + 15 dk sonrası → platform iptal sabit ücreti tutarında kayıt (tahsilat ayrı süreç)
+      /**
+       * Geç teslim alma ücreti — ARTIK KENDİ AYARINDAN.
+       *
+       * Eskiden `pricingRules.cancelFixedFeeTry` kullanılıyordu: iptal ücretini
+       * değiştiren admin, gecikme ücretini de farkında olmadan değiştiriyordu.
+       * Canlı `cancelFixedFeeTry = 0` olduğu için gecikme pratikte ÜCRETSİZDİ,
+       * yani süreyi aşan müşterinin maliyetini partner üstleniyordu (P0-5).
+       *
+       * Tolerans da sabit 15 dakika değil, ayardan geliyor.
+       */
       const scheduledEnd = new Date(booking.checkOutTime);
-      const graceMs = 15 * 60 * 1000;
+      const graceMs = pricingRules.latePickupGraceMin * 60 * 1000;
       const lateMs = now.getTime() - scheduledEnd.getTime();
       const lateFeeTry =
-        lateMs > graceMs ? pricingRules.cancelFixedFeeTry : 0;
+        lateMs > graceMs ? pricingRules.latePickupFeeTry : 0;
       if (lateFeeTry > 0) {
         logger.info(
           {

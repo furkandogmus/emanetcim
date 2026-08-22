@@ -814,7 +814,9 @@
     "resetError": "Bir hata oluştu.",
     "resetCancel": "İptal",
     "resetDone": "Tamam",
-    "resetClose": "Kapat"
+    "resetClose": "Kapat",
+    "platformSettingsLatePickupFee": "Geç teslim alma ücreti (₺)",
+    "platformSettingsLatePickupGrace": "Gecikme toleransı (dk)"
   },
   "Auth": {
     "loginTitle": "BagajPark'a Giriş Yap",

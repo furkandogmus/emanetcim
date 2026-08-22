@@ -772,7 +772,9 @@
     "resetError": "An error occurred.",
     "resetCancel": "Cancel",
     "resetDone": "Done",
-    "resetClose": "Close"
+    "resetClose": "Close",
+    "platformSettingsLatePickupFee": "受取遅延料金 (₺)",
+    "platformSettingsLatePickupGrace": "遅延猶予時間（分）"
   },
   "Auth": {
     "loginTitle": "バガジパークにサインインする",

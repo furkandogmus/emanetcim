@@ -12,6 +12,14 @@ export const SEED_GALATA_SHOP_ID = 'e2e00000-0000-4000-8000-000000000001';
 async function main() {
   console.log('Seedleme başlatılıyor...');
 
+  /**
+   * Ayar satırı BİLEREK boş yaratılıyor: tüm değerler şemadaki `@default`'tan
+   * gelsin diye. Buraya değer yazmak dördüncü bir doğruluk kaynağı olurdu —
+   * şema/kod/canlı satır üçlüsünün ayrışması zaten P0-3'ü doğurmuştu.
+   * Şema ile `DEFAULT_PRICING_RULES` eşliğini `pricing-defaults.test.ts` korur.
+   *
+   * `update: {}` de bilerek: seed mevcut CANLI fiyatı asla ezmez.
+   */
   await prisma.platformSettings.upsert({
     where: { id: 'default' },
     create: { id: 'default' },

@@ -772,7 +772,9 @@
     "resetError": "An error occurred.",
     "resetCancel": "Cancel",
     "resetDone": "Done",
-    "resetClose": "Close"
+    "resetClose": "Close",
+    "platformSettingsLatePickupFee": "Tarifa por recogida tardía (₺)",
+    "platformSettingsLatePickupGrace": "Margen de tolerancia (min)"
   },
   "Auth": {
     "loginTitle": "Iniciar sesión en BagajPark",

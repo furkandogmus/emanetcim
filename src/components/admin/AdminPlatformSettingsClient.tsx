@@ -12,6 +12,8 @@ export type PlatformSettingsFormValues = {
   insuranceFeeTry: number;
   earlyRefundRatio: number;
   cancelFixedFeeTry: number;
+  latePickupFeeTry: number;
+  latePickupGraceMin: number;
   defaultShopCapacity: number;
   defaultPricePerDay: number;
   bagMultiplierS: number;
@@ -80,6 +82,8 @@ export default function AdminPlatformSettingsClient({
         insuranceFeeTry: form.insuranceFeeTry,
         earlyRefundRatio: form.earlyRefundRatio,
         cancelFixedFeeTry: form.cancelFixedFeeTry,
+        latePickupFeeTry: form.latePickupFeeTry,
+        latePickupGraceMin: form.latePickupGraceMin,
         defaultShopCapacity: form.defaultShopCapacity,
         defaultPricePerDay: form.defaultPricePerDay,
         bagMultiplierS: form.bagMultiplierS,
@@ -126,6 +130,21 @@ export default function AdminPlatformSettingsClient({
           label={t("platformSettingsCancelFee")}
           value={form.cancelFixedFeeTry}
           onChange={(v) => patch({ cancelFixedFeeTry: v })}
+        />
+        {/*
+          Gecikme ücreti KENDİ alanı. Eskiden `cancelFixedFeeTry` ödünç alınıyordu,
+          yani iptal ücretini değiştiren admin gecikme ücretini de farkında olmadan
+          değiştiriyordu (P0-5).
+        */}
+        <Field
+          label={t("platformSettingsLatePickupFee")}
+          value={form.latePickupFeeTry}
+          onChange={(v) => patch({ latePickupFeeTry: v })}
+        />
+        <Field
+          label={t("platformSettingsLatePickupGrace")}
+          value={form.latePickupGraceMin}
+          onChange={(v) => patch({ latePickupGraceMin: Math.round(v) })}
         />
         <Field
           label={t("platformSettingsDefaultCapacity")}

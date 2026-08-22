@@ -207,6 +207,17 @@ model Booking {
   updatedAt              DateTime          @updatedAt
   /// Eşzamanlı durum geçişleri için optimistic sürüm (onay vb. updateMany ile artırılır).
   bookingRowVersion      Int               @default(0)
+  /// Rezervasyonun fiyatını üreten kural kümesinin ANLIK KOPYASI (`PricingRules`).
+  ///
+  /// NEDEN: `PlatformSettings` tek satırlık ve sürümsüz — admin bir çarpanı
+  /// değiştirdiği anda GEÇMİŞ tahsilatlar yeniden üretilemez hale geliyordu.
+  /// 2026-08-22'de ölçüldü: 19 rezervasyonun tamamı `insuranceFee = 150.00`
+  /// taşıyor, canlı ayar `0.00`; kayıtlı 440.00'lık bir toplam bugünkü kurallarla
+  /// 150.00 çıkıyor. Anlaşmazlıkta, faturada ve iadede "o gün hangi kural
+  /// geçerliydi" sorusunun cevabı burasıdır.
+  ///
+  /// Yalnızca rezervasyon YARATILIRKEN yazılır, sonra DEĞİŞMEZ.
+  pricingSnapshot        Json?
   /// Referans kodu ile uygulanan indirim miktarı (TRY)
   referralDiscountAmount Decimal           @default(0) @db.Decimal(12, 2)
   /// Rezervasyonda kullanılan referans kodu (varsa)
@@ -409,18 +420,32 @@ model FeatureFlag {
   @@index([key])
 }
 
+/// Platform geneli iş kuralları. TEK SATIR: id = "default".
+///
+/// BURADAKİ `@default` DEĞERLERİ `DEFAULT_PRICING_RULES` (src/lib/pricing-rules.ts)
+/// İLE AYNI OLMAK ZORUNDA. 2026-08-22'de üçü de farklıydı — şema 1.0/1.0/1.0, kod
+/// 0.8/1.0/1.5, canlı satır 1.0/1.0/1.0 — ve kod varsayılanı yalnızca satır YOKKEN
+/// devreye girdiği için prod'da hiç çalışmıyordu. Sonuç: birisi boy bazlı
+/// fiyatlandırmayı "düzelttiğini" sanarken XL bavul hâlâ küçük bavul fiyatı ödüyordu.
+/// `src/__tests__/pricing-defaults.test.ts` ikisinin ayrışmasını CI'da kırmızı yakar.
 model PlatformSettings {
   id                   String   @id @default("default")
   maxStayDays          Int      @default(30)
   maxBagsPerSlot       Int      @default(50)
-  insuranceFeeTry      Decimal  @default(15) @db.Decimal(12, 2)
-  earlyRefundRatio     Decimal  @default(0.9) @db.Decimal(6, 4)
-  cancelFixedFeeTry    Decimal  @default(20) @db.Decimal(12, 2)
+  insuranceFeeTry      Decimal  @default(0) @db.Decimal(12, 2)
+  earlyRefundRatio     Decimal  @default(1.0) @db.Decimal(6, 4)
+  cancelFixedFeeTry    Decimal  @default(0) @db.Decimal(12, 2)
+  /// Geç teslim alma ücreti. KENDİ ALANI: eskiden `cancelFixedFeeTry` ödünç
+  /// alınıyordu (BookingService), yani iptal ücretini değiştiren gecikme ücretini de
+  /// farkında olmadan değiştiriyordu.
+  latePickupFeeTry     Decimal  @default(0) @db.Decimal(12, 2)
+  /// Gecikme ücreti işlemeden önceki tolerans (dakika).
+  latePickupGraceMin   Int      @default(15)
   defaultShopCapacity  Int      @default(10)
   defaultPricePerDay   Decimal  @default(50) @db.Decimal(12, 2)
-  bagMultiplierS       Decimal  @default(1.0) @db.Decimal(6, 4)
+  bagMultiplierS       Decimal  @default(0.8) @db.Decimal(6, 4)
   bagMultiplierM       Decimal  @default(1.0) @db.Decimal(6, 4)
-  bagMultiplierXl      Decimal  @default(1.0) @db.Decimal(6, 4)
+  bagMultiplierXl      Decimal  @default(1.5) @db.Decimal(6, 4)
   updatedAt            DateTime @updatedAt
   /// Platform genelinde rezervasyona kapalı takvim günleri (YYYY-MM-DD JSON dizisi).
   platformHolidayDates Json?

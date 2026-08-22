@@ -15,6 +15,8 @@ function mapRow(row: {
   insuranceFeeTry: unknown;
   earlyRefundRatio: unknown;
   cancelFixedFeeTry: unknown;
+  latePickupFeeTry: unknown;
+  latePickupGraceMin: number;
   defaultShopCapacity: number;
   defaultPricePerDay: unknown;
   bagMultiplierS: unknown;
@@ -28,6 +30,8 @@ function mapRow(row: {
     insuranceFeeTry: moneyToNumber(row.insuranceFeeTry),
     earlyRefundRatio: moneyToNumber(row.earlyRefundRatio),
     cancelFixedFeeTry: moneyToNumber(row.cancelFixedFeeTry),
+    latePickupFeeTry: moneyToNumber(row.latePickupFeeTry),
+    latePickupGraceMin: row.latePickupGraceMin,
     defaultShopCapacity: row.defaultShopCapacity,
     defaultPricePerDay: moneyToNumber(row.defaultPricePerDay),
     bagMultipliers: {
