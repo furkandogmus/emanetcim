@@ -26,6 +26,11 @@ interface BottomSheetProps {
    * bunu geçmek gerekir.
    */
   ariaLabel?: string;
+  /**
+   * Panelin alt kenarını yukarı taşır — sayfada sabit bir alt gezinme çubuğu varsa
+   * (`MobileNav`, 5rem + güvenli alan) liste onun altında kalmasın diye.
+   */
+  aboveMobileNav?: boolean;
 }
 
 export default function BottomSheet({
@@ -39,6 +44,7 @@ export default function BottomSheet({
   showClose = true,
   showOverlay = true,
   ariaLabel,
+  aboveMobileNav = false,
 }: BottomSheetProps) {
   const tCommon = useTranslations("Common");
 
@@ -69,6 +75,8 @@ export default function BottomSheet({
   const dragStartY = useRef(0);
   const dragStartSnap = useRef(initialSnap);
   const isDragging = useRef(false);
+  /** Parmak/fare gerçekten hareket etti mi? Salt dokunma paneli kapatmamalı. */
+  const dragMoved = useRef(false);
 
   const snapTo = useCallback((index: number) => {
     const clamped = Math.max(0, Math.min(index, snapPoints.length - 1));
@@ -79,11 +87,13 @@ export default function BottomSheet({
     dragStartY.current = clientY;
     dragStartSnap.current = currentSnap;
     isDragging.current = true;
+    dragMoved.current = false;
   }, [currentSnap]);
 
   const handleDragMove = useCallback((clientY: number) => {
     if (!isDragging.current || !sheetRef.current) return;
     const diff = dragStartY.current - clientY;
+    if (Math.abs(diff) > 6) dragMoved.current = true;
     const vhDiff = (diff / window.innerHeight) * 100;
     const currentHeight = snapPoints[dragStartSnap.current];
     const newHeight = currentHeight + vhDiff;
@@ -95,6 +105,16 @@ export default function BottomSheet({
     if (!isDragging.current) return;
     isDragging.current = false;
     if (!sheetRef.current) return;
+
+    /**
+     * Tutamaca yalnızca DOKUNMAK paneli kapatıyordu: hareket yokken "en yakın
+     * nokta" en alttaki nokta oluyor ve `currentSnap <= 0` ile `onClose` tetikleniyordu
+     * (2026-08-23 mobil ekran görüntüsünde yakalandı). Hareket yoksa hiçbir şey yapma.
+     */
+    if (!dragMoved.current) {
+      sheetRef.current.style.removeProperty("--sheet-height");
+      return;
+    }
 
     const current = parseFloat(sheetRef.current.style.getPropertyValue("--sheet-height") || `${snapPoints[currentSnap]}vh`);
     let closest = 0;
@@ -122,11 +142,22 @@ export default function BottomSheet({
     const handleTouchEnd = () => {
       handleDragEnd();
     };
+    // Fare desteği: masaüstünde ve testte sürükleme de çalışsın.
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging.current) handleDragMove(e.clientY);
+    };
+    const handleMouseUp = () => {
+      if (isDragging.current) handleDragEnd();
+    };
     document.addEventListener("touchmove", handleTouchMove, { passive: true });
     document.addEventListener("touchend", handleTouchEnd);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
     return () => {
       document.removeEventListener("touchmove", handleTouchMove);
       document.removeEventListener("touchend", handleTouchEnd);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
     };
   }, [open, handleDragMove, handleDragEnd]);
 
@@ -156,7 +187,9 @@ export default function BottomSheet({
         aria-modal={isModal ? true : undefined}
         aria-label={!title ? ariaLabel : undefined}
         aria-labelledby={title ? "bottom-sheet-title" : undefined}
-        className={`absolute bottom-0 left-0 right-0 z-10 bg-white flex flex-col transition-transform duration-300 ${showOverlay ? "rounded-t-[2rem] shadow-2xl" : "rounded-t-[1.5rem] shadow-[0_-8px_30px_rgba(0,0,0,0.12)]"}`}
+        className={`absolute left-0 right-0 z-10 bg-white flex flex-col transition-transform duration-300 ${
+          aboveMobileNav ? "bottom-[calc(5rem+env(safe-area-inset-bottom,0px))]" : "bottom-0"
+        } ${showOverlay ? "rounded-t-[2rem] shadow-2xl" : "rounded-t-[1.5rem] shadow-[0_-8px_30px_rgba(0,0,0,0.12)]"}`}
         style={{
           height: `var(--sheet-height, ${sheetHeight}vh)`,
           transform: open ? "translateY(0)" : "translateY(100%)",
