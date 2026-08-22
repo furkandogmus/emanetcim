@@ -43,7 +43,10 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
    — yani prod'a rezervasyon yazabilen bir yol açık olabilir (P1-5).
 3. **19 rezervasyonun 18'i çıkış saatini geçmiş hâlde açık; hiçbiri hiç
    `CHECKED_OUT` olmamış.** Üç müşterinin bavulu Haziran'dan beri "dükkanda"
-   görünüyor. Yaşam döngüsünün pratikte sonlanan bir durumu yok (P1-6).
+   görünüyor. → **Tarama altyapısı kuruldu (2026-08-22)**: `OverdueBookingService`,
+   `/api/internal/overdue-scan`, `/api/health/jobs`'ta 503 sinyali,
+   `scripts/README.md` runbook'u. **Kalan**: cron kurulumu (runbook 3. adım), 3 eski
+   satır için saha kararı ve `CHECKED_OUT`'un neden hiç kullanılmadığı (P1-22).
 
 ---
 
@@ -422,14 +425,39 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
 - **Çözüm**: *veri* — 8 rezervasyonu ve ödemelerini işaretle/temizle. Ayrıca kaynağın
   ne olduğu bulunmalı; prod'a rezervasyon yazabilen bir test yolu varsa kapatılmalı.
 
-### [P1-6] 19 rezervasyonun 18'i çıkış saatini geçmiş halde açık; hiçbiri CHECKED_OUT olmamış
+### [P1-6] ⚠️ ALTYAPI KURULDU, VERİ KARARI + CRON BEKLİYOR — 19 rezervasyonun 18'i çıkış saatini geçmiş halde açık
 - **Kanıt**: durum dağılımı `PAID 10 | APPROVED 5 | CHECKED_IN 3 | CANCELLED 1` —
   **hiç CHECKED_OUT yok**, `BookingEvent`'te de sıfır CHECKED_OUT olayı. En eskisi
   12 Haziran'dan beri CHECKED_IN.
 - **Neden önemli**: yaşam döngüsünün pratikte sonlanan bir durumu yok; üç müşterinin
   bavulu Haziran'dan beri "dükkanda" görünüyor.
-- **Çözüm**: *operasyonel* — mutabakat/süre aşımı taraması (hiç yok). *Veri* — 3 eski
-  CHECKED_IN satırı için karar.
+- **Kök neden bir hata değil, EKSİKLİKTİ**: hiç tarama yoktu, dolayısıyla kimse fark
+  etmiyordu.
+- **Yapıldı (2026-08-22)**:
+  - `OverdueBookingService` — dört eşikte (24s / 72s / 1 hafta / 1 ay) tarar, eşik
+    atlayanlara `BookingEvent` (`OVERDUE`) yazar, rapor döner. İdempotent: aynı
+    rezervasyon için aynı eşik ikinci kez yazılmaz. Sayımlar limitten etkilenmez.
+  - `POST /api/internal/overdue-scan` (`CRON_SECRET` korumalı).
+  - `GET /api/health/jobs` artık bunu da ölçüyor ve sağlıksızsa **503** dönüyor.
+    Sinyal sayı değil **yaş**: 5 tane bir günlük gecikme normal operasyon, 1 tane
+    iki aylık gecikme kayıp bavul demektir. Eşik 72 saat.
+  - `scripts/overdue-scan.sh` + adım adım runbook: `scripts/README.md`.
+- **TASARIM KARARI — iş durum DEĞİŞTİRMEZ**: otomatik `NO_SHOW` işaretlemek veya
+  iptal etmek cazipti ama yanlış olurdu. `PAID` bir rezervasyonun durumu değişirse
+  partner hakedişi değişir (`EARNING_BOOKING_STATUSES`), yani bir tarama işi sessizce
+  para hareketi yaratmış olur; ayrıca bavul gerçekten dükkanda olabilir ve "no-show"
+  demek fiziksel gerçeği bilmeden verilen bir karardır. Karar operasyonundur.
+- **AÇIK KALAN**:
+  1. **Cron kurulmadı.** `scripts/README.md` → 3. adım. Kurulana kadar tarama
+     çalışmıyor, yalnızca elle tetiklenebiliyor.
+  2. **3 eski `CHECKED_IN` satırı için karar hâlâ verilmedi** — Haziran'dan beri
+     açıklar. Bavullar gerçekten dükkanda mı, yoksa çıkış kaydedilmemiş mi? Bu
+     partnerlere sorulmalı.
+  3. **`CHECKED_OUT`'a giden bir yol pratikte kullanılmıyor.** Tarama bunu görünür
+     kılıyor ama sebebini çözmüyor: partner panelinde çıkış akışı var mı, esnaf
+     biliyor mu? → **P1-22**
+- **Not**: `/api/health/jobs` bu düzeltmeden sonra **503 dönecek** ve bu DOĞRUDUR —
+  prod'da 18 açık gecikmiş rezervasyon var. Kontrolün çalıştığının kanıtıdır.
 
 ### [P1-7] 1.277 mühür ASSIGNED, 1.247'si hiçbir dükkana bağlı değil
 - **Kanıt**: `ASSIGNED 1277 (1247 shopId NULL) | STOCK 22 | FAULTY 2`. Ayrıca
@@ -456,14 +484,21 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
 - **Çözüm**: *kod* — check-in `SUCCESS` ödeme kaydı (veya açık "kapıda ödeme"
   işareti) şartı koşmalı.
 
-### [P1-10] `checkOut` rezerve pencereyi eziyor; şemada gerçek giriş/çıkış zamanı yok
+### [P1-10] ✅ DÜZELTİLDİ — `checkOut` rezerve pencereyi eziyordu; şemada gerçek giriş/çıkış zamanı yoktu
 - **Nerede**: `src/services/BookingService.ts:574-588`
 - **Kanıt**: `checkOutTime: now` yazması rezerve bitiş zamanını yok ediyor. `Booking`'de
   yalnızca *rezerve* pencere var; `checkedInAt`/`checkedOutAt` yok, gerçek geçişler
   sadece `BookingEvent`'te.
 - **Neden önemli**: gecikme ücreti ve erken iade ikisi de `checkOutTime`'dan
   hesaplanıyor, dolayısıyla çıkıştan sonra faturanın girdileri yeniden kurulamıyor.
-- **Çözüm**: *kod* — `checkedInAt`/`checkedOutAt` ekle; rezerve pencere değişmez olsun.
+- **Çözüm (uygulandı, 2026-08-22)**: `Booking.checkedInAt` ve `Booking.checkedOutAt`
+  eklendi; `checkOut()` artık `checkOutTime`'ı **ezmiyor**. Rezerve pencere yaratılıştan
+  sonra değişmez — şemada bu bir yorumla da sabitlendi.
+  Migrasyon geçmiş kayıtları `BookingEvent`'ten geri kazandı: `checkOutTime` üzerine
+  yazılmış olabilir ama olay kaydı append-only, yani tek güvenilir kaynak o. Olay
+  yoksa alan `NULL` kalıyor — uydurmuyoruz.
+  Prod'da hiç `CHECKED_OUT` olayı olmadığı için (P1-6) `checkedOutAt` şu an her yerde
+  `NULL` olacak; bu beklenen sonuç, migrasyonun başarısızlığı değil.
 
 ### [P2-10] ✅ DÜZELTİLDİ — Admin mesaj mutasyonlarında `*.vercel.app` güvenilir origin sayılıyordu
 - **Nerede**: `src/app/api/admin/messages/route.ts:12`;
@@ -581,6 +616,20 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   olduğu için pratikte esnafın çıkışta ek ücreti alması ve bunu panelden işaretlemesi
   gerekiyor; o akış henüz yok. Ayrıntı: `docs/PAYMENTS.md`.
 - **O zamana kadar**: sözleşme metni gerçeğe çekilmeli.
+
+### [P1-22] `CHECKED_OUT`'a giden yol pratikte hiç kullanılmıyor
+- **Kanıt**: prod'da `BookingEvent`'te **sıfır** `CHECKED_OUT` olayı; 19 rezervasyonun
+  hiçbiri bu duruma hiç geçmemiş (P1-6). Kod tarafında `BookingService.checkOut()`
+  var ve çalışıyor (testleri yeşil) — yani sorun uygulamada değil, **kullanımda**.
+- **Neden P1**: yaşam döngüsünün sonlanan bir durumu olmadan hiçbir mutabakat
+  kapanmıyor: erken iade hesaplanamıyor, gecikme ücreti işlemiyor, partner hakedişi
+  hiç kesinleşmiyor, mühürler `RETURNED` olmuyor (P1-7 ile bağlantılı).
+- **Cevaplanması gereken — kod değil, saha sorusu**: partner panelinde çıkış akışı
+  görünür mü, esnaf bu adımı biliyor mu, yoksa QR okutma pratikte yalnızca girişte mi
+  yapılıyor? Süre aşımı taraması (`OverdueBookingService`) bu durumu artık **görünür**
+  kılıyor ama sebebini çözmüyor.
+- **Sıradaki adım**: 3 açık `CHECKED_IN` rezervasyonun partnerine sorulması, sonra
+  partner panelindeki çıkış ekranının denetlenmesi (denetlenmemiş yüzeylerden biri).
 
 ### [P2-8] Admin gelen kutusundaki toplu işlem metinleri i18n'i baypas ediyor
 - **Nerede**: `src/components/admin/AdminMessagesClient.tsx:26-29`

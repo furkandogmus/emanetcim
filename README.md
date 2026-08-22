@@ -12,7 +12,7 @@
 
 İş kuralları (max konaklama günü, sigorta, valiz çarpanları, iptal kesintisi vb.) `PlatformSettings` tablosunda tutulur; `prisma migrate` + `prisma db seed` ile `default` satırı oluşur. Admin’den yönetim: [`docs/PLATFORM_SETTINGS.md`](docs/PLATFORM_SETTINGS.md).
 
-**Operasyon:** [Ödeme mimarisi](docs/PAYMENTS.md) · [Finans / ledger](docs/FINANCE_LEDGER.md) · [Gözlemlenebilirlik](docs/OBSERVABILITY.md)
+**Operasyon:** [Ödeme mimarisi](docs/PAYMENTS.md) · [Zamanlanmış işler](scripts/README.md) · [Finans / ledger](docs/FINANCE_LEDGER.md) · [Gözlemlenebilirlik](docs/OBSERVABILITY.md)
 
 **Yol haritası / commit disiplini:** [Üretim backlog](docs/PRODUCTION_BACKLOG.md) · [Commit mesajları ve geçmiş](docs/GIT_COMMIT_GUIDE.md)
 
