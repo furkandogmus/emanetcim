@@ -998,7 +998,8 @@
       "activeBookings": "You have active bookings; close them before deleting your account.",
       "authRequired": "Please sign in.",
       "unauthorized": "You are not allowed to do this.",
-      "generic": "Something went wrong."
+      "generic": "Something went wrong.",
+      "guestContactRequired": "Please enter an email or phone number."
     },
     "deleteConfirmTitle": "You are about to close your account",
     "deleteConfirmBody": "This cannot be undone. Your personal data will be anonymised and you will be signed out.",
@@ -1225,7 +1226,7 @@
     "b2Body": "10-20% commission per referral. Zero operational burden, passive income.",
     "b3Title": "Operational Ease",
     "b3Body": "No need for luggage rooms, staff or lockers. Everything is online.",
-    "b4Title": "11 Languages",
+    "b4Title": "6 Languages",
     "b4Body": "International guests book in their native language. No translation hassle.",
     "faqTitle": "Frequently Asked Questions",
     "faqs": [
@@ -1354,7 +1355,7 @@
         "Book online to skip the queue at storage points",
         "Your belongings are covered by insurance",
         "Free cancellation until the last minute",
-        "11 language support for international travelers"
+        "6-language support for international travelers"
       ],
       "nearbyPlaces": [
         "Sultanahmet Square",

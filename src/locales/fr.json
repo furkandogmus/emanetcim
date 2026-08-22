@@ -156,7 +156,47 @@
     "nextPage": "Next",
     "overdueBadgeHours": "en attente depuis {hours} h",
     "overdueBadgeDays": "en attente depuis {days} jours",
-    "overdueHint": "Si le bagage a été remis, finalisez le retrait."
+    "overdueHint": "Si le bagage a été remis, finalisez le retrait.",
+    "locationLocateMe": "Me localiser",
+    "locationDetecting": "Localisation en cours…",
+    "locationResolvingAddress": "Résolution de l’adresse…",
+    "locationHintTapMap": "Utilisez le bouton ou touchez la carte",
+    "locationDetectedTitle": "Position détectée",
+    "locationReset": "Réinitialiser la position",
+    "locationStreetPlaceholder": "Rue",
+    "locationNeighborhoodPlaceholder": "Quartier",
+    "locationBuildingNoPlaceholder": "N° de bâtiment",
+    "locationDoorNoPlaceholder": "N° de porte",
+    "locationPostalCodePlaceholder": "Code postal",
+    "locationBrowserUnsupported": "Votre navigateur ne prend pas en charge la géolocalisation.",
+    "locationGenericError": "Impossible d’obtenir la position. Veuillez réessayer.",
+    "actionCancelled": "Action annulée.",
+    "sealsTitle": "Gestion des scellés",
+    "sealsStatusPending": "En attente",
+    "sealsStatusShipped": "Expédié",
+    "sealsStatusDelivered": "Livré",
+    "sealsGenericError": "Une erreur est survenue.",
+    "sealsRequestCreated": "Demande de {count} scellés créée. Veuillez attendre la validation de l’administrateur.",
+    "sealsDeliveryConfirmed": "Livraison confirmée ! Les scellés ont été ajoutés à votre stock.",
+    "sealsRecycled": "{count} scellés retournés remis en stock.",
+    "sealsLowStockWarning": "Stock faible ! Il ne vous reste que <strong>{count}</strong> scellés disponibles. Veuillez créer une demande.",
+    "sealsStockReady": "Prêts",
+    "sealsStockInUse": "En cours d’utilisation",
+    "sealsStockReturned": "Retournés",
+    "sealsRecycleCta": "Réutiliser {count} scellés retournés",
+    "sealsRequestTitle": "Demande de scellés",
+    "sealsNewRequest": "Nouvelle demande",
+    "sealsQuantityPlaceholder": "Quantité",
+    "sealsRequestSubmit": "Demander",
+    "sealsRequestHint": "Créez une demande ici lorsque votre stock de scellés baisse. Le système {auto}l’expédie après validation de l’administrateur.",
+    "sealsAutoRequestPrefix": "a peut-être créé une demande automatiquement et ",
+    "sealsHistoryTitle": "Historique des demandes",
+    "sealsQuantityLabel": "{count} unités",
+    "sealsAutoBadge": "Auto",
+    "sealsTrackingNo": "N° de suivi : {tracking}",
+    "sealsSerialRange": "Série : {from} – {to}",
+    "sealsConfirmDelivery": "Reçu — ajouter au stock",
+    "sealsNoRequests": "Vous n’avez pas encore de demande de scellés."
   },
   "Guest": {
     "heroTitle": "Déposez vos bagages, explorez librement",
@@ -832,7 +872,9 @@
     "campaignUpdateFailed": "Impossible de mettre à jour la campagne.",
     "campaignCreateFailed": "Impossible de créer la campagne.",
     "platformSettingsRequireSeals": "Scellé obligatoire à l'enregistrement",
-    "platformSettingsRequireSealsHint": "Activé, les partenaires ne peuvent pas enregistrer sans saisir un numéro de scellé pour chaque bagage. N'activez PAS avant la distribution des scellés — l'enregistrement serait totalement bloqué."
+    "platformSettingsRequireSealsHint": "Activé, les partenaires ne peuvent pas enregistrer sans saisir un numéro de scellé pour chaque bagage. N'activez PAS avant la distribution des scellés — l'enregistrement serait totalement bloqué.",
+    "platformSettingsHolidayDates": "Jours fériés de la plateforme (AAAA-MM-JJ)",
+    "platformSettingsHolidayDatesHint": "Une date par ligne ou séparées par des virgules. Les séjours chevauchant ces jours sont refusés."
   },
   "Auth": {
     "loginTitle": "Connectez-vous à BagajPark",
@@ -1142,7 +1184,14 @@
     "b1Body": "Adapté aux groupes et aux périodes de pointe de paiement.",
     "b2Title": "Adapté aux entreprises",
     "b2Body": "Contrat, commission et reporting alignés sur les opérations hôtelières.",
-    "cta": "Contacter les partenariats hôteliers"
+    "cta": "Contacter les partenariats hôteliers",
+    "b3Title": "Simplicité opérationnelle",
+    "b3Body": "Pas besoin de bagagerie, de personnel ni de casiers. Tout se passe en ligne.",
+    "b4Title": "6 langues",
+    "b4Body": "Les voyageurs internationaux réservent dans leur langue. Aucun souci de traduction.",
+    "faqTitle": "Questions fréquentes",
+    "ctaTitle": "Ajoutez votre hôtel à BagajPark",
+    "ctaDescription": "Rejoignez le réseau partenaire BagajPark en un appel de 10 minutes. Sans frais d’installation."
   },
   "CookieConsent": {
     "bannerTitle": "Cookies",
@@ -1329,7 +1378,16 @@
     "indexMetaTitle": "Consigne à bagages par ville",
     "indexMetaDescription": "Trouvez une consigne sécurisée dans les grandes villes. Ouvrez la carte et réservez un commerce de confiance près de vous.",
     "indexHeadline": "Consigne par ville",
-    "indexIntro": "Choisissez une ville pour accéder à la page locale et lancer la carte au bon endroit."
+    "indexIntro": "Choisissez une ville pour accéder à la page locale et lancer la carte au bon endroit.",
+    "indexWhyTitle": "Guide de consigne à bagages par ville",
+    "indexWhyBody": "Chaque page ville est pensée pour la recherche locale, la découverte à proximité et un passage rapide à la réservation.",
+    "indexFaqTitle": "Questions fréquentes",
+    "indexFaq1Q": "Comment savoir quelles villes sont disponibles ?",
+    "indexFaq1A": "Choisissez une ville dans la liste pour ouvrir sa page et lancer une recherche ciblée.",
+    "indexFaq2Q": "Le centre de recherche se met-il à jour depuis les pages ville ?",
+    "indexFaq2A": "Oui. Les boutons des pages ville ouvrent la recherche centrée sur les coordonnées de la ville.",
+    "indexFaq3Q": "Pourquoi les pages ville comptent-elles pour le SEO ?",
+    "indexFaq3A": "Elles répondent directement aux requêtes locales (par ex. « consigne bagages Ankara ») et améliorent visibilité et conversions."
   },
   "AdminStatus": {
     "title": "Platform Technical Audit",
@@ -1360,6 +1418,41 @@
   "AccountPrivacy": {
     "deleteConfirmTitle": "Vous allez fermer votre compte",
     "deleteConfirmBody": "Cette action est irréversible. Vos données personnelles seront anonymisées et vous serez déconnecté.",
-    "deleteConfirmYes": "Oui, fermer mon compte"
+    "deleteConfirmYes": "Oui, fermer mon compte",
+    "pageTitle": "Données et confidentialité",
+    "pageIntro": "Exportez vos données ou anonymisez votre compte (libre-service RGPD).",
+    "back": "Retour aux réservations",
+    "guestOnly": "Cette page est réservée aux comptes voyageurs.",
+    "exportTitle": "Exporter les données",
+    "exportDesc": "Téléchargez un fichier JSON contenant les données principales liées à votre compte.",
+    "exportButton": "Télécharger",
+    "deleteTitle": "Anonymiser le compte",
+    "deleteDesc": "Sans réservation active, les données personnelles sont supprimées ; certains enregistrements peuvent être conservés si la loi l’exige.",
+    "deleteButton": "Fermer le compte",
+    "errors": {
+      "activeBookings": "Vous avez des réservations actives ; clôturez-les avant de supprimer votre compte.",
+      "authRequired": "Veuillez vous connecter.",
+      "guestContactRequired": "Veuillez saisir un e-mail ou un numéro de téléphone.",
+      "unauthorized": "Vous n’êtes pas autorisé à faire cela.",
+      "generic": "Une erreur est survenue."
+    }
+  },
+  "WebPush": {
+    "title": "Notifications push",
+    "description": "Autoriser les notifications du navigateur pour les mises à jour de réservation (facultatif).",
+    "enable": "Activer les notifications",
+    "unsupported": "Ce navigateur ou cet appareil ne prend pas en charge le push.",
+    "invalidSubscription": "Impossible de créer l’abonnement.",
+    "saveFailed": "Enregistrement sur le serveur impossible.",
+    "enabled": "Notifications activées.",
+    "permissionDenied": "Autorisation refusée ou erreur survenue."
+  },
+  "PartnerPromo": {
+    "badge": "Offre de lancement",
+    "title": "Envie de devenir partenaire ?",
+    "description": "Transformez votre espace inutilisé en point de consigne sécurisé et générez un revenu complémentaire.",
+    "offer": "0 % de commission pendant 3 mois pour les 100 premiers partenaires !",
+    "cta": "Devenir partenaire",
+    "close": "Fermer"
   }
 }

@@ -156,7 +156,47 @@
     "nextPage": "Next",
     "overdueBadgeHours": "{hours}時間経過",
     "overdueBadgeDays": "{days}日経過",
-    "overdueHint": "荷物をお渡し済みの場合は、受取処理を完了してください。"
+    "overdueHint": "荷物をお渡し済みの場合は、受取処理を完了してください。",
+    "locationLocateMe": "現在地を取得",
+    "locationDetecting": "位置情報を取得中…",
+    "locationResolvingAddress": "住所を解決中…",
+    "locationHintTapMap": "ボタンを使うか、地図をタップしてください",
+    "locationDetectedTitle": "位置を検出しました",
+    "locationReset": "位置をリセット",
+    "locationStreetPlaceholder": "通り",
+    "locationNeighborhoodPlaceholder": "地区",
+    "locationBuildingNoPlaceholder": "建物番号",
+    "locationDoorNoPlaceholder": "部屋番号",
+    "locationPostalCodePlaceholder": "郵便番号",
+    "locationBrowserUnsupported": "お使いのブラウザは位置情報に対応していません。",
+    "locationGenericError": "位置情報を取得できませんでした。もう一度お試しください。",
+    "actionCancelled": "操作をキャンセルしました。",
+    "sealsTitle": "シール管理",
+    "sealsStatusPending": "保留中",
+    "sealsStatusShipped": "発送済み",
+    "sealsStatusDelivered": "配達済み",
+    "sealsGenericError": "エラーが発生しました。",
+    "sealsRequestCreated": "{count}個のシール申請を作成しました。管理者の承認をお待ちください。",
+    "sealsDeliveryConfirmed": "受領を確認しました。シールが在庫に追加されました。",
+    "sealsRecycled": "返却済みシール{count}個を再び利用可能にしました。",
+    "sealsLowStockWarning": "在庫僅少！利用可能なシールは残り<strong>{count}</strong>個です。申請を作成してください。",
+    "sealsStockReady": "利用可能",
+    "sealsStockInUse": "使用中",
+    "sealsStockReturned": "返却済み",
+    "sealsRecycleCta": "返却済みシール{count}個を再利用",
+    "sealsRequestTitle": "シール申請",
+    "sealsNewRequest": "新規申請",
+    "sealsQuantityPlaceholder": "数量",
+    "sealsRequestSubmit": "申請する",
+    "sealsRequestHint": "シールの在庫が減ったらここから申請できます。システム{auto}管理者の承認後に発送されます。",
+    "sealsAutoRequestPrefix": "が自動で申請している場合もあり、",
+    "sealsHistoryTitle": "申請履歴",
+    "sealsQuantityLabel": "{count}個",
+    "sealsAutoBadge": "自動",
+    "sealsTrackingNo": "追跡番号: {tracking}",
+    "sealsSerialRange": "シリアル: {from} – {to}",
+    "sealsConfirmDelivery": "受け取りました — 在庫に追加",
+    "sealsNoRequests": "シール申請はまだありません。"
   },
   "Guest": {
     "heroTitle": "荷物を置いて、自由に探索しましょう",
@@ -832,7 +872,9 @@
     "campaignUpdateFailed": "キャンペーンを更新できませんでした。",
     "campaignCreateFailed": "キャンペーンを作成できませんでした。",
     "platformSettingsRequireSeals": "預け入れ時に封印を必須にする",
-    "platformSettingsRequireSealsHint": "有効にすると、パートナーは各荷物の封印番号を入力しないと預かり処理ができません。封印の配布前は有効にしないでください — 預かりが完全に止まります。"
+    "platformSettingsRequireSealsHint": "有効にすると、パートナーは各荷物の封印番号を入力しないと預かり処理ができません。封印の配布前は有効にしないでください — 預かりが完全に止まります。",
+    "platformSettingsHolidayDates": "プラットフォーム休業日（YYYY-MM-DD）",
+    "platformSettingsHolidayDatesHint": "1行に1日付、またはカンマ区切り。これらの日に重なる預かりは拒否されます。"
   },
   "Auth": {
     "loginTitle": "バガジパークにサインインする",
@@ -1142,7 +1184,14 @@
     "b1Body": "グループやピーク時のチェックアウト時間帯に適しています。",
     "b2Title": "エンタープライズ向け",
     "b2Body": "ホテルの運営に合わせた契約、手数料、報告。",
-    "cta": "ホテルパートナーシップに問い合わせる"
+    "cta": "ホテルパートナーシップに問い合わせる",
+    "b3Title": "運用がかんたん",
+    "b3Body": "荷物室もスタッフもロッカーも不要。すべてオンラインで完結します。",
+    "b4Title": "6言語対応",
+    "b4Body": "海外からのお客様が母国語で予約できます。翻訳の手間はありません。",
+    "faqTitle": "よくある質問",
+    "ctaTitle": "ホテルをBagajParkに登録",
+    "ctaDescription": "10分の通話でBagajParkパートナーネットワークに参加できます。初期費用はかかりません。"
   },
   "CookieConsent": {
     "bannerTitle": "クッキー",
@@ -1329,7 +1378,16 @@
     "indexMetaTitle": "都市別の手荷物預かり",
     "indexMetaDescription": "主要都市で安心の荷物預かり。地図を開いて近くの店舗を予約。",
     "indexHeadline": "都市から選ぶ手荷物預かり",
-    "indexIntro": "都市を選ぶとローカルページから、適切なエリアに寄った地図検索へ進めます。"
+    "indexIntro": "都市を選ぶとローカルページから、適切なエリアに寄った地図検索へ進めます。",
+    "indexWhyTitle": "都市別 荷物預かりガイド",
+    "indexWhyBody": "各都市ページはローカル検索、周辺の発見、そして予約への素早い導線に最適化されています。",
+    "indexFaqTitle": "よくある質問",
+    "indexFaq1Q": "利用できる都市はどこで確認できますか？",
+    "indexFaq1A": "一覧から都市を選ぶと専用ページが開き、その地域を中心に検索できます。",
+    "indexFaq2Q": "都市ページから検索の中心は自動で設定されますか？",
+    "indexFaq2A": "はい。都市ページのボタンは、その都市の中心座標を基点に検索を開きます。",
+    "indexFaq3Q": "都市ページはなぜSEOに重要ですか？",
+    "indexFaq3A": "「アンカラ 荷物預かり」のようなローカルな検索意図に直接応え、自然流入と予約率を高めます。"
   },
   "AdminStatus": {
     "title": "Platform Technical Audit",
@@ -1360,6 +1418,41 @@
   "AccountPrivacy": {
     "deleteConfirmTitle": "アカウントを閉じようとしています",
     "deleteConfirmBody": "この操作は取り消せません。個人データは匿名化され、ログアウトされます。",
-    "deleteConfirmYes": "はい、閉じます"
+    "deleteConfirmYes": "はい、閉じます",
+    "pageTitle": "データとプライバシー",
+    "pageIntro": "データのエクスポート、またはアカウントの匿名化（GDPR相当のセルフサービス）。",
+    "back": "予約一覧へ戻る",
+    "guestOnly": "このページはゲストアカウント専用です。",
+    "exportTitle": "データをエクスポート",
+    "exportDesc": "アカウントに関連する主要データをJSONファイルでダウンロードします。",
+    "exportButton": "ダウンロード",
+    "deleteTitle": "アカウントを匿名化",
+    "deleteDesc": "有効な予約がなければ個人データは削除されます。法律上必要な記録は保持される場合があります。",
+    "deleteButton": "アカウントを閉鎖",
+    "errors": {
+      "activeBookings": "有効な予約があります。アカウント削除の前に完了させてください。",
+      "authRequired": "サインインしてください。",
+      "guestContactRequired": "メールアドレスまたは電話番号を入力してください。",
+      "unauthorized": "この操作は許可されていません。",
+      "generic": "エラーが発生しました。"
+    }
+  },
+  "WebPush": {
+    "title": "プッシュ通知",
+    "description": "予約の更新をブラウザ通知で受け取る（任意）。",
+    "enable": "通知を有効にする",
+    "unsupported": "このブラウザまたは端末はプッシュ通知に対応していません。",
+    "invalidSubscription": "購読を作成できませんでした。",
+    "saveFailed": "サーバーに保存できませんでした。",
+    "enabled": "通知を有効にしました。",
+    "permissionDenied": "許可が拒否されたか、エラーが発生しました。"
+  },
+  "PartnerPromo": {
+    "badge": "ローンチ特典",
+    "title": "パートナーになりませんか？",
+    "description": "使っていないスペースを安全な荷物預かり所にして、副収入を得ましょう。",
+    "offer": "先着100パートナーは最初の3か月手数料0%！",
+    "cta": "パートナー申請",
+    "close": "閉じる"
   }
 }

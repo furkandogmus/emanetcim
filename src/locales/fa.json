@@ -156,7 +156,47 @@
     "nextPage": "Next",
     "overdueBadgeHours": "{hours} ساعت در انتظار",
     "overdueBadgeDays": "{days} روز در انتظار",
-    "overdueHint": "اگر چمدان تحویل داده شده، فرآیند خروج را کامل کنید."
+    "overdueHint": "اگر چمدان تحویل داده شده، فرآیند خروج را کامل کنید.",
+    "locationLocateMe": "موقعیت من",
+    "locationDetecting": "در حال دریافت موقعیت…",
+    "locationResolvingAddress": "در حال یافتن نشانی…",
+    "locationHintTapMap": "از دکمه استفاده کنید یا روی نقشه بزنید",
+    "locationDetectedTitle": "موقعیت شناسایی شد",
+    "locationReset": "بازنشانی موقعیت",
+    "locationStreetPlaceholder": "خیابان",
+    "locationNeighborhoodPlaceholder": "محله",
+    "locationBuildingNoPlaceholder": "شماره ساختمان",
+    "locationDoorNoPlaceholder": "شماره واحد",
+    "locationPostalCodePlaceholder": "کد پستی",
+    "locationBrowserUnsupported": "مرورگر شما از موقعیت‌یابی پشتیبانی نمی‌کند.",
+    "locationGenericError": "دریافت موقعیت ممکن نشد. دوباره تلاش کنید.",
+    "actionCancelled": "عملیات لغو شد.",
+    "sealsTitle": "مدیریت پلمب‌ها",
+    "sealsStatusPending": "در انتظار",
+    "sealsStatusShipped": "ارسال شده",
+    "sealsStatusDelivered": "تحویل شده",
+    "sealsGenericError": "خطایی رخ داد.",
+    "sealsRequestCreated": "درخواست {count} پلمب ثبت شد. منتظر تأیید مدیر بمانید.",
+    "sealsDeliveryConfirmed": "تحویل تأیید شد! پلمب‌ها به موجودی شما اضافه شدند.",
+    "sealsRecycled": "{count} پلمب برگشتی دوباره قابل استفاده شد.",
+    "sealsLowStockWarning": "موجودی کم! فقط <strong>{count}</strong> پلمب قابل استفاده دارید. لطفاً درخواست ثبت کنید.",
+    "sealsStockReady": "آماده",
+    "sealsStockInUse": "در حال استفاده",
+    "sealsStockReturned": "برگشتی",
+    "sealsRecycleCta": "استفاده مجدد از {count} پلمب برگشتی",
+    "sealsRequestTitle": "درخواست پلمب",
+    "sealsNewRequest": "درخواست جدید",
+    "sealsQuantityPlaceholder": "تعداد",
+    "sealsRequestSubmit": "درخواست",
+    "sealsRequestHint": "وقتی موجودی پلمب کم شد می‌توانید از اینجا درخواست بدهید. سامانه {auto}پس از تأیید مدیر ارسال می‌شود.",
+    "sealsAutoRequestPrefix": "ممکن است خودکار درخواست ثبت کرده باشد و ",
+    "sealsHistoryTitle": "تاریخچه درخواست‌ها",
+    "sealsQuantityLabel": "{count} عدد",
+    "sealsAutoBadge": "خودکار",
+    "sealsTrackingNo": "کد رهگیری: {tracking}",
+    "sealsSerialRange": "سریال: {from} – {to}",
+    "sealsConfirmDelivery": "دریافت کردم — افزودن به موجودی",
+    "sealsNoRequests": "هنوز درخواست پلمبی ندارید."
   },
   "Guest": {
     "heroTitle": "چمدان را بسپارید، آزاد بگردید",
@@ -832,7 +872,9 @@
     "campaignUpdateFailed": "به‌روزرسانی کمپین انجام نشد.",
     "campaignCreateFailed": "ایجاد کمپین انجام نشد.",
     "platformSettingsRequireSeals": "پلمب هنگام تحویل الزامی است",
-    "platformSettingsRequireSealsHint": "در حالت فعال، شریک بدون وارد کردن شمارهٔ پلمب برای هر چمدان نمی‌تواند تحویل بگیرد. پیش از توزیع پلمب‌ها فعال نکنید — تحویل کاملاً مسدود می‌شود."
+    "platformSettingsRequireSealsHint": "در حالت فعال، شریک بدون وارد کردن شمارهٔ پلمب برای هر چمدان نمی‌تواند تحویل بگیرد. پیش از توزیع پلمب‌ها فعال نکنید — تحویل کاملاً مسدود می‌شود.",
+    "platformSettingsHolidayDates": "تعطیلات پلتفرم (YYYY-MM-DD)",
+    "platformSettingsHolidayDatesHint": "هر تاریخ در یک خط یا جداشده با ویرگول. اقامت‌هایی که با این روزها هم‌پوشانی دارند رد می‌شوند."
   },
   "Auth": {
     "loginTitle": "ورود به BagajPark",
@@ -1142,7 +1184,14 @@
     "b1Body": "مناسب گروه‌ها و اوج خروج.",
     "b2Title": "سازمانی",
     "b2Body": "قرارداد، کمیسیون و گزارش هم‌راستا با عملیات هتل.",
-    "cta": "تماس مشارکت هتل"
+    "cta": "تماس مشارکت هتل",
+    "b3Title": "سهولت عملیاتی",
+    "b3Body": "نیازی به اتاق چمدان، کارکنان یا کمد نیست. همه‌چیز آنلاین است.",
+    "b4Title": "۶ زبان",
+    "b4Body": "مهمانان خارجی به زبان خودشان رزرو می‌کنند. بدون دردسر ترجمه.",
+    "faqTitle": "پرسش‌های متداول",
+    "ctaTitle": "هتل خود را به BagajPark اضافه کنید",
+    "ctaDescription": "با یک تماس ۱۰ دقیقه‌ای هتل خود را به شبکه شرکای BagajPark اضافه کنید. بدون هزینه راه‌اندازی."
   },
   "CookieConsent": {
     "bannerTitle": "کوکی",
@@ -1329,7 +1378,16 @@
     "indexMetaTitle": "نگهداری چمدان به تفکیک شهر",
     "indexMetaDescription": "در شهرهای بزرگ، نگهداری امن چمدان پیدا کنید. نقشه را باز کنید و نزدیک‌ترین فروشگاه را رزرو کنید.",
     "indexHeadline": "نگهداری چمدان بر پایهٔ شهر",
-    "indexIntro": "شهر را انتخاب کنید تا به صفحهٔ محلی بروید و جستجو با مرکز درست نقشه شروع شود."
+    "indexIntro": "شهر را انتخاب کنید تا به صفحهٔ محلی بروید و جستجو با مرکز درست نقشه شروع شود.",
+    "indexWhyTitle": "راهنمای نگهداری چمدان بر اساس شهر",
+    "indexWhyBody": "هر صفحه شهر برای جست‌وجوی محلی، کشف اطراف و ورود سریع به رزرو بهینه شده است.",
+    "indexFaqTitle": "پرسش‌های متداول",
+    "indexFaq1Q": "چطور بفهمم کدام شهرها در دسترس‌اند؟",
+    "indexFaq1A": "از فهرست یک شهر را انتخاب کنید تا صفحه آن باز شود و جست‌وجوی محلی آغاز گردد.",
+    "indexFaq2Q": "آیا مرکز جست‌وجو از صفحه شهر به‌طور خودکار تنظیم می‌شود؟",
+    "indexFaq2A": "بله. دکمه‌های صفحه شهر، جست‌وجو را با مختصات مرکز همان شهر باز می‌کنند.",
+    "indexFaq3Q": "چرا صفحه‌های شهر برای سئو مهم‌اند؟",
+    "indexFaq3A": "آن‌ها مستقیماً به جست‌وجوهای محلی (مثلاً «نگهداری چمدان آنکارا») پاسخ می‌دهند و دیده‌شدن و تبدیل را بالا می‌برند."
   },
   "AdminStatus": {
     "title": "ممیزی فنی پلتفرم",
@@ -1360,6 +1418,41 @@
   "AccountPrivacy": {
     "deleteConfirmTitle": "در آستانهٔ بستن حساب خود هستید",
     "deleteConfirmBody": "این کار برگشت‌ناپذیر است. داده‌های شخصی شما ناشناس می‌شود و از حساب خارج می‌شوید.",
-    "deleteConfirmYes": "بله، حسابم را ببند"
+    "deleteConfirmYes": "بله، حسابم را ببند",
+    "pageTitle": "داده‌ها و حریم خصوصی",
+    "pageIntro": "داده‌های خود را خروجی بگیرید یا حساب را ناشناس کنید (خودخدمت مطابق GDPR).",
+    "back": "بازگشت به رزروها",
+    "guestOnly": "این صفحه فقط برای حساب‌های مهمان است.",
+    "exportTitle": "خروجی داده‌ها",
+    "exportDesc": "یک فایل JSON شامل داده‌های اصلی حساب خود را دانلود کنید.",
+    "exportButton": "دانلود",
+    "deleteTitle": "ناشناس‌سازی حساب",
+    "deleteDesc": "اگر رزرو فعالی ندارید، داده‌های شخصی حذف می‌شود؛ برخی سوابق در صورت الزام قانونی نگه داشته می‌شوند.",
+    "deleteButton": "بستن حساب",
+    "errors": {
+      "activeBookings": "رزرو فعال دارید؛ پیش از حذف حساب آن‌ها را ببندید.",
+      "authRequired": "لطفاً وارد شوید.",
+      "guestContactRequired": "لطفاً ایمیل یا شماره تلفن وارد کنید.",
+      "unauthorized": "اجازه این کار را ندارید.",
+      "generic": "خطایی رخ داد."
+    }
+  },
+  "WebPush": {
+    "title": "اعلان‌های پوش",
+    "description": "دریافت اعلان مرورگر برای به‌روزرسانی رزروها (اختیاری).",
+    "enable": "فعال‌سازی اعلان‌ها",
+    "unsupported": "این مرورگر یا دستگاه از پوش پشتیبانی نمی‌کند.",
+    "invalidSubscription": "ایجاد اشتراک ممکن نشد.",
+    "saveFailed": "ذخیره در سرور ممکن نشد.",
+    "enabled": "اعلان‌ها فعال شد.",
+    "permissionDenied": "اجازه رد شد یا خطایی رخ داد."
+  },
+  "PartnerPromo": {
+    "badge": "پیشنهاد ویژه آغاز",
+    "title": "می‌خواهید شریک ما شوید؟",
+    "description": "فضای بلااستفاده خود را به یک نقطه امن نگهداری چمدان تبدیل کنید و درآمد اضافه داشته باشید.",
+    "offer": "برای ۱۰۰ شریک اول، ۳ ماه اول بدون کارمزد!",
+    "cta": "درخواست شراکت",
+    "close": "بستن"
   }
 }

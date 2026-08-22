@@ -19,13 +19,15 @@ const BASE = "tr"; // referans dil: en zengin ve ürünün ana dili
 const GUEST_FACING = ["Guest", "Common", "Footer", "Home", "Errors", "UserNav"];
 
 /**
- * Misafir dışı yüzeylerde (Partner/Admin panelleri, şehir SEO sayfaları) hâlâ borç var.
- * Bu sayı bir MANDAL: düşebilir, ama yükselemez. Yeni bir özellik 12 dili
- * daha fazla geride bırakamaz.
+ * Misafir dışı yüzeylerde hâlâ borç var. Bu sayı bir MANDAL: düşebilir, ama
+ * yükselemez. Yeni bir özellik diğer dilleri daha fazla geride bırakamaz.
  *
- * Borç kapatıldıkça bu sayıyı düşürün (kayıt: docs/DEFECT_BACKLOG.md → P1-12).
+ * 2026-08-22: 106 → 19. Kalan 19 anahtarın tamamı uzun SEO içeriği
+ * (`CityStorage.<şehir>.sections/tips/nearbyPlaces`, `MarketingHotels.faqs`) —
+ * makine çevirisi değil, anadil yazarı isteyen metinler. Kullanıcı bunları
+ * İngilizce görür (`src/i18n/request.ts` fallback), ham anahtar DEĞİL.
  */
-const NON_GUEST_DEBT_CEILING = 106;
+const NON_GUEST_DEBT_CEILING = 19;
 
 type Flat = Record<string, unknown>;
 

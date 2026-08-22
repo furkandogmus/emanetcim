@@ -156,7 +156,47 @@
     "nextPage": "Next",
     "overdueBadgeHours": "seit {hours} Std. offen",
     "overdueBadgeDays": "seit {days} Tagen offen",
-    "overdueHint": "Wenn das Gepäck übergeben wurde, schließen Sie die Abholung ab."
+    "overdueHint": "Wenn das Gepäck übergeben wurde, schließen Sie die Abholung ab.",
+    "locationLocateMe": "Standort ermitteln",
+    "locationDetecting": "Standort wird ermittelt…",
+    "locationResolvingAddress": "Adresse wird aufgelöst…",
+    "locationHintTapMap": "Button verwenden oder auf die Karte tippen",
+    "locationDetectedTitle": "Standort erkannt",
+    "locationReset": "Standort zurücksetzen",
+    "locationStreetPlaceholder": "Straße",
+    "locationNeighborhoodPlaceholder": "Stadtteil",
+    "locationBuildingNoPlaceholder": "Hausnummer",
+    "locationDoorNoPlaceholder": "Türnummer",
+    "locationPostalCodePlaceholder": "Postleitzahl",
+    "locationBrowserUnsupported": "Ihr Browser unterstützt keine Standortbestimmung.",
+    "locationGenericError": "Standort konnte nicht ermittelt werden. Bitte erneut versuchen.",
+    "actionCancelled": "Aktion abgebrochen.",
+    "sealsTitle": "Siegelverwaltung",
+    "sealsStatusPending": "Ausstehend",
+    "sealsStatusShipped": "Versandt",
+    "sealsStatusDelivered": "Geliefert",
+    "sealsGenericError": "Etwas ist schiefgelaufen.",
+    "sealsRequestCreated": "Siegelanfrage über {count} Stück erstellt. Bitte auf die Admin-Freigabe warten.",
+    "sealsDeliveryConfirmed": "Lieferung bestätigt! Die Siegel wurden Ihrem Bestand hinzugefügt.",
+    "sealsRecycled": "{count} zurückgegebene Siegel wieder in den Bestand aufgenommen.",
+    "sealsLowStockWarning": "Geringer Bestand! Nur noch <strong>{count}</strong> verfügbare Siegel. Bitte eine Anfrage erstellen.",
+    "sealsStockReady": "Bereit",
+    "sealsStockInUse": "In Gebrauch",
+    "sealsStockReturned": "Zurückgegeben",
+    "sealsRecycleCta": "{count} zurückgegebene Siegel wiederverwenden",
+    "sealsRequestTitle": "Siegelanfrage",
+    "sealsNewRequest": "Neue Anfrage",
+    "sealsQuantityPlaceholder": "Menge",
+    "sealsRequestSubmit": "Anfragen",
+    "sealsRequestHint": "Wenn Ihr Siegelbestand sinkt, können Sie hier eine Anfrage stellen. Das System {auto}wird nach Admin-Freigabe versandt.",
+    "sealsAutoRequestPrefix": "hat möglicherweise automatisch eine erstellt und ",
+    "sealsHistoryTitle": "Anfrageverlauf",
+    "sealsQuantityLabel": "{count} Stück",
+    "sealsAutoBadge": "Automatisch",
+    "sealsTrackingNo": "Sendungsnr.: {tracking}",
+    "sealsSerialRange": "Serie: {from} – {to}",
+    "sealsConfirmDelivery": "Erhalten — zum Bestand hinzufügen",
+    "sealsNoRequests": "Sie haben noch keine Siegelanfragen."
   },
   "Guest": {
     "heroTitle": "Lassen Sie Ihr Gepäck fallen und erkunden Sie es frei",
@@ -832,7 +872,9 @@
     "campaignUpdateFailed": "Kampagne konnte nicht aktualisiert werden.",
     "campaignCreateFailed": "Kampagne konnte nicht erstellt werden.",
     "platformSettingsRequireSeals": "Siegel beim Check-in erforderlich",
-    "platformSettingsRequireSealsHint": "Wenn aktiv, können Partner ohne Siegelnummer für jedes Gepäckstück nicht einchecken. NICHT aktivieren, bevor die Siegel verteilt sind — Check-in wird vollständig blockiert."
+    "platformSettingsRequireSealsHint": "Wenn aktiv, können Partner ohne Siegelnummer für jedes Gepäckstück nicht einchecken. NICHT aktivieren, bevor die Siegel verteilt sind — Check-in wird vollständig blockiert.",
+    "platformSettingsHolidayDates": "Plattform-Feiertage (JJJJ-MM-TT)",
+    "platformSettingsHolidayDatesHint": "Ein Datum pro Zeile oder kommagetrennt. Aufenthalte, die diese Tage überschneiden, werden abgelehnt."
   },
   "Auth": {
     "loginTitle": "Melden Sie sich bei BagajPark an",
@@ -1142,7 +1184,14 @@
     "b1Body": "Geeignet für Gruppen und Spitzenzeiten an der Kasse.",
     "b2Title": "Unternehmensfreundlich",
     "b2Body": "Verträge, Provisionen und Berichterstattung abgestimmt auf den Hotelbetrieb.",
-    "cta": "Kontaktieren Sie Hotelpartnerschaften"
+    "cta": "Kontaktieren Sie Hotelpartnerschaften",
+    "b3Title": "Einfacher Betrieb",
+    "b3Body": "Kein Gepäckraum, kein Personal, keine Schließfächer nötig. Alles läuft online.",
+    "b4Title": "6 Sprachen",
+    "b4Body": "Internationale Gäste buchen in ihrer Muttersprache. Kein Übersetzungsaufwand.",
+    "faqTitle": "Häufige Fragen",
+    "ctaTitle": "Ihr Hotel bei BagajPark",
+    "ctaDescription": "Mit einem 10-minütigen Gespräch nehmen Sie Ihr Hotel ins BagajPark-Partnernetz auf. Keine Einrichtungsgebühr."
   },
   "CookieConsent": {
     "bannerTitle": "Kekse",
@@ -1329,7 +1378,16 @@
     "indexMetaTitle": "Gepäckaufbewahrung nach Städten",
     "indexMetaDescription": "Sichere Gepäckaufbewahrung in großen Städten. Karte öffnen und vertrauenswürdigen Shop buchen.",
     "indexHeadline": "Gepäckaufbewahrung nach Stadt",
-    "indexIntro": "Stadt wählen, lokale Seite öffnen und direkt mit passender Kartenmitte suchen."
+    "indexIntro": "Stadt wählen, lokale Seite öffnen und direkt mit passender Kartenmitte suchen.",
+    "indexWhyTitle": "Gepäckaufbewahrung nach Stadt",
+    "indexWhyBody": "Jede Stadtseite ist auf lokale Suchanfragen, Umgebungssuche und einen schnellen Einstieg in die Buchung ausgelegt.",
+    "indexFaqTitle": "Häufige Fragen",
+    "indexFaq1Q": "Wie sehe ich, welche Städte verfügbar sind?",
+    "indexFaq1A": "Wählen Sie eine Stadt aus der Liste, um ihre Seite zu öffnen und eine ortsbezogene Suche zu starten.",
+    "indexFaq2Q": "Wird der Suchmittelpunkt von Stadtseiten automatisch übernommen?",
+    "indexFaq2A": "Ja. Die Buttons der Stadtseiten öffnen die Suche mit den Koordinaten des Stadtzentrums.",
+    "indexFaq3Q": "Warum sind Stadtseiten wichtig für SEO?",
+    "indexFaq3A": "Sie treffen lokale Suchanfragen direkt (z. B. „Gepäckaufbewahrung Ankara“) und verbessern Auffindbarkeit und Conversion."
   },
   "AdminStatus": {
     "title": "Platform Technical Audit",
@@ -1360,6 +1418,41 @@
   "AccountPrivacy": {
     "deleteConfirmTitle": "Sie sind dabei, Ihr Konto zu schließen",
     "deleteConfirmBody": "Dies kann nicht rückgängig gemacht werden. Ihre personenbezogenen Daten werden anonymisiert und Sie werden abgemeldet.",
-    "deleteConfirmYes": "Ja, Konto schließen"
+    "deleteConfirmYes": "Ja, Konto schließen",
+    "pageTitle": "Daten & Datenschutz",
+    "pageIntro": "Exportieren Sie Ihre Daten oder anonymisieren Sie Ihr Konto (DSGVO-Selbstbedienung).",
+    "back": "Zurück zu den Buchungen",
+    "guestOnly": "Diese Seite ist nur für Gastkonten.",
+    "exportTitle": "Daten exportieren",
+    "exportDesc": "Laden Sie eine JSON-Datei mit den wichtigsten Daten Ihres Kontos herunter.",
+    "exportButton": "Herunterladen",
+    "deleteTitle": "Konto anonymisieren",
+    "deleteDesc": "Ohne aktive Buchungen werden personenbezogene Daten entfernt; einige Datensätze bleiben, wo das Gesetz es verlangt.",
+    "deleteButton": "Konto schließen",
+    "errors": {
+      "activeBookings": "Sie haben aktive Buchungen; schließen Sie diese vor dem Löschen des Kontos.",
+      "authRequired": "Bitte anmelden.",
+      "guestContactRequired": "Bitte E-Mail oder Telefonnummer eingeben.",
+      "unauthorized": "Dazu sind Sie nicht berechtigt.",
+      "generic": "Etwas ist schiefgelaufen."
+    }
+  },
+  "WebPush": {
+    "title": "Push-Benachrichtigungen",
+    "description": "Browser-Benachrichtigungen für Buchungsupdates erlauben (optional).",
+    "enable": "Benachrichtigungen aktivieren",
+    "unsupported": "Dieser Browser oder dieses Gerät unterstützt kein Push.",
+    "invalidSubscription": "Abonnement konnte nicht erstellt werden.",
+    "saveFailed": "Speichern auf dem Server fehlgeschlagen.",
+    "enabled": "Benachrichtigungen aktiviert.",
+    "permissionDenied": "Berechtigung verweigert oder Fehler aufgetreten."
+  },
+  "PartnerPromo": {
+    "badge": "Launch-Angebot",
+    "title": "Möchten Sie unser Partner werden?",
+    "description": "Machen Sie aus ungenutztem Platz eine sichere Gepäckaufbewahrung und verdienen Sie dazu.",
+    "offer": "0 % Provision in den ersten 3 Monaten für die ersten 100 Partner!",
+    "cta": "Als Partner bewerben",
+    "close": "Schließen"
   }
 }
