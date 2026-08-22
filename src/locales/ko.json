@@ -37,7 +37,10 @@
     "navSecondaryLabel": "보조 탐색",
     "navLogoLabel": "BagajPark 홈",
     "footerCancellationPolicy": "취소 정책",
-    "footerManageBooking": "예약 관리"
+    "footerManageBooking": "예약 관리",
+    "close": "닫기",
+    "previous": "이전",
+    "next": "다음"
   },
   "SEO": {
     "title": "BagajPark | 짐은 안전하게, 여행은 자유롭게",

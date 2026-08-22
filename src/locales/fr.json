@@ -37,7 +37,10 @@
     "navSecondaryLabel": "Navigation secondaire",
     "navLogoLabel": "Page d'accueil BagajPark",
     "footerCancellationPolicy": "Annulation",
-    "footerManageBooking": "Gérer la réservation"
+    "footerManageBooking": "Gérer la réservation",
+    "close": "Fermer",
+    "previous": "Précédent",
+    "next": "Suivant"
   },
   "SEO": {
     "title": "Parc Bagaj | Laissez vos bagages en toute sécurité, voyagez librement",

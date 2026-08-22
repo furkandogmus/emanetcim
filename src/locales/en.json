@@ -37,7 +37,10 @@
     "navSecondaryLabel": "Secondary navigation",
     "navLogoLabel": "BagajPark home page",
     "footerCancellationPolicy": "Cancellation",
-    "footerManageBooking": "Manage Booking"
+    "footerManageBooking": "Manage Booking",
+    "close": "Close",
+    "previous": "Previous",
+    "next": "Next"
   },
   "SEO": {
     "title": "BagajPark | Leave Your Luggage Safely, Travel Freely",

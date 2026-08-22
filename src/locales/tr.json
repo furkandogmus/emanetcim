@@ -37,7 +37,10 @@
     "navSecondaryLabel": "İkincil navigasyon",
     "navLogoLabel": "BagajPark ana sayfa",
     "footerCancellationPolicy": "İptal Politikası",
-    "footerManageBooking": "Rezervasyon Yönetimi"
+    "footerManageBooking": "Rezervasyon Yönetimi",
+    "close": "Kapat",
+    "previous": "Önceki",
+    "next": "Sonraki"
   },
   "SEO": {
     "title": "BagajPark | Valiz Saklama ve Güvenli Bagaj Emaneti",

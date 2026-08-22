@@ -37,7 +37,10 @@
     "navSecondaryLabel": "Дополнительная навигация",
     "navLogoLabel": "Главная страница BagajPark",
     "footerCancellationPolicy": "Отмена",
-    "footerManageBooking": "Управление бронью"
+    "footerManageBooking": "Управление бронью",
+    "close": "Закрыть",
+    "previous": "Назад",
+    "next": "Вперёд"
   },
   "SEO": {
     "title": "BagajPark | Оставьте багаж в безопасности, путешествуйте свободно",

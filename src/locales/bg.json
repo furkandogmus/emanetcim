@@ -37,7 +37,10 @@
     "navSecondaryLabel": "Второстепенна навигация",
     "navLogoLabel": "Начална страница на BagajPark",
     "footerCancellationPolicy": "Отмяна",
-    "footerManageBooking": "Управление на резервацията"
+    "footerManageBooking": "Управление на резервацията",
+    "close": "Затвори",
+    "previous": "Назад",
+    "next": "Напред"
   },
   "SEO": {
     "title": "BagajPark | Безопасен багаж, свободно пътуване",

@@ -37,7 +37,10 @@
     "navSecondaryLabel": "ناوبری فرعی",
     "navLogoLabel": "صفحهٔ اصلی BagajPark",
     "footerCancellationPolicy": "لغو",
-    "footerManageBooking": "مدیریت رزرو"
+    "footerManageBooking": "مدیریت رزرو",
+    "close": "بستن",
+    "previous": "قبلی",
+    "next": "بعدی"
   },
   "SEO": {
     "title": "BagajPark | چمدان امن، سفر آزاد",

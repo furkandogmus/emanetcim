@@ -671,6 +671,7 @@ export default function SearchClient({
           initialSnap={0}
           showClose={false}
           showOverlay={false}
+          ariaLabel={t("allShops")}
         >
           <header className="px-4 pt-2 pb-3 border-b border-gray-100 shrink-0">
             <div className="flex items-center gap-3">

@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
+import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
 
 interface BottomSheetProps {
   open: boolean;
@@ -18,6 +20,12 @@ interface BottomSheetProps {
   showClose?: boolean;
   /** Show overlay backdrop. Set false for map+list split view */
   showOverlay?: boolean;
+  /**
+   * `title` gösterilmediğinde ekran okuyucuya verilecek ad. Adsız bir
+   * `dialog`/`region` yer imi listesinde görünmez; başlıksız kullanımda
+   * bunu geçmek gerekir.
+   */
+  ariaLabel?: string;
 }
 
 export default function BottomSheet({
@@ -30,7 +38,22 @@ export default function BottomSheet({
   showHandle = true,
   showClose = true,
   showOverlay = true,
+  ariaLabel,
 }: BottomSheetProps) {
+  const tCommon = useTranslations("Common");
+
+  /**
+   * `showOverlay` bu bileşenin İKİ AYRI ŞEY olmasını sağlıyor:
+   *   - `true`  → gerçek bir modal (arkası kapalı, odak burada)
+   *   - `false` → harita + liste bölünmüş görünümündeki KALICI panel
+   *
+   * Modal sözleşmesi (Escape, `role="dialog"`, arka plan kaydırma kilidi)
+   * yalnızca ilkine uygulanır; kalıcı paneli `aria-modal` yapmak ekran
+   * okuyucuya sayfanın geri kalanı yokmuş gibi yalan söylerdi.
+   */
+  const isModal = showOverlay;
+  useModalBehavior({ open: open && isModal, onClose });
+
   const sheetRef = useRef<HTMLDivElement>(null);
   const [currentSnap, setCurrentSnap] = useState(initialSnap);
   // "open" prop degistiginde snap'i sifirlama — React'in onerdigi "render sirasinda
@@ -110,7 +133,15 @@ export default function BottomSheet({
   const sheetHeight = snapPoints[currentSnap];
 
   return (
+    /**
+     * Kapalıyken `inert` ŞART. Panel DOM'da kalıyor (kapanış animasyonu için) ve
+     * `pointer-events-none` yalnızca FAREYİ durdurur: içerideki butonlar hâlâ
+     * sekmeyle gezilebilir ve ekran okuyucu tarafından okunurdu. Yani klavye
+     * kullanıcısı görünmeyen bir panelin içine sekiyordu.
+     */
     <div
+      inert={!open}
+      aria-hidden={!open}
       className={`fixed inset-0 z-40 transition-opacity duration-300 ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
     >
       {showOverlay && (
@@ -121,6 +152,10 @@ export default function BottomSheet({
       )}
       <div
         ref={sheetRef}
+        role={isModal ? "dialog" : "region"}
+        aria-modal={isModal ? true : undefined}
+        aria-label={!title ? ariaLabel : undefined}
+        aria-labelledby={title ? "bottom-sheet-title" : undefined}
         className={`absolute bottom-0 left-0 right-0 z-10 bg-white flex flex-col transition-transform duration-300 ${showOverlay ? "rounded-t-[2rem] shadow-2xl" : "rounded-t-[1.5rem] shadow-[0_-8px_30px_rgba(0,0,0,0.12)]"}`}
         style={{
           height: `var(--sheet-height, ${sheetHeight}vh)`,
@@ -140,7 +175,12 @@ export default function BottomSheet({
         {(title || showClose) && (
           <div className="flex items-center justify-between px-5 pb-3 border-b border-gray-50 shrink-0">
             {title ? (
-              <h2 className="text-sm font-black uppercase tracking-widest text-gray-900">{title}</h2>
+              <h2
+                id="bottom-sheet-title"
+                className="text-sm font-black uppercase tracking-widest text-gray-900"
+              >
+                {title}
+              </h2>
             ) : (
               <div />
             )}
@@ -149,7 +189,7 @@ export default function BottomSheet({
                 type="button"
                 onClick={onClose}
                 className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
-                aria-label="Close"
+                aria-label={tCommon("close")}
               >
                 <X size={16} className="text-gray-600" />
               </button>

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { X, Loader2, Send } from 'lucide-react';
 import { addReviewAction } from '@/actions/review';
+import { useModalBehavior } from '@/lib/hooks/useModalBehavior';
 import StarRating from '@/components/common/StarRating';
 import { toast } from "sonner";
 
@@ -24,6 +25,13 @@ export default function ReviewForm({
   bookingId, guestId, shopId, shopName, onClose, onSuccess 
 }: ReviewFormProps) {
   const t = useTranslations();
+
+  /**
+   * Escape ile kapanmıyordu ve `role="dialog"` taşımıyordu: klavye kullanıcısı
+   * göndermek dışında çıkış yolu olmayan bir formun içinde kalıyordu.
+   */
+  useModalBehavior({ open: true, onClose });
+
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -51,21 +59,30 @@ export default function ReviewForm({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-300">
-      <div className="bg-white text-gray-900 rounded-[3rem] w-full max-w-sm p-10 flex flex-col gap-8 shadow-2xl relative border border-gray-100 overflow-hidden">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="review-form-title"
+        aria-describedby="review-form-subtitle"
+        className="bg-white text-gray-900 rounded-[3rem] w-full max-w-sm p-10 flex flex-col gap-8 shadow-2xl relative border border-gray-100 overflow-hidden"
+      >
         {/* Background Accent */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-bl-[4rem] -z-10 translate-x-8 -translate-y-8"></div>
         
         <button 
           type="button"
           onClick={onClose} 
+          aria-label={t("Common.close")}
           className="btn-ui btn-ui-sm btn-ui-ghost btn-ui-icon absolute top-6 right-6 rounded-full"
         >
           <X size={20} />
         </button>
 
         <div className="text-center">
-          <h3 className="ui-heading-lg mb-2">{shopName.toLowerCase()}</h3>
-          <p className="ui-kicker leading-relaxed px-4">
+          <h3 id="review-form-title" className="ui-heading-lg mb-2">
+            {shopName.toLowerCase()}
+          </h3>
+          <p id="review-form-subtitle" className="ui-kicker leading-relaxed px-4">
              {t("Review.subtitle")}
            </p>
         </div>

@@ -37,7 +37,10 @@
     "navSecondaryLabel": "Nawigacja dodatkowa",
     "navLogoLabel": "Strona główna BagajPark",
     "footerCancellationPolicy": "Anulowanie",
-    "footerManageBooking": "Zarządzaj rezerwacją"
+    "footerManageBooking": "Zarządzaj rezerwacją",
+    "close": "Zamknij",
+    "previous": "Poprzedni",
+    "next": "Następny"
   },
   "SEO": {
     "title": "BagajPark | Zostaw bagaż bezpiecznie, podróżuj swobodnie",

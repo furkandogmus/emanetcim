@@ -2,7 +2,9 @@
 
 import { useState, useRef, useCallback } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
 
 interface Props {
   images: { id: string; url: string }[];
@@ -10,6 +12,7 @@ interface Props {
 }
 
 export default function ShopGallery({ images, shopName }: Props) {
+  const t = useTranslations("Common");
   const [activeIndex, setActiveIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [scale, setScale] = useState(1);
@@ -18,6 +21,15 @@ export default function ShopGallery({ images, shopName }: Props) {
 
   const prev = () => setActiveIndex((i) => (i === 0 ? images.length - 1 : i - 1));
   const next = () => setActiveIndex((i) => (i === images.length - 1 ? 0 : i + 1));
+
+  /**
+   * Büyütülmüş görsel tam ekranı kaplıyor ama Escape ile kapanmıyordu ve ekran
+   * okuyucuya bunun bir iletişim kutusu olduğu söylenmiyordu — klavye kullanıcısı
+   * için çıkışsız bir katmandı. Kapatma/ileri/geri düğmeleri de yalnızca ikondu,
+   * yani erişilebilir adları yoktu.
+   */
+  const closeLightbox = useCallback(() => setLightboxOpen(false), []);
+  useModalBehavior({ open: lightboxOpen, onClose: closeLightbox });
 
   const dist = (t: React.TouchEvent) => {
     const dx = t.touches[0].clientX - t.touches[1].clientX;
@@ -66,13 +78,17 @@ export default function ShopGallery({ images, shopName }: Props) {
         {images.length > 1 && (
           <>
             <button
+              type="button"
               onClick={prev}
+              aria-label={t("previous")}
               className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition-colors"
             >
               <ChevronLeft size={18} />
             </button>
             <button
+              type="button"
               onClick={next}
+              aria-label={t("next")}
               className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition-colors"
             >
               <ChevronRight size={18} />
@@ -109,14 +125,19 @@ export default function ShopGallery({ images, shopName }: Props) {
 
       {lightboxOpen && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={shopName}
           className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center touch-pinch-zoom"
-          onClick={() => setLightboxOpen(false)}
+          onClick={closeLightbox}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
           <button
-            onClick={() => setLightboxOpen(false)}
+            type="button"
+            onClick={closeLightbox}
+            aria-label={t("close")}
             className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 text-white flex items-center justify-center hover:bg-white/30 z-10"
           >
             <X size={20} />

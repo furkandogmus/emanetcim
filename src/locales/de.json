@@ -37,7 +37,10 @@
     "navSecondaryLabel": "Sekundäre Navigation",
     "navLogoLabel": "BagajPark Startseite",
     "footerCancellationPolicy": "Stornierung",
-    "footerManageBooking": "Buchung verwalten"
+    "footerManageBooking": "Buchung verwalten",
+    "close": "Schließen",
+    "previous": "Zurück",
+    "next": "Weiter"
   },
   "SEO": {
     "title": "BagajPark | Lassen Sie Ihr Gepäck sicher und reisen Sie frei",

@@ -37,7 +37,10 @@
     "navSecondaryLabel": "التنقل الثانوي",
     "navLogoLabel": "الصفحة الرئيسية لـ BagajPark",
     "footerCancellationPolicy": "الإلغاء",
-    "footerManageBooking": "إدارة الحجز"
+    "footerManageBooking": "إدارة الحجز",
+    "close": "إغلاق",
+    "previous": "السابق",
+    "next": "التالي"
   },
   "SEO": {
     "title": "BagajPark | اترك أمتعتك بأمان وسافر بحرية",

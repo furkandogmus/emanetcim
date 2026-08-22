@@ -37,7 +37,10 @@
     "navSecondaryLabel": "サブナビゲーション",
     "navLogoLabel": "BagajPark ホーム",
     "footerCancellationPolicy": "キャンセル",
-    "footerManageBooking": "予約を管理"
+    "footerManageBooking": "予約を管理",
+    "close": "閉じる",
+    "previous": "前へ",
+    "next": "次へ"
   },
   "SEO": {
     "title": "バガジパーク |荷物を安全に預けて、自由に旅行しましょう",

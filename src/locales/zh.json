@@ -37,7 +37,10 @@
     "navSecondaryLabel": "次级导航",
     "navLogoLabel": "BagajPark 首页",
     "footerCancellationPolicy": "取消政策",
-    "footerManageBooking": "管理预订"
+    "footerManageBooking": "管理预订",
+    "close": "关闭",
+    "previous": "上一个",
+    "next": "下一个"
   },
   "SEO": {
     "title": "BagajPark |安全寄存行李，自由出行",
