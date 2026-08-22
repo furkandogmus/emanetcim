@@ -249,6 +249,36 @@ export class BookingService implements IBookingService {
           newBags,
         );
 
+        /**
+         * DÜKKAN KAPASİTESİ EMNİYET KONTROLÜ — slot kontrolüne EK olarak.
+         *
+         * NEDEN GEREKLİ (P1-2): iki rezervasyon yolu iki AYRI kapasite doğruluğu
+         * kullanıyordu ve birbirlerini görmüyorlardı.
+         *   - Legacy yol örtüşen `Booking` satırlarını sayar; `ReservationSlot`
+         *     YAZMAZ.
+         *   - Slot yolu yalnızca `ReservationSlot` satırlarını sayar.
+         * Sonuç: legacy yolla yapılmış bir rezervasyon slot yolu için GÖRÜNMEZDİ,
+         * yani slot yolu fiziksel dükkan kapasitesini AŞAN rezervasyon alabiliyordu.
+         * Prod'da `ReservationSlot` tamamen boş (19 rezervasyona karşı 0 satır),
+         * yani şu an her rezervasyon slot yolu için görünmez durumda.
+         *
+         * `Shop.capacity` FİZİKSEL gerçektir: dükkana kaç valiz sığdığı. Slot
+         * kapasitesi onun içindeki daha ince bir dağıtımdır. İkisi birbirinin
+         * yerine geçmez — fiziksel sınır her iki yolda da tutmak zorunda.
+         *
+         * Rezerve edilmiş pencere kullanılıyor (`checkInTime`/`checkOutTime`),
+         * istenen değil: slot sınırlarına yuvarlanmış olabilir ve kaydedilen budur.
+         */
+        await this.assertCapacityTx(
+          tx,
+          shop,
+          data.shopId,
+          checkInTime,
+          checkOutTime,
+          newBags,
+          undefined,
+        );
+
         // Create ReservationSlot entries
         const slots = await tx.shopTimeSlot.findMany({
           where: {

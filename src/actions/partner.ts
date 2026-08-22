@@ -13,6 +13,10 @@ import { BookingStatus, Prisma } from "@prisma/client";
 import { z } from "zod";
 import logger from "@/lib/logger";
 import { bookingEventService } from "@/services/BookingEventService";
+import { getPricingRules } from "@/lib/platform-settings";
+import { readPricingSnapshot } from "@/lib/pricing-snapshot";
+import { computeAuthoritativeCheckoutTotals } from "@/lib/booking-server-price";
+import { moneyToNumber } from "@/lib/money";
 
 function revalidatePartnerPaths() {
   revalidatePathAllLocales("/partner");
@@ -430,12 +434,19 @@ export async function reportFaultySealAction(serialNumber: number, shopId: strin
   }
 }
 
+/**
+ * `extraAmount` BİLEREK YOK.
+ *
+ * Eskiden istemciden alınıyordu, yani esnaf misafire gösterilecek ek ücreti
+ * kendisi yazabiliyordu ve sunucu hiç doğrulamıyordu. Fark artık sunucuda,
+ * `computeAuthoritativeCheckoutTotals` ile hesaplanıyor — istemciden gelen tutar
+ * varsa yok sayılır (P1-8).
+ */
 const pendingBagRevisionBodySchema = z.object({
   bookingId: z.string().uuid(),
   bagCountS: z.number().int().min(0).max(500),
   bagCountM: z.number().int().min(0).max(500),
   bagCountXl: z.number().int().min(0).max(500),
-  extraAmount: z.number().min(0).max(1_000_000),
 });
 
 /**
@@ -455,8 +466,7 @@ export async function setPendingBagRevisionAction(raw: unknown) {
   if (!parsed.success) {
     return { success: false as const, error: "Errors.invalidData" };
   }
-  const { bookingId, bagCountS, bagCountM, bagCountXl, extraAmount } =
-    parsed.data;
+  const { bookingId, bagCountS, bagCountM, bagCountXl } = parsed.data;
 
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId },
@@ -480,6 +490,38 @@ export async function setPendingBagRevisionAction(raw: unknown) {
     return { success: false as const, error: "Errors.invalidData" };
   }
 
+  /**
+   * Fark SUNUCUDA hesaplanıyor.
+   *
+   * Rezervasyonun kendi fiyat kuralları (anlık kopya) varsa onlar kullanılır —
+   * o gün geçerli olan kural budur. Yoksa bugünküler; hangisinin kullanıldığı
+   * revizyon kaydına yazılıyor ki sonradan sorgulanabilsin.
+   */
+  const snapshot = readPricingSnapshot(booking.pricingSnapshot);
+  const rules = snapshot ?? (await getPricingRules());
+
+  const unitPrice = moneyToNumber(booking.shop.pricePerDay);
+  const before = computeAuthoritativeCheckoutTotals(
+    unitPrice,
+    booking.bagCountS,
+    booking.bagCountM,
+    booking.bagCountXl,
+    booking.checkInTime,
+    booking.checkOutTime,
+    rules,
+  );
+  const after = computeAuthoritativeCheckoutTotals(
+    unitPrice,
+    bagCountS,
+    bagCountM,
+    bagCountXl,
+    booking.checkInTime,
+    booking.checkOutTime,
+    rules,
+  );
+  const extraAmount =
+    Math.round((after.subtotalBeforeCoupon - before.subtotalBeforeCoupon) * 100) / 100;
+
   await prisma.booking.update({
     where: { id: bookingId },
     data: {
@@ -487,17 +529,146 @@ export async function setPendingBagRevisionAction(raw: unknown) {
         bagCountS,
         bagCountM,
         bagCountXl,
+        /** Sunucuda hesaplandı. Negatif olabilir (valiz azaldıysa). */
         extraAmount,
+        previousTotal: before.subtotalBeforeCoupon,
+        newTotal: after.subtotalBeforeCoupon,
+        /** Hangi kural kümesiyle hesaplandı — anlık kopya mı, bugünkü mü. */
+        rulesSource: snapshot ? "booking_snapshot" : "current_platform_settings",
         recordedAt: new Date().toISOString(),
       } as Prisma.InputJsonValue,
     },
   });
 
   revalidatePartnerPaths();
-  return { success: true as const };
+  return { success: true as const, extraAmount };
 }
 
-/** Revizyon kaydını siler (misafir ek ücreti ödedikten / anlaşma sonrası). */
+/**
+ * Revizyonu UYGULAR: yeni valiz sayılarını ve yeniden hesaplanan toplamı yazar.
+ *
+ * NEDEN VAR (P1-8): eskiden yalnızca `clearPendingBagRevisionAction` vardı ve o
+ * revizyonu **siliyordu** — valiz sayıları ve `totalPrice` hiç güncellenmiyordu.
+ * Yani bavul fiziksel olarak teslim alınıyor, kayıt eski hâlinde kalıyordu.
+ * Prod'da bunun izi var: `S1 M3 XL1 → 540.00`, oysa aynı kurallarla 640 olmalıydı
+ * — 100 TRY eksik, üstelik rezervasyon `CHECKED_IN`, yani 5 bavul teslim alınmış
+ * ve 4'ü ödenmiş.
+ *
+ * Tek transaction: valiz sayıları ve toplam birlikte değişir, aralarında bir an
+ * bile tutarsız kalmazlar.
+ */
+export async function applyPendingBagRevisionAction(bookingId: string) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false as const, error: "Errors.authRequired" };
+  }
+  if (session.user.role !== "PARTNER" && session.user.role !== "ADMIN") {
+    return { success: false as const, error: "Errors.notAuthorizedPartner" };
+  }
+
+  const booking = await prisma.booking.findUnique({
+    where: { id: bookingId },
+    include: { shop: true },
+  });
+  if (!booking) {
+    return { success: false as const, error: "Errors.bookingNotFound" };
+  }
+  if (
+    session.user.role === "PARTNER" &&
+    booking.shop.ownerId !== session.user.id
+  ) {
+    return { success: false as const, error: "Errors.unauthorized" };
+  }
+
+  const revision = booking.pendingBagRevision as {
+    bagCountS?: unknown;
+    bagCountM?: unknown;
+    bagCountXl?: unknown;
+  } | null;
+  if (
+    !revision ||
+    typeof revision.bagCountS !== "number" ||
+    typeof revision.bagCountM !== "number" ||
+    typeof revision.bagCountXl !== "number"
+  ) {
+    return { success: false as const, error: "Errors.invalidData" };
+  }
+
+  // Toplam SUNUCUDA yeniden hesaplanıyor; revizyon kaydındaki tutara güvenilmiyor.
+  const snapshot = readPricingSnapshot(booking.pricingSnapshot);
+  const rules = snapshot ?? (await getPricingRules());
+  const totals = computeAuthoritativeCheckoutTotals(
+    moneyToNumber(booking.shop.pricePerDay),
+    revision.bagCountS,
+    revision.bagCountM,
+    revision.bagCountXl,
+    booking.checkInTime,
+    booking.checkOutTime,
+    rules,
+  );
+
+  const previousTotal = moneyToNumber(booking.totalPrice);
+
+  await prisma.booking.update({
+    where: { id: bookingId },
+    data: {
+      bagCountS: totals.bagCountS,
+      bagCountM: totals.bagCountM,
+      bagCountXl: totals.bagCountXl,
+      totalPrice: totals.subtotalBeforeCoupon,
+      insuranceFee: totals.insuranceFee,
+      pendingBagRevision: Prisma.JsonNull,
+    },
+  });
+
+  await bookingEventService
+    .record({
+      bookingId,
+      event: "BAGS_MODIFIED",
+      actorId: session.user.id,
+      actorRole: session.user.role,
+      metadata: {
+        from: {
+          S: booking.bagCountS,
+          M: booking.bagCountM,
+          XL: booking.bagCountXl,
+          total: previousTotal,
+        },
+        to: {
+          S: totals.bagCountS,
+          M: totals.bagCountM,
+          XL: totals.bagCountXl,
+          total: totals.subtotalBeforeCoupon,
+        },
+        delta: Math.round((totals.subtotalBeforeCoupon - previousTotal) * 100) / 100,
+        rulesSource: snapshot ? "booking_snapshot" : "current_platform_settings",
+        /**
+         * Fark HENÜZ TAHSİL EDİLMEDİ. Sağlayıcı `manual` olduğu sürece tahsilat
+         * dükkanda yapılır; ödeme defterine bağlanması ayrı iş (P1-21 ile aynı
+         * boşluk). Bu alan operasyonun takip etmesi gereken şeydir.
+         */
+        settled: false,
+      },
+    })
+    .catch((err) =>
+      logger.error({ err, bookingId }, "bag_revision_apply_event_failed"),
+    );
+
+  revalidatePartnerPaths();
+  return {
+    success: true as const,
+    newTotal: totals.subtotalBeforeCoupon,
+    delta: Math.round((totals.subtotalBeforeCoupon - previousTotal) * 100) / 100,
+  };
+}
+
+/**
+ * Revizyonu REDDEDER: kaydı siler, rezervasyona DOKUNMAZ.
+ *
+ * Uygulamak için `applyPendingBagRevisionAction` kullanın. Bu ikisinin ayrı olması
+ * bilinçli: eskiden tek bir "temizle" vardı ve o, uygulamak ile reddetmek arasında
+ * ayrım yapmadan revizyonu yok ediyordu (P1-8).
+ */
 export async function clearPendingBagRevisionAction(bookingId: string) {
   const session = await auth();
   if (!session?.user?.id) {

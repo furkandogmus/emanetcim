@@ -5,6 +5,9 @@ import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 import { computeAuthoritativeCheckoutTotals } from "@/lib/booking-server-price";
 import { getPricingRules } from "@/lib/platform-settings";
 import { moneyToNumber } from "@/lib/money";
+import { readPricingSnapshot } from "@/lib/pricing-snapshot";
+import { bookingEventService } from "@/services/BookingEventService";
+import logger from "@/lib/logger";
 
 const VALID_STATUSES = ["APPROVED", "PAID"];
 
@@ -47,7 +50,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   }
 
   try {
-    const rules = await getPricingRules();
+    /**
+     * Rezervasyonun KENDİ fiyat kuralları kullanılır (anlık kopya) — o gün geçerli
+     * olan kural budur. Kopya yoksa bugünküler; hangisinin kullanıldığı denetim
+     * izine yazılıyor.
+     *
+     * Eskiden koşulsuz `getPricingRules()` çağrılıyordu, yani admin bir çarpanı
+     * değiştirdikten sonra yapılan bir valiz revizyonu, rezervasyonun tamamını
+     * yeni fiyata çeviriyordu (P0-4 ile aynı sınıf).
+     */
+    const snapshot = readPricingSnapshot(booking.pricingSnapshot);
+    const rules = snapshot ?? (await getPricingRules());
     const pricePerDay = moneyToNumber(booking.shop.pricePerDay);
 
     const totals = computeAuthoritativeCheckoutTotals(
@@ -60,6 +73,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       rules
     );
 
+    const previousTotal = moneyToNumber(booking.totalPrice);
+
     await prisma.booking.update({
       where: { id },
       data: {
@@ -71,7 +86,41 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         totalPrice: totals.subtotalBeforeCoupon,
       },
     });
-    return NextResponse.json({ success: true });
+
+    // Denetim izi: web yolundaki `applyPendingBagRevisionAction` ile aynı biçim.
+    // Valiz sayısı para demektir; kim değiştirdi ve fark ne kadardı, kayıtlı olmalı.
+    await bookingEventService
+      .record({
+        bookingId: id,
+        event: "BAGS_MODIFIED",
+        actorId: auth.user.id,
+        actorRole: "PARTNER",
+        metadata: {
+          from: {
+            S: booking.bagCountS,
+            M: booking.bagCountM,
+            XL: booking.bagCountXl,
+            total: previousTotal,
+          },
+          to: {
+            S: totals.bagCountS,
+            M: totals.bagCountM,
+            XL: totals.bagCountXl,
+            total: totals.subtotalBeforeCoupon,
+          },
+          delta:
+            Math.round((totals.subtotalBeforeCoupon - previousTotal) * 100) / 100,
+          rulesSource: snapshot ? "booking_snapshot" : "current_platform_settings",
+          source: "mobile",
+          /** Fark henüz tahsil edilmedi — bkz. P1-21. */
+          settled: false,
+        },
+      })
+      .catch((err) =>
+        logger.error({ err, bookingId: id }, "bag_revision_event_failed"),
+      );
+
+    return NextResponse.json({ success: true, newTotal: totals.subtotalBeforeCoupon });
   } catch {
     return NextResponse.json({ error: "server_error" }, { status: 500 });
   }
