@@ -2,6 +2,10 @@ import type { Shop } from "@prisma/client";
 import { Prisma } from "@prisma/client";
 import prisma from "@/lib/db";
 import { distanceKm } from "@/lib/geo";
+import {
+  PUBLIC_SHOP_FILTER,
+  PUBLIC_SHOP_SQL_CONDITION,
+} from "@/lib/public-shop-filter";
 
 type IdDistRow = { id: string; dist_km: unknown };
 
@@ -17,7 +21,7 @@ function distanceSubselect(centerLat: number, centerLng: number) {
         / 1000.0
       ) AS dist_km
     FROM "Shop" s
-    WHERE s."isActive" = true
+    WHERE ${Prisma.raw(PUBLIC_SHOP_SQL_CONDITION)}
       AND s."latitude" IS NOT NULL
       AND s."longitude" IS NOT NULL
   `;
@@ -47,7 +51,7 @@ async function fallbackActiveShopsByDistance(
   take: number | null,
 ): Promise<Array<{ shop: Shop; distanceKm: number }>> {
   const shops = await prisma.shop.findMany({
-    where: { isActive: true },
+    where: PUBLIC_SHOP_FILTER,
   });
   const withDist = shops
     .filter((s) => s.latitude != null && s.longitude != null)
@@ -114,7 +118,7 @@ export async function getActiveShopsOrderedByDistanceKm(
 
     const ids = rows.map((r) => r.id);
     const shops = await prisma.shop.findMany({
-      where: { id: { in: ids }, isActive: true },
+      where: { id: { in: ids }, ...PUBLIC_SHOP_FILTER },
     });
     return mapRowsToShops(rows, shops);
   } catch {

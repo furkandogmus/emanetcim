@@ -31,6 +31,7 @@ interface AdminPartnerEditClientProps {
     capacity: number;
     pricePerDay: number; // Decimal
     isActive: boolean;
+    isTest: boolean;
     rating: number;
     owner: {
       name: string | null;
@@ -68,7 +69,8 @@ export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientP
     longitude: shop.longitude || 28.9784,
     capacity: shop.capacity || 10,
     pricePerDay: Number(shop.pricePerDay || 50),
-    isActive: shop.isActive
+    isActive: shop.isActive,
+    isTest: shop.isTest
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -209,6 +211,30 @@ export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientP
                   />
                   <label htmlFor="isActive" className="text-sm font-black text-gray-700 uppercase tracking-tight cursor-pointer">
                     {t("active")}
+                  </label>
+                </div>
+
+                {/*
+                  Test kaydı işareti. `Aktif değil` ile karıştırılmamalı:
+                  işaretli dükkan kamuya açık arama/harita/istatistiklerden düşer ama
+                  ESNAF AKIŞLARI ÇALIŞMAYA DEVAM EDER — mevcut rezervasyonları olan
+                  bir test kaydını pasife almak esnaf tarafını bozuyordu (P1-4).
+                */}
+                <div className="md:col-span-2 flex items-start gap-4 px-4 mt-2 p-4 bg-amber-50 border border-amber-100 rounded-2xl">
+                  <input
+                    type="checkbox"
+                    id="isTest"
+                    checked={formData.isTest}
+                    onChange={(e) => setFormData({...formData, isTest: e.target.checked})}
+                    className="w-5 h-5 mt-0.5 rounded-lg border-amber-300 text-amber-600 focus:ring-amber-500"
+                  />
+                  <label htmlFor="isTest" className="cursor-pointer">
+                    <span className="block text-sm font-black text-amber-800 uppercase tracking-tight">
+                      {t("shopIsTest")}
+                    </span>
+                    <span className="block text-xs font-medium text-amber-700 mt-1">
+                      {t("shopIsTestHint")}
+                    </span>
                   </label>
                 </div>
 

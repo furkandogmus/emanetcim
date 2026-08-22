@@ -816,7 +816,9 @@
     "resetDone": "Tamam",
     "resetClose": "Kapat",
     "platformSettingsLatePickupFee": "Geç teslim alma ücreti (₺)",
-    "platformSettingsLatePickupGrace": "Gecikme toleransı (dk)"
+    "platformSettingsLatePickupGrace": "Gecikme toleransı (dk)",
+    "shopIsTest": "Test kaydı",
+    "shopIsTestHint": "İşaretli dükkan aramada, haritada ve ana sayfa istatistiklerinde görünmez. Esnaf paneli ve mevcut rezervasyonlar etkilenmez."
   },
   "Auth": {
     "loginTitle": "BagajPark'a Giriş Yap",

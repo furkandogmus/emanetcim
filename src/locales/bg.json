@@ -774,7 +774,9 @@
     "resetDone": "Done",
     "resetClose": "Close",
     "platformSettingsLatePickupFee": "Такса за късно вземане (₺)",
-    "platformSettingsLatePickupGrace": "Толеранс при закъснение (мин)"
+    "platformSettingsLatePickupGrace": "Толеранс при закъснение (мин)",
+    "shopIsTest": "Тестов запис",
+    "shopIsTestHint": "Маркиран обект не се показва в търсенето, картата и статистиките. Партньорският панел и съществуващите резервации не се засягат."
   },
   "Auth": {
     "loginTitle": "Вход в BagajPark",

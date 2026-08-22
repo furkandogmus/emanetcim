@@ -816,7 +816,9 @@
     "resetDone": "Done",
     "resetClose": "Close",
     "platformSettingsLatePickupFee": "Late pickup fee (₺)",
-    "platformSettingsLatePickupGrace": "Late pickup grace (min)"
+    "platformSettingsLatePickupGrace": "Late pickup grace (min)",
+    "shopIsTest": "Test record",
+    "shopIsTestHint": "A flagged shop is hidden from search, the map and homepage stats. The partner panel and existing bookings are unaffected."
   },
   "Auth": {
     "loginTitle": "Sign in to BagajPark",

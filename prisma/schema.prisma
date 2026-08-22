@@ -125,6 +125,14 @@ model Shop {
   isVerified       Boolean       @default(false)
   /// Ortalama yanıt süresi (dakika cinsinden)
   responseTimeMinutes Int?       @default(0)
+  /// Test/demo kaydı. Kamuya açık hiçbir listede, aramada veya istatistikte görünmez.
+  ///
+  /// NEDEN: 2026-08-22'de Türkiye'de bulunabilen üç dükkandan biri kişisel bir test
+  /// kaydıydı (`Furkan'ın Diğer Mekan`) ve gerçek partnerden ayırt edilemiyordu.
+  /// `isActive = false` yapmak da işe yaramıyordu: dükkanın 5 rezervasyonu var ve
+  /// kapatmak esnaf akışlarını bozuyor. Doğru ayrım "aktif mi" değil, "gerçek mi".
+  /// Filtre tek yerde: `src/lib/public-shop-filter.ts` (P1-4).
+  isTest           Boolean       @default(false)
   bookings         Booking[]
   reviews          Review[]
   seals            Seal[]

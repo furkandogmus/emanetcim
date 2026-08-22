@@ -528,6 +528,15 @@ export async function updateShopAction(shopId: string, data: {
   capacity?: number;
   pricePerDay?: number;
   isActive?: boolean;
+  /**
+   * Test/demo kaydı olarak işaretle. İşaretli dükkan kamuya açık arama, harita ve
+   * ana sayfa istatistiklerinden düşer (`src/lib/public-shop-filter.ts`) ama
+   * esnaf akışları çalışmaya devam eder.
+   *
+   * `isActive: false` yapmaktan FARKI budur: prod'daki test kaydının 5 rezervasyonu
+   * var ve pasife almak esnaf tarafını bozuyordu (P1-4).
+   */
+  isTest?: boolean;
 }) {
   await ensureAdmin();
 
@@ -573,9 +582,18 @@ export async function updateShopAction(shopId: string, data: {
       capacity: data.capacity,
       pricePerDay,
       isActive: data.isActive,
+      isTest: data.isTest,
     },
     include: { owner: true },
   });
+
+  if (data.isTest !== undefined) {
+    // Bir dükkanı kamuya açık yüzeylerden düşürmek/geri getirmek denetlenmeli.
+    logger.info(
+      { shopId, isTest: data.isTest, shopName: shop.name },
+      "admin_shop_test_flag_changed",
+    );
+  }
 
   try {
     revalidatePathAllLocales(`/admin/partners/${shopId}/edit`);

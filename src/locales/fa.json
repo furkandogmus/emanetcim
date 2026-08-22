@@ -774,7 +774,9 @@
     "resetDone": "Done",
     "resetClose": "Close",
     "platformSettingsLatePickupFee": "هزینه تحویل دیرهنگام (₺)",
-    "platformSettingsLatePickupGrace": "مهلت تأخیر (دقیقه)"
+    "platformSettingsLatePickupGrace": "مهلت تأخیر (دقیقه)",
+    "shopIsTest": "رکورد آزمایشی",
+    "shopIsTestHint": "محل علامت‌گذاری‌شده در جست‌وجو، نقشه و آمار صفحهٔ اصلی دیده نمی‌شود. پنل شریک و رزروهای موجود تغییری نمی‌کنند."
   },
   "Auth": {
     "loginTitle": "ورود به BagajPark",

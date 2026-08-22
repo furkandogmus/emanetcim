@@ -2,15 +2,25 @@ import 'dotenv/config';
 import { Role, BookingStatus, SealStatus } from '@prisma/client';
 import prisma from '../src/lib/db';
 import { hashPassword } from '../src/lib/auth-password';
+import { checkSeedGuard } from '../src/lib/seed-guard';
 
 /** E2E ve dokümantasyonla uyumlu sabit dükkan id (checkout URL). */
 export const SEED_GALATA_SHOP_ID = 'e2e00000-0000-4000-8000-000000000001';
 
 /**
  * Seed Script - BagajPark Test Verileri
+ *
+ * ÜRETİMDE ÇALIŞTIRILMAZ. Bu script demo hesapları BİLİNEN bir parolayla yeniden
+ * kurar (`admin@test.com` **ADMIN rolüyle** dahil) ve test verisi yazar. Kapı
+ * `src/lib/seed-guard.ts` içinde; gerekçesi de orada.
  */
 async function main() {
-  console.log('Seedleme başlatılıyor...');
+  const verdict = checkSeedGuard();
+  if (!verdict.allowed) {
+    console.error(`\n[seed] ENGELLENDİ: ${verdict.reason}\n`);
+    process.exit(1);
+  }
+  console.log(`Seedleme başlatılıyor (${verdict.reason})...`);
 
   /**
    * Ayar satırı BİLEREK boş yaratılıyor: tüm değerler şemadaki `@default`'tan
@@ -33,7 +43,10 @@ async function main() {
       ? process.env.NEXT_PUBLIC_DEMO_PASSWORD
       : 'Demo123!';
   const passwordHash = await hashPassword(demoPassword);
-  console.log(`Demo hesap şifresi (NEXT_PUBLIC_DEMO_PASSWORD veya varsayılan): ${demoPassword}`);
+  // Parola STDOUT'A BASILMAZ: deploy/CI log'larına düşer ve orada kalır.
+  // Varsayılan zaten `login` sayfasındaki demo kısayollarıyla aynı; bilinmesi
+  // gereken yerde zaten biliniyor.
+  console.log('Demo hesap şifresi: NEXT_PUBLIC_DEMO_PASSWORD (tanımsızsa varsayılan)');
 
   const admin = await prisma.user.upsert({
     where: { email: 'admin@test.com' },
@@ -168,15 +181,25 @@ async function main() {
     });
   }
 
+  /**
+   * Örnek rezervasyon `PENDING` yaratılır, `PAID` DEĞİL.
+   *
+   * Eskiden doğrudan `PAID` yazılıyordu ve hiçbir `PaymentLog` satırı üretmiyordu —
+   * prod'daki "ödenmiş ama ödeme kaydı olmayan" rezervasyonlarla tam olarak aynı
+   * sınıf (P0-0 / P1-9). Seed'in kendisi o hatanın bir kaynağıydı.
+   *
+   * Ödenmiş bir örnek gerekirse yol `PaymentService` üzerindendir; seed onu kısa
+   * devre yapmamalı.
+   */
   const existingSample = await prisma.booking.findFirst({
-    where: { guestId: guest.id, shopId: testShop.id, status: BookingStatus.PAID },
+    where: { guestId: guest.id, shopId: testShop.id },
   });
   if (!existingSample) {
     await prisma.booking.create({
       data: {
         guestId: guest.id,
         shopId: testShop.id,
-        status: BookingStatus.PAID,
+        status: BookingStatus.PENDING,
         checkInTime: new Date(),
         checkOutTime: new Date(Date.now() + 86400000),
         bagCountS: 0,

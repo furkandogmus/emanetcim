@@ -774,7 +774,9 @@
     "resetDone": "Done",
     "resetClose": "Close",
     "platformSettingsLatePickupFee": "逾期取件费 (₺)",
-    "platformSettingsLatePickupGrace": "逾期宽限时间（分钟）"
+    "platformSettingsLatePickupGrace": "逾期宽限时间（分钟）",
+    "shopIsTest": "测试记录",
+    "shopIsTestHint": "被标记的门店不会出现在搜索、地图和首页统计中。合作商户面板与现有预订不受影响。"
   },
   "Auth": {
     "loginTitle": "登录巴加公园",

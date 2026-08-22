@@ -1,5 +1,6 @@
 import { BookingStatus } from "@prisma/client";
 import prisma from "@/lib/db";
+import { PUBLIC_SHOP_FILTER } from "@/lib/public-shop-filter";
 
 export type GuestLandingStats = {
   activeLocations: number;
@@ -21,7 +22,9 @@ const empty: GuestLandingStats = {
 export async function getGuestLandingStats(): Promise<GuestLandingStats> {
   try {
     const [activeLocations, completedStays, reviewAgg] = await Promise.all([
-      prisma.shop.count({ where: { isActive: true } }),
+      // Test dükkanları sayılmaz: ana sayfadaki "aktif lokasyon" rakamı
+      // gerçek kapasiteyi göstermeli (P1-4).
+      prisma.shop.count({ where: PUBLIC_SHOP_FILTER }),
       prisma.booking.count({ where: { status: BookingStatus.CHECKED_OUT } }),
       prisma.review.aggregate({
         _count: { _all: true },

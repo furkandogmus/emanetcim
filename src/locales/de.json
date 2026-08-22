@@ -774,7 +774,9 @@
     "resetDone": "Done",
     "resetClose": "Close",
     "platformSettingsLatePickupFee": "Gebühr für verspätete Abholung (₺)",
-    "platformSettingsLatePickupGrace": "Kulanzzeit bei Verspätung (Min.)"
+    "platformSettingsLatePickupGrace": "Kulanzzeit bei Verspätung (Min.)",
+    "shopIsTest": "Testeintrag",
+    "shopIsTestHint": "Ein markierter Shop erscheint nicht in Suche, Karte und Startseiten-Statistiken. Partnerbereich und bestehende Buchungen bleiben unberührt."
   },
   "Auth": {
     "loginTitle": "Melden Sie sich bei BagajPark an",

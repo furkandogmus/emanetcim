@@ -774,7 +774,9 @@
     "resetDone": "Done",
     "resetClose": "Close",
     "platformSettingsLatePickupFee": "Tarifa por recogida tardía (₺)",
-    "platformSettingsLatePickupGrace": "Margen de tolerancia (min)"
+    "platformSettingsLatePickupGrace": "Margen de tolerancia (min)",
+    "shopIsTest": "Registro de prueba",
+    "shopIsTestHint": "Un local marcado no aparece en la búsqueda, el mapa ni las estadísticas. El panel de socios y las reservas existentes no se ven afectados."
   },
   "Auth": {
     "loginTitle": "Iniciar sesión en BagajPark",
