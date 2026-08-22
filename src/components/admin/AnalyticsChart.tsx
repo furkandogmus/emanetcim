@@ -10,7 +10,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import type { ValueType, NameType } from "recharts/types/component/DefaultTooltipContent";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { dateLocaleForUiLocale } from "@/lib/date-locale";
 
 /**
  * AnalyticsChart — son 7 gün (parent’tan gelen veri).
@@ -31,6 +32,10 @@ function CustomTooltip({
   payload?: TooltipEntry[];
   label?: string;
 }) {
+  // Hook erken dönüşten ÖNCE (React kuralları).
+  const locale = useLocale();
+  const dateLocale = dateLocaleForUiLocale(locale);
+
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 px-4 py-3 text-xs font-bold">
@@ -38,7 +43,9 @@ function CustomTooltip({
       {payload.map((entry) => (
         <p key={String(entry.dataKey)} style={{ color: entry.color }}>
           {entry.name}:{" "}
-          {typeof entry.value === "number" ? entry.value.toLocaleString() : entry.value}
+          {typeof entry.value === "number"
+            ? new Intl.NumberFormat(dateLocale).format(entry.value)
+            : entry.value}
         </p>
       ))}
     </div>

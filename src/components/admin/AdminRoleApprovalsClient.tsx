@@ -2,11 +2,12 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Link } from "@/i18n/routing";
 import { ArrowLeft, Check, X } from "lucide-react";
 import { Role } from "@prisma/client";
+import { dateLocaleForUiLocale } from "@/lib/date-locale";
 import {
   approveAdminRoleChangeAction,
   cancelAdminRoleChangeAction,
@@ -42,6 +43,8 @@ export default function AdminRoleApprovalsClient({
   currentAdminId: string;
 }) {
   const t = useTranslations("Admin");
+  const locale = useLocale();
+  const dateLocale = dateLocaleForUiLocale(locale);
   const router = useRouter();
   const [rows, setRows] = useState(initialRows);
   const [pending, startTransition] = useTransition();
@@ -144,7 +147,7 @@ export default function AdminRoleApprovalsClient({
                       {row.requestedBy.name || row.requestedBy.email || "—"}
                     </span>
                     {" · "}
-                    {new Date(row.createdAtIso).toLocaleString()}
+                    {new Date(row.createdAtIso).toLocaleString(dateLocale)}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">

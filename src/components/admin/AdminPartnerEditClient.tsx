@@ -21,6 +21,7 @@ import { motion } from "framer-motion";
 import StarRating from "@/components/common/StarRating";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 import { formatDecimal } from "@/lib/currency";
+import { dateLocaleForUiLocale } from "@/lib/date-locale";
 
 interface AdminPartnerEditClientProps {
   shop: {
@@ -56,6 +57,7 @@ interface AdminPartnerEditClientProps {
 export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientProps) {
   const t = useTranslations("Admin");
   const locale = useLocale();
+  const dateLocale = dateLocaleForUiLocale(locale);
   const tCommon = useTranslations("Common");
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -314,7 +316,7 @@ export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientP
                          &quot;{review.comment}&quot;
                        </p>
                        <p className="text-[8px] font-black text-gray-300 uppercase tracking-widest">
-                         {new Date(review.createdAt).toLocaleDateString()}
+                         {new Date(review.createdAt).toLocaleDateString(dateLocale)}
                        </p>
                     </div>
                   ))

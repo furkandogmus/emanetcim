@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { 
   Store, 
@@ -18,6 +18,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { approveShopAction, rejectShopAction } from "@/actions/admin-management";
 import { toast } from "sonner";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
+import { dateLocaleForUiLocale } from "@/lib/date-locale";
 
 interface Application {
   id: string;
@@ -38,6 +39,8 @@ interface AdminApplicationsClientProps {
 
 export default function AdminApplicationsClient({ applications: initialApps }: AdminApplicationsClientProps) {
   const t = useTranslations("Admin");
+  const locale = useLocale();
+  const dateLocale = dateLocaleForUiLocale(locale);
   const tCommon = useTranslations("Common");
   const [apps, setApps] = useState<Application[]>(initialApps);
   const [search, setSearch] = useState("");
@@ -178,7 +181,7 @@ export default function AdminApplicationsClient({ applications: initialApps }: A
                     <td className="px-8 py-6">
                       <p className="text-xs text-gray-500 font-bold flex items-center gap-2">
                         <Calendar size={14} />
-                        {new Date(app.createdAt).toLocaleDateString()}
+                        {new Date(app.createdAt).toLocaleDateString(dateLocale)}
                       </p>
                     </td>
                     <td className="px-8 py-6 text-right">

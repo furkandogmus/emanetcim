@@ -3,7 +3,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Link } from "@/i18n/routing";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { dateLocaleForUiLocale } from "@/lib/date-locale";
 import {
   ArrowLeft,
   Shield,
@@ -72,6 +73,8 @@ export default function PartnerSealsClient({
   requests,
 }: Props) {
   const t = useTranslations("Partner");
+  const locale = useLocale();
+  const dateLocale = dateLocaleForUiLocale(locale);
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [requestQty, setRequestQty] = useState("20");
@@ -268,7 +271,7 @@ export default function PartnerSealsClient({
                         )}
                       </div>
                       <p className="text-xs text-gray-400 mt-0.5">
-                        {new Date(req.createdAt).toLocaleDateString()}
+                        {new Date(req.createdAt).toLocaleDateString(dateLocale)}
                       </p>
                     </div>
                     <StatusBadge status={req.status} t={t} />

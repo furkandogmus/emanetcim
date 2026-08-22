@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { Link } from "@/i18n/routing";
 import { toast } from "sonner";
 import { MapPin, Calendar, Clock, Package, Shield, XCircle } from "lucide-react";
 import Money from "@/components/common/Money";
+import { dateLocaleForUiLocale } from "@/lib/date-locale";
 
 interface BookingInfo {
   id: string;
@@ -24,6 +25,8 @@ interface BookingInfo {
 
 export default function ManageBookingClient({ initialToken }: { initialToken: string }) {
   const t = useTranslations("Guest");
+  const locale = useLocale();
+  const dateLocale = dateLocaleForUiLocale(locale);
   const router = useRouter();
   const [booking, setBooking] = useState<BookingInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -136,7 +139,7 @@ export default function ManageBookingClient({ initialToken }: { initialToken: st
                   <Calendar size={12} /> {t("checkIn")}
                 </span>
                 <span className="text-sm font-bold text-gray-900">
-                  {checkIn.toLocaleDateString()} {String(checkIn.getHours()).padStart(2, "0")}:{String(checkIn.getMinutes()).padStart(2, "0")}
+                  {checkIn.toLocaleDateString(dateLocale)} {String(checkIn.getHours()).padStart(2, "0")}:{String(checkIn.getMinutes()).padStart(2, "0")}
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -144,7 +147,7 @@ export default function ManageBookingClient({ initialToken }: { initialToken: st
                   <Calendar size={12} /> {t("checkOut")}
                 </span>
                 <span className="text-sm font-bold text-gray-900">
-                  {checkOut.toLocaleDateString()} {String(checkOut.getHours()).padStart(2, "0")}:{String(checkOut.getMinutes()).padStart(2, "0")}
+                  {checkOut.toLocaleDateString(dateLocale)} {String(checkOut.getHours()).padStart(2, "0")}:{String(checkOut.getMinutes()).padStart(2, "0")}
                 </span>
               </div>
               <div className="flex justify-between items-center">

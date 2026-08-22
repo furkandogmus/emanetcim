@@ -6,6 +6,8 @@ import prisma from "@/lib/db";
 import { moneyToNumber } from "@/lib/money";
 import { EARNING_BOOKING_STATUSES } from "@/lib/platform-split";
 import AdminDashboardClient from "@/components/admin/AdminDashboardClient";
+import { dateLocaleForUiLocale } from "@/lib/date-locale";
+import { formatTryCurrency } from "@/lib/currency";
 
 /**
  * Ciroya sayılan durumlar. Partner panelindekiyle AYNI küme olmak zorunda —
@@ -76,6 +78,7 @@ export default async function AdminDashboard({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const dateLocale = dateLocaleForUiLocale(locale);
 
   const session = await auth();
   if (!session?.user || session.user.role !== "ADMIN") {
@@ -137,9 +140,18 @@ export default async function AdminDashboard({
     prisma.adminRoleChangeRequest.count(),
   ]);
 
+  /**
+   * Sayı biçimlendirmesi SUNUCUDA yapılıyor ve `toLocaleString()` locale ARGÜMANI
+   * ALMIYORDU — yani sonuç, isteğin diline değil **sunucunun ICU varsayılanına**
+   * bağlıydı. Farklı bir makinede `₺3.480` yerine `₺3,480` çıkar; istemci ile
+   * sunucu ayrışırsa hydration uyuşmazlığı bile üretebilir.
+   *
+   * Ayrıca `Math.round` kuruşu atıyordu: 3.480,75 TRY ciro "₺3.481" görünüyordu.
+   * Ciro ekranında yuvarlama, mutabakatta açıklanamayan fark demektir.
+   */
   const stats = {
-    totalBookings: totalBookings.toLocaleString(),
-    dailyRevenue: `₺${Math.round(totalRevenue).toLocaleString()}`,
+    totalBookings: new Intl.NumberFormat(dateLocale).format(totalBookings),
+    dailyRevenue: formatTryCurrency(totalRevenue, dateLocale),
     activePartners: activePartnersCount,
     pendingApplications: pendingApps.length,
     trends: {
