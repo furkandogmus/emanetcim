@@ -36,10 +36,11 @@ aws sts get-caller-identity --profile bagajpark --query Account --output text  #
 
 ```bash
 cd infra/aws/stack
-terraform plan  -var="allowed_ssh_cidr=$(curl -s https://ifconfig.me)/32"
-# Beklenen: "Plan: 1 to add, 1 to change, 0 to destroy." — add: app_backup_write,
-# change: security group SSH CIDR (kendi IP'niz önceki apply'dan farklıysa; beklenen)
-terraform apply -var="allowed_ssh_cidr=$(curl -s https://ifconfig.me)/32"
+# NOT: allowed_ssh_cidr'a YENİ bir IP verirseniz plan instance'ın user_data'sını da
+# değiştirir ve EC2 dur-kalk yapar (aws-test kesintisi). Bu adımda boş bırakın:
+terraform plan  -var="allowed_ssh_cidr="
+# Beklenen: "Plan: 1 to add, 0 to change, 0 to destroy." (aws_iam_role_policy.app_backup_write)
+terraform apply -var="allowed_ssh_cidr="
 ```
 
 Doğrulama (read-only, instance'ta):
