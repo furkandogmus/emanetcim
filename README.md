@@ -8,7 +8,7 @@
 | Lint | `npm run lint` (`eslint`) |
 | Typecheck | `npm run typecheck` (`tsc --noEmit`) |
 | Docker | `npm run docker:up` veya `docker compose up --build -d` — **http://localhost** (Nginx, 80). Ayrıntı: [`docs/DOCKER.md`](docs/DOCKER.md) |
-| Ortam şablonu | [`.env.example`](.env.example) |
+| Ortam şablonu | [`docker-compose.env.example`](docker-compose.env.example) (Docker) · [`.env.ci.example`](.env.ci.example) (CI) |
 
 İş kuralları (max konaklama günü, sigorta, valiz çarpanları, iptal kesintisi vb.) `PlatformSettings` tablosunda tutulur; `prisma migrate` + `prisma db seed` ile `default` satırı oluşur. Admin’den yönetim: [`docs/PLATFORM_SETTINGS.md`](docs/PLATFORM_SETTINGS.md).
 

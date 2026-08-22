@@ -472,7 +472,7 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
 - **Kanıt**: 9 saniyelik pencerede, tek misafir, tek dükkan, hepsi `PAID` 190.00 olan
   8 rezervasyon. 8 × 190 = **1.520 TRY**, kayıtlı 3.480 TRY hacminin %44'ü.
 - **Neden önemli**: gelir, dönüşüm ve doluluk rakamlarının tamamı yanlış.
-- **Kaynak henüz belirsiz**: ilk değerlendirmede bunu repo kökündeki `load-test.js`'e
+- **Kaynak henüz belirsiz**: ilk değerlendirmede bunu `scripts/load-test.k6.js`'e
   atfetmiştim; **bu atıf yanlıştı.** Dosyayı okudum: yalnızca `/tr` ve `/tr/search`
   GET'liyor, hiçbir POST/checkout/rezervasyon çağrısı yok ve varsayılan hedefi
   `localhost:3000`. Yani bu 8 rezervasyonu o script üretmemiş. Gerçek kaynak

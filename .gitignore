@@ -89,3 +89,10 @@ infra/**/.terraform/
 infra/**/*.tfstate
 infra/**/*.tfstate.backup
 infra/**/*.tfvars
+
+# Yerel calisma artiklari: ekran goruntuleri, analiz dokumleri, test raporlari
+/*.png
+/*.txt
+/report.xml
+/mobile/*.txt
+/mobile/*.png

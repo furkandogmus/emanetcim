@@ -19,7 +19,7 @@ Bu dosya, projede geliştirme, hata ayıklama (debugging) veya kod analizi yapac
 *   **Veritabanı ve ORM:** PostgreSQL, Prisma ORM
 *   **Kimlik Doğrulama:** Auth.js (NextAuth) (Web kullanıcıları) & Özel JWT + `isBanned` Önbellek Sistemi (Mobil esnaf API'si)
 *   **SMS & OTP İletişimi:** Netgsm SMS API
-*   **Stil:** Vanilla CSS
+*   **Stil:** Tailwind CSS v4 (`src/app/[locale]/globals.css` tasarım sistemi)
 
 ---
 
@@ -28,19 +28,19 @@ Bu dosya, projede geliştirme, hata ayıklama (debugging) veya kod analizi yapac
 Projeyle ilgili çalışırken bakılması gereken ana klasörler ve kritik dosyalar aşağıda listelenmiştir:
 
 ### ⚙️ İş Mantığı (Core Services) ➡️ `src/services/`
-*   [BookingService.ts](file:///Users/furkan/emanetcim/src/services/BookingService.ts): Rezervasyon durumları, check-in, check-out ve iptal lojiği.
-*   [SealService.ts](file:///Users/furkan/emanetcim/src/services/SealService.ts): Bagajların teslim alınırken bağlandığı fiziksel mühür numaralarının ve kanıt fotoğraflarının (`photoUrl`) yönetimi.
-*   [NotificationService.ts](file:///Users/furkan/emanetcim/src/services/NotificationService.ts): Kullanıcılara ve esnafa giden SMS'ler, doğrulama kodları (OTP).
-*   [PricingService.ts](file:///Users/furkan/emanetcim/src/services/PricingService.ts): Boyut katsayıları ve gün sayısına göre dinamik sepet hesaplama.
-*   [ShopService.ts](file:///Users/furkan/emanetcim/src/services/ShopService.ts): Esnaf dükkan koordinatları, harita sorguları ve kapasite durumları.
+*   [BookingService.ts](src/services/BookingService.ts): Rezervasyon durumları, check-in, check-out ve iptal lojiği.
+*   [SealService.ts](src/services/SealService.ts): Bagajların teslim alınırken bağlandığı fiziksel mühür numaralarının ve kanıt fotoğraflarının (`photoUrl`) yönetimi.
+*   [NotificationService.ts](src/services/NotificationService.ts): Kullanıcılara ve esnafa giden SMS'ler, doğrulama kodları (OTP).
+*   [PricingService.ts](src/services/PricingService.ts): Boyut katsayıları ve gün sayısına göre dinamik sepet hesaplama.
+*   [ShopService.ts](src/services/ShopService.ts): Esnaf dükkan koordinatları, harita sorguları ve kapasite durumları.
 
 ### 🌐 API ve Yönlendirmeler ➡️ `src/app/api/`
 *   `api/mobile/`: Mobil uygulamaya (özellikle partner paneline) hizmet veren JWT korumalı endpoint'ler.
 *   `api/internal/`: Vercel cron veya internal servislerin tetiklediği hatırlatıcı ve istatistik API'leri.
 
 ### 🛡️ Güvenlik ve Kimlik Doğrulama
-*   [mobile-auth.ts](file:///Users/furkan/emanetcim/src/lib/mobile-auth.ts): Mobil API istekleri için JWT doğrulama. Esnaf ban/yasaklanma kontrolleri için 30 saniyelik veritabanı önbellek mekanizması (`getMobileSession`) buradadır.
-*   [auth.config.ts](file:///Users/furkan/emanetcim/src/auth.config.ts): Web arayüzü kullanıcı giriş ve telefon numarası format normalizasyon ayarları.
+*   [mobile-auth.ts](src/lib/mobile-auth.ts): Mobil API istekleri için JWT doğrulama. Esnaf ban/yasaklanma kontrolleri için 30 saniyelik veritabanı önbellek mekanizması (`getMobileSession`) buradadır.
+*   [auth.config.ts](src/auth.config.ts): Web arayüzü kullanıcı giriş ve telefon numarası format normalizasyon ayarları.
 
 ---
 
@@ -48,11 +48,11 @@ Projeyle ilgili çalışırken bakılması gereken ana klasörler ve kritik dosy
 
 Geliştirme yaparken iş kuralları ve mimari detaylar için şu dokümanları referans alabilirsiniz:
 
-*   [uygulama_akislari_ve_use_cases.md](file:///Users/furkan/emanetcim/docs/uygulama_akislari_ve_use_cases.md): Tüm durum geçişleri, Mermaid akış diyagramları ve 28 kullanım senaryosu (Use Cases).
-*   [rakip_analizi.md](file:///Users/furkan/emanetcim/docs/rakip_analizi.md): Sektördeki Bounce, LuggageHero gibi rakiplerle özellik ve model bazlı karşılaştırma.
-*   [prd_tam_kapsam_tr.md](file:///Users/furkan/emanetcim/docs/prd_tam_kapsam_tr.md): Genel ürün gereksinim dokümanı (PRD).
-*   [PLATFORM_SETTINGS.md](file:///Users/furkan/emanetcim/docs/PLATFORM_SETTINGS.md): Sistem kurallarının yönetimi.
-*   [FINANCE_LEDGER.md](file:///Users/furkan/emanetcim/docs/FINANCE_LEDGER.md): Finansal hakediş ve mutabakat yapısı.
+*   [uygulama_akislari_ve_use_cases.md](docs/uygulama_akislari_ve_use_cases.md): Tüm durum geçişleri, Mermaid akış diyagramları ve 28 kullanım senaryosu (Use Cases).
+*   [rakip_analizi.md](docs/rakip_analizi.md): Sektördeki Bounce, LuggageHero gibi rakiplerle özellik ve model bazlı karşılaştırma.
+*   [prd_tam_kapsam_tr.md](docs/prd_tam_kapsam_tr.md): Genel ürün gereksinim dokümanı (PRD).
+*   [PLATFORM_SETTINGS.md](docs/PLATFORM_SETTINGS.md): Sistem kurallarının yönetimi.
+*   [FINANCE_LEDGER.md](docs/FINANCE_LEDGER.md): Finansal hakediş ve mutabakat yapısı.
 
 ---
 
