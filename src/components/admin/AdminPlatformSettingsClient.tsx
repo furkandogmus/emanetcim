@@ -14,6 +14,7 @@ export type PlatformSettingsFormValues = {
   cancelFixedFeeTry: number;
   latePickupFeeTry: number;
   latePickupGraceMin: number;
+  requireSealsOnCheckIn: boolean;
   defaultShopCapacity: number;
   defaultPricePerDay: number;
   bagMultiplierS: number;
@@ -84,6 +85,7 @@ export default function AdminPlatformSettingsClient({
         cancelFixedFeeTry: form.cancelFixedFeeTry,
         latePickupFeeTry: form.latePickupFeeTry,
         latePickupGraceMin: form.latePickupGraceMin,
+        requireSealsOnCheckIn: form.requireSealsOnCheckIn,
         defaultShopCapacity: form.defaultShopCapacity,
         defaultPricePerDay: form.defaultPricePerDay,
         bagMultiplierS: form.bagMultiplierS,
@@ -146,6 +148,29 @@ export default function AdminPlatformSettingsClient({
           value={form.latePickupGraceMin}
           onChange={(v) => patch({ latePickupGraceMin: Math.round(v) })}
         />
+
+        {/*
+          Mühür zorunluluğu. VARSAYILAN KAPALI ve öyle kalmalı ki lansmanda
+          mührü olmayan esnafta check-in bloke olmasın. Envanter dağıtıldıktan
+          sonra açılır (P1-23).
+        */}
+        <div className="md:col-span-2 flex items-start gap-4 p-4 bg-blue-50 border border-blue-100 rounded-2xl">
+          <input
+            type="checkbox"
+            id="requireSealsOnCheckIn"
+            checked={form.requireSealsOnCheckIn}
+            onChange={(e) => patch({ requireSealsOnCheckIn: e.target.checked })}
+            className="w-5 h-5 mt-0.5 rounded-lg border-blue-300 text-blue-600 focus:ring-blue-500"
+          />
+          <label htmlFor="requireSealsOnCheckIn" className="cursor-pointer">
+            <span className="block text-sm font-black text-blue-900 uppercase tracking-tight">
+              {t("platformSettingsRequireSeals")}
+            </span>
+            <span className="block text-xs font-medium text-blue-700 mt-1">
+              {t("platformSettingsRequireSealsHint")}
+            </span>
+          </label>
+        </div>
         <Field
           label={t("platformSettingsDefaultCapacity")}
           value={form.defaultShopCapacity}

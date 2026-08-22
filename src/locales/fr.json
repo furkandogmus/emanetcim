@@ -124,6 +124,7 @@
     "sealRowLabel": "Sac {index} · {size}",
     "markSealFaulty": "Joint défectueux",
     "sealAssignmentsTitle": "Affectations de sceaux",
+    "sealNumbersRequired": "Saisissez un numéro de scellé pour chaque bagage.",
     "checkoutSealsTitle": "Sceaux à remettre",
     "checkoutSealConfirmEach": "Confirmez que chaque sceau a été retourné au client.",
     "confirmCheckoutSeals": "Confirmer tous les sceaux et terminer la remise",
@@ -826,7 +827,9 @@
     "ipBlockFailed": "Impossible de bloquer l'IP. Vérifiez le format.",
     "resendFailed": "Impossible d'envoyer l'e-mail de vérification.",
     "campaignUpdateFailed": "Impossible de mettre à jour la campagne.",
-    "campaignCreateFailed": "Impossible de créer la campagne."
+    "campaignCreateFailed": "Impossible de créer la campagne.",
+    "platformSettingsRequireSeals": "Scellé obligatoire à l'enregistrement",
+    "platformSettingsRequireSealsHint": "Activé, les partenaires ne peuvent pas enregistrer sans saisir un numéro de scellé pour chaque bagage. N'activez PAS avant la distribution des scellés — l'enregistrement serait totalement bloqué."
   },
   "Auth": {
     "loginTitle": "Connectez-vous à BagajPark",

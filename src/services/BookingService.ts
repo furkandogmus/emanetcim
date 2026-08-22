@@ -451,6 +451,45 @@ export class BookingService implements IBookingService {
       }
 
       /**
+       * MÜHÜR KAYDI OLMADAN BAVUL KABUL EDİLMEZ — ayar açıksa (P1-23).
+       *
+       * 2026-08-22'de `BookingSeal` tablosu TAMAMEN BOŞTU, buna karşılık 3
+       * `CHECKED_IN` rezervasyon vardı: üç bavul dükkanda ama hangi mühürle
+       * mühürlendikleri hiçbir yerde kayıtlı değil. Mühür, anlaşmazlıkta
+       * zilyetliğin kanıtıdır — "bu bavul mühürlü teslim alındı, numarası şu,
+       * çıkışta aynı mühür sağlamdı". Kaydı yoksa platform hiçbir şey ispat edemez.
+       *
+       * `SEAL_REQUIRED` hata kodu tipte ZATEN VARDI ama hiç kullanılmıyordu —
+       * zorlama planlanmış, hiç uygulanmamıştı.
+       *
+       * Ayar VARSAYILAN OLARAK KAPALI: lansmanda esnafın elinde mühür olmayabilir
+       * ve açık olması check-in'i tamamen bloke eder.
+       */
+      const rules = await getPricingRules();
+      if (rules.requireSealsOnCheckIn) {
+        const bagCount = totalBagCount(
+          existing.bagCountS,
+          existing.bagCountM,
+          existing.bagCountXl,
+        );
+        const providedSeals = seals?.sealAssignments?.length ?? 0;
+        if (bagCount > 0 && providedSeals === 0) {
+          return {
+            ok: false,
+            code: 'SEAL_REQUIRED',
+            message: `Bu rezervasyonda ${bagCount} valiz var; her biri için mühür numarası girilmeli.`,
+          };
+        }
+        if (providedSeals > 0 && providedSeals !== bagCount) {
+          return {
+            ok: false,
+            code: 'SEAL_COUNT_MISMATCH',
+            message: `${bagCount} valiz için ${providedSeals} mühür girildi; sayılar eşit olmalı.`,
+          };
+        }
+      }
+
+      /**
        * ÖDEME KANITI OLMADAN BAVUL KABUL EDİLMEZ (P1-9).
        *
        * 2026-08-22'de prod'da 7 rezervasyon ödeme kaydı olmadan ilerlemişti;
@@ -533,23 +572,29 @@ export class BookingService implements IBookingService {
           throw new Error("Concurrency conflict: Rezervasyon başka bir işlem tarafından güncellendi.");
         }
 
-        // Process seal assignments if provided
-        if (seals?.sealAssignments?.length) {
-          for (const assignment of seals.sealAssignments) {
-            await tx.bookingSeal.create({
-              data: {
-                bookingId,
-                sealNumber: assignment.sealNumber,
-                bagIndex: assignment.bagIndex,
-                bagSize: assignment.bagSize,
-              },
-            });
-
-            await tx.seal.update({
-              where: { serialNumber: assignment.sealNumber },
-              data: { status: 'IN_USE' },
-            });
-          }
+        /**
+         * Mühür yazımı `SealService`'e devredilir — burada satır içi YAZILMAZ.
+         *
+         * Buradaki eski satır içi döngü doğrulamanın TAMAMINI atlıyordu:
+         * mührün bu dükkana ait olup olmadığına, `ASSIGNED` durumunda olup
+         * olmadığına ve payload içinde tekrar edip etmediğine bakmıyordu. Yani
+         * BAŞKA BİR DÜKKANIN mührü ya da HÂLİHAZIRDA `IN_USE` bir mühür ikinci
+         * bir valize takılabiliyordu — mührün kanıt değerini bitiren şey tam da
+         * budur. `faultySealNumbers` alanı ise hiç okunmuyordu; esnafın
+         * "bu mühür bozuk çıktı" beyanı sessizce düşüyordu.
+         *
+         * `applyCheckInWithinTx` bu doğrulamaların hepsini yapar ve aşağıdaki
+         * catch bloğunun ZATEN beklediği hata dizgelerini (`SEAL_INVALID:*`,
+         * `SEAL_NOT_ASSIGNED:*`, `duplicate_seal_in_assignments`, ...) fırlatır.
+         */
+        if (seals?.sealAssignments?.length || seals?.faultySealNumbers?.length) {
+          await sealService.applyCheckInWithinTx(tx, {
+            shopId: existing.shopId,
+            bookingId,
+            assignments: seals.sealAssignments ?? [],
+            faultySealNumbers: seals.faultySealNumbers ?? [],
+            sealPhotoUrl: null,
+          });
         }
       });
 

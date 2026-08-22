@@ -124,6 +124,7 @@
     "sealRowLabel": "包{index}·{size}",
     "markSealFaulty": "密封不良",
     "sealAssignmentsTitle": "印章分配",
+    "sealNumbersRequired": "请为每件行李输入封条编号。",
     "checkoutSealsTitle": "移交印章",
     "checkoutSealConfirmEach": "确认每个密封件均已退还给客户。",
     "confirmCheckoutSeals": "确认所有封条并完成移交",
@@ -826,7 +827,9 @@
     "ipBlockFailed": "无法封禁该 IP，请检查格式。",
     "resendFailed": "无法发送验证邮件。",
     "campaignUpdateFailed": "无法更新此活动。",
-    "campaignCreateFailed": "无法创建此活动。"
+    "campaignCreateFailed": "无法创建此活动。",
+    "platformSettingsRequireSeals": "寄存时必须使用封条",
+    "platformSettingsRequireSealsHint": "启用后，合作商户必须为每件行李输入封条编号才能完成寄存。封条未发放前请勿启用，否则将完全阻断寄存流程。"
   },
   "Auth": {
     "loginTitle": "登录巴加公园",

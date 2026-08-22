@@ -16,6 +16,7 @@ import { bookingEventService } from "@/services/BookingEventService";
 import { getPricingRules } from "@/lib/platform-settings";
 import { readPricingSnapshot } from "@/lib/pricing-snapshot";
 import { computeAuthoritativeCheckoutTotals } from "@/lib/booking-server-price";
+import { parseCheckInSeals } from "@/lib/seal-payload";
 import { moneyToNumber } from "@/lib/money";
 
 function revalidatePartnerPaths() {
@@ -127,9 +128,15 @@ export async function getPartnerBookingSealsAction(bookingIdRaw: string) {
 
 /**
  * checkInAction - QR JWT veya ham token / booking id ile check-in.
+ *
+ * `seals` İSTEĞE BAĞLI ama akışın kalbi: verilmezse `BookingSeal` boş kalır ve
+ * anlaşmazlıkta "bu valizi mühürlü teslim aldık" iddiası kanıtsız kalır. Platform
+ * ayarı `requireSealsOnCheckIn` açıkken `BookingService` mühürsüz check-in'i
+ * reddeder (P1-23).
  */
 export async function checkInAction(
-  qrTokenOrBookingId: string
+  qrTokenOrBookingId: string,
+  seals?: unknown,
 ) {
   const session = await auth();
 
@@ -161,9 +168,19 @@ export async function checkInAction(
     };
   }
 
+  const parsedSeals = parseCheckInSeals(seals);
+  if (!parsedSeals.ok) {
+    return {
+      success: false as const,
+      error: "Errors.invalidInput",
+      code: "SEAL_INVALID" as const,
+    };
+  }
+  const sealPayload = parsedSeals.value;
+
   // Aktör kim: dükkanda tahsilat modunda check-in aynı zamanda "parayı aldım"
   // beyanıdır ve bu denetim izine yazılır (P1-9).
-  const result = await bookingService.checkIn(bookingId, undefined, {
+  const result = await bookingService.checkIn(bookingId, sealPayload, {
     id: session.user.id,
     role: session.user.role,
   });

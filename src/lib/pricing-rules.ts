@@ -12,6 +12,11 @@ export type PricingRules = {
   latePickupFeeTry: number;
   /** Gecikme ücreti işlemeden önceki tolerans (dakika). */
   latePickupGraceMin: number;
+  /**
+   * Check-in'de mühür kaydı zorunlu mu? Varsayılan `false` — lansmanda esnafın
+   * elinde mühür olmayabilir ve `true` check-in'i tamamen bloke eder (P1-23).
+   */
+  requireSealsOnCheckIn: boolean;
   defaultShopCapacity: number;
   defaultPricePerDay: number;
   bagMultipliers: { S: number; M: number; XL: number };
@@ -44,6 +49,7 @@ export const DEFAULT_PRICING_RULES: PricingRules = {
   cancelFixedFeeTry: 0,
   latePickupFeeTry: 0,
   latePickupGraceMin: 15,
+  requireSealsOnCheckIn: false,
   defaultShopCapacity: 10,
   defaultPricePerDay: 50,
   bagMultipliers: { S: 0.8, M: 1.0, XL: 1.5 },

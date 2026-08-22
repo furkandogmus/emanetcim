@@ -478,6 +478,17 @@ model PlatformSettings {
   latePickupFeeTry     Decimal  @default(0) @db.Decimal(12, 2)
   /// Gecikme ücreti işlemeden önceki tolerans (dakika).
   latePickupGraceMin   Int      @default(15)
+  /// Check-in'de mühür kaydı ZORUNLU mu?
+  ///
+  /// VARSAYILAN `false` — bilinçli. Lansmanda esnafın elinde mühür olmayabilir ve
+  /// `true` yapmak check-in'i tamamen bloke eder. Envanter dağıtıldıktan sonra
+  /// `/admin/platform-settings` üzerinden açılır.
+  ///
+  /// NEDEN GEREKLİ: 2026-08-22'de `BookingSeal` tablosu TAMAMEN BOŞTU, buna
+  /// karşılık 3 `CHECKED_IN` rezervasyon vardı — üç bavul dükkanda ama hangi
+  /// mühürle mühürlendikleri hiçbir yerde kayıtlı değil. Mühür, anlaşmazlıkta
+  /// zilyetliğin kanıtıdır; kaydı yoksa platform hiçbir şey ispat edemez (P1-23).
+  requireSealsOnCheckIn Boolean @default(false)
   defaultShopCapacity  Int      @default(10)
   defaultPricePerDay   Decimal  @default(50) @db.Decimal(12, 2)
   bagMultiplierS       Decimal  @default(0.8) @db.Decimal(6, 4)

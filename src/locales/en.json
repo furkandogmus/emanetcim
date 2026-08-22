@@ -124,6 +124,7 @@
     "sealRowLabel": "Bag {index} · {size}",
     "markSealFaulty": "Faulty seal",
     "sealAssignmentsTitle": "Seal assignments",
+    "sealNumbersRequired": "Enter a seal number for every bag.",
     "checkoutSealsTitle": "Seals to hand over",
     "checkoutSealConfirmEach": "Confirm each seal was returned to the customer.",
     "confirmCheckoutSeals": "Confirm all seals and complete handover",
@@ -868,7 +869,9 @@
     "ipBlockFailed": "Could not block the IP. Check the format.",
     "resendFailed": "Could not send the verification email.",
     "campaignUpdateFailed": "Could not update the campaign.",
-    "campaignCreateFailed": "Could not create the campaign."
+    "campaignCreateFailed": "Could not create the campaign.",
+    "platformSettingsRequireSeals": "Require seals at check-in",
+    "platformSettingsRequireSealsHint": "When on, partners cannot check in without entering a seal number for every bag. Do NOT enable before seal inventory is distributed — it blocks check-in entirely."
   },
   "Auth": {
     "loginTitle": "Sign in to BagajPark",

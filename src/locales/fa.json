@@ -124,6 +124,7 @@
     "sealRowLabel": "چمدان {index} · {size}",
     "markSealFaulty": "پلمب معیوب",
     "sealAssignmentsTitle": "تخصیص پلمب",
+    "sealNumbersRequired": "برای هر چمدان شماره پلمب وارد کنید.",
     "checkoutSealsTitle": "پلمب‌های برای تحویل",
     "checkoutSealConfirmEach": "تأیید کنید هر پلمب به مشتری برگردانده شد.",
     "confirmCheckoutSeals": "تأیید همه پلمب‌ها و اتمام تحویل",
@@ -826,7 +827,9 @@
     "ipBlockFailed": "مسدودسازی IP انجام نشد. قالب را بررسی کنید.",
     "resendFailed": "ارسال ایمیل تأیید انجام نشد.",
     "campaignUpdateFailed": "به‌روزرسانی کمپین انجام نشد.",
-    "campaignCreateFailed": "ایجاد کمپین انجام نشد."
+    "campaignCreateFailed": "ایجاد کمپین انجام نشد.",
+    "platformSettingsRequireSeals": "پلمب هنگام تحویل الزامی است",
+    "platformSettingsRequireSealsHint": "در حالت فعال، شریک بدون وارد کردن شمارهٔ پلمب برای هر چمدان نمی‌تواند تحویل بگیرد. پیش از توزیع پلمب‌ها فعال نکنید — تحویل کاملاً مسدود می‌شود."
   },
   "Auth": {
     "loginTitle": "ورود به BagajPark",

@@ -124,6 +124,7 @@
     "sealRowLabel": "Tasche {index} · {size}",
     "markSealFaulty": "Fehlerhafte Dichtung",
     "sealAssignmentsTitle": "Siegelaufgaben",
+    "sealNumbersRequired": "Geben Sie für jedes Gepäckstück eine Siegelnummer ein.",
     "checkoutSealsTitle": "Siegel zur Übergabe",
     "checkoutSealConfirmEach": "Bestätigen Sie, dass jedes Siegel an den Kunden zurückgegeben wurde.",
     "confirmCheckoutSeals": "Bestätigen Sie alle Siegel und schließen Sie die Übergabe ab",
@@ -826,7 +827,9 @@
     "ipBlockFailed": "IP konnte nicht gesperrt werden. Format prüfen.",
     "resendFailed": "Bestätigungs-E-Mail konnte nicht gesendet werden.",
     "campaignUpdateFailed": "Kampagne konnte nicht aktualisiert werden.",
-    "campaignCreateFailed": "Kampagne konnte nicht erstellt werden."
+    "campaignCreateFailed": "Kampagne konnte nicht erstellt werden.",
+    "platformSettingsRequireSeals": "Siegel beim Check-in erforderlich",
+    "platformSettingsRequireSealsHint": "Wenn aktiv, können Partner ohne Siegelnummer für jedes Gepäckstück nicht einchecken. NICHT aktivieren, bevor die Siegel verteilt sind — Check-in wird vollständig blockiert."
   },
   "Auth": {
     "loginTitle": "Melden Sie sich bei BagajPark an",

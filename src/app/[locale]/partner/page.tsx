@@ -93,6 +93,7 @@ export default async function PartnerPage({
       initialBookingId={initialBookingId}
       initialCheckoutBookingId={initialCheckoutBookingId}
       initialPhone={ownerPhoneRow?.phone ?? ""}
+      requireSeals={pricingRules.requireSealsOnCheckIn}
     />
   );
 }

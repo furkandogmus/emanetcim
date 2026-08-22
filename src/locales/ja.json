@@ -124,6 +124,7 @@
     "sealRowLabel": "バッグ {index} · {size}",
     "markSealFaulty": "シール不良",
     "sealAssignmentsTitle": "シールの割り当て",
+    "sealNumbersRequired": "各荷物にシール番号を入力してください。",
     "checkoutSealsTitle": "渡す印鑑",
     "checkoutSealConfirmEach": "各シールが顧客に返却されたことを確認します。",
     "confirmCheckoutSeals": "すべてのシールを確認し、引き渡しを完了する",
@@ -826,7 +827,9 @@
     "ipBlockFailed": "IP をブロックできませんでした。形式を確認してください。",
     "resendFailed": "確認メールを送信できませんでした。",
     "campaignUpdateFailed": "キャンペーンを更新できませんでした。",
-    "campaignCreateFailed": "キャンペーンを作成できませんでした。"
+    "campaignCreateFailed": "キャンペーンを作成できませんでした。",
+    "platformSettingsRequireSeals": "預け入れ時に封印を必須にする",
+    "platformSettingsRequireSealsHint": "有効にすると、パートナーは各荷物の封印番号を入力しないと預かり処理ができません。封印の配布前は有効にしないでください — 預かりが完全に止まります。"
   },
   "Auth": {
     "loginTitle": "バガジパークにサインインする",

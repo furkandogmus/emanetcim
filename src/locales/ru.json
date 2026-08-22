@@ -124,6 +124,7 @@
     "sealRowLabel": "Сумка {index} · {size}",
     "markSealFaulty": "Бракованная пломба",
     "sealAssignmentsTitle": "Назначение пломб",
+    "sealNumbersRequired": "Укажите номер пломбы для каждого места багажа.",
     "checkoutSealsTitle": "Пломбы к выдаче",
     "checkoutSealConfirmEach": "Подтвердите возврат каждой пломбы гостю.",
     "confirmCheckoutSeals": "Подтвердить все пломбы и завершить выдачу",
@@ -826,7 +827,9 @@
     "ipBlockFailed": "Не удалось заблокировать IP. Проверьте формат.",
     "resendFailed": "Не удалось отправить письмо для подтверждения.",
     "campaignUpdateFailed": "Не удалось обновить кампанию.",
-    "campaignCreateFailed": "Не удалось создать кампанию."
+    "campaignCreateFailed": "Не удалось создать кампанию.",
+    "platformSettingsRequireSeals": "Пломба обязательна при приёме",
+    "platformSettingsRequireSealsHint": "Когда включено, партнёр не может принять багаж без номера пломбы для каждого места. НЕ включайте до раздачи пломб — приём будет полностью заблокирован."
   },
   "Auth": {
     "loginTitle": "Вход в BagajPark",

@@ -124,6 +124,7 @@
     "sealRowLabel": "가방 {index} · {size}",
     "markSealFaulty": "불량 실링",
     "sealAssignmentsTitle": "실링 배정",
+    "sealNumbersRequired": "각 수하물에 봉인 번호를 입력하세요.",
     "checkoutSealsTitle": "인도할 실링",
     "checkoutSealConfirmEach": "각 실링을 고객에게 반환했는지 확인하세요.",
     "confirmCheckoutSeals": "모든 실링 확인 후 인도 완료",
@@ -826,7 +827,9 @@
     "ipBlockFailed": "IP를 차단하지 못했습니다. 형식을 확인하세요.",
     "resendFailed": "인증 이메일을 보내지 못했습니다.",
     "campaignUpdateFailed": "캠페인을 업데이트하지 못했습니다.",
-    "campaignCreateFailed": "캠페인을 생성하지 못했습니다."
+    "campaignCreateFailed": "캠페인을 생성하지 못했습니다.",
+    "platformSettingsRequireSeals": "체크인 시 봉인 필수",
+    "platformSettingsRequireSealsHint": "켜면 파트너는 모든 짐에 봉인 번호를 입력해야 체크인할 수 있습니다. 봉인 재고 배포 전에는 켜지 마세요 — 체크인이 완전히 차단됩니다."
   },
   "Auth": {
     "loginTitle": "BagajPark 로그인",

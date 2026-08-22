@@ -124,6 +124,7 @@
     "sealRowLabel": "حقيبة {index} · {size}",
     "markSealFaulty": "ختم معيب",
     "sealAssignmentsTitle": "تعيين الأختام",
+    "sealNumbersRequired": "أدخل رقم ختم لكل حقيبة.",
     "checkoutSealsTitle": "تسليم الأختام",
     "checkoutSealConfirmEach": "أكّد أن كل ختم أُعيد إلى الضيف.",
     "confirmCheckoutSeals": "أكّد جميع الأختام وأكمل التسليم",
@@ -826,7 +827,9 @@
     "ipBlockFailed": "تعذر حظر عنوان IP. تحقق من الصيغة.",
     "resendFailed": "تعذر إرسال بريد التحقق.",
     "campaignUpdateFailed": "تعذر تحديث الحملة.",
-    "campaignCreateFailed": "تعذر إنشاء الحملة."
+    "campaignCreateFailed": "تعذر إنشاء الحملة.",
+    "platformSettingsRequireSeals": "الختم إلزامي عند الاستلام",
+    "platformSettingsRequireSealsHint": "عند التفعيل، لا يمكن للشريك إتمام الاستلام دون إدخال رقم ختم لكل حقيبة. لا تُفعّله قبل توزيع الأختام — سيُعطّل الاستلام تمامًا."
   },
   "Auth": {
     "loginTitle": "تسجيل الدخول إلى BagajPark",

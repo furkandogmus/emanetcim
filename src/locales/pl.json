@@ -124,6 +124,7 @@
     "sealRowLabel": "Torba {index} · {size}",
     "markSealFaulty": "Wadliwa plomba",
     "sealAssignmentsTitle": "Przypisanie plomb",
+    "sealNumbersRequired": "Podaj numer plomby dla każdej sztuki bagażu.",
     "checkoutSealsTitle": "Plomby do wydania",
     "checkoutSealConfirmEach": "Potwierdź, że każda plomba wróciła do gościa.",
     "confirmCheckoutSeals": "Potwierdź wszystkie plomby i zakończ wydanie",
@@ -826,7 +827,9 @@
     "ipBlockFailed": "Nie udało się zablokować IP. Sprawdź format.",
     "resendFailed": "Nie udało się wysłać e-maila weryfikacyjnego.",
     "campaignUpdateFailed": "Nie udało się zaktualizować kampanii.",
-    "campaignCreateFailed": "Nie udało się utworzyć kampanii."
+    "campaignCreateFailed": "Nie udało się utworzyć kampanii.",
+    "platformSettingsRequireSeals": "Plomba wymagana przy przyjęciu",
+    "platformSettingsRequireSealsHint": "Gdy włączone, partner nie może przyjąć bagażu bez podania numeru plomby dla każdej sztuki. NIE włączaj przed rozdaniem plomb — całkowicie zablokuje przyjęcia."
   },
   "Auth": {
     "loginTitle": "Zaloguj się do BagajPark",

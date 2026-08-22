@@ -3,8 +3,14 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { BookingService } from "../services/BookingService";
 import { isShopOpenAt } from "@/lib/shop-hours";
 
-const { mockGetPricingRules } = vi.hoisted(() => ({
-  mockGetPricingRules: vi.fn().mockResolvedValue({
+/**
+ * `vi.clearAllMocks()` çağrıları temizler ama `mockResolvedValue` ile verilen
+ * GERÇEKLEŞTİRİMİ temizlemez. Bir testin kurduğu kural seti, aksi belirtilmezse
+ * dosyanın geri kalanına sızar. Bu yüzden temel kural seti tek yerde durur ve
+ * her testten önce geri yüklenir.
+ */
+const { mockGetPricingRules, BASE_PRICING_RULES } = vi.hoisted(() => {
+  const BASE_PRICING_RULES = {
     maxStayDays: 30,
     maxBagsPerSlot: 50,
     insuranceFeeTry: 15,
@@ -14,8 +20,13 @@ const { mockGetPricingRules } = vi.hoisted(() => ({
     defaultPricePerDay: 50,
     bagMultipliers: { S: 0.8, M: 1.0, XL: 1.5 },
     platformHolidayDates: [],
-  }),
-}));
+    requireSealsOnCheckIn: false,
+  };
+  return {
+    BASE_PRICING_RULES,
+    mockGetPricingRules: vi.fn().mockResolvedValue(BASE_PRICING_RULES),
+  };
+});
 
 const { mockTx, mockPrisma, mockSealService, mockPaymentService } = vi.hoisted(() => {
   const mockPaymentService = {
@@ -92,6 +103,7 @@ describe("BookingService Deep Logic", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetPricingRules.mockResolvedValue(BASE_PRICING_RULES);
     vi.mocked(isShopOpenAt).mockReturnValue(true);
     mockPrisma.booking.findUnique.mockResolvedValue({ id: "b1", shop: { openingTime: "09:00", closingTime: "18:00" } } as any);
   });
@@ -221,6 +233,118 @@ describe("BookingService Deep Logic", () => {
         expect(order).toEqual(["capture", "checkin"]);
       });
     });
+
+    /**
+     * P1-23: `BookingSeal` prod'da TAMAMEN BOŞTU, buna karşılık 3 `CHECKED_IN`
+     * rezervasyon vardı. Üç bavul dükkanda, hangi mühürle mühürlendikleri
+     * hiçbir yerde yok — mührün kanıt zinciri hiç kurulmamıştı.
+     */
+    describe("mühür kaydı (P1-23)", () => {
+      const paidBooking = {
+        id: "b1",
+        status: "PAID",
+        shopId: "s1",
+        bagCountS: 1,
+        bagCountM: 1,
+        bagCountXl: 0,
+        totalPrice: 100,
+        bookingRowVersion: 0,
+        shop: { id: "s1" },
+      };
+
+      const assignments = [
+        { sealNumber: 101, bagIndex: 0, bagSize: "S" },
+        { sealNumber: 102, bagIndex: 1, bagSize: "M" },
+      ];
+
+      beforeEach(() => {
+        mockPrisma.booking.findUnique.mockResolvedValue(paidBooking as any);
+        mockGetPricingRules.mockResolvedValue({
+          ...BASE_PRICING_RULES,
+          requireSealsOnCheckIn: true,
+        });
+      });
+
+      it("ayar AÇIKKEN mühürsüz check-in reddedilir", async () => {
+        const result = await service.checkIn("b1");
+
+        expect(result.ok).toBe(false);
+        expect((result as any).code).toBe("SEAL_REQUIRED");
+        expect(mockTx.booking.updateMany).not.toHaveBeenCalled();
+      });
+
+      it("ayar AÇIKKEN valiz sayısıyla mühür sayısı eşleşmezse reddedilir", async () => {
+        const result = await service.checkIn("b1", {
+          sealAssignments: [assignments[0]] as any,
+          faultySealNumbers: [],
+        });
+
+        expect(result.ok).toBe(false);
+        expect((result as any).code).toBe("SEAL_COUNT_MISMATCH");
+        expect(mockTx.booking.updateMany).not.toHaveBeenCalled();
+      });
+
+      it("ayar KAPALIYKEN mühürsüz check-in geçer — lansman esnafı bloke edilmez", async () => {
+        mockGetPricingRules.mockResolvedValue(BASE_PRICING_RULES);
+
+        const result = await service.checkIn("b1");
+
+        expect(result.ok).toBe(true);
+      });
+
+      /**
+       * Satır içi `bookingSeal.create` döngüsü doğrulamanın tamamını atlıyordu:
+       * başka dükkanın mührü ya da zaten `IN_USE` bir mühür kabul ediliyordu.
+       * Yazım `SealService`'ten GEÇMEK ZORUNDA.
+       */
+      it("mühür yazımı SealService üzerinden yapılır — satır içi create YOK", async () => {
+        const result = await service.checkIn("b1", {
+          sealAssignments: assignments as any,
+          faultySealNumbers: [],
+        });
+
+        expect(result.ok).toBe(true);
+        expect(mockSealService.applyCheckInWithinTx).toHaveBeenCalledWith(
+          mockTx,
+          expect.objectContaining({
+            shopId: "s1",
+            bookingId: "b1",
+            assignments,
+            faultySealNumbers: [],
+          }),
+        );
+      });
+
+      it("SealService mührü reddederse check-in TAMAMEN geri alınır", async () => {
+        mockSealService.applyCheckInWithinTx.mockRejectedValueOnce(
+          new Error("SEAL_NOT_ASSIGNED:101"),
+        );
+
+        const result = await service.checkIn("b1", {
+          sealAssignments: assignments as any,
+          faultySealNumbers: [],
+        });
+
+        expect(result.ok).toBe(false);
+        expect((result as any).code).toBe("SEAL_NOT_ASSIGNED");
+      });
+
+      it("yalnızca BOZUK mühür bildirilse bile SealService çağrılır", async () => {
+        mockGetPricingRules.mockResolvedValue(BASE_PRICING_RULES);
+
+        const result = await service.checkIn("b1", {
+          sealAssignments: [],
+          faultySealNumbers: [999],
+        });
+
+        expect(result.ok).toBe(true);
+        expect(mockSealService.applyCheckInWithinTx).toHaveBeenCalledWith(
+          mockTx,
+          expect.objectContaining({ faultySealNumbers: [999] }),
+        );
+      });
+    });
+
   });
 
   describe("checkOut", () => {

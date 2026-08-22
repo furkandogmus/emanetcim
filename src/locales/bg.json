@@ -124,6 +124,7 @@
     "sealRowLabel": "Чанта {index} · {size}",
     "markSealFaulty": "Дефектна пломба",
     "sealAssignmentsTitle": "Разпределение на пломби",
+    "sealNumbersRequired": "Въведете номер на пломба за всеки багаж.",
     "checkoutSealsTitle": "Пломби за предаване",
     "checkoutSealConfirmEach": "Потвърдете, че всяка пломба е върната на клиента.",
     "confirmCheckoutSeals": "Потвърди всички пломби и завърши предаването",
@@ -826,7 +827,9 @@
     "ipBlockFailed": "IP адресът не можа да бъде блокиран. Проверете формата.",
     "resendFailed": "Имейлът за потвърждение не можа да бъде изпратен.",
     "campaignUpdateFailed": "Кампанията не можа да бъде обновена.",
-    "campaignCreateFailed": "Кампанията не можа да бъде създадена."
+    "campaignCreateFailed": "Кампанията не можа да бъде създадена.",
+    "platformSettingsRequireSeals": "Пломбата е задължителна при приемане",
+    "platformSettingsRequireSealsHint": "Когато е включено, партньорът не може да приеме багаж без номер на пломба за всяка чанта. НЕ включвайте преди пломбите да са раздадени — приемането спира напълно."
   },
   "Auth": {
     "loginTitle": "Вход в BagajPark",

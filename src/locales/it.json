@@ -124,6 +124,7 @@
     "sealRowLabel": "Borsa {index} · {size}",
     "markSealFaulty": "Sigillo difettoso",
     "sealAssignmentsTitle": "Assegnazioni di sigilli",
+    "sealNumbersRequired": "Inserisci un numero di sigillo per ogni bagaglio.",
     "checkoutSealsTitle": "Sigilli da consegnare",
     "checkoutSealConfirmEach": "Confermare che ciascun sigillo sia stato restituito al cliente.",
     "confirmCheckoutSeals": "Confermare tutti i sigilli e completare la consegna",
@@ -826,7 +827,9 @@
     "ipBlockFailed": "Impossibile bloccare l'IP. Controlla il formato.",
     "resendFailed": "Impossibile inviare l'email di verifica.",
     "campaignUpdateFailed": "Impossibile aggiornare la campagna.",
-    "campaignCreateFailed": "Impossibile creare la campagna."
+    "campaignCreateFailed": "Impossibile creare la campagna.",
+    "platformSettingsRequireSeals": "Sigillo obbligatorio al check-in",
+    "platformSettingsRequireSealsHint": "Se attivo, i partner non possono effettuare il check-in senza inserire un sigillo per ogni bagaglio. NON attivare prima della distribuzione dei sigilli: blocca completamente il check-in."
   },
   "Auth": {
     "loginTitle": "Accedi a BagajPark",

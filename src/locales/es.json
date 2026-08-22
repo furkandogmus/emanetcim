@@ -124,6 +124,7 @@
     "sealRowLabel": "Bolsa {index} · {size}",
     "markSealFaulty": "Sello defectuoso",
     "sealAssignmentsTitle": "Asignaciones de sellos",
+    "sealNumbersRequired": "Introduce un número de precinto para cada maleta.",
     "checkoutSealsTitle": "Sellos para entregar",
     "checkoutSealConfirmEach": "Confirme que cada sello fue devuelto al cliente.",
     "confirmCheckoutSeals": "Confirmar todos los sellos y completar la entrega.",
@@ -826,7 +827,9 @@
     "ipBlockFailed": "No se pudo bloquear la IP. Revisa el formato.",
     "resendFailed": "No se pudo enviar el correo de verificación.",
     "campaignUpdateFailed": "No se pudo actualizar la campaña.",
-    "campaignCreateFailed": "No se pudo crear la campaña."
+    "campaignCreateFailed": "No se pudo crear la campaña.",
+    "platformSettingsRequireSeals": "Precinto obligatorio al registrar",
+    "platformSettingsRequireSealsHint": "Si está activo, los socios no pueden registrar sin introducir un precinto por cada maleta. NO lo actives antes de repartir los precintos: bloquea el registro por completo."
   },
   "Auth": {
     "loginTitle": "Iniciar sesión en BagajPark",

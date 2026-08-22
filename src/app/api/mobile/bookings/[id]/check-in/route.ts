@@ -4,6 +4,7 @@ import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 import { bookingService } from "@/services/BookingService";
 import { notificationService } from "@/services/NotificationService";
 import prisma from "@/lib/db";
+import { parseCheckInSeals } from "@/lib/seal-payload";
 
 export async function POST(
   req: NextRequest,
@@ -17,13 +18,33 @@ export async function POST(
 
   const { id } = await params;
 
-  let sealPayload;
+  /**
+   * Mühür gövdesi DOĞRULANIR — eskiden `body` olduğu gibi servise geçiyordu.
+   *
+   * `if (body?.sealAssignments) sealPayload = body` doğruluk sınaması bile
+   * değildi: dizi olmayan bir değer (`"x"`) testi geçiyor, `.length` 1 dönüyor
+   * ve valizle mühür sayısı "eşleşmiş" sayılıyordu. `bagSize` sütunu düz
+   * `String`, `bagIndex` sınırsız — veritabanı hiçbirini engellemiyor. Web
+   * tarafıyla aynı şema kullanılır ki iki uç farklı şeyi kabul etmesin.
+   */
+  let rawSeals: unknown;
   try {
     const body = await req.json();
-    if (body?.sealAssignments) sealPayload = body;
+    if (body && typeof body === "object" && "sealAssignments" in body) {
+      rawSeals = body;
+    }
   } catch {
-    // No body or JSON parse error — just check-in without seals
+    // Gövde yok veya JSON değil — mühürsüz check-in denemesi.
   }
+
+  const parsedSeals = parseCheckInSeals(rawSeals);
+  if (!parsedSeals.ok) {
+    return NextResponse.json(
+      { error: "SEAL_INVALID", message: "Mühür bilgisi geçersiz." },
+      { status: 400 },
+    );
+  }
+  const sealPayload = parsedSeals.value;
 
   const booking = await prisma.booking.findUnique({
     where: { id },
