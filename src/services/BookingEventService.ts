@@ -13,7 +13,13 @@ export type BookingEventType =
   | "DISPUTED"
   | "REFUNDED"
   | "SEAL_ASSIGNED"
-  | "BAGS_MODIFIED";
+  | "BAGS_MODIFIED"
+  /**
+   * Çıkış saati geçtiği hâlde rezervasyon hâlâ açık. Süre aşımı taraması yazar
+   * (`OverdueBookingService`), durum DEĞİŞTİRMEZ — yalnızca iz bırakır.
+   * `metadata.tier` eşiği taşır; aynı eşik ikinci kez yazılmaz.
+   */
+  | "OVERDUE";
 
 export class BookingEventService {
   async record(params: {

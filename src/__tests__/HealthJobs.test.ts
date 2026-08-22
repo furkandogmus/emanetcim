@@ -9,14 +9,28 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
  * kırmızı yanan bir sağlık kontrolü, hiç olmayandan daha kötüdür — kimse bakmaz.
  */
 
-const { mockPrisma } = vi.hoisted(() => ({
+const { mockPrisma, mockOverdueScan } = vi.hoisted(() => ({
   mockPrisma: {
     shopTimeSlot: { aggregate: vi.fn(), count: vi.fn() },
     shop: { count: vi.fn() },
   },
+  // Varsayılan: hiç gecikme yok. Böylece slot testleri süre aşımı sinyalinden
+  // etkilenmez; gecikmeyi ölçen testler kendi değerini verir.
+  mockOverdueScan: vi.fn().mockResolvedValue({
+    scannedAt: new Date().toISOString(),
+    overdueCount: 0,
+    bagsInShopCount: 0,
+    byTier: { day_1: 0, day_3: 0, week_1: 0, month_1: 0 },
+    eventsRecorded: 0,
+    oldestOverdueHours: 0,
+    items: [],
+  }),
 }));
 
 vi.mock("@/lib/db", () => ({ default: mockPrisma }));
+vi.mock("@/services/OverdueBookingService", () => ({
+  overdueBookingService: { scan: mockOverdueScan },
+}));
 vi.mock("@/lib/logger", () => ({
   default: { warn: vi.fn(), error: vi.fn(), info: vi.fn() },
 }));
@@ -109,5 +123,77 @@ describe("GET /api/health/jobs", () => {
     setup({ horizonDays: 30, activeShops: 7 });
     const body = await (await GET()).json();
     expect(body.context.activeShopCount).toBe(7);
+  });
+});
+
+describe("GET /api/health/jobs — sure asimi mutabakati", () => {
+  beforeEach(() => {
+    // Slot tarafi saglikli: yalnizca sure asimi sinyalini olcuyoruz.
+    setup({ horizonDays: 30, activeShops: 5 });
+  });
+
+  it("gecikme yoksa UP", async () => {
+    mockOverdueScan.mockResolvedValueOnce({
+      overdueCount: 0,
+      oldestOverdueHours: 0,
+    } as any);
+
+    const res = await GET();
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.checks.overdueReconciliation.status).toBe("ok");
+  });
+
+  it("kisa gecikme alarm vermez — normal operasyon", async () => {
+    mockOverdueScan.mockResolvedValueOnce({
+      overdueCount: 5,
+      oldestOverdueHours: 30,
+    } as any);
+
+    const res = await GET();
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.checks.overdueReconciliation.status).toBe("ok");
+    // Sayi degil YAS sinyal: 5 tane bir gunluk gecikme normal.
+    expect(body.checks.overdueReconciliation.overdueCount).toBe(5);
+  });
+
+  it("72 saati asan TEK bir rezervasyon 503 verir", async () => {
+    mockOverdueScan.mockResolvedValueOnce({
+      overdueCount: 1,
+      oldestOverdueHours: 100,
+    } as any);
+
+    const res = await GET();
+    const body = await res.json();
+
+    expect(res.status).toBe(503);
+    expect(body.status).toBe("DEGRADED");
+    expect(body.checks.overdueReconciliation.status).toBe("stale");
+  });
+
+  it("2026-08-22'deki gercek durumu yakalar (Haziran'dan beri acik)", async () => {
+    // Prod'da 19 rezervasyonun 18'i cikis saatini gecmis haldeydi; en eskisi
+    // 12 Haziran'dan beri CHECKED_IN — yaklasik 1700 saat.
+    mockOverdueScan.mockResolvedValueOnce({
+      overdueCount: 18,
+      oldestOverdueHours: 1700,
+    } as any);
+
+    const res = await GET();
+    const body = await res.json();
+
+    expect(res.status).toBe(503);
+    expect(body.checks.overdueReconciliation.oldestOverdueHours).toBe(1700);
+  });
+
+  it("saglik kontrolu HICBIR SEY YAZMAZ — yan etkisiz olmali", async () => {
+    await GET();
+
+    expect(mockOverdueScan).toHaveBeenCalledWith(
+      expect.objectContaining({ recordEvents: false }),
+    );
   });
 });

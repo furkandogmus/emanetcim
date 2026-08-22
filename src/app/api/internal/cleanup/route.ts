@@ -1,28 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
+import { authorizeCron } from "@/lib/internal-api-guard";
 
-function authorize(req: NextRequest): boolean {
-  const secret = process.env.CRON_SECRET?.trim();
-  if (!secret) return false;
-  const auth = req.headers.get("authorization");
-  const bearer = auth?.startsWith("Bearer ") ? auth.slice(7).trim() : null;
-  const headerSecret = req.headers.get("x-cron-secret");
-  return bearer === secret || headerSecret === secret;
-}
+// Yerel `authorize()` kopyası kaldırıldı (2026-08-22): sır karşılaştırmasını `===`
+// ile yapıyordu, yani sabit zamanlı değildi ve dört uçtaki kopyalardan biriydi.
+// Ortak guard `crypto.timingSafeEqual` kullanıyor.
 
 /**
  * Veritabanı Hijyeni: Süresi geçmiş token ve oturumları temizleme.
  * Günde bir kez çalıştırılması önerilir.
  */
 async function runCleanup(req: NextRequest): Promise<NextResponse> {
-  if (!process.env.CRON_SECRET?.trim()) {
+  const authState = authorizeCron(req);
+  if (authState === "not_configured") {
     return NextResponse.json(
       { ok: false, error: "CRON_SECRET not configured" },
       { status: 503 }
     );
   }
-  if (!authorize(req)) {
+  if (authState === "unauthorized") {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 

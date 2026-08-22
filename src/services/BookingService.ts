@@ -426,6 +426,9 @@ export class BookingService implements IBookingService {
           },
           data: {
             status: 'CHECKED_IN',
+            // GERÇEKLEŞEN teslim alma anı. Rezerve pencere (`checkInTime`)
+            // değişmez — planlanan ile gerçekleşenin karışması P1-10'du.
+            checkedInAt: new Date(),
             bookingRowVersion: { increment: 1 },
             updatedAt: new Date(),
           },
@@ -588,7 +591,15 @@ export class BookingService implements IBookingService {
           where: { id: bookingId, bookingRowVersion: booking.bookingRowVersion },
           data: {
             status: 'CHECKED_OUT',
-            checkOutTime: now,
+            /**
+             * `checkOutTime: now` KALDIRILDI (2026-08-22, P1-10).
+             *
+             * Rezerve bitiş zamanının üzerine yazmak, gecikme ücretinin ve erken
+             * iadenin girdisini yok ediyordu: ikisi de `checkOutTime`'dan
+             * hesaplanıyor, dolayısıyla çıkıştan sonra fatura yeniden kurulamıyordu.
+             * Gerçekleşen an artık `checkedOutAt`.
+             */
+            checkedOutAt: now,
             lateFeeApplied: new Prisma.Decimal(lateFeeTry),
             pendingBagRevision: Prisma.JsonNull,
             bookingRowVersion: { increment: 1 },

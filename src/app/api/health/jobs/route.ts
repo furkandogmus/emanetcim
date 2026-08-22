@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
+import { overdueBookingService } from "@/services/OverdueBookingService";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +24,12 @@ export const dynamic = "force-dynamic";
 
 /** Üretim 30 gün ileriye yazar; 28'in altı = iş ~2 gündür çalışmıyor. */
 const SLOT_HORIZON_MIN_DAYS = 28;
+
+/**
+ * Bir rezervasyonun çıkış saatini bu kadar saat aşıp hâlâ açık kalması sağlıksızdır.
+ * 72 saat: bir hafta sonu tamamen geçmiş ve kimse dokunmamış demektir.
+ */
+const OVERDUE_CRITICAL_HOURS = 72;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 export async function GET() {
@@ -60,19 +67,56 @@ export async function GET() {
       estimatedDaysSinceLastRun: applicable ? Math.max(0, 30 - horizonDays) : null,
     };
 
-    const healthy = slotGeneration.status !== "stale";
+    /**
+     * Süre aşımı mutabakatı: çıkış saati geçtiği hâlde açık kalan rezervasyonlar.
+     *
+     * Slot üretimiyle aynı sebeple burada: 2026-08-22'de prod'da 19 rezervasyonun
+     * 18'i böyleydi ve hiç kimse fark etmemişti — altyapı sağlığı sapasağlamdı
+     * (P1-6). Sayı değil, EN ESKİSİNİN yaşı sinyaldir: 5 tane bir günlük gecikme
+     * normal operasyon, 1 tane iki aylık gecikme kayıp bavul demektir.
+     *
+     * `recordEvents: false` — sağlık kontrolü hiçbir şey yazmaz. Bir izleyicinin
+     * her dakika çağırdığı uç yan etki üretmemeli.
+     */
+    const overdue = await overdueBookingService.scan({
+      now,
+      limit: 1,
+      recordEvents: false,
+    });
 
-    if (!healthy) {
+    const overdueReconciliation = {
+      status:
+        overdue.oldestOverdueHours >= OVERDUE_CRITICAL_HOURS
+          ? ("stale" as const)
+          : ("ok" as const),
+      overdueCount: overdue.overdueCount,
+      oldestOverdueHours: overdue.oldestOverdueHours,
+      criticalAfterHours: OVERDUE_CRITICAL_HOURS,
+    };
+
+    const healthy =
+      slotGeneration.status !== "stale" && overdueReconciliation.status !== "stale";
+
+    if (slotGeneration.status === "stale") {
       logger.warn(
         { horizonDays, futureSlotCount, activeShopCount },
         "health_jobs_slot_generation_stale",
+      );
+    }
+    if (overdueReconciliation.status === "stale") {
+      logger.warn(
+        {
+          overdueCount: overdue.overdueCount,
+          oldestOverdueHours: overdue.oldestOverdueHours,
+        },
+        "health_jobs_overdue_reconciliation_stale",
       );
     }
 
     return NextResponse.json(
       {
         status: healthy ? "UP" : "DEGRADED",
-        checks: { slotGeneration },
+        checks: { slotGeneration, overdueReconciliation },
         context: { activeShopCount },
         timestamp: now.toISOString(),
       },
@@ -83,7 +127,10 @@ export async function GET() {
     return NextResponse.json(
       {
         status: "DOWN",
-        checks: { slotGeneration: { status: "unknown" } },
+        checks: {
+          slotGeneration: { status: "unknown" },
+          overdueReconciliation: { status: "unknown" },
+        },
         timestamp: new Date().toISOString(),
       },
       { status: 503 },

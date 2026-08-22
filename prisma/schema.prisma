@@ -188,8 +188,18 @@ model Booking {
   guestEmail             String?
   /// Telefon ile guest checkout
   guestPhone             String?
+  /// REZERVE edilen pencere. Yaratılışta yazılır, yaşam döngüsü boyunca DEĞİŞMEZ.
+  ///
+  /// 2026-08-22'ye kadar `checkOut()` buraya `now` yazıyordu, yani rezerve bitiş
+  /// zamanı yok oluyordu. Gecikme ücreti ve erken iade ikisi de bu alandan
+  /// hesaplandığı için, çıkıştan sonra faturanın girdileri yeniden kurulamıyordu
+  /// (P1-10). Gerçekleşen zamanlar artık `checkedInAt` / `checkedOutAt`.
   checkInTime            DateTime
   checkOutTime           DateTime
+  /// GERÇEKLEŞEN teslim alma anı. Bavul dükkana bırakıldığında yazılır.
+  checkedInAt            DateTime?
+  /// GERÇEKLEŞEN teslim etme anı. Bavul misafire verildiğinde yazılır.
+  checkedOutAt           DateTime?
   bagCountS              Int               @default(0)
   bagCountM              Int               @default(0)
   bagCountXl             Int               @default(0)
@@ -241,6 +251,8 @@ model Booking {
   @@index([status, checkInTime])
   @@index([status, checkOutTime])
   @@index([guestId, status])
+  /// Süre aşımı taraması: çıkış saati geçmiş ama hâlâ açık rezervasyonlar.
+  @@index([status, checkedOutAt])
 }
 
 /// Rezervasyon başına tek ödeme defteri satırı.
