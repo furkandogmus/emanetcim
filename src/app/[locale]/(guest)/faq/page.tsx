@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getPaymentCopyMode, paymentCopyKey } from "@/lib/payment-copy";
 import { ChevronRight, ShieldCheck } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { buildFaqPageJsonLd } from "@/lib/faq-json-ld";
@@ -28,10 +29,22 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
   setRequestLocale(locale);
   const t = await getTranslations("FAQ");
 
+  /**
+   * a2 (iptal/iade) ve a3 (ödeme yöntemi) aktif ödeme sağlayıcısına göre seçilir.
+   *
+   * Bu iki cevap, sağlayıcı entegre değilken "kartınıza iade edilir" ve
+   * "Visa/Mastercard ile online ödeme alınır, nakit kabul edilmez" diyordu —
+   * ikisi de yanlıştı ve JSON-LD ile Google'a da bu şekilde veriliyordu.
+   * Artık `PAYMENT_PROVIDER` ne diyorsa metin onu söyler.
+   */
+  const paymentCopy = getPaymentCopyMode();
   const guestFaqIds = [1, 2, 3, 4, 5, 6, 7, 8] as const;
   const faqItems = guestFaqIds.map((idx) => ({
     question: t(`q${idx}` as "q1"),
-    answer: t(`a${idx}` as "a1"),
+    answer:
+      idx === 2 || idx === 3
+        ? t(paymentCopyKey(`a${idx}`, paymentCopy) as "a1")
+        : t(`a${idx}` as "a1"),
   }));
   const faqJsonLd = buildFaqPageJsonLd(faqItems);
 
@@ -58,25 +71,25 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
               {t("guestTitle")}
             </h2>
             <div className="flex flex-col gap-4">
-              {guestFaqIds.map((idx) => {
-                const qKey = `q${idx}`;
-                const aKey = `a${idx}`;
-                return (
-                  <details key={idx} className="group bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all overflow-hidden">
-                    <summary className="flex items-center justify-between p-6 cursor-pointer list-none">
-                      <span className="font-bold text-gray-900 group-open:text-orange-600 transition-colors pr-4">
-                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                        {t(qKey as any)}
-                      </span>
-                      <ChevronRight size={18} className="text-gray-300 group-open:rotate-90 transition-transform" />
-                    </summary>
-                    <div className="px-6 pb-6 text-sm text-gray-500 font-medium leading-relaxed">
-                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                      {t(aKey as any)}
-                    </div>
-                  </details>
-                );
-              })}
+              {/*
+                Ekranda gösterilen metin ile JSON-LD'ye verilen metin AYNI kaynaktan
+                (`faqItems`) geliyor. Eskiden ikisi ayrı ayrı `t(\`a${idx}\`)` çağırıyordu;
+                ödeme metni koşullu hale gelince bu, Google'a bir cevabı, kullanıcıya
+                başkasını göstermek demek olurdu.
+              */}
+              {faqItems.map((item, i) => (
+                <details key={guestFaqIds[i]} className="group bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all overflow-hidden">
+                  <summary className="flex items-center justify-between p-6 cursor-pointer list-none">
+                    <span className="font-bold text-gray-900 group-open:text-orange-600 transition-colors pr-4">
+                      {item.question}
+                    </span>
+                    <ChevronRight size={18} className="text-gray-300 group-open:rotate-90 transition-transform" />
+                  </summary>
+                  <div className="px-6 pb-6 text-sm text-gray-500 font-medium leading-relaxed">
+                    {item.answer}
+                  </div>
+                </details>
+              ))}
             </div>
           </section>
 

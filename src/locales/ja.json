@@ -449,7 +449,10 @@
     "bookingLookupError": "予約が見つからない、または情報が一致しません。",
     "duration": "期間",
     "showFilters": "絞り込みを表示",
-    "hideFilters": "絞り込みを隠す"
+    "hideFilters": "絞り込みを隠す",
+    "payBookingDividerOnsite": "お支払いは店舗で行います",
+    "cancellationEstimateCardOnsite": "約 ₺{amount} が返金されます。まだお支払いでない場合は、請求は発生しません。",
+    "modifyRefundNoteOnsite": "お支払いは店舗で、更新後の金額にて承ります。"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -1052,7 +1055,9 @@
     "q7": "Are there bag sizes?",
     "a7": "Yes. We use S, M and XL slots with different daily rates. Choose the size that matches your luggage. Oversized or unusual items may need partner approval — ask support before booking.",
     "q8": "Do you accept cash?",
-    "a8": "No. Only online card payments (and future wallet options) are accepted. This keeps a clear payment trail and aligns with platform protection rules."
+    "a8": "No. Only online card payments (and future wallet options) are accepted. This keeps a clear payment trail and aligns with platform protection rules.",
+    "a2Onsite": "チェックイン時刻まではいつでも無料でキャンセルできます。お支払いは店舗で行うため、キャンセルされても請求は一切発生しません。隠れた条件はありません。",
+    "a3Onsite": "お荷物をお預けになる店舗でお支払いいただきます（現金またはパートナー店のカード端末）。ご予約時にカード情報をお伺いすることはありません。オンライン決済は近日中に開始予定で、サイトでお知らせします。"
   },
   "MarketingBecomePartner": {
     "metaTitle": "パートナーになる |バガジパーク",

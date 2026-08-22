@@ -449,7 +449,10 @@
     "bookingLookupError": "Prenotazione non trovata o dati non corrispondenti.",
     "duration": "Durata",
     "showFilters": "Mostra filtri",
-    "hideFilters": "Nascondi filtri"
+    "hideFilters": "Nascondi filtri",
+    "payBookingDividerOnsite": "Paghi in negozio",
+    "cancellationEstimateCardOnsite": "Verranno rimborsati circa ₺{amount}; se non hai ancora pagato, non ti verrà addebitato nulla.",
+    "modifyRefundNoteOnsite": "Il pagamento avviene in negozio e sarà calcolato sull'importo aggiornato."
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -1052,7 +1055,9 @@
     "q7": "Ci sono taglie per i bagagli?",
     "a7": "Sì. Slot S, M e XL con tariffe giornaliere diverse. Oggetti molto ingombranti possono richiedere approvazione — chiedi al supporto prima.",
     "q8": "Accettate contanti?",
-    "a8": "No. Solo pagamento con carta online (e wallet in futuro), per tracciabilità e regole di protezione della piattaforma."
+    "a8": "No. Solo pagamento con carta online (e wallet in futuro), per tracciabilità e regole di protezione della piattaforma.",
+    "a2Onsite": "Puoi annullare gratuitamente in qualsiasi momento prima del check-in. Poiché il pagamento avviene in negozio, annullando non ti viene addebitato nulla. Nessuna condizione nascosta.",
+    "a3Onsite": "Paghi nel negozio dove lasci i bagagli — in contanti o con il POS del partner. Al momento della prenotazione non vengono richiesti dati della carta. Il pagamento online arriverà presto; lo annunceremo sul sito."
   },
   "MarketingBecomePartner": {
     "metaTitle": "Diventa partner",

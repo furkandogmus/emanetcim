@@ -449,7 +449,10 @@
     "bookingLookupError": "Резервацията не е намерена или данните не съвпадат.",
     "duration": "Продължителност",
     "showFilters": "Показване на филтрите",
-    "hideFilters": "Скриване на филтрите"
+    "hideFilters": "Скриване на филтрите",
+    "payBookingDividerOnsite": "Плащате на място",
+    "cancellationEstimateCardOnsite": "Ще бъдат възстановени около ₺{amount}; ако още не сте платили, няма да ви бъде удържано нищо.",
+    "modifyRefundNoteOnsite": "Плащането се извършва на място и ще бъде начислено по актуализираната сума."
   },
   "Admin": {
     "dashboardTitle": "Админ център BagajPark",
@@ -1052,7 +1055,9 @@
     "q7": "Are there bag sizes?",
     "a7": "Yes. We use S, M and XL slots with different daily rates. Choose the size that matches your luggage. Oversized or unusual items may need partner approval — ask support before booking.",
     "q8": "Do you accept cash?",
-    "a8": "No. Only online card payments (and future wallet options) are accepted. This keeps a clear payment trail and aligns with platform protection rules."
+    "a8": "No. Only online card payments (and future wallet options) are accepted. This keeps a clear payment trail and aligns with platform protection rules.",
+    "a2Onsite": "Можете да анулирате безплатно по всяко време преди настаняването. Тъй като плащането е на място, при анулиране не ви се удържа нищо. Без скрити условия.",
+    "a3Onsite": "Плащате в обекта, където оставяте багажа си — в брой или на ПОС терминала на партньора. При резервация не се искат данни на карта. Онлайн плащането предстои скоро; ще съобщим на сайта."
   },
   "MarketingBecomePartner": {
     "metaTitle": "Стани партньор",

@@ -449,7 +449,10 @@
     "bookingLookupError": "Buchung nicht gefunden oder die Angaben stimmen nicht überein.",
     "duration": "Dauer",
     "showFilters": "Filter anzeigen",
-    "hideFilters": "Filter ausblenden"
+    "hideFilters": "Filter ausblenden",
+    "payBookingDividerOnsite": "Sie zahlen im Geschäft",
+    "cancellationEstimateCardOnsite": "Etwa ₺{amount} werden erstattet; wenn Sie noch nicht bezahlt haben, wird nichts abgebucht.",
+    "modifyRefundNoteOnsite": "Die Zahlung erfolgt im Geschäft und wird zum aktualisierten Betrag berechnet."
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -1052,7 +1055,9 @@
     "q7": "Gibt es Gepäckgrößen?",
     "a7": "Ja. Wir nutzen S-, M- und XL-Slots mit unterschiedlichen Tagespreisen. Wählen Sie die passende Größe. Sehr große oder ungewöhnliche Gegenstände können eine Shop-Freigabe erfordern — fragen Sie vor der Buchung den Support.",
     "q8": "Akzeptieren Sie Bargeld?",
-    "a8": "Nein. Nur Online-Kartenzahlung (und künftig Wallet-Optionen). So bleibt eine klare Zahlungsspur und es passt zu den Plattform-Schutzregeln."
+    "a8": "Nein. Nur Online-Kartenzahlung (und künftig Wallet-Optionen). So bleibt eine klare Zahlungsspur und es passt zu den Plattform-Schutzregeln.",
+    "a2Onsite": "Sie können bis zum Check-in jederzeit kostenlos stornieren. Da im Geschäft bezahlt wird, entstehen Ihnen bei einer Stornierung keine Kosten. Keine versteckten Bedingungen.",
+    "a3Onsite": "Sie zahlen im Geschäft, in dem Sie Ihr Gepäck abgeben — bar oder am Kartenterminal des Partners. Bei der Buchung werden keine Kartendaten abgefragt. Online-Zahlung folgt in Kürze; wir informieren Sie auf der Website."
   },
   "MarketingBecomePartner": {
     "metaTitle": "Werden Sie Partner",

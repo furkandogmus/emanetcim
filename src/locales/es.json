@@ -449,7 +449,10 @@
     "bookingLookupError": "Reserva no encontrada o los datos no coinciden.",
     "duration": "Duración",
     "showFilters": "Mostrar filtros",
-    "hideFilters": "Ocultar filtros"
+    "hideFilters": "Ocultar filtros",
+    "payBookingDividerOnsite": "Pagas en el local",
+    "cancellationEstimateCardOnsite": "Se reembolsarán unos ₺{amount}; si aún no has pagado, no se te cobrará nada.",
+    "modifyRefundNoteOnsite": "El pago se realiza en el local y se cobrará según el importe actualizado."
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -1052,7 +1055,9 @@
     "q7": "¿Hay tallas de equipaje?",
     "a7": "Sí. Usamos tallas S, M y XL con precios diarios distintos. Objetos muy grandes pueden requerir aprobación — consulta al soporte antes.",
     "q8": "¿Aceptáis efectivo?",
-    "a8": "No. Solo pago con tarjeta online (y wallets en el futuro), para trazabilidad y las reglas de protección de la plataforma."
+    "a8": "No. Solo pago con tarjeta online (y wallets en el futuro), para trazabilidad y las reglas de protección de la plataforma.",
+    "a2Onsite": "Puedes cancelar gratis en cualquier momento antes del check-in. Como el pago se realiza en el local, cancelar no te supone ningún cargo. Sin condiciones ocultas.",
+    "a3Onsite": "Pagas en el local donde dejas tu equipaje — en efectivo o con el datáfono del socio. No se piden datos de tarjeta al reservar. El pago online llegará pronto; lo anunciaremos en la web."
   },
   "MarketingBecomePartner": {
     "metaTitle": "Conviértete en socio",

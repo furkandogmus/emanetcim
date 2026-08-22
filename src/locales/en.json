@@ -489,7 +489,10 @@
     "bookingLookupError": "Booking not found or information does not match.",
     "duration": "Duration",
     "showFilters": "Show Filters",
-    "hideFilters": "Hide Filters"
+    "hideFilters": "Hide Filters",
+    "payBookingDividerOnsite": "You pay at the shop",
+    "cancellationEstimateCardOnsite": "About ₺{amount} will be refunded; if you haven't paid yet, nothing will be charged.",
+    "modifyRefundNoteOnsite": "Payment is taken at the shop and will be charged at the updated amount."
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -1130,7 +1133,9 @@
     "q7": "Are there bag sizes?",
     "a7": "Yes. We use S, M and XL slots with different daily rates. Choose the size that matches your luggage. Oversized or unusual items may need partner approval — ask support before booking.",
     "q8": "Do you accept cash?",
-    "a8": "No. Only online card payments (and future wallet options) are accepted. This keeps a clear payment trail and aligns with platform protection rules."
+    "a8": "No. Only online card payments (and future wallet options) are accepted. This keeps a clear payment trail and aligns with platform protection rules.",
+    "a2Onsite": "You can cancel free of charge any time before your check-in. Because payment is taken at the shop, cancelling means you are never charged. No hidden terms.",
+    "a3Onsite": "You pay at the shop where you drop off your luggage — in cash or on the partner's card terminal. No card details are asked for when you book. Online payment is coming soon; we'll announce it on the site."
   },
   "MarketingBecomePartner": {
     "metaTitle": "Become a partner",

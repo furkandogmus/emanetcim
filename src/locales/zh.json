@@ -449,7 +449,10 @@
     "bookingLookupError": "未找到预订或信息不匹配。",
     "duration": "时长",
     "showFilters": "显示筛选",
-    "hideFilters": "隐藏筛选"
+    "hideFilters": "隐藏筛选",
+    "payBookingDividerOnsite": "您在门店付款",
+    "cancellationEstimateCardOnsite": "将退还约 ₺{amount}；如果您尚未付款，则不会产生任何扣款。",
+    "modifyRefundNoteOnsite": "款项在门店收取，将按更新后的金额结算。"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -1052,7 +1055,9 @@
     "q7": "Are there bag sizes?",
     "a7": "Yes. We use S, M and XL slots with different daily rates. Choose the size that matches your luggage. Oversized or unusual items may need partner approval — ask support before booking.",
     "q8": "Do you accept cash?",
-    "a8": "No. Only online card payments (and future wallet options) are accepted. This keeps a clear payment trail and aligns with platform protection rules."
+    "a8": "No. Only online card payments (and future wallet options) are accepted. This keeps a clear payment trail and aligns with platform protection rules.",
+    "a2Onsite": "您可以在寄存时间之前随时免费取消。由于款项在门店收取，取消时不会向您收取任何费用。没有隐藏条款。",
+    "a3Onsite": "您在寄存行李的门店付款——现金或使用合作商户的刷卡机。预订时不会索取您的银行卡信息。在线支付即将上线，我们会在网站上公布。"
   },
   "MarketingBecomePartner": {
     "metaTitle": "成为合作伙伴 |BagajPark",

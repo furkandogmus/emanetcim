@@ -449,7 +449,10 @@
     "bookingLookupError": "لم يتم العثور على الحجز أو البيانات غير متطابقة.",
     "duration": "المدة",
     "showFilters": "إظهار عوامل التصفية",
-    "hideFilters": "إخفاء عوامل التصفية"
+    "hideFilters": "إخفاء عوامل التصفية",
+    "payBookingDividerOnsite": "تدفع في المحل",
+    "cancellationEstimateCardOnsite": "سيتم رد حوالي ₺{amount}؛ وإذا لم تكن قد دفعت بعد، فلن يتم خصم أي مبلغ.",
+    "modifyRefundNoteOnsite": "يتم الدفع في المحل وسيُحتسب على المبلغ المحدَّث."
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -1052,7 +1055,9 @@
     "q7": "Are there bag sizes?",
     "a7": "Yes. We use S, M and XL slots with different daily rates. Choose the size that matches your luggage. Oversized or unusual items may need partner approval — ask support before booking.",
     "q8": "Do you accept cash?",
-    "a8": "No. Only online card payments (and future wallet options) are accepted. This keeps a clear payment trail and aligns with platform protection rules."
+    "a8": "No. Only online card payments (and future wallet options) are accepted. This keeps a clear payment trail and aligns with platform protection rules.",
+    "a2Onsite": "يمكنك الإلغاء مجانًا في أي وقت قبل موعد الإيداع. وبما أن الدفع يتم في المحل، فلن يُخصم منك أي مبلغ عند الإلغاء. لا شروط خفية.",
+    "a3Onsite": "تدفع في المحل الذي تترك فيه أمتعتك — نقدًا أو عبر جهاز الدفع بالبطاقة لدى الشريك. لا نطلب بيانات البطاقة عند الحجز. الدفع الإلكتروني قادم قريبًا؛ وسنعلن عنه على الموقع."
   },
   "MarketingBecomePartner": {
     "metaTitle": "كن شريكًا",

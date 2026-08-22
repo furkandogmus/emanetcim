@@ -489,7 +489,10 @@
     "bookingLookupError": "Rezervasyon bulunamadı veya bilgiler eşleşmiyor.",
     "duration": "Süre",
     "showFilters": "Filtreleri Goster",
-    "hideFilters": "Filtreleri Gizle"
+    "hideFilters": "Filtreleri Gizle",
+    "payBookingDividerOnsite": "Ödemeyi dükkanda yaparsınız",
+    "cancellationEstimateCardOnsite": "Yaklaşık ₺{amount} iade edilir; ödemeyi henüz yapmadıysanız tahsilat da yapılmaz.",
+    "modifyRefundNoteOnsite": "Ödeme dükkanda alınacak; güncel tutar üzerinden tahsil edilir."
   },
   "Admin": {
     "dashboardTitle": "BagajPark Yönetim Masası",
@@ -1131,7 +1134,9 @@
     "q7": "Çanta boyutu limiti var mı?",
     "a7": "Evet. S, M ve XL slotları farklı günlük ücretlerle seçilir. Çok büyük veya özel eşya için önce destekten onay alın.",
     "q8": "Nakit ödeme alıyor musunuz?",
-    "a8": "Hayır. Yalnızca online kart (ve ileride cüzdan) ödemesi kabul edilir; kayıt ve güvence kuralları buna göre işler."
+    "a8": "Hayır. Yalnızca online kart (ve ileride cüzdan) ödemesi kabul edilir; kayıt ve güvence kuralları buna göre işler.",
+    "a2Onsite": "Check-in saatinize kadar istediğiniz an ücretsiz iptal edebilirsiniz. Ödeme dükkanda alındığı için iptal ettiğinizde sizden hiçbir tahsilat yapılmaz. Gizli koşul yok.",
+    "a3Onsite": "Ödemeyi bagajınızı bıraktığınız dükkanda yaparsınız — nakit veya esnafın kartlı ödeme cihazıyla. Rezervasyon sırasında kart bilgisi istenmez. Online ödeme yakında devreye alınacak; sitede duyururuz."
   },
   "MarketingBecomePartner": {
     "metaTitle": "Esnaf olun",

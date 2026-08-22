@@ -449,7 +449,10 @@
     "bookingLookupError": "Réservation introuvable ou informations incorrectes.",
     "duration": "Durée",
     "showFilters": "Afficher les filtres",
-    "hideFilters": "Masquer les filtres"
+    "hideFilters": "Masquer les filtres",
+    "payBookingDividerOnsite": "Vous payez sur place",
+    "cancellationEstimateCardOnsite": "Environ ₺{amount} seront remboursés ; si vous n'avez pas encore payé, rien ne sera débité.",
+    "modifyRefundNoteOnsite": "Le paiement se fait sur place et sera calculé sur le montant mis à jour."
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -1052,7 +1055,9 @@
     "q7": "Y a-t-il des tailles de bagages ?",
     "a7": "Oui. Formats S, M et XL avec tarifs journaliers différents. Les objets très volumineux peuvent nécessiter une validation — contactez le support avant réservation.",
     "q8": "Acceptez-vous les espèces ?",
-    "a8": "Non. Paiement carte en ligne uniquement (et portefeuilles numériques à venir), pour une traçabilité claire et les règles de protection de la plateforme."
+    "a8": "Non. Paiement carte en ligne uniquement (et portefeuilles numériques à venir), pour une traçabilité claire et les règles de protection de la plateforme.",
+    "a2Onsite": "Vous pouvez annuler gratuitement à tout moment avant votre check-in. Le paiement étant effectué sur place, une annulation ne vous coûte rien. Aucune condition cachée.",
+    "a3Onsite": "Vous payez dans le commerce où vous déposez vos bagages — en espèces ou sur le terminal de carte du partenaire. Aucune donnée bancaire n'est demandée à la réservation. Le paiement en ligne arrive bientôt ; nous l'annoncerons sur le site."
   },
   "MarketingBecomePartner": {
     "metaTitle": "Devenez partenaire | Parc Bagaj",

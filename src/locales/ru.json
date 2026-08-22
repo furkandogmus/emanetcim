@@ -449,7 +449,10 @@
     "bookingLookupError": "Бронирование не найдено или данные не совпадают.",
     "duration": "Длительность",
     "showFilters": "Показать фильтры",
-    "hideFilters": "Скрыть фильтры"
+    "hideFilters": "Скрыть фильтры",
+    "payBookingDividerOnsite": "Вы платите в пункте хранения",
+    "cancellationEstimateCardOnsite": "Будет возвращено около ₺{amount}; если вы ещё не платили, с вас ничего не спишут.",
+    "modifyRefundNoteOnsite": "Оплата производится в пункте хранения по обновлённой сумме."
   },
   "Admin": {
     "dashboardTitle": "Центр администрирования BagajPark",
@@ -1052,7 +1055,9 @@
     "q7": "Are there bag sizes?",
     "a7": "Yes. We use S, M and XL slots with different daily rates. Choose the size that matches your luggage. Oversized or unusual items may need partner approval — ask support before booking.",
     "q8": "Do you accept cash?",
-    "a8": "No. Only online card payments (and future wallet options) are accepted. This keeps a clear payment trail and aligns with platform protection rules."
+    "a8": "No. Only online card payments (and future wallet options) are accepted. This keeps a clear payment trail and aligns with platform protection rules.",
+    "a2Onsite": "Вы можете бесплатно отменить бронь в любой момент до заезда. Так как оплата происходит на месте, при отмене с вас ничего не списывается. Скрытых условий нет.",
+    "a3Onsite": "Вы платите в пункте, где оставляете багаж — наличными или картой через терминал партнёра. Данные карты при бронировании не запрашиваются. Онлайн-оплата появится скоро; мы сообщим об этом на сайте."
   },
   "MarketingBecomePartner": {
     "metaTitle": "Стать партнёром",

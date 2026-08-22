@@ -449,7 +449,10 @@
     "bookingLookupError": "رزرو یافت نشد یا اطلاعات مطابقت ندارد.",
     "duration": "مدت",
     "showFilters": "نمایش فیلترها",
-    "hideFilters": "پنهان کردن فیلترها"
+    "hideFilters": "پنهان کردن فیلترها",
+    "payBookingDividerOnsite": "پرداخت در محل انجام می‌شود",
+    "cancellationEstimateCardOnsite": "حدود ₺{amount} بازگردانده می‌شود؛ اگر هنوز پرداخت نکرده‌اید، مبلغی از شما کسر نمی‌شود.",
+    "modifyRefundNoteOnsite": "پرداخت در محل انجام می‌شود و بر اساس مبلغ به‌روزشده محاسبه خواهد شد."
   },
   "Admin": {
     "dashboardTitle": "مرکز مدیریت BagajPark",
@@ -1052,7 +1055,9 @@
     "q7": "Are there bag sizes?",
     "a7": "Yes. We use S, M and XL slots with different daily rates. Choose the size that matches your luggage. Oversized or unusual items may need partner approval — ask support before booking.",
     "q8": "Do you accept cash?",
-    "a8": "No. Only online card payments (and future wallet options) are accepted. This keeps a clear payment trail and aligns with platform protection rules."
+    "a8": "No. Only online card payments (and future wallet options) are accepted. This keeps a clear payment trail and aligns with platform protection rules.",
+    "a2Onsite": "می‌توانید تا پیش از زمان تحویل، هر لحظه به‌صورت رایگان لغو کنید. چون پرداخت در محل انجام می‌شود، با لغو کردن هیچ مبلغی از شما گرفته نمی‌شود. هیچ شرط پنهانی وجود ندارد.",
+    "a3Onsite": "پرداخت را در همان محلی که چمدان خود را تحویل می‌دهید انجام می‌دهید — نقدی یا با دستگاه کارت‌خوان شریک. هنگام رزرو اطلاعات کارت از شما خواسته نمی‌شود. پرداخت آنلاین به‌زودی فعال می‌شود؛ در سایت اطلاع‌رسانی می‌کنیم."
   },
   "MarketingBecomePartner": {
     "metaTitle": "شریک شوید",

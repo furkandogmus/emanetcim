@@ -449,7 +449,10 @@
     "bookingLookupError": "Nie znaleziono rezerwacji lub dane się nie zgadzają.",
     "duration": "Czas",
     "showFilters": "Pokaż filtry",
-    "hideFilters": "Ukryj filtry"
+    "hideFilters": "Ukryj filtry",
+    "payBookingDividerOnsite": "Płacisz w punkcie",
+    "cancellationEstimateCardOnsite": "Zwrócone zostanie około ₺{amount}; jeśli jeszcze nie zapłaciłeś, nic nie zostanie pobrane.",
+    "modifyRefundNoteOnsite": "Płatność następuje w punkcie i zostanie naliczona według zaktualizowanej kwoty."
   },
   "Admin": {
     "dashboardTitle": "Centrum administracyjne BagajPark",
@@ -1052,7 +1055,9 @@
     "q7": "Czy są rozmiary bagaży?",
     "a7": "Tak. Sloty S, M i XL z różnymi stawkami dziennymi. Bardzo duże przedmioty mogą wymagać akceptacji — zapytaj wsparcie przed rezerwacją.",
     "q8": "Czy przyjmujecie gotówkę?",
-    "a8": "Nie. Tylko płatność kartą online (w przyszłości portfele), dla przejrzystości i zasad ochrony platformy."
+    "a8": "Nie. Tylko płatność kartą online (w przyszłości portfele), dla przejrzystości i zasad ochrony platformy.",
+    "a2Onsite": "Możesz bezpłatnie anulować w dowolnym momencie przed odbiorem. Ponieważ płatność następuje w punkcie, anulowanie nie wiąże się z żadną opłatą. Bez ukrytych warunków.",
+    "a3Onsite": "Płacisz w punkcie, w którym zostawiasz bagaż — gotówką lub na terminalu partnera. Podczas rezerwacji nie prosimy o dane karty. Płatność online pojawi się wkrótce; poinformujemy o tym na stronie."
   },
   "MarketingBecomePartner": {
     "metaTitle": "Zostań partnerem",

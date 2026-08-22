@@ -449,7 +449,10 @@
     "bookingLookupError": "예약을 찾을 수 없거나 정보가 일치하지 않습니다.",
     "duration": "기간",
     "showFilters": "필터 보기",
-    "hideFilters": "필터 숨기기"
+    "hideFilters": "필터 숨기기",
+    "payBookingDividerOnsite": "매장에서 결제합니다",
+    "cancellationEstimateCardOnsite": "약 ₺{amount}이 환불됩니다. 아직 결제하지 않으셨다면 청구되지 않습니다.",
+    "modifyRefundNoteOnsite": "결제는 매장에서 진행되며 변경된 금액으로 청구됩니다."
   },
   "Admin": {
     "dashboardTitle": "BagajPark 관리 센터",
@@ -1052,7 +1055,9 @@
     "q7": "Are there bag sizes?",
     "a7": "Yes. We use S, M and XL slots with different daily rates. Choose the size that matches your luggage. Oversized or unusual items may need partner approval — ask support before booking.",
     "q8": "Do you accept cash?",
-    "a8": "No. Only online card payments (and future wallet options) are accepted. This keeps a clear payment trail and aligns with platform protection rules."
+    "a8": "No. Only online card payments (and future wallet options) are accepted. This keeps a clear payment trail and aligns with platform protection rules.",
+    "a2Onsite": "체크인 시간 전에는 언제든 무료로 취소할 수 있습니다. 결제가 매장에서 이루어지므로 취소해도 청구되는 금액은 없습니다. 숨은 조건은 없습니다.",
+    "a3Onsite": "짐을 맡기시는 매장에서 결제하시면 됩니다 — 현금 또는 파트너 매장의 카드 단말기. 예약 시 카드 정보를 요청하지 않습니다. 온라인 결제는 곧 도입될 예정이며 사이트에서 안내드립니다."
   },
   "MarketingBecomePartner": {
     "metaTitle": "파트너 되기",
