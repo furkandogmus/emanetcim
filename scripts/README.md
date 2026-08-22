@@ -13,13 +13,14 @@
 
 **Sağlık kontrolü:** `GET /api/health/jobs` — sır gerektirmez, sağlıksızsa **503**
 döner. Herhangi bir HTTP izleyici (UptimeRobot, Cloudflare health check, telefondan
-`curl`) bunu izleyebilir. **Üç** sinyal ölçer:
+`curl`) bunu izleyebilir. **Dört** sinyal ölçer:
 
 | Kontrol | Neyi ölçer | `stale`/`broken` ne demek |
 |---|---|---|
 | `slotGeneration` | slot ufkunun tazeliği | üretim ~2 gündür çalışmamış |
 | `overdueReconciliation` | en eski açık rezervasyonun yaşı | 72 saati aşmış açık rezervasyon var |
 | `sealIntegrity` | mühür sahiplik değişmezi | sahipsiz `ASSIGNED` veya dükkanlı `STOCK` mühür var |
+| `partnerReachability` | partnerin ulaşılabilir kanalı | ne e-postası ne telefonu olan partner var |
 
 Biri bozuksa diğerleri **maskelemez** — toplam durum `DEGRADED` olur.
 

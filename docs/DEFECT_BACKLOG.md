@@ -389,7 +389,7 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
 - **Çözüm**: *kod* — slot yolunu tek yol yap ya da legacy yol da `ReservationSlot`
   yazsın. Slot motoru geri açılmadan önce *veri backfill'i* gerekiyor.
 
-### [P1-3] 3 PARTNER hesabının 2'sinin e-postası yok; onay maili ve doğrulama sessizce atlanıyor
+### [P1-3] ⚠️ KOD DÜZELTİLDİ, VERİ AÇIK — 3 PARTNER hesabının 2'sinin e-postası yok; onay maili sessizce atlanıyordu
 - **Nerede**: `User.email` (`String? @unique`); `src/services/ShopService.ts:375-404`
 - **Kanıt** (bu sorguyu kendim de gördüm): `PARTNER 3 | email IS NULL 2`. İkisinin de
   telefonu ve parolası var, ikisi de **canlı bir dükkan sahibi**. `approveShop`'ta iki
@@ -398,8 +398,28 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   edilmemiş.
 - **Neden önemli**: partnerlerin üçte ikisine e-postayla ulaşılamıyor, ama dükkanları
   rezervasyon alıyor.
-- **Çözüm**: *kod* — partner kaydında e-posta zorunlu olsun (ya da mantık telefon
-  farkında olsun ve atlanan bildirim loglansın). *Veri* — 2 satır için e-posta topla.
+- **ÖNEMLİ DÜZELTME**: e-postasız partner bir **bozulma değil, tasarımın sonucu** —
+  esnaf girişi telefon tabanlı tasarlanmış (P1-16). Yani "partner kaydında e-posta
+  zorunlu olsun" yanlış çözümdü; telefonu olan bir esnafa ulaşılabiliyor.
+  **Asıl açık, HİÇBİR kanalı olmayan partner.**
+- **Çözüm (uygulandı, 2026-08-22)**:
+  1. `approveShop` artık atlanan her kanalı **logluyor**; hiçbir kanal yoksa bu bir
+     `ERROR` (`shop_approved_but_partner_unreachable`) — onaylanmış ama ulaşılamayan
+     partner operasyonel bir açıktır.
+  2. `PartnerReachabilityService` + `/api/health/jobs` dördüncü kontrolü. **Yalnızca
+     telefonu olan partner alarm ÜRETMEZ** (test edildi); alarm yalnızca hiçbir
+     kanalı olmayan için çalışır, ayrıca aktif dükkanı olanları ayrı sayar.
+  3. **Yan bulgu — onay e-postasının HTML'i bozuktu**: `style=”` ve `href=”`
+     (kıvrık tırnak) yazılıyordu, yani hiçbir öznitelik geçerli değildi. E-posta
+     stilsiz gidiyor ve "Partner Panelime Git" butonu hiçbir yere bağlanmıyordu.
+     Kod derleniyor, test geçiyor, tip kontrolü temiz — hata yalnızca gelen kutusunda
+     görünüyor. Bu yüzden **lint kuralına taşındı** (`no-restricted-syntax`,
+     `eslint.config.mjs`); kuralın gerçekten tetiklendiği probe dosyasıyla doğrulandı.
+- **AÇIK KALAN — veri**: 2 partnerin e-postası hâlâ yok. Telefonları olduğu için
+  `unreachable` **değiller**, yani sağlık kontrolü yeşil. Yine de e-posta toplamak
+  faydalı (fatura, sözleşme, parola sıfırlama). Acil değil.
+- **Not**: doğrulama backfill'indeki `email: { not: null }` filtresi **doğru** ve
+  değiştirilmedi — var olmayan bir e-posta doğrulanamaz.
 
 ### [P1-4] Test dükkanı canlı aramada, üstelik 5 rezervasyonu var
 - **Nerede**: `Shop` `131bcf6d-...` (`Furkan'ın Diğer Mekan`)
@@ -735,7 +755,7 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   para biçimlendirmesi (panelde her ikisi de var). Kesinleştirmek için üretim
   build'inde unminified React ile tekrar üretmek gerekiyor.
 
-### [P1-16] Esnaf, e-posta ile "ESNAF" sekmesinden giriş yapamıyor
+### [P1-16] ✅ DÜZELTİLDİ — Esnaf, e-posta ile "ESNAF" sekmesinden giriş yapamıyordu
 - **Nerede**: `src/app/[locale]/login/LoginClient.tsx:121`
 - **Kanıt** (canlıda ölçtüm):
   | Sekme | Input | Placeholder |
@@ -753,9 +773,17 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   tasarlanmış, o yüzden e-postasız 2 partner kaydı bir bozulma değil, tasarımın
   sonucu. P1-3'te asıl hata olan şey duruyor: `approveShop`'un e-posta bildirimini
   sessizce atlaması.
-- **Çözüm**: *kod* — ESNAF sekmesi de e-posta kabul etsin (girdiyi telefon/e-posta
-  olarak otomatik ayırt et), ve giriş sonrası rol bazlı yönlendirme yapılsın
-  (PARTNER → `/partner`).
+- **Çözüm (uygulandı, 2026-08-22)** — kök neden **sahte bir ayrımdı**: sekmeler iki
+  farklı kimlik sistemiymiş gibi davranıyordu, oysa arkada tek sistem var
+  (`auth.config.ts` → `authorize()` zaten e-posta VE telefonu birlikte sorguluyor).
+  Sekme, olmayan bir ayrımı taklit edip çalışan bir yolu kapatıyordu.
+  1. Her iki sekme de e-posta/telefon kabul ediyor; girdiyi ayırt etme işi zaten
+     backend'de olduğu için istemcide ek mantık gerekmedi.
+  2. **Varış noktası artık ROLDEN türüyor** (`src/lib/auth-landing.ts`).
+     Kullanıcının gitmek istediği yer (`callbackUrl`) her zaman öncelikli — korumalı
+     bir sayfadan yönlendirilmiş olabilir; yalnızca anlamlı hedef yokken rol devreye
+     giriyor. 6 test.
+  3. Sekme artık yalnızca görsel bir ipucu.
 
 ### [P1-12] ✅ MİSAFİR TARAFI KAPATILDI — 14 dilin 12'si aynı 138 çeviri anahtarını eksikti
 - **Nerede**: `src/locales/*.json`
