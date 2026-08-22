@@ -4,6 +4,7 @@ import { Link } from "@/i18n/routing";
 import { ShieldCheck, CircleCheck, Wrench, SearchCheck } from "lucide-react";
 import { alternatesForPath } from "@/lib/seo-alternates";
 import { buildFaqJsonLd } from "@/lib/faq-json-ld";
+import { resolveCommerceContext } from "@/lib/commerce-context";
 
 const copy = {
   tr: {
@@ -37,7 +38,9 @@ const copy = {
     ctaPrimary: "Emanet Noktası Bul",
     ctaSecondary: "Rezervasyonlarım",
     peaceOfMind: "Tam İç Huzuru",
-    partnerLogos: ["AXA Alliance", "SecureGate", "UrbanShield", "TravelClaim Grid"],
+    notActiveTitle: "Güvence şu anda etkin değil",
+    notActiveBody:
+      "Platform güvencesi henüz devreye alınmadı; aşağıdaki kapsam ve tutarlar devreye alındığında geçerli olacaktır. Bagajınız mühürlenir, teslim kaydı ve anlaşmazlık süreci bugün de işler.",
   },
   en: {
     title: "Storage Protection",
@@ -70,7 +73,9 @@ const copy = {
     ctaPrimary: "Find a Storage Point",
     ctaSecondary: "Book now",
     peaceOfMind: "Total peace of mind",
-    partnerLogos: ["AXA Alliance", "SecureGate", "UrbanShield", "TravelClaim Grid"],
+    notActiveTitle: "Coverage is not active yet",
+    notActiveBody:
+      "Platform protection has not been activated yet; the coverage and amounts below will apply once it is. Your bag is still sealed, the hand-over is recorded and the dispute process works today.",
   },
 } as const;
 
@@ -109,6 +114,7 @@ export default async function InsurancePage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const { insuranceEnabled } = await resolveCommerceContext();
   const c = byLocale(locale);
   const faqItems =
     locale === "tr"
@@ -160,6 +166,28 @@ export default async function InsurancePage({
       />
       <section className="mx-auto max-w-6xl px-6 pt-14 pb-16 grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
         <div>
+          {/*
+            GÜVENCE ETKİN DEĞİLKEN AÇIKÇA SÖYLENİR.
+
+            Sayfa "çanta başına 10.000 TL" vaat ediyor ama canlı
+            `insuranceFeeTry = 0` — yani karşılığı toplanmıyor ve arkasında bir
+            sigortacı yok (P1-20). Rakamları sessizce göstermek, az önce
+            kaldırılan sahte partner şeridiyle aynı sınıf bir yanlış beyandır.
+
+            Sayfa kaldırılmadı çünkü anlattığı SÜREÇ gerçek: mühürleme, teslim
+            kaydı ve anlaşmazlık akışı bugün de işliyor. Ücret belirlendiği an
+            bu uyarı kendiliğinden kaybolur.
+          */}
+          {!insuranceEnabled ? (
+            <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+              <p className="text-sm font-black text-amber-900">
+                {c.notActiveTitle}
+              </p>
+              <p className="mt-2 text-xs leading-relaxed text-amber-800">
+                {c.notActiveBody}
+              </p>
+            </div>
+          ) : null}
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
             {c.badge}
           </p>
@@ -249,13 +277,18 @@ export default async function InsurancePage({
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-6 pb-10">
-        <div className="flex flex-wrap items-center justify-center gap-5 text-xs font-black uppercase tracking-wider text-gray-400">
-          {c.partnerLogos.map((name) => (
-            <span key={name}>{name}</span>
-          ))}
-        </div>
-      </section>
+      {/*
+        SAHTE PARTNER ŞERİDİ KALDIRILDI (2026-08-22).
+
+        Burada "AXA Alliance", "SecureGate", "UrbanShield", "TravelClaim Grid"
+        isimleri bir güven şeridi olarak gösteriliyordu. **AXA gerçek ve tescilli
+        bir sigorta markasıdır** ve böyle bir ortaklık yok; diğer üçü de uydurma.
+        Halka açık ticari bir sayfada, adı geçen üçüncü taraf hakkında yanlış
+        beyandır — bir hata değil, hukuki risktir.
+
+        Gerçek bir sigorta ortaklığı kurulursa buraya SÖZLEŞMESİ OLAN taraflar
+        yazılır. Yer doldurmak için marka adı yazılmaz.
+      */}
 
       <section className="mx-auto max-w-6xl px-6 pb-16">
         <div className="rounded-[2rem] bg-gradient-to-r from-orange-700 to-orange-500 p-10 text-white text-center">
