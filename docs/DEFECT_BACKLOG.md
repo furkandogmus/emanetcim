@@ -385,13 +385,30 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   404/401'de sessizce çıkıp hiçbir şey loglamamak bu hatanın 2 ay gizli kalmasının
   tek sebebiydi.
 
-### [P1-2] `ReservationSlot` tamamen boş — 19 rezervasyona karşı 0 satır
+### [P1-2] ⚠️ AŞIRI REZERVASYON RİSKİ KAPATILDI, BACKFILL AÇIK — `ReservationSlot` tamamen boş
 - **Nerede**: `ReservationSlot`; `src/services/BookingService.ts:130,246-256`
 - **Kanıt**: `SELECT count(*) FROM "ReservationSlot"` → **0**.
 - **Neden önemli**: müsaitlik motorunun okuduğu tablo hiç dolmamış; slot üretimi geri
   açılırsa mevcut rezervasyonlar görünmez olacağı için `reserved` sıfırdan başlar.
-- **Çözüm**: *kod* — slot yolunu tek yol yap ya da legacy yol da `ReservationSlot`
-  yazsın. Slot motoru geri açılmadan önce *veri backfill'i* gerekiyor.
+- **Tanının kaçırdığı, daha ciddi kısım**: sorun yalnızca "slot motoru geri
+  açılırsa" değildi. İki yol **şu anda** iki ayrı kapasite doğruluğu kullanıyor ve
+  birbirini görmüyor:
+  - Legacy yol örtüşen `Booking` satırlarını sayar, `ReservationSlot` **yazmaz**.
+  - Slot yolu yalnızca `ReservationSlot` satırlarını sayardı.
+  `ReservationSlot` boş olduğu için **her mevcut rezervasyon slot yolu için
+  görünmezdi**, yani slot yolu fiziksel dükkan kapasitesini **aşan** rezervasyon
+  alabiliyordu. Fiziksel sonucu: dükkana sığandan fazla bavul gelir.
+- **Çözüm (uygulandı, 2026-08-22)**: slot yoluna `Shop.capacity` emniyet kontrolü
+  eklendi. `Shop.capacity` **fiziksel gerçektir** (dükkana kaç valiz sığdığı); slot
+  kapasitesi onun içindeki daha ince bir dağıtımdır — ikisi birbirinin yerine
+  geçmez. Kontrol **rezerve edilmiş** pencereyle yapılıyor, istenenle değil (slot
+  sınırlarına yuvarlanmış olabilir ve kaydedilen odur).
+  Düzeltmenin gerçekten gerekli olduğu **kanıtlandı**: emniyet kontrolü geçici
+  olarak kaldırıldığında 3 test kırılıyor, geri konulduğunda hepsi geçiyor.
+- **AÇIK KALAN**: legacy yol hâlâ `ReservationSlot` yazmıyor, yani slot bazlı
+  *ince* kapasite (saat başına) mevcut rezervasyonları görmüyor. Bu artık bir
+  **doğruluk açığı değil, hassasiyet eksikliği**: fiziksel sınır her iki yolda da
+  tutuyor. Slot motoru tam devreye alınmadan önce backfill yine de gerekli.
 
 ### [P1-3] ⚠️ KOD DÜZELTİLDİ, VERİ AÇIK — 3 PARTNER hesabının 2'sinin e-postası yok; onay maili sessizce atlanıyordu
 - **Nerede**: `User.email` (`String? @unique`); `src/services/ShopService.ts:375-404`
@@ -553,14 +570,39 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
 - **Not**: `/api/health/jobs` bu düzeltmeden sonra da **503 dönecek** — envanter
   hâlâ bozuk. Onarım koşulunca yeşile döner.
 
-### [P1-8] Bir rezervasyonun toplamı kendi valiz sayısıyla çelişiyor
+### [P1-8] ✅ DÜZELTİLDİ — Bir rezervasyonun toplamı kendi valiz sayısıyla çelişiyordu
 - **Nerede**: `Booking` `3c98aa28-...`
 - **Kanıt**: 19 toplamın 18'i `150 sabit + S·40 + M·100 + XL·150` modeline birebir
   oturuyor. İstisna: `S1 M3 XL1 → 540.00` (model 640, **100.00 eksik**). Bekleyen
   revizyon yok. Satır `CHECKED_IN` — 5 bavul teslim alınmış, 4'ü ödenmiş.
 - **Neden önemli**: fiyat yeniden hesaplanmadan bavul eklenmiş.
-- **Çözüm**: *kod* — valiz değişikliği aynı işlemde
-  `computeAuthoritativeCheckoutTotals`'ı yeniden çalıştırıp farkı tahsil etmeli.
+- **Kök neden — iki ayrı hata**:
+  1. `extraAmount` **istemciden** alınıyordu. Esnaf misafire gösterilecek ek ücreti
+     kendisi yazabiliyordu ve sunucu hiç doğrulamıyordu.
+  2. Revizyon **hiç uygulanmıyordu**. Yalnızca `clearPendingBagRevisionAction` vardı
+     ve o revizyonu **siliyordu** — `bagCount*` ve `totalPrice` hiç güncellenmiyordu.
+     Yani bavul fiziksel olarak teslim alınıyor, kayıt eski hâlinde kalıyordu. 540 /
+     640 farkı tam olarak bu.
+- **Çözüm (uygulandı, 2026-08-22)**:
+  - Fark artık `computeAuthoritativeCheckoutTotals` ile **sunucuda** hesaplanıyor;
+    `extraAmount` zod şemasından kaldırıldı, istemci gönderirse yok sayılıyor.
+  - `applyPendingBagRevisionAction` eklendi: yeni valiz sayıları + yeniden
+    hesaplanan toplam, `BookingEvent` denetim iziyle. `clear` artık **reddet**
+    anlamında ve bu ayrım kodda açık.
+  - Rezervasyonun **kendi** fiyat kuralları (anlık kopya) önceliklidir; hangi kural
+    kümesinin kullanıldığı kayda yazılıyor.
+  - Mobil uç da hizalandı: koşulsuz `getPricingRules()` çağırıyordu, yani admin bir
+    çarpanı değiştirdikten sonraki bir revizyon rezervasyonun **tamamını** yeni
+    fiyata çeviriyordu (P0-4 ile aynı sınıf).
+- **DİKKAT ÇEKİCİ**: mevcut test açıklığı **doğrulanmış davranış olarak
+  kodluyordu** — `expect(...extraAmount: 50)`, yani istemcinin uydurduğu tutarın
+  deftere yazılmasını bekliyordu. Açıklık testiyle birlikte geldiği için kimse fark
+  etmemişti.
+- **AÇIK KALAN — veri**: prod'daki `3c98aa28-...` rezervasyonu hâlâ 100 TRY eksik.
+  Düzeltme yeni revizyonları doğru yapıyor, mevcut satırı geriye dönük değiştirmiyor.
+- **Bağlantılı**: fark hesaplanıyor ama **tahsil edilmiyor** — sağlayıcı `manual`
+  olduğu sürece tahsilat dükkanda yapılır; ödeme defterine bağlanması P1-21 ile
+  aynı boşluk. Denetim izinde `settled: false` olarak işaretleniyor.
 
 ### [P1-9] Ödenmiş sayılan 7 rezervasyonun hiç ödeme kaydı yok
 - **Kanıt**: `APPROVED 5 | CHECKED_IN 2` ödeme kaydı olmadan. İkisinde bavul zaten
