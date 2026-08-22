@@ -20,6 +20,11 @@
 - **P2 — Geçmiş rozeti ham enum basıyordu** (`APPROVED`, `WAITING_APPROVAL`) → düzeltildi,
   6 dilde `statusApproved`/`statusWaitingApproval` eklendi. `ja.statusPaid` "有料" (ücretli)
   yanlış çeviriydi → 支払い済み.
+- **P1 (düzeltildi) — PWA service worker hiç üretilmiyordu.** `@ducanh2912/next-pwa` webpack
+  eklentisi; Next 16 Turbopack build'inde devreye girmiyor. Canlıdaki `sw.js` git'e commit
+  edilmiş eski bir çıktıydı: önbellek kuralları kodla eşleşmiyor, `/api/mobile/*` yanıtlarını
+  önbellekliyordu. Eklenti kaldırıldı; `public/sw.js` kendini kaldıran dosya, `PWARegister`
+  mevcut kayıtları ve önbellekleri temizliyor. Manifest/"ana ekrana ekle" duruyor.
 - **Gözlem:** dil değişiminde kısa süre iki `<h1>` DOM'da (geçiş animasyonu); arama
   sayfasında masaüstü liste + mobil alt panel aynı anda DOM'da (çift `nearby-heading`).
 

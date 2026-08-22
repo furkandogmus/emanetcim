@@ -97,6 +97,5 @@ infra/**/*.tfvars
 /mobile/*.txt
 /mobile/*.png
 
-# next-pwa build ciktisi (next build uretir; standalone imaja girer)
-/public/sw.js
+# next-pwa kaldirildi; public/sw.js artik kendini kaldiran statik dosya (takipte)
 /public/workbox-*.js

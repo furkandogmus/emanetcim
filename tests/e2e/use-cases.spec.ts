@@ -131,7 +131,8 @@ test.describe('UC: Esnaf — Partner paneli', () => {
     await page.goto('/tr/login');
     await page.getByText('Esnaf Girişi').click();
     await expect(page).toHaveURL(/\/tr\/partner/, { timeout: 20000 });
-    await page.goto('/tr/partner/settings');
+    // Sayfa akış (streaming) ile gelir; CI'da DOM yerleşmeden ölçmek çift eşleşme veriyordu.
+    await page.goto('/tr/partner/settings', { waitUntil: 'networkidle' });
     await expect(page.getByTestId('partner-settings-capacity')).toBeVisible();
     await expect(page.getByTestId('partner-settings-capacity')).toHaveValue(/^(15|25)$/);
   });
@@ -142,8 +143,9 @@ test.describe('UC: Admin — Yönetim paneli', () => {
     await page.goto('/tr/login');
     await page.getByText('Admin Girişi').click();
     await expect(page).toHaveURL(/\/tr\/admin/, { timeout: 20000 });
+    await page.waitForLoadState('networkidle');
 
-    await expect(page.locator('h1')).toContainText(/Yönetim Masası/i);
+    await expect(page.getByRole('heading', { level: 1 }).first()).toContainText(/Yönetim Masası/i);
     await expect(page.getByText(/₺[\d.,]+/).first()).toBeVisible();
     await expect(page.locator('text=Canlı Analiz').first()).toBeVisible();
   });

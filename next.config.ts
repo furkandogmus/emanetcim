@@ -1,6 +1,5 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from 'next-intl/plugin';
-import withPWA from "@ducanh2912/next-pwa";
 
 const withNextIntl = createNextIntlPlugin();
 
@@ -46,69 +45,16 @@ const securityHeaders = [
   },
 ];
 
-const nextConfig: NextConfig = withPWA({
-  dest: "public",
-  disable: process.env.NODE_ENV === "development",
-  register: true,
-  workboxOptions: {
-    skipWaiting: true,
-    runtimeCaching: [
-    {
-      urlPattern: /\/_next\/static\/(?:chunks|css|media)\/.*/i,
-      handler: "CacheFirst",
-      options: {
-        cacheName: "next-static",
-        expiration: { maxEntries: 64, maxAgeSeconds: 86400 * 30 },
-      },
-    },
-    {
-      urlPattern: /\/_next\/static\/.*/i,
-      handler: "NetworkFirst",
-      options: {
-        cacheName: "next-other-static",
-        expiration: { maxEntries: 32, maxAgeSeconds: 86400 },
-      },
-    },
-    {
-      urlPattern: /\/icons\/.*/i,
-      handler: "CacheFirst",
-      options: {
-        cacheName: "app-icons",
-        expiration: { maxEntries: 16, maxAgeSeconds: 86400 * 60 },
-      },
-    },
-    /**
-     * API yanitlari ASLA onbelleklenmez.
-     *
-     * Eskiden `/api/mobile/*` icin `StaleWhileRevalidate` vardi: Bearer
-     * token'li, kullaniciya OZEL yanitlar (rezervasyonlar, kazanc, profil)
-     * tarayici SW onbellegine yaziliyordu -- paylasilan cihazda bir
-     * kullanicinin verisi digerine gosterilebilirdi. Flutter SW kullanmadigi
-     * icin kuralin faydasi da yoktu; yalnizca risk (2026-08-22 incelemesi).
-     */
-    {
-      urlPattern: /\/api\/.*/i,
-      handler: "NetworkOnly",
-    },
-    {
-      urlPattern: /(?:\.(?:html?|json))$|^\/(?:(?:tr|en)\/)?(?:search|bookings|shop\/)/i,
-      handler: "NetworkFirst",
-      options: {
-        cacheName: "pages",
-        expiration: { maxEntries: 32, maxAgeSeconds: 86400 },
-      },
-    },
-    {
-      urlPattern: /.*/i,
-      handler: "NetworkFirst",
-      options: {
-        cacheName: "others",
-        expiration: { maxEntries: 32, maxAgeSeconds: 3600 },
-      },
-    },
-    ],
-  },
-})({
+/**
+ * PWA service worker KALDIRILDI (2026-08-23).
+ *
+ * `@ducanh2912/next-pwa` bir webpack eklentisi; Next 16 build'i Turbopack ile
+ * calistigi icin hic devreye girmiyordu. Uretimde servis edilen `sw.js`, git'e
+ * commit edilmis ESKİ bir dosyaydi — onbellek kurallari kodla eslesmiyordu ve
+ * yetkili mobil API yanitlarini onbellekliyordu. Manifest + "ana ekrana ekle"
+ * duruyor; `public/sw.js` artik kendini kaldiran minimal bir dosya.
+ */
+const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
   reactCompiler: true,
@@ -135,6 +81,6 @@ const nextConfig: NextConfig = withPWA({
       },
     ];
   },
-});
+};
 
 export default withNextIntl(nextConfig);

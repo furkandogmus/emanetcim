@@ -29,6 +29,7 @@ test.describe('BagajPark Production Hardening & PWA E2E Tests', () => {
     expect(manifest.short_name).toBe('BagajPark');
   });
 
+  // sw.js artık kendini kaldıran statik dosya; erişilebilir olmalı ki eski SW'ler temizlensin.
   test('PWA: sw.js (Service Worker) should be accessible', async ({ page }) => {
     const response = await page.goto('/sw.js');
     expect(response?.ok()).toBeTruthy();
