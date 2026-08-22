@@ -604,12 +604,28 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   olduğu sürece tahsilat dükkanda yapılır; ödeme defterine bağlanması P1-21 ile
   aynı boşluk. Denetim izinde `settled: false` olarak işaretleniyor.
 
-### [P1-9] Ödenmiş sayılan 7 rezervasyonun hiç ödeme kaydı yok
+### [P1-9] ✅ DÜZELTİLDİ — Ödenmiş sayılan 7 rezervasyonun hiç ödeme kaydı yoktu
 - **Kanıt**: `APPROVED 5 | CHECKED_IN 2` ödeme kaydı olmadan. İkisinde bavul zaten
   dükkana teslim edilmiş. (Kayıt olan yerlerde tutarlar tutarlı: uyuşmazlık 0.)
 - **Neden önemli**: ödeme kanıtı olmayan rezervasyonlara karşı bavul kabul edilmiş.
-- **Çözüm**: *kod* — check-in `SUCCESS` ödeme kaydı (veya açık "kapıda ödeme"
-  işareti) şartı koşmalı.
+- **Çözüm (uygulandı, 2026-08-22)** — kural **sağlayıcıya bağlı**, sabit değil:
+  - Sağlayıcı **online tahsil ediyorsa** (`capabilities.capturesOnline`), para
+    check-in'den **önce** alınmış olmalı; alınmamışsa check-in `PAYMENT_REQUIRED`
+    ile reddedilir. Misafir ödemeden bavul bırakamaz.
+  - Sağlayıcı online tahsil **etmiyorsa** (lansmandaki `manual` = dükkanda
+    tahsilat), check-in **tam olarak paranın el değiştirdiği andır.** O yüzden
+    tahsilat orada yapılıyor: niyet yoksa açılıyor, sonra yakalanıyor. Esnafın
+    "aldım" beyanı deftere ve denetim izine yazılıyor — bu yüzden çağıran `actor`
+    gönderiyor (web + mobil).
+  - Tahsilat kaydedilemezse **bavul kabul edilmiyor.**
+- **SIRA ÖNEMLİ**: önce tahsilat, sonra check-in. Aradaki bir çökme `PAID` + defter
+  satırı bırakır ki bu **geçerli** bir durumdur (ödendi, henüz teslim alınmadı).
+  Ters sıra `CHECKED_IN` ama ödemesiz bırakırdı — düzeltmeye çalıştığımız hatanın
+  ta kendisi. Sırayı doğrulayan ayrı bir test var.
+- Bundan sonra ödeme kaydı olmayan bir `CHECKED_IN` **üretilemez**.
+- **AÇIK KALAN — veri**: mevcut 7 rezervasyon geriye dönük düzeltilmedi. İkisinde
+  bavul zaten teslim edilmiş; bunların gerçekten ödenip ödenmediği saha bilgisidir
+  ve uydurulamaz.
 
 ### [P1-10] ✅ DÜZELTİLDİ — `checkOut` rezerve pencereyi eziyordu; şemada gerçek giriş/çıkış zamanı yoktu
 - **Nerede**: `src/services/BookingService.ts:574-588`
@@ -829,14 +845,16 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   bloke eder), envanter dağıtıldıktan sonra `true`. Bayrak olmadan bunu doğrudan
   zorunlu yapmak lansmanı riske atar.
 
-### [P2-8] Admin gelen kutusundaki toplu işlem metinleri i18n'i baypas ediyor
+### [P2-8] ✅ DÜZELTİLDİ — Admin gelen kutusundaki toplu işlem metinleri i18n'i baypas ediyordu
 - **Nerede**: `src/components/admin/AdminMessagesClient.tsx:26-29`
 - **Kanıt**: metinler bileşen içinde sabit bir tr/en üçlü operatörüyle yazılmış
   (`bulkCopy = locale === "tr" ? {...} : {...}`), locale dosyalarından gelmiyor.
   Sonuç: diğer 12 dilde toplu işlem arayüzü İngilizce çıkıyor.
-- **Çözüm**: *kod* — anahtarları `Admin` namespace'ine taşı.
+- **Çözüm (uygulandı, 2026-08-22)**: anahtarlar `Admin` namespace'ine taşındı ve
+  14 dile çeviri eklendi. Kullanılmayan `useLocale` kaldırıldı (lint uyarısı
+  16 → 15). Çeviri borcu mandalı tuttu: misafir dışı en kötü eksik 106'da sabit.
 
-### [P2-9] Gelen kutusu satır aksiyonlarının erişilebilir adı yalnızca `title`
+### [P2-9] ✅ DÜZELTİLDİ — Gelen kutusu satır aksiyonlarının erişilebilir adı yalnızca `title`'dı
 - **Nerede**: `src/components/admin/AdminMessagesClient.tsx:282-297`
 - **Kanıt**: satır butonları `title={t("messagesMarkAsRead")}` / `title={t("messagesDelete")}`
   kullanıyor, `aria-label` yok. `title` çoğu tarayıcıda erişilebilir ad olarak kabul
@@ -845,7 +863,7 @@ Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denet
   > Not: ilk DOM taramamda bunları "124 etiketsiz buton" olarak saymıştım; yalnızca
   > `innerText`/`aria-label` kontrol ettiğim için yanlış çıktı. Kodu okuyunca durum
   > düzeltildi ve şiddet P2'ye indirildi.
-- **Çözüm**: *kod* — `aria-label` ekle (`title` kalabilir).
+- **Çözüm (uygulandı, 2026-08-22)**: `title` korundu, `aria-label` eklendi.
 
 ### [P2-11] Olmayan sayfalar HTTP 200 dönüyor (soft-404) — ama `noindex` zararı engelliyor
 - **Nerede**: uygulama genelinde; `src/app/[locale]/shop/[shopId]/page.tsx:57`
