@@ -485,7 +485,8 @@
     "searchOnlyAvailableHint": "Wyświetlane są tylko punkty dostępne w wybranych godzinach nadania/odbioru.",
     "slotsNoneForDate": "Brak dostępnych terminów w tym dniu",
     "slotsAvailableTitle": "Dostępne terminy",
-    "slotsBagsSelected": "Wybrano {count} bagaży"
+    "slotsBagsSelected": "Wybrano {count} bagaży",
+    "timesInShopTimezone": "Godziny podane w czasie lokalnym punktu (Stambuł)."
   },
   "Admin": {
     "dashboardTitle": "Centrum administracyjne BagajPark",

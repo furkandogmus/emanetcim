@@ -70,3 +70,75 @@ export function defaultStayWindowLocalValues(): {
     checkOut: toDatetimeLocalValueInTimeZone(next),
   };
 }
+
+/**
+ * Bir saat diliminin belirli bir AN'daki UTC ofsetini milisaniye olarak verir.
+ *
+ * `Intl` bize doğrudan ofset vermiyor; o an için bölgenin duvar saatini üretip
+ * UTC ile farkını alıyoruz. DST geçişleri dahil doğru sonuç verir.
+ */
+function zoneOffsetMs(instant: Date, timeZone: string): number {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).formatToParts(instant);
+  const get = (t: Intl.DateTimeFormatPartTypes) =>
+    Number(parts.find((p) => p.type === t)?.value ?? "0");
+  const hour = get("hour") === 24 ? 0 : get("hour");
+  const asUtc = Date.UTC(
+    get("year"),
+    get("month") - 1,
+    get("day"),
+    hour,
+    get("minute"),
+    get("second"),
+  );
+  return asUtc - instant.getTime();
+}
+
+/**
+ * `datetime-local` DUVAR SAATİNİ belirli bir saat diliminde yorumlar.
+ *
+ * NEDEN GEREKLİ (2026-08-22'de ölçüldü): `parseDatetimeLocal` değeri `new Date()`
+ * ile ayrıştırıyor, yani **cihazın** saat diliminde yorumluyor. Ama ana sayfa
+ * varsayılanları `toDatetimeLocalValueInTimeZone` ile **İstanbul** saatinde
+ * üretiliyor ve dükkan açık/kapalı hesabı da İstanbul referanslı. İkisi ayrışıyordu:
+ *
+ *   Ana sayfada gösterilen (İstanbul): 2026-08-22T14:00
+ *   Cihaz Berlin ise sunucuya giden  : 12:00Z  (yani İstanbul 15:00)
+ *   Olması gereken                   : 11:00Z  (İstanbul 14:00)
+ *
+ * Berlin'de 1 saat, New York'ta 7 saat kayma. Hedef kitle turist olduğu için asıl
+ * senaryo şu: Alman bir misafir **seyahatten önce evinden** rezervasyon yapıyor,
+ * "14:00" seçiyor, dükkana 15:00 bildiriliyor ve misafir 14:00'te geliyor.
+ *
+ * Bu ürün için doğru model: rezervasyon saatleri DÜKKANIN yerel saatidir, misafirin
+ * cihazınınki değil. Misafir Berlin'de otururken bile İstanbul'daki bir dükkana
+ * "saat 14:00'te bırakacağım" der.
+ */
+export function parseDatetimeLocalInTimeZone(
+  value: string,
+  timeZone: string = PLATFORM_TIMEZONE,
+): Date | null {
+  const trimmed = value?.trim();
+  if (!trimmed) return null;
+
+  // Duvar saatini önce UTC'ymiş gibi al, sonra bölgenin ofseti kadar geri sar.
+  const asIfUtc = new Date(`${trimmed}${trimmed.length === 16 ? ":00" : ""}Z`);
+  if (Number.isNaN(asIfUtc.getTime())) return null;
+
+  const firstGuess = new Date(asIfUtc.getTime() - zoneOffsetMs(asIfUtc, timeZone));
+  /**
+   * DST sınırında bir düzeltme daha: ofset, tahmin edilen ANDA farklı olabilir.
+   * (Örn. saat ileri alınan gece 03:00 seçildiğinde.)
+   */
+  const refinedOffset = zoneOffsetMs(firstGuess, timeZone);
+  const refined = new Date(asIfUtc.getTime() - refinedOffset);
+  return Number.isNaN(refined.getTime()) ? null : refined;
+}

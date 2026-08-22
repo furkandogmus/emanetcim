@@ -525,7 +525,8 @@
     "searchOnlyAvailableHint": "Only locations available for your selected drop-off/pick-up times are listed.",
     "slotsNoneForDate": "No available slots for this date",
     "slotsAvailableTitle": "Available Time Slots",
-    "slotsBagsSelected": "{count} bags selected"
+    "slotsBagsSelected": "{count} bags selected",
+    "timesInShopTimezone": "Times are in the shop's local time (Istanbul)."
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

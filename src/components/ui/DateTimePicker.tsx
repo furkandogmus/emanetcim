@@ -30,10 +30,7 @@ import {
   type Locale as DateFnsLocale,
 } from "date-fns/locale";
 import { Calendar, Clock } from "lucide-react";
-import {
-  parseDatetimeLocal,
-  toDatetimeLocalValue,
-} from "@/lib/datetime-local";
+import { parseDatetimeLocal } from "@/lib/datetime-local";
 import BottomSheet from "@/components/ui/BottomSheet";
 import "react-day-picker/style.css";
 
@@ -93,6 +90,24 @@ function getIsMobileSnapshot() {
 
 function getIsMobileServerSnapshot() {
   return false;
+}
+
+/**
+ * `datetime-local` duvar saati metnini bileşenlerden doğrudan kurar.
+ *
+ * `Date` üzerinden geçmez — böylece cihazın saat dilimi ve DST geçişleri sonucu
+ * etkileyemez. Bu alan bir DUVAR SAATİDİR; hangi saat diliminde yorumlanacağına
+ * çağıran karar verir (`parseDatetimeLocalInTimeZone`).
+ */
+function wallTimeString(
+  year: number,
+  month: number,
+  day: number,
+  hour: number,
+  minute: number,
+): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${year}-${pad(month)}-${pad(day)}T${pad(hour)}:${pad(minute)}`;
 }
 
 export default function DateTimePicker({
@@ -192,15 +207,18 @@ export default function DateTimePicker({
   const applyDate = useCallback(
     (date: Date | undefined) => {
       if (!date) return;
+      // Tarih seçilen günden, saat mevcut değerden; ikisi de `Date` kurulmadan
+      // birleştiriliyor (bkz. `applyTime` yorumu).
       const base = parsed ?? date;
-      const merged = new Date(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate(),
-        base.getHours(),
-        base.getMinutes(),
+      onChange(
+        wallTimeString(
+          date.getFullYear(),
+          date.getMonth() + 1,
+          date.getDate(),
+          base.getHours(),
+          base.getMinutes(),
+        ),
       );
-      onChange(toDatetimeLocalValue(merged));
     },
     [onChange, parsed],
   );
@@ -209,14 +227,24 @@ export default function DateTimePicker({
     (time: string) => {
       const [hh, mm] = time.split(":").map((n) => parseInt(n, 10));
       const base = parsed ?? new Date();
-      const merged = new Date(
-        base.getFullYear(),
-        base.getMonth(),
-        base.getDate(),
-        hh,
-        mm,
+      /**
+       * SAAT, `Date` üzerinden GEÇMEDEN yazılıyor.
+       *
+       * Eskiden `new Date(y, m, d, hh, mm)` kuruluyor ve tekrar metne
+       * çevriliyordu. Bu, cihazın saat diliminde DST sınırına denk gelen bir
+       * saatte sessizce KAYIYOR: örneğin Berlin'de 29 Mart 02:30 "yok"tur ve
+       * JS onu 03:30 yapar — kullanıcı 02:30 seçer, alan 03:30 yazar.
+       * Duvar saatini doğrudan yazmak bu sınıfı tamamen ortadan kaldırıyor.
+       */
+      onChange(
+        wallTimeString(
+          base.getFullYear(),
+          base.getMonth() + 1,
+          base.getDate(),
+          hh,
+          mm,
+        ),
       );
-      onChange(toDatetimeLocalValue(merged));
     },
     [onChange, parsed],
   );

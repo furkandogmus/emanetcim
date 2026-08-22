@@ -485,7 +485,8 @@
     "searchOnlyAvailableHint": "فقط نقاطی نمایش داده می‌شوند که در ساعات تحویل/دریافت انتخابی شما در دسترس‌اند.",
     "slotsNoneForDate": "برای این تاریخ بازهٔ خالی وجود ندارد",
     "slotsAvailableTitle": "بازه‌های خالی",
-    "slotsBagsSelected": "{count} چمدان انتخاب شد"
+    "slotsBagsSelected": "{count} چمدان انتخاب شد",
+    "timesInShopTimezone": "ساعت‌ها به وقت محلی محل است (استانبول)."
   },
   "Admin": {
     "dashboardTitle": "مرکز مدیریت BagajPark",

@@ -26,7 +26,15 @@ import {
   computeStayDaysFromWindow,
   validateBookingStayWindow,
 } from "@/lib/booking-server-price";
-import { parseDatetimeLocal, toDatetimeLocalValue } from "@/lib/datetime-local";
+/**
+ * Saat dilimi: rezervasyon saatleri DÜKKANIN yerel saatidir, cihazınkinin değil.
+ * Ayrıntı ve ölçülen hata: `src/lib/datetime-local.ts` →
+ * `parseDatetimeLocalInTimeZone`.
+ */
+import {
+  parseDatetimeLocalInTimeZone,
+  toDatetimeLocalValueInTimeZone,
+} from "@/lib/datetime-local";
 import DateTimePicker from "@/components/ui/DateTimePicker";
 import type { PricingRules } from "@/lib/pricing-rules";
 import {
@@ -38,7 +46,7 @@ import { useShare } from "@/lib/hooks/useShare";
 import WebPushOptIn from "@/components/WebPushOptIn";
 import SlotAvailabilityGrid from "@/components/guest/SlotAvailabilityGrid";
 import Money from "@/components/common/Money";
-import { formatDecimal } from "@/lib/currency";
+import { formatDecimal, formatTryCurrency } from "@/lib/currency";
 interface CheckoutClientProps {
   shopId: string;
   shopName: string;
@@ -83,25 +91,25 @@ export default function CheckoutClient({
 
   const [checkInLocal, setCheckInLocal] = useState(() => {
     if (initialCheckIn && !isNaN(Date.parse(initialCheckIn))) {
-      return toDatetimeLocalValue(new Date(initialCheckIn));
+      return toDatetimeLocalValueInTimeZone(new Date(initialCheckIn));
     }
-    return toDatetimeLocalValue(new Date());
+    return toDatetimeLocalValueInTimeZone(new Date());
   });
   const [checkOutLocal, setCheckOutLocal] = useState(() => {
     if (initialCheckOut && !isNaN(Date.parse(initialCheckOut))) {
-      return toDatetimeLocalValue(new Date(initialCheckOut));
+      return toDatetimeLocalValueInTimeZone(new Date(initialCheckOut));
     }
     const now = new Date();
     const defaultOut = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-    return toDatetimeLocalValue(defaultOut);
+    return toDatetimeLocalValueInTimeZone(defaultOut);
   });
 
   useEffect(() => {
     trackPlausibleEvent(PLAUSIBLE_EVENTS.CheckoutStarted, { shopId });
   }, [shopId]);
 
-  const checkInDate = parseDatetimeLocal(checkInLocal);
-  const checkOutDate = parseDatetimeLocal(checkOutLocal);
+  const checkInDate = parseDatetimeLocalInTimeZone(checkInLocal);
+  const checkOutDate = parseDatetimeLocalInTimeZone(checkOutLocal);
   const windowOk =
     checkInDate !== null &&
     checkOutDate !== null &&
@@ -453,21 +461,21 @@ export default function CheckoutClient({
               <div className="flex flex-col gap-4">
                 <BagSelector
                   label={t("smallBag")}
-                  sublabel={`S / ₺${priceS}`}
+                  sublabel={`S / ${formatTryCurrency(priceS, locale)}`}
                   count={bagS}
                   onIncrease={() => setBagS(bagS + 1)}
                   onDecrease={() => setBagS(Math.max(0, bagS - 1))}
                 />
                 <BagSelector
                   label={t("mediumBag")}
-                  sublabel={`M/L / ₺${priceM}`}
+                  sublabel={`M/L / ${formatTryCurrency(priceM, locale)}`}
                   count={bagM}
                   onIncrease={() => setBagM(bagM + 1)}
                   onDecrease={() => setBagM(Math.max(0, bagM - 1))}
                 />
                 <BagSelector
                   label={t("xlBag")}
-                  sublabel={`XL / ₺${priceXl}`}
+                  sublabel={`XL / ${formatTryCurrency(priceXl, locale)}`}
                   count={bagXl}
                   onIncrease={() => setBagXl(bagXl + 1)}
                   onDecrease={() => setBagXl(Math.max(0, bagXl - 1))}

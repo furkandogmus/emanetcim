@@ -485,7 +485,8 @@
     "searchOnlyAvailableHint": "Es werden nur Standorte angezeigt, die zu Ihren gewählten Abgabe-/Abholzeiten verfügbar sind.",
     "slotsNoneForDate": "Für dieses Datum sind keine Zeitfenster verfügbar",
     "slotsAvailableTitle": "Verfügbare Zeitfenster",
-    "slotsBagsSelected": "{count} Gepäckstücke ausgewählt"
+    "slotsBagsSelected": "{count} Gepäckstücke ausgewählt",
+    "timesInShopTimezone": "Zeiten in der Ortszeit des Geschäfts (Istanbul)."
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

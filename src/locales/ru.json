@@ -485,7 +485,8 @@
     "searchOnlyAvailableHint": "Показаны только пункты, доступные в выбранное вами время сдачи и получения.",
     "slotsNoneForDate": "На эту дату нет доступных слотов",
     "slotsAvailableTitle": "Доступные слоты",
-    "slotsBagsSelected": "Выбрано мест: {count}"
+    "slotsBagsSelected": "Выбрано мест: {count}",
+    "timesInShopTimezone": "Время указано по местному времени пункта (Стамбул)."
   },
   "Admin": {
     "dashboardTitle": "Центр администрирования BagajPark",

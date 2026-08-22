@@ -90,14 +90,21 @@ describe("ham para gösterimi kalmadı — mandal", () => {
     for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
       const p = path.join(dir, e.name);
       if (e.isDirectory()) walk(p, out);
-      else if (e.name.endsWith(".tsx")) out.push(p);
+      else if (e.name.endsWith(".tsx") || e.name.endsWith(".ts")) out.push(p);
     }
     return out;
   }
 
-  it("hiçbir bileşende ham `₺{` kalmadı", () => {
+  /**
+   * `₺{` ARAMASI YETMEDİ — kör noktası iki kez vurdu:
+   *   `₺${Math.round(rev).toLocaleString()}`  (admin cirosu)
+   *   sublabel={`S / ₺${priceS}`}             (valiz seçici)
+   * İkisi de template literal olduğu için JSX araması kaçırmıştı. Artık `₺$` de
+   * taranıyor ve tarama `.ts` dosyalarını da kapsıyor (e-posta gövdeleri orada).
+   */
+  it("hiçbir yerde ham `₺{` veya `₺${` kalmadı", () => {
     const offenders: string[] = [];
-    for (const root of ["src/components", "src/app"]) {
+    for (const root of ["src/components", "src/app", "src/services"]) {
       const abs = path.join(process.cwd(), root);
       if (!fs.existsSync(abs)) continue;
       for (const file of walk(abs)) {
@@ -107,7 +114,9 @@ describe("ham para gösterimi kalmadı — mandal", () => {
           .replace(/\/\*[\s\S]*?\*\//g, "")
           .replace(/^\s*\/\/.*$/gm, "")
           .replace(/\{\/\*[\s\S]*?\*\/\}/g, "");
-        if (src.includes("₺{")) offenders.push(path.relative(process.cwd(), file));
+        if (src.includes("₺{") || src.includes("₺${")) {
+          offenders.push(path.relative(process.cwd(), file));
+        }
       }
     }
     expect(

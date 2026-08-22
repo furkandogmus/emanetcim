@@ -485,7 +485,8 @@
     "searchOnlyAvailableHint": "Solo se muestran los puntos disponibles para los horarios de entrega/recogida elegidos.",
     "slotsNoneForDate": "No hay franjas disponibles para esta fecha",
     "slotsAvailableTitle": "Franjas disponibles",
-    "slotsBagsSelected": "{count} maletas seleccionadas"
+    "slotsBagsSelected": "{count} maletas seleccionadas",
+    "timesInShopTimezone": "Los horarios están en la hora local del local (Estambul)."
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

@@ -22,7 +22,15 @@ import ShopListItem from "@/components/guest/ShopListItem";
 import SearchMap from "@/components/guest/SearchMap";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ShopSearchHit } from "@/services/ShopService";
-import { parseDatetimeLocal, toDatetimeLocalValue } from "@/lib/datetime-local";
+/**
+ * Saat dilimi: rezervasyon saatleri DÜKKANIN yerel saatidir, cihazınkinin değil.
+ * Ayrıntı ve ölçülen hata: `src/lib/datetime-local.ts` →
+ * `parseDatetimeLocalInTimeZone`.
+ */
+import {
+  parseDatetimeLocalInTimeZone,
+  toDatetimeLocalValueInTimeZone,
+} from "@/lib/datetime-local";
 import { refreshSearchShopsAction } from "@/actions/search-shops";
 import { geocodeSearchCenterAction } from "@/actions/geocode-search-center";
 import { toast } from "sonner";
@@ -87,8 +95,8 @@ export default function SearchClient({
   const [resolvedPlaceLabel, setResolvedPlaceLabel] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(true);
   useEffect(() => {
-    setCheckInLocal(toDatetimeLocalValue(new Date(defaultCheckInIso)));
-    setCheckOutLocal(toDatetimeLocalValue(new Date(defaultCheckOutIso)));
+    setCheckInLocal(toDatetimeLocalValueInTimeZone(new Date(defaultCheckInIso)));
+    setCheckOutLocal(toDatetimeLocalValueInTimeZone(new Date(defaultCheckOutIso)));
     setDatesReady(true);
   }, [defaultCheckInIso, defaultCheckOutIso]);
 
@@ -105,8 +113,8 @@ export default function SearchClient({
   useEffect(() => {
     if (!datesReady || !filterDirty) return;
 
-    const checkIn = parseDatetimeLocal(checkInLocal);
-    const checkOut = parseDatetimeLocal(checkOutLocal);
+    const checkIn = parseDatetimeLocalInTimeZone(checkInLocal);
+    const checkOut = parseDatetimeLocalInTimeZone(checkOutLocal);
     if (!checkIn || !checkOut) return;
 
     const handle = window.setTimeout(async () => {
@@ -146,8 +154,8 @@ export default function SearchClient({
   ]);
 
   const handleManualRefresh = useCallback(async () => {
-    const checkIn = parseDatetimeLocal(checkInLocal);
-    const checkOut = parseDatetimeLocal(checkOutLocal);
+    const checkIn = parseDatetimeLocalInTimeZone(checkInLocal);
+    const checkOut = parseDatetimeLocalInTimeZone(checkOutLocal);
     if (!checkIn || !checkOut) return;
     const res = await refreshSearchShopsAction({
       checkInIso: checkIn.toISOString(),
@@ -414,7 +422,7 @@ export default function SearchClient({
                     testId="search-checkout"
                     ariaLabel={t("searchCheckOut")}
                     iconSize={14}
-                    minDate={parseDatetimeLocal(checkInLocal) ?? undefined}
+                    minDate={parseDatetimeLocalInTimeZone(checkInLocal) ?? undefined}
                   />
                 </div>
               </label>

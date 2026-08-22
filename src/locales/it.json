@@ -485,7 +485,8 @@
     "searchOnlyAvailableHint": "Vengono elencati solo i punti disponibili per gli orari di consegna/ritiro scelti.",
     "slotsNoneForDate": "Nessuna fascia disponibile per questa data",
     "slotsAvailableTitle": "Fasce orarie disponibili",
-    "slotsBagsSelected": "{count} bagagli selezionati"
+    "slotsBagsSelected": "{count} bagagli selezionati",
+    "timesInShopTimezone": "Gli orari sono nell'ora locale del negozio (Istanbul)."
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

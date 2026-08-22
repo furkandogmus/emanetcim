@@ -485,7 +485,8 @@
     "searchOnlyAvailableHint": "Seuls les points disponibles pour vos horaires de dépôt/retrait sont listés.",
     "slotsNoneForDate": "Aucun créneau disponible pour cette date",
     "slotsAvailableTitle": "Créneaux disponibles",
-    "slotsBagsSelected": "{count} bagages sélectionnés"
+    "slotsBagsSelected": "{count} bagages sélectionnés",
+    "timesInShopTimezone": "Les horaires sont à l'heure locale du commerce (Istanbul)."
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

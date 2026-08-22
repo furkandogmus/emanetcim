@@ -485,7 +485,8 @@
     "searchOnlyAvailableHint": "選択したお預け・お受取り時刻に利用できる場所のみ表示されます。",
     "slotsNoneForDate": "この日に空き枠はありません",
     "slotsAvailableTitle": "空き時間枠",
-    "slotsBagsSelected": "荷物 {count} 個を選択"
+    "slotsBagsSelected": "荷物 {count} 個を選択",
+    "timesInShopTimezone": "時刻は店舗の現地時間（イスタンブール）です。"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

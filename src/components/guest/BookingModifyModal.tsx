@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { X } from "lucide-react";
 import DateTimePicker from "@/components/ui/DateTimePicker";
 import BagSelector from "@/components/guest/BagSelector";
@@ -14,12 +14,21 @@ import {
   computeStayDaysFromWindow,
   validateBookingStayWindow,
 } from "@/lib/booking-server-price";
-import { parseDatetimeLocal, toDatetimeLocalValue } from "@/lib/datetime-local";
+/**
+ * Saat dilimi: rezervasyon saatleri DÜKKANIN yerel saatidir, cihazınkinin değil.
+ * Ayrıntı ve ölçülen hata: `src/lib/datetime-local.ts` →
+ * `parseDatetimeLocalInTimeZone`.
+ */
+import {
+  parseDatetimeLocalInTimeZone,
+  toDatetimeLocalValueInTimeZone,
+} from "@/lib/datetime-local";
 import type { PricingRules } from "@/lib/pricing-rules";
 import type { GuestBookingListItem } from "@/services/BookingService";
 import { moneyToNumber } from "@/lib/money";
 import { usePaymentCopyKey } from "@/components/providers/CommerceProvider";
 import Money from "@/components/common/Money";
+import { formatTryCurrency } from "@/lib/currency";
 
 export type BookingModifyModalBooking = Pick<
   GuestBookingListItem,
@@ -49,6 +58,7 @@ export default function BookingModifyModal({
   onSuccess,
 }: BookingModifyModalProps) {
   const t = useTranslations("Guest");
+  const locale = useLocale();
   /**
    * Ödeme metni aktif sağlayıcıya göre seçilir. Bu satır eskiden koşulsuz
    * "kartınıza iade edilir" diyordu; ödeme dükkanda alınırken bu yanlıştı
@@ -63,16 +73,16 @@ export default function BookingModifyModal({
   const [bagM, setBagM] = useState(booking.bagCountM);
   const [bagXl, setBagXl] = useState(booking.bagCountXl);
   const [checkInLocal, setCheckInLocal] = useState(() =>
-    toDatetimeLocalValue(new Date(booking.checkInTime)),
+    toDatetimeLocalValueInTimeZone(new Date(booking.checkInTime)),
   );
   const [checkOutLocal, setCheckOutLocal] = useState(() =>
-    toDatetimeLocalValue(new Date(booking.checkOutTime)),
+    toDatetimeLocalValueInTimeZone(new Date(booking.checkOutTime)),
   );
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  const checkInDate = parseDatetimeLocal(checkInLocal);
-  const checkOutDate = parseDatetimeLocal(checkOutLocal);
+  const checkInDate = parseDatetimeLocalInTimeZone(checkInLocal);
+  const checkOutDate = parseDatetimeLocalInTimeZone(checkOutLocal);
   const windowOk =
     checkInDate !== null &&
     checkOutDate !== null &&
@@ -192,7 +202,7 @@ export default function BookingModifyModal({
                   value={checkOutLocal}
                   onChange={setCheckOutLocal}
                   ariaLabel={t("checkoutCheckOutLabel")}
-                  minDate={parseDatetimeLocal(checkInLocal) ?? undefined}
+                  minDate={parseDatetimeLocalInTimeZone(checkInLocal) ?? undefined}
                 />
               </div>
             </label>
@@ -201,21 +211,21 @@ export default function BookingModifyModal({
           <div className="flex flex-col gap-3">
             <BagSelector
               label={t("smallBag")}
-              sublabel={`S / ₺${slot.s}`}
+              sublabel={`S / ${formatTryCurrency(slot.s, locale)}`}
               count={bagS}
               onIncrease={() => setBagS(bagS + 1)}
               onDecrease={() => setBagS(Math.max(0, bagS - 1))}
             />
             <BagSelector
               label={t("mediumBag")}
-              sublabel={`M/L / ₺${slot.m}`}
+              sublabel={`M/L / ${formatTryCurrency(slot.m, locale)}`}
               count={bagM}
               onIncrease={() => setBagM(bagM + 1)}
               onDecrease={() => setBagM(Math.max(0, bagM - 1))}
             />
             <BagSelector
               label={t("xlBag")}
-              sublabel={`XL / ₺${slot.xl}`}
+              sublabel={`XL / ${formatTryCurrency(slot.xl, locale)}`}
               count={bagXl}
               onIncrease={() => setBagXl(bagXl + 1)}
               onDecrease={() => setBagXl(Math.max(0, bagXl - 1))}
