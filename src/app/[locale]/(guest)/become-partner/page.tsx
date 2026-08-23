@@ -3,7 +3,7 @@ import { Link } from "@/i18n/routing";
 import type { Metadata } from "next";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { alternatesForPath } from "@/lib/seo-alternates";
-import { TrendingUp, LayoutDashboard, MapPin } from "lucide-react";
+import { TrendingUp, LayoutDashboard, MapPin, Clock } from "lucide-react";
 import { getPricingRules } from "@/lib/platform-settings";
 import { getMerchantShareRatio } from "@/lib/platform-split";
 import PartnerEarningsCalculator from "@/components/guest/PartnerEarningsCalculator";
@@ -81,6 +81,10 @@ export default async function BecomePartnerPage({
             {t("ctaSecondary")}
           </Link>
         </div>
+        <p className="mx-auto mt-6 flex w-fit items-center gap-2 text-xs font-bold text-gray-400">
+          <Clock size={14} />
+          {t("approvalTimeNote")}
+        </p>
       </header>
 
       <main className="mx-auto max-w-5xl px-6 py-16">
