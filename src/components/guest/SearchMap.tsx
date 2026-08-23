@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useLocale } from "next-intl";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { formatTryCurrency } from "@/lib/currency";
 
 type Shop = {
   id: string;
@@ -28,6 +30,7 @@ export default function SearchMap({
   userLng = 28.9741,
   onSelectShop,
 }: SearchMapProps) {
+  const locale = useLocale();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
@@ -122,8 +125,14 @@ export default function SearchMap({
     valid.forEach((shop) => {
       const el = document.createElement("div");
       el.className =
-        "w-8 h-8 rounded-full bg-orange-600 border-2 border-white shadow-lg flex items-center justify-center text-[10px] font-black text-white cursor-pointer hover:bg-orange-700 transition-colors";
-      el.textContent = "₺";
+        "px-2.5 h-8 min-w-8 rounded-full bg-orange-600 border-2 border-white shadow-lg flex items-center justify-center text-xs font-black text-white cursor-pointer hover:bg-orange-700 transition-colors whitespace-nowrap";
+      el.textContent =
+        shop.pricePerDay != null
+          ? formatTryCurrency(shop.pricePerDay, locale, {
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0,
+            })
+          : "₺";
       el.title = shop.name;
 
       const marker = new maplibregl.Marker({ element: el })
@@ -150,7 +159,7 @@ export default function SearchMap({
         essential: true,
       });
     }
-  }, [shops, userLat, userLng]);
+  }, [shops, userLat, userLng, locale]);
 
   return <div ref={containerRef} className="absolute inset-0 w-full h-full min-h-[240px]" />;
 }
