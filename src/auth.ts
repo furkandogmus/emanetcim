@@ -6,6 +6,8 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { Role } from "@prisma/client";
 import prisma from "@/lib/db";
 import { authConfig } from "./auth.config";
+import { notificationService } from "@/services/NotificationService";
+import logger from "@/lib/logger";
 
 /**
  * Auth.js (v5) - Merkezi Kimlik Doğrulama Konfigürasyonu
@@ -32,6 +34,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           data: { emailVerified: new Date() },
         });
       }
+    },
+    // Yalnızca adapter GERÇEKTEN yeni bir User satırı yarattığında tetiklenir
+    // (web Google girişi) — credentials kaydı registerGuestAction'da ayrıca ele alınıyor.
+    async createUser({ user }) {
+      void notificationService
+        .notifyAdminsForNewUser({
+          name: user.name ?? null,
+          email: user.email ?? null,
+          phone: null,
+          role: "GUEST",
+          source: "web_google",
+        })
+        .catch((err) => logger.error({ err, userId: user.id }, "notify_admins_new_guest_failed"));
     },
   },
   callbacks: {

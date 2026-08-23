@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
+import type { User } from "@prisma/client";
 import { signAccessToken, signRefreshToken } from "@/lib/mobile-auth";
 import { normalizeTrGsm10 } from "@/lib/netgsm";
 import { rateLimit } from "@/lib/rate-limit";
+import { notificationService } from "@/services/NotificationService";
+import logger from "@/lib/logger";
 
 const schema = z.union([
   z.object({ email: z.string().email(), code: z.string().length(6) }),
@@ -38,7 +41,7 @@ export async function POST(req: Request) {
   const { code, password } = data;
   const identifier = `mobile:${normalizedIdentity}`;
 
-  let user;
+  let user: User | null = null;
 
   if (code) {
     if (!(await rateLimit(`mobile_otp_verify:${normalizedIdentity}`, 5, 15 * 60_000))) {
@@ -74,6 +77,16 @@ export async function POST(req: Request) {
           name: isEmail ? normalizedIdentity.split("@")[0] : `User ${normalizedIdentity.slice(-4)}`,
         },
       });
+      const newUserId = user.id;
+      void notificationService
+        .notifyAdminsForNewUser({
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          role: "GUEST",
+          source: "mobile_otp",
+        })
+        .catch((err) => logger.error({ err, userId: newUserId }, "notify_admins_new_guest_failed"));
     }
   } else if (password) {
     if (!(await rateLimit(`mobile_pwd:${normalizedIdentity}`, 5, 15 * 60_000))) {

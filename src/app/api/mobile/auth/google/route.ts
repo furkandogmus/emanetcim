@@ -4,6 +4,8 @@ import { createRemoteJWKSet, jwtVerify } from "jose";
 import prisma from "@/lib/db";
 import { signAccessToken, signRefreshToken } from "@/lib/mobile-auth";
 import { rateLimit } from "@/lib/rate-limit";
+import { notificationService } from "@/services/NotificationService";
+import logger from "@/lib/logger";
 
 const GOOGLE_JWKS = createRemoteJWKSet(new URL("https://www.googleapis.com/oauth2/v3/certs"));
 
@@ -41,6 +43,16 @@ export async function POST(req: Request) {
       user = await prisma.user.create({
         data: { email, name, image: picture, role: "GUEST", emailVerified: new Date() },
       });
+      const newUserId = user.id;
+      void notificationService
+        .notifyAdminsForNewUser({
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          role: "GUEST",
+          source: "mobile_google",
+        })
+        .catch((err) => logger.error({ err, userId: newUserId }, "notify_admins_new_guest_failed"));
     }
 
     if (user.isBanned) {

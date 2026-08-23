@@ -5,6 +5,8 @@ import { signAccessToken, signRefreshToken } from "@/lib/mobile-auth";
 import { hashPassword } from "@/lib/auth-password";
 import { normalizeTrGsm10 } from "@/lib/netgsm";
 import { rateLimit } from "@/lib/rate-limit";
+import { notificationService } from "@/services/NotificationService";
+import logger from "@/lib/logger";
 
 const schema = z.object({
   email: z.string().email().optional().or(z.literal("")),
@@ -82,6 +84,16 @@ export async function POST(req: Request) {
       emailVerified: normalizedEmail ? new Date() : null,
     },
   });
+
+  void notificationService
+    .notifyAdminsForNewUser({
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      role: "GUEST",
+      source: "mobile_register",
+    })
+    .catch((err) => logger.error({ err, userId: user.id }, "notify_admins_new_guest_failed"));
 
   const access = await signAccessToken(user.id, user.role);
   const refresh = await signRefreshToken(user.id, user.role);

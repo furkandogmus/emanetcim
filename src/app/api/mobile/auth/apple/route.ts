@@ -4,6 +4,8 @@ import { createRemoteJWKSet, jwtVerify } from "jose";
 import prisma from "@/lib/db";
 import { signAccessToken, signRefreshToken } from "@/lib/mobile-auth";
 import { rateLimit } from "@/lib/rate-limit";
+import { notificationService } from "@/services/NotificationService";
+import logger from "@/lib/logger";
 
 const APPLE_JWKS = createRemoteJWKSet(new URL("https://appleid.apple.com/auth/keys"));
 
@@ -44,6 +46,10 @@ export async function POST(req: Request) {
     let user = account?.user;
     if (!user) {
       const fullName = [parsed.data.givenName, parsed.data.familyName].filter(Boolean).join(" ") || null;
+      // Apple sign-in mevcut bir e-postaya bağlanıyor olabilir (yeni yöntem
+      // eklemek) — bu durumda "yeni kullanıcı" bildirimi YANLIŞ olur; yalnızca
+      // gerçekten yeni bir hesap yaratılınca gönderilmeli.
+      const existedBefore = email ? !!(await prisma.user.findUnique({ where: { email } })) : false;
       if (email) {
         user = await prisma.user.upsert({
           where: { email },
@@ -54,6 +60,17 @@ export async function POST(req: Request) {
         user = await prisma.user.create({
           data: { email: null, name: fullName, role: "GUEST" },
         });
+      }
+      if (!existedBefore) {
+        void notificationService
+          .notifyAdminsForNewUser({
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            role: "GUEST",
+            source: "mobile_apple",
+          })
+          .catch((err) => logger.error({ err, userId: user!.id }, "notify_admins_new_guest_failed"));
       }
       await prisma.account.create({
         data: {

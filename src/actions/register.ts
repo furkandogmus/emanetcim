@@ -16,6 +16,8 @@ import {
   LEGAL_DOC_TERMS,
   getLegalDocumentVersion,
 } from "@/lib/legal-versions";
+import { notificationService } from "@/services/NotificationService";
+import logger from "@/lib/logger";
 
 const guestSchema = z.object({
   email: z.string().email(),
@@ -97,6 +99,16 @@ export async function registerGuestAction(data: unknown) {
   const locale = await getLocale();
   const verificationToken = await generateVerificationToken(user.email!);
   await sendVerificationEmail(user.email!, verificationToken.token, locale);
+
+  void notificationService
+    .notifyAdminsForNewUser({
+      name: user.name,
+      email: user.email,
+      phone: null,
+      role: "GUEST",
+      source: "web_email",
+    })
+    .catch((err) => logger.error({ err, userId: user.id }, "notify_admins_new_guest_failed"));
 
   return { success: true as const };
 }
@@ -181,6 +193,16 @@ export async function registerPartnerApplicationAction(data: unknown) {
       },
     });
   });
+
+  void notificationService
+    .notifyAdminsForNewUser({
+      name: parsed.data.name.trim(),
+      email,
+      phone: phoneNorm,
+      role: "PARTNER",
+      source: "web_partner_application",
+    })
+    .catch((err) => logger.error({ err }, "notify_admins_new_partner_failed"));
 
   return { success: true as const };
 }

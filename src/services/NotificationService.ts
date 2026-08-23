@@ -579,6 +579,60 @@ export class NotificationService implements INotificationService {
     }
   }
 
+  /**
+   * Yeni kullanıcı kaydında admin e-postalarına bilgilendirme gönderir.
+   * Esnaf başvurusu ayrıca admin GSM listesine SMS de alır — onay bekleyen bir
+   * işlem olduğu için booking/dispute ile aynı aciliyet sınıfında. Misafir
+   * kaydında SMS yok: hacim çok daha yüksek olabilir, bilgilendirme e-posta
+   * yeterli (alert fatigue — bkz. observability kuralları).
+   */
+  async notifyAdminsForNewUser(params: {
+    name: string | null;
+    email: string | null;
+    phone: string | null;
+    role: "GUEST" | "PARTNER";
+    source: string;
+  }): Promise<void> {
+    const { name, email, phone, role, source } = params;
+    const identity = email ?? phone ?? "—";
+    const roleLabel = role === "PARTNER" ? "Esnaf Başvurusu" : "Yeni Misafir Kaydı";
+
+    const adminEmails = (process.env.ADMIN_EMAILS ?? "")
+      .split(",")
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+
+    const emailSubject = `[Admin] BagajPark: ${roleLabel} (${identity})`;
+    const emailBody = `Merhaba,\n\nYeni bir kullanıcı kaydoldu.\n\nAd: ${name ?? "—"}\nE-posta/Telefon: ${identity}\nKayıt türü: ${roleLabel}\nKaynak: ${source}`;
+    const emailHtml = `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
+      <h2 style="color:#2563eb">${roleLabel}</h2>
+      <table style="width:100%;border-collapse:collapse;margin:16px 0">
+        <tr><td style="padding:8px;color:#6b7280">Ad</td><td style="padding:8px;font-weight:bold">${name ?? "—"}</td></tr>
+        <tr style="background:#f9fafb"><td style="padding:8px;color:#6b7280">E-posta/Telefon</td><td style="padding:8px;font-weight:bold">${identity}</td></tr>
+        <tr><td style="padding:8px;color:#6b7280">Kaynak</td><td style="padding:8px;font-weight:bold">${source}</td></tr>
+      </table>
+      <p style="font-size:13px;color:#6b7280;margin-top:24px">BagajPark — Yönetim Masası</p>
+    </div>`;
+
+    for (const adminEmail of adminEmails) {
+      if (adminEmail.includes("@")) {
+        void this.sendEmail(adminEmail, emailSubject, emailBody, undefined, emailHtml).catch((e) => {
+          logger.error({ err: e, adminEmail, source }, "notifyAdminsForNewUser_email_failed");
+        });
+      }
+    }
+
+    if (role !== "PARTNER") return;
+    if (!isNetgsmConfigured()) {
+      logger.debug({ source }, "netgsm_off_skipping_new_partner_sms");
+      return;
+    }
+    const msg = `BagajPark [Admin]: Yeni esnaf basvurusu — ${name ?? identity}`;
+    for (const adminNo of parseAdminGsmNumbers()) {
+      await this.sendSms(adminNo, msg);
+    }
+  }
+
   async notifyCheckIn(email: string, bookingId: string, locale: string = "tr"): Promise<void> {
     const content =
       {
