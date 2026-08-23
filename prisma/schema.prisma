@@ -22,10 +22,17 @@ model User {
   lastIp                   String?
   createdAt                DateTime                 @default(now())
   updatedAt                DateTime                 @updatedAt
-  /// Referans kodu: misafire verilebilir, yeni rezervasyonda indirim sağlar
+  /// Referans kodu: misafire ya da esnafa verilebilir. Misafirde yeni
+  /// rezervasyonda indirim sağlar (`referralCode` alanı Booking'de); esnafta
+  /// yeni bir esnaf başvurusunu davet edene bağlar (`referredByPartnerId`).
   referralCode             String?                  @unique
   /// Sadakat puanı — her 1 TL harcamada 1 puan, 100 puan = 1 TL indirim
   loyaltyPoints            Int                      @default(0)
+  /// Bu esnabı davet eden esnafın User.id'si (varsa). İlişki bilerek yok —
+  /// davet eden hesap silinse de bu kayıt kalmalı. Ödül mekanizması henüz
+  /// otomatik değil (bkz. docs/KOD_TARAMA_2026-08-23.md) — bilinçli iş kararı
+  /// bekliyor; şimdilik yalnızca atıf kaydediliyor.
+  referredByPartnerId      String?
   accounts                 Account[]
   adminRoleChangeRequested AdminRoleChangeRequest[] @relation("AdminRoleChangeRequester")
   adminRoleChangeTargets   AdminRoleChangeRequest?  @relation("AdminRoleChangeTarget")

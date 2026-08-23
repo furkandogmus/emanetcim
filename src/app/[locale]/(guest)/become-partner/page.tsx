@@ -7,6 +7,15 @@ import { TrendingUp, LayoutDashboard, MapPin } from "lucide-react";
 import { getPricingRules } from "@/lib/platform-settings";
 import { getMerchantShareRatio } from "@/lib/platform-split";
 import PartnerEarningsCalculator from "@/components/guest/PartnerEarningsCalculator";
+import prisma from "@/lib/db";
+import { PUBLIC_SHOP_FILTER } from "@/lib/public-shop-filter";
+import { Users } from "lucide-react";
+
+/** Sosyal kanıt için gerçek sayı bu eşiğin altındaysa "ilk ortaklardan olun"
+ * çerçevesi kullanılır — küçük bir rakamı olduğu gibi göstermek ikna edici
+ * değil, ama uydurma bir sayı da yazılmaz (bu kod tabanında defalarca
+ * düzeltilen "gerçekleşmeyen vaat" hatasının aynısı olurdu). */
+const SOCIAL_PROOF_MIN_COUNT = 5;
 
 export async function generateMetadata({
   params,
@@ -41,6 +50,7 @@ export default async function BecomePartnerPage({
   const t = await getTranslations("MarketingBecomePartner");
   const pricingRules = await getPricingRules();
   const merchantShareRatio = getMerchantShareRatio();
+  const activePartnerCount = await prisma.shop.count({ where: PUBLIC_SHOP_FILTER });
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
@@ -51,6 +61,12 @@ export default async function BecomePartnerPage({
         <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-600">
           {t("heroSubtitle")}
         </p>
+        <div className="mx-auto mt-6 flex w-fit items-center gap-2 rounded-full border border-orange-100 bg-white px-4 py-2 text-xs font-bold text-orange-700 shadow-sm">
+          <Users size={14} />
+          {activePartnerCount >= SOCIAL_PROOF_MIN_COUNT
+            ? t("socialProofActive", { count: activePartnerCount })
+            : t("socialProofEarly")}
+        </div>
         <div className="mt-10 flex flex-wrap justify-center gap-4">
           <Link
             href="/partners"

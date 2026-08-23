@@ -54,12 +54,20 @@ export default function RegisterPage() {
   const tCommon = useTranslations('Common');
   const tErrors = useTranslations('Errors');
   const [activeTab, setActiveTab] = useState<RegisterType>('GUEST');
+  const [referredByCode, setReferredByCode] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const role = new URLSearchParams(window.location.search).get("role");
+      const params = new URLSearchParams(window.location.search);
+      const role = params.get("role");
       if (role?.toLowerCase() === "partner") {
         setActiveTab("PARTNER");
+      }
+      // Bir esnafın davet linkiyle geldiyse (`/register?role=partner&ref=...`)
+      // — bkz. PartnerReferralCard.
+      const ref = params.get("ref");
+      if (ref) {
+        setReferredByCode(ref);
       }
     }
   }, []);
@@ -135,6 +143,7 @@ export default function RegisterPage() {
           shopDistrict: shopLocation.district,
           shopLatitude: shopLocation.latitude,
           shopLongitude: shopLocation.longitude,
+          referredByCode,
         });
         if (res.success) setSuccess(true);
         else setError(translateServerError(res.error));

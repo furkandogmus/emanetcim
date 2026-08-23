@@ -41,6 +41,8 @@ const partnerSchema = z.object({
   shopDistrict: z.string().max(100).optional(),
   shopLatitude: z.number().min(-90).max(90).nullable().optional(),
   shopLongitude: z.number().min(-180).max(180).nullable().optional(),
+  /** Bir esnafın davet linkiyle geldiyse (`?ref=`) o kod. */
+  referredByCode: z.string().trim().max(32).optional(),
 });
 
 export async function registerGuestAction(data: unknown) {
@@ -162,6 +164,21 @@ export async function registerPartnerApplicationAction(data: unknown) {
 
   const passwordHash = await hashPassword(parsed.data.password);
 
+  // Yalnızca ESNAF hesabından üretilmiş bir kod kabul edilir — misafir
+  // indirim kodlarıyla aynı alanı (`User.referralCode`) paylaşıyor ama
+  // anlamları farklı, karıştırılmamalı.
+  let referredByPartnerId: string | null = null;
+  const referredByCode = parsed.data.referredByCode?.trim().toUpperCase();
+  if (referredByCode) {
+    const referrer = await prisma.user.findUnique({
+      where: { referralCode: referredByCode },
+      select: { id: true, role: true },
+    });
+    if (referrer?.role === Role.PARTNER) {
+      referredByPartnerId = referrer.id;
+    }
+  }
+
   const newPartnerId = await prisma.$transaction(async (tx) => {
     const user = await tx.user.create({
       data: {
@@ -172,6 +189,7 @@ export async function registerPartnerApplicationAction(data: unknown) {
         role: Role.PARTNER,
         passwordHash,
         lastIp: ip,
+        referredByPartnerId,
         legalAcceptances: {
           create: [
             {

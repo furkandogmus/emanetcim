@@ -21,6 +21,7 @@ import CheckoutSealsDialog, { type CheckoutSeal } from "@/components/partner/Che
 import PartnerHistoryTab from "@/components/partner/PartnerHistoryTab";
 import PartnerRequestsTab from "@/components/partner/PartnerRequestsTab";
 import PartnerBottomNav, { type PartnerTab } from "@/components/partner/PartnerBottomNav";
+import PartnerReferralCard from "@/components/partner/PartnerReferralCard";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 import {
   checkOutAction,
@@ -441,6 +442,9 @@ export default function PartnerClient({
               <p className="text-2xl font-black text-gray-900 md:text-3xl">
                 {monthlyShopViews}
               </p>
+            </div>
+            <div className="col-span-2">
+              <PartnerReferralCard />
             </div>
           </div>
         </main>

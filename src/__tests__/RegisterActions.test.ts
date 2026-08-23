@@ -155,5 +155,51 @@ describe("Register Actions", () => {
         })
       }));
     });
+
+    it("attributes a partner-to-partner referral when the code belongs to a PARTNER", async () => {
+      mockPrisma.user.findUnique
+        .mockResolvedValueOnce(null) // phone-exists check
+        .mockResolvedValueOnce({ id: "referrer-partner-id", role: "PARTNER" }); // referral lookup
+
+      const result = await registerPartnerApplicationAction({
+        name: "New Partner",
+        phone: "0555 555 55 66",
+        password: "password123",
+        shopName: "Referred Shop",
+        shopAddress: "Kadikoy, Istanbul",
+        referredByCode: "abc123",
+      });
+
+      expect(result.success).toBe(true);
+      expect(mockPrisma.user.findUnique).toHaveBeenLastCalledWith(
+        expect.objectContaining({ where: { referralCode: "ABC123" } }),
+      );
+      expect(mockPrisma.user.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ referredByPartnerId: "referrer-partner-id" }),
+        }),
+      );
+    });
+
+    it("ignores a referral code that belongs to a non-PARTNER user", async () => {
+      mockPrisma.user.findUnique
+        .mockResolvedValueOnce(null) // phone-exists check
+        .mockResolvedValueOnce({ id: "some-guest-id", role: "GUEST" }); // referral lookup
+
+      await registerPartnerApplicationAction({
+        name: "New Partner",
+        phone: "0555 555 55 77",
+        password: "password123",
+        shopName: "Another Shop",
+        shopAddress: "Sisli, Istanbul",
+        referredByCode: "GUESTCODE",
+      });
+
+      expect(mockPrisma.user.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ referredByPartnerId: null }),
+        }),
+      );
+    });
   });
 });
