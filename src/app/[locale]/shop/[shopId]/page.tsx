@@ -10,6 +10,9 @@ import { getSiteBaseUrl } from "@/lib/site-urls";
 import { buildShopLocalBusinessJsonLd } from "@/lib/shop-json-ld";
 import { buildBreadcrumbJsonLd } from "@/lib/breadcrumb-json-ld";
 import { routing } from "@/i18n/routing";
+import { auth } from "@/auth";
+import { analyticsService } from "@/services/AnalyticsService";
+import { resolveServerSessionId } from "@/lib/analytics-server";
 
 export async function generateMetadata({
   params,
@@ -56,6 +59,15 @@ export default async function ShopDetailPage({
   if (!shop) {
     notFound();
   }
+
+  const session = await auth();
+  analyticsService.track({
+    name: "shop_view",
+    sessionId: await resolveServerSessionId(session?.user?.id),
+    userId: session?.user?.id ?? null,
+    locale,
+    metadata: { shopId: shop.id },
+  });
 
   const shopImages = await shopService.getShopImages(shopId).catch(() => []);
 

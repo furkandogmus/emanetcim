@@ -25,18 +25,31 @@ async function runCleanup(req: NextRequest): Promise<NextResponse> {
 
   try {
     const now = new Date();
+    const analyticsRetentionCutoff = new Date(
+      now.getTime() - 90 * 24 * 60 * 60 * 1000,
+    );
 
-    const [deletedTokens, deletedSessions] = await prisma.$transaction([
-      prisma.verificationToken.deleteMany({
-        where: { expires: { lt: now } },
-      }),
-      prisma.session.deleteMany({
-        where: { expires: { lt: now } },
-      }),
-    ]);
+    const [deletedTokens, deletedSessions, deletedAnalyticsEvents] =
+      await prisma.$transaction([
+        prisma.verificationToken.deleteMany({
+          where: { expires: { lt: now } },
+        }),
+        prisma.session.deleteMany({
+          where: { expires: { lt: now } },
+        }),
+        // AnalyticsEvent sınırsız büyümesin diye 90 günden eskisi silinir —
+        // bkz. docs/KOD_TARAMA_2026-08-23.md, kullanıcı analitiği bölümü.
+        prisma.analyticsEvent.deleteMany({
+          where: { createdAt: { lt: analyticsRetentionCutoff } },
+        }),
+      ]);
 
     logger.info(
-      { deletedTokens: deletedTokens.count, deletedSessions: deletedSessions.count },
+      {
+        deletedTokens: deletedTokens.count,
+        deletedSessions: deletedSessions.count,
+        deletedAnalyticsEvents: deletedAnalyticsEvents.count,
+      },
       "database_cleanup_success"
     );
 
@@ -44,6 +57,7 @@ async function runCleanup(req: NextRequest): Promise<NextResponse> {
       ok: true,
       deletedTokens: deletedTokens.count,
       deletedSessions: deletedSessions.count,
+      deletedAnalyticsEvents: deletedAnalyticsEvents.count,
     });
   } catch (err) {
     logger.error({ err }, "database_cleanup_failed");

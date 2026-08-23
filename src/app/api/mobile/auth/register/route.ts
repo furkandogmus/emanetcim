@@ -6,6 +6,8 @@ import { hashPassword } from "@/lib/auth-password";
 import { normalizeTrGsm10 } from "@/lib/netgsm";
 import { rateLimit } from "@/lib/rate-limit";
 import { notificationService } from "@/services/NotificationService";
+import { analyticsService } from "@/services/AnalyticsService";
+import { resolveServerSessionId } from "@/lib/analytics-server";
 import logger from "@/lib/logger";
 
 const schema = z.object({
@@ -94,6 +96,13 @@ export async function POST(req: Request) {
       source: "mobile_register",
     })
     .catch((err) => logger.error({ err, userId: user.id }, "notify_admins_new_guest_failed"));
+
+  analyticsService.track({
+    name: "user_signed_up",
+    sessionId: await resolveServerSessionId(user.id),
+    userId: user.id,
+    metadata: { source: "mobile_register", role: "GUEST" },
+  });
 
   const access = await signAccessToken(user.id, user.role);
   const refresh = await signRefreshToken(user.id, user.role);

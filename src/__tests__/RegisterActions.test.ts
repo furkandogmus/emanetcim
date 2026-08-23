@@ -11,6 +11,9 @@ const { mockPrisma, mockRateLimit, mockMail } = vi.hoisted(() => {
       shop: {
         create: vi.fn(),
       },
+      analyticsEvent: {
+        create: vi.fn().mockResolvedValue({}),
+      },
       $transaction: vi.fn((fn) => fn(mockPrisma)),
     },
     mockRateLimit: vi.fn().mockResolvedValue(true),

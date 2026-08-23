@@ -17,6 +17,7 @@ import {
   Flag,
   UserCog,
   Scale,
+  BarChart3,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
@@ -262,6 +263,13 @@ export default function AdminDashboardClient({
               >
                 <MessageSquare size={18} className="opacity-40" />
                 {t("messagesTitle")}
+              </Link>
+              <Link
+                href="/admin/analytics"
+                className="w-full min-h-[3rem] px-5 bg-white/10 rounded-2xl text-xs font-black uppercase tracking-wider hover:bg-white/20 transition-all text-left flex items-center gap-3"
+              >
+                <BarChart3 size={18} className="opacity-40" />
+                {t("analyticsNav")}
               </Link>
             </div>
           </div>

@@ -7,6 +7,7 @@ import { computeAuthoritativeCheckoutTotals } from "@/lib/booking-server-price";
 import { getPricingRules } from "@/lib/platform-settings";
 import prisma from "@/lib/db";
 import { notificationService } from "@/services/NotificationService";
+import { analyticsService } from "@/services/AnalyticsService";
 
 const schema = z.object({
   shopId: z.string().uuid(),
@@ -82,6 +83,13 @@ export async function POST(req: NextRequest) {
       totals.subtotalBeforeCoupon,
     );
   }
+  analyticsService.track({
+    name: "booking_created",
+    sessionId: `user:${auth.user.id}`,
+    userId: auth.user.id,
+    metadata: { shopId, source: "mobile" },
+  });
+
   void notificationService.notifyPartnerAndAdminsForNewPaidBooking({
     bookingId: booking.id,
     shopName: shop.name,

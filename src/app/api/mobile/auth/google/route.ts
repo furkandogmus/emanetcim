@@ -5,6 +5,8 @@ import prisma from "@/lib/db";
 import { signAccessToken, signRefreshToken } from "@/lib/mobile-auth";
 import { rateLimit } from "@/lib/rate-limit";
 import { notificationService } from "@/services/NotificationService";
+import { analyticsService } from "@/services/AnalyticsService";
+import { resolveServerSessionId } from "@/lib/analytics-server";
 import logger from "@/lib/logger";
 
 const GOOGLE_JWKS = createRemoteJWKSet(new URL("https://www.googleapis.com/oauth2/v3/certs"));
@@ -53,6 +55,12 @@ export async function POST(req: Request) {
           source: "mobile_google",
         })
         .catch((err) => logger.error({ err, userId: newUserId }, "notify_admins_new_guest_failed"));
+      analyticsService.track({
+        name: "user_signed_up",
+        sessionId: await resolveServerSessionId(newUserId),
+        userId: newUserId,
+        metadata: { source: "mobile_google", role: "GUEST" },
+      });
     }
 
     if (user.isBanned) {

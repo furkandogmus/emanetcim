@@ -77,9 +77,9 @@ export const JOB_REGISTRY: readonly JobDefinition[] = [
   },
   {
     name: "cleanup",
-    what: "Süresi geçmiş doğrulama token'larını ve oturumları siler.",
+    what: "Süresi geçmiş doğrulama token'larını, oturumları ve 90 günden eski analitik olaylarını siler.",
     ifItStops:
-      "Tablolar sınırsız büyür ve süresi geçmiş token'lar gereğinden uzun yaşar.",
+      "Tablolar sınırsız büyür — süresi geçmiş token'lar gereğinden uzun yaşar, AnalyticsEvent hiç küçülmez.",
     cron: "23 3 * * *",
     maxStaleHours: 72,
     enforced: false,

@@ -5,6 +5,8 @@ import prisma from "@/lib/db";
 import { signAccessToken, signRefreshToken } from "@/lib/mobile-auth";
 import { rateLimit } from "@/lib/rate-limit";
 import { notificationService } from "@/services/NotificationService";
+import { analyticsService } from "@/services/AnalyticsService";
+import { resolveServerSessionId } from "@/lib/analytics-server";
 import logger from "@/lib/logger";
 
 const APPLE_JWKS = createRemoteJWKSet(new URL("https://appleid.apple.com/auth/keys"));
@@ -62,6 +64,7 @@ export async function POST(req: Request) {
         });
       }
       if (!existedBefore) {
+        const newUserId = user.id;
         void notificationService
           .notifyAdminsForNewUser({
             name: user.name,
@@ -70,7 +73,13 @@ export async function POST(req: Request) {
             role: "GUEST",
             source: "mobile_apple",
           })
-          .catch((err) => logger.error({ err, userId: user!.id }, "notify_admins_new_guest_failed"));
+          .catch((err) => logger.error({ err, userId: newUserId }, "notify_admins_new_guest_failed"));
+        analyticsService.track({
+          name: "user_signed_up",
+          sessionId: await resolveServerSessionId(newUserId),
+          userId: newUserId,
+          metadata: { source: "mobile_apple", role: "GUEST" },
+        });
       }
       await prisma.account.create({
         data: {

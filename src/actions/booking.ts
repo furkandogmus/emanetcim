@@ -20,6 +20,8 @@ import { bookingEventService } from "@/services/BookingEventService";
 import { headers } from "next/headers";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-ip";
+import { analyticsService } from "@/services/AnalyticsService";
+import { resolveServerSessionId } from "@/lib/analytics-server";
 import { getLocale } from "next-intl/server";
 import logger from "@/lib/logger";
 import type {
@@ -264,6 +266,13 @@ export async function createBookingAction(data: CreateBookingInput) {
 
     revalidatePathAllLocales("/bookings");
     revalidatePathAllLocales("/search");
+
+    analyticsService.track({
+      name: "booking_created",
+      sessionId: await resolveServerSessionId(userId),
+      userId: userId ?? null,
+      metadata: { shopId: data.shopId, source: "web" },
+    });
 
     return {
       success: true as const,

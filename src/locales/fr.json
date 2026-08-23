@@ -707,6 +707,7 @@
     "roleApprovalsNav": "Role approvals",
     "roleApprovalsPendingBanner": "{count} pending role approval(s).",
     "disputesNav": "Disputes",
+    "analyticsNav": "Analytics",
     "usersManagement": "User Management",
     "banDeleteUsers": "Ban & Delete",
     "user": "User",
@@ -1414,6 +1415,22 @@
     "healthScore": "General Health Score",
     "healthDesc": "All critical services checked.",
     "noCriticalError": "No Critical Errors"
+  },
+  "AdminAnalytics": {
+    "title": "User Analytics",
+    "subtitle": "Last {days} days — behavior and conversion summary",
+    "uniqueSessions": "Unique Sessions",
+    "pageViews": "Page Views",
+    "searches": "Searches",
+    "shopViews": "Shop Views",
+    "checkoutsStarted": "Checkouts Started",
+    "bookingsCreated": "Bookings Created",
+    "newUsers": "New Users",
+    "topPagesTitle": "Most Viewed Pages",
+    "topShopsTitle": "Most Viewed Shops",
+    "noData": "No data yet.",
+    "viewsSuffix": "views",
+    "consentNote": "Only page views from visitors who gave cookie consent are counted; search/booking/signup events are tracked server-side regardless of consent."
   },
   "Home": {
     "seoTitle": "Consigne à bagages et dépôt de valises"

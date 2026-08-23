@@ -10,6 +10,9 @@ import {
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-ip";
 import { roundedSlotPrices } from "@/lib/bag-pricing";
+import { analyticsService } from "@/services/AnalyticsService";
+import { resolveServerSessionId } from "@/lib/analytics-server";
+import { auth } from "@/auth";
 
 export async function refreshSearchShopsAction(input: {
   checkInIso: string;
@@ -66,6 +69,14 @@ export async function refreshSearchShopsAction(input: {
       ...h,
       slotPrices: roundedSlotPrices(h.pricePerDay, rules),
     }));
+
+  const session = await auth();
+  analyticsService.track({
+    name: "search_performed",
+    sessionId: await resolveServerSessionId(session?.user?.id),
+    userId: session?.user?.id ?? null,
+    metadata: { resultCount: all.length, bags },
+  });
 
   return {
     ok: true as const,

@@ -542,6 +542,32 @@ model AuditLog {
   @@index([createdAt])
 }
 
+/// Birinci taraf, minimal kullanıcı analitiği (sayfa görüntüleme, arama, dükkan
+/// görüntüleme, checkout/booking huni adımları). Kişisel veri asgaride: `userId`
+/// yalnızca zaten oturum açmış kullanıcı için, IP/User-Agent hiç tutulmuyor.
+/// İstemci tarafı olaylar yalnızca çerez onayı verilmişse gönderiliyor
+/// (`hasAnalyticsConsent`, `src/lib/plausible-events.ts`).
+///
+/// Retention: `cleanup` iç işi 90 günden eski kayıtları siler (bkz.
+/// `src/lib/jobs/registry.ts`) — tablo sınırsız büyümesin diye.
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  /// Sabit sözlük — `src/lib/analytics-events.ts`. Rastgele metin değil.
+  name      String
+  /// İstemcide üretilip localStorage'da saklanan anonim oturum kimliği.
+  sessionId String
+  userId    String?
+  path      String?
+  referrer  String?
+  locale    String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([name, createdAt])
+  @@index([sessionId])
+  @@index([createdAt])
+}
+
 model LegalAcceptance {
   id          String   @id @default(cuid())
   userId      String

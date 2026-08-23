@@ -709,6 +709,7 @@
     "roleApprovalsNav": "Rol onayları",
     "roleApprovalsPendingBanner": "{count} bekleyen rol onayı var.",
     "disputesNav": "Anlaşmazlıklar",
+    "analyticsNav": "Analitik",
     "usersManagement": "Kullanıcı Yönetimi",
     "banDeleteUsers": "Banla & Sil",
     "user": "Kullanıcı",
@@ -1600,6 +1601,22 @@
     "healthScore": "Genel Sağlık Puanı",
     "healthDesc": "Tüm kritik servisler kontrol edildi.",
     "noCriticalError": "Kritik Hata Yok"
+  },
+  "AdminAnalytics": {
+    "title": "Kullanıcı Analitiği",
+    "subtitle": "Son {days} gün — davranış ve dönüşüm özeti",
+    "uniqueSessions": "Benzersiz Oturum",
+    "pageViews": "Sayfa Görüntüleme",
+    "searches": "Arama",
+    "shopViews": "Dükkan Görüntüleme",
+    "checkoutsStarted": "Checkout Başlatıldı",
+    "bookingsCreated": "Rezervasyon Oluşturuldu",
+    "newUsers": "Yeni Kullanıcı",
+    "topPagesTitle": "En Çok Görüntülenen Sayfalar",
+    "topShopsTitle": "En Çok İlgi Gören Dükkanlar",
+    "noData": "Henüz veri yok.",
+    "viewsSuffix": "görüntüleme",
+    "consentNote": "Yalnızca çerez onayı verilmiş ziyaretçilerin sayfa görüntülemeleri sayılıyor; arama/rezervasyon/kayıt olayları sunucu tarafında, onaydan bağımsız sayılır."
   },
   "Home": {
     "seoTitle": "Bagaj Emanet ve Valiz Depolama"

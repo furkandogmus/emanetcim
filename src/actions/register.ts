@@ -17,6 +17,8 @@ import {
   getLegalDocumentVersion,
 } from "@/lib/legal-versions";
 import { notificationService } from "@/services/NotificationService";
+import { analyticsService } from "@/services/AnalyticsService";
+import { resolveServerSessionId } from "@/lib/analytics-server";
 import logger from "@/lib/logger";
 
 const guestSchema = z.object({
@@ -110,6 +112,13 @@ export async function registerGuestAction(data: unknown) {
     })
     .catch((err) => logger.error({ err, userId: user.id }, "notify_admins_new_guest_failed"));
 
+  analyticsService.track({
+    name: "user_signed_up",
+    sessionId: await resolveServerSessionId(user.id),
+    userId: user.id,
+    metadata: { source: "web_email", role: "GUEST" },
+  });
+
   return { success: true as const };
 }
 
@@ -153,7 +162,7 @@ export async function registerPartnerApplicationAction(data: unknown) {
 
   const passwordHash = await hashPassword(parsed.data.password);
 
-  await prisma.$transaction(async (tx) => {
+  const newPartnerId = await prisma.$transaction(async (tx) => {
     const user = await tx.user.create({
       data: {
         email: email || null,
@@ -192,6 +201,8 @@ export async function registerPartnerApplicationAction(data: unknown) {
         isActive: false, // Admin onayı bekleyecek
       },
     });
+
+    return user.id;
   });
 
   void notificationService
@@ -203,6 +214,13 @@ export async function registerPartnerApplicationAction(data: unknown) {
       source: "web_partner_application",
     })
     .catch((err) => logger.error({ err }, "notify_admins_new_partner_failed"));
+
+  analyticsService.track({
+    name: "user_signed_up",
+    sessionId: await resolveServerSessionId(newPartnerId),
+    userId: newPartnerId,
+    metadata: { source: "web_partner_application", role: "PARTNER" },
+  });
 
   return { success: true as const };
 }

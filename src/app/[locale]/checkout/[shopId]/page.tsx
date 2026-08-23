@@ -6,6 +6,8 @@ import { getPricingRules } from '@/lib/platform-settings';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { auth } from '@/auth';
+import { analyticsService } from '@/services/AnalyticsService';
+import { resolveServerSessionId } from '@/lib/analytics-server';
 
 export async function generateMetadata({
   params,
@@ -48,6 +50,14 @@ export default async function CheckoutPage({
   if (!shop) {
     notFound();
   }
+
+  analyticsService.track({
+    name: "checkout_started",
+    sessionId: await resolveServerSessionId(session?.user?.id),
+    userId: session?.user?.id ?? null,
+    locale,
+    metadata: { shopId },
+  });
 
   const isLoggedIn = !!session?.user?.id;
   const checkInParam = typeof sp.checkIn === "string" ? sp.checkIn : undefined;

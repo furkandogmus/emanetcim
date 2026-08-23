@@ -7,6 +7,8 @@ import { Role } from "@prisma/client";
 import prisma from "@/lib/db";
 import { authConfig } from "./auth.config";
 import { notificationService } from "@/services/NotificationService";
+import { analyticsService } from "@/services/AnalyticsService";
+import { resolveServerSessionId } from "@/lib/analytics-server";
 import logger from "@/lib/logger";
 
 /**
@@ -47,6 +49,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           source: "web_google",
         })
         .catch((err) => logger.error({ err, userId: user.id }, "notify_admins_new_guest_failed"));
+      analyticsService.track({
+        name: "user_signed_up",
+        sessionId: await resolveServerSessionId(user.id),
+        userId: user.id ?? null,
+        metadata: { source: "web_google", role: "GUEST" },
+      });
     },
   },
   callbacks: {

@@ -6,6 +6,8 @@ import { signAccessToken, signRefreshToken } from "@/lib/mobile-auth";
 import { normalizeTrGsm10 } from "@/lib/netgsm";
 import { rateLimit } from "@/lib/rate-limit";
 import { notificationService } from "@/services/NotificationService";
+import { analyticsService } from "@/services/AnalyticsService";
+import { resolveServerSessionId } from "@/lib/analytics-server";
 import logger from "@/lib/logger";
 
 const schema = z.union([
@@ -87,6 +89,12 @@ export async function POST(req: Request) {
           source: "mobile_otp",
         })
         .catch((err) => logger.error({ err, userId: newUserId }, "notify_admins_new_guest_failed"));
+      analyticsService.track({
+        name: "user_signed_up",
+        sessionId: await resolveServerSessionId(newUserId),
+        userId: newUserId,
+        metadata: { source: "mobile_otp", role: "GUEST" },
+      });
     }
   } else if (password) {
     if (!(await rateLimit(`mobile_pwd:${normalizedIdentity}`, 5, 15 * 60_000))) {
