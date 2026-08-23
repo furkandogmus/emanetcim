@@ -1459,6 +1459,25 @@
     "viewsSuffix": "views",
     "consentNote": "Only page views from visitors who gave cookie consent are counted; search/booking/signup events are tracked server-side regardless of consent."
   },
+  "Account": {
+    "title": "حساب من",
+    "hello": "سلام",
+    "subtitle": "رزروها و تنظیمات حساب خود را در یک مکان مدیریت کنید.",
+    "bookings": "رزروهای من",
+    "bookingsDesc": "مشاهده رزروهای پیش رو و گذشته",
+    "explore": "پیدا کردن نقطه نگهداری",
+    "exploreDesc": "مکان‌های امن نزدیک خود را کشف کنید",
+    "support": "کمک و پشتیبانی",
+    "supportDesc": "برای سوالات خود با تیم ما تماس بگیرید",
+    "privacy": "حریم خصوصی و داده‌ها",
+    "privacyDesc": "امنیت حساب و تنظیمات داده",
+    "profile": "پروفایل",
+    "referralTitle": "دوستی را دعوت کنید، {pct}٪ تخفیف بگیرد",
+    "referralBody": "کد معرفی خود را با یک دوست به اشتراک بگذارید. او {pct}٪ تخفیف در اولین رزرو خود دریافت می‌کند.",
+    "referralReveal": "نمایش کد معرفی من",
+    "referralLoading": "در حال بارگذاری...",
+    "referralCopyTitle": "کپی لینک"
+  },
   "Home": {
     "seoTitle": "نگهداری چمدان و تحویل بار"
   },

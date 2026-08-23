@@ -1646,6 +1646,25 @@
     "viewsSuffix": "views",
     "consentNote": "Only page views from visitors who gave cookie consent are counted; search/booking/signup events are tracked server-side regardless of consent."
   },
+  "Account": {
+    "title": "My Account",
+    "hello": "Hello",
+    "subtitle": "Manage your bookings and account preferences in one place.",
+    "bookings": "My Bookings",
+    "bookingsDesc": "View upcoming and previous storage bookings",
+    "explore": "Find a storage point",
+    "exploreDesc": "Discover secure locations near you",
+    "support": "Help and support",
+    "supportDesc": "Contact our team with your questions",
+    "privacy": "Privacy and data",
+    "privacyDesc": "Account security and data preferences",
+    "profile": "Profile",
+    "referralTitle": "Invite a Friend, They Get {pct}% Off",
+    "referralBody": "Share your referral code with a friend. They get {pct}% off their first booking.",
+    "referralReveal": "Show My Referral Code",
+    "referralLoading": "Loading...",
+    "referralCopyTitle": "Copy link"
+  },
   "Home": {
     "seoTitle": "Luggage Storage and Bag Drop"
   }

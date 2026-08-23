@@ -1,4 +1,4 @@
-import { setRequestLocale } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { Link } from "@/i18n/routing";
@@ -28,46 +28,26 @@ export default async function AccountPage({
     Math.min(50, Math.max(0, Number(process.env.REFERRAL_DISCOUNT_PCT ?? "5"))),
   );
 
-  const copy =
-    locale === "tr"
-      ? {
-          title: "Hesabım",
-          hello: "Merhaba",
-          subtitle: "Rezervasyonlarını ve hesap tercihlerini tek yerden yönet.",
-          bookings: "Rezervasyonlarım",
-          bookingsDesc: "Yaklaşan ve geçmiş emanetlerini görüntüle",
-          explore: "Yeni emanet noktası bul",
-          exploreDesc: "Yakınındaki güvenli noktaları keşfet",
-          support: "Yardım ve destek",
-          supportDesc: "Soruların için ekibimize ulaş",
-          privacy: "Gizlilik ve veri",
-          privacyDesc: "Hesap güvenliği ve veri tercihleri",
-          profile: "Profil",
-          referralTitle: `Arkadaşını Davet Et, İndirim Kazandır`,
-          referralBody: `Referans kodunu arkadaşınla paylaş. İlk rezervasyonunda %${discountPct} indirim alır.`,
-          referralReveal: "Referans Kodumu Göster",
-          referralLoading: "Yükleniyor...",
-          referralCopyTitle: "Linki kopyala",
-        }
-      : {
-          title: "My Account",
-          hello: "Hello",
-          subtitle: "Manage your bookings and account preferences in one place.",
-          bookings: "My Bookings",
-          bookingsDesc: "View upcoming and previous storage bookings",
-          explore: "Find a storage point",
-          exploreDesc: "Discover secure locations near you",
-          support: "Help and support",
-          supportDesc: "Contact our team with your questions",
-          privacy: "Privacy and data",
-          privacyDesc: "Account security and data preferences",
-          profile: "Profile",
-          referralTitle: `Invite a Friend, They Get ${discountPct}% Off`,
-          referralBody: `Share your referral code with a friend. They get ${discountPct}% off their first booking.`,
-          referralReveal: "Show My Referral Code",
-          referralLoading: "Loading...",
-          referralCopyTitle: "Copy link",
-        };
+  const t = await getTranslations("Account");
+  const copy = {
+    title: t("title"),
+    hello: t("hello"),
+    subtitle: t("subtitle"),
+    bookings: t("bookings"),
+    bookingsDesc: t("bookingsDesc"),
+    explore: t("explore"),
+    exploreDesc: t("exploreDesc"),
+    support: t("support"),
+    supportDesc: t("supportDesc"),
+    privacy: t("privacy"),
+    privacyDesc: t("privacyDesc"),
+    profile: t("profile"),
+    referralTitle: t("referralTitle", { pct: discountPct }),
+    referralBody: t("referralBody", { pct: discountPct }),
+    referralReveal: t("referralReveal"),
+    referralLoading: t("referralLoading"),
+    referralCopyTitle: t("referralCopyTitle"),
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">

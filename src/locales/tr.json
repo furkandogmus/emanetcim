@@ -1645,6 +1645,25 @@
     "viewsSuffix": "görüntüleme",
     "consentNote": "Yalnızca çerez onayı verilmiş ziyaretçilerin sayfa görüntülemeleri sayılıyor; arama/rezervasyon/kayıt olayları sunucu tarafında, onaydan bağımsız sayılır."
   },
+  "Account": {
+    "title": "Hesabım",
+    "hello": "Merhaba",
+    "subtitle": "Rezervasyonlarını ve hesap tercihlerini tek yerden yönet.",
+    "bookings": "Rezervasyonlarım",
+    "bookingsDesc": "Yaklaşan ve geçmiş emanetlerini görüntüle",
+    "explore": "Yeni emanet noktası bul",
+    "exploreDesc": "Yakınındaki güvenli noktaları keşfet",
+    "support": "Yardım ve destek",
+    "supportDesc": "Soruların için ekibimize ulaş",
+    "privacy": "Gizlilik ve veri",
+    "privacyDesc": "Hesap güvenliği ve veri tercihleri",
+    "profile": "Profil",
+    "referralTitle": "Arkadaşını Davet Et, %{pct} İndirim Kazandır",
+    "referralBody": "Referans kodunu arkadaşınla paylaş. İlk rezervasyonunda %{pct} indirim alır.",
+    "referralReveal": "Referans Kodumu Göster",
+    "referralLoading": "Yükleniyor...",
+    "referralCopyTitle": "Linki kopyala"
+  },
   "Home": {
     "seoTitle": "Bagaj Emanet ve Valiz Depolama"
   }

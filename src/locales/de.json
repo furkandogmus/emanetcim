@@ -1459,6 +1459,25 @@
     "viewsSuffix": "views",
     "consentNote": "Only page views from visitors who gave cookie consent are counted; search/booking/signup events are tracked server-side regardless of consent."
   },
+  "Account": {
+    "title": "Mein Konto",
+    "hello": "Hallo",
+    "subtitle": "Verwalten Sie Ihre Buchungen und Kontoeinstellungen an einem Ort.",
+    "bookings": "Meine Buchungen",
+    "bookingsDesc": "Bevorstehende und frühere Buchungen ansehen",
+    "explore": "Aufbewahrungsort finden",
+    "exploreDesc": "Entdecken Sie sichere Orte in Ihrer Nähe",
+    "support": "Hilfe und Support",
+    "supportDesc": "Kontaktieren Sie unser Team bei Fragen",
+    "privacy": "Datenschutz und Daten",
+    "privacyDesc": "Kontosicherheit und Datenpräferenzen",
+    "profile": "Profil",
+    "referralTitle": "Laden Sie einen Freund ein, {pct}% Rabatt schenken",
+    "referralBody": "Teilen Sie Ihren Empfehlungscode mit einem Freund. Er erhält {pct}% Rabatt auf die erste Buchung.",
+    "referralReveal": "Meinen Empfehlungscode anzeigen",
+    "referralLoading": "Wird geladen...",
+    "referralCopyTitle": "Link kopieren"
+  },
   "Home": {
     "seoTitle": "Gepäckaufbewahrung und Gepäckabgabe"
   },
