@@ -514,6 +514,7 @@
     "duration": "مدت",
     "showFilters": "نمایش فیلترها",
     "hideFilters": "پنهان کردن فیلترها",
+    "showResults": "نمایش {count} نتیجه",
     "payBookingDividerOnsite": "پرداخت در محل انجام می‌شود",
     "cancellationEstimateCardOnsite": "حدود ₺{amount} بازگردانده می‌شود؛ اگر هنوز پرداخت نکرده‌اید، مبلغی از شما کسر نمی‌شود.",
     "modifyRefundNoteOnsite": "پرداخت در محل انجام می‌شود و بر اساس مبلغ به‌روزشده محاسبه خواهد شد.",

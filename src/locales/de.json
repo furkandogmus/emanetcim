@@ -514,6 +514,7 @@
     "duration": "Dauer",
     "showFilters": "Filter anzeigen",
     "hideFilters": "Filter ausblenden",
+    "showResults": "{count} Ergebnisse anzeigen",
     "payBookingDividerOnsite": "Sie zahlen im Geschäft",
     "cancellationEstimateCardOnsite": "Etwa ₺{amount} werden erstattet; wenn Sie noch nicht bezahlt haben, wird nichts abgebucht.",
     "modifyRefundNoteOnsite": "Die Zahlung erfolgt im Geschäft und wird zum aktualisierten Betrag berechnet.",

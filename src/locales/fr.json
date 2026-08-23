@@ -514,6 +514,7 @@
     "duration": "Durée",
     "showFilters": "Afficher les filtres",
     "hideFilters": "Masquer les filtres",
+    "showResults": "Afficher {count} résultats",
     "payBookingDividerOnsite": "Vous payez sur place",
     "cancellationEstimateCardOnsite": "Environ ₺{amount} seront remboursés ; si vous n'avez pas encore payé, rien ne sera débité.",
     "modifyRefundNoteOnsite": "Le paiement se fait sur place et sera calculé sur le montant mis à jour.",

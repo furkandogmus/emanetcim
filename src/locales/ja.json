@@ -514,6 +514,7 @@
     "duration": "期間",
     "showFilters": "絞り込みを表示",
     "hideFilters": "絞り込みを隠す",
+    "showResults": "{count}件の結果を表示",
     "payBookingDividerOnsite": "お支払いは店舗で行います",
     "cancellationEstimateCardOnsite": "約 ₺{amount} が返金されます。まだお支払いでない場合は、請求は発生しません。",
     "modifyRefundNoteOnsite": "お支払いは店舗で、更新後の金額にて承ります。",

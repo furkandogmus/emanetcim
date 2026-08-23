@@ -101,6 +101,13 @@ export default function SearchClient({
    * değişiyordu. Yavaş bağlantıda "değişikliğim işlendi mi?" belirsizliği yaratıyordu.
    */
   const [isSearching, setIsSearching] = useState(false);
+  /**
+   * Mobilde (bottom sheet) tarih/valiz/arama/sırala/filtre için hiçbir erişim
+   * yoktu — yalnızca "Yakındaki/Tüm Noktalar" sekmeleri vardı. Bu, masaüstü
+   * kenar panelindeki AYNI kontrolleri (searchAndDateControls,
+   * sortAndAmenityControls) ayrı bir modal sheet'te açan tek bir durum.
+   */
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   useEffect(() => {
     setCheckInLocal(toDatetimeLocalValueInTimeZone(new Date(defaultCheckInIso)));
@@ -402,6 +409,233 @@ export default function SearchClient({
     </div>
   );
 
+  const searchAndDateControls = (
+    <>
+      {resolvedPlaceLabel ? (
+        <p className="mb-2 text-xs font-semibold text-gray-500 truncate">
+          {resolvedPlaceLabel}
+        </p>
+      ) : null}
+
+      <div className="flex gap-2 mb-3">
+        <div className="relative group flex-1">
+          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+            <SearchIcon
+              size={18}
+              className="text-gray-400 group-focus-within:text-orange-600 transition-colors"
+            />
+          </div>
+          <input
+            type="text"
+            aria-label={t("searchPlaceholder")}
+            placeholder={t("searchPlaceholder")}
+            className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-transparent focus:border-orange-500/30 focus:bg-white focus:ring-4 focus:ring-orange-500/5 rounded-2xl text-base font-semibold placeholder:text-gray-400 transition-all shadow-sm outline-none"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <button
+          type="button"
+          onClick={handleUseMyLocation}
+          disabled={gpsLocating}
+          className="shrink-0 h-[52px] w-[52px] bg-gray-50 hover:bg-orange-50 border border-transparent hover:border-orange-200 rounded-2xl flex items-center justify-center text-gray-400 hover:text-orange-600 transition-all disabled:opacity-50"
+          title={t("useMyLocation")}
+          aria-label={t("useMyLocation")}
+        >
+          {gpsLocating ? (
+            <div className="w-5 h-5 border-2 border-gray-300 border-t-orange-600 rounded-full animate-spin" />
+          ) : (
+            <Crosshair size={20} />
+          )}
+        </button>
+      </div>
+
+      {datesReady ? (
+        <section
+          className="mb-3 space-y-2 rounded-2xl border border-gray-100 bg-gray-50/80 p-3"
+          data-testid="search-stay-filters"
+        >
+          <p className="text-xs font-black uppercase tracking-widest text-gray-400">
+            {t("searchStayWindow")}
+          </p>
+          <p className="text-[11px] text-gray-400">
+            {t("searchOnlyAvailableHint")}
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-bold text-gray-400 uppercase">
+                {t("searchCheckIn")}
+              </span>
+              <div className="rounded-xl bg-white border border-gray-100 px-2 py-2">
+                <DateTimePicker
+                  value={checkInLocal}
+                  onChange={(v) => {
+                    setCheckInLocal(v);
+                    markFiltersDirty();
+                  }}
+                  testId="search-checkin"
+                  ariaLabel={t("searchCheckIn")}
+                  iconSize={14}
+                />
+              </div>
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-bold text-gray-400 uppercase">
+                {t("searchCheckOut")}
+              </span>
+              <div className="rounded-xl bg-white border border-gray-100 px-2 py-2">
+                <DateTimePicker
+                  value={checkOutLocal}
+                  onChange={(v) => {
+                    setCheckOutLocal(v);
+                    markFiltersDirty();
+                  }}
+                  testId="search-checkout"
+                  ariaLabel={t("searchCheckOut")}
+                  iconSize={14}
+                  minDate={parseDatetimeLocalInTimeZone(checkInLocal) ?? undefined}
+                />
+              </div>
+            </label>
+          </div>
+          <div className="flex items-center justify-between gap-3 pt-1">
+            <span className="text-xs font-bold text-gray-400 uppercase">
+              {t("searchBagCount")}
+            </span>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                data-testid="search-bags-decrease"
+                aria-label="Decrease bags"
+                onClick={() => {
+                  setRequestedBags((n) => Math.max(1, n - 1));
+                  markFiltersDirty();
+                }}
+                disabled={requestedBags <= 1}
+                className="w-9 h-9 rounded-full bg-white border border-gray-200 flex items-center justify-center disabled:opacity-30"
+              >
+                <Minus size={16} />
+              </button>
+              <span
+                data-testid="search-bags-value"
+                className="w-6 text-center font-black text-gray-900"
+              >
+                {requestedBags}
+              </span>
+              <button
+                type="button"
+                data-testid="search-bags-increase"
+                aria-label="Increase bags"
+                onClick={() => {
+                  setRequestedBags((n) => Math.min(MAX_SEARCH_BAGS, n + 1));
+                  markFiltersDirty();
+                }}
+                disabled={requestedBags >= MAX_SEARCH_BAGS}
+                className="w-9 h-9 rounded-full bg-orange-600 text-white flex items-center justify-center disabled:opacity-40"
+              >
+                <Plus size={16} />
+              </button>
+            </div>
+          </div>
+        </section>
+      ) : null}
+    </>
+  );
+
+  const sortAndAmenityControls = (
+    <>
+      <div className="flex items-center gap-2 mb-2">
+        <ArrowUpDown size={14} className="text-gray-400 shrink-0" />
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          className="text-[10px] font-bold uppercase tracking-widest bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-gray-700 outline-none focus:border-orange-300"
+          aria-label={t("sortBy")}
+        >
+          <option value="distance">{t("sortByDistance")}</option>
+          <option value="price_asc">{t("sortByPriceLow")}</option>
+          <option value="price_desc">{t("sortByPriceHigh")}</option>
+          <option value="hourly">{t("sortByHourly")}</option>
+          <option value="rating">{t("sortByRating")}</option>
+        </select>
+      </div>
+      <div className="flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-widest">
+        <label className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-lg">
+          {t("filterMinRating")}
+          <input
+            type="number"
+            min={0}
+            max={5}
+            step={0.1}
+            className="w-12 bg-transparent border-none text-xs font-black"
+            value={minRating}
+            onChange={(e) => setMinRating(Number(e.target.value) || 0)}
+          />
+        </label>
+        <label className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-lg">
+          {t("filterMaxPrice")}
+          <input
+            type="number"
+            min={0}
+            className="w-14 bg-transparent border-none text-xs font-black"
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(Number(e.target.value) || 500)}
+          />
+        </label>
+        <label className="flex items-center gap-1 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={open247Only}
+            onChange={(e) => setOpen247Only(e.target.checked)}
+          />
+          7/24
+        </label>
+        <label className="flex items-center gap-1 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={hasRestroom}
+            onChange={(e) => setHasRestroom(e.target.checked)}
+          />
+          WC
+        </label>
+        <label className="flex items-center gap-1 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={hasCctv}
+            onChange={(e) => setHasCctv(e.target.checked)}
+          />
+          {t("filterCctv")}
+        </label>
+        <label className="flex items-center gap-1 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={hasClimateControlFilter}
+            onChange={(e) => setHasClimateControlFilter(e.target.checked)}
+          />
+          {t("filterClimate")}
+        </label>
+        <label className="flex items-center gap-1 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={acceptsLargeItemsFilter}
+            onChange={(e) => setAcceptsLargeItemsFilter(e.target.checked)}
+          />
+          {t("filterLargeItems")}
+        </label>
+      </div>
+    </>
+  );
+
+  const activeAmenityFilterCount = [
+    minRating > 0,
+    maxPrice < 500,
+    open247Only,
+    hasRestroom,
+    hasCctv,
+    hasClimateControlFilter,
+    acceptsLargeItemsFilter,
+  ].filter(Boolean).length;
+
   return (
     <div className="relative h-[100svh] w-full overflow-hidden bg-white font-sans selection:bg-orange-100">
       <div className="absolute inset-0 z-0">
@@ -444,134 +678,8 @@ export default function SearchClient({
             </h1>
           </div>
         </div>
-        {resolvedPlaceLabel ? (
-          <p className="mb-2 text-xs font-semibold text-gray-500 truncate">
-            {resolvedPlaceLabel}
-          </p>
-        ) : null}
 
-          <div className="flex gap-2 mb-3">
-            <div className="relative group flex-1">
-              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                <SearchIcon
-                  size={18}
-                  className="text-gray-400 group-focus-within:text-orange-600 transition-colors"
-                />
-              </div>
-              <input
-                type="text"
-                aria-label={t("searchPlaceholder")}
-                placeholder={t("searchPlaceholder")}
-                className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-transparent focus:border-orange-500/30 focus:bg-white focus:ring-4 focus:ring-orange-500/5 rounded-2xl text-base font-semibold placeholder:text-gray-400 transition-all shadow-sm outline-none"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <button
-              type="button"
-              onClick={handleUseMyLocation}
-              disabled={gpsLocating}
-              className="shrink-0 h-[52px] w-[52px] bg-gray-50 hover:bg-orange-50 border border-transparent hover:border-orange-200 rounded-2xl flex items-center justify-center text-gray-400 hover:text-orange-600 transition-all disabled:opacity-50"
-              title={t("useMyLocation")}
-              aria-label={t("useMyLocation")}
-            >
-              {gpsLocating ? (
-                <div className="w-5 h-5 border-2 border-gray-300 border-t-orange-600 rounded-full animate-spin" />
-              ) : (
-                <Crosshair size={20} />
-              )}
-            </button>
-          </div>
-
-        {datesReady ? (
-          <section
-            className="mb-3 space-y-2 rounded-2xl border border-gray-100 bg-gray-50/80 p-3"
-            data-testid="search-stay-filters"
-          >
-            <p className="text-xs font-black uppercase tracking-widest text-gray-400">
-              {t("searchStayWindow")}
-            </p>
-            <p className="text-[11px] text-gray-400">
-              {t("searchOnlyAvailableHint")}
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <label className="flex flex-col gap-1">
-                <span className="text-xs font-bold text-gray-400 uppercase">
-                  {t("searchCheckIn")}
-                </span>
-                <div className="rounded-xl bg-white border border-gray-100 px-2 py-2">
-                  <DateTimePicker
-                    value={checkInLocal}
-                    onChange={(v) => {
-                      setCheckInLocal(v);
-                      markFiltersDirty();
-                    }}
-                    testId="search-checkin"
-                    ariaLabel={t("searchCheckIn")}
-                    iconSize={14}
-                  />
-                </div>
-              </label>
-              <label className="flex flex-col gap-1">
-                <span className="text-xs font-bold text-gray-400 uppercase">
-                  {t("searchCheckOut")}
-                </span>
-                <div className="rounded-xl bg-white border border-gray-100 px-2 py-2">
-                  <DateTimePicker
-                    value={checkOutLocal}
-                    onChange={(v) => {
-                      setCheckOutLocal(v);
-                      markFiltersDirty();
-                    }}
-                    testId="search-checkout"
-                    ariaLabel={t("searchCheckOut")}
-                    iconSize={14}
-                    minDate={parseDatetimeLocalInTimeZone(checkInLocal) ?? undefined}
-                  />
-                </div>
-              </label>
-            </div>
-            <div className="flex items-center justify-between gap-3 pt-1">
-              <span className="text-xs font-bold text-gray-400 uppercase">
-                {t("searchBagCount")}
-              </span>
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  data-testid="search-bags-decrease"
-                  aria-label="Decrease bags"
-                  onClick={() => {
-                    setRequestedBags((n) => Math.max(1, n - 1));
-                    markFiltersDirty();
-                  }}
-                  disabled={requestedBags <= 1}
-                  className="w-9 h-9 rounded-full bg-white border border-gray-200 flex items-center justify-center disabled:opacity-30"
-                >
-                  <Minus size={16} />
-                </button>
-                <span
-                  data-testid="search-bags-value"
-                  className="w-6 text-center font-black text-gray-900"
-                >
-                  {requestedBags}
-                </span>
-                <button
-                  type="button"
-                  data-testid="search-bags-increase"
-                  aria-label="Increase bags"
-                  onClick={() => {
-                    setRequestedBags((n) => Math.min(MAX_SEARCH_BAGS, n + 1));
-                    markFiltersDirty();
-                  }}
-                  disabled={requestedBags >= MAX_SEARCH_BAGS}
-                  className="w-9 h-9 rounded-full bg-orange-600 text-white flex items-center justify-center disabled:opacity-40"
-                >
-                  <Plus size={16} />
-                </button>
-              </div>
-            </div>
-          </section>
-          ) : null}
+        {searchAndDateControls}
 
         <button
           type="button"
@@ -609,89 +717,7 @@ export default function SearchClient({
           </div>
         </div>
 
-        {filtersOpen && (
-          <>
-            <div className="flex items-center gap-2 mb-2">
-              <ArrowUpDown size={14} className="text-gray-400 shrink-0" />
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="text-[10px] font-bold uppercase tracking-widest bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-gray-700 outline-none focus:border-orange-300"
-                aria-label={t("sortBy")}
-              >
-                  <option value="distance">{t("sortByDistance")}</option>
-                  <option value="price_asc">{t("sortByPriceLow")}</option>
-                  <option value="price_desc">{t("sortByPriceHigh")}</option>
-                  <option value="hourly">{t("sortByHourly")}</option>
-                  <option value="rating">{t("sortByRating")}</option>
-                </select>
-              </div>
-              <div className="flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-widest">
-                <label className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-lg">
-                  {t("filterMinRating")}
-                  <input
-                    type="number"
-                    min={0}
-                    max={5}
-                    step={0.1}
-                    className="w-12 bg-transparent border-none text-xs font-black"
-                    value={minRating}
-                    onChange={(e) => setMinRating(Number(e.target.value) || 0)}
-                  />
-                </label>
-                <label className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-lg">
-                  {t("filterMaxPrice")}
-                  <input
-                    type="number"
-                    min={0}
-                    className="w-14 bg-transparent border-none text-xs font-black"
-                    value={maxPrice}
-                    onChange={(e) => setMaxPrice(Number(e.target.value) || 500)}
-                  />
-                </label>
-                <label className="flex items-center gap-1 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={open247Only}
-                    onChange={(e) => setOpen247Only(e.target.checked)}
-                  />
-                  7/24
-                </label>
-                <label className="flex items-center gap-1 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={hasRestroom}
-                    onChange={(e) => setHasRestroom(e.target.checked)}
-                  />
-                  WC
-                </label>
-                <label className="flex items-center gap-1 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={hasCctv}
-                    onChange={(e) => setHasCctv(e.target.checked)}
-                  />
-                  {t("filterCctv")}
-                </label>
-                <label className="flex items-center gap-1 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={hasClimateControlFilter}
-                    onChange={(e) => setHasClimateControlFilter(e.target.checked)}
-                  />
-                  {t("filterClimate")}
-                </label>
-                <label className="flex items-center gap-1 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={acceptsLargeItemsFilter}
-                    onChange={(e) => setAcceptsLargeItemsFilter(e.target.checked)}
-                  />
-                  {t("filterLargeItems")}
-                </label>
-              </div>
-          </>
-        )}
+        {filtersOpen && sortAndAmenityControls}
       </header>
 
       {resultsList}
@@ -712,7 +738,7 @@ export default function SearchClient({
           aboveMobileNav
         >
           <header className="px-4 pt-2 pb-3 border-b border-gray-100 shrink-0">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <div className="flex bg-gray-100 rounded-xl p-1 flex-1">
                 <button
                   type="button"
@@ -729,9 +755,48 @@ export default function SearchClient({
                   {t("allShops")} ({allList.length})
                 </button>
               </div>
+              <button
+                type="button"
+                onClick={() => setMobileFiltersOpen(true)}
+                aria-label={t("showFilters")}
+                className="relative shrink-0 flex h-[38px] w-[38px] items-center justify-center rounded-xl bg-gray-100 text-gray-600 active:scale-95 transition-all"
+              >
+                <SlidersHorizontal size={16} />
+                {activeAmenityFilterCount > 0 && (
+                  <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-orange-600 text-[9px] font-black text-white">
+                    {activeAmenityFilterCount}
+                  </span>
+                )}
+              </button>
             </div>
           </header>
           {resultsList}
+        </BottomSheet>
+
+        {/* Mobil: tarih/valiz/arama/sırala/filtre — masaüstündeki AYNI kontroller,
+            ayrı bir modal sheet'te (bkz. searchAndDateControls/sortAndAmenityControls). */}
+        <BottomSheet
+          open={mobileFiltersOpen}
+          onClose={() => setMobileFiltersOpen(false)}
+          title={t("showFilters")}
+          snapPoints={[92]}
+          initialSnap={0}
+          showClose
+          showOverlay
+        >
+          <div className="flex-1 overflow-y-auto p-4">
+            {searchAndDateControls}
+            {sortAndAmenityControls}
+          </div>
+          <div className="shrink-0 border-t border-gray-100 p-4">
+            <button
+              type="button"
+              onClick={() => setMobileFiltersOpen(false)}
+              className="btn-ui btn-ui-md btn-ui-primary w-full"
+            >
+              {t("showResults", { count: sortedShops.length })}
+            </button>
+          </div>
         </BottomSheet>
       </div>
       )}

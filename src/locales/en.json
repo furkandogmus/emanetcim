@@ -514,6 +514,7 @@
     "duration": "Duration",
     "showFilters": "Show Filters",
     "hideFilters": "Hide Filters",
+    "showResults": "Show {count} Results",
     "payBookingDividerOnsite": "You pay at the shop",
     "cancellationEstimateCardOnsite": "About ₺{amount} will be refunded; if you haven't paid yet, nothing will be charged.",
     "modifyRefundNoteOnsite": "Payment is taken at the shop and will be charged at the updated amount.",
