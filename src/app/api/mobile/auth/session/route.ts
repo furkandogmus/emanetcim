@@ -41,6 +41,10 @@ export async function POST(req: Request) {
   let user;
 
   if (code) {
+    if (!(await rateLimit(`mobile_otp_verify:${normalizedIdentity}`, 5, 15 * 60_000))) {
+      return NextResponse.json({ error: "too_many_attempts" }, { status: 429 });
+    }
+
     const token = await prisma.verificationToken.delete({
       where: { identifier_token: { identifier, token: code } },
     }).catch(() => null);

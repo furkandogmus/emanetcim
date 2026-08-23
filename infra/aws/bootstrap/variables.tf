@@ -84,3 +84,9 @@ variable "monthly_budget_usd" {
   type        = number
   default     = 25
 }
+
+variable "budget_name" {
+  description = "Aylık bütçe alarmının adı (eski hesaptaki mevcut ad: bagajpark-aws-test-guardrail)."
+  type        = string
+  default     = "bagajpark-aws-test-guardrail"
+}

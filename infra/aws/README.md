@@ -67,12 +67,16 @@ managed policy'lerinin YETMEDİĞİ ortaya çıktı (TLS-via-SSM otomasyonu ekle
 terraform-bagajpark ...`), `terraform-bagajpark`'ın kendisi bunu kendine veremez
 (iam:PutUserPolicy yetkisi yok, kasıtlı):
 
-- `ssm:PutParameter/GetParameter/GetParameters/DeleteParameter/AddTagsToResource/ListTagsForResource`
+- `ssm:PutParameter/GetParameter/GetParameters/DeleteParameter/AddTagsToResource/RemoveTagsFromResource/ListTagsForResource`
   → sadece `arn:aws:ssm:*:<account>:parameter/bagajpark/*`
 - `ssm:DescribeParameters` → `Resource:"*"` (AWS kısıtı — bu action resource-level ARN
   desteklemiyor, provider her `aws_ssm_parameter` için bunu da çağırıyor)
 - `kms:Encrypt/Decrypt/GenerateDataKey` → `Resource:"*"`, `Condition:
   kms:ViaService=ssm.*.amazonaws.com` (SecureString'in varsayılan AWS-managed anahtarı için)
+- `iam:GetOpenIDConnectProvider/ListOpenIDConnectProviders` → `oidc-provider/*` (bootstrap'ın
+  GitHub OIDC data source'u URL ile arama yapar; 2026-08-23 hesap taşımasında eksik çıktı)
+- `budgets:ViewBudget/ModifyBudget/TagResource/UntagResource/ListTagsForResource` → `*`
+  (bütçe alarmı; TagResource eksikliği CreateBudget'ı 400 ile düşürüyor)
 - `iam:CreateRole/DeleteRole/GetRole/PutRolePolicy/DeleteRolePolicy/GetRolePolicy/
   ListRolePolicies/ListAttachedRolePolicies/CreateInstanceProfile/DeleteInstanceProfile/
   GetInstanceProfile/AddRoleToInstanceProfile/RemoveRoleFromInstanceProfile/PassRole/

@@ -133,28 +133,48 @@ export async function createBookingAction(data: CreateBookingInput) {
       where: { code: data.couponCode },
     });
     const now = new Date();
-    if (
-      coupon &&
+    const eligible =
+      !!coupon &&
       coupon.isActive &&
       (!coupon.expiresAt || coupon.expiresAt > now) &&
-      (coupon.maxUses == null || coupon.usedCount < coupon.maxUses) &&
-      (coupon.minPrice == null ||
-        totalPrice >= moneyToNumber(coupon.minPrice))
-    ) {
-      if (coupon.isPercent) {
-        totalPrice = Math.max(
-          0,
-          Math.round(
-            totalPrice * (1 - moneyToNumber(coupon.discount) / 100) * 100
-          ) / 100
-        );
-      } else {
-        totalPrice = Math.max(
-          0,
-          Math.round((totalPrice - moneyToNumber(coupon.discount)) * 100) / 100
-        );
+      (coupon.minPrice == null || totalPrice >= moneyToNumber(coupon.minPrice));
+
+    if (eligible && coupon) {
+      // Kota hakkı booking oluşmadan ÖNCE, atomik olarak alınır. Yarış koşulunda
+      // (eşzamanlı istekler kotanın sınırında) sayaç doluysa `claimed` false döner
+      // ve indirim hiç uygulanmaz — booking indirimsiz fiyatla devam eder.
+      const claimed =
+        coupon.maxUses == null
+          ? true
+          : (
+              await prisma.coupon.updateMany({
+                where: { id: coupon.id, usedCount: { lt: coupon.maxUses } },
+                data: { usedCount: { increment: 1 } },
+              })
+            ).count > 0;
+
+      if (claimed) {
+        if (coupon.maxUses == null) {
+          await prisma.coupon.update({
+            where: { id: coupon.id },
+            data: { usedCount: { increment: 1 } },
+          });
+        }
+        if (coupon.isPercent) {
+          totalPrice = Math.max(
+            0,
+            Math.round(
+              totalPrice * (1 - moneyToNumber(coupon.discount) / 100) * 100
+            ) / 100
+          );
+        } else {
+          totalPrice = Math.max(
+            0,
+            Math.round((totalPrice - moneyToNumber(coupon.discount)) * 100) / 100
+          );
+        }
+        appliedCouponId = coupon.id;
       }
-      appliedCouponId = coupon.id;
     }
   }
 
@@ -234,26 +254,6 @@ export async function createBookingAction(data: CreateBookingInput) {
       })
       .catch(() => {});
 
-    // Kupon kullanıldıysa usedCount artır (atomik, race condition önlemi)
-    if (appliedCouponId) {
-      const coupon = await prisma.coupon.findUnique({ where: { id: appliedCouponId } });
-      if (coupon && coupon.maxUses != null) {
-        const updateCount = await prisma.coupon.updateMany({
-          where: { id: appliedCouponId, usedCount: { lt: coupon.maxUses } },
-          data: { usedCount: { increment: 1 } },
-        });
-        if (updateCount.count === 0) {
-          // Kupon kotası doldu, booking zaten oluştu ama indirimsiz bırakılmalı
-          logger.warn({ couponId: appliedCouponId, bookingId: booking.id }, "coupon_quota_exceeded_after_booking");
-        }
-      } else if (coupon) {
-        await prisma.coupon.update({
-          where: { id: appliedCouponId },
-          data: { usedCount: { increment: 1 } },
-        });
-      }
-    }
-
     // Sadakat puanı: her 1 TL harcamaya 1 puan
     if (userId) {
       const earnedPoints = Math.floor(totalPrice);
@@ -272,6 +272,12 @@ export async function createBookingAction(data: CreateBookingInput) {
       status: "APPROVED",
     };
   } catch (e: unknown) {
+    // Booking oluşturulamadıysa, önceden atomik olarak alınmış kupon hakkı iade edilir.
+    if (appliedCouponId) {
+      await prisma.coupon
+        .update({ where: { id: appliedCouponId }, data: { usedCount: { decrement: 1 } } })
+        .catch((err) => logger.error({ err, couponId: appliedCouponId }, "coupon_claim_release_failed"));
+    }
     if (e instanceof BookingCapacityExceededError) {
       return { success: false as const, error: e.message };
     }

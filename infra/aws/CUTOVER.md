@@ -1,31 +1,22 @@
 # Hetzner → AWS kesim (cutover) runbook'u
 
-## Son durum — 2026-08-23 00:25 (UTC+3)
+## Son durum — 2026-08-23 15:30 (UTC+3)
 
-**KESİM TAMAMLANDI. `bagajpark.com` AWS'te (`<ORIGIN_IP>`), gerçek veriyle.**
+**HESAP TAŞIMA TAMAMLANDI. `bagajpark.com` artık YENİ AWS hesabında (772853132412).**
 
 | | |
 |---|---|
-| DNS | Cloudflare A kayıtları AWS EIP'de (Proxied) |
-| Veri | Hetzner dump `emanetci_20260822_211509` restore edildi; 19 rezervasyon / 39 kullanıcı / 3 dükkan birebir |
-| Migration | 10/10 uygulandı (`JobRun` ve eski `init_schema` kaydı elle çözüldü, aşağıda) |
-| Cron | `crontab.prod` kurulu (yedek 6 saat, slot, gecikme, mühür tahmini, prune) |
-| Yedek | `s3://bagajpark-backups-43403243/backups/` — ilk dump 00:21'de yüklendi |
-| Hetzner | sunucu açık, yalnızca `web` durmuş; **1 hafta geri alma penceresi**, sonra iptal |
-| Deploy | `main` push → AWS = **canlı deploy** |
+| Sunucu | `<ESKI_ORIGIN_IP>:2222` (eu-central-1, `hesap2` terraform workspace, profil `bagajpark-yeni`) |
+| Veri | son dump `emanetci_20260823_122308` (19/39/3) — kesim penceresi ~7 dk |
+| Yedek | `s3://bagajpark-backups-1d9eb152/backups/` (6 saatte bir cron) |
+| Deploy | GitHub vars yeni hesaba çevrildi (`AWS_DEPLOY_ROLE_ARN`, `AWS_DEPLOY_BUCKET`); `main` push → yeni hesap |
+| Eski AWS (269174115166) | konteynerler `down`, instance `i-015afc0ebcbb989d5` STOPPED — 1 hafta geri dönüş payı, sonra `terraform destroy` (workspace `default`) + hesap kapatma |
+| Hetzner | sunucu açık ama trafiksiz; aboneliği İPTAL ET (kullanıcı) |
+| Terraform | eski hesap state'i `default` workspace'te, yeni hesap `hesap2`'de |
 
-### Kesimde yaşananlar (postmortem notu)
-- Plan "önce veri, sonra DNS" idi; DNS veri taşınmadan çevrildi ve Hetzner **sunucusu**
-  (yalnızca `web` değil) kapatıldı → ~10 dk boş veritabanıyla canlı, ardından 502.
-  Sunucu açılınca dump alınıp taşındı. Ders: kesim adımlarını tek kişi, sırayla, runbook'tan yürütür.
-- `scripts/restore.sh` SSH üzerinden (stdin yok) `pg_restore -` ile çalışmıyor; elle
-  `docker cp` + `pg_restore --clean --if-exists` yapıldı. Script düzeltilmeli.
-- Hetzner DB'de `JobRun` tablosu migration kaydı olmadan vardı (`db push` izi) ve repoda
-  olmayan eski bir başarısız `20260101000000_init_schema` satırı duruyordu → `migrate deploy`
-  P3009 ile durdu, web crash-loop. Çözüm: indeksler `IF NOT EXISTS`, eski satır silindi,
-  `prisma migrate resolve --applied 20260822120000_job_run_ledger`.
-- ioredis `lazyConnect`+`enableOfflineQueue:false` ilk komutu reddediyordu (provada
-  yakalandı, kesimden önce düzeltildi).
+Taşınabilirlik provası + kesimde bulunanlar: bildirilmemiş `budget_name` değişkeni;
+IAM policy listesine `iam:ListOpenIDConnectProviders` ve `budgets:TagResource/UntagResource/ListTagsForResource`
+eklenmesi gerekti (README güncellenmeli). Sıfır hesaptan çalışan kopyaya ~25 dk.
 
 ## ⚠️ Önce bilinmesi gereken
 

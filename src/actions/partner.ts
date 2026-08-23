@@ -383,10 +383,10 @@ export async function rejectBookingAction(bookingId: string) {
       return { success: false as const, error: "Errors.bookingStateConflict" };
     }
 
-    await prisma.booking.update({
-      where: { id: bookingId },
-      data: { status: BookingStatus.CANCELLED },
-    });
+    const cancelResult = await bookingService.cancelBooking(bookingId);
+    if (!cancelResult.ok) {
+      return { success: false as const, error: "Errors.bookingStateConflict" };
+    }
 
     void bookingEventService.record({
       bookingId,

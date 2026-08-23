@@ -4,6 +4,8 @@ import { z } from "zod";
 import { shopService } from "@/services/ShopService";
 import { validateBookingStayWindow } from "@/lib/booking-server-price";
 import { getPricingRules } from "@/lib/platform-settings";
+import { rateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/get-ip";
 
 const schema = z.object({
   lat: z.coerce.number(),
@@ -17,6 +19,11 @@ const schema = z.object({
 });
 
 export async function GET(req: NextRequest) {
+  const ip = await getClientIp(req);
+  if (!(await rateLimit(`mobile_shops_nearby:${ip}`, 30, 60_000))) {
+    return NextResponse.json({ error: "too_many_requests" }, { status: 429 });
+  }
+
   const parsed = schema.safeParse(Object.fromEntries(req.nextUrl.searchParams));
   if (!parsed.success) return NextResponse.json({ error: "invalid" }, { status: 400 });
   const { lat, lng, r, page, limit, checkIn, checkOut, bags } = parsed.data;

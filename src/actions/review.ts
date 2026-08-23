@@ -39,7 +39,7 @@ export async function addReviewAction(data: {
   }
 
   try {
-    const review = await reviewService.addReview(data);
+    const review = await reviewService.addReview({ ...data, shopId: booking.shopId });
 
     revalidatePathAllLocales("/bookings");
     revalidatePathAllLocales("/search");

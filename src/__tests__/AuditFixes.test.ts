@@ -147,6 +147,65 @@ describe("Audit Fix #1: Coupon usedCount Increment", () => {
       data: { usedCount: { increment: 1 } },
     });
   });
+
+  it("does not discount the booking when the quota claim loses the race (BULGU 9.1)", async () => {
+    // bkz. docs/KOD_TARAMA_2026-08-23.md: kota kontrolü artık booking oluşmadan ÖNCE,
+    // atomik `updateMany` ile yapılıyor. Kota doluysa (count: 0) indirim hiç
+    // uygulanmamalı — booking, kuponsuz haliyle aynı tam fiyattan oluşmalı.
+    mockAuth.mockResolvedValue({ user: { id: "guest-1", role: "GUEST" } });
+    mockPrisma.shop.findUnique.mockResolvedValue({
+      id: "shop-1",
+      isActive: true,
+      pricePerDay: 50,
+      owner: { phone: "555" },
+    });
+    mockBookingService.createInitialBooking.mockResolvedValue({
+      id: "b1",
+      qrCodeToken: "tok",
+    });
+    mockPrisma.booking.update.mockResolvedValue({});
+    mockPrisma.user.findUnique.mockResolvedValue(null);
+
+    const { createBookingAction } = await import("@/actions/booking");
+    const checkIn = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const checkOut = new Date(Date.now() + 48 * 60 * 60 * 1000);
+    const baseInput = {
+      shopId: "shop-1",
+      bagCountS: 1,
+      bagCountM: 0,
+      bagCountXl: 0,
+      unitPrice: 50,
+      totalPrice: 50,
+      checkInTime: checkIn,
+      checkOutTime: checkOut,
+    };
+
+    // 1) Kuponsuz referans fiyat
+    await createBookingAction(baseInput);
+    const baselineTotalPrice =
+      mockBookingService.createInitialBooking.mock.calls[0][0].totalPrice;
+
+    // 2) Aynı fiyat, ama kupon kotası yarışı kaybetmiş (count: 0) gibi kur
+    mockPrisma.coupon.findUnique.mockResolvedValue({
+      id: "coupon-1",
+      code: "TEST10",
+      isActive: true,
+      expiresAt: null,
+      maxUses: 1,
+      usedCount: 0, // eski (stale) okuma hâlâ kota var gibi görünüyor
+      isPercent: false,
+      discount: 10,
+      minPrice: null,
+    });
+    mockPrisma.coupon.updateMany.mockResolvedValue({ count: 0 }); // yarışı kaybetti
+
+    await createBookingAction({ ...baseInput, couponCode: "TEST10" });
+
+    expect(mockPrisma.coupon.update).not.toHaveBeenCalled();
+    expect(mockBookingService.createInitialBooking).toHaveBeenLastCalledWith(
+      expect.objectContaining({ totalPrice: baselineTotalPrice }),
+    );
+  });
 });
 
 describe("Audit Fix #2: rejectBookingAction Status Guard", () => {
@@ -177,13 +236,16 @@ describe("Audit Fix #2: rejectBookingAction Status Guard", () => {
       shop: { ownerId: "owner-1" },
       guest: { email: "g@t.com" },
     });
-    mockPrisma.booking.update.mockResolvedValue({});
+    mockBookingService.cancelBooking.mockResolvedValue({ ok: true, fullRefund: false });
 
     const { rejectBookingAction } = await import("@/actions/partner");
     const result = await rejectBookingAction("b2");
 
     expect(result.success).toBe(true);
-    expect(mockPrisma.booking.update).toHaveBeenCalled();
+    // rejectBookingAction artık ham prisma.booking.update yerine
+    // bookingService.cancelBooking() üzerinden geçiyor (refund/loyalty/slot temizliği
+    // için tek doğruluk kaynağı orada) — bkz. docs/KOD_TARAMA_2026-08-23.md, BULGU 1.1.
+    expect(mockBookingService.cancelBooking).toHaveBeenCalledWith("b2");
   });
 });
 
@@ -287,5 +349,31 @@ describe("Audit Fix #5: Review Rating Integer Check", () => {
     });
 
     expect(result.success).toBe(true);
+  });
+
+  it("ignores client-supplied shopId and reviews the booking's real shop", async () => {
+    // bkz. docs/KOD_TARAMA_2026-08-23.md, BULGU 10.1: istemci `shopId`'yi başka bir
+    // dükkana ayarlayıp o dükkana sahte yorum bırakabiliyordu.
+    mockAuth.mockResolvedValue({ user: { id: "guest-1" } });
+    mockPrisma.booking.findUnique.mockResolvedValue({
+      id: "b1",
+      guestId: "guest-1",
+      shopId: "real-shop",
+      status: "CHECKED_OUT",
+    });
+    const { reviewService } = await import("@/services/ReviewService");
+
+    const { addReviewAction } = await import("@/actions/review");
+    const result = await addReviewAction({
+      bookingId: "b1",
+      guestId: "guest-1",
+      shopId: "attacker-controlled-shop",
+      rating: 1,
+    });
+
+    expect(result.success).toBe(true);
+    expect(reviewService.addReview).toHaveBeenCalledWith(
+      expect.objectContaining({ shopId: "real-shop" }),
+    );
   });
 });

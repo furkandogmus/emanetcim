@@ -24,11 +24,14 @@ export async function POST(req: NextRequest) {
 
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId },
-    select: { id: true, guestId: true },
+    select: { id: true, guestId: true, status: true },
   });
 
   if (!booking) return NextResponse.json({ error: "not_found" }, { status: 404 });
   if (booking.guestId !== auth.user.id) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  if (booking.status !== "CHECKED_IN" && booking.status !== "CHECKED_OUT") {
+    return NextResponse.json({ error: "booking_not_ready" }, { status: 400 });
+  }
 
   try {
     const dispute = await prisma.dispute.create({
@@ -40,7 +43,11 @@ export async function POST(req: NextRequest) {
       },
     });
     return NextResponse.json({ success: true, id: dispute.id });
-  } catch {
+  } catch (e: unknown) {
+    const err = e as { code?: string };
+    if (err.code === "P2002") {
+      return NextResponse.json({ error: "duplicate_dispute" }, { status: 409 });
+    }
     return NextResponse.json({ error: "server_error" }, { status: 500 });
   }
 }
