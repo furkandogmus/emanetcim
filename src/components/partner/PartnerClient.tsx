@@ -57,6 +57,8 @@ interface PartnerClientProps {
    * basıp anlaşılmaz bir hata görür (P1-23).
    */
   requireSeals?: boolean;
+  /** `AnalyticsService.getShopViewCountThisMonth` — bu ay kaç kez görüntülendi. */
+  monthlyShopViews?: number;
 }
 
 export default function PartnerClient({
@@ -75,6 +77,7 @@ export default function PartnerClient({
   initialCheckoutBookingId,
   initialPhone = "",
   requireSeals = false,
+  monthlyShopViews = 0,
 }: PartnerClientProps) {
   const t = useTranslations("Partner");
   const tCommon = useTranslations("Common");
@@ -430,6 +433,14 @@ export default function PartnerClient({
                   TL
                 </span>
               </div>
+            </div>
+            <div className="ui-card col-span-2 flex items-center justify-between gap-2 p-5 md:rounded-[2.5rem] md:p-6">
+              <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
+                {t("monthlyShopViews")}
+              </p>
+              <p className="text-2xl font-black text-gray-900 md:text-3xl">
+                {monthlyShopViews}
+              </p>
             </div>
           </div>
         </main>

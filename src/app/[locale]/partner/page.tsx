@@ -10,6 +10,7 @@ import { getMerchantShareRatio, countsTowardEarnings } from "@/lib/platform-spli
 import { moneyToNumber } from "@/lib/money";
 import { getPricingRules } from "@/lib/platform-settings";
 import prisma from "@/lib/db";
+import { analyticsService } from "@/services/AnalyticsService";
 
 /**
  * esnaf Ana Sayfası - Partner Dashboard (Server Component)
@@ -53,13 +54,14 @@ export default async function PartnerPage({
     );
   }
 
-  const [result, pricingRules, ownerPhoneRow] = await Promise.all([
+  const [result, pricingRules, ownerPhoneRow, monthlyShopViews] = await Promise.all([
     bookingService.getPartnerBookings(activeShop.id),
     getPricingRules(),
     prisma.user.findUnique({
       where: { id: session!.user.id },
       select: { phone: true },
     }),
+    analyticsService.getShopViewCountThisMonth(activeShop.id),
   ]);
   const bookings = result.items;
   const activeCount = bookings.filter(
@@ -94,6 +96,7 @@ export default async function PartnerPage({
       initialCheckoutBookingId={initialCheckoutBookingId}
       initialPhone={ownerPhoneRow?.phone ?? ""}
       requireSeals={pricingRules.requireSealsOnCheckIn}
+      monthlyShopViews={monthlyShopViews}
     />
   );
 }

@@ -132,6 +132,25 @@ class AnalyticsService {
       })),
     };
   }
+
+  /**
+   * Partner panelinde "bu ay dükkanınız kaç kez görüntülendi" kartı için.
+   * Esnafa platformun getirdiği görünürlüğü somutlaştırıyor — DEFECT_BACKLOG'daki
+   * "esnaf ne kadar kazandığını göremiyor" temasının görünürlük tarafı.
+   */
+  async getShopViewCountThisMonth(shopId: string): Promise<number> {
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    return prisma.analyticsEvent.count({
+      where: {
+        name: "shop_view",
+        createdAt: { gte: startOfMonth },
+        metadata: { path: ["shopId"], equals: shopId },
+      },
+    });
+  }
 }
 
 export const analyticsService = new AnalyticsService();

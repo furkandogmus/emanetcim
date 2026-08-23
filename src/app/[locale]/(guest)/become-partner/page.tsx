@@ -4,6 +4,9 @@ import type { Metadata } from "next";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { alternatesForPath } from "@/lib/seo-alternates";
 import { TrendingUp, LayoutDashboard, MapPin } from "lucide-react";
+import { getPricingRules } from "@/lib/platform-settings";
+import { getMerchantShareRatio } from "@/lib/platform-split";
+import PartnerEarningsCalculator from "@/components/guest/PartnerEarningsCalculator";
 
 export async function generateMetadata({
   params,
@@ -36,6 +39,8 @@ export default async function BecomePartnerPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("MarketingBecomePartner");
+  const pricingRules = await getPricingRules();
+  const merchantShareRatio = getMerchantShareRatio();
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
@@ -86,6 +91,19 @@ export default async function BecomePartnerPage({
           <p className="mx-auto mt-3 max-w-xl text-sm text-gray-600">
             {t("calcBody")}
           </p>
+          <div className="mt-8">
+            <PartnerEarningsCalculator
+              defaultPricePerDay={pricingRules.defaultPricePerDay}
+              merchantShareRatio={merchantShareRatio}
+              locale={locale}
+              labels={{
+                capacityLabel: t("calcCapacityLabel"),
+                occupancyLabel: t("calcOccupancyLabel"),
+                monthlyEarningsLabel: t("calcMonthlyEarningsLabel"),
+                disclaimer: t("calcDisclaimer"),
+              }}
+            />
+          </div>
         </section>
       </main>
     </div>
