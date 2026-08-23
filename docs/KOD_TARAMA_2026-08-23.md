@@ -27,6 +27,15 @@
 | 13 | Mobil token yenileme (refresh) | ✅ tamamlandı — temiz |
 | 14 | Admin rol değişikliği / yetki yükseltme | ✅ tamamlandı — temiz, iyi tasarlanmış |
 | 15 | SQL enjeksiyonu (`$queryRawUnsafe`/`Prisma.raw`) | ✅ tamamlandı — temiz |
+| 16 | Arama/coğrafi filtreleme (web+mobil paritesi) | ✅ tamamlandı — **1 gerçek bulgu** (§12) |
+| 17 | Bildirim içeriği doğruluğu (`NotificationService`) | ✅ tamamlandı — **1 gerçek bulgu** (§13.1) |
+| 18 | Feature flag sistemi, hesap silme (GDPR), gecikme taraması | ✅ tamamlandı — 1 küçük not (kullanılmayan kod), 2 alan temiz (§14) |
+| 19 | Referans (referral) sistemi uçtan uca | ✅ tamamlandı — **4 bulgu**, 3'ü küçük+düzeltildi, 1'i büyük+ertelendi (§15) |
+| 20 | Partner kazanç istatistiği web/mobil paritesi | ✅ tamamlandı — **1 gerçek bulgu, düzeltildi** (§16) |
+
+> Not: alt bölüm numaraları (§1-§15) kronolojik eklenme sırasına göre; üstteki
+> tablo satır numaraları (1-19) yalnızca bu özet tablonun kendi sırası, birebir
+> eşleşmiyor. Her satırdaki `§N` referansı doğru bölüme işaret eder.
 
 ---
 
@@ -45,6 +54,12 @@
 | B6 | 11 — Mobil dispute, durum kontrolünü atlıyor | Tutarlılık | `api/mobile/disputes/route.ts` | ✅ Düzeltildi (2026-08-23) |
 | B7 | 8 — Fiyat güven sınırı serviste değil çağıranda | Tasarım borcu, istismar yok | `services/booking/create.ts` | 📝 not düşüldü, refactor kapsamı büyük — ayrı ele alınacak |
 | B8 | 12 — Mobil "yakındaki dükkanlar" ucu auth/rate-limit'siz | Kaynak tüketimi / scraping | `api/mobile/shops/nearby/route.ts` | ✅ Düzeltildi (2026-08-23) |
+| B9 | 13.1 — Partnere yanlış "ödeme tamamlandı" SMS'i | İçerik doğruluğu (P0-0 ailesi) | `services/NotificationService.ts` | ✅ Düzeltildi (2026-08-23) |
+| B10 | 15.1 — Referans linki/kodu hiçbir yerde uygulanmıyor, özellik ölü | Büyük — ürün kararı gerekiyor | checkout akışı (yeni kod gerekir) | 📝 not düşüldü, **düzeltilmedi** — ayrı görev |
+| B11 | 15.2 — Gösterilen indirim %'si ayrı bir env var'dan, drift riski | İçerik doğruluğu | `account/page.tsx`, `docker-compose.yml` | ✅ Düzeltildi (2026-08-23) |
+| B12 | 15.3 — Paylaşım linki her zaman `/tr`'ye gidiyor | i18n bütünlüğü | `ReferralCodeCard.tsx` | ✅ Düzeltildi (2026-08-23) |
+| B13 | 15.4 — `ReferralCodeCard`'da hiç i18n yok (testin kör noktası) | i18n bütünlüğü | `ReferralCodeCard.tsx`, `account/page.tsx` | ✅ Düzeltildi (2026-08-23) |
+| B14 | 16 — Mobil kazanç istatistiği, kısmi iadede web'den farklı sayıyor (P0-7 deseni) | Para (partner güveni) | `api/mobile/partner/earnings/stats/route.ts` | ✅ Düzeltildi (2026-08-23) |
 
 ### Uygulanan değişiklikler (2026-08-23)
 
@@ -256,6 +271,172 @@ birlikte okudum; **koruma yanlış yere konmuş**.
 - **Önerilen düzeltme**: mobil route'taki deseni birebir kopyala — `addReviewAction`
   içinde `reviewService.addReview({ ...data, shopId: booking.shopId })` (istemcinin
   gönderdiği `shopId`'yi tamamen yok say).
+
+## 16) Partner kazanç istatistikleri — P0-7 deseni web/mobil arasında tekrar etmiş
+
+- **Nerede**: `src/app/api/mobile/partner/earnings/stats/route.ts`
+- **Bağlam**: DEFECT_BACKLOG'daki P0-7, aynı dükkan için partner panelinin iki web
+  sayfasının (`/partner`, `/partner/earnings`) farklı "NET HAKEDİŞ" göstermesiydi;
+  düzeltme tek doğru kaynağı `src/lib/platform-split.ts`'e taşımaktı
+  (`EARNING_BOOKING_STATUSES` = `PAID`/`CHECKED_IN`/`CHECKED_OUT`). İki web sayfası
+  da (`partner/page.tsx`, `partner/earnings/page.tsx`) bunu doğru kullanıyor.
+- **Mobil bunu hiç kullanmıyordu** — kendi ham `where` cümlesini yazmıştı:
+  ```ts
+  const baseWhere = {
+    shopId: { in: shopIds },
+    status: { in: [BookingStatus.PAID, BookingStatus.CHECKED_IN, BookingStatus.CHECKED_OUT] },
+    paymentLog: { is: { status: PaymentStatus.SUCCESS } },   // <-- web'de YOK
+  };
+  ```
+  Durum listesi bugün web'le aynı (kopya-yapıştır, henüz ayrışmamış — ama paylaşılan
+  sabite bağlı değil, gelecekte biri değişirse ikisi ayrışır). **Asıl fark**, mobilin
+  eklediği `paymentLog: SUCCESS` şartı.
+- **BULGU 16 — bu ekstra şart, kısmi iade sonrası mobil ve web'i FARKLI kümeler
+  saymaya itiyor**: `PaymentService.refund()` kısmi iadede `PaymentLog.status`'u
+  `SUCCESS`'ten `PARTIALLY_REFUNDED`'a çeviriyor (`PaymentService.ts:267-269`),
+  **`Booking.status` `CHECKED_OUT` olarak kalıyor** (erken çıkışta bu senaryo test
+  loglarında da görüldü: `booking_early_checkout_refund_requires_manual_handling`).
+  Yani kısmi iade uygulanmış bir CHECKED_OUT rezervasyon:
+  - **Web** (`EARNING_BOOKING_STATUSES`, yalnızca `Booking.status` bakıyor) →
+    hakedişe **dahil**, tam `totalPrice` ile.
+  - **Mobil** (üstteki ek `paymentLog: SUCCESS` şartı) → `PaymentLog.status` artık
+    `SUCCESS` olmadığı için hakedişe **dahil değil** — o rezervasyon mobil
+    toplamından tamamen düşüyor.
+  Sonuç: erken çıkış/kısmi iade yaşamış herhangi bir partner, mobil uygulamada
+  web'den **daha düşük** toplam kazanç görür — P0-7'nin "aynı esnaf, iki farklı NET
+  HAKEDİŞ" bulgusuyla birebir aynı kullanıcı deneyimi, bu kez iki ekran yerine iki
+  platform arasında.
+- **Ayrı not**: ne web ne mobil, kısmi iade tutarını (`refundedAmount`) düşerek net
+  bir rakam göstermiyor — ikisi de tam `totalPrice`'ı kullanıyor. Bu tutarlı (iki
+  taraf da aynı şekilde "yanlış") ve ayrı bir iş kararı; burada dokunulmadı.
+- **Düzeltildi (2026-08-23)**: mobil route artık `EARNING_BOOKING_STATUSES`'u
+  `platform-split.ts`'ten import ediyor, kendi ham durum listesini ve
+  `paymentLog: SUCCESS` şartını tamamen kaldırdı — üç yüzey (iki web sayfası + mobil)
+  artık tek kaynaktan besleniyor.
+
+## 15) Referans (referral) sistemi — arka uç eksiksiz, ön uçta uçtan uca kırık
+
+`ReferralCodeCard.tsx`'i i18n açısından incelerken (bkz. altta §14) dört ayrı sorun
+bulundu; üçü küçük ve düzeltildi, biri büyük ve **ürün kararı gerektiriyor**.
+
+### BULGU 15.1 (BÜYÜK, düzeltilmedi) — Paylaşılan referans linki hiçbir yerde okunmuyor; özellik misafir tarafında tamamen ölü
+
+- **Kanıt**: `handleCopy`, panoya `${baseUrl}/${locale}?ref=${code}` kopyalıyordu
+  (eskiden `/tr` sabit — bkz. 15.3). `git grep -n "ref\b.*searchParams\|get(\"ref\")"`
+  ve `grep -rln "referralCode" src/components` → **sıfır sonuç**. Hiçbir bileşen
+  `?ref=` parametresini okumuyor, hiçbir checkout ekranında elle referans kodu
+  girecek bir alan yok. `createBookingAction`'ın `data.referralCode` girdisini
+  (`actions/booking.ts:164`) dolduran **tek bir çağıran bile yok**.
+- **Sonuç**: `getOrCreateReferralCodeAction`, `validateReferralCodeAction`, kendi
+  kodunu kullanamama koruması, `%5` indirim hesaplama mantığı — hepsi doğru yazılmış
+  ve çalışır durumda (arka uç tarafı bu oturumda ayrıca doğrulandı, bkz. §9). Ama
+  bunlara giden **hiçbir yol yok**: `/hesabım` sayfasındaki kart bir kod üretip
+  paylaşma linki oluşturuyor, arkadaş o linki açıyor, **hiçbir şey olmuyor** —
+  kod hiçbir formda görünmüyor, checkout'a hiç taşınmıyor.
+- **Neden ayrı ele alınmalı**: düzeltmesi bir satırlık bir hata değil — en az şu
+  ürün/UX kararlarını gerektiriyor: `ref` parametresi nerede yakalanıp nereye
+  (cookie/localStorage) yazılacak, ne kadar süre saklanacak, checkout'ta görünür bir
+  "referans kodun var mı?" alanı mı olacak yoksa sessizce mi uygulanacak. Bu
+  yüzden burada **yalnızca tespit edip yazıyorum**, kod değişikliği yapmadım.
+- **Önerilen sıradaki adım**: en azından sessiz auto-apply — `?ref=` parametresi
+  görüldüğünde bir cookie'ye yazılsın, `createBookingAction`'a girdi hazırlanırken
+  o cookie okunup `referralCode` alanı doldurulsun. Görünür bir giriş alanı ayrı
+  bir iterasyon olabilir.
+
+### BULGU 15.2 (küçük, düzeltildi) — Ekrandaki indirim yüzdesi, gerçekte uygulanandan bağımsız ayrı bir env var'dan okunuyordu
+
+- `docker-compose.yml`'de hem `REFERRAL_DISCOUNT_PCT` (gerçek indirimi hesaplayan,
+  `actions/booking.ts`/`actions/referral.ts`'nin okuduğu) hem de
+  `NEXT_PUBLIC_REFERRAL_DISCOUNT_PCT` (yalnızca kartın gösterdiği rakam) ayrı ayrı
+  tanımlıydı, ikisi de kendi başına `5`'e düşüyordu. Biri değişip diğeri
+  unutulursa, karttaki rakam **gerçek uygulanan indirimden farklı** görünecekti.
+- **Düzeltildi**: `NEXT_PUBLIC_...` kaldırıldı; gösterilen yüzde artık
+  `account/page.tsx`'te sunucu tarafında `REFERRAL_DISCOUNT_PCT`'ten (tek kaynak)
+  hesaplanıp bileşene prop olarak geçiyor.
+
+### BULGU 15.3 (küçük, düzeltildi) — Paylaşım linki her zaman `/tr`'ye gidiyordu
+
+- İngilizce/diğer dil sayfasından paylaşılan link bile sabit `${baseUrl}/tr?ref=...`
+  üretiyordu — Türkçe bilmeyen bir arkadaşı Türkçe ana sayfaya yönlendiriyordu.
+  **Düzeltildi**: bileşene geçen gerçek `locale` kullanılıyor.
+
+### BULGU 15.4 (küçük, düzeltildi) — `ReferralCodeCard` hiç i18n taşımıyordu
+
+- Bileşende `useTranslations`/`next-intl` hiç yoktu; tüm metinler (başlık, açıklama,
+  buton, "Yükleniyor...", "Linki kopyala") sabit Türkçeydi — dil ne olursa olsun.
+  Bunu ilginç kılan şey: mevcut `hardcoded-copy.test.ts` mandalı **bunu hiç
+  yakalayamıyor**, çünkü yalnızca `locale === "tr" ? ... : ...` deseni arıyor; bu
+  bileşen o deseni bile kullanmıyor (hiç dallanma yok, tek dil). Ebeveyn sayfa
+  (`account/page.tsx`) zaten o desenle bilinen/takip edilen borcun bir parçası
+  ("account (1)" — test yorumunda listeli); bu bileşen o listeden bağımsız, testin
+  kör noktasında duran **ayrı** bir örnekti.
+  **Düzeltildi**: metinler `account/page.tsx`'in zaten kullandığı aynı
+  `locale === "tr" ? {...} : {...}` deseniyle (ebeveynle tutarlı, yeni bir mekanizma
+  icat etmeden) prop olarak geçiliyor; ayrıca başlık "Arkadaşını Davet Et, %5
+  İndirim Kazan" → "...İndirim Kazandır" olarak netleştirildi (eskisi, indirimi
+  DAVET EDENİN kazandığı izlenimini verebiliyordu — gerçekte yalnızca davet edilen
+  arkadaş kazanıyor).
+- **Not**: `hardcoded-copy.test.ts`'in bu kör noktası (yalnızca ternary deseni
+  arıyor, i18n'i TAMAMEN yok olan bileşenleri göremiyor) düzeltilmedi — testin
+  kendisini genişletmek ayrı bir iş; burada yalnızca somut örneği düzelttim.
+
+## 14) Feature flag / hesap silme (GDPR) / gecikme taraması — küçük bir not, iki temiz alan
+
+- **Hesap silme (GDPR)**: `src/actions/account-privacy.ts` (web) ve
+  `src/app/api/mobile/account/delete/route.ts` (mobil) satır satır aynı mantığı
+  taşıyor — aktif rezervasyon kontrolü, aynı transaction, aynı anonimleştirme.
+  Daha önceki bulgularda görülen web/mobil çatallanması burada yok. **Temiz.**
+- **`OverdueBookingService`**: bilinçli olarak durum değiştirmiyor, yalnızca tespit
+  edip `BookingEvent`'e idempotent iz bırakıyor — para hareketi yaratma riskini
+  tasarım gereği kapatmış. **Temiz.**
+- **Not (düzeltilmedi — kullanılmayan kod)**: `FeatureFlagService.isEnabled`
+  (`src/services/FeatureFlagService.ts:70-87`), `ctx.userId` verilmediğinde
+  (`// Webhooks / server paths`) `allowedUserIds` kısıtını VE `rolloutPct`'i
+  tamamen atlayıp koşulsuz `true` dönüyor. Yani "yalnızca şu kullanıcılara, %0
+  genel" diye kurulmuş bir bayrak, anonim/sunucu bağlamından sorulduğunda **herkese
+  açık** görünür. `git grep` ile doğruladım: `featureFlagService.isEnabled(...)`
+  bugün **kod tabanında hiçbir yerde çağrılmıyor** — yönetim ekranı ve şema hazır,
+  gerçek bir özelliği kapılamıyor henüz. Bu yüzden bugün etkisi sıfır; düzeltmedim,
+  ama bu servis ilk kez bir özelliğe bağlanacağı gün önce bu satır ele alınmalı.
+
+## 13) Bildirim içeriği — BULGU 13.1: partnere "ödeme tamamlandı" SMS'i, hiç ödeme alınmadan gönderiliyordu
+
+- **Nerede**: `src/services/NotificationService.ts:508-519`
+  (`notifyPartnerAndAdminsForNewPaidBooking`)
+- **Zincir**:
+  1. Fonksiyon, booking'in DB'deki durumuna bakıp `isRequest = status ===
+     "WAITING_APPROVAL"` hesaplıyor; `true` ise "talep geldi" metni, `false` ise
+     "ödeme tamamlandı" metni yolluyor.
+  2. **Ama kod tabanında artık hiçbir yer booking'i `WAITING_APPROVAL` olarak
+     YARATMIYOR** — yalnızca eski durumdan çıkışta `where` filtresi olarak geçiyor
+     (`git grep` ile doğrulandı: `status: BookingStatus.WAITING_APPROVAL` yalnızca
+     `where` cümlelerinde ve testlerde var, hiçbir `create`/`update` hedefinde yok).
+     Gerçek akış: `createInitialBooking` `PENDING` yaratıyor
+     (`create.ts:87`), hem web (`actions/booking.ts:206-209`) hem mobil
+     (`checkout/intent/route.ts:73-76`) bunu **hemen `APPROVED`'a çeviriyor** —
+     `WAITING_APPROVAL`'dan hiç geçmiyor.
+  3. Sonuç: `isRequest` bugün pratikte **her zaman `false`** — yani her yeni
+     rezervasyonda partnere gönderilen SMS hep "else" dalı: **"Rezervasyon odemesi
+     tamamlandi"**.
+  4. Ama bu platformda tahsilat dükkanda yapılıyor (`docs/PAYMENTS.md`,
+     `ManualPaymentProvider`) — booking oluşurken **hiçbir ödeme alınmıyor**;
+     tahsilat yalnızca check-in akışında `markAsPaid`/`PaymentService` üzerinden
+     olur. Yani SMS, gerçekleşmemiş bir tahsilatı "tamamlandı" diye bildiriyordu —
+     **aynı fonksiyonun kendi e-postasıyla bile çelişiyordu**: e-posta doğru şekilde
+     "Yeni Onaylı Rezervasyon" diyor, SMS yanlış şekilde "ödemesi tamamlandı" diyordu.
+- **Neden önemli**: bu, DEFECT_BACKLOG'daki P0-0'ın ("sistem para almış gibi
+  davranıyordu") kök nedeniyle birebir aynı aileden bir metin hatası — yalnızca
+  P0-0'ın düzeltmesi (`payment-copy.ts`, müşteriye görünen metinler) bu **partnere
+  giden iç SMS'e** hiç uğramamış.
+- **Düzeltildi (2026-08-23)**: partner ve admin SMS metinleri "ödeme(si) tamamlandı"
+  yerine e-postayla tutarlı "Yeni onaylı rezervasyon" diyecek şekilde değiştirildi.
+- **Ayrı not (düzeltilmedi, kapsam dışı)**: `WAITING_APPROVAL` durumunun artık hiçbir
+  yerde yaratılmaması — `src/actions/partner.ts`'deki partner-onay akışı,
+  `PartnerRequestsTab`, `rejectBookingAction`'ın "yalnızca WAITING_APPROVAL'ı
+  reddedebilir" partner dalı gibi epey kod hâlâ bu durumu bekliyor. Bu ya kasıtlı bir
+  ürün pivotu (esnaf onayı kaldırıldı, doğrudan onay) ya da unutulmuş bir akış — ikisi
+  de olası, kod okumasıyla ayırt edilemedi. Netleştirilmesi ayrı bir ürün kararı;
+  burada yalnızca **yanlış metin** düzeltildi, davranış değiştirilmedi.
 
 ## 12) Arama/coğrafi filtreleme — mobil "yakındaki dükkanlar" ucu tamamen açık
 

@@ -100,9 +100,9 @@ services:
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
       # Crisp canlı destek widget
       NEXT_PUBLIC_CRISP_WEBSITE_ID: ${NEXT_PUBLIC_CRISP_WEBSITE_ID:-}
-      # Referans sistemi
+      # Referans sistemi — tek kaynak (server-only); istemci tarafı ayrı bir
+      # NEXT_PUBLIC_ kopyası artık yok, ikisi senkron kalmayabiliyordu.
       REFERRAL_DISCOUNT_PCT: ${REFERRAL_DISCOUNT_PCT:-5}
-      NEXT_PUBLIC_REFERRAL_DISCOUNT_PCT: ${NEXT_PUBLIC_REFERRAL_DISCOUNT_PCT:-5}
       PG_POOL_MAX: ${PG_POOL_MAX:-}
       PG_POOL_IDLE_MS: ${PG_POOL_IDLE_MS:-}
       PG_POOL_CONNECT_TIMEOUT_MS: ${PG_POOL_CONNECT_TIMEOUT_MS:-}

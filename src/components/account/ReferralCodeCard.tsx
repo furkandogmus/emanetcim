@@ -4,13 +4,28 @@ import { useState, useTransition } from "react";
 import { Copy, Check, Gift } from "lucide-react";
 import { getOrCreateReferralCodeAction } from "@/actions/referral";
 
-export default function ReferralCodeCard() {
+type ReferralCodeCardProps = {
+  locale: string;
+  title: string;
+  body: string;
+  revealLabel: string;
+  loadingLabel: string;
+  copyTitle: string;
+};
+
+export default function ReferralCodeCard({
+  locale,
+  title,
+  body,
+  revealLabel,
+  loadingLabel,
+  copyTitle,
+}: ReferralCodeCardProps) {
   const [code, setCode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  const discountPct = process.env.NEXT_PUBLIC_REFERRAL_DISCOUNT_PCT ?? "5";
   const baseUrl =
     typeof window !== "undefined"
       ? window.location.origin
@@ -29,7 +44,9 @@ export default function ReferralCodeCard() {
 
   const handleCopy = async () => {
     if (!code) return;
-    const shareUrl = `${baseUrl}/tr?ref=${code}`;
+    // Paylaşılan link, misafirin AN O ANKİ dilinde açılmalı — sabit `/tr`
+    // İngilizce/diğer dillerdeki kullanıcıyı yanlış locale'e yönlendiriyordu.
+    const shareUrl = `${baseUrl}/${locale}?ref=${code}`;
     await navigator.clipboard.writeText(shareUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -39,11 +56,9 @@ export default function ReferralCodeCard() {
     <div className="bg-white rounded-2xl border border-orange-100 p-5">
       <div className="flex items-center gap-2 mb-2">
         <Gift size={18} className="text-orange-500" />
-        <h2 className="text-sm font-bold text-gray-900">Arkadaşını Davet Et, %{discountPct} İndirim Kazan</h2>
+        <h2 className="text-sm font-bold text-gray-900">{title}</h2>
       </div>
-      <p className="text-xs text-gray-500 mb-4">
-        Referans kodunu arkadaşınla paylaş. İlk rezervasyonunda %{discountPct} indirim alır, sen de takipte kalırsın.
-      </p>
+      <p className="text-xs text-gray-500 mb-4">{body}</p>
 
       {!code ? (
         <button
@@ -51,7 +66,7 @@ export default function ReferralCodeCard() {
           disabled={isPending}
           className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm py-2.5 rounded-xl transition-colors disabled:opacity-60"
         >
-          {isPending ? "Yükleniyor..." : "Referans Kodumu Göster"}
+          {isPending ? loadingLabel : revealLabel}
         </button>
       ) : (
         <div className="flex items-center gap-2">
@@ -61,7 +76,7 @@ export default function ReferralCodeCard() {
           <button
             onClick={handleCopy}
             className="p-2.5 bg-orange-100 hover:bg-orange-200 rounded-xl transition-colors"
-            title="Linki kopyala"
+            title={copyTitle}
           >
             {copied ? (
               <Check size={18} className="text-green-600" />

@@ -18,6 +18,16 @@ export default async function AccountPage({
     redirect(`/${locale}/login?callbackUrl=/${locale}/account`);
   }
 
+  /**
+   * `actions/booking.ts` ve `actions/referral.ts`'nin indirimi uyguladığı TEK
+   * kaynak — `NEXT_PUBLIC_REFERRAL_DISCOUNT_PCT` diye ayrı bir istemci-tarafı
+   * env var kullanılmıyor artık: ikisi senkron kalmayabiliyordu (bkz.
+   * docs/KOD_TARAMA_2026-08-23.md, BULGU 15).
+   */
+  const discountPct = String(
+    Math.min(50, Math.max(0, Number(process.env.REFERRAL_DISCOUNT_PCT ?? "5"))),
+  );
+
   const copy =
     locale === "tr"
       ? {
@@ -33,6 +43,11 @@ export default async function AccountPage({
           privacy: "Gizlilik ve veri",
           privacyDesc: "Hesap güvenliği ve veri tercihleri",
           profile: "Profil",
+          referralTitle: `Arkadaşını Davet Et, İndirim Kazandır`,
+          referralBody: `Referans kodunu arkadaşınla paylaş. İlk rezervasyonunda %${discountPct} indirim alır.`,
+          referralReveal: "Referans Kodumu Göster",
+          referralLoading: "Yükleniyor...",
+          referralCopyTitle: "Linki kopyala",
         }
       : {
           title: "My Account",
@@ -47,6 +62,11 @@ export default async function AccountPage({
           privacy: "Privacy and data",
           privacyDesc: "Account security and data preferences",
           profile: "Profile",
+          referralTitle: `Invite a Friend, They Get ${discountPct}% Off`,
+          referralBody: `Share your referral code with a friend. They get ${discountPct}% off their first booking.`,
+          referralReveal: "Show My Referral Code",
+          referralLoading: "Loading...",
+          referralCopyTitle: "Copy link",
         };
 
   return (
@@ -79,7 +99,14 @@ export default async function AccountPage({
             </span>
             <ChevronRight size={18} className="ml-auto text-orange-400 transition-transform group-hover:translate-x-1" />
           </Link>
-          <ReferralCodeCard />
+          <ReferralCodeCard
+            locale={locale}
+            title={copy.referralTitle}
+            body={copy.referralBody}
+            revealLabel={copy.referralReveal}
+            loadingLabel={copy.referralLoading}
+            copyTitle={copy.referralCopyTitle}
+          />
         </section>
 
         <nav className="h-fit divide-y divide-gray-50 rounded-3xl border border-gray-100 bg-white shadow-sm">

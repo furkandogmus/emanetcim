@@ -505,9 +505,16 @@ export class NotificationService implements INotificationService {
       return;
     }
 
+    /**
+     * "Ödeme tamamlandı" DENMİYOR: tahsilat dükkanda yapılıyor (bkz. docs/PAYMENTS.md,
+     * `ManualPaymentProvider`), booking oluşurken hiçbir ödeme alınmıyor — `markAsPaid`
+     * yalnızca check-in akışında çağrılır. Eskiden burada "Rezervasyon odemesi
+     * tamamlandi" yazıyordu; bu, aynı e-postanın kendi metniyle bile çelişen ve
+     * P0-0'ın kök nedeniyle aynı aileden yanlış bir tahsilat iddiasıydı.
+     */
     const partnerMsg = isRequest
       ? `BagajPark: Yeni rezervasyon talebi — ${shopName}. Kod: ${shortId} Tutar: ${priceTr}`
-      : `BagajPark: Rezervasyon odemesi tamamlandi — ${shopName}. Kod: ${shortId} Tutar: ${priceTr}`;
+      : `BagajPark: Yeni onayli rezervasyon — ${shopName}. Kod: ${shortId} Tutar: ${priceTr}`;
 
     const p = normalizeTrGsm10(partnerPhone ?? undefined);
     if (p) {
@@ -516,7 +523,7 @@ export class NotificationService implements INotificationService {
       logger.debug({ bookingId }, "partner_sms_skipped_no_phone");
     }
 
-    const adminMsg = `BagajPark [Admin]: ${isRequest ? "Yeni talep" : "Yeni odeme"} — ${shopName}. ${shortId} ${priceTr}`;
+    const adminMsg = `BagajPark [Admin]: ${isRequest ? "Yeni talep" : "Yeni onayli rezervasyon"} — ${shopName}. ${shortId} ${priceTr}`;
     for (const adminNo of parseAdminGsmNumbers()) {
       await this.sendSms(adminNo, adminMsg, bookingId);
     }
