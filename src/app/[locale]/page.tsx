@@ -213,7 +213,7 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
         dangerouslySetInnerHTML={{ __html: JSON.stringify(cityItemListJsonLd) }}
       />
       {/* Hero Section */}
-      <header className="relative overflow-hidden bg-gray-50 px-6 pt-28 pb-20 flex flex-col items-center text-center md:pt-32">
+      <header className="relative overflow-hidden bg-gray-50 px-6 pt-14 pb-6 flex flex-col items-center text-center md:pt-32 md:pb-20">
         {/*
           Sıcak ışık + nokta dokusu. Eski hâli düz gri zemin üzerinde tek başına
           duran bir başlıktı; markanın turuncusu hero'da hiç görünmüyordu.
@@ -225,10 +225,10 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
         </div>
 
         <div className="relative z-10 max-w-2xl">
-          <h1 className="text-4xl md:text-6xl font-black tracking-tight text-gray-900 mb-6 leading-[1.1]">
+          <h1 className="text-3xl md:text-6xl font-black tracking-tight text-gray-900 mb-3 md:mb-6 leading-[1.15] md:leading-[1.1]">
             {t('heroTitle')}
           </h1>
-          <p className="text-lg text-gray-500 mb-10 max-w-md mx-auto">
+          <p className="text-base md:text-lg text-gray-500 mb-6 md:mb-10 max-w-md mx-auto">
             {t('heroSubtitle')}
           </p>
 
