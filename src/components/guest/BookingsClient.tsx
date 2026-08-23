@@ -90,36 +90,26 @@ export default function BookingsClient({
   const itemCount = (booking: GuestBookingListItem) =>
     booking.bagCountS + booking.bagCountM + booking.bagCountXl;
   const pseudoPassCode = featuredBooking.id.replace(/-/g, '').slice(-4).toUpperCase();
-  const mobileCopy =
-    locale === 'tr'
-      ? {
-          loyaltyMember: 'Sadakat Üyesi',
-          totalStays: 'Toplam Konaklama',
-          storagePoints: 'Emanet Noktası',
-          upcomingBooking: 'Yaklaşan Rezervasyon',
-          latestBooking: 'Son Rezervasyon',
-          activeReservation: 'Aktif Rezervasyon',
-          passcode: 'Geçiş Kodu',
-          pastBookings: 'Geçmiş Rezervasyonlar',
-          account: 'Hesap',
-          personalInfo: 'Kişisel Bilgiler',
-          paymentPrivacy: 'Ödeme ve Gizlilik',
-          helpCenter: 'Yardım Merkezi',
-        }
-      : {
-          loyaltyMember: 'Loyalty Member',
-          totalStays: 'Total Stays',
-          storagePoints: 'Storage Points',
-          upcomingBooking: 'Upcoming Booking',
-          latestBooking: 'Latest Booking',
-          activeReservation: 'Active Reservation',
-          passcode: 'Passcode',
-          pastBookings: 'Past Bookings',
-          account: 'Account',
-          personalInfo: 'Personal Information',
-          paymentPrivacy: 'Payment & Privacy',
-          helpCenter: 'Help Center',
-        };
+  /**
+   * Eskiden `locale === 'tr' ? {...} : {...}` idi — yalnızca tr/diğer diye
+   * dallanıyordu, yani Almanca/Fransızca/Farsça/Japonca kullanıcı bu metinleri
+   * hep İngilizce görüyordu (bkz. hardcoded-copy.test.ts mandalı). Artık
+   * çeviri dosyalarında, 6 dilin hepsinde gerçek karşılığı var.
+   */
+  const mobileCopy = {
+    loyaltyMember: t('bookingsLoyaltyMember'),
+    totalStays: t('bookingsTotalStays'),
+    storagePoints: t('bookingsStoragePoints'),
+    upcomingBooking: t('bookingsUpcomingBooking'),
+    latestBooking: t('bookingsLatestBooking'),
+    activeReservation: t('bookingsActiveReservation'),
+    passcode: t('bookingsPasscode'),
+    pastBookings: t('bookingsPastBookingsTitle'),
+    account: t('bookingsAccountSection'),
+    personalInfo: t('bookingsPersonalInfo'),
+    paymentPrivacy: t('bookingsPaymentPrivacy'),
+    helpCenter: t('bookingsHelpCenter'),
+  };
 
   if (bookings.length === 0) {
     return (
