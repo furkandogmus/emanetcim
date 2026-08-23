@@ -212,6 +212,7 @@
     "searchPlaceholder": "Nereye gidiyorsun? (Örn: Galata Kulesi)",
     "findShops": "Emanet Noktası Bul",
     "nearbyShops": "Yakındaki",
+    "searchUpdating": "Sonuçlar güncelleniyor",
     "allShops": "Tüm Noktalar",
     "noShopsFound": "Sonuç bulunamadı",
     "noShopsFoundDesc": "Farklı bir arama terimi veya \"Tüm Noktalar\" sekmesini deneyin.",

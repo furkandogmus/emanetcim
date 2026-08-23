@@ -212,6 +212,7 @@
     "searchPlaceholder": "Where are you going? (e.g. Galata Tower)",
     "findShops": "Find Storage Point",
     "nearbyShops": "Nearby",
+    "searchUpdating": "Updating results",
     "allShops": "All Locations",
     "noShopsFound": "No results found",
     "noShopsFoundDesc": "Try a different search term or switch to \"All Locations\".",

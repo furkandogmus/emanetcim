@@ -212,6 +212,7 @@
     "searchPlaceholder": "どこに行くの？ (ガラタ塔など)",
     "findShops": "ストレージポイントを探す",
     "nearbyShops": "近く",
+    "searchUpdating": "結果を更新しています",
     "allShops": "すべての場所",
     "noShopsFound": "結果が見つかりませんでした",
     "noShopsFoundDesc": "別の検索語を試すか、「すべての場所」に切り替えてください。",

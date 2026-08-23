@@ -212,6 +212,7 @@
     "searchPlaceholder": "Où vas-tu? (par exemple la Tour de Galata)",
     "findShops": "Trouver un point de stockage",
     "nearbyShops": "Proche",
+    "searchUpdating": "Mise à jour des résultats",
     "allShops": "Tous les emplacements",
     "noShopsFound": "Aucun résultat trouvé",
     "noShopsFoundDesc": "Essayez un autre terme de recherche ou passez à « Tous les emplacements ».",
