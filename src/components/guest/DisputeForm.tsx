@@ -5,6 +5,7 @@ import { createDisputeAction } from "@/actions/dispute";
 import { Link, useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { ChevronLeft } from "lucide-react";
+import { disputeErrorKey } from "@/lib/dispute-error-copy";
 
 export default function DisputeForm({
   bookingId,
@@ -15,6 +16,7 @@ export default function DisputeForm({
 }) {
   const router = useRouter();
   const t = useTranslations("Dispute");
+  const tErrors = useTranslations("Errors");
   const [reason, setReason] = useState<"DAMAGE" | "THEFT" | "OTHER">("OTHER");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,7 +28,7 @@ export default function DisputeForm({
     const r = await createDisputeAction({ bookingId, reason, description });
     setLoading(false);
     if (r.success) router.push("/bookings");
-    else setErr(r.error);
+    else setErr(disputeErrorKey(r.error));
   };
 
   return (
@@ -61,7 +63,7 @@ export default function DisputeForm({
         placeholder={t("descriptionPlaceholder")}
       />
 
-      {err && <p className="ui-state ui-state-error mt-2">{err}</p>}
+      {err && <p className="ui-state ui-state-error mt-2">{tErrors(err)}</p>}
 
       <button
         type="button"
