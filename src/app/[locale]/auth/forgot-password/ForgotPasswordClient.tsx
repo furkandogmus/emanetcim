@@ -24,9 +24,14 @@ export default function ForgotPasswordClient() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-6 font-sans">
-      <div className="w-full max-w-md rounded-[2.5rem] border border-gray-100 bg-white p-10 shadow-xl shadow-gray-200/50">
-        <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-2xl bg-orange-600 shadow-lg shadow-orange-200">
+    <div className="relative flex min-h-screen flex-col items-center justify-center bg-gray-50 p-6 font-sans overflow-hidden">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-40 left-1/2 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,hsl(21_95%_60%/.22),transparent)] blur-2xl" />
+        <div className="absolute -right-24 top-24 h-72 w-72 rounded-full bg-[radial-gradient(closest-side,hsl(38_92%_55%/.18),transparent)] blur-2xl" />
+        <div className="absolute inset-0 opacity-[0.035] bg-[radial-gradient(#ea580c_1px,transparent_1px)] [background-size:20px_20px]" />
+      </div>
+      <div className="relative z-10 w-full max-w-md rounded-[2.5rem] border border-gray-100 bg-white p-10 shadow-xl shadow-gray-200/50">
+        <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-gradient shadow-brand-md">
           <Package size={32} className="text-white" />
         </div>
 

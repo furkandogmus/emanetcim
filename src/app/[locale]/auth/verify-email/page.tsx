@@ -59,8 +59,13 @@ export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageP
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 font-sans">
-      <div className="w-full max-w-md bg-white rounded-[2.5rem] p-10 shadow-xl shadow-gray-200/50 border border-gray-100 text-center">
+    <div className="relative min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 font-sans overflow-hidden">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-40 left-1/2 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,hsl(21_95%_60%/.22),transparent)] blur-2xl" />
+        <div className="absolute -right-24 top-24 h-72 w-72 rounded-full bg-[radial-gradient(closest-side,hsl(38_92%_55%/.18),transparent)] blur-2xl" />
+        <div className="absolute inset-0 opacity-[0.035] bg-[radial-gradient(#ea580c_1px,transparent_1px)] [background-size:20px_20px]" />
+      </div>
+      <div className="relative z-10 w-full max-w-md bg-white rounded-[2.5rem] p-10 shadow-xl shadow-gray-200/50 border border-gray-100 text-center">
         <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-8 mx-auto">
           <CheckCircle2 size={32} className="text-blue-600" />
         </div>
@@ -68,7 +73,7 @@ export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageP
         <p className="text-gray-500 text-sm font-medium mb-8 leading-relaxed">
           {t("verifyEmailSuccess")}
         </p>
-        <Link 
+        <Link
           href="/login"
           className="w-full h-12 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-bold text-sm transition-all flex items-center justify-center"
         >
@@ -81,8 +86,13 @@ export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageP
 
 function ErrorState({ message, tAuth }: { message: string, tAuth: (key: string) => string }) {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 font-sans">
-      <div className="w-full max-w-md bg-white rounded-[2.5rem] p-10 shadow-xl shadow-gray-200/50 border border-gray-100 text-center">
+    <div className="relative min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 font-sans overflow-hidden">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-40 left-1/2 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,hsl(21_95%_60%/.22),transparent)] blur-2xl" />
+        <div className="absolute -right-24 top-24 h-72 w-72 rounded-full bg-[radial-gradient(closest-side,hsl(38_92%_55%/.18),transparent)] blur-2xl" />
+        <div className="absolute inset-0 opacity-[0.035] bg-[radial-gradient(#ea580c_1px,transparent_1px)] [background-size:20px_20px]" />
+      </div>
+      <div className="relative z-10 w-full max-w-md bg-white rounded-[2.5rem] p-10 shadow-xl shadow-gray-200/50 border border-gray-100 text-center">
         <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mb-8 mx-auto">
           <XCircle size={32} className="text-red-600" />
         </div>
@@ -90,7 +100,7 @@ function ErrorState({ message, tAuth }: { message: string, tAuth: (key: string) 
         <p className="text-gray-500 text-sm font-medium mb-8 leading-relaxed">
           {message}
         </p>
-        <Link 
+        <Link
           href="/login"
           className="w-full h-12 border-2 border-gray-100 rounded-xl font-bold text-sm text-gray-600 hover:border-orange-200 transition-all flex items-center justify-center"
         >
