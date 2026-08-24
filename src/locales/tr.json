@@ -233,7 +233,7 @@
     "sortByHourly": "Saatlik ücret",
     "sortByDistance": "En yakın",
     "sortByRating": "En yüksek puan",
-    "useMyLocation": "Use my location",
+    "useMyLocation": "Konumumu kullan",
     "searchGeolocationUnavailable": "Tarayıcınız konum servisini desteklemiyor",
     "searchGeolocationDenied": "Konum erişimi reddedildi. Lütfen konum servislerini açın.",
     "searchLocationUpdated": "Konum güncellendi",
