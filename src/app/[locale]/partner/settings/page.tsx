@@ -61,7 +61,7 @@ export default async function PartnerSettingsPage({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans pb-24">
+    <div className="bg-gray-50 flex flex-col font-sans pb-24">
       <header className="p-6 bg-white border-b border-gray-100 flex items-center gap-4 sticky top-0 z-10">
         <Link
           href="/partner"

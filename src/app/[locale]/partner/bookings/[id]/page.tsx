@@ -73,7 +73,7 @@ export default async function PartnerBookingDetailPage({
   const totalBags = booking.bagCountS + booking.bagCountM + booking.bagCountXl;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="bg-gray-50 pb-20">
       <header className="sticky top-0 z-10 flex items-center gap-4 border-b border-gray-100 bg-white p-6">
         <Link href="/partner/bookings" className="rounded-full p-2 transition-colors hover:bg-gray-100">
           <ChevronLeft size={24} />

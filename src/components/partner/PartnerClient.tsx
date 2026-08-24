@@ -299,7 +299,7 @@ export default function PartnerClient({
     Math.round(totalEarnings * merchantShareRatio * 100) / 100;
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-gray-50 px-4 pb-32 pt-6 font-sans text-gray-900 sm:px-6 md:p-12 md:pb-36">
+    <div className="relative flex flex-col overflow-hidden bg-gray-50 px-4 pb-32 pt-6 font-sans text-gray-900 sm:px-6 md:p-12 md:pb-36">
       <div className="absolute top-0 right-0 w-80 h-80 bg-orange-100/30 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2"></div>
 
       {isScanning && (

@@ -29,6 +29,15 @@ const APP_SURFACE_PREFIXES = [
 ];
 
 /**
+ * Bu yüzeylerde `MobileNav` (misafir alt gezinme çubuğu) hiç render edilmez
+ * (bkz. `MobileNav.tsx`'teki aynı liste) — dolayısıyla altbilgiye o çubuğu
+ * temizlemek için fazladan alt boşluk eklemenin anlamı yok. Eklenirse
+ * esnaf/admin/giriş gibi kısa sayfalarda içerikle altbilgi arasında
+ * kullanıcının "sayfa mı bozuk" diye düşüneceği boş bir alan kalıyordu.
+ */
+const NO_MOBILE_NAV_PREFIXES = ["/partner", "/admin", "/login", "/register", "/auth"];
+
+/**
  * Footer - Kurumsal Bilgi ve Navigasyon Çubuğu
  */
 export default function Footer() {
@@ -44,10 +53,15 @@ export default function Footer() {
   const isAppSurface = APP_SURFACE_PREFIXES.some(
     (p) => pathname === p || pathname.startsWith(`${p}/`),
   );
+  const needsMobileNavClearance = !NO_MOBILE_NAV_PREFIXES.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`),
+  );
 
   if (isAppSurface) {
     return (
-      <footer className="border-t border-gray-100 bg-white px-6 py-6 max-md:pb-28 font-sans">
+      <footer
+        className={`border-t border-gray-100 bg-white px-6 py-6 font-sans ${needsMobileNavClearance ? "max-md:pb-28" : ""}`}
+      >
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 text-[11px] font-bold text-gray-400 sm:flex-row">
           <p>© {currentYear} {tCommon("appName")}. {t("rights")}</p>
           <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 uppercase tracking-widest">
