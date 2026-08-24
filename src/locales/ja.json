@@ -45,7 +45,8 @@
     "addToFavorites": "お気に入りに追加",
     "removeFromFavorites": "お気に入りから削除",
     "increase": "{label}を増やす",
-    "decrease": "{label}を減らす"
+    "decrease": "{label}を減らす",
+    "language": "言語"
   },
   "SEO": {
     "title": "バガジパーク |荷物を安全に預けて、自由に旅行しましょう",

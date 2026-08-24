@@ -45,7 +45,8 @@
     "addToFavorites": "افزودن به علاقه‌مندی‌ها",
     "removeFromFavorites": "حذف از علاقه‌مندی‌ها",
     "increase": "افزایش {label}",
-    "decrease": "کاهش {label}"
+    "decrease": "کاهش {label}",
+    "language": "زبان"
   },
   "SEO": {
     "title": "BagajPark | چمدان امن، سفر آزاد",
