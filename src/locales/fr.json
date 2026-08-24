@@ -46,7 +46,9 @@
     "removeFromFavorites": "Retirer des favoris",
     "increase": "Augmenter {label}",
     "decrease": "Diminuer {label}",
-    "language": "Langue"
+    "language": "Langue",
+    "rateStars": "Noter {count} étoiles",
+    "ratingOutOf": "{rating} sur {max} étoiles"
   },
   "SEO": {
     "title": "Parc Bagaj | Laissez vos bagages en toute sécurité, voyagez librement",
