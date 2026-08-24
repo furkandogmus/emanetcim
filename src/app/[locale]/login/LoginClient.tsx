@@ -207,14 +207,25 @@ export default function LoginPage({
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 sm:p-6 font-sans overflow-x-hidden">
+    <div className="relative min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 sm:p-6 font-sans overflow-hidden">
+      {/*
+        Ana sayfanin hero'suyla ayni sicak degrade dokusu -- eskiden bu sayfa
+        duz gri zemindi, markanin turuncusu hic gorunmuyordu (kullanici
+        talebi: "giris sayfasini biraz daha guzellestir").
+      */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-40 left-1/2 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,hsl(21_95%_60%/.22),transparent)] blur-2xl" />
+        <div className="absolute -right-24 top-24 h-72 w-72 rounded-full bg-[radial-gradient(closest-side,hsl(38_92%_55%/.18),transparent)] blur-2xl" />
+        <div className="absolute inset-0 opacity-[0.035] bg-[radial-gradient(#ea580c_1px,transparent_1px)] [background-size:20px_20px]" />
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md max-w-[calc(100vw-1rem)] bg-white rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-10 shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col items-center"
+        className="relative z-10 w-full max-w-md max-w-[calc(100vw-1rem)] bg-white rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-10 shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col items-center"
       >
         {/* Logo */}
-        <div className="w-16 h-16 bg-orange-600 rounded-2xl flex items-center justify-center mb-8 shadow-lg shadow-orange-200">
+        <div className="w-16 h-16 bg-brand-gradient rounded-2xl flex items-center justify-center mb-8 shadow-brand-md">
           <Package size={32} className="text-white" />
         </div>
 
