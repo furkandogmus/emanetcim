@@ -33,14 +33,17 @@ const ROOTS = ["src/components", "src/app"];
  * sayfası (1 blok / 34 metin), `luggage-storage/[slug]` (3 dal / 18 metin —
  * 12 şehir sayfasının "neden BagajPark / nasıl çalışır / FAQ / ipuçları"
  * bölümü artık şehir adı `{city}` ile enterpolasyonlu, 6 dilde ortak; 12
- * şehir × 4 dil = 48 sayfa kombinasyonunu etkiliyordu). → 5
+ * şehir × 4 dil = 48 sayfa kombinasyonunu etkiliyordu), `cancellation`
+ * sayfası (1 blok / 22 metin — iptal/iade politikası artık 6 dilde de doğru
+ * çıkıyor, önceden DE/FR/FA/JA kullanıcıları bu kritik güven sayfasını
+ * İngilizce görüyordu). → 3
  *
  * Borç kapatıldıkça bu sayıyı DÜŞÜRÜN. Yükseltmek, "yeni özellik 12 dilde
  * çalışmıyor" demenin başka bir yoludur.
  *
- * Kalan: `cancellation` (2), `page.tsx` (1), iki admin sayfası (2).
+ * Kalan: `page.tsx` (1), iki admin sayfası (2).
  */
-const HARDCODED_COPY_CEILING = 5;
+const HARDCODED_COPY_CEILING = 3;
 
 /** Yorum satırları sayılmaz — yalnızca gerçek kod. */
 function stripComments(src: string): string {

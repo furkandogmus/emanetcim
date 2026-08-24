@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { setRequestLocale } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { Clock, RefreshCw, CreditCard, ShieldCheck } from "lucide-react";
 import { alternatesForPath } from "@/lib/seo-alternates";
@@ -8,64 +8,6 @@ import { alternatesForPath } from "@/lib/seo-alternates";
 // check-in zamanina bakmaksizin HER ZAMAN tam iade uyguluyor ("Bounce-style: full
 // refund"). Onceki 3-katmanli metin (24s/1-24s/1s altinda kademeli iade) koddaki
 // gercek davranisla hic eslesmiyordu; audit'te (UX_AUDIT_BOUNCE_COMPARISON) bulundu.
-const copy = {
-  tr: {
-    title: "İptal ve İade Politikası",
-    subtitle: "Check-in'e kadar her zaman ücretsiz iptal, her zaman tam iade.",
-    badge: "HER ZAMAN ÜCRETSİZ İPTAL",
-    heroTitle: "Endişesiz",
-    heroTitle2: "İptal",
-    tier1Title: "Check-in'e Kadar",
-    tier1Badge: "Tam İade",
-    tier1Desc:
-      "Check-in saatinize kadar istediğiniz an iptal edebilirsiniz; ödediğiniz tutarın tamamı kartınıza iade edilir. Gizli koşul yok.",
-    tier2Title: "Otomatik ve Hızlı",
-    tier2Badge: "Aracısız",
-    tier2Desc:
-      "İptal talebiniz anında işleme alınır; onay için kimseyi beklemeniz gerekmez.",
-    tier3Title: "Hiçbir Ücret Yok",
-    tier3Badge: "Ek Masraf Yok",
-    tier3Desc:
-      "İptal işleminde kesinti, ceza veya işlem ücreti uygulanmaz.",
-    howToTitle: "Nasıl İptal Ederim?",
-    howTo1: "Rezervasyonlarım sayfasına gidin",
-    howTo2: "İptal etmek istediğiniz rezervasyonu bulun",
-    howTo3: '"Rezervasyonu İptal Et" butonuna tıklayın',
-    howTo4: "İptal onayı otomatik olarak gerçekleşir",
-    noteTitle: "Önemli Not",
-    noteBody:
-      "İptal durumunda iade, ödeme yönteminize bağlı olarak 5-10 iş günü içinde hesabınıza yansır.",
-    cta: "Rezervasyon Yap",
-  },
-  en: {
-    title: "Cancellation & Refund Policy",
-    subtitle: "Free cancellation, full refund, anytime before check-in.",
-    badge: "ALWAYS FREE TO CANCEL",
-    heroTitle: "Worry-Free",
-    heroTitle2: "Cancellation",
-    tier1Title: "Until Check-in",
-    tier1Badge: "Full Refund",
-    tier1Desc:
-      "Cancel anytime before your check-in time for a full refund to your card — no hidden conditions.",
-    tier2Title: "Automatic & Fast",
-    tier2Badge: "No Waiting",
-    tier2Desc:
-      "Your cancellation is processed instantly — no approval needed from anyone.",
-    tier3Title: "No Fees",
-    tier3Badge: "No Extra Cost",
-    tier3Desc:
-      "No deductions, penalties, or processing fees on cancellation.",
-    howToTitle: "How to Cancel?",
-    howTo1: "Go to My Bookings page",
-    howTo2: "Find the booking you want to cancel",
-    howTo3: 'Click "Cancel Booking" button',
-    howTo4: "Cancellation is confirmed automatically",
-    noteTitle: "Important Note",
-    noteBody:
-      "Refunds are processed within 5-10 business days depending on your payment method.",
-    cta: "Book Now",
-  },
-};
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -73,14 +15,16 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  const content = locale === "tr" ? copy.tr : copy.en;
+  const t = await getTranslations({ locale, namespace: "Cancellation" });
+  const title = t("title");
+  const description = t("subtitle");
   return {
-    title: content.title,
-    description: content.subtitle,
+    title,
+    description,
     alternates: alternatesForPath(locale, "/cancellation"),
     openGraph: {
-      title: content.title,
-      description: content.subtitle,
+      title,
+      description,
     },
   };
 }
@@ -88,7 +32,31 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function CancellationPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const content = locale === "tr" ? copy.tr : copy.en;
+  const t = await getTranslations("Cancellation");
+  const content = {
+    title: t("title"),
+    subtitle: t("subtitle"),
+    badge: t("badge"),
+    heroTitle: t("heroTitle"),
+    heroTitle2: t("heroTitle2"),
+    tier1Title: t("tier1Title"),
+    tier1Badge: t("tier1Badge"),
+    tier1Desc: t("tier1Desc"),
+    tier2Title: t("tier2Title"),
+    tier2Badge: t("tier2Badge"),
+    tier2Desc: t("tier2Desc"),
+    tier3Title: t("tier3Title"),
+    tier3Badge: t("tier3Badge"),
+    tier3Desc: t("tier3Desc"),
+    howToTitle: t("howToTitle"),
+    howTo1: t("howTo1"),
+    howTo2: t("howTo2"),
+    howTo3: t("howTo3"),
+    howTo4: t("howTo4"),
+    noteTitle: t("noteTitle"),
+    noteBody: t("noteBody"),
+    cta: t("cta"),
+  };
 
   const tiers = [
     {
