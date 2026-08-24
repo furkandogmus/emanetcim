@@ -40,8 +40,13 @@ export default function ManageLookupForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-      <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
+    <div className="relative min-h-screen bg-gray-50 flex items-center justify-center p-6 overflow-hidden">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-40 left-1/2 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,hsl(21_95%_60%/.22),transparent)] blur-2xl" />
+        <div className="absolute -right-24 top-24 h-72 w-72 rounded-full bg-[radial-gradient(closest-side,hsl(38_92%_55%/.18),transparent)] blur-2xl" />
+        <div className="absolute inset-0 opacity-[0.035] bg-[radial-gradient(#ea580c_1px,transparent_1px)] [background-size:20px_20px]" />
+      </div>
+      <div className="relative z-10 max-w-md w-full bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
         <div className="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center mb-4">
           <Search size={24} className="text-orange-600" />
         </div>
