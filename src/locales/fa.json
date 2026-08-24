@@ -48,7 +48,9 @@
     "decrease": "کاهش {label}",
     "language": "زبان",
     "rateStars": "امتیاز {count} ستاره",
-    "ratingOutOf": "{rating} از {max} ستاره"
+    "ratingOutOf": "{rating} از {max} ستاره",
+    "goToImage": "رفتن به عکس {index}",
+    "viewPhoto": "مشاهده عکس {index}"
   },
   "SEO": {
     "title": "BagajPark | چمدان امن، سفر آزاد",

@@ -48,7 +48,9 @@
     "decrease": "{label} verringern",
     "language": "Sprache",
     "rateStars": "{count} Sterne bewerten",
-    "ratingOutOf": "{rating} von {max} Sternen"
+    "ratingOutOf": "{rating} von {max} Sternen",
+    "goToImage": "Zu Foto {index} gehen",
+    "viewPhoto": "Foto {index} ansehen"
   },
   "SEO": {
     "title": "BagajPark | Lassen Sie Ihr Gepäck sicher und reisen Sie frei",

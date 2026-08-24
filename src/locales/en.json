@@ -48,7 +48,9 @@
     "decrease": "Decrease {label}",
     "language": "Language",
     "rateStars": "Rate {count} stars",
-    "ratingOutOf": "{rating} out of {max} stars"
+    "ratingOutOf": "{rating} out of {max} stars",
+    "goToImage": "Go to photo {index}",
+    "viewPhoto": "View photo {index}"
   },
   "SEO": {
     "title": "BagajPark | Leave Your Luggage Safely, Travel Freely",

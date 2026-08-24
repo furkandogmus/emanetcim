@@ -97,7 +97,10 @@ export default function ShopGallery({ images, shopName }: Props) {
               {images.map((_, i) => (
                 <button
                   key={i}
+                  type="button"
                   onClick={() => setActiveIndex(i)}
+                  aria-label={t("goToImage", { index: i + 1 })}
+                  aria-current={i === activeIndex}
                   className={`w-2 h-2 rounded-full transition-all ${i === activeIndex ? "bg-white w-4" : "bg-white/50"}`}
                 />
               ))}
@@ -114,7 +117,10 @@ export default function ShopGallery({ images, shopName }: Props) {
           {images.map((img, i) => (
             <button
               key={img.id}
+              type="button"
               onClick={() => setActiveIndex(i)}
+              aria-label={t("viewPhoto", { index: i + 1 })}
+              aria-current={i === activeIndex}
               className={`relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 transition-all ${i === activeIndex ? "border-orange-500" : "border-transparent opacity-60 hover:opacity-100"}`}
             >
               <Image src={img.url} alt="" fill unoptimized className="object-cover" />

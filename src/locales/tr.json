@@ -48,7 +48,9 @@
     "decrease": "{label} azalt",
     "language": "Dil",
     "rateStars": "{count} yıldız ver",
-    "ratingOutOf": "{max} üzerinden {rating} yıldız"
+    "ratingOutOf": "{max} üzerinden {rating} yıldız",
+    "goToImage": "{index}. fotoğrafa git",
+    "viewPhoto": "{index}. fotoğrafı görüntüle"
   },
   "SEO": {
     "title": "BagajPark | Valiz Saklama ve Güvenli Bagaj Emaneti",
