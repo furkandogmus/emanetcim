@@ -1076,9 +1076,9 @@
     "ariaEmail": "電子メール",
     "corporate": "企業向け",
     "citiesTitle": "人気の都市",
-    "citiesViewAll": "All cities & guides",
-    "paymentsNote": "Cards via service provider (secure). Cash not accepted. Wallets (Apple/Google Pay, PayPal) planned with service provider.",
-    "securityNote": "Reservations and personal data are protected with SSL.",
+    "citiesViewAll": "すべての都市とガイド",
+    "paymentsNote": "決済代行会社によるカード決済（安全）。現金は利用できません。ウォレット（Apple/Google Pay、PayPal）は決済代行会社を通じて対応予定です。",
+    "securityNote": "予約情報および個人情報はSSLで保護されています。",
     "sitemap": "サイトマップ"
   },
   "Contact": {
