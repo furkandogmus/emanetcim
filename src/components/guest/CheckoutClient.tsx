@@ -383,7 +383,7 @@ export default function CheckoutClient({
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-white text-gray-900">
+    <div className="flex flex-col bg-white text-gray-900">
       <header className="p-6 border-b border-gray-50 flex flex-col gap-4 bg-white sticky top-0 z-10">
         <div className="flex items-center gap-4">
           <Link

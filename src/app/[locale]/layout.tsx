@@ -165,7 +165,7 @@ export default async function RootLayout({
     >
       <body
         suppressHydrationWarning
-        className={`${geistSans.variable} bg-gray-50 antialiased selection:bg-orange-100 selection:text-orange-900`}
+        className={`${geistSans.variable} flex min-h-screen flex-col bg-gray-50 antialiased selection:bg-orange-100 selection:text-orange-900`}
       >
         <script
           type="application/ld+json"
@@ -193,7 +193,7 @@ export default async function RootLayout({
               İçeriğe atla
             </a>
             <Header />
-            <main id="main-content" className="min-h-screen pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
+            <main id="main-content" className="flex-1 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
               {children}
             </main>
             <Footer />
