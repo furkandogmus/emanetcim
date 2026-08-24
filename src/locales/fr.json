@@ -1281,6 +1281,7 @@
     "tier1Title": "Jusqu'à l'enregistrement",
     "tier1Badge": "Remboursement intégral",
     "tier1Desc": "Annulez à tout moment avant votre heure d'enregistrement pour un remboursement intégral sur votre carte — sans conditions cachées.",
+    "tier1DescOnsite": "Annulez à tout moment avant votre heure d'enregistrement, sans frais. Le paiement étant effectué sur place, une annulation ne vous coûte rien — sans conditions cachées.",
     "tier2Title": "Automatique et rapide",
     "tier2Badge": "Sans attente",
     "tier2Desc": "Votre annulation est traitée instantanément — aucune approbation nécessaire.",
@@ -1294,6 +1295,7 @@
     "howTo4": "L'annulation est confirmée automatiquement",
     "noteTitle": "Remarque importante",
     "noteBody": "Les remboursements sont traités sous 5 à 10 jours ouvrés selon votre mode de paiement.",
+    "noteBodyOnsite": "Le paiement étant effectué sur place, annuler signifie que vous n'avez jamais été débité — il n'y a rien à rembourser.",
     "cta": "Réserver maintenant"
   },
   "Dispute": {

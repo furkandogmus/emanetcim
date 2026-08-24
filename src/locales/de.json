@@ -1281,6 +1281,7 @@
     "tier1Title": "Bis zum Check-in",
     "tier1Badge": "Volle Rückerstattung",
     "tier1Desc": "Stornieren Sie jederzeit vor Ihrer Check-in-Zeit für eine volle Rückerstattung auf Ihre Karte — keine versteckten Bedingungen.",
+    "tier1DescOnsite": "Stornieren Sie jederzeit vor Ihrer Check-in-Zeit kostenlos. Da im Geschäft bezahlt wird, entstehen Ihnen bei einer Stornierung keine Kosten — keine versteckten Bedingungen.",
     "tier2Title": "Automatisch und schnell",
     "tier2Badge": "Ohne Wartezeit",
     "tier2Desc": "Ihre Stornierung wird sofort bearbeitet — keine Genehmigung erforderlich.",
@@ -1294,6 +1295,7 @@
     "howTo4": "Die Stornierung wird automatisch bestätigt",
     "noteTitle": "Wichtiger Hinweis",
     "noteBody": "Rückerstattungen werden je nach Zahlungsmethode innerhalb von 5-10 Werktagen bearbeitet.",
+    "noteBodyOnsite": "Da im Geschäft bezahlt wird, bedeutet eine Stornierung, dass Ihnen nie etwas berechnet wurde — es gibt nichts zu erstatten.",
     "cta": "Jetzt buchen"
   },
   "Dispute": {

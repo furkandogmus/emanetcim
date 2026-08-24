@@ -1339,6 +1339,7 @@
     "tier1Title": "Check-in'e Kadar",
     "tier1Badge": "Tam İade",
     "tier1Desc": "Check-in saatinize kadar istediğiniz an iptal edebilirsiniz; ödediğiniz tutarın tamamı kartınıza iade edilir. Gizli koşul yok.",
+    "tier1DescOnsite": "Check-in saatinize kadar istediğiniz an ücretsiz iptal edebilirsiniz. Ödeme dükkanda alındığı için iptalde sizden hiçbir tahsilat yapılmaz. Gizli koşul yok.",
     "tier2Title": "Otomatik ve Hızlı",
     "tier2Badge": "Aracısız",
     "tier2Desc": "İptal talebiniz anında işleme alınır; onay için kimseyi beklemeniz gerekmez.",
@@ -1352,6 +1353,7 @@
     "howTo4": "İptal onayı otomatik olarak gerçekleşir",
     "noteTitle": "Önemli Not",
     "noteBody": "İptal durumunda iade, ödeme yönteminize bağlı olarak 5-10 iş günü içinde hesabınıza yansır.",
+    "noteBodyOnsite": "Ödeme dükkanda alındığı için iptal ettiğinizde sizden herhangi bir tahsilat yapılmamış olur; iade edilecek bir tutar bulunmaz.",
     "cta": "Rezervasyon Yap"
   },
   "Dispute": {

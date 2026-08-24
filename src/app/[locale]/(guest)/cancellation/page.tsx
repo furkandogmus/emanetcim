@@ -3,11 +3,17 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { Clock, RefreshCw, CreditCard, ShieldCheck } from "lucide-react";
 import { alternatesForPath } from "@/lib/seo-alternates";
+import { paymentCopyKey } from "@/lib/payment-copy";
 
 // 2026-08-21: Tek politika motoru ile hizalandi — BookingService.cancelBooking()
 // check-in zamanina bakmaksizin HER ZAMAN tam iade uyguluyor ("Bounce-style: full
 // refund"). Onceki 3-katmanli metin (24s/1-24s/1s altinda kademeli iade) koddaki
 // gercek davranisla hic eslesmiyordu; audit'te (UX_AUDIT_BOUNCE_COMPARISON) bulundu.
+//
+// 2026-08-24: `tier1Desc` ve `noteBody` "kartınıza iade edilir" / "hesabınıza
+// yansır" diyordu -- hicbir odeme saglayicisi entegre degilken (P1-19, bkz.
+// `payment-copy.ts`). FAQ sayfasindaki ayni cozumle hizalandi: metin
+// PAYMENT_PROVIDER'in yetenegine bagli, elle geri alinmasi gerekmiyor.
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -41,7 +47,7 @@ export default async function CancellationPage({ params }: Props) {
     heroTitle2: t("heroTitle2"),
     tier1Title: t("tier1Title"),
     tier1Badge: t("tier1Badge"),
-    tier1Desc: t("tier1Desc"),
+    tier1Desc: t(paymentCopyKey("tier1Desc") as "tier1Desc"),
     tier2Title: t("tier2Title"),
     tier2Badge: t("tier2Badge"),
     tier2Desc: t("tier2Desc"),
@@ -54,7 +60,7 @@ export default async function CancellationPage({ params }: Props) {
     howTo3: t("howTo3"),
     howTo4: t("howTo4"),
     noteTitle: t("noteTitle"),
-    noteBody: t("noteBody"),
+    noteBody: t(paymentCopyKey("noteBody") as "noteBody"),
     cta: t("cta"),
   };
 

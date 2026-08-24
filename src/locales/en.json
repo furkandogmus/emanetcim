@@ -1339,6 +1339,7 @@
     "tier1Title": "Until Check-in",
     "tier1Badge": "Full Refund",
     "tier1Desc": "Cancel anytime before your check-in time for a full refund to your card — no hidden conditions.",
+    "tier1DescOnsite": "Cancel anytime before your check-in time at no cost. Because payment is taken at the shop, you're never charged if you cancel — no hidden conditions.",
     "tier2Title": "Automatic & Fast",
     "tier2Badge": "No Waiting",
     "tier2Desc": "Your cancellation is processed instantly — no approval needed from anyone.",
@@ -1352,6 +1353,7 @@
     "howTo4": "Cancellation is confirmed automatically",
     "noteTitle": "Important Note",
     "noteBody": "Refunds are processed within 5-10 business days depending on your payment method.",
+    "noteBodyOnsite": "Because payment is taken at the shop, cancelling means you were never charged — there's nothing to refund.",
     "cta": "Book Now"
   },
   "Dispute": {
