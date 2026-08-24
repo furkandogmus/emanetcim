@@ -376,16 +376,27 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
       </div>
 
       {/* Trust Features - Minimalist Icons */}
-      <section className="py-20 px-6 max-w-5xl mx-auto w-full grid grid-cols-1 md:grid-cols-3 gap-12 text-center text-sm">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 flex items-center justify-center text-orange-600 border border-orange-100 rounded-2xl bg-orange-50">
-            <ShieldCheck size={28} />
+      {/* Sigorta karti P1-20 korumasi altinda: `insuranceFeeTry = 0` iken
+          "10.000 TL Sigorta Dahil" karsiligi olmayan bir vaatti (bkz.
+          ShopDetailClient/BagProtection, ayni hata sinifi). Kart gizlenince
+          3 sutunlu izgarada bos bir hucre kalmasin diye sutun sayisi da
+          o zaman 2'ye dusuyor. */}
+      <section
+        className={`py-20 px-6 max-w-5xl mx-auto w-full grid grid-cols-1 gap-12 text-center text-sm ${
+          insuranceEnabled ? "md:grid-cols-3" : "md:grid-cols-2"
+        }`}
+      >
+        {insuranceEnabled ? (
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 flex items-center justify-center text-orange-600 border border-orange-100 rounded-2xl bg-orange-50">
+              <ShieldCheck size={28} />
+            </div>
+            <div>
+              <h4 className="font-bold mb-1">{t('insuranceIncluded')}</h4>
+              <p className="text-gray-500 leading-relaxed">{t('trustInsuranceBody')}</p>
+            </div>
           </div>
-          <div>
-            <h4 className="font-bold mb-1">{t('insuranceIncluded')}</h4>
-            <p className="text-gray-500 leading-relaxed">{t('trustInsuranceBody')}</p>
-          </div>
-        </div>
+        ) : null}
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 flex items-center justify-center text-orange-600 border border-orange-100 rounded-2xl bg-orange-50">
             <MapPin size={28} />
