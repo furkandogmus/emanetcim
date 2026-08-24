@@ -1,6 +1,7 @@
 "use client";
 
 import { Minus, Plus, Package } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface BagSelectorProps {
   label: string;
@@ -15,6 +16,7 @@ interface BagSelectorProps {
  * KISS Prensibi: Basit +/- kontrolleri.
  */
 export default function BagSelector({ label, sublabel, count, onIncrease, onDecrease }: BagSelectorProps) {
+  const t = useTranslations('Common');
   return (
     <div className="ui-card-soft flex items-center justify-between p-4 group hover:border-orange-200 transition-all">
       <div className="flex items-center gap-4">
@@ -32,7 +34,7 @@ export default function BagSelector({ label, sublabel, count, onIncrease, onDecr
           type="button"
           onClick={onDecrease}
           disabled={count === 0}
-          aria-label="Decrease"
+          aria-label={t("decrease", { label })}
           className="btn-ui btn-ui-sm btn-ui-secondary btn-ui-icon rounded-full text-gray-900 shadow-sm"
         >
           <Minus size={18} />
@@ -41,7 +43,7 @@ export default function BagSelector({ label, sublabel, count, onIncrease, onDecr
         <button 
           type="button"
           onClick={onIncrease}
-          aria-label="Increase"
+          aria-label={t("increase", { label })}
           className="btn-ui btn-ui-sm btn-ui-primary btn-ui-icon rounded-full"
         >
           <Plus size={18} />

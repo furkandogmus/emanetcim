@@ -43,7 +43,9 @@
     "next": "Weiter",
     "resetZoom": "Zoom zurücksetzen",
     "addToFavorites": "Zu Favoriten hinzufügen",
-    "removeFromFavorites": "Aus Favoriten entfernen"
+    "removeFromFavorites": "Aus Favoriten entfernen",
+    "increase": "{label} erhöhen",
+    "decrease": "{label} verringern"
   },
   "SEO": {
     "title": "BagajPark | Lassen Sie Ihr Gepäck sicher und reisen Sie frei",

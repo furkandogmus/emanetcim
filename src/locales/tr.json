@@ -43,7 +43,9 @@
     "next": "Sonraki",
     "resetZoom": "Yakınlaştırmayı Sıfırla",
     "addToFavorites": "Favorilere ekle",
-    "removeFromFavorites": "Favorilerden çıkar"
+    "removeFromFavorites": "Favorilerden çıkar",
+    "increase": "{label} artır",
+    "decrease": "{label} azalt"
   },
   "SEO": {
     "title": "BagajPark | Valiz Saklama ve Güvenli Bagaj Emaneti",
