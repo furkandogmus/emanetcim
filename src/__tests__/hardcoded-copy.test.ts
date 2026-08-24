@@ -29,15 +29,17 @@ const ROOTS = ["src/components", "src/app"];
  * etiketleri (1 blok / 7 metin), Footer (3), arama ipucu (1), slot ızgarası
  * (1 blok / 5 metin), sadakat rozeti (1 blok / 3 metin), `BookingsClient`
  * (1 blok / 12 metin), `account/page.tsx` (1 blok / 17 metin — referans kodu
- * kartı ve indirim yüzdesi diğer 5 dilde hep İngilizce çıkıyordu). → 10
+ * kartı ve indirim yüzdesi diğer 5 dilde hep İngilizce çıkıyordu), `insurance`
+ * sayfası (1 blok / 34 metin — güvence sayfası artık 6 dilde de doğru
+ * çıkıyor). → 8
  *
  * Borç kapatıldıkça bu sayıyı DÜŞÜRÜN. Yükseltmek, "yeni özellik 12 dilde
  * çalışmıyor" demenin başka bir yoludur.
  *
- * Kalan: `luggage-storage/[slug]` (3), `cancellation` (2), `insurance` (2),
- * `page.tsx` (1), iki admin sayfası (2).
+ * Kalan: `luggage-storage/[slug]` (3), `cancellation` (2), `page.tsx` (1),
+ * iki admin sayfası (2).
  */
-const HARDCODED_COPY_CEILING = 10;
+const HARDCODED_COPY_CEILING = 8;
 
 /** Yorum satırları sayılmaz — yalnızca gerçek kod. */
 function stripComments(src: string): string {
