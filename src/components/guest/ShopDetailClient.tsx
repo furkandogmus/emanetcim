@@ -142,7 +142,7 @@ export default function ShopDetailClient({
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-28">
+    <div className="bg-gray-50 pb-28">
       <div className="md:hidden">
         <div className={`relative h-[360px] ${shop.image || shop.images.length > 0 ? '' : 'bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 flex items-center justify-center'}`}>
           {shop.images.length > 0 ? (
