@@ -1750,6 +1750,18 @@
     "referralCopyTitle": "Linki kopyala"
   },
   "Home": {
-    "seoTitle": "Bagaj Emanet ve Valiz Depolama"
+    "seoTitle": "Bagaj Emanet ve Valiz Depolama",
+    "visualTitle": "Şehri Özgürce Yaşa",
+    "visualBody": "Uçuş öncesi, otel check-in beklerken veya günlük şehir turunda valiz taşımadan hareket edin.",
+    "visualCard1Title": "Havalimanı ve terminal sonrası konfor",
+    "visualCard1Text": "Varıştan sonra en yakın noktaya bırak, günü valizsiz geçir.",
+    "visualCard2Title": "Tarihi bölgelerde kolay dolaşım",
+    "visualCard2Text": "Müze, çarşı ve merkez rotalarında ağırlık taşımadan gez.",
+    "visualCard3Title": "İş seyahatlerinde hızlı teslim-al",
+    "visualCard3Text": "Toplantı aralarında güvenli teslim, hızlı geri alma deneyimi.",
+    "aboutTitle": "Bagaj Emanet Hizmeti Hakkında",
+    "aboutParagraph1": "BagajPark, Türkiye genelinde yaygın emanet noktalarıyla valiz depolama sürecini dijitalleştirir. Kullanıcılar konuma göre en yakın noktaları görür, tarih aralığına uygun müsaitliği kontrol eder ve rezervasyonunu birkaç adımda tamamlar.",
+    "aboutParagraph2": "Platform, güven sinyallerini görünür hale getirir: doğrulanmış partner noktaları, süreç kayıtları ve politika tabanlı koruma akışı. Bu yapı özellikle turistler, aktarma yolcuları ve otel check-in saatini bekleyen kullanıcılar için yüksek fayda sağlar.",
+    "aboutParagraph3": "Luggage storage, bagaj emanet, valiz depolama ve şehir içi kısa süreli emanet gibi arama niyetlerine uygun olarak; sayfa yapısı hızlı keşif, net fiyat, güven ve mobil kullanılabilirlik ekseninde optimize edilmiştir."
   }
 }

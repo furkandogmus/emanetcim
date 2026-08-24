@@ -137,70 +137,36 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
       urlPath: `/luggage-storage/${city.slug}`,
     })),
   });
-  const editorialCopy =
-    locale === "tr"
-      ? {
-          visualTitle: "Şehri Özgürce Yaşa",
-          visualBody:
-            "Uçuş öncesi, otel check-in beklerken veya günlük şehir turunda valiz taşımadan hareket edin.",
-          visualCards: [
-            {
-              title: "Havalimanı ve terminal sonrası konfor",
-              text: "Varıştan sonra en yakın noktaya bırak, günü valizsiz geçir.",
-              image:
-                "https://images.unsplash.com/photo-1527631746610-bca00a040d60?auto=format&fit=crop&w=1200&q=80",
-            },
-            {
-              title: "Tarihi bölgelerde kolay dolaşım",
-              text: "Müze, çarşı ve merkez rotalarında ağırlık taşımadan gez.",
-              image:
-                "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=1200&q=80",
-            },
-            {
-              title: "İş seyahatlerinde hızlı teslim-al",
-              text: "Toplantı aralarında güvenli teslim, hızlı geri alma deneyimi.",
-              image:
-                "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1200&q=80",
-            },
-          ],
-          seoTitle: "Bagaj Emanet Hizmeti Hakkında",
-          seoParagraphs: [
-            "BagajPark, Türkiye genelinde yaygın emanet noktalarıyla valiz depolama sürecini dijitalleştirir. Kullanıcılar konuma göre en yakın noktaları görür, tarih aralığına uygun müsaitliği kontrol eder ve rezervasyonunu birkaç adımda tamamlar.",
-            "Platform, güven sinyallerini görünür hale getirir: doğrulanmış partner noktaları, süreç kayıtları ve politika tabanlı koruma akışı. Bu yapı özellikle turistler, aktarma yolcuları ve otel check-in saatini bekleyen kullanıcılar için yüksek fayda sağlar.",
-            "Luggage storage, bagaj emanet, valiz depolama ve şehir içi kısa süreli emanet gibi arama niyetlerine uygun olarak; sayfa yapısı hızlı keşif, net fiyat, güven ve mobil kullanılabilirlik ekseninde optimize edilmiştir.",
-          ],
-        }
-      : {
-          visualTitle: "Move Through the City, Hands-Free",
-          visualBody:
-            "Before check-in, after arrival, or during a full-day city walk, store your luggage and move freely.",
-          visualCards: [
-            {
-              title: "Comfort right after airport transfer",
-              text: "Drop your bags at a nearby point and start your day immediately.",
-              image:
-                "https://images.unsplash.com/photo-1527631746610-bca00a040d60?auto=format&fit=crop&w=1200&q=80",
-            },
-            {
-              title: "Easier sightseeing in dense city zones",
-              text: "Explore museums and historic districts without carrying weight.",
-              image:
-                "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=1200&q=80",
-            },
-            {
-              title: "Fast drop-off for business travelers",
-              text: "Store safely between meetings and pick up when needed.",
-              image:
-                "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1200&q=80",
-            },
-          ],
-          seoTitle: "About Our Luggage Storage Experience",
-          seoParagraphs: [
-            "BagajPark digitizes luggage storage with verified local partner points across major Turkish cities. Guests can discover nearby locations, check date-based availability, and complete booking in minutes.",
-            "The product is designed around trust and speed: visible partner verification, process records, and policy-based protection flows. This helps tourists, transfer passengers, and early-arrival guests stay mobile.",
-            "For intent clusters such as luggage storage, baggage storage near me, and short-term bag drop, the page structure is optimized for discoverability, transparent pricing, and mobile-first conversion.",
-          ],
-        };
+  const editorialCopy = {
+    visualTitle: tHome("visualTitle"),
+    visualBody: tHome("visualBody"),
+    visualCards: [
+      {
+        title: tHome("visualCard1Title"),
+        text: tHome("visualCard1Text"),
+        image:
+          "https://images.unsplash.com/photo-1527631746610-bca00a040d60?auto=format&fit=crop&w=1200&q=80",
+      },
+      {
+        title: tHome("visualCard2Title"),
+        text: tHome("visualCard2Text"),
+        image:
+          "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=1200&q=80",
+      },
+      {
+        title: tHome("visualCard3Title"),
+        text: tHome("visualCard3Text"),
+        image:
+          "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1200&q=80",
+      },
+    ],
+    seoTitle: tHome("aboutTitle"),
+    seoParagraphs: [
+      tHome("aboutParagraph1"),
+      tHome("aboutParagraph2"),
+      tHome("aboutParagraph3"),
+    ],
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-900">

@@ -36,14 +36,18 @@ const ROOTS = ["src/components", "src/app"];
  * şehir × 4 dil = 48 sayfa kombinasyonunu etkiliyordu), `cancellation`
  * sayfası (1 blok / 22 metin — iptal/iade politikası artık 6 dilde de doğru
  * çıkıyor, önceden DE/FR/FA/JA kullanıcıları bu kritik güven sayfasını
- * İngilizce görüyordu). → 3
+ * İngilizce görüyordu), ana sayfa `page.tsx` (1 blok / 12 metin — "şehri
+ * özgürce yaşa" görsel bölümü ve alt SEO paragrafları artık 6 dilde; aynı
+ * taramada ayrıca `homeStep1-3Title/Desc` (6 anahtar) DE/FR/FA/JA'da anahtar
+ * VARDI ama değer hep İngilizceydi — bu test onu göremiyordu, ayrıca
+ * düzeltildi). → 2
  *
  * Borç kapatıldıkça bu sayıyı DÜŞÜRÜN. Yükseltmek, "yeni özellik 12 dilde
  * çalışmıyor" demenin başka bir yoludur.
  *
- * Kalan: `page.tsx` (1), iki admin sayfası (2).
+ * Kalan: iki admin sayfası (2).
  */
-const HARDCODED_COPY_CEILING = 3;
+const HARDCODED_COPY_CEILING = 2;
 
 /** Yorum satırları sayılmaz — yalnızca gerçek kod. */
 function stripComments(src: string): string {
