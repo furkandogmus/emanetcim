@@ -41,7 +41,9 @@
     "close": "بستن",
     "previous": "قبلی",
     "next": "بعدی",
-    "resetZoom": "بازنشانی بزرگ‌نمایی"
+    "resetZoom": "بازنشانی بزرگ‌نمایی",
+    "addToFavorites": "افزودن به علاقه‌مندی‌ها",
+    "removeFromFavorites": "حذف از علاقه‌مندی‌ها"
   },
   "SEO": {
     "title": "BagajPark | چمدان امن، سفر آزاد",

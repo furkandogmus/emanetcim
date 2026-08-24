@@ -41,7 +41,9 @@
     "close": "Fermer",
     "previous": "Précédent",
     "next": "Suivant",
-    "resetZoom": "Réinitialiser le zoom"
+    "resetZoom": "Réinitialiser le zoom",
+    "addToFavorites": "Ajouter aux favoris",
+    "removeFromFavorites": "Retirer des favoris"
   },
   "SEO": {
     "title": "Parc Bagaj | Laissez vos bagages en toute sécurité, voyagez librement",

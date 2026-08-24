@@ -1,6 +1,7 @@
 "use client";
 
 import { Heart } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useFavorites } from "@/lib/use-favorites";
 
 type Props = {
@@ -9,6 +10,7 @@ type Props = {
 };
 
 export default function FavoriteButton({ shopId, className = "" }: Props) {
+  const t = useTranslations("Common");
   const { isFavorite, toggleFavorite } = useFavorites();
   const fav = isFavorite(shopId);
 
@@ -25,7 +27,7 @@ export default function FavoriteButton({ shopId, className = "" }: Props) {
           ? "bg-red-50 text-red-500 hover:bg-red-100"
           : "bg-white/80 text-gray-400 hover:text-red-400 hover:bg-red-50"
       } ${className}`}
-      aria-label={fav ? "Remove from favorites" : "Add to favorites"}
+      aria-label={fav ? t("removeFromFavorites") : t("addToFavorites")}
     >
       <Heart size={18} fill={fav ? "currentColor" : "none"} />
     </button>
