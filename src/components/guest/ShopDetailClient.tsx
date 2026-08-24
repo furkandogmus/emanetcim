@@ -206,24 +206,27 @@ export default function ShopDetailClient({
                 {mobileCopy.verifiedPartner}
               </span>
               {/*
-                SİGORTA ROZETİ YALNIZCA GERÇEKTEN SİGORTA VARSA.
+                SİGORTA ROZETLERİ YALNIZCA GERÇEKTEN SİGORTA VARSA.
 
-                2026-08-22'de canlı `insuranceFeeTry = 0` iken bu rozet
+                2026-08-22'de canlı `insuranceFeeTry = 0` iken bu rozetler
                 gösteriliyordu — karşılığı olmayan bir güvence vaadi. Bir bavul
                 kaybolduğunda platformun neye dayanarak ödeme yapacağı belirsizdi
-                (P1-20). Ücret belirlendiği an rozet kendiliğinden geri gelir;
-                hiçbir kod değişikliği gerekmez.
+                (P1-20). "10.000 TL Garanti" rozeti de aynı hata sınıfını
+                taşıyordu, aynı kontrole eklendi. Ücret belirlendiği an rozetler
+                kendiliğinden geri gelir; hiçbir kod değişikliği gerekmez.
               */}
               {insuranceEnabled ? (
-                <span className="rounded-xl bg-emerald-50 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-emerald-700">
-                  {mobileCopy.insuredStorage}
-                </span>
+                <>
+                  <span className="rounded-xl bg-emerald-50 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-emerald-700">
+                    {mobileCopy.insuredStorage}
+                  </span>
+                  <span className="rounded-xl bg-rose-50 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-rose-700">
+                    {t("guaranteeBadge")}
+                  </span>
+                </>
               ) : null}
               <span className="rounded-xl bg-amber-50 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-amber-700">
                 {t("searchFreeCancelBadge")}
-              </span>
-              <span className="rounded-xl bg-rose-50 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-rose-700">
-                {t("guaranteeBadge")}
               </span>
             </div>
           </div>

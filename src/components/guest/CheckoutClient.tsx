@@ -37,6 +37,7 @@ import {
 } from "@/lib/datetime-local";
 import DateTimePicker from "@/components/ui/DateTimePicker";
 import type { PricingRules } from "@/lib/pricing-rules";
+import { isInsuranceEnabled } from "@/lib/commerce-context";
 import {
   PLAUSIBLE_EVENTS,
   trackPlausibleEvent,
@@ -194,6 +195,7 @@ export default function CheckoutClient({
       : 0;
   const insuranceFee = totalPrice > 0 ? pricingRules.insuranceFeeTry : 0;
   const grandTotal = totalPrice + insuranceFee;
+  const insuranceEnabled = isInsuranceEnabled(pricingRules);
 
   const totalBags = bagS + bagM + bagXl;
 
@@ -591,14 +593,14 @@ export default function CheckoutClient({
               </div>
             </section>
 
-            <BagProtection variant="checkout" />
+            <BagProtection variant="checkout" insuranceEnabled={insuranceEnabled} />
 
             <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-xs leading-relaxed text-emerald-800 flex items-center gap-2">
               <span className="text-emerald-600 font-black text-base">✓</span>
               <span className="font-semibold">{t("freeCancellationNote")}</span>
             </div>
 
-            <CheckoutWhatIsIncluded />
+            <CheckoutWhatIsIncluded insuranceEnabled={insuranceEnabled} />
 
             <BagSizeGuide />
 

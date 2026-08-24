@@ -5,8 +5,23 @@ import { ShieldCheck } from "lucide-react";
 
 type Variant = "checkout" | "landing";
 
-export default function BagProtection({ variant }: { variant: Variant }) {
+/**
+ * `insuranceEnabled` çağıranın zaten yüklediği `pricingRules`'tan
+ * (`isInsuranceEnabled`) türer — burada ayrı bir sorgu yok. `insuranceFeeTry`
+ * sıfırken bu bileşen "10.000 TL'ye kadar güvence" vaat ediyordu; karşılığı
+ * olmayan bir taahhüttü (bkz. `commerce-context.ts` P1-20, aynı hata sınıfı
+ * `ShopDetailClient`'taki sigorta rozetinde de vardı).
+ */
+export default function BagProtection({
+  variant,
+  insuranceEnabled,
+}: {
+  variant: Variant;
+  insuranceEnabled: boolean;
+}) {
   const t = useTranslations("Guest");
+
+  if (!insuranceEnabled) return null;
 
   const wrap =
     variant === "checkout"

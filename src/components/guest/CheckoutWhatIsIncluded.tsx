@@ -3,7 +3,11 @@
 import { useTranslations } from "next-intl";
 import { BaggageClaim, ShieldCheck, Clock, Phone } from "lucide-react";
 
-export default function CheckoutWhatIsIncluded() {
+export default function CheckoutWhatIsIncluded({
+  insuranceEnabled,
+}: {
+  insuranceEnabled: boolean;
+}) {
   const t = useTranslations("Guest");
 
   const items = [
@@ -12,11 +16,18 @@ export default function CheckoutWhatIsIncluded() {
       label: t("checkoutIncludedSeals"),
       desc: t("checkoutIncludedSealsDesc"),
     },
-    {
-      icon: ShieldCheck,
-      label: t("insuranceIncluded"),
-      desc: t("checkoutIncludedInsuranceDesc"),
-    },
+    // `insuranceEnabled` doğrulanmadan bu kalem her zaman gösteriliyordu --
+    // bkz. `BagProtection.tsx` ve `commerce-context.ts` (P1-20): sigorta
+    // ücreti sıfırken karşılığı olmayan bir güvence vaadiydi.
+    ...(insuranceEnabled
+      ? [
+          {
+            icon: ShieldCheck,
+            label: t("insuranceIncluded"),
+            desc: t("checkoutIncludedInsuranceDesc"),
+          },
+        ]
+      : []),
     {
       icon: Clock,
       label: t("searchFreeCancelBadge"),

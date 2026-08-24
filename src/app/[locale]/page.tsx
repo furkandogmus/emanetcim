@@ -17,6 +17,8 @@ import { alternatesForPath } from "@/lib/seo-alternates";
 import { buildFaqJsonLd } from "@/lib/faq-json-ld";
 import { buildItemListJsonLd, buildWebPageJsonLd } from "@/lib/page-json-ld";
 import { formatDecimal } from "@/lib/currency";
+import { getPricingRules } from "@/lib/platform-settings";
+import { isInsuranceEnabled } from "@/lib/commerce-context";
 
 export const revalidate = 120;
 
@@ -71,10 +73,12 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
   };
   const tCity = await getTranslations("CityStorage");
   const tHome = await getTranslations("Home");
-  const [stats, testimonials] = await Promise.all([
+  const [stats, testimonials, pricingRules] = await Promise.all([
     getGuestLandingStats(),
     getHomeTestimonials(14),
+    getPricingRules(),
   ]);
+  const insuranceEnabled = isInsuranceEnabled(pricingRules);
   // Arama kutusunun varsayilanlari burada, SUNUCUDA uretilir. Istemcide
   // uretilirse sunucu (UTC) ile ziyaretcinin saat dilimi farkli metin verir ve
   // hydration'da #418 metin uyusmazligi olusur.
@@ -402,7 +406,7 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
       </section>
 
       <div className="mx-auto max-w-3xl px-6 pb-4">
-        <BagProtection variant="landing" />
+        <BagProtection variant="landing" insuranceEnabled={insuranceEnabled} />
       </div>
 
       {/* Trust Features - Minimalist Icons */}
