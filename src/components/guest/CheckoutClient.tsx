@@ -550,37 +550,13 @@ export default function CheckoutClient({
               {t("checkoutStep2Title")}
             </h2>
 
-            <BagProtection variant="checkout" />
-
-            <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-xs leading-relaxed text-emerald-800 flex items-center gap-2">
-              <span className="text-emerald-600 font-black text-base">✓</span>
-              <span className="font-semibold">{t("freeCancellationNote")}</span>
-            </div>
-
-            <CheckoutWhatIsIncluded />
-
-            <BagSizeGuide />
-
-            <section
-              className="rounded-2xl border border-gray-100 bg-gray-50/90 p-4 text-xs leading-relaxed text-gray-600"
-              aria-labelledby="checkout-policy-callout"
-            >
-              <p
-                id="checkout-policy-callout"
-                className="text-[10px] font-black uppercase tracking-widest text-gray-400"
-              >
-                {t("checkoutPolicyCalloutTitle")}
-              </p>
-              <p className="mt-2">{t("checkoutPolicyCalloutBody")}</p>
-              <Link
-                href="/faq"
-                className="mt-3 inline-block text-[11px] font-black uppercase tracking-wider text-orange-600 hover:underline"
-              >
-                {t("checkoutFaqLink")}
-              </Link>
-            </section>
-
-            <section className="flex flex-col gap-4">
+            {/*
+              2026-08-24: fiyat dokumu bu adimin en altindaydi -- kullanici
+              odeme onayindan once koruma metni, "neler dahil" karti ve tam bir
+              valiz boyut rehberini kaydirmak zorunda kaliyordu. Bir onay
+              adiminda en onemli bilgi ne odedigidir; ozet en basa alindi.
+            */}
+            <section className="flex flex-col gap-4 rounded-2xl border border-gray-100 bg-gray-50/60 p-4">
               <div className="flex justify-between items-start text-sm">
                 <div className="flex flex-col gap-0.5">
                   <span className="text-gray-400 font-medium">
@@ -613,6 +589,36 @@ export default function CheckoutClient({
                   <Money amount={grandTotal} />
                 </span>
               </div>
+            </section>
+
+            <BagProtection variant="checkout" />
+
+            <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-xs leading-relaxed text-emerald-800 flex items-center gap-2">
+              <span className="text-emerald-600 font-black text-base">✓</span>
+              <span className="font-semibold">{t("freeCancellationNote")}</span>
+            </div>
+
+            <CheckoutWhatIsIncluded />
+
+            <BagSizeGuide />
+
+            <section
+              className="rounded-2xl border border-gray-100 bg-gray-50/90 p-4 text-xs leading-relaxed text-gray-600"
+              aria-labelledby="checkout-policy-callout"
+            >
+              <p
+                id="checkout-policy-callout"
+                className="text-[10px] font-black uppercase tracking-widest text-gray-400"
+              >
+                {t("checkoutPolicyCalloutTitle")}
+              </p>
+              <p className="mt-2">{t("checkoutPolicyCalloutBody")}</p>
+              <Link
+                href="/faq"
+                className="mt-3 inline-block text-[11px] font-black uppercase tracking-wider text-orange-600 hover:underline"
+              >
+                {t("checkoutFaqLink")}
+              </Link>
             </section>
           </>
         )}
