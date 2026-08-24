@@ -30,16 +30,17 @@ const ROOTS = ["src/components", "src/app"];
  * (1 blok / 5 metin), sadakat rozeti (1 blok / 3 metin), `BookingsClient`
  * (1 blok / 12 metin), `account/page.tsx` (1 blok / 17 metin — referans kodu
  * kartı ve indirim yüzdesi diğer 5 dilde hep İngilizce çıkıyordu), `insurance`
- * sayfası (1 blok / 34 metin — güvence sayfası artık 6 dilde de doğru
- * çıkıyor). → 8
+ * sayfası (1 blok / 34 metin), `luggage-storage/[slug]` (3 dal / 18 metin —
+ * 12 şehir sayfasının "neden BagajPark / nasıl çalışır / FAQ / ipuçları"
+ * bölümü artık şehir adı `{city}` ile enterpolasyonlu, 6 dilde ortak; 12
+ * şehir × 4 dil = 48 sayfa kombinasyonunu etkiliyordu). → 5
  *
  * Borç kapatıldıkça bu sayıyı DÜŞÜRÜN. Yükseltmek, "yeni özellik 12 dilde
  * çalışmıyor" demenin başka bir yoludur.
  *
- * Kalan: `luggage-storage/[slug]` (3), `cancellation` (2), `page.tsx` (1),
- * iki admin sayfası (2).
+ * Kalan: `cancellation` (2), `page.tsx` (1), iki admin sayfası (2).
  */
-const HARDCODED_COPY_CEILING = 8;
+const HARDCODED_COPY_CEILING = 5;
 
 /** Yorum satırları sayılmaz — yalnızca gerçek kod. */
 function stripComments(src: string): string {

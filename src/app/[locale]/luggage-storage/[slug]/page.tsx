@@ -67,66 +67,25 @@ export default async function CityLuggageStoragePage({
   const tCommon = await getTranslations("Common");
   const appName = tCommon("appName");
   const cityLabel = t(`${slug}.label`);
-  const localeCopy =
-    locale === "tr"
-      ? {
-          whyTitle: `${cityLabel} için neden BagajPark?`,
-          whyItems: [
-            `${cityLabel} içinde merkezi noktalara yakın emanet seçenekleri.`,
-            "Rezervasyon öncesi net süreç, hızlı teslim ve geri alma deneyimi.",
-            "Mobil odaklı akış ile dakikalar içinde uygun nokta seçimi.",
-          ],
-          howTitle: "Nasıl çalışır?",
-          howItems: [
-            "Arama ekranında konum veya bölge girin, en yakın noktaları görün.",
-            "Tarih aralığını seçin ve valiz adedine göre müsaitliği kontrol edin.",
-            "Rezervasyonu tamamlayın, noktada teslim ederek şehrin tadını çıkarın.",
-          ],
-          faqTitle: `${cityLabel} bagaj emanet FAQ`,
-          faqs: [
-            {
-              q: `${cityLabel} içinde bagaj emanet noktaları nerede?`,
-              a: "Nokta ağı şehir merkezi, turistik ve transit alanlara yakın olacak şekilde listelenir.",
-            },
-            {
-              q: "Rezervasyon ne kadar sürer?",
-              a: "Doğru tarih ve valiz adedi ile uygun noktayı seçip rezervasyonu dakikalar içinde tamamlayabilirsiniz.",
-            },
-            {
-              q: "Fiyatlar nasıl hesaplanır?",
-              a: "Fiyatlar çanta adedi ve süreye göre hesaplanır; rezervasyon akışında toplam tutar açık şekilde gösterilir.",
-            },
-          ],
-        }
-      : {
-          whyTitle: `Why use BagajPark in ${cityLabel}?`,
-          whyItems: [
-            `Convenient luggage storage options near key areas in ${cityLabel}.`,
-            "Clear booking flow with fast drop-off and pickup experience.",
-            "Mobile-first journey to find a suitable location in minutes.",
-          ],
-          howTitle: "How it works",
-          howItems: [
-            "Enter a district or location in search and view nearby points.",
-            "Choose your dates and verify availability by bag count.",
-            "Complete booking, drop your luggage, and enjoy the city.",
-          ],
-          faqTitle: `${cityLabel} luggage storage FAQ`,
-          faqs: [
-            {
-              q: `Where are luggage storage points in ${cityLabel}?`,
-              a: "Locations are listed around central, touristic, and transfer-friendly zones.",
-            },
-            {
-              q: "How long does booking take?",
-              a: "With dates and bag count selected, booking can be completed in just a few minutes.",
-            },
-            {
-              q: "How is pricing calculated?",
-              a: "Pricing is based on bag count and duration; the total is shown clearly during checkout.",
-            },
-          ],
-        };
+  const localeCopy = {
+    whyTitle: t("detailWhyTitle", { city: cityLabel }),
+    whyItems: [
+      t("detailWhyItem1", { city: cityLabel }),
+      t("detailWhyItem2"),
+      t("detailWhyItem3"),
+    ],
+    howTitle: t("detailHowTitle"),
+    howItems: [t("detailHowItem1"), t("detailHowItem2"), t("detailHowItem3")],
+    faqTitle: t("detailFaqTitle", { city: cityLabel }),
+    faqs: [
+      {
+        q: t("detailFaq1Question", { city: cityLabel }),
+        a: t("detailFaq1Answer"),
+      },
+      { q: t("detailFaq2Question"), a: t("detailFaq2Answer") },
+      { q: t("detailFaq3Question"), a: t("detailFaq3Answer") },
+    ],
+  };
   const faqJsonLd = buildFaqJsonLd({
     locale,
     path: `/luggage-storage/${slug}`,
@@ -267,7 +226,7 @@ export default async function CityLuggageStoragePage({
         {tips.length > 0 && (
           <section className="mt-6 rounded-[1.5rem] border border-orange-100 bg-orange-50 p-6">
             <h2 className="text-lg font-black text-gray-900 flex items-center gap-2">
-              <span className="text-orange-600">★</span> {locale === 'tr' ? 'BagajPark İpuçları' : 'BagajPark Tips'}
+              <span className="text-orange-600">★</span> {t("detailTipsTitle")}
             </h2>
             <ul className="mt-4 space-y-2">
               {tips.map((tip, idx) => (
@@ -284,7 +243,7 @@ export default async function CityLuggageStoragePage({
         {nearbyPlaces.length > 0 && (
           <section className="mt-6 rounded-[1.5rem] border border-gray-100 bg-white p-6">
             <h2 className="text-lg font-black text-gray-900">
-              {locale === 'tr' ? 'Yakındaki Popüler Noktalar' : 'Nearby Popular Places'}
+              {t("detailNearbyTitle")}
             </h2>
             <div className="mt-4 flex flex-wrap gap-2">
               {nearbyPlaces.map((place) => (
