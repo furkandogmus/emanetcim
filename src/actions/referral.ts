@@ -18,13 +18,18 @@ function generateCode(length = 8): string {
 
 /**
  * Kullanıcının referans kodunu döndürür; yoksa oluşturur ve kaydeder.
+ *
+ * `error` alanı düz Türkçe metin değil `"Errors.x"` anahtarıdır — bu proje
+ * çapında kurulu kalıp (bkz. `action-error.ts`, `dispute-error-copy.ts`);
+ * ham Türkçe metin dönseydi DE/FR/FA/JA kullanıcısı hata mesajını hep
+ * Türkçe görürdü. Çağıran taraf `useTranslations("Errors")` ile çevirir.
  */
 export async function getOrCreateReferralCodeAction(): Promise<
   { success: true; code: string } | { success: false; error: string }
 > {
   const session = await auth();
   if (!session?.user?.id) {
-    return { success: false, error: "Giriş yapmanız gerekiyor." };
+    return { success: false, error: "Errors.authRequired" };
   }
 
   const user = await prisma.user.findUnique({
@@ -49,7 +54,7 @@ export async function getOrCreateReferralCodeAction(): Promise<
       // unique constraint ihlali — tekrar dene
     }
   }
-  return { success: false, error: "Kod oluşturulamadı, lütfen tekrar deneyin." };
+  return { success: false, error: "Errors.referralCodeFailed" };
 }
 
 /**

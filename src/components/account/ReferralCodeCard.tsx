@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Copy, Check, Gift } from "lucide-react";
 import { getOrCreateReferralCodeAction } from "@/actions/referral";
 
@@ -21,6 +22,7 @@ export default function ReferralCodeCard({
   loadingLabel,
   copyTitle,
 }: ReferralCodeCardProps) {
+  const tErrors = useTranslations("Errors");
   const [code, setCode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -37,7 +39,9 @@ export default function ReferralCodeCard({
       if (res.success) {
         setCode(res.code);
       } else {
-        setError(res.error);
+        // `res.error` bir "Errors.x" anahtaridir, ham metin degil.
+        const key = res.error === "Errors.authRequired" ? "authRequired" : "referralCodeFailed";
+        setError(tErrors(key));
       }
     });
   };

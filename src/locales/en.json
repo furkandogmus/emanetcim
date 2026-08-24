@@ -1412,7 +1412,8 @@
     "reviewNotReady": "Reviews can only be made after the delivery is complete.",
     "verificationCooldown": "Please wait {seconds} seconds before sending another email.",
     "maxVerificationAttempts": "Too many attempts. Please contact our support team.",
-    "invalidTrPhone": "Enter a valid Turkish mobile number (10 digits starting with 5, e.g. 05xx or +90 5xx)."
+    "invalidTrPhone": "Enter a valid Turkish mobile number (10 digits starting with 5, e.g. 05xx or +90 5xx).",
+    "referralCodeFailed": "Could not generate a code. Please try again."
   },
   "Emails": {
     "verificationSubject": "Verify Your Email",

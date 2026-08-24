@@ -1412,7 +1412,8 @@
     "reviewNotReady": "Yorum yalnızca teslim tamamlandıktan sonra yapılabilir.",
     "verificationCooldown": "Yeni bir e-posta göndermek için {seconds} saniye beklemeniz gerekiyor.",
     "maxVerificationAttempts": "Çok fazla deneme yaptınız. Lütfen destek ekibimizle iletişime geçin.",
-    "invalidTrPhone": "Telefon numarası 05xx xxx xx xx formatında olmalıdır."
+    "invalidTrPhone": "Telefon numarası 05xx xxx xx xx formatında olmalıdır.",
+    "referralCodeFailed": "Kod oluşturulamadı, lütfen tekrar deneyin."
   },
   "Emails": {
     "verificationSubject": "E-postanızı Doğrulayın",
