@@ -4,6 +4,7 @@ import createMiddleware from 'next-intl/middleware';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { routing } from './i18n/routing';
+import { isAdminPath as matchesAdminPath, isPartnerPath as matchesPartnerPath } from './lib/route-protection';
 
 const { auth } = NextAuth({
   ...authConfig,
@@ -94,12 +95,8 @@ const authProxy = auth((req) => {
   const { locale: pathLocale, barePath: pathWithoutLocale } =
     stripLocalePrefix(pathname);
 
-  const isAdminPath =
-    pathWithoutLocale.startsWith("/admin") ||
-    pathWithoutLocale.startsWith("/api/admin");
-  const isPartnerPath =
-    pathWithoutLocale.startsWith("/partner") ||
-    pathWithoutLocale.startsWith("/api/partner");
+  const isAdminPath = matchesAdminPath(pathWithoutLocale);
+  const isPartnerPath = matchesPartnerPath(pathWithoutLocale);
   const isInternalApiPath = pathWithoutLocale.startsWith("/api/internal");
 
   if (isAdminPath || isPartnerPath) {
