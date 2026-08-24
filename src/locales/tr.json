@@ -447,6 +447,7 @@
     "shopDetailLocation": "Konum",
     "shopDetailReviews": "Yorumlar",
     "shopDetailNoReviews": "Henüz yorum yok; ilk siz değerlendirin.",
+    "shopDetailShowLess": "Daha Az Göster",
     "shopDetailTitleSuffix": "Emanet noktası",
     "shopDetailNotFoundTitle": "Dükkan bulunamadı",
     "shopDetailMetaFallback": "Güvenli valiz emanet noktası",

@@ -437,6 +437,7 @@
     "shopDetailLocation": "位置",
     "shopDetailReviews": "レビュー",
     "shopDetailNoReviews": "まだレビューはありません。訪問後、最初のレビューを投稿してください。",
+    "shopDetailShowLess": "表示を減らす",
     "shopDetailTitleSuffix": "荷物預かり",
     "shopDetailNotFoundTitle": "ショップが見つかりません",
     "shopDetailMetaFallback": "安全な荷物預かり",

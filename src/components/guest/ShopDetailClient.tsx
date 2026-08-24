@@ -125,6 +125,7 @@ export default function ShopDetailClient({
 
   const { share } = useShare();
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+  const [showAllReviews, setShowAllReviews] = useState(false);
 
   const [checkoutParams] = useState(() => {
     try {
@@ -285,16 +286,41 @@ export default function ShopDetailClient({
           <section>
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-2xl font-black text-gray-900">{t("shopDetailReviews")}</h2>
-              <span className="text-xs font-black text-orange-600 uppercase tracking-wider">{mobileCopy.seeAll}</span>
+              {/*
+                Onceden bu her zaman gorunen, hicbir seye baglanmayan sabit
+                bir `<span>` idi -- "Tumunu Gor" yaziyordu ama tiklaninca
+                hicbir sey olmuyordu, sifir yorumda bile gosteriliyordu.
+                Simdi yalnizca gosterilecek fazladan yorum varken cikiyor
+                ve masaustu surumunun zaten yaptigi gibi tumunu acar.
+              */}
+              {shop.reviews.length > 1 ? (
+                <button
+                  type="button"
+                  onClick={() => setShowAllReviews((v) => !v)}
+                  className="text-xs font-black text-orange-600 uppercase tracking-wider"
+                >
+                  {showAllReviews ? t("shopDetailShowLess") : mobileCopy.seeAll}
+                </button>
+              ) : null}
             </div>
             {shop.reviews.length === 0 ? (
               <p className="rounded-3xl bg-white p-4 text-sm text-gray-500">{t("shopDetailNoReviews")}</p>
             ) : (
-              <div className="rounded-3xl border border-gray-100 bg-white p-4">
-                <p className="font-black text-gray-900">{shop.reviews[0].authorLabel || t("guestDefaultName")}</p>
-                {shop.reviews[0].comment ? (
-                  <p className="mt-2 text-sm leading-relaxed text-gray-600">{shop.reviews[0].comment}</p>
-                ) : null}
+              <div className="flex flex-col gap-3">
+                {(showAllReviews ? shop.reviews : shop.reviews.slice(0, 1)).map((r) => (
+                  <div key={r.id} className="rounded-3xl border border-gray-100 bg-white p-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-black text-gray-900">{r.authorLabel || t("guestDefaultName")}</p>
+                      <span className="flex items-center gap-0.5 text-xs font-bold text-orange-600">
+                        <Star size={12} fill="currentColor" />
+                        {r.rating}
+                      </span>
+                    </div>
+                    {r.comment ? (
+                      <p className="mt-2 text-sm leading-relaxed text-gray-600">{r.comment}</p>
+                    ) : null}
+                  </div>
+                ))}
               </div>
             )}
           </section>
