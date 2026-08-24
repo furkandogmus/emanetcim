@@ -160,7 +160,7 @@ export default function ShopGallery({ images, shopName }: Props) {
               onClick={() => setScale(1)}
               className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-white/20 text-white text-xs font-bold backdrop-blur-sm"
             >
-              Reset Zoom
+              {t("resetZoom")}
             </button>
           )}
         </div>
