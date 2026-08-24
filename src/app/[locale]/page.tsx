@@ -477,7 +477,7 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
       </section>
 
       <TestimonialCarousel items={testimonials} />
-      <ComparisonTable />
+      <ComparisonTable insuranceEnabled={insuranceEnabled} />
       <PartnerPromoModal />
     </div>
   );

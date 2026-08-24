@@ -9,16 +9,25 @@ type ComparisonRowKey =
   | "comparisonNetwork"
   | "comparisonHours";
 
-const ROWS: { key: ComparisonRowKey; us: "yes" | "partial" }[] = [
-  { key: "comparisonPrice", us: "yes" },
-  { key: "comparisonFlex", us: "yes" },
-  { key: "comparisonInsurance", us: "yes" },
-  { key: "comparisonNetwork", us: "partial" },
-  { key: "comparisonHours", us: "partial" },
-];
-
-export default function ComparisonTable() {
+export default function ComparisonTable({
+  insuranceEnabled,
+}: {
+  insuranceEnabled: boolean;
+}) {
   const t = useTranslations("Guest");
+  // Sigorta karsiligi yokken bu satir "Evet" diyerek P1-20 sinifi bir
+  // rakip-karsilastirma vaadi veriyordu (bkz. ShopDetailClient/BagProtection/
+  // ana sayfa guven kartlari, ayni hata). Ucret belirlenene kadar satir hic
+  // gosterilmiyor.
+  const rows: { key: ComparisonRowKey; us: "yes" | "partial" }[] = [
+    { key: "comparisonPrice", us: "yes" },
+    { key: "comparisonFlex", us: "yes" },
+    ...(insuranceEnabled
+      ? [{ key: "comparisonInsurance" as const, us: "yes" as const }]
+      : []),
+    { key: "comparisonNetwork", us: "partial" },
+    { key: "comparisonHours", us: "partial" },
+  ];
 
   return (
     <section
@@ -51,7 +60,7 @@ export default function ComparisonTable() {
               </tr>
             </thead>
             <tbody>
-              {ROWS.map(({ key, us }) => (
+              {rows.map(({ key, us }) => (
                 <tr key={key} className="border-b border-gray-50 last:border-0">
                   <td className="px-4 py-3 font-semibold text-gray-800">
                     {t(key)}
