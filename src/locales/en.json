@@ -1306,7 +1306,12 @@
     "submitting": "Sending...",
     "submit": "Submit",
     "statusTitle": "Status",
-    "statusLabel": "Status"
+    "statusLabel": "Status",
+    "statusOpen": "Awaiting review",
+    "statusInReview": "Under review",
+    "statusResolved": "Resolved",
+    "statusClosed": "Closed",
+    "backToBooking": "Back to booking"
   },
   "Errors": {
     "authRequired": "Session required.",

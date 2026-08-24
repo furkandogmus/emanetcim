@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { createDisputeAction } from "@/actions/dispute";
-import { useRouter } from "@/i18n/routing";
+import { Link, useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
+import { ChevronLeft } from "lucide-react";
 
 export default function DisputeForm({
   bookingId,
@@ -30,6 +31,13 @@ export default function DisputeForm({
 
   return (
     <div className="ui-card max-w-lg mx-auto rounded-3xl p-8">
+      <Link
+        href={`/bookings/${bookingId}`}
+        className="ui-kicker inline-flex items-center gap-1.5 text-gray-400 hover:text-orange-600 transition-colors mb-4"
+      >
+        <ChevronLeft size={14} />
+        {t("backToBooking")}
+      </Link>
       <h1 className="ui-heading-md">{t("title")}</h1>
       <p className="ui-body-sm mt-1">{shopName}</p>
 

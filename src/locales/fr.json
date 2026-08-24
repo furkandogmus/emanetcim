@@ -1248,7 +1248,12 @@
     "submitting": "Envoi...",
     "submit": "Soumettre",
     "statusTitle": "Statut",
-    "statusLabel": "Statut"
+    "statusLabel": "Statut",
+    "statusOpen": "En attente d'examen",
+    "statusInReview": "En cours d'examen",
+    "statusResolved": "Résolu",
+    "statusClosed": "Clôturé",
+    "backToBooking": "Retour à la réservation"
   },
   "Errors": {
     "authRequired": "Séance obligatoire.",

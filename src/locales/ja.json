@@ -1248,7 +1248,12 @@
     "submitting": "送信中...",
     "submit": "提出する",
     "statusTitle": "状態",
-    "statusLabel": "状態"
+    "statusLabel": "状態",
+    "statusOpen": "確認待ち",
+    "statusInReview": "確認中",
+    "statusResolved": "解決済み",
+    "statusClosed": "クローズ済み",
+    "backToBooking": "予約に戻る"
   },
   "Errors": {
     "authRequired": "セッションが必要です。",
