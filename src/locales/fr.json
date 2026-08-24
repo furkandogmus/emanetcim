@@ -328,6 +328,7 @@
     "showToPartner": "Veuillez montrer le code QR ci-dessous au propriétaire du magasin.",
     "myBookings": "Mes réservations",
     "backToBookings": "Toutes les réservations",
+    "bookingViewDetails": "Voir les détails",
     "bookingStatus_WAITING_APPROVAL": "En attente du commerce",
     "bookingStatus_APPROVED": "Approuvé — payez pour confirmer",
     "bookingStatus_PENDING": "Paiement en attente",

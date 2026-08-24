@@ -328,6 +328,7 @@
     "showToPartner": "Bitte zeigen Sie dem Shop-Inhaber den untenstehenden QR-Code.",
     "myBookings": "Meine Buchungen",
     "backToBookings": "Alle Buchungen",
+    "bookingViewDetails": "Details ansehen",
     "bookingStatus_WAITING_APPROVAL": "Warten auf Shop-Bestätigung",
     "bookingStatus_APPROVED": "Genehmigt — bitte zahlen",
     "bookingStatus_PENDING": "Zahlung ausstehend",

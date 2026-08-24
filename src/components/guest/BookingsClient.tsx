@@ -177,7 +177,7 @@ export default function BookingsClient({
             {hasUpcoming ? mobileCopy.upcomingBooking : mobileCopy.latestBooking}
           </h2>
           <Link href={`/bookings/${featuredBooking.id}`} className="text-xs font-black text-orange-600 uppercase tracking-wider">
-            {t('backToBookings')}
+            {t('bookingViewDetails')}
           </Link>
         </section>
 
@@ -219,20 +219,12 @@ export default function BookingsClient({
           </div>
 
           <div className="mt-4">
-            <div className="grid grid-cols-2 gap-3">
-              <Link
-                href={`/bookings/${featuredBooking.id}`}
-                className="btn-ui btn-ui-lg btn-ui-primary w-full rounded-2xl"
-              >
-                {t('showQR')}
-              </Link>
-              <Link
-                href={`/bookings/${featuredBooking.id}`}
-                className="btn-ui btn-ui-lg btn-ui-secondary w-full rounded-2xl"
-              >
-                {t('backToBookings')}
-              </Link>
-            </div>
+            <Link
+              href={`/bookings/${featuredBooking.id}`}
+              className="btn-ui btn-ui-lg btn-ui-primary w-full rounded-2xl"
+            >
+              {t('showQR')}
+            </Link>
           </div>
         </article>
 

@@ -328,6 +328,7 @@
     "showToPartner": "کد QR زیر را به صاحب فروشگاه نشان دهید.",
     "myBookings": "رزروهای من",
     "backToBookings": "All bookings",
+    "bookingViewDetails": "مشاهده جزئیات",
     "bookingStatus_WAITING_APPROVAL": "Awaiting shop confirmation",
     "bookingStatus_APPROVED": "Approved — complete payment",
     "bookingStatus_PENDING": "Awaiting payment",

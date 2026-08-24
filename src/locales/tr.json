@@ -336,6 +336,7 @@
     "showToPartner": "Lütfen aşağıdaki QR kodu dükkan sahibine gösterin.",
     "myBookings": "Rezervasyonlarım",
     "backToBookings": "Tüm rezervasyonlar",
+    "bookingViewDetails": "Detayları Gör",
     "bookingStatus_WAITING_APPROVAL": "Esnaf onayı bekleniyor",
     "bookingStatus_APPROVED": "Onaylandı — Dükkanda öde",
     "bookingStatus_PENDING": "Ödeme bekleniyor",

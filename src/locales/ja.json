@@ -328,6 +328,7 @@
     "showToPartner": "下記のQRコードを店主にご提示ください。",
     "myBookings": "私の予約",
     "backToBookings": "All bookings",
+    "bookingViewDetails": "詳細を見る",
     "bookingStatus_WAITING_APPROVAL": "Awaiting shop confirmation",
     "bookingStatus_APPROVED": "Approved — complete payment",
     "bookingStatus_PENDING": "Awaiting payment",
