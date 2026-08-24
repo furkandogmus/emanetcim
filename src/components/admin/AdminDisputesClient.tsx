@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { updateDisputeStatusAction } from "@/actions/dispute";
 import { toast } from "sonner";
 import { dateLocaleForUiLocale } from "@/lib/date-locale";
+import { adminDisputeErrorKey } from "@/lib/admin-dispute-error-copy";
 
 interface DisputeBooking {
   id: string;
@@ -54,6 +55,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function AdminDisputesClient({ disputes: initial }: { disputes: Dispute[] }) {
   const t = useTranslations("Admin");
+  const tErrors = useTranslations("Errors");
   const locale = useLocale();
   const dateLocale = dateLocaleForUiLocale(locale);
 
@@ -113,7 +115,9 @@ export default function AdminDisputesClient({ disputes: initial }: { disputes: D
         setEditId(null);
         toast.success(t("disputesToastUpdated"));
       } else {
-        toast.error(t("disputesToastError", { error: res.error }));
+        toast.error(
+          t("disputesToastError", { error: tErrors(adminDisputeErrorKey(res.error)) }),
+        );
       }
     } finally {
       setSaving(false);
