@@ -88,7 +88,7 @@ export default function ShopListItem({
           ) : null}
         </div>
 
-        <div className="mt-3 flex justify-between items-center">
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 flex-wrap">
             <div className="flex items-center gap-1 text-[10px] text-green-600 font-bold uppercase tracking-wider">
               <Shield size={10} />
@@ -110,53 +110,50 @@ export default function ShopListItem({
               </span>
             )}
           </div>
-          
-          <div className="flex items-center gap-3">
+
+          <div className="text-right">
+            {slotPrices ? (
+              <div className="flex items-center gap-1.5">
+                <span className="flex flex-col items-center"><span className="text-[9px] text-gray-400 font-bold uppercase">S</span><Money amount={slotPrices.s} compact className="text-xs font-black text-gray-900" /></span>
+                <span className="text-gray-300 text-xs">|</span>
+                <span className="flex flex-col items-center bg-orange-50/50 rounded-lg px-1.5 py-0.5"><span className="text-[9px] text-orange-500 font-bold uppercase">M/L</span><Money amount={slotPrices.m} compact className="text-sm font-black text-orange-600" /></span>
+                <span className="text-gray-300 text-xs">|</span>
+                <span className="flex flex-col items-center"><span className="text-[9px] text-gray-400 font-bold uppercase">XL</span><Money amount={slotPrices.xl} compact className="text-xs font-black text-gray-900" /></span>
+              </div>
+            ) : (
+              <>
+                <span className="text-[10px] text-gray-400 font-bold uppercase block -mb-0.5">{t("from")}</span>
+                <Money amount={price} className="text-xl font-black text-gray-900" />
+                <span className="text-[10px] text-gray-400 font-bold uppercase ml-1">/ {t("day")}</span>
+              </>
+            )}
+          </div>
+        </div>
+        <div className="mt-3 flex items-center justify-between gap-3 border-t border-gray-100 pt-3">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClick?.();
+            }}
+            className="btn-ui btn-ui-sm bg-orange-600 text-white rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-wider hover:bg-orange-700 transition-colors flex-1"
+          >
+            {t("bookNow")}
+          </button>
+          {lat && lng && (
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                onClick?.();
+                window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
               }}
-              className="btn-ui btn-ui-sm bg-orange-600 text-white rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-wider hover:bg-orange-700 transition-colors shrink-0"
+              className="btn-ui btn-ui-sm btn-ui-icon bg-gray-50 hover:bg-orange-50 text-gray-400 hover:text-orange-600 shrink-0"
+              title={t("getDirections")}
             >
-              {t("bookNow")}
+              <MapPin size={16} />
             </button>
-            {lat && lng && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
-                }}
-                className="btn-ui btn-ui-sm btn-ui-icon bg-gray-50 hover:bg-orange-50 text-gray-400 hover:text-orange-600 shrink-0"
-                title={t("getDirections")}
-              >
-                <MapPin size={16} />
-              </button>
-            )}
-            <div className="text-right">
-              {slotPrices ? (
-                <div className="flex items-center gap-1.5">
-                  <span className="flex flex-col items-center"><span className="text-[9px] text-gray-400 font-bold uppercase">S</span><Money amount={slotPrices.s} compact className="text-xs font-black text-gray-900" /></span>
-                  <span className="text-gray-300 text-xs">|</span>
-                  <span className="flex flex-col items-center bg-orange-50/50 rounded-lg px-1.5 py-0.5"><span className="text-[9px] text-orange-500 font-bold uppercase">M/L</span><Money amount={slotPrices.m} compact className="text-sm font-black text-orange-600" /></span>
-                  <span className="text-gray-300 text-xs">|</span>
-                  <span className="flex flex-col items-center"><span className="text-[9px] text-gray-400 font-bold uppercase">XL</span><Money amount={slotPrices.xl} compact className="text-xs font-black text-gray-900" /></span>
-                </div>
-              ) : (
-                <>
-                  <span className="text-[10px] text-gray-400 font-bold uppercase block -mb-0.5">{t("from")}</span>
-                  <Money amount={price} className="text-xl font-black text-gray-900" />
-                  <span className="text-[10px] text-gray-400 font-bold uppercase ml-1">/ {t("day")}</span>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-        <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-3">
-          <span className="text-xs font-black text-orange-600">{t("bookNow")}</span>
-          <ChevronRight size={16} className="text-orange-500 transition-transform group-hover:translate-x-1" />
+          )}
+          <ChevronRight size={16} className="text-orange-500 transition-transform group-hover:translate-x-1 shrink-0" />
         </div>
       </div>
     </motion.div>
