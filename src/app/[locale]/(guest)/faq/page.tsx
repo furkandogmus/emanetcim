@@ -97,7 +97,7 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
             <h2 className="text-xs font-black text-blue-600 uppercase tracking-[0.3em] mb-8">
               {t("partnerTitle")}
             </h2>
-            <div className="p-8 bg-blue-50 rounded-[2.5rem] border border-blue-100 flex flex-col items-center text-center gap-6">
+            <div className="p-8 bg-blue-50 rounded-[2.5rem] border border-blue-100 flex flex-col items-center text-center gap-6 md:sticky md:top-8">
               <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-blue-600 shadow-sm">
                 <ShieldCheck size={32} />
               </div>
