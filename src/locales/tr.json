@@ -1286,8 +1286,8 @@
     "cta": "Otel iş birliği için iletişim"
   },
   "CookieConsent": {
-    "bannerTitle": "Cerezler",
-    "bannerText": "Siteyi calistirmak icin gereklidir.",
+    "bannerTitle": "Çerezler",
+    "bannerText": "Sitenin çalışması için gereklidir.",
     "acceptAll": "Kabul et",
     "essentialOnly": "Sadece zorunlu",
     "linksIntro": "Detaylar:",
