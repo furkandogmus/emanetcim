@@ -23,6 +23,7 @@ export default function ReferralCodeCard({
   copyTitle,
 }: ReferralCodeCardProps) {
   const tErrors = useTranslations("Errors");
+  const tCommon = useTranslations("Common");
   const [code, setCode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -51,9 +52,15 @@ export default function ReferralCodeCard({
     // Paylaşılan link, misafirin AN O ANKİ dilinde açılmalı — sabit `/tr`
     // İngilizce/diğer dillerdeki kullanıcıyı yanlış locale'e yönlendiriyordu.
     const shareUrl = `${baseUrl}/${locale}?ref=${code}`;
-    await navigator.clipboard.writeText(shareUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // `clipboard.writeText` reddedilirse (izin yok, guvensiz baglam vb.)
+      // hicbir sey olmuyordu -- kullanici kopyaladigini sanip yapistiriyordu.
+      setError(tCommon("linkCopyFailed"));
+    }
   };
 
   return (
