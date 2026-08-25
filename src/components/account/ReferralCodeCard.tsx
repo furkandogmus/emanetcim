@@ -66,6 +66,7 @@ export default function ReferralCodeCard({
 
       {!code ? (
         <button
+          type="button"
           onClick={handleReveal}
           disabled={isPending}
           className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm py-2.5 rounded-xl transition-colors disabled:opacity-60"
@@ -78,7 +79,9 @@ export default function ReferralCodeCard({
             <span className="font-mono font-bold text-orange-700 tracking-widest text-base">{code}</span>
           </div>
           <button
+            type="button"
             onClick={handleCopy}
+            aria-label={copyTitle}
             className="p-2.5 bg-orange-100 hover:bg-orange-200 rounded-xl transition-colors"
             title={copyTitle}
           >
