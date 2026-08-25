@@ -488,6 +488,7 @@ export default function CheckoutClient({
               </div>
               <div className="flex flex-col gap-4">
                 <BagSelector
+                  size="s"
                   label={t("smallBag")}
                   sublabel={`S / ${formatTryCurrency(priceS, locale)}`}
                   count={bagS}
@@ -495,6 +496,7 @@ export default function CheckoutClient({
                   onDecrease={() => setBagS(Math.max(0, bagS - 1))}
                 />
                 <BagSelector
+                  size="m"
                   label={t("mediumBag")}
                   sublabel={`M/L / ${formatTryCurrency(priceM, locale)}`}
                   count={bagM}
@@ -502,6 +504,7 @@ export default function CheckoutClient({
                   onDecrease={() => setBagM(Math.max(0, bagM - 1))}
                 />
                 <BagSelector
+                  size="xl"
                   label={t("xlBag")}
                   sublabel={`XL / ${formatTryCurrency(priceXl, locale)}`}
                   count={bagXl}

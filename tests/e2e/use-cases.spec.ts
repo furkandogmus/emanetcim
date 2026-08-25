@@ -33,17 +33,29 @@ test.describe('UC: Misafir — Checkout fiyat ve çanta (anonim)', () => {
     await expect(page.getByTestId('checkout-total-amount')).toHaveText(/₺80(,00)?/);
   });
 
+  /*
+  Valiz +/- dugmeleri `data-testid` ile hedefleniyor, erisilebilirlik adiyla degil.
+
+  ONCEDEN: `getByRole('button', { name: 'Increase' }).nth(0)`. Iki hatasi vardi ve
+  ikisi birlikte CI'yi kirmizi tutuyordu:
+    1. Erisilebilirlik adi CEVRILIYOR (`Common.increase`). Bu testler `/tr`
+       sayfasinda geziyor, orada ad "M artir" -- 'Increase' hicbir zaman
+       eslesmiyordu, `locator.click` 30 sn sonra zaman asimina ugruyordu.
+    2. `.nth(n)` konum bazliydi: boy sirasi degisirse test sessizce BASKA bir
+       dugmeye tiklar ve yanlis tutari dogrular.
+  Kanca dilden bagimsiz ve boyu adiyla soyluyor; `aria-label` cevrilmeye devam eder.
+*/
   test('Çanta adetleri değişince toplam güncellenir', async ({ page }) => {
     await page.goto('/tr/search');
     await openCheckoutFromSearchList(page);
     await waitForCheckoutDatesReady(page);
 
-    await page.getByRole('button', { name: 'Increase' }).nth(0).click();
+    await page.getByTestId('bag-s-increase').click();
     await page.getByTestId('checkout-footer-primary').click();
     await expect(page.getByTestId('checkout-total-amount')).toHaveText(/₺144(,00)?/);
 
     await page.getByRole('button', { name: 'Geri' }).click();
-    await page.getByRole('button', { name: 'Increase' }).nth(2).click();
+    await page.getByTestId('bag-xl-increase').click();
     await page.getByTestId('checkout-footer-primary').click();
     await expect(page.getByTestId('checkout-total-amount')).toHaveText(/₺264(,00)?/);
   });
@@ -91,7 +103,7 @@ test.describe('UC: Misafir — Rezervasyon oluşturma', () => {
     await page.getByTestId('checkout-footer-primary').click();
     await expect(page.getByTestId('checkout-total-amount')).toHaveText(/₺80(,00)?/);
     await page.getByRole('button', { name: 'Geri' }).click();
-    await page.getByRole('button', { name: 'Increase' }).nth(1).click();
+    await page.getByTestId('bag-m-increase').click();
     await confirmCheckout(page);
 
     await expect(page.getByRole('heading', { name: /Rezervasyon (Başarılı|Onaylandı)/i })).toBeVisible({

@@ -9,13 +9,29 @@ interface BagSelectorProps {
   count: number;
   onIncrease: () => void;
   onDecrease: () => void;
+  /**
+   * Boy kimligi (`s` | `m` | `xl`). Verilirse +/- dugmelerine
+   * `bag-<size>-increase` / `bag-<size>-decrease` test kancasi eklenir.
+   *
+   * NEDEN VAR (2026-08-26): E2E bu dugmeleri
+   * `getByRole('button', { name: 'Increase' }).nth(0)` ile ariyordu. Iki ayri
+   * kirilganlik: (1) erisilebilirlik adi `t("increase")` ile CEVRILIYOR, yani
+   * `/tr` sayfasinda "M artir" oluyor ve 'Increase' HICBIR ZAMAN eslesmiyor;
+   * (2) `.nth(0)` konum bazli -- boylarin sirasi degisirse test sessizce
+   * baska bir dugmeye tiklar. Ikisi birlikte CI'yi kirmizi tutuyordu
+   * (`use-cases.spec.ts:36` ve `:82`, `locator.click` zaman asimi).
+   *
+   * Test kancasi bilerek `aria-label`'dan AYRI: erisilebilirlik adi cevrilmeye
+   * devam etmeli, test ise dilden bagimsiz olmali.
+   */
+  size?: "s" | "m" | "xl";
 }
 
 /**
  * BagSelector - Valiz Adet Seçici
  * KISS Prensibi: Basit +/- kontrolleri.
  */
-export default function BagSelector({ label, sublabel, count, onIncrease, onDecrease }: BagSelectorProps) {
+export default function BagSelector({ label, sublabel, count, onIncrease, onDecrease, size }: BagSelectorProps) {
   const t = useTranslations('Common');
   return (
     <div className="ui-card-soft flex items-center justify-between p-4 group hover:border-orange-200 transition-all">
@@ -35,6 +51,7 @@ export default function BagSelector({ label, sublabel, count, onIncrease, onDecr
           onClick={onDecrease}
           disabled={count === 0}
           aria-label={t("decrease", { label })}
+          data-testid={size ? `bag-${size}-decrease` : undefined}
           className="btn-ui btn-ui-sm btn-ui-secondary btn-ui-icon rounded-full text-gray-900 shadow-sm"
         >
           <Minus size={18} />
@@ -44,6 +61,7 @@ export default function BagSelector({ label, sublabel, count, onIncrease, onDecr
           type="button"
           onClick={onIncrease}
           aria-label={t("increase", { label })}
+          data-testid={size ? `bag-${size}-increase` : undefined}
           className="btn-ui btn-ui-sm btn-ui-primary btn-ui-icon rounded-full"
         >
           <Plus size={18} />
