@@ -14,7 +14,7 @@ import { useEffect, useRef } from "react";
  * Kalıp kod tabanında zaten vardı (`DateTimePicker` Escape'i işliyor); eksik olan
  * onu paylaşılan bir yere almaktı.
  *
- * Dört şey yapar:
+ * Beş şey yapar:
  *  1. **Escape kapatır.** Klavye kullanıcısının çıkış yolu.
  *  2. **Arka plan kaydırması kilitlenir.** Mobilde modal açıkken arkadaki sayfanın
  *     kayması, kullanıcının yerini kaybetmesine yol açar.
@@ -26,6 +26,12 @@ import { useEffect, useRef } from "react";
  *     Ref almadan çalışması için DOM'daki en son `[role="dialog"]` öğesi baz
  *     alınır (iç içe modallarda en üstteki); hook zaten Escape/scroll-kilidi
  *     için de ref istemiyordu.
+ *  5. **Açılışta odak modala taşınır.** `ConfirmDialog` gibi kendi odak hedefini
+ *     seçen bileşenler ayrıca kendi `useEffect`'iyle üzerine yazabilir (bu hook
+ *     önce çalışır); ama `CheckoutSealsDialog` / galeri lightbox'ı gibi özel
+ *     mantığı olmayanlarda odak, tetikleyen düğmede (artık arka planda, görsel
+ *     olarak erişilemez) kalıyordu — Tab'a basana kadar modal açılmamış gibi
+ *     davranıyordu.
  */
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -73,6 +79,13 @@ export function useModalBehavior({
       }
     };
     document.addEventListener("keydown", onKeyDown);
+
+    const dialogsOnOpen = document.querySelectorAll<HTMLElement>('[role="dialog"]');
+    const dialogOnOpen = dialogsOnOpen[dialogsOnOpen.length - 1];
+    if (dialogOnOpen && !dialogOnOpen.contains(document.activeElement)) {
+      const firstFocusable = dialogOnOpen.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
+      firstFocusable?.focus();
+    }
 
     /**
      * Önceki değeri saklayıp geri koyuyoruz: iç içe iki modal açıldığında
