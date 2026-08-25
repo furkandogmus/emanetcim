@@ -34,4 +34,10 @@ describe("LoyaltyBadge", () => {
     render(<LoyaltyBadge points={100} />);
     expect(screen.getByText(/1,00/)).toBeTruthy();
   });
+
+  it("100'ün altındaki puanlarda TRY karşılığını yuvarlayıp sıfırlamaz", () => {
+    render(<LoyaltyBadge points={50} locale="tr" />);
+    // 50 puan / 100 = ₺0,50 — Math.floor ile bu 0,00 gösterilirdi
+    expect(screen.getByText(/0,50/)).toBeTruthy();
+  });
 });

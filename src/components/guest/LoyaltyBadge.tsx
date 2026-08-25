@@ -15,7 +15,11 @@ export default function LoyaltyBadge({ points, locale }: Props) {
 
   if (points < 50) return null;
 
-  const value = Math.floor(points / 100);
+  // Tam sayıya yuvarlamak 50-99 puan aralığında rozeti "0,00 TRY indirim"
+  // gösterirdi (50/100 = 0.5 -> Math.floor -> 0) — rozet görünüyordu ama
+  // karşılığı sıfırmış gibi duruyordu. formatTryCurrency ondalığı zaten
+  // doğru basıyor, o yüzden burada yuvarlamaya gerek yok.
+  const value = points / 100;
 
   return (
     <div className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-400 text-white px-3 py-1 shadow-sm">
