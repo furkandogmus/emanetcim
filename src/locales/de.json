@@ -50,7 +50,9 @@
     "rateStars": "{count} Sterne bewerten",
     "ratingOutOf": "{rating} von {max} Sternen",
     "goToImage": "Zu Foto {index} gehen",
-    "viewPhoto": "Foto {index} ansehen"
+    "viewPhoto": "Foto {index} ansehen",
+    "linkCopied": "Link in die Zwischenablage kopiert",
+    "linkCopyFailed": "Link konnte nicht kopiert werden"
   },
   "SEO": {
     "title": "BagajPark | Lassen Sie Ihr Gepäck sicher und reisen Sie frei",

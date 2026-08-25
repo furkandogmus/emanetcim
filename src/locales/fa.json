@@ -50,7 +50,9 @@
     "rateStars": "امتیاز {count} ستاره",
     "ratingOutOf": "{rating} از {max} ستاره",
     "goToImage": "رفتن به عکس {index}",
-    "viewPhoto": "مشاهده عکس {index}"
+    "viewPhoto": "مشاهده عکس {index}",
+    "linkCopied": "لینک در کلیپ‌بورد کپی شد",
+    "linkCopyFailed": "کپی لینک انجام نشد"
   },
   "SEO": {
     "title": "BagajPark | چمدان امن، سفر آزاد",

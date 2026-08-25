@@ -50,7 +50,9 @@
     "rateStars": "Noter {count} étoiles",
     "ratingOutOf": "{rating} sur {max} étoiles",
     "goToImage": "Aller à la photo {index}",
-    "viewPhoto": "Voir la photo {index}"
+    "viewPhoto": "Voir la photo {index}",
+    "linkCopied": "Lien copié dans le presse-papiers",
+    "linkCopyFailed": "Impossible de copier le lien"
   },
   "SEO": {
     "title": "Parc Bagaj | Laissez vos bagages en toute sécurité, voyagez librement",

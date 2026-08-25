@@ -50,7 +50,9 @@
     "rateStars": "{count} yıldız ver",
     "ratingOutOf": "{max} üzerinden {rating} yıldız",
     "goToImage": "{index}. fotoğrafa git",
-    "viewPhoto": "{index}. fotoğrafı görüntüle"
+    "viewPhoto": "{index}. fotoğrafı görüntüle",
+    "linkCopied": "Bağlantı panoya kopyalandı",
+    "linkCopyFailed": "Bağlantı kopyalanamadı"
   },
   "SEO": {
     "title": "BagajPark | Valiz Saklama ve Güvenli Bagaj Emaneti",

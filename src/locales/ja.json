@@ -50,7 +50,9 @@
     "rateStars": "{count}つ星で評価",
     "ratingOutOf": "{max}段階中{rating}",
     "goToImage": "写真{index}へ移動",
-    "viewPhoto": "写真{index}を表示"
+    "viewPhoto": "写真{index}を表示",
+    "linkCopied": "リンクをクリップボードにコピーしました",
+    "linkCopyFailed": "リンクをコピーできませんでした"
   },
   "SEO": {
     "title": "バガジパーク |荷物を安全に預けて、自由に旅行しましょう",
