@@ -1319,6 +1319,7 @@
     "reasonOther": "سایر",
     "descriptionLabel": "توضیح",
     "descriptionPlaceholder": "جزئیات...",
+    "descriptionMinHint": "{remaining} نویسه دیگر بنویسید",
     "submitting": "در حال ارسال...",
     "submit": "ارسال",
     "statusTitle": "وضعیت",

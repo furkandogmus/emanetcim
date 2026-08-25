@@ -1377,6 +1377,7 @@
     "reasonOther": "Other",
     "descriptionLabel": "Description",
     "descriptionPlaceholder": "Details...",
+    "descriptionMinHint": "Write {remaining} more characters",
     "submitting": "Sending...",
     "submit": "Submit",
     "statusTitle": "Status",

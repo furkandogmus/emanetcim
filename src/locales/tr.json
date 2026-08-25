@@ -1377,6 +1377,7 @@
     "reasonOther": "Diğer",
     "descriptionLabel": "Açıklama",
     "descriptionPlaceholder": "Detay...",
+    "descriptionMinHint": "En az {remaining} karakter daha yazın",
     "submitting": "Gönderiliyor...",
     "submit": "Gönder",
     "statusTitle": "Durum",

@@ -1319,6 +1319,7 @@
     "reasonOther": "Andere",
     "descriptionLabel": "Beschreibung",
     "descriptionPlaceholder": "Details...",
+    "descriptionMinHint": "Schreiben Sie noch {remaining} Zeichen",
     "submitting": "Senden...",
     "submit": "Einreichen",
     "statusTitle": "Status",

@@ -1319,6 +1319,7 @@
     "reasonOther": "他の",
     "descriptionLabel": "説明",
     "descriptionPlaceholder": "詳細...",
+    "descriptionMinHint": "あと{remaining}文字入力してください",
     "submitting": "送信中...",
     "submit": "提出する",
     "statusTitle": "状態",

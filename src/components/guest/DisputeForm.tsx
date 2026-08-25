@@ -22,6 +22,9 @@ export default function DisputeForm({
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
+  const MIN_DESCRIPTION_LENGTH = 10;
+  const remaining = Math.max(0, MIN_DESCRIPTION_LENGTH - description.length);
+
   const submit = async () => {
     setLoading(true);
     setErr(null);
@@ -66,14 +69,22 @@ export default function DisputeForm({
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         aria-label={t("descriptionLabel")}
+        aria-describedby={remaining > 0 ? "dispute-description-hint" : undefined}
         placeholder={t("descriptionPlaceholder")}
       />
+      {/* Buton aciklama 10 karakterin altindaysa hicbir mesaj olmadan
+          devre disi kaliyordu -- kullanici neden basamadigini bilemiyordu. */}
+      {remaining > 0 && description.length > 0 && (
+        <p id="dispute-description-hint" className="ui-body-sm mt-1 text-gray-400">
+          {t("descriptionMinHint", { remaining })}
+        </p>
+      )}
 
       {err && <p className="ui-state ui-state-error mt-2">{tErrors(err)}</p>}
 
       <button
         type="button"
-        disabled={loading || description.length < 10}
+        disabled={loading || remaining > 0}
         onClick={submit}
         className="btn-ui btn-ui-lg btn-ui-primary mt-6 w-full rounded-2xl"
       >
