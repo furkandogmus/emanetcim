@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
+import { rejectShopErrorKey } from "@/lib/reject-shop-error-copy";
 
 export default function RejectButton({
   shopId,
@@ -17,6 +18,7 @@ export default function RejectButton({
 }) {
   const t = useTranslations("Admin");
   const tCommon = useTranslations("Common");
+  const tErrors = useTranslations("Errors");
   const [isPending, startTransition] = useTransition();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const router = useRouter();
@@ -54,7 +56,7 @@ export default function RejectButton({
               toast.success(t("rejectSuccess"));
               router.refresh();
             } else {
-              toast.error(result.error || t("rejectError"));
+              toast.error(tErrors(rejectShopErrorKey(result.error)));
             }
           });
         }}

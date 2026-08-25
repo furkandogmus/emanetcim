@@ -1359,7 +1359,9 @@
     "bookingIncludesPlatformHoliday": "選択された日程はプラットフォームの休業日と重なっています。別の日程をお選びください。",
     "bookingStateConflict": "予約の状態が変更されました。ページを再読み込みしてもう一度お試しください。",
     "accountDeleteActiveBookings": "有効な予約がある間はアカウントを閉鎖できません。",
-    "referralCodeFailed": "コードを生成できませんでした。もう一度お試しください。"
+    "referralCodeFailed": "コードを生成できませんでした。もう一度お試しください。",
+    "shopAlreadyApproved": "承認済みのショップは拒否できません。",
+    "shopHasBookings": "このショップには予約記録があるため削除できません。"
   },
   "Emails": {
     "verificationSubject": "メールアドレスを確認してください",

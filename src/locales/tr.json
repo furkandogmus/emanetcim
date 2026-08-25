@@ -1417,7 +1417,9 @@
     "verificationCooldown": "Yeni bir e-posta göndermek için {seconds} saniye beklemeniz gerekiyor.",
     "maxVerificationAttempts": "Çok fazla deneme yaptınız. Lütfen destek ekibimizle iletişime geçin.",
     "invalidTrPhone": "Telefon numarası 05xx xxx xx xx formatında olmalıdır.",
-    "referralCodeFailed": "Kod oluşturulamadı, lütfen tekrar deneyin."
+    "referralCodeFailed": "Kod oluşturulamadı, lütfen tekrar deneyin.",
+    "shopAlreadyApproved": "Onaylı dükkan reddedilemez.",
+    "shopHasBookings": "Bu dükkan için rezervasyon kaydı var; silinemez."
   },
   "Emails": {
     "verificationSubject": "E-postanızı Doğrulayın",

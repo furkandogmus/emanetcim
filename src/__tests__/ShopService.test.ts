@@ -170,6 +170,25 @@ describe("ShopService", () => {
   });
 
   describe("rejectPendingShop", () => {
+    it("should return an Errors.x key when the shop does not exist", async () => {
+      mockPrisma.shop.findUnique.mockResolvedValue(null);
+
+      const result = await service.rejectPendingShop("missing-shop");
+
+      expect(result.ok).toBe(false);
+      expect(result.error).toBe("Errors.shopNotFound");
+    });
+
+    it("should not reject an already-approved shop", async () => {
+      mockPrisma.shop.findUnique.mockResolvedValue({ id: "shop-1", isActive: true });
+
+      const result = await service.rejectPendingShop("shop-1");
+
+      expect(result.ok).toBe(false);
+      expect(result.error).toBe("Errors.shopAlreadyApproved");
+      expect(mockPrisma.shop.delete).not.toHaveBeenCalled();
+    });
+
     it("should not delete shop if it has existing bookings", async () => {
       mockPrisma.shop.findUnique.mockResolvedValue({ id: "shop-1", isActive: false });
       mockPrisma.booking.count.mockResolvedValue(1);
@@ -177,7 +196,7 @@ describe("ShopService", () => {
       const result = await service.rejectPendingShop("shop-1");
 
       expect(result.ok).toBe(false);
-      expect(result.error).toContain("rezervasyon kaydı var");
+      expect(result.error).toBe("Errors.shopHasBookings");
       expect(mockPrisma.shop.delete).not.toHaveBeenCalled();
     });
 

@@ -1359,7 +1359,9 @@
     "bookingIncludesPlatformHoliday": "Vos dates coïncident avec un jour férié de la plateforme ; veuillez choisir d'autres dates.",
     "bookingStateConflict": "Le statut de la réservation a changé ; actualisez la page et réessayez.",
     "accountDeleteActiveBookings": "Vous ne pouvez pas fermer votre compte tant que vous avez des réservations actives.",
-    "referralCodeFailed": "Impossible de générer un code. Veuillez réessayer."
+    "referralCodeFailed": "Impossible de générer un code. Veuillez réessayer.",
+    "shopAlreadyApproved": "Une boutique déjà approuvée ne peut pas être refusée.",
+    "shopHasBookings": "Cette boutique a des réservations enregistrées ; elle ne peut pas être supprimée."
   },
   "Emails": {
     "verificationSubject": "Vérifiez votre e-mail",

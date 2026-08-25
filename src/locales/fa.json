@@ -1359,7 +1359,9 @@
     "bookingIncludesPlatformHoliday": "تاریخ‌های انتخابی با روز تعطیل پلتفرم هم‌زمان است؛ لطفاً تاریخ دیگری انتخاب کنید.",
     "bookingStateConflict": "وضعیت رزرو تغییر کرد؛ صفحه را بازخوانی کنید و دوباره تلاش کنید.",
     "accountDeleteActiveBookings": "تا زمانی که رزرو فعال دارید نمی‌توانید حساب خود را ببندید.",
-    "referralCodeFailed": "کد ایجاد نشد. لطفاً دوباره امتحان کنید."
+    "referralCodeFailed": "کد ایجاد نشد. لطفاً دوباره امتحان کنید.",
+    "shopAlreadyApproved": "فروشگاه تأییدشده را نمی‌توان رد کرد.",
+    "shopHasBookings": "این فروشگاه دارای سوابق رزرو است و قابل حذف نیست."
   },
   "Emails": {
     "verificationSubject": "ایمیل خود را تأیید کنید",

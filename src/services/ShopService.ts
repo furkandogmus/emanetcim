@@ -455,26 +455,29 @@ export class ShopService implements IShopService {
 
   /**
    * Bekleyen başvuruyu reddeder: bağlı rezervasyon yoksa dükkan kaydını siler.
+   *
+   * `error` alanı ham Türkçe metin değil `"Errors.x"` anahtarı döner — arayüz
+   * `useTranslations("Errors")` ile çevirmeden göstermemeli (bkz. `RejectButton.tsx`).
    */
   async rejectPendingShop(shopId: string): Promise<{ ok: boolean; error?: string }> {
     try {
       const shop = await prisma.shop.findUnique({ where: { id: shopId } });
-      if (!shop) return { ok: false, error: 'Dükkan bulunamadı.' };
+      if (!shop) return { ok: false, error: 'Errors.shopNotFound' };
       if (shop.isActive) {
-        return { ok: false, error: 'Onaylı dükkan reddedilemez.' };
+        return { ok: false, error: 'Errors.shopAlreadyApproved' };
       }
       const bookingCount = await prisma.booking.count({ where: { shopId } });
       if (bookingCount > 0) {
         return {
           ok: false,
-          error: 'Bu dükkan için rezervasyon kaydı var; silinemez.',
+          error: 'Errors.shopHasBookings',
         };
       }
       await prisma.shop.delete({ where: { id: shopId } });
       return { ok: true };
     } catch (error) {
       console.error('ShopService::rejectPendingShop Error:', error);
-      return { ok: false, error: 'Red işlemi başarısız.' };
+      return { ok: false, error: 'Errors.generic' };
     }
   }
 
