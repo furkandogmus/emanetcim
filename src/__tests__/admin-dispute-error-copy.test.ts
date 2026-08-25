@@ -12,6 +12,12 @@ describe("adminDisputeErrorKey", () => {
     expect(adminDisputeErrorKey("Errors.invalidData")).toBe("invalidData");
   });
 
+  it("requireAdmin()'in donebildigi authRequired/notAuthorizedAdmin'i generic'e dusurmez", () => {
+    // src/lib/action-auth.ts::requireAdmin() -- oturum yoksa/admin degilse
+    expect(adminDisputeErrorKey("Errors.authRequired")).toBe("authRequired");
+    expect(adminDisputeErrorKey("Errors.notAuthorizedAdmin")).toBe("notAuthorizedAdmin");
+  });
+
   it("bilinmeyen veya ham metni generic'e dusurur", () => {
     expect(adminDisputeErrorKey("Errors.somethingNew")).toBe("generic");
     expect(adminDisputeErrorKey("boom")).toBe("generic");
