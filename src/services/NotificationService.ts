@@ -294,7 +294,18 @@ export class NotificationService implements INotificationService {
      */
     const priceTr = formatTryCurrency(Number(totalPrice), "tr-TR");
     const priceEn = formatTryCurrency(Number(totalPrice), "en-US");
+    const priceDe = formatTryCurrency(Number(totalPrice), "de-DE");
+    const priceFr = formatTryCurrency(Number(totalPrice), "fr-FR");
+    const priceJa = formatTryCurrency(Number(totalPrice), "ja-JP");
+    const priceFa = formatTryCurrency(Number(totalPrice), "fa-IR");
 
+    /**
+     * NEDEN 6 DİL (2026-08-25'te ölçüldü): burası yalnızca `tr`/`en` içeriyordu;
+     * diğer 4 dil (`de`/`fr`/`ja`/`fa`) `?? fallback`'e düşüp Türkçe, HTML'siz,
+     * tek satırlık bir e-posta alıyordu — uygulamanın geri kalanı tam
+     * çevrilmişken rezervasyon onay e-postası (misafirin sakladığı belge) 4
+     * dilde bozuk geliyordu.
+     */
     const content = {
       tr: {
         subject: "BagajPark: Rezervasyonunuz Oluşturuldu! 🎒",
@@ -322,6 +333,62 @@ export class NotificationService implements INotificationService {
           </table>
           <a href="${bookingUrl}" style="display:inline-block;background:#ea580c;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;margin:16px 0">View My Ticket</a>
           <p style="font-size:13px;color:#6b7280;margin-top:24px">BagajPark — Secure Luggage Storage</p>
+        </div>`,
+      },
+      de: {
+        subject: "BagajPark: Ihre Reservierung wurde erstellt! 🎒",
+        body: `Hallo,\n\nIhre Reservierung wurde erfolgreich erstellt!\n\nReferenz: ${shortId}\nGesamtbetrag: ${priceDe}\n\nSie können vor Ort im Geschäft bezahlen.\n\nUm Ihr Ticket anzuzeigen: ${bookingUrl}`,
+        html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
+          <h2 style="color:#ea580c">Ihre Reservierung wurde erstellt! 🎒</h2>
+          <p>Ihre Reservierung wurde erfolgreich erstellt. Sie können vor Ort im Geschäft bezahlen.</p>
+          <table style="width:100%;border-collapse:collapse;margin:16px 0">
+            <tr><td style="padding:8px;color:#6b7280">Referenz</td><td style="padding:8px;font-weight:bold">${shortId}</td></tr>
+            <tr style="background:#f9fafb"><td style="padding:8px;color:#6b7280">Gesamtbetrag</td><td style="padding:8px;font-weight:bold">${priceDe}</td></tr>
+          </table>
+          <a href="${bookingUrl}" style="display:inline-block;background:#ea580c;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;margin:16px 0">Mein Ticket ansehen</a>
+          <p style="font-size:13px;color:#6b7280;margin-top:24px">BagajPark — Sichere Gepäckaufbewahrung</p>
+        </div>`,
+      },
+      fr: {
+        subject: "BagajPark : Réservation confirmée ! 🎒",
+        body: `Bonjour,\n\nVotre réservation a été créée avec succès !\n\nRéférence : ${shortId}\nMontant total : ${priceFr}\n\nVous pouvez payer à la boutique à votre arrivée.\n\nPour voir votre billet : ${bookingUrl}`,
+        html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
+          <h2 style="color:#ea580c">Réservation confirmée ! 🎒</h2>
+          <p>Votre réservation a été créée avec succès. Vous pouvez payer à la boutique à votre arrivée.</p>
+          <table style="width:100%;border-collapse:collapse;margin:16px 0">
+            <tr><td style="padding:8px;color:#6b7280">Référence</td><td style="padding:8px;font-weight:bold">${shortId}</td></tr>
+            <tr style="background:#f9fafb"><td style="padding:8px;color:#6b7280">Montant total</td><td style="padding:8px;font-weight:bold">${priceFr}</td></tr>
+          </table>
+          <a href="${bookingUrl}" style="display:inline-block;background:#ea580c;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;margin:16px 0">Voir mon billet</a>
+          <p style="font-size:13px;color:#6b7280;margin-top:24px">BagajPark — Consigne à bagages sécurisée</p>
+        </div>`,
+      },
+      ja: {
+        subject: "BagajPark: ご予約が完了しました！🎒",
+        body: `こんにちは、\n\nご予約が完了しました！\n\n参照番号: ${shortId}\n合計金額: ${priceJa}\n\n店舗到着時にお支払いいただけます。\n\nチケットを見る: ${bookingUrl}`,
+        html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
+          <h2 style="color:#ea580c">ご予約が完了しました！🎒</h2>
+          <p>ご予約が完了しました。店舗到着時にお支払いいただけます。</p>
+          <table style="width:100%;border-collapse:collapse;margin:16px 0">
+            <tr><td style="padding:8px;color:#6b7280">参照番号</td><td style="padding:8px;font-weight:bold">${shortId}</td></tr>
+            <tr style="background:#f9fafb"><td style="padding:8px;color:#6b7280">合計金額</td><td style="padding:8px;font-weight:bold">${priceJa}</td></tr>
+          </table>
+          <a href="${bookingUrl}" style="display:inline-block;background:#ea580c;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;margin:16px 0">チケットを見る</a>
+          <p style="font-size:13px;color:#6b7280;margin-top:24px">BagajPark — 安全な荷物預かりサービス</p>
+        </div>`,
+      },
+      fa: {
+        subject: "BagajPark: رزرو شما ثبت شد! 🎒",
+        body: `سلام،\n\nرزرو شما با موفقیت ثبت شد!\n\nشماره پیگیری: ${shortId}\nمبلغ کل: ${priceFa}\n\nمی‌توانید هنگام مراجعه به فروشگاه پرداخت کنید.\n\nمشاهده بلیط: ${bookingUrl}`,
+        html: `<div dir="rtl" style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
+          <h2 style="color:#ea580c">رزرو شما ثبت شد! 🎒</h2>
+          <p>رزرو شما با موفقیت ثبت شد. می‌توانید هنگام مراجعه به فروشگاه پرداخت کنید.</p>
+          <table style="width:100%;border-collapse:collapse;margin:16px 0">
+            <tr><td style="padding:8px;color:#6b7280">شماره پیگیری</td><td style="padding:8px;font-weight:bold">${shortId}</td></tr>
+            <tr style="background:#f9fafb"><td style="padding:8px;color:#6b7280">مبلغ کل</td><td style="padding:8px;font-weight:bold">${priceFa}</td></tr>
+          </table>
+          <a href="${bookingUrl}" style="display:inline-block;background:#ea580c;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;margin:16px 0">مشاهده بلیط من</a>
+          <p style="font-size:13px;color:#6b7280;margin-top:24px">BagajPark — نگهداری امن چمدان</p>
         </div>`,
       },
     }[locale] ?? {
@@ -363,6 +430,46 @@ export class NotificationService implements INotificationService {
           <p style="font-size:13px;color:#6b7280">Reference: ${shortId}</p>
         </div>`,
       },
+      de: {
+        subject: "BagajPark: Ihre Anfrage wurde angenommen 🎒",
+        body: `Hallo,\n\n${shopName} hat Ihre Reservierungsanfrage angenommen!\n\nReservierungsdetails: ${bookingUrl}\n\nReferenz: ${shortId}`,
+        html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
+          <h2 style="color:#ea580c">Ihre Anfrage wurde angenommen! 🎒</h2>
+          <p><strong>${shopName}</strong> hat Ihre Reservierungsanfrage angenommen.</p>
+          <a href="${bookingUrl}" style="display:inline-block;background:#ea580c;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;margin:16px 0">Reservierung ansehen</a>
+          <p style="font-size:13px;color:#6b7280">Referenz: ${shortId}</p>
+        </div>`,
+      },
+      fr: {
+        subject: "BagajPark : Votre demande a été acceptée 🎒",
+        body: `Bonjour,\n\n${shopName} a accepté votre demande de réservation !\n\nDétails de la réservation : ${bookingUrl}\n\nRéférence : ${shortId}`,
+        html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
+          <h2 style="color:#ea580c">Votre demande a été acceptée ! 🎒</h2>
+          <p><strong>${shopName}</strong> a accepté votre demande de réservation.</p>
+          <a href="${bookingUrl}" style="display:inline-block;background:#ea580c;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;margin:16px 0">Voir la réservation</a>
+          <p style="font-size:13px;color:#6b7280">Référence : ${shortId}</p>
+        </div>`,
+      },
+      ja: {
+        subject: "BagajPark: リクエストが承認されました 🎒",
+        body: `こんにちは、\n\n${shopName} があなたの予約リクエストを承認しました！\n\n予約の詳細: ${bookingUrl}\n\n参照番号: ${shortId}`,
+        html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
+          <h2 style="color:#ea580c">リクエストが承認されました！🎒</h2>
+          <p><strong>${shopName}</strong> があなたの予約リクエストを承認しました。</p>
+          <a href="${bookingUrl}" style="display:inline-block;background:#ea580c;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;margin:16px 0">予約を見る</a>
+          <p style="font-size:13px;color:#6b7280">参照番号: ${shortId}</p>
+        </div>`,
+      },
+      fa: {
+        subject: "BagajPark: درخواست شما تأیید شد 🎒",
+        body: `سلام،\n\nفروشگاه ${shopName} درخواست رزرو شما را تأیید کرد!\n\nجزئیات رزرو: ${bookingUrl}\n\nشماره پیگیری: ${shortId}`,
+        html: `<div dir="rtl" style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
+          <h2 style="color:#ea580c">درخواست شما تأیید شد! 🎒</h2>
+          <p><strong>${shopName}</strong> درخواست رزرو شما را تأیید کرد.</p>
+          <a href="${bookingUrl}" style="display:inline-block;background:#ea580c;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;margin:16px 0">مشاهده رزرو</a>
+          <p style="font-size:13px;color:#6b7280">شماره پیگیری: ${shortId}</p>
+        </div>`,
+      },
     }[locale] ?? { subject: "BagajPark: Onaylandı", body: `Rezervasyon: ${bookingUrl}`, html: undefined as string | undefined };
 
     await this.sendEmail(email, content.subject, content.body, bookingId, content.html);
@@ -394,6 +501,46 @@ export class NotificationService implements INotificationService {
           <p>Your request to <strong>${shopName}</strong> was unfortunately declined.</p>
           <p>Browse other locations <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://bagajpark.com"}/${locale}/search" style="color:#ea580c">here</a>.</p>
           <p style="font-size:13px;color:#6b7280">Reference: ${shortId}</p>
+        </div>`,
+      },
+      de: {
+        subject: "BagajPark: Reservierungsanfrage abgelehnt",
+        body: `Hallo,\n\nIhre Reservierungsanfrage bei ${shopName} (Ref: ${shortId}) wurde leider abgelehnt.\n\nSie können auf bagajpark.com andere Standorte durchsuchen.`,
+        html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
+          <h2 style="color:#6b7280">Reservierungsanfrage abgelehnt</h2>
+          <p>Ihre Anfrage bei <strong>${shopName}</strong> wurde leider abgelehnt.</p>
+          <p>Entdecken Sie andere Standorte <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://bagajpark.com"}/${locale}/search" style="color:#ea580c">hier</a>.</p>
+          <p style="font-size:13px;color:#6b7280">Referenz: ${shortId}</p>
+        </div>`,
+      },
+      fr: {
+        subject: "BagajPark : Demande de réservation refusée",
+        body: `Bonjour,\n\nVotre demande de réservation auprès de ${shopName} (Réf : ${shortId}) a malheureusement été refusée.\n\nVous pouvez parcourir d'autres établissements sur bagajpark.com.`,
+        html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
+          <h2 style="color:#6b7280">Demande de réservation refusée</h2>
+          <p>Votre demande auprès de <strong>${shopName}</strong> a malheureusement été refusée.</p>
+          <p>Découvrez d'autres établissements <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://bagajpark.com"}/${locale}/search" style="color:#ea580c">ici</a>.</p>
+          <p style="font-size:13px;color:#6b7280">Référence : ${shortId}</p>
+        </div>`,
+      },
+      ja: {
+        subject: "BagajPark: 予約リクエストが却下されました",
+        body: `こんにちは、\n\n${shopName} への予約リクエスト（参照番号: ${shortId}）は残念ながら却下されました。\n\nbagajpark.com で他の店舗をご覧いただけます。`,
+        html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
+          <h2 style="color:#6b7280">予約リクエストが却下されました</h2>
+          <p><strong>${shopName}</strong> へのリクエストは残念ながら却下されました。</p>
+          <p>他の店舗を<a href="${process.env.NEXT_PUBLIC_APP_URL || "https://bagajpark.com"}/${locale}/search" style="color:#ea580c">こちら</a>からご覧いただけます。</p>
+          <p style="font-size:13px;color:#6b7280">参照番号: ${shortId}</p>
+        </div>`,
+      },
+      fa: {
+        subject: "BagajPark: درخواست رزرو رد شد",
+        body: `سلام،\n\nمتأسفانه درخواست رزرو شما برای ${shopName} (شماره پیگیری: ${shortId}) رد شد.\n\nمی‌توانید سایر فروشگاه‌ها را در bagajpark.com مشاهده کنید.`,
+        html: `<div dir="rtl" style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
+          <h2 style="color:#6b7280">درخواست رزرو رد شد</h2>
+          <p>متأسفانه درخواست شما برای <strong>${shopName}</strong> رد شد.</p>
+          <p>سایر فروشگاه‌ها را <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://bagajpark.com"}/${locale}/search" style="color:#ea580c">اینجا</a> مشاهده کنید.</p>
+          <p style="font-size:13px;color:#6b7280">شماره پیگیری: ${shortId}</p>
         </div>`,
       },
     }[locale] ?? { subject: "BagajPark: İptal", body: `Ref: ${shortId}`, html: undefined as string | undefined };
@@ -441,8 +588,9 @@ export class NotificationService implements INotificationService {
      * yani tutar yanlış okunabilir. Rezervasyon onayı misafirin sakladığı belge —
      * üzerindeki rakamın okunuşunda belirsizlik olmamalı.
      */
+    // Bu bildirim yalnızca Türkiye'deki esnafa/admine gider (panelUrl `/tr/partner`
+    // olarak sabit) — İngilizce sürüm hiç gerekmiyor, bu yüzden yalnızca priceTr var.
     const priceTr = formatTryCurrency(Number(totalPrice), "tr-TR");
-    const priceEn = formatTryCurrency(Number(totalPrice), "en-US");
 
     let emailSubject = "";
     let emailBody = "";
@@ -634,13 +782,68 @@ export class NotificationService implements INotificationService {
   }
 
   async notifyCheckIn(email: string, bookingId: string, locale: string = "tr"): Promise<void> {
+    /**
+     * NEDEN 6 DİL (2026-08-25'te ölçüldü): `tr`/`en` dışındaki 4 dil (`de`/`fr`/
+     * `ja`/`fa`) hem başlık/gövdede hem de aşağıdaki mühür listesinde Türkçe'ye
+     * düşüyordu. Yalnızca üstteki cümleyi çevirip mühür listesini İngilizce
+     * bırakmak da yanlış olurdu — misafir yarı Fransızca yarı İngilizce bir
+     * e-posta alırdı.
+     */
     const content =
       {
         tr: { subject: "Valiziniz Güvende! 🔒", body: "Valiziniz teslim alındı." },
         en: { subject: "Your Luggage is Safe! 🔒", body: "Your luggage has been received." },
-      }[locale] || { tr: { subject: "Valiziniz Güvende! 🔒", body: "Valiziniz teslim alındı." } }.tr;
+        de: { subject: "Ihr Gepäck ist sicher! 🔒", body: "Ihr Gepäck wurde entgegengenommen." },
+        fr: { subject: "Vos bagages sont en sécurité ! 🔒", body: "Vos bagages ont été déposés." },
+        ja: { subject: "お荷物は安全です！🔒", body: "お荷物をお預かりしました。" },
+        fa: { subject: "چمدان شما امن است! 🔒", body: "چمدان شما تحویل گرفته شد." },
+      }[locale] ?? { subject: "Valiziniz Güvende! 🔒", body: "Valiziniz teslim alındı." };
 
-    const sealLangTr = locale === "tr";
+    const sealCopy =
+      {
+        tr: {
+          bagLabel: (i: number, size: string) => `Valiz ${i} (${size})`,
+          sealWord: "mühür",
+          intro: "Atanan mühür seri numaraları:",
+          outro: "Check-in sırasında kaydedildi. Teslim alırken valizlerinizle karşılaştırın.",
+        },
+        en: {
+          bagLabel: (i: number, size: string) => `Bag ${i} (${size})`,
+          sealWord: "seal",
+          intro: "Seal serial numbers assigned:",
+          outro: "Recorded at check-in. Use these to match your bags at pick-up.",
+        },
+        de: {
+          bagLabel: (i: number, size: string) => `Gepäckstück ${i} (${size})`,
+          sealWord: "Siegel",
+          intro: "Zugewiesene Siegel-Seriennummern:",
+          outro: "Bei der Anmeldung erfasst. Vergleichen Sie diese bei der Abholung mit Ihrem Gepäck.",
+        },
+        fr: {
+          bagLabel: (i: number, size: string) => `Bagage ${i} (${size})`,
+          sealWord: "scellé",
+          intro: "Numéros de série des scellés attribués :",
+          outro: "Enregistré lors du dépôt. Utilisez ces numéros pour identifier vos bagages au retrait.",
+        },
+        ja: {
+          bagLabel: (i: number, size: string) => `バッグ${i}（${size}）`,
+          sealWord: "シール",
+          intro: "割り当てられたシール番号:",
+          outro: "チェックイン時に記録されました。受け取り時にお荷物と照合してください。",
+        },
+        fa: {
+          bagLabel: (i: number, size: string) => `چمدان ${i} (${size})`,
+          sealWord: "مهر",
+          intro: "شماره‌های سریال مهر اختصاص‌یافته:",
+          outro: "هنگام تحویل ثبت شد. هنگام تحویل‌گیری با چمدان‌های خود مطابقت دهید.",
+        },
+      }[locale] ?? {
+        bagLabel: (i: number, size: string) => `Bag ${i} (${size})`,
+        sealWord: "seal",
+        intro: "Seal serial numbers assigned:",
+        outro: "Recorded at check-in. Use these to match your bags at pick-up.",
+      };
+
     const escapeHtml = (s: string) =>
       s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
@@ -658,31 +861,17 @@ export class NotificationService implements INotificationService {
     let textBody = content.body;
     let htmlBody: string | undefined;
     if (seals.length > 0) {
-      if (sealLangTr) {
-        const lines = seals
-          .map((s) => `• Valiz ${s.bagIndex} (${s.bagSize}): mühür #${s.sealNumber}`)
-          .join("\n");
-        textBody += `\n\nAtanan mühür seri numaraları:\n${lines}\n\nCheck-in sırasında kaydedildi. Teslim alırken valizlerinizle karşılaştırın.`;
-        const items = seals
-          .map(
-            (s) =>
-              `<li>Valiz ${s.bagIndex} (${escapeHtml(s.bagSize)}): <strong>#${s.sealNumber}</strong></li>`,
-          )
-          .join("");
-        htmlBody = `<p>${escapeHtml(content.body)}</p><p><strong>Atanan mühür seri numaraları:</strong></p><ul>${items}</ul><p style="font-size:13px;color:#555">Check-in sırasında kaydedildi. Teslim alırken valizlerinizle karşılaştırın.</p>`;
-      } else {
-        const lines = seals
-          .map((s) => `• Bag ${s.bagIndex} (${s.bagSize}): seal #${s.sealNumber}`)
-          .join("\n");
-        textBody += `\n\nSeal serial numbers assigned:\n${lines}\n\nRecorded at check-in. Use these to match your bags at pick-up.`;
-        const items = seals
-          .map(
-            (s) =>
-              `<li>Bag ${s.bagIndex} (${escapeHtml(s.bagSize)}): <strong>#${s.sealNumber}</strong></li>`,
-          )
-          .join("");
-        htmlBody = `<p>${escapeHtml(content.body)}</p><p><strong>Seal serial numbers assigned:</strong></p><ul>${items}</ul><p style="font-size:13px;color:#555">Recorded at check-in. Use these to match your bags at pick-up.</p>`;
-      }
+      const lines = seals
+        .map((s) => `• ${sealCopy.bagLabel(s.bagIndex, s.bagSize)}: ${sealCopy.sealWord} #${s.sealNumber}`)
+        .join("\n");
+      textBody += `\n\n${sealCopy.intro}\n${lines}\n\n${sealCopy.outro}`;
+      const items = seals
+        .map(
+          (s) =>
+            `<li>${escapeHtml(sealCopy.bagLabel(s.bagIndex, s.bagSize))}: <strong>#${s.sealNumber}</strong></li>`,
+        )
+        .join("");
+      htmlBody = `<p>${escapeHtml(content.body)}</p><p><strong>${escapeHtml(sealCopy.intro)}</strong></p><ul>${items}</ul><p style="font-size:13px;color:#555">${escapeHtml(sealCopy.outro)}</p>`;
     }
 
     if (email.includes("@")) {
@@ -693,8 +882,12 @@ export class NotificationService implements INotificationService {
   async notifyCheckOut(email: string, bookingId: string, locale: string = "tr"): Promise<void> {
     const content = {
       tr: { subject: "İyi Yolculuklar! 👋", body: "Valiziniz size teslim edildi." },
-      en: { subject: "Safe Travels! 👋", body: "Your luggage has been delivered to you." }
-    }[locale] || { tr: { subject: "İyi Yolculuklar! 👋", body: "Valiziniz size teslim edildi." } }.tr;
+      en: { subject: "Safe Travels! 👋", body: "Your luggage has been delivered to you." },
+      de: { subject: "Gute Reise! 👋", body: "Ihr Gepäck wurde Ihnen übergeben." },
+      fr: { subject: "Bon voyage ! 👋", body: "Vos bagages vous ont été remis." },
+      ja: { subject: "良い旅を！👋", body: "お荷物をお渡ししました。" },
+      fa: { subject: "سفر خوبی داشته باشید! 👋", body: "چمدان شما به شما تحویل داده شد." },
+    }[locale] ?? { subject: "İyi Yolculuklar! 👋", body: "Valiziniz size teslim edildi." };
 
     if (email.includes("@")) {
       await this.sendEmail(email, content.subject, content.body, bookingId);

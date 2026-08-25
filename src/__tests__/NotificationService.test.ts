@@ -138,6 +138,111 @@ describe("NotificationService", () => {
         })
       );
     });
+
+    /**
+     * NEDEN (2026-08-25'te ölçüldü): `de`/`fr`/`ja`/`fa` misafiri, üstteki
+     * cümle çevrilse bile mühür listesi hep İngilizce ("seal #1234") kalsaydı,
+     * yarı Fransızca yarı İngilizce bir e-posta alırdı.
+     */
+    it("should translate the seal list too, not just the greeting (fr)", async () => {
+      (global.fetch as any).mockResolvedValue({ ok: true });
+      mockPrisma.bookingSeal.findMany.mockResolvedValue([
+        { sealNumber: 1234, bagIndex: 1, bagSize: "M" },
+      ]);
+
+      await service.notifyCheckIn("test@example.com", "booking-1", "fr");
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: expect.stringContaining("scellé #1234"),
+        })
+      );
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: expect.not.stringContaining("seal #1234"),
+        })
+      );
+    });
+  });
+
+  describe("notifyCheckOut — 6 dil", () => {
+    it.each([
+      ["de", "Gute Reise"],
+      ["fr", "Bon voyage"],
+      ["ja", "良い旅を"],
+      ["fa", "سفر خوبی"],
+    ])("should not fall back to Turkish for %s", async (locale, expectedPhrase) => {
+      (global.fetch as any).mockResolvedValue({ ok: true });
+
+      await service.notifyCheckOut("test@example.com", "booking-1", locale);
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ body: expect.stringContaining(expectedPhrase) }),
+      );
+    });
+  });
+
+  describe("notifyBookingSuccess — 6 dil", () => {
+    /**
+     * NEDEN (2026-08-25'te ölçüldü): içerik nesnesi yalnızca `tr`/`en` içeriyordu;
+     * diğer 4 dil `?? fallback`'e düşüp HTML'siz, tek satırlık bir Türkçe e-posta
+     * alıyordu — uygulamanın geri kalanı tam çevrilmişken rezervasyon onay
+     * e-postası (misafirin sakladığı belge) 4 dilde bozuk geliyordu.
+     */
+    it.each([
+      ["de", "Reservierung wurde erstellt"],
+      ["fr", "Réservation confirmée"],
+      ["ja", "ご予約が完了しました"],
+      ["fa", "رزرو شما ثبت شد"],
+    ])("should not fall back to Turkish for %s", async (locale, expectedPhrase) => {
+      (global.fetch as any).mockResolvedValue({ ok: true });
+
+      await service.notifyBookingSuccess("test@example.com", "booking-1", 1520, locale);
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ body: expect.stringContaining(expectedPhrase) }),
+      );
+    });
+  });
+
+  describe("notifyBookingApproved — 6 dil", () => {
+    it.each([
+      ["de", "wurde angenommen"],
+      ["fr", "a été acceptée"],
+      ["ja", "承認されました"],
+      ["fa", "تأیید شد"],
+    ])("should not fall back to Turkish for %s", async (locale, expectedPhrase) => {
+      (global.fetch as any).mockResolvedValue({ ok: true });
+
+      await service.notifyBookingApproved("test@example.com", "booking-1", "Test Shop", locale);
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ body: expect.stringContaining(expectedPhrase) }),
+      );
+    });
+  });
+
+  describe("notifyBookingCancelled — 6 dil", () => {
+    it.each([
+      ["de", "abgelehnt"],
+      ["fr", "refusée"],
+      ["ja", "却下されました"],
+      ["fa", "رد شد"],
+    ])("should not fall back to Turkish for %s", async (locale, expectedPhrase) => {
+      (global.fetch as any).mockResolvedValue({ ok: true });
+
+      await service.notifyBookingCancelled("test@example.com", "booking-1", "Test Shop", locale);
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ body: expect.stringContaining(expectedPhrase) }),
+      );
+    });
   });
 
   describe("notifyPartnerAndAdminsForNewPaidBooking", () => {
