@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import tr from "@/locales/tr.json";
 import en from "@/locales/en.json";
 import de from "@/locales/de.json";
@@ -55,6 +55,13 @@ export default function GlobalError({
     if (typeof window === "undefined") return "tr";
     return pathLocale(window.location.pathname);
   });
+
+  // Kardeş sınır `[locale]/error.tsx` hatayı loglar; bu kök sınır (layout
+  // hatalarını da yakalayan SON çare) sessizce yutuyordu -- tam da en kritik
+  // çökmede hiçbir teşhis izi kalmıyordu.
+  useEffect(() => {
+    console.error(error);
+  }, [error]);
 
   const c = commonForLocale(locale);
 
