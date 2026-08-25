@@ -22,6 +22,7 @@ export default async function PartnerSettingsPage({
   setRequestLocale(locale);
 
   const t = await getTranslations("Partner");
+  const tCommon = await getTranslations("Common");
 
   const session = await auth();
   if (!session?.user?.id) {
@@ -65,6 +66,7 @@ export default async function PartnerSettingsPage({
       <header className="p-6 bg-white border-b border-gray-100 flex items-center gap-4 sticky top-0 z-10">
         <Link
           href="/partner"
+          aria-label={tCommon("back")}
           className="p-2 hover:bg-gray-100 rounded-full transition-colors"
         >
           <ChevronLeft size={24} />

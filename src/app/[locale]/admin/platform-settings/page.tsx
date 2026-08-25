@@ -23,6 +23,7 @@ export default async function AdminPlatformSettingsPage({
   }
 
   const t = await getTranslations("Admin");
+  const tCommon = await getTranslations("Common");
 
   const row = await prisma.platformSettings.findUnique({
     where: { id: "default" },
@@ -74,6 +75,7 @@ export default async function AdminPlatformSettingsPage({
         <div className="flex items-center gap-4">
           <Link
             href="/admin"
+            aria-label={tCommon("back")}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
             <ChevronLeft size={24} />

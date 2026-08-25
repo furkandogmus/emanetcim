@@ -27,6 +27,7 @@ export default async function AdminFeatureFlagsPage({
   }
 
   const t = await getTranslations("Admin");
+  const tCommon = await getTranslations("Common");
 
   const rows = await prisma.featureFlag.findMany({ orderBy: { key: "asc" } });
 
@@ -48,6 +49,7 @@ export default async function AdminFeatureFlagsPage({
         <div className="flex items-center gap-4">
           <Link
             href="/admin"
+            aria-label={tCommon("back")}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
             <ChevronLeft size={24} />

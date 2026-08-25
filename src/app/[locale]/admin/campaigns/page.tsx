@@ -24,6 +24,7 @@ export default async function AdminCampaignsPage({
   }
 
   const t = await getTranslations("Admin");
+  const tCommon = await getTranslations("Common");
 
   const campaigns = await prisma.campaign.findMany({
     orderBy: { createdAt: "desc" },
@@ -68,6 +69,7 @@ export default async function AdminCampaignsPage({
         <div className="flex items-center gap-4">
           <Link
             href="/admin"
+            aria-label={tCommon("back")}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
             <ChevronLeft size={24} />
