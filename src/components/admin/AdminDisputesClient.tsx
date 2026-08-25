@@ -8,6 +8,7 @@ import { updateDisputeStatusAction } from "@/actions/dispute";
 import { toast } from "sonner";
 import { dateLocaleForUiLocale } from "@/lib/date-locale";
 import { adminDisputeErrorKey } from "@/lib/admin-dispute-error-copy";
+import Money from "@/components/common/Money";
 
 interface DisputeBooking {
   id: string;
@@ -67,10 +68,6 @@ export default function AdminDisputesClient({ disputes: initial }: { disputes: D
   const [editNote, setEditNote] = useState("");
   const [saving, setSaving] = useState(false);
   const [filter, setFilter] = useState<string>("ALL");
-
-  function fmt(n: number) {
-    return n.toLocaleString(dateLocale, { minimumFractionDigits: 2 });
-  }
 
   function fmtDate(iso: string) {
     return new Date(iso).toLocaleDateString(dateLocale, {
@@ -183,7 +180,8 @@ export default function AdminDisputesClient({ disputes: initial }: { disputes: D
                   {d.booking.guest?.name ?? d.booking.guest?.email ?? t("disputesGuestFallback")}
                 </p>
                 <p className="text-xs text-gray-400">
-                  {reasonLabel(d.reason)} · {fmtDate(d.createdAt)} · {fmt(d.booking.totalPrice)} ₺
+                  {reasonLabel(d.reason)} · {fmtDate(d.createdAt)} ·{" "}
+                  <Money amount={d.booking.totalPrice} />
                 </p>
               </div>
               <span
