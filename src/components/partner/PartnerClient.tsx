@@ -87,10 +87,26 @@ export default function PartnerClient({
    *
    * Her çağrıda `new Date()` kullanmak React Compiler'ın saflık kuralını ihlal
    * eder ve aynı listede satırdan satıra farklı "şimdi" değeri üretir.
+   *
+   * NEDEN `useState(() => new Date())` DEĞİL (P1-15, React #418 — DEFECT_BACKLOG):
+   * o başlangıç değeri sunucuda VE istemcinin hydration render'ında AYRI AYRI
+   * hesaplanır — ikisi arasındaki fark (ağ gecikmesi + JS ayrıştırma) genellikle
+   * saniyelerle ölçülür. Bir rezervasyonun çıkış saati tam bu aralıkta bir saat
+   * sınırını geçerse `overdueOf(...).overdueHours` sunucuda "3", istemcide "4"
+   * basar — metin içeriği uyuşmaz, React o alt ağacı sıfırdan render eder
+   * (titreme, ilk tıklamanın kaybolması). `null` ile başlatılıp `useEffect`'te
+   * gerçek an atanıyor: sunucu ve ilk istemci render'ı HER ZAMAN aynı ("nötr")
+   * sonucu üretir, gerçek gecikme durumu mount SONRASI (karşılaştırma dışı) gelir.
    */
-  const [nowRef] = useState(() => new Date());
+  const [nowRef, setNowRef] = useState<Date | null>(null);
+  useEffect(() => {
+    setNowRef(new Date());
+  }, []);
   const overdueOf = useCallback(
-    (checkOutTime: string | Date) => computeOverdue(checkOutTime, nowRef),
+    (checkOutTime: string | Date) =>
+      nowRef
+        ? computeOverdue(checkOutTime, nowRef)
+        : { severity: "none" as const, overdueHours: 0, overdueDays: 0 },
     [nowRef],
   );
   const locale = useLocale();
