@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { Link } from "@/i18n/routing";
 import { CalendarDays, ChevronRight, CircleHelp, MapPin, Shield } from "lucide-react";
 import ReferralCodeCard from "@/components/account/ReferralCodeCard";
+import LoyaltyBadge from "@/components/guest/LoyaltyBadge";
+import prisma from "@/lib/db";
 
 export default async function AccountPage({
   params,
@@ -17,6 +19,17 @@ export default async function AccountPage({
   if (!session?.user?.id) {
     redirect(`/${locale}/login?callbackUrl=/${locale}/account`);
   }
+
+  /**
+   * `loyaltyPoints` her rezervasyonda sessizce artıyor (`actions/booking.ts`)
+   * ve iptalde azalıyor (`booking/lifecycle.ts`) ama HİÇBİR sayfa bu değeri
+   * okumuyordu — `LoyaltyBadge` bileşeni yazılmış, hiçbir yerde render
+   * edilmiyordu. Sonuç: misafir puan kazanıyordu ama bunu asla göremiyordu.
+   */
+  const loyaltyUser = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { loyaltyPoints: true },
+  });
 
   /**
    * `actions/booking.ts` ve `actions/referral.ts`'nin indirimi uyguladığı TEK
@@ -58,6 +71,11 @@ export default async function AccountPage({
           <p className="mt-1 text-sm text-gray-500">
             {copy.hello}{session.user.name ? `, ${session.user.name}` : ""}. {copy.subtitle}
           </p>
+          {loyaltyUser && (
+            <div className="mt-3">
+              <LoyaltyBadge points={loyaltyUser.loyaltyPoints} locale={locale} />
+            </div>
+          )}
         </div>
       </header>
 
