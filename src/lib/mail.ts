@@ -18,6 +18,11 @@ export const sendVerificationEmail = async (email: string, token: string, locale
 
   const confirmLink = `${domain}/${locale}/auth/verify-email?token=${token}`;
 
+  /**
+   * NEDEN 6 DİL (2026-08-25'te ölçüldü): bu nesne yalnızca `tr`/`en` içeriyordu;
+   * diğer 4 dilde kayıt olan kullanıcı (uygulamanın geri kalanı tam çevrilmişken)
+   * doğrulama e-postasını Türkçe alıyordu — kayıt akışının en kritik adımı.
+   */
   const content = {
     tr: {
       subject: "E-postanızı Doğrulayın",
@@ -32,6 +37,34 @@ export const sendVerificationEmail = async (email: string, token: string, locale
       text: "Please click the button below to verify your account:",
       button: "Verify Email",
       footer: "If you did not perform this action, you can safely ignore this email."
+    },
+    de: {
+      subject: "Bestätigen Sie Ihre E-Mail",
+      title: "Willkommen bei BagajPark!",
+      text: "Bitte klicken Sie auf die Schaltfläche unten, um Ihr Konto zu bestätigen:",
+      button: "E-Mail bestätigen",
+      footer: "Wenn Sie diese Aktion nicht durchgeführt haben, können Sie diese E-Mail ignorieren."
+    },
+    fr: {
+      subject: "Vérifiez votre e-mail",
+      title: "Bienvenue chez BagajPark !",
+      text: "Veuillez cliquer sur le bouton ci-dessous pour vérifier votre compte :",
+      button: "Vérifier l'e-mail",
+      footer: "Si vous n'êtes pas à l'origine de cette action, vous pouvez ignorer cet e-mail en toute sécurité."
+    },
+    ja: {
+      subject: "メールアドレスを確認してください",
+      title: "BagajParkへようこそ！",
+      text: "アカウントを確認するには、下のボタンをクリックしてください：",
+      button: "メールを確認",
+      footer: "このアクションに心当たりがない場合は、このメールを無視していただいて構いません。"
+    },
+    fa: {
+      subject: "ایمیل خود را تأیید کنید",
+      title: "به BagajPark خوش آمدید!",
+      text: "برای تأیید حساب خود، لطفاً روی دکمه زیر کلیک کنید:",
+      button: "تأیید ایمیل",
+      footer: "اگر این کار را شما انجام نداده‌اید، می‌توانید این ایمیل را نادیده بگیرید."
     }
   }[locale] || {
     tr: {
@@ -49,10 +82,10 @@ export const sendVerificationEmail = async (email: string, token: string, locale
       to: email,
       subject: content.subject,
       html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div dir="${locale === "fa" ? "rtl" : "ltr"}" style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h1 style="color: #ea580c;">${content.title}</h1>
           <p style="color: #374151;">${content.text}</p>
-          <a href="${confirmLink}" 
+          <a href="${confirmLink}"
              style="display: inline-block; background-color: #ea580c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0;">
             ${content.button}
           </a>
@@ -82,6 +115,10 @@ export const sendPasswordResetEmail = async (email: string, token: string, local
 
   const resetLink = `${domain}/${locale}/auth/new-password?token=${token}`;
 
+  /**
+   * NEDEN 6 DİL: bu nesne yalnızca `tr`/`en` içeriyordu; şifre sıfırlama —
+   * hesabınıza tekrar erişmenin tek yolu — diğer 4 dilde Türkçe geliyordu.
+   */
   const content = {
     tr: {
       subject: "Şifrenizi Sıfırlayın",
@@ -96,6 +133,34 @@ export const sendPasswordResetEmail = async (email: string, token: string, local
       text: "Please click the button below to reset your password:",
       button: "Reset Password",
       footer: "If you did not perform this action, you can safely ignore this email."
+    },
+    de: {
+      subject: "Setzen Sie Ihr Passwort zurück",
+      title: "Anfrage zum Zurücksetzen des Passworts",
+      text: "Bitte klicken Sie auf die Schaltfläche unten, um Ihr Passwort zurückzusetzen:",
+      button: "Passwort zurücksetzen",
+      footer: "Wenn Sie diese Aktion nicht durchgeführt haben, können Sie diese E-Mail ignorieren."
+    },
+    fr: {
+      subject: "Réinitialisez votre mot de passe",
+      title: "Demande de réinitialisation du mot de passe",
+      text: "Veuillez cliquer sur le bouton ci-dessous pour réinitialiser votre mot de passe :",
+      button: "Réinitialiser le mot de passe",
+      footer: "Si vous n'êtes pas à l'origine de cette action, vous pouvez ignorer cet e-mail en toute sécurité."
+    },
+    ja: {
+      subject: "パスワードをリセットしてください",
+      title: "パスワードリセットのリクエスト",
+      text: "パスワードをリセットするには、下のボタンをクリックしてください：",
+      button: "パスワードをリセット",
+      footer: "このアクションに心当たりがない場合は、このメールを無視していただいて構いません。"
+    },
+    fa: {
+      subject: "رمز عبور خود را بازنشانی کنید",
+      title: "درخواست بازنشانی رمز عبور",
+      text: "برای بازنشانی رمز عبور خود، لطفاً روی دکمه زیر کلیک کنید:",
+      button: "بازنشانی رمز عبور",
+      footer: "اگر این کار را شما انجام نداده‌اید، می‌توانید این ایمیل را نادیده بگیرید."
     }
   }[locale] || {
     tr: {
@@ -113,10 +178,10 @@ export const sendPasswordResetEmail = async (email: string, token: string, local
       to: email,
       subject: content.subject,
       html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div dir="${locale === "fa" ? "rtl" : "ltr"}" style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h1 style="color: #ea580c;">${content.title}</h1>
           <p style="color: #374151;">${content.text}</p>
-          <a href="${resetLink}" 
+          <a href="${resetLink}"
              style="display: inline-block; background-color: #ea580c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0;">
             ${content.button}
           </a>
@@ -144,6 +209,10 @@ export const sendMobileOtp = async (email: string, code: string, locale: string 
     return;
   }
 
+  /**
+   * NEDEN 6 DİL: bu nesne yalnızca `tr`/`en` içeriyordu; mobil uygulama giriş
+   * kodu diğer 4 dilde Türkçe geliyordu.
+   */
   const content = {
     tr: {
       subject: "Giriş Kodunuz",
@@ -156,6 +225,30 @@ export const sendMobileOtp = async (email: string, code: string, locale: string 
       title: "Your Login Code",
       text: "Here is your verification code to log in to the BagajPark mobile app:",
       footer: "This code will expire in 5 minutes."
+    },
+    de: {
+      subject: "Ihr Anmeldecode",
+      title: "Ihr Anmeldecode",
+      text: "Hier ist Ihr Bestätigungscode, um sich in der BagajPark-App anzumelden:",
+      footer: "Dieser Code läuft in 5 Minuten ab."
+    },
+    fr: {
+      subject: "Votre code de connexion",
+      title: "Votre code de connexion",
+      text: "Voici votre code de vérification pour vous connecter à l'application mobile BagajPark :",
+      footer: "Ce code expirera dans 5 minutes."
+    },
+    ja: {
+      subject: "ログインコード",
+      title: "ログインコード",
+      text: "BagajParkモバイルアプリにログインするための確認コードです：",
+      footer: "このコードは5分後に無効になります。"
+    },
+    fa: {
+      subject: "کد ورود شما",
+      title: "کد ورود شما",
+      text: "این کد تأیید برای ورود به اپلیکیشن موبایل BagajPark است:",
+      footer: "این کد تا ۵ دقیقه دیگر منقضی می‌شود."
     }
   }[locale] || {
     tr: {
@@ -172,7 +265,7 @@ export const sendMobileOtp = async (email: string, code: string, locale: string 
       to: email,
       subject: content.subject,
       html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 12px;">
+        <div dir="${locale === "fa" ? "rtl" : "ltr"}" style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 12px;">
           <h1 style="color: #ea580c;">${content.title}</h1>
           <p style="color: #374151; font-size: 16px;">${content.text}</p>
           <div style="background-color: #f8fafc; padding: 20px; text-align: center; border-radius: 8px; margin: 24px 0;">
