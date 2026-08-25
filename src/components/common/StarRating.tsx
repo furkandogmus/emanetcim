@@ -33,6 +33,10 @@ export default function StarRating({
    * okuyucuya soyleyen hicbir metin yoktu. Grup seviyesinde ozet + interaktif
    * modda dugme basina etiket eklendi; goruntuleme modunda tek tek yildizlar
    * dekoratif oldugu icin `aria-hidden`.
+   *
+   * `focus:outline-none` klavye odak halkasini da kaldiriyordu, yerine
+   * hicbir gorsel isaret konmamisti -- klavyeyle puan verirken hangi
+   * yildizda oldugunuzu goremezdiniz. `focus-visible:ring` ile geri eklendi.
    */
   return (
     <div
@@ -58,7 +62,7 @@ export default function StarRating({
             onClick={() => interactive && onRatingChange?.(starValue)}
             whileHover={interactive ? { scale: 1.2, rotate: 5 } : {}}
             whileTap={interactive ? { scale: 0.9 } : {}}
-            className={`${interactive ? 'cursor-pointer' : 'cursor-default'} transition-colors focus:outline-none`}
+            className={`${interactive ? 'cursor-pointer' : 'cursor-default'} rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2`}
           >
             <Star
               size={size}
