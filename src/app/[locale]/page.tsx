@@ -83,13 +83,17 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
   // uretilirse sunucu (UTC) ile ziyaretcinin saat dilimi farkli metin verir ve
   // hydration'da #418 metin uyusmazligi olusur.
   const stayWindow = defaultStayWindowLocalValues();
+  // Bu harita 14->6 dil geçişinde (2026-08-22) güncellenmemiş kalıp hâlâ
+  // kaldırılmış es/it içeriyor, ja/fa'yı hiç tanımıyordu -- o iki dilde ana
+  // sayfanın güven istatistikleri (lokasyon/konaklama/yorum sayısı) sessizce
+  // en-US biçimiyle gösteriliyordu.
   const nfLocale: Record<string, string> = {
     tr: "tr-TR",
     en: "en-US",
     de: "de-DE",
     fr: "fr-FR",
-    es: "es-ES",
-    it: "it-IT",
+    ja: "ja-JP",
+    fa: "fa-IR",
   };
   const nf = new Intl.NumberFormat(nfLocale[locale] ?? "en-US");
   const faqItems = [
