@@ -43,8 +43,11 @@ export default function DisputeForm({
       <h1 className="ui-heading-md">{t("title")}</h1>
       <p className="ui-body-sm mt-1">{shopName}</p>
 
-      <label className="ui-kicker block mt-6">{t("reasonLabel")}</label>
+      <label htmlFor="dispute-reason" className="ui-kicker block mt-6">
+        {t("reasonLabel")}
+      </label>
       <select
+        id="dispute-reason"
         className="ui-field mt-2"
         value={reason}
         onChange={(e) => setReason(e.target.value as typeof reason)}
@@ -54,12 +57,15 @@ export default function DisputeForm({
         <option value="OTHER">{t("reasonOther")}</option>
       </select>
 
-      <label className="ui-kicker block mt-4">{t("descriptionLabel")}</label>
+      <label htmlFor="dispute-description" className="ui-kicker block mt-4">
+        {t("descriptionLabel")}
+      </label>
       <textarea
+        id="dispute-description"
         className="ui-field mt-2 min-h-[120px]"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
-        aria-label={t("descriptionPlaceholder")}
+        aria-label={t("descriptionLabel")}
         placeholder={t("descriptionPlaceholder")}
       />
 
