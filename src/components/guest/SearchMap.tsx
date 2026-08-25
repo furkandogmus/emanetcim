@@ -125,7 +125,7 @@ export default function SearchMap({
     valid.forEach((shop) => {
       const el = document.createElement("div");
       el.className =
-        "px-2.5 h-8 min-w-8 rounded-full bg-orange-600 border-2 border-white shadow-lg flex items-center justify-center text-xs font-black text-white cursor-pointer hover:bg-orange-700 transition-colors whitespace-nowrap";
+        "px-2.5 h-8 min-w-8 rounded-full bg-orange-600 border-2 border-white shadow-lg flex items-center justify-center text-xs font-black text-white cursor-pointer hover:bg-orange-700 transition-colors whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2";
       el.textContent =
         shop.pricePerDay != null
           ? formatTryCurrency(shop.pricePerDay, locale, {
@@ -134,12 +134,26 @@ export default function SearchMap({
             })
           : "₺";
       el.title = shop.name;
+      // Marker'lar MapLibre tarafından ham DOM element'i olarak eklendiği için
+      // yalnızca fare/dokunmatikle çalışıyordu — klavye kullanıcısı hiçbir
+      // dükkanı seçemiyordu. `role="button"` + `tabIndex` + Enter/Space,
+      // <button>'ın klavye davranışını taklit eder.
+      el.setAttribute("role", "button");
+      el.tabIndex = 0;
+      el.setAttribute("aria-label", shop.name);
 
       const marker = new maplibregl.Marker({ element: el })
         .setLngLat([shop.longitude!, shop.latitude!])
         .addTo(map);
 
-      el.addEventListener("click", () => selectRef.current?.(shop.id));
+      const select = () => selectRef.current?.(shop.id);
+      el.addEventListener("click", select);
+      el.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          select();
+        }
+      });
       markersRef.current.push(marker);
     });
 
