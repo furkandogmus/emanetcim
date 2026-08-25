@@ -1,12 +1,22 @@
 import logger from "../lib/logger";
 import prisma from "../lib/db";
 import { formatTryCurrency } from "@/lib/currency";
+import { withTimeout } from "@/lib/async-timeout";
 import {
   isNetgsmConfigured,
   normalizeTrGsm10,
   parseAdminGsmNumbers,
   sendNetgsmRestSms,
 } from "@/lib/netgsm";
+
+/**
+ * NEDEN (2026-08-25): `sendEmail` partner check-in/check-out akışlarında
+ * (`actions/partner.ts`) DOĞRUDAN `await`leniyor — yani esnafın "Teslim Al" /
+ * "Teslim Et" butonuna bastığı istek bu gönderim bitene kadar sonuçlanmaz.
+ * Resend'e yapılan ham `fetch` çağrısında hiç zaman aşımı yoktu: yavaşlarsa
+ * ya da yanıt vermezse çağıran akış SÜRESİZ askıda kalırdı.
+ */
+const EMAIL_SEND_TIMEOUT_MS = 8000;
 
 export interface INotificationService {
   sendEmail(
@@ -45,20 +55,24 @@ export class NotificationService implements INotificationService {
           process.env.EMAIL_FROM?.trim() ||
           process.env.RESEND_FROM?.trim() ||
           "BagajPark <info@bagajpark.com>";
-        const r = await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${resendKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            from,
-            to: [to],
-            subject,
-            text: body,
-            ...(html ? { html } : {}),
+        const r = await withTimeout(
+          fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${resendKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              from,
+              to: [to],
+              subject,
+              text: body,
+              ...(html ? { html } : {}),
+            }),
           }),
-        });
+          EMAIL_SEND_TIMEOUT_MS,
+          "notification_email_send",
+        );
         if (!r.ok) {
           errorDetail = await r.text();
           status = "FAILED";

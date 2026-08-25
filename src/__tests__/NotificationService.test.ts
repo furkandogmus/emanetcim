@@ -90,6 +90,25 @@ describe("NotificationService", () => {
         })
       );
     });
+
+    /**
+     * NEDEN (2026-08-25): `sendEmail` partner check-in/check-out akışlarında
+     * DOĞRUDAN `await`leniyor. Resend hiç yanıt vermezse (asılı kalırsa) zaman
+     * aşımı olmadan istek süresiz askıda kalırdı.
+     */
+    it("should time out instead of hanging forever if Resend never responds", async () => {
+      vi.useFakeTimers();
+      try {
+        (global.fetch as any).mockImplementation(() => new Promise(() => {}));
+
+        const promise = service.sendEmail("test@example.com", "Subject", "Body");
+        await vi.advanceTimersByTimeAsync(8000);
+
+        await expect(promise).resolves.toBe(false);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
   });
 
   describe("sendSms", () => {

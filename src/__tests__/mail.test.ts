@@ -15,14 +15,42 @@ vi.mock("resend", () => ({
   },
 }));
 
+const loggerError = vi.fn();
 vi.mock("@/lib/logger", () => ({
-  default: { warn: vi.fn(), error: vi.fn(), info: vi.fn() },
+  default: { warn: vi.fn(), error: loggerError, info: vi.fn() },
 }));
 
 describe("mail.ts — 6 dil desteği", () => {
   beforeEach(() => {
     sendMock.mockClear();
+    loggerError.mockClear();
     process.env.RESEND_API_KEY = "test_key";
+  });
+
+  /**
+   * NEDEN (2026-08-25): bu üç fonksiyon kayıt/şifre-sıfırlama/mobil-giriş
+   * akışlarında DOĞRUDAN `await`leniyor. Resend hiç yanıt vermezse (asılı
+   * kalırsa) zaman aşımı olmadan istek süresiz askıda kalırdı — hesap DB'de
+   * zaten oluşturulmuş olsa bile kullanıcı "Kayıt Ol" ekranında sonsuza kadar
+   * dönen bir yükleniyor ikonuyla kalırdı.
+   */
+  it("sendVerificationEmail Resend hiç yanıt vermezse zaman aşımıyla döner, askıda kalmaz", async () => {
+    vi.useFakeTimers();
+    try {
+      sendMock.mockImplementationOnce(() => new Promise(() => {}));
+      const { sendVerificationEmail } = await import("@/lib/mail");
+
+      const promise = sendVerificationEmail("guest@example.com", "tok-1", "tr");
+      await vi.advanceTimersByTimeAsync(8000);
+
+      await expect(promise).resolves.toBeUndefined();
+      expect(loggerError).toHaveBeenCalledWith(
+        expect.objectContaining({ email: "guest@example.com" }),
+        "verification_email_exception",
+      );
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   describe("sendVerificationEmail", () => {

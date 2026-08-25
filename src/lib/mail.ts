@@ -1,5 +1,18 @@
 import { Resend } from "resend";
 import logger from "@/lib/logger";
+import { withTimeout } from "@/lib/async-timeout";
+
+/**
+ * NEDEN (2026-08-25): bu üç fonksiyon kayıt/şifre-sıfırlama/mobil-giriş
+ * akışlarında DOĞRUDAN `await`leniyor (bkz. `actions/register.ts`,
+ * `actions/password-reset.ts`, `api/mobile/auth/otp/route.ts) — yani
+ * misafirin "Kayıt Ol" / "Şifremi Sıfırla" butonuna tıkladığı istek, bu e-posta
+ * gönderimi bitene kadar sonuçlanmaz. Resend'e yapılan `fetch` çağrısında hiç
+ * zaman aşımı yoktu: Resend yavaşlarsa ya da yanıt vermezse istek SÜRESİZ
+ * askıda kalır — hesap DB'de zaten oluşturulmuş olsa bile kullanıcı "Kayıt
+ * Ol" ekranında sonsuza kadar dönen bir yükleniyor ikonuyla kalırdı.
+ */
+const MAIL_SEND_TIMEOUT_MS = 8000;
 
 function getResendClient(): Resend | null {
   const key = process.env.RESEND_API_KEY?.trim();
@@ -77,11 +90,12 @@ export const sendVerificationEmail = async (email: string, token: string, locale
   }.tr;
 
   try {
-    const { data, error } = await resend.emails.send({
-      from: process.env.RESEND_FROM || "BagajPark <info@bagajpark.com>",
-      to: email,
-      subject: content.subject,
-      html: `
+    const { data, error } = await withTimeout(
+      resend.emails.send({
+        from: process.env.RESEND_FROM || "BagajPark <info@bagajpark.com>",
+        to: email,
+        subject: content.subject,
+        html: `
         <div dir="${locale === "fa" ? "rtl" : "ltr"}" style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h1 style="color: #ea580c;">${content.title}</h1>
           <p style="color: #374151;">${content.text}</p>
@@ -94,7 +108,10 @@ export const sendVerificationEmail = async (email: string, token: string, locale
           </p>
         </div>
       `,
-    });
+      }),
+      MAIL_SEND_TIMEOUT_MS,
+      "verification_email_send",
+    );
 
     if (error) {
       logger.error({ error, email }, "verification_email_error");
@@ -173,11 +190,12 @@ export const sendPasswordResetEmail = async (email: string, token: string, local
   }.tr;
 
   try {
-    const { data, error } = await resend.emails.send({
-      from: process.env.RESEND_FROM || "BagajPark <info@bagajpark.com>",
-      to: email,
-      subject: content.subject,
-      html: `
+    const { data, error } = await withTimeout(
+      resend.emails.send({
+        from: process.env.RESEND_FROM || "BagajPark <info@bagajpark.com>",
+        to: email,
+        subject: content.subject,
+        html: `
         <div dir="${locale === "fa" ? "rtl" : "ltr"}" style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h1 style="color: #ea580c;">${content.title}</h1>
           <p style="color: #374151;">${content.text}</p>
@@ -190,7 +208,10 @@ export const sendPasswordResetEmail = async (email: string, token: string, local
           </p>
         </div>
       `,
-    });
+      }),
+      MAIL_SEND_TIMEOUT_MS,
+      "password_reset_email_send",
+    );
 
     if (error) {
       logger.error({ error, email }, "password_reset_email_error");
@@ -260,11 +281,12 @@ export const sendMobileOtp = async (email: string, code: string, locale: string 
   }.tr;
 
   try {
-    const { data, error } = await resend.emails.send({
-      from: process.env.RESEND_FROM || "BagajPark <info@bagajpark.com>",
-      to: email,
-      subject: content.subject,
-      html: `
+    const { data, error } = await withTimeout(
+      resend.emails.send({
+        from: process.env.RESEND_FROM || "BagajPark <info@bagajpark.com>",
+        to: email,
+        subject: content.subject,
+        html: `
         <div dir="${locale === "fa" ? "rtl" : "ltr"}" style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 12px;">
           <h1 style="color: #ea580c;">${content.title}</h1>
           <p style="color: #374151; font-size: 16px;">${content.text}</p>
@@ -276,7 +298,10 @@ export const sendMobileOtp = async (email: string, code: string, locale: string 
           </p>
         </div>
       `,
-    });
+      }),
+      MAIL_SEND_TIMEOUT_MS,
+      "mobile_otp_email_send",
+    );
 
     if (error) {
       logger.error({ error, email }, "mobile_otp_mail_error");
