@@ -18,6 +18,8 @@ import { useTranslations, useLocale } from "next-intl";
  */
 export default function PartnerReferralCard() {
   const t = useTranslations("Partner");
+  const tErrors = useTranslations("Errors");
+  const tCommon = useTranslations("Common");
   const locale = useLocale();
   const [code, setCode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -35,7 +37,11 @@ export default function PartnerReferralCard() {
       if (res.success) {
         setCode(res.code);
       } else {
-        setError(res.error);
+        // `res.error` bir "Errors.x" anahtaridir, ham metin degil -- cevrilmeden
+        // basilirsa ekranda birebir "Errors.authRequired" yazardi (bkz.
+        // ReferralCodeCard.tsx'teki misafir tarafindaki ayni sinif duzeltme).
+        const key = res.error === "Errors.authRequired" ? "authRequired" : "referralCodeFailed";
+        setError(tErrors(key));
       }
     });
   };
@@ -43,9 +49,15 @@ export default function PartnerReferralCard() {
   const handleCopy = async () => {
     if (!code) return;
     const shareUrl = `${baseUrl}/${locale}/register?role=PARTNER&ref=${code}`;
-    await navigator.clipboard.writeText(shareUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // clipboard.writeText reddedilirse (izin yok, guvensiz baglam vb.)
+      // hicbir sey olmuyordu -- esnaf kopyaladigini sanip yapistiriyordu.
+      setError(tCommon("linkCopyFailed"));
+    }
   };
 
   return (
