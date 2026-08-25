@@ -1,6 +1,12 @@
 import type { Prisma, Shop } from '@prisma/client';
 import { Role } from '@prisma/client';
 import prisma from '@/lib/db';
+import {
+  RESPONSE_TIME_LOOKBACK_DAYS,
+  RESPONSE_TIME_MAX_SAMPLES,
+  minutesBetween,
+  p90Minutes,
+} from '@/lib/shop-response-time';
 import { moneyToNumber } from '@/lib/money';
 import { getActiveShopsOrderedByDistanceKm } from '@/lib/shop-distance-postgis';
 
@@ -8,6 +14,13 @@ import { isShopOpenForStay } from '@/lib/shop-hours';
 import { notificationService } from '@/services/NotificationService';
 import { getSlotAvailability } from '@/services/SlotService';
 import logger from '@/lib/logger';
+import { renderEmailHtml } from '@/lib/email-template';
+
+/**
+ * `recomputeResponseTimes` içinde `null`'a çekilecek dükkanlar tek seferde değil,
+ * bu boyutta öbeklerle yazılır — tek bir dev `IN (...)` listesi üretmemek için.
+ */
+const RESPONSE_TIME_CLEAR_BATCH = 500;
 
 export type ShopWithDistance = {
   id: string;
@@ -47,6 +60,28 @@ export type ShopSearchHit = ShopWithDistance & {
   bagsAvailable: number;
   _score?: number;
 };
+
+/**
+ * Sıralamada kullanılan puan skoru (0-1).
+ *
+ * NEDEN AYRI (P2-2, 2026-08-24): iki çağrı yerinde de `(shop.rating ?? 3) / 5`
+ * yazıyordu, yani "puanı yoksa nötr 3 varsay". Ama `Shop.rating` şema
+ * varsayılanı `0.0` — `NULL` DEĞİL. `??` hiç devreye girmiyor ve HENÜZ YORUM
+ * ALMAMIŞ her dükkan puan bileşeninden sıfır alıyor. Bugün üç dükkan da 0
+ * olduğu için sıralama görünürde doğru; ilk yorum geldiği anda o dükkan
+ * diğerlerinin önüne 0.3'lük bir farkla geçer — nötr varsayım hiç çalışmamış olur.
+ *
+ * Düzeltme kolonu değil YORUMU okuyor: puan 0 ise "değerlendirilmemiş" demektir
+ * (yıldız arayüzü de `rating > 0` ile zaten böyle davranıyor), o yüzden nötr
+ * varsayım uygulanır. Kolonun `NULL`'a çevrilmesi ayrı bir veri kararıdır;
+ * bu satır her iki durumda da doğru sonucu verir.
+ */
+const NEUTRAL_RATING = 3;
+
+function ratingScore(rating: number | null | undefined): number {
+  const r = rating ?? 0;
+  return (r > 0 ? r : NEUTRAL_RATING) / 5;
+}
 
 function toShopWithDistance(shop: Shop, distanceKm: number): ShopWithDistance {
   return {
@@ -93,6 +128,23 @@ export type ShopPublicDetail = Prisma.ShopGetPayload<{
   };
 }>;
 
+export type RecomputeResponseTimesResult = {
+  /** Değer yazılan dükkan sayısı (yeterli örneği olanlar). */
+  updated: number;
+  /** Örneği yetersiz olduğu için `null`'a çekilen dükkan sayısı. */
+  cleared: number;
+  /** Hesaba giren toplam onay örneği. */
+  samples: number;
+  /**
+   * GERÇEKTEN veritabanına yazılan satır sayısı.
+   *
+   * `updated + cleared`'dan küçüktür: değeri değişmeyen dükkan yazılmaz. Sıfıra
+   * yakın bir `written`, işin boşa dönmediğinin değil, platformun oturduğunun
+   * işaretidir.
+   */
+  written: number;
+};
+
 export type FindShopsForSearchOptions = {
   centerLat: number;
   centerLng: number;
@@ -123,6 +175,7 @@ export interface IShopService {
   getShopsByOwner(ownerId: string): Promise<Shop[]>;
   getShopByOwner(ownerId: string): Promise<Shop | null>;
   updateShop(shopId: string, data: Partial<Shop>): Promise<Shop>;
+  recomputeResponseTimes(now?: Date): Promise<RecomputeResponseTimesResult>;
 }
 
 /**
@@ -197,10 +250,6 @@ export class ShopService implements IShopService {
           radiusKm,
           take: 100,
         });
-        const shopMap = new Map(
-          pairs.map(({ shop }) => [shop.id, shop]),
-        );
-
         const withDist: ShopWithDistance[] = pairs.map(({ shop, distanceKm }) =>
           toShopWithDistance(shop, distanceKm),
         );
@@ -234,9 +283,9 @@ export class ShopService implements IShopService {
               if (!openOk) continue;
 
               const distScore = 1 - Math.min(1, shop.distanceKm / 20);
-              const ratingScore = (shop.rating ?? 3) / 5;
+              const rScore = ratingScore(shop.rating);
               const availScore = Math.min(1, minAvailable / Math.max(10, shop.capacity));
-              const score = distScore * 0.5 + ratingScore * 0.3 + availScore * 0.2;
+              const score = distScore * 0.5 + rScore * 0.3 + availScore * 0.2;
 
               hits.push({ ...shop, bagsAvailable: minAvailable, _score: score });
             } catch {
@@ -307,9 +356,9 @@ export class ShopService implements IShopService {
 
           // Weighted score: 50% distance + 30% rating + 20% availability
           const distScore = 1 - Math.min(1, shop.distanceKm / 20);
-          const ratingScore = (shop.rating ?? 3) / 5;
+          const rScore = ratingScore(shop.rating);
           const availScore = Math.min(1, bagsAvailable / Math.max(10, shop.capacity));
-          const score = distScore * 0.5 + ratingScore * 0.3 + availScore * 0.2;
+          const score = distScore * 0.5 + rScore * 0.3 + availScore * 0.2;
 
           hits.push({ ...shop, bagsAvailable, _score: score });
         }
@@ -407,16 +456,22 @@ export class ShopService implements IShopService {
           'BagajPark: Başvurunuz Onaylandı! 🎉',
           `Merhaba ${partnerName},\n\n${shop.name} mağazanız BagajPark platformuna kabul edildi!\n\nHemen giriş yaparak rezervasyonları yönetebilirsiniz:\n${panelUrl}`,
           undefined,
-          // Tırnaklar DÜZ olmalı: burada kıvrık tırnak (") kullanılıyordu, yani
-          // hiçbir `style`/`href` özniteliği geçerli değildi — e-posta stilsiz
-          // gidiyor ve buton bağlantısı çalışmıyordu.
-          `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
-            <h2 style="color:#ea580c">Başvurunuz Onaylandı! 🎉</h2>
-            <p>Merhaba <strong>${partnerName}</strong>,</p>
-            <p><strong>${shop.name}</strong> mağazanız BagajPark platformuna kabul edildi. Artık rezervasyon almaya başlayabilirsiniz!</p>
-            <a href="${panelUrl}" style="display:inline-block;background:#ea580c;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:bold;margin:16px 0">Partner Panelime Git</a>
-            <p style="font-size:13px;color:#6b7280;margin-top:24px">BagajPark — Güvenli Bagaj Emaneti</p>
-          </div>`
+          /*
+            Kabuk `renderEmailHtml`'te. Buradaki HTML elle yaziliyordu ve bir kez
+            KIVRIK TIRNAK ile yazilmisti — hicbir `style`/`href` ozniteligi gecerli
+            degildi, e-posta stilsiz gidiyor ve buton bir yere baglanmiyordu (P1-3).
+            Markup artik tek yerde; o hatanin tekrari icin bir yuzey kalmadi.
+          */
+          renderEmailHtml({
+            locale: 'tr',
+            heading: 'Başvurunuz Onaylandı! 🎉',
+            paragraphs: [
+              `Merhaba <strong>${partnerName}</strong>,`,
+              `<strong>${shop.name}</strong> mağazanız BagajPark platformuna kabul edildi. Artık rezervasyon almaya başlayabilirsiniz!`,
+            ],
+            cta: { href: panelUrl, label: 'Partner Panelime Git', variant: 'button' },
+            footer: 'BagajPark — Güvenli Bagaj Emaneti',
+          })
         ).catch((e) => logger.warn({ err: e, shopId }, 'shop_approval_email_failed'));
       } else {
         logger.warn(
@@ -499,6 +554,120 @@ export class ShopService implements IShopService {
       where: { id: shopId },
       data,
     });
+  }
+
+  /**
+   * "Yanıt süresi" rozetini GERÇEK veriden yeniden hesaplar (P2-7).
+   *
+   * Ölçüm: misafirin talebi oluşturduğu an (`Booking.createdAt`) ile esnafın
+   * onay verdiği an (`BookingEvent` `APPROVED`) arası. Yeterli örneği olmayan
+   * dükkanın değeri `null`'a çekilir — rozet o zaman hiç çizilmez. Uydurulmuş
+   * bir sayı, gösterilmeyen bir rozetten daha kötüdür.
+   *
+   * İDEMPOTENT: yalnızca okuyup yazar, olay üretmez; tekrar çalıştırmak zararsız.
+   */
+  async recomputeResponseTimes(
+    now: Date = new Date(),
+  ): Promise<RecomputeResponseTimesResult> {
+    const since = new Date(
+      now.getTime() - RESPONSE_TIME_LOOKBACK_DAYS * 24 * 60 * 60 * 1000,
+    );
+
+    const events = await prisma.bookingEvent.findMany({
+      where: { event: 'APPROVED', createdAt: { gte: since } },
+      select: { bookingId: true, createdAt: true },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    /*
+      MEVCUT DEĞER DE OKUNUYOR: aşağıdaki döngü yalnızca DEĞİŞEN satırı yazsın
+      diye. Aynı sorgu, ek maliyet yok.
+    */
+    const shops = await prisma.shop.findMany({
+      select: { id: true, responseTimeMinutes: true },
+    });
+    const stored = new Map(shops.map((s) => [s.id, s.responseTimeMinutes]));
+    const byShop = new Map<string, number[]>(shops.map((s) => [s.id, []]));
+
+    if (events.length > 0) {
+      const bookings = await prisma.booking.findMany({
+        where: { id: { in: events.map((e) => e.bookingId) } },
+        select: { id: true, shopId: true, createdAt: true },
+      });
+      const bookingById = new Map(bookings.map((b) => [b.id, b]));
+
+      for (const ev of events) {
+        const booking = bookingById.get(ev.bookingId);
+        if (!booking) continue;
+        const bucket = byShop.get(booking.shopId);
+        if (!bucket || bucket.length >= RESPONSE_TIME_MAX_SAMPLES) continue;
+        const minutes = minutesBetween(booking.createdAt, ev.createdAt);
+        // Negatif fark yalnızca saat sapmasından çıkar; örnek olarak sayılmaz.
+        if (minutes < 0) continue;
+        bucket.push(minutes);
+      }
+    }
+
+    let updated = 0;
+    let cleared = 0;
+    let samples = 0;
+    let written = 0;
+
+    /*
+      YALNIZCA DEĞİŞENİ YAZ (performans).
+
+      Eskiden bu döngü, dükkan başına BİR `UPDATE` atıyordu — sırayla, yani
+      dükkan sayısı × gidiş-dönüş süresi. Üstelik dükkanların ezici çoğunluğunun
+      yeterli örneği hiç olmuyor: onlar için hesap her gece `null` çıkıyor ve
+      zaten `null` olan satır tekrar `null` yazılıyordu. Yani işin yaptığı
+      yazmaların neredeyse tamamı hiçbir şeyi değiştirmiyordu, ama havuzdan bir
+      bağlantıyı dükkan sayısıyla orantılı süre boyunca tutuyordu.
+
+      Şimdi: değişmeyen satır atlanır, `null`'a çekilecekler tek `updateMany` ile
+      toplu yazılır. Geriye yalnızca gerçekten yeni bir değer kazanan avuç dolusu
+      dükkan için tekil `UPDATE` kalır.
+
+      `updated`/`cleared` ANLAMI DEĞİŞMEDİ — hâlâ "sonuçta değeri olan / `null`
+      olan dükkan sayısı"dır, "yazılan" değil. Çağıran (`/api/internal/
+      response-times` → iş defteri) bu sayıları böyle okuyor. Gerçek yazma
+      sayısı ayrı bir alan: `written`.
+    */
+    const toClear: string[] = [];
+
+    for (const [shopId, values] of byShop) {
+      samples += values.length;
+      const value = p90Minutes(values);
+      if (value === null) cleared += 1;
+      else updated += 1;
+
+      if (stored.get(shopId) === value) continue;
+
+      if (value === null) {
+        toClear.push(shopId);
+      } else {
+        await prisma.shop.update({
+          where: { id: shopId },
+          data: { responseTimeMinutes: value },
+        });
+        written += 1;
+      }
+    }
+
+    /*
+      Parça parça: `responseTimeMinutes` şemada `@default(0)`, yani HİÇ
+      çalışmamış bir veritabanında ilk koşu tüm dükkanları temizler. Tek bir dev
+      `IN (...)` listesi üretmemek için 500'lük öbekler.
+    */
+    for (let i = 0; i < toClear.length; i += RESPONSE_TIME_CLEAR_BATCH) {
+      const batch = toClear.slice(i, i + RESPONSE_TIME_CLEAR_BATCH);
+      await prisma.shop.updateMany({
+        where: { id: { in: batch } },
+        data: { responseTimeMinutes: null },
+      });
+      written += batch.length;
+    }
+
+    return { updated, cleared, samples, written };
   }
 }
 

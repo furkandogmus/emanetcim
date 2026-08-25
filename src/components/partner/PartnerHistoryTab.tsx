@@ -28,7 +28,7 @@ export default function PartnerHistoryTab({
   return (
     <main className="flex-1 flex flex-col gap-6 animate-in slide-in-from-right-4 duration-500">
       <header className="flex items-center justify-between">
-        <h2 className="text-xl font-black tracking-tight uppercase tracking-widest">
+        <h2 className="text-xl id-eyebrow tracking-tight">
           {t("transactionHistory")}
         </h2>
         <div className="px-4 py-2 bg-orange-100 text-orange-600 rounded-2xl text-[10px] font-black uppercase">
@@ -38,7 +38,7 @@ export default function PartnerHistoryTab({
 
       <div className="flex flex-col gap-4 pb-32">
         {bookings.length === 0 ? (
-          <div className="ui-state ui-state-empty p-12 rounded-[2.5rem] text-center flex flex-col items-center gap-4">
+          <div className="ui-state ui-state-empty p-12 rounded-4xl text-center flex flex-col items-center gap-4">
             <Package size={48} strokeWidth={1} />
             <p className="font-bold">{t("noTransactionsYet")}</p>
           </div>
@@ -52,7 +52,7 @@ export default function PartnerHistoryTab({
             .map((booking) => (
               <div
                 key={booking.id}
-                className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-xl shadow-gray-100/50 flex flex-col gap-6 hover:translate-y-[-4px] transition-all group overflow-hidden relative"
+                className="bg-white p-6 rounded-4xl border border-gray-100 shadow-xl shadow-gray-100/50 flex flex-col gap-6 hover:translate-y-[-4px] transition-all group overflow-hidden relative"
               >
                 <div className="flex justify-between items-start relative z-10">
                   <div className="flex gap-4 items-center">
@@ -68,7 +68,7 @@ export default function PartnerHistoryTab({
                         {booking.guest?.name ||
                           t("guestFallback", { id: booking.id.slice(0, 4) })}
                       </h3>
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                      <p className="id-eyebrow text-gray-400">
                         {new Date(booking.checkInTime).toLocaleDateString(
                           dateLocale
                         )}
@@ -99,7 +99,7 @@ export default function PartnerHistoryTab({
 
                 <div className="flex justify-between items-center border-t border-gray-50 pt-6">
                   <div className="flex flex-col gap-1">
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                    <p className="id-eyebrow text-gray-400">
                       {t("netEarningsShort")}
                     </p>
                     <p className="font-black text-xl text-gray-900">
@@ -116,7 +116,7 @@ export default function PartnerHistoryTab({
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                    <p className="id-eyebrow text-gray-400">
                       {t("bagLabel")}
                     </p>
                     <p className="font-black text-gray-900 tracking-tight">

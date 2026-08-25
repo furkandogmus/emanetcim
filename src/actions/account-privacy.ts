@@ -1,11 +1,11 @@
 "use server";
 
-import { auth } from "@/auth";
 import prisma from "@/lib/db";
 import { BookingStatus, Role } from "@prisma/client";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { headers } from "next/headers";
 import { writeAuditLog } from "@/lib/audit-log";
+import { requireUser } from "@/lib/action-auth";
 
 const ACTIVE_BOOKING_STATUSES: BookingStatus[] = [
   BookingStatus.WAITING_APPROVAL,
@@ -21,15 +21,18 @@ const ACTIVE_BOOKING_STATUSES: BookingStatus[] = [
 export async function anonymizeGuestAccountAction(): Promise<
   { success: true } | { success: false; error: string }
 > {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false, error: "Errors.authRequired" };
-  }
-  if (session.user.role !== Role.GUEST) {
+  const auth = await requireUser();
+  if (!auth.ok) return { success: false, error: auth.error };
+  /*
+    Hesabi yalnizca MISAFIR kapatabilir: esnaf/admin hesabinin silinmesi
+    dukkan ve denetim izini de etkiler, o yol admin panelindedir. Bu bir ROL
+    KAPISI degil, ALAN kurali — kapidan gecmis aktor uzerinde uygulanir.
+  */
+  if (auth.actor.role !== Role.GUEST) {
     return { success: false, error: "Errors.unauthorized" };
   }
 
-  const userId = session.user.id;
+  const userId = auth.actor.id;
 
   const activeCount = await prisma.booking.count({
     where: { guestId: userId, status: { in: ACTIVE_BOOKING_STATUSES } },

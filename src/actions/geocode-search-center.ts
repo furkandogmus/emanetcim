@@ -1,6 +1,6 @@
 "use server";
 
-import { withTimeout } from "@/lib/async-timeout";
+import { fetchWithTimeout } from "@/lib/async-timeout";
 
 type GeocodeSearchCenterResult =
   | { ok: true; lat: number; lng: number; label: string }
@@ -26,7 +26,7 @@ export async function geocodeSearchCenterAction(
 
   try {
     /**
-     * NEDEN `withTimeout` (2026-08-25): bu, misafirin arama kutusuna yazarken
+     * NEDEN zaman aşımı (2026-08-25): bu, misafirin arama kutusuna yazarken
      * canlı tetiklenen bir sunucu eylemi (bkz. `SearchClient.tsx` debounce).
      * Ücretsiz/hız-sınırlı bir üçüncü taraf servise (Nominatim) sınırsız
      * bekleyen bir `fetch` — yanıt vermezse arama kutusu süresiz "yükleniyor"
@@ -36,15 +36,20 @@ export async function geocodeSearchCenterAction(
      * istek o yedeğe hiç ulaşamaz. Zaman aşımı, `catch` bloğunun zaten
      * döndürdüğü `{ ok: false }` ile aynı yola düşürüp var olan yedeği
      * tamamlıyor.
+     *
+     * `fetchWithTimeout` (yarış değil, gerçek iptal): Nominatim ücretsiz ve
+     * yavaşlamaya açık. Yalnızca vazgeçmek yetmez — istek de sonlandırılmalı,
+     * yoksa her tuş vuruşunda terk edilmiş bir soket birikir.
      */
-    const res = await withTimeout(
-      fetch(url.toString(), {
+    const res = await fetchWithTimeout(
+      url.toString(),
+      {
         headers: {
           // Nominatim requires identifiable UA/contact.
           "User-Agent": "bagajpark-search/1.0 (support@bagajpark.com)",
         },
         next: { revalidate: 0 },
-      }),
+      },
       5000,
       "geocode_search",
     );

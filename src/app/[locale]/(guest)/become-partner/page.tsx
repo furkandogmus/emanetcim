@@ -106,7 +106,7 @@ export default async function BecomePartnerPage({
           </div>
         </div>
 
-        <section className="mt-16 rounded-[2rem] border border-orange-100 bg-orange-50/50 p-10 text-center">
+        <section className="mt-16 rounded-3xl border border-orange-100 bg-orange-50/50 p-10 text-center">
           <h2 className="text-xl font-black">{t("calcTitle")}</h2>
           <p className="mx-auto mt-3 max-w-xl text-sm text-gray-600">
             {t("calcBody")}

@@ -639,8 +639,31 @@ model ContactMessage {
   category  String   @default("UNCLASSIFIED")
   /// Kararı hangi sinyal verdi. Operatör "neden buraya düştü" diye sorabilmeli.
   categoryReason String?
+  /// Gelen postanın RFC Message-ID başlığı — panelden verilen cevabın
+  /// `In-Reply-To`/`References` başlıklarıyla aynı yazışma zincirine bağlanması için.
+  inboundMessageId String?
+  replies          ContactReply[]
 
   @@index([category, isRead, createdAt])
+}
+
+/// Panelden gönderilen destek cevabı. Cevap Resend ile gerçek e-posta olarak gider;
+/// bu tablo panelde yazışma geçmişini gösterir ve "cevaplandı mı"nın kaydıdır.
+model ContactReply {
+  id               String         @id @default(cuid())
+  contactMessageId String
+  fromEmail        String
+  toEmail          String
+  subject          String
+  body             String
+  /// Resend'in dönen e-posta id'si — teslim sorunu izinde kullanılır.
+  resendId         String?
+  /// Cevabı yazan admin (User.id). İlişki bilerek yok: kullanıcı silinse de kayıt kalmalı.
+  sentBy           String
+  createdAt        DateTime       @default(now())
+  message          ContactMessage @relation(fields: [contactMessageId], references: [id], onDelete: Cascade)
+
+  @@index([contactMessageId, createdAt])
 }
 
 model BlogPost {

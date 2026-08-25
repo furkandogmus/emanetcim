@@ -77,11 +77,11 @@ export default function AdminFeatureFlagsClient({
       {rows.map((row) => (
         <div
           key={row.id}
-          className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm flex flex-col gap-6"
+          className="rounded-3xl border border-gray-100 bg-white p-8 shadow-sm flex flex-col gap-6"
         >
           <div className="flex flex-wrap items-baseline justify-between gap-4">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+              <p className="id-eyebrow text-gray-400">
                 {t("featureFlagsKeyLabel")}
               </p>
               <p className="font-mono text-lg font-bold text-gray-900">
@@ -108,7 +108,7 @@ export default function AdminFeatureFlagsClient({
           </label>
 
           <label className="flex flex-col gap-1">
-            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+            <span className="id-eyebrow text-gray-400">
               {t("featureFlagsRollout")}
             </span>
             <input
@@ -132,7 +132,7 @@ export default function AdminFeatureFlagsClient({
           </label>
 
           <label className="flex flex-col gap-1">
-            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+            <span className="id-eyebrow text-gray-400">
               {t("featureFlagsAllowlist")}
             </span>
             <textarea
@@ -150,7 +150,7 @@ export default function AdminFeatureFlagsClient({
           </label>
 
           <label className="flex flex-col gap-1">
-            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+            <span className="id-eyebrow text-gray-400">
               {t("featureFlagsDescription")}
             </span>
             <input
@@ -167,7 +167,7 @@ export default function AdminFeatureFlagsClient({
             type="button"
             disabled={pending}
             onClick={() => save(row)}
-            className="self-start rounded-2xl bg-orange-600 px-8 py-4 text-[11px] font-black uppercase tracking-widest text-white shadow-lg shadow-orange-900/30 hover:bg-orange-700 disabled:opacity-50"
+            className="self-start rounded-2xl bg-orange-600 px-8 py-4 text-[11px] id-eyebrow text-white shadow-lg shadow-orange-900/30 hover:bg-orange-700 disabled:opacity-50"
           >
             {t("featureFlagsSave")}
           </button>

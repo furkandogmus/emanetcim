@@ -9,6 +9,7 @@ import { notificationService } from "@/services/NotificationService";
 import { analyticsService } from "@/services/AnalyticsService";
 import { resolveServerSessionId } from "@/lib/analytics-server";
 import logger from "@/lib/logger";
+import { toMobileUser } from "@/lib/mobile-dto";
 
 const schema = z.object({
   email: z.string().email().optional().or(z.literal("")),
@@ -64,14 +65,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       accessToken: access,
       refreshToken: refresh,
-      user: {
-        id: existing.id,
-        email: existing.email,
-        name: existing.name,
-        phone: existing.phone,
-        role: existing.role,
-        avatarUrl: existing.image,
-      },
+      user: toMobileUser(existing),
     });
   }
 
@@ -110,13 +104,6 @@ export async function POST(req: Request) {
   return NextResponse.json({
     accessToken: access,
     refreshToken: refresh,
-    user: {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      phone: user.phone,
-      role: user.role,
-      avatarUrl: user.image,
-    },
+    user: toMobileUser(user),
   });
 }

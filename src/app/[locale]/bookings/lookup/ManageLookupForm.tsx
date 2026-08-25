@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { toast } from "sonner";
 import { Search } from "lucide-react";
+import AmbientBackdrop from "@/components/common/AmbientBackdrop";
 
 export default function ManageLookupForm() {
   const t = useTranslations("Guest");
@@ -41,11 +42,7 @@ export default function ManageLookupForm() {
 
   return (
     <div className="relative min-h-screen bg-gray-50 flex items-center justify-center p-6 overflow-hidden">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-40 left-1/2 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,hsl(21_95%_60%/.22),transparent)] blur-2xl" />
-        <div className="absolute -right-24 top-24 h-72 w-72 rounded-full bg-[radial-gradient(closest-side,hsl(38_92%_55%/.18),transparent)] blur-2xl" />
-        <div className="absolute inset-0 opacity-[0.035] bg-[radial-gradient(#ea580c_1px,transparent_1px)] [background-size:20px_20px]" />
-      </div>
+      <AmbientBackdrop />
       <div className="relative z-10 max-w-md w-full bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
         <div className="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center mb-4">
           <Search size={24} className="text-orange-600" />
@@ -54,7 +51,7 @@ export default function ManageLookupForm() {
         <p className="text-sm text-gray-500 mb-6">{t("manageBookingDesc")}</p>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <label className="flex flex-col gap-1.5">
-            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+            <span className="id-eyebrow text-gray-400">
               {t("email")}
             </span>
             <input
@@ -67,7 +64,7 @@ export default function ManageLookupForm() {
             />
           </label>
           <label className="flex flex-col gap-1.5">
-            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+            <span className="id-eyebrow text-gray-400">
               {t("bookingId")}
             </span>
             <input
@@ -83,7 +80,7 @@ export default function ManageLookupForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-orange-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-sm disabled:opacity-50 hover:bg-orange-700 transition-colors"
+            className="w-full bg-orange-600 text-white py-4 rounded-2xl id-eyebrow text-sm disabled:opacity-50 hover:bg-orange-700 transition-colors"
           >
             {loading ? "..." : t("manageBookingCta")}
           </button>

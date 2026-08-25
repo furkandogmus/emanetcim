@@ -1,6 +1,5 @@
 "use server";
 
-import { auth } from "@/auth";
 import { bookingService } from "@/services/BookingService";
 import { notificationService } from "@/services/NotificationService";
 import prisma from "@/lib/db";
@@ -9,15 +8,10 @@ import { verifyQrToken } from "@/lib/qr-token";
 import { normalizeTrGsm10 } from "@/lib/netgsm";
 import { getLocale } from "next-intl/server";
 import { sealService } from "@/services/SealService";
-import { BookingStatus, Prisma } from "@prisma/client";
 import { z } from "zod";
-import logger from "@/lib/logger";
-import { bookingEventService } from "@/services/BookingEventService";
-import { getPricingRules } from "@/lib/platform-settings";
-import { readPricingSnapshot } from "@/lib/pricing-snapshot";
-import { computeAuthoritativeCheckoutTotals } from "@/lib/booking-server-price";
 import { parseCheckInSeals } from "@/lib/seal-payload";
-import { moneyToNumber } from "@/lib/money";
+import { bookingNotificationEmail } from "@/services/booking/guest-contact";
+import { requirePartner, assertPartner } from "@/lib/action-auth";
 
 function revalidatePartnerPaths() {
   revalidatePathAllLocales("/partner");
@@ -26,17 +20,67 @@ function revalidatePartnerPaths() {
 }
 
 /**
+ * Check-in / check-out sonuç KODLARININ çeviri anahtarı karşılıkları.
+ *
+ * NEDEN VAR (2026-08-25): iki action da servisin dönüş metnini olduğu gibi
+ * geçiriyordu. O metin TÜRKÇE bir cümledir ("Rezervasyon bulunamadı.") ve
+ * `PartnerClient` / `CheckInDialog` onu ekrana aynen basıyordu — yani Japonca
+ * veya Farsça arayüzdeki bir esnaf Türkçe hata okuyordu. Kod zaten dönüyordu;
+ * eksik olan tek şey eşlemeydi.
+ *
+ * Sayı taşıyan iki mesajda ("3 valiz için 2 mühür girildi") sayılar kayboldu:
+ * sonuç nesnesi onları ayrı alan olarak taşımıyor. Karşılık metinleri sayıya
+ * ihtiyaç duymayacak şekilde yazıldı; sayılar zaten esnafın önündeki formda.
+ */
+/**
+ * HER esnaf işleminde ortak olan sonuç kodları.
+ *
+ * Dört ayrı tablo (`CHECKIN`, `CHECKOUT`, `REVIEW`, `BAG_REVISION`) bu dört satırı
+ * kelimesi kelimesine tekrarlıyordu. Bir eşlemeyi düzeltmek diğer üçünü sessizce
+ * geride bırakıyordu; taban artık tek yerde, her tablo yalnızca KENDİ farkını yazar.
+ */
+const COMMON_CODE_TO_KEY = {
+  NOT_FOUND: "Errors.bookingNotFound",
+  FORBIDDEN: "Errors.unauthorized",
+  INVALID_STATUS: "Errors.bookingStateConflict",
+  UNKNOWN: "Errors.generic",
+} as const;
+
+/** Sonuç kodunu kullanıcıya gösterilebilir çeviri anahtarına çevirir. */
+function toErrorKey(map: Record<string, string>, code: string): string {
+  return map[code] ?? COMMON_CODE_TO_KEY.UNKNOWN;
+}
+
+const CHECKIN_CODE_TO_KEY: Record<string, string> = {
+  ...COMMON_CODE_TO_KEY,
+  SHOP_CLOSED: "Errors.checkInShopClosed",
+  SEAL_REQUIRED: "Errors.sealNumbersRequired",
+  SEAL_COUNT_MISMATCH: "Errors.sealCountMismatch",
+  PAYMENT_REQUIRED: "Errors.checkInPaymentFailed",
+  SEAL_INVALID: "Errors.sealInvalid",
+  FAULTY_OVERLAPS_ASSIGNMENT: "Errors.sealFaultyOverlaps",
+  SEAL_FAULTY_INVALID: "Errors.sealFaultyInvalid",
+  SEAL_NOT_ASSIGNED: "Errors.sealNotAssigned",
+};
+
+/** Check-out'un servisten dönen tek ekstra kodu yok; taban yeter. */
+const CHECKOUT_CODE_TO_KEY: Record<string, string> = COMMON_CODE_TO_KEY;
+
+/** Onay ve red aynı sonuç tipini döndürür; ikisi de tabanla karşılanır. */
+const REVIEW_CODE_TO_KEY: Record<string, string> = COMMON_CODE_TO_KEY;
+
+const BAG_REVISION_CODE_TO_KEY: Record<string, string> = {
+  ...COMMON_CODE_TO_KEY,
+  INVALID_COUNTS: "Errors.invalidData",
+  NO_PENDING_REVISION: "Errors.invalidData",
+};
+
+/**
  * QR / ham id ile rezervasyon önizlemesi (esnaf paneli).
  */
 export async function getPartnerBookingPreviewAction(raw: string) {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return { success: false as const, error: "Errors.authRequired" };
-  }
-  if (session.user.role !== "PARTNER" && session.user.role !== "ADMIN") {
-    return { success: false as const, error: "Errors.notAuthorizedPartner" };
-  }
+  const auth = await requirePartner();
+  if (!auth.ok) return { success: false as const, error: auth.error };
 
   let bookingId = raw.trim();
   const payload = await verifyQrToken(bookingId);
@@ -52,8 +96,8 @@ export async function getPartnerBookingPreviewAction(raw: string) {
   }
 
   if (
-    session.user.role === "PARTNER" &&
-    booking.shop.ownerId !== session.user.id
+    auth.actor.role === "PARTNER" &&
+    booking.shop.ownerId !== auth.actor.id
   ) {
     return {
       success: false as const,
@@ -82,13 +126,8 @@ export async function getPartnerBookingPreviewAction(raw: string) {
  * Check-out öncesi rezervasyona bağlı mühür listesi (onay ekranı).
  */
 export async function getPartnerBookingSealsAction(bookingIdRaw: string) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false as const, error: "Errors.authRequired" };
-  }
-  if (session.user.role !== "PARTNER" && session.user.role !== "ADMIN") {
-    return { success: false as const, error: "Errors.notAuthorizedPartner" };
-  }
+  const auth = await requirePartner();
+  if (!auth.ok) return { success: false as const, error: auth.error };
 
   let bookingId = bookingIdRaw.trim();
   const payload = await verifyQrToken(bookingIdRaw);
@@ -101,7 +140,7 @@ export async function getPartnerBookingSealsAction(bookingIdRaw: string) {
   if (!booking) {
     return { success: false as const, error: "Errors.bookingNotFound" };
   }
-  if (booking.shop.ownerId !== session.user.id && session.user.role !== "ADMIN") {
+  if (booking.shop.ownerId !== auth.actor.id && auth.actor.role !== "ADMIN") {
     return { success: false as const, error: "Errors.unauthorized" };
   }
 
@@ -138,11 +177,7 @@ export async function checkInAction(
   qrTokenOrBookingId: string,
   seals?: unknown,
 ) {
-  const session = await auth();
-
-  if (session?.user?.role !== "PARTNER" && session?.user?.role !== "ADMIN") {
-    throw new Error("Unauthorized");
-  }
+  const actor = await assertPartner();
 
   let bookingId = qrTokenOrBookingId.trim();
   const payload = await verifyQrToken(qrTokenOrBookingId);
@@ -160,7 +195,7 @@ export async function checkInAction(
     };
   }
 
-  if (session.user.role === "PARTNER" && booking.shop.ownerId !== session.user.id) {
+  if (actor.role === "PARTNER" && booking.shop.ownerId !== actor.id) {
     return {
       success: false as const,
       error: "Errors.unauthorized",
@@ -181,14 +216,20 @@ export async function checkInAction(
   // Aktör kim: dükkanda tahsilat modunda check-in aynı zamanda "parayı aldım"
   // beyanıdır ve bu denetim izine yazılır (P1-9).
   const result = await bookingService.checkIn(bookingId, sealPayload, {
-    id: session.user.id,
-    role: session.user.role,
+    id: actor.id,
+    role: actor.role,
   });
 
   if (result.ok) {
-    if (booking.guest?.email) {
+    /*
+      Alici kurali SERVISTE: web `booking.guest?.email`, mobil ise
+      `booking.guestEmail` bakiyordu — biri hesapli, digeri hesapsiz misafiri
+      atliyordu. `bookingNotificationEmail` ikisini de kapsar.
+    */
+    const recipient = bookingNotificationEmail(booking);
+    if (recipient) {
       const locale = await getLocale();
-      await notificationService.notifyCheckIn(booking.guest.email, booking.id, locale);
+      await notificationService.notifyCheckIn(recipient, booking.id, locale);
     }
 
     revalidatePartnerPaths();
@@ -197,7 +238,7 @@ export async function checkInAction(
 
   return {
     success: false as const,
-    error: result.message,
+    error: toErrorKey(CHECKIN_CODE_TO_KEY, result.code),
     code: result.code,
   };
 }
@@ -206,11 +247,7 @@ export async function checkInAction(
  * checkOutAction - Esnafın valizi müşteriye teslim ettiği adım.
  */
 export async function checkOutAction(qrTokenOrBookingId: string) {
-  const session = await auth();
-
-  if (session?.user?.role !== "PARTNER" && session?.user?.role !== "ADMIN") {
-    throw new Error("Unauthorized");
-  }
+  const actor = await assertPartner();
 
   let bookingId = qrTokenOrBookingId.trim();
   const payload = await verifyQrToken(qrTokenOrBookingId);
@@ -227,7 +264,7 @@ export async function checkOutAction(qrTokenOrBookingId: string) {
       code: "NOT_FOUND" as const,
     };
   }
-  if (session.user.role === "PARTNER" && booking.shop.ownerId !== session.user.id) {
+  if (actor.role === "PARTNER" && booking.shop.ownerId !== actor.id) {
     return {
       success: false as const,
       error: "Errors.unauthorized",
@@ -238,9 +275,10 @@ export async function checkOutAction(qrTokenOrBookingId: string) {
   const result = await bookingService.checkOut(bookingId);
 
   if (result.ok) {
-    if (booking.guest?.email) {
+    const recipient = bookingNotificationEmail(booking);
+    if (recipient) {
       const locale = await getLocale();
-      await notificationService.notifyCheckOut(booking.guest.email, booking.id, locale);
+      await notificationService.notifyCheckOut(recipient, booking.id, locale);
     }
 
     revalidatePartnerPaths();
@@ -249,7 +287,7 @@ export async function checkOutAction(qrTokenOrBookingId: string) {
 
   return {
     success: false as const,
-    error: result.message,
+    error: toErrorKey(CHECKOUT_CODE_TO_KEY, result.code),
     code: result.code,
   };
 }
@@ -258,13 +296,8 @@ export async function checkOutAction(qrTokenOrBookingId: string) {
  * Esnaf / admin hesabına GSM (Netgsm bildirimleri için). Misafirlere SMS gönderilmez.
  */
 export async function updatePartnerPhoneAction(phone: string) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false as const, error: "Errors.authRequired" };
-  }
-  if (session.user.role !== "PARTNER" && session.user.role !== "ADMIN") {
-    return { success: false as const, error: "Errors.notAuthorizedPartner" };
-  }
+  const auth = await requirePartner();
+  if (!auth.ok) return { success: false as const, error: auth.error };
 
   const trimmed = phone.trim();
   const normalized = normalizeTrGsm10(trimmed);
@@ -277,7 +310,7 @@ export async function updatePartnerPhoneAction(phone: string) {
 
   try {
     await prisma.user.update({
-      where: { id: session.user.id },
+      where: { id: auth.actor.id },
       data: { phone: normalized },
     });
   } catch (e: unknown) {
@@ -300,133 +333,66 @@ export async function updatePartnerPhoneAction(phone: string) {
 
 /**
  * Rezervasyon talebini onayla.
+ *
+ * Govde `BookingService.approveBooking`'de: mobil uc de AYNI cagriyi yapar.
+ * Burada kalan tek is oturum cozumu, bildirim dili ve `revalidate`.
  */
 export async function approveBookingAction(bookingId: string) {
-  const session = await auth();
-  if (session?.user?.role !== "PARTNER" && session?.user?.role !== "ADMIN") {
-    return { success: false as const, error: "Errors.authRequired" };
+  const auth = await requirePartner();
+  if (!auth.ok) return { success: false as const, error: auth.error };
+
+  const result = await bookingService.approveBooking(
+    bookingId,
+    { id: auth.actor.id, role: auth.actor.role },
+    { locale: await getLocale() },
+  );
+
+  if (!result.ok) {
+    return { success: false as const, error: toErrorKey(REVIEW_CODE_TO_KEY, result.code) };
   }
 
-  try {
-    const booking = await prisma.booking.findUnique({
-      where: { id: bookingId },
-      include: { shop: true, guest: { select: { email: true } } },
-    });
-
-    if (!booking) return { success: false as const, error: "Errors.bookingNotFound" };
-    if (session.user.role === "PARTNER" && booking.shop.ownerId !== session.user.id) {
-       return { success: false as const, error: "Errors.unauthorized" };
-    }
-
-    const updated = await prisma.booking.updateMany({
-      where: {
-        id: bookingId,
-        shopId: booking.shopId,
-        status: BookingStatus.WAITING_APPROVAL,
-      },
-      data: {
-        status: BookingStatus.APPROVED,
-        bookingRowVersion: { increment: 1 },
-      },
-    });
-
-    if (updated.count !== 1) {
-      return { success: false as const, error: "Errors.bookingStateConflict" };
-    }
-
-    void bookingEventService.record({
-      bookingId,
-      event: "APPROVED",
-      actorId: session.user.id,
-      actorRole: session.user.role as "PARTNER" | "ADMIN",
-    }).catch(() => {});
-
-    if (booking.guest?.email) {
-      const locale = await getLocale();
-      void notificationService
-        .notifyBookingApproved(booking.guest.email, bookingId, booking.shop.name, locale)
-        .catch((err) => logger.error({ err, bookingId }, "notify_booking_approved_failed"));
-    }
-
-    revalidatePartnerPaths();
-    return { success: true as const };
-  } catch {
-    return { success: false as const, error: "Errors.generic" };
-  }
+  revalidatePartnerPaths();
+  return { success: true as const };
 }
 
 /**
- * Rezervasyon talebini reddet.
+ * Rezervasyon talebini reddet (admin icin: iptal et).
+ *
+ * Iade, kapasite serbest birakma ve sadakat puani geri alma `cancelBooking`'de —
+ * bu action onu KENDI BASINA tekrar etmez.
  */
 export async function rejectBookingAction(bookingId: string) {
-  const session = await auth();
-  if (session?.user?.role !== "PARTNER" && session?.user?.role !== "ADMIN") {
-    return { success: false as const, error: "Errors.authRequired" };
+  const auth = await requirePartner();
+  if (!auth.ok) return { success: false as const, error: auth.error };
+
+  const result = await bookingService.rejectBooking(
+    bookingId,
+    { id: auth.actor.id, role: auth.actor.role },
+    { locale: await getLocale() },
+  );
+
+  if (!result.ok) {
+    return { success: false as const, error: toErrorKey(REVIEW_CODE_TO_KEY, result.code) };
   }
 
-  try {
-    const booking = await prisma.booking.findUnique({
-      where: { id: bookingId },
-      include: { shop: true, guest: { select: { email: true } } },
-    });
-
-    if (!booking) return { success: false as const, error: "Errors.bookingNotFound" };
-    if (session.user.role === "PARTNER" && booking.shop.ownerId !== session.user.id) {
-       return { success: false as const, error: "Errors.unauthorized" };
-    }
-
-    // Partner sadece onay bekleyen talepleri reddedebilir; admin WAITING_APPROVAL veya APPROVED iptal edebilir
-    if (booking.status === BookingStatus.APPROVED && session.user.role !== "ADMIN") {
-      return { success: false as const, error: "Errors.unauthorized" };
-    }
-    if (booking.status !== BookingStatus.WAITING_APPROVAL && booking.status !== BookingStatus.APPROVED) {
-      return { success: false as const, error: "Errors.bookingStateConflict" };
-    }
-
-    const cancelResult = await bookingService.cancelBooking(bookingId);
-    if (!cancelResult.ok) {
-      return { success: false as const, error: "Errors.bookingStateConflict" };
-    }
-
-    void bookingEventService.record({
-      bookingId,
-      event: "CANCELLED",
-      actorId: session.user.id,
-      actorRole: session.user.role as "PARTNER" | "ADMIN",
-      metadata: { reason: session.user.role === "ADMIN" ? "cancelled_by_admin" : "rejected_by_partner" },
-    }).catch(() => {});
-
-    // Misafire "Reddedildi" e-postası
-    if (booking.guest?.email) {
-      const locale = await getLocale();
-      void notificationService
-        .notifyBookingCancelled(booking.guest.email, bookingId, booking.shop.name, locale)
-        .catch((err) => logger.error({ err, bookingId }, "notify_booking_cancelled_failed"));
-    }
-
-    revalidatePartnerPaths();
-    return { success: true as const };
-  } catch {
-    return { success: false as const, error: "Errors.generic" };
-  }
+  revalidatePartnerPaths();
+  return { success: true as const };
 }
 
 /**
  * Sıradaki uygun mühürleri getirir (Otomatik mühürleme için).
  */
 export async function getNextAvailableSealsAction(shopId: string, count: number) {
-  const session = await auth();
-  if (session?.user?.role !== "PARTNER" && session?.user?.role !== "ADMIN") {
-    return { success: false as const, error: "Errors.authRequired" };
-  }
+  const auth = await requirePartner();
+  if (!auth.ok) return { success: false as const, error: auth.error };
 
   // Sahiplik kontrolü: esnaf sadece kendi dükkanının mühürlerini görebilir
-  if (session.user.role === "PARTNER") {
+  if (auth.actor.role === "PARTNER") {
     const shop = await prisma.shop.findUnique({
       where: { id: shopId },
       select: { ownerId: true },
     });
-    if (!shop || shop.ownerId !== session.user.id) {
+    if (!shop || shop.ownerId !== auth.actor.id) {
       return { success: false as const, error: "Errors.unauthorized" };
     }
   }
@@ -442,10 +408,8 @@ export async function getNextAvailableSealsAction(shopId: string, count: number)
  * Bir mührü hatalı olarak işaretler ve stoktan düşer.
  */
 export async function reportFaultySealAction(serialNumber: number, shopId: string) {
-  const session = await auth();
-  if (session?.user?.role !== "PARTNER" && session?.user?.role !== "ADMIN") {
-    return { success: false as const, error: "Errors.authRequired" };
-  }
+  const auth = await requirePartner();
+  if (!auth.ok) return { success: false as const, error: auth.error };
 
   try {
     await sealService.markSealAsFaulty(serialNumber, shopId);
@@ -472,216 +436,55 @@ const pendingBagRevisionBodySchema = z.object({
 });
 
 /**
- * Gerçek valiz sayısı / boyutu rezervasyondan farklıysa kayıt (ek ücret tahsilatı ayrı süreç).
- * PAID veya CHECKED_IN rezervasyonlarda güncellenebilir.
+ * Gerçek valiz sayısı / boyutu rezervasyondan farklıysa ÖNERİ kaydı açar.
+ * Gövde `BookingService.proposeBagRevision`'da; mobil uç da aynı gövdeyi kullanır.
  */
 export async function setPendingBagRevisionAction(raw: unknown) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false as const, error: "Errors.authRequired" };
-  }
-  if (session.user.role !== "PARTNER" && session.user.role !== "ADMIN") {
-    return { success: false as const, error: "Errors.notAuthorizedPartner" };
-  }
+  const auth = await requirePartner();
+  if (!auth.ok) return { success: false as const, error: auth.error };
 
   const parsed = pendingBagRevisionBodySchema.safeParse(raw);
   if (!parsed.success) {
     return { success: false as const, error: "Errors.invalidData" };
   }
-  const { bookingId, bagCountS, bagCountM, bagCountXl } = parsed.data;
+  const { bookingId, ...counts } = parsed.data;
 
-  const booking = await prisma.booking.findUnique({
-    where: { id: bookingId },
-    include: { shop: true },
-  });
-  if (!booking) {
-    return { success: false as const, error: "Errors.bookingNotFound" };
+  const result = await bookingService.proposeBagRevision(bookingId, counts, auth.actor);
+  if (!result.ok) {
+    return {
+      success: false as const,
+      error: toErrorKey(BAG_REVISION_CODE_TO_KEY, result.code),
+    };
   }
-  if (
-    session.user.role === "PARTNER" &&
-    booking.shop.ownerId !== session.user.id
-  ) {
-    return { success: false as const, error: "Errors.unauthorized" };
-  }
-  if (booking.status !== "PAID" && booking.status !== "CHECKED_IN") {
-    return { success: false as const, error: "Errors.invalidData" };
-  }
-
-  const total = bagCountS + bagCountM + bagCountXl;
-  if (total < 1) {
-    return { success: false as const, error: "Errors.invalidData" };
-  }
-
-  /**
-   * Fark SUNUCUDA hesaplanıyor.
-   *
-   * Rezervasyonun kendi fiyat kuralları (anlık kopya) varsa onlar kullanılır —
-   * o gün geçerli olan kural budur. Yoksa bugünküler; hangisinin kullanıldığı
-   * revizyon kaydına yazılıyor ki sonradan sorgulanabilsin.
-   */
-  const snapshot = readPricingSnapshot(booking.pricingSnapshot);
-  const rules = snapshot ?? (await getPricingRules());
-
-  const unitPrice = moneyToNumber(booking.shop.pricePerDay);
-  const before = computeAuthoritativeCheckoutTotals(
-    unitPrice,
-    booking.bagCountS,
-    booking.bagCountM,
-    booking.bagCountXl,
-    booking.checkInTime,
-    booking.checkOutTime,
-    rules,
-  );
-  const after = computeAuthoritativeCheckoutTotals(
-    unitPrice,
-    bagCountS,
-    bagCountM,
-    bagCountXl,
-    booking.checkInTime,
-    booking.checkOutTime,
-    rules,
-  );
-  const extraAmount =
-    Math.round((after.subtotalBeforeCoupon - before.subtotalBeforeCoupon) * 100) / 100;
-
-  await prisma.booking.update({
-    where: { id: bookingId },
-    data: {
-      pendingBagRevision: {
-        bagCountS,
-        bagCountM,
-        bagCountXl,
-        /** Sunucuda hesaplandı. Negatif olabilir (valiz azaldıysa). */
-        extraAmount,
-        previousTotal: before.subtotalBeforeCoupon,
-        newTotal: after.subtotalBeforeCoupon,
-        /** Hangi kural kümesiyle hesaplandı — anlık kopya mı, bugünkü mü. */
-        rulesSource: snapshot ? "booking_snapshot" : "current_platform_settings",
-        recordedAt: new Date().toISOString(),
-      } as Prisma.InputJsonValue,
-    },
-  });
 
   revalidatePartnerPaths();
-  return { success: true as const, extraAmount };
+  return { success: true as const, extraAmount: result.extraAmount };
 }
 
 /**
  * Revizyonu UYGULAR: yeni valiz sayılarını ve yeniden hesaplanan toplamı yazar.
  *
- * NEDEN VAR (P1-8): eskiden yalnızca `clearPendingBagRevisionAction` vardı ve o
- * revizyonu **siliyordu** — valiz sayıları ve `totalPrice` hiç güncellenmiyordu.
- * Yani bavul fiziksel olarak teslim alınıyor, kayıt eski hâlinde kalıyordu.
- * Prod'da bunun izi var: `S1 M3 XL1 → 540.00`, oysa aynı kurallarla 640 olmalıydı
- * — 100 TRY eksik, üstelik rezervasyon `CHECKED_IN`, yani 5 bavul teslim alınmış
- * ve 4'ü ödenmiş.
- *
- * Tek transaction: valiz sayıları ve toplam birlikte değişir, aralarında bir an
- * bile tutarsız kalmazlar.
+ * NEDEN VAR (P1-8): eskiden yalnızca "temizle" vardı ve o revizyonu **siliyordu** —
+ * valiz sayıları ve `totalPrice` hiç güncellenmiyordu. Yani bavul fiziksel olarak
+ * teslim alınıyor, kayıt eski hâlinde kalıyordu. Prod'da izi var: `S1 M3 XL1 → 540.00`,
+ * oysa aynı kurallarla 640 olmalıydı — 100 TRY eksik.
  */
 export async function applyPendingBagRevisionAction(bookingId: string) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false as const, error: "Errors.authRequired" };
-  }
-  if (session.user.role !== "PARTNER" && session.user.role !== "ADMIN") {
-    return { success: false as const, error: "Errors.notAuthorizedPartner" };
-  }
+  const auth = await requirePartner();
+  if (!auth.ok) return { success: false as const, error: auth.error };
 
-  const booking = await prisma.booking.findUnique({
-    where: { id: bookingId },
-    include: { shop: true },
+  const result = await bookingService.applyBagRevision(bookingId, auth.actor, {
+    source: "web",
   });
-  if (!booking) {
-    return { success: false as const, error: "Errors.bookingNotFound" };
+  if (!result.ok) {
+    return {
+      success: false as const,
+      error: toErrorKey(BAG_REVISION_CODE_TO_KEY, result.code),
+    };
   }
-  if (
-    session.user.role === "PARTNER" &&
-    booking.shop.ownerId !== session.user.id
-  ) {
-    return { success: false as const, error: "Errors.unauthorized" };
-  }
-
-  const revision = booking.pendingBagRevision as {
-    bagCountS?: unknown;
-    bagCountM?: unknown;
-    bagCountXl?: unknown;
-  } | null;
-  if (
-    !revision ||
-    typeof revision.bagCountS !== "number" ||
-    typeof revision.bagCountM !== "number" ||
-    typeof revision.bagCountXl !== "number"
-  ) {
-    return { success: false as const, error: "Errors.invalidData" };
-  }
-
-  // Toplam SUNUCUDA yeniden hesaplanıyor; revizyon kaydındaki tutara güvenilmiyor.
-  const snapshot = readPricingSnapshot(booking.pricingSnapshot);
-  const rules = snapshot ?? (await getPricingRules());
-  const totals = computeAuthoritativeCheckoutTotals(
-    moneyToNumber(booking.shop.pricePerDay),
-    revision.bagCountS,
-    revision.bagCountM,
-    revision.bagCountXl,
-    booking.checkInTime,
-    booking.checkOutTime,
-    rules,
-  );
-
-  const previousTotal = moneyToNumber(booking.totalPrice);
-
-  await prisma.booking.update({
-    where: { id: bookingId },
-    data: {
-      bagCountS: totals.bagCountS,
-      bagCountM: totals.bagCountM,
-      bagCountXl: totals.bagCountXl,
-      totalPrice: totals.subtotalBeforeCoupon,
-      insuranceFee: totals.insuranceFee,
-      pendingBagRevision: Prisma.JsonNull,
-    },
-  });
-
-  await bookingEventService
-    .record({
-      bookingId,
-      event: "BAGS_MODIFIED",
-      actorId: session.user.id,
-      actorRole: session.user.role,
-      metadata: {
-        from: {
-          S: booking.bagCountS,
-          M: booking.bagCountM,
-          XL: booking.bagCountXl,
-          total: previousTotal,
-        },
-        to: {
-          S: totals.bagCountS,
-          M: totals.bagCountM,
-          XL: totals.bagCountXl,
-          total: totals.subtotalBeforeCoupon,
-        },
-        delta: Math.round((totals.subtotalBeforeCoupon - previousTotal) * 100) / 100,
-        rulesSource: snapshot ? "booking_snapshot" : "current_platform_settings",
-        /**
-         * Fark HENÜZ TAHSİL EDİLMEDİ. Sağlayıcı `manual` olduğu sürece tahsilat
-         * dükkanda yapılır; ödeme defterine bağlanması ayrı iş (P1-21 ile aynı
-         * boşluk). Bu alan operasyonun takip etmesi gereken şeydir.
-         */
-        settled: false,
-      },
-    })
-    .catch((err) =>
-      logger.error({ err, bookingId }, "bag_revision_apply_event_failed"),
-    );
 
   revalidatePartnerPaths();
-  return {
-    success: true as const,
-    newTotal: totals.subtotalBeforeCoupon,
-    delta: Math.round((totals.subtotalBeforeCoupon - previousTotal) * 100) / 100,
-  };
+  return { success: true as const, newTotal: result.newTotal, delta: result.delta };
 }
 
 /**
@@ -692,32 +495,16 @@ export async function applyPendingBagRevisionAction(bookingId: string) {
  * ayrım yapmadan revizyonu yok ediyordu (P1-8).
  */
 export async function clearPendingBagRevisionAction(bookingId: string) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false as const, error: "Errors.authRequired" };
-  }
-  if (session.user.role !== "PARTNER" && session.user.role !== "ADMIN") {
-    return { success: false as const, error: "Errors.notAuthorizedPartner" };
-  }
+  const auth = await requirePartner();
+  if (!auth.ok) return { success: false as const, error: auth.error };
 
-  const booking = await prisma.booking.findUnique({
-    where: { id: bookingId },
-    include: { shop: true },
-  });
-  if (!booking) {
-    return { success: false as const, error: "Errors.bookingNotFound" };
+  const result = await bookingService.clearBagRevision(bookingId, auth.actor);
+  if (!result.ok) {
+    return {
+      success: false as const,
+      error: toErrorKey(BAG_REVISION_CODE_TO_KEY, result.code),
+    };
   }
-  if (
-    session.user.role === "PARTNER" &&
-    booking.shop.ownerId !== session.user.id
-  ) {
-    return { success: false as const, error: "Errors.unauthorized" };
-  }
-
-  await prisma.booking.update({
-    where: { id: bookingId },
-    data: { pendingBagRevision: Prisma.JsonNull },
-  });
 
   revalidatePartnerPaths();
   return { success: true as const };

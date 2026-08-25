@@ -97,7 +97,7 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
             <h2 className="text-xs font-black text-blue-600 uppercase tracking-[0.3em] mb-8">
               {t("partnerTitle")}
             </h2>
-            <div className="p-8 bg-blue-50 rounded-[2.5rem] border border-blue-100 flex flex-col items-center text-center gap-6 md:sticky md:top-8">
+            <div className="p-8 bg-blue-50 rounded-4xl border border-blue-100 flex flex-col items-center text-center gap-6 md:sticky md:top-8">
               <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-blue-600 shadow-sm">
                 <ShieldCheck size={32} />
               </div>
@@ -105,7 +105,7 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
               <p className="text-sm text-gray-500 font-bold leading-relaxed px-4">
                 {t("partnerPitchBody")}
               </p>
-              <Link href="/partners" className="h-12 flex items-center px-8 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-blue-200">
+              <Link href="/partners" className="h-12 flex items-center px-8 bg-blue-600 hover:bg-blue-700 text-white rounded-xl id-eyebrow text-xs transition-all active:scale-95 shadow-lg shadow-blue-200">
                 {t("partnerPitchCta")}
               </Link>
             </div>
@@ -113,17 +113,17 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
         </div>
 
         {/* Support CTA */}
-        <section className="bg-gray-900 rounded-[3rem] p-12 text-center text-white relative overflow-hidden">
+        <section className="bg-gray-900 rounded-4xl p-12 text-center text-white relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-orange-600/20 blur-[100px] rounded-full" />
           <h2 className="text-3xl font-black mb-2">{t("ctaTitle")}</h2>
           <p className="text-gray-400 font-medium mb-8">
             {t("ctaSubtitle")}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/contact" className="h-14 flex items-center px-10 bg-white text-gray-900 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-orange-600 hover:text-white transition-all">
+            <Link href="/contact" className="h-14 flex items-center px-10 bg-white text-gray-900 rounded-2xl id-eyebrow text-sm hover:bg-orange-600 hover:text-white transition-all">
               {t("ctaButton")}
             </Link>
-            <a href="https://wa.me/905422415597" target="_blank" rel="noopener noreferrer" className="h-14 flex items-center px-10 bg-green-500/10 text-green-500 border border-green-500/30 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-green-500 hover:text-white transition-all">
+            <a href="https://wa.me/905422415597" target="_blank" rel="noopener noreferrer" className="h-14 flex items-center px-10 bg-green-500/10 text-green-500 border border-green-500/30 rounded-2xl id-eyebrow text-sm hover:bg-green-500 hover:text-white transition-all">
               WHATSAPP DESTEK
             </a>
           </div>

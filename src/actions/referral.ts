@@ -3,6 +3,7 @@
 import { auth } from "@/auth";
 import prisma from "@/lib/db";
 import { randomBytes } from "crypto";
+import { requireUser } from "@/lib/action-auth";
 
 const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // belirsiz karakterler çıkarıldı
 
@@ -27,13 +28,11 @@ function generateCode(length = 8): string {
 export async function getOrCreateReferralCodeAction(): Promise<
   { success: true; code: string } | { success: false; error: string }
 > {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false, error: "Errors.authRequired" };
-  }
+  const auth = await requireUser();
+  if (!auth.ok) return { success: false, error: auth.error };
 
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: auth.actor.id },
     select: { referralCode: true },
   });
 
@@ -46,7 +45,7 @@ export async function getOrCreateReferralCodeAction(): Promise<
     const code = generateCode();
     try {
       await prisma.user.update({
-        where: { id: session.user.id },
+        where: { id: auth.actor.id },
         data: { referralCode: code },
       });
       return { success: true, code };

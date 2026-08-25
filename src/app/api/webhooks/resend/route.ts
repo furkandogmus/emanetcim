@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
-import { createHmac, timingSafeEqual } from "node:crypto";
+import {
+  verifyWebhook,
+  type WebhookSignatureHeaders,
+} from "@/lib/webhook-signature";
 import prisma from "@/lib/db";
 import type { Resend } from "resend";
 import { Resend as ResendCtor } from "resend";
 import { normalizeInboundSubjectLine } from "@/lib/reply-subject";
 import { classifyInboxMessage } from "@/lib/inbox-classifier";
+import logger from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 /** Inbound gövde için art arda bekleme + birkaç deneme (self-hosted / Vercel Pro uyumu). */
@@ -79,7 +83,7 @@ function getResendClient(): Resend | null {
   return new ResendCtor(key);
 }
 
-function extractWebhookSignature(req: Request): { svixId: string; svixTs: string; signature: string } | null {
+function extractWebhookSignature(req: Request): WebhookSignatureHeaders | null {
   const svixId = req.headers.get("svix-id")?.trim();
   const svixTs = req.headers.get("svix-timestamp")?.trim();
   const sig = req.headers.get("svix-signature")?.trim();
@@ -101,51 +105,6 @@ function extractWebhookSignature(req: Request): { svixId: string; svixTs: string
   return null;
 }
 
-function verifySvixSignature(rawBody: string, svixId: string, svixTs: string, signature: string, secret: string): boolean {
-  // Strip whsec_ prefix and decode base64 key
-  const rawSecret = secret.startsWith("whsec_") ? secret.slice(6) : secret;
-  let secretBytes: Buffer;
-  try {
-    secretBytes = Buffer.from(rawSecret, "base64");
-  } catch {
-    secretBytes = Buffer.from(rawSecret);
-  }
-
-  // Svix format: signed_content = "${svix_id}.${svix_timestamp}.${body}"
-  const signedContent = `${svixId}.${svixTs}.${rawBody}`;
-  const expected = createHmac("sha256", secretBytes).update(signedContent).digest();
-  const expectedHex = expected.toString("hex");
-
-  // Signature comes as "v1,<base64_encoded_hmac>"
-  const parts = signature.split(",");
-  const provided = parts.length === 2 ? parts[1] : signature;
-
-  let providedBytes: Buffer;
-  try {
-    providedBytes = Buffer.from(provided, "base64");
-  } catch {
-    providedBytes = Buffer.from(provided);
-  }
-
-  // Compare signatures
-  const expectedHexFromProvided = providedBytes.toString("hex");
-  const a = Buffer.from(expectedHex);
-  const b = Buffer.from(expectedHexFromProvided);
-  if (a.length !== b.length) return false;
-  return timingSafeEqual(a, b);
-}
-
-// Legacy verification for non-Svix secrets
-function verifyLegacySignature(rawBody: string, signature: string, secret: string): boolean {
-  const provided = signature.replace(/^sha256=/i, "").trim();
-  if (!provided) return false;
-  const expected = createHmac("sha256", secret).update(rawBody).digest("hex");
-  const a = Buffer.from(expected);
-  const b = Buffer.from(provided);
-  if (a.length !== b.length) return false;
-  return timingSafeEqual(a, b);
-}
-
 export async function POST(req: Request) {
   try {
     const secret = process.env.RESEND_WEBHOOK_SECRET?.trim();
@@ -161,12 +120,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized: missing signature" }, { status: 401 });
     }
 
-    // Try Svix verification first, then legacy
-    const isValid = sigData.svixId
-      ? verifySvixSignature(rawBody, sigData.svixId, sigData.svixTs, sigData.signature, secret)
-      : verifyLegacySignature(rawBody, sigData.signature, secret);
-
-    if (!isValid) {
+    /*
+      Doğrulama `src/lib/webhook-signature.ts`'te ve TEST EDİLİYOR. Buradaki
+      sürümde `svix-timestamp` imzalanan içeriğe giriyor ama tazeliği hiç
+      kontrol edilmiyordu: yakalanan geçerli bir istek sonsuza kadar tekrar
+      oynatılabilirdi ve gelen e-posta yolu tekilleştirme yapmadan
+      `contactMessage.create` çağırıyor.
+    */
+    const verdict = verifyWebhook(rawBody, sigData, secret, Date.now());
+    if (!verdict.ok) {
+      logger.warn({ reason: verdict.reason }, "resend_webhook_rejected");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -307,11 +270,28 @@ export async function POST(req: Request) {
       raw: body,
     });
 
+    /**
+     * RFC Message-ID: panelden verilen cevabın `In-Reply-To` başlığı bunu ister —
+     * yoksa cevap misafirin kutusunda ayrı bir konu olarak açılır.
+     */
+    let inboundMessageId: string | null = null;
+    const rawMsgId = (data as { message_id?: unknown }).message_id;
+    if (typeof rawMsgId === "string" && rawMsgId.trim()) {
+      inboundMessageId = rawMsgId.trim();
+    } else {
+      const hdrs = (data as { headers?: unknown }).headers ?? (body as { headers?: unknown }).headers;
+      if (hdrs && typeof hdrs === "object") {
+        const hv = (hdrs as Record<string, unknown>)["message-id"] ?? (hdrs as Record<string, unknown>)["Message-ID"] ?? (hdrs as Record<string, unknown>)["Message-Id"];
+        if (typeof hv === "string" && hv.trim()) inboundMessageId = hv.trim();
+      }
+    }
+
     await prisma.contactMessage.create({
       data: {
         from: (from as string) || "unknown",
         to: toAddress as string,
         subject: subject || "No Subject",
+        inboundMessageId,
         text: typeof text === "string" ? text : JSON.stringify(text),
         html: typeof html === "string" ? html : JSON.stringify(html),
         raw: (body as object) || {}, // Tam payload'u her zaman saklıyoruz

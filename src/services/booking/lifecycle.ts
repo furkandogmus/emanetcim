@@ -46,9 +46,19 @@ export async function issueCancellationCreditCoupon(amountTry: number): Promise<
 }
 
 /**
- * Rezervasyon İptali ve İade Süreci
- * Kademe: ≥24s check-in → tam kart iadesi; ≥1s → %50 kart iadesi; &lt;1s veya geçmiş check-in → kartsız, tek kullanımlı kupon (tutar kadar).
- * Ödeme alınmışsa iade başarısızsa rezervasyon CANCELLED yapılmaz.
+ * Rezervasyon iptali ve iade.
+ *
+ * KADEME YOK: check-in'e kalan süreye BAKILMAZ. Tahsilat varsa
+ * `PaymentService.refund` ile TAM iade işaretlenir, yoksa açık ödeme niyeti
+ * kapatılır; her iki durumda rezervasyon `CANCELLED` olur.
+ *
+ * Bu yorum 2026-08-24'e kadar "≥24s tam iade, ≥1s %50, sonrası kupon" diyordu
+ * (P2-4). Ne kod ne de iptal ekranı öyle davranıyordu; yorum, iade mantığını
+ * değiştirecek kişinin okuduğu İLK şey olduğu için en yanıltıcı yerdeydi.
+ * Kademeli politika istenirse önce karar, sonra kod + metin birlikte değişir.
+ *
+ * Not: iade `PaymentLog`'da işaretlenir; para gerçekten geri gönderilmez —
+ * entegre bir sağlayıcı yok (P0-2, docs/PAYMENTS.md).
  */
 export async function cancelBooking(bookingId: string): Promise<CancelBookingResult> {
   const booking = await prisma.booking.findUnique({

@@ -64,7 +64,7 @@ export default function Footer() {
       >
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 text-[11px] font-bold text-gray-400 sm:flex-row">
           <p>© {currentYear} {tCommon("appName")}. {t("rights")}</p>
-          <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 uppercase tracking-widest">
+          <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 id-eyebrow">
             <Link href="/terms" className="transition-colors hover:text-orange-600">{t("terms")}</Link>
             <Link href="/privacy" className="transition-colors hover:text-orange-600">{t("privacy")}</Link>
             <Link href="/contact" className="transition-colors hover:text-orange-600">{t("contact")}</Link>
@@ -131,7 +131,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-xs font-black uppercase tracking-widest text-gray-900 mb-6">{t("about")}</h4>
+            <h4 className="text-xs id-eyebrow text-gray-900 mb-6">{t("about")}</h4>
             <ul className="flex flex-col gap-4 text-sm font-bold text-gray-400">
               <li>
                 <Link href="/about" className="hover:text-orange-600 transition-colors">
@@ -157,7 +157,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-xs font-black uppercase tracking-widest text-gray-900 mb-6">{t("corporate")}</h4>
+            <h4 className="text-xs id-eyebrow text-gray-900 mb-6">{t("corporate")}</h4>
             <ul className="flex flex-col gap-4 text-sm font-bold text-gray-400">
               {!hideGuestBookingNav && (
                 <li>
@@ -199,9 +199,9 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div className="bg-gray-50 p-8 rounded-[2rem] flex flex-col justify-between border border-gray-100">
+          <div className="bg-gray-50 p-8 rounded-3xl flex flex-col justify-between border border-gray-100">
             <div>
-              <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4">
+              <h4 className="id-eyebrow text-gray-400 mb-4">
                 {t("securityProtocol")}
               </h4>
               <div className="flex items-center gap-2 mb-2">
@@ -216,12 +216,12 @@ export default function Footer() {
         {!hideGuestBookingNav && (
           <div className="mb-16 pb-16 border-b border-gray-100">
             <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-              <h4 className="text-xs font-black uppercase tracking-widest text-gray-900">
+              <h4 className="text-xs id-eyebrow text-gray-900">
                 {t("citiesTitle")}
               </h4>
               <Link
                 href="/luggage-storage"
-                className="text-[10px] font-black uppercase tracking-widest text-orange-600 hover:underline"
+                className="id-eyebrow text-orange-600 hover:underline"
               >
                 {t("citiesViewAll")}
               </Link>
@@ -244,7 +244,7 @@ export default function Footer() {
           <p className="text-xs font-bold text-gray-400">
             © {currentYear} {tCommon("appName")}. {t("rights")}
           </p>
-          <div className="flex items-center gap-4 text-[10px] font-black text-gray-300 uppercase tracking-widest">
+          <div className="flex items-center gap-4 id-eyebrow text-gray-300">
             <span className="flex items-center gap-1">
               <MapPin size={12} /> {t("location")}
             </span>

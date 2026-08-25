@@ -31,7 +31,7 @@ export default async function KvkkPage({ params }: { params: Promise<{ locale: s
       <header className="py-24 px-6 bg-gray-900 text-white overflow-hidden relative">
         <div className="absolute top-0 right-0 w-96 h-96 bg-orange-600/20 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2" />
         <div className="max-w-4xl mx-auto relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-lg text-orange-400 text-[10px] font-black uppercase tracking-widest mb-6 border border-white/10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-lg text-orange-400 id-eyebrow mb-6 border border-white/10">
             <Fingerprint size={14} />
             {t("badge")}
           </div>
@@ -71,10 +71,10 @@ export default async function KvkkPage({ params }: { params: Promise<{ locale: s
             })}
           </div>
 
-          <div className="mt-20 p-12 bg-gray-900 rounded-[3rem] text-center text-white">
+          <div className="mt-20 p-12 bg-gray-900 rounded-4xl text-center text-white">
             <h3 className="text-xl font-black mb-4">{t("contactTitle")}</h3>
             <p className="text-gray-400 font-bold mb-8">{t("contactBody")}</p>
-            <a href="mailto:kvkk@bagajpark.com" className="inline-flex h-14 items-center px-10 bg-orange-600 hover:bg-orange-700 text-white rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-xl shadow-orange-900/20">
+            <a href="mailto:kvkk@bagajpark.com" className="inline-flex h-14 items-center px-10 bg-orange-600 hover:bg-orange-700 text-white rounded-2xl id-eyebrow text-sm transition-all shadow-xl shadow-orange-900/20">
               kvkk@bagajpark.com
             </a>
           </div>

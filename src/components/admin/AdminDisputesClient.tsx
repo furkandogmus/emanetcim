@@ -6,7 +6,7 @@ import { Link } from "@/i18n/routing";
 import { useLocale, useTranslations } from "next-intl";
 import { updateDisputeStatusAction } from "@/actions/dispute";
 import { toast } from "sonner";
-import { dateLocaleForUiLocale } from "@/lib/date-locale";
+import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import { adminDisputeErrorKey } from "@/lib/admin-dispute-error-copy";
 import Money from "@/components/common/Money";
 
@@ -59,7 +59,7 @@ export default function AdminDisputesClient({ disputes: initial }: { disputes: D
   const tErrors = useTranslations("Errors");
   const tCommon = useTranslations("Common");
   const locale = useLocale();
-  const dateLocale = dateLocaleForUiLocale(locale);
+  const dateLocale = bcp47ForUiLocale(locale);
 
   const [disputes, setDisputes] = useState(initial);
   const [expanded, setExpanded] = useState<string | null>(null);

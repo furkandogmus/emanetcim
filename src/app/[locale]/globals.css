@@ -51,10 +51,11 @@
   --color-amber-700:  #b45309;
 
   /* Warm gray override — replaces Tailwind cold grays globally */
-  --color-gray-50:    #fafaf9;
-  --color-gray-100:   #f5f5f4;
-  --color-gray-200:   #e7e5e4;
-  --color-gray-300:   #d6d3d1;
+  /* Nötrlerin ilk dört adımı kimlikten: yüzey, zemin ve saç teli çizgisi. */
+  --color-gray-50:    var(--id-neutral-50);
+  --color-gray-100:   var(--id-neutral-100);
+  --color-gray-200:   var(--id-neutral-200);
+  --color-gray-300:   var(--id-neutral-300);
   --color-gray-400:   #a8a29e;
   --color-gray-500:   #78716c;
   --color-gray-600:   #57534e;
@@ -63,14 +64,57 @@
   --color-gray-900:   #1c1917;
   --color-gray-950:   #0c0a09;
 
-  /* ── Radius scale ── */
-  --radius-xl:  1.25rem;  /* 20px — cards */
-  --radius-2xl: 1.5rem;   /* 24px — panels */
-  --radius-3xl: 2rem;     /* 32px — hero cards */
-  --radius-4xl: 2.5rem;   /* 40px — full-round surfaces */
-  --radius-lg:  var(--radius);
-  --radius-md:  calc(var(--radius) - 2px);
+  /* ═══════════════════════════════════════════════════════════
+     TAILWIND YARDIMCILARININ KİMLİĞE BAĞLANMASI
+     ═══════════════════════════════════════════════════════════
+
+     ASIL HAMLE BU. Kodda 1.658 sabit stil kullanımı var:
+       orange-*  687 · font-black 615 · tracking-widest 284 · rounded-3xl 155
+
+     Bunları tek tek `.id-*` sınıflarına çevirmek 114 dosyada elle düzenleme
+     demekti — hem riskli hem de yarım kalmaya mahkûm. Bunun yerine sınıfların
+     KENDİSİ yeniden tanımlandı: Tailwind v4'te `orange-600`'ün ne olduğu bir
+     tema değişkenidir, o değişken de artık kimlik katmanını gösteriyor.
+
+     Sonuç: `text-orange-600` yazan 687 satır DEĞİŞMEDEN kimliği takip ediyor.
+     Sabit sınıf artık bir KARAR değil, bir REFERANS.
+
+     Not: yalnızca MARKA rengi (`orange-*`) bağlandı. `emerald` / `amber` /
+     `blue` durum renkleridir (başarı, uyarı, bilgi) ve kimlikle değişmemeli —
+     bilerek dışarıda bırakıldı.
+     ═══════════════════════════════════════════════════════════ */
+  --color-orange-50:  var(--id-accent-50);
+  --color-orange-100: var(--id-accent-100);
+  --color-orange-200: var(--id-accent-200);
+  --color-orange-300: var(--id-accent-300);
+  --color-orange-400: var(--id-accent-400);
+  --color-orange-500: var(--id-accent-500);
+  --color-orange-600: var(--id-accent-600);
+  --color-orange-700: var(--id-accent-700);
+  --color-orange-800: var(--id-accent-800);
+  --color-orange-900: var(--id-accent-900);
+  --color-orange-950: var(--id-accent-950);
+
+  /* `font-black` (615 kullanım) → başlık ağırlığı kimlikten gelir. */
+  --font-weight-black: var(--id-display-weight);
+
+  /* `tracking-widest` (284 kullanım) → mikro etiket harf aralığı kimlikten. */
+  --tracking-widest: var(--id-eyebrow-tracking);
+
+  /* ── Radius scale ──
+     Yüzey dili kimlikten gelir (571 kullanım). `rounded-full` listede YOK:
+     rozet her kimlikte rozettir.
+
+     `rounded-sm`/`rounded-md` bilerek taban skalada (`--radius`) bırakıldı:
+     kimliğe bağlansalardı keskin köşeli bir yönde `--radius-sm` negatife
+     düşerdi. İkisi de yalnızca ince kontrollerde kullanılıyor. */
   --radius-sm:  calc(var(--radius) - 4px);
+  --radius-md:  calc(var(--radius) - 2px);
+  --radius-lg:  var(--id-radius-sm);
+  --radius-xl:  var(--id-radius-md);
+  --radius-2xl: var(--id-radius-lg);
+  --radius-3xl: var(--id-radius-xl);
+  --radius-4xl: var(--id-surface-radius);
 
   /* ── Shadow palette ── */
   --shadow-brand-sm:  0 1px 3px 0 hsl(21 90% 48% / .12), 0 1px 2px -1px hsl(21 90% 48% / .08);
@@ -214,6 +258,242 @@
   --chart-3: hsl(160 84% 39%);    /* emerald */
   --chart-4: hsl(193 82% 36%);    /* teal */
   --chart-5: hsl(263 70% 54%);    /* violet — contrast */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   KİMLİK KATMANI — sitenin "nasıl göründüğü" YALNIZCA burada karar verilir
+   ═══════════════════════════════════════════════════════════════
+
+   NEDEN VAR (2026-08-24'te ölçüldü): görsel dil ~1.900 yerde ELLE yazılmıştı —
+   `orange-*` 687, `font-black` 615, `tracking-widest` 284, büyük `rounded-*` 155
+   kez. Yani "görünümü değiştirelim" demek 90+ dosyayı elle düzenlemek demekti.
+   Bu blok o kararı tek yere taşır: aşağıdaki değerler değişince tüm site değişir.
+
+   VARSAYILAN = SİTENİN KENDİ GÖRÜNÜMÜ (turuncu · font-black · yuvarlak köşe).
+   25 Ağustos 2026'da bilerek buraya geri alındı: 24 Ağustos'ta varsayılan kısa
+   süreliğine "fiş" diline (keskin köşe, monospace, manila kâğıt) çevrilmişti,
+   beğenilmedi. Fiş dili silinmedi — `[data-identity="ticket"]` olarak duruyor.
+
+   Tek gerçek kayma şurada: `orange-*` sınıfları eskiden Tailwind'in VARSAYILAN
+   turuncusunu kullanıyordu, `--brand-*` ise projenin kendi skalasıydı ve ikisi
+   yalnızca 600 adımında çakışıyordu. Artık ikisi de bu skalayı gösteriyor; yani
+   varsayılan tonlar 24 Ağustos öncesiyle birebir aynı. İki ayrı turuncunun yan
+   yana yaşaması zaten tutarsızlıktı.
+
+   KULLANIM: `NEXT_PUBLIC_SITE_IDENTITY=ticket` → `<html data-identity="ticket">`
+   → tüm site o dile geçer. Tek değişken; geri dönüş de tek değişken.
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  /* ── 1. Vurgu rengi — TAM SKALA ──
+     Skala olmasının nedeni: Tailwind'in `orange-*` paleti yukarıda buraya
+     bağlanıyor. Yani koddaki 687 `orange-*` kullanımı tek tek düzeltilmeden
+     kimliği takip ediyor. Tek bir değer yetmezdi; `orange-50`'den
+     `orange-950`'e kadar hepsinin karşılığı olmalı. */
+  --id-accent-50:   hsl(21 100% 97%);
+  --id-accent-100:  hsl(21 96% 93%);
+  --id-accent-200:  hsl(21 94% 85%);
+  --id-accent-300:  hsl(21 92% 74%);
+  --id-accent-400:  hsl(21 91% 62%);
+  --id-accent-500:  hsl(21 91% 53%);
+  --id-accent-600:  hsl(21 90% 48%);
+  --id-accent-700:  hsl(21 86% 40%);
+  --id-accent-800:  hsl(21 80% 32%);
+  --id-accent-900:  hsl(21 72% 25%);
+  --id-accent-950:  hsl(21 68% 16%);
+
+  --id-accent:            var(--id-accent-600);
+  --id-accent-strong:     var(--id-accent-700);
+  --id-accent-soft:       var(--id-accent-50);
+  --id-accent-contrast:   #ffffff;
+
+  /* ── 2. Başlık karakteri ── */
+  --id-display-family:    var(--font-geist-sans, ui-sans-serif, system-ui, sans-serif);
+  --id-display-weight:    900;
+  --id-display-tracking:  -0.03em;
+  --id-display-transform: none;
+
+  /* ── 3. Mikro etiket ("eyebrow") ──
+     `text-[10px] font-black uppercase tracking-widest` üçlüsü tek token'a indi;
+     tek başına 284 yerde tekrarlanıyordu. Değerler o üçlünün birebir karşılığı:
+     10px · 900 · uppercase · 0.1em (Tailwind `tracking-widest`). */
+  --id-eyebrow-family:    inherit;
+  --id-eyebrow-size:      0.625rem;
+  --id-eyebrow-weight:    900;
+  --id-eyebrow-tracking:  0.1em;
+  --id-eyebrow-transform: uppercase;
+
+  /* ── 4. Yüzey dili — TAM YARIÇAP SKALASI ──
+     Tek bir değer yetmezdi. Kodda `rounded-2xl` 293, `rounded-xl` 134,
+     `rounded-3xl` 73, `rounded-[2.5rem]` 50, `rounded-[2rem]` 32 kez geçiyor.
+     Yalnızca büyük adımlar bağlansaydı yön değiştirince kartların köşesi
+     keskinleşir, içindeki kutuların köşesi yuvarlak kalırdı — yarım uygulanmış
+     bir görünüm, ikisinden de kötü.
+     `rounded-full` BİLEREK bağlanmadı: rozet rozettir, kimlik onu değiştirmez. */
+  --id-radius-sm:         0.75rem;   /* rounded-lg  */
+  --id-radius-md:         1.25rem;   /* rounded-xl  */
+  --id-radius-lg:         1.5rem;    /* rounded-2xl */
+  --id-radius-xl:         2rem;      /* rounded-3xl */
+  --id-surface-radius:    2.5rem;    /* rounded-4xl · en dış yüzey */
+  --id-control-radius:    1rem;
+  --id-pill-radius:       9999px;
+
+  /* ── 4b. Nötr skala ──
+     Nötr bir kimlik kararıdır, miras değil. `bg-gray-50` 213, `border-gray-100`
+     252 kez geçiyor: yüzey tonu ve saç teli çizgisi bunlardan geliyor. */
+  --id-neutral-50:        #fafaf9;
+  --id-neutral-100:       #f5f5f4;
+  --id-neutral-200:       #e7e5e4;
+  --id-neutral-300:       #d6d3d1;
+  --id-surface-bg:        #ffffff;
+  --id-surface-border:    1px solid #e7e5e4;
+  --id-surface-shadow:    var(--shadow-brand-sm);
+
+  /* ── 5. Sayfa dokusu ── */
+  --id-page-bg:           hsl(30 30% 99%);
+  --id-page-texture:      none;
+  --id-divider:           1px solid #e7e5e4;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   YÖN A — "Fiş / bagaj etiketi"
+   24 Ağustos 2026'da kısa süre varsayılandı, sonra geri alındı (beğenilmedi).
+   Gerekçesi duruyor: misafir zaten bir teslim kodu alıyor ve bagaj etiketi altı
+   dilin hepsinde çeviri gerektirmeden okunuyor.
+   Keskin köşe, kesikli ayraç, monospace seri numarası, manila kâğıt tonu.
+   Denemek için: `NEXT_PUBLIC_SITE_IDENTITY=ticket`.
+   ─────────────────────────────────────────────────────────────── */
+[data-identity="ticket"] {
+  --id-accent-50:         hsl(36 45% 96%);
+  --id-accent-100:        hsl(34 44% 90%);
+  --id-accent-200:        hsl(28 46% 80%);
+  --id-accent-300:        hsl(22 52% 68%);
+  --id-accent-400:        hsl(18 62% 56%);
+  --id-accent-500:        hsl(15 72% 48%);
+  --id-accent-600:        hsl(14 78% 42%);
+  --id-accent-700:        hsl(14 80% 32%);
+  --id-accent-800:        hsl(13 78% 25%);
+  --id-accent-900:        hsl(12 72% 19%);
+  --id-accent-950:        hsl(12 70% 13%);
+
+  --id-display-family:    var(--font-geist-sans, ui-sans-serif, system-ui, sans-serif);
+  --id-display-weight:    800;
+  --id-display-tracking:  -0.01em;
+  --id-display-transform: none;
+
+  --id-eyebrow-family:    ui-monospace, "SF Mono", "Roboto Mono", monospace;
+  --id-eyebrow-size:      0.625rem;
+  --id-eyebrow-weight:    600;
+  --id-eyebrow-tracking:  0.22em;
+  --id-eyebrow-transform: uppercase;
+
+  --id-radius-sm:         0.125rem;
+  --id-radius-md:         0.1875rem;
+  --id-radius-lg:         0.25rem;
+  --id-radius-xl:         0.3125rem;
+  --id-surface-radius:    0.375rem;
+  --id-control-radius:    0.1875rem;
+
+  --id-neutral-50:        hsl(36 30% 96%);
+  --id-neutral-100:       hsl(34 26% 92%);
+  --id-neutral-200:       hsl(30 20% 85%);
+  --id-neutral-300:       hsl(28 16% 74%);
+
+  --id-page-bg:           hsl(36 30% 96%);
+  --id-surface-bg:        hsl(40 40% 99%);
+  --id-surface-border:    1px solid hsl(30 18% 82%);
+  --id-surface-shadow:    0 1px 0 0 hsl(30 18% 86%);
+  --id-divider:           1px dashed hsl(30 18% 72%);
+}
+
+
+/* ───────────────────────────────────────────────────────────────
+   YÖN B — "Mühür numarası"
+   Her rezervasyonun fiziksel, numaralı bir mührü var; ürünün tüm güven
+   mekanizması bu ve rakiplerde yok. Tipografi rakamların üstüne kurulur:
+   plaka/sayaç estetiği, yüksek kontrast, dar ve teknik.
+   ─────────────────────────────────────────────────────────────── */
+[data-identity="seal"] {
+  --id-accent-50:   hsl(158 40% 95%);
+  --id-accent-100:  hsl(158 38% 87%);
+  --id-accent-200:  hsl(158 34% 75%);
+  --id-accent-300:  hsl(158 34% 62%);
+  --id-accent-400:  hsl(158 42% 48%);
+  --id-accent-500:  hsl(158 56% 38%);
+  --id-accent-600:  hsl(158 64% 32%);
+  --id-accent-700:  hsl(158 68% 24%);
+  --id-accent-800:  hsl(159 66% 18%);
+  --id-accent-900:  hsl(160 60% 13%);
+  --id-accent-950:  hsl(160 58% 9%);
+
+  --id-display-family:    ui-monospace, "SF Mono", "Roboto Mono", monospace;
+  --id-display-weight:    700;
+  --id-display-tracking:  -0.02em;
+
+  --id-eyebrow-weight:    700;
+  --id-eyebrow-tracking:  0.3em;
+
+  --id-radius-sm:         0.25rem;
+  --id-radius-md:         0.375rem;
+  --id-radius-lg:         0.5rem;
+  --id-radius-xl:         0.625rem;
+  --id-surface-radius:    0.75rem;
+  --id-control-radius:    0.375rem;
+
+  --id-neutral-50:        hsl(160 12% 97%);
+  --id-neutral-100:       hsl(158 12% 93%);
+  --id-neutral-200:       hsl(158 14% 86%);
+  --id-neutral-300:       hsl(158 12% 74%);
+
+  --id-page-bg:           hsl(160 12% 97%);
+  --id-surface-bg:        #ffffff;
+  --id-surface-border:    1.5px solid hsl(158 20% 84%);
+  --id-surface-shadow:    none;
+  --id-divider:           1.5px solid hsl(158 20% 88%);
+}
+
+/* ───────────────────────────────────────────────────────────────
+   YÖN C — "Mahalle / esnaf"
+   Depo zinciri değil, dükkân. Sıcak, elle-yazılmış, tabela hissi.
+   Yuvarlaklık kalır ama yumuşar; renk turuncudan kirli kırmızıya kayar.
+   ─────────────────────────────────────────────────────────────── */
+[data-identity="shop"] {
+  --id-accent-50:   hsl(28 60% 96%);
+  --id-accent-100:  hsl(24 58% 90%);
+  --id-accent-200:  hsl(18 56% 80%);
+  --id-accent-300:  hsl(12 56% 69%);
+  --id-accent-400:  hsl(8 58% 57%);
+  --id-accent-500:  hsl(6 60% 50%);
+  --id-accent-600:  hsl(6 62% 45%);
+  --id-accent-700:  hsl(6 66% 35%);
+  --id-accent-800:  hsl(5 66% 27%);
+  --id-accent-900:  hsl(5 62% 21%);
+  --id-accent-950:  hsl(5 60% 14%);
+
+  --id-display-family:    Georgia, "Times New Roman", serif;
+  --id-display-weight:    700;
+  --id-display-tracking:  -0.015em;
+
+  --id-eyebrow-weight:    700;
+  --id-eyebrow-tracking:  0.12em;
+  --id-eyebrow-transform: none;
+
+  --id-radius-sm:         0.5rem;
+  --id-radius-md:         0.75rem;
+  --id-radius-lg:         0.875rem;
+  --id-radius-xl:         1rem;
+  --id-surface-radius:    1.25rem;
+  --id-control-radius:    0.75rem;
+
+  --id-neutral-50:        hsl(34 38% 96%);
+  --id-neutral-100:       hsl(32 32% 92%);
+  --id-neutral-200:       hsl(28 24% 85%);
+  --id-neutral-300:       hsl(26 20% 74%);
+
+  --id-page-bg:           hsl(34 38% 96%);
+  --id-surface-bg:        hsl(38 50% 99%);
+  --id-surface-border:    1px solid hsl(28 24% 84%);
+  --id-surface-shadow:    0 2px 0 0 hsl(28 24% 88%);
+  --id-divider:           1px solid hsl(28 24% 88%);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -731,4 +1011,63 @@
   body .print-area,
   body .print-area * { visibility: visible; }
   body .print-area { position: absolute; left: 0; top: 0; width: 100%; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   KİMLİK SINIFLARI — kimlik katmanını TÜKETEN yardımcılar
+   ═══════════════════════════════════════════════════════════════
+
+   Bileşenler `bg-orange-600 rounded-3xl font-black` yerine bunları kullanır.
+   Fark şu: sabit sınıf bir KARARDIR ve 687 kez tekrarlanır; bu sınıflar bir
+   REFERANSTIR ve kararı `[data-identity]` bloğuna bırakır.
+
+   Göç `src/__tests__/design-tokens.test.ts` mandalıyla yürütülüyor: sabit
+   kullanım sayısı düşebilir, yükselemez.
+   ═══════════════════════════════════════════════════════════════ */
+@layer components {
+  /* ── Yüzey: kart, panel, sayfa bloğu ── */
+  .id-surface {
+    background: var(--id-surface-bg);
+    border: var(--id-surface-border);
+    border-radius: var(--id-surface-radius);
+    box-shadow: var(--id-surface-shadow);
+  }
+
+  /* Form girdisi, buton, küçük kontrol. */
+  .id-control { border-radius: var(--id-control-radius); }
+  .id-pill    { border-radius: var(--id-pill-radius); }
+
+  /* ── Tipografi ── */
+  .id-display {
+    font-family: var(--id-display-family);
+    font-weight: var(--id-display-weight);
+    letter-spacing: var(--id-display-tracking);
+    text-transform: var(--id-display-transform);
+  }
+
+  /* `text-[10px] font-black uppercase tracking-widest` üçlüsünün yerini alır. */
+  .id-eyebrow {
+    font-family: var(--id-eyebrow-family);
+    font-size: var(--id-eyebrow-size);
+    font-weight: var(--id-eyebrow-weight);
+    letter-spacing: var(--id-eyebrow-tracking);
+    text-transform: var(--id-eyebrow-transform);
+    line-height: 1.2;
+  }
+
+  /* ── Vurgu ── */
+  .id-accent      { color: var(--id-accent); }
+  .id-accent-bg   { background: var(--id-accent); color: var(--id-accent-contrast); }
+  .id-accent-soft { background: var(--id-accent-soft); color: var(--id-accent-strong); }
+  .id-accent-border { border-color: var(--id-accent); }
+
+  /* ── Ayraç ──
+     Fiş yönünde kesikli, mühür yönünde kalın düz çizgi olur. */
+  .id-divider { border-top: var(--id-divider); }
+
+  /* ── Sayfa zemini ── */
+  .id-page {
+    background: var(--id-page-bg);
+    background-image: var(--id-page-texture);
+  }
 }

@@ -11,7 +11,7 @@ import {
 } from "recharts";
 import type { ValueType, NameType } from "recharts/types/component/DefaultTooltipContent";
 import { useLocale, useTranslations } from "next-intl";
-import { dateLocaleForUiLocale } from "@/lib/date-locale";
+import { bcp47ForUiLocale } from "@/lib/intl-locale";
 
 /**
  * AnalyticsChart — son 7 gün (parent’tan gelen veri).
@@ -34,7 +34,7 @@ function CustomTooltip({
 }) {
   // Hook erken dönüşten ÖNCE (React kuralları).
   const locale = useLocale();
-  const dateLocale = dateLocaleForUiLocale(locale);
+  const dateLocale = bcp47ForUiLocale(locale);
 
   if (!active || !payload?.length) return null;
   return (
@@ -62,7 +62,7 @@ export default function AnalyticsChart({
 
   if (chartData.length === 0) {
     return (
-      <div className="w-full h-[300px] flex items-center justify-center text-xs font-bold text-gray-400 uppercase tracking-widest">
+      <div className="w-full h-[300px] flex items-center justify-center text-xs id-eyebrow text-gray-400">
         {t("dashboardChartEmpty")}
       </div>
     );

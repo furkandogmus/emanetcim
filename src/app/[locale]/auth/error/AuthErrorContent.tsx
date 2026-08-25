@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { Package, AlertCircle } from "lucide-react";
 import { authErrorMessage } from "@/lib/auth-error-message";
+import AmbientBackdrop from "@/components/common/AmbientBackdrop";
 
 export function AuthErrorContent() {
   const t = useTranslations("Auth");
@@ -14,12 +15,8 @@ export function AuthErrorContent() {
 
   return (
     <div className="relative min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 font-sans overflow-hidden">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-40 left-1/2 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,hsl(21_95%_60%/.22),transparent)] blur-2xl" />
-        <div className="absolute -right-24 top-24 h-72 w-72 rounded-full bg-[radial-gradient(closest-side,hsl(38_92%_55%/.18),transparent)] blur-2xl" />
-        <div className="absolute inset-0 opacity-[0.035] bg-[radial-gradient(#ea580c_1px,transparent_1px)] [background-size:20px_20px]" />
-      </div>
-      <div className="relative z-10 w-full max-w-md bg-white rounded-[2.5rem] p-10 shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col items-center">
+      <AmbientBackdrop />
+      <div className="relative z-10 w-full max-w-md bg-white rounded-4xl p-10 shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col items-center">
         <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mb-6">
           <AlertCircle className="text-red-500" size={32} />
         </div>

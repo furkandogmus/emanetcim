@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/routing";
 import { Link } from "@/i18n/routing";
 import { toast } from "sonner";
 import { MapPin, Calendar, Clock, Package, Shield, XCircle } from "lucide-react";
 import Money from "@/components/common/Money";
-import { dateLocaleForUiLocale } from "@/lib/date-locale";
+import { bcp47ForUiLocale } from "@/lib/intl-locale";
+import { useActionErrorText } from "@/lib/use-action-error";
 
 interface BookingInfo {
   id: string;
@@ -25,9 +25,9 @@ interface BookingInfo {
 
 export default function ManageBookingClient({ initialToken }: { initialToken: string }) {
   const t = useTranslations("Guest");
+  const errorText = useActionErrorText();
   const locale = useLocale();
-  const dateLocale = dateLocaleForUiLocale(locale);
-  const router = useRouter();
+  const dateLocale = bcp47ForUiLocale(locale);
   const [booking, setBooking] = useState<BookingInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
@@ -39,10 +39,11 @@ export default function ManageBookingClient({ initialToken }: { initialToken: st
       headers: { Authorization: `Bearer ${token}` },
     }).then(r => r.json()).then(d => {
       if (d.ok) setBooking(d.booking);
-      else toast.error(t("bookingLookupError"));
+      // Suresi dolmus baglanti en sik sebep; `errorText` kodu ona cevirir.
+      else toast.error(errorText(d.error, t("bookingLookupError")));
     }).catch(() => toast.error(t("bookingLookupError")))
     .finally(() => setLoading(false));
-  }, [token, t]);
+  }, [token, t, errorText]);
 
   const handleCancel = async () => {
     if (!confirm(t("confirmCancel"))) return;
@@ -57,7 +58,8 @@ export default function ManageBookingClient({ initialToken }: { initialToken: st
         setCancelled(true);
         toast.success(t("cancelSuccess"));
       } else {
-        toast.error(data.error || t("cancelError"));
+        // `data.error` bir KOD; ham basilirsa misafir "email_mismatch" okur.
+        toast.error(errorText(data.error, t("cancelError")));
       }
     } catch {
       toast.error(t("cancelError"));
@@ -173,7 +175,7 @@ export default function ManageBookingClient({ initialToken }: { initialToken: st
                 type="button"
                 onClick={handleCancel}
                 disabled={cancelling}
-                className="mt-6 w-full py-4 rounded-2xl bg-red-500 text-white font-black uppercase tracking-widest text-sm disabled:opacity-50 hover:bg-red-600 transition-colors"
+                className="mt-6 w-full py-4 rounded-2xl bg-red-500 text-white id-eyebrow text-sm disabled:opacity-50 hover:bg-red-600 transition-colors"
               >
                 {cancelling ? "..." : t("confirmCancel")}
               </button>

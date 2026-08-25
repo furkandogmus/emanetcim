@@ -125,7 +125,7 @@ export default async function LuggageStorageIndexPage({
         <div className="mx-auto flex max-w-3xl items-center gap-3 px-6 py-4">
           <Link
             href="/"
-            className="text-xs font-black uppercase tracking-widest text-gray-400 hover:text-orange-600"
+            className="text-xs id-eyebrow text-gray-400 hover:text-orange-600"
           >
             ← {tCommon("back")}
           </Link>
@@ -163,7 +163,7 @@ export default async function LuggageStorageIndexPage({
           ))}
         </ul>
 
-        <section className="mt-12 rounded-[1.5rem] border border-gray-100 bg-gray-50 p-6">
+        <section className="mt-12 rounded-2xl border border-gray-100 bg-gray-50 p-6">
           <h2 className="text-xl font-black text-gray-900">
             {msg("indexWhyTitle", "City-Based Luggage Storage Guide")}
           </h2>
@@ -175,7 +175,7 @@ export default async function LuggageStorageIndexPage({
           </p>
         </section>
 
-        <section className="mt-6 rounded-[1.5rem] border border-gray-100 bg-white p-6">
+        <section className="mt-6 rounded-2xl border border-gray-100 bg-white p-6">
           <h2 className="text-xl font-black text-gray-900">
             {msg("indexFaqTitle", "Frequently Asked Questions")}
           </h2>

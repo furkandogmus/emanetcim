@@ -1,6 +1,5 @@
 "use server";
 
-import { auth } from "@/auth";
 import prisma from "@/lib/db";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { Prisma } from "@prisma/client";
@@ -9,6 +8,7 @@ import { invalidatePricingRulesCache } from "@/lib/platform-settings";
 import { sealService } from "@/services/SealService";
 import { headers } from "next/headers";
 import { writeAuditLog } from "@/lib/audit-log";
+import { assertAdmin } from "@/lib/action-auth";
 
 const platformSettingsUpdateSchema = z.object({
   maxStayDays: z.number().int().min(1).max(365),
@@ -31,10 +31,7 @@ const platformSettingsUpdateSchema = z.object({
 });
 
 export async function updatePlatformSettingsAction(data: unknown) {
-  const session = await auth();
-  if (session?.user?.role !== "ADMIN") {
-    throw new Error("Unauthorized");
-  }
+  const actor = await assertAdmin();
   const parsed = platformSettingsUpdateSchema.safeParse(data);
   if (!parsed.success) {
     return { success: false as const, error: "invalid_data" as const };
@@ -82,8 +79,8 @@ export async function updatePlatformSettingsAction(data: unknown) {
   invalidatePricingRulesCache();
   const h = await headers();
   writeAuditLog({
-    actorUserId: session.user.id ?? null,
-    actorRole: session.user.role ?? "ADMIN",
+    actorUserId: actor.id,
+    actorRole: actor.role,
     action: "platform_settings.update",
     entityType: "PlatformSettings",
     entityId: "default",
@@ -98,10 +95,7 @@ export async function updatePlatformSettingsAction(data: unknown) {
 }
 
 export async function bulkCreateSealsAction(fromSerial: number, toSerial: number) {
-  const session = await auth();
-  if (session?.user?.role !== "ADMIN") {
-    throw new Error("Unauthorized");
-  }
+  await assertAdmin();
   try {
     const { created } = await sealService.bulkCreateSeals(fromSerial, toSerial);
     revalidatePathAllLocales("/admin/seals");
@@ -116,10 +110,7 @@ export async function assignSealsToShopAction(
   shopId: string,
   count: number
 ) {
-  const session = await auth();
-  if (session?.user?.role !== "ADMIN") {
-    throw new Error("Unauthorized");
-  }
+  await assertAdmin();
   try {
     const { updated } = await sealService.assignSealsToShop(shopId, count);
     revalidatePathAllLocales("/admin/seals");
@@ -153,8 +144,7 @@ export async function createCampaignAction(data: {
   isActive?: boolean;
   endsAt?: Date | null;
 }) {
-  const session = await auth();
-  if (session?.user?.role !== "ADMIN") throw new Error("Unauthorized");
+  await assertAdmin();
 
   const parsed = createCampaignSchema.safeParse(data);
   if (!parsed.success) {
@@ -185,8 +175,7 @@ export async function updateCampaignAction(
     endsAt?: Date | null;
   }
 ) {
-  const session = await auth();
-  if (session?.user?.role !== "ADMIN") throw new Error("Unauthorized");
+  await assertAdmin();
 
   const parsed = updateCampaignSchema.safeParse(data);
   if (!parsed.success) {
@@ -202,8 +191,7 @@ export async function updateCampaignAction(
 }
 
 export async function deleteCampaignAction(id: string) {
-  const session = await auth();
-  if (session?.user?.role !== "ADMIN") throw new Error("Unauthorized");
+  await assertAdmin();
 
   await prisma.campaign.delete({ where: { id } });
   revalidatePathAllLocales("/admin/campaigns");
@@ -211,8 +199,7 @@ export async function deleteCampaignAction(id: string) {
 }
 
 export async function toggleCampaignActiveAction(id: string, isActive: boolean) {
-  const session = await auth();
-  if (session?.user?.role !== "ADMIN") throw new Error("Unauthorized");
+  await assertAdmin();
 
   await prisma.campaign.update({
     where: { id },

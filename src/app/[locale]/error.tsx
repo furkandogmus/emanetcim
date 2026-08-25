@@ -23,7 +23,7 @@ export default function Error({
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="bg-orange-50 p-8 rounded-[3rem] border-2 border-orange-100 flex flex-col items-center gap-6 max-w-sm"
+        className="bg-orange-50 p-8 rounded-4xl border-2 border-orange-100 flex flex-col items-center gap-6 max-w-sm"
       >
         <div className="bg-orange-600 p-4 rounded-3xl text-white">
           <AlertTriangle size={48} strokeWidth={1.5} />

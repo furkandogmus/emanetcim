@@ -19,6 +19,7 @@ import { buildItemListJsonLd, buildWebPageJsonLd } from "@/lib/page-json-ld";
 import { formatDecimal } from "@/lib/currency";
 import { getPricingRules } from "@/lib/platform-settings";
 import { isInsuranceEnabled } from "@/lib/commerce-context";
+import AmbientBackdrop from "@/components/common/AmbientBackdrop";
 
 export const revalidate = 120;
 
@@ -192,11 +193,7 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
           Sıcak ışık + nokta dokusu. Eski hâli düz gri zemin üzerinde tek başına
           duran bir başlıktı; markanın turuncusu hero'da hiç görünmüyordu.
         */}
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-40 left-1/2 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,hsl(21_95%_60%/.22),transparent)] blur-2xl" />
-          <div className="absolute -right-24 top-24 h-72 w-72 rounded-full bg-[radial-gradient(closest-side,hsl(38_92%_55%/.18),transparent)] blur-2xl" />
-          <div className="absolute inset-0 opacity-[0.035] bg-[radial-gradient(#ea580c_1px,transparent_1px)] [background-size:20px_20px]" />
-        </div>
+        <AmbientBackdrop />
 
         <div className="relative z-10 max-w-2xl">
           <h1 className="text-3xl md:text-6xl font-black tracking-tight text-gray-900 mb-3 md:mb-6 leading-[1.15] md:leading-[1.1]">
@@ -340,7 +337,7 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
           <p className="mt-8 text-center">
             <Link
               href="/luggage-storage"
-              className="text-sm font-black uppercase tracking-widest text-orange-600 underline-offset-4 hover:underline"
+              className="text-sm id-eyebrow text-orange-600 underline-offset-4 hover:underline"
             >
               {t("cityHubViewAll")}
             </Link>
@@ -359,7 +356,7 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
           {editorialCopy.visualCards.map((card) => (
             <article
               key={card.title}
-              className="overflow-hidden rounded-[1.5rem] border border-gray-100 bg-white shadow-sm"
+              className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm"
             >
               <div
                 className="h-44 w-full bg-cover bg-center"
@@ -443,7 +440,7 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
               <ShieldCheck size={24} />
             </div>
             <p className="text-sm text-gray-500 font-medium">{t('trustpilotRatingText')}</p>
-            <div className="flex items-center gap-1 text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+            <div className="flex items-center gap-1 id-eyebrow text-gray-400">
               <ShieldCheck size={12} />
               {t('trustVerificationBadge')}
             </div>
@@ -468,7 +465,7 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
       </section>
 
       <section className="mx-auto w-full max-w-4xl px-6 pb-16">
-        <div className="rounded-[1.75rem] border border-gray-100 bg-white p-6 md:p-8">
+        <div className="rounded-2xl border border-gray-100 bg-white p-6 md:p-8">
           <h2 className="text-2xl font-black tracking-tight text-gray-900">
             {editorialCopy.seoTitle}
           </h2>

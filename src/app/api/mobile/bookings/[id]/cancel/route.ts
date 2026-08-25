@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireMobileUser } from "@/lib/mobile-auth";
 import { bookingService } from "@/services/BookingService";
+import { canAccessBooking } from "@/services/booking/access";
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireMobileUser(req);
@@ -11,8 +12,12 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   const b = await bookingService.getBookingDetails(id);
   if (!b) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
-  const isOwner = b.guestId === auth.user.id;
-  if (!isOwner && auth.user.role !== "ADMIN") {
+  /*
+    DEGISTIRME: esnaf HARIC. Esnafin yolu "reddet"tir ve o yol iadeyi + slot
+    temizligini `cancelBooking` uzerinden yurutur; buradan iptal yapabilseydi
+    o muhasebe atlanirdi.
+  */
+  if (!canAccessBooking(b, auth.user, { allowShopPartner: false })) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 

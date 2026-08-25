@@ -142,3 +142,19 @@ export function parseDatetimeLocalInTimeZone(
   const refined = new Date(asIfUtc.getTime() - refinedOffset);
   return Number.isNaN(refined.getTime()) ? null : refined;
 }
+
+/**
+ * IANA saat dilimi kimliğinden okunur şehir adı üretir: `Europe/Istanbul` → `Istanbul`.
+ *
+ * NEDEN (2026-08-24): "Saatler dükkanın yerel saatiyle (İstanbul)." metni 6 dilde de
+ * İstanbul'u SABİT yazıyordu. Şema `Shop.timezone` tutuyor ve `SlotService` müsaitliği
+ * o dilimde hesaplıyor; İstanbul dışı ilk dükkan eklendiğinde metin yalan söyler —
+ * üstelik tam da hangi takvimin geçerli olduğunu açıklaması gereken cümlede.
+ * Metin artık `{zone}` parametresi alıyor, kaynağı dükkanın kendi dilimi.
+ */
+export function timeZoneCityLabel(
+  timeZone: string = PLATFORM_TIMEZONE,
+): string {
+  const last = timeZone.split("/").pop() ?? timeZone;
+  return last.replace(/_/g, " ");
+}

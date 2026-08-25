@@ -1,8 +1,8 @@
 "use server";
 
-import { auth } from "@/auth";
 import prisma from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { requireAdmin } from "@/lib/action-auth";
 
 function sanitizeHtml(html: string): string {
   return html
@@ -30,10 +30,8 @@ type BlogPostFormData = {
  * Yeni blog yazısı oluşturur veya mevcut olanı günceller.
  */
 export async function upsertBlogPostAction(formData: BlogPostFormData) {
-  const session = await auth();
-  if (session?.user?.role !== "ADMIN") {
-    return { success: false, error: "Errors.notAuthorizedAdmin" };
-  }
+  const auth = await requireAdmin();
+  if (!auth.ok) return { success: false, error: auth.error };
 
   const { id, title, slug, excerpt, coverImage, locale, isPublished } = formData;
   const content = sanitizeHtml(formData.content);
@@ -68,10 +66,8 @@ export async function upsertBlogPostAction(formData: BlogPostFormData) {
  * Blog yazısını siler.
  */
 export async function deleteBlogPostAction(id: string) {
-  const session = await auth();
-  if (session?.user?.role !== "ADMIN") {
-    return { success: false, error: "Errors.notAuthorizedAdmin" };
-  }
+  const auth = await requireAdmin();
+  if (!auth.ok) return { success: false, error: auth.error };
 
   await prisma.blogPost.delete({
     where: { id },
@@ -86,10 +82,8 @@ export async function deleteBlogPostAction(id: string) {
  * Tüm blog yazılarını getirir (Admin tarafı için).
  */
 export async function getAllBlogPostsAction() {
-  const session = await auth();
-  if (session?.user?.role !== "ADMIN") {
-    return [];
-  }
+  const auth = await requireAdmin();
+  if (!auth.ok) return [];
 
   return await prisma.blogPost.findMany({
     orderBy: { createdAt: "desc" },

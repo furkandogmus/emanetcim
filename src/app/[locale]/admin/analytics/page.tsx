@@ -46,7 +46,7 @@ export default async function AdminAnalyticsPage({
         <h1 className="text-3xl font-black tracking-tighter text-gray-900 mb-2 sm:text-4xl">
           {t("title")}
         </h1>
-        <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">
+        <p className="text-gray-400 id-eyebrow text-xs">
           {t("subtitle", { days: RANGE_DAYS })}
         </p>
       </header>
@@ -55,7 +55,7 @@ export default async function AdminAnalyticsPage({
         {cards.map((c) => (
           <div
             key={c.title}
-            className="rounded-[2rem] border border-gray-100 bg-white p-5 shadow-sm sm:p-6"
+            className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6"
           >
             <div
               className={`mb-4 flex h-11 w-11 items-center justify-center rounded-2xl ${
@@ -71,7 +71,7 @@ export default async function AdminAnalyticsPage({
             >
               {c.value.toLocaleString(locale)}
             </p>
-            <p className="mt-1 text-[10px] font-black uppercase tracking-widest text-gray-400">
+            <p className="mt-1 id-eyebrow text-gray-400">
               {c.title}
             </p>
           </div>
@@ -79,8 +79,8 @@ export default async function AdminAnalyticsPage({
       </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-        <div className="rounded-[2.5rem] border border-gray-100 bg-white p-6 shadow-sm sm:p-8">
-          <h3 className="mb-6 text-sm font-black uppercase tracking-widest text-gray-400">
+        <div className="rounded-4xl border border-gray-100 bg-white p-6 shadow-sm sm:p-8">
+          <h3 className="mb-6 text-sm id-eyebrow text-gray-400">
             {t("topPagesTitle")}
           </h3>
           {summary.topPaths.length === 0 ? (
@@ -102,8 +102,8 @@ export default async function AdminAnalyticsPage({
           )}
         </div>
 
-        <div className="rounded-[2.5rem] border border-gray-100 bg-white p-6 shadow-sm sm:p-8">
-          <h3 className="mb-6 text-sm font-black uppercase tracking-widest text-gray-400">
+        <div className="rounded-4xl border border-gray-100 bg-white p-6 shadow-sm sm:p-8">
+          <h3 className="mb-6 text-sm id-eyebrow text-gray-400">
             {t("topShopsTitle")}
           </h3>
           {summary.topShops.length === 0 ? (

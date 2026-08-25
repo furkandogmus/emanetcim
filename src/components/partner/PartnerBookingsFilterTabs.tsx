@@ -27,7 +27,7 @@ export default function PartnerBookingsFilterTabs({
             href={href}
             role="tab"
             aria-selected={active}
-            className={`rounded-full px-4 py-2 text-xs font-black uppercase tracking-widest transition-colors ${
+            className={` rounded-full px-4 py-2 text-xs id-eyebrow transition-colors ${
               active
                 ? "bg-orange-600 text-white shadow-md shadow-orange-200"
                 : "border border-gray-200 bg-white text-gray-600 hover:border-orange-200 hover:text-orange-700"

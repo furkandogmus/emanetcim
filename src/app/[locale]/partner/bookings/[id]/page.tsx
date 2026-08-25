@@ -12,7 +12,7 @@ import { Link } from "@/i18n/routing";
 import { auth } from "@/auth";
 import prisma from "@/lib/db";
 import { notFound, redirect } from "next/navigation";
-import { dateLocaleForUiLocale } from "@/lib/date-locale";
+import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import { guestBookingStatusMessageKey } from "@/lib/booking-status-i18n";
 import { formatTryCurrency } from "@/lib/currency";
 import { moneyToNumber } from "@/lib/money";
@@ -63,7 +63,7 @@ export default async function PartnerBookingDetailPage({
     notFound();
   }
 
-  const dateLocale = dateLocaleForUiLocale(locale);
+  const dateLocale = bcp47ForUiLocale(locale);
   const fmt = (d: Date) =>
     d.toLocaleString(dateLocale, { dateStyle: "medium", timeStyle: "short" });
 
@@ -80,14 +80,14 @@ export default async function PartnerBookingDetailPage({
         </Link>
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-lg font-black tracking-tight">{t("partnerBookingDetailTitle")}</h1>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{shortRef}</p>
+          <p className="id-eyebrow text-gray-400">{shortRef}</p>
         </div>
       </header>
 
       <div className="mx-auto flex max-w-2xl flex-col gap-6 p-6">
         <Link
           href="/partner/bookings"
-          className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-orange-600"
+          className="inline-flex items-center gap-2 text-xs id-eyebrow text-gray-400 hover:text-orange-600"
         >
           <ChevronLeft size={16} aria-hidden />
           {t("partnerBookingBackToList")}
@@ -99,7 +99,7 @@ export default async function PartnerBookingDetailPage({
               <MapPin size={22} />
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+              <p className="id-eyebrow text-gray-400">
                 {t("partnerBookingShopLabel")}
               </p>
               <p className="font-bold text-gray-900">{booking.shop.name}</p>
@@ -107,14 +107,14 @@ export default async function PartnerBookingDetailPage({
           </div>
 
           <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-gray-50 pt-6">
-            <span className="rounded-full bg-gray-100 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-gray-700">
+            <span className="rounded-full bg-gray-100 px-3 py-1 id-eyebrow text-gray-700">
               {tGuest("status")}: {statusLabel}
             </span>
           </div>
         </div>
 
         <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
-          <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+          <h2 className="id-eyebrow text-gray-400">
             {t("partnerBookingGuestContact")}
           </h2>
           <p className="mt-1 text-xl font-black text-gray-900">
@@ -149,14 +149,14 @@ export default async function PartnerBookingDetailPage({
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="rounded-2xl bg-gray-50 p-4">
-            <div className="mb-1 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400">
+            <div className="mb-1 flex items-center gap-2 id-eyebrow text-gray-400">
               <Calendar size={14} />
               {t("checkInWord")}
             </div>
             <p className="text-sm font-bold text-gray-900">{fmt(booking.checkInTime)}</p>
           </div>
           <div className="rounded-2xl bg-gray-50 p-4">
-            <div className="mb-1 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400">
+            <div className="mb-1 flex items-center gap-2 id-eyebrow text-gray-400">
               <Calendar size={14} />
               {t("partnerBookingsCheckOut")}
             </div>
@@ -165,7 +165,7 @@ export default async function PartnerBookingDetailPage({
         </div>
 
         <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
-          <div className="mb-4 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400">
+          <div className="mb-4 flex items-center gap-2 id-eyebrow text-gray-400">
             <Package size={14} />
             {tGuest("bagCount")}
           </div>

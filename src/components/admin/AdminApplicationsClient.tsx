@@ -18,7 +18,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { approveShopAction, rejectShopAction } from "@/actions/admin-management";
 import { toast } from "sonner";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
-import { dateLocaleForUiLocale } from "@/lib/date-locale";
+import { bcp47ForUiLocale } from "@/lib/intl-locale";
+import { actionErrorKey } from "@/lib/action-error";
 
 interface Application {
   id: string;
@@ -40,8 +41,9 @@ interface AdminApplicationsClientProps {
 export default function AdminApplicationsClient({ applications: initialApps }: AdminApplicationsClientProps) {
   const t = useTranslations("Admin");
   const locale = useLocale();
-  const dateLocale = dateLocaleForUiLocale(locale);
+  const dateLocale = bcp47ForUiLocale(locale);
   const tCommon = useTranslations("Common");
+  const tErrors = useTranslations("Errors");
   const [apps, setApps] = useState<Application[]>(initialApps);
   const [search, setSearch] = useState("");
   const [loadingId, setLoadingId] = useState<string | null>(null);
@@ -69,8 +71,8 @@ export default function AdminApplicationsClient({ applications: initialApps }: A
           await approveShopAction(id);
           setApps(prev => prev.filter(a => a.id !== id));
           toast.success(t("approveSuccess"));
-        } catch (error: unknown) {
-          toast.error(error instanceof Error ? error.message : String(error));
+        } catch (caughtError: unknown) {
+          toast.error(tErrors(actionErrorKey(caughtError)));
         } finally {
           setLoadingId(null);
         }
@@ -93,8 +95,8 @@ export default function AdminApplicationsClient({ applications: initialApps }: A
           }
           setApps((prev) => prev.filter((a) => a.id !== id));
           toast.success(t("rejectSuccess"));
-        } catch (error: unknown) {
-          toast.error(error instanceof Error ? error.message : String(error));
+        } catch (caughtError: unknown) {
+          toast.error(tErrors(actionErrorKey(caughtError)));
         } finally {
           setLoadingId(null);
         }
@@ -108,7 +110,7 @@ export default function AdminApplicationsClient({ applications: initialApps }: A
         <div>
           <Link href="/admin" className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors mb-4 group">
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="text-xs font-black uppercase tracking-widest">{t("backToDashboard")}</span>
+            <span className="text-xs id-eyebrow">{t("backToDashboard")}</span>
           </Link>
           <h1 className="text-4xl font-black tracking-tighter text-gray-900 flex items-center gap-3">
             <Store className="text-orange-600" />
@@ -128,15 +130,15 @@ export default function AdminApplicationsClient({ applications: initialApps }: A
         </div>
       </header>
 
-      <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden text-sm">
+      <div className="bg-white rounded-4xl border border-gray-100 shadow-sm overflow-hidden text-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50/50 border-b border-gray-100">
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">{t("shopDetails")}</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">{t("owner")}</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">{t("date")}</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">{t("actions")}</th>
+                <th className="px-8 py-5 id-eyebrow text-gray-400">{t("shopDetails")}</th>
+                <th className="px-8 py-5 id-eyebrow text-gray-400">{t("owner")}</th>
+                <th className="px-8 py-5 id-eyebrow text-gray-400">{t("date")}</th>
+                <th className="px-8 py-5 id-eyebrow text-gray-400 text-right">{t("actions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -189,7 +191,7 @@ export default function AdminApplicationsClient({ applications: initialApps }: A
                         <button
                           onClick={() => handleReject(app.id)}
                           disabled={loadingId === app.id}
-                          className="px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 disabled:opacity-50"
+                          className="px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl id-eyebrow transition-all flex items-center gap-2 disabled:opacity-50"
                         >
                           <XCircle size={14} />
                           {t("reject")}
@@ -197,7 +199,7 @@ export default function AdminApplicationsClient({ applications: initialApps }: A
                         <button
                           onClick={() => handleApprove(app.id)}
                           disabled={loadingId === app.id}
-                          className="px-4 py-2.5 bg-green-50 hover:bg-green-100 text-green-600 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 disabled:opacity-50"
+                          className="px-4 py-2.5 bg-green-50 hover:bg-green-100 text-green-600 rounded-xl id-eyebrow transition-all flex items-center gap-2 disabled:opacity-50"
                         >
                           <CheckCircle2 size={14} />
                           {t("approve")}
@@ -211,7 +213,7 @@ export default function AdminApplicationsClient({ applications: initialApps }: A
           </table>
           {filteredApps.length === 0 && (
             <div className="py-20 text-center">
-              <p className="text-xs font-black uppercase tracking-widest text-gray-400">
+              <p className="text-xs id-eyebrow text-gray-400">
                 {search ? t("noApplicationsFound") : t("noApplications")}
               </p>
             </div>

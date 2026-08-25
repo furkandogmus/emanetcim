@@ -1,4 +1,4 @@
-import { Booking, Prisma } from '@prisma/client';
+import { Booking, BookingStatus, Prisma } from '@prisma/client';
 import prisma from '@/lib/db';
 import { type SealAssignmentInput } from '@/services/SealService';
 import { moneyToNumber } from '@/lib/money';
@@ -8,6 +8,23 @@ import { createInitialBooking as createInitialBookingImpl } from '@/services/boo
 import { checkIn as checkInImpl } from '@/services/booking/check-in';
 import { checkOut as checkOutImpl } from '@/services/booking/check-out';
 import { cancelBooking as cancelBookingImpl, modifyBooking as modifyBookingImpl } from '@/services/booking/lifecycle';
+import {
+  approveBooking as approveBookingImpl,
+  rejectBooking as rejectBookingImpl,
+  type PartnerReviewActor,
+  type PartnerReviewResult,
+  forceCancelOpenBookingsForUser as forceCancelOpenBookingsForUserImpl,
+  type ForceCancelSummary,
+} from '@/services/booking/partner-review';
+import {
+  proposeBagRevision as proposeBagRevisionImpl,
+  applyBagRevision as applyBagRevisionImpl,
+  clearBagRevision as clearBagRevisionImpl,
+  type BagRevisionActor,
+  type BagCounts,
+  type BagRevisionResult,
+  type ProposeRevisionResult,
+} from '@/services/booking/bag-revision';
 
 export type CreateInitialBookingInput = {
   guestId?: string | null;
@@ -26,6 +43,11 @@ export type CreateInitialBookingInput = {
   referredByCode?: string;
   /** Time-slot based: if provided, slot IDs to reserve instead of datetime pair */
   slotIds?: string[];
+  /**
+   * Rezervasyonun YARATILDIGI durum. Verilmezse `PENDING`.
+   * Misafir akislari `APPROVED` gecer — gerekce `src/services/booking/create.ts`.
+   */
+  initialStatus?: BookingStatus;
 };
 
 export type ModifyBookingInput = {
@@ -45,7 +67,7 @@ export type BookingWithGuestShop = Prisma.BookingGetPayload<{
     id: true; guestId: true; shopId: true; checkInTime: true; checkOutTime: true;
     totalPrice: true; bagCountS: true; bagCountM: true; bagCountXl: true;
     status: true; qrCodeToken: true; createdAt: true;
-    shop: { select: { name: true; address: true; pricePerDay: true } };
+    shop: { select: { name: true; address: true; pricePerDay: true; timezone: true } };
     dispute: { select: { id: true } };
   };
 }>;
@@ -64,6 +86,8 @@ export type TxClient = Omit<
 >;
 
 export { BookingCapacityExceededError } from '@/services/booking/errors';
+export type { PartnerReviewActor, PartnerReviewResult, PartnerReviewErrorCode, ForceCancelSummary } from '@/services/booking/partner-review';
+export type { BagRevisionActor, BagCounts, BagRevisionResult, ProposeRevisionResult, BagRevisionErrorCode } from '@/services/booking/bag-revision';
 
 export type CheckInSealPayload = {
   sealAssignments: SealAssignmentInput[];
@@ -83,6 +107,8 @@ export interface IBookingService {
   getPartnerBookings(shopId: string, opts?: { page?: number; limit?: number }): Promise<{ items: PartnerBookingListItem[]; total: number }>;
   getBookingDetails(id: string): Promise<BookingWithShopGuestDetails | null>;
   cancelBooking(bookingId: string): Promise<CancelBookingResult>;
+  approveBooking(bookingId: string, actor: PartnerReviewActor, opts?: { locale?: string }): Promise<PartnerReviewResult>;
+  rejectBooking(bookingId: string, actor: PartnerReviewActor, opts?: { locale?: string }): Promise<PartnerReviewResult>;
   markAsPaid(bookingId: string): Promise<void>;
   modifyBooking(
     bookingId: string,
@@ -189,7 +215,9 @@ export class BookingService implements IBookingService {
           id: true, guestId: true, shopId: true, checkInTime: true, checkOutTime: true,
           totalPrice: true, bagCountS: true, bagCountM: true, bagCountXl: true,
           status: true, qrCodeToken: true, createdAt: true,
-          shop: { select: { name: true, address: true, pricePerDay: true } },
+          // `timezone`: rezervasyon değiştirme modalı saatleri dükkanın
+          // diliminde yorumlamalı; checkout ile aynı sözleşme.
+          shop: { select: { name: true, address: true, pricePerDay: true, timezone: true } },
           dispute: { select: { id: true } },
         },
         orderBy: { createdAt: 'desc' },
@@ -229,6 +257,62 @@ export class BookingService implements IBookingService {
 
   async cancelBooking(bookingId: string): Promise<CancelBookingResult> {
     return cancelBookingImpl(bookingId);
+  }
+
+  /**
+   * Esnaf/admin talebi onaylar. Web action'i ve mobil uc AYNI govdeyi cagirir —
+   * ayrintili gerekce `src/services/booking/partner-review.ts` basinda.
+   */
+  async approveBooking(
+    bookingId: string,
+    actor: PartnerReviewActor,
+    opts?: { locale?: string },
+  ): Promise<PartnerReviewResult> {
+    return approveBookingImpl(bookingId, actor, opts);
+  }
+
+  /** Esnaf/admin talebi reddeder; iptalin tamami `cancelBooking`'e devredilir. */
+  async rejectBooking(
+    bookingId: string,
+    actor: PartnerReviewActor,
+    opts?: { locale?: string },
+  ): Promise<PartnerReviewResult> {
+    return rejectBookingImpl(bookingId, actor, opts);
+  }
+
+  /**
+   * Valiz revizyonu — govde `src/services/booking/bag-revision.ts`'te.
+   * Web iki adimli (oner -> uygula), mobil tek adimli; ikisi de AYNI govdeyi kullanir.
+   */
+  async proposeBagRevision(
+    bookingId: string,
+    counts: BagCounts,
+    actor: BagRevisionActor,
+  ): Promise<ProposeRevisionResult> {
+    return proposeBagRevisionImpl(bookingId, counts, actor);
+  }
+
+  async applyBagRevision(
+    bookingId: string,
+    actor: BagRevisionActor,
+    opts?: { counts?: BagCounts; source?: 'web' | 'mobile' },
+  ): Promise<BagRevisionResult> {
+    return applyBagRevisionImpl(bookingId, actor, opts);
+  }
+
+  async clearBagRevision(bookingId: string, actor: BagRevisionActor) {
+    return clearBagRevisionImpl(bookingId, actor);
+  }
+
+  /**
+   * Kullanici silinirken acik rezervasyonlarini iptal eder — iade ve kapasite
+   * muhasebesiyle birlikte. Gerekce `src/services/booking/partner-review.ts`.
+   */
+  async forceCancelOpenBookingsForUser(
+    userId: string,
+    openStatuses: BookingStatus[],
+  ): Promise<ForceCancelSummary> {
+    return forceCancelOpenBookingsForUserImpl(userId, openStatuses);
   }
 
   async modifyBooking(bookingId: string,

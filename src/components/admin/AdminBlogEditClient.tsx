@@ -15,6 +15,7 @@ import { Link, useRouter } from "@/i18n/routing";
 import { upsertBlogPostAction } from "@/actions/blog-actions";
 import { toast } from "sonner";
 import { BlogPost } from "@prisma/client";
+import { useActionErrorText } from "@/lib/use-action-error";
 
 interface AdminBlogEditClientProps {
   post: BlogPost | null;
@@ -23,6 +24,7 @@ interface AdminBlogEditClientProps {
 
 export default function AdminBlogEditClient({ post, locale: currentLocale }: AdminBlogEditClientProps) {
   const t = useTranslations("Admin");
+  const errorText = useActionErrorText();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -46,7 +48,7 @@ export default function AdminBlogEditClient({ post, locale: currentLocale }: Adm
     setLoading(true);
     try {
       const res = await upsertBlogPostAction(formData);
-      if (!res.success) { toast.error(res.error); return; }
+      if (!res.success) { toast.error(errorText(res.error)); return; }
       toast.success(post ? t("postUpdatedSuccess") : t("postCreatedSuccess"));
       router.push("/admin/blog");
       router.refresh();
@@ -71,7 +73,7 @@ export default function AdminBlogEditClient({ post, locale: currentLocale }: Adm
       <header className="mb-10 max-w-5xl mx-auto">
         <Link href="/admin/blog" className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors mb-4 group">
           <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-          <span className="text-xs font-black uppercase tracking-widest">{t("blogManagement")}</span>
+          <span className="text-xs id-eyebrow">{t("blogManagement")}</span>
         </Link>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <h1 className="text-4xl font-black tracking-tighter text-gray-900 flex items-center gap-3">
@@ -81,7 +83,7 @@ export default function AdminBlogEditClient({ post, locale: currentLocale }: Adm
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="flex items-center justify-center gap-2 bg-gray-900 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-orange-600 transition-all shadow-lg active:scale-95 disabled:opacity-50"
+            className="flex items-center justify-center gap-2 bg-gray-900 text-white px-8 py-4 rounded-2xl id-eyebrow text-xs hover:bg-orange-600 transition-all shadow-lg active:scale-95 disabled:opacity-50"
           >
             {loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={18} />}
             {t("saveChanges")}
@@ -92,9 +94,9 @@ export default function AdminBlogEditClient({ post, locale: currentLocale }: Adm
       <form onSubmit={handleSubmit} className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8 text-sm font-bold">
         {/* Ana İçerik */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-6">
+          <div className="bg-white p-8 rounded-4xl border border-gray-100 shadow-sm space-y-6">
             <div>
-              <label className="block text-[10px] uppercase tracking-widest text-gray-400 mb-2 px-1">{t("fieldTitle")}</label>
+              <label className="block id-eyebrow text-gray-400 mb-2 px-1">{t("fieldTitle")}</label>
               <input
                 type="text"
                 value={formData.title}
@@ -106,7 +108,7 @@ export default function AdminBlogEditClient({ post, locale: currentLocale }: Adm
             </div>
 
             <div>
-              <label className="block text-[10px] uppercase tracking-widest text-gray-400 mb-2 px-1">{t("fieldContent")}</label>
+              <label className="block id-eyebrow text-gray-400 mb-2 px-1">{t("fieldContent")}</label>
               <textarea
                 value={formData.content}
                 onChange={(e) => setFormData({ ...formData, content: e.target.value })}
@@ -119,9 +121,9 @@ export default function AdminBlogEditClient({ post, locale: currentLocale }: Adm
 
         {/* Yan Menü (Ayarlar) */}
         <div className="space-y-6">
-          <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-6">
+          <div className="bg-white p-8 rounded-4xl border border-gray-100 shadow-sm space-y-6">
             <div>
-              <label className="block text-[10px] uppercase tracking-widest text-gray-400 mb-2 px-1">{t("fieldSlug")}</label>
+              <label className="block id-eyebrow text-gray-400 mb-2 px-1">{t("fieldSlug")}</label>
               <div className="relative">
                 <LinkIcon size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
@@ -135,7 +137,7 @@ export default function AdminBlogEditClient({ post, locale: currentLocale }: Adm
             </div>
 
             <div>
-              <label className="block text-[10px] uppercase tracking-widest text-gray-400 mb-2 px-1">{t("fieldLanguage")}</label>
+              <label className="block id-eyebrow text-gray-400 mb-2 px-1">{t("fieldLanguage")}</label>
               <div className="relative">
                 <Globe size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                 <select
@@ -150,7 +152,7 @@ export default function AdminBlogEditClient({ post, locale: currentLocale }: Adm
             </div>
 
             <div>
-              <label className="block text-[10px] uppercase tracking-widest text-gray-400 mb-2 px-1">{t("fieldCoverImage")}</label>
+              <label className="block id-eyebrow text-gray-400 mb-2 px-1">{t("fieldCoverImage")}</label>
               <div className="relative">
                 <ImageIcon size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
@@ -174,17 +176,17 @@ export default function AdminBlogEditClient({ post, locale: currentLocale }: Adm
                   checked={formData.isPublished}
                   onChange={(e) => setFormData({ ...formData, isPublished: e.target.checked })}
                 />
-                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 group-hover:text-gray-900 transition-colors">
+                <span className="id-eyebrow text-gray-500 group-hover:text-gray-900 transition-colors">
                   {formData.isPublished ? t("fieldPublish") : t("fieldKeepDraft")}
                 </span>
               </label>
             </div>
           </div>
 
-          <div className="bg-orange-50 p-6 rounded-[2rem] border border-orange-100 italic text-[11px] text-orange-600 font-bold leading-relaxed">
+          <div className="bg-orange-50 p-6 rounded-3xl border border-orange-100 italic text-[11px] text-orange-600 font-bold leading-relaxed">
             <div className="flex items-center gap-2 mb-2 not-italic">
               <CheckCircle2 size={16} />
-              <span className="font-black uppercase tracking-widest">{t("seoTip")}</span>
+              <span className="id-eyebrow">{t("seoTip")}</span>
             </div>
             {t("seoDescription")}
           </div>

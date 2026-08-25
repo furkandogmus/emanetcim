@@ -72,7 +72,7 @@ export default function VerificationBanner() {
       <div className="flex items-center gap-2">
         <AlertCircle size={18} className="shrink-0" />
         <div className="flex flex-col">
-          <p className="text-[10px] md:text-xs font-black uppercase tracking-widest text-center sm:text-left">
+          <p className="id-eyebrow md:text-xs text-center sm:text-left">
             {t("emailVerificationRequiredBanner")}
           </p>
           {isMaxAttempts && (
@@ -87,7 +87,7 @@ export default function VerificationBanner() {
         {isMaxAttempts ? (
           <a
             href="mailto:info@bagajpark.com"
-            className="flex items-center gap-2 bg-white text-orange-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-orange-50 transition-all shadow-sm"
+            className="flex items-center gap-2 bg-white text-orange-600 px-4 py-1.5 rounded-full id-eyebrow hover:bg-orange-50 transition-all shadow-sm"
           >
             {t("contact")}
           </a>
@@ -95,7 +95,7 @@ export default function VerificationBanner() {
           <button
             onClick={handleResend}
             disabled={loading || (cooldown !== null && cooldown > 0)}
-            className="flex items-center gap-2 bg-white text-orange-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-orange-50 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shrink-0"
+            className="flex items-center gap-2 bg-white text-orange-600 px-4 py-1.5 rounded-full id-eyebrow hover:bg-orange-50 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shrink-0"
           >
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
             {cooldown && cooldown > 0 

@@ -79,7 +79,7 @@ export default function PartnerEarningsCalculator({
       </div>
 
       <div className="mt-8 rounded-3xl bg-white p-6 text-center shadow-sm">
-        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+        <p className="id-eyebrow text-gray-400">
           {labels.monthlyEarningsLabel}
         </p>
         <p className="mt-2 text-4xl font-black tracking-tight text-orange-600">

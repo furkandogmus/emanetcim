@@ -292,7 +292,7 @@ export default function DateTimePicker({
             />
           </div>
           <div className="px-2 pb-2">
-            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 px-1">
+            <p className="id-eyebrow text-gray-400 mb-2 px-1">
               {timeLabel}
             </p>
             <div className="flex gap-2 overflow-x-auto pb-2 px-1 no-scrollbar">

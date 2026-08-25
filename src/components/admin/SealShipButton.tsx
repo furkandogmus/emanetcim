@@ -6,9 +6,13 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
+import { useActionErrorText } from "@/lib/use-action-error";
 
 export default function SealShipButton({ requestId, requestedQuantity }: { requestId: string, requestedQuantity: number }) {
   const t = useTranslations("Admin");
+  const errorText = useActionErrorText();
+  const tCommon = useTranslations("Common");
+  const tErrors = useTranslations("Errors");
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
@@ -34,13 +38,13 @@ export default function SealShipButton({ requestId, requestedQuantity }: { reque
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!trackingNumber.trim()) {
-      toast.error("Kargo takip numarası zorunlu");
+      toast.error(t("sealShipTrackingRequired"));
       return;
     }
 
     const qty = parseInt(quantity, 10);
     if (isNaN(qty) || qty <= 0) {
-      toast.error("Geçerli bir adet giriniz");
+      toast.error(t("sealShipQuantityInvalid"));
       return;
     }
 
@@ -56,7 +60,8 @@ export default function SealShipButton({ requestId, requestedQuantity }: { reque
         setOpen(false);
         router.refresh();
       } else {
-        toast.error(result.error ?? "Bir hata oluştu");
+        // `result.error` snake_case bir KOD ("tracking_number_required"); ham basiliyordu.
+        toast.error(errorText(result.error, tErrors("generic")));
       }
     });
   }
@@ -90,22 +95,22 @@ export default function SealShipButton({ requestId, requestedQuantity }: { reque
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">
-                  Kargo Takip Numarası <span className="text-orange-600">*</span>
+                <label className="text-xs id-eyebrow text-gray-500">
+                  {t("sealShipTrackingLabel")} <span className="text-orange-600">*</span>
                 </label>
                 <input
                   type="text"
                   value={trackingNumber}
                   onChange={(e) => setTrackingNumber(e.target.value)}
-                  placeholder="Örn: 12345678901234"
+                  placeholder={t("sealShipTrackingPlaceholder")}
                   required
                   className="border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">
-                  Gönderilen Adet <span className="text-orange-600">*</span>
+                <label className="text-xs id-eyebrow text-gray-500">
+                  {t("sealShipQuantityLabel")} <span className="text-orange-600">*</span>
                 </label>
                 <input
                   type="number"
@@ -120,8 +125,8 @@ export default function SealShipButton({ requestId, requestedQuantity }: { reque
 
 
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">
-                  Admin Notu (İsteğe Bağlı)
+                <label className="text-xs id-eyebrow text-gray-500">
+                  {t("sealShipNoteLabel")}
                 </label>
                 <textarea
                   value={adminNote}
@@ -139,7 +144,7 @@ export default function SealShipButton({ requestId, requestedQuantity }: { reque
                   disabled={pending}
                   className="flex-1 py-3 rounded-xl border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
                 >
-                  İptal
+                  {tCommon("cancel")}
                 </button>
                 <button
                   type="submit"

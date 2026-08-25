@@ -99,9 +99,9 @@ export default async function InsurancePage({
             <ShieldCheck size={14} /> {t("thresholdTitle")}
           </div>
         </div>
-        <div className="rounded-[2rem] bg-gradient-to-br from-slate-700 via-slate-800 to-gray-900 p-8 min-h-[270px] shadow-2xl">
-          <div className="h-full rounded-[1.5rem] border border-white/10 bg-white/5 backdrop-blur p-6 flex flex-col justify-between">
-            <p className="text-xs uppercase tracking-widest text-white/60 font-black">
+        <div className="rounded-3xl bg-gradient-to-br from-slate-700 via-slate-800 to-gray-900 p-8 min-h-[270px] shadow-2xl">
+          <div className="h-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-6 flex flex-col justify-between">
+            <p className="text-xs id-eyebrow text-white/60">
               {t("peaceOfMind")}
             </p>
             <p className="text-sm text-white/80 leading-relaxed">{t("antiTheftBody")}</p>
@@ -115,7 +115,7 @@ export default async function InsurancePage({
           <p className="mt-2 text-center text-sm text-gray-500">{t("coverageSubtitle")}</p>
 
           <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-5">
-            <article className="rounded-[2rem] bg-white border border-gray-100 p-6">
+            <article className="rounded-3xl bg-white border border-gray-100 p-6">
               <h3 className="text-2xl font-black text-gray-900">{t("thresholdTitle")}</h3>
               <p className="mt-3 text-sm text-gray-600 leading-relaxed">{t("thresholdBody")}</p>
               <ul className="mt-5 space-y-3 text-sm font-bold text-gray-700">
@@ -133,7 +133,7 @@ export default async function InsurancePage({
                 </li>
               </ul>
             </article>
-            <article className="rounded-[2rem] bg-teal-700 text-white p-6">
+            <article className="rounded-3xl bg-teal-700 text-white p-6">
               <h3 className="text-2xl font-black">{t("antiTheftTitle")}</h3>
               <p className="mt-3 text-sm text-white/85 leading-relaxed">{t("antiTheftBody")}</p>
             </article>
@@ -142,7 +142,7 @@ export default async function InsurancePage({
       </section>
 
       <section className="mx-auto max-w-6xl px-6 py-16 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="rounded-[2rem] bg-white border border-gray-100 p-6">
+        <div className="rounded-3xl bg-white border border-gray-100 p-6">
           <h2 className="text-3xl font-black text-gray-900">{t("stepsTitle")}</h2>
           <ol className="mt-6 space-y-5 text-sm">
             <li>
@@ -168,7 +168,7 @@ export default async function InsurancePage({
             </li>
           </ol>
         </div>
-        <div className="rounded-[2rem] bg-gradient-to-br from-indigo-50 to-slate-100 border border-indigo-100 p-8 flex items-center justify-center">
+        <div className="rounded-3xl bg-gradient-to-br from-indigo-50 to-slate-100 border border-indigo-100 p-8 flex items-center justify-center">
           <p className="text-xl font-black text-gray-700 text-center">{t("stepsTitle")}.</p>
         </div>
       </section>
@@ -187,7 +187,7 @@ export default async function InsurancePage({
       */}
 
       <section className="mx-auto max-w-6xl px-6 pb-16">
-        <div className="rounded-[2rem] bg-gradient-to-r from-orange-700 to-orange-500 p-10 text-white text-center">
+        <div className="rounded-3xl bg-gradient-to-r from-orange-700 to-orange-500 p-10 text-white text-center">
           <h2 className="text-4xl font-black">{t("ctaTitle")}</h2>
           <p className="mt-2 text-white/85">{t("ctaBody")}</p>
           <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3">

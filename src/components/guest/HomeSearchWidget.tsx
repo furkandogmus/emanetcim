@@ -43,7 +43,7 @@ export default function HomeSearchWidget({
   return (
     <div className="w-full max-w-2xl mx-auto bg-white border border-gray-200 shadow-xl rounded-2xl p-4 sm:p-6 flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
       <div className="flex-1 flex flex-col gap-1.5">
-        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+        <label className="id-eyebrow text-gray-400">
           {t("searchCheckIn")}
         </label>
         <div className="p-3 bg-gray-50 rounded-xl border border-gray-100 focus-within:border-orange-200 transition-colors">
@@ -51,7 +51,7 @@ export default function HomeSearchWidget({
         </div>
       </div>
       <div className="flex-1 flex flex-col gap-1.5">
-        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+        <label className="id-eyebrow text-gray-400">
           {t("searchCheckOut")}
         </label>
         <div className="p-3 bg-gray-50 rounded-xl border border-gray-100 focus-within:border-orange-200 transition-colors">
@@ -59,7 +59,7 @@ export default function HomeSearchWidget({
         </div>
       </div>
       <div className="w-full sm:w-24 flex flex-col gap-1.5">
-        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+        <label className="id-eyebrow text-gray-400">
           {t("searchBagCount")}
         </label>
         <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-xl border border-gray-100">

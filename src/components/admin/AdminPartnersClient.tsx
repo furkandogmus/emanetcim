@@ -85,13 +85,13 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
         <div>
           <Link href="/admin" className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors mb-4 group">
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="text-xs font-black uppercase tracking-widest">{t("backToDashboard")}</span>
+            <span className="text-xs id-eyebrow">{t("backToDashboard")}</span>
           </Link>
           <h1 className="text-4xl font-black tracking-tighter text-gray-900 flex items-center gap-3">
             <Store className="text-orange-600" />
             {t("shopManagement")}
           </h1>
-          <p className="text-xs font-bold text-gray-400 mt-2 uppercase tracking-widest">
+          <p className="text-xs id-eyebrow text-gray-400 mt-2">
             {initialShops.length} {t("activePartners")}
           </p>
         </div>
@@ -109,16 +109,16 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
         </div>
       </header>
 
-      <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden text-sm">
+      <div className="bg-white rounded-4xl border border-gray-100 shadow-sm overflow-hidden text-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50/50 border-b border-gray-100">
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">{t("shopDetails")}</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">{t("owner")}</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">{t("performance")}</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">{t("status")}</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">{t("actions")}</th>
+                <th className="px-8 py-5 id-eyebrow text-gray-400">{t("shopDetails")}</th>
+                <th className="px-8 py-5 id-eyebrow text-gray-400">{t("owner")}</th>
+                <th className="px-8 py-5 id-eyebrow text-gray-400">{t("performance")}</th>
+                <th className="px-8 py-5 id-eyebrow text-gray-400">{t("status")}</th>
+                <th className="px-8 py-5 id-eyebrow text-gray-400 text-right">{t("actions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -135,7 +135,7 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
                       <div className="flex flex-col gap-1">
                         <p className="truncate max-w-[200px] font-bold text-gray-900">{shop.name}</p>
                         <p className="text-xs text-gray-400 font-medium truncate max-w-[200px]">{shop.address}</p>
-                        <p className="text-[10px] font-black text-orange-600 uppercase tracking-widest">
+                        <p className="id-eyebrow text-orange-600">
                           <Money amount={Number(shop.pricePerDay || 0)} /> / {t("day")}
                         </p>
                       </div>
@@ -155,14 +155,14 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-4">
                         <div className="flex flex-col">
-                          <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">{t("bookings")}</span>
+                          <span className="id-eyebrow text-gray-300">{t("bookings")}</span>
                           <span className="font-bold text-gray-700 flex items-center gap-1">
                             <ShoppingBag size={14} />
                             {shop._count.bookings}
                           </span>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">{t("rating")}</span>
+                          <span className="id-eyebrow text-gray-300">{t("rating")}</span>
                           <span className="font-bold text-gray-700 flex items-center gap-1">
                             <Star size={14} className="text-yellow-500 fill-yellow-500" />
                             {formatDecimal(shop.rating, locale)}
@@ -221,7 +221,7 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              className="w-full max-w-lg rounded-[2rem] bg-white p-8 shadow-2xl"
+              className="w-full max-w-lg rounded-3xl bg-white p-8 shadow-2xl"
             >
               <div className="flex items-center justify-between mb-6">
                 <h2

@@ -10,6 +10,7 @@ import { authErrorMessage } from '@/lib/auth-error-message';
 import { resolveLoginLanding } from '@/lib/auth-landing';
 import { Package, ShieldCheck, Globe, Loader2, Store, Shield, Mail, Lock, ChevronDown, Apple } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import AmbientBackdrop from "@/components/common/AmbientBackdrop";
 
 /** Seed ile aynı varsayılan; `NEXT_PUBLIC_DEMO_PASSWORD` ile yerelde override edilebilir. */
 const DEMO_PASSWORD =
@@ -182,7 +183,7 @@ export default function LoginPage({
       <div className="flex justify-end">
         <Link
           href="/auth/forgot-password"
-          className="text-[11px] font-bold uppercase tracking-widest text-orange-600 hover:text-orange-700"
+          className="text-[11px] id-eyebrow text-orange-600 hover:text-orange-700"
         >
           {t("forgotPasswordLink")}
         </Link>
@@ -190,7 +191,9 @@ export default function LoginPage({
 
       {/* Hata */}
       {credError && (
-        <p className="text-xs text-red-500 font-semibold text-center">{credError}</p>
+        <p className="text-xs text-red-500 font-semibold text-center" role="alert">
+            {credError}
+          </p>
       )}
 
       {/* Giriş butonu */}
@@ -213,16 +216,12 @@ export default function LoginPage({
         duz gri zemindi, markanin turuncusu hic gorunmuyordu (kullanici
         talebi: "giris sayfasini biraz daha guzellestir").
       */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-40 left-1/2 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,hsl(21_95%_60%/.22),transparent)] blur-2xl" />
-        <div className="absolute -right-24 top-24 h-72 w-72 rounded-full bg-[radial-gradient(closest-side,hsl(38_92%_55%/.18),transparent)] blur-2xl" />
-        <div className="absolute inset-0 opacity-[0.035] bg-[radial-gradient(#ea580c_1px,transparent_1px)] [background-size:20px_20px]" />
-      </div>
+      <AmbientBackdrop />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative z-10 w-full max-w-md max-w-[calc(100vw-1rem)] bg-white rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-10 shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col items-center"
+        className="relative z-10 w-full max-w-md max-w-[calc(100vw-1rem)] bg-white rounded-3xl sm:rounded-4xl p-6 sm:p-10 shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col items-center"
       >
         {/* Logo */}
         <div className="w-16 h-16 bg-brand-gradient rounded-2xl flex items-center justify-center mb-8 shadow-brand-md">
@@ -241,7 +240,7 @@ export default function LoginPage({
               setActiveTab('GUEST');
               setCredError('');
             }}
-            className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all cursor-pointer ${
+            className={` flex-1 py-3 id-eyebrow rounded-xl transition-all cursor-pointer ${
               activeTab === 'GUEST' ? "bg-white text-orange-600 shadow-sm" : "text-gray-400 hover:text-gray-600"
             }`}
           >
@@ -253,7 +252,7 @@ export default function LoginPage({
               setCredError('');
               setShowEmailForm(true);
             }}
-            className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all cursor-pointer ${
+            className={` flex-1 py-3 id-eyebrow rounded-xl transition-all cursor-pointer ${
               activeTab === 'PARTNER' ? "bg-white text-orange-600 shadow-sm" : "text-gray-400 hover:text-gray-600"
             }`}
           >
@@ -262,7 +261,7 @@ export default function LoginPage({
         </div>
 
         {oauthBanner && (
-          <p className="w-full text-xs text-red-600 font-semibold text-center mb-4 leading-snug px-1">
+          <p className="w-full text-xs text-red-600 font-semibold text-center mb-4 leading-snug px-1" role="alert">
             {oauthBanner}
           </p>
         )}
@@ -302,7 +301,7 @@ export default function LoginPage({
                     <Package size={20} className="text-gray-400" />
                     <span className="font-bold text-gray-400">{t('continueWithApple')}</span>
                   </div>
-                  <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full shadow">
+                  <span className="absolute -top-2 -right-2 bg-orange-500 text-white id-eyebrow px-2 py-0.5 rounded-full shadow">
                     {t('comingSoon')}
                   </span>
                 </div>
@@ -379,7 +378,7 @@ export default function LoginPage({
                 <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform">
                   <Package size={20} />
                 </div>
-                <span className="text-[10px] font-black text-green-800 uppercase tracking-widest">{t('demoGuest')}</span>
+                <span className="id-eyebrow text-green-800">{t('demoGuest')}</span>
               </button>
 
               <button
@@ -396,7 +395,7 @@ export default function LoginPage({
                 <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
                   <Store size={20} />
                 </div>
-                <span className="text-[10px] font-black text-blue-800 uppercase tracking-widest">{t('demoPartner')}</span>
+                <span className="id-eyebrow text-blue-800">{t('demoPartner')}</span>
               </button>
 
               <button
@@ -413,7 +412,7 @@ export default function LoginPage({
                 <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform">
                   <Shield size={20} />
                 </div>
-                <span className="text-[10px] font-black text-purple-800 uppercase tracking-widest">{t('demoAdmin')}</span>
+                <span className="id-eyebrow text-purple-800">{t('demoAdmin')}</span>
               </button>
             </div>
           </>
@@ -435,11 +434,11 @@ export default function LoginPage({
         <div className="mt-10 w-full flex flex-col items-center gap-0">
           <div className="inline-flex items-center justify-center gap-2 text-green-600 bg-green-50 px-4 py-2.5 rounded-xl border border-green-100 mx-auto">
             <ShieldCheck size={16} className="shrink-0" aria-hidden />
-            <span className="text-[10px] font-black uppercase tracking-widest leading-tight text-center">
+            <span className="id-eyebrow leading-tight text-center">
               {t('secureRegister')}
             </span>
           </div>
-          <p className="mt-6 w-full max-w-xs mx-auto text-[10px] text-gray-400 font-bold text-center leading-relaxed uppercase tracking-widest opacity-50 px-2">
+          <p className="mt-6 w-full max-w-xs mx-auto id-eyebrow text-gray-400 text-center leading-relaxed opacity-50 px-2">
             {t('privacyPolicy')}
           </p>
         </div>

@@ -1,12 +1,14 @@
 "use server";
 
 import { auth } from "@/auth";
+import { bookingService } from "@/services/BookingService";
 import {
-  bookingService,
-  BookingCapacityExceededError,
-} from "@/services/BookingService";
+  BookingRejectedError,
+  type BookingRejectionCode,
+} from "@/services/booking/errors";
 import { notificationService } from "@/services/NotificationService";
 import prisma from "@/lib/db";
+import { actionErrorKey } from "@/lib/action-error";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import {
   computeAuthoritativeCheckoutTotals,
@@ -16,7 +18,6 @@ import { bookingTouchesPlatformHoliday } from "@/lib/booking-holidays";
 import { getPricingRules } from "@/lib/platform-settings";
 import { moneyToNumber } from "@/lib/money";
 import { BookingStatus } from "@prisma/client";
-import { bookingEventService } from "@/services/BookingEventService";
 import { headers } from "next/headers";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-ip";
@@ -24,6 +25,8 @@ import { analyticsService } from "@/services/AnalyticsService";
 import { resolveServerSessionId } from "@/lib/analytics-server";
 import { getLocale } from "next-intl/server";
 import logger from "@/lib/logger";
+import { couponService } from "@/services/CouponService";
+import { requireUser } from "@/lib/action-auth";
 import type {
   CancelBookingErrorCode,
   ModifyBookingErrorCode,
@@ -94,28 +97,13 @@ export async function createBookingAction(data: CreateBookingInput) {
     return { success: false as const, error: "Errors.shopNotFound" };
   }
 
-  if (
-    !validateBookingStayWindow(
-      new Date(data.checkInTime),
-      new Date(data.checkOutTime),
-      pricingRules
-    )
-  ) {
-    return { success: false as const, error: "Errors.invalidBookingDates" };
-  }
-
-  if (
-    bookingTouchesPlatformHoliday(
-      new Date(data.checkInTime),
-      new Date(data.checkOutTime),
-      pricingRules.platformHolidayDates,
-    )
-  ) {
-    return {
-      success: false as const,
-      error: "Errors.bookingIncludesPlatformHoliday",
-    };
-  }
+  /*
+    Tarih doğrulamaları burada TEKRARLANMIYOR: `createInitialBooking` ikisini de
+    yapıyor ve tipli hata fırlatıyor (`BookingWindowInvalidError` /
+    `BookingHolidayError`). Aşağıdaki `catch` onları kullanıcıya görünen anahtara
+    çeviriyor. Eskiden pencere kontrolü iki yerde, tatil kontrolü ise YALNIZCA
+    burada vardı — mobil uç tatilde rezervasyona izin veriyordu.
+  */
 
   const authTotals = computeAuthoritativeCheckoutTotals(
     moneyToNumber(shop.pricePerDay),
@@ -129,54 +117,18 @@ export async function createBookingAction(data: CreateBookingInput) {
 
   let totalPrice = authTotals.subtotalBeforeCoupon;
 
+  /*
+    Kupon hakkı rezervasyon oluşmadan ÖNCE atomik olarak alınır; oluşturma
+    başarısız olursa aşağıdaki `catch` bloğunda geri verilir. Kota mantığı ve
+    indirim aritmetiği `CouponService`'te — para değiştiren her yol servis
+    katmanından geçer (`service-layer-writes` mandalı).
+  */
   let appliedCouponId: string | undefined;
   if (data.couponCode) {
-    const coupon = await prisma.coupon.findUnique({
-      where: { code: data.couponCode },
-    });
-    const now = new Date();
-    const eligible =
-      !!coupon &&
-      coupon.isActive &&
-      (!coupon.expiresAt || coupon.expiresAt > now) &&
-      (coupon.minPrice == null || totalPrice >= moneyToNumber(coupon.minPrice));
-
-    if (eligible && coupon) {
-      // Kota hakkı booking oluşmadan ÖNCE, atomik olarak alınır. Yarış koşulunda
-      // (eşzamanlı istekler kotanın sınırında) sayaç doluysa `claimed` false döner
-      // ve indirim hiç uygulanmaz — booking indirimsiz fiyatla devam eder.
-      const claimed =
-        coupon.maxUses == null
-          ? true
-          : (
-              await prisma.coupon.updateMany({
-                where: { id: coupon.id, usedCount: { lt: coupon.maxUses } },
-                data: { usedCount: { increment: 1 } },
-              })
-            ).count > 0;
-
-      if (claimed) {
-        if (coupon.maxUses == null) {
-          await prisma.coupon.update({
-            where: { id: coupon.id },
-            data: { usedCount: { increment: 1 } },
-          });
-        }
-        if (coupon.isPercent) {
-          totalPrice = Math.max(
-            0,
-            Math.round(
-              totalPrice * (1 - moneyToNumber(coupon.discount) / 100) * 100
-            ) / 100
-          );
-        } else {
-          totalPrice = Math.max(
-            0,
-            Math.round((totalPrice - moneyToNumber(coupon.discount)) * 100) / 100
-          );
-        }
-        appliedCouponId = coupon.id;
-      }
+    const claim = await couponService.claim(data.couponCode, totalPrice);
+    if (claim.ok) {
+      totalPrice = claim.claimed.totalPrice;
+      appliedCouponId = claim.claimed.couponId;
     }
   }
 
@@ -204,7 +156,11 @@ export async function createBookingAction(data: CreateBookingInput) {
     return { success: false as const, error: "Errors.invalidData" };
   }
 
-  let booking;
+  /*
+    Tip ACIK yaziliyor: `booking` try icinde atanip asagidaki `.catch` kapaniclarinda
+    okunuyor; cikarim orada `any`e dusuyordu.
+  */
+  let booking: Awaited<ReturnType<typeof bookingService.createInitialBooking>>;
   try {
     booking = await bookingService.createInitialBooking({
       guestId: userId ?? null,
@@ -222,20 +178,14 @@ export async function createBookingAction(data: CreateBookingInput) {
       referralDiscountAmount,
       referredByCode: appliedReferralCode,
       slotIds: data.slotIds,
+      /*
+        Doğrudan APPROVED: esnaf onayı beklenmez. Eskiden rezervasyon `PENDING`
+        yaratılıp hemen ardından ham `booking.update` ile APPROVED yapılıyordu;
+        iki adım arasında süreç ölürse rezervasyon kalıcı `PENDING` kalıyordu.
+        Durum artık yaratılışla aynı transaction'da; denetim izini de servis yazar.
+      */
+      initialStatus: BookingStatus.APPROVED,
     });
-
-    // Booking onaylandı (doğrudan APPROVED, esnaf onayı beklenmez)
-    await prisma.booking.update({
-      where: { id: booking.id },
-      data: { status: BookingStatus.APPROVED },
-    });
-
-    void bookingEventService.record({
-      bookingId: booking.id,
-      event: "APPROVED",
-      actorId: session?.user?.id ?? "",
-      actorRole: "GUEST",
-    }).catch(() => {});
 
     // Misafire onay e-postası
     const recipientEmail = session?.user?.email ?? data.guestEmail;
@@ -243,7 +193,9 @@ export async function createBookingAction(data: CreateBookingInput) {
       const locale = await getLocale();
       void notificationService
         .notifyBookingSuccess(recipientEmail, booking.id, totalPrice, locale)
-        .catch(() => {});
+        .catch((err) =>
+          logger.error({ err, bookingId: booking.id }, "notify_booking_success_failed"),
+        );
     }
 
     // Esnafa bildirim gönder (Yeni Rezervasyon)
@@ -254,13 +206,23 @@ export async function createBookingAction(data: CreateBookingInput) {
         partnerPhone: shop.owner.phone,
         totalPrice,
       })
-      .catch(() => {});
+      .catch((err) =>
+        logger.error({ err, bookingId: booking.id }, "notify_partner_admins_failed"),
+      );
 
     // Sadakat puanı: her 1 TL harcamaya 1 puan
     if (userId) {
       const earnedPoints = Math.floor(totalPrice);
       if (earnedPoints > 0) {
-        void prisma.$executeRaw`UPDATE "User" SET "loyaltyPoints" = "loyaltyPoints" + ${earnedPoints} WHERE id = ${userId}`.catch(() => {});
+        /*
+          Sessizce yutulmaz. Iptal tarafi (`lifecycle.ts`) dusme hatasini zaten
+          logluyordu; kazanma tarafi loglamiyordu, yani misafir puanini
+          alamadiginda sebebi HICBIR yerde yazmiyordu. "Sadakat puani kazaniliyor
+          ama gorunmuyor" hatasi (b069522) tam bu korlukten cikmisti.
+        */
+        void prisma.$executeRaw`UPDATE "User" SET "loyaltyPoints" = "loyaltyPoints" + ${earnedPoints} WHERE id = ${userId}`.catch(
+          (err) => logger.error({ err, userId, earnedPoints }, "loyalty_points_increment_failed"),
+        );
       }
     }
 
@@ -283,12 +245,19 @@ export async function createBookingAction(data: CreateBookingInput) {
   } catch (e: unknown) {
     // Booking oluşturulamadıysa, önceden atomik olarak alınmış kupon hakkı iade edilir.
     if (appliedCouponId) {
-      await prisma.coupon
-        .update({ where: { id: appliedCouponId }, data: { usedCount: { decrement: 1 } } })
-        .catch((err) => logger.error({ err, couponId: appliedCouponId }, "coupon_claim_release_failed"));
+      await couponService.release(appliedCouponId);
     }
-    if (e instanceof BookingCapacityExceededError) {
-      return { success: false as const, error: e.message };
+    /*
+      Servisin REDDETME sebepleri tipli; metin DEĞİL kod taşınıyor. Eskiden burada
+      `e.message` dönüyordu ve servis Türkçe cümle üretiyordu ("...kalan: 3 valiz,
+      talep: 5"); `CheckoutClient` anahtar olmayan her değeri ekrana aynen bastığı
+      için Japonca arayüzdeki misafir Türkçe hata okuyordu.
+    */
+    if (e instanceof BookingRejectedError) {
+      return {
+        success: false as const,
+        error: BOOKING_REJECTION_TO_KEY[e.code],
+      };
     }
     console.error("createBookingAction", e);
     return { success: false as const, error: "Errors.generic" };
@@ -302,6 +271,13 @@ export type ModifyBookingActionInput = {
   bagCountS: number;
   bagCountM: number;
   bagCountXl: number;
+};
+
+/** Servisin rezervasyon REDDETME kodlarının çeviri anahtarı karşılıkları. */
+const BOOKING_REJECTION_TO_KEY: Record<BookingRejectionCode, string> = {
+  CAPACITY_EXCEEDED: "Errors.insufficientCapacity",
+  INVALID_DATES: "Errors.invalidBookingDates",
+  PLATFORM_HOLIDAY: "Errors.bookingIncludesPlatformHoliday",
 };
 
 const CANCEL_ERROR_TO_KEY: Record<CancelBookingErrorCode, string> = {
@@ -323,11 +299,8 @@ const MODIFY_ERROR_TO_KEY: Record<ModifyBookingErrorCode, string> = {
 };
 
 export async function modifyBookingAction(data: ModifyBookingActionInput) {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return { success: false as const, error: "Errors.authRequired" };
-  }
+  const auth = await requireUser();
+  if (!auth.ok) return { success: false as const, error: auth.error };
 
   const pricingRules = await getPricingRules();
   const cin = new Date(data.checkInTime);
@@ -344,7 +317,7 @@ export async function modifyBookingAction(data: ModifyBookingActionInput) {
 
   const result = await bookingService.modifyBooking(
     data.bookingId,
-    session.user.id,
+    auth.actor.id,
     {
       checkInTime: new Date(data.checkInTime),
       checkOutTime: new Date(data.checkOutTime),
@@ -367,11 +340,8 @@ export async function modifyBookingAction(data: ModifyBookingActionInput) {
 }
 
 export async function cancelBookingAction(bookingId: string) {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return { success: false as const, error: "Errors.authRequired" };
-  }
+  const auth = await requireUser();
+  if (!auth.ok) return { success: false as const, error: auth.error };
 
   const booking = await bookingService.getBookingDetails(bookingId);
 
@@ -379,7 +349,7 @@ export async function cancelBookingAction(bookingId: string) {
     return { success: false, error: "Errors.bookingNotFound" };
   }
 
-  if (booking.guestId !== session.user.id && session.user.role !== "ADMIN") {
+  if (booking.guestId !== auth.actor.id && auth.actor.role !== "ADMIN") {
     return { success: false, error: "Errors.unauthorized" };
   }
 
@@ -399,7 +369,13 @@ export async function cancelBookingAction(bookingId: string) {
       error: CANCEL_ERROR_TO_KEY[result.code] ?? "Errors.generic",
     };
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Bilinmeyen bir hata oluştu.";
-    return { success: false as const, error: message };
+    /*
+      Ham `Error.message` DÖNMEZ. Prod'da Next zaten o metni kırpıyor, geliştirmede
+      ise ham anahtar sızıyordu; `BookingDetailActions` gelen değeri aynen
+      bastığı için misafir "Errors.bookingNotFound" okuyordu. `actionErrorKey`
+      tanınan anahtarı korur, tanımadığını `generic`e düşürür.
+    */
+    logger.error({ err: error }, "cancelBookingAction");
+    return { success: false as const, error: `Errors.${actionErrorKey(error)}` };
   }
 }

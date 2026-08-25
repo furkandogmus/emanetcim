@@ -101,22 +101,39 @@ describe("Dispute Actions", () => {
   });
 
   describe("updateDisputeStatusAction", () => {
+    /**
+     * Yetki kapisi 2026-08-25'te `src/lib/action-auth.ts`'e tasindi ve iki sey
+     * degisti:
+     *
+     *   1. Oturum fixture'lari `id` TASIYOR. Gercek oturum her zaman tasir
+     *      (`src/types/next-auth.d.ts`); id'siz taklit, kapinin "giris yapmis mi"
+     *      dalini yanlislikla tetikliyordu.
+     *   2. Giris yapmis ama YETKISIZ kullanici artik `notAuthorizedAdmin` aliyor,
+     *      `unauthorized` degil — kullaniciya neyin eksik oldugunu soyleyen anahtar.
+     */
     it("should block non-admins", async () => {
-      mockAuth.mockResolvedValue({ user: { role: "PARTNER" } });
+      mockAuth.mockResolvedValue({ user: { id: "partner-1", role: "PARTNER" } });
       const result = await updateDisputeStatusAction("d1", "RESOLVED");
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Errors.unauthorized");
+      expect(result.error).toBe("Errors.notAuthorizedAdmin");
+    });
+
+    it("giriş yapmamış kullanıcıya giriş yapmasını söyler", async () => {
+      mockAuth.mockResolvedValue(null);
+      const result = await updateDisputeStatusAction("d1", "RESOLVED");
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Errors.authRequired");
     });
 
     it("should fail with invalid status (zod enum check)", async () => {
-      mockAuth.mockResolvedValue({ user: { role: "ADMIN" } });
+      mockAuth.mockResolvedValue({ user: { id: "admin-1", role: "ADMIN" } });
       const result = await updateDisputeStatusAction("d1", "INVALID_STATUS");
       expect(result.success).toBe(false);
       expect(result.error).toBe("Errors.invalidData");
     });
 
     it("should update status for admins", async () => {
-      mockAuth.mockResolvedValue({ user: { role: "ADMIN" } });
+      mockAuth.mockResolvedValue({ user: { id: "admin-1", role: "ADMIN" } });
       const result = await updateDisputeStatusAction("d1", "RESOLVED", "Log note");
       expect(result.success).toBe(true);
       expect(mockPrisma.dispute.update).toHaveBeenCalledWith({

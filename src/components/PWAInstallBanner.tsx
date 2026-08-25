@@ -83,14 +83,14 @@ export default function PWAInstallBanner() {
             <button
               type="button"
               onClick={install}
-              className="rounded-full bg-orange-600 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white hover:bg-orange-700"
+              className="rounded-full bg-orange-600 px-4 py-2 id-eyebrow text-white hover:bg-orange-700"
             >
               {t("pwaInstallCta")}
             </button>
             <button
               type="button"
               onClick={dismiss}
-              className="rounded-full border border-gray-200 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-gray-500 hover:bg-gray-50"
+              className="rounded-full border border-gray-200 px-4 py-2 id-eyebrow text-gray-500 hover:bg-gray-50"
             >
               {t("pwaInstallDismiss")}
             </button>

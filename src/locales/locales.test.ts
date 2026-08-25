@@ -29,6 +29,32 @@ const GUEST_FACING = ["Guest", "Common", "Footer", "Home", "Errors", "UserNav"];
  */
 const NON_GUEST_DEBT_CEILING = 19;
 
+/**
+ * ANAHTAR VAR ama değeri İngilizce ile BİREBİR AYNI — yani anahtar sayımı temiz
+ * görünürken kullanıcı yine İngilizce okuyor.
+ *
+ * Neden ayrı bir tarama: yukarıdaki mandal EKSİK anahtarı sayıyor. 2026-08-24'te
+ * ölçüldü ki asıl borç orada değildi — 202 anahtar dört dilde de MEVCUTTU ama
+ * İngilizce metin taşıyordu (misafir SSS'i, ödeme ekranı, esnaf check-in'i, admin
+ * panelinin tamamı). Eksik anahtar en azından gürültü yapar (`MISSING_MESSAGE`);
+ * bu sessizdir ve tam olarak hedef kitlenin gördüğü şeydir.
+ *
+ * Aşağıdakiler bilinçli istisna: özel ad, marka, e-posta ve yer adları. Bunların
+ * dillere göre değişmemesi doğrudur.
+ */
+const IDENTICAL_TO_EN_OK = new Set([
+  "Contact.emailAddress", // destek e-posta adresi
+  "KVKK.a1", // şirketin tescilli ünvanı
+  "Guest.loyaltyRewardsTitle", // marka adı ("BagajPark Rewards")
+  "Guest.responseTimeMinutes", // "≤{minutes} min" — Fransızcada da doğru
+]);
+
+/** İstasyon/semt arama sorguları: yer adı, çevrilmez. */
+const IDENTICAL_TO_EN_OK_PATTERN = /^CityStorage\..+\.searchQuery$/;
+
+/** En az iki latin kelime => gerçekten cümle; tek kelimelik teknik token elenir. */
+const LATIN_WORD = /[A-Za-z]{3,}/g;
+
 type Flat = Record<string, unknown>;
 
 function flatten(obj: Record<string, unknown>, prefix = "", out: Flat = {}): Flat {
@@ -123,6 +149,26 @@ describe("çeviri dosyaları", () => {
     const extra = Object.keys(all[loc]).filter((k) => !base.has(k));
     expect(extra, `${loc}: ${BASE}.json'da karşılığı olmayan anahtarlar`).toEqual([]);
   });
+
+  it.each(locales.filter((l) => l !== "en"))(
+    "%s: hiçbir metin İngilizce ile birebir aynı kalmadı",
+    (loc) => {
+      const en = all["en"];
+      const offenders = Object.keys(en).filter((k) => {
+        const ev = en[k];
+        const ov = all[loc][k];
+        if (typeof ev !== "string" || ov !== ev) return false;
+        if (IDENTICAL_TO_EN_OK.has(k)) return false;
+        if (IDENTICAL_TO_EN_OK_PATTERN.test(k)) return false;
+        return (ev.match(LATIN_WORD) ?? []).length >= 2;
+      });
+      expect(
+        offenders,
+        `${loc}: ${offenders.length} metin hâlâ İngilizce. Anahtar VAR, değer çevrilmemiş — ` +
+          `kullanıcı sessizce İngilizce okur. Özel ad ise IDENTICAL_TO_EN_OK'a ekleyin.`,
+      ).toEqual([]);
+    },
+  );
 
   it("misafir dışı çeviri borcu artmıyor (mandal)", () => {
     let worst = 0;

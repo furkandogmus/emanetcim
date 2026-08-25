@@ -52,7 +52,7 @@ export default async function AdminStatusPage({ params }: { params: Promise<{ lo
     <div className="min-h-screen bg-gray-50 px-4 py-24 font-sans sm:px-6 lg:p-10 lg:pt-32">
       <header className="mb-8 lg:mb-12">
         <h1 className="text-3xl font-black tracking-tighter text-gray-900 mb-2 sm:text-4xl">{t("title")}</h1>
-        <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">{t("subtitle")}</p>
+        <p className="text-gray-400 id-eyebrow text-xs">{t("subtitle")}</p>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -108,15 +108,15 @@ export default async function AdminStatusPage({ params }: { params: Promise<{ lo
       </div>
 
       <footer className="mt-12 border-t border-gray-200 pt-8 lg:mt-16">
-        <div className="flex flex-col gap-6 rounded-[2rem] border border-gray-100 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-8">
+        <div className="flex flex-col gap-6 rounded-3xl border border-gray-100 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-8">
           <div>
-            <h4 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-1">{t("healthScore")}</h4>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t("healthDesc")}</p>
+            <h4 className="text-sm id-eyebrow text-gray-900 mb-1">{t("healthScore")}</h4>
+            <p className="text-xs id-eyebrow text-gray-400">{t("healthDesc")}</p>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
               <p className={`text-2xl font-black tracking-tighter ${healthTone.text}`}>{healthScore} / 100</p>
-              <p className={`text-[10px] font-black uppercase tracking-widest ${healthTone.text}`}>{healthTone.label}</p>
+              <p className={` id-eyebrow ${healthTone.text}`}>{healthTone.label}</p>
             </div>
             <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${healthTone.bg} ${healthTone.text}`}>
               <HealthIcon size={24} />
@@ -151,12 +151,12 @@ function StatusCard({ title, subtitle, icon, status, details, tLabels }: {
   const StatusIcon = IconMap[status];
 
   return (
-    <div className="rounded-[2rem] border border-gray-100 bg-white p-6 shadow-sm transition-all hover:shadow-xl hover:shadow-gray-200/50 sm:p-8 lg:rounded-[3rem]">
+    <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition-all hover:shadow-xl hover:shadow-gray-200/50 sm:p-8 lg:rounded-4xl">
       <div className="flex items-center justify-between mb-8">
         <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${status === 'success' ? 'bg-gray-50 text-gray-900' : colors[status]}`}>
           {icon}
         </div>
-        <div className={`flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${colors[status]}`}>
+        <div className={` flex items-center gap-1 px-3 py-1 rounded-full id-eyebrow ${colors[status]}`}>
           <StatusIcon size={12} />
           {status === 'success' ? tLabels.online : status === 'error' ? tLabels.error : tLabels.warning}
         </div>
@@ -164,7 +164,7 @@ function StatusCard({ title, subtitle, icon, status, details, tLabels }: {
       
       <div className="mb-6">
         <h3 className="text-xl font-black text-gray-900 tracking-tight">{title}</h3>
-        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{subtitle}</p>
+        <p className="text-xs id-eyebrow text-gray-400">{subtitle}</p>
       </div>
 
       <div className="space-y-2">

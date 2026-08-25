@@ -9,6 +9,8 @@ import { toast } from "sonner";
 
 import type { ContactMessageDTO } from "@/lib/contact-message-dto";
 import { replySubjectForMailto } from "@/lib/reply-subject";
+import { replyToContactMessageAction } from "@/actions/contact";
+import { actionErrorKey } from "@/lib/action-error";
 
 interface AdminMessagesClientProps {
   messages: ContactMessageDTO[];
@@ -16,6 +18,38 @@ interface AdminMessagesClientProps {
 
 export default function AdminMessagesClient({ messages: initialMessages }: AdminMessagesClientProps) {
   const t = useTranslations("Admin");
+  const tErrors = useTranslations("Errors");
+  /**
+   * Panelden cevap: gerçek e-posta olarak gider (destek adresi + In-Reply-To).
+   * Eski "Yanıtla" yalnızca mailto: idi — cevap adminin kişisel kutusundan çıkıyordu.
+   */
+  const [replyDraft, setReplyDraft] = useState("");
+  const [replySendingId, setReplySendingId] = useState<string | null>(null);
+
+  const handleSendReply = async (messageId: string) => {
+    const body = replyDraft.trim();
+    if (body.length < 2) return;
+    setReplySendingId(messageId);
+    try {
+      const res = await replyToContactMessageAction({ messageId, body });
+      if (res.success) {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === messageId
+              ? { ...m, isRead: true, replies: [...m.replies, res.reply] }
+              : m,
+          ),
+        );
+        setReplyDraft("");
+        toast.success(t("replySent"));
+      } else {
+        toast.error(t("replyFailed"));
+      }
+    } finally {
+      setReplySendingId(null);
+    }
+  };
+
   const [messages, setMessages] = useState<ContactMessageDTO[]>(initialMessages);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"ALL" | "UNREAD">("ALL");
@@ -91,8 +125,8 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
       }
       setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, isRead: true } : m)));
       toast.success(t("messageMarkedReadInfo"));
-    } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : String(error));
+    } catch (caughtError: unknown) {
+      toast.error(tErrors(actionErrorKey(caughtError)));
     } finally {
       setLoadingId(null);
     }
@@ -117,8 +151,8 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
         return next;
       });
       toast.success(t("messageDeletedInfo"));
-    } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : String(error));
+    } catch (caughtError: unknown) {
+      toast.error(tErrors(actionErrorKey(caughtError)));
     } finally {
       setLoadingId(null);
     }
@@ -143,8 +177,8 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
       setMessages((prev) => prev.filter((m) => !selectedIds.has(m.id)));
       setSelectedIds(new Set());
       toast.success(t("messageDeletedInfo"));
-    } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : String(error));
+    } catch (caughtError: unknown) {
+      toast.error(tErrors(actionErrorKey(caughtError)));
     } finally {
       setLoadingId(null);
     }
@@ -183,7 +217,7 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
         <div>
           <Link href="/admin" className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors mb-4 group">
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="text-xs font-black uppercase tracking-widest">{t("backToDashboard")}</span>
+            <span className="text-xs id-eyebrow">{t("backToDashboard")}</span>
           </Link>
           <h1 className="text-4xl font-black tracking-tighter text-gray-900 flex items-center gap-3">
             <Inbox className="text-orange-600" />
@@ -202,7 +236,7 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
             onChange={(e) =>
               setCategory(e.target.value as "SUPPORT" | "BULK" | "AUTOMATED" | "ALL")
             }
-            className="px-4 py-4 bg-white border border-gray-100 rounded-2xl text-xs font-black uppercase tracking-widest text-gray-500 hover:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+            className="px-4 py-4 bg-white border border-gray-100 rounded-2xl text-xs id-eyebrow text-gray-500 hover:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
           >
             <option value="SUPPORT">
               {t("messagesCategorySupport")} ({categoryCounts.SUPPORT})
@@ -221,7 +255,7 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value as "ALL" | "UNREAD")}
-            className="px-4 py-4 bg-white border border-gray-100 rounded-2xl text-xs font-black uppercase tracking-widest text-gray-500 hover:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+            className="px-4 py-4 bg-white border border-gray-100 rounded-2xl text-xs id-eyebrow text-gray-500 hover:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
           >
             <option value="ALL">{t("messagesFilterAll")}</option>
             <option value="UNREAD">{t("messagesFilterUnread")}</option>
@@ -266,13 +300,13 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
         )}
       </div>
 
-      <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden min-h-[500px]">
+      <div className="bg-white rounded-4xl border border-gray-100 shadow-sm overflow-hidden min-h-[500px]">
         {filteredMessages.length === 0 ? (
           <div className="py-32 flex flex-col items-center justify-center text-gray-400">
             <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-6">
               <MailOpen size={32} className="text-gray-300" />
             </div>
-            <p className="text-sm font-black uppercase tracking-widest">{t("messagesEmpty")}</p>
+            <p className="text-sm id-eyebrow">{t("messagesEmpty")}</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-50">
@@ -389,7 +423,7 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
                                 </div>
                                 <a
                                   href={`mailto:${encodeURIComponent(msg.from)}?subject=${encodeURIComponent(replySubjectForMailto(msg.subject))}`}
-                                  className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-orange-600 transition-colors"
+                                  className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl id-eyebrow hover:bg-orange-600 transition-colors"
                                 >
                                   <Reply size={14} /> {t("replyLabel")}
                                 </a>
@@ -409,6 +443,52 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
                                   <span className="italic text-gray-400">{t("contentParseError")}</span>
                                 </div>
                               )}
+                            </div>
+                          </div>
+
+                          <div className="mt-6 bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex flex-col gap-4">
+                            <h4 className="text-xs id-eyebrow text-gray-400">
+                              {t("repliesTitle")}
+                            </h4>
+
+                            {msg.replies.length > 0 && (
+                              <ul className="flex flex-col gap-3">
+                                {msg.replies.map((r) => (
+                                  <li key={r.id} className="rounded-2xl bg-orange-50/60 border border-orange-100 p-4">
+                                    <p className="text-xs font-bold text-orange-700 mb-1">
+                                      {r.fromEmail} · {new Date(r.createdAt).toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" })}
+                                    </p>
+                                    <p className="text-sm text-gray-700 whitespace-pre-wrap">{r.body}</p>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+
+                            <label htmlFor={`reply-${msg.id}`} className="sr-only">
+                              {t("replyPlaceholder")}
+                            </label>
+                            <textarea
+                              id={`reply-${msg.id}`}
+                              value={expandedId === msg.id ? replyDraft : ""}
+                              onChange={(e) => setReplyDraft(e.target.value)}
+                              placeholder={t("replyPlaceholder")}
+                              aria-label={t("replyPlaceholder")}
+                              rows={4}
+                              maxLength={5000}
+                              className="ui-field resize-y"
+                            />
+                            <div className="flex items-center justify-between gap-3">
+                              <p className="text-[10px] font-bold text-gray-400">
+                                {t("replyFromHint", { address: msg.to })}
+                              </p>
+                              <button
+                                type="button"
+                                onClick={() => void handleSendReply(msg.id)}
+                                disabled={replySendingId === msg.id || replyDraft.trim().length < 2}
+                                className="btn-ui btn-ui-md btn-ui-primary disabled:cursor-not-allowed"
+                              >
+                                {replySendingId === msg.id ? t("replySending") : t("replySendButton")}
+                              </button>
                             </div>
                           </div>
                         </div>

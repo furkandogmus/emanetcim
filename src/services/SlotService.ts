@@ -1,8 +1,8 @@
 import prisma from "@/lib/db";
+import { parseDatetimeLocalInTimeZone } from "@/lib/datetime-local";
 import type { Prisma } from "@prisma/client";
 
 export const SLOT_MINUTES = 30;
-const SLOTS_PER_HOUR = 60 / SLOT_MINUTES; // 2
 const MS_PER_SLOT = SLOT_MINUTES * 60 * 1000;
 
 export function slotDuration(start: Date, end: Date): number {
@@ -49,14 +49,6 @@ export function operatingHoursToSlots(
   return Math.max(0, Math.ceil(totalMins / SLOT_MINUTES));
 }
 
-async function shopTimeZone(shopId: string): Promise<string> {
-  const shop = await prisma.shop.findUniqueOrThrow({
-    where: { id: shopId },
-    select: { timezone: true },
-  });
-  return shop.timezone ?? "Europe/Istanbul";
-}
-
 export async function generateSlotsForShop(
   shopId: string,
   daysForward = 30,
@@ -95,11 +87,40 @@ export async function generateSlotsForShop(
       const h = Math.floor(slotStartMins / 60) % 24;
       const m = slotStartMins % 60;
 
-      // Construct ISO datetime string in shop timezone, then parse as UTC
-      const localIso = `${localDay}T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:00`;
-      const startUtc = new Date(localIso);
+      /*
+        DÜKKANIN duvar saatini o dükkanın SAAT DİLİMİNDE bir ANA çevirir.
 
-      if (isNaN(startUtc.getTime())) continue;
+        NEDEN (P0, 2026-08-24'te ölçüldü): burada `new Date(localIso)` vardı ve
+        üstündeki yorum "parse as UTC" diyordu. İkisi de yanlış: saat dilimi eki
+        OLMAYAN bir ISO tarih-saat dizesi, çalışma ortamının YEREL saatine göre
+        ayrıştırılır. Konteynerde TZ ayarlı değil, yani prod UTC:
+
+            TZ=UTC             new Date("2026-06-15T09:00:00") -> 09:00Z
+            TZ=Europe/Istanbul new Date("2026-06-15T09:00:00") -> 06:00Z   (doğrusu)
+
+        Sonuç: 09:00–20:00 açık bir İstanbul dükkanının slotları 09:00Z–20:00Z
+        olarak üretiliyordu; misafir ızgarada bunları dükkanın takviminde
+        12:00–23:00 olarak görüyordu. Yani
+
+          - dükkan AÇIKKEN (09:00–12:00) hiç slot yok — arama bile o pencerede
+            dükkanı eliyor (`getSlotAvailability` boş dönüyor),
+          - dükkan KAPALIYKEN (20:00–23:00) slot var; misafir rezervasyon yapıyor,
+            parasını ödüyor, geliyor ve `isShopOpenAt` check-in'i REDDEDİYOR
+            (`src/services/booking/check-in.ts:42`) — hata tam da tezgâhın
+            başında, valizle patlıyor.
+
+        Geliştirici makinesi İstanbul saatinde olduğu için hata YALNIZCA PROD'DA
+        görünüyordu. `shopTimeZone()` yardımcısı da tanımlı ama hiç çağrılmıyordu
+        — dönüşümün amaçlandığını ama hiç bağlanmadığını gösteriyor.
+
+        `parseDatetimeLocalInTimeZone` DST sınırlarını da doğru çözüyor ve misafir
+        tarafındaki tarih girdileri zaten onunla ayrıştırılıyor: iki taraf artık
+        aynı fonksiyonu kullanıyor.
+      */
+      const localIso = `${localDay}T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:00`;
+      const startUtc = parseDatetimeLocalInTimeZone(localIso, tz);
+
+      if (!startUtc || isNaN(startUtc.getTime())) continue;
       if (startUtc < now) continue;
 
       // Handle overnight slots: if slot is in next calendar day

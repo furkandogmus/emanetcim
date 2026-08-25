@@ -1,14 +1,14 @@
 import { describe, it, expect } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
-import { dateLocaleForUiLocale } from "@/lib/date-locale";
+import { bcp47ForUiLocale } from "@/lib/intl-locale";
 
 /**
  * Tarih ve sayı biçimlendirmesi.
  *
  * İki ayrı hata bulundu (2026-08-22):
  *
- * 1. `dateLocaleForUiLocale` 14 dilin yalnızca 7'sini eşliyordu; kalan 6'sı
+ * 1. `bcp47ForUiLocale` 14 dilin yalnızca 7'sini eşliyordu; kalan 6'sı
  *    (`de`, `fr`, `es`, `it`, `zh`, `ja`) sessizce **`en-US`'e** düşüyordu.
  *    Alman bir kullanıcı `8/22/2026` görüyordu, oysa `22.8.2026` olmalı.
  *    `8/22` ile `22/8` arasındaki fark, yılın hangi günü bavul bırakılacağıdır —
@@ -23,10 +23,10 @@ import { dateLocaleForUiLocale } from "@/lib/date-locale";
 /** `src/i18n` yapılandırmasındaki desteklenen diller. */
 const SUPPORTED = ["tr", "en", "de", "fr", "ja", "fa"];
 
-describe("dateLocaleForUiLocale", () => {
+describe("bcp47ForUiLocale", () => {
   it("desteklenen HİÇBİR dil sessizce en-US'e düşmüyor", () => {
     const fallenBack = SUPPORTED.filter(
-      (l) => l !== "en" && dateLocaleForUiLocale(l) === "en-US",
+      (l) => l !== "en" && bcp47ForUiLocale(l) === "en-US",
     );
     expect(
       fallenBack,
@@ -36,14 +36,14 @@ describe("dateLocaleForUiLocale", () => {
 
   it("her dil kendi dilinde bir etiket döndürür", () => {
     for (const l of SUPPORTED) {
-      expect(dateLocaleForUiLocale(l).startsWith(l), `${l}`).toBe(true);
+      expect(bcp47ForUiLocale(l).startsWith(l), `${l}`).toBe(true);
     }
   });
 
   it("gerçekten farklı tarih biçimleri üretir", () => {
     const d = new Date("2026-08-22T12:00:00Z");
     const fmt = (l: string) =>
-      d.toLocaleDateString(dateLocaleForUiLocale(l), { timeZone: "UTC" });
+      d.toLocaleDateString(bcp47ForUiLocale(l), { timeZone: "UTC" });
 
     // Gun/ay sirasi dillere gore GERCEKTEN degismeli.
     expect(fmt("de")).not.toBe(fmt("en"));
@@ -53,11 +53,11 @@ describe("dateLocaleForUiLocale", () => {
 
   it("bilinmeyen dil en-US'e değil, DİLİN KENDİSİNE düşer", () => {
     // Sessizce Amerikan formatina dusmek yerine en azindan dogru dilde kalmali.
-    expect(dateLocaleForUiLocale("nl")).toBe("nl");
+    expect(bcp47ForUiLocale("nl")).toBe("nl");
   });
 
   it("boş girdide çökmez", () => {
-    expect(dateLocaleForUiLocale("")).toBe("en-US");
+    expect(bcp47ForUiLocale("")).toBe("en-US");
   });
 });
 
@@ -89,7 +89,7 @@ describe("locale'siz biçimlendirme kalmadı — mandal", () => {
     expect(
       offenders,
       `Bu dosyalar locale ARGÜMANI OLMADAN biçimlendiriyor; sonuç ortama göre ` +
-        `değişir. \`dateLocaleForUiLocale(locale)\` geçin:\n` +
+        `değişir. \`bcp47ForUiLocale(locale)\` geçin:\n` +
         offenders.map((o) => `  ${o}`).join("\n"),
     ).toEqual([]);
   });

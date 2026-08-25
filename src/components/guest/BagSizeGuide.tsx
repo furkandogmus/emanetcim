@@ -7,7 +7,7 @@ export default function BagSizeGuide() {
 
   return (
     <div className="bg-white border border-gray-100 rounded-3xl p-5 shadow-sm">
-      <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">
+      <h3 className="text-xs id-eyebrow text-gray-400 mb-4">
         {t("bagSizeGuide")}
       </h3>
       <div className="flex flex-col gap-3">

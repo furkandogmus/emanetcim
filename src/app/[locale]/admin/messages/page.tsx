@@ -26,6 +26,7 @@ export default async function AdminMessagesPage({
   }
 
   const rows = await prisma.contactMessage.findMany({
+    include: { replies: { orderBy: { createdAt: "asc" } } },
     orderBy: { createdAt: "desc" },
   });
 

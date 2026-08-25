@@ -1,5 +1,3 @@
-import logger from "@/lib/logger";
-
 /**
  * Netgsm REST API — kullanıcı adı / şifre panelden.
  * NETGSM_MSGHEADER: onaylı SMS başlığı (gönderici adı).
@@ -44,10 +42,16 @@ export function parseAdminGsmNumbers(): string[] {
   return [...new Set(out)];
 }
 
-export async function sendNetgsmRestSms(params: {
+/**
+ * SMS entegrasyonu GEÇİCİ OLARAK DEVRE DIŞI.
+ *
+ * İmza korunuyor: çağıranlar (`NotificationService`) `{ ok: false }` görüp
+ * sessizce geçiyor, yani entegrasyon geri açıldığında yalnızca bu gövde değişir.
+ * Parametreler bilerek okunmuyor — `_params` adı bunu açıkça söylüyor.
+ */
+export async function sendNetgsmRestSms(_params: {
   to10: string;
   message: string;
 }): Promise<{ ok: boolean; jobId?: string; error?: string }> {
-  // SMS entegrasyonu geçici olarak devre dışı bırakıldı.
   return { ok: false, error: "sms_disabled" };
 }

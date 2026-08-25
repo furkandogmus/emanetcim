@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getMobileSession } from "@/lib/mobile-auth";
+import { sealService } from "@/services/SealService";
 
 export async function POST(
   req: Request,
@@ -29,11 +30,12 @@ export async function POST(
       );
     }
     await prisma.shop.delete({ where: { id } });
-    // Cleanup: orphaned ASSIGNED seals → STOCK
-    await prisma.seal.updateMany({
-      where: { shopId: id, status: "ASSIGNED" },
-      data: { status: "STOCK", shopId: null, assignedAt: null },
-    });
+    /*
+      Dükkana atanmış mühürler stoğa döner. Eskiden burada ham
+      `prisma.seal.updateMany` vardı; mühür envanteri `SealService`'in işidir ve
+      aynı işlem başka bir yerde farklı yazılırsa envanter sessizce ayrışır.
+    */
+    await sealService.releaseShopSeals(id);
   } else {
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   }

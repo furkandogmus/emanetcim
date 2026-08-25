@@ -55,7 +55,7 @@ export default function AccountPrivacyClient() {
         <button
           type="button"
           onClick={exportData}
-          className="mt-4 rounded-full border border-gray-200 px-6 py-3 text-xs font-black uppercase tracking-widest text-gray-900 hover:bg-gray-50"
+          className="mt-4 rounded-full border border-gray-200 px-6 py-3 text-xs id-eyebrow text-gray-900 hover:bg-gray-50"
         >
           {t("exportButton")}
         </button>
@@ -79,7 +79,7 @@ export default function AccountPrivacyClient() {
           type="button"
           disabled={pending}
           onClick={() => setConfirmOpen(true)}
-          className="mt-4 rounded-full bg-red-600 px-6 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-red-700 disabled:opacity-50"
+          className="mt-4 rounded-full bg-red-600 px-6 py-3 text-xs id-eyebrow text-white hover:bg-red-700 disabled:opacity-50"
         >
           {pending ? "…" : t("deleteButton")}
         </button>

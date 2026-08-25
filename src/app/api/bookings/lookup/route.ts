@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { SignJWT } from "jose";
-
-const GUEST_SECRET = new TextEncoder().encode(
-  process.env.AUTH_SECRET || "bagajpark-guest-management-secret"
-);
+import { guestLookupSecret } from "@/lib/guest-lookup-token";
+import logger from "@/lib/logger";
 
 export async function POST(req: NextRequest) {
   try {
@@ -46,10 +44,17 @@ export async function POST(req: NextRequest) {
     const token = await new SignJWT({ bookingId: foundId, email })
       .setProtectedHeader({ alg: "HS256" })
       .setExpirationTime("1h")
-      .sign(GUEST_SECRET);
+      .sign(guestLookupSecret());
 
     return NextResponse.json({ ok: true, token });
   } catch (e) {
-    return NextResponse.json({ ok: false, error: String(e) }, { status: 500 });
+    /*
+      Ham hata metni İSTEMCİYE GİTMEZ (2026-08-25). `String(e)` bir Prisma
+      sorgusunu, dosya yolunu veya şema adını dışarı taşıyabiliyordu; ayrıca
+      hiçbir yere loglanmadığı için gerçek sebep de kayboluyordu. Sebep log'a,
+      istemciye sabit bir kod.
+    */
+    logger.error({ err: e }, "booking_lookup_failed");
+    return NextResponse.json({ ok: false, error: "lookup_failed" }, { status: 500 });
   }
 }

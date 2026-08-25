@@ -55,8 +55,8 @@ export default async function BlogListPage({
       <section className="py-20 px-6">
         <div className="max-w-7xl mx-auto">
           {posts.length === 0 ? (
-            <div className="text-center py-20 bg-gray-50 rounded-[3rem] border border-dashed border-gray-200">
-              <p className="text-gray-400 font-bold uppercase tracking-widest">{t("noPostsFound")}</p>
+            <div className="text-center py-20 bg-gray-50 rounded-4xl border border-dashed border-gray-200">
+              <p className="text-gray-400 id-eyebrow">{t("noPostsFound")}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -64,7 +64,7 @@ export default async function BlogListPage({
                 <Link 
                   key={post.id} 
                   href={`/blog/${post.slug}`}
-                  className="group flex flex-col h-full bg-white rounded-[2.5rem] border border-gray-100 overflow-hidden hover:shadow-2xl hover:shadow-orange-100/50 transition-all active:scale-[0.98]"
+                  className="group flex flex-col h-full bg-white rounded-4xl border border-gray-100 overflow-hidden hover:shadow-2xl hover:shadow-orange-100/50 transition-all active:scale-[0.98]"
                 >
                   <div className="relative aspect-[16/10] overflow-hidden bg-gray-100">
                     {post.coverImage ? (
@@ -79,13 +79,13 @@ export default async function BlogListPage({
                         <FileText size={48} />
                       </div>
                     )}
-                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-orange-600 border border-white/20">
+                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full id-eyebrow text-orange-600 border border-white/20">
                       {t("blogCategoryTravel")}
                     </div>
                   </div>
 
                   <div className="p-8 flex-1 flex flex-col">
-                    <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4">
+                    <div className="flex items-center gap-4 id-eyebrow text-gray-400 mb-4">
                       <span className="flex items-center gap-1.5"><Clock size={12} /> {new Date(post.createdAt).toLocaleDateString(locale)}</span>
                       <span className="flex items-center gap-1.5"><User size={12} /> {post.authorName}</span>
                     </div>
@@ -95,7 +95,7 @@ export default async function BlogListPage({
                     <p className="text-sm font-bold text-gray-400 line-clamp-2 mb-6 leading-relaxed">
                       {post.excerpt || post.content.substring(0, 150).replace(/<[^>]*>/g, "")}
                     </p>
-                    <div className="mt-auto flex items-center gap-1 text-xs font-black uppercase tracking-widest text-gray-900 group-hover:gap-2 transition-all">
+                    <div className="mt-auto flex items-center gap-1 text-xs id-eyebrow text-gray-900 group-hover:gap-2 transition-all">
                       {t("readMore")} <ChevronRight size={16} className="text-orange-600" />
                     </div>
                   </div>

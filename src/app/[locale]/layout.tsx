@@ -6,6 +6,7 @@ import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { getSiteBaseUrl } from "@/lib/site-urls";
+import { siteIdentityAttribute } from "@/lib/site-identity";
 import { openGraphLocaleForUiLocale } from "@/lib/i18n-open-graph";
 import PWARegister from "@/components/PWARegister";
 import PWAInstallBanner from "@/components/PWAInstallBanner";
@@ -110,6 +111,7 @@ export default async function RootLayout({
   }
 
   const tSEO = await getTranslations({ locale, namespace: "SEO" });
+  const tCommon = await getTranslations({ locale, namespace: "Common" });
   const messages = await getMessages();
   /**
    * Ödeme modu: ortam değişkeninden türer, VERİTABANINA DOKUNMAZ.
@@ -161,6 +163,12 @@ export default async function RootLayout({
     <html
       lang={locale}
       dir={locale === "fa" ? "rtl" : "ltr"}
+      /*
+        Görsel kimlik anahtarı. Yokken bugünkü görünüm; `ticket`/`seal`/`shop`
+        değerlerinde `globals.css`'teki ilgili blok devreye girer. Tek öznitelik
+        — geri almak da tek satır. Ayrıntı: `src/lib/site-identity.ts`
+      */
+      {...siteIdentityAttribute()}
       suppressHydrationWarning
     >
       <body
@@ -190,7 +198,11 @@ export default async function RootLayout({
               href="#main-content"
               className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-orange-600 focus:text-white focus:rounded-lg focus:shadow-lg focus:outline-none"
             >
-              İçeriğe atla
+              {/*
+                Sabit Türkçeydi. Bu bağlantı her sayfadaki İLK sekme durağı:
+                klavye/ekran okuyucu kullanan Japon bir misafir Türkçe duyuyordu.
+              */}
+              {tCommon("skipToContent")}
             </a>
             <Header />
             <main id="main-content" className="flex-1 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">

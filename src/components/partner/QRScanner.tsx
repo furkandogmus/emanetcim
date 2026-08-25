@@ -98,6 +98,7 @@ async function startWithCamera(
 }
 
 export default function QRScanner({ onResult, onClose }: QRScannerProps) {
+  const t = useTranslations("Partner");
   const tCommon = useTranslations("Common");
 
   /**
@@ -115,7 +116,15 @@ export default function QRScanner({ onResult, onClose }: QRScannerProps) {
   }, [onResult]);
 
   const [phase, setPhase] = useState<Phase>("starting");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  /**
+   * Hata METNİ değil ANAHTARI tutuluyor.
+   *
+   * Eskiden üç kamera hatası da sabit Türkçe metindi: esnaf 6 dilin hepsinde
+   * Türkçe okuyordu ve metin `src/locales`'e hiç uğramıyordu.
+   */
+  const [errorKey, setErrorKey] = useState<
+    "qrNeedsHttps" | "qrPermissionFailed" | "qrBusy" | null
+  >(null);
   const runIdRef = useRef(0);
 
   const stopAndClear = useCallback(async () => {
@@ -138,7 +147,7 @@ export default function QRScanner({ onResult, onClose }: QRScannerProps) {
   const runStart = useCallback(async (userInitiated = false) => {
     const id = ++runIdRef.current;
     setPhase("starting");
-    setErrorMessage(null);
+    setErrorKey(null);
 
     await stopAndClear();
     if (id !== runIdRef.current) return;
@@ -209,17 +218,13 @@ export default function QRScanner({ onResult, onClose }: QRScannerProps) {
 
       if (isInsecureContext) {
         setPhase("error");
-        setErrorMessage("Kamera için HTTPS gerekli. Lütfen güvenli bağlantı (https) kullanın.");
+        setErrorKey("qrNeedsHttps");
       } else if (isPermission || isNoCamera) {
         setPhase("needTap");
-        setErrorMessage(
-          "Kamera izni/erişimi başarısız. Tarayıcıdan kamera iznini kontrol edip tekrar deneyin."
-        );
+        setErrorKey("qrPermissionFailed");
       } else {
         setPhase("error");
-        setErrorMessage(
-          "Kamera açılamadı. Başka bir uygulama kamerayı kullanıyorsa kapatıp tekrar deneyin."
-        );
+        setErrorKey("qrBusy");
       }
     }
   }, [stopAndClear]);
@@ -259,10 +264,10 @@ export default function QRScanner({ onResult, onClose }: QRScannerProps) {
             id="qr-scanner-title"
             className="mb-2 text-center text-xl font-bold text-gray-900"
           >
-            QR Kodu Okutun
+            {t("qrScanTitle")}
           </h2>
           <p className="mb-6 text-center text-sm text-gray-500">
-            Misafirin telefonundaki QR kodu alanın içine getirin.
+            {t("qrAimHint")}
           </p>
 
           <div className="relative min-h-[220px]">
@@ -279,22 +284,24 @@ export default function QRScanner({ onResult, onClose }: QRScannerProps) {
 
           {(phase === "needTap" || phase === "error") && (
             <div className="mt-4 flex flex-col gap-3">
-              {errorMessage && (
-                <p className="text-center text-sm text-gray-600">{errorMessage}</p>
+              {errorKey && (
+                /* Sabit Türkçe metin yerine anahtar tutuluyor: kamera hatası da 6 dilde. */
+                <p className="text-center text-sm text-gray-600" role="alert">
+                  {t(errorKey)}
+                </p>
               )}
               <button
                 type="button"
                 onClick={() => void runStart(true)}
-                className="w-full rounded-2xl bg-orange-600 py-4 text-sm font-black uppercase tracking-widest text-white transition-colors hover:bg-orange-700"
+                className="w-full rounded-2xl bg-orange-600 py-4 text-sm id-eyebrow text-white transition-colors hover:bg-orange-700"
               >
-                Kamerayı başlat
+                {t("qrStartCamera")}
               </button>
             </div>
           )}
 
           <p className="mt-6 text-center text-xs italic text-gray-400">
-            Yalnızca canlı kamera ile okuma yapılır; galeri / dosya yükleme
-            kullanılmaz.
+            {t("qrLiveOnlyNote")}
           </p>
         </div>
       </div>

@@ -123,7 +123,7 @@ export default async function CityLuggageStoragePage({
         <div className="mx-auto flex max-w-3xl items-center gap-3 px-6 py-4">
           <Link
             href="/"
-            className="text-xs font-black uppercase tracking-widest text-gray-400 hover:text-orange-600"
+            className="text-xs id-eyebrow text-gray-400 hover:text-orange-600"
           >
             ← {tCommon("back")}
           </Link>
@@ -163,7 +163,7 @@ export default async function CityLuggageStoragePage({
           {t(`${slug}.cta`)}
         </Link>
 
-        <div className="mt-12 overflow-hidden rounded-[1.5rem] border border-gray-100 bg-white shadow-sm">
+        <div className="mt-12 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
           <div
             className="h-56 w-full bg-cover bg-center"
             style={{
@@ -173,7 +173,7 @@ export default async function CityLuggageStoragePage({
           />
         </div>
 
-        <section className="mt-12 rounded-[1.5rem] border border-gray-100 bg-gray-50 p-6">
+        <section className="mt-12 rounded-2xl border border-gray-100 bg-gray-50 p-6">
           <h2 className="text-xl font-black text-gray-900">{localeCopy.whyTitle}</h2>
           <ul className="mt-4 space-y-2 text-sm text-gray-600">
             {localeCopy.whyItems.map((item) => (
@@ -182,7 +182,7 @@ export default async function CityLuggageStoragePage({
           </ul>
         </section>
 
-        <section className="mt-6 rounded-[1.5rem] border border-gray-100 bg-white p-6">
+        <section className="mt-6 rounded-2xl border border-gray-100 bg-white p-6">
           <h2 className="text-xl font-black text-gray-900">{localeCopy.howTitle}</h2>
           <ol className="mt-4 space-y-2 text-sm text-gray-600">
             {localeCopy.howItems.map((item, idx) => (
@@ -193,7 +193,7 @@ export default async function CityLuggageStoragePage({
           </ol>
         </section>
 
-        <section className="mt-6 rounded-[1.5rem] border border-gray-100 bg-white p-6">
+        <section className="mt-6 rounded-2xl border border-gray-100 bg-white p-6">
           <h2 className="text-xl font-black text-gray-900">{localeCopy.faqTitle}</h2>
           <div className="mt-4 space-y-4">
             {localeCopy.faqs.map((faq) => (
@@ -209,11 +209,11 @@ export default async function CityLuggageStoragePage({
         {sections.length > 0 && (
           <div className="mt-12 space-y-6">
             {sections.map((section, idx) => (
-              <section key={idx} className="rounded-[1.5rem] border border-gray-100 bg-white p-6">
+              <section key={idx} className="rounded-2xl border border-gray-100 bg-white p-6">
                 <h2 className="text-lg font-black text-gray-900">{section.title}</h2>
                 <p className="mt-3 text-sm leading-relaxed text-gray-600">{section.body}</p>
                 {section.keywords && (
-                  <p className="mt-3 text-[10px] font-bold uppercase tracking-widest text-gray-300">
+                  <p className="mt-3 id-eyebrow text-gray-300">
                     #{section.keywords}
                   </p>
                 )}
@@ -224,7 +224,7 @@ export default async function CityLuggageStoragePage({
 
         {/* Tips Section */}
         {tips.length > 0 && (
-          <section className="mt-6 rounded-[1.5rem] border border-orange-100 bg-orange-50 p-6">
+          <section className="mt-6 rounded-2xl border border-orange-100 bg-orange-50 p-6">
             <h2 className="text-lg font-black text-gray-900 flex items-center gap-2">
               <span className="text-orange-600">★</span> {t("detailTipsTitle")}
             </h2>
@@ -241,7 +241,7 @@ export default async function CityLuggageStoragePage({
 
         {/* Nearby Places */}
         {nearbyPlaces.length > 0 && (
-          <section className="mt-6 rounded-[1.5rem] border border-gray-100 bg-white p-6">
+          <section className="mt-6 rounded-2xl border border-gray-100 bg-white p-6">
             <h2 className="text-lg font-black text-gray-900">
               {t("detailNearbyTitle")}
             </h2>

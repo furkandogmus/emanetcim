@@ -49,7 +49,7 @@ export default function BagProtection({
         <ShieldCheck size={variant === "checkout" ? 24 : 22} aria-hidden />
       </div>
       <div>
-        <p className="text-[10px] font-black uppercase tracking-widest text-orange-600/80 mb-1">
+        <p className="id-eyebrow text-orange-600/80 mb-1">
           {t("bagProtectionBadge")}
         </p>
         <h3 className={titleClass}>{t("bagProtectionTitle")}</h3>

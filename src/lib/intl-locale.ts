@@ -1,6 +1,11 @@
 /**
  * Uygulama dilini `Intl` / `toLocaleString` için BCP 47 etiketine çevirir.
  *
+ * TARİHE ÖZGÜ DEĞİL: para birimi, sayı ve göreli zaman biçimlendirmesi de aynı
+ * etiketi ister. Adı `bcp47ForUiLocale` olduğu için 2026-08-25'te
+ * `NotificationService` kendi kopyasını (`CURRENCY_LOCALES`) yazmıştı — birebir
+ * aynı altı satır. İsim dar olduğu sürece kopyalanmaya davet ediyordu.
+ *
  * NEDEN AÇIK LİSTE: eski hâli yalnızca 7 dili eşliyor, kalan **6'sını
  * (`de`, `fr`, `es`, `it`, `zh`, `ja`) `en-US`'e düşürüyordu.** Sonuç: Alman bir
  * kullanıcı Amerikan tarih formatı görüyordu — `8/22/2026`, oysa `22.8.2026`
@@ -23,7 +28,7 @@ const UI_LOCALE_TO_BCP47: Record<string, string> = {
   ja: "ja-JP",
 };
 
-export function dateLocaleForUiLocale(locale: string): string {
+export function bcp47ForUiLocale(locale: string): string {
   const mapped = UI_LOCALE_TO_BCP47[locale];
   if (mapped) return mapped;
   /**

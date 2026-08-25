@@ -23,8 +23,16 @@ npm run test:e2e     # Playwright; dev sunucuyu kendisi kaldırır
 ## Mimari kurallar
 
 - **Yazma işlemleri yalnızca `src/services/`** üzerinden. Rezervasyon yaşam döngüsü
-  `src/services/booking/` (create, check-in, check-out, lifecycle); `BookingService` cephedir. `app/` ve `actions/`
-  Prisma'yı okuma için doğrudan kullanabilir.
+  `src/services/booking/` (create, check-in, check-out, lifecycle, partner-review,
+  bag-revision); `BookingService` cephedir. `app/` ve `actions/` Prisma'yı okuma için
+  doğrudan kullanabilir.
+  - Kural `service-layer-writes` mandalıyla ölçülüyor: `Booking`, `ReservationSlot`,
+    `BookingSeal`, `Seal`, `SealRequest`, `PaymentLog`, `Coupon` modellerine servis
+    dışından yazmak **kesin yasak**; kalan modeller tavanla tutuluyor.
+  - **Bir iş kuralını web action'ında ve mobil API ucunda ayrı ayrı yazma.** Gövde
+    servise girer, iki taşıyıcı da onu çağırır. 24 Ağustos'ta bu kural delinmişti ve
+    kopyalar sessizce ayrışmıştı: mobil "reddet" iadeyi ve slot temizliğini
+    atlıyordu, mobil "teslim aldım" mühürleri hiç atamıyordu.
 - **Para yalnızca `PaymentService`** ile değişir; `PaymentLog` elle yazılmaz.
   Sağlayıcı port/adapter: `src/lib/payments/`. Tutarlar `Decimal`; istemciye
   `moneyToNumber` ile çıkar.
@@ -32,6 +40,19 @@ npm run test:e2e     # Playwright; dev sunucuyu kendisi kaldırır
   kontrolü oradan türer.
 - **Modal** çizen her bileşen `useModalBehavior` + `role="dialog"` taşır
   (`modal-a11y.test.ts`). Yıkıcı onay için `ConfirmDialog`.
+- **E-posta HTML'i** `renderEmailHtml` ile çizilir (`src/lib/email-template.ts`);
+  şablonlarda elle `<div style=...>` yazılmaz. Dil haritaları `pickLocale` ile
+  seçilir ve her dili taşımak zorundadır (`notification-locale-coverage`).
+- **Yetki** kapısı `src/lib/action-auth.ts` (`requireAdmin`/`requirePartner`/
+  `assertAdmin`); action içinde elle rol kontrolü yazılmaz. Mobil uçlarda
+  `requireMobileUser` — o FIRLATMAZ, `{ error }` döndürür.
+- **Mobil yanıt gövdeleri** `src/lib/mobile-dto.ts`'te; uçta elle alan listesi kurulmaz.
+- **Ateşle-unut promise HER ZAMAN `.catch` taşır** (`void x().catch(...)`).
+  Yakalanmamış red Node'da süreci düşürür: bir bildirim hatası tüm sunucuyu
+  indirir. Mandal `unhandled-rejection`, tavan 0.
+- **Dış HTTP çağrısı `fetchWithTimeout`** (`src/lib/async-timeout.ts`) ile yapılır —
+  o isteği gerçekten iptal eder. `withTimeout` yalnızca yarışır ve soketi açık
+  bırakır; iptal edilemeyen işler (Resend SDK, `src/lib/mail.ts`) için kalır.
 - **Mühür** yazımı `SealService.applyCheckInWithinTx`; gövde doğrulaması
   `src/lib/seal-payload.ts` (web + mobil aynı şema).
 - Web auth: Auth.js v5 (`src/auth.config.ts`, `src/proxy.ts`). Mobil auth: jose JWT
@@ -47,6 +68,13 @@ npm run test:e2e     # Playwright; dev sunucuyu kendisi kaldırır
 | `src/__tests__/input-labels.test.ts` | etiketsiz form girdisi |
 | `src/__tests__/modal-a11y.test.ts` | dialog rolü / Escape olmayan modal |
 | `src/__tests__/jobs-registry.test.ts` | kayıt defteri ↔ `/api/internal` uçları |
+| `src/__tests__/service-layer-writes.test.ts` | servis dışından doğrudan Prisma yazma |
+| `src/__tests__/raw-error-copy.test.ts` | kullanıcıya basılan ham hata metni / sarkan `Errors.*` |
+| `src/__tests__/notification-locale-coverage.test.ts` | e-posta şablonunda eksik dil |
+| `src/__tests__/guest-contact.test.ts` | taşıyıcının kendi bildirim-alıcısı kuralını yazması |
+| `src/__tests__/action-auth.test.ts` | elle yazılmış yetki kontrolü |
+| `src/__tests__/mobile-dto.test.ts` | uçta elle kurulan yanıt gövdesi |
+| `src/__tests__/unhandled-rejection.test.ts` | sunucuda `.catch`'siz ateşle-unut promise (tavan **0**) |
 
 Tavan sayısını yükselten bir PR, sorunu çözmüyor, saklıyor.
 

@@ -1,28 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
-import { jwtVerify } from "jose";
 import prisma from "@/lib/db";
 import { bookingService } from "@/services/BookingService";
-import { notificationService } from "@/services/NotificationService";
+import { authenticateGuestLookup } from "@/lib/guest-lookup-token";
+import logger from "@/lib/logger";
 
-const GUEST_SECRET = new TextEncoder().encode(
-  process.env.AUTH_SECRET || "bagajpark-guest-management-secret"
-);
+/** Servis iptal KODU -> bu ucun sabit dis sozlesmesi. */
+const CANCEL_CODE_TO_ERROR: Record<string, string> = {
+  NOT_FOUND: "booking_not_found",
+  INVALID_STATUS: "cancel_not_allowed",
+  REFUND_FAILED: "cancel_refund_failed",
+  UNKNOWN: "cancel_failed",
+};
 
 export async function POST(req: NextRequest) {
   try {
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    const guest = await authenticateGuestLookup(req.headers.get("authorization"));
+    if (!guest.ok) {
+      return NextResponse.json({ ok: false, error: guest.code }, { status: 401 });
     }
-
-    const token = authHeader.slice(7);
-    let payload: { bookingId: string; email: string };
-    try {
-      const { payload: p } = await jwtVerify(token, GUEST_SECRET);
-      payload = p as { bookingId: string; email: string };
-    } catch {
-      return NextResponse.json({ ok: false, error: "Invalid or expired token" }, { status: 401 });
-    }
+    const payload = guest.claims;
 
     const booking = await prisma.booking.findUnique({
       where: { id: payload.bookingId },
@@ -37,16 +33,31 @@ export async function POST(req: NextRequest) {
     const bookingEmail = booking.guestEmail?.toLowerCase().trim();
     const tokenEmail = payload.email.toLowerCase().trim();
     if (bookingEmail !== tokenEmail) {
-      return NextResponse.json({ ok: false, error: "Email mismatch" }, { status: 403 });
+      return NextResponse.json({ ok: false, error: "email_mismatch" }, { status: 403 });
     }
 
     const result = await bookingService.cancelBooking(payload.bookingId);
     if (!result.ok) {
-      return NextResponse.json({ ok: false, error: result.message }, { status: 400 });
+      /*
+        Ham servis METNI dönmez: `result.message` Türkçe bir cümledir ve
+        `ManageBookingClient` gelen değeri ekrana aynen basıyordu — Japonca
+        arayüzdeki misafir Türkçe hata okuyordu. Kod zaten dönüyor.
+      */
+      return NextResponse.json(
+        { ok: false, error: CANCEL_CODE_TO_ERROR[result.code] ?? "cancel_failed" },
+        { status: 400 },
+      );
     }
 
     return NextResponse.json({ ok: true, fullRefund: result.fullRefund });
   } catch (e) {
-    return NextResponse.json({ ok: false, error: String(e) }, { status: 500 });
+    /*
+      Ham hata metni İSTEMCİYE GİTMEZ (2026-08-25). `String(e)` bir Prisma
+      sorgusunu, dosya yolunu veya şema adını dışarı taşıyabiliyordu; ayrıca
+      hiçbir yere loglanmadığı için gerçek sebep de kayboluyordu. Sebep log'a,
+      istemciye sabit bir kod.
+    */
+    logger.error({ err: e }, "guest_cancel_failed");
+    return NextResponse.json({ ok: false, error: "cancel_failed" }, { status: 500 });
   }
 }

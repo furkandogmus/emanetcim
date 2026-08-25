@@ -4,7 +4,7 @@
  * `BookingService`'ten ayrildi (2026-08-22): 1186 satirlik sinif bes ayri
  * yasam dongusu adimini tasiyordu. Sinif cephe olarak kaldi; davranis ayni.
  */
-import { Booking, Prisma } from '@prisma/client';
+import { Booking, BookingStatus, Prisma } from '@prisma/client';
 import prisma from '@/lib/db';
 
 import { createQrToken } from '@/lib/qr-token';
@@ -15,15 +15,57 @@ import { toPricingSnapshot } from '@/lib/pricing-snapshot';
 import { moneyToNumber } from '@/lib/money';
 import { reserveSlots } from '@/services/SlotService';
 import { validateBookingStayWindow } from '@/lib/booking-server-price';
+import { bookingTouchesPlatformHoliday } from '@/lib/booking-holidays';
 import { bookingEventService } from '@/services/BookingEventService';
-import { BookingCapacityExceededError } from '@/services/booking/errors';
+import {
+  BookingCapacityExceededError,
+  BookingWindowInvalidError,
+  BookingHolidayError,
+} from '@/services/booking/errors';
 import type { CreateInitialBookingInput, TxClient } from '@/services/BookingService';
+
+/**
+ * Rezervasyonun YARATILDIGI durum.
+ *
+ * NEDEN PARAMETRE (2026-08-25): her iki cagiran da — web `createBookingAction` ve
+ * mobil `checkout/intent` — once `PENDING` yaratip HEMEN ardindan ham
+ * `prisma.booking.update({ status: APPROVED })` yaziyordu. Iki sorunu vardi:
+ *
+ *   1. Iki adim arasinda surec olurse rezervasyon KALICI OLARAK `PENDING`
+ *      kaliyordu; hicbir yol onu kurtarmiyordu.
+ *   2. Ayni kural iki tasiyicida yaziliydi ve zaten ayrisimisti: web denetim
+ *      izine `APPROVED` olayini yaziyordu, mobil YAZMIYORDU. Mobilden yapilan
+ *      rezervasyonlarin onay izi hicbir yerde yoktu.
+ *
+ * Varsayilan `PENDING`: bu fonksiyonun eski sozlesmesi. Misafir akislari
+ * `APPROVED` gecer (esnaf onayi beklenmez).
+ */
+const DEFAULT_INITIAL_STATUS: BookingStatus = 'PENDING';
 
 export async function createInitialBooking(data: CreateInitialBookingInput): Promise<Booking> {
   const rules = await getPricingRules();
+  const initialStatus = data.initialStatus ?? DEFAULT_INITIAL_STATUS;
 
+  /*
+    Tarih dogrulamalari BURADA, tek yerde.
+
+    2026-08-25'e kadar pencere kontrolu buradaydi ama TATIL kontrolu yalnizca web
+    action'indaydi; mobil checkout ucu onu hic yapmiyordu, yani ayni tarih web'de
+    reddedilirken mobilde kabul ediliyordu. Ayrica buradaki firlatma tipsiz bir
+    Turkce cumleydi ve mobil uc onu yakalamadigi icin gecersiz tarih HTTP 500
+    donuyordu.
+  */
   if (!validateBookingStayWindow(data.checkInTime, data.checkOutTime, rules)) {
-    throw new Error('Geçersiz rezervasyon tarihleri.');
+    throw new BookingWindowInvalidError();
+  }
+  if (
+    bookingTouchesPlatformHoliday(
+      data.checkInTime,
+      data.checkOutTime,
+      rules.platformHolidayDates,
+    )
+  ) {
+    throw new BookingHolidayError();
   }
 
   const newBags = totalBagCount(data.bagCountS, data.bagCountM, data.bagCountXl);
@@ -84,7 +126,7 @@ export async function createInitialBooking(data: CreateInitialBookingInput): Pro
           unitPrice,
           pricingSnapshot: toPricingSnapshot(rules),
           qrCodeToken: `temp_${crypto.randomUUID()}`,
-          status: 'PENDING',
+          status: initialStatus,
         },
       });
 
@@ -116,6 +158,20 @@ export async function createInitialBooking(data: CreateInitialBookingInput): Pro
     },
   }).catch((err) => logger.error({ err, bookingId: booking.id }, "booking_event_created_failed"));
 
+  if (initialStatus === 'APPROVED') {
+    /*
+      Esnaf onayi beklenmeyen akis. Olay burada yazilir ki mobil ve web ayni izi
+      biraksin — 2026-08-25 oncesinde yalnizca web yaziyordu.
+    */
+    bookingEventService.record({
+      bookingId: booking.id,
+      event: 'APPROVED',
+      actorId: data.guestId ?? 'guest',
+      actorRole: 'GUEST',
+      metadata: { autoApproved: true },
+    }).catch((err) => logger.error({ err, bookingId: booking.id }, 'booking_event_approved_failed'));
+  }
+
   return booking;
 }
 
@@ -127,6 +183,7 @@ export async function createSlotBooking(
   newBags: number,
   rules: Awaited<ReturnType<typeof getPricingRules>>,
 ): Promise<Booking> {
+  const initialStatus = data.initialStatus ?? DEFAULT_INITIAL_STATUS;
   const booking = await prisma.$transaction(
     async (tx) => {
       const shop = await tx.shop.findUnique({ where: { id: data.shopId } });
@@ -213,7 +270,7 @@ export async function createSlotBooking(
           unitPrice,
           pricingSnapshot: toPricingSnapshot(rules),
           qrCodeToken: `temp_${crypto.randomUUID()}`,
-          status: 'PENDING',
+          status: initialStatus,
           reservationSlots: {
             create: slots.map((s) => ({
               slotId: s.id,
@@ -248,6 +305,20 @@ export async function createSlotBooking(
       slotBooking: true,
     },
   }).catch((err) => logger.error({ err, bookingId: booking.id }, "booking_event_created_failed"));
+
+  if (initialStatus === 'APPROVED') {
+    /*
+      Esnaf onayi beklenmeyen akis. Olay burada yazilir ki mobil ve web ayni izi
+      biraksin — 2026-08-25 oncesinde yalnizca web yaziyordu.
+    */
+    bookingEventService.record({
+      bookingId: booking.id,
+      event: 'APPROVED',
+      actorId: data.guestId ?? 'guest',
+      actorRole: 'GUEST',
+      metadata: { autoApproved: true },
+    }).catch((err) => logger.error({ err, bookingId: booking.id }, 'booking_event_approved_failed'));
+  }
 
   return booking;
 }

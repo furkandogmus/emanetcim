@@ -147,10 +147,10 @@ export default function AdminCampaignsClient({
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="bg-gray-900 text-white p-10 rounded-[3rem] relative overflow-hidden group">
+        <div className="bg-gray-900 text-white p-10 rounded-4xl relative overflow-hidden group">
           <div className="relative z-10">
             <h2 className="text-3xl font-black mb-2 italic">{t("discountSummaryTitle")}</h2>
-            <p className="text-white/40 text-sm font-bold uppercase tracking-widest mb-10">
+            <p className="text-white/40 text-sm id-eyebrow mb-10">
               {t("activeDiscountHeading")}
             </p>
             <div className="flex items-baseline gap-2">
@@ -161,13 +161,13 @@ export default function AdminCampaignsClient({
           </div>
         </div>
 
-        <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm flex flex-col justify-center gap-6">
+        <div className="bg-white p-10 rounded-4xl border border-gray-100 shadow-sm flex flex-col justify-center gap-6">
           <div className="flex gap-4">
             <div className="bg-green-50 text-green-600 p-4 rounded-2xl">
               <Calendar size={24} />
             </div>
             <div>
-              <p className="text-xs font-black uppercase tracking-widest text-gray-400">
+              <p className="text-xs id-eyebrow text-gray-400">
                 {t("activeCampaignCountLabel")}
               </p>
               <p className="text-2xl font-black">
@@ -180,7 +180,7 @@ export default function AdminCampaignsClient({
               <MapPin size={24} />
             </div>
             <div>
-              <p className="text-xs font-black uppercase tracking-widest text-gray-400">
+              <p className="text-xs id-eyebrow text-gray-400">
                 {t("topBookingRegion")}
               </p>
               <p className="text-2xl font-black">{topRegionLabel}</p>
@@ -189,8 +189,8 @@ export default function AdminCampaignsClient({
         </div>
       </div>
 
-      <div className="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-sm flex flex-col gap-4">
-        <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">
+      <div className="bg-white rounded-4xl p-8 border border-gray-100 shadow-sm flex flex-col gap-4">
+        <h3 className="text-sm id-eyebrow text-gray-400">
           {editing ? t("editCampaign") : t("newCampaign")}
         </h3>
         <input
@@ -238,7 +238,7 @@ export default function AdminCampaignsClient({
         </div>
       </div>
 
-      <h3 className="text-sm font-black uppercase tracking-widest text-gray-400 mt-8 mb-2 px-2">
+      <h3 className="text-sm id-eyebrow text-gray-400 mt-8 mb-2 px-2">
         {t("campaignListTitle")}
       </h3>
 
@@ -246,13 +246,13 @@ export default function AdminCampaignsClient({
         {campaigns.map((camp) => (
           <div
             key={camp.id}
-            className="bg-white rounded-[2rem] p-8 border border-gray-100 flex flex-col md:flex-row justify-between items-center gap-6 hover:shadow-lg transition-all border-l-8 border-l-orange-500"
+            className="bg-white rounded-3xl p-8 border border-gray-100 flex flex-col md:flex-row justify-between items-center gap-6 hover:shadow-lg transition-all border-l-8 border-l-orange-500"
           >
             <div>
               <h4 className="text-xl font-bold text-gray-900 flex items-center gap-3">
                 {camp.name}
                 <span
-                  className={`text-[10px] px-3 py-1 rounded-full font-black uppercase tracking-widest ${
+                  className={` id-eyebrow px-3 py-1 rounded-full ${
                     camp.isActive
                       ? "bg-green-100 text-green-600"
                       : "bg-gray-100 text-gray-400"
@@ -261,7 +261,7 @@ export default function AdminCampaignsClient({
                   {camp.isActive ? t("statusActiveBadge") : t("statusPausedBadge")}
                 </span>
               </h4>
-              <div className="flex items-center gap-4 mt-2 text-gray-400 font-bold text-xs uppercase tracking-widest">
+              <div className="flex items-center gap-4 mt-2 text-gray-400 id-eyebrow text-xs">
                 <span className="flex items-center gap-1">
                   <MapPin size={12} /> {t("campaignScopeGeneral")}
                 </span>

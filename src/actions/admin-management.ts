@@ -1,12 +1,12 @@
 "use server";
 
 import prisma from "@/lib/db";
-import { auth } from "@/auth";
 import { shopService } from "@/services/ShopService";
 import { BookingStatus, Prisma, Role } from "@prisma/client";
 import { z } from "zod";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import logger from "@/lib/logger";
+import { bookingService } from "@/services/BookingService";
 import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
 import { getLocale } from "next-intl/server";
@@ -17,16 +17,18 @@ import {
   isPrismaUniqueViolation,
 } from "@/lib/prisma-errors";
 import { DELETE_USER_BLOCKED_CODE } from "@/lib/admin/constants";
+import { assertAdmin } from "@/lib/action-auth";
 
 /**
  * Admin koruması sağlayan yardımcı fonksiyon
  */
+/**
+ * Yetki kapisi `src/lib/action-auth.ts`'te; burasi yalnizca eski cagri bicimini
+ * korur (`session.user.id` bekleyen 14 cagri yeri var).
+ */
 async function ensureAdmin() {
-  const session = await auth();
-  if (!session?.user || session.user.role !== Role.ADMIN) {
-    throw new Error("Errors.notAuthorizedAdmin");
-  }
-  return session;
+  const actor = await assertAdmin();
+  return { user: actor };
 }
 
 async function clientIp(): Promise<string | null> {
@@ -389,19 +391,25 @@ export async function deleteUserAction(
   const activeStatuses: BookingStatus[] = ["WAITING_APPROVAL", "APPROVED", "PENDING", "PAID", "CHECKED_IN"];
 
   if (userToDelete.isBanned) {
-    // Banlıysa: Bekleyen veya aktif rezervasyonları zorla iptal et, sonra sil
-    await prisma.booking.updateMany({
-      where: {
-        status: { in: activeStatuses },
-        OR: [
-          { guestId: userId },
-          { shop: { ownerId: userId } }
-        ]
-      },
-      data: {
-        status: "CANCELLED"
-      }
-    });
+    /*
+      Banlıysa: açık rezervasyonları zorla iptal et, sonra sil.
+
+      Eskiden burada ham `prisma.booking.updateMany({ status: "CANCELLED" })` vardı.
+      Mobil "reddet" ucundaki hatanın aynısı: iade/ödeme niyeti kapatılmıyor,
+      `ReservationSlot` satırları SİLİNMİYOR ve sadakat puanı geri alınmıyordu —
+      yani yasaklanan bir esnafın dükkanı silinse bile o dükkanın slotları dolu
+      görünmeye devam ediyordu. Artık her rezervasyon `cancelBooking`'den geçer.
+    */
+    const summary = await bookingService.forceCancelOpenBookingsForUser(
+      userId,
+      activeStatuses,
+    );
+    if (summary.failed > 0) {
+      logger.warn(
+        { userId, ...summary },
+        "admin_delete_user_force_cancel_partial",
+      );
+    }
   } else {
     // Normal kullanıcı: Aktif rezervasyon kontrolü (silmeyi engelle)
     const activeBooking = await prisma.booking.findFirst({
@@ -548,11 +556,32 @@ export async function updateShopAction(shopId: string, data: {
    * var ve pasife almak esnaf tarafını bozuyordu (P1-4).
    */
   isTest?: boolean;
+  /**
+   * Misafire "Doğrulanmış" rozetini gösteren bayrak.
+   *
+   * NEDEN BURAYA EKLENDİ (P2-7, 2026-08-24): kolon şemada vardı, rozet üç
+   * yüzeyde çiziliyordu, ama `src/` içinde onu YAZAN hiçbir kod yolu yoktu —
+   * prod'daki tek `true` elle veritabanına girilmişti. Yani güven rozetinin
+   * arkasında ne bir süreç ne de bir denetim izi vardı. `isTest` ile aynı
+   * kalıp: admin bilinçli olarak veriyor ve değişiklik loglanıyor.
+   */
+  isVerified?: boolean;
 }) {
   await ensureAdmin();
 
+  /*
+    Doğrulama hataları FIRLATILMIYOR, dönüyor.
+
+    Neden (2026-08-24'te ölçüldü): Next 16'da bir server action'dan fırlayan hata
+    istemciye kırpılarak gider — React yerine "An error occurred in the Server
+    Components render. The specific message is omitted in production builds…"
+    koyar. Yani yönetici geçersiz bir kapasite girdiğinde bu İngilizce paragrafı
+    görüyordu; hangi alanın yanlış olduğu prod'a HİÇ ulaşmıyordu.
+    `{ success: false, error }` dönüşü kırpılmaz. Projenin geri kalanı da bu
+    kalıbı kullanıyor (`action-result-checked.test.ts` çağrı yerini denetler).
+  */
   if (data.name !== undefined && !String(data.name).trim()) {
-    throw new Error("Errors.invalidData");
+    return { success: false as const, error: "Errors.invalidData" };
   }
 
   const lat =
@@ -572,13 +601,13 @@ export async function updateShopAction(shopId: string, data: {
     data.capacity !== undefined &&
     (!Number.isInteger(data.capacity) || data.capacity < 1 || data.capacity > 100_000)
   ) {
-    throw new Error("Errors.invalidData");
+    return { success: false as const, error: "Errors.invalidData" };
   }
 
   let pricePerDay: Prisma.Decimal | undefined;
   if (data.pricePerDay !== undefined) {
     if (!Number.isFinite(data.pricePerDay) || data.pricePerDay < 1 || data.pricePerDay > 1_000_000) {
-      throw new Error("Errors.invalidData");
+      return { success: false as const, error: "Errors.invalidData" };
     }
     pricePerDay = new Prisma.Decimal(data.pricePerDay);
   }
@@ -594,6 +623,7 @@ export async function updateShopAction(shopId: string, data: {
       pricePerDay,
       isActive: data.isActive,
       isTest: data.isTest,
+      isVerified: data.isVerified,
     },
     include: { owner: true },
   });
@@ -606,6 +636,14 @@ export async function updateShopAction(shopId: string, data: {
     );
   }
 
+  if (data.isVerified !== undefined) {
+    // Güven rozeti misafire verilen bir iddiadır; kimin ne zaman verdiği yazılı olmalı.
+    logger.info(
+      { shopId, isVerified: data.isVerified, shopName: shop.name },
+      "admin_shop_verified_flag_changed",
+    );
+  }
+
   try {
     revalidatePathAllLocales(`/admin/partners/${shopId}/edit`);
     revalidatePathAllLocales(`/admin/partners/${shopId}`);
@@ -614,7 +652,7 @@ export async function updateShopAction(shopId: string, data: {
   } catch (e) {
     logger.error({ shopId, err: e }, "revalidate_after_shop_update_failed");
   }
-  return { success: true };
+  return { success: true as const };
 }
 
 /**

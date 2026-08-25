@@ -130,7 +130,7 @@ export default function PartnerShopSettingsForm({
 
   return (
     <section
-      className={`bg-white p-8 rounded-[2.5rem] shadow-xl border border-gray-50 flex flex-col gap-6 ${compact ? "" : "min-h-[50vh]"}`}
+      className={`bg-white p-8 rounded-4xl shadow-xl border border-gray-50 flex flex-col gap-6 ${compact ? "" : "min-h-[50vh]"}`}
     >
       <h2 className={`font-black tracking-tight ${compact ? "text-lg" : "text-xl"}`}>
         {t("settings")}
@@ -261,7 +261,7 @@ export default function PartnerShopSettingsForm({
           type="button"
           onClick={handleSave}
           disabled={isUpdating || !!priceError}
-          className="btn-ui btn-ui-lg btn-ui-primary w-full rounded-[2rem] gap-3"
+          className="btn-ui btn-ui-lg btn-ui-primary w-full rounded-3xl gap-3"
         >
           {isUpdating ? (
             <Loader2 size={24} className="animate-spin" />

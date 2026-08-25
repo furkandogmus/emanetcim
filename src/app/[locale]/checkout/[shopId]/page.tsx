@@ -75,6 +75,9 @@ export default async function CheckoutPage({
       initialCheckIn={checkInParam}
       initialCheckOut={checkOutParam}
       initialBags={!isNaN(bagsParam ?? -1) ? bagsParam : undefined}
+      /* Slot müsaitliği dükkanın kendi diliminde üretiliyor; checkout da aynı
+         dilimi kullanmalı, yoksa İstanbul dışı bir dükkanda saatler kayar. */
+      timeZone={shop.timezone ?? undefined}
     />
   );
 }

@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Copy, Check, Users } from "lucide-react";
 import { getOrCreateReferralCodeAction } from "@/actions/referral";
 import { useTranslations, useLocale } from "next-intl";
+import { useActionErrorText } from "@/lib/use-action-error";
 
 /**
  * Esnaf-esnaf davet: `User.referralCode` alanını (misafir indirim koduyla
@@ -18,6 +19,7 @@ import { useTranslations, useLocale } from "next-intl";
  */
 export default function PartnerReferralCard() {
   const t = useTranslations("Partner");
+  const errorText = useActionErrorText();
   const locale = useLocale();
   const [code, setCode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -35,7 +37,8 @@ export default function PartnerReferralCard() {
       if (res.success) {
         setCode(res.code);
       } else {
-        setError(res.error);
+        // `res.error` bir `Errors.*` ANAHTARI; ham basiliyordu.
+        setError(errorText(res.error));
       }
     });
   };
@@ -49,7 +52,7 @@ export default function PartnerReferralCard() {
   };
 
   return (
-    <div className="ui-card p-5 md:rounded-[2.5rem] md:p-6">
+    <div className="ui-card p-5 md:rounded-4xl md:p-6">
       <div className="mb-2 flex items-center gap-2">
         <Users size={18} className="text-orange-500" />
         <h2 className="text-sm font-bold text-gray-900">{t("referralTitle")}</h2>

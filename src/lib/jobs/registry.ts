@@ -103,6 +103,15 @@ export const JOB_REGISTRY: readonly JobDefinition[] = [
     enforced: false,
   },
   {
+    name: "response-times",
+    what: "Dükkanların 'yanıt süresi' rozetini geçmiş onay verisinden yeniden hesaplar.",
+    ifItStops:
+      "Rozet donar: dükkan yavaşlasa da eski hızlı sayıyı göstermeye devam eder. Çalışmadan hiç, `responseTimeMinutes` platform genelinde 0'dı ve rozet hiçbir ölçüme dayanmıyordu (P2-7).",
+    cron: "29 3 * * *",
+    maxStaleHours: 72,
+    enforced: false,
+  },
+  {
     name: "finance-export",
     what: "Finans/mutabakat verisini dışa aktarır.",
     ifItStops: "Mutabakat elle yapılmak zorunda kalır.",

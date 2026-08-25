@@ -210,7 +210,7 @@ export default function BottomSheet({
             {title ? (
               <h2
                 id="bottom-sheet-title"
-                className="text-sm font-black uppercase tracking-widest text-gray-900"
+                className="text-sm id-eyebrow text-gray-900"
               >
                 {title}
               </h2>

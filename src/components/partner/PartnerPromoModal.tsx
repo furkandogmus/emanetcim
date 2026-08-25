@@ -43,7 +43,7 @@ export default function PartnerPromoModal() {
         role="dialog"
         aria-modal="true"
         aria-labelledby="partner-promo-title"
-        className="relative bg-white rounded-[2rem] shadow-2xl border border-gray-100 max-w-lg w-full overflow-hidden p-8 md:p-10 animate-slide-up"
+        className="relative bg-white rounded-3xl shadow-2xl border border-gray-100 max-w-lg w-full overflow-hidden p-8 md:p-10 animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Decorative Top Gradient bar */}

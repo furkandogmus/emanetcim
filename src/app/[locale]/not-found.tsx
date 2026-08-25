@@ -17,7 +17,7 @@ export default function NotFound() {
       >
         <div className="relative">
           <div className="bg-orange-100/50 p-12 rounded-full blur-2xl absolute -z-10 -inset-4"></div>
-          <div className="bg-orange-600 p-8 rounded-[3rem] text-white rotate-6 shadow-2xl shadow-orange-100">
+          <div className="bg-orange-600 p-8 rounded-4xl text-white rotate-6 shadow-2xl shadow-orange-100">
             <Search size={64} strokeWidth={1} />
           </div>
           <div className="absolute -bottom-4 -right-4 bg-gray-900 p-4 rounded-3xl text-white -rotate-12 shadow-xl">

@@ -19,6 +19,7 @@ import { deleteBlogPostAction } from "@/actions/blog-actions";
 import { toast } from "sonner";
 import { BlogPost } from "@prisma/client";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
+import { useActionErrorText } from "@/lib/use-action-error";
 
 interface AdminBlogClientProps {
   posts: BlogPost[];
@@ -26,6 +27,7 @@ interface AdminBlogClientProps {
 
 export default function AdminBlogClient({ posts: initialPosts }: AdminBlogClientProps) {
   const t = useTranslations("Admin");
+  const errorText = useActionErrorText();
   const tCommon = useTranslations("Common");
   const [posts, setPosts] = useState<BlogPost[]>(initialPosts);
   const [search, setSearch] = useState("");
@@ -46,7 +48,7 @@ export default function AdminBlogClient({ posts: initialPosts }: AdminBlogClient
     setLoadingId(pendingDeleteId);
     try {
       const res = await deleteBlogPostAction(pendingDeleteId);
-      if (!res.success) { toast.error(res.error); return; }
+      if (!res.success) { toast.error(errorText(res.error)); return; }
       setPosts(prev => prev.filter(p => p.id !== pendingDeleteId));
       toast.success(t("postDeletedSuccess") || "Yazı başarıyla silindi.");
     } catch {
@@ -63,13 +65,13 @@ export default function AdminBlogClient({ posts: initialPosts }: AdminBlogClient
         <div>
           <Link href="/admin" className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors mb-4 group">
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="text-xs font-black uppercase tracking-widest">{t("backToDashboard")}</span>
+            <span className="text-xs id-eyebrow">{t("backToDashboard")}</span>
           </Link>
           <h1 className="text-4xl font-black tracking-tighter text-gray-900 flex items-center gap-3">
             <FileText className="text-orange-600" />
             {t("blogManagement")}
           </h1>
-          <p className="text-xs font-bold text-gray-400 mt-2 uppercase tracking-widest">
+          <p className="text-xs id-eyebrow text-gray-400 mt-2">
             {posts.length} {t("totalPosts")}
           </p>
         </div>
@@ -87,7 +89,7 @@ export default function AdminBlogClient({ posts: initialPosts }: AdminBlogClient
           </div>
           <Link
             href="/admin/blog/new"
-            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-orange-600 text-white px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-orange-700 transition-all shadow-lg shadow-orange-200 active:scale-95"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-orange-600 text-white px-6 py-4 rounded-2xl id-eyebrow text-xs hover:bg-orange-700 transition-all shadow-lg shadow-orange-200 active:scale-95"
           >
             <Plus size={18} />
             {t("newPost")}
@@ -95,15 +97,15 @@ export default function AdminBlogClient({ posts: initialPosts }: AdminBlogClient
         </div>
       </header>
 
-      <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden text-sm">
+      <div className="bg-white rounded-4xl border border-gray-100 shadow-sm overflow-hidden text-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50/50 border-b border-gray-100">
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">{t("postDetails")}</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">{t("fieldLocale")}</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">{t("status")}</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">{t("actions")}</th>
+                <th className="px-8 py-5 id-eyebrow text-gray-400">{t("postDetails")}</th>
+                <th className="px-8 py-5 id-eyebrow text-gray-400">{t("fieldLocale")}</th>
+                <th className="px-8 py-5 id-eyebrow text-gray-400">{t("status")}</th>
+                <th className="px-8 py-5 id-eyebrow text-gray-400 text-right">{t("actions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -123,7 +125,7 @@ export default function AdminBlogClient({ posts: initialPosts }: AdminBlogClient
                       </div>
                     </td>
                     <td className="px-8 py-6">
-                      <div className="flex items-center gap-2 font-black text-[10px] uppercase tracking-widest text-gray-500">
+                      <div className="flex items-center gap-2 id-eyebrow text-gray-500">
                         <Globe size={14} className="text-gray-300" />
                         {post.locale}
                       </div>

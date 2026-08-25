@@ -6,6 +6,7 @@ import { validateBookingStayWindow } from "@/lib/booking-server-price";
 import { getPricingRules } from "@/lib/platform-settings";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-ip";
+import { toMobileShop } from "@/lib/mobile-dto";
 
 const schema = z.object({
   lat: z.coerce.number(),
@@ -48,23 +49,8 @@ export async function GET(req: NextRequest) {
     });
     return NextResponse.json(
       results.slice((page - 1) * limit, page * limit).map((s) => ({
-        id: s.id,
-        name: s.name,
-        address: s.address,
-        city: s.city,
-        district: s.district,
-        latitude: s.latitude,
-        longitude: s.longitude,
-        pricePerDay: Number(s.pricePerDay),
-        capacity: s.capacity,
-        rating: s.rating,
-        openingTime: s.openingTime,
-        closingTime: s.closingTime,
-        open247: s.open247,
-        hasRestroom: s.hasRestroom,
-        image: s.image,
-        isVerified: s.isVerified,
-        isActive: s.isActive,
+        ...toMobileShop(s),
+        /* Aramaya OZGU alanlar: ortak govdeye girmez, listede anlamli. */
         distanceKm: s.distanceKm,
         bagsAvailable: s.bagsAvailable,
       })),
@@ -74,23 +60,7 @@ export async function GET(req: NextRequest) {
   const shops = await shopService.findNearby(lat, lng, radiusKm, page, limit);
   return NextResponse.json(
     shops.map((s) => ({
-      id: s.id,
-      name: s.name,
-      address: s.address,
-      city: s.city,
-      district: s.district,
-      latitude: s.latitude,
-      longitude: s.longitude,
-      pricePerDay: Number(s.pricePerDay),
-      capacity: s.capacity,
-      rating: s.rating,
-      openingTime: s.openingTime,
-      closingTime: s.closingTime,
-      open247: s.open247,
-      hasRestroom: s.hasRestroom,
-      image: s.image,
-        isVerified: s.isVerified,
-      isActive: s.isActive,
+      ...toMobileShop(s),
       distanceKm: s.distanceKm,
     })),
   );

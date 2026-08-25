@@ -64,7 +64,7 @@ export default function WebPushOptIn() {
         type="button"
         disabled={busy}
         onClick={() => void subscribe()}
-        className="mt-3 rounded-full bg-orange-600 px-4 py-2 text-xs font-black uppercase tracking-widest text-white disabled:opacity-50"
+        className="mt-3 rounded-full bg-orange-600 px-4 py-2 text-xs id-eyebrow text-white disabled:opacity-50"
       >
         {busy ? "…" : t("enable")}
       </button>

@@ -3,7 +3,7 @@ import { ChevronLeft, Package, Clock, CheckCircle2, Phone, ChevronRight } from "
 import { Link } from "@/i18n/routing";
 import { auth } from "@/auth";
 import prisma from "@/lib/db";
-import { dateLocaleForUiLocale } from "@/lib/date-locale";
+import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import { guestBookingStatusMessageKey } from "@/lib/booking-status-i18n";
 import {
   parsePartnerBookingsFilter,
@@ -46,7 +46,7 @@ export default async function PartnerBookingsPage({
           <p className="mb-6 text-gray-500">{t("loginRequiredPartner")}</p>
           <Link
             href={`/login?callbackUrl=${callback}`}
-            className="inline-flex rounded-2xl bg-orange-600 px-8 py-4 text-sm font-black uppercase tracking-widest text-white transition-colors hover:bg-orange-700"
+            className="inline-flex rounded-2xl bg-orange-600 px-8 py-4 text-sm id-eyebrow text-white transition-colors hover:bg-orange-700"
           >
             {t("signIn")}
           </Link>
@@ -92,7 +92,7 @@ export default async function PartnerBookingsPage({
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
-  const timeLocale = dateLocaleForUiLocale(locale);
+  const timeLocale = bcp47ForUiLocale(locale);
 
   const fmtDt = (d: Date) =>
     d.toLocaleString(timeLocale, { dateStyle: "short", timeStyle: "short" });
@@ -174,7 +174,7 @@ export default async function PartnerBookingsPage({
                   </div>
                   <div className="min-w-0">
                     <h3 className="font-bold text-gray-900">{task.customer}</h3>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                    <p className="id-eyebrow text-gray-400">
                       {task.shortRef}
                     </p>
                     <p className="mt-1 text-xs font-medium leading-snug text-gray-500">
@@ -188,7 +188,7 @@ export default async function PartnerBookingsPage({
                   ) : null}
                   <Link
                     href={`/partner/bookings/${task.bookingId}`}
-                    className="text-[10px] font-black uppercase tracking-widest text-orange-600 hover:underline"
+                    className="id-eyebrow text-orange-600 hover:underline"
                   >
                     {t("partnerBookingViewDetail")}
                   </Link>

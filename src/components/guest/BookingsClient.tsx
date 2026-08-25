@@ -27,9 +27,10 @@ import BookingModifyModal, {
 } from '@/components/guest/BookingModifyModal';
 import type { GuestBookingListItem } from '@/services/BookingService';
 import type { PricingRules } from '@/lib/pricing-rules';
-import { dateLocaleForUiLocale } from '@/lib/date-locale';
+import { bcp47ForUiLocale } from '@/lib/intl-locale';
 import { signOut } from 'next-auth/react';
 import { useModalBehavior } from '@/lib/hooks/useModalBehavior';
+import { useActionErrorText } from "@/lib/use-action-error";
 
 interface BookingsClientProps {
   bookings: GuestBookingListItem[];
@@ -55,11 +56,11 @@ export default function BookingsClient({
   pricingRules,
 }: BookingsClientProps) {
   const t = useTranslations('Guest');
-  const tErr = useTranslations('Errors');
+  const errorText = useActionErrorText();
   const tUserNav = useTranslations('UserNav');
   const tCommon = useTranslations('Common');
   const locale = useLocale();
-  const dateLocale = dateLocaleForUiLocale(locale);
+  const dateLocale = bcp47ForUiLocale(locale);
   const router = useRouter();
   const [reviewBooking, setReviewBooking] = useState<GuestBookingListItem | null>(null);
   const [modifyBooking, setModifyBooking] = useState<GuestBookingListItem | null>(null);
@@ -153,7 +154,7 @@ export default function BookingsClient({
       </header>
 
       <main className="p-4 flex flex-col gap-4 max-w-2xl mx-auto md:hidden">
-        <section className="rounded-[1.75rem] bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#172554] text-white p-5 shadow-xl shadow-slate-200">
+        <section className="rounded-2xl bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#172554] text-white p-5 shadow-xl shadow-slate-200">
           <p className="text-[10px] font-black uppercase tracking-[0.24em] text-white/60">
             {mobileCopy.loyaltyMember}
           </p>
@@ -181,8 +182,8 @@ export default function BookingsClient({
           </Link>
         </section>
 
-        <article className="bg-white rounded-[1.75rem] border border-gray-100 p-4 shadow-sm">
-          <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-700">
+        <article className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+          <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 id-eyebrow text-emerald-700">
             <span className="h-2 w-2 rounded-full bg-emerald-600" />
             {mobileCopy.activeReservation}
           </div>
@@ -338,7 +339,7 @@ export default function BookingsClient({
 
               <div className="mt-6 flex items-center justify-between pt-6 border-t border-gray-50">
                 <div className="flex flex-col">
-                  <div className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">{t('totalAmount')}</div>
+                  <div className="id-eyebrow text-gray-400 mb-1">{t('totalAmount')}</div>
                   <div className="text-xl font-black text-gray-900 tracking-tighter">
                     {formatTryCurrency(moneyToNumber(booking.totalPrice), locale)}
                   </div>
@@ -388,7 +389,7 @@ export default function BookingsClient({
                   {booking.status !== 'CANCELLED' && (
                     <Link 
                       href={`/bookings/${booking.id}`}
-                      className="btn-ui btn-ui-md btn-ui-primary rounded-[1.25rem] bg-gray-900 hover:bg-black shadow-xl shadow-gray-200"
+                      className="btn-ui btn-ui-md btn-ui-primary rounded-xl bg-gray-900 hover:bg-black shadow-xl shadow-gray-200"
                     >
                       <QrCode size={16} strokeWidth={2.5} />
                       {t('showQR')}
@@ -474,12 +475,7 @@ export default function BookingsClient({
                     }
                     router.refresh();
                   } else {
-                    const msg = res.error;
-                    if (msg?.startsWith('Errors.')) {
-                      toast.error(tErr(msg.slice(7) as never));
-                    } else {
-                      toast.error(msg || t('cancelError'));
-                    }
+                    toast.error(errorText(res.error, t('cancelError')));
                   }
                 }}
                 className="btn-ui btn-ui-md btn-ui-danger flex-1 rounded-2xl bg-red-600 text-white hover:bg-red-700"
