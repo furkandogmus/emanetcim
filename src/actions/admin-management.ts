@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/db";
 import { auth } from "@/auth";
+import { shopService } from "@/services/ShopService";
 import { BookingStatus, Prisma, Role } from "@prisma/client";
 import { z } from "zod";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
@@ -466,14 +467,24 @@ export async function resendVerificationEmailAction(email: string) {
 
 /**
  * Esnaf (Shop) onaylama
+ *
+ * NEDEN `shopService.approveShop` ÜZERİNDEN (2026-08-25): burası düz
+ * `prisma.shop.update({ isActive: true })` çağırıyordu — dükkanı aktif
+ * ediyordu ama partnere HİÇBİR bildirim gitmiyordu. `ShopService.approveShop`
+ * aynı işi yaparken partnere onay e-postası + SMS'i de gönderiyor (P1-3'ün
+ * düzeltmesi burada), e-postası doğrulanmamış eski kayıtları da düzeltiyor —
+ * ama hiçbir çağıran onu kullanmıyordu (yalnızca kullanılmayan
+ * `ApproveButton.tsx` üzerinden erişilebiliyordu). Sonuç: canlıda onaylanan
+ * HER esnaf, panelinin açıldığını fark etmesi için hiçbir bildirim almadan
+ * kalıyordu.
  */
 export async function approveShopAction(shopId: string) {
   const session = await ensureAdmin();
 
-  await prisma.shop.update({
-    where: { id: shopId },
-    data: { isActive: true },
-  });
+  const success = await shopService.approveShop(shopId);
+  if (!success) {
+    throw new Error("Errors.generic");
+  }
 
   writeAuditLog({
     actorUserId: session.user.id ?? null,

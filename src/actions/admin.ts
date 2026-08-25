@@ -1,7 +1,6 @@
 "use server";
 
 import { auth } from "@/auth";
-import { shopService } from "@/services/ShopService";
 import prisma from "@/lib/db";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { Prisma } from "@prisma/client";
@@ -10,17 +9,6 @@ import { invalidatePricingRulesCache } from "@/lib/platform-settings";
 import { sealService } from "@/services/SealService";
 import { headers } from "next/headers";
 import { writeAuditLog } from "@/lib/audit-log";
-
-function revalidateAdmin() {
-  revalidatePathAllLocales("/admin");
-  revalidatePathAllLocales("/admin/applications");
-  revalidatePathAllLocales("/admin/seals");
-  revalidatePathAllLocales("/admin/campaigns");
-  revalidatePathAllLocales("/admin/platform-settings");
-  revalidatePathAllLocales("/admin/feature-flags");
-  revalidatePathAllLocales("/admin/role-approvals");
-  revalidatePathAllLocales("/admin/disputes");
-}
 
 const platformSettingsUpdateSchema = z.object({
   maxStayDays: z.number().int().min(1).max(365),
@@ -107,49 +95,6 @@ export async function updatePlatformSettingsAction(data: unknown) {
   revalidatePathAllLocales("/admin/platform-settings");
   revalidatePathAllLocales("/admin");
   return { success: true as const };
-}
-
-export async function approveShopAction(shopId: string) {
-  const session = await auth();
-
-  if (session?.user?.role !== "ADMIN") {
-    throw new Error("Only admins can approve shops");
-  }
-
-  const success = await shopService.approveShop(shopId);
-
-  if (success) {
-    const h = await headers();
-    writeAuditLog({
-      actorUserId: session.user.id ?? null,
-      actorRole: session.user.role ?? "ADMIN",
-      action: "shop.approve",
-      entityType: "Shop",
-      entityId: shopId,
-      ip:
-        h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-        h.get("x-real-ip") ||
-        null,
-    });
-    revalidateAdmin();
-  }
-
-  return { success };
-}
-
-export async function rejectShopAction(shopId: string) {
-  const session = await auth();
-
-  if (session?.user?.role !== "ADMIN") {
-    throw new Error("Only admins can reject shops");
-  }
-
-  const result = await shopService.rejectPendingShop(shopId);
-  if (result.ok) {
-    revalidateAdmin();
-    return { success: true as const };
-  }
-  return { success: false as const, error: result.error };
 }
 
 export async function bulkCreateSealsAction(fromSerial: number, toSerial: number) {
