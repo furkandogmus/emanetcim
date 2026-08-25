@@ -235,6 +235,16 @@ export default function BookingModifyModal({
             />
           </div>
 
+          {/* Butonun "0 valiz" durumunda disabled kalmasinin TEK aciklamasi
+              handleSubmit icindeki err mesajiydi -- ama buton zaten disabled
+              oldugu icin o kod hic calismiyordu. !windowOk ve PAID+artis
+              durumlari gibi kalici bir ipucu yoktu. */}
+          {bagS + bagM + bagXl < 1 ? (
+            <p className="text-xs font-bold id-accent">
+              {t("checkoutSelectBagsHint")}
+            </p>
+          ) : null}
+
           <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 text-sm space-y-2">
             <div className="flex justify-between">
               <span className="text-gray-500">{t("modifyPreviewNewTotal")}</span>
