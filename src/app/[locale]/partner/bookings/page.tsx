@@ -7,6 +7,7 @@ import { dateLocaleForUiLocale } from "@/lib/date-locale";
 import { guestBookingStatusMessageKey } from "@/lib/booking-status-i18n";
 import {
   parsePartnerBookingsFilter,
+  partnerBookingsFilterStatuses,
   type PartnerBookingsFilter,
 } from "@/lib/partner-bookings-filter";
 import PartnerBookingsFilterTabs from "@/components/partner/PartnerBookingsFilterTabs";
@@ -62,7 +63,21 @@ export default async function PartnerBookingsPage({
   const filter: PartnerBookingsFilter = parsePartnerBookingsFilter(sp.filter);
   const page = Math.max(1, parseInt(sp.page ?? "1", 10) || 1);
 
-  const where = { shop: { ownerId: userId } };
+  /**
+   * NEDEN (2026-08-25): `filter` yalnızca ayrıştırılıp URL/aktif-sekme
+   * gösterimi için kullanılıyordu — sorgunun `where` koşuluna HİÇ
+   * eklenmiyordu. Yani partner "Ödeme Bekleyen" ya da "Tamamlanan" sekmesine
+   * tıkladığında sunucu her zaman AYNI, filtrelenmemiş tam listeyi
+   * döndürüyordu; sekmeler görsel olarak seçili görünüyor ama hiçbir şeyi
+   * değiştirmiyordu. Sayfalama da (`totalCount`/`totalPages`) aynı sebeple
+   * yanlıştı — her zaman TÜM rezervasyonları sayıyordu, filtrelenmiş alt
+   * kümeyi değil.
+   */
+  const filterStatuses = partnerBookingsFilterStatuses(filter);
+  const where = {
+    shop: { ownerId: userId },
+    ...(filterStatuses ? { status: { in: filterStatuses } } : {}),
+  };
 
   const [totalCount, dbBookings] = await Promise.all([
     prisma.booking.count({ where }),
