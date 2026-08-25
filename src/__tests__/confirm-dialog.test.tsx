@@ -87,6 +87,20 @@ describe("ConfirmDialog", () => {
     expect(onConfirm).toHaveBeenCalledTimes(1);
   });
 
+  it("son elemandan Tab ilk elemana döner (focus trap)", () => {
+    setup();
+    screen.getByText("Evet, kapat").focus();
+    fireEvent.keyDown(document, { key: "Tab" });
+    expect(document.activeElement?.textContent).toBe("Vazgeç");
+  });
+
+  it("ilk elemandan Shift+Tab son elemana döner (focus trap)", () => {
+    setup();
+    // Varsayılan odak zaten ilk elemanda (İPTAL).
+    fireEvent.keyDown(document, { key: "Tab", shiftKey: true });
+    expect(document.activeElement?.textContent).toBe("Evet, kapat");
+  });
+
   it("açıkken arka plan kaydırması kilitlenir, kapanınca geri açılır", () => {
     const { unmount } = render(
       <ConfirmDialog
