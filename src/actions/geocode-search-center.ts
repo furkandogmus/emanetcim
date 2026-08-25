@@ -1,5 +1,7 @@
 "use server";
 
+import { withTimeout } from "@/lib/async-timeout";
+
 type GeocodeSearchCenterResult =
   | { ok: true; lat: number; lng: number; label: string }
   | { ok: false };
@@ -23,13 +25,29 @@ export async function geocodeSearchCenterAction(
   url.searchParams.set("accept-language", locale);
 
   try {
-    const res = await fetch(url.toString(), {
-      headers: {
-        // Nominatim requires identifiable UA/contact.
-        "User-Agent": "bagajpark-search/1.0 (support@bagajpark.com)",
-      },
-      next: { revalidate: 0 },
-    });
+    /**
+     * NEDEN `withTimeout` (2026-08-25): bu, misafirin arama kutusuna yazarken
+     * canlı tetiklenen bir sunucu eylemi (bkz. `SearchClient.tsx` debounce).
+     * Ücretsiz/hız-sınırlı bir üçüncü taraf servise (Nominatim) sınırsız
+     * bekleyen bir `fetch` — yanıt vermezse arama kutusu süresiz "yükleniyor"
+     * kalır. Client tarafında zaten "bilinen şehir merkezine düş" yedeği var
+     * (`SearchClient.tsx`, ~satır 223) ama o yalnızca bu istek BİR SONUÇLA
+     * (başarı ya da hata) döndüğünde devreye giriyor — sonsuz askıda kalan bir
+     * istek o yedeğe hiç ulaşamaz. Zaman aşımı, `catch` bloğunun zaten
+     * döndürdüğü `{ ok: false }` ile aynı yola düşürüp var olan yedeği
+     * tamamlıyor.
+     */
+    const res = await withTimeout(
+      fetch(url.toString(), {
+        headers: {
+          // Nominatim requires identifiable UA/contact.
+          "User-Agent": "bagajpark-search/1.0 (support@bagajpark.com)",
+        },
+        next: { revalidate: 0 },
+      }),
+      5000,
+      "geocode_search",
+    );
     if (!res.ok) return { ok: false };
     const data = (await res.json()) as Array<{
       lat?: string;
