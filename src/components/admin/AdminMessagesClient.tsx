@@ -45,6 +45,13 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
       } else {
         toast.error(t("replyFailed"));
       }
+    } catch {
+      // `replyToContactMessageAction` icindeki prisma.contactReply.create/
+      // contactMessage.update try/catch disinda -- beklenmedik bir DB
+      // hatasinda hala firlar. finally yuklenme durumunu zaten sifirliyordu
+      // ama hicbir hata gorulmuyordu; admin cevabin gidip gitmedigini
+      // anlayamiyordu.
+      toast.error(t("replyFailed"));
     } finally {
       setReplySendingId(null);
     }
