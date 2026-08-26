@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { updateFeatureFlagAction } from "@/actions/feature-flags";
+import { actionErrorKey } from "@/lib/action-error";
 
 export type FeatureFlagFormRow = {
   id: string;
@@ -29,6 +30,7 @@ export default function AdminFeatureFlagsClient({
   initial: FeatureFlagFormRow[];
 }) {
   const t = useTranslations("Admin");
+  const tErrors = useTranslations("Errors");
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [rows, setRows] = useState<FeatureFlagFormRow[]>(initial);
@@ -56,19 +58,27 @@ export default function AdminFeatureFlagsClient({
         toast.error(t("featureFlagsInvalidUuids"));
         return;
       }
-      const res = await updateFeatureFlagAction({
-        key: row.key,
-        enabled: row.enabled,
-        rolloutPct: row.rolloutPct,
-        allowedUserIds,
-        description: row.description.trim() || null,
-      });
-      if (!res.success) {
-        toast.error(t("featureFlagsInvalid"));
-        return;
+      try {
+        const res = await updateFeatureFlagAction({
+          key: row.key,
+          enabled: row.enabled,
+          rolloutPct: row.rolloutPct,
+          allowedUserIds,
+          description: row.description.trim() || null,
+        });
+        if (!res.success) {
+          toast.error(t("featureFlagsInvalid"));
+          return;
+        }
+        toast.success(t("featureFlagsSaved"));
+        router.refresh();
+      } catch (e) {
+        // `updateFeatureFlagAction` icinde assertAdmin() ve Prisma cagrisi
+        // hicbir try/catch icinde degil -- oturum/yetki hatasi ya da DB
+        // hatasi burada FIRLAR. catch olmadan hicbir toast gorulmuyordu;
+        // yonetici kaydetmenin neden hicbir sey yapmadigini anlayamiyordu.
+        toast.error(tErrors(actionErrorKey(e) as never));
       }
-      toast.success(t("featureFlagsSaved"));
-      router.refresh();
     });
   };
 
