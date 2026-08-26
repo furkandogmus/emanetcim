@@ -33,14 +33,26 @@ export default function BookingDetailActions({
   const handleCancel = async () => {
     if (!confirm(t("cancelBookingConfirm"))) return;
     setCancelling(true);
-    const res = await cancelBookingAction(bookingId);
-    setCancelling(false);
-    if (res.success) {
-      toast.success(t("bookingCancelled"));
-      window.location.reload();
-    } else {
-      // `res.error` bir `Errors.*` ANAHTARI; eskiden ekrana aynen basiliyordu.
-      toast.error(errorText(res.error, t("cancelFailed")));
+    /*
+      `cancelBookingAction` `getBookingDetails` cagrisi kendi try/catch'inin
+      DISINDA -- beklenmedik bir DB hatasinda hala firlar. try/catch olmadan
+      setCancelling hic sifirlanmiyor, buton "iptal ediliyor" durumunda
+      SONSUZA dek kaliyordu.
+    */
+    try {
+      const res = await cancelBookingAction(bookingId);
+      if (res.success) {
+        toast.success(t("bookingCancelled"));
+        window.location.reload();
+      } else {
+        // `res.error` bir `Errors.*` ANAHTARI; eskiden ekrana aynen basiliyordu.
+        toast.error(errorText(res.error, t("cancelFailed")));
+      }
+    } catch (e) {
+      const raw = e instanceof Error ? e.message : undefined;
+      toast.error(errorText(raw, t("cancelFailed")));
+    } finally {
+      setCancelling(false);
     }
   };
 
