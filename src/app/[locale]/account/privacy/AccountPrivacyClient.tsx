@@ -23,20 +23,30 @@ export default function AccountPrivacyClient() {
     setConfirmOpen(false);
     setError(null);
     startTransition(async () => {
-      const r = await anonymizeGuestAccountAction();
-      if (!r.success) {
-        if (r.error === "Errors.accountDeleteActiveBookings") {
-          setError(t("errors.activeBookings"));
-        } else if (r.error === "Errors.authRequired") {
-          setError(t("errors.authRequired"));
-        } else if (r.error === "Errors.unauthorized") {
-          setError(t("errors.unauthorized"));
-        } else {
-          setError(t("errors.generic"));
+      /*
+        `anonymizeGuestAccountAction` icindeki $transaction hicbir try/catch
+        icinde degil -- beklenmedik bir DB hatasinda hala firlar. catch
+        olmadan bu sessizce yutuluyordu: hesap silme gibi geri donusu olmayan
+        bir islemde misafir hicbir sonuc gormeden kaliyordu.
+      */
+      try {
+        const r = await anonymizeGuestAccountAction();
+        if (!r.success) {
+          if (r.error === "Errors.accountDeleteActiveBookings") {
+            setError(t("errors.activeBookings"));
+          } else if (r.error === "Errors.authRequired") {
+            setError(t("errors.authRequired"));
+          } else if (r.error === "Errors.unauthorized") {
+            setError(t("errors.unauthorized"));
+          } else {
+            setError(t("errors.generic"));
+          }
+          return;
         }
-        return;
+        await signOut({ callbackUrl: "/" });
+      } catch {
+        setError(t("errors.generic"));
       }
-      await signOut({ callbackUrl: "/" });
     });
   };
 
