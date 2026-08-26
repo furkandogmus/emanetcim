@@ -220,21 +220,24 @@ export default function BookingModifyModal({
               label={t("smallBag")}
               sublabel={`S / ${formatTryCurrency(slot.s, locale)}`}
               count={bagS}
-              onIncrease={() => setBagS(bagS + 1)}
+              max={pricingRules.maxBagsPerSlot}
+              onIncrease={() => setBagS((b) => Math.min(pricingRules.maxBagsPerSlot, b + 1))}
               onDecrease={() => setBagS(Math.max(0, bagS - 1))}
             />
             <BagSelector
               label={t("mediumBag")}
               sublabel={`M/L / ${formatTryCurrency(slot.m, locale)}`}
               count={bagM}
-              onIncrease={() => setBagM(bagM + 1)}
+              max={pricingRules.maxBagsPerSlot}
+              onIncrease={() => setBagM((b) => Math.min(pricingRules.maxBagsPerSlot, b + 1))}
               onDecrease={() => setBagM(Math.max(0, bagM - 1))}
             />
             <BagSelector
               label={t("xlBag")}
               sublabel={`XL / ${formatTryCurrency(slot.xl, locale)}`}
               count={bagXl}
-              onIncrease={() => setBagXl(bagXl + 1)}
+              max={pricingRules.maxBagsPerSlot}
+              onIncrease={() => setBagXl((b) => Math.min(pricingRules.maxBagsPerSlot, b + 1))}
               onDecrease={() => setBagXl(Math.max(0, bagXl - 1))}
             />
           </div>

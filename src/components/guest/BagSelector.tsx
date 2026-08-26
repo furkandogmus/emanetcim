@@ -25,13 +25,22 @@ interface BagSelectorProps {
    * devam etmeli, test ise dilden bagimsiz olmali.
    */
   size?: "s" | "m" | "xl";
+  /**
+   * Verilirse `count >= max` oldugunda "+" pasif olur.
+   *
+   * NEDEN VAR: "+" hicbir zaman disabled olmuyordu -- misafir art art
+   * tiklayip sunucunun `clampBagCount` ile sessizce kirptigi (varsayilan 50)
+   * tutarin cok uzerine cikabiliyordu. Checkout boyunca kirpilmamis sayi
+   * gosterilip son anda farkli bir tutar cikmasi guveni kirar.
+   */
+  max?: number;
 }
 
 /**
  * BagSelector - Valiz Adet Seçici
  * KISS Prensibi: Basit +/- kontrolleri.
  */
-export default function BagSelector({ label, sublabel, count, onIncrease, onDecrease, size }: BagSelectorProps) {
+export default function BagSelector({ label, sublabel, count, onIncrease, onDecrease, size, max }: BagSelectorProps) {
   const t = useTranslations('Common');
   return (
     <div className="ui-card-soft flex items-center justify-between p-4 group hover:border-orange-200 transition-all">
@@ -60,6 +69,7 @@ export default function BagSelector({ label, sublabel, count, onIncrease, onDecr
         <button 
           type="button"
           onClick={onIncrease}
+          disabled={max !== undefined && count >= max}
           aria-label={t("increase", { label })}
           data-testid={size ? `bag-${size}-increase` : undefined}
           className="btn-ui btn-ui-sm btn-ui-primary btn-ui-icon rounded-full"

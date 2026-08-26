@@ -492,7 +492,8 @@ export default function CheckoutClient({
                   label={t("smallBag")}
                   sublabel={`S / ${formatTryCurrency(priceS, locale)}`}
                   count={bagS}
-                  onIncrease={() => setBagS(bagS + 1)}
+                  max={pricingRules.maxBagsPerSlot}
+                  onIncrease={() => setBagS((b) => Math.min(pricingRules.maxBagsPerSlot, b + 1))}
                   onDecrease={() => setBagS(Math.max(0, bagS - 1))}
                 />
                 <BagSelector
@@ -500,7 +501,8 @@ export default function CheckoutClient({
                   label={t("mediumBag")}
                   sublabel={`M/L / ${formatTryCurrency(priceM, locale)}`}
                   count={bagM}
-                  onIncrease={() => setBagM(bagM + 1)}
+                  max={pricingRules.maxBagsPerSlot}
+                  onIncrease={() => setBagM((b) => Math.min(pricingRules.maxBagsPerSlot, b + 1))}
                   onDecrease={() => setBagM(Math.max(0, bagM - 1))}
                 />
                 <BagSelector
@@ -508,7 +510,8 @@ export default function CheckoutClient({
                   label={t("xlBag")}
                   sublabel={`XL / ${formatTryCurrency(priceXl, locale)}`}
                   count={bagXl}
-                  onIncrease={() => setBagXl(bagXl + 1)}
+                  max={pricingRules.maxBagsPerSlot}
+                  onIncrease={() => setBagXl((b) => Math.min(pricingRules.maxBagsPerSlot, b + 1))}
                   onDecrease={() => setBagXl(Math.max(0, bagXl - 1))}
                 />
               </div>
