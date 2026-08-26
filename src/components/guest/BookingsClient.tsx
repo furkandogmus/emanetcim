@@ -463,19 +463,32 @@ export default function BookingsClient({
                   const b = cancelModalBooking;
                   if (!b) return;
                   setCancelSubmitting(true);
-                  const { cancelBookingAction } = await import('@/actions/booking');
-                  const res = await cancelBookingAction(b.id);
-                  setCancelSubmitting(false);
-                  if (res.success) {
-                    setCancelModalBooking(null);
-                    if (res.fullRefund) {
-                      toast.success(t('cancelSuccessRefund'));
+                  /*
+                    `cancelBookingAction`in `getBookingDetails` cagrisi kendi
+                    try/catch'inin disinda -- beklenmedik bir DB hatasinda hala
+                    firlar. try/catch olmadan setCancelSubmitting hic
+                    sifirlanmiyordu, buton SONSUZA dek kilitli kaliyordu (ayni
+                    sinif BookingDetailActions.tsx'te de bulunup duzeltildi).
+                  */
+                  try {
+                    const { cancelBookingAction } = await import('@/actions/booking');
+                    const res = await cancelBookingAction(b.id);
+                    if (res.success) {
+                      setCancelModalBooking(null);
+                      if (res.fullRefund) {
+                        toast.success(t('cancelSuccessRefund'));
+                      } else {
+                        toast.success(t('cancelSuccess'));
+                      }
+                      router.refresh();
                     } else {
-                      toast.success(t('cancelSuccess'));
+                      toast.error(errorText(res.error, t('cancelError')));
                     }
-                    router.refresh();
-                  } else {
-                    toast.error(errorText(res.error, t('cancelError')));
+                  } catch (e) {
+                    const raw = e instanceof Error ? e.message : undefined;
+                    toast.error(errorText(raw, t('cancelError')));
+                  } finally {
+                    setCancelSubmitting(false);
                   }
                 }}
                 className="btn-ui btn-ui-md btn-ui-danger flex-1 rounded-2xl bg-red-600 text-white hover:bg-red-700"
