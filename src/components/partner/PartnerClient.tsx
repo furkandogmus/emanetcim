@@ -214,7 +214,11 @@ export default function PartnerClient({
           bagCountXl: preview.bagCountXl,
           totalBags: preview.totalBags,
         });
-
+      } catch (e) {
+        // Beklenmeyen bir DB hatasinda finally yuklenme durumunu zaten
+        // sifirliyordu ama hicbir hata gorulmuyordu -- tarama sessizce
+        // hicbir sey yapmamis gibi sonuclaniyordu.
+        showError(e instanceof Error ? e.message : undefined);
       } finally {
         setPreviewLoading(false);
       }
@@ -300,8 +304,15 @@ export default function PartnerClient({
        * mühürsüz bir rezervasyonu onaylanacak mühür yok diye kilitlemek
        * teslimi imkânsız kılardı.
        */
-      const res = await getPartnerBookingSealsAction(bookingId);
-      if (res.success && res.seals.length > 0) {
+      /*
+        try/catch bilerek YOK-SAYMA DEGIL, AYNI YEDEGE dusme: mühür sorgusu
+        beklenmedik sekilde firlarsa da (auth/DB hatasi) teslim akisini
+        kilitlemek yerine asagidaki genel onaya dusuluyor -- yorumdaki
+        "mühürsüz rezervasyon" felsefesiyle ayni: eksik veri teslimi
+        imkansiz kilmamali.
+      */
+      const res = await getPartnerBookingSealsAction(bookingId).catch(() => null);
+      if (res?.success && res.seals.length > 0) {
         setCheckoutSeals({ bookingId, seals: res.seals });
         return;
       }
@@ -326,6 +337,8 @@ export default function PartnerClient({
           return;
         }
         await openCheckoutFlow(bookingId);
+      } catch (e) {
+        showError(e instanceof Error ? e.message : undefined);
       } finally {
         setPreviewLoading(false);
       }
