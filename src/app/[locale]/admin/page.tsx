@@ -6,7 +6,7 @@ import prisma from "@/lib/db";
 import { moneyToNumber } from "@/lib/money";
 import { EARNING_BOOKING_STATUSES } from "@/lib/platform-split";
 import AdminDashboardClient from "@/components/admin/AdminDashboardClient";
-import { dateLocaleForUiLocale } from "@/lib/date-locale";
+import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import { formatTryCurrency } from "@/lib/currency";
 
 /**
@@ -78,7 +78,7 @@ export default async function AdminDashboard({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const dateLocale = dateLocaleForUiLocale(locale);
+  const dateLocale = bcp47ForUiLocale(locale);
 
   const session = await auth();
   if (!session?.user || session.user.role !== "ADMIN") {

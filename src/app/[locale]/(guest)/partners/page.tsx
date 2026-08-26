@@ -33,7 +33,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ local
       <section className="relative py-24 px-6 overflow-hidden bg-blue-600">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-700 to-blue-500" />
         <div className="max-w-7xl mx-auto relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-white text-xs font-black uppercase tracking-widest mb-8 border border-white/10">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-white text-xs id-eyebrow mb-8 border border-white/10">
             <Store size={14} />
             {t("heroBadge")}
           </div>
@@ -47,8 +47,8 @@ export default async function PartnersPage({ params }: { params: Promise<{ local
             <Link href="/register?role=PARTNER" className="h-16 inline-flex items-center px-12 bg-white text-blue-600 rounded-2xl font-black text-lg transition-all active:scale-95 shadow-xl shadow-blue-900/20">
               {t("heroCta")}
             </Link>
-            <a href="https://wa.me/905422415597" target="_blank" rel="noopener noreferrer" className="h-16 inline-flex items-center px-10 bg-blue-500 text-white border border-blue-400/30 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-blue-400 transition-all">
-              Bize Ulaşın
+            <a href="https://wa.me/905422415597" target="_blank" rel="noopener noreferrer" className="h-16 inline-flex items-center px-10 bg-blue-500 text-white border border-blue-400/30 rounded-2xl id-eyebrow text-sm hover:bg-blue-400 transition-all">
+              {t("contactUs")}
             </a>
           </div>
         </div>
@@ -94,7 +94,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ local
               const titleKey = `step${idx}Title`;
               const descKey = `step${idx}Desc`;
               return (
-                <div key={idx} className="relative p-10 bg-white rounded-[3rem] border border-gray-100 shadow-sm">
+                <div key={idx} className="relative p-10 bg-white rounded-4xl border border-gray-100 shadow-sm">
                   <div className="absolute -top-4 -left-4 w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-black shadow-lg shadow-blue-200">
                     {idx}
                   </div>
@@ -113,7 +113,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ local
 
       {/* Stats/Social Proof */}
       <section className="py-32 px-6">
-        <div className="max-w-5xl mx-auto bg-gray-900 rounded-[4rem] p-12 md:p-24 text-center text-white relative overflow-hidden">
+        <div className="max-w-5xl mx-auto bg-gray-900 rounded-4xl p-12 md:p-24 text-center text-white relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-600/20 to-transparent" />
           <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-12 relative z-10">
             {t("ctaTitle")}
@@ -125,7 +125,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ local
             </Link>
             <div className="flex items-center gap-3 px-6 py-4 bg-white/5 rounded-2xl border border-white/10">
               <MessageCircle size={20} className="text-blue-400" />
-              <span className="text-sm font-bold uppercase tracking-widest text-blue-100">7/24 Esnaf Desteği</span>
+              <span className="text-sm id-eyebrow text-blue-100">{t("support247")}</span>
             </div>
           </div>
         </div>
@@ -133,9 +133,9 @@ export default async function PartnersPage({ params }: { params: Promise<{ local
 
       {/* FAQ Link */}
       <section className="py-20 text-center">
-        <p className="text-gray-400 font-bold mb-4">Aklınızda başka sorular mı var?</p>
-        <Link href="/faq" className="text-blue-600 font-black hover:underline uppercase tracking-widest text-sm">
-          Sıkça Sorulan Sorulara Göz Atın
+        <p className="text-gray-400 font-bold mb-4">{t("moreQuestions")}</p>
+        <Link href="/faq" className="text-blue-600 id-eyebrow hover:underline text-sm">
+          {t("seeFaq")}
         </Link>
       </section>
     </div>

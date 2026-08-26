@@ -15,7 +15,7 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className={`relative text-[10px] font-black uppercase tracking-widest transition-all duration-200 ${
+      className={` relative id-eyebrow transition-all duration-200 ${
         active ? "text-orange-600" : "text-gray-500 hover:text-gray-900"
       }`}
     >
@@ -66,7 +66,7 @@ export default function Header() {
           BagajPark
         </span>
         {process.env.NEXT_PUBLIC_BETA_BADGE === "true" && (
-          <span className="rounded-md bg-orange-100 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-orange-700">
+          <span className="rounded-md bg-orange-100 px-1.5 py-0.5 text-[9px] id-eyebrow text-orange-700">
             Beta
           </span>
         )}
@@ -80,7 +80,7 @@ export default function Header() {
             <NavLink href="/insurance">{navCopy.insurance}</NavLink>
             {/* 2026-08-21: /register (rolsuz) -> /partners — footer'daki "Esnafımız Olun" ile
                 aynı tek tanıtım/başvuru funnel'ına hizalandı, bkz. UX_AUDIT_BOUNCE_COMPARISON */}
-            <Link href="/partners" className="relative text-[10px] font-black uppercase tracking-widest text-orange-600 hover:text-orange-700 transition-all duration-200">{navCopy.becomePartner}</Link>
+            <Link href="/partners" className="relative id-eyebrow text-orange-600 hover:text-orange-700 transition-all duration-200">{navCopy.becomePartner}</Link>
           </nav>
         )}
         <nav aria-label={navCopy.secondaryLabel} className="hidden md:flex">

@@ -33,6 +33,8 @@ const { mockPrisma, mockAuth, mockBookingService, mockSealService } = vi.hoisted
       createInitialBooking: vi.fn(),
       getBookingDetails: vi.fn(),
       cancelBooking: vi.fn(),
+      approveBooking: vi.fn(),
+      rejectBooking: vi.fn(),
       checkIn: vi.fn(),
       checkOut: vi.fn(),
       modifyBooking: vi.fn(),
@@ -211,14 +213,16 @@ describe("Audit Fix #1: Coupon usedCount Increment", () => {
 describe("Audit Fix #2: rejectBookingAction Status Guard", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("should reject PAID booking request with error", async () => {
+  /**
+   * Durum korumasi 2026-08-25'te SERVISE tasindi
+   * (`src/services/booking/partner-review.ts`): ayni kural web action'inda ve
+   * mobil ucta iki kez yaziliydi ve mobil kopya iadeyi/slot temizligini
+   * atliyordu. Kuralin KENDISI artik `PartnerReview.test.ts`'te sinaniyor;
+   * burada action'in ham prisma yazmadigi ve sonucu dogru cevirdigi kaliyor.
+   */
+  it("durum çakışmasını kullanıcıya çeviri anahtarı olarak döner", async () => {
     mockAuth.mockResolvedValue({ user: { id: "owner-1", role: "PARTNER" } });
-    mockPrisma.booking.findUnique.mockResolvedValue({
-      id: "b1",
-      status: "PAID",
-      shop: { ownerId: "owner-1" },
-      guest: { email: "g@t.com" },
-    });
+    mockBookingService.rejectBooking.mockResolvedValue({ ok: false, code: "INVALID_STATUS" });
 
     const { rejectBookingAction } = await import("@/actions/partner");
     const result = await rejectBookingAction("b1");
@@ -226,26 +230,23 @@ describe("Audit Fix #2: rejectBookingAction Status Guard", () => {
     expect(result.success).toBe(false);
     expect(result.error).toBe("Errors.bookingStateConflict");
     expect(mockPrisma.booking.update).not.toHaveBeenCalled();
+    expect(mockPrisma.booking.updateMany).not.toHaveBeenCalled();
   });
 
-  it("should allow rejecting WAITING_APPROVAL booking", async () => {
+  it("reddi ham prisma yerine servise devreder", async () => {
     mockAuth.mockResolvedValue({ user: { id: "owner-1", role: "PARTNER" } });
-    mockPrisma.booking.findUnique.mockResolvedValue({
-      id: "b2",
-      status: "WAITING_APPROVAL",
-      shop: { ownerId: "owner-1" },
-      guest: { email: "g@t.com" },
-    });
-    mockBookingService.cancelBooking.mockResolvedValue({ ok: true, fullRefund: false });
+    mockBookingService.rejectBooking.mockResolvedValue({ ok: true });
 
     const { rejectBookingAction } = await import("@/actions/partner");
     const result = await rejectBookingAction("b2");
 
     expect(result.success).toBe(true);
-    // rejectBookingAction artık ham prisma.booking.update yerine
-    // bookingService.cancelBooking() üzerinden geçiyor (refund/loyalty/slot temizliği
-    // için tek doğruluk kaynağı orada) — bkz. docs/KOD_TARAMA_2026-08-23.md, BULGU 1.1.
-    expect(mockBookingService.cancelBooking).toHaveBeenCalledWith("b2");
+    expect(mockBookingService.rejectBooking).toHaveBeenCalledWith(
+      "b2",
+      { id: "owner-1", role: "PARTNER" },
+      expect.objectContaining({ locale: expect.any(String) }),
+    );
+    expect(mockPrisma.booking.update).not.toHaveBeenCalled();
   });
 });
 

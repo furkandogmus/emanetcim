@@ -103,14 +103,14 @@ export default function AdminDashboardClient({
         className="grid grid-cols-1 lg:grid-cols-3 gap-8"
       >
         <div className="lg:col-span-2 flex flex-col gap-8">
-          <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
+          <div className="bg-white p-8 rounded-4xl border border-gray-100 shadow-sm">
             <div className="mb-6 flex justify-between items-center px-2">
-              <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">
+              <h3 className="text-sm id-eyebrow text-gray-400">
                 {t("dashboardLiveAnalytics")}
               </h3>
               <div className="flex gap-2">
                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                <span className="id-eyebrow text-gray-400">
                   {t("systemActive")}
                 </span>
               </div>
@@ -120,14 +120,14 @@ export default function AdminDashboardClient({
             </div>
           </div>
 
-          <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
-            <h3 className="text-sm font-black uppercase tracking-widest text-gray-400 mb-6 px-2">
+          <div className="bg-white p-8 rounded-4xl border border-gray-100 shadow-sm">
+            <h3 className="text-sm id-eyebrow text-gray-400 mb-6 px-2">
               {t("partnerStatus")}
             </h3>
             <div className="flex flex-col gap-3">
               <Link
                 href="/admin/applications"
-                className="group flex items-center justify-between p-5 bg-orange-50 hover:bg-orange-100 rounded-[2rem] transition-all border border-orange-100/50"
+                className="group flex items-center justify-between p-5 bg-orange-50 hover:bg-orange-100 rounded-3xl transition-all border border-orange-100/50"
               >
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-orange-600 shadow-sm group-hover:scale-110 transition-transform">
@@ -135,7 +135,7 @@ export default function AdminDashboardClient({
                   </div>
                   <div>
                     <p className="font-black text-gray-900 tracking-tight">{t("applications")}</p>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-orange-600/60">{t("approveShop")}</p>
+                    <p className="id-eyebrow text-orange-600/60">{t("approveShop")}</p>
                   </div>
                 </div>
                 <ArrowRight className="text-orange-300 group-hover:translate-x-1 transition-transform" size={20} />
@@ -143,7 +143,7 @@ export default function AdminDashboardClient({
 
               <Link
                 href="/admin/partners"
-                className="group flex items-center justify-between p-5 bg-blue-50 hover:bg-blue-100 rounded-[2rem] transition-all border border-blue-100/50"
+                className="group flex items-center justify-between p-5 bg-blue-50 hover:bg-blue-100 rounded-3xl transition-all border border-blue-100/50"
               >
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-blue-600 shadow-sm group-hover:scale-110 transition-transform">
@@ -151,7 +151,7 @@ export default function AdminDashboardClient({
                   </div>
                   <div>
                     <p className="font-black text-gray-900 tracking-tight">{t("shopManagement")}</p>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-blue-600/60">{t("activePartners")}</p>
+                    <p className="id-eyebrow text-blue-600/60">{t("activePartners")}</p>
                   </div>
                 </div>
                 <ArrowRight className="text-blue-300 group-hover:translate-x-1 transition-transform" size={20} />
@@ -159,7 +159,7 @@ export default function AdminDashboardClient({
 
               <Link
                 href="/admin/users"
-                className="group flex items-center justify-between p-5 bg-gray-50 hover:bg-gray-100 rounded-[2rem] transition-all border border-gray-100"
+                className="group flex items-center justify-between p-5 bg-gray-50 hover:bg-gray-100 rounded-3xl transition-all border border-gray-100"
               >
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-gray-600 shadow-sm group-hover:scale-110 transition-transform">
@@ -167,7 +167,7 @@ export default function AdminDashboardClient({
                   </div>
                   <div>
                     <p className="font-black text-gray-900 tracking-tight">{t("usersManagement")}</p>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">{t("banDeleteUsers")}</p>
+                    <p className="id-eyebrow text-gray-400">{t("banDeleteUsers")}</p>
                   </div>
                 </div>
                 <ArrowRight className="text-gray-300 group-hover:translate-x-1 transition-transform" size={20} />
@@ -176,9 +176,9 @@ export default function AdminDashboardClient({
           </div>
         </div>
 
-        <div className="bg-gray-900 rounded-[2.5rem] p-8 text-white flex flex-col justify-between shadow-2xl shadow-gray-200 h-fit lg:sticky lg:top-10">
+        <div className="bg-gray-900 rounded-4xl p-8 text-white flex flex-col justify-between shadow-2xl shadow-gray-200 h-fit lg:sticky lg:top-10">
           <div>
-            <h3 className="text-sm font-black uppercase tracking-widest opacity-40 mb-6">
+            <h3 className="text-sm id-eyebrow opacity-40 mb-6">
               {t("quickActions")}
             </h3>
             <div className="flex flex-col gap-4">
@@ -210,7 +210,7 @@ export default function AdminDashboardClient({
               </Link>
               <Link
                 href="/admin/status"
-                className="w-full min-h-[3rem] px-5 bg-orange-600 rounded-2xl text-xs font-black uppercase tracking-widest transition-all text-left flex items-center justify-between group shadow-lg shadow-orange-900/40"
+                className="w-full min-h-[3rem] px-5 bg-orange-600 rounded-2xl text-xs id-eyebrow transition-all text-left flex items-center justify-between group shadow-lg shadow-orange-900/40"
               >
                 <span className="flex items-center gap-3">
                   <Activity size={18} />
@@ -274,7 +274,7 @@ export default function AdminDashboardClient({
             </div>
           </div>
           <div className="pt-8 mt-8 border-t border-white/10 flex items-center justify-between">
-            <span className="text-[10px] font-bold opacity-40 uppercase tracking-widest">
+            <span className="id-eyebrow opacity-40">
               {t("versionLabel")}
             </span>
             <div className="p-2 bg-orange-600 rounded-lg shadow-lg shadow-orange-900/40">
@@ -311,7 +311,7 @@ function StatCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
       whileHover={{ y: -5 }}
-      className="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-gray-200/50 transition-all"
+      className="bg-white rounded-4xl p-8 border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-gray-200/50 transition-all"
     >
       <div className="flex items-center gap-4 text-gray-400 mb-6">
         <div
@@ -319,7 +319,7 @@ function StatCard({
         >
           {icon}
         </div>
-        <span className="text-[10px] font-black uppercase tracking-widest leading-none">
+        <span className="id-eyebrow leading-none">
           {title}
         </span>
       </div>

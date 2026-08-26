@@ -21,7 +21,11 @@ export default async function PartnerPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams?: Promise<{ booking?: string; checkoutBooking?: string }>;
+  searchParams?: Promise<{
+    booking?: string;
+    checkoutBooking?: string;
+    shop?: string;
+  }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -39,7 +43,16 @@ export default async function PartnerPage({
   }
 
   const shops = await shopService.getShopsByOwner(session.user.id);
-  const activeShop = shops[0];
+  /**
+   * Panel eskiden koşulsuz `shops[0]`'ı gösteriyordu. Çok dükkanlı esnafın
+   * (seed'deki demo esnaf: Galata + Sultanahmet) ikinci dükkanındaki valizler
+   * "İşlem Geçmişi"nde hiç görünmüyordu: check-in `?booking=`/QR ile sahiplik
+   * üzerinden çalıştığı için valiz ALINIYOR ama listede bulunamıyor, dolayısıyla
+   * teslim edilemiyordu. Seçim `?shop=` ile, sahiplik listesinden doğrulanarak.
+   */
+  const requestedShopId = sp.shop?.trim();
+  const activeShop =
+    shops.find((s) => s.id === requestedShopId) ?? shops[0];
 
   if (!activeShop) {
     return (
@@ -92,6 +105,7 @@ export default async function PartnerPage({
       initialPricePerDay={moneyToNumber(activeShop.pricePerDay) || marketPrice}
       marketPrice={marketPrice}
       bookings={JSON.parse(JSON.stringify(bookings))}
+      shops={shops.map((s) => ({ id: s.id, name: s.name }))}
       initialBookingId={initialBookingId}
       initialCheckoutBookingId={initialCheckoutBookingId}
       initialPhone={ownerPhoneRow?.phone ?? ""}

@@ -32,10 +32,10 @@ import {
  * `parseDatetimeLocalInTimeZone`.
  */
 import {
+  PLATFORM_TIMEZONE,
   parseDatetimeLocalInTimeZone,
   toDatetimeLocalValueInTimeZone,
 } from "@/lib/datetime-local";
-import DateTimePicker from "@/components/ui/DateTimePicker";
 import type { PricingRules } from "@/lib/pricing-rules";
 import { isInsuranceEnabled } from "@/lib/commerce-context";
 import {
@@ -43,12 +43,12 @@ import {
   trackPlausibleEvent,
 } from "@/lib/plausible-events";
 import { useKeyboardAware } from "@/lib/hooks/useKeyboardAware";
-import { useShare } from "@/lib/hooks/useShare";
 import WebPushOptIn from "@/components/WebPushOptIn";
 import SlotAvailabilityGrid from "@/components/guest/SlotAvailabilityGrid";
 import Money from "@/components/common/Money";
 import { formatDecimal, formatTryCurrency } from "@/lib/currency";
 import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
+import { useActionErrorText } from "@/lib/use-action-error";
 interface CheckoutClientProps {
   shopId: string;
   shopName: string;
@@ -59,6 +59,14 @@ interface CheckoutClientProps {
   initialCheckIn?: string;
   initialCheckOut?: string;
   initialBags?: number;
+  /**
+   * Dükkanın kendi saat dilimi (`Shop.timezone`). `SlotService` müsaitliği bu
+   * dilimde üretiyordu ama checkout her yerde platform varsayılanını (İstanbul)
+   * kullanıyordu; İstanbul dışı ilk dükkanda ikisi ayrışır ve misafirin seçtiği
+   * saat ile dükkanın gördüğü saat kayar. Dilim uçtan uca tek parametre olarak
+   * taşınıyor: sayfa → checkout → ızgara.
+   */
+  timeZone?: string;
 }
 
 export default function CheckoutClient({
@@ -71,13 +79,12 @@ export default function CheckoutClient({
   initialCheckIn,
   initialCheckOut,
   initialBags,
+  timeZone = PLATFORM_TIMEZONE,
 }: CheckoutClientProps) {
   const t = useTranslations("Guest");
-  const tErr = useTranslations("Errors");
+  const errorText = useActionErrorText();
   const locale = useLocale();
   const { keyboardHeight } = useKeyboardAware();
-  const { share } = useShare();
-  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
   const [selectedSlotCount, setSelectedSlotCount] = useState(0);
   const slot = roundedSlotPrices(pricePerDay, pricingRules);
   const priceS = slot.s;
@@ -101,25 +108,25 @@ export default function CheckoutClient({
 
   const [checkInLocal, setCheckInLocal] = useState(() => {
     if (initialCheckIn && !isNaN(Date.parse(initialCheckIn))) {
-      return toDatetimeLocalValueInTimeZone(new Date(initialCheckIn));
+      return toDatetimeLocalValueInTimeZone(new Date(initialCheckIn), timeZone);
     }
-    return toDatetimeLocalValueInTimeZone(new Date());
+    return toDatetimeLocalValueInTimeZone(new Date(), timeZone);
   });
   const [checkOutLocal, setCheckOutLocal] = useState(() => {
     if (initialCheckOut && !isNaN(Date.parse(initialCheckOut))) {
-      return toDatetimeLocalValueInTimeZone(new Date(initialCheckOut));
+      return toDatetimeLocalValueInTimeZone(new Date(initialCheckOut), timeZone);
     }
     const now = new Date();
     const defaultOut = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-    return toDatetimeLocalValueInTimeZone(defaultOut);
+    return toDatetimeLocalValueInTimeZone(defaultOut, timeZone);
   });
 
   useEffect(() => {
     trackPlausibleEvent(PLAUSIBLE_EVENTS.CheckoutStarted, { shopId });
   }, [shopId]);
 
-  const checkInDate = parseDatetimeLocalInTimeZone(checkInLocal);
-  const checkOutDate = parseDatetimeLocalInTimeZone(checkOutLocal);
+  const checkInDate = parseDatetimeLocalInTimeZone(checkInLocal, timeZone);
+  const checkOutDate = parseDatetimeLocalInTimeZone(checkOutLocal, timeZone);
   const windowOk =
     checkInDate !== null &&
     checkOutDate !== null &&
@@ -243,13 +250,7 @@ export default function CheckoutClient({
       }
       setIsSuccess(true);
     } else {
-      const code = result.error;
-      if (code?.startsWith("Errors.")) {
-        const key = code.slice(7);
-        setError(tErr(key as never));
-      } else {
-        setError(code || t("checkoutUnexpectedError"));
-      }
+      setError(errorText(result.error, t("checkoutUnexpectedError")));
     }
   };
 
@@ -284,6 +285,22 @@ export default function CheckoutClient({
   };
 
   const totalSteps = 2;
+
+  /*
+    2026-08-24: 1. adimin "devam" butonu valiz secilmeden ya da tarih araligi
+    gecersizken `disabled` idi. Disabled buton tiklanamadigi icin `goNext()`
+    hic calismiyor, dolayisiyla oradaki `setError(...)` aciklamasi da ekrana
+    hic dusmuyordu: kullanici sonuk bir butona bakip nedenini ogrenemiyordu.
+    Engelin sebebi artik butonun ustunde pasif bir ipucu olarak yaziyor ve
+    `aria-describedby` ile butona baglaniyor. */
+  const step1Blocker =
+    step === 1
+      ? totalBags === 0 || totalPrice === 0
+        ? t("checkoutSelectBagsHint")
+        : !windowOk
+          ? t("checkoutDatesInvalid", { max: pricingRules.maxStayDays })
+          : null
+      : null;
   const stepLabels = [t("checkoutStep1Short"), t("checkoutStep2Short")];
   if (isSuccess) {
     return (
@@ -299,7 +316,7 @@ export default function CheckoutClient({
             <p className="text-green-50/80 font-medium">{t("requestSentSub")}</p>
           </div>
 
-          <div className="bg-white text-gray-900 rounded-[2.5rem] p-10 w-full shadow-2xl relative overflow-hidden">
+          <div className="bg-white text-gray-900 rounded-4xl p-10 w-full shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-2 bg-orange-600"></div>
             <div className="flex flex-col items-center gap-6">
               <div className="bg-gray-50 border-2 border-gray-100 p-8 rounded-3xl flex items-center justify-center min-h-[220px]">
@@ -463,7 +480,7 @@ export default function CheckoutClient({
         {step === 1 && (
           <>
             <div>
-              <h2 className="text-sm font-black uppercase tracking-widest text-gray-900 mb-4">
+              <h2 className="text-sm id-eyebrow text-gray-900 mb-4">
                 {t("checkoutStep1Title")}
               </h2>
               <div className="flex justify-between items-baseline mb-2">
@@ -498,7 +515,7 @@ export default function CheckoutClient({
             </div>
 
             <section className="flex flex-col gap-3" data-testid="checkout-stay-days">
-              <h2 className="text-sm font-black uppercase tracking-widest text-gray-900">
+              <h2 className="text-sm id-eyebrow text-gray-900">
                 {t("stayDuration")}
               </h2>
 
@@ -506,6 +523,7 @@ export default function CheckoutClient({
                 shopId={shopId}
                 date={checkInDate ?? new Date()}
                 selectedBags={totalBags || 1}
+                timeZone={timeZone}
                 onSelectRange={(from, to, count) => {
                   setSelectedSlotCount(count);
                   if (from) setCheckInLocal(from);
@@ -516,7 +534,7 @@ export default function CheckoutClient({
               {selectedSlotCount > 0 && (
                 <div className="flex items-center justify-between p-4 bg-orange-50 rounded-2xl border border-orange-100">
                   <div>
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                    <p className="id-eyebrow text-gray-400">
                       {t("checkoutSelectedDuration")}
                     </p>
                     <p className="font-black text-lg text-gray-900 mt-0.5">
@@ -551,7 +569,7 @@ export default function CheckoutClient({
 
         {step === 2 && (
           <>
-            <h2 className="text-sm font-black uppercase tracking-widest text-gray-900">
+            <h2 className="text-sm id-eyebrow text-gray-900">
               {t("checkoutStep2Title")}
             </h2>
 
@@ -613,7 +631,7 @@ export default function CheckoutClient({
             >
               <p
                 id="checkout-policy-callout"
-                className="text-[10px] font-black uppercase tracking-widest text-gray-400"
+                className="id-eyebrow text-gray-400"
               >
                 {t("checkoutPolicyCalloutTitle")}
               </p>
@@ -634,10 +652,60 @@ export default function CheckoutClient({
           (~80px, Playwright ile olculdu) kucuktu -> CTA nav'in ustune biniyordu
           (UX_AUDIT_BOUNCE_COMPARISON P0). 6rem'e cikarildi, ~16px pay birakiyor. */}
       <footer style={{ bottom: keyboardHeight }} className="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-2xl w-full p-4 sm:p-6 pb-[calc(env(safe-area-inset-bottom)+6rem)] bg-white/90 backdrop-blur-xl border-t border-gray-50 flex flex-col gap-3 z-20">
-        {step === 1 && error && (
-          <div className="ui-state ui-state-error flex items-center gap-2 rounded-xl">
-            <AlertCircle size={14} />
+        {/*
+          2026-08-24: HATA SON ADIMDA GORUNMUYORDU.
+
+          Bu blok `step === 1` ile kisitliydi. Uye girisi yapmis bir misafir 2.
+          adimda "gonder"e bastiginda sunucu hatasi (kapasite dolu, gecersiz
+          kupon, slot kapali) `setError(...)` ile yaziliyor ama HICBIR YERDE
+          render edilmiyordu -- ne footer'da ne 2. adimin govdesinde. Ekranda
+          hicbir sey degismedigi icin akis "tikla, hicbir sey olmuyor"a
+          donuyordu; modal icin ayni hata sinifi daha once duzeltilmisti.
+          Kisit kaldirildi; modal acikken kendi hatasini gosterdigi icin
+          yalnizca o durumda gizleniyor.
+        */}
+        {error && !showAuthModal && (
+          <div
+            role="alert"
+            className="ui-state ui-state-error flex items-center gap-2 rounded-xl"
+          >
+            <AlertCircle size={14} className="shrink-0" />
             {error}
+          </div>
+        )}
+
+        {step === 1 && !error && step1Blocker && (
+          <p
+            id="checkout-step1-blocker"
+            className="ui-state ui-state-empty flex items-center gap-2 rounded-xl"
+          >
+            <AlertCircle size={14} className="shrink-0" />
+            {step1Blocker}
+          </p>
+        )}
+
+        {/*
+          Adim 1'de calisan toplam: kullanici valizi ve sureyi burada seciyor
+          ama tutari yalnizca 2. adimda goruyordu. Ucu ogrenmek icin bir adim
+          ilerlemek gerekiyordu; ozet CTA'nin hemen ustune alindi.
+        */}
+        {step === 1 && !step1Blocker && (
+          <div className="flex items-center justify-between gap-3 px-1">
+            <div className="flex flex-col min-w-0">
+              <span className="id-eyebrow text-gray-400">
+                {t("total")}
+              </span>
+              <span className="text-[11px] font-bold text-gray-500 truncate">
+                {totalBags} {t("bagsUnit")}
+                {displayBillableDays ? ` · ${displayBillableDays} ${t("daysUnit")}` : ""}
+              </span>
+            </div>
+            <span data-testid="checkout-running-total" className="shrink-0">
+              <Money
+                amount={grandTotal}
+                className="text-2xl font-black tracking-tighter text-orange-600"
+              />
+            </span>
           </div>
         )}
         <div className="flex gap-3">
@@ -655,6 +723,11 @@ export default function CheckoutClient({
               type="button"
               data-testid="checkout-footer-primary"
               onClick={goNext}
+              aria-describedby={
+                step === 1 && !error && step1Blocker
+                  ? "checkout-step1-blocker"
+                  : undefined
+              }
               disabled={
                 step === 1 && (!windowOk || totalPrice === 0)
               }
@@ -695,7 +768,7 @@ export default function CheckoutClient({
             role="dialog"
             aria-modal="true"
             aria-label={t("checkoutGuestContinue")}
-            className="relative bg-white rounded-[2rem] shadow-2xl border border-gray-100 max-w-md w-full overflow-hidden p-8 animate-slide-up text-center"
+            className="relative bg-white rounded-3xl shadow-2xl border border-gray-100 max-w-md w-full overflow-hidden p-8 animate-slide-up text-center"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-orange-500 to-amber-500" />

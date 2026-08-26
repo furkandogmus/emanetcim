@@ -9,6 +9,7 @@ import { notificationService } from "@/services/NotificationService";
 import { analyticsService } from "@/services/AnalyticsService";
 import { resolveServerSessionId } from "@/lib/analytics-server";
 import logger from "@/lib/logger";
+import { toMobileUser } from "@/lib/mobile-dto";
 
 const schema = z.union([
   z.object({ email: z.string().email(), code: z.string().length(6) }),
@@ -132,14 +133,6 @@ export async function POST(req: Request) {
   return NextResponse.json({
     accessToken: access,
     refreshToken: refresh,
-    user: {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      phone: user.phone,
-      role: user.role,
-      avatarUrl: user.image,
-      emailVerified: user.emailVerified !== null,
-    },
+    user: toMobileUser(user),
   });
 }

@@ -92,7 +92,7 @@ export default async function HotelsPage({
         </section>
 
         {/* CTA */}
-        <section className="mt-16 bg-blue-50 p-10 rounded-[3rem] border border-blue-100 text-center">
+        <section className="mt-16 bg-blue-50 p-10 rounded-4xl border border-blue-100 text-center">
           <h2 className="text-2xl font-black text-gray-900">{t("ctaTitle")}</h2>
           <p className="mt-3 text-gray-600 max-w-xl mx-auto">{t("ctaDescription")}</p>
           <div className="mt-8">

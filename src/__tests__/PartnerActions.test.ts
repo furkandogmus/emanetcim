@@ -98,23 +98,33 @@ describe("Partner Actions", () => {
       expect(result.error).toBe("Errors.unauthorized");
     });
 
-    it("should fail if booking status is not PAID or CHECKED_IN", async () => {
-      mockPrisma.booking.findUnique.mockResolvedValue({
-        id: "b1",
-        status: "WAITING_APPROVAL",
-        shop: { ownerId: "partner-1" },
-      });
+    /**
+     * Durum kosulu 2026-08-25'te BIRLESTIRILDI (`APPROVED | PAID | CHECKED_IN`).
+     *
+     * Oncesinde web `PAID | CHECKED_IN`, mobil uc `APPROVED | PAID` istiyordu —
+     * ayni rezervasyon icin ayni islem bir tasiyicida kabul edilip digerinde
+     * reddediliyordu. Kural artik `src/services/booking/bag-revision.ts`'te tek
+     * yerde; birlesim secildi ki hicbir tasiyici calisan bir yetenegini
+     * kaybetmesin. Daraltmak bir IS KARARIDIR ve tek satirda yapilir.
+     */
+    it("revizyona kapalı durumlarda reddeder", async () => {
+      for (const status of ["WAITING_APPROVAL", "PENDING", "CANCELLED", "CHECKED_OUT"]) {
+        mockPrisma.booking.findUnique.mockResolvedValue({
+          id: "b1",
+          status,
+          shop: { ownerId: "partner-1" },
+        });
 
-      const result = await setPendingBagRevisionAction({
-        bookingId: "550e8400-e29b-41d4-a716-446655440000",
-        bagCountS: 1,
-        bagCountM: 1,
-        bagCountXl: 0,
-        extraAmount: 0,
-      });
+        const result = await setPendingBagRevisionAction({
+          bookingId: "550e8400-e29b-41d4-a716-446655440000",
+          bagCountS: 1,
+          bagCountM: 1,
+          bagCountXl: 0,
+        });
 
-      expect(result.success).toBe(false);
-      expect(result.error).toBe("Errors.invalidData");
+        expect(result.success, status).toBe(false);
+        expect(result.error, status).toBe("Errors.bookingStateConflict");
+      }
     });
 
     it("should update booking with valid data", async () => {

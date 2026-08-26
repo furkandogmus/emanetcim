@@ -19,7 +19,7 @@ import { hapticMedium } from "@/lib/haptic";
 import { useShare } from "@/lib/hooks/useShare";
 import { roundedSlotPrices } from "@/lib/bag-pricing";
 import type { PricingRules } from "@/lib/pricing-rules";
-import { dateLocaleForUiLocale } from "@/lib/date-locale";
+import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import {
   PLAUSIBLE_EVENTS,
   trackPlausibleEvent,
@@ -81,7 +81,7 @@ export default function ShopDetailClient({
    */
   const insuranceEnabled = isInsuranceEnabled(pricingRules);
   const locale = useLocale();
-  const dateLocale = dateLocaleForUiLocale(locale);
+  const dateLocale = bcp47ForUiLocale(locale);
   const slot = roundedSlotPrices(shop.pricePerDay, pricingRules);
   const rating = shop.rating ?? 0;
   const mapsUrl =
@@ -181,7 +181,7 @@ export default function ShopDetailClient({
               </span>
             </div>
           </div>
-          <div className="absolute inset-x-4 -bottom-12 z-10 rounded-[1.75rem] bg-white p-5 shadow-2xl shadow-gray-300/60">
+          <div className="absolute inset-x-4 -bottom-12 z-10 rounded-2xl bg-white p-5 shadow-2xl shadow-gray-300/60">
             <div className="flex items-start justify-between gap-3">
               <h1 className="min-w-0 flex-1 break-words text-[1.65rem] sm:text-[1.9rem] leading-[1.05] font-black text-gray-900">
                 {shop.name}
@@ -259,13 +259,13 @@ export default function ShopDetailClient({
           </section>
 
           {shop.description && (
-            <section className="rounded-[1.75rem] border border-gray-100 bg-white p-5">
+            <section className="rounded-2xl border border-gray-100 bg-white p-5">
               <h2 className="text-xl font-black text-gray-900 mb-3">{t("shopDetailAbout")}</h2>
               <p className="text-sm leading-relaxed text-gray-600">{shop.description}</p>
             </section>
           )}
 
-          <section className="rounded-[1.75rem] border border-gray-100 bg-[#f2f4ff] p-5">
+          <section className="rounded-2xl border border-gray-100 bg-[#f2f4ff] p-5">
             <h2 className="text-xl font-black text-gray-900 mb-3">{t("shopDetailHours")}</h2>
             <div className="space-y-2 text-sm font-bold text-gray-700">
               <div className="flex justify-between"><span>{mobileCopy.weekDays}</span><span>{hoursLabel}</span></div>
@@ -331,7 +331,7 @@ export default function ShopDetailClient({
         <div className="fixed inset-x-0 bottom-0 z-20 border-t border-gray-100 bg-white/95 px-4 pb-[calc(env(safe-area-inset-bottom)+6rem)] pt-3 backdrop-blur-xl">
           <div className="mx-auto flex max-w-lg items-center gap-3">
             <div className="flex-1">
-              <p className="text-xs font-black uppercase tracking-widest text-gray-400">{t("perBag")}</p>
+              <p className="text-xs id-eyebrow text-gray-400">{t("perBag")}</p>
               <p className="text-3xl font-black text-gray-900">
                 {/*
                   ÇİFT PARA İŞARETİ HATASI DÜZELTİLDİ (2026-08-22).
@@ -406,7 +406,7 @@ export default function ShopDetailClient({
 
       <main className="max-w-lg mx-auto px-4 -mt-4 relative z-[1] flex flex-col gap-4">
         <section className="bg-white rounded-3xl p-6 shadow-xl shadow-gray-200/50 border border-gray-100">
-          <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4">
+          <h2 className="id-eyebrow text-gray-400 mb-4">
             {t("shopDetailBagPrices")}
           </h2>
           <div className="grid grid-cols-3 gap-3 text-center">
@@ -476,7 +476,7 @@ export default function ShopDetailClient({
 
         {mapsUrl ? (
           <section className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
-            <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">
+            <h2 className="id-eyebrow text-gray-400 mb-3">
               {t("shopDetailLocation")}
             </h2>
             <a
@@ -492,7 +492,7 @@ export default function ShopDetailClient({
         ) : null}
 
         <section className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
-          <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4">
+          <h2 className="id-eyebrow text-gray-400 mb-4">
             {t("shopDetailReviews")} ({shop.reviews.length})
           </h2>
           {shop.reviews.length === 0 ? (
@@ -539,7 +539,7 @@ export default function ShopDetailClient({
           <Link
             href={`/checkout/${shop.id}${checkoutParams}`}
             data-testid="shop-book-now"
-            className="flex w-full items-center justify-center gap-2 py-4 rounded-2xl bg-orange-600 text-white text-sm font-black uppercase tracking-widest shadow-lg shadow-orange-200 hover:bg-orange-700 transition-all active:scale-[0.97]"
+            className="flex w-full items-center justify-center gap-2 py-4 rounded-2xl bg-orange-600 text-white text-sm id-eyebrow shadow-lg shadow-orange-200 hover:bg-orange-700 transition-all active:scale-[0.97]"
             onClick={() => hapticMedium()}
           >
             {t("shopDetailBookNow")}

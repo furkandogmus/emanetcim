@@ -1,10 +1,10 @@
 "use server";
 
-import { auth } from "@/auth";
 import prisma from "@/lib/db";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { getPricingRules } from "@/lib/platform-settings";
 import { z } from "zod";
+import { requireUser } from "@/lib/action-auth";
 
 const hm = /^\d{1,2}:\d{2}$/;
 
@@ -34,9 +34,8 @@ export async function updateShopSettingsAction(
     longitude?: number | null;
   }
 ) {
-  const session = await auth();
-
-  if (!session?.user?.id) return { success: false, error: "Errors.authRequired" };
+  const auth = await requireUser();
+  if (!auth.ok) return { success: false, error: auth.error };
 
   const shop = await prisma.shop.findUnique({
     where: { id: shopId },
@@ -45,8 +44,8 @@ export async function updateShopSettingsAction(
 
   if (!shop) return { success: false, error: "Errors.shopNotFound" };
 
-  if (shop.ownerId !== session.user.id) {
-    if (session.user.role !== "ADMIN") return { success: false, error: "Errors.unauthorized" };
+  if (shop.ownerId !== auth.actor.id) {
+    if (auth.actor.role !== "ADMIN") return { success: false, error: "Errors.unauthorized" };
   }
 
   const parsed = shopSettingsSchema.safeParse(data);

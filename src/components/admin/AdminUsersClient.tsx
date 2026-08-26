@@ -29,6 +29,7 @@ import { DELETE_USER_BLOCKED_CODE } from "@/lib/admin/constants";
 import { toast } from "sonner";
 import { Role } from "@prisma/client";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
+import { actionErrorKey } from "@/lib/action-error";
 
 interface User {
   id: string;
@@ -110,8 +111,8 @@ export default function AdminUsersClient({
       await toggleUserBanAction(id, !currentBan);
       setUsers(prev => prev.map(u => u.id === id ? { ...u, isBanned: !currentBan } : u));
       toast.success(currentBan ? t("userUnbanned") : t("userBanned"));
-    } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : String(error));
+    } catch (caughtError: unknown) {
+      toast.error(tErrors(actionErrorKey(caughtError)));
     } finally {
       setLoadingId(null);
     }
@@ -136,8 +137,8 @@ export default function AdminUsersClient({
           }
           setUsers((prev) => prev.filter((u) => u.id !== id));
           toast.success(t("userDeleted"));
-        } catch (error: unknown) {
-          toast.error(error instanceof Error ? error.message : String(error));
+        } catch (caughtError: unknown) {
+          toast.error(tErrors(actionErrorKey(caughtError)));
         } finally {
           setLoadingId(null);
         }
@@ -161,8 +162,8 @@ export default function AdminUsersClient({
         prev.map((u) => (u.id === id ? { ...u, role: newRole } : u)),
       );
       toast.success(t("roleChangeApplied"));
-    } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : String(error));
+    } catch (caughtError: unknown) {
+      toast.error(tErrors(actionErrorKey(caughtError)));
     } finally {
       setLoadingId(null);
     }
@@ -206,8 +207,8 @@ export default function AdminUsersClient({
         return;
       }
       toast.success(t("resendSuccess"));
-    } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : String(error));
+    } catch (caughtError: unknown) {
+      toast.error(tErrors(actionErrorKey(caughtError)));
     }
   };
 
@@ -231,8 +232,8 @@ export default function AdminUsersClient({
         return;
       }
       toast.warning(t("ipBlockedSuccess"));
-    } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : String(error));
+    } catch (caughtError: unknown) {
+      toast.error(tErrors(actionErrorKey(caughtError)));
     }
   };
 
@@ -243,7 +244,7 @@ export default function AdminUsersClient({
         <div>
           <Link href="/admin" className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors mb-4 group">
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="text-xs font-black uppercase tracking-widest">{t("backToDashboard")}</span>
+            <span className="text-xs id-eyebrow">{t("backToDashboard")}</span>
           </Link>
           <h1 className="text-4xl font-black tracking-tighter text-gray-900 flex items-center gap-3">
             <ShieldAlert className="text-orange-600" />
@@ -255,7 +256,7 @@ export default function AdminUsersClient({
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="px-4 py-4 bg-white border border-gray-100 rounded-2xl text-xs font-black uppercase tracking-widest text-gray-500 hover:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+            className="px-4 py-4 bg-white border border-gray-100 rounded-2xl text-xs id-eyebrow text-gray-500 hover:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
           >
             <option value="ALL">{t("userRole_ALL")}</option>
             <option value="ADMIN">{t("userRole_ADMIN")}</option>
@@ -266,7 +267,7 @@ export default function AdminUsersClient({
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-4 bg-white border border-gray-100 rounded-2xl text-xs font-black uppercase tracking-widest text-gray-500 hover:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+            className="px-4 py-4 bg-white border border-gray-100 rounded-2xl text-xs id-eyebrow text-gray-500 hover:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
           >
             <option value="ALL">{t("userStatus_ALL")}</option>
             <option value="ACTIVE">{t("userStatus_ACTIVE")}</option>
@@ -301,7 +302,7 @@ export default function AdminUsersClient({
       </header>
 
       <div className="mb-5 flex items-center justify-between">
-        <p className="text-xs font-black uppercase tracking-widest text-gray-400">
+        <p className="text-xs id-eyebrow text-gray-400">
           {filteredUsers.length} / {users.length} users
         </p>
       </div>
@@ -313,23 +314,23 @@ export default function AdminUsersClient({
           </span>
           <Link
             href="/admin/role-approvals"
-            className="text-[10px] font-black uppercase tracking-widest text-orange-700 hover:underline"
+            className="id-eyebrow text-orange-700 hover:underline"
           >
             {t("roleApprovalsNav")}
           </Link>
         </div>
       ) : null}
 
-      <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden hidden lg:block">
+      <div className="bg-white rounded-4xl border border-gray-100 shadow-sm overflow-hidden hidden lg:block">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50/50 border-b border-gray-100">
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">{t("user")}</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">{t("role")}</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">{t("lastIp")}</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">{t("status")}</th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">{t("actions")}</th>
+                <th className="px-8 py-5 id-eyebrow text-gray-400">{t("user")}</th>
+                <th className="px-8 py-5 id-eyebrow text-gray-400">{t("role")}</th>
+                <th className="px-8 py-5 id-eyebrow text-gray-400">{t("lastIp")}</th>
+                <th className="px-8 py-5 id-eyebrow text-gray-400">{t("status")}</th>
+                <th className="px-8 py-5 id-eyebrow text-gray-400 text-right">{t("actions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -354,7 +355,7 @@ export default function AdminUsersClient({
                       </div>
                     </td>
                     <td className="px-8 py-6">
-                      <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
+                      <span className={` px-3 py-1 rounded-full text-[9px] id-eyebrow ${
                         user.role === Role.ADMIN ? "bg-purple-50 text-purple-600" :
                         user.role === Role.PARTNER ? "bg-blue-50 text-blue-600" : "bg-gray-100 text-gray-600"
                       }`}>
@@ -378,18 +379,18 @@ export default function AdminUsersClient({
                     <td className="px-8 py-6">
                       <div className="flex flex-col gap-1">
                         {user.isBanned ? (
-                          <div className="flex items-center gap-1.5 text-red-600 text-[10px] font-black uppercase tracking-widest">
+                          <div className="flex items-center gap-1.5 text-red-600 id-eyebrow">
                             <ShieldX size={12} />
                             {t("banned")}
                           </div>
                         ) : (
-                          <div className="flex items-center gap-1.5 text-green-600 text-[10px] font-black uppercase tracking-widest">
+                          <div className="flex items-center gap-1.5 text-green-600 id-eyebrow">
                             <ShieldCheck size={12} />
                             {t("active")}
                           </div>
                         )}
                         {!user.emailVerified && (
-                          <div className="flex items-center gap-1.5 text-orange-500 text-[10px] font-black uppercase tracking-widest">
+                          <div className="flex items-center gap-1.5 text-orange-500 id-eyebrow">
                             <Activity size={12} className="animate-pulse" />
                             {t("unverified")}
                           </div>
@@ -469,7 +470,7 @@ export default function AdminUsersClient({
           </table>
           {filteredUsers.length === 0 && (
             <div className="py-20 text-center">
-              <p className="text-xs font-black uppercase tracking-widest text-gray-400">{t("noUsersFound")}</p>
+              <p className="text-xs id-eyebrow text-gray-400">{t("noUsersFound")}</p>
             </div>
           )}
         </div>
@@ -495,7 +496,7 @@ export default function AdminUsersClient({
                     <p className="text-xs text-gray-400 font-bold truncate">{user.email}</p>
                   </div>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
+                <span className={` px-3 py-1 rounded-full text-[9px] id-eyebrow ${
                   user.role === Role.ADMIN ? "bg-purple-50 text-purple-600" :
                   user.role === Role.PARTNER ? "bg-blue-50 text-blue-600" : "bg-gray-100 text-gray-600"
                 }`}>
@@ -519,18 +520,18 @@ export default function AdminUsersClient({
 
               <div className="mt-3 flex flex-wrap gap-2">
                 {user.isBanned ? (
-                  <span className="inline-flex items-center gap-1.5 text-red-600 text-[10px] font-black uppercase tracking-widest">
+                  <span className="inline-flex items-center gap-1.5 text-red-600 id-eyebrow">
                     <ShieldX size={12} />
                     {t("banned")}
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 text-green-600 text-[10px] font-black uppercase tracking-widest">
+                  <span className="inline-flex items-center gap-1.5 text-green-600 id-eyebrow">
                     <ShieldCheck size={12} />
                     {t("active")}
                   </span>
                 )}
                 {!user.emailVerified ? (
-                  <span className="inline-flex items-center gap-1.5 text-orange-500 text-[10px] font-black uppercase tracking-widest">
+                  <span className="inline-flex items-center gap-1.5 text-orange-500 id-eyebrow">
                     <Activity size={12} className="animate-pulse" />
                     {t("unverified")}
                   </span>
@@ -610,7 +611,7 @@ export default function AdminUsersClient({
         </AnimatePresence>
         {filteredUsers.length === 0 && (
           <div className="py-14 text-center bg-white rounded-3xl border border-gray-100">
-            <p className="text-xs font-black uppercase tracking-widest text-gray-400">{t("noUsersFound")}</p>
+            <p className="text-xs id-eyebrow text-gray-400">{t("noUsersFound")}</p>
           </div>
         )}
       </div>

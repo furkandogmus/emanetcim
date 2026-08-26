@@ -8,6 +8,7 @@ import { notificationService } from "@/services/NotificationService";
 import { analyticsService } from "@/services/AnalyticsService";
 import { resolveServerSessionId } from "@/lib/analytics-server";
 import logger from "@/lib/logger";
+import { toMobileUser } from "@/lib/mobile-dto";
 
 const GOOGLE_JWKS = createRemoteJWKSet(new URL("https://www.googleapis.com/oauth2/v3/certs"));
 
@@ -72,14 +73,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       accessToken: access,
       refreshToken: refresh,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        phone: user.phone,
-        role: user.role,
-        avatarUrl: user.image,
-      },
+      user: toMobileUser(user),
     });
   } catch {
     return NextResponse.json({ error: "invalid_token" }, { status: 401 });

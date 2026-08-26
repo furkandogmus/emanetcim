@@ -5,9 +5,27 @@ import { requireMobileUser } from "@/lib/mobile-auth";
 import { bookingService } from "@/services/BookingService";
 import { computeAuthoritativeCheckoutTotals } from "@/lib/booking-server-price";
 import { getPricingRules } from "@/lib/platform-settings";
+import { moneyToNumber } from "@/lib/money";
+import { BookingRejectedError, type BookingRejectionCode } from "@/services/booking/errors";
 import prisma from "@/lib/db";
+import logger from "@/lib/logger";
+import { BookingStatus } from "@prisma/client";
 import { notificationService } from "@/services/NotificationService";
 import { analyticsService } from "@/services/AnalyticsService";
+
+/**
+ * Servisin rezervasyon REDDETME kodlarinin HTTP karsiliklari.
+ *
+ * 2026-08-25 oncesinde bu uc hicbirini yakalamiyordu: gecersiz bir tarih araligi
+ * `createInitialBooking`'in tipsiz Turkce hatasini firlatiyor ve istemciye HTTP 500
+ * donuyordu. Platform tatili kontrolu ise yalnizca web action'indaydi, yani ayni
+ * tarih web'de reddedilirken mobilde KABUL EDILIYORDU.
+ */
+const REJECTION_TO_HTTP: Record<BookingRejectionCode, { status: number; error: string }> = {
+  CAPACITY_EXCEEDED: { status: 409, error: "insufficient_capacity" },
+  INVALID_DATES: { status: 400, error: "invalid_dates" },
+  PLATFORM_HOLIDAY: { status: 400, error: "platform_holiday" },
+};
 
 const schema = z.object({
   shopId: z.string().uuid(),
@@ -49,7 +67,7 @@ export async function POST(req: NextRequest) {
   const checkOutTime = new Date(parsed.data.checkOutTime);
   const rules = await getPricingRules();
   const totals = computeAuthoritativeCheckoutTotals(
-    Number(shop.pricePerDay),
+    moneyToNumber(shop.pricePerDay),
     bagCountS,
     bagCountM,
     bagCountXl,
@@ -58,30 +76,56 @@ export async function POST(req: NextRequest) {
     rules,
   );
 
-  const booking = await bookingService.createInitialBooking({
-    guestId: auth.user.id,
-    shopId,
-    totalPrice: totals.subtotalBeforeCoupon,
-    unitPrice: totals.unitPrice,
-    insuranceFee: totals.insuranceFee,
-    bagCountS: totals.bagCountS,
-    bagCountM: totals.bagCountM,
-    bagCountXl: totals.bagCountXl,
-    checkInTime,
-    checkOutTime,
-  });
+  let booking;
+  try {
+    booking = await bookingService.createInitialBooking({
+      guestId: auth.user.id,
+      shopId,
+      totalPrice: totals.subtotalBeforeCoupon,
+      unitPrice: totals.unitPrice,
+      insuranceFee: totals.insuranceFee,
+      bagCountS: totals.bagCountS,
+      bagCountM: totals.bagCountM,
+      bagCountXl: totals.bagCountXl,
+      checkInTime,
+      checkOutTime,
+      /*
+        Web `createBookingAction` ile AYNI sozlesme. Eskiden burada ham
+        `booking.update({ status: "APPROVED" })` vardi ve web'den farkli olarak
+        denetim izine onay olayi HIC yazilmiyordu — mobil rezervasyonlarin onay
+        izi yoktu. Ikisi de artik servisin isi.
+      */
+      initialStatus: BookingStatus.APPROVED,
+    });
+  } catch (e) {
+    if (e instanceof BookingRejectedError) {
+      const { status, error } = REJECTION_TO_HTTP[e.code];
+      return NextResponse.json({ error }, { status });
+    }
+    throw e;
+  }
 
-  await prisma.booking.update({
-    where: { id: booking.id },
-    data: { status: "APPROVED" },
-  });
-
+  /*
+    Bildirimler ATEŞLE-UNUT: rezervasyon zaten yazıldı, e-posta gecikmesi
+    yanıtı bekletmemeli. Ama `.catch` ŞART — yakalanmamış bir promise reddi
+    Node'da varsayılan olarak SÜRECİ DÜŞÜRÜR. Yani sağlayıcı kaynaklı bir
+    bildirim hatası, ödeme ucunu komple çökertebilirdi. Dosyanın geri kalanı ve
+    `NotificationService` zaten bu kalıbı kullanıyor; burada iki çağrı dışarıda
+    kalmıştı.
+  */
   if (auth.user.email) {
-    void notificationService.notifyBookingSuccess(
-      auth.user.email,
-      booking.id,
-      totals.subtotalBeforeCoupon,
-    );
+    void notificationService
+      .notifyBookingSuccess(
+        auth.user.email,
+        booking.id,
+        totals.subtotalBeforeCoupon,
+      )
+      .catch((err) =>
+        logger.error(
+          { err, bookingId: booking.id },
+          "mobile_checkout_booking_success_notify_failed",
+        ),
+      );
   }
   analyticsService.track({
     name: "booking_created",
@@ -90,12 +134,19 @@ export async function POST(req: NextRequest) {
     metadata: { shopId, source: "mobile" },
   });
 
-  void notificationService.notifyPartnerAndAdminsForNewPaidBooking({
-    bookingId: booking.id,
-    shopName: shop.name,
-    partnerPhone: shop.owner.phone,
-    totalPrice: totals.subtotalBeforeCoupon,
-  });
+  void notificationService
+    .notifyPartnerAndAdminsForNewPaidBooking({
+      bookingId: booking.id,
+      shopName: shop.name,
+      partnerPhone: shop.owner.phone,
+      totalPrice: totals.subtotalBeforeCoupon,
+    })
+    .catch((err) =>
+      logger.error(
+        { err, bookingId: booking.id },
+        "mobile_checkout_partner_notify_failed",
+      ),
+    );
 
   return NextResponse.json({
     bookingId: booking.id,

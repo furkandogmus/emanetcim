@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { XCircle, Calendar as CalendarIcon, Phone, ExternalLink } from "lucide-react";
 import { cancelBookingAction } from "@/actions/booking";
 import { toast } from "sonner";
+import { useActionErrorText } from "@/lib/use-action-error";
 
 type Props = {
   bookingId: string;
@@ -26,6 +27,7 @@ export default function BookingDetailActions({
   shopPhone,
 }: Props) {
   const t = useTranslations("Guest");
+  const errorText = useActionErrorText();
   const [cancelling, setCancelling] = useState(false);
 
   const handleCancel = async () => {
@@ -37,7 +39,8 @@ export default function BookingDetailActions({
       toast.success(t("bookingCancelled"));
       window.location.reload();
     } else {
-      toast.error(typeof res.error === "string" ? res.error : t("cancelFailed"));
+      // `res.error` bir `Errors.*` ANAHTARI; eskiden ekrana aynen basiliyordu.
+      toast.error(errorText(res.error, t("cancelFailed")));
     }
   };
 
@@ -62,7 +65,7 @@ export default function BookingDetailActions({
           type="button"
           onClick={handleCancel}
           disabled={cancelling}
-          className="flex w-full items-center justify-center gap-2 py-3.5 rounded-2xl border border-red-200 bg-red-50 text-red-700 text-xs font-black uppercase tracking-widest hover:bg-red-100 transition-colors disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-2 py-3.5 rounded-2xl border border-red-200 bg-red-50 text-red-700 text-xs id-eyebrow hover:bg-red-100 transition-colors disabled:opacity-50"
         >
           {cancelling ? (
             <div className="w-4 h-4 border-2 border-red-300 border-t-red-700 rounded-full animate-spin" />
@@ -77,7 +80,7 @@ export default function BookingDetailActions({
         href={googleCalUrl()}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex w-full items-center justify-center gap-2 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-700 text-xs font-black uppercase tracking-widest hover:bg-gray-50 transition-colors"
+        className="flex w-full items-center justify-center gap-2 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-700 text-xs id-eyebrow hover:bg-gray-50 transition-colors"
       >
         <CalendarIcon size={16} />
         {t("addToCalendar")}
@@ -86,7 +89,7 @@ export default function BookingDetailActions({
       {shopPhone && (
         <a
           href={`tel:${shopPhone}`}
-          className="flex w-full items-center justify-center gap-2 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-700 text-xs font-black uppercase tracking-widest hover:bg-gray-50 transition-colors"
+          className="flex w-full items-center justify-center gap-2 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-700 text-xs id-eyebrow hover:bg-gray-50 transition-colors"
         >
           <Phone size={16} />
           {shopPhone}
@@ -98,7 +101,7 @@ export default function BookingDetailActions({
           href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(shopAddress)}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex w-full items-center justify-center gap-2 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-700 text-xs font-black uppercase tracking-widest hover:bg-gray-50 transition-colors"
+          className="flex w-full items-center justify-center gap-2 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-700 text-xs id-eyebrow hover:bg-gray-50 transition-colors"
         >
           <ExternalLink size={16} />
           {t("getDirections")}

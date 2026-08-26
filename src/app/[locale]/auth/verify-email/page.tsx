@@ -1,7 +1,18 @@
-import prisma from "@/lib/db";
+import { verifyEmailToken, type VerifyEmailErrorCode } from "@/services/auth/verify-email";
 import { CheckCircle2, XCircle } from 'lucide-react';
 import { Link } from "@/i18n/routing";
 import { getTranslations } from "next-intl/server";
+import AmbientBackdrop from "@/components/common/AmbientBackdrop";
+
+/** Servis kodunun `Auth` sözlüğündeki karşılığı. */
+const VERIFY_ERROR_KEY: Record<VerifyEmailErrorCode, string> = {
+  INVALID_TOKEN: "verifyEmailInvalidToken",
+  TOKEN_NOT_FOUND: "verifyEmailTokenNotFound",
+  TOKEN_EXPIRED: "verifyEmailTokenExpired",
+  USER_NOT_FOUND: "verifyEmailUserNotFound",
+  UNKNOWN: "verifyEmailErrorTitle",
+};
+
 
 interface VerifyEmailPageProps {
   searchParams: Promise<{ token?: string }>;
@@ -12,60 +23,23 @@ export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageP
   const { token } = await searchParams;
   const t = await getTranslations("Auth");
 
-  if (!token) {
-    return <ErrorState message={t("verifyEmailInvalidToken")} tAuth={t} />;
+  /*
+    Doğrulama kuralı `src/services/auth/verify-email.ts`'te. Bu sayfa ve mobil uç
+    2026-08-25'e kadar aynı 35 satırı ayrı ayrı taşıyordu.
+  */
+  const result = await verifyEmailToken(token);
+  if (!result.ok) {
+    return <ErrorState message={t(VERIFY_ERROR_KEY[result.code])} tAuth={t} />;
   }
 
-  try {
-    // Token'ı bul
-    const existingToken = await prisma.verificationToken.findUnique({
-      where: { token },
-    });
-
-    if (!existingToken) {
-      return <ErrorState message={t("verifyEmailTokenNotFound")} tAuth={t} />;
-    }
-
-    const hasExpired = new Date(existingToken.expires) < new Date();
-    if (hasExpired) {
-      return <ErrorState message={t("verifyEmailTokenExpired")} tAuth={t} />;
-    }
-
-    // Kullanıcıyı bul ve doğrula
-    const existingUser = await prisma.user.findUnique({
-      where: { email: existingToken.identifier },
-    });
-
-    if (!existingUser) {
-      return <ErrorState message={t("verifyEmailUserNotFound")} tAuth={t} />;
-    }
-
-    await prisma.$transaction([
-      prisma.user.update({
-        where: { id: existingUser.id },
-        data: { emailVerified: new Date(), email: existingToken.identifier },
-      }),
-      prisma.verificationToken.delete({
-        where: { token },
-      }),
-    ]);
-
-    // Revalidate layout to hide verification banner
-    const { revalidatePath } = await import("next/cache");
-    revalidatePath("/", "layout");
-  } catch (error) {
-    console.error("VerifyEmailPage Error:", error);
-    return <ErrorState message={t("verifyEmailErrorTitle")} tAuth={t} />;
-  }
+  // Doğrulama bandını gizlemek için layout'u tazele.
+  const { revalidatePath } = await import("next/cache");
+  revalidatePath("/", "layout");
 
   return (
     <div className="relative min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 font-sans overflow-hidden">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-40 left-1/2 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,hsl(21_95%_60%/.22),transparent)] blur-2xl" />
-        <div className="absolute -right-24 top-24 h-72 w-72 rounded-full bg-[radial-gradient(closest-side,hsl(38_92%_55%/.18),transparent)] blur-2xl" />
-        <div className="absolute inset-0 opacity-[0.035] bg-[radial-gradient(#ea580c_1px,transparent_1px)] [background-size:20px_20px]" />
-      </div>
-      <div className="relative z-10 w-full max-w-md bg-white rounded-[2.5rem] p-10 shadow-xl shadow-gray-200/50 border border-gray-100 text-center">
+      <AmbientBackdrop />
+      <div className="relative z-10 w-full max-w-md bg-white rounded-4xl p-10 shadow-xl shadow-gray-200/50 border border-gray-100 text-center">
         <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-8 mx-auto">
           <CheckCircle2 size={32} className="text-blue-600" />
         </div>
@@ -87,12 +61,8 @@ export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageP
 function ErrorState({ message, tAuth }: { message: string, tAuth: (key: string) => string }) {
   return (
     <div className="relative min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 font-sans overflow-hidden">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-40 left-1/2 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,hsl(21_95%_60%/.22),transparent)] blur-2xl" />
-        <div className="absolute -right-24 top-24 h-72 w-72 rounded-full bg-[radial-gradient(closest-side,hsl(38_92%_55%/.18),transparent)] blur-2xl" />
-        <div className="absolute inset-0 opacity-[0.035] bg-[radial-gradient(#ea580c_1px,transparent_1px)] [background-size:20px_20px]" />
-      </div>
-      <div className="relative z-10 w-full max-w-md bg-white rounded-[2.5rem] p-10 shadow-xl shadow-gray-200/50 border border-gray-100 text-center">
+      <AmbientBackdrop />
+      <div className="relative z-10 w-full max-w-md bg-white rounded-4xl p-10 shadow-xl shadow-gray-200/50 border border-gray-100 text-center">
         <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mb-8 mx-auto">
           <XCircle size={32} className="text-red-600" />
         </div>

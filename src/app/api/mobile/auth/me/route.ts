@@ -2,20 +2,13 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import prisma from "@/lib/db";
 import { requireMobileUser } from "@/lib/mobile-auth";
+import { toMobileUser } from "@/lib/mobile-dto";
 
 export async function GET(req: NextRequest) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
   const u = auth.user;
-  return NextResponse.json({
-    id: u.id,
-    email: u.email,
-    name: u.name,
-    phone: u.phone,
-    role: u.role,
-    avatarUrl: u.image,
-    emailVerified: u.emailVerified !== null,
-  });
+  return NextResponse.json(toMobileUser(u));
 }
 
 export async function PUT(req: NextRequest) {

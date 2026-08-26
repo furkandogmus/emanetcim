@@ -34,7 +34,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
         <div className="absolute top-0 right-0 w-1/2 h-full bg-orange-50/50 -skew-x-12 translate-x-32" />
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-100 rounded-full text-orange-600 text-xs font-black uppercase tracking-widest mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-100 rounded-full text-orange-600 text-xs id-eyebrow mb-6">
               <Heart size={14} />
               {t("badge")}
             </div>
@@ -51,7 +51,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
       {/* Vision & Mission */}
       <section className="py-24 px-6 bg-gray-50">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
-          <div className="p-12 bg-white rounded-[3rem] border border-gray-100 shadow-sm">
+          <div className="p-12 bg-white rounded-4xl border border-gray-100 shadow-sm">
             <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 mb-8">
               <Target size={28} />
             </div>
@@ -60,7 +60,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
               {t("visionBody")}
             </p>
           </div>
-          <div className="p-12 bg-white rounded-[3rem] border border-gray-100 shadow-sm">
+          <div className="p-12 bg-white rounded-4xl border border-gray-100 shadow-sm">
             <div className="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-600 mb-8">
               <Rocket size={28} />
             </div>
@@ -91,7 +91,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
               const titleKey = `value${idx}Title`;
               const descKey = `value${idx}Desc`;
               return (
-                <div key={idx} className="group p-10 rounded-[2.5rem] bg-white hover:bg-orange-600 transition-all duration-500 border border-gray-100 hover:border-orange-600">
+                <div key={idx} className="group p-10 rounded-4xl bg-white hover:bg-orange-600 transition-all duration-500 border border-gray-100 hover:border-orange-600">
                   <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-900 mb-6 group-hover:bg-white/20 group-hover:text-white transition-colors">
                     <Icon size={24} />
                   </div>
@@ -112,7 +112,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
 
       {/* CTA */}
       <section className="pb-32 px-6">
-        <div className="max-w-7xl mx-auto bg-gray-900 rounded-[4rem] p-12 md:p-24 text-center overflow-hidden relative">
+        <div className="max-w-7xl mx-auto bg-gray-900 rounded-4xl p-12 md:p-24 text-center overflow-hidden relative">
           <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 to-transparent pointer-events-none" />
           <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-8 relative z-10">
             {t("ctaTitle")}

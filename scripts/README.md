@@ -10,6 +10,7 @@
 | `cleanup` | `23 3 * * *` | — | ⚠️ kurulmadı |
 | `seal-forecast` | `37 6 * * 1` | — | ⚠️ kurulmadı |
 | `classify-inbox` | `13 5 * * *` | — | ⚠️ kurulmadı |
+| `response-times` | `29 3 * * *` | — | ⚠️ kurulmadı |
 | `finance-export` | `53 2 * * *` | — | ⚠️ kurulmadı |
 
 > Bu tablonun kaynağı **`src/lib/jobs/registry.ts`**'tir. Elle güncellemeyin —
@@ -227,6 +228,7 @@ Beklenen: `"status": "ok"`, `"orphanedNonStock": 0`, `"stockWithShop": 0`.
 bavula hiç mühür kaydedilmemiş `CHECKED_IN` rezervasyon sayısını verir
 (2026-08-22'de 3). Bkz. `docs/DEFECT_BACKLOG.md` → P1-23.
 
+
 ### Geri alma
 
 Onarım `assignedAt` alanını da `NULL` yapar, yani satır satır geri alınamaz.
@@ -239,6 +241,84 @@ değildir; kısıtın tamamen kaldırılması gerekir:
 ALTER TABLE "Seal" DROP CONSTRAINT "Seal_ownership_matches_status";
 ```
 
+---
+
+## Slot saat dilimi onarımı — `repair-slot-timezone.sh`
+
+**Neden gerekli (2026-08-24):** `generateSlotsForShop` duvar saatini
+`new Date("2026-06-15T09:00:00")` ile ana çeviriyordu. Saat dilimi eki **olmayan**
+bir ISO dizesi, çalışma ortamının **yerel** saatine göre ayrıştırılır; konteynerde
+`TZ` ayarlı olmadığı için prod UTC. Sonuç: 09:00–20:00 açık bir İstanbul dükkanının
+slotları `09:00Z–20:00Z` olarak üretiliyordu — misafirin takviminde **12:00–23:00**.
+
+| Gerçek durum | Misafirin gördüğü | Sonuç |
+|---|---|---|
+| Dükkan açık, 09:00–12:00 | slot yok | arama dükkanı o pencerede eliyor |
+| Dükkan kapalı, 20:00–23:00 | slot var | rezervasyon alınıyor; misafir geliyor; `isShopOpenAt` check-in'i **reddediyor** |
+
+Geliştirici makinesi İstanbul saatinde olduğu için hata **yalnızca prod'da**
+görünüyordu. Kod düzeltildi (`src/services/SlotService.ts`), ama üretim
+`(shopId, startTime)` üzerinden `upsert` yapıyor: iş tekrar koştuğunda **doğru
+slotlar eklenir, yanlış olanlar yerinde kalır**. Bu script yanlış olanları siler.
+
+**Dokunulmayanlar:** rezervasyonu olan slotlar ve geçmiş slotlar — ikisi de
+tarihsel kayıt. `open247` dükkanlar da kapsam dışı (her saat açıklar).
+
+### 1. Kuru çalışma — hiçbir şey silmez
+
+```bash
+cd /root/emanetci
+./scripts/repair-slot-timezone.sh
+```
+
+Beklenen: önce dükkan başına gelecek slot tablosu (`ilk_slot_yerel` /
+`son_slot_yerel` sütunları hatayı doğrudan gösterir — açılış 09:00 iken ilk slot
+12:00 çıkıyorsa kayma budur), sonra:
+
+```
+[...] INFO  Toplam silinecek satir: <N>
+[...] WARN  KURU CALISMA -- hicbir sey silinmedi.
+```
+
+Rezervasyonu **olan** ve kapalı saate düşen slot varsa ayrıca uyarır. Onlara
+dokunulmaz: her biri için esnafla konuşulup misafire yeni saat önerilmelidir.
+
+### 2. Yedek al — **silmeden önce zorunlu**
+
+```bash
+./scripts/backup.sh
+```
+
+### 3. Sil — **ilk değiştiren adım**
+
+```bash
+./scripts/repair-slot-timezone.sh --apply
+```
+
+### 4. Slotları yeniden üret — **zorunlu, atlanamaz**
+
+```bash
+./scripts/generate-slots.sh
+```
+
+3. adımdan sonra doğru saatlerdeki slotlar **henüz yoktur**; bu adım koşmadan
+dükkanların saatlik ürünü seçilemez hâlde kalır.
+
+### 5. Doğrula
+
+```bash
+./scripts/repair-slot-timezone.sh
+```
+
+Beklenen: `Toplam silinecek satir: 0` ve dükkan tablosunda `ilk_slot_yerel`
+değerinin `acilis` ile, `son_slot_yerel` değerinin `kapanis`'tan bir slot öncesiyle
+uyuşması.
+
+### Geri alma
+
+Silme satır satır geri alınamaz; geri dönüş yolu 2. adımdaki yedektir. Ancak
+slotlar türetilmiş veridir: yedek olmadan da `generate-slots.sh` doğru slotları
+yeniden üretir. Kaybolan tek şey silinen yanlış satırlardır ki amaç zaten odur.
 
 ---
 

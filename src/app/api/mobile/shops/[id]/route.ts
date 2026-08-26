@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { ShopService } from "@/services/ShopService";
+import { toMobileShop } from "@/lib/mobile-dto";
 
 const shopService = new ShopService();
 
@@ -7,22 +8,10 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const { id } = await params;
   const s = await shopService.getShopDetails(id);
   if (!s) return NextResponse.json({ error: "not_found" }, { status: 404 });
-  return NextResponse.json({
-    id: s.id,
-    name: s.name,
-    address: s.address,
-    city: s.city,
-    district: s.district,
-    latitude: s.latitude,
-    longitude: s.longitude,
-    pricePerDay: Number(s.pricePerDay),
-    capacity: s.capacity,
-    rating: s.rating,
-    openingTime: s.openingTime,
-    closingTime: s.closingTime,
-    open247: s.open247,
-    hasRestroom: s.hasRestroom,
-    isActive: s.isActive,
-    image: s.image,
-  });
+  /*
+    `isVerified` bu uctan EKSIKTI: liste yaniti tasiyordu, detay tasimiyordu —
+    mobil uygulama ayni dukkani listede "dogrulanmis", detayda dogrulanmamis
+    gosteriyordu. Ortak govde farki kapatti.
+  */
+  return NextResponse.json(toMobileShop(s));
 }

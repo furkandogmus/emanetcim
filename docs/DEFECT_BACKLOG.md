@@ -10,9 +10,939 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-08-26 — performans (kritik yol) + iki güvenilirlik açığı
+
+Önceki turlar kod tekrarını kapatmıştı. Bu tur farklı bir soru sordu: kullanıcı
+BEKLERKEN ne indiriyor, ve bir dış sağlayıcı yavaşladığında ne oluyor?
+
+### 1. Üç ağır kütüphane kritik yoldaydı
+
+Build çıktısındaki parçalar `page_client-reference-manifest.js` ile eşleştirildi —
+yani "büyük görünüyor" değil, "bu sayfa bunu ilk yükte indiriyor" ölçüldü:
+
+| Sayfa | Kütüphane | Parça (ham) | Kritik yoldan düşen (brotli) |
+|---|---|---|---|
+| `/search` | `maplibre-gl` — uygulamanın **en büyük** parçası | 1012 KB | **−215 KB** |
+| `/partner` | `html5-qrcode` | 368 KB | **−84 KB** |
+| `/partner/earnings` | `recharts` | 340 KB | **−82 KB** |
+
+Üçü de statik `import` ile sayfanın ilk JS yükünün İÇİNDEYDİ. En pahalısı
+`/search`: harita `absolute inset-0` ile listenin ARKASINDA duruyor, ama misafirin
+gerçekte dokunduğu liste paneli, harita motorunun tamamı indirilip ayrıştırılmadan
+etkileşime hazır olmuyordu. `/partner` ise esnafın gün boyu en çok açtığı sayfa ve
+QR tarayıcı yalnızca "tara"ya BASILDIĞINDA çiziliyor — 368 KB, tarayıcı hiç
+açılmasa bile her açılışta iniyordu.
+
+Üçü `next/dynamic` + `ssr: false` ile ayrı parçaya alındı; kalıp yeni değil,
+`AdminDashboardClient` → `AnalyticsChart` zaten böyleydi. Grafikler için
+`PartnerEarningsCharts.tsx` ayrıldı (biçimlendiriciler prop olarak geçiyor ki
+tutar/tarih biçimi tek yerde kalsın). **Build sonrası doğrulandı: hiçbir sayfanın
+manifestinde bu üç kütüphane yok.**
+
+### 2. Zaman aşımı isteği İPTAL ETMİYORDU
+
+`withTimeout(fetch(...), ms)` yalnızca bir `Promise.race`. Süre dolduğunda ÇAĞIRAN
+vazgeçiyor, ama alttaki istek çalışmaya devam ediyor: soket açık kalıyor, gövde
+inmeye devam ediyor, yanıt geldiğinde kimsenin okumadığı bir sonuç üretiliyor.
+
+Sağlayıcı DÜŞTÜĞÜNDE değil, YAVAŞLADIĞINDA ısırır: her deneme bir soket biriktirir
+ve dışarıdaki bir yavaşlama bizim tarafımızda kaynak tükenmesine dönüşür.
+
+`fetchWithTimeout` (`src/lib/async-timeout.ts`) `AbortSignal.timeout` ile isteği ağ
+katmanında sonlandırır. Hata metni `withTimeout` ile AYNI tutuldu
+(`<label>_timeout_after_<ms>ms`) ki çağıranların `catch` blokları ve log'lar iki yol
+için ayrışmasın. İki ham fetch noktası taşındı: Resend (`NotificationService`) ve
+Nominatim (`geocode-search-center`). `withTimeout` yerini KORUYOR — iptal
+edilemeyen işler (`src/lib/mail.ts` içindeki Resend SDK çağrıları) için tek seçenek
+hâlâ yarış.
+
+**Test tarafında bir sürpriz:** `AbortSignal.timeout` vitest'in sahte
+zamanlayıcılarıyla TETİKLENMİYOR (ölçüldü — Node'un iç zamanlayıcısını kullanıyor,
+`vi.advanceTimersByTime` ona ulaşmıyor). Zaman aşımına dayanan iki mevcut test bu
+yüzden çalışma zamanının gerçekten ürettiği hatayla yeniden yazıldı; zaman aşımının
+KENDİSİ artık `src/lib/async-timeout.test.ts`'te doğrudan test ediliyor.
+
+### 3. Mobil ödeme ucunda yakalanmamış promise — süreç düşürücü
+
+`api/mobile/checkout/intent` içinde iki bildirim çağrısı `.catch`'siz `void` idi.
+Node 15'ten beri yakalanmamış bir promise reddi **süreci düşürür**
+(`--unhandled-rejections=throw` varsayılandır). Yani bir e-posta sağlayıcısı hatası
+rezervasyonu değil, TÜM SUNUCUYU vururdu — üstelik rezervasyon yazıldıktan SONRA
+çalıştıkları için hata da hiçbir yerde görünmezdi.
+
+Kod tabanının geri kalanı zaten doğru kalıptaydı
+(`void x().catch((e) => logger.warn(...))`); istisna bu iki çağrıydı.
+
+### 4. Gecelik iş: dükkan başına bir sıralı `UPDATE`
+
+`ShopService.recomputeResponseTimes` her dükkan için ayrı ayrı, SIRAYLA `UPDATE`
+atıyordu. Üstelik dükkanların ezici çoğunluğunun yeterli örneği hiç olmuyor: onlar
+için hesap her gece `null` çıkıyor ve **zaten `null` olan satır tekrar `null`
+yazılıyordu**. Yani yazmaların neredeyse tamamı hiçbir şeyi değiştirmiyor, ama
+havuzdan bir bağlantıyı dükkan sayısıyla orantılı süre boyunca tutuyordu.
+
+Artık değişmeyen satır atlanıyor, `null`'a çekilecekler tek `updateMany` ile toplu
+yazılıyor (500'lük öbekler — şemada `@default(0)` olduğu için ilk koşu hepsini
+temizler). `updated`/`cleared` ANLAMI KORUNDU (iş defteri onları "sonuçta değeri
+olan / olmayan dükkan" diye okuyor); gerçek yazma sayısı ayrı bir alan: `written`.
+
+### Mandal: `src/__tests__/unhandled-rejection.test.ts` (tavan **0**)
+
+Kapsam yalnızca SUNUCU (`services`, `actions`, `app/api`, `lib`). Tarayıcıda
+yakalanmamış red yalnızca konsola yazılır, sekmeyi veya sunucuyu düşürmez — aynı
+kural değildir, o yüzden `src/components` bilerek dışarıda.
+
+Mandalın gerçekten kırıldığı doğrulandı: geçici bir ihlal eklenip dosya:satır
+vererek kırmızı yandığı, geri alınca yeşile döndüğü görüldü.
+
+**Ölçüm:** test **623 → 638**. `recomputeResponseTimes` için hiç test yoktu, beş
+tane yazıldı (değişmeyen satırın YAZILMADIĞINI kanıtlayanlar dahil).
+
+## 2026-08-26 — SOLID/DRY turu: kopyalar ve dağılmış konvansiyonlar
+
+Önceki turlar **iş kurallarının** ikizlenmesini kapatmıştı. Bu tur aynı soruyu bir
+kat aşağıya sordu: aynı şeyi iki kez SÖYLEYEN yerler nerede?
+
+### 1. Yetki kapısı — ~28 kopya, BEŞ farklı konvansiyon
+
+Aynı üç kontrol (`giriş yapmış mı`, `admin mi`, `esnaf mı`) 12 dosyada elle
+yazılmıştı ve kopyalar farklı biçimlerde başarısız oluyordu:
+
+| Biçim | Kaç yerde |
+|---|---|
+| `throw new Error("Unauthorized")` | 8 |
+| `return { error: "Errors.authRequired" }` | çoğunluk |
+| `return { error: "Errors.unauthorized" }` / `"Errors.notAuthorizedAdmin"` | karışık |
+| `return { error: "unauthorized" }` (snake_case) | `seal.ts` |
+
+**Kullanıcı açısından:** aynı "yetkiniz yok" durumu, hangi dosyaya denk geldiğine
+göre dört farklı mesaj üretiyordu. Ham `"Unauthorized"` ayrıca `actionErrorKey`'in
+tanıdığı bir anahtar DEĞİLDİ — `generic`e düşüyor ve yönetici sebebi
+söyleyebilecekken **"Bilinmeyen bir hata oluştu"** okuyordu.
+
+`src/lib/action-auth.ts`: tek gövde, iki biçim (`requireX` sonuç döner,
+`assertX` TANINAN anahtarla fırlatır). Rol JENERİK — `requirePartner()` çalışma
+zamanında daralttığı gibi tipte de daraltır, yoksa çağıran `as` ile susturmak
+zorunda kalır ve kapı anlamsızlaşır. **Ölçüm: elle yazılmış yetki bloğu 28 → 0.**
+
+Ayrıca artık **giriş yapmamış** ile **yetkisiz** ayrılıyor: kopyaların bir kısmı
+ikisini de `authRequired` ile karşılıyordu, yani zaten giriş yapmış bir kullanıcıya
+tekrar giriş yapmasını söylüyordu.
+
+### 2. Kopyalanan gövdeler (DTO) — ayrışma zaten BAŞLAMIŞTI
+
+Mobil uçlar alan-alan eşlemeyi ayrı ayrı yazıyordu. İki yerde kopyalar çoktan
+ayrışmıştı — kimse bir alanı silmedi, biri EKLENDİ ve diğeri geride kaldı:
+
+- **`isVerified`** yalnızca `shops/nearby` yanıtındaydı, `shops/[id]`'de yoktu:
+  uygulama aynı dükkanı **listede "doğrulanmış", detayda doğrulanmamış** gösteriyordu.
+- **`emailVerified`** yalnızca `auth/session` ve `auth/me` yanıtlarındaydı;
+  Apple/Google/kayıt ile girenler için yoktu — **"e-postanı doğrula" uyarısı hangi
+  yoldan girildiğine göre çıkıyor ya da çıkmıyordu.**
+
+`src/lib/mobile-dto.ts`: `toMobileUser`, `toMobileShop`,
+`toMobileBookingSummary` / `toMobileBookingDetail` (detay, özetin ÜST KÜMESİ —
+mandal bunu sınıyor). Gövde AÇIK alan listesi; `...user` yayılması olsaydı yeni bir
+sütun (örneğin `passwordHash`) sessizce istemciye giderdi.
+
+### 3. Ölü yetki kodu — yanlış güvence
+
+`api/mobile/shops/[id]/slots` şunu yazıyordu:
+
+```ts
+try { await requireMobileUser(req); } catch { return 401; }
+```
+
+`requireMobileUser` **hiç fırlatmaz**, başarısızlıkta `{ error: NextResponse }`
+DÖNDÜRÜR. Yani `catch` hiçbir zaman çalışmıyordu ve uç fiilen kimlik doğrulaması
+YAPMIYORDU. Slot müsaitliği zaten herkese açık veri (web ucu de istemiyor, misafir
+giriş yapmadan slot seçmek zorunda), o yüzden doğru düzeltme yetkiyi uygulamak
+değil ölü kodu kaldırıp açıklığı SÖYLEMEK oldu. Gövde web ucuyla ortaklaştı.
+
+### 4. Diğer tekilleştirmeler
+
+- **`CURRENCY_LOCALES` birebir kopyaydı.** `date-locale.ts` içindeki
+  `UI_LOCALE_TO_BCP47` ile aynı altı satır. İsim (`dateLocaleForUiLocale`) dar
+  olduğu için kopyalanmaya davet ediyordu; modül `intl-locale.ts` /
+  `bcp47ForUiLocale` olarak genelleştirildi (37 çağrı yeri).
+- **`partner.ts`'te dört örtüşen kod→anahtar tablosu** ortak tabana indi; bir
+  eşlemeyi düzeltmek diğer üçünü geride bırakıyordu.
+- **E-posta doğrulama iki kez yazılıydı** (web sayfası + mobil uç, 35'er satır,
+  kelimesi kelimesine aynı, ikisi de `console.error` kullanıyordu) →
+  `src/services/auth/verify-email.ts`.
+- **Misafir bearer-token doğrulaması iki uçta** → `authenticateGuestLookup`.
+  Kimlik doğrulama, kopyaların ayrışmasını en pahalıya ödeyeceğimiz yer.
+- **Dekoratif sayfa zemini 8 dosyada 10 kez** kopyalanmıştı →
+  `<AmbientBackdrop />`. `pointer-events-none` sınıfı bir kopyada unutulsa
+  altındaki form tıklanamaz olurdu; bileşen bunu garanti eder.
+- **Süresi dolmuş misafir bağlantısı** artık gerçek mesaj alıyor
+  (`Errors.guestLinkExpired`, 6 dil); önce genel "sorgulama hatası" diyordu.
+
+### 5. Rezervasyon erişim kuralı — kasıtlı ama YAZISIZ fark
+
+Kural üç mobil uçta elle yazılmıştı ve aralarında kasıtlı bir fark vardı: detay
+ucunda dükkan sahibi esnaf da okuyabiliyor, iptal/düzenleme uçlarında
+okuyamıyordu. **Fark doğruydu** — esnafın yolu "reddet"tir ve o yol iadeyi + slot
+temizliğini `cancelBooking` üzerinden yürütür — ama üç kopyanın arasında yazılı
+değildi; biri güncellenirken diğerinin geride kalması an meselesiydi.
+
+`src/services/booking/access.ts`: fark artık ADI OLAN bir parametre
+(`allowShopPartner`), `booking-access.test.ts` ile kilitli.
+
+### Mandallar
+
+- `action-auth.test.ts` — ham `Unauthorized` yok; hiçbir action rolü OTURUMDAN
+  kendi çözmüyor. **Ayrım kasıtlı:** `session.user.role !== "ADMIN"` yasak,
+  `auth.actor.role !== "ADMIN"` serbest (aktör kapıdan gelmiştir, bu bir ALAN
+  kuralıdır — "admin sahiplik kontrolünü atlar"). İkisini ayırmayan bir mandal
+  meşru kuralları da bastırır ve kapatılmaya yol açar.
+- `mobile-dto.test.ts` — uçlar kendi kullanıcı gövdesini kurmuyor; detay özetin
+  üst kümesi; özet QR/mühür taşımıyor.
+
+**Ölçüm:** servis dışı doğrudan yazma **95 → 91**, elle yazılmış yetki bloğu **28 → 0**, e-posta kabuğu kopyası **0**, test **599 → 623**.
+
+## 2026-08-25 — bildirim alıcısı: her iki taraf da müşterilerinin yarısını atlıyordu
+
+**En pahalı bulgu bu turda.** Check-in / check-out bildiriminin ALICISI iki
+taşıyıcıda farklı yazılmıştı:
+
+| Taşıyıcı | Baktığı alan | Kimi atlıyordu |
+|---|---|---|
+| Web (`actions/partner.ts`) | `booking.guest?.email` | **hesapsız** misafir checkout'u |
+| Mobil (`api/mobile/bookings/[id]/check-in`) | `booking.guestEmail` | **hesaplı** kullanıcı |
+
+Rezervasyon ya hesaplıdır (`guestId` → `guest.email`) ya da hesapsız misafir
+checkout'udur (`guestEmail`); ikisi aynı anda dolu değildir. Yani **her iki yol da
+müşterilerinin yarısına "valiziniz güvende" e-postasını hiç göndermiyordu** — ve
+hiçbir hata oluşmadığı için bu hiçbir yerde görünmüyordu.
+
+Kural artık `src/services/booking/guest-contact.ts`'te tek satır:
+`bookingNotificationEmail(booking)` — hesap adresi öncelikli, yoksa misafir
+adresi, ikisi de yoksa `null`. `guest-contact.test.ts` hem kuralı hem de
+"hiçbir taşıyıcı kendi alıcı kuralını yazmıyor" mandalını taşıyor (geçici ihlal
+enjekte edilerek kırıldığı doğrulandı).
+
+### Aynı turda kapatılanlar
+
+- **Mobil check-in/out ham TÜRKÇE servis metnini istemciye dönüyordu**
+  (`message: result.message`). Kod zaten dönüyordu; metin kaldırıldı.
+- **Sessizce yutulan hatalar loglandı.** `.catch(() => {})` yazan 8 sunucu-tarafı
+  çağrı vardı. En kötüsü **sadakat puanı artırımı**: iptal tarafı (`lifecycle.ts`)
+  düşme hatasını zaten logluyordu, kazanma tarafı loglamıyordu — misafir puanını
+  alamadığında sebebi HİÇBİR yerde yazmıyordu. "Sadakat puanı kazanılıyor ama
+  görünmüyor" hatası (`b069522`) tam bu körlükten çıkmıştı. Diğerleri: rezervasyon
+  onay e-postası, esnaf/admin bildirimi, şikayet olayı ve bildirimi, süresi geçmiş
+  token temizliği.
+- **Mobil bildirimlerde dil eksikti** (`notifyCheckIn(email, id)` → `"tr"`
+  varsayılanı). Alıcıyla birlikte düzeltildi.
+
+- **`/api/bookings/guest-cancel` ham servis METNİNİ dönüyordu** (`result.message`)
+  ve `ManageBookingClient` onu ekrana aynen basıyordu; `"Email mismatch"` de öyle.
+  Uç artık sabit kod döner (`email_mismatch`, `cancel_not_allowed`, ...), istemci
+  `useActionErrorText` ile çevirir.
+
+### Aynı turda: rezervasyon oluşturma kapıları
+
+- **Platform tatili kontrolü YALNIZCA web'deydi.** Mobil checkout ucu bunu hiç
+  yapmıyordu: aynı tarih web'de reddedilirken mobilde kabul ediliyordu.
+- **Geçersiz tarih aralığı mobilde HTTP 500 dönüyordu.** `createInitialBooking`
+  tipsiz bir Türkçe cümle fırlatıyordu (`new Error('Geçersiz rezervasyon
+  tarihleri.')`) ve mobil uç onu yakalamıyordu.
+
+İkisi de artık `createInitialBooking` içinde ve TİPLİ
+(`BookingRejectedError` → `INVALID_DATES` / `PLATFORM_HOLIDAY` /
+`CAPACITY_EXCEEDED`); taşıyıcılar kodu kendi hata sözleşmesine çevirir.
+`BookingCreationGuards.test.ts` bunu kilitliyor.
+
+## 2026-08-25 — e-posta kabuğu: aynı markup 22 kez kopyalanmıştı
+
+**Ölçüm:** `NotificationService` 913 satırdı ve aynı HTML kabuğu **22 kez**
+yazılmıştı; marka rengi `#ea580c` **32 yerde** sabitti, buton stili **13 yerde**.
+Bunun iki somut sonucu vardı:
+
+1. **E-postaların görünümü değiştirilemiyordu.** Marka rengini değiştirmek ya da
+   footer'a bir satır eklemek 22 ayrı yerde aynı düzenleme demekti. Sitenin geri
+   kalanı `globals.css` kimlik katmanından besleniyor; e-postalar o katmanın hiç
+   ulaşmadığı tek yüzeydi.
+2. **Kopyalar zaten ayrışmıştı.** Footer'ın `margin-top:24px`i yalnızca BİR
+   şablonda vardı; diğer ikisinde footer gövdeye yapışıktı. Kimse fark etmemişti,
+   çünkü görmek için 18 bloğu yan yana koymak gerekiyordu.
+
+### Yapılan
+
+- **`src/lib/email-template.ts`** — tek kabuk: `renderEmailHtml({ locale, tone,
+  heading, paragraphs, rows, cta, footer })`. `dir="rtl"`, tablo zebrası, düğme /
+  bağlantı ayrımı ve footer boşluğu artık tek yerde. **Ton** kavramı eklendi
+  (`brand` / `muted` / `success` / `alert` / `info`): başlık ve düğme aynı renkten
+  beslenir, yani bir e-postanın ne anlattığı renginden okunur.
+- **Yedek dil davranışı düzeltildi.** Her şablon kendi `?? { ... }` yedeğini
+  yazıyordu ve o yedekler DEGRADE'ydi — tek satırlık, HTML'siz, Türkçe. Yani bir
+  dil unutulduğunda misafir yalnızca yanlış dili değil, bozuk bir belgeyi de
+  alıyordu. `pickLocale` artık TAM Türkçe şablona düşürüyor.
+- **Marka rengi çevirilerin İÇİNDEN çıkarıldı.** İptal e-postasının cümle içi
+  bağlantısı 6 çevirinin her birinde `style="color:#ea580c"` taşıyordu; çeviri
+  artık `{link}` yer tutucusu tutuyor, rengi kod veriyor.
+- **`ShopService`'in onay e-postası** da kabuğa taşındı. O e-posta bir kez KIVRIK
+  TIRNAK ile yazılmıştı ve hiçbir `style`/`href` geçerli değildi (P1-3); markup
+  tek yerde olduğu için o hatanın tekrarı için bir yüzey kalmadı.
+- Tutar biçimlendirmesi: altı dilin altısı da her gönderimde hesaplanıyor, beşi
+  atılıyordu. Artık yalnızca gerekli olan.
+
+**Ölçüm sonrası:** kabuk tekrarı **22 → 0** (yalnızca `email-template.ts`),
+`#ea580c` **32 → 0**, buton stili **13 → 0**.
+
+### Doğrulama — iddia değil, karşılaştırma
+
+Değişiklikten ÖNCE 5 şablon × 6 dil = **30 e-posta** (konu, düz metin, HTML)
+yakalandı; değişiklikten SONRA aynı 30'u yeniden üretilip karşılaştırıldı.
+
+**Tek fark:** 12 e-postada footer'ın `margin-top:24px` kazanması — yukarıda
+anlatılan, kasıtlı ve görünür düzeltme. Kalan her bayt aynı.
+
+### Mandal: `src/__tests__/notification-locale-coverage.test.ts`
+
+**Bu hata ÜÇ KEZ elle düzeltildi** (`3a1c988`, `051e89e` ve 24 Ağustos turu) ve
+her seferinde aynı yapıdan çıktı: `{ tr: {...}, en: {...} }[locale] ?? {...}`
+kalıbında `??` eksik bir dili SESSİZCE yutar. Ne tip kontrolü ne lint bunu görür —
+teknik olarak doğru kod. Görülebilmesi için ÖLÇÜLMESİ gerekiyordu.
+
+Mandal her şablonun `src/i18n/routing.ts`'teki dillerin TAMAMINI taşıdığını ve
+desteklenmeyen bir dilin şablonda kalmadığını sınar; iki kalıbı da (`pickLocale`
+ve eski `[locale] ??`) tanır. Geçici ihlal enjekte edilerek kırıldığı doğrulandı.
+
+Ayrıca `email-template.test.ts` (8 test) kabuğun kendi davranışını kilitliyor.
+
+## 2026-08-25 — web/mobil ikizleri: aynı iş kuralı iki kez yazılmıştı
+
+**Kök bulgu:** `CLAUDE.md` "yazma işlemleri yalnızca `src/services/`" diyordu ama
+**hiçbir şey bu kuralı tutmuyordu** ve kural sessizce aşınmıştı: `src/actions` +
+`src/app` içinde **118 doğrudan Prisma yazma çağrısı** vardı. Aşınmanın bedeli
+teorik değil — aynı iş kuralı bir kez web action'ında, bir kez mobil API ucunda
+yazılmıştı ve **kopyalar ayrışmıştı**.
+
+### Kanıtlanan hatalar (hepsi bu ayrışmadan)
+
+| # | Nerede | Ne oluyordu |
+|---|---|---|
+| 1 | `api/mobile/partner/bookings/[id]/reject` | Ham `booking.update({ status: CANCELLED })`. Web `cancelBooking()` çağırıyor; o iadeyi/ödeme niyetini `PaymentService` üzerinden kapatıyor, **`ReservationSlot` satırlarını siliyor** ve sadakat puanını geri alıyor. Mobil hiçbirini yapmıyordu: **reddedilen rezervasyon dükkanın kapasitesini kalıcı olarak tutuyordu** ve ödeme defterinde açık satır kalıyordu. |
+| 2 | `api/mobile/partner/seals/confirm-delivery` | Yalnızca `sealRequest.status = DELIVERED` yazıyordu, **mühürleri dükkana hiç atamıyordu**. Esnaf "teslim aldım" dedikten sonra elinde kullanılabilir mühür olmuyor, check-in "mühür bu dükkana atanmamış" diye reddediyordu. |
+| 3 | `admin-management.ts` `deleteUserAction` | Yasaklı kullanıcının açık rezervasyonlarını ham `updateMany({ status: CANCELLED })` ile iptal ediyordu — 1 numaralı sızıntının aynısı. Yasaklanan bir esnafın dükkanı silinse bile slotları dolu görünüyordu. |
+| 4 | `api/mobile/partner/bookings/[id]/approve` | Bildirim dili `"en"` sabitti; web `getLocale()` geçiyordu. Türk misafir, esnaf mobilden onayladığında **İngilizce e-posta** alıyordu. |
+| 5 | `api/mobile/partner/bookings/[id]/bag-revision` | Web'le **üç noktada** ayrışıktı: durum koşulu tersti (`APPROVED\|PAID` ↔ `PAID\|CHECKED_IN`), `pendingBagRevision` **temizlenmiyordu** (eski öneri sonradan bir kez daha uygulanabiliyordu), `unitPrice` farklı yazılıyordu. |
+| 6 | `api/mobile/checkout/intent` | Web'in aksine denetim izine `APPROVED` olayını **hiç yazmıyordu** — mobilden yapılan rezervasyonların onay izi yoktu. |
+| 7 | `api/mobile/partner/seals/request` | Adet doğrulaması yoktu (web 1..10.000 arıyor) ve `requestedBy` boş kalıyordu: talebi kimin açtığı denetim izinde kayboluyordu. |
+
+Hiçbiri "unutulmuş bir satır" değil. Aynı kuralı iki yere yazmanın kaçınılmaz sonucu.
+
+### Çözüm: gövde servise, taşıyıcılar ince
+
+Yeni servis modülleri — her biri iki taşıyıcı tarafından da çağrılır:
+
+- `src/services/booking/partner-review.ts` — `approveBooking`, `rejectBooking`,
+  `forceCancelOpenBookingsForUser`
+- `src/services/booking/bag-revision.ts` — `proposeBagRevision`, `applyBagRevision`,
+  `clearBagRevision`
+- `src/services/seal/requests.ts` — `createSealRequest`, `confirmSealDelivery`,
+  `shipSealRequest`
+- `src/services/CouponService.ts` — `claim`, `release` (kupon = para)
+
+Alan yetkisi ("bu esnaf bu dükkanın sahibi mi") **servise** taşındı: taşıyıcıların
+kendi tarafında yazdığı şey tam olarak sapan şeydi. Oturum/token çözümü, i18n ve
+HTTP/`revalidate` eşlemesi taşıyıcıda kaldı.
+
+- **`createInitialBooking` artık nihai durumu yaratılışta yazar** (`initialStatus`).
+  İki çağıran da önce `PENDING` yaratıp hemen ardından ham `update` ile `APPROVED`
+  yapıyordu; **iki adım arasında süreç ölürse rezervasyon kalıcı `PENDING` kalıyordu**
+  ve hiçbir yol onu kurtarmıyordu.
+- **Valiz revizyonu durum koşulu birleştirildi** (`APPROVED | PAID | CHECKED_IN`) —
+  hiçbir taşıyıcı çalışan bir yeteneğini kaybetmesin diye birleşim seçildi.
+  **Daraltmak bir İŞ KARARIDIR** ve artık tek satırda yapılır.
+- `partner.ts` **757 → 549 satır**: fiyat hesabı makinesi tamamen servise geçti.
+
+### Mandal: `src/__tests__/service-layer-writes.test.ts`
+
+Üç seviye, üçü de geçici ihlal enjekte edilerek **kırıldığı doğrulandı**:
+
+1. **Alan-kritik modeller KESİN 0**: `Booking`, `ReservationSlot`, `BookingSeal`,
+   `Seal`, `SealRequest`, `PaymentLog`, `Coupon`. Ortak yanları: bir yazma işlemi
+   tek başına anlamlı değil, yanında iade / slot temizliği / envanter hareketi gerekiyor.
+2. **Kalan modeller tavanla**: sayı düşebilir, yükselemez. Tavanı olmayan yeni bir
+   model de yakalanır.
+3. **Toplam tavan** 96.
+
+Ölçüm: **118 → 96**; kritik modellerde **21 → 0**.
+
+### Test kapsamı
+
+`PartnerReview.test.ts` (10), `SealRequests.test.ts` (13), `BagRevision.test.ts` (12)
+— üçü de düzeltilen hatayı doğrudan kilitliyor ("red ham update YAZMAZ", "teslim
+mühürleri ATAR", "öneri HER DURUMDA temizlenir"). Toplam test 538 → 573.
+
+### Kabul edilen kayıp / açık kalan
+
+- **Bildirim dili hâlâ İSTEĞİN dili, misafirin değil.** Mobil `"en"` sabiti kalktı ama
+  doğru çözüm misafirin dilini rezervasyonda saklamak (`Booking.guestLocale`) — bu bir
+  şema değişikliği ve migrasyon gerektiriyor. Bu tur kapsam dışı bırakıldı.
+- **`user` (26), `verificationToken` (12), `contactMessage` (9), `shop` (7)** hâlâ
+  servis dışından yazılıyor. Aynı aciliyette değiller: çoğu kimlik doğrulama akışlarının
+  kendi kayıtları ve içerik CRUD'u. Tavanlarla tutuluyorlar.
+
+## 2026-08-25 — hata metinleri: sunucudan geleni ekrana ham basma turu
+
+Fiş geri alışının ardından yapılan genel tarama tek bir kusur SINIFI buldu ve
+hepsi aynı kökten: **action'lar `error` alanında üç ayrı biçim döndürüyordu ve
+ekranlar ne gelirse aynen basıyordu.** Üçü de kullanıcının gözüne düşüyordu:
+
+| Biçim | Nereden | Kullanıcı ne görüyordu |
+|---|---|---|
+| Çeviri anahtarı | `booking.ts`, `review.ts`, `referral.ts`, `blog-actions.ts` | `Errors.bookingNotFound` |
+| snake_case kod | `seal.ts` | `tracking_number_required` |
+| Servisin Türkçe cümlesi | `partner.ts` (`result.message`) | Japonca arayüzde Türkçe hata |
+
+- **12 gösterim noktası düzeltildi.** `BookingDetailActions`, `ReviewForm`,
+  `PartnerReferralCard`, `SealShipButton`, `AdminSealInventoryClient` (2),
+  `AdminBlogClient`, `AdminBlogEditClient`, `PartnerSealsClient` (3),
+  `PartnerClient`, `CheckInDialog`, `BookingsClient`, `CheckoutClient`,
+  `BookingModifyModal`. Hepsi tek yardımcıya bağlandı:
+  `useActionErrorText()` (`src/lib/use-action-error.ts`). Ayrıştırma saf ve
+  test edilebilir: `returnedErrorKey` (`src/lib/action-error.ts`).
+  Üç ekran (`BookingsClient`, `CheckoutClient`, `BookingModifyModal`) kendi
+  `startsWith("Errors.")` ayıklamasını elle yazmıştı — üçü de silindi.
+
+- **Sunucu tarafı ham metin döndürmeyi bıraktı.**
+  `cancelBookingAction`'ın `catch`'i `Error.message` döndürüyordu →
+  `Errors.${actionErrorKey(e)}` + log. `createBookingAction` kapasite hatasında
+  Türkçe cümle döndürüyordu → `Errors.insufficientCapacity`.
+  `checkInAction`/`checkOutAction` servis cümlesini geçiriyordu → sonuç KODU
+  eşleniyor (`CHECKIN_CODE_TO_KEY` / `CHECKOUT_CODE_TO_KEY`).
+  `seal.ts`'in dört `catch` bloğu `e.message` döndürüyordu → `"unknown"` +
+  **loglama eklendi** (o dosyada hiç log yoktu, yani gerçek sebep hiçbir yerde
+  yazmıyordu).
+
+- **DÖRT çeviri anahtarı sözlükte HİÇ YOKTU** — kod onları döndürüyordu ama
+  `Errors` sözlüğünde karşılıkları olmadığı için ekranda anahtar adı görünürdü:
+  `invalidInput` (`contact.ts` + `partner.ts`), `invalidPhone` (`booking.ts`),
+  `notFound` ve `emailSendFailed` (`contact.ts`). Bu sessiz sınıfı yakalamak
+  için mandal eklendi.
+
+- **Dört API ucu ham hata metnini İSTEMCİYE gönderiyordu** (`String(e)`):
+  `bookings/guest-cancel`, `bookings/lookup`, `bookings/lookup/me`,
+  `mobile/partner/shop`. `String(e)` bir Prisma sorgusunu veya şema adını dışarı
+  taşıyabiliyordu ve dördü de hatayı hiç loglamıyordu. Artık sebep log'a, gövdede
+  sabit kod.
+
+- **18 yeni `Errors` anahtarı, altı dilin hepsinde.** Sözlük 35 → 53.
+
+- **İki yeni mandal** (`src/__tests__/raw-error-copy.test.ts`), ikisi de geçici
+  ihlal enjekte edilerek KIRILDIĞI doğrulandı:
+  1. koddaki her `Errors.x` referansının sözlükte karşılığı var mı,
+  2. hiçbir bileşen `toast.error(res.error)` / `setError(res.error)` yazmıyor.
+
+- **Ölü kod temizlendi, lint 11 uyarı → 0.** `CheckoutClient`'ta kaldırılmış
+  paylaş özelliğinin kalıntıları (`useShare`, `shareUrl`, `DateTimePicker`),
+  `ManageBookingClient`'ta kullanılmayan `router`, `ShopService`'te hiç okunmayan
+  `shopMap`, `SlotService`'te `SLOTS_PER_HOUR`, `guest-cancel`'da
+  kullanılmayan `notificationService`, iki gereksiz `eslint-disable`.
+  `eslint.config.mjs`'e `_` öneki kuralı eklendi: "imza gereği duruyor" demenin
+  bir yolu olsun diye (`sendNetgsmRestSms`, SMS entegrasyonu kapalı).
+
+**KABUL EDİLEN KAYIP:** check-in mühür hatalarının Türkçe metinleri sayı
+taşıyordu ("3 valiz için 2 mühür girildi"); sonuç nesnesi sayıları ayrı alan
+olarak taşımadığı için karşılık metinleri sayısız yazıldı. Aynı şekilde kapasite
+hatası "kalan: 3, talep: 5" detayını kaybetti. İkisinde de sayılar zaten
+kullanıcının önündeki formda; dilin doğru olması o detaydan önemli.
+
+**BİR HATA YAPILDI, KURTARILDI:** mandalın gerçekten kırıldığını doğrulamak için
+`src/locales/tr.json`'a geçici bir ihlal enjekte edildi ve geri alırken
+`git checkout -- src/locales/tr.json` kullanıldı — dosya commit'siz olduğu için
+bu, o oturumun TÜM tr.json işini sildi. İçerik `.next` derleme çıktısındaki
+derlenmiş sözlük parçasından geri getirildi ve `en.json`'a karşı anahtar bazında
+doğrulandı (1.608 anahtar, tek fark bu turun 18 eklemesi). **Ders:** commit'siz
+bir çalışma ağacında `git checkout -- <dosya>` geri alma aracı değildir; önce
+kopyasını al.
+
+## 2026-08-25 — fiş dili varsayılandan alındı (geri alma)
+
+**Karar:** 24 Ağustos'ta varsayılan yapılan "fiş / bagaj etiketi" dili beğenilmedi
+ve varsayılandan alındı. Site 24 Ağustos öncesi görünümüne döndü: turuncu vurgu,
+`font-black` başlık, yuvarlak köşe, beyaz yüzey.
+
+**Nasıl geri alındı — kimlik katmanı tam da bunun için vardı.** 90+ dosyada sınıf
+düzenlemesi YAPILMADI; yalnızca `globals.css` içindeki `:root` kimlik bloğunun
+değerleri eski görünümle değiştirildi. Tek dosya, tek blok.
+
+- **Fiş dili silinmedi**, `[data-identity="ticket"]` olarak duruyor.
+  `NEXT_PUBLIC_SITE_IDENTITY=ticket` ile hâlâ denenebilir. Kimlik katmanının
+  bütün savunması buydu: bir yön denenebilir ve VAZGEÇİLEBİLİR olmalı.
+- **`legacy` yönü kaldırıldı** — artık varsayılanın kendisi o olduğu için ikinci
+  bir kopyası anlamsızdı. `SITE_IDENTITIES` şimdi
+  `["default", "ticket", "seal", "shop"]` (`src/lib/site-identity.ts`).
+- **Mikro etiket harf aralığı 0.15em → 0.1em.** `legacy` bloğu bu değeri
+  `tracking-widest`in Tailwind karşılığı olan 0.1em yerine 0.15em yazıyordu; yani
+  "geri dönüş yolu" aslında birebir geri dönmüyordu. `--tracking-widest` bu
+  token'a bağlı olduğu için sapma 284 kullanımın tamamına yayılmıştı.
+- **Yarıçap skalasındaki ölü tanımlar temizlendi.** `@theme` bloğunda
+  `--radius-xl`, `--radius-2xl` ve `--radius-lg` ikişer kez tanımlanmıştı;
+  `--radius-lg: var(--id-radius-sm)` satırı hemen ardından gelen
+  `--radius-lg: var(--radius)` tarafından eziliyordu — yani `rounded-lg`
+  (39 kullanım) kimliğe bağlı SANILIYORDU ama değildi. Skala tekilleştirildi ve
+  `rounded-lg` gerçekten bağlandı. `rounded-sm`/`rounded-md` bilerek taban
+  skalada bırakıldı: keskin köşeli bir yönde `calc(... - 4px)` negatife düşerdi.
+
+**Geriye kalan:** `.id-*` sınıfları ve mandal tavanları yerinde. Bunlar bir
+görünüm kararı değil, kararın TEK YERDE durmasını sağlayan mekanizma — bu geri
+alma da onların işe yaradığının kanıtı.
+
+## 2026-08-24 — eyebrow göçü: fiş dili tamamlandı (8. tur)
+
+7. turda açık kalan tek eksen kapandı: `--id-eyebrow-family` monospace'ti ama onu
+uygulayan `.id-eyebrow` sınıfını hiçbir bileşen kullanmıyordu — harf aralığı
+geçmişti, **yazı tipi geçmemişti**.
+
+- **280 sınıf dizisi `.id-eyebrow`'a taşındı, 83 dosyada.** Ölçülen kalıplar:
+  `font-black text-[10px] uppercase tracking-widest` (121), `text-xs` varyantı (51),
+  `text-sm` (36), `font-bold text-xs` (18), ve 9 küçük varyant daha.
+  Sonuç: `tracking-widest` **284 → 5**, `font-black` **615 → 380**.
+
+- **Boyut sınıfları korundu.** `.id-eyebrow` kendi boyutunu (10px) yazıyor ama
+  Tailwind `utilities` katmanı `components`'i eziyor — üretilen CSS'te
+  `.id-eyebrow` 17.490. bayt, `.text-xs` 62.046. bayt, yani sonra gelen kazanıyor.
+  **Varsayarak değil, üretilen CSS'teki bayt konumlarına bakarak doğrulandı.**
+  Bu yüzden `text-xs`/`text-sm` varyantlarında boyut sınıfı bırakıldı, 10px
+  olanlarda atıldı.
+
+- **Arbitrary yarıçap sıfırlandı ve mandallandı.** 125 kullanım (`rounded-[2.5rem]`
+  50, `[2rem]` 32, `[3rem]` 20, `[1.5rem]` 11, `[1.75rem]` 6, `[4rem]` 5,
+  `[1.25rem]` 1) 53 dosyada skala adımlarına çevrildi. Responsive önekliler de
+  (`md:rounded-[2.5rem]`) dahil. Yeni mandal: arbitrary yarıçap **= 0**.
+
+### Bu turda verilen hasar ve onarımı — kayda geçsin
+
+Template literal içindeki sınıfları göçürmek için yazdığım regex
+(`` `([^`]*tracking-widest[^`]*)` ``) **yorumlardaki backtick'lere takıldı**:
+`CheckoutClient.tsx` içinde bir açıklama bloğu `` `disabled` ``, `` `goNext()` ``
+gibi backtick'ler taşıyordu, regex oradan çok uzaktaki bir backtick'e kadar
+eşleşti ve 2.638 karakterlik bir JSX bloğunu tek satıra çökertti. Ayrıca
+`${...}` ayrıştırması `[^}]*` kullandığı için iç içe süslü parantezli
+(`${t("x", { max: y })}`) ifadelerde bozuldu ve **dört yerde sınıf düşürdü**.
+
+Onarım: dosya `git`'te izleniyor ama bu oturumun değişiklikleri commit'siz olduğu
+için `git checkout` tüm oturum işini silecekti. Bunun yerine bozulan bölge
+`HEAD`'den alınıp bu oturumun bilinçli değişiklikleri (saat dilimi, `role="alert"`,
+`step1Blocker`, yarıçap göçü) elle yeniden uygulandı; sonra `HEAD` ile
+sözcük-bazlı fark alınarak **düşen dört sınıfın da geri geldiği** doğrulandı.
+
+Ardından 94 değişmiş dosyanın tamamı `HEAD`'e karşı sınıf-çoklukları bazında
+tarandı; beklenmeyen kayıp çıkmadı (çıkanların hepsi açıklanabilir: locale'e
+taşınan Türkçe metinler, paylaşılan rozet bileşenine geçen `ShopListItem`).
+
+**Ders:** JSX/TSX içinde backtick veya süslü parantez sayan regex yazma. Bir
+sonraki toplu göçte ya AST tabanlı bir araç kullanılmalı ya da değişiklik
+öncesi dosyaların kopyası alınmalı.
+
+## 2026-08-24 — kimlik seçildi: FİŞ varsayılan oldu (7. tur)
+
+**Seçim:** bagaj etiketi / vestiyer fişi dili. Gerekçe estetik değil işlevsel —
+misafir zaten bir teslim kodu alıyor ve bagaj etiketi altı dilin hepsinde çeviri
+gerektirmeden okunuyor. Turist hedefli bir üründe bu bir avantaj.
+
+Değerler artık `globals.css` KİMLİK KATMANI `:root` bloğunda; ayrıca öznitelik
+gerekmiyor. Eski görünüm `[data-identity="legacy"]` olarak duruyor:
+`NEXT_PUBLIC_SITE_IDENTITY=legacy` ile tek değişkende dönülür.
+
+> **25 Ağustos 2026 — bu tur geri alındı.** Fiş dili beğenilmedi; varsayılan eski
+> görünüme döndü ve fiş `[data-identity="ticket"]` oldu. `legacy` yönü kalktı.
+> Aşağıdaki ölçümler o günkü durumu anlatır, bugünkü varsayılanı değil.
+> Ayrıntı: en üstteki 25 Ağustos girdisi.
+
+- **Varsayılan yapmadan önce kapatılan iki açık.** Yalnızca büyük yarıçaplar
+  bağlıydı; bu haliyle fişe geçmek YARIM uygulanmış bir görünüm verirdi —
+  kartların köşesi keskinleşir, içindeki kutular yuvarlak kalırdı:
+
+  1. **Yarıçap skalasının tamamı bağlandı.** Ölçüm: `rounded-2xl` **293**,
+     `rounded-xl` 134, `rounded-3xl` 73, `rounded-lg` 39. `rounded-full` bilerek
+     dışarıda — rozet her kimlikte rozettir.
+  2. **Nötr skalanın yüzey adımları bağlandı** (`gray-50..300`). `bg-gray-50` 213,
+     `border-gray-100` 252 kullanım: kâğıt tonu ve saç teli çizgisi bunlardan
+     geliyor. Nötr bir kimlik kararıdır, miras değil.
+
+- **125 arbitrary değer skalaya taşındı (53 dosya).** `rounded-[2.5rem]` (50),
+  `rounded-[2rem]` (32), `rounded-[3rem]` (20), `rounded-[1.5rem]` (11),
+  `rounded-[1.75rem]` (6), `rounded-[4rem]` (5), `rounded-[1.25rem]` (1).
+  Bunlar token sistemini **tamamen baypas ediyordu**: geri kalan her şey
+  keskinleşirken onlar yuvarlak kalırdı. Legacy değerlerle birebir eşdeğer
+  adımlara çevrildi (`[2.5rem]`→`4xl`, `[2rem]`→`3xl`, `[1.5rem]`→`2xl`,
+  `[1.25rem]`→`xl`), yani göç eski görünümü değiştirmedi ama artık kimliğe bağlı.
+  Kalan arbitrary yarıçap: **0**.
+
+- **Üretilen CSS'ten doğrulandı** (iddia değil): `--id-accent-600:#bf3f18`,
+  `--id-surface-radius:.375rem`, `--id-radius-lg:.25rem`,
+  `--id-neutral-50:#f8f5f2`, `--id-display-weight:800`, `--radius-2xl:var(--id-radius-lg)`,
+  `--color-gray-50:var(--id-neutral-50)`, ve `[data-identity=legacy]` bloğu yerinde.
+  (Bu değerler 24 Ağustos'ta ölçüldü; 25 Ağustos'ta varsayılan geri alındı.)
+
+- **AÇIK — monospace mikro etiket henüz uygulanmadı.** Fişin
+  `--id-eyebrow-family` değeri monospace ama bunu uygulayan `.id-eyebrow` sınıfını
+  hiçbir bileşen kullanmıyor: harf aralığı geçti (284 kullanım), **yazı tipi
+  geçmedi**. Bunun için gerçek bileşen göçü gerekiyor —
+  `text-[10px] font-black uppercase tracking-widest` üçlüsünün `.id-eyebrow` ile
+  değişmesi. Mandal tavanları bu göçü yürütmek için duruyor.
+
+- **Bilerek dışarıda:** `emerald`/`amber`/`blue` (durum renkleri), `rounded-full`
+  (rozet), ve 6 adet arbitrary lacivert/gri gradyan
+  (`ShopDetailClient`, `BookingsClient`, `insurance/page` — marka rengi değil).
+
+## 2026-08-24 — görsel kimlik: jenerik görünümün mimari sebebi (6. tur)
+
+- **Ölçüm.** Görsel dil bileşenlerde ELLE yazılmıştı:
+
+  | Sabit | Kullanım | Dosya |
+  |---|---|---|
+  | `orange-*` | 687 | 90 |
+  | `font-black` | 615 | 102 |
+  | `tracking-widest` | 284 | — |
+  | `rounded-3xl` / `[2rem]` / `[2.5rem]` | 155 | 56 |
+  | **Toplam** | **1.658** | **114** |
+
+  Buna karşılık `globals.css`'te düzgün bir `--brand-*` token katmanı ZATEN vardı
+  ve yalnızca **8 dosyada** kullanılıyordu.
+
+- **Teşhis.** Sitenin jenerik görünmesi bir zevk meselesi değil, **mimari** bir
+  meseleydi — ve bu oturumda düzeltilen her şeyle aynı sınıf: *karar tek bir yerde
+  durmuyordu.* İki sonucu vardı:
+  1. Görünüm **değiştirilemiyordu**: "tasarımı özgünleştirelim" demek 114 dosyayı
+     elle düzenlemek demekti, o yüzden hiç yapılmadı.
+  2. Tam bu yüzden **jenerikti**: kimse global karar veremeyince herkes Tailwind'in
+     en az dirençli yolunu tekrarladı (`font-black` + `rounded-3xl` + `orange-600`).
+
+- **Düzeltme — 1.658 kullanım TEK BİR bileşen dosyasına dokunmadan kimliğe bağlandı.**
+  Sınıfları `.id-*` yardımcılarına çevirmek 114 dosyada elle düzenleme demekti; hem
+  riskli hem yarım kalmaya mahkûm. Bunun yerine **sınıfların ne anlama geldiği**
+  yeniden tanımlandı — Tailwind v4'te `orange-600`'ün değeri bir tema değişkenidir:
+
+  ```css
+  --color-orange-600: var(--id-accent-600);
+  --font-weight-black: var(--id-display-weight);
+  --tracking-widest:   var(--id-eyebrow-tracking);
+  --radius-4xl:        var(--id-surface-radius);
+  ```
+
+  Sabit sınıf artık bir **karar** değil, bir **referans**. Üretilen CSS'ten
+  doğrulandı: `.font-black{font-weight:var(--font-weight-black)}` ve
+  `--color-orange-600:var(--id-accent-600)`; `bg-orange-600/20` gibi opaklık
+  varyantları da `color-mix()` üzerinden kimliği takip ediyor.
+
+- **Üç yön** `[data-identity="ticket|seal|shop"]` olarak tanımlı; `<html>`
+  özniteliği `NEXT_PUBLIC_SITE_IDENTITY` ile seçiliyor (`src/lib/site-identity.ts`).
+  Bilinmeyen değer sessizce varsayılana düşer.
+
+- **Bilinçli kapsam dışı:** `emerald` / `amber` / `blue` bağlanmadı. Bunlar durum
+  renkleridir (başarı, uyarı, bilgi); yeşil bir "başarılı" rozeti yön değiştirdi
+  diye turuncuya dönerse anlam kayar.
+
+- **Kabul edilen kayma:** `orange-*` bugüne kadar Tailwind'in VARSAYILAN turuncusunu
+  kullanıyordu, `--brand-*` ise projenin kendi skalasıydı; yalnızca 600 adımı
+  çakışıyordu (#ea580c). Bağlama sonrası ikisi tek skalada birleşti, ara adımlarda
+  (50/100/500) hafif kayma var. Bilinçli: iki ayrı turuncunun bir arada yaşaması
+  zaten tutarsızlıktı.
+
+- **Mandal:** `src/__tests__/design-tokens.test.ts` (13 tarama). Asıl garanti sayı
+  değil **bağlantının kendisi**: 11 accent adımının hepsi, ağırlık, harf aralığı ve
+  yarıçap tek tek doğrulanıyor; her yönün TAM skala tanımladığı kontrol ediliyor
+  (yarım skala, sayfada iki farklı marka rengi demektir). Bağlantı koparıldığında
+  kırmızı yandığı deneyerek doğrulandı. Sabit kullanım tavanları da korunuyor —
+  düşebilir, yükselemez.
+
+## 2026-08-24 — backend güvenlik/doğruluk taraması (5. tur)
+
+- **P0 (KOD DÜZELTİLDİ, VERİ ONARIMI BEKLİYOR) — Slot ÜRETİMİ dükkanın saat
+  dilimini kullanmıyordu; hata yalnızca PROD'da görünüyordu.**
+
+  `generateSlotsForShop` duvar saatini şöyle ana çeviriyordu:
+
+  ```js
+  const localIso = `${localDay}T${h}:${m}:00`;
+  const startUtc = new Date(localIso);   // üstündeki yorum: "parse as UTC"
+  ```
+
+  Yorum da kod da yanlış: saat dilimi eki **olmayan** bir ISO tarih-saat dizesi,
+  çalışma ortamının **yerel** saatine göre ayrıştırılır. Ölçüldü:
+
+  ```
+  TZ=UTC             new Date("2026-06-15T09:00:00") -> 2026-06-15T09:00:00.000Z
+  TZ=Europe/Istanbul new Date("2026-06-15T09:00:00") -> 2026-06-15T06:00:00.000Z  (doğrusu)
+  ```
+
+  `Dockerfile` ve `docker-compose.yml` içinde `TZ` **ayarlı değil**, yani prod
+  konteyneri UTC. Geliştirici makinesi İstanbul saatinde olduğu için hata yerelde
+  hiç görünmüyordu — bu yüzden bugüne kadar fark edilmedi.
+
+  `tz` değişkeni hesaplanıyor ama yalnızca `localDay` için kullanılıyordu; saat
+  hiç çevrilmiyordu. Ayrıca `shopTimeZone()` diye bir yardımcı **tanımlıydı ve
+  hiç çağrılmıyordu** — dönüşümün amaçlandığını ama hiç bağlanmadığını gösteriyor
+  (lint bunu "unused" olarak 2 gündür raporluyormuş).
+
+  **Sonuç:** 09:00–20:00 açık bir İstanbul dükkanının slotları `09:00Z–20:00Z`
+  üretiliyordu; misafir bunları ızgarada dükkanın takviminde **12:00–23:00**
+  olarak görüyordu.
+
+  | Gerçek durum | Misafirin gördüğü | Sonuç |
+  |---|---|---|
+  | Dükkan **açık**, 09:00–12:00 | slot yok | `getSlotAvailability` boş dönüyor → arama dükkanı o pencerede **eliyor** (`ShopService.ts:264,336`) |
+  | Dükkan **kapalı**, 20:00–23:00 | slot var | rezervasyon alınıyor, misafir geliyor, `isShopOpenAt` check-in'i **reddediyor** (`src/services/booking/check-in.ts:42`) |
+
+  İkinci satır bu ürünün verebileceği en kötü hata: arayüzün kendisinin önerdiği
+  saat, tezgâhın başında valizle reddediliyor.
+
+  **Düzeltme:** dönüşüm artık misafir tarafının zaten kullandığı
+  `parseDatetimeLocalInTimeZone(localIso, tz)` ile yapılıyor — DST sınırlarını da
+  doğru çözüyor ve iki taraf aynı fonksiyonu paylaşıyor. Kullanılmayan
+  `shopTimeZone()` kaldırıldı.
+  Mandal: `src/__tests__/slot-generation-timezone.test.ts` (ham `new Date(localIso)`
+  geri gelirse kırmızı yanar).
+
+  **AÇIK — veri onarımı.** Üretim `(shopId, startTime)` üzerinden `upsert` yapıyor:
+  iş tekrar koştuğunda **doğru slotlar eklenir, yanlış olanlar yerinde kalır**.
+  İkisi bir arada durduğu sürece misafir hâlâ kapalı saate rezervasyon yapabilir.
+  Onarım aracı ve adım adım yordamı hazır: `scripts/repair-slot-timezone.sh`
+  (varsayılanı kuru çalışma) + `scripts/README.md` → "Slot saat dilimi onarımı".
+  Sıra: **kuru çalışma → yedek → `--apply` → `generate-slots.sh` → doğrula.**
+  Rezervasyonu olan slotlara dokunulmuyor; onlar için esnafla konuşulup misafire
+  yeni saat önerilmeli — script bunları ayrıca sayıp uyarıyor.
+
+- **P2 (düzeltildi) — Webhook imzası tekrar oynatmaya (replay) açıktı.**
+  `/api/webhooks/resend`, kimlik doğrulaması olmayan ve veritabanına YAZAN tek
+  genel POST ucu; **hiç testi yoktu**. `svix-timestamp` imzalanan içeriğe giriyor
+  ama **tazeliği hiç kontrol edilmiyordu**: geçerli bir isteği bir kez yakalayan
+  biri onu sonsuza kadar tekrar gönderebilir, gövde ve imza değişmediği için
+  doğrulama her seferinde geçer. Gelen e-posta yolu tekilleştirme yapmadan
+  `contactMessage.create` çağırdığı için tek bir yakalanmış istek admin gelen
+  kutusunu doldurmaya yeter — P1-18 ile aynı kanal.
+  Ayrıca `svix-signature` başlığı sır döndürme sırasında **birden çok** imza taşır
+  (`"v1,a v1,b"`); eski kod `","` ile bölüp ikinci parçayı alıyordu, iki imza
+  geldiğinde tüm başlığı imza sanıp reddediyordu — yani sır döndürme anında
+  webhook **sessizce kırılırdı**.
+  Doğrulama `src/lib/webhook-signature.ts`'e çıkarıldı: 5 dakikalık zaman damgası
+  toleransı, çoklu imza desteği, ve Svix sırrı varken zaman damgası taşımayan eski
+  imza yoluna düşmenin engellenmesi. 10 test: `src/__tests__/webhook-signature.test.ts`.
+
+## 2026-08-24 — misafir diğer sayfalar + auth taraması (4. tur)
+
+Durum tablosundaki son ❌ satır. Üç ayrı hata sınıfı çıktı; üçü de **sessiz**.
+
+- **P2 (düzeltildi) — Yönetim ekranlarının hata mesajı prod'da İngilizce bir
+  paragrafa dönüşüyordu.** 12 çağrı yerinde `catch` bloğu
+  `toast.error(error instanceof Error ? error.message : String(error))` yazıyordu.
+  Next 16'da bir server action'dan FIRLAYAN hata istemciye kırpılarak gider;
+  React onun yerine şunu koyar:
+  *"An error occurred in the Server Components render. The specific message is
+  omitted in production builds to avoid leaking sensitive details. …"*
+  (doğrulandı: `node_modules/next/dist/compiled/react-server-dom-turbopack/…/client.browser.production.js`)
+  Yani yönetici geçersiz bir kapasite girdiğinde bu paragrafı görüyordu — 6 dilin
+  hepsinde, hangi alanın yanlış olduğunu söylemeden. Geliştirmede ise ham anahtar
+  sızıyordu: `admin-management.ts` `Errors.invalidData` diye fırlattığı için ekranda
+  birebir "Errors.invalidData" yazıyordu.
+  İki katmanlı düzeltme: (a) `updateShopAction`'ın DOĞRULAMA hataları artık
+  fırlatmıyor, `{ success: false, error }` dönüyor — o dönüş kırpılmaz, sebep prod'a
+  ulaşır; (b) `src/lib/action-error.ts` ile `catch` yolu asla ham metin basmaz,
+  tanınmayan her şey yerelleştirilmiş `Errors.generic`'e düşer.
+  Mandal: `src/__tests__/raw-error-copy.test.ts`.
+
+- **P2 (düzeltildi) — Giriş, kayıt ve şifre ekranlarında hata DUYURULMUYORDU.**
+  Dördü de hatayı düz bir `<p>` olarak çiziyordu, `role="alert"` yok. Ekran okuyucu
+  kullanan biri yanlış şifreyle "giriş yap"a bastığında HİÇBİR ŞEY duymuyor: odak
+  butonda kalıyor, form değişmemiş görünüyor. Checkout'ta aynı sınıf 1. turda
+  düzeltilmişti; auth yüzeyi o düzeltmenin dışında kalmıştı.
+
+- **P2 (düzeltildi) — 119 satır sabit TÜRKÇE metin; çeviri dosyalarına hiç uğramıyordu.**
+  Mevcut `hardcoded-copy.test.ts` yalnızca `locale === "tr" ? …` DALINI arıyordu;
+  asıl borç koşulsuzdu — bileşenin içine düpedüz Türkçe yazılmıştı. En can yakıcı üçü:
+  - `layout.tsx` → **"İçeriğe atla"**: her sayfadaki İLK sekme durağı. Klavye veya
+    ekran okuyucu kullanan Japon bir misafir Türkçe duyuyordu.
+  - `ShopListItem.tsx` → **"Doğr."** ve **"≤{n}dk"**: arama sonuçlarındaki iki güven
+    rozeti. Aynı ikili `TrustBadge` içinde ZATEN yerelleştirilmişti; burada ikinci kez,
+    elle ve Türkçe çiziliyordu. İki kopya olması hatanın kendisiydi — artık paylaşılan
+    bileşen kullanılıyor.
+  - `QRScanner.tsx` → üç kamera hata metni; esnaf 6 dilde Türkçe okuyordu.
+  Ayrıca `partners`/`contact`/`register` sayfaları, esnaf kazanç ekranı, mühür kargo
+  formu ve `partner/seals` boş durumu. 31 yeni anahtar × 6 dil.
+  Mandal: `hardcoded-copy.test.ts` → "sabit yazılmış Türkçe metin", tavan 13.
+  Tarama iki sinyale birden bakıyor (Türkçe'ye özgü harfler + Türkçe durak kelimeler);
+  yalnızca harfe bakmak yetmiyordu, "Platform komisyonu dahil" ve "Puan" düz ASCII
+  olduğu için ilk ölçümde görünmemişti.
+
+### Açık — misafire giden hatırlatma e-postaları TÜRKÇE (şema işi)
+
+`src/app/api/internal/booking-reminders/route.ts:57,79` — check-in ve check-out
+hatırlatmaları sabit Türkçe metinle gidiyor, tarihler de `toLocaleString("tr-TR")`.
+Japon bir misafir Türkçe e-posta ve Türk tarih biçimi alıyor. Hedef kitle turist
+olduğu için bu P1 sınıfı.
+
+**Neden burada durdu:** düzeltmesi kod değil ŞEMA işi. `NotificationService`
+yerelleştirilmiş yolu zaten biliyor (`notifyBookingApproved(..., locale)`), ama o
+locale'i `getLocale()` ile İSTEK anından alıyor — cron'un isteği yok. Ne `User` ne
+`Booking` misafirin dilini saklıyor (`prisma/schema.prisma` içinde `locale` yalnızca
+`AnalyticsEvent`, `MobilePushToken`, `BlogPost`'ta var).
+
+**Gereken değişiklik:** `Booking.locale` (nullable) + rezervasyon oluşturulurken
+yazılması + hatırlatma işinin onu kullanması + 3 e-posta şablonunun 6 dile çıkarılması.
+Prod veritabanına migrasyon gerektirdiği için karar bekliyor.
+
+## 2026-08-24 — açık kalan KOD maddeleri (3. tur)
+
+Karar/veri bekleyen maddelere dokunulmadı; yalnızca "kod" diye işaretlenmiş ve
+kanıtı zaten yazılı olanlar kapatıldı.
+
+- **P1 (düzeltildi) — Saat dilimi uçtan uca taşınmıyordu.** 2. turun "açık kalan"
+  maddesi. `SlotService` müsaitliği `Shop.timezone`'da üretiyor, ama `CheckoutClient`
+  her yerde `parseDatetimeLocalInTimeZone`'un VARSAYILANINI (İstanbul) kullanıyordu.
+  Bugün üç dükkan da İstanbul olduğu için ikisi tesadüfen örtüşüyor; İstanbul dışı
+  ilk dükkanda misafirin ızgarada gördüğü saat ile rezervasyona yazılan an ofset
+  kadar ayrışır ve ekranda hiçbir uyarı çıkmaz. Dilim artık tek parametre:
+  sayfa (`shop.timezone`) → `CheckoutClient` → `SlotAvailabilityGrid`. Aynı sözleşme
+  `BookingModifyModal`'a da getirildi (`GuestBookingListItem.shop` artık `timezone`
+  seçiyor). Mandal: `src/__tests__/slot-range-timezone.test.ts` (3 yeni tarama).
+- **UX — "Saatler dükkanın yerel saatiyle (İstanbul)." metni şehri SABİT yazıyordu.**
+  6 dilde de. Artık `{zone}` parametreli; kaynağı dükkanın kendi dilimi
+  (`timeZoneCityLabel`). Dilim parametre olup metin sabit kalsaydı, tam da hangi
+  takvimin geçerli olduğunu açıklayan cümle yalan söylerdi.
+
+- **P2 (düzeltildi) — Esnaf paneli yalnızca ilk dükkanı gösteriyordu** (23 Ağustos
+  maddesi). `partner/page.tsx` koşulsuz `shops[0]`'ı alıyordu. Artık `?shop=<id>`
+  ile seçiliyor — id, esnafın KENDİ dükkan listesine karşı doğrulanıyor, sahipliği
+  atlatan bir yol açılmıyor — ve birden fazla dükkanı olan esnafa başlıkta bir
+  dükkan seçici çıkıyor (`shopSwitcherLabel`, 6 dil).
+
+- **P2-6 (düzeltildi) — Misafir iptal token'ı repoda YAZILI bir sırra düşüyordu.**
+  Üç uç (`lookup`, `lookup/me`, `guest-cancel`) sırrı
+  `process.env.AUTH_SECRET || "bagajpark-guest-management-secret"` diye türetiyordu;
+  `AUTH_SECRET` yoksa üçü de herkesin okuyabildiği bir sırla imza doğruluyordu ve o
+  sırla üretilmiş token `guest-cancel`'da kabul edilirdi. Tek yer:
+  `src/lib/guest-lookup-token.ts` — fallback yok, eksikse atar. Sır artık `catch`'in
+  DIŞINDA okunuyor, yoksa yapılandırma hatası "geçersiz token" (401) diye görünürdü.
+  Mandal: `src/__tests__/guest-token-secret.test.ts` (`AUTH_SECRET || "..."` kalıbı
+  `src/` genelinde yasak).
+
+- **P2-2 (düzeltildi) — Sıralayıcının nötr puan varsayımı hiç çalışmıyordu.**
+  `(shop.rating ?? 3) / 5` yazıyordu ama `Shop.rating` şema varsayılanı `0.0`,
+  `NULL` değil — `??` hiç devreye girmiyor ve yorum almamış her dükkan puan
+  bileşeninden sıfır alıyordu. Üçü de 0 olduğu için sıralama bugün görünürde doğru;
+  ilk yorum geldiği anda o dükkan 0.3'lük bir farkla öne geçerdi. `ratingScore()`
+  artık kolonu değil YORUM DURUMUNU okuyor (0 = değerlendirilmemiş → nötr).
+  Kolonun `NULL`'a çevrilmesi ayrı bir veri kararı; kod her iki hâlde de doğru.
+
+- **P2-4 (düzeltildi) — `cancelBooking` yorumu kodun yaptığını anlatmıyordu.**
+  Yorum "≥24s tam iade, ≥1s %50, sonrası kupon" diyordu; gövdede kademe YOK,
+  koşulsuz tam iade işaretleniyor. İade mantığını değiştirecek kişinin okuduğu ilk
+  şey olduğu için en yanıltıcı yerdeydi. Yorum gerçeğe çekildi.
+
+- **P2-7 (düzeltildi) — İki güven rozetinin de arkasında hiçbir kod yolu yoktu.**
+  - *"Doğrulanmış"*: kolon şemada, rozet üç yüzeyde çiziliyor, ama `src/` içinde
+    `isVerified`'i YAZAN tek satır yoktu — prod'daki tek `true` elle veritabanına
+    girilmişti. Admin dükkan düzenleme formuna `isTest` ile aynı kalıpta bir onay
+    kutusu eklendi; değişiklik `admin_shop_verified_flag_changed` ile loglanıyor.
+    Rozet artık bilinçli ve izlenebilir bir admin kararı.
+  - *"≤ X dk yanıt"*: `responseTimeMinutes` platform genelinde 0'dı ve onu yazan bir
+    kod yolu yoktu. Artık GERÇEK veriden hesaplanıyor: misafirin talebi oluşturduğu an
+    (`Booking.createdAt`) ile esnafın onayladığı an (`BookingEvent` `APPROVED`) arası.
+    `ShopService.recomputeResponseTimes` + `POST /api/internal/response-times`, kayıt
+    defterinde `response-times` (`29 3 * * *`, `enforced: false` — cron henüz kurulmadı).
+    Üç karar yazılı: **p90** kullanılıyor çünkü metin "≤" diyor, yani üst sınır iddiası
+    (ortanca kullanılsaydı iddia yarı yarıya yanlış olurdu); **5 örnekten az** olan
+    dükkana `null` yazılıyor, yani rozet hiç çizilmiyor — tek bir hızlı onaydan çıkarılan
+    sayı, rozeti yine karşılıksız bir iddiaya çevirirdi; **en az 1 dk**'ya yuvarlanıyor
+    çünkü 0, şema varsayılanı olan "veri yok" ile karışırdı.
+    `TrustBadge`'deki `minutes < 1 → responseTimeFast` dalı hiç çalışmıyordu (üstteki
+    koşul 1'in altını zaten eliyordu); dal ve karşılığı olan çeviri anahtarı kaldırıldı.
+    Mandal: `src/__tests__/shop-response-time.test.ts`.
+
+- **i18n çeviri KALİTESİ (kapatıldı) — 289 anahtar EN ile birebir aynıydı.**
+  Ölçüm: anahtar MEVCUT ama değeri İngilizce ile birebir aynı ve en az iki latin
+  kelime içeriyor. Bu, `locales.test.ts`'in ölçtüğü EKSİK anahtardan farklı bir borç:
+  eksik anahtar en azından `MISSING_MESSAGE` gürültüsü yapıyor, bu sessiz ve tam
+  olarak hedef kitlenin gördüğü şey. Önce misafir + esnaf yüzeyi (87 anahtar), sonra
+  admin paneli (196 anahtar: `Admin`, `AdminAnalytics`, `AdminStatus`) çevrildi.
+  Kalan tek istisna özel adlar: destek e-postası, şirketin tescilli ünvanı, istasyon
+  arama sorguları, marka adı ve Fransızcada zaten doğru olan "≤{minutes} min".
+  Mandal: `locales.test.ts` → "hiçbir metin İngilizce ile birebir aynı kalmadı".
+  İstisnalar `IDENTICAL_TO_EN_OK` içinde tek tek gerekçeli.
+
+## 2026-08-24 — misafir rezervasyon akışı (UI) taraması, 2. tur (slot ızgarası)
+
+- **P0 (düzeltildi) — Müsaitlik ızgarasıyla saat seçmek rezervasyonu BOZUYORDU.**
+  `SlotAvailabilityGrid` seçilen aralığı `onSelectRange` ile HAM ISO anı olarak
+  veriyordu (`"2026-08-24T09:30:00.000Z"`); `CheckoutClient` bunu doğrudan
+  `setCheckInLocal`'a yazıyor, o state ise `datetime-local` DUVAR SAATİ bekliyor.
+  `parseDatetimeLocalInTimeZone` gelen değerin sonuna koşulsuz `"Z"` ekliyor →
+  `"...000Z" + "Z"` = `"...000ZZ"` → **Invalid Date → `null`**.
+  Ölçüldü (`src/__tests__/slot-range-timezone.test.ts`): ham ISO `null`'a düşüyor.
+  Sonuç: ikinci slot'a dokunup aralığı tamamlayan kullanıcının `windowOk`'u FALSE
+  oluyor, "devam" butonu sönüyor ve "tarih geçersiz" uyarısı alıyordu — yani
+  ızgarayı **amacına uygun** kullanmak akışı kilitliyordu. Çeviri artık sınırda
+  (`toWallValue`) yapılıyor; gidiş-dönüş aynı anı koruyor.
+
+- **P1 (düzeltildi) — Slot saatleri CİHAZIN saat diliminde yazılıyordu.**
+  `formatSlotTime` `new Date(iso).getHours()`, gün penceresi de `setHours(0,0,0,0)`
+  kullanıyordu. `src/lib/datetime-local.ts` bu hata sınıfını ("Berlin'de 1 saat,
+  New York'ta 7 saat kayma") tam olarak anlatıyor ve tarih GİRDİLERİ için
+  düzeltilmişti; slot ızgarası o düzeltmenin dışında kalmıştı. Hedef kitle turist
+  olduğu için telefonu memleket saatinde olan misafir, dükkanın müsaitlik
+  takvimiyle uyuşmayan saatler görüyordu. İkisi de `PLATFORM_TIMEZONE` üzerinden.
+  **Açık kalan:** `SlotService` dükkan başına `shop.timezone` tutuyor, ama
+  `CheckoutClient` her yerde `parseDatetimeLocalInTimeZone`'un varsayılanını
+  (İstanbul) kullanıyor. İstanbul dışı bir dükkan eklendiğinde ikisi ayrışır;
+  saat dilimi uçtan uca tek parametre olarak taşınmalı (ızgara `timeZone` prop'unu
+  zaten kabul ediyor).
+
+- **P1 (düzeltildi) — Slot yüklenemezse adım çıkmaza giriyordu.** `catch` bloğu
+  `e.message`'ı ekrana basıyordu: kullanıcı 6 dilin hepsinde İngilizce
+  "Failed to fetch slots" görüyor ve tekrar deneme yolu bulamıyordu. Yerelleştirilmiş
+  metin (`slotsLoadError`, 6 dil) + "TEKRAR DENE" butonu eklendi.
+
+- **P2 (düzeltildi) — Slot butonları erişilebilir değildi.** Ekran okuyucu yalnızca
+  "09:30 3" duyuyordu; rakamın neyi saydığı hiçbir yerde yazmıyordu ve müsaitlik
+  görsel olarak yalnızca RENK ile (yeşil/amber) taşınıyordu. `aria-label`
+  (`slotsSlotAriaLabel` / `slotsSlotFullAriaLabel`, 6 dil), `aria-pressed` ve
+  görünür klavye odağı eklendi.
+
+- **P2 (düzeltildi) — "1.5 saat" ondalığı yerelleştirilmemişti.** `count * 0.5` ham
+  basılıyordu; TR'de nokta binlik ayracı gibi okunur (`Money`/`formatDecimal`
+  yakınmasının aynısı). `formatDecimal(..., locale)` kullanılıyor.
+
+- **UX (eklendi) — Saatlerin hangi takvime ait olduğu yazmıyordu.** `timesInShopTimezone`
+  ("Saatler dükkanın yerel saatiyle (İstanbul).") anahtarı 6 dilde zaten VARDI ama
+  hiçbir yerde kullanılmıyordu; ait olduğu yer ızgaranın altı.
+
+## 2026-08-24 — misafir rezervasyon akışı (UI) taraması, 1. tur
+
+Yukarıdaki durum tablosunda "❌ yapılmadı / tek kalan yüzey" diye duran yüzey.
+İkisi de **sessiz çıkmaz**: arayüz kullanıcıya hiçbir şey söylemeden akışı durduruyordu.
+
+- **P1 (düzeltildi) — Son adımdaki hata hiç görünmüyordu.**
+  `src/components/guest/CheckoutClient.tsx` footer'daki hata bloğu `step === 1` ile
+  kısıtlıydı. Üye girişi yapmış misafir 2. adımda "gönder"e bastığında sunucu hatası
+  (kapasite dolu, geçersiz kupon, kapalı slot) `setError(...)` ile yazılıyor ama ne
+  footer'da ne 2. adımın gövdesinde render ediliyordu → "tıkla, hiçbir şey olmuyor".
+  Dönüşüm yolunun **son** adımında. Aynı hata sınıfı misafir modalı için daha önce
+  düzeltilmişti; kusur bileşende değil kalıptaydı (hata durumunu bir adıma bağlamak).
+  Kısıt kaldırıldı, `role="alert"` eklendi, modal açıkken kendi hatasını gösterdiği
+  için yalnızca o durumda gizleniyor. Mandal: `src/__tests__/checkout-error-visibility.test.ts`.
+
+- **P2 (düzeltildi) — Sönük "devam" butonunun nedeni hiçbir yerde yazmıyordu.**
+  1. adımın CTA'sı valiz seçilmeden ya da tarih aralığı geçersizken `disabled` idi.
+  Disabled buton tıklanamadığı için `goNext()` hiç çalışmıyor, dolayısıyla oradaki
+  `checkoutSelectBagsHint` / `checkoutDatesInvalid` açıklaması da ekrana hiç düşmüyordu.
+  Engelin sebebi artık butonun üstünde pasif ipucu olarak yazıyor ve `aria-describedby`
+  ile butona bağlı.
+
+- **UX (eklendi) — 1. adımda çalışan toplam.** Kullanıcı valizi ve süreyi 1. adımda
+  seçiyor ama tutarı yalnızca 2. adımda görüyordu; ücreti öğrenmek için bir adım
+  ilerlemek gerekiyordu. Özet (toplam + valiz sayısı · gün) CTA'nın hemen üstüne alındı;
+  2. adımdaki dökümle aynı `grandTotal`.
+
 ## 2026-08-23 — e2e yeniden yazımında bulunanlar
 
-- **P2 — Esnaf paneli yalnızca ilk dükkanı gösterir.** `partner/page.tsx` `shops[0]`'ı
+- **P2 (24 Ağu'da düzeltildi — bkz. 3. tur) — Esnaf paneli yalnızca ilk dükkanı gösterir.** `partner/page.tsx` `shops[0]`'ı
   `activeShop` alır; çok dükkanlı esnafın (seed'deki demo esnaf: Galata + Sultanahmet)
   diğer dükkanındaki valizler "İşlem Geçmişi"nde görünmez. Check-in `?booking=`/QR ile
   sahiplik üzerinden çalıştığı için valiz alınır ama listede bulunamaz → teslim edilemez.
@@ -41,9 +971,9 @@
 | IDOR / kaynak sahipliği | ✅ tamamlandı | **1 P0 bulundu ve düzeltildi** |
 | Partner paneli (UI + yetenek) | ✅ tamamlandı | 1 P0 (düzeltildi) + 3 P1 |
 | Admin paneli (UI + yetenek) | ✅ tamamlandı | 2 P1 (biri düzeltildi) + 2 P2 |
-| Misafir rezervasyon akışı (UI) | ❌ yapılmadı | tek kalan yüzey |
-| Misafir diğer sayfalar + auth (UI) | ❌ yapılmadı | kısmen: giriş sayfası incelendi |
-| i18n çeviri KALİTESİ | ❌ yapılmadı | eksik anahtar sayıldı, yanlış çeviri taranmadı |
+| Misafir rezervasyon akışı (UI) | ✅ tamamlandı (24 Ağu) | 1 P0 + 2 P1 + 3 P2 — hepsi düzeltildi |
+| Misafir diğer sayfalar + auth (UI) | ✅ tamamlandı (24 Ağu) | 3 P2 düzeltildi; 1 P1 açık (hatırlatma e-postaları) |
+| i18n çeviri KALİTESİ | ✅ tamamlandı (24 Ağu) | 289 anahtar EN'de kalmıştı; mandallandı |
 
 Yani aşağıdaki liste **eksiksiz değil** — yalnızca bir yüzeyin tam denetimini ve
 21-22 Ağustos'ta elle bulunan hataları içeriyor. Kalan 6 yüzey hâlâ taranmayı bekliyor.

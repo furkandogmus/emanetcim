@@ -1,11 +1,12 @@
 "use client";
 
-import { Building2, ChevronRight, MapPin, Star, Shield, Timer } from 'lucide-react';
+import { Building2, ChevronRight, MapPin, Star, Shield } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import FavoriteButton from '@/components/guest/FavoriteButton';
 import Money from "@/components/common/Money";
 import { formatDecimal } from "@/lib/currency";
+import { ResponseTimeBadge, VerifiedBadge } from "@/components/common/TrustBadge";
 
 interface ShopListItemProps {
   id: string;
@@ -97,18 +98,15 @@ export default function ShopListItem({
             <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-md">
               {t("searchFreeCancelBadge")}
             </span>
-            {isVerified && (
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded-md">
-                <Shield size={10} />
-                Doğr.
-              </span>
-            )}
-            {responseTimeMinutes != null && responseTimeMinutes > 0 && (
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-md">
-                <Timer size={10} />
-                ≤{responseTimeMinutes}dk
-              </span>
-            )}
+            {/*
+              Bu iki rozet burada İKİNCİ kez, elle çiziliyordu: "Doğr." ve
+              "≤{n}dk" sabit TÜRKÇEYDİ, yani arama sonuçlarında 6 dilin
+              hepsinde Türkçe görünüyordu. `TrustBadge` aynı ikiliyi zaten
+              yerelleştirilmiş ve ölçüme bağlı biçimde çiziyor (P2-7); iki
+              kopya olması hatanın kendisiydi.
+            */}
+            <VerifiedBadge isVerified={!!isVerified} />
+            <ResponseTimeBadge minutes={responseTimeMinutes ?? null} />
           </div>
 
           <div className="text-right">

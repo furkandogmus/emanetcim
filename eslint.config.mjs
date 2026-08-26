@@ -29,6 +29,19 @@ const eslintConfig = defineConfig([
      */
     files: ["src/**/*.ts", "src/**/*.tsx"],
     rules: {
+      /*
+       * `_` önekli argüman = BİLEREK okunmuyor.
+       *
+       * Kuralın kendisi açık kalmalı (ölü değişken gerçek bir sinyaldir), ama
+       * "bu parametre imza gereği duruyor" demenin bir yolu olmalıydı; yoksa
+       * tek çare her seferinde satır bazında `eslint-disable` yazmak oluyor ve
+       * o yorum gerçek uyarıları da susturur. Örnek: `sendNetgsmRestSms`
+       * SMS entegrasyonu kapalıyken imzasını koruyor.
+       */
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" },
+      ],
       "no-restricted-syntax": [
         "error",
         {

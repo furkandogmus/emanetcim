@@ -472,7 +472,7 @@ export default function LocationPicker({ value, onChange }: Props) {
         <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 flex flex-col gap-2">
           <div className="flex items-center gap-2">
             <CheckCircle2 size={15} className="text-orange-500 shrink-0" />
-            <span className="text-[11px] font-black text-orange-600 uppercase tracking-widest">
+            <span className="text-[11px] id-eyebrow text-orange-600">
               {t("locationDetectedTitle")}
             </span>
           </div>

@@ -51,7 +51,7 @@ export default async function AdminSealsPage({ params }: { params: Promise<{ loc
 
       <main className="p-10 max-w-5xl mx-auto w-full flex flex-col gap-6">
         <section className="flex flex-col gap-4">
-          <h2 className="text-sm font-black uppercase tracking-widest text-gray-400 px-2">
+          <h2 className="text-sm id-eyebrow text-gray-400 px-2">
             {t('sealInventorySection')}
           </h2>
           <AdminSealInventoryClient 
@@ -61,26 +61,26 @@ export default async function AdminSealsPage({ params }: { params: Promise<{ loc
           />
         </section>
 
-        <h2 className="text-sm font-black uppercase tracking-widest text-gray-400 mt-4 px-2">
+        <h2 className="text-sm id-eyebrow text-gray-400 mt-4 px-2">
           {t('sealRequestsSection')}
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
-           <div className="bg-orange-600 text-white p-8 rounded-[2.5rem] shadow-xl shadow-orange-200">
-              <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-2">{t('sealsPending')}</p>
+           <div className="bg-orange-600 text-white p-8 rounded-4xl shadow-xl shadow-orange-200">
+              <p className="id-eyebrow opacity-60 mb-2">{t('sealsPending')}</p>
               <h2 className="text-4xl font-black">{pending}</h2>
            </div>
-           <div className="bg-gray-900 text-white p-8 rounded-[2.5rem]">
-              <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2">{t('sealsInTransit')}</p>
+           <div className="bg-gray-900 text-white p-8 rounded-4xl">
+              <p className="id-eyebrow opacity-40 mb-2">{t('sealsInTransit')}</p>
               <h2 className="text-4xl font-black">{shipped}</h2>
            </div>
-           <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100">
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">{t('sealsDelivered')}</p>
+           <div className="bg-white p-8 rounded-4xl border border-gray-100">
+              <p className="id-eyebrow text-gray-400 mb-2">{t('sealsDelivered')}</p>
               <h2 className="text-4xl font-black text-gray-900">{delivered}</h2>
            </div>
         </div>
 
-        <h3 className="text-sm font-black uppercase tracking-widest text-gray-400 mt-8 mb-2 px-2">{t('recentRequests')}</h3>
+        <h3 className="text-sm id-eyebrow text-gray-400 mt-8 mb-2 px-2">{t('recentRequests')}</h3>
         
         {requests.map((req) => (
           <div key={req.id} className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex items-center justify-between group hover:shadow-md transition-all">
@@ -90,13 +90,13 @@ export default async function AdminSealsPage({ params }: { params: Promise<{ loc
               </div>
               <div>
                 <h4 className="font-bold text-gray-900">{req.shop.name}</h4>
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t('sealQuantity', { count: req.quantity })}</p>
+                <p className="text-xs id-eyebrow text-gray-400">{t('sealQuantity', { count: req.quantity })}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-6">
                <div className="text-right hidden md:block">
-                  <p className={`text-[10px] font-black uppercase tracking-widest ${req.status === 'PENDING' ? 'text-orange-600' : 'text-gray-400'}`}>
+                  <p className={` id-eyebrow ${req.status === 'PENDING' ? 'text-orange-600' : 'text-gray-400'}`}>
                     {req.status === 'PENDING' ? t('statusPendingApproval') : req.status === 'SHIPPED' ? t('statusInTransit') : t('statusDelivered')}
                   </p>
                   <p className="text-[10px] font-bold text-gray-300">{req.createdAt.toISOString().slice(0, 10)}</p>
@@ -105,7 +105,7 @@ export default async function AdminSealsPage({ params }: { params: Promise<{ loc
                  <SealShipButton requestId={req.id} requestedQuantity={req.quantity} />
                ) : req.status === 'SHIPPED' ? (
                  <div className="flex flex-col items-end gap-1">
-                   <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Kargoda</span>
+                   <span className="id-eyebrow text-gray-400">Kargoda</span>
                    {req.trackingNumber && (
                      <span className="text-xs font-mono text-gray-500">{req.trackingNumber}</span>
                    )}

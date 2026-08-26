@@ -20,6 +20,7 @@ import {
  * `parseDatetimeLocalInTimeZone`.
  */
 import {
+  PLATFORM_TIMEZONE,
   parseDatetimeLocalInTimeZone,
   toDatetimeLocalValueInTimeZone,
 } from "@/lib/datetime-local";
@@ -30,6 +31,7 @@ import { usePaymentCopyKey } from "@/components/providers/CommerceProvider";
 import Money from "@/components/common/Money";
 import { formatTryCurrency } from "@/lib/currency";
 import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
+import { useActionErrorText } from "@/lib/use-action-error";
 
 export type BookingModifyModalBooking = Pick<
   GuestBookingListItem,
@@ -42,7 +44,12 @@ export type BookingModifyModalBooking = Pick<
   | "totalPrice"
   | "status"
 > & {
-  shop?: { pricePerDay?: unknown; name?: string | null } | null;
+  shop?: {
+    pricePerDay?: unknown;
+    name?: string | null;
+    /** Dükkanın kendi dilimi; yoksa platform varsayılanı. */
+    timezone?: string | null;
+  } | null;
 };
 
 interface BookingModifyModalProps {
@@ -59,6 +66,7 @@ export default function BookingModifyModal({
   onSuccess,
 }: BookingModifyModalProps) {
   const t = useTranslations("Guest");
+  const errorText = useActionErrorText();
   // Escape kapatır, arka plan kaydırması kilitlenir, odak geri verilir.
   useModalBehavior({ open: true, onClose });
   const locale = useLocale();
@@ -68,24 +76,25 @@ export default function BookingModifyModal({
    * (P1-19).
    */
   const payKey = usePaymentCopyKey();
-  const tErr = useTranslations("Errors");
   const pricePerDay = moneyToNumber(booking.shop?.pricePerDay ?? 0);
+  /** Saatler dükkanın diliminde yorumlanır — checkout ile aynı sözleşme. */
+  const timeZone = booking.shop?.timezone ?? PLATFORM_TIMEZONE;
   const slot = roundedSlotPrices(pricePerDay, pricingRules);
 
   const [bagS, setBagS] = useState(booking.bagCountS);
   const [bagM, setBagM] = useState(booking.bagCountM);
   const [bagXl, setBagXl] = useState(booking.bagCountXl);
   const [checkInLocal, setCheckInLocal] = useState(() =>
-    toDatetimeLocalValueInTimeZone(new Date(booking.checkInTime)),
+    toDatetimeLocalValueInTimeZone(new Date(booking.checkInTime), timeZone),
   );
   const [checkOutLocal, setCheckOutLocal] = useState(() =>
-    toDatetimeLocalValueInTimeZone(new Date(booking.checkOutTime)),
+    toDatetimeLocalValueInTimeZone(new Date(booking.checkOutTime), timeZone),
   );
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  const checkInDate = parseDatetimeLocalInTimeZone(checkInLocal);
-  const checkOutDate = parseDatetimeLocalInTimeZone(checkOutLocal);
+  const checkInDate = parseDatetimeLocalInTimeZone(checkInLocal, timeZone);
+  const checkOutDate = parseDatetimeLocalInTimeZone(checkOutLocal, timeZone);
   const windowOk =
     checkInDate !== null &&
     checkOutDate !== null &&
@@ -145,12 +154,7 @@ export default function BookingModifyModal({
       onClose();
       return;
     }
-    const code = res.error;
-    if (code?.startsWith("Errors.")) {
-      setErr(tErr(code.slice(7) as never));
-    } else {
-      setErr(code ?? t("checkoutUnexpectedError"));
-    }
+    setErr(errorText(res.error, t("checkoutUnexpectedError")));
   };
 
   return (
@@ -185,7 +189,7 @@ export default function BookingModifyModal({
 
           <div className="flex flex-col gap-3">
             <label className="flex flex-col gap-1.5">
-              <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+              <span className="id-eyebrow text-gray-400">
                 {t("checkoutCheckInLabel")}
               </span>
               <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100">
@@ -197,7 +201,7 @@ export default function BookingModifyModal({
               </div>
             </label>
             <label className="flex flex-col gap-1.5">
-              <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+              <span className="id-eyebrow text-gray-400">
                 {t("checkoutCheckOutLabel")}
               </span>
               <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100">
@@ -205,7 +209,7 @@ export default function BookingModifyModal({
                   value={checkOutLocal}
                   onChange={setCheckOutLocal}
                   ariaLabel={t("checkoutCheckOutLabel")}
-                  minDate={parseDatetimeLocalInTimeZone(checkInLocal) ?? undefined}
+                  minDate={parseDatetimeLocalInTimeZone(checkInLocal, timeZone) ?? undefined}
                 />
               </div>
             </label>

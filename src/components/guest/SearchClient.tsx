@@ -20,7 +20,7 @@ import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
 import { Link } from "@/i18n/routing";
 import { useRouter } from "@/i18n/routing";
 import ShopListItem from "@/components/guest/ShopListItem";
-import SearchMap from "@/components/guest/SearchMap";
+import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ShopSearchHit } from "@/services/ShopService";
 /**
@@ -40,6 +40,26 @@ import {
   PLAUSIBLE_EVENTS,
   trackPlausibleEvent,
 } from "@/lib/plausible-events";
+
+/**
+ * Harita AYRI BİR PARÇAYA alındı (performans).
+ *
+ * `maplibre-gl` derlenmiş hâlde ~1 MB ve uygulamanın EN BÜYÜK istemci parçası.
+ * Statik `import` ile `/search` sayfasının ilk JS yükünün içindeydi: liste
+ * paneli — misafirin gerçekte dokunduğu yüzey — harita motorunun tamamı
+ * indirilip ayrıştırılmadan etkileşime hazır olmuyordu. Harita `absolute
+ * inset-0` ile listenin ARKASINDA duruyor; hidrasyondan sonra gelmesi
+ * kullanıcının gördüğü hiçbir şeyi geciktirmez.
+ *
+ * `ssr: false`: harita bir `<canvas>`; sunucuda çizilecek içeriği yok, SEO
+ * değeri taşımıyor (şehir sayfalarının metni ayrı).
+ */
+const SearchMap = dynamic(() => import("@/components/guest/SearchMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-full w-full bg-gray-100" aria-hidden="true" />
+  ),
+});
 
 type Tab = "nearby" | "all";
 
@@ -341,7 +361,7 @@ export default function SearchClient({
       <div className="flex justify-between items-center px-1 mb-2">
         <h2
           data-testid="nearby-heading"
-          className="flex items-center gap-2 text-sm font-black text-gray-900 uppercase tracking-widest"
+          className="flex items-center gap-2 text-sm id-eyebrow text-gray-900"
         >
           {activeTab === "nearby" ? t("nearbyShops") : t("allShops")} (
           {sortedShops.length})
@@ -455,7 +475,7 @@ export default function SearchClient({
           className="mb-3 space-y-2 rounded-2xl border border-gray-100 bg-gray-50/80 p-3"
           data-testid="search-stay-filters"
         >
-          <p className="text-xs font-black uppercase tracking-widest text-gray-400">
+          <p className="text-xs id-eyebrow text-gray-400">
             {t("searchStayWindow")}
           </p>
           <p className="text-[11px] text-gray-400">
@@ -549,7 +569,7 @@ export default function SearchClient({
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
-          className="text-[10px] font-bold uppercase tracking-widest bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-gray-700 outline-none focus:border-orange-300"
+          className="id-eyebrow bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-gray-700 outline-none focus:border-orange-300"
           aria-label={t("sortBy")}
         >
           <option value="distance">{t("sortByDistance")}</option>
@@ -559,7 +579,7 @@ export default function SearchClient({
           <option value="rating">{t("sortByRating")}</option>
         </select>
       </div>
-      <div className="flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-widest">
+      <div className="flex flex-wrap gap-2 id-eyebrow">
         <label className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-lg">
           {t("filterMinRating")}
           <input
@@ -652,7 +672,7 @@ export default function SearchClient({
           type="button"
           onClick={() => setPanelOpen(true)}
           aria-label="Open search panel"
-          className="md:hidden absolute top-4 left-4 z-20 h-12 px-5 rounded-full bg-white shadow-lg border border-gray-100 flex items-center gap-2 font-black text-xs uppercase tracking-widest text-gray-900 hover:bg-gray-50 active:scale-95 transition-all"
+          className="md:hidden absolute top-4 left-4 z-20 h-12 px-5 rounded-full bg-white shadow-lg border border-gray-100 flex items-center gap-2 id-eyebrow text-xs text-gray-900 hover:bg-gray-50 active:scale-95 transition-all"
         >
           <SlidersHorizontal size={16} className="text-orange-600" />
           {filteredShops.length}
@@ -684,7 +704,7 @@ export default function SearchClient({
         <button
           type="button"
           onClick={() => setFiltersOpen((v) => !v)}
-          className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gray-700 py-1"
+          className="flex items-center gap-2 id-eyebrow text-gray-400 hover:text-gray-700 py-1"
         >
           <SlidersHorizontal size={12} />
           {filtersOpen ? t("hideFilters") : t("showFilters")} ({sortedShops.length})

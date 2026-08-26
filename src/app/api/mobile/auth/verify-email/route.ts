@@ -1,51 +1,27 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import prisma from "@/lib/db";
+import { verifyEmailToken, type VerifyEmailErrorCode } from "@/services/auth/verify-email";
+
+/**
+ * Servis kodunun mobil HTTP karsiligi. Istemcinin gordugu kodlar DEGISMEDI;
+ * degisen tek sey, govdenin web sayfasiyla PAYLASILIYOR olmasi.
+ */
+const CODE_TO_HTTP: Record<VerifyEmailErrorCode, { status: number; error: string }> = {
+  INVALID_TOKEN: { status: 400, error: "invalid_data" },
+  TOKEN_NOT_FOUND: { status: 400, error: "token_not_found" },
+  TOKEN_EXPIRED: { status: 400, error: "token_expired" },
+  USER_NOT_FOUND: { status: 404, error: "user_not_found" },
+  UNKNOWN: { status: 500, error: "server_error" },
+};
 
 export async function POST(req: NextRequest) {
-  try {
-    const { token } = await req.json();
+  const { token } = await req.json().catch(() => ({ token: undefined }));
 
-    if (!token) {
-      return NextResponse.json({ error: "invalid_data" }, { status: 400 });
-    }
-
-    // Token'ı bul
-    const existingToken = await prisma.verificationToken.findUnique({
-      where: { token },
-    });
-
-    if (!existingToken) {
-      return NextResponse.json({ error: "token_not_found" }, { status: 400 });
-    }
-
-    const hasExpired = new Date(existingToken.expires) < new Date();
-    if (hasExpired) {
-      return NextResponse.json({ error: "token_expired" }, { status: 400 });
-    }
-
-    // Kullanıcıyı bul ve doğrula
-    const existingUser = await prisma.user.findUnique({
-      where: { email: existingToken.identifier },
-    });
-
-    if (!existingUser) {
-      return NextResponse.json({ error: "user_not_found" }, { status: 404 });
-    }
-
-    await prisma.$transaction([
-      prisma.user.update({
-        where: { id: existingUser.id },
-        data: { emailVerified: new Date(), email: existingToken.identifier },
-      }),
-      prisma.verificationToken.delete({
-        where: { token },
-      }),
-    ]);
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("verify-email API error:", error);
-    return NextResponse.json({ error: "server_error" }, { status: 500 });
+  const result = await verifyEmailToken(token);
+  if (!result.ok) {
+    const { status, error } = CODE_TO_HTTP[result.code];
+    return NextResponse.json({ error }, { status });
   }
+
+  return NextResponse.json({ success: true });
 }

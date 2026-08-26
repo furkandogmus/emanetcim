@@ -19,6 +19,7 @@ import {
 import { motion } from 'framer-motion';
 import { Link } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
+import AmbientBackdrop from "@/components/common/AmbientBackdrop";
 
 const LocationPicker = dynamic(() => import('@/components/partner/LocationPicker'), { ssr: false });
 
@@ -127,7 +128,7 @@ export default function RegisterPage() {
           return;
         }
         if (!shopLocation.city) {
-          setError('Lütfen şehir seçin.');
+          setError(tErrors("cityRequired"));
           return;
         }
         const fullAddress = [
@@ -158,15 +159,11 @@ export default function RegisterPage() {
   if (success) {
     return (
       <div className="relative min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 font-sans overflow-hidden">
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-40 left-1/2 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,hsl(21_95%_60%/.22),transparent)] blur-2xl" />
-          <div className="absolute -right-24 top-24 h-72 w-72 rounded-full bg-[radial-gradient(closest-side,hsl(38_92%_55%/.18),transparent)] blur-2xl" />
-          <div className="absolute inset-0 opacity-[0.035] bg-[radial-gradient(#ea580c_1px,transparent_1px)] [background-size:20px_20px]" />
-        </div>
+        <AmbientBackdrop />
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="relative z-10 w-full max-w-md bg-white rounded-[2.5rem] p-10 shadow-xl shadow-gray-200/50 border border-gray-100 text-center"
+          className="relative z-10 w-full max-w-md bg-white rounded-4xl p-10 shadow-xl shadow-gray-200/50 border border-gray-100 text-center"
         >
           <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mb-8 mx-auto">
             {activeTab === 'GUEST' ? <Mail size={32} className="text-green-600" /> : <CheckCircle2 size={32} className="text-green-600" />}
@@ -191,15 +188,11 @@ export default function RegisterPage() {
 
   return (
     <div className="relative min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 font-sans overflow-x-hidden overflow-y-auto pt-20 pb-20">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-40 left-1/2 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,hsl(21_95%_60%/.22),transparent)] blur-2xl" />
-        <div className="absolute -right-24 top-24 h-72 w-72 rounded-full bg-[radial-gradient(closest-side,hsl(38_92%_55%/.18),transparent)] blur-2xl" />
-        <div className="absolute inset-0 opacity-[0.035] bg-[radial-gradient(#ea580c_1px,transparent_1px)] [background-size:20px_20px]" />
-      </div>
+      <AmbientBackdrop />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative z-10 w-full max-w-md bg-white rounded-[2.5rem] p-8 md:p-10 shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col"
+        className="relative z-10 w-full max-w-md bg-white rounded-4xl p-8 md:p-10 shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col"
       >
         <div className="flex flex-col items-center mb-8">
           <div className="w-16 h-16 bg-brand-gradient rounded-2xl flex items-center justify-center mb-6 shadow-brand-md">
@@ -215,7 +208,7 @@ export default function RegisterPage() {
         <div className="flex p-1 bg-gray-50 rounded-2xl gap-1 mb-8">
           <button
             onClick={() => setActiveTab('GUEST')}
-            className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${
+            className={` flex-1 py-3 id-eyebrow rounded-xl transition-all ${
               activeTab === 'GUEST' ? "bg-white text-orange-600 shadow-sm" : "text-gray-400 hover:text-gray-600"
             }`}
           >
@@ -223,7 +216,7 @@ export default function RegisterPage() {
           </button>
           <button
             onClick={() => setActiveTab('PARTNER')}
-            className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${
+            className={` flex-1 py-3 id-eyebrow rounded-xl transition-all ${
               activeTab === 'PARTNER' ? "bg-white text-orange-600 shadow-sm" : "text-gray-400 hover:text-gray-600"
             }`}
           >
@@ -327,8 +320,8 @@ export default function RegisterPage() {
 
               {/* Konum Seçici */}
               <div className="border-2 border-gray-100 rounded-2xl p-4">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">
-                  İşyeri Konumu
+                <p className="id-eyebrow text-gray-400 mb-3">
+                  {t("registerShopLocation")}
                 </p>
                 <LocationPicker value={shopLocation} onChange={setShopLocation} />
               </div>
@@ -336,7 +329,9 @@ export default function RegisterPage() {
           )}
 
           {error && (
-            <p className="text-xs text-red-500 font-semibold text-center mt-2">{error}</p>
+            <p className="text-xs text-red-500 font-semibold text-center mt-2" role="alert">
+              {error}
+            </p>
           )}
 
           <button
@@ -361,7 +356,7 @@ export default function RegisterPage() {
         <div className="mt-10 w-full flex flex-col items-center gap-0">
           <div className="inline-flex items-center justify-center gap-2 text-green-600 bg-green-50 px-4 py-2.5 rounded-xl border border-green-100 mx-auto">
             <ShieldCheck size={16} className="shrink-0" />
-            <span className="text-[10px] font-black uppercase tracking-widest leading-tight">
+            <span className="id-eyebrow leading-tight">
               {t('secureRegister')}
             </span>
           </div>

@@ -87,11 +87,11 @@ export default async function BlogDetailPage({
 
       {/* Hero Header */}
       <header className="pt-32 pb-10 px-6 max-w-4xl mx-auto">
-        <Link href="/blog" className="inline-flex items-center gap-2 text-gray-400 hover:text-orange-600 transition-colors mb-8 group font-bold text-xs uppercase tracking-widest">
+        <Link href="/blog" className="inline-flex items-center gap-2 text-gray-400 hover:text-orange-600 transition-colors mb-8 group id-eyebrow text-xs">
           <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
           {t("backToBlog")}
         </Link>
-        <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-orange-600 mb-6 font-sans">
+        <div className="flex items-center gap-4 id-eyebrow text-orange-600 mb-6 font-sans">
           <span className="bg-orange-600 text-white px-3 py-1 rounded-full uppercase">{t("blogCategory")}</span>
           <span className="flex items-center gap-1.5 text-gray-400"><Clock size={12} /> {new Date(post.createdAt).toLocaleDateString(locale)}</span>
         </div>
@@ -104,7 +104,7 @@ export default async function BlogDetailPage({
               <User size={20} />
             </div>
             <div>
-              <p className="text-xs font-black text-gray-900 uppercase tracking-widest">{post.authorName}</p>
+              <p className="text-xs id-eyebrow text-gray-900">{post.authorName}</p>
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">{t("editorLabel")}</p>
             </div>
           </div>
@@ -117,7 +117,7 @@ export default async function BlogDetailPage({
       {/* Cover Image */}
       {post.coverImage && (
         <section className="mb-16 px-6 max-w-6xl mx-auto">
-          <div className="relative aspect-[21/9] rounded-[3rem] overflow-hidden shadow-2xl shadow-gray-200">
+          <div className="relative aspect-[21/9] rounded-4xl overflow-hidden shadow-2xl shadow-gray-200">
             <Image 
               src={post.coverImage} 
               alt={post.title}
@@ -138,12 +138,12 @@ export default async function BlogDetailPage({
         
         {/* Footer Area */}
         <div className="mt-20 pt-10 border-t border-gray-100">
-          <div className="bg-orange-50 p-8 rounded-[2.5rem] border border-orange-100">
-            <h4 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-2">{t("ctaTitle")}</h4>
+          <div className="bg-orange-50 p-8 rounded-4xl border border-orange-100">
+            <h4 className="text-sm id-eyebrow text-gray-900 mb-2">{t("ctaTitle")}</h4>
             <p className="text-sm font-bold text-gray-500 mb-6 leading-relaxed">{t("ctaDescription")}</p>
             <Link 
               href="/search"
-              className="inline-flex items-center gap-2 bg-orange-600 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-orange-200 hover:scale-105 transition-all"
+              className="inline-flex items-center gap-2 bg-orange-600 text-white px-6 py-3 rounded-2xl id-eyebrow text-xs shadow-lg shadow-orange-200 hover:scale-105 transition-all"
             >
               {t("findShop")}
             </Link>

@@ -6,6 +6,7 @@ import { AlertTriangle, CheckCircle2, Loader2, Package, ShieldCheck, X } from "l
 import { toast } from "sonner";
 import { checkInAction, getNextAvailableSealsAction } from "@/actions/partner";
 import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
+import { useActionErrorText } from "@/lib/use-action-error";
 
 type BagSize = "S" | "M" | "XL";
 
@@ -63,6 +64,7 @@ export default function CheckInDialog({
   onSuccess,
 }: CheckInDialogProps) {
   const t = useTranslations("Partner");
+  const errorText = useActionErrorText();
   useModalBehavior({ open: true, onClose });
 
   const [sealRows, setSealRows] = useState<SealRow[]>(() =>
@@ -165,7 +167,7 @@ export default function CheckInDialog({
     if (result.success) {
       onSuccess();
     } else {
-      toast.error(result.error || t("checkInFailed"));
+      toast.error(errorText(result.error, t("checkInFailed")));
     }
   };
 
@@ -175,7 +177,7 @@ export default function CheckInDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby="partner-checkin-title"
-        className="bg-white text-gray-900 rounded-[2.5rem] w-full max-w-lg p-10 flex flex-col gap-8 shadow-2xl relative border border-gray-100 my-8"
+        className="bg-white text-gray-900 rounded-4xl w-full max-w-lg p-10 flex flex-col gap-8 shadow-2xl relative border border-gray-100 my-8"
       >
         <button
           type="button"
@@ -187,7 +189,7 @@ export default function CheckInDialog({
         </button>
 
             <div className="flex items-center gap-6">
-              <div className="rounded-[2rem] bg-orange-100 p-5 text-orange-600 ring-4 ring-orange-50 shadow-inner">
+              <div className="rounded-3xl bg-orange-100 p-5 text-orange-600 ring-4 ring-orange-50 shadow-inner">
                 <Package size={32} />
               </div>
               <div>
@@ -197,7 +199,7 @@ export default function CheckInDialog({
                 >
                   {preview.guestName}
                 </h3>
-                <p className="text-xs font-bold uppercase tracking-widest text-gray-400">
+                <p className="text-xs id-eyebrow text-gray-400">
                   {preview.bags}
                 </p>
               </div>
@@ -207,7 +209,7 @@ export default function CheckInDialog({
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-2">
                   <ShieldCheck size={16} className="text-orange-600" />
-                  <h4 className="text-xs font-black uppercase tracking-widest text-gray-500">
+                  <h4 className="text-xs id-eyebrow text-gray-500">
                     {t("sealAssignmentsTitle")}
                   </h4>
                   {sealsLoading && (
@@ -285,7 +287,7 @@ export default function CheckInDialog({
               type="button"
               onClick={() => void handleCheckIn()}
               disabled={isProcessing}
-              className={`flex h-20 w-full items-center justify-center gap-3 rounded-[2rem] text-sm font-black uppercase tracking-widest shadow-2xl transition-all active:scale-95 ${
+              className={` flex h-20 w-full items-center justify-center gap-3 rounded-3xl text-sm id-eyebrow shadow-2xl transition-all active:scale-95 ${
                 !isProcessing
                   ? "bg-orange-600 text-white shadow-orange-200/50 hover:bg-orange-700"
                   : "cursor-not-allowed bg-gray-100 text-gray-300 grayscale"

@@ -15,7 +15,7 @@ interface PartnerBottomNavProps {
 export default function PartnerBottomNav({ activeTab, onChange, pendingCount }: PartnerBottomNavProps) {
   const t = useTranslations("Partner");
   return (
-  <nav className="fixed bottom-3 left-1/2 z-20 flex w-[calc(100%-1.5rem)] max-w-md -translate-x-1/2 justify-around gap-2 rounded-[2rem] border border-gray-100 bg-white/90 px-3 py-2 shadow-[0_20px_50px_rgba(0,0,0,0.1)] backdrop-blur-2xl sm:bottom-8 sm:w-auto sm:gap-8 sm:px-6 sm:py-3">
+  <nav className="fixed bottom-3 left-1/2 z-20 flex w-[calc(100%-1.5rem)] max-w-md -translate-x-1/2 justify-around gap-2 rounded-3xl border border-gray-100 bg-white/90 px-3 py-2 shadow-[0_20px_50px_rgba(0,0,0,0.1)] backdrop-blur-2xl sm:bottom-8 sm:w-auto sm:gap-8 sm:px-6 sm:py-3">
     <button
       type="button"
       onClick={() => onChange("PANEL")}

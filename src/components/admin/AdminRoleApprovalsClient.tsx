@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Link } from "@/i18n/routing";
 import { ArrowLeft, Check, X } from "lucide-react";
 import { Role } from "@prisma/client";
-import { dateLocaleForUiLocale } from "@/lib/date-locale";
+import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import {
   approveAdminRoleChangeAction,
   cancelAdminRoleChangeAction,
@@ -44,7 +44,7 @@ export default function AdminRoleApprovalsClient({
 }) {
   const t = useTranslations("Admin");
   const locale = useLocale();
-  const dateLocale = dateLocaleForUiLocale(locale);
+  const dateLocale = bcp47ForUiLocale(locale);
   const router = useRouter();
   const [rows, setRows] = useState(initialRows);
   const [pending, startTransition] = useTransition();
@@ -102,7 +102,7 @@ export default function AdminRoleApprovalsClient({
           className="mb-4 inline-flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors group"
         >
           <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-          <span className="text-xs font-black uppercase tracking-widest">
+          <span className="text-xs id-eyebrow">
             {t("backToDashboard")}
           </span>
         </Link>
@@ -123,10 +123,10 @@ export default function AdminRoleApprovalsClient({
             return (
               <div
                 key={row.id}
-                className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+                className="rounded-3xl border border-gray-100 bg-white p-8 shadow-sm flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
               >
                 <div className="flex flex-col gap-2">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                  <p className="id-eyebrow text-gray-400">
                     {t("roleApprovalsTarget")}
                   </p>
                   <p className="font-bold text-gray-900">
@@ -158,7 +158,7 @@ export default function AdminRoleApprovalsClient({
                       isSelfRequest ? t("roleApprovalsCannotSelfApprove") : undefined
                     }
                     onClick={() => approve(row.id)}
-                    className="flex items-center gap-2 rounded-2xl bg-orange-600 px-6 py-3 text-[11px] font-black uppercase tracking-widest text-white shadow-lg shadow-orange-900/20 hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="flex items-center gap-2 rounded-2xl bg-orange-600 px-6 py-3 text-[11px] id-eyebrow text-white shadow-lg shadow-orange-900/20 hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     <Check size={16} />
                     {t("roleApprovalsApprove")}
@@ -167,7 +167,7 @@ export default function AdminRoleApprovalsClient({
                     type="button"
                     disabled={pending}
                     onClick={() => cancel(row.id)}
-                    className="flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-6 py-3 text-[11px] font-black uppercase tracking-widest text-gray-700 hover:bg-gray-50"
+                    className="flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-6 py-3 text-[11px] id-eyebrow text-gray-700 hover:bg-gray-50"
                   >
                     <X size={16} />
                     {t("roleApprovalsCancel")}

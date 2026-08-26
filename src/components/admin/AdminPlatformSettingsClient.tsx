@@ -44,7 +44,7 @@ function Field({
 }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+      <span className="id-eyebrow text-gray-400">
         {label}
       </span>
       <input
@@ -200,7 +200,7 @@ export default function AdminPlatformSettingsClient({
           step="0.0001"
         />
         <label className="flex flex-col gap-1 md:col-span-2">
-          <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+          <span className="id-eyebrow text-gray-400">
             {t("platformSettingsHolidayDates")}
           </span>
           <textarea
@@ -218,7 +218,7 @@ export default function AdminPlatformSettingsClient({
         type="button"
         disabled={pending}
         onClick={submit}
-        className="self-start rounded-2xl bg-gray-900 px-8 py-4 text-sm font-black uppercase tracking-widest text-white hover:bg-gray-800 disabled:opacity-50"
+        className="self-start rounded-2xl bg-gray-900 px-8 py-4 text-sm id-eyebrow text-white hover:bg-gray-800 disabled:opacity-50"
       >
         {pending ? "…" : t("platformSettingsSave")}
       </button>

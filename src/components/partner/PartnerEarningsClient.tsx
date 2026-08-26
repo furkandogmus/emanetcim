@@ -3,15 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { ArrowLeft, TrendingUp, Wallet, Receipt, Clock, Star, BarChart3, RefreshCw } from "lucide-react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-} from "recharts";
+import dynamic from "next/dynamic";
 import { formatDecimal } from "@/lib/currency";
 
 interface Booking {
@@ -59,6 +51,43 @@ function fmtMonth(key: string) {
   return d.toLocaleString("tr-TR", { month: "long", year: "numeric" });
 }
 
+/**
+ * Grafikler AYRI PARÇADA (performans).
+ *
+ * `recharts` ~340 KB ve bu sayfanın ilk JS yükünün içindeydi. Esnafın önce
+ * gördüğü şey üstteki kazanç kartları; iki grafik de katlamanın altında ve
+ * veri yoksa hiç çizilmiyor. `AdminDashboardClient` → `AnalyticsChart` ile
+ * aynı kalıp.
+ */
+const CHART_SKELETON_CLASS =
+  "w-full bg-gray-50/50 rounded-2xl animate-pulse";
+
+const MonthlyNetChart = dynamic(
+  () =>
+    import("@/components/partner/PartnerEarningsCharts").then(
+      (m) => m.MonthlyNetChart,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className={CHART_SKELETON_CLASS} style={{ height: 160 }} />
+    ),
+  },
+);
+
+const PeakHoursChart = dynamic(
+  () =>
+    import("@/components/partner/PartnerEarningsCharts").then(
+      (m) => m.PeakHoursChart,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className={CHART_SKELETON_CLASS} style={{ height: 140 }} />
+    ),
+  },
+);
+
 export default function PartnerEarningsClient({
   shopName,
   merchantRatio,
@@ -77,6 +106,9 @@ export default function PartnerEarningsClient({
 
   // Only show hours with any activity for cleaner chart
   const activePeakHours = peakHoursData.filter((h) => h.count > 0);
+
+  /** Grafikte en yeni 6 ay, soldan sağa eskiden yeniye. `slice` kopya üretir. */
+  const monthlyChartData = monthly.slice(0, 6).reverse();
 
   return (
     <div className="bg-gray-50">
@@ -99,10 +131,10 @@ export default function PartnerEarningsClient({
           <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
             <div className="flex items-center gap-2 mb-2">
               <TrendingUp className="w-4 h-4 text-gray-400" />
-              <span className="text-xs text-gray-500 uppercase tracking-wider">Brüt Ciro</span>
+              <span className="text-xs text-gray-500 uppercase tracking-wider">{t("earningsGross")}</span>
             </div>
             <p className="text-2xl font-black text-gray-900">{fmt(totalGross)} ₺</p>
-            <p className="text-xs text-gray-400 mt-1">Platform komisyonu dahil</p>
+            <p className="text-xs text-gray-400 mt-1">{t("earningsCommissionIncluded")}</p>
           </div>
           <div className="bg-emerald-50 rounded-2xl p-4 border border-emerald-100 shadow-sm">
             <div className="flex items-center gap-2 mb-2">
@@ -110,7 +142,7 @@ export default function PartnerEarningsClient({
               <span className="text-xs text-emerald-600 uppercase tracking-wider">{t("netEarningsShort")}</span>
             </div>
             <p className="text-2xl font-black text-emerald-700">{fmt(totalNet)} ₺</p>
-            <p className="text-xs text-emerald-500 mt-1">%{100 - commissionPct} size kalır</p>
+            <p className="text-xs text-emerald-500 mt-1">{t("earningsYourShare", { share: 100 - commissionPct })}</p>
           </div>
         </div>
 
@@ -119,19 +151,19 @@ export default function PartnerEarningsClient({
           <div className="bg-white rounded-2xl p-3 border border-gray-100 shadow-sm text-center">
             <Clock className="w-4 h-4 text-blue-400 mx-auto mb-1" />
             <p className="text-lg font-black text-gray-900">{avgStayHours}s</p>
-            <p className="text-xs text-gray-400">Ort. Süre</p>
+            <p className="text-xs text-gray-400">{t("earningsAvgDuration")}</p>
           </div>
           <div className="bg-white rounded-2xl p-3 border border-gray-100 shadow-sm text-center">
             <RefreshCw className="w-4 h-4 text-purple-400 mx-auto mb-1" />
             <p className="text-lg font-black text-gray-900">%{conversionRate}</p>
-            <p className="text-xs text-gray-400">Dönüşüm</p>
+            <p className="text-xs text-gray-400">{t("earningsConversion")}</p>
           </div>
           <div className="bg-white rounded-2xl p-3 border border-gray-100 shadow-sm text-center">
             <Star className="w-4 h-4 text-amber-400 mx-auto mb-1" />
             <p className="text-lg font-black text-gray-900">
               {avgRating > 0 ? formatDecimal(avgRating, locale) : "—"}
             </p>
-            <p className="text-xs text-gray-400">Puan</p>
+            <p className="text-xs text-gray-400">{t("earningsRating")}</p>
           </div>
         </div>
 
@@ -139,8 +171,9 @@ export default function PartnerEarningsClient({
         <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 flex items-start gap-3">
           <Receipt className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
           <div className="text-sm text-amber-800">
-            <span className="font-semibold">Platform komisyonu %{commissionPct}</span>
-            {" — "}her ödemeden %{commissionPct} platform payı düşülür, %{100 - commissionPct} hesabınıza aktarılır.
+            <span className="font-semibold">{t("earningsCommissionTitle", { commission: commissionPct })}</span>
+            {" — "}
+            {t("earningsSplitNote", { commission: commissionPct, share: 100 - commissionPct })}
           </div>
         </div>
 
@@ -148,31 +181,14 @@ export default function PartnerEarningsClient({
         {monthly.length > 0 && (
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <div className="px-4 py-3 border-b border-gray-100">
-              <h2 className="font-bold text-gray-900">Aylık Özet</h2>
+              <h2 className="font-bold text-gray-900">{t("earningsMonthlySummary")}</h2>
             </div>
             <div className="px-4 pt-4 pb-2">
-              <ResponsiveContainer width="100%" height={160}>
-                <BarChart data={monthly.slice(0, 6).reverse()} barSize={28}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                  <XAxis
-                    dataKey="month"
-                    tickFormatter={(v) => {
-                      const [, m] = v.split("-");
-                      return `${m}.ay`;
-                    }}
-                    tick={{ fontSize: 11, fill: "#9ca3af" }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis hide />
-                  <Tooltip
-                    formatter={(v) => [`${fmt(Number(v))} ₺`, "Net"]}
-                    labelFormatter={(l) => fmtMonth(l as string)}
-                    contentStyle={{ borderRadius: 12, border: "1px solid #e5e7eb", fontSize: 12 }}
-                  />
-                  <Bar dataKey="netTotal" fill="#10b981" radius={[6, 6, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              <MonthlyNetChart
+                data={monthlyChartData}
+                formatAmount={fmt}
+                formatMonth={fmtMonth}
+              />
             </div>
             <div className="divide-y divide-gray-50">
               {monthly.map((m) => (
@@ -183,7 +199,7 @@ export default function PartnerEarningsClient({
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-emerald-600">{fmt(m.netTotal)} ₺</p>
-                    <p className="text-xs text-gray-400">{fmt(m.grossTotal)} ₺ brüt</p>
+                    <p className="text-xs text-gray-400">{t("earningsGrossSuffix", { amount: fmt(m.grossTotal) })}</p>
                   </div>
                 </div>
               ))}
@@ -199,24 +215,10 @@ export default function PartnerEarningsClient({
               <h2 className="font-bold text-gray-900">Check-in Saatleri</h2>
             </div>
             <div className="px-4 pt-4 pb-2">
-              <ResponsiveContainer width="100%" height={140}>
-                <BarChart data={peakHoursData} barSize={8}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                  <XAxis
-                    dataKey="hour"
-                    tick={{ fontSize: 10, fill: "#9ca3af" }}
-                    axisLine={false}
-                    tickLine={false}
-                    interval={3}
-                  />
-                  <YAxis hide />
-                  <Tooltip
-                    formatter={(v) => [`${v} rezervasyon`, ""]}
-                    contentStyle={{ borderRadius: 12, border: "1px solid #e5e7eb", fontSize: 12 }}
-                  />
-                  <Bar dataKey="count" fill="#f97316" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              <PeakHoursChart
+                data={peakHoursData}
+                formatCount={(n) => `${n} rezervasyon`}
+              />
             </div>
           </div>
         )}
@@ -245,7 +247,7 @@ export default function PartnerEarningsClient({
                     </div>
                     <div className="text-right">
                       <p className="font-semibold text-emerald-600">{fmt(net)} ₺</p>
-                      <p className="text-xs text-gray-400">{fmt(gross)} ₺ brüt</p>
+                      <p className="text-xs text-gray-400">{t("earningsGrossSuffix", { amount: fmt(gross) })}</p>
                     </div>
                   </div>
                 );

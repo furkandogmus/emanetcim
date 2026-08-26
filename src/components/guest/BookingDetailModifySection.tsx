@@ -30,7 +30,7 @@ export default function BookingDetailModifySection({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="w-full py-4 rounded-2xl text-xs font-black uppercase tracking-widest border-2 border-gray-200 text-gray-800 hover:bg-gray-50 transition-colors"
+        className="w-full py-4 rounded-2xl text-xs id-eyebrow border-2 border-gray-200 text-gray-800 hover:bg-gray-50 transition-colors"
       >
         {t("modifyBooking")}
       </button>

@@ -6,6 +6,7 @@ import { Link, useRouter } from "@/i18n/routing";
 import { useSearchParams } from "next/navigation";
 import { Package, Lock, Loader2 } from "lucide-react";
 import { resetPasswordWithTokenAction } from "@/actions/password-reset";
+import AmbientBackdrop from "@/components/common/AmbientBackdrop";
 
 export default function NewPasswordClient() {
   const t = useTranslations("Auth");
@@ -72,12 +73,8 @@ export default function NewPasswordClient() {
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center bg-gray-50 p-6 font-sans overflow-hidden">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-40 left-1/2 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,hsl(21_95%_60%/.22),transparent)] blur-2xl" />
-        <div className="absolute -right-24 top-24 h-72 w-72 rounded-full bg-[radial-gradient(closest-side,hsl(38_92%_55%/.18),transparent)] blur-2xl" />
-        <div className="absolute inset-0 opacity-[0.035] bg-[radial-gradient(#ea580c_1px,transparent_1px)] [background-size:20px_20px]" />
-      </div>
-      <div className="relative z-10 w-full max-w-md rounded-[2.5rem] border border-gray-100 bg-white p-10 shadow-xl shadow-gray-200/50">
+      <AmbientBackdrop />
+      <div className="relative z-10 w-full max-w-md rounded-4xl border border-gray-100 bg-white p-10 shadow-xl shadow-gray-200/50">
         <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-gradient shadow-brand-md">
           <Package size={32} className="text-white" />
         </div>
@@ -129,7 +126,12 @@ export default function NewPasswordClient() {
                 className="h-12 w-full rounded-xl border-2 border-gray-100 pl-10 pr-4 text-sm font-medium text-gray-800 placeholder-gray-300 transition focus:border-orange-300 focus:outline-none disabled:opacity-50"
               />
             </div>
-            {errMsg && <p className="text-center text-xs font-semibold text-red-600">{errMsg}</p>}
+            {errMsg && (
+              /* `role="alert"`: hatasız bir formda ekran okuyucu HİÇBİR ŞEY duymuyordu. */
+              <p className="text-center text-xs font-semibold text-red-600" role="alert">
+                {errMsg}
+              </p>
+            )}
             <button
               type="submit"
               disabled={busy || !token}
@@ -146,7 +148,7 @@ export default function NewPasswordClient() {
             </button>
             <Link
               href="/login"
-              className="text-center text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-orange-600"
+              className="text-center text-xs id-eyebrow text-gray-400 hover:text-orange-600"
             >
               {t("backToLogin")}
             </Link>

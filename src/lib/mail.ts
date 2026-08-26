@@ -312,3 +312,42 @@ export const sendMobileOtp = async (email: string, code: string, locale: string 
     logger.error({ error, email }, "mobile_otp_mail_exception");
   }
 };
+
+
+/**
+ * Panelden yazılan destek cevabını gerçek e-posta olarak gönderir.
+ *
+ * `inReplyTo` gelen postanın RFC Message-ID'sidir; `In-Reply-To`/`References`
+ * başlıkları sayesinde cevap, misafirin posta kutusunda AYNI yazışmanın altına
+ * düşer — yeni bir konu olarak değil. Başarıda Resend'in e-posta id'si döner.
+ */
+export const sendSupportReplyEmail = async (params: {
+  to: string;
+  from: string;
+  subject: string;
+  text: string;
+  inReplyTo?: string | null;
+}): Promise<{ id: string } | null> => {
+  const resend = getResendClient();
+  if (!resend) {
+    logger.warn({}, "mail_support_reply_skipped_no_resend_key");
+    return null;
+  }
+  const headers: Record<string, string> = {};
+  if (params.inReplyTo) {
+    headers["In-Reply-To"] = params.inReplyTo;
+    headers["References"] = params.inReplyTo;
+  }
+  const { data, error } = await resend.emails.send({
+    from: params.from,
+    to: params.to,
+    subject: params.subject,
+    text: params.text,
+    ...(Object.keys(headers).length > 0 ? { headers } : {}),
+  });
+  if (error || !data?.id) {
+    logger.error({ error }, "mail_support_reply_failed");
+    return null;
+  }
+  return { id: data.id };
+};

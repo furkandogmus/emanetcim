@@ -1,4 +1,4 @@
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/db";
@@ -11,6 +11,7 @@ export default async function PartnerSealsPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: "Partner" });
 
   const session = await auth();
   if (
@@ -28,7 +29,7 @@ export default async function PartnerSealsPage({
   if (!shop) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-10">
-        <p className="text-gray-500 font-bold">Dükkanınız bulunamadı.</p>
+        <p className="text-gray-500 font-bold">{t("sealsNoShop")}</p>
       </div>
     );
   }

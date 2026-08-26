@@ -1,26 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { jwtVerify } from "jose";
 import prisma from "@/lib/db";
-
-const GUEST_SECRET = new TextEncoder().encode(
-  process.env.AUTH_SECRET || "bagajpark-guest-management-secret"
-);
+import { authenticateGuestLookup } from "@/lib/guest-lookup-token";
+import logger from "@/lib/logger";
 
 export async function GET(req: NextRequest) {
   try {
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    const guest = await authenticateGuestLookup(req.headers.get("authorization"));
+    if (!guest.ok) {
+      return NextResponse.json({ ok: false, error: guest.code }, { status: 401 });
     }
-
-    const token = authHeader.slice(7);
-    let payload: { bookingId: string; email: string };
-    try {
-      const { payload: p } = await jwtVerify(token, GUEST_SECRET);
-      payload = p as { bookingId: string; email: string };
-    } catch {
-      return NextResponse.json({ ok: false, error: "Invalid or expired token" }, { status: 401 });
-    }
+    const payload = guest.claims;
 
     const booking = await prisma.booking.findUnique({
       where: { id: payload.bookingId },
@@ -67,6 +56,13 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (e) {
-    return NextResponse.json({ ok: false, error: String(e) }, { status: 500 });
+    /*
+      Ham hata metni İSTEMCİYE GİTMEZ (2026-08-25). `String(e)` bir Prisma
+      sorgusunu, dosya yolunu veya şema adını dışarı taşıyabiliyordu; ayrıca
+      hiçbir yere loglanmadığı için gerçek sebep de kayboluyordu. Sebep log'a,
+      istemciye sabit bir kod.
+    */
+    logger.error({ err: e }, "booking_lookup_me_failed");
+    return NextResponse.json({ ok: false, error: "lookup_failed" }, { status: 500 });
   }
 }

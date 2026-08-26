@@ -7,14 +7,7 @@ import { addReviewAction } from '@/actions/review';
 import { useModalBehavior } from '@/lib/hooks/useModalBehavior';
 import StarRating from '@/components/common/StarRating';
 import { toast } from "sonner";
-
-/** `addReviewAction`'in basarisizlikta donebildigi `Errors.*` anahtarlari. */
-const KNOWN_REVIEW_ERROR_KEYS = new Set([
-  "invalidData",
-  "unauthorized",
-  "reviewNotReady",
-  "duplicateReview",
-]);
+import { useActionErrorText } from "@/lib/use-action-error";
 
 interface ReviewFormProps {
   bookingId: string;
@@ -33,6 +26,7 @@ export default function ReviewForm({
   bookingId, guestId, shopId, shopName, onClose, onSuccess 
 }: ReviewFormProps) {
   const t = useTranslations();
+  const errorText = useActionErrorText();
 
   /**
    * Escape ile kapanmıyordu ve `role="dialog"` taşımıyordu: klavye kullanıcısı
@@ -62,11 +56,8 @@ export default function ReviewForm({
       onSuccess();
     } else {
       // `res.error` bir "Errors.x" anahtaridir, ham metin degil -- cevrilmeden
-      // basilirsa toast'ta birebir "Errors.duplicateReview" yazardi. `res.error`
-      // hep dolu geldigi icin `|| t("Review.error")` hicbir zaman calismiyordu.
-      const bare = res.error?.startsWith("Errors.") ? res.error.slice(7) : "";
-      const key = KNOWN_REVIEW_ERROR_KEYS.has(bare) ? bare : "generic";
-      toast.error(t(`Errors.${key}` as never));
+      // basilirsa toast'ta birebir "Errors.duplicateReview" yazardi.
+      toast.error(errorText(res.error, t("Review.error")));
     }
   };
 
@@ -77,7 +68,7 @@ export default function ReviewForm({
         aria-modal="true"
         aria-labelledby="review-form-title"
         aria-describedby="review-form-subtitle"
-        className="bg-white text-gray-900 rounded-[3rem] w-full max-w-sm p-10 flex flex-col gap-8 shadow-2xl relative border border-gray-100 overflow-hidden"
+        className="bg-white text-gray-900 rounded-4xl w-full max-w-sm p-10 flex flex-col gap-8 shadow-2xl relative border border-gray-100 overflow-hidden"
       >
         {/* Background Accent */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-bl-[4rem] -z-10 translate-x-8 -translate-y-8"></div>
@@ -117,13 +108,13 @@ export default function ReviewForm({
              onChange={(e) => setComment(e.target.value)}
              aria-label={t("Review.placeholder")}
              placeholder={t("Review.placeholder")}
-             className="ui-field min-h-[120px] rounded-[2rem] p-6 resize-none"
+             className="ui-field min-h-[120px] rounded-3xl p-6 resize-none"
            />
 
            <button
              type="submit"
              disabled={isSubmitting}
-             className="btn-ui btn-ui-lg btn-ui-primary w-full h-20 rounded-[2rem] gap-3"
+             className="btn-ui btn-ui-lg btn-ui-primary w-full h-20 rounded-3xl gap-3"
            >
              {isSubmitting ? <Loader2 size={24} className="animate-spin" /> : <Send size={20} />}
              {t("Review.submit")}

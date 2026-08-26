@@ -7,6 +7,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { hashPassword } from "@/lib/auth-password";
 import { sendPasswordResetEmail } from "@/lib/mail";
 import { getLocale } from "next-intl/server";
+import logger from "@/lib/logger";
 import {
   generatePasswordResetToken,
   PASSWORD_RESET_IDENTIFIER_PREFIX,
@@ -96,7 +97,10 @@ export async function resetPasswordWithTokenAction(input: unknown) {
   }
 
   if (row.expires < new Date()) {
-    await prisma.verificationToken.delete({ where: { token } }).catch(() => {});
+    // Suresi gecmis token temizligi; basarisizligi akisi bozmaz ama gorunur olmali.
+    await prisma.verificationToken
+      .delete({ where: { token } })
+      .catch((err) => logger.error({ err }, "expired_reset_token_cleanup_failed"));
     return { ok: false as const, error: "expired" as const };
   }
 

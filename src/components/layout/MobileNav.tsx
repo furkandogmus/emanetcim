@@ -96,7 +96,7 @@ export default function MobileNav() {
                 <div className="w-7 h-7 flex items-center justify-center rounded-xl hover:bg-gray-100 transition-all duration-200">
                   <ChevronLeft className="h-4.5 w-4.5 text-gray-400" strokeWidth={2} aria-hidden />
                 </div>
-                <span className="truncate text-[9px] font-black uppercase tracking-widest text-gray-400">
+                <span className="truncate text-[9px] id-eyebrow text-gray-400">
                   {t("back")}
                 </span>
               </button>
@@ -132,7 +132,7 @@ export default function MobileNav() {
                   {/* Label */}
                   <span
                     className={clsx(
-                      "truncate text-[9px] font-black uppercase tracking-widest transition-colors duration-200",
+                      "truncate text-[9px] id-eyebrow transition-colors duration-200",
                       active ? "text-orange-600" : "text-gray-400"
                     )}
                   >

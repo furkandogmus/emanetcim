@@ -5,6 +5,7 @@ import { Prisma } from "@prisma/client";
 import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 import { shopService } from "@/services/ShopService";
 import prisma from "@/lib/db";
+import logger from "@/lib/logger";
 
 const shopUpdateSchema = z.object({
   name: z.string().min(2).max(200).optional(),
@@ -67,6 +68,13 @@ export async function PUT(req: NextRequest) {
 
     return NextResponse.json(updated);
   } catch (error) {
-    return NextResponse.json({ error: String(error) }, { status: 400 });
+    /*
+      Ham hata metni İSTEMCİYE GİTMEZ (2026-08-25). `String(e)` bir Prisma
+      sorgusunu, dosya yolunu veya şema adını dışarı taşıyabiliyordu; ayrıca
+      hiçbir yere loglanmadığı için gerçek sebep de kayboluyordu. Sebep log'a,
+      istemciye sabit bir kod.
+    */
+    logger.error({ err: error }, "mobile_partner_shop_update_failed");
+    return NextResponse.json({ error: "shop_update_failed" }, { status: 400 });
   }
 }

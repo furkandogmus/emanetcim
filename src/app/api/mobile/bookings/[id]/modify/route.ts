@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { z } from "zod";
 import { requireMobileUser } from "@/lib/mobile-auth";
 import { bookingService } from "@/services/BookingService";
+import { canAccessBooking } from "@/services/booking/access";
 
 const modifySchema = z.object({
   checkInTime: z.string().min(1),
@@ -20,8 +21,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const b = await bookingService.getBookingDetails(id);
   if (!b) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
-  const isOwner = b.guestId === auth.user.id;
-  if (!isOwner && auth.user.role !== "ADMIN") {
+  /*
+    DEGISTIRME: esnaf HARIC. Esnafin yolu "reddet"tir ve o yol iadeyi + slot
+    temizligini `cancelBooking` uzerinden yurutur; buradan duzenleme yapabilseydi
+    o muhasebe atlanirdi.
+  */
+  if (!canAccessBooking(b, auth.user, { allowShopPartner: false })) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 

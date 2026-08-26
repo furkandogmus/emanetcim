@@ -21,7 +21,7 @@ export default function Loading() {
               repeat: Infinity, 
               ease: "easeInOut" 
             }}
-            className="w-full h-full bg-orange-600 rounded-[2rem] flex items-center justify-center shadow-2xl shadow-orange-200"
+            className="w-full h-full bg-orange-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-orange-200"
           >
             <div className="w-8 h-2 bg-white/30 rounded-full mb-6"></div>
           </motion.div>
@@ -29,7 +29,7 @@ export default function Loading() {
         </div>
 
         <div className="flex flex-col gap-3 text-center">
-           <h2 className="text-sm font-black uppercase tracking-widest text-gray-900 animate-pulse">{t("loading")}</h2>
+           <h2 className="text-sm id-eyebrow text-gray-900 animate-pulse">{t("loading")}</h2>
            <div className="h-1 w-48 bg-gray-50 rounded-full overflow-hidden">
               <motion.div 
                 initial={{ x: "-100%" }}

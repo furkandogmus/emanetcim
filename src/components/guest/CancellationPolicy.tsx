@@ -16,7 +16,7 @@ export default function CancellationPolicy({ className = "" }: CancellationPolic
 
   return (
     <div className={`text-left space-y-4 ${className}`}>
-      <h3 className="text-sm font-black uppercase tracking-widest text-gray-900">
+      <h3 className="text-sm id-eyebrow text-gray-900">
         {t("cancellationPolicyTitle")}
       </h3>
       <div className="flex gap-3 rounded-xl p-3 border border-orange-200 bg-orange-50/80 text-sm text-gray-600 leading-relaxed">

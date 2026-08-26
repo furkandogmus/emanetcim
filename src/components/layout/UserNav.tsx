@@ -79,12 +79,12 @@ export default function UserNav() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             role="menu"
-            className="absolute right-0 mt-3 w-56 bg-white rounded-[2rem] shadow-2xl border border-gray-100 overflow-hidden z-[100]"
+            className="absolute right-0 mt-3 w-56 bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden z-[100]"
           >
             <div className="p-6 border-b border-gray-100 bg-gray-50/50">
                <div className="flex items-center gap-2 mb-1">
                   <Icon size={14} className={currentRole.color} />
-                  <span className={`text-[10px] font-black uppercase tracking-widest ${currentRole.color}`}>{t(currentRole.labelKey)}</span>
+                  <span className={` id-eyebrow ${currentRole.color}`}>{t(currentRole.labelKey)}</span>
                </div>
                <p className="text-xs font-bold text-gray-500 truncate">{session?.user?.email}</p>
             </div>

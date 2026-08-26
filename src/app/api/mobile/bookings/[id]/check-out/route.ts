@@ -4,6 +4,8 @@ import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 import { bookingService } from "@/services/BookingService";
 import { notificationService } from "@/services/NotificationService";
 import prisma from "@/lib/db";
+import { bookingNotificationEmail } from "@/services/booking/guest-contact";
+import logger from "@/lib/logger";
 
 export async function POST(
   req: NextRequest,
@@ -31,12 +33,21 @@ export async function POST(
   const result = await bookingService.checkOut(id);
 
   if (!result.ok) {
-    return NextResponse.json({ error: result.code, message: result.message }, { status: 400 });
+    /* Ham servis METNI gonderilmez; istemci kodu kendi dilinde eslesir. */
+    return NextResponse.json({ error: result.code }, { status: 400 });
   }
 
   // Send check-out notification to guest
-  if (booking.guestEmail) {
-    notificationService.notifyCheckOut(booking.guestEmail, id).catch(() => {});
+  /*
+    Alici kurali servistedir: bu uc `booking.guestEmail`e bakiyordu, web ise
+    `booking.guest?.email`e — biri hesapsiz, digeri hesapli misafiri atliyordu.
+    Hata artik yutulmuyor: bildirim gitmediyse sebebi loglarda olmali.
+  */
+  const recipient = bookingNotificationEmail(booking);
+  if (recipient) {
+    void notificationService
+      .notifyCheckOut(recipient, id)
+      .catch((err) => logger.error({ err, bookingId: id }, "mobile_checkout_notify_failed"));
   }
 
   return NextResponse.json({ 

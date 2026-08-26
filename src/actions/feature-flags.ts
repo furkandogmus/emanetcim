@@ -1,6 +1,5 @@
 "use server";
 
-import { auth } from "@/auth";
 import { headers } from "next/headers";
 import { z } from "zod";
 import prisma from "@/lib/db";
@@ -8,6 +7,7 @@ import { Prisma } from "@prisma/client";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { writeAuditLog } from "@/lib/audit-log";
 import { invalidateFeatureFlagsCache } from "@/services/FeatureFlagService";
+import { assertAdmin } from "@/lib/action-auth";
 
 const updateSchema = z.object({
   key: z.string().min(2).max(64).regex(/^[a-z0-9_]+$/),
@@ -18,10 +18,7 @@ const updateSchema = z.object({
 });
 
 export async function updateFeatureFlagAction(data: unknown) {
-  const session = await auth();
-  if (session?.user?.role !== "ADMIN") {
-    throw new Error("Unauthorized");
-  }
+  const actor = await assertAdmin();
   const parsed = updateSchema.safeParse(data);
   if (!parsed.success) {
     return { success: false as const, error: "invalid_data" as const };
@@ -53,8 +50,8 @@ export async function updateFeatureFlagAction(data: unknown) {
   invalidateFeatureFlagsCache();
   const h = await headers();
   writeAuditLog({
-    actorUserId: session.user.id ?? null,
-    actorRole: session.user.role ?? "ADMIN",
+    actorUserId: actor.id,
+    actorRole: actor.role,
     action: "feature_flag.update",
     entityType: "FeatureFlag",
     entityId: d.key,

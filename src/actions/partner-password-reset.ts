@@ -1,12 +1,11 @@
 "use server";
 
-import { auth } from "@/auth";
 import prisma from "@/lib/db";
 import { normalizeTrGsm10 } from "@/lib/netgsm";
 import { generatePasswordResetTokenByPhone } from "@/lib/password-reset-token";
 import { writeAuditLog } from "@/lib/audit-log";
-import { Role } from "@prisma/client";
 import { headers } from "next/headers";
+import { requireAdmin } from "@/lib/action-auth";
 
 async function clientIp(): Promise<string | null> {
   const h = await headers();
@@ -31,10 +30,8 @@ export async function adminInitiatePartnerPasswordResetAction(
   | { ok: true; resetUrl: string; userName: string }
   | { ok: false; error: string }
 > {
-  const session = await auth();
-  if (!session?.user || session.user.role !== Role.ADMIN) {
-    return { ok: false, error: "unauthorized" };
-  }
+  const auth = await requireAdmin();
+  if (!auth.ok) return { ok: false, error: auth.error };
 
   const normalized = normalizeTrGsm10(phone);
   if (!normalized) {
@@ -53,8 +50,8 @@ export async function adminInitiatePartnerPasswordResetAction(
   const row = await generatePasswordResetTokenByPhone(normalized);
 
   writeAuditLog({
-    actorUserId: session.user.id ?? null,
-    actorRole: "ADMIN",
+    actorUserId: auth.actor.id,
+    actorRole: auth.actor.role,
     action: "partner.password_reset_initiated",
     entityType: "User",
     entityId: user.id,

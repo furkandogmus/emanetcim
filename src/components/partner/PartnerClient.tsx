@@ -14,7 +14,7 @@ import {
 
 import { Link } from "@/i18n/routing";
 import { toast } from "sonner";
-import QRScanner from "@/components/partner/QRScanner";
+import dynamic from "next/dynamic";
 import PartnerShopSettingsForm from "@/components/partner/PartnerShopSettingsForm";
 import CheckInDialog, { type CheckInPreview } from "@/components/partner/CheckInDialog";
 import CheckoutSealsDialog, { type CheckoutSeal } from "@/components/partner/CheckoutSealsDialog";
@@ -31,8 +31,33 @@ import {
   rejectBookingAction,
 } from "@/actions/partner";
 import type { PartnerBookingListItem } from "@/services/BookingService";
-import { dateLocaleForUiLocale } from "@/lib/date-locale";
+import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import { computeOverdue } from "@/lib/overdue-display";
+import { useActionErrorText } from "@/lib/use-action-error";
+
+/**
+ * QR tarayıcı AYRI BİR PARÇAYA alındı (performans).
+ *
+ * `html5-qrcode` derlenmiş hâlde ~400 KB ve yalnızca esnaf "QR tara"ya
+ * BASTIĞINDA (`isScanning`) çiziliyor. Statik `import` ile bu 400 KB, tarayıcı
+ * hiç açılmasa bile partner panelinin her açılışında iniyordu — panel esnafın
+ * gün boyu en çok açtığı sayfa ve çoğu zaman mobil veriyle açılıyor.
+ *
+ * `ssr: false`: bileşen kamera API'sine bağlı, sunucuda çizilebilecek bir
+ * karşılığı yok.
+ */
+const QRScanner = dynamic(() => import("@/components/partner/QRScanner"), {
+  ssr: false,
+  loading: () => (
+    <div
+      role="status"
+      aria-live="polite"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm"
+    >
+      <Loader2 className="animate-spin text-white w-12 h-12" />
+    </div>
+  ),
+});
 
 
 
@@ -60,6 +85,13 @@ interface PartnerClientProps {
   requireSeals?: boolean;
   /** `AnalyticsService.getShopViewCountThisMonth` — bu ay kaç kez görüntülendi. */
   monthlyShopViews?: number;
+  /**
+   * Esnafın TÜM dükkanları. Panel eskiden koşulsuz `shops[0]`'ı gösteriyordu:
+   * çok dükkanlı esnafın ikinci dükkanındaki valizler "İşlem Geçmişi"nde hiç
+   * görünmüyordu. Check-in `?booking=`/QR ile sahiplik üzerinden çalıştığı için
+   * valiz ALINIYOR ama listede bulunamıyor → teslim edilemiyordu.
+   */
+  shops?: Array<{ id: string; name: string }>;
 }
 
 export default function PartnerClient({
@@ -74,6 +106,7 @@ export default function PartnerClient({
   initialPricePerDay,
   marketPrice,
   bookings,
+  shops = [],
   initialBookingId,
   initialCheckoutBookingId,
   initialPhone = "",
@@ -81,6 +114,7 @@ export default function PartnerClient({
   monthlyShopViews = 0,
 }: PartnerClientProps) {
   const t = useTranslations("Partner");
+  const errorText = useActionErrorText();
   const tCommon = useTranslations("Common");
   /**
    * Gecikme hesabı için TEK referans an.
@@ -110,7 +144,7 @@ export default function PartnerClient({
     [nowRef],
   );
   const locale = useLocale();
-  const dateLocale = dateLocaleForUiLocale(locale);
+  const dateLocale = bcp47ForUiLocale(locale);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -140,11 +174,16 @@ export default function PartnerClient({
     [],
   );
 
+  /*
+    Gelen deger bir `Errors.*` ANAHTARI ya da servisin Turkce cumlesiydi; ikisi de
+    ekrana aynen basiliyordu (2026-08-25). Artik once anahtara indirgenip
+    cevriliyor, taninmayan her sey yerellestirilmis yedek metne dusuyor.
+  */
   const showError = useCallback(
     (message?: string | null) => {
-      toast.error(message || t("checkInFailed"));
+      toast.error(errorText(message, t("checkInFailed")));
     },
-    [t]
+    [errorText, t]
   );
 
   const askConfirm = useCallback((message: string, onConfirm: () => void) => {
@@ -387,9 +426,36 @@ export default function PartnerClient({
           >
             {shopName.toLowerCase()}
           </h1>
-          <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-3">
+          <p className="text-xs text-gray-400 id-eyebrow mt-3">
             {t("partnerPanelActive")}
           </p>
+          {shops.length > 1 && (
+            <div className="mt-3">
+              <label
+                htmlFor="partner-shop-switcher"
+                className="block id-eyebrow text-gray-400"
+              >
+                {t("shopSwitcherLabel")}
+              </label>
+              <select
+                id="partner-shop-switcher"
+                data-testid="partner-shop-switcher"
+                value={shopId}
+                onChange={(e) => {
+                  const next = new URLSearchParams();
+                  next.set("shop", e.target.value);
+                  router.push(`${pathname}?${next.toString()}`);
+                }}
+                className="mt-1 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-bold text-gray-800 cursor-pointer"
+              >
+                {shops.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
         <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-col">
           <Link
@@ -421,7 +487,7 @@ export default function PartnerClient({
           <button
             type="button"
             onClick={() => setIsScanning(true)}
-            className="group mx-auto flex aspect-square w-full max-w-[280px] flex-col items-center justify-center gap-5 overflow-hidden rounded-[2.5rem] bg-brand-gradient text-white shadow-brand-xl transition-all hover:brightness-105 active:scale-95 sm:max-w-xs md:max-w-sm md:gap-8 md:rounded-[4rem]"
+            className="group mx-auto flex aspect-square w-full max-w-[280px] flex-col items-center justify-center gap-5 overflow-hidden rounded-4xl bg-brand-gradient text-white shadow-brand-xl transition-all hover:brightness-105 active:scale-95 sm:max-w-xs md:max-w-sm md:gap-8 md:rounded-4xl"
           >
             <div className="bg-white/10 p-8 rounded-full group-hover:scale-110 transition-transform">
               <Camera size={64} strokeWidth={1} />
@@ -432,14 +498,14 @@ export default function PartnerClient({
           </button>
 
           <div className="grid w-full grid-cols-2 gap-3 md:gap-6">
-            <div className="ui-card flex flex-col gap-1 p-5 md:rounded-[2.5rem] md:p-6">
-              <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
+            <div className="ui-card flex flex-col gap-1 p-5 md:rounded-4xl md:p-6">
+              <p className="id-eyebrow text-gray-400">
                 {t("activeBookings")}
               </p>
               <p className="text-3xl font-black text-gray-900 md:text-4xl">{activeCount}</p>
             </div>
-            <div className="ui-card flex flex-col gap-1 p-5 md:rounded-[2.5rem] md:p-6">
-              <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
+            <div className="ui-card flex flex-col gap-1 p-5 md:rounded-4xl md:p-6">
+              <p className="id-eyebrow text-gray-400">
                 {t("netEarnings")}
               </p>
               <div className="flex items-baseline gap-1">
@@ -451,8 +517,8 @@ export default function PartnerClient({
                 </span>
               </div>
             </div>
-            <div className="ui-card col-span-2 flex items-center justify-between gap-2 p-5 md:rounded-[2.5rem] md:p-6">
-              <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
+            <div className="ui-card col-span-2 flex items-center justify-between gap-2 p-5 md:rounded-4xl md:p-6">
+              <p className="id-eyebrow text-gray-400">
                 {t("monthlyShopViews")}
               </p>
               <p className="text-2xl font-black text-gray-900 md:text-3xl">

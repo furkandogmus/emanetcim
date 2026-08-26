@@ -24,7 +24,7 @@ export default function ContactFormClient({ labels, responseNote }: Props) {
 
   if (state.status === "success") {
     return (
-      <div className="bg-white rounded-[4rem] p-12 border border-gray-100 shadow-2xl shadow-gray-200/50 order-1 lg:order-2 flex flex-col items-center justify-center gap-6 text-center min-h-[400px]">
+      <div className="bg-white rounded-4xl p-12 border border-gray-100 shadow-2xl shadow-gray-200/50 order-1 lg:order-2 flex flex-col items-center justify-center gap-6 text-center min-h-[400px]">
         <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center text-green-500">
           <CheckCircle size={40} />
         </div>
@@ -34,7 +34,7 @@ export default function ContactFormClient({ labels, responseNote }: Props) {
   }
 
   return (
-    <div className="bg-white rounded-[4rem] p-12 border border-gray-100 shadow-2xl shadow-gray-200/50 order-1 lg:order-2">
+    <div className="bg-white rounded-4xl p-12 border border-gray-100 shadow-2xl shadow-gray-200/50 order-1 lg:order-2">
       <h2 className="text-3xl font-black text-gray-900 mb-8 tracking-tight">{labels.formTitle}</h2>
 
       {state.status === "error" && (
@@ -46,7 +46,7 @@ export default function ContactFormClient({ labels, responseNote }: Props) {
 
       <form action={formAction} className="flex flex-col gap-6">
         <div className="space-y-2">
-          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">
+          <label className="id-eyebrow text-gray-400 px-2">
             {labels.name}
           </label>
           <input
@@ -59,7 +59,7 @@ export default function ContactFormClient({ labels, responseNote }: Props) {
           />
         </div>
         <div className="space-y-2">
-          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">
+          <label className="id-eyebrow text-gray-400 px-2">
             {labels.email}
           </label>
           <input
@@ -71,7 +71,7 @@ export default function ContactFormClient({ labels, responseNote }: Props) {
           />
         </div>
         <div className="space-y-2">
-          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">
+          <label className="id-eyebrow text-gray-400 px-2">
             {labels.message}
           </label>
           <textarea
@@ -80,13 +80,13 @@ export default function ContactFormClient({ labels, responseNote }: Props) {
             rows={4}
             minLength={5}
             maxLength={2000}
-            className="w-full p-6 bg-gray-50 border-none rounded-[2rem] focus:ring-4 focus:ring-orange-500/10 focus:bg-white transition-all font-bold resize-none"
+            className="w-full p-6 bg-gray-50 border-none rounded-3xl focus:ring-4 focus:ring-orange-500/10 focus:bg-white transition-all font-bold resize-none"
           />
         </div>
         <button
           type="submit"
           disabled={isPending}
-          className="h-16 w-full bg-gray-900 hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-2xl font-black text-sm uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-2 group"
+          className="h-16 w-full bg-gray-900 hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-2xl id-eyebrow text-sm transition-all active:scale-95 flex items-center justify-center gap-2 group"
         >
           <Send
             size={18}

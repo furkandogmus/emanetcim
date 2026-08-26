@@ -5,6 +5,8 @@ import { bookingService } from "@/services/BookingService";
 import { notificationService } from "@/services/NotificationService";
 import prisma from "@/lib/db";
 import { parseCheckInSeals } from "@/lib/seal-payload";
+import { bookingNotificationEmail } from "@/services/booking/guest-contact";
+import logger from "@/lib/logger";
 
 export async function POST(
   req: NextRequest,
@@ -64,12 +66,21 @@ export async function POST(
   });
 
   if (!result.ok) {
-    return NextResponse.json({ error: result.code, message: result.message }, { status: 400 });
+    /* Ham servis METNI gonderilmez; istemci kodu kendi dilinde eslesir. */
+    return NextResponse.json({ error: result.code }, { status: 400 });
   }
 
   // Send check-in notification to guest
-  if (booking.guestEmail) {
-    notificationService.notifyCheckIn(booking.guestEmail, id).catch(() => {});
+  /*
+    Alici kurali servistedir: bu uc `booking.guestEmail`e bakiyordu, web ise
+    `booking.guest?.email`e — biri hesapsiz, digeri hesapli misafiri atliyordu.
+    Hata artik yutulmuyor: bildirim gitmediyse sebebi loglarda olmali.
+  */
+  const recipient = bookingNotificationEmail(booking);
+  if (recipient) {
+    void notificationService
+      .notifyCheckIn(recipient, id)
+      .catch((err) => logger.error({ err, bookingId: id }, "mobile_checkin_notify_failed"));
   }
 
   return NextResponse.json({ ok: true });

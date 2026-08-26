@@ -19,7 +19,7 @@ import { moneyToNumber } from "@/lib/money";
 import { getPricingRules } from "@/lib/platform-settings";
 import BookingDetailModifySection from "@/components/guest/BookingDetailModifySection";
 import type { Metadata } from "next";
-import { dateLocaleForUiLocale } from "@/lib/date-locale";
+import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import { formatTryCurrency } from "@/lib/currency";
 
 export async function generateMetadata({
@@ -49,7 +49,7 @@ export default async function BookingDetailPage({
   setRequestLocale(locale);
   const session = await auth();
   const t = await getTranslations("Guest");
-  const dateLocale = dateLocaleForUiLocale(locale);
+  const dateLocale = bcp47ForUiLocale(locale);
 
   if (!session?.user?.id) {
     redirect(`/${locale}/login?callbackUrl=/${locale}/bookings/${id}`);
@@ -89,7 +89,7 @@ export default async function BookingDetailPage({
       <div className="max-w-md mx-auto flex flex-col gap-6 print-area">
         <Link
           href="/bookings"
-          className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-orange-600"
+          className="inline-flex items-center gap-2 text-xs id-eyebrow text-gray-400 hover:text-orange-600"
         >
           <ChevronLeft size={16} aria-hidden />
           {t("backToBookings")}
@@ -133,7 +133,7 @@ export default async function BookingDetailPage({
 
         {/* QR & ID Card */}
         {(isPaidFlow || confirmedAtShop) ? (
-        <div className="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col items-center gap-6">
+        <div className="bg-white rounded-4xl p-8 shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col items-center gap-6">
            <BookingQrDisplay token={booking.qrCodeToken} />
            <div className="text-center">
               <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-1">{t("bookingCodeLabel")}</p>
@@ -141,8 +141,8 @@ export default async function BookingDetailPage({
            </div>
         </div>
         ) : (
-          <div className="rounded-[2.5rem] border border-gray-100 bg-white p-6 text-center shadow-sm">
-            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">{t("bookingCodeLabel")}</p>
+          <div className="rounded-4xl border border-gray-100 bg-white p-6 text-center shadow-sm">
+            <p className="id-eyebrow text-gray-400">{t("bookingCodeLabel")}</p>
             <code className="mt-2 block text-lg font-mono font-black text-orange-600 tracking-widest">
               {booking.id.slice(0, 8).toUpperCase()}
             </code>
@@ -151,13 +151,13 @@ export default async function BookingDetailPage({
         )}
 
         {/* Details Card */}
-        <div className="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col gap-6">
+        <div className="bg-white rounded-4xl p-8 shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col gap-6">
            <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center">
                  <MapPin size={24} />
               </div>
               <div className="flex-1">
-                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">{t("depositPointLabel")}</p>
+                 <p className="id-eyebrow text-gray-400 leading-none mb-1">{t("depositPointLabel")}</p>
                  <h3 className="font-bold text-gray-900 leading-tight">{booking.shop.name}</h3>
               </div>
            </div>
@@ -166,14 +166,14 @@ export default async function BookingDetailPage({
               <div className="p-4 bg-gray-50 rounded-2xl">
                  <div className="flex items-center gap-2 mb-1">
                     <Calendar size={14} className="text-gray-400" />
-                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t("checkIn")}</span>
+                    <span className="id-eyebrow text-gray-400">{t("checkIn")}</span>
                  </div>
                  <p className="text-sm font-bold text-gray-900">{new Date(booking.checkInTime).toLocaleDateString(dateLocale)}</p>
               </div>
               <div className="p-4 bg-gray-50 rounded-2xl">
                  <div className="flex items-center gap-2 mb-1">
                     <Calendar size={14} className="text-gray-400" />
-                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t("checkOut")}</span>
+                    <span className="id-eyebrow text-gray-400">{t("checkOut")}</span>
                  </div>
                  <p className="text-sm font-bold text-gray-900">{new Date(booking.checkOutTime).toLocaleDateString(dateLocale)}</p>
               </div>
@@ -191,13 +191,13 @@ export default async function BookingDetailPage({
         </div>
 
         {booking.seals && booking.seals.length > 0 ? (
-          <div className="flex flex-col gap-4 rounded-[2.5rem] border border-orange-100 bg-orange-50/40 p-8 shadow-sm">
+          <div className="flex flex-col gap-4 rounded-4xl border border-orange-100 bg-orange-50/40 p-8 shadow-sm">
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-orange-700">
                 <Hash size={22} aria-hidden />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-orange-800/80">
+                <p className="id-eyebrow text-orange-800/80">
                   {t("guestSealNumbersTitle")}
                 </p>
                 <p className="text-xs font-medium text-gray-600">{t("guestSealNumbersHint")}</p>

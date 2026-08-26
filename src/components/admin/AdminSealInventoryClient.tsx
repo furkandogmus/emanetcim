@@ -8,6 +8,7 @@ import {
   bulkCreateSealsAction,
 } from "@/actions/admin";
 import { toast } from "sonner";
+import { useActionErrorText } from "@/lib/use-action-error";
 
 type ShopOption = { id: string; name: string; isActive: boolean };
 
@@ -27,6 +28,7 @@ type Props = {
 
 export default function AdminSealInventoryClient({ sealCounts, shops, assignedBatches }: Props) {
   const t = useTranslations("Admin");
+  const errorText = useActionErrorText();
   const [fromCreate, setFromCreate] = useState("");
   const [toCreate, setToCreate] = useState("");
   const [creating, setCreating] = useState(false);
@@ -53,7 +55,7 @@ export default function AdminSealInventoryClient({ sealCounts, shops, assignedBa
         setToCreate("");
         window.location.reload();
       } else {
-        toast.error(res.error);
+        toast.error(errorText(res.error));
       }
     } finally {
       setCreating(false);
@@ -79,7 +81,7 @@ export default function AdminSealInventoryClient({ sealCounts, shops, assignedBa
         setCountAssign("");
         window.location.reload();
       } else {
-        toast.error(res.error);
+        toast.error(errorText(res.error));
       }
     } finally {
       setAssigning(false);
@@ -94,7 +96,7 @@ export default function AdminSealInventoryClient({ sealCounts, shops, assignedBa
             key={st}
             className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm"
           >
-            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+            <p className="id-eyebrow text-gray-400">
               {t(`sealStatus_${st}`)}
             </p>
             <p className="text-2xl font-black text-gray-900 mt-1">
@@ -186,7 +188,7 @@ export default function AdminSealInventoryClient({ sealCounts, shops, assignedBa
 
       {/* Aktif Atamalar Listesi */}
       <div className="flex flex-col gap-4">
-        <h3 className="text-sm font-black uppercase tracking-widest text-gray-400 px-2">
+        <h3 className="text-sm id-eyebrow text-gray-400 px-2">
           {t("sealActiveAssignments")}
         </h3>
         
@@ -194,8 +196,8 @@ export default function AdminSealInventoryClient({ sealCounts, shops, assignedBa
           <table className="w-full text-left">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">{t("shopColumn")}</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">{t("sealAssignmentCount")}</th>
+                <th className="px-6 py-4 id-eyebrow text-gray-400">{t("shopColumn")}</th>
+                <th className="px-6 py-4 id-eyebrow text-gray-400 text-right">{t("sealAssignmentCount")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">

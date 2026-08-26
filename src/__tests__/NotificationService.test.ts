@@ -96,18 +96,43 @@ describe("NotificationService", () => {
      * DOĞRUDAN `await`leniyor. Resend hiç yanıt vermezse (asılı kalırsa) zaman
      * aşımı olmadan istek süresiz askıda kalırdı.
      */
-    it("should time out instead of hanging forever if Resend never responds", async () => {
-      vi.useFakeTimers();
-      try {
-        (global.fetch as any).mockImplementation(() => new Promise(() => {}));
+    it("her istek bir iptal sinyaliyle çıkar — asılı kalan istek soket sızdırmaz", async () => {
+      let seenSignal: unknown;
+      (global.fetch as any).mockImplementation(
+        async (_url: string, init: RequestInit) => {
+          seenSignal = init.signal;
+          return { ok: true, text: async () => "" };
+        },
+      );
 
-        const promise = service.sendEmail("test@example.com", "Subject", "Body");
-        await vi.advanceTimersByTimeAsync(8000);
+      await service.sendEmail("test@example.com", "Subject", "Body");
 
-        await expect(promise).resolves.toBe(false);
-      } finally {
-        vi.useRealTimers();
-      }
+      expect(seenSignal).toBeInstanceOf(AbortSignal);
+    });
+
+    it("Resend hiç yanıt vermezse (zaman aşımı) gönderim FAILED olarak kaydedilir", async () => {
+      /*
+        Süre dolduğunda ÇALIŞMA ZAMANININ ürettiği hata bu: `fetchWithTimeout`
+        isteği `AbortSignal.timeout` ile sonlandırıp etiketli hataya normalize
+        eder. Sahte zamanlayıcıyla sürülemez — `AbortSignal.timeout` Node'un iç
+        zamanlayıcısını kullanır ve `vi.advanceTimersByTime` onu tetiklemez
+        (ölçüldü). Zaman aşımının KENDİSİ `src/lib/async-timeout.test.ts`'te;
+        burada ölçülen şey, o hata geldiğinde çağıranın çökmeyip `false`
+        döndürmesi ve girişimin deftere yazılması.
+      */
+      (global.fetch as any).mockRejectedValue(
+        new Error("notification_email_send_timeout_after_8000ms"),
+      );
+
+      await expect(
+        service.sendEmail("test@example.com", "Subject", "Body"),
+      ).resolves.toBe(false);
+
+      expect(mockPrisma.notificationLog.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ type: "EMAIL", status: "FAILED" }),
+        }),
+      );
     });
   });
 

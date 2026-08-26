@@ -31,7 +31,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
     <div className="min-h-screen bg-gray-50/50">
       <header className="py-24 px-6 bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
-          <div className="w-16 h-16 bg-orange-600 rounded-[2rem] flex items-center justify-center text-white shadow-xl shadow-orange-200 mb-8 rotate-3">
+          <div className="w-16 h-16 bg-orange-600 rounded-3xl flex items-center justify-center text-white shadow-xl shadow-orange-200 mb-8 rotate-3">
             <MessageSquare size={32} />
           </div>
           <h1 className="text-5xl font-black text-gray-900 tracking-tighter mb-4">
@@ -47,7 +47,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
           {/* Info cards */}
           <div className="flex flex-col gap-6 order-2 lg:order-1">
-            <div className="group p-10 bg-white rounded-[3rem] border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-orange-200/20 transition-all">
+            <div className="group p-10 bg-white rounded-4xl border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-orange-200/20 transition-all">
               <div className="flex items-center gap-6">
                 <div className="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 shrink-0">
                   <MessageCircle size={32} />
@@ -55,14 +55,14 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
                 <div className="flex-1">
                   <h3 className="text-xl font-black text-gray-900 mb-1">{t("whatsappTitle")}</h3>
                   <p className="text-gray-400 font-bold text-sm mb-6">{t("whatsappSubtitle")}</p>
-                  <a href="https://wa.me/905422415597" target="_blank" rel="noopener noreferrer" className="h-12 inline-flex items-center px-8 bg-green-500 hover:bg-green-600 text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-green-100">
+                  <a href="https://wa.me/905422415597" target="_blank" rel="noopener noreferrer" className="h-12 inline-flex items-center px-8 bg-green-500 hover:bg-green-600 text-white rounded-xl id-eyebrow text-xs transition-all active:scale-95 shadow-lg shadow-green-100">
                     {t("whatsappCta")}
                   </a>
                 </div>
               </div>
             </div>
 
-            <div className="group p-10 bg-white rounded-[3rem] border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-blue-200/20 transition-all">
+            <div className="group p-10 bg-white rounded-4xl border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-blue-200/20 transition-all">
               <div className="flex items-center gap-6">
                 <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 shrink-0">
                   <Mail size={32} />
@@ -77,13 +77,13 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
               </div>
             </div>
 
-            <div className="group p-10 bg-white rounded-[3rem] border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-orange-200/20 transition-all">
+            <div className="group p-10 bg-white rounded-4xl border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-orange-200/20 transition-all">
               <div className="flex items-center gap-6">
                 <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-600 shrink-0">
                   <MapPin size={32} />
                 </div>
                 <div className="flex-1">
-                  <div className="inline-flex px-2 py-0.5 bg-orange-100 text-orange-600 text-[8px] font-black uppercase tracking-widest rounded mb-2">
+                  <div className="inline-flex px-2 py-0.5 bg-orange-100 text-orange-600 text-[8px] id-eyebrow rounded mb-2">
                     {t("opsBadge")}
                   </div>
                   <h3 className="text-xl font-black text-gray-900 mb-1">{t("opsTitle")}</h3>
@@ -106,7 +106,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
               success: t("success"),
               error: t("error"),
             }}
-            responseNote="Genelde 2 saat içinde yanıt veriyoruz."
+            responseNote={t("responseNote")}
           />
         </div>
       </main>
