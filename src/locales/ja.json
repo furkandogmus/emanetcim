@@ -135,6 +135,8 @@
     "referralCopyTitle": "招待リンクをコピー",
     "transactionHistory": "取引履歴",
     "transactionsCount": "{count} アイテム",
+    "earningsPeakHoursTitle": "チェックイン時間帯",
+    "earningsReservationCount": "{count} 件の予約",
     "noTransactionsYet": "まだ取引はありません。",
     "guestFallback": "ゲスト #{id}",
     "netEarningsShort": "純利益",

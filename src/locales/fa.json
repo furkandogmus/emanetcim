@@ -135,6 +135,8 @@
     "referralCopyTitle": "کپی لینک دعوت",
     "transactionHistory": "تاریخچه تراکنش",
     "transactionsCount": "{count} مورد",
+    "earningsReservationCount": "{count} رزرو",
+    "earningsPeakHoursTitle": "ساعات ورود",
     "noTransactionsYet": "هنوز تراکنشی نیست.",
     "guestFallback": "مهمان #{id}",
     "netEarningsShort": "درآمد خالص",

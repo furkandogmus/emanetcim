@@ -5,6 +5,7 @@ import { Link } from "@/i18n/routing";
 import { ArrowLeft, TrendingUp, Wallet, Receipt, Clock, Star, BarChart3, RefreshCw } from "lucide-react";
 import dynamic from "next/dynamic";
 import { formatDecimal } from "@/lib/currency";
+import { bcp47ForUiLocale } from "@/lib/intl-locale";
 
 interface Booking {
   id: string;
@@ -39,16 +40,6 @@ interface Props {
   avgStayHours: number;
   conversionRate: number;
   avgRating: number;
-}
-
-function fmt(n: number) {
-  return n.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-function fmtMonth(key: string) {
-  const [year, month] = key.split("-");
-  const d = new Date(Number(year), Number(month) - 1, 1);
-  return d.toLocaleString("tr-TR", { month: "long", year: "numeric" });
 }
 
 /**
@@ -102,7 +93,22 @@ export default function PartnerEarningsClient({
 }: Props) {
   const t = useTranslations("Partner");
   const locale = useLocale();
+  const bcp47 = bcp47ForUiLocale(locale);
   const commissionPct = Math.round((1 - merchantRatio) * 100);
+
+  /*
+    `fmt`/`fmtMonth` eskiden modul seviyesinde "tr-TR"ye sabitlenmisti --
+    Turkce disindaki bir arayuzde kazanc, tarih ve grafik etiketleri hep
+    Turk bicimiyle (binlik nokta, ondalik virgul) gosteriliyordu. Bilesen
+    icine tasinip `locale`e bagli hale getirildi.
+  */
+  const fmt = (n: number) =>
+    n.toLocaleString(bcp47, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmtMonth = (key: string) => {
+    const [year, month] = key.split("-");
+    const d = new Date(Number(year), Number(month) - 1, 1);
+    return d.toLocaleString(bcp47, { month: "long", year: "numeric" });
+  };
 
   // Only show hours with any activity for cleaner chart
   const activePeakHours = peakHoursData.filter((h) => h.count > 0);
@@ -195,7 +201,7 @@ export default function PartnerEarningsClient({
                 <div key={m.month} className="px-4 py-3 flex items-center justify-between">
                   <div>
                     <p className="font-semibold text-gray-900">{fmtMonth(m.month)}</p>
-                    <p className="text-xs text-gray-400">{m.count} rezervasyon</p>
+                    <p className="text-xs text-gray-400">{t("earningsReservationCount", { count: m.count })}</p>
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-emerald-600">{fmt(m.netTotal)} ₺</p>
@@ -212,12 +218,12 @@ export default function PartnerEarningsClient({
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
               <BarChart3 className="w-4 h-4 text-gray-400" />
-              <h2 className="font-bold text-gray-900">Check-in Saatleri</h2>
+              <h2 className="font-bold text-gray-900">{t("earningsPeakHoursTitle")}</h2>
             </div>
             <div className="px-4 pt-4 pb-2">
               <PeakHoursChart
                 data={peakHoursData}
-                formatCount={(n) => `${n} rezervasyon`}
+                formatCount={(n) => t("earningsReservationCount", { count: n })}
               />
             </div>
           </div>
@@ -236,7 +242,7 @@ export default function PartnerEarningsClient({
               {bookings.map((b) => {
                 const gross = b.totalPrice;
                 const net = Math.round(gross * merchantRatio * 100) / 100;
-                const date = new Date(b.createdAt).toLocaleDateString("tr-TR");
+                const date = new Date(b.createdAt).toLocaleDateString(bcp47);
                 return (
                   <div key={b.id} className="px-4 py-3 flex items-center justify-between">
                     <div>

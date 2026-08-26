@@ -135,6 +135,8 @@
     "referralCopyTitle": "Davet linkini kopyala",
     "transactionHistory": "İşlem Geçmişi",
     "transactionsCount": "{count} İŞLEM",
+    "earningsReservationCount": "{count} rezervasyon",
+    "earningsPeakHoursTitle": "Check-in Saatleri",
     "noTransactionsYet": "Henüz işlem bulunmuyor.",
     "guestFallback": "Misafir #{id}",
     "netEarningsShort": "Net Hakediş",

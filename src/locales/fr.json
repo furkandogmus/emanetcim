@@ -135,6 +135,8 @@
     "referralCopyTitle": "Copier le lien d'invitation",
     "transactionHistory": "Historique des transactions",
     "transactionsCount": "{count} ARTICLES",
+    "earningsReservationCount": "{count} réservations",
+    "earningsPeakHoursTitle": "Heures d'arrivée",
     "noTransactionsYet": "Aucune transaction pour l'instant.",
     "guestFallback": "Invité #{id}",
     "netEarningsShort": "Bénéfice net",
