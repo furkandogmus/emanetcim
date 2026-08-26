@@ -113,6 +113,6 @@ Hetzner'e geri yükleyin (aynı `backup.sh`/`restore.sh`).
 
 - 1 hafta sorunsuz geçince Hetzner sunucusunu kapat/iptal et; `ops/README.md` ve
   `infra/aws/README.md`'deki "AWS = doğrulama kapısı, Hetzner = canlı" politikasını güncelle.
-- `.github/workflows/deploy.yml` zaten AWS'e gidiyor; `main` push = canlı deploy olur.
+- `.github/workflows/ci.yml` (`deploy` job'ı) zaten AWS'e gidiyor; `main` push = canlı deploy olur.
   Küçük değişiklikler için `develop` → PR → `main` disiplini şart.
 - AWS hesabını Paid plana yükselt; Cost Explorer'ı 1 hafta sonra kontrol et.

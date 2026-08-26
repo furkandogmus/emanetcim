@@ -56,7 +56,11 @@ Tavan sayısını yükselten bir PR, sorunu çözmüyor, saklıyor.
   stratejik dilek listesidir).
 - Ödeme mimarisi `docs/PAYMENTS.md`, iş kuralları `docs/PLATFORM_SETTINGS.md`,
   cron/sağlık `scripts/README.md`, deploy `docs/DOCKER.md` + `ops/README.md`.
-- Prod: Hetzner, `main` push → GHCR → deploy (`.github/workflows/deploy.yml`).
+- CI/CD `docs/CI_CD.md` — tek workflow `.github/workflows/ci.yml`
+  (`verify` → `image` → `deploy`). Deploy doğrulamaya `needs` ile bağlı, yani
+  kırmızı commit üretime çıkamaz. Actions kotası bitince job'lar 0 adımda düşer
+  ve hiç log bırakmaz; o tabloyu kodda aramayın, belgede yazıyor.
+- Prod: `main` push → GHCR → deploy.
   AWS (`infra/aws`) paralel deneme ortamıdır, prod değil.
 
 ## Yapma

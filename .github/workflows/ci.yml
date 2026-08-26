@@ -1,84 +1,84 @@
 name: CI
 
+# =============================================================================
+# TEK GIRIS NOKTASI: dogrula -> imaj -> deploy.
+#
+# NEDEN BOYLE (2026-08-26'da olculdu): `CI` ve `Build & Deploy` AYRI iki
+# workflow'du ve ikisi de `main` push'unda tetikleniyordu. Sonuclari:
+#
+#   1. Next uygulamasi push BASINA UC KEZ derleniyordu -- `build` job'inda,
+#      `e2e` job'inda bir daha (ayri job, `.next`i paylasamiyor) ve bir de
+#      Docker imajinin icinde.
+#   2. `Build & Deploy`, `CI`yi BEKLEMIYORDU. Yani testleri kirmizi olan bir
+#      commit uretime cikabiliyordu; ikisini birbirine baglayan hicbir sey yoktu.
+#   3. Ustuste gelen push'lar iptal edilmiyordu. Ayni gun 58 kosu tetiklendi;
+#      her biri, kendisinden sonra gelen commit onu gecersiz kilmis olsa bile
+#      sonuna kadar kosuyordu.
+#
+# Agustos faturasi: 1547 dk (CI 918, Build & Deploy 611) -- private repo
+# kotasi 2000 dk/ay. Kota bitince job'lar 0 adimda, ~3 saniyede dusuyor ve
+# hicbir log birakmiyor; "test kirildi" gibi degil, "hicbir sey olmadi" gibi
+# gorunur. Bu dosyanin bicimi o faturayi dusurmek icin.
+#
+# UC KURAL:
+#   - Tek `npm ci`, tek `npm run build` (Docker imajininki haric -- o BILEREK
+#     ayri, asagida gerekcesi var).
+#   - Deploy, dogrulamaya BAGLI (`needs`). Kirmizi commit cikamaz.
+#   - Ustuste gelen kosular iptal olur.
+# =============================================================================
+
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
+    # Bu yollar uygulamanin davranisini degistirmez; tam pipeline'i hak etmiyorlar.
+    # `mobile/**` kendi workflow'unda (mobile-ci.yml) zaten path filtreli.
+    paths-ignore:
+      - "docs/**"
+      - "mobile/**"
+      - "ops/**"
+      - "**/*.md"
   pull_request:
-    branches: [main, develop]
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "mobile/**"
+      - "ops/**"
+      - "**/*.md"
+  # Path filtresi yuzunden atlanan bir degisikligi elle dogrulamak icin.
+  workflow_dispatch:
+
+# Iptal WORKFLOW seviyesinde DEGIL, job seviyesinde tanimli.
+#
+# NEDEN: workflow seviyesinde `cancel-in-progress: true` yazmak, yeni bir push
+# geldiginde SUREN BIR DEPLOY'U da yarida keserdi -- S3 yuklemesi bitmis ama
+# SSM komutu beklenirken kesilen bir kosu, sunucuyu yari guncellenmis birakir
+# ve workflow "iptal edildi" der. Pahali olan is `verify`; iptal edilmesi
+# gereken de odur. `deploy` asla kesilmez, ustelik kendi grubunda sirayla
+# calisir (asagiya bakin).
 
 jobs:
-  build:
+  # ---------------------------------------------------------------------------
+  # Her sey TEK job'da: lint, typecheck, migrasyon sapmasi, birim testleri,
+  # build ve E2E.
+  #
+  # NEDEN TEK JOB: bunlar eskiden iki job'di ve ikisi de `npm ci` + `npm run
+  # build` calistiriyordu. Ayri job'lar ayri makinelerdir; `node_modules` ve
+  # `.next` paylasilamaz. Birlestirmek push basina bir checkout, bir `npm ci`,
+  # bir Next build ve bir runner acilisi siliyor.
+  #
+  # Yan faydasi: ucuz kontroller (lint, typecheck) pahali olanlardan ONCE
+  # calisir, yani bir yazim hatasi 10 dakikalik E2E'yi hic baslatmadan yakalanir.
+  # ---------------------------------------------------------------------------
+  verify:
+    name: Dogrula (lint, tip, test, e2e)
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgis/postgis:16-3.4-alpine
-        env:
-          POSTGRES_USER: ci
-          POSTGRES_PASSWORD: ci
-          POSTGRES_DB: ci
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U ci -d ci"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
+    timeout-minutes: 30
+    # Ayni dala arka arkaya push atilirsa yalnizca sonuncusu dogrulanir.
+    # Gecersiz kilinmis bir commit'i sonuna kadar test etmek saf dakika kaybi.
+    concurrency:
+      group: verify-${{ github.ref }}
+      cancel-in-progress: true
 
-    env:
-      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: npm audit (high+)
-        run: npm audit --audit-level=high
-        continue-on-error: true
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Prisma migrate (CI DB)
-        run: npx prisma migrate deploy
-
-      # Migrasyonlarin urettigi sema, schema.prisma ile BIREBIR mi?
-      #
-      # NEDEN: sekiz migrasyon elle yazilmisti ve hicbiri gercek bir Postgres'e
-      # karsi denenmemisti. Denendiginde iki sapma cikti (PaymentLog.updatedAt
-      # varsayilani ve semada bildirilmemis bir Shop indeksi). Ikisi de deploy'u
-      # kirmazdi ama bir sonraki `migrate dev` calistiran kisiye aciklanamayan
-      # bir drift olarak cikardi.
-      - name: Migrasyon / sema sapma kontrolu
-        run: npm run db:verify -- --host localhost --port 5432 --user ci
-        env:
-          PGPASSWORD: ci
-
-      - name: Unit + integration tests
-        run: npm run test
-        env:
-          CI: true
-
-      - name: Build
-        run: npm run build
-        env:
-          AUTH_SECRET: ci-build-placeholder-not-for-production
-          CI: "true"
-          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
-
-  e2e:
-    name: E2E (Playwright)
-    runs-on: ubuntu-latest
-    needs: build
     services:
       postgres:
         image: postgis/postgis:16-3.4-alpine
@@ -108,25 +108,234 @@ jobs:
       # Testler ayni IP'den onlarca istek uretir; gercek limitler production disinda kapatilir.
       E2E_DISABLE_RATE_LIMIT: "true"
       # Demo giris dugmeleri production build'de ancak bu bayrakla gorunur (build aninda gomulur).
+      #
+      # DIKKAT: bu bayrak SADECE burada acik. Uretime giden imaj asagida AYRI
+      # bir job'da, bu env olmadan derleniyor -- E2E build'ini uretim imaji
+      # olarak yeniden kullanmamamizin sebebi tam olarak bu.
       NEXT_PUBLIC_ENABLE_AUTH_DEMO: "true"
       CI: "true"
 
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: npm
-      - run: npm ci
-      - run: npx prisma migrate deploy
-      - run: npx prisma db seed
-      - run: npx playwright install --with-deps chromium
-      # playwright.config.ts CI'da `npm run start` kullanir; build burada yapilir.
-      - run: npm run build
-      - run: npx playwright test
+
+      - name: Bagimliliklar
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Prisma migrate (CI DB)
+        run: npx prisma migrate deploy
+
+      # Migrasyonlarin urettigi sema, schema.prisma ile BIREBIR mi?
+      #
+      # NEDEN: sekiz migrasyon elle yazilmisti ve hicbiri gercek bir Postgres'e
+      # karsi denenmemisti. Denendiginde iki sapma cikti (PaymentLog.updatedAt
+      # varsayilani ve semada bildirilmemis bir Shop indeksi). Ikisi de deploy'u
+      # kirmazdi ama bir sonraki `migrate dev` calistiran kisiye aciklanamayan
+      # bir drift olarak cikardi.
+      - name: Migrasyon / sema sapma kontrolu
+        run: npm run db:verify -- --host localhost --port 5432 --user ci
+        env:
+          PGPASSWORD: ci
+
+      - name: Birim + entegrasyon testleri
+        run: npm run test
+
+      - name: Build
+        run: npm run build
+
+      # Tarayici ikilisi ~150 MB ve her kosuda yeniden indiriliyordu.
+      # Anahtar Playwright surumune bagli: paket yukseltilince otomatik tazelenir.
+      - name: Playwright surumunu oku
+        id: pw
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Playwright tarayici onbellegi
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+
+      - name: Playwright tarayicilari
+        # Onbellek tuttuysa yalnizca sistem bagimliliklari kurulur, indirme olmaz.
+        run: |
+          if [ "${{ steps.pw-cache.outputs.cache-hit }}" = "true" ]; then
+            npx playwright install-deps chromium
+          else
+            npx playwright install --with-deps chromium
+          fi
+
+      - name: Seed (E2E verisi)
+        run: npx prisma db seed
+
+      - name: E2E (Playwright)
+        run: npx playwright test
+
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Uretim imaji.
+  #
+  # NEDEN AYRI BIR BUILD: `verify` job'indaki build, E2E icin
+  # `NEXT_PUBLIC_ENABLE_AUTH_DEMO=true` ile derlendi -- bayrak derleme aninda
+  # gomuluyor. O ciktiyi uretime gondermek, demo giris dugmelerini canliya
+  # tasirdi. Imaj bu yuzden kendi build'ini yapar; Docker katman onbellegi
+  # (type=gha) tekrar maliyetini dusuk tutar.
+  #
+  # Yalnizca `main` push'unda. PR'da imaj uretilmez: PR'in isi dogrulamaktir.
+  # ---------------------------------------------------------------------------
+  image:
+    name: Imaj (GHCR)
+    needs: verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Imaj da iptal edilebilir: bir sonraki commit zaten yenisini uretecek.
+    concurrency:
+      group: image-${{ github.ref }}
+      cancel-in-progress: true
+    permissions:
+      contents: read
+      packages: write
+
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}
+      DOCKER_BUILD_SUMMARY: false
+      DOCKER_BUILD_RECORD_UPLOAD: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: GHCR girisi
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Etiket ve etiketler
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=sha-
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Derle ve gonder
+        id: build
+        uses: docker/build-push-action@v6
+        env:
+          DOCKER_BUILD_SUMMARY: false
+          DOCKER_BUILD_RECORD_UPLOAD: false
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false
+          sbom: false
+          build-args: |
+            DATABASE_URL=postgresql://bagajpark:bagajpark@localhost:5432/bagajpark?schema=public
+            AUTH_SECRET=docker-build-placeholder-not-for-production
+            NEXT_PUBLIC_BETA_BADGE=true
+
+  # ---------------------------------------------------------------------------
+  # Deploy. Eskiden AYRI bir workflow'daydi ve `CI`yi beklemiyordu -- yani
+  # testleri kirmizi bir commit uretime cikabilirdi. Artik `needs: image`,
+  # o da `needs: verify`: zincir kirilirsa deploy hic baslamaz.
+  # ---------------------------------------------------------------------------
+  deploy:
+    name: Deploy (AWS SSM, OIDC — statik key yok)
+    needs: image
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # ASLA iptal edilmez (`cancel-in-progress` yok) ve tek sirada calisir:
+    # iki deploy ayni anda `docker compose up` cagirirsa sunucuda yaris olur.
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    environment: production
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout (docker-compose.yml icin)
+        uses: actions/checkout@v4
+
+      - name: AWS kimligi (GitHub OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Deploy config'i ve public/ dosyalarini S3'e yukle
+        # nginx `public/` dizinini sunucudaki /opt/emanetci/public'ten servis eder
+        # (try_files $uri @next); imajin icindeki kopya DEGIL. Senkronlanmazsa
+        # sw.js/manifest/ikonlar eski kalir (2026-08-23: eski service worker canlida kaldi).
+        run: |
+          aws s3 cp docker-compose.yml "s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/docker-compose.yml"
+          # `sync` s3:ListBucket ister; github-deploy rolunde yalnizca PutObject var.
+          # `cp --recursive` listeleme yapmaz. Sunucu tarafi `sync --delete` ile aynalar.
+          aws s3 cp public/ "s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/public/" --recursive --only-show-errors
+
+      - name: SSM Run Command ile deploy et
+        run: |
+          set -e
+          COMMAND_ID=$(aws ssm send-command \
+            --document-name "AWS-RunShellScript" \
+            --targets "Key=tag:Project,Values=bagajpark-aws-test" \
+            --comment "GitHub Actions deploy — ${{ github.sha }}" \
+            --parameters commands='[
+              "set -e",
+              "aws s3 cp s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/docker-compose.yml /opt/emanetci/docker-compose.yml",
+              "aws s3 sync s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/public/ /opt/emanetci/public/ --delete --only-show-errors",
+              "cd /opt/emanetci",
+              "docker rm -f $(docker ps -aq --filter name=_emanetci-) 2>/dev/null || true",
+              "docker compose --env-file docker-compose.env pull web --quiet",
+              "docker compose --env-file docker-compose.env up -d --no-build",
+              "docker compose --env-file docker-compose.env restart nginx",
+              "docker image prune -f"
+            ]' \
+            --query "Command.CommandId" --output text)
+          echo "Command ID: $COMMAND_ID"
+
+          for i in $(seq 1 60); do
+            sleep 5
+            STATUS=$(aws ssm list-command-invocations --command-id "$COMMAND_ID" --details \
+              --query "CommandInvocations[0].Status" --output text 2>/dev/null || echo "Pending")
+            echo "[$i/60] Status: $STATUS"
+            if [ "$STATUS" = "Success" ]; then
+              echo "✅ Deploy tamamlandı: $(date)"
+              exit 0
+            elif [ "$STATUS" = "Failed" ] || [ "$STATUS" = "Cancelled" ] || [ "$STATUS" = "TimedOut" ]; then
+              echo "❌ Deploy başarısız: $STATUS"
+              aws ssm list-command-invocations --command-id "$COMMAND_ID" --details \
+                --query "CommandInvocations[0].CommandPlugins[0].Output" --output text
+              exit 1
+            fi
+          done
+          echo "❌ Timeout: komut 300s içinde tamamlanmadı"
+          exit 1

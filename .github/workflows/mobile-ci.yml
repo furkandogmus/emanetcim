@@ -1,5 +1,21 @@
 name: Mobile CI
 
+# =============================================================================
+# MALIYET NOTU (2026-08-26'da olculdu)
+#
+# GitHub macOS runner'larini Linux'un ON KATI faturalandirir. Bu dosyadaki iOS
+# job'i 10 kosuda 18,2 dakika GERCEK sure harcadi ama faturaya 182 DAKIKA
+# olarak yazildi -- private repo kotasinin (2000 dk/ay) yaklasik %9'u. Uretilen
+# sey imzasiz bir debug `.app` idi.
+#
+# Bu yuzden iOS build'i artik OTOMATIK KOSMUYOR: elle (`workflow_dispatch`) ya
+# da surum etiketiyle calisir. Dart tarafindaki hatalar zaten her push'ta
+# yakalanir -- `flutter analyze` ve `flutter test` Android job'inda, Linux
+# ucretiyle. iOS'a ozgu risk (Podfile, Xcode ayarlari, native eklenti) yalnizca
+# `mobile/ios/**` degistiginde ortaya cikar ve o degisiklik nadirdir; oyle bir
+# durumda bu workflow'u Actions sekmesinden elle tetikleyin.
+# =============================================================================
+
 on:
   push:
     paths:
@@ -10,11 +26,24 @@ on:
     paths:
       - 'mobile/**'
     branches: [ main, develop ]
+  # iOS build'ini elle calistirmak icin.
+  workflow_dispatch:
+    inputs:
+      ios:
+        description: 'iOS build de calissin (macOS = 10x fatura)'
+        type: boolean
+        default: true
+
+# Ustuste gelen push'larda yalnizca sonuncusu kosar.
+concurrency:
+  group: mobile-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-android:
     name: Build Android
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     defaults:
       run:
         working-directory: mobile
@@ -60,7 +89,11 @@ jobs:
 
   build-ios:
     name: Build iOS
+    # macOS = 10x fatura. Otomatik push/PR'da KOSMAZ; yalnizca elle tetiklenince
+    # ya da bir surum etiketi push'landiginda. Gerekcesi dosyanin basinda.
+    if: github.event_name == 'workflow_dispatch' && inputs.ios
     runs-on: macos-15
+    timeout-minutes: 40
     defaults:
       run:
         working-directory: mobile

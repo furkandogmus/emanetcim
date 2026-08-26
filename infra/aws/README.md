@@ -12,7 +12,7 @@ küçük değişikliklerde GÜNCELLENMEZ.**
 
 | Ortam | Ne zaman güncellenir | Nasıl |
 |-------|----------------------|-------|
-| AWS (`aws-test.bagajpark.com`) | `main`'e her push'ta, otomatik | `.github/workflows/deploy.yml` → GitHub OIDC + SSM Run Command |
+| AWS (`aws-test.bagajpark.com`) | `main`'e her push'ta, otomatik | `.github/workflows/ci.yml` (`deploy` job'ı) → GitHub OIDC + SSM Run Command |
 | Hetzner (`bagajpark.com`, canlı) | **Sadece** biriktirilmiş, büyük ve AWS'te doğrulanmış bir güncelleme olduğunda, **elle** | `ssh hetzner "cd /root/emanetci && sudo ./scripts/update.sh"` |
 
 Hetzner'in her 5 dakikada çalışan otomatik deploy cron'u **2026-08-21'de kasıtlı olarak
