@@ -12,6 +12,7 @@ import {
   approveAdminRoleChangeAction,
   cancelAdminRoleChangeAction,
 } from "@/actions/admin-management";
+import { actionErrorKey } from "@/lib/action-error";
 
 export type RoleApprovalRowVm = {
   id: string;
@@ -43,6 +44,7 @@ export default function AdminRoleApprovalsClient({
   currentAdminId: string;
 }) {
   const t = useTranslations("Admin");
+  const tErrors = useTranslations("Errors");
   const locale = useLocale();
   const dateLocale = bcp47ForUiLocale(locale);
   const router = useRouter();
@@ -53,44 +55,59 @@ export default function AdminRoleApprovalsClient({
 
   const approve = (requestId: string) => {
     startTransition(async () => {
-      const res = await approveAdminRoleChangeAction(requestId);
-      if (!res.ok) {
-        const key =
-          res.error === "cannot_self_approve"
-            ? "roleApprovalsCannotSelfApprove"
-            : res.error === "stale"
-              ? "roleApprovalsStale"
-              : res.error === "cannot_demote_sole_admin"
-                ? "roleChangeErrorCannotDemoteSoleAdmin"
-                : res.error === "not_found"
-                  ? "roleChangeErrorNotFound"
-                  : "roleApprovalsApproveError";
-        toast.error(t(key));
-        if (
-          res.error === "stale" ||
-          res.error === "not_found" ||
-          res.error === "cannot_demote_sole_admin"
-        ) {
-          setRows((r) => r.filter((x) => x.id !== requestId));
+      /*
+        `approveAdminRoleChangeAction` icinde assertAdmin() ve `$transaction`
+        hicbir try/catch icinde degil -- oturum/yetki hatasi ya da DB hatasi
+        buraya kadar FIRLAR. catch olmadan hicbir toast gorulmuyordu; onay
+        satiri ekranda takiliyor, yonetici ne oldugunu anlayamiyordu.
+      */
+      try {
+        const res = await approveAdminRoleChangeAction(requestId);
+        if (!res.ok) {
+          const key =
+            res.error === "cannot_self_approve"
+              ? "roleApprovalsCannotSelfApprove"
+              : res.error === "stale"
+                ? "roleApprovalsStale"
+                : res.error === "cannot_demote_sole_admin"
+                  ? "roleChangeErrorCannotDemoteSoleAdmin"
+                  : res.error === "not_found"
+                    ? "roleChangeErrorNotFound"
+                    : "roleApprovalsApproveError";
+          toast.error(t(key));
+          if (
+            res.error === "stale" ||
+            res.error === "not_found" ||
+            res.error === "cannot_demote_sole_admin"
+          ) {
+            setRows((r) => r.filter((x) => x.id !== requestId));
+          }
+          return;
         }
-        return;
+        setRows((r) => r.filter((x) => x.id !== requestId));
+        toast.success(t("roleApprovalsApproved"));
+        refresh();
+      } catch (e) {
+        toast.error(tErrors(actionErrorKey(e) as never));
       }
-      setRows((r) => r.filter((x) => x.id !== requestId));
-      toast.success(t("roleApprovalsApproved"));
-      refresh();
     });
   };
 
   const cancel = (requestId: string) => {
     startTransition(async () => {
-      const res = await cancelAdminRoleChangeAction(requestId);
-      if (!res.ok) {
-        toast.error(t("roleApprovalsCancelError"));
-        return;
+      // Ayni sinif: cancelAdminRoleChangeAction icinde assertAdmin() de firlar.
+      try {
+        const res = await cancelAdminRoleChangeAction(requestId);
+        if (!res.ok) {
+          toast.error(t("roleApprovalsCancelError"));
+          return;
+        }
+        setRows((r) => r.filter((x) => x.id !== requestId));
+        toast.success(t("roleApprovalsCancelled"));
+        refresh();
+      } catch (e) {
+        toast.error(tErrors(actionErrorKey(e) as never));
       }
-      setRows((r) => r.filter((x) => x.id !== requestId));
-      toast.success(t("roleApprovalsCancelled"));
-      refresh();
     });
   };
 
