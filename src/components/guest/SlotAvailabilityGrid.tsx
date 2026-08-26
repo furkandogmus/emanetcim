@@ -129,16 +129,34 @@ export default function SlotAvailabilityGrid({
       setSelectedEnd(null);
       return;
     }
-    setSelectedEnd(slotStart);
     const startIdx = slots.findIndex((s) => s.startTime === selectedStart);
     const endIdx = slots.findIndex((s) => s.startTime === slotStart);
-    if (startIdx >= 0 && endIdx >= 0) {
-      onSelectRange(
-        toWallValue(selectedStart, timeZone),
-        toWallValue(slots[endIdx].endTime, timeZone),
-        endIdx - startIdx + 1,
-      );
+    if (startIdx < 0 || endIdx < 0) return;
+
+    /*
+      Uc noktalarin musait olmasi araya giren bir slotun da musait oldugunu
+      GARANTI ETMEZ: baslangic ve bitis dokunuslari kendi disabled durumuyla
+      korunuyor ama aradaki slotlara hic dokunulmuyor. Bu kontrol olmadan
+      dolu bir orta slot "secili" (turuncu) gorunuyordu -- inSelectedRange
+      yalnizca zaman araligina bakiyor, musaitlige degil -- ve secim
+      onSelectRange ile yukari tasiniyordu; misafir neden basaramadigini
+      hicbir yerde gormeden checkout'ta genel bir hatayla karsilasiyordu.
+    */
+    const rangeFullyAvailable = slots
+      .slice(startIdx, endIdx + 1)
+      .every((s) => s.available >= selectedBags);
+    if (!rangeFullyAvailable) {
+      setSelectedStart(slotStart);
+      setSelectedEnd(null);
+      return;
     }
+
+    setSelectedEnd(slotStart);
+    onSelectRange(
+      toWallValue(selectedStart, timeZone),
+      toWallValue(slots[endIdx].endTime, timeZone),
+      endIdx - startIdx + 1,
+    );
   };
 
   if (loading) {
