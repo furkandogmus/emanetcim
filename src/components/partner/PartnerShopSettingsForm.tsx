@@ -7,6 +7,7 @@ import { Clock, Loader2, Luggage, Settings, CheckCircle, Phone, MapPin } from "l
 import { updateShopSettingsAction } from "@/actions/shop";
 import { updatePartnerPhoneAction } from "@/actions/partner";
 import { isValidPartnerTrPhone } from "@/lib/netgsm";
+import { useActionErrorText } from "@/lib/use-action-error";
 import dynamic from "next/dynamic";
 
 const LocationPicker = dynamic(() => import("./LocationPicker"), { ssr: false });
@@ -48,6 +49,7 @@ export default function PartnerShopSettingsForm({
 }: Props) {
   const t = useTranslations("Partner");
   const tErrors = useTranslations("Errors");
+  const errorText = useActionErrorText();
   const router = useRouter();
   const [capacity, setCapacity] = useState(initialCapacity);
   const [openingTime, setOpeningTime] = useState(initialOpening);
@@ -105,17 +107,15 @@ export default function PartnerShopSettingsForm({
         longitude: location.longitude,
       });
       if (!shopRes.success) {
-        setPhoneError(shopRes.error ?? tErrors("generic"));
+        // `shopRes.error` bir "Errors.x" anahtaridir, ham metin degil --
+        // cevrilmeden basilirsa alanda birebir "Errors.invalidData" yazardi
+        // (asagidaki phoneRes ayni sinifi zaten dogru ele aliyordu).
+        setPhoneError(errorText(shopRes.error));
         return;
       }
       const phoneRes = await updatePartnerPhoneAction(partnerPhone);
       if (!phoneRes.success) {
-        const code = phoneRes.error;
-        setPhoneError(
-          code?.startsWith("Errors.")
-            ? tErrors(code.slice("Errors.".length) as Parameters<typeof tErrors>[0])
-            : (code ?? tErrors("generic"))
-        );
+        setPhoneError(errorText(phoneRes.error));
         return;
       }
       router.refresh();
