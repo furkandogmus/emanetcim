@@ -890,6 +890,7 @@
     "generating": "Generating...",
     "resetLinkGenerated": "Password reset link created:",
     "resetError": "An error occurred.",
+    "resetUserNotFound": "Aucun partenaire trouvé avec ce numéro de téléphone.",
     "resetCancel": "Cancel",
     "resetDone": "Done",
     "resetClose": "Close",

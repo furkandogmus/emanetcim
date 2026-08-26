@@ -49,8 +49,26 @@ interface AdminPartnersClientProps {
   shops: Shop[];
 }
 
+/**
+ * `adminInitiatePartnerPasswordResetAction` ham snake_case kod donuyor
+ * ("invalid_phone", "user_not_found", "unauthorized") -- ceviri anahtari
+ * degil. Cevrilmeden basilirsa yonetici ekranda birebir "invalid_phone"
+ * okurdu.
+ */
+function resetErrorMessage(
+  code: string,
+  t: ReturnType<typeof useTranslations>,
+  tErrors: ReturnType<typeof useTranslations>,
+): string {
+  if (code === "invalid_phone") return tErrors("invalidTrPhone");
+  if (code === "user_not_found") return t("resetUserNotFound");
+  return t("resetError");
+}
+
 export default function AdminPartnersClient({ shops: initialShops }: AdminPartnersClientProps) {
   const t = useTranslations("Admin");
+  const tErrors = useTranslations("Errors");
+  const tCommon = useTranslations("Common");
   const locale = useLocale();
   const [search, setSearch] = useState("");
 
@@ -58,6 +76,7 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
   const [resetResult, setResetResult] = useState<{ ok: true; resetUrl: string } | { ok: false; error: string } | null>(null);
   const [resetPending, startResetTransition] = useTransition();
   const [copied, setCopied] = useState(false);
+  const [copyFailed, setCopyFailed] = useState(false);
 
   /**
    * Kapatma TEK yerde. Daha once dort ayri satir ici kapatici vardi ve ucu
@@ -288,15 +307,29 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
                     <button
                       type="button"
                       onClick={() => {
-                        navigator.clipboard.writeText(resetResult.resetUrl);
-                        setCopied(true);
-                        setTimeout(() => setCopied(false), 2000);
+                        navigator.clipboard
+                          .writeText(resetResult.resetUrl)
+                          .then(() => {
+                            setCopied(true);
+                            setTimeout(() => setCopied(false), 2000);
+                          })
+                          .catch(() => {
+                            // Reddedilirse (izin yok, guvensiz baglam vb.) hicbir
+                            // sey olmuyordu -- yonetici kopyaladigini saniyordu.
+                            setCopyFailed(true);
+                            setTimeout(() => setCopyFailed(false), 3000);
+                          });
                       }}
                       className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg hover:bg-gray-200 text-gray-500 transition-colors"
                     >
                       {copied ? <Check size={18} className="text-green-600" /> : <Copy size={18} />}
                     </button>
                   </div>
+                  {copyFailed ? (
+                    <p className="mt-2 text-xs font-bold text-red-600">
+                      {tCommon("linkCopyFailed")}
+                    </p>
+                  ) : null}
                   <button
                     type="button"
                     onClick={closeResetModal}
@@ -311,7 +344,9 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
                     <AlertCircle size={20} />
                     <span className="text-sm font-bold">{t("resetError")}</span>
                   </div>
-                  <p className="text-sm text-gray-600 mb-6">{resetResult.error}</p>
+                  <p className="text-sm text-gray-600 mb-6">
+                    {resetErrorMessage(resetResult.error, t, tErrors)}
+                  </p>
                   <button
                     type="button"
                     onClick={closeResetModal}

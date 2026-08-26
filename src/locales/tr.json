@@ -892,6 +892,7 @@
     "generating": "Oluşturuluyor...",
     "resetLinkGenerated": "Şifre sıfırlama linki oluşturuldu:",
     "resetError": "Bir hata oluştu.",
+    "resetUserNotFound": "Bu telefon numarasıyla eşleşen bir esnaf bulunamadı.",
     "resetCancel": "İptal",
     "resetDone": "Tamam",
     "resetClose": "Kapat",

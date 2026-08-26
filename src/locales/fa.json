@@ -890,6 +890,7 @@
     "generating": "Generating...",
     "resetLinkGenerated": "Password reset link created:",
     "resetError": "An error occurred.",
+    "resetUserNotFound": "هیچ شریکی با این شماره تلفن یافت نشد.",
     "resetCancel": "Cancel",
     "resetDone": "Done",
     "resetClose": "Close",

@@ -890,6 +890,7 @@
     "generating": "Generating...",
     "resetLinkGenerated": "Password reset link created:",
     "resetError": "An error occurred.",
+    "resetUserNotFound": "この電話番号に一致するパートナーが見つかりません。",
     "resetCancel": "Cancel",
     "resetDone": "Done",
     "resetClose": "Close",

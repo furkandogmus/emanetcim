@@ -892,6 +892,7 @@
     "generating": "Generating...",
     "resetLinkGenerated": "Password reset link created:",
     "resetError": "An error occurred.",
+    "resetUserNotFound": "No partner found with this phone number.",
     "resetCancel": "Cancel",
     "resetDone": "Done",
     "resetClose": "Close",
