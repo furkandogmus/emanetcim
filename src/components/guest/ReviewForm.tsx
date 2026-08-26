@@ -8,6 +8,14 @@ import { useModalBehavior } from '@/lib/hooks/useModalBehavior';
 import StarRating from '@/components/common/StarRating';
 import { toast } from "sonner";
 
+/** `addReviewAction`'in basarisizlikta donebildigi `Errors.*` anahtarlari. */
+const KNOWN_REVIEW_ERROR_KEYS = new Set([
+  "invalidData",
+  "unauthorized",
+  "reviewNotReady",
+  "duplicateReview",
+]);
+
 interface ReviewFormProps {
   bookingId: string;
   guestId: string;
@@ -53,7 +61,12 @@ export default function ReviewForm({
     if (res.success) {
       onSuccess();
     } else {
-      toast.error(res.error || t("Review.error"));
+      // `res.error` bir "Errors.x" anahtaridir, ham metin degil -- cevrilmeden
+      // basilirsa toast'ta birebir "Errors.duplicateReview" yazardi. `res.error`
+      // hep dolu geldigi icin `|| t("Review.error")` hicbir zaman calismiyordu.
+      const bare = res.error?.startsWith("Errors.") ? res.error.slice(7) : "";
+      const key = KNOWN_REVIEW_ERROR_KEYS.has(bare) ? bare : "generic";
+      toast.error(t(`Errors.${key}` as never));
     }
   };
 
