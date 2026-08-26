@@ -139,22 +139,34 @@ export default function BookingModifyModal({
     }
 
     setSaving(true);
-    const res = await modifyBookingAction({
-      bookingId: booking.id,
-      checkInTime: checkInDate,
-      checkOutTime: checkOutDate,
-      bagCountS: bagS,
-      bagCountM: bagM,
-      bagCountXl: bagXl,
-    });
-    setSaving(false);
-
-    if (res.success) {
-      onSuccess();
-      onClose();
-      return;
+    /*
+      `modifyBookingAction` hicbir try/catch icermiyor -- getPricingRules ya
+      da bookingService.modifyBooking beklenmedik sekilde firlarsa dogrudan
+      buraya ulasir. try/catch olmadan setSaving hic sifirlanmiyordu, "Kaydet"
+      butonu SONSUZA dek kilitli kaliyordu (cancelBookingAction'da bulunup
+      duzeltilen ayni sinif).
+    */
+    try {
+      const res = await modifyBookingAction({
+        bookingId: booking.id,
+        checkInTime: checkInDate,
+        checkOutTime: checkOutDate,
+        bagCountS: bagS,
+        bagCountM: bagM,
+        bagCountXl: bagXl,
+      });
+      if (res.success) {
+        onSuccess();
+        onClose();
+        return;
+      }
+      setErr(errorText(res.error, t("checkoutUnexpectedError")));
+    } catch (e) {
+      const raw = e instanceof Error ? e.message : undefined;
+      setErr(errorText(raw, t("checkoutUnexpectedError")));
+    } finally {
+      setSaving(false);
     }
-    setErr(errorText(res.error, t("checkoutUnexpectedError")));
   };
 
   return (
