@@ -9,6 +9,7 @@ import {
 } from "@/actions/admin";
 import { toast } from "sonner";
 import { useActionErrorText } from "@/lib/use-action-error";
+import { actionErrorKey } from "@/lib/action-error";
 
 type ShopOption = { id: string; name: string; isActive: boolean };
 
@@ -28,6 +29,7 @@ type Props = {
 
 export default function AdminSealInventoryClient({ sealCounts, shops, assignedBatches }: Props) {
   const t = useTranslations("Admin");
+  const tErrors = useTranslations("Errors");
   const errorText = useActionErrorText();
   const [fromCreate, setFromCreate] = useState("");
   const [toCreate, setToCreate] = useState("");
@@ -57,6 +59,12 @@ export default function AdminSealInventoryClient({ sealCounts, shops, assignedBa
       } else {
         toast.error(errorText(res.error));
       }
+    } catch (e) {
+      // `bulkCreateSealsAction` icinde `assertAdmin()` kendi try/catch'inin
+      // DISINDA cagriliyor -- oturum/yetki hatasi burada hala FIRLAR, donmez.
+      // catch olmadan setCreating(false) calisiyordu ama hicbir toast
+      // gorulmuyordu; yonetici islemin neden takildigini anlayamiyordu.
+      toast.error(tErrors(actionErrorKey(e) as never));
     } finally {
       setCreating(false);
     }
@@ -83,6 +91,10 @@ export default function AdminSealInventoryClient({ sealCounts, shops, assignedBa
       } else {
         toast.error(errorText(res.error));
       }
+    } catch (e) {
+      // Ayni sinif: assignSealsToShopAction icinde assertAdmin() de kendi
+      // try/catch'inin disinda -- oturum/yetki hatasi burada firlar.
+      toast.error(tErrors(actionErrorKey(e) as never));
     } finally {
       setAssigning(false);
     }
