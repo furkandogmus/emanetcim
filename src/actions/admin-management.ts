@@ -16,7 +16,10 @@ import {
   isPrismaForeignKeyViolation,
   isPrismaUniqueViolation,
 } from "@/lib/prisma-errors";
-import { DELETE_USER_BLOCKED_CODE } from "@/lib/admin/constants";
+import {
+  DELETE_USER_BLOCKED_CODE,
+  DELETE_USER_HAS_ACTIVE_BOOKING_CODE,
+} from "@/lib/admin/constants";
 import { assertAdmin } from "@/lib/action-auth";
 
 /**
@@ -361,7 +364,10 @@ export type DeleteUserActionResult =
   | { ok: true }
   | {
       ok: false;
-      error: typeof DELETE_USER_BLOCKED_CODE | "unauthorized" | "HAS_ACTIVE_BOOKING";
+      error:
+        | typeof DELETE_USER_BLOCKED_CODE
+        | "unauthorized"
+        | typeof DELETE_USER_HAS_ACTIVE_BOOKING_CODE;
     };
 
 /**
@@ -424,7 +430,7 @@ export async function deleteUserAction(
 
     if (activeBooking) {
       logger.warn({ userId, bookingId: activeBooking.id }, "admin_delete_user_blocked_active_booking");
-      return { ok: false, error: "HAS_ACTIVE_BOOKING" };
+      return { ok: false, error: DELETE_USER_HAS_ACTIVE_BOOKING_CODE };
     }
   }
 

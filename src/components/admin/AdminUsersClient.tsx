@@ -25,7 +25,10 @@ import {
   blockIpAction,
   submitAdminRoleChangeAction,
 } from "@/actions/admin-management";
-import { DELETE_USER_BLOCKED_CODE } from "@/lib/admin/constants";
+import {
+  DELETE_USER_BLOCKED_CODE,
+  DELETE_USER_HAS_ACTIVE_BOOKING_CODE,
+} from "@/lib/admin/constants";
 import { toast } from "sonner";
 import { Role } from "@prisma/client";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
@@ -128,7 +131,12 @@ export default function AdminUsersClient({
         try {
           const res = await deleteUserAction(id);
           if (!res.ok) {
-            if (res.error === DELETE_USER_BLOCKED_CODE) {
+            // `HAS_ACTIVE_BOOKING` da iliskili-kayit engeliydi ama "unauthorized"
+            // dalina dusuyordu -- admin, tam yetkisi varken "yetkiniz yok" okuyordu.
+            if (
+              res.error === DELETE_USER_BLOCKED_CODE ||
+              res.error === DELETE_USER_HAS_ACTIVE_BOOKING_CODE
+            ) {
               toast.error(t("deleteUserBlockedByRelations"));
             } else {
               toast.error(tErrors("unauthorized"));
