@@ -158,16 +158,28 @@ export default function CheckInDialog({
     const hasSealInput = sealAssignments.length > 0 || faultySeals.length > 0;
 
     setIsProcessing(true);
-    const result = await checkInAction(
-      preview.id,
-      hasSealInput ? { sealAssignments, faultySealNumbers: faultySeals } : undefined,
-    );
-    setIsProcessing(false);
-
-    if (result.success) {
-      onSuccess();
-    } else {
-      toast.error(errorText(result.error, t("checkInFailed")));
+    try {
+      /*
+        `checkInAction` icinde assertPartner() try/catch disinda -- oturum
+        teslim sirasinda sona ererse hala FIRLAR, donmez. finally olmadan
+        setIsProcessing hic sifirlanmiyordu: buton "isleniyor" durumunda
+        SONSUZA dek kaliyordu, esnaf tezgahta musteriyi beklerken hicbir
+        geri bildirim alamiyordu.
+      */
+      const result = await checkInAction(
+        preview.id,
+        hasSealInput ? { sealAssignments, faultySealNumbers: faultySeals } : undefined,
+      );
+      if (result.success) {
+        onSuccess();
+      } else {
+        toast.error(errorText(result.error, t("checkInFailed")));
+      }
+    } catch (e) {
+      const raw = e instanceof Error ? e.message : undefined;
+      toast.error(errorText(raw, t("checkInFailed")));
+    } finally {
+      setIsProcessing(false);
     }
   };
 

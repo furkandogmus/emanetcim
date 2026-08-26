@@ -224,26 +224,41 @@ export default function PartnerClient({
 
   const handleApprove = async (id: string) => {
     setIsProcessing(true);
-    const res = await approveBookingAction(id);
-    setIsProcessing(false);
-    if (res.success) {
-      setSuccessBanner(t("approvedSuccess"));
-      setTimeout(() => setSuccessBanner(null), 3000);
-      router.refresh();
-    } else {
-      showError(res.error);
+    /*
+      Ne action ne de bu handler try/catch icermiyordu -- beklenmeyen bir
+      hata (DB baglanti sorunu vb.) firlarsa setIsProcessing hic sifirlanmiyor,
+      buton SONSUZA dek "isleniyor" durumunda kaliyordu.
+    */
+    try {
+      const res = await approveBookingAction(id);
+      if (res.success) {
+        setSuccessBanner(t("approvedSuccess"));
+        setTimeout(() => setSuccessBanner(null), 3000);
+        router.refresh();
+      } else {
+        showError(res.error);
+      }
+    } catch (e) {
+      showError(e instanceof Error ? e.message : undefined);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const handleReject = async (id: string) => {
     askConfirm(t("confirmReject"), async () => {
       setIsProcessing(true);
-      const res = await rejectBookingAction(id);
-      setIsProcessing(false);
-      if (res.success) {
-        router.refresh();
-      } else {
-        showError(res.error);
+      try {
+        const res = await rejectBookingAction(id);
+        if (res.success) {
+          router.refresh();
+        } else {
+          showError(res.error);
+        }
+      } catch (e) {
+        showError(e instanceof Error ? e.message : undefined);
+      } finally {
+        setIsProcessing(false);
       }
     });
   };
@@ -263,6 +278,12 @@ export default function PartnerClient({
           return true;
         }
         showError(result.error || t("checkoutFailed"));
+        return false;
+      } catch (e) {
+        // checkOutAction icinde assertPartner() try/catch disinda -- teslim
+        // sirasinda oturum sona ererse hala firlar. finally checkingOutId'yi
+        // zaten sifirliyordu ama hicbir hata gorulmuyordu.
+        showError(e instanceof Error ? e.message : undefined);
         return false;
       } finally {
         setCheckingOutId(null);
