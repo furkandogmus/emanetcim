@@ -91,41 +91,59 @@ export default function PartnerSealsClient({
     setTimeout(() => setFeedback(null), 4000);
   };
 
+  /*
+    Uc handler'in ucunde de try/catch yoktu -- requestSealsAction ve
+    confirmSealDeliveryAction kendi icinde de try/catch icermiyor, yani
+    beklenmedik bir hata dogrudan buraya kadar firlar. catch olmadan esnaf
+    hicbir geri bildirim almadan kaliyordu (fiziksel muhur stogu islemi).
+  */
   const handleRequestSeals = () => {
     const qty = parseInt(requestQty, 10);
     if (!qty || qty < 1) return;
     startTransition(async () => {
-      const res = await requestSealsAction(shopId, qty);
-      if (res.success) {
-        showFeedback(t("sealsRequestCreated", { count: qty }), true);
-        setShowRequestForm(false);
-        router.refresh();
-      } else {
-        showFeedback(errorText(res.error, t("sealsGenericError")), false);
+      try {
+        const res = await requestSealsAction(shopId, qty);
+        if (res.success) {
+          showFeedback(t("sealsRequestCreated", { count: qty }), true);
+          setShowRequestForm(false);
+          router.refresh();
+        } else {
+          showFeedback(errorText(res.error, t("sealsGenericError")), false);
+        }
+      } catch {
+        showFeedback(t("sealsGenericError"), false);
       }
     });
   };
 
   const handleConfirmDelivery = (requestId: string) => {
     startTransition(async () => {
-      const res = await confirmSealDeliveryAction(requestId);
-      if (res.success) {
-        showFeedback(t("sealsDeliveryConfirmed"), true);
-        router.refresh();
-      } else {
-        showFeedback(errorText(res.error, t("sealsGenericError")), false);
+      try {
+        const res = await confirmSealDeliveryAction(requestId);
+        if (res.success) {
+          showFeedback(t("sealsDeliveryConfirmed"), true);
+          router.refresh();
+        } else {
+          showFeedback(errorText(res.error, t("sealsGenericError")), false);
+        }
+      } catch {
+        showFeedback(t("sealsGenericError"), false);
       }
     });
   };
 
   const handleRecycle = () => {
     startTransition(async () => {
-      const res = await recycleReturnedSealsAction(shopId);
-      if (res.success) {
-        showFeedback(t("sealsRecycled", { count: res.recycled }), true);
-        router.refresh();
-      } else {
-        showFeedback(errorText(res.error, t("sealsGenericError")), false);
+      try {
+        const res = await recycleReturnedSealsAction(shopId);
+        if (res.success) {
+          showFeedback(t("sealsRecycled", { count: res.recycled }), true);
+          router.refresh();
+        } else {
+          showFeedback(errorText(res.error, t("sealsGenericError")), false);
+        }
+      } catch {
+        showFeedback(t("sealsGenericError"), false);
       }
     });
   };
