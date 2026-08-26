@@ -49,19 +49,29 @@ export default function SealShipButton({ requestId, requestedQuantity }: { reque
     }
 
     startTransition(async () => {
-      const result = await shipSealRequestAction({
-        requestId,
-        trackingNumber: trackingNumber.trim(),
-        quantity: qty,
-        adminNote: adminNote.trim() || undefined,
-      });
-      if (result.success) {
-        toast.success("Kargo bilgisi kaydedildi, partner bildirildi.");
-        setOpen(false);
-        router.refresh();
-      } else {
-        // `result.error` snake_case bir KOD ("tracking_number_required"); ham basiliyordu.
-        toast.error(errorText(result.error, tErrors("generic")));
+      /*
+        `shipSealRequestAction` icindeki sealService.shipRequest cagrisi
+        try/catch icinde degil -- beklenmedik bir hata dogrudan buraya kadar
+        firlar. catch olmadan hicbir toast gorulmuyordu; yonetici kargo
+        bilgisinin gercekten kaydedilip kaydedilmedigini anlayamiyordu.
+      */
+      try {
+        const result = await shipSealRequestAction({
+          requestId,
+          trackingNumber: trackingNumber.trim(),
+          quantity: qty,
+          adminNote: adminNote.trim() || undefined,
+        });
+        if (result.success) {
+          toast.success("Kargo bilgisi kaydedildi, partner bildirildi.");
+          setOpen(false);
+          router.refresh();
+        } else {
+          // `result.error` snake_case bir KOD ("tracking_number_required"); ham basiliyordu.
+          toast.error(errorText(result.error, tErrors("generic")));
+        }
+      } catch {
+        toast.error(tErrors("generic"));
       }
     });
   }
