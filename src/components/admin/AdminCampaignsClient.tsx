@@ -121,10 +121,21 @@ export default function AdminCampaignsClient({
   const confirmDelete = () => {
     if (!pendingDeleteId) return;
     startTransition(async () => {
-      await deleteCampaignAction(pendingDeleteId);
-      toast.success(t("campaignDeleted"));
-      setPendingDeleteId(null);
-      router.refresh();
+      /*
+        `deleteCampaignAction` basarisizlikta DONMEZ, FIRLATIR (assertAdmin ya
+        da Prisma kisiti). try/catch olmadan bu hic yakalanmiyordu: ne hata
+        toast'u ne basari toast'u goruluyordu, onay kutusu acik kaliyordu ve
+        yonetici islemin gercekten olup olmadigini bilemiyordu.
+      */
+      try {
+        await deleteCampaignAction(pendingDeleteId);
+        toast.success(t("campaignDeleted"));
+        router.refresh();
+      } catch {
+        toast.error(t("campaignDeleteFailed"));
+      } finally {
+        setPendingDeleteId(null);
+      }
     });
   };
 
@@ -138,9 +149,14 @@ export default function AdminCampaignsClient({
 
   const handleToggle = (c: Camp) => {
     startTransition(async () => {
-      await toggleCampaignActiveAction(c.id, !c.isActive);
-      toast.success(c.isActive ? t("campaignPaused") : t("campaignResumed"));
-      router.refresh();
+      // Ayni sinif: toggleCampaignActiveAction de basarisizlikta donmez, firlatir.
+      try {
+        await toggleCampaignActiveAction(c.id, !c.isActive);
+        toast.success(c.isActive ? t("campaignPaused") : t("campaignResumed"));
+        router.refresh();
+      } catch {
+        toast.error(t("campaignToggleFailed"));
+      }
     });
   };
 

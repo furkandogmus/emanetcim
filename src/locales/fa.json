@@ -933,6 +933,8 @@
     "ipBlockFailed": "مسدودسازی IP انجام نشد. قالب را بررسی کنید.",
     "resendFailed": "ارسال ایمیل تأیید انجام نشد.",
     "campaignUpdateFailed": "به‌روزرسانی کمپین انجام نشد.",
+    "campaignDeleteFailed": "حذف کمپین انجام نشد.",
+    "campaignToggleFailed": "تغییر وضعیت کمپین انجام نشد.",
     "campaignCreateFailed": "ایجاد کمپین انجام نشد.",
     "platformSettingsRequireSeals": "پلمب هنگام تحویل الزامی است",
     "platformSettingsRequireSealsHint": "در حالت فعال، شریک بدون وارد کردن شمارهٔ پلمب برای هر چمدان نمی‌تواند تحویل بگیرد. پیش از توزیع پلمب‌ها فعال نکنید — تحویل کاملاً مسدود می‌شود.",

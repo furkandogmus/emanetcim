@@ -933,6 +933,8 @@
     "ipBlockFailed": "IP konnte nicht gesperrt werden. Format prüfen.",
     "resendFailed": "Bestätigungs-E-Mail konnte nicht gesendet werden.",
     "campaignUpdateFailed": "Kampagne konnte nicht aktualisiert werden.",
+    "campaignDeleteFailed": "Kampagne konnte nicht gelöscht werden.",
+    "campaignToggleFailed": "Kampagnenstatus konnte nicht geändert werden.",
     "campaignCreateFailed": "Kampagne konnte nicht erstellt werden.",
     "platformSettingsRequireSeals": "Siegel beim Check-in erforderlich",
     "platformSettingsRequireSealsHint": "Wenn aktiv, können Partner ohne Siegelnummer für jedes Gepäckstück nicht einchecken. NICHT aktivieren, bevor die Siegel verteilt sind — Check-in wird vollständig blockiert.",

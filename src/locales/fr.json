@@ -933,6 +933,8 @@
     "ipBlockFailed": "Impossible de bloquer l'IP. Vérifiez le format.",
     "resendFailed": "Impossible d'envoyer l'e-mail de vérification.",
     "campaignUpdateFailed": "Impossible de mettre à jour la campagne.",
+    "campaignDeleteFailed": "Impossible de supprimer la campagne.",
+    "campaignToggleFailed": "Impossible de modifier le statut de la campagne.",
     "campaignCreateFailed": "Impossible de créer la campagne.",
     "platformSettingsRequireSeals": "Scellé obligatoire à l'enregistrement",
     "platformSettingsRequireSealsHint": "Activé, les partenaires ne peuvent pas enregistrer sans saisir un numéro de scellé pour chaque bagage. N'activez PAS avant la distribution des scellés — l'enregistrement serait totalement bloqué.",

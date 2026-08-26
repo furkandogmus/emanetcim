@@ -935,6 +935,8 @@
     "ipBlockFailed": "IP engellenemedi. Biçimi kontrol edin.",
     "resendFailed": "Doğrulama e-postası gönderilemedi.",
     "campaignUpdateFailed": "Kampanya güncellenemedi.",
+    "campaignDeleteFailed": "Kampanya silinemedi.",
+    "campaignToggleFailed": "Kampanya durumu değiştirilemedi.",
     "campaignCreateFailed": "Kampanya oluşturulamadı.",
     "platformSettingsRequireSeals": "Check-in'de mühür zorunlu",
     "platformSettingsRequireSealsHint": "Açıkken esnaf, her valiz için mühür numarası girmeden check-in yapamaz. Mühür envanteri dağıtılmadan AÇMAYIN — check-in tamamen bloke olur.",
