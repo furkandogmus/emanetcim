@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Link } from "@/i18n/routing";
 import { useLocale, useTranslations } from "next-intl";
@@ -86,10 +86,25 @@ export default function PartnerSealsClient({
   const totalUsable = assignedCount + returnedCount;
   const isLow = assignedCount < 10;
 
+  /**
+   * `showFeedback` alti ayri yerden (uc islemin basari/hata/beklenmedik-hata
+   * dallari) cagriliyor, hicbiri onceki zamanlayiciyi iptal etmiyordu. Esnaf
+   * ust uste iki islem yaparsa (ornek: talep olusturup hemen ardindan geri
+   * donusum tiklarsa) ILK islemin 4sn'lik zamanlayicisi SONRAKI (henuz
+   * taze) geri bildirimi erken silebilirdi -- ayni sinif PartnerClient.tsx'te
+   * bulunup duzeltilmisti.
+   */
+  const feedbackTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const showFeedback = (msg: string, ok: boolean) => {
+    if (feedbackTimeout.current) clearTimeout(feedbackTimeout.current);
     setFeedback({ msg, ok });
-    setTimeout(() => setFeedback(null), 4000);
+    feedbackTimeout.current = setTimeout(() => setFeedback(null), 4000);
   };
+  useEffect(() => {
+    return () => {
+      if (feedbackTimeout.current) clearTimeout(feedbackTimeout.current);
+    };
+  }, []);
 
   /*
     Uc handler'in ucunde de try/catch yoktu -- requestSealsAction ve
