@@ -67,11 +67,18 @@ export default function ManageLookupForm() {
             <span className="id-eyebrow text-gray-400">
               {t("bookingId")}
             </span>
+            {/*
+              `aria-label="ABC12345"` (ornek placeholder metni) buradaydi ve
+              ARIA erisilebilir-ad hesabinda sarmalayan <label>in ONUNE
+              geciyordu -- ekran okuyucu kullanicisi alanin ne oldugunu
+              ("Rezervasyon Numarasi") degil, ornek deger "ABC12345"i
+              isim olarak duyuyordu. Kaldirildi; sarmalayan <label>
+              (ustteki e-posta alaniyla ayni desen) zaten dogru ismi verir.
+            */}
             <input
               type="text"
               value={bookingId}
               onChange={(e) => setBookingId(e.target.value)}
-              aria-label="ABC12345"
               placeholder="ABC12345"
               className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-sm font-mono font-bold uppercase"
               required
