@@ -13,6 +13,7 @@ interface Props {
     send: string;
     success: string;
     error: string;
+    tooManyRequests: string;
   };
   responseNote: string;
 }
@@ -40,7 +41,12 @@ export default function ContactFormClient({ labels, responseNote }: Props) {
       {state.status === "error" && (
         <div className="mb-6 flex items-center gap-3 p-4 bg-red-50 rounded-2xl text-red-600 text-sm font-bold">
           <AlertCircle size={18} className="shrink-0" />
-          {labels.error}
+          {/*
+            `state.error` "too_many_requests" oldugunda da hep ayni genel
+            mesaj gosteriliyordu -- misafir arka arkaya denedigi icin hizlandirma
+            sinirina takildigini degil, formun "bozuk" oldugunu dusunuyordu.
+          */}
+          {state.error === "too_many_requests" ? labels.tooManyRequests : labels.error}
         </div>
       )}
 

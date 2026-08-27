@@ -1200,6 +1200,7 @@
     "opsBadge": "HEAD OFFICE",
     "success": "Your message has been received. We'll get back to you soon.",
     "error": "Failed to send message. Please try again.",
+    "tooManyRequests": "You've tried too many times. Please wait a moment and try again.",
     "responseNote": "We usually reply within 2 hours."
   },
   "KVKK": {

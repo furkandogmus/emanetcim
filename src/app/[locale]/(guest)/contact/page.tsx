@@ -105,6 +105,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
               send: t("send"),
               success: t("success"),
               error: t("error"),
+              tooManyRequests: t("tooManyRequests"),
             }}
             responseNote={t("responseNote")}
           />

@@ -1160,6 +1160,7 @@
     "opsBadge": "SIÈGE SOCIAL",
     "success": "Votre message a été reçu. Nous vous répondrons bientôt.",
     "error": "Échec de l'envoi du message. Veuillez réessayer.",
+    "tooManyRequests": "Vous avez essayé trop de fois. Veuillez patienter un instant puis réessayer.",
     "responseNote": "Nous répondons généralement sous 2 heures."
   },
   "KVKK": {
