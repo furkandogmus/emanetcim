@@ -144,6 +144,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       TextFormField(
                         controller: _nameController,
                         style: GoogleFonts.outfit(fontSize: isTablet ? 18 : 16),
+                        autofillHints: const [AutofillHints.name],
                         decoration: InputDecoration(
                           labelText: 'auth.name_label'.tr(),
                           prefixIcon: const Icon(Icons.person_outline_rounded),
@@ -170,6 +171,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                         ),
                         keyboardType: TextInputType.emailAddress,
+                        autofillHints: const [AutofillHints.email, AutofillHints.telephoneNumber],
                         validator: (v) {
                           final input = v ?? '';
                           if (input.isEmpty) return 'auth.invalid_identity'.tr();
@@ -183,6 +185,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         controller: _passwordController,
                         obscureText: _obscure,
                         keyboardType: TextInputType.visiblePassword,
+                        autofillHints: const [AutofillHints.newPassword],
                         style: GoogleFonts.outfit(fontSize: isTablet ? 18 : 16),
                         decoration: InputDecoration(
                           labelText: 'auth.password'.tr(),

@@ -297,6 +297,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       TextFormField(
                                         controller: _identity,
                                         keyboardType: TextInputType.emailAddress,
+                                        autofillHints: const [AutofillHints.username, AutofillHints.email],
                                         style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: isTablet ? 18 : 16),
                                         decoration: InputDecoration(
                                           hintText: 'auth.email_or_phone'.tr(),
@@ -311,6 +312,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                         controller: _password,
                                         obscureText: _obscure,
                                         keyboardType: TextInputType.visiblePassword,
+                                        autofillHints: const [AutofillHints.password],
                                         style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: isTablet ? 18 : 16),
                                         decoration: InputDecoration(
                                           hintText: 'auth.password'.tr(),
