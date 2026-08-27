@@ -221,6 +221,16 @@ export default function LocationPicker({ value, onChange }: Props) {
   const [geocoding, setGeocoding] = useState(false);
   const [locError, setLocError] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(!!value.latitude);
+  /**
+   * Yaris kosulu koruyucusu: harita uzerine ust uste hizlica tiklamak (ya da
+   * tiklayip hemen isaretciyi surumek) ayni anda birden fazla `reverseGeocode`
+   * cagrisi baslatabilir. Ag gecikmesi degiskense ONCEKI (artik terk edilmis)
+   * tiklamanin sonucu SONRAKINDEN GEC donup adres alanlarini yazabilir --
+   * isaretci son tiklanan noktada gorunurken adres metni ONCEKI noktaya ait
+   * kalirdi. `SearchClient.tsx`/`SlotAvailabilityGrid.tsx`'teki ayni sinif
+   * duzeltmeyle tutarli.
+   */
+  const geocodeSeq = useRef(0);
 
 
   /* ── Marker yardımcısı ── */
@@ -254,9 +264,11 @@ export default function LocationPicker({ value, onChange }: Props) {
 
       marker.on("dragend", async () => {
         const pos = marker.getLngLat();
+        const mySeq = ++geocodeSeq.current;
         setGeocoding(true);
         try {
           const geo = await reverseGeocode(pos.lat, pos.lng);
+          if (mySeq !== geocodeSeq.current) return;
           const initialParts = geo.parts;
 
           onChangeRef.current({
@@ -269,7 +281,7 @@ export default function LocationPicker({ value, onChange }: Props) {
           });
           setConfirmed(true);
         } finally {
-          setGeocoding(false);
+          if (mySeq === geocodeSeq.current) setGeocoding(false);
         }
       });
 
@@ -316,9 +328,11 @@ export default function LocationPicker({ value, onChange }: Props) {
       map.on("click", async (e) => {
         const { lng, lat } = e.lngLat;
         placeMarker(map, maplibre, lat, lng);
+        const mySeq = ++geocodeSeq.current;
         setGeocoding(true);
         try {
           const geo = await reverseGeocode(lat, lng);
+          if (mySeq !== geocodeSeq.current) return;
           const initialParts = geo.parts;
 
           onChangeRef.current({
@@ -331,7 +345,7 @@ export default function LocationPicker({ value, onChange }: Props) {
           });
           setConfirmed(true);
         } finally {
-          setGeocoding(false);
+          if (mySeq === geocodeSeq.current) setGeocoding(false);
         }
       });
 
@@ -377,9 +391,11 @@ export default function LocationPicker({ value, onChange }: Props) {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude: lat, longitude: lng } = pos.coords;
+        const mySeq = ++geocodeSeq.current;
         setGeocoding(true);
         try {
           const geo = await reverseGeocode(lat, lng);
+          if (mySeq !== geocodeSeq.current) return;
           const initialParts = geo.parts;
 
           onChangeRef.current({
@@ -392,10 +408,11 @@ export default function LocationPicker({ value, onChange }: Props) {
           });
           setConfirmed(true);
         } catch {
+          if (mySeq !== geocodeSeq.current) return;
           onChangeRef.current({ address: "", city: "", district: "", latitude: lat, longitude: lng });
           setConfirmed(true);
         } finally {
-          setGeocoding(false);
+          if (mySeq === geocodeSeq.current) setGeocoding(false);
           setLocating(false);
         }
       },
