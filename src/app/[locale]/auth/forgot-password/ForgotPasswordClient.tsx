@@ -12,13 +12,27 @@ export default function ForgotPasswordClient() {
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+  const [error, setError] = useState(false);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
+    setError(false);
     try {
+      /*
+        requestPasswordResetAction hicbir try/catch icermiyor -- DB/e-posta
+        gonderimi (Resend) beklenmedik sekilde firlarsa buraya kadar ulasir.
+        catch olmadan setDone hic cagrilmiyor ama hicbir hata da
+        gorulmuyordu: misafir formda kalip busy'nin sifirlanmasindan baska
+        hicbir geri bildirim almiyordu, isteginin gidip gitmedigini
+        anlayamiyordu. Bu, "hesap var mi" bilgisini SIZDIRMAZ (ok:true
+        yerine gercek bir sistem hatasidir), o yuzden generic bir hata
+        gostermek guvenlik acisindan sorun degil.
+      */
       await requestPasswordResetAction(email);
       setDone(true);
+    } catch {
+      setError(true);
     } finally {
       setBusy(false);
     }
@@ -69,6 +83,12 @@ export default function ForgotPasswordClient() {
                 className="h-12 w-full rounded-xl border-2 border-gray-100 pl-10 pr-4 text-sm font-medium text-gray-800 placeholder-gray-300 transition focus:border-orange-300 focus:outline-none disabled:opacity-50"
               />
             </div>
+            {error && (
+              /* `role="alert"`: hatasız bir formda ekran okuyucu HİÇBİR ŞEY duymuyordu. */
+              <p className="text-center text-xs font-semibold text-red-600" role="alert">
+                {t("authErrorGeneric")}
+              </p>
+            )}
             <button
               type="submit"
               disabled={busy}
