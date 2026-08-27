@@ -10,6 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http_parser/http_parser.dart';
 
 import '../../core/auth/auth_controller.dart';
+import '../../core/utils/error_handler.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/services/share_service.dart';
 import '../../shared/models/user.dart';
@@ -95,7 +96,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${'common.error'.tr()}: $e')),
+          SnackBar(content: Text(getErrorMessage(e, fallback: 'common.error'.tr()))),
         );
       }
     } finally {
@@ -909,7 +910,7 @@ Future<void> _handleBiometricToggle(bool val) async {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('${'common.error'.tr()}: $e'),
+                                content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
                               ),
                             );
                           }
