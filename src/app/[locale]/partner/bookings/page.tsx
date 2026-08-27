@@ -226,33 +226,50 @@ export default async function PartnerBookingsPage({
             className="flex items-center justify-center gap-4 pt-4"
             aria-label={t("pagination")}
           >
-            <Link
-              href={qs(page - 1)}
-              className={`inline-flex items-center gap-1 rounded-xl px-4 py-2 text-sm font-bold transition-colors ${
-                page <= 1
-                  ? "pointer-events-none text-gray-300"
-                  : "text-gray-600 hover:bg-gray-200"
-              }`}
-              aria-disabled={page <= 1}
-            >
-              <ChevronLeft size={16} />
-              {t("prevPage")}
-            </Link>
+            {/*
+              `pointer-events-none` + `aria-disabled` yalnizca FAREYI durdurur.
+              Link hala gercek bir `href` tasidigi icin klavye kullanicisi
+              Tab'la gelip Enter'a basarak sinirin OTESINE gecebiliyordu --
+              son sayfadayken "Sonraki" bos bir sayfaya goturuyordu. Sinirda
+              gercek bir baglanti yerine erisilemez bir `span` render edilir.
+            */}
+            {page <= 1 ? (
+              <span
+                aria-disabled="true"
+                className="inline-flex items-center gap-1 rounded-xl px-4 py-2 text-sm font-bold text-gray-300"
+              >
+                <ChevronLeft size={16} />
+                {t("prevPage")}
+              </span>
+            ) : (
+              <Link
+                href={qs(page - 1)}
+                className="inline-flex items-center gap-1 rounded-xl px-4 py-2 text-sm font-bold text-gray-600 transition-colors hover:bg-gray-200"
+              >
+                <ChevronLeft size={16} />
+                {t("prevPage")}
+              </Link>
+            )}
             <span className="text-xs font-bold text-gray-400">
               {page} / {totalPages}
             </span>
-            <Link
-              href={qs(page + 1)}
-              className={`inline-flex items-center gap-1 rounded-xl px-4 py-2 text-sm font-bold transition-colors ${
-              page >= totalPages
-                  ? "pointer-events-none text-gray-300"
-                  : "text-gray-600 hover:bg-gray-200"
-              }`}
-              aria-disabled={page >= totalPages}
-            >
-              {t("nextPage")}
-              <ChevronRight size={16} />
-            </Link>
+            {page >= totalPages ? (
+              <span
+                aria-disabled="true"
+                className="inline-flex items-center gap-1 rounded-xl px-4 py-2 text-sm font-bold text-gray-300"
+              >
+                {t("nextPage")}
+                <ChevronRight size={16} />
+              </span>
+            ) : (
+              <Link
+                href={qs(page + 1)}
+                className="inline-flex items-center gap-1 rounded-xl px-4 py-2 text-sm font-bold text-gray-600 transition-colors hover:bg-gray-200"
+              >
+                {t("nextPage")}
+                <ChevronRight size={16} />
+              </Link>
+            )}
           </nav>
         )}
       </main>
