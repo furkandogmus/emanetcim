@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import clsx from "clsx";
 import { useLocale, useTranslations } from "next-intl";
 import { AlertCircle, RotateCw } from "lucide-react";
@@ -93,8 +93,18 @@ export default function SlotAvailabilityGrid({
   const [failed, setFailed] = useState(false);
   const [selectedStart, setSelectedStart] = useState<string | null>(initialFrom ?? null);
   const [selectedEnd, setSelectedEnd] = useState<string | null>(initialTo ?? null);
+  /**
+   * Yaris kosulu koruyucusu: tarih hizlica degistirilirse (ornek: secici
+   * uzerinde gun ok tuslariyla ileri geri gezinme) iki ayri istek es zamanli
+   * ucabilir. Ag gecikmesi degiskense ONCEKI (artik baska bir gune ait) istek
+   * SONRAKINDEN GEC donebilir ve o gunun slotlarini ekrana yazardi -- misafir
+   * 15 Eylul'u secmisken 14 Eylul'un musaitligini gorup yanlis saati
+   * secebilirdi. `SearchClient.tsx`'teki ayni sinif duzeltmeyle tutarli.
+   */
+  const fetchSeq = useRef(0);
 
   const fetchSlots = useCallback(async () => {
+    const mySeq = ++fetchSeq.current;
     setLoading(true);
     setFailed(false);
     try {
@@ -106,6 +116,7 @@ export default function SlotAvailabilityGrid({
       );
       if (!res.ok) throw new Error(`slots request failed: ${res.status}`);
       const data = await res.json();
+      if (mySeq !== fetchSeq.current) return;
       setSlots(data.slots ?? []);
     } catch {
       /*
@@ -113,9 +124,9 @@ export default function SlotAvailabilityGrid({
         kullanıcı 6 dilin hepsinde İngilizce "Failed to fetch slots" görüyordu ve
         tekrar deneme yolu yoktu — ağ tökezlerse adım çıkmaza giriyordu.
       */
-      setFailed(true);
+      if (mySeq === fetchSeq.current) setFailed(true);
     } finally {
-      setLoading(false);
+      if (mySeq === fetchSeq.current) setLoading(false);
     }
   }, [shopId, date, timeZone]);
 
