@@ -161,6 +161,8 @@
     "dailyPrice": "バッグあたりの 1 日あたりの価格 (₺)",
     "priceRangeHint": "許容範囲: {min}₺ – {max}₺ (市場価格の 1/2 – 2 倍)",
     "priceOutOfRange": "価格は {min}₺ から {max}₺ までである必要があります。",
+    "capacityRangeHint": "許容範囲: {min} – {max} 個",
+    "capacityOutOfRange": "容量は {min} から {max} の間である必要があります。",
     "openingTime": "オープニング",
     "closingTime": "終わりに",
     "settingsSaved": "設定が保存されました。",

@@ -161,6 +161,8 @@
     "dailyPrice": "Tagespreis pro Beutel (₺)",
     "priceRangeHint": "Zulässiger Bereich: {min}₺ – {max}₺ (½ – 2× Marktpreis)",
     "priceOutOfRange": "Der Preis muss zwischen {min}₺ und {max}₺ liegen.",
+    "capacityRangeHint": "Zulässiger Bereich: {min} – {max} Taschen",
+    "capacityOutOfRange": "Die Kapazität muss zwischen {min} und {max} liegen.",
     "openingTime": "Öffnung",
     "closingTime": "Schließen",
     "settingsSaved": "Einstellungen gespeichert.",

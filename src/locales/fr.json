@@ -161,6 +161,8 @@
     "dailyPrice": "Prix ​​journalier par sac (₺)",
     "priceRangeHint": "Plage autorisée : {min}₺ – {max}₺ (½ – 2× prix du marché)",
     "priceOutOfRange": "Le prix doit être compris entre {min}₺ et {max}₺.",
+    "capacityRangeHint": "Plage autorisée : {min} – {max} sacs",
+    "capacityOutOfRange": "La capacité doit être comprise entre {min} et {max}.",
     "openingTime": "Ouverture",
     "closingTime": "Clôture",
     "settingsSaved": "Paramètres enregistrés.",

@@ -66,10 +66,13 @@ export default function PartnerShopSettingsForm({
   const [isUpdating, setIsUpdating] = useState(false);
   const [saved, setSaved] = useState(false);
   const [priceError, setPriceError] = useState<string | null>(null);
+  const [capacityError, setCapacityError] = useState<string | null>(null);
   const [phoneError, setPhoneError] = useState<string | null>(null);
 
   const minPrice = Math.round(marketPrice / 2);
   const maxPrice = marketPrice * 2;
+  const minCapacity = 1;
+  const maxCapacity = 100_000;
 
   const handlePriceChange = (val: number) => {
     setPricePerDay(val);
@@ -80,10 +83,23 @@ export default function PartnerShopSettingsForm({
     }
   };
 
+  const handleCapacityChange = (val: number) => {
+    setCapacity(val);
+    if (val < minCapacity || val > maxCapacity) {
+      setCapacityError(t("capacityOutOfRange", { min: minCapacity, max: maxCapacity }));
+    } else {
+      setCapacityError(null);
+    }
+  };
+
   const handleSave = async () => {
-    if (priceError) return;
+    if (priceError || capacityError) return;
     if (pricePerDay < minPrice || pricePerDay > maxPrice) {
       setPriceError(t("priceOutOfRange", { min: minPrice, max: maxPrice }));
+      return;
+    }
+    if (capacity < minCapacity || capacity > maxCapacity) {
+      setCapacityError(t("capacityOutOfRange", { min: minCapacity, max: maxCapacity }));
       return;
     }
     setIsUpdating(true);
@@ -149,10 +165,22 @@ export default function PartnerShopSettingsForm({
                 type="number"
                 data-testid="partner-settings-capacity"
                 value={capacity}
-                onChange={(e) => setCapacity(parseInt(e.target.value, 10) || 0)}
-                className="ui-field flex-1 rounded-2xl"
+                min={minCapacity}
+                max={maxCapacity}
+                step={1}
+                onChange={(e) => handleCapacityChange(parseInt(e.target.value, 10) || 0)}
+                className={`ui-field flex-1 rounded-2xl ${
+                  capacityError ? "border-red-400 bg-red-50" : ""
+                }`}
               />
             </div>
+            {capacityError ? (
+              <p className="ui-state ui-state-error mt-1.5">{capacityError}</p>
+            ) : (
+              <p className="ui-body-sm mt-1.5">
+                {t("capacityRangeHint", { min: minCapacity, max: maxCapacity })}
+              </p>
+            )}
           </div>
 
           {/* Günlük fiyat */}
@@ -260,7 +288,7 @@ export default function PartnerShopSettingsForm({
         <button
           type="button"
           onClick={handleSave}
-          disabled={isUpdating || !!priceError}
+          disabled={isUpdating || !!priceError || !!capacityError}
           className="btn-ui btn-ui-lg btn-ui-primary w-full rounded-3xl gap-3"
         >
           {isUpdating ? (

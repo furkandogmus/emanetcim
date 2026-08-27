@@ -161,6 +161,8 @@
     "dailyPrice": "Günlük Birim Fiyat (₺)",
     "priceRangeHint": "İzin verilen aralık: {min}₺ – {max}₺ (piyasa fiyatının ½ – 2×)",
     "priceOutOfRange": "Birim fiyat {min}₺ ile {max}₺ arasında olmalıdır.",
+    "capacityRangeHint": "İzin verilen aralık: {min} – {max} valiz",
+    "capacityOutOfRange": "Kapasite {min} ile {max} arasında olmalıdır.",
     "openingTime": "Açılış",
     "closingTime": "Kapanış",
     "settingsSaved": "Ayarlar güncellendi.",

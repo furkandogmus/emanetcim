@@ -161,6 +161,8 @@
     "dailyPrice": "قیمت روزانه هر چمدان (₺)",
     "priceRangeHint": "محدوده مجاز: {min}₺ – {max}₺ (½ تا ۲× قیمت بازار)",
     "priceOutOfRange": "قیمت باید بین {min}₺ و {max}₺ باشد.",
+    "capacityRangeHint": "محدوده مجاز: {min} تا {max} چمدان",
+    "capacityOutOfRange": "ظرفیت باید بین {min} و {max} باشد.",
     "openingTime": "باز شدن",
     "closingTime": "بسته شدن",
     "settingsSaved": "تنظیمات ذخیره شد.",
