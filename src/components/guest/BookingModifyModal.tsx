@@ -66,6 +66,7 @@ export default function BookingModifyModal({
   onSuccess,
 }: BookingModifyModalProps) {
   const t = useTranslations("Guest");
+  const tCommon = useTranslations("Common");
   const errorText = useActionErrorText();
   // Escape kapatır, arka plan kaydırması kilitlenir, odak geri verilir.
   useModalBehavior({ open: true, onClose });
@@ -188,7 +189,7 @@ export default function BookingModifyModal({
             type="button"
             onClick={onClose}
             className="btn-ui btn-ui-sm btn-ui-ghost btn-ui-icon rounded-full text-gray-500"
-            aria-label="Close"
+            aria-label={tCommon("close")}
           >
             <X size={22} />
           </button>

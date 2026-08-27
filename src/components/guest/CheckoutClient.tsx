@@ -82,6 +82,7 @@ export default function CheckoutClient({
   timeZone = PLATFORM_TIMEZONE,
 }: CheckoutClientProps) {
   const t = useTranslations("Guest");
+  const tCommon = useTranslations("Common");
   const errorText = useActionErrorText();
   const locale = useLocale();
   const { keyboardHeight } = useKeyboardAware();
@@ -435,7 +436,7 @@ export default function CheckoutClient({
 
         <nav
           className="flex items-center max-w-md mx-auto w-full px-1"
-          aria-label="Checkout steps"
+          aria-label={t("checkoutStepsLabel")}
         >
           {stepLabels.map((label, i) => {
             const n = i + 1;
@@ -779,7 +780,7 @@ export default function CheckoutClient({
             <button
               onClick={() => setShowAuthModal(false)}
               className="absolute top-6 right-6 text-gray-400 hover:text-gray-900 transition-colors p-1.5 rounded-full hover:bg-gray-50 cursor-pointer"
-              aria-label="Close"
+              aria-label={tCommon("close")}
             >
               <ChevronLeft size={20} className="rotate-180" />
             </button>

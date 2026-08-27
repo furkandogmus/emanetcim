@@ -81,7 +81,7 @@ export default function MobileNav() {
   return (
     <nav
       className="fixed bottom-0 inset-x-0 z-40 pb-safe md:hidden"
-      aria-label="Mobile navigation"
+      aria-label={t("mobileNavLabel")}
     >
       {/* Blur backdrop */}
       <div className="glass border-t border-gray-100/80">

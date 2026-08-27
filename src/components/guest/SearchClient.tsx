@@ -88,6 +88,7 @@ export default function SearchClient({
   searchCenter,
 }: SearchClientProps) {
   const t = useTranslations("Guest");
+  const tCommon = useTranslations("Common");
   const tErr = useTranslations("Errors");
   const locale = useLocale();
   const router = useRouter();
@@ -543,7 +544,7 @@ export default function SearchClient({
               <button
                 type="button"
                 data-testid="search-bags-decrease"
-                aria-label="Decrease bags"
+                aria-label={tCommon("decrease", { label: t("searchBagCount") })}
                 onClick={() => {
                   setRequestedBags((n) => Math.max(1, n - 1));
                   markFiltersDirty();
@@ -562,7 +563,7 @@ export default function SearchClient({
               <button
                 type="button"
                 data-testid="search-bags-increase"
-                aria-label="Increase bags"
+                aria-label={tCommon("increase", { label: t("searchBagCount") })}
                 onClick={() => {
                   setRequestedBags((n) => Math.min(MAX_SEARCH_BAGS, n + 1));
                   markFiltersDirty();
@@ -688,7 +689,7 @@ export default function SearchClient({
         <button
           type="button"
           onClick={() => setPanelOpen(true)}
-          aria-label="Open search panel"
+          aria-label={t("openSearchPanel")}
           className="md:hidden absolute top-4 left-4 z-20 h-12 px-5 rounded-full bg-white shadow-lg border border-gray-100 flex items-center gap-2 id-eyebrow text-xs text-gray-900 hover:bg-gray-50 active:scale-95 transition-all"
         >
           <SlidersHorizontal size={16} className="text-orange-600" />
