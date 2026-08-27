@@ -635,6 +635,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
 
   Future<void> _showReviewSheet(BookingDto bk) async {
     var rating = 5;
+    var submitting = false;
     final commentCtl = TextEditingController();
     await showModalBottomSheet(
       context: context,
@@ -660,7 +661,8 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
               TextField(controller: commentCtl, maxLines: 3, decoration: InputDecoration(labelText: 'booking.review_comment'.tr())),
               const SizedBox(height: 20),
               FilledButton(
-                onPressed: () async {
+                onPressed: submitting ? null : () async {
+                  setSheetState(() => submitting = true);
                   try {
                     final dio = ref.read(dioProvider);
                     await dio.post('/reviews', data: {'bookingId': bk.id, 'rating': rating, 'comment': commentCtl.text});
@@ -672,9 +674,13 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                     if (ctx.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('common.error'.tr())));
                     }
+                  } finally {
+                    if (ctx.mounted) setSheetState(() => submitting = false);
                   }
                 },
-                child: Text('booking.submit_review'.tr()),
+                child: submitting
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                    : Text('booking.submit_review'.tr()),
               ),
               const SizedBox(height: 16),
             ],
@@ -687,6 +693,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
   Future<void> _showDisputeSheet(BookingDto bk) async {
     final descCtl = TextEditingController();
     var reason = 'DAMAGE';
+    var submitting = false;
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -714,8 +721,9 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
               TextField(controller: descCtl, maxLines: 4, decoration: InputDecoration(labelText: 'booking.dispute_description'.tr())),
               const SizedBox(height: 20),
               FilledButton(
-                onPressed: () async {
+                onPressed: submitting ? null : () async {
                   if (descCtl.text.length < 10) return;
+                  setSheetState(() => submitting = true);
                   try {
                     final dio = ref.read(dioProvider);
                     await dio.post('/disputes', data: {'bookingId': bk.id, 'reason': reason, 'description': descCtl.text});
@@ -727,9 +735,13 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                     if (ctx.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('common.error'.tr())));
                     }
+                  } finally {
+                    if (ctx.mounted) setSheetState(() => submitting = false);
                   }
                 },
-                child: Text('booking.submit_dispute'.tr()),
+                child: submitting
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                    : Text('booking.submit_dispute'.tr()),
               ),
               const SizedBox(height: 16),
             ],
