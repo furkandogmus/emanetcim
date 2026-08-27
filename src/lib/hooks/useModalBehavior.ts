@@ -43,6 +43,23 @@ export function useModalBehavior({
   onClose: () => void;
 }): void {
   const previouslyFocused = useRef<HTMLElement | null>(null);
+  /**
+   * `onClose` cogu cagirandan INLINE bir fonksiyon olarak geliyor (ornek:
+   * `ConfirmDialog`'un `onCancel` prop'u -- `onCancel={() => setX(null)}`).
+   * Bu her render'da YENI bir referans demek. Eskiden `onClose` bagimlilik
+   * dizisindeydi: modal acikken ebeveyn BASKA bir nedenle yeniden render
+   * olursa (ilgisiz bir state degisikligi) efekt tamamen sokulup yeniden
+   * kuruluyordu -- temizleme adimi odagi ONCEKI (tetikleyici) elemana geri
+   * tasiyor, sonra kurulum tekrar modalin icine odaklaniyordu. Klavye/ekran
+   * okuyucu kullanicisi icin odak bir anlik disari-iceri titriyordu; bir
+   * form alanina yazarken bu yasanirsa imlec tamamen kayboluyordu. Ref'e
+   * alinip bagimliliktan cikarilarak efekt yalnizca `open` degisince
+   * yeniden kuruluyor.
+   */
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
 
   useEffect(() => {
     if (!open) return;
@@ -55,7 +72,7 @@ export function useModalBehavior({
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.stopPropagation();
-        onClose();
+        onCloseRef.current();
         return;
       }
       if (e.key !== "Tab") return;
@@ -99,5 +116,6 @@ export function useModalBehavior({
       document.body.style.overflow = previousOverflow;
       previouslyFocused.current?.focus?.();
     };
-  }, [open, onClose]);
+    // `onClose` bilerek burada degil -- yukaridaki `onCloseRef`e bakin.
+  }, [open]);
 }

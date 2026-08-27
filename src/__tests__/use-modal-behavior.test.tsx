@@ -53,4 +53,26 @@ describe("useModalBehavior — açılışta odak", () => {
     fireEvent.click(trigger);
     expect(document.activeElement?.textContent).toBe("Birinci");
   });
+
+  /**
+   * `onClose` cogu cagirandan INLINE bir fonksiyon olarak geliyor (ornek:
+   * `ConfirmDialog`'un `onCancel={() => setX(null)}` kullanan cagiranlari).
+   * Eskiden `onClose` efektin bagimlilik dizisindeydi: modal acikken ebeveyn
+   * BASKA bir nedenle yeniden render olup `onClose`a yeni bir referans
+   * verirse efekt sokulup yeniden kuruluyordu -- temizleme adimi odagi
+   * tetikleyiciye geri tasiyordu, kullanici modal icindeki bir alana
+   * yazarken bile.
+   */
+  it("onClose her render'da yeni bir referans olsa da, ilgisiz bir yeniden render odagi modalden disari tasimaz", () => {
+    // `rerender` ile ayni agaci, her seferinde YENI (inline) bir `onClose`
+    // referansiyla yeniden render ediyoruz -- odak degisikligine yol acacak
+    // hicbir DOM etkilesimi (tiklama vb.) olmadan, salt render nedeniyle.
+    const { rerender } = render(<MinimalDialog open onClose={() => {}} />);
+    const second = screen.getByText("İkinci");
+    second.focus();
+    expect(document.activeElement).toBe(second);
+
+    rerender(<MinimalDialog open onClose={() => {}} />);
+    expect(document.activeElement).toBe(second);
+  });
 });
