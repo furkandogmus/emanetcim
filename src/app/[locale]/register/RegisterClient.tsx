@@ -233,6 +233,7 @@ export default function RegisterPage() {
               aria-label={t('fullName')}
               placeholder={t('fullName')}
               required
+              autoComplete="name"
               value={activeTab === 'GUEST' ? guestData.name : partnerData.name}
               onChange={(e) => activeTab === 'GUEST'
                 ? setGuestData({ ...guestData, name: e.target.value })
@@ -251,6 +252,7 @@ export default function RegisterPage() {
                 aria-label={t('email')}
                 placeholder={t('email')}
                 required
+                autoComplete="email"
                 value={guestData.email}
                 onChange={(e) => setGuestData({ ...guestData, email: e.target.value })}
                 className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 focus:outline-none focus:border-orange-300 transition"
@@ -287,6 +289,7 @@ export default function RegisterPage() {
               aria-label={t('password')}
               placeholder={t('password')}
               required
+              autoComplete="new-password"
               minLength={6}
               value={activeTab === 'GUEST' ? guestData.password : partnerData.password}
               onChange={(e) => activeTab === 'GUEST'
@@ -312,6 +315,7 @@ export default function RegisterPage() {
                   aria-label={t('shopName')}
                   placeholder={t('shopName')}
                   required
+                  autoComplete="organization"
                   value={partnerData.shopName}
                   onChange={(e) => setPartnerData({ ...partnerData, shopName: e.target.value })}
                   className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 focus:outline-none focus:border-orange-300 transition"
