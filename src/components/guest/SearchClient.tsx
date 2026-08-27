@@ -129,6 +129,15 @@ export default function SearchClient({
    */
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  /**
+   * Yaris kosulu koruyucusu: iki filtre degisikligi ust uste hizli yapilirsa
+   * iki ayri `refreshSearchShopsAction` cagrisi es zamanli ucabilir. Ag
+   * gecikmesi degiskense ONCEKI (artik gecersiz) istek SONRAKINDEN GEC
+   * donebilir ve onun sonucu son filtreyi ezerdi -- misafir bags=3 secmisken
+   * ekran bags=2 sonuclarini gosterirdi. Her cagriya artan bir sira numarasi
+   * verilip yalnizca EN GUNCEL istegin sonucu uygulanir.
+   */
+  const searchRequestSeq = useRef(0);
   useEffect(() => {
     setCheckInLocal(toDatetimeLocalValueInTimeZone(new Date(defaultCheckInIso)));
     setCheckOutLocal(toDatetimeLocalValueInTimeZone(new Date(defaultCheckOutIso)));
@@ -153,6 +162,7 @@ export default function SearchClient({
     if (!checkIn || !checkOut) return;
 
     const handle = window.setTimeout(async () => {
+      const mySeq = ++searchRequestSeq.current;
       setIsSearching(true);
       try {
         const res = await refreshSearchShopsAction({
@@ -162,6 +172,9 @@ export default function SearchClient({
           centerLat: dynamicCenter.lat,
           centerLng: dynamicCenter.lng,
         });
+        // Bu sirada baska bir filtre degisikligi daha yeni bir istek baslattiysa
+        // bu artik BAYAT bir yanittir -- uygulanmaz.
+        if (mySeq !== searchRequestSeq.current) return;
         if (res.ok) {
           setNearbyList(res.nearby as ShopSearchHit[]);
           setAllList(res.all as ShopSearchHit[]);
@@ -176,7 +189,7 @@ export default function SearchClient({
           toast.error(t("searchRefreshError"));
         }
       } finally {
-        setIsSearching(false);
+        if (mySeq === searchRequestSeq.current) setIsSearching(false);
       }
     }, 400);
 
@@ -197,6 +210,9 @@ export default function SearchClient({
     const checkIn = parseDatetimeLocalInTimeZone(checkInLocal);
     const checkOut = parseDatetimeLocalInTimeZone(checkOutLocal);
     if (!checkIn || !checkOut) return;
+    // Ayni sira sayaci: asagi cekip yenileme tam bir filtre degisikligiyle
+    // cakisirsa hangisinin sonucu daha yeni ise o kazanir.
+    const mySeq = ++searchRequestSeq.current;
     const res = await refreshSearchShopsAction({
       checkInIso: checkIn.toISOString(),
       checkOutIso: checkOut.toISOString(),
@@ -204,6 +220,7 @@ export default function SearchClient({
       centerLat: dynamicCenter.lat,
       centerLng: dynamicCenter.lng,
     });
+    if (mySeq !== searchRequestSeq.current) return;
     if (res.ok) {
       setNearbyList(res.nearby as ShopSearchHit[]);
       setAllList(res.all as ShopSearchHit[]);
