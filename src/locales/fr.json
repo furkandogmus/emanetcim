@@ -1,6 +1,8 @@
 {
   "Common": {
     "appName": "Parc Bagaj",
+    "selectDate": "Choisir la date",
+    "selectTime": "Choisir l'heure",
     "loading": "Se préparer...",
     "error": "UNE ERREUR EST SURVENUE",
     "back": "Retour",

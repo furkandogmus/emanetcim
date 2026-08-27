@@ -1,6 +1,8 @@
 {
   "Common": {
     "appName": "BagajPark",
+    "selectDate": "انتخاب تاریخ",
+    "selectTime": "انتخاب ساعت",
     "loading": "در حال آماده‌سازی...",
     "error": "خطایی رخ داد",
     "back": "بازگشت",

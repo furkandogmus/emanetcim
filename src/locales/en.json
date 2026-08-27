@@ -1,6 +1,8 @@
 {
   "Common": {
     "appName": "BagajPark",
+    "selectDate": "Select Date",
+    "selectTime": "Select Time",
     "loading": "Getting ready...",
     "error": "AN ERROR OCCURRED",
     "back": "Back",

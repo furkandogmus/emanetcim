@@ -11,7 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import { DayPicker } from "react-day-picker";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   de,
   enUS,
@@ -108,6 +108,7 @@ export default function DateTimePicker({
 }: DateTimePickerProps) {
   const locale = useLocale();
   const dfLocale = LOCALE_MAP[locale] ?? enUS;
+  const t = useTranslations("Common");
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const isMobile = useSyncExternalStore(
@@ -116,32 +117,17 @@ export default function DateTimePicker({
     getIsMobileServerSnapshot,
   );
 
-  const DATE_LABELS: Record<string, string> = {
-    tr: "Tarih Seç",
-    en: "Select Date",
-    de: "Datum wählen",
-    fr: "Choisir la date",
-    es: "Seleccionar fecha",
-    ar: "اختيار التاريخ",
-    bg: "Избор на дата",
-    fa: "انتخاب تاریخ",
-    it: "Seleziona data",
-    ja: "日付を選択",
-    ko: "날짜 선택",
-    pl: "Wybierz datę",
-    ru: "Выберите дату",
-    zh: "选择日期",
-  };
-
-  const TIME_LABELS: Record<string, string> = {
-    tr: "Saat Seç",
-    en: "Select Time",
-    de: "Uhrzeit wählen",
-    fr: "Choisir l'heure",
-  };
-
-  const dateLabel = DATE_LABELS[locale] || DATE_LABELS.en;
-  const timeLabel = TIME_LABELS[locale] || TIME_LABELS.en;
+  /**
+   * `DATE_LABELS`/`TIME_LABELS` sabit nesnelerdi -- uygulamanin geri kalani
+   * `useTranslations` kullanirken burasi atlanmisti. Ikisi de bozuktu:
+   * `DATE_LABELS` 14->6 dil gecisinde (2026-08-22) kaldirilmis es/ar/bg/it/
+   * ko/pl/ru/zh'yi hala tasiyordu; `TIME_LABELS` ise gercek 6 dilden ikisini
+   * (fa, ja) HIC tanimiyordu -- Farsca/Japonca arayuzdeki misafir mobil saat
+   * secicide sabit Ingilizce "Select Time" okuyordu. `Common.selectDate`/
+   * `selectTime` ile degistirildi.
+   */
+  const dateLabel = t("selectDate");
+  const timeLabel = t("selectTime");
 
   const parsed = useMemo(() => parseDatetimeLocal(value), [value]);
   const timeOptions = useMemo(

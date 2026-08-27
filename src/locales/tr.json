@@ -1,6 +1,8 @@
 {
   "Common": {
     "appName": "BagajPark",
+    "selectDate": "Tarih Seç",
+    "selectTime": "Saat Seç",
     "loading": "Hazırlanıyor...",
     "error": "BİR HATA OLUŞTU",
     "back": "Geri",

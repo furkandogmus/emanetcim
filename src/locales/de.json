@@ -1,6 +1,8 @@
 {
   "Common": {
     "appName": "BagajPark",
+    "selectDate": "Datum wählen",
+    "selectTime": "Uhrzeit wählen",
     "loading": "Wir machen uns bereit...",
     "error": "Es ist ein Fehler aufgetreten",
     "back": "Zurück",
