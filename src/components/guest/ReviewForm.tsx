@@ -42,22 +42,29 @@ export default function ReviewForm({
     e.preventDefault();
     setIsSubmitting(true);
 
-    const res = await addReviewAction({
-      bookingId,
-      guestId,
-      shopId,
-      rating,
-      comment
-    });
+    try {
+      const res = await addReviewAction({
+        bookingId,
+        guestId,
+        shopId,
+        rating,
+        comment
+      });
 
-    setIsSubmitting(false);
-
-    if (res.success) {
-      onSuccess();
-    } else {
-      // `res.error` bir "Errors.x" anahtaridir, ham metin degil -- cevrilmeden
-      // basilirsa toast'ta birebir "Errors.duplicateReview" yazardi.
-      toast.error(errorText(res.error, t("Review.error")));
+      if (res.success) {
+        onSuccess();
+      } else {
+        // `res.error` bir "Errors.x" anahtaridir, ham metin degil -- cevrilmeden
+        // basilirsa toast'ta birebir "Errors.duplicateReview" yazardi.
+        toast.error(errorText(res.error, t("Review.error")));
+      }
+    } catch (err) {
+      // addReviewAction oturum uyusmazliginda dogrudan firlatiyor (Errors.unauthorized);
+      // yakalanmazsa buton sonsuza dek donuyor kalirdi.
+      const raw = err instanceof Error ? err.message : undefined;
+      toast.error(errorText(raw, t("Review.error")));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
