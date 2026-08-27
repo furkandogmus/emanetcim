@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter, usePathname } from "next/navigation";
 import {
@@ -153,6 +153,27 @@ export default function PartnerClient({
   const [isProcessing, setIsProcessing] = useState(false);
   const [scanResult, setScanResult] = useState<CheckInPreview | null>(null);
   const [successBanner, setSuccessBanner] = useState<string | null>(null);
+  /**
+   * Uc ayri yerde (onay, checkout, check-in) `setSuccessBanner(msg)` +
+   * bagimsiz bir `setTimeout(() => setSuccessBanner(null), 3000)` vardi.
+   * Esnaf ust uste iki islem yaparsa (ornek: bir rezervasyonu onaylayip
+   * 1sn sonra baskasini checkout ederse) ILK islemin zamanlayicisi 3sn
+   * sonra hala calisir ve SONRAKI (henuz 2sn'lik) banner'i erken siler --
+   * mesaj beklenenden kisa gorunur ya da hic gorunmeden kaybolur. Tek bir
+   * zamanlayici referansi tutup her yeni banner'da oncekini iptal ederek
+   * bu duzeltilir.
+   */
+  const successBannerTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showSuccessBanner = useCallback((msg: string) => {
+    if (successBannerTimeout.current) clearTimeout(successBannerTimeout.current);
+    setSuccessBanner(msg);
+    successBannerTimeout.current = setTimeout(() => setSuccessBanner(null), 3000);
+  }, []);
+  useEffect(() => {
+    return () => {
+      if (successBannerTimeout.current) clearTimeout(successBannerTimeout.current);
+    };
+  }, []);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [checkingOutId, setCheckingOutId] = useState<string | null>(null);
   const [checkoutSeals, setCheckoutSeals] = useState<{
@@ -236,8 +257,7 @@ export default function PartnerClient({
     try {
       const res = await approveBookingAction(id);
       if (res.success) {
-        setSuccessBanner(t("approvedSuccess"));
-        setTimeout(() => setSuccessBanner(null), 3000);
+        showSuccessBanner(t("approvedSuccess"));
         router.refresh();
       } else {
         showError(res.error);
@@ -275,8 +295,7 @@ export default function PartnerClient({
       try {
         const result = await checkOutAction(bookingId);
         if (result.success) {
-          setSuccessBanner(t("checkoutDone"));
-          setTimeout(() => setSuccessBanner(null), 3000);
+          showSuccessBanner(t("checkoutDone"));
           router.replace(pathname);
           router.refresh();
           return true;
@@ -293,7 +312,7 @@ export default function PartnerClient({
         setCheckingOutId(null);
       }
     },
-    [pathname, router, showError, t]
+    [pathname, router, showError, showSuccessBanner, t]
   );
 
   const openCheckoutFlow = useCallback(
@@ -374,9 +393,8 @@ export default function PartnerClient({
   };
 
   const handleCheckInSuccess = () => {
-    setSuccessBanner(t("checkInSuccess"));
+    showSuccessBanner(t("checkInSuccess"));
     setScanResult(null);
-    setTimeout(() => setSuccessBanner(null), 3000);
     router.refresh();
   };
 
