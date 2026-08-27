@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { Mail, MailOpen, Trash2, Search, ArrowLeft, Inbox, Clock, User, Reply } from "lucide-react";
 import { Link } from "@/i18n/routing";
@@ -11,6 +11,7 @@ import type { ContactMessageDTO } from "@/lib/contact-message-dto";
 import { replySubjectForMailto } from "@/lib/reply-subject";
 import { replyToContactMessageAction } from "@/actions/contact";
 import { actionErrorKey } from "@/lib/action-error";
+import { bcp47ForUiLocale } from "@/lib/intl-locale";
 
 interface AdminMessagesClientProps {
   messages: ContactMessageDTO[];
@@ -19,6 +20,8 @@ interface AdminMessagesClientProps {
 export default function AdminMessagesClient({ messages: initialMessages }: AdminMessagesClientProps) {
   const t = useTranslations("Admin");
   const tErrors = useTranslations("Errors");
+  const locale = useLocale();
+  const dateLocale = bcp47ForUiLocale(locale);
   /**
    * Panelden cevap: gerçek e-posta olarak gider (destek adresi + In-Reply-To).
    * Eski "Yanıtla" yalnızca mailto: idi — cevap adminin kişisel kutusundan çıkıyordu.
@@ -373,7 +376,7 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
                     <div className="flex items-center justify-between md:justify-end gap-6 md:w-48 flex-shrink-0">
                       <div className="text-xs font-bold text-gray-400 flex items-center gap-1.5">
                         <Clock size={12} />
-                        {new Date(msg.createdAt).toLocaleDateString(undefined, {
+                        {new Date(msg.createdAt).toLocaleDateString(dateLocale, {
                           month: "short",
                           day: "numeric",
                           hour: "2-digit",
@@ -463,7 +466,7 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
                                 {msg.replies.map((r) => (
                                   <li key={r.id} className="rounded-2xl bg-orange-50/60 border border-orange-100 p-4">
                                     <p className="text-xs font-bold text-orange-700 mb-1">
-                                      {r.fromEmail} · {new Date(r.createdAt).toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" })}
+                                      {r.fromEmail} · {new Date(r.createdAt).toLocaleString(dateLocale, { dateStyle: "short", timeStyle: "short" })}
                                     </p>
                                     <p className="text-sm text-gray-700 whitespace-pre-wrap">{r.body}</p>
                                   </li>
