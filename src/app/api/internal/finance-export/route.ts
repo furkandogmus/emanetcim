@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
+import { withJobRun } from "@/lib/jobs/run-ledger";
 import { moneyToNumber } from "@/lib/money";
 
 export const runtime = "nodejs";
@@ -30,15 +31,26 @@ export async function GET(req: NextRequest) {
   );
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
-  const rows = await prisma.booking.findMany({
-    where: { createdAt: { gte: since } },
-    include: {
-      paymentLog: true,
-      shop: { select: { name: true } },
-    },
-    orderBy: { createdAt: "desc" },
-    take: 10000,
+  // Defter kaydi: is CSV dondurse bile CALISTIGI kayda gecmeli. Yoksa
+  // /api/health/jobs bu isi HIC gormez ve enforced=true yapildiginda sonsuza
+  // dek "gecikmis" gorunur -- 2026-08-29'da sekiz isten DORDU boyleydi:
+  // HTTP 200 donuyorlardi ama JobRun'a tek satir yazmiyorlardi.
+  const outcome = await withJobRun("finance-export", async () => {
+    const found = await prisma.booking.findMany({
+      where: { createdAt: { gte: since } },
+      include: {
+        paymentLog: true,
+        shop: { select: { name: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 10000,
+    });
+    return { ok: true as const, detail: found };
   });
+  if (!outcome.ok) {
+    return NextResponse.json({ ok: false, error: outcome.error }, { status: 500 });
+  }
+  const rows = outcome.detail;
 
   const header = [
     "bookingId",

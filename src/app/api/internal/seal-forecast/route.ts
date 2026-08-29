@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
+import { withJobRun } from "@/lib/jobs/run-ledger";
 import { notificationService } from "@/services/NotificationService";
 import { parseAdminGsmNumbers } from "@/lib/netgsm";
 import logger from "@/lib/logger";
@@ -26,7 +27,10 @@ async function runSealForecast(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  try {
+  // Defter kaydi: HTTP 200 donmek yetmiyor, is CALISTIGINI JobRun'a yazmali.
+  // Yoksa /api/health/jobs bu isi hic gormez ve enforced=true yapildiginda
+  // sonsuza dek "gecikmis" gorunur (2026-08-29: sekiz isten dordu boyleydi).
+  const outcome = await withJobRun("seal-forecast", async () => {
     const shops = await prisma.shop.findMany({
       where: { isActive: true },
       select: {
@@ -38,7 +42,9 @@ async function runSealForecast(req: NextRequest): Promise<NextResponse> {
     });
 
     if (shops.length === 0) {
-      return NextResponse.json({ ok: true, processed: 0, alerts: [], autoRequests: 0 });
+      // Aktif dukkan yoksa is BASARIYLA calismistir -- deftere de oyle gecer.
+      // "Yapacak is yoktu" ile "calismadi" ayni sey degil.
+      return { ok: true as const, detail: { processed: 0, alerts: [], autoRequests: 0 } };
     }
 
     const shopIds = shops.map(s => s.id);
@@ -145,19 +151,14 @@ async function runSealForecast(req: NextRequest): Promise<NextResponse> {
 
     logger.info({ processed, alerts: alerts.length, autoRequests }, "seal_forecast_complete");
 
-    return NextResponse.json({
-      ok: true,
-      processed,
-      alerts,
-      autoRequests,
-    });
-  } catch (err) {
-    logger.error({ err }, "seal_forecast_failed");
-    return NextResponse.json(
-      { ok: false, error: err instanceof Error ? err.message : "unknown" },
-      { status: 500 }
-    );
+    return { ok: true as const, detail: { processed, alerts, autoRequests } };
+  });
+
+  if (!outcome.ok) {
+    logger.error({ error: outcome.error }, "seal_forecast_failed");
+    return NextResponse.json({ ok: false, error: outcome.error }, { status: 500 });
   }
+  return NextResponse.json({ ok: true, ...outcome.detail });
 }
 
 /**

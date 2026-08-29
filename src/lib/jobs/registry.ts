@@ -76,7 +76,7 @@ export const JOB_REGISTRY: readonly JobDefinition[] = [
     cron: "47 4 * * *",
     maxStaleHours: 48,
     // Cron henüz kurulmadı — bkz. scripts/README.md 3. adım.
-    enforced: false,
+    enforced: true,
     script: "scripts/overdue-scan.sh",
   },
   {
@@ -86,7 +86,7 @@ export const JOB_REGISTRY: readonly JobDefinition[] = [
     method: "GET",
     cron: "7 9 * * *",
     maxStaleHours: 48,
-    enforced: false,
+    enforced: true,
   },
   {
     name: "cleanup",
@@ -96,7 +96,7 @@ export const JOB_REGISTRY: readonly JobDefinition[] = [
     method: "POST",
     cron: "23 3 * * *",
     maxStaleHours: 72,
-    enforced: false,
+    enforced: true,
   },
   {
     name: "seal-forecast",
@@ -106,7 +106,7 @@ export const JOB_REGISTRY: readonly JobDefinition[] = [
     method: "POST",
     cron: "37 6 * * 1",
     maxStaleHours: 24 * 9,
-    enforced: false,
+    enforced: true,
   },
   {
     name: "classify-inbox",
@@ -116,7 +116,7 @@ export const JOB_REGISTRY: readonly JobDefinition[] = [
     method: "POST",
     cron: "13 5 * * *",
     maxStaleHours: 48,
-    enforced: false,
+    enforced: true,
   },
   {
     name: "response-times",
@@ -126,7 +126,7 @@ export const JOB_REGISTRY: readonly JobDefinition[] = [
     method: "POST",
     cron: "29 3 * * *",
     maxStaleHours: 72,
-    enforced: false,
+    enforced: true,
   },
   {
     name: "finance-export",
@@ -135,7 +135,7 @@ export const JOB_REGISTRY: readonly JobDefinition[] = [
     method: "GET",
     cron: "53 2 * * *",
     maxStaleHours: 72,
-    enforced: false,
+    enforced: true,
   },
 ] as const;
 

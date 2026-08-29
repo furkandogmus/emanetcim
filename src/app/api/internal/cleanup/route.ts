@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
+import { withJobRun } from "@/lib/jobs/run-ledger";
 import logger from "@/lib/logger";
 import { authorizeCron } from "@/lib/internal-api-guard";
 
@@ -23,7 +24,10 @@ async function runCleanup(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  try {
+  // Defter kaydi: HTTP 200 donmek yetmiyor, is CALISTIGINI JobRun'a yazmali.
+  // Yoksa /api/health/jobs bu isi hic gormez ve enforced=true yapildiginda
+  // sonsuza dek "gecikmis" gorunur (2026-08-29: sekiz isten dordu boyleydi).
+  const outcome = await withJobRun("cleanup", async () => {
     const now = new Date();
     const analyticsRetentionCutoff = new Date(
       now.getTime() - 90 * 24 * 60 * 60 * 1000,
@@ -53,19 +57,21 @@ async function runCleanup(req: NextRequest): Promise<NextResponse> {
       "database_cleanup_success"
     );
 
-    return NextResponse.json({
-      ok: true,
-      deletedTokens: deletedTokens.count,
-      deletedSessions: deletedSessions.count,
-      deletedAnalyticsEvents: deletedAnalyticsEvents.count,
-    });
-  } catch (err) {
-    logger.error({ err }, "database_cleanup_failed");
-    return NextResponse.json(
-      { ok: false, error: err instanceof Error ? err.message : "unknown" },
-      { status: 500 }
-    );
+    return {
+      ok: true as const,
+      detail: {
+        deletedTokens: deletedTokens.count,
+        deletedSessions: deletedSessions.count,
+        deletedAnalyticsEvents: deletedAnalyticsEvents.count,
+      },
+    };
+  });
+
+  if (!outcome.ok) {
+    logger.error({ error: outcome.error }, "database_cleanup_failed");
+    return NextResponse.json({ ok: false, error: outcome.error }, { status: 500 });
   }
+  return NextResponse.json({ ok: true, ...outcome.detail });
 }
 
 export async function GET(req: NextRequest) {

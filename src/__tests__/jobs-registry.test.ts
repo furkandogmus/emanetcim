@@ -51,6 +51,43 @@ describe("kayıt defteri gerçekle örtüşüyor", () => {
   });
 });
 
+describe("her iş çalıştığını deftere yazıyor", () => {
+  /**
+   * NEDEN BU TEST VAR: 2026-08-29'da sekiz işin tamamı elle koşturuldu ve
+   * SEKİZİ DE HTTP 200 döndü -- ama yalnızca DÖRDÜ `JobRun` tablosuna satır
+   * yazdı. Diğer dördü `withJobRun` kullanmıyordu.
+   *
+   * Sonucu sinsi: `/api/health/jobs` gecikmeyi `JobRun` üzerinden ölçüyor.
+   * Defterine yazmayan bir iş, mükemmel çalışsa bile sağlık kontrolü için
+   * "hiç koşmamış" görünür. `enforced=true` yapıldığı anda o dört iş sonsuza
+   * dek DEGRADED olurdu -- yani gözlemlenebilirlik katmanı, gözlemlediği
+   * sağlıklı sistemi bozuk gösterirdi.
+   */
+  it.each(JOB_REGISTRY.map((j) => [j.name] as const))(
+    "%s: route'u withJobRun kullanıyor",
+    (name) => {
+      const routePath = path.join(
+        process.cwd(),
+        "src/app/api/internal",
+        name,
+        "route.ts",
+      );
+      const src = fs.readFileSync(routePath, "utf8");
+      expect(
+        src.includes("withJobRun"),
+        `${name}: withJobRun yok -> /api/health/jobs bu işi hiç göremez, ` +
+          `enforced=true yapılınca sonsuza dek DEGRADED olur`,
+      ).toBe(true);
+      // Defter adı iş adıyla aynı olmalı; farklıysa sağlık kontrolü yine
+      // eşleştiremez ve hata sessizce geri gelir.
+      expect(
+        src.includes(`withJobRun("${name}"`),
+        `${name}: withJobRun farklı bir iş adıyla çağrılmış`,
+      ).toBe(true);
+    },
+  );
+});
+
 describe("HTTP metodu uçla örtüşüyor", () => {
   /**
    * NEDEN BU TEST VAR: `call-internal-job.sh` sabit POST gönderiyordu, ama
@@ -131,7 +168,13 @@ describe("kayıt defteri tanımları tutarlı", () => {
     for (const j of enforcedJobs()) {
       expect(j.enforced).toBe(true);
     }
-    // Su an yalnizca generate-slots'un cron'u kurulu (scripts/README.md).
-    expect(enforcedJobs().map((j) => j.name)).toEqual(["generate-slots"]);
+    // 2026-08-29: SEKIZININ DE cron'u kuruldu (ops/crontab.prod), sekizi de
+    // canlida elle kosturulup HTTP 200 dondugu ve JobRun'a yazdigi dogrulandi.
+    // Onceki beklenti "yalnizca generate-slots kurulu" idi -- artik gecersiz.
+    //
+    // Bir isi enforced=false'a almak, gecikmesinin saglik kontrolunu DEGRADED
+    // YAPMAMASI demektir; yani bir isi sessizce izlenemez hale getirir.
+    // Bu liste kisalirsa sebebi commit govdesinde yazili olmali.
+    expect(enforcedJobs().length).toBe(JOB_REGISTRY.length);
   });
 });

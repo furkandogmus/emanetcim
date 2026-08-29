@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
+import { withJobRun } from "@/lib/jobs/run-ledger";
 import logger from "@/lib/logger";
 import { notificationService } from "@/services/NotificationService";
 
@@ -39,7 +40,10 @@ export async function GET(req: NextRequest) {
     overdueNotifications: 0,
   };
 
-  try {
+  // Defter kaydi: HTTP 200 donmek yetmiyor, is CALISTIGINI JobRun'a yazmali.
+  // Yoksa /api/health/jobs bu isi hic gormez ve enforced=true yapildiginda
+  // sonsuza dek "gecikmis" gorunur (2026-08-29: sekiz isten dordu boyleydi).
+  const outcome = await withJobRun("booking-reminders", async () => {
     // 1. 2 saat içinde check-in yapacak PAID booking'ler
     const checkInSoon = await prisma.booking.findMany({
       where: {
@@ -108,12 +112,12 @@ export async function GET(req: NextRequest) {
     }
 
     logger.info({ results }, "booking_reminders_cron_completed");
-    return NextResponse.json({ ok: true, results });
-  } catch (error) {
-    logger.error({ err: error }, "booking_reminders_cron_failed");
-    return NextResponse.json(
-      { ok: false, error: "Internal error" },
-      { status: 500 }
-    );
+    return { ok: true as const, detail: results };
+  });
+
+  if (!outcome.ok) {
+    logger.error({ error: outcome.error }, "booking_reminders_cron_failed");
+    return NextResponse.json({ ok: false, error: "Internal error" }, { status: 500 });
   }
+  return NextResponse.json({ ok: true, results: outcome.detail });
 }

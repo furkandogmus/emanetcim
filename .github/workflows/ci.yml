@@ -308,8 +308,16 @@ jobs:
           aws s3 cp public/ "s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/public/" --recursive --only-show-errors
           # Sirlar Parameter Store'da; sunucu docker-compose.env'i bunlarla uretiyor.
           # Kutudaki git kopyasinin tazeligine guvenmiyoruz -- deploy yolu S3.
-          aws s3 cp scripts/secrets-render.sh "s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/secrets-render.sh"
           aws s3 cp ops/secrets.manifest "s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/secrets.manifest"
+          # scripts/ dizininin TAMAMI gidiyor -- yalnizca secrets-render.sh degil.
+          #
+          # NEDEN: 2026-08-29'da sekiz cron isi kurulunca hepsi dustu, cunku
+          # sunucudaki call-internal-job.sh hala Hetzner donemindeki
+          # /root/emanetci yolunu ariyordu. Duzeltme repoda AYLARDIR vardi ama
+          # deploy scripts/ dizinini hic gondermiyordu: repodaki script ile
+          # sunucudaki script ayri yasiyordu ve bunu kimse gormuyordu.
+          aws s3 cp scripts/ "s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/scripts/" \
+            --recursive --exclude "*.js" --exclude "*.mjs" --only-show-errors
 
       - name: SSM Run Command ile deploy et
         run: |
@@ -322,9 +330,10 @@ jobs:
               "set -e",
               "aws s3 cp s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/docker-compose.yml /opt/emanetci/docker-compose.yml",
               "aws s3 sync s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/public/ /opt/emanetci/public/ --delete --only-show-errors",
-              "aws s3 cp s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/secrets-render.sh /opt/emanetci/scripts/secrets-render.sh",
+              "aws s3 sync s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/scripts/ /opt/emanetci/scripts/ --only-show-errors",
               "aws s3 cp s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/secrets.manifest /opt/emanetci/secrets.manifest",
-              "chmod +x /opt/emanetci/scripts/secrets-render.sh",
+              "chmod +x /opt/emanetci/scripts/*.sh",
+              "chown -R ec2-user:ec2-user /opt/emanetci/scripts",
               "cd /opt/emanetci",
               "bash scripts/secrets-render.sh --prefix ${{ vars.SSM_APP_PARAMETER_PREFIX }} --out /opt/emanetci/docker-compose.env --manifest /opt/emanetci/secrets.manifest",
               "docker rm -f $(docker ps -aq --filter name=_emanetci-) 2>/dev/null || true",
