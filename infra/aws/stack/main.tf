@@ -51,6 +51,73 @@ resource "aws_iam_role_policy" "app_ssm_read" {
   })
 }
 
+# Uygulama env anahtarlari (docker-compose.env) -- scripts/secrets-render.sh
+# her deploy'da bunlardan dosyayi uretir.
+#
+# NEDEN AYRI POLICY: TLS onegi tek tek iki parametre (cert/key) ile
+# sinirliyken bu onek altindaki her sey okunabilir olmali; ikisini tek
+# policy'de birlestirmek TLS'in dar kapsamini gereksiz genisletirdi.
+resource "aws_iam_role_policy" "app_ssm_read_env" {
+  name = "read-app-env-ssm-parameters"
+  role = aws_iam_role.app.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        # GetParametersByPath onek uzerinde, GetParameter tek tek okuma icin.
+        Action = ["ssm:GetParametersByPath", "ssm:GetParameter", "ssm:GetParameters"]
+        Resource = [
+          "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter${var.ssm_app_parameter_prefix}",
+          "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter${var.ssm_app_parameter_prefix}/*",
+        ]
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["kms:Decrypt"]
+        Resource = "*"
+        Condition = {
+          StringEquals = { "kms:ViaService" = "ssm.${var.region}.amazonaws.com" }
+        }
+      }
+    ]
+  })
+}
+
+# Tek seferlik seed icin yazma izni -- varsayilan KAPALI.
+#
+# Sirlar bugun yalnizca sunucunun diskinde, tek kopya. Onlari Parameter
+# Store'a tasiyan scripts/secrets-put.sh kutuda calisir (degerler laptop'a
+# inmesin diye), dolayisiyla instance rolunun gecici olarak yazabilmesi
+# gerekir. Seed bittiginde `enable_secret_seeding = false` ile geri alinir:
+# uygulamanin normal isleyisinde kendi sirlarini degistirmesi gerekmez.
+resource "aws_iam_role_policy" "app_ssm_write_env" {
+  count = var.enable_secret_seeding ? 1 : 0
+
+  name = "seed-app-env-ssm-parameters"
+  role = aws_iam_role.app.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["ssm:PutParameter"]
+        Resource = "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter${var.ssm_app_parameter_prefix}/*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["kms:Encrypt", "kms:GenerateDataKey"]
+        Resource = "*"
+        Condition = {
+          StringEquals = { "kms:ViaService" = "ssm.${var.region}.amazonaws.com" }
+        }
+      }
+    ]
+  })
+}
+
 resource "aws_iam_instance_profile" "app" {
   name = "${var.project_name}-app-profile"
   role = aws_iam_role.app.name
@@ -161,25 +228,63 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.id
 }
 
+# Cloudflare edge aralik listeleri -- kaynak Cloudflare'in kendi yayini.
+# https://www.cloudflare.com/ips-v4  ve  /ips-v6
+data "http" "cloudflare_ipv4" {
+  url = "https://www.cloudflare.com/ips-v4"
+}
+
+data "http" "cloudflare_ipv6" {
+  url = "https://www.cloudflare.com/ips-v6"
+}
+
+locals {
+  cf_ipv4 = compact(split("\n", trimspace(data.http.cloudflare_ipv4.response_body)))
+  cf_ipv6 = compact(split("\n", trimspace(data.http.cloudflare_ipv6.response_body)))
+
+  # Normalde yalnizca Cloudflare; acil durumda herkese acik (bkz. degiskenin aciklamasi).
+  web_ipv4 = var.allow_direct_origin_access ? ["0.0.0.0/0"] : local.cf_ipv4
+  web_ipv6 = var.allow_direct_origin_access ? ["::/0"] : local.cf_ipv6
+}
+
+# 80/443 yalnizca Cloudflare edge'ine acik.
+#
+# NEDEN: bagajpark.com Cloudflare arkasinda ve nginx bir Cloudflare Origin
+# Certificate sunuyor (nginx/conf.d/default.conf) -- yani mimari zaten
+# "yalnizca Cloudflare" olarak tasarlanmis. Ama guvenlik grubu 0.0.0.0/0
+# oldugu surece origin IP'yi ogrenen biri Cloudflare'i tamamen atlayip
+# dogrudan baglanabiliyordu: WAF yok, rate limit yok, DDoS korumasi yok.
+# Origin IP'yi repodan silmek bunu kapatmaz, yalnizca adresi zorlastirir.
+#
+# ACME bagimliligi YOK: sertifika Cloudflare Origin CA'dan geliyor, certbot
+# ve HTTP-01 dogrulamasi kullanilmiyor. Yani 80'i daraltmak sertifika
+# yenilemeyi kirmaz.
 resource "aws_security_group" "web" {
-  name        = "${var.project_name}-web"
+  name = "${var.project_name}-web"
+  # DIKKAT: AWS guvenlik grubu aciklamasini DEGISTIRILEMEZ kabul eder; bu metni
+  # duzeltmek gruba replace zorlar ve replace instance'a da dokunur. Metin bu
+  # yuzden eski haliyle birakildi -- guncel gercek asagidaki Ingress etiketinde
+  # ve bu bloktaki yorumlarda. (2026-08-29: plan "2 to destroy" gosteriyordu,
+  # sebebi buydu.)
   description = "80/443 herkese acik, SSH sadece allowed_ssh_cidr degerine acik"
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    description = "HTTP"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    description      = "HTTP (Cloudflare edge)"
+    from_port        = 80
+    to_port          = 80
+    protocol         = "tcp"
+    cidr_blocks      = local.web_ipv4
+    ipv6_cidr_blocks = local.web_ipv6
   }
 
   ingress {
-    description = "HTTPS"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    description      = "HTTPS (Cloudflare edge)"
+    from_port        = 443
+    to_port          = 443
+    protocol         = "tcp"
+    cidr_blocks      = local.web_ipv4
+    ipv6_cidr_blocks = local.web_ipv6
   }
 
   ingress {
@@ -197,7 +302,23 @@ resource "aws_security_group" "web" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = { Name = "${var.project_name}-web-sg" }
+  tags = {
+    Name = "${var.project_name}-web-sg"
+    # description degistirilemedigi icin guncel durum burada duruyor.
+    Ingress = var.allow_direct_origin_access ? "ACIL-DURUM-herkese-acik" : "yalnizca-cloudflare-edge"
+  }
+
+  lifecycle {
+    # Cloudflare listesi bos ya da anlamsiz kisa donerse (fetch bozuldu, sayfa
+    # degisti) bu kaynak SIFIR ingress ile apply edilir ve siteyi kapatir.
+    # Onu apply'a birakmak yerine planda durduruyoruz.
+    precondition {
+      condition = var.allow_direct_origin_access || (
+        length(local.cf_ipv4) >= 10 && length(local.cf_ipv6) >= 5
+      )
+      error_message = "Cloudflare aralik listesi beklenenden kisa geldi (ipv4=${length(local.cf_ipv4)}, ipv6=${length(local.cf_ipv6)}; beklenen >=10 ve >=5). Liste bozuk olabilir -- apply edilirse 80/443 tamamen kapanir. https://www.cloudflare.com/ips-v4 adresini kontrol edin."
+    }
+  }
 }
 
 resource "aws_key_pair" "deployer" {
@@ -233,7 +354,14 @@ resource "aws_instance" "app" {
   # sablon ancak yeni instance'ta anlam tasir. (2026-08-22: plan "1 to change"
   # gosteriyordu, sebebi buydu.)
   lifecycle {
-    ignore_changes = [user_data]
+    # `ami` de ayni sebeple yok sayiliyor: data.aws_ami.al2023 `most_recent`
+    # oldugu icin Amazon her yeni AL2023 yayininda id degisiyor ve plan CALISAN
+    # PROD INSTANCE'INI yeniden kurmak istiyor -- ilgisiz bir degisiklik icin
+    # apply eden kisi bunu farketmezse kesinti yasanir. (2026-08-29: bu
+    # guvenlik grubu degisikliginin plani "2 to destroy" gosterdi, biri buydu.)
+    # AMI yukseltmesi ARTIK BILINCLI bir is: ignore_changes'ten `ami` gecici
+    # olarak cikarilir, plan okunur, bakim penceresinde apply edilir.
+    ignore_changes = [user_data, ami]
   }
 }
 

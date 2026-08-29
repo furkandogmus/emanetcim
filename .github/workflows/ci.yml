@@ -132,6 +132,12 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      # Prod bagimliliklarinda yuksek/kritik CVE varsa burada durur.
+      # Bilincli tasinan istisnalar gerekce + gozden gecirme tarihiyle
+      # scripts/audit-deps.mjs icinde; tarih gecince kapi yine kirilir.
+      - name: Bagimlilik acigi taramasi
+        run: npm run audit
+
       - name: Prisma migrate (CI DB)
         run: npx prisma migrate deploy
 
@@ -300,6 +306,10 @@ jobs:
           # `sync` s3:ListBucket ister; github-deploy rolunde yalnizca PutObject var.
           # `cp --recursive` listeleme yapmaz. Sunucu tarafi `sync --delete` ile aynalar.
           aws s3 cp public/ "s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/public/" --recursive --only-show-errors
+          # Sirlar Parameter Store'da; sunucu docker-compose.env'i bunlarla uretiyor.
+          # Kutudaki git kopyasinin tazeligine guvenmiyoruz -- deploy yolu S3.
+          aws s3 cp scripts/secrets-render.sh "s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/secrets-render.sh"
+          aws s3 cp ops/secrets.manifest "s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/secrets.manifest"
 
       - name: SSM Run Command ile deploy et
         run: |
@@ -312,7 +322,11 @@ jobs:
               "set -e",
               "aws s3 cp s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/docker-compose.yml /opt/emanetci/docker-compose.yml",
               "aws s3 sync s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/public/ /opt/emanetci/public/ --delete --only-show-errors",
+              "aws s3 cp s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/secrets-render.sh /opt/emanetci/scripts/secrets-render.sh",
+              "aws s3 cp s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/secrets.manifest /opt/emanetci/secrets.manifest",
+              "chmod +x /opt/emanetci/scripts/secrets-render.sh",
               "cd /opt/emanetci",
+              "bash scripts/secrets-render.sh --prefix ${{ vars.SSM_APP_PARAMETER_PREFIX }} --out /opt/emanetci/docker-compose.env --manifest /opt/emanetci/secrets.manifest",
               "docker rm -f $(docker ps -aq --filter name=_emanetci-) 2>/dev/null || true",
               "docker compose --env-file docker-compose.env pull web --quiet",
               "docker compose --env-file docker-compose.env up -d --no-build",
