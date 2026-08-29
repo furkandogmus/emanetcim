@@ -6,7 +6,10 @@ Bu liste **tamamlanmış işleri değil**, üretime yaklaşırken ve sonrasında
 
 ## 1. Güvenlik ve uyumluluk
 
-- [ ] **Secret yönetimi:** Production’da sadece vault / secret manager; rotasyon politikası; `.env` sızıntı taraması (git history dahil).
+- [x] **Secret yönetimi:** 2026-08-29 tamamlandı. Sırlar AWS SSM Parameter Store’da
+  (`ops/SECRETS.md`); deploy env dosyasını her seferinde oradan üretir. Postgres
+  parolası döndürüldü. Git history sızıntı taraması yapıldı ve `docker_logs_500.txt`
+  geçmişten çıkarıldı. Kalan: rotasyonun **takvime** bağlanması (şu an elle).
 - [ ] **CSP / güvenlik başlıkları:** Nginx ve Next.js için tutarlı `Content-Security-Policy`, `HSTS`, `X-Frame-Options`, `Referrer-Policy`; raporlama endpoint’i.
 - [ ] **Rate limiting:** Dağıtımlı limit (Redis/Upstash); kritik aksiyonlar (ödeme, giriş, şifre sıfırlama) için ayrı kotalar.
 - [ ] **Auth hardening:** Session fixation, CSRF (form POST’lar), OAuth callback doğrulama, brute-force / account lockout politikası.
@@ -21,7 +24,11 @@ Bu liste **tamamlanmış işleri değil**, üretime yaklaşırken ve sonrasında
 ## 2. Finans, mutabakat ve muhasebe
 
 - [ ] **Ledger tutarlılığı:** Çift kayıt / tek doğruluk kaynağı; günlük mutabakat job’ı; banka/ödeme sağlayıcı raporu ile karşılaştırma.
-- [ ] **Para birimi ve yuvarlama:** Tüm tutarlar `Decimal` / minor unit; vergi ve komisyon kuralları tek yerde; yuvarlama hataları için test seti.
+- [~] **Para birimi ve yuvarlama:** Kısmen. Tutarlar `Decimal`, komisyon kuralı tek
+  yerde (`PlatformSettings.platformCommissionRate` + `src/lib/platform-split.ts`),
+  yuvarlama test seti var (`platformCommission + merchantAmount === grossAmount`).
+  Kalan: **KDV**. Komisyon faturası KDV dahil mi hariç mi, `PaymentSplit` üzerinde
+  oran enstantanesi tutulacak mı — karar verilmedi.
 - [ ] **İade ve chargeback:** Durum makinesi; kısmi iade; webhook sonrası reconciliation; manuel düzeltme akışı (yetki + kayıt).
 - [ ] **Fraud sinyalleri:** Anomali kuralları (hızlı ardışık rezervasyon, tutar eşiği); manuel inceleme kuyruğu.
 - [ ] **Raporlama:** Günlük/aylık gelir, komisyon, iptal oranı; CSV/Excel export; vergi raporları için alanlar.
@@ -157,6 +164,16 @@ Bu liste **tamamlanmış işleri değil**, üretime yaklaşırken ve sonrasında
 
 - [ ] **Sürümleme:** Public API varsa `/v1` ve deprecation politikası; breaking change duyurusu.
 - [ ] **Giden webhook’lar:** Partner’a olay teslimi; imza, retry, idempotency anahtarı.
+- [ ] **Gelen ödeme webhook’u (`/api/webhooks/payments/[provider]`):** Sözleşme HAZIR,
+  HTTP ucu yok. `PaymentProvider.verifyWebhook()` ve `NormalizedPaymentEvent`
+  (`src/lib/payments/types.ts`) tanımlı; eksik olan ucun kendisi.
+  Yazarken: (a) imza doğrulaması `JSON.parse`’tan **önce ham gövde** üzerinde
+  yapılır — Next.js gövdeyi otomatik ayrıştırırsa imza tutmaz; (b) `verified:false`
+  dönen isteğe **asla** defter işlemi uygulanmaz; (c) aynı olayın iki kez gelmesi
+  ikinci bir tahsilat üretmemeli — `PaymentLog.idempotencyKey` bunun için var.
+  **Bilinçli olarak sağlayıcı seçimine bırakıldı:** doğrulayacağı imzanın şeklini
+  bilmeden yazılan uç, PSP belli olunca büyük ihtimalle ikinci kez yazılır.
+  Bağlam: `docs/PAYMENTS.md` → “Pazaryeri katmanı”.
 - [ ] **Sandbox–prod paritesi:** Test ortamında üretimle aynı kod yolu; mock seviyesi dokümante.
 
 ---

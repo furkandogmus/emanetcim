@@ -70,7 +70,8 @@ bölümde açık iş olarak kalmıştı ve yapılmamıştı.**
   giderse liste de gider; başka bir makinede kesim adımı olduğu gibi tekrarlanamaz.
   Ayrıca `scripts/README.md`'deki "kurulu/kurulmadı" tablosu 2026-08-22'de **eski**
   kutuda ölçülmüştü — yeni kutuda hangi işlerin kurulu olduğu doğrulanmadı.
-- **Sonraki adım**: sunucuda `crontab -l` çıktısını al; uygulama işlerini
+- **Durum**: `crontab -l` adımı 2026-08-29'da yapıldı — sonucu **madde 6**'da.
+- **Sonraki adım**: uygulama işlerini
   `scripts/emit-crontab.sh`'tan üret, sunucuya özgü işleri (yedekleme, disk temizliği)
   repoya bir `crontab.prod` olarak ekle. Tetikleyiciyi tamamen kutunun dışına almak
   (EventBridge Scheduler → `/api/internal/*`, `X-Cron-Secret` başlığıyla) bu sorunu ve
@@ -93,6 +94,39 @@ bölümde açık iş olarak kalmıştı ve yapılmamıştı.**
   --with-decryption` çıktısındaki sertifikanın CN/SAN'ını oku; `bagajpark.com` ise
   cloud-init'teki dosya adını `bagajpark.{crt,key}` yap, değilse önce doğru origin
   sertifikasını SSM'e yaz.
+
+### 6. 🔴 AÇIK — Zamanlanmış sekiz işten BEŞİ hiç çalışmıyor
+
+Madde 4'ün "sunucuda `crontab -l` çıktısını al" adımı 2026-08-29'da yapıldı ve
+beklenenden kötü bir tablo çıktı.
+
+- **Kanıt (2026-08-29, canlı sunucu, SSM Run Command)**: `crontab -l -u ec2-user`
+  beş satır döndürüyor. Bunların yalnızca üçü uygulama işi:
+
+  ```
+  kosuyor  : generate-slots, overdue-scan, seal-forecast
+  KOSMUYOR : booking-reminders, cleanup, finance-export,
+             classify-inbox, response-times
+  ```
+
+  `src/lib/jobs/registry.ts` sekiz iş tanımlıyor; `src/app/api/internal/` altında
+  sekizinin de ucu var. `scripts/emit-crontab.sh` de sekiz satır üretiyor —
+  yani üretilen crontab sunucuya hiç kurulmamış.
+- **Neden önemli**: `booking-reminders` çalışmıyor, yani **misafirlere rezervasyon
+  hatırlatma e-postası gitmiyor**. `cleanup` veri temizliği yapmıyor,
+  `finance-export` finansal dışa aktarım üretmiyor, `response-times` ve
+  `classify-inbox` destek metriklerini beslemiyor. Hiçbiri hata vermiyor; sadece
+  hiç çalışmıyorlar. Madde 4'teki "cron çalışmadı, kimse fark etmedi" sınıfının
+  fiilen gerçekleşmiş hali.
+- **Neden hemen açılmadı**: `booking-reminders` aylardır uykudaysa ilk koşuşunda
+  **birikmiş rezervasyonlara toplu e-posta** atabilir. Bu, hatayı düzeltirken
+  misafirlere alakasız hatırlatma göndermek demek olurdu.
+- **Sonraki adım**: (1) her iş için ilk koşuşta kaç kayda dokunacağını salt okunur
+  bir sorguyla ölç — özellikle `booking-reminders`; (2) gerekiyorsa işe bir
+  "şu tarihten eski kayıtları atla" penceresi ekle; (3) `emit-crontab.sh`
+  çıktısını kur ve işleri **tek tek**, aralarında gözlemleyerek aç;
+  (4) çalıştıklarını doğrulamak için bir sağlık kontrolü ekle — bu sınıfın
+  tekrar sessizce oluşmaması ancak böyle engellenir.
 
 ## 2026-08-26 — performans (kritik yol) + iki güvenilirlik açığı
 
