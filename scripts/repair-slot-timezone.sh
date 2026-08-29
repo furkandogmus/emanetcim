@@ -32,6 +32,13 @@
 # Ayrinti: docs/DEFECT_BACKLOG.md -> 2026-08-24 slot uretimi P0
 # ============================================================
 
+# 2026-08-29: bu script bu sunucuda HIC calismiyordu. Iki sebep vardi ve
+# ikincisi birincisi duzeltilmeden gorunmuyordu:
+#   1. `psql` HOST'ta kurulu degil -> assert_is_installed ilk adimda duserdi.
+#   2. .env icindeki DATABASE_URL `emanetci` veritabanini gosteriyor, o ise YOK
+#      (yalnizca `postgres` ve `bagajpark` var). Ikisi de Hetzner doneminden.
+# Sorgular artik konteyner icindeki psql ile, compose'un kendi baglantisiyla
+# kosuyor; host'ta psql aranmiyor ve olu DATABASE_URL'e guvenilmiyor.
 set -e
 export PATH=$PATH:/usr/local/bin:/usr/bin:/bin
 
@@ -73,19 +80,10 @@ function assert_is_installed() {
   fi
 }
 
-function read_database_url() {
-  local -r env_file="$1"
-  if [[ ! -f "$env_file" ]]; then
-    log_error "$env_file bulunamadi"
-    return 1
-  fi
-  local url
-  url=$(grep -m1 '^DATABASE_URL=' "$env_file" | cut -d= -f2- | tr -d '"'"'"'')
-  if [[ -z "$url" ]]; then
-    log_error "DATABASE_URL $env_file icinde tanimli degil veya bos"
-    return 1
-  fi
-  echo "$url"
+function psql_run() {
+  local -r app_dir="$1"; shift
+  docker compose --project-directory "$app_dir" --env-file "$app_dir/docker-compose.env" \
+    exec -T postgres psql -U bagajpark -d bagajpark -v ON_ERROR_STOP=1 "$@"
 }
 
 # Kapali saate dusen, GELECEK ve rezervasyonsuz slotlari secen kosul.
@@ -129,13 +127,10 @@ function main() {
     esac
   done
 
-  assert_is_installed "psql"
-
-  local db_url
-  db_url=$(read_database_url "$app_dir/.env")
+  assert_is_installed "docker"
 
   log_info "Mevcut durum okunuyor (salt okunur)..."
-  psql "$db_url" -v ON_ERROR_STOP=1 -c "
+  psql_run "$app_dir" -c "
     SELECT sh.name AS dukkan,
            sh.timezone,
            sh.\"openingTime\" AS acilis,
@@ -150,19 +145,19 @@ function main() {
     ORDER BY sh.name;"
 
   log_info "Silinecek (kapali saate dusen, rezervasyonsuz, gelecek) slotlar:"
-  psql "$db_url" -v ON_ERROR_STOP=1 -c "
+  psql_run "$app_dir" -c "
     SELECT sh.name AS dukkan, COUNT(*) AS silinecek
     $WHERE_CLAUSE
     GROUP BY sh.name ORDER BY sh.name;"
 
   local affected
-  affected=$(psql "$db_url" -t -A -v ON_ERROR_STOP=1 -c "SELECT COUNT(*) $WHERE_CLAUSE;")
+  affected=$(psql_run "$app_dir" -t -A -c "SELECT COUNT(*) $WHERE_CLAUSE;")
 
   log_info "Toplam silinecek satir: $affected"
 
   # Rezervasyonu OLAN ve kapali saate dusen slotlar: bunlar elle bakilmali.
   local booked
-  booked=$(psql "$db_url" -t -A -v ON_ERROR_STOP=1 -c "
+  booked=$(psql_run "$app_dir" -t -A -c "
     SELECT COUNT(*)
     FROM \"ShopTimeSlot\" s
     JOIN \"Shop\" sh ON sh.id = s.\"shopId\"
@@ -193,7 +188,7 @@ function main() {
   fi
 
   log_info "Siliniyor ($affected satir)..."
-  psql "$db_url" -v ON_ERROR_STOP=1 -c "
+  psql_run "$app_dir" -c "
     DELETE FROM \"ShopTimeSlot\" s
     USING \"Shop\" sh
     WHERE sh.id = s.\"shopId\"

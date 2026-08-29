@@ -160,7 +160,7 @@ beklenenden kötü bir tablo çıktı.
   DEGRADED yapsın — bu sınıfın tekrar sessizce oluşmaması ancak böyle engellenir;
   (5) `booking-reminders`'a "bildirildi" işareti ekle.
 
-### 8. ⚠️ AÇIK — Mevcut iki onarım scripti bu sunucuda hiç çalışmıyor
+### 8. ✅ DÜZELTİLDİ — Mevcut iki onarım scripti bu sunucuda hiç çalışmıyordu
 
 - **Kanıt (2026-08-29, canlı)**: `command -v psql` → **HAYIR**, psql host'ta kurulu
   değil. `scripts/repair-seal-ownership.sh:98` ve `repair-slot-timezone.sh` ise
@@ -171,10 +171,14 @@ beklenenden kötü bir tablo çıktı.
 - **Neden önemli**: ikisi de kanıtlı bir veri bozukluğunu düzeltmek için yazılmış
   (P1-7'deki 1.247 sahipsiz mühür dahil). "Script var" diye sorun çözülmüş
   sanılıyor; oysa koşturulsa ilk satırda duruyor. Hetzner kutusu için yazılmışlar.
-- **Sonraki adım**: ikisini de `scripts/repair-stale-checkin.sh`'taki desene taşı —
-  sorguları konteyner içindeki psql ile koştur
-  (`docker compose exec -T postgres psql`), host'ta psql aramayı ve env'deki ölü
-  `DATABASE_URL`'e güvenmeyi bırak.
+- **Düzeltme (2026-08-29)**: ikisi de `repair-stale-checkin.sh` desenine taşındı —
+  sorgular konteyner içindeki psql ile koşuyor, host'ta psql aranmıyor, env'deki
+  ölü `DATABASE_URL` kullanılmıyor. Gerekçe scriptlerin başında yazılı.
+- **Ve hemen işe yaradı**: `repair-seal-ownership.sh` ilk kez koşabildi ve **P1-7'nin
+  hâlâ canlı olduğunu** gösterdi — 1.249 mühür `ASSIGNED`/`FAULTY` ama sahipsiz
+  (1.277'nin yalnızca 30'u düzgün atanmış). `/api/health/jobs` bunu artık
+  `sealIntegrity: broken` olarak raporluyor. **`--apply` HENÜZ KOŞULMADI**:
+  1.249 satırlık bir düzeltme, bilinçli bir onay gerektirir.
 
 ### 9. ✅ DÜZELTİLDİ — Cron zinciri üç ayrı katmanda sessizce kopuyordu
 

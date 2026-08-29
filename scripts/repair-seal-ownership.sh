@@ -15,6 +15,13 @@
 # Ayrinti: docs/DEFECT_BACKLOG.md -> P1-7, scripts/README.md
 # ============================================================
 
+# 2026-08-29: bu script bu sunucuda HIC calismiyordu. Iki sebep vardi ve
+# ikincisi birincisi duzeltilmeden gorunmuyordu:
+#   1. `psql` HOST'ta kurulu degil -> assert_is_installed ilk adimda duserdi.
+#   2. .env icindeki DATABASE_URL `emanetci` veritabanini gosteriyor, o ise YOK
+#      (yalnizca `postgres` ve `bagajpark` var). Ikisi de Hetzner doneminden.
+# Sorgular artik konteyner icindeki psql ile, compose'un kendi baglantisiyla
+# kosuyor; host'ta psql aranmiyor ve olu DATABASE_URL'e guvenilmiyor.
 set -e
 export PATH=$PATH:/usr/local/bin:/usr/bin:/bin
 
@@ -56,19 +63,10 @@ function assert_is_installed() {
   fi
 }
 
-function read_database_url() {
-  local -r env_file="$1"
-  if [[ ! -f "$env_file" ]]; then
-    log_error "$env_file bulunamadi"
-    return 1
-  fi
-  local url
-  url=$(grep -m1 '^DATABASE_URL=' "$env_file" | cut -d= -f2- | tr -d '"'"'"'')
-  if [[ -z "$url" ]]; then
-    log_error "DATABASE_URL $env_file icinde tanimli degil veya bos"
-    return 1
-  fi
-  echo "$url"
+function psql_run() {
+  local -r app_dir="$1"; shift
+  docker compose --project-directory "$app_dir" --env-file "$app_dir/docker-compose.env" \
+    exec -T postgres psql -U bagajpark -d bagajpark -v ON_ERROR_STOP=1 "$@"
 }
 
 function main() {
@@ -95,13 +93,10 @@ function main() {
     exit 1
   fi
 
-  assert_is_installed "psql"
-
-  local db_url
-  db_url=$(read_database_url "$app_dir/.env")
+  assert_is_installed "docker"
 
   log_info "Mevcut durum okunuyor (salt okunur)..."
-  psql "$db_url" -v ON_ERROR_STOP=1 -c "
+  psql_run "$app_dir" -c "
     SELECT status,
            COUNT(*) FILTER (WHERE \"shopId\" IS NULL)     AS sahipsiz,
            COUNT(*) FILTER (WHERE \"shopId\" IS NOT NULL) AS sahipli,
@@ -109,7 +104,7 @@ function main() {
     FROM \"Seal\" GROUP BY status ORDER BY status;"
 
   local affected
-  affected=$(psql "$db_url" -t -A -v ON_ERROR_STOP=1 -c "
+  affected=$(psql_run "$app_dir" -t -A -c "
     SELECT COUNT(*) FROM \"Seal\" WHERE status <> 'STOCK' AND \"shopId\" IS NULL;")
 
   log_info "Onarilacak satir sayisi: $affected"
@@ -122,7 +117,7 @@ function main() {
     return 0
   else
     log_info "Onariliyor ($affected satir -> STOCK)..."
-    psql "$db_url" -v ON_ERROR_STOP=1 -c "
+    psql_run "$app_dir" -c "
       UPDATE \"Seal\"
       SET status = 'STOCK', \"assignedAt\" = NULL
       WHERE status <> 'STOCK' AND \"shopId\" IS NULL;"
@@ -132,7 +127,7 @@ function main() {
   if [[ "$validate" == "true" ]]; then
     log_info "DB kisiti dogrulaniyor..."
     # NOT VALID olarak eklenmisti; buradan sonra mevcut satirlar da kontrol edilir.
-    psql "$db_url" -v ON_ERROR_STOP=1 -c "
+    psql_run "$app_dir" -c "
       ALTER TABLE \"Seal\" VALIDATE CONSTRAINT \"Seal_ownership_matches_status\";"
     log_info "Kisit dogrulandi -- bundan sonra gecersiz satir DB seviyesinde imkansiz."
   fi
