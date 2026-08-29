@@ -61,7 +61,7 @@ bölümde açık iş olarak kalmıştı ve yapılmamıştı.**
   ve branch `APP_DIR`/`BRANCH` ile ezilebilir hâle getirildi (`update.sh` ayrıca
   `origin/develop`e sabitlenmişti — canlı `main`den deploy ediliyor).
 
-### 4. ⚠️ AÇIK — Sunucudaki crontab repoda yok
+### 4. ✅ DÜZELTİLDİ — Sunucudaki crontab repoda yok
 
 - **Nerede**: `infra/aws/CUTOVER.md` 3c adımı → `crontab /opt/emanetci/crontab.prod`
 - **Kanıt**: `crontab.prod` bu repoda hiçbir yerde yok; tek geçtiği yer o dokümandır.
@@ -70,7 +70,11 @@ bölümde açık iş olarak kalmıştı ve yapılmamıştı.**
   giderse liste de gider; başka bir makinede kesim adımı olduğu gibi tekrarlanamaz.
   Ayrıca `scripts/README.md`'deki "kurulu/kurulmadı" tablosu 2026-08-22'de **eski**
   kutuda ölçülmüştü — yeni kutuda hangi işlerin kurulu olduğu doğrulanmadı.
-- **Durum**: `crontab -l` adımı 2026-08-29'da yapıldı — sonucu **madde 6**'da.
+- **Durum**: 2026-08-29'da kapatıldı. `crontab -l` alındı (sonucu **madde 6**'da) ve
+  liste `ops/crontab.prod` olarak repoya girdi: uygulama işleri
+  `scripts/emit-crontab.sh` çıktısından, sunucuya özgü işler (yedekleme, disk
+  temizliği) elle. Kurulum, yeniden üretme ve kurmadan önce okunması gerekenler
+  dosyanın başında. **Sunucuya HENÜZ KURULMADI** — bkz. madde 6.
 - **Sonraki adım**: uygulama işlerini
   `scripts/emit-crontab.sh`'tan üret, sunucuya özgü işleri (yedekleme, disk temizliği)
   repoya bir `crontab.prod` olarak ekle. Tetikleyiciyi tamamen kutunun dışına almak
@@ -121,12 +125,40 @@ beklenenden kötü bir tablo çıktı.
 - **Neden hemen açılmadı**: `booking-reminders` aylardır uykudaysa ilk koşuşunda
   **birikmiş rezervasyonlara toplu e-posta** atabilir. Bu, hatayı düzeltirken
   misafirlere alakasız hatırlatma göndermek demek olurdu.
-- **Sonraki adım**: (1) her iş için ilk koşuşta kaç kayda dokunacağını salt okunur
-  bir sorguyla ölç — özellikle `booking-reminders`; (2) gerekiyorsa işe bir
-  "şu tarihten eski kayıtları atla" penceresi ekle; (3) `emit-crontab.sh`
-  çıktısını kur ve işleri **tek tek**, aralarında gözlemleyerek aç;
-  (4) çalıştıklarını doğrulamak için bir sağlık kontrolü ekle — bu sınıfın
-  tekrar sessizce oluşmaması ancak böyle engellenir.
+- **İlk koşuş etkisi ÖLÇÜLDÜ (2026-08-29, canlı, salt okunur SQL)**:
+
+  | İş | İlk koşuşta |
+  |---|---|
+  | `booking-reminders` | misafire **0** e-posta; esnafa **3** bildirim (2 dükkan) |
+  | `cleanup` | **37** süresi dolmuş doğrulama token'ı siler; 0 session, 0 analitik |
+  | `classify-inbox` | 0 (77 mesajın hepsi sınıflanmış) |
+  | `finance-export` | 0 satır; zaten salt okunur (CSV üretir) |
+
+  Yani "toplu e-posta" riski **yok**: `booking-reminders`'ın misafir dalları ileri
+  dönük pencereler (check-in'e 2 saat, check-out'a 1 saat) ve ölçüm anında boştu.
+  Kalan tek gürültü, esnafa giden overdue bildirimi.
+- **Ama o bildirim SÜRESİZ tekrarlanır**: sorguda alt sınır yok ve "bildirildi"
+  işareti tutulmuyor (`src/app/api/internal/booking-reminders/route.ts:88`), yani
+  aynı 3 kayıt için 2 esnaf **her gün** uyarı alır. Üç kayıt 12–14 Haziran tarihli
+  ve `overdue-scan`'in kendi açıklamasında geçen kayıtlarla aynı ("üç müşterinin
+  bavulu Haziran'dan beri 'dükkanda' görünüyordu").
+- **Sonraki adım**: (1) o üç açık `CHECKED_IN` kaydı kapat — bunlar zaten başlı
+  başına bir veri sorunu; (2) `ops/crontab.prod`'u kur (`mkdir -p
+  /opt/emanetci/logs` ÖNCE); (3) işleri tek tek, aralarında gözlemleyerek aç;
+  (4) `registry.ts` içinde `enforced=true` yap ki gecikme sağlık kontrolünü
+  DEGRADED yapsın — bu sınıfın tekrar sessizce oluşmaması ancak böyle engellenir;
+  (5) `booking-reminders`'a "bildirildi" işareti ekle.
+
+### 7. ✅ DÜZELTİLDİ — Üretilen crontab, yazılamayan bir dizine log yazıyordu
+
+- **Kanıt (2026-08-29, canlı)**: `sudo -u ec2-user test -w /var/log` → **HAYIR**.
+  `scripts/emit-crontab.sh` ise her satırı `>> /var/log/bagajpark-<is>.log` ile
+  üretiyordu (`emit-crontab.sh:102`).
+- **Neden önemli**: `>>` hedefi açılamazsa komut **hiç çalışmaz**. Yani madde 6'daki
+  eksik işler kurulsaydı bile koşmayacaklardı — üstelik logsuz, yani ikinci kez
+  sessizce. Madde 6'yı düzeltmeye çalışan kişi tuzağa basardı.
+- **Düzeltme**: log dizini `--log-dir` ile parametreleştirildi, varsayılanı
+  yazılabilir olan `/opt/emanetci/logs`. Gerekçe scriptin başında yazılı.
 
 ## 2026-08-26 — performans (kritik yol) + iki güvenilirlik açığı
 

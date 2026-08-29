@@ -23,6 +23,14 @@ readonly SCRIPT_NAME="$(basename "$0")"
 # varsayilan orada kalirsa bu script VAR OLMAYAN bir yola isaret eden crontab
 # satirlari uretir -- cron da bunu sessizce basarisiz eder.
 readonly DEFAULT_APP_DIR="/opt/emanetci"
+# Log dizini varsayilani UYGULAMA DIZINI, /var/log DEGIL.
+#
+# NEDEN: cron isleri sunucuda `ec2-user` olarak kosuyor ve o kullanicinin
+# /var/log'a YAZMA IZNI YOK (2026-08-29'da canlida dogrulandi). `>>` hedefi
+# acilamazsa komut hic calismaz -- yani /var/log'a yazan bir crontab kurulsa
+# isler sessizce kosmazdi. Bu, "cron calismadi, kimse fark etmedi" sinifinin
+# tam olarak kendisi.
+readonly DEFAULT_LOG_DIR="/opt/emanetci/logs"
 
 function log() {
   >&2 echo -e "[$(date -u '+%Y-%m-%dT%H:%M:%SZ')] [$SCRIPT_NAME] $*"
@@ -40,6 +48,8 @@ function print_usage() {
   echo
   echo "Secenekler:"
   echo -e "  --app-dir\tSunucudaki uygulama dizini. Varsayilan: $DEFAULT_APP_DIR"
+  echo -e "  --log-dir\tLog dizini. Varsayilan: $DEFAULT_LOG_DIR"
+  echo -e "\t\tYAZILABILIR olmali; cron kullanicisi /var/log'a yazamaz."
   echo -e "  --only-enforced\tYalnizca enforced=true isleri yaz"
   echo -e "  --help\t\tBu metni gosterir"
   echo
@@ -59,11 +69,13 @@ function assert_is_installed() {
 
 function main() {
   local app_dir="$DEFAULT_APP_DIR"
+  local log_dir="$DEFAULT_LOG_DIR"
   local only_enforced="false"
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --app-dir)       app_dir="$2";        shift 2 ;;
+      --log-dir)       log_dir="$2";        shift 2 ;;
       --only-enforced) only_enforced="true"; shift ;;
       --help)          print_usage; exit 0 ;;
       *)
@@ -79,10 +91,11 @@ function main() {
   local -r repo_root="$(cd "$(dirname "$0")/.." && pwd)"
   log_info "Kayit defteri okunuyor: src/lib/jobs/registry.ts"
 
-  APP_DIR="$app_dir" ONLY_ENFORCED="$only_enforced" \
+  APP_DIR="$app_dir" LOG_DIR="$log_dir" ONLY_ENFORCED="$only_enforced" \
     npx tsx --eval "
       import { JOB_REGISTRY } from './src/lib/jobs/registry';
       const appDir = process.env.APP_DIR;
+      const logDir = process.env.LOG_DIR;
       const onlyEnforced = process.env.ONLY_ENFORCED === 'true';
       const jobs = JOB_REGISTRY.filter(j => !onlyEnforced || j.enforced);
       console.log('# BagajPark zamanlanmis isler');
@@ -99,7 +112,7 @@ function main() {
           console.log('# NOT: enforced=false -- gecikmesi saglik kontrolunu DEGRADED yapmaz.');
           console.log('#       Cron kurulduktan sonra registry.ts icinde true yapin.');
         }
-        console.log(\`\${j.cron} \${script} >> /var/log/bagajpark-\${j.name}.log 2>&1\`);
+        console.log(\`\${j.cron} \${script} >> \${logDir}/bagajpark-\${j.name}.log 2>&1\`);
         console.log('');
       }
     " 2>/dev/null || {

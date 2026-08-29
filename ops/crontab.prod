@@ -1,0 +1,91 @@
+# BagajPark — canlı sunucu crontab'ı (ec2-user)
+#
+# NEDEN REPODA: 2026-08-29'a kadar canlının zamanlanmış iş listesinin TEK kopyası
+# sunucudaydı. Sunucu gitse liste de giderdi (DEFECT_BACKLOG madde 4).
+#
+# İKİ BÖLÜM:
+#   1) Uygulama işleri — `scripts/emit-crontab.sh` ÜRETİR. Elle düzenlemeyin;
+#      iş eklemek için `src/lib/jobs/registry.ts` değişir, sonra bu dosya
+#      yeniden üretilir.
+#   2) Sunucuya özgü işler — yedekleme ve disk temizliği; uygulama işi değiller.
+#
+# LOG YOLU /var/log DEĞİL: cron `ec2-user` olarak koşuyor ve o kullanıcının
+# /var/log'a yazma izni YOK (2026-08-29'da canlıda doğrulandı). `>>` hedefi
+# açılamazsa komut hiç çalışmaz — /var/log'a yazan bir crontab kurulsaydı
+# işler sessizce koşmazdı.
+#
+# KURULUM (sunucuda, ec2-user olarak):
+#   mkdir -p /opt/emanetci/logs          # ÖNCE: yoksa hiçbir iş çalışmaz
+#   crontab -l > /tmp/crontab.yedek      # mevcut listeyi yedekle
+#   crontab /tmp/crontab.prod
+#   crontab -l                           # doğrula
+#
+# YENİDEN ÜRETME:
+#   bash scripts/emit-crontab.sh          # uygulama işleri
+#
+# DİKKAT — kurmadan önce okuyun:
+#   `booking-reminders` açıldığında çıkış saati geçmiş açık rezervasyonlar için
+#   esnafa bildirim gider ve bu HER KOŞUDA tekrarlanır ("bildirildi" işareti yok).
+#   2026-08-29 ölçümü: 12–14 Haziran tarihli 3 açık rezervasyon, 2 dükkan.
+#   Misafire giden e-posta YOK (pencereler ileri dönük ve o an boştu).
+#   Önce o üç kaydı kapatın — yoksa iki esnaf her gün Haziran'dan kalma uyarı alır.
+
+PATH=/usr/local/bin:/usr/bin:/bin
+
+
+# Aktif dükkanlar için 30 gün ileriye zaman slotu üretir.
+# Calismazsa: Saatlik ürün seçilemez hâle gelir (slot seçici boşalır) ve per-slot kapasite kontrolü yerini kaba, dükkan geneli bir kontrole bırakır. 2026-07-14'te oldu, 37 gün fark edilmedi.
+17 4 * * * /opt/emanetci/scripts/generate-slots.sh >> /opt/emanetci/logs/bagajpark-generate-slots.log 2>&1
+
+# Çıkış saatini geçtiği hâlde açık kalan rezervasyonları bulur ve olay yazar.
+# Calismazsa: Yaşam döngüsünün sonlanmayan ucu görünmez kalır. 19 rezervasyonun 18'i böyleydi ve üç müşterinin bavulu Haziran'dan beri 'dükkanda' görünüyordu.
+# NOT: enforced=false -- gecikmesi saglik kontrolunu DEGRADED yapmaz.
+#       Cron kurulduktan sonra registry.ts icinde true yapin.
+47 4 * * * /opt/emanetci/scripts/overdue-scan.sh >> /opt/emanetci/logs/bagajpark-overdue-scan.log 2>&1
+
+# Yaklaşan rezervasyonlar için misafire hatırlatma gönderir.
+# Calismazsa: Misafir check-in saatini kaçırır; no-show ve destek yükü artar.
+# NOT: enforced=false -- gecikmesi saglik kontrolunu DEGRADED yapmaz.
+#       Cron kurulduktan sonra registry.ts icinde true yapin.
+7 9 * * * /opt/emanetci/scripts/call-internal-job.sh --job booking-reminders >> /opt/emanetci/logs/bagajpark-booking-reminders.log 2>&1
+
+# Süresi geçmiş doğrulama token'larını, oturumları ve 90 günden eski analitik olaylarını siler.
+# Calismazsa: Tablolar sınırsız büyür — süresi geçmiş token'lar gereğinden uzun yaşar, AnalyticsEvent hiç küçülmez.
+# NOT: enforced=false -- gecikmesi saglik kontrolunu DEGRADED yapmaz.
+#       Cron kurulduktan sonra registry.ts icinde true yapin.
+23 3 * * * /opt/emanetci/scripts/call-internal-job.sh --job cleanup >> /opt/emanetci/logs/bagajpark-cleanup.log 2>&1
+
+# Dükkanların mühür ihtiyacını öngörür ve azalanları bildirir.
+# Calismazsa: Dükkanın mührü biter ve check-in yapılamaz; mühür tedariki 3 gün sürüyor.
+# NOT: enforced=false -- gecikmesi saglik kontrolunu DEGRADED yapmaz.
+#       Cron kurulduktan sonra registry.ts icinde true yapin.
+37 6 * * 1 /opt/emanetci/scripts/call-internal-job.sh --job seal-forecast >> /opt/emanetci/logs/bagajpark-seal-forecast.log 2>&1
+
+# Sınıflandırılmamış gelen kutusu mesajlarını destek/toplu/otomatik olarak ayırır.
+# Calismazsa: Soğuk pazarlama destek kutusunu doldurur ve gerçek bir misafir şikâyeti aralarında kaybolur. 2026-08-22'de 67 mesajın 57'si okunmamıştı.
+# NOT: enforced=false -- gecikmesi saglik kontrolunu DEGRADED yapmaz.
+#       Cron kurulduktan sonra registry.ts icinde true yapin.
+13 5 * * * /opt/emanetci/scripts/call-internal-job.sh --job classify-inbox >> /opt/emanetci/logs/bagajpark-classify-inbox.log 2>&1
+
+# Dükkanların 'yanıt süresi' rozetini geçmiş onay verisinden yeniden hesaplar.
+# Calismazsa: Rozet donar: dükkan yavaşlasa da eski hızlı sayıyı göstermeye devam eder. Çalışmadan hiç, `responseTimeMinutes` platform genelinde 0'dı ve rozet hiçbir ölçüme dayanmıyordu (P2-7).
+# NOT: enforced=false -- gecikmesi saglik kontrolunu DEGRADED yapmaz.
+#       Cron kurulduktan sonra registry.ts icinde true yapin.
+29 3 * * * /opt/emanetci/scripts/call-internal-job.sh --job response-times >> /opt/emanetci/logs/bagajpark-response-times.log 2>&1
+
+# Finans/mutabakat verisini dışa aktarır.
+# Calismazsa: Mutabakat elle yapılmak zorunda kalır.
+# NOT: enforced=false -- gecikmesi saglik kontrolunu DEGRADED yapmaz.
+#       Cron kurulduktan sonra registry.ts icinde true yapin.
+53 2 * * * /opt/emanetci/scripts/call-internal-job.sh --job finance-export >> /opt/emanetci/logs/bagajpark-finance-export.log 2>&1
+
+
+# ---------------------------------------------------------------------------
+# Sunucuya özgü işler — registry.ts'te DEĞİL, çünkü uygulama işi değiller.
+# ---------------------------------------------------------------------------
+
+# Postgres yedeği + S3 kopyası. Yedekler yalnızca sunucu diskinde kalmasın diye.
+0 */6 * * * /opt/emanetci/scripts/backup-s3.sh --bucket bagajpark-backups-1d9eb152 >> /opt/emanetci/logs/backup.log 2>&1
+
+# Kullanılmayan docker imajları; tek diskli kutuda disk dolmasını önler.
+0 3 * * 0 docker image prune -af --filter "until=168h" >> /opt/emanetci/logs/docker-prune.log 2>&1
