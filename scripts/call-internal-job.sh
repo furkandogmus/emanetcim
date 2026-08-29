@@ -16,7 +16,9 @@ set -e
 export PATH=$PATH:/usr/local/bin:/usr/bin:/bin
 
 readonly SCRIPT_NAME="$(basename "$0")"
-readonly DEFAULT_APP_DIR="/root/emanetci"
+# Uygulama dizini /opt/emanetci: canli sunucu AWS EC2 (2026-08-23 kesimi).
+# .env bu dizinde aranir; eski Hetzner yolu /root/emanetci artik gecerli degil.
+readonly DEFAULT_APP_DIR="/opt/emanetci"
 readonly DEFAULT_BASE_URL="https://bagajpark.com"
 
 function log() {

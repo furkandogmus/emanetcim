@@ -19,7 +19,7 @@ set -e
 export PATH=$PATH:/usr/local/bin:/usr/bin:/bin
 
 readonly SCRIPT_NAME="$(basename "$0")"
-readonly DEFAULT_APP_DIR="/root/emanetci"
+readonly DEFAULT_APP_DIR="/opt/emanetci"
 
 function log() {
   >&2 echo -e "[$(date -u '+%Y-%m-%dT%H:%M:%SZ')] [$SCRIPT_NAME] $*"

@@ -9,6 +9,11 @@
 
 set -euo pipefail
 
+# Canli sunucu 2026-08-23 kesimiyle AWS EC2'ye tasindi; uygulama dizini
+# /opt/emanetci. Eski Hetzner yolu (/root/emanetci) burada sabitlenmisti ve
+# script son adimda `cd` hatasiyla duserdi.
+APP_DIR="${APP_DIR:-/opt/emanetci}"
+
 echo "╔══════════════════════════════════════════════════════════╗"
 echo "║     BagajPark — Sunucu Stress Test Hazırlık            ║"
 echo "╚══════════════════════════════════════════════════════════╝"
@@ -120,7 +125,7 @@ echo "   ✅ İndeksler oluşturuldu"
 
 # ── 7. Servisleri Yeniden Başlat ─────────────────────────────
 echo "🔄 Servisleri yeniden başlatılıyor..."
-cd /root/emanetci
+cd "$APP_DIR"
 docker compose restart postgres
 sleep 5
 docker compose restart nginx

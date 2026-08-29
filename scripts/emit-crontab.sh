@@ -18,7 +18,11 @@ set -e
 export PATH=$PATH:/usr/local/bin:/usr/bin:/bin
 
 readonly SCRIPT_NAME="$(basename "$0")"
-readonly DEFAULT_APP_DIR="/root/emanetci"
+# Uygulama dizini /opt/emanetci: canli sunucu 2026-08-23 kesimiyle AWS EC2'ye
+# tasindi (bkz. infra/aws/CUTOVER.md). Eski Hetzner yolu /root/emanetci idi ve
+# varsayilan orada kalirsa bu script VAR OLMAYAN bir yola isaret eden crontab
+# satirlari uretir -- cron da bunu sessizce basarisiz eder.
+readonly DEFAULT_APP_DIR="/opt/emanetci"
 
 function log() {
   >&2 echo -e "[$(date -u '+%Y-%m-%dT%H:%M:%SZ')] [$SCRIPT_NAME] $*"
