@@ -51,6 +51,73 @@ resource "aws_iam_role_policy" "app_ssm_read" {
   })
 }
 
+# Uygulama env anahtarlari (docker-compose.env) -- scripts/secrets-render.sh
+# her deploy'da bunlardan dosyayi uretir.
+#
+# NEDEN AYRI POLICY: TLS onegi tek tek iki parametre (cert/key) ile
+# sinirliyken bu onek altindaki her sey okunabilir olmali; ikisini tek
+# policy'de birlestirmek TLS'in dar kapsamini gereksiz genisletirdi.
+resource "aws_iam_role_policy" "app_ssm_read_env" {
+  name = "read-app-env-ssm-parameters"
+  role = aws_iam_role.app.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        # GetParametersByPath onek uzerinde, GetParameter tek tek okuma icin.
+        Action = ["ssm:GetParametersByPath", "ssm:GetParameter", "ssm:GetParameters"]
+        Resource = [
+          "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter${var.ssm_app_parameter_prefix}",
+          "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter${var.ssm_app_parameter_prefix}/*",
+        ]
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["kms:Decrypt"]
+        Resource = "*"
+        Condition = {
+          StringEquals = { "kms:ViaService" = "ssm.${var.region}.amazonaws.com" }
+        }
+      }
+    ]
+  })
+}
+
+# Tek seferlik seed icin yazma izni -- varsayilan KAPALI.
+#
+# Sirlar bugun yalnizca sunucunun diskinde, tek kopya. Onlari Parameter
+# Store'a tasiyan scripts/secrets-put.sh kutuda calisir (degerler laptop'a
+# inmesin diye), dolayisiyla instance rolunun gecici olarak yazabilmesi
+# gerekir. Seed bittiginde `enable_secret_seeding = false` ile geri alinir:
+# uygulamanin normal isleyisinde kendi sirlarini degistirmesi gerekmez.
+resource "aws_iam_role_policy" "app_ssm_write_env" {
+  count = var.enable_secret_seeding ? 1 : 0
+
+  name = "seed-app-env-ssm-parameters"
+  role = aws_iam_role.app.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["ssm:PutParameter"]
+        Resource = "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter${var.ssm_app_parameter_prefix}/*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["kms:Encrypt", "kms:GenerateDataKey"]
+        Resource = "*"
+        Condition = {
+          StringEquals = { "kms:ViaService" = "ssm.${var.region}.amazonaws.com" }
+        }
+      }
+    ]
+  })
+}
+
 resource "aws_iam_instance_profile" "app" {
   name = "${var.project_name}-app-profile"
   role = aws_iam_role.app.name

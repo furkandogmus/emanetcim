@@ -53,6 +53,18 @@ variable "ssm_parameter_prefix" {
   default     = "/bagajpark/aws-test/tls"
 }
 
+variable "ssm_app_parameter_prefix" {
+  description = "Uygulama env anahtarlarinin SSM onegi. TLS onegiyle (ssm_parameter_prefix) BILEREK ayri: TLS'i yalnizca nginx okur, bu oneki uygulama okur ve seed sirasinda yazilabilir hale gelir."
+  type        = string
+  default     = "/bagajpark/env/app"
+}
+
+variable "enable_secret_seeding" {
+  description = "Instance rolune bu onek altina ssm:PutParameter verir. YALNIZCA tek seferlik seed (scripts/secrets-put.sh) icin true yapin, seed bitince false'a alip tekrar apply edin. Surekli acik birakmak, kutuyu ele geciren birine kendi sirlarini kalici olarak degistirme imkani verir."
+  type        = bool
+  default     = false
+}
+
 variable "deploy_config_bucket" {
   description = "bootstrap/ çıktısındaki backup_bucket_name — bucket adı random_id içerdiğinden isimlendirme sözleşmesiyle DEĞİL, bu değişkenle bağlanıyor. Hesap değişirse `terraform output backup_bucket_name` ile güncellenmeli."
   type        = string

@@ -4,6 +4,12 @@ Bu dizin, canlı Hetzner sunucusuna erişim ve denetim için kullanılan yerel b
 tutar. `server.env` **git'e girmez** (`.gitignore`); `server.env.example` şablon
 olarak git'te kalır.
 
+## Üretim sırları
+
+`docker-compose.env` artık elle düzenlenmez — tek doğruluk kaynağı SSM Parameter
+Store, dosya her deploy'da oradan üretilir. Taşıma adımları, doğrulama ve geri
+alma: [`ops/SECRETS.md`](SECRETS.md).
+
 ## Kurulum
 
 ```bash
