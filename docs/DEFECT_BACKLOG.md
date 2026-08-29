@@ -103,7 +103,7 @@ getiren hata sınıfının ta kendisi olurdu.
 
 **Sonuç**: `/api/health/jobs` → `UP`, beş kontrolün beşi de `ok`.
 
-### 5. ⚠️ AÇIK — Yeni bir instance TLS sertifikasını bulamadan açılır
+### 5. ✅ DÜZELTİLDİ — Yeni bir instance TLS sertifikasını bulamadan açılırdı
 
 - **Nerede**: `infra/aws/stack/cloud-init.sh.tftpl:65-70` ↔ `nginx/conf.d/default.conf:38-51`
 - **Kanıt**: cloud-init SSM'den çektiği materyali `/etc/ssl/cloudflare/aws-test.crt` ve
@@ -126,9 +126,15 @@ getiren hata sınıfının ta kendisi olurdu.
   `bagajpark.com`'u kapsadığını `openssl -checkhost` ile doğrulayıp aksi hâlde
   **duruyor** — yanlış sertifikayla açılan bir sunucu üretmektense cloud-init'in
   orada patlaması iyidir.
-- **Kalan**: iki `terraform apply` (seed iznini aç → `tls-put.sh --apply` → kapat).
-  Çalışan instance ETKİLENMEZ: `user_data` zaten `ignore_changes`'te, plan
-  "No changes" diyor.
+- **Uygulandı (2026-08-29)**: canlı sertifika ve özel anahtar SSM'e taşındı
+  (`/bagajpark/aws-test/tls/{cert,key}` → sürüm 2). Doğrulama: SSM'deki
+  sertifikanın SAN'ı artık `*.bagajpark.com, bagajpark.com`. Özel anahtar kutudan
+  hiç çıkmadı — script sunucuda koştu, ekrana yalnızca uzunluk basıldı.
+  Seed yazma izni açılıp **kapatıldı** (`NoSuchEntity` ile doğrulandı); instance
+  rolünde yalnızca okuma politikaları kaldı.
+- **Çalışan sunucuya dokunulmadı**: `user_data` `ignore_changes`'te olduğu için
+  plan "No changes" dedi. Kazanç bugünde değil, yarında: kutu gidince yenisi
+  sertifikayı SSM'den bulabilir. Bugüne kadar bu yol kırıktı ve kimse denememişti.
 
 ### 6. ✅ DÜZELTİLDİ — Zamanlanmış sekiz işten BEŞİ hiç çalışmıyordu
 
