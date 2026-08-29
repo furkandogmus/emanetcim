@@ -99,7 +99,7 @@ bölümde açık iş olarak kalmıştı ve yapılmamıştı.**
   cloud-init'teki dosya adını `bagajpark.{crt,key}` yap, değilse önce doğru origin
   sertifikasını SSM'e yaz.
 
-### 6. 🔴 AÇIK — Zamanlanmış sekiz işten BEŞİ hiç çalışmıyor
+### 6. ✅ DÜZELTİLDİ — Zamanlanmış sekiz işten BEŞİ hiç çalışmıyordu
 
 Madde 4'ün "sunucuda `crontab -l` çıktısını al" adımı 2026-08-29'da yapıldı ve
 beklenenden kötü bir tablo çıktı.
@@ -147,7 +147,14 @@ beklenenden kötü bir tablo çıktı.
   `PaymentLog.status = SUCCESS`) script tarafından **bilerek atlandı**: iptal,
   karşılığı olan bir SUCCESS ödemeyi öksüz bırakır ve raporda karşılığı olmayan
   gelir görünür. Önce para tarafına karar verilmeli.
-- **Sonraki adım**: (1) kalan 540 TL'lik kaydın ödemesine karar ver; (2) `ops/crontab.prod`'u kur (`mkdir -p
+- **Durum (2026-08-29, akşam)**: **crontab kuruldu, sekiz işin tamamı zamanlanmış.**
+  Kurulum sırasında duman testi ÜÇ ayrı gizli hata yakaladı — üçü de sırayla
+  ortaya çıktı, biri düzeltilmeden diğeri görünmüyordu (madde 9).
+  Kalan 540 TL'lik kayıt `PAID`'e alındı ve artık hiçbir şeyi bloke etmiyor:
+  `CHECKED_IN` sayısı **0**, yani overdue bildirimi tetiklenmiyor.
+- **Sonraki adım**: (1) kalan 540 TL'lik kaydı normal iptal akışından iptal et;
+  (2) yarın sabah `/opt/emanetci/logs/` altındaki çıktıları oku;
+  (3) işler doğrulanınca `registry.ts` içinde `enforced=true` yap; (2) `ops/crontab.prod`'u kur (`mkdir -p
   /opt/emanetci/logs` ÖNCE); (3) işleri tek tek, aralarında gözlemleyerek aç;
   (4) `registry.ts` içinde `enforced=true` yap ki gecikme sağlık kontrolünü
   DEGRADED yapsın — bu sınıfın tekrar sessizce oluşmaması ancak böyle engellenir;
@@ -168,6 +175,31 @@ beklenenden kötü bir tablo çıktı.
   sorguları konteyner içindeki psql ile koştur
   (`docker compose exec -T postgres psql`), host'ta psql aramayı ve env'deki ölü
   `DATABASE_URL`'e güvenmeyi bırak.
+
+### 9. ✅ DÜZELTİLDİ — Cron zinciri üç ayrı katmanda sessizce kopuyordu
+
+Crontab kurulduktan sonra "yarın bakarız" demek yerine duman testi koşuldu ve
+üç hata ÜST ÜSTE çıktı. Her biri bir öncekini düzeltmeden görünmüyordu; hiçbiri
+hata vermiyordu, işler sadece çalışmıyordu.
+
+1. **Sunucudaki scriptler eski**: `call-internal-job.sh` hâlâ `/root/emanetci/.env`
+   arıyordu. Düzeltme repoda vardı ama sunucuya hiç gitmemişti — **CI deploy
+   `scripts/` dizinini göndermiyor**, yalnızca `docker-compose.yml`, `public/`
+   ve secrets scriptlerini gönderiyor. Scriptler S3 üzerinden senkronlandı.
+2. **Env dosyası cron kullanıcısına kapalı**: `secrets-render.sh` dosyayı
+   `600 root` yazıyordu (bu oturumda ben ekledim), cron ise `ec2-user` olarak
+   koşup `CRON_SECRET`'i o dosyadan okuyor. Sekiz iş de "CRON_SECRET tanımlı
+   değil" ile düşerdi. `640 root:ec2-user` yapıldı — taviz değil: `ec2-user`
+   zaten `docker compose exec web printenv` ile tüm sırları görebiliyor.
+3. **HTTP metodu uyuşmuyordu**: `call-internal-job.sh` sabit `POST` gönderiyordu,
+   ama `booking-reminders` ve `finance-export` yalnızca `GET` export ediyor.
+   İkisi de **405** alıp sessizce düşerdi — üstelik biri misafire hatırlatma
+   e-postası gönderen iş. Metot artık `registry.ts` içinde, crontab satırını
+   `emit-crontab.sh` oradan üretiyor ve `jobs-registry.test.ts` route dosyasının
+   gerçekten o metodu export ettiğini doğruluyor.
+
+**Doğrulama**: GET ucu (`finance-export`) CSV döndürdü, POST ucu
+(`response-times`) `{"ok":true,"samples":8,"written":3}` döndürdü.
 
 ### 7. ✅ DÜZELTİLDİ — Üretilen crontab, yazılamayan bir dizine log yazıyordu
 

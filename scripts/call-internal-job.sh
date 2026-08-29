@@ -39,6 +39,10 @@ function print_usage() {
   echo -e "  --job\t\tIc is adi (uc yolu: /api/internal/<ad>). ZORUNLU."
   echo -e "  --base-url\tUygulama adresi. Varsayilan: $DEFAULT_BASE_URL"
   echo -e "  --app-dir\t.env dosyasinin bulundugu dizin. Varsayilan: $DEFAULT_APP_DIR"
+  echo -e "  --method\tHTTP metodu (GET|POST). Varsayilan: POST"
+  echo -e "\t\tUcun kabul ettigi metot src/lib/jobs/registry.ts icinde yazili;"
+  echo -e "\t\tcrontab satirini emit-crontab.sh oradan uretir. Yanlis metot"
+  echo -e "\t\t405 doner ve is SESSIZCE calismamis olur."
   echo -e "  --timeout\tcurl azami sure (saniye). Varsayilan: 120"
   echo -e "  --help\t\tBu metni gosterir"
   echo
@@ -85,6 +89,7 @@ function read_cron_secret() {
 
 function main() {
   local job=""
+  local method="POST"
   local base_url="$DEFAULT_BASE_URL"
   local app_dir="$DEFAULT_APP_DIR"
   local timeout="120"
@@ -92,6 +97,7 @@ function main() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --job)      job="$2";      shift 2 ;;
+      --method)  method="$2";  shift 2 ;;
       --base-url) base_url="$2"; shift 2 ;;
       --app-dir)  app_dir="$2";  shift 2 ;;
       --timeout)  timeout="$2";  shift 2 ;;
@@ -122,7 +128,7 @@ function main() {
   local http_code
   http_code=$(curl -s -o "$body_file" -w '%{http_code}' \
     --max-time "$timeout" \
-    -X POST \
+    -X "$method" \
     -H "X-Cron-Secret: $secret" \
     "$endpoint" || echo "000")
 

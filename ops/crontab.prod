@@ -47,38 +47,37 @@ PATH=/usr/local/bin:/usr/bin:/bin
 # Calismazsa: Misafir check-in saatini kaçırır; no-show ve destek yükü artar.
 # NOT: enforced=false -- gecikmesi saglik kontrolunu DEGRADED yapmaz.
 #       Cron kurulduktan sonra registry.ts icinde true yapin.
-7 9 * * * /opt/emanetci/scripts/call-internal-job.sh --job booking-reminders >> /opt/emanetci/logs/bagajpark-booking-reminders.log 2>&1
+7 9 * * * /opt/emanetci/scripts/call-internal-job.sh --job booking-reminders --method GET >> /opt/emanetci/logs/bagajpark-booking-reminders.log 2>&1
 
 # Süresi geçmiş doğrulama token'larını, oturumları ve 90 günden eski analitik olaylarını siler.
 # Calismazsa: Tablolar sınırsız büyür — süresi geçmiş token'lar gereğinden uzun yaşar, AnalyticsEvent hiç küçülmez.
 # NOT: enforced=false -- gecikmesi saglik kontrolunu DEGRADED yapmaz.
 #       Cron kurulduktan sonra registry.ts icinde true yapin.
-23 3 * * * /opt/emanetci/scripts/call-internal-job.sh --job cleanup >> /opt/emanetci/logs/bagajpark-cleanup.log 2>&1
+23 3 * * * /opt/emanetci/scripts/call-internal-job.sh --job cleanup --method POST >> /opt/emanetci/logs/bagajpark-cleanup.log 2>&1
 
 # Dükkanların mühür ihtiyacını öngörür ve azalanları bildirir.
 # Calismazsa: Dükkanın mührü biter ve check-in yapılamaz; mühür tedariki 3 gün sürüyor.
 # NOT: enforced=false -- gecikmesi saglik kontrolunu DEGRADED yapmaz.
 #       Cron kurulduktan sonra registry.ts icinde true yapin.
-37 6 * * 1 /opt/emanetci/scripts/call-internal-job.sh --job seal-forecast >> /opt/emanetci/logs/bagajpark-seal-forecast.log 2>&1
+37 6 * * 1 /opt/emanetci/scripts/call-internal-job.sh --job seal-forecast --method POST >> /opt/emanetci/logs/bagajpark-seal-forecast.log 2>&1
 
 # Sınıflandırılmamış gelen kutusu mesajlarını destek/toplu/otomatik olarak ayırır.
 # Calismazsa: Soğuk pazarlama destek kutusunu doldurur ve gerçek bir misafir şikâyeti aralarında kaybolur. 2026-08-22'de 67 mesajın 57'si okunmamıştı.
 # NOT: enforced=false -- gecikmesi saglik kontrolunu DEGRADED yapmaz.
 #       Cron kurulduktan sonra registry.ts icinde true yapin.
-13 5 * * * /opt/emanetci/scripts/call-internal-job.sh --job classify-inbox >> /opt/emanetci/logs/bagajpark-classify-inbox.log 2>&1
+13 5 * * * /opt/emanetci/scripts/call-internal-job.sh --job classify-inbox --method POST >> /opt/emanetci/logs/bagajpark-classify-inbox.log 2>&1
 
 # Dükkanların 'yanıt süresi' rozetini geçmiş onay verisinden yeniden hesaplar.
 # Calismazsa: Rozet donar: dükkan yavaşlasa da eski hızlı sayıyı göstermeye devam eder. Çalışmadan hiç, `responseTimeMinutes` platform genelinde 0'dı ve rozet hiçbir ölçüme dayanmıyordu (P2-7).
 # NOT: enforced=false -- gecikmesi saglik kontrolunu DEGRADED yapmaz.
 #       Cron kurulduktan sonra registry.ts icinde true yapin.
-29 3 * * * /opt/emanetci/scripts/call-internal-job.sh --job response-times >> /opt/emanetci/logs/bagajpark-response-times.log 2>&1
+29 3 * * * /opt/emanetci/scripts/call-internal-job.sh --job response-times --method POST >> /opt/emanetci/logs/bagajpark-response-times.log 2>&1
 
 # Finans/mutabakat verisini dışa aktarır.
 # Calismazsa: Mutabakat elle yapılmak zorunda kalır.
 # NOT: enforced=false -- gecikmesi saglik kontrolunu DEGRADED yapmaz.
 #       Cron kurulduktan sonra registry.ts icinde true yapin.
-53 2 * * * /opt/emanetci/scripts/call-internal-job.sh --job finance-export >> /opt/emanetci/logs/bagajpark-finance-export.log 2>&1
-
+53 2 * * * /opt/emanetci/scripts/call-internal-job.sh --job finance-export --method GET >> /opt/emanetci/logs/bagajpark-finance-export.log 2>&1
 
 # ---------------------------------------------------------------------------
 # Sunucuya özgü işler — registry.ts'te DEĞİL, çünkü uygulama işi değiller.

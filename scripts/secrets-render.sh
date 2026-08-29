@@ -14,6 +14,18 @@ export PATH=$PATH:/usr/local/bin:/usr/bin:/bin
 readonly SCRIPT_NAME="$(basename "$0")"
 readonly DEFAULT_OUT="/opt/emanetci/docker-compose.env"
 readonly DEFAULT_MANIFEST="/opt/emanetci/secrets.manifest"
+# Uretilen dosyanin sahibi/grubu ve izni.
+#
+# NEDEN 600 DEGIL: cron isleri `ec2-user` olarak kosuyor ve CRON_SECRET'i bu
+# dosyadan okuyor (call-internal-job.sh). 600/root birakilinca sekiz zamanlanmis
+# isin tamami "CRON_SECRET tanimli degil" ile SESSIZCE duser -- 2026-08-29'da
+# duman testinde tam olarak bu yasandi.
+#
+# Ve 640 bir taviz DEGIL: ec2-user zaten `docker compose exec web printenv` ile
+# butun sirlari gorebiliyor. Dosyayi ondan saklamak hicbir seyi korumuyordu,
+# yalnizca cron'u kiriyordu. Dosya diger kullanicilara kapali kalmaya devam eder.
+readonly DEFAULT_FILE_GROUP="ec2-user"
+readonly FILE_MODE="640"
 
 function log()       { >&2 echo "[$(date -u '+%Y-%m-%dT%H:%M:%SZ')] [$SCRIPT_NAME] $*"; }
 function log_info()  { log "INFO  $*"; }
@@ -32,6 +44,7 @@ function print_usage() {
   echo -e "  --prefix\tSSM onek yolu. ZORUNLU."
   echo -e "  --out\t\tHedef dosya. Varsayilan: $DEFAULT_OUT"
   echo -e "  --manifest\tZorunlu anahtar listesi. Varsayilan: $DEFAULT_MANIFEST"
+  echo -e "  --group\tDosya grubu. Varsayilan: $DEFAULT_FILE_GROUP (cron kullanicisi)"
   echo -e "\t\t(yoksa atlanir; varsa eksik anahtarda script KIRAR)"
   echo -e "  --help\tBu yardim."
   echo
@@ -55,12 +68,14 @@ function main() {
   local prefix=""
   local out="$DEFAULT_OUT"
   local manifest="$DEFAULT_MANIFEST"
+  local file_group="$DEFAULT_FILE_GROUP"
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --prefix)   prefix="$2"; shift 2 ;;
       --out)      out="$2"; shift 2 ;;
       --manifest) manifest="$2"; shift 2 ;;
+      --group)    file_group="$2"; shift 2 ;;
       --help)     print_usage; exit 0 ;;
       *)          log_error "bilinmeyen secenek: $1"; print_usage; exit 1 ;;
     esac
@@ -145,10 +160,14 @@ PY
   local -r dir="$(dirname "$out")"
   local final
   final=$(mktemp "$dir/.docker-compose.env.XXXXXX")
-  chmod 600 "$final"
   cat "$tmp" > "$final"
+  # Grup once, izin sonra: ters sirada dosya kisa bir an grup-okunabilir olur.
+  if ! chgrp "$file_group" "$final" 2>/dev/null; then
+    log_warn "grup '$file_group' atanamadi; cron bu dosyayi okuyamayabilir."
+  fi
+  chmod "$FILE_MODE" "$final"
   mv -f "$final" "$out"
-  log_info "$out yazildi: $written anahtar ($prefix)"
+  log_info "$out yazildi: $written anahtar ($prefix), izin $FILE_MODE grup $file_group"
 }
 
 main "$@"

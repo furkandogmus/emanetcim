@@ -51,6 +51,43 @@ describe("kayıt defteri gerçekle örtüşüyor", () => {
   });
 });
 
+describe("HTTP metodu uçla örtüşüyor", () => {
+  /**
+   * NEDEN BU TEST VAR: `call-internal-job.sh` sabit POST gönderiyordu, ama
+   * `booking-reminders` ve `finance-export` route'ları yalnızca GET export
+   * ediyor. İkisi de 405 alıp SESSİZCE düşüyordu -- iş "kurulu" görünüyor,
+   * cron çalışıyor, ama hiçbir şey olmuyordu. 2026-08-29'da duman testinde
+   * yakalandı; buradaki asıl hata sınıfı bu ("kurulu ama çalışmıyor").
+   *
+   * Artık metot kayıt defterinde ve bu test route dosyasının gerçekten o metodu
+   * export ettiğini doğruluyor. Biri değişip diğeri unutulursa CI kırmızı olur.
+   */
+  it.each(JOB_REGISTRY.map((j) => [j.name, j.method] as const))(
+    "%s: route dosyası '%s' export ediyor",
+    (name, method) => {
+      const routePath = path.join(
+        process.cwd(),
+        "src/app/api/internal",
+        name,
+        "route.ts",
+      );
+      const src = fs.readFileSync(routePath, "utf8");
+      const exported = [...src.matchAll(/export\s+(?:async\s+)?function\s+(GET|POST|PUT|PATCH)/g)]
+        .map((m) => m[1]);
+      expect(
+        exported,
+        `${name}: kayıt defteri "${method}" diyor, route ${exported.join("/") || "hiçbir metot"} export ediyor`,
+      ).toContain(method);
+    },
+  );
+
+  it("her işin metodu GET veya POST", () => {
+    for (const j of JOB_REGISTRY) {
+      expect(["GET", "POST"]).toContain(j.method);
+    }
+  });
+});
+
 describe("kayıt defteri tanımları tutarlı", () => {
   it("iş adları benzersiz", () => {
     const names = JOB_REGISTRY.map((j) => j.name);

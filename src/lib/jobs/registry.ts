@@ -30,6 +30,16 @@ export type JobDefinition = {
   /** Önerilen cron ifadesi (sunucu yerel saati). */
   readonly cron: string;
   /**
+   * Ucun kabul ettiği HTTP metodu.
+   *
+   * NEDEN KAYIT DEFTERİNDE: `call-internal-job.sh` sabit POST gönderiyordu, ama
+   * `booking-reminders` ve `finance-export` yalnızca GET kabul ediyor. İkisi de
+   * 405 alıp SESSİZCE düşüyordu — 2026-08-29 duman testinde yakalandı.
+   * Metot artık uçla birlikte tek yerde; `jobs-registry.test.ts` route dosyasının
+   * gerçekten bu metodu export ettiğini doğruluyor, yani ayrışma CI'da kırmızı olur.
+   */
+  readonly method: "GET" | "POST";
+  /**
    * Son BAŞARILI çalışmanın üzerinden bu kadar saat geçtiyse iş gecikmiş sayılır.
    * Cron periyodunun ~2 katı olmalı: tek bir kaçırılmış çalışma alarm üretmesin,
    * ikincisi üretsin.
@@ -51,6 +61,7 @@ export const JOB_REGISTRY: readonly JobDefinition[] = [
     what: "Aktif dükkanlar için 30 gün ileriye zaman slotu üretir.",
     ifItStops:
       "Saatlik ürün seçilemez hâle gelir (slot seçici boşalır) ve per-slot kapasite kontrolü yerini kaba, dükkan geneli bir kontrole bırakır. 2026-07-14'te oldu, 37 gün fark edilmedi.",
+    method: "POST",
     cron: "17 4 * * *",
     maxStaleHours: 48,
     enforced: true,
@@ -61,6 +72,7 @@ export const JOB_REGISTRY: readonly JobDefinition[] = [
     what: "Çıkış saatini geçtiği hâlde açık kalan rezervasyonları bulur ve olay yazar.",
     ifItStops:
       "Yaşam döngüsünün sonlanmayan ucu görünmez kalır. 19 rezervasyonun 18'i böyleydi ve üç müşterinin bavulu Haziran'dan beri 'dükkanda' görünüyordu.",
+    method: "POST",
     cron: "47 4 * * *",
     maxStaleHours: 48,
     // Cron henüz kurulmadı — bkz. scripts/README.md 3. adım.
@@ -71,6 +83,7 @@ export const JOB_REGISTRY: readonly JobDefinition[] = [
     name: "booking-reminders",
     what: "Yaklaşan rezervasyonlar için misafire hatırlatma gönderir.",
     ifItStops: "Misafir check-in saatini kaçırır; no-show ve destek yükü artar.",
+    method: "GET",
     cron: "7 9 * * *",
     maxStaleHours: 48,
     enforced: false,
@@ -80,6 +93,7 @@ export const JOB_REGISTRY: readonly JobDefinition[] = [
     what: "Süresi geçmiş doğrulama token'larını, oturumları ve 90 günden eski analitik olaylarını siler.",
     ifItStops:
       "Tablolar sınırsız büyür — süresi geçmiş token'lar gereğinden uzun yaşar, AnalyticsEvent hiç küçülmez.",
+    method: "POST",
     cron: "23 3 * * *",
     maxStaleHours: 72,
     enforced: false,
@@ -89,6 +103,7 @@ export const JOB_REGISTRY: readonly JobDefinition[] = [
     what: "Dükkanların mühür ihtiyacını öngörür ve azalanları bildirir.",
     ifItStops:
       "Dükkanın mührü biter ve check-in yapılamaz; mühür tedariki 3 gün sürüyor.",
+    method: "POST",
     cron: "37 6 * * 1",
     maxStaleHours: 24 * 9,
     enforced: false,
@@ -98,6 +113,7 @@ export const JOB_REGISTRY: readonly JobDefinition[] = [
     what: "Sınıflandırılmamış gelen kutusu mesajlarını destek/toplu/otomatik olarak ayırır.",
     ifItStops:
       "Soğuk pazarlama destek kutusunu doldurur ve gerçek bir misafir şikâyeti aralarında kaybolur. 2026-08-22'de 67 mesajın 57'si okunmamıştı.",
+    method: "POST",
     cron: "13 5 * * *",
     maxStaleHours: 48,
     enforced: false,
@@ -107,6 +123,7 @@ export const JOB_REGISTRY: readonly JobDefinition[] = [
     what: "Dükkanların 'yanıt süresi' rozetini geçmiş onay verisinden yeniden hesaplar.",
     ifItStops:
       "Rozet donar: dükkan yavaşlasa da eski hızlı sayıyı göstermeye devam eder. Çalışmadan hiç, `responseTimeMinutes` platform genelinde 0'dı ve rozet hiçbir ölçüme dayanmıyordu (P2-7).",
+    method: "POST",
     cron: "29 3 * * *",
     maxStaleHours: 72,
     enforced: false,
@@ -115,6 +132,7 @@ export const JOB_REGISTRY: readonly JobDefinition[] = [
     name: "finance-export",
     what: "Finans/mutabakat verisini dışa aktarır.",
     ifItStops: "Mutabakat elle yapılmak zorunda kalır.",
+    method: "GET",
     cron: "53 2 * * *",
     maxStaleHours: 72,
     enforced: false,

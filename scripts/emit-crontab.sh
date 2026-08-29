@@ -105,7 +105,7 @@ function main() {
       for (const j of jobs) {
         const script = j.script
           ? \`\${appDir}/\${j.script}\`
-          : \`\${appDir}/scripts/call-internal-job.sh --job \${j.name}\`;
+          : \`\${appDir}/scripts/call-internal-job.sh --job \${j.name} --method \${j.method}\`;
         console.log(\`# \${j.what}\`);
         console.log(\`# Calismazsa: \${j.ifItStops}\`);
         if (!j.enforced) {
