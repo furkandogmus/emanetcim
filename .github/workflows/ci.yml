@@ -132,6 +132,12 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      # Prod bagimliliklarinda yuksek/kritik CVE varsa burada durur.
+      # Bilincli tasinan istisnalar gerekce + gozden gecirme tarihiyle
+      # scripts/audit-deps.mjs icinde; tarih gecince kapi yine kirilir.
+      - name: Bagimlilik acigi taramasi
+        run: npm run audit
+
       - name: Prisma migrate (CI DB)
         run: npx prisma migrate deploy
 

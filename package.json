@@ -32,7 +32,8 @@
     "docker:logs": "docker compose logs -f web",
     "release:patch": "npm version patch -m \"chore(release): %s\"",
     "release:minor": "npm version minor -m \"chore(release): %s\"",
-    "release:major": "npm version major -m \"chore(release): %s\""
+    "release:major": "npm version major -m \"chore(release): %s\"",
+    "audit": "node scripts/audit-deps.mjs"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.3",
