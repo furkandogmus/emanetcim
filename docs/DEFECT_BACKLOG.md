@@ -81,6 +81,28 @@ bölümde açık iş olarak kalmıştı ve yapılmamıştı.**
   (EventBridge Scheduler → `/api/internal/*`, `X-Cron-Secret` başlığıyla) bu sorunu ve
   "cron çalışmadı, kimse fark etmedi" sınıfını birlikte kapatır.
 
+### 10. ✅ DÜZELTİLDİ — Üretim veritabanı baştan sona test verisiyle doluydu
+
+`enforced=true` açılır açılmaz `/api/health/jobs` **DEGRADED** dönmeye başladı ve
+aylardır görünmeyen iki gerçek sorunu ortaya çıkardı. İkisi de temizlendi.
+
+- **1.249 sahipsiz mühür** (P1-7): 1.277 mührün 1.247'si `ASSIGNED` ama `shopId`
+  NULL, artı 2 `FAULTY`. Yalnızca 30'u düzgün atanmış. `repair-seal-ownership.sh`
+  bunun için yazılmıştı ama **hiç koşturulamamıştı** (madde 8). Taşındıktan sonra
+  ilk kez koştu, 1.249 satır `STOCK`'a alındı.
+- **17 gecikmiş rezervasyon**: açık kalan tüm rezervasyonlar. Ölçüm: 11'i `PAID`
+  ve **on birinin de işlem numarası `bypass_` ile başlıyor** (yani
+  `MOBILE_PAYMENT_BYPASS` ile üretilmiş, gerçek para hiç geçmemiş); 6'sı
+  `APPROVED` ve hiç ödeme kaydı yok. En yeni rezervasyon 23 Ağustos.
+  `scripts/repair-bypass-bookings.sh` ile kapatıldı.
+
+**Kapsam bilerek dardı**: script yalnızca ödemesiz veya `bypass_` ödemeli
+kayıtlara dokunuyor ve kümede gerçek bir tahsilat bulursa **hiçbir şey yapmadan
+durur**. Gerçek parayı elle "iade edilmiş" işaretlemek, bu projeyi bu hale
+getiren hata sınıfının ta kendisi olurdu.
+
+**Sonuç**: `/api/health/jobs` → `UP`, beş kontrolün beşi de `ok`.
+
 ### 5. ⚠️ AÇIK — Yeni bir instance TLS sertifikasını bulamadan açılır
 
 - **Nerede**: `infra/aws/stack/cloud-init.sh.tftpl:65-70` ↔ `nginx/conf.d/default.conf:38-51`
