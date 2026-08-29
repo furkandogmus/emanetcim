@@ -1,10 +1,20 @@
 # Zamanlanmış işler — kurulum ve çalıştırma
 
-## Son durum — 2026-08-22
+## Son durum — 2026-08-29
 
-| İş | Cron | Sarmalayıcı | Durum |
+> **Kurulum durumu sunucu değişikliğinden beri doğrulanmadı.** Aşağıdaki tablo
+> 2026-08-22'de **Hetzner** sunucusunda ölçülmüştü. Canlı 2026-08-23'te AWS EC2'ye
+> taşındı (`infra/aws/CUTOVER.md`) ve crontab yeni kutuda `crontab.prod` adlı,
+> **repoda bulunmayan** bir dosyadan kuruldu. Yani "kurulu" sütunu şu an yalnızca
+> eski kutu için kanıtlıdır. Doğrulamanın tek yolu sunucuda `crontab -l`:
+>
+> ```bash
+> ssh <prod> 'crontab -l'
+> ```
+
+| İş | Cron | Sarmalayıcı | Durum (2026-08-22, eski sunucu) |
 |---|---|---|---|
-| `generate-slots` | `17 4 * * *` | `generate-slots.sh` | ✅ prod'da kurulu |
+| `generate-slots` | `17 4 * * *` | `generate-slots.sh` | ✅ kurulmuştu — yeni sunucuda doğrulanmadı |
 | `overdue-scan` | `47 4 * * *` | `overdue-scan.sh` | ⚠️ **kurulmadı** |
 | `booking-reminders` | `7 9 * * *` | — | ⚠️ kurulmadı |
 | `cleanup` | `23 3 * * *` | — | ⚠️ kurulmadı |
@@ -38,7 +48,7 @@ Biri bozuksa diğerleri **maskelemez** — toplam durum `DEGRADED` olur.
 
 ## Ön koşullar
 
-- Sunucuda uygulama dizini: `/root/emanetci` (farklıysa `--app-dir` ile verin).
+- Sunucuda uygulama dizini: `/opt/emanetci` (farklıysa `--app-dir` ile verin).
 - `CRON_SECRET` uygulamanın `.env` dosyasında tanımlı olmalı. Script değeri
   **çalışma anında** okur — crontab'a sır yazılmaz, çünkü `crontab -l` çalıştıran
   herkes görür.
@@ -47,7 +57,7 @@ Biri bozuksa diğerleri **maskelemez** — toplam durum `DEGRADED` olur.
 Sunucuya bağlandıktan sonra bir kez:
 
 ```bash
-cd /root/emanetci
+cd /opt/emanetci
 ```
 
 ---
@@ -106,7 +116,7 @@ crontab -e
 Şu satırı ekleyin (slot üretiminden sonra çalışsın diye 4:47):
 
 ```
-47 4 * * * /root/emanetci/scripts/overdue-scan.sh >> /var/log/bagajpark-overdue.log 2>&1
+47 4 * * * /opt/emanetci/scripts/overdue-scan.sh >> /var/log/bagajpark-overdue.log 2>&1
 ```
 
 Doğrulama:
@@ -176,7 +186,7 @@ INSERT/UPDATE kontrol ediliyor. Bu adım eskileri temizler ve kısıtı tamamlar
 ### 1. Kuru çalışma — hiçbir şey değiştirmez
 
 ```bash
-cd /root/emanetci
+cd /opt/emanetci
 ./scripts/repair-seal-ownership.sh
 ```
 
@@ -267,7 +277,7 @@ tarihsel kayıt. `open247` dükkanlar da kapsam dışı (her saat açıklar).
 ### 1. Kuru çalışma — hiçbir şey silmez
 
 ```bash
-cd /root/emanetci
+cd /opt/emanetci
 ./scripts/repair-slot-timezone.sh
 ```
 
@@ -331,7 +341,7 @@ yazmak, kayıt defteriyle gerçeğin ayrılmasının ta kendisidir — slot üre
 ### 1. Üretilecek satırları gör — hiçbir şey değiştirmez
 
 ```bash
-cd /root/emanetci
+cd /opt/emanetci
 ./scripts/emit-crontab.sh
 ```
 
@@ -395,7 +405,7 @@ Yeni mesajlar **giriş anında** sınıflandırılıyor. Geçmiş mesajlar için
 kez çalıştırın:
 
 ```bash
-cd /root/emanetci
+cd /opt/emanetci
 ./scripts/call-internal-job.sh --job classify-inbox
 ```
 

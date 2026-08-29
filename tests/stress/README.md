@@ -34,10 +34,21 @@ npx tsx tests/stress/seed-test-data.ts --cleanup
 
 ### 3. Sunucu Hazırlığı
 
+> **Bu script CANLI sunucuyu değiştirir** (swap açar, kernel parametrelerini yazar,
+> Postgres/nginx yapılandırmasını düzenler, servisleri yeniden başlatır). Yük testi
+> için hazırlanmış ayrı bir kutuda çalıştırın; canlıda çalıştırmak kesinti demektir.
+>
+> Adres bilgisi burada sabit tutulmuyor — `ops/server.env` içinden okunuyor. Önceki
+> sürümde sabit bir IP ve port yazılıydı; ikisi de 2026-08-23 öncesi Hetzner kutusuna
+> aitti ve artık geçerli değil.
+
 ```bash
-# Sunucuda çalıştır (swap, kernel tuning, pg index)
-scp tests/stress/server-prepare.sh root@178.104.144.3:/tmp/
-ssh root@178.104.144.3 -p 12022 "bash /tmp/server-prepare.sh"
+source ops/server.env   # SSH_HOST / SSH_PORT / SSH_USER / SSH_KEY_PATH / APP_DIR
+
+scp -i "$SSH_KEY_PATH" -P "$SSH_PORT" \
+  tests/stress/server-prepare.sh "$SSH_USER@$SSH_HOST:/tmp/"
+ssh -i "$SSH_KEY_PATH" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
+  "APP_DIR=$APP_DIR sudo -E bash /tmp/server-prepare.sh"
 ```
 
 ### 4. Test Çalıştır

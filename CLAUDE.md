@@ -1,7 +1,7 @@
 # BagajPark (Emanetçi) — çalışma kuralları
 
 Valiz emanet pazar yeri: misafir → dükkan (esnaf) → plastik mühür → teslim. Web Next.js,
-mobil Flutter (`mobile/`), tek Hetzner VM'de Docker Compose. Ürün haritası: `README_AI.md`.
+mobil Flutter (`mobile/`), tek AWS EC2 VM'de Docker Compose. Ürün haritası: `README_AI.md`.
 
 ## Komutlar
 

@@ -60,7 +60,8 @@ seçim senin. Üçü de ücretsiz kademede yeter:
    `curl` satırı eklemek yeterli.
 
 Şu an kurulu olan tek şey: `generate-slots.sh` başarısızlıkta non-zero çıkıyor ve
-`/root/emanetci/slots.log`'a yazıyor. **Kimse log'a bakmıyorsa bu sessizdir** —
+crontab satırındaki log dosyasına yazıyor (yolu crontab'ın kendisi belirler; eski
+Hetzner kutusunda `slots.log`'du). **Kimse log'a bakmıyorsa bu sessizdir** —
 bugün çözülen hatanın aynısı bir kademe yukarıda hâlâ mümkün.
 
 ## Önerilen metrikler / paneller

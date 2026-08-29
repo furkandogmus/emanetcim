@@ -10,6 +10,90 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-08-29 — kesim sonrası sapma taraması: repo hâlâ Hetzner'i anlatıyordu
+
+23 Ağustos'ta canlı Hetzner'den AWS EC2'ye taşındı (`infra/aws/CUTOVER.md`), ama repo
+bunu birçok yerde öğrenmemişti. Sapmaların tamamı dosya:satır ile kanıtlı; hepsi aynı
+kök nedenden geliyor: **kesim sonrası doküman/varsayılan güncellemesi `CUTOVER.md` 5.
+bölümde açık iş olarak kalmıştı ve yapılmamıştı.**
+
+### 1. ✅ DÜZELTİLDİ — Terraform canlı hesabın state'ini eski hesabın kimliğiyle açıyordu
+
+- **Nerede**: `infra/aws/stack/variables.tf`, `infra/aws/bootstrap/variables.tf` →
+  `aws_profile`
+- **Kanıt**: yerel workspace `hesap2` (`infra/aws/stack/.terraform/environment` ve
+  `bootstrap/.terraform/environment` içeriği `hesap2`; `terraform.tfstate.d/` altında
+  yalnızca `hesap2` var). `hesap2` = **canlı** hesap 772853132412 / profil
+  `bagajpark-yeni` (`CUTOVER.md` "Son durum"). Ama `aws_profile` varsayılanı hâlâ
+  `bagajpark` — yani **eski** hesap 269174115166.
+- **Neden önemli**: profil ile workspace ayrışınca `terraform plan`, canlı ortamın
+  state'ini elinde tutarken eski hesaba bakar ve **her kaynağı "to create" gösterir**.
+  Farkına varmadan bir `apply`, altyapıyı yanlış hesapta ikinci kez kurar. Bu, eldeki
+  en pahalı sessiz hataydı.
+- **Düzeltme**: iki kökte de varsayılan `bagajpark-yeni`; değişkenin başına profil ↔
+  workspace eşleşmesini ve doğrulama komutlarını anlatan bir not eklendi.
+
+### 2. ✅ DÜZELTİLDİ — Deploy config bucket'ı başka bir hesabı gösteriyordu
+
+- **Nerede**: `infra/aws/stack/variables.tf` → `deploy_config_bucket`
+- **Kanıt**: varsayılan `bagajpark-backups-43403243`; canlı hesabın bucket'ı
+  `bagajpark-backups-1d9eb152` (`CUTOVER.md` "Son durum" tablosu). CI'nin GitHub
+  değişkeni (`AWS_DEPLOY_BUCKET`) taşımada güncellenmiş, Terraform varsayılanı
+  unutulmuştu.
+- **Neden önemli**: bu değer sunucunun `deploy-config` okuma IAM policy'sini üretiyor
+  (`stack/main.tf` → `app_deploy_config_read`). Yanlış hesabın bucket'ına bağlı bir
+  policy, CI'nin bıraktığı `docker-compose.yml`/`public/` dosyalarını okunamaz yapar.
+- **Düzeltme**: varsayılan canlı bucket'a çevrildi, gerekçe yorumda.
+
+### 3. ✅ DÜZELTİLDİ — Cron üreteci var olmayan bir yola işaret eden satırlar üretiyordu
+
+- **Nerede**: `scripts/emit-crontab.sh`, `scripts/call-internal-job.sh`,
+  `scripts/repair-seal-ownership.sh`, `scripts/repair-slot-timezone.sh`,
+  `scripts/update.sh`, `tests/stress/server-prepare.sh`
+- **Kanıt**: hepsinde uygulama dizini `/root/emanetci` (Hetzner) sabitlenmişti; canlı
+  sunucuda dizin `/opt/emanetci` (CI deploy adımları, `CUTOVER.md`, `scripts/backup-s3.sh`
+  hepsi `/opt/emanetci` diyor).
+- **Neden önemli**: `emit-crontab.sh` çıktısı "yapıştırılabilir crontab satırı" olarak
+  tasarlandı. Yanlış yolla üretilen satır cron'da **sessizce** başarısız olur — bu
+  proje, tam olarak sessiz cron başarısızlığı yüzünden 37 gün slot üretmedi (P0-1) ve
+  2 ay boşa 404 aldı (P1-1b).
+- **Düzeltme**: varsayılanlar `/opt/emanetci`; `update.sh` ve `server-prepare.sh`'ta yol
+  ve branch `APP_DIR`/`BRANCH` ile ezilebilir hâle getirildi (`update.sh` ayrıca
+  `origin/develop`e sabitlenmişti — canlı `main`den deploy ediliyor).
+
+### 4. ⚠️ AÇIK — Sunucudaki crontab repoda yok
+
+- **Nerede**: `infra/aws/CUTOVER.md` 3c adımı → `crontab /opt/emanetci/crontab.prod`
+- **Kanıt**: `crontab.prod` bu repoda hiçbir yerde yok; tek geçtiği yer o dokümandır.
+  `stack/cloud-init.sh.tftpl` de cron kurmuyor (`grep -n "cron" ` → sonuç yok).
+- **Neden önemli**: canlının zamanlanmış iş listesinin tek kopyası sunucuda. Sunucu
+  giderse liste de gider; başka bir makinede kesim adımı olduğu gibi tekrarlanamaz.
+  Ayrıca `scripts/README.md`'deki "kurulu/kurulmadı" tablosu 2026-08-22'de **eski**
+  kutuda ölçülmüştü — yeni kutuda hangi işlerin kurulu olduğu doğrulanmadı.
+- **Sonraki adım**: sunucuda `crontab -l` çıktısını al; uygulama işlerini
+  `scripts/emit-crontab.sh`'tan üret, sunucuya özgü işleri (yedekleme, disk temizliği)
+  repoya bir `crontab.prod` olarak ekle. Tetikleyiciyi tamamen kutunun dışına almak
+  (EventBridge Scheduler → `/api/internal/*`, `X-Cron-Secret` başlığıyla) bu sorunu ve
+  "cron çalışmadı, kimse fark etmedi" sınıfını birlikte kapatır.
+
+### 5. ⚠️ AÇIK — Yeni bir instance TLS sertifikasını bulamadan açılır
+
+- **Nerede**: `infra/aws/stack/cloud-init.sh.tftpl:65-70` ↔ `nginx/conf.d/default.conf:38-51`
+- **Kanıt**: cloud-init SSM'den çektiği materyali `/etc/ssl/cloudflare/aws-test.crt` ve
+  `aws-test.key` olarak yazıyor; repodaki nginx yapılandırması
+  `/etc/ssl/cloudflare/bagajpark.crt` / `bagajpark.key` istiyor.
+- **Neden önemli**: bugünkü sunucu çalışıyor çünkü dosyalar oraya elle konuldu. `stack`
+  yeniden kurulursa (EIP değişimi, bölge değişimi, felaket kurtarma) nginx sertifikayı
+  bulamaz ve **site açılmaz**. Yani felaket kurtarma yolu bugün kırık.
+- **Neden hâlâ açık**: doğru düzeltme, SSM'deki sertifikanın hangi alan adına ait
+  olduğunu bilmeyi gerektiriyor ve bu repodan doğrulanamıyor. Tahminle dosya adı
+  değiştirmek, yanlış sertifikayla açılan bir sunucu üretebilirdi — bilerek
+  değiştirilmedi.
+- **Sonraki adım**: `aws ssm get-parameter --name /bagajpark/aws-test/tls/cert
+  --with-decryption` çıktısındaki sertifikanın CN/SAN'ını oku; `bagajpark.com` ise
+  cloud-init'teki dosya adını `bagajpark.{crt,key}` yap, değilse önce doğru origin
+  sertifikasını SSM'e yaz.
+
 ## 2026-08-26 — performans (kritik yol) + iki güvenilirlik açığı
 
 Önceki turlar kod tekrarını kapatmıştı. Bu tur farklı bir soru sordu: kullanıcı

@@ -1,8 +1,14 @@
 # ops/ — sunucu erişimi ve credential deposu
 
-Bu dizin, canlı Hetzner sunucusuna erişim ve denetim için kullanılan yerel bilgileri
-tutar. `server.env` **git'e girmez** (`.gitignore`); `server.env.example` şablon
-olarak git'te kalır.
+Bu dizin, **canlı sunucuya** erişim ve denetim için kullanılan yerel bilgileri tutar.
+`server.env` **git'e girmez** (`.gitignore`); `server.env.example` şablon olarak git'te
+kalır.
+
+> Canlı sunucu 2026-08-23 kesimiyle Hetzner'den **AWS EC2**'ye taşındı
+> (`infra/aws/CUTOVER.md`). Bu dosya o tarihe kadar "canlı Hetzner sunucusu" diyordu.
+> Bugünkü değerler: kullanıcı `ec2-user`, SSH portu `2222`, uygulama dizini
+> `/opt/emanetci`, key `~/.ssh/aws-bagajpark`. Sunucuya normalde elle girilmez —
+> deploy `main` push'uyla CI + SSM üzerinden olur (`docs/CI_CD.md`).
 
 ## Üretim sırları
 

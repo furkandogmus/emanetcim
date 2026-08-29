@@ -1,12 +1,23 @@
 # Hetzner → AWS kesim (cutover) runbook'u
 
+> **`<ORIGIN_IP>` nedir:** origin sunucunun public IP'si bilerek repoya yazılmıyor.
+> `bagajpark.com` Cloudflare arkasında ve güvenlik grubu 80/443'ü yalnızca
+> Cloudflare edge aralıklarına açıyor (`infra/aws/stack/main.tf`); origin adresini
+> dokümana gömmek o korumanın etrafından dolaşmayı kolaylaştırır. Güncel değeri
+> her zaman AWS'ten okuyun:
+>
+> ```bash
+> aws ec2 describe-addresses --profile bagajpark-yeni --region eu-central-1 \
+>   --query 'Addresses[].PublicIp' --output text
+> ```
+
 ## Son durum — 2026-08-23 15:30 (UTC+3)
 
 **HESAP TAŞIMA TAMAMLANDI. `bagajpark.com` artık YENİ AWS hesabında (772853132412).**
 
 | | |
 |---|---|
-| Sunucu | `<ESKI_ORIGIN_IP>:2222` (eu-central-1, `hesap2` terraform workspace, profil `bagajpark-yeni`) |
+| Sunucu | `<ORIGIN_IP>:2222` (eu-central-1, `hesap2` terraform workspace, profil `bagajpark-yeni`) |
 | Veri | son dump `emanetci_20260823_122308` (19/39/3) — kesim penceresi ~7 dk |
 | Yedek | `s3://bagajpark-backups-1d9eb152/backups/` (6 saatte bir cron) |
 | Deploy | GitHub vars yeni hesaba çevrildi (`AWS_DEPLOY_ROLE_ARN`, `AWS_DEPLOY_BUCKET`); `main` push → yeni hesap |
@@ -20,8 +31,9 @@ eklenmesi gerekti (README güncellenmeli). Sıfır hesaptan çalışan kopyaya ~
 
 ## ⚠️ Önce bilinmesi gereken
 
-- AWS hesabı **Free Plan + ~$47 kredi**. `c7i-flex.large` 7/24 ≈ $35-45/ay. Kredi bitince
-  hesap **kapanır**. Kesimden önce veya hemen sonra hesabı Paid plana yükseltin (Billing →
+- AWS hesabı **Free Plan + ~$47 kredi**. `c7i-flex.large` 7/24 = **~$70.63/ay** (AWS fiyat
+  listesi, eu-central-1, 2026-08-29 doğrulandı; burada önceden "$35-45/ay" yazıyordu ve
+  yanlıştı). EBS + public IPv4 ile birlikte **~$77/ay**. Kredi bitince hesap **kapanır**. Kesimden önce veya hemen sonra hesabı Paid plana yükseltin (Billing →
   Account → Upgrade). Bütçe alarmı `$40/ay` kurulu.
 - DNS Cloudflare'de, API token yok: A kayıtları **elle** değiştirilir.
 - Kesim penceresinde site ~5 dk kapalı olur (yazma kaybı olmaması için).
@@ -88,6 +100,10 @@ ssh -i ~/.ssh/aws-bagajpark -p 2222 ec2-user@<ORIGIN_IP> \
 # Beklenen: Hetzner'deki sayılarla birebir (ör. 19|39|3)
 
 # 3c. Cron'u kur
+# DIKKAT: crontab.prod BU REPODA YOK -- tek kopyasi sunucuda. Yani bu adim baska bir
+# makinede oldugu gibi tekrarlanamaz ve sunucu giderse is listesi de gider.
+# Uygulama isleri src/lib/jobs/registry.ts'ten uretilebilir (scripts/emit-crontab.sh);
+# sunucuya ozgu isler (yedekleme, disk temizligi) uretilemez. Bkz. docs/DEFECT_BACKLOG.md.
 ssh -i ~/.ssh/aws-bagajpark -p 2222 ec2-user@<ORIGIN_IP> \
   'crontab /opt/emanetci/crontab.prod && crontab -l | grep -c emanetci'
 # Beklenen: 5
@@ -111,8 +127,13 @@ Hetzner'e geri yükleyin (aynı `backup.sh`/`restore.sh`).
 
 ## 5. Kesim sonrası
 
-- 1 hafta sorunsuz geçince Hetzner sunucusunu kapat/iptal et; `ops/README.md` ve
-  `infra/aws/README.md`'deki "AWS = doğrulama kapısı, Hetzner = canlı" politikasını güncelle.
+- 1 hafta sorunsuz geçince Hetzner sunucusunu kapat/iptal et.
+- ✅ **2026-08-29 yapıldı**: `ops/README.md` ve `infra/aws/README.md`'deki "AWS =
+  doğrulama kapısı, Hetzner = canlı" politikası güncellendi. Aynı taramada bulunan ve
+  düzeltilen sapmalar: script'lerin varsayılan uygulama dizini (`/root/emanetci` →
+  `/opt/emanetci`), Terraform `aws_profile` varsayılanı (eski hesap → `bagajpark-yeni`,
+  workspace `hesap2` ile eşleşecek şekilde) ve `deploy_config_bucket` varsayılanı (eski
+  hesabın bucket'ı → `bagajpark-backups-1d9eb152`).
 - `.github/workflows/ci.yml` (`deploy` job'ı) zaten AWS'e gidiyor; `main` push = canlı deploy olur.
   Küçük değişiklikler için `develop` → PR → `main` disiplini şart.
 - AWS hesabını Paid plana yükselt; Cost Explorer'ı 1 hafta sonra kontrol et.
