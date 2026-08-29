@@ -27,6 +27,11 @@ export class ManualPaymentProvider implements PaymentProvider {
     capturesOnline: false,
     supportsCardRefund: false,
     supportsSplit: false,
+    // Dükkanda tahsilatta alt üye iş yeri kavramı yok: para zaten esnafın
+    // elinde, platform komisyonunu ayrıca tahsil eder. Onboarding ve webhook
+    // bu yüzden false -- ilgili metotlar da bilinçli olarak yazılmadı.
+    supportsOnboarding: false,
+    supportsWebhooks: false,
   };
 
   async createIntent(input: PaymentIntentInput): Promise<PaymentIntentResult> {

@@ -77,6 +77,71 @@ Rezervasyon                PaymentService              PaymentProvider
 
 ---
 
+## Pazaryeri katmanı (marketplace / alt üye iş yeri)
+
+Sağlayıcı seçilmeden önce kurulan, sağlayıcıdan **bağımsız** katman.
+
+| Parça | Yer | Ne yapar |
+|---|---|---|
+| TR kimlik doğrulama | `src/lib/tr/identity.ts` | TCKN, VKN, TR IBAN checksum |
+| Başvuru kuralları | `src/lib/tr/merchant.ts` | Tüzel kişilik tipine göre zorunlu alanlar |
+| Esnaf kimliği | `MerchantProfile` | Sağlayıcıdan bağımsız; PSP değişince belge tekrar istenmez |
+| Sağlayıcı hesabı | `MerchantPaymentAccount` | Dükkan × sağlayıcı, onboarding durumu |
+| Paylaşım kaydı | `PaymentSplit` | Oran + tutarlar, ödeme anında dondurulur |
+
+### Türkiye kuralları koda gömülü
+
+Hangi alanın zorunlu olduğu PSP'nin değil, **tüzel kişilik tipinin** sonucu:
+
+| Tip | TCKN | VKN + vergi dairesi |
+|---|---|---|
+| `INDIVIDUAL` (gerçek kişi) | zorunlu | **olmamalı** |
+| `SOLE_PROPRIETORSHIP` (şahıs şirketi) | olmamalı | zorunlu |
+| `COMPANY` (limited/anonim) | olmamalı | zorunlu |
+
+Doğrulama başvuru **alınırken** yapılır. Aksi halde eksik başvuru PSP'ye gider,
+günler sonra "reddedildi" olarak döner ve esnaf neyi düzelteceğini bilmez —
+alan bazlı hata mesajı yalnızca burada üretilebilir.
+
+`ibanHolder` ayrı bir alandır: PSP'ler IBAN sahibi ile unvanı karşılaştırır.
+Tipe ait olmayan alanlar **saklanmaz** — gerçek kişinin VKN'si defterde durursa
+bir sonraki okuyan hangisinin doğru olduğunu bilemez.
+
+### Komisyon oranı artık ortam değişkeninde değil
+
+`PLATFORM_COMMISSION_RATE` yoksa eski kod, yazılı `0.5`'e **sessizce** düşüyordu:
+env bir deploy'da kaybolsa esnaf, kimse fark etmeden parasının yarısını alırdı.
+Oran artık `PlatformSettings.platformCommissionRate` — yönetim arayüzü, önbellek
+ve audit'i hazır. Bozuk/aralık dışı bir oran **0'a** düşer: hatanın zararı
+platformda kalır, esnafta değil.
+
+### Paylaşım hesaplanmaz, yazılır
+
+Oran ve tutarlar tahsilat anında `PaymentSplit`'e **dondurulur**, tahsilatla aynı
+transaction'da. İki sebep:
+
+1. Oran sonradan değişince **geçmiş hakedişler değişmesin**. Esnafın geçen ay
+   gördüğü tutar bu ay başka çıkarsa dayanacak kayıt kalmaz.
+2. Sağlayıcı tarafında split yapıldığında platformun kendi defterinde karşılığı
+   olsun; mutabakat ancak böyle yapılabilir.
+
+Yuvarlama **farktan**: iki tarafı ayrı ayrı yuvarlamak kuruş kaçırır. Bu yüzden
+`platformCommission + merchantAmount === grossAmount` her zaman doğrudur.
+
+İade paylaşımı da düzeltir — tamamı iade edilirse `REVERSED`, kısmi iadede kalan
+tutar **kaydın kendi oranıyla** yeniden bölünür (güncel ayarla değil).
+
+### Yetenek ilan etmek metot yazmayı zorunlu kılar
+
+`supportsSplit` / `supportsOnboarding` / `supportsWebhooks` bayraklarının
+karşılığı olan metotlar arayüzde isteğe bağlıdır — TypeScript eksikliği
+yakalamaz, hata canlıda `undefined is not a function` olarak çıkar.
+`src/__tests__/payment-provider-contract.test.ts` bu boşluğu kapatır: ilan edilen
+her yetenek metodunu zorunlu kılar. **Yeni adaptör yazıldığında o testteki
+`PROVIDERS` listesine eklenir.**
+
+---
+
 ## Yeni sağlayıcı ekleme
 
 Çağıran hiçbir kod değişmez. Üç adım:

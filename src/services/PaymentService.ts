@@ -2,6 +2,8 @@ import type { PaymentStatus, Role } from "@prisma/client";
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 import { moneyToNumber } from "@/lib/money";
+import { computeSplit } from "@/lib/platform-split";
+import { getPricingRules } from "@/lib/platform-settings";
 import { bookingEventService } from "./BookingEventService";
 import { getPaymentProvider, type PaymentProvider } from "@/lib/payments";
 
@@ -172,6 +174,18 @@ export class PaymentService {
     });
     const transactionId = params.externalReference ?? captured.transactionId;
 
+    // Paylaşım, tahsilatla AYNI işlemde yazılır. Ayrı yazılsaydı araya giren bir
+    // hata "tahsil edilmiş ama paylaşımı olmayan" bir ödeme bırakırdı -- bu
+    // servisin var olma sebebi olan hatanın (karşılığı olmayan para kaydı) tam
+    // olarak aynısı, yalnızca bir katman aşağıda.
+    const booking = await prisma.booking.findUnique({
+      where: { id: params.bookingId },
+      select: { shopId: true },
+    });
+    const rules = await getPricingRules();
+    const gross = moneyToNumber(log.amount);
+    const split = computeSplit(gross, rules.platformCommissionRate);
+
     await prisma.$transaction(async (tx) => {
       await tx.paymentLog.update({
         where: { id: log.id },
@@ -187,6 +201,25 @@ export class PaymentService {
         where: { id: params.bookingId },
         data: { status: "PAID" },
       });
+      if (booking) {
+        // upsert: aynı tahsilatın iki kez bildirilmesi ikinci bir paylaşım
+        // satırı üretmemeli. paymentLogId @unique olduğu için yarış da burada
+        // kırılır, sessizce çiftlenmez.
+        await tx.paymentSplit.upsert({
+          where: { paymentLogId: log.id },
+          create: {
+            paymentLogId: log.id,
+            shopId: booking.shopId,
+            grossAmount: split.grossAmount,
+            commissionRate: split.commissionRate,
+            platformCommission: split.platformCommission,
+            merchantAmount: split.merchantAmount,
+            currency: log.currency,
+            status: "PENDING",
+          },
+          update: {},
+        });
+      }
     });
 
     await this.audit(params.bookingId, "PAID", params.actor, {
@@ -283,14 +316,52 @@ export class PaymentService {
       reason: params.reason,
     });
 
-    await prisma.paymentLog.update({
-      where: { id: log.id },
-      data: {
-        status: nextStatus,
-        refundedAmount: nextTotal,
-        refundedAt: new Date(),
-        providerRef: result.providerRef ?? log.providerRef,
-      },
+    // İade, paylaşımı da düzeltmek ZORUNDA. Aksi halde tamamı iade edilmiş bir
+    // ödeme, esnafa ödenmeyi bekleyen PENDING bir paylaşım satırı bırakır ve
+    // hakediş, geri verilmiş parayı içerir.
+    const existingSplit = await prisma.paymentSplit.findUnique({
+      where: { paymentLogId: log.id },
+    });
+
+    await prisma.$transaction(async (tx) => {
+      await tx.paymentLog.update({
+        where: { id: log.id },
+        data: {
+          status: nextStatus,
+          refundedAmount: nextTotal,
+          refundedAt: new Date(),
+          providerRef: result.providerRef ?? log.providerRef,
+        },
+      });
+
+      if (existingSplit) {
+        if (nextStatus === "REFUNDED") {
+          // Tamamı iade: paylaşım geri alınır. Tutarlar SİLİNMEZ, tarihsel
+          // kayıt olarak durur -- ne kadarın hangi oranla bölünmüş olduğu
+          // mutabakatta hâlâ gerekir.
+          await tx.paymentSplit.update({
+            where: { id: existingSplit.id },
+            data: { status: "REVERSED" },
+          });
+        } else {
+          // Kısmi iade: kalan tutar, KAYDIN KENDİ oranıyla yeniden bölünür.
+          // Güncel ayarı kullanmak, aradan geçen sürede oran değiştiyse geçmiş
+          // bir ödemeyi bugünkü komisyonla yeniden hesaplamak olurdu.
+          const remainingGross = Math.round((total - nextTotal) * 100) / 100;
+          const rebalanced = computeSplit(
+            remainingGross,
+            moneyToNumber(existingSplit.commissionRate),
+          );
+          await tx.paymentSplit.update({
+            where: { id: existingSplit.id },
+            data: {
+              grossAmount: rebalanced.grossAmount,
+              platformCommission: rebalanced.platformCommission,
+              merchantAmount: rebalanced.merchantAmount,
+            },
+          });
+        }
+      }
     });
 
     await this.audit(params.bookingId, "REFUNDED", params.actor, {

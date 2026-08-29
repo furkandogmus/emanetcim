@@ -7,6 +7,7 @@ const { mockPrisma, mockRecord } = vi.hoisted(() => {
   const tx = {
     paymentLog: { update: vi.fn() },
     booking: { update: vi.fn() },
+    paymentSplit: { upsert: vi.fn(), update: vi.fn() },
   };
   return {
     mockRecord: vi.fn().mockResolvedValue(undefined),
@@ -18,6 +19,7 @@ const { mockPrisma, mockRecord } = vi.hoisted(() => {
         update: vi.fn(),
       },
       booking: { findUnique: vi.fn(), update: vi.fn() },
+      paymentSplit: { findUnique: vi.fn(), update: vi.fn(), upsert: vi.fn() },
       $transaction: vi.fn(async (fn: (t: typeof tx) => Promise<any>) => fn(tx)),
       __tx: tx,
     },
@@ -27,6 +29,11 @@ const { mockPrisma, mockRecord } = vi.hoisted(() => {
 vi.mock("@/lib/db", () => ({ default: mockPrisma }));
 vi.mock("@/services/BookingEventService", () => ({
   bookingEventService: { record: mockRecord },
+}));
+// Komisyon orani artik merkezi kurallardan geliyor; testte sabitleniyor ki
+// ayarin degismesi bu testleri kirmasin.
+vi.mock("@/lib/platform-settings", () => ({
+  getPricingRules: vi.fn().mockResolvedValue({ platformCommissionRate: 0.2 }),
 }));
 
 describe("PaymentService — para birimi dönüşümü", () => {
@@ -46,6 +53,8 @@ describe("PaymentService — defter", () => {
     mockPrisma.paymentLog.findUnique.mockResolvedValue(null);
     mockPrisma.paymentLog.create.mockResolvedValue({ id: "p1" });
     mockPrisma.paymentLog.update.mockResolvedValue({ id: "p1" });
+    mockPrisma.booking.findUnique.mockResolvedValue({ shopId: "s1" });
+    mockPrisma.paymentSplit.findUnique.mockResolvedValue(null);
   });
 
   it("niyet PENDING olarak açılır — manuel sağlayıcı asla anında SUCCESS yazmaz", async () => {
@@ -131,7 +140,9 @@ describe("PaymentService — defter", () => {
     const res = await service.refund({ bookingId: "b1", amount: 100, reason: "test" });
 
     expect(res).toMatchObject({ ok: true });
-    const data = mockPrisma.paymentLog.update.mock.calls[0][0].data;
+    // Iade artik tahsilat gibi TEK transaction icinde: paylasim satiri da ayni
+    // anda duzeltiliyor, o yuzden assert tx mock'una bakiyor.
+    const data = mockPrisma.__tx.paymentLog.update.mock.calls[0][0].data;
     expect(data.status).toBe("PARTIALLY_REFUNDED");
     expect(data.refundedAmount).toBe(150);
   });
@@ -149,7 +160,7 @@ describe("PaymentService — defter", () => {
     const res = await service.refund({ bookingId: "b1", reason: "test" });
 
     expect(res).toMatchObject({ ok: true });
-    const data = mockPrisma.paymentLog.update.mock.calls[0][0].data;
+    const data = mockPrisma.__tx.paymentLog.update.mock.calls[0][0].data;
     expect(data.status).toBe("REFUNDED");
     expect(data.refundedAmount).toBe(250);
   });
@@ -211,5 +222,101 @@ describe("ManualPaymentProvider — yetenekler", () => {
     expect(caps.id).toBe("manual");
     expect(caps.capturesOnline).toBe(false);
     expect(caps.supportsCardRefund).toBe(false);
+  });
+});
+
+describe("PaymentService — paylaşım (split)", () => {
+  const service = new PaymentService(new ManualPaymentProvider());
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockPrisma.booking.findUnique.mockResolvedValue({ shopId: "s1" });
+    mockPrisma.paymentSplit.findUnique.mockResolvedValue(null);
+  });
+
+  it("tahsilatla AYNI transaction'da paylaşımı yazar", async () => {
+    // Ayri yazilsaydi araya giren bir hata "tahsil edilmis ama paylasimi
+    // olmayan" bir odeme birakirdi -- bu servisin var olma sebebi olan
+    // hatanin aynisi, bir katman asagida.
+    mockPrisma.paymentLog.findUnique.mockResolvedValue({
+      id: "p1", bookingId: "b1", status: "PENDING", amount: 100,
+      refundedAmount: 0, currency: "TRY", providerRef: null, transactionId: null,
+    });
+
+    const res = await service.markCaptured({ bookingId: "b1" });
+    expect(res.ok).toBe(true);
+
+    expect(mockPrisma.__tx.paymentSplit.upsert).toHaveBeenCalledTimes(1);
+    const arg = mockPrisma.__tx.paymentSplit.upsert.mock.calls[0][0];
+    expect(arg.where).toEqual({ paymentLogId: "p1" });
+    expect(arg.create).toMatchObject({
+      shopId: "s1",
+      grossAmount: 100,
+      commissionRate: 0.2,
+      platformCommission: 20,
+      merchantAmount: 80,
+      status: "PENDING",
+    });
+  });
+
+  it("kullanılan oranı KAYDA yazar — sonradan ayar değişse de geçmiş sabit kalır", async () => {
+    mockPrisma.paymentLog.findUnique.mockResolvedValue({
+      id: "p1", bookingId: "b1", status: "PENDING", amount: 250,
+      refundedAmount: 0, currency: "TRY", providerRef: null, transactionId: null,
+    });
+    await service.markCaptured({ bookingId: "b1" });
+    const create = mockPrisma.__tx.paymentSplit.upsert.mock.calls[0][0].create;
+    expect(create.commissionRate).toBe(0.2);
+    expect(create.platformCommission + create.merchantAmount).toBe(create.grossAmount);
+  });
+
+  it("aynı tahsilat iki kez bildirilirse ikinci paylaşım satırı üretmez", async () => {
+    // upsert + paymentLogId @unique: yaris da burada kirilir.
+    mockPrisma.paymentLog.findUnique.mockResolvedValue({
+      id: "p1", bookingId: "b1", status: "PENDING", amount: 100,
+      refundedAmount: 0, currency: "TRY", providerRef: null, transactionId: null,
+    });
+    await service.markCaptured({ bookingId: "b1" });
+    const arg = mockPrisma.__tx.paymentSplit.upsert.mock.calls[0][0];
+    expect(arg.update).toEqual({});
+  });
+
+  it("tamamı iade edilince paylaşımı REVERSED yapar", async () => {
+    // Aksi halde geri verilmis para, esnafin hakedisinde PENDING olarak durur.
+    mockPrisma.paymentLog.findUnique.mockResolvedValue({
+      id: "p1", bookingId: "b1", status: "SUCCESS", amount: 100,
+      refundedAmount: 0, currency: "TRY", providerRef: "r1", transactionId: "t1",
+    });
+    mockPrisma.paymentSplit.findUnique.mockResolvedValue({
+      id: "sp1", commissionRate: 0.2, grossAmount: 100,
+    });
+
+    await service.refund({ bookingId: "b1", amount: 100, reason: "iptal" });
+
+    expect(mockPrisma.__tx.paymentSplit.update).toHaveBeenCalledTimes(1);
+    expect(mockPrisma.__tx.paymentSplit.update.mock.calls[0][0].data).toEqual({
+      status: "REVERSED",
+    });
+  });
+
+  it("kısmi iadede kalanı KAYDIN KENDİ oranıyla yeniden böler", async () => {
+    // Guncel ayari kullanmak, aradan gecen surede oran degistiyse gecmis bir
+    // odemeyi bugunku komisyonla yeniden hesaplamak olurdu. Kayitta 0.4 var,
+    // guncel ayar 0.2 -- sonuc 0.4'e gore cikmali.
+    mockPrisma.paymentLog.findUnique.mockResolvedValue({
+      id: "p1", bookingId: "b1", status: "SUCCESS", amount: 100,
+      refundedAmount: 0, currency: "TRY", providerRef: "r1", transactionId: "t1",
+    });
+    mockPrisma.paymentSplit.findUnique.mockResolvedValue({
+      id: "sp1", commissionRate: 0.4, grossAmount: 100,
+    });
+
+    await service.refund({ bookingId: "b1", amount: 40, reason: "kismi" });
+
+    const data = mockPrisma.__tx.paymentSplit.update.mock.calls[0][0].data;
+    expect(data.grossAmount).toBe(60);
+    expect(data.merchantAmount).toBe(36);
+    expect(data.platformCommission).toBe(24);
+    expect(data.merchantAmount + data.platformCommission).toBe(data.grossAmount);
   });
 });
