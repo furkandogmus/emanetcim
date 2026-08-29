@@ -25,7 +25,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-bagajpark}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bagajpark}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD zorunlu -- uretimde Parameter Store'dan gelir (ops/SECRETS.md), yerelde docker-compose.env icinde tanimlayin}
       POSTGRES_DB: ${POSTGRES_DB:-bagajpark}
     # pg_stat_statements için shared_preload_libraries PostGIS imajında ayrı ele alınmalı (çakışma riski).
     command:
@@ -74,7 +74,7 @@ services:
       AUTH_URL: ${AUTH_URL:-}
       DEBUG: ${DEBUG:-}
       PUBLIC_URL_PROTOCOL: ${PUBLIC_URL_PROTOCOL:-}
-      DATABASE_URL: postgresql://${POSTGRES_USER:-bagajpark}:${POSTGRES_PASSWORD:-bagajpark}@postgres:5432/${POSTGRES_DB:-bagajpark}?schema=public
+      DATABASE_URL: postgresql://${POSTGRES_USER:-bagajpark}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD zorunlu -- uretimde Parameter Store'dan gelir (ops/SECRETS.md), yerelde docker-compose.env icinde tanimlayin}@postgres:5432/${POSTGRES_DB:-bagajpark}?schema=public
       NODE_ENV: production
       AUTH_SECRET: ${AUTH_SECRET:-docker-dev-change-me-use-openssl-rand-hex-32}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
