@@ -102,9 +102,16 @@ resource "aws_iam_role_policy" "app_ssm_write_env" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect   = "Allow"
-        Action   = ["ssm:PutParameter"]
-        Resource = "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter${var.ssm_app_parameter_prefix}/*"
+        Effect = "Allow"
+        Action = ["ssm:PutParameter"]
+        Resource = [
+          "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter${var.ssm_app_parameter_prefix}/*",
+          # TLS oneki de kapsamda: canli origin sertifikasi ve OZEL ANAHTARI
+          # yalnizca sunucunun diskinde duruyordu. Onlari Parameter Store'a
+          # tasiyan script de kutuda kosuyor -- ozel anahtar boylece hicbir
+          # laptop'a inmiyor ve hicbir SSM komut ciktisina dusmuyor.
+          "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter${var.ssm_parameter_prefix}/*",
+        ]
       },
       {
         Effect   = "Allow"

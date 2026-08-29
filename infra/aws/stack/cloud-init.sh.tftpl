@@ -61,12 +61,33 @@ if ! command -v aws >/dev/null 2>&1; then
   rm -rf /tmp/awscliv2.zip /tmp/aws
 fi
 
+# TLS materyali. DOSYA ADLARI nginx/conf.d/default.conf ile AYNI OLMAK ZORUNDA
+# (ssl_certificate /etc/ssl/cloudflare/bagajpark.crt).
+#
+# 2026-08-29'a kadar buraya `aws-test.crt` / `aws-test.key` yaziliyordu, nginx ise
+# `bagajpark.crt` istiyordu. Bugunku sunucu yalnizca dosyalar oraya ELLE
+# konuldugu icin calisiyordu; stack yeniden kurulsa (EIP degisimi, bolge
+# degisimi, felaket kurtarma) nginx sertifikayi bulamaz ve SITE ACILMAZDI.
+# Yani felaket kurtarma yolu kirikti. (DEFECT_BACKLOG madde 5.)
+#
+# Ad degisikligi tek basina yeterli degildi: SSM'deki sertifika
+# `aws-test.bagajpark.com` icindi, canli alan adi icin degil. Once canli
+# sertifika/anahtar SSM'e tasindi (scripts/tls-put.sh), sonra bu adlar duzeltildi.
 mkdir -p /etc/ssl/cloudflare
 aws ssm get-parameter --name "${ssm_cert_name}" --with-decryption --region ${region} \
-  --query Parameter.Value --output text > /etc/ssl/cloudflare/aws-test.crt
+  --query Parameter.Value --output text > /etc/ssl/cloudflare/bagajpark.crt
 aws ssm get-parameter --name "${ssm_key_name}" --with-decryption --region ${region} \
-  --query Parameter.Value --output text > /etc/ssl/cloudflare/aws-test.key
-chmod 644 /etc/ssl/cloudflare/aws-test.crt
-chmod 600 /etc/ssl/cloudflare/aws-test.key
+  --query Parameter.Value --output text > /etc/ssl/cloudflare/bagajpark.key
+chmod 644 /etc/ssl/cloudflare/bagajpark.crt
+chmod 600 /etc/ssl/cloudflare/bagajpark.key
+
+# Cektigimiz sertifika gercekten bu alan adina mi ait? Yanlis sertifikayla acilan
+# bir nginx, "calisiyor ama TLS hatasi veriyor" gibi teshisi zor bir duruma yol
+# acar. Uyusmazlik varsa cloud-init'i BURADA durdurmak daha iyi.
+if ! openssl x509 -in /etc/ssl/cloudflare/bagajpark.crt -noout -checkhost bagajpark.com >/dev/null 2>&1; then
+  echo "HATA: SSM'deki sertifika bagajpark.com'u kapsamiyor" >&2
+  openssl x509 -in /etc/ssl/cloudflare/bagajpark.crt -noout -ext subjectAltName >&2 || true
+  exit 1
+fi
 
 echo "cloud-init tamam: $(date)" > /var/log/bagajpark-cloud-init-done

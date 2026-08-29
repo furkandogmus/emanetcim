@@ -112,14 +112,23 @@ getiren hata sınıfının ta kendisi olurdu.
 - **Neden önemli**: bugünkü sunucu çalışıyor çünkü dosyalar oraya elle konuldu. `stack`
   yeniden kurulursa (EIP değişimi, bölge değişimi, felaket kurtarma) nginx sertifikayı
   bulamaz ve **site açılmaz**. Yani felaket kurtarma yolu bugün kırık.
-- **Neden hâlâ açık**: doğru düzeltme, SSM'deki sertifikanın hangi alan adına ait
-  olduğunu bilmeyi gerektiriyor ve bu repodan doğrulanamıyor. Tahminle dosya adı
-  değiştirmek, yanlış sertifikayla açılan bir sunucu üretebilirdi — bilerek
-  değiştirilmedi.
-- **Sonraki adım**: `aws ssm get-parameter --name /bagajpark/aws-test/tls/cert
-  --with-decryption` çıktısındaki sertifikanın CN/SAN'ını oku; `bagajpark.com` ise
-  cloud-init'teki dosya adını `bagajpark.{crt,key}` yap, değilse önce doğru origin
-  sertifikasını SSM'e yaz.
+- **2026-08-29'da ölçüldü ve temkin HAKLIYMIŞ**: SSM'deki sertifikanın SAN'ı
+  **`aws-test.bagajpark.com`** — canlı alan adı için değil. nginx'in gerçekten
+  servis ettiği sertifikanın SAN'ı ise `bagajpark.com, *.bagajpark.com` ve o
+  **yalnızca sunucunun diskinde** duruyordu. Yani sadece dosya adını değiştirmek
+  yanlış alan adının sertifikasıyla açılan bir sunucu üretecekti.
+  (`aws-test.bagajpark.com` alan adının DNS kaydı yok — ölü.)
+- **Hazırlandı, UYGULANMADI**: `scripts/tls-put.sh` canlı sertifika ve özel
+  anahtarı **sunucuda çalışarak** SSM'e yazıyor (anahtar hiçbir laptop'a inmiyor).
+  Sertifika/anahtar çiftinin eşleştiğini yazmadan önce doğruluyor, yazdıktan sonra
+  SAN'ı geri okuyup karşılaştırıyor. Kuru koşusu canlıda denendi.
+  cloud-init artık `bagajpark.{crt,key}` yazıyor ve çektiği sertifikanın
+  `bagajpark.com`'u kapsadığını `openssl -checkhost` ile doğrulayıp aksi hâlde
+  **duruyor** — yanlış sertifikayla açılan bir sunucu üretmektense cloud-init'in
+  orada patlaması iyidir.
+- **Kalan**: iki `terraform apply` (seed iznini aç → `tls-put.sh --apply` → kapat).
+  Çalışan instance ETKİLENMEZ: `user_data` zaten `ignore_changes`'te, plan
+  "No changes" diyor.
 
 ### 6. ✅ DÜZELTİLDİ — Zamanlanmış sekiz işten BEŞİ hiç çalışmıyordu
 
