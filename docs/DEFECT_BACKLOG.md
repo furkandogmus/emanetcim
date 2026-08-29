@@ -142,12 +142,32 @@ beklenenden kötü bir tablo çıktı.
   aynı 3 kayıt için 2 esnaf **her gün** uyarı alır. Üç kayıt 12–14 Haziran tarihli
   ve `overdue-scan`'in kendi açıklamasında geçen kayıtlarla aynı ("üç müşterinin
   bavulu Haziran'dan beri 'dükkanda' görünüyordu").
-- **Sonraki adım**: (1) o üç açık `CHECKED_IN` kaydı kapat — bunlar zaten başlı
-  başına bir veri sorunu; (2) `ops/crontab.prod`'u kur (`mkdir -p
+- **Durum (2026-08-29)**: üç kayıttan **ikisi kapatıldı**
+  (`scripts/repair-stale-checkin.sh --apply`). Kalan bir tanesi (540 TL,
+  `PaymentLog.status = SUCCESS`) script tarafından **bilerek atlandı**: iptal,
+  karşılığı olan bir SUCCESS ödemeyi öksüz bırakır ve raporda karşılığı olmayan
+  gelir görünür. Önce para tarafına karar verilmeli.
+- **Sonraki adım**: (1) kalan 540 TL'lik kaydın ödemesine karar ver; (2) `ops/crontab.prod`'u kur (`mkdir -p
   /opt/emanetci/logs` ÖNCE); (3) işleri tek tek, aralarında gözlemleyerek aç;
   (4) `registry.ts` içinde `enforced=true` yap ki gecikme sağlık kontrolünü
   DEGRADED yapsın — bu sınıfın tekrar sessizce oluşmaması ancak böyle engellenir;
   (5) `booking-reminders`'a "bildirildi" işareti ekle.
+
+### 8. ⚠️ AÇIK — Mevcut iki onarım scripti bu sunucuda hiç çalışmıyor
+
+- **Kanıt (2026-08-29, canlı)**: `command -v psql` → **HAYIR**, psql host'ta kurulu
+  değil. `scripts/repair-seal-ownership.sh:98` ve `repair-slot-timezone.sh` ise
+  `assert_is_installed "psql"` ile başlıyor, yani ilk adımda düşerler.
+  İkinci katman: ikisi de `DATABASE_URL`'i `$app_dir/.env`'den okuyor, ama o URL
+  **`emanetci`** veritabanını gösteriyor ve o veritabanı YOK
+  (`SELECT datname FROM pg_database` → yalnızca `postgres`, `bagajpark`).
+- **Neden önemli**: ikisi de kanıtlı bir veri bozukluğunu düzeltmek için yazılmış
+  (P1-7'deki 1.247 sahipsiz mühür dahil). "Script var" diye sorun çözülmüş
+  sanılıyor; oysa koşturulsa ilk satırda duruyor. Hetzner kutusu için yazılmışlar.
+- **Sonraki adım**: ikisini de `scripts/repair-stale-checkin.sh`'taki desene taşı —
+  sorguları konteyner içindeki psql ile koştur
+  (`docker compose exec -T postgres psql`), host'ta psql aramayı ve env'deki ölü
+  `DATABASE_URL`'e güvenmeyi bırak.
 
 ### 7. ✅ DÜZELTİLDİ — Üretilen crontab, yazılamayan bir dizine log yazıyordu
 
