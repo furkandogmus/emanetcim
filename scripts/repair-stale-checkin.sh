@@ -56,6 +56,11 @@ function print_usage() {
   echo -e "  --apply\tGercekten degistir."
   echo -e "  --include-paid\tTahsil edilmis odemesi olanlari da kapsa. TEHLIKELI --"
   echo -e "\t\tkarsiligi olmayan gelir birakir; once PaymentService.refund."
+  echo -e "  --revert-to-paid <id>\tTEK bir kaydi CHECKED_IN'den PAID'e geri alir."
+  echo -e "\t\tOdemesi olan kayitlar icin dogru yol budur: PAID'e donunce"
+  echo -e "\t\tnormal iptal akisi (cancelBookingAction) calisir ve iadeyi"
+  echo -e "\t\tPaymentService uzerinden KENDI yapar -- denetim izi, slot"
+  echo -e "\t\ttemizligi ve paylasim geri alimi dahil. Kimlik ZORUNLU."
   echo -e "  --help\tBu yardim."
   echo
 }
@@ -82,6 +87,7 @@ function main() {
   local min_age_days="$DEFAULT_MIN_AGE_DAYS"
   local apply="false"
   local include_paid="false"
+  local revert_id=""
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -89,12 +95,49 @@ function main() {
       --min-age-days)  min_age_days="$2"; shift 2 ;;
       --apply)         apply="true"; shift ;;
       --include-paid)  include_paid="true"; shift ;;
+      --revert-to-paid) revert_id="$2"; shift 2 ;;
       --help)          print_usage; exit 0 ;;
       *)               log_error "Bilinmeyen secenek: $1"; print_usage; exit 1 ;;
     esac
   done
 
   assert_is_installed "docker"
+
+  # --revert-to-paid: tek kayit, acik kimlikle. Desen eslesmesi YOK -- bu mod
+  # odemesi olan kayitlara dokundugu icin yanlislikla suprulmesi imkansiz olmali.
+  if [[ -n "$revert_id" ]]; then
+    log_info "Hedef kayit (salt okunur):"
+    psql_run "$app_dir" -c "
+      SELECT left(b.id,8) AS rez, b.status, s.name AS dukkan,
+             to_char(b.\"checkOutTime\",'YYYY-MM-DD') AS cikis,
+             (SELECT count(*) FROM \"BookingSeal\" x WHERE x.\"bookingId\"=b.id) AS muhur,
+             COALESCE(p.status::text,'(yok)') AS odeme
+      FROM \"Booking\" b JOIN \"Shop\" s ON s.id=b.\"shopId\"
+      LEFT JOIN \"PaymentLog\" p ON p.\"bookingId\"=b.id
+      WHERE b.id LIKE '${revert_id}%';"
+
+    local n
+    n=$(psql_run "$app_dir" -t -A -c "
+      SELECT count(*) FROM \"Booking\" b
+      WHERE b.id LIKE '${revert_id}%' AND b.status='CHECKED_IN'
+        AND NOT EXISTS (SELECT 1 FROM \"BookingSeal\" x WHERE x.\"bookingId\"=b.id);" | tr -d '[:space:]')
+    if [[ "$n" != "1" ]]; then
+      log_error "Tam olarak 1 uygun kayit bekleniyordu, $n bulundu."
+      log_error "  Kosul: status=CHECKED_IN ve muhru olmayan. Kimligi netlestirin."
+      exit 1
+    fi
+    if [[ "$apply" != "true" ]]; then
+      log_warn "KURU KOSU -- PAID'e alinmadi. Uygulamak icin --apply ekleyin."
+      return 0
+    fi
+    psql_run "$app_dir" -c "
+      UPDATE \"Booking\" SET status='PAID', \"updatedAt\"=now()
+      WHERE id LIKE '${revert_id}%' AND status='CHECKED_IN';"
+    log_info "Kayit PAID'e alindi."
+    log_warn "SIRADAKI ADIM SIZDE: rezervasyonu normal iptal akisindan iptal edin."
+    log_warn "  Iadeyi cancelBooking -> PaymentService.refund kendi yapacak."
+    return 0
+  fi
 
   # Odemesi olanlari disarida birakan kosul. --include-paid ile gevsetilir.
   local paid_filter="AND NOT EXISTS (SELECT 1 FROM \"PaymentLog\" p WHERE p.\"bookingId\" = b.id AND p.status = 'SUCCESS')"
