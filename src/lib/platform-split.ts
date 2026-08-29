@@ -1,17 +1,52 @@
-function clampCommissionRate(): number {
-  const rate = Number(process.env.PLATFORM_COMMISSION_RATE ?? 0.5);
-  return Number.isFinite(rate) ? Math.min(1, Math.max(0, rate)) : 0.5;
+/**
+ * Platform/esnaf paylaşımı — SAF hesap.
+ *
+ * Oran ARTIK ORTAM DEĞİŞKENİNDEN OKUNMUYOR. Eskiden `PLATFORM_COMMISSION_RATE`
+ * yoksa kodda yazılı `0.5`'e sessizce düşüyordu: env bir deploy'da kaybolsa
+ * esnaf, kimse fark etmeden parasının yarısını alırdı — bu projeyi bu hale
+ * getiren "yanlış varsayılan, gerçekmiş gibi görünen para" hatasının aynısı.
+ * Oran artık `PricingRules.platformCommissionRate` ile ÇAĞIRAN TARAFINDAN
+ * verilir; nereden geldiği tek yerde bellidir.
+ */
+
+/** Oranı geçerli aralığa çeker. 0..1 dışındaki bir değer hesabı anlamsız kılar. */
+export function clampCommissionRate(rate: number): number {
+  if (!Number.isFinite(rate)) return 0;
+  return Math.min(1, Math.max(0, rate));
+}
+
+export type SplitAmounts = {
+  grossAmount: number;
+  /** Hesapta kullanılan oran — kayda da bu yazılır (enstantane). */
+  commissionRate: number;
+  platformCommission: number;
+  merchantAmount: number;
+};
+
+/**
+ * Brüt tutarı platform komisyonu ile esnaf payına böler.
+ *
+ * YUVARLAMA: iki tarafı ayrı ayrı yuvarlamak kuruş kaçırır (120,005 gibi bir
+ * tutarda toplam brütü tutmaz). Bu yüzden önce esnaf payı yuvarlanır, komisyon
+ * FARKTAN bulunur. Böylece `platformCommission + merchantAmount === grossAmount`
+ * her zaman doğrudur — mutabakatta bir kuruşluk açık aramak zorunda kalmayın.
+ */
+export function computeSplit(grossAmount: number, rate: number): SplitAmounts {
+  const commissionRate = clampCommissionRate(rate);
+  const gross = Math.round(grossAmount * 100) / 100;
+  const merchantAmount = Math.round(gross * (1 - commissionRate) * 100) / 100;
+  const platformCommission = Math.round((gross - merchantAmount) * 100) / 100;
+  return { grossAmount: gross, commissionRate, platformCommission, merchantAmount };
 }
 
 /** Esnaf payı. Kalan tutar platform komisyonudur. */
-export function computeSubMerchantShare(totalPrice: number): number {
-  const clamped = clampCommissionRate();
-  return Math.round(totalPrice * (1 - clamped) * 100) / 100;
+export function computeSubMerchantShare(totalPrice: number, rate: number): number {
+  return computeSplit(totalPrice, rate).merchantAmount;
 }
 
 /** Esnafın brüt tutardan aldığı oran (1 - platform komisyonu). UI / Partner paneli için. */
-export function getMerchantShareRatio(): number {
-  return 1 - clampCommissionRate();
+export function getMerchantShareRatio(rate: number): number {
+  return 1 - clampCommissionRate(rate);
 }
 
 /**

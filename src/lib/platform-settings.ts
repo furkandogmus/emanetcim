@@ -24,8 +24,14 @@ function mapRow(row: {
   bagMultiplierM: unknown;
   bagMultiplierXl: unknown;
   platformHolidayDates?: unknown;
+  platformCommissionRate?: unknown;
 }): PricingRules {
   return {
+    // Kolon yeni; eski satirlarda null gelirse varsayilana duser.
+    platformCommissionRate:
+      row.platformCommissionRate == null
+        ? DEFAULT_PRICING_RULES.platformCommissionRate
+        : moneyToNumber(row.platformCommissionRate),
     maxStayDays: row.maxStayDays,
     maxBagsPerSlot: row.maxBagsPerSlot,
     insuranceFeeTry: moneyToNumber(row.insuranceFeeTry),

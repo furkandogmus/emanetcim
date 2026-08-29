@@ -89,7 +89,7 @@ export default async function PartnerPage({
     0
   );
 
-  const merchantShareRatio = getMerchantShareRatio();
+  const merchantShareRatio = getMerchantShareRatio(pricingRules.platformCommissionRate);
   const marketPrice = pricingRules.defaultPricePerDay;
 
   return (

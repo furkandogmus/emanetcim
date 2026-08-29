@@ -60,6 +60,12 @@ const SERVICE_ONLY_MODELS = [
   "sealRequest",
   "paymentLog",
   "coupon",
+  // Paylasim kaydi para demektir ve tek basina anlamli degildir: bir
+  // PaymentSplit satiri ancak karsiliginda tahsil edilmis bir PaymentLog
+  // varsa dogrudur. Liste modeli DAHA ILK GUNDEN koruyor -- paymentLog'un
+  // basina gelen (servis disindan yazilip karsiliksiz "SUCCESS" uretilmesi)
+  // burada hic yasanmasin diye.
+  "paymentSplit",
 ] as const;
 
 /**

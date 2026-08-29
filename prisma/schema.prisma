@@ -16,9 +16,9 @@ model User {
   name                     String?
   /// bcrypt hash; OAuth-only kullanıcılarda null
   passwordHash             String?
-  isBanned               Boolean           @default(false)
+  isBanned                 Boolean                  @default(false)
   /// JWT token sürümü — şifre değişikliğinde artırılır, eski token'lar geçersiz olur
-  tokenVersion           Int               @default(0)
+  tokenVersion             Int                      @default(0)
   lastIp                   String?
   createdAt                DateTime                 @default(now())
   updatedAt                DateTime                 @updatedAt
@@ -101,37 +101,37 @@ model VerificationToken {
 }
 
 model Shop {
-  id               String        @id @default(uuid())
-  ownerId          String
-  name              String
-  address           String?
-  image             String?
-  description       String?
-  latitude          Float?
-  longitude         Float?
-  capacity          Int           @default(10)
-  isActive          Boolean       @default(false)
-  rating            Float?        @default(0.0)
-  pricePerDay       Decimal       @default(50) @db.Decimal(12, 2)
-  pricePerHour       Decimal       @default(10) @db.Decimal(12, 2)
-  timezone          String        @default("Europe/Istanbul")
-  hasRestroom       Boolean       @default(false)
-  hasCctv           Boolean       @default(false)
-  hasClimateControl Boolean       @default(false)
-  acceptsLargeItems Boolean       @default(false)
-  open247          Boolean       @default(false)
-  openingTime      String?       @default("09:00")
-  closingTime      String?       @default("20:00")
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  city             String?
-  district         String?
-  sealLeadTimeDays Int           @default(3)
-  sealReorderPoint Int           @default(15)
+  id                  String         @id @default(uuid())
+  ownerId             String
+  name                String
+  address             String?
+  image               String?
+  description         String?
+  latitude            Float?
+  longitude           Float?
+  capacity            Int            @default(10)
+  isActive            Boolean        @default(false)
+  rating              Float?         @default(0.0)
+  pricePerDay         Decimal        @default(50) @db.Decimal(12, 2)
+  pricePerHour        Decimal        @default(10) @db.Decimal(12, 2)
+  timezone            String         @default("Europe/Istanbul")
+  hasRestroom         Boolean        @default(false)
+  hasCctv             Boolean        @default(false)
+  hasClimateControl   Boolean        @default(false)
+  acceptsLargeItems   Boolean        @default(false)
+  open247             Boolean        @default(false)
+  openingTime         String?        @default("09:00")
+  closingTime         String?        @default("20:00")
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  city                String?
+  district            String?
+  sealLeadTimeDays    Int            @default(3)
+  sealReorderPoint    Int            @default(15)
   /// Doğrulanmış dükkan rozeti (güven & güvenilirlik)
-  isVerified       Boolean       @default(false)
+  isVerified          Boolean        @default(false)
   /// Ortalama yanıt süresi (dakika cinsinden)
-  responseTimeMinutes Int?       @default(0)
+  responseTimeMinutes Int?           @default(0)
   /// Test/demo kaydı. Kamuya açık hiçbir listede, aramada veya istatistikte görünmez.
   ///
   /// NEDEN: 2026-08-22'de Türkiye'de bulunabilen üç dükkandan biri kişisel bir test
@@ -139,14 +139,18 @@ model Shop {
   /// `isActive = false` yapmak da işe yaramıyordu: dükkanın 5 rezervasyonu var ve
   /// kapatmak esnaf akışlarını bozuyor. Doğru ayrım "aktif mi" değil, "gerçek mi".
   /// Filtre tek yerde: `src/lib/public-shop-filter.ts` (P1-4).
-  isTest           Boolean       @default(false)
-  bookings         Booking[]
-  reviews          Review[]
-  seals            Seal[]
-  sealRequests     SealRequest[]
-  images           ShopImage[]
-  timeSlots        ShopTimeSlot[]
-  owner            User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  isTest              Boolean        @default(false)
+  bookings            Booking[]
+  reviews             Review[]
+  seals               Seal[]
+  sealRequests        SealRequest[]
+  images              ShopImage[]
+  timeSlots           ShopTimeSlot[]
+  owner               User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  merchantProfile        MerchantProfile?
+  merchantPaymentAccount MerchantPaymentAccount[]
+  paymentSplits          PaymentSplit[]
 
   @@index([ownerId])
   @@index([isActive])
@@ -169,13 +173,13 @@ model ShopImage {
 
 /// 30-minute bookable time slot per shop
 model ShopTimeSlot {
-  id        String   @id @default(cuid())
-  shopId    String
-  startTime DateTime // 2026-06-15T09:00:00Z
-  endTime   DateTime // 2026-06-15T09:30:00Z
-  capacity  Int      @default(10)
-  isActive  Boolean  @default(true)
-  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  id           String            @id @default(cuid())
+  shopId       String
+  startTime    DateTime // 2026-06-15T09:00:00Z
+  endTime      DateTime // 2026-06-15T09:30:00Z
+  capacity     Int               @default(10)
+  isActive     Boolean           @default(true)
+  shop         Shop              @relation(fields: [shopId], references: [id], onDelete: Cascade)
   reservations ReservationSlot[]
 
   @@unique([shopId, startTime])
@@ -306,6 +310,7 @@ model PaymentLog {
   /// Chargeback incelemesi: OPEN | WON | LOST | null
   chargebackStatus String?
   booking          Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  split            PaymentSplit?
 
   @@index([status])
   @@index([splitCompleted])
@@ -473,18 +478,18 @@ model FeatureFlag {
 /// fiyatlandırmayı "düzelttiğini" sanarken XL bavul hâlâ küçük bavul fiyatı ödüyordu.
 /// `src/__tests__/pricing-defaults.test.ts` ikisinin ayrışmasını CI'da kırmızı yakar.
 model PlatformSettings {
-  id                   String   @id @default("default")
-  maxStayDays          Int      @default(30)
-  maxBagsPerSlot       Int      @default(50)
-  insuranceFeeTry      Decimal  @default(0) @db.Decimal(12, 2)
-  earlyRefundRatio     Decimal  @default(1.0) @db.Decimal(6, 4)
-  cancelFixedFeeTry    Decimal  @default(0) @db.Decimal(12, 2)
+  id                     String   @id @default("default")
+  maxStayDays            Int      @default(30)
+  maxBagsPerSlot         Int      @default(50)
+  insuranceFeeTry        Decimal  @default(0) @db.Decimal(12, 2)
+  earlyRefundRatio       Decimal  @default(1.0) @db.Decimal(6, 4)
+  cancelFixedFeeTry      Decimal  @default(0) @db.Decimal(12, 2)
   /// Geç teslim alma ücreti. KENDİ ALANI: eskiden `cancelFixedFeeTry` ödünç
   /// alınıyordu (BookingService), yani iptal ücretini değiştiren gecikme ücretini de
   /// farkında olmadan değiştiriyordu.
-  latePickupFeeTry     Decimal  @default(0) @db.Decimal(12, 2)
+  latePickupFeeTry       Decimal  @default(0) @db.Decimal(12, 2)
   /// Gecikme ücreti işlemeden önceki tolerans (dakika).
-  latePickupGraceMin   Int      @default(15)
+  latePickupGraceMin     Int      @default(15)
   /// Check-in'de mühür kaydı ZORUNLU mu?
   ///
   /// VARSAYILAN `false` — bilinçli. Lansmanda esnafın elinde mühür olmayabilir ve
@@ -495,13 +500,25 @@ model PlatformSettings {
   /// karşılık 3 `CHECKED_IN` rezervasyon vardı — üç bavul dükkanda ama hangi
   /// mühürle mühürlendikleri hiçbir yerde kayıtlı değil. Mühür, anlaşmazlıkta
   /// zilyetliğin kanıtıdır; kaydı yoksa platform hiçbir şey ispat edemez (P1-23).
-  requireSealsOnCheckIn Boolean @default(false)
-  defaultShopCapacity  Int      @default(10)
-  defaultPricePerDay   Decimal  @default(50) @db.Decimal(12, 2)
-  bagMultiplierS       Decimal  @default(0.8) @db.Decimal(6, 4)
-  bagMultiplierM       Decimal  @default(1.0) @db.Decimal(6, 4)
-  bagMultiplierXl      Decimal  @default(1.5) @db.Decimal(6, 4)
-  updatedAt            DateTime @updatedAt
+  requireSealsOnCheckIn  Boolean  @default(false)
+  defaultShopCapacity    Int      @default(10)
+  defaultPricePerDay     Decimal  @default(50) @db.Decimal(12, 2)
+  bagMultiplierS         Decimal  @default(0.8) @db.Decimal(6, 4)
+  bagMultiplierM         Decimal  @default(1.0) @db.Decimal(6, 4)
+  bagMultiplierXl        Decimal  @default(1.5) @db.Decimal(6, 4)
+  updatedAt              DateTime @updatedAt
+  /// Platform komisyon oranı (0..1). Esnaf payı = brüt × (1 - bu oran).
+  ///
+  /// EVİ BURASI, ortam değişkeni DEĞİL. Eskiden `PLATFORM_COMMISSION_RATE`
+  /// env'inden okunuyordu ve kaybolduğunda kodda yazılı `0.5`'e SESSİZCE
+  /// düşüyordu — yani esnaf, kimse fark etmeden parasının yarısını alırdı.
+  /// Burada durunca yönetim arayüzü, önbellek ve audit'i hazır geliyor
+  /// (docs/PLATFORM_SETTINGS.md) ve değişiklik iz bırakıyor.
+  ///
+  /// Varsayılan 0.5, üretimdeki fiilî değerle birebir — bu alanın eklenmesi
+  /// hiçbir hesabı değiştirmesin diye.
+  platformCommissionRate Decimal  @default(0.5) @db.Decimal(6, 4)
+
   /// Platform genelinde rezervasyona kapalı takvim günleri (YYYY-MM-DD JSON dizisi).
   platformHolidayDates Json?
 }
@@ -603,7 +620,7 @@ model PushSubscription {
 model MobilePushToken {
   token      String   @id
   userId     String
-  platform   String   // ios, android
+  platform   String // ios, android
   appVersion String?
   locale     String?
   lastSeenAt DateTime @default(now())
@@ -622,23 +639,23 @@ model BlockedIp {
 
 /// Gelen kutusu. İletişim formundan VE `destek@` adresine gelen e-postalardan dolar.
 model ContactMessage {
-  id        String   @id @default(cuid())
-  from      String
-  to        String
-  subject   String?
-  text      String?
-  html      String?
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
-  raw       Json?
+  id               String         @id @default(cuid())
+  from             String
+  to               String
+  subject          String?
+  text             String?
+  html             String?
+  isRead           Boolean        @default(false)
+  createdAt        DateTime       @default(now())
+  raw              Json?
   /// SUPPORT | BULK | AUTOMATED | UNCLASSIFIED — `src/lib/inbox-classifier.ts`
   ///
   /// NEDEN: 2026-08-22'de kutuda 67 mesaj vardı, 57'si okunmamış ve ezici
   /// çoğunluğu soğuk pazarlamaydı. Gerçek bir misafir şikâyeti bunların arasında
   /// kaybolur — destek kanalının kendisi çalışmıyor demektir (P1-18).
-  category  String   @default("UNCLASSIFIED")
+  category         String         @default("UNCLASSIFIED")
   /// Kararı hangi sinyal verdi. Operatör "neden buraya düştü" diye sorabilmeli.
-  categoryReason String?
+  categoryReason   String?
   /// Gelen postanın RFC Message-ID başlığı — panelden verilen cevabın
   /// `In-Reply-To`/`References` başlıklarıyla aynı yazışma zincirine bağlanması için.
   inboundMessageId String?
@@ -686,13 +703,13 @@ model BlogPost {
 /// Append-only booking event log — booking'in tüm durum değişikliklerini kaydeder
 /// Dispute çözümlerinde booking yaşam döngüsünü kanıtlamak için kullanılır
 model BookingEvent {
-  id          String   @id @default(cuid())
-  bookingId   String
-  event       String   // CREATED, PAID, CHECKED_IN, CHECKED_OUT, CANCELLED, APPROVED, WAITING_APPROVAL, MODIFIED, DISPUTED, REFUNDED
-  actorId     String?  // kim yaptı (userId)
-  actorRole   Role?    // GUEST, PARTNER, ADMIN
-  metadata    Json?    // event-specific data (eski durum, yeni durum, tutar, vs.)
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  bookingId String
+  event     String // CREATED, PAID, CHECKED_IN, CHECKED_OUT, CANCELLED, APPROVED, WAITING_APPROVAL, MODIFIED, DISPUTED, REFUNDED
+  actorId   String? // kim yaptı (userId)
+  actorRole Role? // GUEST, PARTNER, ADMIN
+  metadata  Json? // event-specific data (eski durum, yeni durum, tutar, vs.)
+  createdAt DateTime @default(now())
 
   @@index([bookingId])
   @@index([bookingId, createdAt])
@@ -742,4 +759,151 @@ enum SealStatus {
   IN_USE
   RETURNED
   FAULTY
+}
+
+/// Esnafın tüzel kimliği — SAĞLAYICIDAN BAĞIMSIZ.
+///
+/// NEDEN AYRI TABLO: alt üye iş yeri (sub-merchant) onboarding'inde her PSP aynı
+/// çekirdek bilgiyi ister — unvan, TCKN veya VKN, vergi dairesi, IBAN. Bunu
+/// sağlayıcıya bağlı tutmak, PSP değiştiğinde esnaftan belgeleri BİR KEZ DAHA
+/// istemek demektir. Kimlik burada bir kez durur; her sağlayıcı hesabı
+/// (`MerchantPaymentAccount`) buna bakar.
+model MerchantProfile {
+  id        String            @id @default(uuid())
+  shopId    String            @unique
+  legalType MerchantLegalType
+
+  /// Gerçek kişide ad soyad, şirkette ticari unvan.
+  legalName String
+  /// Yalnızca INDIVIDUAL için. Checksum doğrulaması `src/lib/tr/identity.ts`.
+  tckn      String?
+  /// SOLE_PROPRIETORSHIP ve COMPANY için. Checksum aynı modülde.
+  vkn       String?
+  taxOffice String?
+
+  /// Boşluksuz, büyük harf (`normalizeTrIban`). Hakediş bu hesaba gider.
+  iban       String
+  /// IBAN sahibinin adı. Unvandan FARKLI olabilir ve PSP'ler bu ikisini
+  /// karşılaştırır; ayrı alan olmazsa eşleşmeyen hesap onboarding'de reddedilir.
+  ibanHolder String
+
+  addressLine String
+  city        String
+  district    String?
+  phone       String
+  email       String
+
+  /// Belge/bilgi doğrulaması insan eliyle yapıldıysa kim ve ne zaman.
+  verifiedAt DateTime?
+  verifiedBy String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  shop Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@index([legalType])
+  @@index([verifiedAt])
+}
+
+/// Bir dükkanın BİR sağlayıcıdaki alt üye iş yeri hesabı.
+///
+/// Dükkan × sağlayıcı tekil: aynı dükkan ileride hem iyzico hem PayTR hesabı
+/// taşıyabilir, sağlayıcı değişimi eskisini silmeden yapılır.
+model MerchantPaymentAccount {
+  id       String @id @default(uuid())
+  shopId   String
+  /// `PaymentProvider.capabilities.id` ile aynı değer ("manual", "iyzico", ...).
+  provider String
+
+  /// Sağlayıcının verdiği alt üye iş yeri kimliği. Onboarding tamamlanana dek null.
+  providerAccountId String?
+  status            MerchantAccountStatus @default(NOT_STARTED)
+
+  /// Sağlayıcı reddettiyse gerekçesi — esnafa ne düzelteceğini söyleyebilmek için.
+  rejectionReason String?
+  submittedAt     DateTime?
+  activatedAt     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Profile AYRI bir yabanci anahtarla baglanmiyor. Ayri bir merchantProfileId
+  // kolonu, BASKA bir dukkanin profilini gosterebilirdi -- veritabani bunu
+  // engelleyemez. Iki kayit da shopId tasidigi icin baglanti zaten tekil ve
+  // tutarli: profile `shop.merchantProfile` uzerinden erisilir.
+  shop Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@unique([shopId, provider])
+  @@index([provider, status])
+  @@index([status])
+}
+
+/// Bir ödemenin platform/esnaf paylaşımı — HESAPLANMIŞ DEĞİL, YAZILMIŞ.
+///
+/// NEDEN TABLO: paylaşım bugün `src/lib/platform-split.ts` içinde her
+/// görüntülemede yeniden hesaplanıyor ve hiçbir yere yazılmıyor. İki sonucu var:
+///   1. Komisyon oranı değişince GEÇMİŞ hakedişler de değişir — esnafın geçen ay
+///      gördüğü tutar bu ay başka çıkar, dayanacak kayıt yoktur.
+///   2. Sağlayıcı tarafında split yapıldığında (marketplace) platformun kendi
+///      defterinde karşılığı olmaz; mutabakat yapılamaz.
+/// Bu yüzden oran da tutarlar da ödeme anında DONDURULUP yazılıyor.
+model PaymentSplit {
+  id           String @id @default(uuid())
+  paymentLogId String @unique
+  shopId       String
+
+  grossAmount        Decimal @db.Decimal(12, 2)
+  /// Ödeme anındaki oranın ENSTANTANESİ. Ayarı sonradan değiştirmek bu satırı
+  /// değiştirmez — geçmiş hakediş sabit kalır.
+  commissionRate     Decimal @db.Decimal(6, 4)
+  platformCommission Decimal @db.Decimal(12, 2)
+  merchantAmount     Decimal @db.Decimal(12, 2)
+  currency           String  @default("TRY")
+
+  status      SplitStatus @default(PENDING)
+  /// Sağlayıcı split'i kendi tarafında yaptıysa referansı.
+  providerRef String?
+  settledAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  paymentLog PaymentLog @relation(fields: [paymentLogId], references: [id], onDelete: Cascade)
+  shop       Shop       @relation(fields: [shopId], references: [id])
+
+  @@index([shopId, status])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum MerchantLegalType {
+  /// Gerçek kişi — TCKN ile. Vergi mükellefiyeti yok.
+  INDIVIDUAL
+  /// Şahıs şirketi — VKN ile.
+  SOLE_PROPRIETORSHIP
+  /// Limited / anonim şirket — VKN ile.
+  COMPANY
+}
+
+enum MerchantAccountStatus {
+  /// Esnaf henüz ödeme hesabı bağlamadı.
+  NOT_STARTED
+  /// Bilgiler sağlayıcıya gönderildi, inceleniyor.
+  PENDING
+  /// Hakediş alabilir.
+  ACTIVE
+  /// Sağlayıcı reddetti; `rejectionReason` sebebi tutar.
+  REJECTED
+  /// Daha önce aktifti, askıya alındı.
+  SUSPENDED
+}
+
+enum SplitStatus {
+  /// Ödeme alındı, paylaşım henüz esnafa geçmedi.
+  PENDING
+  /// Esnaf payı sağlayıcı tarafından aktarıldı.
+  SETTLED
+  /// İade sonrası paylaşım geri alındı.
+  REVERSED
 }

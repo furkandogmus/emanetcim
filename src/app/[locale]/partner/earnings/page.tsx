@@ -7,6 +7,7 @@ import {
   getMerchantShareRatio,
   EARNING_BOOKING_STATUSES,
 } from "@/lib/platform-split";
+import { getPricingRules } from "@/lib/platform-settings";
 import PartnerEarningsClient from "@/components/partner/PartnerEarningsClient";
 
 export default async function PartnerEarningsPage({
@@ -53,7 +54,10 @@ export default async function PartnerEarningsPage({
     prisma.booking.count({ where: { shopId: shop.id } }),
   ]);
 
-  const merchantRatio = getMerchantShareRatio();
+  // Oran artik merkezi is kurallarindan geliyor (onbellekli); ortam degiskeni
+  // kaybolunca sessizce %50'ye dusen eski davranis kapandi.
+  const pricingRules = await getPricingRules();
+  const merchantRatio = getMerchantShareRatio(pricingRules.platformCommissionRate);
 
   // Group by month
   const monthMap: Record<

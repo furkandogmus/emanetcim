@@ -22,6 +22,15 @@ export type PricingRules = {
   bagMultipliers: { S: number; M: number; XL: number };
   /** YYYY-MM-DD — bu günlere denk gelen konaklama pencereleri reddedilir. */
   platformHolidayDates: string[];
+  /**
+   * Platform komisyon oranı (0..1). Esnaf payı = brüt × (1 - bu oran).
+   *
+   * Eskiden `PLATFORM_COMMISSION_RATE` ortam değişkeninden okunuyordu; env
+   * kaybolduğunda kodda yazılı `0.5`'e sessizce düşüyordu, yani esnaf kimse
+   * fark etmeden parasının yarısını alıyordu. Artık diğer ticari kurallarla
+   * aynı yerde: veritabanı, yönetim arayüzü, önbellek, audit.
+   */
+  platformCommissionRate: number;
 };
 
 /**
@@ -42,6 +51,7 @@ export type PricingRules = {
  * olarak değişir. Bir migrasyonun canlı fiyatı sessizce değiştirmesi kabul edilmez.
  */
 export const DEFAULT_PRICING_RULES: PricingRules = {
+  platformCommissionRate: 0.5,
   maxStayDays: 30,
   maxBagsPerSlot: 50,
   insuranceFeeTry: 0,

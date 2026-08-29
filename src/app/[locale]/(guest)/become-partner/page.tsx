@@ -49,7 +49,7 @@ export default async function BecomePartnerPage({
   setRequestLocale(locale);
   const t = await getTranslations("MarketingBecomePartner");
   const pricingRules = await getPricingRules();
-  const merchantShareRatio = getMerchantShareRatio();
+  const merchantShareRatio = getMerchantShareRatio(pricingRules.platformCommissionRate);
   const activePartnerCount = await prisma.shop.count({ where: PUBLIC_SHOP_FILTER });
 
   return (
