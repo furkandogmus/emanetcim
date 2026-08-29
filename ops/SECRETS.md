@@ -36,6 +36,53 @@ aws sts get-caller-identity --query Account --output text
 
 Beklenen: `772853132412`. Başka bir numara çıkarsa **durun** — yanlış hesaptasınız.
 
+### Gerekli IAM izinleri — bunu önce kontrol edin
+
+Adım 1, 2, 4 ve 6 sunucuda SSM Run Command ile çalışır. `terraform-bagajpark`
+kullanıcısında bu izinler **yok** (2026-08-29'da doğrulandı):
+
+```bash
+aws ssm send-command --document-name "AWS-RunShellScript" \
+  --targets "Key=tag:Project,Values=bagajpark-aws-test" \
+  --parameters 'commands=["echo ok"]' --query "Command.CommandId" --output text
+```
+
+Beklenen: bir komut kimliği. `AccessDeniedException ... ssm:SendCommand`
+alıyorsanız aşağıdaki politikayı kullanıcıya ekleyin (konsoldan, çünkü bu
+kullanıcı kendi IAM kayıtlarını okuyamıyor ve Terraform'da tanımlı değil):
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "RunCommandOnProjectInstances",
+      "Effect": "Allow",
+      "Action": "ssm:SendCommand",
+      "Resource": "arn:aws:ec2:eu-central-1:772853132412:instance/*",
+      "Condition": {
+        "StringEquals": { "ssm:resourceTag/Project": "bagajpark-aws-test" }
+      }
+    },
+    {
+      "Sid": "RunCommandDocument",
+      "Effect": "Allow",
+      "Action": "ssm:SendCommand",
+      "Resource": "arn:aws:ssm:eu-central-1::document/AWS-RunShellScript"
+    },
+    {
+      "Sid": "ReadCommandStatus",
+      "Effect": "Allow",
+      "Action": ["ssm:GetCommandInvocation", "ssm:ListCommandInvocations", "ssm:ListCommands"],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+Kapsam, deploy rolündeki (`infra/aws/bootstrap/main.tf`) izinle aynı: yalnızca
+`Project=bagajpark-aws-test` etiketli instance'lara komut gönderilebilir.
+
 > Hiçbir adım SSH/SCP kullanmaz ve hiçbir adım ekrana sır **değeri** basmaz.
 > Bütün iş sunucuda SSM Run Command ile olur; çıktı yalnızca anahtar adlarıdır.
 > Sebebi: SSM komut çıktısı CloudTrail/SSM geçmişinde saklanır.
