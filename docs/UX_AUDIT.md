@@ -33,6 +33,7 @@ yazılmaz; ölçüm yazılır.
 | 18 | İkincil gri metin 2.52:1 — 406 yerde | Her sayfa | ⏳ KARAR BEKLİYOR |
 | 19 | PWA her açılışta Türkçe açılıyor | PWA | ⏳ AÇIK |
 | 20 | `offline.html` ölü dosya | PWA | ✅ SİLİNDİ |
+| 21 | **GÜVENLİK**: `callbackUrl` ters bölüyle açık yönlendirme | Giriş | ✅ DÜZELTİLDİ |
 | 16 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
 | 17 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
 | 18 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
@@ -277,6 +278,30 @@ DEĞİŞTİRDİĞİNDE bir tercih çerezi yazmak ve yalnızca `/` kökünde onu 
 Tarayıcı diline göre otomatik yönlendirme olmadığı için SEO davranışı aynı
 kalır.
 
+### 21. GÜVENLİK — `callbackUrl` açık yönlendirmesi
+
+`sanitizeAuthCallbackUrl` yalnızca `//` ile başlayan değerleri eliyordu. Ama
+WHATWG URL ayrıştırıcısı http(s) gibi "özel" şemalarda **ters bölüyü eğik
+çizgiyle eş sayar** ve tab/satır başı karakterlerini URL'den atar. Ölçüldü:
+
+| Girdi | Eski sanitize | Tarayıcının çözdüğü |
+|---|---|---|
+| `/\evil.com` | `/\evil.com` (geçiyor) | **https://evil.com/** |
+| `/\tevil` | `/\tevil` (geçiyor) | **https://tevil/** |
+| `//evil.com` | `/` | bagajpark.com |
+
+Saldırı: kurbana `.../login?callbackUrl=/\evil.com` bağlantısı gönderilir;
+kurban **gerçek BagajPark adresinde** giriş yapar ve sonrasında saldırganın
+sitesine düşer. Adres çubuğunda doğru site göründüğü için kimlik avı ikna
+edici olur.
+
+Düzeltme iki katmanlı: (1) ters bölü ve kontrol karakterleri önce
+normalleştiriliyor, (2) sonuç `URL` ile ÇÖZÜLÜP origin'in değişmediği
+doğrulanıyor. İkincisi asıl koruma — kalıp ezberlemek her zaman bir sonraki
+kaçış yolunu kaçırır, tarayıcının kendi kuralına sormak kaçırmaz.
+
+7 testlik `src/__tests__/auth-callback-url.test.ts` eklendi.
+
 ### Erişilebilirlik: klavye odağı SAĞLIKLI
 
 21 sekme durağı gezildi, **hepsinde görünür odak halkası var** (0 eksik).
@@ -326,14 +351,17 @@ Bu liste bilerek uzun; her tur birkaçını kapatıp buraya sonucunu yazın.
 - [ ] Yatay taşma (sayfanın sağa kayması) — her sayfada
 
 **Akış**
-- [ ] Misafir rezervasyon hunisi baştan sona (arama → dükkan → checkout)
+- [x] Misafir hunisi denendi: arama → dükkan → checkout 1. adım.
+- [ ] Checkout 2. adım (ÖZET) ve sonrası — hesap gerektiriyor, denenmedi.
 - [ ] Boş durumlar: sonuç yok, saat kapalı, kapasite dolu — sebep söyleniyor mu
 - [ ] Hata durumları: ağ kesik, action hatası, oturum düşmesi
 - [ ] Geri tuşu / tarayıcı geçmişi davranışı
 
 **Diller**
-- [ ] DE / FR / JA / FA ekranlarında taşma ve kesilme (EN'de ikisi bulundu)
-- [ ] FA sağdan sola (RTL) — `dir` uygulanıyor mu
+- [x] DE / FR / JA / FA ana sayfada ölçüldü — DE ve FR'de kayma bulundu, düzeltildi.
+- [x] FA sağdan sola (RTL) doğru.
+- [x] Dil değiştirici sayfayı KORUYOR (`/tr/search` → `/en/search`).
+- [ ] İkincil sayfalar (blog, sigorta, SSS) yalnızca TR'de tarandı — hepsi temiz.
 
 **Giriş gerektirenler — KULLANICI OTURUMU AÇMALI**
 - [ ] Hesap sayfaları, rezervasyonlarım
@@ -345,6 +373,11 @@ Bu liste bilerek uzun; her tur birkaçını kapatıp buraya sonucunu yazın.
 
 **PWA**
 - [ ] Gerçek cihazda kurulum akışı (Android + iOS "Ana Ekrana Ekle")
+- [ ] 404 soft-404 (HTTP 200) sürüyor. Kod içindeki not `force-dynamic`in işe
+      yaramadığını yazıyor; Next 16'da bu şekle özel `app/global-not-found.js`
+      var (`experimental.globalNotFound`). Ama deneysel VE layout'u baypas
+      ediyor (markalı ekran, dil, fontlar yeniden kurulmalı). P2 bir konu için
+      prod'a deneysel bayrak açmak doğru takas değil — kayda geçirildi.
 - [x] `start_url` incelendi → 19 numaralı bulgu (her açılış Türkçe)
 - [ ] Bildirim ucu uçtan uca denenmedi (VAPID anahtarı gerekiyor)
 - [x] `public/offline.html` silindi: hiçbir yerden referans edilmiyordu ve
