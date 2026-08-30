@@ -556,6 +556,28 @@ yeniden koşun.
 
 **Koşuldu (2026-08-30):** `--verify` 482 noktanın hepsinde `hepsi dogru ulkede`
 döndü (önce 456'lık liste toptan, sonra elle koordinat eklenen 10 şehir tek tek).
-Kuru çalışma yerel geliştirme veritabanına karşı koşuldu: `482 nokta, 252 sehir`,
-`Olusturulacak: 477   Guncellenecek: 5` — yani önceki koşudan kalan 5 nokta kopya
-değil GÜNCELLEME olarak eşleşti. Üretime **uygulanmadı**; `--apply` sizde.
+
+### Üretime uygulandı — 2026-08-31
+
+482 noktanın tamamı üretim veritabanına yazıldı (`Olusturulacak: 482,
+Guncellenecek: 0` — prod'da daha önce hiç talep testi noktası yoktu). Hemen
+ardından koşulan ikinci kuru çalışma `Olusturulacak: 0, Guncellenecek: 482`
+verdi, yani idempotentlik üretimde de ölçüldü: kopya üretilmedi.
+
+**Sıra önemliydi ve öyle uygulandı:** önce `OPERATING_SHOP_FILTER` düzeltmesinin
+deploy'u tamamlandı, sonra noktalar yazıldı. Ters sırada ana sayfa ve
+`/become-partner` kısa süreliğine 485 lokasyon/ortak iddia ederdi.
+
+Uygulama sonrası üretimde ölçülenler:
+
+| Ölçüm | Değer |
+|---|---|
+| `isPrelaunch` nokta / şehir | 482 / 252 |
+| İşletilen dükkan (`OPERATING_SHOP_FILTER`) | 3 |
+| Kamuya görünür (`PUBLIC_SHOP_FILTER`) | 485 |
+| `/become-partner` sosyal kanıtı | `socialProofEarly` ("İlk esnaf ortaklarımızdan biri olun") — eski filtreyle "485 aktif esnaf ortağı" yazacaktı |
+| Bir nokta sayfası (Paris/Eyfel) | fiyat yerine "Yakında"; `Valiz Fiyatları` bölümü ve `₺` yok |
+
+Erişim yolu: üretim Postgres dışarı açık değil (`127.0.0.1:5433`), script yerelden
+SSH tüneliyle koşuldu — sunucudaki imajda `scripts/` ve `src/` yok
+(bkz. `Dockerfile`), o yüzden konteyner içinde koşturulamıyor.
