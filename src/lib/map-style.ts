@@ -28,8 +28,12 @@
  * sorusuna cevabı: *"Yes"*). Yani yapılandırma olmadan bugün çalışır.
  */
 
-/** OpenFreeMap stilleri. `positron` açık ve sade — mevcut görünüme en yakını. */
-const OPENFREEMAP_STYLE = "https://tiles.openfreemap.org/styles/positron";
+/**
+ * OpenFreeMap stilleri arasından `bright`. `positron` denendi ve bırakıldı:
+ * her şeyi gri tonlarına indiriyor, harita ölü görünüyordu. `bright` yeşil
+ * alanları, suyu ve yol hiyerarşisini renkle ayırıyor.
+ */
+const OPENFREEMAP_STYLE = "https://tiles.openfreemap.org/styles/bright";
 
 /**
  * MapLibre'ye verilecek `style` değeri: vektör stilinin URL'i.
