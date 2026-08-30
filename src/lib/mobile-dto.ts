@@ -94,11 +94,20 @@ type ShopSummarySource = {
   hasRestroom: boolean;
   isActive: boolean;
   isVerified: boolean;
+  isPrelaunch?: boolean;
 };
 
 /**
  * Dükkan gövdesi. `isVerified` HER İKİ uçta da bulunur: güven rozeti ürünün
  * temel vaadi, listede gösterip detayda gizlemek tutarsızdı.
+ *
+ * `isPrelaunch` de aynı sebeple burada: 2026-08-31'de arama, talep testi
+ * noktalarını da döndürmeye başladı (`findShopsForSearch`) ve `/mobile/shops/
+ * nearby` aynı servisi kullanıyor. Bayrak taşınmazsa mobil istemci bu noktayı
+ * normal bir dükkandan AYIRT EDEMEZ: ₺50 (şema varsayılanı, gerçek fiyat değil)
+ * ve "Rezervasyon yap" gösterir, misafir dener ve sunucudan `409
+ * shop_not_open_yet` yer. Sunucu kapısı sağlam, ama misafire tutamayacağımız
+ * sözü verdikten sonra reddetmek kapının işi değil — arayüzün işi.
  */
 export function toMobileShop(s: ShopSummarySource) {
   return {
@@ -119,6 +128,7 @@ export function toMobileShop(s: ShopSummarySource) {
     hasRestroom: s.hasRestroom,
     isActive: s.isActive,
     isVerified: s.isVerified,
+    isPrelaunch: s.isPrelaunch ?? false,
   };
 }
 

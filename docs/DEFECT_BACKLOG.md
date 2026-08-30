@@ -10,6 +10,44 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-08-31 — talep testi noktaları aramada HİÇ görünmüyordu (üretimde ölçüldü)
+
+482 nokta üretime yazıldıktan sonra arama ekranı İstanbul'da **"TÜM NOKTALAR (3)"**
+dedi; İstanbul'da 10 nokta vardı ve hiçbiri listede yoktu. Özellik üretimde vardı ama
+ölçmüyordu — misafirin noktaya tıklaması, yani ölçmek istediğimiz tek sinyal, hiç
+gerçekleşemezdi.
+
+- **Sebep özelliğin kendi tasarımıydı.** Prelaunch noktaları bilerek slot üretmiyor
+  (`OPERATING_SHOP_FILTER`; aksi halde 482 nokta `slotGeneration` sağlık sinyalini bir
+  günde `stale` yapardı). `findShopsForSearch` ise slot dalında `slots.length === 0`
+  gördüğü her dükkanı eliyordu, eski kapasite dalında da varsayılan 09:00–20:00
+  saatleri `isShopOpenForStay`e takılıyordu. İki süzgeç de doğru çalışıyordu; yanlış
+  olan, rezervasyon alan bir dükkanla bir ölçüm noktasına aynı soruları sormaktı.
+- **Düzeltme**: prelaunch ayrı listede toplanıp iki süzgecin dışında tutuluyor. Eski
+  kapasite dalına düşme kararı yalnızca işletilen dükkanlara bakıyor (yoksa slot
+  tablosu boşken gerçek dükkanlar aramadan kaybolurdu) ve rezervasyon alabilen dükkan
+  her zaman önce sıralanıyor.
+- **Arayüz üç yüzeyde ayrıştırılmıştı**: detay sayfası "Yakında" derken kart ve harita
+  pin'i hâlâ ₺50 ve "Rezervasyon yap" gösteriyordu. Üçü birleştirildi; kart müsaitlik
+  rozetini ("~49 müsait" — olmayan bir stok) de çizmiyor.
+- **Regresyon testi**: `src/__tests__/search-prelaunch-visibility.test.ts`. Hatanın
+  sinsi tarafı sessiz olması — aramaya eklenen yeni bir süzgeç prelaunch'u yeniden eler
+  ve hiçbir şey kırılmaz. Test, düzeltme geri alındığında 5'te 3 kırılarak doğrulandı.
+
+### AÇIK — mobil uygulama aynı bayrağı henüz kullanmıyor
+
+`/api/mobile/shops/nearby` aynı `findShopsForSearch`i kullanıyor, yani **mobil de artık
+talep testi noktalarını listeliyor**. `toMobileShop` bayrağı (`isPrelaunch`) taşıyacak
+şekilde güncellendi, ama Flutter tarafı henüz okumuyor: `ShopDto` alanı yok, kart ve
+detay ekranı hâlâ ₺50 + "Rezervasyon yap" çiziyor. Rezervasyon sunucuda `409
+shop_not_open_yet` ile reddedildiği için hayalet rezervasyon oluşamaz — ama misafire
+tutamayacağımız söz veriliyor.
+
+Yapılacak (Flutter araçları gerekiyor, bu makinede yok):
+`mobile/lib/shared/models/shop.dart`'a `@Default(false) bool isPrelaunch` ekleyip
+`build_runner` ile freezed dosyalarını üret; `shop_preview_card.dart` ve
+`shop_detail_screen.dart`'ta fiyat/CTA'yı web'deki gibi "Yakında" / "Haber ver" yap.
+
 ## 2026-08-30 — talep testi kapsamı: 482 nokta / 252 şehir (ve büyümenin açtığı üç hata)
 
 Liste 50 nokta / 10 şehirden 482 nokta / 252 şehre çıkarıldı: büyük ve kalabalık
