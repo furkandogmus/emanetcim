@@ -43,8 +43,20 @@ interface BagSelectorProps {
 export default function BagSelector({ label, sublabel, count, onIncrease, onDecrease, size, max }: BagSelectorProps) {
   const t = useTranslations('Common');
   return (
-    <div className="ui-card-soft flex items-center justify-between p-4 group hover:border-orange-200 transition-all">
-      <div className="flex items-center gap-4">
+    /*
+      `flex-wrap` + sol grupta `min-w-0 flex-1`, sag grupta `shrink-0`.
+
+      NEDEN (2026-08-31'de olculdu): metin boyutu %200'e cikarildiginda (WCAG
+      2.2 kriteri 1.4.4) checkout sayfasi 200 px yana kayiyordu ve kaynak bu
+      satirdi. Iki grup da buyuyor (ikon dolgusu, bosluk, sayi genisligi) ama
+      satir sarmalanamadigi icin tasiyordu. Sarmalama acilinca adimlayici alt
+      satira geciyor ve yatay kaydirma sifirlaniyor -- olculdu: 200 px -> 0.
+
+      Etiket kuculebilmeli (`min-w-0`), ADIMLAYICI KUCULMEMELI (`shrink-0`):
+      +/- dugmeleri dokunma hedefi, daralirsa isabet edilemez hale gelir.
+    */
+    <div className="ui-card-soft flex flex-wrap items-center justify-between gap-3 p-4 group hover:border-orange-200 transition-all">
+      <div className="flex min-w-0 flex-1 items-center gap-4">
         <div className="bg-white p-3 rounded-xl shadow-sm text-gray-400 group-hover:text-orange-600 transition-colors">
           <Package size={24} strokeWidth={1.5} />
         </div>
@@ -54,7 +66,7 @@ export default function BagSelector({ label, sublabel, count, onIncrease, onDecr
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex shrink-0 items-center gap-4">
         <button 
           type="button"
           onClick={onDecrease}

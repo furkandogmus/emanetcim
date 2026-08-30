@@ -40,7 +40,9 @@ yazılmaz; ölçüm yazılır.
 | 20 | `offline.html` ölü dosya | PWA | ✅ SİLİNDİ |
 | 21 | **GÜVENLİK**: `callbackUrl` ters bölüyle açık yönlendirme | Giriş | ✅ DÜZELTİLDİ |
 | 22 | Hareket azaltma tercihi framer-motion'da uygulanmıyor | Her sayfa | ✅ DÜZELTİLDİ |
-| 23 | %200 metin büyütmede sayfa 93 px yana kayıyor | Mobil | ✅ DÜZELTİLDİ (93→0) |
+| 23 | %200 metin büyütmede ana sayfa 93 px yana kayıyor | Mobil | ✅ DÜZELTİLDİ (93→0) |
+| 24 | %200'de checkout 200 px kayıyor — valiz adımlayıcısı | Mobil checkout | ✅ DÜZELTİLDİ (200→0) |
+| 25 | %200'de dükkan 17 px, sigorta 76 px kayıyor | Mobil | ⏳ AÇIK |
 | 101 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
 | 102 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
 | 103 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
@@ -376,6 +378,27 @@ Ders: bir flex öğesinin küçülmemesinin iki ayrı sebebi olabilir (esneme
 kilitli, ya da genişlik içerikten geliyor) ve ikisi ayrı ayrı kapatılmalı.
 İlk düzeltmeden sonra "tamam" deyip geçilseydi, sorun yarı yarıya duruyordu.
 
+### 24–25. %200 büyütme, diğer sayfalar
+
+Ana sayfa kapandıktan sonra aynı test beş sayfaya daha uygulandı:
+
+| Sayfa | %200'de yatay kaydırma |
+|---|---|
+| `/tr/search` | 0 ✅ |
+| `/tr/faq` | 0 ✅ |
+| `/tr/shop/<id>` | 17 px ⏳ |
+| `/tr/insurance` | 76 px ⏳ |
+| `/tr/checkout/<id>` | **200 px** → 0 ✅ |
+
+**Checkout (en kötüsü, düzeltildi):** kaynak `BagSelector` satırıydı.
+`justify-between` ile iki grup (etiket + adımlayıcı) yan yana duruyor; %200'de
+ikisi de büyüyor ama satır sarmalanamadığı için taşıyor. `flex-wrap` açıldı,
+etiket `min-w-0 flex-1` ile küçülebilir yapıldı, adımlayıcı `shrink-0` ile
+korundu — çünkü +/- düğmeleri dokunma hedefi, daralırsa isabet edilemez.
+Ölçüldü: **200 px → 0**.
+
+Dükkan (17 px) ve sigorta (76 px) sayfaları henüz izlenmedi.
+
 ### Erişilebilirlik: klavye odağı SAĞLIKLI
 
 21 sekme durağı gezildi, **hepsinde görünür odak halkası var** (0 eksik).
@@ -466,7 +489,8 @@ Bu liste bilerek uzun; her tur birkaçını kapatıp buraya sonucunu yazın.
       aştığı için yatay modda MASAÜSTÜ düzeni geliyor; alt panel yerine kenar
       paneli çıkıyor ve 390 px yükseklikte çalışıyor.
 - [x] %200 metin büyütme kapandı: ana sayfada yatay kaydırma 0 (23 numaralı bulgu).
-- [ ] %200 büyütme yalnızca ANA SAYFADA ölçüldü; arama/dükkan/checkout ölçülmedi.
+- [x] %200 büyütme altı sayfada ölçüldü (24-25 numaralı bulgular).
+- [ ] %200'de dükkan (17 px) ve sigorta (76 px) sayfalarının kaynağı izlenmedi.
 - [ ] Odak tuzağı olan modallar test edilmedi.
 - [ ] Ekran okuyucu ile gerçek gezinme yapılmadı.
 
