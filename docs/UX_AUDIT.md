@@ -20,8 +20,9 @@ yazılmaz; ölçüm yazılır.
 | 5 | Temizlik kodu push worker'ını da silecekti | PWA | ✅ DÜZELTİLDİ |
 | 6 | İki ayrı manifest, biri ölü | PWA | ✅ (başka agent `3929ad5` ile sildi) |
 | 7 | Manifest 404 veren ekran görüntüleri ilan ediyor | PWA | ✅ DÜZELTİLDİ (referans kaldırıldı) |
-| 8 | İngilizcede ana sayfa arama kutusu karttan taşıyor | Ana sayfa | ⛔ BAŞKA AGENT'IN DOSYASI |
+| 8 | İngilizcede ana sayfa arama kutusu karttan taşıyor | Ana sayfa | ✅ DÜZELTİLDİ (`86887b3`, diğer agent) |
 | 9 | Başlık menüsü bağlantıları 12 px, footer 17 px yüksek | Web + mobil | ✅ DÜZELTİLDİ |
+| 10 | FR mobilde sayfa 33 px, DE'de 13 px yana kayıyor | Mobil başlık | ✅ DÜZELTİLDİ |
 
 ---
 
@@ -74,7 +75,21 @@ tekrar oluşabilir.
 zengin kurulum ekranı için); `.gitignore` yalnızca kök `*.png`'yi engelliyor,
 `public/screenshots/` serbest.
 
-### 8. İngilizcede ana sayfa arama kutusu karttan taşıyor — DOKUNULMADI
+### 8. İngilizcede ana sayfa arama kutusu karttan taşıyor — DÜZELTİLDİ
+
+**Kapandı (`86887b3`, aynı ağaçtaki diğer agent).** Düğmeye
+`whitespace-nowrap shrink-0` eklendi ve etiketler kısaltıldı ("Find Storage
+Point" → "Find storage"; Almanca "Finden Sie den Speicherpunkt" →
+"Aufbewahrung finden"). Yeniden ölçüldü (`/en`, 2560 px): kart sağ kenarı 1613,
+düğme sağ kenarı **1601** — yani 12 px İÇERİDE, düğme yüksekliği 44 px (tek
+satır; önce üç satıra sarıyordu). `document.body.scrollWidth` 2554 ≤ 2560,
+yatay taşma yok.
+
+Bulgunun ilk hâli aşağıda duruyor, çünkü sebebi tekrar oluşabilir: etiket
+uzunluğu dile göre değişiyor ve Türkçe en kısa olanı — hata Türkçe'de hiç
+görünmüyor.
+
+#### İlk ölçüm
 
 Ölçüm: kart `x=941→1613`, "Find Storage Point" düğmesi `1503→1650`. **37 px
 dışarı**. Satır `flex-wrap: nowrap`; İngilizce tarih metni Türkçeden geniş
@@ -98,6 +113,28 @@ Düzeltme görünümü DEĞİŞTİRMİYOR: `py-2 -my-2` (footer'da `py-1.5 -my-1
 ile tıklanabilir alan büyütüldü, yerleşim aynı kaldı. Liste aralığı
 (`gap-4` = 16 px) komşu hedeflerin çakışmasına izin vermeyecek kadar geniş.
 
+### 10. Mobil başlık taşıyor — Fransızca ve Almancada sayfa yana kayıyor
+
+Gerçek mobil viewport'ta ölçüldü (Playwright, iPhone 13 / 390 px):
+
+| Dil | Yatay kaydırma | Sebep |
+|---|---|---|
+| TR | 0 px | — |
+| JA | 0 px | — |
+| DE | **13 px** | "anmelden" düğmesi sağ kenarı 6 px aşıyor |
+| FR | **33 px** | "Se connecter" düğmesi sağ kenarı 33 px aşıyor |
+
+Başlık `justify-between`; sağdaki kontroller (`LocaleSwitcher`, `UserNav`)
+`shrink-0`, logo ise küçülemiyordu. Toplam 390 px'i aşınca sayfa yana
+kayıyor — telefonda bu, kaydırırken içeriğin sağa sola oynaması demek.
+Türkçede görünmüyordu çünkü "GİRİŞ YAP" kısa; yani hata **yalnızca ana
+dilde test edilirse görünmez**.
+
+Düzeltme iki parçalı: logoya `min-w-0` + marka adına `truncate` (esneyebilen
+tek öge o), ve Beta rozetine `hidden sm:inline-block` (390 px'de rozet, marka
+adından önce feda edilecek öge). Sabit boşluk ayarı yerine esneme seçildi;
+yarın eklenecek daha uzun bir etiket aynı hatayı geri getirmesin.
+
 ### Sağlıklı çıkanlar (bu turda doğrulandı)
 
 - **Farsça / RTL**: `<html lang="fa" dir="rtl">` doğru kuruluyor, düzen düzgün
@@ -116,10 +153,15 @@ ile tıklanabilir alan büyütüldü, yerleşim aynı kaldı. Liste aralığı
 Bu liste bilerek uzun; her tur birkaçını kapatıp buraya sonucunu yazın.
 
 **Mobil (asıl risk burada)**
-- [ ] Gerçek mobil genişlikte (390px) ana sayfa, arama, dükkan detay, checkout
-      — **ENGEL**: tarayıcı aracı pencereyi küçültmüyor (`resize_window`
-      başarılı diyor ama `innerWidth` 1420'de kalıyor), yani mobil kırılım
-      noktası hiç tetiklenemedi. Bu satır kapanmadan "mobil tamam" denemez.
+- [x] **ENGEL AŞILDI**: tarayıcı aracı pencereyi küçültmüyordu; mobil ölçüm
+      artık repodaki Playwright ile gerçek 390×844 viewport'ta yapılıyor
+      (`chromium` + `devices["iPhone 13"]`). Ana sayfa TR/EN/DE/FR/JA ölçüldü.
+- [ ] Arama, dükkan detay ve checkout mobilde ÖLÇÜLEMEDİ — Cloudflare, başsız
+      tarayıcıyı doğrulama sayfasına düşürüyor. `headless: false` ile ana sayfa
+      geçiyor; bu iki sayfa için de aynısı denenmeli.
+- [ ] Çerez paneli mobilde hero'daki arama kutusunu tamamen örtüyor (ekran
+      görüntüsüyle doğrulandı). Rıza paneli gerekli ama ana eylemi kapatması
+      dönüşümü düşürür; yüksekliği azaltılabilir.
 - [ ] Alt sayfa (bottom sheet) davranışı: snap noktaları, kaydırma kilidi
 - [ ] Güvenli alan (`safe-area-inset`) — çentikli cihazlarda alt bar
 - [ ] Dokunma hedefleri 44×44 px altında kalan düğmeler

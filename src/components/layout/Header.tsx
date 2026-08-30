@@ -60,19 +60,37 @@ export default function Header() {
   return (
     <header className="sticky top-0 w-full z-50 glass border-b border-gray-100/80 px-4 sm:px-6 py-3 flex justify-between items-center transition-all duration-300">
       {/* Logo */}
+      {/*
+        `min-w-0`: logonun KUCULEBILMESI gerekiyor. Olculdu (2026-08-31, iPhone
+        13 / 390 px): logo 181 px + dil secici 69 px + "GIRIS YAP" 97 px +
+        yatay bosluklar, 390'i asiyordu ve giris dugmesi ekranin sag kenarindan
+        2 px TASIYORDU -- sayfa da yana kayiyordu. Sagdaki kontroller `shrink-0`
+        oldugu icin esneyecek tek oge logo; `min-w-0` olmadan flex cocugu
+        iceriginin altina inemez ve tasma kacinilmazdi.
+
+        Fransizca gibi uzun etiketlerde ("SE CONNECTER") pay daha da daralir,
+        bu yuzden sabit bir bosluk ayari degil, esneme cozumu secildi.
+      */}
       <Link
         href={logoHref}
         aria-label={navCopy.logoLabel}
-        className="flex items-center gap-2.5 group"
+        className="flex items-center gap-2.5 group min-w-0"
       >
-        <div className="w-8 h-8 bg-brand-gradient rounded-xl flex items-center justify-center shadow-brand-sm group-hover:shadow-brand-md transition-all duration-200 group-active:scale-95">
+        <div className="w-8 h-8 shrink-0 bg-brand-gradient rounded-xl flex items-center justify-center shadow-brand-sm group-hover:shadow-brand-md transition-all duration-200 group-active:scale-95">
           <Package size={16} className="text-white" strokeWidth={2.5} aria-hidden="true" />
         </div>
-        <span className="text-lg font-black tracking-tight text-gray-900 group-hover:text-orange-600 transition-colors duration-200">
+        <span className="truncate text-lg font-black tracking-tight text-gray-900 group-hover:text-orange-600 transition-colors duration-200">
           BagajPark
         </span>
         {process.env.NEXT_PUBLIC_BETA_BADGE === "true" && (
-          <span className="rounded-md bg-orange-100 px-1.5 py-0.5 text-[9px] id-eyebrow text-orange-700">
+          /*
+            En dar ekranlarda GIZLI. 390 px'de logo + rozet + dil secici +
+            giris dugmesi sigmiyor; olculdu (2026-08-31): Fransizca ana sayfa
+            33 px, Almanca 13 px yana kayiyordu ("Se connecter" / "anmelden"
+            etiketleri Turkcedekinden uzun). Rozet, marka adindan once feda
+            edilecek ogedir.
+          */
+          <span className="hidden sm:inline-block rounded-md bg-orange-100 px-1.5 py-0.5 text-[9px] id-eyebrow text-orange-700">
             Beta
           </span>
         )}
