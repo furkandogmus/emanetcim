@@ -23,7 +23,14 @@ const UUID_RE =
 
 export function extractBookingRef(raw: string): string {
   const text = raw.trim();
-  return text.match(UUID_RE)?.[0] ?? text;
+  const fromLink = text.match(UUID_RE)?.[0];
+  if (fromLink) return fromLink;
+  /*
+    Misafirin ekranındaki KISA KOD büyük harf yazılı ("AA4249AD") ama kimlik
+    küçük harf saklanıyor. Küçültme sunucuda da yapılıyor; burada da yapmak
+    kullanıcıya "neden olmadı" dedirtmiyor.
+  */
+  return text;
 }
 
 const SCAN_CONFIG = {

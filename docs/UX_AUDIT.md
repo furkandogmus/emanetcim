@@ -47,6 +47,7 @@ yazılmaz; ölçüm yazılır.
 | 104 | Mühür stoğu boşken ekran "sistem mühürleri atadı" diyordu | Check-in | ✅ DÜZELTİLDİ (diğer agent) |
 | 105 | Check-in kapısı `open247` ve dükkan saat dilimini yok sayıyordu | Check-in (sunucu) | ✅ DÜZELTİLDİ (diğer agent) |
 | 106 | Harita pinleri üst üste biniyor, okunmuyor | Harita | ✅ DÜZELTİLDİ (diğer agent) |
+| 107 | Misafirin gördüğü kod 8 hane, esnafın alanı tam kimlik istiyordu | Check-in | ✅ DÜZELTİLDİ (diğer agent) |
 
 ---
 
@@ -596,3 +597,30 @@ Düzeltme: `isShopOpenForHandover(opening, closing, open247, at, timezone)`,
 ikisi bir daha ayrışmasın. Test, aramanın sattığı her anın check-in tarafından
 da kabul edildiğini dört farklı saat diliminde doğruluyor ve `check-in.ts`in ham
 `isShopOpenAt`e geri dönmesini kırmızı yakıyor.
+
+### 107. Misafirin gördüğü kod ile esnafın yazdığı kod buluşmuyordu — DÜZELTİLDİ
+
+103 numaralı düzeltme (kamera çalışmazsa elle giriş) tek başına yetmiyormuş.
+Alan tam kimlik ya da bağlantı bekliyordu; ama misafirin rezervasyon ekranında
+**tam kimlik hiç yazmıyor**:
+
+```tsx
+// bookings/[id]/page.tsx
+<code>{booking.id.slice(0, 8).toUpperCase()}</code>   // "AA4249AD"
+```
+
+Yani gerçek senaryoda — kamera çalışmıyor, esnaf misafirden kodu okumasını
+istiyor — misafir 8 haneyi okuyor, esnaf yazıyor ve sistem "bulunamadı" diyordu.
+İki uç birbirini bulamıyordu; özellik kâğıt üzerinde vardı, tezgâhta yoktu.
+
+Düzeltme: tam kimlik tutmazsa **kısa kod öneki** deneniyor. İki koruma:
+
+- Arama **önce sahipliğe daraltılıyor**, sonra öneke bakılıyor — esnaf yalnızca
+  kendi dükkanlarının rezervasyonlarını arayabilir. (Yönetici zaten hepsini
+  okuyabildiği için onda daraltma yok.)
+- **İki eşleşme çıkarsa hiçbiri açılmaz.** Yanlış rezervasyonu açmak, doğru
+  olanı bulamamaktan kötüdür: esnaf başkasının valizini teslim alır. Alt sınır
+  6 hane; daha kısası tek bir dükkanın içinde bile çakışabilir.
+
+Yerel veritabanında doğrulandı: `AA4249AD` → tam 1 eşleşme; başka bir esnafın
+kodu bu kapsamda 0 eşleşme.

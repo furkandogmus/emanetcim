@@ -76,7 +76,21 @@ const BAG_REVISION_CODE_TO_KEY: Record<string, string> = {
 };
 
 /**
- * QR / ham id ile rezervasyon önizlemesi (esnaf paneli).
+ * Misafirin ekranında yazan KISA KOD: rezervasyon kimliğinin ilk 8 hanesi
+ * (`bookings/[id]/page.tsx` → `booking.id.slice(0, 8).toUpperCase()`).
+ *
+ * NEDEN KABUL EDİLİYOR: esnafın elle giriş alanı (kamera çalışmadığında tek
+ * yol) tam kimlik ya da bağlantı bekliyordu. Ama misafirin ekranında tam kimlik
+ * HİÇ yazmıyor — orada bu 8 hane var. Yani iki uç birbirini bulamıyordu:
+ * misafir okuyor, esnaf yazıyor, sistem "bulunamadı" diyordu.
+ *
+ * 6 hane alt sınır: daha kısası bir dükkanın kendi rezervasyonları içinde bile
+ * çakışabilir ve yanlış rezervasyonu açmak, doğru olanı bulamamaktan kötüdür.
+ */
+const SHORT_CODE_RE = /^[0-9a-f]{6,12}$/i;
+
+/**
+ * QR / ham id / kısa kod ile rezervasyon önizlemesi (esnaf paneli).
  */
 export async function getPartnerBookingPreviewAction(raw: string) {
   const auth = await requirePartner();
@@ -86,10 +100,33 @@ export async function getPartnerBookingPreviewAction(raw: string) {
   const payload = await verifyQrToken(bookingId);
   if (payload) bookingId = payload.bookingId;
 
-  const booking = await prisma.booking.findUnique({
+  let booking = await prisma.booking.findUnique({
     where: { id: bookingId },
     include: { guest: true, shop: true },
   });
+
+  /*
+    Tam kimlik tutmadıysa KISA KOD olarak dene.
+
+    Arama ÖNCE sahipliğe daraltılıyor, sonra öneke bakılıyor: esnaf yalnızca
+    kendi dükkanlarının rezervasyonlarını arayabilir. (Yönetici zaten hepsini
+    okuyabildiği için onda daraltma yok.)
+
+    İki eşleşme çıkarsa HİÇBİRİ açılmaz. Yanlış rezervasyonu açmak, doğru olanı
+    bulamamaktan kötüdür: esnaf başkasının valizini teslim alır.
+  */
+  if (!booking && SHORT_CODE_RE.test(bookingId)) {
+    const scope =
+      auth.actor.role === "PARTNER"
+        ? { shop: { ownerId: auth.actor.id } }
+        : {};
+    const matches = await prisma.booking.findMany({
+      where: { id: { startsWith: bookingId.toLowerCase() }, ...scope },
+      include: { guest: true, shop: true },
+      take: 2,
+    });
+    if (matches.length === 1) booking = matches[0];
+  }
 
   if (!booking) {
     return { success: false as const, error: "Errors.bookingNotFound" };

@@ -27,6 +27,17 @@ describe("extractBookingRef", () => {
     expect(extractBookingRef(`https://bagajpark.com/tr/partner?booking=${ID}`)).toBe(ID);
   });
 
+  it("misafirin ekranindaki KISA KODU bozmadan gecirir", () => {
+    /**
+     * Misafirin rezervasyon ekraninda tam kimlik HIC yazmiyor; orada
+     * `booking.id.slice(0, 8).toUpperCase()` var. Esnaf onu okuyup yaziyor, yani
+     * kisa kod sunucuya OLDUGU GIBI ulasmali -- sunucu onek eslesmesi yapiyor
+     * (`getPartnerBookingPreviewAction`, sahiplige daraltilmis).
+     */
+    expect(extractBookingRef("AA4249AD")).toBe("AA4249AD");
+    expect(extractBookingRef("  aa4249ad ")).toBe("aa4249ad");
+  });
+
   it("kimlik icermeyen metni OLDUGU GIBI birakir", () => {
     // Sunucu imzali QR jetonunu da cozebiliyor; burada kirpmak onu bozardi.
     const token = "eyJhbGciOiJIUzI1NiJ9.eyJib29raW5nSWQiOiJ4In0.sig";
