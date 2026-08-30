@@ -42,10 +42,42 @@ export default function PrelaunchNotifyButton({
 
   useModalBehavior({ open, onClose: () => setOpen(false) });
 
+  /**
+   * Yapiskan cubuktaki dugme artik MODAL ACMIYOR, sayfadaki talep paneline
+   * goturuyor.
+   *
+   * NEDEN: ayni ekranda iki ayri talep yuzeyi vardi (bu modal ve panel) ve
+   * ikisi ayri sinyal yaziyordu -- birinde tek tik sayilmiyordu. Ayni isi iki
+   * yerde yapmak, bu kod tabaninda defalarca duzeltilen "kopyalar sessizce
+   * ayrisir" hatasinin aynisi. Tek yuzey birakildi; bu dugme ona yonlendirir.
+   */
   function handleOpen() {
-    // Rezervasyon KALKISMASI -- e-posta birakilmasa bile olculur. Talep
-    // haritasinin ana girdisi bu; e-posta bir adim otesidir.
+    // Rezervasyon KALKISMASI -- her durumda olculur.
     trackEvent("prelaunch_booking_attempt", { shopId });
+
+    /*
+      TEK TIK, IKI ADIM DEGIL. Bu dugme sayfadaki talep panelinin istek
+      dugmesine BASAR ve paneli goruntuye getirir; misafir tek dokunusla hem
+      sayilir hem de sonucu (artan sayi ve e-posta alani) gorur. Sadece kaydirmak
+      yetmezdi: "tiklayinca sayi artsin" istegi tam olarak bir tik demek.
+
+      Sayaci burada AYRICA yazmiyoruz -- ayni sinyali iki yerden yazmak, bu kod
+      tabaninda defalarca duzeltilen "kopyalar sessizce ayrisir" hatasi olurdu.
+      Tek yazan yer panel; burasi ona basar.
+    */
+    const panel = document.querySelector<HTMLElement>(
+      '[data-testid="prelaunch-demand-panel"]',
+    );
+    const wantButton = panel?.querySelector<HTMLButtonElement>(
+      '[data-testid="prelaunch-want-button"]',
+    );
+    if (panel && wantButton) {
+      panel.scrollIntoView({ behavior: "smooth", block: "center" });
+      wantButton.click();
+      wantButton.focus();
+      return;
+    }
+    // Panel yoksa (dar bir duzen, eski bir sayfa) eski e-posta yolu korunur.
     setOpen(true);
   }
 
@@ -69,7 +101,7 @@ export default function PrelaunchNotifyButton({
   return (
     <>
       <button type="button" onClick={handleOpen} className={className}>
-        {t("prelaunchCta")}
+        {t("prelaunchWantCta")}
       </button>
 
       {open && (

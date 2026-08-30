@@ -155,6 +155,7 @@ model Shop {
   /// sunucu tarafi kapisi `createInitialBooking` icinde.
   isPrelaunch         Boolean             @default(false)
   prelaunchInterests  PrelaunchInterest[]
+  prelaunchWants      PrelaunchWant[]
   bookings            Booking[]
   reviews             Review[]
   seals               Seal[]
@@ -929,6 +930,36 @@ enum SplitStatus {
 /// rezervasyon yapmaya kalkisti ve haberdar edilmek istedi. Tiklamadan daha
 /// guclu bir sinyaldir -- kisi niyetini beyan etmistir -- ve sehir acildiginda
 /// hazir talep listesi olur.
+/// Talep testi noktasina birakilan TEK TIKLIK istek.
+///
+/// NEDEN `PrelaunchInterest` YETMIYOR: o kayit e-posta ISTIYOR ve e-posta
+/// birakmak yuksek surtunmeli bir adim. Olcmek istedigimiz ilk soru daha ucuz:
+/// "burada bir nokta olsun mu?" Tek tik bunu sorar; e-posta bir adim otesidir ve
+/// ikisi AYRI sinyaldir -- biri ilgi genisligini, digeri niyet derinligini olcer.
+/// Ikisini ayni tabloda toplamak, e-postasiz kayitlari sahte e-postalarla
+/// doldurmak ya da benzersizligi kaybetmek anlamina gelirdi.
+///
+/// `anonId` HTTP-only bir cerezde tasinan rastgele kimliktir; kisiyi tanimlamaz,
+/// yalnizca ayni tarayicinin sayiyi sisirmesini engeller. Karar bu sayiya
+/// bakilarak verildigi icin dedupe veritabani seviyesinde tutulur -- istemciye
+/// birakilan bir kontrol, konsoldan gecilebilecek bir kontroldur.
+model PrelaunchWant {
+  id        String   @id @default(cuid())
+  shopId    String
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  /// Cerezdeki anonim tarayici kimligi. Kisisel veri degil, sayac dedupe anahtari.
+  anonId    String
+  locale    String?
+  /// Kayit hangi yoldan geldi: "web" | "mobile".
+  source    String   @default("web")
+  createdAt DateTime @default(now())
+
+  /// Ayni tarayici ayni noktayi iki kez isteyemez.
+  @@unique([shopId, anonId])
+  @@index([shopId, createdAt])
+  @@index([createdAt])
+}
+
 model PrelaunchInterest {
   id        String   @id @default(cuid())
   shopId    String

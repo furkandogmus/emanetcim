@@ -42,12 +42,17 @@ export default async function AdminPrelaunchPage({
    */
   const byCity = new Map<string, number>();
   for (const r of rows) {
-    byCity.set(r.city ?? "—", (byCity.get(r.city ?? "—") ?? 0) + r.interestCount);
+    // Sehir toplaminda IKI sinyal birlikte: bir sehri acmaya deger kilan sey
+    // toplam talep, tek basina e-posta degil.
+    byCity.set(
+      r.city ?? "—",
+      (byCity.get(r.city ?? "—") ?? 0) + r.interestCount + r.wantCount,
+    );
   }
   const cities = [...byCity.entries()]
     .filter(([, count]) => count > 0)
     .sort((a, b) => b[1] - a[1]);
-  const activeRows = rows.filter((r) => r.interestCount > 0);
+  const activeRows = rows.filter((r) => r.interestCount > 0 || r.wantCount > 0);
   const silentCount = rows.length - activeRows.length;
 
   return (
@@ -95,6 +100,11 @@ export default async function AdminPrelaunchPage({
           <h2 className="text-xs id-eyebrow text-gray-500">
             {t("prelaunchByPoint")}
           </h2>
+          {/* Iki sinyal ayri okunur: tek tik ilginin GENISLIGI, e-posta niyetin
+              DERINLIGI. Tek sayiya toplamak hangisinin oldugunu kaybettirir. */}
+          <p className="text-xs text-gray-400">
+            {t("prelaunchWants")} / {t("prelaunchEmails")}
+          </p>
           {activeRows.length === 0 ? (
             <p className="text-sm text-gray-500">{t("prelaunchEmpty")}</p>
           ) : (
@@ -110,7 +120,9 @@ export default async function AdminPrelaunchPage({
                     </span>
                   </td>
                   <td className="py-3 text-right tabular-nums">
-                    {r.interestCount}
+                    <span title={t("prelaunchWants")}>{r.wantCount}</span>
+                    <span className="text-gray-300"> / </span>
+                    <span title={t("prelaunchEmails")}>{r.interestCount}</span>
                   </td>
                 </tr>
               ))}

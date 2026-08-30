@@ -83,7 +83,14 @@ export default function HomeSearchWidget({
       <button
         type="button"
         onClick={handleSearch}
-        className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-xl font-black text-sm transition-all shadow-lg shadow-orange-200 hover:shadow-orange-300 flex items-center justify-center gap-2 cursor-pointer"
+        /*
+          `whitespace-nowrap shrink-0`: etiket dile gore uzuyor ve bu buton bir
+          flex satirinin icinde. Almancada ("Aufbewahrung finden") ve Ingilizcede
+          buton UC SATIRA sariyordu, yani satirin iki katina cikip tarih
+          alanlarinin hizasini bozuyordu (2026-08-31 ekran goruntusu). Turkce'de
+          gorunmeyen bir hata: en kisa etiket Turkce.
+        */
+        className="w-full sm:w-auto shrink-0 whitespace-nowrap bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-xl font-black text-sm transition-all shadow-lg shadow-orange-200 hover:shadow-orange-300 flex items-center justify-center gap-2 cursor-pointer"
       >
         <Search size={18} />
         {t("findShops")}

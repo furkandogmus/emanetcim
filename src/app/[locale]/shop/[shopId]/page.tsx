@@ -12,6 +12,7 @@ import { buildBreadcrumbJsonLd } from "@/lib/breadcrumb-json-ld";
 import { routing } from "@/i18n/routing";
 import { auth } from "@/auth";
 import { analyticsService } from "@/services/AnalyticsService";
+import { prelaunchInterestService } from "@/services/PrelaunchInterestService";
 import { resolveServerSessionId } from "@/lib/analytics-server";
 
 export async function generateMetadata({
@@ -70,6 +71,15 @@ export default async function ShopDetailPage({
   });
 
   const shopImages = await shopService.getShopImages(shopId).catch(() => []);
+  /*
+    Talep testi noktasinda "kac kisi burayi istiyor" sayisi SUNUCUDA okunur:
+    misafir sayfayi actigi anda gormeli, tiklamayi beklememeli -- gorunen sayi
+    tiklamanin kendisini tesvik eden seyin ta kendisi. Isletilen dukkanlarda
+    sorgu hic calismaz.
+  */
+  const prelaunchWantCount = shop.isPrelaunch
+    ? await prelaunchInterestService.wantCount(shopId).catch(() => 0)
+    : 0;
 
   const pricingRules = await getPricingRules();
 
@@ -129,6 +139,7 @@ export default async function ShopDetailPage({
       <ShopDetailClient
         shop={clientShop}
         pricingRules={JSON.parse(JSON.stringify(pricingRules))}
+        prelaunchWantCount={prelaunchWantCount}
       />
     </>
   );

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { getLocale } from "next-intl/server";
 import { prelaunchInterestService } from "@/services/PrelaunchInterestService";
 import { analyticsService } from "@/services/AnalyticsService";
+import { ensureAnonVisitorId } from "@/lib/anon-visitor";
 import logger from "@/lib/logger";
 
 /**
@@ -68,4 +69,73 @@ export async function registerPrelaunchInterestAction(data: unknown) {
   ).catch((err) => logger.warn({ err }, "prelaunch_interest_track_failed"));
 
   return { success: true as const, alreadyRegistered: result.alreadyRegistered };
+}
+
+
+const wantSchema = z.object({
+  shopId: z.string().uuid(),
+  sessionId: z.string().min(1).max(100).optional(),
+});
+
+/**
+ * Talep testi noktasi icin TEK TIKLIK istek.
+ *
+ * E-POSTA ISTEMEZ. Olculmek istenen ilk soru ucuz olmali: "burada bir nokta
+ * olsun mu?" E-posta bir adim otesidir ve o adimi soruyu sormanin ONUNE koymak,
+ * cevaplarin buyuk kismini kaybettiriyordu.
+ *
+ * Dedupe sunucuda: `bp_anon` cerezindeki anonim kimlik + veritabani benzersizligi
+ * (`@@unique([shopId, anonId])`). Istemciye birakilan bir "zaten tikladim"
+ * isareti konsoldan silinebilirdi ve bu sayiya bakarak bir sehre esnaf
+ * onboarding'i yapiliyor.
+ */
+export async function registerPrelaunchWantAction(data: unknown) {
+  const parsed = wantSchema.safeParse(data);
+  if (!parsed.success) {
+    return { success: false as const, error: "Errors.generic" };
+  }
+
+  const locale = await getLocale();
+
+  let result;
+  let anonId: string;
+  try {
+    anonId = await ensureAnonVisitorId();
+    result = await prelaunchInterestService.recordWant({
+      shopId: parsed.data.shopId,
+      anonId,
+      locale,
+      source: "web",
+    });
+  } catch (err) {
+    logger.error({ err }, "prelaunch_want_action_failed");
+    return { success: false as const, error: "Errors.generic" };
+  }
+
+  if (!result.ok) {
+    // Nokta bu arada acilmis olabilir; dogru eylem artik rezervasyon yapmak.
+    return {
+      success: false as const,
+      error:
+        result.code === "shop_not_prelaunch"
+          ? "Errors.shopNowOpenBookInstead"
+          : "Errors.generic",
+    };
+  }
+
+  // Atesle-unut: analitik yazimi kullaniciyi bekletmemeli ve DUSURMEMELI.
+  void Promise.resolve(
+    analyticsService.track({
+      name: "prelaunch_want",
+      sessionId: parsed.data.sessionId ?? "server",
+      locale,
+      metadata: { shopId: parsed.data.shopId },
+    }),
+  ).catch((err) => logger.warn({ err }, "prelaunch_want_track_failed"));
+
+  return {
+    success: true as const,
+    alreadyCounted: result.alreadyCounted,
+    count: result.count,
+  };
 }

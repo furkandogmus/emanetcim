@@ -31,6 +31,7 @@ import { isInsuranceEnabled } from "@/lib/commerce-context";
 import Money from "@/components/common/Money";
 import { formatDecimal } from "@/lib/currency";
 import PrelaunchNotifyButton from "@/components/guest/PrelaunchNotifyButton";
+import PrelaunchDemandPanel from "@/components/guest/PrelaunchDemandPanel";
 
 /*
   CTA sinif dizgeleri TEK YERDE: rezervasyon dali ile talep-testi dali ayni
@@ -81,11 +82,14 @@ export type ShopDetailClientShop = {
 interface ShopDetailClientProps {
   shop: ShopDetailClientShop;
   pricingRules: PricingRules;
+  /** Talep testi noktasi icin "kac kisi istiyor"; isletilen dukkanda 0 ve kullanilmaz. */
+  prelaunchWantCount: number;
 }
 
 export default function ShopDetailClient({
   shop,
   pricingRules,
+  prelaunchWantCount,
 }: ShopDetailClientProps) {
   const router = useRouter();
   const t = useTranslations("Guest");
@@ -248,6 +252,19 @@ export default function ShopDetailClient({
         </div>
 
         <main className="px-4 pt-16 space-y-5">
+        {/*
+          TALEP PANELI EN USTTE. Onceki halinde tek erisim, sayfanin DIBINDEKI
+          yapiskan cubuktaki dugmeydi ve e-posta formu onun actigi modalin
+          icindeydi -- olcmek istedigimiz sinyalin onunde iki adim vardi.
+          Burada, basligin hemen altinda, tek tikla sayilir.
+        */}
+        {shop.isPrelaunch ? (
+          <PrelaunchDemandPanel
+            shopId={shop.id}
+            shopName={shop.name}
+            initialWantCount={prelaunchWantCount}
+          />
+        ) : null}
           <section>
             <h2 className="text-2xl font-black text-gray-900 mb-3">{mobileCopy.premiumAmenities}</h2>
             <div className="grid grid-cols-2 gap-3">
@@ -444,6 +461,19 @@ export default function ShopDetailClient({
       )}
 
       <main className="max-w-lg mx-auto px-4 -mt-4 relative z-[1] flex flex-col gap-4">
+      {/*
+        TALEP PANELI EN USTTE. Onceki halinde tek erisim, sayfanin DIBINDEKI
+        yapiskan cubuktaki dugmeydi ve e-posta formu onun actigi modalin
+        icindeydi -- olcmek istedigimiz sinyalin onunde iki adim vardi.
+        Burada, basligin hemen altinda, tek tikla sayilir.
+      */}
+      {shop.isPrelaunch ? (
+        <PrelaunchDemandPanel
+          shopId={shop.id}
+          shopName={shop.name}
+          initialWantCount={prelaunchWantCount}
+        />
+      ) : null}
         {/* Aynı gerekçe: talep testi noktasında valiz fiyat tablosu gösterilmez. */}
         {!shop.isPrelaunch && (
         <section className="bg-white rounded-3xl p-6 shadow-xl shadow-gray-200/50 border border-gray-100">

@@ -28,10 +28,16 @@ export const SERVER_ANALYTICS_EVENTS = [
   "booking_created",
   "user_signed_up",
   /*
-    Talep testi sinyalleri. `prelaunch_booking_attempt` ASIL olculen seydir:
-    kisi o noktada rezervasyon dugmesine bastı. `prelaunch_interest` ise bir
-    adim otesi -- e-postasini birakti, yani niyetini beyan etti.
+    Talep testi sinyalleri, ARTAN niyet sirasiyla:
+
+      prelaunch_booking_attempt  nokta sayfasinda rezervasyona kalkisti (istemci)
+      prelaunch_want             "burayi istiyorum"a bastı -- tek tik, sunucu
+      prelaunch_interest         e-postasini birakti; niyet BEYANI
+
+    Ucu ayri ayri sayilir cunku sorulari farkli: ilki merak, ikincisi talep,
+    ucuncusu taahhut. Tek bir sayiya toplamak, hangisinin oldugunu kaybettirir.
   */
+  "prelaunch_want",
   "prelaunch_interest",
 ] as const;
 export type ServerAnalyticsEventName = (typeof SERVER_ANALYTICS_EVENTS)[number];
