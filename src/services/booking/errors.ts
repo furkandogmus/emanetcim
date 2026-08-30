@@ -30,7 +30,8 @@ export class BookingRejectedError extends Error {
 export type BookingRejectionCode =
   | 'CAPACITY_EXCEEDED'
   | 'INVALID_DATES'
-  | 'PLATFORM_HOLIDAY';
+  | 'PLATFORM_HOLIDAY'
+  | 'PAYMENTS_DISABLED';
 
 /** Dukkan kapasitesi secilen aralikta yetmiyor. */
 export class BookingCapacityExceededError extends BookingRejectedError {
@@ -55,5 +56,28 @@ export class BookingWindowInvalidError extends BookingRejectedError {
 export class BookingHolidayError extends BookingRejectedError {
   constructor(message = 'Rezervasyon bir platform tatiline denk geliyor.') {
     super(message, 'PLATFORM_HOLIDAY');
+  }
+}
+
+/**
+ * Odeme alimi kapatilmis: `PAYMENTS_ENABLED=false` ya da `payments` bayragi kapali.
+ *
+ * NEDEN VAR (2026-08-30): admin panelindeki bayrak ekrani ALTI DILDE
+ * "PAYMENTS_ENABLED=false ile aninda odeme kapatmasi yapabilirsiniz" diyordu, ama
+ * `PAYMENTS_ENABLED` src altinda HIC OKUNMUYORDU -- ne env semasinda ne bir kod
+ * yolunda. Yani olay aninda operator degiskeni yazar, servisi yeniden baslatir ve
+ * odeme akisi aynen devam ederdi; ustelik "kapattim" sanarak. Var olmayan bir acil
+ * durum dugmesi, hic olmayandan tehlikelidir.
+ *
+ * KAPSAM BILEREK DAR -- yalnizca YENI odeme yukumlulugu acmayi durdurur:
+ *   - Check-in DURDURULMAZ. `manual` saglayicida para dukkanda o an aliniyor ve
+ *     `check-in.ts` bunun icin `openIntent`/`markCaptured` cagiriyor. Orayi
+ *     kapatmak, elinde valizle bekleyen misafiri kapida birakirdi.
+ *   - Iade DURDURULMAZ. Bir odeme olayinda iadeleri bloke etmek tam ters yondur.
+ * Yani anahtar on kapiyi kapatir, icerideki yukumlulukler normal sekilde kapanir.
+ */
+export class BookingPaymentsDisabledError extends BookingRejectedError {
+  constructor(message = 'Odeme alimi gecici olarak kapali.') {
+    super(message, 'PAYMENTS_DISABLED');
   }
 }

@@ -278,6 +278,7 @@ const BOOKING_REJECTION_TO_KEY: Record<BookingRejectionCode, string> = {
   CAPACITY_EXCEEDED: "Errors.insufficientCapacity",
   INVALID_DATES: "Errors.invalidBookingDates",
   PLATFORM_HOLIDAY: "Errors.bookingIncludesPlatformHoliday",
+  PAYMENTS_DISABLED: "Errors.paymentsDisabled",
 };
 
 const CANCEL_ERROR_TO_KEY: Record<CancelBookingErrorCode, string> = {

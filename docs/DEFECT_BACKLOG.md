@@ -10,6 +10,66 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-08-30 — var olmayan acil durum düğmesi
+
+### 1. ✅ DÜZELTİLDİ — Admin ekranı altı dilde olmayan bir ödeme kapatma anahtarı vaat ediyordu
+
+- **Nerede**: `src/app/[locale]/admin/feature-flags/page.tsx`, `src/locales/*.json`
+  → `Admin.featureFlagsIntro`
+- **Kanıt**: metin altı dilde şunu diyordu — *"Ortamda `PAYMENTS_ENABLED=false` ile bu
+  ekrandan bağımsız anında ödeme kapatması yapabilirsiniz."* Ölçüm:
+  `grep -rn "PAYMENTS_ENABLED" src --include="*.ts" --include="*.tsx"` → locale
+  dosyaları dışında **sıfır** sonuç. `src/lib/env.ts` şemasında yok,
+  `docker-compose.env.example`'da yok.
+- **Neden önemli**: bir olay anında operatör değişkeni yazar, servisi yeniden başlatır
+  ve ödeme akışı aynen devam eder — üstelik "kapattım" sanarak. **Var olmayan bir acil
+  durum düğmesi, hiç olmayandan tehlikelidir**: hiç olmasa operatör başka bir yol arar.
+- **Düzeltme**: anahtar gerçekten uygulandı —
+  `PaymentService.isAcceptingNewPayments()`. İki kaynak, ortam kazanır ve **DB'ye hiç
+  bakmaz** (kapatma ihtiyacı doğuran olay tam da veritabanını yavaşlatan olay
+  olabilir). Kapı `createInitialBooking`'de, yani web ve mobil **ortak**; taşıyıcıya
+  yazılsaydı ayrışırdı — tatil kontrolü tam olarak bunu yaşamıştı.
+  Yeni reddetme kodu `PAYMENTS_DISABLED`; iki taşıyıcı eşlemesi de
+  `Record<BookingRejectionCode, …>` olduğu için **derleyici ikisini de zorladı**.
+  Mobil `503 payments_disabled`, web `Errors.paymentsDisabled` (6 dil).
+- **Varsayılanlar bilinçli**: yalnızca tam olarak `"false"` kapatır (`"0"`, `"no"`,
+  `"FALSE"` kapatmaz — kapatmak bilinçli bir eylem olmalı, yazım hatası ciro
+  durdurmamalı); `payments` bayrak **satırı yoksa ödeme AÇIK** sayılır
+  (`defaultWhenMissing: true`) — yokluk "kapat" demek olsaydı bu değişikliğin kendisi
+  canlıda ödemeyi durdururdu.
+- **Kapsam bilerek dar**: check-in tahsilatı ve iade **durmaz**. `manual` sağlayıcıda
+  para dükkanda o an alınıyor; check-in'i kapatmak elinde valizle bekleyen misafiri
+  kapıda bırakırdı. İadeyi bir ödeme olayında bloke etmek ise tam ters yöndür.
+- **Doğrulama**: 12 yeni test (test **714 → 726**). Üç ayrı ihlal enjekte edilip
+  kırıldıkları görüldü: kapıyı kaldırmak (1 kırmızı), ortam kontrolünü atlamak
+  (5 kırmızı), yoksa-varsayılanı `false`'a çevirmek (3 kırmızı).
+
+### 2. ✅ DÜZELTİLDİ — Özellik bayrağı sistemi hiçbir şeyi kontrol etmiyordu
+
+- **Kanıt**: `featureFlagService.isEnabled` **hiçbir yerden çağrılmıyordu**
+  (`grep -rn "featureFlagService" src` → test dışı sıfır sonuç). Admin bayrak
+  oluşturuyor, `rolloutPct` ve allowlist kaydediyor, denetim izi yazılıyor — ve
+  hiçbiri hiçbir davranışı değiştirmiyordu.
+- **Not — ilk teşhisim yanlıştı**: "değerlendirici yok" demiştim; `FeatureFlagService`
+  cache'i, TTL'i, stabil bucket'ı ve allowlist'iyle **zaten yazılmıştı**
+  (`src/services/FeatureFlagService.ts`). Eksik olan onu tüketen taraftı.
+- **Düzeltme**: `payments` bayrağı ilk gerçek tüketici oldu. `isEnabled`'a
+  `defaultWhenMissing` seçeneği eklendi — bir özelliği AÇAN bayrakla bir şeyi KAPATAN
+  bayrağın doğru varsayılanı terstir ve bu ayrım artık tipte duruyor.
+
+### 3. ✅ DÜZELTİLDİ — Admin, ödemenin gerçekte açık mı kapalı mı olduğunu göremiyordu
+
+Ortam değişkeni bayrağı ezdiği için admin `payments`'ı "açık" görüp ödemenin aslında
+kapalı olduğunu anlayamazdı — ekran doğru veriyi gösterip yanlış sonuç düşündürürdü.
+Sayfa artık **etkin durumu** yeşil/kırmızı bantla gösteriyor ve kapatma ortamdan
+geliyorsa "aşağıdaki bayrak bunu geri açamaz" diye söylüyor.
+
+### 4. ✅ TEMİZLENDİ — `docker-compose.yml`'de ölü bypass değişkenleri
+
+`MOBILE_PAYMENT_BYPASS` ve `MOBILE_PAYMENT_BYPASS_ALLOW_PROD` konteynere geçiriliyordu
+ama koddan **hiç okunmuyordu** (`683b70b`'de kaldırılmış, compose'daki hayaleti
+kalmış). Yanıltıcı ölü konfig; yerlerini gerçek `PAYMENTS_ENABLED` aldı.
+
 ## 2026-08-30 — izleme kurulmadan önce: açık uç kendini koruyamıyordu
 
 Soru "alarm/izleme eklesek ortamı yorar mı" diye başladı. Ölçüm, yükün izlemede

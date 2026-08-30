@@ -68,15 +68,21 @@ async function loadMap(): Promise<Map<string, FlagRow>> {
 class FeatureFlagService {
   /**
    * Whether the flag is on for this context.
-   * Missing flags are disabled by default.
+   *
+   * Missing flags are disabled by default -- the right default for a NEW feature
+   * being rolled out. `defaultWhenMissing` flips that for the opposite case: a
+   * flag that TURNS SOMETHING OFF. There, absence must mean "on", or merely
+   * introducing the flag would disable a working feature in production.
+   * See `PaymentService.isAcceptingNewPayments`.
    */
   async isEnabled(
     key: string,
-    ctx: FeatureFlagContext
+    ctx: FeatureFlagContext,
+    opts?: { defaultWhenMissing?: boolean }
   ): Promise<boolean> {
     const map = await loadMap();
     const row = map.get(key);
-    if (!row) return false;
+    if (!row) return opts?.defaultWhenMissing ?? false;
     if (!row.enabled) return false;
 
     const allow = parseAllowlist(row.allowedUserIds);

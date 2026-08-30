@@ -17,10 +17,12 @@ import { reserveSlots } from '@/services/SlotService';
 import { validateBookingStayWindow } from '@/lib/booking-server-price';
 import { bookingTouchesPlatformHoliday } from '@/lib/booking-holidays';
 import { bookingEventService } from '@/services/BookingEventService';
+import { paymentService } from '@/services/PaymentService';
 import {
   BookingCapacityExceededError,
   BookingWindowInvalidError,
   BookingHolidayError,
+  BookingPaymentsDisabledError,
 } from '@/services/booking/errors';
 import type { CreateInitialBookingInput, TxClient } from '@/services/BookingService';
 
@@ -66,6 +68,19 @@ export async function createInitialBooking(data: CreateInitialBookingInput): Pro
     )
   ) {
     throw new BookingHolidayError();
+  }
+
+  /*
+    Odeme alimi kapali mi? Kapi BURADA, cunku bu yeni bir odeme yukumlulugunun
+    dogdugu TEK yer -- web action'i da mobil checkout ucu da buradan geciyor.
+    Tasiyiciya yazilsaydi ikisi ayrisirdi; tatil kontrolu tam olarak bunu yasadi
+    (2026-08-25'e kadar yalnizca web'deydi, ayni tarih mobilde kabul ediliyordu).
+
+    Check-in ve iade bilerek DISARIDA: gerekcesi errors.ts icinde
+    `BookingPaymentsDisabledError` uzerinde yazili.
+  */
+  if (!(await paymentService.isAcceptingNewPayments())) {
+    throw new BookingPaymentsDisabledError();
   }
 
   const newBags = totalBagCount(data.bagCountS, data.bagCountM, data.bagCountXl);

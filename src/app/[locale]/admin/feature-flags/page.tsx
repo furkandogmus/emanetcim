@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/db";
 import AdminFeatureFlagsClient from "@/components/admin/AdminFeatureFlagsClient";
+import { paymentService } from "@/services/PaymentService";
 
 function allowListToLines(v: unknown): string {
   if (!Array.isArray(v)) return "";
@@ -30,6 +31,17 @@ export default async function AdminFeatureFlagsPage({
   const tCommon = await getTranslations("Common");
 
   const rows = await prisma.featureFlag.findMany({ orderBy: { key: "asc" } });
+
+  /*
+    ETKIN durum, bayragin kendisi DEGIL.
+
+    NEDEN: ortam degiskeni bayragi eziyor. Admin `payments` bayragini "acik"
+    gorup odemenin aslinda kapali oldugunu anlayamazdi -- ekran dogru veriyi
+    gosterip yanlis sonuc dusundururdu. Bu sayfanin bastaki hatasi da tam olarak
+    buydu: metin var olmayan bir anahtardan bahsediyordu.
+  */
+  const acceptingPayments = await paymentService.isAcceptingNewPayments();
+  const envForcedOff = process.env.PAYMENTS_ENABLED?.trim() === "false";
 
   const flags = rows.map((r) => ({
     id: r.id,
@@ -61,6 +73,23 @@ export default async function AdminFeatureFlagsPage({
       </header>
 
       <main className="p-10 max-w-5xl mx-auto w-full flex flex-col gap-8">
+        <div
+          className={`rounded-lg border p-4 text-sm font-bold ${
+            acceptingPayments
+              ? "border-green-200 bg-green-50 text-green-900"
+              : "border-red-200 bg-red-50 text-red-900"
+          }`}
+        >
+          <p>
+            {acceptingPayments
+              ? t("paymentsStateOn")
+              : t("paymentsStateOff")}
+          </p>
+          {envForcedOff && (
+            <p className="mt-2 font-normal">{t("paymentsStateEnvOff")}</p>
+          )}
+        </div>
+
         <p className="text-sm text-gray-600 max-w-2xl">
           {t("featureFlagsIntro")}
         </p>

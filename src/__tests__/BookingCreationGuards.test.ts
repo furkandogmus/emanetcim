@@ -37,6 +37,11 @@ const { mockPrisma, mockGetPricingRules, RULES } = vi.hoisted(() => {
 });
 
 vi.mock("@/lib/db", () => ({ default: mockPrisma }));
+// Odeme kapisi bu dosyanin konusu degil; acik varsayilir.
+// Kapali hali PaymentsKillSwitch.test.ts'te sinaniyor.
+vi.mock("@/services/PaymentService", () => ({
+  paymentService: { isAcceptingNewPayments: vi.fn().mockResolvedValue(true) },
+}));
 vi.mock("@/lib/platform-settings", () => ({ getPricingRules: mockGetPricingRules }));
 vi.mock("@/services/BookingEventService", () => ({
   bookingEventService: { record: vi.fn().mockResolvedValue(undefined) },
@@ -47,7 +52,9 @@ import {
   BookingRejectedError,
   BookingWindowInvalidError,
   BookingHolidayError,
+  BookingPaymentsDisabledError,
 } from "@/services/booking/errors";
+import { paymentService } from "@/services/PaymentService";
 
 const BASE_INPUT = {
   guestId: "g1",
@@ -63,6 +70,13 @@ const BASE_INPUT = {
 beforeEach(() => {
   vi.clearAllMocks();
   mockGetPricingRules.mockResolvedValue({ ...RULES, platformHolidayDates: [] });
+  /*
+    HER TESTTE ACIKCA kuruluyor, `vi.mock` fabrikasindaki degere GUVENILMIYOR:
+    `vi.clearAllMocks()` cagri kayitlarini temizler ama IMPLEMENTASYONU birakir.
+    Yani bir testin `mockResolvedValue(false)`'u sonraki testlere sizar --
+    bu dosyada tam olarak oldu ve alakasiz bir testi kirmizi yakti.
+  */
+  vi.mocked(paymentService.isAcceptingNewPayments).mockResolvedValue(true);
 });
 
 describe("createInitialBooking tarih kapıları", () => {
@@ -97,6 +111,35 @@ describe("createInitialBooking tarih kapıları", () => {
       code: "PLATFORM_HOLIDAY",
     });
     expect(mockPrisma.$transaction).not.toHaveBeenCalled();
+  });
+
+  it("ödeme alımı kapalıyken reddeder — web ve mobil AYNI kapıdan geçer", async () => {
+    // Kapi serviste, tasiyicida degil. Tasiyiciya yazilsaydi ikisi ayrisirdi:
+    // tatil kontrolu 2026-08-25'e kadar tam olarak boyleydi ve ayni tarih
+    // web'de reddedilirken mobilde KABUL EDILIYORDU.
+    vi.mocked(paymentService.isAcceptingNewPayments).mockResolvedValue(false);
+
+    await expect(createInitialBooking(BASE_INPUT)).rejects.toBeInstanceOf(
+      BookingPaymentsDisabledError,
+    );
+    await expect(createInitialBooking(BASE_INPUT)).rejects.toMatchObject({
+      code: "PAYMENTS_DISABLED",
+    });
+    // Kapiyi gecemeyen istek veritabanina HIC dokunmaz.
+    expect(mockPrisma.$transaction).not.toHaveBeenCalled();
+  });
+
+  it("ödeme kapısı TARİH kapılarından SONRA çalışır", async () => {
+    // Gecersiz bir tarih, odeme kapali olsa bile INVALID_DATES donmeli:
+    // kullaniciya "odeme kapali" demek, duzeltebilecegi gercek sebebi gizler.
+    vi.mocked(paymentService.isAcceptingNewPayments).mockResolvedValue(false);
+
+    await expect(
+      createInitialBooking({
+        ...BASE_INPUT,
+        checkOutTime: new Date("2026-12-01T18:00:00Z"),
+      }),
+    ).rejects.toMatchObject({ code: "INVALID_DATES" });
   });
 
   it("her iki reddetme de ortak tabandan türer — tek `catch` yeter", async () => {

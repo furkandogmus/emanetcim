@@ -728,7 +728,7 @@
     "platformSettingsInvalid": "Ungültige Werte.",
     "platformSettingsNav": "Plattformeinstellungen",
     "featureFlagsTitle": "Feature-Flags",
-    "featureFlagsIntro": "Laufzeitschalter in der Datenbank. Setzen Sie PAYMENTS_ENABLED=false in der Umgebung, um Zahlungen sofort zu deaktivieren — das übergeht diese Einstellungen.",
+    "featureFlagsIntro": "Laufzeitschalter in der Datenbank. Wird das `payments`-Flag deaktiviert, werden keine neuen Buchungszahlungen angenommen; Check-in-Erfassung und Erstattungen bleiben unberührt. Ist PAYMENTS_ENABLED=false gesetzt, sind Zahlungen unabhängig von diesem Bildschirm deaktiviert.",
     "featureFlagsKeyLabel": "Key",
     "featureFlagsUpdatedAt": "Zuletzt aktualisiert: {at}",
     "featureFlagsEnabled": "Enabled",
@@ -961,7 +961,10 @@
     "sealShipTrackingLabel": "Sendungsnummer",
     "sealShipTrackingPlaceholder": "z. B. 12345678901234",
     "sealShipQuantityLabel": "Versandte Menge",
-    "sealShipNoteLabel": "Admin-Notiz (optional)"
+    "sealShipNoteLabel": "Admin-Notiz (optional)",
+    "paymentsStateOn": "Zahlungen sind AKTIV — neue Buchungszahlungen werden angenommen.",
+    "paymentsStateOff": "Zahlungen sind DEAKTIVIERT — neue Buchungszahlungen werden nicht angenommen. Check-in-Erfassung und Erstattungen funktionieren weiter.",
+    "paymentsStateEnvOff": "Die Abschaltung stammt aus der Umgebung (PAYMENTS_ENABLED=false). Das Flag unten kann sie nicht aufheben; entfernen Sie zuerst die Variable."
   },
   "Auth": {
     "loginTitle": "Melden Sie sich bei BagajPark an",
@@ -1439,7 +1442,8 @@
     "tooManyRequests": "Zu viele Versuche. Bitte versuchen Sie es später noch einmal.",
     "unauthorized": "Sie sind für diese Aktion nicht berechtigt.",
     "verificationCooldown": "Bitte warten Sie {seconds} Sekunden, bevor Sie eine weitere E-Mail senden.",
-    "verifyEmailRequired": "Bitte überprüfen Sie Ihre E-Mail-Adresse vor der Buchung."
+    "verifyEmailRequired": "Bitte überprüfen Sie Ihre E-Mail-Adresse vor der Buchung.",
+    "paymentsDisabled": "Zahlungen sind vorübergehend pausiert. Bitte versuchen Sie es in Kürze erneut."
   },
   "Emails": {
     "verificationSubject": "Bestätigen Sie Ihre E-Mail",

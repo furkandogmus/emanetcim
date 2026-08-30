@@ -730,7 +730,7 @@
     "platformSettingsInvalid": "Geçersiz değerler.",
     "platformSettingsNav": "Platform ayarları",
     "featureFlagsTitle": "Özellik bayrakları",
-    "featureFlagsIntro": "Veritabanında tutulan çalışma anı anahtarları. Ortamda PAYMENTS_ENABLED=false ile bu ekrandan bağımsız anında ödeme kapatması yapabilirsiniz.",
+    "featureFlagsIntro": "Veritabanında tutulan çalışma anı anahtarları. `payments` bayrağı kapatılırsa yeni rezervasyon ödemesi alınmaz; check-in tahsilatı ve iadeler etkilenmez. Ortamda PAYMENTS_ENABLED=false ise bu ekrandan bağımsız olarak ödeme alımı kapalıdır.",
     "featureFlagsKeyLabel": "Anahtar",
     "featureFlagsUpdatedAt": "Son güncelleme: {at}",
     "featureFlagsEnabled": "Açık",
@@ -961,7 +961,10 @@
     "sealShipTrackingLabel": "Kargo Takip Numarası",
     "sealShipTrackingPlaceholder": "Örn: 12345678901234",
     "sealShipQuantityLabel": "Gönderilen Adet",
-    "sealShipNoteLabel": "Admin Notu (İsteğe Bağlı)"
+    "sealShipNoteLabel": "Admin Notu (İsteğe Bağlı)",
+    "paymentsStateOn": "Ödeme alımı AÇIK — yeni rezervasyon ödemesi alınıyor.",
+    "paymentsStateOff": "Ödeme alımı KAPALI — yeni rezervasyon ödemesi alınmıyor. Check-in tahsilatı ve iadeler çalışmaya devam ediyor.",
+    "paymentsStateEnvOff": "Kapatma ortam değişkeninden geliyor (PAYMENTS_ENABLED=false). Aşağıdaki bayrak bunu geri açamaz; önce değişkeni kaldırın."
   },
   "Auth": {
     "loginTitle": "BagajPark'a Giriş Yap",
@@ -1497,7 +1500,8 @@
     "tooManyRequests": "Çok fazla deneme. Lütfen daha sonra tekrar deneyin.",
     "unauthorized": "Bu işlemi yapmaya yetkiniz yok.",
     "verificationCooldown": "Yeni bir e-posta göndermek için {seconds} saniye beklemeniz gerekiyor.",
-    "verifyEmailRequired": "Lütfen rezervasyon yapabilmek için önce e-posta adresinizi doğrulayın."
+    "verifyEmailRequired": "Lütfen rezervasyon yapabilmek için önce e-posta adresinizi doğrulayın.",
+    "paymentsDisabled": "Ödeme alımı geçici olarak kapalı. Lütfen kısa süre sonra tekrar deneyin."
   },
   "Emails": {
     "verificationSubject": "E-postanızı Doğrulayın",

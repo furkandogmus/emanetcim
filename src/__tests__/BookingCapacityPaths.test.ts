@@ -64,6 +64,11 @@ vi.mock("@/lib/qr-token", () => ({
   verifyQrToken: vi.fn(),
 }));
 vi.mock("@/services/SealService", () => ({ sealService: {} }));
+// Odeme kapisi bu dosyanin konusu degil; acik varsayilir.
+// Kapali hali PaymentsKillSwitch.test.ts'te sinaniyor.
+vi.mock("@/services/PaymentService", () => ({
+  paymentService: { isAcceptingNewPayments: vi.fn().mockResolvedValue(true) },
+}));
 
 const IN = new Date(Date.now() + 3 * 60 * 60 * 1000);
 const OUT = new Date(Date.now() + 9 * 60 * 60 * 1000);
