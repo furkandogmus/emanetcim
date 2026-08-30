@@ -208,9 +208,18 @@ export default function BottomSheet({
         {(title || showClose) && (
           <div className="flex items-center justify-between px-5 pb-3 border-b border-gray-50 shrink-0">
             {title ? (
+              /*
+                `min-w-0 truncate`: baslik SATIRI TASIRIYORDU. Olculdu
+                (2026-08-31, iPhone 13): Almanca ana sayfada bu satir 14 px
+                genisliyor, panel `fixed` oldugu icin tasma belgeye yansiyor
+                ve SAYFA 13 px yana kayiyordu. `id-eyebrow` buyuk harf +
+                genis harf araligi uyguladigi icin ayni metin Almancada
+                Turkcedekinden belirgin genis. Baslik kirpilabilmeli;
+                kapatma dugmesi ise asla kuculmemeli.
+              */
               <h2
                 id="bottom-sheet-title"
-                className="text-sm id-eyebrow text-gray-900"
+                className="min-w-0 truncate text-sm id-eyebrow text-gray-900"
               >
                 {title}
               </h2>
@@ -221,7 +230,7 @@ export default function BottomSheet({
               <button
                 type="button"
                 onClick={onClose}
-                className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+                className="w-8 h-8 shrink-0 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
                 aria-label={tCommon("close")}
               >
                 <X size={16} className="text-gray-600" />

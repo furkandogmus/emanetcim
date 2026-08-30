@@ -22,15 +22,16 @@ yazılmaz; ölçüm yazılır.
 | 7 | Manifest 404 veren ekran görüntüleri ilan ediyor | PWA | ✅ DÜZELTİLDİ (referans kaldırıldı) |
 | 8 | İngilizcede ana sayfa arama kutusu karttan taşıyor | Ana sayfa | ✅ DÜZELTİLDİ (`86887b3`, diğer agent) |
 | 9 | Başlık menüsü bağlantıları 12 px, footer 17 px yüksek | Web + mobil | ✅ DÜZELTİLDİ |
-| 10 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
-| 11 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
-| 12 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
 | 10 | FR mobilde sayfa 33 px, DE'de 13 px yana kayıyor | Mobil başlık | ✅ DÜZELTİLDİ |
 | 11 | Mobil aramada TEK BİR sonuç kartı bile görünmüyor | Mobil arama | ✅ DÜZELTİLDİ |
 | 12 | Çerez paneli mobilde ana eylemi tamamen örtüyor | Mobil (her sayfa) | ⏳ AÇIK |
 | 13 | Harita pinleri üst üste biniyor, okunmuyor | Harita | ⏳ AÇIK |
 | 14 | Checkout'ta görünen valiz satırı 0, özet "1 Valiz" diyor | Mobil checkout | ⏳ AÇIK |
 | 15 | Checkout'ta ekranın %31'i sabit çubuk; 3 valiz tipinden 1'i görünüyor | Mobil checkout | ⏳ AÇIK |
+| 16 | Almancada sayfa 13 px yana kayıyor — panel başlığı taşıyor | Mobil (BottomSheet) | ✅ DÜZELTİLDİ |
+| 16 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
+| 17 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
+| 18 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
 
 ---
 
@@ -202,6 +203,33 @@ Mobil ve masaüstünde yatay kaydırma yok, taşma yok, kırpılma yok. Tek kusu
 sayfanın en altında footer telif satırının ~13 px'i yapışkan fiyat çubuğunun
 altında kalıyor (düşük öncelik).
 
+### 16. Almancadaki 13 px kayma: `BottomSheet` başlığı
+
+10 numaralı düzeltme Fransızcayı çözdü (33 → 0) ama Almancada 13 px kaldı.
+İz sürüldü: kaydırmayı yaratan öge başlık değil, **alt panelin başlık satırı**.
+
+```
+html            scrollWidth 403  (viewport 390)
+ └ body                     403   overflow-x: hidden
+   └ div.fixed.inset-0.z-40      ← BottomSheet
+     └ div.flex.items-center.justify-between.px-5  → 14 px taşıyor
+```
+
+Başlık `<h2>` `min-w-0`/`truncate` taşımıyordu; `id-eyebrow` büyük harf ve
+geniş harf aralığı uyguladığı için aynı metin Almancada Türkçedekinden
+belirgin geniş çıkıyor. Panel `fixed` olduğu için taşma belgeye yansıyor ve
+sayfa yana kayıyor. Başlığa `min-w-0 truncate`, kapatma düğmesine `shrink-0`.
+
+### Canlıda DOĞRULANAN düzeltmeler (2026-08-31)
+
+Kod doğru diye "düzeldi" denmez; canlıda ölçüldü:
+
+| Düzeltme | Önce | Sonra |
+|---|---|---|
+| Başlık taşması (FR) | 33 px kayma | **0** |
+| Footer dokunma hedefi | 17 px | **32 px** |
+| Mobil arama paneli | %22 (146 px), 0 kart | **%42 (279 px), 1 kart tam** |
+
 ### Sağlıklı çıkanlar (bu turda doğrulandı)
 
 - **Farsça / RTL**: `<html lang="fa" dir="rtl">` doğru kuruluyor, düzen düzgün
@@ -264,7 +292,7 @@ Bu liste bilerek uzun; her tur birkaçını kapatıp buraya sonucunu yazın.
 - [ ] Klavye ile tam gezinme, odak halkaları, odak tuzağı olan modallar
 - [ ] Renk kontrastı (özellikle gri üstü gri ikincil metinler)
 
-### 10. Haritada OpenStreetMap atfı hiç görünmüyordu — DÜZELTİLDİ
+### 16. Haritada OpenStreetMap atfı hiç görünmüyordu — DÜZELTİLDİ
 
 Canlıda ölçüldü (`bagajpark.com/tr/search`, 2026-08-31): atıf kutusunun tüm
 içeriği **"MapLibre"**. Tek satır OpenStreetMap kredisi yok. OSM verisi ODbL
@@ -285,7 +313,7 @@ Düzeltme: `MAP_ATTRIBUTION` tek kaynakta tanımlandı ve iki bileşen de
 `customAttribution` ile açıkça veriyor. `map-style.test.ts` her iki dosyada
 `attributionControl: false` ve eksik `customAttribution` durumunu kırmızı yakar.
 
-### 11. Altlık otomasyon tarayıcısında hiç boyanmıyor — SORUN YOK
+### 17. Altlık otomasyon tarayıcısında hiç boyanmıyor — SORUN YOK
 
 Belirti: `bagajpark.com/tr/search` ve localhost'ta harita alanı **bembeyaz**;
 üzerinde yalnızca fiyat/`Yakında` pinleri yüzüyor. İskelet kalkıyor, yani
@@ -318,7 +346,7 @@ görünebilir; "harita bozuk" demeden önce ikinci bir kare alın.**
 Sağlayıcı ölçümleri yine de değerli — altlık bir gün gerçekten kaybolursa
 elenecek ilk şey onlar ve hepsi 200 dönüyordu.
 
-### 12. Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu — DÜZELTİLDİ
+### 18. Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu — DÜZELTİLDİ
 
 Esnaf panelinde tek birincil eylem var: "Yeni valiz teslim al". O da tek bir yol
 açıyordu — kamera. `QRScanner` içinde elle giriş alanı yoktu; kamera izni
