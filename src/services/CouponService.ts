@@ -12,6 +12,7 @@
  * `claimCoupon` yalnizca kotayi ve uygunlugu, `applyDiscount` yalnizca aritmetigi.
  */
 import prisma from '@/lib/db';
+import { Prisma } from '@prisma/client';
 import logger from '@/lib/logger';
 import { moneyToNumber } from '@/lib/money';
 
@@ -98,6 +99,73 @@ export async function releaseCoupon(couponId: string): Promise<void> {
     .catch((err) => logger.error({ err, couponId }, 'coupon_claim_release_failed'));
 }
 
+/** Kupon kodu her yerde AYNI biçimde saklanır: boşluksuz, büyük harf. */
+export function normalizeCouponCode(code: string): string {
+  return code.trim().toUpperCase();
+}
+
+export type CouponInput = {
+  code: string;
+  discount: number;
+  isPercent: boolean;
+  minPrice: number | null;
+  /** `null` = sinirsiz kullanim. */
+  maxUses: number | null;
+  expiresAt: Date | null;
+};
+
+export type CouponCreateResult =
+  | { ok: true; id: string; code: string }
+  | { ok: false; reason: 'duplicate_code' };
+
+/**
+ * Yeni kupon uretir.
+ *
+ * NEDEN SERVISTE: `Coupon` para yolundaki modellerden biri ve CLAUDE.md'nin
+ * `service-layer-writes` mandali bu tabloya servis disindan yazmayi KESIN
+ * yasakliyor. Admin ekrani da bu kurala tabi -- 2026-08-30'a kadar kupon
+ * uretecek hicbir ekran yoktu ve kuponlar ancak veritabanina elle satir
+ * atilarak dogabiliyordu.
+ *
+ * Kod tekilligini veritabani zorluyor (`@unique`); onceden `findUnique` ile
+ * bakip sonra yazmak, iki es zamanli istekte ikisinin de "musait" gormesi
+ * demekti. Cakismayi P2002 uzerinden yakalamak yarissiz tek yoldur.
+ */
+export async function createCoupon(input: CouponInput): Promise<CouponCreateResult> {
+  const code = normalizeCouponCode(input.code);
+  try {
+    const row = await prisma.coupon.create({
+      data: {
+        code,
+        discount: input.discount,
+        isPercent: input.isPercent,
+        minPrice: input.minPrice,
+        maxUses: input.maxUses,
+        expiresAt: input.expiresAt,
+        isActive: true,
+      },
+      select: { id: true, code: true },
+    });
+    return { ok: true, id: row.id, code: row.code };
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+      return { ok: false, reason: 'duplicate_code' };
+    }
+    throw err;
+  }
+}
+
+/**
+ * Kuponu acar/kapatir.
+ *
+ * SILME YOK, BILEREK: kullanilmis bir kuponu silmek, o kuponla yapilmis
+ * rezervasyonlarin indiriminin nereden geldigini yok eder. Kapatmak yeni
+ * kullanimi durdurur ve gecmisi yerinde birakir.
+ */
+export async function setCouponActive(id: string, isActive: boolean): Promise<void> {
+  await prisma.coupon.update({ where: { id }, data: { isActive } });
+}
+
 export class CouponService {
   claim(code: string, totalPrice: number): Promise<CouponClaimResult> {
     return claimCoupon(code, totalPrice);
@@ -105,6 +173,14 @@ export class CouponService {
 
   release(couponId: string): Promise<void> {
     return releaseCoupon(couponId);
+  }
+
+  create(input: CouponInput): Promise<CouponCreateResult> {
+    return createCoupon(input);
+  }
+
+  setActive(id: string, isActive: boolean): Promise<void> {
+    return setCouponActive(id, isActive);
   }
 }
 

@@ -18,6 +18,12 @@ import {
   UserCog,
   Scale,
   BarChart3,
+  Search,
+  CreditCard,
+  ShieldCheck,
+  Clock,
+  Mail,
+  Ticket,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
@@ -270,6 +276,48 @@ export default function AdminDashboardClient({
               >
                 <BarChart3 size={18} className="opacity-40" />
                 {t("analyticsNav")}
+              </Link>
+              <Link
+                href="/admin/bookings"
+                className="w-full min-h-[3rem] px-5 bg-white/10 rounded-2xl text-xs id-eyebrow hover:bg-white/20 transition-all text-left flex items-center gap-3"
+              >
+                <Search size={18} className="opacity-40" />
+                {t("bookingsSearchTitle")}
+              </Link>
+              <Link
+                href="/admin/payments"
+                className="w-full min-h-[3rem] px-5 bg-white/10 rounded-2xl text-xs id-eyebrow hover:bg-white/20 transition-all text-left flex items-center gap-3"
+              >
+                <CreditCard size={18} className="opacity-40" />
+                {t("paymentsTitle")}
+              </Link>
+              <Link
+                href="/admin/coupons"
+                className="w-full min-h-[3rem] px-5 bg-white/10 rounded-2xl text-xs id-eyebrow hover:bg-white/20 transition-all text-left flex items-center gap-3"
+              >
+                <Ticket size={18} className="opacity-40" />
+                {t("couponsTitle")}
+              </Link>
+              <Link
+                href="/admin/jobs"
+                className="w-full min-h-[3rem] px-5 bg-white/10 rounded-2xl text-xs id-eyebrow hover:bg-white/20 transition-all text-left flex items-center gap-3"
+              >
+                <Clock size={18} className="opacity-40" />
+                {t("jobsTitle")}
+              </Link>
+              <Link
+                href="/admin/notifications"
+                className="w-full min-h-[3rem] px-5 bg-white/10 rounded-2xl text-xs id-eyebrow hover:bg-white/20 transition-all text-left flex items-center gap-3"
+              >
+                <Mail size={18} className="opacity-40" />
+                {t("notificationsTitle")}
+              </Link>
+              <Link
+                href="/admin/audit-log"
+                className="w-full min-h-[3rem] px-5 bg-white/10 rounded-2xl text-xs id-eyebrow hover:bg-white/20 transition-all text-left flex items-center gap-3"
+              >
+                <ShieldCheck size={18} className="opacity-40" />
+                {t("auditLogTitle")}
               </Link>
             </div>
           </div>
