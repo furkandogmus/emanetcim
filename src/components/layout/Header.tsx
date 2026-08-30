@@ -15,7 +15,13 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className={` relative id-eyebrow transition-all duration-200 ${
+      /*
+        `py-2 -my-2`: baglantinin GORUNUSU ayni kaliyor, DOKUNMA ALANI buyuyor.
+        Olculdu (2026-08-31): bu baglantilar 47x12 ve 33x12 px'di -- WCAG 2.2
+        2.5.8'in astigi 24x24 esiginin yarisi. Kucuk hedef masaustunde
+        "isabet etmedim" demek, telefonda "yanlis sayfaya gittim" demek.
+      */
+      className={` relative inline-block py-2 -my-2 id-eyebrow transition-all duration-200 ${
         active ? "text-orange-600" : "text-gray-500 hover:text-gray-900"
       }`}
     >

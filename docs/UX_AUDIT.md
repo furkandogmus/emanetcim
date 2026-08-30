@@ -21,6 +21,7 @@ yazılmaz; ölçüm yazılır.
 | 6 | İki ayrı manifest, biri ölü | PWA | ✅ (başka agent `3929ad5` ile sildi) |
 | 7 | Manifest 404 veren ekran görüntüleri ilan ediyor | PWA | ✅ DÜZELTİLDİ (referans kaldırıldı) |
 | 8 | İngilizcede ana sayfa arama kutusu karttan taşıyor | Ana sayfa | ⛔ BAŞKA AGENT'IN DOSYASI |
+| 9 | Başlık menüsü bağlantıları 12 px, footer 17 px yüksek | Web + mobil | ✅ DÜZELTİLDİ |
 
 ---
 
@@ -83,6 +84,31 @@ Dosya `src/components/guest/HomeSearchWidget.tsx` — **şu an başka bir agent
 üzerinde çalışıyor**, o yüzden elleşilmedi. Düzeltmesi: satıra `flex-wrap`
 vermek ya da tarih alanlarına `min-w-0` koyup butonu daraltmak.
 
+### 9. Dokunma hedefleri WCAG eşiğinin altındaydı
+
+Canlıda ölçüldü (2026-08-31): başlık menüsündeki bağlantılar **47×12** ve
+**33×12 px**, footer bağlantıları **17 px** yüksekliğinde. WCAG 2.2 kriteri
+2.5.8 asgari **24×24 px** ister; ikisi de altındaydı.
+
+Küçük hedef masaüstünde "ıskaladım" demektir, telefonda "yanlış sayfaya
+gittim". Footer özellikle önemli çünkü mobilde de görünüyor ve bağlantılar
+alt alta sıralı.
+
+Düzeltme görünümü DEĞİŞTİRMİYOR: `py-2 -my-2` (footer'da `py-1.5 -my-1.5`)
+ile tıklanabilir alan büyütüldü, yerleşim aynı kaldı. Liste aralığı
+(`gap-4` = 16 px) komşu hedeflerin çakışmasına izin vermeyecek kadar geniş.
+
+### Sağlıklı çıkanlar (bu turda doğrulandı)
+
+- **Farsça / RTL**: `<html lang="fa" dir="rtl">` doğru kuruluyor, düzen düzgün
+  aynalanmış, yatay kaydırma yok, kırpılan metin yok. Tarihler Celali
+  takvimde çıkıyor — Farsça kullanıcı için doğru olan bu.
+- **Yatay kaydırma**: `/tr` ve `/fa` ana sayfalarında yok (`scrollWidth ==
+  clientWidth`). Dekoratif bulanıklık öğesi (`-right-24`) 96 px taşıyor ama
+  hero `overflow-hidden` taşıdığı için sayfaya kaydırma çubuğu getirmiyor.
+- **Mobil alt menü** (`MobileNav`): `pb-safe` ile güvenli alan hesaba
+  katılmış, hedefler `py-2` + 28 px ikon ile eşiğin üstünde.
+
 ---
 
 ## Henüz BAKILMADI (sıradaki turların işi)
@@ -91,6 +117,9 @@ Bu liste bilerek uzun; her tur birkaçını kapatıp buraya sonucunu yazın.
 
 **Mobil (asıl risk burada)**
 - [ ] Gerçek mobil genişlikte (390px) ana sayfa, arama, dükkan detay, checkout
+      — **ENGEL**: tarayıcı aracı pencereyi küçültmüyor (`resize_window`
+      başarılı diyor ama `innerWidth` 1420'de kalıyor), yani mobil kırılım
+      noktası hiç tetiklenemedi. Bu satır kapanmadan "mobil tamam" denemez.
 - [ ] Alt sayfa (bottom sheet) davranışı: snap noktaları, kaydırma kilidi
 - [ ] Güvenli alan (`safe-area-inset`) — çentikli cihazlarda alt bar
 - [ ] Dokunma hedefleri 44×44 px altında kalan düğmeler

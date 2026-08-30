@@ -64,7 +64,7 @@ export default function Footer() {
       >
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 text-[11px] font-bold text-gray-400 sm:flex-row">
           <p>© {currentYear} {tCommon("appName")}. {t("rights")}</p>
-          <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 id-eyebrow">
+          <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 id-eyebrow [&_a]:inline-block [&_a]:py-2 [&_a]:-my-2">
             <Link href="/terms" className="transition-colors hover:text-orange-600">{t("terms")}</Link>
             <Link href="/privacy" className="transition-colors hover:text-orange-600">{t("privacy")}</Link>
             <Link href="/contact" className="transition-colors hover:text-orange-600">{t("contact")}</Link>
@@ -132,7 +132,7 @@ export default function Footer() {
 
           <div>
             <h4 className="text-xs id-eyebrow text-gray-900 mb-6">{t("about")}</h4>
-            <ul className="flex flex-col gap-4 text-sm font-bold text-gray-400">
+            <ul className="flex flex-col gap-4 text-sm font-bold text-gray-400 [&_a]:inline-block [&_a]:py-1.5 [&_a]:-my-1.5">
               <li>
                 <Link href="/about" className="hover:text-orange-600 transition-colors">
                   {t("about")}
@@ -158,7 +158,7 @@ export default function Footer() {
 
           <div>
             <h4 className="text-xs id-eyebrow text-gray-900 mb-6">{t("corporate")}</h4>
-            <ul className="flex flex-col gap-4 text-sm font-bold text-gray-400">
+            <ul className="flex flex-col gap-4 text-sm font-bold text-gray-400 [&_a]:inline-block [&_a]:py-1.5 [&_a]:-my-1.5">
               {!hideGuestBookingNav && (
                 <li>
                   <Link href="/partners" className="hover:text-orange-600 transition-colors">
