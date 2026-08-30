@@ -29,6 +29,10 @@ yazılmaz; ölçüm yazılır.
 | 14 | Checkout'ta görünen valiz satırı 0, özet "1 Valiz" diyor | Mobil checkout | ⏳ AÇIK |
 | 15 | Checkout'ta ekranın %31'i sabit çubuk; 3 valiz tipinden 1'i görünüyor | Mobil checkout | ⏳ AÇIK |
 | 16 | Almancada sayfa 13 px yana kayıyor — panel başlığı taşıyor | Mobil (BottomSheet) | ✅ DÜZELTİLDİ |
+| 17 | Birincil butonlarda beyaz yazı 3.56:1 — WCAG AA'nın altında | Her sayfa | ⏳ KARAR BEKLİYOR |
+| 18 | İkincil gri metin 2.52:1 — 406 yerde | Her sayfa | ⏳ KARAR BEKLİYOR |
+| 19 | PWA her açılışta Türkçe açılıyor | PWA | ⏳ AÇIK |
+| 20 | `offline.html` ölü dosya | PWA | ✅ SİLİNDİ |
 | 16 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
 | 17 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
 | 18 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
@@ -222,6 +226,61 @@ geniş harf aralığı uyguladığı için aynı metin Almancada Türkçedekinde
 belirgin geniş çıkıyor. Panel `fixed` olduğu için taşma belgeye yansıyor ve
 sayfa yana kayıyor. Başlığa `min-w-0 truncate`, kapatma düğmesine `shrink-0`.
 
+### 17–18. Renk kontrastı — ÖLÇÜLDÜ, KARAR SENİN
+
+Üç sayfada ölçüldü (mobil + masaüstü). Sistemik iki sorun:
+
+| Kombinasyon | Oran | Gereken | Nerede |
+|---|---|---|---|
+| Beyaz üstü `orange-600` (#e9590c) | **3.56** | 4.5 | Her birincil buton: "Emanet Noktası Bul", "GİRİŞ YAP", "REZERVASYON YAP", fiyat baloncukları |
+| `gray-400` (#a8a29e) beyaz üstü | **2.52** | 4.5 | İkincil metin, yardım metinleri, "10 m uzakta", form etiketleri — **406 kullanım** |
+| Beyaz üstü `orange-600` metin | 3.56 | 4.5 | "Partner Ol", "Süreci adım adım gör", aktif sekme |
+| `gray-500` gri-50 üstü | 4.40 | 4.5 | "Tüm Noktalar (100)" sekmesi — kıl payı |
+
+**Neden önemli:** bu ürün sokakta, güneş altında, telefonla kullanılıyor.
+2.52:1 gri metin kapalı bir odada bile zor okunur; dışarıda okunmaz. Ayrıca
+Avrupa Erişilebilirlik Yasası (Haziran 2025) AA'yı zorunlu kılıyor ve hedef
+kitle Avrupalı turist.
+
+**Neden kendim değiştirmedim:** ikisi de MARKA kararı. Düzeltmeleri tek satır:
+
+```css
+/* src/app/[locale]/globals.css */
+--color-gray-400: #78716c;   /* 2.52 -> 4.80; 406 kullanımı birden düzeltir */
+```
+
+Turuncu için `orange-700` (#c2410c) beyazla **5.18** veriyor; ama bu markanın
+ana tonunu koyulaştırmak demek. Alternatif: butonlarda yazıyı büyütüp
+kalınlaştırmak (18.66px + bold ⇒ eşik 3:1'e düşer, mevcut 3.56 geçer).
+
+Hangisini istersin? Söyle, uygularım ve öncesi/sonrası ekran görüntüsüyle
+gösteririm.
+
+### 19. PWA her açılışta Türkçe açılıyor — AÇIK
+
+Ölçüldü:
+
+```
+Accept-Language: tr        ->  /tr
+Accept-Language: en-US,en  ->  /tr
+Accept-Language: de-DE,de  ->  /tr
+```
+
+`src/i18n/routing.ts` içinde `localeDetection: false` ve manifest
+`start_url: "/"`. Sonuç: İngilizce gezip uygulamayı kuran bir turist, **her
+açılışta Türkçe** karşılanıyor ve dili her seferinde elle değiştiriyor.
+Hedef kitlenin yabancı turist olduğu bir üründe bu ciddi bir sürtünme.
+
+Dokunmadım çünkü `localeDetection`'ı açmak SEO'yu ve tüm kullanıcıların
+yönlenmesini etkiler — paylaşılan altyapı. Daha dar bir çözüm: kullanıcı dili
+DEĞİŞTİRDİĞİNDE bir tercih çerezi yazmak ve yalnızca `/` kökünde onu okumak.
+Tarayıcı diline göre otomatik yönlendirme olmadığı için SEO davranışı aynı
+kalır.
+
+### Erişilebilirlik: klavye odağı SAĞLIKLI
+
+21 sekme durağı gezildi, **hepsinde görünür odak halkası var** (0 eksik).
+
 ### Canlıda DOĞRULANAN düzeltmeler (2026-08-31)
 
 Kod doğru diye "düzeldi" denmez; canlıda ölçüldü:
@@ -286,9 +345,11 @@ Bu liste bilerek uzun; her tur birkaçını kapatıp buraya sonucunu yazın.
 
 **PWA**
 - [ ] Gerçek cihazda kurulum akışı (Android + iOS "Ana Ekrana Ekle")
-- [ ] `start_url` locale'siz `/` → her açılışta yönlendirme; `/tr` olmalı mı
+- [x] `start_url` incelendi → 19 numaralı bulgu (her açılış Türkçe)
 - [ ] Bildirim ucu uçtan uca denenmedi (VAPID anahtarı gerekiyor)
-- [ ] Çevrimdışı: `public/offline.html` duruyor ama artık hiçbir şey kullanmıyor
+- [x] `public/offline.html` silindi: hiçbir yerden referans edilmiyordu ve
+      canlıda 200 dönüyordu. Çevrimdışı desteği olmayan bir üründe "offline"
+      adlı bir sayfa durması, olmayan bir yeteneği vaat ediyor.
 
 **Erişilebilirlik**
 - [ ] Klavye ile tam gezinme, odak halkaları, odak tuzağı olan modallar
