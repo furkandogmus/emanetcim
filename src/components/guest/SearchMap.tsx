@@ -5,6 +5,7 @@ import { useLocale } from "next-intl";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { formatTryCurrency } from "@/lib/currency";
+import { getMapStyle } from "@/lib/map-style";
 
 type Shop = {
   id: string;
@@ -48,31 +49,7 @@ export default function SearchMap({
 
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: {
-        version: 8,
-        sources: {
-          "osm-tiles": {
-            type: "raster",
-            tiles: [
-              "https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png",
-              "https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png",
-              "https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png",
-              "https://d.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png",
-            ],
-            tileSize: 256,
-            attribution: "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors &copy; <a href=\"https://carto.com/attributions\">CARTO</a>",
-          },
-        },
-        layers: [
-          {
-            id: "osm-tiles-layer",
-            type: "raster",
-            source: "osm-tiles",
-            minzoom: 0,
-            maxzoom: 19,
-          },
-        ],
-      },
+      style: getMapStyle(),
       center: initialCenter.current,
       zoom: 15,
     });

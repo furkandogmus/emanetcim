@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Navigation, Loader2, MapPin, CheckCircle2 } from "lucide-react";
 import { TR_CITIES } from "@/lib/tr-cities";
 import { useTranslations } from "next-intl";
+import { getMapStyle } from "@/lib/map-style";
 
 export interface LocationValue {
   address: string;
@@ -302,22 +303,7 @@ export default function LocationPicker({ value, onChange }: Props) {
 
       map = new maplibre.Map({
         container: containerRef.current!,
-        style: {
-          version: 8,
-          sources: {
-            osm: {
-              type: "raster",
-              tiles: [
-                "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
-              ],
-              tileSize: 256,
-              attribution: "© OpenStreetMap",
-            },
-          },
-          layers: [{ id: "osm", type: "raster", source: "osm" }],
-        },
+        style: getMapStyle(),
         center: [value.longitude ?? TR_CENTER.lng, value.latitude ?? TR_CENTER.lat],
         zoom: value.latitude ? 15 : 5.5,
         attributionControl: false,
