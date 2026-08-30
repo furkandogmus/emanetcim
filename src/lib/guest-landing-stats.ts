@@ -1,6 +1,6 @@
 import { BookingStatus } from "@prisma/client";
 import prisma from "@/lib/db";
-import { PUBLIC_SHOP_FILTER } from "@/lib/public-shop-filter";
+import { OPERATING_SHOP_FILTER } from "@/lib/public-shop-filter";
 
 export type GuestLandingStats = {
   activeLocations: number;
@@ -22,9 +22,16 @@ const empty: GuestLandingStats = {
 export async function getGuestLandingStats(): Promise<GuestLandingStats> {
   try {
     const [activeLocations, completedStays, reviewAgg] = await Promise.all([
-      // Test dükkanları sayılmaz: ana sayfadaki "aktif lokasyon" rakamı
-      // gerçek kapasiteyi göstermeli (P1-4).
-      prisma.shop.count({ where: PUBLIC_SHOP_FILTER }),
+      /**
+       * OPERATING, PUBLIC değil: bu rakam misafire "şu kadar yerde bagajını
+       * bırakabilirsin" diyor, yani sorulan soru "gösterilsin mi" değil
+       * "burada iş yapılıyor mu". Talep testi noktaları aramada görünür ama
+       * rezervasyon almaz; onları saymak, misafirin gidip valizini
+       * bırakamayacağı yerleri kapasite diye ilan etmek olurdu. Nokta sayısı
+       * arttıkça (bkz. `scripts/prelaunch-points.ts`) fark küçülmüyor, büyüyor.
+       * Test dükkanları da sayılmaz (P1-4).
+       */
+      prisma.shop.count({ where: OPERATING_SHOP_FILTER }),
       prisma.booking.count({ where: { status: BookingStatus.CHECKED_OUT } }),
       prisma.review.aggregate({
         _count: { _all: true },

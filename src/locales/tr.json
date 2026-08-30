@@ -975,7 +975,8 @@
     "prelaunchByCity": "Şehir bazında",
     "prelaunchByPoint": "Nokta bazında",
     "prelaunchEmpty": "Henüz kayıt yok.",
-    "prelaunchIntro": "Talep testi noktalarına bırakılan \"açılınca haber ver\" kayıtları. Bu noktalar aramada görünür ama rezervasyon almaz; sayı, o semtte esnaf aramaya değip değmeyeceğini gösterir."
+    "prelaunchIntro": "Talep testi noktalarına bırakılan \"açılınca haber ver\" kayıtları. Bu noktalar aramada görünür ama rezervasyon almaz; sayı, o semtte esnaf aramaya değip değmeyeceğini gösterir.",
+    "prelaunchSilent": "{total} noktadan {count} tanesi henüz hiç sinyal almadı."
   },
   "Auth": {
     "loginTitle": "BagajPark'a Giriş Yap",

@@ -30,11 +30,25 @@ export default async function AdminPrelaunchPage({
   const tCommon = await getTranslations("Common");
   const rows = await prelaunchInterestService.summary();
 
+  /**
+   * SIFIRLAR TABLODAN ÇIKARILIR, sayıları başlıkta durur.
+   *
+   * Nokta sayısı 50'den birkaç yüze çıktı (`scripts/prelaunch-points.ts`).
+   * Hepsini basmak tabloyu birkaç yüz satırlık bir "0" listesine çevirir ve
+   * asıl sinyali — hangi üç noktada kaç kişi e-posta bıraktı — görünmez kılar.
+   * Ama sıfırları tamamen susturmak da yanıltıcı olur: "3 kayıt" rakamı ancak
+   * "kaç nokta denendi" ile birlikte anlam taşıyor, o yüzden sessiz nokta
+   * sayısı `prelaunchSilent` satırında yazılı kalıyor.
+   */
   const byCity = new Map<string, number>();
   for (const r of rows) {
     byCity.set(r.city ?? "—", (byCity.get(r.city ?? "—") ?? 0) + r.interestCount);
   }
-  const cities = [...byCity.entries()].sort((a, b) => b[1] - a[1]);
+  const cities = [...byCity.entries()]
+    .filter(([, count]) => count > 0)
+    .sort((a, b) => b[1] - a[1]);
+  const activeRows = rows.filter((r) => r.interestCount > 0);
+  const silentCount = rows.length - activeRows.length;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
@@ -53,6 +67,9 @@ export default async function AdminPrelaunchPage({
 
       <main className="p-10 max-w-5xl mx-auto w-full flex flex-col gap-10">
         <p className="text-sm text-gray-600 max-w-2xl">{t("prelaunchIntro")}</p>
+        <p className="text-sm text-gray-500">
+          {t("prelaunchSilent", { count: silentCount, total: rows.length })}
+        </p>
 
         <section className="flex flex-col gap-3">
           <h2 className="text-xs id-eyebrow text-gray-500">
@@ -78,9 +95,12 @@ export default async function AdminPrelaunchPage({
           <h2 className="text-xs id-eyebrow text-gray-500">
             {t("prelaunchByPoint")}
           </h2>
+          {activeRows.length === 0 ? (
+            <p className="text-sm text-gray-500">{t("prelaunchEmpty")}</p>
+          ) : (
           <table className="w-full text-sm">
             <tbody>
-              {rows.map((r) => (
+              {activeRows.map((r) => (
                 <tr key={r.shopId} className="border-b border-gray-100">
                   <td className="py-3">
                     <span className="font-bold">{r.shopName}</span>
@@ -96,6 +116,7 @@ export default async function AdminPrelaunchPage({
               ))}
             </tbody>
           </table>
+          )}
         </section>
       </main>
     </div>

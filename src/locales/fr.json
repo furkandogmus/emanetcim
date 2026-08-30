@@ -975,7 +975,8 @@
     "prelaunchByCity": "Par ville",
     "prelaunchByPoint": "Par point",
     "prelaunchEmpty": "Aucune inscription pour l'instant.",
-    "prelaunchIntro": "Inscriptions « prévenez-moi » laissées sur les points de test. Ces points apparaissent dans la recherche mais n'acceptent pas de réservations ; le nombre indique s'il vaut la peine d'y recruter des partenaires."
+    "prelaunchIntro": "Inscriptions « prévenez-moi » laissées sur les points de test. Ces points apparaissent dans la recherche mais n'acceptent pas de réservations ; le nombre indique s'il vaut la peine d'y recruter des partenaires.",
+    "prelaunchSilent": "{count} des {total} points n'ont encore reçu aucun signal."
   },
   "Auth": {
     "loginTitle": "Connectez-vous à BagajPark",

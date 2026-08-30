@@ -344,16 +344,33 @@ export default function ShopDetailClient({
             sticky footer ile ayni 6rem offset kullaniliyor. */}
         <div className="fixed inset-x-0 bottom-0 z-20 border-t border-gray-100 bg-white/95 px-4 pb-[calc(env(safe-area-inset-bottom)+6rem)] pt-3 backdrop-blur-xl">
           <div className="mx-auto flex max-w-lg items-center gap-3">
+            {/*
+              TALEP TESTİ NOKTASINDA FİYAT YAZILMAZ.
+
+              Bu noktalarda `pricePerDay` şema varsayılanıdır (₺50) — bir esnafla
+              anlaşılmadığı için gerçek bir fiyat yok. Yanında "Haber ver" düğmesi
+              dururken bir tutar basmak, tutamayacağımız bir söz vermek olurdu; üstelik
+              nokta Tokyo'da da olabilir, o zaman yanlış para biriminde bir söz.
+              Yerine, hâlâ kullanılmayan `prelaunchBadge` metni geçiyor.
+            */}
             <div className="flex-1">
-              <p className="text-xs id-eyebrow text-gray-400">{t("perBag")}</p>
+              {!shop.isPrelaunch && (
+                <p className="text-xs id-eyebrow text-gray-400">{t("perBag")}</p>
+              )}
               <p className="text-3xl font-black text-gray-900">
-                {/*
-                  ÇİFT PARA İŞARETİ HATASI DÜZELTİLDİ (2026-08-22).
-                  `mobilePricePerBag` zaten `formatTryCurrency` çıktısıydı ("₺50,00")
-                  ve başına bir `₺` daha ekleniyordu — yapışkan fiyat çubuğunda
-                  "₺₺50,00" yazıyordu.
-                */}
-                <Money amount={slot.m} /> <span className="text-base text-gray-500">{mobileCopy.perDay}</span>
+                {shop.isPrelaunch ? (
+                  t("prelaunchBadge")
+                ) : (
+                  <>
+                    {/*
+                      ÇİFT PARA İŞARETİ HATASI DÜZELTİLDİ (2026-08-22).
+                      `mobilePricePerBag` zaten `formatTryCurrency` çıktısıydı ("₺50,00")
+                      ve başına bir `₺` daha ekleniyordu — yapışkan fiyat çubuğunda
+                      "₺₺50,00" yazıyordu.
+                    */}
+                    <Money amount={slot.m} /> <span className="text-base text-gray-500">{mobileCopy.perDay}</span>
+                  </>
+                )}
               </p>
             </div>
             {shop.isPrelaunch ? (
@@ -427,6 +444,8 @@ export default function ShopDetailClient({
       )}
 
       <main className="max-w-lg mx-auto px-4 -mt-4 relative z-[1] flex flex-col gap-4">
+        {/* Aynı gerekçe: talep testi noktasında valiz fiyat tablosu gösterilmez. */}
+        {!shop.isPrelaunch && (
         <section className="bg-white rounded-3xl p-6 shadow-xl shadow-gray-200/50 border border-gray-100">
           <h2 className="id-eyebrow text-gray-400 mb-4">
             {t("shopDetailBagPrices")}
@@ -451,6 +470,7 @@ export default function ShopDetailClient({
             {t("perBag")} / {t("day")}
           </p>
         </section>
+        )}
 
         <section className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 flex flex-wrap gap-3">
           <div className="flex items-center gap-2 text-xs font-bold text-gray-700 min-w-[140px]">

@@ -975,7 +975,8 @@
     "prelaunchByCity": "By city",
     "prelaunchByPoint": "By location",
     "prelaunchEmpty": "No sign-ups yet.",
-    "prelaunchIntro": "\"Notify me\" sign-ups left at demand-test locations. These appear in search but take no bookings; the count shows whether it's worth recruiting partners in that area."
+    "prelaunchIntro": "\"Notify me\" sign-ups left at demand-test locations. These appear in search but take no bookings; the count shows whether it's worth recruiting partners in that area.",
+    "prelaunchSilent": "{count} of {total} points have received no signal yet."
   },
   "Auth": {
     "loginTitle": "Sign in to BagajPark",

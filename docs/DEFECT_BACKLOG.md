@@ -10,6 +10,43 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-08-30 — talep testi kapsamı: 482 nokta / 252 şehir (ve büyümenin açtığı üç hata)
+
+Liste 50 nokta / 10 şehirden 482 nokta / 252 şehre çıkarıldı: büyük ve kalabalık
+şehirler artı meşhur turistik yerler (Türkiye ağırlıklı, sonra Avrupa, Orta Doğu,
+Asya, Amerika, Afrika/Okyanusya). Nokta eklemenin maliyeti bir satır; esnaf maliyeti
+ancak sinyal geldikten sonra doğuyor — asimetri kasıtlı.
+
+- **Koordinatlar tahmin edilmedi.** Noktaların çoğu için bir yer adı sorgusu Nominatim'e
+  ileri geocode ettirildi; ülke kodu tutmayan 11 sonuç sorgusu düzeltilerek yeniden
+  çözüldü. Sonradan elle verilen 26 nokta da aynı kapıdan geçiyor. `--verify` aynı
+  koordinatları **ters** geocode edip ülke kodunu karşılaştırır (ileri yön kendi
+  kendini onaylamak olurdu) — elle düzeltilen bir noktada enlem/boylamı ters yazmak
+  buradan yakalanır.
+- **`--city` artık `key` alanı**, slug öneki değil. Önek eşleşmesi yüzlerce nokta
+  arasında iki şehri sessizce karıştırabilirdi. Ayrıca her koşuda tekrar eden slug,
+  aralık dışı koordinat ve geçersiz IANA saat dilimi kontrol ediliyor.
+
+Büyüme, 50 noktayla görünmeyen üç hatayı görünür yaptı; üçü de bu değişikliğin
+parçası olarak düzeltildi:
+
+1. **Ana sayfa "aktif lokasyon" ve `/become-partner` "aktif ortak" sayıları
+   prelaunch'u sayıyordu** (`PUBLIC_SHOP_FILTER`). Yani misafire valizini
+   bırakamayacağı yerler kapasite, esnafa da olmayan ortaklar sosyal kanıt diye
+   ilan ediliyordu — üstelik fark nokta sayısıyla birlikte büyüyor. İkisi de
+   `OPERATING_SHOP_FILTER`a alındı; sorulan soru "gösterilsin mi" değil "burada iş
+   yapılıyor mu".
+2. **Talep testi noktasında fiyat gösteriliyordu.** `pricePerDay` şema
+   varsayılanıdır (₺50) — gerçek bir fiyat değil, ve nokta Tokyo'daysa yanlış para
+   biriminde bir söz. "Haber ver" düğmesinin yanında duran bu tutar tam olarak bu
+   kod tabanının defalarca düzelttiği "gerçekleşmeyen vaat". Yerine, o güne kadar
+   hiç kullanılmamış olan `prelaunchBadge` ("Yakında") metni geçti; valiz fiyat
+   tablosu da bu noktalarda çizilmiyor.
+3. **`/admin/prelaunch` karar yüzeyi okunamaz hale geliyordu.** 482 noktanın
+   neredeyse hepsi 0 gösterecekti ve asıl sinyal aralarında kaybolurdu. Sinyal
+   almamış noktalar tablodan çıkarıldı, sayıları `prelaunchSilent` satırında duruyor
+   — sıfırları büsbütün susturmak "3 kayıt" rakamını paydasız bırakırdı.
+
 ## 2026-08-30 — talep testi noktaları (yeni yetenek)
 
 Esnafla anlaşmadan önce hangi şehirde müşteri olduğunu ölçmek için. `Shop.isPrelaunch`

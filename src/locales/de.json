@@ -975,7 +975,8 @@
     "prelaunchByCity": "Nach Stadt",
     "prelaunchByPoint": "Nach Standort",
     "prelaunchEmpty": "Noch keine Anmeldungen.",
-    "prelaunchIntro": "„Benachrichtigen“-Anmeldungen an Nachfragetest-Standorten. Diese erscheinen in der Suche, nehmen aber keine Buchungen an; die Zahl zeigt, ob sich die Partnersuche dort lohnt."
+    "prelaunchIntro": "„Benachrichtigen“-Anmeldungen an Nachfragetest-Standorten. Diese erscheinen in der Suche, nehmen aber keine Buchungen an; die Zahl zeigt, ob sich die Partnersuche dort lohnt.",
+    "prelaunchSilent": "{count} von {total} Standorten haben noch kein Signal erhalten."
   },
   "Auth": {
     "loginTitle": "Melden Sie sich bei BagajPark an",

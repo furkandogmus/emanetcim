@@ -483,19 +483,27 @@ Nokta aramada ve haritada normal görünür; misafir rezervasyona kalkıştığ�
 
 ```bash
 npx tsx scripts/prelaunch-points.ts                      # KURU ÇALIŞMA (varsayılan)
-npx tsx scripts/prelaunch-points.ts --apply              # 50 nokta, 10 şehir
+npx tsx scripts/prelaunch-points.ts --list               # şehir listesi + sayılar
+npx tsx scripts/prelaunch-points.ts --apply              # 482 nokta, 252 şehir
 npx tsx scripts/prelaunch-points.ts --apply --city bodrum
+npx tsx scripts/prelaunch-points.ts --verify             # koordinat denetimi (ağ ister)
 npx tsx scripts/prelaunch-points.ts --apply --close istanbul-taksim
 ```
 
-Beklenen kuru çalışma çıktısı: `50 nokta, 10 sehir  [KURU CALISMA -- hicbir sey
+Beklenen kuru çalışma çıktısı: `482 nokta, 252 sehir  [KURU CALISMA -- hicbir sey
 yazilmaz]` ve nokta başına bir `OLUSTUR`/`guncelle` satırı. **İdempotenttir** —
 ikinci koşu kopya üretmez, `slug` üzerinden günceller (ölçüldü).
+
+`--city` argümanı listedeki `key` alanıdır (`--list` ile görülür), slug öneki
+değil: liste yüzlerce noktaya çıktığında önek eşleşmesi iki şehri sessizce
+birbirine karıştırabilirdi.
 
 ### Rezervasyon ALMAZ — üç katman
 
 1. **Arayüz**: `isPrelaunch` noktalarında rezervasyon düğmesinin yerini
-   `PrelaunchNotifyButton` alır (`ShopDetailClient`, iki CTA da).
+   `PrelaunchNotifyButton` alır (`ShopDetailClient`, iki CTA da) ve **fiyat
+   gösterilmez** — bu noktalarda `pricePerDay` şema varsayılanıdır (₺50), yani
+   gerçek bir fiyat değil; yerine "Yakında" rozeti yazılır.
 2. **Sunucu**: `createInitialBooking` → `BookingShopPrelaunchError`
    (`SHOP_PRELAUNCH`). Web `Errors.shopNotOpenYet`, mobil `409 shop_not_open_yet`.
    Arayüz tek başına yeterli değil: mobil uç, doğrudan API çağrısı ya da
@@ -508,17 +516,46 @@ ikinci koşu kopya üretmez, `slug` üzerinden günceller (ölçüldü).
 **Neden bu kadar katman:** bir rezervasyonun bedelini valiziyle boş adrese giden
 misafir öder. Tek bir katmanın unutulması yeterlidir.
 
+### Kamuya açık sayılar prelaunch'u SAYMAZ
+
+`activeLocations` (ana sayfa güven bandı) ve `activePartnerCount`
+(`/become-partner` sosyal kanıtı) `OPERATING_SHOP_FILTER` kullanır. Sorulan soru
+"gösterilsin mi" değil "burada iş yapılıyor mu": talep testi noktalarını saymak,
+misafire valizini bırakamayacağı yerleri kapasite, esnafa da olmayan ortakları
+sosyal kanıt diye ilan etmek olurdu. Liste büyüdükçe bu fark büyüyor.
+
 ### Sonuçlar nerede okunur
 
 `/admin/prelaunch` — şehir ve nokta bazında "açılınca haber ver" sayısı. Aynı
 kişi iki kez sayılmaz (`@@unique([shopId, email])`), çünkü karar bu sayıya
-bakılarak veriliyor.
+bakılarak veriliyor. **Sinyal almamış noktalar tabloda listelenmez**, sayıları
+üstteki satırda durur — birkaç yüz satırlık "0" listesi asıl sinyali görünmez
+kılardı, ama sıfırları büsbütün susturmak da "3 kayıt" rakamını paydasız
+bırakırdı.
 
 Yanında analitik: `shop_view` (sunucu, koşulsuz), `prelaunch_booking_attempt`
 (istemci, çerez onayına bağlı), `prelaunch_interest` (sunucu).
 
-### Koordinatlar yaklaşıktır
+### Koordinatlar nereden geldi
 
-Her nokta ilgili turistik yerin merkezine yakın bir değerdir, gerçek bir dükkan
-adresi değildir — ölçülen şey "bu semtte talep var mı". Taşımak için scriptteki
-`POINTS` listesini düzenleyip `--apply` ile yeniden koşun.
+Elle yazılmadılar: 2026-08-30'da her nokta için bir yer adı sorgusu (ör.
+"Sultanahmet Meydanı, Fatih, İstanbul") Nominatim'e ileri geocode ettirildi,
+dönen değer listeye yazıldı, ülke kodu tutmayanlar elendi. Yine de bunlar ilgili
+semtin merkezine yakın değerlerdir, gerçek bir dükkan adresi **değildir** —
+ölçülen soru "bu semtte talep var mı".
+
+`--verify` bu iddiayı denetlenebilir tutar: her koordinatı **ters** geocode edip
+dönen ülke kodunu listedeki `country` ile karşılaştırır (ileri yön aynı sorguyu
+tekrarlamak, yani kendi kendini onaylamak olurdu). Elle düzeltilen bir noktada en
+sık yapılan hata — enlem/boylamı ters yazmak, işaret düşürmek — tam buradan
+yakalanır. Nominatim politikası gereği saniyede bir istek; tüm liste birkaç
+dakika sürer, `--city` ile daraltılabilir.
+
+Taşımak/eklemek için scriptteki `CITIES` listesini düzenleyip `--apply` ile
+yeniden koşun.
+
+**Koşuldu (2026-08-30):** `--verify` 482 noktanın hepsinde `hepsi dogru ulkede`
+döndü (önce 456'lık liste toptan, sonra elle koordinat eklenen 10 şehir tek tek).
+Kuru çalışma yerel geliştirme veritabanına karşı koşuldu: `482 nokta, 252 sehir`,
+`Olusturulacak: 477   Guncellenecek: 5` — yani önceki koşudan kalan 5 nokta kopya
+değil GÜNCELLEME olarak eşleşti. Üretime **uygulanmadı**; `--apply` sizde.

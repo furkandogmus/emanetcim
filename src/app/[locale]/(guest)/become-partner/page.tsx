@@ -8,7 +8,7 @@ import { getPricingRules } from "@/lib/platform-settings";
 import { getMerchantShareRatio } from "@/lib/platform-split";
 import PartnerEarningsCalculator from "@/components/guest/PartnerEarningsCalculator";
 import prisma from "@/lib/db";
-import { PUBLIC_SHOP_FILTER } from "@/lib/public-shop-filter";
+import { OPERATING_SHOP_FILTER } from "@/lib/public-shop-filter";
 import { Users } from "lucide-react";
 
 /** Sosyal kanıt için gerçek sayı bu eşiğin altındaysa "ilk ortaklardan olun"
@@ -50,7 +50,13 @@ export default async function BecomePartnerPage({
   const t = await getTranslations("MarketingBecomePartner");
   const pricingRules = await getPricingRules();
   const merchantShareRatio = getMerchantShareRatio(pricingRules.platformCommissionRate);
-  const activePartnerCount = await prisma.shop.count({ where: PUBLIC_SHOP_FILTER });
+  /**
+   * OPERATING: burada esnafa "şu kadar ortağımız var" deniyor. Talep testi
+   * noktalarının sahibi platformun kendisi (`prelaunch@bagajpark.com`), ortak
+   * değil — onları saymak, aşağıdaki eşik mantığının önlemeye çalıştığı şeyin
+   * ta kendisi olurdu: gerçek olmayan bir sosyal kanıt.
+   */
+  const activePartnerCount = await prisma.shop.count({ where: OPERATING_SHOP_FILTER });
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
