@@ -35,6 +35,11 @@ import {
 import { refreshSearchShopsAction } from "@/actions/search-shops";
 import { geocodeSearchCenterAction } from "@/actions/geocode-search-center";
 import { toast } from "sonner";
+import {
+  getCurrentPoint,
+  isGeolocationSupported,
+  readGeoPermission,
+} from "@/lib/geolocation";
 import { STORAGE_CITIES } from "@/lib/storage-cities";
 import {
   PLAUSIBLE_EVENTS,
@@ -65,6 +70,9 @@ type Tab = "nearby" | "all";
 
 const MAX_SEARCH_BAGS = 20;
 
+/** Otomatik konum isteminin oturum başına bir kez çıkmasını sağlayan anahtar. */
+const GEO_AUTO_ASK_KEY = "bagajpark_geo_auto_asked";
+
 interface SearchClientProps {
   initialNearby: ShopSearchHit[];
   initialAll: ShopSearchHit[];
@@ -74,6 +82,11 @@ interface SearchClientProps {
   initialSearchQuery?: string;
   /** URL ?lat=&lng= veya şehir sayfası; yakın liste ve yenileme merkezi */
   searchCenter: { lat: number; lng: number };
+  /**
+   * Merkez URL'den mi geldi. `true` ise tarayıcı konumu otomatik SORULMAZ:
+   * kullanıcı zaten bir yer seçmiştir, konum onu ezmemeli.
+   */
+  hasExplicitCenter?: boolean;
 }
 
 /**
@@ -86,6 +99,7 @@ export default function SearchClient({
   defaultCheckOutIso,
   initialSearchQuery = "",
   searchCenter,
+  hasExplicitCenter = false,
 }: SearchClientProps) {
   const t = useTranslations("Guest");
   const tCommon = useTranslations("Common");
@@ -154,6 +168,69 @@ export default function SearchClient({
   useEffect(() => {
     setSearchQuery(initialSearchQuery);
   }, [initialSearchQuery]);
+
+  /**
+   * Harita AÇILIR AÇILMAZ konum izni.
+   *
+   * NEDEN: konum yalnızca "konumumu bul" düğmesinin arkasındaydı ve o düğme iş
+   * görmüyordu — kullanıcı haritayı İstanbul merkezinde açıyor, kendi
+   * semtindeki noktaları görmek için önce bir düğme keşfetmesi gerekiyordu.
+   * Oysa aramanın tamamı (yakındakiler sekmesi, mesafeye göre sıralama, "6152 m
+   * uzakta") merkeze bağlı; yanlış merkez, ekrandaki her sayıyı yanlış yapıyor.
+   *
+   * DÖRT KURAL:
+   *
+   * 1. Kullanıcı bir yer seçtiyse (`?lat=&lng=`) SORULMAZ. Şehir sayfasından
+   *    gelen ya da paylaşılmış bir aramanın merkezi bilinçli bir tercihtir.
+   * 2. İzin daha önce REDDEDİLDİYSE `getCurrentPosition` hiç çağrılmaz.
+   *    Tarayıcı ikinci kez sormaz; çağrı yalnızca boş bir bekleyiş üretirdi.
+   * 3. İzin verilmişse sessizce alınır (tarayıcı bir şey sormaz), `prompt`
+   *    hâlinde oturum başına BİR kez sorulur. Her sayfa açılışında yeniden
+   *    sormak, kullanıcıyı istemi kalıcı reddetmeye iter.
+   * 4. Otomatik denemede hata TOAST ETMEZ. Kullanıcı bir şey istemedi;
+   *    istemediği bir işlemin başarısızlığını ona bildirmek gürültüdür.
+   *    Sessizce İstanbul varsayılanında kalınır (`SEARCH_DEFAULT_CENTER`).
+   */
+  useEffect(() => {
+    if (hasExplicitCenter || !isGeolocationSupported()) return;
+
+    let cancelled = false;
+
+    void (async () => {
+      const permission = await readGeoPermission();
+      if (cancelled || permission === "denied") return;
+
+      if (permission !== "granted") {
+        // Istem GORUNECEK: oturum basina bir kez.
+        try {
+          if (sessionStorage.getItem(GEO_AUTO_ASK_KEY)) return;
+          sessionStorage.setItem(GEO_AUTO_ASK_KEY, "1");
+        } catch {
+          // Depolama kapaliysa (gizli sekme, katı gizlilik ayari) yine de
+          // soruyoruz; tek maliyeti, o oturumda tekrar sorulabilmesi.
+        }
+      }
+
+      try {
+        const point = await getCurrentPoint({
+          enableHighAccuracy: false,
+          timeout: 8_000,
+          // Bir dakikalik onbellek: sayfa yenilendiginde telefonun GPS'ini
+          // bastan calistirmak hem yavas hem pil yakan bir davranis.
+          maximumAge: 60_000,
+        });
+        if (cancelled) return;
+        setDynamicCenter(point);
+        setFilterDirty(true);
+      } catch {
+        // Kural 4: sessiz. Varsayilan merkez zaten Istanbul.
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [hasExplicitCenter]);
 
   useEffect(() => {
     if (!datesReady || !filterDirty) return;
@@ -314,25 +391,24 @@ export default function SearchClient({
 
   const markFiltersDirty = () => setFilterDirty(true);
 
-  const handleUseMyLocation = () => {
-    if (!navigator.geolocation) {
+  const handleUseMyLocation = async () => {
+    if (!isGeolocationSupported()) {
       toast.error(t("searchGeolocationUnavailable"));
       return;
     }
     setGpsLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setDynamicCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        setFilterDirty(true);
-        setGpsLocating(false);
-        toast.success(t("searchLocationUpdated"));
-      },
-      () => {
-        setGpsLocating(false);
-        toast.error(t("searchGeolocationDenied"));
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
+    try {
+      const point = await getCurrentPoint();
+      setDynamicCenter(point);
+      setFilterDirty(true);
+      toast.success(t("searchLocationUpdated"));
+    } catch {
+      // Dugmeye BASILDI: burada sessiz kalmak yanlis olurdu, kullanici bir
+      // sonuc bekliyor.
+      toast.error(t("searchGeolocationDenied"));
+    } finally {
+      setGpsLocating(false);
+    }
   };
 
   const sortedShops = useMemo(() => {

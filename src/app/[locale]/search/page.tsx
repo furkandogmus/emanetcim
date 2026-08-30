@@ -10,19 +10,28 @@ import {
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { alternatesForPath } from "@/lib/seo-alternates";
 
+/**
+ * `explicit`: merkez URL'den mi geldi, yoksa varsayilana mi dusuldu.
+ *
+ * Bu ayrim, tarayici konumunun merkezi ne zaman EZEBILECEGINI belirler:
+ * kullanici bir sehir baglantisiyla ya da paylasilmis bir aramayla geldiyse
+ * o merkez bilincli bir tercihtir. Koordinatlari varsayilanla karsilastirmak
+ * yeterli degil -- birisi tam da Istanbul merkezini elle gecirebilir.
+ */
 function parseCenter(
   latRaw: string | undefined,
   lngRaw: string | undefined,
-): { lat: number; lng: number } {
+): { lat: number; lng: number; explicit: boolean } {
+  const fallback = {
+    lat: SEARCH_DEFAULT_CENTER.lat,
+    lng: SEARCH_DEFAULT_CENTER.lng,
+    explicit: false,
+  };
   const lat = latRaw != null ? Number(latRaw) : NaN;
   const lng = lngRaw != null ? Number(lngRaw) : NaN;
-  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-    return { lat: SEARCH_DEFAULT_CENTER.lat, lng: SEARCH_DEFAULT_CENTER.lng };
-  }
-  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-    return { lat: SEARCH_DEFAULT_CENTER.lat, lng: SEARCH_DEFAULT_CENTER.lng };
-  }
-  return { lat, lng };
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return fallback;
+  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return fallback;
+  return { lat, lng, explicit: true };
 }
 
 export async function generateMetadata({
@@ -93,7 +102,8 @@ export default async function SearchPage({
       defaultCheckInIso={checkIn.toISOString()}
       defaultCheckOutIso={checkOut.toISOString()}
       initialSearchQuery={initialQuery}
-      searchCenter={center}
+      searchCenter={{ lat: center.lat, lng: center.lng }}
+      hasExplicitCenter={center.explicit}
     />
   );
 }
