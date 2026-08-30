@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -35,6 +35,18 @@ export default function SearchMap({
 }: SearchMapProps) {
   const locale = useLocale();
   const t = useTranslations("Guest");
+  const tCommon = useTranslations("Common");
+  /**
+   * Altlık boyanana kadar iskelet gösterilir.
+   *
+   * NEDEN: altlık vektör (OpenFreeMap) ve ilk boyama soğuk açılışta birkaç
+   * saniye sürüyor — MapLibre önce stili, sonra fontları, sprite'ı ve karoları
+   * çekiyor. O sürede ekranda BEMBEYAZ bir alan duruyordu; üstünde turuncu
+   * pinler yüzüyor ama zemin yok. Kullanıcı bunu "yavaş" diye değil "bozuk"
+   * diye okuyor — hatta bu oturumda tam olarak öyle okundu. Boş beyazlık bir
+   * durum bildirmiyor; iskelet bildiriyor.
+   */
+  const [mapReady, setMapReady] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
@@ -60,11 +72,23 @@ export default function SearchMap({
     map.addControl(new maplibregl.NavigationControl(), "top-right");
     mapRef.current = map;
 
+    map.on("load", () => setMapReady(true));
+
+    /*
+      GUVENLIK SUPABI: altlik hic gelmezse (karo sunucusuna erisilemiyor, ag
+      kesik) `load` HIC tetiklenmez ve iskelet sonsuza kadar donerdi -- yani
+      "yavas" hissi, "hicbir sey olmuyor" hissine donusurdu. Sure dolunca
+      iskelet kaldirilir: kullanici en azindan pinleri ve kontrolleri gorur,
+      haritayi kaydirabilir.
+    */
+    const failSafe = window.setTimeout(() => setMapReady(true), 10_000);
+
     // container boyutu değişirse haritayı güncelle
     const resizeObserver = new ResizeObserver(() => map.resize());
     resizeObserver.observe(containerRef.current);
 
     return () => {
+      window.clearTimeout(failSafe);
       resizeObserver.disconnect();
       map.remove();
       mapRef.current = null;
@@ -162,5 +186,23 @@ export default function SearchMap({
     }
   }, [shops, userLat, userLng, locale, t]);
 
-  return <div ref={containerRef} className="absolute inset-0 w-full h-full min-h-[240px]" />;
+  return (
+    <div className="absolute inset-0 w-full h-full min-h-[240px]">
+      <div ref={containerRef} className="absolute inset-0 w-full h-full" />
+      {mapReady ? null : (
+        <div
+          role="status"
+          aria-live="polite"
+          className="absolute inset-0 flex items-center justify-center bg-gray-100"
+        >
+          {/* Zeminin kendisi de bir sinyal: hareket eden bir yuzey, donmus bir
+              ekran olmadigini soyluyor. */}
+          <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100" />
+          <span className="relative id-eyebrow text-gray-400">
+            {tCommon("loading")}
+          </span>
+        </div>
+      )}
+    </div>
+  );
 }

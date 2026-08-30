@@ -10,6 +10,7 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
+import { createPortal } from "react-dom";
 import { DayPicker } from "react-day-picker";
 import { useLocale, useTranslations } from "next-intl";
 import {
@@ -47,6 +48,11 @@ interface DateTimePickerProps {
   icon?: ReactNode;
   iconSize?: number;
 }
+
+/** Popup genisligi (px). Dar ekranda %94'e kirpilir. */
+const POPUP_WIDTH = 340;
+/** Takvim + saat satirinin yaklasik yuksekligi; yukari/asagi acma karari icin. */
+const POPUP_HEIGHT = 430;
 
 function buildTimeOptions(step: number): string[] {
   const out: string[] = [];
@@ -111,6 +117,12 @@ export default function DateTimePicker({
   const t = useTranslations("Common");
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const popRef = useRef<HTMLDivElement>(null);
+  const [anchor, setAnchor] = useState<{
+    left: number;
+    top: number;
+    width: number;
+  } | null>(null);
   const isMobile = useSyncExternalStore(
     subscribeIsMobile,
     getIsMobileSnapshot,
@@ -145,25 +157,86 @@ export default function DateTimePicker({
     return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
   }, [parsed, timeOptions, stepMinutes]);
 
+  /**
+   * Alanın metni. `dateStyle/timeStyle: "short"` BİLEREK — elle kurulan
+   * `2-digit` alanları İngilizcede "08/31/2026, 01:00 PM" üretiyordu (21
+   * karakter) ve arama panelindeki dar alanda son harf kırpılıyordu: ekranda
+   * "01:00 P" yazıyordu, yani saatin öğleden önce mi sonra mı olduğu
+   * OKUNAMIYORDU. Kısa biçim aynı bilgiyi "8/31/26, 1:00 PM" ile veriyor.
+   * Türkçe çıktı değişmiyor ("31.08.2026 13:00") — her dil kendi kısaltma
+   * geleneğini uyguluyor.
+   */
   const display = useMemo(() => {
     if (!parsed) return placeholder ?? "";
     return new Intl.DateTimeFormat(locale, {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
+      dateStyle: "short",
+      timeStyle: "short",
     }).format(parsed);
   }, [parsed, locale, placeholder]);
 
+  /*
+    Disari tiklama: popup artik `document.body` altinda (asagidaki portal), yani
+    `rootRef` onu ICERMEZ. Yalnizca root'a bakan eski kontrol, takvime her
+    tiklamada paneli kapatirdi.
+  */
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (rootRef.current?.contains(target)) return;
+      if (popRef.current?.contains(target)) return;
+      setOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
+
+  /**
+   * Popup KONUMU — `position: fixed`, tetikleyicinin ekran koordinatlarindan.
+   *
+   * NEDEN PORTAL: popup daha once tetikleyicinin yaninda `absolute` duruyordu
+   * ve ana sayfada takvimin ALT YARISI hic gorunmuyordu. Sebep z-index degildi;
+   * ustteki hero bolumu `overflow-hidden` tasiyor ve mutlak konumlu cocugunu
+   * kendi sinirinda KESIYOR. Popup'in dogru calismasi, kullanildigi her yerin
+   * `overflow` degerine bagli olamaz -- bir tarih secici sayfanin duzenini
+   * bilmek zorunda degil. `document.body`ye tasinmasi bu bagimliligi tamamen
+   * ortadan kaldiriyor.
+   */
+  const place = useCallback(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const width = Math.min(POPUP_WIDTH, window.innerWidth * 0.94);
+    // Yatayda ekrandan tasmasin.
+    const left = Math.max(8, Math.min(rect.left, window.innerWidth - width - 8));
+    /*
+      Asagida yer yoksa YUKARI ac. Sayfanin altindaki bir alanda popup asagi
+      acilirsa kullanici onu gormek icin kaydirmak zorunda kalir -- ve kaydirma
+      cogu zaman popup'i kapatan sey olur.
+    */
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const openUp = spaceBelow < POPUP_HEIGHT && rect.top > spaceBelow;
+    const top = openUp
+      ? Math.max(8, rect.top - POPUP_HEIGHT - 8)
+      : rect.bottom + 8;
+    setAnchor({ left, top, width });
+  }, []);
+
+  useEffect(() => {
+    if (!open || isMobile) return;
+    place();
+    /*
+      `true`: kaydirma olayini YAKALAMA fazinda dinliyoruz. Tetikleyici bir ic
+      kaydirma kutusunda olabilir (arama panelinin kenar cubugu boyle) ve o
+      kutunun kaydirmasi `window`a baloncuk YAPMAZ.
+    */
+    window.addEventListener("scroll", place, true);
+    window.addEventListener("resize", place);
+    return () => {
+      window.removeEventListener("scroll", place, true);
+      window.removeEventListener("resize", place);
+    };
+  }, [open, isMobile, place]);
 
   useEffect(() => {
     if (!open) return;
@@ -311,12 +384,21 @@ export default function DateTimePicker({
             </button>
           </div>
         </BottomSheet>
-      ) : open ? (
+      ) : open && anchor ? (
+        createPortal(
         <div
+          ref={popRef}
           role="dialog"
-          className="absolute left-0 top-full z-50 mt-2 w-[min(340px,94vw)] rounded-2xl border border-gray-100 bg-white shadow-2xl p-3"
+          className="rounded-2xl border border-gray-100 bg-white shadow-2xl p-3"
           style={
             {
+              position: "fixed",
+              left: anchor.left,
+              top: anchor.top,
+              width: anchor.width,
+              // Sayfadaki her seyin ustunde: portal `body` altinda oldugu icin
+              // baska bir yigilma baglamiyla yarismiyor.
+              zIndex: 100,
               "--rdp-accent-color": "#ea580c",
               "--rdp-accent-background-color": "#fff7ed",
               "--rdp-day_button-border-radius": "9999px",
@@ -360,7 +442,9 @@ export default function DateTimePicker({
               OK
             </button>
           </div>
-        </div>
+        </div>,
+        document.body,
+        )
       ) : null}
     </div>
   );
