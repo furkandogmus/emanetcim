@@ -22,6 +22,8 @@ yazılmaz; ölçüm yazılır.
 | 7 | Manifest 404 veren ekran görüntüleri ilan ediyor | PWA | ✅ DÜZELTİLDİ (referans kaldırıldı) |
 | 8 | İngilizcede ana sayfa arama kutusu karttan taşıyor | Ana sayfa | ✅ DÜZELTİLDİ (`86887b3`, diğer agent) |
 | 9 | Başlık menüsü bağlantıları 12 px, footer 17 px yüksek | Web + mobil | ✅ DÜZELTİLDİ |
+| 10 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
+| 11 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ❓ AÇIK — gerçek cihazda doğrulanmalı |
 | 10 | FR mobilde sayfa 33 px, DE'de 13 px yana kayıyor | Mobil başlık | ✅ DÜZELTİLDİ |
 | 11 | Mobil aramada TEK BİR sonuç kartı bile görünmüyor | Mobil arama | ✅ DÜZELTİLDİ |
 | 12 | Çerez paneli mobilde ana eylemi tamamen örtüyor | Mobil (her sayfa) | ⏳ AÇIK |
@@ -231,3 +233,51 @@ Bu liste bilerek uzun; her tur birkaçını kapatıp buraya sonucunu yazın.
 **Erişilebilirlik**
 - [ ] Klavye ile tam gezinme, odak halkaları, odak tuzağı olan modallar
 - [ ] Renk kontrastı (özellikle gri üstü gri ikincil metinler)
+
+### 10. Haritada OpenStreetMap atfı hiç görünmüyordu — DÜZELTİLDİ
+
+Canlıda ölçüldü (`bagajpark.com/tr/search`, 2026-08-31): atıf kutusunun tüm
+içeriği **"MapLibre"**. Tek satır OpenStreetMap kredisi yok. OSM verisi ODbL
+altında; atıf bir tercih değil, lisans şartı.
+
+Sebep iki ayrı yerde:
+
+- `SearchMap` atfı sağlayıcının TileJSON'ından gelmeye bırakıyordu
+  (`tiles.openfreemap.org/planet` içinde gerçekten var). O zincir koptuğunda —
+  vektör kaynağı yüklenemediğinde — atıf da onunla birlikte kayboluyor.
+- `LocationPicker` doğrudan `attributionControl: false` yazıyordu. Yani atıf
+  kutusu hiç çizilmiyordu.
+
+İkisinin de ortak yanı: hata **hiçbir belirti üretmiyor**. Harita çalışmaya
+devam ediyor, yalnızca kredi kayboluyor.
+
+Düzeltme: `MAP_ATTRIBUTION` tek kaynakta tanımlandı ve iki bileşen de
+`customAttribution` ile açıkça veriyor. `map-style.test.ts` her iki dosyada
+`attributionControl: false` ve eksik `customAttribution` durumunu kırmızı yakar.
+
+### 11. Altlık otomasyon tarayıcısında hiç boyanmıyor — AÇIK
+
+Belirti: `bagajpark.com/tr/search` ve localhost'ta harita alanı **bembeyaz**;
+üzerinde yalnızca fiyat/`Yakında` pinleri yüzüyor. İskelet kalkıyor, yani
+`map.on("load")` tetikleniyor.
+
+Sağlayıcı tarafı ELENDİ — hepsi kabuktan doğrulandı:
+
+| İstek | Sonuç |
+|---|---|
+| `styles/bright` | 200 |
+| `planet` (TileJSON) | 200 |
+| `sprites/ofm_f384/ofm@2x.{json,png}` | 200 |
+| `planet/20260823_080002_pt/12/2456/1580.pbf` | 200, 6.105 bayt, `access-control-allow-origin: *` |
+
+Tarayıcı ağ kaydında stil, TileJSON ve sprite istekleri **görülüyor**, ama tek
+bir `.pbf` isteği yok. MapLibre karoları bir Web Worker'dan çeker; şüphe o
+tarafta (otomasyon tarayıcısında worker/WebGL kısıtı).
+
+**Neden ürün hatası sayılmadı:** kullanıcının kendi Chrome'undan aldığı ekran
+görüntüsünde (2026-08-31, İstanbul araması) harita sokaklarıyla birlikte
+düzgün çiziliyor. Yani en az bir gerçek tarayıcıda sorun yok.
+
+**Yapılacak:** gerçek bir cihazda (mobil Safari + masaüstü Chrome) doğrulanmalı.
+Boyanmıyorsa `worker-src`/`connect-src` ve `maplibregl.getWorkerUrl` yolu
+incelenmeli. Doğruysa bu satır kapatılabilir.

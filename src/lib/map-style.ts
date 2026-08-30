@@ -45,3 +45,20 @@ export function getMapStyle(): string {
 
 /** Testlerin ve gözden geçirmenin okuyabilmesi için dışa açık. */
 export const MAP_STYLE_URL = OPENFREEMAP_STYLE;
+
+/**
+ * Harita atfı — HER haritada gösterilmesi ZORUNLU.
+ *
+ * NEDEN SABİT, sağlayıcıdan gelen değil: OpenStreetMap verisi ODbL altında ve
+ * atıf bir tercih değil, lisans şartı. Bugün OpenFreeMap bu metni TileJSON'ın
+ * içinde gönderiyor ve MapLibre onu otomatik gösteriyor — ama o zincirin
+ * sessizce kopabildiği ÖLÇÜLDÜ: 2026-08-31'de canlıda atıf kutusunda yalnızca
+ * "MapLibre" yazıyordu, tek satır OSM kredisi yoktu (vektör kaynağı o tarayıcıda
+ * yüklenememişti; atıf da onunla birlikte kaybolmuştu). Üçüncü tarafın bir JSON
+ * alanına bağlı bir lisans yükümlülüğü, yükümlülüğü karşılamıyor.
+ *
+ * `LocationPicker` daha da ileri gidiyordu: `attributionControl: false` ile atıf
+ * kutusunu TAMAMEN kapatmıştı.
+ */
+export const MAP_ATTRIBUTION =
+  '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a> · <a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a>';

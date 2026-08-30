@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { formatTryCurrency } from "@/lib/currency";
-import { getMapStyle } from "@/lib/map-style";
+import { getMapStyle, MAP_ATTRIBUTION } from "@/lib/map-style";
 
 type Shop = {
   id: string;
@@ -67,6 +67,9 @@ export default function SearchMap({
       style: getMapStyle(),
       center: initialCenter.current,
       zoom: 15,
+      // Atıf sağlayıcının TileJSON'ına bırakılmaz: o zincir koptuğunda atıf da
+      // sessizce kayboluyor (bkz. `MAP_ATTRIBUTION`).
+      attributionControl: { compact: true, customAttribution: MAP_ATTRIBUTION },
     });
 
     map.addControl(new maplibregl.NavigationControl(), "top-right");

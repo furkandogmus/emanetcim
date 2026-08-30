@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Navigation, Loader2, MapPin, CheckCircle2 } from "lucide-react";
 import { TR_CITIES } from "@/lib/tr-cities";
 import { useTranslations } from "next-intl";
-import { getMapStyle } from "@/lib/map-style";
+import { getMapStyle, MAP_ATTRIBUTION } from "@/lib/map-style";
 
 export interface LocationValue {
   address: string;
@@ -306,7 +306,9 @@ export default function LocationPicker({ value, onChange }: Props) {
         style: getMapStyle(),
         center: [value.longitude ?? TR_CENTER.lng, value.latitude ?? TR_CENTER.lat],
         zoom: value.latitude ? 15 : 5.5,
-        attributionControl: false,
+        // ESKIDEN `false`: OpenStreetMap verisi ODbL altinda ve atif bir tercih
+        // degil, lisans sarti. `compact` kucuk secicide yer kaplamasin diye.
+        attributionControl: { compact: true, customAttribution: MAP_ATTRIBUTION },
       });
 
       map.addControl(new maplibre.NavigationControl({ showCompass: false }), "bottom-right");
