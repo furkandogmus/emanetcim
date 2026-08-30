@@ -7,6 +7,7 @@ import FavoriteButton from '@/components/guest/FavoriteButton';
 import Money from "@/components/common/Money";
 import { formatDecimal } from "@/lib/currency";
 import { ResponseTimeBadge, VerifiedBadge } from "@/components/common/TrustBadge";
+import { buildDirectionsUrl } from "@/lib/directions-url";
 
 interface ShopListItemProps {
   id: string;
@@ -167,7 +168,8 @@ export default function ShopListItem({
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
+                const url = buildDirectionsUrl({ latitude: lat, longitude: lng });
+              if (url) window.open(url, '_blank');
               }}
               className="btn-ui btn-ui-sm btn-ui-icon bg-gray-50 hover:bg-orange-50 text-gray-400 hover:text-orange-600 shrink-0"
               title={t("getDirections")}

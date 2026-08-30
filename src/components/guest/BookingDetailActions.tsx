@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { buildDirectionsUrl } from "@/lib/directions-url";
 import { XCircle, Calendar as CalendarIcon, Phone, ExternalLink } from "lucide-react";
 import { cancelBookingAction } from "@/actions/booking";
 import { toast } from "sonner";
@@ -14,6 +15,8 @@ type Props = {
   checkOutIso: string;
   shopName: string;
   shopAddress: string | null;
+  shopLat?: number | null;
+  shopLng?: number | null;
   shopPhone: string | null;
 };
 
@@ -24,6 +27,8 @@ export default function BookingDetailActions({
   checkOutIso,
   shopName,
   shopAddress,
+  shopLat,
+  shopLng,
   shopPhone,
 }: Props) {
   const t = useTranslations("Guest");
@@ -69,6 +74,17 @@ export default function BookingDetailActions({
     });
     return `https://calendar.google.com/calendar/render?${params.toString()}`;
   };
+  /*
+    Koordinat varsa koordinat: adres metni Google tarafında yeniden geocode
+    ediliyor ve bizim `address` alanımız çoğu zaman ilçe/şehir kadar kaba.
+    Misafir valizini taşırken tahmini bir noktaya yönlendirilmemeli.
+  */
+  const directionsUrl = buildDirectionsUrl({
+    latitude: shopLat,
+    longitude: shopLng,
+    address: shopAddress,
+  });
+
 
   return (
     <div className="flex flex-col gap-3">
@@ -108,9 +124,9 @@ export default function BookingDetailActions({
         </a>
       )}
 
-      {shopAddress && (
+      {directionsUrl && (
         <a
-          href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(shopAddress)}`}
+          href={directionsUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="flex w-full items-center justify-center gap-2 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-700 text-xs id-eyebrow hover:bg-gray-50 transition-colors"

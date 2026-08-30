@@ -32,6 +32,7 @@ import Money from "@/components/common/Money";
 import { formatDecimal } from "@/lib/currency";
 import PrelaunchNotifyButton from "@/components/guest/PrelaunchNotifyButton";
 import PrelaunchDemandPanel from "@/components/guest/PrelaunchDemandPanel";
+import { buildDirectionsUrl } from "@/lib/directions-url";
 import PartnerDemandPopup from "@/components/guest/PartnerDemandPopup";
 
 /*
@@ -105,7 +106,7 @@ export default function ShopDetailClient({
   const rating = shop.rating ?? 0;
   const mapsUrl =
     shop.latitude != null && shop.longitude != null
-      ? `https://www.google.com/maps/dir/?api=1&destination=${shop.latitude},${shop.longitude}`
+      ? buildDirectionsUrl({ latitude: shop.latitude, longitude: shop.longitude, address: shop.address }) ?? "#"
       : null;
 
   const hoursLabel = shop.open247

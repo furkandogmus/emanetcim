@@ -42,7 +42,8 @@ yazılmaz; ölçüm yazılır.
 | 22 | Hareket azaltma tercihi framer-motion'da uygulanmıyor | Her sayfa | ✅ DÜZELTİLDİ |
 | 23 | %200 metin büyütmede ana sayfa 93 px yana kayıyor | Mobil | ✅ DÜZELTİLDİ (93→0) |
 | 24 | %200'de checkout 200 px kayıyor — valiz adımlayıcısı | Mobil checkout | ✅ DÜZELTİLDİ (200→0) |
-| 25 | %200'de dükkan 17 px, sigorta 76 px kayıyor | Mobil | ⏳ AÇIK |
+| 25 | %200'de sigorta sayfası 76 px kayıyor | Mobil | ✅ DÜZELTİLDİ (76→0) |
+| 26 | %200'de dükkan sayfası 17 px kayıyor | Mobil | ⛔ BAŞKA AGENT'IN DOSYASI |
 | 101 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
 | 102 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
 | 103 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
@@ -50,6 +51,7 @@ yazılmaz; ölçüm yazılır.
 | 105 | Check-in kapısı `open247` ve dükkan saat dilimini yok sayıyordu | Check-in (sunucu) | ✅ DÜZELTİLDİ (diğer agent) |
 | 106 | Harita pinleri üst üste biniyor, okunmuyor | Harita | ✅ DÜZELTİLDİ (diğer agent) |
 | 107 | Misafirin gördüğü kod 8 hane, esnafın alanı tam kimlik istiyordu | Check-in | ✅ DÜZELTİLDİ (diğer agent) |
+| 108 | Rezervasyondaki "Yol Tarifi" koordinat yerine adres METNİ gönderiyordu | Rezervasyon detayı | ✅ DÜZELTİLDİ (diğer agent) |
 
 ---
 
@@ -397,7 +399,23 @@ etiket `min-w-0 flex-1` ile küçülebilir yapıldı, adımlayıcı `shrink-0` i
 korundu — çünkü +/- düğmeleri dokunma hedefi, daralırsa isabet edilemez.
 Ölçüldü: **200 px → 0**.
 
-Dükkan (17 px) ve sigorta (76 px) sayfaları henüz izlenmedi.
+**Sigorta (76 px, düzeltildi):** özyinelemeli arama (her seviyede çocuğu
+gizleyip kaydırmanın düştüğü dalı takip etmek) suçluyu `h1.text-5xl`'e
+indirdi. %200'de bu başlık 96 px'lik fonta çıkıyor ve "Koruması" gibi tek bir
+kelime 390 px'e sığmıyor. Zaten commit'lenmiş olan `body { overflow-wrap:
+break-word }` kuralı bunu çözüyor — ölçüldü: **76 px → 0**.
+
+Bu, kuralın gerekçe yorumunu düzeltmemi gerektirdi: geçen tur "işe yaramadı"
+yazmıştım, çünkü ana sayfada denemiştim ve orada sebep başkaydı. Aynı belirti
+(yatay kaydırma) farklı sebeplerden geliyor; her sayfayı ayrı ölçmek gerek.
+
+**Dükkan (17 px, dokunulmadı):** suçlu, hero'nun sol üstündeki geri rozeti —
+`div.absolute.top-4.left-4.right-4` içindeki `a.inline-flex` ("BagajPark").
+%200'de dolgu + boşluk + metin 390 px'i aşıyor. Doğrulandı: rozete
+`min-w-0 max-w-full` + kırpma verilince **17 px → 0**.
+
+Dosya `src/components/guest/ShopDetailClient.tsx` ve **şu anda başka bir agent
+üzerinde çalışıyor**, o yüzden elleşilmedi.
 
 ### Erişilebilirlik: klavye odağı SAĞLIKLI
 
@@ -490,7 +508,8 @@ Bu liste bilerek uzun; her tur birkaçını kapatıp buraya sonucunu yazın.
       paneli çıkıyor ve 390 px yükseklikte çalışıyor.
 - [x] %200 metin büyütme kapandı: ana sayfada yatay kaydırma 0 (23 numaralı bulgu).
 - [x] %200 büyütme altı sayfada ölçüldü (24-25 numaralı bulgular).
-- [ ] %200'de dükkan (17 px) ve sigorta (76 px) sayfalarının kaynağı izlenmedi.
+- [x] %200'de dükkan ve sigorta sayfalarının kaynağı izlendi (25-26).
+- [ ] %200 testi yalnızca Türkçede yapıldı; uzun etiketli dillerde (DE/FR) tekrarlanmadı.
 - [ ] Odak tuzağı olan modallar test edilmedi.
 - [ ] Ekran okuyucu ile gerçek gezinme yapılmadı.
 
@@ -648,3 +667,25 @@ Düzeltme: tam kimlik tutmazsa **kısa kod öneki** deneniyor. İki koruma:
 
 Yerel veritabanında doğrulandı: `AA4249AD` → tam 1 eşleşme; başka bir esnafın
 kodu bu kapsamda 0 eşleşme.
+
+### 108. "Yol Tarifi" üç yüzeyde üç türlü — DÜZELTİLDİ
+
+Üç yerde "Yol Tarifi" bağlantısı var ve biri ayrışmıştı:
+
+| Yüzey | Gönderdiği hedef |
+|---|---|
+| Arama kartı (`ShopListItem`) | `destination=<lat>,<lng>` |
+| Dükkan detayı (`ShopDetailClient`) | `destination=<lat>,<lng>` |
+| **Rezervasyon detayı** (`BookingDetailActions`) | **`destination=<adres metni>`** |
+
+Fark tam da en kritik anda ortaya çıkıyor: misafir valizini taşırken bu düğmeye
+basıyor. Adres metni Google tarafında yeniden geocode ediliyor ve bizim
+`Shop.address` alanımız çoğu zaman ilçe/şehir kadar kaba — talep testi
+noktalarında tam olarak `"<ilçe>, <şehir>"` biçiminde kuruluyor — ya da esnafın
+elle yazdığı serbest metin. Yani elimizde **kesin koordinat dururken** misafir
+tahmini bir noktaya yönlendirilebiliyordu.
+
+Düzeltme: `buildDirectionsUrl` tek kaynak. Koordinat varsa koordinat, yoksa
+adres metni, o da yoksa **bağlantı yok** — çalışmayan bir "Yol Tarifi" düğmesi,
+olmayan düğmeden kötüdür. Üç yüzey de aynı kaynağı kullanıyor ve mandal, elle
+`maps/dir` yazan bir dosyayı kırmızı yakıyor.

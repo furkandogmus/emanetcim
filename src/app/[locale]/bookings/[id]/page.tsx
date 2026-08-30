@@ -62,7 +62,7 @@ export default async function BookingDetailPage({
         id: true, guestId: true, shopId: true, checkInTime: true, checkOutTime: true,
         totalPrice: true, bagCountS: true, bagCountM: true, bagCountXl: true,
         status: true, qrCodeToken: true, createdAt: true,
-        shop: { select: { name: true, pricePerDay: true, address: true, owner: { select: { phone: true } } } },
+        shop: { select: { name: true, pricePerDay: true, address: true, latitude: true, longitude: true, owner: { select: { phone: true } } } },
         seals: { orderBy: { bagIndex: "asc" } },
       },
     }),
@@ -251,6 +251,8 @@ export default async function BookingDetailPage({
           checkOutIso={booking.checkOutTime.toISOString()}
           shopName={booking.shop.name}
           shopAddress={booking.shop.address}
+          shopLat={booking.shop.latitude}
+          shopLng={booking.shop.longitude}
           shopPhone={booking.shop.owner?.phone ?? null}
         />
 
