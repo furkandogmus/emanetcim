@@ -1440,7 +1440,8 @@
     "calcMonthlyEarningsLabel": "درآمد خالص ماهانه تخمینی شما",
     "calcDisclaimer": "این فقط یک تخمین است؛ درآمد واقعی به موقعیت مغازه شما، قیمتی که تعیین می‌کنید و اشغال واقعی بستگی دارد.",
     "ctaPrimary": "رفتن به درخواست",
-    "ctaSecondary": "برنامه عمومی شریک"
+    "ctaSecondary": "برنامه عمومی شریک",
+    "ctaDemandMap": "دیدن نقشه تقاضا"
   },
   "MarketingHotels": {
     "metaTitle": "BagajPark برای هتل‌ها",

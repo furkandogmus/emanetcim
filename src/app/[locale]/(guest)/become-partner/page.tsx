@@ -86,6 +86,16 @@ export default async function BecomePartnerPage({
           >
             {t("ctaSecondary")}
           </Link>
+          {/*
+            Talep haritası buraya bağlanıyor çünkü bir esnafı ikna eden şey
+            "ortağımız olun" cümlesi değil, KENDİ SEMTİNDE ölçülmüş talep.
+            Sayfa zaten o ölçümü gösteriyor; buraya bağlanmadan yalnızca
+            prelaunch nokta sayfalarından ulaşılabiliyordu — yani esnafın
+            geldiği yerden değil.
+          */}
+          <Link href="/demand" className="btn-ui btn-ui-lg btn-ui-secondary">
+            {t("ctaDemandMap")}
+          </Link>
         </div>
         <p className="mx-auto mt-6 flex w-fit items-center gap-2 text-xs font-bold text-gray-400">
           <Clock size={14} />

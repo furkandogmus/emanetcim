@@ -1480,7 +1480,8 @@
     "calcMonthlyEarningsLabel": "Tahmini aylık net kazancınız",
     "calcDisclaimer": "Bu yalnızca bir tahmindir; gerçek kazanç dükkanınızın konumuna, belirlediğiniz fiyata ve gerçek dolulukla değişir.",
     "ctaPrimary": "Başvuru sayfasına git",
-    "ctaSecondary": "Genel ortaklık bilgisi"
+    "ctaSecondary": "Genel ortaklık bilgisi",
+    "ctaDemandMap": "Talep haritasını gör"
   },
   "MarketingHotels": {
     "metaTitle": "Oteller için BagajPark | Valiz Emanet Çözümü",

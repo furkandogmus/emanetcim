@@ -1440,7 +1440,8 @@
     "calcMonthlyEarningsLabel": "Vos gains nets mensuels estimés",
     "calcDisclaimer": "Il ne s'agit que d'une estimation ; les gains réels dépendent de l'emplacement de votre commerce, du prix que vous fixez et du taux d'occupation réel.",
     "ctaPrimary": "Aller à l'application",
-    "ctaSecondary": "Programme de partenariat général"
+    "ctaSecondary": "Programme de partenariat général",
+    "ctaDemandMap": "Voir la carte de la demande"
   },
   "MarketingHotels": {
     "metaTitle": "BagajPark pour les hôtels",

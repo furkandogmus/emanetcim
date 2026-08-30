@@ -1480,7 +1480,8 @@
     "calcMonthlyEarningsLabel": "Your estimated monthly net earnings",
     "calcDisclaimer": "This is only an estimate; actual earnings depend on your shop's location, the price you set, and real occupancy.",
     "ctaPrimary": "Go to application",
-    "ctaSecondary": "General partner program"
+    "ctaSecondary": "General partner program",
+    "ctaDemandMap": "See the demand map"
   },
   "MarketingHotels": {
     "metaTitle": "BagajPark for Hotels | Luggage Storage Solution",
