@@ -28,6 +28,8 @@ yazılmaz; ölçüm yazılır.
 | 11 | Mobil aramada TEK BİR sonuç kartı bile görünmüyor | Mobil arama | ✅ DÜZELTİLDİ |
 | 12 | Çerez paneli mobilde ana eylemi tamamen örtüyor | Mobil (her sayfa) | ⏳ AÇIK |
 | 13 | Harita pinleri üst üste biniyor, okunmuyor | Harita | ⏳ AÇIK |
+| 14 | Checkout'ta görünen valiz satırı 0, özet "1 Valiz" diyor | Mobil checkout | ⏳ AÇIK |
+| 15 | Checkout'ta ekranın %31'i sabit çubuk; 3 valiz tipinden 1'i görünüyor | Mobil checkout | ⏳ AÇIK |
 
 ---
 
@@ -174,6 +176,31 @@ biniyor ve hiçbiri okunmuyor. Kümeleme (clustering) ya da çakışma çözüm�
 Yakınlaştırma seviyesine göre kümelemek gerekiyor; MapLibre'de küme katmanı
 standart bir çözüm.
 
+### 14–15. Mobil checkout: görünenle özet çelişiyor — AÇIK
+
+Akış gerçekten denendi: arama → dükkan → "REZERVASYON YAP" → `/tr/checkout/<id>`.
+Sayfa ölçümde temiz (yatay kaydırma yok, kırpılma yok, **etiketsiz form
+girdisi yok**). Sorun düzende:
+
+- Ekranda görünen tek valiz satırı **"Küçük Valiz (S) … 0"**, ama hemen
+  altındaki özet **"1 Valiz · 1 gün · ₺50,00"** diyor. Sayılan valiz M/L
+  satırında ve o satır katlanın altında. Kullanıcı ilk bakışta "0 seçtim ama
+  1 valiz mi ödüyorum?" diye okuyor.
+- Sabit alan **209 px / 664 px = ekranın %31'i** (özet + DEVAM çubuğu, içinde
+  mobil alt menü). Geriye kalan 455 px'e başlık + adım göstergesi + dükkan adı
+  + valiz satırları sığmıyor: **üç valiz tipinden yalnızca biri** görünüyor.
+
+Öneri (uygulamadım, karar senin): checkout adımlarında mobil alt menüyü
+gizlemek. Ödeme akışında kullanıcıyı sayfadan çıkaran bir menü zaten
+istenmiyor ve 77 px geri kazandırır — üç valiz satırının ikisi görünür hale
+gelir. `MobileNav` içinde zaten sayfaya göre davranış var (`isDetailPage`).
+
+### Dükkan detay sayfası — ölçüldü, büyük ölçüde temiz
+
+Mobil ve masaüstünde yatay kaydırma yok, taşma yok, kırpılma yok. Tek kusur:
+sayfanın en altında footer telif satırının ~13 px'i yapışkan fiyat çubuğunun
+altında kalıyor (düşük öncelik).
+
 ### Sağlıklı çıkanlar (bu turda doğrulandı)
 
 - **Farsça / RTL**: `<html lang="fa" dir="rtl">` doğru kuruluyor, düzen düzgün
@@ -197,7 +224,9 @@ Bu liste bilerek uzun; her tur birkaçını kapatıp buraya sonucunu yazın.
       (`chromium` + `devices["iPhone 13"]`). Ana sayfa TR/EN/DE/FR/JA ölçüldü.
 - [x] Arama sayfası mobilde ölçüldü (`headless: false` Cloudflare'i geçiyor):
       yatay kaydırma yok, arama girdisi ve iki tarih alanı DOM'da mevcut.
-- [ ] Dükkan detay ve checkout mobilde HENÜZ ölçülmedi.
+- [x] Dükkan detay ve checkout mobilde ölçüldü (yukarıda).
+- [ ] Checkout 2. adım (ÖZET) ve ödeme ekranı ölçülmedi.
+- [ ] Rezervasyon sonrası ekranlar (onay, QR, iptal) ölçülmedi.
 - [ ] Mobil listede dükkan adları tek satıra kırpılıyor ("Galata Kulesi Emanet
       Noktası" → kesiliyor). İki satıra izin vermek (`line-clamp-2`) okunurluğu
       artırır; kullanıcı dükkanı adından seçiyor.
