@@ -42,10 +42,15 @@ export default function UserNav() {
         kaydiriyordu -- logo o noktada zaten "B..."ye inmisti, kucullecek baska
         oge kalmamisti. Ayni sinir Fransizca "Se connecter" gibi uzun
         etiketlerde de zorlaniyor.
+
+        `max-w-full` SART: dugme `inline-flex`, yani genisligini ICERIGINDEN
+        alir. `min-w-0` ve `flex-shrink` tek basina yetmedi -- olculdu, tasma
+        93'ten 48 px'e indi ama sifirlanmadi. Ust sinir konunca dugme 184 ->
+        103 px'e iniyor ve yatay kaydirma 0 oluyor.
       */
       <Link 
         href="/login" 
-        className="btn-ui btn-ui-md btn-ui-primary rounded-full min-w-0 truncate"
+        className="btn-ui btn-ui-md btn-ui-primary rounded-full min-w-0 max-w-full truncate"
       >
         {t('signIn')}
       </Link>

@@ -40,7 +40,7 @@ yazılmaz; ölçüm yazılır.
 | 20 | `offline.html` ölü dosya | PWA | ✅ SİLİNDİ |
 | 21 | **GÜVENLİK**: `callbackUrl` ters bölüyle açık yönlendirme | Giriş | ✅ DÜZELTİLDİ |
 | 22 | Hareket azaltma tercihi framer-motion'da uygulanmıyor | Her sayfa | ✅ DÜZELTİLDİ |
-| 23 | %200 metin büyütmede sayfa 93 px yana kayıyor | Mobil | 🟡 KISMEN (93→48) |
+| 23 | %200 metin büyütmede sayfa 93 px yana kayıyor | Mobil | ✅ DÜZELTİLDİ (93→0) |
 | 101 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
 | 102 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
 | 103 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
@@ -364,9 +364,16 @@ Giriş düğmesinin sarmalayıcısı `shrink-0` taşıyordu; logo o noktada zate
 "B…"ye inmiş, küçülecek başka öge kalmamıştı. `shrink-0` kaldırıldı ve
 düğmeye `min-w-0 truncate` verildi.
 
-**Ölçülen sonuç: 93 px → 48 px.** Yani düzeldi DEĞİL, yarıya indi. Kalan
-48 px başka bir kaynaktan; henüz izlenmedi. Bu satır kapanmadan "%200 tamam"
-denemez.
+İlk denemede **93 → 48 px**; yani yarıya indi ama bitmedi. Kalan 48 px'in
+sebebi ayrı ölçüldü: düğme `inline-flex`, yani genişliğini **içeriğinden**
+alıyor. Böyle bir öge için `min-width: 0` ve `flex-shrink` yetmez — üst sınır
+gerekir. `max-w-full` eklenince düğme 184 → 103 px'e indi.
+
+**Ölçülen son durum: 93 px → 0 px.**
+
+Ders: bir flex öğesinin küçülmemesinin iki ayrı sebebi olabilir (esneme
+kilitli, ya da genişlik içerikten geliyor) ve ikisi ayrı ayrı kapatılmalı.
+İlk düzeltmeden sonra "tamam" deyip geçilseydi, sorun yarı yarıya duruyordu.
 
 ### Erişilebilirlik: klavye odağı SAĞLIKLI
 
@@ -457,7 +464,8 @@ Bu liste bilerek uzun; her tur birkaçını kapatıp buraya sonucunu yazın.
 - [x] Yatay ekran (844×390) — taşma yok. Not: 844 px genişlik `md` kırılımını
       aştığı için yatay modda MASAÜSTÜ düzeni geliyor; alt panel yerine kenar
       paneli çıkıyor ve 390 px yükseklikte çalışıyor.
-- [ ] %200 metin büyütmede kalan 48 px izlenmedi (23 numaralı bulgu).
+- [x] %200 metin büyütme kapandı: ana sayfada yatay kaydırma 0 (23 numaralı bulgu).
+- [ ] %200 büyütme yalnızca ANA SAYFADA ölçüldü; arama/dükkan/checkout ölçülmedi.
 - [ ] Odak tuzağı olan modallar test edilmedi.
 - [ ] Ekran okuyucu ile gerçek gezinme yapılmadı.
 
