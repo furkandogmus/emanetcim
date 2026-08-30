@@ -30,7 +30,8 @@ export class BookingRejectedError extends Error {
 export type BookingRejectionCode =
   | 'CAPACITY_EXCEEDED'
   | 'INVALID_DATES'
-  | 'PLATFORM_HOLIDAY';
+  | 'PLATFORM_HOLIDAY'
+  | 'SHOP_PRELAUNCH';
 
 /** Dukkan kapasitesi secilen aralikta yetmiyor. */
 export class BookingCapacityExceededError extends BookingRejectedError {
@@ -55,5 +56,21 @@ export class BookingWindowInvalidError extends BookingRejectedError {
 export class BookingHolidayError extends BookingRejectedError {
   constructor(message = 'Rezervasyon bir platform tatiline denk geliyor.') {
     super(message, 'PLATFORM_HOLIDAY');
+  }
+}
+
+/**
+ * Dukkan bir TALEP TESTI noktasi: aramada gorunur ama rezervasyon almaz.
+ *
+ * NEDEN SUNUCUDA: arayuz zaten prelaunch noktalarinda rezervasyon dugmesi yerine
+ * "acilinca haber ver" gosteriyor, ama arayuz TEK basina yeterli degil -- mobil
+ * uc, dogrudan API cagrisi ya da eski bir istemci ayni yolu deneyebilir. Bu kapi
+ * son savunmadir: hicbir yoldan, olmayan bir noktaya onaylanmis rezervasyon
+ * uretilemez. Cunku o rezervasyonun bedelini valiziyle bos adrese giden misafir
+ * oder.
+ */
+export class BookingShopPrelaunchError extends BookingRejectedError {
+  constructor(message = 'Bu nokta henuz hizmete acilmadi.') {
+    super(message, 'SHOP_PRELAUNCH');
   }
 }

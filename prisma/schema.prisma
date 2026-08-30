@@ -101,7 +101,7 @@ model VerificationToken {
 }
 
 model Shop {
-  id                  String         @id @default(uuid())
+  id                  String              @id @default(uuid())
   ownerId             String
   name                String
   address             String?
@@ -109,29 +109,29 @@ model Shop {
   description         String?
   latitude            Float?
   longitude           Float?
-  capacity            Int            @default(10)
-  isActive            Boolean        @default(false)
-  rating              Float?         @default(0.0)
-  pricePerDay         Decimal        @default(50) @db.Decimal(12, 2)
-  pricePerHour        Decimal        @default(10) @db.Decimal(12, 2)
-  timezone            String         @default("Europe/Istanbul")
-  hasRestroom         Boolean        @default(false)
-  hasCctv             Boolean        @default(false)
-  hasClimateControl   Boolean        @default(false)
-  acceptsLargeItems   Boolean        @default(false)
-  open247             Boolean        @default(false)
-  openingTime         String?        @default("09:00")
-  closingTime         String?        @default("20:00")
-  createdAt           DateTime       @default(now())
-  updatedAt           DateTime       @updatedAt
+  capacity            Int                 @default(10)
+  isActive            Boolean             @default(false)
+  rating              Float?              @default(0.0)
+  pricePerDay         Decimal             @default(50) @db.Decimal(12, 2)
+  pricePerHour        Decimal             @default(10) @db.Decimal(12, 2)
+  timezone            String              @default("Europe/Istanbul")
+  hasRestroom         Boolean             @default(false)
+  hasCctv             Boolean             @default(false)
+  hasClimateControl   Boolean             @default(false)
+  acceptsLargeItems   Boolean             @default(false)
+  open247             Boolean             @default(false)
+  openingTime         String?             @default("09:00")
+  closingTime         String?             @default("20:00")
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
   city                String?
   district            String?
-  sealLeadTimeDays    Int            @default(3)
-  sealReorderPoint    Int            @default(15)
+  sealLeadTimeDays    Int                 @default(3)
+  sealReorderPoint    Int                 @default(15)
   /// Doğrulanmış dükkan rozeti (güven & güvenilirlik)
-  isVerified          Boolean        @default(false)
+  isVerified          Boolean             @default(false)
   /// Ortalama yanıt süresi (dakika cinsinden)
-  responseTimeMinutes Int?           @default(0)
+  responseTimeMinutes Int?                @default(0)
   /// Test/demo kaydı. Kamuya açık hiçbir listede, aramada veya istatistikte görünmez.
   ///
   /// NEDEN: 2026-08-22'de Türkiye'de bulunabilen üç dükkandan biri kişisel bir test
@@ -139,14 +139,29 @@ model Shop {
   /// `isActive = false` yapmak da işe yaramıyordu: dükkanın 5 rezervasyonu var ve
   /// kapatmak esnaf akışlarını bozuyor. Doğru ayrım "aktif mi" değil, "gerçek mi".
   /// Filtre tek yerde: `src/lib/public-shop-filter.ts` (P1-4).
-  isTest              Boolean        @default(false)
+  isTest              Boolean             @default(false)
+  /// Talep testi noktasi: aramada ve haritada GORUNUR, rezervasyona KAPALIDIR.
+  ///
+  /// NEDEN: bir sehirde esnafla anlasmadan once orada musteri olup olmadigini
+  /// olcmek gerekiyor -- yoksa talebi olmayan bir sehre onboarding maliyeti
+  /// yatiriliyor. Nokta normal bir kayit gibi listelenir, misafir tiklar ve
+  /// rezervasyona kalkisir; o AN "burasi yakinda aciliyor, haber verelim" gorur
+  /// ve isterse e-posta birakir (`PrelaunchInterest`). Olculen sey tam olarak
+  /// budur: hangi sehirde kac kisi rezervasyona kalkisti.
+  ///
+  /// `isTest`ten FARKI: isTest kaydi kamuya HIC gorunmez (P1-4). Bu gorunur ama
+  /// rezervasyon URETMEZ -- kimse olmayan bir adrese gonderilmez. Kural tek
+  /// yerde: `src/lib/public-shop-filter.ts` -> `OPERATING_SHOP_FILTER`, ve
+  /// sunucu tarafi kapisi `createInitialBooking` icinde.
+  isPrelaunch         Boolean             @default(false)
+  prelaunchInterests  PrelaunchInterest[]
   bookings            Booking[]
   reviews             Review[]
   seals               Seal[]
   sealRequests        SealRequest[]
   images              ShopImage[]
   timeSlots           ShopTimeSlot[]
-  owner               User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner               User                @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   merchantProfile        MerchantProfile?
   merchantPaymentAccount MerchantPaymentAccount[]
@@ -906,4 +921,26 @@ enum SplitStatus {
   SETTLED
   /// İade sonrası paylaşım geri alındı.
   REVERSED
+}
+
+/// Talep testi noktasina birakilan "acilinca haber ver" kaydi.
+///
+/// Bu tablo, `Shop.isPrelaunch` noktalarinin TEK ciktisidir: bir kisi orada
+/// rezervasyon yapmaya kalkisti ve haberdar edilmek istedi. Tiklamadan daha
+/// guclu bir sinyaldir -- kisi niyetini beyan etmistir -- ve sehir acildiginda
+/// hazir talep listesi olur.
+model PrelaunchInterest {
+  id        String   @id @default(cuid())
+  shopId    String
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  email     String
+  locale    String?
+  /// Kayit hangi yoldan geldi: "web" | "mobile".
+  source    String   @default("web")
+  createdAt DateTime @default(now())
+
+  /// Ayni kisi ayni noktaya iki kez kaydolmasin; ilgi SAYISI sisirilmemeli.
+  @@unique([shopId, email])
+  @@index([shopId, createdAt])
+  @@index([createdAt])
 }

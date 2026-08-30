@@ -1,4 +1,5 @@
 import { hasAnalyticsConsent } from "@/lib/plausible-events";
+import type { ClientAnalyticsEventName } from "@/lib/analytics-events";
 
 const SESSION_STORAGE_KEY = "bp_analytics_sid";
 /** `src/lib/analytics-server.ts` bu ADI aynen okuyor — ikisi birlikte değişmeli. */
@@ -35,18 +36,47 @@ function getOrCreateSessionId(): string {
  * çerez onayı `all` iken (bkz. `hasAnalyticsConsent`) — onaysız hiçbir istek
  * atılmaz.
  */
+export function trackEvent(
+  name: ClientAnalyticsEventName,
+  metadata?: Record<string, unknown>,
+): void {
+  if (typeof window === "undefined") return;
+  if (!hasAnalyticsConsent()) return;
+
+  send(
+    JSON.stringify({
+      name,
+      sessionId: getOrCreateSessionId(),
+      path: window.location.pathname,
+      locale: document.documentElement.lang || undefined,
+      metadata,
+    }),
+  );
+}
+
 export function trackPageView(path: string): void {
   if (typeof window === "undefined") return;
   if (!hasAnalyticsConsent()) return;
 
-  const payload = JSON.stringify({
-    name: "page_view",
-    sessionId: getOrCreateSessionId(),
-    path,
-    referrer: document.referrer || undefined,
-    locale: document.documentElement.lang || undefined,
-  });
+  send(
+    JSON.stringify({
+      name: "page_view",
+      sessionId: getOrCreateSessionId(),
+      path,
+      referrer: document.referrer || undefined,
+      locale: document.documentElement.lang || undefined,
+    }),
+  );
+}
 
+/**
+ * Gövdeyi `/api/analytics/event`'e yollar. `sendBeacon` varsa onu kullanır —
+ * sayfa kapanırken bile teslim edilir; yoksa `keepalive` fetch'e düşer.
+ *
+ * TEK YERDE: `trackPageView` ve `trackEvent` aynı gönderim yolunu paylaşır.
+ * Kopyalansaydı biri `sendBeacon` düzeltmesini alır, diğeri geride kalırdı.
+ */
+function send(payload: string): void {
   try {
     if (navigator.sendBeacon) {
       navigator.sendBeacon(

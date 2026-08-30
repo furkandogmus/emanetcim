@@ -602,7 +602,16 @@
     "slotsAvailableTitle": "Verfügbare Zeitfenster",
     "slotsBagsSelected": "{count} Gepäckstücke ausgewählt",
     "timesInShopTimezone": "Zeiten in der Ortszeit des Geschäfts ({zone}).",
-    "checkoutProcessing": "Wird verarbeitet…"
+    "checkoutProcessing": "Wird verarbeitet…",
+    "prelaunchCta": "Jetzt buchen",
+    "prelaunchBadge": "Demnächst",
+    "prelaunchTitle": "{shop} eröffnet bald",
+    "prelaunchBody": "Dieser Standort ist noch nicht in Betrieb, daher können wir hier vorerst keine Buchungen annehmen. Hinterlassen Sie Ihre E-Mail-Adresse und erfahren Sie es als Erste(r).",
+    "prelaunchEmailLabel": "E-Mail",
+    "prelaunchEmailPlaceholder": "sie@beispiel.de",
+    "prelaunchSubmit": "Benachrichtigen",
+    "prelaunchRegistered": "Gespeichert — wir melden uns zur Eröffnung.",
+    "prelaunchAlreadyRegistered": "Sie stehen bereits auf der Liste; wir melden uns zur Eröffnung."
   },
   "Admin": {
     "dashboardTitle": "BagajPark Verwaltungszentrale",
@@ -961,7 +970,12 @@
     "sealShipTrackingLabel": "Sendungsnummer",
     "sealShipTrackingPlaceholder": "z. B. 12345678901234",
     "sealShipQuantityLabel": "Versandte Menge",
-    "sealShipNoteLabel": "Admin-Notiz (optional)"
+    "sealShipNoteLabel": "Admin-Notiz (optional)",
+    "prelaunchTitle": "Nachfragetest",
+    "prelaunchByCity": "Nach Stadt",
+    "prelaunchByPoint": "Nach Standort",
+    "prelaunchEmpty": "Noch keine Anmeldungen.",
+    "prelaunchIntro": "„Benachrichtigen“-Anmeldungen an Nachfragetest-Standorten. Diese erscheinen in der Suche, nehmen aber keine Buchungen an; die Zahl zeigt, ob sich die Partnersuche dort lohnt."
   },
   "Auth": {
     "loginTitle": "Melden Sie sich bei BagajPark an",
@@ -1439,7 +1453,9 @@
     "tooManyRequests": "Zu viele Versuche. Bitte versuchen Sie es später noch einmal.",
     "unauthorized": "Sie sind für diese Aktion nicht berechtigt.",
     "verificationCooldown": "Bitte warten Sie {seconds} Sekunden, bevor Sie eine weitere E-Mail senden.",
-    "verifyEmailRequired": "Bitte überprüfen Sie Ihre E-Mail-Adresse vor der Buchung."
+    "verifyEmailRequired": "Bitte überprüfen Sie Ihre E-Mail-Adresse vor der Buchung.",
+    "shopNotOpenYet": "Dieser Standort ist noch nicht geöffnet. Hinterlassen Sie Ihre E-Mail-Adresse, und wir informieren Sie zum Start.",
+    "shopNowOpenBookInstead": "Dieser Standort ist jetzt geöffnet — Sie können direkt buchen."
   },
   "Emails": {
     "verificationSubject": "Bestätigen Sie Ihre E-Mail",

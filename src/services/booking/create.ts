@@ -21,6 +21,7 @@ import {
   BookingCapacityExceededError,
   BookingWindowInvalidError,
   BookingHolidayError,
+  BookingShopPrelaunchError,
 } from '@/services/booking/errors';
 import type { CreateInitialBookingInput, TxClient } from '@/services/BookingService';
 
@@ -66,6 +67,23 @@ export async function createInitialBooking(data: CreateInitialBookingInput): Pro
     )
   ) {
     throw new BookingHolidayError();
+  }
+
+  /*
+    Talep testi noktasina rezervasyon YAZILMAZ.
+
+    Kapi BURADA cunku iki yol da (slot ve legacy) buradan geciyor ve ikisi de
+    dukkani ancak KENDI transaction'i icinde okuyor -- kapiyi asagiya koymak onu
+    iki kez yazmak demekti. Arayuz bu noktalarda zaten rezervasyon dugmesi
+    gostermiyor; burasi son savunma: mobil uc, dogrudan API cagrisi ya da eski
+    bir istemci ayni yolu denerse de olmayan bir adrese onay uretilmez.
+  */
+  const shopGate = await prisma.shop.findUnique({
+    where: { id: data.shopId },
+    select: { isPrelaunch: true },
+  });
+  if (shopGate?.isPrelaunch) {
+    throw new BookingShopPrelaunchError();
   }
 
   const newBags = totalBagCount(data.bagCountS, data.bagCountM, data.bagCountXl);

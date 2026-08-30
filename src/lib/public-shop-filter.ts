@@ -28,3 +28,29 @@ export const PUBLIC_SHOP_FILTER = {
  * Tablo takma adı `s` varsayılır.
  */
 export const PUBLIC_SHOP_SQL_CONDITION = `s."isActive" = true AND s."isTest" = false`;
+
+/**
+ * Bir dükkanın GERÇEKTEN İŞLETİLİYOR olması için gereken koşullar.
+ *
+ * `PUBLIC_SHOP_FILTER`'dan FARKI tek kelime: talep testi noktaları misafire
+ * GÖRÜNÜR (aramada, haritada, detayda) ama işletilmiyorlar — slot üretilmez,
+ * rezervasyon alınmaz, mühür beklenmez, sağlık kontrolleri onlardan slot
+ * beklemez. İki soruyu ayırmak zorundayız çünkü cevapları farklı:
+ *
+ *   "misafire gösterilsin mi?"  -> PUBLIC_SHOP_FILTER   (prelaunch DAHIL)
+ *   "burada iş yapılıyor mu?"   -> OPERATING_SHOP_FILTER (prelaunch HARIÇ)
+ *
+ * Bir prelaunch noktası bu filtreden geçseydi slot üreteci ona 30 günlük slot
+ * yazar, `/api/health/jobs` ondan slot bekler ve mühür/gecikme kontrolleri onu
+ * gerçek bir işletme sanardı — yani talep testi, kurduğumuz sağlık sinyalini
+ * kirletirdi.
+ */
+export const OPERATING_SHOP_FILTER = {
+  isActive: true,
+  isTest: false,
+  isPrelaunch: false,
+} as const satisfies Prisma.ShopWhereInput;
+
+/** `OPERATING_SHOP_FILTER`'ın ham SQL karşılığı. Tablo takma adı `s` varsayılır. */
+export const OPERATING_SHOP_SQL_CONDITION =
+  `s."isActive" = true AND s."isTest" = false AND s."isPrelaunch" = false`;

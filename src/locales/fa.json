@@ -602,7 +602,16 @@
     "slotsAvailableTitle": "بازه‌های خالی",
     "slotsBagsSelected": "{count} چمدان انتخاب شد",
     "timesInShopTimezone": "ساعت‌ها به وقت محلی محل است ({zone}).",
-    "checkoutProcessing": "در حال پردازش…"
+    "checkoutProcessing": "در حال پردازش…",
+    "prelaunchCta": "رزرو کنید",
+    "prelaunchBadge": "به‌زودی",
+    "prelaunchTitle": "{shop} به‌زودی افتتاح می‌شود",
+    "prelaunchBody": "این نقطه هنوز فعال نیست، بنابراین فعلاً نمی‌توانیم رزرو بپذیریم. ایمیل خود را بگذارید تا نخستین نفری باشید که خبردار می‌شود.",
+    "prelaunchEmailLabel": "ایمیل",
+    "prelaunchEmailPlaceholder": "you@example.ir",
+    "prelaunchSubmit": "خبرم کن",
+    "prelaunchRegistered": "ذخیره شد — هنگام افتتاح خبر می‌دهیم.",
+    "prelaunchAlreadyRegistered": "شما از قبل ثبت شده‌اید؛ هنگام افتتاح خبر می‌دهیم."
   },
   "Admin": {
     "dashboardTitle": "مرکز مدیریت BagajPark",
@@ -961,7 +970,12 @@
     "sealShipTrackingLabel": "شمارهٔ رهگیری",
     "sealShipTrackingPlaceholder": "مثلاً ۱۲۳۴۵۶۷۸۹۰۱۲۳۴",
     "sealShipQuantityLabel": "تعداد ارسال‌شده",
-    "sealShipNoteLabel": "یادداشت مدیر (اختیاری)"
+    "sealShipNoteLabel": "یادداشت مدیر (اختیاری)",
+    "prelaunchTitle": "آزمون تقاضا",
+    "prelaunchByCity": "بر اساس شهر",
+    "prelaunchByPoint": "بر اساس نقطه",
+    "prelaunchEmpty": "هنوز ثبت‌نامی نیست.",
+    "prelaunchIntro": "ثبت‌نام‌های «خبرم کن» در نقاط آزمون تقاضا. این نقاط در جست‌وجو دیده می‌شوند اما رزرو نمی‌پذیرند؛ این عدد نشان می‌دهد آیا جذب شریک در آن منطقه ارزش دارد."
   },
   "Auth": {
     "loginTitle": "ورود به BagajPark",
@@ -1439,7 +1453,9 @@
     "tooManyRequests": "تلاش‌ها زیاد است. بعداً دوباره امتحان کنید.",
     "unauthorized": "مجوز این اقدام را ندارید.",
     "verificationCooldown": "لطفاً {seconds} ثانیه صبر کنید قبل از ارسال ایمیل دیگر.",
-    "verifyEmailRequired": "قبل از رزرو ایمیل را تأیید کنید."
+    "verifyEmailRequired": "قبل از رزرو ایمیل را تأیید کنید.",
+    "shopNotOpenYet": "این نقطه هنوز افتتاح نشده است. ایمیل خود را بگذارید تا هنگام راه‌اندازی به شما اطلاع دهیم.",
+    "shopNowOpenBookInstead": "این نقطه اکنون افتتاح شده است — می‌توانید مستقیماً رزرو کنید."
   },
   "Emails": {
     "verificationSubject": "ایمیل خود را تأیید کنید",

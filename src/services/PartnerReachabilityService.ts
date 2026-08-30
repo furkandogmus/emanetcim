@@ -1,4 +1,5 @@
 import prisma from "@/lib/db";
+import { OPERATING_SHOP_FILTER } from "@/lib/public-shop-filter";
 import logger from "@/lib/logger";
 
 /**
@@ -55,7 +56,8 @@ export class PartnerReachabilityService {
           where: {
             ...partnerBase,
             AND: [noEmail, noPhone],
-            shops: { some: { isActive: true } },
+            // Talep testi noktasi olan bir partner "aktif dukkani var" sayilmaz.
+            shops: { some: OPERATING_SHOP_FILTER },
           },
         }),
       ]);

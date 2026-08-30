@@ -602,7 +602,16 @@
     "slotsAvailableTitle": "Müsait Saatler",
     "slotsBagsSelected": "{count} bagaj seçildi",
     "timesInShopTimezone": "Saatler dükkanın yerel saatiyle ({zone}).",
-    "checkoutProcessing": "İşleniyor…"
+    "checkoutProcessing": "İşleniyor…",
+    "prelaunchCta": "Rezervasyon yap",
+    "prelaunchBadge": "Yakında",
+    "prelaunchTitle": "{shop} yakında açılıyor",
+    "prelaunchBody": "Bu noktada henüz hizmet başlamadı, bu yüzden şimdilik rezervasyon alamıyoruz. E-postanı bırak, açıldığı gün ilk sen haberdar ol.",
+    "prelaunchEmailLabel": "E-posta",
+    "prelaunchEmailPlaceholder": "ornek@eposta.com",
+    "prelaunchSubmit": "Haber ver",
+    "prelaunchRegistered": "Kaydedildi — açıldığında haber vereceğiz.",
+    "prelaunchAlreadyRegistered": "Zaten kayıtlısın, açıldığında haber vereceğiz."
   },
   "Admin": {
     "dashboardTitle": "BagajPark Yönetim Masası",
@@ -961,7 +970,12 @@
     "sealShipTrackingLabel": "Kargo Takip Numarası",
     "sealShipTrackingPlaceholder": "Örn: 12345678901234",
     "sealShipQuantityLabel": "Gönderilen Adet",
-    "sealShipNoteLabel": "Admin Notu (İsteğe Bağlı)"
+    "sealShipNoteLabel": "Admin Notu (İsteğe Bağlı)",
+    "prelaunchTitle": "Talep Testi",
+    "prelaunchByCity": "Şehir bazında",
+    "prelaunchByPoint": "Nokta bazında",
+    "prelaunchEmpty": "Henüz kayıt yok.",
+    "prelaunchIntro": "Talep testi noktalarına bırakılan \"açılınca haber ver\" kayıtları. Bu noktalar aramada görünür ama rezervasyon almaz; sayı, o semtte esnaf aramaya değip değmeyeceğini gösterir."
   },
   "Auth": {
     "loginTitle": "BagajPark'a Giriş Yap",
@@ -1497,7 +1511,9 @@
     "tooManyRequests": "Çok fazla deneme. Lütfen daha sonra tekrar deneyin.",
     "unauthorized": "Bu işlemi yapmaya yetkiniz yok.",
     "verificationCooldown": "Yeni bir e-posta göndermek için {seconds} saniye beklemeniz gerekiyor.",
-    "verifyEmailRequired": "Lütfen rezervasyon yapabilmek için önce e-posta adresinizi doğrulayın."
+    "verifyEmailRequired": "Lütfen rezervasyon yapabilmek için önce e-posta adresinizi doğrulayın.",
+    "shopNotOpenYet": "Bu nokta henüz hizmete açılmadı. Açıldığında haberdar olmak için e-postanı bırakabilirsin.",
+    "shopNowOpenBookInstead": "Bu nokta artık hizmete açıldı — doğrudan rezervasyon yapabilirsiniz."
   },
   "Emails": {
     "verificationSubject": "E-postanızı Doğrulayın",

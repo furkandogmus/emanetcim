@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { OPERATING_SHOP_FILTER } from "@/lib/public-shop-filter";
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 import { overdueBookingService } from "@/services/OverdueBookingService";
@@ -42,7 +43,14 @@ export async function GET() {
     const [newestSlot, activeShopCount, futureSlotCount] = await Promise.all([
       prisma.shopTimeSlot.aggregate({ _max: { startTime: true } }),
       prisma.shop.count({
-        where: { isActive: true, latitude: { not: null }, longitude: { not: null } },
+        // ISLETILEN dukkanlar: talep testi noktalari slot uretmez, dolayisiyla
+        // onlardan slot BEKLENMEZ. Sayilsalardi, hicbir sey bozuk olmadigi halde
+        // ufuk kontrolu bir gun `stale` derdi.
+        where: {
+          ...OPERATING_SHOP_FILTER,
+          latitude: { not: null },
+          longitude: { not: null },
+        },
       }),
       prisma.shopTimeSlot.count({ where: { startTime: { gt: now } } }),
     ]);

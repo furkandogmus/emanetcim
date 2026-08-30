@@ -602,7 +602,16 @@
     "slotsAvailableTitle": "Available Time Slots",
     "slotsBagsSelected": "{count} bags selected",
     "timesInShopTimezone": "Times are in the shop's local time ({zone}).",
-    "checkoutProcessing": "Processing…"
+    "checkoutProcessing": "Processing…",
+    "prelaunchCta": "Book now",
+    "prelaunchBadge": "Coming soon",
+    "prelaunchTitle": "{shop} is opening soon",
+    "prelaunchBody": "This location isn't running yet, so we can't take bookings here for now. Leave your email and you'll be the first to know when it opens.",
+    "prelaunchEmailLabel": "Email",
+    "prelaunchEmailPlaceholder": "you@example.com",
+    "prelaunchSubmit": "Notify me",
+    "prelaunchRegistered": "Saved — we'll let you know when it opens.",
+    "prelaunchAlreadyRegistered": "You're already on the list; we'll let you know when it opens."
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -961,7 +970,12 @@
     "sealShipTrackingLabel": "Tracking number",
     "sealShipTrackingPlaceholder": "e.g. 12345678901234",
     "sealShipQuantityLabel": "Quantity shipped",
-    "sealShipNoteLabel": "Admin note (optional)"
+    "sealShipNoteLabel": "Admin note (optional)",
+    "prelaunchTitle": "Demand test",
+    "prelaunchByCity": "By city",
+    "prelaunchByPoint": "By location",
+    "prelaunchEmpty": "No sign-ups yet.",
+    "prelaunchIntro": "\"Notify me\" sign-ups left at demand-test locations. These appear in search but take no bookings; the count shows whether it's worth recruiting partners in that area."
   },
   "Auth": {
     "loginTitle": "Sign in to BagajPark",
@@ -1497,7 +1511,9 @@
     "tooManyRequests": "Too many attempts. Please try again later.",
     "unauthorized": "You are not authorized for this action.",
     "verificationCooldown": "Please wait {seconds} seconds before sending another email.",
-    "verifyEmailRequired": "Please verify your email address before booking."
+    "verifyEmailRequired": "Please verify your email address before booking.",
+    "shopNotOpenYet": "This location isn't open yet. Leave your email and we'll let you know when it launches.",
+    "shopNowOpenBookInstead": "This location is now open — you can book it directly."
   },
   "Emails": {
     "verificationSubject": "Verify Your Email",

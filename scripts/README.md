@@ -472,3 +472,53 @@ yaşıyordu). Yani bozuk bir konfig artık **siteyi kapatabilir**. İki kapı va
 CI'nın `verify` işi bu scripti koşar (bozuk konfig S3'e hiç ulaşmaz) ve sunucuda
 `up -d`'den sonra `docker compose exec -T nginx nginx -t` koşar (geçmezse deploy
 kırmızı düşer). Konfige dokunduysanız yerelde de koşturun.
+
+---
+
+## Talep testi noktaları — `prelaunch-points.ts`
+
+Bir şehirde esnafla anlaşmadan **önce** orada müşteri olup olmadığını ölçer.
+Nokta aramada ve haritada normal görünür; misafir rezervasyona kalkıştığı an
+"burası yakında açılıyor, haber verelim" görür ve isterse e-posta bırakır.
+
+```bash
+npx tsx scripts/prelaunch-points.ts                      # KURU ÇALIŞMA (varsayılan)
+npx tsx scripts/prelaunch-points.ts --apply              # 50 nokta, 10 şehir
+npx tsx scripts/prelaunch-points.ts --apply --city bodrum
+npx tsx scripts/prelaunch-points.ts --apply --close istanbul-taksim
+```
+
+Beklenen kuru çalışma çıktısı: `50 nokta, 10 sehir  [KURU CALISMA -- hicbir sey
+yazilmaz]` ve nokta başına bir `OLUSTUR`/`guncelle` satırı. **İdempotenttir** —
+ikinci koşu kopya üretmez, `slug` üzerinden günceller (ölçüldü).
+
+### Rezervasyon ALMAZ — üç katman
+
+1. **Arayüz**: `isPrelaunch` noktalarında rezervasyon düğmesinin yerini
+   `PrelaunchNotifyButton` alır (`ShopDetailClient`, iki CTA da).
+2. **Sunucu**: `createInitialBooking` → `BookingShopPrelaunchError`
+   (`SHOP_PRELAUNCH`). Web `Errors.shopNotOpenYet`, mobil `409 shop_not_open_yet`.
+   Arayüz tek başına yeterli değil: mobil uç, doğrudan API çağrısı ya da
+   önbelleğe alınmış eski bir sayfa aynı yolu deneyebilir.
+3. **Filtre**: `OPERATING_SHOP_FILTER` (`src/lib/public-shop-filter.ts`) bu
+   noktaları slot üretiminden, `/api/health/jobs` slot beklentisinden ve
+   `partnerReachability`den dışarıda tutar — yani talep testi, sağlık sinyalini
+   kirletmez.
+
+**Neden bu kadar katman:** bir rezervasyonun bedelini valiziyle boş adrese giden
+misafir öder. Tek bir katmanın unutulması yeterlidir.
+
+### Sonuçlar nerede okunur
+
+`/admin/prelaunch` — şehir ve nokta bazında "açılınca haber ver" sayısı. Aynı
+kişi iki kez sayılmaz (`@@unique([shopId, email])`), çünkü karar bu sayıya
+bakılarak veriliyor.
+
+Yanında analitik: `shop_view` (sunucu, koşulsuz), `prelaunch_booking_attempt`
+(istemci, çerez onayına bağlı), `prelaunch_interest` (sunucu).
+
+### Koordinatlar yaklaşıktır
+
+Her nokta ilgili turistik yerin merkezine yakın bir değerdir, gerçek bir dükkan
+adresi değildir — ölçülen şey "bu semtte talep var mı". Taşımak için scriptteki
+`POINTS` listesini düzenleyip `--apply` ile yeniden koşun.

@@ -32,7 +32,11 @@ const { mockPrisma, mockGetPricingRules, RULES } = vi.hoisted(() => {
   return {
     RULES,
     mockGetPricingRules: vi.fn(),
-    mockPrisma: { $transaction: vi.fn() },
+    mockPrisma: {
+      $transaction: vi.fn(),
+      // Prelaunch kapisi rezervasyondan ONCE dukkani okuyor.
+      shop: { findUnique: vi.fn() },
+    },
   };
 });
 
@@ -47,6 +51,7 @@ import {
   BookingRejectedError,
   BookingWindowInvalidError,
   BookingHolidayError,
+  BookingShopPrelaunchError,
 } from "@/services/booking/errors";
 
 const BASE_INPUT = {
@@ -63,6 +68,8 @@ const BASE_INPUT = {
 beforeEach(() => {
   vi.clearAllMocks();
   mockGetPricingRules.mockResolvedValue({ ...RULES, platformHolidayDates: [] });
+  // Varsayilan: normal (prelaunch olmayan) dukkan.
+  mockPrisma.shop.findUnique.mockResolvedValue({ isPrelaunch: false });
 });
 
 describe("createInitialBooking tarih kapıları", () => {
@@ -99,6 +106,36 @@ describe("createInitialBooking tarih kapıları", () => {
     expect(mockPrisma.$transaction).not.toHaveBeenCalled();
   });
 
+  it("talep testi noktasına rezervasyon YAZILMAZ", async () => {
+    // Arayuz bu noktalarda rezervasyon dugmesi gostermiyor, ama arayuz TEK
+    // basina yeterli degil: mobil uc, dogrudan API cagrisi ya da onbellege
+    // alinmis eski bir sayfa ayni yolu deneyebilir. Bedelini valiziyle bos
+    // adrese giden misafir oderdi.
+    mockPrisma.shop.findUnique.mockResolvedValue({ isPrelaunch: true });
+
+    await expect(createInitialBooking(BASE_INPUT)).rejects.toBeInstanceOf(
+      BookingShopPrelaunchError,
+    );
+    await expect(createInitialBooking(BASE_INPUT)).rejects.toMatchObject({
+      code: "SHOP_PRELAUNCH",
+    });
+    // Kapiyi gecemeyen istek veritabanina HIC yazmaz.
+    expect(mockPrisma.$transaction).not.toHaveBeenCalled();
+  });
+
+  it("prelaunch kapısı TARİH kapılarından SONRA çalışır", async () => {
+    // Gecersiz tarihli bir istek, nokta prelaunch olsa bile INVALID_DATES
+    // donmeli: kullaniciya duzeltebilecegi gercek sebep soylenmeli.
+    mockPrisma.shop.findUnique.mockResolvedValue({ isPrelaunch: true });
+
+    await expect(
+      createInitialBooking({
+        ...BASE_INPUT,
+        checkOutTime: new Date("2026-12-01T18:00:00Z"),
+      }),
+    ).rejects.toMatchObject({ code: "INVALID_DATES" });
+  });
+
   it("her iki reddetme de ortak tabandan türer — tek `catch` yeter", async () => {
     // Tasiyicilar `instanceof BookingRejectedError` ile TEK dalda esleyebilsin diye.
     mockGetPricingRules.mockResolvedValue({
@@ -110,6 +147,8 @@ describe("createInitialBooking tarih kapıları", () => {
     );
 
     mockGetPricingRules.mockResolvedValue({ ...RULES, platformHolidayDates: [] });
+  // Varsayilan: normal (prelaunch olmayan) dukkan.
+  mockPrisma.shop.findUnique.mockResolvedValue({ isPrelaunch: false });
     await expect(
       createInitialBooking({ ...BASE_INPUT, checkOutTime: new Date("2026-12-01T18:00:00Z") }),
     ).rejects.toBeInstanceOf(BookingRejectedError);

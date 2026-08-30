@@ -602,7 +602,16 @@
     "slotsAvailableTitle": "Créneaux disponibles",
     "slotsBagsSelected": "{count} bagages sélectionnés",
     "timesInShopTimezone": "Les horaires sont à l'heure locale du commerce ({zone}).",
-    "checkoutProcessing": "Traitement…"
+    "checkoutProcessing": "Traitement…",
+    "prelaunchCta": "Réserver",
+    "prelaunchBadge": "Bientôt",
+    "prelaunchTitle": "{shop} ouvre bientôt",
+    "prelaunchBody": "Ce point n'est pas encore en service, nous ne pouvons donc pas accepter de réservations pour l'instant. Laissez votre e-mail et soyez prévenu(e) en premier.",
+    "prelaunchEmailLabel": "E-mail",
+    "prelaunchEmailPlaceholder": "vous@exemple.fr",
+    "prelaunchSubmit": "Me prévenir",
+    "prelaunchRegistered": "Enregistré — nous vous préviendrons à l'ouverture.",
+    "prelaunchAlreadyRegistered": "Vous êtes déjà inscrit(e) ; nous vous préviendrons à l'ouverture."
   },
   "Admin": {
     "dashboardTitle": "Centre d'administration BagajPark",
@@ -961,7 +970,12 @@
     "sealShipTrackingLabel": "Numéro de suivi",
     "sealShipTrackingPlaceholder": "ex. 12345678901234",
     "sealShipQuantityLabel": "Quantité expédiée",
-    "sealShipNoteLabel": "Note d'administration (facultative)"
+    "sealShipNoteLabel": "Note d'administration (facultative)",
+    "prelaunchTitle": "Test de demande",
+    "prelaunchByCity": "Par ville",
+    "prelaunchByPoint": "Par point",
+    "prelaunchEmpty": "Aucune inscription pour l'instant.",
+    "prelaunchIntro": "Inscriptions « prévenez-moi » laissées sur les points de test. Ces points apparaissent dans la recherche mais n'acceptent pas de réservations ; le nombre indique s'il vaut la peine d'y recruter des partenaires."
   },
   "Auth": {
     "loginTitle": "Connectez-vous à BagajPark",
@@ -1439,7 +1453,9 @@
     "tooManyRequests": "Trop de tentatives. Veuillez réessayer plus tard.",
     "unauthorized": "Vous n'êtes pas autorisé à effectuer cette action.",
     "verificationCooldown": "Veuillez patienter {seconds} secondes avant d'envoyer un autre e-mail.",
-    "verifyEmailRequired": "Veuillez vérifier votre adresse e-mail avant de réserver."
+    "verifyEmailRequired": "Veuillez vérifier votre adresse e-mail avant de réserver.",
+    "shopNotOpenYet": "Ce point n'est pas encore ouvert. Laissez votre e-mail et nous vous préviendrons à l'ouverture.",
+    "shopNowOpenBookInstead": "Ce point est désormais ouvert — vous pouvez réserver directement."
   },
   "Emails": {
     "verificationSubject": "Vérifiez votre e-mail",

@@ -30,6 +30,18 @@ import ShopGallery from "@/components/guest/ShopGallery";
 import { isInsuranceEnabled } from "@/lib/commerce-context";
 import Money from "@/components/common/Money";
 import { formatDecimal } from "@/lib/currency";
+import PrelaunchNotifyButton from "@/components/guest/PrelaunchNotifyButton";
+
+/*
+  CTA sinif dizgeleri TEK YERDE: rezervasyon dali ile talep-testi dali ayni
+  dugmeyi cizmek zorunda. Kopyalansaydi biri stil duzeltmesini alir digeri
+  geride kalirdi -- ve `design-tokens` mandali kopyayi zaten sabit stil borcu
+  olarak sayiyor.
+*/
+const MOBILE_CTA_CLASS =
+  "btn-ui btn-ui-lg btn-ui-primary rounded-2xl px-8 active:scale-[0.97] transition-transform";
+const MAIN_CTA_CLASS =
+  "flex w-full items-center justify-center gap-2 py-4 rounded-2xl id-accent-bg text-white text-sm id-eyebrow shadow-lg transition-all active:scale-[0.97]";
 
 export type ShopDetailClientShop = {
   id: string;
@@ -50,6 +62,8 @@ export type ShopDetailClientShop = {
   openingTime: string | null;
   closingTime: string | null;
   isVerified: boolean;
+  /** Talep testi noktasi: rezervasyon alinmaz, CTA "haber ver"e doner. */
+  isPrelaunch: boolean;
   responseTimeMinutes: number | null;
   reviews: Array<{
     id: string;
@@ -342,14 +356,22 @@ export default function ShopDetailClient({
                 <Money amount={slot.m} /> <span className="text-base text-gray-500">{mobileCopy.perDay}</span>
               </p>
             </div>
+            {shop.isPrelaunch ? (
+              <PrelaunchNotifyButton
+                shopId={shop.id}
+                shopName={shop.name}
+                className={MOBILE_CTA_CLASS}
+              />
+            ) : (
             <Link
               href={`/checkout/${shop.id}${checkoutParams}`}
               data-testid="shop-book-now-mobile"
-              className="btn-ui btn-ui-lg btn-ui-primary rounded-2xl px-8 active:scale-[0.97] transition-transform"
+              className={MOBILE_CTA_CLASS}
               onClick={() => hapticMedium()}
             >
               {t("bookNow")}
             </Link>
+            )}
           </div>
         </div>
       </div>
@@ -536,14 +558,22 @@ export default function ShopDetailClient({
 
       <div className="fixed bottom-0 left-0 right-0 p-4 pb-6 bg-white/95 backdrop-blur-xl border-t border-gray-100 z-20">
         <div className="max-w-lg mx-auto">
+          {shop.isPrelaunch ? (
+            <PrelaunchNotifyButton
+              shopId={shop.id}
+              shopName={shop.name}
+              className={MAIN_CTA_CLASS}
+            />
+          ) : (
           <Link
             href={`/checkout/${shop.id}${checkoutParams}`}
             data-testid="shop-book-now"
-            className="flex w-full items-center justify-center gap-2 py-4 rounded-2xl bg-orange-600 text-white text-sm id-eyebrow shadow-lg shadow-orange-200 hover:bg-orange-700 transition-all active:scale-[0.97]"
+            className={MAIN_CTA_CLASS}
             onClick={() => hapticMedium()}
           >
             {t("shopDetailBookNow")}
           </Link>
+          )}
         </div>
       </div>
       </div>

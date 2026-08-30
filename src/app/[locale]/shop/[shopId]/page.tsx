@@ -100,6 +100,7 @@ export default async function ShopDetailPage({
     openingTime: shop.openingTime,
     closingTime: shop.closingTime,
     isVerified: shop.isVerified,
+    isPrelaunch: shop.isPrelaunch,
     responseTimeMinutes: shop.responseTimeMinutes,
     reviews: shop.reviews.map((r) => ({
       id: r.id,

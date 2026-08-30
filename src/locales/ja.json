@@ -602,7 +602,16 @@
     "slotsAvailableTitle": "空き時間枠",
     "slotsBagsSelected": "荷物 {count} 個を選択",
     "timesInShopTimezone": "時刻は店舗の現地時間（{zone}）です。",
-    "checkoutProcessing": "処理中…"
+    "checkoutProcessing": "処理中…",
+    "prelaunchCta": "予約する",
+    "prelaunchBadge": "近日オープン",
+    "prelaunchTitle": "{shop} は近日オープン予定です",
+    "prelaunchBody": "この拠点はまだ稼働していないため、現在ご予約を承れません。メールアドレスをご登録いただければ、オープン時に最初にお知らせします。",
+    "prelaunchEmailLabel": "メールアドレス",
+    "prelaunchEmailPlaceholder": "you@example.jp",
+    "prelaunchSubmit": "知らせる",
+    "prelaunchRegistered": "登録しました。オープン時にお知らせします。",
+    "prelaunchAlreadyRegistered": "すでに登録済みです。オープン時にお知らせします。"
   },
   "Admin": {
     "dashboardTitle": "BagajPark 管理センター",
@@ -961,7 +970,12 @@
     "sealShipTrackingLabel": "追跡番号",
     "sealShipTrackingPlaceholder": "例: 12345678901234",
     "sealShipQuantityLabel": "発送数量",
-    "sealShipNoteLabel": "管理者メモ（任意）"
+    "sealShipNoteLabel": "管理者メモ（任意）",
+    "prelaunchTitle": "需要テスト",
+    "prelaunchByCity": "都市別",
+    "prelaunchByPoint": "拠点別",
+    "prelaunchEmpty": "まだ登録はありません。",
+    "prelaunchIntro": "需要テスト拠点で登録された「オープン時に知らせる」件数です。これらは検索に表示されますが予約は受け付けません。数値は、その地域で加盟店を探す価値があるかを示します。"
   },
   "Auth": {
     "loginTitle": "バガジパークにサインインする",
@@ -1439,7 +1453,9 @@
     "tooManyRequests": "試行回数が多すぎます。後でもう一度試してください。",
     "unauthorized": "この操作を行う権限がありません。",
     "verificationCooldown": "次のメールを送信するまで {seconds} 秒お待ちください。",
-    "verifyEmailRequired": "ご予約前にメールアドレスをご確認ください。"
+    "verifyEmailRequired": "ご予約前にメールアドレスをご確認ください。",
+    "shopNotOpenYet": "この拠点はまだオープンしていません。メールアドレスをご登録いただければ、開始時にお知らせします。",
+    "shopNowOpenBookInstead": "この拠点はオープンしました。そのままご予約いただけます。"
   },
   "Emails": {
     "verificationSubject": "メールアドレスを確認してください",

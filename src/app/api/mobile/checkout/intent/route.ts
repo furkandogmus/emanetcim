@@ -25,6 +25,9 @@ const REJECTION_TO_HTTP: Record<BookingRejectionCode, { status: number; error: s
   CAPACITY_EXCEEDED: { status: 409, error: "insufficient_capacity" },
   INVALID_DATES: { status: 400, error: "invalid_dates" },
   PLATFORM_HOLIDAY: { status: 400, error: "platform_holiday" },
+  // 409: istek gecerli ama kaynagin SU ANKI durumu kabul etmiyor. Nokta hizmete
+  // acildiginda ayni istek calisir; 400 "istegin bozuk" demek olurdu.
+  SHOP_PRELAUNCH: { status: 409, error: "shop_not_open_yet" },
 };
 
 const schema = z.object({

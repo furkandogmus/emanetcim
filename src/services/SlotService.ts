@@ -1,4 +1,5 @@
 import prisma from "@/lib/db";
+import { OPERATING_SHOP_FILTER } from "@/lib/public-shop-filter";
 import { parseDatetimeLocalInTimeZone } from "@/lib/datetime-local";
 import type { Prisma } from "@prisma/client";
 
@@ -148,8 +149,10 @@ export async function generateSlotsForShop(
 }
 
 export async function fillMissingSlots() {
+  // Talep testi noktalarina slot URETILMEZ: rezervasyon almiyorlar, dolayisiyla
+  // slot bekleyen her sey (kapasite, saglik kontrolu) onlari saymamali.
   const shops = await prisma.shop.findMany({
-    where: { isActive: true },
+    where: OPERATING_SHOP_FILTER,
     select: { id: true },
   });
   let total = 0;

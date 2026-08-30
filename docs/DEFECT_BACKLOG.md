@@ -10,6 +10,33 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-08-30 — talep testi noktaları (yeni yetenek)
+
+Esnafla anlaşmadan önce hangi şehirde müşteri olduğunu ölçmek için. `Shop.isPrelaunch`
+noktası aramada normal görünür, **rezervasyon almaz**; misafir rezervasyona kalkıştığı
+an durumu öğrenir ve isterse "açılınca haber ver" kaydı bırakır (`PrelaunchInterest`).
+
+- **Neden rezervasyon almıyor**: bir rezervasyonun bedelini valiziyle boş adrese giden
+  misafir öder. Üç katman: arayüz (CTA değişir), sunucu (`createInitialBooking` →
+  `SHOP_PRELAUNCH`), ve filtre (`OPERATING_SHOP_FILTER`).
+- **`isTest`ten farkı**: `isTest` kaydı kamuya HİÇ görünmez (P1-4'ün çözümü). Bu
+  görünür ama işletilmez. İki soru ayrıldı: *"misafire gösterilsin mi"*
+  (`PUBLIC_SHOP_FILTER`, prelaunch dahil) ve *"burada iş yapılıyor mu"*
+  (`OPERATING_SHOP_FILTER`, prelaunch hariç).
+- **Sağlık sinyali korundu**: prelaunch noktaları slot üretmez, `/api/health/jobs`
+  onlardan slot beklemez, `partnerReachability` onları "aktif dükkanı var" saymaz.
+  Ayrılmasaydı 50 nokta eklemek `slotGeneration`'ı bir gün içinde `stale` yapardı.
+- **Ölçüm**: `/admin/prelaunch` (şehir + nokta bazında), artı `shop_view` (sunucu,
+  koşulsuz), `prelaunch_booking_attempt` (istemci, çerez onayına bağlı),
+  `prelaunch_interest` (sunucu). Aynı kişi iki kez sayılmaz.
+- **Script**: `scripts/prelaunch-points.ts` — kuru çalışma varsayılan, idempotent
+  (ölçüldü), 50 nokta / 10 şehir. Koordinatlar yaklaşık; liste scriptte veri olarak
+  duruyor ve gözden geçirilebilir.
+- **Mandallar iş gördü**: `design-tokens` (CTA sınıf dizgesi iki dala kopyalanmıştı →
+  tek const'a alındı), `input-labels` (yalnızca placeholder ile etiketli girdi →
+  `aria-label`), `locales` (`fa`/`ja` yer tutucusu İngilizce kalmıştı). Üçü de
+  düzeltildi. Prelaunch kapısının testi, kapı kaldırılarak kırıldığı doğrulanmış hâlde.
+
 ## 2026-08-30 — izleme kurulmadan önce: açık uç kendini koruyamıyordu
 
 Soru "alarm/izleme eklesek ortamı yorar mı" diye başladı. Ölçüm, yükün izlemede
