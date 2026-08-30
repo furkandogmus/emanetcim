@@ -23,6 +23,9 @@ yazılmaz; ölçüm yazılır.
 | 8 | İngilizcede ana sayfa arama kutusu karttan taşıyor | Ana sayfa | ✅ DÜZELTİLDİ (`86887b3`, diğer agent) |
 | 9 | Başlık menüsü bağlantıları 12 px, footer 17 px yüksek | Web + mobil | ✅ DÜZELTİLDİ |
 | 10 | FR mobilde sayfa 33 px, DE'de 13 px yana kayıyor | Mobil başlık | ✅ DÜZELTİLDİ |
+| 11 | Mobil aramada TEK BİR sonuç kartı bile görünmüyor | Mobil arama | ✅ DÜZELTİLDİ |
+| 12 | Çerez paneli mobilde ana eylemi tamamen örtüyor | Mobil (her sayfa) | ⏳ AÇIK |
+| 13 | Harita pinleri üst üste biniyor, okunmuyor | Harita | ⏳ AÇIK |
 
 ---
 
@@ -135,6 +138,40 @@ tek öge o), ve Beta rozetine `hidden sm:inline-block` (390 px'de rozet, marka
 adından önce feda edilecek öge). Sabit boşluk ayarı yerine esneme seçildi;
 yarın eklenecek daha uzun bir etiket aynı hatayı geri getirmesin.
 
+### 11. Mobil aramada hiç sonuç görünmüyordu
+
+Alt panel `snapPoints={[22, 60, 92]}` ile **%22'de** açılıyordu. Ölçüldü
+(iPhone 13, 664 px yükseklik): %22 = **146 px**, ve o 146 pikselin tamamı
+tutamaç + sekmeler + "YAKINDAKİ (11)" başlığıyla doluyor. **Tek bir dükkan
+kartı bile görünmüyor.**
+
+Kullanıcının gördüğü: harita, üstünde üst üste binmiş "Yakında" pinleri, ve
+altta içi boş görünen bir panel. Ürünün ana ekranında ilk anlamlı içerik
+katlanın altında; üstelik panelin sürüklenebildiğini söyleyen bir şey de yok.
+
+İlk durak %42'ye (~279 px) çekildi: ilk kart tam görünüyor, harita hâlâ
+ekranın yarısından fazlası. Diğer duraklar (70, 92) aynen duruyor.
+
+### 12. Çerez paneli mobilde ana eylemi örtüyor — AÇIK
+
+Ekran görüntüsüyle doğrulandı, iki sayfada birden:
+
+- **Ana sayfa**: hero'daki arama kutusunun ALIŞ alanı, valiz sayısı ve
+  "Emanet Noktası Bul" düğmesi panelin altında kalıyor.
+- **Arama sayfası**: alt panelin TAMAMI örtülüyor; kullanıcı sonuç listesini,
+  tarih alanlarını ve filtreleri hiç göremiyor.
+
+Rıza panelinin görünür olması gerekiyor, ama ana eylemi kapatması dönüşümü
+düşürür. Öneri: mobilde kompakt tek satır + iki düğme (yaklaşık 96 px),
+metnin detayı "Detaylar" bağlantısının arkasına.
+
+### 13. Harita pinleri üst üste biniyor — AÇIK
+
+Mobilde Fatih/Üsküdar çevresinde altı "Yakında" etiketi birbirinin üstüne
+biniyor ve hiçbiri okunmuyor. Kümeleme (clustering) ya da çakışma çözümü yok.
+Yakınlaştırma seviyesine göre kümelemek gerekiyor; MapLibre'de küme katmanı
+standart bir çözüm.
+
 ### Sağlıklı çıkanlar (bu turda doğrulandı)
 
 - **Farsça / RTL**: `<html lang="fa" dir="rtl">` doğru kuruluyor, düzen düzgün
@@ -156,12 +193,12 @@ Bu liste bilerek uzun; her tur birkaçını kapatıp buraya sonucunu yazın.
 - [x] **ENGEL AŞILDI**: tarayıcı aracı pencereyi küçültmüyordu; mobil ölçüm
       artık repodaki Playwright ile gerçek 390×844 viewport'ta yapılıyor
       (`chromium` + `devices["iPhone 13"]`). Ana sayfa TR/EN/DE/FR/JA ölçüldü.
-- [ ] Arama, dükkan detay ve checkout mobilde ÖLÇÜLEMEDİ — Cloudflare, başsız
-      tarayıcıyı doğrulama sayfasına düşürüyor. `headless: false` ile ana sayfa
-      geçiyor; bu iki sayfa için de aynısı denenmeli.
-- [ ] Çerez paneli mobilde hero'daki arama kutusunu tamamen örtüyor (ekran
-      görüntüsüyle doğrulandı). Rıza paneli gerekli ama ana eylemi kapatması
-      dönüşümü düşürür; yüksekliği azaltılabilir.
+- [x] Arama sayfası mobilde ölçüldü (`headless: false` Cloudflare'i geçiyor):
+      yatay kaydırma yok, arama girdisi ve iki tarih alanı DOM'da mevcut.
+- [ ] Dükkan detay ve checkout mobilde HENÜZ ölçülmedi.
+- [ ] Mobil listede dükkan adları tek satıra kırpılıyor ("Galata Kulesi Emanet
+      Noktası" → kesiliyor). İki satıra izin vermek (`line-clamp-2`) okunurluğu
+      artırır; kullanıcı dükkanı adından seçiyor.
 - [ ] Alt sayfa (bottom sheet) davranışı: snap noktaları, kaydırma kilidi
 - [ ] Güvenli alan (`safe-area-inset`) — çentikli cihazlarda alt bar
 - [ ] Dokunma hedefleri 44×44 px altında kalan düğmeler

@@ -845,7 +845,21 @@ export default function SearchClient({
         <BottomSheet
           open={panelOpen}
           onClose={() => setPanelOpen(false)}
-          snapPoints={[22, 60, 92]}
+          /*
+            ILK DURAK %22 DEGIL %42.
+
+            Olculdu (2026-08-31, iPhone 13 / 664 px yukseklik): %22 = 146 px ve
+            o 146 pikselin tamami tutamac + sekmeler + "YAKINDAKI (11)"
+            basligiyla doluyordu -- TEK BIR DUKKAN KARTI bile gorunmuyordu.
+            Kullanici haritayi ve "Yakinda" pinlerini goruyor, sonuc goremiyor;
+            urunun ana ekraninda ilk anlamli icerik katlanin altinda kaliyordu.
+            Sonuc gormek icin paneli suruklemesi gerektigini de hicbir sey
+            soylemiyor.
+
+            %42 (~279 px) ilk kartin tamamini gosteriyor, harita hala ekranin
+            yarisindan fazlasi. Ikinci ve ucuncu duraklar aynen duruyor.
+          */
+          snapPoints={[42, 70, 92]}
           initialSnap={0}
           showClose={false}
           showOverlay={false}
