@@ -25,10 +25,6 @@ const REJECTION_TO_HTTP: Record<BookingRejectionCode, { status: number; error: s
   CAPACITY_EXCEEDED: { status: 409, error: "insufficient_capacity" },
   INVALID_DATES: { status: 400, error: "invalid_dates" },
   PLATFORM_HOLIDAY: { status: 400, error: "platform_holiday" },
-  // 503: gecici ve SUNUCU tarafli. 400 olsaydi istemci "istegim hatali" diye
-  // yorumlar ve kullaniciya duzeltemeyecegi bir sey soylerdi; 403 ise kalici
-  // bir yetki reddi gibi okunurdu. Odeme geri acildiginda ayni istek gecerlidir.
-  PAYMENTS_DISABLED: { status: 503, error: "payments_disabled" },
 };
 
 const schema = z.object({

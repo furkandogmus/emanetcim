@@ -18,11 +18,9 @@ lansmanda sıfır.
 | `PaymentService` (defterin tek yazıcısı) | ✅ uygulandı | `src/services/PaymentService.ts` |
 | Şema: `PENDING` varsayılanı + denetim alanları | ✅ uygulandı | `prisma/schema.prisma` |
 | Sunucu tarafı metinlerin yeteneğe bağlanması | ✅ uygulandı | `src/lib/payment-copy.ts`, FAQ sayfası |
-| İstemci bileşenlerinde aynı bağlama | ✅ uygulandı | `CommerceProvider` + `usePaymentCopyKey`; `BookingModifyModal` dahil (P1-19) |
+| İstemci bileşenlerinde aynı bağlama | ❌ yapılmadı | `BookingModifyModal` vb. hâlâ koşulsuz kartlı metin |
 | Iyzico / PayTR adaptörü | ❌ yapılmadı | şirket kurulumunu bekliyor |
 | Marketplace split (esnaf payının sağlayıcıda ayrılması) | ❌ yapılmadı | `capabilities.supportsSplit` false |
-| Esnafa **hakediş ödemesi** (payout) | ❌ yapılmadı | `PaymentSplit` `PENDING` yazılıyor, `SETTLED`'a geçiren kod yok; `splitCompleted` hiç yazılmıyor |
-| Ödeme alımı acil durum anahtarı | ✅ uygulandı | `PaymentService.isAcceptingNewPayments` (aşağıda) |
 
 ### Değişmeyen şeyler
 
@@ -222,58 +220,3 @@ değişmez bir kayıttır. Anlık kopya olmadan admin bir çarpanı değiştirdi
 tahsilat kalemi akışı yok. Sağlayıcı `manual` olduğu sürece bu pratikte esnafın
 çıkışta ek ücreti alıp panelden işaretlemesi demek; o ekran da yok.
 Bkz. `docs/DEFECT_BACKLOG.md` → P1-21.
-
-
-## Ödeme alımını kapatma (acil durum anahtarı)
-
-İki kaynak var, **ortam kazanır**:
-
-| Kaynak | Nerede | Etkisi |
-|---|---|---|
-| `PAYMENTS_ENABLED=false` | ortam değişkeni | Kapatır. Veritabanına **hiç bakmadan**. |
-| `payments` özellik bayrağı | Admin → Özellik Bayrakları | Kapatır. Satır **yoksa ödeme açıktır**. |
-
-Tek okuma noktası: `PaymentService.isAcceptingNewPayments()`.
-
-### Neden bu sıra ve bu varsayılanlar
-
-- **Ortam önce ve DB'ye bakmadan.** Kapatma ihtiyacı doğuran olay, tam da
-  veritabanını yavaşlatan olay olabilir; acil durum düğmesinin çalışması
-  veritabanının sağlıklı olmasına bağlı olmamalı.
-- **Yalnızca tam olarak `"false"` kapatır.** `"0"`, `"no"`, `"FALSE"` kapatmaz.
-  Kapatmak bilinçli bir eylem olmalı; bir yazım hatasının sessizce ciro durdurması,
-  düzeltmeye çalıştığımız belirsizliğin ta kendisi olurdu.
-- **Bayrak satırı yoksa AÇIK.** `featureFlagService.isEnabled` tanımsız bayrağı
-  `false` sayar — yeni bir özelliği açmak için doğru varsayılan. Burada tersi
-  gerekir: bayrak bir şeyi KAPATIYOR, dolayısıyla yokluğu "kapat" demek olsaydı bu
-  değişikliğin kendisi canlıda ödemeyi durdururdu. `defaultWhenMissing: true`.
-
-### Kapsam bilerek DAR
-
-Anahtar yalnızca **yeni ödeme yükümlülüğü açmayı** durdurur — yani misafir
-checkout'unu (`createInitialBooking`, web ve mobil ortak kapı; mobil `503
-payments_disabled` döner, web `Errors.paymentsDisabled`).
-
-**Durdurmadıkları ve nedenleri:**
-
-- **Check-in tahsilatı.** `manual` sağlayıcıda para dükkanda o an alınıyor ve
-  `check-in.ts` bunun için `openIntent`/`markCaptured` çağırıyor. Kapatmak, elinde
-  valizle bekleyen misafiri kapıda bırakırdı.
-- **İade.** Bir ödeme olayında iadeleri bloke etmek tam ters yöndür.
-
-### Neden yazıldı
-
-Admin panelindeki bayrak ekranı **altı dilde** "ortamda `PAYMENTS_ENABLED=false` ile
-bu ekrandan bağımsız anında ödeme kapatması yapabilirsiniz" diyordu — ama
-`PAYMENTS_ENABLED` `src/` altında **hiç okunmuyordu**. Ne env şemasında vardı, ne bir
-kod yolunda. Bir olay anında operatör değişkeni yazar, servisi yeniden başlatır ve
-ödeme akışı aynen devam ederdi; üstelik "kapattım" sanarak. **Var olmayan bir acil
-durum düğmesi, hiç olmayandan tehlikelidir.**
-
-Aynı turda ekran artık **etkin durumu** gösteriyor (yeşil/kırmızı bant): admin
-`payments` bayrağını "açık" görüp ödemenin ortam değişkeni yüzünden kapalı olduğunu
-anlayamıyordu.
-
-Testler: `src/__tests__/PaymentsKillSwitch.test.ts` (10) +
-`BookingCreationGuards.test.ts` içinde iki uçtan uca kapı testi. Üçü de ihlal
-enjekte edilerek kırıldığı doğrulanmış hâlde.

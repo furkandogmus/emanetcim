@@ -730,7 +730,7 @@
     "platformSettingsInvalid": "Invalid values.",
     "platformSettingsNav": "Platform settings",
     "featureFlagsTitle": "Feature flags",
-    "featureFlagsIntro": "Runtime toggles stored in the database. Turning the `payments` flag off stops new booking payments; check-in capture and refunds are unaffected. If PAYMENTS_ENABLED=false is set in the environment, payments are off regardless of this screen.",
+    "featureFlagsIntro": "Runtime toggles stored in the database. Set PAYMENTS_ENABLED=false in the environment for an immediate payment kill switch that overrides these settings.",
     "featureFlagsKeyLabel": "Key",
     "featureFlagsUpdatedAt": "Last updated: {at}",
     "featureFlagsEnabled": "Enabled",
@@ -961,10 +961,7 @@
     "sealShipTrackingLabel": "Tracking number",
     "sealShipTrackingPlaceholder": "e.g. 12345678901234",
     "sealShipQuantityLabel": "Quantity shipped",
-    "sealShipNoteLabel": "Admin note (optional)",
-    "paymentsStateOn": "Payments are ON — new booking payments are being accepted.",
-    "paymentsStateOff": "Payments are OFF — new booking payments are not accepted. Check-in capture and refunds keep working.",
-    "paymentsStateEnvOff": "The shutdown comes from the environment (PAYMENTS_ENABLED=false). The flag below cannot re-enable it; remove the variable first."
+    "sealShipNoteLabel": "Admin note (optional)"
   },
   "Auth": {
     "loginTitle": "Sign in to BagajPark",
@@ -1500,8 +1497,7 @@
     "tooManyRequests": "Too many attempts. Please try again later.",
     "unauthorized": "You are not authorized for this action.",
     "verificationCooldown": "Please wait {seconds} seconds before sending another email.",
-    "verifyEmailRequired": "Please verify your email address before booking.",
-    "paymentsDisabled": "Payments are temporarily paused. Please try again shortly."
+    "verifyEmailRequired": "Please verify your email address before booking."
   },
   "Emails": {
     "verificationSubject": "Verify Your Email",

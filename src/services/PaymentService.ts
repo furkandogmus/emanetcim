@@ -6,7 +6,6 @@ import { computeSplit } from "@/lib/platform-split";
 import { getPricingRules } from "@/lib/platform-settings";
 import { bookingEventService } from "./BookingEventService";
 import { getPaymentProvider, type PaymentProvider } from "@/lib/payments";
-import { featureFlagService } from "./FeatureFlagService";
 
 /**
  * Ödeme defterinin TEK yazıcısı.
@@ -61,12 +60,6 @@ const ALLOWED_TRANSITIONS: Record<PaymentStatus, PaymentStatus[]> = {
   CANCELLED: [],
 };
 
-/**
- * Ödeme alımını kapatan özellik bayrağının anahtarı. Admin ekranında bu adla
- * görünür; satır yoksa ödeme AÇIK sayılır (bkz. `isAcceptingNewPayments`).
- */
-export const PAYMENTS_FLAG_KEY = "payments";
-
 function canTransition(from: PaymentStatus, to: PaymentStatus): boolean {
   return ALLOWED_TRANSITIONS[from]?.includes(to) ?? false;
 }
@@ -77,40 +70,6 @@ export class PaymentService {
   /** Aktif sağlayıcının yetenekleri. UI ve kamuya açık metinler bunu okumalı. */
   get capabilities() {
     return this.provider.capabilities;
-  }
-
-  /**
-   * Yeni ödeme yükümlülüğü açılabilir mi? İki kaynak, ortam KAZANIR.
-   *
-   * 1. `PAYMENTS_ENABLED=false` (ortam) → kapalı, veritabanına hiç bakılmaz.
-   * 2. `payments` özellik bayrağı (veritabanı) → yoksa AÇIK sayılır.
-   *
-   * SIRA VE VARSAYILANLAR BİLEREK BÖYLE:
-   *
-   * - **Ortam önce ve DB'ye bakmadan.** Acil durum düğmesinin çalışması,
-   *   veritabanının sağlıklı olmasına bağlı olmamalı — kapatma ihtiyacı doğuran
-   *   olay tam da veritabanını yavaşlatan olay olabilir. Admin ekranı da altı
-   *   dilde "bu ekrandan bağımsız" diyor; sözleşme bu.
-   * - **Bayrak yoksa AÇIK.** `featureFlagService.isEnabled` tanımsız bayrağı
-   *   `false` sayar (yeni özellikler için doğru varsayılan), ama burada tersi
-   *   gerekir: bugün `payments` satırı olmayan bir kurulumda ödeme almak
-   *   ÇALIŞIYOR. Bayrağın yokluğu "ödemeyi kapat" demek olsaydı, bu değişikliğin
-   *   kendisi canlıda ödemeyi durdururdu.
-   *
-   * KAPSAM: yalnızca YENİ yükümlülük açmayı yönetir (misafir checkout'u).
-   * Check-in tahsilatı ve iade bilerek dışarıda — gerekçe
-   * `src/services/booking/errors.ts` → `BookingPaymentsDisabledError`.
-   */
-  async isAcceptingNewPayments(): Promise<boolean> {
-    if (process.env.PAYMENTS_ENABLED?.trim() === "false") {
-      return false;
-    }
-
-    return featureFlagService.isEnabled(
-      PAYMENTS_FLAG_KEY,
-      {},
-      { defaultWhenMissing: true },
-    );
   }
 
   /**

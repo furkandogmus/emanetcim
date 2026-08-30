@@ -728,7 +728,7 @@
     "platformSettingsInvalid": "مقادیر نامعتبر.",
     "platformSettingsNav": "تنظیمات پلتفرم",
     "featureFlagsTitle": "پرچم‌های قابلیت",
-    "featureFlagsIntro": "کلیدهای زمان اجرا که در پایگاه داده نگهداری می‌شوند. با خاموش کردن پرچم `payments` پرداخت رزرو جدید انجام نمی‌شود؛ ثبت پرداخت هنگام تحویل و بازپرداخت‌ها تحت تأثیر قرار نمی‌گیرند. اگر PAYMENTS_ENABLED=false در محیط تنظیم شده باشد، پرداخت‌ها مستقل از این صفحه غیرفعال است.",
+    "featureFlagsIntro": "کلیدهای زمان اجرا که در پایگاه داده نگهداری می‌شوند. با تنظیم PAYMENTS_ENABLED=false در محیط، پرداخت‌ها فوراً و مستقل از این تنظیمات قطع می‌شود.",
     "featureFlagsKeyLabel": "Key",
     "featureFlagsUpdatedAt": "آخرین به‌روزرسانی: {at}",
     "featureFlagsEnabled": "Enabled",
@@ -961,10 +961,7 @@
     "sealShipTrackingLabel": "شمارهٔ رهگیری",
     "sealShipTrackingPlaceholder": "مثلاً ۱۲۳۴۵۶۷۸۹۰۱۲۳۴",
     "sealShipQuantityLabel": "تعداد ارسال‌شده",
-    "sealShipNoteLabel": "یادداشت مدیر (اختیاری)",
-    "paymentsStateOn": "دریافت پرداخت فعال است — پرداخت رزروهای جدید انجام می‌شود.",
-    "paymentsStateOff": "دریافت پرداخت غیرفعال است — پرداخت رزرو جدید انجام نمی‌شود. ثبت پرداخت هنگام تحویل و بازپرداخت‌ها همچنان کار می‌کنند.",
-    "paymentsStateEnvOff": "این توقف از متغیر محیطی می‌آید (PAYMENTS_ENABLED=false). پرچم پایین نمی‌تواند آن را دوباره فعال کند؛ ابتدا متغیر را حذف کنید."
+    "sealShipNoteLabel": "یادداشت مدیر (اختیاری)"
   },
   "Auth": {
     "loginTitle": "ورود به BagajPark",
@@ -1442,8 +1439,7 @@
     "tooManyRequests": "تلاش‌ها زیاد است. بعداً دوباره امتحان کنید.",
     "unauthorized": "مجوز این اقدام را ندارید.",
     "verificationCooldown": "لطفاً {seconds} ثانیه صبر کنید قبل از ارسال ایمیل دیگر.",
-    "verifyEmailRequired": "قبل از رزرو ایمیل را تأیید کنید.",
-    "paymentsDisabled": "پرداخت‌ها موقتاً متوقف شده است. لطفاً کمی بعد دوباره تلاش کنید."
+    "verifyEmailRequired": "قبل از رزرو ایمیل را تأیید کنید."
   },
   "Emails": {
     "verificationSubject": "ایمیل خود را تأیید کنید",

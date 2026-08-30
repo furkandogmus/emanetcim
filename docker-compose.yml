@@ -79,12 +79,8 @@ services:
       AUTH_SECRET: ${AUTH_SECRET:-docker-dev-change-me-use-openssl-rand-hex-32}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
       AUTH_TRUST_HOST: ${AUTH_TRUST_HOST:-true}
-      # Odeme alimi acil durum anahtari. "false" ise YENI rezervasyon odemesi
-      # alinmaz; check-in tahsilati ve iadeler ETKILENMEZ. Veritabanindaki
-      # `payments` bayragini EZER ve DB'ye hic bakmaz -- kapatma ihtiyaci doguran
-      # olay tam da veritabanini yavaslatan olay olabilir.
-      # Bosken odeme aciktir. Bkz. src/services/PaymentService.ts.
-      PAYMENTS_ENABLED: ${PAYMENTS_ENABLED:-}
+      MOBILE_PAYMENT_BYPASS: ${MOBILE_PAYMENT_BYPASS:-}
+      MOBILE_PAYMENT_BYPASS_ALLOW_PROD: ${MOBILE_PAYMENT_BYPASS_ALLOW_PROD:-}
       RESEND_API_KEY: ${RESEND_API_KEY:-}
       RESEND_WEBHOOK_SECRET: ${RESEND_WEBHOOK_SECRET:-}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}

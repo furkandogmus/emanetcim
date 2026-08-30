@@ -728,7 +728,7 @@
     "platformSettingsInvalid": "値が正しくありません。",
     "platformSettingsNav": "プラットフォーム設定",
     "featureFlagsTitle": "フィーチャーフラグ",
-    "featureFlagsIntro": "データベースに保存される実行時スイッチです。`payments` フラグをオフにすると新規予約の支払いを受け付けません。チェックイン時の計上と返金は影響を受けません。環境変数 PAYMENTS_ENABLED=false が設定されている場合、この画面とは無関係に支払いは停止します。",
+    "featureFlagsIntro": "データベースに保存される実行時スイッチです。環境変数 PAYMENTS_ENABLED=false を設定すると、この画面の設定より優先して決済を即時停止できます。",
     "featureFlagsKeyLabel": "Key",
     "featureFlagsUpdatedAt": "最終更新: {at}",
     "featureFlagsEnabled": "Enabled",
@@ -961,10 +961,7 @@
     "sealShipTrackingLabel": "追跡番号",
     "sealShipTrackingPlaceholder": "例: 12345678901234",
     "sealShipQuantityLabel": "発送数量",
-    "sealShipNoteLabel": "管理者メモ（任意）",
-    "paymentsStateOn": "支払いは有効です — 新規予約の支払いを受け付けています。",
-    "paymentsStateOff": "支払いは停止中です — 新規予約の支払いを受け付けていません。チェックイン時の計上と返金は引き続き動作します。",
-    "paymentsStateEnvOff": "停止は環境変数によるものです (PAYMENTS_ENABLED=false)。下のフラグでは再開できません。先に変数を削除してください。"
+    "sealShipNoteLabel": "管理者メモ（任意）"
   },
   "Auth": {
     "loginTitle": "バガジパークにサインインする",
@@ -1442,8 +1439,7 @@
     "tooManyRequests": "試行回数が多すぎます。後でもう一度試してください。",
     "unauthorized": "この操作を行う権限がありません。",
     "verificationCooldown": "次のメールを送信するまで {seconds} 秒お待ちください。",
-    "verifyEmailRequired": "ご予約前にメールアドレスをご確認ください。",
-    "paymentsDisabled": "お支払いは一時的に停止しています。しばらくしてからもう一度お試しください。"
+    "verifyEmailRequired": "ご予約前にメールアドレスをご確認ください。"
   },
   "Emails": {
     "verificationSubject": "メールアドレスを確認してください",

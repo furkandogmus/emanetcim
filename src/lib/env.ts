@@ -27,13 +27,6 @@ const serverSchema = z.object({
    * bkz. `src/lib/payments/index.ts`. Ayrıntı: docs/PAYMENTS.md
    */
   PAYMENT_PROVIDER: z.string().optional(),
-  /**
-   * Odeme alimi acil durum anahtari. Yalnizca tam olarak "false" kapatir;
-   * tanimsiz/bos ise odeme ACIKTIR (bir yazim hatasinin odemeyi sessizce
-   * durdurmamasi icin -- kapatmak bilincli bir eylem olmali).
-   * Veritabanindaki `payments` bayragini EZER. Bkz. PaymentService.
-   */
-  PAYMENTS_ENABLED: z.string().optional(),
 });
 
 export type ServerEnv = z.infer<typeof serverSchema>;

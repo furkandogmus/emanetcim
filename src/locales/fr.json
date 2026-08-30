@@ -728,7 +728,7 @@
     "platformSettingsInvalid": "Valeurs invalides.",
     "platformSettingsNav": "Paramètres de la plateforme",
     "featureFlagsTitle": "Indicateurs de fonctionnalité",
-    "featureFlagsIntro": "Interrupteurs d'exécution stockés en base. Désactiver l'indicateur `payments` arrête les nouveaux paiements de réservation ; l'encaissement à l'enregistrement et les remboursements ne sont pas affectés. Si PAYMENTS_ENABLED=false est défini dans l'environnement, les paiements sont coupés indépendamment de cet écran.",
+    "featureFlagsIntro": "Interrupteurs d'exécution stockés en base. Définissez PAYMENTS_ENABLED=false dans l'environnement pour couper immédiatement les paiements, ce qui prime sur ces réglages.",
     "featureFlagsKeyLabel": "Key",
     "featureFlagsUpdatedAt": "Dernière mise à jour : {at}",
     "featureFlagsEnabled": "Enabled",
@@ -961,10 +961,7 @@
     "sealShipTrackingLabel": "Numéro de suivi",
     "sealShipTrackingPlaceholder": "ex. 12345678901234",
     "sealShipQuantityLabel": "Quantité expédiée",
-    "sealShipNoteLabel": "Note d'administration (facultative)",
-    "paymentsStateOn": "Les paiements sont ACTIFS — les nouveaux paiements de réservation sont acceptés.",
-    "paymentsStateOff": "Les paiements sont DÉSACTIVÉS — les nouveaux paiements de réservation ne sont pas acceptés. L'encaissement à l'enregistrement et les remboursements continuent de fonctionner.",
-    "paymentsStateEnvOff": "La coupure provient de l'environnement (PAYMENTS_ENABLED=false). L'indicateur ci-dessous ne peut pas la rétablir ; supprimez d'abord la variable."
+    "sealShipNoteLabel": "Note d'administration (facultative)"
   },
   "Auth": {
     "loginTitle": "Connectez-vous à BagajPark",
@@ -1442,8 +1439,7 @@
     "tooManyRequests": "Trop de tentatives. Veuillez réessayer plus tard.",
     "unauthorized": "Vous n'êtes pas autorisé à effectuer cette action.",
     "verificationCooldown": "Veuillez patienter {seconds} secondes avant d'envoyer un autre e-mail.",
-    "verifyEmailRequired": "Veuillez vérifier votre adresse e-mail avant de réserver.",
-    "paymentsDisabled": "Les paiements sont temporairement suspendus. Veuillez réessayer sous peu."
+    "verifyEmailRequired": "Veuillez vérifier votre adresse e-mail avant de réserver."
   },
   "Emails": {
     "verificationSubject": "Vérifiez votre e-mail",
