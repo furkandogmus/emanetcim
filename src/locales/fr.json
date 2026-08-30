@@ -613,6 +613,7 @@
     "timesInShopTimezone": "Les horaires sont à l'heure locale du commerce ({zone}).",
     "checkoutProcessing": "Traitement…",
     "prelaunchBadge": "Bientôt",
+    "mapClusterLabel": "{count} points — zoomer",
     "prelaunchWantCta": "J'en veux un ici",
     "prelaunchWantDone": "Votre demande est comptée",
     "prelaunchWantCount": "{count} personnes veulent une consigne ici.",

@@ -25,7 +25,7 @@ yazılmaz; ölçüm yazılır.
 | 10 | FR mobilde sayfa 33 px, DE'de 13 px yana kayıyor | Mobil başlık | ✅ DÜZELTİLDİ |
 | 11 | Mobil aramada TEK BİR sonuç kartı bile görünmüyor | Mobil arama | ✅ DÜZELTİLDİ |
 | 12 | Çerez paneli mobilde ana eylemi tamamen örtüyor | Mobil (her sayfa) | ⏳ AÇIK |
-| 13 | Harita pinleri üst üste biniyor, okunmuyor | Harita | ⏳ AÇIK |
+| 13 | Harita pinleri üst üste biniyor, okunmuyor | Harita | ✅ DÜZELTİLDİ (diğer agent) |
 | 14 | Checkout'ta görünen valiz satırı 0, özet "1 Valiz" diyor | Mobil checkout | ⏳ AÇIK |
 | 15 | Checkout'ta ekranın %31'i sabit çubuk; 3 valiz tipinden 1'i görünüyor | Mobil checkout | ⏳ AÇIK |
 | 16 | Almancada sayfa 13 px yana kayıyor — panel başlığı taşıyor | Mobil (BottomSheet) | ✅ DÜZELTİLDİ |
@@ -178,12 +178,32 @@ Rıza panelinin görünür olması gerekiyor, ama ana eylemi kapatması dönüş
 düşürür. Öneri: mobilde kompakt tek satır + iki düğme (yaklaşık 96 px),
 metnin detayı "Detaylar" bağlantısının arkasına.
 
-### 13. Harita pinleri üst üste biniyor — AÇIK
+### 13. Harita pinleri üst üste biniyor — DÜZELTİLDİ
 
 Mobilde Fatih/Üsküdar çevresinde altı "Yakında" etiketi birbirinin üstüne
-biniyor ve hiçbiri okunmuyor. Kümeleme (clustering) ya da çakışma çözümü yok.
-Yakınlaştırma seviyesine göre kümelemek gerekiyor; MapLibre'de küme katmanı
-standart bir çözüm.
+biniyor ve hiçbiri okunmuyordu. Sorunu büyüten şey talep testinin 50 noktadan
+**482'ye** çıkması: nokta eklemek haritayı okunmaz yapıyorsa, ölçmek için
+eklenen noktalar ölçmek istediğimiz davranışı engelliyor demektir.
+
+**Çözüm ekran mesafesiyle kümeleme** (`clusterByScreenDistance`), MapLibre'nin
+GeoJSON küme katmanı DEĞİL. Küme katmanı pin'lerin fiyat/"Yakında" etiketini ve
+DOM tıklama/klavye davranışını kaybettirirdi; burada görünüm aynı kalıyor,
+yalnızca üst üste binenler tek bir sayıya dönüşüyor.
+
+Eşik **44 px** — pin yüksekliğiyle ve WCAG dokunma hedefiyle aynı: bu mesafenin
+altındaki iki pin ne okunabiliyor ne de ayrı ayrı dokunulabiliyor.
+
+Neden coğrafi mesafe değil: çakışma bir **görüntü** olayı. Aynı iki nokta z=10'da
+üst üste binerken z=16'da rahatça ayrı durur. Bu yüzden kümeler her `moveend`'de
+yeniden hesaplanıyor. (`fitBounds` de bir `moveend` üretir; çizim ile sığdırma
+ayrı efektlerde, yoksa sonsuz döngü olurdu.)
+
+Kümeye dokunmak **seçmez, yakınlaştırır**: hangi noktanın kastedildiği
+belirsizken birini açmak kullanıcı adına karar vermek olurdu.
+
+Ölçüldü (İstanbul, 16 nokta): tek "2" rozeti çizildi; tıklayınca yakınlaştı ve
+kümeler `2 + 5 + 9 = 16` olarak yeniden hesaplandı — hiçbir nokta kaybolmadı,
+hiçbiri iki kez çizilmedi (test bunu da doğruluyor).
 
 ### 14–15. Mobil checkout: görünenle özet çelişiyor — AÇIK
 

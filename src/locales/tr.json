@@ -613,6 +613,7 @@
     "timesInShopTimezone": "Saatler dükkanın yerel saatiyle ({zone}).",
     "checkoutProcessing": "İşleniyor…",
     "prelaunchBadge": "Yakında",
+    "mapClusterLabel": "{count} nokta — yakınlaştır",
     "prelaunchWantCta": "Burayı istiyorum",
     "prelaunchWantDone": "İsteğin sayıldı",
     "prelaunchWantCount": "{count} kişi burada bir emanet noktası istiyor.",

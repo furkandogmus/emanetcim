@@ -613,6 +613,7 @@
     "timesInShopTimezone": "Times are in the shop's local time ({zone}).",
     "checkoutProcessing": "Processing…",
     "prelaunchBadge": "Coming soon",
+    "mapClusterLabel": "{count} points — zoom in",
     "prelaunchWantCta": "I want a point here",
     "prelaunchWantDone": "Your request is counted",
     "prelaunchWantCount": "{count} people want a storage point here.",

@@ -613,6 +613,7 @@
     "timesInShopTimezone": "時刻は店舗の現地時間（{zone}）です。",
     "checkoutProcessing": "処理中…",
     "prelaunchBadge": "近日オープン",
+    "mapClusterLabel": "{count}件 — 拡大",
     "prelaunchWantCta": "ここに欲しい",
     "prelaunchWantDone": "リクエストを受け付けました",
     "prelaunchWantCount": "{count}人がここに預かり所を希望しています。",

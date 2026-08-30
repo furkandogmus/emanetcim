@@ -613,6 +613,7 @@
     "timesInShopTimezone": "Zeiten in der Ortszeit des Geschäfts ({zone}).",
     "checkoutProcessing": "Wird verarbeitet…",
     "prelaunchBadge": "Demnächst",
+    "mapClusterLabel": "{count} Standorte — heranzoomen",
     "prelaunchWantCta": "Ich will hier einen Standort",
     "prelaunchWantDone": "Deine Anfrage zählt",
     "prelaunchWantCount": "{count} Personen wünschen sich hier eine Gepäckaufbewahrung.",

@@ -7,6 +7,54 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { formatTryCurrency } from "@/lib/currency";
 import { getMapStyle, MAP_ATTRIBUTION } from "@/lib/map-style";
 
+/**
+ * İki pin'in çakışmadan durabildiği en küçük ekran mesafesi (px).
+ *
+ * Pin 32 px yüksekliğinde ve genişliği metne göre büyüyor ("Yakında" ~72 px).
+ * 44 px, WCAG dokunma hedefi eşiğiyle de aynı: bu mesafenin altındaki iki pin
+ * ne okunabiliyor ne de ayrı ayrı dokunulabiliyor.
+ */
+const MIN_PIN_DISTANCE_PX = 44;
+
+export type ClusterInput = { id: string; x: number; y: number };
+
+/**
+ * Ekranda üst üste binen noktaları TEK pin'de toplar.
+ *
+ * NEDEN EKRAN PİKSELİ, coğrafi mesafe değil: çakışma bir GÖRÜNTÜ olayı.
+ * Aynı iki nokta z=10'da üst üste binerken z=16'da rahatça ayrı durur;
+ * coğrafi bir eşik ise yakınlaştırmadan bağımsız olur ve ya erken kümeler ya
+ * da hiç kümelemez.
+ *
+ * Açgözlü ve SIRAYA BAĞLI: liste zaten mesafeye/puana göre sıralı geliyor, yani
+ * kümenin temsilcisi en alakalı nokta oluyor. Kararlı olması da önemli —
+ * her `moveend`'de yeniden hesaplanıyor ve pin'lerin zıplaması istenmiyor.
+ */
+export function clusterByScreenDistance(
+  points: ClusterInput[],
+  minDistancePx = MIN_PIN_DISTANCE_PX,
+): ClusterInput[][] {
+  const groups: ClusterInput[][] = [];
+  const taken = new Set<string>();
+
+  for (const p of points) {
+    if (taken.has(p.id)) continue;
+    taken.add(p.id);
+    const group = [p];
+    for (const q of points) {
+      if (taken.has(q.id)) continue;
+      const dx = p.x - q.x;
+      const dy = p.y - q.y;
+      if (Math.hypot(dx, dy) < minDistancePx) {
+        taken.add(q.id);
+        group.push(q);
+      }
+    }
+    groups.push(group);
+  }
+  return groups;
+}
+
 type Shop = {
   id: string;
   name: string;
@@ -118,63 +166,123 @@ export default function SearchMap({
     });
   }, [userLat, userLng]);
 
-  // Shop'lar değiştikçe marker'ları güncelle
+  /**
+   * Pin'leri çiz — ÇAKIŞANLARI TEK PİN'DE TOPLAYARAK.
+   *
+   * NEDEN GEREKTİ: talep testi 50 noktadan 482'ye çıkınca İstanbul gibi yoğun
+   * bir merkezde altı "Yakında" etiketi birbirinin üstüne biniyor ve hiçbiri
+   * okunmuyordu (2026-08-31 mobil ölçümü). Tek tek çizmek, nokta sayısı
+   * arttıkça haritayı okunmaz yapıyor.
+   *
+   * Kümeleme MapLibre'nin GeoJSON küme katmanıyla DEĞİL, ekran mesafesiyle
+   * yapılıyor: küme katmanı pin'lerin fiyat/"Yakında" etiketini ve DOM
+   * tıklama/klavye davranışını kaybettirirdi. Burada görünüm aynı kalıyor,
+   * yalnızca üst üste binenler tek bir sayıya dönüşüyor.
+   *
+   * `moveend`'e abone: kümeleme yakınlaştırmaya bağlı, yani her hareketten
+   * sonra yeniden hesaplanmalı. `fitBounds` de bir `moveend` üretir; bu
+   * yeniden çizimi tetikler ama YENİDEN SIĞDIRMAZ (sığdırma ayrı efektte),
+   * yoksa sonsuz döngü olurdu.
+   */
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
 
-    // Eskileri temizle
-    markersRef.current.forEach(m => m.remove());
-    markersRef.current = [];
-
     const valid = shops.filter((s) => s.latitude != null && s.longitude != null);
 
-    valid.forEach((shop) => {
-      const el = document.createElement("div");
-      el.className =
-        "px-2.5 h-8 min-w-8 rounded-full bg-orange-600 border-2 border-white shadow-lg flex items-center justify-center text-xs font-black text-white cursor-pointer hover:bg-orange-700 transition-colors whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2";
-      /*
-        Talep testi noktasında pin'e fiyat yazılmaz: oradaki `pricePerDay` şema
-        varsayılanıdır (₺50), esnafla anlaşılmadığı için gerçek bir fiyat değil
-        ve nokta yurt dışındaysa yanlış para biriminde. Kart ve detay sayfası da
-        aynı yerde "Yakında" gösteriyor — haritanın ayrışmaması gerekiyor.
-      */
-      el.textContent = shop.isPrelaunch
-        ? t("prelaunchBadge")
-        : shop.pricePerDay != null
-          ? formatTryCurrency(shop.pricePerDay, locale, {
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0,
-            })
-          : "₺";
-      el.title = shop.name;
-      // Marker'lar MapLibre tarafından ham DOM element'i olarak eklendiği için
-      // yalnızca fare/dokunmatikle çalışıyordu — klavye kullanıcısı hiçbir
-      // dükkanı seçemiyordu. `role="button"` + `tabIndex` + Enter/Space,
-      // <button>'ın klavye davranışını taklit eder.
-      el.setAttribute("role", "button");
-      el.tabIndex = 0;
-      el.setAttribute("aria-label", shop.name);
+    const draw = () => {
+      markersRef.current.forEach((m) => m.remove());
+      markersRef.current = [];
 
-      const marker = new maplibregl.Marker({ element: el })
-        .setLngLat([shop.longitude!, shop.latitude!])
-        .addTo(map);
-
-      const select = () => selectRef.current?.(shop.id);
-      el.addEventListener("click", select);
-      el.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          select();
-        }
+      const projected = valid.map((shop) => {
+        const p = map.project([shop.longitude!, shop.latitude!]);
+        return { id: shop.id, x: p.x, y: p.y };
       });
-      markersRef.current.push(marker);
-    });
+      const byId = new Map(valid.map((s) => [s.id, s]));
+
+      for (const group of clusterByScreenDistance(projected)) {
+        const head = byId.get(group[0].id)!;
+        const el = document.createElement("div");
+        el.className =
+          "px-2.5 h-8 min-w-8 rounded-full bg-orange-600 border-2 border-white shadow-lg flex items-center justify-center text-xs font-black text-white cursor-pointer hover:bg-orange-700 transition-colors whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2";
+
+        if (group.length > 1) {
+          const label = t("mapClusterLabel", { count: group.length });
+          el.textContent = String(group.length);
+          el.title = label;
+          el.setAttribute("aria-label", label);
+        } else {
+          /*
+            Talep testi noktasında pin'e fiyat yazılmaz: oradaki `pricePerDay`
+            şema varsayılanıdır (₺50), esnafla anlaşılmadığı için gerçek bir
+            fiyat değil ve nokta yurt dışındaysa yanlış para biriminde. Kart ve
+            detay sayfası da aynı yerde "Yakında" gösteriyor.
+          */
+          el.textContent = head.isPrelaunch
+            ? t("prelaunchBadge")
+            : head.pricePerDay != null
+              ? formatTryCurrency(head.pricePerDay, locale, {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })
+              : "₺";
+          el.title = head.name;
+          el.setAttribute("aria-label", head.name);
+        }
+
+        // Ham DOM ögesi olduğu için klavye davranışı elle taklit ediliyor.
+        el.setAttribute("role", "button");
+        el.tabIndex = 0;
+
+        const activate = () => {
+          if (group.length > 1) {
+            /*
+              Kümeye dokunmak SEÇMEZ, YAKINLAŞTIRIR: hangi noktanın kastedildiği
+              belirsizken birini açmak kullanıcı adına karar vermek olurdu.
+            */
+            const b = new maplibregl.LngLatBounds();
+            for (const g of group) {
+              const s2 = byId.get(g.id)!;
+              b.extend([s2.longitude!, s2.latitude!]);
+            }
+            map.fitBounds(b, { padding: 120, maxZoom: 17, duration: 600 });
+            return;
+          }
+          selectRef.current?.(head.id);
+        };
+
+        const marker = new maplibregl.Marker({ element: el })
+          .setLngLat([head.longitude!, head.latitude!])
+          .addTo(map);
+
+        el.addEventListener("click", activate);
+        el.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            activate();
+          }
+        });
+        markersRef.current.push(marker);
+      }
+    };
+
+    draw();
+    map.on("moveend", draw);
+    return () => {
+      map.off("moveend", draw);
+    };
+  }, [shops, locale, t]);
+
+  /** Sonuçlara sığdırma — çizimden AYRI, yoksa `moveend` sonsuz döngü olur. */
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const valid = shops.filter((s) => s.latitude != null && s.longitude != null);
 
     if (valid.length > 0) {
       const b = new maplibregl.LngLatBounds(
         [valid[0].longitude!, valid[0].latitude!],
-        [valid[0].longitude!, valid[0].latitude!]
+        [valid[0].longitude!, valid[0].latitude!],
       );
       valid.forEach((s) => b.extend([s.longitude!, s.latitude!]));
       map.fitBounds(b, { padding: 80, maxZoom: 15, duration: 800 });
@@ -187,7 +295,7 @@ export default function SearchMap({
         essential: true,
       });
     }
-  }, [shops, userLat, userLng, locale, t]);
+  }, [shops, userLat, userLng]);
 
   return (
     <div className="absolute inset-0 w-full h-full min-h-[240px]">

@@ -613,6 +613,7 @@
     "timesInShopTimezone": "ساعت‌ها به وقت محلی محل است ({zone}).",
     "checkoutProcessing": "در حال پردازش…",
     "prelaunchBadge": "به‌زودی",
+    "mapClusterLabel": "{count} نقطه — بزرگ‌نمایی",
     "prelaunchWantCta": "اینجا را می‌خواهم",
     "prelaunchWantDone": "درخواست شما ثبت شد",
     "prelaunchWantCount": "{count} نفر اینجا محل نگهداری چمدان می‌خواهند.",
