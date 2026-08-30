@@ -7,6 +7,12 @@ yapın, silmeyin — neyin neden değiştiği sonraki turda gerekiyor.
 Yöntem: canlıda (bagajpark.com) tarayıcıyla gezmek + DOM ölçmek. "Sanırım şöyle"
 yazılmaz; ölçüm yazılır.
 
+> **Numara aralıkları — çakışmayı önlemek için.** Bu dosyaya aynı anda birden
+> fazla agent yazıyor ve ikisi de sıradaki numarayı alınca üç kez çakışma oldu
+> (iki `#10`, iki `#16`…). Bundan sonra: **1–99 mobil/PWA/erişilebilirlik
+> hattı**, **101+ harita ve esnaf/check-in hattı**. Numara ne olursa olsun,
+> bulguyu kapatan commit hash'i satırda yazılı olmalı — asıl kimlik o.
+
 ---
 
 ## Son durum — 2026-08-31
@@ -25,7 +31,6 @@ yazılmaz; ölçüm yazılır.
 | 10 | FR mobilde sayfa 33 px, DE'de 13 px yana kayıyor | Mobil başlık | ✅ DÜZELTİLDİ |
 | 11 | Mobil aramada TEK BİR sonuç kartı bile görünmüyor | Mobil arama | ✅ DÜZELTİLDİ |
 | 12 | Çerez paneli mobilde ana eylemi tamamen örtüyor | Mobil (her sayfa) | ⏳ AÇIK |
-| 13 | Harita pinleri üst üste biniyor, okunmuyor | Harita | ✅ DÜZELTİLDİ (diğer agent) |
 | 14 | Checkout'ta görünen valiz satırı 0, özet "1 Valiz" diyor | Mobil checkout | ⏳ AÇIK |
 | 15 | Checkout'ta ekranın %31'i sabit çubuk; 3 valiz tipinden 1'i görünüyor | Mobil checkout | ⏳ AÇIK |
 | 16 | Almancada sayfa 13 px yana kayıyor — panel başlığı taşıyor | Mobil (BottomSheet) | ✅ DÜZELTİLDİ |
@@ -34,11 +39,12 @@ yazılmaz; ölçüm yazılır.
 | 19 | PWA her açılışta Türkçe açılıyor | PWA | ⏳ AÇIK |
 | 20 | `offline.html` ölü dosya | PWA | ✅ SİLİNDİ |
 | 21 | **GÜVENLİK**: `callbackUrl` ters bölüyle açık yönlendirme | Giriş | ✅ DÜZELTİLDİ |
-| 16 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
-| 17 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
-| 18 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
-| 19 | Mühür stoğu boşken ekran "sistem mühürleri atadı" diyordu | Check-in | ✅ DÜZELTİLDİ (diğer agent) |
-| 20 | Check-in kapısı `open247` ve dükkan saat dilimini yok sayıyordu | Check-in (sunucu) | ✅ DÜZELTİLDİ (diğer agent) |
+| 101 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
+| 102 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
+| 103 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
+| 104 | Mühür stoğu boşken ekran "sistem mühürleri atadı" diyordu | Check-in | ✅ DÜZELTİLDİ (diğer agent) |
+| 105 | Check-in kapısı `open247` ve dükkan saat dilimini yok sayıyordu | Check-in (sunucu) | ✅ DÜZELTİLDİ (diğer agent) |
+| 106 | Harita pinleri üst üste biniyor, okunmuyor | Harita | ✅ DÜZELTİLDİ (diğer agent) |
 
 ---
 
@@ -178,7 +184,7 @@ Rıza panelinin görünür olması gerekiyor, ama ana eylemi kapatması dönüş
 düşürür. Öneri: mobilde kompakt tek satır + iki düğme (yaklaşık 96 px),
 metnin detayı "Detaylar" bağlantısının arkasına.
 
-### 13. Harita pinleri üst üste biniyor — DÜZELTİLDİ
+### 106. Harita pinleri üst üste biniyor — DÜZELTİLDİ
 
 Mobilde Fatih/Üsküdar çevresinde altı "Yakında" etiketi birbirinin üstüne
 biniyor ve hiçbiri okunmuyordu. Sorunu büyüten şey talep testinin 50 noktadan
@@ -408,7 +414,7 @@ Bu liste bilerek uzun; her tur birkaçını kapatıp buraya sonucunu yazın.
 - [ ] Klavye ile tam gezinme, odak halkaları, odak tuzağı olan modallar
 - [ ] Renk kontrastı (özellikle gri üstü gri ikincil metinler)
 
-### 16. Haritada OpenStreetMap atfı hiç görünmüyordu — DÜZELTİLDİ
+### 101. Haritada OpenStreetMap atfı hiç görünmüyordu — DÜZELTİLDİ
 
 Canlıda ölçüldü (`bagajpark.com/tr/search`, 2026-08-31): atıf kutusunun tüm
 içeriği **"MapLibre"**. Tek satır OpenStreetMap kredisi yok. OSM verisi ODbL
@@ -429,7 +435,7 @@ Düzeltme: `MAP_ATTRIBUTION` tek kaynakta tanımlandı ve iki bileşen de
 `customAttribution` ile açıkça veriyor. `map-style.test.ts` her iki dosyada
 `attributionControl: false` ve eksik `customAttribution` durumunu kırmızı yakar.
 
-### 17. Altlık otomasyon tarayıcısında hiç boyanmıyor — SORUN YOK
+### 102. Altlık otomasyon tarayıcısında hiç boyanmıyor — SORUN YOK
 
 Belirti: `bagajpark.com/tr/search` ve localhost'ta harita alanı **bembeyaz**;
 üzerinde yalnızca fiyat/`Yakında` pinleri yüzüyor. İskelet kalkıyor, yani
@@ -462,7 +468,7 @@ görünebilir; "harita bozuk" demeden önce ikinci bir kare alın.**
 Sağlayıcı ölçümleri yine de değerli — altlık bir gün gerçekten kaybolursa
 elenecek ilk şey onlar ve hepsi 200 dönüyordu.
 
-### 18. Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu — DÜZELTİLDİ
+### 103. Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu — DÜZELTİLDİ
 
 Esnaf panelinde tek birincil eylem var: "Yeni valiz teslim al". O da tek bir yol
 açıyordu — kamera. `QRScanner` içinde elle giriş alanı yoktu; kamera izni
@@ -486,7 +492,7 @@ Uçtan uca doğrulandı: bağlantı yapıştırıldı → "Bul" → check-in kut
 adı ve valiz özetiyle açıldı. `partner-manual-checkin.test.ts` alanın kamera
 hatası dalının İÇİNE kaçmasını da kırmızı yakar.
 
-### 19. Mühür stoğu boşken ekran "sistem mühürleri atadı" diyordu — DÜZELTİLDİ
+### 104. Mühür stoğu boşken ekran "sistem mühürleri atadı" diyordu — DÜZELTİLDİ
 
 Check-in kutusu, stok boş olsa bile şunu yazıyordu: *"Sistem dükkan stoğundaki
 sıradaki mühürleri atamıştır."* Alan ise bomboştu. Esnaf tezgâhta, müşteri
@@ -506,7 +512,7 @@ edin — artı "Mühür Yönetimi'ne git" bağlantısı. Mühür zorunlu ayarı 
 "bu rezervasyon stok gelmeden teslim alınamaz" da yazıyor; bunu düğmeye
 bastıktan sonra öğrenmek en kötü an.
 
-### 20. Check-in kapısı `open247` ve dükkanın saat dilimini yok sayıyordu — DÜZELTİLDİ
+### 105. Check-in kapısı `open247` ve dükkanın saat dilimini yok sayıyordu — DÜZELTİLDİ
 
 `src/services/booking/check-in.ts` doğrudan şunu çağırıyordu:
 
