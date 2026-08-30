@@ -191,12 +191,18 @@
    davranis TASMAKTIR, bolmek degil. `break-word` yalnizca kelime baska turlu
    tasacaksa boler -- normal metinde hicbir sey degismez.
 
-   DURUSTLUK NOTU: bu kural, %200 metin buyutmede olculen 93 px'lik yatay
-   kaydirmayi COZMEDI (olculdu: duzeltmeli/duzeltmesiz ikisi de 93 px). Oradaki
-   sebep kelime bolunmesi degil, basliktaki giris dugmesinin kuculememesiydi
-   (bkz. UserNav / Header). Kural yine de duruyor cunku kendi basina dogru bir
-   koruma: uzun kelimeli bir metin yarin baska bir dar yuzeyde ayni hatayi
-   uretmesin.
+   NEREDE ISE YARIYOR, NEREDE YARAMIYOR (ikisi de olculdu):
+
+     /tr/insurance  %200 metinde  76 px -> 0    ISE YARADI
+     /tr            %200 metinde  93 px -> 93   YARAMADI
+
+   Sigorta sayfasinda sebep gercekten kelimeydi: `text-5xl` baslik %200'de
+   96 px'lik fonta cikiyor ve "Korumasi" gibi tek bir kelime 390 px'e sigmiyor.
+   Ana sayfada ise sebep bambaskaydi -- basliktaki giris dugmesi kuculemiyordu
+   (bkz. UserNav / Header) ve bu kural ona dokunmuyor.
+
+   Ders: ayni belirti (yatay kaydirma) farkli sebeplerden gelir; her sayfada
+   ayri olcmek gerekiyor.
    ═══════════════════════════════════════════════════════════════ */
 body {
   overflow-wrap: break-word;
