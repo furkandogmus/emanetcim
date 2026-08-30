@@ -1,31 +1,35 @@
 # Zamanlanmış işler — kurulum ve çalıştırma
 
-## Son durum — 2026-08-29
+## Son durum — 2026-08-30
 
-> **Kurulum durumu sunucu değişikliğinden beri doğrulanmadı.** Aşağıdaki tablo
-> 2026-08-22'de **Hetzner** sunucusunda ölçülmüştü. Canlı 2026-08-23'te AWS EC2'ye
-> taşındı (`infra/aws/CUTOVER.md`) ve crontab yeni kutuda `crontab.prod` adlı,
-> **repoda bulunmayan** bir dosyadan kuruldu. Yani "kurulu" sütunu şu an yalnızca
-> eski kutu için kanıtlıdır. Doğrulamanın tek yolu sunucuda `crontab -l`:
->
-> ```bash
-> ssh <prod> 'crontab -l'
-> ```
+> **Sekiz işin tamamı canlı sunucuda kurulu ve `enforced=true`.** 2026-08-29
+> akşamı `crontab -l -u ec2-user` ile ölçüldü, eksik beş iş kuruldu ve kurulum
+> sırasında çıkan üç gizli hata düzeltildi (`docs/DEFECT_BACKLOG.md` madde 9).
+> Listenin repodaki kopyası: [`ops/crontab.prod`](../ops/crontab.prod) — sunucu
+> giderse liste onunla gitmesin diye.
 
-| İş | Cron | Sarmalayıcı | Durum (2026-08-22, eski sunucu) |
-|---|---|---|---|
-| `generate-slots` | `17 4 * * *` | `generate-slots.sh` | ✅ kurulmuştu — yeni sunucuda doğrulanmadı |
-| `overdue-scan` | `47 4 * * *` | `overdue-scan.sh` | ⚠️ **kurulmadı** |
-| `booking-reminders` | `7 9 * * *` | — | ⚠️ kurulmadı |
-| `cleanup` | `23 3 * * *` | — | ⚠️ kurulmadı |
-| `seal-forecast` | `37 6 * * 1` | — | ⚠️ kurulmadı |
-| `classify-inbox` | `13 5 * * *` | — | ⚠️ kurulmadı |
-| `response-times` | `29 3 * * *` | — | ⚠️ kurulmadı |
-| `finance-export` | `53 2 * * *` | — | ⚠️ kurulmadı |
+| İş | Cron | Sarmalayıcı | Metot | `enforced` |
+|---|---|---|---|---|
+| `generate-slots` | `17 4 * * *` | `generate-slots.sh` | POST | ✅ |
+| `overdue-scan` | `47 4 * * *` | `overdue-scan.sh` | POST | ✅ |
+| `booking-reminders` | `7 9 * * *` | — | GET | ✅ |
+| `cleanup` | `23 3 * * *` | — | POST | ✅ |
+| `seal-forecast` | `37 6 * * 1` | — | POST | ✅ |
+| `classify-inbox` | `13 5 * * *` | — | POST | ✅ |
+| `response-times` | `29 3 * * *` | — | POST | ✅ |
+| `finance-export` | `53 2 * * *` | — | GET | ✅ |
 
 > Bu tablonun kaynağı **`src/lib/jobs/registry.ts`**'tir. Elle güncellemeyin —
 > `./scripts/emit-crontab.sh` çalıştırıp güncel hâli görün. Kayıt defterinin
 > gerçekle ayrışmasını `src/__tests__/jobs-registry.test.ts` CI'da kırmızı yakar.
+> **Metot sütunu da oradan gelir**: `booking-reminders` ve `finance-export`
+> yalnızca `GET` export ediyor; sabit `POST` gönderilen bir crontab satırı ikisini
+> de **405** ile sessizce düşürüyordu.
+
+> **Açık kalan:** `booking-reminders` "bildirildi" işareti tutmuyor
+> (`src/app/api/internal/booking-reminders/route.ts`), yani çıkış saati geçmiş açık
+> bir rezervasyon varsa esnaf her koşuda aynı uyarıyı alır. Bugün tetikleyen kayıt
+> yok (`CHECKED_IN` = 0), ama yenisi takılırsa geri gelir.
 
 Hepsi `call-internal-job.sh` üzerinden çalışır; sarmalayıcısı olan işlerde iş adı
 **sabitlenir** ki crontab'a elle yanlış ad yazılamasın.
@@ -425,3 +429,34 @@ sayaçlar diğer kategorilerde ne biriktiğini bakmadan söyler.
 > Sınıflandırma migrasyonda SQL ile yapılmadı: kural `List-Unsubscribe` /
 > `Auto-Submitted` gibi başlıklara bakıyor ve o başlıklar `raw` JSON'unun içinde.
 > SQL'de yeniden yazmak, kuralın ikinci bir kopyası olurdu ve iki kopya ayrışırdı.
+
+---
+
+## nginx konfig doğrulaması — `verify-nginx-conf.sh`
+
+`nginx/conf.d/*.conf` dosyalarını **gerçek** bir nginx binary'sine `nginx -t` ile
+sınatır. Repoyu değiştirmez; dosyaları geçici bir dizine kopyalar ve yalnızca
+yerelde çözülemeyen iki şeyi ikame eder: TLS sertifika yolları (sadece sunucuda
+var) ve `upstream server web:3000` (sadece compose ağında çözülür). Geri kalan her
+satır — `limit_req`, `location` önceliği, başlıklar — olduğu gibi sınanır.
+
+```bash
+bash scripts/verify-nginx-conf.sh
+```
+
+Beklenen çıktı:
+
+```
+nginx: configuration file .../nginx.conf test is successful
+[...] INFO  Konfig gecerli.
+```
+
+Çıkış kodu 0 = geçerli, 1 = geçersiz. `nginx` kurulu değilse: `brew install nginx`
+(macOS) / `apt-get install nginx-core` (Linux).
+
+**Neden zorunlu bir adım:** 2026-08-30'dan beri deploy `nginx/conf.d`'yi canlıya
+gönderiyor (öncesinde göndermiyordu ve repodaki konfig ile sunucudaki ayrı
+yaşıyordu). Yani bozuk bir konfig artık **siteyi kapatabilir**. İki kapı var:
+CI'nın `verify` işi bu scripti koşar (bozuk konfig S3'e hiç ulaşmaz) ve sunucuda
+`up -d`'den sonra `docker compose exec -T nginx nginx -t` koşar (geçmezse deploy
+kırmızı düşer). Konfige dokunduysanız yerelde de koşturun.

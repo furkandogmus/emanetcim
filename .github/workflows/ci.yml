@@ -132,6 +132,16 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      # nginx konfigi 2026-08-30'dan beri deploy ile CANLIYA gidiyor (asagidaki
+      # deploy isinde nginx/conf.d senkronu). Yani bozuk bir konfig artik siteyi
+      # kapatabilir; bu kapi onu S3'e ULASMADAN once durdurur.
+      # Runner'da nginx kurulu degil, apt'ten geliyor (~2 sn).
+      - name: nginx konfig dogrulamasi
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq nginx-core
+          bash scripts/verify-nginx-conf.sh
+
       # Prod bagimliliklarinda yuksek/kritik CVE varsa burada durur.
       # Bilincli tasinan istisnalar gerekce + gozden gecirme tarihiyle
       # scripts/audit-deps.mjs icinde; tarih gecince kapi yine kirilir.
@@ -318,6 +328,16 @@ jobs:
           # sunucudaki script ayri yasiyordu ve bunu kimse gormuyordu.
           aws s3 cp scripts/ "s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/scripts/" \
             --recursive --exclude "*.js" --exclude "*.mjs" --only-show-errors
+          # nginx/conf.d de gidiyor -- scripts/ ile AYNI sebep, ayni sinif hata.
+          #
+          # NEDEN: docker-compose.yml bu uc dosyayi sunucudaki
+          # /opt/emanetci/nginx/conf.d/'den bind-mount ediyor (docker-compose.yml
+          # 157-159), imajin icinden DEGIL. Ama deploy onlari hic gondermiyordu:
+          # repodaki nginx konfigi ile sunucudaki ayri yasiyordu ve bunu hicbir
+          # sey gostermiyordu. scripts/ icin ayni delik 2026-08-29'da sekiz cron
+          # isini birden dusurmustu; bu, onun nginx'teki ikizi.
+          aws s3 cp nginx/conf.d/ "s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/nginx/conf.d/" \
+            --recursive --only-show-errors
 
       - name: SSM Run Command ile deploy et
         run: |
@@ -331,6 +351,7 @@ jobs:
               "aws s3 cp s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/docker-compose.yml /opt/emanetci/docker-compose.yml",
               "aws s3 sync s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/public/ /opt/emanetci/public/ --delete --only-show-errors",
               "aws s3 sync s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/scripts/ /opt/emanetci/scripts/ --only-show-errors",
+              "aws s3 sync s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/nginx/conf.d/ /opt/emanetci/nginx/conf.d/ --only-show-errors",
               "aws s3 cp s3://${{ vars.AWS_DEPLOY_BUCKET }}/deploy-config/secrets.manifest /opt/emanetci/secrets.manifest",
               "chmod +x /opt/emanetci/scripts/*.sh",
               "chown -R ec2-user:ec2-user /opt/emanetci/scripts",
@@ -339,6 +360,7 @@ jobs:
               "docker rm -f $(docker ps -aq --filter name=_emanetci-) 2>/dev/null || true",
               "docker compose --env-file docker-compose.env pull web --quiet",
               "docker compose --env-file docker-compose.env up -d --no-build",
+              "docker compose --env-file docker-compose.env exec -T nginx nginx -t",
               "docker compose --env-file docker-compose.env restart nginx",
               "docker image prune -f"
             ]' \

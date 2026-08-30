@@ -10,6 +10,117 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-08-30 — izleme kurulmadan önce: açık uç kendini koruyamıyordu
+
+Soru "alarm/izleme eklesek ortamı yorar mı" diye başladı. Ölçüm, yükün izlemede
+değil **ucun kendisinde** olduğunu ve o yükün bugün zaten korumasız durduğunu
+gösterdi.
+
+### 1. ✅ DÜZELTİLDİ — `/api/health/jobs` kimliksiz açık ve çağrı başına 18 sorgu koşuyor
+
+- **Nerede**: `nginx/conf.d/default.conf` (uç `location /` üzerinden `@next`e düşüyordu),
+  `nginx/conf.d/01-hardening.conf:6`
+- **Kanıt**: uç tek çağrıda **18 sorgu** koşuyor — slot ufku 3 (`shopTimeSlot.aggregate`,
+  `shop.count`, `shopTimeSlot.count`), gecikme taraması 2, mühür bütünlüğü 5
+  (3× `seal.count`, `seal.groupBy`, `booking.count`), partner ulaşılabilirliği 5, iş defteri 3.
+  (`recordEvents: false` olduğu için gecikme taraması olay yazma sorgusunu koşmuyor.) Bölümler `await` ile sıra sıra koşuyor, yani ~5 gidiş-dönüş.
+  Uçta ne cache var ne kendi limiti (`route.ts:9` yalnızca `force-dynamic`).
+  Limit `api_general`'dı: `rate=30r/s`, `burst=120` (`01-hardening.conf:6`).
+- **Neden önemli**: uç **bilerek** kimlik doğrulamasız ve sırsız — sır bilmeyen bir
+  izleyicinin alarm verebilmesi için. Ama bu, tek bir IP'nin veritabanına **saniyede
+  ~540 sorgu** yaptırabilmesi demekti; üstelik `seal.count()` gibi tam tablo sayımlarıyla.
+  Kurulacak izleyicinin 30 dakikada bir yapacağı çağrı bunun yanında ölçülemez —
+  yani uç, **izlenmediği hâlde izlendiğinden daha riskliydi**.
+- **Düzeltme**: kendi zone'u — `api_health`, IP başına `12r/m`
+  (`01-hardening.conf`), `burst=6 nodelay` ile `location = /api/health/jobs`'a bağlı.
+  Tam eşleşme (`=`) bilerek: nginx'te en yüksek öncelik ondadır, `location /` üzerinden
+  `@next`e düşmeyi engeller ve kardeşi `/api/health/live`'a **dokunmaz** — o sıfır sorgu
+  koşuyor ve nginx'in konteyner healthcheck'i onu 5 saniyede bir çağırıyor
+  (`docker-compose.yml:151`); limitlense konteyner `unhealthy` düşerdi.
+- **DOĞRULANDI (2026-08-30, yerel gerçek nginx 1.31.4)**: `nginx -t` geçti. Ayrıca
+  **davranışsal** olarak sınandı — konfig yerelde ayağa kaldırılıp 12 ardışık istek
+  atıldı:
+
+  | Uç | Sonuç |
+  |---|---|
+  | `/api/health/jobs` | 7× geçti, sonra **5× `429`** — limit devrede |
+  | `/api/health/live` | 12× geçti, hiç limitlenmedi |
+  | `/api/health` | 12× geçti, dokunulmadı |
+
+  Yani `location = ` önceliği de kanıtlandı: blok `location /` üzerinden `@next`e
+  düşmüyor ve kardeş uçlara sızmıyor.
+
+### 2. ✅ DÜZELTİLDİ — Deploy `nginx/` dizinini HİÇ göndermiyordu (madde 1'i prod'a taşıyan yol kırıktı)
+
+Madde 1'in düzeltmesi yazıldıktan sonra "bu prod'a nasıl gidiyor" diye bakınca çıktı.
+
+- **Nerede**: `.github/workflows/ci.yml` → "Deploy config'i ve public/ dosyalarini
+  S3'e yukle" adımı ve SSM komut listesi
+- **Kanıt**: deploy S3'e yalnızca `docker-compose.yml`, `public/`, `scripts/` ve
+  `ops/secrets.manifest` yüklüyordu; `nginx/` listede yoktu. Oysa
+  `docker-compose.yml:157-159` üç nginx konfigini **sunucudaki**
+  `/opt/emanetci/nginx/conf.d/`'den bind-mount ediyor, imajın içinden değil.
+- **Neden önemli**: repodaki nginx konfigi ile canlıdaki ayrı yaşıyordu ve hiçbir şey
+  bunu göstermiyordu. Bu, `scripts/` dizininin **birebir aynı** deliği — o delik
+  2026-08-29'da sekiz cron işini birden düşürmüştü (madde 9.1) ve düzeltilirken
+  nginx'teki ikizi görülmemişti. Somut sonucu: madde 1'deki rate limit deploy edilse
+  bile canlıya **hiç ulaşmayacaktı**.
+- **Düzeltme**: `nginx/conf.d/` de `scripts/` ile aynı yoldan gidiyor (S3 `cp
+  --recursive` + sunucuda `s3 sync`).
+- **Ve bu yeni bir risk yarattı, o da kapatıldı**: konfig artık canlıya gittiği için
+  bozuk bir konfig **siteyi kapatabilir**. İki kapı eklendi:
+  1. `scripts/verify-nginx-conf.sh` — gerçek `nginx -t`, CI'nın `verify` işinde koşar,
+     yani bozuk konfig S3'e hiç ulaşmaz. Repoyu değiştirmez; yalnızca yerelde
+     çözülemeyen iki şeyi ikame eder (TLS yolları, `web` upstream host'u).
+     **Mandalın kırıldığı doğrulandı**: `zone=api_YOK` gibi geçici bir ihlal enjekte
+     edilip çıkış kodunun `1`e döndüğü, geri alınca `0` olduğu görüldü.
+  2. Sunucuda `up -d`'den sonra `docker compose exec -T nginx nginx -t` — geçmezse
+     deploy **kırmızı** düşer. Öncesinde nginx sessizce kapalı kalıp deploy "başarılı"
+     diyebilirdi.
+
+### 3. ⚠️ AÇIK — `ops/server.env` ölü Hetzner kutusunu gösteriyor (yerel dosya)
+
+- **Kanıt**: `APP_DIR=/root/emanetci` (canlıda `/opt/emanetci`) ve `SSH_HOST` canlı
+  EC2'nin adresi değil. Repodaki `ops/server.env.example` **doğru** — sapma yalnızca
+  yerel, git'e girmeyen kopyada.
+- **Neden önemli**: `README_AI.md` ve `ops/README.md` sunucuya erişimin yolu olarak
+  bu dosyayı gösteriyor. Bugün o yolu izleyen kişi ölü kutuya bağlanmaya çalışır.
+  Bu oturumda canlıya erişilemedi, sebebi tam olarak buydu (SSM tarafında da
+  `terraform-bagajpark` IAM kullanıcısının `ssm:SendCommand` izni yok — deploy
+  GitHub OIDC rolüyle çalışıyor).
+- **Yapılacak**: `ops/server.env.example`'daki değerlerle doldur; canlı instance
+  `i-0753b8302a5f73413`, `eu-central-1`. Bu dosya git'e girmediği için düzeltme
+  yalnızca yerelde geçerlidir.
+
+### 4. İzleme kurulumu — yapılandırma hazır, monitörler AÇILMADI
+
+İki monitör, aralık sinyalin ritmine göre: `/api/health/live` 1–5 dk (**0 sorgu**),
+`/api/health/jobs` **30 dk** (~18 sorgu). `jobs`'ı 5 dakikada bir sormak tek bir ek
+bilgi üretmez — ölçtüğü her şey günlük ritimde değişir (slot ufku günde 1 gün kısalır,
+kritik gecikme eşiği 72 saat) — ama veritabanına 6 kat yük bindirir. 30 dakikada bir
+= günde 48 çağrı ≈ 900 sorgu, birkaç sayfa açılışı kadar.
+
+Kalan iş **bir hesap açmak**: UptimeRobot ücretsiz kademesi ikisine de yeter.
+Ayrıntı `docs/OBSERVABILITY.md`.
+
+### 5. ✅ DÜZELTİLDİ — `ops/crontab.prod` yapılmış işi yapılacak diye tarif ediyordu
+
+- **Kanıt**: dosyada **7 kez** "NOT: enforced=false — cron kurulduktan sonra
+  `registry.ts` içinde true yapın" notu vardı; oysa `src/lib/jobs/registry.ts`'te
+  sekiz işin de `enforced: true` ve `scripts/emit-crontab.sh` o notu artık hiç
+  üretmiyor. Üreteci koşturup karşılaştırdım: **zamanlanmış komut satırları birebir
+  aynı**, sapan yalnızca yorumlardı. Dosyanın başındaki "önce 3 açık rezervasyonu
+  kapatın, yoksa iki esnaf her gün Haziran'dan kalma uyarı alır" uyarısı da bayattı —
+  o üç kayıt 2026-08-29'da kapatıldı, `CHECKED_IN` sayısı 0.
+- **Neden önemli**: bu dosya felaket kurtarma kopyası (madde 4'ün tüm gerekçesi buydu).
+  Yeni bir sunucu kuran kişiye yapılmış bir işi tarif etmek, o kişinin dosyanın geri
+  kalanına duyduğu güveni de düşürür.
+- **Düzeltme**: uygulama işleri bölümü `emit-crontab.sh` ile yeniden üretildi;
+  komut satırları değişmedi (`git diff` ile doğrulandı). `booking-reminders`
+  uyarısı gerçeğe çevrildi: kayıt bugün tetiklenmiyor ama "bildirildi" işareti hâlâ
+  yok, yani yeni bir takılı kayıtta tekrar geri gelir.
+- **Sonraki adım (değişmedi)**: `booking-reminders`'a "bildirildi" işareti ekle.
+
 ## 2026-08-29 — kesim sonrası sapma taraması: repo hâlâ Hetzner'i anlatıyordu
 
 23 Ağustos'ta canlı Hetzner'den AWS EC2'ye taşındı (`infra/aws/CUTOVER.md`), ama repo

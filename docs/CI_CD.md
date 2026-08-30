@@ -58,6 +58,18 @@ sürüm etiketinde çalışır.
   gömülüyor. O çıktıyı üretime göndermek **demo giriş düğmelerini canlıya
   taşırdı**. Katman önbelleği (`type=gha`) tekrarın maliyetini düşük tutar.
 - **Deploy doğrulamaya `needs` ile bağlı.** Zincir kırılırsa deploy hiç başlamaz.
+- **Deploy'un sunucuya gönderdiği şeyler S3 üzerinden gider**, kutudaki git
+  kopyasından değil: `docker-compose.yml`, `public/`, `scripts/`,
+  `ops/secrets.manifest` ve (2026-08-30'dan beri) **`nginx/conf.d/`**. Bu listeye
+  girmeyen bir dosya sunucuya HİÇ ulaşmaz. `nginx/conf.d` eksikti ve
+  `docker-compose.yml` onu sunucudan bind-mount ettiği için repodaki nginx
+  konfigi ile canlıdaki ayrı yaşıyordu — `scripts/` ile birebir aynı hatanın
+  ikiziydi (o delik sekiz cron işini birden düşürmüştü).
+- **nginx konfigi artık canlıya gidiyor, yani bozuk konfig siteyi kapatabilir.**
+  İki kapı var: `verify` işinde `scripts/verify-nginx-conf.sh` (gerçek `nginx -t`,
+  bozuk konfig S3'e hiç ulaşmaz) ve sunucuda `up -d`'den sonra
+  `docker compose exec -T nginx nginx -t` — geçmezse deploy **kırmızı** düşer,
+  sessizce "başarılı" demez. Yerelde de aynı script koşar: `bash scripts/verify-nginx-conf.sh`.
 - **İptal job seviyesinde.** Workflow seviyesinde olsaydı yeni bir push süren bir
   deploy'u yarıda keserdi: S3 yüklemesi bitmiş, SSM komutu beklenirken kesilen bir
   koşu sunucuyu yarı güncellenmiş bırakır. `deploy` ayrıca `deploy-production`
