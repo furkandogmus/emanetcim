@@ -23,7 +23,8 @@ yazılmaz; ölçüm yazılır.
 | 8 | İngilizcede ana sayfa arama kutusu karttan taşıyor | Ana sayfa | ✅ DÜZELTİLDİ (`86887b3`, diğer agent) |
 | 9 | Başlık menüsü bağlantıları 12 px, footer 17 px yüksek | Web + mobil | ✅ DÜZELTİLDİ |
 | 10 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
-| 11 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ❓ AÇIK — gerçek cihazda doğrulanmalı |
+| 11 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
+| 12 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
 | 10 | FR mobilde sayfa 33 px, DE'de 13 px yana kayıyor | Mobil başlık | ✅ DÜZELTİLDİ |
 | 11 | Mobil aramada TEK BİR sonuç kartı bile görünmüyor | Mobil arama | ✅ DÜZELTİLDİ |
 | 12 | Çerez paneli mobilde ana eylemi tamamen örtüyor | Mobil (her sayfa) | ⏳ AÇIK |
@@ -284,7 +285,7 @@ Düzeltme: `MAP_ATTRIBUTION` tek kaynakta tanımlandı ve iki bileşen de
 `customAttribution` ile açıkça veriyor. `map-style.test.ts` her iki dosyada
 `attributionControl: false` ve eksik `customAttribution` durumunu kırmızı yakar.
 
-### 11. Altlık otomasyon tarayıcısında hiç boyanmıyor — AÇIK
+### 11. Altlık otomasyon tarayıcısında hiç boyanmıyor — SORUN YOK
 
 Belirti: `bagajpark.com/tr/search` ve localhost'ta harita alanı **bembeyaz**;
 üzerinde yalnızca fiyat/`Yakında` pinleri yüzüyor. İskelet kalkıyor, yani
@@ -307,6 +308,36 @@ tarafta (otomasyon tarayıcısında worker/WebGL kısıtı).
 görüntüsünde (2026-08-31, İstanbul araması) harita sokaklarıyla birlikte
 düzgün çiziliyor. Yani en az bir gerçek tarayıcıda sorun yok.
 
-**Yapılacak:** gerçek bir cihazda (mobil Safari + masaüstü Chrome) doğrulanmalı.
-Boyanmıyorsa `worker-src`/`connect-src` ve `maplibregl.getWorkerUrl` yolu
-incelenmeli. Doğruysa bu satır kapatılabilir.
+**KAPANDI (aynı oturumda):** aynı tarayıcıda, aynı sayfada birkaç dakika sonra
+alınan ekran görüntüsünde harita sokakları, suyu ve etiketleriyle **tam olarak
+çiziliyor**. Yani beyazlık bir hata değil, WebGL tuvalinin ilk boyanmasından
+önce alınan ekran görüntüsüydü. Bulgu burada duruyor çünkü sonraki turda aynı
+yanılgıya düşülmesin: **WebGL tuvali erken alınan bir ekran görüntüsünde boş
+görünebilir; "harita bozuk" demeden önce ikinci bir kare alın.**
+
+Sağlayıcı ölçümleri yine de değerli — altlık bir gün gerçekten kaybolursa
+elenecek ilk şey onlar ve hepsi 200 dönüyordu.
+
+### 12. Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu — DÜZELTİLDİ
+
+Esnaf panelinde tek birincil eylem var: "Yeni valiz teslim al". O da tek bir yol
+açıyordu — kamera. `QRScanner` içinde elle giriş alanı yoktu; kamera izni
+reddedilmişse, webcam'i olmayan bir masaüstünde ya da misafirin telefonu bittiği
+için gösterecek QR yoksa ekranda **"Kamerayı başlat"tan başka hiçbir şey**
+kalmıyordu. Akış orada bitiyor, hata mesajı bile çıkmıyordu.
+
+Ölçüm: otomasyon tarayıcısında (kamera yok) modal açıldı ve tarama alanı
+süresiz döndü. Bir esnaf için bu, valizi teslim alamamak demek.
+
+Düzeltme: kamera alanının altında **koşulsuz** görünen bir "rezervasyon kodunu
+yaz" alanı. Kod ya da misafirin ekranındaki bağlantı kabul ediliyor
+(`extractBookingRef` UUID'yi bağlantıdan çıkarır; kimlik yoksa metni olduğu gibi
+sunucuya bırakır, çünkü sunucu imzalı QR jetonunu da çözebiliyor).
+
+Yetki sunucuda: `getPartnerBookingPreviewAction` rezervasyonun dükkanı esnafa
+ait değilse `Errors.unauthorized` döner — elle kod yazmak başka bir dükkanın
+rezervasyonunu açmaz.
+
+Uçtan uca doğrulandı: bağlantı yapıştırıldı → "Bul" → check-in kutusu misafir
+adı ve valiz özetiyle açıldı. `partner-manual-checkin.test.ts` alanın kamera
+hatası dalının İÇİNE kaçmasını da kırmızı yakar.

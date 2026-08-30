@@ -8,6 +8,24 @@ import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
 
 const READER_ID = "partner-qr-reader";
 
+/**
+ * Yapıştırılan metinden rezervasyon kimliğini çıkarır.
+ *
+ * Esnaf pratikte iki şeyden birini yapıştırır: kimliğin kendisi ya da misafirin
+ * ekranındaki bağlantı (`.../bookings/<id>`, `?booking=<id>`). Bağlantıyı
+ * reddetmek, kullanıcıyı elle kırpmaya zorlamak olurdu — ve bu ekran zaten
+ * "kamera çalışmadı" durumunda açılıyor, yani işlerin zaten ters gittiği an.
+ * Hiçbir kimlik bulunamazsa metin OLDUĞU GİBİ gönderilir: sunucu imzalı QR
+ * jetonunu da çözebiliyor.
+ */
+const UUID_RE =
+  /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+
+export function extractBookingRef(raw: string): string {
+  const text = raw.trim();
+  return text.match(UUID_RE)?.[0] ?? text;
+}
+
 const SCAN_CONFIG = {
   fps: 10,
   qrbox: { width: 250, height: 250 },
@@ -116,6 +134,7 @@ export default function QRScanner({ onResult, onClose }: QRScannerProps) {
   }, [onResult]);
 
   const [phase, setPhase] = useState<Phase>("starting");
+  const [manualRef, setManualRef] = useState("");
   /**
    * Hata METNİ değil ANAHTARI tutuluyor.
    *
@@ -281,6 +300,58 @@ export default function QRScanner({ onResult, onClose }: QRScannerProps) {
               </div>
             )}
           </div>
+
+          {/*
+            ELLE GİRİŞ HER ZAMAN AÇIK.
+
+            Önceden tek yol kameraydı: kamera izni reddedilmişse, webcam'i
+            olmayan bir masaüstünde ya da misafirin telefonu bittiği için
+            gösterecek QR yoksa esnaf valizi HİÇ teslim alamıyordu — ekranda
+            "Kamerayı başlat"tan başka bir şey yoktu. Bagaj teslimi kameranın
+            çalışmasına bağlı olamaz.
+
+            Yetki sunucuda: `getPartnerBookingPreviewAction` rezervasyonun
+            dükkanı esnafa ait değilse `Errors.unauthorized` döner. Yani elle
+            kod yazmak başka bir dükkanın rezervasyonunu açmaz.
+          */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const value = manualRef.trim();
+              if (value === "") return;
+              onResult(extractBookingRef(value));
+            }}
+            className="mt-6 flex flex-col gap-2 border-t border-gray-100 pt-5"
+          >
+            <label
+              htmlFor="partner-manual-booking"
+              className="text-xs id-eyebrow text-gray-500"
+            >
+              {t("qrManualLabel")}
+            </label>
+            <div className="flex gap-2">
+              <input
+                id="partner-manual-booking"
+                type="text"
+                inputMode="text"
+                autoComplete="off"
+                value={manualRef}
+                onChange={(e) => setManualRef(e.target.value)}
+                placeholder={t("qrManualPlaceholder")}
+                aria-label={t("qrManualLabel")}
+                className="flex-1 rounded-xl border border-gray-200 px-3 py-2 text-sm"
+              />
+              <button
+                type="submit"
+                disabled={manualRef.trim() === ""}
+                className="btn-ui btn-ui-md btn-ui-primary shrink-0"
+                data-testid="partner-manual-lookup"
+              >
+                {t("qrManualSubmit")}
+              </button>
+            </div>
+            <p className="text-xs text-gray-400">{t("qrManualHint")}</p>
+          </form>
 
           {(phase === "needTap" || phase === "error") && (
             <div className="mt-4 flex flex-col gap-3">
