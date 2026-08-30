@@ -609,6 +609,11 @@
     "prelaunchWantCount": "{count} Personen wünschen sich hier eine Gepäckaufbewahrung.",
     "prelaunchWantFirst": "Sei die erste Person, die fragt — ein Tippen genügt.",
     "prelaunchEmailHint": "Erfahre als Erstes, wenn es öffnet.",
+    "partnerPopupTitle": "Haben Sie hier einen Laden?",
+    "partnerPopupBodyWithDemand": "{count} Personen haben rund um {district} nach Gepäckaufbewahrung gesucht. Mit einem freien Regal können Sie hier der Erste sein.",
+    "partnerPopupBodyEarly": "Wir messen die Nachfrage in diesem Viertel. Wenn Ihr Laden hier ist, erfahren Sie als Erste davon.",
+    "partnerPopupCta": "Partner werden",
+    "partnerPopupSecondary": "Nachfragekarte",
     "prelaunchTitle": "{shop} eröffnet bald",
     "prelaunchBody": "Dieser Standort ist noch nicht in Betrieb, daher können wir hier vorerst keine Buchungen annehmen. Hinterlassen Sie Ihre E-Mail-Adresse und erfahren Sie es als Erste(r).",
     "prelaunchEmailLabel": "E-Mail",
@@ -1862,5 +1867,20 @@
     "offer": "0 % Provision in den ersten 3 Monaten für die ersten 100 Partner!",
     "cta": "Als Partner bewerben",
     "close": "Schließen"
+  },
+  "MarketingDemand": {
+    "metaTitle": "Wo wird Gepäckaufbewahrung gewünscht? — BagajPark",
+    "heroTitle": "Wo suchen Reisende eine Gepäckaufbewahrung?",
+    "heroSubtitle": "Wir messen die Nachfrage in einem Viertel, bevor wir dort öffnen. Die Liste zeigt, wo Reisende eine Gepäckaufbewahrung gewünscht haben. Liegt Ihr Laden in der Nähe, können Sie der Erste sein.",
+    "howTitle": "Woher kommt diese Zahl?",
+    "howBody": "Jeder Standort erscheint normal in der Suche, nimmt aber keine Buchungen an. Tippt jemand auf \"Ich will hier einen Standort\", wird das einmal gezählt — derselbe Browser nie zweimal. Manche hinterlassen zusätzlich eine E-Mail: eine fertige Kundenliste für den Eröffnungstag.",
+    "tableWants": "Anfragen",
+    "tableEmails": "E-Mail hinterlassen",
+    "tablePoint": "Standort",
+    "emptyTitle": "Die Nachfrage wird noch erfasst",
+    "emptyBody": "482 Standorte in 252 Städten werden gemessen. Diese Liste füllt sich mit den ersten Signalen — Sie können uns Ihr Viertel schon jetzt nennen.",
+    "ctaTitle": "Liegt Ihr Laden in der Nähe eines dieser Standorte?",
+    "ctaBody": "Ein freies Regal und ein paar Quadratmeter genügen. Keine Einrichtungsgebühr; Buchung, Zahlung und Siegel kommen von uns.",
+    "ctaButton": "Als Partner bewerben"
   }
 }

@@ -15,6 +15,7 @@ export const SITEMAP_PATHS: readonly string[] = [
   "/login",
   "/register",
   "/become-partner",
+  "/demand",
   "/hotels",
   "/luggage-storage",
 ];

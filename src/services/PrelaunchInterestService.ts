@@ -142,6 +142,30 @@ class PrelaunchInterestService {
     return { ok: true, alreadyCounted, count };
   }
 
+  /**
+   * EN COK ISTENEN noktalar — esnafa gosterilen talep haritasinin verisi.
+   *
+   * Yalnizca SINYAL ALMIS noktalar doner. Sifirlari da listelemek, "bu
+   * sehirlerde talep var" diyen bir sayfayi 482 satirlik bir sifir listesine
+   * cevirir ve iddiayi cururdu: bir esnafa gosterilen rakam, onun dukkan
+   * acmasina gerekce olacak rakamdir.
+   */
+  async topDemand(limit = 30): Promise<
+    {
+      shopId: string;
+      shopName: string;
+      city: string | null;
+      district: string | null;
+      wantCount: number;
+      interestCount: number;
+    }[]
+  > {
+    const rows = await this.summary();
+    return rows
+      .filter((r) => r.wantCount > 0 || r.interestCount > 0)
+      .slice(0, limit);
+  }
+
   /** Bir noktayi kac kisi istedi. Detay sayfasi sunucuda bunu okur. */
   async wantCount(shopId: string): Promise<number> {
     return prisma.prelaunchWant.count({ where: { shopId } });

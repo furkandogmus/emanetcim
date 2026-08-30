@@ -609,6 +609,11 @@
     "prelaunchWantCount": "{count} people want a storage point here.",
     "prelaunchWantFirst": "Be the first to ask — one tap is enough.",
     "prelaunchEmailHint": "Be the first to know the day it opens.",
+    "partnerPopupTitle": "Do you own a shop here?",
+    "partnerPopupBodyWithDemand": "{count} people looked for luggage storage around {district}. With one free shelf you can be the first to open here.",
+    "partnerPopupBodyEarly": "We are measuring demand in this neighbourhood. If your shop is here, be the first to know when the point opens.",
+    "partnerPopupCta": "Become a partner",
+    "partnerPopupSecondary": "Demand map",
     "prelaunchTitle": "{shop} is opening soon",
     "prelaunchBody": "This location isn't running yet, so we can't take bookings here for now. Leave your email and you'll be the first to know when it opens.",
     "prelaunchEmailLabel": "Email",
@@ -2009,5 +2014,20 @@
     "aboutParagraph1": "BagajPark digitizes luggage storage with verified local partner points across major Turkish cities. Guests can discover nearby locations, check date-based availability, and complete booking in minutes.",
     "aboutParagraph2": "The product is designed around trust and speed: visible partner verification, process records, and policy-based protection flows. This helps tourists, transfer passengers, and early-arrival guests stay mobile.",
     "aboutParagraph3": "For intent clusters such as luggage storage, baggage storage near me, and short-term bag drop, the page structure is optimized for discoverability, transparent pricing, and mobile-first conversion."
+  },
+  "MarketingDemand": {
+    "metaTitle": "Where do travellers want luggage storage? — BagajPark",
+    "heroTitle": "Where are travellers looking for luggage storage?",
+    "heroSubtitle": "We measure demand in a neighbourhood before we open there. The list below shows where travellers asked for a storage point. If your shop is near one of them, you can be the first to open it.",
+    "howTitle": "Where does this number come from?",
+    "howBody": "Each point appears in search like any other, but takes no bookings. When a traveller taps \"I want a point here\" it is counted once — the same browser is never counted twice. Some also leave an email; that is a ready customer list for the day it opens.",
+    "tableWants": "Requests",
+    "tableEmails": "Left an email",
+    "tablePoint": "Point",
+    "emptyTitle": "Demand is still being collected",
+    "emptyBody": "482 points across 252 cities are being measured. This list fills up as the first signals arrive — you can tell us about your neighbourhood now.",
+    "ctaTitle": "Is your shop near one of these points?",
+    "ctaBody": "An empty shelf and a few square metres are enough. No setup fee; we provide the booking, payment and seal infrastructure.",
+    "ctaButton": "Apply as a partner"
   }
 }

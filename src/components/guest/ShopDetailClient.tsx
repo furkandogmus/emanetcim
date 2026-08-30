@@ -32,6 +32,7 @@ import Money from "@/components/common/Money";
 import { formatDecimal } from "@/lib/currency";
 import PrelaunchNotifyButton from "@/components/guest/PrelaunchNotifyButton";
 import PrelaunchDemandPanel from "@/components/guest/PrelaunchDemandPanel";
+import PartnerDemandPopup from "@/components/guest/PartnerDemandPopup";
 
 /*
   CTA sinif dizgeleri TEK YERDE: rezervasyon dali ile talep-testi dali ayni
@@ -162,6 +163,13 @@ export default function ShopDetailClient({
 
   return (
     <div className="bg-gray-50 pb-28">
+      {/* Esnafa seslenen kart -- mobil/masaustu dallarinin DISINDA, tek kez. */}
+      {shop.isPrelaunch ? (
+        <PartnerDemandPopup
+          district={shop.address?.split(",")[0]?.trim() || shop.name}
+          wantCount={prelaunchWantCount}
+        />
+      ) : null}
       <div className="md:hidden">
         <div className={`relative h-[360px] ${shop.image || shop.images.length > 0 ? '' : 'bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 flex items-center justify-center'}`}>
           {shop.images.length > 0 ? (

@@ -609,6 +609,11 @@
     "prelaunchWantCount": "{count} personnes veulent une consigne ici.",
     "prelaunchWantFirst": "Soyez le premier à le demander — un clic suffit.",
     "prelaunchEmailHint": "Soyez informé dès l'ouverture.",
+    "partnerPopupTitle": "Vous avez une boutique ici ?",
+    "partnerPopupBodyWithDemand": "{count} personnes ont cherché une consigne près de {district}. Avec une étagère libre, vous pouvez être le premier à ouvrir ici.",
+    "partnerPopupBodyEarly": "Nous mesurons la demande dans ce quartier. Si votre boutique est ici, soyez le premier informé.",
+    "partnerPopupCta": "Devenir partenaire",
+    "partnerPopupSecondary": "Carte de la demande",
     "prelaunchTitle": "{shop} ouvre bientôt",
     "prelaunchBody": "Ce point n'est pas encore en service, nous ne pouvons donc pas accepter de réservations pour l'instant. Laissez votre e-mail et soyez prévenu(e) en premier.",
     "prelaunchEmailLabel": "E-mail",
@@ -1862,5 +1867,20 @@
     "offer": "0 % de commission pendant 3 mois pour les 100 premiers partenaires !",
     "cta": "Devenir partenaire",
     "close": "Fermer"
+  },
+  "MarketingDemand": {
+    "metaTitle": "Où veut-on une consigne à bagages ? — BagajPark",
+    "heroTitle": "Où les voyageurs cherchent-ils une consigne ?",
+    "heroSubtitle": "Nous mesurons la demande d'un quartier avant d'y ouvrir. La liste ci-dessous montre où les voyageurs ont demandé une consigne. Si votre boutique est à proximité, vous pouvez être le premier à ouvrir.",
+    "howTitle": "D'où vient ce chiffre ?",
+    "howBody": "Chaque point apparaît normalement dans la recherche mais n'accepte pas de réservation. Quand un voyageur clique sur « J'en veux un ici », c'est compté une fois — jamais deux fois pour le même navigateur. Certains laissent aussi un e-mail : une liste de clients prête pour le jour de l'ouverture.",
+    "tableWants": "Demandes",
+    "tableEmails": "E-mails laissés",
+    "tablePoint": "Point",
+    "emptyTitle": "La demande est encore en cours de collecte",
+    "emptyBody": "482 points dans 252 villes sont en cours de mesure. Cette liste se remplira avec les premiers signaux — parlez-nous déjà de votre quartier.",
+    "ctaTitle": "Votre boutique est-elle près de l'un de ces points ?",
+    "ctaBody": "Une étagère libre et quelques mètres carrés suffisent. Aucuns frais d'installation ; réservation, paiement et scellés sont fournis par nous.",
+    "ctaButton": "Devenir partenaire"
   }
 }

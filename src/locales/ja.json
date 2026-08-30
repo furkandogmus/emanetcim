@@ -609,6 +609,11 @@
     "prelaunchWantCount": "{count}人がここに預かり所を希望しています。",
     "prelaunchWantFirst": "最初のリクエストをどうぞ — タップするだけです。",
     "prelaunchEmailHint": "オープン当日にお知らせします。",
+    "partnerPopupTitle": "この街でお店をお持ちですか？",
+    "partnerPopupBodyWithDemand": "{district}周辺で{count}人が預かり所を探しました。空いた棚があれば、最初の一軒になれます。",
+    "partnerPopupBodyEarly": "この地域の需要を測っています。お店がこの辺りなら、開設の際に最初にお知らせします。",
+    "partnerPopupCta": "パートナー申請",
+    "partnerPopupSecondary": "需要マップ",
     "prelaunchTitle": "{shop} は近日オープン予定です",
     "prelaunchBody": "この拠点はまだ稼働していないため、現在ご予約を承れません。メールアドレスをご登録いただければ、オープン時に最初にお知らせします。",
     "prelaunchEmailLabel": "メールアドレス",
@@ -1862,5 +1867,20 @@
     "offer": "先着100パートナーは最初の3か月手数料0%！",
     "cta": "パートナー申請",
     "close": "閉じる"
+  },
+  "MarketingDemand": {
+    "metaTitle": "どこで預かり所が求められている？ — BagajPark",
+    "heroTitle": "旅行者はどこで預かり所を探していますか？",
+    "heroSubtitle": "出店の前に、その街の需要を測っています。以下は旅行者が預かり所を求めた場所です。近くにお店があれば、最初の一軒になれます。",
+    "howTitle": "この数字はどこから？",
+    "howBody": "各拠点は通常どおり検索に表示されますが、予約は受け付けません。「ここに欲しい」を押すと1回だけ数えられ、同じブラウザは二重に数えません。メールを残す人もいます。開店当日にお知らせできる顧客リストです。",
+    "tableWants": "希望",
+    "tableEmails": "メール登録",
+    "tablePoint": "拠点",
+    "emptyTitle": "需要はまだ集計中です",
+    "emptyBody": "252都市482拠点を計測中です。最初のシグナルが届き次第このリストが埋まります。今から地域をお知らせいただけます。",
+    "ctaTitle": "お店はこれらの拠点の近くにありますか？",
+    "ctaBody": "空いた棚と数平方メートルがあれば十分です。初期費用なし。予約・決済・封印の仕組みは当社が用意します。",
+    "ctaButton": "パートナー申請"
   }
 }

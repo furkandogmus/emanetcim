@@ -609,6 +609,11 @@
     "prelaunchWantCount": "{count} kişi burada bir emanet noktası istiyor.",
     "prelaunchWantFirst": "İlk isteyen sen ol — bir tık yeter.",
     "prelaunchEmailHint": "Açıldığı gün ilk sen haberdar ol.",
+    "partnerPopupTitle": "Dükkan sahibi misiniz?",
+    "partnerPopupBodyWithDemand": "{district} çevresinde {count} kişi emanet noktası aradı. Boş bir rafınız varsa burayı ilk siz açabilirsiniz.",
+    "partnerPopupBodyEarly": "Bu semtte talebi ölçüyoruz. Dükkanınız buradaysa, nokta açıldığında ilk siz haberdar olun.",
+    "partnerPopupCta": "Esnaf başvurusu",
+    "partnerPopupSecondary": "Talep haritası",
     "prelaunchTitle": "{shop} yakında açılıyor",
     "prelaunchBody": "Bu noktada henüz hizmet başlamadı, bu yüzden şimdilik rezervasyon alamıyoruz. E-postanı bırak, açıldığı gün ilk sen haberdar ol.",
     "prelaunchEmailLabel": "E-posta",
@@ -2008,5 +2013,20 @@
     "aboutParagraph1": "BagajPark, Türkiye genelinde yaygın emanet noktalarıyla valiz depolama sürecini dijitalleştirir. Kullanıcılar konuma göre en yakın noktaları görür, tarih aralığına uygun müsaitliği kontrol eder ve rezervasyonunu birkaç adımda tamamlar.",
     "aboutParagraph2": "Platform, güven sinyallerini görünür hale getirir: doğrulanmış partner noktaları, süreç kayıtları ve politika tabanlı koruma akışı. Bu yapı özellikle turistler, aktarma yolcuları ve otel check-in saatini bekleyen kullanıcılar için yüksek fayda sağlar.",
     "aboutParagraph3": "Luggage storage, bagaj emanet, valiz depolama ve şehir içi kısa süreli emanet gibi arama niyetlerine uygun olarak; sayfa yapısı hızlı keşif, net fiyat, güven ve mobil kullanılabilirlik ekseninde optimize edilmiştir."
+  },
+  "MarketingDemand": {
+    "metaTitle": "Nerede emanet noktası isteniyor? — BagajPark",
+    "heroTitle": "Misafirler nerede emanet noktası arıyor?",
+    "heroSubtitle": "Bir semtte noktamız açılmadan önce oradaki talebi ölçüyoruz. Aşağıdaki liste, misafirlerin \"burada bir emanet noktası olsun\" dediği yerleri gösteriyor. Dükkanınız bu noktalardan birinin yanındaysa, orayı ilk siz açabilirsiniz.",
+    "howTitle": "Bu sayı nereden geliyor?",
+    "howBody": "Her noktanın sayfası aramada normal görünür ama rezervasyon almaz. Misafir \"burayı istiyorum\" dediğinde bir kez sayılır — aynı tarayıcı ikinci kez sayılmaz. Bazıları ayrıca e-posta bırakır; o, açıldığı gün haber vereceğimiz hazır bir müşteri listesidir.",
+    "tableWants": "İsteyen",
+    "tableEmails": "E-posta bırakan",
+    "tablePoint": "Nokta",
+    "emptyTitle": "Talep henüz toplanıyor",
+    "emptyBody": "252 şehirde 482 nokta ölçümde. İlk sinyaller geldikçe bu liste dolacak — dükkanınızın semtini şimdiden bildirebilirsiniz.",
+    "ctaTitle": "Dükkanınız bu noktalardan birinin yanında mı?",
+    "ctaBody": "Boş bir rafınız ve birkaç metrekareniz yeterli. Kurulum ücreti yok; rezervasyon, ödeme ve mühür altyapısını biz sağlıyoruz.",
+    "ctaButton": "Esnaf başvurusu yap"
   }
 }
