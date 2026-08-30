@@ -452,6 +452,7 @@
     "ctaDescription": "Laissez vos bagages dans les boutiques sécurisées de BagajPark et explorez la ville sans fardeaux.",
     "findShop": "Trouver une consigne",
     "howItWorks": "Comment ça marche ?",
+    "howItWorksMore": "Voir le processus étape par étape",
     "homeStep1Title": "Réservez en ligne",
     "homeStep1Desc": "Choisissez vos dates et le nombre de bagages, réservation en quelques secondes.",
     "homeStep2Title": "Déposez",
@@ -1882,5 +1883,25 @@
     "ctaTitle": "Votre boutique est-elle près de l'un de ces points ?",
     "ctaBody": "Une étagère libre et quelques mètres carrés suffisent. Aucuns frais d'installation ; réservation, paiement et scellés sont fournis par nous.",
     "ctaButton": "Devenir partenaire"
+  },
+  "HowItWorks": {
+    "metaTitle": "Comment ça marche — BagajPark",
+    "heroTitle": "Déposer vos bagages en quatre étapes",
+    "heroSubtitle": "Vous réservez en ligne, déposez le bagage en boutique, et il est fermé par un scellé numéroté. Ci-dessous, ce qui se passe à chaque étape et le temps que cela prend.",
+    "animAria": "Le parcours du bagage en quatre étapes, de la réservation au retrait",
+    "s1Short": "Réserver",
+    "s2Short": "Aller en boutique",
+    "s3Short": "Sceller",
+    "s4Short": "Récupérer",
+    "s1Title": "1. Choisissez un point et vos horaires",
+    "s1Body": "Choisissez un point proche sur la carte, indiquez les horaires de dépôt et de retrait et le nombre de bagages. Le paiement se fait en ligne et vous recevez un QR code. Cela prend une minute.",
+    "s2Title": "2. Montrez votre QR code en boutique",
+    "s2Body": "Rendez-vous à l'adresse et faites scanner le code. Le commerçant voit votre réservation à l'écran : nom, horaires et nombre de bagages correspondent. Ni pièce d'identité ni caution.",
+    "s3Title": "3. Le bagage est fermé par un scellé numéroté",
+    "s3Body": "Le commerçant pose un scellé plastique à usage unique. Son numéro est enregistré pour vous et dans le système. C'est la preuve que votre bagage n'a pas été ouvert en votre absence : le scellé ne peut être retiré sans être brisé.",
+    "s4Title": "4. Revenez, vérifiez le scellé, reprenez votre bagage",
+    "s4Body": "Revenez à l'heure prévue. Vérifiez vous-même que le numéro du scellé est bien celui du départ, puis il est coupé et vous reprenez votre bagage. En cas de retard, le système vous prévient, vous et le commerçant.",
+    "ctaGuest": "Voir les points près de moi",
+    "ctaPartner": "Faire de ma boutique une consigne"
   }
 }

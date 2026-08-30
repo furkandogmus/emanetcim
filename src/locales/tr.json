@@ -470,6 +470,7 @@
     "ctaDescription": "Valizlerinizi BagajPark'ın güvenli dükkanlarına bırakın ve yüklerinizden kurtulmuş olarak şehri keşfedin.",
     "findShop": "Emanet Noktası Bul",
     "howItWorks": "Nasıl Çalışır?",
+    "howItWorksMore": "Süreci adım adım gör",
     "away": "{distance} m uzakta",
     "insured": "SİGORTALI",
     "verifiedBadge": "Doğrulanmış",
@@ -2028,5 +2029,25 @@
     "ctaTitle": "Dükkanınız bu noktalardan birinin yanında mı?",
     "ctaBody": "Boş bir rafınız ve birkaç metrekareniz yeterli. Kurulum ücreti yok; rezervasyon, ödeme ve mühür altyapısını biz sağlıyoruz.",
     "ctaButton": "Esnaf başvurusu yap"
+  },
+  "HowItWorks": {
+    "metaTitle": "Nasıl çalışır? — BagajPark",
+    "heroTitle": "Valizini bırakmak dört adım",
+    "heroSubtitle": "Rezervasyon çevrimiçi, teslim dükkanda, valiz numaralı bir mühürle kapanıyor. Aşağıda her adımın ne olduğu ve ne kadar sürdüğü yazıyor.",
+    "animAria": "Valizin rezervasyondan teslim almaya kadar dört adımlık yolculuğu",
+    "s1Short": "Rezerve et",
+    "s2Short": "Dükkana git",
+    "s3Short": "Mühürle",
+    "s4Short": "Geri al",
+    "s1Title": "1. Noktayı seç, saatleri gir",
+    "s1Body": "Haritadan sana yakın noktayı seç, bırakış ve alış saatini gir, valiz sayısını belirle. Ödeme çevrimiçi tamamlanır ve elinde bir QR kod olur. Bir dakika sürer.",
+    "s2Title": "2. Dükkanda QR kodunu göster",
+    "s2Body": "Adrese git ve QR kodu esnafa okut. Esnaf rezervasyonu ekranında görür; isim, saat ve valiz sayısı eşleşir. Kimlik ya da depozito istenmez.",
+    "s3Title": "3. Valiz numaralı mühürle kapanır",
+    "s3Body": "Esnaf valizine tek kullanımlık plastik bir mühür takar. Mühür numarası hem sana hem sisteme yazılır. Bu, valizinin sen yokken açılmadığının kanıtıdır — kopartılmadan çıkarılamaz.",
+    "s4Title": "4. Dön, mührü kontrol et, valizini al",
+    "s4Body": "Alış saatinde dükkana dön. Mühür numarasının başlangıçtakiyle aynı olduğunu kendin kontrol et, sonra mühür kesilir ve valizini alırsın. Geç kalırsan sistem seni ve esnafı uyarır.",
+    "ctaGuest": "Yakınımdaki noktaları gör",
+    "ctaPartner": "Dükkanımı emanet noktası yap"
   }
 }

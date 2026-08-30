@@ -462,6 +462,7 @@
     "ctaDescription": "Leave your luggage at BagajPark's secure shops and explore the city free from your burdens.",
     "findShop": "Find Storage Point",
     "howItWorks": "How It Works?",
+    "howItWorksMore": "See the process step by step",
     "homeStep1Title": "Book Online",
     "homeStep1Desc": "Choose your dates and bags, complete booking in seconds.",
     "homeStep2Title": "Drop Off",
@@ -2029,5 +2030,25 @@
     "ctaTitle": "Is your shop near one of these points?",
     "ctaBody": "An empty shelf and a few square metres are enough. No setup fee; we provide the booking, payment and seal infrastructure.",
     "ctaButton": "Apply as a partner"
+  },
+  "HowItWorks": {
+    "metaTitle": "How it works — BagajPark",
+    "heroTitle": "Dropping your bags takes four steps",
+    "heroSubtitle": "You book online, hand the bag over in the shop, and it is closed with a numbered seal. Below is what happens at each step and how long it takes.",
+    "animAria": "A bag's four-step journey from booking to pickup",
+    "s1Short": "Book",
+    "s2Short": "Go to the shop",
+    "s3Short": "Seal",
+    "s4Short": "Pick up",
+    "s1Title": "1. Pick a point, choose your hours",
+    "s1Body": "Pick a nearby point on the map, enter drop-off and pickup times, choose how many bags. Payment is completed online and you get a QR code. Takes about a minute.",
+    "s2Title": "2. Show your QR code at the shop",
+    "s2Body": "Go to the address and let the shopkeeper scan the code. They see your booking on screen — name, times and bag count all match. No ID or deposit is asked for.",
+    "s3Title": "3. The bag is closed with a numbered seal",
+    "s3Body": "The shopkeeper attaches a single-use plastic seal. Its number is recorded for you and in the system. That number is the proof your bag was not opened while you were away — the seal cannot be removed without breaking it.",
+    "s4Title": "4. Come back, check the seal, take your bag",
+    "s4Body": "Return at your pickup time. Check yourself that the seal number is the one you started with, then it is cut and you take your bag. If you run late, the system warns both you and the shopkeeper.",
+    "ctaGuest": "See points near me",
+    "ctaPartner": "Turn my shop into a storage point"
   }
 }

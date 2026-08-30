@@ -452,6 +452,7 @@
     "ctaDescription": "Lassen Sie Ihr Gepäck in den sicheren Geschäften des BagajParks und erkunden Sie die Stadt frei von Lasten.",
     "findShop": "Aufbewahrung finden",
     "howItWorks": "Wie funktioniert es?",
+    "howItWorksMore": "Den Ablauf Schritt für Schritt ansehen",
     "homeStep1Title": "Online buchen",
     "homeStep1Desc": "Wählen Sie Daten und Gepäckanzahl, Buchung in Sekunden abgeschlossen.",
     "homeStep2Title": "Abgeben",
@@ -1882,5 +1883,25 @@
     "ctaTitle": "Liegt Ihr Laden in der Nähe eines dieser Standorte?",
     "ctaBody": "Ein freies Regal und ein paar Quadratmeter genügen. Keine Einrichtungsgebühr; Buchung, Zahlung und Siegel kommen von uns.",
     "ctaButton": "Als Partner bewerben"
+  },
+  "HowItWorks": {
+    "metaTitle": "So funktioniert's — BagajPark",
+    "heroTitle": "Gepäck abgeben in vier Schritten",
+    "heroSubtitle": "Sie buchen online, geben das Gepäck im Laden ab, und es wird mit einem nummerierten Siegel verschlossen. Unten steht, was in jedem Schritt passiert und wie lange es dauert.",
+    "animAria": "Der Weg des Gepäcks in vier Schritten – von der Buchung bis zur Abholung",
+    "s1Short": "Buchen",
+    "s2Short": "Zum Laden",
+    "s3Short": "Versiegeln",
+    "s4Short": "Abholen",
+    "s1Title": "1. Standort wählen, Zeiten eingeben",
+    "s1Body": "Wählen Sie einen Standort in der Nähe, geben Sie Abgabe- und Abholzeit an und die Anzahl der Gepäckstücke. Die Zahlung erfolgt online, Sie erhalten einen QR-Code. Dauert etwa eine Minute.",
+    "s2Title": "2. QR-Code im Laden zeigen",
+    "s2Body": "Gehen Sie zur Adresse und lassen Sie den Code scannen. Der Ladeninhaber sieht Ihre Buchung auf dem Bildschirm: Name, Zeiten und Gepäckanzahl stimmen überein. Weder Ausweis noch Kaution nötig.",
+    "s3Title": "3. Das Gepäck wird mit einem nummerierten Siegel verschlossen",
+    "s3Body": "Der Ladeninhaber bringt ein Einweg-Plastiksiegel an. Die Nummer wird für Sie und im System festgehalten. Sie ist der Nachweis, dass Ihr Gepäck in Ihrer Abwesenheit nicht geöffnet wurde — das Siegel lässt sich nicht zerstörungsfrei entfernen.",
+    "s4Title": "4. Zurückkommen, Siegel prüfen, Gepäck mitnehmen",
+    "s4Body": "Kommen Sie zur Abholzeit zurück. Prüfen Sie selbst, ob die Siegelnummer die ursprüngliche ist, dann wird das Siegel durchtrennt und Sie nehmen Ihr Gepäck. Bei Verspätung werden Sie und der Ladeninhaber benachrichtigt.",
+    "ctaGuest": "Standorte in meiner Nähe",
+    "ctaPartner": "Meinen Laden zur Gepäckaufbewahrung machen"
   }
 }

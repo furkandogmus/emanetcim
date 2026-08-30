@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { MapPin, ShieldCheck, Clock, Star, Smartphone, Map, QrCode } from "lucide-react";
+import { MapPin, ShieldCheck, Clock, Star, Smartphone, Map, QrCode, ArrowRight } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { getGuestLandingStats } from "@/lib/guest-landing-stats";
 import { getHomeTestimonials } from "@/lib/home-testimonials";
@@ -247,6 +247,19 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
               </p>
             </div>
           </div>
+          {/*
+            Uc kutucuk NE yapildigini soyluyor; misafirin durduran sorulari
+            (kimlik isteniyor mu, valizim acilir mi, gec kalirsam ne olur) bu
+            sayfada cevaplaniyor. Emanet guven satan bir hizmet -- cevabi
+            olmayan soru rezervasyonu durdurur.
+          */}
+          <Link
+            href="/how-it-works"
+            className="mt-10 inline-flex items-center gap-2 text-sm font-bold text-orange-600 hover:text-orange-700"
+          >
+            {t("howItWorksMore")}
+            <ArrowRight size={16} />
+          </Link>
         </div>
       </section>
 
