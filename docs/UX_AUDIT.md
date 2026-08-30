@@ -32,6 +32,8 @@ yazılmaz; ölçüm yazılır.
 | 16 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
 | 17 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
 | 18 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
+| 19 | Mühür stoğu boşken ekran "sistem mühürleri atadı" diyordu | Check-in | ✅ DÜZELTİLDİ (diğer agent) |
+| 20 | Check-in kapısı `open247` ve dükkan saat dilimini yok sayıyordu | Check-in (sunucu) | ✅ DÜZELTİLDİ (diğer agent) |
 
 ---
 
@@ -369,3 +371,53 @@ rezervasyonunu açmaz.
 Uçtan uca doğrulandı: bağlantı yapıştırıldı → "Bul" → check-in kutusu misafir
 adı ve valiz özetiyle açıldı. `partner-manual-checkin.test.ts` alanın kamera
 hatası dalının İÇİNE kaçmasını da kırmızı yakar.
+
+### 19. Mühür stoğu boşken ekran "sistem mühürleri atadı" diyordu — DÜZELTİLDİ
+
+Check-in kutusu, stok boş olsa bile şunu yazıyordu: *"Sistem dükkan stoğundaki
+sıradaki mühürleri atamıştır."* Alan ise bomboştu. Esnaf tezgâhta, müşteri
+karşısında; ekran ona olmamış bir şeyi olmuş gibi söylüyordu.
+
+Daha kötüsü, esnafın yapabileceğini sandığı şey de mümkün değildi: numarayı elle
+yazmak sunucuda `SEAL_INVALID` ile reddediliyor (`SealService`), çünkü numara
+stokta KAYITLI olmak zorunda. Yani ekran hem yanlış bilgi veriyor hem de çıkış
+yolu göstermiyordu.
+
+Ölçüm: `Sultanahmet Corner (Test)` dükkanının `Seal` tablosunda hiç kayıt yok;
+ön doldurma boş dönüyor, metin yine de "atamıştır" diyor.
+
+Düzeltme: ön doldurmanın gerçekten mühür getirip getirmediği izleniyor. Boşsa
+kehribar renkli bir kutu çıkıyor: stok boş, numara elle yazılamaz, mühür talep
+edin — artı "Mühür Yönetimi'ne git" bağlantısı. Mühür zorunlu ayarı açıksa
+"bu rezervasyon stok gelmeden teslim alınamaz" da yazıyor; bunu düğmeye
+bastıktan sonra öğrenmek en kötü an.
+
+### 20. Check-in kapısı `open247` ve dükkanın saat dilimini yok sayıyordu — DÜZELTİLDİ
+
+`src/services/booking/check-in.ts` doğrudan şunu çağırıyordu:
+
+```ts
+isShopOpenAt(shop.openingTime, shop.closingTime, new Date())
+```
+
+İki alan sessizce düşüyordu:
+
+1. **`open247`.** Arama ve rezervasyon tarafı `isShopOpenForStay` kullanıyor ve
+   o, 24/7 dükkanda kısa devre yapıp `true` dönüyor. `isShopOpenAt`in böyle bir
+   parametresi yok. Sonuç: `open247 = true` ama `openingTime/closingTime` şema
+   varsayılanında (09:00–20:00) kalmış bir dükkan aramada **22:00 slotunu
+   satıyor**, misafir valiziyle geliyor ve tezgâhta check-in **reddediliyor**.
+2. **Saat dilimi.** `isShopOpenAt`in varsayılanı `Europe/Istanbul`; çağrı
+   dükkanın `timezone` alanını hiç geçmiyordu. Tokyo'daki bir dükkan İstanbul
+   duvar saatine göre değerlendiriliyordu.
+
+Bugün belirti üretmiyor: üretimdeki üç dükkanın üçü de Türkiye'de ve saatleri
+00:00–23:59. İlk yurt dışı esnafı ya da varsayılan saatlerini değiştirmemiş ilk
+24/7 dükkan ortaya çıkarır — yani 252 şehirlik talep testinin karşılığı geldiği
+gün.
+
+Düzeltme: `isShopOpenForHandover(opening, closing, open247, at, timezone)`,
+`isShopOpenForStay` ile **aynı şekilde** yazıldı (önce `open247`, sonra saat) ki
+ikisi bir daha ayrışmasın. Test, aramanın sattığı her anın check-in tarafından
+da kabul edildiğini dört farklı saat diliminde doğruluyor ve `check-in.ts`in ham
+`isShopOpenAt`e geri dönmesini kırmızı yakıyor.

@@ -57,3 +57,33 @@ export function isShopOpenForStay(
 
   return true;
 }
+
+/**
+ * Valizin EL DEĞİŞTİRDİĞİ an dükkan açık mı — check-in kapısının sorduğu soru.
+ *
+ * NEDEN AYRI BİR FONKSİYON: `check-in.ts` doğrudan `isShopOpenAt`i çağırıyordu
+ * ve iki alanı sessizce düşürüyordu:
+ *
+ *   1. `open247`. `isShopOpenForStay` (arama ve rezervasyon) 24/7 dükkanda
+ *      kısa devre yapıp TRUE dönüyor; `isShopOpenAt`in böyle bir parametresi
+ *      yok. Yani `open247 = true` ama `openingTime/closingTime` şema
+ *      varsayılanında (09:00–20:00) kalmış bir dükkan, aramada 22:00 slotunu
+ *      SATIYOR, misafir geliyor ve tezgâhta check-in REDDEDİLİYOR.
+ *   2. Saat dilimi. `isShopOpenAt`in varsayılanı `Europe/Istanbul`; çağrı
+ *      dükkanın `timezone` alanını hiç geçmiyordu. Tokyo'daki bir dükkan
+ *      İstanbul duvar saatine göre değerlendiriliyordu.
+ *
+ * `isShopOpenForStay` ile AYNI ŞEKİLDE yazıldı (önce `open247`, sonra saat
+ * kontrolü) ki ikisi bir daha ayrışmasın: aynı soruyu iki farklı yerde iki
+ * farklı şekilde cevaplamak, bu hatanın kaynağıydı.
+ */
+export function isShopOpenForHandover(
+  openingTime: string | null | undefined,
+  closingTime: string | null | undefined,
+  open247: boolean | null | undefined,
+  at: Date,
+  timezone = "Europe/Istanbul",
+): boolean {
+  if (open247) return true;
+  return isShopOpenAt(openingTime, closingTime, at, timezone);
+}

@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { AlertTriangle, CheckCircle2, Loader2, Package, ShieldCheck, X } from "lucide-react";
 import { toast } from "sonner";
 import { checkInAction, getNextAvailableSealsAction } from "@/actions/partner";
+import { Link } from "@/i18n/routing";
 import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
 import { useActionErrorText } from "@/lib/use-action-error";
 
@@ -81,6 +82,16 @@ export default function CheckInDialog({
     () => preview.bagCountS + preview.bagCountM + preview.bagCountXl > 0,
   );
   const [isProcessing, setIsProcessing] = useState(false);
+  /**
+   * Ön doldurma GERÇEKTEN mühür getirdi mi.
+   *
+   * NEDEN AYRI BİR DURUM: ekran, stok boşken bile "Sistem dükkan stoğundaki
+   * sıradaki mühürleri atamıştır" yazıyordu — alan bomboşken. Esnaf tezgâhta,
+   * müşteri karşısında; ekran ona olmamış bir şeyi olmuş gibi söylüyordu.
+   * Üstelik yapabileceğini sandığı şey (numarayı elle yazmak) sunucuda
+   * `SEAL_INVALID` ile reddediliyor: numara stokta KAYITLI olmak zorunda.
+   */
+  const [stockEmpty, setStockEmpty] = useState(false);
 
   /**
    * Mühür numaralarını dükkan stoğundan ÖN DOLDUR.
@@ -96,6 +107,7 @@ export default function CheckInDialog({
     getNextAvailableSealsAction(shopId, count)
       .then((suggested) => {
         if (cancelled || !suggested.success) return;
+        setStockEmpty(suggested.seals.length === 0);
         setSealRows((rows) =>
           rows.map((r, i) => ({
             ...r,
@@ -229,9 +241,37 @@ export default function CheckInDialog({
                   )}
                 </div>
 
-                <p className="text-xs leading-relaxed text-gray-500">
-                  {t("automaticSealNotice")}
-                </p>
+                {stockEmpty ? (
+                  /*
+                    Stok boşken doğru bilgi: numara elle yazılamaz (sunucu
+                    `SEAL_INVALID` döner), yapılacak şey mühür talep etmek.
+                    Mühür zorunluysa bu rezervasyon şu an teslim alınamaz —
+                    bunu düğmeye bastıktan sonra öğrenmek en kötü an.
+                  */
+                  <div className="flex flex-col items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3">
+                    <p className="text-xs font-bold text-amber-900">
+                      {t("sealNoStockTitle")}
+                    </p>
+                    <p className="text-xs leading-relaxed text-amber-800">
+                      {t("sealNoStockBody")}
+                    </p>
+                    {requireSeals && (
+                      <p className="text-xs font-bold text-amber-900">
+                        {t("sealNoStockBlocked")}
+                      </p>
+                    )}
+                    <Link
+                      href="/partner/seals"
+                      className="text-xs font-bold underline text-amber-900"
+                    >
+                      {t("sealNoStockCta")}
+                    </Link>
+                  </div>
+                ) : (
+                  <p className="text-xs leading-relaxed text-gray-500">
+                    {t("automaticSealNotice")}
+                  </p>
+                )}
 
                 <ul className="flex flex-col gap-2">
                   {sealRows.map((row) => {

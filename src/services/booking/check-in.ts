@@ -4,7 +4,7 @@
 import prisma from '@/lib/db';
 
 import logger from '@/lib/logger';
-import { isShopOpenAt } from '@/lib/shop-hours';
+import { isShopOpenForHandover } from '@/lib/shop-hours';
 import { totalBagCount } from '@/lib/bag-pricing';
 import { sealService } from '@/services/SealService';
 import { getPricingRules } from '@/lib/platform-settings';
@@ -39,10 +39,18 @@ export async function checkIn(
       };
     }
     if (
-      !isShopOpenAt(
+      /*
+        `open247` ve dükkanın SAAT DİLİMİ buraya girmek zorunda: eskiden
+        `isShopOpenAt` doğrudan çağrılıyordu ve ikisi de düşüyordu. Sonucu
+        misafir ödüyordu -- 24/7 işaretli bir dükkan aramada 22:00 slotunu
+        satıyor, misafir valiziyle geliyor, tezgâhta "dükkan kapalı" yiyordu.
+      */
+      !isShopOpenForHandover(
         existing.shop.openingTime,
         existing.shop.closingTime,
-        new Date()
+        existing.shop.open247,
+        new Date(),
+        existing.shop.timezone ?? undefined,
       )
     ) {
       logger.warn('BookingService::checkIn: dükkan kapalı saat aralığında');
