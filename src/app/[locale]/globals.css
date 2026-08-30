@@ -183,6 +183,25 @@
    Success  : Emerald hsl(160 84% 39%) #059669
    Neutrals : Warm stone (not cold gray)
    ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   UZUN KELIME = YATAY KAYDIRMA
+
+   Turkce ve Almanca birlesik kelime ureten dillerdir; dar bir ekranda tek bir
+   kelime ("Gepackaufbewahrung", "noktalarindaki") satira sigmazsa varsayilan
+   davranis TASMAKTIR, bolmek degil. `break-word` yalnizca kelime baska turlu
+   tasacaksa boler -- normal metinde hicbir sey degismez.
+
+   DURUSTLUK NOTU: bu kural, %200 metin buyutmede olculen 93 px'lik yatay
+   kaydirmayi COZMEDI (olculdu: duzeltmeli/duzeltmesiz ikisi de 93 px). Oradaki
+   sebep kelime bolunmesi degil, basliktaki giris dugmesinin kuculememesiydi
+   (bkz. UserNav / Header). Kural yine de duruyor cunku kendi basina dogru bir
+   koruma: uzun kelimeli bir metin yarin baska bir dar yuzeyde ayni hatayi
+   uretmesin.
+   ═══════════════════════════════════════════════════════════════ */
+body {
+  overflow-wrap: break-word;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

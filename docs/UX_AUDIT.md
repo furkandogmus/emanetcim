@@ -39,6 +39,8 @@ yazılmaz; ölçüm yazılır.
 | 19 | PWA her açılışta Türkçe açılıyor | PWA | ⏳ AÇIK |
 | 20 | `offline.html` ölü dosya | PWA | ✅ SİLİNDİ |
 | 21 | **GÜVENLİK**: `callbackUrl` ters bölüyle açık yönlendirme | Giriş | ✅ DÜZELTİLDİ |
+| 22 | Hareket azaltma tercihi framer-motion'da uygulanmıyor | Her sayfa | ✅ DÜZELTİLDİ |
+| 23 | %200 metin büyütmede sayfa 93 px yana kayıyor | Mobil | 🟡 KISMEN (93→48) |
 | 101 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
 | 102 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
 | 103 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
@@ -328,6 +330,44 @@ kaçış yolunu kaçırır, tarayıcının kendi kuralına sormak kaçırmaz.
 
 7 testlik `src/__tests__/auth-callback-url.test.ts` eklendi.
 
+### 22. "Hareketi azalt" tercihi yok sayılıyordu
+
+`globals.css` içinde bir `@media (prefers-reduced-motion: reduce)` bloğu VAR,
+ama o blok yalnızca **CSS** animasyon ve geçişlerini durduruyor. Uygulamadaki
+animasyonların çoğu **framer-motion** ile, yani JavaScript'in satır içi
+`transform` yazmasıyla çalışıyor — CSS kuralı onlara hiç değmiyor. 18 bileşen
+framer-motion kullanıyor.
+
+Sonuç: telefonunda "Hareketi Azalt"ı açmış bir kullanıcı, bütün kayma/ölçek
+animasyonlarını aynen görüyordu. Bu tercih meselesi değil; vestibüler
+rahatsızlığı olanlarda hareket baş dönmesi ve mide bulantısı yapar.
+
+Düzeltme tek satır: `Providers` içinde `<MotionConfig reducedMotion="user">`.
+Tercihi olmayan kullanıcı için hiçbir şey değişmiyor.
+
+### 23. %200 metin büyütmede yatay kaydırma — KISMEN
+
+WCAG 2.2 kriteri 1.4.4 metnin %200'e büyütülebilmesini ve içeriğin yatay
+kaydırma OLMADAN yeniden akmasını ister. Az gören kullanıcının günlük ayarı.
+
+Ölçüldü (iPhone 13, kök font 32px): ana sayfa **93 px** yana kayıyor, başlık
+iki yandan birden kırpılıyor. Kaynak izlendi:
+
+```
+header.sticky   clientWidth 388   scrollWidth 482
+ └ div.flex (esneyebilir, 176 px'e küçüldü)
+   └ div.shrink-0  w=184  right=483   ← ESNEMEYEN çocuk, ebeveyni aşıyor
+     └ a.btn-ui "Giriş yap"
+```
+
+Giriş düğmesinin sarmalayıcısı `shrink-0` taşıyordu; logo o noktada zaten
+"B…"ye inmiş, küçülecek başka öge kalmamıştı. `shrink-0` kaldırıldı ve
+düğmeye `min-w-0 truncate` verildi.
+
+**Ölçülen sonuç: 93 px → 48 px.** Yani düzeldi DEĞİL, yarıya indi. Kalan
+48 px başka bir kaynaktan; henüz izlenmedi. Bu satır kapanmadan "%200 tamam"
+denemez.
+
 ### Erişilebilirlik: klavye odağı SAĞLIKLI
 
 21 sekme durağı gezildi, **hepsinde görünür odak halkası var** (0 eksik).
@@ -411,8 +451,15 @@ Bu liste bilerek uzun; her tur birkaçını kapatıp buraya sonucunu yazın.
       adlı bir sayfa durması, olmayan bir yeteneği vaat ediyor.
 
 **Erişilebilirlik**
-- [ ] Klavye ile tam gezinme, odak halkaları, odak tuzağı olan modallar
-- [ ] Renk kontrastı (özellikle gri üstü gri ikincil metinler)
+- [x] Klavye odak halkaları — sağlıklı.
+- [x] Renk kontrastı ölçüldü → 17-18 numaralı bulgular (karar bekliyor).
+- [x] Hareket azaltma tercihi → 22 numaralı bulgu, düzeltildi.
+- [x] Yatay ekran (844×390) — taşma yok. Not: 844 px genişlik `md` kırılımını
+      aştığı için yatay modda MASAÜSTÜ düzeni geliyor; alt panel yerine kenar
+      paneli çıkıyor ve 390 px yükseklikte çalışıyor.
+- [ ] %200 metin büyütmede kalan 48 px izlenmedi (23 numaralı bulgu).
+- [ ] Odak tuzağı olan modallar test edilmedi.
+- [ ] Ekran okuyucu ile gerçek gezinme yapılmadı.
 
 ### 101. Haritada OpenStreetMap atfı hiç görünmüyordu — DÜZELTİLDİ
 

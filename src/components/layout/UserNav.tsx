@@ -35,9 +35,17 @@ export default function UserNav() {
   if (status === 'loading') return <div className="w-8 h-8 rounded-full bg-gray-100 animate-pulse" />;
   if (status === 'unauthenticated') {
     return (
+      /*
+        `min-w-0 truncate`: bu dugme baslikta esneyebilmeli. Olculdu
+        (2026-08-31): metin boyutu %200'e cikarildiginda (WCAG 1.4.4, az goren
+        kullanicinin gunluk ayari) dugme 184 px'e ciktigi icin sayfa 93 px yana
+        kaydiriyordu -- logo o noktada zaten "B..."ye inmisti, kucullecek baska
+        oge kalmamisti. Ayni sinir Fransizca "Se connecter" gibi uzun
+        etiketlerde de zorlaniyor.
+      */
       <Link 
         href="/login" 
-        className="btn-ui btn-ui-md btn-ui-primary rounded-full"
+        className="btn-ui btn-ui-md btn-ui-primary rounded-full min-w-0 truncate"
       >
         {t('signIn')}
       </Link>

@@ -113,7 +113,8 @@ export default function Header() {
         <div className="shrink-0">
           <LocaleSwitcher />
         </div>
-        <div className="shrink-0">
+        {/* `shrink-0` DEGIL: buyuk metinde kucullecek tek sey logo kalmasin. */}
+        <div className="min-w-0">
           <UserNav />
         </div>
       </div>
