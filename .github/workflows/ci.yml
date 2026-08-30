@@ -135,12 +135,14 @@ jobs:
       # nginx konfigi 2026-08-30'dan beri deploy ile CANLIYA gidiyor (asagidaki
       # deploy isinde nginx/conf.d senkronu). Yani bozuk bir konfig artik siteyi
       # kapatabilir; bu kapi onu S3'e ULASMADAN once durdurur.
-      # Runner'da nginx kurulu degil, apt'ten geliyor (~2 sn).
+      #
+      # `--engine docker` ZORUNLU, apt'teki nginx DEGIL: Ubuntu 24.04 nginx 1.24
+      # veriyor ve o surum `http2 on;` direktifini tanimiyor (1.25.1'de geldi).
+      # Ilk denemede kapi tam da bu yuzden DOGRU bir konfigi reddetti. Imaj
+      # docker-compose.yml'den okunuyor, yani uretimin kosturdugu surumun ta
+      # kendisi. Runner'da docker hazir kurulu.
       - name: nginx konfig dogrulamasi
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq nginx-core
-          bash scripts/verify-nginx-conf.sh
+        run: bash scripts/verify-nginx-conf.sh --engine docker
 
       # Prod bagimliliklarinda yuksek/kritik CVE varsa burada durur.
       # Bilincli tasinan istisnalar gerekce + gozden gecirme tarihiyle

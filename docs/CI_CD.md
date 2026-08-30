@@ -66,8 +66,10 @@ sürüm etiketinde çalışır.
   konfigi ile canlıdaki ayrı yaşıyordu — `scripts/` ile birebir aynı hatanın
   ikiziydi (o delik sekiz cron işini birden düşürmüştü).
 - **nginx konfigi artık canlıya gidiyor, yani bozuk konfig siteyi kapatabilir.**
-  İki kapı var: `verify` işinde `scripts/verify-nginx-conf.sh` (gerçek `nginx -t`,
-  bozuk konfig S3'e hiç ulaşmaz) ve sunucuda `up -d`'den sonra
+  İki kapı var: `verify` işinde `scripts/verify-nginx-conf.sh --engine docker`
+  (üretimin **kendi imajıyla** gerçek `nginx -t`; bozuk konfig S3'e hiç ulaşmaz —
+  imaj `docker-compose.yml`'den okunur, çünkü apt'in verdiği nginx 1.24 `http2 on;`
+  tanımıyor ve doğru konfigi reddediyordu) ve sunucuda `up -d`'den sonra
   `docker compose exec -T nginx nginx -t` — geçmezse deploy **kırmızı** düşer,
   sessizce "başarılı" demez. Yerelde de aynı script koşar: `bash scripts/verify-nginx-conf.sh`.
 - **İptal job seviyesinde.** Workflow seviyesinde olsaydı yeni bir push süren bir

@@ -78,6 +78,34 @@ Madde 1'in düzeltmesi yazıldıktan sonra "bu prod'a nasıl gidiyor" diye bakı
      deploy **kırmızı** düşer. Öncesinde nginx sessizce kapalı kalıp deploy "başarılı"
      diyebilirdi.
 
+### 2b. ✅ DÜZELTİLDİ — Yeni kapı ilk koşuşunda DOĞRU konfigi reddetti (yanlış negatif)
+
+2. maddedeki kapı yazıldı, push edildi ve **CI kırmızı düştü** — ama konfig
+doğruydu, kapı yanlıştı.
+
+- **Kanıt (CI koşusu 33320668574)**:
+  `[emerg] unknown directive "http2" in .../default.conf:35` — doğrulayıcı
+  `nginx/1.24.0 (Ubuntu)` kullanıyordu.
+- **Kök neden**: `http2 on;` ayrı bir direktif olarak **nginx 1.25.1**'de geldi
+  (1.24'te `listen 443 ssl http2;` yazılır). CI adımı `apt-get install nginx-core`
+  diyordu ve Ubuntu 24.04 bunun **1.24.0**'ını veriyor. Üretim ise
+  `nginx:1.27-alpine` koşuyor (`docker-compose.yml:144`) ve direktif orada geçerli.
+  Yani konfig üretimde sorunsuz, doğrulayıcı yanlış sürüme sormuş.
+- **Neden önemli**: **yanlış negatif üreten bir kapı, hiç olmayandan kötüdür.**
+  Doğru bir değişikliği bloke eden bir kontrol, insanlara onu baypas etmeyi
+  öğretir; birkaç tekrardan sonra kapı fiilen kapatılır ve asıl koruduğu şey de
+  korumasız kalır. Bu koşuda deploy hiç çalışmadı, yani 1. maddedeki rate limit
+  yine canlıya gitmedi.
+- **Düzeltme**: doğrulama artık **üretimin kendi imajıyla** yapılıyor
+  (`--engine docker`) ve imaj **`docker-compose.yml`'den okunuyor**, elle
+  yazılmıyor — elle yazılan bir sürüm compose'dakiyle sessizce ayrışırdı, yani
+  aynı hatanın bir sonraki hâli olurdu. Docker yoksa script yerel binary'ye düşer
+  ama sürüm farkını **uyarı olarak söyler** ve o modun kesin cevap olmadığını
+  belirtir.
+- **Genel ders**: bir konfigin "geçerli" olup olmadığı sorusunun cevabı, onu
+  **çalıştıracak sürüme** bağlıdır. Doğrulayıcı ile üretim arasındaki sürüm farkı,
+  doğrulamanın kendisini geçersiz kılar.
+
 ### 3. ⚠️ AÇIK — `ops/server.env` ölü Hetzner kutusunu gösteriyor (yerel dosya)
 
 - **Kanıt**: `APP_DIR=/root/emanetci` (canlıda `/opt/emanetci`) ve `SSH_HOST` canlı

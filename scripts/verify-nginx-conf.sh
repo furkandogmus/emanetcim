@@ -21,6 +21,15 @@
 # Bunlarin disinda HICBIR satir degistirilmez: limit_req, location onceligi,
 # proxy basliklari, header'lar hepsi oldugu gibi sinanir.
 #
+# SURUM TUZAGI -- BU SCRIPTIN ILK KOSUSUNDA ISIRDI:
+# Dogrulama URETIMIN KOSTURDUGU nginx surumuyle yapilmali. Ilk surum CI'da
+# `apt-get install nginx-core` diyordu; Ubuntu 24.04 bunun 1.24.0'ini veriyor ve
+# 1.24 `http2 on;` direktifini TANIMIYOR (ayri direktif olarak 1.25.1'de geldi;
+# 1.24'te `listen 443 ssl http2;` yazilir). Uretim `nginx:1.27-alpine` kosuyor ve
+# direktif orada gecerli -- yani kapi DOGRU bir konfigi reddetti. Yanlis negatif
+# ureten bir kapi hic olmayandan kotudur: insanlara onu baypas etmeyi ogretir.
+# Bu yuzden imaj docker-compose.yml'den OKUNUR, elle yazilmaz.
+#
 # HICBIR SEY DEGISTIRMEZ. Basarisizlikta non-zero doner.
 # ============================================================
 
@@ -29,12 +38,14 @@ set -e
 readonly SCRIPT_NAME="$(basename "$0")"
 readonly REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 readonly DEFAULT_CONF_DIR="$REPO_ROOT/nginx/conf.d"
+readonly COMPOSE_FILE="$REPO_ROOT/docker-compose.yml"
 
 function log() {
   >&2 echo -e "[$(date -u '+%Y-%m-%dT%H:%M:%SZ')] [$SCRIPT_NAME] $*"
 }
 
 function log_info()  { log "INFO  $*"; }
+function log_warn()  { log "WARN  $*"; }
 function log_error() { log "ERROR $*"; }
 
 function print_usage() {
@@ -45,11 +56,14 @@ function print_usage() {
   echo
   echo "Secenekler:"
   echo -e "  --conf-dir\tDogrulanacak dizin. Varsayilan: nginx/conf.d"
+  echo -e "  --engine\tdocker | local | auto. Varsayilan: auto"
+  echo -e "\t\tdocker = docker-compose.yml'deki nginx imaji (URETIMLE AYNI SURUM)"
+  echo -e "\t\tlocal  = PATH'teki nginx binary'si; surum farkliysa UYARIR"
   echo -e "  --help\t\tBu metni gosterir"
   echo
   echo "Cikis kodu: 0 = konfig gecerli, 1 = gecersiz ya da on kosul eksik."
   echo
-  echo "Gereksinimler: nginx, openssl. nginx yoksa: brew install nginx"
+  echo "Gereksinimler: openssl, artı docker YA DA nginx (brew install nginx)."
   echo
 }
 
@@ -79,32 +93,69 @@ function resolve_nginx() {
   return 1
 }
 
+# Uretimin nginx imajini docker-compose.yml'den okur. Elle yazilan bir surum
+# compose'dakiyle sessizce ayrisir; tek kaynak compose dosyasidir.
+function prod_nginx_image() {
+  local image
+  image="$(grep -oE 'image: *nginx:[^ ]+' "$COMPOSE_FILE" | head -1 | sed 's/image: *//')"
+  if [[ -z "$image" ]]; then
+    log_error "docker-compose.yml icinde 'image: nginx:...' bulunamadi"
+    return 1
+  fi
+  echo "$image"
+}
+
+function docker_is_usable() {
+  command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1
+}
+
 function main() {
   local conf_dir="$DEFAULT_CONF_DIR"
+  local engine_pref="auto"
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --conf-dir) conf_dir="$2"; shift 2 ;;
+      --engine)   engine_pref="$2"; shift 2 ;;
       --help)     print_usage; exit 0 ;;
       *)          log_error "Bilinmeyen secenek: $1"; print_usage; exit 1 ;;
     esac
   done
 
-  assert_is_installed "openssl"
+  case "$engine_pref" in
+    auto|docker|local) ;;
+    *) log_error "--engine yalnizca auto|docker|local olabilir (verilen: $engine_pref)"; return 1 ;;
+  esac
 
-  # `local x=$(cmd)` cmd'nin cikis kodunu MASKELER (donen sey `local`in kodudur,
-  # yani 0). Bu yuzden tanim ve atama ayri satirda.
-  local nginx_bin
-  nginx_bin="$(resolve_nginx)" || {
-    log_error "nginx bulunamadi (PATH ve /usr/sbin, /usr/local/sbin, /opt/homebrew/bin bakildi)"
-    log_error "  macOS : brew install nginx"
-    log_error "  Linux : sudo apt-get install -y nginx-core"
-    return 1
-  }
+  assert_is_installed "openssl"
 
   if [[ ! -d "$conf_dir" ]]; then
     log_error "Dizin yok: $conf_dir"
     return 1
+  fi
+
+  # `local x=$(cmd)` cmd'nin cikis kodunu MASKELER (donen sey `local`in kodudur,
+  # yani 0). Bu yuzden tanim ve atama ayri satirda.
+  local prod_image
+  prod_image="$(prod_nginx_image)" || return 1
+
+  # Motor secimi. Tercih docker: uretimin imajiyla dogrulamak, "gecerli mi"
+  # sorusunun TEK dogru cevabidir -- yerel binary baska bir surum olabilir ve
+  # dogru bir konfigi reddedebilir (bkz. bastaki SURUM TUZAGI notu).
+  local engine="" nginx_bin=""
+  if [[ "$engine_pref" != "local" ]] && docker_is_usable; then
+    engine="docker"
+  elif [[ "$engine_pref" == "docker" ]]; then
+    log_error "--engine docker istendi ama docker calismiyor"
+    return 1
+  else
+    engine="local"
+    nginx_bin="$(resolve_nginx)" || {
+      log_error "Ne docker ne de nginx bulunabildi."
+      log_error "  macOS : brew install nginx   (ya da Docker Desktop'i baslat)"
+      log_error "  Linux : sudo apt-get install -y nginx-core"
+      return 1
+    }
   fi
 
   local -r work="$(mktemp -d)"
@@ -151,12 +202,33 @@ http {
 EOF
 
   log_info "Dogrulaniyor: $conf_dir ($(ls -1 "$conf_dir"/*.conf | wc -l | tr -d ' ') dosya)"
-  log_info "nginx: $nginx_bin ($("$nginx_bin" -v 2>&1))"
 
-  # `nginx -t` ciktisi stderr'e gider; hem gosterip hem cikis kodunu korumak
-  # icin pipe KULLANILMIYOR -- `set -e` pipefail olmadan pipeline'in son
-  # komutunun kodunu dondururdu ve hata yutulurdu.
-  if "$nginx_bin" -t -p "$work" -c "$work/nginx.conf"; then
+  local ok="false"
+  if [[ "$engine" == "docker" ]]; then
+    log_info "Motor: docker, imaj $prod_image (uretimle AYNI surum)"
+    # $work konteynerde AYNI yola baglanir; uretilen nginx.conf mutlak yollar
+    # tasiyor, yoksa include ve sertifika yollari cozulmez. rw: `nginx -t`
+    # temp dizinlerini olusturmaya calisir.
+    if docker run --rm -v "$work:$work" "$prod_image" \
+         nginx -t -p "$work" -c "$work/nginx.conf"; then
+      ok="true"
+    fi
+  else
+    local local_ver prod_ver
+    local_ver="$("$nginx_bin" -v 2>&1 | grep -oE '[0-9]+\.[0-9]+' | head -1)"
+    prod_ver="$(echo "$prod_image" | grep -oE '[0-9]+\.[0-9]+' | head -1)"
+    log_info "Motor: yerel binary $nginx_bin ($("$nginx_bin" -v 2>&1))"
+    if [[ "$local_ver" != "$prod_ver" ]]; then
+      log_warn "Yerel nginx $local_ver, uretim $prod_ver -- SURUMLER FARKLI."
+      log_warn "Bir direktif surumler arasinda gelmis/gitmis olabilir (ornek:"
+      log_warn "\`http2 on;\` 1.25.1'de geldi). Kesin cevap icin: --engine docker"
+    fi
+    if "$nginx_bin" -t -p "$work" -c "$work/nginx.conf"; then
+      ok="true"
+    fi
+  fi
+
+  if [[ "$ok" == "true" ]]; then
     log_info "Konfig gecerli."
     return 0
   fi

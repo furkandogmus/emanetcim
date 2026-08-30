@@ -441,18 +441,30 @@ var) ve `upstream server web:3000` (sadece compose ağında çözülür). Geri k
 satır — `limit_req`, `location` önceliği, başlıklar — olduğu gibi sınanır.
 
 ```bash
-bash scripts/verify-nginx-conf.sh
+bash scripts/verify-nginx-conf.sh                  # docker varsa onu kullanir
+bash scripts/verify-nginx-conf.sh --engine docker  # kesin cevap; CI bunu koşar
 ```
 
 Beklenen çıktı:
 
 ```
+[...] INFO  Motor: docker, imaj nginx:1.27-alpine (uretimle AYNI surum)
 nginx: configuration file .../nginx.conf test is successful
 [...] INFO  Konfig gecerli.
 ```
 
-Çıkış kodu 0 = geçerli, 1 = geçersiz. `nginx` kurulu değilse: `brew install nginx`
-(macOS) / `apt-get install nginx-core` (Linux).
+Çıkış kodu 0 = geçerli, 1 = geçersiz.
+
+**Hangi nginx sürümüyle doğruladığı önemli — bu ilk koşuşta ısırdı.** Sürüm
+`docker-compose.yml`'deki `image: nginx:...` satırından okunur, elle yazılmaz.
+İlk hâli CI'da `apt-get install nginx-core` diyordu; Ubuntu 24.04 bunun **1.24**'ünü
+veriyor ve o sürüm `http2 on;` direktifini **tanımıyor** (ayrı direktif olarak
+1.25.1'de geldi). Üretim `nginx:1.27-alpine` koşuyor ve direktif orada geçerli —
+yani kapı **doğru bir konfigi reddetti**. Yanlış negatif üreten bir kapı hiç
+olmayandan kötüdür: insanlara onu baypas etmeyi öğretir.
+
+Docker yoksa script yerel `nginx` binary'sine düşer ama sürüm farklıysa **uyarır**;
+o mod hızlı bir ön kontroldür, kesin cevap değildir.
 
 **Neden zorunlu bir adım:** 2026-08-30'dan beri deploy `nginx/conf.d`'yi canlıya
 gönderiyor (öncesinde göndermiyordu ve repodaki konfig ile sunucudaki ayrı
