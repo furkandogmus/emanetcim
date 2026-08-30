@@ -53,6 +53,14 @@ export type ShopWithDistance = {
   responseTimeMinutes: number | null;
   timezone: string | null;
   distanceKm: number;
+  /**
+   * Talep testi noktası. Aramada GÖRÜNÜR, rezervasyon ALMAZ.
+   *
+   * Arama sonucuna kadar taşınması şart: bu noktalar müsaitlik üretmiyor, o
+   * yüzden `findShopsForSearch` onları ayrı ele almak zorunda; arayüz de fiyat
+   * yerine "Yakında" çizebilmek için bunu bilmek zorunda.
+   */
+  isPrelaunch: boolean;
 };
 
 /** Arama: seçilen pencerede kalan valiz kapasitesi (tahmini). */
@@ -115,6 +123,7 @@ function toShopWithDistance(shop: Shop, distanceKm: number): ShopWithDistance {
     responseTimeMinutes: shop.responseTimeMinutes,
     timezone: shop.timezone ?? null,
     distanceKm,
+    isPrelaunch: shop.isPrelaunch,
   };
 }
 
@@ -256,14 +265,49 @@ export class ShopService implements IShopService {
 
         if (withDist.length === 0) return [];
 
-        const shopIds = withDist.map((s) => s.id);
+        /**
+         * TALEP TESTİ NOKTALARI MÜSAİTLİK KAPISINDAN GEÇMEZ.
+         *
+         * Bu noktalar tanım gereği slot ÜRETMEZ (`OPERATING_SHOP_FILTER` onları
+         * slot üretiminin dışında tutuyor) ve varsayılan 09:00–20:00 saatleri
+         * gerçek bir çalışma saati değil. Aşağıdaki iki süzgeç de bu yüzden
+         * onları eliyordu: slot dalında `slots.length === 0` ile, eski dalda
+         * `isShopOpenForStay` ile. Sonuç 2026-08-31'de üretimde ölçüldü —
+         * İstanbul'da 10 nokta yazılıyken arama "TÜM NOKTALAR (3)" diyordu,
+         * yani talep testinin TAMAMI görünmezdi ve ölçmek istediğimiz tıklama
+         * hiç gerçekleşemezdi.
+         *
+         * Ayrı bir listede toplanıyorlar, çünkü:
+         *   - Eski dala düşme kararı YALNIZCA işletilen dükkanlara bakmalı;
+         *     yoksa bir prelaunch noktası `hits`i doldurup, slot tablosu boş
+         *     olduğunda gerçek dükkanların kapasite yedeğine düşmesini engeller.
+         *   - Sıralamada rezervasyon ALABİLEN dükkan her zaman önce gelir;
+         *     misafire önce gidip valizini bırakabileceği yer gösterilir.
+         */
+        const operating = withDist.filter((s) => !s.isPrelaunch);
+        const prelaunchHits: ShopSearchHit[] = withDist
+          .filter((s) => s.isPrelaunch)
+          .map((shop) => ({
+            ...shop,
+            // 0 değil, "bilinmiyor": kart müsaitlik rozetini hiç çizmemeli,
+            // çünkü burada ölçülecek bir kapasite yok.
+            bagsAvailable: 0,
+            _score:
+              (1 - Math.min(1, shop.distanceKm / 20)) * 0.5 +
+              ratingScore(shop.rating) * 0.3,
+          }))
+          .sort((a, b) => (b._score ?? 0) - (a._score ?? 0));
+
+        if (operating.length === 0) return prelaunchHits;
+
+        const shopIds = operating.map((s) => s.id);
 
         // Try slot-based availability first (more accurate for short stays)
         const stayHours = (checkOut.getTime() - checkIn.getTime()) / 3600000;
 
         if (stayHours <= 48) {
           const hits: ShopSearchHit[] = [];
-          for (const shop of withDist) {
+          for (const shop of operating) {
             try {
               const slots = await getSlotAvailability(shop.id, checkIn, checkOut);
               if (slots.length === 0) continue;
@@ -294,7 +338,7 @@ export class ShopService implements IShopService {
           }
           if (hits.length > 0) {
             hits.sort((a, b) => (b._score ?? 0) - (a._score ?? 0));
-            return hits;
+            return [...hits, ...prelaunchHits];
           }
         }
 
@@ -339,7 +383,7 @@ export class ShopService implements IShopService {
 
         const hits: ShopSearchHit[] = [];
 
-        for (const shop of withDist) {
+        for (const shop of operating) {
           const used = usedByShop.get(shop.id) ?? 0;
           const bagsAvailable = Math.max(0, shop.capacity - used);
           if (bagsAvailable < bags) continue;
@@ -365,7 +409,7 @@ export class ShopService implements IShopService {
 
         // Sort by weighted score (desc), then fallback to distance
         hits.sort((a, b) => (b._score ?? 0) - (a._score ?? 0));
-        return hits;
+        return [...hits, ...prelaunchHits];
     } catch (error) {
       console.error('ShopService::findShopsForSearch Error:', error);
       return [];

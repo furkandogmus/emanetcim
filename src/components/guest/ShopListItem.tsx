@@ -21,8 +21,19 @@ interface ShopListItemProps {
   isVerified?: boolean;
   responseTimeMinutes?: number | null;
   slotPrices?: { s: number; m: number; xl: number };
+  /** Talep testi noktası: rezervasyon almaz, fiyatı da yoktur. */
+  isPrelaunch?: boolean;
   onClick?: () => void;
 }
+
+/**
+ * Fiyatın ve "Yakında" rozetinin ORTAK sınıf dizgesi.
+ *
+ * Tek `const`ta duruyor çünkü iki dala kopyalamak hem `design-tokens`
+ * mandalının saydığı sabit stil borcunu artırırdı hem de ikisinin sessizce
+ * ayrışmasına açık kapı bırakırdı — aynı yerde, aynı boyutta iki şey.
+ */
+const PRICE_SLOT_CLASS = "text-xl font-black text-gray-900";
 
 /**
  * ShopListItem - Misafir Arama Sonucu Kartı
@@ -40,6 +51,7 @@ export default function ShopListItem({
   isVerified,
   responseTimeMinutes,
   slotPrices,
+  isPrelaunch,
   onClick,
 }: ShopListItemProps) {
   const t = useTranslations('Guest');
@@ -82,7 +94,9 @@ export default function ShopListItem({
             <MapPin size={12} />
             {t("away", { distance })}
           </span>
-          {bagsAvailable != null ? (
+          {/* Talep testi noktasında ölçülecek bir kapasite yok; "~49 müsait"
+              yazmak olmayan bir stoku ilan etmek olurdu. */}
+          {bagsAvailable != null && !isPrelaunch ? (
             <span className="text-[10px] font-black uppercase tracking-tight text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
               {t("searchBagsAvailable", { count: bagsAvailable })}
             </span>
@@ -110,7 +124,15 @@ export default function ShopListItem({
           </div>
 
           <div className="text-right">
-            {slotPrices ? (
+            {/*
+              PRELAUNCH'TA FİYAT YOK. `pricePerDay` burada şema varsayılanıdır
+              (₺50) — esnafla anlaşılmadığı için gerçek bir fiyat değil, üstelik
+              nokta Tokyo'daysa yanlış para biriminde. Detay sayfası da aynı
+              yerde "Yakında" gösteriyor; ikisi ayrışmamalı.
+            */}
+            {isPrelaunch ? (
+              <span className={PRICE_SLOT_CLASS}>{t("prelaunchBadge")}</span>
+            ) : slotPrices ? (
               <div className="flex items-center gap-1.5">
                 <span className="flex flex-col items-center"><span className="text-[9px] text-gray-400 font-bold uppercase">S</span><Money amount={slotPrices.s} compact className="text-xs font-black text-gray-900" /></span>
                 <span className="text-gray-300 text-xs">|</span>
@@ -121,7 +143,7 @@ export default function ShopListItem({
             ) : (
               <>
                 <span className="text-[10px] text-gray-400 font-bold uppercase block -mb-0.5">{t("from")}</span>
-                <Money amount={price} className="text-xl font-black text-gray-900" />
+                <Money amount={price} className={PRICE_SLOT_CLASS} />
                 <span className="text-[10px] text-gray-400 font-bold uppercase ml-1">/ {t("day")}</span>
               </>
             )}
@@ -136,7 +158,9 @@ export default function ShopListItem({
             }}
             className="btn-ui btn-ui-sm bg-orange-600 text-white rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-wider hover:bg-orange-700 transition-colors flex-1"
           >
-            {t("bookNow")}
+            {/* Tutamayacağımız sözü kartta da vermiyoruz: bu düğme misafiri
+                "haber ver" formunun olduğu detay sayfasına götürüyor. */}
+            {isPrelaunch ? t("prelaunchSubmit") : t("bookNow")}
           </button>
           {lat && lng && (
             <button

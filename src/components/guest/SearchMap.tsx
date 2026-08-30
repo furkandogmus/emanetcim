@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { formatTryCurrency } from "@/lib/currency";
@@ -13,6 +13,8 @@ type Shop = {
   latitude: number | null;
   longitude: number | null;
   pricePerDay?: number;
+  /** Talep testi noktası: pin'de fiyat değil "Yakında" yazar. */
+  isPrelaunch?: boolean;
 };
 
 interface SearchMapProps {
@@ -32,6 +34,7 @@ export default function SearchMap({
   onSelectShop,
 }: SearchMapProps) {
   const locale = useLocale();
+  const t = useTranslations("Guest");
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
@@ -103,8 +106,15 @@ export default function SearchMap({
       const el = document.createElement("div");
       el.className =
         "px-2.5 h-8 min-w-8 rounded-full bg-orange-600 border-2 border-white shadow-lg flex items-center justify-center text-xs font-black text-white cursor-pointer hover:bg-orange-700 transition-colors whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2";
-      el.textContent =
-        shop.pricePerDay != null
+      /*
+        Talep testi noktasında pin'e fiyat yazılmaz: oradaki `pricePerDay` şema
+        varsayılanıdır (₺50), esnafla anlaşılmadığı için gerçek bir fiyat değil
+        ve nokta yurt dışındaysa yanlış para biriminde. Kart ve detay sayfası da
+        aynı yerde "Yakında" gösteriyor — haritanın ayrışmaması gerekiyor.
+      */
+      el.textContent = shop.isPrelaunch
+        ? t("prelaunchBadge")
+        : shop.pricePerDay != null
           ? formatTryCurrency(shop.pricePerDay, locale, {
               minimumFractionDigits: 0,
               maximumFractionDigits: 0,
@@ -150,7 +160,7 @@ export default function SearchMap({
         essential: true,
       });
     }
-  }, [shops, userLat, userLng, locale]);
+  }, [shops, userLat, userLng, locale, t]);
 
   return <div ref={containerRef} className="absolute inset-0 w-full h-full min-h-[240px]" />;
 }

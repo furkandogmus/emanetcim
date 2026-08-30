@@ -503,7 +503,11 @@ birbirine karıştırabilirdi.
 1. **Arayüz**: `isPrelaunch` noktalarında rezervasyon düğmesinin yerini
    `PrelaunchNotifyButton` alır (`ShopDetailClient`, iki CTA da) ve **fiyat
    gösterilmez** — bu noktalarda `pricePerDay` şema varsayılanıdır (₺50), yani
-   gerçek bir fiyat değil; yerine "Yakında" rozeti yazılır.
+   gerçek bir fiyat değil; yerine "Yakında" rozeti yazılır. Aynı kural üç
+   yüzeyde birden geçerli ve ayrışmamalı: detay sayfası, arama sonucu kartı
+   (`ShopListItem` — müsaitlik rozeti de çizilmez, CTA "Haber ver" olur) ve
+   harita pin'i (`SearchMap`).
+
 2. **Sunucu**: `createInitialBooking` → `BookingShopPrelaunchError`
    (`SHOP_PRELAUNCH`). Web `Errors.shopNotOpenYet`, mobil `409 shop_not_open_yet`.
    Arayüz tek başına yeterli değil: mobil uç, doğrudan API çağrısı ya da
@@ -515,6 +519,32 @@ birbirine karıştırabilirdi.
 
 **Neden bu kadar katman:** bir rezervasyonun bedelini valiziyle boş adrese giden
 misafir öder. Tek bir katmanın unutulması yeterlidir.
+
+### Aramada GÖRÜNÜR — ve bu bir kez kırıldı
+
+Talep testinin tamamı, misafirin noktayı aramada görüp tıklamasına bağlı. Ama bu
+noktalar tanım gereği **slot üretmiyor** ve `findShopsForSearch` slot dalında
+`slots.length === 0` gördüğü her dükkanı eliyordu; eski kapasite dalında da
+varsayılan 09:00–20:00 saatleri `isShopOpenForStay`e takılıyordu.
+
+2026-08-31'de üretimde ölçüldü: 482 nokta yazılıyken, İstanbul'da 10 nokta
+varken arama **"TÜM NOKTALAR (3)"** diyordu — talep testinin tamamı görünmezdi.
+
+Düzeltme, prelaunch noktalarını `findShopsForSearch` içinde ayrı bir listede
+toplayıp müsaitlik ve çalışma saati süzgeçlerinin dışında tutuyor. İki ayrıntı
+kasıtlı:
+
+- **Eski kapasite dalına düşme kararı yalnızca işletilen dükkanlara bakar.**
+  Prelaunch noktaları `hits`i doldursaydı, slot tablosu boşken gerçek dükkanlar
+  kapasite yedeğine hiç düşemez ve aramadan kaybolurdu.
+- **Rezervasyon alabilen dükkan her zaman önce sıralanır**, prelaunch daha yakın
+  olsa bile: misafire önce gerçekten valizini bırakabileceği yer gösterilir.
+
+Kural `src/__tests__/search-prelaunch-visibility.test.ts` ile ölçülüyor —
+düzeltme geri alındığında 5 testin 3'ü kırılıyor (doğrulandı). Aramaya yeni bir
+süzgeç eklerken bu dosyaya bakın: prelaunch'u eleyen bir süzgeç hiçbir hata
+mesajı üretmez, nokta sessizce yok olur.
+
 
 ### Kamuya açık sayılar prelaunch'u SAYMAZ
 
