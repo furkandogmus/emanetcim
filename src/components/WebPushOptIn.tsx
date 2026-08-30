@@ -3,10 +3,20 @@
 import { useCallback, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
+import { withTimeout } from "@/lib/async-timeout";
 
 /**
  * VAPID public key (NEXT_PUBLIC_VAPID_PUBLIC_KEY) tanımlıysa push izni ister.
  */
+/** Push worker'i: `public/push-sw.js`. `fetch` dinlemez, onbellek tutmaz. */
+const PUSH_SW_PATH = "/push-sw.js";
+
+/**
+ * Kayit + etkinlesme icin ust sinir. Suresiz beklemek, dugmeyi kilitleyen
+ * hatanin ta kendisiydi: bir ust sinir olmadan "basarisiz" hali hic olusmuyor.
+ */
+const SW_READY_TIMEOUT_MS = 10_000;
+
 export default function WebPushOptIn() {
   const t = useTranslations("WebPush");
   const { data: session, status } = useSession();
@@ -22,8 +32,28 @@ export default function WebPushOptIn() {
     setBusy(true);
     setMsg(null);
     try {
-      const reg = await navigator.serviceWorker.ready;
-      const sub = await reg.pushManager.subscribe({
+      /*
+        SERVICE WORKER'I BURADA KAYDEDIYORUZ.
+
+        Onceden `navigator.serviceWorker.ready` bekleniyordu. O soz, ETKIN bir
+        kayit olmadan HIC cozulmez -- ve 2026-08-23'te eski worker kaldirildigi
+        icin uygulamada hicbir kayit kalmamisti. Sonuc: dugmeye basan kullanici
+        sonsuza kadar donen bir yukleme goruyordu; `finally` hic calismadigi
+        icin dugme sayfa yenilenene kadar kilitli kaliyordu ve tek bir hata
+        mesaji bile cikmiyordu.
+
+        Worker yalnizca BURADA, kullanici bildirim istediginde kaydediliyor --
+        yani hic istemeyen kullanicinin tarayicisinda service worker olmuyor.
+      */
+      const registration = await withTimeout(
+        navigator.serviceWorker
+          .register(PUSH_SW_PATH)
+          .then(() => navigator.serviceWorker.ready),
+        SW_READY_TIMEOUT_MS,
+        "push_sw_ready",
+      );
+
+      const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(vapid) as BufferSource,
       });

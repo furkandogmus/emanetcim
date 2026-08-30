@@ -8,9 +8,16 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["standalone", "window-controls-overlay"],
+  "display_override": [
+    "standalone",
+    "window-controls-overlay"
+  ],
   "orientation": "portrait-primary",
-  "categories": ["travel", "business", "utilities"],
+  "categories": [
+    "travel",
+    "business",
+    "utilities"
+  ],
   "background_color": "#fafaf9",
   "theme_color": "#ea580c",
   "edge_side_panel": {
@@ -36,30 +43,24 @@
       "short_name": "Ara",
       "description": "Yakındaki emanet noktalarını bul",
       "url": "/search",
-      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/icons/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Rezervasyonlarım",
       "short_name": "Rezervasyon",
       "description": "Rezervasyonlarımı görüntüle",
       "url": "/bookings",
-      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshots/search-mobile.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "BagajPark arama ekranı"
-    },
-    {
-      "src": "/screenshots/home-desktop.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "BagajPark ana sayfa"
+      "icons": [
+        {
+          "src": "/icons/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }
