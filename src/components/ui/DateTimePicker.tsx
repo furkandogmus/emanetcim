@@ -247,6 +247,39 @@ export default function DateTimePicker({
     return () => document.removeEventListener("keydown", handler);
   }, [open]);
 
+
+  /**
+   * Takvimin ERİŞİLEBİLİRLİK ETİKETLERİ.
+   *
+   * NEDEN (2026-08-31'de ölçüldü): `react-day-picker` kendi varsayılan ARIA
+   * etiketlerini İNGİLİZCE üretiyor ve bunlar `locale` prop'undan etkilenmiyor.
+   * Türkçe bir sayfada ekran okuyucu şunları duyuyordu:
+   *
+   *   nav      → "Navigation bar"
+   *   düğmeler → "Go to the Previous Month" / "Go to the Next Month"
+   *
+   * Yani altı dilin hepsinde takvimin gezinme kontrolleri İngilizceydi.
+   *
+   * YENİ ÇEVİRİ ANAHTARI EKLENMEDİ, bilerek: ay adını kullanıcının kendi
+   * diliyle `Intl` üretiyor ("Eylül 2026"), nav etiketi de zaten var olan
+   * `Common.selectDate`. Böylece Farsça ve Japonca dahil altı dilde birden
+   * doğru oluyor — benim çeviremeyeceğim diller de dahil.
+   */
+  const calendarLabels = useMemo(
+    () => {
+      const monthName = (month: Date | undefined) =>
+        month
+          ? new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }).format(month)
+          : "";
+      return {
+        labelNav: () => dateLabel,
+        labelPrevious: (month: Date | undefined) => monthName(month),
+        labelNext: (month: Date | undefined) => monthName(month),
+      };
+    },
+    [locale, dateLabel],
+  );
+
   const applyDate = useCallback(
     (date: Date | undefined) => {
       if (!date) return;
@@ -344,6 +377,7 @@ export default function DateTimePicker({
               onSelect={applyDate}
               locale={dfLocale}
               weekStartsOn={1}
+              labels={calendarLabels}
               disabled={minDate ? { before: minDate } : undefined}
               defaultMonth={parsed ?? minDate ?? new Date()}
               showOutsideDays
@@ -415,6 +449,7 @@ export default function DateTimePicker({
             onSelect={applyDate}
             locale={dfLocale}
             weekStartsOn={1}
+            labels={calendarLabels}
             disabled={minDate ? { before: minDate } : undefined}
             defaultMonth={parsed ?? minDate ?? new Date()}
             showOutsideDays

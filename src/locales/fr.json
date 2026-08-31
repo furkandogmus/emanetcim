@@ -1309,7 +1309,8 @@
     "citiesViewAll": "Toutes les villes & guides",
     "paymentsNote": "Cartes via service provider (sécurisé). Pas d’espèces. Portefeuilles (Apple/Google Pay, PayPal) prévus avec service provider.",
     "securityNote": "Les réservations et données personnelles sont protégées par SSL.",
-    "sitemap": "Plan du site"
+    "sitemap": "Plan du site",
+    "legalNavLabel": "Liens juridiques"
   },
   "Contact": {
     "title": "Contactez-nous",

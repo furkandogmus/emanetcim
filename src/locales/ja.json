@@ -1309,7 +1309,8 @@
     "citiesViewAll": "すべての都市とガイド",
     "paymentsNote": "決済代行会社によるカード決済（安全）。現金は利用できません。ウォレット（Apple/Google Pay、PayPal）は決済代行会社を通じて対応予定です。",
     "securityNote": "予約情報および個人情報はSSLで保護されています。",
-    "sitemap": "サイトマップ"
+    "sitemap": "サイトマップ",
+    "legalNavLabel": "法的リンク"
   },
   "Contact": {
     "title": "お問い合わせ",

@@ -1341,7 +1341,8 @@
     "citiesViewAll": "All cities & guides",
     "paymentsNote": "Cards via service provider (secure). Cash not accepted. Wallets (Apple/Google Pay, PayPal) planned with service provider.",
     "sitemap": "Sitemap",
-    "securityNote": "Reservations and personal data are protected with SSL."
+    "securityNote": "Reservations and personal data are protected with SSL.",
+    "legalNavLabel": "Legal links"
   },
   "PartnerPromo": {
     "badge": "Launch Special",

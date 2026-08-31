@@ -64,7 +64,10 @@ export default function Footer() {
       >
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 text-[11px] font-bold text-gray-400 sm:flex-row">
           <p>© {currentYear} {tCommon("appName")}. {t("rights")}</p>
-          <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 id-eyebrow [&_a]:inline-block [&_a]:py-2 [&_a]:-my-2">
+          <nav
+            aria-label={t("legalNavLabel")}
+            className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 id-eyebrow [&_a]:inline-block [&_a]:py-2 [&_a]:-my-2"
+          >
             <Link href="/terms" className="transition-colors hover:text-orange-600">{t("terms")}</Link>
             <Link href="/privacy" className="transition-colors hover:text-orange-600">{t("privacy")}</Link>
             <Link href="/contact" className="transition-colors hover:text-orange-600">{t("contact")}</Link>

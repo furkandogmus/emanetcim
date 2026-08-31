@@ -1341,7 +1341,8 @@
     "citiesViewAll": "Tüm şehirler ve rehberler",
     "paymentsNote": "Kart ile hizmet sağlayıcı (güvenli). Nakit yok. Cüzdan ödemeleri (Apple/Google Pay, PayPal) hizmet sağlayıcı ile planlanıyor.",
     "sitemap": "Site Haritası",
-    "securityNote": "Rezervasyon ve kişisel verileriniz SSL ile korunur."
+    "securityNote": "Rezervasyon ve kişisel verileriniz SSL ile korunur.",
+    "legalNavLabel": "Yasal bağlantılar"
   },
   "PartnerPromo": {
     "badge": "Lansmana Özel",

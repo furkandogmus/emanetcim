@@ -48,7 +48,8 @@ yazılmaz; ölçüm yazılır.
 | 28 | Arama sayfasında mobilde HİÇ `h1` yok | Ekran okuyucu | ✅ DÜZELTİLDİ |
 | 29 | Footer başlıkları `h2→h4` atlaması yapıyor (4 sayfa) | Ekran okuyucu | ✅ DÜZELTİLDİ |
 | 30 | Sayfa içinde iç içe `main` (25 dosya) | Ekran okuyucu | ✅ DÜZELTİLDİ |
-| 31 | Etiketsiz `nav` (arama, checkout) | Ekran okuyucu | ⏳ AÇIK |
+| 31 | Etiketsiz `nav` (footer yasal bağlantılar) | Ekran okuyucu | ✅ DÜZELTİLDİ |
+| 32 | Takvim kontrolleri her dilde İNGİLİZCE konuşuyor | Ekran okuyucu | ✅ DÜZELTİLDİ |
 | 101 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
 | 102 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
 | 103 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
@@ -525,6 +526,38 @@ erişilebilirlik ağacına HİÇ girmez, yani ekran okuyucu tek `h1` görüyor.
 süzüyordum. `display:none` bir ebeveynin çocuğu, kendi `display`ini yine
 `block` olarak raporlar. Doğrusu `el.checkVisibility({checkVisibilityCSS:
 true})` — ataları da hesaba katıyor. Bundan sonraki taramalarda bu kullanılmalı.
+
+### 32. Takvim, ekran okuyucuya her dilde İngilizce konuşuyordu
+
+İşaret taraması sırasında Türkçe sayfada `aria-label="Navigation bar"` diye
+**iki** işaret çıktı — ne kodda ne dil dosyalarında böyle bir metin var.
+İzlendi: `nav.rdp-nav`, yani **react-day-picker**'ın ay gezinme çubuğu.
+
+Kütüphane kendi ARIA etiketlerini İngilizce üretiyor ve bunlar `locale`
+prop'undan **etkilenmiyor**. Altı dilin hepsinde ekran okuyucu şunu duyuyordu:
+
+```
+nav      → "Navigation bar"
+düğmeler → "Go to the Previous Month" / "Go to the Next Month"
+```
+
+Yani görme engelli bir Türk kullanıcı, tarih seçicinin kontrollerini
+İngilizce duyuyordu — üstelik iki takvim (bırakış + alış) olduğu için aynı
+anlamsız etiket iki kez.
+
+Düzeltme `labels` prop'u ile. **Yeni çeviri anahtarı eklenmedi, bilerek:** ay
+adını kullanıcının kendi diliyle `Intl` üretiyor ("Eylül 2026"), nav etiketi
+zaten var olan `Common.selectDate`. Böylece Farsça ve Japonca dahil altı dilde
+birden doğru — benim çeviremeyeceğim diller de dahil. Düğme artık hedef ayı
+söylüyor, ki bu "önceki aya git"ten daha bilgilendirici.
+
+### 31. Footer yasal bağlantı `nav`'ı etiketsizdi
+
+Arama ve checkout sayfalarında üç-dört işaret var; etiketsiz olan, ekran
+okuyucuda ayırt edilemiyordu. `Footer.legalNavLabel` anahtarı altı dile
+gerçek çevirisiyle eklendi ve `aria-label` olarak bağlandı. (Bu, oturumda dil
+dosyalarına dokunduğum ikinci yer — diğer agent'in o dosyalarda açık işi
+olmadığı doğrulandıktan sonra yapıldı.)
 
 ### Yavaş bağlantı (3G) — SAĞLIKLI
 
