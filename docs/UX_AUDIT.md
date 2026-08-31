@@ -29,6 +29,22 @@ giriş düğmesi) dar ekranlarda da tutuyor.
 > staging'de ne olursa olsun yalnızca o yolları alır. `git add` + `git commit`
 > ikilisi, eş zamanlı çalışılan bir repoda güvenli değil.
 >
+> **`git add -A <dizin>` DE AYNI TUZAK — bu sefer main KIRMIZI oldu (3).**
+> 2026-08-31, `ef9c2cc`: 22 sayfalık bir meta-etiket düzeltmesini `git add -A
+> src/app` ile hazırladım. O dizinde diğer agent'in **commit'lenmemiş** XSS
+> düzeltmesi duruyordu (JSON-LD kaçışı, 7 dosyada `serializeJsonLd` çağrısı) ve
+> commit onları da aldı — ama çağrılan `src/lib/json-ld-script.ts` `src/app`
+> altında olmadığı için commit'e girmedi. Sonuç: `Cannot find module
+> '@/lib/json-ld-script'`, dokuz dosyada typecheck hatası, **CI kırmızı**.
+> Önceki iki vakada iş tesadüfen sağlamdı; bu üçüncüsünde değildi.
+> Üretim korundu, çünkü deploy `verify`e `needs` ile bağlı: kırmızı commit
+> yayına çıkmadı ve diğer agent eksik dosyayı bir sonraki commit'te gönderince
+> main toparlandı.
+> Kural bir adım daha sertleşiyor: **`git add -A` ve `git add <dizin>` hiç
+> kullanılmaz.** Dosyalar tek tek yazılır, ya da doğrudan
+> `git commit -- <yol> <yol>` verilir. Bir dizin, o an içinde ne olduğunu
+> bilmediğiniz bir kümedir.
+>
 > **PAYLAŞILAN DOSYA UYARISI — pahalıya mal oldu.** `src/locales/*.json`
 > dosyalarını iki agent birden düzenliyor. Bir betikle dosyanın TAMAMINI okuyup
 > yeniden yazarsanız, diğer agent'in o an **commit'lenmemiş** anahtarları da
