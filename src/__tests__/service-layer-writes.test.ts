@@ -109,12 +109,17 @@ const CEILINGS: Record<string, number> = {
     muhurleri stoga dondurmuyordu.
   */
   shop: 4,
-  user: 22,
+  /*
+    22 -> 20 (2026-09-01): telefon guncelleme govdesi `PartnerProfileService`e
+    tasindi. Web action'inda ve mobil ucta ayri yaziliydi; mobil kopya
+    normalizasyon, gecerlilik ve cakisma kurallarinin HICBIRINI uygulamiyordu.
+  */
+  user: 20,
   verificationToken: 7,
 };
 
 /** Toplam tavan — yeni bir MODELİN sessizce eklenmesini de yakalar. */
-const TOTAL_CEILING = 83;
+const TOTAL_CEILING = 81;
 
 /**
  * Yorumlar ayıklanır: bu dosyaların çoğunda "eskiden burada ham

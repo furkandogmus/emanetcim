@@ -5,7 +5,7 @@ import { notificationService } from "@/services/NotificationService";
 import prisma from "@/lib/db";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { verifyQrToken } from "@/lib/qr-token";
-import { normalizeTrGsm10 } from "@/lib/netgsm";
+import { partnerProfileService } from "@/services/PartnerProfileService";
 import { getLocale } from "next-intl/server";
 import { sealService } from "@/services/SealService";
 import { z } from "zod";
@@ -348,32 +348,20 @@ export async function updatePartnerPhoneAction(phone: string) {
   const auth = await requirePartner();
   if (!auth.ok) return { success: false as const, error: auth.error };
 
-  const trimmed = phone.trim();
-  const normalized = normalizeTrGsm10(trimmed);
-  if (trimmed && !normalized) {
+  /*
+    GOVDE `PartnerProfileService`TE. Ayni kural mobil ucta da gerekiyordu ve
+    orada hic yazilmamisti (ham deger dogrudan yaziliyordu). Burada kalan tek
+    is oturum cozumu, hata anahtari eslemesi ve `revalidate`.
+  */
+  const result = await partnerProfileService.updatePhone(auth.actor.id, phone);
+  if (!result.ok) {
     return {
       success: false as const,
-      error: "Errors.invalidTrPhone",
+      error:
+        result.reason === "invalid_tr_phone"
+          ? "Errors.invalidTrPhone"
+          : "Errors.phoneAlreadyRegistered",
     };
-  }
-
-  try {
-    await prisma.user.update({
-      where: { id: auth.actor.id },
-      data: { phone: normalized },
-    });
-  } catch (e: unknown) {
-    const code =
-      e && typeof e === "object" && "code" in e
-        ? (e as { code?: string }).code
-        : undefined;
-    if (code === "P2002") {
-      return {
-        success: false as const,
-        error: "Errors.phoneAlreadyRegistered",
-      };
-    }
-    throw e;
   }
 
   revalidatePartnerPaths();
