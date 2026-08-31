@@ -22,6 +22,8 @@ import PartnerHistoryTab from "@/components/partner/PartnerHistoryTab";
 import PartnerRequestsTab from "@/components/partner/PartnerRequestsTab";
 import PartnerBottomNav, { type PartnerTab } from "@/components/partner/PartnerBottomNav";
 import PartnerReferralCard from "@/components/partner/PartnerReferralCard";
+import PartnerPulse, { type PulseProps } from "@/components/partner/PartnerPulse";
+import { formatTryCurrency } from "@/lib/currency";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 import {
   checkOutAction,
@@ -85,6 +87,10 @@ interface PartnerClientProps {
   requireSeals?: boolean;
   /** `AnalyticsService.getShopViewCountThisMonth` — bu ay kaç kez görüntülendi. */
   monthlyShopViews?: number;
+  /** Günlük enstantane — `PartnerDashboardService.getSnapshot`. */
+  pulse?: Omit<PulseProps, "capacity" | "commissionActive">;
+  capacity?: number;
+  commissionActive?: boolean;
   /**
    * Esnafın TÜM dükkanları. Panel eskiden koşulsuz `shops[0]`'ı gösteriyordu:
    * çok dükkanlı esnafın ikinci dükkanındaki valizler "İşlem Geçmişi"nde hiç
@@ -112,6 +118,9 @@ export default function PartnerClient({
   initialPhone = "",
   requireSeals = false,
   monthlyShopViews = 0,
+  pulse,
+  capacity = 0,
+  commissionActive = false,
 }: PartnerClientProps) {
   const t = useTranslations("Partner");
   const errorText = useActionErrorText();
@@ -534,6 +543,16 @@ export default function PartnerClient({
         </div>
       </header>
 
+      {activeTab === "PANEL" && pulse && (
+        <div className="mx-auto w-full max-w-5xl animate-in fade-in duration-500">
+          <PartnerPulse
+            {...pulse}
+            capacity={capacity}
+            commissionActive={commissionActive}
+          />
+        </div>
+      )}
+
       {activeTab === "PANEL" && (
         <div className="mx-auto grid w-full max-w-5xl flex-1 items-center gap-6 animate-in fade-in duration-500 md:grid-cols-[minmax(260px,0.9fr)_minmax(320px,1.1fr)] md:gap-10">
           <button
@@ -557,17 +576,25 @@ export default function PartnerClient({
               <p className="text-3xl font-black text-gray-900 md:text-4xl">{activeCount}</p>
             </div>
             <div className="ui-card flex flex-col gap-1 p-5 md:rounded-4xl md:p-6">
+              {/*
+                ETIKET DURUMA BAGLI. Komisyon yururlukte degilken "NET HAKEDIS"
+                demek, platformun esnafa para gonderecegini ima ediyor; oysa para
+                zaten kasada. Kazanc sayfasindaki ayni duzeltmenin panel hali.
+              */}
               <p className="id-eyebrow text-gray-400">
-                {t("netEarnings")}
+                {t(commissionActive ? "netEarnings" : "totalCollected")}
               </p>
-              <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-black text-green-600 md:text-4xl">
-                  {netEarnings}
-                </span>
-                <span className="text-xs font-black text-green-600/60 uppercase">
-                  TL
-                </span>
-              </div>
+              {/*
+                Tutar ARTIK HAM SAYI DEGIL. `{netEarnings}` JS'in varsayilan
+                gosterimini basiyordu ve o HER ZAMAN NOKTA kullanir: Turkce'de
+                nokta BINLIK ayracidir, yani 1520.5 "on bes bin ikiyuz bes" gibi
+                okunur. `currency.ts` bu hata sinifi icin yazilmisti; esnafin ana
+                para rakami onu atliyordu. "TL" eki de elle yaziliydi -- para
+                biriminin yerlesimi dile gore degisir.
+              */}
+              <p className="id-display text-3xl text-green-600 md:text-4xl">
+                {formatTryCurrency(netEarnings, dateLocale)}
+              </p>
             </div>
             <div className="ui-card col-span-2 flex items-center justify-between gap-2 p-5 md:rounded-4xl md:p-6">
               <p className="id-eyebrow text-gray-400">

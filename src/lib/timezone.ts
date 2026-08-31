@@ -71,3 +71,65 @@ export function startOfDayInTimeZone(timeZone: string, now: Date = new Date()): 
   const naiveMidnight = Date.UTC(year, month - 1, day);
   return new Date(naiveMidnight - offsetMs(timeZone, new Date(naiveMidnight)));
 }
+
+/**
+ * `timeZone` içinde `now`un ait olduğu GÜNÜN yarı açık aralığı: `[start, end)`.
+ *
+ * `end` HESAPLANMAZ, ARANIR. "Başlangıç + 24 saat" demek yaz saati geçişinin
+ * olduğu günlerde bir saat kaydırır (o gün 23 ya da 25 saattir) ve gecenin son
+ * saatindeki rezervasyon ya iki güne birden ya da hiçbirine düşer. Bunun yerine
+ * kesinlikle ertesi güne düşen bir ana (+36 saat) bakılıp O GÜNÜN başlangıcı
+ * alınıyor — DST ne yaparsa yapsın sınır doğru yerde durur.
+ */
+export function dayRangeInTimeZone(
+  timeZone: string,
+  now: Date = new Date(),
+): { start: Date; end: Date } {
+  const start = startOfDayInTimeZone(timeZone, now);
+  const end = startOfDayInTimeZone(
+    timeZone,
+    new Date(start.getTime() + 36 * 60 * 60 * 1000),
+  );
+  return { start, end };
+}
+
+/**
+ * `timeZone` içinde `now`un ait olduğu AYIN yarı açık aralığı: `[start, end)`.
+ * `monthsAgo` ile geriye gidilir (1 = geçen ay).
+ */
+export function monthRangeInTimeZone(
+  timeZone: string,
+  now: Date = new Date(),
+  monthsAgo = 0,
+): { start: Date; end: Date } {
+  const [year, month] = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+  })
+    .format(now)
+    .split("-")
+    .map(Number);
+
+  // Ayin ilk gununun 00:00'i; `Date.UTC` ay tasmasini kendisi cozer (0 -> Aralik).
+  const firstOf = (offset: number) =>
+    startOfDayInTimeZone(
+      timeZone,
+      // Ayin 15'i: DST gecisleri ve ay uzunlugu ne olursa olsun o ayin icinde kalir.
+      new Date(Date.UTC(year, month - 1 + offset, 15, 12)),
+    );
+  const startOfMonth = (offset: number) => {
+    const mid = firstOf(offset);
+    const [y, m] = new Intl.DateTimeFormat("en-CA", {
+      timeZone,
+      year: "numeric",
+      month: "2-digit",
+    })
+      .format(mid)
+      .split("-")
+      .map(Number);
+    return startOfDayInTimeZone(timeZone, new Date(Date.UTC(y, m - 1, 1, 12)));
+  };
+
+  return { start: startOfMonth(-monthsAgo), end: startOfMonth(-monthsAgo + 1) };
+}

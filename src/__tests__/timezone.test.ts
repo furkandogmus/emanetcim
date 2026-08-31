@@ -44,3 +44,52 @@ describe("dükkan saat diliminde günün başlangıcı", () => {
     expect(winter.toISOString()).toBe("2026-01-15T05:00:00.000Z");
   });
 });
+
+import { dayRangeInTimeZone, monthRangeInTimeZone } from "@/lib/timezone";
+
+describe("gün aralığı", () => {
+  it("yarı açık aralık üretir ve gün 24 saattir", () => {
+    const { start, end } = dayRangeInTimeZone("Europe/Istanbul", new Date("2026-08-31T10:00:00Z"));
+    expect(start.toISOString()).toBe("2026-08-30T21:00:00.000Z");
+    expect(end.toISOString()).toBe("2026-08-31T21:00:00.000Z");
+  });
+
+  it("yaz saati BİTİŞİNDE gün 25 saattir — sabit +24 saat yanlış olurdu", () => {
+    /*
+      Avrupa'da 2026-10-25'te saatler geri aliniyor. O gun 25 saat surer; sinir
+      "baslangic + 24 saat" ile hesaplansaydi gunun son saati aralik DISINDA
+      kalir ve o saatteki rezervasyon hicbir gune dusmezdi.
+    */
+    const { start, end } = dayRangeInTimeZone("Europe/Berlin", new Date("2026-10-25T10:00:00Z"));
+    const hours = (end.getTime() - start.getTime()) / 3_600_000;
+    expect(hours).toBe(25);
+  });
+
+  it("yaz saati BAŞLANGICINDA gün 23 saattir", () => {
+    const { start, end } = dayRangeInTimeZone("Europe/Berlin", new Date("2026-03-29T10:00:00Z"));
+    expect((end.getTime() - start.getTime()) / 3_600_000).toBe(23);
+  });
+});
+
+describe("ay aralığı", () => {
+  it("içinde bulunulan ayın sınırlarını verir", () => {
+    const { start, end } = monthRangeInTimeZone("Europe/Istanbul", new Date("2026-08-31T10:00:00Z"));
+    // Agustos 1, 00:00 IST = 31 Temmuz 21:00 UTC
+    expect(start.toISOString()).toBe("2026-07-31T21:00:00.000Z");
+    expect(end.toISOString()).toBe("2026-08-31T21:00:00.000Z");
+  });
+
+  it("geçen aya gidebilir ve yıl sınırını geçebilir", () => {
+    const prev = monthRangeInTimeZone("Europe/Istanbul", new Date("2026-01-15T10:00:00Z"), 1);
+    // Aralik 2025. Turkiye 2016'dan beri KALICI UTC+3 -- kis saati yok, yani
+    // Aralik da Agustos gibi +3. 1 Aralik 00:00 IST = 30 Kasim 21:00 UTC.
+    expect(prev.start.toISOString()).toBe("2025-11-30T21:00:00.000Z");
+    expect(prev.end.toISOString()).toBe("2025-12-31T21:00:00.000Z");
+  });
+
+  it("ayın son gününde bakıldığında da doğru ayı seçer", () => {
+    // Ayin 31'inde `setMonth(-1)` tipi hesaplar bir onceki ayi atlar (31 Mart -> 3 Mart).
+    const { start } = monthRangeInTimeZone("Europe/Istanbul", new Date("2026-03-31T20:00:00Z"), 1);
+    expect(start.toISOString().slice(0, 7)).toBe("2026-01"); // Subat 1 00:00 IST = 31 Ocak 21:00 UTC
+  });
+});

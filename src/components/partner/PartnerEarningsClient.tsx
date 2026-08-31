@@ -319,11 +319,17 @@ export default function PartnerEarningsClient({
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-emerald-600">{money(m.netTotal)}</p>
-                    <p className="text-xs text-gray-400">
-                      {commissionActive
-                        ? t("earningsGrossSuffix", { amount: fmtPlain(m.grossTotal) })
-                        : t("earningsReservationCount", { count: m.count })}
-                    </p>
+                    {/*
+                      Komisyon yururlukte degilken net ile brut ESITTIR; altina
+                      brutu yazmak ayni sayiyi iki kez basmak olur. Ilk denemede
+                      yerine rezervasyon adedi konmustu, o da SOLDAKI etiketi
+                      tekrar ediyordu. Soylenecek bir sey yoksa satir cikmaz.
+                    */}
+                    {commissionActive && (
+                      <p className="text-xs text-gray-400">
+                        {t("earningsGrossSuffix", { amount: fmtPlain(m.grossTotal) })}
+                      </p>
+                    )}
                   </div>
                 </div>
               ))}
@@ -372,9 +378,11 @@ export default function PartnerEarningsClient({
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-emerald-600">{money(net)}</p>
-                        <p className="text-xs text-gray-400">
-                          {t("earningsGrossSuffix", { amount: fmtPlain(b.totalPrice) })}
-                        </p>
+                        {commissionActive && (
+                          <p className="text-xs text-gray-400">
+                            {t("earningsGrossSuffix", { amount: fmtPlain(b.totalPrice) })}
+                          </p>
+                        )}
                       </div>
                     </div>
                   );

@@ -4,6 +4,7 @@ import prisma from "@/lib/db";
 import { bookingService } from "@/services/BookingService";
 import { analyticsService } from "@/services/AnalyticsService";
 import { partnerEarningsService } from "@/services/PartnerEarningsService";
+import { partnerDashboardService } from "@/services/PartnerDashboardService";
 import { getEffectiveCommission } from "@/lib/commission";
 import { getPricingRules } from "@/lib/platform-settings";
 import { moneyToNumber } from "@/lib/money";
@@ -63,6 +64,7 @@ export default async function PartnerPage({
         openingTime: true,
         closingTime: true,
         pricePerDay: true,
+        timezone: true,
       },
     }),
     getEffectiveCommission(),
@@ -88,6 +90,17 @@ export default async function PartnerPage({
       */
       partnerEarningsService.getTotals(activeShop.id, commission.rate),
     ]);
+
+  /*
+    GUNLUK ENSTANTANE. Panel yalnizca omur boyu toplamlari gosteriyordu; esnafin
+    dukkani actiginda sordugu sorularin (bugun kac valiz gelecek, kaci alinacak,
+    elimde ne var, bu ay nasil gidiyor) hicbiri ekranda yoktu.
+  */
+  const pulse = await partnerDashboardService.getSnapshot(
+    activeShop.id,
+    shopDetail.timezone,
+    commission.rate,
+  );
 
   const bookings = result.items;
   const activeCount = bookings.filter(
@@ -115,6 +128,9 @@ export default async function PartnerPage({
       initialPhone={ownerPhoneRow?.phone ?? ""}
       requireSeals={pricingRules.requireSealsOnCheckIn}
       monthlyShopViews={monthlyShopViews}
+      pulse={pulse}
+      capacity={shopDetail.capacity}
+      commissionActive={commission.rate > 0}
     />
   );
 }
