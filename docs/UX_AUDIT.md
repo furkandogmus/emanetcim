@@ -7,6 +7,22 @@ yapın, silmeyin — neyin neden değiştiği sonraki turda gerekiyor.
 Yöntem: canlıda (bagajpark.com) tarayıcıyla gezmek + DOM ölçmek. "Sanırım şöyle"
 yazılmaz; ölçüm yazılır.
 
+**Regresyon taraması:** `node scripts/ux-sweep.mjs` — kapatılan hataların geri
+gelmediğini tek komutla ölçer (yatay kaydırma, tek `main`, tek `h1`, başlık
+atlaması, etiketsiz `nav`, ekran okuyucuya giden İngilizce metin, dokunma
+hedefi ≥24×24; normal boyut ve %200 metin). Bozulursa çıkış kodu 1.
+**2026-08-31 itibarıyla altı sayfa, iki koşul: hepsi geçiyor.**
+
+> **PAYLAŞILAN DOSYA UYARISI — pahalıya mal oldu.** `src/locales/*.json`
+> dosyalarını iki agent birden düzenliyor. Bir betikle dosyanın TAMAMINI okuyup
+> yeniden yazarsanız, diğer agent'in o an **commit'lenmemiş** anahtarları da
+> sizin commit'inize girer. 2026-08-31'de tam bu oldu:
+> `Admin.platformSettingsCheckInGrace` anahtarı `de`/`fr`'ye sızdı ama `tr`'de
+> olmadığı için `locales.test.ts` CI'da kırıldı ve deploy durdu.
+> Kural: dil dosyasına dokunan her commit'ten önce
+> `git diff --cached src/locales` çıktısını okuyun; yalnızca kendi
+> anahtarlarınız olmalı.
+
 > **Numara aralıkları — çakışmayı önlemek için.** Bu dosyaya aynı anda birden
 > fazla agent yazıyor ve ikisi de sıradaki numarayı alınca üç kez çakışma oldu
 > (iki `#10`, iki `#16`…). Bundan sonra: **1–99 mobil/PWA/erişilebilirlik
