@@ -38,6 +38,21 @@ const APP_SURFACE_PREFIXES = [
 const NO_MOBILE_NAV_PREFIXES = ["/partner", "/admin", "/login", "/register", "/auth"];
 
 /**
+ * TELEFONDA ALTBILGI HIC CIZILMEZ.
+ *
+ * Arama ekrani telefonda tam ekran bir uygulama yuzeyidir: ustte harita, altta
+ * suruklenebilir sonuc paneli, en altta gezinme cubugu. Ince yasal satir bile
+ * o duzenin altinda bos, kalabalik yapan bir serit olarak duruyor -- kullanici
+ * listeyi kaydirinca haritanin ardindan bir "sayfa sonu" cikiyor ve ekran
+ * uygulama olmaktan cikip web sayfasina donuyor.
+ *
+ * Yalnizca `max-md`: masaustunde yanda yer var, orada kalmasinin bir zarari
+ * yok. Bagliklar da kaybolmuyor -- ayni baglantilar her pazarlama sayfasinin
+ * altbilgisinde ve site haritasinda duruyor.
+ */
+const MAP_SURFACE_PREFIXES = ["/search"];
+
+/**
  * Footer - Kurumsal Bilgi ve Navigasyon Çubuğu
  */
 export default function Footer() {
@@ -56,11 +71,16 @@ export default function Footer() {
   const needsMobileNavClearance = !NO_MOBILE_NAV_PREFIXES.some(
     (p) => pathname === p || pathname.startsWith(`${p}/`),
   );
+  const isMapSurface = MAP_SURFACE_PREFIXES.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`),
+  );
 
   if (isAppSurface) {
     return (
       <footer
-        className={`border-t border-gray-100 bg-white px-6 py-6 font-sans [&_a]:inline-block [&_a]:py-1.5 [&_a]:-my-1.5 [&_a]:px-1 [&_a]:-mx-1 ${needsMobileNavClearance ? "max-md:pb-28" : ""}`}
+        className={`border-t border-gray-100 bg-white px-6 py-6 font-sans [&_a]:inline-block [&_a]:py-1.5 [&_a]:-my-1.5 [&_a]:px-1 [&_a]:-mx-1 ${
+          isMapSurface ? "max-md:hidden" : needsMobileNavClearance ? "max-md:pb-28" : ""
+        }`}
       >
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 text-[11px] font-bold text-gray-400 sm:flex-row">
           <p>© {currentYear} {tCommon("appName")}. {t("rights")}</p>
