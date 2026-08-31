@@ -40,8 +40,24 @@ export async function generateMetadata({
    */
   const title = tHome("seoTitle");
   const description = t("heroSubtitle");
+  /*
+    MARKA EKI ELLE: `[locale]/layout.tsx` icinde `title.template` = "%s |
+    BagajPark" var, ama Next'te bu sablon AYNI SEGMENTTEKI `page.tsx`e
+    uygulanmaz -- yalnizca ALT segmentlere. Sonuc olculdu (2026-08-31):
+
+      /tr          "Bagaj Emanet ve Valiz Depolama"        <- marka YOK
+      /tr/search   "Emanet noktasi ara | Harita | BagajPark"
+      /tr/faq      "Sikca Sorulan Sorular | BagajPark"
+
+    Yani sitenin EN COK yer imine eklenen ve paylasilan sayfasi, sekme
+    seridinde kimin sitesi oldugunu soylemiyordu. Sablonun yaptigi ekin
+    aynisi burada elle yapiliyor.
+
+    `openGraph`/`twitter` basligi bilerek EKSIZ kaliyor: paylasim kartinda
+    marka zaten `siteName` alanindan geliyor, iki kez yazmak gereksiz.
+  */
   return {
-    title,
+    title: `${title} | BagajPark`,
     description,
     alternates: alternatesForPath(locale, ""),
     openGraph: {
