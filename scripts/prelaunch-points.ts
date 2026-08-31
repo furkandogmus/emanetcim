@@ -1889,6 +1889,151 @@ const CITIES: City[] = [
       { slug: "merkez", name: "Queenstown Mall", district: "Queenstown", latitude: -45.03222, longitude: 168.66099 },
     ],
   },
+  // ===== 31 AĞUSTOS EKİ: kapsam denetiminde çıkan boşluklar =====
+  /*
+    Bu 16 şehir listede HİÇ YOKTU ve boşluk üretimde ölçülerek bulundu: farklı
+    alfabelerden on şehir için arama yapıldı, Moskova ve Tel Aviv **sıfır nokta**
+    döndürdü. Ardından liste sistematik olarak tarandı.
+
+    En dikkat çekeni İRAN: ürün Farsça arayüz taşıyor (`src/locales/fa.json`,
+    altı dilden biri) ama tek bir İran şehri yoktu. Bir dili desteklemek, o dili
+    konuşanın arayacağı yerlerde nokta bulundurmayı da gerektiriyor.
+
+    Koordinatlar yine tahmin edilmedi: 2026-08-31'de Nominatim'e ileri geocode
+    ettirildi ve dönen değer buraya yazıldı; `addressdetails` ile dönen ülke
+    kodu da o an denetlendi. Tutmayan üç sorgu (Tel Aviv Savidor garı, Shenzhen
+    Luohu, Atlanta "downtown" -- sonuncusu bir bazilikaya düşüyordu) yeniden
+    soruldu; Savidor hiç çözülemedi, o yüzden Tel Aviv üç yerine iki noktayla
+    duruyor. Hepsi `--verify` kapısından geçer.
+
+    Kapsam denetiminin kendisi de bir kez yanıldı: "casablanca", "jakarta" ve
+    "colombo" eksik görünüyordu, oysa listede `kazablanka`, `cakarta` ve
+    `kolombo` olarak duruyorlardı. Farklı yazımla arayan bir denetim, olmayan
+    bir boşluk uydurur -- bu yüzden ekleme öncesi her anahtar gerçek listeye
+    karşı tek tek sınandı ve üçü çıkarıldı.
+  */
+  {
+    key: "moskova", city: "Moscow", country: "RU", suffix: " — Камера хранения", timezone: "Europe/Moscow",
+    points: [
+      { slug: "kizil-meydan", name: "Красная площадь", district: "Tverskoy", latitude: 55.75359, longitude: 37.6215 },
+      { slug: "arbat", name: "Арбат", district: "Arbat", latitude: 55.74709, longitude: 37.58381 },
+      { slug: "kurskiy", name: "Курский вокзал", district: "Basmanny", latitude: 55.75744, longitude: 37.6609 },
+      { slug: "leningradskiy", name: "Ленинградский вокзал", district: "Krasnoselsky", latitude: 55.77648, longitude: 37.65511 },
+    ],
+  },
+  {
+    key: "st-petersburg", city: "Saint Petersburg", country: "RU", suffix: " — Камера хранения", timezone: "Europe/Moscow",
+    points: [
+      { slug: "ermitaj", name: "Эрмитаж", district: "Tsentralny", latitude: 59.94121, longitude: 30.31549 },
+      { slug: "nevskiy", name: "Невский проспект", district: "Tsentralny", latitude: 59.93398, longitude: 30.3284 },
+      { slug: "moskovskiy", name: "Московский вокзал", district: "Tsentralny", latitude: 59.92731, longitude: 30.36235 },
+    ],
+  },
+  {
+    key: "tel-aviv", city: "Tel Aviv", country: "IL", suffix: " — שמירת מזוודות", timezone: "Asia/Jerusalem",
+    points: [
+      { slug: "karmel", name: "שוק הכרמל", district: "Tel Aviv", latitude: 32.06837, longitude: 34.76855 },
+      { slug: "namal", name: "נמל תל אביב", district: "Tel Aviv", latitude: 32.09865, longitude: 34.77552 },
+      { slug: "rothschild", name: "שדרות רוטשילד", district: "Tel Aviv", latitude: 32.06379, longitude: 34.77433 },
+    ],
+  },
+  {
+    key: "tahran", city: "Tehran", country: "IR", suffix: " — امانات بار", timezone: "Asia/Tehran",
+    points: [
+      { slug: "azadi", name: "میدان آزادی", district: "Tehran", latitude: 35.69974, longitude: 51.33806 },
+      { slug: "bazar", name: "بازار بزرگ تهران", district: "Tehran", latitude: 35.67657, longitude: 51.4214 },
+      { slug: "milad", name: "برج میلاد", district: "Tehran", latitude: 35.7447, longitude: 51.37527 },
+    ],
+  },
+  {
+    key: "isfahan", city: "Isfahan", country: "IR", suffix: " — امانات بار", timezone: "Asia/Tehran",
+    points: [
+      { slug: "naghsh-e-jahan", name: "میدان نقش جهان", district: "Isfahan", latitude: 32.6581, longitude: 51.67736 },
+      { slug: "si-o-se-pol", name: "سی و سه پل", district: "Isfahan", latitude: 32.64459, longitude: 51.66751 },
+    ],
+  },
+  {
+    key: "siraz", city: "Shiraz", country: "IR", suffix: " — امانات بار", timezone: "Asia/Tehran",
+    points: [
+      { slug: "hafezieh", name: "حافظیه", district: "Shiraz", latitude: 29.62577, longitude: 52.5585 },
+      { slug: "vakil", name: "بازار وکیل", district: "Shiraz", latitude: 29.61763, longitude: 52.5489 },
+    ],
+  },
+  {
+    key: "kalkuta", city: "Kolkata", country: "IN", suffix: " Luggage Storage", timezone: "Asia/Kolkata",
+    points: [
+      { slug: "howrah", name: "Howrah Station", district: "Howrah", latitude: 22.58287, longitude: 88.34281 },
+      { slug: "park-street", name: "Park Street", district: "Park Street", latitude: 22.55516, longitude: 88.35012 },
+      { slug: "sealdah", name: "Sealdah Station", district: "Sealdah", latitude: 22.56738, longitude: 88.37102 },
+    ],
+  },
+  {
+    key: "chennai", city: "Chennai", country: "IN", suffix: " Luggage Storage", timezone: "Asia/Kolkata",
+    points: [
+      { slug: "central", name: "Chennai Central", district: "Park Town", latitude: 13.08259, longitude: 80.27631 },
+      { slug: "marina", name: "Marina Beach", district: "Triplicane", latitude: 13.05328, longitude: 80.28331 },
+      { slug: "egmore", name: "Chennai Egmore", district: "Egmore", latitude: 13.07775, longitude: 80.26126 },
+    ],
+  },
+  {
+    key: "bengaluru", city: "Bengaluru", country: "IN", suffix: " Luggage Storage", timezone: "Asia/Kolkata",
+    points: [
+      { slug: "majestic", name: "Majestic", district: "Gandhi Nagar", latitude: 12.97818, longitude: 77.57219 },
+      { slug: "mg-road", name: "MG Road", district: "Shivaji Nagar", latitude: 12.97553, longitude: 77.60679 },
+      { slug: "krantivira", name: "Bengaluru City Station", district: "Majestic", latitude: 12.97586, longitude: 77.56538 },
+    ],
+  },
+  {
+    key: "guangzhou", city: "Guangzhou", country: "CN", suffix: " 行李寄存", timezone: "Asia/Shanghai",
+    points: [
+      { slug: "guangzhou-station", name: "广州站", district: "Yuexiu", latitude: 23.15262, longitude: 113.25226 },
+      { slug: "beijing-lu", name: "北京路", district: "Yuexiu", latitude: 23.12073, longitude: 113.26466 },
+      { slug: "guangzhou-south", name: "广州南站", district: "Panyu", latitude: 22.99141, longitude: 113.26404 },
+    ],
+  },
+  {
+    key: "shenzhen", city: "Shenzhen", country: "CN", suffix: " 行李寄存", timezone: "Asia/Shanghai",
+    points: [
+      { slug: "futian", name: "福田站", district: "Futian", latitude: 22.54132, longitude: 114.05118 },
+      { slug: "luohu", name: "深圳站", district: "Luohu", latitude: 22.53449, longitude: 114.11211 },
+    ],
+  },
+  {
+    key: "chengdu", city: "Chengdu", country: "CN", suffix: " 行李寄存", timezone: "Asia/Shanghai",
+    points: [
+      { slug: "chunxi", name: "春熙路", district: "Jinjiang", latitude: 30.65763, longitude: 104.07788 },
+      { slug: "chengdu-east", name: "成都东站", district: "Chenghua", latitude: 30.63176, longitude: 104.13717 },
+    ],
+  },
+  {
+    key: "kiev", city: "Kyiv", country: "UA", suffix: " — Камера схову", timezone: "Europe/Kyiv",
+    points: [
+      { slug: "maydan", name: "Майдан Незалежності", district: "Shevchenkivskyi", latitude: 50.44994, longitude: 30.52444 },
+      { slug: "vokzal", name: "Київ-Пасажирський", district: "Solomianskyi", latitude: 50.43986, longitude: 30.48866 },
+      { slug: "sofia", name: "Софійська площа", district: "Shevchenkivskyi", latitude: 50.45339, longitude: 30.51604 },
+    ],
+  },
+  {
+    key: "houston", city: "Houston", country: "US", suffix: " Luggage Storage", timezone: "America/Chicago",
+    points: [
+      { slug: "downtown", name: "Downtown Houston", district: "Downtown", latitude: 29.75656, longitude: -95.36524 },
+      { slug: "museum-district", name: "Museum District", district: "Museum District", latitude: 29.7247, longitude: -95.38784 },
+    ],
+  },
+  {
+    key: "dallas", city: "Dallas", country: "US", suffix: " Luggage Storage", timezone: "America/Chicago",
+    points: [
+      { slug: "downtown", name: "Downtown Dallas", district: "Downtown", latitude: 32.77979, longitude: -96.79801 },
+      { slug: "deep-ellum", name: "Deep Ellum", district: "Deep Ellum", latitude: 32.7843, longitude: -96.78046 },
+    ],
+  },
+  {
+    key: "atlanta", city: "Atlanta", country: "US", suffix: " Luggage Storage", timezone: "America/New_York",
+    points: [
+      { slug: "peachtree", name: "Peachtree Center", district: "Downtown", latitude: 33.76021, longitude: -84.38682 },
+      { slug: "five-points", name: "Five Points", district: "Downtown", latitude: 33.75389, longitude: -84.3916 },
+    ],
+  },
 ];
 
 type Point = CityPoint & {
