@@ -719,6 +719,36 @@
     "license": "CC BY-SA 4.0",
     "cityKey": "diyarbakir"
   },
+  "dublin-connolly": {
+    "file": "/images/blog/dublin-connolly.webp",
+    "alt": {
+      "tr": "Dublin Connolly garının cephesi",
+      "en": "The frontage of Dublin Connolly station"
+    },
+    "caption": {
+      "tr": "Dublin Connolly",
+      "en": "Dublin Connolly station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Dublin_Connolly_railway_station_2006.jpg",
+    "author": "Kaihsu Tai",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "dublin"
+  },
+  "dublin-temple-bar": {
+    "file": "/images/blog/dublin-temple-bar.webp",
+    "alt": {
+      "tr": "Alacakaranlıkta Temple Bar ve taş döşeli sokak",
+      "en": "Temple Bar at dusk and the cobbled street in front of it"
+    },
+    "caption": {
+      "tr": "Temple Bar, Dublin",
+      "en": "Temple Bar, Dublin"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Temple_Bar_Dublin_at_dusk.jpg",
+    "author": "EWilson (Volunteer)",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "dublin"
+  },
   "dusseldorf-altstadt": {
     "file": "/images/blog/dusseldorf-altstadt.webp",
     "alt": {
@@ -958,6 +988,36 @@
     "author": "Thomas Wolf, www.foto-tw.de",
     "license": "CC BY-SA 3.0",
     "cityKey": "hamburg"
+  },
+  "helsinki-gar": {
+    "file": "/images/blog/helsinki-gar.webp",
+    "alt": {
+      "tr": "Helsinki merkez garının granit cephesi ve heykelli girişi",
+      "en": "The granite frontage and statue-flanked entrance of Helsinki Central Station"
+    },
+    "caption": {
+      "tr": "Helsingin päärautatieasema",
+      "en": "Helsinki Central Station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:11-07-31-helsinki-by-RalfR-034.jpg",
+    "author": "Ralf Roletschek (talk) - Fahrradtechnik auf fahrradmonteur.de",
+    "license": "FAL",
+    "cityKey": "helsinki"
+  },
+  "helsinki-senaatintori": {
+    "file": "/images/blog/helsinki-senaatintori.webp",
+    "alt": {
+      "tr": "Helsinki Katedrali'nden Senato Meydanı'na bakış",
+      "en": "Looking down from Helsinki Cathedral over Senate Square"
+    },
+    "caption": {
+      "tr": "Senato Meydanı, Helsinki",
+      "en": "Senate Square, Helsinki"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:View_from_Helsinki_Cathedral_towards_Senate_Square.JPG",
+    "author": "Ypsilon from Finland",
+    "license": "CC0",
+    "cityKey": "helsinki"
   },
   "ibiza-dalt-vila": {
     "file": "/images/blog/ibiza-dalt-vila.webp",
@@ -1333,6 +1393,36 @@
     "author": "Bernard Gagnon",
     "license": "CC BY-SA 3.0",
     "cityKey": "konya"
+  },
+  "kopenhag-h": {
+    "file": "/images/blog/kopenhag-h.webp",
+    "alt": {
+      "tr": "København H garının tuğla cephesi",
+      "en": "The brick frontage of Copenhagen Central Station"
+    },
+    "caption": {
+      "tr": "København H",
+      "en": "Copenhagen Central Station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Copenhagen_H_street_side.JPG",
+    "author": "Nils Öberg",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "kopenhag"
+  },
+  "kopenhag-nyhavn": {
+    "file": "/images/blog/kopenhag-nyhavn.webp",
+    "alt": {
+      "tr": "Nyhavn kanalı boyunca renkli evler ve demirlemiş yelkenliler",
+      "en": "The coloured houses and moored boats along the Nyhavn canal"
+    },
+    "caption": {
+      "tr": "Nyhavn, Kopenhag",
+      "en": "Nyhavn, Copenhagen"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Kopenhagen_(DK),_Nyhavn_--_2017_--_1711.jpg",
+    "author": "Dietmar Rabich",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "kopenhag"
   },
   "kusadasi-guvercinada": {
     "file": "/images/blog/kusadasi-guvercinada.webp",
@@ -1724,6 +1814,36 @@
     "license": "Public domain",
     "cityKey": "napoli"
   },
+  "oslo-opera": {
+    "file": "/images/blog/oslo-opera.webp",
+    "alt": {
+      "tr": "Oslo Opera Binası'nın eğimli mermer çatısına yürüyerek çıkan insanlar",
+      "en": "People walking up the sloping marble roof of the Oslo Opera House"
+    },
+    "caption": {
+      "tr": "Opera Binası'nın çatısına çıkanlar",
+      "en": "Walking up the roof of the Opera House"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Climbing_the_Oslo_Opera_House_(Operahuset)_(29796497621).jpg",
+    "author": "Jorge Láscar from Melbourne, Australia",
+    "license": "CC BY 2.0",
+    "cityKey": "oslo"
+  },
+  "oslo-sentralstasjon": {
+    "file": "/images/blog/oslo-sentralstasjon.webp",
+    "alt": {
+      "tr": "Oslo Sentralstasjon binası",
+      "en": "The Oslo Sentralstasjon building"
+    },
+    "caption": {
+      "tr": "Oslo Sentralstasjon",
+      "en": "Oslo Central Station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Oslo_Sentralstasjon.JPG",
+    "author": "Wasielgallery",
+    "license": "CC BY 3.0",
+    "cityKey": "oslo"
+  },
   "pamukkale-hierapolis": {
     "file": "/images/blog/pamukkale-hierapolis.webp",
     "alt": {
@@ -1843,6 +1963,36 @@
     "author": "Jorge Láscar from Australia",
     "license": "CC BY 2.0",
     "cityKey": "prag"
+  },
+  "reykjavik-hallgrimskirkja": {
+    "file": "/images/blog/reykjavik-hallgrimskirkja.webp",
+    "alt": {
+      "tr": "Hallgrímskirkja kilisesinin basamaklı beton kulesi",
+      "en": "The stepped concrete tower of the Hallgrimskirkja"
+    },
+    "caption": {
+      "tr": "Hallgrímskirkja, Reykjavík",
+      "en": "The Hallgrimskirkja, Reykjavik"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Hallgr%C3%ADmskirkja_1.jpg",
+    "author": "Dmitry Brant",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "reykjavik"
+  },
+  "reykjavik-laugavegur": {
+    "file": "/images/blog/reykjavik-laugavegur.webp",
+    "alt": {
+      "tr": "Reykjavík'te Laugavegur caddesi ve renkli binalar",
+      "en": "The Laugavegur street in Reykjavik with its coloured buildings"
+    },
+    "caption": {
+      "tr": "Laugavegur, Reykjavík",
+      "en": "Laugavegur, Reykjavik"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Laugavegur,_Reykjavik.jpg",
+    "author": "Marek Ślusarczyk (Tupungato) Photo gallery",
+    "license": "CC BY 3.0",
+    "cityKey": "reykjavik"
   },
   "rize-ayder": {
     "file": "/images/blog/rize-ayder.webp",
@@ -2173,6 +2323,36 @@
     "author": "Daniel Åhs Karlsson",
     "license": "CC BY-SA 3.0",
     "cityKey": "side"
+  },
+  "stockholm-centralstation": {
+    "file": "/images/blog/stockholm-centralstation.webp",
+    "alt": {
+      "tr": "Stockholm Centralstation'ın cephesi",
+      "en": "The frontage of Stockholm Central Station"
+    },
+    "caption": {
+      "tr": "Stockholm Centralstation",
+      "en": "Stockholm Central Station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Stockholm_Central_Station_September_2013.jpg",
+    "author": "Arild Vågen",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "stockholm"
+  },
+  "stockholm-gamla-stan": {
+    "file": "/images/blog/stockholm-gamla-stan.webp",
+    "alt": {
+      "tr": "Gamla Stan'da dar, taş döşeli bir sokak",
+      "en": "A narrow, stone-paved lane in Gamla Stan"
+    },
+    "caption": {
+      "tr": "Gamla Stan, Stockholm",
+      "en": "Gamla Stan, Stockholm"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Gamla_stan_September_2014_01.jpg",
+    "author": "Arild Vågen",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "stockholm"
   },
   "trabzon-liman": {
     "file": "/images/blog/trabzon-liman.webp",

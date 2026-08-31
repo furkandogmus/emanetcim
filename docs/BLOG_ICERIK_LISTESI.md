@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| Yazısı olan şehir | **75 / 265** — Türkiye'nin 39 şehri tamamlandı |
+| Yazısı olan şehir | **81 / 265** — Türkiye'nin 39 şehri tamamlandı |
 | Yayına yazma | `npx tsx scripts/blog-city-posts.ts --apply` (kuru çalışma varsayılan) |
 | Denetim | `npx tsx scripts/blog-city-posts.ts --verify` + `npx tsx scripts/blog-images.ts --verify` |
 | Eksik listesi | `npx tsx scripts/blog-city-posts.ts --coverage` |
@@ -63,7 +63,7 @@ alakasız olabilir.
 
 <!-- Aşağısı üretilmiştir: npx tsx scripts/blog-city-posts.ts --list-md -->
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 75/265 sehir -->
+<!-- 81/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -147,12 +147,12 @@ alakasız olabilir.
 | 78 | BE | Antwerpen | `anvers` | 1 | yayında | anvers-centraal-dort-kat-valiz | antwerp-luggage-storage-central-station |
 | 79 | NL | Rotterdam | `rotterdam` | 1 | yayında | rotterdam-genis-cadde-ruzgar-valiz | rotterdam-luggage-storage-wide-streets |
 | 80 | NL | Den Haag | `lahey` | 1 | yayında | lahey-iki-gar-scheveningen-valiz | the-hague-luggage-storage-two-stations |
-| 81 | DK | København | `kopenhag` | 2 | — |  |  |
-| 82 | SE | Stockholm | `stockholm` | 2 | — |  |  |
-| 83 | NO | Oslo | `oslo` | 1 | — |  |  |
-| 84 | FI | Helsinki | `helsinki` | 1 | — |  |  |
-| 85 | IS | Reykjavík | `reykjavik` | 1 | — |  |  |
-| 86 | IE | Dublin | `dublin` | 2 | — |  |  |
+| 81 | DK | København | `kopenhag` | 2 | yayında | kopenhag-bisiklet-yolu-stroget-valiz | copenhagen-luggage-storage-cycle-lanes |
+| 82 | SE | Stockholm | `stockholm` | 2 | yayında | stockholm-on-dort-ada-gamla-stan-valiz | stockholm-luggage-storage-fourteen-islands |
+| 83 | NO | Oslo | `oslo` | 1 | yayında | oslo-opera-catisi-yuruyus-valiz | oslo-luggage-storage-opera-roof |
+| 84 | FI | Helsinki | `helsinki` | 1 | yayında | helsinki-suomenlinna-tallinn-feribot-valiz | helsinki-luggage-storage-suomenlinna-tallinn |
+| 85 | IS | Reykjavík | `reykjavik` | 1 | yayında | reykjavik-golden-circle-turu-valiz | reykjavik-luggage-storage-golden-circle |
+| 86 | IE | Dublin | `dublin` | 2 | yayında | dublin-havalimanina-tren-yok-valiz | dublin-luggage-storage-no-airport-train |
 | 87 | GB | Edinburgh | `edinburgh` | 2 | — |  |  |
 | 88 | GB | Manchester | `manchester` | 1 | — |  |  |
 | 89 | GB | Liverpool | `liverpool` | 1 | — |  |  |
