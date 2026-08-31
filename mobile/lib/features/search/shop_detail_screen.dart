@@ -291,7 +291,7 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                           // Map Preview
                           _sectionHeader('shop.location'.tr()),
                           const SizedBox(height: 16),
-                          if (shop.latitude != null && shop.longitude != null)
+                          if (s.latitude != null && s.longitude != null)
                             ClipRRect(
                               borderRadius: BorderRadius.circular(24),
                               child: SizedBox(
@@ -299,7 +299,7 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                                 width: double.infinity,
                                 child: FlutterMap(
                                   options: MapOptions(
-                                    initialCenter: LatLng(shop.latitude!, shop.longitude!),
+                                    initialCenter: LatLng(s.latitude!, s.longitude!),
                                     initialZoom: 15.0,
                                     interactionOptions: const InteractionOptions(
                                       flags: InteractiveFlag.none,
@@ -314,7 +314,7 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                                     MarkerLayer(
                                       markers: [
                                         Marker(
-                                          point: LatLng(shop.latitude!, shop.longitude!),
+                                          point: LatLng(s.latitude!, s.longitude!),
                                           width: 36,
                                           height: 36,
                                           child: const Icon(

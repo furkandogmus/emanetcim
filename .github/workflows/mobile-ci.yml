@@ -84,8 +84,21 @@ jobs:
       #
       # Bicimlendirme borcu kapandiginda bu adim tekrar basa alinabilir; o zaman
       # sira farketmez.
+      # `--no-fatal-infos`: HATA ve UYARI hala kirmizi dusurur, `info` seviyesi
+      # dusurmez.
+      #
+      # NEDEN: `flutter analyze` varsayilan olarak `info`yu da olumcul sayiyor ve
+      # agacta 60 tane var -- hepsi bicim/stil onerisi (`directives_ordering`,
+      # `prefer_const_constructors`, `omit_local_variable_types`). Sonucu, kapinin
+      # KALICI OLARAK kirmizi olmasiydi ve kalici kirmizi bir kapi hicbir seyi
+      # korumaz: nitekim `Undefined name 'shop'` gibi ALTI DERLEME HATASI bu
+      # yuzden gorunmedi.
+      #
+      # Ayrim bilincli: `error` ve `warning` gercek dogruluk sinyali, `info`
+      # oneridir. Oneriler yine ciktida gorunuyor, yalnizca is dusurmuyor.
+      # Borc kapandiginda bayrak kaldirilabilir.
       - name: Analyze code
-        run: flutter analyze
+        run: flutter analyze --no-fatal-infos
 
       - name: Run tests
         run: flutter test

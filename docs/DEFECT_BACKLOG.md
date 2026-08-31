@@ -38,7 +38,33 @@ diğerlerini maskelemesi, kapının kendisinden büyük bir sorun. Biçim kontro
 `Upload APK`'dan da sonraya alındı — aksi halde kırmızı biçim, üretilmiş APK'nin
 yüklenmesini de engelliyor ve elde inceleyecek çıktı kalmıyordu.
 
-**Açık:** 37 dosyanın biçim borcu duruyor. `dart format .` tek komut ama bu
+### Ölü kapının sakladığı şey: mobil uygulama DERLENMİYORDU
+
+Sıra değiştirilince `flutter analyze` bir haftada ilk kez çalıştı ve **6 derleme
+hatası** buldu:
+
+```
+error • Undefined name 'shop' • lib/features/search/shop_detail_screen.dart:294 • undefined_identifier
+error • Undefined name 'shop' • .../shop_detail_screen.dart:302 • undefined_identifier
+error • Undefined name 'shop' • .../shop_detail_screen.dart:317 • undefined_identifier
+```
+
+Sebep: kapsamdaki değişken `s` (`data: (s) => Stack(...)`) ama harita önizleme
+bloğu `shop.latitude` / `shop.longitude` yazıyor. `76218f6`'da girmiş
+("shop map") ve **biçim adımı ilk sırada olduğu için analiz hiç çalışmamış**.
+Yani mobil uygulama en az bir haftadır derlenmiyordu ve bunu kimse görmüyordu.
+
+Düzeltildi (`shop.` → `s.`, 6 referans). Ayrıca ölü `_showInfo` metodu silindi
+(tek `warning`).
+
+**`--no-fatal-infos`:** `flutter analyze` varsayılan olarak `info` seviyesini de
+ölümcül sayıyor ve ağaçta 60 tane var — hepsi biçim/stil önerisi
+(`directives_ordering`, `prefer_const_constructors`). Sonucu kapının **kalıcı
+olarak kırmızı** olmasıydı, ve kalıcı kırmızı bir kapı hiçbir şeyi korumaz:
+nitekim altı derleme hatası tam bu yüzden görünmedi. Artık `error` ve `warning`
+işi düşürüyor, `info` düşürmüyor ama çıktıda görünmeye devam ediyor.
+
+**Açık:** 37 dosyanın biçim borcu ve 60 `info` önerisi duruyor. `dart format .` tek komut ama bu
 makinede dart/flutter kurulu değil ve kullanıcının bilgisayarına kurulum
 yapılmayacak. Mobil geliştirme yapan biri `cd mobile && dart format .` koşup
 commit'lerse gate tamamen yeşile döner.

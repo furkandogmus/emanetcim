@@ -939,24 +939,6 @@ Future<void> _handleBiometricToggle(bool val) async {
     );
   }
 
-  void _showInfo(BuildContext context, String title, String msg) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          title,
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-        ),
-        content: Text(msg, style: GoogleFonts.outfit()),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('common.confirm'.tr()),
-          ),
-        ],
-      ),
-    );
-  }
 
   void _showLegal(BuildContext context, String title, String content) {
     showModalBottomSheet(
