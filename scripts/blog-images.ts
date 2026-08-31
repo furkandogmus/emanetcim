@@ -97,6 +97,42 @@ async function search(query: string, limit = 12) {
   }
 }
 
+/**
+ * Bir Commons KATEGORİSİNDEKİ dosyaları listeler.
+ *
+ * NEDEN AYRI BİR MOD: serbest metin arama küçük şehirlerde çöküyor. "Samsun"
+ * sorgusu şehir manzarası yerine bir hastane sevk defterinin fotoğrafını
+ * döndürüyor, çünkü arama dosya ADINDA eşleşme arıyor. Kategori ise şehri
+ * bilen biri tarafından elle kürelenmiş: `Category:Samsun` içindekiler
+ * gerçekten Samsun'a ait.
+ */
+async function category(name: string, limit = 30) {
+  const title = name.startsWith("Category:") ? name : `Category:${name}`;
+  const data = await api({
+    action: "query",
+    generator: "categorymembers",
+    gcmtitle: title,
+    gcmtype: "file",
+    gcmlimit: String(limit),
+    prop: "imageinfo",
+    iiprop: "url|extmetadata|size",
+  });
+  const pages = (data.query as { pages?: Record<string, RawPage> } | undefined)?.pages ?? {};
+  const rows = Object.values(pages);
+  if (rows.length === 0) {
+    console.log(`Kategori bos ya da yok: ${title}`);
+    return;
+  }
+  for (const p of rows) {
+    const info = p.imageinfo?.[0];
+    if (!info) continue;
+    // Yatay olmayanlar kapak icin uygun degil; yine de listeleniyor ama isaretli.
+    const shape = info.width >= info.height ? "yatay" : "DIKEY";
+    console.log(`\n  ${p.title}`);
+    console.log(`    ${stripHtml(info.extmetadata?.LicenseShortName?.value ?? "?")}   ${info.width}x${info.height} ${shape}`);
+  }
+}
+
 type RawPage = {
   title: string;
   imageinfo?: Array<{
@@ -236,6 +272,11 @@ async function main() {
     return;
   }
 
+  if (argv.includes("--category")) {
+    await category(arg("category"));
+    return;
+  }
+
   if (argv.includes("--verify")) {
     process.exitCode = verify() > 0 ? 1 : 0;
     return;
@@ -257,6 +298,8 @@ async function main() {
 
   console.log(`Kullanim:
   --search "<sorgu>"                    Commons'ta aday dosya arar
+  --category "<Kategori>"               bir Commons kategorisindeki dosyalari listeler
+                                        (kucuk sehirlerde aramadan cok daha iyi)
   --add <anahtar> --file "File:X.jpg" --city <sehir>
         --alt-tr .. --alt-en .. --caption-tr .. --caption-en .. [--width 1400]
   --verify                              manifest / disk / kunye denetimi`);

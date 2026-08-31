@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| Yazısı olan şehir | **12 / 265** (aşağıdaki tablo) |
+| Yazısı olan şehir | **18 / 265** (aşağıdaki tablo) |
 | Yayına yazma | `npx tsx scripts/blog-city-posts.ts --apply` (kuru çalışma varsayılan) |
 | Denetim | `npx tsx scripts/blog-city-posts.ts --verify` + `npx tsx scripts/blog-images.ts --verify` |
 | Eksik listesi | `npx tsx scripts/blog-city-posts.ts --coverage` |
@@ -43,6 +43,10 @@ bavulla yürünmez) ve nokta sayfasına organik giriş üretiyor.
 ```bash
 npx tsx scripts/blog-images.ts --search "Izmir Konak clock tower"
 
+# serbest metin arama kucuk sehirlerde coker ("Samsun" sorgusu bir hastane
+# sevk defteri fotografi dondurdu). Kategori elle kurelenmis, cok daha iyi:
+npx tsx scripts/blog-images.ts --category "Samsun"
+
 npx tsx scripts/blog-images.ts --add izmir-saat-kulesi \
   --file "File:Izmir Saat Kulesi.jpg" --city izmir \
   --alt-tr "..." --alt-en "..." \
@@ -58,7 +62,7 @@ alakasız olabilir.
 
 <!-- Aşağısı üretilmiştir: npx tsx scripts/blog-city-posts.ts --list-md -->
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 12/265 sehir -->
+<!-- 18/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -68,16 +72,16 @@ alakasız olabilir.
 | 4 | TR | Antalya | `antalya` | 5 | yayında | antalya-son-gun-valiz-nereye | antalya-luggage-storage-last-day |
 | 5 | TR | Bodrum | `bodrum` | 5 | yayında | bodrum-valiz-emanet-tekne-turu | bodrum-luggage-storage-boat-day |
 | 6 | TR | Bursa | `bursa` | 4 | yayında | bursa-gunubirlik-valiz-nereye | bursa-day-trip-luggage-storage |
-| 7 | TR | Adana | `adana` | 2 | — |  |  |
+| 7 | TR | Adana | `adana` | 2 | yayında | adana-aktarma-gunu-valiz | adana-layover-luggage-storage |
 | 8 | TR | Gaziantep | `gaziantep` | 2 | yayında | gaziantep-yemek-turu-valiz | gaziantep-food-trip-luggage-storage |
 | 9 | TR | Konya | `konya` | 2 | yayında | konya-yht-gunubirlik-valiz | konya-day-trip-luggage-storage |
 | 10 | TR | Trabzon | `trabzon` | 3 | yayında | trabzon-sumela-uzungol-valiz | trabzon-luggage-storage-sumela-uzungol |
-| 11 | TR | Kayseri | `kayseri` | 2 | — |  |  |
-| 12 | TR | Eskişehir | `eskisehir` | 2 | — |  |  |
-| 13 | TR | Samsun | `samsun` | 1 | — |  |  |
+| 11 | TR | Kayseri | `kayseri` | 2 | yayında | kayseri-kapadokya-transfer-valiz | kayseri-cappadocia-transfer-luggage |
+| 12 | TR | Eskişehir | `eskisehir` | 2 | yayında | eskisehir-gunubirlik-odunpazari-valiz | eskisehir-day-trip-luggage-storage |
+| 13 | TR | Samsun | `samsun` | 1 | yayında | samsun-karadeniz-turu-valiz | samsun-black-sea-route-luggage-storage |
 | 14 | TR | Şanlıurfa | `sanliurfa` | 2 | yayında | sanliurfa-gobeklitepe-balikligol-valiz | sanliurfa-gobekli-tepe-luggage-storage |
-| 15 | TR | Diyarbakır | `diyarbakir` | 1 | — |  |  |
-| 16 | TR | Mersin | `mersin` | 2 | — |  |  |
+| 15 | TR | Diyarbakır | `diyarbakir` | 1 | yayında | diyarbakir-surlar-sur-ici-valiz | diyarbakir-city-walls-luggage-storage |
+| 16 | TR | Mersin | `mersin` | 2 | yayında | mersin-kizkalesi-gunubirlik-valiz | mersin-kizkalesi-day-trip-luggage |
 | 17 | TR | Kapadokya | `kapadokya` | 4 | yayında | kapadokya-son-gun-valiz-tur-otobus | cappadocia-last-day-luggage-storage |
 | 18 | TR | Denizli | `pamukkale` | 2 | — |  |  |
 | 19 | TR | Selçuk | `selcuk` | 2 | — |  |  |

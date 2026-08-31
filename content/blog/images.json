@@ -1,4 +1,34 @@
 {
+  "adana-sabanci-camii": {
+    "file": "/images/blog/adana-sabanci-camii.webp",
+    "alt": {
+      "tr": "Sabancı Merkez Camii ve nehir kıyısındaki meydan",
+      "en": "The Sabanci Central Mosque and the riverside plaza"
+    },
+    "caption": {
+      "tr": "Sabancı Merkez Camii",
+      "en": "The Sabanci Central Mosque"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Adana_Sabanc%C4%B1_Central_Mosque_-_Sabanc%C4%B1_Merkez_Camii_05.JPG",
+    "author": "Zeynel Cebeci",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "adana"
+  },
+  "adana-taskopru": {
+    "file": "/images/blog/adana-taskopru.webp",
+    "alt": {
+      "tr": "Seyhan Nehri üzerindeki Taşköprü'nün kemerleri",
+      "en": "The arches of the Roman Taskopru bridge over the Seyhan"
+    },
+    "caption": {
+      "tr": "Taşköprü, Seyhan Nehri",
+      "en": "Taskopru over the Seyhan river"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Ta%C5%9Fk%C3%B6pr%C3%BC%27n%C3%BCn_Panoramik_Foto%C4%9Fraf%C4%B1.jpg",
+    "author": "MUSTAFA TOR",
+    "license": "CC BY-SA 2.5",
+    "cityKey": "adana"
+  },
   "ankara-anitkabir": {
     "file": "/images/blog/ankara-anitkabir.webp",
     "alt": {
@@ -148,6 +178,66 @@
     "author": "Carl Ha",
     "license": "CC BY-SA 4.0",
     "cityKey": "bursa"
+  },
+  "diyarbakir-surlar": {
+    "file": "/images/blog/diyarbakir-surlar.webp",
+    "alt": {
+      "tr": "Diyarbakır'ın siyah bazalt surları ve burçları",
+      "en": "The black basalt walls and bastions of Diyarbakir"
+    },
+    "caption": {
+      "tr": "Diyarbakır Surları",
+      "en": "The Diyarbakir city walls"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Diyarbak%C4%B1r_old_walls_2559.jpg",
+    "author": "Dosseman",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "diyarbakir"
+  },
+  "diyarbakir-ulucami": {
+    "file": "/images/blog/diyarbakir-ulucami.webp",
+    "alt": {
+      "tr": "Diyarbakır Ulu Camii'nin taş işçilikli iç mekânı",
+      "en": "The carved stone interior of the Great Mosque of Diyarbakir"
+    },
+    "caption": {
+      "tr": "Diyarbakır Ulu Camii",
+      "en": "The Great Mosque of Diyarbakir"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Diyarbak%C4%B1r_Ulu_Camii_Interior_Mihrab_3719_in_2014.jpg",
+    "author": "Dosseman",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "diyarbakir"
+  },
+  "eskisehir-odunpazari": {
+    "file": "/images/blog/eskisehir-odunpazari.webp",
+    "alt": {
+      "tr": "Odunpazarı'nın renkli ahşap cumbalı evleri",
+      "en": "The colourful timber houses with bay windows in Odunpazari"
+    },
+    "caption": {
+      "tr": "Odunpazarı evleri",
+      "en": "Odunpazari houses"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Traditional_Odunpazar%C4%B1_houses,_Eski%C5%9Fehir.jpg",
+    "author": "Serragok",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "eskisehir"
+  },
+  "eskisehir-porsuk": {
+    "file": "/images/blog/eskisehir-porsuk.webp",
+    "alt": {
+      "tr": "Porsuk Çayı boyunca uzanan yürüyüş yolu ve köprüler",
+      "en": "The riverside walkway and bridges along the Porsuk stream"
+    },
+    "caption": {
+      "tr": "Porsuk Çayı",
+      "en": "The Porsuk stream"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Porsuk_%C3%87ay%C4%B1,_Eski%C5%9Fehir_01.jpg",
+    "author": "Zeynel Cebeci",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "eskisehir"
   },
   "gaziantep-kale": {
     "file": "/images/blog/gaziantep-kale.webp",
@@ -314,6 +404,36 @@
     "license": "CC BY-SA 3.0",
     "cityKey": "kapadokya"
   },
+  "kayseri-erciyes": {
+    "file": "/images/blog/kayseri-erciyes.webp",
+    "alt": {
+      "tr": "Şehrin arkasında yükselen karlı Erciyes Dağı",
+      "en": "Snow-covered Mount Erciyes rising behind the city"
+    },
+    "caption": {
+      "tr": "Kayseri'den Erciyes Dağı",
+      "en": "Mount Erciyes seen from Kayseri"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Kayseri_B%C3%BCr%C3%BCng%C3%BCz_Camii_ve_Erciyes_Da%C4%9F%C4%B1.jpg",
+    "author": "Abdurrahman Çam",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "kayseri"
+  },
+  "kayseri-kale": {
+    "file": "/images/blog/kayseri-kale.webp",
+    "alt": {
+      "tr": "Kayseri Kalesi'nin siyah bazalt surları",
+      "en": "The black basalt walls of Kayseri Castle"
+    },
+    "caption": {
+      "tr": "Kayseri Kalesi",
+      "en": "Kayseri Castle"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Fortress_of_Kayseri_01.jpg",
+    "author": "Bernard Gagnon",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "kayseri"
+  },
   "konya-manzara": {
     "file": "/images/blog/konya-manzara.webp",
     "alt": {
@@ -373,6 +493,66 @@
     "author": "Florian Koch French translation by Yolan Chériaux",
     "license": "CC BY-SA 2.0",
     "cityKey": "mardin"
+  },
+  "mersin-kizkalesi": {
+    "file": "/images/blog/mersin-kizkalesi.webp",
+    "alt": {
+      "tr": "Denizin ortasında yükselen Kızkalesi",
+      "en": "Maiden's Castle standing offshore in the sea"
+    },
+    "caption": {
+      "tr": "Kızkalesi",
+      "en": "Maiden's Castle (Kizkalesi)"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:K%C4%B1zkalesi_(Korykos)_Mersin_Turkey_2.jpg",
+    "author": "Zcebeci",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "mersin"
+  },
+  "mersin-sehir": {
+    "file": "/images/blog/mersin-sehir.webp",
+    "alt": {
+      "tr": "Mersin'de Atatürk Parkı sahil yürüyüş yolu, arkada liman vinçleri",
+      "en": "The seafront promenade at Ataturk Park in Mersin, with the container port cranes behind"
+    },
+    "caption": {
+      "tr": "Atatürk Parkı sahil yolu ve arkada Mersin Limanı",
+      "en": "The Ataturk Park promenade with Mersin's port behind"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Mersin_Atat%C3%BCrk_park.jpg",
+    "author": "Nedim Ardoğa",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "mersin"
+  },
+  "samsun-anit": {
+    "file": "/images/blog/samsun-anit.webp",
+    "alt": {
+      "tr": "Samsun'daki Millî Kurtuluş Anıtı ve çevresindeki park",
+      "en": "The National Liberation Monument in Samsun and the park around it"
+    },
+    "caption": {
+      "tr": "Millî Kurtuluş Anıtı",
+      "en": "The National Liberation Monument"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Mill%C3%AE_Kurtulu%C5%9F_An%C4%B1t%C4%B1.JPG",
+    "author": "Cobija",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "samsun"
+  },
+  "samsun-bandirma": {
+    "file": "/images/blog/samsun-bandirma.webp",
+    "alt": {
+      "tr": "Bandırma Vapuru Müzesi ve yanındaki Millî Kurtuluş Anıtı",
+      "en": "The Bandirma steamship museum and the monument beside it"
+    },
+    "caption": {
+      "tr": "Bandırma Vapuru Müzesi",
+      "en": "The Bandirma steamship museum"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Band%C4%B1rma_Vapuru_M%C3%BCzesi_ve_Mill%C3%AE_Kurtulu%C5%9F_An%C4%B1t%C4%B1_(2).JPG",
+    "author": "Cobija",
+    "license": "CC0",
+    "cityKey": "samsun"
   },
   "sanliurfa-balikligol": {
     "file": "/images/blog/sanliurfa-balikligol.webp",
