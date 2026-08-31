@@ -73,3 +73,33 @@ export const EARNING_BOOKING_STATUSES = [
 export function countsTowardEarnings(status: string): boolean {
   return (EARNING_BOOKING_STATUSES as readonly string[]).includes(status);
 }
+
+/**
+ * TAHSİLAT YAPAMAYAN PLATFORM KOMİSYON DA ALAMAZ.
+ *
+ * NEDEN VAR (2026-08-31'de karar verildi, üretimde ölçüldü): aktif sağlayıcı
+ * `manual` — para misafirden DÜKKANDA, esnafın kendi kasasına/POS'una giriyor.
+ * Platformun parayı görmediği bir akışta komisyon, esnafa kesilen bir FATURA
+ * demektir. `PlatformSettings.platformCommissionRate` ise üretimde **0.5000**
+ * duruyordu ve şu üç sonucu üretiyordu:
+ *
+ * 1. `PaymentService` her tahsilatta `PaymentSplit`'e %50'lik bir platform
+ *    komisyonu DONDURUYORDU. O satırlar defterde kalıcıdır ve karşılığında
+ *    hiçbir zaman para hareketi olmayacaktı — yani tahsil edilmeyecek bir
+ *    alacak birikiyordu. `PaymentLog`'daki "karşılığı olmayan 3.480 TRY"
+ *    soruşturmasının (`DEFECT_BACKLOG` P1-5) aynı sınıfı.
+ * 2. Esnaf panelinde "Net Hakediş" kasasındakinin YARISINI gösteriyordu.
+ * 3. `become-partner` sayfasındaki kazanç hesaplayıcısı, kazanmaya çalıştığı
+ *    esnafa **%50 komisyon** vaat ediyordu.
+ *
+ * Kural bir AYAR DEĞİL, sağlayıcının yeteneğinin sonucu: oran ancak platform
+ * parayı kendi topluyorsa (`capturesOnline`) uygulanabilir. Böylece komisyonu
+ * açmak, PSP'yi bağlamakla AYNI hareket olur — biri açılıp diğeri unutulamaz.
+ * `payment-copy.ts` metin tarafında aynı kuralı uyguluyor.
+ */
+export function effectiveCommissionRate(
+  configuredRate: number,
+  capturesOnline: boolean,
+): number {
+  return capturesOnline ? clampCommissionRate(configuredRate) : 0;
+}
