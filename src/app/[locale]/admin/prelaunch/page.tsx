@@ -70,7 +70,7 @@ export default async function AdminPrelaunchPage({
         </h1>
       </header>
 
-      <main className="p-10 max-w-5xl mx-auto w-full flex flex-col gap-10">
+      <div className="p-10 max-w-5xl mx-auto w-full flex flex-col gap-10">
         <p className="text-sm text-gray-600 max-w-2xl">{t("prelaunchIntro")}</p>
         <p className="text-sm text-gray-500">
           {t("prelaunchSilent", { count: silentCount, total: rows.length })}
@@ -130,7 +130,7 @@ export default async function AdminPrelaunchPage({
           </table>
           )}
         </section>
-      </main>
+      </div>
     </div>
   );
 }

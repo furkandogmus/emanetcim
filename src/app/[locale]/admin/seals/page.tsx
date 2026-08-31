@@ -49,7 +49,7 @@ export default async function AdminSealsPage({ params }: { params: Promise<{ loc
         <h1 className="text-3xl font-black tracking-tight">{t('sealRequests')}</h1>
       </header>
 
-      <main className="p-10 max-w-5xl mx-auto w-full flex flex-col gap-6">
+      <div className="p-10 max-w-5xl mx-auto w-full flex flex-col gap-6">
         <section className="flex flex-col gap-4">
           <h2 className="text-sm id-eyebrow text-gray-400 px-2">
             {t('sealInventorySection')}
@@ -125,7 +125,7 @@ export default async function AdminSealsPage({ params }: { params: Promise<{ loc
         >
           <Download size={18} /> {t('exportCsv')}
         </Link>
-      </main>
+      </div>
     </div>
   );
 }

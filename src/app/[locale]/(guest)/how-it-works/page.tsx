@@ -90,7 +90,7 @@ export default async function HowItWorksPage({
         </p>
       </header>
 
-      <main className="mx-auto max-w-3xl px-6 py-12 flex flex-col gap-14">
+      <div className="mx-auto max-w-3xl px-6 py-12 flex flex-col gap-14">
         <section className="text-gray-900">
           <HowItWorksAnimation
             ariaLabel={t("animAria")}
@@ -120,7 +120,7 @@ export default async function HowItWorksPage({
             {t("ctaPartner")}
           </Link>
         </section>
-      </main>
+      </div>
     </div>
   );
 }

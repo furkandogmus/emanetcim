@@ -40,7 +40,7 @@ export default async function KvkkPage({ params }: { params: Promise<{ locale: s
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto py-24 px-6">
+      <div className="max-w-4xl mx-auto py-24 px-6">
         <div className="prose prose-orange max-w-none">
           <div className="flex items-start gap-6 p-8 bg-orange-50 rounded-3xl border border-orange-100 mb-12">
             <ShieldAlert className="text-orange-600 shrink-0 mt-1" size={24} />
@@ -79,7 +79,7 @@ export default async function KvkkPage({ params }: { params: Promise<{ locale: s
             </a>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

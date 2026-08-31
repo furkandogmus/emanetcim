@@ -103,7 +103,7 @@ export default async function BecomePartnerPage({
         </p>
       </header>
 
-      <main className="mx-auto max-w-5xl px-6 py-16">
+      <div className="mx-auto max-w-5xl px-6 py-16">
         <div className="grid gap-10 md:grid-cols-3">
           <div className="rounded-3xl border border-gray-100 bg-gray-50/80 p-8">
             <TrendingUp className="text-orange-600" size={32} />
@@ -141,7 +141,7 @@ export default async function BecomePartnerPage({
             />
           </div>
         </section>
-      </main>
+      </div>
     </div>
   );
 }

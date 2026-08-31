@@ -79,7 +79,7 @@ export default async function AccountPage({
         </div>
       </header>
 
-      <main className="mx-auto grid max-w-5xl gap-5 p-4 sm:p-6 md:grid-cols-[1.2fr_0.8fr]">
+      <div className="mx-auto grid max-w-5xl gap-5 p-4 sm:p-6 md:grid-cols-[1.2fr_0.8fr]">
         <section className="space-y-4">
           <Link href="/bookings" className="group flex items-center gap-4 rounded-3xl bg-gray-900 p-6 text-white shadow-xl transition-transform hover:-translate-y-0.5">
             <span className="rounded-2xl bg-white/10 p-3"><CalendarDays size={24} /></span>
@@ -131,7 +131,7 @@ export default async function AccountPage({
             <ChevronRight size={16} className="ml-auto text-gray-300" />
           </Link>
         </nav>
-      </main>
+      </div>
     </div>
   );
 }

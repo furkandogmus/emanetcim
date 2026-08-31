@@ -61,7 +61,7 @@ export default async function DemandPage({
         </p>
       </header>
 
-      <main className="mx-auto max-w-3xl px-6 py-12 flex flex-col gap-12">
+      <div className="mx-auto max-w-3xl px-6 py-12 flex flex-col gap-12">
         <section className="flex flex-col gap-4">
           {rows.length === 0 ? (
             <div className="id-surface border border-gray-100 bg-gray-50 p-8 text-center">
@@ -129,7 +129,7 @@ export default async function DemandPage({
             {t("ctaButton")}
           </Link>
         </section>
-      </main>
+      </div>
     </div>
   );
 }

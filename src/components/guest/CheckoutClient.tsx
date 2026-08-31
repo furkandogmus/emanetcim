@@ -477,7 +477,7 @@ export default function CheckoutClient({
         </nav>
       </header>
 
-      <main className="flex-1 max-w-2xl mx-auto w-full p-4 sm:p-6 flex flex-col gap-8 pb-36 sm:pb-40">
+      <div className="flex-1 max-w-2xl mx-auto w-full p-4 sm:p-6 flex flex-col gap-8 pb-36 sm:pb-40">
         {step === 1 && (
           <>
             <div>
@@ -650,7 +650,7 @@ export default function CheckoutClient({
           </>
         )}
 
-      </main>
+      </div>
 
       {/* 2026-08-21: pb 4.5rem (72px) mobil alt navigasyonun gercek yuksekliginden
           (~80px, Playwright ile olculdu) kucuktu -> CTA nav'in ustune biniyordu

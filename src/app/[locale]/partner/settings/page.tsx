@@ -74,7 +74,7 @@ export default async function PartnerSettingsPage({
         <h1 className="text-xl font-black tracking-tight">{t("settings")}</h1>
       </header>
 
-      <main className="p-6 max-w-2xl mx-auto w-full space-y-6">
+      <div className="p-6 max-w-2xl mx-auto w-full space-y-6">
         <PartnerShopSettingsForm
           shopId={shop.id}
           initialCapacity={shop.capacity}
@@ -89,7 +89,7 @@ export default async function PartnerSettingsPage({
           marketPrice={marketPrice}
           initialPhone={ownerPhoneRow?.phone ?? ""}
         />
-      </main>
+      </div>
     </div>
   );
 }

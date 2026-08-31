@@ -51,7 +51,7 @@ export default async function HotelsPage({
         </p>
       </header>
 
-      <main className="mx-auto max-w-4xl px-6 py-16">
+      <div className="mx-auto max-w-4xl px-6 py-16">
         <div className="grid gap-8 md:grid-cols-2">
           <div className="rounded-3xl border border-gray-100 bg-gray-50/80 p-8">
             <Users className="text-blue-600" size={32} />
@@ -104,7 +104,7 @@ export default async function HotelsPage({
             </Link>
           </div>
         </section>
-      </main>
+      </div>
     </div>
   );
 }

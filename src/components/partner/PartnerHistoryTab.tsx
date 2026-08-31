@@ -26,7 +26,7 @@ export default function PartnerHistoryTab({
 }: PartnerHistoryTabProps) {
   const t = useTranslations("Partner");
   return (
-    <main className="flex-1 flex flex-col gap-6 animate-in slide-in-from-right-4 duration-500">
+    <div className="flex-1 flex flex-col gap-6 animate-in slide-in-from-right-4 duration-500">
       <header className="flex items-center justify-between">
         <h2 className="text-xl id-eyebrow tracking-tight">
           {t("transactionHistory")}
@@ -191,6 +191,6 @@ export default function PartnerHistoryTab({
             ))
         )}
       </div>
-    </main>
+    </div>
   );
 }

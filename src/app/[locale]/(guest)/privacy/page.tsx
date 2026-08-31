@@ -43,7 +43,7 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto py-24 px-6">
+      <div className="max-w-4xl mx-auto py-24 px-6">
         <div className="space-y-12">
           <div className="p-10 bg-white rounded-4xl border border-gray-100 shadow-sm flex items-start gap-8">
             <div className="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 shrink-0">
@@ -87,7 +87,7 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
             privacy@bagajpark.com
           </a>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

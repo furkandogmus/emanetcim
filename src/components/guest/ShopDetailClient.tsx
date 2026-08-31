@@ -267,7 +267,7 @@ export default function ShopDetailClient({
           </div>
         </div>
 
-        <main className="px-4 pt-16 space-y-5">
+        <div className="px-4 pt-16 space-y-5">
         {/*
           TALEP PANELI EN USTTE. Onceki halinde tek erisim, sayfanin DIBINDEKI
           yapiskan cubuktaki dugmeydi ve e-posta formu onun actigi modalin
@@ -371,7 +371,7 @@ export default function ShopDetailClient({
               </div>
             )}
           </section>
-        </main>
+        </div>
 
         {/* pb: mobil alt nav (~80px) bu bar'in ustune biniyordu; CheckoutClient.tsx'teki
             sticky footer ile ayni 6rem offset kullaniliyor. */}
@@ -477,7 +477,7 @@ export default function ShopDetailClient({
       </div>
       )}
 
-      <main className="max-w-lg mx-auto px-4 -mt-4 relative z-[1] flex flex-col gap-4">
+      <div className="max-w-lg mx-auto px-4 -mt-4 relative z-[1] flex flex-col gap-4">
       {/*
         TALEP PANELI EN USTTE. Onceki halinde tek erisim, sayfanin DIBINDEKI
         yapiskan cubuktaki dugmeydi ve e-posta formu onun actigi modalin
@@ -621,7 +621,7 @@ export default function ShopDetailClient({
             </ul>
           )}
         </section>
-      </main>
+      </div>
 
       <div className="fixed bottom-0 left-0 right-0 p-4 pb-6 bg-white/95 backdrop-blur-xl border-t border-gray-100 z-20">
         <div className="max-w-lg mx-auto">

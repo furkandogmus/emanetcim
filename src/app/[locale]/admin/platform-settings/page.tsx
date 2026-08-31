@@ -86,13 +86,13 @@ export default async function AdminPlatformSettingsPage({
         </div>
       </header>
 
-      <main className="p-10 max-w-5xl mx-auto w-full flex flex-col gap-8">
+      <div className="p-10 max-w-5xl mx-auto w-full flex flex-col gap-8">
         <p className="text-sm text-gray-600 max-w-2xl">{t("platformSettingsIntro")}</p>
         <AdminPlatformSettingsClient
           initial={base}
           updatedAtLabel={updatedAtLabel}
         />
-      </main>
+      </div>
     </div>
   );
 }

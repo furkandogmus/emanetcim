@@ -47,8 +47,8 @@ yazılmaz; ölçüm yazılır.
 | 27 | %200'de DE sigorta 28 px, FR ana sayfa 7 px kayıyor | Mobil | ✅ DÜZELTİLDİ (ikisi de 0) |
 | 28 | Arama sayfasında mobilde HİÇ `h1` yok | Ekran okuyucu | ✅ DÜZELTİLDİ |
 | 29 | Footer başlıkları `h2→h4` atlaması yapıyor (4 sayfa) | Ekran okuyucu | ✅ DÜZELTİLDİ |
-| 30 | Dükkan sayfasında 2 `h1`, 3 `main` | Ekran okuyucu | ⏳ AÇIK |
-| 31 | Checkout'ta 2 `main`, etiketsiz `nav` | Ekran okuyucu | ⏳ AÇIK |
+| 30 | Sayfa içinde iç içe `main` (25 dosya) | Ekran okuyucu | ✅ DÜZELTİLDİ |
+| 31 | Etiketsiz `nav` (arama, checkout) | Ekran okuyucu | ⏳ AÇIK |
 | 101 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
 | 102 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
 | 103 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
@@ -503,11 +503,28 @@ gezinen kullanıcı için bu "arada bir başlık kaçırdım mı?" demek. Dörd�
 `h2` yapıldı (görsel sınıflar aynı kaldı, görünüm değişmedi). Dört sayfadaki
 atlamayı birden kapatıyor.
 
-**Açık 30–31 — birden fazla `main`:** dükkan sayfasında **üç**, checkout ve
-SSS'te **iki** `main` var. Sayfada yalnızca bir `main` olmalı; işaret
-gezinmesi (screen reader'da "ana içeriğe git") birden fazlasında belirsizleşir.
-Muhtemel sebep mobil/masaüstü varyantlarının ikisinin birden render edilmesi.
-Dükkandaki çift `h1` de aynı kökten. Henüz izlenmedi.
+**Düzeltilen 30 — iç içe `main`:** kök `layout.tsx` zaten
+`<main id="main-content">` render ediyor, ama **25 dosya** (18 sayfa + 7
+bileşen) kendi `<main>`'ini de açıyordu. Yani her sayfada `main` içinde `main`
+vardı — geçersiz HTML ve işaret gezinmesini ("ana içeriğe git") belirsiz
+kılıyor. Hepsi `<div>`e çevrildi; `main` ve `div` ikisi de blok, görünüm
+değişmedi. Artık kaynakta tek bir `<main>` var: layout'unki.
+
+**DÜZELTME: "dükkan sayfasında 2 `h1`" bulgum YANLIŞTI.** Ataya bakan ölçümle
+kontrol edildi:
+
+```
+h1 #1  "Furkan'ın Diğer Mekan"  checkVisibility: true   yükseklik 55
+h1 #2  "Furkan'ın Diğer Mekan"  checkVisibility: false  yükseklik  0
+```
+
+İkinci `h1`, `hidden md:block` kapsayıcısının içinde; `display:none` içerik
+erişilebilirlik ağacına HİÇ girmez, yani ekran okuyucu tek `h1` görüyor.
+
+Ölçüm hatam şuydu: görünürlüğü ögenin **kendi** `display`ine bakarak
+süzüyordum. `display:none` bir ebeveynin çocuğu, kendi `display`ini yine
+`block` olarak raporlar. Doğrusu `el.checkVisibility({checkVisibilityCSS:
+true})` — ataları da hesaba katıyor. Bundan sonraki taramalarda bu kullanılmalı.
 
 ### Yavaş bağlantı (3G) — SAĞLIKLI
 
@@ -624,6 +641,8 @@ Bu liste bilerek uzun; her tur birkaçını kapatıp buraya sonucunu yazın.
 - [x] %200 testi TR/DE/FR/JA'da tekrarlandı; kalan iki sayfa da kapandı.
 - [ ] Odak tuzağı olan modallar test edilmedi.
 - [ ] Ekran okuyucu ile gerçek gezinme yapılmadı.
+- [ ] Etiketsiz `nav` ögeleri (arama ve checkout'ta birer tane) — `aria-label`
+      eklenmeli; hangi nav olduğu izlenmedi.
 
 ### 101. Haritada OpenStreetMap atfı hiç görünmüyordu — DÜZELTİLDİ
 

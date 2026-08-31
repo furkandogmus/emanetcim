@@ -171,7 +171,7 @@ export default async function TermsPage({ params }: { params: Promise<{ locale: 
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto py-16 px-6">
+      <div className="max-w-4xl mx-auto py-16 px-6">
         <div className="space-y-12">
           {SECTIONS.map((section) => (
             <section key={section.title}>
@@ -203,7 +203,7 @@ export default async function TermsPage({ params }: { params: Promise<{ locale: 
             </Link>
           </p>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

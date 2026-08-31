@@ -535,7 +535,7 @@ export default function PartnerClient({
       </header>
 
       {activeTab === "PANEL" && (
-        <main className="mx-auto grid w-full max-w-5xl flex-1 items-center gap-6 animate-in fade-in duration-500 md:grid-cols-[minmax(260px,0.9fr)_minmax(320px,1.1fr)] md:gap-10">
+        <div className="mx-auto grid w-full max-w-5xl flex-1 items-center gap-6 animate-in fade-in duration-500 md:grid-cols-[minmax(260px,0.9fr)_minmax(320px,1.1fr)] md:gap-10">
           <button
             type="button"
             onClick={() => setIsScanning(true)}
@@ -581,7 +581,7 @@ export default function PartnerClient({
               <PartnerReferralCard />
             </div>
           </div>
-        </main>
+        </div>
       )}
 
       {activeTab === "GECMIS" && (
@@ -606,7 +606,7 @@ export default function PartnerClient({
       )}
 
       {activeTab === "AYARLAR" && (
-        <main className="flex-1 max-w-md mx-auto w-full flex flex-col gap-8 animate-in slide-in-from-bottom-4 duration-500">
+        <div className="flex-1 max-w-md mx-auto w-full flex flex-col gap-8 animate-in slide-in-from-bottom-4 duration-500">
           <PartnerShopSettingsForm
             shopId={shopId}
             initialCapacity={initialCapacity}
@@ -617,7 +617,7 @@ export default function PartnerClient({
             initialPhone={initialPhone}
             compact
           />
-        </main>
+        </div>
       )}
 
       <PartnerBottomNav

@@ -175,7 +175,7 @@ export default function PartnerSealsClient({
         </div>
       </header>
 
-      <main className="max-w-lg mx-auto p-4 space-y-4">
+      <div className="max-w-lg mx-auto p-4 space-y-4">
         {/* Feedback */}
         {feedback && (
           <div
@@ -353,7 +353,7 @@ export default function PartnerSealsClient({
             {t("sealsNoRequests")}
           </p>
         )}
-      </main>
+      </div>
     </div>
   );
 }

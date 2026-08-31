@@ -43,7 +43,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto py-24 px-6">
+      <div className="max-w-7xl mx-auto py-24 px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
           {/* Info cards */}
           <div className="flex flex-col gap-6 order-2 lg:order-1">
@@ -110,7 +110,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
             responseNote={t("responseNote")}
           />
         </div>
-      </main>
+      </div>
     </div>
   );
 }

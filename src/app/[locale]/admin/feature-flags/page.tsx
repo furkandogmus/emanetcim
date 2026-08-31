@@ -60,7 +60,7 @@ export default async function AdminFeatureFlagsPage({
         </div>
       </header>
 
-      <main className="p-10 max-w-5xl mx-auto w-full flex flex-col gap-8">
+      <div className="p-10 max-w-5xl mx-auto w-full flex flex-col gap-8">
         <p className="text-sm text-gray-600 max-w-2xl">
           {t("featureFlagsIntro")}
         </p>
@@ -69,7 +69,7 @@ export default async function AdminFeatureFlagsPage({
         ) : (
           <AdminFeatureFlagsClient initial={flags} />
         )}
-      </main>
+      </div>
     </div>
   );
 }

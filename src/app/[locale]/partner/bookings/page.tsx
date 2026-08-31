@@ -140,7 +140,7 @@ export default async function PartnerBookingsPage({
         <h1 className="text-xl font-black tracking-tight">{t("history")}</h1>
       </header>
 
-      <main className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-6">
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-6">
         {totalCount > 0 ? (
           <PartnerBookingsFilterTabs
             current={filter}
@@ -272,7 +272,7 @@ export default async function PartnerBookingsPage({
             )}
           </nav>
         )}
-      </main>
+      </div>
     </div>
   );
 }

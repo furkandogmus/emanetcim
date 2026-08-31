@@ -153,7 +153,7 @@ export default function BookingsClient({
         </span>
       </header>
 
-      <main className="p-4 flex flex-col gap-4 max-w-2xl mx-auto md:hidden">
+      <div className="p-4 flex flex-col gap-4 max-w-2xl mx-auto md:hidden">
         <section className="rounded-2xl bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#172554] text-white p-5 shadow-xl shadow-slate-200">
           <p className="text-[10px] font-black uppercase tracking-[0.24em] text-white/60">
             {mobileCopy.loyaltyMember}
@@ -278,9 +278,9 @@ export default function BookingsClient({
             {tUserNav('signOut')}
           </button>
         </section>
-      </main>
+      </div>
 
-      <main className="p-4 flex-col gap-4 max-w-2xl mx-auto hidden md:flex">
+      <div className="p-4 flex-col gap-4 max-w-2xl mx-auto hidden md:flex">
         <AnimatePresence>
           {bookings.map((booking, index) => (
             <motion.div
@@ -400,7 +400,7 @@ export default function BookingsClient({
             </motion.div>
           ))}
         </AnimatePresence>
-      </main>
+      </div>
 
       {reviewBooking && (
         <ReviewForm 

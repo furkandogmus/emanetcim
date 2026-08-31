@@ -63,7 +63,7 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
         </p>
       </header>
 
-      <main className="max-w-4xl mx-auto py-20 px-6">
+      <div className="max-w-4xl mx-auto py-20 px-6">
         {/* Categories */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-20">
           <section>
@@ -128,7 +128,7 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
             </a>
           </div>
         </section>
-      </main>
+      </div>
     </div>
   );
 }
