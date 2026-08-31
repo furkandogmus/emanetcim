@@ -88,7 +88,9 @@ export default async function DemandPage({
                       <td className="py-3">
                         <Link
                           href={`/shop/${r.shopId}`}
-                          className="font-bold hover:underline"
+                          /* `inline-block py-1.5 -my-1.5`: olculdu 143x17 px; WCAG 2.2
+                             kriteri 2.5.8 en az 24x24 ister. Gorunum degismiyor. */
+                          className="inline-block py-1.5 -my-1.5 font-bold hover:underline"
                         >
                           {r.shopName}
                         </Link>
