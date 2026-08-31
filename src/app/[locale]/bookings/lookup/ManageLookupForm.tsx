@@ -50,12 +50,25 @@ export default function ManageLookupForm() {
         <h1 className="text-xl font-black text-gray-900 mb-2">{t("manageBookingTitle")}</h1>
         <p className="text-sm text-gray-500 mb-6">{t("manageBookingDesc")}</p>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {/*
+            `autoComplete`/`inputMode`: telefonda tarayicinin e-postayi
+            onermesi buna bagli. Onerisiz kullanici adresini kucuk ekranda elle
+            yaziyor; yanlis yazarsa aldigi cevap "Rezervasyon bulunamadi"
+            oluyor ve hatayi kendi yazimindan ayirt edemiyor. WCAG 1.3.5.
+
+            YORUM BURADA, etiketin ICINDE degil: `input-labels` mandali
+            girdiden 400 karakter geriye bakip sarmalayan `<label>` ariyor.
+            Araya giren uzun bir yorum o etiketi pencerenin disina itiyor ve
+            test, dogru etiketlenmis bir girdiyi etiketsiz sayiyor.
+          */}
           <label className="flex flex-col gap-1.5">
             <span className="id-eyebrow text-gray-400">
               {t("email")}
             </span>
             <input
               type="email"
+              autoComplete="email"
+              inputMode="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="ornek@email.com"

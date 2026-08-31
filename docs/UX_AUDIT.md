@@ -53,6 +53,8 @@ yazılmaz; ölçüm yazılır.
 | 33 | Harita kontrolleri her dilde İNGİLİZCE konuşuyor | Ekran okuyucu | ✅ DÜZELTİLDİ |
 | 34 | PWA ikonu `maskable` ilan ediyor ama güvenli bölgeyi aşıyor | PWA | ✅ DÜZELTİLDİ |
 | 35 | İletişim formunun üç alanının erişilebilir adı yok | Form | ✅ DÜZELTİLDİ |
+| 36 | Rezervasyon sorgulamada `autocomplete` yok | Form | ✅ DÜZELTİLDİ |
+| 37 | Prelaunch formlarında `autocomplete` yok (2 dosya) | Form | ⛔ BAŞKA AGENT'IN ÖZELLİĞİ |
 | 101 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
 | 102 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
 | 103 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
@@ -615,6 +617,31 @@ yoktu, yani gönderim başarısız olduğunda ekran okuyucuya hiçbir şey
 duyurulmuyordu.
 
 Üçü de düzeltildi.
+
+### 36. Rezervasyon sorgulama — hata UX'i iyi, otomatik doldurma yok
+
+Akış denendi: geçersiz kodla sorgulandı. **Hata yönetimi sağlıklı çıktı** —
+`role="alert"` var ve mesaj net: "Rezervasyon bulunamadı veya bilgiler
+eşleşmiyor." Ekran okuyucuya duyuruluyor.
+
+Eksik olan `autocomplete`/`inputmode`'du. Bu form misafirin rezervasyonunu
+bulmak için doldurduğu iki alandan biri; öneri olmadan kullanıcı adresini
+küçük ekranda elle yazıyor ve **yanlış yazarsa aldığı cevap "Rezervasyon
+bulunamadı" oluyor** — yani sistem hatasını kendi yazım hatasından ayırt
+edemiyor. Eklendi.
+
+`PrelaunchDemandPanel.tsx` ve `PrelaunchNotifyButton.tsx` dosyalarında da aynı
+eksik var; ikisi de başka agent'in özelliği olduğu için dokunulmadı. Düzeltmesi
+tek satır: e-posta girdisine `autoComplete="email" inputMode="email"`.
+
+### Mandal testinin kırılgan yanı (yol boyunca öğrenildi)
+
+`input-labels` mandalı, girdiden **400 karakter geriye** bakıp sarmalayan bir
+`<label>` arıyor. Bu alana uzun bir açıklama yorumu eklediğimde etiket o
+pencerenin dışına itildi ve test, **doğru etiketlenmiş** bir girdiyi etiketsiz
+saydı. Çözüm: açıklama yorumları `<label>` ile `<input>` ARASINA değil,
+etiketin üstüne yazılmalı. Bu, bu repoda yorum yazarken bilinmesi gereken bir
+kısıt.
 
 ### Yaygın sanılan ama gerçek olmayan bulgu
 
