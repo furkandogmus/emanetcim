@@ -118,8 +118,17 @@ test.describe('UC: Esnaf — Partner paneli', () => {
     await page.goto('/tr/login');
     await page.getByText('Esnaf Girişi').click();
     await expect(page).toHaveURL(/\/tr\/partner/, { timeout: 20000 });
-    // İlk dükkan: getShopsByOwner createdAt desc → en son oluşturulan (seed: Sultanahmet)
-    await expect(page.getByTestId('partner-shop-name')).toContainText(/sultanahmet|galata/i);
+    /*
+      İlk dükkan: getShopsByOwner createdAt desc → en son oluşturulan (seed: Sultanahmet).
+      `.first()` ŞART: seed demo esnafa ÜÇ dükkan veriyor, panel her biri için bir kart
+      çiziyor ve sayfa akışla (streaming) geliyor. `.first()` olmadan eşleşme sayısı
+      kartların ne zaman yerleştiğine bağlı oluyordu: bazen 1 (geçer), bazen 3 ("strict
+      mode violation: resolved to 2 elements" ile düşer). Aynı komut arka arkaya
+      koşturulduğunda düşen testler DEĞİŞİYORDU (2026-08-31: üç koşu, üç farklı sonuç).
+      E2E, deploy'un bağlı olduğu `verify` işinde koşuyor -- yani bu kaypaklık rastgele
+      dağıtım kesiyor.
+    */
+    await expect(page.getByTestId('partner-shop-name').first()).toContainText(/sultanahmet|galata/i);
   });
 
   test('QR teslim al modalı aç/kapat', async ({ page }) => {
@@ -127,7 +136,8 @@ test.describe('UC: Esnaf — Partner paneli', () => {
     await page.getByText('Esnaf Girişi').click();
     await expect(page).toHaveURL(/\/tr\/partner/, { timeout: 20000 });
 
-    await page.getByText('YENİ VALİZ TESLİM AL').click();
+    // `.first()`: yukarıdaki testle aynı sebep -- her dükkan kartında bir tane var.
+    await page.getByText('YENİ VALİZ TESLİM AL').first().click();
     await expect(page.getByRole('heading', { name: 'QR Kodu Okutun' })).toBeVisible();
 
     await page

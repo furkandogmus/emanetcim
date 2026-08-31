@@ -10,6 +10,34 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-08-31 — E2E kapısı kaypaktı: aynı komut, üç koşu, üç farklı sonuç
+
+Deploy `verify` işine `needs` ile bağlı, yani E2E kırmızıysa üretime çıkılamıyor.
+O kapı **rastgele** kırmızıydı: aynı `npx playwright test --workers=1` üç kez
+koşturuldu, üçünde de farklı testler düştü.
+
+| Koşu | Düşen |
+|---|---|
+| 1 | `QR teslim al modalı aç/kapat` |
+| 2 | `Misafir demo → arama → onay` + `Esnaf girişi ve dükkan özeti` |
+| 3 | `Esnaf girişi ve dükkan özeti` + `QR teslim al modalı aç/kapat` |
+
+- **Sebep**: seed demo esnafa **üç** dükkan veriyor (`prisma/seed.ts`, üç kez
+  `ownerId: partner.id`), panel her dükkan için bir kart çiziyor, ama iki test tek
+  öğe varsayıyordu: `getByTestId('partner-shop-name')` ve
+  `getByText('YENİ VALİZ TESLİM AL')`. Sayfa akışla (streaming) geldiği için
+  eşleşme sayısı kartların ne zaman yerleştiğine bağlıydı — bazen 1 (geçer), bazen
+  3 (`strict mode violation: resolved to 2 elements`).
+- **Düzeltme**: iki yerde `.first()`. Testin kendi yorumu zaten "İlk dükkan"
+  diyordu; eksik olan niyet değil, onu yazıya döken çağrıydı.
+- **Doğrulama**: düzeltmeden sonra tam seri koşu **30/30**.
+- **Yanlış teşhis edilmeye çok yakındı.** İlk hipotez "düzen değişikliklerim bozdu"
+  idi; testler tek başına koştuğunda geçtiği için ikinci hipotez "ölçüm koşularım
+  dev veritabanını kirletti" oldu. İkisi de yanlıştı ve ikisi de saatlerce
+  aranabilirdi. Ayırt eden tek şey **aynı komutu tekrar koşturup düşen testlerin
+  DEĞİŞTİĞİNİ görmek** oldu: değişen bir sonuç, deterministik bir kod değişikliğini
+  şüpheli olmaktan çıkarır.
+
 ## 2026-08-31 — dar ekranlarda dokuz düzen kusuru (ölçüldü, hiçbiri Türkçe/390 px'te görünmüyordu)
 
 Sekiz sayfa × altı dil × 320–1920 px otomatik olarak tarandı. Aranan üç şey: görünüm
