@@ -10,6 +10,33 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-08-31 — talep testi zinciri CANLIDA uçtan uca doğrulandı
+
+Bu oturumda gönderilen her parça üretimde tek tek denendi. "Testler geçiyor"
+ile "kullanıcının elinde çalışıyor" ayrı şeyler; ikincisi ölçülmeden kapatılmadı.
+
+| Doğrulanan | Sonuç |
+|---|---|
+| `/tr/how-it-works` | 200; animasyon anahtar kareleri, HowTo yapısal verisi ve mühür metni sayfada |
+| `/tr/demand` | 200; sinyal yokken dürüst boş durum, sinyal gelince nokta listede |
+| `/tr/become-partner` | 200; "Talep haritasını gör" bağlantısı var |
+| `/tr/search` | 200; 11 sonuç kartı, prelaunch noktaları "Yakında" ile |
+| Prod şeması | `PrelaunchInterest.notifiedAt` sütunu mevcut (migrasyon geçti), 482 nokta |
+| Nokta sayfası | Yerel ad ("Tour Eiffel — Consigne à Bagages"), fiyat yok, "Yakında", panel en üstte |
+| **Tek tık sayacı** | Tıklandı → "İsteğin sayıldı", düğme kilitlendi, sayı **1**'e çıktı |
+| **Esnaf kartı** | Köşede çıktı; eşiğin altında olduğu için **rakam vermeyen** metinle |
+| **Talep haritası** | Aynı nokta listeye düştü, boş durum kalktı |
+
+**Test verisi temizlendi.** Sayacı kanıtlamak için üretime tek bir `PrelaunchWant`
+satırı yazıldı ve hemen silindi (`DELETE 1`, ardından tablo 0, `/demand` yeniden
+boş durum). Karar bu sayıya bakılarak veriliyor — bir şehre esnaf onboarding'i
+on binlerce dolarlık taahhüt — ve kendi test tıklamamı bırakmak o kararı
+kirletirdi.
+
+**Açık kalan:** `--open` ile gönderilen açılış e-postası üretimde HİÇ
+denenmedi; yerelde Resend anahtarı olmadığı için gönderim "atlandı" olarak
+loglandı. İlk gerçek nokta açılışında ilk e-posta gözle doğrulanmalı.
+
 ## 2026-08-31 — talep testi noktaları aramada HİÇ görünmüyordu (üretimde ölçüldü)
 
 482 nokta üretime yazıldıktan sonra arama ekranı İstanbul'da **"TÜM NOKTALAR (3)"**
