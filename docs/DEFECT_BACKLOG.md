@@ -213,6 +213,47 @@ kutuları. Esnaf ekranları projenin kendi E2E yardımcılarıyla (`loginAsDemoP
 Ders: bir düzen sondası, **kırpan atayı ve gerçekten çizilen elemanı** hesaba katmadan
 güven vermez. Sıfır bulgu, sondanın yanlış yere baktığının da cevabıdır.
 
+## 2026-08-31 — P0 kimlik doğrulama atlaması artık ÖLÇÜLÜYOR (kaynak taraması değil)
+
+Bu oturumun en ağır bulgusu (`POST /api/mobile/auth/register` parolasız hesaplara
+token basıyordu) bugüne kadar iki şeyle korunuyordu: düzeltmenin kendisi ve bir
+**kaynak taraması** (`auth-endpoint-guards`). Tarama kalıbı tutuyor ama
+**davranışı ölçmüyor** — `if (!existing.passwordHash)` satırı yerinde durup gövde
+yanlış olsaydı yeşil kalırdı.
+
+Docker geldiği için artık gerçek bir veritabanına karşı gerçek uç gövdesi
+koşturulabiliyor. `src/__tests__/mobile-register-bypass.integration.test.ts`
+saldırının senaryosunu birebir kuruyor:
+
+1. `passwordHash = null`, `role = ADMIN` bir kullanıcı yaratılıyor — Google ile
+   açılmış ve `ADMIN_EMAILS` ile yükseltilmiş bir hesabın birebir taklidi.
+2. Uç, saldırganın uydurduğu bir parolayla çağrılıyor.
+3. `409` bekleniyor, `accessToken`/`refreshToken` **bulunmaması** bekleniyor,
+   yanıt gövdesinde `ADMIN` geçmemesi bekleniyor.
+4. Gönderilen parolanın hesaba **yazılmadığı** da doğrulanıyor.
+5. Karşı durum: parolası olan hesap doğru parolayla `200`, yanlışla `401`.
+
+### Testin gerçekten ölçtüğü doğrulandı
+
+Açık geçici olarak geri konuldu (`if (existing.passwordHash) { ... }` — eski hâl)
+ve test **kırmızıya döndü**:
+
+```
+AssertionError: expected 200 to be 409
+Tests  2 failed | 3 passed (5)
+```
+
+`200` = token basıldı. Yani açık yeniden üretildi ve test onu yakaladı; sonra
+düzeltme geri alındı ve beşi de yeşil.
+
+> Üçüncü test (parola yazılmıyor) açıklı hâlde de geçiyor — eski kod da parolayı
+> yazmıyordu, yalnızca token veriyordu. Test yorumunda böyle yazıyor; yanlış
+> güvence vermesin diye.
+
+Diğer entegrasyon testleriyle aynı kapıda: yalnızca `CI=true` ve `DATABASE_URL`
+varken koşar. CI'nın Postgres servisi `postgis/postgis:16-3.4-alpine`, yani orada
+her koşuda çalışacak.
+
 ## 2026-08-31 — mesafe araması her satır için mesafe hesaplıyordu (5000 dükkanda 12,4 ms → 0,5 ms)
 
 Geçen turda "PostGIS çalışırken gerçek planı ölçmeden indeks eklemek tahmin
