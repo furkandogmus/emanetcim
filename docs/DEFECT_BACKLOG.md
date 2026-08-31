@@ -159,6 +159,45 @@ kutuları. Esnaf ekranları projenin kendi E2E yardımcılarıyla (`loginAsDemoP
 Ders: bir düzen sondası, **kırpan atayı ve gerçekten çizilen elemanı** hesaba katmadan
 güven vermez. Sıfır bulgu, sondanın yanlış yere baktığının da cevabıdır.
 
+## 2026-08-31 — mobil kimlik doğrulama nginx'te on kat gevşek kovadaydı
+
+`/api/mobile/auth/*` hiçbir özel `location`a düşmüyordu, yani `location /`
+üzerinden `@next`e gidip `api_general` limitini alıyordu.
+
+| Yüzey | nginx kovası | Hız |
+|---|---|---|
+| Web girişi (`/api/auth/`) | `api_auth` | 180 r/**dakika** |
+| Mobil giriş (`/api/mobile/auth/*`) | `api_general` | 30 r/**saniye** |
+
+Aynı işi yapan iki yüzeyden biri diğerinden ~**10 kat** gevşek bir kovadaydı — ve
+gevşek olan, parola/OTP denemelerinin ucuz olduğu taraftı: `auth/session` (şifre +
+OTP doğrulama), `auth/register`, `auth/refresh`, `auth/password-reset/*`,
+`auth/otp` (ki her çağrısı bir SMS maliyeti).
+
+Aynı boşluk misafir rezervasyon zincirinde de vardı (`bookings/lookup` →
+`guest-cancel`): kimlik doğrulaması yok, başarısı misafirin QR token'ını ve iptal
+yetkisini veriyor, ve kaba kuvvetin maliyeti tamamen istek hızına bağlı.
+
+Uygulama katmanında bu uçların hepsinde IP kovası **var** (bir önceki turda
+güvenilir hale geldi). Bu düzeltme onun yerine geçmiyor, **yanında** duruyor:
+nginx isteği Node'a hiç sokmadan keser, yani veritabanı ve bcrypt maliyeti hiç
+doğmaz.
+
+### Mandal: `src/__tests__/nginx-auth-zones.test.ts`
+
+`nginx -t`nin yerine geçmiyor — o `scripts/verify-nginx-conf.sh` ile CI'da koşuyor
+ve **sözdizimini** sınıyor. Bu tarama **politikayı** sınıyor: hangi yolun hangi
+kovaya düştüğünü, nginx'in kendi eşleştirme sırasını (tam eşleşme → dosya
+sırasında regex → önek) taklit ederek.
+
+Mandalın gerçekten yakaladığı, yeni blok geçici olarak kaldırılarak **doğrulandı**.
+Değişiklik `nginx -t` ile de sınandı (`--engine local`, nginx 1.31; üretim 1.27 —
+script sürüm farkını uyarıyor, kesin cevap için `--engine docker`).
+
+Ayrıca test `/api/health/live`'ın limitlenmediğini de sabitliyor: nginx kendi
+healthcheck'inde beş saniyede bir çağırıyor, limitlenirse konteyner unhealthy'e
+düşer.
+
 ## 2026-08-31 — şifre sıfırlama e-postaları `localhost` işaret edebiliyordu
 
 Aynı kavram — sitenin kamu kök adresi — **on yerde** ayrı ayrı çözülüyordu ve
