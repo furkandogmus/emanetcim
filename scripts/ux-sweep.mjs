@@ -23,13 +23,21 @@ const BASE = process.env.BASE_URL ?? "https://bagajpark.com";
 const HEADLESS = process.env.HEADLESS === "1";
 
 /** Ölçülen sayfalar. Dil × yol; hepsi misafir yüzeyi (giriş gerekmiyor). */
+const SHOP_ID = process.env.SHOP_ID ?? "131bcf6d-9156-4716-8925-3b8a26c04894";
+
 const SAYFALAR = [
   ["/tr", "ana sayfa"],
   ["/de", "ana sayfa (DE)"],
   ["/fr", "ana sayfa (FR)"],
   ["/tr/search", "arama"],
+  ["/de/search", "arama (DE)"],
   ["/tr/insurance", "sigorta"],
   ["/tr/faq", "SSS"],
+  ["/tr/blog", "blog"],
+  ["/tr/luggage-storage/istanbul", "şehir sayfası"],
+  // Huninin geri kalani: bu denetimde en cok hata bu ikisinden cikti.
+  [`/tr/shop/${SHOP_ID}`, "dükkan detay"],
+  [`/tr/checkout/${SHOP_ID}`, "checkout 1. adım"],
 ];
 
 /** Sayfa içinde koşan ölçüm. Tarayıcı bağlamında çalışır. */
@@ -130,6 +138,23 @@ for (const buyukMetin of [false, true]) {
       await page.waitForTimeout(900);
     }
     const r = await page.evaluate(olcum);
+
+    /*
+      Cloudflare bot dogrulamasi: bassiz olmayan tarayicida bile ara sira
+      "Click to reveal" ara sayfasi cikiyor. O sayfa bizim isaretlerimizi
+      tasimadigi icin butun kurallari birden bozuyor ve GERCEK bir regresyon
+      gibi gorunuyor. Yanlis alarm uretmemek icin atlaniyor -- ama sessizce
+      degil: satirda "atlandi" yaziyor ki kapsamin daraldigi gorunsun.
+    */
+    const cloudflare = await page
+      .evaluate(() => /cloudflare|click to reveal/i.test(document.body.innerText.slice(0, 400)))
+      .catch(() => false);
+    if (cloudflare) {
+      console.log(`atlandı  ${yol.padEnd(16)} Cloudflare doğrulama sayfası`);
+      await ctx.close();
+      continue;
+    }
+
     const hatalar = kurallar(ad, r, buyukMetin);
     if (hatalar.length) kirik += 1;
     console.log(

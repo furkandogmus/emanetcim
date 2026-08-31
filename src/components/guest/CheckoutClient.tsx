@@ -355,7 +355,7 @@ export default function CheckoutClient({
             <span>{t("checkoutSupportIntro")}</span>
             <Link
               href="/faq"
-              className="font-bold text-white underline underline-offset-4 hover:text-white"
+              className="inline-block py-1.5 -my-1.5 font-bold text-white underline underline-offset-4 hover:text-white"
             >
               {t("checkoutSupportFaq")}
             </Link>
@@ -364,7 +364,7 @@ export default function CheckoutClient({
             </span>
             <Link
               href="/contact"
-              className="font-bold text-white underline underline-offset-4 hover:text-white"
+              className="inline-block py-1.5 -my-1.5 font-bold text-white underline underline-offset-4 hover:text-white"
             >
               {t("checkoutSupportContact")}
             </Link>
@@ -419,7 +419,7 @@ export default function CheckoutClient({
           <span>{t("checkoutSupportIntro")}</span>
           <Link
             href="/faq"
-            className="font-bold text-orange-600 hover:underline"
+            className="inline-block py-1.5 -my-1.5 font-bold text-orange-600 hover:underline"
           >
             {t("checkoutSupportFaq")}
           </Link>
@@ -428,7 +428,7 @@ export default function CheckoutClient({
           </span>
           <Link
             href="/contact"
-            className="font-bold text-orange-600 hover:underline"
+            className="inline-block py-1.5 -my-1.5 font-bold text-orange-600 hover:underline"
           >
             {t("checkoutSupportContact")}
           </Link>

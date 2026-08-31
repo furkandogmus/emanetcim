@@ -123,7 +123,9 @@ export default async function CityLuggageStoragePage({
         <div className="mx-auto flex max-w-3xl items-center gap-3 px-6 py-4">
           <Link
             href="/"
-            className="text-xs id-eyebrow text-gray-400 hover:text-orange-600"
+            /* `inline-block py-2 -my-2`: olculdu 52x16 px. Sehir sayfasinin tek
+               geri baglantisi ve mobilde parmakla isabet edilmesi gerekiyor. */
+            className="inline-block py-2 -my-2 text-xs id-eyebrow text-gray-400 hover:text-orange-600"
           >
             ← {tCommon("back")}
           </Link>
