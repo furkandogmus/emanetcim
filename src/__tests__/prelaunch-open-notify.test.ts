@@ -12,12 +12,18 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
  * Bu sınıf hata sessizdir: kimse hata almaz, kimse şikâyet etmez, e-postalar
  * tabloda birikir ve özellik "çalışıyor" görünür.
  */
-const { mockPrisma, mockNotify } = vi.hoisted(() => ({
+const { mockPrisma, mockNotify, mockConfirm } = vi.hoisted(() => ({
   mockPrisma: {
     shop: { findUnique: vi.fn() },
-    prelaunchInterest: { findMany: vi.fn(), count: vi.fn(), update: vi.fn() },
+    prelaunchInterest: {
+      findMany: vi.fn(),
+      count: vi.fn(),
+      update: vi.fn(),
+      create: vi.fn(),
+    },
   },
   mockNotify: vi.fn(),
+  mockConfirm: vi.fn(),
 }));
 
 vi.mock("@/lib/db", () => ({ default: mockPrisma }));
@@ -25,7 +31,10 @@ vi.mock("@/lib/logger", () => ({
   default: { error: vi.fn(), warn: vi.fn(), info: vi.fn() },
 }));
 vi.mock("@/services/NotificationService", () => ({
-  notificationService: { notifyPrelaunchOpened: mockNotify },
+  notificationService: {
+    notifyPrelaunchOpened: mockNotify,
+    notifyPrelaunchInterestReceived: mockConfirm,
+  },
 }));
 
 import { prelaunchInterestService } from "@/services/PrelaunchInterestService";
@@ -107,5 +116,51 @@ describe("notifyOpened", () => {
     mockPrisma.shop.findUnique.mockResolvedValue(null);
     const res = await prelaunchInterestService.notifyOpened("yok");
     expect(res).toEqual({ sent: 0, failed: 0, alreadyNotified: 0 });
+  });
+});
+
+describe("record — kayit teyidi", () => {
+  beforeEach(() => {
+    mockPrisma.shop.findUnique.mockResolvedValue({
+      isPrelaunch: true,
+      name: "Tour Eiffel",
+    });
+    mockPrisma.prelaunchInterest.create.mockResolvedValue({});
+    mockConfirm.mockResolvedValue(undefined);
+  });
+
+  it("kayit alininca TEYIT gonderilir", async () => {
+    /**
+     * Once yalnizca ekranda bir toast cikiyordu. Iki sonucu vardi ve ikisi de
+     * sessizdi: yazim hatali bir adres sessizce kabul ediliyordu (kisi acilis
+     * gununde hicbir sey almazdi ve bunu HIC ogrenemezdi), ve kisinin elinde
+     * kayit kalmiyordu.
+     */
+    const res = await prelaunchInterestService.record({
+      shopId: "s1",
+      email: "A@Example.com",
+      locale: "ja",
+    });
+
+    expect(res).toEqual({ ok: true, alreadyRegistered: false });
+    // E-posta kucuk harfe indirilerek saklaniyor; teyit de ayni adrese gider.
+    expect(mockConfirm).toHaveBeenCalledWith(
+      "a@example.com",
+      "s1",
+      "Tour Eiffel",
+      "ja",
+    );
+  });
+
+  it("teyit patlarsa KAYIT yine basarili sayilir", async () => {
+    // Kayit zaten yazildi; kisiye "kaydolamadin" demek YANLIS olurdu.
+    mockConfirm.mockRejectedValue(new Error("smtp down"));
+
+    const res = await prelaunchInterestService.record({
+      shopId: "s1",
+      email: "b@example.com",
+    });
+
+    expect(res).toEqual({ ok: true, alreadyRegistered: false });
   });
 });

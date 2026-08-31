@@ -415,6 +415,100 @@ export class NotificationService implements INotificationService {
 
   /** Partner rezervasyonu onayladığında misafire onay e-postası gönderir. */
   /**
+   * "Açılınca haber ver" kaydı alındığında gönderilen TEYİT.
+   *
+   * NEDEN VAR (2026-08-31'de ölçüldü): kayıt sonrası yalnızca ekranda bir toast
+   * çıkıyordu. İki sonucu vardı ve ikisi de sessizdi:
+   *
+   *   - Adres DOĞRULANMIYORDU. Yazım hatası olan bir e-posta sessizce kabul
+   *     ediliyor, kişi açılış gününde hiçbir şey almıyordu. Yani "açıldığı gün
+   *     ilk sen haberdar ol" sözü, kişinin hiç öğrenemeyeceği bir şekilde
+   *     bozuluyordu.
+   *   - Kişinin elinde KAYIT KALMIYORDU. Toast kayboluyor; geri döndüğünde
+   *     kaydolup kaydolmadığını bilmiyor ve baştan yazıyor.
+   *
+   * Teyit ikisini birden çözüyor: gelen kutusunda bir iz kalıyor ve adres
+   * çalışmıyorsa bu HEMEN belli oluyor.
+   */
+  async notifyPrelaunchInterestReceived(
+    email: string,
+    shopId: string,
+    shopName: string,
+    locale: string = "tr",
+  ): Promise<void> {
+    if (!email.includes("@")) return;
+    const domain = process.env.NEXT_PUBLIC_APP_URL || "https://bagajpark.com";
+    const shopUrl = `${domain}/${locale}/shop/${shopId}`;
+
+    const content = pickLocale({
+      tr: {
+        subject: `${shopName} açılınca haber vereceğiz 🎒`,
+        body: `Merhaba,\n\n${shopName} için "açılınca haber ver" kaydını aldık. Nokta hizmete girdiği gün ilk sana yazacağız.\n\nNokta: ${shopUrl}`,
+        heading: `Kaydını aldık 🎒`,
+        p1: `${shopName} için "açılınca haber ver" isteğini kaydettik.`,
+        p2: `Bu nokta henüz rezervasyon almıyor. Hizmete girdiği gün ilk sana yazacağız — başka bir şey yapmana gerek yok.`,
+        cta: `Noktayı gör`,
+        footer: `BagajPark — Güvenli Bagaj Emaneti`,
+      },
+      en: {
+        subject: `We'll tell you when ${shopName} opens 🎒`,
+        body: `Hello,\n\nWe have your request to be notified when ${shopName} opens. You will hear from us the day it goes live.\n\nPoint: ${shopUrl}`,
+        heading: `Request received 🎒`,
+        p1: `We saved your request to be notified about ${shopName}.`,
+        p2: `This point does not take bookings yet. You will be the first to hear the day it opens — nothing else to do.`,
+        cta: `View the point`,
+        footer: `BagajPark — Secure Luggage Storage`,
+      },
+      de: {
+        subject: `Wir melden uns, wenn ${shopName} öffnet 🎒`,
+        body: `Hallo,\n\nIhre Anfrage für eine Benachrichtigung zu ${shopName} ist bei uns. Am Eröffnungstag hören Sie von uns.\n\nStandort: ${shopUrl}`,
+        heading: `Anfrage erhalten 🎒`,
+        p1: `Wir haben Ihre Benachrichtigungsanfrage für ${shopName} gespeichert.`,
+        p2: `Dieser Standort nimmt noch keine Buchungen an. Am Eröffnungstag erfahren Sie es als Erste — sonst ist nichts zu tun.`,
+        cta: `Standort ansehen`,
+        footer: `BagajPark — Sichere Gepäckaufbewahrung`,
+      },
+      fr: {
+        subject: `Nous vous préviendrons à l'ouverture de ${shopName} 🎒`,
+        body: `Bonjour,\n\nNous avons bien votre demande d'alerte pour ${shopName}. Vous serez prévenu le jour de l'ouverture.\n\nPoint : ${shopUrl}`,
+        heading: `Demande enregistrée 🎒`,
+        p1: `Nous avons enregistré votre demande d'alerte pour ${shopName}.`,
+        p2: `Ce point n'accepte pas encore de réservations. Vous serez le premier informé le jour de l'ouverture — rien d'autre à faire.`,
+        cta: `Voir le point`,
+        footer: `BagajPark — Consigne à bagages sécurisée`,
+      },
+      ja: {
+        subject: `${shopName} のオープン時にお知らせします 🎒`,
+        body: `こんにちは。\n\n${shopName} のオープン通知のご登録を承りました。オープン当日に最初にお知らせします。\n\n拠点: ${shopUrl}`,
+        heading: `ご登録を承りました 🎒`,
+        p1: `${shopName} のオープン通知をご登録いただきました。`,
+        p2: `この拠点はまだ予約を受け付けていません。オープン当日に最初にお知らせしますので、ほかに必要な操作はありません。`,
+        cta: `拠点を見る`,
+        footer: `BagajPark — 安全な手荷物預かり`,
+      },
+      fa: {
+        subject: `هنگام افتتاح ${shopName} خبر می‌دهیم 🎒`,
+        body: `سلام،\n\nدرخواست شما برای اطلاع از افتتاح ${shopName} ثبت شد. روز افتتاح اول از همه به شما خبر می‌دهیم.\n\nنقطه: ${shopUrl}`,
+        heading: `درخواست شما ثبت شد 🎒`,
+        p1: `درخواست اطلاع‌رسانی شما برای ${shopName} ذخیره شد.`,
+        p2: `این نقطه هنوز رزرو نمی‌گیرد. روز افتتاح اول از همه باخبر می‌شوید — کار دیگری لازم نیست.`,
+        cta: `دیدن نقطه`,
+        footer: `BagajPark — نگهداری امن چمدان`,
+      },
+    }, locale);
+
+    const html = renderEmailHtml({
+      locale,
+      heading: content.heading,
+      paragraphs: [content.p1, content.p2],
+      cta: { href: shopUrl, label: content.cta, variant: "button" },
+      footer: content.footer,
+    });
+
+    await this.sendEmail(email, content.subject, content.body, undefined, html);
+  }
+
+  /**
    * Talep testi noktası HİZMETE AÇILDIĞINDA, "haber ver" diyen kişiye e-posta.
    *
    * NEDEN VAR (2026-08-31'de ölçüldü): `PrelaunchInterest` kayıtları yalnızca

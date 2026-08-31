@@ -53,7 +53,7 @@ class PrelaunchInterestService {
 
     const shop = await prisma.shop.findUnique({
       where: { id: input.shopId },
-      select: { isPrelaunch: true },
+      select: { isPrelaunch: true, name: true },
     });
     if (!shop) return { ok: false, code: "shop_not_found" };
 
@@ -77,6 +77,25 @@ class PrelaunchInterestService {
           source: input.source ?? "web",
         },
       });
+      /*
+        TEYIT ATESLE-UNUT: kullaniciyi bekletmez ve DUSURMEZ.
+
+        Kayit zaten yazildi; e-posta gonderimi patlarsa kisiye "kaydolamadin"
+        demek YANLIS olurdu -- kaydoldu. Bu yuzden hata yalnizca loglaniyor.
+        `.catch` zorunlu: yakalanmamis bir red Node'da sureci indirir
+        (mandal: unhandled-rejection, tavan 0).
+      */
+      void notificationService
+        .notifyPrelaunchInterestReceived(
+          email,
+          input.shopId,
+          shop.name,
+          input.locale ?? "tr",
+        )
+        .catch((err) =>
+          logger.warn({ err, shopId: input.shopId }, "prelaunch_interest_confirm_failed"),
+        );
+
       return { ok: true, alreadyRegistered: false };
     } catch (err) {
       if (
