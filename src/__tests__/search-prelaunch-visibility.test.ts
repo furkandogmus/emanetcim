@@ -17,10 +17,16 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
  * kural burada ölçülüyor.
  */
 
-const { mockPrisma, mockGetActiveShops, mockGetSlotAvailability } = vi.hoisted(() => ({
+const { mockPrisma, mockGetActiveShops, mockGetSlotAvailabilityForShops } = vi.hoisted(() => ({
   mockPrisma: { booking: { groupBy: vi.fn() } },
   mockGetActiveShops: vi.fn(),
-  mockGetSlotAvailability: vi.fn(),
+  /*
+    `getSlotAvailabilityForShops` TOPLU surum: dukkan basina ayri cagri yerine
+    tek cagri, `Map<shopId, slots[]>` donuyor. Arama bunu 2026-08-31'de
+    kullanmaya basladi -- yuz dukkan icin sirayla uc yuze varan sorgu
+    kosuyordu.
+  */
+  mockGetSlotAvailabilityForShops: vi.fn(),
 }));
 
 vi.mock("@/lib/db", () => ({ default: mockPrisma }));
@@ -28,7 +34,7 @@ vi.mock("@/lib/shop-distance-postgis", () => ({
   getActiveShopsOrderedByDistanceKm: mockGetActiveShops,
 }));
 vi.mock("@/services/SlotService", () => ({
-  getSlotAvailability: mockGetSlotAvailability,
+  getSlotAvailabilityForShops: mockGetSlotAvailabilityForShops,
 }));
 vi.mock("@/services/NotificationService", () => ({ notificationService: {} }));
 
@@ -96,8 +102,9 @@ describe("findShopsForSearch — talep testi noktaları", () => {
       { shop: shop({ id: "acik-1" }), distanceKm: 2 },
     ]);
     // Prelaunch noktasının slotu YOK; gerçek dükkanınki var.
-    mockGetSlotAvailability.mockImplementation(async (id: string) =>
-      id === "acik-1" ? [{ available: 5 }] : [],
+    // Toplu surum `Map<shopId, slots[]>` donuyor; prelaunch noktasi haritada YOK.
+    mockGetSlotAvailabilityForShops.mockResolvedValue(
+      new Map([["acik-1", [{ available: 5 }]]]),
     );
 
     const hits = await shopService.findShopsForSearch(SEARCH);
@@ -112,8 +119,9 @@ describe("findShopsForSearch — talep testi noktaları", () => {
       { shop: shop({ id: "pre-1", isPrelaunch: true }), distanceKm: 0.1 },
       { shop: shop({ id: "acik-1" }), distanceKm: 9 },
     ]);
-    mockGetSlotAvailability.mockImplementation(async (id: string) =>
-      id === "acik-1" ? [{ available: 5 }] : [],
+    // Toplu surum `Map<shopId, slots[]>` donuyor; prelaunch noktasi haritada YOK.
+    mockGetSlotAvailabilityForShops.mockResolvedValue(
+      new Map([["acik-1", [{ available: 5 }]]]),
     );
 
     const hits = await shopService.findShopsForSearch(SEARCH);
@@ -132,7 +140,7 @@ describe("findShopsForSearch — talep testi noktaları", () => {
       { shop: shop({ id: "pre-1", isPrelaunch: true }), distanceKm: 1 },
       { shop: shop({ id: "acik-1" }), distanceKm: 2 },
     ]);
-    mockGetSlotAvailability.mockResolvedValue([]);
+    mockGetSlotAvailabilityForShops.mockResolvedValue(new Map());
 
     const hits = await shopService.findShopsForSearch(SEARCH);
 
@@ -145,7 +153,7 @@ describe("findShopsForSearch — talep testi noktaları", () => {
       { shop: shop({ id: "pre-1", isPrelaunch: true }), distanceKm: 1 },
       { shop: shop({ id: "pre-2", isPrelaunch: true }), distanceKm: 3 },
     ]);
-    mockGetSlotAvailability.mockResolvedValue([]);
+    mockGetSlotAvailabilityForShops.mockResolvedValue(new Map());
 
     const hits = await shopService.findShopsForSearch(SEARCH);
 
@@ -158,7 +166,7 @@ describe("findShopsForSearch — talep testi noktaları", () => {
     mockGetActiveShops.mockResolvedValue([
       { shop: shop({ id: "pre-1", isPrelaunch: true }), distanceKm: 1 },
     ]);
-    mockGetSlotAvailability.mockResolvedValue([]);
+    mockGetSlotAvailabilityForShops.mockResolvedValue(new Map());
 
     const hits = await shopService.findShopsForSearch(SEARCH);
 

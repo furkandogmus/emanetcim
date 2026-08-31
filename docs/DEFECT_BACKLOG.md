@@ -213,6 +213,49 @@ kutuları. Esnaf ekranları projenin kendi E2E yardımcılarıyla (`loginAsDemoP
 Ders: bir düzen sondası, **kırpan atayı ve gerçekten çizilen elemanı** hesaba katmadan
 güven vermez. Sıfır bulgu, sondanın yanlış yere baktığının da cevabıdır.
 
+## 2026-08-31 — arama sayfası tek istekte 300'e varan sorgu koşuyordu (N+1)
+
+`findShopsForSearch` şunu yapıyordu:
+
+```ts
+for (const shop of operating) {
+  const slots = await getSlotAvailability(shop.id, checkIn, checkOut);
+  ...
+}
+```
+
+- `operating` **yüz** dükkana kadar çıkabiliyor —
+  `getActiveShopsOrderedByDistanceKm` `take: 100` ile çağrılıyor.
+- `getSlotAvailability` dükkan başına **üç** sorgu koşuyor: slot listesi,
+  `ReservationSlot` toplamı, ve kendi slot satırı olmayan eski rezervasyonlar.
+
+Yani **tek bir arama isteği, sırayla, üç yüze varan veritabanı gidiş-dönüşü**
+üretiyordu — sitenin en çok trafik alan sayfasında ve kimlik doğrulaması olmadan.
+
+**Paralelleştirmek yetmezdi:** yüz eş zamanlı sorgu bu sefer bağlantı havuzunu
+(`PG_POOL_MAX`, varsayılan 10) doldurur ve diğer istekleri bekletirdi. Doğru
+çözüm sorgu **sayısını** düşürmek, eş zamanlılığı artırmak değil.
+
+### Düzeltme
+
+`SlotService.getSlotAvailabilityForShops(shopIds, from, to)` — aynı üç sorgu,
+`shopId: { in: [...] }` ile bir kez, sonra bellekte dükkan başına gruplanıyor.
+**Kaç dükkan olursa olsun üç sorgu.** Anlam tekil sürümle birebir aynı, özellikle
+"kendi `ReservationSlot` satırı olmayan rezervasyonlar da yer kaplar" kuralı — ki
+o kural fazla satışı önleyen şey.
+
+> **Uygularken kendi hatam:** ilk hâlde toplu çağrıyı çıplak bıraktım. Eski
+> döngüde her çağrı kendi `try`indeydi ve `catch { fall through }` diyordu — yani
+> slot sorgusu patlarsa o dükkan atlanıyor, hiç sonuç çıkmazsa **eski kapasite
+> dalına** düşülüyordu. Çıplak toplu çağrı bunu değiştiriyordu: tek bir hata bütün
+> aramayı düşürürdü. Mevcut testler bunu yakaladı (`ShopService.test.ts` eksik
+> prisma mock'uyla tam da o yolu geçiyormuş). Boş `Map` ile devam edip logluyor;
+> davranış korundu ve artık testle sabit.
+
+Mandal: `src/__tests__/search-query-count.test.ts` — sayıyı değil **şekli** ölçüyor:
+üç dükkanla yüz dükkan **aynı** sayıda çağrı üretmeli. Hata yolundaki geri düşüş de
+ölçülüyor.
+
 ## 2026-08-31 — test dükkanına rezervasyon yapılabiliyordu; adı 404 sayfasının başlığında sızıyordu
 
 `src/lib/public-shop-filter.ts` iki kuralı tek yerde tanımlıyor ve gerekçesini

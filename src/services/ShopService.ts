@@ -14,7 +14,10 @@ import { getActiveShopsOrderedByDistanceKm } from '@/lib/shop-distance-postgis';
 import { isShopOpenForStay } from '@/lib/shop-hours';
 import { PUBLIC_SHOP_FILTER, OPERATING_SHOP_FILTER } from '@/lib/public-shop-filter';
 import { notificationService } from '@/services/NotificationService';
-import { getSlotAvailability } from '@/services/SlotService';
+import {
+  getSlotAvailabilityForShops,
+  type SlotAvailability,
+} from '@/services/SlotService';
 import logger from '@/lib/logger';
 import { renderEmailHtml } from '@/lib/email-template';
 
@@ -308,12 +311,49 @@ export class ShopService implements IShopService {
         const stayHours = (checkOut.getTime() - checkIn.getTime()) / 3600000;
 
         if (stayHours <= 48) {
+          /*
+            TOPLU MUSAITLIK (2026-08-31'de duzeltildi).
+
+            Bu dongu her dukkan icin ayri ayri `getSlotAvailability` cagiriyordu
+            ve o fonksiyon dukkan basina UC sorgu kosuyor. `operating` yuz
+            dukkana kadar cikabildigi icin (`take: 100`) TEK BIR ARAMA ISTEGI,
+            SIRAYLA, uc yuze varan veritabani gidis-donusu uretiyordu -- sitenin
+            en cok trafik alan sayfasinda ve kimlik dogrulamasi olmadan.
+
+            Paralellestirmek yetmezdi: yuz es zamanli sorgu bu sefer baglanti
+            havuzunu (`PG_POOL_MAX`, varsayilan 10) doldurur ve diger istekleri
+            bekletirdi. Cozum sorgu SAYISINI dusurmek -- artik uc sorgu, kac
+            dukkan olursa olsun.
+          */
+          /*
+            HATA YOLU KORUNDU. Onceki dongude her dukkanin cagrisi kendi
+            `try`indeydi ve `catch { /* fall through *\/ }` diyordu -- yani slot
+            sorgusu patlarsa o dukkan atlaniyor, sonucta hic `hit` cikmazsa
+            asagidaki ESKI KAPASITE dalina duşuluyordu. Toplu cagriyi ciplak
+            birakmak bu davranisi degistirirdi: tek bir hata butun slot dalini
+            oldurup en distaki `catch`e duserdi. Bos `Map` ile devam etmek ayni
+            sonucu verir -- `hits` bos kalir, eski dal calisir.
+          */
+          let availabilityByShop = new Map<string, SlotAvailability[]>();
+          try {
+            availabilityByShop = await getSlotAvailabilityForShops(
+              shopIds,
+              checkIn,
+              checkOut,
+            );
+          } catch (err) {
+            logger.warn(
+              { err, shopCount: shopIds.length },
+              "search_slot_availability_batch_failed_using_capacity_fallback",
+            );
+          }
+
           const hits: ShopSearchHit[] = [];
           for (const shop of operating) {
             try {
-              const slots = await getSlotAvailability(shop.id, checkIn, checkOut);
+              const slots = availabilityByShop.get(shop.id) ?? [];
               if (slots.length === 0) continue;
-              const availableCounts = slots.map((s: { available: number }) => s.available);
+              const availableCounts = slots.map((s) => s.available);
               if (availableCounts.length === 0) continue;
               const minAvailable = Math.min(...availableCounts);
               if (minAvailable < bags) continue;

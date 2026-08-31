@@ -163,6 +163,21 @@ export async function fillMissingSlots() {
   return total;
 }
 
+export type SlotAvailability = {
+  id: string;
+  startTime: Date;
+  endTime: Date;
+  capacity: number;
+  reserved: number;
+  available: number;
+};
+
+/**
+ * Tek sorguda donebilecek en fazla slot. Emniyet subabi -- cagiran taraf
+ * araligi zaten sinirliyor (`slot-availability-route.ts`, 31 gun).
+ */
+const MAX_SLOTS_PER_QUERY = 5000;
+
 export async function getSlotAvailability(
   shopId: string,
   from: Date,
@@ -178,7 +193,7 @@ export async function getSlotAvailability(
     normal calismada HIC devreye girmez. Devreye girerse sessizce yarim veri
     dondurmek yanlis olurdu, o yuzden loglaniyor.
   */
-  const MAX_SLOTS = 5000;
+  const MAX_SLOTS = MAX_SLOTS_PER_QUERY;
   const slots = await prisma.shopTimeSlot.findMany({
     where: {
       shopId,
@@ -279,6 +294,135 @@ export async function getSlotAvailability(
       available: Math.max(0, slot.capacity - reserved),
     };
   });
+}
+
+/**
+ * COK DUKKAN icin slot musaitligi — TEK sorgu setiyle.
+ *
+ * NEDEN VAR (2026-08-31'de olculdu): `findShopsForSearch` sunu yapiyordu:
+ *
+ *     for (const shop of operating) {
+ *       const slots = await getSlotAvailability(shop.id, checkIn, checkOut);
+ *       ...
+ *     }
+ *
+ * `operating` yuz dukkana kadar cikabiliyor (`getActiveShopsOrderedByDistanceKm`
+ * `take: 100` ile cagriliyor) ve `getSlotAvailability` dukkan basina UC sorgu
+ * kosuyor: slot listesi, `ReservationSlot` toplami ve eski yoldan acilmis
+ * rezervasyonlar. Yani TEK BIR ARAMA ISTEGI, sirayla, uc yuze varan
+ * gidis-donus uretiyordu -- sitenin en cok trafik alan sayfasinda ve kimlik
+ * dogrulamasi olmadan.
+ *
+ * Paralellestirmek yetmezdi: yuz es zamanli sorgu bu sefer baglanti havuzunu
+ * (`PG_POOL_MAX`, varsayilan 10) doldurur ve diger istekleri bekletirdi. Dogru
+ * cozum sorgu SAYISINI dusurmek: uc sorgu, kac dukkan olursa olsun.
+ *
+ * Anlam `getSlotAvailability` ile BIREBIR AYNI -- ozellikle "kendi
+ * `ReservationSlot` satiri olmayan rezervasyonlar da yer kaplar" kurali, ki o
+ * kural fazla satisi onleyen sey (gerekcesi `getSlotAvailability` icinde).
+ */
+export async function getSlotAvailabilityForShops(
+  shopIds: string[],
+  from: Date,
+  to: Date,
+): Promise<Map<string, SlotAvailability[]>> {
+  const result = new Map<string, SlotAvailability[]>();
+  if (shopIds.length === 0) return result;
+
+  const slots = await prisma.shopTimeSlot.findMany({
+    where: {
+      shopId: { in: shopIds },
+      startTime: { gte: from },
+      endTime: { lte: to },
+      isActive: true,
+    },
+    orderBy: { startTime: "asc" },
+    take: MAX_SLOTS_PER_QUERY,
+  });
+  if (slots.length === MAX_SLOTS_PER_QUERY) {
+    logger.warn(
+      { shopCount: shopIds.length, from, to, cap: MAX_SLOTS_PER_QUERY },
+      "slot_availability_batch_result_capped",
+    );
+  }
+  if (slots.length === 0) return result;
+
+  const now = new Date();
+  const cutoff = new Date(now.getTime() - 24 * 3600000);
+
+  const [reservations, legacyBookings] = await Promise.all([
+    prisma.reservationSlot.groupBy({
+      by: ["slotId"],
+      where: {
+        slotId: { in: slots.map((s) => s.id) },
+        booking: {
+          OR: [
+            { status: { in: ["PAID", "CHECKED_IN", "APPROVED"] } },
+            { status: { in: ["WAITING_APPROVAL", "PENDING"] }, checkInTime: { gte: cutoff } },
+          ],
+        },
+      },
+      _sum: { bagCount: true },
+    }),
+    prisma.booking.findMany({
+      where: {
+        shopId: { in: shopIds },
+        reservationSlots: { none: {} },
+        checkInTime: { lt: to },
+        checkOutTime: { gt: from },
+        OR: [
+          { status: { in: ["PAID", "CHECKED_IN", "APPROVED"] } },
+          {
+            status: { in: ["WAITING_APPROVAL", "PENDING"] },
+            checkInTime: { gte: cutoff },
+          },
+        ],
+      },
+      select: {
+        shopId: true,
+        checkInTime: true,
+        checkOutTime: true,
+        bagCountS: true,
+        bagCountM: true,
+        bagCountXl: true,
+      },
+    }),
+  ]);
+
+  const reservedMap = new Map<string, number>();
+  for (const r of reservations) {
+    reservedMap.set(r.slotId, r._sum.bagCount ?? 0);
+  }
+
+  const legacyByShop = new Map<string, typeof legacyBookings>();
+  for (const b of legacyBookings) {
+    const list = legacyByShop.get(b.shopId) ?? [];
+    list.push(b);
+    legacyByShop.set(b.shopId, list);
+  }
+
+  for (const slot of slots) {
+    const legacy = legacyByShop.get(slot.shopId) ?? [];
+    let legacyBags = 0;
+    for (const b of legacy) {
+      if (b.checkInTime < slot.endTime && b.checkOutTime > slot.startTime) {
+        legacyBags += (b.bagCountS ?? 0) + (b.bagCountM ?? 0) + (b.bagCountXl ?? 0);
+      }
+    }
+    const reserved = (reservedMap.get(slot.id) ?? 0) + legacyBags;
+    const list = result.get(slot.shopId) ?? [];
+    list.push({
+      id: slot.id,
+      startTime: slot.startTime,
+      endTime: slot.endTime,
+      capacity: slot.capacity,
+      reserved,
+      available: Math.max(0, slot.capacity - reserved),
+    });
+    result.set(slot.shopId, list);
+  }
+
+  return result;
 }
 
 export async function reserveSlots(
