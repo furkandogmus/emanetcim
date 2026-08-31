@@ -46,6 +46,7 @@ olduğuna göre. Bu blok, kimin ne yapması gerektiğini tek bakışta görmek i
 
 | # | Konu | Neden kendi başıma yapmadım |
 |---|---|---|
+| 42 | Çevrimdışı kalınca markasız tarayıcı hatası | Çözüm bir service worker gerektiriyor; öncekini bilerek kaldırmışsınız |
 | 17 | Birincil butonlarda beyaz yazı **3.56:1** (gerekli 4.5) | Markanın ana tonunu koyulaştırmak gerekiyor |
 | 18 | İkincil gri metin **2.52:1**, 406 kullanım | Tek satırlık token değişimi ama tipografi tonunu değiştiriyor |
 | 15 | Checkout'ta ekranın %31'i sabit çubuk | Çözüm mobil alt menüyü gizlemek — gezinme davranışı değişir |
@@ -114,6 +115,8 @@ tarayıcıda oturumu sen açarsan aynı sekmeden devam edilebilir.
 | 38 | Blog yazısında `h2→h4` + çıkış bağlantısı 115×16 | Blog | ✅ DÜZELTİLDİ |
 | 39 | Kısa etiketli dillerde footer/çip hedefleri dar | FA/JA | ✅ DÜZELTİLDİ |
 | 40 | "İptal Politikası" 5 dilde sadece "İptal"e düşmüş | i18n | ✅ DÜZELTİLDİ |
+| 41 | Footer'da İKİNCİ şehir çipi listesi eşiğin altında | FA | ✅ DÜZELTİLDİ |
+| 42 | Çevrimdışı kalınca tarayıcının dinozor sayfası çıkıyor | PWA | ⏳ KARAR BEKLİYOR |
 | 101 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
 | 102 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
 | 103 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
@@ -761,6 +764,35 @@ hiçbir şey değişmiyor; yalnızca alt sınır kondu.
 **Ders:** dokunma hedefi kuralı iki eksenlidir. Türkçe/İngilizce test ederken
 etiketler yeterince uzun olduğu için yatay eksen hiç sınanmıyor — hata ancak
 kısa yazan dillerde görünüyor.
+
+### 42. Çevrimdışı: kullanıcı dinozor sayfası görüyor — KARAR BEKLİYOR
+
+Ölçüldü (Playwright, ağ kesilerek):
+
+```
+service worker kaydı : 0
+önbellek             : 0
+çevrimdışı gezinme   : ERR_INTERNET_DISCONNECTED — Chrome'un dinozor sayfası
+```
+
+Uygulama `display: standalone` ile **kurulabilir** bir PWA. Yani kullanıcı onu
+ana ekranına ekleyip açtığında, ağ yokken uygulama kabuğunun içinde
+tarayıcının jenerik hata ekranını görüyor — marka yok, ne yapacağını söyleyen
+bir metin yok, rezervasyon kodunu gösteren bir şey yok. Metroda, havalimanında
+ya da roaming boşluğunda tam da bu oluyor ve ürün bir seyahat ürünü.
+
+**Kendim yapmadım, çünkü:** çözüm bir service worker gerektiriyor ve öncekini
+2026-08-23'te **bilerek** kaldırmışsınız — yetkili API yanıtlarını
+önbelleğe alıyordu, yani bir kullanıcının verisi başka bir oturumda geri
+servis edilebiliyordu. O kararı sessizce geri almak doğru olmaz.
+
+**Güvenli tasarım (öneri):** yalnızca GEZİNME isteklerini ele alan, önce ağı
+deneyen ve yalnızca ağ başarısız olursa tek bir statik `/offline` sayfasını
+gösteren bir worker. API yanıtı, yetkili içerik, kullanıcı verisi hiç
+önbelleğe alınmaz — eski hatanın sınıfı yapısal olarak imkânsız kalır.
+`push-sw.js` zaten aynı disiplinle yazıldı (fetch dinleyicisi yok).
+
+Karar senin: "yap" dersen güvenli varyantı yazar, ölçüp gösteririm.
 
 ### Yavaş bağlantı (3G) — SAĞLIKLI
 
