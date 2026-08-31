@@ -44,7 +44,7 @@ yazılmaz; ölçüm yazılır.
 | 24 | %200'de checkout 200 px kayıyor — valiz adımlayıcısı | Mobil checkout | ✅ DÜZELTİLDİ (200→0) |
 | 25 | %200'de sigorta sayfası 76 px kayıyor | Mobil | ✅ DÜZELTİLDİ (76→0) |
 | 26 | %200'de dükkan sayfası 17 px kayıyor | Mobil | ⛔ BAŞKA AGENT'IN DOSYASI |
-| 27 | %200'de DE sigorta 28 px, FR ana sayfa 7 px kayıyor | Mobil | ⏳ AÇIK — sebebi bulunamadı |
+| 27 | %200'de DE sigorta 28 px, FR ana sayfa 7 px kayıyor | Mobil | ✅ DÜZELTİLDİ (ikisi de 0) |
 | 101 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
 | 102 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
 | 103 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
@@ -441,9 +441,34 @@ düzeltmesiz                                 28 px
 + ikon shrink-0 + li min-w-0 + items-start  44 px
 ```
 
-Bu yüzden kod değiştirilmedi. Sebebi bilmeden gönderilen bir düzeltme,
-ölçümün söylediğinin tersini yapıyordu. Kalan miktar küçük (28 px ve 7 px);
-sonraki turda farklı bir yöntemle (ögeleri tek tek daraltarak) aranmalı.
+**Sonraki turda çözüldü — yöntem değiştirilerek.** Gizleme testi yerine
+**nedensellik testi**: her ögeye tek tek `overflow-x: hidden` verip sayfa
+kaydırmasının bitip bitmediğine bakmak. Bu, "kaçıran kapsayıcıyı" doğrudan
+bulur; gizleme ise yalnızca "büyük olan"ı bulur.
+
+Sonuç, ikisinde de aynı sınıf çıktı:
+
+| Sayfa | Kaçıran kapsayıcı | İçerik |
+|---|---|---|
+| DE sigorta | `li.flex.items-center.gap-2` | "Lückenlose Verwahrungs…" |
+| FR ana sayfa | `h3.text-lg.font-black` | "Récompenses BagajPark" |
+
+**Asıl içgörü:** `overflow-wrap: break-word` bir kelimeyi satır taşarken böler
+ama ögenin **min-content genişliğini küçültmez**. Flex/grid öğeleri varsayılan
+`min-width: auto` taşıdığı için min-content'in altına inemez — yani uzun
+kelimeli metin flex satırında hâlâ taşar. `anywhere` ise oluşturduğu bölme
+fırsatlarını min-content hesabına **da** katar.
+
+Ölçüldü (%200 metin):
+
+```
+kural          /de/insurance  /fr   /tr  /tr/search  /de  /ja
+break-word         28 px      7 px   0       0        0    0
+anywhere            0          0     0       0        0    0
+```
+
+Normal yazı boyutunda yan etki ölçüldü: sayfa yüksekliği 7419 → 7399 px,
+başlık aynı 2 satır, yatay kaydırma ikisinde de 0. Görünür değişiklik yok.
 
 ### Yavaş bağlantı (3G) — SAĞLIKLI
 
@@ -557,7 +582,7 @@ Bu liste bilerek uzun; her tur birkaçını kapatıp buraya sonucunu yazın.
 - [x] %200 metin büyütme kapandı: ana sayfada yatay kaydırma 0 (23 numaralı bulgu).
 - [x] %200 büyütme altı sayfada ölçüldü (24-25 numaralı bulgular).
 - [x] %200'de dükkan ve sigorta sayfalarının kaynağı izlendi (25-26).
-- [ ] %200 testi yalnızca Türkçede yapıldı; uzun etiketli dillerde (DE/FR) tekrarlanmadı.
+- [x] %200 testi TR/DE/FR/JA'da tekrarlandı; kalan iki sayfa da kapandı.
 - [ ] Odak tuzağı olan modallar test edilmedi.
 - [ ] Ekran okuyucu ile gerçek gezinme yapılmadı.
 

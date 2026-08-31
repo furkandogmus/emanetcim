@@ -191,21 +191,31 @@
    davranis TASMAKTIR, bolmek degil. `break-word` yalnizca kelime baska turlu
    tasacaksa boler -- normal metinde hicbir sey degismez.
 
-   NEREDE ISE YARIYOR, NEREDE YARAMIYOR (ikisi de olculdu):
+   NEDEN `anywhere`, `break-word` DEGIL -- ONEMLI AYRIM:
 
-     /tr/insurance  %200 metinde  76 px -> 0    ISE YARADI
-     /tr            %200 metinde  93 px -> 93   YARAMADI
+   `break-word` bir kelimeyi satir tasarken boler, AMA ogenin min-content
+   genisligini KUCULTMEZ. Flex ve grid ogeleri varsayilan olarak
+   `min-width: auto` tasir, yani min-content'in altina inemez. Sonuc: uzun
+   kelimeli bir metin flex satirinda hala tasar. `anywhere` ise spec geregi
+   olusturdugu bolme firsatlarini min-content hesabina DA katar, dolayisiyla
+   flex ogesi kuculebilir.
 
-   Sigorta sayfasinda sebep gercekten kelimeydi: `text-5xl` baslik %200'de
-   96 px'lik fonta cikiyor ve "Korumasi" gibi tek bir kelime 390 px'e sigmiyor.
-   Ana sayfada ise sebep bambaskaydi -- basliktaki giris dugmesi kuculemiyordu
-   (bkz. UserNav / Header) ve bu kural ona dokunmuyor.
+   Olculdu (2026-08-31, iPhone 13, kok font 32px = %200 metin):
 
-   Ders: ayni belirti (yatay kaydirma) farkli sebeplerden gelir; her sayfada
-   ayri olcmek gerekiyor.
+     kural          /de/insurance   /fr   /tr   /tr/search   /de   /ja
+     break-word          28 px      7 px   0        0         0     0
+     anywhere             0          0     0        0         0     0
+
+   Iki kalintinin da kaynagi ayni sinifti: uzun kelime (`Verwahrungs...`,
+   `Recompenses`) iceren bir FLEX ogesi. `break-word` ile tespit edilemedi
+   cunku sorun bolme degil, olculebilir en kucuk genislikti.
+
+   Normal yazi boyutunda yan etkisi olculdu: sayfa yuksekligi 7419 -> 7399 px,
+   baslik ayni 2 satir, yatay kaydirma ikisinde de 0. Yani gorunur bir
+   degisiklik yok.
    ═══════════════════════════════════════════════════════════════ */
 body {
-  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
 }
 
 @media (prefers-reduced-motion: reduce) {
