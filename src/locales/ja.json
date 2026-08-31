@@ -280,7 +280,9 @@
     "pulseZeroCommission": "手数料なし",
     "pulseVsLastMonthUp": "先月比 {pct}% 増",
     "pulseVsLastMonthDown": "先月比 {pct}% 減",
-    "totalCollected": "あなたの総収益"
+    "totalCollected": "あなたの総収益",
+    "partnerWhatsAppGuest": "WhatsAppで連絡",
+    "partnerWhatsAppGuestMessage": "こんにちは、{shop}です。BagajParkのご予約（{code}）についてご連絡します。"
   },
   "Guest": {
     "heroTitle": "荷物を預けて、身軽に街へ",
@@ -660,7 +662,9 @@
     "prelaunchEmailPlaceholder": "you@example.jp",
     "prelaunchSubmit": "知らせる",
     "prelaunchRegistered": "登録しました。オープン時にお知らせします。",
-    "prelaunchAlreadyRegistered": "すでに登録済みです。オープン時にお知らせします。"
+    "prelaunchAlreadyRegistered": "すでに登録済みです。オープン時にお知らせします。",
+    "whatsAppShop": "WhatsAppで店舗に連絡",
+    "whatsAppShopMessage": "こんにちは、BagajParkの予約（{code}）についてご連絡します。"
   },
   "Admin": {
     "dashboardTitle": "BagajPark 管理センター",

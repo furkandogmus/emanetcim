@@ -280,7 +280,9 @@
     "pulseZeroCommission": "Sans commission",
     "pulseVsLastMonthUp": "{pct}% de plus qu'au mois dernier",
     "pulseVsLastMonthDown": "{pct}% de moins qu'au mois dernier",
-    "totalCollected": "Vos gains totaux"
+    "totalCollected": "Vos gains totaux",
+    "partnerWhatsAppGuest": "Écrire sur WhatsApp",
+    "partnerWhatsAppGuestMessage": "Bonjour, ici {shop} — au sujet de votre réservation BagajPark ({code})."
   },
   "Guest": {
     "heroTitle": "Déposez vos bagages, explorez librement",
@@ -660,7 +662,9 @@
     "prelaunchEmailPlaceholder": "vous@exemple.fr",
     "prelaunchSubmit": "Me prévenir",
     "prelaunchRegistered": "Enregistré — nous vous préviendrons à l'ouverture.",
-    "prelaunchAlreadyRegistered": "Vous êtes déjà inscrit(e) ; nous vous préviendrons à l'ouverture."
+    "prelaunchAlreadyRegistered": "Vous êtes déjà inscrit(e) ; nous vous préviendrons à l'ouverture.",
+    "whatsAppShop": "Écrire à la boutique sur WhatsApp",
+    "whatsAppShopMessage": "Bonjour, j'écris au sujet de ma réservation BagajPark ({code})."
   },
   "Admin": {
     "dashboardTitle": "Centre d'administration BagajPark",

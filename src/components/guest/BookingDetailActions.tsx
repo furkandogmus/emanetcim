@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { buildDirectionsUrl } from "@/lib/directions-url";
-import { XCircle, Calendar as CalendarIcon, Phone, ExternalLink } from "lucide-react";
+import { waMeUrl } from "@/lib/whatsapp";
+import { XCircle, Calendar as CalendarIcon, Phone, ExternalLink, MessageCircle } from "lucide-react";
 import { cancelBookingAction } from "@/actions/booking";
 import { toast } from "sonner";
 import { useActionErrorText } from "@/lib/use-action-error";
@@ -32,6 +33,14 @@ export default function BookingDetailActions({
   shopPhone,
 }: Props) {
   const t = useTranslations("Guest");
+  /*
+    Hazir metin: misafirin dil bilmeden bile bir seyler yazabilmesi icin. Kisa
+    kod esnafin panelinde de arattigi referans.
+  */
+  const shopWaUrl = waMeUrl(
+    shopPhone,
+    t("whatsAppShopMessage", { code: bookingId.slice(0, 8).toUpperCase() }),
+  );
   const errorText = useActionErrorText();
   const [cancelling, setCancelling] = useState(false);
 
@@ -121,6 +130,24 @@ export default function BookingDetailActions({
         >
           <Phone size={16} />
           {shopPhone}
+        </a>
+      )}
+
+      {/*
+        Dukkana WHATSAPP'tan yazma. Misafirlerin cogu yabanci: Turkiye'ye
+        uluslararasi arama pahali ve karsilikli dil bilinmeden ise yaramiyor.
+        Esnaf tarafinda kacan cagri = bulunamayan misafir = iptal; bu dugme iki
+        tarafin da isine yariyor. Numara wa.me bicimine cevrilemezse cizilmez.
+      */}
+      {shopWaUrl && (
+        <a
+          href={shopWaUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex w-full items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 py-3.5 text-xs id-eyebrow text-emerald-700 transition-colors hover:bg-emerald-100"
+        >
+          <MessageCircle size={16} />
+          {t("whatsAppShop")}
         </a>
       )}
 

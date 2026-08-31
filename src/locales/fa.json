@@ -280,7 +280,9 @@
     "pulseZeroCommission": "بدون کارمزد",
     "pulseVsLastMonthUp": "{pct}٪ بیشتر از ماه گذشته",
     "pulseVsLastMonthDown": "{pct}٪ کمتر از ماه گذشته",
-    "totalCollected": "مجموع درآمد شما"
+    "totalCollected": "مجموع درآمد شما",
+    "partnerWhatsAppGuest": "پیام در واتساپ",
+    "partnerWhatsAppGuestMessage": "سلام، {shop} هستم — درباره رزرو BagajPark شما ({code}) می‌نویسم."
   },
   "Guest": {
     "heroTitle": "چمدان را بسپارید، آزاد بگردید",
@@ -660,7 +662,9 @@
     "prelaunchEmailPlaceholder": "you@example.ir",
     "prelaunchSubmit": "خبرم کن",
     "prelaunchRegistered": "ثبت شد — روز افتتاح خبر می‌دهیم.",
-    "prelaunchAlreadyRegistered": "شما از قبل ثبت شده‌اید؛ هنگام افتتاح خبر می‌دهیم."
+    "prelaunchAlreadyRegistered": "شما از قبل ثبت شده‌اید؛ هنگام افتتاح خبر می‌دهیم.",
+    "whatsAppShop": "پیام به فروشگاه در واتساپ",
+    "whatsAppShopMessage": "سلام، درباره رزرو BagajPark خودم ({code}) می‌نویسم."
   },
   "Admin": {
     "dashboardTitle": "مرکز مدیریت BagajPark",

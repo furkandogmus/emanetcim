@@ -7,9 +7,11 @@ import {
   MapPin,
   Package,
   Phone,
+  MessageCircle,
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { requirePartnerPage } from "@/lib/page-auth";
+import { waMeUrl } from "@/lib/whatsapp";
 import prisma from "@/lib/db";
 import { notFound } from "next/navigation";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
@@ -68,6 +70,19 @@ export default async function PartnerBookingDetailPage({
   const fmt = (d: Date) =>
     d.toLocaleString(dateLocale, { dateStyle: "medium", timeStyle: "short" });
 
+  /*
+    Hazir mesaj BILEREK: esnaftan sifirdan cumle kurmasini beklemek, dugmeye
+    basilmamasinin en yaygin sebebi. Kisa kod (`id`nin ilk 8 hanesi) misafirin
+    KENDI ekraninda yazan sey -- iki taraf ayni referansi konusur.
+  */
+  const waLink = waMeUrl(
+    booking.guest?.phone,
+    t("partnerWhatsAppGuestMessage", {
+      shop: booking.shop.name,
+      code: booking.id.slice(0, 8).toUpperCase(),
+    }),
+  );
+
   const statusKey = guestBookingStatusMessageKey(booking.status);
   const statusLabel = statusKey ? tGuest(statusKey) : booking.status;
   const shortRef = "EMN-" + booking.id.substring(0, 6).toUpperCase();
@@ -123,13 +138,37 @@ export default async function PartnerBookingDetailPage({
           </p>
           <div className="mt-4 flex flex-col gap-3 text-sm font-medium text-gray-600">
             {booking.guest?.phone ? (
-              <a
-                href={`tel:${booking.guest.phone}`}
-                className="flex items-center gap-2 hover:text-orange-600"
-              >
-                <Phone size={16} className="text-gray-400" />
-                {booking.guest.phone}
-              </a>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                <a
+                  href={`tel:${booking.guest.phone}`}
+                  className="flex items-center gap-2 hover:text-orange-600"
+                >
+                  <Phone size={16} className="text-gray-400" />
+                  {booking.guest.phone}
+                </a>
+                {/*
+                  WHATSAPP. Turkiye'de esnafin birincil kanali WhatsApp ve
+                  misafirlerin cogu YABANCI: uluslararasi arama hem pahali hem
+                  de karsilikli dil bilinmeden ise yaramiyor. Esnafin SMS'i de
+                  su an calismiyor (`netgsm.ts` bilerek devre disi), yani
+                  geriye e-posta kaliyor -- esnaf e-postaya bakmiyor.
+
+                  Numara wa.me bicimine cevrilemezse dugme HIC CIZILMEZ: bozuk
+                  bir baglanti WhatsApp'ta "numara gecersiz" ekrani acar ve
+                  esnaf hatanin kendisinde oldugunu sanir.
+                */}
+                {waLink && (
+                  <a
+                    href={waLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="id-pill flex items-center gap-1.5 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 transition-colors hover:bg-emerald-100"
+                  >
+                    <MessageCircle size={14} />
+                    {t("partnerWhatsAppGuest")}
+                  </a>
+                )}
+              </div>
             ) : (
               <div className="flex items-center gap-2 text-gray-400">
                 <Phone size={16} />

@@ -102,10 +102,16 @@ export default async function PartnerPage({
     commission.rate,
   );
 
+  /*
+    `activeCount` KALDIRILDI (2026-09-01). Panelde "AKTIF EMANETLER" karti
+    olarak duruyordu ve gunluk durum blogu eklenince onun kopyasi haline geldi
+    -- "Elinde duran" (valiz) ile yan yana iki farkli sayi gosteriyordu.
+
+    Ayrica ayni kesilme hatasini tasiyordu: `result.items` `getPartnerBookings()`
+    in ILK SAYFASI (varsayilan limit 100), yani 100'den fazla rezervasyonu olan
+    esnafta sayi sessizce eksikti.
+  */
   const bookings = result.items;
-  const activeCount = bookings.filter(
-    (b) => b.status === "PAID" || b.status === "CHECKED_IN",
-  ).length;
 
   const marketPrice = pricingRules.defaultPricePerDay;
 
@@ -113,7 +119,6 @@ export default async function PartnerPage({
     <PartnerClient
       shopId={activeShop.id}
       shopName={activeShop.name}
-      activeCount={activeCount}
       totalEarnings={totals.gross}
       merchantShareRatio={commission.merchantShareRatio}
       initialCapacity={shopDetail.capacity}

@@ -280,7 +280,9 @@
     "pulseZeroCommission": "No commission",
     "pulseVsLastMonthUp": "{pct}% up vs last month",
     "pulseVsLastMonthDown": "{pct}% down vs last month",
-    "totalCollected": "Your total earnings"
+    "totalCollected": "Your total earnings",
+    "partnerWhatsAppGuest": "Message on WhatsApp",
+    "partnerWhatsAppGuestMessage": "Hello, this is {shop} — writing about your BagajPark booking ({code})."
   },
   "Guest": {
     "heroTitle": "Drop Your Bags, Explore Freely",
@@ -660,7 +662,9 @@
     "prelaunchEmailPlaceholder": "you@example.com",
     "prelaunchSubmit": "Notify me",
     "prelaunchRegistered": "Saved — we'll let you know when it opens.",
-    "prelaunchAlreadyRegistered": "You're already on the list; we'll let you know when it opens."
+    "prelaunchAlreadyRegistered": "You're already on the list; we'll let you know when it opens.",
+    "whatsAppShop": "Message the shop on WhatsApp",
+    "whatsAppShopMessage": "Hello, I'm writing about my BagajPark booking ({code})."
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

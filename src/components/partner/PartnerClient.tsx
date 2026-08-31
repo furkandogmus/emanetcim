@@ -65,7 +65,6 @@ const QRScanner = dynamic(() => import("@/components/partner/QRScanner"), {
 
 interface PartnerClientProps {
   shopId: string;
-  activeCount: number;
   totalEarnings: number;
   /** PLATFORM_COMMISSION_RATE ile uyumlu esnaf payı oranı (örn. 0.5 komisyon → 0.5) */
   merchantShareRatio: number;
@@ -102,7 +101,6 @@ interface PartnerClientProps {
 
 export default function PartnerClient({
   shopId,
-  activeCount,
   totalEarnings,
   merchantShareRatio,
   shopName,
@@ -568,39 +566,43 @@ export default function PartnerClient({
             </span>
           </button>
 
-          <div className="grid w-full grid-cols-2 gap-3 md:gap-6">
-            <div className="ui-card flex flex-col gap-1 p-5 md:rounded-4xl md:p-6">
-              <p className="id-eyebrow text-gray-400">
-                {t("activeBookings")}
-              </p>
-              <p className="text-3xl font-black text-gray-900 md:text-4xl">{activeCount}</p>
+          {/*
+            KART SADELESTIRILDI (2026-09-01). Ustteki gunluk durum blogu
+            eklenince bu izgara ONUN KOPYASI haline gelmisti ve iki sayi yan
+            yana BIRBIRINI YALANLIYOR gibi duruyordu:
+
+              "Elinde duran 4"  (blok, VALIZ sayisi)
+              "AKTIF EMANETLER 3" (bu kart, REZERVASYON sayisi)
+
+            Ikisi de dogru, birimleri farkli -- ama esnaf ekrana bakinca hangi
+            sayinin dogru oldugunu soruyor. Ayni sekilde iki ayri para karti
+            (bu ay / toplam) vardi. Aktif emanet sayisi bloktaki "Bugun"
+            seridine devredildi; toplam kazanc, bu-ay kartinin ALT SATIRI oldu.
+            Fazla gosterge, gostergesizlikten kotudur.
+          */}
+          <div className="grid w-full grid-cols-1 gap-3 md:gap-6">
+            <div className="ui-card flex items-center justify-between gap-2 p-5 md:rounded-4xl md:p-6">
+              <div>
+                <p className="id-eyebrow text-gray-400">
+                  {t(commissionActive ? "netEarnings" : "totalCollected")}
+                </p>
+                {/*
+                  Tutar ARTIK HAM SAYI DEGIL. `{netEarnings}` JS'in varsayilan
+                  gosterimini basiyordu ve o HER ZAMAN NOKTA kullanir: Turkce'de
+                  nokta BINLIK ayracidir, yani 1520.5 "on bes bin ikiyuz bes"
+                  gibi okunur. `currency.ts` bu hata sinifi icin yazilmisti;
+                  esnafin ana para rakami onu atliyordu.
+                */}
+                <p className="id-display mt-1 text-3xl text-green-600 md:text-4xl">
+                  {formatTryCurrency(netEarnings, dateLocale)}
+                </p>
+              </div>
             </div>
-            <div className="ui-card flex flex-col gap-1 p-5 md:rounded-4xl md:p-6">
-              {/*
-                ETIKET DURUMA BAGLI. Komisyon yururlukte degilken "NET HAKEDIS"
-                demek, platformun esnafa para gonderecegini ima ediyor; oysa para
-                zaten kasada. Kazanc sayfasindaki ayni duzeltmenin panel hali.
-              */}
-              <p className="id-eyebrow text-gray-400">
-                {t(commissionActive ? "netEarnings" : "totalCollected")}
-              </p>
-              {/*
-                Tutar ARTIK HAM SAYI DEGIL. `{netEarnings}` JS'in varsayilan
-                gosterimini basiyordu ve o HER ZAMAN NOKTA kullanir: Turkce'de
-                nokta BINLIK ayracidir, yani 1520.5 "on bes bin ikiyuz bes" gibi
-                okunur. `currency.ts` bu hata sinifi icin yazilmisti; esnafin ana
-                para rakami onu atliyordu. "TL" eki de elle yaziliydi -- para
-                biriminin yerlesimi dile gore degisir.
-              */}
-              <p className="id-display text-3xl text-green-600 md:text-4xl">
-                {formatTryCurrency(netEarnings, dateLocale)}
-              </p>
-            </div>
-            <div className="ui-card col-span-2 flex items-center justify-between gap-2 p-5 md:rounded-4xl md:p-6">
+            <div className="ui-card flex items-center justify-between gap-2 p-5 md:rounded-4xl md:p-6">
               <p className="id-eyebrow text-gray-400">
                 {t("monthlyShopViews")}
               </p>
-              <p className="text-2xl font-black text-gray-900 md:text-3xl">
+              <p className="id-display text-2xl text-gray-900 md:text-3xl">
                 {monthlyShopViews}
               </p>
             </div>

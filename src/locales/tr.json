@@ -280,7 +280,9 @@
     "pulseZeroCommission": "Komisyon yok",
     "pulseVsLastMonthUp": "geçen aya göre %{pct} artış",
     "pulseVsLastMonthDown": "geçen aya göre %{pct} düşüş",
-    "totalCollected": "Toplam kazancın"
+    "totalCollected": "Toplam kazancın",
+    "partnerWhatsAppGuest": "WhatsApp'tan yaz",
+    "partnerWhatsAppGuestMessage": "Merhaba, {shop} — BagajPark rezervasyonunuz ({code}) hakkında yazıyorum."
   },
   "Guest": {
     "heroTitle": "Valizini Güvenle Bırak, Özgürce Gez",
@@ -660,7 +662,9 @@
     "prelaunchEmailPlaceholder": "ornek@eposta.com",
     "prelaunchSubmit": "Haber ver",
     "prelaunchRegistered": "Kaydedildi — açıldığında haber vereceğiz.",
-    "prelaunchAlreadyRegistered": "Zaten kayıtlısın, açıldığında haber vereceğiz."
+    "prelaunchAlreadyRegistered": "Zaten kayıtlısın, açıldığında haber vereceğiz.",
+    "whatsAppShop": "Dükkana WhatsApp'tan yaz",
+    "whatsAppShopMessage": "Merhaba, BagajPark rezervasyonum ({code}) hakkında yazıyorum."
   },
   "Admin": {
     "dashboardTitle": "BagajPark Yönetim Masası",
