@@ -130,6 +130,16 @@ function kurallar(ad, r, buyukMetin) {
 const browser = await chromium.launch({ headless: HEADLESS });
 let kirik = 0;
 
+/*
+  DUSMANCA ICERIK TESTI: gercek veriyle olcmek yetmiyor. Uzun bir dukkan adi,
+  bosluksuz bir kelime ya da cok uzun bir yorum yarin veritabanina girdiginde
+  duzenin dayanip dayanmadigini bugunden bilmek gerekiyor. Bu yuzden ucuncu bir
+  kosul: metinleri 72 karakterlik BOSLUKSUZ bir kelimeyle degistirip olcmek.
+  `overflow-wrap: anywhere` (globals.css) bunu tasimali.
+*/
+const DUSMANCA_METIN =
+  "Kadikoyvalizemanetnoktasimerkeziguvenlisigortaliyirmidorsaatacikdepolama";
+
 for (const buyukMetin of [false, true]) {
   console.log(`\n=== ${buyukMetin ? "METİN %200 (WCAG 1.4.4)" : "NORMAL BOYUT"} ===`);
   /*
@@ -157,6 +167,25 @@ for (const buyukMetin of [false, true]) {
       await page.addStyleTag({ content: "html{font-size:32px !important}" });
       await page.waitForTimeout(700);
     }
+    /*
+      Buyuk metin kosulunda ayrica DUSMANCA ICERIK deneniyor: sayfadaki ilk
+      sekiz metin dugumu bosluksuz uzun bir kelimeyle degistiriliyor. Ikisi bir
+      arada, gercekcinin en kotusu: az goren kullanici + uzun isimli dukkan.
+    */
+    if (buyukMetin) {
+      await page.evaluate((U) => {
+        let n = 0;
+        for (const el of document.querySelectorAll("h1,h2,h3,h4,p,span,a,button")) {
+          const t = (el.textContent || "").trim();
+          if (t.length > 3 && el.children.length === 0) {
+            el.textContent = U;
+            if (++n >= 8) break;
+          }
+        }
+      }, DUSMANCA_METIN);
+      await page.waitForTimeout(400);
+    }
+
     const r = await page.evaluate(olcum);
 
     /*

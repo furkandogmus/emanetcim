@@ -7,7 +7,10 @@ yapın, silmeyin — neyin neden değiştiği sonraki turda gerekiyor.
 Yöntem: canlıda (bagajpark.com) tarayıcıyla gezmek + DOM ölçmek. "Sanırım şöyle"
 yazılmaz; ölçüm yazılır.
 
-**Regresyon taraması:** `node scripts/ux-sweep.mjs` — kapatılan hataların geri
+**Regresyon taraması:** `node scripts/ux-sweep.mjs` — %200 koşulunda ayrıca
+**düşmanca içerik** deniyor (metinler 72 karakterlik boşluksuz bir kelimeyle
+değiştiriliyor). Gerçek veriyle ölçmek yetmiyor: uzun bir dükkan adı yarın
+veritabanına girdiğinde düzenin dayanacağını bugünden bilmek gerekiyor. — kapatılan hataların geri
 gelmediğini tek komutla ölçer (yatay kaydırma, tek `main`, tek `h1`, başlık
 atlaması, etiketsiz `nav`, ekran okuyucuya giden İngilizce metin, dokunma
 hedefi ≥24×24; normal boyut ve %200 metin). Bozulursa çıkış kodu 1.
@@ -972,6 +975,28 @@ her yerde" beklentisi doğarsa buradan başlanmalı.
 Yani #48 bir desen değil, **istisna**. Bunu ölçmek önemliydi: bir ölü özellik
 bulunca "acaba hepsi böyle mi" diye varsaymak kolay, ve öyle olmadığını
 göstermek de bir sonuç.
+
+### Düşmanca içerik testi — düzen dayanıyor
+
+Gerçek veriyle test etmek, veritabanına yarın ne gireceğini söylemiyor. Bu
+yüzden metinler 72–216 karakterlik **boşluksuz** kelimelerle değiştirilip
+ölçüldü:
+
+| Sayfa | Normal | Uzun kelime | Uzun kelime + %200 metin |
+|---|---|---|---|
+| ana sayfa | 0 | 0 | 0 |
+| arama | 0 | 0 | 0 |
+| checkout | 0 | 0 | 0 |
+| sigorta | 0 | 0 | 0 |
+| dükkan detay | 0 | 0 | — |
+
+Hiçbirinde yatay kaydırma oluşmuyor. Bu, 13. turda `overflow-wrap` için
+`break-word` yerine **`anywhere`** seçmenin doğrudan karşılığı: `break-word`
+min-content genişliğini küçültmediği için uzun bir dükkan adı flex satırını
+patlatırdı.
+
+Test artık taramanın kalıcı parçası — yani ileride biri o CSS kuralını
+kaldırırsa tek komutla görünür.
 
 ### Yavaş bağlantı (3G) — SAĞLIKLI
 
