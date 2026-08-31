@@ -21,6 +21,7 @@ import BookingDetailModifySection from "@/components/guest/BookingDetailModifySe
 import type { Metadata } from "next";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import { formatTryCurrency } from "@/lib/currency";
+import { bookingShortCode } from "@/lib/booking-code";
 
 export async function generateMetadata({
   params,
@@ -137,14 +138,14 @@ export default async function BookingDetailPage({
            <BookingQrDisplay token={booking.qrCodeToken} />
            <div className="text-center">
               <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-1">{t("bookingCodeLabel")}</p>
-              <code className="text-xl font-mono font-black text-orange-600 tracking-widest">{booking.id.slice(0, 8).toUpperCase()}</code>
+              <code className="text-xl font-mono font-black text-orange-600 tracking-widest">{bookingShortCode(booking.id)}</code>
            </div>
         </div>
         ) : (
           <div className="rounded-4xl border border-gray-100 bg-white p-6 text-center shadow-sm">
             <p className="id-eyebrow text-gray-400">{t("bookingCodeLabel")}</p>
             <code className="mt-2 block text-lg font-mono font-black text-orange-600 tracking-widest">
-              {booking.id.slice(0, 8).toUpperCase()}
+              {bookingShortCode(booking.id)}
             </code>
             <p className="mt-3 text-xs font-medium text-gray-500">{t("bookingDetailQrAfterPayment")}</p>
           </div>

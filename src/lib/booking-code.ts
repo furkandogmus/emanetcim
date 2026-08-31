@@ -25,3 +25,20 @@ export function normalizeBookingCode(raw: unknown): string {
  * valiz sayısı tutmaz.
  */
 export const MIN_BOOKING_CODE_LENGTH = 6;
+
+/**
+ * Rezervasyon kimliğinden misafire GÖSTERİLEN kodu üretir.
+ *
+ * NEDEN BURADA: bu kod üç uçta birden görünüyor — misafirin rezervasyon
+ * sayfası, e-posta/SMS bildirimleri, ve `/bookings/lookup` formu. Üçü ayrı ayrı
+ * `id.replace(/-/g, "").slice(0, 8)` yazıyordu ve uçlar sessizce ayrışmıştı:
+ * sayfa BÜYÜK harf gösterirken bildirimler küçük harf gönderiyordu. Hesabı
+ * olmayan misafir için bu iki ucu birleştirmek zorunda olduğu tek an, e-postadaki
+ * kodu forma yazdığı andır; orada aynı şeyin iki farklı yazımını görüyordu.
+ *
+ * `normalizeBookingCode` bunun okuma tarafı: burası ne ürettiyse o onu geri
+ * getirir. İkisi aynı dosyada duruyor ki biri değişirse diğeri gözden kaçmasın.
+ */
+export function bookingShortCode(bookingId: string): string {
+  return bookingId.replace(/-/g, "").slice(0, 8).toUpperCase();
+}

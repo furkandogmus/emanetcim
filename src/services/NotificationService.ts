@@ -10,6 +10,7 @@ import {
   parseAdminGsmNumbers,
   sendNetgsmRestSms,
 } from "@/lib/netgsm";
+import { bookingShortCode } from "@/lib/booking-code";
 
 /**
  * NEDEN (2026-08-25): `sendEmail` partner check-in/check-out akışlarında
@@ -248,8 +249,8 @@ export class NotificationService implements INotificationService {
     shopName: string,
   ): Promise<void> {
     if (process.env.GUEST_SMS_BOOKING_NOTIFICATIONS !== "true") return;
-    const shortId = bookingId.replace(/-/g, "").slice(0, 8);
-    const msg = `BagajPark: Talebiniz alindi — ${shopName}. Ref: ${shortId}`;
+    const shortId = bookingShortCode(bookingId);
+    const msg = `BagajPark: Talebiniz alindi — ${shopName}. Kod: ${shortId}`;
     await this.sendSms(phoneE164OrTr10, msg, bookingId);
   }
 
@@ -329,67 +330,67 @@ export class NotificationService implements INotificationService {
   async notifyBookingSuccess(emailOrPlaceholder: string, bookingId: string, totalPrice: number, locale: string = "tr"): Promise<void> {
     const domain = process.env.NEXT_PUBLIC_APP_URL || "https://bagajpark.com";
     const bookingUrl = `${domain}/${locale}/bookings/${bookingId}`;
-    const shortId = bookingId.replace(/-/g, "").slice(0, 8);
+    const shortId = bookingShortCode(bookingId);
     /* Eskiden ALTI dilin tutari da her gonderimde hesaplaniyordu; besi bosa. */
     const price = formatTryCurrency(Number(totalPrice), bcp47ForUiLocale(locale));
 
     const content = pickLocale({
       tr: {
         subject: `BagajPark: Rezervasyonunuz Oluşturuldu! 🎒`,
-        body: `Merhaba,\n\nRezervasyonunuz başarıyla oluşturuldu!\n\nReferans: ${shortId}\nToplam Tutar: ${price}\n\nÜcreti dükkana gittiğinizde ödeyebilirsiniz.\n\nBiletinizi görmek için: ${bookingUrl}`,
+        body: `Merhaba,\n\nRezervasyonunuz başarıyla oluşturuldu!\n\nRezervasyon Kodu: ${shortId}\nToplam Tutar: ${price}\n\nÜcreti dükkana gittiğinizde ödeyebilirsiniz.\n\nBiletinizi görmek için: ${bookingUrl}`,
         heading: `Rezervasyonunuz Oluşturuldu! 🎒`,
         p1: `Rezervasyonunuz başarıyla oluşturuldu. Ücreti dükkana gittiğinizde ödeyebilirsiniz.`,
-        row1: `Referans`,
+        row1: `Rezervasyon Kodu`,
         row2: `Toplam Tutar`,
         cta: `Biletimi Görüntüle`,
         footer: `BagajPark — Güvenli Bagaj Emaneti`,
       },
       en: {
         subject: `BagajPark: Booking Confirmed! 🎒`,
-        body: `Hello,\n\nYour booking has been created!\n\nReference: ${shortId}\nTotal: ${price}\n\nYou can pay at the shop when you arrive.\n\nView your ticket: ${bookingUrl}`,
+        body: `Hello,\n\nYour booking has been created!\n\nBooking code: ${shortId}\nTotal: ${price}\n\nYou can pay at the shop when you arrive.\n\nView your ticket: ${bookingUrl}`,
         heading: `Booking Confirmed! 🎒`,
         p1: `Your booking has been created. You can pay at the shop when you arrive.`,
-        row1: `Reference`,
+        row1: `Booking code`,
         row2: `Total`,
         cta: `View My Ticket`,
         footer: `BagajPark — Secure Luggage Storage`,
       },
       de: {
         subject: `BagajPark: Ihre Reservierung wurde erstellt! 🎒`,
-        body: `Hallo,\n\nIhre Reservierung wurde erfolgreich erstellt!\n\nReferenz: ${shortId}\nGesamtbetrag: ${price}\n\nSie können vor Ort im Geschäft bezahlen.\n\nUm Ihr Ticket anzuzeigen: ${bookingUrl}`,
+        body: `Hallo,\n\nIhre Reservierung wurde erfolgreich erstellt!\n\nBuchungscode: ${shortId}\nGesamtbetrag: ${price}\n\nSie können vor Ort im Geschäft bezahlen.\n\nUm Ihr Ticket anzuzeigen: ${bookingUrl}`,
         heading: `Ihre Reservierung wurde erstellt! 🎒`,
         p1: `Ihre Reservierung wurde erfolgreich erstellt. Sie können vor Ort im Geschäft bezahlen.`,
-        row1: `Referenz`,
+        row1: `Buchungscode`,
         row2: `Gesamtbetrag`,
         cta: `Mein Ticket ansehen`,
         footer: `BagajPark — Sichere Gepäckaufbewahrung`,
       },
       fr: {
         subject: `BagajPark : Réservation confirmée ! 🎒`,
-        body: `Bonjour,\n\nVotre réservation a été créée avec succès !\n\nRéférence : ${shortId}\nMontant total : ${price}\n\nVous pouvez payer à la boutique à votre arrivée.\n\nPour voir votre billet : ${bookingUrl}`,
+        body: `Bonjour,\n\nVotre réservation a été créée avec succès !\n\nCode de réservation : ${shortId}\nMontant total : ${price}\n\nVous pouvez payer à la boutique à votre arrivée.\n\nPour voir votre billet : ${bookingUrl}`,
         heading: `Réservation confirmée ! 🎒`,
         p1: `Votre réservation a été créée avec succès. Vous pouvez payer à la boutique à votre arrivée.`,
-        row1: `Référence`,
+        row1: `Code de réservation`,
         row2: `Montant total`,
         cta: `Voir mon billet`,
         footer: `BagajPark — Consigne à bagages sécurisée`,
       },
       ja: {
         subject: `BagajPark: ご予約が完了しました！🎒`,
-        body: `こんにちは、\n\nご予約が完了しました！\n\n参照番号: ${shortId}\n合計金額: ${price}\n\n店舗到着時にお支払いいただけます。\n\nチケットを見る: ${bookingUrl}`,
+        body: `こんにちは、\n\nご予約が完了しました！\n\n予約コード: ${shortId}\n合計金額: ${price}\n\n店舗到着時にお支払いいただけます。\n\nチケットを見る: ${bookingUrl}`,
         heading: `ご予約が完了しました！🎒`,
         p1: `ご予約が完了しました。店舗到着時にお支払いいただけます。`,
-        row1: `参照番号`,
+        row1: `予約コード`,
         row2: `合計金額`,
         cta: `チケットを見る`,
         footer: `BagajPark — 安全な荷物預かりサービス`,
       },
       fa: {
         subject: `BagajPark: رزرو شما ثبت شد! 🎒`,
-        body: `سلام،\n\nرزرو شما با موفقیت ثبت شد!\n\nشماره پیگیری: ${shortId}\nمبلغ کل: ${price}\n\nمی‌توانید هنگام مراجعه به فروشگاه پرداخت کنید.\n\nمشاهده بلیط: ${bookingUrl}`,
+        body: `سلام،\n\nرزرو شما با موفقیت ثبت شد!\n\nکد رزرو: ${shortId}\nمبلغ کل: ${price}\n\nمی‌توانید هنگام مراجعه به فروشگاه پرداخت کنید.\n\nمشاهده بلیط: ${bookingUrl}`,
         heading: `رزرو شما ثبت شد! 🎒`,
         p1: `رزرو شما با موفقیت ثبت شد. می‌توانید هنگام مراجعه به فروشگاه پرداخت کنید.`,
-        row1: `شماره پیگیری`,
+        row1: `کد رزرو`,
         row2: `مبلغ کل`,
         cta: `مشاهده بلیط من`,
         footer: `BagajPark — نگهداری امن چمدان`,
@@ -604,56 +605,56 @@ export class NotificationService implements INotificationService {
     if (!email.includes("@")) return;
     const domain = process.env.NEXT_PUBLIC_APP_URL || "https://bagajpark.com";
     const bookingUrl = `${domain}/${locale}/bookings/${bookingId}`;
-    const shortId = bookingId.replace(/-/g, "").slice(0, 8);
+    const shortId = bookingShortCode(bookingId);
 
     const content = pickLocale({
       tr: {
         subject: `BagajPark: Talebiniz Onaylandı 🎒`,
-        body: `Merhaba,\n\n${shopName} mağazası rezervasyon talebinizi onayladı!\n\nRezervasyon detayları: ${bookingUrl}\n\nReferans: ${shortId}`,
+        body: `Merhaba,\n\n${shopName} mağazası rezervasyon talebinizi onayladı!\n\nRezervasyon detayları: ${bookingUrl}\n\nRezervasyon Kodu: ${shortId}`,
         heading: `Talebiniz Onaylandı! 🎒`,
         p1: `<strong>${shopName}</strong> rezervasyon talebinizi onayladı.`,
         cta: `Rezervasyonu Görüntüle`,
-        footer: `Referans: ${shortId}`,
+        footer: `Rezervasyon Kodu: ${shortId}`,
       },
       en: {
         subject: `BagajPark: Request Approved 🎒`,
-        body: `Hello,\n\n${shopName} has approved your booking request!\n\nBooking details: ${bookingUrl}\n\nReference: ${shortId}`,
+        body: `Hello,\n\n${shopName} has approved your booking request!\n\nBooking details: ${bookingUrl}\n\nBooking code: ${shortId}`,
         heading: `Request Approved! 🎒`,
         p1: `<strong>${shopName}</strong> has approved your booking request.`,
         cta: `View Booking`,
-        footer: `Reference: ${shortId}`,
+        footer: `Booking code: ${shortId}`,
       },
       de: {
         subject: `BagajPark: Ihre Anfrage wurde angenommen 🎒`,
-        body: `Hallo,\n\n${shopName} hat Ihre Reservierungsanfrage angenommen!\n\nReservierungsdetails: ${bookingUrl}\n\nReferenz: ${shortId}`,
+        body: `Hallo,\n\n${shopName} hat Ihre Reservierungsanfrage angenommen!\n\nReservierungsdetails: ${bookingUrl}\n\nBuchungscode: ${shortId}`,
         heading: `Ihre Anfrage wurde angenommen! 🎒`,
         p1: `<strong>${shopName}</strong> hat Ihre Reservierungsanfrage angenommen.`,
         cta: `Reservierung ansehen`,
-        footer: `Referenz: ${shortId}`,
+        footer: `Buchungscode: ${shortId}`,
       },
       fr: {
         subject: `BagajPark : Votre demande a été acceptée 🎒`,
-        body: `Bonjour,\n\n${shopName} a accepté votre demande de réservation !\n\nDétails de la réservation : ${bookingUrl}\n\nRéférence : ${shortId}`,
+        body: `Bonjour,\n\n${shopName} a accepté votre demande de réservation !\n\nDétails de la réservation : ${bookingUrl}\n\nCode de réservation : ${shortId}`,
         heading: `Votre demande a été acceptée ! 🎒`,
         p1: `<strong>${shopName}</strong> a accepté votre demande de réservation.`,
         cta: `Voir la réservation`,
-        footer: `Référence : ${shortId}`,
+        footer: `Code de réservation : ${shortId}`,
       },
       ja: {
         subject: `BagajPark: リクエストが承認されました 🎒`,
-        body: `こんにちは、\n\n${shopName} があなたの予約リクエストを承認しました！\n\n予約の詳細: ${bookingUrl}\n\n参照番号: ${shortId}`,
+        body: `こんにちは、\n\n${shopName} があなたの予約リクエストを承認しました！\n\n予約の詳細: ${bookingUrl}\n\n予約コード: ${shortId}`,
         heading: `リクエストが承認されました！🎒`,
         p1: `<strong>${shopName}</strong> があなたの予約リクエストを承認しました。`,
         cta: `予約を見る`,
-        footer: `参照番号: ${shortId}`,
+        footer: `予約コード: ${shortId}`,
       },
       fa: {
         subject: `BagajPark: درخواست شما تأیید شد 🎒`,
-        body: `سلام،\n\nفروشگاه ${shopName} درخواست رزرو شما را تأیید کرد!\n\nجزئیات رزرو: ${bookingUrl}\n\nشماره پیگیری: ${shortId}`,
+        body: `سلام،\n\nفروشگاه ${shopName} درخواست رزرو شما را تأیید کرد!\n\nجزئیات رزرو: ${bookingUrl}\n\nکد رزرو: ${shortId}`,
         heading: `درخواست شما تأیید شد! 🎒`,
         p1: `<strong>${shopName}</strong> درخواست رزرو شما را تأیید کرد.`,
         cta: `مشاهده رزرو`,
-        footer: `شماره پیگیری: ${shortId}`,
+        footer: `کد رزرو: ${shortId}`,
       },
     }, locale);
 
@@ -673,62 +674,62 @@ export class NotificationService implements INotificationService {
     if (!email.includes("@")) return;
     const domain = process.env.NEXT_PUBLIC_APP_URL || "https://bagajpark.com";
     const searchUrl = `${domain}/${locale}/search`;
-    const shortId = bookingId.replace(/-/g, "").slice(0, 8);
+    const shortId = bookingShortCode(bookingId);
 
     const content = pickLocale({
       tr: {
         subject: `BagajPark: Rezervasyon Talebi Reddedildi`,
-        body: `Merhaba,\n\n${shopName} mağazasına yaptığınız rezervasyon talebi (Ref: ${shortId}) ne yazık ki reddedildi.\n\nBagajpark.com üzerinden başka mağazalara göz atabilirsiniz.`,
+        body: `Merhaba,\n\n${shopName} mağazasına yaptığınız rezervasyon talebi (Kod: ${shortId}) ne yazık ki reddedildi.\n\nBagajpark.com üzerinden başka mağazalara göz atabilirsiniz.`,
         heading: `Rezervasyon Talebi Reddedildi`,
         p1: `<strong>${shopName}</strong> mağazasına yaptığınız talep maalesef reddedildi.`,
         p2: `Diğer mağazaları keşfetmek için {link}.`,
         p2Link: `buraya tıklayın`,
-        footer: `Referans: ${shortId}`,
+        footer: `Rezervasyon Kodu: ${shortId}`,
       },
       en: {
         subject: `BagajPark: Booking Request Declined`,
-        body: `Hello,\n\nYour booking request to ${shopName} (Ref: ${shortId}) was unfortunately declined.\n\nYou can browse other locations on bagajpark.com.`,
+        body: `Hello,\n\nYour booking request to ${shopName} (Booking code: ${shortId}) was unfortunately declined.\n\nYou can browse other locations on bagajpark.com.`,
         heading: `Booking Request Declined`,
         p1: `Your request to <strong>${shopName}</strong> was unfortunately declined.`,
         p2: `Browse other locations {link}.`,
         p2Link: `here`,
-        footer: `Reference: ${shortId}`,
+        footer: `Booking code: ${shortId}`,
       },
       de: {
         subject: `BagajPark: Reservierungsanfrage abgelehnt`,
-        body: `Hallo,\n\nIhre Reservierungsanfrage bei ${shopName} (Ref: ${shortId}) wurde leider abgelehnt.\n\nSie können auf bagajpark.com andere Standorte durchsuchen.`,
+        body: `Hallo,\n\nIhre Reservierungsanfrage bei ${shopName} (Buchungscode: ${shortId}) wurde leider abgelehnt.\n\nSie können auf bagajpark.com andere Standorte durchsuchen.`,
         heading: `Reservierungsanfrage abgelehnt`,
         p1: `Ihre Anfrage bei <strong>${shopName}</strong> wurde leider abgelehnt.`,
         p2: `Entdecken Sie andere Standorte {link}.`,
         p2Link: `hier`,
-        footer: `Referenz: ${shortId}`,
+        footer: `Buchungscode: ${shortId}`,
       },
       fr: {
         subject: `BagajPark : Demande de réservation refusée`,
-        body: `Bonjour,\n\nVotre demande de réservation auprès de ${shopName} (Réf : ${shortId}) a malheureusement été refusée.\n\nVous pouvez parcourir d'autres établissements sur bagajpark.com.`,
+        body: `Bonjour,\n\nVotre demande de réservation auprès de ${shopName} (Code de réservation : ${shortId}) a malheureusement été refusée.\n\nVous pouvez parcourir d'autres établissements sur bagajpark.com.`,
         heading: `Demande de réservation refusée`,
         p1: `Votre demande auprès de <strong>${shopName}</strong> a malheureusement été refusée.`,
         p2: `Découvrez d'autres établissements {link}.`,
         p2Link: `ici`,
-        footer: `Référence : ${shortId}`,
+        footer: `Code de réservation : ${shortId}`,
       },
       ja: {
         subject: `BagajPark: 予約リクエストが却下されました`,
-        body: `こんにちは、\n\n${shopName} への予約リクエスト（参照番号: ${shortId}）は残念ながら却下されました。\n\nbagajpark.com で他の店舗をご覧いただけます。`,
+        body: `こんにちは、\n\n${shopName} への予約リクエスト（予約コード: ${shortId}）は残念ながら却下されました。\n\nbagajpark.com で他の店舗をご覧いただけます。`,
         heading: `予約リクエストが却下されました`,
         p1: `<strong>${shopName}</strong> へのリクエストは残念ながら却下されました。`,
         p2: `他の店舗を{link}からご覧いただけます。`,
         p2Link: `こちら`,
-        footer: `参照番号: ${shortId}`,
+        footer: `予約コード: ${shortId}`,
       },
       fa: {
         subject: `BagajPark: درخواست رزرو رد شد`,
-        body: `سلام،\n\nمتأسفانه درخواست رزرو شما برای ${shopName} (شماره پیگیری: ${shortId}) رد شد.\n\nمی‌توانید سایر فروشگاه‌ها را در bagajpark.com مشاهده کنید.`,
+        body: `سلام،\n\nمتأسفانه درخواست رزرو شما برای ${shopName} (کد رزرو: ${shortId}) رد شد.\n\nمی‌توانید سایر فروشگاه‌ها را در bagajpark.com مشاهده کنید.`,
         heading: `درخواست رزرو رد شد`,
         p1: `متأسفانه درخواست شما برای <strong>${shopName}</strong> رد شد.`,
         p2: `سایر فروشگاه‌ها را {link} مشاهده کنید.`,
         p2Link: `اینجا`,
-        footer: `شماره پیگیری: ${shortId}`,
+        footer: `کد رزرو: ${shortId}`,
       },
     }, locale);
 
@@ -767,7 +768,7 @@ export class NotificationService implements INotificationService {
     totalPrice: number;
   }): Promise<void> {
     const { bookingId, shopName, partnerPhone, totalPrice } = params;
-    const shortId = bookingId.replace(/-/g, "").slice(0, 8);
+    const shortId = bookingShortCode(bookingId);
 
     // Veritabanından rezervasyon durumunu ve partner e-posta adresini çekelim
     let partnerEmail: string | null = null;
@@ -807,7 +808,7 @@ export class NotificationService implements INotificationService {
     if (isRequest) {
       // Yeni Rezervasyon Talebi (WAITING_APPROVAL)
       emailSubject = `BagajPark: Yeni Rezervasyon Talebi! 🎒 (Kod: ${shortId})`;
-      emailBody = `Merhaba,\n\n${shopName} mağazanıza yeni bir rezervasyon talebi geldi!\n\nTutar: ${priceTr}\nReferans Kodu: ${shortId}\n\nTalebi onaylamak veya reddetmek için partner panelinize giriş yapın:\n${panelUrl}`;
+      emailBody = `Merhaba,\n\n${shopName} mağazanıza yeni bir rezervasyon talebi geldi!\n\nTutar: ${priceTr}\nRezervasyon Kodu: ${shortId}\n\nTalebi onaylamak veya reddetmek için partner panelinize giriş yapın:\n${panelUrl}`;
       emailHtml = renderEmailHtml({
         locale: "tr",
         heading: "Yeni Rezervasyon Talebi! 🎒",
@@ -815,7 +816,7 @@ export class NotificationService implements INotificationService {
           `<strong>${shopName}</strong> mağazanıza yeni bir rezervasyon talebi ulaştı. Onaylama veya reddetme işlemlerini gerçekleştirmek için lütfen partner panelinize giriş yapın.`,
         ],
         rows: [
-          { label: "Referans Kodu", value: shortId },
+          { label: "Rezervasyon Kodu", value: shortId },
           { label: "Toplam Tutar", value: priceTr },
         ],
         cta: { href: panelUrl, label: "Partner Paneline Git", variant: "button" },
@@ -823,7 +824,7 @@ export class NotificationService implements INotificationService {
       });
     } else {
       emailSubject = `BagajPark: Yeni Onaylı Rezervasyon! (Kod: ${shortId})`;
-      emailBody = `Merhaba,\n\n${shopName} mağazanıza yeni bir onaylı rezervasyon geldi!\n\nTutar: ${priceTr}\nReferans Kodu: ${shortId}\n\nDetayları görmek için partner panelinize giriş yapın:\n${panelUrl}`;
+      emailBody = `Merhaba,\n\n${shopName} mağazanıza yeni bir onaylı rezervasyon geldi!\n\nTutar: ${priceTr}\nRezervasyon Kodu: ${shortId}\n\nDetayları görmek için partner panelinize giriş yapın:\n${panelUrl}`;
       /* Onaylanmis is: ton `success` — baslik ve dugme birlikte yesile doner. */
       emailHtml = renderEmailHtml({
         locale: "tr",
@@ -833,7 +834,7 @@ export class NotificationService implements INotificationService {
           `<strong>${shopName}</strong> mağazanıza yeni bir onaylı rezervasyon geldi. Müşteri bagajı teslim etmek üzere dükkanınıza gelecektir.`,
         ],
         rows: [
-          { label: "Referans Kodu", value: shortId },
+          { label: "Rezervasyon Kodu", value: shortId },
           { label: "Toplam Tutar", value: priceTr },
         ],
         cta: { href: panelUrl, label: "Partner Paneline Git", variant: "button" },
@@ -901,7 +902,7 @@ export class NotificationService implements INotificationService {
     reason: string;
   }): Promise<void> {
     const { bookingId, reason } = params;
-    const shortId = bookingId.replace(/-/g, "").slice(0, 8);
+    const shortId = bookingShortCode(bookingId);
 
     // 1. E-posta Bildirimi
     const adminEmails = (process.env.ADMIN_EMAILS ?? "")
@@ -910,7 +911,7 @@ export class NotificationService implements INotificationService {
       .filter(Boolean);
 
     const emailSubject = `[Admin] BagajPark: Yeni Şikayet Bildirimi! ⚠️ (Rez: ${shortId})`;
-    const emailBody = `Merhaba,\n\nRezervasyon hakkında yeni bir şikayet açıldı.\n\nReferans Kodu: ${shortId}\nŞikayet Nedeni: ${reason}`;
+    const emailBody = `Merhaba,\n\nRezervasyon hakkında yeni bir şikayet açıldı.\n\nRezervasyon Kodu: ${shortId}\nŞikayet Nedeni: ${reason}`;
     /* Sikayet: ton `alert`; neden hucresi de vurgulu basilir. */
     const emailHtml = renderEmailHtml({
       locale: "tr",
@@ -918,7 +919,7 @@ export class NotificationService implements INotificationService {
       heading: "Yeni Şikayet Bildirimi! ⚠️",
       paragraphs: ["Bir rezervasyon için şikayet/itiraz oluşturulmuştur."],
       rows: [
-        { label: "Referans Kodu", value: shortId },
+        { label: "Rezervasyon Kodu", value: shortId },
         { label: "Şikayet Nedeni", value: reason, emphasized: true },
       ],
       footer: "BagajPark — Yönetim Masası",

@@ -4,6 +4,7 @@ import prisma from "@/lib/db";
 import { withJobRun } from "@/lib/jobs/run-ledger";
 import logger from "@/lib/logger";
 import { notificationService } from "@/services/NotificationService";
+import { bookingShortCode } from "@/lib/booking-code";
 
 // Booking Reminder Cron
 //
@@ -106,7 +107,7 @@ export async function GET(req: NextRequest) {
         void notificationService.sendEmail(
           partnerEmail,
           `BagajPark: Geç teslim — ${booking.shop.name} ⏰`,
-          `Merhaba,\n\nAşağıdaki rezervasyonun check-out saati geçti ancak valiz henüz teslim alınmamış:\n\nRezervasyon: ${booking.id.slice(0, 8)}\nPlanlanan check-out: ${booking.checkOutTime.toLocaleString("tr-TR")}\n\nLütfen misafir ile iletişime geçin.`,
+          `Merhaba,\n\nAşağıdaki rezervasyonun check-out saati geçti ancak valiz henüz teslim alınmamış:\n\nRezervasyon Kodu: ${bookingShortCode(booking.id)}\nPlanlanan check-out: ${booking.checkOutTime.toLocaleString("tr-TR")}\n\nLütfen misafir ile iletişime geçin.`,
           booking.id,
         ).catch((e) => logger.warn({ err: e, bookingId: booking.id }, "reminder_overdue_email_failed"));
         results.overdueNotifications++;

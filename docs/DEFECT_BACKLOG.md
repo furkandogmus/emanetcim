@@ -10,6 +10,50 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-08-31 — rezervasyon kodu üç uçta üç farklı isim ve iki farklı yazımdaydı
+
+Hesabı olmayan misafir için `/bookings/lookup` tek yol; oraya yazacağı kodu ise
+e-postadan okuyor. Yani e-posta ile form arasındaki köprüyü misafir kuruyor — ve
+köprünün iki ucu birbirini tutmuyordu.
+
+| Uç | Ne diyordu | Nasıl yazıyordu |
+|---|---|---|
+| Rezervasyon sayfası | "Rezervasyon Kodu" | `2A9E8619` (BÜYÜK) |
+| E-posta / SMS | "Referans" · "Reference" · "Referenz" · "Référence" · "参照番号" · "شماره پیگیری" · "Ref:" | `2a9e8619` (küçük) |
+| Arama formu | "Rezervasyon Kodu" | — |
+
+Misafir e-postada **"Referans: 2a9e8619"** görüp sitede **"Rezervasyon Kodu"**
+soruluyordu; aynı şeyin farklı adı ve farklı yazımı. Arama zaten harf duyarsız
+hâle getirilmişti (bkz. aynı gün, "hesapsız misafir KENDİ kodunu yazınca..."),
+yani bu artık bir *hata* değil ama hâlâ bir tereddüt sebebiydi: kullanıcı
+eşleştiremediği iki şeyi görünce denemeden vazgeçiyor.
+
+- **Düzeltme**: altı dilin hepsinde bildirim metinleri, o dilin web etiketiyle
+  (`Guest.bookingCodeLabel`) aynı sözcüğü kullanıyor. Kod üretimi tek yere indi:
+  `src/lib/booking-code.ts` → `bookingShortCode()`, altı bildirim + misafir
+  sayfası + esnaf hatırlatma e-postası hepsi onu çağırıyor. Yazan uç
+  (`bookingShortCode`) ile okuyan uç (`normalizeBookingCode`) artık **aynı
+  dosyada**, ki biri değişirse diğeri gözden kaçmasın.
+- **Regresyon testi**: `src/__tests__/booking-code-ends.test.ts`. Ölçtüğü şey bir
+  fonksiyon değil, tek bir cümle: *misafirin gördüğü kod, misafirin yazdığı
+  hâliyle, saklanan kimliğe geri götürür.* Telefonda okunarak aktarılan biçimler
+  ("2a9e 8619", "2A9E-8619") de kapsamda.
+
+### Kör bul-değiştir üç sızıntı üretti — üçü de ölçümle yakalandı
+
+Sözcük değişimini altı dilde tek seferde yapmak cazipti ve üç yerde yanlış çıktı:
+
+1. `"Referans Kodu"` → **`"Rezervasyon Kodu Kodu"`** (sözcük ikilendi, beş yerde).
+2. SMS için yaptığım `"Ref: "` → `"Kod: "` değişimi **Almanca** reddetme
+   e-postasının içine sızdı: `(Kod: ...) wurde leider abgelehnt`.
+3. Aynı sızıntı **İngilizce** gövdede de vardı: `(Kod: ...) was declined`.
+4. Fransızca `"Réf :"` ise hiç yakalanmamıştı, çünkü desen `"Référence"` idi.
+
+Yakalayan şey diff'i okumak ve ardından her dil bloğunda "başka dilin sözcüğü
+var mı" diye taramaktı. Ders: çok dilli metinde bul-değiştir, **değişikliği değil
+sonucu** doğrulamayı gerektirir — her dil bloğu kendi sözcüklerinden başkasını
+taşımamalı.
+
 ## 2026-08-31 — E2E kapısı kaypaktı: aynı komut, üç koşu, üç farklı sonuç
 
 Deploy `verify` işine `needs` ile bağlı, yani E2E kırmızıysa üretime çıkılamıyor.
