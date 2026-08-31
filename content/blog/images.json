@@ -1,0 +1,47 @@
+{
+  "ankara-anitkabir": {
+    "file": "/images/blog/ankara-anitkabir.webp",
+    "alt": {
+      "tr": "Anıtkabir'in sütunlu ana bloğu ve tören meydanı",
+      "en": "The colonnaded main block of Anitkabir and its ceremonial plaza"
+    },
+    "caption": {
+      "tr": "Anıtkabir tören meydanı",
+      "en": "Anitkabir ceremonial plaza"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:An%C4%B1tkabir,_Ankara.jpg",
+    "author": "Bernard Gagnon",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "ankara"
+  },
+  "ankara-kale": {
+    "file": "/images/blog/ankara-kale.webp",
+    "alt": {
+      "tr": "Ankara Kalesi'nin surları ve altındaki eski Ankara evleri",
+      "en": "The walls of Ankara Castle above the old town houses"
+    },
+    "caption": {
+      "tr": "Ankara Kalesi ve Hamamönü'ne bakan eski şehir dokusu",
+      "en": "Ankara Castle, looking over the old town"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Ankara_Castle.jpg",
+    "author": "Bernard Gagnon",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "ankara"
+  },
+  "ankara-kizilay": {
+    "file": "/images/blog/ankara-kizilay.webp",
+    "alt": {
+      "tr": "Kızılay Meydanı'nda yaya trafiği ve çevresindeki iş hanları",
+      "en": "Pedestrian traffic on Kizilay Square with surrounding office blocks"
+    },
+    "caption": {
+      "tr": "Kızılay Meydanı",
+      "en": "Kizilay Square"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:K%C4%B1z%C4%B1lay_Square.JPG",
+    "author": "Yabancı",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "ankara"
+  }
+}
