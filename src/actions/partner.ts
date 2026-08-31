@@ -102,7 +102,15 @@ export async function getPartnerBookingPreviewAction(raw: string) {
 
   let booking = await prisma.booking.findUnique({
     where: { id: bookingId },
-    include: { guest: true, shop: true },
+    /*
+      DAR SECIM (2026-08-31): `guest: true` misafirin `passwordHash`ini ve base64
+      avatarini da getiriyordu; bu action yalnizca `guest.name` donduruyor.
+      `shop`tan da tek gereken sahiplik kontrolu icin `ownerId`.
+    */
+    include: {
+      guest: { select: { name: true } },
+      shop: { select: { ownerId: true } },
+    },
   });
 
   /*
@@ -122,7 +130,11 @@ export async function getPartnerBookingPreviewAction(raw: string) {
         : {};
     const matches = await prisma.booking.findMany({
       where: { id: { startsWith: bookingId.toLowerCase() }, ...scope },
-      include: { guest: true, shop: true },
+      // Dar secim -- gerekcesi yukarida.
+      include: {
+        guest: { select: { name: true } },
+        shop: { select: { ownerId: true } },
+      },
       take: 2,
     });
     if (matches.length === 1) booking = matches[0];

@@ -56,7 +56,16 @@ export default async function PartnerBookingDetailPage({
 
   const booking = await prisma.booking.findFirst({
     where: { id, shop: { ownerId: userId } },
-    include: { guest: true, shop: true },
+    /*
+      DAR SECIM (2026-08-31): `guest: true` misafirin `passwordHash`ini ve
+      base64 avatarini (MB'lar) da getiriyordu; bu sayfa yalnizca ad, telefon
+      ve e-posta yaziyor. `shop: true` de tum sutunlari getiriyordu; kullanilan
+      tek alan `name`.
+    */
+    include: {
+      guest: { select: { name: true, phone: true, email: true } },
+      shop: { select: { name: true } },
+    },
   });
 
   if (!booking) {

@@ -90,7 +90,12 @@ export async function createBookingAction(data: CreateBookingInput) {
   const pricingRules = await getPricingRules();
   const shop = await prisma.shop.findUnique({
     where: { id: data.shopId },
-    include: { owner: true },
+    /*
+      DAR SECIM (2026-08-31): `owner: true` tam `User` satirini getiriyordu
+      (`passwordHash` ve MB'lik base64 `image` dahil); bu akisin okudugu tek
+      alan `shop.owner.phone` -- esnafa gonderilen bildirim icin.
+    */
+    include: { owner: { select: { id: true, phone: true, email: true, name: true } } },
   });
 
   if (!shop || !shop.isActive) {

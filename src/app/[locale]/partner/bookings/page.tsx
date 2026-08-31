@@ -83,7 +83,20 @@ export default async function PartnerBookingsPage({
     prisma.booking.count({ where }),
     prisma.booking.findMany({
       where,
-      include: { guest: true },
+      /*
+      DAR SECIM (2026-08-31). Onceki hali `include: { guest: true }` idi, yani
+      her satirla birlikte TAM `User` kaydi geliyordu: `passwordHash` ve --
+      asil maliyet -- `image`. `image` bir base64 data URL (avatar 2 MB'a kadar,
+      base64 ile ~2,7 MB) ve bu sorgu sayfa basina PAGE_SIZE kayit donduruyor. Yani
+      avatarli misafirlerin oldugu bir sayfa on megabaytlarca metni bosuna
+      cekiyordu. Ayni sinif hata mobil `requireMobileUser`da da vardi.
+
+      `passwordHash`in sunucu bileseninin bellegine girmemesi ikinci kazanc:
+      bugun hicbir sey onu istemciye gecirmiyor (alanlar tek tek yaziliyor) ama
+      bir gun biri nesneyi oldugu gibi bir istemci bilesenine verirse bcrypt
+      hash'i RSC yukuyle tarayiciya gider.
+    */
+      include: { guest: { select: { name: true, phone: true } } },
       orderBy: { checkInTime: "desc" },
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,

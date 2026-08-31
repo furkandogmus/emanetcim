@@ -10,6 +10,38 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-08-31 — `include: { guest: true }` web tarafında da MB'larca base64 çekiyordu
+
+Mobil `requireMobileUser`'da düzeltilen sınıfın web karşılığı. Prisma'da
+`include: { guest: true }` o ilişkinin **bütün** sütunlarını getirir; `User` için
+bu iki şey demek:
+
+1. **`image` bir base64 data URL** (avatar 2 MB'a kadar, base64 ile ~2,7 MB). Bir
+   **liste** sorgusunda — esnaf rezervasyonları, sayfa başına 50 kayıt — bu,
+   hiçbir ekranın okumadığı on megabaytlarca metnin çekilmesi demek.
+2. **`passwordHash` sunucu bileşeninin belleğine girer.** Bugün hiçbir şey onu
+   istemciye geçirmiyor (sayfalar alanları tek tek yazıyor) ama RSC'de bir gün
+   biri nesneyi olduğu gibi bir istemci bileşenine verirse bcrypt hash'i RSC
+   yüküyle tarayıcıya gider. Alan listesi yazmak bu ihtimali baştan siler.
+
+Daraltılan beş sorgu:
+
+| Yer | Önce | Sonra |
+|---|---|---|
+| `partner/bookings/page.tsx` | `guest: true` × 50 kayıt | `guest: { name, phone }` |
+| `partner/bookings/[id]/page.tsx` | `guest: true, shop: true` | kullanılan alanlar (`shop`tan yalnızca `name`) |
+| `actions/partner.ts` (2 sorgu) | `guest: true, shop: true` | `guest: { name }`, `shop: { ownerId }` |
+| `actions/booking.ts` | `owner: true` | `owner: { id, phone, email, name }` |
+| `actions/admin-management.ts` | `owner: true` | **kaldırıldı** — getirilen `owner` fonksiyonun hiçbir yerinde okunmuyordu |
+
+### Mandal: `src/__tests__/relation-overfetch.test.ts`
+
+- **Taşıyıcı katmanda (`src/app/[locale]`, `src/actions`) kesin 0** — liste
+  sorguları ve sayfa çizimleri bu katmanda, en pahalı yer burası.
+- **Toplam için tavan: 12** (ölçüldü, 14'ten indi). Kalanlar `src/services/`
+  içindeki tiplenmiş sorgular (`BookingWithShopGuestDetails` gibi) ve onları
+  daraltmak çağıran tarafı da değiştirmeyi gerektiriyor. Sayı yalnızca **düşer**.
+
 ## 2026-08-31 — bir esnaf başka bir dükkanın mühürlerini arızalı işaretleyebiliyordu (IDOR)
 
 `reportFaultySealAction(serialNumber, shopId)` — `shopId` **istemciden** geliyor ve

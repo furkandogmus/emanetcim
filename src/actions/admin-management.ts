@@ -658,7 +658,11 @@ export async function updateShopAction(shopId: string, data: {
       isTest: data.isTest,
       isVerified: data.isVerified,
     },
-    include: { owner: true },
+    /*
+      `include: { owner: true }` KALDIRILDI (2026-08-31): getirilen `owner`
+      nesnesi bu fonksiyonun hicbir yerinde OKUNMUYORDU -- tamamen bosa cekilen
+      bir tam `User` satiriydi (`passwordHash` ve MB'lik base64 `image` dahil).
+    */
   });
 
   if (data.isTest !== undefined) {
