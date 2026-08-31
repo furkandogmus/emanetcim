@@ -2,7 +2,7 @@ import logger from "../lib/logger";
 import prisma from "../lib/db";
 import { formatTryCurrency } from "@/lib/currency";
 import { fetchWithTimeout } from "@/lib/async-timeout";
-import { renderEmailHtml, EMAIL_BRAND_COLOR } from "@/lib/email-template";
+import { renderEmailHtml, escapeEmailHtml, EMAIL_BRAND_COLOR } from "@/lib/email-template";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import {
   isNetgsmConfigured,
@@ -444,6 +444,14 @@ export class NotificationService implements INotificationService {
     shopName: string,
     locale: string = "tr",
   ): Promise<void> {
+    /*
+      GOVDEYE GIREN DUKKAN ADI KACIRILIR (2026-08-31). `shopName` esnafin kendi
+      yazdigi deger; kacirilmadan `<strong>${...}</strong>` icine girince esnaf,
+      misafire giden e-postaya baglanti/isaretleme enjekte edebiliyordu.
+      `subject` ve `body` DUZ METIN oldugu icin orada ham deger kullanilir --
+      kacirmak kullaniciya `&amp;` gosterirdi.
+    */
+    const shopNameHtml = escapeEmailHtml(shopName);
     if (!email.includes("@")) return;
     const domain = getSiteBaseUrl();
     const shopUrl = `${domain}/${locale}/shop/${shopId}`;
@@ -453,7 +461,7 @@ export class NotificationService implements INotificationService {
         subject: `${shopName} açılınca haber vereceğiz 🎒`,
         body: `Merhaba,\n\n${shopName} için "açılınca haber ver" kaydını aldık. Nokta hizmete girdiği gün ilk sana yazacağız.\n\nNokta: ${shopUrl}`,
         heading: `Kaydını aldık 🎒`,
-        p1: `${shopName} için "açılınca haber ver" isteğini kaydettik.`,
+        p1: `${shopNameHtml} için "açılınca haber ver" isteğini kaydettik.`,
         p2: `Bu nokta henüz rezervasyon almıyor. Hizmete girdiği gün ilk sana yazacağız — başka bir şey yapmana gerek yok.`,
         cta: `Noktayı gör`,
         footer: `BagajPark — Güvenli Bagaj Emaneti`,
@@ -462,7 +470,7 @@ export class NotificationService implements INotificationService {
         subject: `We'll tell you when ${shopName} opens 🎒`,
         body: `Hello,\n\nWe have your request to be notified when ${shopName} opens. You will hear from us the day it goes live.\n\nPoint: ${shopUrl}`,
         heading: `Request received 🎒`,
-        p1: `We saved your request to be notified about ${shopName}.`,
+        p1: `We saved your request to be notified about ${shopNameHtml}.`,
         p2: `This point does not take bookings yet. You will be the first to hear the day it opens — nothing else to do.`,
         cta: `View the point`,
         footer: `BagajPark — Secure Luggage Storage`,
@@ -471,7 +479,7 @@ export class NotificationService implements INotificationService {
         subject: `Wir melden uns, wenn ${shopName} öffnet 🎒`,
         body: `Hallo,\n\nIhre Anfrage für eine Benachrichtigung zu ${shopName} ist bei uns. Am Eröffnungstag hören Sie von uns.\n\nStandort: ${shopUrl}`,
         heading: `Anfrage erhalten 🎒`,
-        p1: `Wir haben Ihre Benachrichtigungsanfrage für ${shopName} gespeichert.`,
+        p1: `Wir haben Ihre Benachrichtigungsanfrage für ${shopNameHtml} gespeichert.`,
         p2: `Dieser Standort nimmt noch keine Buchungen an. Am Eröffnungstag erfahren Sie es als Erste — sonst ist nichts zu tun.`,
         cta: `Standort ansehen`,
         footer: `BagajPark — Sichere Gepäckaufbewahrung`,
@@ -480,7 +488,7 @@ export class NotificationService implements INotificationService {
         subject: `Nous vous préviendrons à l'ouverture de ${shopName} 🎒`,
         body: `Bonjour,\n\nNous avons bien votre demande d'alerte pour ${shopName}. Vous serez prévenu le jour de l'ouverture.\n\nPoint : ${shopUrl}`,
         heading: `Demande enregistrée 🎒`,
-        p1: `Nous avons enregistré votre demande d'alerte pour ${shopName}.`,
+        p1: `Nous avons enregistré votre demande d'alerte pour ${shopNameHtml}.`,
         p2: `Ce point n'accepte pas encore de réservations. Vous serez le premier informé le jour de l'ouverture — rien d'autre à faire.`,
         cta: `Voir le point`,
         footer: `BagajPark — Consigne à bagages sécurisée`,
@@ -489,7 +497,7 @@ export class NotificationService implements INotificationService {
         subject: `${shopName} のオープン時にお知らせします 🎒`,
         body: `こんにちは。\n\n${shopName} のオープン通知のご登録を承りました。オープン当日に最初にお知らせします。\n\n拠点: ${shopUrl}`,
         heading: `ご登録を承りました 🎒`,
-        p1: `${shopName} のオープン通知をご登録いただきました。`,
+        p1: `${shopNameHtml} のオープン通知をご登録いただきました。`,
         p2: `この拠点はまだ予約を受け付けていません。オープン当日に最初にお知らせしますので、ほかに必要な操作はありません。`,
         cta: `拠点を見る`,
         footer: `BagajPark — 安全な手荷物預かり`,
@@ -498,7 +506,7 @@ export class NotificationService implements INotificationService {
         subject: `هنگام افتتاح ${shopName} خبر می‌دهیم 🎒`,
         body: `سلام،\n\nدرخواست شما برای اطلاع از افتتاح ${shopName} ثبت شد. روز افتتاح اول از همه به شما خبر می‌دهیم.\n\nنقطه: ${shopUrl}`,
         heading: `درخواست شما ثبت شد 🎒`,
-        p1: `درخواست اطلاع‌رسانی شما برای ${shopName} ذخیره شد.`,
+        p1: `درخواست اطلاع‌رسانی شما برای ${shopNameHtml} ذخیره شد.`,
         p2: `این نقطه هنوز رزرو نمی‌گیرد. روز افتتاح اول از همه باخبر می‌شوید — کار دیگری لازم نیست.`,
         cta: `دیدن نقطه`,
         footer: `BagajPark — نگهداری امن چمدان`,
@@ -535,6 +543,14 @@ export class NotificationService implements INotificationService {
     shopName: string,
     locale: string = "tr",
   ): Promise<void> {
+    /*
+      GOVDEYE GIREN DUKKAN ADI KACIRILIR (2026-08-31). `shopName` esnafin kendi
+      yazdigi deger; kacirilmadan `<strong>${...}</strong>` icine girince esnaf,
+      misafire giden e-postaya baglanti/isaretleme enjekte edebiliyordu.
+      `subject` ve `body` DUZ METIN oldugu icin orada ham deger kullanilir --
+      kacirmak kullaniciya `&amp;` gosterirdi.
+    */
+    const shopNameHtml = escapeEmailHtml(shopName);
     if (!email.includes("@")) return;
     const domain = getSiteBaseUrl();
     const shopUrl = `${domain}/${locale}/shop/${shopId}`;
@@ -543,7 +559,7 @@ export class NotificationService implements INotificationService {
       tr: {
         subject: `${shopName} açıldı — valizini bırakabilirsin 🎒`,
         body: `Merhaba,\n\n${shopName} artık hizmette. Sözümüzü tutuyoruz: açıldığı gün haber veriyoruz.\n\nRezervasyon: ${shopUrl}`,
-        heading: `${shopName} açıldı 🎒`,
+        heading: `${shopNameHtml} açıldı 🎒`,
         p1: `Bu noktada emanet hizmeti başladı. Bir süre önce "açılınca haber ver" demiştin — sözümüzü tutuyoruz.`,
         p2: `Artık valizini bırakmak için rezervasyon yapabilirsin.`,
         cta: `Rezervasyon yap`,
@@ -552,7 +568,7 @@ export class NotificationService implements INotificationService {
       en: {
         subject: `${shopName} is open — you can drop your bags 🎒`,
         body: `Hello,\n\n${shopName} is now live. You asked to be told the day it opens, so here we are.\n\nBook: ${shopUrl}`,
-        heading: `${shopName} is open 🎒`,
+        heading: `${shopNameHtml} is open 🎒`,
         p1: `Luggage storage has started at this point. A while ago you asked us to tell you when it opens — here we are.`,
         p2: `You can book a drop-off now.`,
         cta: `Book now`,
@@ -561,7 +577,7 @@ export class NotificationService implements INotificationService {
       de: {
         subject: `${shopName} ist offen — Sie können Ihr Gepäck abgeben 🎒`,
         body: `Hallo,\n\n${shopName} ist jetzt in Betrieb. Sie wollten es am Eröffnungstag erfahren — hier sind wir.\n\nBuchen: ${shopUrl}`,
-        heading: `${shopName} ist offen 🎒`,
+        heading: `${shopNameHtml} ist offen 🎒`,
         p1: `An diesem Standort hat die Gepäckaufbewahrung begonnen. Sie hatten gebeten, bei der Eröffnung informiert zu werden — hier sind wir.`,
         p2: `Sie können jetzt eine Abgabe buchen.`,
         cta: `Jetzt buchen`,
@@ -570,7 +586,7 @@ export class NotificationService implements INotificationService {
       fr: {
         subject: `${shopName} est ouvert — déposez vos bagages 🎒`,
         body: `Bonjour,\n\n${shopName} est maintenant en service. Vous vouliez être prévenu le jour de l'ouverture — nous y sommes.\n\nRéserver : ${shopUrl}`,
-        heading: `${shopName} est ouvert 🎒`,
+        heading: `${shopNameHtml} est ouvert 🎒`,
         p1: `La consigne à bagages a ouvert à ce point. Vous nous aviez demandé de vous prévenir le jour de l'ouverture — nous y sommes.`,
         p2: `Vous pouvez désormais réserver un dépôt.`,
         cta: `Réserver`,
@@ -579,7 +595,7 @@ export class NotificationService implements INotificationService {
       ja: {
         subject: `${shopName} がオープンしました — 荷物を預けられます 🎒`,
         body: `こんにちは。\n\n${shopName} の運用が始まりました。オープン当日にお知らせするお約束でした。\n\n予約: ${shopUrl}`,
-        heading: `${shopName} がオープンしました 🎒`,
+        heading: `${shopNameHtml} がオープンしました 🎒`,
         p1: `この拠点で手荷物預かりが始まりました。オープンしたら知らせてほしいとご登録いただいていました。`,
         p2: `お預け入れのご予約が可能になりました。`,
         cta: `予約する`,
@@ -588,7 +604,7 @@ export class NotificationService implements INotificationService {
       fa: {
         subject: `${shopName} باز شد — می‌توانید چمدانتان را بسپارید 🎒`,
         body: `سلام،\n\n${shopName} اکنون فعال است. گفته بودید روز افتتاح خبر بدهیم — همان روز رسید.\n\nرزرو: ${shopUrl}`,
-        heading: `${shopName} باز شد 🎒`,
+        heading: `${shopNameHtml} باز شد 🎒`,
         p1: `نگهداری چمدان در این نقطه آغاز شد. شما خواسته بودید روز افتتاح خبر بدهیم.`,
         p2: `اکنون می‌توانید برای سپردن چمدان رزرو کنید.`,
         cta: `رزرو کنید`,
@@ -609,6 +625,14 @@ export class NotificationService implements INotificationService {
 
   /** Esnaf rezervasyonu onayladiginda misafire onay e-postasi gonderir. */
   async notifyBookingApproved(email: string, bookingId: string, shopName: string, locale: string = "tr"): Promise<void> {
+    /*
+      GOVDEYE GIREN DUKKAN ADI KACIRILIR (2026-08-31). `shopName` esnafin kendi
+      yazdigi deger; kacirilmadan `<strong>${...}</strong>` icine girince esnaf,
+      misafire giden e-postaya baglanti/isaretleme enjekte edebiliyordu.
+      `subject` ve `body` DUZ METIN oldugu icin orada ham deger kullanilir --
+      kacirmak kullaniciya `&amp;` gosterirdi.
+    */
+    const shopNameHtml = escapeEmailHtml(shopName);
     if (!email.includes("@")) return;
     const domain = getSiteBaseUrl();
     const bookingUrl = `${domain}/${locale}/bookings/${bookingId}`;
@@ -619,7 +643,7 @@ export class NotificationService implements INotificationService {
         subject: `BagajPark: Talebiniz Onaylandı 🎒`,
         body: `Merhaba,\n\n${shopName} mağazası rezervasyon talebinizi onayladı!\n\nRezervasyon detayları: ${bookingUrl}\n\nRezervasyon Kodu: ${shortId}`,
         heading: `Talebiniz Onaylandı! 🎒`,
-        p1: `<strong>${shopName}</strong> rezervasyon talebinizi onayladı.`,
+        p1: `<strong>${shopNameHtml}</strong> rezervasyon talebinizi onayladı.`,
         cta: `Rezervasyonu Görüntüle`,
         footer: `Rezervasyon Kodu: ${shortId}`,
       },
@@ -627,7 +651,7 @@ export class NotificationService implements INotificationService {
         subject: `BagajPark: Request Approved 🎒`,
         body: `Hello,\n\n${shopName} has approved your booking request!\n\nBooking details: ${bookingUrl}\n\nBooking code: ${shortId}`,
         heading: `Request Approved! 🎒`,
-        p1: `<strong>${shopName}</strong> has approved your booking request.`,
+        p1: `<strong>${shopNameHtml}</strong> has approved your booking request.`,
         cta: `View Booking`,
         footer: `Booking code: ${shortId}`,
       },
@@ -635,7 +659,7 @@ export class NotificationService implements INotificationService {
         subject: `BagajPark: Ihre Anfrage wurde angenommen 🎒`,
         body: `Hallo,\n\n${shopName} hat Ihre Reservierungsanfrage angenommen!\n\nReservierungsdetails: ${bookingUrl}\n\nBuchungscode: ${shortId}`,
         heading: `Ihre Anfrage wurde angenommen! 🎒`,
-        p1: `<strong>${shopName}</strong> hat Ihre Reservierungsanfrage angenommen.`,
+        p1: `<strong>${shopNameHtml}</strong> hat Ihre Reservierungsanfrage angenommen.`,
         cta: `Reservierung ansehen`,
         footer: `Buchungscode: ${shortId}`,
       },
@@ -643,7 +667,7 @@ export class NotificationService implements INotificationService {
         subject: `BagajPark : Votre demande a été acceptée 🎒`,
         body: `Bonjour,\n\n${shopName} a accepté votre demande de réservation !\n\nDétails de la réservation : ${bookingUrl}\n\nCode de réservation : ${shortId}`,
         heading: `Votre demande a été acceptée ! 🎒`,
-        p1: `<strong>${shopName}</strong> a accepté votre demande de réservation.`,
+        p1: `<strong>${shopNameHtml}</strong> a accepté votre demande de réservation.`,
         cta: `Voir la réservation`,
         footer: `Code de réservation : ${shortId}`,
       },
@@ -651,7 +675,7 @@ export class NotificationService implements INotificationService {
         subject: `BagajPark: リクエストが承認されました 🎒`,
         body: `こんにちは、\n\n${shopName} があなたの予約リクエストを承認しました！\n\n予約の詳細: ${bookingUrl}\n\n予約コード: ${shortId}`,
         heading: `リクエストが承認されました！🎒`,
-        p1: `<strong>${shopName}</strong> があなたの予約リクエストを承認しました。`,
+        p1: `<strong>${shopNameHtml}</strong> があなたの予約リクエストを承認しました。`,
         cta: `予約を見る`,
         footer: `予約コード: ${shortId}`,
       },
@@ -659,7 +683,7 @@ export class NotificationService implements INotificationService {
         subject: `BagajPark: درخواست شما تأیید شد 🎒`,
         body: `سلام،\n\nفروشگاه ${shopName} درخواست رزرو شما را تأیید کرد!\n\nجزئیات رزرو: ${bookingUrl}\n\nکد رزرو: ${shortId}`,
         heading: `درخواست شما تأیید شد! 🎒`,
-        p1: `<strong>${shopName}</strong> درخواست رزرو شما را تأیید کرد.`,
+        p1: `<strong>${shopNameHtml}</strong> درخواست رزرو شما را تأیید کرد.`,
         cta: `مشاهده رزرو`,
         footer: `کد رزرو: ${shortId}`,
       },
@@ -678,6 +702,14 @@ export class NotificationService implements INotificationService {
 
   /** Talep reddedildiginde / rezervasyon iptal edildiginde misafire bildirim. */
   async notifyBookingCancelled(email: string, bookingId: string, shopName: string, locale: string = "tr"): Promise<void> {
+    /*
+      GOVDEYE GIREN DUKKAN ADI KACIRILIR (2026-08-31). `shopName` esnafin kendi
+      yazdigi deger; kacirilmadan `<strong>${...}</strong>` icine girince esnaf,
+      misafire giden e-postaya baglanti/isaretleme enjekte edebiliyordu.
+      `subject` ve `body` DUZ METIN oldugu icin orada ham deger kullanilir --
+      kacirmak kullaniciya `&amp;` gosterirdi.
+    */
+    const shopNameHtml = escapeEmailHtml(shopName);
     if (!email.includes("@")) return;
     const domain = getSiteBaseUrl();
     const searchUrl = `${domain}/${locale}/search`;
@@ -688,7 +720,7 @@ export class NotificationService implements INotificationService {
         subject: `BagajPark: Rezervasyon Talebi Reddedildi`,
         body: `Merhaba,\n\n${shopName} mağazasına yaptığınız rezervasyon talebi (Kod: ${shortId}) ne yazık ki reddedildi.\n\nBagajpark.com üzerinden başka mağazalara göz atabilirsiniz.`,
         heading: `Rezervasyon Talebi Reddedildi`,
-        p1: `<strong>${shopName}</strong> mağazasına yaptığınız talep maalesef reddedildi.`,
+        p1: `<strong>${shopNameHtml}</strong> mağazasına yaptığınız talep maalesef reddedildi.`,
         p2: `Diğer mağazaları keşfetmek için {link}.`,
         p2Link: `buraya tıklayın`,
         footer: `Rezervasyon Kodu: ${shortId}`,
@@ -697,7 +729,7 @@ export class NotificationService implements INotificationService {
         subject: `BagajPark: Booking Request Declined`,
         body: `Hello,\n\nYour booking request to ${shopName} (Booking code: ${shortId}) was unfortunately declined.\n\nYou can browse other locations on bagajpark.com.`,
         heading: `Booking Request Declined`,
-        p1: `Your request to <strong>${shopName}</strong> was unfortunately declined.`,
+        p1: `Your request to <strong>${shopNameHtml}</strong> was unfortunately declined.`,
         p2: `Browse other locations {link}.`,
         p2Link: `here`,
         footer: `Booking code: ${shortId}`,
@@ -706,7 +738,7 @@ export class NotificationService implements INotificationService {
         subject: `BagajPark: Reservierungsanfrage abgelehnt`,
         body: `Hallo,\n\nIhre Reservierungsanfrage bei ${shopName} (Buchungscode: ${shortId}) wurde leider abgelehnt.\n\nSie können auf bagajpark.com andere Standorte durchsuchen.`,
         heading: `Reservierungsanfrage abgelehnt`,
-        p1: `Ihre Anfrage bei <strong>${shopName}</strong> wurde leider abgelehnt.`,
+        p1: `Ihre Anfrage bei <strong>${shopNameHtml}</strong> wurde leider abgelehnt.`,
         p2: `Entdecken Sie andere Standorte {link}.`,
         p2Link: `hier`,
         footer: `Buchungscode: ${shortId}`,
@@ -715,7 +747,7 @@ export class NotificationService implements INotificationService {
         subject: `BagajPark : Demande de réservation refusée`,
         body: `Bonjour,\n\nVotre demande de réservation auprès de ${shopName} (Code de réservation : ${shortId}) a malheureusement été refusée.\n\nVous pouvez parcourir d'autres établissements sur bagajpark.com.`,
         heading: `Demande de réservation refusée`,
-        p1: `Votre demande auprès de <strong>${shopName}</strong> a malheureusement été refusée.`,
+        p1: `Votre demande auprès de <strong>${shopNameHtml}</strong> a malheureusement été refusée.`,
         p2: `Découvrez d'autres établissements {link}.`,
         p2Link: `ici`,
         footer: `Code de réservation : ${shortId}`,
@@ -724,7 +756,7 @@ export class NotificationService implements INotificationService {
         subject: `BagajPark: 予約リクエストが却下されました`,
         body: `こんにちは、\n\n${shopName} への予約リクエスト（予約コード: ${shortId}）は残念ながら却下されました。\n\nbagajpark.com で他の店舗をご覧いただけます。`,
         heading: `予約リクエストが却下されました`,
-        p1: `<strong>${shopName}</strong> へのリクエストは残念ながら却下されました。`,
+        p1: `<strong>${shopNameHtml}</strong> へのリクエストは残念ながら却下されました。`,
         p2: `他の店舗を{link}からご覧いただけます。`,
         p2Link: `こちら`,
         footer: `予約コード: ${shortId}`,
@@ -733,7 +765,7 @@ export class NotificationService implements INotificationService {
         subject: `BagajPark: درخواست رزرو رد شد`,
         body: `سلام،\n\nمتأسفانه درخواست رزرو شما برای ${shopName} (کد رزرو: ${shortId}) رد شد.\n\nمی‌توانید سایر فروشگاه‌ها را در bagajpark.com مشاهده کنید.`,
         heading: `درخواست رزرو رد شد`,
-        p1: `متأسفانه درخواست شما برای <strong>${shopName}</strong> رد شد.`,
+        p1: `متأسفانه درخواست شما برای <strong>${shopNameHtml}</strong> رد شد.`,
         p2: `سایر فروشگاه‌ها را {link} مشاهده کنید.`,
         p2Link: `اینجا`,
         footer: `کد رزرو: ${shortId}`,

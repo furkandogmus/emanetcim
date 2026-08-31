@@ -213,6 +213,49 @@ kutuları. Esnaf ekranları projenin kendi E2E yardımcılarıyla (`loginAsDemoP
 Ders: bir düzen sondası, **kırpan atayı ve gerçekten çizilen elemanı** hesaba katmadan
 güven vermez. Sıfır bulgu, sondanın yanlış yere baktığının da cevabıdır.
 
+## 2026-08-31 — esnaf, misafire giden e-postaya oltalama bağlantısı koyabiliyordu
+
+Bir önceki bulgunun (JSON-LD XSS) kardeşi: aynı esnaf-kontrollü değer, bu sefer
+e-posta gövdesinde.
+
+`renderEmailHtml` aldığı dizeleri HTML olarak basıyor — öyle olmalı, çünkü
+şablonlar bilerek `<strong>` ve bağlantı taşıyor. Ama o dizelerin **içine**
+güvenilmez değerler enterpole ediliyordu: `shopName`, yani esnafın
+`updateShopSettingsAction` ile kendi yazdığı dükkan adı, **yirmi dört** HTML
+alanında (`heading`, `p1`, `p2`, `footer`) kaçırılmadan basılıyordu.
+
+Bir esnaf dükkan adını
+
+```html
+<a href="https://kötü/">Ödemenizi tamamlayın</a>
+```
+
+yaparsa, o dükkanla rezervasyon yapan **misafirlere** giden onay e-postasında bu
+bağlantı çıkıyordu. "Dükkan açıldı" bildirimi ise ilgi kaydeden **herkese**
+gidiyor — yani tek bir dükkan adı çok sayıda kutuya ulaşıyor.
+
+**Bu XSS değil** — e-posta istemcileri script çalıştırmaz. Bazı açılardan daha
+kötü: platformun **kendi gönderim alanından**, kendi şablonuyla, yüksek teslim
+edilebilirlikle giden bir oltalama bağlantısı. Kullanıcının güvenmesi için her
+sebebi var.
+
+### Düzeltme
+
+`escapeEmailHtml()` (`src/lib/email-template.ts`), yedi metotta `shopNameHtml`
+olarak türetiliyor ve yalnızca HTML alanlarında kullanılıyor.
+
+**`subject` ve `body` kapsam dışı ve bilerek:** ikisi de düz metin: orada
+kaçırmak kullanıcıya `&amp;` gösterir, yani görünür bir hata üretir. Kaçış
+şablona değil **değere** uygulanıyor — şablonun kendi `<strong>`'u duruyor.
+
+> Uygulama sırasında iki metot `shopNameHtml` türetip hiç kullanmadı (biri
+> SMS-only, biri yönetici bildirimi — ikisi de dükkan adını HTML alanına
+> koymuyor). Lint yakaladı, ikisi de kaldırıldı: kullanılmayan bir güvenlik
+> değişkeni, korumanın uygulandığı izlenimi verir.
+
+Mandal: `src/__tests__/email-html-injection.test.ts` — HTML alanlarında ham
+`shopName` yasak, artı gerçek saldırı yüküyle davranış testleri.
+
 ## 2026-08-31 — depolanmış XSS: esnaf, dükkan adı üzerinden script çalıştırabiliyordu
 
 On yedi yerde JSON-LD şöyle basılıyordu:

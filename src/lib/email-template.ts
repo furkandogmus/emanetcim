@@ -131,6 +131,41 @@ function renderCta(cta: EmailCta, accent: string): string {
  * oncesinde yalnizca `notifyBookingSuccess`'te vardi ve digerlerinde footer
  * govdeye yapisik duruyordu. Kasitli ve gorunur bir duzeltme.
  */
+/**
+ * E-POSTA GOVDESINE GIREN GUVENILMEZ DEGERLERIN KACIRILMASI.
+ *
+ * NEDEN VAR (2026-08-31'de olculdu): `renderEmailHtml` aldigi dizeleri HTML
+ * olarak basiyor -- oyle olmali, cunku sablonlar bilerek `<strong>` ve baglanti
+ * tasiyor. Ama o dizelerin ICINE guvenilmez degerler enterpole ediliyordu; en
+ * belirgini `shopName`, yani ESNAFIN kendi yazdigi dukkan adi
+ * (`updateShopSettingsAction`).
+ *
+ * Somut hali: bir esnaf dukkan adini
+ *
+ *     <a href="https://kotu/">Odemenizi tamamlayin</a>
+ *
+ * yaparsa, o dukkanla rezervasyon yapan MISAFIRLERE giden onay e-postasinin
+ * govdesinde bu baglanti cikiyordu. "Dukkan acildi" bildirimi ise ilgi
+ * kaydeden HERKESE gidiyor, yani tek bir dukkan adi cok sayida kutuya ulasiyor.
+ *
+ * Bu XSS DEGIL -- e-posta istemcileri script calistirmaz. Daha kotusu olabilir:
+ * platformun KENDI gonderim alanindan, kendi sablonuyla, yuksek teslim
+ * edilebilirlikle giden bir oltalama baglantisi. Kullanicinin guvenmesi icin
+ * her sebebi var.
+ *
+ * NEREYE UYGULANIR: yalnizca HTML olarak cizilen alanlara (`heading`, `p1`,
+ * `p2`, `footer`, `cta`). `subject` ve `body` DUZ METIN -- orada kacirmak
+ * kullaniciya `&amp;` gosterir, yani gorunur bir hata uretir.
+ */
+export function escapeEmailHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export function renderEmailHtml(content: EmailContent): string {
   const dir = RTL_LOCALES.has(content.locale) ? ` dir="rtl"` : "";
   /*
