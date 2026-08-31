@@ -10,6 +10,99 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-08-31 — kimlik doğrulama denetimi: on iki bulgu, biri tam yetki atlaması
+
+Kapsam: `src/auth.ts`, `src/auth.config.ts`, `src/proxy.ts`, `src/lib/*-auth*`,
+`src/lib/*token*` ve **72 API ucunun tamamı** (her uç için hangi kapıdan geçtiği
+tek tek çıkarıldı). Hepsi düzeltildi ve mandala bağlandı.
+
+> **Commit kaydı:** düzeltmeler `247fe42` içinde. O commit'in mesajı a11y
+> düzeltmelerini anlatıyor — aynı çalışma ağacında ikinci bir agent `git commit`
+> çalıştırdığında hazırlanmış güvenlik dosyaları onun commit'ine karıştı ve
+> push edildi. İçerik eksiksiz; kayıt bu bölümdür. Push edilmiş geçmiş yeniden
+> yazılmadı.
+
+### P0 — `POST /api/mobile/auth/register` kimlik doğrulamayı atlıyordu
+
+```js
+if (existing) {
+  if (existing.passwordHash) { /* şifreyi doğrula */ }
+  // passwordHash NULL ise: hiçbir şey doğrulanmaz, aşağıda token basılır
+  const access = await signAccessToken(existing.id, existing.role);
+```
+
+`passwordHash` **null** olan hesaplar: Google ile giren, Apple ile giren ve OTP
+ile açılan **herkes**. Bir e-posta adresini bilen biri o hesabın mobil oturumunu
+alıyordu; gönderdiği şifre hiçbir yere yazılmıyordu bile.
+
+Yıkıcı hâli: `src/auth.ts` içindeki `ADMIN_EMAILS` listesi Google ile ilk
+girişte hesabı **ADMIN** yapıyor ve o hesabın şifresi yok. Yönetici adresini
+bilen biri ADMIN rolünde mobil token alıp `/api/mobile/admin/*` uçlarının
+tamamına erişiyordu. **Depo açık kaynak** — uç adresi de gövde şeması da tahmin
+edilmiyor, okunuyor.
+
+Düzeltme: parolasız hesapta bu uç token üretmez, `409 account_exists_social`
+döner. Mobil kayıt ekranı bu kodu karşılıyor (`account_exists_social` anahtarı
+`tr`/`en`).
+
+### P1 — hesap devralma ve iptal edilemeyen oturum
+
+| # | Bulgu | Sonucu |
+|---|---|---|
+| 1 | Apple girişi `email_verified`i **hiç** kontrol etmiyordu | Doğrulanmamış bir e-postayla açılmış Apple ID, o adrese ait hesaba bağlanıyordu. Google ucu bunu baştan beri kontrol ediyordu. |
+| 2 | Mobil çıkış yalnızca web `Session` satırlarını siliyordu | Mobil kimlik durumsuz JWT; çıkış **hiçbir şey** yapmıyordu. Refresh token **30 gün** daha geçerliydi — çalınan telefonda çıkış yapmak hesabı korumuyordu. |
+| 3 | Web şifre sıfırlama `tokenVersion`ı artırmıyordu (mobil artırıyordu) | Şifre değişse bile saldırganın mobil oturumu 30 gün yaşıyordu. Şifre sıfırlamanın var olma amacı tam olarak buydu. |
+| 4 | `bookings/lookup` **hiçbir** hız sınırı taşımıyordu | E-postası bilinen misafirin rezervasyon kodu (altı hane, ~16,7M olasılık) bedava taranabiliyordu; kod bulununca QR token okunup rezervasyon iptal ettirilebiliyordu. |
+| 5 | `lookup/me` sahiplik kontrolünü `guestEmail` NULL ise **tamamen atlıyordu** | Aynı rezervasyon bir uçta okunabiliyor, `guest-cancel`da iptal edilemiyordu — iki uç aynı soruya farklı yanıt veriyordu. |
+
+3 numaranın kökü `CLAUDE.md`'nin adıyla uyardığı şey: aynı kural web action'ında
+ve mobil uçta ayrı ayrı yazılmıştı ve **üç ayrı noktada sapmıştı** (tokenVersion,
+alt sınır 8'e karşı 6, telefonla sıfırlama yalnızca web'de). Gövde
+`src/services/auth/password-reset.ts`'e taşındı; oturum iptali
+`src/services/auth/mobile-session.ts`'e.
+
+### P2 — hizmet dışı bırakma, sır ve bilgi sızıntısı
+
+| # | Bulgu | Sonucu |
+|---|---|---|
+| 6 | Sosyal giriş ve kayıt uçları **sabit** hız sınırı anahtarı kullanıyordu (`mobile_google_auth`, `mobile_apple_auth`, `register`) | Tek kova tüm dünyayı sayıyordu: dakikada on istek atan biri Google/Apple girişini **herkes için** kapatıyordu. Hız sınırı değil, bedava hizmet dışı bırakma düğmesi. |
+| 7 | Web parola girişinde yalnızca kimlik başına kova vardı | Tek hesabı zorlamayı engelliyor, binlerce hesabı tek şifreyle taramayı (**password spraying**) engellemiyordu. |
+| 8 | Kullanıcı yoksa bcrypt hiç çalışmıyordu | Yanıt süresi "bu e-posta kayıtlı mı" sorusunu ücretsiz yanıtlıyordu (kullanıcı sayımı). |
+| 9 | `refresh`, `verify-email`, `password-reset/confirm`, `lookup/me`, `guest-cancel` hiç sınır taşımıyordu | Hepsine sınır eklendi. |
+| 10 | `src/auth.ts` içinde `debug` **sabit olarak açıktı**; ayrıca her `jwt` çağrısında token anahtarları `console.log` ile basılıyordu | Auth.js ayıklama kipi sağlayıcı yanıtlarını ve `state`/`code_verifier` değerlerini stdout'a yazar. Log'lar Docker stdout'unda tutuluyor. |
+| 11 | Resend webhook'u 500 gövdesinde `error.message` döndürüyordu | Projenin kendi "ham hata metni istemciye gitmez" kuralı bu uçta atlanmıştı. |
+| 12 | Üç iç uç (`booking-reminders`, `finance-export`, `seal-forecast`) kendi `CRON_SECRET` karşılaştırmasını yazıyor ve `bearer === secret` kullanıyordu | `authorizeCron` sabit zamanlı karşılaştırma yapıyor ve zaten üç uçta kullanılıyordu; bu üçü kopyada kalmıştı — `internal-api-guard.ts`in var olma gerekçesinin tam olarak gerçekleştiği yer. |
+
+### Token aileleri — henüz bir açık değil, ama tesadüfen değil
+
+Mobil oturum, QR/mühür ve misafir sorgu token'ları **aynı sırla** (`AUTH_SECRET`)
+imzalanıyor. İmza hangi aileye ait olduğunu söylemez; ayrımı yalnızca doğrulayan
+tarafın *"gerekli alan var mı"* kontrolleri yapıyordu — *"yabancı alan var mı"*
+kontrolü hiçbirinde yoktu.
+
+Bugün geçiş yok, ama bu bir tasarım değil tesadüf: QR token'ı misafirin elinde ve
+ekranında duruyor; ona bir gün `email` alanı eklenirse `guest-cancel` onu kabul
+eder ve rezervasyon iptaline yeter. `src/lib/jwt-audience.ts` iki katman ekliyor:
+`aud` (yeni token'larda) ve yabancı-alan reddi (eski token'lar için).
+
+`aud` bilinçli olarak **zorunlu değil**: QR token'ları `Booking.qrCodeToken`
+sütununda, misafirin e-postasında ve ekranında duruyor, ömrü check-out + 24 saat.
+Bugün zorunlu kılmak o an açık olan rezervasyonların QR'larını kırardı. Yayındaki
+en uzun ömürlü QR düştükten sonra tek satırla zorunlu yapılabilir
+(`audienceAllows` → eşitlik).
+
+### Mandal
+
+İki yeni tarama dosyası bu on iki kuralı sabitliyor:
+
+| Test | Ne ölçer |
+|---|---|
+| `src/__tests__/auth-endpoint-guards.test.ts` | kimlik uçlarında eksik/sabit hız sınırı, register atlaması, Apple `email_verified`, çıkışın gerçekten iptal etmesi, iç uçların ortak cron kapısı, `debug` |
+| `src/__tests__/jwt-family-boundary.test.ts` | bir ailenin token'ının diğerinin ucunda geçmesi |
+
+Servis dışı doğrudan yazma tavanları **düşürüldü**: `user` 24→22,
+`verificationToken` 9→7, `session` 4→3, toplam 91→86.
+
 ## 2026-08-31 — mobil CI 22 Ağustos'tan beri kırmızı; hiçbir mobil değişiklik doğrulanmamış
 
 Flutter düzeltmesini gönderdim ve "CI doğrulayacak" dedim. CI kırmızı döndü —
