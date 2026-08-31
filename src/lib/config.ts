@@ -1,3 +1,5 @@
+import { getSiteBaseUrl } from '@/lib/site-base-url';
+
 /**
  * App Configuration - Ortam Duyarlı Yapılandırma
  * "Senior" Checklist: Environment Isolation.
@@ -10,7 +12,9 @@ export const config = {
   isTest: process.env.NODE_ENV === 'test',
   
   api: {
-    baseUrl: process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000',
+    // Tek kaynak: `getSiteBaseUrl` -- burasi `NEXT_PUBLIC_APP_URL`i yok
+    // sayiyordu, yani yalnizca o tanimliyken `localhost`a dusuyordu.
+    baseUrl: getSiteBaseUrl(),
     timeout: 10000,
   },
   

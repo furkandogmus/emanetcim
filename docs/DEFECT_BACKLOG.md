@@ -159,6 +159,65 @@ kutuları. Esnaf ekranları projenin kendi E2E yardımcılarıyla (`loginAsDemoP
 Ders: bir düzen sondası, **kırpan atayı ve gerçekten çizilen elemanı** hesaba katmadan
 güven vermez. Sıfır bulgu, sondanın yanlış yere baktığının da cevabıdır.
 
+## 2026-08-31 — şifre sıfırlama e-postaları `localhost` işaret edebiliyordu
+
+Aynı kavram — sitenin kamu kök adresi — **on yerde** ayrı ayrı çözülüyordu ve
+**dört farklı** yedek değeri vardı:
+
+| Yer | Nasıl çözüyordu |
+|---|---|
+| `site-urls.ts` | `BASE \|\| APP \|\| "http://localhost:3000"` |
+| `config.ts` | `BASE \|\| "http://localhost:3000"` — **APP'i yok sayar** |
+| `mail.ts` | `APP \|\| "http://localhost:3000"` — **BASE'i yok sayar** |
+| `NotificationService` (×6), `ShopService` | `APP \|\| "https://bagajpark.com"` |
+
+### Arıza 1 — sıfırlama bağlantıları çalışmıyor
+
+`NEXT_PUBLIC_BASE_URL` tanımlı ve `NEXT_PUBLIC_APP_URL` tanımsızsa canonical ve
+sitemap doğru çıkıyor ama **`mail.ts` `localhost`'a düşüyordu** — yani şifre
+sıfırlama ve e-posta doğrulama bağlantılarının hiçbiri çalışmıyor. Kullanıcı
+parolasını sıfırlayamaz hale gelir ve **bunun sebebini göremez**.
+
+Bu bir varsayım değil: `docker-compose.env.example` tam olarak bu ayrımı
+öneriyor — `NEXT_PUBLIC_APP_URL=http://localhost` satırını açık bırakıp
+`NEXT_PUBLIC_BASE_URL`'i "sitemap/canonical temeli" diye yorum satırında
+gösteriyor. Belgelenen yapılandırma, arızayı davet ediyor.
+
+> Aynı hata bir tur önce `partner-password-reset.ts`'te tek dosyada bulunmuştu.
+> Kökü buymuş: tek dosyayı düzeltmek sınıfı kapatmıyor.
+
+### Arıza 2 — hazırlık ortamından üretim bağlantıları
+
+Yedi yerde yedek değer olarak **üretim alan adı sabitlenmişti**
+(`https://bagajpark.com`). Değişken tanımsız kalan bir hazırlık/deneme ortamı,
+test kullanıcılarına sessizce **üretim** bağlantıları gönderiyordu — ve URL
+"doğru göründüğü" için hata hiçbir yere yansımıyordu.
+
+### Düzeltme
+
+Tek uygulama: `src/lib/site-base-url.ts` (`logger` dışında bağımlılığı yok —
+`site-urls.ts` i18n `routing`'ini çekiyor ve onu e-posta şablonlarına taşımak
+gereksiz). On çağrı buna bağlandı.
+
+- **Üretimde yedeğe düşmek artık `logger.error` yazıyor** (bir kez):
+  `site_base_url_missing_emails_will_point_to_localhost`.
+- **`/api/health` `siteBaseUrl` alanı döndürüyor** — dışarıdan sorulabilir.
+- `mail.ts` adresi modül yüklenirken bir kez okuyordu; artık çağrı anında.
+- Mandal: `src/__tests__/site-base-url.test.ts` — yardımcı dışında kimse
+  değişkeni okuyamaz, hiçbir yerde üretim alan adı yedek olarak sabitlenemez,
+  artı davranış testleri.
+
+### Denetimde temiz çıkanlar
+
+- **nginx'in kendi hız sınırı `$binary_remote_addr` kullanıyor** — yani bir önceki
+  turdaki `X-Forwarded-For` sahteciliği o katmanı hiç etkilemiyordu. Uygulama
+  katmanı atlanabilirken nginx katmanı ayaktaydı.
+- **E-posta bağlantıları istek host'undan üretilmiyor** (`process.env`'den) —
+  klasik "host header ile hesap devralma" yüzeyi yok.
+- **`AUTH_PUBLIC_HOST`** üretimde OAuth yapılandırılmışsa zorunlu
+  (`requireProdSecrets`) ve `AUTH_URL`'i sabitliyor, yani OAuth callback'i
+  `Host` başlığıyla zehirlenemiyor.
+
 ## 2026-08-31 — bütün IP hız sınırları tek bir başlıkla atlanabiliyordu
 
 **Bu oturumun en ağır bulgusu.** On beş dosya istemci IP'sini kendisi çıkarıyordu

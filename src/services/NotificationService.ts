@@ -11,6 +11,7 @@ import {
   sendNetgsmRestSms,
 } from "@/lib/netgsm";
 import { bookingShortCode } from "@/lib/booking-code";
+import { getSiteBaseUrl } from "@/lib/site-base-url";
 
 /**
  * NEDEN (2026-08-25): `sendEmail` partner check-in/check-out akışlarında
@@ -328,7 +329,13 @@ export class NotificationService implements INotificationService {
    * misafirin sakladigi belgedir, rakamin okunusunda belirsizlik olmamali.
    */
   async notifyBookingSuccess(emailOrPlaceholder: string, bookingId: string, totalPrice: number, locale: string = "tr"): Promise<void> {
-    const domain = process.env.NEXT_PUBLIC_APP_URL || "https://bagajpark.com";
+    /*
+      KOK ADRES ORTAK YARDIMCIDAN (2026-08-31). Burasi yedek olarak URETIM alan
+      adini SABITLIYORDU (`https://bagajpark.com`): degisken tanimsiz kalan bir
+      hazirlik/deneme ortami, test kullanicilarina sessizce uretim baglantilari
+      gonderiyordu. Ayrica `NEXT_PUBLIC_BASE_URL`i yok sayiyordu.
+    */
+    const domain = getSiteBaseUrl();
     const bookingUrl = `${domain}/${locale}/bookings/${bookingId}`;
     const shortId = bookingShortCode(bookingId);
     /* Eskiden ALTI dilin tutari da her gonderimde hesaplaniyordu; besi bosa. */
@@ -438,7 +445,7 @@ export class NotificationService implements INotificationService {
     locale: string = "tr",
   ): Promise<void> {
     if (!email.includes("@")) return;
-    const domain = process.env.NEXT_PUBLIC_APP_URL || "https://bagajpark.com";
+    const domain = getSiteBaseUrl();
     const shopUrl = `${domain}/${locale}/shop/${shopId}`;
 
     const content = pickLocale({
@@ -529,7 +536,7 @@ export class NotificationService implements INotificationService {
     locale: string = "tr",
   ): Promise<void> {
     if (!email.includes("@")) return;
-    const domain = process.env.NEXT_PUBLIC_APP_URL || "https://bagajpark.com";
+    const domain = getSiteBaseUrl();
     const shopUrl = `${domain}/${locale}/shop/${shopId}`;
 
     const content = pickLocale({
@@ -603,7 +610,7 @@ export class NotificationService implements INotificationService {
   /** Esnaf rezervasyonu onayladiginda misafire onay e-postasi gonderir. */
   async notifyBookingApproved(email: string, bookingId: string, shopName: string, locale: string = "tr"): Promise<void> {
     if (!email.includes("@")) return;
-    const domain = process.env.NEXT_PUBLIC_APP_URL || "https://bagajpark.com";
+    const domain = getSiteBaseUrl();
     const bookingUrl = `${domain}/${locale}/bookings/${bookingId}`;
     const shortId = bookingShortCode(bookingId);
 
@@ -672,7 +679,7 @@ export class NotificationService implements INotificationService {
   /** Talep reddedildiginde / rezervasyon iptal edildiginde misafire bildirim. */
   async notifyBookingCancelled(email: string, bookingId: string, shopName: string, locale: string = "tr"): Promise<void> {
     if (!email.includes("@")) return;
-    const domain = process.env.NEXT_PUBLIC_APP_URL || "https://bagajpark.com";
+    const domain = getSiteBaseUrl();
     const searchUrl = `${domain}/${locale}/search`;
     const shortId = bookingShortCode(bookingId);
 
@@ -787,7 +794,7 @@ export class NotificationService implements INotificationService {
     }
 
     // 1. E-posta Bildirimi
-    const domain = process.env.NEXT_PUBLIC_APP_URL || "https://bagajpark.com";
+    const domain = getSiteBaseUrl();
     const panelUrl = `${domain}/tr/partner`;
     /**
      * Tutar LOCALE'E GÖRE biçimlendiriliyor.

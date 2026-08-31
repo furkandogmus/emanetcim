@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import logger from "@/lib/logger";
+import { getSiteBaseUrl } from "@/lib/site-base-url";
 import { withTimeout } from "@/lib/async-timeout";
 
 /**
@@ -20,7 +21,17 @@ function getResendClient(): Resend | null {
   return new Resend(key);
 }
 
-const domain = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+/*
+  KOK ADRES ORTAK YARDIMCIDAN (2026-08-31). Burasi YALNIZCA
+  `NEXT_PUBLIC_APP_URL`e bakiyordu; projenin geri kalani once
+  `NEXT_PUBLIC_BASE_URL`i okuyor. Yani yalnizca ikincisi tanimliysa -- ki
+  `docker-compose.env.example` tam olarak bunu oneriyor -- canonical ve sitemap
+  dogru cikarken SIFRE SIFIRLAMA ve DOGRULAMA e-postalari `localhost` isaret
+  ediyordu. Kullanici parolasini sifirlayamaz hale gelir ve sebebini goremez.
+
+  Ayrica modul yuklenirken bir kez okunuyordu; artik cagri aninda okunuyor.
+*/
+const domain = () => getSiteBaseUrl();
 
 export const sendVerificationEmail = async (email: string, token: string, locale: string = "tr") => {
   const resend = getResendClient();
@@ -29,7 +40,7 @@ export const sendVerificationEmail = async (email: string, token: string, locale
     return;
   }
 
-  const confirmLink = `${domain}/${locale}/auth/verify-email?token=${token}`;
+  const confirmLink = `${domain()}/${locale}/auth/verify-email?token=${token}`;
 
   /**
    * NEDEN 6 DİL (2026-08-25'te ölçüldü): bu nesne yalnızca `tr`/`en` içeriyordu;
@@ -130,7 +141,7 @@ export const sendPasswordResetEmail = async (email: string, token: string, local
     return;
   }
 
-  const resetLink = `${domain}/${locale}/auth/new-password?token=${token}`;
+  const resetLink = `${domain()}/${locale}/auth/new-password?token=${token}`;
 
   /**
    * NEDEN 6 DİL: bu nesne yalnızca `tr`/`en` içeriyordu; şifre sıfırlama —

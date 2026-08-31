@@ -1,4 +1,5 @@
 import { routing } from "@/i18n/routing";
+import { getSiteBaseUrl } from "@/lib/site-base-url";
 
 /** Public paths (locale prefix hariç) — SEO sitemap için. */
 export const SITEMAP_PATHS: readonly string[] = [
@@ -21,13 +22,8 @@ export const SITEMAP_PATHS: readonly string[] = [
   "/luggage-storage",
 ];
 
-export function getSiteBaseUrl(): string {
-  const raw =
-    process.env.NEXT_PUBLIC_BASE_URL?.trim() ||
-    process.env.NEXT_PUBLIC_APP_URL?.trim() ||
-    "http://localhost:3000";
-  return raw.replace(/\/$/, "");
-}
+/** Govde `src/lib/site-base-url.ts`te; burasi yalnizca mevcut adi koruyor. */
+export { getSiteBaseUrl } from "@/lib/site-base-url";
 
 export function buildLocalizedUrls(): { locale: string; path: string; url: string }[] {
   const base = getSiteBaseUrl();

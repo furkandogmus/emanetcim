@@ -3,6 +3,7 @@ import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 import { getRedis } from "@/lib/rate-limit";
 import { getShopDistanceBackend } from "@/lib/shop-distance-postgis";
+import { isSiteBaseUrlConfigured } from "@/lib/site-base-url";
 
 export const dynamic = "force-dynamic";
 
@@ -64,6 +65,13 @@ export async function GET() {
           rateLimitMode,
           postgis,
           distanceBackend: getShopDistanceBackend(),
+          /*
+            Kok adres yapilandirilmamissa gonderilen HER e-posta (sifre
+            sifirlama, dogrulama, rezervasyon) `http://localhost:3000` isaret
+            eder -- yani kullanici parolasini sifirlayamaz ve sebebini goremez.
+            Disaridan sorulabilir olmasi gerekiyor.
+          */
+          siteBaseUrl: isSiteBaseUrlConfigured() ? "ok" : "missing",
           distributedRateLimitRequired:
             process.env.REQUIRE_DISTRIBUTED_RATE_LIMIT === "true",
         },

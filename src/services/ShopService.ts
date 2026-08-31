@@ -1,6 +1,7 @@
 import type { Prisma, Shop } from '@prisma/client';
 import { Role } from '@prisma/client';
 import prisma from '@/lib/db';
+import { getSiteBaseUrl } from "@/lib/site-base-url";
 import {
   RESPONSE_TIME_LOOKBACK_DAYS,
   RESPONSE_TIME_MAX_SAMPLES,
@@ -505,7 +506,13 @@ export class ShopService implements IShopService {
       const partnerEmail = shop.owner?.email;
       const partnerPhone = shop.owner?.phone;
       const partnerName = shop.owner?.name ?? 'Esnaf';
-      const domain = process.env.NEXT_PUBLIC_APP_URL || 'https://bagajpark.com';
+    /*
+      KOK ADRES ORTAK YARDIMCIDAN (2026-08-31). Burasi yedek olarak URETIM alan
+      adini SABITLIYORDU (`https://bagajpark.com`): degisken tanimsiz kalan bir
+      hazirlik/deneme ortami, test kullanicilarina sessizce uretim baglantilari
+      gonderiyordu. Ayrica `NEXT_PUBLIC_BASE_URL`i yok sayiyordu.
+    */
+      const domain = getSiteBaseUrl();
       const panelUrl = `${domain}/tr/partner`;
 
       if (partnerEmail) {
