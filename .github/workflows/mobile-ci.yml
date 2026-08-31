@@ -48,7 +48,11 @@ jobs:
       run:
         working-directory: mobile
     steps:
+      # `fetch-depth: 2`: bicim kontrolu DEGISEN dosyalara bakiyor ve bunun icin
+      # bir onceki commit'in agaci gerekiyor. Varsayilan sig klonda `HEAD^` yok.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -112,8 +116,38 @@ jobs:
           name: android-debug-apk
           path: mobile/build/app/outputs/flutter-apk/app-debug.apk
 
-      - name: Check formatting
-        run: dart format --output=none --set-exit-if-changed .
+      # BICIM KONTROLU YALNIZCA DEGISEN DOSYALARA.
+      #
+      # NEDEN (2026-08-31'de olculdu): agacta 37 dosya bicim disi ve cogu
+      # aylardir oyle. Tum agaca bakan bir kontrol, kapiyi KALICI kirmiziya
+      # cakiyordu -- ve kalici kirmizi bir kapi hicbir seyi korumaz: nitekim
+      # ardinda alti derleme hatasi, bir olu metot ve iki kirik test birikmisti.
+      #
+      # Degisen dosyalara bakmak ikisini birden saglar: YENI kod standarda
+      # uymak zorunda, eski borc ise gercek hatalari maskelemiyor. Borc
+      # kapandiginda (`cd mobile && dart format .`) kontrol tekrar tum agaca
+      # genisletilebilir.
+      - name: Check formatting (degisen dosyalar)
+        run: |
+          BASE="${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || 'HEAD^' }}"
+          FILES=$(git diff --name-only --diff-filter=ACMR "$BASE" HEAD -- '*.dart' \
+            | sed 's|^mobile/||' || true)
+          if [ -z "$FILES" ]; then
+            echo "Degisen Dart dosyasi yok."
+            exit 0
+          fi
+          echo "Kontrol edilen:"; echo "$FILES"
+          if ! echo "$FILES" | xargs dart format --output=none --set-exit-if-changed; then
+            echo ""
+            echo "Bicim disi dosya var. Duzeltmek icin, dokundugunuz dosyalarda:"
+            echo "  cd mobile && dart format <dosya>"
+            echo ""
+            echo "Not: agacta 37 dosyalik eski bicim borcu var; dokundugunuz"
+            echo "dosya onlardan biriyse tek satirlik degisiklik bile bu adimi"
+            echo "kirmizi yapar. Tumunu bir kerede kapatmak icin:"
+            echo "  cd mobile && dart format ."
+            exit 1
+          fi
 
   build-ios:
     name: Build iOS

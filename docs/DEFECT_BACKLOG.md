@@ -83,7 +83,33 @@ Düzeltildi (`ProviderScope` sarmalayıcı) ve prelaunch davranışı için bir 
 eklendi: talep testi noktasında `₺50` **gösterilmediği** doğrulanıyor. Bu, tam
 da bu turda düzelttiğim davranışın regresyonunu yakalar.
 
-**Açık:** 37 dosyanın biçim borcu ve 60 `info` önerisi duruyor. `dart format .` tek komut ama bu
+### Zincirin sonu: APK bir haftadır ilk kez derlendi
+
+Üç düzeltmeden sonra mobil iş şu hale geldi:
+
+| Adım | Bir hafta boyunca | Şimdi |
+|---|---|---|
+| `flutter analyze` | hiç çalışmadı | ✅ |
+| `flutter test` | hiç çalışmadı | ✅ (19 test) |
+| `flutter build apk` | hiç çalışmadı | ✅ **derlendi** |
+| `Upload APK` | hiç çalışmadı | ✅ artefakt yüklendi |
+| `dart format` (tüm ağaç) | ❌ | ❌ → değişen dosyalara daraltıldı |
+
+**Biçim kontrolü artık yalnızca değişen dosyalara bakıyor.** Tüm ağaca bakan
+kontrol kapıyı kalıcı kırmızıya çakıyordu ve kalıcı kırmızı bir kapı hiçbir şeyi
+korumaz — nitekim ardında altı derleme hatası, bir ölü metot ve iki kırık test
+birikmişti. Değişen dosyalara bakmak ikisini birden sağlar: **yeni kod standarda
+uymak zorunda, eski borç gerçek hataları maskelemiyor.**
+
+Kabul edilen ödünç: 37 dosyalık borçtan birine dokunan tek satırlık bir
+değişiklik bile bu adımı kırmızı yapar. Adımın hata çıktısı ne yapılacağını
+yazıyor (`cd mobile && dart format <dosya>`), ve borç tümüyle kapandığında
+kontrol tekrar tüm ağaca genişletilebilir.
+
+**Açık:** 37 dosyanın biçim borcu, 60 `info` önerisi, ve
+`booking_detail_screen.dart`'ta altı `use_build_context_synchronously` — sonuncusu
+stil değil, gerçek çökme sınıfı (kullanıcı tarih seçiciyi açıkken sayfayı
+kapatırsa). `dart format .` tek komut ama bu
 makinede dart/flutter kurulu değil ve kullanıcının bilgisayarına kurulum
 yapılmayacak. Mobil geliştirme yapan biri `cd mobile && dart format .` koşup
 commit'lerse gate tamamen yeşile döner.
