@@ -78,7 +78,10 @@ export default function ShopListItem({
       */}
       <div className="min-w-0 flex-1 flex flex-col gap-1">
         <div className="flex justify-between items-start gap-2">
-          <h4 className="min-w-0 truncate font-bold text-gray-900 group-hover:text-orange-600 transition-colors">{name}</h4>
+          {/* `h3`, `h4` DEGIL: sayfa h1 (gizli baslik) + bolum h2 ("Yakindaki")
+              zincirinden sonra kart basligi h3 olmali. `h4` iki seviye atlama
+              uretiyordu ve ekran okuyucuda "bir baslik kacirdim mi" hissi veriyor. */}
+          <h3 className="min-w-0 truncate font-bold text-gray-900 group-hover:text-orange-600 transition-colors">{name}</h3>
           <div className="shrink-0 flex items-center gap-1">
             <FavoriteButton shopId={id} className="!w-7 !h-7" />
             {rating > 0 ? (

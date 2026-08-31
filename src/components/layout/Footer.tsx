@@ -60,13 +60,13 @@ export default function Footer() {
   if (isAppSurface) {
     return (
       <footer
-        className={`border-t border-gray-100 bg-white px-6 py-6 font-sans ${needsMobileNavClearance ? "max-md:pb-28" : ""}`}
+        className={`border-t border-gray-100 bg-white px-6 py-6 font-sans [&_a]:inline-block [&_a]:py-1.5 [&_a]:-my-1.5 ${needsMobileNavClearance ? "max-md:pb-28" : ""}`}
       >
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 text-[11px] font-bold text-gray-400 sm:flex-row">
           <p>© {currentYear} {tCommon("appName")}. {t("rights")}</p>
           <nav
             aria-label={t("legalNavLabel")}
-            className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 id-eyebrow [&_a]:inline-block [&_a]:py-2 [&_a]:-my-2"
+            className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 id-eyebrow"
           >
             <Link href="/terms" className="transition-colors hover:text-orange-600">{t("terms")}</Link>
             <Link href="/privacy" className="transition-colors hover:text-orange-600">{t("privacy")}</Link>
@@ -77,8 +77,16 @@ export default function Footer() {
     );
   }
 
+  /*
+    `[&_a]:py-1.5 -my-1.5` KOK SEVIYEDE: footer icindeki HER baglanti yeterli
+    dokunma hedefi alsin. Onceki turda yalnizca iki liste ve bir nav
+    kapsanmisti; regresyon taramasi footer'da BASKA baglantilar da oldugunu
+    gosterdi (sehir bolumu 187x12 px). Kokte uygulamak yarin eklenecek
+    baglantiyi da kapsar. Gorunum degismiyor: `-my` yerlesimi aynen birakiyor,
+    yalnizca tiklanabilir alan buyuyor.
+  */
   return (
-    <footer className="bg-white border-t border-gray-100 pt-20 pb-10 max-md:pb-28 px-6 font-sans overflow-hidden">
+    <footer className="bg-white border-t border-gray-100 pt-20 pb-10 max-md:pb-28 px-6 font-sans overflow-hidden [&_a]:inline-block [&_a]:py-1.5 [&_a]:-my-1.5">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
           <div className="col-span-1 md:col-span-1">
@@ -135,7 +143,7 @@ export default function Footer() {
 
           <div>
             <h2 className="text-xs id-eyebrow text-gray-900 mb-6">{t("about")}</h2>
-            <ul className="flex flex-col gap-4 text-sm font-bold text-gray-400 [&_a]:inline-block [&_a]:py-1.5 [&_a]:-my-1.5">
+            <ul className="flex flex-col gap-4 text-sm font-bold text-gray-400">
               <li>
                 <Link href="/about" className="hover:text-orange-600 transition-colors">
                   {t("about")}
@@ -161,7 +169,7 @@ export default function Footer() {
 
           <div>
             <h2 className="text-xs id-eyebrow text-gray-900 mb-6">{t("corporate")}</h2>
-            <ul className="flex flex-col gap-4 text-sm font-bold text-gray-400 [&_a]:inline-block [&_a]:py-1.5 [&_a]:-my-1.5">
+            <ul className="flex flex-col gap-4 text-sm font-bold text-gray-400">
               {!hideGuestBookingNav && (
                 <li>
                   <Link href="/partners" className="hover:text-orange-600 transition-colors">

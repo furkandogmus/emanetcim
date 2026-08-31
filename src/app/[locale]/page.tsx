@@ -255,7 +255,9 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
           */}
           <Link
             href="/how-it-works"
-            className="mt-10 inline-flex items-center gap-2 text-sm font-bold text-orange-600 hover:text-orange-700"
+            /* `py-2 -my-2`: olculdu 169x20 px; WCAG 2.2 kriteri 2.5.8 en az
+               24x24 ister. Gorunum degismiyor, yalnizca tiklanabilir alan. */
+            className="mt-10 inline-flex items-center gap-2 py-2 -my-2 text-sm font-bold text-orange-600 hover:text-orange-700"
           >
             {t("howItWorksMore")}
             <ArrowRight size={16} />
