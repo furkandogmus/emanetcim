@@ -56,6 +56,7 @@ olduğuna göre. Bu blok, kimin ne yapması gerektiğini tek bakışta görmek i
 
 | # | Konu | Neden kendi başıma yapmadım |
 |---|---|---|
+| 48 | Web push uçtan uca ölü; açılırsa checkout'ta izin ister | Kullanıcıya bildirim göndermek ürün kararı |
 | 42 | Çevrimdışı kalınca markasız tarayıcı hatası | Çözüm bir service worker gerektiriyor; öncekini bilerek kaldırmışsınız |
 | 17 | Birincil butonlarda beyaz yazı **3.56:1** (gerekli 4.5) | Markanın ana tonunu koyulaştırmak gerekiyor |
 | 18 | İkincil gri metin **2.52:1**, 406 kullanım | Tek satırlık token değişimi ama tipografi tonunu değiştiriyor |
@@ -132,6 +133,7 @@ tarayıcıda oturumu sen açarsan aynı sekmeden devam edilebilir.
 | 45 | Yazdırılan fişte iptal/geri/yazdır düğmeleri de basılıyor | Yazdırma | ⛔ DOSYA BAŞKA AGENT'TE |
 | 46 | Ana sayfa sekme başlığında marka yok; blogda iki kez | SEO/sekme | ✅ DÜZELTİLDİ |
 | 47 | Push bildirimine tıklayan ana sayfaya düşüyor | Push | ✅ DÜZELTİLDİ |
+| 48 | Web push uçtan uca ÖLÜ: `sendPush` hiç çağrılmıyor | Push | ⏳ KARAR BEKLİYOR |
 | 101 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
 | 102 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
 | 103 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
@@ -895,6 +897,44 @@ doğrulandı:
 
 Worker'ın dili bilmesi gerekmiyor, ki zaten bilemez (bildirim uygulama kapalı
 gelir).
+
+### 48. Web push uçtan uca ölü — ve açılırsa yanlış anda izin isteyecek
+
+`sendPush` aranınca **hiçbir çağrı yeri çıkmadı**:
+
+```
+tanim   : NotificationService.ts:55  (arayuz)
+govde   : NotificationService.ts:164 (uygulama)
+cagri   : YOK
+```
+
+`pushSubscription` tablosu yazılıyor (abone olma ucu), siliniyor (hesap
+silme, gizlilik) ve **yalnızca `sendPush` içinde okunuyor** — yani kimse
+okumuyor. `MobilePushToken` de aynı: kaydediliyor, silinebiliyor, hiç
+kullanılmıyor.
+
+**Bugün zararsız:** `NEXT_PUBLIC_VAPID_PUBLIC_KEY` tanımlı olmadığı için
+`WebPushOptIn` hiç render edilmiyor. Canlıda doğrulandı — checkout'ta bildirim
+kartı yok, sayfada VAPID izi yok.
+
+**Risk gelecekte:** o anahtar bir gün "bildirimleri açalım" diye set
+edildiğinde, opt-in kartı **checkout'ta** görünmeye başlayacak
+(`CheckoutClient.tsx:46`) — yani kullanıcının ödeme yapmak üzere olduğu anda
+tarayıcı bildirim izni istenecek. Ve hâlâ hiçbir bildirim gönderilmeyecek,
+çünkü çağrı yeri yok.
+
+Bildirim izni **geri dönüşü zor** bir kaynaktır: bir kez reddedilince
+kullanıcı onu nadiren geri açar. Hiçbir şey göndermeyen bir özellik için,
+üstelik ödeme anında harcanması pahalı bir güven maliyeti.
+
+**Not — kendi işim hakkında dürüstlük:** 18. turda bu akıştaki "sonsuza kadar
+donan düğme" hatasını düzeltmiştim. Düzeltme doğruydu ama akış zaten
+ulaşılamaz durumdaydı; o zaman bunu fark etmemiştim, çünkü düğmeye değil
+sayfaya bakmıştım.
+
+**Karar senin:** ya `sendPush` yaşam döngüsüne bağlanır (rezervasyon onayı,
+check-in, hatırlatma), ya da opt-in checkout'tan alınıp yalnızca hesap
+ayarlarında bırakılır. İkisi de ürün kararı; ölçüm ve gerekçe hazır.
 
 ### Yavaş bağlantı (3G) — SAĞLIKLI
 
