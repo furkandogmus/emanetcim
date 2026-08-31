@@ -291,6 +291,13 @@ model Booking {
   @@index([guestId, status])
   /// Süre aşımı taraması: çıkış saati geçmiş ama hâlâ açık rezervasyonlar.
   @@index([status, checkedOutAt])
+  /// Misafir rezervasyon sorgulama (`POST /api/bookings/lookup`).
+  ///
+  /// O uç KİMLİK DOĞRULAMASIZ ve her çağrıda `guestEmail = ? OR guest.email = ?`
+  /// koşuyor. `guestId` indeksliydi ama `guestEmail` DEĞİLDİ — yani hesapsız
+  /// (guest checkout) rezervasyonların sorgulanması her seferinde tam tablo
+  /// taraması yapıyordu. 2026-08-31'de ölçüldü.
+  @@index([guestEmail])
 }
 
 /// Rezervasyon başına tek ödeme defteri satırı.
@@ -343,11 +350,21 @@ model NotificationLog {
   content   String
   status    String   @default("SENT")
   error     String?
+  /// Sağlayıcının (Resend) e-posta kimliği — teslim olaylarını DOĞRU satırla
+  /// eşleştirmek için.
+  ///
+  /// NEDEN EKLENDİ (2026-08-31): webhook bu sütun olmadığı için
+  /// `updateMany({ where: { recipient } })` yazıyordu — tek bir e-postanın
+  /// "delivered" olayı, o adrese gönderilmiş BÜTÜN bildirimlerin durumunu
+  /// birden eziyordu. Defter anlamsızlaşıyor, yazma maliyeti o adresin
+  /// geçmişiyle büyüyordu.
+  providerMessageId String?
   createdAt DateTime @default(now())
   booking   Booking? @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
   @@index([bookingId])
   @@index([recipient])
+  @@unique([providerMessageId])
 }
 
 model Review {

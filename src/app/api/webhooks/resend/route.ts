@@ -185,16 +185,28 @@ export async function POST(req: Request) {
             : eventType === "email.bounced" ? "BOUNCED"
             : "COMPLAINED";
 
-          const latest = await prisma.notificationLog.findFirst({
-            where: { recipient: emailTo },
-            orderBy: { createdAt: "desc" },
-            select: { id: true },
+          /*
+            SAGLAYICI KIMLIGIYLE ESLESTIRME (2026-08-31'de tamamlandi).
+
+            `NotificationLog.providerMessageId` sutunu eklendi ve gonderim
+            aninda Resend'in dondurdugu `id` oraya yaziliyor. Webhook ayni
+            degeri `email_id` olarak tasiyor, yani artik TAM DOGRU satir
+            guncelleniyor.
+
+            `updateMany` bilerek: `update` eslesme bulamazsa FIRLATIYOR ve bu
+            uc, kaydi olmayan bir e-posta icin (or. sutun eklenmeden once
+            gonderilmisler) 500 donmemeli. Kac satir guncellendigi loglaniyor;
+            surekli sifir gorulmesi eslestirmenin bozuldugunu soyler.
+          */
+          const { count } = await prisma.notificationLog.updateMany({
+            where: { providerMessageId: emailId },
+            data: { status: newStatus },
           });
-          if (latest) {
-            await prisma.notificationLog.update({
-              where: { id: latest.id },
-              data: { status: newStatus },
-            });
+          if (count === 0) {
+            logger.info(
+              { emailId, eventType },
+              "resend_event_no_matching_notification_log",
+            );
           }
 
           if (eventType === "email.bounced" || eventType === "email.complained") {

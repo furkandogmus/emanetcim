@@ -213,6 +213,71 @@ kutuları. Esnaf ekranları projenin kendi E2E yardımcılarıyla (`loginAsDemoP
 Ders: bir düzen sondası, **kırpan atayı ve gerçekten çizilen elemanı** hesaba katmadan
 güven vermez. Sıfır bulgu, sondanın yanlış yere baktığının da cevabıdır.
 
+## 2026-08-31 — migration kuyruğu: ikisi kapandı, ikisi gerekmiyordu, biri gate'e takıldı
+
+Docker (OrbStack) açıldı; beş maddelik kuyruk **ölçülerek** ele alındı.
+`npm run db:verify` yeşil, migration sıfırdan temiz uygulanıyor.
+
+### Kapatıldı
+
+**1. `Booking.guestEmail` indekssizdi.** `POST /api/bookings/lookup` kimlik
+doğrulamasız ve her çağrıda `guestEmail = ? OR guest.email = ?` koşuyor.
+`guestId` indeksliydi, `guestEmail` değildi — yani hesapsız (guest checkout)
+rezervasyonların sorgulanması tam tablo taraması yapıyordu. `EXPLAIN` ile
+doğrulandı: `Index Scan using "Booking_guestEmail_idx"`.
+
+**2. `NotificationLog.providerMessageId` yoktu.** Webhook doğru satırı
+eşleştiremediği için `updateMany({ where: { recipient } })` yazıyordu — tek bir
+"delivered" olayı o adrese gönderilmiş **bütün** bildirimleri eziyordu. Sütun
+eklendi (tekil indeksli), gönderim anında Resend'in `id`'si yazılıyor, webhook
+artık onunla eşleştiriyor.
+
+> Bunu yazarken bir hata yaptım ve **mevcut test yakaladı**: gönderim yanıtını
+> `r.json().then(...).catch(...)` ile okuyordum. `r.json` bir fonksiyon değilse
+> çağrı **senkron** fırlatıyor, yani `.catch` zincire hiç bağlanamıyor ve hata en
+> dıştaki `catch`e düşüyor — orada da gönderim `FAILED` sayılıyordu. Yani
+> **başarılı bir e-posta, okunamayan bir gövde yüzünden başarısız
+> raporlanacaktı.** `try/catch` ile düzeltildi; kimlik okumak best-effort, gönderimin
+> başarısını değiştirmez.
+
+### Gerekmiyordu
+
+**3. `CREATE EXTENSION postgis`** — gerekmedi. `postgis/postgis` imajının açılış
+betiği eklentiyi taze volume'da zaten kuruyor; doğrulandı
+(`postgis_version() → 3.4`). Riski hâlâ eski bir volume'dan geçiş senaryosunda,
+ve o soruyu artık `/api/health` `postgis` alanı yanıtlıyor.
+
+**4. Mesafe için GiST indeksi** — bu turda ele alınmadı; PostGIS çalışırken
+mesafe sorgusunun gerçek planını ölçmeden indeks eklemek tahmin olurdu. Ayrı bir
+ölçüm işi.
+
+### Gate'e takıldı — `text_pattern_ops` (kapatılmadı)
+
+Rezervasyon kodu araması (`id LIKE 'önek%'`, `bookings/lookup` +
+`actions/partner.ts`) için operatör sınıfı indeksi **gerçekten gerekli** —
+ölçüldü:
+
+- Veritabanı collation'ı `en_US.utf8`.
+- İndeks **varken**: `Index Only Scan`, `Index Cond: (id ~>=~ 'd8a7ff' AND id ~<~ 'd8a7fg')`.
+- İndeks **yokken**: `Bitmap Index Scan on "Booking_pkey"` — aralık koşulu yok,
+  `rows=150` tarayıp `Filter` ile eliyor. Yani düz B-tree bu sorguyu **kullanamıyor**.
+
+Ama `@@index([id(ops: raw("text_pattern_ops"))])` **kalıcı drift** üretiyor:
+Prisma operatör sınıfını gölge veritabanından geri okuyamıyor ve her
+`migrate diff` aynı indeks için `DROP` + `CREATE` yazıyor. Yani `db:verify`
+sonsuza dek kırmızı kalırdı.
+
+**Geri alındı.** Gerekçe `scripts/verify-nginx-conf.sh`'ın kendi yorumunda yazıyor:
+*"yanlış negatif üreten bir kapı hiç olmayandan kötüdür: insanlara onu baypas
+etmeyi öğretir."* Kalıcı kırmızı bir `db:verify` de aynı şeyi öğretir.
+
+**Önerilen çözüm (karar bekliyor):** `Booking.shortCode` sütunu — `id`'nin ilk
+sekiz hanesi, büyük harf, düz B-tree ile tekil indeksli. Önek araması yerine
+**eşitlik** araması olur: operatör sınıfı gerekmez, Prisma tam ifade eder,
+`db:verify` yeşil kalır. Üstelik daha doğru: bugünkü kod iki eşleşme çıkarsa
+hiçbirini açmıyor (`take: 2` + `length === 1`), tekil sütunda o belirsizlik hiç
+doğmaz. Maliyeti: yazma yolunda bir alan, mevcut satırlar için bir backfill.
+
 ## 2026-08-31 — arama sayfası tek istekte 300'e varan sorgu koşuyordu (N+1)
 
 `findShopsForSearch` şunu yapıyordu:

@@ -47,9 +47,17 @@ describe("NotificationService", () => {
 
   describe("sendEmail", () => {
     it("should call resend API and log the notification", async () => {
+      /*
+        `json()` mock'a 2026-08-31'de eklendi: gonderim yaniti artik okunuyor
+        (Resend'in `id`si `NotificationLog.providerMessageId`e yaziliyor, teslim
+        webhook'u DOGRU satiri onunla buluyor). Mock govdesizken bu cagri
+        SENKRON firliyordu ve basarili bir gonderim FAILED raporlaniyordu --
+        bu test tam olarak onu yakaladi.
+      */
       (global.fetch as any).mockResolvedValue({
         ok: true,
         status: 200,
+        json: async () => ({ id: "resend-msg-1" }),
       });
 
       const result = await service.sendEmail("test@example.com", "Subject", "Body");

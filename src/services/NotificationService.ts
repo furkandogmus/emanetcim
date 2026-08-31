@@ -74,6 +74,8 @@ export class NotificationService implements INotificationService {
       const resendKey = process.env.RESEND_API_KEY;
       let status: "SENT" | "FAILED" | "SKIPPED" = "SKIPPED";
       let errorDetail: string | null = null;
+      /** Resend gonderim kimligi; teslim webhook'u DOGRU satiri bununla bulur. */
+      let providerMessageId: string | null = null;
 
       if (resendKey && to.includes("@")) {
         const from =
@@ -108,7 +110,39 @@ export class NotificationService implements INotificationService {
           );
         } else {
           status = "SENT";
-          logger.info({ to, subject, bookingId }, "notification_email_sent");
+          /*
+            SAGLAYICI KIMLIGI SAKLANIYOR (2026-08-31). Resend gonderim yanitinda
+            bir `id` donuyor ve teslim webhook'lari ayni degeri `email_id` olarak
+            tasiyor. Bu sutun olmadigi icin webhook `updateMany({ where: {
+              recipient } })` yaziyordu -- tek bir e-postanin "delivered" olayi,
+            o adrese gonderilmis BUTUN bildirimlerin durumunu birden eziyordu.
+            Yanit govdesi beklenmedik bir sekil alirsa `null` kalir; kayit yine
+            yazilir, yalnizca eslestirme yapilamaz.
+          */
+          try {
+            const payload: unknown = await r.json();
+            if (
+              payload &&
+              typeof payload === "object" &&
+              typeof (payload as { id?: unknown }).id === "string"
+            ) {
+              providerMessageId = (payload as { id: string }).id;
+            }
+          } catch {
+            /*
+              GONDERIM ZATEN BASARILI (`r.ok`). Govdeyi okuyamamak bunu
+              degistirmez: kimlik yalnizca teslim olaylarini eslestirmeye yarar,
+              onu kaybetmek e-postanin gitmedigi anlamina gelmez.
+
+              Ilk halim bunu `.catch()` ile yaziyordu ve YETMIYORDU: `r.json`
+              bir fonksiyon degilse cagri SENKRON firlatir, yani `.catch`
+              zincire hic baglanamaz ve hata en distaki `catch`e duser -- orada
+              da gonderim FAILED sayilirdi. Yani basarili bir e-posta,
+              okunamayan bir govde yuzunden basarisiz raporlanacakti.
+              `NotificationService.test.ts` bunu yakaladi.
+            */
+          }
+          logger.info({ to, subject, bookingId, providerMessageId }, "notification_email_sent");
         }
       } else if (to.includes("@")) {
         if (process.env.NODE_ENV === "production") {
@@ -133,6 +167,7 @@ export class NotificationService implements INotificationService {
           content: body,
           status,
           error: errorDetail,
+          providerMessageId,
         },
       });
 
