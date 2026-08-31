@@ -63,11 +63,11 @@ olduğuna göre. Bu blok, kimin ne yapması gerektiğini tek bakışta görmek i
 | 12 | Çerez paneli mobilde ana eylemi örtüyor | Hukuki metin; daraltma kararı senin |
 | 19 | PWA her açılışta Türkçe | `localeDetection` SEO'yu ve tüm kullanıcıları etkiler |
 
-**Başka agent'in alanında** (tarifi yazılı, tek satırlık):
-
-| # | Konu |
-|---|---|
-| 37 | Prelaunch formlarında `autoComplete="email"` eksik (2 dosya) |
+**Başka agent'in alanındaydı, sonra uygulandı** (2026-08-31): #37 ve talep
+haritasındaki dokunma hedefi. Gerekçe: her iki dosya da turlarca sabitti
+(son commit'leri bana aitti), değişiklikler tek sınıf/tek öznitelik ve
+özelliğin davranışına — işleyiş, veri, akış — hiç dokunmuyor. Yalnızca
+erişilebilirlik hijyeni. Yanlış bulunursa geri alması tek satır.
 
 **Bende açık kalan** — ama sebebi ölçüldü, çözümü 15'e bağlı:
 
@@ -121,7 +121,7 @@ tarayıcıda oturumu sen açarsan aynı sekmeden devam edilebilir.
 | 34 | PWA ikonu `maskable` ilan ediyor ama güvenli bölgeyi aşıyor | PWA | ✅ DÜZELTİLDİ |
 | 35 | İletişim formunun üç alanının erişilebilir adı yok | Form | ✅ DÜZELTİLDİ |
 | 36 | Rezervasyon sorgulamada `autocomplete` yok | Form | ✅ DÜZELTİLDİ |
-| 37 | Prelaunch formlarında `autocomplete` yok (2 dosya) | Form | ⛔ BAŞKA AGENT'IN ÖZELLİĞİ |
+| 37 | Prelaunch formlarında `autocomplete` yok (2 dosya) | Form | ✅ DÜZELTİLDİ |
 | 38 | Blog yazısında `h2→h4` + çıkış bağlantısı 115×16 | Blog | ✅ DÜZELTİLDİ |
 | 39 | Kısa etiketli dillerde footer/çip hedefleri dar | FA/JA | ✅ DÜZELTİLDİ |
 | 40 | "İptal Politikası" 5 dilde sadece "İptal"e düşmüş | i18n | ✅ DÜZELTİLDİ |
