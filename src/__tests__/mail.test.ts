@@ -108,4 +108,59 @@ describe("mail.ts — 6 dil desteği", () => {
       expect(call.html).toContain('dir="rtl"');
     });
   });
+
+  /**
+   * DUZ METIN PARCASI (2026-08-31'de olculdu). Bu uc e-posta Resend'e YALNIZCA
+   * `html` veriyordu; `text` alani hic gecilmiyordu. Iki sonucu var:
+   *
+   *  - HTML-only posta spam filtrelerinde puan kaybeder. Kayit dogrulamasi
+   *    spam'e duserse kullanici hesabini hic acamaz ve sebebini goremez.
+   *  - Duz metin gosteren istemcilerde, saat bildiriminde ve onizlemede govde
+   *    bos ya da bozuk cikar. OTP'de bu dogrudan islevsel: kodu onizlemeden
+   *    okuyan kisi kodu goremez.
+   */
+  it("ucu de Resend'e duz metin parcasi gecer; OTP kodu o metnin icindedir", async () => {
+    const { sendVerificationEmail, sendPasswordResetEmail, sendMobileOtp } =
+      await import("@/lib/mail");
+
+    await sendVerificationEmail("a@b.com", "tok", "tr");
+    await sendPasswordResetEmail("a@b.com", "tok", "tr");
+    await sendMobileOtp("a@b.com", "483920", "tr");
+
+    const gonderilenler = sendMock.mock.calls.map((c) => c[0]);
+    expect(gonderilenler).toHaveLength(3);
+
+    for (const g of gonderilenler) {
+      expect(typeof g.text).toBe("string");
+      expect(g.text.length).toBeGreaterThan(20);
+      // Duz metin parcasinda HTML olmamali, yoksa amacini kaybeder.
+      expect(g.text).not.toContain("<");
+    }
+
+    expect(gonderilenler[0].text).toContain("/tr/auth/verify-email?token=tok");
+    expect(gonderilenler[1].text).toContain("/tr/auth/new-password?token=tok");
+    expect(gonderilenler[2].text).toContain("483920");
+  });
+
+  /**
+   * KARANLIK MOD. Acik zemin basip metin rengini soylemeyen bir kabuk, e-posta
+   * istemcisinin karanlik modunda beyaz-uzerine-beyaz uretir. Her kabugun
+   * zemin+renk cifti tam olmali.
+   */
+  it("her kabuk hem zemin hem metin rengi tasir", async () => {
+    const { sendVerificationEmail, sendPasswordResetEmail, sendMobileOtp } =
+      await import("@/lib/mail");
+
+    await sendVerificationEmail("a@b.com", "tok", "tr");
+    await sendPasswordResetEmail("a@b.com", "tok", "tr");
+    await sendMobileOtp("a@b.com", "483920", "tr");
+
+    for (const g of sendMock.mock.calls.map((c) => c[0])) {
+      expect(g.html).toContain("background: #ffffff");
+      expect(g.html).toContain("color: #111827");
+      // rem, Outlook masaustunde guvenilir cozulmez.
+      expect(g.html).not.toContain("rem;");
+    }
+  });
+
 });

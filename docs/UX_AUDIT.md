@@ -1442,3 +1442,39 @@ geçiyor. Layout sabit.
 Son iki satır marka turuncusunun ta kendisi. #17'de sitede sorduğum soru
 e-postalarda da aynen geçerli: turuncuyu koyultmadan bu ikisi geçmez.
 Tek başıma marka rengine dokunmuyorum.
+
+### 53. Kimlik doğrulama e-postaları HTML-only gidiyordu — DÜZELTİLDİ
+
+#52'yi düzeltirken fark ettim: `renderEmailHtml` **üç e-postaya hiç
+uğramıyor**. Kayıt doğrulama, şifre sıfırlama ve mobil OTP — yani ürünün
+en kritik üç e-postası — `src/lib/mail.ts` içinde HTML'i **elle yazıyor**.
+(CLAUDE.md bunu açıkça yasaklıyor: "şablonlarda elle `<div style=...>`
+yazılmaz".) Yani #52'deki karanlık mod düzeltmesi bu üçüne **ulaşmıyordu**.
+
+Ölçüm — üçünde birden:
+
+| sorun | sonuç |
+|---|---|
+| Resend'e `text:` parçası | **hiç geçilmiyor** — HTML-only |
+| `font-size: 0.875rem` | 3 yerde — Outlook masaüstü `rem`i güvenilir çözmez |
+| kabuk zemin/renk çifti | eksik — karanlık modda #52'nin aynısı |
+
+`text:` eksikliğinin iki somut sonucu var:
+
+- HTML-only posta **spam filtrelerinde puan kaybeder**. Kayıt doğrulaması
+  spam'e düşerse kullanıcı hesabını hiç açamaz ve sebebini göremez.
+- Düz metin gösteren istemcilerde, saat bildiriminde ve önizlemede gövde boş
+  çıkar. **OTP'de bu doğrudan işlevsel**: kodu bildirim önizlemesinden okuyan
+  kişi kodu göremez — ki OTP e-postası tam olarak öyle okunur.
+
+Üçü de düzeltildi ve `mail.test.ts`'e iki kalıcı test eklendi. Testlerin
+gerçekten koruduğunu kanıtladım — eski kodda ikisi de düşüyor:
+
+```
+ESKI:  × duz metin parcasi ...   × kabuk zemin+renk ...   2 failed | 14 passed
+YENI:  16 passed
+```
+
+**Yapılmadı — ayrı iş:** bu üç e-postanın ortak kabuğa (`renderEmailHtml`)
+taşınması. Somut kusurları giderdim ama mimari ihlal duruyor; taşımak auth
+e-postalarının görünümünü değiştirir, o yüzden ayrı ve görünür bıraktım.

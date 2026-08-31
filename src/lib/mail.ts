@@ -106,15 +106,16 @@ export const sendVerificationEmail = async (email: string, token: string, locale
         from: process.env.RESEND_FROM || "BagajPark <info@bagajpark.com>",
         to: email,
         subject: content.subject,
+        text: `${content.title}\n\n${content.text}\n\n${confirmLink}\n\n${content.footer}`,
         html: `
-        <div dir="${locale === "fa" ? "rtl" : "ltr"}" style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div dir="${locale === "fa" ? "rtl" : "ltr"}" style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #ffffff; color: #111827;">
           <h1 style="color: #ea580c;">${content.title}</h1>
           <p style="color: #374151;">${content.text}</p>
           <a href="${confirmLink}"
              style="display: inline-block; background-color: #ea580c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0;">
             ${content.button}
           </a>
-          <p style="margin-top: 24px; font-size: 0.875rem; color: #6b7280;">
+          <p style="margin-top: 24px; font-size: 14px; color: #6b7280;">
             ${content.footer}
           </p>
         </div>
@@ -206,15 +207,16 @@ export const sendPasswordResetEmail = async (email: string, token: string, local
         from: process.env.RESEND_FROM || "BagajPark <info@bagajpark.com>",
         to: email,
         subject: content.subject,
+        text: `${content.title}\n\n${content.text}\n\n${resetLink}\n\n${content.footer}`,
         html: `
-        <div dir="${locale === "fa" ? "rtl" : "ltr"}" style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div dir="${locale === "fa" ? "rtl" : "ltr"}" style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #ffffff; color: #111827;">
           <h1 style="color: #ea580c;">${content.title}</h1>
           <p style="color: #374151;">${content.text}</p>
           <a href="${resetLink}"
              style="display: inline-block; background-color: #ea580c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0;">
             ${content.button}
           </a>
-          <p style="margin-top: 24px; font-size: 0.875rem; color: #6b7280;">
+          <p style="margin-top: 24px; font-size: 14px; color: #6b7280;">
             ${content.footer}
           </p>
         </div>
@@ -297,14 +299,15 @@ export const sendMobileOtp = async (email: string, code: string, locale: string 
         from: process.env.RESEND_FROM || "BagajPark <info@bagajpark.com>",
         to: email,
         subject: content.subject,
+        text: `${content.title}\n\n${content.text}\n\n${code}\n\n${content.footer}`,
         html: `
-        <div dir="${locale === "fa" ? "rtl" : "ltr"}" style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 12px;">
+        <div dir="${locale === "fa" ? "rtl" : "ltr"}" style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 12px; background: #ffffff; color: #111827;">
           <h1 style="color: #ea580c;">${content.title}</h1>
           <p style="color: #374151; font-size: 16px;">${content.text}</p>
           <div style="background-color: #f8fafc; padding: 20px; text-align: center; border-radius: 8px; margin: 24px 0;">
             <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #0f172a;">${code}</span>
           </div>
-          <p style="font-size: 0.875rem; color: #6b7280; text-align: center;">
+          <p style="font-size: 14px; color: #6b7280; text-align: center;">
             ${content.footer}
           </p>
         </div>
