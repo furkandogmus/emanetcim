@@ -136,8 +136,34 @@ doğru — panel kapandıktan sonra bildirim **sayfanın** üzerinde görünmeli
 Dosya zaten başka yerlerde (`512`, `609`) aynı `if (mounted)` kalıbını
 kullanıyordu.
 
+### Mobil CI TAM YEŞİL — 26 Ağustos'tan beri ilk kez
+
+`e0a001e` koşusunda beş adımın beşi de geçti:
+
+```
+Analyze code: success
+Run tests: success
+Build APK: success
+Upload APK: success
+Check formatting (yeni borc): success
+```
+
+Öncesindeki tablo (Mobile CI geçmişi): **26 Ağustos'tan 31 Ağustos'a kadar
+on koşunun onu da başarısız.** Yani bu iş beş gündür — biçim borcunun yaşına
+bakılırsa daha uzun süredir — tek bir kez bile yeşil dönmemişti.
+
+Yeni biçim kuralı da ilk gerçek sınavını geçti: `booking_detail_screen.dart`
+eski borçta olduğu için **atlandı** ve adım yeşil döndü. Kural tasarlandığı gibi
+çalışıyor — eski borç ceza değil, yeni borç yasak.
+
+**Zincirin özeti:** biçim adımı ilk sıradaydı → analiz/test/derleme hiç
+çalışmıyordu → ardında altı derleme hatası, bir ölü metot, iki kırık test ve
+altı `BuildContext` çökme riski birikmişti. Hiçbiri tek bir commit'in hatası
+değildi; hepsi **ölü bir kapının** biriktirdiği borçtu.
+
 **Açık:** 37 dosyanın biçim borcu ve kalan ~54 `info` önerisi (hepsi stil:
-`directives_ordering`, `prefer_const_constructors`). `dart format .` tek komut ama bu
+`directives_ordering`, `prefer_const_constructors`). Bunlar artık hiçbir şeyi
+bloke etmiyor; `cd mobile && dart format .` ile tek seferde kapanır. `dart format .` tek komut ama bu
 makinede dart/flutter kurulu değil ve kullanıcının bilgisayarına kurulum
 yapılmayacak. Mobil geliştirme yapan biri `cd mobile && dart format .` koşup
 commit'lerse gate tamamen yeşile döner.
