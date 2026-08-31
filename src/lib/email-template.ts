@@ -43,7 +43,15 @@ export const EMAIL_ZEBRA_BG = "#f9fafb";
 export const EMAIL_TONES = {
   brand: EMAIL_BRAND_COLOR,
   muted: EMAIL_MUTED_COLOR,
-  success: "#16a34a",
+  /*
+    `#15803d` (green-700), `#16a34a` (green-600) DEGIL. Olculdu 2026-08-31:
+    yesil zemin uzerine BEYAZ yazi green-600'de 3.30:1 kaliyor ve WCAG AA'nin
+    4.5 esigini gecmiyor. Bu ton hem baslikta hem ana eylem dugmesinde
+    kullaniliyor, yani en cok okunan iki yerde. green-700 ayni anlami tasiyor
+    ve 5.02:1 veriyor. Marka turuncusu DEGISTIRILMEDI -- o bir kimlik karari
+    ve `docs/UX_AUDIT.md` #17'de kullaniciya birakildi.
+  */
+  success: "#15803d",
   alert: "#dc2626",
   info: "#2563eb",
 } as const;
@@ -125,6 +133,13 @@ function renderCta(cta: EmailCta, accent: string): string {
  */
 export function renderEmailHtml(content: EmailContent): string {
   const dir = RTL_LOCALES.has(content.locale) ? ` dir="rtl"` : "";
+  /*
+    `lang`: kabuk `dir`i basiyordu ama dili HIC soylemiyordu. Ekran okuyucu
+    e-postayi yanlis telaffuz eder, Gmail/Apple Mail'in ceviri onerisi calismaz
+    ve tireleme kurallari sasar. Dil zaten elimizde (`content.locale`); tek
+    eksik onu yazmakti.
+  */
+  const lang = ` lang="${content.locale}"`;
   const accent = EMAIL_TONES[content.tone ?? "brand"];
 
   const parts = [
@@ -136,7 +151,7 @@ export function renderEmailHtml(content: EmailContent): string {
   ];
 
   return (
-    `<div${dir} style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">` +
+    `<div${dir}${lang} style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">` +
     parts.filter(Boolean).join("") +
     `</div>`
   );

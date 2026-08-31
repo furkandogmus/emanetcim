@@ -20,6 +20,16 @@ const BASE = {
 };
 
 describe("renderEmailHtml", () => {
+  it("kabuk DILI de basar, yalnizca yonu degil", () => {
+    /*
+      `dir` vardi ama `lang` yoktu. Dil olmadan ekran okuyucu e-postayi yanlis
+      telaffuz eder, Gmail/Apple Mail'in ceviri onerisi calismaz ve tireleme
+      kurallari sasar -- ustelik dil zaten elimizde.
+    */
+    expect(renderEmailHtml({ ...BASE, locale: "tr" })).toContain('lang="tr"');
+    expect(renderEmailHtml({ ...BASE, locale: "fa" })).toContain('lang="fa"');
+  });
+
   it("sağdan sola dillerde `dir=\"rtl\"` basar", () => {
     expect(renderEmailHtml({ ...BASE, locale: "fa" })).toContain('<div dir="rtl"');
     // LTR dillerde oznitelik HIC basilmaz — bos `dir=""` degil.

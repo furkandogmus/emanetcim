@@ -127,6 +127,8 @@ tarayıcıda oturumu sen açarsan aynı sekmeden devam edilebilir.
 | 40 | "İptal Politikası" 5 dilde sadece "İptal"e düşmüş | i18n | ✅ DÜZELTİLDİ |
 | 41 | Footer'da İKİNCİ şehir çipi listesi eşiğin altında | FA | ✅ DÜZELTİLDİ |
 | 42 | Çevrimdışı kalınca tarayıcının dinozor sayfası çıkıyor | PWA | ⏳ KARAR BEKLİYOR |
+| 43 | E-posta kabuğu dili söylemiyordu (`lang` yok) | E-posta | ✅ DÜZELTİLDİ |
+| 44 | E-postada başarı tonunda beyaz yazı 3.30:1 | E-posta | ✅ DÜZELTİLDİ |
 | 101 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
 | 102 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
 | 103 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
@@ -803,6 +805,31 @@ gösteren bir worker. API yanıtı, yetkili içerik, kullanıcı verisi hiç
 `push-sw.js` zaten aynı disiplinle yazıldı (fetch dinleyicisi yok).
 
 Karar senin: "yap" dersen güvenli varyantı yazar, ölçüp gösteririm.
+
+### 43–44. E-posta şablonu — hiç denetlenmemiş bir yüzey
+
+Rezervasyon ürününde onay/hatırlatma e-postaları da bir UX yüzeyi ve bu
+denetimde hiç bakılmamıştı. `src/lib/email-template.ts` ölçüldü.
+
+**Kontrast (beyaz yazı, renkli zemin):**
+
+| Ton | Oran | Durum |
+|---|---|---|
+| marka `#ea580c` | 3.56 | ⏳ #17 ile aynı karar (marka) |
+| başarı `#16a34a` | **3.30** | ✅ `#15803d` yapıldı → 5.02 |
+| uyarı `#dc2626` | 4.83 | ✓ |
+| bilgi `#2563eb` | 5.17 | ✓ |
+| gövde `#6b7280` beyazda | 4.83 | ✓ |
+
+Başarı tonu marka rengi **değil**, durum rengi — o yüzden karar beklemeden
+düzeltildi. Bu ton hem başlıkta hem ana eylem düğmesinde kullanılıyor, yani
+e-postanın en çok okunan iki yerinde.
+
+**`lang` eksikti.** Kabuk `dir="rtl"` basıyordu ama dili hiç söylemiyordu.
+Dil olmadan ekran okuyucu e-postayı yanlış telaffuz eder, Gmail/Apple Mail'in
+çeviri önerisi çalışmaz, tireleme kuralları şaşar — üstelik dil zaten
+`content.locale` olarak elde. Eklendi; mevcut `dir` testinin niyeti bozulmasın
+diye öznitelik sırası korundu ve `lang` için ayrı bir güvence yazıldı.
 
 ### Yavaş bağlantı (3G) — SAĞLIKLI
 
