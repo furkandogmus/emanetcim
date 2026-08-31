@@ -130,3 +130,58 @@ describe("mandal: yetki kontrolü elle yazılmıyor", () => {
     ).toEqual([]);
   });
 });
+
+describe("mandal: esnaf SAYFALARI da kapıyı kullanıyor", () => {
+  /*
+    NEDEN AYRI BIR MANDAL (2026-08-31'de olculdu): yukaridaki mandal yalnizca
+    `src/actions/` tariyor. Sayfalar hic kapsanmamisti ve esnaf panelinin bes
+    sayfasi kontrolu elle yaziyordu -- ustelik UC AYRI davranisla:
+
+      - `partner/page.tsx`, `earnings`, `seals` -> yetkisizi /login'e atiyordu
+      - `partner/settings`                      -> sessizce /${locale}'e atiyordu
+      - `partner/bookings`                      -> satir ici "erisim yok" karti
+                                                   cizip role gore /bookings'e
+
+    Giris YAPMIS bir misafir icin ilk davranis SONSUZ DONGU uretiyordu: /login'e
+    gidiyor, zaten girisli oldugu icin callbackUrl'e geri donuyor, yine
+    atiliyordu. Kural artik `src/lib/page-auth.ts`'te.
+  */
+  const PARTNER_PAGE_DIR = "src/app/[locale]/partner";
+
+  function partnerPageFiles(): string[] {
+    const root = path.join(process.cwd(), PARTNER_PAGE_DIR);
+    const out: string[] = [];
+    const walk = (dir: string) => {
+      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) walk(full);
+        else if (entry.name === "page.tsx") out.push(full);
+      }
+    };
+    walk(root);
+    return out;
+  }
+
+  it("hiçbir esnaf sayfası rolü OTURUMDAN kendi çözmüyor", () => {
+    const re = /session[?.]*\.user[?.]*\.role|\brole\s*!==\s*["'](?:PARTNER|ADMIN)["']/;
+    const offenders = partnerPageFiles()
+      .filter((f) => re.test(fs.readFileSync(f, "utf8")))
+      .map((f) => path.relative(process.cwd(), f));
+    expect(
+      offenders,
+      "Sayfa yetki kapısı `src/lib/page-auth.ts`'te (`requirePartnerPage`). " +
+        "Bu sayfalar kendi kopyasını yazıyor:\n" + offenders.join("\n"),
+    ).toEqual([]);
+  });
+
+  it("her esnaf sayfası `requirePartnerPage` çağırıyor", () => {
+    // Kopyayi yasaklamak yetmez: kapiyi HIC cagirmayan bir sayfa da gecerdi.
+    const offenders = partnerPageFiles()
+      .filter((f) => !/requirePartnerPage\(/.test(fs.readFileSync(f, "utf8")))
+      .map((f) => path.relative(process.cwd(), f));
+    expect(
+      offenders,
+      "Bu esnaf sayfaları hiçbir yetki kapısından geçmiyor:\n" + offenders.join("\n"),
+    ).toEqual([]);
+  });
+});

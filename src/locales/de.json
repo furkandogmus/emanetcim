@@ -256,7 +256,15 @@
     "earningsCommissionIncluded": "Inklusive Plattformprovision",
     "earningsRating": "Bewertung",
     "earningsCommissionTitle": "Plattformprovision {commission} %",
-    "qrScanTitle": "QR-Code scannen"
+    "qrScanTitle": "QR-Code scannen",
+    "earningsAllYoursTitle": "Von dir kassiert — alles deins",
+    "earningsZeroCommissionNote": "Keine Provision wird abgezogen. Alles, was du vom Gast erhältst, bleibt bei dir.",
+    "earningsNoCommissionTitle": "Provisionsfreier Zeitraum",
+    "earningsNoCommissionBody": "Derzeit wird keine Plattformprovision berechnet; von deinen Einnahmen wird nichts abgezogen.",
+    "earningsNoCommissionBodyFuture": "Derzeit wird keine Plattformprovision berechnet. Sie tritt mit {commission}% in Kraft, sobald die Online-Zahlung startet, und wir kündigen das vorher an.",
+    "earningsShopSwitcher": "Ladenauswahl",
+    "earningsRecentNote": "Letzte {count} Transaktionen",
+    "earningsSeeAllBookings": "Alle Buchungen ansehen"
   },
   "Guest": {
     "heroTitle": "Gepäck abgeben, die Stadt frei erkunden",
@@ -1449,7 +1457,8 @@
     "calcDisclaimer": "Dies ist nur eine Schätzung; der tatsächliche Verdienst hängt von der Lage Ihres Geschäfts, dem von Ihnen festgelegten Preis und der tatsächlichen Auslastung ab.",
     "ctaPrimary": "Gehen Sie zur Bewerbung",
     "ctaSecondary": "Komplementärprogramm",
-    "ctaDemandMap": "Nachfragekarte ansehen"
+    "ctaDemandMap": "Nachfragekarte ansehen",
+    "zeroCommissionBadge": "Derzeit keine Provision — dir bleibt alles"
   },
   "MarketingHotels": {
     "metaTitle": "BagajPark für Hotels",

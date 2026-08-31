@@ -256,7 +256,15 @@
     "earningsCommissionIncluded": "Platform commission included",
     "earningsRating": "Rating",
     "earningsCommissionTitle": "Platform commission {commission}%",
-    "qrScanTitle": "Scan the QR code"
+    "qrScanTitle": "Scan the QR code",
+    "earningsAllYoursTitle": "You Collected — All Yours",
+    "earningsZeroCommissionNote": "No commission is deducted. Everything you take from the guest stays with you.",
+    "earningsNoCommissionTitle": "Commission-free period",
+    "earningsNoCommissionBody": "No platform commission is charged right now; nothing is deducted from your earnings.",
+    "earningsNoCommissionBodyFuture": "No platform commission is charged right now. It takes effect at {commission}% once online payment starts, and we will announce it in advance.",
+    "earningsShopSwitcher": "Shop selection",
+    "earningsRecentNote": "Last {count} transactions",
+    "earningsSeeAllBookings": "See all bookings"
   },
   "Guest": {
     "heroTitle": "Drop Your Bags, Explore Freely",
@@ -1489,7 +1497,8 @@
     "calcDisclaimer": "This is only an estimate; actual earnings depend on your shop's location, the price you set, and real occupancy.",
     "ctaPrimary": "Go to application",
     "ctaSecondary": "General partner program",
-    "ctaDemandMap": "See the demand map"
+    "ctaDemandMap": "See the demand map",
+    "zeroCommissionBadge": "No commission right now — you keep everything"
   },
   "MarketingHotels": {
     "metaTitle": "BagajPark for Hotels | Luggage Storage Solution",

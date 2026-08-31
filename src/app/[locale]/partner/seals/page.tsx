@@ -1,30 +1,31 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
 import prisma from "@/lib/db";
+import { requirePartnerPage } from "@/lib/page-auth";
+import { resolvePartnerShops } from "@/lib/partner-shop";
 import PartnerSealsClient from "@/components/partner/PartnerSealsClient";
 
 export default async function PartnerSealsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams?: Promise<{ shop?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "Partner" });
 
-  const session = await auth();
-  if (
-    !session?.user?.id ||
-    (session.user.role !== "PARTNER" && session.user.role !== "ADMIN")
-  ) {
-    redirect(`/${locale}/login?callbackUrl=/${locale}/partner/seals`);
-  }
+  const actor = await requirePartnerPage(locale, "/partner/seals");
 
-  const shop = await prisma.shop.findFirst({
-    where: { ownerId: session.user.id },
-    select: { id: true, name: true },
-  });
+  /*
+    Dukkan secimi PANELLE AYNI kuraldan (`partner-shop.ts`). Onceki hali
+    `findFirst({ ownerId })` idi: siralamasiz, yani hangi dukkanin gelecegi
+    veritabaninin plan secimine kalmisti. Cok dukkanli esnaf panelde
+    Sultanahmet'i secip buraya gectiginde Galata'nin muhur stogunu goruyor,
+    yanlis dukkan icin siparis veriyordu.
+  */
+  const sp = (await searchParams) ?? {};
+  const { activeShop: shop } = await resolvePartnerShops(actor.id, sp.shop);
 
   if (!shop) {
     return (

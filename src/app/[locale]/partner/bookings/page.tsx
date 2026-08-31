@@ -1,7 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { ChevronLeft, Package, Clock, CheckCircle2, Phone, ChevronRight } from "lucide-react";
 import { Link } from "@/i18n/routing";
-import { auth } from "@/auth";
+import { requirePartnerPage } from "@/lib/page-auth";
 import prisma from "@/lib/db";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import { guestBookingStatusMessageKey } from "@/lib/booking-status-i18n";
@@ -12,7 +12,6 @@ import {
 } from "@/lib/partner-bookings-filter";
 import PartnerBookingsFilterTabs from "@/components/partner/PartnerBookingsFilterTabs";
 import PartnerBookingActionLinks from "@/components/partner/PartnerBookingActionLinks";
-import { redirect } from "next/navigation";
 
 const PAGE_SIZE = 30;
 
@@ -33,31 +32,8 @@ export default async function PartnerBookingsPage({
   const t = await getTranslations("Partner");
   const tGuest = await getTranslations("Guest");
 
-  const session = await auth();
-  const userId = session?.user?.id;
-  const role = session?.user?.role;
-
-  if (!userId) {
-    const callback = encodeURIComponent(`/${locale}/partner/bookings`);
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 p-6 text-center">
-        <div>
-          <h2 className="mb-2 text-xl font-bold text-gray-900">{t("accessDenied")}</h2>
-          <p className="mb-6 text-gray-500">{t("loginRequiredPartner")}</p>
-          <Link
-            href={`/login?callbackUrl=${callback}`}
-            className="inline-flex rounded-2xl bg-orange-600 px-8 py-4 text-sm id-eyebrow text-white transition-colors hover:bg-orange-700"
-          >
-            {t("signIn")}
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  if (role !== "PARTNER" && role !== "ADMIN") {
-    redirect(`/${locale}/bookings`);
-  }
+  const actor = await requirePartnerPage(locale, "/partner/bookings");
+  const userId = actor.id;
 
   const sp = (await searchParams) ?? {};
   const filter: PartnerBookingsFilter = parsePartnerBookingsFilter(sp.filter);

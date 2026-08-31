@@ -1,20 +1,20 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import { auth } from "@/auth";
-import { shopService } from "@/services/ShopService";
-import {
-  bookingService,
-} from "@/services/BookingService";
-import PartnerClient from "@/components/partner/PartnerClient";
 import { redirect } from "next/navigation";
-import { getMerchantShareRatio, countsTowardEarnings } from "@/lib/platform-split";
-import { moneyToNumber } from "@/lib/money";
-import { getPricingRules } from "@/lib/platform-settings";
 import prisma from "@/lib/db";
+import { bookingService } from "@/services/BookingService";
 import { analyticsService } from "@/services/AnalyticsService";
+import { partnerEarningsService } from "@/services/PartnerEarningsService";
+import { getEffectiveCommission } from "@/lib/commission";
+import { getPricingRules } from "@/lib/platform-settings";
+import { moneyToNumber } from "@/lib/money";
+import { requirePartnerPage } from "@/lib/page-auth";
+import { resolvePartnerShops } from "@/lib/partner-shop";
+import PartnerClient from "@/components/partner/PartnerClient";
 
 /**
- * esnaf Ana Sayfası - Partner Dashboard (Server Component)
- * Query: ?booking=<uuid> check-in akışı, ?checkoutBooking=<uuid> teslim onayı
+ * Esnaf Ana Sayfası — Partner Dashboard (Server Component)
+ * Query: ?booking=<uuid> check-in akışı, ?checkoutBooking=<uuid> teslim onayı,
+ *        ?shop=<uuid> aktif dükkan
  */
 export default async function PartnerPage({
   params,
@@ -35,61 +35,65 @@ export default async function PartnerPage({
   const initialBookingId = sp.booking?.trim() || undefined;
   const initialCheckoutBookingId = sp.checkoutBooking?.trim() || undefined;
 
-  const session = await auth();
-  const role = session?.user?.role;
+  const actor = await requirePartnerPage(locale, "/partner");
 
-  if (!session?.user?.id || (role !== "PARTNER" && role !== "ADMIN")) {
-    redirect(`/${locale}/login?callbackUrl=/${locale}/partner`);
-  }
-
-  const shops = await shopService.getShopsByOwner(session.user.id);
   /**
    * Panel eskiden koşulsuz `shops[0]`'ı gösteriyordu. Çok dükkanlı esnafın
-   * (seed'deki demo esnaf: Galata + Sultanahmet) ikinci dükkanındaki valizler
-   * "İşlem Geçmişi"nde hiç görünmüyordu: check-in `?booking=`/QR ile sahiplik
-   * üzerinden çalıştığı için valiz ALINIYOR ama listede bulunamıyor, dolayısıyla
-   * teslim edilemiyordu. Seçim `?shop=` ile, sahiplik listesinden doğrulanarak.
+   * ikinci dükkanındaki valizler "İşlem Geçmişi"nde hiç görünmüyordu: check-in
+   * `?booking=`/QR ile sahiplik üzerinden çalıştığı için valiz ALINIYOR ama
+   * listede bulunamıyor, dolayısıyla teslim edilemiyordu. Seçim artık
+   * `partner-shop.ts`'te — alt sayfalarla AYNI kural.
    */
-  const requestedShopId = sp.shop?.trim();
-  const activeShop =
-    shops.find((s) => s.id === requestedShopId) ?? shops[0];
+  const { shops, activeShop } = await resolvePartnerShops(actor.id, sp.shop);
 
   if (!activeShop) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-10 text-center">
-        <h1 className="text-2xl font-black text-gray-900 mb-4">
-          {t("noShopTitle")}
-        </h1>
-        <p className="text-gray-500 mb-8 max-w-xs">
-          {t("noShopDesc")}
-        </p>
+        <h1 className="text-2xl font-black text-gray-900 mb-4">{t("noShopTitle")}</h1>
+        <p className="text-gray-500 mb-8 max-w-xs">{t("noShopDesc")}</p>
       </div>
     );
   }
 
-  const [result, pricingRules, ownerPhoneRow, monthlyShopViews] = await Promise.all([
-    bookingService.getPartnerBookings(activeShop.id),
-    getPricingRules(),
-    prisma.user.findUnique({
-      where: { id: session!.user.id },
-      select: { phone: true },
+  const [shopDetail, commission] = await Promise.all([
+    prisma.shop.findUnique({
+      where: { id: activeShop.id },
+      select: {
+        capacity: true,
+        openingTime: true,
+        closingTime: true,
+        pricePerDay: true,
+      },
     }),
-    analyticsService.getShopViewCountThisMonth(activeShop.id),
+    getEffectiveCommission(),
   ]);
+  if (!shopDetail) redirect(`/${locale}/partner`);
+
+  const [result, pricingRules, ownerPhoneRow, monthlyShopViews, totals] =
+    await Promise.all([
+      bookingService.getPartnerBookings(activeShop.id),
+      getPricingRules(),
+      prisma.user.findUnique({
+        where: { id: actor.id },
+        select: { phone: true },
+      }),
+      analyticsService.getShopViewCountThisMonth(activeShop.id),
+      /*
+        TOPLAM KAZANC ARTIK LISTEDEN DEGIL, TOPLAMADAN.
+
+        Onceki hal `bookings.reduce(...)` ile hesapliyordu; ama `bookings`
+        `getPartnerBookings()`in ILK SAYFASI ve varsayilan limiti 100. Yani
+        100'den fazla rezervasyonu olan esnafin ana paneldeki "toplam kazanc"i
+        sessizce eksikti ve kazanc sayfasindaki rakamla tutmuyordu.
+      */
+      partnerEarningsService.getTotals(activeShop.id, commission.rate),
+    ]);
+
   const bookings = result.items;
   const activeCount = bookings.filter(
-    (b) => b.status === "PAID" || b.status === "CHECKED_IN"
+    (b) => b.status === "PAID" || b.status === "CHECKED_IN",
   ).length;
-  // Kazanç sayfasıyla AYNI tanım (bkz. EARNING_BOOKING_STATUSES). Daha önce burada
-  // "CANCELLED olmayan her şey" sayılıyordu ve ödenmemiş rezervasyonlar da hakedişe
-  // giriyordu; iki ekran farklı net hakediş gösteriyordu.
-  const totalEarnings = bookings.reduce(
-    (sum, b) =>
-      sum + (countsTowardEarnings(b.status) ? moneyToNumber(b.totalPrice) : 0),
-    0
-  );
 
-  const merchantShareRatio = getMerchantShareRatio(pricingRules.platformCommissionRate);
   const marketPrice = pricingRules.defaultPricePerDay;
 
   return (
@@ -97,12 +101,12 @@ export default async function PartnerPage({
       shopId={activeShop.id}
       shopName={activeShop.name}
       activeCount={activeCount}
-      totalEarnings={totalEarnings}
-      merchantShareRatio={merchantShareRatio}
-      initialCapacity={activeShop.capacity}
-      initialOpening={activeShop.openingTime || "09:00"}
-      initialClosing={activeShop.closingTime || "20:00"}
-      initialPricePerDay={moneyToNumber(activeShop.pricePerDay) || marketPrice}
+      totalEarnings={totals.gross}
+      merchantShareRatio={commission.merchantShareRatio}
+      initialCapacity={shopDetail.capacity}
+      initialOpening={shopDetail.openingTime || "09:00"}
+      initialClosing={shopDetail.closingTime || "20:00"}
+      initialPricePerDay={moneyToNumber(shopDetail.pricePerDay) || marketPrice}
       marketPrice={marketPrice}
       bookings={JSON.parse(JSON.stringify(bookings))}
       shops={shops.map((s) => ({ id: s.id, name: s.name }))}

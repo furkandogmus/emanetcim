@@ -3,9 +3,9 @@ import { Link } from "@/i18n/routing";
 import type { Metadata } from "next";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { alternatesForPath } from "@/lib/seo-alternates";
-import { TrendingUp, LayoutDashboard, MapPin, Clock } from "lucide-react";
+import { TrendingUp, LayoutDashboard, MapPin, Clock, BadgePercent } from "lucide-react";
 import { getPricingRules } from "@/lib/platform-settings";
-import { getMerchantShareRatio } from "@/lib/platform-split";
+import { getEffectiveCommission } from "@/lib/commission";
 import PartnerEarningsCalculator from "@/components/guest/PartnerEarningsCalculator";
 import prisma from "@/lib/db";
 import { OPERATING_SHOP_FILTER } from "@/lib/public-shop-filter";
@@ -49,7 +49,13 @@ export default async function BecomePartnerPage({
   setRequestLocale(locale);
   const t = await getTranslations("MarketingBecomePartner");
   const pricingRules = await getPricingRules();
-  const merchantShareRatio = getMerchantShareRatio(pricingRules.platformCommissionRate);
+  /*
+    YURURLUKTEKI oran. Ayarda %50 yaziyor ama platform su an tahsilat yapmiyor
+    (`manual` saglayici) -- yani esnaftan kesilen bir sey yok. Hesaplayici
+    ayardaki orani gosterirken, kazanmaya calistigi esnafa var olmayan bir %50
+    komisyon vaat ediyordu. Bkz. `platform-split.ts` -> `effectiveCommissionRate`.
+  */
+  const { merchantShareRatio, rate: commissionRate } = await getEffectiveCommission();
   /**
    * OPERATING: burada esnafa "şu kadar ortağımız var" deniyor. Talep testi
    * noktalarının sahibi platformun kendisi (`prelaunch@bagajpark.com`), ortak
@@ -67,11 +73,28 @@ export default async function BecomePartnerPage({
         <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-600">
           {t("heroSubtitle")}
         </p>
-        <div className="mx-auto mt-6 flex w-fit items-center gap-2 rounded-full border border-orange-100 bg-white px-4 py-2 text-xs font-bold text-orange-700 shadow-sm">
-          <Users size={14} />
-          {activePartnerCount >= SOCIAL_PROOF_MIN_COUNT
-            ? t("socialProofActive", { count: activePartnerCount })
-            : t("socialProofEarly")}
+        <div className="mx-auto mt-6 flex w-fit flex-wrap items-center justify-center gap-2">
+          <span className="flex items-center gap-2 rounded-full border border-orange-100 bg-white px-4 py-2 text-xs font-bold text-orange-700 shadow-sm">
+            <Users size={14} />
+            {activePartnerCount >= SOCIAL_PROOF_MIN_COUNT
+              ? t("socialProofActive", { count: activePartnerCount })
+              : t("socialProofEarly")}
+          </span>
+          {/*
+            KOMİSYONSUZ DÖNEM ROZETİ — esnafı ikna eden asıl cümle bu.
+
+            Platform şu an tahsilat yapmıyor (`manual` sağlayıcı), dolayısıyla
+            komisyon da alamıyor; oran `effectiveCommissionRate` ile 0'a düşüyor.
+            Bu rozet o gerçeği söylüyor ve PSP bağlandığı gün — oran yürürlüğe
+            girdiğinde — KENDİLİĞİNDEN kayboluyor. Elle geri alınacak bir vaat
+            değil, durumun görüntüsü.
+          */}
+          {commissionRate === 0 && (
+            <span className="flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-700 shadow-sm">
+              <BadgePercent size={14} />
+              {t("zeroCommissionBadge")}
+            </span>
+          )}
         </div>
         <div className="mt-10 flex flex-wrap justify-center gap-4">
           <Link

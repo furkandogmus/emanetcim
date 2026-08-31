@@ -256,7 +256,15 @@
     "earningsCommissionIncluded": "Commission de la plateforme incluse",
     "earningsRating": "Note",
     "earningsCommissionTitle": "Commission de la plateforme {commission} %",
-    "qrScanTitle": "Scannez le QR code"
+    "qrScanTitle": "Scannez le QR code",
+    "earningsAllYoursTitle": "Encaissé par vous — tout est à vous",
+    "earningsZeroCommissionNote": "Aucune commission n'est prélevée. Tout ce que vous recevez du client vous reste.",
+    "earningsNoCommissionTitle": "Période sans commission",
+    "earningsNoCommissionBody": "Aucune commission de plateforme n'est prélevée actuellement ; rien n'est déduit de vos revenus.",
+    "earningsNoCommissionBodyFuture": "Aucune commission de plateforme n'est prélevée actuellement. Elle s'appliquera à {commission}% dès le lancement du paiement en ligne, et nous vous préviendrons à l'avance.",
+    "earningsShopSwitcher": "Sélection de boutique",
+    "earningsRecentNote": "{count} dernières transactions",
+    "earningsSeeAllBookings": "Voir toutes les réservations"
   },
   "Guest": {
     "heroTitle": "Déposez vos bagages, explorez librement",
@@ -1449,7 +1457,8 @@
     "calcDisclaimer": "Il ne s'agit que d'une estimation ; les gains réels dépendent de l'emplacement de votre commerce, du prix que vous fixez et du taux d'occupation réel.",
     "ctaPrimary": "Aller à l'application",
     "ctaSecondary": "Programme de partenariat général",
-    "ctaDemandMap": "Voir la carte de la demande"
+    "ctaDemandMap": "Voir la carte de la demande",
+    "zeroCommissionBadge": "Aucune commission pour l'instant — tout vous revient"
   },
   "MarketingHotels": {
     "metaTitle": "BagajPark pour les hôtels",

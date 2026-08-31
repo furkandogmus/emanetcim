@@ -9,9 +9,9 @@ import {
   Phone,
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
-import { auth } from "@/auth";
+import { requirePartnerPage } from "@/lib/page-auth";
 import prisma from "@/lib/db";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import { guestBookingStatusMessageKey } from "@/lib/booking-status-i18n";
 import { formatTryCurrency } from "@/lib/currency";
@@ -43,16 +43,8 @@ export default async function PartnerBookingDetailPage({
   const t = await getTranslations("Partner");
   const tGuest = await getTranslations("Guest");
 
-  const session = await auth();
-  const userId = session?.user?.id;
-  const role = session?.user?.role;
-
-  if (!userId) {
-    redirect(`/${locale}/login?callbackUrl=/${locale}/partner/bookings/${id}`);
-  }
-  if (role !== "PARTNER" && role !== "ADMIN") {
-    redirect(`/${locale}/bookings`);
-  }
+  const actor = await requirePartnerPage(locale, `/partner/bookings/${id}`);
+  const userId = actor.id;
 
   const booking = await prisma.booking.findFirst({
     where: { id, shop: { ownerId: userId } },

@@ -256,7 +256,15 @@
     "earningsCommissionIncluded": "プラットフォーム手数料を含む",
     "earningsRating": "評価",
     "earningsCommissionTitle": "プラットフォーム手数料 {commission}%",
-    "qrScanTitle": "QR コードをスキャン"
+    "qrScanTitle": "QR コードをスキャン",
+    "earningsAllYoursTitle": "受け取った金額 — 全額あなたのもの",
+    "earningsZeroCommissionNote": "手数料は引かれません。ゲストから受け取った金額はすべてあなたのものです。",
+    "earningsNoCommissionTitle": "手数料無料期間",
+    "earningsNoCommissionBody": "現在プラットフォーム手数料はいただいていません。収益から差し引かれるものはありません。",
+    "earningsNoCommissionBodyFuture": "現在プラットフォーム手数料はいただいていません。オンライン決済の開始時に{commission}%が適用され、事前にお知らせします。",
+    "earningsShopSwitcher": "店舗の選択",
+    "earningsRecentNote": "直近{count}件の取引",
+    "earningsSeeAllBookings": "すべての予約を見る"
   },
   "Guest": {
     "heroTitle": "荷物を預けて、身軽に街へ",
@@ -1449,7 +1457,8 @@
     "calcDisclaimer": "これはあくまで目安です。実際の収益は店舗の立地、設定価格、実際の稼働率によって変わります。",
     "ctaPrimary": "アプリケーションに移動",
     "ctaSecondary": "ゼネラルパートナープログラム",
-    "ctaDemandMap": "需要マップを見る"
+    "ctaDemandMap": "需要マップを見る",
+    "zeroCommissionBadge": "現在手数料なし — 全額あなたのもの"
   },
   "MarketingHotels": {
     "metaTitle": "ホテル向けバガジパーク",

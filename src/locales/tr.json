@@ -256,7 +256,15 @@
     "earningsCommissionIncluded": "Platform komisyonu dahil",
     "earningsRating": "Puan",
     "earningsCommissionTitle": "Platform komisyonu %{commission}",
-    "qrScanTitle": "QR Kodu Okutun"
+    "qrScanTitle": "QR Kodu Okutun",
+    "earningsAllYoursTitle": "Tahsil Ettiğin — Tamamı Sende",
+    "earningsZeroCommissionNote": "Komisyon kesintisi yok. Misafirden aldığın tutarın tamamı kasanda kalıyor.",
+    "earningsNoCommissionTitle": "Komisyonsuz dönem",
+    "earningsNoCommissionBody": "Şu an platform komisyonu alınmıyor; kazancından hiçbir kesinti yapılmıyor.",
+    "earningsNoCommissionBodyFuture": "Şu an platform komisyonu alınmıyor. Online ödeme başladığında %{commission} olarak yürürlüğe girecek ve bunu önceden duyuracağız.",
+    "earningsShopSwitcher": "Dükkan seçimi",
+    "earningsRecentNote": "Son {count} işlem",
+    "earningsSeeAllBookings": "Tüm rezervasyonları gör"
   },
   "Guest": {
     "heroTitle": "Valizini Güvenle Bırak, Özgürce Gez",
@@ -1489,7 +1497,8 @@
     "calcDisclaimer": "Bu yalnızca bir tahmindir; gerçek kazanç dükkanınızın konumuna, belirlediğiniz fiyata ve gerçek dolulukla değişir.",
     "ctaPrimary": "Başvuru sayfasına git",
     "ctaSecondary": "Genel ortaklık bilgisi",
-    "ctaDemandMap": "Talep haritasını gör"
+    "ctaDemandMap": "Talep haritasını gör",
+    "zeroCommissionBadge": "Şu an komisyon yok — kazancın tamamı sende"
   },
   "MarketingHotels": {
     "metaTitle": "Oteller için BagajPark | Valiz Emanet Çözümü",

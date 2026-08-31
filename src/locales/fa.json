@@ -256,7 +256,15 @@
     "earningsCommissionIncluded": "شامل کارمزد پلتفرم",
     "earningsRating": "امتیاز",
     "earningsCommissionTitle": "کارمزد پلتفرم {commission}٪",
-    "qrScanTitle": "کد QR را اسکن کنید"
+    "qrScanTitle": "کد QR را اسکن کنید",
+    "earningsAllYoursTitle": "دریافتی شما — همه‌اش مال شماست",
+    "earningsZeroCommissionNote": "هیچ کارمزدی کسر نمی‌شود. تمام مبلغی که از مهمان می‌گیرید نزد شما می‌ماند.",
+    "earningsNoCommissionTitle": "دوره بدون کارمزد",
+    "earningsNoCommissionBody": "در حال حاضر کارمزد پلتفرم دریافت نمی‌شود؛ هیچ مبلغی از درآمد شما کسر نمی‌شود.",
+    "earningsNoCommissionBodyFuture": "در حال حاضر کارمزد پلتفرم دریافت نمی‌شود. با شروع پرداخت آنلاین معادل {commission}٪ اعمال می‌شود و از قبل اطلاع می‌دهیم.",
+    "earningsShopSwitcher": "انتخاب فروشگاه",
+    "earningsRecentNote": "{count} تراکنش اخیر",
+    "earningsSeeAllBookings": "مشاهده همه رزروها"
   },
   "Guest": {
     "heroTitle": "چمدان را بسپارید، آزاد بگردید",
@@ -1449,7 +1457,8 @@
     "calcDisclaimer": "این فقط یک تخمین است؛ درآمد واقعی به موقعیت مغازه شما، قیمتی که تعیین می‌کنید و اشغال واقعی بستگی دارد.",
     "ctaPrimary": "رفتن به درخواست",
     "ctaSecondary": "برنامه عمومی شریک",
-    "ctaDemandMap": "دیدن نقشه تقاضا"
+    "ctaDemandMap": "دیدن نقشه تقاضا",
+    "zeroCommissionBadge": "در حال حاضر بدون کارمزد — همه درآمد مال شماست"
   },
   "MarketingHotels": {
     "metaTitle": "BagajPark برای هتل‌ها",

@@ -2,9 +2,8 @@ import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 import { ChevronLeft } from "lucide-react";
 import { Link } from "@/i18n/routing";
-import { auth } from "@/auth";
-import { shopService } from "@/services/ShopService";
-import { redirect } from "next/navigation";
+import { requirePartnerPage } from "@/lib/page-auth";
+import { resolvePartnerShops } from "@/lib/partner-shop";
 import PartnerShopSettingsForm from "@/components/partner/PartnerShopSettingsForm";
 import { moneyToNumber } from "@/lib/money";
 import { getPricingRules } from "@/lib/platform-settings";
@@ -15,8 +14,10 @@ import prisma from "@/lib/db";
  */
 export default async function PartnerSettingsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams?: Promise<{ shop?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -24,25 +25,34 @@ export default async function PartnerSettingsPage({
   const t = await getTranslations("Partner");
   const tCommon = await getTranslations("Common");
 
-  const session = await auth();
-  if (!session?.user?.id) {
-    redirect(
-      `/${locale}/login?callbackUrl=${encodeURIComponent(`/${locale}/partner/settings`)}`
-    );
-  }
-  if (session.user.role !== "PARTNER" && session.user.role !== "ADMIN") {
-    redirect(`/${locale}`);
-  }
+  const actor = await requirePartnerPage(locale, "/partner/settings");
 
-  const [shops, pricingRules, ownerPhoneRow] = await Promise.all([
-    shopService.getShopsByOwner(session.user.id),
+  const sp = (await searchParams) ?? {};
+  const [{ activeShop: shopRef }, pricingRules, ownerPhoneRow] = await Promise.all([
+    resolvePartnerShops(actor.id, sp.shop),
     getPricingRules(),
     prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: actor.id },
       select: { phone: true },
     }),
   ]);
-  const shop = shops[0];
+  const shop = shopRef
+    ? await prisma.shop.findUnique({
+        where: { id: shopRef.id },
+        select: {
+          id: true,
+          capacity: true,
+          openingTime: true,
+          closingTime: true,
+          pricePerDay: true,
+          address: true,
+          city: true,
+          district: true,
+          latitude: true,
+          longitude: true,
+        },
+      })
+    : null;
   const marketPrice = pricingRules.defaultPricePerDay;
 
   if (!shop) {
