@@ -56,7 +56,11 @@
     "goToImage": "写真{index}へ移動",
     "viewPhoto": "写真{index}を表示",
     "linkCopied": "リンクをクリップボードにコピーしました",
-    "linkCopyFailed": "リンクをコピーできませんでした"
+    "linkCopyFailed": "リンクをコピーできませんでした",
+    "mapZoomIn": "拡大",
+    "mapZoomOut": "縮小",
+    "mapResetBearing": "北を上にする",
+    "mapToggleAttribution": "出典を表示"
   },
   "SEO": {
     "title": "バガジパーク |荷物を安全に預けて、自由に旅行しましょう",

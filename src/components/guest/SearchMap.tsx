@@ -104,6 +104,25 @@ export default function SearchMap({
     selectRef.current = onSelectShop;
   }, [onSelectShop]);
 
+  /*
+    Harita bir KEZ kuruluyor (asagidaki etkinin bagimlilik dizisi bos), ama
+    etiketler cevirilerden geliyor. `selectRef` ile ayni kalip: deger ref'te
+    tutuluyor, boylece kurulum etkisi cevirilere bagimli olmuyor ve harita
+    her dil degisiminde yeniden yaratilmiyor.
+
+    Pratikte dil degisimi zaten rotayi degistirip bileseni yeniden monte eder;
+    ref yalnizca kurulum anindaki dogru degeri garanti ediyor.
+  */
+  const mapLocaleRef = useRef<Record<string, string>>({});
+  useEffect(() => {
+    mapLocaleRef.current = {
+      "NavigationControl.ZoomIn": tCommon("mapZoomIn"),
+      "NavigationControl.ZoomOut": tCommon("mapZoomOut"),
+      "NavigationControl.ResetBearing": tCommon("mapResetBearing"),
+      "AttributionControl.ToggleAttribution": tCommon("mapToggleAttribution"),
+    };
+  }, [tCommon]);
+
   const initialCenter = useRef<[number, number]>([userLng, userLat]);
 
   // Haritayı bir kez oluştur
@@ -118,6 +137,22 @@ export default function SearchMap({
       // Atıf sağlayıcının TileJSON'ına bırakılmaz: o zincir koptuğunda atıf da
       // sessizce kayboluyor (bkz. `MAP_ATTRIBUTION`).
       attributionControl: { compact: true, customAttribution: MAP_ATTRIBUTION },
+      /*
+        HARITA KONTROLLERININ DILI.
+
+        Olculdu (2026-08-31): MapLibre kendi erisilebilirlik etiketlerini
+        INGILIZCE basiyor, sayfanin diliyle ilgilenmiyor. Turkce arayuzde ekran
+        okuyucu, urunun ANA ekraninda sunlari duyuyordu:
+
+          dugme -> "Zoom in" / "Zoom out"
+          ozet  -> "Toggle attribution"
+
+        Ayni sinif hata takvimde de vardi (react-day-picker). Ucuncu taraf bir
+        bilesen eklerken "kendi metinlerini de basiyor mu" diye bakmak
+        gerekiyor: bu metinler yalnizca ekran okuyucuya gittigi icin gozle
+        bakinca hic gorunmuyor.
+      */
+      locale: mapLocaleRef.current,
     });
 
     map.addControl(new maplibregl.NavigationControl(), "top-right");

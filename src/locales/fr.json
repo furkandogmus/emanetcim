@@ -56,7 +56,11 @@
     "goToImage": "Aller à la photo {index}",
     "viewPhoto": "Voir la photo {index}",
     "linkCopied": "Lien copié dans le presse-papiers",
-    "linkCopyFailed": "Impossible de copier le lien"
+    "linkCopyFailed": "Impossible de copier le lien",
+    "mapZoomIn": "Zoom avant",
+    "mapZoomOut": "Zoom arrière",
+    "mapResetBearing": "Orienter vers le nord",
+    "mapToggleAttribution": "Afficher les crédits"
   },
   "SEO": {
     "title": "Parc Bagaj | Laissez vos bagages en toute sécurité, voyagez librement",

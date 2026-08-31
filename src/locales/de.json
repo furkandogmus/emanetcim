@@ -56,7 +56,11 @@
     "goToImage": "Zu Foto {index} gehen",
     "viewPhoto": "Foto {index} ansehen",
     "linkCopied": "Link in die Zwischenablage kopiert",
-    "linkCopyFailed": "Link konnte nicht kopiert werden"
+    "linkCopyFailed": "Link konnte nicht kopiert werden",
+    "mapZoomIn": "Vergrößern",
+    "mapZoomOut": "Verkleinern",
+    "mapResetBearing": "Nach Norden ausrichten",
+    "mapToggleAttribution": "Quellenangaben anzeigen"
   },
   "SEO": {
     "title": "BagajPark | Lassen Sie Ihr Gepäck sicher und reisen Sie frei",

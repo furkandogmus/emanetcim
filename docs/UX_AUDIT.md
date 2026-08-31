@@ -50,6 +50,7 @@ yazılmaz; ölçüm yazılır.
 | 30 | Sayfa içinde iç içe `main` (25 dosya) | Ekran okuyucu | ✅ DÜZELTİLDİ |
 | 31 | Etiketsiz `nav` (footer yasal bağlantılar) | Ekran okuyucu | ✅ DÜZELTİLDİ |
 | 32 | Takvim kontrolleri her dilde İNGİLİZCE konuşuyor | Ekran okuyucu | ✅ DÜZELTİLDİ |
+| 33 | Harita kontrolleri her dilde İNGİLİZCE konuşuyor | Ekran okuyucu | ✅ DÜZELTİLDİ |
 | 101 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
 | 102 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
 | 103 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
@@ -550,6 +551,31 @@ adını kullanıcının kendi diliyle `Intl` üretiyor ("Eylül 2026"), nav etik
 zaten var olan `Common.selectDate`. Böylece Farsça ve Japonca dahil altı dilde
 birden doğru — benim çeviremeyeceğim diller de dahil. Düğme artık hedef ayı
 söylüyor, ki bu "önceki aya git"ten daha bilgilendirici.
+
+### 33. Aynı hata haritada da vardı — üçüncü taraf bileşenler kendi dilinde konuşuyor
+
+Takvim bulgusundan sonra bütün sayfa İngilizce erişilebilirlik metni için
+tarandı. MapLibre de aynısını yapıyordu — ve bu, ürünün **ana ekranı**:
+
+```
+canvas → "Map"
+düğme  → "Zoom in" / "Zoom out"
+özet   → "Toggle attribution"
+```
+
+MapLibre'nin `locale` seçeneği ile dört etiket çevrildi
+(`Common.mapZoomIn` vb., altı dile eklendi).
+
+**Bu artık bir desen, tek olay değil.** Üçüncü taraf bir bileşen eklenirken
+"kendi metinlerini de basıyor mu?" diye bakmak gerekiyor. Gözle bakınca
+görünmüyorlar, çünkü yalnızca ekran okuyucuya gidiyorlar. Sonraki denetimlerde
+şu tarama tekrarlanmalı:
+
+```js
+// Görünür ögelerdeki İngilizce aria-label / title
+document.querySelectorAll("[aria-label],[title]")
+  → /^(zoom|reset|go to|navigation|close|open|previous|next|toggle)\b/i
+```
 
 ### 31. Footer yasal bağlantı `nav`'ı etiketsizdi
 

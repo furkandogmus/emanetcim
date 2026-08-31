@@ -56,7 +56,11 @@
     "goToImage": "رفتن به عکس {index}",
     "viewPhoto": "مشاهده عکس {index}",
     "linkCopied": "لینک در کلیپ‌بورد کپی شد",
-    "linkCopyFailed": "کپی لینک انجام نشد"
+    "linkCopyFailed": "کپی لینک انجام نشد",
+    "mapZoomIn": "بزرگ‌نمایی",
+    "mapZoomOut": "کوچک‌نمایی",
+    "mapResetBearing": "چرخش به شمال",
+    "mapToggleAttribution": "نمایش منابع"
   },
   "SEO": {
     "title": "BagajPark | چمدان امن، سفر آزاد",

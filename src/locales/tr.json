@@ -56,7 +56,11 @@
     "goToImage": "{index}. fotoğrafa git",
     "viewPhoto": "{index}. fotoğrafı görüntüle",
     "linkCopied": "Bağlantı panoya kopyalandı",
-    "linkCopyFailed": "Bağlantı kopyalanamadı"
+    "linkCopyFailed": "Bağlantı kopyalanamadı",
+    "mapZoomIn": "Yakınlaştır",
+    "mapZoomOut": "Uzaklaştır",
+    "mapResetBearing": "Kuzeye döndür",
+    "mapToggleAttribution": "Kaynakları göster"
   },
   "SEO": {
     "title": "BagajPark | Valiz Saklama ve Güvenli Bagaj Emaneti",
