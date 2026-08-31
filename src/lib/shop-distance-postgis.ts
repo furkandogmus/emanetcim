@@ -1,6 +1,7 @@
 import type { Shop } from "@prisma/client";
 import { Prisma } from "@prisma/client";
 import prisma from "@/lib/db";
+import logger from "@/lib/logger";
 import { distanceKm } from "@/lib/geo";
 import {
   PUBLIC_SHOP_FILTER,
@@ -41,6 +42,44 @@ function mapRowsToShops(
     out.push({ shop, distanceKm: d });
   }
   return out;
+}
+
+/**
+ * PostGIS yolunun SON durumu — `/api/health` bunu okuyor.
+ *
+ * NEDEN VAR (2026-08-31'de olculdu): asagidaki `catch` HICBIR SEY loglamiyordu.
+ * PostGIS eklentisi kurulu degilse ya da sorgu hata verirse, arama sessizce
+ * `fallbackActiveShopsByDistance`e dusuyor: **butun** aktif dukkanlari bellege
+ * alip orada siraliyor. Sonuclar dogru cikiyor -- o yuzden disaridan hicbir sey
+ * yanlis gorunmuyor -- ama sitenin en cok trafik alan sayfasi her istekte tam
+ * tablo tarayip bellek ici siralama yapiyor ve bunu kimse GOREMIYOR.
+ *
+ * `rules/observability`: bir uretim bozulmasini gizleyen sessiz yedek yol,
+ * bozulmanin kendisinden daha pahalidir.
+ *
+ * Log bir kez atilir (durum degistiginde): her arama icin bir satir yazmak
+ * log'u bosaltir ve asil sinyali gomer.
+ */
+type DistanceBackend = "postgis" | "in_memory_fallback" | "unknown";
+
+let lastBackend: DistanceBackend = "unknown";
+
+export function getShopDistanceBackend(): DistanceBackend {
+  return lastBackend;
+}
+
+function noteBackend(next: Exclude<DistanceBackend, "unknown">, err?: unknown) {
+  if (lastBackend === next) return;
+  const previous = lastBackend;
+  lastBackend = next;
+  if (next === "in_memory_fallback") {
+    logger.warn(
+      { err, previous },
+      "shop_distance_postgis_unavailable_using_memory_fallback",
+    );
+  } else if (previous !== "unknown") {
+    logger.info({ previous }, "shop_distance_postgis_restored");
+  }
 }
 
 async function fallbackActiveShopsByDistance(
@@ -114,14 +153,25 @@ export async function getActiveShopsOrderedByDistanceKm(
       ${limitFrag}
     `;
 
-    if (rows.length === 0) return [];
+    if (rows.length === 0) {
+      noteBackend("postgis");
+      return [];
+    }
 
     const ids = rows.map((r) => r.id);
     const shops = await prisma.shop.findMany({
       where: { id: { in: ids }, ...PUBLIC_SHOP_FILTER },
     });
+    noteBackend("postgis");
     return mapRowsToShops(rows, shops);
-  } catch {
+  } catch (err) {
+    /*
+      Yedek yol SESSIZ DEGIL (2026-08-31). Onceden `catch {}` idi: PostGIS
+      eksikse ya da sorgu hata verdiyse arama, butun aktif dukkanlari bellege
+      alip siralayan yola dusuyor ve bunu hicbir yere yazmiyordu. Sonuclar
+      dogru olduğu icin disaridan da anlasilmiyordu.
+    */
+    noteBackend("in_memory_fallback", err);
     return fallbackActiveShopsByDistance(
       centerLat,
       centerLng,

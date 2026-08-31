@@ -10,6 +10,40 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-08-31 — arama sessizce tam tablo taramasına düşebiliyordu (görülemeden)
+
+`getActiveShopsOrderedByDistanceKm` PostGIS sorgusunu `try` içinde çalıştırıp
+**`catch {}`** — gövdesi boş — ile yakalıyordu. Eklenti kurulu değilse veya sorgu
+hata verirse arama `fallbackActiveShopsByDistance`'a düşüyor: **bütün** aktif
+dükkanları belleğe alıp orada sıralıyor.
+
+Bunu tehlikeli yapan şey **yanlış sonuç üretmemesi**. Sıralama doğru çıkıyor, yani
+dışarıdan hiçbir şey bozuk görünmüyor — ama sitenin en çok trafik alan sayfası her
+istekte tam tablo tarayıp bellek içi sıralama yapıyor. Hiçbir log, hiçbir metrik,
+hiçbir sağlık alanı bunu söylemiyordu.
+
+Teorik bir ihtimal de değil: `docker-compose.yml` `postgis/postgis:16-3.4-alpine`
+imajını kullanıyor ama **eklentiyi kuran bir migration yok** — `CREATE EXTENSION`
+imajın açılış betiğine bağlı, yani eski bir veri biriminden geçilmişse (ör. düz
+`postgres:16`'dan) eklenti kurulu olmayabilir ve bunu anlamanın bir yolu yoktu.
+
+### Düzeltme
+
+- **Yedek yola düşüş loglanıyor** (`shop_distance_postgis_unavailable_using_memory_fallback`),
+  ve geri dönüş de (`shop_distance_postgis_restored`). Log **durum değiştiğinde**
+  yazılıyor, her aramada değil — gürültü sessizliğin başka bir biçimidir.
+- **`/api/health` iki alan döndürüyor**: `postgis` (`SELECT postgis_version()` ile
+  doğrudan sorulan gerçek durum) ve `distanceBackend` (en son hangi yolun
+  kullanıldığı). Artık dışarıdan sorulabilir bir soru.
+- Mandal: `src/__tests__/shop-distance-backend.test.ts`.
+
+### Bekliyor — migration kuyruğuna eklendi
+
+| # | Bulgu | Ölçüm |
+|---|---|---|
+| 4 | PostGIS'in kendisi migration'la kurulmuyor | `CREATE EXTENSION IF NOT EXISTS postgis;` bir migration'da olmalı — imajın açılış betiğine güvenmek, veri biriminin geçmişine güvenmek demek. |
+| 5 | Hızlı yol da tam tarama | `ST_Distance` her satır için hesaplanıyor ve yarıçap filtresi alt sorgunun **dışında** — mevcut `@@index([latitude, longitude])` btree'si burada işe yaramaz. Üretilmiş bir `geography` sütunu + GiST indeksi gerekiyor. |
+
 ## 2026-08-31 — `include: { guest: true }` web tarafında da MB'larca base64 çekiyordu
 
 Mobil `requireMobileUser`'da düzeltilen sınıfın web karşılığı. Prisma'da
