@@ -1369,3 +1369,28 @@ Düzeltme: `buildDirectionsUrl` tek kaynak. Koordinat varsa koordinat, yoksa
 adres metni, o da yoksa **bağlantı yok** — çalışmayan bir "Yol Tarifi" düğmesi,
 olmayan düğmeden kötüdür. Üç yüzey de aynı kaynağı kullanıyor ve mandal, elle
 `maps/dir` yazan bir dosyayı kırmızı yakıyor.
+
+### 51. Kazanç hesaplayıcısının kaydırıcıları etiketsiz, sonucu sessiz — DÜZELTİLDİ
+
+`become-partner` sayfasında giriş gerektirmeyen bir form yok, ama **iki
+kaydırıcı** var: kapasite ve doluluk. Ölçüm:
+
+| alan | erişilebilir ad |
+|---|---|
+| Dil seçici | "Dil" |
+| kaydırıcı 1 | **yok** |
+| kaydırıcı 2 | **yok** |
+
+Etiketler ekranda duruyor ("Kapasite", "Doluluk") ama bir `<span>` içinde —
+programatik bağ yok. Ekran okuyucu "kaydırıcı, 12" diyor; neyin 12'si
+olduğunu söylemiyor. İkisi de arka arkaya geldiği için sırayla gezen biri
+hangisinin ne olduğunu ayırt edemiyor (WCAG 4.1.2).
+
+Üstelik bu sayfa **aday esnafı ikna etmek için** var: "ayda ne kazanırım"
+sorusunun cevabı. Aracın tamamı o rakamın kaydırıcıyla değişmesi üzerine
+kurulu — ve o değişim `aria-live` olmadığı için ekran okuyucuda **hiç
+duyulmuyordu**. Kaydırıcıyı çekiyorsun, hiçbir şey olmuyor.
+
+Düzeltme: `<span>` → `<label htmlFor>`, yüzde kaydırıcısına `aria-valuetext`
+(yoksa "%50" değil çıplak "50" okunur), sonuç bloğuna
+`aria-live="polite" aria-atomic="true"`.

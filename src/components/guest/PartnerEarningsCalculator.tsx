@@ -47,10 +47,11 @@ export default function PartnerEarningsCalculator({
       <div className="space-y-6">
         <div>
           <div className="mb-2 flex items-center justify-between text-sm font-bold text-gray-700">
-            <span>{labels.capacityLabel}</span>
+            <label htmlFor="partner-capacity">{labels.capacityLabel}</label>
             <span className="text-orange-600">{capacity}</span>
           </div>
           <input
+            id="partner-capacity"
             type="range"
             min={2}
             max={50}
@@ -63,11 +64,13 @@ export default function PartnerEarningsCalculator({
 
         <div>
           <div className="mb-2 flex items-center justify-between text-sm font-bold text-gray-700">
-            <span>{labels.occupancyLabel}</span>
+            <label htmlFor="partner-occupancy">{labels.occupancyLabel}</label>
             <span className="text-orange-600">%{occupancyPct}</span>
           </div>
           <input
+            id="partner-occupancy"
             type="range"
+            aria-valuetext={`%${occupancyPct}`}
             min={10}
             max={100}
             step={5}
@@ -78,7 +81,13 @@ export default function PartnerEarningsCalculator({
         </div>
       </div>
 
-      <div className="mt-8 rounded-3xl bg-white p-6 text-center shadow-sm">
+      {/* Kaydiraci ceken kisi rakamin degistigini gormeli; goremeyen de
+          duymali. aria-live olmadan bu arac ekran okuyucuda sessiz. */}
+      <div
+        aria-live="polite"
+        aria-atomic="true"
+        className="mt-8 rounded-3xl bg-white p-6 text-center shadow-sm"
+      >
         <p className="id-eyebrow text-gray-400">
           {labels.monthlyEarningsLabel}
         </p>
