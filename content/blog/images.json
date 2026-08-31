@@ -149,6 +149,36 @@
     "license": "CC BY-SA 4.0",
     "cityKey": "bursa"
   },
+  "gaziantep-kale": {
+    "file": "/images/blog/gaziantep-kale.webp",
+    "alt": {
+      "tr": "Gaziantep Kalesi'nin yuvarlak burçları ve sur duvarları",
+      "en": "The round bastions and walls of Gaziantep Castle"
+    },
+    "caption": {
+      "tr": "Gaziantep Kalesi",
+      "en": "Gaziantep Castle"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Gaziantep_Kalesi_(Gaziantep_Castle).jpg",
+    "author": "Boubacar Amadou Cisse",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "gaziantep"
+  },
+  "gaziantep-zeugma": {
+    "file": "/images/blog/gaziantep-zeugma.webp",
+    "alt": {
+      "tr": "Zeugma Mozaik Müzesi'ndeki Okeanos ve Tethys mozaiği",
+      "en": "The Oceanus and Tethys mosaic in the Zeugma Mosaic Museum"
+    },
+    "caption": {
+      "tr": "Zeugma Mozaik Müzesi, Okeanos ve Tethys",
+      "en": "Zeugma Mosaic Museum, Oceanus and Tethys"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:The_Oceanus_and_Tethys_Mosaic.jpg",
+    "author": "Bernard Gagnon",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "gaziantep"
+  },
   "istanbul-eminonu": {
     "file": "/images/blog/istanbul-eminonu.webp",
     "alt": {
@@ -283,5 +313,140 @@
     "author": "Bernard Gagnon",
     "license": "CC BY-SA 3.0",
     "cityKey": "kapadokya"
+  },
+  "konya-manzara": {
+    "file": "/images/blog/konya-manzara.webp",
+    "alt": {
+      "tr": "Selçuk Kulesi'nden Konya şehir merkezine bakış",
+      "en": "Konya city centre seen from the Seljuk Tower"
+    },
+    "caption": {
+      "tr": "Selçuk Kulesi'nden Konya",
+      "en": "Konya from the Seljuk Tower"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Konya_view_from_Seljuk_Tower_3992.jpg",
+    "author": "Dosseman",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "konya"
+  },
+  "konya-mevlana": {
+    "file": "/images/blog/konya-mevlana.webp",
+    "alt": {
+      "tr": "Mevlâna Müzesi'nin turkuaz kubbesi ve avlusu",
+      "en": "The turquoise dome and courtyard of the Mevlana Museum"
+    },
+    "caption": {
+      "tr": "Mevlâna Müzesi",
+      "en": "The Mevlana Museum"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Mevlana_M%C3%BCzesi_01.jpg",
+    "author": "Bernard Gagnon",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "konya"
+  },
+  "mardin-eski-sehir": {
+    "file": "/images/blog/mardin-eski-sehir.webp",
+    "alt": {
+      "tr": "Eski Mardin'in yamaca sıralanmış taş evleri",
+      "en": "The stone houses of old Mardin stacked up the hillside"
+    },
+    "caption": {
+      "tr": "Eski Mardin",
+      "en": "Old Mardin"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Eski_Mardin_3.jpg",
+    "author": "Hamdigumus",
+    "license": "CC0",
+    "cityKey": "mardin"
+  },
+  "mardin-ova": {
+    "file": "/images/blog/mardin-ova.webp",
+    "alt": {
+      "tr": "Mardin'den Mezopotamya ovasına bakış",
+      "en": "Looking out from Mardin over the Mesopotamian plain"
+    },
+    "caption": {
+      "tr": "Mardin'den Mezopotamya ovası",
+      "en": "The Mesopotamian plain from Mardin"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:View_from_Mardin_to_the_Mesopotamian_plains.jpg",
+    "author": "Florian Koch French translation by Yolan Chériaux",
+    "license": "CC BY-SA 2.0",
+    "cityKey": "mardin"
+  },
+  "sanliurfa-balikligol": {
+    "file": "/images/blog/sanliurfa-balikligol.webp",
+    "alt": {
+      "tr": "Balıklıgöl'ün kenarındaki revaklar ve gölde yüzen sazan balıkları",
+      "en": "The arcades beside Balikligol and the carp swimming in the pool"
+    },
+    "caption": {
+      "tr": "Balıklıgöl",
+      "en": "Balikligol"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Bal%C4%B1kl%C4%B1g%C3%B6l,_Urfa_2015.jpg",
+    "author": "Hamdigumus",
+    "license": "CC0",
+    "cityKey": "sanliurfa"
+  },
+  "sanliurfa-gobeklitepe": {
+    "file": "/images/blog/sanliurfa-gobeklitepe.webp",
+    "alt": {
+      "tr": "Göbeklitepe'de kazıyla ortaya çıkarılmış T biçimli dikilitaşlar",
+      "en": "The excavated T-shaped pillars at Gobekli Tepe"
+    },
+    "caption": {
+      "tr": "Göbeklitepe kazı alanı",
+      "en": "The excavation at Gobekli Tepe"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Urfa_G%C3%B6beklitepe_Building_A_5340.jpg",
+    "author": "Dosseman",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "sanliurfa"
+  },
+  "trabzon-liman": {
+    "file": "/images/blog/trabzon-liman.webp",
+    "alt": {
+      "tr": "Trabzon limanı ve arkasındaki şehir yamacı",
+      "en": "Trabzon harbour with the city rising behind it"
+    },
+    "caption": {
+      "tr": "Trabzon limanı",
+      "en": "Trabzon harbour"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Trabzon,harbour.jpg",
+    "author": "Bertramz",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "trabzon"
+  },
+  "trabzon-sumela": {
+    "file": "/images/blog/trabzon-sumela.webp",
+    "alt": {
+      "tr": "Dik kaya yamacına oyulmuş Sümela Manastırı",
+      "en": "Sumela Monastery built into a sheer cliff face"
+    },
+    "caption": {
+      "tr": "Sümela Manastırı",
+      "en": "Sumela Monastery"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:S%C3%BCmela_Manast%C4%B1r%C4%B1_2014-3.jpg",
+    "author": "Hamdigumus",
+    "license": "CC0",
+    "cityKey": "trabzon"
+  },
+  "trabzon-uzungol": {
+    "file": "/images/blog/trabzon-uzungol.webp",
+    "alt": {
+      "tr": "Uzungöl ve gölün çevresindeki ahşap evler, arkada sisli dağlar",
+      "en": "Uzungol lake with wooden houses around it and misty mountains behind"
+    },
+    "caption": {
+      "tr": "Uzungöl",
+      "en": "Uzungol"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Uzung%C3%B6l,Trabzon.jpg",
+    "author": "g",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "trabzon"
   }
 }

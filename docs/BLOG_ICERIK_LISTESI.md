@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| Yazısı olan şehir | **7 / 265** (aşağıdaki tablo) |
+| Yazısı olan şehir | **12 / 265** (aşağıdaki tablo) |
 | Yayına yazma | `npx tsx scripts/blog-city-posts.ts --apply` (kuru çalışma varsayılan) |
 | Denetim | `npx tsx scripts/blog-city-posts.ts --verify` + `npx tsx scripts/blog-images.ts --verify` |
 | Eksik listesi | `npx tsx scripts/blog-city-posts.ts --coverage` |
@@ -58,7 +58,7 @@ alakasız olabilir.
 
 <!-- Aşağısı üretilmiştir: npx tsx scripts/blog-city-posts.ts --list-md -->
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 7/265 sehir -->
+<!-- 12/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -69,13 +69,13 @@ alakasız olabilir.
 | 5 | TR | Bodrum | `bodrum` | 5 | yayında | bodrum-valiz-emanet-tekne-turu | bodrum-luggage-storage-boat-day |
 | 6 | TR | Bursa | `bursa` | 4 | yayında | bursa-gunubirlik-valiz-nereye | bursa-day-trip-luggage-storage |
 | 7 | TR | Adana | `adana` | 2 | — |  |  |
-| 8 | TR | Gaziantep | `gaziantep` | 2 | — |  |  |
-| 9 | TR | Konya | `konya` | 2 | — |  |  |
-| 10 | TR | Trabzon | `trabzon` | 3 | — |  |  |
+| 8 | TR | Gaziantep | `gaziantep` | 2 | yayında | gaziantep-yemek-turu-valiz | gaziantep-food-trip-luggage-storage |
+| 9 | TR | Konya | `konya` | 2 | yayında | konya-yht-gunubirlik-valiz | konya-day-trip-luggage-storage |
+| 10 | TR | Trabzon | `trabzon` | 3 | yayında | trabzon-sumela-uzungol-valiz | trabzon-luggage-storage-sumela-uzungol |
 | 11 | TR | Kayseri | `kayseri` | 2 | — |  |  |
 | 12 | TR | Eskişehir | `eskisehir` | 2 | — |  |  |
 | 13 | TR | Samsun | `samsun` | 1 | — |  |  |
-| 14 | TR | Şanlıurfa | `sanliurfa` | 2 | — |  |  |
+| 14 | TR | Şanlıurfa | `sanliurfa` | 2 | yayında | sanliurfa-gobeklitepe-balikligol-valiz | sanliurfa-gobekli-tepe-luggage-storage |
 | 15 | TR | Diyarbakır | `diyarbakir` | 1 | — |  |  |
 | 16 | TR | Mersin | `mersin` | 2 | — |  |  |
 | 17 | TR | Kapadokya | `kapadokya` | 4 | yayında | kapadokya-son-gun-valiz-tur-otobus | cappadocia-last-day-luggage-storage |
@@ -94,7 +94,7 @@ alakasız olabilir.
 | 30 | TR | Ayvalık | `ayvalik` | 2 | — |  |  |
 | 31 | TR | Çanakkale | `canakkale` | 4 | — |  |  |
 | 32 | TR | Bergama | `bergama` | 1 | — |  |  |
-| 33 | TR | Mardin | `mardin` | 1 | — |  |  |
+| 33 | TR | Mardin | `mardin` | 1 | yayında | mardin-eski-sehir-merdiven-valiz | mardin-old-town-luggage-storage |
 | 34 | TR | Van | `van` | 2 | — |  |  |
 | 35 | TR | Kars | `kars` | 2 | — |  |  |
 | 36 | TR | Rize | `rize` | 2 | — |  |  |
