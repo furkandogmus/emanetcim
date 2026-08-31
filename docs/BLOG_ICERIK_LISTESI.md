@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| Yazısı olan şehir | **63 / 265** — Türkiye'nin 39 şehri tamamlandı |
+| Yazısı olan şehir | **69 / 265** — Türkiye'nin 39 şehri tamamlandı |
 | Yayına yazma | `npx tsx scripts/blog-city-posts.ts --apply` (kuru çalışma varsayılan) |
 | Denetim | `npx tsx scripts/blog-city-posts.ts --verify` + `npx tsx scripts/blog-images.ts --verify` |
 | Eksik listesi | `npx tsx scripts/blog-city-posts.ts --coverage` |
@@ -63,7 +63,7 @@ alakasız olabilir.
 
 <!-- Aşağısı üretilmiştir: npx tsx scripts/blog-city-posts.ts --list-md -->
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 63/265 sehir -->
+<!-- 69/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -131,16 +131,16 @@ alakasız olabilir.
 | 62 | ES | Bilbao | `bilbao` | 1 | yayında | bilbao-guggenheim-buyuk-canta-valiz | bilbao-luggage-storage-guggenheim |
 | 63 | ES | San Sebastián | `san-sebastian` | 1 | yayında | san-sebastian-pintxo-turu-ayakta-valiz | san-sebastian-luggage-storage-pintxo-crawl |
 | 64 | ES | Palma | `mallorca` | 1 | yayında | mallorca-palma-sóller-treni-valiz | mallorca-luggage-storage-soller-train |
-| 65 | ES | Eivissa | `ibiza` | 1 | — |  |  |
+| 65 | ES | Eivissa | `ibiza` | 1 | yayında | ibiza-dalt-vila-rampa-valiz | ibiza-luggage-storage-dalt-vila |
 | 66 | AT | Wien | `viyana` | 3 | yayında | viyana-schonbrunn-yarim-gun-valiz | vienna-luggage-storage-schonbrunn |
-| 67 | AT | Salzburg | `salzburg` | 1 | — |  |  |
-| 68 | AT | Innsbruck | `innsbruck` | 1 | — |  |  |
+| 67 | AT | Salzburg | `salzburg` | 1 | yayında | salzburg-gunubirlik-altstadt-valiz | salzburg-luggage-storage-day-trip |
+| 68 | AT | Innsbruck | `innsbruck` | 1 | yayında | innsbruck-nordkette-teleferik-kayak-valiz | innsbruck-luggage-storage-nordkette |
 | 69 | CZ | Praha | `prag` | 3 | yayında | prag-kaldirim-tasi-kale-yokusu-valiz | prague-luggage-storage-cobbles-castle |
 | 70 | HU | Budapest | `budapeste` | 3 | yayında | budapeste-kaplica-dolap-valiz | budapest-luggage-storage-thermal-baths |
 | 71 | DE | München | `munih` | 2 | yayında | munih-oktoberfest-canta-yasak-valiz | munich-luggage-storage-oktoberfest |
-| 72 | DE | Frankfurt | `frankfurt` | 2 | — |  |  |
-| 73 | DE | Hamburg | `hamburg` | 2 | — |  |  |
-| 74 | DE | Köln | `koln` | 1 | — |  |  |
+| 72 | DE | Frankfurt | `frankfurt` | 2 | yayında | frankfurt-aktarma-fuar-valiz | frankfurt-luggage-storage-layover |
+| 73 | DE | Hamburg | `hamburg` | 2 | yayında | hamburg-koprular-speicherstadt-valiz | hamburg-luggage-storage-bridges |
+| 74 | DE | Köln | `koln` | 1 | yayında | koln-katedral-533-basamak-valiz | cologne-luggage-storage-cathedral-533-steps |
 | 75 | DE | Düsseldorf | `dusseldorf` | 1 | — |  |  |
 | 76 | BE | Bruxelles | `bruksel` | 2 | — |  |  |
 | 77 | BE | Brugge | `brugge` | 1 | — |  |  |

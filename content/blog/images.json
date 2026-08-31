@@ -719,6 +719,36 @@
     "license": "CC BY-SA 3.0",
     "cityKey": "floransa"
   },
+  "frankfurt-hauptbahnhof": {
+    "file": "/images/blog/frankfurt-hauptbahnhof.webp",
+    "alt": {
+      "tr": "Frankfurt Hauptbahnhof'un peronları ve trenler",
+      "en": "The platforms and trains at Frankfurt Hauptbahnhof"
+    },
+    "caption": {
+      "tr": "Frankfurt Hauptbahnhof",
+      "en": "Frankfurt Hauptbahnhof"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Nahverkehrsz%C3%BCge_Frankfurt.jpg",
+    "author": "Thomas Wolf (Der Wolf im Wald)",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "frankfurt"
+  },
+  "frankfurt-romer": {
+    "file": "/images/blog/frankfurt-romer.webp",
+    "alt": {
+      "tr": "Römerberg meydanı ve yeniden inşa edilmiş ahşap cepheli evler",
+      "en": "The Romerberg square and its rebuilt timber-framed houses"
+    },
+    "caption": {
+      "tr": "Römerberg, Frankfurt",
+      "en": "The Romerberg, Frankfurt"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:R%C3%B6merberg_Weihnachten.jpg",
+    "author": "Thomas Wolf (Der Wolf im Wald)",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "frankfurt"
+  },
   "gaziantep-kale": {
     "file": "/images/blog/gaziantep-kale.webp",
     "alt": {
@@ -778,6 +808,96 @@
     "author": "Jebulon",
     "license": "Public domain",
     "cityKey": "granada"
+  },
+  "hamburg-reeperbahn": {
+    "file": "/images/blog/hamburg-reeperbahn.webp",
+    "alt": {
+      "tr": "Reeperbahn'da bir bina cephesi ve neon tabelalar",
+      "en": "A building front and neon signs on the Reeperbahn"
+    },
+    "caption": {
+      "tr": "Reeperbahn, Hamburg",
+      "en": "The Reeperbahn, Hamburg"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:12893_Reeperbahn_96.JPG",
+    "author": "Hinnerk11",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "hamburg"
+  },
+  "hamburg-speicherstadt": {
+    "file": "/images/blog/hamburg-speicherstadt.webp",
+    "alt": {
+      "tr": "Speicherstadt'ın tuğla depoları ve aralarındaki kanal",
+      "en": "The brick warehouses of the Speicherstadt and the canal between them"
+    },
+    "caption": {
+      "tr": "Speicherstadt, Hamburg",
+      "en": "The Speicherstadt, Hamburg"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Speicherstadt_abends.jpg",
+    "author": "Thomas Wolf, www.foto-tw.de",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "hamburg"
+  },
+  "ibiza-dalt-vila": {
+    "file": "/images/blog/ibiza-dalt-vila.webp",
+    "alt": {
+      "tr": "Surlarla çevrili Dalt Vila'nın yamaca sıralanmış evleri",
+      "en": "The walled old town of Dalt Vila rising up its hillside"
+    },
+    "caption": {
+      "tr": "Dalt Vila, İbiza",
+      "en": "Dalt Vila, Ibiza"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Dalt_Vila_004.JPG",
+    "author": "Xaviduran",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "ibiza"
+  },
+  "ibiza-surlar": {
+    "file": "/images/blog/ibiza-surlar.webp",
+    "alt": {
+      "tr": "Dalt Vila'nın bastiyonundan eski şehir ve katedral",
+      "en": "The old town and cathedral seen from a bastion of Dalt Vila"
+    },
+    "caption": {
+      "tr": "Dalt Vila surlarından eski şehir",
+      "en": "The old town from the walls of Dalt Vila"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Ibiza_-_Dalt_Villa_(45314015).jpg",
+    "author": "Nils van der Burg from Madrid, Spain",
+    "license": "CC BY-SA 2.0",
+    "cityKey": "ibiza"
+  },
+  "innsbruck-altstadt": {
+    "file": "/images/blog/innsbruck-altstadt.webp",
+    "alt": {
+      "tr": "Innsbruck eski şehrinde renkli cepheler ve arkada dağlar",
+      "en": "Coloured facades in Innsbruck's old town with the mountains behind"
+    },
+    "caption": {
+      "tr": "Innsbruck Altstadt",
+      "en": "Innsbruck's old town"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Innsbruck_-_Wegweise_Altstadt.jpg",
+    "author": "Taxiarchos228",
+    "license": "FAL",
+    "cityKey": "innsbruck"
+  },
+  "innsbruck-nordkette": {
+    "file": "/images/blog/innsbruck-nordkette.webp",
+    "alt": {
+      "tr": "Nordkette'de Hafelekarspitze'den Inn vadisine bakış",
+      "en": "Looking down into the Inn valley from the Hafelekarspitze on the Nordkette"
+    },
+    "caption": {
+      "tr": "Nordkette, Hafelekarspitze",
+      "en": "The Nordkette, Hafelekarspitze"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Hafelekarspitze_-_Flickr_-_mendhak.jpg",
+    "author": "mendhak",
+    "license": "CC BY-SA 2.0",
+    "cityKey": "innsbruck"
   },
   "istanbul-eminonu": {
     "file": "/images/blog/istanbul-eminonu.webp",
@@ -1033,6 +1153,36 @@
     "author": "Сергей Секачёв",
     "license": "CC BY-SA 3.0",
     "cityKey": "kemer"
+  },
+  "koln-dom": {
+    "file": "/images/blog/koln-dom.webp",
+    "alt": {
+      "tr": "Ren kıyısından Köln Katedrali ve tren köprüsü",
+      "en": "Cologne Cathedral and the railway bridge seen from the Rhine"
+    },
+    "caption": {
+      "tr": "Köln Katedrali ve Ren",
+      "en": "Cologne Cathedral and the Rhine"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:K%C3%B6ln_Panorama.jpg",
+    "author": "Raimond Spekking",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "koln"
+  },
+  "koln-dom-yakin": {
+    "file": "/images/blog/koln-dom-yakin.webp",
+    "alt": {
+      "tr": "Köln Katedrali'nin kuzey portali ve taş işçiliği",
+      "en": "The north portal of Cologne Cathedral and its stonework"
+    },
+    "caption": {
+      "tr": "Köln Katedrali, kuzey portal",
+      "en": "Cologne Cathedral, the north portal"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:K%C3%B6lner_Dom_-_Nordportal.jpg",
+    "author": "Raymond - Raimond Spekking",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "koln"
   },
   "konya-manzara": {
     "file": "/images/blog/konya-manzara.webp",
@@ -1633,6 +1783,36 @@
     "author": "Makalp",
     "license": "CC BY-SA 3.0",
     "cityKey": "safranbolu"
+  },
+  "salzburg-altstadt": {
+    "file": "/images/blog/salzburg-altstadt.webp",
+    "alt": {
+      "tr": "Salzach nehrinin karşısından Salzburg eski şehri ve tepedeki Hohensalzburg kalesi",
+      "en": "Salzburg's old town across the Salzach with the Hohensalzburg fortress above it"
+    },
+    "caption": {
+      "tr": "Salzburg eski şehri ve Hohensalzburg",
+      "en": "Salzburg's old town and the Hohensalzburg"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Old_Town_Salzburg_across_the_Salzach_river.jpg",
+    "author": "Jiuguang Wang",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "salzburg"
+  },
+  "salzburg-getreidegasse": {
+    "file": "/images/blog/salzburg-getreidegasse.webp",
+    "alt": {
+      "tr": "Getreidegasse'de dar bir geçit ve dükkân tabelaları",
+      "en": "A narrow passage and shop signs on the Getreidegasse"
+    },
+    "caption": {
+      "tr": "Getreidegasse, Salzburg",
+      "en": "The Getreidegasse, Salzburg"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Salzburg_Getreidegasse_3_Schatz_Durchhaus-9151.jpg",
+    "author": "Isiwal",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "salzburg"
   },
   "samsun-anit": {
     "file": "/images/blog/samsun-anit.webp",
