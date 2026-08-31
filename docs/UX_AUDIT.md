@@ -11,7 +11,13 @@ yazılmaz; ölçüm yazılır.
 gelmediğini tek komutla ölçer (yatay kaydırma, tek `main`, tek `h1`, başlık
 atlaması, etiketsiz `nav`, ekran okuyucuya giden İngilizce metin, dokunma
 hedefi ≥24×24; normal boyut ve %200 metin). Bozulursa çıkış kodu 1.
-**2026-08-31 itibarıyla altı sayfa, iki koşul: hepsi geçiyor.**
+**2026-08-31 itibarıyla 11 sayfa × 2 koşul = 22 kontrol: hepsi geçiyor.**
+Kullanımı `scripts/README.md`'de.
+
+Ayrıca dar ekranlar ölçüldü — **320 px** (iPhone SE / eski Android) ve
+**360 px** (yaygın Android): ana sayfa, arama ve checkout üçünde de yatay
+kaydırma yok. Başlıktaki esneme düzeltmeleri (küçülebilir logo, kırpılabilir
+giriş düğmesi) dar ekranlarda da tutuyor.
 
 > **PAYLAŞILAN DOSYA UYARISI — pahalıya mal oldu.** `src/locales/*.json`
 > dosyalarını iki agent birden düzenliyor. Bir betikle dosyanın TAMAMINI okuyup

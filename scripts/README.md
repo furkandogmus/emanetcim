@@ -643,3 +643,37 @@ Uygulama sonrası üretimde ölçülenler:
 Erişim yolu: üretim Postgres dışarı açık değil (`127.0.0.1:5433`), script yerelden
 SSH tüneliyle koşuldu — sunucudaki imajda `scripts/` ve `src/` yok
 (bkz. `Dockerfile`), o yüzden konteyner içinde koşturulamıyor.
+
+## UI/UX regresyon taraması — `ux-sweep.mjs`
+
+```bash
+node scripts/ux-sweep.mjs                          # canlıya karşı
+BASE_URL=http://localhost:3000 node scripts/ux-sweep.mjs
+SHOP_ID=<uuid> node scripts/ux-sweep.mjs           # dükkan/checkout için başka nokta
+HEADLESS=1 node scripts/ux-sweep.mjs               # başsız (Cloudflare'e takılabilir)
+```
+
+**Ne yapar:** 11 misafir sayfasını iki koşulda (normal boyut ve `%200 metin`)
+gerçek bir mobil viewport'ta gezip yedi kuralı doğrular:
+
+| Kural | Neden |
+|---|---|
+| Yatay kaydırma yok | Sayfanın yana oynaması; DE/FR'de üç kez çıktı |
+| Tek `main` | 25 dosyada iç içe `main` vardı; "ana içeriğe git" belirsizleşiyordu |
+| Tek görünür `h1` | Arama sayfasında mobilde hiç `h1` yoktu |
+| Başlık seviyesi atlaması yok | `h2→h4` dört sayfada vardı |
+| Etiketsiz `nav` yok | Üç-dört işaret arasında ayırt edilemiyordu |
+| Ekran okuyucuya İngilizce metin yok | Takvim ve harita her dilde İngilizce konuşuyordu |
+| Dokunma hedefi ≥ 24×24 (WCAG 2.5.8) | Menü 12 px, footer 17 px'di |
+
+**Çıkış kodu 1** kural bozulursa — bir cron ya da CI adımı buna bakıp alarm
+üretebilir.
+
+**Neden var:** bu kuralların hepsi `docs/UX_AUDIT.md`'de kanıtıyla kayıtlı
+gerçek hatalardan geliyor ve **hiçbiri gözle bakınca görünmüyordu** — 2 px'lik
+kayma, ekran okuyucuya İngilizce konuşan takvim, güvenli bölgeyi aşan PWA
+ikonu. Geri sızmalarının tek güvencesi tekrar ölçmek.
+
+**Bilinen sınır:** Cloudflare bot doğrulaması ara sıra araya giriyor. Tarama
+bunu tespit edip o sayfayı `atlandı` olarak işaretler — sessizce geçmez, çünkü
+kapsamın daraldığı görünmeli.
