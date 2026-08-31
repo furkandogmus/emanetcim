@@ -10,6 +10,39 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-08-31 — mobil CI 22 Ağustos'tan beri kırmızı; hiçbir mobil değişiklik doğrulanmamış
+
+Flutter düzeltmesini gönderdim ve "CI doğrulayacak" dedim. CI kırmızı döndü —
+ama sebebi benim değişikliğim değildi.
+
+`dart format --set-exit-if-changed` **37 dosyada** biçim farkı buluyor ve
+çoğuna aylardır dokunulmamış (`router.dart`, `api_client.dart`,
+`login_screen.dart`…). Adım **ilk sıradaydı**, yani:
+
+| Adım | Durum |
+|---|---|
+| `dart run build_runner build` | çalışıyordu |
+| `dart format --set-exit-if-changed` | **kırmızı → iş burada duruyor** |
+| `flutter analyze` | hiç çalışmadı |
+| `flutter test` | hiç çalışmadı |
+| `flutter build apk` | hiç çalışmadı |
+
+Mobile CI geçmişi: **22 Ağustos'tan bu yana dokuz koşunun dokuzu da başarısız.**
+Yani mobil tarafa giren her değişiklik — profil ekranı hata metni, giriş/kayıt
+autofill, değerlendirme gönderimi ve benim prelaunch düzeltmem — **gerçek
+kapıların hiçbirinden geçmeden** bıraktı.
+
+**Düzeltme sıra değiştirmek, gevşetmek değil.** Biçim bozuksa iş yine KIRMIZI
+düşer; fark, analiz/test/derleme sonuçlarının artık görünmesi. Bir kapının
+diğerlerini maskelemesi, kapının kendisinden büyük bir sorun. Biçim kontrolü
+`Upload APK`'dan da sonraya alındı — aksi halde kırmızı biçim, üretilmiş APK'nin
+yüklenmesini de engelliyor ve elde inceleyecek çıktı kalmıyordu.
+
+**Açık:** 37 dosyanın biçim borcu duruyor. `dart format .` tek komut ama bu
+makinede dart/flutter kurulu değil ve kullanıcının bilgisayarına kurulum
+yapılmayacak. Mobil geliştirme yapan biri `cd mobile && dart format .` koşup
+commit'lerse gate tamamen yeşile döner.
+
 ## 2026-08-31 — açık kalan üç madde kapatıldı
 
 Önceki turlarda "sizin kararınız" ya da "araç yok" diye bıraktığım üç şey vardı.

@@ -69,9 +69,21 @@ jobs:
       - name: Run build_runner
         run: dart run build_runner build --delete-conflicting-outputs
 
-      - name: Check formatting
-        run: dart format --output=none --set-exit-if-changed .
-
+      # ONCE ANALIZ/TEST/DERLEME, SONRA BICIMLENDIRME.
+      #
+      # NEDEN (2026-08-31'de olculdu): `dart format` adimi ILK siradaydi ve
+      # 22 Agustos'tan beri HER kosuda kirmizi donuyordu -- 37 dosya bicim
+      # disiydi, cogu aylardir oyle. Adim ilk sirada oldugu icin `flutter
+      # analyze`, `flutter test` ve `flutter build apk` BIR HAFTADIR HIC
+      # CALISMADI. Yani mobil tarafa giren her degisiklik, gercek kapilarin
+      # hicbirinden gecmeden birakti.
+      #
+      # Sira degistirildi, GEVSETILMEDI: bicim bozuksa is yine KIRMIZI duser.
+      # Fark, artik analiz/test/derleme sonuclarinin da gorunmesi. Bir kapinin
+      # digerlerini maskelemesi, kapinin kendisinden daha buyuk bir sorun.
+      #
+      # Bicimlendirme borcu kapandiginda bu adim tekrar basa alinabilir; o zaman
+      # sira farketmez.
       - name: Analyze code
         run: flutter analyze
 
@@ -86,6 +98,9 @@ jobs:
         with:
           name: android-debug-apk
           path: mobile/build/app/outputs/flutter-apk/app-debug.apk
+
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed .
 
   build-ios:
     name: Build iOS
