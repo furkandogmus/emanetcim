@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| Yazısı olan şehir | **57 / 265** — Türkiye'nin 39 şehri tamamlandı |
+| Yazısı olan şehir | **63 / 265** — Türkiye'nin 39 şehri tamamlandı |
 | Yayına yazma | `npx tsx scripts/blog-city-posts.ts --apply` (kuru çalışma varsayılan) |
 | Denetim | `npx tsx scripts/blog-city-posts.ts --verify` + `npx tsx scripts/blog-images.ts --verify` |
 | Eksik listesi | `npx tsx scripts/blog-city-posts.ts --coverage` |
@@ -63,7 +63,7 @@ alakasız olabilir.
 
 <!-- Aşağısı üretilmiştir: npx tsx scripts/blog-city-posts.ts --list-md -->
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 57/265 sehir -->
+<!-- 63/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -125,12 +125,12 @@ alakasız olabilir.
 | 56 | PT | Lisboa | `lizbon` | 6 | yayında | lizbon-calcada-yokus-valiz | lisbon-luggage-storage-hills-calcada |
 | 57 | PT | Porto | `porto` | 2 | yayında | porto-ribeira-yokus-kopru-valiz | porto-luggage-storage-ribeira-hill |
 | 58 | ES | Sevilla | `sevilla` | 2 | yayında | sevilla-sicak-santa-cruz-valiz | seville-luggage-storage-heat-santa-cruz |
-| 59 | ES | Granada | `granada` | 2 | — |  |  |
-| 60 | ES | València | `valensiya` | 2 | — |  |  |
-| 61 | ES | Málaga | `malaga` | 2 | — |  |  |
-| 62 | ES | Bilbao | `bilbao` | 1 | — |  |  |
-| 63 | ES | San Sebastián | `san-sebastian` | 1 | — |  |  |
-| 64 | ES | Palma | `mallorca` | 1 | — |  |  |
+| 59 | ES | Granada | `granada` | 2 | yayında | granada-alhambra-saatli-giris-valiz | granada-luggage-storage-alhambra-timed-entry |
+| 60 | ES | València | `valensiya` | 2 | yayında | valensiya-iki-gar-turia-valiz | valencia-luggage-storage-two-stations |
+| 61 | ES | Málaga | `malaga` | 2 | yayında | malaga-costa-del-sol-aktarma-valiz | malaga-luggage-storage-costa-del-sol |
+| 62 | ES | Bilbao | `bilbao` | 1 | yayında | bilbao-guggenheim-buyuk-canta-valiz | bilbao-luggage-storage-guggenheim |
+| 63 | ES | San Sebastián | `san-sebastian` | 1 | yayında | san-sebastian-pintxo-turu-ayakta-valiz | san-sebastian-luggage-storage-pintxo-crawl |
+| 64 | ES | Palma | `mallorca` | 1 | yayında | mallorca-palma-sóller-treni-valiz | mallorca-luggage-storage-soller-train |
 | 65 | ES | Eivissa | `ibiza` | 1 | — |  |  |
 | 66 | AT | Wien | `viyana` | 3 | yayında | viyana-schonbrunn-yarim-gun-valiz | vienna-luggage-storage-schonbrunn |
 | 67 | AT | Salzburg | `salzburg` | 1 | — |  |  |

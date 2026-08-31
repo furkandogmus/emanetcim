@@ -359,6 +359,36 @@
     "license": "CC BY-SA 3.0",
     "cityKey": "berlin"
   },
+  "bilbao-casco-viejo": {
+    "file": "/images/blog/bilbao-casco-viejo.webp",
+    "alt": {
+      "tr": "Bilbao Casco Viejo'da dar bir sokak ve iki yanındaki binalar",
+      "en": "A narrow street in Bilbao's Casco Viejo with buildings on both sides"
+    },
+    "caption": {
+      "tr": "Casco Viejo, Bilbao",
+      "en": "The Casco Viejo, Bilbao"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Bilbao_-_casco_viejo_02.jpg",
+    "author": "Zarateman",
+    "license": "CC0",
+    "cityKey": "bilbao"
+  },
+  "bilbao-guggenheim": {
+    "file": "/images/blog/bilbao-guggenheim.webp",
+    "alt": {
+      "tr": "Guggenheim Bilbao'nun titanyum kaplı kavisli cepheleri",
+      "en": "The curved titanium surfaces of the Guggenheim Bilbao"
+    },
+    "caption": {
+      "tr": "Guggenheim Bilbao",
+      "en": "The Guggenheim Bilbao"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Museo_Guggenheim_Bilbao,_Bilbao._(23811575351).jpg",
+    "author": "Sergio S.C from Zaragoza, España",
+    "license": "CC BY-SA 2.0",
+    "cityKey": "bilbao"
+  },
   "bodrum-kale": {
     "file": "/images/blog/bodrum-kale.webp",
     "alt": {
@@ -718,6 +748,36 @@
     "author": "Bernard Gagnon",
     "license": "CC BY-SA 3.0",
     "cityKey": "gaziantep"
+  },
+  "granada-albaicin": {
+    "file": "/images/blog/granada-albaicin.webp",
+    "alt": {
+      "tr": "Yamaca kurulmuş Albaicín mahallesi ve beyaz evleri",
+      "en": "The Albaicin quarter and its white houses on the hillside"
+    },
+    "caption": {
+      "tr": "Albaicín",
+      "en": "The Albaicin"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Granada_Albaicin_Panorama.jpg",
+    "author": "Mateusz.Kwasnicki",
+    "license": "CC BY 3.0",
+    "cityKey": "granada"
+  },
+  "granada-alhambra": {
+    "file": "/images/blog/granada-alhambra.webp",
+    "alt": {
+      "tr": "Akşam ışığında Alhambra ve arkasında karlı Sierra Nevada",
+      "en": "The Alhambra in evening light with the snowy Sierra Nevada behind"
+    },
+    "caption": {
+      "tr": "Alhambra",
+      "en": "The Alhambra"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Alhambra_in_the_evening.jpg",
+    "author": "Jebulon",
+    "license": "Public domain",
+    "cityKey": "granada"
   },
   "istanbul-eminonu": {
     "file": "/images/blog/istanbul-eminonu.webp",
@@ -1123,6 +1183,66 @@
     "author": "Carlos Delgado",
     "license": "CC BY-SA 3.0",
     "cityKey": "madrid"
+  },
+  "malaga-alcazaba": {
+    "file": "/images/blog/malaga-alcazaba.webp",
+    "alt": {
+      "tr": "Málaga'da Alcazaba'nın surları ve yamaç",
+      "en": "The walls of the Alcazaba in Malaga on its hillside"
+    },
+    "caption": {
+      "tr": "Alcazaba, Málaga",
+      "en": "The Alcazaba, Malaga"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Spain_Andalusia_Malaga_BW_2015-10-24_14-59-25.jpg",
+    "author": "Berthold Werner",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "malaga"
+  },
+  "malaga-larios": {
+    "file": "/images/blog/malaga-larios.webp",
+    "alt": {
+      "tr": "Calle Larios'un mermer döşeli yaya caddesi",
+      "en": "The marble-paved pedestrian Calle Larios"
+    },
+    "caption": {
+      "tr": "Calle Larios, Málaga",
+      "en": "Calle Larios, Malaga"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Calle_Larios_1,_M%C3%A1laga_01.jpg",
+    "author": "Tyk",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "malaga"
+  },
+  "mallorca-born": {
+    "file": "/images/blog/mallorca-born.webp",
+    "alt": {
+      "tr": "Palma'da Passeig des Born'un ağaçlı yaya aksı",
+      "en": "The tree-lined pedestrian Passeig des Born in Palma"
+    },
+    "caption": {
+      "tr": "Passeig des Born, Palma",
+      "en": "Passeig des Born, Palma"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Passeig_des_Born.JPG",
+    "author": "Gt-man",
+    "license": "CC BY-SA 2.0 de",
+    "cityKey": "mallorca"
+  },
+  "mallorca-katedral": {
+    "file": "/images/blog/mallorca-katedral.webp",
+    "alt": {
+      "tr": "Palma Katedrali ve önündeki havuz",
+      "en": "Palma Cathedral and the pool in front of it"
+    },
+    "caption": {
+      "tr": "Palma Katedrali",
+      "en": "Palma Cathedral"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Palma_de_Mallorca_cathedral_view_from_west.JPG",
+    "author": "Heuschrecke (Dmitry Tonkonog and Ksenia Fedosova)",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "mallorca"
   },
   "mardin-eski-sehir": {
     "file": "/images/blog/mardin-eski-sehir.webp",
@@ -1544,6 +1664,36 @@
     "license": "CC0",
     "cityKey": "samsun"
   },
+  "san-sebastian-concha": {
+    "file": "/images/blog/san-sebastian-concha.webp",
+    "alt": {
+      "tr": "La Concha koyu ve kumsalı, yukarıdan",
+      "en": "La Concha bay and its beach seen from above"
+    },
+    "caption": {
+      "tr": "La Concha, San Sebastián",
+      "en": "La Concha, San Sebastian"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Donostia_Kontxa_Loretope_gainetik2.JPG",
+    "author": "No machine-readable author provided. Josugoni assumed (based on copyright claims).",
+    "license": "Public domain",
+    "cityKey": "san-sebastian"
+  },
+  "san-sebastian-parte-vieja": {
+    "file": "/images/blog/san-sebastian-parte-vieja.webp",
+    "alt": {
+      "tr": "Parte Vieja'da dar bir sokak ve kalabalık",
+      "en": "A narrow street and the crowd in the Parte Vieja"
+    },
+    "caption": {
+      "tr": "Parte Vieja, San Sebastián",
+      "en": "The Parte Vieja, San Sebastian"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Parte_zaharra_ta_gu_ze_01.JPG",
+    "author": "Joxemai",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "san-sebastian"
+  },
   "sanliurfa-balikligol": {
     "file": "/images/blog/sanliurfa-balikligol.webp",
     "alt": {
@@ -1708,6 +1858,36 @@
     "author": "g",
     "license": "CC BY-SA 4.0",
     "cityKey": "trabzon"
+  },
+  "valensiya-nord": {
+    "file": "/images/blog/valensiya-nord.webp",
+    "alt": {
+      "tr": "Estació del Nord'un süslü giriş cephesi",
+      "en": "The ornate frontage of the Estacio del Nord"
+    },
+    "caption": {
+      "tr": "Estació del Nord",
+      "en": "The Estacio del Nord"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Valencia_dworzec.jpg",
+    "author": "Bilinmiyor",
+    "license": "Public domain",
+    "cityKey": "valensiya"
+  },
+  "valensiya-sanatlar": {
+    "file": "/images/blog/valensiya-sanatlar.webp",
+    "alt": {
+      "tr": "Gece aydınlatılmış Sanatlar ve Bilimler Şehri yapıları",
+      "en": "The Ciutat de les Arts i les Ciencies buildings lit at night"
+    },
+    "caption": {
+      "tr": "Sanatlar ve Bilimler Şehri",
+      "en": "The City of Arts and Sciences"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Ciudad_de_las_ciencias_noche.JPG",
+    "author": "Chosovi",
+    "license": "CC BY-SA 2.5",
+    "cityKey": "valensiya"
   },
   "van-akdamar": {
     "file": "/images/blog/van-akdamar.webp",
