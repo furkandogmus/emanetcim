@@ -79,7 +79,19 @@ export default function Header() {
         <div className="w-8 h-8 shrink-0 bg-brand-gradient rounded-xl flex items-center justify-center shadow-brand-sm group-hover:shadow-brand-md transition-all duration-200 group-active:scale-95">
           <Package size={16} className="text-white" strokeWidth={2.5} aria-hidden="true" />
         </div>
-        <span className="truncate text-lg font-black tracking-tight text-gray-900 group-hover:text-orange-600 transition-colors duration-200">
+        {/*
+          `max-[400px]:hidden`: 400 pikselin altinda yalnizca simge kaliyor.
+          Sebep, logonun kendisi degil KOMSUSU: 360 px'lik bir ekranda logo 130 +
+          dil secici 64 + "Se connecter" 129 + bosluklar, 328 pikselik ic
+          genisligi 11 px asiyordu. Logo `truncate` oldugu icin sessizce
+          kisaliyor ("BagajPar..."), ama pay bitince kirpilan giris DUGMESI
+          oluyordu -- ve okunmasi gereken bir kontrolun etiketi, marka adindan
+          once korunur. Erisilebilir ad sarmalayan <Link>in `aria-label`inde
+          duruyor, yani ekran okuyucu icin degisen bir sey yok.
+          Alti dil x bes genislikte olculdu (2026-08-31); 400 px ustunde
+          sozcuk markasi aynen duruyor.
+        */}
+        <span className="max-[400px]:hidden truncate text-lg font-black tracking-tight text-gray-900 group-hover:text-orange-600 transition-colors duration-200">
           BagajPark
         </span>
         {process.env.NEXT_PUBLIC_BETA_BADGE === "true" && (
@@ -104,7 +116,13 @@ export default function Header() {
             <NavLink href="/insurance">{navCopy.insurance}</NavLink>
             {/* 2026-08-21: /register (rolsuz) -> /partners — footer'daki "Esnafımız Olun" ile
                 aynı tek tanıtım/başvuru funnel'ına hizalandı, bkz. UX_AUDIT_BOUNCE_COMPARISON */}
-            <Link href="/partners" className="relative id-eyebrow text-orange-600 hover:text-orange-700 transition-all duration-200">{navCopy.becomePartner}</Link>
+            {/*
+              `py-2 -my-2`: ustteki NavLink ile AYNI sebep. Bu baglanti NavLink
+              kullanmadigi icin o duzeltmenin disinda kalmisti ve olculdugunde
+              (2026-08-31) tek basina 77x12 px'te duruyordu -- komsulari 24 px'e
+              cikarilmisken sirf sarmalayicisi farkli diye. Gorunus degismiyor.
+            */}
+            <Link href="/partners" className="relative inline-block py-2 -my-2 id-eyebrow text-orange-600 hover:text-orange-700 transition-all duration-200">{navCopy.becomePartner}</Link>
           </nav>
         )}
         <nav aria-label={navCopy.secondaryLabel} className="hidden md:flex">

@@ -56,11 +56,30 @@ export default function BagSelector({ label, sublabel, count, onIncrease, onDecr
       +/- dugmeleri dokunma hedefi, daralirsa isabet edilemez hale gelir.
     */
     <div className="ui-card-soft flex flex-wrap items-center justify-between gap-3 p-4 group hover:border-orange-200 transition-all">
-      <div className="flex min-w-0 flex-1 items-center gap-4">
+      <div className="flex min-w-[7.5rem] flex-1 items-center gap-4">
         <div className="bg-white p-3 rounded-xl shadow-sm text-gray-400 group-hover:text-orange-600 transition-colors">
           <Package size={24} strokeWidth={1.5} />
         </div>
-        <div>
+        {/*
+          Taban SOL GRUPTA (`min-w-[7.5rem]`), metnin kendisinde degil.
+
+          Disardaki kap zaten `flex-wrap` tasiyor, yani dar ekranda sayaci alt
+          satira indirebilmesi gerekiyordu -- ama sol grup `min-w-0` ile dibe
+          kadar kuculdugu icin sarma HIC tetiklenmiyordu. 320 px'lik bir ekranda
+          sonuc suydu: "Küçük Valiz (S)" harf harf sariyor ("Küçü / k / Valiz /
+          (S)"), fiyat "₺56,0 / 0" diye ikiye boluniyordu -- rezervasyonun ILK
+          adiminda misafir hangi boyutu sectigini okuyamiyordu (2026-08-31).
+
+          Taban metin kutusuna konursa yetmiyor: sol grup yine kuculuyor, sarma
+          yine tetiklenmiyor, ve bu sefer eksi dugmesi etiketin USTUNE biniyor.
+          Ustu ortulmus bir kontrol, kirpilmis bir metinden kotudur.
+
+          Sayi olculerek secildi: sayac 136 px, aradaki bosluk 12 px, satirin ic
+          genisligi 320 px'te 254 / 360 px'te 294 / 390 px'te 324. 120 pikselik
+          taban yalnizca 320'de sarmayi tetikliyor; 360 ve ustunde satir tek
+          parca kaliyor, yani yaygin telefonlarda gorunum hic degismiyor.
+        */}
+        <div className="min-w-0 flex-1">
           <p className="font-bold text-gray-900 text-sm">{label}</p>
           <p className="ui-kicker">{sublabel}</p>
         </div>

@@ -86,8 +86,15 @@ export default function MobileNav() {
       {/* Blur backdrop */}
       <div className="glass border-t border-gray-100/80">
         <ul className="mx-auto flex max-w-lg items-stretch justify-around gap-1 px-2 pt-2 pb-2">
+          {/*
+            Asagidaki oge listesiyle AYNI kural: `flex-auto`. Buradaki
+            `max-w-[60px]` ustelik bir de sabit tavan koyuyordu; Fransizca
+            "Retour" 45 px + yatay dolgu o tavani asip 360 px'te ekranin SOL
+            kenarindan 2 px disari cikiyordu (2026-08-31 olcumu). Icerikten
+            baslayan yuva her dilde kendi genisligini buluyor.
+          */}
           {isDetailPage ? (
-            <li className="flex min-w-0 flex-1 max-w-[60px]">
+            <li className="flex min-w-0 flex-auto">
               <button
                 type="button"
                 onClick={() => router.back()}
@@ -104,8 +111,18 @@ export default function MobileNav() {
           ) : null}
           {items.map(({ href, labelKey, Icon }) => {
             const active = pathMatchesHref(pathname, href);
+            /*
+              `flex-auto`, `flex-1` DEGIL: `flex-1` her ogeye ESIT genislik
+              verir, ama etiketler esit degil. Odeme sayfasinda dorduncu bir
+              oge ("Geri") eklendiginde 320 px'lik bir ekranda her yuva 69 px
+              kaliyordu: "Ara" o yuvanin 24 pikselini kullaniyor,
+              "Rezervasyonlar" ise 104 px isteyip ekranin sag kenarindan 5 px
+              TASIYORDU (2026-08-31'de alti dil x 320-414 px olculdu).
+              `flex-auto` yuvayi icerikten baslatiyor, yani bos yer ihtiyaci
+              olana gidiyor; hicbir dilde ne kirpma ne tasma kaliyor.
+            */
             return (
-              <li key={href} className="flex min-w-0 flex-1">
+              <li key={href} className="flex min-w-0 flex-auto">
                 <Link
                   href={href}
                   aria-current={active ? "page" : undefined}
