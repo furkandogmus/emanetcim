@@ -9,6 +9,7 @@
  * gerekcesi ve GOZDEN GECIRME TARIHI ile girer; tarih gecince kapi yine
  * kirilir, boylece "kabul ettik" sessizce "unuttuk"a donusemez.
  */
+import { readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 
 /** @type {{id: string, paket: string, neden: string, gozdenGecir: string}[]} */
@@ -17,10 +18,22 @@ const ISTISNALAR = [
     id: "GHSA-ggr8-5vv4-36mx",
     paket: "deepmerge-ts",
     neden:
-      "prisma (devDependency, CLI) -> @prisma/config -> deepmerge-ts. Ozyineli " +
-      "nesne grafigi birlestirirken yigin tuketimi. Birlestirilen sey bizim " +
-      "yazdigimiz prisma.config.ts; saldirgan girdisi degil ve uygulama " +
-      "kodundan erisilemiyor. Tek duzeltmesi prisma 7.7 -> 6.12 majör düşürme.",
+      "prisma CLI -> @prisma/config -> deepmerge-ts. Ozyineli nesne grafigi " +
+      "birlestirirken yigin tuketimi (DoS). Birlestirilen sey bizim yazdigimiz " +
+      "prisma.config.ts; saldirgan girdisi DEGIL. Uygulama kodu bu zincire hic " +
+      "girmiyor: `@prisma/config`i yalnizca `prisma` paketi istiyor ve `prisma` " +
+      "yalnizca CLI olarak (entrypoint'te `migrate deploy`) kosuyor -- " +
+      "`@prisma/client` calisma aninda onu YUKLEMIYOR. Tek duzeltmesi " +
+      "prisma 7.7 -> 6.12 majör düşürme.\n" +
+      "DUZELTME (2026-08-31): bu gerekce eskiden 'devDependency' diyordu ve bu " +
+      "YANLISTI. `package.json` onu devDependencies'te tutuyor ama `@prisma/" +
+      "client` (PROD bagimliligi) onu peerDependency olarak istiyor; npm 7+ " +
+      "peer'leri kuruyor ve ebeveyn prod oldugu icin lockfile'da dev=false " +
+      "isaretliyor -- `npm audit --omit=dev`in bu acigi yine gormesinin sebebi " +
+      "tam olarak bu. Ustelik Dockerfile calisma imajina TAM node_modules'i " +
+      "kopyaliyor (satir 41, bilerek: entrypoint prisma CLI'a ihtiyac duyuyor), " +
+      "yani paket uretim imajinda GERCEKTEN bulunuyor. Karar degismiyor; " +
+      "degisen, kararin dayandigi olgu.",
     gozdenGecir: "2026-11-30",
   },
 ];
@@ -42,6 +55,32 @@ function auditOku() {
   } catch {
     console.error("npm audit ciktisi JSON degil.");
     process.exit(2);
+  }
+}
+
+/**
+ * Bir paketin LOCKFILE'daki dev/prod gercegini dondurur.
+ *
+ * NEDEN VAR (2026-08-31): `deepmerge-ts` istisnasinin gerekcesi "prisma
+ * devDependency" diyordu ve bu YANLISTI. `package.json` onu devDependencies'te
+ * tutuyor, ama `@prisma/client` (PROD bagimliligi) `prisma`yi peerDependency
+ * olarak istiyor; npm 7+ peer'leri kuruyor ve ebeveyn prod oldugu icin
+ * lockfile'da `dev` bayragini KOYMUYOR. `npm audit --omit=dev`in bu acigi yine
+ * gormesinin sebebi tam olarak buydu -- ve gerekceyi yazan kisi bu celiskiyi
+ * fark etmemisti.
+ *
+ * Bir istisnanin gerekcesi YANLIS BIR OLGUYA dayaniyorsa, gozden gecirme
+ * tarihinde onu tazeleyecek kisi de ayni yanlis olguyla onaylar. Bu yuzden
+ * ciktida `package.json` DEGIL lockfile gercegi gosteriliyor.
+ */
+function lockfileKapsami(paket) {
+  try {
+    const lock = JSON.parse(readFileSync("package-lock.json", "utf8"));
+    const kayit = lock.packages?.[`node_modules/${paket}`];
+    if (!kayit) return "bilinmiyor";
+    return kayit.dev === true ? "dev" : "PROD";
+  } catch {
+    return "bilinmiyor";
   }
 }
 
@@ -103,6 +142,23 @@ function main() {
     console.error(
       `${k.severity.toUpperCase().padEnd(8)} ${k.id}  ${k.paket}\n` +
         `   ${k.baslik}\n   ${k.url}`,
+    );
+  }
+
+  /*
+    TASINAN ISTISNALARI SESSIZ GECME. Onceden yalnizca "1 bilincli istisna
+    tasiniyor" yaziyordu; hangisi, hangi paket, ne zamana kadar ve PROD'a girip
+    girmedigi gorunmuyordu. Gozden gecirme tarihi geldiginde insanin baktigi ilk
+    yer bu cikti.
+  */
+  const tasinan = ISTISNALAR.filter((i) => bulunan.has(i.id)).filter(
+    (i) => i.gozdenGecir >= bugun,
+  );
+  for (const t of tasinan) {
+    const acik = bulunan.get(t.id);
+    console.warn(
+      `TASINIYOR  ${acik.severity.toUpperCase()} ${t.id} (${t.paket})\n` +
+        `   kapsam: ${lockfileKapsami(t.paket)} (lockfile)  ·  gozden gecirme: ${t.gozdenGecir}`,
     );
   }
 

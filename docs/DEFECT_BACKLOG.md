@@ -256,6 +256,58 @@ kutuları. Esnaf ekranları projenin kendi E2E yardımcılarıyla (`loginAsDemoP
 Ders: bir düzen sondası, **kırpan atayı ve gerçekten çizilen elemanı** hesaba katmadan
 güven vermez. Sıfır bulgu, sondanın yanlış yere baktığının da cevabıdır.
 
+## 2026-08-31 — bağımlılık istisnası YANLIŞ bir olguya dayanıyordu
+
+`npm run audit` yeşil ve bir bilinçli istisna taşıyor (`deepmerge-ts`,
+GHSA-ggr8-5vv4-36mx, HIGH). İstisnanın gerekçesi şöyle başlıyordu:
+
+> "prisma (**devDependency**, CLI) -> @prisma/config -> deepmerge-ts"
+
+Bu **yanlıştı** ve çelişkisi gözle görülür duruyordu: denetim `npm audit
+--omit=dev` ile koşuyor, yani devDependency'leri hariç tutuyor — ama bu açığı
+yine de görüyordu. Ölçüldü:
+
+| Ölçüm | Sonuç |
+|---|---|
+| `package.json` | `prisma` **devDependencies**'te |
+| `@prisma/client` (PROD bağımlılığı) | `prisma`'yı **peerDependency** olarak istiyor |
+| `package-lock.json` → `node_modules/prisma` | **`dev=false`** — npm onu prod sayıyor |
+| `Dockerfile:41` | çalışma imajına **tam** `node_modules` kopyalanıyor (bilerek: entrypoint prisma CLI'a ihtiyaç duyuyor) |
+
+Yani paket üretim imajında **gerçekten bulunuyor**.
+
+**Karar değişmiyor, dayanağı değişiyor.** Açık, özyineli nesne grafiği
+birleştirirken yığın tüketimi (DoS); birleştirilen şey bizim yazdığımız
+`prisma.config.ts` — saldırgan girdisi değil. Ve uygulama kodu bu zincire hiç
+girmiyor: `@prisma/config`'i yalnızca `prisma` paketi istiyor, `prisma` yalnızca
+CLI olarak koşuyor, `@prisma/client` çalışma anında onu yüklemiyor. Bu da
+ölçüldü (lockfile'da `@prisma/config`'i isteyen tek kayıt `node_modules/prisma`).
+
+> Bir istisnanın gerekçesi yanlış bir olguya dayanıyorsa, gözden geçirme
+> tarihinde (2026-11-30) onu tazeleyecek kişi **aynı yanlış olguyla** onaylar.
+> Tehlike açığın kendisi değil, kararın altındaki kum.
+
+### Denetim çıktısı artık olguyu kendisi gösteriyor
+
+Önceden yalnızca "1 bilinçli istisna taşınıyor" yazıyordu — hangisi, hangi paket,
+ne zamana kadar ve **PROD'a girip girmediği** görünmüyordu. Artık:
+
+```
+TASINIYOR  HIGH GHSA-ggr8-5vv4-36mx (deepmerge-ts)
+   kapsam: PROD (lockfile)  ·  gozden gecirme: 2026-11-30
+```
+
+`kapsam` bilgisi `package.json`'dan **değil** lockfile'dan okunuyor — aradaki
+farkın bu hatayı doğurduğu yer tam da orası.
+
+### Kapının hâlâ kırdığı doğrulandı
+
+| Senaryo | Çıkış kodu |
+|---|---|
+| İstisna listesi boşaltıldı | **1** (kırıyor) |
+| Gözden geçirme tarihi geçmiş yapıldı | `SURESI GECMIS` + kırıyor |
+| Normal hâl | **0** |
+
 ## 2026-08-31 — sahiplik ve görünürlük kuralları da artık ölçülüyor
 
 Kalan iki bulgu (çapraz kiracı mühür IDOR'u ve test dükkanının rezervasyon
