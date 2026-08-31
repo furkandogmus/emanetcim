@@ -1,50 +1,19 @@
 import prisma from "@/lib/db";
 
 const DEFAULT_POSTS = [
-  {
-    locale: "tr",
-    slug: "istanbul-valiz-emanet-rehberi",
-    title: "İstanbul Seyahatinde Valiz Çilesine Son: Güvenli Emanet Rehberi",
-    excerpt: "İstanbul sokaklarını valizlerinizi sürüklemeden, özgürce gezmeniz için en iyi emanet çözümlerini ve ipuçlarını derledik.",
-    coverImage: "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=1200&q=80",
-    authorName: "BagajPark Seyahat Editörü",
-    isPublished: true,
-    content: `
-      <h2>İstanbul Sokaklarında Özgürce Dolaşmak Mümkün</h2>
-      <p>Tarihi yarımadadan Galata'ya, Kadıköy'ün hareketli sokaklarından Beşiktaş'a kadar İstanbul, her köşesinde keşfedilecek binlerce detayı barındıran devasa bir metropoldür. Ancak bu muhteşem şehri gezerken yanınızda ağır valizler taşımak, seyahat deneyiminizi ciddi anlamda olumsuz etkileyebilir. Özellikle tarihi bölgelerdeki taş döşemeli sokaklar, yokuşlar ve kalabalık caddeler, tekerlekli bavullarla seyahat etmeyi neredeyse imkansız hale getirir.</p>
+  /*
+    ISTANBUL YAZILARI BURADAN KALDIRILDI (2026-09-01).
 
-      <h2>Tarihi Yarımada ve Sultanahmet Gezileri</h2>
-      <p>Ayasofya Camii, Yerebatan Sarnıcı ve Topkapı Sarayı gibi noktaları ziyaret ederken güvenlik önlemleri nedeniyle büyük sırt çantaları veya valizlerle içeri girmeniz mümkün değildir. Bu tarihi yapıların girişlerinde emanet ofisleri bulunmamaktadır. Dolayısıyla gezintiye başlamadan önce bagajlarınızı güvenli bir yere bırakmanız gerekir.</p>
+    Ayni iki slug artik `content/blog/cities/istanbul.ts` icinde ve
+    `scripts/blog-city-posts.ts` ile yaziliyor. Ikisi bir arada durursa
+    hangisinin kazandigi CALISMA SIRASINA bagli kaliyordu: bos bir
+    veritabaninda once bu dosya calisip eski jenerik govdeyi yaziyor, sonra
+    script uzerine yaziyordu -- ya da tersi. Slug `@unique` oldugu icin
+    catisma sessiz: kimse hata gormuyor, sadece yanlis metin yayinda kaliyor.
 
-      <h2>Havalimanı ve Terminal Emanetlerinin Sınırları</h2>
-      <p>Birçok gezgin valizlerini havalimanı veya tren istasyonlarındaki emanet dolaplarına bırakmayı düşünür. Ancak bu dolapların kapasiteleri sınırlıdır ve yüksek saatlik/günlük ücretleri nedeniyle bütçenizi zorlayabilir. Ayrıca şehre uzak terminallere sadece bavul bırakıp geri dönmek büyük bir zaman kaybıdır.</p>
-
-      <h2>BagajPark ile Yerel Esnaf Güvencesi</h2>
-      <p>BagajPark, İstanbul genelindeki yüzlerce güvenilir cafe, otel ve mağaza ile iş birliği yaparak seyahatinizi kolaylaştırır. Sisteme giriş yapıp konumunuza en yakın emanet noktasını seçerek rezervasyon yapabilirsiniz. Teslim ettiğiniz her bagaj özel güvenlik mühürleriyle kapatılır ve anlaşmalı kurumlarca çalınmaya veya hasara karşı sigortalanır. Böylece yüklerinizden kurtulup İstanbul'un tadını son ana kadar çıkarabilirsiniz.</p>
-    `.trim(),
-  },
-  {
-    locale: "en",
-    slug: "istanbul-luggage-storage-guide",
-    title: "No More Suitcase Struggle in Istanbul: Secure Luggage Storage Guide",
-    excerpt: "Discover the best options and tips for storing your luggage securely in Istanbul so you can explore the city hassle-free.",
-    coverImage: "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=1200&q=80",
-    authorName: "BagajPark Travel Editor",
-    isPublished: true,
-    content: `
-      <h2>Explore Istanbul Without Heavy Suitcases</h2>
-      <p>From the historical peninsula to Galata, the lively streets of Kadikoy, and the coastal vibe of Besiktas, Istanbul is a massive metropolis filled with endless historical gems. However, dragging heavy suitcases around this city can quickly ruin your experience. Cobblestone paths, steep hills, and crowded avenues make traveling with wheeled bags extremely difficult.</p>
-
-      <h2>Visiting Historic Sultanahmet</h2>
-      <p>When visiting landmarks like Hagia Sophia, the Basilica Cistern, or Topkapi Palace, you cannot enter with large bags due to strict security measures. Since these monuments do not offer cloakrooms or locker services, finding a nearby luggage storage option beforehand is essential.</p>
-
-      <h2>The Limits of Airport and Station Lockers</h2>
-      <p>While airport or major train station lockers seem like an option, they are often located far from the city center, have limited capacity, and charge high hourly rates. Traveling all the way back to a transit hub just to drop off a bag is a massive waste of precious travel time.</p>
-
-      <h2>Secure Storage in Local Partners with BagajPark</h2>
-      <p>BagajPark collaborates with trusted local cafes, hotels, and retail shops across Istanbul to solve this problem. Through the online platform, you can book a verified location close to you in seconds. Every stored bag is locked with a numbered security seal and covered by insurance, letting you wander the streets of Istanbul completely weight-free.</p>
-    `.trim(),
-  },
+    Sehre bagli olmayan uc yazi burada kaldi; onlarin kod tarafinda baska bir
+    kaynagi yok.
+  */
   {
     locale: "tr",
     slug: "seyahatte-hafif-olma-yollari",

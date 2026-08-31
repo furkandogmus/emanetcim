@@ -89,6 +89,126 @@
     "license": "CC BY-SA 4.0",
     "cityKey": "antalya"
   },
+  "bodrum-kale": {
+    "file": "/images/blog/bodrum-kale.webp",
+    "alt": {
+      "tr": "Bodrum Kalesi ve önündeki liman",
+      "en": "Bodrum Castle above the harbour"
+    },
+    "caption": {
+      "tr": "Bodrum Kalesi ve liman",
+      "en": "Bodrum Castle and the harbour"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:TurkeyBodrumCastle.jpg",
+    "author": "Horvat",
+    "license": "Public domain",
+    "cityKey": "bodrum"
+  },
+  "bodrum-liman": {
+    "file": "/images/blog/bodrum-liman.webp",
+    "alt": {
+      "tr": "Bodrum limanında sıralanmış guletler ve beyaz evler",
+      "en": "Gulets moored in Bodrum harbour with white houses behind"
+    },
+    "caption": {
+      "tr": "Bodrum limanı",
+      "en": "Bodrum harbour"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Bodrum_harbour_west.jpg",
+    "author": "Dean Sas",
+    "license": "CC BY-SA 2.0",
+    "cityKey": "bodrum"
+  },
+  "bursa-cumalikizik": {
+    "file": "/images/blog/bursa-cumalikizik.webp",
+    "alt": {
+      "tr": "Cumalıkızık'ın taş döşeli dar sokağı ve renkli Osmanlı evleri",
+      "en": "A cobbled lane and painted Ottoman houses in Cumalikizik"
+    },
+    "caption": {
+      "tr": "Cumalıkızık sokakları",
+      "en": "The lanes of Cumalikizik"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Cumal%C4%B1k%C4%B1z%C4%B1k-Old_Ottoman_village-Bursa_-_panoramio.jpg",
+    "author": "Haluk Comertel",
+    "license": "CC BY 3.0",
+    "cityKey": "bursa"
+  },
+  "bursa-ulucami": {
+    "file": "/images/blog/bursa-ulucami.webp",
+    "alt": {
+      "tr": "Bursa Ulu Cami'nin hat yazılı sütunları ve şadırvanı",
+      "en": "The calligraphy-covered pillars and fountain inside Bursa's Grand Mosque"
+    },
+    "caption": {
+      "tr": "Bursa Ulu Cami içi",
+      "en": "Inside the Grand Mosque, Bursa"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Bursa,_Ulu_Cami,_pillars_with_calligraphy.jpg",
+    "author": "Carl Ha",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "bursa"
+  },
+  "istanbul-eminonu": {
+    "file": "/images/blog/istanbul-eminonu.webp",
+    "alt": {
+      "tr": "Eminönü iskelesine yanaşan vapur ve iskele önündeki kalabalık",
+      "en": "A ferry at the Eminonu pier with crowds waiting on the quay"
+    },
+    "caption": {
+      "tr": "Eminönü vapur iskelesi",
+      "en": "The ferry pier at Eminonu"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Sh-Fatih_ferry_at_the_Emin%C3%B6n%C3%BC_ferry_pier_on_the_Bosphorus_in_Istanbul,_Turkey_001.JPG",
+    "author": "Moonik",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "istanbul"
+  },
+  "istanbul-galata": {
+    "file": "/images/blog/istanbul-galata.webp",
+    "alt": {
+      "tr": "Galata Köprüsü ve arkada Karaköy yamacında Galata Kulesi",
+      "en": "The Galata Bridge with Galata Tower on the Karakoy slope behind"
+    },
+    "caption": {
+      "tr": "Galata Köprüsü ve Karaköy",
+      "en": "The Galata Bridge and Karakoy"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Galata_Bridge_and_view_of_Karakoy.jpg",
+    "author": "Yunus Ustunol / Ustunol at en.wikipedia",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "istanbul"
+  },
+  "istanbul-sirkeci": {
+    "file": "/images/blog/istanbul-sirkeci.webp",
+    "alt": {
+      "tr": "Sirkeci Garı'nın tarihi taş cephesi",
+      "en": "The historic stone facade of Sirkeci station"
+    },
+    "caption": {
+      "tr": "Sirkeci Garı",
+      "en": "Sirkeci station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Bahnhofsfront-Istanbul-Sirkeci_retouched.jpg",
+    "author": "Bahnhofsfront-Istanbul-Sirkeci.jpg: Martin Dürrschnabel derivative work: Dha (talk)",
+    "license": "CC BY-SA 2.5",
+    "cityKey": "istanbul"
+  },
+  "istanbul-sultanahmet": {
+    "file": "/images/blog/istanbul-sultanahmet.webp",
+    "alt": {
+      "tr": "Sultanahmet Meydanı'ndan Ayasofya'nın kubbe ve minareleri",
+      "en": "Hagia Sophia's dome and minarets seen from Sultanahmet Square"
+    },
+    "caption": {
+      "tr": "Sultanahmet Meydanı'ndan Ayasofya",
+      "en": "Hagia Sophia from Sultanahmet Square"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Hagia_Sophia_from_the_Sultanameht_Square_(Hippodrome).JPG",
+    "author": "Helge Høifødt",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "istanbul"
+  },
   "izmir-kemeralti": {
     "file": "/images/blog/izmir-kemeralti.webp",
     "alt": {
@@ -133,5 +253,35 @@
     "author": "LWY from Pasadena, USA",
     "license": "CC BY 2.0",
     "cityKey": "izmir"
+  },
+  "kapadokya-goreme": {
+    "file": "/images/blog/kapadokya-goreme.webp",
+    "alt": {
+      "tr": "Göreme Vadisi'ndeki peribacaları ve kayaya oyulmuş odalar",
+      "en": "Fairy chimneys and rock-cut rooms in the Goreme Valley"
+    },
+    "caption": {
+      "tr": "Göreme Vadisi",
+      "en": "The Goreme Valley"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:G%C3%B6reme_Valley_in_Cappadocia_edit1.jpg",
+    "author": "Brocken Inaglory",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "kapadokya"
+  },
+  "kapadokya-uchisar": {
+    "file": "/images/blog/kapadokya-uchisar.webp",
+    "alt": {
+      "tr": "Uçhisar Kalesi ve eteğindeki kaya evler",
+      "en": "Uchisar Castle rock and the cave houses below it"
+    },
+    "caption": {
+      "tr": "Uçhisar Kalesi",
+      "en": "Uchisar Castle"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:U%C3%A7hisar,_Cappadocia_01.jpg",
+    "author": "Bernard Gagnon",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "kapadokya"
   }
 }
