@@ -242,7 +242,11 @@ export default function Footer() {
                 <Link
                   key={c.slug}
                   href={`/luggage-storage/${c.slug}`}
-                  className="rounded-full border border-gray-100 bg-gray-50 px-3 py-1.5 text-xs font-bold text-gray-600 transition hover:border-orange-200 hover:bg-white hover:text-orange-600"
+                  /* `min-w-11 text-center`: ana sayfadaki cip listesiyle AYNI sinir.
+                     Olculdu: Farsca "رم" (Roma) burada 21x30 px kaliyordu. Iki
+                     listeden yalnizca birini duzeltmek, ayni hatayi ikinci bir
+                     yerde acik birakmakti. */
+                  className="min-w-11 rounded-full border border-gray-100 bg-gray-50 px-3 py-1.5 text-center text-xs font-bold text-gray-600 transition hover:border-orange-200 hover:bg-white hover:text-orange-600"
                 >
                   {tCity(`${c.slug}.label`)}
                 </Link>

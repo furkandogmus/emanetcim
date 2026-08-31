@@ -38,6 +38,10 @@ const SAYFALAR = [
   // Farsca RTL: duzen aynalanıyor, tasma sinifi farkli davranabilir
   ["/fa", "ana sayfa (FA/RTL)"],
   ["/fa/search", "arama (FA/RTL)"],
+  // Japonca da KISA yazan bir dil: dokunma hedefinin yatay ekseni burada da
+  // sinaniyor (Farscada iki hata tam bu yuzden cikti).
+  ["/ja", "ana sayfa (JA)"],
+  ["/ja/insurance", "sigorta (JA)"],
   ["/tr/luggage-storage/istanbul", "şehir sayfası"],
   // Huninin geri kalani: bu denetimde en cok hata bu ikisinden cikti.
   [`/tr/shop/${SHOP_ID}`, "dükkan detay"],
@@ -123,23 +127,30 @@ let kirik = 0;
 
 for (const buyukMetin of [false, true]) {
   console.log(`\n=== ${buyukMetin ? "METİN %200 (WCAG 1.4.4)" : "NORMAL BOYUT"} ===`);
+  /*
+    TEK BAGLAM, TEK SAYFA: her yol icin yeni bir baglam acmak tarama 16 sayfaya
+    cikinca 10 dakikayi asti. Ayni baglamda kalinca cerez onayi BIR KEZ
+    veriliyor (sonraki sayfalarda panel hic cikmiyor) ve tarayici acilis
+    maliyeti bir kez oduniyor.
+  */
+  const ctx = await browser.newContext({ ...devices["iPhone 13"] });
+  const page = await ctx.newPage();
+
   for (const [yol, ad] of SAYFALAR) {
-    const ctx = await browser.newContext({ ...devices["iPhone 13"] });
-    const page = await ctx.newPage();
     try {
       await page.goto(BASE + yol, { waitUntil: "domcontentloaded", timeout: 45000 });
     } catch {
       /* yavaş yükleme ölçümü engellemesin */
     }
-    await page.waitForTimeout(3200);
+    await page.waitForTimeout(2200);
     const kabul = page.locator("button").filter({ hasText: /kabul|akzeptier|accept|受け入|پذیرش/i }).first();
     if (await kabul.count()) {
       await kabul.click().catch(() => {});
-      await page.waitForTimeout(800);
+      await page.waitForTimeout(600);
     }
     if (buyukMetin) {
       await page.addStyleTag({ content: "html{font-size:32px !important}" });
-      await page.waitForTimeout(900);
+      await page.waitForTimeout(700);
     }
     const r = await page.evaluate(olcum);
 
@@ -155,7 +166,6 @@ for (const buyukMetin of [false, true]) {
       .catch(() => false);
     if (cloudflare) {
       console.log(`atlandı  ${yol.padEnd(16)} Cloudflare doğrulama sayfası`);
-      await ctx.close();
       continue;
     }
 
@@ -164,8 +174,8 @@ for (const buyukMetin of [false, true]) {
     console.log(
       `${hatalar.length ? "HATA" : "  ok"}  ${yol.padEnd(16)} ${hatalar.length ? hatalar.join(" · ") : ""}`,
     );
-    await ctx.close();
   }
+  await ctx.close();
 }
 
 await browser.close();
