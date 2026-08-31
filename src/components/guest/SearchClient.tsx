@@ -753,6 +753,18 @@ export default function SearchClient({
 
   return (
     <div className="relative h-[100svh] w-full overflow-hidden bg-white font-sans selection:bg-orange-100">
+      {/*
+        Sayfanin TEK `h1`i. Olculdu (2026-08-31, iPhone 13): mobilde sayfada
+        HIC h1 yoktu -- var olan tek h1 `isDesktop` dalindaki kenar panelinin
+        icindeydi ve mobilde hic render edilmiyordu. Ekran okuyucu kullanicisi
+        urunun ANA ekraninda sayfanin ne oldugunu soyleyen bir baslik
+        bulamiyordu.
+
+        Gorsel olarak gizli cunku ekranda basligin yeri harita; ama belge
+        anahatti icin bir h1 sart. Metin, sayfanin SEO basligiyla ayni
+        anahtardan geliyor -- iki yerde iki ayri isim olmasin.
+      */}
+      <h1 className="sr-only">{t("searchTitleBrowse")}</h1>
       <div className="absolute inset-0 z-0">
         <SearchMap
           shops={filteredShops}
@@ -788,9 +800,11 @@ export default function SearchClient({
             <ChevronLeft size={22} className="text-gray-900" />
           </Link>
           <div className="flex-1">
-            <h1 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">
+            {/* `h1` DEGIL: bu metin sayfa basligi degil, arama alaninin
+                etiketi. Sayfanin h1'i yukarida, tek. */}
+            <p className="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">
               {t("searchPlaceholder")}
-            </h1>
+            </p>
           </div>
         </div>
 

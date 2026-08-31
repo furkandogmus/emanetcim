@@ -131,7 +131,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-xs id-eyebrow text-gray-900 mb-6">{t("about")}</h4>
+            <h2 className="text-xs id-eyebrow text-gray-900 mb-6">{t("about")}</h2>
             <ul className="flex flex-col gap-4 text-sm font-bold text-gray-400 [&_a]:inline-block [&_a]:py-1.5 [&_a]:-my-1.5">
               <li>
                 <Link href="/about" className="hover:text-orange-600 transition-colors">
@@ -157,7 +157,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-xs id-eyebrow text-gray-900 mb-6">{t("corporate")}</h4>
+            <h2 className="text-xs id-eyebrow text-gray-900 mb-6">{t("corporate")}</h2>
             <ul className="flex flex-col gap-4 text-sm font-bold text-gray-400 [&_a]:inline-block [&_a]:py-1.5 [&_a]:-my-1.5">
               {!hideGuestBookingNav && (
                 <li>
@@ -201,9 +201,9 @@ export default function Footer() {
 
           <div className="bg-gray-50 p-8 rounded-3xl flex flex-col justify-between border border-gray-100">
             <div>
-              <h4 className="id-eyebrow text-gray-400 mb-4">
+              <h2 className="id-eyebrow text-gray-400 mb-4">
                 {t("securityProtocol")}
-              </h4>
+              </h2>
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
                 <span className="text-xs font-black text-gray-900">{t("sslProtection")}</span>
@@ -216,9 +216,9 @@ export default function Footer() {
         {!hideGuestBookingNav && (
           <div className="mb-16 pb-16 border-b border-gray-100">
             <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-              <h4 className="text-xs id-eyebrow text-gray-900">
+              <h2 className="text-xs id-eyebrow text-gray-900">
                 {t("citiesTitle")}
-              </h4>
+              </h2>
               <Link
                 href="/luggage-storage"
                 className="id-eyebrow text-orange-600 hover:underline"

@@ -45,6 +45,10 @@ yazılmaz; ölçüm yazılır.
 | 25 | %200'de sigorta sayfası 76 px kayıyor | Mobil | ✅ DÜZELTİLDİ (76→0) |
 | 26 | %200'de dükkan sayfası 17 px kayıyor | Mobil | ✅ DÜZELTİLDİ |
 | 27 | %200'de DE sigorta 28 px, FR ana sayfa 7 px kayıyor | Mobil | ✅ DÜZELTİLDİ (ikisi de 0) |
+| 28 | Arama sayfasında mobilde HİÇ `h1` yok | Ekran okuyucu | ✅ DÜZELTİLDİ |
+| 29 | Footer başlıkları `h2→h4` atlaması yapıyor (4 sayfa) | Ekran okuyucu | ✅ DÜZELTİLDİ |
+| 30 | Dükkan sayfasında 2 `h1`, 3 `main` | Ekran okuyucu | ⏳ AÇIK |
+| 31 | Checkout'ta 2 `main`, etiketsiz `nav` | Ekran okuyucu | ⏳ AÇIK |
 | 101 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
 | 102 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
 | 103 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
@@ -471,6 +475,39 @@ anywhere            0          0     0       0        0    0
 
 Normal yazı boyutunda yan etki ölçüldü: sayfa yüksekliği 7419 → 7399 px,
 başlık aynı 2 satır, yatay kaydırma ikisinde de 0. Görünür değişiklik yok.
+
+### 28–31. Başlık ve işaret (landmark) yapısı
+
+Altı sayfa mobil viewport'ta tarandı:
+
+| Sayfa | `h1` | Seviye atlaması | `main` | Etiketsiz `nav` |
+|---|---|---|---|---|
+| `/tr` | 1 | h2→h4 | 1 | 0 |
+| `/tr/search` | **0** | h2→h4 | 1 | 1 |
+| `/tr/shop/<id>` | **2** | h2→h4 | **3** | 0 |
+| `/tr/checkout/<id>` | 1 | — | **2** | 1 |
+| `/tr/insurance` | 1 | h2→h4 | 1 | 0 |
+| `/tr/faq` | 1 | h2→h4 | **2** | 0 |
+
+**Düzeltilen 28 — arama sayfasında `h1` yok:** var olan tek `h1`,
+`isDesktop` dalındaki kenar panelinin içindeydi ve mobilde hiç render
+edilmiyordu. Ekran okuyucu kullanıcısı ürünün ana ekranında sayfanın ne
+olduğunu söyleyen bir başlık bulamıyordu. Görsel olarak gizli (`sr-only`) tek
+bir `h1` eklendi; metni SEO başlığıyla aynı anahtardan geliyor. Masaüstündeki
+`h1` `<p>`ye çevrildi — içeriği zaten sayfa başlığı değil, arama alanının
+etiketiydi.
+
+**Düzeltilen 29 — footer `h2→h4`:** footer sütun başlıkları `h4`tü; sayfanın
+son `h2`sinden sonra iki seviye atlıyordu. Ekran okuyucuda başlıktan başlığa
+gezinen kullanıcı için bu "arada bir başlık kaçırdım mı?" demek. Dördü de
+`h2` yapıldı (görsel sınıflar aynı kaldı, görünüm değişmedi). Dört sayfadaki
+atlamayı birden kapatıyor.
+
+**Açık 30–31 — birden fazla `main`:** dükkan sayfasında **üç**, checkout ve
+SSS'te **iki** `main` var. Sayfada yalnızca bir `main` olmalı; işaret
+gezinmesi (screen reader'da "ana içeriğe git") birden fazlasında belirsizleşir.
+Muhtemel sebep mobil/masaüstü varyantlarının ikisinin birden render edilmesi.
+Dükkandaki çift `h1` de aynı kökten. Henüz izlenmedi.
 
 ### Yavaş bağlantı (3G) — SAĞLIKLI
 
