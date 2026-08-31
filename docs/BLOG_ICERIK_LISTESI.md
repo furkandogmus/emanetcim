@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| Yazısı olan şehir | **69 / 265** — Türkiye'nin 39 şehri tamamlandı |
+| Yazısı olan şehir | **75 / 265** — Türkiye'nin 39 şehri tamamlandı |
 | Yayına yazma | `npx tsx scripts/blog-city-posts.ts --apply` (kuru çalışma varsayılan) |
 | Denetim | `npx tsx scripts/blog-city-posts.ts --verify` + `npx tsx scripts/blog-images.ts --verify` |
 | Eksik listesi | `npx tsx scripts/blog-city-posts.ts --coverage` |
@@ -63,7 +63,7 @@ alakasız olabilir.
 
 <!-- Aşağısı üretilmiştir: npx tsx scripts/blog-city-posts.ts --list-md -->
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 69/265 sehir -->
+<!-- 75/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -141,12 +141,12 @@ alakasız olabilir.
 | 72 | DE | Frankfurt | `frankfurt` | 2 | yayında | frankfurt-aktarma-fuar-valiz | frankfurt-luggage-storage-layover |
 | 73 | DE | Hamburg | `hamburg` | 2 | yayında | hamburg-koprular-speicherstadt-valiz | hamburg-luggage-storage-bridges |
 | 74 | DE | Köln | `koln` | 1 | yayında | koln-katedral-533-basamak-valiz | cologne-luggage-storage-cathedral-533-steps |
-| 75 | DE | Düsseldorf | `dusseldorf` | 1 | — |  |  |
-| 76 | BE | Bruxelles | `bruksel` | 2 | — |  |  |
-| 77 | BE | Brugge | `brugge` | 1 | — |  |  |
-| 78 | BE | Antwerpen | `anvers` | 1 | — |  |  |
-| 79 | NL | Rotterdam | `rotterdam` | 1 | — |  |  |
-| 80 | NL | Den Haag | `lahey` | 1 | — |  |  |
+| 75 | DE | Düsseldorf | `dusseldorf` | 1 | yayında | dusseldorf-altstadt-dunyanin-en-uzun-bari-valiz | dusseldorf-luggage-storage-longest-bar |
+| 76 | BE | Bruxelles | `bruksel` | 2 | yayında | bruksel-uc-gar-midi-valiz | brussels-luggage-storage-three-stations |
+| 77 | BE | Brugge | `brugge` | 1 | yayında | brugge-arnavut-kaldirimi-gunubirlik-valiz | bruges-luggage-storage-cobblestones |
+| 78 | BE | Antwerpen | `anvers` | 1 | yayında | anvers-centraal-dort-kat-valiz | antwerp-luggage-storage-central-station |
+| 79 | NL | Rotterdam | `rotterdam` | 1 | yayında | rotterdam-genis-cadde-ruzgar-valiz | rotterdam-luggage-storage-wide-streets |
+| 80 | NL | Den Haag | `lahey` | 1 | yayında | lahey-iki-gar-scheveningen-valiz | the-hague-luggage-storage-two-stations |
 | 81 | DK | København | `kopenhag` | 2 | — |  |  |
 | 82 | SE | Stockholm | `stockholm` | 2 | — |  |  |
 | 83 | NO | Oslo | `oslo` | 1 | — |  |  |

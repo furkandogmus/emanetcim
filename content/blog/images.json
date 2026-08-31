@@ -239,6 +239,36 @@
     "license": "CC BY-SA 4.0",
     "cityKey": "antalya"
   },
+  "anvers-centraal": {
+    "file": "/images/blog/anvers-centraal.webp",
+    "alt": {
+      "tr": "Antwerpen-Centraal garının kubbeli giriş holü",
+      "en": "The domed entrance hall of Antwerpen-Centraal station"
+    },
+    "caption": {
+      "tr": "Antwerpen-Centraal",
+      "en": "Antwerpen-Centraal station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Antwerpen_centraal_2.jpg",
+    "author": "Ziko-C (Ziko van Dijk)",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "anvers"
+  },
+  "anvers-grote-markt": {
+    "file": "/images/blog/anvers-grote-markt.webp",
+    "alt": {
+      "tr": "Antwerp'in Grote Markt meydanı ve lonca evleri",
+      "en": "Antwerp's Grote Markt and its guild houses"
+    },
+    "caption": {
+      "tr": "Grote Markt, Antwerp",
+      "en": "The Grote Markt, Antwerp"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Antwerpen_Grote_Markt_02.jpg",
+    "author": "Zairon",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "anvers"
+  },
   "ayvalik-adalar": {
     "file": "/images/blog/ayvalik-adalar.webp",
     "alt": {
@@ -418,6 +448,66 @@
     "author": "Dean Sas",
     "license": "CC BY-SA 2.0",
     "cityKey": "bodrum"
+  },
+  "brugge-kanal": {
+    "file": "/images/blog/brugge-kanal.webp",
+    "alt": {
+      "tr": "Rozenhoedkaai'de kanal, tuğla evler ve arkada çan kulesi",
+      "en": "The canal at Rozenhoedkaai with brick houses and the belfry behind"
+    },
+    "caption": {
+      "tr": "Rozenhoedkaai, Brugge",
+      "en": "The Rozenhoedkaai, Bruges"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Rozenhoedkaai_(canal)_and_Belfry_of_Bruges,_Bruges,_Belgium_(Ank_Kumar,_Infosys_Limited)_02.jpg",
+    "author": "Ank Kumar",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "brugge"
+  },
+  "brugge-markt": {
+    "file": "/images/blog/brugge-markt.webp",
+    "alt": {
+      "tr": "Markt meydanından Brugge Çan Kulesi",
+      "en": "The Belfry of Bruges from the Markt square"
+    },
+    "caption": {
+      "tr": "Markt ve Çan Kulesi, Brugge",
+      "en": "The Markt and the Belfry, Bruges"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Belfry_from_Grot_Markt.jpg",
+    "author": "Tony Grist",
+    "license": "Public domain",
+    "cityKey": "brugge"
+  },
+  "bruksel-grand-place": {
+    "file": "/images/blog/bruksel-grand-place.webp",
+    "alt": {
+      "tr": "Grand-Place'ın süslü lonca evleri ve taş zemini",
+      "en": "The guild houses and stone paving of the Grand-Place"
+    },
+    "caption": {
+      "tr": "Grand-Place, Brüksel",
+      "en": "The Grand-Place, Brussels"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Grand-Place,_Brussels_-_panorama,_June_2018.jpg",
+    "author": "Celuici",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "bruksel"
+  },
+  "bruksel-midi": {
+    "file": "/images/blog/bruksel-midi.webp",
+    "alt": {
+      "tr": "Bruxelles-Midi garının peronları",
+      "en": "The platforms at Bruxelles-Midi station"
+    },
+    "caption": {
+      "tr": "Bruxelles-Midi",
+      "en": "Bruxelles-Midi station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Gare_de_Bruxelles-Midi_Station_Brussel-Zuid176.jpg",
+    "author": "Saber68",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "bruksel"
   },
   "budapeste-keleti": {
     "file": "/images/blog/budapeste-keleti.webp",
@@ -628,6 +718,36 @@
     "author": "Dosseman",
     "license": "CC BY-SA 4.0",
     "cityKey": "diyarbakir"
+  },
+  "dusseldorf-altstadt": {
+    "file": "/images/blog/dusseldorf-altstadt.webp",
+    "alt": {
+      "tr": "Ren kıyısındaki Rathausufer promenadı ve arkasındaki eski şehir",
+      "en": "The Rathausufer promenade on the Rhine with the old town behind it"
+    },
+    "caption": {
+      "tr": "Rathausufer, Düsseldorf",
+      "en": "The Rathausufer, Dusseldorf"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:D%C3%BCsseldorf_(DE),_Rathausufer_--_2014_--_2154.jpg",
+    "author": "Anıl Öztaş",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "dusseldorf"
+  },
+  "dusseldorf-koenigsallee": {
+    "file": "/images/blog/dusseldorf-koenigsallee.webp",
+    "alt": {
+      "tr": "Königsallee boyunca uzanan kanal ve ağaçlı yürüyüş yolu",
+      "en": "The canal and tree-lined walkway along the Konigsallee"
+    },
+    "caption": {
+      "tr": "Königsallee, Düsseldorf",
+      "en": "The Konigsallee, Dusseldorf"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:K%C3%B6nigsallee_D%C3%BCsseldorf_am_Samstagmorgen.jpg",
+    "author": "--Stöhrfall (talk) 09:17, 7 August 2010 (UTC)",
+    "license": "Public domain",
+    "cityKey": "dusseldorf"
   },
   "eskisehir-odunpazari": {
     "file": "/images/blog/eskisehir-odunpazari.webp",
@@ -1244,6 +1364,36 @@
     "license": "CC BY 3.0",
     "cityKey": "kusadasi"
   },
+  "lahey-binnenhof": {
+    "file": "/images/blog/lahey-binnenhof.webp",
+    "alt": {
+      "tr": "Binnenhof'un avlusu ve gotik Ridderzaal binası",
+      "en": "The Binnenhof courtyard and the Gothic Ridderzaal"
+    },
+    "caption": {
+      "tr": "Binnenhof, Lahey",
+      "en": "The Binnenhof, The Hague"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Binnenhof,_The_Hague_-hu-1798.jpg",
+    "author": "Hubertl",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "lahey"
+  },
+  "lahey-centraal": {
+    "file": "/images/blog/lahey-centraal.webp",
+    "alt": {
+      "tr": "Den Haag Centraal garının çatı örtüsü ve peronları",
+      "en": "The roof and platforms of Den Haag Centraal station"
+    },
+    "caption": {
+      "tr": "Den Haag Centraal",
+      "en": "Den Haag Centraal station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Den_Haag_Centraal-1589.jpg",
+    "author": "Hubertl",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "lahey"
+  },
   "lizbon-alfama": {
     "file": "/images/blog/lizbon-alfama.webp",
     "alt": {
@@ -1753,6 +1903,36 @@
     "author": "VallVit",
     "license": "CC BY 3.0",
     "cityKey": "roma"
+  },
+  "rotterdam-centraal": {
+    "file": "/images/blog/rotterdam-centraal.webp",
+    "alt": {
+      "tr": "Rotterdam Centraal garının sivri uçlu modern cephesi",
+      "en": "The angular modern frontage of Rotterdam Centraal station"
+    },
+    "caption": {
+      "tr": "Rotterdam Centraal",
+      "en": "Rotterdam Centraal station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:20180225_004_Rotterdam_-_Centraal_Station.jpg",
+    "author": "Sjaak Kempe",
+    "license": "CC BY 2.0",
+    "cityKey": "rotterdam"
+  },
+  "rotterdam-markthal": {
+    "file": "/images/blog/rotterdam-markthal.webp",
+    "alt": {
+      "tr": "Markthal'in kemer biçimli iç mekânı ve tezgâhları",
+      "en": "The arched interior of the Markthal and its stalls"
+    },
+    "caption": {
+      "tr": "Markthal, Rotterdam",
+      "en": "The Markthal, Rotterdam"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Markthal-Rotterdam.jpg",
+    "author": "Exmpletree",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "rotterdam"
   },
   "safranbolu-carsi": {
     "file": "/images/blog/safranbolu-carsi.webp",
