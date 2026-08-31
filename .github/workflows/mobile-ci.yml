@@ -116,18 +116,25 @@ jobs:
           name: android-debug-apk
           path: mobile/build/app/outputs/flutter-apk/app-debug.apk
 
-      # BICIM KONTROLU YALNIZCA DEGISEN DOSYALARA.
+      # BICIM: YENI BORC YASAK, ESKI BORC ZORUNLU DEGIL.
       #
-      # NEDEN (2026-08-31'de olculdu): agacta 37 dosya bicim disi ve cogu
-      # aylardir oyle. Tum agaca bakan bir kontrol, kapiyi KALICI kirmiziya
-      # cakiyordu -- ve kalici kirmizi bir kapi hicbir seyi korumaz: nitekim
-      # ardinda alti derleme hatasi, bir olu metot ve iki kirik test birikmisti.
+      # NEDEN (2026-08-31'de olculdu): agacta 37 dosya bicim disi, cogu aylardir
+      # oyle. Tum agaca bakan bir kontrol kapiyi KALICI kirmiziya cakiyordu -- ve
+      # kalici kirmizi bir kapi hicbir seyi korumaz: ardinda alti derleme hatasi,
+      # bir olu metot ve iki kirik test birikmisti.
       #
-      # Degisen dosyalara bakmak ikisini birden saglar: YENI kod standarda
-      # uymak zorunda, eski borc ise gercek hatalari maskelemiyor. Borc
-      # kapandiginda (`cd mobile && dart format .`) kontrol tekrar tum agaca
-      # genisletilebilir.
-      - name: Check formatting (degisen dosyalar)
+      # Yalnizca "degisen dosyalar" demek de yetmiyordu: 37 dosyadan birine
+      # dokunan tek satirlik bir DUZELTME bile kirmizi duserdi. Yani hata
+      # duzeltmek cezalandirilirdi.
+      #
+      # Kural bu yuzden sart bagli: dosya BASE'te ZATEN bicim disiysa atlanir
+      # (eski borc, o commit'in isi degil); temizse ya da YENI eklenmisse
+      # zorunlu tutulur. Boylece bicim borcu BUYUYEMEZ, ama kimseyi
+      # dokunmadigi bir borcu odemeye zorlamaz.
+      #
+      # Borc tumuyle kapandiginda (`cd mobile && dart format .`) bu adim tek
+      # satirlik `dart format --set-exit-if-changed .` haline geri donebilir.
+      - name: Check formatting (yeni borc)
         run: |
           BASE="${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || 'HEAD^' }}"
           FILES=$(git diff --name-only --diff-filter=ACMR "$BASE" HEAD -- '*.dart' \
@@ -136,18 +143,29 @@ jobs:
             echo "Degisen Dart dosyasi yok."
             exit 0
           fi
-          echo "Kontrol edilen:"; echo "$FILES"
-          if ! echo "$FILES" | xargs dart format --output=none --set-exit-if-changed; then
+          BAD=""
+          SKIPPED=""
+          for f in $FILES; do
+            WAS_CLEAN=1
+            if git show "$BASE:mobile/$f" > /tmp/base.dart 2>/dev/null; then
+              dart format --output=none --set-exit-if-changed /tmp/base.dart \
+                >/dev/null 2>&1 || WAS_CLEAN=0
+            fi
+            if [ "$WAS_CLEAN" = "0" ]; then
+              SKIPPED="$SKIPPED $f"
+              continue
+            fi
+            dart format --output=none --set-exit-if-changed "$f" >/dev/null 2>&1 \
+              || BAD="$BAD $f"
+          done
+          [ -n "$SKIPPED" ] && echo "Eski bicim borcu, atlandi:$SKIPPED"
+          if [ -n "$BAD" ]; then
             echo ""
-            echo "Bicim disi dosya var. Duzeltmek icin, dokundugunuz dosyalarda:"
-            echo "  cd mobile && dart format <dosya>"
-            echo ""
-            echo "Not: agacta 37 dosyalik eski bicim borcu var; dokundugunuz"
-            echo "dosya onlardan biriyse tek satirlik degisiklik bile bu adimi"
-            echo "kirmizi yapar. Tumunu bir kerede kapatmak icin:"
-            echo "  cd mobile && dart format ."
+            echo "Bu dosyalar bicim disi ve ONCEDEN TEMIZDI:$BAD"
+            echo "Duzeltmek icin: cd mobile && dart format$BAD"
             exit 1
           fi
+          echo "Yeni bicim borcu yok."
 
   build-ios:
     name: Build iOS

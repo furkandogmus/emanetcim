@@ -548,6 +548,9 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                 trailing: const Icon(Icons.calendar_today_rounded, color: AppColors.brandOrange),
                 onTap: () async {
                   final date = await showDatePicker(context: context, initialDate: newCheckIn, firstDate: DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 365)));
+                  // Tarih secici acikken sayfa kapatilmis olabilir; `context`
+                  // o durumda bayat ve saat secici cokerdi.
+                  if (!context.mounted) return;
                   if (date != null) {
                     final time = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(newCheckIn!));
                     if (time != null) {
@@ -562,6 +565,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                 trailing: const Icon(Icons.calendar_today_rounded, color: AppColors.brandOrange),
                 onTap: () async {
                   final date = await showDatePicker(context: context, initialDate: newCheckOut, firstDate: newCheckIn ?? DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 365)));
+                  if (!context.mounted) return;
                   if (date != null) {
                     final time = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(newCheckOut!));
                     if (time != null) {
@@ -666,12 +670,16 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                   try {
                     final dio = ref.read(dioProvider);
                     await dio.post('/reviews', data: {'bookingId': bk.id, 'rating': rating, 'comment': commentCtl.text});
-                    if (ctx.mounted) {
-                      Navigator.pop(ctx);
+                    // `ctx` alt panelin, `context` sayfanin. Panel kapandiktan
+                    // sonra da bildirim SAYFANIN uzerinde gorunmeli, o yuzden
+                    // ikisi AYRI korunuyor -- eskiden `ctx.mounted` ile korunup
+                    // `context` kullaniliyordu, yani yanlis olcut.
+                    if (ctx.mounted) Navigator.pop(ctx);
+                    if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('booking.review_success'.tr())));
                     }
                   } catch (_) {
-                    if (ctx.mounted) {
+                    if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('common.error'.tr())));
                     }
                   } finally {
@@ -727,12 +735,16 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                   try {
                     final dio = ref.read(dioProvider);
                     await dio.post('/disputes', data: {'bookingId': bk.id, 'reason': reason, 'description': descCtl.text});
-                    if (ctx.mounted) {
-                      Navigator.pop(ctx);
+                    // `ctx` alt panelin, `context` sayfanin. Panel kapandiktan
+                    // sonra da bildirim SAYFANIN uzerinde gorunmeli, o yuzden
+                    // ikisi AYRI korunuyor -- eskiden `ctx.mounted` ile korunup
+                    // `context` kullaniliyordu, yani yanlis olcut.
+                    if (ctx.mounted) Navigator.pop(ctx);
+                    if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('booking.dispute_success'.tr())));
                     }
                   } catch (_) {
-                    if (ctx.mounted) {
+                    if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('common.error'.tr())));
                     }
                   } finally {

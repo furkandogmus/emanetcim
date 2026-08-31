@@ -101,15 +101,43 @@ korumaz — nitekim ardında altı derleme hatası, bir ölü metot ve iki kır�
 birikmişti. Değişen dosyalara bakmak ikisini birden sağlar: **yeni kod standarda
 uymak zorunda, eski borç gerçek hataları maskelemiyor.**
 
-Kabul edilen ödünç: 37 dosyalık borçtan birine dokunan tek satırlık bir
-değişiklik bile bu adımı kırmızı yapar. Adımın hata çıktısı ne yapılacağını
-yazıyor (`cd mobile && dart format <dosya>`), ve borç tümüyle kapandığında
-kontrol tekrar tüm ağaca genişletilebilir.
+İlk hâli yalnızca "değişen dosyalar" diyordu ve o da yetmedi: 37 dosyadan
+birine dokunan tek satırlık bir **düzeltme** bile kırmızı düşerdi — yani hata
+düzeltmek cezalandırılırdı. Kural şart bağlı hale getirildi:
 
-**Açık:** 37 dosyanın biçim borcu, 60 `info` önerisi, ve
-`booking_detail_screen.dart`'ta altı `use_build_context_synchronously` — sonuncusu
-stil değil, gerçek çökme sınıfı (kullanıcı tarih seçiciyi açıkken sayfayı
-kapatırsa). `dart format .` tek komut ama bu
+| Dosyanın BASE'teki hâli | Davranış |
+|---|---|
+| Zaten biçim dışıydı | atlanır (eski borç, o commit'in işi değil) |
+| Temizdi | zorunlu — yeni borç yasak |
+| Yeni eklenmiş | zorunlu |
+
+Böylece biçim borcu **büyüyemez**, ama kimse dokunmadığı bir borcu ödemeye
+zorlanmaz. Borç tümüyle kapandığında adım tek satırlık
+`dart format --set-exit-if-changed .` hâline geri dönebilir.
+
+### `use_build_context_synchronously` — DÜZELTİLDİ
+
+Altı yer, `booking_detail_screen.dart`. Stil değil, gerçek çökme sınıfı. İki
+ayrı kalıp vardı:
+
+**1. Tarih seçici → saat seçici (2 yer).** `await showDatePicker(...)` sonrası
+`showTimePicker(context: context, ...)`. Kullanıcı tarih seçici açıkken sayfayı
+kapatırsa `context` bayat ve saat seçici çöker. Araya `if (!context.mounted)
+return;` kondu.
+
+**2. Yanlış ölçütle korunmuş `context` (4 yer).** Kod `ctx.mounted` ile
+koruyup `ScaffoldMessenger.of(context)` çağırıyordu — `ctx` alt panelin,
+`context` sayfanın. Analizörün "guarded by an unrelated 'mounted' check"
+uyarısı tam olarak bunu söylüyordu.
+
+Düzeltme ikisini ayırdı: `if (ctx.mounted) Navigator.pop(ctx);` ve ayrıca
+`if (mounted) { ScaffoldMessenger.of(context)... }`. Semantik olarak da daha
+doğru — panel kapandıktan sonra bildirim **sayfanın** üzerinde görünmeli.
+Dosya zaten başka yerlerde (`512`, `609`) aynı `if (mounted)` kalıbını
+kullanıyordu.
+
+**Açık:** 37 dosyanın biçim borcu ve kalan ~54 `info` önerisi (hepsi stil:
+`directives_ordering`, `prefer_const_constructors`). `dart format .` tek komut ama bu
 makinede dart/flutter kurulu değil ve kullanıcının bilgisayarına kurulum
 yapılmayacak. Mobil geliştirme yapan biri `cd mobile && dart format .` koşup
 commit'lerse gate tamamen yeşile döner.
