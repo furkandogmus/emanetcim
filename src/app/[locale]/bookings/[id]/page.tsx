@@ -88,9 +88,19 @@ export default async function BookingDetailPage({
   return (
     <div className="min-h-screen bg-gray-50 pt-32 pb-20 px-6 font-sans">
       <div className="max-w-md mx-auto flex flex-col gap-6 print-area">
+        {/*
+          `print:hidden` -- YAZDIRILAN FIS temiz olsun.
+
+          `.print-area` butun sutunu sariyor (bkz. globals.css `@media print`),
+          yani buradaki her sey kagida basiliyordu: geri baglantisi, iptal/
+          degistir dugmeleri ve "Fisi indir" dugmesinin kendisi. Fis otelde ya
+          da havalimaninda basilip esnafa gosterilen bir BELGE; ustunde
+          islemez dugmeler olmasi onu belge olmaktan cikariyor -- ozellikle
+          basili bir "Iptal et" dugmesi kafa karistirici.
+        */}
         <Link
           href="/bookings"
-          className="inline-flex items-center gap-2 text-xs id-eyebrow text-gray-400 hover:text-orange-600"
+          className="print:hidden inline-flex items-center gap-2 text-xs id-eyebrow text-gray-400 hover:text-orange-600"
         >
           <ChevronLeft size={16} aria-hidden />
           {t("backToBookings")}
@@ -245,19 +255,23 @@ export default async function BookingDetailPage({
           pricingRules={JSON.parse(JSON.stringify(pricingRules))}
         />
 
-        <BookingDetailActions
-          bookingId={booking.id}
-          canCancel={canCancel}
-          checkInIso={booking.checkInTime.toISOString()}
-          checkOutIso={booking.checkOutTime.toISOString()}
-          shopName={booking.shop.name}
-          shopAddress={booking.shop.address}
-          shopLat={booking.shop.latitude}
-          shopLng={booking.shop.longitude}
-          shopPhone={booking.shop.owner?.phone ?? null}
-        />
+        <div className="print:hidden">
+          <BookingDetailActions
+            bookingId={booking.id}
+            canCancel={canCancel}
+            checkInIso={booking.checkInTime.toISOString()}
+            checkOutIso={booking.checkOutTime.toISOString()}
+            shopName={booking.shop.name}
+            shopAddress={booking.shop.address}
+            shopLat={booking.shop.latitude}
+            shopLng={booking.shop.longitude}
+            shopPhone={booking.shop.owner?.phone ?? null}
+          />
+        </div>
 
-        <PrintButton label={t('downloadReceipt')} />
+        <div className="print:hidden">
+          <PrintButton label={t('downloadReceipt')} />
+        </div>
       </div>
     </div>
   );

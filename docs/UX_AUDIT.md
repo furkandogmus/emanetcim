@@ -146,7 +146,7 @@ tarayıcıda oturumu sen açarsan aynı sekmeden devam edilebilir.
 | 42 | Çevrimdışı kalınca tarayıcının dinozor sayfası çıkıyor | PWA | ⏳ KARAR BEKLİYOR |
 | 43 | E-posta kabuğu dili söylemiyordu (`lang` yok) | E-posta | ✅ DÜZELTİLDİ |
 | 44 | E-postada başarı tonunda beyaz yazı 3.30:1 | E-posta | ✅ DÜZELTİLDİ |
-| 45 | Yazdırılan fişte iptal/geri/yazdır düğmeleri de basılıyor | Yazdırma | ⛔ DOSYA BAŞKA AGENT'TE |
+| 45 | Yazdırılan fişte iptal/geri/yazdır düğmeleri de basılıyor | Yazdırma | ✅ DÜZELTİLDİ |
 | 46 | Ana sayfa sekme başlığında marka yok; blogda iki kez | SEO/sekme | ✅ DÜZELTİLDİ |
 | 47 | Push bildirimine tıklayan ana sayfaya düşüyor | Push | ✅ DÜZELTİLDİ |
 | 48 | Web push uçtan uca ÖLÜ: `sendPush` hiç çağrılmıyor | Push | ⏳ KARAR BEKLİYOR |
@@ -881,9 +881,8 @@ düğmeler olması onu belge olmaktan çıkarıyor.
 **Düzeltmesi:** üç ögeye Tailwind'in `print:hidden` varyantı. Tek satırlık,
 görünüm ekranda hiç değişmiyor.
 
-**Neden yapılmadı:** `src/app/[locale]/bookings/[id]/page.tsx` şu anda başka
-bir agent tarafından düzenleniyor (`git status` = `M`). Dosya serbest kalınca
-uygulanmalı.
+**Uygulandı** (dosya serbest kalınca, bir sonraki turda): üç öge
+`print:hidden` aldı. Ekranda hiçbir şey değişmiyor.
 
 **Ölçülemedi:** gerçek bir fişin nasıl basıldığı — o sayfa giriş ya da geçerli
 bir rezervasyon kodu gerektiriyor. Yukarıdaki tespit kaynak koddan.
