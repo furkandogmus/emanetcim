@@ -3,6 +3,7 @@ import { buildLocalizedUrls, getSiteBaseUrl } from "@/lib/site-urls";
 import prisma from "@/lib/db";
 import { routing } from "@/i18n/routing";
 import { STORAGE_CITIES } from "@/lib/storage-cities";
+import { OPERATING_SHOP_FILTER } from "@/lib/public-shop-filter";
 
 export const dynamic = 'force-dynamic';
 
@@ -49,8 +50,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const shopEntries: MetadataRoute.Sitemap = [];
   try {
     // 2. Dinamik Dükkan Sayfaları (Checkout Akışı)
+    /*
+      OPERATING_SHOP_FILTER: site haritasi ARAMA MOTORUNA "bu sayfalari
+      siralayin" demektir. Iki sey disarida kalmali:
+
+      - `isTest` kayitlari. Elle yazilan `isActive: true` bunlari iceriyordu;
+        yani kamuya HIC gorunmemesi gereken kayitlar Google'a BILDIRILIYORDU
+        (P1-4'un kacirdigi yer).
+      - Talep testi noktalari. 482 nokta x 6 dil = 2.892 URL ve hepsi
+        rezervasyon almayan, birbirinin neredeyse ayni "yakinda aciliyor"
+        sayfasi. Bunlari dizine sokmak hem tarama butcesini uc gercek dukkandan
+        calar hem de ince icerik sinyali uretir. Talep testinin trafigi zaten
+        site ici aramadan geliyor; /demand sayfasi ise gercek icerik olarak
+        dizinde kaliyor.
+    */
     const shops = await prisma.shop.findMany({
-      where: { isActive: true },
+      where: OPERATING_SHOP_FILTER,
       select: { id: true, updatedAt: true },
     });
 

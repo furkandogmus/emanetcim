@@ -10,6 +10,44 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-08-31 — 482 nokta arama motoruna 2.892 ince sayfa olarak bildiriliyordu
+
+Talep testini 50 noktadan 482'ye çıkarmanın görmediğim bir bedeli varmış. Üç
+ayrı sorun, üçü de sessiz:
+
+**1. Site haritası 2.892 yer tutucu URL bildiriyordu.** 482 nokta × 6 dil, hepsi
+rezervasyon almayan ve birbirinin neredeyse aynı "yakında açılıyor" sayfası.
+Aramadan gelen ziyaretçi aradığını bulamaz (kötü kullanıcı deneyimi), arama
+motoru ince içerik görür (kötü kalite sinyali) ve üç gerçek dükkanın tarama
+bütçesi 482 yer tutucuya bölünür.
+
+**2. Aynı sorgu `isTest` kayıtlarını da bildiriyordu.** `where: { isActive: true }`
+elle yazılmıştı. Oysa P1-4'ün kuralı "isTest kaydı kamuya HİÇ görünmez" — ve
+site haritasından daha kamuya açık bir yer yok. Filtreyi tek yerde tutmanın
+sebebi tam olarak buydu; dördüncü çağrı yeri eklendiğinde biri unutuldu.
+
+**3. `getShopPublicDetail` de `isTest` süzmüyordu.** P1-4 düzeltmesi arama,
+listeler ve istatistikleri kapsamış ama **detay sayfasını atlamıştı**: test
+dükkanı aramada görünmüyor, URL'i bilen (ya da eski bir bağı olan) herkes
+sayfasını açabiliyordu. Bugün üretimde aktif test kaydı yok, yani belirti
+üretmiyor — ama kural mutlak yazılmış.
+
+Düzeltmeler:
+
+- Site haritası `OPERATING_SHOP_FILTER` kullanıyor: yalnızca gerçekten
+  rezervasyon alan dükkanlar bildiriliyor. Yerelde ölçüldü — 2 işletilen dükkan
+  kaldı, 9 prelaunch noktası çıktı.
+- Prelaunch nokta sayfası `robots: { index: false, follow: true }`. `follow`
+  kalıyor ki sayfadaki gerçek bağlantılar (talep haritası, esnaf başvurusu)
+  taranabilsin. Nokta açıldığında `isPrelaunch` false olur ve sayfa
+  kendiliğinden dizine açılır — ayrıca bir şey yapmak gerekmiyor.
+- `getShopPublicDetail` artık `PUBLIC_SHOP_FILTER` kullanıyor (prelaunch geçer,
+  test geçmez).
+
+Talep testinin trafiği zaten site içi aramadan geliyor; `/demand` sayfası ise
+gerçek içerik olarak dizinde kalıyor — esnafa ölçülmüş talebi gösteren asıl
+pazarlama yüzeyi o.
+
 ## 2026-08-31 — talep testi zinciri CANLIDA uçtan uca doğrulandı
 
 Bu oturumda gönderilen her parça üretimde tek tek denendi. "Testler geçiyor"

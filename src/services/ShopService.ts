@@ -11,6 +11,7 @@ import { moneyToNumber } from '@/lib/money';
 import { getActiveShopsOrderedByDistanceKm } from '@/lib/shop-distance-postgis';
 
 import { isShopOpenForStay } from '@/lib/shop-hours';
+import { PUBLIC_SHOP_FILTER } from '@/lib/public-shop-filter';
 import { notificationService } from '@/services/NotificationService';
 import { getSlotAvailability } from '@/services/SlotService';
 import logger from '@/lib/logger';
@@ -423,8 +424,21 @@ export class ShopService implements IShopService {
   }
 
   async getShopPublicDetail(shopId: string): Promise<ShopPublicDetail | null> {
+    /*
+      PUBLIC_SHOP_FILTER, elle `isActive: true` DEGIL.
+
+      P1-4'un kurali "isTest kaydi kamuya HIC gorunmez" ama duzeltme yalnizca
+      arama, listeler ve istatistikleri kapsamisti; DETAY SAYFASI disarida
+      kalmisti. Yani bir test dukkani aramada gorunmuyor, ama URL'i bilen
+      (ya da eski bir bagi olan) herkes sayfasini aciyordu. Filtreyi tek yerde
+      tutmanin sebebi tam olarak buydu: dorduncu bir cagri yeri eklendiginde
+      biri unutuluyor.
+
+      Prelaunch noktalari BU FILTREDEN GECER -- gorunmeleri gerekiyor, olculen
+      sey o.
+    */
     return prisma.shop.findFirst({
-      where: { id: shopId, isActive: true },
+      where: { id: shopId, ...PUBLIC_SHOP_FILTER },
       include: {
         reviews: {
           orderBy: { createdAt: 'desc' },

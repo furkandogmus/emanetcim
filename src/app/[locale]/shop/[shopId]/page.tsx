@@ -38,6 +38,19 @@ export async function generateMetadata({
   return {
     title,
     description,
+    /*
+      Talep testi noktasi DIZINE GIRMEZ, ama baglantilari izlenir.
+
+      Bu sayfa rezervasyon almiyor ve 482 tanesi neredeyse ayni. Aramadan gelen
+      bir ziyaretci burada aradigini bulamaz -- yani hem kotu bir kullanici
+      deneyimi hem de arama motoruna kotu bir kalite sinyali. `follow` kaliyor
+      ki sayfadaki gercek baglantilar (talep haritasi, esnaf basvurusu)
+      taranabilsin.
+
+      Nokta hizmete acildiginda `isPrelaunch` false olur ve sayfa kendiliginden
+      dizine acilir; ayrica bir sey yapmak gerekmiyor.
+    */
+    ...(shop.isPrelaunch ? { robots: { index: false, follow: true } } : {}),
     alternates: { canonical, languages },
     openGraph: {
       title,
