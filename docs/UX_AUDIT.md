@@ -130,6 +130,8 @@ tarayıcıda oturumu sen açarsan aynı sekmeden devam edilebilir.
 | 43 | E-posta kabuğu dili söylemiyordu (`lang` yok) | E-posta | ✅ DÜZELTİLDİ |
 | 44 | E-postada başarı tonunda beyaz yazı 3.30:1 | E-posta | ✅ DÜZELTİLDİ |
 | 45 | Yazdırılan fişte iptal/geri/yazdır düğmeleri de basılıyor | Yazdırma | ⛔ DOSYA BAŞKA AGENT'TE |
+| 46 | Ana sayfa sekme başlığında marka yok; blogda iki kez | SEO/sekme | ✅ DÜZELTİLDİ |
+| 47 | Push bildirimine tıklayan ana sayfaya düşüyor | Push | ✅ DÜZELTİLDİ |
 | 101 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
 | 102 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
 | 103 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
@@ -867,6 +869,32 @@ uygulanmalı.
 
 **Ölçülemedi:** gerçek bir fişin nasıl basıldığı — o sayfa giriş ya da geçerli
 bir rezervasyon kodu gerektiriyor. Yukarıdaki tespit kaynak koddan.
+
+### 47. Push bildirimi yanlış yere götürüyordu
+
+Sunucu ile service worker arasında gövde uyuşmazlığı — ve ikisi de bu
+denetimde benim dokunduğum kod:
+
+```
+sunucu gonderiyor : { title, body, bookingId }     (NotificationService.sendPush)
+worker ariyordu   : payload.url                    (push-sw.js)
+```
+
+`url` hiç gelmediği için worker `"/"`e düşüyordu: **rezervasyonuyla ilgili bir
+bildirime dokunan kullanıcı ana sayfaya gidiyor** ve aradığı şeyi kendisi
+bulmak zorunda kalıyordu. Bildirimin tek işi kullanıcıyı doğru yere götürmek
+olduğu için bu, özelliği anlamsız kılıyor.
+
+Worker artık `bookingId` varsa `/bookings/<id>`e gidiyor. Yol dil öneksiz
+veriliyor ve `src/proxy.ts` onu kullanıcının diline yönlendiriyor — canlıda
+doğrulandı:
+
+```
+/bookings/<id>  ->  307  ->  /tr/bookings/<id>
+```
+
+Worker'ın dili bilmesi gerekmiyor, ki zaten bilemez (bildirim uygulama kapalı
+gelir).
 
 ### Yavaş bağlantı (3G) — SAĞLIKLI
 

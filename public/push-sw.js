@@ -27,7 +27,22 @@ self.addEventListener("push", function (event) {
     body: payload.body || "",
     icon: "/icons/icon-192x192.png",
     badge: "/icons/icon-192x192.png",
-    data: { url: payload.url || "/" },
+    /*
+      TIKLAMA HEDEFI. Sunucu (`NotificationService.sendPush`) govdede `url`
+      DEGIL `bookingId` gonderiyor -- olculdu 2026-08-31:
+
+        payload = { title, body, bookingId }
+
+      Bu worker yalnizca `url` ariyordu, bulamayinca "/"e dusuyordu: yani
+      rezervasyonuyla ilgili bildirime dokunan kullanici ANA SAYFAYA gidiyor
+      ve aradigi seyi kendisi bulmak zorunda kaliyordu.
+
+      Yol dil onekSIZ veriliyor; `src/proxy.ts` onu kullanicinin diline
+      yonlendiriyor. Worker'in dili bilmesi gerekmiyor, ki zaten bilemez.
+    */
+    data: {
+      url: payload.url || (payload.bookingId ? "/bookings/" + payload.bookingId : "/"),
+    },
     tag: payload.tag || undefined,
   };
 
