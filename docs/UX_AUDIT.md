@@ -15,6 +15,40 @@ yazılmaz; ölçüm yazılır.
 
 ---
 
+## Ne bekliyor — kime bağlı
+
+Kapanmış bulgular aşağıdaki tabloda; **açık kalanlar** burada, kime bağlı
+olduğuna göre. Bu blok, kimin ne yapması gerektiğini tek bakışta görmek için.
+
+**Senin kararını bekleyenler** (uygulanabilir durumda, ölçümleri hazır):
+
+| # | Konu | Neden kendi başıma yapmadım |
+|---|---|---|
+| 17 | Birincil butonlarda beyaz yazı **3.56:1** (gerekli 4.5) | Markanın ana tonunu koyulaştırmak gerekiyor |
+| 18 | İkincil gri metin **2.52:1**, 406 kullanım | Tek satırlık token değişimi ama tipografi tonunu değiştiriyor |
+| 15 | Checkout'ta ekranın %31'i sabit çubuk | Çözüm mobil alt menüyü gizlemek — gezinme davranışı değişir |
+| 12 | Çerez paneli mobilde ana eylemi örtüyor | Hukuki metin; daraltma kararı senin |
+| 19 | PWA her açılışta Türkçe | `localeDetection` SEO'yu ve tüm kullanıcıları etkiler |
+
+**Başka agent'in alanında** (tarifi yazılı, tek satırlık):
+
+| # | Konu |
+|---|---|
+| 37 | Prelaunch formlarında `autoComplete="email"` eksik (2 dosya) |
+
+**Bende açık kalan** — ama sebebi ölçüldü, çözümü 15'e bağlı:
+
+| # | Konu | Ölçülen sebep |
+|---|---|---|
+| 14 | Checkout'ta görünen satır 0, özet "1 Valiz" diyor | Seçili satır (M/L) ilk açılışta yapışkan çubuğun ARKASINDA |
+
+**Hiç ölçülemeyenler:** giriş gerektiren bütün yüzeyler (hesabım,
+rezervasyonlarım, partner paneli, admin ekranları) ve gerçek cihazda PWA
+kurulum akışı. Hesap açmak ve parola girmek yapabileceğim işler değil;
+tarayıcıda oturumu sen açarsan aynı sekmeden devam edilebilir.
+
+---
+
 ## Son durum — 2026-08-31
 
 | # | Bulgu | Yüzey | Durum |
@@ -229,7 +263,31 @@ belirsizken birini açmak kullanıcı adına karar vermek olurdu.
 kümeler `2 + 5 + 9 = 16` olarak yeniden hesaplandı — hiçbir nokta kaybolmadı,
 hiçbiri iki kez çizilmedi (test bunu da doğruluyor).
 
-### 14–15. Mobil checkout: görünenle özet çelişiyor — AÇIK
+### 14–15. Mobil checkout: görünenle özet çelişiyor — SEBEBİ ÖLÇÜLDÜ
+
+**2026-08-31 güncellemesi — kaynak kesinleşti.** Örtülme testi yapıldı
+(satırın merkez noktasında `elementFromPoint` ile üstteki öge kim):
+
+| Satır | Üst konum | İlk açılışta örtülü mü |
+|---|---|---|
+| Küçük Valiz (S) — sayı **0** | 339 | hayır |
+| Orta/Büyük (M/L) — sayı **1** | 437 | **evet** |
+| Ekstra Büyük (XL) — sayı 0 | 543 | **evet** |
+
+Yapışkan özet çubuğu y=455'te başlıyor. Yani kullanıcı **0 yazan satırı
+görüyor, 1 sayılan satırı görmüyor** — çelişki tam olarak buradan.
+
+Sayfa kaydırılabiliyor (669 px kaydırma payı var), yani satırlar
+erişilemez değil; **keşfedilemez**. Kullanıcıya "aşağıda bir şey var" diyen
+bir işaret yok.
+
+Denendi ve İŞE YARAMADI: mobil alt menüyü gizlemek örtülmeyi değiştirmiyor
+(çubuk zaten y=455'te başlıyor, menü onun içinde). Yani #15'in çözümü
+sanıldığı gibi "alt menüyü gizle" değil; **özet çubuğunun kendisi** ya da
+üstündeki başlık/adım göstergesi daralmalı.
+
+Varsayılanı S'e çevirmek (görünen satırla özeti eşitlerdi) fiyat kararıdır —
+S daha ucuz — ve bu denetimin yetkisinde değil.
 
 Akış gerçekten denendi: arama → dükkan → "REZERVASYON YAP" → `/tr/checkout/<id>`.
 Sayfa ölçümde temiz (yatay kaydırma yok, kırpılma yok, **etiketsiz form
@@ -399,8 +457,8 @@ Ana sayfa kapandıktan sonra aynı test beş sayfaya daha uygulandı:
 |---|---|
 | `/tr/search` | 0 ✅ |
 | `/tr/faq` | 0 ✅ |
-| `/tr/shop/<id>` | 17 px ⏳ |
-| `/tr/insurance` | 76 px ⏳ |
+| `/tr/shop/<id>` | 17 px → **0** ✅ (#26) |
+| `/tr/insurance` | 76 px → **0** ✅ (#25) |
 | `/tr/checkout/<id>` | **200 px** → 0 ✅ |
 
 **Checkout (en kötüsü, düzeltildi):** kaynak `BagSelector` satırıydı.
