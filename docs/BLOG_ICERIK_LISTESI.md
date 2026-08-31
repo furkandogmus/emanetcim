@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| Yazısı olan şehir | **18 / 265** (aşağıdaki tablo) |
+| Yazısı olan şehir | **24 / 265** (aşağıdaki tablo) |
 | Yayına yazma | `npx tsx scripts/blog-city-posts.ts --apply` (kuru çalışma varsayılan) |
 | Denetim | `npx tsx scripts/blog-city-posts.ts --verify` + `npx tsx scripts/blog-images.ts --verify` |
 | Eksik listesi | `npx tsx scripts/blog-city-posts.ts --coverage` |
@@ -62,7 +62,7 @@ alakasız olabilir.
 
 <!-- Aşağısı üretilmiştir: npx tsx scripts/blog-city-posts.ts --list-md -->
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 18/265 sehir -->
+<!-- 24/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -83,12 +83,12 @@ alakasız olabilir.
 | 15 | TR | Diyarbakır | `diyarbakir` | 1 | yayında | diyarbakir-surlar-sur-ici-valiz | diyarbakir-city-walls-luggage-storage |
 | 16 | TR | Mersin | `mersin` | 2 | yayında | mersin-kizkalesi-gunubirlik-valiz | mersin-kizkalesi-day-trip-luggage |
 | 17 | TR | Kapadokya | `kapadokya` | 4 | yayında | kapadokya-son-gun-valiz-tur-otobus | cappadocia-last-day-luggage-storage |
-| 18 | TR | Denizli | `pamukkale` | 2 | — |  |  |
-| 19 | TR | Selçuk | `selcuk` | 2 | — |  |  |
-| 20 | TR | Kuşadası | `kusadasi` | 2 | — |  |  |
-| 21 | TR | Çeşme | `cesme` | 3 | — |  |  |
-| 22 | TR | Fethiye | `fethiye` | 3 | — |  |  |
-| 23 | TR | Marmaris | `marmaris` | 2 | — |  |  |
+| 18 | TR | Denizli | `pamukkale` | 2 | yayında | pamukkale-travertenler-yalinayak-valiz | pamukkale-travertines-luggage-storage |
+| 19 | TR | Selçuk | `selcuk` | 2 | yayında | selcuk-efes-iki-kapi-valiz | selcuk-ephesus-two-gates-luggage |
+| 20 | TR | Kuşadası | `kusadasi` | 2 | yayında | kusadasi-kruvaziyer-gemiye-donus-valiz | kusadasi-cruise-day-luggage-storage |
+| 21 | TR | Çeşme | `cesme` | 3 | yayında | cesme-alacati-arnavut-kaldirimi-valiz | cesme-alacati-cobblestones-luggage |
+| 22 | TR | Fethiye | `fethiye` | 3 | yayında | fethiye-oludeniz-kayakoy-valiz | fethiye-oludeniz-kayakoy-luggage-storage |
+| 23 | TR | Marmaris | `marmaris` | 2 | yayında | marmaris-rodos-feribotu-valiz | marmaris-rhodes-ferry-luggage-storage |
 | 24 | TR | Kaş | `kas` | 2 | — |  |  |
 | 25 | TR | Alanya | `alanya` | 2 | — |  |  |
 | 26 | TR | Side | `side` | 2 | — |  |  |

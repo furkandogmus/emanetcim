@@ -179,6 +179,36 @@
     "license": "CC BY-SA 4.0",
     "cityKey": "bursa"
   },
+  "cesme-alacati": {
+    "file": "/images/blog/cesme-alacati.webp",
+    "alt": {
+      "tr": "Alaçatı'da taş evler ve dar arnavut kaldırımı sokak",
+      "en": "Stone houses and a narrow cobbled lane in Alacati"
+    },
+    "caption": {
+      "tr": "Alaçatı sokakları",
+      "en": "The lanes of Alacati"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Ala%C3%A7at%C4%B1_2016.jpg",
+    "author": "Kadı",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "cesme"
+  },
+  "cesme-kale": {
+    "file": "/images/blog/cesme-kale.webp",
+    "alt": {
+      "tr": "Çeşme Kalesi'nin sur duvarları ve burçları",
+      "en": "The walls and bastions of Cesme Castle"
+    },
+    "caption": {
+      "tr": "Çeşme Kalesi",
+      "en": "Cesme Castle"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:%C3%87e%C5%9Fme_Kalesi,_%C4%B0zmir,_2020_02.jpg",
+    "author": "Gargarapalvin",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "cesme"
+  },
   "diyarbakir-surlar": {
     "file": "/images/blog/diyarbakir-surlar.webp",
     "alt": {
@@ -238,6 +268,36 @@
     "author": "Zeynel Cebeci",
     "license": "CC BY-SA 4.0",
     "cityKey": "eskisehir"
+  },
+  "fethiye-liman": {
+    "file": "/images/blog/fethiye-liman.webp",
+    "alt": {
+      "tr": "Fethiye limanında demirlemiş tekneler ve arkadaki dağlar",
+      "en": "Boats moored in Fethiye harbour with the mountains behind"
+    },
+    "caption": {
+      "tr": "Fethiye limanı",
+      "en": "Fethiye harbour"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Fethiye_harbour_(1091840607).jpg",
+    "author": "allen watkin from London, UK",
+    "license": "CC BY-SA 2.0",
+    "cityKey": "fethiye"
+  },
+  "fethiye-oludeniz": {
+    "file": "/images/blog/fethiye-oludeniz.webp",
+    "alt": {
+      "tr": "Ölüdeniz'in kumsalı ve arkasındaki lagün",
+      "en": "The beach at Oludeniz with the lagoon behind it"
+    },
+    "caption": {
+      "tr": "Ölüdeniz",
+      "en": "Oludeniz"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:The_Blue_Lagoon_(1105270821).jpg",
+    "author": "allen watkin from London, UK",
+    "license": "CC BY-SA 2.0",
+    "cityKey": "fethiye"
   },
   "gaziantep-kale": {
     "file": "/images/blog/gaziantep-kale.webp",
@@ -464,6 +524,36 @@
     "license": "CC BY-SA 3.0",
     "cityKey": "konya"
   },
+  "kusadasi-guvercinada": {
+    "file": "/images/blog/kusadasi-guvercinada.webp",
+    "alt": {
+      "tr": "Kuşadası'nda Güvercinada ve onu kıyıya bağlayan yol",
+      "en": "Pigeon Island at Kusadasi and the causeway linking it to the shore"
+    },
+    "caption": {
+      "tr": "Güvercinada, Kuşadası",
+      "en": "Pigeon Island, Kusadasi"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:G%C3%BCvercinada,_Ku%C5%9Fadas%C4%B1_03.jpg",
+    "author": "Zeynel Cebeci",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "kusadasi"
+  },
+  "kusadasi-liman": {
+    "file": "/images/blog/kusadasi-liman.webp",
+    "alt": {
+      "tr": "Kuşadası limanında bekleyen gezi tekneleri",
+      "en": "Excursion boats waiting in Kusadasi harbour"
+    },
+    "caption": {
+      "tr": "Kuşadası limanı",
+      "en": "Kusadasi harbour"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Ready_4_Samos_boot_tour_-)_-_panoramio.jpg",
+    "author": "Nihat1988",
+    "license": "CC BY 3.0",
+    "cityKey": "kusadasi"
+  },
   "mardin-eski-sehir": {
     "file": "/images/blog/mardin-eski-sehir.webp",
     "alt": {
@@ -494,6 +584,36 @@
     "license": "CC BY-SA 2.0",
     "cityKey": "mardin"
   },
+  "marmaris-icmeler": {
+    "file": "/images/blog/marmaris-icmeler.webp",
+    "alt": {
+      "tr": "İçmeler'de kumsal, şemsiyeler ve arkasındaki çam kaplı dağlar",
+      "en": "The beach at Icmeler with umbrellas and pine-covered hills behind"
+    },
+    "caption": {
+      "tr": "İçmeler",
+      "en": "Icmeler"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Icmeler_2.07.2011_-_panoramio.jpg",
+    "author": "agentura",
+    "license": "CC BY 3.0",
+    "cityKey": "marmaris"
+  },
+  "marmaris-kale": {
+    "file": "/images/blog/marmaris-kale.webp",
+    "alt": {
+      "tr": "Marmaris Kalesi ve altındaki eski mahalle",
+      "en": "Marmaris Castle above the old quarter"
+    },
+    "caption": {
+      "tr": "Marmaris Kalesi",
+      "en": "Marmaris Castle"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Marmaris_Castle_2019_G7.jpg",
+    "author": "George Chernilevsky",
+    "license": "CC BY 4.0",
+    "cityKey": "marmaris"
+  },
   "mersin-kizkalesi": {
     "file": "/images/blog/mersin-kizkalesi.webp",
     "alt": {
@@ -523,6 +643,36 @@
     "author": "Nedim Ardoğa",
     "license": "CC BY-SA 3.0",
     "cityKey": "mersin"
+  },
+  "pamukkale-hierapolis": {
+    "file": "/images/blog/pamukkale-hierapolis.webp",
+    "alt": {
+      "tr": "Travertenlerin güney girişinden yukarı bakış",
+      "en": "Looking up from the south entrance to the travertines"
+    },
+    "caption": {
+      "tr": "Travertenlerin güney girişi",
+      "en": "The south entrance to the travertines"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:South_Entrance_of_Pamukkale_Travertines_-_2014.10_-_panoramio.jpg",
+    "author": "rheins",
+    "license": "CC BY 3.0",
+    "cityKey": "pamukkale"
+  },
+  "pamukkale-travertenler": {
+    "file": "/images/blog/pamukkale-travertenler.webp",
+    "alt": {
+      "tr": "Pamukkale'nin beyaz kireç taşı terasları ve içlerindeki sıcak su",
+      "en": "The white limestone terraces of Pamukkale with thermal water in them"
+    },
+    "caption": {
+      "tr": "Pamukkale travertenleri",
+      "en": "The Pamukkale travertines"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Pamukkale_Travertines_-_2014.10_-_panoramio.jpg",
+    "author": "rheins",
+    "license": "CC BY 3.0",
+    "cityKey": "pamukkale"
   },
   "samsun-anit": {
     "file": "/images/blog/samsun-anit.webp",
@@ -583,6 +733,36 @@
     "author": "Dosseman",
     "license": "CC BY-SA 4.0",
     "cityKey": "sanliurfa"
+  },
+  "selcuk-efes": {
+    "file": "/images/blog/selcuk-efes.webp",
+    "alt": {
+      "tr": "Efes Antik Kenti'nde Celsus Kütüphanesi'nin iki katlı cephesi",
+      "en": "The two-storey facade of the Library of Celsus at Ephesus"
+    },
+    "caption": {
+      "tr": "Celsus Kütüphanesi, Efes",
+      "en": "The Library of Celsus, Ephesus"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Celsus_library_in_Ephesus_.jpg",
+    "author": "QuartierLatin1968",
+    "license": "CC BY-SA 2.0",
+    "cityKey": "selcuk"
+  },
+  "selcuk-sirince": {
+    "file": "/images/blog/selcuk-sirince.webp",
+    "alt": {
+      "tr": "Şirince'nin yamaca kurulmuş evleri ve köye çıkan yol",
+      "en": "The houses of Sirince on the hillside and the road up to the village"
+    },
+    "caption": {
+      "tr": "Şirince",
+      "en": "Sirince"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Sirinceroad.jpg",
+    "author": "Flickr user: Charles Kremenak https://www.flickr.com/people/charleskremenak/",
+    "license": "CC BY 2.0",
+    "cityKey": "selcuk"
   },
   "trabzon-liman": {
     "file": "/images/blog/trabzon-liman.webp",
