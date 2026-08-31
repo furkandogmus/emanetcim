@@ -352,16 +352,38 @@ export const sendSupportReplyEmail = async (params: {
     headers["In-Reply-To"] = params.inReplyTo;
     headers["References"] = params.inReplyTo;
   }
-  const { data, error } = await resend.emails.send({
-    from: params.from,
-    to: params.to,
-    subject: params.subject,
-    text: params.text,
-    ...(Object.keys(headers).length > 0 ? { headers } : {}),
-  });
-  if (error || !data?.id) {
-    logger.error({ error }, "mail_support_reply_failed");
+  /*
+    ZAMAN ASIMI (2026-08-31). Bu dosyanin basindaki gerekce diger UC fonksiyon
+    icin yazilmisti ama dorduncusu atlanmisti: bu cagri da bir server
+    action'da (`actions/contact.ts`) DOGRUDAN `await`leniyor. Resend yanit
+    vermezse adminin "Cevap gonder" dugmesi sonsuza kadar doner ve cevabin
+    gidip gitmedigi hic ogrenilemez.
+  */
+  try {
+    const { data, error } = await withTimeout(
+      resend.emails.send({
+        from: params.from,
+        to: params.to,
+        subject: params.subject,
+        text: params.text,
+        ...(Object.keys(headers).length > 0 ? { headers } : {}),
+      }),
+      MAIL_SEND_TIMEOUT_MS,
+      "support_reply_send",
+    );
+    if (error || !data?.id) {
+      logger.error({ error }, "mail_support_reply_failed");
+      return null;
+    }
+    return { id: data.id };
+  } catch (error) {
+    /*
+      Zaman asimi da `null` donmeli, FIRLATMAMALI. Cagiran taraf
+      (`actions/contact.ts`) `null`i zaten dogru isliyor: kullaniciya
+      cevirili bir hata gosteriyor ve gitmemis cevabi kayda YAZMIYOR.
+      Firlatirsak o dikkatli davranis atlanir, admin ham bir hata gorur.
+    */
+    logger.error({ error }, "mail_support_reply_exception");
     return null;
   }
-  return { id: data.id };
 };

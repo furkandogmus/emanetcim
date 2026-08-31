@@ -163,4 +163,30 @@ describe("mail.ts — 6 dil desteği", () => {
     }
   });
 
+
+  /**
+   * DORDUNCU FONKSIYON (2026-08-31). Bu dosyanin basindaki zaman asimi
+   * gerekcesi uc fonksiyon icin yazilmisti; `sendSupportReplyEmail`
+   * atlanmisti. O da bir server action'da (`actions/contact.ts`) dogrudan
+   * `await`leniyor -- Resend yanit vermezse adminin "Cevap gonder" dugmesi
+   * sonsuza kadar doner.
+   *
+   * Zaman asiminda FIRLATMAMALI, `null` donmeli: cagiran taraf `null`i zaten
+   * dogru isliyor (cevirili hata gosterir, gitmemis cevabi kayda yazmaz).
+   */
+  it("sendSupportReplyEmail Resend hic yanit vermezse null doner, askida kalmaz", async () => {
+    sendMock.mockImplementationOnce(() => new Promise(() => {}));
+    const { sendSupportReplyEmail } = await import("@/lib/mail");
+
+    const sonuc = await sendSupportReplyEmail({
+      to: "a@b.com",
+      from: "destek@bagajpark.com",
+      subject: "Re: soru",
+      text: "cevap",
+    });
+
+    expect(sonuc).toBeNull();
+    expect(loggerError).toHaveBeenCalled();
+  }, 20000);
+
 });

@@ -1478,3 +1478,32 @@ YENI:  16 passed
 **Yapılmadı — ayrı iş:** bu üç e-postanın ortak kabuğa (`renderEmailHtml`)
 taşınması. Somut kusurları giderdim ama mimari ihlal duruyor; taşımak auth
 e-postalarının görünümünü değiştirir, o yüzden ayrı ve görünür bıraktım.
+
+### 54. Adminin "Cevap gönder" düğmesi sonsuza kadar dönebiliyordu — DÜZELTİLDİ
+
+`mail.ts`'in en başındaki yorum, üç fonksiyonun neden `withTimeout` ile
+sarıldığını anlatıyor: server action'da doğrudan `await`leniyorlar, Resend
+takılırsa istek süresiz askıda kalır. Gerekçe doğru — ama **dördüncü
+fonksiyon atlanmış**. `sendSupportReplyEmail` de `actions/contact.ts:124`'te
+aynen `await` ediliyor ve zaman aşımı yoktu.
+
+Somut hali: admin destek mesajına cevap yazar, "Gönder"e basar, Resend
+yanıt vermez → düğme sonsuza kadar döner. Cevabın gidip gitmediği hiç
+öğrenilemez.
+
+Zaman aşımında **fırlatmıyor, `null` dönüyor** — çünkü çağıran taraf `null`i
+zaten doğru işliyor: çevirili bir hata gösteriyor ve gitmemiş cevabı kayda
+yazmıyor (`contact.ts:130`, "gitmemiş bir cevabı 'gitti' diye göstermek en
+kötüsü"). Fırlatsaydık o dikkatli davranış atlanırdı.
+
+Kalıcı test eklendi ve koruduğu kanıtlandı:
+
+```
+ESKI kod:  × ... 20004ms   Error: Test timed out in 20000ms.   1 failed
+YENI kod:  1 passed
+```
+
+**Not — yöntem hatası:** ilk denemede `timeout` komutuyla ölçtüm, macOS'ta o
+komut yok, çıkış kodu 127 ("komut bulunamadı") geldi ve ben bunu "asıldı"
+diye okudum. Kanıt dayanaksızdı. Vitest'in kendi zaman aşımıyla tekrar
+ölçtüm; yukarıdaki çıktı gerçek olan.
