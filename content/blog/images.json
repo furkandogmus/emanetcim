@@ -29,6 +29,36 @@
     "license": "CC BY-SA 2.5",
     "cityKey": "adana"
   },
+  "alanya-kizilkule": {
+    "file": "/images/blog/alanya-kizilkule.webp",
+    "alt": {
+      "tr": "Alanya Kalesi surlarından Kızıl Kule ve limana bakış",
+      "en": "The Red Tower and the harbour seen from the walls of Alanya Castle"
+    },
+    "caption": {
+      "tr": "Alanya Kalesi'nden Kızıl Kule",
+      "en": "The Red Tower from Alanya Castle"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Alanya_K%C4%B1z%C4%B1l_Kule_View_from_walls_to_southwest_8515.jpg",
+    "author": "Dosseman",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "alanya"
+  },
+  "alanya-kleopatra": {
+    "file": "/images/blog/alanya-kleopatra.webp",
+    "alt": {
+      "tr": "Alanya'da kumsal ve arkasındaki kale burnu",
+      "en": "The beach at Alanya with the castle headland behind"
+    },
+    "caption": {
+      "tr": "Alanya sahili",
+      "en": "The beach at Alanya"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Antalya,_Alanya_plaj%C4%B1_1.JPG",
+    "author": "Cano58",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "alanya"
+  },
   "ankara-anitkabir": {
     "file": "/images/blog/ankara-anitkabir.webp",
     "alt": {
@@ -208,6 +238,36 @@
     "author": "Gargarapalvin",
     "license": "CC BY-SA 4.0",
     "cityKey": "cesme"
+  },
+  "didim-altinkum": {
+    "file": "/images/blog/didim-altinkum.webp",
+    "alt": {
+      "tr": "Altınkum'da kumsal ve sıralanmış şemsiyeler",
+      "en": "The beach at Altinkum with rows of parasols"
+    },
+    "caption": {
+      "tr": "Altınkum plajı",
+      "en": "Altinkum beach"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Panoramio_-_henkiedenkie_-_Didim_Beach_-_Altinkum_-_2007.jpg",
+    "author": "henkiedenkie",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "didim"
+  },
+  "didim-apollon": {
+    "file": "/images/blog/didim-apollon.webp",
+    "alt": {
+      "tr": "Didyma'da Apollon Tapınağı'nın devasa sütunları",
+      "en": "The giant columns of the Temple of Apollo at Didyma"
+    },
+    "caption": {
+      "tr": "Apollon Tapınağı, Didyma",
+      "en": "The Temple of Apollo, Didyma"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Temple_of_Apollo,_Didyma_01.jpg",
+    "author": "Bernard Gagnon",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "didim"
   },
   "diyarbakir-surlar": {
     "file": "/images/blog/diyarbakir-surlar.webp",
@@ -464,6 +524,36 @@
     "license": "CC BY-SA 3.0",
     "cityKey": "kapadokya"
   },
+  "kas-kalkan": {
+    "file": "/images/blog/kas-kalkan.webp",
+    "alt": {
+      "tr": "Kalkan'ın limanı ve yamaca sıralanmış beyaz evleri",
+      "en": "Kalkan's harbour and the white houses stacked up the slope"
+    },
+    "caption": {
+      "tr": "Kalkan limanı",
+      "en": "Kalkan harbour"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Turkey_Harbour_in_Kalkan.JPG",
+    "author": "Kitkatcrazy",
+    "license": "Public domain",
+    "cityKey": "kas"
+  },
+  "kas-merkez": {
+    "file": "/images/blog/kas-merkez.webp",
+    "alt": {
+      "tr": "Kaş'ın deniz kıyısındaki evleri ve arkasındaki dik yamaçlar",
+      "en": "The houses of Kas by the sea with steep slopes behind"
+    },
+    "caption": {
+      "tr": "Kaş",
+      "en": "Kas"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Akdeniz-_the_mediterranean-ka%C5%9F_-_panoramio.jpg",
+    "author": "HALUK COMERTEL",
+    "license": "CC BY 3.0",
+    "cityKey": "kas"
+  },
   "kayseri-erciyes": {
     "file": "/images/blog/kayseri-erciyes.webp",
     "alt": {
@@ -493,6 +583,36 @@
     "author": "Bernard Gagnon",
     "license": "CC BY-SA 3.0",
     "cityKey": "kayseri"
+  },
+  "kemer-marina": {
+    "file": "/images/blog/kemer-marina.webp",
+    "alt": {
+      "tr": "Kemer Marina'da demirlemiş tekneler ve arkadaki Toros yamaçları",
+      "en": "Boats moored at Kemer Marina with the Taurus slopes behind"
+    },
+    "caption": {
+      "tr": "Kemer Marina",
+      "en": "Kemer Marina"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:KEMER_MAR%C4%B0NA_%C2%A9Abdullah_Kiyga_-_panoramio.jpg",
+    "author": "Abdullah kıyga",
+    "license": "CC BY 3.0",
+    "cityKey": "kemer"
+  },
+  "kemer-tahtali": {
+    "file": "/images/blog/kemer-tahtali.webp",
+    "alt": {
+      "tr": "Kemer'in arkasında yükselen Tahtalı Dağı",
+      "en": "Mount Tahtali rising behind Kemer"
+    },
+    "caption": {
+      "tr": "Tahtalı Dağı",
+      "en": "Mount Tahtali"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:%D0%92%D0%B8%D0%B4_%D0%BD%D0%B0_%D0%B3%D0%BE%D1%80%D1%83_%D0%9E%D0%BB%D0%B8%D0%BC%D0%BF%D0%BE%D1%81_(%D0%A2%D0%B0%D1%85%D1%82%D0%B0%D0%BB%D1%8B)_-_panoramio.jpg",
+    "author": "Сергей Секачёв",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "kemer"
   },
   "konya-manzara": {
     "file": "/images/blog/konya-manzara.webp",
@@ -674,6 +794,36 @@
     "license": "CC BY 3.0",
     "cityKey": "pamukkale"
   },
+  "safranbolu-carsi": {
+    "file": "/images/blog/safranbolu-carsi.webp",
+    "alt": {
+      "tr": "Safranbolu Arastası'nda dar, tenteli çarşı sokağı",
+      "en": "A narrow covered lane in the Safranbolu arasta bazaar"
+    },
+    "caption": {
+      "tr": "Safranbolu Arastası",
+      "en": "The Safranbolu arasta"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Arasta_-_panoramio.jpg",
+    "author": "Halit Edip Özcan",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "safranbolu"
+  },
+  "safranbolu-evler": {
+    "file": "/images/blog/safranbolu-evler.webp",
+    "alt": {
+      "tr": "Safranbolu'nun beyaz badanalı, ahşap cumbalı geleneksel evleri",
+      "en": "Safranbolu's whitewashed traditional houses with timber bay windows"
+    },
+    "caption": {
+      "tr": "Safranbolu evleri",
+      "en": "The houses of Safranbolu"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Safranbolu_traditional_houses-2.jpg",
+    "author": "Makalp",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "safranbolu"
+  },
   "samsun-anit": {
     "file": "/images/blog/samsun-anit.webp",
     "alt": {
@@ -763,6 +913,36 @@
     "author": "Flickr user: Charles Kremenak https://www.flickr.com/people/charleskremenak/",
     "license": "CC BY 2.0",
     "cityKey": "selcuk"
+  },
+  "side-apollon": {
+    "file": "/images/blog/side-apollon.webp",
+    "alt": {
+      "tr": "Side'de deniz kenarındaki Apollon Tapınağı'nın sütunları",
+      "en": "The columns of the Temple of Apollo by the sea at Side"
+    },
+    "caption": {
+      "tr": "Apollon Tapınağı, Side",
+      "en": "The Temple of Apollo, Side"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Antalya_Side_Apollo.jpg",
+    "author": "Saffron Blaze",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "side"
+  },
+  "side-manavgat": {
+    "file": "/images/blog/side-manavgat.webp",
+    "alt": {
+      "tr": "Manavgat Şelalesi'nin geniş su perdesi",
+      "en": "The wide curtain of the Manavgat waterfall"
+    },
+    "caption": {
+      "tr": "Manavgat Şelalesi",
+      "en": "The Manavgat waterfall"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Manavgat_Waterfall_(1)_Red.jpg",
+    "author": "Daniel Åhs Karlsson",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "side"
   },
   "trabzon-liman": {
     "file": "/images/blog/trabzon-liman.webp",

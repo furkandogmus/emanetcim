@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| Yazısı olan şehir | **24 / 265** (aşağıdaki tablo) |
+| Yazısı olan şehir | **30 / 265** (aşağıdaki tablo) |
 | Yayına yazma | `npx tsx scripts/blog-city-posts.ts --apply` (kuru çalışma varsayılan) |
 | Denetim | `npx tsx scripts/blog-city-posts.ts --verify` + `npx tsx scripts/blog-images.ts --verify` |
 | Eksik listesi | `npx tsx scripts/blog-city-posts.ts --coverage` |
@@ -62,7 +62,7 @@ alakasız olabilir.
 
 <!-- Aşağısı üretilmiştir: npx tsx scripts/blog-city-posts.ts --list-md -->
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 24/265 sehir -->
+<!-- 30/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -89,12 +89,12 @@ alakasız olabilir.
 | 21 | TR | Çeşme | `cesme` | 3 | yayında | cesme-alacati-arnavut-kaldirimi-valiz | cesme-alacati-cobblestones-luggage |
 | 22 | TR | Fethiye | `fethiye` | 3 | yayında | fethiye-oludeniz-kayakoy-valiz | fethiye-oludeniz-kayakoy-luggage-storage |
 | 23 | TR | Marmaris | `marmaris` | 2 | yayında | marmaris-rodos-feribotu-valiz | marmaris-rhodes-ferry-luggage-storage |
-| 24 | TR | Kaş | `kas` | 2 | — |  |  |
-| 25 | TR | Alanya | `alanya` | 2 | — |  |  |
-| 26 | TR | Side | `side` | 2 | — |  |  |
-| 27 | TR | Kemer | `kemer` | 1 | — |  |  |
-| 28 | TR | Didim | `didim` | 1 | — |  |  |
-| 29 | TR | Safranbolu | `safranbolu` | 1 | — |  |  |
+| 24 | TR | Kaş | `kas` | 2 | yayında | kas-kekova-teknesi-kalkan-valiz | kas-kekova-boat-kalkan-luggage |
+| 25 | TR | Alanya | `alanya` | 2 | yayında | alanya-kale-teleferik-valiz | alanya-castle-cable-car-luggage |
+| 26 | TR | Side | `side` | 2 | yayında | side-antik-kent-icinde-koy-valiz | side-ancient-town-luggage-storage |
+| 27 | TR | Kemer | `kemer` | 1 | yayında | kemer-tahtali-teleferik-valiz | kemer-tahtali-cable-car-luggage |
+| 28 | TR | Didim | `didim` | 1 | yayında | didim-altinkum-apollon-valiz | didim-altinkum-luggage-storage |
+| 29 | TR | Safranbolu | `safranbolu` | 1 | yayında | safranbolu-carsi-konak-otel-valiz | safranbolu-old-town-luggage-storage |
 | 30 | TR | Ayvalık | `ayvalik` | 2 | — |  |  |
 | 31 | TR | Çanakkale | `canakkale` | 4 | — |  |  |
 | 32 | TR | Bergama | `bergama` | 1 | — |  |  |
