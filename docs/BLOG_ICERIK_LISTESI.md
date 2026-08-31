@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| Yazısı olan şehir | **39 / 265** — Türkiye'nin 39 şehri tamamlandı (aşağıdaki tablo) |
+| Yazısı olan şehir | **45 / 265** — Türkiye'nin 39 şehri tamamlandı |
 | Yayına yazma | `npx tsx scripts/blog-city-posts.ts --apply` (kuru çalışma varsayılan) |
 | Denetim | `npx tsx scripts/blog-city-posts.ts --verify` + `npx tsx scripts/blog-images.ts --verify` |
 | Eksik listesi | `npx tsx scripts/blog-city-posts.ts --coverage` |
@@ -62,7 +62,7 @@ alakasız olabilir.
 
 <!-- Aşağısı üretilmiştir: npx tsx scripts/blog-city-posts.ts --list-md -->
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 39/265 sehir -->
+<!-- 45/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -105,13 +105,13 @@ alakasız olabilir.
 | 37 | TR | Amasya | `amasya` | 1 | yayında | amasya-yaliboyu-kaya-mezarlari-valiz | amasya-yaliboyu-rock-tombs-luggage |
 | 38 | TR | Adıyaman | `adiyaman` | 1 | yayında | adiyaman-nemrut-gun-dogumu-valiz | adiyaman-nemrut-sunrise-tour-luggage |
 | 39 | TR | Datça | `datca` | 1 | yayında | datca-yarimada-knidos-valiz | datca-peninsula-knidos-luggage |
-| 40 | GB | London | `londra` | 9 | — |  |  |
-| 41 | NL | Amsterdam | `amsterdam` | 7 | — |  |  |
+| 40 | GB | London | `londra` | 9 | yayında | londra-valiz-emanet-istasyonlar | london-luggage-storage-stations-guide |
+| 41 | NL | Amsterdam | `amsterdam` | 7 | yayında | amsterdam-kanal-evi-merdiven-valiz | amsterdam-luggage-storage-canal-house-stairs |
 | 42 | ES | Madrid | `madrid` | 5 | — |  |  |
-| 43 | FR | Paris | `paris` | 9 | — |  |  |
-| 44 | ES | Barcelona | `barcelona` | 6 | — |  |  |
-| 45 | IT | Roma | `roma` | 7 | — |  |  |
-| 46 | DE | Berlin | `berlin` | 7 | — |  |  |
+| 43 | FR | Paris | `paris` | 9 | yayında | paris-louvre-valiz-almiyor-emanet | paris-luggage-storage-louvre-metro |
+| 44 | ES | Barcelona | `barcelona` | 6 | yayında | barcelona-sagrada-familia-valiz-almiyor | barcelona-luggage-storage-sagrada-gothic |
+| 45 | IT | Roma | `roma` | 7 | yayında | roma-sampietrini-valiz-tekerlegi | rome-luggage-storage-cobblestones |
+| 46 | DE | Berlin | `berlin` | 7 | yayında | berlin-mesafeler-uzun-valiz-emanet | berlin-luggage-storage-distances |
 | 47 | IT | Milano | `milano` | 3 | — |  |  |
 | 48 | IT | Venezia | `venedik` | 3 | — |  |  |
 | 49 | IT | Firenze | `floransa` | 3 | — |  |  |

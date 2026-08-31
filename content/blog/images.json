@@ -119,6 +119,36 @@
     "license": "CC BY-SA 2.0",
     "cityKey": "amasya"
   },
+  "amsterdam-centraal": {
+    "file": "/images/blog/amsterdam-centraal.webp",
+    "alt": {
+      "tr": "Amsterdam Centraal garının tuğla cephesi",
+      "en": "The brick frontage of Amsterdam Centraal station"
+    },
+    "caption": {
+      "tr": "Amsterdam Centraal",
+      "en": "Amsterdam Centraal"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Amsterdam_Centraal_Station2.jpg",
+    "author": "Unknown authorUnknown author",
+    "license": "Public domain",
+    "cityKey": "amsterdam"
+  },
+  "amsterdam-jordaan": {
+    "file": "/images/blog/amsterdam-jordaan.webp",
+    "alt": {
+      "tr": "Jordaan'da kanal, kanal evleri ve köprü",
+      "en": "A canal, canal houses and a bridge in the Jordaan"
+    },
+    "caption": {
+      "tr": "Jordaan'da bir kanal",
+      "en": "A canal in the Jordaan"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Canal_in_Jordaan,_Amsterdam_(9258952020).jpg",
+    "author": "kevinmcgill from Den Bosch, Netherlands",
+    "license": "CC BY-SA 2.0",
+    "cityKey": "amsterdam"
+  },
   "ankara-anitkabir": {
     "file": "/images/blog/ankara-anitkabir.webp",
     "alt": {
@@ -239,6 +269,36 @@
     "license": "CC BY-SA 3.0",
     "cityKey": "ayvalik"
   },
+  "barcelona-sagrada": {
+    "file": "/images/blog/barcelona-sagrada.webp",
+    "alt": {
+      "tr": "Sagrada Família'nın kuleleri ve önündeki meydan",
+      "en": "The towers of the Sagrada Familia and the square in front of it"
+    },
+    "caption": {
+      "tr": "Sagrada Família",
+      "en": "The Sagrada Familia"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Barcelona_-_Pla%C3%A7a_de_la_Sagrada_Fam%C3%ADlia_-_View_NE_on_La_Sagrada_Fam%C3%ADlia.jpg",
+    "author": "Txllxt TxllxT",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "barcelona"
+  },
+  "barcelona-sants": {
+    "file": "/images/blog/barcelona-sants.webp",
+    "alt": {
+      "tr": "Barcelona Sants garının giriş cephesi",
+      "en": "The entrance frontage of Barcelona Sants station"
+    },
+    "caption": {
+      "tr": "Barcelona Sants",
+      "en": "Barcelona Sants station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Barcelona_Sants_2021_1.jpg",
+    "author": "Smiley.toerist",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "barcelona"
+  },
   "bergama-akropol": {
     "file": "/images/blog/bergama-akropol.webp",
     "alt": {
@@ -268,6 +328,36 @@
     "author": "HALUK COMERTEL",
     "license": "CC BY 3.0",
     "cityKey": "bergama"
+  },
+  "berlin-brandenburg": {
+    "file": "/images/blog/berlin-brandenburg.webp",
+    "alt": {
+      "tr": "Gece aydınlatılmış Brandenburg Kapısı ve üzerindeki dörtlü at heykeli",
+      "en": "The Brandenburg Gate lit at night with the Quadriga above it"
+    },
+    "caption": {
+      "tr": "Brandenburg Kapısı",
+      "en": "The Brandenburg Gate"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Brandenburg_Gate_Quadriga_at_Night.jpg",
+    "author": "א (Aleph) Creator: Johann Gottfried Schadow",
+    "license": "CC BY-SA 2.5",
+    "cityKey": "berlin"
+  },
+  "berlin-hauptbahnhof": {
+    "file": "/images/blog/berlin-hauptbahnhof.webp",
+    "alt": {
+      "tr": "Berlin Hauptbahnhof'un cam ve çelik cephesi",
+      "en": "The glass and steel frontage of Berlin Hauptbahnhof"
+    },
+    "caption": {
+      "tr": "Berlin Hauptbahnhof",
+      "en": "Berlin Hauptbahnhof"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Berlin_Hauptbahnhof0514.JPG",
+    "author": "MaryG90",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "berlin"
   },
   "bodrum-kale": {
     "file": "/images/blog/bodrum-kale.webp",
@@ -884,6 +974,36 @@
     "license": "CC BY 3.0",
     "cityKey": "kusadasi"
   },
+  "londra-covent-garden": {
+    "file": "/images/blog/londra-covent-garden.webp",
+    "alt": {
+      "tr": "Covent Garden çarşısının kemerli iç mekânı ve tezgâhları",
+      "en": "The arcaded interior of Covent Garden market with its stalls"
+    },
+    "caption": {
+      "tr": "Covent Garden çarşısı",
+      "en": "Covent Garden market"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Covent_Garden_Interior_May_2006.jpg",
+    "author": "Diliff",
+    "license": "CC BY 2.5",
+    "cityKey": "londra"
+  },
+  "londra-kings-cross": {
+    "file": "/images/blog/londra-kings-cross.webp",
+    "alt": {
+      "tr": "King's Cross istasyonunun kavisli çatılı batı holü",
+      "en": "The curved roof of the Western Concourse at King's Cross station"
+    },
+    "caption": {
+      "tr": "King's Cross, batı holü",
+      "en": "The Western Concourse, King's Cross"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:King%27s_Cross_Western_Concourse.jpg",
+    "author": "Colin",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "londra"
+  },
   "mardin-eski-sehir": {
     "file": "/images/blog/mardin-eski-sehir.webp",
     "alt": {
@@ -1004,6 +1124,36 @@
     "license": "CC BY 3.0",
     "cityKey": "pamukkale"
   },
+  "paris-gare-du-nord": {
+    "file": "/images/blog/paris-gare-du-nord.webp",
+    "alt": {
+      "tr": "Gare du Nord'un heykelli taş cephesi",
+      "en": "The statue-topped stone facade of the Gare du Nord"
+    },
+    "caption": {
+      "tr": "Gare du Nord",
+      "en": "The Gare du Nord"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Paris_-_Gare_du_Nord.jpg",
+    "author": "Taxiarchos228",
+    "license": "CC BY 3.0",
+    "cityKey": "paris"
+  },
+  "paris-sacre-coeur": {
+    "file": "/images/blog/paris-sacre-coeur.webp",
+    "alt": {
+      "tr": "Montmartre'da Sacré-Cœur Bazilikası ve önündeki merdivenli yamaç",
+      "en": "The Sacre-Coeur basilica in Montmartre above its stepped slope"
+    },
+    "caption": {
+      "tr": "Sacré-Cœur, Montmartre",
+      "en": "Sacre-Coeur, Montmartre"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Paris,_Sacr%C3%A9-C%C5%93ur_de_Montmartre_--_2014_--_1180.jpg",
+    "author": "Dietmar Rabich",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "paris"
+  },
   "rize-ayder": {
     "file": "/images/blog/rize-ayder.webp",
     "alt": {
@@ -1033,6 +1183,36 @@
     "author": "Turalhemidli",
     "license": "CC BY 3.0",
     "cityKey": "rize"
+  },
+  "roma-kolezyum": {
+    "file": "/images/blog/roma-kolezyum.webp",
+    "alt": {
+      "tr": "Kolezyum'un dış cephesi ve kemerleri",
+      "en": "The exterior arches of the Colosseum"
+    },
+    "caption": {
+      "tr": "Kolezyum",
+      "en": "The Colosseum"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Rome_Colosseum_exterior_1.jpg",
+    "author": "Nicholas Hartmann",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "roma"
+  },
+  "roma-termini": {
+    "file": "/images/blog/roma-termini.webp",
+    "alt": {
+      "tr": "Roma Termini garının peronları",
+      "en": "The platforms at Roma Termini station"
+    },
+    "caption": {
+      "tr": "Roma Termini",
+      "en": "Roma Termini"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Roma_Termini,_binario_14_(2020).jpg",
+    "author": "VallVit",
+    "license": "CC BY 3.0",
+    "cityKey": "roma"
   },
   "safranbolu-carsi": {
     "file": "/images/blog/safranbolu-carsi.webp",
