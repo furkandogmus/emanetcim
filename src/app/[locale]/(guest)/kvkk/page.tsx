@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { alternatesForPath } from "@/lib/seo-alternates";
 import { getGuestStaticSeo } from "@/lib/guest-static-seo";
 import { getSiteBaseUrl } from "@/lib/site-urls";
+import { socialMetadata } from "@/lib/social-metadata";
 
 export async function generateMetadata({
   params,
@@ -17,7 +18,11 @@ export async function generateMetadata({
     title,
     description,
     alternates: alternatesForPath(locale, "/kvkk"),
-    openGraph: { title, description, url: `${base}/${locale}/kvkk` },
+    ...socialMetadata({
+      url: `${base}/${locale}/kvkk`,
+      title,
+      description,
+    }),
   };
 }
 

@@ -10,6 +10,7 @@ import {
   isAppleOAuthConfigured,
   isAuthDemoUiEnabled,
 } from "@/lib/auth-providers";
+import { socialMetadata } from "@/lib/social-metadata";
 
 export async function generateMetadata({
   params,
@@ -23,7 +24,11 @@ export async function generateMetadata({
     title,
     description,
     alternates: alternatesForPath(locale, "/login"),
-    openGraph: { title, description, url: `${base}/${locale}/login` },
+    ...socialMetadata({
+      url: `${base}/${locale}/login`,
+      title,
+      description,
+    }),
   };
 }
 

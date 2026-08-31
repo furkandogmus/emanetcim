@@ -5,6 +5,7 @@ import { getGuestStaticSeo } from "@/lib/guest-static-seo";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { Gavel } from "lucide-react";
 import { Link } from "@/i18n/routing";
+import { socialMetadata } from "@/lib/social-metadata";
 
 export async function generateMetadata({
   params,
@@ -18,7 +19,11 @@ export async function generateMetadata({
     title,
     description,
     alternates: alternatesForPath(locale, "/terms"),
-    openGraph: { title, description, url: `${base}/${locale}/terms` },
+    ...socialMetadata({
+      url: `${base}/${locale}/terms`,
+      title,
+      description,
+    }),
   };
 }
 

@@ -1,9 +1,11 @@
+import { getSiteBaseUrl } from "@/lib/site-urls";
 import type { Metadata } from "next";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { Clock, RefreshCw, CreditCard, ShieldCheck } from "lucide-react";
 import { alternatesForPath } from "@/lib/seo-alternates";
 import { paymentCopyKey } from "@/lib/payment-copy";
+import { socialMetadata } from "@/lib/social-metadata";
 
 // 2026-08-21: Tek politika motoru ile hizalandi — BookingService.cancelBooking()
 // check-in zamanina bakmaksizin HER ZAMAN tam iade uyguluyor ("Bounce-style: full
@@ -28,10 +30,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     alternates: alternatesForPath(locale, "/cancellation"),
-    openGraph: {
+    ...socialMetadata({
+      url: `${getSiteBaseUrl()}/${locale}/cancellation`,
       title,
       description,
-    },
+    }),
   };
 }
 

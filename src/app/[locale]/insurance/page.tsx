@@ -2,10 +2,13 @@ import type { Metadata } from "next";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { ShieldCheck, CircleCheck, Wrench, SearchCheck } from "lucide-react";
+import { getSiteBaseUrl } from "@/lib/site-urls";
 import { alternatesForPath } from "@/lib/seo-alternates";
 import { buildFaqJsonLd } from "@/lib/faq-json-ld";
 import { isInsuranceEnabled } from "@/lib/commerce-context";
 import { getPricingRules } from "@/lib/platform-settings";
+import { socialMetadata } from "@/lib/social-metadata";
+import { serializeJsonLd } from "@/lib/json-ld-script";
 
 export async function generateMetadata({
   params,
@@ -20,16 +23,11 @@ export async function generateMetadata({
     title,
     description,
     alternates: alternatesForPath(locale, "/insurance"),
-    openGraph: {
+    ...socialMetadata({
+      url: `${getSiteBaseUrl()}/${locale}/insurance`,
       title,
       description,
-      type: "website",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-    },
+    }),
   };
 }
 
@@ -58,7 +56,7 @@ export default async function InsurancePage({
     <div className="min-h-screen bg-[#f5f6fb]">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(faqJsonLd) }}
       />
       <section className="mx-auto max-w-6xl px-6 pt-14 pb-16 grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
         <div>

@@ -8,6 +8,8 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ensureDefaultBlogPosts } from "@/lib/blog-initializer";
 import { alternatesForPath } from "@/lib/seo-alternates";
+import { socialMetadata } from "@/lib/social-metadata";
+import { serializeJsonLd } from "@/lib/json-ld-script";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; slug: string }> }): Promise<Metadata> {
   const { locale, slug } = await params;
@@ -27,15 +29,23 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     title: post.title,
     description,
     alternates: alternatesForPath(locale, `/blog/${slug}`),
-    openGraph: {
+    /*
+      `images` KOSULLU veriliyor: onceki hali `post.coverImage ? [...] : []` idi,
+      yani kapagi olmayan bir yazinin paylasim karti BOS dizi aliyordu ve geri
+      dusecek marka gorseli de kalmiyordu. Tanimsiz birakildiginda
+      `socialMetadata` varsayilan gorseli koyuyor.
+    */
+    ...socialMetadata({
       type: "article",
+      url: canonical,
       title: post.title,
       description,
-      url: canonical,
-      images: post.coverImage ? [post.coverImage] : [],
-      publishedTime: post.createdAt.toISOString(),
-      authors: [post.authorName],
-    },
+      images: post.coverImage ? [post.coverImage] : undefined,
+      article: {
+        publishedTime: post.createdAt.toISOString(),
+        authors: [post.authorName],
+      },
+    }),
   };
 }
 
@@ -82,7 +92,7 @@ export default async function BlogDetailPage({
     <div className="min-h-screen bg-white pb-20">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
 
       {/* Hero Header */}

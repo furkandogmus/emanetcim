@@ -10,6 +10,60 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-08-31 — paylaşılan her BagajPark bağlantısı görselsiz çıkıyordu (üretimde ölçüldü)
+
+Üretimde ölçüldü: `/tr`, `/tr/demand`, `/tr/how-it-works`, `/tr/become-partner`
+ve diğerleri — **hiçbirinde `og:image` yok**. Yani WhatsApp, Facebook, LinkedIn
+veya Slack'te paylaşılan her bağlantı görselsiz, düz metin bir önizleme
+veriyordu. Görsel dosyası (`/og-image.png`) yerinde ve 200 dönüyor; sorun onu
+kimsenin bildirmemesiydi.
+
+Ayrıca **19 sayfa** kendi `twitter` bloğunu vermediği için X kartında o sayfanın
+değil ANA SAYFANIN metnini gösteriyordu: `/tr/demand` paylaşıldığında kartta
+"BagajPark — Türkiye'nin Valiz Saklama Ağı" yazıyordu, esnafa yönelik talep
+mesajı değil.
+
+- **Sebep**: Next'te bir sayfa kendi `openGraph` nesnesini verdiğinde kök
+  yerleşimdekiyle **alan alan birleşmez, bütünüyle yerini alır**. Kök yerleşim
+  `images`, `siteName` ve `locale` tanımlıyordu; kendi başlığını veren 21 sayfa
+  üçünü birden düşürüyordu. `twitter` ayrı bir alan olduğu için orada tersi
+  oluyordu: sayfa vermeyince kökünki olduğu gibi kalıyor ve yanlış metni
+  gösteriyordu.
+- **Dosya kuralı çözmüyor — denendi ve ölçüldü.** `app/[locale]/opengraph-image.png`
+  eklendiğinde yalnızca o segmentin kendi sayfası (`/tr`) görseli aldı;
+  `openGraph`'ını ezen alt sayfalara geçmedi. Next belgesinde ("more specific
+  image takes precedence") bu durum açıkça yazmıyor, deneyerek görüldü.
+- **Düzeltme**: `src/lib/social-metadata.ts` → `socialMetadata({ url, title,
+  description })` ikisini birden üretiyor. 21 sayfa buna geçti. Blog yazısında
+  ayrıca `images: post.coverImage ? [...] : []` vardı — kapaksız bir yazı **boş
+  dizi** alıyordu, yani geri düşecek marka görseli de kalmıyordu; artık
+  tanımsız bırakılıp varsayılana düşüyor.
+- **Doğrulama**: 21 sayfa × `og:image` var mı + `og:title` ile `twitter:title`
+  aynı mı → hepsi geçti (tr/de/fr örneklendi).
+- **Mandal**: `src/__tests__/social-metadata.test.ts`. Sayfa dosyalarında
+  `openGraph:` anahtarının elle yazılmasını yasaklıyor.
+
+### Yan bulgu: kodda duran bir yorum, olmayan bir şeyi anlatıyordu
+
+`src/app/[locale]/page.tsx` içinde şu yorum vardı: *"`openGraph`/`twitter`
+başlığı bilerek EKSİZ kalıyor: paylaşım kartında marka zaten `siteName`
+alanından geliyor."* Üretimde ölçüldüğünde `og:site_name` **hiç yoktu** — çünkü
+sayfanın kendi `openGraph`'ı kökünkini ezerken `siteName`'i de düşürüyordu.
+Yorum bir gerekçe sunuyordu ama gerekçenin dayandığı şey ortada değildi; yani
+başlıkta marka hiçbir yerde görünmüyordu. Düzeltme yorumu doğru hâle getiriyor.
+
+Bu, yorumların kendi başına doğrulanmadığının örneği: doğru yazılmış bir gerekçe,
+altındaki davranış değiştiğinde sessizce yanlışa dönüşüyor.
+
+### Mandalın ilk hâli işe yaramıyordu
+
+İlk ölçütüm "dosya `socialMetadata` içeriyor mu" idi. Bir sayfayı bilerek eski
+hâline döndürüp denedim: **mandal geçti**. Çünkü dosyada içe aktarma satırı
+duruyordu. Ölçüt "yardımcı geçiyor mu" değil, "`openGraph:` kaldı mı" olmalıydı.
+
+Ders: bir mandalın çalıştığını, onu **kırmayı deneyerek** görmek gerekiyor.
+Yeşil bir mandal, ölçtüğü şeyin yanlış olduğunun da cevabı olabilir.
+
 ## 2026-08-31 — rezervasyon kodu üç uçta üç farklı isim ve iki farklı yazımdaydı
 
 Hesabı olmayan misafir için `/bookings/lookup` tek yol; oraya yazacağı kodu ise

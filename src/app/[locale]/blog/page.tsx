@@ -17,12 +17,11 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     title,
     description,
     alternates: alternatesForPath(locale, "/blog"),
-    openGraph: {
+    ...socialMetadata({
+      url: `${base}/${locale}/blog`,
       title,
       description,
-      url: `${base}/${locale}/blog`,
-      type: "website",
-    },
+    }),
   };
 }
 
@@ -110,3 +109,4 @@ export default async function BlogListPage({
 }
 
 import { FileText } from "lucide-react";
+import { socialMetadata } from "@/lib/social-metadata";

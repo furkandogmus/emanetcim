@@ -7,6 +7,8 @@ import type { Metadata } from "next";
 import { alternatesForPath } from "@/lib/seo-alternates";
 import { getGuestStaticSeo } from "@/lib/guest-static-seo";
 import { getSiteBaseUrl } from "@/lib/site-urls";
+import { socialMetadata } from "@/lib/social-metadata";
+import { serializeJsonLd } from "@/lib/json-ld-script";
 
 export async function generateMetadata({
   params,
@@ -20,7 +22,11 @@ export async function generateMetadata({
     title,
     description,
     alternates: alternatesForPath(locale, "/faq"),
-    openGraph: { title, description, url: `${base}/${locale}/faq` },
+    ...socialMetadata({
+      url: `${base}/${locale}/faq`,
+      title,
+      description,
+    }),
   };
 }
 
@@ -52,7 +58,7 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
     <div className="min-h-screen bg-gray-50/50">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(faqJsonLd) }}
       />
       <header className="py-24 px-6 bg-white border-b border-gray-100 text-center">
         <h1 className="text-5xl font-black text-gray-900 tracking-tighter mb-4">

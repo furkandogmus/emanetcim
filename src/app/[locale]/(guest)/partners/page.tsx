@@ -5,6 +5,7 @@ import { getGuestStaticSeo } from "@/lib/guest-static-seo";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { Store, TrendingUp, Shield, Smartphone, ArrowRight, MessageCircle } from "lucide-react";
 import { Link } from "@/i18n/routing";
+import { socialMetadata } from "@/lib/social-metadata";
 
 export async function generateMetadata({
   params,
@@ -18,7 +19,11 @@ export async function generateMetadata({
     title,
     description,
     alternates: alternatesForPath(locale, "/partners"),
-    openGraph: { title, description, url: `${base}/${locale}/partners` },
+    ...socialMetadata({
+      url: `${base}/${locale}/partners`,
+      title,
+      description,
+    }),
   };
 }
 

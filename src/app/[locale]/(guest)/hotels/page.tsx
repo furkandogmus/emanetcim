@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { alternatesForPath } from "@/lib/seo-alternates";
 import { Building2, Users, Globe, Languages, ChevronDown } from "lucide-react";
+import { socialMetadata } from "@/lib/social-metadata";
 
 export async function generateMetadata({
   params,
@@ -19,12 +20,11 @@ export async function generateMetadata({
     title,
     description,
     alternates: alternatesForPath(locale, "/hotels"),
-    openGraph: {
+    ...socialMetadata({
+      url: `${base}/${locale}/hotels`,
       title,
       description,
-      url: `${base}/${locale}/hotels`,
-      type: "website",
-    },
+    }),
   };
 }
 

@@ -14,6 +14,8 @@ import { auth } from "@/auth";
 import { analyticsService } from "@/services/AnalyticsService";
 import { prelaunchInterestService } from "@/services/PrelaunchInterestService";
 import { resolveServerSessionId } from "@/lib/analytics-server";
+import { socialMetadata } from "@/lib/social-metadata";
+import { serializeJsonLd } from "@/lib/json-ld-script";
 
 export async function generateMetadata({
   params,
@@ -52,12 +54,11 @@ export async function generateMetadata({
     */
     ...(shop.isPrelaunch ? { robots: { index: false, follow: true } } : {}),
     alternates: { canonical, languages },
-    openGraph: {
+    ...socialMetadata({
+      url: canonical,
       title,
       description,
-      url: canonical,
-      type: "website",
-    },
+    }),
   };
 }
 
@@ -143,11 +144,11 @@ export default async function ShopDetailPage({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbLd) }}
       />
       <ShopDetailClient
         shop={clientShop}

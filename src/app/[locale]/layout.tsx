@@ -22,6 +22,7 @@ import VerificationBanner from "@/components/layout/VerificationBanner";
 import { config } from "@/lib/config";
 import { resolveCommerceContext } from "@/lib/commerce-context";
 import { CommerceProvider } from "@/components/providers/CommerceProvider";
+import { serializeJsonLd } from "@/lib/json-ld-script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -177,11 +178,11 @@ export default async function RootLayout({
       >
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(orgLd) }}
         />
         <NextIntlClientProvider messages={messages}>
           {/*

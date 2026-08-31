@@ -10,6 +10,8 @@ import { routing } from "@/i18n/routing";
 import { buildCityStorageJsonLd } from "@/lib/city-storage-json-ld";
 import { buildBreadcrumbJsonLd } from "@/lib/breadcrumb-json-ld";
 import { buildFaqJsonLd } from "@/lib/faq-json-ld";
+import { socialMetadata } from "@/lib/social-metadata";
+import { serializeJsonLd } from "@/lib/json-ld-script";
 
 export function generateStaticParams() {
   return STORAGE_CITIES.map((c) => ({ slug: c.slug }));
@@ -44,12 +46,11 @@ export async function generateMetadata({
         ] as const,
       ]),
     },
-    openGraph: {
+    ...socialMetadata({
+      url: canonical,
       title,
       description,
-      url: canonical,
-      type: "website",
-    },
+    }),
   };
 }
 
@@ -134,15 +135,15 @@ export default async function CityLuggageStoragePage({
 
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(faqJsonLd) }}
       />
 
       <article className="mx-auto max-w-3xl px-6 py-12 md:py-16">

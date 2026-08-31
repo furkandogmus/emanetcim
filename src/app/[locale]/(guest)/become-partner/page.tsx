@@ -10,6 +10,7 @@ import PartnerEarningsCalculator from "@/components/guest/PartnerEarningsCalcula
 import prisma from "@/lib/db";
 import { OPERATING_SHOP_FILTER } from "@/lib/public-shop-filter";
 import { Users } from "lucide-react";
+import { socialMetadata } from "@/lib/social-metadata";
 
 /** Sosyal kanıt için gerçek sayı bu eşiğin altındaysa "ilk ortaklardan olun"
  * çerçevesi kullanılır — küçük bir rakamı olduğu gibi göstermek ikna edici
@@ -31,12 +32,11 @@ export async function generateMetadata({
     title,
     description,
     alternates: alternatesForPath(locale, "/become-partner"),
-    openGraph: {
+    ...socialMetadata({
+      url: `${base}/${locale}/become-partner`,
       title,
       description,
-      url: `${base}/${locale}/become-partner`,
-      type: "website",
-    },
+    }),
   };
 }
 

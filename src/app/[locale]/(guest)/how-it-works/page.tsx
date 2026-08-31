@@ -5,6 +5,8 @@ import { CalendarCheck, QrCode, ShieldCheck, PackageCheck } from "lucide-react";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { alternatesForPath } from "@/lib/seo-alternates";
 import HowItWorksAnimation from "@/components/guest/HowItWorksAnimation";
+import { socialMetadata } from "@/lib/social-metadata";
+import { serializeJsonLd } from "@/lib/json-ld-script";
 
 /**
  * Süreci anlatan sayfa.
@@ -31,12 +33,11 @@ export async function generateMetadata({
     title: t("metaTitle"),
     description: t("heroSubtitle"),
     alternates: alternatesForPath(locale, "/how-it-works"),
-    openGraph: {
+    ...socialMetadata({
+      url: `${base}/${locale}/how-it-works`,
       title: t("metaTitle"),
       description: t("heroSubtitle"),
-      url: `${base}/${locale}/how-it-works`,
-      type: "website",
-    },
+    }),
   };
 }
 
@@ -78,7 +79,7 @@ export default async function HowItWorksPage({
     <div className="min-h-screen bg-white text-gray-900">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(howToJsonLd) }}
       />
 
       <header className="border-b border-gray-100 px-6 py-16 text-center">

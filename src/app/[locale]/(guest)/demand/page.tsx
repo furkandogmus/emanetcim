@@ -5,6 +5,7 @@ import { MapPin, Store } from "lucide-react";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { alternatesForPath } from "@/lib/seo-alternates";
 import { prelaunchInterestService } from "@/services/PrelaunchInterestService";
+import { socialMetadata } from "@/lib/social-metadata";
 
 /**
  * Talep haritası — ESNAFA yönelik pazarlama sayfası.
@@ -31,12 +32,11 @@ export async function generateMetadata({
     title: t("metaTitle"),
     description: t("heroSubtitle"),
     alternates: alternatesForPath(locale, "/demand"),
-    openGraph: {
+    ...socialMetadata({
+      url: `${base}/${locale}/demand`,
       title: t("metaTitle"),
       description: t("heroSubtitle"),
-      url: `${base}/${locale}/demand`,
-      type: "website",
-    },
+    }),
   };
 }
 

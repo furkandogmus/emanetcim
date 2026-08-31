@@ -20,6 +20,8 @@ import { formatDecimal } from "@/lib/currency";
 import { getPricingRules } from "@/lib/platform-settings";
 import { isInsuranceEnabled } from "@/lib/commerce-context";
 import AmbientBackdrop from "@/components/common/AmbientBackdrop";
+import { socialMetadata } from "@/lib/social-metadata";
+import { serializeJsonLd } from "@/lib/json-ld-script";
 
 export const revalidate = 120;
 
@@ -60,17 +62,11 @@ export async function generateMetadata({
     title: `${title} | BagajPark`,
     description,
     alternates: alternatesForPath(locale, ""),
-    openGraph: {
+    ...socialMetadata({
       url: `${base}/${locale}`,
       title,
       description,
-      type: "website",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-    },
+    }),
   };
 }
 
@@ -193,15 +189,15 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
     <div className="flex flex-col min-h-screen bg-white text-gray-900">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(faqJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(webPageJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(cityItemListJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(cityItemListJsonLd) }}
       />
       {/* Hero Section */}
       <header className="relative overflow-hidden bg-gray-50 px-6 pt-14 pb-6 flex flex-col items-center text-center md:pt-32 md:pb-20">

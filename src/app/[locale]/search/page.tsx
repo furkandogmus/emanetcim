@@ -9,6 +9,7 @@ import {
 } from '@/lib/search-defaults';
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { alternatesForPath } from "@/lib/seo-alternates";
+import { socialMetadata } from "@/lib/social-metadata";
 
 /**
  * `explicit`: merkez URL'den mi geldi, yoksa varsayilana mi dusuldu.
@@ -57,11 +58,11 @@ export async function generateMetadata({
     title,
     description,
     alternates: alternatesForPath(locale, "/search"),
-    openGraph: {
+    ...socialMetadata({
+      url: searchCanonical,
       title,
       description,
-      url: searchCanonical,
-    },
+    }),
   };
 }
 

@@ -5,6 +5,7 @@ import { getGuestStaticSeo } from "@/lib/guest-static-seo";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { MessageCircle, Mail, MapPin, MessageSquare } from "lucide-react";
 import ContactFormClient from "@/components/ContactFormClient";
+import { socialMetadata } from "@/lib/social-metadata";
 
 export async function generateMetadata({
   params,
@@ -18,7 +19,11 @@ export async function generateMetadata({
     title,
     description,
     alternates: alternatesForPath(locale, "/contact"),
-    openGraph: { title, description, url: `${base}/${locale}/contact` },
+    ...socialMetadata({
+      url: `${base}/${locale}/contact`,
+      title,
+      description,
+    }),
   };
 }
 

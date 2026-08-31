@@ -8,6 +8,8 @@ import { getSiteBaseUrl } from "@/lib/site-urls";
 import { routing } from "@/i18n/routing";
 import { buildFaqJsonLd } from "@/lib/faq-json-ld";
 import { buildItemListJsonLd, buildWebPageJsonLd } from "@/lib/page-json-ld";
+import { socialMetadata } from "@/lib/social-metadata";
+import { serializeJsonLd } from "@/lib/json-ld-script";
 
 export async function generateMetadata({
   params,
@@ -32,17 +34,11 @@ export async function generateMetadata({
         ["x-default", `${base}/${routing.defaultLocale}/luggage-storage`] as const,
       ]),
     },
-    openGraph: {
-      title,
-      description,
+    ...socialMetadata({
       url: canonical,
-      type: "website",
-    },
-    twitter: {
-      card: "summary_large_image",
       title,
       description,
-    },
+    }),
   };
 }
 
@@ -111,15 +107,15 @@ export default async function LuggageStorageIndexPage({
     <div className="min-h-screen bg-white text-gray-900">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(faqJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(webPageJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(cityItemListJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(cityItemListJsonLd) }}
       />
       <header className="border-b border-gray-100 bg-gray-50/80">
         <div className="mx-auto flex max-w-3xl items-center gap-3 px-6 py-4">
