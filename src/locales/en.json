@@ -961,6 +961,7 @@
     "resetClose": "Close",
     "platformSettingsLatePickupFee": "Late pickup fee (₺)",
     "platformSettingsLatePickupGrace": "Late pickup grace (min)",
+    "platformSettingsCheckInGrace": "Check-in grace (min)",
     "shopIsTest": "Test record",
     "shopIsTestHint": "A flagged shop is hidden from search, the map and homepage stats. The partner panel and existing bookings are unaffected.",
     "shopIsVerified": "Verified shop",

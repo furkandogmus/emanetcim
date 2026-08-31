@@ -10,6 +10,61 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-08-31 — açık kalan üç madde kapatıldı
+
+Önceki turlarda "sizin kararınız" ya da "araç yok" diye bıraktığım üç şey vardı.
+Üçü de kapandı; ikisinde teşhisim yanlıştı.
+
+### 1. Mobil uygulama — YANLIŞ TEŞHİS DÜZELTİLDİ
+
+"Bu makinede flutter/dart yok, freezed dosyaları üretilemez, `mobile/` dizinine
+dokunmuyorum" demiştim. Yanlıştı: üretilmiş dosyalar depoda değil,
+`mobile-ci.yml` içinde `dart run build_runner build` koşuyor ve ardından
+`flutter analyze`, `flutter test`, `flutter build apk` geliyor. Kaynağı
+düzenlemek yeterli; doğrulamayı CI yapıyor. **Araç eksikliği sandığım şey, iş
+akışını okumamış olmamdı.**
+
+`ShopDto` bayrağı aldı; kart ve detay ekranı fiyat yerine "Yakında" gösteriyor;
+detay ekranındaki rezervasyon düğmesi **kapalı** (`onPressed: null`). Önceden
+misafir 50 TL görüp "Şimdi Rezerve Et"e basıyor ve sunucudan `409
+shop_not_open_yet` yiyordu — sunucu kapısı sağlamdı ama söz önce veriliyordu.
+
+### 2. Açılış e-postası — üretimde ÖLÇÜLDÜ
+
+"Prod'da hiç denenmedi" diye bırakmıştım. Gönderim yolu üretimde doğrulandı
+(sır hiçbir yere yazılmadan, yalnızca durum kodu okunarak):
+
+| Kontrol | Sonuç |
+|---|---|
+| `RESEND_API_KEY` tanımlı | evet (36 karakter) |
+| Resend `/domains` çağrısı | **200** — anahtar geçerli |
+| `bagajpark.com` alan adı | **verified**, eu-west-1 |
+| `EMAIL_FROM` | `BagajPark <info@bagajpark.com>` — doğrulanmış alanla eşleşiyor |
+
+`notifyPrelaunchOpened`, diğer bütün işlem e-postalarıyla **aynı** `sendEmail`
+yolunu kullanıyor. Geriye kalan tek bilinmeyen, şablonun gerçek bir gelen
+kutusunda nasıl göründüğü — o da her e-postayla ortak olan `renderEmailHtml`.
+
+### 3. Check-in kapanış toleransı — KARAR VERİLDİ
+
+İki turda sorup cevap alamadım; kararı verdim ve **ayarlanabilir** yaptım.
+
+Sorun: misafir çalışma saati **içinde** bir bırakış saati seçip rezervasyon
+yapıyor, ama birkaç dakika geç geliyor. Esnaf tezgahta, misafir karşısında,
+ikisi de razı — ve sistem valizi reddediyordu. Ret, misafiri valiziyle sokakta
+bırakır; kabul, esnafın zaten orada olduğu bir anda tek bir işlem yapmasını
+sağlar.
+
+`PlatformSettings.checkInGraceMin`, **varsayılan 30 dakika**. Kalıp yeni değil —
+`latePickupGraceMin` zaten aynı şekilde çalışıyor. `/admin/platform-settings`
+üzerinden değiştirilir; **`0` yazılırsa eski davranış (tolerans yok) birebir
+geri gelir.**
+
+İki ayrıntı kasıtlı: tolerans yalnızca **kapanış** tarafına uygulanıyor (açılıştan
+önce gelen misafir için anlamsız — dükkan açılmamış, esnaf orada değil), ve
+uygulaması "saati geriye al, aynı kontrolü tekrarla" biçiminde; kapanış saatini
+ileri kaydırmak gece yarısını aşan çalışma saatlerini (`22:00–04:00`) bozardı.
+
 ## 2026-08-31 — hesapsız misafir KENDİ kodunu yazınca rezervasyonunu bulamıyordu
 
 En kritik yol: misafir anonim rezervasyon yaptı, sekmeyi kapattı, dükkanın

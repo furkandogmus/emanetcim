@@ -83,7 +83,31 @@ export function isShopOpenForHandover(
   open247: boolean | null | undefined,
   at: Date,
   timezone = "Europe/Istanbul",
+  /**
+   * Kapanış saatine tanınan tolerans (dakika) — `PlatformSettings.checkInGraceMin`.
+   *
+   * NEDEN VAR: misafir çalışma saati İÇİNDE bir bırakış saati seçip rezervasyon
+   * yapıyor, ama birkaç dakika geç geliyor. Esnaf tezgahta, misafir karşısında,
+   * ikisi de razı — ve sistem valizi reddediyordu. Ret, misafiri valiziyle
+   * sokakta bırakır; kabul, esnafın zaten orada olduğu bir anda tek bir işlem
+   * yapmasını sağlar.
+   *
+   * Yalnızca KAPANIŞ tarafına uygulanır. Açılıştan önce gelen misafir için
+   * tolerans anlamsız: dükkan henüz açılmamıştır, esnaf orada değildir.
+   */
+  graceMinutes = 0,
 ): boolean {
   if (open247) return true;
-  return isShopOpenAt(openingTime, closingTime, at, timezone);
+  if (isShopOpenAt(openingTime, closingTime, at, timezone)) return true;
+  if (graceMinutes <= 0) return false;
+
+  /*
+    Tolerans "kapanıştan bu kadar dakika önceymiş gibi davran" demek: `at`i
+    geriye alıp aynı kontrolü tekrarlıyoruz. Kapanış saatini ileri kaydırmak
+    yerine saati geri almak, gece yarısını aşan çalışma saatlerini
+    (`22:00–04:00`) de bozmadan çalışır -- `isShopOpenAt` o durumu zaten
+    doğru ele alıyor.
+  */
+  const shifted = new Date(at.getTime() - graceMinutes * 60_000);
+  return isShopOpenAt(openingTime, closingTime, shifted, timezone);
 }

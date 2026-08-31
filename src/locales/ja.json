@@ -959,6 +959,7 @@
     "resetClose": "Close",
     "platformSettingsLatePickupFee": "受取遅延料金 (₺)",
     "platformSettingsLatePickupGrace": "遅延猶予時間（分）",
+    "platformSettingsCheckInGrace": "チェックイン猶予（分）",
     "shopIsTest": "テストレコード",
     "shopIsTestHint": "マークされた店舗は検索・地図・トップページの統計に表示されません。パートナー画面と既存の予約には影響しません。",
     "shopIsVerified": "認証済み店舗",

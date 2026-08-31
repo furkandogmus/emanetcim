@@ -959,6 +959,7 @@
     "resetClose": "Close",
     "platformSettingsLatePickupFee": "هزینه تحویل دیرهنگام (₺)",
     "platformSettingsLatePickupGrace": "مهلت تأخیر (دقیقه)",
+    "platformSettingsCheckInGrace": "مهلت پذیرش (دقیقه)",
     "shopIsTest": "رکورد آزمایشی",
     "shopIsTestHint": "محل علامت‌گذاری‌شده در جست‌وجو، نقشه و آمار صفحهٔ اصلی دیده نمی‌شود. پنل شریک و رزروهای موجود تغییری نمی‌کنند.",
     "shopIsVerified": "فروشگاه تأییدشده",

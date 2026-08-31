@@ -53,6 +53,54 @@ describe("isShopOpenForHandover", () => {
   });
 });
 
+describe("kapanis toleransi", () => {
+  /**
+   * Misafir calisma saati ICINDE bir birakis saati secip rezervasyon yapiyor,
+   * ama birkac dakika gec geliyor. Esnaf tezgahta, misafir karsisinda, ikisi de
+   * razi -- ve sistem valizi reddediyordu. Ret, misafiri valiziyle sokakta
+   * birakir.
+   *
+   * `PlatformSettings.checkInGraceMin` ile ayarlanir; `0` yazilirsa eski
+   * davranis (tolerans yok) geri gelir.
+   */
+  const JUST_AFTER = new Date("2026-09-01T17:10:00Z"); // Istanbul'da 20:10
+
+  it("kapanistan 10 dk sonra, 30 dk tolerans ile KABUL eder", () => {
+    expect(
+      isShopOpenForHandover("09:00", "20:00", false, JUST_AFTER, "Europe/Istanbul", 30),
+    ).toBe(true);
+  });
+
+  it("tolerans 0 iken eski davranis: REDDEDER", () => {
+    expect(
+      isShopOpenForHandover("09:00", "20:00", false, JUST_AFTER, "Europe/Istanbul", 0),
+    ).toBe(false);
+  });
+
+  it("tolerans penceresini ASMAYI kabul etmez", () => {
+    const wayLate = new Date("2026-09-01T18:30:00Z"); // Istanbul'da 21:30
+    expect(
+      isShopOpenForHandover("09:00", "20:00", false, wayLate, "Europe/Istanbul", 30),
+    ).toBe(false);
+  });
+
+  it("ACILIS tarafina tolerans UYGULANMAZ", () => {
+    // Dukkan henuz acilmamistir, esnaf orada degildir; tolerans anlamsiz.
+    const beforeOpen = new Date("2026-09-01T05:50:00Z"); // Istanbul'da 08:50
+    expect(
+      isShopOpenForHandover("09:00", "20:00", false, beforeOpen, "Europe/Istanbul", 30),
+    ).toBe(false);
+  });
+
+  it("gece yarisini asan saatlerde de bozulmaz", () => {
+    // 22:00-04:00 calisan bir dukkan; 04:20'de 30 dk tolerans ile hala kabul.
+    const late = new Date("2026-09-01T01:20:00Z"); // Istanbul'da 04:20
+    expect(
+      isShopOpenForHandover("22:00", "04:00", false, late, "Europe/Istanbul", 30),
+    ).toBe(true);
+  });
+});
+
 describe("check-in kapisi duzeltmeyi kullaniyor", () => {
   it("check-in.ts artik ham isShopOpenAt cagirmiyor", async () => {
     const fs = await import("node:fs");
@@ -62,5 +110,7 @@ describe("check-in kapisi duzeltmeyi kullaniyor", () => {
     expect(src).toContain("isShopOpenForHandover");
     expect(src).toContain("existing.shop.open247");
     expect(src).toContain("existing.shop.timezone");
+    // Tolerans ayardan gelmeli; sabit bir sayi yazilirsa yonetici degistiremez.
+    expect(src).toContain("rules.checkInGraceMin");
   });
 });

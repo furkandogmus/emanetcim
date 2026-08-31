@@ -31,6 +31,13 @@ export async function checkIn(
         message: 'Rezervasyon bulunamadı.',
       };
     }
+    /*
+      Kurallar burada okunuyor cunku hem saat toleransi hem muhur zorunlulugu
+      bunlara bagli. Iki ayri okuma yapmak, ayni istekte iki kez ayni satiri
+      cekmek olurdu.
+    */
+    const rules = await getPricingRules();
+
     if (existing.status !== 'PAID' && (existing.status as string) !== 'APPROVED') {
       return {
         ok: false,
@@ -51,6 +58,7 @@ export async function checkIn(
         existing.shop.open247,
         new Date(),
         existing.shop.timezone ?? undefined,
+        rules.checkInGraceMin,
       )
     ) {
       logger.warn('BookingService::checkIn: dükkan kapalı saat aralığında');
@@ -77,7 +85,6 @@ export async function checkIn(
      * Ayar VARSAYILAN OLARAK KAPALI: lansmanda esnafın elinde mühür olmayabilir
      * ve açık olması check-in'i tamamen bloke eder.
      */
-    const rules = await getPricingRules();
     if (rules.requireSealsOnCheckIn) {
       const bagCount = totalBagCount(
         existing.bagCountS,

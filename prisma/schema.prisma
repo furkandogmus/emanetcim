@@ -506,6 +506,17 @@ model PlatformSettings {
   latePickupFeeTry       Decimal  @default(0) @db.Decimal(12, 2)
   /// Gecikme ücreti işlemeden önceki tolerans (dakika).
   latePickupGraceMin     Int      @default(15)
+  /// Check-in'de dükkanın kapanış saatine tanınan tolerans (dakika).
+  ///
+  /// NEDEN VAR: misafir çalışma saati İÇİNDE bir bırakış saati seçip rezervasyon
+  /// yapıyor, ama birkaç dakika geç geliyor. Esnaf tezgahta, misafir karşısında,
+  /// ikisi de razı — ve sistem valizi reddediyordu. Ret, misafiri valiziyle
+  /// sokakta bırakıyor; kabul, esnafın zaten orada olduğu bir anda tek bir işlem
+  /// yapmasını sağlıyor.
+  ///
+  /// VARSAYILAN 30 dakika. `0` yazılırsa eski davranış (tolerans yok) geri gelir;
+  /// `/admin/platform-settings` üzerinden değiştirilir.
+  checkInGraceMin        Int      @default(30)
   /// Check-in'de mühür kaydı ZORUNLU mu?
   ///
   /// VARSAYILAN `false` — bilinçli. Lansmanda esnafın elinde mühür olmayabilir ve

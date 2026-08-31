@@ -17,6 +17,7 @@ function mapRow(row: {
   cancelFixedFeeTry: unknown;
   latePickupFeeTry: unknown;
   latePickupGraceMin: number;
+  checkInGraceMin: number;
   requireSealsOnCheckIn: boolean;
   defaultShopCapacity: number;
   defaultPricePerDay: unknown;
@@ -39,6 +40,7 @@ function mapRow(row: {
     cancelFixedFeeTry: moneyToNumber(row.cancelFixedFeeTry),
     latePickupFeeTry: moneyToNumber(row.latePickupFeeTry),
     latePickupGraceMin: row.latePickupGraceMin,
+    checkInGraceMin: row.checkInGraceMin,
     requireSealsOnCheckIn: row.requireSealsOnCheckIn,
     defaultShopCapacity: row.defaultShopCapacity,
     defaultPricePerDay: moneyToNumber(row.defaultPricePerDay),

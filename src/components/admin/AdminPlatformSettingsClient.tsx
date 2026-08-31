@@ -14,6 +14,7 @@ export type PlatformSettingsFormValues = {
   cancelFixedFeeTry: number;
   latePickupFeeTry: number;
   latePickupGraceMin: number;
+  checkInGraceMin: number;
   requireSealsOnCheckIn: boolean;
   defaultShopCapacity: number;
   defaultPricePerDay: number;
@@ -85,6 +86,7 @@ export default function AdminPlatformSettingsClient({
         cancelFixedFeeTry: form.cancelFixedFeeTry,
         latePickupFeeTry: form.latePickupFeeTry,
         latePickupGraceMin: form.latePickupGraceMin,
+        checkInGraceMin: form.checkInGraceMin,
         requireSealsOnCheckIn: form.requireSealsOnCheckIn,
         defaultShopCapacity: form.defaultShopCapacity,
         defaultPricePerDay: form.defaultPricePerDay,
@@ -147,6 +149,17 @@ export default function AdminPlatformSettingsClient({
           label={t("platformSettingsLatePickupGrace")}
           value={form.latePickupGraceMin}
           onChange={(v) => patch({ latePickupGraceMin: Math.round(v) })}
+        />
+        {/*
+          Check-in toleransı: misafir çalışma saati İÇİNDE bir bırakış saati
+          seçip rezervasyon yapıyor ama birkaç dakika geç geliyor. Esnaf
+          tezgahta, misafir karşısında, ikisi de razı — ve sistem valizi
+          reddediyordu. `0` yazılırsa eski davranış geri gelir.
+        */}
+        <Field
+          label={t("platformSettingsCheckInGrace")}
+          value={form.checkInGraceMin}
+          onChange={(v) => patch({ checkInGraceMin: Math.round(v) })}
         />
 
         {/*
