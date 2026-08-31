@@ -26,7 +26,31 @@ export default function LocaleSwitcher() {
         aria-label={t("language")}
         value={locale}
         onChange={(e) => {
-          router.replace(pathname, { locale: e.target.value });
+          /*
+            SORGU DIZESI KORUNUR.
+
+            Olculdu (2026-08-31): `/tr/search?lat=41.0082&lng=28.9784` uzerinde
+            dil degistirilince `/en/search`e gidiliyordu -- `?lat=&lng=`
+            dusuyordu ve kullanici aradigi konumu kaybedip varsayilan merkeze
+            (Istanbul) donuyordu. Sebep `usePathname()`in sorgu dizesini
+            ICERMEMESI.
+
+            Bu, tam da yabanci ziyaretcinin yaptigi sey: paylasilan ya da
+            sehir sayfasindan gelen bir arama baglantisini acip once dili
+            degistiriyor. Aramasini kaybetmesi, dil degistirmenin bedeli
+            olmamali.
+
+            `useSearchParams` KULLANILMADI bilerek: o bir hook ve render
+            sirasinda calisir; Next'te statik sayfalarda Suspense sinirini
+            zorunlu kilar ve bu bilesen HER sayfanin basliginda. `onChange`
+            icinde `window.location` okumak olay anindadir, o kisiti hic
+            dogurmuyor.
+          */
+          const ek =
+            typeof window === "undefined"
+              ? ""
+              : window.location.search + window.location.hash;
+          router.replace(`${pathname}${ek}`, { locale: e.target.value });
         }}
         /*
           `w-16`: bir <select>un kapali genisligi EN UZUN SECENEGE gore belirlenir,

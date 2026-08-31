@@ -153,6 +153,7 @@ tarayıcıda oturumu sen açarsan aynı sekmeden devam edilebilir.
 | 46 | Ana sayfa sekme başlığında marka yok; blogda iki kez | SEO/sekme | ✅ DÜZELTİLDİ |
 | 47 | Push bildirimine tıklayan ana sayfaya düşüyor | Push | ✅ DÜZELTİLDİ |
 | 48 | Web push uçtan uca ÖLÜ: `sendPush` hiç çağrılmıyor | Push | ⏳ KARAR BEKLİYOR |
+| 49 | Dil değiştirince arama konumu kayboluyor | Gezinme | ✅ DÜZELTİLDİ |
 | 101 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
 | 102 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
 | 103 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
@@ -975,6 +976,29 @@ her yerde" beklentisi doğarsa buradan başlanmalı.
 Yani #48 bir desen değil, **istisna**. Bunu ölçmek önemliydi: bir ölü özellik
 bulunca "acaba hepsi böyle mi" diye varsaymak kolay, ve öyle olmadığını
 göstermek de bir sonuç.
+
+### 49. Dil değiştirince arama konumu kayboluyordu
+
+Ölçüldü: `/tr/search?lat=41.0082&lng=28.9784` üzerinde dil değiştirilince
+`/en/search`e gidiliyordu — `?lat=&lng=` düşüyor ve kullanıcı aradığı konumu
+kaybedip varsayılan merkeze (İstanbul) dönüyordu.
+
+Sebep: `usePathname()` sorgu dizesini içermiyor.
+
+Bu tam da yabancı ziyaretçinin yaptığı sey: paylaşılan ya da şehir
+sayfasından gelen bir arama bağlantısını açıp **önce dili değiştiriyor**.
+Aramasını kaybetmesi, dil değiştirmenin bedeli olmamalı.
+
+`useSearchParams` bilerek kullanılmadı: o bir hook, render sırasında çalışır
+ve Next'te statik sayfalarda Suspense sınırını zorunlu kılar — bu bileşen ise
+**her sayfanın başlığında**. `onChange` içinde `window.location` okumak olay
+anındadır ve o kısıtı hiç doğurmuyor.
+
+### Geri/ileri tuşu — SAĞLIKLI
+
+Arama → dükkan → geri denendi: `/tr/search`e dönüyor, sayfa tam yükleniyor
+(harita canvas'ı var, 2921 karakter içerik). Erken turlarda işaretlenmiş ama
+hiç test edilmemiş bir maddeydi.
 
 ### Düşmanca içerik testi — düzen dayanıyor
 
