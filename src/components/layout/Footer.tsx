@@ -60,7 +60,7 @@ export default function Footer() {
   if (isAppSurface) {
     return (
       <footer
-        className={`border-t border-gray-100 bg-white px-6 py-6 font-sans [&_a]:inline-block [&_a]:py-1.5 [&_a]:-my-1.5 ${needsMobileNavClearance ? "max-md:pb-28" : ""}`}
+        className={`border-t border-gray-100 bg-white px-6 py-6 font-sans [&_a]:inline-block [&_a]:py-1.5 [&_a]:-my-1.5 [&_a]:px-1 [&_a]:-mx-1 ${needsMobileNavClearance ? "max-md:pb-28" : ""}`}
       >
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 text-[11px] font-bold text-gray-400 sm:flex-row">
           <p>© {currentYear} {tCommon("appName")}. {t("rights")}</p>
@@ -86,7 +86,7 @@ export default function Footer() {
     yalnizca tiklanabilir alan buyuyor.
   */
   return (
-    <footer className="bg-white border-t border-gray-100 pt-20 pb-10 max-md:pb-28 px-6 font-sans overflow-hidden [&_a]:inline-block [&_a]:py-1.5 [&_a]:-my-1.5">
+    <footer className="bg-white border-t border-gray-100 pt-20 pb-10 max-md:pb-28 px-6 font-sans overflow-hidden [&_a]:inline-block [&_a]:py-1.5 [&_a]:-my-1.5 [&_a]:px-1 [&_a]:-mx-1">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
           <div className="col-span-1 md:col-span-1">

@@ -87,7 +87,9 @@ export default async function BlogDetailPage({
 
       {/* Hero Header */}
       <header className="pt-32 pb-10 px-6 max-w-4xl mx-auto">
-        <Link href="/blog" className="inline-flex items-center gap-2 text-gray-400 hover:text-orange-600 transition-colors mb-8 group id-eyebrow text-xs">
+        <Link href="/blog" /* `py-2 -my-2`: olculdu 115x16 px; yazidan cikisin tek yolu ve
+             mobilde parmakla isabet edilmesi gerekiyor (WCAG 2.5.8). */
+          className="inline-flex items-center gap-2 py-2 -my-2 text-gray-400 hover:text-orange-600 transition-colors mb-8 group id-eyebrow text-xs">
           <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
           {t("backToBlog")}
         </Link>
@@ -139,7 +141,8 @@ export default async function BlogDetailPage({
         {/* Footer Area */}
         <div className="mt-20 pt-10 border-t border-gray-100">
           <div className="bg-orange-50 p-8 rounded-4xl border border-orange-100">
-            <h4 className="text-sm id-eyebrow text-gray-900 mb-2">{t("ctaTitle")}</h4>
+            {/* `h2`, `h4` DEGIL: yazinin h1'inden sonra iki seviye atliyordu. */}
+            <h2 className="text-sm id-eyebrow text-gray-900 mb-2">{t("ctaTitle")}</h2>
             <p className="text-sm font-bold text-gray-500 mb-6 leading-relaxed">{t("ctaDescription")}</p>
             <Link 
               href="/search"

@@ -34,6 +34,10 @@ const SAYFALAR = [
   ["/tr/insurance", "sigorta"],
   ["/tr/faq", "SSS"],
   ["/tr/blog", "blog"],
+  ["/tr/blog/istanbul-valiz-emanet-rehberi", "blog yazısı"],
+  // Farsca RTL: duzen aynalanıyor, tasma sinifi farkli davranabilir
+  ["/fa", "ana sayfa (FA/RTL)"],
+  ["/fa/search", "arama (FA/RTL)"],
   ["/tr/luggage-storage/istanbul", "şehir sayfası"],
   // Huninin geri kalani: bu denetimde en cok hata bu ikisinden cikti.
   [`/tr/shop/${SHOP_ID}`, "dükkan detay"],
