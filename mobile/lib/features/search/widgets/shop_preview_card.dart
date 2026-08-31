@@ -154,7 +154,16 @@ class ShopPreviewCard extends ConsumerWidget {
                           ),
                         ),
                       ],
-                      if (shop.pricePerDay > 0) ...[
+                      // Talep testi noktasinda fiyat YAZILMAZ: oradaki
+                      // `pricePerDay` sema varsayilanidir (50 TL), esnafla
+                      // anlasilmadigi icin gercek bir fiyat degil ve nokta
+                      // yurt disindaysa yanlis para biriminde. Web'de de ayni
+                      // yerde "Yakinda" yaziyor; ikisi ayrismamali.
+                      if (shop.isPrelaunch) ...[
+                        const Spacer(),
+                        Text('search.coming_soon'.tr(),
+                          style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.brandOrange)),
+                      ] else if (shop.pricePerDay > 0) ...[
                         const Spacer(),
                         Text('₺${shop.pricePerDay.toStringAsFixed(0)}${'search.day_unit'.tr()}',
                           style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.brandOrange)),

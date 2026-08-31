@@ -142,19 +142,30 @@ gerçekleşemezdi.
   sinsi tarafı sessiz olması — aramaya eklenen yeni bir süzgeç prelaunch'u yeniden eler
   ve hiçbir şey kırılmaz. Test, düzeltme geri alındığında 5'te 3 kırılarak doğrulandı.
 
-### AÇIK — mobil uygulama aynı bayrağı henüz kullanmıyor
+### KAPANDI — mobil uygulama bayrağı kullanıyor
 
-`/api/mobile/shops/nearby` aynı `findShopsForSearch`i kullanıyor, yani **mobil de artık
-talep testi noktalarını listeliyor**. `toMobileShop` bayrağı (`isPrelaunch`) taşıyacak
-şekilde güncellendi, ama Flutter tarafı henüz okumuyor: `ShopDto` alanı yok, kart ve
-detay ekranı hâlâ ₺50 + "Rezervasyon yap" çiziyor. Rezervasyon sunucuda `409
-shop_not_open_yet` ile reddedildiği için hayalet rezervasyon oluşamaz — ama misafire
-tutamayacağımız söz veriliyor.
+`/api/mobile/shops/nearby` aynı `findShopsForSearch`i kullanıyor, yani mobil de
+talep testi noktalarını listeliyor. Sunucu bayrağı (`isPrelaunch`) taşıyordu ama
+Flutter tarafı okumuyordu: kart 50 TL ve "Şimdi Rezerve Et" çiziyor, misafir
+deniyor ve sunucudan `409 shop_not_open_yet` yiyordu. Sunucu kapısı sağlam,
+hayalet rezervasyon oluşmuyor — ama tutamayacağımız sözü verdikten sonra
+reddetmek kapının işi değil, arayüzün işi.
 
-Yapılacak (Flutter araçları gerekiyor, bu makinede yok):
-`mobile/lib/shared/models/shop.dart`'a `@Default(false) bool isPrelaunch` ekleyip
-`build_runner` ile freezed dosyalarını üret; `shop_preview_card.dart` ve
-`shop_detail_screen.dart`'ta fiyat/CTA'yı web'deki gibi "Yakında" / "Haber ver" yap.
+**Önce yanlış teşhis koymuştum:** "bu makinede flutter/dart yok, freezed
+dosyaları üretilemez, dokunmuyorum" demiştim. Yanlıştı — üretilmiş dosyalar
+depoda değil, `mobile-ci.yml` içinde `dart run build_runner build` koşuyor ve
+ardından `flutter analyze`, `flutter test`, `flutter build apk` geliyor. Yani
+kaynağı düzenlemek yeterli; doğrulamayı CI yapıyor.
+
+Yapılanlar:
+
+- `ShopDto` += `@Default(false) bool isPrelaunch`
+- `shop_preview_card.dart`: fiyat yerine "Yakında"
+- `shop_detail_screen.dart`: fiyat yerine "Yakında", rezervasyon düğmesi
+  **kapalı** (`onPressed: null`) ve etiketi "Yakında" — misafiri reddedilişe
+  kadar götürmek, tutamayacağımız sözü önce vermek demek
+- `search.coming_soon` iki dile de eklendi (tr/en anahtar kümeleri eşit)
+
 
 ## 2026-08-30 — talep testi kapsamı: 482 nokta / 252 şehir (ve büyümenin açtığı üç hata)
 

@@ -539,7 +539,9 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                             ),
                           ),
                           Text(
-                            '\u20BA${s.pricePerDay.toStringAsFixed(2)} /g\u00fcn',
+                            s.isPrelaunch
+                                ? 'search.coming_soon'.tr()
+                                : '\u20BA${s.pricePerDay.toStringAsFixed(2)} /g\u00fcn',
                             style: GoogleFonts.outfit(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
@@ -552,12 +554,22 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                     const SizedBox(width: 24),
                     Expanded(
                       flex: 2,
+                      // Talep testi noktasinda rezervasyon dugmesi KAPALI.
+                      // Sunucu zaten `409 shop_not_open_yet` doner; misafiri o
+                      // reddedilise kadar goturmek, tutamayacagimiz bir sozu
+                      // once vermek demek.
                       child: FilledButton(
-                        onPressed: () {
-                          unawaited(ref.read(hapticServiceProvider).medium());
-                          context.push('/checkout/${s.id}');
-                        },
-                        child: Text('search.book_now'.tr()),
+                        onPressed: s.isPrelaunch
+                            ? null
+                            : () {
+                                unawaited(ref.read(hapticServiceProvider).medium());
+                                context.push('/checkout/${s.id}');
+                              },
+                        child: Text(
+                          s.isPrelaunch
+                              ? 'search.coming_soon'.tr()
+                              : 'search.book_now'.tr(),
+                        ),
                       ),
                     ),
                   ],

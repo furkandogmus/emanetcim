@@ -25,6 +25,14 @@ abstract class ShopDto with _$ShopDto {
     @Default(false) bool acceptsLargeItems,
 @Default(true) bool isActive,
   @Default(false) bool isVerified,
+  /// Talep testi noktasi: aramada gorunur ama REZERVASYON ALMAZ.
+  ///
+  /// Sunucu `toMobileShop` ile gonderiyor. Bayrak olmadan istemci bu noktayi
+  /// normal bir dukkandan ayirt edemiyordu: sema varsayilani olan 50 TL'yi ve
+  /// "Simdi Rezerve Et"i gosteriyor, misafir deniyor ve sunucudan
+  /// `409 shop_not_open_yet` yiyordu. Sunucu kapisi saglam, ama tutamayacagimiz
+  /// sozu verdikten sonra reddetmek kapinin isi degil -- arayuzun isi.
+  @Default(false) bool isPrelaunch,
   double? distanceKm,
   int? bagsAvailable,
   @JsonKey(name: 'image') String? imageUrl,
