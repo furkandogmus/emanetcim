@@ -38,8 +38,10 @@ function secretsMatch(provided: string, expected: string): boolean {
  * slot üretimini tetikleyebiliyordu (2026-08-22 denetimi). Tek yere alındı ki
  * yeni bir iç uç eklemek korumayı unutmayı gerektirmesin.
  *
- * `proxy.ts` içindeki `/api/internal` kontrolü yalnızca başlığın VARLIĞINA
- * bakar, değerine bakmaz — yani gerçek savunma burasıdır, orası değil.
+ * `proxy.ts` içinde bir `/api/internal` kontrolü VARDI ama hiç çalışmıyordu:
+ * proxy `/api/` ile başlayan her yolda erken dönüyor, yani akış oraya hiç
+ * ulaşmıyordu. Üstelik ulaşsaydı bile yalnızca başlığın VARLIĞINA bakıyordu,
+ * değerine değil. 2026-08-31'de silindi; gerçek savunma burasıdır.
  *
  * Dönen değer: `null` = yetkili. Aksi halde döndürülecek hata durumu.
  *   - `"not_configured"`: `CRON_SECRET` tanımsız → uç kapalı sayılır (503)

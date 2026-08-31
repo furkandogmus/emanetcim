@@ -16,6 +16,13 @@ import logger from "@/lib/logger";
  * Google ve Apple sosyal girişlerini ve RBAC (Role-Based Access Control) yönetimini sağlar.
  */
 /** ADMIN_EMAILS: virgülle ayrılmış e-posta listesi; Google ile ilk girişte bu adresler otomatik ADMIN olur. */
+/**
+ * Web oturumundaki rol/yasak bilgisinin veritabanina karsi yeniden
+ * dogrulanma araligi (saniye). Ust sinir: yetki kaybinin gecerli olmasi icin
+ * beklenecek en uzun sure.
+ */
+const REVALIDATE_SECONDS = 60;
+
 const adminEmailSet = new Set(
   (process.env.ADMIN_EMAILS ?? "")
     .split(",")
@@ -77,7 +84,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return session;
     },
-    async jwt({ token, user, account, trigger, session }: { token: JWT; user?: User; account?: Account | null; trigger?: string; session?: { user?: { emailVerified?: Date | string | null } } }) {
+    async jwt({ token, user, account, trigger, session }: { token: JWT; user?: User; account?: Account | null; trigger?: string; session?: { user?: { emailVerified?: Date | string | null } } }): Promise<JWT | null> {
       if (user) {
         // İlk giriş anı veya oturum yenilenmesi
         const dbUser = await prisma.user.findUnique({
@@ -109,8 +116,57 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         } else {
           token.emailVerified = dbUser.emailVerified || null;
         }
+
+        // Yeniden dogrulama sayaci ve surum: ilk giriste tohumlanir.
+        token.tv = dbUser.tokenVersion;
+        token.rv = Math.floor(Date.now() / 1000);
       }
       
+      /*
+        WEB OTURUMUNUN ROLU VERITABANINA KARSI YENIDEN DOGRULANIYOR (2026-08-31).
+
+        Onceki hali `role`, `isBanned` ve hesabin varligini YALNIZCA ilk girişte
+        okuyordu (`if (user)` blogu). Sonraki her istekte rol, JWT'nin icinde
+        yazan degerdi ve kimse ona bir daha bakmiyordu. Uc somut sonucu:
+
+          1. **Yetkisi alinan yonetici yonetici kalıyordu.** `admin-management`
+             rolu dusuruyor ama oturumdaki token'da hâlâ `role: "ADMIN"` yazili.
+             `proxy.ts` de yol korumasini `req.auth.user.role` ile, yani ayni
+             token'la yapiyor. Auth.js varsayilan oturum omru 30 GUN: yetkisi
+             alinmis bir yonetici, cikis yapmadigi surece bir ay boyunca
+             `/admin` panelinin tamamini kullanmaya devam ediyordu.
+          2. **Yasaklanan kullanici gezinmeye devam ediyordu.** `isBanned`
+             yalnizca giris aninda bakiliyordu; halihazirdaki oturum etkilenmiyordu.
+          3. **`tokenVersion` web tarafinda hic okunmuyordu.** Sifre sifirlama ve
+             cikis mobil token'lari dusuruyor ama web oturumuna dokunamiyordu.
+
+        MALIYET SINIRLI: birincil anahtar uzerinden tek satirlik bir sorgu ve en
+        fazla `REVALIDATE_SECONDS`ta bir. Yani etkin bir kullanici icin dakikada
+        bir sorgu; her istekte degil. Gecikme, yetki kaybinin gecerli olmasi icin
+        beklenecek en uzun suredir -- 30 gun yerine bir dakika.
+
+        `null` DONMEK oturumu dusurur (`Awaitable<JWT | null>`): hesap silinmis
+        ya da yasaklanmissa cerez temizlenir.
+      */
+      if (token.sub) {
+        const now = Math.floor(Date.now() / 1000);
+        const lastCheck = typeof token.rv === "number" ? token.rv : 0;
+        if (now - lastCheck >= REVALIDATE_SECONDS) {
+          const fresh = await prisma.user.findUnique({
+            where: { id: token.sub },
+            select: { role: true, isBanned: true, tokenVersion: true },
+          });
+          if (!fresh || fresh.isBanned) return null;
+          if (typeof token.tv === "number" && token.tv !== fresh.tokenVersion) {
+            // Sifre sifirlandi ya da "her yerden cikis" yapildi.
+            return null;
+          }
+          token.role = fresh.role;
+          token.tv = fresh.tokenVersion;
+          token.rv = now;
+        }
+      }
+
       // Handle manual updates (e.g. from useSession().update())
       if (trigger === "update" && session?.user) {
         if (session.user.emailVerified) token.emailVerified = new Date(session.user.emailVerified as string);
@@ -142,6 +198,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           id: token.id || token.sub,
           role: token.role,
           emailVerified: token.emailVerified,
+          // Bunlar DUSURULEMEZ: dusarlerse yeniden dogrulama her istekte
+          // bastan baslar (rv) ve iptal kontrolu sessizce devre disi kalir (tv).
+          tv: token.tv,
+          rv: token.rv,
         };
         return safeToken as JWT;
       }

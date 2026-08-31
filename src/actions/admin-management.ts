@@ -49,9 +49,21 @@ async function clientIp(): Promise<string | null> {
 export async function toggleUserBanAction(userId: string, isBanned: boolean) {
   const session = await ensureAdmin();
 
+  /*
+    YASAKLAMA da token'lari iptal eder (2026-08-31). `isBanned` her istekte
+    okundugu icin mobil uclar zaten aninda kapaniyordu, ama web oturumu farkli:
+    Auth.js `jwt` cagrisi kullaniciyi YALNIZCA ilk girişte okuyordu, yani
+    halihazirda acik bir oturum yasaklamadan etkilenmiyordu. `auth.ts`e eklenen
+    periyodik yeniden dogrulama bunu kapatiyor; `tokenVersion` artisi ise
+    beklemeyi de kaldirip yasagi aninda gecerli kiliyor.
+
+    Yasagi KALDIRIRKEN de artiyor: zararsiz (kullanici zaten yeniden giris
+    yapacak) ve kural "yasak durumu degisti -> oturumlar duser" seklinde tek
+    parca kalıyor.
+  */
   await prisma.user.update({
     where: { id: userId },
-    data: { isBanned },
+    data: { isBanned, tokenVersion: { increment: 1 } },
   });
 
   writeAuditLog({
@@ -101,9 +113,23 @@ async function applyUserRoleChange(params: {
   ip: string | null;
   metadataExtra?: Record<string, unknown>;
 }) {
+  /*
+    ROL DEGISIKLIGI TOKEN'LARI IPTAL EDER (2026-08-31'de eklendi).
+
+    Onceden yalnizca `role` yaziliyordu. Rol, hem mobil JWT'nin (`role` istemi)
+    hem de web oturum token'inin ICINDE tasiniyor; ikisi de imzali ve gecerli
+    kaliyordu. Yani yetkisi ALINAN bir yonetici, elindeki token'lar suresi
+    dolana kadar yonetici kalıyordu -- mobil erisim token'i 15 dakika, refresh
+    token'i 30 GUN, web oturumu Auth.js varsayilaniyla 30 gun.
+
+    `tokenVersion` artisi ucunu birden dusurur: `requireMobileUser`,
+    `getMobileSession` ve web `jwt` yeniden dogrulamasi hepsi bu sayiyi
+    karsilastiriyor. Yetki kaybi ANINDA gecerli olur; kullanici yeniden giris
+    yapar ve YENI rolunu alir.
+  */
   await prisma.user.update({
     where: { id: params.targetUserId },
-    data: { role: params.newRole },
+    data: { role: params.newRole, tokenVersion: { increment: 1 } },
   });
   writeAuditLog({
     actorUserId: params.actorUserId,
@@ -280,9 +306,10 @@ export async function approveAdminRoleChangeAction(
       }
     }
 
+    // Rol degisikligi token'lari iptal eder -- gerekcesi `applyUserRoleChange`te.
     await tx.user.update({
       where: { id: user.id },
-      data: { role: reqRow.requestedRole },
+      data: { role: reqRow.requestedRole, tokenVersion: { increment: 1 } },
     });
     await tx.adminRoleChangeRequest.delete({ where: { id: requestId } });
     return { code: "ok" as const, targetId: user.id, newRole: reqRow.requestedRole };

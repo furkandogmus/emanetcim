@@ -173,13 +173,26 @@ export async function getMobileSession() {
   try {
     const claims = await verifyMobileToken(token);
     if (claims.type !== "access") return null;
-    const user = await prisma.user.findUnique({ where: { id: claims.sub }, select: { isBanned: true, tokenVersion: true } });
+    const user = await prisma.user.findUnique({
+      where: { id: claims.sub },
+      select: { role: true, isBanned: true, tokenVersion: true },
+    });
     if (!user) return null;
     if (user.isBanned) return null;
     if (user.tokenVersion !== (claims.tv ?? 0)) return null;
+    /*
+      ROL VERITABANINDAN OKUNUR (2026-08-31'de duzeltildi).
+
+      Onceki hali `claims.role` donduruyordu, yani TOKEN'da yazan rolu. Kardesi
+      `requireMobileUser` ayni bilgiyi veritabanindan okuyor -- iki yardimci ayni
+      soruya iki farkli kaynaktan yanit veriyordu. Bu yardimciyi kullanan uclar
+      web yonetici uclari (`/api/admin/applications`, `/api/admin/messages`),
+      yani farkin en pahaliya patlayacagi yer: yetkisi alinmis bir yoneticinin
+      elindeki token'da hâlâ `role: "ADMIN"` yaziyor ve bu uclar ona inaniyordu.
+    */
     return {
       userId: claims.sub,
-      role: claims.role,
+      role: user.role,
     };
   } catch {
     return null;

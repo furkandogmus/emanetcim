@@ -216,6 +216,72 @@ describe("kimlik dogrulama uclarinin kapilari", () => {
     expect(src).toMatch(/invalid_phone/);
   });
 
+  it("rol her iki mobil yardimcida da VERITABANINDAN okunur", () => {
+    /*
+      `getMobileSession` `claims.role` donduruyordu -- yani TOKEN'da yazan rolu --
+      kardesi `requireMobileUser` ise veritabanindakini. Ayni soruya iki farkli
+      kaynak. Bu yardimciyi kullanan uclar web yonetici uclari
+      (`/api/admin/applications`, `/api/admin/messages`), yani farkin en
+      pahaliya patlayacagi yer: yetkisi ALINAN bir yoneticinin elindeki
+      token'da hâlâ `role: "ADMIN"` yaziyor ve o uclar ona inaniyordu.
+    */
+    const src = read("src/lib/mobile-auth.ts");
+    const fn = src.match(/export async function getMobileSession[\s\S]*$/);
+    expect(fn).not.toBeNull();
+    expect(
+      fn![0],
+      "getMobileSession rolu token'dan degil, veritabanindan dondurmeli.",
+    ).not.toMatch(/role:\s*claims\.role/);
+    expect(fn![0]).toMatch(/role:\s*user\.role/);
+  });
+
+  it("rol degisikligi ve yasaklama token'lari iptal eder", () => {
+    /*
+      Rol hem mobil JWT'nin hem web oturum token'inin ICINDE tasiniyor. Yalnizca
+      `role` sutununu yazmak, elde duran imzali token'lari degistirmez: yetkisi
+      alinan yonetici, mobil refresh token'i (30 GUN) ve web oturumu (Auth.js
+      varsayilani 30 gun) suresince yonetici kalıyordu.
+    */
+    const src = read("src/actions/admin-management.ts");
+    const roleWrites = [...src.matchAll(/data:\s*\{[^}]*\brole:[^}]*\}/g)].map((m) => m[0]);
+    expect(roleWrites.length).toBeGreaterThan(0);
+    const missing = roleWrites.filter((w) => !/tokenVersion/.test(w));
+    expect(
+      missing,
+      "Rol yazan her guncelleme `tokenVersion` da artirmali; aksi halde eski " +
+        "rolu tasiyan token'lar gecerli kalir:\n" + missing.join("\n"),
+    ).toEqual([]);
+    expect(src).toMatch(/data:\s*\{\s*isBanned,\s*tokenVersion:\s*\{\s*increment:\s*1\s*\}\s*\}/);
+  });
+
+  it("web oturumu rolu/yasagi periyodik olarak veritabanina karsi dogrular", () => {
+    /*
+      Auth.js `jwt` cagrisi kullaniciyi YALNIZCA ilk girişte okuyordu; sonraki
+      her istekte rol, token'in icinde yazan degerdi. `proxy.ts` de yol
+      korumasini ayni token'la yapiyor. Yani yetkisi alinmis bir yonetici,
+      cikis yapmadigi surece oturum omru boyunca (varsayilan 30 GUN) `/admin`
+      panelini kullanmaya devam ediyordu; yasaklanan kullanici da gezinmeye.
+    */
+    const src = read("src/auth.ts");
+    expect(src).toMatch(/REVALIDATE_SECONDS/);
+    expect(src).toMatch(/select:\s*\{\s*role:\s*true,\s*isBanned:\s*true,\s*tokenVersion:\s*true\s*\}/);
+    expect(src, "yasakli/silinmis hesapta `null` donerek oturum dusmeli").toMatch(
+      /if\s*\(!fresh\s*\|\|\s*fresh\.isBanned\)\s*return null/,
+    );
+  });
+
+  it("proxy'de calismayan bir `/api/internal` kapisi kalmadi", () => {
+    /*
+      Proxy `/api/` ile baslayan her yolda erken donuyor, yani o kontrol akisa
+      hic ulasmiyordu; ulassaydi bile basligin yalnizca VARLIGINA bakiyordu.
+      Calismayan bir kapiyi kodda birakmak koruma sanildigi surece ondan
+      kotudur -- biri "zaten proxy koruyor" deyip yeni ic uca `authorizeCron`
+      koymayabilir.
+    */
+    const src = read("src/proxy.ts");
+    expect(src).not.toMatch(/isInternalApiPath\s*&&/);
+  });
+
   it("Auth.js ayiklama kipi uretimde kapali", () => {
     /*
       `debug: true` SABITTI. Auth.js ayiklama kipinde saglayici yanitlarini,

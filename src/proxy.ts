@@ -97,7 +97,6 @@ const authProxy = auth((req) => {
 
   const isAdminPath = matchesAdminPath(pathWithoutLocale);
   const isPartnerPath = matchesPartnerPath(pathWithoutLocale);
-  const isInternalApiPath = pathWithoutLocale.startsWith("/api/internal");
 
   if (isAdminPath || isPartnerPath) {
     if (!isLoggedIn) {
@@ -117,12 +116,25 @@ const authProxy = auth((req) => {
     }
   }
 
-  // 4. Internal API Protection (Cron/Jobs) - This is usually handled by secrets,
-  // but we can add an extra layer if no secret is present.
-  if (isInternalApiPath && !isLoggedIn && !req.headers.get("authorization") && !req.headers.get("x-cron-secret")) {
-    return new NextResponse(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { 'Content-Type': 'application/json' } });
-  }
+  /*
+    BURADA BIR `/api/internal` KONTROLU VARDI; HIC CALISMIYORDU (2026-08-31).
 
+    Yukaridaki 1. adim `pathname.startsWith('/api/')` gorunce `NextResponse.next`
+    ile ERKEN DONUYOR -- `/api/internal/...` de `/api/` ile basladigi icin akis
+    buraya asla ulasmiyordu. Silindi.
+
+    Silinmesi hicbir korumayi kaldirmiyor, cunku ilettigi koruma zaten yoktu:
+    kontrol `authorization` ya da `x-cron-secret` basliginin YALNIZCA VARLIGINA
+    bakiyordu, degerine degil. Yani `X-Cron-Secret: x` yazan herkes gecerdi.
+
+    Gercek savunma `src/lib/internal-api-guard.ts` icindeki `authorizeCron`:
+    `CRON_SECRET`i `crypto.timingSafeEqual` ile karsilastiriyor ve sekiz ic ucun
+    HEPSI onu cagiriyor (`auth-endpoint-guards` testi bunu sabitliyor).
+
+    Calismayan bir kapiyi kodda birakmak, koruma sanildigi surece ondan daha
+    kotudur: birisi "zaten proxy koruyor" diyip yeni bir ic uca `authorizeCron`
+    koymayabilir.
+  */
   return response;
 
 });

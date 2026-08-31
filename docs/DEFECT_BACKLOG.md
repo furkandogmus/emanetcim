@@ -10,6 +10,46 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-08-31 — yetkisi alınan yönetici 30 gün yönetici kalıyordu
+
+Rol, **hem** mobil JWT'nin `role` isteminde **hem** web oturum token'ının içinde
+taşınıyor. `admin-management` rolü düşürüyordu ama elde duran imzalı token'lara
+dokunmuyordu, ve hiçbir taraf rolü veritabanına karşı yeniden okumuyordu.
+
+| Katman | Rol nereden okunuyordu | Sonuç |
+|---|---|---|
+| Web oturumu (`src/auth.ts`) | JWT — yalnızca **ilk girişte** DB'den yazılıyordu | Auth.js varsayılan oturum ömrü **30 gün**. Yetkisi alınmış yönetici, çıkış yapmadığı sürece bir ay `/admin` panelinin tamamını kullanabiliyordu. `proxy.ts` yol korumasını `req.auth.user.role` ile, yani aynı token'la yapıyor. |
+| `getMobileSession` | **token'daki** `claims.role` | Bu yardımcıyı web yönetici uçları kullanıyor (`/api/admin/applications`, `/api/admin/messages`) — farkın en pahalıya patlayacağı yer. |
+| `requireMobileUser` | veritabanı | Doğru olan buydu; iki kardeş yardımcı aynı soruya iki farklı kaynaktan yanıt veriyordu. |
+
+Aynı boşluk **yasaklama** için de vardı: `isBanned` her istekte okunduğu için
+mobil uçlar anında kapanıyordu, ama web oturumu etkilenmiyordu — açık bir oturum
+yasaklamadan sonra da gezinmeye devam ediyordu.
+
+### Düzeltme — üç katman
+
+1. **`getMobileSession` rolü veritabanından okuyor** (`requireMobileUser` ile aynı kaynak).
+2. **Rol değişikliği ve yasaklama `tokenVersion`'ı artırıyor.** Üç doğrulayıcı da
+   bu sayıyı karşılaştırdığı için yetki kaybı **anında** geçerli oluyor: kullanıcı
+   yeniden giriş yapar ve yeni rolünü alır.
+3. **Web `jwt` çağrısı `role` / `isBanned` / `tokenVersion`'ı periyodik olarak
+   yeniden okuyor** (`REVALIDATE_SECONDS = 60`). Hesap silinmiş veya yasaklanmışsa
+   `null` dönüyor ve oturum düşüyor. Maliyet: birincil anahtar üzerinden tek
+   satırlık sorgu, etkin kullanıcı başına dakikada bir — her istekte değil.
+   Gecikme, yetki kaybının geçerli olması için beklenecek en uzun süredir:
+   **30 gün yerine bir dakika.**
+
+### Ayrıca — `proxy.ts`'te çalışmayan bir kapı
+
+`/api/internal` koruması hiç çalışmıyordu: proxy `/api/` ile başlayan her yolda
+`NextResponse.next` ile **erken dönüyor**, yani akış oraya ulaşmıyordu. Ulaşsaydı
+bile yalnızca `authorization` / `x-cron-secret` başlığının **varlığına** bakıyordu,
+değerine değil — `X-Cron-Secret: x` yazan herkes geçerdi. Silindi; gerçek savunma
+`authorizeCron` ve sekiz iç ucun hepsi onu çağırıyor (mandalla sabit).
+
+Çalışmayan bir kapıyı kodda bırakmak, koruma sanıldığı sürece ondan kötüdür:
+biri "zaten proxy koruyor" deyip yeni bir iç uca `authorizeCron` koymayabilir.
+
 ## 2026-08-31 — performans: her yetkili mobil istek megabaytlarca base64 okuyordu
 
 ### Düzeltildi
