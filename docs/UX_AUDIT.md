@@ -19,6 +19,16 @@ Ayrıca dar ekranlar ölçüldü — **320 px** (iPhone SE / eski Android) ve
 kaydırma yok. Başlıktaki esneme düzeltmeleri (küçülebilir logo, kırpılabilir
 giriş düğmesi) dar ekranlarda da tutuyor.
 
+> **`git commit` STAGING'DEKİ HER ŞEYİ ALIR — pahalıya mal oldu (2).**
+> 2026-08-31'de üç dosyalık bir düzeltme commit'ledim ve **34 dosya** gitti:
+> staging alanında diğer agent'in yarım auth/JWT çalışması duruyordu (biri
+> `git add -A` yapmış) ve `git commit` onları da aldı. Yani başka bir agent'in
+> bitmemiş işini ben prod'a gönderdim. Tesadüfen sağlamdı (typecheck temiz,
+> 814 test geçti, CI yeşil) ama olmayabilirdi.
+> Kural: **`git commit -- <yollar>`** kullanın; pathspec verilen bir commit,
+> staging'de ne olursa olsun yalnızca o yolları alır. `git add` + `git commit`
+> ikilisi, eş zamanlı çalışılan bir repoda güvenli değil.
+>
 > **PAYLAŞILAN DOSYA UYARISI — pahalıya mal oldu.** `src/locales/*.json`
 > dosyalarını iki agent birden düzenliyor. Bir betikle dosyanın TAMAMINI okuyup
 > yeniden yazarsanız, diğer agent'in o an **commit'lenmemiş** anahtarları da
