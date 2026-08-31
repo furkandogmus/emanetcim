@@ -14,6 +14,7 @@ const { mockPrisma, mockRateLimit, mockMail } = vi.hoisted(() => {
         findFirst: vi.fn(),
         create: vi.fn(),
         delete: vi.fn(),
+        deleteMany: vi.fn(),
       },
       $transaction: vi.fn((fn) => {
         if (typeof fn === 'function') return fn(mockPrisma);
@@ -116,12 +117,24 @@ describe("Password Reset Actions", () => {
       });
 
       expect(result.ok).toBe(true);
+      /*
+        `tokenVersion` artisi bu testin ASIL konusu (2026-08-31). Web yolu bunu
+        yapmiyordu: sifre degisiyor ama mobil access/refresh token'lar (refresh
+        30 GUN) ayakta kaliyordu — yani "sifremi calmislar, degistirdim" diyen
+        kullanicinin telefonundaki saldirgan oturumu suruyordu. Mobil uc bunu
+        bastan beri yapiyordu; iki tasiyici ayni servisi cagirdigi icin artik
+        ikisinde de var.
+      */
       expect(mockPrisma.user.update).toHaveBeenCalledWith(expect.objectContaining({
         where: { id: "user123" },
-        data: { passwordHash: "hashed_new_pass" },
+        data: { passwordHash: "hashed_new_pass", tokenVersion: { increment: 1 } },
       }));
-      expect(mockPrisma.verificationToken.delete).toHaveBeenCalledWith({
-        where: { token: validToken },
+      /*
+        `identifier` uzerinden silinir, `token` uzerinden degil: ayni kimlik icin
+        eskiden kalmis baska bir sifirlama satiri varsa o da dusmeli.
+      */
+      expect(mockPrisma.verificationToken.deleteMany).toHaveBeenCalledWith({
+        where: { identifier: `${PASSWORD_RESET_IDENTIFIER_PREFIX}user@test.com` },
       });
     });
 
@@ -131,7 +144,7 @@ describe("Password Reset Actions", () => {
         identifier: `${PASSWORD_RESET_IDENTIFIER_PREFIX}user@test.com`,
         expires: new Date(Date.now() - 10000),
       });
-      mockPrisma.verificationToken.delete.mockResolvedValue({});
+      mockPrisma.verificationToken.deleteMany.mockResolvedValue({});
 
       const result = await resetPasswordWithTokenAction({
         token: validToken,

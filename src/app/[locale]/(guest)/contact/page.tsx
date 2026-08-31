@@ -52,8 +52,8 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
                 <div className="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 shrink-0">
                   <MessageCircle size={32} />
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-black text-gray-900 mb-1">{t("whatsappTitle")}</h3>
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-xl font-black text-gray-900 mb-1">{t("whatsappTitle")}</h2>
                   <p className="text-gray-400 font-bold text-sm mb-6">{t("whatsappSubtitle")}</p>
                   <a href="https://wa.me/905422415597" target="_blank" rel="noopener noreferrer" className="h-12 inline-flex items-center px-8 bg-green-500 hover:bg-green-600 text-white rounded-xl id-eyebrow text-xs transition-all active:scale-95 shadow-lg shadow-green-100">
                     {t("whatsappCta")}
@@ -67,8 +67,8 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
                 <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 shrink-0">
                   <Mail size={32} />
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-black text-gray-900 mb-1">{t("emailTitle")}</h3>
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-xl font-black text-gray-900 mb-1">{t("emailTitle")}</h2>
                   <p className="text-gray-400 font-bold text-sm mb-1">{t("emailSubtitle")}</p>
                   <a href="mailto:destek@bagajpark.com" className="text-lg font-black text-blue-600 hover:underline">
                     {t("emailAddress")}
@@ -82,11 +82,11 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
                 <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-600 shrink-0">
                   <MapPin size={32} />
                 </div>
-                <div className="flex-1">
+                <div className="min-w-0 flex-1">
                   <div className="inline-flex px-2 py-0.5 bg-orange-100 text-orange-600 text-[8px] id-eyebrow rounded mb-2">
                     {t("opsBadge")}
                   </div>
-                  <h3 className="text-xl font-black text-gray-900 mb-1">{t("opsTitle")}</h3>
+                  <h2 className="text-xl font-black text-gray-900 mb-1">{t("opsTitle")}</h2>
                   <p className="text-gray-400 font-bold text-sm leading-relaxed">
                     {t("opsAddress")}
                   </p>

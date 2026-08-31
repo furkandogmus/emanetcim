@@ -1,11 +1,25 @@
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
 import { signAccessToken, signRefreshToken, verifyMobileToken } from "@/lib/mobile-auth";
+import { rateLimit } from "@/lib/rate-limit";
+import { clientIp } from "@/lib/internal-api-guard";
 
 const schema = z.object({ refreshToken: z.string() });
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  /*
+    HIZ SINIRI (2026-08-31): bu uc hicbir sinir tasimiyordu ve her cagrida bir
+    JWT dogrulamasi + bir `user` sorgusu yapiyor. Sinirsiz olmasi hem imza
+    dogrulama denemelerini bedava kiliyor hem de tek bir istemcinin veritabani
+    havuzunu doldurmasina izin veriyordu.
+  */
+  const ip = clientIp(req);
+  if (!(await rateLimit(`mobile_refresh:ip:${ip}`, 60, 60_000))) {
+    return NextResponse.json({ error: "too_many_attempts" }, { status: 429 });
+  }
+
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "invalid" }, { status: 400 });

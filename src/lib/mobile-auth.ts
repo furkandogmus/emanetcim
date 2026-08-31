@@ -3,6 +3,12 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import prisma from "./db";
 import type { Role } from "@prisma/client";
+import {
+  JWT_AUDIENCE,
+  JWT_ISSUER,
+  audienceAllows,
+  hasForeignClaims,
+} from "./jwt-audience";
 
 const secret = () => {
   const s = process.env.MOBILE_JWT_SECRET ?? process.env.AUTH_SECRET;
@@ -24,6 +30,8 @@ export async function signAccessToken(userId: string, role: Role) {
   const user = await prisma.user.findUnique({ where: { id: userId }, select: { tokenVersion: true } });
   return new SignJWT({ role, type: "access", tv: user?.tokenVersion ?? 0 })
     .setProtectedHeader({ alg: "HS256" })
+    .setIssuer(JWT_ISSUER)
+    .setAudience(JWT_AUDIENCE.mobile)
     .setSubject(userId)
     .setIssuedAt()
     .setExpirationTime(ACCESS_TTL)
@@ -34,14 +42,34 @@ export async function signRefreshToken(userId: string, role: Role) {
   const user = await prisma.user.findUnique({ where: { id: userId }, select: { tokenVersion: true } });
   return new SignJWT({ role, type: "refresh", tv: user?.tokenVersion ?? 0 })
     .setProtectedHeader({ alg: "HS256" })
+    .setIssuer(JWT_ISSUER)
+    .setAudience(JWT_AUDIENCE.mobile)
     .setSubject(userId)
     .setIssuedAt()
     .setExpirationTime(REFRESH_TTL)
     .sign(secret());
 }
 
+/**
+ * AILE SINIRI (2026-08-31) — gerekcesi `src/lib/jwt-audience.ts`'te. Ayni sir
+ * QR ve misafir sorgu token'larini da imzaliyor; `bookingId`/`email` tasiyan
+ * bir govde mobil oturum token'i DEGILDIR. `type` kontrolu cagiranlarda
+ * ("access" / "refresh") zaten var, bu onun tamamlayicisi.
+ *
+ * FIRLATIR: cagiranlarin hepsi zaten `try`/`catch` icinde ve yakalayinca 401
+ * donuyor -- gecersiz token'in tek bir cikis yolu olsun.
+ */
 export async function verifyMobileToken(token: string) {
   const { payload } = await jwtVerify(token, secret());
+  if (!audienceAllows(payload.aud, JWT_AUDIENCE.mobile)) {
+    throw new Error("audience mismatch");
+  }
+  if (hasForeignClaims(payload as Record<string, unknown>, ["bookingId", "email", "guestId", "shopId"])) {
+    throw new Error("foreign token claims");
+  }
+  if (typeof payload.sub !== "string" || !payload.sub) {
+    throw new Error("missing subject");
+  }
   return payload as unknown as MobileJwtClaims & { exp: number };
 }
 

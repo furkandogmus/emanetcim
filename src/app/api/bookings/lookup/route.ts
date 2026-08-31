@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
-import { SignJWT } from "jose";
-import { guestLookupSecret } from "@/lib/guest-lookup-token";
+import { signGuestLookupToken } from "@/lib/guest-lookup-token";
 import logger from "@/lib/logger";
+import { rateLimit } from "@/lib/rate-limit";
+import { clientIp } from "@/lib/internal-api-guard";
 import {
   normalizeBookingCode,
   MIN_BOOKING_CODE_LENGTH,
@@ -10,6 +11,29 @@ import {
 
 export async function POST(req: NextRequest) {
   try {
+    /*
+      HIZ SINIRI (2026-08-31'de eklendi). Bu uc, kimlik dogrulamasi OLMAYAN ve
+      basarisinda `guest-cancel`in kabul ettigi bir tasiyici token ureten tek
+      yer. Sinir yoktu; yani e-postasini bildigimiz bir misafirin rezervasyon
+      kodunu KABA KUVVETLE bulmak bedavaydi.
+
+      Buyukluk: alt sinir alti hane (`MIN_BOOKING_CODE_LENGTH`), onaltilik
+      tabanda ~16,7 milyon olasilik. Sinirsiz bir uc, sabit hizli bir istemciyle
+      bunu saatler mertebesine indirir; kod bulununca saldirgan misafirin QR
+      token'ini okuyabilir ve rezervasyonu iptal ettirebilir. Depo acik kaynak
+      oldugu icin kodun `booking.id`'nin ilk sekiz hanesi oldugu da,
+      normalizasyonun ne yaptigi da zaten herkese acik -- sinirlamayi kodun
+      gizliligi tasiyamaz.
+
+      Iki kova: IP basina (kaba kuvvet) ve e-posta basina (tek kurbani
+      hedefleyip IP degistirme). E-posta kovasi govde okunduktan sonra, cunku
+      anahtari govdeden geliyor.
+    */
+    const ip = clientIp(req);
+    if (!(await rateLimit(`booking_lookup:ip:${ip}`, 20, 10 * 60_000))) {
+      return NextResponse.json({ ok: false, error: "too_many_requests" }, { status: 429 });
+    }
+
     const { email, bookingId } = await req.json();
     if (!email || !bookingId) {
       return NextResponse.json({ ok: false, error: "Missing email or booking ID" }, { status: 400 });
@@ -40,6 +64,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: "Booking not found" }, { status: 404 });
     }
 
+    if (!(await rateLimit(`booking_lookup:email:${normalizedEmail}`, 20, 60 * 60_000))) {
+      return NextResponse.json({ ok: false, error: "too_many_requests" }, { status: 429 });
+    }
+
     const guestScope = {
       OR: [{ guestEmail: normalizedEmail }, { guest: { email: normalizedEmail } }],
     };
@@ -59,10 +87,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: "Booking not found" }, { status: 404 });
     }
 
-    const token = await new SignJWT({ bookingId: foundId, email })
-      .setProtectedHeader({ alg: "HS256" })
-      .setExpirationTime("1h")
-      .sign(guestLookupSecret());
+    const token = await signGuestLookupToken({ bookingId: foundId, email: normalizedEmail });
 
     return NextResponse.json({ ok: true, token });
   } catch (e) {

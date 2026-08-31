@@ -69,12 +69,19 @@ const SERVICE_ONLY_MODELS = [
 ] as const;
 
 /**
- * Kalan modellerin ÖLÇÜLEN tavanları (2026-08-25).
+ * Kalan modellerin ÖLÇÜLEN tavanları (2026-08-25, **2026-08-31'de düşürüldü**).
  *
  * Bunlar henüz servise taşınmadı ve hepsi aynı aciliyette değil: `user` /
  * `session` / `verificationToken` çoğunlukla kimlik doğrulama akışlarının kendi
  * kayıtları, `contactMessage` / `blogPost` / `campaign` ise içerik CRUD'u.
  * Tavanlar borç kapandıkça DÜŞÜRÜLÜR.
+ *
+ * 2026-08-31: şifre sıfırlamanın gövdesi `src/services/auth/password-reset.ts`e,
+ * oturum iptali `src/services/auth/mobile-session.ts`e taşındı — ikisi de web ve
+ * mobil tarafından AYRI AYRI yazılmıştı ve kopyalar ayrışmıştı (web
+ * `tokenVersion`'ı artırmıyordu, yani şifre değişse bile çalınmış mobil oturum
+ * 30 gün daha yaşıyordu). Borç kapandı, tavanlar ölçülen değere indi:
+ * `user` 24→22, `verificationToken` 9→7, `session` 4→3, toplam 91→86.
  */
 const CEILINGS: Record<string, number> = {
   account: 3,
@@ -94,14 +101,14 @@ const CEILINGS: Record<string, number> = {
   platformSettings: 1,
   pushSubscription: 4,
   review: 3,
-  session: 4,
+  session: 3,
   shop: 7,
-  user: 24,
-  verificationToken: 9,
+  user: 22,
+  verificationToken: 7,
 };
 
 /** Toplam tavan — yeni bir MODELİN sessizce eklenmesini de yakalar. */
-const TOTAL_CEILING = 91;
+const TOTAL_CEILING = 86;
 
 /**
  * Yorumlar ayıklanır: bu dosyaların çoğunda "eskiden burada ham

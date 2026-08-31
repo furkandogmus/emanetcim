@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import { z } from "zod";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import prisma from "@/lib/db";
 import { signAccessToken, signRefreshToken } from "@/lib/mobile-auth";
 import { rateLimit } from "@/lib/rate-limit";
+import { clientIp } from "@/lib/internal-api-guard";
 import { notificationService } from "@/services/NotificationService";
 import { analyticsService } from "@/services/AnalyticsService";
 import { resolveServerSessionId } from "@/lib/analytics-server";
@@ -14,12 +16,18 @@ const GOOGLE_JWKS = createRemoteJWKSet(new URL("https://www.googleapis.com/oauth
 
 const schema = z.object({ idToken: z.string() });
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "invalid" }, { status: 400 });
 
-  if (!(await rateLimit(`mobile_google_auth`, 10, 60_000))) {
+  /*
+    KOVA ANAHTARI IP BASINA (2026-08-31): sabit `mobile_google_auth` anahtari
+    TEK bir kovada tum kullanicilari sayiyordu. Dakikada on istek atan biri
+    Google ile girisi HERKES icin kapatiyordu.
+  */
+  const ip = clientIp(req);
+  if (!(await rateLimit(`mobile_google_auth:ip:${ip}`, 10, 60_000))) {
     return NextResponse.json({ error: "too_many_attempts" }, { status: 429 });
   }
 

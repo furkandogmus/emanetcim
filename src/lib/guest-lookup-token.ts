@@ -1,4 +1,10 @@
-import { jwtVerify } from "jose";
+import { SignJWT, jwtVerify } from "jose";
+import {
+  JWT_AUDIENCE,
+  JWT_ISSUER,
+  audienceAllows,
+  hasForeignClaims,
+} from "@/lib/jwt-audience";
 
 /**
  * Misafir rezervasyon arama/iptal token'ının imza sırrı.
@@ -42,6 +48,27 @@ export function guestLookupSecret(): Uint8Array {
  */
 export type GuestLookupClaims = { bookingId: string; email: string };
 
+/**
+ * Token URETIMI ARTIK BURADA (2026-08-31). Onceden `bookings/lookup` ucu
+ * `SignJWT`'yi kendi cagiriyordu; dogrulama burada, uretim orada olunca ikisi
+ * ayri ayri degistirilebiliyordu. `aud` gibi bir alani yalnizca bir tarafa
+ * eklemek sessizce ise yaramayan bir onlem birakir.
+ *
+ * `setIssuedAt` da eklendi: yoksa token ne zaman verildigi bilinmez ve bir
+ * sizinti sonrasi "hangi tarihten oncekiler dusurulsun" sorusu yanitsizdir.
+ */
+export async function signGuestLookupToken(
+  claims: GuestLookupClaims,
+): Promise<string> {
+  return new SignJWT({ bookingId: claims.bookingId, email: claims.email })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuer(JWT_ISSUER)
+    .setAudience(JWT_AUDIENCE.guestLookup)
+    .setIssuedAt()
+    .setExpirationTime("1h")
+    .sign(guestLookupSecret());
+}
+
 export type GuestLookupAuth =
   | { ok: true; claims: GuestLookupClaims }
   | { ok: false; code: "missing_token" | "invalid_token" };
@@ -57,7 +84,34 @@ export async function authenticateGuestLookup(
 
   try {
     const { payload } = await jwtVerify(token, secret);
+
+    /*
+      AILE SINIRI (2026-08-31). Bu sir ayni zamanda mobil oturum ve QR
+      token'larini da imzaliyor; imza tek basina hangi aileye ait oldugunu
+      soylemez. `src/lib/jwt-audience.ts` bunun neden onemli oldugunu anlatiyor.
+
+      `sub`/`type`/`tv`  -> mobil oturum token'i
+      `guestId`/`shopId` -> QR token'i
+      Bunlardan birini tasiyan bir govde misafir sorgu token'i DEGILDIR.
+    */
+    if (!audienceAllows(payload.aud, JWT_AUDIENCE.guestLookup)) {
+      return { ok: false, code: "invalid_token" };
+    }
+    if (
+      hasForeignClaims(payload as Record<string, unknown>, [
+        "type",
+        "tv",
+        "guestId",
+        "shopId",
+      ])
+    ) {
+      return { ok: false, code: "invalid_token" };
+    }
+
     const claims = payload as Partial<GuestLookupClaims>;
+    if (typeof claims.bookingId !== "string" || typeof claims.email !== "string") {
+      return { ok: false, code: "invalid_token" };
+    }
     if (!claims.bookingId || !claims.email) return { ok: false, code: "invalid_token" };
     return { ok: true, claims: { bookingId: claims.bookingId, email: claims.email } };
   } catch {

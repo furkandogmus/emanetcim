@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { authorizeCron } from "@/lib/internal-api-guard";
 import prisma from "@/lib/db";
 import { withJobRun } from "@/lib/jobs/run-ledger";
 import { moneyToNumber } from "@/lib/money";
@@ -6,22 +7,25 @@ import { moneyToNumber } from "@/lib/money";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-function assertCron(req: NextRequest): boolean {
-  const secret = process.env.CRON_SECRET?.trim();
-  if (!secret) return false;
-  const auth = req.headers.get("authorization");
-  const bearer =
-    auth?.startsWith("Bearer ") ? auth.slice(7).trim() : "";
-  const header = req.headers.get("x-cron-secret")?.trim() ?? "";
-  return bearer === secret || header === secret;
-}
-
 /**
  * Finans özeti CSV — cron veya operasyon (`CRON_SECRET`).
  * Query: `days` (varsayılan 90).
  */
 export async function GET(req: NextRequest) {
-  if (!assertCron(req)) {
+  /*
+    ORTAK KAPIYA GECILDI (2026-08-31). Bu dosya `CRON_SECRET` karsilastirmasini
+    kendi icinde yaziyordu ve `bearer === secret` kullaniyordu -- yani sabit
+    ZAMANLI olmayan bir karsilastirma. `authorizeCron` ayni isi
+    `crypto.timingSafeEqual` ile yapiyor ve zaten UC ucta kullaniliyordu; bu dosya
+    (ve iki kardesi) kopyada kalmisti. Kopya olmasi, `internal-api-guard.ts`in var
+    olma gerekcesinin tam olarak gerceklestigi yer: bir uc duzeltilirken digerleri
+    unutuluyor.
+  */
+  const denial = authorizeCron(req);
+  if (denial === "not_configured") {
+    return NextResponse.json({ error: "CRON_SECRET not configured" }, { status: 503 });
+  }
+  if (denial) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

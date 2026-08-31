@@ -303,8 +303,15 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true }, { status: 201 });
   } catch (error: unknown) {
-    console.error("[Resend Webhook Error]", error);
-    const message = error instanceof Error ? error.message : "Internal Server Error";
-    return NextResponse.json({ error: "Internal Server Error", details: message }, { status: 500 });
+    /*
+      Ham hata metni ISTEMCIYE GITMEZ (proje kurali; `bookings/lookup` ve
+      `guest-cancel` bunu 2026-08-25'te uygulamisti, bu uc atlanmisti).
+      `error.message` bir Prisma sorgusunu, dosya yolunu ya da sema adini disari
+      tasiyabiliyordu -- ve bu uc KIMLIK DOGRULAMASIZ cagrilabilen bir adres:
+      gecersiz imzayla degil ama gecerli imzayla bozuk govde gondererek ic
+      yapiyi okumak mumkundu. Sebep log'a, istemciye sabit bir kod.
+    */
+    logger.error({ err: error }, "resend_webhook_failed");
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

@@ -79,6 +79,7 @@
     "sign_in": "Sign In",
     "skip": "Skip",
     "account_exists": "This account already exists. Try logging in.",
+    "account_exists_social": "This email was registered with Google or Apple. Sign in the same way; use \"Forgot password\" to set a password.",
     "apple_error": "Could not sign in with Apple.",
     "google_error": "Could not sign in with Google.",
     "invalid_credentials": "Invalid email or password.",

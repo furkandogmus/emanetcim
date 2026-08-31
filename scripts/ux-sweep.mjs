@@ -43,6 +43,11 @@ const SAYFALAR = [
   ["/ja", "ana sayfa (JA)"],
   ["/ja/insurance", "sigorta (JA)"],
   ["/tr/luggage-storage/istanbul", "şehir sayfası"],
+  // Denetim basladiktan SONRA eklenen sayfalar: hic olculmediler.
+  ["/tr/how-it-works", "nasıl çalışır"],
+  ["/tr/demand", "talep haritası"],
+  ["/tr/partners", "esnaf tanıtım"],
+  ["/tr/contact", "iletişim"],
   // Huninin geri kalani: bu denetimde en cok hata bu ikisinden cikti.
   [`/tr/shop/${SHOP_ID}`, "dükkan detay"],
   [`/tr/checkout/${SHOP_ID}`, "checkout 1. adım"],

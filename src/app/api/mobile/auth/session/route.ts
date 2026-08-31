@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
 import type { User } from "@prisma/client";
 import { signAccessToken, signRefreshToken } from "@/lib/mobile-auth";
 import { normalizeTrGsm10 } from "@/lib/netgsm";
 import { rateLimit } from "@/lib/rate-limit";
+import { clientIp } from "@/lib/internal-api-guard";
 import { notificationService } from "@/services/NotificationService";
 import { analyticsService } from "@/services/AnalyticsService";
 import { resolveServerSessionId } from "@/lib/analytics-server";
@@ -25,7 +27,24 @@ type AuthRequestBody = {
   password?: string;
 };
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  /*
+    IP KOVASI (2026-08-31). Asagidaki kovalar KIMLIK basinaydi: bir hesaba 15
+    dakikada bes deneme. Bu, tek hesabi zorlamayi engelliyor ama SIFRE
+    SERPMESINI (password spraying) hic engellemiyordu: saldirgan binlerce
+    farkli e-postayi ayni tek sifreyle deneyince her istek AYRI kovaya
+    dusuyordu ve toplam bir sinir yoktu. Depo acik kaynak oldugu icin uc
+    adresleri ve govde semasi zaten herkese acik; sinirlamayi kodun gizliligi
+    tasiyamaz.
+
+    Iki kova birlikte: kimlik basina (tek hesabi zorlama) + IP basina (cok
+    hesaba serpme).
+  */
+  const ip = clientIp(req);
+  if (!(await rateLimit(`mobile_session:ip:${ip}`, 30, 15 * 60_000))) {
+    return NextResponse.json({ error: "too_many_attempts" }, { status: 429 });
+  }
+
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);
   if (!parsed.success) {

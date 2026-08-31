@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
 import { signAccessToken, signRefreshToken } from "@/lib/mobile-auth";
 import { hashPassword } from "@/lib/auth-password";
 import { normalizeTrGsm10 } from "@/lib/netgsm";
 import { rateLimit } from "@/lib/rate-limit";
+import { clientIp } from "@/lib/internal-api-guard";
 import { notificationService } from "@/services/NotificationService";
 import { analyticsService } from "@/services/AnalyticsService";
 import { resolveServerSessionId } from "@/lib/analytics-server";
@@ -18,8 +20,15 @@ const schema = z.object({
   name: z.string().min(1).max(100).optional(),
 }).refine((d) => d.email || d.phone, { message: "email or phone required" });
 
-export async function POST(req: Request) {
-  if (!(await rateLimit(`register`, 5, 60_000))) {
+export async function POST(req: NextRequest) {
+  /*
+    KOVA ANAHTARI IP BASINA (2026-08-31). Onceki hali sabit `register` idi:
+    TEK bir kova tum dunyayi sayiyordu, yani saniyede bes istek atan biri
+    GERCEK kayitlarin hepsini 429'a dusuruyordu. Kimlik dogrulama ucunda
+    global kova bir hiz siniri degil, bedava hizmet disi birakma dugmesidir.
+  */
+  const ip = clientIp(req);
+  if (!(await rateLimit(`register:ip:${ip}`, 10, 60_000))) {
     return NextResponse.json({ error: "too_many_attempts" }, { status: 429 });
   }
 
@@ -52,13 +61,36 @@ export async function POST(req: Request) {
       : null;
 
   if (existing) {
-    // Hesap zaten var → giriş yap (şifre doğruysa)
-    if (existing.passwordHash) {
-      const { verifyPassword } = await import("@/lib/auth-password");
-      const valid = await verifyPassword(password, existing.passwordHash);
-      if (!valid) {
-        return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
-      }
+    /*
+      KIMLIK DOGRULAMA ATLAMASI (2026-08-31'de bulundu, en agir bulgu).
+
+      Onceki hali soyleydi: hesap varsa, `passwordHash` DOLUYSA sifre
+      dogrulanir; NULL ise hicbir sey dogrulanmaz ve alt satirda hesaba
+      access + refresh token BASILIRDI.
+
+      `passwordHash` null olan hesaplar: Google ile giren, Apple ile giren ve
+      OTP ile acilan herkes. Yani bir e-posta adresini BILEN herhangi biri
+      `POST /api/mobile/auth/register {email, password}` gonderip o hesabin
+      mobil oturumunu aliyordu. Sifre gerekmiyordu; gonderilen sifre hicbir
+      yere yazilmiyordu bile.
+
+      Yikici hali: `auth.ts` icindeki `ADMIN_EMAILS` listesi Google ile ilk
+      girişte hesabi ADMIN yapiyor -- ve o hesabin `passwordHash`'i null.
+      Yonetici e-postasini bilen biri (depo ACIK KAYNAK, adres commit
+      gecmisinde ve `docs/` icinde gecebilir) ADMIN rolunde mobil erisim
+      token'i aliyordu: `/api/mobile/admin/*` ucunun tamami.
+
+      Dogrusu: parolasiz hesapta bu uc hicbir token uretmez. Hesabin sahibi
+      Google/Apple/OTP ile girer; sifre belirlemek isterse sifre sifirlama
+      akisini kullanir (o akis e-posta sahipligini kanitlar).
+    */
+    if (!existing.passwordHash) {
+      return NextResponse.json({ error: "account_exists_social" }, { status: 409 });
+    }
+    const { verifyPassword } = await import("@/lib/auth-password");
+    const valid = await verifyPassword(password, existing.passwordHash);
+    if (!valid) {
+      return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
     }
     const access = await signAccessToken(existing.id, existing.role);
     const refresh = await signRefreshToken(existing.id, existing.role);

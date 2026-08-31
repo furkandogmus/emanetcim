@@ -4,16 +4,15 @@ import { headers } from "next/headers";
 import { z } from "zod";
 import prisma from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
-import { hashPassword } from "@/lib/auth-password";
 import { sendPasswordResetEmail } from "@/lib/mail";
 import { getLocale } from "next-intl/server";
-import logger from "@/lib/logger";
+import { generatePasswordResetToken } from "@/lib/password-reset-token";
 import {
-  generatePasswordResetToken,
-  PASSWORD_RESET_IDENTIFIER_PREFIX,
-  PASSWORD_RESET_PHONE_PREFIX,
-  isPhoneResetIdentifier,
-} from "@/lib/password-reset-token";
+  consumePasswordResetToken,
+  MIN_NEW_PASSWORD_LENGTH,
+  MAX_NEW_PASSWORD_LENGTH,
+  type PasswordResetErrorCode,
+} from "@/services/auth/password-reset";
 
 async function clientIp(): Promise<string> {
   const h = await headers();
@@ -28,9 +27,18 @@ const emailSchema = z.string().trim().email().max(320);
 
 const resetSchema = z.object({
   token: z.string().uuid(),
-  password: z.string().min(8).max(128),
-  confirmPassword: z.string().min(8).max(128),
+  password: z.string().min(MIN_NEW_PASSWORD_LENGTH).max(MAX_NEW_PASSWORD_LENGTH),
+  confirmPassword: z.string().min(MIN_NEW_PASSWORD_LENGTH).max(MAX_NEW_PASSWORD_LENGTH),
 });
+
+/** Servis kodu -> bu action'in DEGISMEYEN dis sozlesmesi (istemci bunlari okuyor). */
+const RESET_CODE_TO_ERROR: Record<PasswordResetErrorCode, "invalid" | "invalid_token" | "expired"> = {
+  INVALID_INPUT: "invalid",
+  INVALID_TOKEN: "invalid_token",
+  EXPIRED: "expired",
+  USER_NOT_FOUND: "invalid_token",
+  UNKNOWN: "invalid",
+};
 
 /**
  * Şifre sıfırlama e-postası isteği. Hesap yoksa / OAuth ise de aynı genel yanıt (enumeration yok).
@@ -71,6 +79,11 @@ export async function requestPasswordResetAction(rawEmail: string) {
 
 /**
  * Token ile yeni şifre belirleme. IP başına 30 deneme / saat (brute-force azaltma).
+ *
+ * GÖVDE `src/services/auth/password-reset.ts`'te: aynı kural mobil uçta da
+ * yazılıydı ve kopyalar ayrışmıştı — en ağırı, bu web yolunun `tokenVersion`'ı
+ * artırmaması yüzünden şifre değişse bile mobil oturumların 30 gün daha ayakta
+ * kalmasıydı. Gerekçesi servis dosyasının başında.
  */
 export async function resetPasswordWithTokenAction(input: unknown) {
   const ip = await clientIp();
@@ -83,55 +96,14 @@ export async function resetPasswordWithTokenAction(input: unknown) {
     return { ok: false as const, error: "invalid" as const };
   }
 
-  const { token, password } = parsed.data;
+  const result = await consumePasswordResetToken(
+    parsed.data.token,
+    parsed.data.password,
+  );
+  if (result.ok) return { ok: true as const };
 
-  const row = await prisma.verificationToken.findUnique({
-    where: { token },
-  });
-
-  if (
-    !row ||
-    !row.identifier.startsWith(PASSWORD_RESET_IDENTIFIER_PREFIX)
-  ) {
-    return { ok: false as const, error: "invalid_token" as const };
-  }
-
-  if (row.expires < new Date()) {
-    // Suresi gecmis token temizligi; basarisizligi akisi bozmaz ama gorunur olmali.
-    await prisma.verificationToken
-      .delete({ where: { token } })
-      .catch((err) => logger.error({ err }, "expired_reset_token_cleanup_failed"));
-    return { ok: false as const, error: "expired" as const };
-  }
-
-  const user = await (async () => {
-    if (isPhoneResetIdentifier(row.identifier)) {
-      const phone = row.identifier.slice(PASSWORD_RESET_PHONE_PREFIX.length);
-      return prisma.user.findUnique({
-        where: { phone },
-        select: { id: true },
-      });
-    }
-    const email = row.identifier.slice(PASSWORD_RESET_IDENTIFIER_PREFIX.length);
-    return prisma.user.findUnique({
-      where: { email },
-      select: { id: true },
-    });
-  })();
-
-  if (!user) {
-    return { ok: false as const, error: "invalid_token" as const };
-  }
-
-  const passwordHash = await hashPassword(password);
-
-  await prisma.$transaction([
-    prisma.user.update({
-      where: { id: user.id },
-      data: { passwordHash },
-    }),
-    prisma.verificationToken.delete({ where: { token } }),
-  ]);
-
-  return { ok: true as const };
+  return {
+    ok: false as const,
+    error: RESET_CODE_TO_ERROR[result.code],
+  };
 }

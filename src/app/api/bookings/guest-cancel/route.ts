@@ -3,6 +3,8 @@ import prisma from "@/lib/db";
 import { bookingService } from "@/services/BookingService";
 import { authenticateGuestLookup } from "@/lib/guest-lookup-token";
 import logger from "@/lib/logger";
+import { rateLimit } from "@/lib/rate-limit";
+import { clientIp } from "@/lib/internal-api-guard";
 
 /** Servis iptal KODU -> bu ucun sabit dis sozlesmesi. */
 const CANCEL_CODE_TO_ERROR: Record<string, string> = {
@@ -14,6 +16,11 @@ const CANCEL_CODE_TO_ERROR: Record<string, string> = {
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = clientIp(req);
+    if (!(await rateLimit(`guest_cancel:ip:${ip}`, 20, 10 * 60_000))) {
+      return NextResponse.json({ ok: false, error: "too_many_requests" }, { status: 429 });
+    }
+
     const guest = await authenticateGuestLookup(req.headers.get("authorization"));
     if (!guest.ok) {
       return NextResponse.json({ ok: false, error: guest.code }, { status: 401 });
@@ -22,17 +29,30 @@ export async function POST(req: NextRequest) {
 
     const booking = await prisma.booking.findUnique({
       where: { id: payload.bookingId },
-      select: { id: true, guestEmail: true, status: true, guestId: true },
+      select: {
+        id: true,
+        guestEmail: true,
+        status: true,
+        guestId: true,
+        guest: { select: { email: true } },
+      },
     });
 
     if (!booking) {
       return NextResponse.json({ ok: false, error: "Booking not found" }, { status: 404 });
     }
 
-    // Verify email matches
-    const bookingEmail = booking.guestEmail?.toLowerCase().trim();
+    /*
+      Sahiplik kaynagi `lookup/me` ile AYNI: `guestEmail` sutunu giris yapmis
+      kullanicinin rezervasyonlarinda bos kalabiliyor, sahibi `guest.email`de.
+      Ayrisik olduklari surece ayni rezervasyon bir ucta okunuyor, digerinde
+      iptal edilemiyordu.
+    */
+    const bookingEmail = (booking.guestEmail ?? booking.guest?.email)
+      ?.toLowerCase()
+      .trim();
     const tokenEmail = payload.email.toLowerCase().trim();
-    if (bookingEmail !== tokenEmail) {
+    if (!bookingEmail || bookingEmail !== tokenEmail) {
       return NextResponse.json({ ok: false, error: "email_mismatch" }, { status: 403 });
     }
 

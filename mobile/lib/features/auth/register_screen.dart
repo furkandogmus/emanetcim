@@ -85,9 +85,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     } on DioException catch (e) {
       if (mounted) {
         final err = e.response?.data?['error'];
-        final msg = err == 'invalid_credentials'
-            ? 'auth.invalid_credentials'.tr()
-            : 'common.error'.tr();
+        // `account_exists_social`: e-posta Google/Apple/OTP ile acilmis, yani
+        // hesabin sifresi yok. Sunucu 2026-08-31'e kadar bu durumda hicbir sey
+        // dogrulamadan token basiyordu (kimlik dogrulama atlamasi); artik 409
+        // donuyor ve kullaniciya dogru yolu soylemek istemciye dusuyor.
+        final msg = switch (err) {
+          'invalid_credentials' => 'auth.invalid_credentials'.tr(),
+          'account_exists_social' => 'auth.account_exists_social'.tr(),
+          'too_many_attempts' => 'auth.too_many_attempts'.tr(),
+          _ => 'common.error'.tr(),
+        };
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(msg)),
         );

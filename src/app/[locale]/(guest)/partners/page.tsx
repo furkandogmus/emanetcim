@@ -68,10 +68,10 @@ export default async function PartnersPage({ params }: { params: Promise<{ local
                   <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
                     <Icon size={32} />
                   </div>
-                  <h3 className="text-2xl font-black text-gray-900 tracking-tight">
+                  <h2 className="text-2xl font-black text-gray-900 tracking-tight">
                     {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                     {t(titleKey as any)}
-                  </h3>
+                  </h2>
                   <p className="text-gray-500 font-bold leading-relaxed">
                     {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                     {t(descKey as any)}
@@ -99,7 +99,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ local
                     {idx}
                   </div>
                   {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  <h4 className="text-xl font-black text-gray-900 mb-4">{t(titleKey as any)}</h4>
+                  <h3 className="text-xl font-black text-gray-900 mb-4">{t(titleKey as any)}</h3>
                   <p className="text-sm text-gray-400 font-bold leading-relaxed">
                     {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                     {t(descKey as any)}
@@ -134,7 +134,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ local
       {/* FAQ Link */}
       <section className="py-20 text-center">
         <p className="text-gray-400 font-bold mb-4">{t("moreQuestions")}</p>
-        <Link href="/faq" className="text-blue-600 id-eyebrow hover:underline text-sm">
+        <Link href="/faq" className="inline-block py-2 -my-2 text-blue-600 id-eyebrow hover:underline text-sm">
           {t("seeFaq")}
         </Link>
       </section>

@@ -2,9 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { authenticateGuestLookup } from "@/lib/guest-lookup-token";
 import logger from "@/lib/logger";
+import { rateLimit } from "@/lib/rate-limit";
+import { clientIp } from "@/lib/internal-api-guard";
 
 export async function GET(req: NextRequest) {
   try {
+    const ip = clientIp(req);
+    if (!(await rateLimit(`booking_lookup_me:ip:${ip}`, 60, 10 * 60_000))) {
+      return NextResponse.json({ ok: false, error: "too_many_requests" }, { status: 429 });
+    }
+
     const guest = await authenticateGuestLookup(req.headers.get("authorization"));
     if (!guest.ok) {
       return NextResponse.json({ ok: false, error: guest.code }, { status: 401 });
@@ -25,6 +32,7 @@ export async function GET(req: NextRequest) {
         status: true,
         qrCodeToken: true,
         guestEmail: true,
+        guest: { select: { email: true } },
       },
     });
 
@@ -32,10 +40,24 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ ok: false, error: "Booking not found" }, { status: 404 });
     }
 
-    const bookingEmail = booking.guestEmail?.toLowerCase().trim();
+    /*
+      SAHIPLIK KONTROLU (2026-08-31'de siklastirildi). Onceki hali yalnizca
+      `booking.guestEmail` sutununa bakiyordu ve `bookingEmail &&` yazdigi icin
+      sutun NULL oldugunda kontrolu TAMAMEN atliyordu -- yani "e-posta yoksa
+      herkes gecer". `guestEmail` giris yapmis kullanicinin actigi
+      rezervasyonlarda bos kalabiliyor; o rezervasyonun sahibi
+      `booking.guest.email`de.
+
+      Ayni kural `guest-cancel` ucunda da var ve orada `guestEmail` NULL ise
+      kimse gecemiyordu: ayni rezervasyon bir ucta okunabilir, digerinde iptal
+      edilemezdi. Iki uc artik AYNI kaynagi kullaniyor: `guestEmail ?? guest.email`.
+    */
+    const bookingEmail = (booking.guestEmail ?? booking.guest?.email)
+      ?.toLowerCase()
+      .trim();
     const tokenEmail = payload.email.toLowerCase().trim();
 
-    if (bookingEmail && bookingEmail !== tokenEmail) {
+    if (!bookingEmail || bookingEmail !== tokenEmail) {
       return NextResponse.json({ ok: false, error: "Email mismatch" }, { status: 403 });
     }
 

@@ -1,4 +1,10 @@
 import { SignJWT, jwtVerify } from "jose";
+import {
+  JWT_AUDIENCE,
+  JWT_ISSUER,
+  audienceAllows,
+  hasForeignClaims,
+} from "@/lib/jwt-audience";
 
 const getSecret = () => {
   const s = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
@@ -28,6 +34,8 @@ export async function createQrToken(payload: QrPayload): Promise<string> {
 
   return new SignJWT({ ...payload })
     .setProtectedHeader({ alg: "HS256" })
+    .setIssuer(JWT_ISSUER)
+    .setAudience(JWT_AUDIENCE.qr)
     .setIssuedAt()
     .setExpirationTime(`${expirySeconds}s`)
     .sign(getSecret());
@@ -36,6 +44,17 @@ export async function createQrToken(payload: QrPayload): Promise<string> {
 export async function verifyQrToken(token: string): Promise<QrPayload | null> {
   try {
     const { payload } = await jwtVerify(token, getSecret());
+
+    /*
+      AILE SINIRI (2026-08-31) — gerekcesi `src/lib/jwt-audience.ts`'te.
+      `type`/`tv` mobil oturum token'inin, `email` misafir sorgu token'inin
+      alani; ikisi de burada bulunmamali.
+    */
+    if (!audienceAllows(payload.aud, JWT_AUDIENCE.qr)) return null;
+    if (hasForeignClaims(payload as Record<string, unknown>, ["type", "tv", "email"])) {
+      return null;
+    }
+
     const bookingId = String(payload.bookingId || "");
     const guestId = String(payload.guestId || "");
     const shopId = String(payload.shopId || "");

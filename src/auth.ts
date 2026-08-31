@@ -27,7 +27,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
   ...authConfig,
-  debug: true,
+  /*
+    Ayiklama bayragi SABIT olarak acikti (2026-08-31'de bulundu). Auth.js
+    ayiklama kipinde saglayici yanitlarini, `state` / `code_verifier`
+    degerlerini ve callback parametrelerini sunucu ciktisina yazar; uretimde
+    bu, oturum acma akisinin sirlarini duz metin log'a dokmek demektir.
+    Log'lar Docker `stdout`'una gidiyor ve orada tutuluyor.
+
+    `rules/observability`: DEBUG uretimde asla acik olmaz.
+  */
+  debug: process.env.NODE_ENV !== "production",
   events: {
     async linkAccount({ user, account }) {
       if (account.type === "oauth") {
@@ -112,11 +121,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.picture = null;
       }
 
-      // DEBUG: Log the token keys and their sizes
-      const sizes = Object.keys(token).map((k) => `${k}: ${JSON.stringify(token[k])?.length || 0}`);
-      console.log("[auth][debug] Token keys sizes:", sizes.join(", "));
+      /*
+        Onceki hali HER `jwt` cagrisinda `console.log` yaziyordu: uretimde her
+        istekte bir satir, yapilandirilmamis metin olarak (`rules/observability`
+        yapilandirilmis JSON istiyor) ve token anahtarlarini adiyla listeleyerek.
+        Boyut kirpma mantigi GEREKLI -- cerez 4KB'i asarsa oturum sessizce
+        bozuluyor -- ama ölçüm log'u degil.
+      */
       if (JSON.stringify(token).length > 4000) {
-        console.log("[auth][debug] Huge token detected, cleaning up unnecessary fields.");
+        logger.warn(
+          { keys: Object.keys(token) },
+          "auth_token_too_large_trimmed",
+        );
         // Clean up everything except the essential fields
         const safeToken = {
           name: token.name,

@@ -79,6 +79,7 @@
     "sign_in": "Giriş Yap",
     "skip": "Atla",
     "account_exists": "Bu hesap zaten mevcut. Giriş yapmayı deneyin.",
+    "account_exists_social": "Bu e-posta Google veya Apple ile açılmış. Aynı yöntemle giriş yapın; şifre belirlemek için \"Şifremi unuttum\" akışını kullanın.",
     "apple_error": "Apple ile giriş yapılamadı.",
     "google_error": "Google ile giriş yapılamadı.",
     "invalid_credentials": "E-posta veya şifre hatalı.",
