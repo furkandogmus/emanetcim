@@ -15,6 +15,14 @@
  * dosya `public/images/blog/` altında durur; boyut disiplini için 1400px
  * genişlik / WebP q72 (tipik 80-140 KB).
  *
+ * BOYUT (2026-09-01'de daraltıldı): varsayılan 1400px/q72 iken 1200px/q68'e
+ * çekildi. Sebep aritmetik: 51 şehirde 108 görsel 16 MB tutuyordu; aynı hızla
+ * 265 şehir ~80 MB eder ve bu depoya da Docker imajına da giren bir ağırlık.
+ * 1200px, kapak görselinin en geniş yerleşimde bile yeterli olduğu genişlik
+ * (`blog/[slug]` kapağı 21/9 bir kapta duruyor ve Next/Image zaten yeniden
+ * boyutlandırıyor). Daha önce indirilmiş görseller olduğu gibi kaldı — hepsi
+ * `--verify` tavanının altında ve yeniden indirmek boşa iş.
+ *
  * LİSANS: Commons görsellerinin çoğu CC BY-SA'dır — ATIFSIZ KULLANIM İHLALDİR.
  * Bu yüzden `author`/`license`/`source` manifestte ZORUNLU alan; yazının sonuna
  * künye bloğunu `scripts/blog-city-posts.ts` otomatik basar. Künyeyi yazarın
@@ -193,7 +201,7 @@ async function add(opts: {
   await sharp(buf)
     .rotate()
     .resize({ width: opts.width, withoutEnlargement: true })
-    .webp({ quality: 72 })
+    .webp({ quality: 68 })
     .toFile(outFile);
 
   const kb = Math.round(fs.statSync(outFile).size / 1024);
@@ -291,7 +299,7 @@ async function main() {
       altEn: arg("alt-en"),
       captionTr: arg("caption-tr"),
       captionEn: arg("caption-en"),
-      width: Number(arg("width", "1400")),
+      width: Number(arg("width", "1200")),
     });
     return;
   }

@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| Yazısı olan şehir | **51 / 265** — Türkiye'nin 39 şehri tamamlandı |
+| Yazısı olan şehir | **57 / 265** — Türkiye'nin 39 şehri tamamlandı |
 | Yayına yazma | `npx tsx scripts/blog-city-posts.ts --apply` (kuru çalışma varsayılan) |
 | Denetim | `npx tsx scripts/blog-city-posts.ts --verify` + `npx tsx scripts/blog-images.ts --verify` |
 | Eksik listesi | `npx tsx scripts/blog-city-posts.ts --coverage` |
@@ -53,7 +53,8 @@ npx tsx scripts/blog-images.ts --add izmir-saat-kulesi \
   --caption-tr "..." --caption-en "..."
 ```
 
-İndirilen dosya 1400px genişliğe küçültülüp WebP'ye çevrilir (tipik 80–150 KB).
+İndirilen dosya 1200px genişliğe küçültülüp WebP'ye çevrilir (tipik 70–130 KB).
+2026-09-01'de 1400px/q72'den daraltıldı: 265 şehir aynı hızla ~80 MB ederdi.
 `--verify` 400 KB üstünü ve manifestte karşılığı olmayan dosyayı yakalar.
 **İndirdiğiniz her görseli açıp bakın** — Commons'ta başlık doğru, fotoğraf
 alakasız olabilir.
@@ -62,7 +63,7 @@ alakasız olabilir.
 
 <!-- Aşağısı üretilmiştir: npx tsx scripts/blog-city-posts.ts --list-md -->
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 51/265 sehir -->
+<!-- 57/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -115,15 +116,15 @@ alakasız olabilir.
 | 47 | IT | Milano | `milano` | 3 | yayında | milano-centrale-aktarma-valiz | milan-luggage-storage-centrale-layover |
 | 48 | IT | Venezia | `venedik` | 3 | yayında | venedik-koprulerde-valiz-tasimak | venice-luggage-storage-bridges |
 | 49 | IT | Firenze | `floransa` | 3 | yayında | floransa-kubbe-463-basamak-valiz | florence-luggage-storage-dome-463-steps |
-| 50 | IT | Napoli | `napoli` | 2 | — |  |  |
+| 50 | IT | Napoli | `napoli` | 2 | yayında | napoli-pompei-circumvesuviana-valiz | naples-luggage-storage-pompeii-train |
 | 51 | IT | Pisa | `pisa` | 1 | — |  |  |
 | 52 | IT | Verona | `verona` | 1 | — |  |  |
 | 53 | IT | Bologna | `bologna` | 1 | — |  |  |
 | 54 | IT | Torino | `torino` | 1 | — |  |  |
 | 55 | IT | Palermo | `palermo` | 1 | — |  |  |
 | 56 | PT | Lisboa | `lizbon` | 6 | yayında | lizbon-calcada-yokus-valiz | lisbon-luggage-storage-hills-calcada |
-| 57 | PT | Porto | `porto` | 2 | — |  |  |
-| 58 | ES | Sevilla | `sevilla` | 2 | — |  |  |
+| 57 | PT | Porto | `porto` | 2 | yayında | porto-ribeira-yokus-kopru-valiz | porto-luggage-storage-ribeira-hill |
+| 58 | ES | Sevilla | `sevilla` | 2 | yayında | sevilla-sicak-santa-cruz-valiz | seville-luggage-storage-heat-santa-cruz |
 | 59 | ES | Granada | `granada` | 2 | — |  |  |
 | 60 | ES | València | `valensiya` | 2 | — |  |  |
 | 61 | ES | Málaga | `malaga` | 2 | — |  |  |
@@ -131,12 +132,12 @@ alakasız olabilir.
 | 63 | ES | San Sebastián | `san-sebastian` | 1 | — |  |  |
 | 64 | ES | Palma | `mallorca` | 1 | — |  |  |
 | 65 | ES | Eivissa | `ibiza` | 1 | — |  |  |
-| 66 | AT | Wien | `viyana` | 3 | — |  |  |
+| 66 | AT | Wien | `viyana` | 3 | yayında | viyana-schonbrunn-yarim-gun-valiz | vienna-luggage-storage-schonbrunn |
 | 67 | AT | Salzburg | `salzburg` | 1 | — |  |  |
 | 68 | AT | Innsbruck | `innsbruck` | 1 | — |  |  |
 | 69 | CZ | Praha | `prag` | 3 | yayında | prag-kaldirim-tasi-kale-yokusu-valiz | prague-luggage-storage-cobbles-castle |
-| 70 | HU | Budapest | `budapeste` | 3 | — |  |  |
-| 71 | DE | München | `munih` | 2 | — |  |  |
+| 70 | HU | Budapest | `budapeste` | 3 | yayında | budapeste-kaplica-dolap-valiz | budapest-luggage-storage-thermal-baths |
+| 71 | DE | München | `munih` | 2 | yayında | munih-oktoberfest-canta-yasak-valiz | munich-luggage-storage-oktoberfest |
 | 72 | DE | Frankfurt | `frankfurt` | 2 | — |  |  |
 | 73 | DE | Hamburg | `hamburg` | 2 | — |  |  |
 | 74 | DE | Köln | `koln` | 1 | — |  |  |

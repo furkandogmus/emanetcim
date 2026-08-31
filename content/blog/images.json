@@ -389,6 +389,36 @@
     "license": "CC BY-SA 2.0",
     "cityKey": "bodrum"
   },
+  "budapeste-keleti": {
+    "file": "/images/blog/budapeste-keleti.webp",
+    "alt": {
+      "tr": "Budapeşte Keleti garının anıtsal giriş cephesi",
+      "en": "The monumental entrance frontage of Budapest Keleti station"
+    },
+    "caption": {
+      "tr": "Budapest Keleti",
+      "en": "Budapest Keleti station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Budapest_East_Station_1.jpg",
+    "author": "User:Markv",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "budapeste"
+  },
+  "budapeste-zincirli-kopru": {
+    "file": "/images/blog/budapeste-zincirli-kopru.webp",
+    "alt": {
+      "tr": "Gece aydınlatılmış Zincirli Köprü ve arkasında Buda yamacı",
+      "en": "The Chain Bridge lit at night with the Buda hillside behind it"
+    },
+    "caption": {
+      "tr": "Zincirli Köprü",
+      "en": "The Chain Bridge"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Sz%C3%A9chenyi_Chain_Bridge_in_Budapest_at_night.jpg",
+    "author": "Wilfredor",
+    "license": "CC0",
+    "cityKey": "budapeste"
+  },
   "bursa-cumalikizik": {
     "file": "/images/blog/bursa-cumalikizik.webp",
     "alt": {
@@ -1214,6 +1244,66 @@
     "license": "CC BY-SA 3.0",
     "cityKey": "milano"
   },
+  "munih-hauptbahnhof": {
+    "file": "/images/blog/munih-hauptbahnhof.webp",
+    "alt": {
+      "tr": "Yukarıdan Münih Ana Garı ve peron sundurmaları",
+      "en": "Munich's main station and its platform sheds from above"
+    },
+    "caption": {
+      "tr": "München Hauptbahnhof",
+      "en": "Munich Hauptbahnhof"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Munich_Main_Railway_Station_-_aerial_view.JPG",
+    "author": "User:Mattes",
+    "license": "CC BY 2.5",
+    "cityKey": "munih"
+  },
+  "munih-marienplatz": {
+    "file": "/images/blog/munih-marienplatz.webp",
+    "alt": {
+      "tr": "Peterskirche kulesinden Marienplatz ve Yeni Belediye Binası",
+      "en": "Marienplatz and the New Town Hall seen from the Peterskirche tower"
+    },
+    "caption": {
+      "tr": "Marienplatz, Münih",
+      "en": "Marienplatz, Munich"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Rathaus_and_Marienplatz_from_Peterskirche_-_August_2006.jpg",
+    "author": "Diliff",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "munih"
+  },
+  "napoli-centrale": {
+    "file": "/images/blog/napoli-centrale.webp",
+    "alt": {
+      "tr": "Napoli Centrale garının cephesi",
+      "en": "The frontage of Napoli Centrale station"
+    },
+    "caption": {
+      "tr": "Napoli Centrale",
+      "en": "Napoli Centrale"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Stazione_di_Napoli_Centrale_2008.jpg",
+    "author": "Ciro",
+    "license": "CC BY 3.0",
+    "cityKey": "napoli"
+  },
+  "napoli-spaccanapoli": {
+    "file": "/images/blog/napoli-spaccanapoli.webp",
+    "alt": {
+      "tr": "Spaccanapoli'nin dümdüz uzanan dar sokağı",
+      "en": "The dead-straight narrow line of Spaccanapoli"
+    },
+    "caption": {
+      "tr": "Spaccanapoli",
+      "en": "Spaccanapoli"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Spaccanapoli_verso_Castel_Sant%27Elmo.jpg",
+    "author": "TatsuoTabei",
+    "license": "Public domain",
+    "cityKey": "napoli"
+  },
   "pamukkale-hierapolis": {
     "file": "/images/blog/pamukkale-hierapolis.webp",
     "alt": {
@@ -1273,6 +1363,36 @@
     "author": "Dietmar Rabich",
     "license": "CC BY-SA 4.0",
     "cityKey": "paris"
+  },
+  "porto-ribeira": {
+    "file": "/images/blog/porto-ribeira.webp",
+    "alt": {
+      "tr": "Douro kıyısında Ribeira'nın renkli cepheleri",
+      "en": "The coloured facades of the Ribeira along the Douro"
+    },
+    "caption": {
+      "tr": "Cais da Ribeira, Porto",
+      "en": "Cais da Ribeira, Porto"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Cais_da_Ribeira_in_Porto_(2).jpg",
+    "author": "Krzysztof Golik",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "porto"
+  },
+  "porto-sao-bento": {
+    "file": "/images/blog/porto-sao-bento.webp",
+    "alt": {
+      "tr": "São Bento garının mavi çinilerle kaplı giriş holü",
+      "en": "The azulejo-tiled entrance hall of Sao Bento station"
+    },
+    "caption": {
+      "tr": "São Bento garı, çini panolar",
+      "en": "The azulejos at Sao Bento station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Porto,_S%C3%A3o_Bento_station,_azulejos_(1).jpg",
+    "author": "Palickap",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "porto"
   },
   "prag-eski-sehir": {
     "file": "/images/blog/prag-eski-sehir.webp",
@@ -1484,6 +1604,36 @@
     "license": "CC BY 2.0",
     "cityKey": "selcuk"
   },
+  "sevilla-katedral": {
+    "file": "/images/blog/sevilla-katedral.webp",
+    "alt": {
+      "tr": "Sevilla Katedrali ve Giralda kulesi, Plaza Virgen de los Reyes'ten",
+      "en": "Seville Cathedral and the Giralda from the Plaza Virgen de los Reyes"
+    },
+    "caption": {
+      "tr": "Sevilla Katedrali ve Giralda",
+      "en": "Seville Cathedral and the Giralda"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Plaza_Virgen_de_los_Reyes,_Seville,_Spain_-_Sep_2009.jpg",
+    "author": "Diliff",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "sevilla"
+  },
+  "sevilla-santa-justa": {
+    "file": "/images/blog/sevilla-santa-justa.webp",
+    "alt": {
+      "tr": "Sevilla Santa Justa garının iç mekânı",
+      "en": "The interior of Sevilla Santa Justa station"
+    },
+    "caption": {
+      "tr": "Sevilla Santa Justa",
+      "en": "Sevilla Santa Justa station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Sevilla_Santa_Justa_train_station_2018_5.jpg",
+    "author": "Steven Lek",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "sevilla"
+  },
   "side-apollon": {
     "file": "/images/blog/side-apollon.webp",
     "alt": {
@@ -1618,5 +1768,35 @@
     "author": "Janericloebe",
     "license": "Public domain",
     "cityKey": "venedik"
+  },
+  "viyana-hauptbahnhof": {
+    "file": "/images/blog/viyana-hauptbahnhof.webp",
+    "alt": {
+      "tr": "Wien Hauptbahnhof'un Wiedner Gürtel tarafındaki girişi",
+      "en": "The Wiedner Gurtel entrance to Wien Hauptbahnhof"
+    },
+    "caption": {
+      "tr": "Wien Hauptbahnhof",
+      "en": "Wien Hauptbahnhof"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Wien_Hauptbahnhof_Eingang_Wiedner_G%C3%BCrtel.jpg",
+    "author": "Jacek Rużyczka",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "viyana"
+  },
+  "viyana-schonbrunn": {
+    "file": "/images/blog/viyana-schonbrunn.webp",
+    "alt": {
+      "tr": "Schönbrunn Sarayı'nın sarı cephesi ve önündeki avlu",
+      "en": "The yellow frontage of Schonbrunn Palace and the courtyard in front of it"
+    },
+    "caption": {
+      "tr": "Schönbrunn Sarayı",
+      "en": "Schonbrunn Palace"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Schloss_Sch%C3%B6nbrunn_Wien_2014_(Zuschnitt_1).jpg",
+    "author": "Thomas Wolf, www.foto-tw.de",
+    "license": "CC BY-SA 3.0 de",
+    "cityKey": "viyana"
   }
 }
