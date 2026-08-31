@@ -44,6 +44,7 @@ yazılmaz; ölçüm yazılır.
 | 24 | %200'de checkout 200 px kayıyor — valiz adımlayıcısı | Mobil checkout | ✅ DÜZELTİLDİ (200→0) |
 | 25 | %200'de sigorta sayfası 76 px kayıyor | Mobil | ✅ DÜZELTİLDİ (76→0) |
 | 26 | %200'de dükkan sayfası 17 px kayıyor | Mobil | ⛔ BAŞKA AGENT'IN DOSYASI |
+| 27 | %200'de DE sigorta 28 px, FR ana sayfa 7 px kayıyor | Mobil | ⏳ AÇIK — sebebi bulunamadı |
 | 101 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
 | 102 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
 | 103 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
@@ -416,6 +417,53 @@ yazmıştım, çünkü ana sayfada denemiştim ve orada sebep başkaydı. Aynı 
 
 Dosya `src/components/guest/ShopDetailClient.tsx` ve **şu anda başka bir agent
 üzerinde çalışıyor**, o yüzden elleşilmedi.
+
+### 27. %200 + uzun dil: iki küçük kalıntı — SEBEBİ BULUNAMADI
+
+Bütün düzeltmeler uygulanmış hâlde DE/FR/JA'da tekrar ölçüldü:
+
+| | ana sayfa | arama | sigorta |
+|---|---|---|---|
+| DE | 0 | 0 | **28 px** |
+| FR | **7 px** | 0 | 0 |
+| JA | 0 | 0 | 0 |
+
+Özyinelemeli arama DE sigortada `li.flex.items-center.gap-2` ("Lückenlose
+Verwahrungs…") ve içindeki `svg`'ye işaret etti. Ama **bu bir nedensellik
+kanıtı değil**: yöntem "gizlenince kaydırma düşen" ögeyi buluyor ve büyük
+herhangi bir ögeyi gizlemek de kaydırmayı düşürür.
+
+Nitekim ona göre yazdığım iki düzeltme adayı ölçümde durumu **kötüleştirdi**:
+
+```
+düzeltmesiz                                 28 px
++ ikon shrink-0                             44 px
++ ikon shrink-0 + li min-w-0 + items-start  44 px
+```
+
+Bu yüzden kod değiştirilmedi. Sebebi bilmeden gönderilen bir düzeltme,
+ölçümün söylediğinin tersini yapıyordu. Kalan miktar küçük (28 px ve 7 px);
+sonraki turda farklı bir yöntemle (ögeleri tek tek daraltarak) aranmalı.
+
+### Yavaş bağlantı (3G) — SAĞLIKLI
+
+400 kbps / 400 ms gecikme ile ölçüldü:
+
+| Sayfa | İlk metin | İlk iskelet |
+|---|---|---|
+| `/tr` | 918 ms | 918 ms |
+| `/tr/search` | 886 ms | 886 ms |
+
+Boş beyaz ekran yok; harita iskeleti (bu denetimde eklendi) yavaş bağlantıda
+görevini yapıyor ve 10 sn emniyet süpabı devrede.
+
+### Görseller — büyük ölçüde temiz
+
+`<img>` ögelerinin hepsinde `alt` var, ölçü aşımı yok. Tek gözlem: şehir
+sayfasındaki Unsplash arka planı `w=1600` isteniyor, mobilde 340×224 CSS px
+alanda çiziliyor (DPR 3 ⇒ ~1020 px yeterli) — yani **~%35 fazla**, 239 KB.
+Başlangıçta "kat kat fazla" sandım, ölçünce öyle çıkmadı; küçük bir kazanç
+olduğu için kod değiştirilmedi. Responsive `image-set()` ileride yapılabilir.
 
 ### Erişilebilirlik: klavye odağı SAĞLIKLI
 
