@@ -129,6 +129,7 @@ tarayıcıda oturumu sen açarsan aynı sekmeden devam edilebilir.
 | 42 | Çevrimdışı kalınca tarayıcının dinozor sayfası çıkıyor | PWA | ⏳ KARAR BEKLİYOR |
 | 43 | E-posta kabuğu dili söylemiyordu (`lang` yok) | E-posta | ✅ DÜZELTİLDİ |
 | 44 | E-postada başarı tonunda beyaz yazı 3.30:1 | E-posta | ✅ DÜZELTİLDİ |
+| 45 | Yazdırılan fişte iptal/geri/yazdır düğmeleri de basılıyor | Yazdırma | ⛔ DOSYA BAŞKA AGENT'TE |
 | 101 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
 | 102 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
 | 103 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
@@ -830,6 +831,42 @@ Dil olmadan ekran okuyucu e-postayı yanlış telaffuz eder, Gmail/Apple Mail'in
 çeviri önerisi çalışmaz, tireleme kuralları şaşar — üstelik dil zaten
 `content.locale` olarak elde. Eklendi; mevcut `dir` testinin niyeti bozulmasın
 diye öznitelik sırası korundu ve `lang` için ayrı bir güvence yazıldı.
+
+### 45. Yazdırılan fiş — hiç denetlenmemiş bir çıktı
+
+Rezervasyon detayında bir "Fişi indir" düğmesi var ve `window.print()`
+çağırıyor. `globals.css` içinde bir yazdırma stili de var:
+
+```css
+@media print {
+  body * { visibility: hidden; }
+  body .print-area, body .print-area * { visibility: visible; }
+}
+```
+
+**İyi haber:** `.print-area` gerçekten var (`bookings/[id]/page.tsx:90`), yani
+boş kâğıt çıkmıyor — bu kurulumda en sık görülen hata bu ve burada yok.
+
+**Sorun:** `.print-area` bütün sütunu sarıyor, içinde şunlar da var:
+
+| Öge | Kâğıtta ne işi var |
+|---|---|
+| "← Rezervasyonlarım" bağlantısı | Tıklanamaz, anlamsız |
+| `BookingDetailActions` (iptal / değiştir) | **Basılı bir "İptal et" düğmesi kafa karıştırıcı** |
+| `PrintButton` ("Fişi indir") | Kendini basıyor |
+
+Fiş, otelde/havalimanında basılıp esnafa gösterilen bir belge; üstünde işlemez
+düğmeler olması onu belge olmaktan çıkarıyor.
+
+**Düzeltmesi:** üç ögeye Tailwind'in `print:hidden` varyantı. Tek satırlık,
+görünüm ekranda hiç değişmiyor.
+
+**Neden yapılmadı:** `src/app/[locale]/bookings/[id]/page.tsx` şu anda başka
+bir agent tarafından düzenleniyor (`git status` = `M`). Dosya serbest kalınca
+uygulanmalı.
+
+**Ölçülemedi:** gerçek bir fişin nasıl basıldığı — o sayfa giriş ya da geçerli
+bir rezervasyon kodu gerektiriyor. Yukarıdaki tespit kaynak koddan.
 
 ### Yavaş bağlantı (3G) — SAĞLIKLI
 
