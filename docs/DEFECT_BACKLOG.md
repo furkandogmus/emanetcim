@@ -64,6 +64,25 @@ olarak kırmızı** olmasıydı, ve kalıcı kırmızı bir kapı hiçbir şeyi 
 nitekim altı derleme hatası tam bu yüzden görünmedi. Artık `error` ve `warning`
 işi düşürüyor, `info` düşürmüyor ama çıktıda görünmeye devam ediyor.
 
+### Sonraki ölü kapı: `flutter test` de kırıktı
+
+`analyze` düzelince `flutter test` çalıştı ve **19 test geçti, 2'si düştü** —
+ikisi de `shop_preview_card_test.dart`:
+
+```
+ProviderScope.containerOf (flutter_riverpod/src/core/provider_scope.dart:105)
+ShopPreviewCard.build (shop_preview_card.dart:30)
+```
+
+`ShopPreviewCard` bir Riverpod `ConsumerWidget` (favorileri `ref.watch` ile
+okuyor) ama test onu **`ProviderScope` olmadan** render ediyordu. Widget
+`ConsumerWidget`'a çevrildiğinde test güncellenmemiş; `flutter test` hiç
+koşmadığı için de kimse görmemiş.
+
+Düzeltildi (`ProviderScope` sarmalayıcı) ve prelaunch davranışı için bir test
+eklendi: talep testi noktasında `₺50` **gösterilmediği** doğrulanıyor. Bu, tam
+da bu turda düzelttiğim davranışın regresyonunu yakalar.
+
 **Açık:** 37 dosyanın biçim borcu ve 60 `info` önerisi duruyor. `dart format .` tek komut ama bu
 makinede dart/flutter kurulu değil ve kullanıcının bilgisayarına kurulum
 yapılmayacak. Mobil geliştirme yapan biri `cd mobile && dart format .` koşup

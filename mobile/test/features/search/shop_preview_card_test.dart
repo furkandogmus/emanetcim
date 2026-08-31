@@ -2,6 +2,7 @@ import 'package:bagajpark/features/search/widgets/shop_preview_card.dart';
 import 'package:bagajpark/shared/models/shop.dart';
 import 'package:bagajpark/shared/utils/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:network_image_mock/network_image_mock.dart';
 
@@ -22,9 +23,11 @@ void main() {
   ) async {
     await mockNetworkImagesFor(() async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ShopPreviewCard(shop: testShop, isSelected: false),
+        const ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: ShopPreviewCard(shop: testShop, isSelected: false),
+            ),
           ),
         ),
       );
@@ -40,9 +43,11 @@ void main() {
   ) async {
     await mockNetworkImagesFor(() async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ShopPreviewCard(shop: testShop, isSelected: true),
+        const ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: ShopPreviewCard(shop: testShop, isSelected: true),
+            ),
           ),
         ),
       );
@@ -52,6 +57,36 @@ void main() {
       );
       final decoration = container.decoration as BoxDecoration;
       expect(decoration.border?.top.color, AppColors.brandOrange);
+    });
+  });
+
+  testWidgets('talep testi noktasinda FIYAT gosterilmez', (
+    WidgetTester tester,
+  ) async {
+    // Prelaunch noktasinda `pricePerDay` sema varsayilanidir (50 TL), esnafla
+    // anlasilmadigi icin gercek bir fiyat degil. Web'de de ayni yerde "Yakinda"
+    // yaziyor; iki taraf ayrismamali.
+    const prelaunchShop = ShopDto(
+      id: 'pre-1',
+      name: 'Tour Eiffel',
+      pricePerDay: 50.0,
+      capacity: 10,
+      isPrelaunch: true,
+    );
+
+    await mockNetworkImagesFor(() async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: ShopPreviewCard(shop: prelaunchShop, isSelected: false),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Tour Eiffel'), findsOneWidget);
+      expect(find.textContaining('₺50'), findsNothing);
     });
   });
 }
