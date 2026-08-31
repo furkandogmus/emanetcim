@@ -936,6 +936,28 @@ sayfaya bakmıştım.
 check-in, hatırlatma), ya da opt-in checkout'tan alınıp yalnızca hesap
 ayarlarında bırakılır. İkisi de ürün kararı; ölçüm ve gerekçe hazır.
 
+### "Arayüzde var, arkada yok" taraması — push dışında temiz
+
+48 numaralı bulgudan sonra aynı soruyu bütün görünür özelliklere sordum:
+**arayüz bunu vaat ediyor, arka uç gerçekten yapıyor mu?**
+
+| Özellik | Arayüz | Arka uç | Sonuç |
+|---|---|---|---|
+| Kupon | checkout'ta girdi (`CheckoutClient:564`) | `couponService.claim` (`actions/booking.ts:133`) | ✅ bağlı |
+| Yorum | `ReviewForm` (`BookingsClient:406`) | `addReviewAction` | ✅ bağlı |
+| Favori (kalp) | `FavoriteButton` | `localStorage` — **sunucu yok, bilerek** | ✅ çalışıyor |
+| Referans kodu | checkout | `actions/booking.ts:143` | ✅ bağlı |
+| **Web push** | opt-in kartı | **`sendPush` çağrılmıyor** | ❌ ölü (#48) |
+
+Favoriler cihaz-yerel: kullanıcı telefonda beğendiğini masaüstünde görmez.
+Bu bilinçli ve kodda gerekçesiyle belgelenmiş bir MVP tercihi (hydration
+sorunu da ayrıca çözülmüş), o yüzden kusur saymıyorum — ama üründe "favorilerim
+her yerde" beklentisi doğarsa buradan başlanmalı.
+
+Yani #48 bir desen değil, **istisna**. Bunu ölçmek önemliydi: bir ölü özellik
+bulunca "acaba hepsi böyle mi" diye varsaymak kolay, ve öyle olmadığını
+göstermek de bir sonuç.
+
 ### Yavaş bağlantı (3G) — SAĞLIKLI
 
 400 kbps / 400 ms gecikme ile ölçüldü:
