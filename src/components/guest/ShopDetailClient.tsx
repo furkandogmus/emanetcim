@@ -188,11 +188,18 @@ export default function ShopDetailClient({
             </div>
           )}
           <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between">
+            {/*
+              `min-w-0 max-w-full truncate`: bu rozet %200 metin buyutmede
+              sayfayi 17 px yana kaydiriyordu (olculdu 2026-08-31, iPhone 13).
+              `inline-flex` oldugu icin genisligini iceriginden alir; `max-w`
+              olmadan kuculemez. Yanindaki dugmeler `shrink-0` kalmali --
+              onlar dokunma hedefi.
+            */}
             <Link
               href="/search"
-              className="inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-2 text-xs font-black text-gray-900 shadow"
+              className="inline-flex min-w-0 max-w-full items-center gap-2 truncate rounded-full bg-white/90 px-3 py-2 text-xs font-black text-gray-900 shadow"
             >
-              <ArrowLeft size={15} />
+              <ArrowLeft size={15} className="shrink-0" />
               {mobileCopy.bagajPark}
             </Link>
             <div className="flex items-center gap-2">
@@ -426,11 +433,12 @@ export default function ShopDetailClient({
       <div className="relative h-48 sm:h-56 bg-gradient-to-br from-orange-500 via-orange-600 to-amber-700">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxIDAgNiAyLjY5IDYgNnMtMi42OSA2LTYgNi02LTIuNjktNi02IDIuNjktNiA2LTYiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iLjA4Ii8+PC9nPjwvc3ZnPg==')] opacity-40" />
         <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between">
+          {/* Ayni koruma (bkz. mobil varyant): `inline-flex` icerikten genisler. */}
           <Link
             href="/search"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/95 text-gray-900 text-xs font-black uppercase tracking-wider shadow-lg hover:bg-white transition-colors"
+            className="inline-flex min-w-0 max-w-full items-center gap-2 truncate px-4 py-2.5 rounded-full bg-white/95 text-gray-900 text-xs font-black uppercase tracking-wider shadow-lg hover:bg-white transition-colors"
           >
-            <ArrowLeft size={16} />
+            <ArrowLeft size={16} className="shrink-0" />
             {t("shopDetailBackSearch")}
           </Link>
           <button

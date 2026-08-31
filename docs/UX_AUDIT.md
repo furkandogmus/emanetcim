@@ -43,7 +43,7 @@ yazılmaz; ölçüm yazılır.
 | 23 | %200 metin büyütmede ana sayfa 93 px yana kayıyor | Mobil | ✅ DÜZELTİLDİ (93→0) |
 | 24 | %200'de checkout 200 px kayıyor — valiz adımlayıcısı | Mobil checkout | ✅ DÜZELTİLDİ (200→0) |
 | 25 | %200'de sigorta sayfası 76 px kayıyor | Mobil | ✅ DÜZELTİLDİ (76→0) |
-| 26 | %200'de dükkan sayfası 17 px kayıyor | Mobil | ⛔ BAŞKA AGENT'IN DOSYASI |
+| 26 | %200'de dükkan sayfası 17 px kayıyor | Mobil | ✅ DÜZELTİLDİ |
 | 27 | %200'de DE sigorta 28 px, FR ana sayfa 7 px kayıyor | Mobil | ✅ DÜZELTİLDİ (ikisi de 0) |
 | 101 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
 | 102 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
@@ -415,8 +415,10 @@ yazmıştım, çünkü ana sayfada denemiştim ve orada sebep başkaydı. Aynı 
 %200'de dolgu + boşluk + metin 390 px'i aşıyor. Doğrulandı: rozete
 `min-w-0 max-w-full` + kırpma verilince **17 px → 0**.
 
-Dosya `src/components/guest/ShopDetailClient.tsx` ve **şu anda başka bir agent
-üzerinde çalışıyor**, o yüzden elleşilmedi.
+Dosya `src/components/guest/ShopDetailClient.tsx` idi ve o sırada başka bir
+agent üzerinde çalışıyordu; bir sonraki turda dosya serbest kalınca uygulandı.
+Aynı yapıdaki masaüstü varyantına da eklendi — `inline-flex` genişliğini
+içeriğinden alır, `max-w` olmadan küçülemez.
 
 ### 27. %200 + uzun dil: iki küçük kalıntı — SEBEBİ BULUNAMADI
 
