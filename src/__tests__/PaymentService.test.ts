@@ -225,6 +225,20 @@ describe("ManualPaymentProvider — yetenekler", () => {
   });
 });
 
+/**
+ * Tahsilatı KENDİ yapan bir sağlayıcı taklidi.
+ *
+ * Komisyon kuralı (`effectiveCommissionRate`) sağlayıcının `capturesOnline`
+ * yeteneğine bağlı: yalnızca manuel sağlayıcıyla sınamak, kuralın "her zaman 0
+ * döndürüyor" hâlini de geçirirdi.
+ */
+function onlineProvider() {
+  const manual = new ManualPaymentProvider();
+  return Object.assign(Object.create(Object.getPrototypeOf(manual)), manual, {
+    capabilities: { ...manual.capabilities, id: "test_online", capturesOnline: true },
+  });
+}
+
 describe("PaymentService — paylaşım (split)", () => {
   const service = new PaymentService(new ManualPaymentProvider());
 
@@ -238,6 +252,10 @@ describe("PaymentService — paylaşım (split)", () => {
     // Ayri yazilsaydi araya giren bir hata "tahsil edilmis ama paylasimi
     // olmayan" bir odeme birakirdi -- bu servisin var olma sebebi olan
     // hatanin aynisi, bir katman asagida.
+    //
+    // ORAN 0: saglayici `manual`, yani para dukkanda esnafin kasasina giriyor.
+    // Platformun gormedigi bir paradan komisyon dondurmak, tahsil edilmeyecek
+    // bir alacagi deftere yazmak olurdu. Bkz. `effectiveCommissionRate`.
     mockPrisma.paymentLog.findUnique.mockResolvedValue({
       id: "p1", bookingId: "b1", status: "PENDING", amount: 100,
       refundedAmount: 0, currency: "TRY", providerRef: null, transactionId: null,
@@ -252,22 +270,44 @@ describe("PaymentService — paylaşım (split)", () => {
     expect(arg.create).toMatchObject({
       shopId: "s1",
       grossAmount: 100,
-      commissionRate: 0.2,
-      platformCommission: 20,
-      merchantAmount: 80,
+      commissionRate: 0,
+      platformCommission: 0,
+      merchantAmount: 100,
       status: "PENDING",
     });
   });
 
   it("kullanılan oranı KAYDA yazar — sonradan ayar değişse de geçmiş sabit kalır", async () => {
+    // Tahsilati platform yaptiginda ayardaki oran YURURLUKTEDIR ve kayda gecer.
+    const online = new PaymentService(onlineProvider());
+    mockPrisma.paymentLog.findUnique.mockResolvedValue({
+      id: "p1", bookingId: "b1", status: "PENDING", amount: 250,
+      refundedAmount: 0, currency: "TRY", providerRef: null, transactionId: null,
+    });
+    await online.markCaptured({ bookingId: "b1" });
+    const create = mockPrisma.__tx.paymentSplit.upsert.mock.calls[0][0].create;
+    expect(create.commissionRate).toBe(0.2);
+    expect(create.platformCommission).toBe(50);
+    expect(create.merchantAmount).toBe(200);
+    expect(create.platformCommission + create.merchantAmount).toBe(create.grossAmount);
+  });
+
+  it("dükkanda tahsilatta HİÇ komisyon dondurulmaz — tahsil edilmeyecek alacak doğmaz", async () => {
+    /*
+      Uretimde olculdu (2026-08-31): `platformCommissionRate` 0.5000 ve aktif
+      saglayici `manual`. Yani her tahsilat `PaymentSplit`e %50'lik, karsiliginda
+      hicbir para hareketi olmayacak bir alacak yaziyordu -- `PaymentLog`daki
+      "karsiligi olmayan 3.480 TRY" sorusturmasinin ayni sinifi.
+    */
     mockPrisma.paymentLog.findUnique.mockResolvedValue({
       id: "p1", bookingId: "b1", status: "PENDING", amount: 250,
       refundedAmount: 0, currency: "TRY", providerRef: null, transactionId: null,
     });
     await service.markCaptured({ bookingId: "b1" });
     const create = mockPrisma.__tx.paymentSplit.upsert.mock.calls[0][0].create;
-    expect(create.commissionRate).toBe(0.2);
-    expect(create.platformCommission + create.merchantAmount).toBe(create.grossAmount);
+    expect(create.commissionRate).toBe(0);
+    expect(create.platformCommission).toBe(0);
+    expect(create.merchantAmount).toBe(250);
   });
 
   it("aynı tahsilat iki kez bildirilirse ikinci paylaşım satırı üretmez", async () => {

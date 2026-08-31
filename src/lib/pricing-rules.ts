@@ -27,6 +27,15 @@ export type PricingRules = {
   /**
    * Platform komisyon oranı (0..1). Esnaf payı = brüt × (1 - bu oran).
    *
+   * VARSAYILAN 0.20 (2026-09-01'de 0.5'ten düşürüldü). %50, esnaf kazanmaya
+   * çalışan bir pazar yeri için savunulabilir bir rakam değildi: `become-partner`
+   * sayfasındaki kazanç hesaplayıcısı onu ortağa aday esnafa aynen gösteriyordu.
+   * Sektördeki benzer platformlar %20-30 bandında çalışıyor.
+   *
+   * Oranın BUGÜN yürürlükte olmadığını unutma: platform tahsilat yapmadığı sürece
+   * `effectiveCommissionRate` bunu 0'a düşürür (bkz. `platform-split.ts`). Bu
+   * değer, PSP bağlandığı gün devreye girecek olandır.
+   *
    * Eskiden `PLATFORM_COMMISSION_RATE` ortam değişkeninden okunuyordu; env
    * kaybolduğunda kodda yazılı `0.5`'e sessizce düşüyordu, yani esnaf kimse
    * fark etmeden parasının yarısını alıyordu. Artık diğer ticari kurallarla
@@ -53,7 +62,7 @@ export type PricingRules = {
  * olarak değişir. Bir migrasyonun canlı fiyatı sessizce değiştirmesi kabul edilmez.
  */
 export const DEFAULT_PRICING_RULES: PricingRules = {
-  platformCommissionRate: 0.5,
+  platformCommissionRate: 0.2,
   maxStayDays: 30,
   maxBagsPerSlot: 50,
   insuranceFeeTry: 0,

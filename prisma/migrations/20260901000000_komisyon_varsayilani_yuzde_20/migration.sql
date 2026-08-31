@@ -1,0 +1,11 @@
+-- Platform komisyon varsayilani %50 -> %20.
+--
+-- NEDEN: %50, esnaf kazanmaya calisan bir pazar yeri icin savunulabilir bir oran
+-- degildi ve `become-partner` sayfasindaki kazanc hesaplayicisi onu ortaga aday
+-- esnafa aynen gosteriyordu. Sektordeki benzer platformlar %20-30 bandinda.
+--
+-- YALNIZCA VARSAYILANI degistirir; MEVCUT SATIRA DOKUNMAZ. Canli fiyat/oran
+-- yalnizca /admin/platform-settings uzerinden, bilincli bir is karari olarak
+-- degisir -- bir migrasyonun canli ticari kosulu sessizce degistirmesi kabul
+-- edilmez (bkz. `src/lib/pricing-rules.ts` -> DEFAULT_PRICING_RULES notu).
+ALTER TABLE "PlatformSettings" ALTER COLUMN "platformCommissionRate" SET DEFAULT 0.20;

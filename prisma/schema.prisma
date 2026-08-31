@@ -561,7 +561,7 @@ model PlatformSettings {
   ///
   /// Varsayılan 0.5, üretimdeki fiilî değerle birebir — bu alanın eklenmesi
   /// hiçbir hesabı değiştirmesin diye.
-  platformCommissionRate Decimal  @default(0.5) @db.Decimal(6, 4)
+  platformCommissionRate Decimal  @default(0.20) @db.Decimal(6, 4)
 
   /// Platform genelinde rezervasyona kapalı takvim günleri (YYYY-MM-DD JSON dizisi).
   platformHolidayDates Json?

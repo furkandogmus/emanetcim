@@ -50,6 +50,13 @@ describe("fiyat varsayılanları — şema ile kod aynı olmalı", () => {
     ["bagMultiplierS", DEFAULT_PRICING_RULES.bagMultipliers.S],
     ["bagMultiplierM", DEFAULT_PRICING_RULES.bagMultipliers.M],
     ["bagMultiplierXl", DEFAULT_PRICING_RULES.bagMultipliers.XL],
+    /*
+      2026-09-01'de eklendi: bu alan listede HIC YOKTU, yani sema ile kod
+      varsayilaninin ayrismasi sessizce mumkundu -- ve konusu tam olarak esnafin
+      ne kadar aldigi. Testin var olma sebebi olan hatanin (uc ayri dogruluk
+      kaynagi) kapsanmayan bir kosesiydi.
+    */
+    ["platformCommissionRate", DEFAULT_PRICING_RULES.platformCommissionRate],
   ];
 
   it.each(PAIRS)(

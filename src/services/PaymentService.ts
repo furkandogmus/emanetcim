@@ -3,6 +3,7 @@ import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 import { moneyToNumber } from "@/lib/money";
 import { computeSplit } from "@/lib/platform-split";
+import { effectiveCommissionRate } from "@/lib/platform-split";
 import { getPricingRules } from "@/lib/platform-settings";
 import { bookingEventService } from "./BookingEventService";
 import { getPaymentProvider, type PaymentProvider } from "@/lib/payments";
@@ -182,9 +183,25 @@ export class PaymentService {
       where: { id: params.bookingId },
       select: { shopId: true },
     });
+    /*
+      ORAN AYARDAN DEGIL, YURURLUKTEKI ORANDAN.
+
+      `PlatformSettings.platformCommissionRate` uretimde 0.5000 duruyor ama aktif
+      saglayici `manual`: para dukkanda, esnafin kendi kasasina giriyor. Ayardaki
+      orani dogrudan uygulamak, her tahsilatta `PaymentSplit`e hic tahsil
+      edilmeyecek bir %50'lik alacak DONDURUYORDU -- ve bu satirlar defterde
+      kalicidir. Bkz. `platform-split.ts` -> `effectiveCommissionRate`.
+    */
     const rules = await getPricingRules();
+    const commissionRate = effectiveCommissionRate(
+      rules.platformCommissionRate,
+      // SERVISIN KENDI saglayicisi -- modul seviyesindeki degil. Saglayici
+      // enjekte edilebiliyor; kurali global halden okumak, online bir saglayiciyla
+      // kurulmus bir servisi de komisyonsuz birakirdi.
+      this.provider.capabilities.capturesOnline,
+    );
     const gross = moneyToNumber(log.amount);
-    const split = computeSplit(gross, rules.platformCommissionRate);
+    const split = computeSplit(gross, commissionRate);
 
     await prisma.$transaction(async (tx) => {
       await tx.paymentLog.update({
