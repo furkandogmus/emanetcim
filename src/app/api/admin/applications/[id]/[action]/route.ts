@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/db";
 import { getMobileSession } from "@/lib/mobile-auth";
-import { sealService } from "@/services/SealService";
+import { shopService } from "@/services/ShopService";
 
 export async function POST(
   req: Request,
@@ -14,28 +13,36 @@ export async function POST(
 
   const { id, action } = await params;
 
+  /*
+    HER IKI ISLEM DE SERVIS UZERINDEN (2026-09-01).
+
+    ONAY: burasi ham `prisma.shop.update({ isActive: true })` yaziyordu --
+    dukkani aciyor ama esnafa HICBIR SEY SOYLEMIYORDU. `ShopService.approveShop`
+    ayni isi yaparken onay e-postasini gonderiyor, eski kayitlarin
+    dogrulanmamis e-postasini isaretliyor ve HICBIR kanal yoksa uyari
+    logluyor. Web tarafi (`approveShopAction`) zaten servisi cagiriyordu ve
+    oradaki yorum bunun P1-3'te bir kez duzeltildigini yaziyor -- ayni hata
+    mobil ucta hic duzeltilmemisti. Yani mobilden onaylanan esnaf, panelinin
+    acildigini ogrenemiyordu.
+
+    RED: govde `ShopService.rejectShop`a tasindi; web kopyasi muhurleri stoga
+    dondurmuyordu (bkz. o metodun yorumu).
+  */
   if (action === "approve") {
-    await prisma.shop.update({
-      where: { id },
-      data: { isActive: true },
-    });
-  } else if (action === "reject") {
-    const activeBookingCount = await prisma.booking.count({
-      where: { shopId: id, status: { in: ["APPROVED", "PAID", "CHECKED_IN"] } },
-    });
-    if (activeBookingCount > 0) {
-      return NextResponse.json(
-        { error: "Shop has active bookings; cannot delete." },
-        { status: 409 }
-      );
+    const ok = await shopService.approveShop(id);
+    if (!ok) {
+      return NextResponse.json({ error: "Shop not found." }, { status: 404 });
     }
-    await prisma.shop.delete({ where: { id } });
-    /*
-      Dükkana atanmış mühürler stoğa döner. Eskiden burada ham
-      `prisma.seal.updateMany` vardı; mühür envanteri `SealService`'in işidir ve
-      aynı işlem başka bir yerde farklı yazılırsa envanter sessizce ayrışır.
-    */
-    await sealService.releaseShopSeals(id);
+  } else if (action === "reject") {
+    const result = await shopService.rejectShop(id);
+    if (!result.ok) {
+      return result.reason === "not_found"
+        ? NextResponse.json({ error: "Shop not found." }, { status: 404 })
+        : NextResponse.json(
+            { error: "Shop has active bookings; cannot delete." },
+            { status: 409 },
+          );
+    }
   } else {
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   }

@@ -13,6 +13,7 @@ import { getActiveShopsOrderedByDistanceKm } from '@/lib/shop-distance-postgis';
 
 import { isShopOpenForStay } from '@/lib/shop-hours';
 import { PUBLIC_SHOP_FILTER, OPERATING_SHOP_FILTER } from '@/lib/public-shop-filter';
+import { sealService } from "@/services/SealService";
 import { notificationService } from '@/services/NotificationService';
 import {
   getSlotAvailabilityForShops,
@@ -186,11 +187,23 @@ export interface IShopService {
   getShopImages(shopId: string): Promise<Array<{ id: string; url: string; order: number }>>;
   getPendingShops(): Promise<ShopWithOwner[]>;
   approveShop(shopId: string): Promise<boolean>;
+  rejectShop(shopId: string): Promise<RejectShopResult>;
   getShopsByOwner(ownerId: string): Promise<Shop[]>;
   getShopByOwner(ownerId: string): Promise<Shop | null>;
   updateShop(shopId: string, data: Partial<Shop>): Promise<Shop>;
   recomputeResponseTimes(now?: Date): Promise<RecomputeResponseTimesResult>;
 }
+
+/**
+ * Basvuru reddinin sonucu.
+ *
+ * Aktif rezervasyonu olan bir dukkan SILINEMEZ: silinirse misafirin elinde
+ * karsiligi olmayan bir rezervasyon kalir. Cagirana `throw` yerine sebep
+ * donuluyor cunku bu bir HATA degil, gecerli bir "hayir".
+ */
+export type RejectShopResult =
+  | { ok: true; releasedSeals: number }
+  | { ok: false; reason: "not_found" | "has_active_bookings" };
 
 /**
  * ShopService - SOLID: Single Responsibility
@@ -820,6 +833,51 @@ export class ShopService implements IShopService {
     }
 
     return { updated, cleared, samples, written };
+  }
+
+  /**
+   * Esnaf basvurusunu REDDET (dukkani sil) -- iki tasiyicinin ortak govdesi.
+   *
+   * NEDEN SERVISE TASINDI (2026-09-01'de olculdu): red iki yerde AYRI AYRI
+   * yazilmisti ve kopyalar farkli sekilde eksikti:
+   *
+   *   web  (`rejectShopAction`)      : siliyor, aktif rezervasyonu ONCEDEN
+   *                                    kontrol etmiyor (FK ihlaline guveniyor)
+   *                                    ve MUHURLERI STOGA DONDURMUYOR
+   *   mobil (`api/admin/applications`): aktif rezervasyonu sayiyor ve muhurleri
+   *                                    donduruyor
+   *
+   * Yani hangi ekrandan reddedildigine gore muhurler ya stoga donuyor ya da
+   * silinmis bir dukkana ATANMIS halde askida kaliyordu -- envanter sessizce
+   * eksiliyordu. CLAUDE.md'deki kural bu: bir is kurali iki tasiyicida ayri
+   * yazilmaz.
+   *
+   * FK ihlaline GUVENILMIYOR: rezervasyon `onDelete` davranisina gore silme
+   * basarili da olabilir, ve o durumda misafirin elinde karsiligi olmayan bir
+   * rezervasyon kalirdi. Kontrol acikca yapiliyor.
+   */
+  async rejectShop(shopId: string): Promise<RejectShopResult> {
+    const shop = await prisma.shop.findUnique({
+      where: { id: shopId },
+      select: { id: true },
+    });
+    if (!shop) return { ok: false, reason: "not_found" };
+
+    const activeBookingCount = await prisma.booking.count({
+      where: { shopId, status: { in: ["APPROVED", "PAID", "CHECKED_IN"] } },
+    });
+    if (activeBookingCount > 0) {
+      return { ok: false, reason: "has_active_bookings" };
+    }
+
+    await prisma.shop.delete({ where: { id: shopId } });
+
+    /*
+      Muhur envanteri `SealService`in isi. Ham `seal.updateMany` yazmak, ayni
+      islemin baska bir yerde farkli yazilmasi demek -- envanter o zaman ayrisir.
+    */
+    const releasedSeals = await sealService.releaseShopSeals(shopId);
+    return { ok: true, releasedSeals };
   }
 }
 

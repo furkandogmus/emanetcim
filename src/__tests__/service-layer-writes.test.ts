@@ -102,13 +102,19 @@ const CEILINGS: Record<string, number> = {
   pushSubscription: 4,
   review: 3,
   session: 3,
-  shop: 7,
+  /*
+    7 -> 4 (2026-09-01): onay ve red govdeleri `ShopService`e tasindi. Ikisi de
+    web action'inda ve mobil admin ucunda AYRI AYRI yaziliydi ve kopyalar farkli
+    sekilde eksikti -- mobil onay esnafa hic bildirim gondermiyor, web red
+    muhurleri stoga dondurmuyordu.
+  */
+  shop: 4,
   user: 22,
   verificationToken: 7,
 };
 
 /** Toplam tavan — yeni bir MODELİN sessizce eklenmesini de yakalar. */
-const TOTAL_CEILING = 86;
+const TOTAL_CEILING = 83;
 
 /**
  * Yorumlar ayıklanır: bu dosyaların çoğunda "eskiden burada ham

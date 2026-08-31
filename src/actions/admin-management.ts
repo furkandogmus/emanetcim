@@ -545,19 +545,39 @@ export type RejectShopActionResult =
 export async function rejectShopAction(
   shopId: string,
 ): Promise<RejectShopActionResult> {
-  await ensureAdmin();
+  const session = await ensureAdmin();
 
-  try {
-    await prisma.shop.delete({
-      where: { id: shopId },
-    });
-  } catch (e) {
-    if (isPrismaForeignKeyViolation(e)) {
-      logger.warn({ shopId, err: e }, "admin_reject_shop_fk_blocked");
-      return { success: false, error: "has_relations" };
-    }
-    throw e;
+  /*
+    GOVDE ARTIK SERVISTE (2026-09-01). Burasi dukkani siliyor ama MUHURLERI
+    STOGA DONDURMUYORDU: reddedilen dukkana ATANMIS muhurler, dukkan silindikten
+    sonra da atanmis gorunuyor ve envanterden sessizce dusuyordu. Mobil uc ayni
+    islemi dogru yapiyordu -- iki kopya, iki farkli eksik. Bkz.
+    `ShopService.rejectShop`.
+
+    Aktif rezervasyon kontrolu de artik ACIK: onceki hal FK ihlaline
+    guveniyordu, oysa silme `onDelete` davranisina gore BASARILI da olabilir ve
+    o durumda misafirin elinde karsiligi olmayan bir rezervasyon kalirdi.
+  */
+  const result = await shopService.rejectShop(shopId);
+  if (!result.ok) {
+    logger.warn({ shopId, reason: result.reason }, "admin_reject_shop_blocked");
+    return { success: false, error: "has_relations" };
   }
+
+  /*
+    RED DE DENETIM IZI BIRAKIYOR. Onay (`approveShopAction`) log yaziyordu, red
+    yazmiyordu -- oysa bir esnafin dukkanini SILMEK, onaylamaktan daha geri
+    donulmez bir islem.
+  */
+  writeAuditLog({
+    actorUserId: session.user.id ?? null,
+    actorRole: "ADMIN",
+    action: "shop.reject_application",
+    entityType: "Shop",
+    entityId: shopId,
+    ip: await getClientIpOrNull(),
+    metadata: { releasedSeals: result.releasedSeals },
+  });
 
   revalidatePathAllLocales("/admin/applications");
   return { success: true };
