@@ -213,6 +213,40 @@ kutuları. Esnaf ekranları projenin kendi E2E yardımcılarıyla (`loginAsDemoP
 Ders: bir düzen sondası, **kırpan atayı ve gerçekten çizilen elemanı** hesaba katmadan
 güven vermez. Sıfır bulgu, sondanın yanlış yere baktığının da cevabıdır.
 
+## 2026-08-31 — yetki iptali zinciri artık uçtan uca ölçülüyor
+
+P1 bulgusu (yetkisi alınan yönetici 30 gün yönetici kalıyordu) da kaynak
+taramasıyla korunuyordu. Tarama `tokenVersion` artışının **yazıldığını**
+doğruluyor ama **zincirin çalıştığını** doğrulamıyor: artış yazılıp
+`requireMobileUser` onu karşılaştırmasaydı tarama yine yeşil kalırdı.
+
+`src/__tests__/role-revocation.integration.test.ts` zinciri uçtan uca koşturuyor:
+token üret → kabul edildiğini gör → rolü düşür → **aynı** token'ın artık
+reddedildiğini gör.
+
+Dört ölçüm:
+
+1. Geçerli token kabul ediliyor ve rol **veritabanından** geliyor.
+2. `tokenVersion` artınca aynı token reddediliyor (iptalin tek kaldıracı).
+3. Rol düşürülünce eldeki token **anında** geçersizleşiyor — asıl senaryo.
+4. `getMobileSession` rolü token'dan **değil** veritabanından okuyor: token
+   kasıtlı olarak `ADMIN` diyor, kullanıcı `GUEST`, `tokenVersion` aynı (yani
+   token teknik olarak geçerli) — doğru yanıt `GUEST`.
+
+### İki açık ayrı ayrı geri konularak doğrulandı
+
+| Geri konan açık | Testin tepkisi |
+|---|---|
+| `getMobileSession` rolü token'dan okusun | `expected 'ADMIN' to be 'GUEST'` — 1 kırmızı |
+| `tokenVersion` karşılaştırması kalksın | `iptalden sonra token geçmemeli` + `yetkisi alınan yöneticinin token'ı anında düşmeli` — 2 kırmızı |
+
+Sonra ikisi de geri alındı, dördü yeşil.
+
+> Yazarken iki hatam oldu ve ikisini de koşturarak buldum: aynı rolden iki
+> kullanıcı aynı e-postayla yaratılıyordu (`User.email` tekil), ve
+> `vi.mock("next/headers")` bir test **gövdesinin içine** yazılmıştı —
+> `vi.mock` çağrıları dosya başına kaldırıldığı için orada hiç devreye girmiyor.
+
 ## 2026-08-31 — P0 kimlik doğrulama atlaması artık ÖLÇÜLÜYOR (kaynak taraması değil)
 
 Bu oturumun en ağır bulgusu (`POST /api/mobile/auth/register` parolasız hesaplara
