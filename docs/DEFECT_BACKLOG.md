@@ -10,6 +10,70 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-08-31 — dar ekranlarda dokuz düzen kusuru (ölçüldü, hiçbiri Türkçe/390 px'te görünmüyordu)
+
+Sekiz sayfa × altı dil × 320–1920 px otomatik olarak tarandı. Aranan üç şey: görünüm
+dışına taşan kutu, `text-overflow: ellipsis` ile **sessizce** kırpılan metin, 24 px
+altı dokunma hedefi. Dokuz gerçek kusur çıktı. Ortak yanları şu: **geliştirmenin
+yapıldığı ekranda (Türkçe, 390 px, masaüstü) hiçbiri görünmüyordu.**
+
+- **Ana ekran arama kutusu — düğme kartın dışındaydı.** TR 43 px, DE 41 px, FR 71 px.
+  Sebep: tarih alanları `min-width: auto` ile küçülemiyor, düğme `shrink-0`, yani taşan
+  hep düğme oluyordu. `min-w-0` tek başına sorunu **takas etti**: alanlar küçülünce bu
+  sefer tarih `truncate` ile kırpıldı ve misafir "1.09.2026 0" gibi *geçerli görünen*
+  yarım bir tarih okudu. Kart tek satır için gerçekten dardı (672 px kap, FR ~772 px
+  ister) — kap `max-w-4xl`e çıktı, satıra geçiş eşiği `sm` yerine `lg` oldu.
+- **İngilizce etiket bir önceki turda kısaltılmıştı** ("Find Storage Point" →
+  "Find storage") ve bu, kartın dar olduğu gerçeğini **tek dilde gizliyordu**. Kart
+  genişleyince asıl ifade geri alındı. Kaydedilmeye değer olan ders: bir düzen hatasını
+  metni kısaltarak kapatmak, hatayı yalnızca o dilde görünmez yapar.
+- **Arama listesinde dükkan adı** tek satırda 76–193 px kayboluyordu. Talep noktalarının
+  adı "Tour Eiffel — Consigne à Bagages" biçiminde, yani ayırt edici sözcük tirenin
+  **sonrasında**: misafir 482 noktanın hepsini "BagajPark ..." diye aynı görüyordu.
+  `line-clamp-2`.
+- **Başlık, 360 px'te her sayfada** kırpıyordu (FR giriş düğmesi 10 px, logo 12 px).
+  İki sebep vardı. Biri: bir `<select>`in kapalı genişliği **en uzun seçeneğe** göre
+  belirlenir, ekranda "TR" yazarken bile `日本語` kadar yer kaplıyordu (89 px → `w-16`
+  ile 64 px). İkincisi: pay bitince kırpılan şey, `truncate` taşıyan logo değil
+  **okunması gereken kontrol** oluyordu — 400 px altında sözcük markası gizlendi, simge
+  kaldı.
+- **Alt gezinme çubuğu** öğelere eşit genişlik veriyordu (`flex-1`) ama etiketler eşit
+  değil. Ödeme sayfasında dördüncü öğe ("Geri") eklenince her yuva 69 px kalıyordu:
+  "Ara" 24 pikselini kullanıyor, "Rezervasyonlar" 104 px isteyip sağ kenardan 5 px
+  taşıyordu; ayrıca "Geri" öğesinin `max-w-[60px]` tavanı FR "Retour"u sol kenardan
+  2 px dışarı itiyordu. İkisi de `flex-auto`.
+- **Valiz seçici 320 px'te dağılıyordu**: "Küçük Valiz (S)" harf harf sarıyor ("Küçü /
+  k / Valiz / (S)"), fiyat "₺56,0 / 0" diye ikiye bölünüyordu — yani rezervasyonun
+  **ilk adımında** misafir hangi boyutu seçtiğini okuyamıyordu. Satırda `flex-wrap`
+  zaten vardı, ama sol grup `min-w-0` ile dibe kadar küçüldüğü için sarma **hiç**
+  tetiklenmiyordu. Taban metin kutusuna konunca yetmedi: eksi düğmesi etiketin
+  **üstüne bindi** — üstü örtülmüş bir kontrol, kırpılmış metinden kötüdür. Taban sol
+  grubun kendisine kondu ve sayı ölçülerek seçildi (sayaç 136 px, boşluk 12 px, satır
+  iç genişliği 320'de 254 / 360'ta 294 / 390'da 324): 120 px yalnızca 320'de sarmayı
+  tetikliyor, 360 ve üstünde görünüm hiç değişmiyor. RTL (fa) ve ja'da da doğrulandı.
+- **`/how-it-works` animasyonu telefonda** 680 pikselin altına inemediği için
+  `overflow-x-auto` içinde yatay kaydırma şeridine dönüşüyordu: ilk istasyon görünüyor,
+  çanta animasyonun ortasında ekran dışına çıkıyor, kimse yana kaydırmayı denemiyor.
+  Anlatan değil şaşırtan bir görsel. 768 pikselin altında **bölüm** gizlendi (bileşen
+  değil — boş bir `<section>` üstteki `gap-14`ten yuva alıp 56 px ölü boşluk bırakıyor).
+- **Almanca `checkoutStep2Short`** = "Zusammenfassung" 320 px'te 7 px kırpılıyordu.
+  Anahtarın adı `Short` ve diğer beş dil kısa bir sözcük kullanıyor (Özet, Summary,
+  Résumé, まとめ, خلاصه); Almanca tek istisnaydı → "Übersicht".
+- **Çerez şeridinin iki düğmesi** telefonda alt alta diziliyor, şerit bir satır uzuyor
+  ve arama listesinin **ilk sonucunu** tamamen örtüyordu.
+
+### Ölçüm sondasının kendisi iki kez yanlıştı — kayda değer
+
+1. İlk sonda `truncate` kırpmasını **kaçırdı**, çünkü `data-testid`i taşıyan gizli
+   `<input>`u ölçüyordu; görünür metin `truncate` taşıyan bir `<span>`dı. "Tarih tam
+   görünüyor" diye rapor etti, ekran görüntüsü tersini gösteriyordu.
+2. İkinci sonda `overflow-hidden` ata içindeki dekoratif lekeleri ve `overflow-x-auto`
+   kaydırma şeritlerini **taşma** sayıyordu. Kırpan ata kontrolü eklenene kadar gerçek
+   bulgular gürültünün içinde kayboluyordu.
+
+Ders: bir düzen sondası, **kırpan atayı ve gerçekten çizilen elemanı** hesaba katmadan
+güven vermez. Sıfır bulgu, sondanın yanlış yere baktığının da cevabıdır.
+
 ## 2026-08-31 — arama sessizce tam tablo taramasına düşebiliyordu (görülemeden)
 
 `getActiveShopsOrderedByDistanceKm` PostGIS sorgusunu `try` içinde çalıştırıp
