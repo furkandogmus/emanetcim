@@ -51,6 +51,7 @@ yazılmaz; ölçüm yazılır.
 | 31 | Etiketsiz `nav` (footer yasal bağlantılar) | Ekran okuyucu | ✅ DÜZELTİLDİ |
 | 32 | Takvim kontrolleri her dilde İNGİLİZCE konuşuyor | Ekran okuyucu | ✅ DÜZELTİLDİ |
 | 33 | Harita kontrolleri her dilde İNGİLİZCE konuşuyor | Ekran okuyucu | ✅ DÜZELTİLDİ |
+| 34 | PWA ikonu `maskable` ilan ediyor ama güvenli bölgeyi aşıyor | PWA | ✅ DÜZELTİLDİ |
 | 101 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
 | 102 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
 | 103 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
@@ -577,6 +578,28 @@ document.querySelectorAll("[aria-label],[title]")
   → /^(zoom|reset|go to|navigation|close|open|previous|next|toggle)\b/i
 ```
 
+### 34. PWA ikonu kurulumda kırpılacaktı
+
+Manifest her iki ikonu da `purpose: "any maskable"` ilan ediyordu. Maskable
+ikonlarda Android, ikonu bir şekle (daire/squircle) kırpar ve yalnızca
+**merkezdeki %80** garanti altındadır. Ölçüldü:
+
+```
+icon-512x512.png   marka sınır kutusu (0, 24, 486, 510)
+                   güvenli kare       (51, 51, 460, 460)
+                   aşma (sol,üst,sağ,alt) = 51, 27, 26, 50 px
+                   marka, ikonun %95'ini kaplıyor
+```
+
+Yani bavulun **sapı ve tekerlekleri** kurulu uygulamanın simgesinde
+kırpılacaktı — kullanıcının ana ekranında gördüğü ilk şey.
+
+Doğru kurulum ikisini ayırmak: orijinaller `purpose: "any"` (tarayıcı sekmesi,
+masaüstü — tam dolgulu iyi), ve yeni üretilen kenar paylı varyantlar
+`purpose: "maskable"`. Varyantlar orijinalin %80'e küçültülüp aynı arka plan
+renginde ortalanmasıyla üretildi; tasarım değişmedi, yalnızca pay eklendi.
+Doğrulandı: yeni ikonlarda güvenli bölge aşımı **0**.
+
 ### 31. Footer yasal bağlantı `nav`'ı etiketsizdi
 
 Arama ve checkout sayfalarında üç-dört işaret var; etiketsiz olan, ekran
@@ -675,7 +698,8 @@ Bu liste bilerek uzun; her tur birkaçını kapatıp buraya sonucunu yazın.
 > tarayıcıda oturumu **sen** açtığında aynı sekmeden devam edilerek kapatılır.
 
 **PWA**
-- [ ] Gerçek cihazda kurulum akışı (Android + iOS "Ana Ekrana Ekle")
+- [ ] Gerçek cihazda kurulum akışı (Android + iOS "Ana Ekrana Ekle") — ikon
+      artık ölçüm olarak doğru, ama gerçek cihazda görülmedi.
 - [ ] 404 soft-404 (HTTP 200) sürüyor. Kod içindeki not `force-dynamic`in işe
       yaramadığını yazıyor; Next 16'da bu şekle özel `app/global-not-found.js`
       var (`experimental.globalNotFound`). Ama deneysel VE layout'u baypas

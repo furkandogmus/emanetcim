@@ -212,6 +212,7 @@ export function composeAddress(parts: AddressParts): string {
 
 export default function LocationPicker({ value, onChange }: Props) {
   const t = useTranslations("Partner");
+  const tCommon = useTranslations("Common");
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<import("maplibre-gl").Map | null>(null);
   const markerRef = useRef<import("maplibre-gl").Marker | null>(null);
@@ -309,6 +310,20 @@ export default function LocationPicker({ value, onChange }: Props) {
         // ESKIDEN `false`: OpenStreetMap verisi ODbL altinda ve atif bir tercih
         // degil, lisans sarti. `compact` kucuk secicide yer kaplamasin diye.
         attributionControl: { compact: true, customAttribution: MAP_ATTRIBUTION },
+        /*
+          Kontrol etiketleri kullanicinin dilinde. MapLibre varsayilan olarak
+          "Zoom in" / "Zoom out" / "Toggle attribution" basiyor ve sayfanin
+          diliyle ilgilenmiyor -- yani esnaf, ekran okuyucuyla dukkanini
+          haritada isaretlerken Ingilizce kontrol duyuyordu. Ayni duzeltme
+          misafir haritasinda da var (`SearchMap`); iki harita ornegi arasinda
+          fark birakmamak icin buraya da kondu.
+        */
+        locale: {
+          "NavigationControl.ZoomIn": tCommon("mapZoomIn"),
+          "NavigationControl.ZoomOut": tCommon("mapZoomOut"),
+          "NavigationControl.ResetBearing": tCommon("mapResetBearing"),
+          "AttributionControl.ToggleAttribution": tCommon("mapToggleAttribution"),
+        },
       });
 
       map.addControl(new maplibre.NavigationControl({ showCompass: false }), "bottom-right");
