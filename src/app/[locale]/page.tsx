@@ -195,8 +195,16 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
         */}
         <AmbientBackdrop />
 
-        <div className="relative z-10 max-w-2xl">
-          <h1 className="text-3xl md:text-6xl font-black tracking-tight text-gray-900 mb-3 md:mb-6 leading-[1.15] md:leading-[1.1]">
+        {/*
+          Kap `max-w-2xl` (672 px) idi ve arama kutusu de onun icindeydi, yani
+          kutu 672 pikselden genis olamiyordu. Tek satirlik duzen ise dile gore
+          750-790 px istiyor: TR 42+32 px, DE 36+35 px, FR 50+50 px tarih metni
+          kirpiliyordu (2026-08-31'de 640-1440 px arasi her genislikte olculdu).
+          Baslik ve alt baslik dar kalmaya devam ediyor; genisleyen yalnizca
+          arama kutusu.
+        */}
+        <div className="relative z-10 w-full max-w-4xl">
+          <h1 className="mx-auto max-w-2xl text-3xl md:text-6xl font-black tracking-tight text-gray-900 mb-3 md:mb-6 leading-[1.15] md:leading-[1.1]">
             {t('heroTitle')}
           </h1>
           <p className="text-base md:text-lg text-gray-500 mb-6 md:mb-10 max-w-md mx-auto">

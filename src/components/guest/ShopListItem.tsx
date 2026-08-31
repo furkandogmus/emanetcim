@@ -81,7 +81,16 @@ export default function ShopListItem({
           {/* `h3`, `h4` DEGIL: sayfa h1 (gizli baslik) + bolum h2 ("Yakindaki")
               zincirinden sonra kart basligi h3 olmali. `h4` iki seviye atlama
               uretiyordu ve ekran okuyucuda "bir baslik kacirdim mi" hissi veriyor. */}
-          <h3 className="min-w-0 truncate font-bold text-gray-900 group-hover:text-orange-600 transition-colors">{name}</h3>
+          {/*
+            `line-clamp-2`, `truncate` DEGIL: tek satir yuksekligi koruyordu ama
+            adin anlamli kismini yiyordu. Talep noktalarinin adi "Tour Eiffel —
+            Consigne a Bagages" bicimindedir, yani ayirt edici sozcuk tirenin
+            SONRASINDA durur; tek satirda misafir 482 noktanin hepsini
+            "BagajPark ..." diye ayni goruyordu. 2026-08-31'de olculdu: 360-1440
+            px arasi her genislikte 76-193 px metin kirpiliyordu.
+            Iki satir hem adi gosteriyor hem karti sinirli tutuyor.
+          */}
+          <h3 className="min-w-0 line-clamp-2 font-bold text-gray-900 group-hover:text-orange-600 transition-colors">{name}</h3>
           <div className="shrink-0 flex items-center gap-1">
             <FavoriteButton shopId={id} className="!w-7 !h-7" />
             {rating > 0 ? (

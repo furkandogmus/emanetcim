@@ -91,7 +91,18 @@ export default async function HowItWorksPage({
       </header>
 
       <div className="mx-auto max-w-3xl px-6 py-12 flex flex-col gap-14">
-        <section className="text-gray-900">
+        {/*
+          `hidden md:block` BOLUMDE, bilesenin icinde degil: serit 680 px'in altina inemiyor (dort istasyonun etiketi okunakli kalsin diye) ve
+          360 px'lik bir telefonda `overflow-x-auto` icinde yatay kaydirma
+          seridine donusuyordu -- misafir ilk istasyonu goruyor, canta
+          animasyonun ortasinda ekranin disina cikiyor ve kimse yana kaydirmayi
+          denemiyor. Esik `md` (768 px): kap ancak orada 720 px olup 680 pikselik
+          seridi kaydirmadan aliyor -- `sm`de 88 px kaydirma kaliyordu. Anlatan gorsel degil, sasirtan gorsel oluyordu; asagidaki
+          dort ikonlu kart telefonda ayni seyi metinle anlatiyor.
+          Bilesen degil BOLUM gizleniyor, cunku bos bir <section> ustteki
+          `gap-14`ten yine bir yuva alip 56 px olu bosluk birakiyor.
+        */}
+        <section className="hidden md:block text-gray-900">
           <HowItWorksAnimation
             ariaLabel={t("animAria")}
             labels={[t("s1Short"), t("s2Short"), t("s3Short"), t("s4Short")]}

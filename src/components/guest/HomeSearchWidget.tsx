@@ -41,8 +41,25 @@ export default function HomeSearchWidget({
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-white border border-gray-200 shadow-xl rounded-2xl p-4 sm:p-6 flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
-      <div className="flex-1 flex flex-col gap-1.5">
+    <div className="w-full max-w-4xl mx-auto bg-white border border-gray-200 shadow-xl rounded-2xl p-4 sm:p-6 flex flex-col lg:flex-row items-stretch lg:items-end gap-3">
+      {/*
+        `min-w-0`: flex ogesi varsayilan olarak `min-width: auto` alir, yani
+        icerigi kadar genis kalir ve KUCULEMEZ. Tarih alanlari kuculemeyince
+        satir karta sigmiyor ve `shrink-0` olan buton kartin DISINA tasiyor.
+
+        Olculdu (2026-08-31, 640-1440 px arasi her genislikte): TR 43 px, DE
+        41 px, FR 71 px kartin disinda. Ingilizce'de gorunmuyordu, cunku onceki
+        turda etiketi kisaltmistim -- yani hatayi tek dilde kapatip yapisal
+        sebebi birakmisim. Ayni tuzak `ShopListItem`'da da yaziyor.
+
+        Yalniz `min-w-0` yetmiyor: alanlar kuculunce bu sefer tarih metni
+        DateTimePicker'daki `truncate` ile sessizce kirpiliyordu ("1.09.2026 0"
+        gibi -- gecerli bir deger gibi duran, aslinda yarim bir tarih). Yani
+        kart tek satir icin yapisal olarak dardi. Bu yuzden `max-w-4xl` ve
+        satira gecis esigi `sm` yerine `lg`: 1024 pikselin altinda alanlar alt
+        alta, tarih tam okunur; ustunde tek satir ve hepsi sigar.
+      */}
+      <div className="min-w-0 flex-1 flex flex-col gap-1.5">
         <label className="id-eyebrow text-gray-400">
           {t("searchCheckIn")}
         </label>
@@ -50,7 +67,7 @@ export default function HomeSearchWidget({
           <DateTimePicker value={checkIn} onChange={setCheckIn} testId="home-checkin" ariaLabel={t("searchCheckIn")} iconSize={18} />
         </div>
       </div>
-      <div className="flex-1 flex flex-col gap-1.5">
+      <div className="min-w-0 flex-1 flex flex-col gap-1.5">
         <label className="id-eyebrow text-gray-400">
           {t("searchCheckOut")}
         </label>
@@ -58,7 +75,7 @@ export default function HomeSearchWidget({
           <DateTimePicker value={checkOut} onChange={setCheckOut} testId="home-checkout" ariaLabel={t("searchCheckOut")} iconSize={18} />
         </div>
       </div>
-      <div className="w-full sm:w-24 flex flex-col gap-1.5">
+      <div className="w-full lg:w-24 flex flex-col gap-1.5">
         <label className="id-eyebrow text-gray-400">
           {t("searchBagCount")}
         </label>
@@ -90,7 +107,7 @@ export default function HomeSearchWidget({
           alanlarinin hizasini bozuyordu (2026-08-31 ekran goruntusu). Turkce'de
           gorunmeyen bir hata: en kisa etiket Turkce.
         */
-        className="w-full sm:w-auto shrink-0 whitespace-nowrap bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-xl font-black text-sm transition-all shadow-lg shadow-orange-200 hover:shadow-orange-300 flex items-center justify-center gap-2 cursor-pointer"
+        className="w-full lg:w-auto shrink-0 whitespace-nowrap bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-xl font-black text-sm transition-all shadow-lg shadow-orange-200 hover:shadow-orange-300 flex items-center justify-center gap-2 cursor-pointer"
       >
         <Search size={18} />
         {t("findShops")}

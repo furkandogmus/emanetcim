@@ -95,11 +95,17 @@ export default function CookieConsent() {
             </p>
           </div>
         </div>
-        <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:justify-end">
+        {/*
+          Telefonda da YAN YANA: alt alta iken serit bir satir daha uzuyor ve
+          844 px'lik bir ekranda listenin ilk sonucunu tamamen ortuyordu
+          (2026-08-31, 390 px ekran goruntusu). Iki etiket kisa -- 360 px'te
+          yan yana rahat siginca ikinci satira gerek yok.
+        */}
+        <div className="flex shrink-0 flex-row gap-2 sm:justify-end">
           <button
             type="button"
             data-testid="cookie-consent-essential"
-            className="rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-800 transition hover:bg-gray-50"
+            className="flex-1 sm:flex-none rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-800 transition hover:bg-gray-50"
             onClick={() => persist("essential")}
           >
             {t("essentialOnly")}
@@ -107,7 +113,7 @@ export default function CookieConsent() {
           <button
             type="button"
             data-testid="cookie-consent-accept"
-            className="rounded-xl bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-700"
+            className="flex-1 sm:flex-none rounded-xl bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-700"
             onClick={() => persist("all")}
           >
             {t("acceptAll")}
