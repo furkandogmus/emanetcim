@@ -115,6 +115,57 @@ kutuları. Esnaf ekranları projenin kendi E2E yardımcılarıyla (`loginAsDemoP
 Ders: bir düzen sondası, **kırpan atayı ve gerçekten çizilen elemanı** hesaba katmadan
 güven vermez. Sıfır bulgu, sondanın yanlış yere baktığının da cevabıdır.
 
+## 2026-08-31 — şifre sıfırlama token'ı denetim kaydına yazılıyordu (ve admin panelinde görünüyordu)
+
+`adminInitiatePartnerPasswordResetAction` şu satırı yazıyordu:
+
+```ts
+metadata: { phone: normalized, tokenId: row.token }
+```
+
+Alan adı `tokenId` olduğu için bir **tanımlayıcı** gibi görünüyordu. Değildi:
+`row.token`, sıfırlama bağındaki **sırrın ta kendisi** — onu bilen, o hesabın
+parolasını değiştirir. İsimlendirme, bu satırın gözden kaçmasının sebebi.
+
+Nereye gidiyordu:
+
+- **`AuditLog.metadata` sütununa, kalıcı olarak.** Denetim kayıtları budanmıyor.
+- **`/admin/audit-log` sayfası metadata'yı `JSON.stringify` ile ekrana basıyor** —
+  yani her yönetici, başlatılmış her sıfırlamanın **çalışır durumdaki** bağını
+  okuyabiliyordu. Token ömrü 1 saat.
+- Veritabanı yedekleri ve log taşıyıcılar da aynı değeri taşıyor.
+
+Esnaf hesapları e-postasız kaydolduğu için bu akış onların **tek** şifre sıfırlama
+yolu — nadir kullanılan bir kod yolu değil.
+
+**Düzeltme:** token yerine geri dönüşü olmayan bir parmak izi (`sha256` öneki, 12
+karakter) ve `expiresAt`. Denetim kaydının cevaplaması gereken soru "hangi
+yönetici, kime, ne zaman bir sıfırlama başlattı" — token'ın değeri buna hiçbir şey
+katmıyordu; parmak izi ise "şu kayıttaki sıfırlama şu token'la mı yapıldı"
+sorusunu hâlâ yanıtlatıyor, ama tersine çevrilemiyor.
+
+`rules/observability`: sır, token, PII log'a yazılmaz.
+
+### Aynı dosyada ikinci bulgu
+
+`BASE_URL` yalnızca `NEXT_PUBLIC_APP_URL`'e bakıp `http://localhost:3000`'e
+düşüyordu; projenin geri kalanı (`getSiteBaseUrl`) **önce** `NEXT_PUBLIC_BASE_URL`'i
+okuyor. Yalnızca ikincisi tanımlıysa yönetici, `localhost:3000` işaret eden bir bağ
+alıp esnafa gönderiyordu — ve bunun yanlış olduğunu ancak esnaf tıklayınca
+öğreniyordu. Ortak yardımcıya geçirildi.
+
+### Mandal: `src/__tests__/audit-log-secrets.test.ts`
+
+`writeAuditLog(...)` ve `logger.*(...)` çağrılarının ilk nesne argümanı taranıyor
+(süslü parantez sayarak, gerçek sınırla). Kabul edilen çözüm: değeri geri dönüşü
+olmayan bir özete çevirmek.
+
+> Tarayıcının ilk hâli sabit uzunlukta bir pencere (400 karakter) alıyordu ve **iki
+> hatalı pozitif** üretti: `logger.error`'dan birkaç satır *sonra* gelen ilgisiz bir
+> `const passwordHash = ...` ile düzeltmenin kendisi. Yanlış alarm üreten bir mandal
+> bir süre sonra gevşetilir, o yüzden ayrıştırıcı düzeltildi. Mandalın gerçekten
+> yakaladığı, eski satır geri konularak **doğrulandı**.
+
 ## 2026-08-31 — parola tabanı taşıyıcıya göre değişiyordu; en yetkili rol en zayıfını alıyordu
 
 Alt sınır **dört** ayrı şemada elle yazılıydı ve **üç** farklı değer taşıyordu:
