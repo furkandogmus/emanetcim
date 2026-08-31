@@ -39,6 +39,28 @@ export function rateLimitLocalMemory(
   return true;
 }
 
+/**
+ * Dagitik hiz siniri ZORUNLU mu? — tek yer.
+ *
+ * NEDEN VAR (2026-08-31'de olculdu): ayni kural UC yerde, IKI FARKLI ANLAMLA
+ * yaziliydi:
+ *
+ *   `src/lib/env.ts`            `!== "false"`  -> acikca kapatilmadikca ZORUNLU
+ *   `src/lib/rate-limit.ts`     `=== "false"`  -> ayni anlam, ters ifade
+ *   `src/app/api/health/route.ts` `=== "true"` -> OPT-IN, FARKLI anlam
+ *
+ * Sonucu bir izleme yalani: degisken tanimsizken sistem "zorunlu" sayiyor ve
+ * Redis yoksa acilista HATA VERIYOR, ama `/api/health` "distributedRateLimit
+ * Required: false" yaziyordu. Uretimde olculdu -- uc `false` diyordu, gercek
+ * `true`ydu.
+ *
+ * Saglik ucu, gercekten uygulanan kurali soylemek zorunda; yoksa okuyan kisi
+ * yanlis bir sistem modeliyle karar verir.
+ */
+export function isDistributedRateLimitRequired(): boolean {
+  return process.env.REQUIRE_DISTRIBUTED_RATE_LIMIT?.trim() !== "false";
+}
+
 let redisClient: Redis | null | undefined;
 
 /**
@@ -87,8 +109,7 @@ async function redisRateLimit(
   const redis = getRedis();
   if (!redis) {
     const canFallbackToMemory =
-      process.env.NODE_ENV !== "production" ||
-      process.env.REQUIRE_DISTRIBUTED_RATE_LIMIT?.trim() === "false";
+      process.env.NODE_ENV !== "production" || !isDistributedRateLimitRequired();
     if (!canFallbackToMemory) {
       throw new Error(
         "Distributed rate limit is required in production. Set REDIS_URL or set REQUIRE_DISTRIBUTED_RATE_LIMIT=false explicitly.",

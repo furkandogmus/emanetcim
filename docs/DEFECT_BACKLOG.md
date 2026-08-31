@@ -256,6 +256,68 @@ kutuları. Esnaf ekranları projenin kendi E2E yardımcılarıyla (`loginAsDemoP
 Ders: bir düzen sondası, **kırpan atayı ve gerçekten çizilen elemanı** hesaba katmadan
 güven vermez. Sıfır bulgu, sondanın yanlış yere baktığının da cevabıdır.
 
+## 2026-08-31 — üretim sağlığı ölçüldü; blog gövdesi temizleniyor; sağlık ucu yalan söylüyordu
+
+### Üretim ölçümü (açık kalan soru kapandı)
+
+```
+postgis: "ok"   siteBaseUrl: "ok"   redis: "ok"   rateLimitMode: "redis"
+```
+
+İki risk **üretimde yok**: arama hızlı yolda, e-posta bağlantıları doğru alan
+adını gösteriyor. Düzeltmeler koruma olarak duruyor (yeni bir ortam, restore ya
+da RDS'e geçiş bunları sessizce bozabilirdi).
+
+### Sağlık ucu, uygulanmayan bir kuralı raporluyordu
+
+Aynı kural **üç** yerde, **iki farklı anlamla** yazılıydı:
+
+| Yer | İfade | Anlam |
+|---|---|---|
+| `src/lib/env.ts` | `!== "false"` | açıkça kapatılmadıkça **zorunlu** (opt-out) |
+| `src/lib/rate-limit.ts` | `=== "false"` | aynı anlam, ters ifade |
+| `src/app/api/health/route.ts` | `=== "true"` | **opt-in — farklı anlam** |
+
+Sonucu bir izleme yalanı: değişken tanımsızken sistem "zorunlu" sayıyor ve Redis
+yoksa açılışta **hata veriyor**, ama uç `distributedRateLimitRequired: false`
+yazıyordu. Üretimde de öyle ölçüldü. Tek yere alındı
+(`isDistributedRateLimitRequired`).
+
+> Bir sağlık ucu, gerçekten uygulanan kuralı söylemek zorunda; yoksa okuyan kişi
+> yanlış bir sistem modeliyle karar verir.
+
+### Blog gövdesi artık temizleniyor
+
+`blog/[slug]` sayfası `post.content`'i `dangerouslySetInnerHTML` ile **ham**
+basıyordu. İçeriği yönetici yazıyor, yani zengin metin bilinçli bir özellik —
+ama tek savunma "yöneticiye güveniyoruz" olamaz: hesap ele geçirilirse
+depolanmış XSS **siteyi ziyaret eden herkesi** vurur, ve CSP'de `'unsafe-inline'`
+olduğu için enjekte edilen script **çalışır**.
+
+Bu oturumda aynı sınıfın iki örneği zaten bulunmuştu (JSON-LD'ye ve e-posta
+gövdesine giren dükkan adı); ikisi de "güvenilir" sanılan kaynaklardı.
+
+**Kendi temizleyicimizi yazmadık.** HTML ayrıştırma tuzaklarla dolu
+(`<img src=x onerror>`, `<svg><script>`, `javascript:` URL'leri, mutasyon XSS);
+`sanitize-html` bu işi yapan, bakımı sürdürülen, sunucu tarafında çalışan
+yerleşik çözüm. `@types/sanitize-html` **devDependencies**'e alındı — tip paketi
+çalışma anında gerekmiyor.
+
+İzin listesi (yasak listesi değil — yasak listesi her zaman eksiktir): başlıklar,
+paragraf, liste, kalın/italik, bağlantı, görsel, alıntı, kod, tablo. Dışarıda:
+`script`, `style`, `iframe`, `object`, `embed`, `form`, `input`, `svg`. Şemalar
+yalnızca `http`/`https`/`mailto` — `javascript:` ve `data:` yok. `class` serbest
+(yazılar `prose` sınıflarına dayanıyor), `style` değil.
+
+Mandal: `src/__tests__/rich-text-sanitize.test.ts` — 10 ölçüm, gerçek saldırı
+yükleriyle. Biri özellikle önemli: **meşru blog biçimlendirmesinin bozulmadığı**
+da ölçülüyor. Fazla agresif bir temizleyici mevcut yazıları bozar ve sonra
+gevşetilir.
+
+> Uygularken içe aktarmayı eklemeyi atladım (kontrolüm kendi yorumumdaki
+> "rich-text.ts" metnine takıldı). `npm run typecheck` yakaladı — dosya taraması
+> testi ise geçmişti, çünkü o yalnızca çağrının yazıldığını görüyor.
+
 ## 2026-08-31 — bağımlılık istisnası YANLIŞ bir olguya dayanıyordu
 
 `npm run audit` yeşil ve bir bilinçli istisna taşıyor (`deepmerge-ts`,

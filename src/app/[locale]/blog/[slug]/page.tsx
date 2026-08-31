@@ -10,6 +10,7 @@ import { ensureDefaultBlogPosts } from "@/lib/blog-initializer";
 import { alternatesForPath } from "@/lib/seo-alternates";
 import { socialMetadata } from "@/lib/social-metadata";
 import { serializeJsonLd } from "@/lib/json-ld-script";
+import { sanitizeRichText } from "@/lib/rich-text";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; slug: string }> }): Promise<Metadata> {
   const { locale, slug } = await params;
@@ -145,7 +146,15 @@ export default async function BlogDetailPage({
       <article className="px-6 max-w-3xl mx-auto">
         <div 
           className="prose prose-lg md:prose-xl prose-orange max-w-none prose-p:leading-relaxed prose-p:text-gray-700 prose-headings:font-black prose-headings:tracking-tighter prose-headings:text-gray-900 prose-img:rounded-3xl prose-img:shadow-xl prose-a:text-orange-600 prose-a:font-black prose-strong:font-black"
-          dangerouslySetInnerHTML={{ __html: post.content }}
+          /*
+            TEMIZLENMIS govde (2026-08-31). Icerigi yonetici yaziyor, yani
+            zengin metin BILINCLI bir ozellik -- ama tek savunma "yoneticiye
+            guveniyoruz" olamaz: hesap ele gecirilirse depolanmis XSS siteyi
+            ziyaret eden HERKESI vurur ve CSP'de `'unsafe-inline'` oldugu icin
+            enjekte edilen script CALISIR. Gerekce ve izin listesi
+            `src/lib/rich-text.ts`te.
+          */
+          dangerouslySetInnerHTML={{ __html: sanitizeRichText(post.content) }}
         />
         
         {/* Footer Area */}

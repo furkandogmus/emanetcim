@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
-import { getRedis } from "@/lib/rate-limit";
+import { getRedis, isDistributedRateLimitRequired } from "@/lib/rate-limit";
 import { getShopDistanceBackend } from "@/lib/shop-distance-postgis";
 import { isSiteBaseUrlConfigured } from "@/lib/site-base-url";
 
@@ -72,8 +72,14 @@ export async function GET() {
             Disaridan sorulabilir olmasi gerekiyor.
           */
           siteBaseUrl: isSiteBaseUrlConfigured() ? "ok" : "missing",
-          distributedRateLimitRequired:
-            process.env.REQUIRE_DISTRIBUTED_RATE_LIMIT === "true",
+          /*
+            GERCEKTEN UYGULANAN kurali soyler (2026-08-31'de duzeltildi).
+            Burasi `=== "true"` okuyordu -- yani OPT-IN sayiyordu -- oysa
+            zorunluluk `!== "false"` ile, yani OPT-OUT olarak uygulaniyor.
+            Degisken tanimsizken uc "gerekli degil" yaziyor, sistem "gerekli"
+            sayiyordu. Uretimde de oyle olculdu.
+          */
+          distributedRateLimitRequired: isDistributedRateLimitRequired(),
         },
         timestamp: new Date().toISOString(),
         env: process.env.NODE_ENV,

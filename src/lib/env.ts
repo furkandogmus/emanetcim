@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isDistributedRateLimitRequired } from "@/lib/rate-limit";
 
 const serverSchema = z.object({
   DATABASE_URL: z.string().min(1).optional(),
@@ -80,8 +81,7 @@ export function requireProdSecrets(): void {
     );
   }
   const redisUrl = e.REDIS_URL?.trim();
-  const requireDistributedRateLimit =
-    process.env.REQUIRE_DISTRIBUTED_RATE_LIMIT?.trim() !== "false";
+  const requireDistributedRateLimit = isDistributedRateLimitRequired();
   if (requireDistributedRateLimit && !redisUrl) {
     throw new Error(
       "Distributed rate limit is required in production. Set REDIS_URL or explicitly set REQUIRE_DISTRIBUTED_RATE_LIMIT=false",
