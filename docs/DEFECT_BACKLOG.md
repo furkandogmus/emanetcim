@@ -256,6 +256,34 @@ kutuları. Esnaf ekranları projenin kendi E2E yardımcılarıyla (`loginAsDemoP
 Ders: bir düzen sondası, **kırpan atayı ve gerçekten çizilen elemanı** hesaba katmadan
 güven vermez. Sıfır bulgu, sondanın yanlış yere baktığının da cevabıdır.
 
+## 2026-08-31 — `Booking.shortCode` önerisi ÖLÇÜLDÜ ve GERİ ÇEKİLDİ
+
+Rezervasyon kodu araması için ayrı bir `shortCode` sütunu önermiştim
+(`text_pattern_ops` indeksi `db:verify` kapısını kalıcı kırdığı için). Onay
+alındıktan sonra **önce ölçüldü** — 50.000 rezervasyonla:
+
+| Yol | Süre |
+|---|---|
+| Yönetici (filtresiz önek taraması, **eşleşme yok** = en kötü hâl) | **5,0 ms** |
+| Misafir (`guestEmail` ile daraltılmış — bu oturumda eklenen indeks) | **1,7 ms** |
+
+**Öneri geri çekildi.** Gerekçe:
+
+- Kazanç bugün **5 ms**, ve misafir yolu (asıl trafiği alan yol) zaten indeksli.
+- Bedeli `Booking` tablosuna sütun ekleme **artı geri doldurma** — yani para
+  yolundaki tablonun veri göçü. Bu, 5 ms için alınacak bir risk değil.
+- Ayrıca davranış değişikliği getirirdi: bugünkü kod 6 haneden uzun kodları da
+  kabul ediyor (`MIN_BOOKING_CODE_LENGTH`), sabit 8 haneli bir sütunda eşitlik
+  araması bunu kırardı ya da ikinci bir yol gerektirirdi.
+
+**Tetik noktası:** tarama doğrusal büyüyor. 500 bin rezervasyonda ~50 ms, 5
+milyonda ~500 ms. Rezervasyon sayısı **250 bini** geçtiğinde yeniden ölçülmeli;
+o noktada sütun + geri doldurma gerekçelenebilir hâle gelir.
+
+> Bu maddede yapılan iş, kod değişikliği değil **ölçüm**. Onaylanmış bir işi
+> ölçüp geri çekmek, onu ölçmeden yapmaktan daha güvenli — ve sayı olmadan
+> "gerekli" demek tahmindi.
+
 ## 2026-08-31 — üretim sağlığı ölçüldü; blog gövdesi temizleniyor; sağlık ucu yalan söylüyordu
 
 ### Üretim ölçümü (açık kalan soru kapandı)
