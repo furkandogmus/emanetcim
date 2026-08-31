@@ -10,21 +10,53 @@ import {
 
 type IdDistRow = { id: string; dist_km: unknown };
 
-function distanceSubselect(centerLat: number, centerLng: number) {
+/**
+ * YARICAP FILTRESI SORGUNUN ICINDE, `ST_DWithin` ile.
+ *
+ * NEDEN DEGISTI (2026-08-31'de 5000 dukkanla OLCULDU): yaricap filtresi bu alt
+ * sorgunun DISINDA, `WHERE sub.dist_km <= radius` olarak uygulaniyordu.
+ * `ST_Distance(...) <= x` indeks KULLANAMAZ -- planlayici her satir icin mesafe
+ * hesaplamak zorunda:
+ *
+ *     Seq Scan on "Shop"  (cost=0.00..84415.38)
+ *       Rows Removed by Filter: 4999
+ *
+ * `ST_DWithin` indeks farkindadir ve `Shop_geog_gist_idx` (ayni tarihli
+ * migration) ile birlikte:
+ *
+ *     Bitmap Index Scan on "Shop_geog_gist_idx"  (rows=3)
+ *
+ * Sicak kosuda 12,4 ms -> 0,5 ms; taranan aday satir 5000 -> 3. Fark dukkan
+ * sayisiyla DOGRUSAL buyuyordu, yani kazanc buyume ile artiyor.
+ *
+ * `radiusKm` null oldugunda (yaricap filtresi yok) `ST_DWithin` eklenmez --
+ * eklenecek bir sinir yok. O dal zaten butun kayitlari istiyor.
+ *
+ * Mesafe DEGERI hala `ST_Distance` ile hesaplaniyor: istemciye "kac km"
+ * yaziliyor ve `ST_DWithin` yalnizca eleme yapar, mesafe dondurmez. Fark su ki
+ * artik yalnizca ADAY satirlar icin hesaplaniyor.
+ */
+function distanceSubselect(
+  centerLat: number,
+  centerLng: number,
+  radiusKm: number | null,
+) {
+  const shopPoint = Prisma.sql`geography(ST_SetSRID(ST_MakePoint(s."longitude", s."latitude"), 4326))`;
+  const centerPoint = Prisma.sql`geography(ST_SetSRID(ST_MakePoint(${centerLng}, ${centerLat}), 4326))`;
+  const withinFilter =
+    radiusKm == null
+      ? Prisma.empty
+      : Prisma.sql`AND ST_DWithin(${shopPoint}, ${centerPoint}, ${radiusKm * 1000})`;
+
   return Prisma.sql`
     SELECT
       s.id,
-      (
-        ST_Distance(
-          geography(ST_SetSRID(ST_MakePoint(s."longitude", s."latitude"), 4326)),
-          geography(ST_SetSRID(ST_MakePoint(${centerLng}, ${centerLat}), 4326))
-        )
-        / 1000.0
-      ) AS dist_km
+      (ST_Distance(${shopPoint}, ${centerPoint}) / 1000.0) AS dist_km
     FROM "Shop" s
     WHERE ${Prisma.raw(PUBLIC_SHOP_SQL_CONDITION)}
       AND s."latitude" IS NOT NULL
       AND s."longitude" IS NOT NULL
+      ${withinFilter}
   `;
 }
 
@@ -134,6 +166,12 @@ export async function getActiveShopsOrderedByDistanceKm(
     take = null,
   } = options;
 
+  /*
+    Disaridaki yaricap suzgeci KALDI ama artik yalnizca bir emniyet: eleme
+    `ST_DWithin` ile alt sorgunun icinde, indeks uzerinden yapiliyor. Ikisi ayni
+    sinira bakiyor; bu satir `ST_DWithin`in kuresel yaklasikligi ile
+    `ST_Distance`in tam sonucu arasindaki sinir farkini kesiyor.
+  */
   const radiusFilter =
     radiusKm == null
       ? Prisma.sql`TRUE`
@@ -147,7 +185,7 @@ export async function getActiveShopsOrderedByDistanceKm(
   try {
     const rows = await prisma.$queryRaw<IdDistRow[]>`
       SELECT sub.id, sub.dist_km
-      FROM (${distanceSubselect(centerLat, centerLng)}) AS sub
+      FROM (${distanceSubselect(centerLat, centerLng, radiusKm)}) AS sub
       WHERE ${radiusFilter}
       ORDER BY sub.dist_km ASC
       ${limitFrag}

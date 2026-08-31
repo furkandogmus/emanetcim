@@ -213,6 +213,77 @@ kutuları. Esnaf ekranları projenin kendi E2E yardımcılarıyla (`loginAsDemoP
 Ders: bir düzen sondası, **kırpan atayı ve gerçekten çizilen elemanı** hesaba katmadan
 güven vermez. Sıfır bulgu, sondanın yanlış yere baktığının da cevabıdır.
 
+## 2026-08-31 — mesafe araması her satır için mesafe hesaplıyordu (5000 dükkanda 12,4 ms → 0,5 ms)
+
+Geçen turda "PostGIS çalışırken gerçek planı ölçmeden indeks eklemek tahmin
+olurdu" diye ertelemiştim. Ölçüldü.
+
+### Ölçüm — 5000 dükkan, İstanbul merkezli 10 km
+
+`shop-distance-postgis.ts` yarıçap filtresini alt sorgunun **dışında**
+uyguluyordu (`WHERE sub.dist_km <= radius`). `ST_Distance(...) <= x` indeks
+**kullanamaz**:
+
+```
+Seq Scan on "Shop"  (cost=0.00..84415.38)
+  Rows Removed by Filter: 4999
+```
+
+`ST_DWithin` indeks farkındadır. GiST indeksiyle birlikte:
+
+```
+Bitmap Index Scan on "Shop_geog_gist_idx"  (rows=3)
+```
+
+| | Sıcak koşu (3 tekrar) |
+|---|---|
+| İndeks **kapalı** | 11,6 / 12,6 / 12,4 ms |
+| İndeks **açık** | 2,2 / 0,9 / **0,5 ms** |
+
+Taranan aday satır **5000 → 3**, süre **~25 kat**. Fark dükkan sayısıyla
+**doğrusal** büyüyordu — yani kazanç büyümeyle artıyor.
+
+> İlk ölçümüm iki yolu da ~118 ms gösterdi ve bu yanlıştı: tek atışlık
+> `EXPLAIN ANALYZE`, PostGIS kütüphanesinin ilk çağrıdaki yüklenmesini (167 ms)
+> içine alıyor. Isıtıp tekrarlayınca gerçek fark çıktı. Ölçmeden önce ölçtüğümü
+> sandığım şey buydu.
+
+### `CREATE EXTENSION postgis` — geçen turdaki sonucum YANLIŞTI
+
+"İmaj zaten kuruyor, gerekmiyor" demiştim. Yarısı doğruymuş: imajın açılış
+betiği eklentiyi **yalnızca `$POSTGRES_DB`** için kuruyor.
+
+```
+bagajpark    postgis: 1
+template1    postgis: 0      <-- sonradan yaratılan DB'ler MİRAS ALMAZ
+bp_fresh     postgis: 0
+```
+
+Yani eklentinin varlığı "veritabanının imaj tarafından ilklendirilmiş olması"
+şartına bağlı. Şu durumlarda **yok** olur: yedekten yeni bir isimle geri yükleme,
+yönetilen Postgres (RDS/Aurora — açılış betiği hiç çalışmaz), aynı örnek üzerinde
+ikinci bir ortam veritabanı. Ve eksikliği **sessiz**: uygulama bellek içi
+sıralamaya düşer, sonuçlar doğru çıkar, dışarıdan hiçbir şey bozuk görünmez.
+
+Migration eklendi (`IF NOT EXISTS`, imajın kurduğu ortamlarda işlemsiz).
+
+### İkisi de `db:verify`'ı kırmıyor
+
+İfade üzerine kurulu GiST indeksi Prisma şemasında ifade edilemiyor, ama
+`migrate diff` onu **yok sayıyor** — ölçüldü, `db:verify` yeşil kaldı. Bu,
+`text_pattern_ops` denemesinden farkı: o **şemada** tanımlıydı ve her diff'te
+`DROP` + `CREATE` üretiyordu.
+
+### `db:verify` artık PostGIS'i ön kontrolle arıyor
+
+Migration PostGIS gerektirdiği için, eklentisiz bir Postgres'te anlaşılmaz bir
+Prisma `DbError` veriyordu. Ön kontrol eklendi: ne olduğunu **ve ne yapılacağını**
+söylüyor (`docker compose up -d postgres` + `--port 5433`).
+
+> Bu satırları yazarken mesajın içinde ters tırnak kullandım; çift tırnak içinde
+> komut ikamesine gidip mesajın kendisi `command not found` üretti. Betiği
+> **çalıştırınca** görüldü — `bash -n` bunu yakalamaz.
+
 ## 2026-08-31 — migration kuyruğu: ikisi kapandı, ikisi gerekmiyordu, biri gate'e takıldı
 
 Docker (OrbStack) açıldı; beş maddelik kuyruk **ölçülerek** ele alındı.

@@ -1,0 +1,27 @@
+-- Mesafe aramasi icin GiST indeksi (PostGIS geography ifadesi uzerinde).
+--
+-- NEDEN (2026-08-31'de OLCULDU, 5000 dukkanla):
+--
+-- `src/lib/shop-distance-postgis.ts` her satir icin `ST_Distance` hesaplayip
+-- sonucu `WHERE sub.dist_km <= radius` ile eliyordu. `ST_Distance(...) <= x`
+-- indeks KULLANAMAZ; olculen plan:
+--
+--     Seq Scan on "Shop"  (cost=0.00..84415.38)
+--       Rows Removed by Filter: 4999
+--
+-- Yani her aramada dukkan sayisi kadar mesafe hesabi. Sicak kosuda 12,4 ms --
+-- ve dukkan sayisiyla DOGRUSAL buyuyor.
+--
+-- `ST_DWithin` indeks farkindadir. Bu indeksle ayni sorgu:
+--
+--     Bitmap Index Scan on "Shop_geog_gist_idx"  (rows=3)
+--
+-- Sicak kosuda 0,5 ms -- yaklasik 25 kat. Taranan aday satir 5000 -> 3.
+--
+-- INDEKS PRISMA SEMASINDA DEGIL: ifade uzerine kurulu bir GiST indeksi Prisma
+-- semasinda ifade edilemiyor. `prisma migrate diff` onu YOK SAYIYOR (bu
+-- migration eklendikten sonra `npm run db:verify` yesil kaldi -- olculdu), yani
+-- sapma uretmiyor. `text_pattern_ops` denemesinden farki bu: o, semada
+-- tanimlandigi icin her diff'te DROP+CREATE uretiyordu.
+CREATE INDEX IF NOT EXISTS "Shop_geog_gist_idx" ON "Shop"
+  USING GIST (geography(ST_SetSRID(ST_MakePoint("longitude", "latitude"), 4326)));

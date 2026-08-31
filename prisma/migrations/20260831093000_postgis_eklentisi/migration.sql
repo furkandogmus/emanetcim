@@ -1,0 +1,23 @@
+-- PostGIS eklentisi.
+--
+-- NEDEN MIGRATION'DA (2026-08-31'de olculdu): `docker-compose.yml`
+-- `postgis/postgis` imajini kullaniyor ve o imajin acilis betigi eklentiyi
+-- kuruyor -- ama YALNIZCA `$POSTGRES_DB` icin. Olculen durum:
+--
+--     bagajpark    postgis: 1
+--     template1    postgis: 0      <-- sonradan yaratilan DB'ler MIRAS ALMAZ
+--     bp_fresh     postgis: 0
+--
+-- Yani eklentinin varligi "veritabaninin imaj tarafindan ilklendirilmis olmasi"
+-- sartina bagli. Su durumlarda YOK olur:
+--   - yedekten YENI bir isimle geri yukleme
+--   - yonetilen Postgres (RDS/Aurora): acilis betigi hic calismaz
+--   - ayni ornek uzerinde ikinci bir ortam veritabani
+--
+-- Ve eksikligi SESSIZ: `src/lib/shop-distance-postgis.ts` butun aktif dukkanlari
+-- bellege alip orada siralayan yedek yola duser. Sonuclar dogru cikar, yani
+-- disaridan hicbir sey bozuk gorunmez -- sitenin en cok trafik alan sayfasi her
+-- istekte tam tablo tarar.
+--
+-- `IF NOT EXISTS`: imajin zaten kurdugu ortamlarda islemsiz.
+CREATE EXTENSION IF NOT EXISTS postgis;

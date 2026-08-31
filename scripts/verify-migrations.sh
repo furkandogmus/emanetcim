@@ -142,6 +142,34 @@ function main() {
     return 1
   fi
 
+  # POSTGIS ON KONTROLU (2026-08-31'de eklendi).
+  #
+  # Migrasyonlardan biri `CREATE EXTENSION IF NOT EXISTS postgis` iceriyor
+  # (mesafe aramasi onsuz sessizce bellek ici siralamaya dusuyor). Eklenti
+  # SISTEMDE kurulu degilse Prisma su hatayi veriyor:
+  #
+  #   extension "postgis" is not available ... Could not open extension control
+  #   file ".../extension/postgis.control"
+  #
+  # Bu mesaj sorunun NE oldugunu soyluyor ama NE YAPILACAGINI soylemiyor --
+  # ozellikle Homebrew Postgres'e bagli bir gelistiricide, ki uretim ve CI
+  # `postgis/postgis` imajini kullaniyor. Kapiyi burada ve ANLASILIR bicimde
+  # kapatmak, insanlarin onu baypas etmesinden iyidir.
+  if ! psql "$ADMIN_URL" -tAc \
+      "SELECT 1 FROM pg_available_extensions WHERE name = 'postgis'" \
+      2>/dev/null | grep -q 1; then
+    log_error "Bu Postgres'te PostGIS YOK: ${host}:${port}"
+    # Ters tirnak KULLANILMAZ: cift tirnak icinde komut ikamesine gider ve
+    # mesajin kendisi "command not found" uretir (bu satirlar ilk yazildiginda
+    # tam olarak oyle oldu -- betigi CALISTIRINCA gorundu).
+    log_error "  Migrasyonlar 'CREATE EXTENSION postgis' iceriyor; uretim ve CI"
+    log_error "  postgis/postgis:16-3.4-alpine kosuyor."
+    log_error "  Compose'daki Postgres'e karsi calistirin:"
+    log_error "    docker compose up -d postgres"
+    log_error "    $SCRIPT_NAME --host 127.0.0.1 --port 5433 --user bagajpark"
+    return 1
+  fi
+
   log_info "Gecici veritabanlari yaratiliyor: $CHECK_DB, $SHADOW_DB"
   psql "$ADMIN_URL" -q -c "CREATE DATABASE \"$CHECK_DB\""
   psql "$ADMIN_URL" -q -c "CREATE DATABASE \"$SHADOW_DB\""
