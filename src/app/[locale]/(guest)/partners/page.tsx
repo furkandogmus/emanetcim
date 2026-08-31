@@ -6,6 +6,23 @@ import { getSiteBaseUrl } from "@/lib/site-urls";
 import { Store, TrendingUp, Shield, Smartphone, ArrowRight, MessageCircle } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { socialMetadata } from "@/lib/social-metadata";
+import { paymentCopyKey } from "@/lib/payment-copy";
+
+/**
+ * Paranin anlatildigi adim. Metni tahsilat bicimine baglanan TEK adim bu.
+ *
+ * NEDEN (2026-09-01'de olculdu): 4. adim kosulsuz "Hakedislerinizi hafta basi
+ * banka hesabiniza alin." diyordu ve boyle bir sey YOK -- `Payout` modeli yok,
+ * kayitli sekiz zamanlanmis isin hicbiri odeme degil (Pazartesi olan tek is
+ * `seal-forecast`, muhur stogu). Ustelik tahsilat dukkanda yapildigi icin
+ * platformun esnafa gonderecegi bir para da yok; para zaten kasada.
+ *
+ * Bu, esnafi kazanmak icin kurulmus sayfada duran bir PARA VAADI idi -- urunun
+ * tutamayacagi turden. `payment-copy.ts` kurali burada da gecerli: metnin
+ * surumunu saglayicinin yetenegi secer, yani PSP baglandigi gun kartli surum
+ * kendiliginden geri gelir, hicbir ceviri elle degismez.
+ */
+const MONEY_STEP = 4;
 
 export async function generateMetadata({
   params,
@@ -97,7 +114,29 @@ export default async function PartnersPage({ params }: { params: Promise<{ local
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {[1, 2, 3, 4].map((idx) => {
               const titleKey = `step${idx}Title`;
-              const descKey = `step${idx}Desc`;
+              /*
+                ADIM 4'UN METNI TAHSILAT BICIMINE BAGLI.
+
+                Onceki hali kosulsuz "Hakedislerinizi hafta basi banka
+                hesabiniza alin." diyordu -- ve boyle bir sey YOK: `Payout`
+                modeli yok, kayitli sekiz zamanlanmis isin hicbiri odeme degil
+                (Pazartesi olan tek is `seal-forecast`, muhur stogu). Ustelik
+                tahsilat dukkanda yapildigi icin platformun esnafa gonderecegi
+                bir para da yok; para zaten kasada.
+
+                Bu, esnafi kazanmak icin kurulmus sayfada duran bir PARA VAADI
+                idi -- urunun tutamayacagi turden. `payment-copy.ts`teki kural
+                burada da gecerli: metnin surumunu saglayicinin yetenegi secer,
+                yani PSP baglandigi gun kartli surum kendiliginde geri gelir.
+              */
+              /*
+                YALNIZCA 4. ADIM. Ilk uc adim SURECI anlatiyor (basvur, onay al,
+                hizmet ver) ve tahsilat bicimiyle degismiyor; dordunculer PARAYI
+                anlatiyor. Dordunu birden baglamak, ayni cumlenin alti dilde
+                ikiser kopyasini -- 24 gereksiz ceviri -- uretirdi.
+              */
+              const descKey =
+                idx === MONEY_STEP ? paymentCopyKey(`step${idx}Desc`) : `step${idx}Desc`;
               return (
                 <div key={idx} className="relative p-10 bg-white rounded-4xl border border-gray-100 shadow-sm">
                   <div className="absolute -top-4 -left-4 w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-black shadow-lg shadow-blue-200">

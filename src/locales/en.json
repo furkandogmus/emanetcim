@@ -1346,12 +1346,13 @@
     "step3Title": "Start Serving",
     "step3Desc": "Serve travelers as a storage point.",
     "step4Title": "Earn Profit",
-    "step4Desc": "Receive payments to your bank account weekly.",
+    "step4Desc": "The platform fee is deducted and the rest is credited to you as your earnings.",
     "ctaTitle": "Start Earning Today",
     "ctaButton": "Register Your Shop",
     "support247": "24/7 partner support",
     "moreQuestions": "Still have questions?",
-    "seeFaq": "Browse the FAQ"
+    "seeFaq": "Browse the FAQ",
+    "step4DescOnsite": "You collect the payment at your shop — the money is in your till right away."
   },
   "Footer": {
     "about": "About Us",
@@ -1504,7 +1505,7 @@
     "socialProofEarly": "Be one of our first partner shops — get the early-mover advantage",
     "approvalTimeNote": "Applications are reviewed within 24 business hours",
     "b1Title": "New revenue",
-    "b1Body": "Monetise spare space; track occupancy and payouts in the dashboard.",
+    "b1Body": "Monetise spare space; track occupancy and your earnings in the dashboard.",
     "b2Title": "Simple operations",
     "b2Body": "Bookings, QR handoffs and refunds in one partner panel.",
     "b3Title": "Discovery",

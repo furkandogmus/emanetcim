@@ -1346,12 +1346,13 @@
     "step3Title": "Hizmet Verin",
     "step3Desc": "Turistlere emanet noktası olarak hizmet verin.",
     "step4Title": "Kazanç Sağlayın",
-    "step4Desc": "Hakedişlerinizi hafta başı banka hesabınıza alın.",
+    "step4Desc": "Platform payı düşülür, kalan tutar hakedişin olarak hesabına geçer.",
     "ctaTitle": "Hemen Kazanç Sağlamaya Başlayın",
     "ctaButton": "Dükkanını Kaydet",
     "support247": "7/24 Esnaf Desteği",
     "moreQuestions": "Aklınızda başka sorular mı var?",
-    "seeFaq": "Sıkça Sorulan Sorulara Göz Atın"
+    "seeFaq": "Sıkça Sorulan Sorulara Göz Atın",
+    "step4DescOnsite": "Tahsilatı dükkanında sen yaparsın; para anında kasanda kalır."
   },
   "Footer": {
     "about": "Hakkımızda",
@@ -1504,7 +1505,7 @@
     "socialProofEarly": "İlk esnaf ortaklarımızdan biri olun — erken katılan avantajını yakalayın",
     "approvalTimeNote": "Başvurular 24 iş saati içinde değerlendirilir",
     "b1Title": "Ek gelir",
-    "b1Body": "Boş köşeyi dönüştürün; doluluk ve tahsilatları panelden izleyin.",
+    "b1Body": "Boş köşeyi kazanca dönüştürün; doluluğu ve kazancınızı panelden izleyin.",
     "b2Title": "Operasyon kolaylığı",
     "b2Body": "Rezervasyon, QR ve iade süreçleri tek panelde.",
     "b3Title": "Görünürlük",

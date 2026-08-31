@@ -1314,12 +1314,13 @@
     "step3Title": "Commencer à servir",
     "step3Desc": "Servez les voyageurs comme point de consigne.",
     "step4Title": "Gagner des bénéfices",
-    "step4Desc": "Recevez des paiements sur votre compte bancaire chaque semaine.",
+    "step4Desc": "La commission de la plateforme est déduite et le reste vous est crédité.",
     "ctaTitle": "Commencez à gagner aujourd'hui",
     "ctaButton": "Enregistrez votre boutique",
     "support247": "Assistance partenaires 24/7",
     "moreQuestions": "D'autres questions ?",
-    "seeFaq": "Consulter la FAQ"
+    "seeFaq": "Consulter la FAQ",
+    "step4DescOnsite": "Vous encaissez dans votre boutique — l'argent est tout de suite dans votre caisse."
   },
   "Footer": {
     "about": "À propos de nous",

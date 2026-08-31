@@ -1314,12 +1314,13 @@
     "step3Title": "Beginnen Sie mit dem Servieren",
     "step3Desc": "Dienen Reisenden als Aufbewahrungsort.",
     "step4Title": "Gewinn erzielen",
-    "step4Desc": "Erhalten Sie wöchentlich Zahlungen auf Ihr Bankkonto.",
+    "step4Desc": "Die Plattformgebühr wird abgezogen, der Rest wird dir als Verdienst gutgeschrieben.",
     "ctaTitle": "Beginnen Sie noch heute mit dem Verdienen",
     "ctaButton": "Registrieren Sie Ihren Shop",
     "support247": "Partner-Support rund um die Uhr",
     "moreQuestions": "Noch Fragen?",
-    "seeFaq": "Zu den häufigen Fragen"
+    "seeFaq": "Zu den häufigen Fragen",
+    "step4DescOnsite": "Du kassierst in deinem Laden — das Geld ist sofort in deiner Kasse."
   },
   "Footer": {
     "about": "Über uns",

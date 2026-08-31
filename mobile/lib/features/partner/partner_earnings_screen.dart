@@ -96,6 +96,18 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
+                // "Beklemede" istatistigi KALDIRILDI (2026-09-01).
+                //
+                // `_stats.thisWeek` alani `json['thisWeek']` okuyor ve API bu
+                // alani HIC GONDERMIYOR (`/api/mobile/partner/earnings/stats`
+                // yaniti: totalBalance, todayEarnings, pendingPayout, history,
+                // currency, commissionRate, merchantShareRatio). Yani deger her
+                // zaman varsayilan 0'a dusuyordu ve esnaf kalici olarak
+                // "Beklemede 0 TL" goruyordu.
+                //
+                // Sayinin kendisi yanlis degil, VAR OLDUGU IMASI yanlisti:
+                // bekleyen bir odeme yok cunku platformun esnafa yapacagi bir
+                // odeme yok -- tahsilat dukkanda, para zaten kasada.
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
@@ -103,12 +115,6 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
                       'partner.today'.tr(),
                       '₺${_stats.todayEarnings}',
                       Colors.greenAccent,
-                    ),
-                    Container(width: 1, height: 30, color: Colors.white10),
-                    _statSubItem(
-                      'partner.pending'.tr(),
-                      '₺${_stats.thisWeek}',
-                      Colors.orangeAccent,
                     ),
                   ],
                 ),
