@@ -343,7 +343,11 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
               <Link
                 key={c.slug}
                 href={`/luggage-storage/${c.slug}`}
-                className="rounded-full border border-gray-200 bg-white px-4 py-2.5 text-sm font-bold text-gray-800 shadow-sm transition hover:border-orange-200 hover:text-orange-600"
+                /* `min-w-11` (44px): sehir adi cok kisa olabiliyor ve cip o zaman
+                   dokunma hedefi esiginin altina dusuyor. Olculdu: Farsca "رم"
+                   (Roma) 21 px genisligindeydi. Uzun isimlerde hicbir sey
+                   degismiyor; yalnizca alt sinir kondu. */
+                className="min-w-11 rounded-full border border-gray-200 bg-white px-4 py-2.5 text-center text-sm font-bold text-gray-800 shadow-sm transition hover:border-orange-200 hover:text-orange-600"
               >
                 {tCity(`${c.slug}.label`)}
               </Link>

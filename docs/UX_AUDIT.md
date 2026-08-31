@@ -11,7 +11,7 @@ yazılmaz; ölçüm yazılır.
 gelmediğini tek komutla ölçer (yatay kaydırma, tek `main`, tek `h1`, başlık
 atlaması, etiketsiz `nav`, ekran okuyucuya giden İngilizce metin, dokunma
 hedefi ≥24×24; normal boyut ve %200 metin). Bozulursa çıkış kodu 1.
-**2026-08-31 itibarıyla 11 sayfa × 2 koşul = 22 kontrol: hepsi geçiyor.**
+**2026-08-31 itibarıyla 14 sayfa × 2 koşul = 28 kontrol.** Kapsam: TR/DE/FR/FA, ana sayfa · arama · sigorta · SSS · blog · blog yazısı · şehir · dükkan · checkout.
 Kullanımı `scripts/README.md`'de.
 
 Ayrıca dar ekranlar ölçüldü — **320 px** (iPhone SE / eski Android) ve
@@ -111,6 +111,9 @@ tarayıcıda oturumu sen açarsan aynı sekmeden devam edilebilir.
 | 35 | İletişim formunun üç alanının erişilebilir adı yok | Form | ✅ DÜZELTİLDİ |
 | 36 | Rezervasyon sorgulamada `autocomplete` yok | Form | ✅ DÜZELTİLDİ |
 | 37 | Prelaunch formlarında `autocomplete` yok (2 dosya) | Form | ⛔ BAŞKA AGENT'IN ÖZELLİĞİ |
+| 38 | Blog yazısında `h2→h4` + çıkış bağlantısı 115×16 | Blog | ✅ DÜZELTİLDİ |
+| 39 | Kısa etiketli dillerde footer/çip hedefleri dar | FA/JA | ✅ DÜZELTİLDİ |
+| 40 | "İptal Politikası" 5 dilde sadece "İptal"e düşmüş | i18n | ✅ DÜZELTİLDİ |
 | 101 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
 | 102 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
 | 103 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
@@ -740,6 +743,24 @@ okuyucuda ayırt edilemiyordu. `Footer.legalNavLabel` anahtarı altı dile
 gerçek çevirisiyle eklendi ve `aria-label` olarak bağlandı. (Bu, oturumda dil
 dosyalarına dokunduğum ikinci yer — diğer agent'in o dosyalarda açık işi
 olmadığı doğrulandıktan sonra yapıldı.)
+
+### 39. Kısa etiketli diller: dokunma hedefi YATAYDA da ölçülmeli
+
+Footer'daki kök kuralım yalnızca **dikey** pay veriyordu (`py-1.5 -my-1.5`).
+Yükseklik eşiği geçiyordu ama Farsça gibi kısa etiketli dillerde **genişlik**
+altta kalıyordu:
+
+```
+/fa footer  "لغو" (iptal)  20×32 px   → yükseklik tamam, genişlik değil
+/fa ana sayfa "رم" (Roma)  21×30 px   → şehir çipi
+```
+
+İkisi de `px-1 -mx-1` (footer) ve `min-w-11` (çip) ile kapandı. Uzun isimlerde
+hiçbir şey değişmiyor; yalnızca alt sınır kondu.
+
+**Ders:** dokunma hedefi kuralı iki eksenlidir. Türkçe/İngilizce test ederken
+etiketler yeterince uzun olduğu için yatay eksen hiç sınanmıyor — hata ancak
+kısa yazan dillerde görünüyor.
 
 ### Yavaş bağlantı (3G) — SAĞLIKLI
 
