@@ -7,7 +7,8 @@ yapın, silmeyin — neyin neden değiştiği sonraki turda gerekiyor.
 Yöntem: canlıda (bagajpark.com) tarayıcıyla gezmek + DOM ölçmek. "Sanırım şöyle"
 yazılmaz; ölçüm yazılır.
 
-**Regresyon taraması:** `node scripts/ux-sweep.mjs` — %200 koşulunda ayrıca
+**Regresyon taraması:** `node scripts/ux-sweep.mjs` — ayrıca **modal odak
+davranışını** (aç → odak içeri, Escape → kapan) ve %200 koşulunda
 **düşmanca içerik** deniyor (metinler 72 karakterlik boşluksuz bir kelimeyle
 değiştiriliyor). Gerçek veriyle ölçmek yetmiyor: uzun bir dükkan adı yarın
 veritabanına girdiğinde düzenin dayanacağını bugünden bilmek gerekiyor. — kapatılan hataların geri
@@ -1018,6 +1019,18 @@ tetikleyicide kalıyor. Aynı hata Tab tuzağını da yanlış diyaloğa bağlı
 Düzeltme: `inert` bir ata taşıyan diyaloglar elenerek **etkin** olan seçiliyor.
 Regresyon testi eklendi (kapalı diyalog DOM'da sonra gelecek şekilde kuruldu —
 eski kod o testi geçemez).
+
+**Canlıda doğrulandı:**
+
+```
+açılmadan      : 0 etkin diyalog
+panel açıldı   : 1 etkin diyalog, odak İÇERİDE ("Kapat")
+Escape sonrası : 0 etkin diyalog, odak tetikleyiciye döndü ("Bırakış")
+```
+
+Ayrıca `ux-sweep`'e kalıcı bir **modal odak kontrolü** eklendi: aç → odak
+içeri girdi mi, Escape → kapandı mı. Bu davranış sessizce bozulabilecek
+türden; artık tek komutla görünür.
 
 ### YANLIŞ ALARM — kayda geçiyor
 

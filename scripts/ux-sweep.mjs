@@ -212,6 +212,61 @@ for (const buyukMetin of [false, true]) {
   await ctx.close();
 }
 
+/*
+  MODAL ODAK DAVRANISI -- ayri bir kontrol.
+
+  Duzeltildi 2026-08-31 (#50): `useModalBehavior` odagi DOM'daki SON
+  `[role="dialog"]`e tasiyordu; ana sayfada iki panel oldugu icin odak kapali
+  ve `inert` olana gidiyor, yani hicbir yere gitmiyordu. Beklenen davranis:
+
+    ac    -> odak diyalogun ICINE girer
+    Esc   -> diyalog kapanir, odak TETIKLEYICIYE doner
+
+  Bu, ekran okuyucu ve klavye kullanicisi icin "dugmeye bastim, bir sey oldu"
+  geri bildiriminin ta kendisi; sessizce bozulabilecek turden.
+*/
+{
+  const ctx = await browser.newContext({ ...devices["iPhone 13"] });
+  const page = await ctx.newPage();
+  const hatalar = [];
+  try {
+    await page.goto(BASE + "/tr", { waitUntil: "domcontentloaded", timeout: 45000 });
+    await page.waitForTimeout(2500);
+    const kabul = page.locator("button").filter({ hasText: /kabul|akzeptier|accept/i }).first();
+    if (await kabul.count()) {
+      await kabul.click().catch(() => {});
+      await page.waitForTimeout(700);
+    }
+    const oku = () =>
+      page.evaluate(() => {
+        // `inert` iceren atalar elenir: `checkVisibility` bunu HESABA KATMAZ.
+        const etkin = [...document.querySelectorAll('[role="dialog"]')].filter(
+          (d) => !d.closest("[inert]"),
+        );
+        const a = document.activeElement;
+        return { etkin: etkin.length, icerde: etkin.some((d) => d.contains(a)) };
+      });
+
+    await page.locator('button[aria-haspopup="dialog"]').first().click();
+    await page.waitForTimeout(1000);
+    const acik = await oku();
+    if (acik.etkin !== 1) hatalar.push(`açılışta etkin diyalog ${acik.etkin} (1 olmalı)`);
+    if (!acik.icerde) hatalar.push("açılışta odak diyaloğun içine girmedi");
+
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(700);
+    const kapali = await oku();
+    if (kapali.etkin !== 0) hatalar.push("Escape diyaloğu kapatmadı");
+  } catch (e) {
+    hatalar.push("ölçülemedi: " + String(e).slice(0, 60));
+  }
+  if (hatalar.length) kirik += 1;
+  console.log(
+    `\n=== MODAL ODAK ===\n${hatalar.length ? "HATA" : "  ok"}  tarih seçici  ${hatalar.join(" · ")}`,
+  );
+  await ctx.close();
+}
+
 await browser.close();
 console.log(`\n${kirik === 0 ? "Tüm kurallar geçti." : `${kirik} sayfa/koşul kuralları bozdu.`}`);
 process.exit(kirik === 0 ? 0 : 1);
