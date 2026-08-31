@@ -28,11 +28,14 @@ export async function POST(req: NextRequest) {
     // sistemdeki TUM mühürleri arizali isaretleyebiliyordu — ve FAULTY bir mühür
     // check-in'de reddedildiginden (SealService:122) bu, platform genelinde check-in'i
     // durdururdu. markSealAsFaulty sahiplik ve durum kontrollerini zaten iceriyor.
-    await sealService.markSealAsFaulty(serial, shop.id);
+    await sealService.markSealAsFaulty(serial, shop.id, {
+      id: auth.user.id,
+      role: auth.user.role,
+    });
     return NextResponse.json({ success: true });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "";
-    if (msg === "seal_not_owned_by_shop") {
+    if (msg === "shop_not_owned_by_actor" || msg === "seal_not_owned_by_shop") {
       return NextResponse.json({ error: "not_found" }, { status: 404 });
     }
     if (msg === "seal_already_processed") {

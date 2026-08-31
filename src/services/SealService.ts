@@ -235,11 +235,45 @@ export class SealService {
   /**
    * Bir mühürü FAULTY olarak işaretler ve kullanımdan çıkarır.
    */
-  async markSealAsFaulty(serialNumber: number, shopId: string): Promise<void> {
+  /**
+   * Muhuru ARIZALI isaretler.
+   *
+   * `actor` ZORUNLU (2026-08-31'de eklendi). Onceden yalnizca `shopId`
+   * aliyordu ve "muhur bu dukkanin mi" sorusuna bakiyordu; "CAGIRAN bu
+   * dukkanin sahibi mi" sorusunu HIC sormuyordu. `shopId` istemciden geliyor,
+   * yani bir esnaf baska bir dukkanin kimligini gecirip O dukkanin muhurlerini
+   * arizali isaretleyebiliyordu.
+   *
+   * Etkisi envanterle sinirli degil: FAULTY bir muhur check-in'de reddediliyor
+   * (bu dosyada, `applyCheckInWithinTx`), yani hedef dukkanin teslim alma akisi
+   * duruyordu. Seri numaralari ardisik tam sayi, dukkan kimlikleri de herkese
+   * acik sayfalarda -- ikisini de taramak gerekmiyor, okunuyor.
+   *
+   * Mobil uc (`/api/mobile/partner/seals/report-faulty`) bu saldiriyi 2026-08-25'te
+   * ZATEN kapatmisti: dukkani cagirandan turetiyor, istemciden almiyor. Web
+   * action'i (`reportFaultySealAction`) kapatmamisti -- ayni kuralin iki
+   * tasiyicida ayri yazilmasinin bilinen sonucu. Kural artik SERVISTE, yani
+   * ucuncu bir tasiyici eklendiginde de gecerli.
+   */
+  async markSealAsFaulty(
+    serialNumber: number,
+    shopId: string,
+    actor: { id: string; role: string },
+  ): Promise<void> {
+    if (actor.role !== "ADMIN") {
+      const owned = await prisma.shop.findFirst({
+        where: { id: shopId, ownerId: actor.id },
+        select: { id: true },
+      });
+      if (!owned) {
+        throw new Error("shop_not_owned_by_actor");
+      }
+    }
+
     const seal = await prisma.seal.findUnique({
       where: { serialNumber },
     });
-    
+
     if (!seal || seal.shopId !== shopId) {
       throw new Error("seal_not_owned_by_shop");
     }

@@ -10,6 +10,48 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-08-31 — bir esnaf başka bir dükkanın mühürlerini arızalı işaretleyebiliyordu (IDOR)
+
+`reportFaultySealAction(serialNumber, shopId)` — `shopId` **istemciden** geliyor ve
+hiçbir doğrulamadan geçmiyordu. `requirePartner()` "esnaf mı" diye sorar; **"bu
+dükkanın esnafı mı"** diye sormaz.
+
+Etkisi envanterle sınırlı değil: `FAULTY` bir mühür check-in'de reddediliyor
+(`SealService.applyCheckInWithinTx`), yani hedef dükkanın **teslim alma akışı
+duruyordu**. Seri numaraları ardışık tam sayı, dükkan kimlikleri de herkese açık
+sayfalarda — ikisini de tahmin etmek gerekmiyor.
+
+İki ayrıntı bunu öğretici yapıyor:
+
+- **Hemen üstündeki komşusu (`getNextAvailableSealsAction`) kontrolü yapıyordu.**
+  Kural biliniyordu; bir dosyada iki satır arayla bir uygulanıp bir uygulanmamıştı.
+- **Mobil karşılığı 2026-08-25'te zaten kapatılmıştı** ve yorumunda saldırıyı
+  kelimesi kelimesine tarif ediyordu ("herhangi bir partner sistemdeki TÜM
+  mühürleri arızalı işaretleyebiliyordu"). Web action'ı kapatılmamıştı — aynı iş
+  kuralını iki taşıyıcıda ayrı yazmanın bilinen bedeli.
+
+**Düzeltme kuralı servise koydu.** `SealService.markSealAsFaulty` artık `actor`
+alıyor ve ADMIN değilse dükkan sahipliğini doğruluyor; üçüncü bir taşıyıcı
+eklendiğinde de geçerli olacak. Her iki taşıyıcı da güncellendi.
+
+> Action şu an hiçbir yerden çağrılmıyor — ama `"use server"` ihracı Next.js'te
+> **canlı bir HTTP ucudur**. Çağrılmıyor olması onu zararsız yapmaz; depo açık
+> kaynak olduğu için action yüzeyi de okunabilir.
+
+### Mandal: `src/__tests__/ownership-scoping.test.ts`
+
+`shopId` **parametresi** alan her server action taranıyor. Üç kabul edilen çözüm:
+
+| # | Çözüm | Örnek |
+|---|---|---|
+| a | Sahipliği action içinde doğrula | `getNextAvailableSealsAction`, `recycleReturnedSealsAction` |
+| b | Doğruladığı bilinen bir servise devret | `sealService.createRequest` (`ownerId` koşulu ekler) |
+| c | İstemciden geleni sunucudan türetilen bir değerle **ez** | `addReviewAction` → `shopId: booking.shopId` |
+
+(c) taramanın ilk koşuşunda ortaya çıktı: `addReviewAction` işaretlendi, incelendi,
+gerçek bir açık **değildi** — istemcinin `shopId`'sini hiç kullanmıyor. Kurala
+yazıldı; kırmızı kalan bir mandal bir süre sonra gevşetilir.
+
 ## 2026-08-31 — yetkisi alınan yönetici 30 gün yönetici kalıyordu
 
 Rol, **hem** mobil JWT'nin `role` isteminde **hem** web oturum token'ının içinde

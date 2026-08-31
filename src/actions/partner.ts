@@ -448,8 +448,29 @@ export async function reportFaultySealAction(serialNumber: number, shopId: strin
   const auth = await requirePartner();
   if (!auth.ok) return { success: false as const, error: auth.error };
 
+  /*
+    SAHIPLIK (2026-08-31'de eklendi). `shopId` ISTEMCIDEN geliyor ve burada
+    hicbir dogrulamadan gecmiyordu: `requirePartner()` yalnizca "esnaf mi"
+    diye soruyor, "BU dukkanin esnafi mi" diye sormuyor. Yani bir esnaf baska
+    bir dukkanin kimligini gecirip o dukkanin muhurlerini arizali
+    isaretleyebiliyordu -- ve FAULTY muhur check-in'de reddedildigi icin hedef
+    dukkanin teslim alma akisi duruyordu.
+
+    Hemen ustteki `getNextAvailableSealsAction` bu kontrolu YAPIYOR; komsusu
+    yapmiyordu. Mobil karsiligi da 2026-08-25'te kapatilmisti. Kural artik
+    `SealService.markSealAsFaulty` icinde, yani hicbir tasiyici atlayamaz;
+    buradaki kontrol kullaniciya dogru mesaji vermek icin duruyor.
+  */
+  if (auth.actor.role === "PARTNER") {
+    const owned = await prisma.shop.findFirst({
+      where: { id: shopId, ownerId: auth.actor.id },
+      select: { id: true },
+    });
+    if (!owned) return { success: false as const, error: "Errors.unauthorized" };
+  }
+
   try {
-    await sealService.markSealAsFaulty(serialNumber, shopId);
+    await sealService.markSealAsFaulty(serialNumber, shopId, auth.actor);
     return { success: true as const };
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Errors.generic";
