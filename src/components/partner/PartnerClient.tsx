@@ -22,6 +22,7 @@ import PartnerHistoryTab from "@/components/partner/PartnerHistoryTab";
 import PartnerRequestsTab from "@/components/partner/PartnerRequestsTab";
 import PartnerBottomNav, { type PartnerTab } from "@/components/partner/PartnerBottomNav";
 import PartnerReferralCard from "@/components/partner/PartnerReferralCard";
+import WebPushOptIn from "@/components/WebPushOptIn";
 import PartnerPulse, { type PulseProps } from "@/components/partner/PartnerPulse";
 import { formatTryCurrency } from "@/lib/currency";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
@@ -605,6 +606,20 @@ export default function PartnerClient({
               <p className="id-display text-2xl text-gray-900 md:text-3xl">
                 {monthlyShopViews}
               </p>
+            </div>
+            {/*
+              BILDIRIMI ACMA DAVETI. `WebPushOptIn` bu kod tabaninda yalnizca
+              MISAFIR ekranlarinda (checkout, hesap gizliligi) ciziliyordu --
+              esnafa hic sunulmuyordu. Oysa yeni rezervasyon esnafin ISINI
+              baslatan olay ve digir kanallarin hicbiri calismiyor: SMS bilerek
+              devre disi, mobil push'un gonderim kodu hic yok, e-postaya da
+              dukkan isleten esnaf bakmaz.
+
+              Bilesen VAPID yapilandirilmamissa ve abonelik zaten varsa kendini
+              hic cizmiyor -- yani burada kalici bir gurultu olusturmuyor.
+            */}
+            <div>
+              <WebPushOptIn />
             </div>
             <div className="col-span-2">
               <PartnerReferralCard />

@@ -846,14 +846,21 @@ export class NotificationService implements INotificationService {
 
     // Veritabanından rezervasyon durumunu ve partner e-posta adresini çekelim
     let partnerEmail: string | null = null;
+    /** Push icin gerekli: bildirim kullaniciya gider, e-posta adresine degil. */
+    let partnerUserId: string | null = null;
     let isRequest = true;
     try {
       const b = await prisma.booking.findUnique({
         where: { id: bookingId },
-        include: { shop: { include: { owner: true } } },
+        /*
+          DAR SECIM: `owner: true` esnafin `passwordHash`ini ve base64 avatarini
+          da getiriyordu; burada gereken iki alan var.
+        */
+        include: { shop: { select: { owner: { select: { id: true, email: true } } } } },
       });
       if (b) {
         partnerEmail = b.shop?.owner?.email ?? null;
+        partnerUserId = b.shop?.owner?.id ?? null;
         isRequest = b.status === "WAITING_APPROVAL";
       }
     } catch (err) {
@@ -920,6 +927,40 @@ export class NotificationService implements INotificationService {
     if (partnerEmail && partnerEmail.includes("@")) {
       void this.sendEmail(partnerEmail, emailSubject, emailBody, bookingId, emailHtml).catch((e) => {
         logger.error({ err: e, partnerEmail, bookingId }, "notifyPartnerAndAdmins_partner_email_failed");
+      });
+    }
+
+    /*
+      PUSH BILDIRIMI -- esnafin telefonu titresin.
+
+      NEDEN EKLENDI (2026-09-01'de olculdu): `sendPush` bu kod tabaninda
+      TANIMLIYDI, UYGULANMISTI ve HICBIR YERDEN CAGRILMIYORDU. Yani VAPID
+      anahtarlari, `PushSubscription` tablosu, `/api/push/subscribe` ucu ve
+      `WebPushOptIn` bileseni -- abonelik tarafinin tamami kuruluydu ama tek bir
+      bildirim gonderilmiyordu.
+
+      Bu, esnafi kanalsiz birakiyordu. Diger uclarin durumu:
+        - SMS  : `sendNetgsmRestSms` bilerek devre disi, sessizce `{ok:false}`
+        - Mobil push: token toplaniyor, gonderim kodu HIC YOK
+        - E-posta: calisiyor -- ama dukkan isleten esnaf e-postaya bakmaz
+
+      Yeni rezervasyon esnafin ISINI baslatan olaydir; farkina saatler sonra
+      varmasi, misafirin kapida beklemesi demek.
+
+      METIN TURKCE: bu bildirim yalnizca Turkiye'deki esnafa gidiyor -- ustteki
+      e-posta da ayni sebeple tek dilde (bkz. `panelUrl` yorumu).
+
+      `.catch` ZORUNLU: yakalanmamis red Node'da sureci dusurur ve bir bildirim
+      hatasi tum sunucuyu indirir (`unhandled-rejection` mandali, tavan 0).
+      Bildirim gonderimi rezervasyonu BLOKLAMAMALI, o yuzden beklenmiyor.
+    */
+    if (partnerUserId) {
+      const pushTitle = isRequest
+        ? "Yeni rezervasyon talebi 🎒"
+        : "Yeni onaylı rezervasyon 🎒";
+      const pushBody = `${shopName} — ${priceTr} · Kod: ${shortId}`;
+      void this.sendPush(partnerUserId, pushTitle, pushBody, bookingId).catch((e) => {
+        logger.error({ err: e, partnerUserId, bookingId }, "notifyPartnerAndAdmins_partner_push_failed");
       });
     }
 

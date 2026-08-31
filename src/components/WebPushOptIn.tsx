@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { withTimeout } from "@/lib/async-timeout";
@@ -23,6 +23,42 @@ export default function WebPushOptIn() {
   const vapid = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.trim();
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  /**
+   * Bu tarayıcıda ZATEN abonelik var mı?
+   *
+   * `null` = henüz bakılmadı. Bakılmadan kartı çizmek, aboneliği açmış
+   * kullanıcıya her sayfa yenilemesinde aynı daveti göstermek olurdu — panelde
+   * kalıcı bir gürültü, ve esnafın "bunu zaten yapmıştım" diye ikinci kez
+   * tıklaması. Abonelik tarayıcıda duruyor, sunucuya sormaya gerek yok.
+   */
+  const [alreadySubscribed, setAlreadySubscribed] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function check() {
+      if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
+        if (!cancelled) setAlreadySubscribed(false);
+        return;
+      }
+      try {
+        /*
+          `getRegistration` KULLANILIYOR, `ready` DEĞİL: `ready` etkin bir kayıt
+          yoksa HİÇ çözülmez ve bu etki sonsuza kadar askıda kalırdı — aşağıdaki
+          `subscribe` yorumunda anlatılan hatanın aynısı.
+        */
+        const reg = await navigator.serviceWorker.getRegistration(PUSH_SW_PATH);
+        const sub = await reg?.pushManager.getSubscription();
+        if (!cancelled) setAlreadySubscribed(Boolean(sub));
+      } catch {
+        // Tarayıcı izin vermiyorsa kartı göstermek doğru: kullanıcı deneyebilir.
+        if (!cancelled) setAlreadySubscribed(false);
+      }
+    }
+    void check();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const subscribe = useCallback(async () => {
     if (!vapid || typeof window === "undefined" || !("serviceWorker" in navigator)) {
@@ -75,6 +111,7 @@ export default function WebPushOptIn() {
         return;
       }
       setMsg(t("enabled"));
+      setAlreadySubscribed(true);
     } catch {
       setMsg(t("permissionDenied"));
     } finally {
@@ -82,7 +119,14 @@ export default function WebPushOptIn() {
     }
   }, [t, vapid]);
 
+  /*
+    `alreadySubscribed === null` -> henuz bakilmadi; kart CIZILMEZ. Once cizip
+    sonra kaldirmak, sayfa acilisinda goz onunde bir zipllama uretirdi.
+  */
   if (status !== "authenticated" || !session?.user?.id || !vapid) {
+    return null;
+  }
+  if (alreadySubscribed !== false && msg === null) {
     return null;
   }
 
