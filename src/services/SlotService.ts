@@ -1,4 +1,5 @@
 import prisma from "@/lib/db";
+import logger from "@/lib/logger";
 import { OPERATING_SHOP_FILTER } from "@/lib/public-shop-filter";
 import { parseDatetimeLocalInTimeZone } from "@/lib/datetime-local";
 import type { Prisma } from "@prisma/client";
@@ -167,6 +168,17 @@ export async function getSlotAvailability(
   from: Date,
   to: Date,
 ) {
+  /*
+    `take` bir EMNIYET SUBABI (2026-08-31). Cagiran taraf araligi zaten
+    sinirliyor (`slot-availability-route.ts`, 31 gun) -- bu satir o sinirin
+    unutuldugu ya da baska bir cagiranin eklendigi gunu karsiliyor. Sinirsiz bir
+    `findMany`, kimlik dogrulamasi olmayan bir ucun arkasinda durmamali.
+
+    Deger yuksek bilerek: 31 gunluk bir pencerede bu kadar slot uretilemez, yani
+    normal calismada HIC devreye girmez. Devreye girerse sessizce yarim veri
+    dondurmek yanlis olurdu, o yuzden loglaniyor.
+  */
+  const MAX_SLOTS = 5000;
   const slots = await prisma.shopTimeSlot.findMany({
     where: {
       shopId,
@@ -175,7 +187,14 @@ export async function getSlotAvailability(
       isActive: true,
     },
     orderBy: { startTime: "asc" },
+    take: MAX_SLOTS,
   });
+  if (slots.length === MAX_SLOTS) {
+    logger.warn(
+      { shopId, from, to, cap: MAX_SLOTS },
+      "slot_availability_result_capped",
+    );
+  }
 
   const slotIds: string[] = slots.map((s: { id: string }) => s.id);
 

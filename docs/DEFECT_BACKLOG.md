@@ -213,6 +213,40 @@ kutuları. Esnaf ekranları projenin kendi E2E yardımcılarıyla (`loginAsDemoP
 Ders: bir düzen sondası, **kırpan atayı ve gerçekten çizilen elemanı** hesaba katmadan
 güven vermez. Sıfır bulgu, sondanın yanlış yere baktığının da cevabıdır.
 
+## 2026-08-31 — slot müsaitlik ucu sınırsız tarih aralığı kabul ediyordu
+
+`from` ve `to` sorgu parametreleri doğrudan `getSlotAvailability`'ye geçiyordu ve
+orada `shopTimeSlot.findMany` **`take` almıyordu**. Yani:
+
+```
+GET /api/shops/<id>/slots?from=1970-01-01&to=2100-01-01
+```
+
+o dükkanın **bütün** slot satırlarını çekiyor, kimliklerini bir `groupBy`'ın `IN`
+listesine koyuyor ve hepsini JSON'a seriliyordu — **kimlik doğrulaması olmayan**
+bir uçta (web ve mobil aynı gövdeyi paylaşıyor).
+
+Bugünkü hacimde bedeli sınırlı — slot üretimi sınırlı bir ufuk için çalışıyor.
+Ama bedelin **istekle değil tabloyla** sınırlı olması bir tasarım değil, tesadüf:
+veri büyüdükçe büyüyor.
+
+Ayrıca `to <= from` hiç kontrol edilmiyordu: ters aralık **boş sonuç**
+döndürüyordu, yani istemci "müsait slot yok" ile "yanlış parametre gönderdim"
+durumlarını ayırt edemiyordu.
+
+### Düzeltme
+
+- **31 günlük üst sınır**, sorgudan **önce**. Arayüz gerçekte **tek günlük**
+  pencere istiyor (`SlotAvailabilityGrid` → `dayWindow`), en uzun konaklama 30 gün
+  (`pricing-rules`) — yani sınır hiçbir gerçek kullanımı kesmiyor.
+- **Ters ve sıfır genişlikli aralık 400.**
+- **`take: 5000` emniyet supabı** serviste, aşılırsa `logger.warn`. Değer yüksek
+  bilerek: 31 günlük pencerede bu kadar slot üretilemez, yani normal çalışmada
+  hiç devreye girmez. Girerse sessizce yarım veri döndürmek yanlış olurdu.
+
+Mandal: `src/__tests__/slot-range-bound.test.ts` — sınırın sorgudan **önce**
+çalıştığı da ölçülüyor (sonra çalışsa maliyet zaten doğardı).
+
 ## 2026-08-31 — esnaf, misafire giden e-postaya oltalama bağlantısı koyabiliyordu
 
 Bir önceki bulgunun (JSON-LD XSS) kardeşi: aynı esnaf-kontrollü değer, bu sefer
