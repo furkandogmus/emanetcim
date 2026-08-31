@@ -48,7 +48,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
           {/* Info cards */}
           <div className="flex flex-col gap-6 order-2 lg:order-1">
             <div className="group p-10 bg-white rounded-4xl border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-orange-200/20 transition-all">
-              <div className="flex items-center gap-6">
+              <div className="flex flex-wrap items-center gap-6">
                 <div className="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 shrink-0">
                   <MessageCircle size={32} />
                 </div>
@@ -67,7 +67,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
             </div>
 
             <div className="group p-10 bg-white rounded-4xl border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-blue-200/20 transition-all">
-              <div className="flex items-center gap-6">
+              <div className="flex flex-wrap items-center gap-6">
                 <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 shrink-0">
                   <Mail size={32} />
                 </div>
@@ -82,7 +82,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
             </div>
 
             <div className="group p-10 bg-white rounded-4xl border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-orange-200/20 transition-all">
-              <div className="flex items-center gap-6">
+              <div className="flex flex-wrap items-center gap-6">
                 <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-600 shrink-0">
                   <MapPin size={32} />
                 </div>
