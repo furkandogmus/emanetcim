@@ -414,6 +414,97 @@ export class NotificationService implements INotificationService {
   }
 
   /** Partner rezervasyonu onayladığında misafire onay e-postası gönderir. */
+  /**
+   * Talep testi noktası HİZMETE AÇILDIĞINDA, "haber ver" diyen kişiye e-posta.
+   *
+   * NEDEN VAR (2026-08-31'de ölçüldü): `PrelaunchInterest` kayıtları yalnızca
+   * YAZILIYOR ve SAYILIYOR'du — onlardan bir şey gönderen tek satır kod yoktu.
+   * Oysa kişi e-postasını tam olarak şu söz karşılığında bırakıyor: "Açıldığı
+   * gün ilk sen haberdar ol." Yani ürünün en değerli sinyali, karşılığı
+   * olmayan bir vaat üzerine toplanıyordu.
+   *
+   * Gönderim IDEMPOTENT olmak zorunda; `PrelaunchInterest.notifiedAt` bunu
+   * sağlıyor (bkz. `PrelaunchInterestService.notifyOpened`). Bir pazarlama
+   * e-postasını iki kez göndermek, hiç göndermemekten daha çok zarar verir.
+   */
+  async notifyPrelaunchOpened(
+    email: string,
+    shopId: string,
+    shopName: string,
+    locale: string = "tr",
+  ): Promise<void> {
+    if (!email.includes("@")) return;
+    const domain = process.env.NEXT_PUBLIC_APP_URL || "https://bagajpark.com";
+    const shopUrl = `${domain}/${locale}/shop/${shopId}`;
+
+    const content = pickLocale({
+      tr: {
+        subject: `${shopName} açıldı — valizini bırakabilirsin 🎒`,
+        body: `Merhaba,\n\n${shopName} artık hizmette. Sözümüzü tutuyoruz: açıldığı gün haber veriyoruz.\n\nRezervasyon: ${shopUrl}`,
+        heading: `${shopName} açıldı 🎒`,
+        p1: `Bu noktada emanet hizmeti başladı. Bir süre önce "açılınca haber ver" demiştin — sözümüzü tutuyoruz.`,
+        p2: `Artık valizini bırakmak için rezervasyon yapabilirsin.`,
+        cta: `Rezervasyon yap`,
+        footer: `BagajPark — Güvenli Bagaj Emaneti`,
+      },
+      en: {
+        subject: `${shopName} is open — you can drop your bags 🎒`,
+        body: `Hello,\n\n${shopName} is now live. You asked to be told the day it opens, so here we are.\n\nBook: ${shopUrl}`,
+        heading: `${shopName} is open 🎒`,
+        p1: `Luggage storage has started at this point. A while ago you asked us to tell you when it opens — here we are.`,
+        p2: `You can book a drop-off now.`,
+        cta: `Book now`,
+        footer: `BagajPark — Secure Luggage Storage`,
+      },
+      de: {
+        subject: `${shopName} ist offen — Sie können Ihr Gepäck abgeben 🎒`,
+        body: `Hallo,\n\n${shopName} ist jetzt in Betrieb. Sie wollten es am Eröffnungstag erfahren — hier sind wir.\n\nBuchen: ${shopUrl}`,
+        heading: `${shopName} ist offen 🎒`,
+        p1: `An diesem Standort hat die Gepäckaufbewahrung begonnen. Sie hatten gebeten, bei der Eröffnung informiert zu werden — hier sind wir.`,
+        p2: `Sie können jetzt eine Abgabe buchen.`,
+        cta: `Jetzt buchen`,
+        footer: `BagajPark — Sichere Gepäckaufbewahrung`,
+      },
+      fr: {
+        subject: `${shopName} est ouvert — déposez vos bagages 🎒`,
+        body: `Bonjour,\n\n${shopName} est maintenant en service. Vous vouliez être prévenu le jour de l'ouverture — nous y sommes.\n\nRéserver : ${shopUrl}`,
+        heading: `${shopName} est ouvert 🎒`,
+        p1: `La consigne à bagages a ouvert à ce point. Vous nous aviez demandé de vous prévenir le jour de l'ouverture — nous y sommes.`,
+        p2: `Vous pouvez désormais réserver un dépôt.`,
+        cta: `Réserver`,
+        footer: `BagajPark — Consigne à bagages sécurisée`,
+      },
+      ja: {
+        subject: `${shopName} がオープンしました — 荷物を預けられます 🎒`,
+        body: `こんにちは。\n\n${shopName} の運用が始まりました。オープン当日にお知らせするお約束でした。\n\n予約: ${shopUrl}`,
+        heading: `${shopName} がオープンしました 🎒`,
+        p1: `この拠点で手荷物預かりが始まりました。オープンしたら知らせてほしいとご登録いただいていました。`,
+        p2: `お預け入れのご予約が可能になりました。`,
+        cta: `予約する`,
+        footer: `BagajPark — 安全な手荷物預かり`,
+      },
+      fa: {
+        subject: `${shopName} باز شد — می‌توانید چمدانتان را بسپارید 🎒`,
+        body: `سلام،\n\n${shopName} اکنون فعال است. گفته بودید روز افتتاح خبر بدهیم — همان روز رسید.\n\nرزرو: ${shopUrl}`,
+        heading: `${shopName} باز شد 🎒`,
+        p1: `نگهداری چمدان در این نقطه آغاز شد. شما خواسته بودید روز افتتاح خبر بدهیم.`,
+        p2: `اکنون می‌توانید برای سپردن چمدان رزرو کنید.`,
+        cta: `رزرو کنید`,
+        footer: `BagajPark — نگهداری امن چمدان`,
+      },
+    }, locale);
+
+    const html = renderEmailHtml({
+      locale,
+      heading: content.heading,
+      paragraphs: [content.p1, content.p2],
+      cta: { href: shopUrl, label: content.cta, variant: "button" },
+      footer: content.footer,
+    });
+
+    await this.sendEmail(email, content.subject, content.body, undefined, html);
+  }
+
   /** Esnaf rezervasyonu onayladiginda misafire onay e-postasi gonderir. */
   async notifyBookingApproved(email: string, bookingId: string, shopName: string, locale: string = "tr"): Promise<void> {
     if (!email.includes("@")) return;

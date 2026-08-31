@@ -970,6 +970,15 @@ model PrelaunchInterest {
   source    String   @default("web")
   createdAt DateTime @default(now())
 
+  /// Nokta acildiginda bu kisiye haber verildigi an.
+  ///
+  /// NEDEN VAR: kayit sirasinda verilen soz "acildigi gun ilk sen haberdar ol".
+  /// Bu sutun olmadan gonderim IDEMPOTENT olamaz -- `notifyOpened` iki kez
+  /// kosarsa (elle tekrar, yeniden deneme, iki yonetici) ayni kisiye ayni
+  /// e-posta tekrar gider. Bir pazarlama e-postasini iki kez gondermek, hic
+  /// gondermemekten daha cok zarar verir.
+  notifiedAt DateTime?
+
   /// Ayni kisi ayni noktaya iki kez kaydolmasin; ilgi SAYISI sisirilmemeli.
   @@unique([shopId, email])
   @@index([shopId, createdAt])

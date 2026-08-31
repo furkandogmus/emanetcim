@@ -18,6 +18,12 @@
  *   npx tsx scripts/prelaunch-points.ts --list                    # sadece listele
  *   npx tsx scripts/prelaunch-points.ts --verify                  # koordinat denetimi
  *   npx tsx scripts/prelaunch-points.ts --close istanbul-sultanahmet
+ *   npx tsx scripts/prelaunch-points.ts --apply --open istanbul-taksim
+ *
+ * `--open` NOKTAYI HİZMETE AÇAR: `isPrelaunch = false` yapar ve "açılınca haber
+ * ver" diyen herkese e-posta gönderir. İkisi TEK işlemde, çünkü ayrı yapılırsa
+ * biri unutulur — ve unutulan taraf hep bildirim olur: nokta açılır, kimse
+ * haberdar edilmez, toplanan e-postalar hiçbir işe yaramaz.
  *
  * `--city` argümanı aşağıdaki `key` alanıdır (slug öneki değil). Fark önemli:
  * liste yüzlerce noktaya çıktığında "önek eşleşmesi" iki şehri sessizce
@@ -1965,6 +1971,7 @@ function parseArgs() {
     verify: argv.includes("--verify"),
     city: argv.includes("--city") ? argv[argv.indexOf("--city") + 1] : null,
     close: argv.includes("--close") ? argv[argv.indexOf("--close") + 1] : null,
+    open: argv.includes("--open") ? argv[argv.indexOf("--open") + 1] : null,
   };
 }
 
@@ -2050,6 +2057,59 @@ async function main() {
         where: { id: shop.id },
         data: { isActive: false },
       });
+    }
+    return;
+  }
+
+  if (args.open) {
+    const prisma = await getPrisma();
+    const marker = `[prelaunch:${args.open}]`;
+    const shop = await prisma.shop.findFirst({
+      where: { description: { contains: marker } },
+      select: { id: true, name: true, isPrelaunch: true },
+    });
+    if (!shop) {
+      console.error(`Nokta bulunamadi: ${args.open}`);
+      process.exit(1);
+    }
+    if (!shop.isPrelaunch) {
+      console.log(`${shop.name} ZATEN acik; yalnizca bildirim denenecek.`);
+    }
+
+    const waiting = await prisma.prelaunchInterest.count({
+      where: { shopId: shop.id, notifiedAt: null },
+    });
+    console.log(
+      `${args.apply ? "ACILIYOR" : "[kuru] acilacak"}: ${shop.name}\n` +
+        `  haber bekleyen: ${waiting} kisi`,
+    );
+
+    if (!args.apply) {
+      console.log("Yazmak icin: --apply");
+      return;
+    }
+
+    /*
+      SIRA ONEMLI: once `isPrelaunch = false`, sonra bildirim. Ters sirada,
+      e-postayi alip gelen kisi hala rezervasyon alamayan bir noktayla
+      karsilasirdi -- `notifyOpened` bu yuzden hala prelaunch olan bir noktada
+      hicbir sey gondermeyi reddediyor.
+    */
+    await prisma.shop.update({
+      where: { id: shop.id },
+      data: { isPrelaunch: false },
+    });
+
+    const { prelaunchInterestService } = await import(
+      "../src/services/PrelaunchInterestService"
+    );
+    const res = await prelaunchInterestService.notifyOpened(shop.id);
+    console.log(
+      `Bildirim: gonderildi ${res.sent}, basarisiz ${res.failed}, ` +
+        `daha once bildirilmis ${res.alreadyNotified}`,
+    );
+    if (res.failed > 0) {
+      console.log("Basarisiz olanlar damgalanmadi; tekrar kosulabilir.");
     }
     return;
   }

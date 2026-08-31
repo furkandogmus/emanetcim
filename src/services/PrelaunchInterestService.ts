@@ -1,6 +1,7 @@
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 import { Prisma } from "@prisma/client";
+import { notificationService } from "@/services/NotificationService";
 
 /**
  * Talep testi noktalarina birakilan "acilinca haber ver" kayitlari.
@@ -164,6 +165,80 @@ class PrelaunchInterestService {
     return rows
       .filter((r) => r.wantCount > 0 || r.interestCount > 0)
       .slice(0, limit);
+  }
+
+  /**
+   * Nokta HIZMETE ACILDIGINDA "haber ver" diyenlere e-posta gonderir.
+   *
+   * NEDEN VAR (2026-08-31'de olculdu): `PrelaunchInterest` kayitlari yalnizca
+   * YAZILIYOR ve SAYILIYOR'du; onlardan bir sey gonderen tek satir kod yoktu.
+   * Oysa kisi e-postasini tam olarak su soz karsiliginda birakiyor: "acildigi
+   * gun ilk sen haberdar ol". Urunun en degerli sinyali, karsiligi olmayan bir
+   * vaat uzerine toplaniyordu.
+   *
+   * IDEMPOTENT: yalnizca `notifiedAt` bos olanlara gonderir ve gonderdigini
+   * damgalar. Ikinci kosu (elle tekrar, yeniden deneme, iki yonetici) kimseye
+   * ikinci kez e-posta gondermez -- bir pazarlama e-postasini iki kez
+   * gondermek, hic gondermemekten daha cok zarar verir.
+   *
+   * TEK TEK gonderilir ve HATA YUTULMAZ ama AKISI DURDURMAZ: bir adresin
+   * basarisiz olmasi geri kalan yuzlerce kisinin haber almamasi anlamina
+   * gelmemeli. Damga yalnizca gonderim basarili olduysa atilir, yani basarisiz
+   * kalanlar bir sonraki kosuda tekrar denenir.
+   */
+  async notifyOpened(shopId: string): Promise<{
+    sent: number;
+    failed: number;
+    alreadyNotified: number;
+  }> {
+    const shop = await prisma.shop.findUnique({
+      where: { id: shopId },
+      select: { name: true, isPrelaunch: true },
+    });
+    if (!shop) return { sent: 0, failed: 0, alreadyNotified: 0 };
+
+    /*
+      Nokta HALA prelaunch ise haber vermek YANLIS olurdu: kisi gelir ve
+      rezervasyon alamaz. Bu kontrol, yanlis sirayla cagrilan bir betigin
+      yuzlerce kisiye bos vaat gondermesini engelliyor.
+    */
+    if (shop.isPrelaunch) {
+      logger.warn({ shopId }, "prelaunch_notify_skipped_still_prelaunch");
+      return { sent: 0, failed: 0, alreadyNotified: 0 };
+    }
+
+    const [pending, alreadyNotified] = await Promise.all([
+      prisma.prelaunchInterest.findMany({
+        where: { shopId, notifiedAt: null },
+        select: { id: true, email: true, locale: true },
+      }),
+      prisma.prelaunchInterest.count({
+        where: { shopId, notifiedAt: { not: null } },
+      }),
+    ]);
+
+    let sent = 0;
+    let failed = 0;
+    for (const row of pending) {
+      try {
+        await notificationService.notifyPrelaunchOpened(
+          row.email,
+          shopId,
+          shop.name,
+          row.locale ?? "tr",
+        );
+        await prisma.prelaunchInterest.update({
+          where: { id: row.id },
+          data: { notifiedAt: new Date() },
+        });
+        sent++;
+      } catch (err) {
+        failed++;
+        logger.error({ err, shopId }, "prelaunch_notify_failed");
+      }
+    }
+
+    return { sent, failed, alreadyNotified };
   }
 
   /** Bir noktayi kac kisi istedi. Detay sayfasi sunucuda bunu okur. */

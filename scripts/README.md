@@ -488,7 +488,39 @@ npx tsx scripts/prelaunch-points.ts --apply              # 482 nokta, 252 şehir
 npx tsx scripts/prelaunch-points.ts --apply --city bodrum
 npx tsx scripts/prelaunch-points.ts --verify             # koordinat denetimi (ağ ister)
 npx tsx scripts/prelaunch-points.ts --apply --close istanbul-taksim
+npx tsx scripts/prelaunch-points.ts --apply --open istanbul-taksim
 ```
+
+### Nokta açıldığında — `--open`
+
+`--open` **tek işlemde** iki şey yapar: `isPrelaunch = false` (nokta artık
+rezervasyon alır) ve "açılınca haber ver" diyen herkese e-posta.
+
+İkisi ayrılmadı çünkü ayrılsa biri unutulur — ve unutulan taraf hep bildirim
+olur: nokta açılır, kimse haberdar edilmez, aylarca toplanan e-postalar hiçbir
+işe yaramaz. Toplanmalarının tek sebebi o vaatti.
+
+**Sıra kasıtlı:** önce `isPrelaunch = false`, sonra bildirim. Ters sırada,
+e-postayı alıp gelen kişi hâlâ rezervasyon alamayan bir noktayla karşılaşırdı.
+`notifyOpened` bu yüzden hâlâ prelaunch olan bir noktada **hiçbir şey
+göndermeyi reddediyor** — yanlış sırayla çağrılan bir betik yüzlerce kişiye boş
+vaat gönderemesin diye.
+
+**İdempotent.** Yalnızca `PrelaunchInterest.notifiedAt` boş olanlara gönderir ve
+gönderdiğini damgalar; başarısız olan damgalanmaz, bir sonraki koşuda tekrar
+denenir. Bir pazarlama e-postasını iki kez göndermek, hiç göndermemekten daha
+çok zarar verir.
+
+Kuru çalışma kaç kişinin haber beklediğini yazar:
+
+```
+[kuru] acilacak: Tour Eiffel — Consigne à Bagages
+  haber bekleyen: 2 kisi
+Yazmak icin: --apply
+```
+
+Ölçüldü (2026-08-31, yerel): ilk koşu 2 kişiye gönderdi ve damgaladı; ikinci
+koşu `gonderildi 0, daha once bildirilmis 2` dedi.
 
 Beklenen kuru çalışma çıktısı: `482 nokta, 252 sehir  [KURU CALISMA -- hicbir sey
 yazilmaz]` ve nokta başına bir `OLUSTUR`/`guncelle` satırı. **İdempotenttir** —
