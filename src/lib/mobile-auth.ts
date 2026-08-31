@@ -26,9 +26,32 @@ export type MobileJwtClaims = {
   tv?: number; // tokenVersion
 };
 
-export async function signAccessToken(userId: string, role: Role) {
-  const user = await prisma.user.findUnique({ where: { id: userId }, select: { tokenVersion: true } });
-  return new SignJWT({ role, type: "access", tv: user?.tokenVersion ?? 0 })
+/**
+ * `tokenVersion` cagirandan GECIRILEBILIR (2026-08-31).
+ *
+ * NEDEN: her giris yolu once kullaniciyi buluyor, sonra iki token uretiyordu ve
+ * imzalayicilarin HER BIRI ayni kullaniciyi bir kez daha sorguluyordu -- yani
+ * tek bir girise UC `user` sorgusu dusuyordu. `tokenVersion` cagiranin elinde
+ * zaten var; iki gereksiz gidis-donus.
+ *
+ * Parametre ISTEGE BAGLI: gecilmezse eski davranis (sorgula) surer, yani
+ * cagiran taraflari tek tek gecirmek zorunda birakmadan duzeliyor.
+ */
+async function resolveTokenVersion(
+  userId: string,
+  known?: number,
+): Promise<number> {
+  if (typeof known === "number") return known;
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { tokenVersion: true },
+  });
+  return user?.tokenVersion ?? 0;
+}
+
+export async function signAccessToken(userId: string, role: Role, tokenVersion?: number) {
+  const tv = await resolveTokenVersion(userId, tokenVersion);
+  return new SignJWT({ role, type: "access", tv })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuer(JWT_ISSUER)
     .setAudience(JWT_AUDIENCE.mobile)
@@ -38,9 +61,9 @@ export async function signAccessToken(userId: string, role: Role) {
     .sign(secret());
 }
 
-export async function signRefreshToken(userId: string, role: Role) {
-  const user = await prisma.user.findUnique({ where: { id: userId }, select: { tokenVersion: true } });
-  return new SignJWT({ role, type: "refresh", tv: user?.tokenVersion ?? 0 })
+export async function signRefreshToken(userId: string, role: Role, tokenVersion?: number) {
+  const tv = await resolveTokenVersion(userId, tokenVersion);
+  return new SignJWT({ role, type: "refresh", tv })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuer(JWT_ISSUER)
     .setAudience(JWT_AUDIENCE.mobile)
@@ -73,6 +96,34 @@ export async function verifyMobileToken(token: string) {
   return payload as unknown as MobileJwtClaims & { exp: number };
 }
 
+/**
+ * Yetkili mobil isteklerin TASIDIGI kimlik. Tam `User` satiri DEGIL.
+ *
+ * NEDEN DARALTILDI (2026-08-31'de olculdu): onceki hali `findUnique` cagrisini
+ * `select` OLMADAN yapiyordu, yani HER yetkili mobil istekte butun `User`
+ * satirini cekiyordu. Iki ayri bedeli vardi:
+ *
+ *   1. **`image` alani bir base64 data URL.** `/api/mobile/auth/me` yuklenen
+ *      avatari 2 MB'a kadar kabul edip `data:image/...;base64,...` olarak bu
+ *      sutuna yaziyor -- base64 sisirmesiyle ~2,7 MB. Yani avatar yuklemis bir
+ *      kullanicinin HER istegi, hicbir ucun okumadigi megabaytlarca metni
+ *      Postgres'ten cekiyordu. (`auth.config.ts` icinde JWT'den `data:`
+ *      goruntulerini ayiklayan bir yama zaten var; ayni sorunun cerez
+ *      tarafindaki yuzu.)
+ *   2. **`passwordHash` istek nesnesine giriyordu.** Hicbir uc onu yanita
+ *      koymuyor (`toMobileDto` alan listesi kapiyor) ama orada durmasi
+ *      gereksiz: bir gun biri `NextResponse.json(auth.user)` yazarsa bcrypt
+ *      hash'i disari cikar.
+ *
+ * Uclarin GERCEKTEN okudugu alanlar tarandi: `id`, `role`, `email`. Profil
+ * gövdesine ihtiyaci olan tek uc (`auth/me` GET) kendi sorgusunu yapiyor.
+ */
+export type MobileActor = {
+  id: string;
+  role: Role;
+  email: string | null;
+};
+
 export async function requireMobileUser(req: NextRequest) {
   const header = req.headers.get("authorization");
   if (!header?.startsWith("Bearer ")) {
@@ -82,11 +133,21 @@ export async function requireMobileUser(req: NextRequest) {
   try {
     const claims = await verifyMobileToken(token);
     if (claims.type !== "access") throw new Error("bad token type");
-    const user = await prisma.user.findUnique({ where: { id: claims.sub } });
+    const user = await prisma.user.findUnique({
+      where: { id: claims.sub },
+      select: {
+        id: true,
+        role: true,
+        email: true,
+        isBanned: true,
+        tokenVersion: true,
+      },
+    });
     if (!user) throw new Error("user not found");
     if (user.isBanned) throw new Error("user banned");
     if (user.tokenVersion !== (claims.tv ?? 0)) throw new Error("token version mismatch");
-    return { user } as const;
+    const actor: MobileActor = { id: user.id, role: user.role, email: user.email };
+    return { user: actor } as const;
   } catch {
     return { error: NextResponse.json({ error: "unauthorized" }, { status: 401 }) } as const;
   }

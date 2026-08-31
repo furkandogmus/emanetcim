@@ -146,8 +146,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "invalid_input" }, { status: 400 });
   }
 
-  const access = await signAccessToken(user.id, user.role);
-  const refresh = await signRefreshToken(user.id, user.role);
+  const access = await signAccessToken(user.id, user.role, user.tokenVersion);
+  const refresh = await signRefreshToken(user.id, user.role, user.tokenVersion);
 
   return NextResponse.json({
     accessToken: access,

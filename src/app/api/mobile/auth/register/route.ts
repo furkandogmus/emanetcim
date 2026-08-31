@@ -92,8 +92,8 @@ export async function POST(req: NextRequest) {
     if (!valid) {
       return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
     }
-    const access = await signAccessToken(existing.id, existing.role);
-    const refresh = await signRefreshToken(existing.id, existing.role);
+    const access = await signAccessToken(existing.id, existing.role, existing.tokenVersion);
+    const refresh = await signRefreshToken(existing.id, existing.role, existing.tokenVersion);
     return NextResponse.json({
       accessToken: access,
       refreshToken: refresh,
@@ -130,8 +130,8 @@ export async function POST(req: NextRequest) {
     metadata: { source: "mobile_register", role: "GUEST" },
   });
 
-  const access = await signAccessToken(user.id, user.role);
-  const refresh = await signRefreshToken(user.id, user.role);
+  const access = await signAccessToken(user.id, user.role, user.tokenVersion);
+  const refresh = await signRefreshToken(user.id, user.role, user.tokenVersion);
 
   return NextResponse.json({
     accessToken: access,

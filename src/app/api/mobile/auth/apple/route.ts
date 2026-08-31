@@ -129,8 +129,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "account_banned" }, { status: 403 });
     }
 
-    const access = await signAccessToken(user.id, user.role);
-    const refresh = await signRefreshToken(user.id, user.role);
+    const access = await signAccessToken(user.id, user.role, user.tokenVersion);
+    const refresh = await signRefreshToken(user.id, user.role, user.tokenVersion);
     return NextResponse.json({
       accessToken: access,
       refreshToken: refresh,

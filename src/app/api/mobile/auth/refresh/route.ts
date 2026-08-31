@@ -32,8 +32,8 @@ export async function POST(req: NextRequest) {
     if (user.isBanned) throw new Error("user banned");
     if (user.tokenVersion !== (claims.tv ?? 0)) throw new Error("token version mismatch");
 
-    const access = await signAccessToken(user.id, user.role);
-    const refresh = await signRefreshToken(user.id, user.role);
+    const access = await signAccessToken(user.id, user.role, user.tokenVersion);
+    const refresh = await signRefreshToken(user.id, user.role, user.tokenVersion);
     return NextResponse.json({ accessToken: access, refreshToken: refresh });
   } catch {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });

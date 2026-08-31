@@ -154,21 +154,51 @@ export async function POST(req: Request) {
         const emailId = data.email_id as string | undefined;
         const emailTo = (data.to as string[])?.[0] || (data.to as string) || undefined;
 
-        // Update NotificationLog status
-        if (emailId) {
+        /*
+          TEK SATIR GUNCELLENIR (2026-08-31'de duzeltildi).
+
+          Onceki hali `updateMany({ where: { recipient } })` idi: bir e-posta
+          icin gelen tek bir olay, O ADRESE gonderilmis BUTUN bildirimlerin
+          durumunu birden yaziyordu. Iki sonucu vardi:
+
+            - **Defter anlamsizlasiyordu.** Kirkinci e-postanin "delivered"
+              olayi onceki otuz dokuzu da DELIVERED yapiyor, sonraki bir
+              "bounced" hepsini BOUNCED yapiyordu. Yani hicbir satirin durumu
+              kendi e-postasini anlatmiyordu.
+            - **Yazma maliyeti gecmisle buyuyordu.** Cok e-posta almis bir
+              adres icin her webhook olayi yuzlerce satir guncelliyordu ve
+              webhook her e-posta icin geliyor.
+
+          Ayrica `emailTo` tanimsizken `recipient: ""` araniyordu -- sessiz bir
+          eslesmeme.
+
+          DOGRUSU saglayicinin `email_id`'sini satirda saklamak ve onunla
+          eslestirmek; `NotificationLog`ta oyle bir sutun YOK, eklemek migration
+          istiyor (docs/DEFECT_BACKLOG.md'de kayitli). O gelene kadar o adresin
+          EN YENI satiri guncelleniyor: Resend olaylari e-posta basina sirali
+          geldigi icin ilgili satir ezici cogunlukla odur, ve yanlis olsa bile
+          etkisi bir satirla sinirli kaliyor.
+        */
+        if (emailId && emailTo) {
           const newStatus = eventType === "email.sent" ? "SENT"
             : eventType === "email.delivered" ? "DELIVERED"
             : eventType === "email.bounced" ? "BOUNCED"
             : "COMPLAINED";
 
-          await prisma.notificationLog.updateMany({
-            where: { recipient: emailTo ?? "" },
-            data: { status: newStatus },
+          const latest = await prisma.notificationLog.findFirst({
+            where: { recipient: emailTo },
+            orderBy: { createdAt: "desc" },
+            select: { id: true },
           });
+          if (latest) {
+            await prisma.notificationLog.update({
+              where: { id: latest.id },
+              data: { status: newStatus },
+            });
+          }
 
-          // On bounce/complaint, mark future emails to this address as problematic
           if (eventType === "email.bounced" || eventType === "email.complained") {
-            console.warn(`[Resend Webhook] ${eventType} for ${emailTo}, email_id: ${emailId}`);
+            logger.warn({ eventType, emailId }, "resend_delivery_problem");
           }
         }
 

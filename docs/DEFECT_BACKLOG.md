@@ -10,6 +10,55 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-08-31 — performans: her yetkili mobil istek megabaytlarca base64 okuyordu
+
+### Düzeltildi
+
+**1. `requireMobileUser` bütün `User` satırını çekiyordu.** `findUnique` `select`
+olmadan çağrılıyordu. `User.image` bir **base64 data URL**: `/api/mobile/auth/me`
+yüklenen avatarı 2 MB'a kadar kabul edip `data:image/...;base64,...` olarak o
+sütuna yazıyor — base64 şişmesiyle ~2,7 MB. Yani avatar yüklemiş bir kullanıcının
+**her** yetkili isteği, hiçbir ucun okumadığı megabaytlarca metni Postgres'ten
+çekiyordu. `passwordHash` de aynı yoldan istek nesnesine giriyordu.
+
+Uçların gerçekten okuduğu alanlar tarandı: `id`, `role`, `email`. Profil gövdesine
+ihtiyacı olan tek uç (`auth/me` GET) artık kendi dar sorgusunu yapıyor.
+
+> `src/auth.config.ts` içinde JWT'den `data:` görüntülerini ayıklayan bir yama
+> zaten vardı — aynı sorunun çerez tarafındaki yüzü. Kökü (avatarın satırda
+> base64 durması) hâlâ orada; nesne deposu kararı ayrı bir iş.
+
+**2. Bir girişe üç `user` sorgusu düşüyordu.** Her giriş yolu önce kullanıcıyı
+buluyor, sonra iki token üretiyordu ve `signAccessToken` / `signRefreshToken`'ın
+**her biri** `tokenVersion` için aynı kullanıcıyı bir kez daha sorguluyordu.
+`tokenVersion` artık isteğe bağlı parametre; beş çağıran da geçiriyor.
+
+**3. Resend webhook'u bir olayda yüzlerce satır yazıyordu.**
+`notificationLog.updateMany({ where: { recipient } })` — tek bir e-postanın
+"delivered" olayı, o adrese gönderilmiş **bütün** bildirimlerin durumunu birden
+yazıyordu. İki sonucu: defter anlamsızlaşıyordu (kırkıncı e-postanın olayı
+öncekilerin hepsini eziyordu) ve yazma maliyeti o adresin geçmişiyle büyüyordu.
+Şimdilik yalnızca en yeni satır güncelleniyor (aşağıdaki migration bunu
+kesinleştirecek).
+
+**4. `/api/mobile/auth/me` PUT telefonu normalize etmeden yazıyordu.** Giriş ve
+OTP yolları numarayı on haneye indirip **üç** biçimi birden arıyor (`5xx`,
+`+905xx`, `05xx`) ve bunu **sıralamasız** `findFirst` ile yapıyor. Ham değer
+yazılabildiği sürece aynı numaranın iki biçimi iki **ayrı** satırda durabilir
+(`@unique` farklı dizeleri engellemez) ve girişin hangi satırı bulduğu belirsiz
+olur — gerçek sahibi kendi numarası ve kendi şifresiyle giremeyebilir. Artık
+`normalizeTrGsm10` biçiminde saklanıyor; çakışma `500` değil `409 phone_taken`.
+
+### Bekliyor — Postgres gerektiriyor (`npm run db:verify` canlı DB ister)
+
+Bu turda Docker kapalıydı; doğrulanmamış migration gönderilmedi.
+
+| # | Bulgu | Ölçüm |
+|---|---|---|
+| 1 | `Booking.guestEmail` **indekssiz** | `POST /api/bookings/lookup` her çağrıda `guestEmail = ? OR guest.email = ?` ile tam tablo taraması yapıyor. Uç kimlik doğrulamasız. `@@index([guestEmail])`. |
+| 2 | `id: { startsWith: code }` önek taraması | `src/app/api/bookings/lookup/route.ts:80` ve `src/actions/partner.ts:124`. İkincisinde aktör **ADMIN** ise `scope = {}`, yani hiç filtre kalmıyor → her yönetici kod aramasında `Booking` tam taraması. Postgres varsayılan derlemde `LIKE 'önek%'` için B-tree indeksi kullanamaz; `text_pattern_ops` operatör sınıfı gerekiyor. |
+| 3 | `NotificationLog`ta sağlayıcı `email_id` sütunu yok | Webhook doğru satırı eşleştiremiyor (yukarıda 3 numara). `providerMessageId` + tekil indeks. |
+
 ## 2026-08-31 — kimlik doğrulama denetimi: on iki bulgu, biri tam yetki atlaması
 
 Kapsam: `src/auth.ts`, `src/auth.config.ts`, `src/proxy.ts`, `src/lib/*-auth*`,

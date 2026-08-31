@@ -184,6 +184,38 @@ describe("kimlik dogrulama uclarinin kapilari", () => {
     ).toEqual([]);
   });
 
+  it("requireMobileUser tum User satirini CEKMEZ", () => {
+    /*
+      Onceki hali `findUnique`i `select` OLMADAN cagiriyordu: her yetkili mobil
+      istek butun `User` satirini cekiyordu. `image` sutunu bir base64 data URL
+      (avatar 2 MB'a kadar, base64 ile ~2,7 MB), yani avatar yuklemis bir
+      kullanicinin HER istegi hicbir ucun okumadigi megabaytlarca metni
+      Postgres'ten aliyordu. `passwordHash` de istek nesnesine giriyordu.
+    */
+    const src = read("src/lib/mobile-auth.ts");
+    const call = src.match(/requireMobileUser[\s\S]*?findUnique\(\{[\s\S]*?\}\)/);
+    expect(call, "requireMobileUser icinde findUnique bulunamadi").not.toBeNull();
+    expect(
+      call![0],
+      "requireMobileUser `select` kullanmali: `select`siz sorgu `image` " +
+        "(base64 avatar, MB'lar) ve `passwordHash` dahil butun satiri ceker.",
+    ).toMatch(/select:\s*\{/);
+    expect(call![0]).not.toMatch(/passwordHash/);
+  });
+
+  it("profil guncelleme telefonu NORMALIZE ederek yazar", () => {
+    /*
+      Giris ve OTP yollari numarayi on haneye indirip uc bicimi birden ariyor
+      (`5xx`, `+905xx`, `05xx`) ve bunu SIRALAMASIZ `findFirst` ile yapiyor.
+      Ham deger yazilabildigi surece ayni numaranin iki bicimi iki AYRI satirda
+      durabilir (`@unique` farkli dizeleri engellemez) ve girisin hangi satiri
+      buldugu belirsiz olur.
+    */
+    const src = read("src/app/api/mobile/auth/me/route.ts");
+    expect(src).toMatch(/normalizeTrGsm10/);
+    expect(src).toMatch(/invalid_phone/);
+  });
+
   it("Auth.js ayiklama kipi uretimde kapali", () => {
     /*
       `debug: true` SABITTI. Auth.js ayiklama kipinde saglayici yanitlarini,
