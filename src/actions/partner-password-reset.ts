@@ -1,10 +1,11 @@
 "use server";
 
+import { getClientIpOrNull } from "@/lib/client-ip";
+
 import prisma from "@/lib/db";
 import { normalizeTrGsm10 } from "@/lib/netgsm";
 import { generatePasswordResetTokenByPhone } from "@/lib/password-reset-token";
 import { writeAuditLog } from "@/lib/audit-log";
-import { headers } from "next/headers";
 import { requireAdmin } from "@/lib/action-auth";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { createHash } from "crypto";
@@ -21,14 +22,7 @@ function tokenFingerprint(token: string): string {
   return createHash("sha256").update(token).digest("hex").slice(0, 12);
 }
 
-async function clientIp(): Promise<string | null> {
-  const h = await headers();
-  return (
-    h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    h.get("x-real-ip") ||
-    null
-  );
-}
+
 
 /**
  * Admin: partner telefonu ile şifre sıfırlama linki oluşturur.
@@ -88,7 +82,7 @@ export async function adminInitiatePartnerPasswordResetAction(
       tokenFingerprint: tokenFingerprint(row.token),
       expiresAt: row.expires.toISOString(),
     },
-    ip: await clientIp(),
+    ip: await getClientIpOrNull(),
   });
 
   /*

@@ -1,11 +1,12 @@
 "use server";
 
+import { getClientIp } from "@/lib/client-ip";
+
 import { auth } from "@/auth";
 import prisma from "@/lib/db";
 import { randomBytes } from "crypto";
 import { requireUser } from "@/lib/action-auth";
 import { rateLimit } from "@/lib/rate-limit";
-import { headers } from "next/headers";
 
 const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // belirsiz karakterler çıkarıldı
 
@@ -79,11 +80,7 @@ export async function validateReferralCodeAction(
     `"use server"` ihraci Next.js'te canli bir HTTP ucudur: form uzerinden
     cagriliyor olmasi, yalnizca form uzerinden cagrilacagi anlamina gelmez.
   */
-  const h = await headers();
-  const ip =
-    h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    h.get("x-real-ip") ||
-    "unknown";
+  const ip = await getClientIp();
   if (!(await rateLimit(`referral_validate:ip:${ip}`, 30, 10 * 60_000))) {
     return { valid: false, discountPct: 0 };
   }

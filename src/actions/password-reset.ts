@@ -1,6 +1,7 @@
 "use server";
 
-import { headers } from "next/headers";
+import { getClientIpOrNull } from "@/lib/client-ip";
+
 import { z } from "zod";
 import prisma from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
@@ -14,14 +15,7 @@ import {
   type PasswordResetErrorCode,
 } from "@/services/auth/password-reset";
 
-async function clientIp(): Promise<string> {
-  const h = await headers();
-  return (
-    h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    h.get("x-real-ip") ||
-    "unknown"
-  );
-}
+
 
 const emailSchema = z.string().trim().email().max(320);
 
@@ -45,7 +39,7 @@ const RESET_CODE_TO_ERROR: Record<PasswordResetErrorCode, "invalid" | "invalid_t
  * Rate limit: IP başına 10 / 15 dk, e-posta başına 5 / saat.
  */
 export async function requestPasswordResetAction(rawEmail: string) {
-  const ip = await clientIp();
+  const ip = await getClientIpOrNull();
   if (!(await rateLimit(`forgot-password:ip:${ip}`, 10, 15 * 60 * 1000))) {
     return { ok: true as const };
   }
@@ -86,7 +80,7 @@ export async function requestPasswordResetAction(rawEmail: string) {
  * kalmasıydı. Gerekçesi servis dosyasının başında.
  */
 export async function resetPasswordWithTokenAction(input: unknown) {
-  const ip = await clientIp();
+  const ip = await getClientIpOrNull();
   if (!(await rateLimit(`reset-password:ip:${ip}`, 30, 60 * 60 * 1000))) {
     return { ok: false as const, error: "rate_limited" as const };
   }

@@ -1,12 +1,13 @@
 "use server";
 
+import { getClientIpOrNull } from "@/lib/client-ip";
+
 import prisma from "@/lib/db";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { invalidatePricingRulesCache } from "@/lib/platform-settings";
 import { sealService } from "@/services/SealService";
-import { headers } from "next/headers";
 import { writeAuditLog } from "@/lib/audit-log";
 import { assertAdmin } from "@/lib/action-auth";
 
@@ -80,7 +81,6 @@ export async function updatePlatformSettingsAction(data: unknown) {
     },
   });
   invalidatePricingRulesCache();
-  const h = await headers();
   writeAuditLog({
     actorUserId: actor.id,
     actorRole: actor.role,
@@ -88,9 +88,7 @@ export async function updatePlatformSettingsAction(data: unknown) {
     entityType: "PlatformSettings",
     entityId: "default",
     ip:
-      h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      h.get("x-real-ip") ||
-      null,
+      await getClientIpOrNull(),
   });
   revalidatePathAllLocales("/admin/platform-settings");
   revalidatePathAllLocales("/admin");

@@ -1,9 +1,10 @@
 "use server";
 
+import { getClientIp } from "@/lib/client-ip";
+
 import prisma from "@/lib/db";
 import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
-import { headers } from "next/headers";
 import { sendSupportReplyEmail } from "@/lib/mail";
 import { replySubjectForMailto, normalizeInboundSubjectLine } from "@/lib/reply-subject";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
@@ -25,8 +26,7 @@ export async function sendContactMessageAction(
   _prev: ContactFormState,
   formData: FormData
 ): Promise<ContactFormState> {
-  const h = await headers();
-  const ip = h.get("x-forwarded-for") ?? h.get("x-real-ip") ?? "unknown";
+  const ip = await getClientIp();
   const allowed = await rateLimit(`contact:${ip}`, 3, 60_000);
   if (!allowed) {
     return { status: "error", error: "too_many_requests" };

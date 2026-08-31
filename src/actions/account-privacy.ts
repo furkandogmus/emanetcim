@@ -1,9 +1,10 @@
 "use server";
 
+import { getClientIpOrNull } from "@/lib/client-ip";
+
 import prisma from "@/lib/db";
 import { BookingStatus, Role } from "@prisma/client";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
-import { headers } from "next/headers";
 import { writeAuditLog } from "@/lib/audit-log";
 import { requireUser } from "@/lib/action-auth";
 
@@ -40,12 +41,7 @@ export async function anonymizeGuestAccountAction(): Promise<
   if (activeCount > 0) {
     return { success: false, error: "Errors.accountDeleteActiveBookings" };
   }
-
-  const h = await headers();
-  const ip =
-    h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    h.get("x-real-ip") ||
-    null;
+  const ip = await getClientIpOrNull();
 
   const anonEmail = `gdpr_${userId.replace(/-/g, "").slice(0, 20)}@invalid.local`;
 

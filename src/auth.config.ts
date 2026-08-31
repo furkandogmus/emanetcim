@@ -5,6 +5,7 @@ import Google from "next-auth/providers/google";
 import type { Role, User as PrismaUser } from "@prisma/client";
 import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
+import { clientIpFromHeaders } from "@/lib/client-ip";
 import { isAppleOAuthConfigured } from "@/lib/auth-providers";
 
 /**
@@ -78,11 +79,9 @@ export const authConfig: NextAuthConfig = {
           NAT'i arkasindan gelen gercek kullanicilari dusurmemeli, ama binlerce
           hesabi tarayan bir istemciyi durdurmali.
         */
-        const forwarded = request?.headers?.get?.("x-forwarded-for");
-        const ip =
-          forwarded?.split(",")[0]?.trim() ||
-          request?.headers?.get?.("x-real-ip") ||
-          "unknown";
+        const ip = request?.headers
+          ? clientIpFromHeaders(request.headers)
+          : "unknown";
         if (!(await rateLimit(`login:ip:${ip}`, 30, 15 * 60 * 1000))) {
           throw new TooManyAttemptsSignin();
         }

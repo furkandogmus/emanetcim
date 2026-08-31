@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
+import { clientIpFromRequest } from "@/lib/client-ip";
 import { BookingStatus, Role } from "@prisma/client";
 import { writeAuditLog } from "@/lib/audit-log";
 import { requireMobileUser } from "@/lib/mobile-auth";
@@ -32,10 +33,7 @@ async function handleDeleteRequest(req: NextRequest) {
     );
   }
 
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    req.headers.get("x-real-ip") ||
-    null;
+  const ip = clientIpFromRequest(req);
 
   const anonEmail = `gdpr_${user.id.replace(/-/g, "").slice(0, 20)}@invalid.local`;
 

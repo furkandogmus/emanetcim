@@ -1,13 +1,16 @@
 import crypto from "node:crypto";
 import type { NextRequest } from "next/server";
 import { rateLimit } from "@/lib/rate-limit";
+import { clientIpFromRequest } from "@/lib/client-ip";
 
+/**
+ * Govde `src/lib/client-ip.ts`te. Buradaki hali `X-Forwarded-For`in ILK
+ * girdisini okuyordu -- yani istemcinin gonderdigi degeri -- ve nginx o basliga
+ * EKLEDIGI icin (`$proxy_add_x_forwarded_for`) her IP hiz siniri tek bir
+ * baslikla atlanabiliyordu. Guven modeli o dosyada yazili.
+ */
 export function clientIp(req: NextRequest): string {
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    req.headers.get("x-real-ip") ||
-    "unknown"
-  );
+  return clientIpFromRequest(req);
 }
 
 /** true = limit aşıldı, 429 dönmelisiniz */

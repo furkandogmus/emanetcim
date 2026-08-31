@@ -6,6 +6,7 @@ import logger from "@/lib/logger";
 import { sendMobileOtp } from "@/lib/mail";
 import { isNetgsmConfigured, normalizeTrGsm10, sendNetgsmRestSms } from "@/lib/netgsm";
 import { rateLimit } from "@/lib/rate-limit";
+import { clientIpFromHeaders } from "@/lib/client-ip";
 
 const schema = z.union([
   z.object({ email: z.string().email() }),
@@ -28,7 +29,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "invalid_format" }, { status: 400 });
   }
 
-  const ip = req.headers.get("x-forwarded-for") ?? "unknown";
+  const ip = clientIpFromHeaders(req.headers);
   if (!(await rateLimit(`mobile_otp:${normalizedIdentity}`, 3, 2 * 60_000))) {
     return NextResponse.json({ error: "too_many_otp_requests" }, { status: 429 });
   }

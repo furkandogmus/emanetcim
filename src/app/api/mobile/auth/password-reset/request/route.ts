@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
+import { clientIpFromRequest } from "@/lib/client-ip";
 import { sendPasswordResetEmail } from "@/lib/mail";
 import { generatePasswordResetToken } from "@/lib/password-reset-token";
 
@@ -10,14 +11,6 @@ const schema = z.object({
   email: z.string().trim().email().max(320),
   locale: z.enum(["tr", "en"]).optional(),
 });
-
-function clientIp(req: NextRequest): string {
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    req.headers.get("x-real-ip") ||
-    "unknown"
-  );
-}
 
 /**
  * Mobile parity for the web requestPasswordResetAction. Always returns
@@ -27,7 +20,7 @@ function clientIp(req: NextRequest): string {
  * /{locale}/auth/new-password?token=...
  */
 export async function POST(req: NextRequest) {
-  const ip = clientIp(req);
+  const ip = clientIpFromRequest(req);
   if (!(await rateLimit(`forgot-password:ip:${ip}`, 10, 15 * 60 * 1000))) {
     return NextResponse.json({ ok: true });
   }

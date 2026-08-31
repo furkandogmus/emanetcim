@@ -159,6 +159,71 @@ kutuları. Esnaf ekranları projenin kendi E2E yardımcılarıyla (`loginAsDemoP
 Ders: bir düzen sondası, **kırpan atayı ve gerçekten çizilen elemanı** hesaba katmadan
 güven vermez. Sıfır bulgu, sondanın yanlış yere baktığının da cevabıdır.
 
+## 2026-08-31 — bütün IP hız sınırları tek bir başlıkla atlanabiliyordu
+
+**Bu oturumun en ağır bulgusu.** On beş dosya istemci IP'sini kendisi çıkarıyordu
+ve **hepsi** aynı şekilde yanlış yapıyordu:
+
+```ts
+h.get("x-forwarded-for")?.split(",")[0]?.trim()
+```
+
+`X-Forwarded-For`'ın **ilk** girdisi, istemcinin **gönderdiği** değerdir.
+`nginx/conf.d/default.conf`:
+
+```nginx
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;   # EKLER
+proxy_set_header X-Real-IP       $remote_addr;                 # EZER
+```
+
+`$proxy_add_x_forwarded_for` **ekler**, ezmez: istemci `X-Forwarded-For: 9.9.9.9`
+gönderdiğinde uygulamaya `9.9.9.9, <gerçek-ip>` ulaşır ve `[0]` saldırganın
+yazdığı değeri döndürür.
+
+**Sonucu:** uygulamadaki **her** IP hız sınırı, isteğe rastgele bir başlık
+eklenerek atlanabiliyordu:
+
+| Uç | Ne koruyordu |
+|---|---|
+| `login:ip:` | şifre serpmesi (password spraying) |
+| `booking_lookup:ip:` | rezervasyon kodu kaba kuvveti — başarısı misafirin QR token'ını **ve** iptal yetkisini veriyor |
+| `register`, `mobile_otp_ip`, `mobile_refresh`, `password_reset_confirm`, `verify_email` | hesap açma / kimlik doğrulama denemeleri |
+| `contact`, `analytics_event`, `admin_setup`, `referral_validate` | spam ve kaynak tüketimi |
+
+Yani bu oturumda eklediğim IP kovalarının **tamamı dekoratifti**. Depo açık
+kaynak: saldırganın bunu bulması için iki dosya okuması yetiyor —
+`internal-api-guard.ts`'te `.split(",")[0]`, `nginx/conf.d/default.conf`'ta
+`$proxy_add_x_forwarded_for`.
+
+### Güven modeli
+
+`X-Real-IP` güvenilir çünkü `proxy_set_header` **ezer**: istemcinin gönderdiği
+değer uygulamaya ulaşmaz. Ve `$remote_addr` doğru — aynı dosyada
+`real_ip_header CF-Connecting-IP` + Cloudflare aralıkları için `set_real_ip_from`
+var, yani bağlantı bir CF adresinden geldiğinde nginx `$remote_addr`'i gerçek
+istemci adresiyle değiştiriyor.
+
+**`CF-Connecting-IP` doğrudan okunmaz**: nginx onu `proxy_set_header` ile ezmiyor,
+yani istemciden geldiği gibi geçiyor ve uydurulabilir.
+
+XFF'e yedek olarak bakılıyor ama **son** girdisinden — `$proxy_add_x_forwarded_for`
+gerçek adresi sona ekler. Yine de `X-Real-IP` tercih ediliyor: son-girdi kuralı
+vekil zincirinin biçimine bağlı ve zincir değişince sessizce yanlışlanır.
+
+Uygulama konteynerinin host portu yok (`docker-compose.yml`; dışarı açık olan tek
+şey nginx'in 80/443'ü, Postgres `127.0.0.1`'e bağlı). Node sürecine doğrudan
+ulaşılabilseydi hiçbir başlık güvenilir olmazdı.
+
+### Düzeltme
+
+Tek uygulama: `src/lib/client-ip.ts`. On beş kopya (iki "merkezi" yardımcı —
+biri kendini "merkezi ve güvenli IP tespit metodu" diye tanımlıyordu, ikisi de
+değildi — artı on üç satır içi kopya) buna bağlandı.
+
+Mandal: `src/__tests__/client-ip-trust.test.ts` — yardımcı dışında hiçbir dosya
+IP başlığını okuyamaz, artı davranış testleri (saldırgan XFF'i yok sayılıyor, son
+girdi alınıyor, `CF-Connecting-IP` yok sayılıyor).
+
 ## 2026-08-31 — şifre sıfırlama token'ı denetim kaydına yazılıyordu (ve admin panelinde görünüyordu)
 
 `adminInitiatePartnerPasswordResetAction` şu satırı yazıyordu:

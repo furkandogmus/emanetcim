@@ -1,6 +1,7 @@
 "use server";
 
-import { headers } from "next/headers";
+import { getClientIpOrNull } from "@/lib/client-ip";
+
 import { z } from "zod";
 import prisma from "@/lib/db";
 import { Prisma } from "@prisma/client";
@@ -48,7 +49,6 @@ export async function updateFeatureFlagAction(data: unknown) {
   });
 
   invalidateFeatureFlagsCache();
-  const h = await headers();
   writeAuditLog({
     actorUserId: actor.id,
     actorRole: actor.role,
@@ -61,9 +61,7 @@ export async function updateFeatureFlagAction(data: unknown) {
       allowlistSize: d.allowedUserIds.length,
     },
     ip:
-      h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      h.get("x-real-ip") ||
-      null,
+      await getClientIpOrNull(),
   });
 
   revalidatePathAllLocales("/admin/feature-flags");

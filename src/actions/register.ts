@@ -1,6 +1,7 @@
 "use server";
 
-import { headers } from "next/headers";
+import { getClientIp } from "@/lib/client-ip";
+
 import prisma from "@/lib/db";
 import {
   hashPassword,
@@ -60,12 +61,7 @@ export async function registerGuestAction(data: unknown) {
   if (!parsed.success) {
     return { success: false as const, error: "Errors.invalidData" };
   }
-
-  const h = await headers();
-  const ip =
-    h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    h.get("x-real-ip") ||
-    "unknown";
+  const ip = await getClientIp();
   if (!(await rateLimit(`register_guest:${ip}`, 8, 60 * 60 * 1000))) {
     return {
       success: false as const,
@@ -139,12 +135,7 @@ export async function registerPartnerApplicationAction(data: unknown) {
   if (!parsed.success) {
     return { success: false as const, error: "Errors.invalidData" };
   }
-
-  const h = await headers();
-  const ip =
-    h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    h.get("x-real-ip") ||
-    "unknown";
+  const ip = await getClientIp();
   if (!(await rateLimit(`register_partner:${ip}`, 5, 60 * 60 * 1000))) {
     return {
       success: false as const,

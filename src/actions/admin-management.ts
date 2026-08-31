@@ -1,5 +1,7 @@
 "use server";
 
+import { getClientIpOrNull } from "@/lib/client-ip";
+
 import prisma from "@/lib/db";
 import { shopService } from "@/services/ShopService";
 import { BookingStatus, Prisma, Role } from "@prisma/client";
@@ -10,7 +12,6 @@ import { bookingService } from "@/services/BookingService";
 import { generateVerificationToken } from "@/lib/tokens";
 import { sendVerificationEmail } from "@/lib/mail";
 import { getLocale } from "next-intl/server";
-import { headers } from "next/headers";
 import { writeAuditLog } from "@/lib/audit-log";
 import {
   isPrismaForeignKeyViolation,
@@ -34,14 +35,7 @@ async function ensureAdmin() {
   return { user: actor };
 }
 
-async function clientIp(): Promise<string | null> {
-  const h = await headers();
-  return (
-    h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    h.get("x-real-ip") ||
-    null
-  );
-}
+
 
 /**
  * Kullanıcıyı banla veya banını kaldır
@@ -73,7 +67,7 @@ export async function toggleUserBanAction(userId: string, isBanned: boolean) {
     entityType: "User",
     entityId: userId,
     metadata: { isBanned },
-    ip: await clientIp(),
+    ip: await getClientIpOrNull(),
   });
 
   revalidatePathAllLocales("/admin/users");
@@ -177,7 +171,7 @@ export async function submitAdminRoleChangeAction(
   if (!target) return { ok: false, error: "not_found" };
   if (target.role === newRole) return { ok: false, error: "same_role" };
 
-  const ip = await clientIp();
+  const ip = await getClientIpOrNull();
 
   if (!involvesAdminRoleTransition(target.role, newRole)) {
     await applyUserRoleChange({
@@ -281,7 +275,7 @@ export async function approveAdminRoleChangeAction(
     return { ok: false, error: "cannot_self_approve" };
   }
 
-  const ip = await clientIp();
+  const ip = await getClientIpOrNull();
 
   const txResult = await prisma.$transaction(async (tx) => {
     const reqRow = await tx.adminRoleChangeRequest.findUnique({
@@ -378,7 +372,7 @@ export async function cancelAdminRoleChangeAction(
       requestedRole: row.requestedRole,
       originallyRequestedBy: row.requestedByUserId,
     },
-    ip: await clientIp(),
+    ip: await getClientIpOrNull(),
   });
 
   revalidatePathAllLocales("/admin/role-approvals");
@@ -479,7 +473,7 @@ export async function deleteUserAction(
     action: "user.delete",
     entityType: "User",
     entityId: userId,
-    ip: await clientIp(),
+    ip: await getClientIpOrNull(),
   });
 
   revalidatePathAllLocales("/admin/users");
@@ -533,7 +527,7 @@ export async function approveShopAction(shopId: string) {
     action: "shop.approve_application",
     entityType: "Shop",
     entityId: shopId,
-    ip: await clientIp(),
+    ip: await getClientIpOrNull(),
   });
 
   revalidatePathAllLocales("/admin/applications");
