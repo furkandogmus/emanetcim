@@ -1394,3 +1394,51 @@ duyulmuyordu**. Kaydırıcıyı çekiyorsun, hiçbir şey olmuyor.
 Düzeltme: `<span>` → `<label htmlFor>`, yüzde kaydırıcısına `aria-valuetext`
 (yoksa "%50" değil çıplak "50" okunur), sonuç bloğuna
 `aria-live="polite" aria-atomic="true"`.
+
+### 52. E-posta: karanlık modda kaybolan sütun — DÜZELTİLDİ
+
+E-postalara hiç bakmamıştım. Gerçek bir onay e-postası çizip her öğenin
+arka plan / metin rengi çiftini çıkardım:
+
+| öğe | arka plan | metin rengi |
+|---|---|---|
+| `h2` | — | `#ea580c` |
+| `td` etiket | — | `#6b7280` |
+| **`tr` zebra** | **`#f9fafb`** | **YOK** |
+| `td` değer | — | YOK |
+| `a` buton | `#ea580c` | `white` |
+| kabuk `div` | YOK | YOK |
+
+Zebra satırı **açık bir arka plan basıyor ama metin rengini söylemiyor**.
+E-posta istemcilerinin karanlık modu tam burada patlar: istemci yazarın
+verdiği zemini korur, söylenmemiş metni aydınlatır → **beyaz üzerine beyaz**.
+Kaybolan sütun da değer sütunu: referans no, tarih, tutar.
+
+Düzeltme özel bir numara değil — her arka planın bir metin rengi olsun.
+Kabuğa `background:#ffffff; color:#111827`, değer hücresine açık renk.
+
+Işıklı modda ne değiştiğini ölçtüm (aynı e-posta, önce/sonra, 375px):
+
+```
+boyut            359x1184  ->  359x1184   (aynı)
+farklı piksel    7238 / 425056  (%1.70)
+en büyük fark    39 (tek kanal)
+değişen bölge    (21,89) - (326,265)  — tek bölge
+```
+
+Yani hiçbir şey yer değiştirmiyor; gövde metni saf siyahtan gray-900'e
+geçiyor. Layout sabit.
+
+**Ölçüldü ama DÜZELTİLMEDİ — #17'nin uzantısı, senin kararın:**
+
+| kontrast | sonuç | eşik |
+|---|---|---|
+| etiket grisi / beyaz | 4.83:1 ✓ | 4.5 |
+| etiket grisi / zebra | 4.63:1 ✓ | 4.5 |
+| başlık turuncu / beyaz (büyük) | 3.56:1 ✓ | 3.0 |
+| **vurgulu değer (TUTAR) / zebra** | **3.41:1 ✗** | 4.5 |
+| **buton beyaz / turuncu** | **3.56:1 ✗** | 4.5 |
+
+Son iki satır marka turuncusunun ta kendisi. #17'de sitede sorduğum soru
+e-postalarda da aynen geçerli: turuncuyu koyultmadan bu ikisi geçmez.
+Tek başıma marka rengine dokunmuyorum.

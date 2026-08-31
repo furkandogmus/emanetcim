@@ -33,6 +33,19 @@ export const EMAIL_MUTED_COLOR = "#6b7280";
 /** Tablo satirlarinin sirali zebra zemini. */
 export const EMAIL_ZEBRA_BG = "#f9fafb";
 
+/*
+  E-posta istemcilerinin KARANLIK MODU icin. Bir oge acik bir arka plan
+  tasiyip metin rengini SOYLEMEZSE, istemci zemini korur ama metni aydinlatir
+  -- sonuc beyaz uzerine beyaz. Zebra satirlarinda tam bu vardi: satirda
+  `background:#f9fafb`, deger hucresinde hic renk yok. Kaybolan sutun da
+  referans no / tarih / tutar sutunuydu.
+
+  Cozum ozel bir numara degil: her arka planin bir metin rengi olsun. Isikli
+  modda hicbir sey degismez (asagidaki degerler zaten tarayicinin varsayilani).
+*/
+export const EMAIL_BG_COLOR = "#ffffff";
+export const EMAIL_TEXT_COLOR = "#111827";
+
 /**
  * E-postanin TONU: baslik ve ana eylem dugmesi ayni renkten beslenir.
  *
@@ -104,7 +117,7 @@ function renderRows(rows: EmailRow[], accent: string): string {
       (r, i) =>
         `<tr${i % 2 === 1 ? ` style="background:${EMAIL_ZEBRA_BG}"` : ""}>` +
         `<td style="padding:8px;color:${EMAIL_MUTED_COLOR}">${r.label}</td>` +
-        `<td style="padding:8px;font-weight:bold${r.emphasized ? `;color:${accent}` : ""}">` +
+        `<td style="padding:8px;font-weight:bold;color:${r.emphasized ? accent : EMAIL_TEXT_COLOR}">` +
         `${r.value}</td>` +
         `</tr>`,
     )
@@ -186,7 +199,8 @@ export function renderEmailHtml(content: EmailContent): string {
   ];
 
   return (
-    `<div${dir}${lang} style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">` +
+    `<div${dir}${lang} style="font-family:sans-serif;max-width:600px;margin:0 auto;` +
+    `padding:20px;background:${EMAIL_BG_COLOR};color:${EMAIL_TEXT_COLOR}">` +
     parts.filter(Boolean).join("") +
     `</div>`
   );
