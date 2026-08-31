@@ -43,5 +43,95 @@
     "author": "Yabancı",
     "license": "CC BY-SA 3.0",
     "cityKey": "ankara"
+  },
+  "antalya-hadrian": {
+    "file": "/images/blog/antalya-hadrian.webp",
+    "alt": {
+      "tr": "Hadrian Kapısı'nın üç kemerli mermer cephesi",
+      "en": "The three marble arches of Hadrian's Gate"
+    },
+    "caption": {
+      "tr": "Hadrian Kapısı, Kaleiçi girişi",
+      "en": "Hadrian's Gate at the entrance to Kaleici"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Hadrian%27s_Gate,_Antalya_01.jpg",
+    "author": "Bernard Gagnon",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "antalya"
+  },
+  "antalya-kaleici": {
+    "file": "/images/blog/antalya-kaleici.webp",
+    "alt": {
+      "tr": "Kaleiçi'nin eski limanı ve üzerindeki tarihi evler",
+      "en": "Kaleici's old harbour with the historic houses above it"
+    },
+    "caption": {
+      "tr": "Kaleiçi ve Yat Limanı",
+      "en": "Kaleici and the old harbour"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Antalya_kalei%C3%A7i_2.jpg",
+    "author": "REHBER0770",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "antalya"
+  },
+  "antalya-konyaalti": {
+    "file": "/images/blog/antalya-konyaalti.webp",
+    "alt": {
+      "tr": "Falezlerden Konyaaltı Plajı ve arkasındaki Beydağları manzarası",
+      "en": "Konyaalti Beach seen from the cliffs, with the Bey Mountains behind"
+    },
+    "caption": {
+      "tr": "Falezlerden Konyaaltı Plajı",
+      "en": "Konyaalti Beach from the cliffs"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Falezlerden_Antalya_Konyaalt%C4%B1_Plaj%C4%B1na_do%C4%9Fru_bir_g%C3%B6r%C3%BCn%C3%BCm.jpg",
+    "author": "Esginmurat",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "antalya"
+  },
+  "izmir-kemeralti": {
+    "file": "/images/blog/izmir-kemeralti.webp",
+    "alt": {
+      "tr": "Kemeraltı Çarşısı'nın dar, tenteli ve kalabalık sokağı",
+      "en": "A narrow, awning-covered and crowded lane in the Kemeralti bazaar"
+    },
+    "caption": {
+      "tr": "Kemeraltı Çarşısı",
+      "en": "Kemeralti bazaar"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Iz%C4%B0zmirKemeralt%C4%B1Bazaar02.jpg",
+    "author": "Ziegler175",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "izmir"
+  },
+  "izmir-kordon": {
+    "file": "/images/blog/izmir-kordon.webp",
+    "alt": {
+      "tr": "Alsancak'ta Kordon boyu uzanan sahil şeridi ve çim alanlar",
+      "en": "The Kordon seafront promenade and lawns in Alsancak"
+    },
+    "caption": {
+      "tr": "Alsancak'ta Kordon",
+      "en": "The Kordon promenade, Alsancak"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:TR_Izmir_asv2020-02_img16_Alsancak_seaside.jpg",
+    "author": "A.Savin",
+    "license": "FAL",
+    "cityKey": "izmir"
+  },
+  "izmir-saat-kulesi": {
+    "file": "/images/blog/izmir-saat-kulesi.webp",
+    "alt": {
+      "tr": "Konak Meydanı'nda İzmir Saat Kulesi ve çevresindeki yaya kalabalığı",
+      "en": "The Izmir Clock Tower on Konak Square with crowds around it"
+    },
+    "caption": {
+      "tr": "Konak Meydanı ve İzmir Saat Kulesi",
+      "en": "Konak Square and the Izmir Clock Tower"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:%C4%B0zmir_Konak_saat_kulesi_ve_Konak_meydan%C4%B1.jpg",
+    "author": "LWY from Pasadena, USA",
+    "license": "CC BY 2.0",
+    "cityKey": "izmir"
   }
 }

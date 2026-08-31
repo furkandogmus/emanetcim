@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| Yazısı olan şehir | **1 / 265** (aşağıdaki tablo) |
+| Yazısı olan şehir | **3 / 265** (aşağıdaki tablo) |
 | Yayına yazma | `npx tsx scripts/blog-city-posts.ts --apply` (kuru çalışma varsayılan) |
 | Denetim | `npx tsx scripts/blog-city-posts.ts --verify` + `npx tsx scripts/blog-images.ts --verify` |
 | Eksik listesi | `npx tsx scripts/blog-city-posts.ts --coverage` |
@@ -58,14 +58,14 @@ alakasız olabilir.
 
 <!-- Aşağısı üretilmiştir: npx tsx scripts/blog-city-posts.ts --list-md -->
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 1/265 sehir -->
+<!-- 3/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
 | 1 | TR | İstanbul | `istanbul` | 10 | — |  |  |
 | 2 | TR | Ankara | `ankara` | 6 | yayında | ankara-valiz-birakma-noktalari | ankara-luggage-storage-guide |
-| 3 | TR | İzmir | `izmir` | 5 | — |  |  |
-| 4 | TR | Antalya | `antalya` | 5 | — |  |  |
+| 3 | TR | İzmir | `izmir` | 5 | yayında | izmir-valiz-emanet-konak-alsancak | izmir-luggage-storage-guide |
+| 4 | TR | Antalya | `antalya` | 5 | yayında | antalya-son-gun-valiz-nereye | antalya-luggage-storage-last-day |
 | 5 | TR | Bodrum | `bodrum` | 5 | — |  |  |
 | 6 | TR | Bursa | `bursa` | 4 | — |  |  |
 | 7 | TR | Adana | `adana` | 2 | — |  |  |
