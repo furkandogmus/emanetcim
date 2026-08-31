@@ -10,6 +10,49 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-08-31 — hesapsız misafir KENDİ kodunu yazınca rezervasyonunu bulamıyordu
+
+En kritik yol: misafir anonim rezervasyon yaptı, sekmeyi kapattı, dükkanın
+önünde QR'ını arıyor. Tıkanırsa valiz teslim edilemez. İki hata vardı, ikisi de
+yerel veritabanına karşı ölçüldü.
+
+**1. Harf duyarlılığı.** Kod misafirin ekranında BÜYÜK HARF yazılı
+(`booking.id.slice(0, 8).toUpperCase()` → `D8A7FF57`), kimlik ise küçük harf
+saklanıyor. Postgres'te `startsWith` harf duyarlı:
+
+| Girdi | Sonuç (önce) |
+|---|---|
+| `D8A7FF57` (ekranda yazan) | **BULUNAMADI** |
+| `d8a7ff57` | bulundu |
+
+Yani misafir **kendi ekranındaki kodu** yazıyor ve "Rezervasyon bulunamadı"
+alıyor — hatayı kendi yazımından ayırt etmesi imkânsız.
+
+**2. `id` filtresi 8 hanede tamamen düşüyordu.** Kod şöyleydi:
+
+```ts
+id: bookingId.length > 8 ? bookingId : undefined
+```
+
+8 karakterlik kodda `id: undefined` oluyor ve Prisma filtreyi **yok sayıyor**;
+sorgu yalnızca e-postaya bakıp o kişinin İLK rezervasyonunu döndürüyordu. Test
+hesabında o e-postanın **48 rezervasyonu** var. Yani yanlış/eksik kod yazan bir
+misafire BAŞKA bir rezervasyonun QR'ı veriliyordu — esnaf tarar, tarih ve valiz
+sayısı tutmaz.
+
+Düzeltme: kod normalize ediliyor (küçük harf, boşluk ve tire temizleniyor —
+telefonda okunarak aktarılan bir kod için olağan yazımlar), en az 6 hane
+zorunlu, ve **iki eşleşme çıkarsa hiçbiri açılmıyor**. Yanlış rezervasyonun
+QR'ını vermek, hiç vermemekten kötüdür.
+
+Uçtan uca doğrulandı (yerel API):
+
+| Girdi | Sonuç |
+|---|---|
+| `D8A7FF57` | `ok: true`, doğru rezervasyon |
+| `D8A7-FF57` | `ok: true` |
+| `ZZZZZZZZ` | `ok: false, Booking not found` |
+
 ## 2026-08-31 — 482 nokta arama motoruna 2.892 ince sayfa olarak bildiriliyordu
 
 Talep testini 50 noktadan 482'ye çıkarmanın görmediğim bir bedeli varmış. Üç
