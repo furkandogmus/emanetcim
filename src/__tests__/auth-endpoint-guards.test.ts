@@ -282,6 +282,66 @@ describe("kimlik dogrulama uclarinin kapilari", () => {
     expect(src).not.toMatch(/isInternalApiPath\s*&&/);
   });
 
+  it("parola tabani TEK yerde tanimli", () => {
+    /*
+      Alt sinir DORT ayri semada elle yaziliydi ve UC farkli deger tasiyordu:
+      misafir kaydi 8, ESNAF kaydi 6, mobil kayit 6, sifre sifirlama 8.
+
+      Iki sonucu vardi. Birincisi, en yetkili rol en zayif tabani aliyordu:
+      esnaf misafirin adini, telefonunu ve e-postasini goruyor, check-in/
+      check-out yapiyor, muhur envanterini yonetiyor -- misafirden daha GUCLU
+      bir parola istenmesi gerekirken daha zayifi isteniyordu. Ikincisi, ayni
+      hesap hangi ekrandan gelindigine gore farkli kural goruyordu: mobilden
+      alti karakterle kaydolan biri, parolasini sifirlarken sekiz karakter
+      dayatmasiyla karsilasiyordu.
+
+      GIRIS semalari (`auth.config.ts`, `auth/session`) kapsam DISI ve bilerek
+      `min(1)`: mevcut bir parolayi uzunluguna bakip reddetmek, kullaniciyi
+      sebebini soyleyemeden disarida birakir.
+    */
+    const files = [
+      "src/actions/register.ts",
+      "src/actions/password-reset.ts",
+      "src/app/api/mobile/auth/register/route.ts",
+      "src/services/auth/password-reset.ts",
+    ];
+    const offenders: string[] = [];
+    for (const f of files) {
+      const src = read(f);
+      // Yorumlari ayikla: bu dosyalarin cogunda "eskiden min(6) idi" aciklamasi var.
+      const code = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+      for (const m of code.matchAll(/password[^\n]*?\.min\((\d+)\)/g)) {
+        offenders.push(`${f}: min(${m[1]})`);
+      }
+      for (const m of code.matchAll(/password\.length\s*<\s*(\d+)/g)) {
+        offenders.push(`${f}: length < ${m[1]}`);
+      }
+    }
+    expect(
+      offenders,
+      "Parola alt siniri elle yazilmis. Politika `src/lib/auth-password.ts` " +
+        "icindeki `MIN_PASSWORD_LENGTH`; semalar onu ithal etmeli, yoksa " +
+        "taban tasiyiciya gore degisir:\n" + offenders.join("\n"),
+    ).toEqual([]);
+
+    const policy = read("src/lib/auth-password.ts");
+    expect(policy).toMatch(/export const MIN_PASSWORD_LENGTH = \d+/);
+  });
+
+  it("kimliksiz referans dogrulama ucu hiz siniri tasir", () => {
+    /*
+      Kod uzayi kaba kuvvete kapali (sekiz karakter, 32 harfli alfabe) ama
+      sinirsiz bir uc yine de bedava veritabani sorgu ureteci. Ikisi de
+      (`"use server"` action'i ve mobil uc) kimlik dogrulamasiz cagrilabiliyor.
+    */
+    for (const f of [
+      "src/actions/referral.ts",
+      "src/app/api/mobile/referrals/validate/route.ts",
+    ]) {
+      expect(read(f), `${f} hiz siniri tasimali`).toMatch(/rateLimit\(/);
+    }
+  });
+
   it("Auth.js ayiklama kipi uretimde kapali", () => {
     /*
       `debug: true` SABITTI. Auth.js ayiklama kipinde saglayici yanitlarini,

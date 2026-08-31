@@ -3,7 +3,11 @@ import type { NextRequest } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
 import { signAccessToken, signRefreshToken } from "@/lib/mobile-auth";
-import { hashPassword } from "@/lib/auth-password";
+import {
+  hashPassword,
+  MIN_PASSWORD_LENGTH,
+  MAX_PASSWORD_LENGTH,
+} from "@/lib/auth-password";
 import { normalizeTrGsm10 } from "@/lib/netgsm";
 import { rateLimit } from "@/lib/rate-limit";
 import { clientIp } from "@/lib/internal-api-guard";
@@ -16,7 +20,8 @@ import { toMobileUser } from "@/lib/mobile-dto";
 const schema = z.object({
   email: z.string().email().optional().or(z.literal("")),
   phone: z.string().min(10).optional().or(z.literal("")),
-  password: z.string().min(6),
+  // Taban `src/lib/auth-password.ts`te; web kaydiyla AYNI sayi.
+  password: z.string().min(MIN_PASSWORD_LENGTH).max(MAX_PASSWORD_LENGTH),
   name: z.string().min(1).max(100).optional(),
 }).refine((d) => d.email || d.phone, { message: "email or phone required" });
 

@@ -35,6 +35,10 @@ vi.mock("next-intl/server", () => ({
 }));
 vi.mock("@/lib/auth-password", () => ({
   hashPassword: vi.fn().mockResolvedValue("hashed_pass"),
+  // Politika sabitleri de bu modulden geliyor (sema `min()` icin ithal ediyor);
+  // mock etmezsek sema `min(undefined)` gorur ve dosya yuklenirken patlar.
+  MIN_PASSWORD_LENGTH: 8,
+  MAX_PASSWORD_LENGTH: 128,
 }));
 vi.mock("@/lib/disposable-emails", () => ({
   isDisposableEmail: vi.fn((email) => email.includes("tempmail.com")),

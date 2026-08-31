@@ -1,5 +1,9 @@
 import prisma from "@/lib/db";
-import { hashPassword } from "@/lib/auth-password";
+import {
+  hashPassword,
+  MIN_PASSWORD_LENGTH,
+  MAX_PASSWORD_LENGTH,
+} from "@/lib/auth-password";
 import {
   PASSWORD_RESET_IDENTIFIER_PREFIX,
   PASSWORD_RESET_PHONE_PREFIX,
@@ -33,8 +37,9 @@ import logger from "@/lib/logger";
  * token olur sifre degismez (kullanici kilitlenir).
  */
 
-export const MIN_NEW_PASSWORD_LENGTH = 8;
-export const MAX_NEW_PASSWORD_LENGTH = 128;
+/** Politika `src/lib/auth-password.ts`te; burasi yalnizca eski adi koruyor. */
+export const MIN_NEW_PASSWORD_LENGTH = MIN_PASSWORD_LENGTH;
+export const MAX_NEW_PASSWORD_LENGTH = MAX_PASSWORD_LENGTH;
 
 export type PasswordResetErrorCode =
   | "INVALID_INPUT"

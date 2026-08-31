@@ -4,6 +4,8 @@ import { auth } from "@/auth";
 import prisma from "@/lib/db";
 import { randomBytes } from "crypto";
 import { requireUser } from "@/lib/action-auth";
+import { rateLimit } from "@/lib/rate-limit";
+import { headers } from "next/headers";
 
 const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // belirsiz karakterler çıkarıldı
 
@@ -63,7 +65,28 @@ export async function getOrCreateReferralCodeAction(): Promise<
 export async function validateReferralCodeAction(
   code: string
 ): Promise<{ valid: boolean; discountPct: number }> {
-  if (!code?.trim()) return { valid: false, discountPct: 0 };
+  if (typeof code !== "string" || !code.trim() || code.length > 32) {
+    return { valid: false, discountPct: 0 };
+  }
+
+  /*
+    HIZ SINIRI (2026-08-31'de eklendi). Bu action rezervasyon formundan
+    KIMLIKSIZ cagrilabiliyor ve her cagrida bir veritabani sorgusu yapiyor. Kod
+    uzayi kaba kuvvete kapali (sekiz karakter, 32 harfli alfabe) ama sinirsiz
+    bir uc yine de bedava sorgu ureteci; mobil karsiligi da ayni sekilde
+    sertlestirildi.
+
+    `"use server"` ihraci Next.js'te canli bir HTTP ucudur: form uzerinden
+    cagriliyor olmasi, yalnizca form uzerinden cagrilacagi anlamina gelmez.
+  */
+  const h = await headers();
+  const ip =
+    h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    h.get("x-real-ip") ||
+    "unknown";
+  if (!(await rateLimit(`referral_validate:ip:${ip}`, 30, 10 * 60_000))) {
+    return { valid: false, discountPct: 0 };
+  }
 
   const session = await auth();
 

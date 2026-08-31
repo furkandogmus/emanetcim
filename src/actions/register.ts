@@ -2,7 +2,11 @@
 
 import { headers } from "next/headers";
 import prisma from "@/lib/db";
-import { hashPassword } from "@/lib/auth-password";
+import {
+  hashPassword,
+  MIN_PASSWORD_LENGTH,
+  MAX_PASSWORD_LENGTH,
+} from "@/lib/auth-password";
 import { Role } from "@prisma/client";
 import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
@@ -23,7 +27,7 @@ import logger from "@/lib/logger";
 
 const guestSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(8).max(128),
+  password: z.string().min(MIN_PASSWORD_LENGTH).max(MAX_PASSWORD_LENGTH),
   name: z.string().min(1).max(120),
 });
 
@@ -34,7 +38,13 @@ const partnerSchema = z.object({
     .string()
     .trim()
     .regex(/^05\d{2}\s\d{3}\s\d{2}\s\d{2}$/, "Errors.invalidTrPhone"),
-  password: z.string().min(6),
+  /*
+    ESNAF TABANI 6'YDI, MISAFIRINKI 8 (2026-08-31'de duzeltildi). Ters
+    duruyordu: esnaf misafirin adini, telefonunu ve e-postasini goruyor,
+    check-in/check-out yapiyor, muhur envanterini yonetiyor. Daha yetkili rol
+    daha zayif parola tabani aliyordu. Politika artik tek yerde.
+  */
+  password: z.string().min(MIN_PASSWORD_LENGTH).max(MAX_PASSWORD_LENGTH),
   shopName: z.string().min(2).max(200),
   shopAddress: z.string().min(5).max(500),
   shopCity: z.string().max(100).optional(),

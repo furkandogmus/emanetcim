@@ -62,6 +62,19 @@ yapıldığı ekranda (Türkçe, 390 px, masaüstü) hiçbiri görünmüyordu.**
 - **Çerez şeridinin iki düğmesi** telefonda alt alta diziliyor, şerit bir satır uzuyor
   ve arama listesinin **ilk sonucunu** tamamen örtüyordu.
 
+### Kapsam — nerelere bakıldı, nerelere bakılmadı
+
+Bir sonraki kişi aynı yerleri yeniden taramasın diye: **ölçülen** yüzeyler misafir
+tarafında ana ekran, arama, dükkan detayı, ödeme (iki adım), `/how-it-works`,
+`/demand`, `/become-partner`, `/bookings/lookup`, blog, sigorta; esnaf tarafında
+panel, **teslim alma** (`?booking=`) ve **teslim etme** (`?checkoutBooking=`)
+kutuları. Esnaf ekranları projenin kendi E2E yardımcılarıyla (`loginAsDemoPartner`,
+`createBookingAsGuest`) gerçek bir rezervasyon üzerinden açıldı ve 320/360/390/768/
+1024/1280 px'te **temiz** çıktı — düzeltme gerekmedi.
+
+**Ölçülmeyen**: yönetici yüzeyleri (bilerek dışarıda bırakıldı) ve hesapsız misafirin
+`/bookings/manage/<token>` sayfası (jeton üretmek gerekiyor).
+
 ### Ölçüm sondasının kendisi iki kez yanlıştı — kayda değer
 
 1. İlk sonda `truncate` kırpmasını **kaçırdı**, çünkü `data-testid`i taşıyan gizli
@@ -73,6 +86,49 @@ yapıldığı ekranda (Türkçe, 390 px, masaüstü) hiçbiri görünmüyordu.**
 
 Ders: bir düzen sondası, **kırpan atayı ve gerçekten çizilen elemanı** hesaba katmadan
 güven vermez. Sıfır bulgu, sondanın yanlış yere baktığının da cevabıdır.
+
+## 2026-08-31 — parola tabanı taşıyıcıya göre değişiyordu; en yetkili rol en zayıfını alıyordu
+
+Alt sınır **dört** ayrı şemada elle yazılıydı ve **üç** farklı değer taşıyordu:
+
+| Yer | Önce | Sonra |
+|---|---|---|
+| `actions/register.ts` — misafir kaydı | `min(8)` | `MIN_PASSWORD_LENGTH` |
+| `actions/register.ts` — **esnaf** kaydı | `min(6)` | `MIN_PASSWORD_LENGTH` |
+| `api/mobile/auth/register` | `min(6)` | `MIN_PASSWORD_LENGTH` |
+| `services/auth/password-reset.ts` | 8 | `MIN_PASSWORD_LENGTH` |
+
+İki sonucu vardı:
+
+1. **En yetkili rol en zayıf tabanı alıyordu.** Esnaf misafirin adını, telefonunu
+   ve e-postasını görüyor; check-in/check-out yapıyor; mühür envanterini
+   yönetiyor. Misafirden **daha güçlü** bir parola istenmesi gerekirken daha
+   zayıfı isteniyordu.
+2. **Aynı hesap, hangi ekrandan gelindiğine göre farklı kural görüyordu.**
+   Mobilden altı karakterle kaydolan bir kullanıcı, parolasını sıfırlamak
+   istediğinde sekiz karakter dayatmasıyla karşılaşıyordu.
+
+Politika artık `src/lib/auth-password.ts` içinde (`MIN_PASSWORD_LENGTH = 8`),
+şemalar onu ithal ediyor. **Mevcut parolalar etkilenmiyor**: sınır yalnızca yeni
+parola belirlenirken uygulanıyor. Giriş şemaları bilerek `min(1)` kalıyor — mevcut
+bir parolayı uzunluğuna bakıp reddetmek, kullanıcıyı sebebini söyleyemeden
+dışarıda bırakır.
+
+### Referans kodu doğrulama — iki taşıyıcıda da sertleştirildi
+
+`POST /api/mobile/referrals/validate` ve `validateReferralCodeAction`:
+
+- **Hiçbir hız sınırı yoktu.** İkisi de kimlik doğrulamasız çağrılabiliyor ve her
+  çağrıda bir DB sorgusu yapıyor. Kod uzayı kaba kuvvete kapalı (sekiz karakter,
+  32 harfli alfabe ≈ 1,1 × 10¹²) — yani kod **tahmin edilemez**, ama sınırsız bir
+  uç yine de bedava sorgu üreteci. Projedeki diğer kimliksiz uçların hepsinde
+  sınır var; bu ikisi atlanmış.
+- **Gövde doğrulanmıyordu.** `code.toUpperCase()` doğrudan çağrılıyordu:
+  `{"code": 123}` göndermek `TypeError` fırlatıp 500 üretiyordu. Geçersiz girdi
+  400 olmalı, sunucu hatası değil.
+
+> `"use server"` ihracı Next.js'te canlı bir HTTP ucudur: form üzerinden
+> çağrılıyor olması, yalnızca form üzerinden çağrılacağı anlamına gelmez.
 
 ## 2026-08-31 — arama sessizce tam tablo taramasına düşebiliyordu (görülemeden)
 
