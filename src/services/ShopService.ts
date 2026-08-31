@@ -12,7 +12,7 @@ import { moneyToNumber } from '@/lib/money';
 import { getActiveShopsOrderedByDistanceKm } from '@/lib/shop-distance-postgis';
 
 import { isShopOpenForStay } from '@/lib/shop-hours';
-import { PUBLIC_SHOP_FILTER } from '@/lib/public-shop-filter';
+import { PUBLIC_SHOP_FILTER, OPERATING_SHOP_FILTER } from '@/lib/public-shop-filter';
 import { notificationService } from '@/services/NotificationService';
 import { getSlotAvailability } from '@/services/SlotService';
 import logger from '@/lib/logger';
@@ -418,9 +418,56 @@ export class ShopService implements IShopService {
     }
   }
 
+  /**
+   * FILTRESIZ okuma — yalnizca YONETIM yollari icin.
+   *
+   * Misafire donen hicbir yol bunu cagirmamali: `isTest` ve `isActive`
+   * kontrolu YOK. Misafir yuzeyleri `getPublicShopById`, rezervasyon yollari
+   * `getOperatingShopById` kullanir.
+   */
   async getShopDetails(shopId: string): Promise<Shop | null> {
     return await prisma.shop.findUnique({
       where: { id: shopId }
+    });
+  }
+
+  /**
+   * MISAFIRE GORUNEN dukkan — `PUBLIC_SHOP_FILTER` ile.
+   *
+   * NEDEN EKLENDI (2026-08-31'de olculdu): "test kaydi kamuya HIC gorunmez"
+   * kurali (P1-4) `PUBLIC_SHOP_FILTER` icinde tek yerde yaziliydi, ama kimlikle
+   * TEK dukkan okuyan yollarin hicbiri onu kullanmiyordu -- hepsi filtresiz
+   * `getShopDetails`i cagiriyordu:
+   *
+   *   - dukkan sayfasinin `generateMetadata`si: test dukkaninin ADI ve ADRESI
+   *     404 donen bir sayfanin `<title>` ve Open Graph alanlarinda cikiyordu
+   *   - checkout sayfasi (hem metadata hem govde)
+   *   - `/api/mobile/shops/[id]`: mobil detay ucu test dukkanini donduruyordu
+   *
+   * `public-shop-filter.ts` bunu kelimesi kelimesine ongormustu: "yeni bir
+   * cagri yeri eklendiginde biri unutulurdu". Dort cagri yeri eklenmis, dordu
+   * de unutulmustu.
+   */
+  async getPublicShopById(shopId: string): Promise<Shop | null> {
+    return await prisma.shop.findFirst({
+      where: { id: shopId, ...PUBLIC_SHOP_FILTER },
+    });
+  }
+
+  /**
+   * ISLETILEN dukkan — `OPERATING_SHOP_FILTER` ile. Rezervasyon yollari.
+   *
+   * `PUBLIC_SHOP_FILTER`dan farki `isPrelaunch: false`. Talep testi noktalari
+   * misafire GORUNUR ama isletilmiyorlar: slot uretilmez, muhur beklenmez ve
+   * -- `public-shop-filter.ts`in dedigi gibi -- REZERVASYON ALINMAZ.
+   *
+   * Rezervasyon olusturan yollar bu ayrimi yapmiyordu; yalnizca `isActive`e
+   * bakiyorlardi. Yani hem bir TEST dukkanina hem de isletilmeyen bir TALEP
+   * TESTI noktasina rezervasyon yapilip PARA alinabiliyordu.
+   */
+  async getOperatingShopById(shopId: string): Promise<Shop | null> {
+    return await prisma.shop.findFirst({
+      where: { id: shopId, ...OPERATING_SHOP_FILTER },
     });
   }
 

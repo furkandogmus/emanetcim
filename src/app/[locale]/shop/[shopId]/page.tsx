@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { setRequestLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 import { shopService } from "@/services/ShopService";
@@ -17,15 +18,46 @@ import { resolveServerSessionId } from "@/lib/analytics-server";
 import { socialMetadata } from "@/lib/social-metadata";
 import { serializeJsonLd } from "@/lib/json-ld-script";
 
+/**
+ * Ayni istek icinde TEK sorgu.
+ *
+ * Next `generateMetadata` ile sayfa govdesini ayri calistiriyor ve ikisi de bu
+ * dukkani okuyor -- yani her sayfa gorunumu ayni satiri IKI KEZ sorguluyordu.
+ * React `cache` istek basina bellekliyor; ikinci cagri veritabanina hic gitmez.
+ */
+const shopPublicDetail = cache((shopId: string) =>
+  shopService.getShopPublicDetail(shopId),
+);
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ locale: string; shopId: string }>;
 }): Promise<Metadata> {
   const { locale, shopId } = await params;
-  const shop = await shopService.getShopDetails(shopId);
+  /*
+    METADATA DA GOVDEYLE AYNI FILTREYI KULLANIR (2026-08-31'de bulundu).
+
+    Burasi `getShopDetails` cagiriyordu: filtresiz bir `findUnique`. Sonra elle
+    `!shop.isActive` kontrol ediyordu -- ama `PUBLIC_SHOP_FILTER` IKI kosul
+    tasiyor: `isActive: true` VE `isTest: false`. Yani bir TEST dukkani icin
+    metadata basariyla uretiliyor, sayfa govdesi ise `notFound()` cagiriyordu.
+
+    Sonucu: URL'i bilen biri, 404 donen bir sayfanin `<title>`, `<meta
+    description>` ve Open Graph alanlarinda test dukkaninin ADINI ve ADRESINI
+    goruyordu. Arama motorlari da o basligi gorebiliyordu.
+
+    `public-shop-filter.ts` bunu kelimesi kelimesine ongormustu: "yeni bir cagri
+    yeri eklendiginde biri unutulurdu". Unutulan cagri yeri, filtreyi dogru
+    kullanan govdenin HEMEN USTUNDEYDI.
+
+    `getShopPublicDetail` ayrica govdedeki cagriyla tekillestiriliyor
+    (`shopPublicDetail`, React `cache`): Next `generateMetadata` ile sayfayi
+    ayri calistiriyor, yani ayni dukkan istek basina IKI KEZ sorgulaniyordu.
+  */
+  const shop = await shopPublicDetail(shopId);
   const t = await getTranslations({ locale, namespace: "Guest" });
-  if (!shop || !shop.isActive) {
+  if (!shop) {
     return { title: t("shopDetailNotFoundTitle") };
   }
   const base = getSiteBaseUrl();
@@ -70,12 +102,34 @@ export default async function ShopDetailPage({
   const { locale, shopId } = await params;
   setRequestLocale(locale);
 
-  const shop = await shopService.getShopPublicDetail(shopId);
+  /*
+    BAGIMSIZ OKUMALAR PARALEL (2026-08-31'de olculdu).
+
+    Bu sayfa isteklerin buyuk cogunlugunu alan iki sayfadan biri ve okumalari
+    SIRAYLA yapiyordu: dukkan -> oturum -> analitik oturum kimligi -> gorseller
+    -> fiyat kurallari. Bes ayri gidis-donus, hicbiri digerinin sonucuna
+    ihtiyac duymadigi halde arka arkaya. Toplam gecikme, en yavas sorgunun
+    degil, HEPSININ TOPLAMIYDI.
+
+    Dordu gercekten bagimsiz ve birlikte bekleniyor. `wantCount` disarida
+    kaliyor cunku SARTI dukkandan geliyor (`shop.isPrelaunch`) -- isletilen
+    dukkanlarda o sorgu hic calismamali.
+
+    `Promise.all` yerine `allSettled` DEGIL: `getShopPublicDetail` bulunamazsa
+    `notFound()` gerekiyor ve digerlerinin hatasi zaten `.catch` ile
+    yutuluyor. Yani burada bastirilacak bir hata yok.
+  */
+  const [shop, session, shopImages, pricingRules] = await Promise.all([
+    shopPublicDetail(shopId),
+    auth(),
+    shopService.getShopImages(shopId).catch(() => []),
+    getPricingRules(),
+  ]);
+
   if (!shop) {
     notFound();
   }
 
-  const session = await auth();
   analyticsService.track({
     name: "shop_view",
     sessionId: await resolveServerSessionId(session?.user?.id),
@@ -84,18 +138,15 @@ export default async function ShopDetailPage({
     metadata: { shopId: shop.id },
   });
 
-  const shopImages = await shopService.getShopImages(shopId).catch(() => []);
   /*
     Talep testi noktasinda "kac kisi burayi istiyor" sayisi SUNUCUDA okunur:
     misafir sayfayi actigi anda gormeli, tiklamayi beklememeli -- gorunen sayi
     tiklamanin kendisini tesvik eden seyin ta kendisi. Isletilen dukkanlarda
-    sorgu hic calismaz.
+    sorgu hic calismaz -- bu yuzden yukaridaki paralel bloga GIRMIYOR.
   */
   const prelaunchWantCount = shop.isPrelaunch
     ? await prelaunchInterestService.wantCount(shopId).catch(() => 0)
     : 0;
-
-  const pricingRules = await getPricingRules();
 
   const jsonLd = buildShopLocalBusinessJsonLd(shop, locale);
   const tCommon = await getTranslations({ locale, namespace: "Common" });

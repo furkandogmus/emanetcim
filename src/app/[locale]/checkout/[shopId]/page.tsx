@@ -15,7 +15,13 @@ export async function generateMetadata({
   params: Promise<{ locale: string; shopId: string }>;
 }): Promise<Metadata> {
   const { locale, shopId } = await params;
-  const shop = await shopService.getShopDetails(shopId);
+  /*
+    FILTRELI OKUMA (2026-08-31). `getShopDetails` filtresizdi: test dukkanlari
+    da checkout sayfasi uretiyordu. `OPERATING_SHOP_FILTER` hem testi hem
+    isletilmeyen talep testi noktalarini disari aliyor -- ikisi de rezervasyon
+    ALMAZ, o yuzden checkout sayfalari da olmamali.
+  */
+  const shop = await shopService.getOperatingShopById(shopId);
   if (!shop) {
     return { title: "Checkout" };
   }
@@ -42,7 +48,7 @@ export default async function CheckoutPage({
 
   // Veritabanından dükkan bilgilerini, oturumu ve ayarları paralel çek
   const [shop, session, pricingRules] = await Promise.all([
-    shopService.getShopDetails(shopId),
+    shopService.getOperatingShopById(shopId),
     auth(),
     getPricingRules(),
   ]);

@@ -213,6 +213,63 @@ kutuları. Esnaf ekranları projenin kendi E2E yardımcılarıyla (`loginAsDemoP
 Ders: bir düzen sondası, **kırpan atayı ve gerçekten çizilen elemanı** hesaba katmadan
 güven vermez. Sıfır bulgu, sondanın yanlış yere baktığının da cevabıdır.
 
+## 2026-08-31 — test dükkanına rezervasyon yapılabiliyordu; adı 404 sayfasının başlığında sızıyordu
+
+`src/lib/public-shop-filter.ts` iki kuralı tek yerde tanımlıyor ve gerekçesini
+yazıyor:
+
+```
+"misafire gösterilsin mi?"  -> PUBLIC_SHOP_FILTER    (prelaunch DAHİL)
+"burada iş yapılıyor mu?"   -> OPERATING_SHOP_FILTER (prelaunch HARİÇ)
+```
+
+Ama **kimlikle tek dükkan okuyan yolların hiçbiri** onu kullanmıyordu — hepsi
+filtresiz `getShopDetails` çağırıyor ya da elle `isActive` bakıyordu:
+
+| Yer | Sonuç |
+|---|---|
+| `shop/[shopId]` `generateMetadata` | Test dükkanının **adı ve adresi**, gövdesi 404 dönen bir sayfanın `<title>`, `<meta description>` ve Open Graph alanlarında |
+| `checkout/[shopId]` (metadata + gövde) | Test dükkanı için checkout sayfası render ediliyordu |
+| `/api/mobile/shops/[id]` | **Kimliksiz** mobil detay ucu test dükkanlarını döndürüyordu |
+| `createBookingAction` | **Para yolu** — test dükkanına rezervasyon yapılabiliyordu |
+| `/api/mobile/checkout/intent` | Aynısı, mobil taşıyıcıda |
+
+Son ikisinde ayrıca **ikinci** bir kural deliniyordu: yalnızca `isActive`'e
+bakmak, işletilmeyen **talep testi noktalarını** da geçiriyordu. Aynı dosya
+"slot üretilmez, rezervasyon **alınmaz**" diyor — o noktalarda slot hiç
+üretilmediği için misafir, **arkasında hiçbir kapasitesi olmayan** bir yere ödeme
+yapmış olurdu.
+
+### Düzeltme
+
+`ShopService`'e iki filtreli erişimci: `getPublicShopById` (gösterim) ve
+`getOperatingShopById` (rezervasyon). Beş çağrı yeri bunlara bağlandı;
+`getShopDetails` duruyor (yönetim yolları filtresiz okumalı) ama artık belgesi
+**filtresiz olduğunu söylüyor**.
+
+> `public-shop-filter.ts` bunu kelimesi kelimesine öngörmüştü: *"yeni bir çağrı
+> yeri eklendiğinde biri unutulurdu."* Beş çağrı yeri eklenmiş, beşi de
+> unutulmuştu. Ders: filtreyi tek yere almak, onu **kullandırmıyorsa** yetmiyor —
+> mandal filtreyi değil, **çağrı yerlerini** ölçmeli.
+
+Mandal: `src/__tests__/shop-visibility-filter.test.ts`.
+
+## 2026-08-31 — dükkan sayfası aynı satırı istek başına iki kez sorguluyordu
+
+Next `generateMetadata` ile sayfa gövdesini ayrı çalıştırıyor ve ikisi de aynı
+dükkanı okuyordu — yani her sayfa görünümü iki sorgu. React `cache()` ile istek
+başına tekilleştirildi (ikinci çağrı veritabanına hiç gitmiyor).
+
+Aynı sayfada okumalar **sırayla** yapılıyordu: dükkan → oturum → analitik oturum
+kimliği → görseller → fiyat kuralları. Beş ayrı gidiş-dönüş, hiçbiri diğerinin
+sonucuna ihtiyaç duymadığı hâlde arka arkaya — toplam gecikme en yavaş sorgunun
+değil, **hepsinin toplamıydı**. Dördü `Promise.all`'a alındı. `wantCount` dışarıda
+kaldı: şartı dükkandan geliyor (`shop.isPrelaunch`) ve işletilen dükkanlarda o
+sorgu hiç çalışmamalı.
+
+> Ana sayfa bu kalıbı zaten kullanıyordu (`Promise.all`); dükkan detayı — istek
+> hacminin en yüksek olduğu ikinci sayfa — dışarıda kalmıştı.
+
 ## 2026-08-31 — slot müsaitlik ucu sınırsız tarih aralığı kabul ediyordu
 
 `from` ve `to` sorgu parametreleri doğrudan `getSlotAvailability`'ye geçiyordu ve

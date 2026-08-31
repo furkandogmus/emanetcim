@@ -62,7 +62,13 @@ export async function POST(req: NextRequest) {
     where: { id: shopId },
     include: { owner: { select: { phone: true } } },
   });
-  if (!shop?.isActive) {
+  /*
+    Web `createBookingAction` ile AYNI kosul (2026-08-31). Onceden yalnizca
+    `isActive`e bakiyordu, yani hem TEST dukkanlarina hem de isletilmeyen TALEP
+    TESTI noktalarina rezervasyon acilabiliyordu. Gerekcesi
+    `public-shop-filter.ts`te: prelaunch noktalarinda slot hic uretilmiyor.
+  */
+  if (!shop?.isActive || shop.isTest || shop.isPrelaunch) {
     return NextResponse.json({ error: "shop_not_found" }, { status: 404 });
   }
 

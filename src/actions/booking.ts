@@ -98,7 +98,30 @@ export async function createBookingAction(data: CreateBookingInput) {
     include: { owner: { select: { id: true, phone: true, email: true, name: true } } },
   });
 
-  if (!shop || !shop.isActive) {
+  /*
+    ISLETILME KONTROLU (2026-08-31'de siklastirildi).
+
+    Onceki kosul yalnizca `!shop.isActive` idi. `PUBLIC_SHOP_FILTER` /
+    `OPERATING_SHOP_FILTER` bu soruyu ikiye ayirmis ve gerekcesini
+    `public-shop-filter.ts`e yazmisti:
+
+      "misafire gosterilsin mi?"  -> PUBLIC_SHOP_FILTER   (prelaunch DAHIL)
+      "burada is yapiliyor mu?"   -> OPERATING_SHOP_FILTER (prelaunch HARIC)
+
+    Rezervasyon ikinci sorunun yaniti. Tek basina `isActive`e bakmak iki seyi
+    birden kaciriyordu:
+
+      - TEST dukkanlari (`isTest: true`) rezervasyon alabiliyordu; "test kaydi
+        kamuya HIC gorunmez" kurali para yolunda deliniyordu.
+      - TALEP TESTI noktalari (`isPrelaunch: true`) rezervasyon alabiliyordu --
+        oysa ayni dosya "slot uretilmez, rezervasyon ALINMAZ" diyor. Bu
+        noktalarda slot hic uretilmedigi icin misafir, arkasinda hicbir
+        kapasitesi olmayan bir yere odeme yapmis olurdu.
+
+    Kural artik dosyanin kendi tanimindan geliyor, elle yazilmis tek bir
+    bayraktan degil.
+  */
+  if (!shop || !shop.isActive || shop.isTest || shop.isPrelaunch) {
     return { success: false as const, error: "Errors.shopNotFound" };
   }
 
