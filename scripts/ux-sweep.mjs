@@ -120,7 +120,7 @@ for (const buyukMetin of [false, true]) {
       /* yavaş yükleme ölçümü engellemesin */
     }
     await page.waitForTimeout(3200);
-    const kabul = page.locator("button").filter({ hasText: /kabul et|akzeptieren|accepter/i }).first();
+    const kabul = page.locator("button").filter({ hasText: /kabul|akzeptier|accept|受け入|پذیرش/i }).first();
     if (await kabul.count()) {
       await kabul.click().catch(() => {});
       await page.waitForTimeout(800);

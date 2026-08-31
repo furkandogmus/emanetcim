@@ -959,6 +959,7 @@
     "resetClose": "Close",
     "platformSettingsLatePickupFee": "Gebühr für verspätete Abholung (₺)",
     "platformSettingsLatePickupGrace": "Kulanzzeit bei Verspätung (Min.)",
+    "platformSettingsCheckInGrace": "Check-in-Toleranz (Min.)",
     "shopIsTest": "Testeintrag",
     "shopIsTestHint": "Ein markierter Shop erscheint nicht in Suche, Karte und Startseiten-Statistiken. Partnerbereich und bestehende Buchungen bleiben unberührt.",
     "shopIsVerified": "Verifiziertes Geschäft",
@@ -1468,7 +1469,7 @@
   "CookieConsent": {
     "bannerTitle": "Kekse",
     "bannerText": "Erforderlich für den Betrieb der Website.",
-    "acceptAll": "Akzeptiere alles",
+    "acceptAll": "Alle akzeptieren",
     "essentialOnly": "Nur unbedingt erforderlich",
     "linksIntro": "Erfahren Sie mehr:",
     "privacy": "Privatsphäre",

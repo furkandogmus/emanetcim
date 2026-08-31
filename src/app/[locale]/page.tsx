@@ -352,7 +352,9 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
           <p className="mt-8 text-center">
             <Link
               href="/luggage-storage"
-              className="text-sm id-eyebrow text-orange-600 underline-offset-4 hover:underline"
+              /* `inline-block py-2 -my-2`: olculdu 202x17 px, WCAG 2.2 kriteri
+                 2.5.8 en az 24x24 ister. Gorunum degismiyor. */
+              className="inline-block py-2 -my-2 text-sm id-eyebrow text-orange-600 underline-offset-4 hover:underline"
             >
               {t("cityHubViewAll")}
             </Link>

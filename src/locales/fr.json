@@ -959,6 +959,7 @@
     "resetClose": "Close",
     "platformSettingsLatePickupFee": "Frais de retrait tardif (₺)",
     "platformSettingsLatePickupGrace": "Délai de tolérance (min)",
+    "platformSettingsCheckInGrace": "Tolérance d'enregistrement (min)",
     "shopIsTest": "Enregistrement de test",
     "shopIsTestHint": "Un commerce marqué n'apparaît ni dans la recherche, ni sur la carte, ni dans les statistiques. L'espace partenaire et les réservations existantes ne changent pas.",
     "shopIsVerified": "Commerce vérifié",
@@ -1468,7 +1469,7 @@
   "CookieConsent": {
     "bannerTitle": "Cookies",
     "bannerText": "Nécessaire au fonctionnement du site.",
-    "acceptAll": "Acceptez tout",
+    "acceptAll": "Tout accepter",
     "essentialOnly": "Essentiel seulement",
     "linksIntro": "Apprendre encore plus:",
     "privacy": "Confidentialité",
