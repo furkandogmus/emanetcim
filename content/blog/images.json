@@ -29,6 +29,36 @@
     "license": "CC BY-SA 2.5",
     "cityKey": "adana"
   },
+  "adiyaman-cendere": {
+    "file": "/images/blog/adiyaman-cendere.webp",
+    "alt": {
+      "tr": "Cendere Köprüsü'nün tek kemeri ve yanındaki Roma sütunu",
+      "en": "The single arch of the Cendere bridge and the Roman column beside it"
+    },
+    "caption": {
+      "tr": "Cendere Köprüsü",
+      "en": "The Cendere bridge"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Severus_Bridge_(CENDERE_K%C3%96PR%C3%9CS%C3%9C).jpg",
+    "author": "Mutlu88",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "adiyaman"
+  },
+  "adiyaman-nemrut": {
+    "file": "/images/blog/adiyaman-nemrut.webp",
+    "alt": {
+      "tr": "Nemrut Dağı'nın zirvesindeki devasa taş başlar",
+      "en": "The giant stone heads on the summit of Mount Nemrut"
+    },
+    "caption": {
+      "tr": "Nemrut Dağı",
+      "en": "Mount Nemrut"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Heads_on_Mount_Nemrut.JPG",
+    "author": "Urszula Ka",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "adiyaman"
+  },
   "alanya-kizilkule": {
     "file": "/images/blog/alanya-kizilkule.webp",
     "alt": {
@@ -58,6 +88,36 @@
     "author": "Cano58",
     "license": "CC BY-SA 3.0",
     "cityKey": "alanya"
+  },
+  "amasya-kral-mezarlari": {
+    "file": "/images/blog/amasya-kral-mezarlari.webp",
+    "alt": {
+      "tr": "Amasya'da kayaya oyulmuş Pontus kral mezarları",
+      "en": "The Pontic royal tombs cut into the cliff at Amasya"
+    },
+    "caption": {
+      "tr": "Kral kaya mezarları, Amasya",
+      "en": "The rock-cut royal tombs, Amasya"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Amasya_Kral_Mezarlar%C4%B1.jpg",
+    "author": "Nbv",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "amasya"
+  },
+  "amasya-yaliboyu": {
+    "file": "/images/blog/amasya-yaliboyu.webp",
+    "alt": {
+      "tr": "Yeşilırmak kıyısındaki Yalıboyu evleri ve Amasya Saat Kulesi",
+      "en": "The Yaliboyu houses along the Yesilirmak and the Amasya clock tower"
+    },
+    "caption": {
+      "tr": "Yalıboyu evleri, Amasya",
+      "en": "The Yaliboyu houses, Amasya"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Yal%C4%B1boyu_evleri_ve_Amasya_Saat_Kulesi.jpg",
+    "author": "Seyfi Şeren",
+    "license": "CC BY-SA 2.0",
+    "cityKey": "amasya"
   },
   "ankara-anitkabir": {
     "file": "/images/blog/ankara-anitkabir.webp",
@@ -149,6 +209,66 @@
     "license": "CC BY-SA 4.0",
     "cityKey": "antalya"
   },
+  "ayvalik-adalar": {
+    "file": "/images/blog/ayvalik-adalar.webp",
+    "alt": {
+      "tr": "Alacakaranlıkta Ayvalık körfezindeki adalar",
+      "en": "The islands in Ayvalik's bay at dusk"
+    },
+    "caption": {
+      "tr": "Ayvalık adaları, akşamüstü",
+      "en": "The islands off Ayvalik at dusk"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Islands_near_Ayvalik.jpg",
+    "author": "Orhan Bilgin (Zargan)",
+    "license": "CC BY 2.5",
+    "cityKey": "ayvalik"
+  },
+  "ayvalik-cunda": {
+    "file": "/images/blog/ayvalik-cunda.webp",
+    "alt": {
+      "tr": "Cunda Adası'nda taş bir konak ve önündeki dar sokak",
+      "en": "A stone mansion and the narrow lane in front of it on Cunda Island"
+    },
+    "caption": {
+      "tr": "Cunda Adası",
+      "en": "Cunda Island"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Cunda_adas%C4%B1_konak_%22road_house_on_the_cunda_island%22_ayval%C4%B1k_-_panoramio.jpg",
+    "author": "collage bird's eye v…",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "ayvalik"
+  },
+  "bergama-akropol": {
+    "file": "/images/blog/bergama-akropol.webp",
+    "alt": {
+      "tr": "Bergama Akropolü'ndeki dik yamaca oyulmuş antik tiyatro",
+      "en": "The ancient theatre cut into the steep slope of the Pergamon acropolis"
+    },
+    "caption": {
+      "tr": "Bergama Akropolü, antik tiyatro",
+      "en": "The theatre at the Pergamon acropolis"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Pergamon_Greek_Theatre_2007a.jpg",
+    "author": "Erika Praefcke",
+    "license": "CC BY 1.0",
+    "cityKey": "bergama"
+  },
+  "bergama-kizilavlu": {
+    "file": "/images/blog/bergama-kizilavlu.webp",
+    "alt": {
+      "tr": "Bergama'da Kızıl Avlu'nun tuğla duvarları",
+      "en": "The brick walls of the Red Basilica in Bergama"
+    },
+    "caption": {
+      "tr": "Kızıl Avlu, Bergama",
+      "en": "The Red Basilica, Bergama"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Bergama_-_Serapeion_-_k%C4%B1z%C4%B1l_avlu-_Red_basilica_-_panoramio.jpg",
+    "author": "HALUK COMERTEL",
+    "license": "CC BY 3.0",
+    "cityKey": "bergama"
+  },
   "bodrum-kale": {
     "file": "/images/blog/bodrum-kale.webp",
     "alt": {
@@ -209,6 +329,36 @@
     "license": "CC BY-SA 4.0",
     "cityKey": "bursa"
   },
+  "canakkale-assos": {
+    "file": "/images/blog/canakkale-assos.webp",
+    "alt": {
+      "tr": "Assos'ta Athena Tapınağı'nın sütunları ve denize bakan yamaç",
+      "en": "The columns of the Temple of Athena at Assos above the sea"
+    },
+    "caption": {
+      "tr": "Assos, Athena Tapınağı",
+      "en": "The Temple of Athena, Assos"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Assos.jpg",
+    "author": "Gregorof at English Wikipedia",
+    "license": "CC BY-SA 2.5",
+    "cityKey": "canakkale"
+  },
+  "canakkale-truva": {
+    "file": "/images/blog/canakkale-truva.webp",
+    "alt": {
+      "tr": "Çanakkale kordonundaki Truva atı heykeli",
+      "en": "The Trojan horse on the Canakkale waterfront"
+    },
+    "caption": {
+      "tr": "Çanakkale kordonundaki Truva atı",
+      "en": "The Trojan horse on the Canakkale waterfront"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:%C3%87anakkale_truva_at%C4%B1_-_panoramio.jpg",
+    "author": "nevzat demir",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "canakkale"
+  },
   "cesme-alacati": {
     "file": "/images/blog/cesme-alacati.webp",
     "alt": {
@@ -238,6 +388,36 @@
     "author": "Gargarapalvin",
     "license": "CC BY-SA 4.0",
     "cityKey": "cesme"
+  },
+  "datca-koy": {
+    "file": "/images/blog/datca-koy.webp",
+    "alt": {
+      "tr": "Datça limanında demirlemiş guletler ve yat limanı",
+      "en": "Gulets moored in Datca's harbour and its marina"
+    },
+    "caption": {
+      "tr": "Datça limanı",
+      "en": "Datca harbour"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Datca_1410417_Nevit.jpg",
+    "author": "Nevit Dilmen (talk)",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "datca"
+  },
+  "datca-yeldegirmeni": {
+    "file": "/images/blog/datca-yeldegirmeni.webp",
+    "alt": {
+      "tr": "Datça'da taş yeldeğirmeni ve arkasındaki koy",
+      "en": "A stone windmill at Datca with the bay behind it"
+    },
+    "caption": {
+      "tr": "Datça'da yeldeğirmeni",
+      "en": "A windmill at Datca"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Dat%C3%A7a_yelde%C4%9Firmeni_1.jpg",
+    "author": "Nosferatü",
+    "license": "Public domain",
+    "cityKey": "datca"
   },
   "didim-altinkum": {
     "file": "/images/blog/didim-altinkum.webp",
@@ -524,6 +704,36 @@
     "license": "CC BY-SA 3.0",
     "cityKey": "kapadokya"
   },
+  "kars-ani": {
+    "file": "/images/blog/kars-ani.webp",
+    "alt": {
+      "tr": "Ani harabelerinin kilise ve sur kalıntıları",
+      "en": "The churches and walls of the ruins of Ani"
+    },
+    "caption": {
+      "tr": "Ani Harabeleri",
+      "en": "The ruins of Ani"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Ani_seen_from_Armenia.jpg",
+    "author": "haigoes",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "kars"
+  },
+  "kars-gar": {
+    "file": "/images/blog/kars-gar.webp",
+    "alt": {
+      "tr": "Kars Tren Garı binası",
+      "en": "The railway station building in Kars"
+    },
+    "caption": {
+      "tr": "Kars Garı",
+      "en": "Kars railway station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Kars_Train_Station.JPG",
+    "author": "Ex13",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "kars"
+  },
   "kas-kalkan": {
     "file": "/images/blog/kas-kalkan.webp",
     "alt": {
@@ -794,6 +1004,36 @@
     "license": "CC BY 3.0",
     "cityKey": "pamukkale"
   },
+  "rize-ayder": {
+    "file": "/images/blog/rize-ayder.webp",
+    "alt": {
+      "tr": "Ayder Yaylası'nda yamaca dağılmış evler ve sisli dağlar",
+      "en": "Houses scattered up the slope at Ayder plateau with misty mountains"
+    },
+    "caption": {
+      "tr": "Ayder Yaylası",
+      "en": "The Ayder plateau"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Ayder_Yaylasi@Rize-1.JPG",
+    "author": "Dr. Zeynel Cebeci",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "rize"
+  },
+  "rize-sehir": {
+    "file": "/images/blog/rize-sehir.webp",
+    "alt": {
+      "tr": "Rize şehri ve arkasındaki çay bahçeleriyle kaplı yamaçlar",
+      "en": "The city of Rize with tea-covered slopes behind it"
+    },
+    "caption": {
+      "tr": "Rize",
+      "en": "Rize"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Rize_city.jpg",
+    "author": "Turalhemidli",
+    "license": "CC BY 3.0",
+    "cityKey": "rize"
+  },
   "safranbolu-carsi": {
     "file": "/images/blog/safranbolu-carsi.webp",
     "alt": {
@@ -988,5 +1228,35 @@
     "author": "g",
     "license": "CC BY-SA 4.0",
     "cityKey": "trabzon"
+  },
+  "van-akdamar": {
+    "file": "/images/blog/van-akdamar.webp",
+    "alt": {
+      "tr": "Van Gölü'ndeki Akdamar Adası ve üzerindeki kilise",
+      "en": "Akdamar Island in Lake Van with its church"
+    },
+    "caption": {
+      "tr": "Akdamar Adası",
+      "en": "Akdamar Island"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Van_Akdamar_Adas%C4%B1.jpg",
+    "author": "Gözde Akkuş",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "van"
+  },
+  "van-kale": {
+    "file": "/images/blog/van-kale.webp",
+    "alt": {
+      "tr": "Van Kalesi'nin uzun kaya kütlesi üzerindeki surları",
+      "en": "The walls of Van Fortress along its long rock ridge"
+    },
+    "caption": {
+      "tr": "Van Kalesi",
+      "en": "Van Fortress"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Van_Fortress_From_Northwest.JPG",
+    "author": "Bjørn Christian Tørrissen",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "van"
   }
 }

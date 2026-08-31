@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| Yazısı olan şehir | **30 / 265** (aşağıdaki tablo) |
+| Yazısı olan şehir | **39 / 265** — Türkiye'nin 39 şehri tamamlandı (aşağıdaki tablo) |
 | Yayına yazma | `npx tsx scripts/blog-city-posts.ts --apply` (kuru çalışma varsayılan) |
 | Denetim | `npx tsx scripts/blog-city-posts.ts --verify` + `npx tsx scripts/blog-images.ts --verify` |
 | Eksik listesi | `npx tsx scripts/blog-city-posts.ts --coverage` |
@@ -62,7 +62,7 @@ alakasız olabilir.
 
 <!-- Aşağısı üretilmiştir: npx tsx scripts/blog-city-posts.ts --list-md -->
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 30/265 sehir -->
+<!-- 39/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -95,16 +95,16 @@ alakasız olabilir.
 | 27 | TR | Kemer | `kemer` | 1 | yayında | kemer-tahtali-teleferik-valiz | kemer-tahtali-cable-car-luggage |
 | 28 | TR | Didim | `didim` | 1 | yayında | didim-altinkum-apollon-valiz | didim-altinkum-luggage-storage |
 | 29 | TR | Safranbolu | `safranbolu` | 1 | yayında | safranbolu-carsi-konak-otel-valiz | safranbolu-old-town-luggage-storage |
-| 30 | TR | Ayvalık | `ayvalik` | 2 | — |  |  |
-| 31 | TR | Çanakkale | `canakkale` | 4 | — |  |  |
-| 32 | TR | Bergama | `bergama` | 1 | — |  |  |
+| 30 | TR | Ayvalık | `ayvalik` | 2 | yayında | ayvalik-cunda-arnavut-kaldirimi-valiz | ayvalik-cunda-cobblestones-luggage |
+| 31 | TR | Çanakkale | `canakkale` | 4 | yayında | canakkale-gelibolu-turu-feribot-valiz | canakkale-gallipoli-tour-ferry-luggage |
+| 32 | TR | Bergama | `bergama` | 1 | yayında | bergama-akropol-teleferik-valiz | bergama-pergamon-acropolis-luggage |
 | 33 | TR | Mardin | `mardin` | 1 | yayında | mardin-eski-sehir-merdiven-valiz | mardin-old-town-luggage-storage |
-| 34 | TR | Van | `van` | 2 | — |  |  |
-| 35 | TR | Kars | `kars` | 2 | — |  |  |
-| 36 | TR | Rize | `rize` | 2 | — |  |  |
-| 37 | TR | Amasya | `amasya` | 1 | — |  |  |
-| 38 | TR | Adıyaman | `adiyaman` | 1 | — |  |  |
-| 39 | TR | Datça | `datca` | 1 | — |  |  |
+| 34 | TR | Van | `van` | 2 | yayında | van-akdamar-tekne-kahvalti-valiz | van-akdamar-island-luggage-storage |
+| 35 | TR | Kars | `kars` | 2 | yayında | kars-dogu-ekspresi-ani-valiz | kars-eastern-express-ani-luggage |
+| 36 | TR | Rize | `rize` | 2 | yayında | rize-ayder-yayla-minibus-valiz | rize-ayder-plateau-minibus-luggage |
+| 37 | TR | Amasya | `amasya` | 1 | yayında | amasya-yaliboyu-kaya-mezarlari-valiz | amasya-yaliboyu-rock-tombs-luggage |
+| 38 | TR | Adıyaman | `adiyaman` | 1 | yayında | adiyaman-nemrut-gun-dogumu-valiz | adiyaman-nemrut-sunrise-tour-luggage |
+| 39 | TR | Datça | `datca` | 1 | yayında | datca-yarimada-knidos-valiz | datca-peninsula-knidos-luggage |
 | 40 | GB | London | `londra` | 9 | — |  |  |
 | 41 | NL | Amsterdam | `amsterdam` | 7 | — |  |  |
 | 42 | ES | Madrid | `madrid` | 5 | — |  |  |
