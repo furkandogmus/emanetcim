@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| Yazısı olan şehir | **81 / 265** — Türkiye'nin 39 şehri tamamlandı |
+| Yazısı olan şehir | **87 / 265** — Türkiye'nin 39 şehri tamamlandı |
 | Yayına yazma | `npx tsx scripts/blog-city-posts.ts --apply` (kuru çalışma varsayılan) |
 | Denetim | `npx tsx scripts/blog-city-posts.ts --verify` + `npx tsx scripts/blog-images.ts --verify` |
 | Eksik listesi | `npx tsx scripts/blog-city-posts.ts --coverage` |
@@ -63,7 +63,7 @@ alakasız olabilir.
 
 <!-- Aşağısı üretilmiştir: npx tsx scripts/blog-city-posts.ts --list-md -->
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 81/265 sehir -->
+<!-- 87/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -153,12 +153,12 @@ alakasız olabilir.
 | 84 | FI | Helsinki | `helsinki` | 1 | yayında | helsinki-suomenlinna-tallinn-feribot-valiz | helsinki-luggage-storage-suomenlinna-tallinn |
 | 85 | IS | Reykjavík | `reykjavik` | 1 | yayında | reykjavik-golden-circle-turu-valiz | reykjavik-luggage-storage-golden-circle |
 | 86 | IE | Dublin | `dublin` | 2 | yayında | dublin-havalimanina-tren-yok-valiz | dublin-luggage-storage-no-airport-train |
-| 87 | GB | Edinburgh | `edinburgh` | 2 | — |  |  |
-| 88 | GB | Manchester | `manchester` | 1 | — |  |  |
-| 89 | GB | Liverpool | `liverpool` | 1 | — |  |  |
-| 90 | CH | Zürich | `zurih` | 1 | — |  |  |
-| 91 | CH | Genève | `cenevre` | 1 | — |  |  |
-| 92 | CH | Luzern | `luzern` | 1 | — |  |  |
+| 87 | GB | Edinburgh | `edinburgh` | 2 | yayında | edinburgh-waverley-vadi-royal-mile-valiz | edinburgh-luggage-storage-waverley-royal-mile |
+| 88 | GB | Manchester | `manchester` | 1 | yayında | manchester-stadyum-canta-kurali-valiz | manchester-luggage-storage-matchday-bag-policy |
+| 89 | GB | Liverpool | `liverpool` | 1 | yayında | liverpool-cavern-merdiven-anfield-valiz | liverpool-luggage-storage-cavern-anfield |
+| 90 | CH | Zürich | `zurih` | 1 | yayında | zurih-gunubirlik-dag-turlari-valiz | zurich-luggage-storage-day-trips |
+| 91 | CH | Genève | `cenevre` | 1 | yayında | cenevre-chamonix-annecy-gunubirlik-valiz | geneva-luggage-storage-chamonix-annecy |
+| 92 | CH | Luzern | `luzern` | 1 | yayında | luzern-pilatus-dort-tasit-valiz | lucerne-luggage-storage-pilatus-four-vehicles |
 | 93 | CH | Interlaken | `interlaken` | 1 | — |  |  |
 | 94 | PL | Warszawa | `varsova` | 2 | — |  |  |
 | 95 | PL | Kraków | `krakov` | 2 | — |  |  |

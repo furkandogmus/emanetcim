@@ -599,6 +599,36 @@
     "license": "CC BY-SA 3.0",
     "cityKey": "canakkale"
   },
+  "cenevre-cornavin": {
+    "file": "/images/blog/cenevre-cornavin.webp",
+    "alt": {
+      "tr": "Genève-Cornavin garının ana girişi",
+      "en": "The main entrance of Geneve-Cornavin station"
+    },
+    "caption": {
+      "tr": "Genève-Cornavin",
+      "en": "Geneve-Cornavin station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Gare_de_Cornavin,_entr%C3%A9e_principale.jpg",
+    "author": "mpd01605",
+    "license": "CC BY-SA 2.0",
+    "cityKey": "cenevre"
+  },
+  "cenevre-jet-deau": {
+    "file": "/images/blog/cenevre-jet-deau.webp",
+    "alt": {
+      "tr": "Cenevre Gölü ve Jet d'Eau fıskiyesi",
+      "en": "Lake Geneva and the Jet d'Eau fountain"
+    },
+    "caption": {
+      "tr": "Jet d'Eau, Cenevre",
+      "en": "The Jet d'Eau, Geneva"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Geneva_Lac_Leman.jpg",
+    "author": "Markus Bernet",
+    "license": "CC BY-SA 2.5",
+    "cityKey": "cenevre"
+  },
   "cesme-alacati": {
     "file": "/images/blog/cesme-alacati.webp",
     "alt": {
@@ -778,6 +808,36 @@
     "author": "--Stöhrfall (talk) 09:17, 7 August 2010 (UTC)",
     "license": "Public domain",
     "cityKey": "dusseldorf"
+  },
+  "edinburgh-royal-mile": {
+    "file": "/images/blog/edinburgh-royal-mile.webp",
+    "alt": {
+      "tr": "Royal Mile boyunca uzanan taş binalar ve yokuş",
+      "en": "The stone buildings and the slope along the Royal Mile"
+    },
+    "caption": {
+      "tr": "Royal Mile, Edinburgh",
+      "en": "The Royal Mile, Edinburgh"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Royal_Mile,_Edinburgh_-_geograph.org.uk_-_506154.jpg",
+    "author": "Dave Hitchborne",
+    "license": "CC BY-SA 2.0",
+    "cityKey": "edinburgh"
+  },
+  "edinburgh-waverley": {
+    "file": "/images/blog/edinburgh-waverley.webp",
+    "alt": {
+      "tr": "Yukarıdan Edinburgh Waverley garının cam çatısı",
+      "en": "The glass roof of Edinburgh Waverley station seen from above"
+    },
+    "caption": {
+      "tr": "Edinburgh Waverley",
+      "en": "Edinburgh Waverley station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Edinburgh_Waverley_railway_station_roof_from_above_(geograph_4589145_by_Martin_Dawes).jpg",
+    "author": "Martin Dawes",
+    "license": "CC BY-SA 2.0",
+    "cityKey": "edinburgh"
   },
   "eskisehir-odunpazari": {
     "file": "/images/blog/eskisehir-odunpazari.webp",
@@ -1484,6 +1544,36 @@
     "license": "CC BY-SA 4.0",
     "cityKey": "lahey"
   },
+  "liverpool-albert-dock": {
+    "file": "/images/blog/liverpool-albert-dock.webp",
+    "alt": {
+      "tr": "Albert Dock'un tuğla depoları ve önündeki su",
+      "en": "The brick warehouses of the Albert Dock and the water in front of them"
+    },
+    "caption": {
+      "tr": "Albert Dock, Liverpool",
+      "en": "The Albert Dock, Liverpool"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Zebu_in_front_of_the_Albert_Dock_warehouses_1.jpg",
+    "author": "Photograph by Mike Peel (www.mikepeel.net).",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "liverpool"
+  },
+  "liverpool-lime-street": {
+    "file": "/images/blog/liverpool-lime-street.webp",
+    "alt": {
+      "tr": "Liverpool Lime Street garının kemerli çatısı ve peronları",
+      "en": "The arched roof and platforms of Liverpool Lime Street station"
+    },
+    "caption": {
+      "tr": "Liverpool Lime Street",
+      "en": "Liverpool Lime Street station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Liverpool_Lime_Street_railway_station_MMB_01.jpg",
+    "author": "mattbuck (category)",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "liverpool"
+  },
   "lizbon-alfama": {
     "file": "/images/blog/lizbon-alfama.webp",
     "alt": {
@@ -1543,6 +1633,36 @@
     "author": "Colin",
     "license": "CC BY-SA 3.0",
     "cityKey": "londra"
+  },
+  "luzern-kapellbrucke": {
+    "file": "/images/blog/luzern-kapellbrucke.webp",
+    "alt": {
+      "tr": "Reuss nehri üzerindeki ahşap Kapellbrücke ve su kulesi",
+      "en": "The wooden Kapellbrucke over the Reuss and its water tower"
+    },
+    "caption": {
+      "tr": "Kapellbrücke, Luzern",
+      "en": "The Kapellbrucke, Lucerne"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Luzern_Kapellbruecke.jpg",
+    "author": "Ikiwaner",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "luzern"
+  },
+  "luzern-pilatus": {
+    "file": "/images/blog/luzern-pilatus.webp",
+    "alt": {
+      "tr": "Pilatus'un zirvesinden Alpler manzarası",
+      "en": "The view over the Alps from the summit of Pilatus"
+    },
+    "caption": {
+      "tr": "Pilatus zirvesinden Alpler",
+      "en": "The Alps from the summit of Pilatus"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Swiss_Alps,_View_from_Pilatus.jpg",
+    "author": "jay8085",
+    "license": "CC BY 2.0",
+    "cityKey": "luzern"
   },
   "madrid-atocha": {
     "file": "/images/blog/madrid-atocha.webp",
@@ -1633,6 +1753,36 @@
     "author": "Heuschrecke (Dmitry Tonkonog and Ksenia Fedosova)",
     "license": "CC BY-SA 3.0",
     "cityKey": "mallorca"
+  },
+  "manchester-northern-quarter": {
+    "file": "/images/blog/manchester-northern-quarter.webp",
+    "alt": {
+      "tr": "Northern Quarter'da tuğla binalar ve dar bir sokak",
+      "en": "Brick buildings and a narrow street in the Northern Quarter"
+    },
+    "caption": {
+      "tr": "Northern Quarter, Manchester",
+      "en": "The Northern Quarter, Manchester"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Manchester%27s_%22Northern_Quarter%22_-_geograph.org.uk_-_3794486.jpg",
+    "author": "Tricia Neal",
+    "license": "CC BY-SA 2.0",
+    "cityKey": "manchester"
+  },
+  "manchester-piccadilly": {
+    "file": "/images/blog/manchester-piccadilly.webp",
+    "alt": {
+      "tr": "Manchester Piccadilly garının peronları ve trenler",
+      "en": "The platforms and trains at Manchester Piccadilly station"
+    },
+    "caption": {
+      "tr": "Manchester Piccadilly",
+      "en": "Manchester Piccadilly station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Manchester_Piccadilly_station_MMB_01_390051_390037.jpg",
+    "author": "mattbuck (category)",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "manchester"
   },
   "mardin-eski-sehir": {
     "file": "/images/blog/mardin-eski-sehir.webp",
@@ -2518,5 +2668,35 @@
     "author": "Thomas Wolf, www.foto-tw.de",
     "license": "CC BY-SA 3.0 de",
     "cityKey": "viyana"
+  },
+  "zurih-bahnhofstrasse": {
+    "file": "/images/blog/zurih-bahnhofstrasse.webp",
+    "alt": {
+      "tr": "Bahnhofstrasse boyunca tramvay hattı ve vitrinler",
+      "en": "The tram line and shop fronts along the Bahnhofstrasse"
+    },
+    "caption": {
+      "tr": "Bahnhofstrasse, Zürih",
+      "en": "The Bahnhofstrasse, Zurich"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Z%C3%BCrich_(Schweiz),_Auto_in_der_Bahnhofstrasse_--_2011_--_1425.jpg",
+    "author": "Dietmar Rabich",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "zurih"
+  },
+  "zurih-hauptbahnhof": {
+    "file": "/images/blog/zurih-hauptbahnhof.webp",
+    "alt": {
+      "tr": "Zürich Hauptbahnhof'un büyük giriş holü",
+      "en": "The main hall of Zurich Hauptbahnhof"
+    },
+    "caption": {
+      "tr": "Zürich Hauptbahnhof",
+      "en": "Zurich Hauptbahnhof"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Z%C3%BCrich_Hauptbahnhof,_Hall.jpg",
+    "author": "Wojciech Bartosiewicz",
+    "license": "CC BY 3.0",
+    "cityKey": "zurih"
   }
 }
