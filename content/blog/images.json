@@ -629,6 +629,36 @@
     "license": "CC BY-SA 2.0",
     "cityKey": "fethiye"
   },
+  "floransa-ponte-vecchio": {
+    "file": "/images/blog/floransa-ponte-vecchio.webp",
+    "alt": {
+      "tr": "Arno üzerindeki Ponte Vecchio ve üzerindeki dükkânlar",
+      "en": "The Ponte Vecchio over the Arno with the shops built onto it"
+    },
+    "caption": {
+      "tr": "Ponte Vecchio",
+      "en": "The Ponte Vecchio"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Ponte_Vecchio_Arno_Florence.jpg",
+    "author": "Jebulon",
+    "license": "CC0",
+    "cityKey": "floransa"
+  },
+  "floransa-smn": {
+    "file": "/images/blog/floransa-smn.webp",
+    "alt": {
+      "tr": "Firenze Santa Maria Novella garının giriş cephesi",
+      "en": "The entrance frontage of Firenze Santa Maria Novella station"
+    },
+    "caption": {
+      "tr": "Santa Maria Novella garı",
+      "en": "Santa Maria Novella station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Stazione_Santa_Maria_Novella_2.JPG",
+    "author": "Freepenguin",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "floransa"
+  },
   "gaziantep-kale": {
     "file": "/images/blog/gaziantep-kale.webp",
     "alt": {
@@ -974,6 +1004,36 @@
     "license": "CC BY 3.0",
     "cityKey": "kusadasi"
   },
+  "lizbon-alfama": {
+    "file": "/images/blog/lizbon-alfama.webp",
+    "alt": {
+      "tr": "Alfama'da Portekiz kaldırımıyla döşenmiş uzun bir merdiven",
+      "en": "A long flight of steps in Alfama paved with Portuguese calcada stone"
+    },
+    "caption": {
+      "tr": "Alfama'da merdivenli bir sokak",
+      "en": "A stepped lane in Alfama"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Lisboa,_Alfama_13.jpg",
+    "author": "LBM1948",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "lizbon"
+  },
+  "lizbon-tramvay": {
+    "file": "/images/blog/lizbon-tramvay.webp",
+    "alt": {
+      "tr": "Lizbon'da dar bir caddede ilerleyen sarı tramvay",
+      "en": "A yellow tram working through a narrow street in Lisbon"
+    },
+    "caption": {
+      "tr": "Lizbon tramvayı",
+      "en": "A Lisbon tram"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Lisbon_tram_in_Baixa_Chiado.jpg",
+    "author": "Daniel Sparing from Budapest, Hungary",
+    "license": "CC BY 2.0",
+    "cityKey": "lizbon"
+  },
   "londra-covent-garden": {
     "file": "/images/blog/londra-covent-garden.webp",
     "alt": {
@@ -1003,6 +1063,36 @@
     "author": "Colin",
     "license": "CC BY-SA 3.0",
     "cityKey": "londra"
+  },
+  "madrid-atocha": {
+    "file": "/images/blog/madrid-atocha.webp",
+    "alt": {
+      "tr": "Gece aydınlatılmış Atocha garının tuğla cephesi ve saat kulesi",
+      "en": "The brick frontage and clock tower of Atocha station lit at night"
+    },
+    "caption": {
+      "tr": "Madrid Atocha",
+      "en": "Madrid Atocha station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Atocha_railway_station_at_night.jpg",
+    "author": "Javier Perez Montes",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "madrid"
+  },
+  "madrid-sol": {
+    "file": "/images/blog/madrid-sol.webp",
+    "alt": {
+      "tr": "Puerta del Sol meydanı ve çevresindeki binalar",
+      "en": "The Puerta del Sol square and the buildings around it"
+    },
+    "caption": {
+      "tr": "Puerta del Sol",
+      "en": "Puerta del Sol"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Puerta_del_Sol_-_02.jpg",
+    "author": "Carlos Delgado",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "madrid"
   },
   "mardin-eski-sehir": {
     "file": "/images/blog/mardin-eski-sehir.webp",
@@ -1094,6 +1184,36 @@
     "license": "CC BY-SA 3.0",
     "cityKey": "mersin"
   },
+  "milano-centrale": {
+    "file": "/images/blog/milano-centrale.webp",
+    "alt": {
+      "tr": "Milano Centrale garının anıtsal taş cephesi",
+      "en": "The monumental stone frontage of Milano Centrale station"
+    },
+    "caption": {
+      "tr": "Milano Centrale",
+      "en": "Milano Centrale"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Milano_Centrale_2022-09-28_01.jpg",
+    "author": "Leonhard Lenz",
+    "license": "CC0",
+    "cityKey": "milano"
+  },
+  "milano-duomo": {
+    "file": "/images/blog/milano-duomo.webp",
+    "alt": {
+      "tr": "Duomo Meydanı ve Galleria Vittorio Emanuele'nin girişi",
+      "en": "The Piazza del Duomo and the entrance to the Galleria Vittorio Emanuele"
+    },
+    "caption": {
+      "tr": "Duomo Meydanı, Milano",
+      "en": "Piazza del Duomo, Milan"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Milano_galleria_piazza_duomo.jpg",
+    "author": "Bilinmiyor",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "milano"
+  },
   "pamukkale-hierapolis": {
     "file": "/images/blog/pamukkale-hierapolis.webp",
     "alt": {
@@ -1153,6 +1273,36 @@
     "author": "Dietmar Rabich",
     "license": "CC BY-SA 4.0",
     "cityKey": "paris"
+  },
+  "prag-eski-sehir": {
+    "file": "/images/blog/prag-eski-sehir.webp",
+    "alt": {
+      "tr": "Prag Eski Şehir Meydanı ve çevresindeki tarihi cepheler",
+      "en": "Prague's Old Town Square and the historic facades around it"
+    },
+    "caption": {
+      "tr": "Eski Şehir Meydanı, Prag",
+      "en": "The Old Town Square, Prague"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Prague_Old_Town_Square,_Czech_Republic_-_Oct_2010.jpg",
+    "author": "Diliff",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "prag"
+  },
+  "prag-karluv-most": {
+    "file": "/images/blog/prag-karluv-most.webp",
+    "alt": {
+      "tr": "Karl Köprüsü'nün heykelli korkulukları ve üzerindeki kalabalık",
+      "en": "The statue-lined parapets of the Charles Bridge and the crowd on it"
+    },
+    "caption": {
+      "tr": "Karl Köprüsü",
+      "en": "The Charles Bridge"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Lascar_Karl%C5%AFv_most_(Charles_Bridge)_(4504590172).jpg",
+    "author": "Jorge Láscar from Australia",
+    "license": "CC BY 2.0",
+    "cityKey": "prag"
   },
   "rize-ayder": {
     "file": "/images/blog/rize-ayder.webp",
@@ -1438,5 +1588,35 @@
     "author": "Bjørn Christian Tørrissen",
     "license": "CC BY-SA 3.0",
     "cityKey": "van"
+  },
+  "venedik-rialto": {
+    "file": "/images/blog/venedik-rialto.webp",
+    "alt": {
+      "tr": "Büyük Kanal üzerindeki Rialto Köprüsü ve basamakları",
+      "en": "The Rialto Bridge over the Grand Canal with its steps"
+    },
+    "caption": {
+      "tr": "Rialto Köprüsü",
+      "en": "The Rialto Bridge"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Rialto_Bridge_Grand_Canal.jpg",
+    "author": "Saffron Blaze",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "venedik"
+  },
+  "venedik-santa-lucia": {
+    "file": "/images/blog/venedik-santa-lucia.webp",
+    "alt": {
+      "tr": "Venezia Santa Lucia garı ve önündeki kanal",
+      "en": "Venezia Santa Lucia station and the canal in front of it"
+    },
+    "caption": {
+      "tr": "Venezia Santa Lucia",
+      "en": "Venezia Santa Lucia station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Venezia_Stazione_di_Venezia_Santa_Lucia_001.JPG",
+    "author": "Janericloebe",
+    "license": "Public domain",
+    "cityKey": "venedik"
   }
 }
