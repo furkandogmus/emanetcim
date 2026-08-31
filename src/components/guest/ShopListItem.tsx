@@ -8,6 +8,7 @@ import Money from "@/components/common/Money";
 import { formatDecimal } from "@/lib/currency";
 import { ResponseTimeBadge, VerifiedBadge } from "@/components/common/TrustBadge";
 import { buildDirectionsUrl } from "@/lib/directions-url";
+import { formatDistance } from "@/lib/format-distance";
 
 interface ShopListItemProps {
   id: string;
@@ -15,7 +16,8 @@ interface ShopListItemProps {
   rating: number;
   /** Günlük fiyat (TRY). Sayı olarak taşınır — gösterim `Money` bileşeninin işi. */
   price: number;
-  distance: string;
+  /** Ham mesafe (km). `null` ise mesafe rozeti hic cizilmez. */
+  distanceKm?: number | null;
   lat?: number;
   lng?: number;
   bagsAvailable?: number;
@@ -45,7 +47,7 @@ export default function ShopListItem({
   name,
   rating,
   price,
-  distance,
+  distanceKm,
   lat,
   lng,
   bagsAvailable,
@@ -103,10 +105,19 @@ export default function ShopListItem({
         </div>
 
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-400 font-medium">
-          <span className="inline-flex items-center gap-1">
-            <MapPin size={12} />
-            {t("away", { distance })}
-          </span>
+          {/*
+            Mesafe BILINMIYORSA rozet hic cizilmiyor. Onceki hali "— m uzakta"
+            yaziyordu: hem bir sey soylemiyor hem de bir olcum gibi duruyor.
+          */}
+          {distanceKm != null ? (
+            <span className="inline-flex items-center gap-1">
+              <MapPin size={12} />
+              {(() => {
+                const d = formatDistance(distanceKm, locale);
+                return t(d.key, { distance: d.value });
+              })()}
+            </span>
+          ) : null}
           {/* Talep testi noktasında ölçülecek bir kapasite yok; "~49 müsait"
               yazmak olmayan bir stoku ilan etmek olurdu. */}
           {bagsAvailable != null && !isPrelaunch ? (

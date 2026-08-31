@@ -502,11 +502,7 @@ export default function SearchClient({
                   name={shop.name}
                   rating={shop.rating || 0}
                   price={Number(shop.pricePerDay) || 50}
-                  distance={
-                    shop.distanceKm != null
-                      ? Math.round(shop.distanceKm * 1000).toString()
-                      : "—"
-                  }
+                  distanceKm={shop.distanceKm}
                   lat={shop.latitude ?? undefined}
                   lng={shop.longitude ?? undefined}
                   bagsAvailable={shop.bagsAvailable}
