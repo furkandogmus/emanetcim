@@ -39,7 +39,10 @@ export default function ContactFormClient({ labels, responseNote }: Props) {
       <h2 className="text-3xl font-black text-gray-900 mb-8 tracking-tight">{labels.formTitle}</h2>
 
       {state.status === "error" && (
-        <div className="mb-6 flex items-center gap-3 p-4 bg-red-50 rounded-2xl text-red-600 text-sm font-bold">
+        <div
+          role="alert"
+          className="mb-6 flex items-center gap-3 p-4 bg-red-50 rounded-2xl text-red-600 text-sm font-bold"
+        >
           <AlertCircle size={18} className="shrink-0" />
           {/*
             `state.error` "too_many_requests" oldugunda da hep ayni genel
@@ -52,36 +55,50 @@ export default function ContactFormClient({ labels, responseNote }: Props) {
 
       <form action={formAction} className="flex flex-col gap-6">
         <div className="space-y-2">
-          <label className="id-eyebrow text-gray-400 px-2">
+          {/*
+            `htmlFor` + `id`: etiketler GORSEL olarak vardi ama girdiye BAGLI
+            degildi (ne `htmlFor` ne de sarmalama). Ekran okuyucu bu alanlari
+            adsiz okuyordu -- "duzenlenebilir metin, zorunlu" ve baska hicbir
+            sey. Olculdu 2026-08-31: uc alanin ucunde de erisilebilir ad yok.
+
+            `autoComplete` de eksikti: mobilde tarayicinin adi/e-postayi
+            onermesi buna bagli, ve WCAG 1.3.5 bunu istiyor.
+          */}
+          <label htmlFor="contact-name" className="id-eyebrow text-gray-400 px-2">
             {labels.name}
           </label>
           <input
             required
+            id="contact-name"
             name="name"
             type="text"
+            autoComplete="name"
             minLength={2}
             maxLength={100}
             className="w-full h-14 px-6 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-orange-500/10 focus:bg-white transition-all font-bold"
           />
         </div>
         <div className="space-y-2">
-          <label className="id-eyebrow text-gray-400 px-2">
+          <label htmlFor="contact-email" className="id-eyebrow text-gray-400 px-2">
             {labels.email}
           </label>
           <input
             required
+            id="contact-email"
             name="email"
             type="email"
+            autoComplete="email"
             maxLength={200}
             className="w-full h-14 px-6 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-orange-500/10 focus:bg-white transition-all font-bold"
           />
         </div>
         <div className="space-y-2">
-          <label className="id-eyebrow text-gray-400 px-2">
+          <label htmlFor="contact-message" className="id-eyebrow text-gray-400 px-2">
             {labels.message}
           </label>
           <textarea
             required
+            id="contact-message"
             name="message"
             rows={4}
             minLength={5}

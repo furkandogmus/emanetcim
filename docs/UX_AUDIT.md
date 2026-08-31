@@ -52,6 +52,7 @@ yazılmaz; ölçüm yazılır.
 | 32 | Takvim kontrolleri her dilde İNGİLİZCE konuşuyor | Ekran okuyucu | ✅ DÜZELTİLDİ |
 | 33 | Harita kontrolleri her dilde İNGİLİZCE konuşuyor | Ekran okuyucu | ✅ DÜZELTİLDİ |
 | 34 | PWA ikonu `maskable` ilan ediyor ama güvenli bölgeyi aşıyor | PWA | ✅ DÜZELTİLDİ |
+| 35 | İletişim formunun üç alanının erişilebilir adı yok | Form | ✅ DÜZELTİLDİ |
 | 101 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
 | 102 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
 | 103 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
@@ -599,6 +600,31 @@ masaüstü — tam dolgulu iyi), ve yeni üretilen kenar paylı varyantlar
 `purpose: "maskable"`. Varyantlar orijinalin %80'e küçültülüp aynı arka plan
 renginde ortalanmasıyla üretildi; tasarım değişmedi, yalnızca pay eklendi.
 Doğrulandı: yeni ikonlarda güvenli bölge aşımı **0**.
+
+### 35. İletişim formu: etiketler görünüyor ama bağlı değil
+
+Form gerçekten dolduruldu ve ölçüldü. Üç alanın (`name`, `email`, `message`)
+etiketi **görsel olarak var** ama girdiye **bağlı değil** — ne `htmlFor` ne de
+sarmalama. Ekran okuyucu bunları adsız okuyor: "düzenlenebilir metin, zorunlu"
+ve başka hiçbir şey. Üçü de `required`, yani kullanıcı hangi alanı
+doldurmadığını da anlayamıyor.
+
+Ayrıca hiçbirinde `autocomplete` yoktu: mobilde tarayıcının ad/e-posta
+önermesi buna bağlı (ve WCAG 1.3.5 bunu istiyor). Hata kutusunda `role="alert"`
+yoktu, yani gönderim başarısız olduğunda ekran okuyucuya hiçbir şey
+duyurulmuyordu.
+
+Üçü de düzeltildi.
+
+### Yaygın sanılan ama gerçek olmayan bulgu
+
+`<label>` ögelerini `htmlFor` için grep'lediğimde 12 dosyada ~45 "eksik" çıktı.
+Canlıda ölçünce **misafir yüzeyindeki tek gerçek sorun iletişim formuydu**;
+geri kalan etiketlerin çoğu girdisini SARMALIYOR, ki bu da geçerli bir
+ilişkilendirme. Kalanlar `aria-hidden` test girdileri.
+
+Not: grep bir hipotez üretir, ölçüm karar verir. Bu denetimde grep'e göre
+hareket etseydim 12 dosyada gereksiz değişiklik yapmış olacaktım.
 
 ### 31. Footer yasal bağlantı `nav`'ı etiketsizdi
 
