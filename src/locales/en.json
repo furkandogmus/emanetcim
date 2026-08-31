@@ -458,6 +458,7 @@
     "bookingCodeLabel": "Booking code",
     "email": "Email",
     "bookingId": "Booking code",
+    "bookingIdHint": "The code is in your booking confirmation email. 8 characters, case-insensitive.",
     "cityFallback": "Istanbul",
     "searchTitle": "{query} Nearby Storage Points",
     "searchDescription": "Find secure and insured luggage storage locations in the {query} area.",

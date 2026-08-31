@@ -448,6 +448,7 @@
     "bookingCodeLabel": "Code de réservation",
     "email": "E-mail",
     "bookingId": "Code de réservation",
+    "bookingIdHint": "Le code figure dans votre e-mail de confirmation. 8 caractères, majuscules ou minuscules.",
     "cityFallback": "Istanbul",
     "searchTitle": "Consigne à bagages à {query}",
     "searchDescription": "Trouvez des consignes à bagages sécurisées et assurées dans la zone {query}.",

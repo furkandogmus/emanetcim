@@ -60,6 +60,17 @@ export default function ManageLookupForm() {
             girdiden 400 karakter geriye bakip sarmalayan `<label>` ariyor.
             Araya giren uzun bir yorum o etiketi pencerenin disina itiyor ve
             test, dogru etiketlenmis bir girdiyi etiketsiz sayiyor.
+
+            Yer tutucu `ornek@email.com` idi: "ornek" TURKCE bir sozcuk ve bu
+            alan alti dilde de ayni yer tutucuyu gosteriyordu -- Almanca sayfada
+            Turkce bir kelime (2026-08-31 ekran goruntusu). `example.com` RFC
+            2606'da bu is icin ayrilmis alan adidir, yani cevrilmesi gerekmiyor.
+            Yerel kismi da bilerek "name": ilk denemem "ad@" idi ve o da Turkce
+            bir sozcuk -- yani ayni hatayi tekrarliyordu. Alti dilli bir arayuzde
+            her sozcuk birinin dili; "name@example.com" en azindan yaygin bir
+            yer tutucu kalibi ve okuyan onu bir ornek olarak taniyor.
+            `hardcoded-copy` mandali bunu yakalamaz: o iki dilli ternary arar,
+            tek dilli sabit metni degil.
           */}
           <label className="flex flex-col gap-1.5">
             <span className="id-eyebrow text-gray-400">
@@ -71,11 +82,19 @@ export default function ManageLookupForm() {
               inputMode="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="ornek@email.com"
+              placeholder="name@example.com"
               className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-sm"
               required
             />
           </label>
+          {/*
+            Yer tutucu ONALTILIK: rezervasyon kimliği bir UUID ve kod onun ilk 8
+            hanesi, yani içinde yalnızca 0-9 ve a-f geçer. Önceki örnek
+            "ABC12345" idi ve oradaki G-Z kodda hiç çıkmayacak harflerdi --
+            misafire kodunun alabileceği değerler hakkında yanlış bir şey
+            söylüyordu. Yorum etiketin DIŞINDA: `input-labels` mandalı girdiden
+            400 karakter geriye bakıp sarmalayan <label> arıyor.
+          */}
           <label className="flex flex-col gap-1.5">
             <span className="id-eyebrow text-gray-400">
               {t("bookingId")}
@@ -92,11 +111,23 @@ export default function ManageLookupForm() {
               type="text"
               value={bookingId}
               onChange={(e) => setBookingId(e.target.value)}
-              placeholder="ABC12345"
+              placeholder="D8A7FF57"
               className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-sm font-mono font-bold uppercase"
               required
             />
           </label>
+          {/*
+            Kodun NEREDE olduğunu söyleyen tek cümle. Hesapsız misafirin bu
+            sayfaya gelmesinin sebebi zaten kodunu aramak olabilir; "Rezervasyon
+            bulunamadı" hatası ona nereye bakacağını söylemiyordu, çünkü hata
+            yanlış kod ile yanlış e-postayı ayırt edemiyor. Büyük/küçük harf
+            uyarısı da bilerek burada: sunucu `normalizeBookingCode` ile zaten
+            küçültüyor, ama misafir bunu bilmeden kendi yazımından şüphe ediyor.
+            Etiketin DIŞINDA: `input-labels` mandalı girdiden 400 karakter
+            geriye bakıp sarmalayan <label> arıyor, araya giren metin onu
+            pencerenin dışına itiyor.
+          */}
+          <p className="-mt-2 text-xs text-gray-400">{t("bookingIdHint")}</p>
           <button
             type="submit"
             disabled={loading}

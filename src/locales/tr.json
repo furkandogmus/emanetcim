@@ -457,6 +457,7 @@
     "bookingCodeLabel": "Rezervasyon Kodu",
     "email": "E-posta",
     "bookingId": "Rezervasyon Kodu",
+    "bookingIdHint": "Kod, rezervasyon onay e-postanızda. 8 karakter, büyük/küçük harf farketmez.",
     "cityFallback": "İstanbul",
     "searchTitle": "{query} Yakınındaki Emanet Noktaları",
     "searchDescription": "{query} bölgesinde güvenli ve sigortalı valiz depolama alanlarını bulun.",

@@ -448,6 +448,7 @@
     "bookingCodeLabel": "Buchungscode",
     "email": "E-Mail",
     "bookingId": "Buchungscode",
+    "bookingIdHint": "Der Code steht in Ihrer Buchungsbestätigung per E-Mail. 8 Zeichen, Groß-/Kleinschreibung egal.",
     "cityFallback": "Istanbul",
     "searchTitle": "Gepäckaufbewahrung in {query}",
     "searchDescription": "Finden Sie sichere und versicherte Gepäckaufbewahrungsorte im {query}-Gebiet.",

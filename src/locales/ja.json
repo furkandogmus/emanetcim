@@ -448,6 +448,7 @@
     "bookingCodeLabel": "予約コード",
     "email": "電子メール",
     "bookingId": "予約コード",
+    "bookingIdHint": "コードは予約確認メールに記載されています。8文字、大文字・小文字は区別しません。",
     "cityFallback": "イスタンブール",
     "searchTitle": "{query} 近くの保管ポイント",
     "searchDescription": "{query} エリアにある安全で保険付きの荷物保管場所を見つけてください。",

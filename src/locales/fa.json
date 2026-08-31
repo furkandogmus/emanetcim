@@ -448,6 +448,7 @@
     "bookingCodeLabel": "کد رزرو",
     "email": "ایمیل",
     "bookingId": "کد رزرو",
+    "bookingIdHint": "کد در ایمیل تایید رزرو شما آمده است. ۸ نویسه، بزرگی و کوچکی حروف مهم نیست.",
     "cityFallback": "استانبول",
     "searchTitle": "محل‌های نگهداری چمدان نزدیک {query}",
     "searchDescription": "نگهداری امن و بیمه‌شده چمدان در منطقه {query}.",
