@@ -3,7 +3,7 @@
  */
 import { useState } from "react";
 import { describe, it, expect, afterEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
 
 /**
@@ -74,5 +74,42 @@ describe("useModalBehavior — açılışta odak", () => {
 
     rerender(<MinimalDialog open onClose={() => {}} />);
     expect(document.activeElement).toBe(second);
+  });
+});
+
+/**
+ * IKI DIYALOG AYNI ANDA DOM'DA: hangisi ETKIN?
+ *
+ * NEDEN (2026-08-31'de canlida olculdu): hook `[role="dialog"]` sonucunun
+ * SONUNCUSUNU aliyordu. Ana sayfada iki `BottomSheet` var (birakis + alis) ve
+ * ikisi de kapaliyken bile DOM'da duruyor; kapali olan `inert`. Kullanici
+ * BIRINCIYI acinca odak IKINCININ ilk ogesine tasinmaya calisiliyor, o oge
+ * `inert` icinde oldugu icin odaklanamiyor ve odak tetikleyicide kaliyor.
+ * Ekran okuyucu kullanicisi acisindan "dugmeye bastim, bir sey olmadi".
+ */
+describe("useModalBehavior — birden fazla diyalog", () => {
+  it("odagi `inert` OLMAYAN diyaloga tasir", async () => {
+    const kapali = document.createElement("div");
+    kapali.setAttribute("inert", "");
+    kapali.innerHTML = '<div role="dialog"><button>kapali-dugme</button></div>';
+
+    const acik = document.createElement("div");
+    acik.innerHTML = '<div role="dialog"><button>acik-dugme</button></div>';
+
+    // Kapali olan DOM'da SONRA geliyor: eski kod onu secerdi.
+    document.body.append(acik, kapali);
+
+    function Test() {
+      useModalBehavior({ open: true, onClose: () => {} });
+      return null;
+    }
+    render(<Test />);
+
+    await waitFor(() => {
+      expect((document.activeElement as HTMLElement)?.textContent).toBe("acik-dugme");
+    });
+
+    acik.remove();
+    kapali.remove();
   });
 });

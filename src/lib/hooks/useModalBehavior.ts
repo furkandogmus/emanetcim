@@ -57,6 +57,31 @@ export function useModalBehavior({
    * yeniden kuruluyor.
    */
   const onCloseRef = useRef(onClose);
+/**
+ * ETKIN diyalogu bulur -- DOM'daki sonuncuyu degil.
+ *
+ * NEDEN (2026-08-31'de olculdu): hook `querySelectorAll('[role="dialog"]')`
+ * sonucunun SONUNCUSUNU aliyordu. Ana sayfada iki `BottomSheet` var (birakis
+ * ve alis tarih secicileri) ve ikisi de KAPALIYKEN BILE DOM'da duruyor --
+ * kapali olan `inert` ile erisilebilirlik agacindan cikarilmis halde.
+ *
+ * Sonuc: kullanici BIRINCI seciciyi aciyor, hook odagi IKINCININ (kapali,
+ * `inert`) ilk ogesine tasimaya calisiyor ve `inert` icindeki bir oge
+ * odaklanamadigi icin odak tetikleyici dugmede kaliyor. Olculdu: panel
+ * acildiktan sonra `document.activeElement` hala "Birakis" dugmesi.
+ *
+ * Ekran okuyucu kullanicisi acisindan bu, "dugmeye bastim ama bir sey
+ * olmadi" demek. Ayni hata Tab tuzagini da yanlis diyaloga bagliyordu.
+ *
+ * `inert` iceren bir ata varsa o diyalog etkin degildir; filtre bu.
+ */
+function etkinDiyalog(): HTMLElement | null {
+  const hepsi = [...document.querySelectorAll<HTMLElement>('[role="dialog"]')];
+  const etkinler = hepsi.filter((d) => !d.closest("[inert]"));
+  const liste = etkinler.length > 0 ? etkinler : hepsi;
+  return liste[liste.length - 1] ?? null;
+}
+
   useEffect(() => {
     onCloseRef.current = onClose;
   });
@@ -77,8 +102,7 @@ export function useModalBehavior({
       }
       if (e.key !== "Tab") return;
 
-      const dialogs = document.querySelectorAll<HTMLElement>('[role="dialog"]');
-      const dialog = dialogs[dialogs.length - 1];
+      const dialog = etkinDiyalog();
       if (!dialog) return;
 
       const focusable = dialog.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
@@ -97,8 +121,7 @@ export function useModalBehavior({
     };
     document.addEventListener("keydown", onKeyDown);
 
-    const dialogsOnOpen = document.querySelectorAll<HTMLElement>('[role="dialog"]');
-    const dialogOnOpen = dialogsOnOpen[dialogsOnOpen.length - 1];
+    const dialogOnOpen = etkinDiyalog();
     if (dialogOnOpen && !dialogOnOpen.contains(document.activeElement)) {
       const firstFocusable = dialogOnOpen.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
       firstFocusable?.focus();

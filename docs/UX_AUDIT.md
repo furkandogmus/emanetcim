@@ -154,6 +154,7 @@ tarayıcıda oturumu sen açarsan aynı sekmeden devam edilebilir.
 | 47 | Push bildirimine tıklayan ana sayfaya düşüyor | Push | ✅ DÜZELTİLDİ |
 | 48 | Web push uçtan uca ÖLÜ: `sendPush` hiç çağrılmıyor | Push | ⏳ KARAR BEKLİYOR |
 | 49 | Dil değiştirince arama konumu kayboluyor | Gezinme | ✅ DÜZELTİLDİ |
+| 50 | Modal açılınca odak içeri taşınmıyor (yanlış diyalog seçiliyor) | Ekran okuyucu | ✅ DÜZELTİLDİ |
 | 101 | Haritada OpenStreetMap atfı hiç görünmüyordu | Arama + partner konum seçici | ✅ DÜZELTİLDİ (diğer agent) |
 | 102 | Altlık otomasyon tarayıcısında hiç boyanmıyor | Arama haritası | ✅ SORUN YOK — boyama zamanlaması sanrısı |
 | 103 | Kamera çalışmazsa esnaf valizi HİÇ teslim alamıyordu | Esnaf paneli | ✅ DÜZELTİLDİ (diğer agent) |
@@ -993,6 +994,44 @@ Aramasını kaybetmesi, dil değiştirmenin bedeli olmamalı.
 ve Next'te statik sayfalarda Suspense sınırını zorunlu kılar — bu bileşen ise
 **her sayfanın başlığında**. `onChange` içinde `window.location` okumak olay
 anındadır ve o kısıtı hiç doğurmuyor.
+
+### 50. Modal açılınca odak içeri girmiyordu
+
+Ölçüldü: tarih seçici açıldıktan sonra `document.activeElement` hâlâ
+tetikleyici düğme ("Bırakış"). `aria-modal="true"` bir diyalog için beklenen,
+odağın içeri taşınmasıdır; taşınmayınca ekran okuyucu kullanıcısı açısından
+sonuç "düğmeye bastım ama bir şey olmadı" oluyor.
+
+Sebep `useModalBehavior` içinde:
+
+```js
+const dialogs = document.querySelectorAll('[role="dialog"]');
+const dialog  = dialogs[dialogs.length - 1];   // DOM'daki SONUNCU
+```
+
+Ana sayfada **iki** `BottomSheet` var (bırakış + alış) ve ikisi de kapalıyken
+bile DOM'da duruyor — kapalı olan `inert` ile erişilebilirlik ağacından
+çıkarılmış. Kullanıcı birinciyi açınca hook odağı **ikincinin** ilk ögesine
+taşımaya çalışıyor; o öge `inert` içinde olduğu için odaklanamıyor ve odak
+tetikleyicide kalıyor. Aynı hata Tab tuzağını da yanlış diyaloğa bağlıyordu.
+
+Düzeltme: `inert` bir ata taşıyan diyaloglar elenerek **etkin** olan seçiliyor.
+Regresyon testi eklendi (kapalı diyalog DOM'da sonra gelecek şekilde kuruldu —
+eski kod o testi geçemez).
+
+### YANLIŞ ALARM — kayda geçiyor
+
+Bu bulguya giderken önce şunu "ciddi hata" sandım: *"ana sayfada kapalıyken
+bile iki `aria-modal` diyalog var, içlerinde 229 odaklanabilir kontrol; klavye
+kullanıcısı görünmeyen bir takvimin içinden geçiyor."*
+
+**Yanlıştı.** `BottomSheet` kapalı sarmalayıcıya `inert` + `aria-hidden`
+veriyor. Kesin test: panel kapalıyken **40 kez Tab, diyaloğa giren durak
+sayısı 0**. Beni yanıltan `checkVisibility`, `inert`'i hesaba katmıyor.
+
+Bunu silmek yerine yazıyorum çünkü ölçüm aracının kendi kör noktası da
+denetimin parçası: `checkVisibility` görünürlüğü söyler, **erişilebilirliği
+söylemez**.
 
 ### Geri/ileri tuşu — SAĞLIKLI
 
