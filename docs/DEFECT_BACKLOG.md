@@ -10,6 +10,49 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-08-31 — talep noktası kapsamında 16 şehirlik boşluk (üretimde ölçülerek bulundu)
+
+Nokta listesi 482'de "tamam" sayılıyordu. Üretimde farklı alfabelerden on şehir
+için arama yapıldığında **Moskova ve Tel Aviv sıfır nokta** döndürdü; ardından
+liste sistematik tarandı ve 16 şehrin hiç olmadığı çıktı. Liste 482'den **524 nokta /
+268 şehre** çıktı (+42 nokta, +16 şehir).
+
+- **En dikkat çekeni İRAN.** Ürün Farsça arayüz taşıyor (`src/locales/fa.json`,
+  altı dilden biri) ama tek bir İran şehri yoktu. Bir dili desteklemek, o dili
+  konuşanın arayacağı yerlerde nokta bulundurmayı da gerektiriyor; aksi hâlde
+  arayüz çevrilmiş ama ürün o kullanıcı için boş oluyor. Tahran, İsfahan, Şiraz
+  eklendi.
+- Diğerleri: Moskova, St. Petersburg, Tel Aviv, Kalkuta, Chennai, Bengaluru,
+  Guangzhou, Shenzhen, Chengdu, Kiev, Houston, Dallas, Atlanta.
+- **Kudüs bilerek eklenmedi**: statüsü tartışmalı ve bir emanet noktası listesi
+  o tartışmaya girmek için doğru yer değil. Tel Aviv kapsamı zaten veriyor.
+- Adlar yine yerel dilde ve yerel alfabede (Кра́сная площадь, میدان آزادی,
+  שוק הכרמל, 广州站), son ekler de öyle — mevcut 482 noktayla aynı kural.
+
+### Kapsam denetiminin kendisi bir kez yanıldı
+
+İlk tarama "casablanca", "jakarta" ve "colombo"yu eksik gösterdi; oysa listede
+`kazablanka`, `cakarta` ve `kolombo` olarak duruyorlardı. Farklı yazımla arayan
+bir denetim **olmayan bir boşluk uydurur** — ve o boşluğu doldurmak sessizce
+çift kayıt üretirdi. Bu yüzden ekleme öncesi her anahtar gerçek listeye karşı
+tek tek sınandı ve üçü çıkarıldı.
+
+### Koordinatlar yine tahmin edilmedi
+
+Nominatim'e ileri geocode ettirildi, dönen değer yazıldı ve `addressdetails`
+ile gelen ülke kodu o an denetlendi. Tutmayan üç sorgu yeniden soruldu:
+Tel Aviv Savidor garı (hiç çözülemedi — o şehir üç yerine iki noktayla duruyor),
+Shenzhen Luohu, ve Atlanta: "downtown" sorgusu **bir bazilikaya** düşmüştü,
+"Peachtree Center" ve "Five Points" ile değiştirildi -- ve kuru çalışma, ilk
+sonucun listede KALDIĞINI gösterdi: birleştirme betiği slug'a göre tekilleştirdiği
+için üçü birden girmişti. Deftere "değiştirildi" yazıp kodda bırakmak, belgeyi
+yanlış yapardı; nokta çıkarıldı.
+
+Kapılar: `assertListIsSane` (benzersiz `fullSlug`, koordinat aralığı, geçerli
+saat dilimi) ve `--verify` (her koordinat ters geocode edilip ülke kodu
+karşılaştırılır). Ters yön bilerek: değerleri ileri geocode ürettiği için aynı
+sorguyu tekrarlamak kendi kendini onaylamak olurdu.
+
 ## 2026-08-31 — paylaşılan her BagajPark bağlantısı görselsiz çıkıyordu (üretimde ölçüldü)
 
 Üretimde ölçüldü: `/tr`, `/tr/demand`, `/tr/how-it-works`, `/tr/become-partner`
@@ -212,6 +255,41 @@ kutuları. Esnaf ekranları projenin kendi E2E yardımcılarıyla (`loginAsDemoP
 
 Ders: bir düzen sondası, **kırpan atayı ve gerçekten çizilen elemanı** hesaba katmadan
 güven vermez. Sıfır bulgu, sondanın yanlış yere baktığının da cevabıdır.
+
+## 2026-08-31 — sahiplik ve görünürlük kuralları da artık ölçülüyor
+
+Kalan iki bulgu (çapraz kiracı mühür IDOR'u ve test dükkanının rezervasyon
+alabilmesi) da kaynak taramasıyla korunuyordu (`ownership-scoping`,
+`shop-visibility-filter`). Tarama doğru fonksiyonun **çağrıldığını** doğruluyor
+ama o fonksiyonun **doğru davrandığını** doğrulamıyor: `getOperatingShopById`
+çağrılıp içinde yanlış filtre olsaydı tarama yeşil kalırdı.
+
+`src/__tests__/ownership-enforcement.integration.test.ts` gerçek satırlar
+yaratıp gerçek kuralları koşturuyor — iki esnaf, iki dükkan, gerçek bir mühür.
+
+**Mühür (3 ölçüm):** A, B'nin mührüne dokunamıyor ve mühür **dokunulmamış**
+kalıyor; B kendi mührünü işaretleyebiliyor; ADMIN sahiplik kontrolünden muaf.
+
+**Görünürlük (4 ölçüm):** test dükkanı misafir okumasından düşüyor; prelaunch
+noktası **görünüyor ama işletilen sayılmıyor** (iki filtrenin ayrıldığı tam
+nokta); pasif dükkan ikisinden de düşüyor; sağlıklı dükkan ikisinden de geçiyor.
+
+### İki açık ayrı ayrı geri konularak doğrulandı
+
+| Geri konan açık | Testin tepkisi |
+|---|---|
+| `markSealAsFaulty` sahiplik kontrolü kalksın | `promise resolved "undefined" instead of rejecting` — yani **A, B'nin mührünü başarıyla arızalı işaretledi** |
+| `getOperatingShopById` prelaunch'u elemesin | `rezervasyon ALMAMALI: expected {…} to be null` |
+
+İlkinin mesajı bu oturumun en net istismar kanıtı: hata fırlatılmadı, **işlem
+başarılı oldu**.
+
+### Durum
+
+Dört entegrasyon test dosyası, 17 ölçüm — hepsi CI'nın `postgis/postgis`
+Postgres'ine karşı her koşuda çalışıyor. Bu oturumun **dört ağır bulgusunun
+dördü** de artık kaynak taramasıyla değil, gerçek veritabanına karşı gerçek
+davranışla korunuyor; ve dördünün de "gerçekten yakalıyor" kanıtı var.
 
 ## 2026-08-31 — yetki iptali zinciri artık uçtan uca ölçülüyor
 
