@@ -1171,7 +1171,9 @@
     "couponsDeactivate": "Deaktivieren",
     "couponsActivated": "Gutschein aktiviert.",
     "couponsDeactivated": "Gutschein deaktiviert.",
-    "couponsEmpty": "Noch kein Gutschein."
+    "couponsEmpty": "Noch kein Gutschein.",
+    "disputesLabelEvidence": "Siegel-Nachweis",
+    "disputesNoPhoto": "kein Foto"
   },
   "Auth": {
     "loginTitle": "Melden Sie sich bei BagajPark an",

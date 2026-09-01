@@ -30,6 +30,17 @@ export default async function AdminDisputesPage({
           status: true,
           guest: { select: { name: true, email: true } },
           shop: { select: { name: true } },
+          /*
+            MUHUR KANITI (2026-09-01). Fotograf artik cekiliyor
+            (`SealService.uploadSealPhoto`) ama uyusmazliga bakan kimse onu
+            GOREMIYORDU -- toplanan ve kullanilmayan kanit, toplanmamis
+            kanittan yalnizca biraz iyidir. Fotografin var olma sebebi tam
+            olarak bu ekran.
+          */
+          seals: {
+            select: { id: true, sealNumber: true, bagIndex: true, bagSize: true, photoUrl: true },
+            orderBy: { bagIndex: "asc" },
+          },
         },
       },
     },
@@ -42,6 +53,7 @@ export default async function AdminDisputesPage({
     booking: {
       ...d.booking,
       totalPrice: moneyToNumber(d.booking.totalPrice),
+      seals: d.booking.seals,
       checkInTime: d.booking.checkInTime.toISOString(),
       checkOutTime: d.booking.checkOutTime.toISOString(),
     },

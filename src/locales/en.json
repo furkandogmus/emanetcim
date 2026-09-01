@@ -1171,7 +1171,9 @@
     "couponsDeactivate": "Deactivate",
     "couponsActivated": "Coupon activated.",
     "couponsDeactivated": "Coupon deactivated.",
-    "couponsEmpty": "No coupon yet."
+    "couponsEmpty": "No coupon yet.",
+    "disputesLabelEvidence": "Seal evidence",
+    "disputesNoPhoto": "no photo"
   },
   "Auth": {
     "loginTitle": "Sign in to BagajPark",

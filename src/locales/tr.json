@@ -1171,7 +1171,9 @@
     "couponsDeactivate": "Kapat",
     "couponsActivated": "Kupon açıldı.",
     "couponsDeactivated": "Kupon kapatıldı.",
-    "couponsEmpty": "Henüz kupon yok."
+    "couponsEmpty": "Henüz kupon yok.",
+    "disputesLabelEvidence": "Mühür kanıtı",
+    "disputesNoPhoto": "fotoğraf yok"
   },
   "Auth": {
     "loginTitle": "BagajPark'a Giriş Yap",

@@ -148,6 +148,33 @@ UNUTMANIN MÜMKÜN OLMASIYDI.
 - Gizlilik metni paylaşımı **söylüyor** (`Privacy.a2`: "dükkan sahipleriyle
   iletişimi yönetmek", `Privacy.a4`: iş ortakları).
 
+## 2026-09-01 — toplanan kanıt uyuşmazlık ekranında GÖRÜNMÜYORDU (aynı gün çözüldü)
+
+Kanıt fotoğrafı çekilmeye başlandıktan sonra ortaya çıkan yarım halka: fotoğraf
+`BookingSeal.photoUrl`e yazılıyordu ama **uyuşmazlığa bakan admin onu
+göremiyordu** — `/admin/disputes` sorgusu mühür satırlarını hiç yüklemiyordu.
+
+Toplanan ve kullanılamayan kanıt, toplanmamış kanıttan yalnızca biraz iyidir; ve
+fotoğrafın var olma sebebi tam olarak o ekrandı. Bu, bu kod tabanında on üç
+turdur ölçülen kalıbın aynısı — "yazıldı ama bağlanmadı" — bu sefer kaynağı
+kendi bir önceki turumdu.
+
+**Düzeltildi:** uyuşmazlık ekranı mühür kayıtlarını (numara, boy, fotoğraf)
+gösteriyor. Mühür numaraları fotoğraf OLMASA DA gösteriliyor: 2026-09-01
+öncesindeki check-in'lerde fotoğraf yok ama numara zilyetlik kaydıdır ve tek
+başına da anlamlıdır.
+
+Görsel `next/image` ile değil düz `<img>` ile çiziliyor — bilerek: `next/image`
+görseli yeniden kodlar ve boyutlandırır, oysa KANIT için istenen orijinalin
+kendisidir. Bağlantı da orijinali açıyor.
+
+### Düzeltilmeyen — karar gerektiriyor
+
+**Esnaf hâlâ kendi kanıtını göremiyor.** `Dispute` modelinde esnaf için alan yok
+ve partner dizinlerinde uyuşmazlık yüzeyi yok (bkz. 2026-09-01 — mobilden
+açılan şikâyet maddesi). Yani esnaf artık kanıt TOPLUYOR ama ne şikâyetten
+haberdar oluyor ne de topladığı kanıtı gösterebiliyor.
+
 ## 2026-09-01 — mühür KANIT FOTOĞRAFI hiç çekilmiyor (ÇÖZÜLDÜ: S3)
 
 Ürünün güven mekanizması "mühürle + fotoğrafla" ikilisi olarak anlatılıyor.

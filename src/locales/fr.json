@@ -1171,7 +1171,9 @@
     "couponsDeactivate": "Désactiver",
     "couponsActivated": "Code activé.",
     "couponsDeactivated": "Code désactivé.",
-    "couponsEmpty": "Aucun code pour l'instant."
+    "couponsEmpty": "Aucun code pour l'instant.",
+    "disputesLabelEvidence": "Preuve du scellé",
+    "disputesNoPhoto": "pas de photo"
   },
   "Auth": {
     "loginTitle": "Connectez-vous à BagajPark",

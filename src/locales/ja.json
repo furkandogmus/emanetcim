@@ -1171,7 +1171,9 @@
     "couponsDeactivate": "無効化",
     "couponsActivated": "クーポンを有効にしました。",
     "couponsDeactivated": "クーポンを無効にしました。",
-    "couponsEmpty": "まだクーポンがありません。"
+    "couponsEmpty": "まだクーポンがありません。",
+    "disputesLabelEvidence": "封印の証拠",
+    "disputesNoPhoto": "写真なし"
   },
   "Auth": {
     "loginTitle": "バガジパークにサインインする",

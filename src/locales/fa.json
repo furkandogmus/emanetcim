@@ -1171,7 +1171,9 @@
     "couponsDeactivate": "غیرفعال‌سازی",
     "couponsActivated": "کوپن فعال شد.",
     "couponsDeactivated": "کوپن غیرفعال شد.",
-    "couponsEmpty": "هنوز کوپنی وجود ندارد."
+    "couponsEmpty": "هنوز کوپنی وجود ندارد.",
+    "disputesLabelEvidence": "مدرک پلمب",
+    "disputesNoPhoto": "بدون عکس"
   },
   "Auth": {
     "loginTitle": "ورود به BagajPark",

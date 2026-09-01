@@ -18,6 +18,20 @@ interface DisputeBooking {
   status: string;
   guest: { name: string | null; email: string | null } | null;
   shop: { name: string } | null;
+  /**
+   * Teslim alma anındaki mühür kayıtları — uyuşmazlığın KANITI.
+   *
+   * `photoUrl` yalnızca ilk valizde dolar (tek çekimde birden fazla valiz
+   * görünür; aynı görseli her satıra kopyalamak olmayan bir kanıtı varmış gibi
+   * göstermek olurdu). 2026-09-01 öncesi çekilen check-in'lerde hiç yoktur.
+   */
+  seals: {
+    id: string;
+    sealNumber: number;
+    bagIndex: number;
+    bagSize: string;
+    photoUrl: string | null;
+  }[];
 }
 
 interface Dispute {
@@ -226,6 +240,60 @@ export default function AdminDisputesClient({ disputes: initial }: { disputes: D
                   <p className="text-xs text-gray-400 mb-1">{t("disputesLabelDescription")}</p>
                   <p className="text-sm text-gray-700 bg-gray-50 rounded-xl p-3">{d.description}</p>
                 </div>
+
+                {/*
+                  MUHUR KANITI. Fotograf 2026-09-01'de cekilmeye baslandi ama
+                  uyusmazliga bakan kimse onu goremiyordu -- toplanan ve
+                  kullanilmayan kanit, toplanmamis kanittan yalnizca biraz
+                  iyidir. Fotografin var olma sebebi tam olarak bu ekran.
+
+                  Muhur numaralari fotograf OLMASA DA gosteriliyor: eski
+                  check-in'lerde fotograf yok ama numara zilyetlik kaydidir ve
+                  uyusmazlikta tek basina da anlamlidir.
+                */}
+                {d.booking.seals.length > 0 && (
+                  <div>
+                    <p className="text-xs text-gray-400 mb-1">{t("disputesLabelEvidence")}</p>
+                    <div className="flex flex-wrap gap-3 rounded-xl bg-gray-50 p-3">
+                      {d.booking.seals.map((s) => (
+                        <div key={s.id} className="flex flex-col items-center gap-1">
+                          {s.photoUrl ? (
+                            <a
+                              href={s.photoUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block overflow-hidden rounded-lg border border-gray-200"
+                            >
+                              {/*
+                                DUZ `<img>`, `next/image` DEGIL -- bilerek.
+                                `next/image` gorseli yeniden kodlar ve
+                                boyutlandirir; KANIT gorseli icin istenen sey
+                                orijinalin kendisidir. Baglanti da zaten
+                                orijinali aciyor. Kucuk bir kucuk resim icin
+                                iyilestirme kazanci, kanitin degistirilmemis
+                                olmasindan onemsizdir.
+                              */}
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={s.photoUrl}
+                                alt={`#${s.sealNumber}`}
+                                className="h-20 w-20 object-cover"
+                              />
+                            </a>
+                          ) : (
+                            <div className="flex h-20 w-20 items-center justify-center rounded-lg border border-dashed border-gray-300 text-[10px] text-gray-400">
+                              {t("disputesNoPhoto")}
+                            </div>
+                          )}
+                          <span className="text-[11px] font-bold text-gray-600">
+                            #{s.sealNumber}
+                          </span>
+                          <span className="text-[10px] text-gray-400">{s.bagSize}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {d.adminNote && editId !== d.id && (
                   <div>
