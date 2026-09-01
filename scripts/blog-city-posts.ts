@@ -220,8 +220,45 @@ async function listMarkdown() {
   const cities = readPrelaunchCities();
 
   const done = cities.filter((c) => byCity.has(c.key)).length;
+  const posts = entries.reduce((n, e) => n + e.posts.length, 0);
+
+  /*
+    BASLIK BLOGU DA BURADAN URETILIYOR. Dosya her calistirmada bastan
+    yaziliyor; elle eklenen bir giris bir sonraki uretimde silinir. O yuzden
+    okuyucunun ihtiyac duydugu her sey -- sayilar, komutlar, kurallar --
+    uretimin parcasi olmak zorunda.
+  */
   console.log(`<!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->`);
-  console.log(`<!-- ${done}/${cities.length} sehir -->`);
+  console.log(`<!-- Elle duzenlemeyin; komutu yeniden calistirin. -->`);
+  console.log("");
+  console.log("# Blog içerik listesi");
+  console.log("");
+  console.log(`**${done}/${cities.length} şehir** · **${posts} yazı** (her şehir için TR + EN)`);
+  console.log("");
+  console.log("## Komutlar");
+  console.log("");
+  console.log("```bash");
+  console.log("npx tsx scripts/blog-city-posts.ts --verify    # govde, slug, gorsel ve uzunluk denetimi");
+  console.log("npx tsx scripts/blog-city-posts.ts             # kuru calisma: neyin yazilacagini gosterir");
+  console.log("npx tsx scripts/blog-city-posts.ts --apply     # veritabanina yazar (canli Postgres ister)");
+  console.log("npx tsx scripts/blog-city-posts.ts --list-md   # bu dosyayi uretir");
+  console.log("npx tsx scripts/blog-images.ts --verify        # gorsel dosyalari ve kredi bilgileri");
+  console.log("```");
+  console.log("");
+  console.log("## Kurallar");
+  console.log("");
+  console.log("1. Yazi govdesinde ham `<img>` yok; `{{img:anahtar}}` yer tutucusu kullanilir. Alt metin");
+  console.log("   ve foto krediti `content/blog/images.json`den gelir, boylece unutulamaz.");
+  console.log("2. Gorselin `cityKey`i yazinin `cityKey`i ile ayni olmali. Dogrulayici aksini");
+  console.log("   \"ILGISIZ GORSEL\" diye raporlar.");
+  console.log("3. Ticari olmayan / turetilemez lisansli gorsel indirilmez; indirme adiminda reddedilir.");
+  console.log("4. Her gorsel dosyasi 400 KB'i asmaz ve WebP'e cevrilir.");
+  console.log("5. Slug yalnizca `[a-z0-9-]` icerir. Turkce harf URL'de yuzde-kodlamaya donusur.");
+  console.log("6. Gorsel anahtari da yalnizca `[a-z0-9-]` icerir; yer tutucu regexi onu arar.");
+  console.log("7. Turkce yazilar en az 350 kelime. Kisa kalan yaziya dolgu degil, o sehre ait");
+  console.log("   gercek bir bolum eklenir.");
+  console.log("");
+  console.log("## Şehirler");
   console.log("");
   console.log("| # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |");
   console.log("|---|---|---|---|---|---|---|---|");

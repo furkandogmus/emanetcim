@@ -1,5 +1,34 @@
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 261/265 sehir -->
+<!-- Elle duzenlemeyin; komutu yeniden calistirin. -->
+
+# Blog içerik listesi
+
+**265/265 şehir** · **530 yazı** (her şehir için TR + EN)
+
+## Komutlar
+
+```bash
+npx tsx scripts/blog-city-posts.ts --verify    # govde, slug, gorsel ve uzunluk denetimi
+npx tsx scripts/blog-city-posts.ts             # kuru calisma: neyin yazilacagini gosterir
+npx tsx scripts/blog-city-posts.ts --apply     # veritabanina yazar (canli Postgres ister)
+npx tsx scripts/blog-city-posts.ts --list-md   # bu dosyayi uretir
+npx tsx scripts/blog-images.ts --verify        # gorsel dosyalari ve kredi bilgileri
+```
+
+## Kurallar
+
+1. Yazi govdesinde ham `<img>` yok; `{{img:anahtar}}` yer tutucusu kullanilir. Alt metin
+   ve foto krediti `content/blog/images.json`den gelir, boylece unutulamaz.
+2. Gorselin `cityKey`i yazinin `cityKey`i ile ayni olmali. Dogrulayici aksini
+   "ILGISIZ GORSEL" diye raporlar.
+3. Ticari olmayan / turetilemez lisansli gorsel indirilmez; indirme adiminda reddedilir.
+4. Her gorsel dosyasi 400 KB'i asmaz ve WebP'e cevrilir.
+5. Slug yalnizca `[a-z0-9-]` icerir. Turkce harf URL'de yuzde-kodlamaya donusur.
+6. Gorsel anahtari da yalnizca `[a-z0-9-]` icerir; yer tutucu regexi onu arar.
+7. Turkce yazilar en az 350 kelime. Kisa kalan yaziya dolgu degil, o sehre ait
+   gercek bir bolum eklenir.
+
+## Şehirler
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -264,7 +293,7 @@
 | 259 | CN | Guangzhou | `guangzhou` | 3 | yayında | guangzhou-guney-gari-hizli-tren-fuar-valiz | guangzhou-luggage-storage-south-station |
 | 260 | CN | Shenzhen | `shenzhen` | 2 | yayında | shenzhen-hong-kong-sinir-kapisi-kuyruk-valiz | shenzhen-luggage-storage-hong-kong-border |
 | 261 | CN | Chengdu | `chengdu` | 2 | yayında | chengdu-panda-merkezi-sabah-iki-havalimani-valiz | chengdu-luggage-storage-panda-base-morning |
-| 262 | UA | Kyiv | `kiev` | 3 | — |  |  |
-| 263 | US | Houston | `houston` | 2 | — |  |  |
-| 264 | US | Dallas | `dallas` | 2 | — |  |  |
-| 265 | US | Atlanta | `atlanta` | 2 | — |  |  |
+| 262 | UA | Kyiv | `kiev` | 3 | yayında | kiev-gece-treniyle-varis-sokaga-cikma-yasagi-valiz | kyiv-luggage-storage-overnight-train-curfew |
+| 263 | US | Houston | `houston` | 2 | yayında | houston-yeralti-tunelleri-mesai-saatinde-aciliyor-valiz | houston-luggage-storage-tunnels-business-hours |
+| 264 | US | Dallas | `dallas` | 2 | yayında | dallas-dfw-bes-terminal-dart-union-station-valiz | dallas-luggage-storage-dfw-five-terminals |
+| 265 | US | Atlanta | `atlanta` | 2 | yayında | atlanta-dunyanin-en-yogun-havalimani-uzun-aktarma-valiz | atlanta-luggage-storage-busiest-airport-layover |

@@ -449,6 +449,36 @@
     "license": "Public domain",
     "source": "https://commons.wikimedia.org/wiki/File:Athens_Plaka07.jpg"
   },
+  "atlanta-marta": {
+    "file": "/images/blog/atlanta-marta.webp",
+    "alt": {
+      "tr": "Atlanta Havalimanı'ndaki MARTA istasyonu",
+      "en": "The MARTA station at Atlanta airport"
+    },
+    "caption": {
+      "tr": "MARTA havalimanı istasyonu, Atlanta",
+      "en": "The MARTA airport station, Atlanta"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:MARTA_Airport_Station;_Atlanta_Airport.jpg",
+    "author": "DeKalb at English Wikipedia",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "atlanta"
+  },
+  "atlanta-peachtree": {
+    "file": "/images/blog/atlanta-peachtree.webp",
+    "alt": {
+      "tr": "Atlanta'da Peachtree Center'ın kuleleri",
+      "en": "The towers of Peachtree Center in Atlanta"
+    },
+    "caption": {
+      "tr": "Peachtree Center, Atlanta",
+      "en": "Peachtree Center, Atlanta"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:View_of_Peachtree_Center,_Atlanta,_GA_(46558853985).jpg",
+    "author": "Warren LeMay from Cincinnati, OH, United States",
+    "license": "CC0",
+    "cityKey": "atlanta"
+  },
   "auckland-liman": {
     "alt": {
       "en": "Auckland's harbour with the Sky Tower",
@@ -1829,6 +1859,36 @@
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Sacsayhuam%C3%A1n,_Cusco,_Per%C3%BA,_2015-07-31,_DD_05.JPG"
   },
+  "dallas-dart": {
+    "file": "/images/blog/dallas-dart.webp",
+    "alt": {
+      "tr": "Dallas'ta Union Station'da bekleyen DART aracı",
+      "en": "A DART light rail vehicle at Union Station in Dallas"
+    },
+    "caption": {
+      "tr": "DART, Union Station",
+      "en": "DART at Union Station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:19971018_05_DART_LRV_Union_Station,_Dallas,_Texas.jpg",
+    "author": "David Wilson",
+    "license": "CC BY 2.0",
+    "cityKey": "dallas"
+  },
+  "dallas-downtown": {
+    "file": "/images/blog/dallas-downtown.webp",
+    "alt": {
+      "tr": "Dallas'ta şehir merkezinin silueti",
+      "en": "The downtown Dallas skyline"
+    },
+    "caption": {
+      "tr": "Downtown, Dallas",
+      "en": "Downtown Dallas"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Downtown_skyline_from_the_Farmers_Market_of_Dallas,_Texas.jpg",
+    "author": "Drumguy8800 at English Wikipedia",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "dallas"
+  },
   "danang-ejderha-koprusu": {
     "alt": {
       "en": "The Dragon Bridge in Da Nang",
@@ -2759,6 +2819,36 @@
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Peace_Memorial_Park_and_Cenotaph,_Hiroshima,_South_view_20190417_1.jpg"
   },
+  "houston-downtown": {
+    "file": "/images/blog/houston-downtown.webp",
+    "alt": {
+      "tr": "Houston'da şehir merkezinin gökdelenleri",
+      "en": "The towers of downtown Houston"
+    },
+    "caption": {
+      "tr": "Downtown, Houston",
+      "en": "Downtown Houston"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Downtown_Houston_Skyline;_2009.jpg",
+    "author": "Hequals2henry",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "houston"
+  },
+  "houston-metrorail": {
+    "file": "/images/blog/houston-metrorail.webp",
+    "alt": {
+      "tr": "Houston'da METRORail hafif raylı aracı",
+      "en": "A METRORail light rail vehicle in Houston"
+    },
+    "caption": {
+      "tr": "METRORail, Houston",
+      "en": "METRORail, Houston"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:HoustonRail.jpeg",
+    "author": "Jbaker08",
+    "license": "Public domain",
+    "cityKey": "houston"
+  },
   "hurgada-deniz": {
     "alt": {
       "en": "A hotel beach with straw parasols at Hurghada and the bay behind it",
@@ -3403,6 +3493,36 @@
     "file": "/images/blog/kemer-tahtali.webp",
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:%D0%92%D0%B8%D0%B4_%D0%BD%D0%B0_%D0%B3%D0%BE%D1%80%D1%83_%D0%9E%D0%BB%D0%B8%D0%BC%D0%BF%D0%BE%D1%81_(%D0%A2%D0%B0%D1%85%D1%82%D0%B0%D0%BB%D1%8B)_-_panoramio.jpg"
+  },
+  "kiev-gar": {
+    "file": "/images/blog/kiev-gar.webp",
+    "alt": {
+      "tr": "Kiev'in ana tren garının binası",
+      "en": "The main railway station building in Kyiv"
+    },
+    "caption": {
+      "tr": "Kiev tren garı",
+      "en": "Kyiv railway station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Kyiv_-_Railway_Stations.JPG",
+    "author": "Віктор Полянко",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "kiev"
+  },
+  "kiev-sofya": {
+    "file": "/images/blog/kiev-sofya.webp",
+    "alt": {
+      "tr": "Kiev'de Aziz Sofya Katedrali ve çan kulesi",
+      "en": "Saint Sophia Cathedral and its bell tower in Kyiv"
+    },
+    "caption": {
+      "tr": "Aziz Sofya Katedrali, Kiev",
+      "en": "Saint Sophia Cathedral, Kyiv"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Kij%C3%B3w_-_Sob%C3%B3r_M%C4%85dro%C5%9Bci_Bo%C5%BCej_01.jpg",
+    "author": "Paweł 'pbm' Szubert (talk)",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "kiev"
   },
   "kl-petronas": {
     "alt": {
