@@ -292,7 +292,12 @@
     "sealPhotoTitle": "عکس مدرک",
     "sealPhotoOptional": "اختیاری — عکس چمدان پلمب‌شده",
     "sealPhotoAdd": "گرفتن عکس",
-    "sealPhotoChange": "تغییر"
+    "sealPhotoChange": "تغییر",
+    "bagRevisionTitle": "اصلاح تعداد چمدان",
+    "bagRevisionHint": "اگر مهمان با تعداد متفاوتی آمده، اینجا اصلاح کنید. مبلغ دوباره محاسبه می‌شود.",
+    "bagRevisionApply": "اعمال",
+    "bagRevisionDelta": "از {from} به {to} چمدان",
+    "bagRevisionSaved": "به‌روزرسانی شد. مبلغ جدید: {total}"
   },
   "Guest": {
     "heroTitle": "چمدان را بسپارید، آزاد بگردید",

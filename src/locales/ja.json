@@ -292,7 +292,12 @@
     "sealPhotoTitle": "証拠写真",
     "sealPhotoOptional": "任意 — 封印済みの荷物の写真",
     "sealPhotoAdd": "写真を撮る",
-    "sealPhotoChange": "変更"
+    "sealPhotoChange": "変更",
+    "bagRevisionTitle": "荷物の個数を修正",
+    "bagRevisionHint": "ゲストの荷物の数が違う場合はここで修正します。料金は再計算されます。",
+    "bagRevisionApply": "適用",
+    "bagRevisionDelta": "{from}個から{to}個へ",
+    "bagRevisionSaved": "更新しました。新しい合計: {total}"
   },
   "Guest": {
     "heroTitle": "荷物を預けて、身軽に街へ",

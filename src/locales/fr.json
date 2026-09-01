@@ -292,7 +292,12 @@
     "sealPhotoTitle": "Photo de preuve",
     "sealPhotoOptional": "Facultatif — une photo du bagage scellé",
     "sealPhotoAdd": "Prendre une photo",
-    "sealPhotoChange": "Changer"
+    "sealPhotoChange": "Changer",
+    "bagRevisionTitle": "Corriger le nombre de bagages",
+    "bagRevisionHint": "Si le client est venu avec un nombre différent, corrigez ici. Le prix est recalculé.",
+    "bagRevisionApply": "Appliquer",
+    "bagRevisionDelta": "de {from} à {to} bagages",
+    "bagRevisionSaved": "Mis à jour. Nouveau total : {total}"
   },
   "Guest": {
     "heroTitle": "Déposez vos bagages, explorez librement",

@@ -292,7 +292,12 @@
     "sealPhotoTitle": "Kanıt fotoğrafı",
     "sealPhotoOptional": "İsteğe bağlı — mühürlü valizin fotoğrafı",
     "sealPhotoAdd": "Fotoğraf çek",
-    "sealPhotoChange": "Değiştir"
+    "sealPhotoChange": "Değiştir",
+    "bagRevisionTitle": "Valiz sayısını düzelt",
+    "bagRevisionHint": "Misafir farklı sayıda valizle geldiyse buradan düzelt. Tutar yeniden hesaplanır.",
+    "bagRevisionApply": "Uygula",
+    "bagRevisionDelta": "{from} valizden {to} valize",
+    "bagRevisionSaved": "Güncellendi. Yeni tutar: {total}"
   },
   "Guest": {
     "heroTitle": "Valizini Güvenle Bırak, Özgürce Gez",

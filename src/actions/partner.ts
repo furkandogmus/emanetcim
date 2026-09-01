@@ -564,6 +564,54 @@ export async function setPendingBagRevisionAction(raw: unknown) {
  * teslim alınıyor, kayıt eski hâlinde kalıyordu. Prod'da izi var: `S1 M3 XL1 → 540.00`,
  * oysa aynı kurallarla 640 olmalıydı — 100 TRY eksik.
  */
+/**
+ * Valiz sayısını DOĞRUDAN düzeltir — mobil uçla simetrik.
+ *
+ * NEDEN VAR (2026-09-01'de ölçüldü): valiz revizyonu mobilde vardı
+ * (`partner_booking_detail_screen.dart`), webde HİÇ YOKTU. Üç server action
+ * (`setPendingBagRevisionAction`, `applyPendingBagRevisionAction`,
+ * `clearPendingBagRevisionAction`) yazılmış ve test edilmişti ama `.tsx`
+ * içinden ÇAĞIRAN SIFIRDI — yani web esnafı valiz sayısını hiçbir yerden
+ * değiştiremiyordu.
+ *
+ * Tezgahtaki en sık sürtünme bu: misafir 3 valiz için rezervasyon yapıp 4'le
+ * geliyor. Check-in ekranı da rezerve edilen sayıdan mühür satırı ürettiği için
+ * dördüncü valize mühür bile takılamıyordu.
+ *
+ * DOĞRUDAN yol seçildi, "öner → uygula" ikilisi değil: o ikili arada MİSAFİR
+ * ONAYI olsun diye anlamlı olurdu ama `pendingBagRevision` hiçbir misafir
+ * yüzeyinde gösterilmiyor. Onay akışı kurulursa o çift zaten hazır duruyor.
+ */
+export async function reviseBagsAction(raw: unknown) {
+  const auth = await requirePartner();
+  if (!auth.ok) return { success: false as const, error: auth.error };
+
+  const parsed = pendingBagRevisionBodySchema.safeParse(raw);
+  if (!parsed.success) {
+    return { success: false as const, error: "Errors.invalidData" };
+  }
+  const { bookingId, ...counts } = parsed.data;
+
+  const result = await bookingService.applyBagRevision(bookingId, auth.actor, {
+    counts,
+    source: "web",
+  });
+  if (!result.ok) {
+    return {
+      success: false as const,
+      error: toErrorKey(BAG_REVISION_CODE_TO_KEY, result.code),
+    };
+  }
+
+  revalidatePartnerPaths();
+  revalidatePathAllLocales(`/partner/bookings/${bookingId}`);
+  return {
+    success: true as const,
+    newTotal: result.newTotal,
+    delta: result.delta,
+  };
+}
+
 export async function applyPendingBagRevisionAction(bookingId: string) {
   const auth = await requirePartner();
   if (!auth.ok) return { success: false as const, error: auth.error };

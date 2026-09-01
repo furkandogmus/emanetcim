@@ -19,6 +19,7 @@ import { guestBookingStatusMessageKey } from "@/lib/booking-status-i18n";
 import { formatTryCurrency } from "@/lib/currency";
 import { moneyToNumber } from "@/lib/money";
 import PartnerBookingActionLinks from "@/components/partner/PartnerBookingActionLinks";
+import BagRevisionTrigger from "@/components/partner/BagRevisionTrigger";
 import type { Metadata } from "next";
 
 export async function generateMetadata({
@@ -227,6 +228,23 @@ export default async function PartnerBookingDetailPage({
             ) : null}
             {totalBags === 0 ? <li>—</li> : null}
           </ul>
+
+          {/*
+            VALIZ DUZELTME (2026-09-01). Bu islem MOBILDE vardi, WEBDE HIC
+            YOKTU: uc server action yazilmis ve test edilmisti ama `.tsx`
+            icinden cagiran SIFIRDI. Tezgahtaki en sik surtunme bu -- misafir
+            3 valiz icin rezervasyon yapip 4'le geliyor -- ve check-in ekrani
+            rezerve edilen sayidan muhur satiri urettigi icin dorduncu valize
+            muhur bile takilamiyordu.
+          */}
+          <BagRevisionTrigger
+            bookingId={booking.id}
+            status={booking.status}
+            bagCountS={booking.bagCountS}
+            bagCountM={booking.bagCountM}
+            bagCountXl={booking.bagCountXl}
+            unitPrice={moneyToNumber(booking.unitPrice)}
+          />
           <div className="mt-6 flex items-center justify-between rounded-2xl bg-orange-600 px-4 py-4 text-white shadow-lg shadow-orange-100">
             <span className="font-bold">
               {totalBags} {tGuest("bagsUnit")}

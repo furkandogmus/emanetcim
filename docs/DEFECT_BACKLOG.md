@@ -148,6 +148,40 @@ UNUTMANIN MÜMKÜN OLMASIYDI.
 - Gizlilik metni paylaşımı **söylüyor** (`Privacy.a2`: "dükkan sahipleriyle
   iletişimi yönetmek", `Privacy.a4`: iş ortakları).
 
+## 2026-09-01 — valiz sayısı düzeltmesi MOBİLDE vardı, WEBDE hiç yoktu
+
+Tezgahtaki en sık sürtünme: misafir 3 valiz için rezervasyon yapıp 4'le geliyor.
+Bu işlem mobil esnaf uygulamasında vardı
+(`partner_booking_detail_screen.dart` → `/partner/bookings/{id}/bag-revision`)
+ama **web panelinde hiçbir yerde yoktu**.
+
+Üç server action yazılmış ve test edilmişti — `setPendingBagRevisionAction`,
+`applyPendingBagRevisionAction`, `clearPendingBagRevisionAction` — ama `.tsx`
+içinden **çağıran sıfırdı**. Servis gövdesi de 2026-08-25'te zaten
+birleştirilmişti. Yani eksik olan tek şey arayüzdü.
+
+Bileşik etki: check-in ekranı mühür satırlarını **rezerve edilen** sayıdan
+üretiyor, dolayısıyla dördüncü valize mühür bile takılamıyordu.
+
+**Düzeltildi:** rezervasyon detayına valiz düzeltme diyaloğu eklendi. Doğrudan
+yol seçildi ("öner → uygula" ikilisi değil): o ikili arada MİSAFİR ONAYI olsun
+diye anlamlı olurdu ama `pendingBagRevision` hiçbir misafir yüzeyinde
+gösterilmiyor. Onay akışı kurulursa o çift zaten hazır duruyor.
+
+Diyalog fark TUTARINI göstermiyor, yalnızca valiz farkını: fiyat sunucuda
+yeniden hesaplanıyor (boy çarpanları, sigorta, `PlatformSettings`) ve istemcide
+tahmin üretmek, tezgahta misafire yanlış rakam söyletebilirdi.
+
+Tarayıcıda uçtan uca doğrulandı: 2 valiz / 160,00 TRY → 3 valiz / 240,00 TRY.
+
+### Görsel doğrulama bir hatayı yakaladı
+
+İlk yazımda `t("cancel")` çağrılmıştı ama `cancel` `Partner` değil `Common`
+altında — ekranda ham anahtar (**"Partner.cancel"**) görünüyordu. `locales`
+mandalı bunu yakalayamaz: eksik anahtar EKLENMEDİ, **var olmayan bir anahtar
+ÇAĞRILDI**. Tip denetimi, lint ve 1009 testin hiçbiri görmedi; yalnızca ekrana
+bakınca çıktı.
+
 ## 2026-09-01 — kupon indiriminin deftere HİÇ izi kalmıyordu; referans indiriminin kalıyordu
 
 Kupon `Booking.totalPrice`ı **doğrudan düşürüyor** ama indirimin kendisinden
