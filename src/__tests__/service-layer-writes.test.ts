@@ -84,7 +84,7 @@ const SERVICE_ONLY_MODELS = [
  * `user` 24→22, `verificationToken` 9→7, `session` 4→3, toplam 91→86.
  */
 const CEILINGS: Record<string, number> = {
-  account: 3,
+  account: 1,
   adminRoleChangeRequest: 5,
   analyticsEvent: 1,
   blockedIp: 1,
@@ -95,36 +95,34 @@ const CEILINGS: Record<string, number> = {
   dispute: 3,
   featureFlag: 1,
   jobRun: 2,
-  legalAcceptance: 2,
   mobilePushToken: 2,
   notificationLog: 1,
   platformSettings: 1,
-  pushSubscription: 4,
-  review: 3,
-  session: 3,
+  pushSubscription: 2,
+  review: 1,
+  session: 1,
   /*
-    7 -> 4 (2026-09-01): onay ve red govdeleri `ShopService`e tasindi. Ikisi de
-    web action'inda ve mobil admin ucunda AYRI AYRI yaziliydi ve kopyalar farkli
-    sekilde eksikti -- mobil onay esnafa hic bildirim gondermiyor, web red
-    muhurleri stoga dondurmuyordu.
-  */
-  /*
-    4 -> 3 (2026-09-01): dukkan ortalama puani hesabi `ReviewService`e toplandi;
-    `deleteReviewAction` ayni `aggregate` + `update` ikilisinin satir ici bir
-    kopyasini tasiyordu.
+    7 -> 4 -> 3 (2026-09-01): once onay/red govdeleri `ShopService`e, sonra
+    ortalama puan hesabi `ReviewService`e tasindi. Ucu de web action'inda ve
+    mobil ucta AYRI AYRI yaziliydi.
   */
   shop: 3,
   /*
-    22 -> 20 (2026-09-01): telefon guncelleme govdesi `PartnerProfileService`e
-    tasindi. Web action'inda ve mobil ucta ayri yaziliydi; mobil kopya
-    normalizasyon, gecerlilik ve cakisma kurallarinin HICBIRINI uygulamiyordu.
+    22 -> 20 -> 18 (2026-09-01): telefon guncelleme `PartnerProfileService`e,
+    hesap anonimlestirme `AccountPrivacyService`e tasindi.
   */
-  user: 20,
+  user: 18,
   verificationToken: 7,
 };
 
+/*
+  KALDIRILAN GIRDILER (2026-09-01) -- hepsi `AccountPrivacyService`e tasindi ve
+  artik servis disindan HIC yazilmiyor: `legalAcceptance`. `account`, `review` ve
+  `session` de yalnizca birer yerde kaldi.
+*/
+
 /** Toplam tavan — yeni bir MODELİN sessizce eklenmesini de yakalar. */
-const TOTAL_CEILING = 80;
+const TOTAL_CEILING = 68;
 
 /**
  * Yorumlar ayıklanır: bu dosyaların çoğunda "eskiden burada ham

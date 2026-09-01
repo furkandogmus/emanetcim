@@ -1,68 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/db";
 import { clientIpFromRequest } from "@/lib/client-ip";
-import { BookingStatus, Role } from "@prisma/client";
-import { writeAuditLog } from "@/lib/audit-log";
+import { accountPrivacyService } from "@/services/AccountPrivacyService";
 import { requireMobileUser } from "@/lib/mobile-auth";
-
-const ACTIVE_BOOKING_STATUSES: BookingStatus[] = [
-  BookingStatus.WAITING_APPROVAL,
-  BookingStatus.APPROVED,
-  BookingStatus.PENDING,
-  BookingStatus.PAID,
-  BookingStatus.CHECKED_IN,
-];
 
 async function handleDeleteRequest(req: NextRequest) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
   const user = auth.user;
 
-  if (user.role !== Role.GUEST) {
-    return NextResponse.json({ error: "forbidden" }, { status: 403 });
-  }
-
-  const activeCount = await prisma.booking.count({
-    where: { guestId: user.id, status: { in: ACTIVE_BOOKING_STATUSES } },
+  /*
+    GOVDE `AccountPrivacyService`TE (2026-09-01). Ayni is web action'inda da
+    yaziliydi -- rol kapisi, aktif rezervasyon kontrolu, alti silme,
+    `user.update` ve denetim kaydi; `ACTIVE_BOOKING_STATUSES` listesi bile iki
+    yerde tanimliydi. Iki kopya da `MobilePushToken`i atliyordu: modelde
+    `onDelete: Cascade` var ama hesap SILINMIYOR, ANONIMLESTIRILIYOR -- yani
+    cascade hic atesenmiyor ve cihaz token'lari geride kaliyordu.
+  */
+  const result = await accountPrivacyService.anonymizeSelf({
+    userId: user.id,
+    role: user.role,
+    ip: clientIpFromRequest(req),
+    auditAction: "account.anonymize_self_mobile",
   });
-
-  if (activeCount > 0) {
-    return NextResponse.json(
-      { error: "Active bookings exist" },
-      { status: 400 }
-    );
+  if (!result.ok) {
+    return result.reason === "not_guest"
+      ? NextResponse.json({ error: "forbidden" }, { status: 403 })
+      : NextResponse.json({ error: "Active bookings exist" }, { status: 400 });
   }
-
-  const ip = clientIpFromRequest(req);
-
-  const anonEmail = `gdpr_${user.id.replace(/-/g, "").slice(0, 20)}@invalid.local`;
-
-  await prisma.$transaction([
-    prisma.session.deleteMany({ where: { userId: user.id } }),
-    prisma.account.deleteMany({ where: { userId: user.id } }),
-    prisma.review.deleteMany({ where: { guestId: user.id } }),
-    prisma.legalAcceptance.deleteMany({ where: { userId: user.id } }),
-    prisma.pushSubscription.deleteMany({ where: { userId: user.id } }),
-    prisma.user.update({
-      where: { id: user.id },
-      data: {
-        email: anonEmail,
-        phone: null,
-        name: null,
-        image: null,
-        passwordHash: null,
-      },
-    }),
-  ]);
-
-  writeAuditLog({
-    actorUserId: user.id,
-    actorRole: "GUEST",
-    action: "account.anonymize_self_mobile",
-    entityType: "User",
-    entityId: user.id,
-    ip,
-  });
 
   return NextResponse.json({ success: true });
 }

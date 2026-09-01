@@ -10,6 +10,52 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-09-01 — hesap anonimleştirmesi mobil cihaz token'ını geride bırakıyordu (KVKK silme hakkı)
+
+Hesap anonimleştirme yolu (`account-privacy.ts` ve mobil `account/delete`) altı
+şeyi temizliyordu: `Session`, `Account`, `Review`, `LegalAcceptance`,
+`PushSubscription` ve `User` alanları (e-posta, telefon, ad, görsel, parola).
+
+**`MobilePushToken` listede yoktu.** Modelde `onDelete: Cascade` var ama hesap
+SİLİNMİYOR, ANONİMLEŞTİRİLİYOR (`user.update`) — yani cascade hiç ateşlenmiyor.
+Cihaz token'ları anonimleştirilmiş kullanıcıya bağlı kalıyordu.
+
+Neden önemli: cihaz token'ı kişisel veridir ve anonimleştirmeden sağ çıkan **tek
+tanımlayıcıdır** — anonimleştirilmiş hesabı gerçek bir cihaza yeniden
+bağlayabilir. Üstelik o token'lar hiçbir işe de yaramıyor: gönderim kodu hiç
+yazılmamış (bkz. `2026-09-01 — push bildirimi` commit'i). Yani karşılığı olmayan
+bir amaç için toplanan veri, silme talebinden de sağ çıkıyordu.
+
+`PushSubscription` zaten siliniyordu, yani niyet açıktı; `MobilePushToken`
+sonradan eklenmiş ve **iki silme yolu da** güncellenmemişti.
+
+**Düzeltildi** — her iki taşıyıcıda. Asıl koruma ise mandal: kullanıcıya bağlı
+her tablo (`userId`/`guestId`/`ownerId`/`actorUserId`) ya silinenler listesinde
+ya da GEREKÇESİYLE saklananlar listesinde olmak zorunda
+(`src/__tests__/account-erasure-coverage.test.ts`). Kusur unutulan tablo değil,
+UNUTMANIN MÜMKÜN OLMASIYDI.
+
+### Gözden geçirilmeli — karar gerektiriyor
+
+- **`AnalyticsEvent.userId` anonimleştirmeden sağ çıkıyor.** Saklanmasının
+  gerekçesi zayıf: ürün analitiği kullanıcı kimliği olmadan da çalışır. Silmek
+  mi, `userId`yi boşaltmak mı (olay kalır, kimlik gider) — karar ürün
+  sahibinindir. Şimdilik mandalda "saklanan" olarak, bu notla işaretlendi.
+- **Esnafa özel hiçbir hukuki belge yok.** Tanımlı belge yalnızca iki tane:
+  `terms` ve `privacy` (`src/lib/legal-versions.ts`). Esnaf, misafirle
+  TAM AYNI iki tüketici belgesini kabul ederek kaydoluyor
+  (`register.ts:194`) — ortaklık sözleşmesi, veri işleyen sözleşmesi ya da
+  emanet/sorumluluk şartları yok. Misafirin adı, telefonu ve e-postası esnafa
+  gösteriliyor. Hukuk danışmanına sorulmalı.
+
+### Kusur BULUNMAYANLAR (aynı taramada denetlendi)
+
+- Veri minimizasyonu **iyi**: mobil esnaf uçları misafirden yalnızca `name`
+  alıyor; web tarafı da dar seçim yapıyor (`name`, `phone`, gerektiğinde `email`).
+- İki silme yolu birbiriyle **tutarlı** — aynı altı işlemi yapıyorlardı.
+- Gizlilik metni paylaşımı **söylüyor** (`Privacy.a2`: "dükkan sahipleriyle
+  iletişimi yönetmek", `Privacy.a4`: iş ortakları).
+
 ## 2026-09-01 — mühür KANIT FOTOĞRAFI hiç çekilmiyor; ürün üç yerde vaat ediyor
 
 Ürünün güven mekanizması "mühürle + fotoğrafla" ikilisi olarak anlatılıyor.

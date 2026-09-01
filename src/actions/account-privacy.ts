@@ -2,19 +2,9 @@
 
 import { getClientIpOrNull } from "@/lib/client-ip";
 
-import prisma from "@/lib/db";
-import { BookingStatus, Role } from "@prisma/client";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
-import { writeAuditLog } from "@/lib/audit-log";
+import { accountPrivacyService } from "@/services/AccountPrivacyService";
 import { requireUser } from "@/lib/action-auth";
-
-const ACTIVE_BOOKING_STATUSES: BookingStatus[] = [
-  BookingStatus.WAITING_APPROVAL,
-  BookingStatus.APPROVED,
-  BookingStatus.PENDING,
-  BookingStatus.PAID,
-  BookingStatus.CHECKED_IN,
-];
 
 /**
  * KVKK: misafir hesabını anonimleştirir (aktif rezervasyon yoksa).
@@ -29,48 +19,27 @@ export async function anonymizeGuestAccountAction(): Promise<
     dukkan ve denetim izini de etkiler, o yol admin panelindedir. Bu bir ROL
     KAPISI degil, ALAN kurali — kapidan gecmis aktor uzerinde uygulanir.
   */
-  if (auth.actor.role !== Role.GUEST) {
-    return { success: false, error: "Errors.unauthorized" };
-  }
-
-  const userId = auth.actor.id;
-
-  const activeCount = await prisma.booking.count({
-    where: { guestId: userId, status: { in: ACTIVE_BOOKING_STATUSES } },
+  /*
+    GOVDE `AccountPrivacyService`TE. Ayni is mobil ucta da yaziliydi -- rol
+    kapisi, aktif rezervasyon kontrolu, alti silme, `user.update` ve denetim
+    kaydi; `ACTIVE_BOOKING_STATUSES` listesi bile iki yerde tanimliydi. Iki
+    kopya da `MobilePushToken`i atliyordu. Burada kalan tek is oturum cozumu,
+    hata anahtari eslemesi ve `revalidate`.
+  */
+  const result = await accountPrivacyService.anonymizeSelf({
+    userId: auth.actor.id,
+    role: auth.actor.role,
+    ip: await getClientIpOrNull(),
   });
-  if (activeCount > 0) {
-    return { success: false, error: "Errors.accountDeleteActiveBookings" };
+  if (!result.ok) {
+    return {
+      success: false,
+      error:
+        result.reason === "not_guest"
+          ? "Errors.unauthorized"
+          : "Errors.accountDeleteActiveBookings",
+    };
   }
-  const ip = await getClientIpOrNull();
-
-  const anonEmail = `gdpr_${userId.replace(/-/g, "").slice(0, 20)}@invalid.local`;
-
-  await prisma.$transaction([
-    prisma.session.deleteMany({ where: { userId } }),
-    prisma.account.deleteMany({ where: { userId } }),
-    prisma.review.deleteMany({ where: { guestId: userId } }),
-    prisma.legalAcceptance.deleteMany({ where: { userId } }),
-    prisma.pushSubscription.deleteMany({ where: { userId } }),
-    prisma.user.update({
-      where: { id: userId },
-      data: {
-        email: anonEmail,
-        phone: null,
-        name: null,
-        image: null,
-        passwordHash: null,
-      },
-    }),
-  ]);
-
-  writeAuditLog({
-    actorUserId: userId,
-    actorRole: "GUEST",
-    action: "account.anonymize_self",
-    entityType: "User",
-    entityId: userId,
-    ip,
-  });
 
   revalidatePathAllLocales("/");
   return { success: true };
