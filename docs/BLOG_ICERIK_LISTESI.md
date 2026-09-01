@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| Yazısı olan şehir | **117 / 265** — Türkiye'nin 39 şehri tamamlandı |
+| Yazısı olan şehir | **123 / 265** — Türkiye'nin 39 şehri tamamlandı |
 | Yayına yazma | `npx tsx scripts/blog-city-posts.ts --apply` (kuru çalışma varsayılan) |
 | Denetim | `npx tsx scripts/blog-city-posts.ts --verify` + `npx tsx scripts/blog-images.ts --verify` |
 | Eksik listesi | `npx tsx scripts/blog-city-posts.ts --coverage` |
@@ -63,7 +63,7 @@ alakasız olabilir.
 
 <!-- Aşağısı üretilmiştir: npx tsx scripts/blog-city-posts.ts --list-md -->
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 117/265 sehir -->
+<!-- 123/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -189,12 +189,12 @@ alakasız olabilir.
 | 120 | ME | Kotor | `kotor` | 1 | yayında | kotor-surlara-1350-basamak-valiz | kotor-luggage-storage-1350-steps |
 | 121 | LV | Riga | `riga` | 1 | yayında | riga-vecriga-tas-pazar-valiz | riga-luggage-storage-old-town-market |
 | 122 | LT | Vilnius | `vilnius` | 1 | yayında | vilnius-eski-sehir-buyuk-uzupis-valiz | vilnius-luggage-storage-old-town-uzupis |
-| 123 | EE | Tallinn | `tallinn` | 1 | — |  |  |
-| 124 | FR | Nice | `nice` | 2 | — |  |  |
-| 125 | FR | Marseille | `marsilya` | 2 | — |  |  |
-| 126 | FR | Lyon | `lyon` | 2 | — |  |  |
-| 127 | FR | Bordeaux | `bordeaux` | 1 | — |  |  |
-| 128 | FR | Strasbourg | `strasbourg` | 1 | — |  |  |
+| 123 | EE | Tallinn | `tallinn` | 1 | yayında | tallinn-toompea-iki-merdiven-feribot-valiz | tallinn-luggage-storage-toompea-stairs |
+| 124 | FR | Nice | `nice` | 2 | yayında | nice-sahil-treni-monako-eze-valiz | nice-luggage-storage-coastal-train |
+| 125 | FR | Marseille | `marsilya` | 2 | yayında | marsilya-saint-charles-merdiven-panier-valiz | marseille-luggage-storage-saint-charles-steps |
+| 126 | FR | Lyon | `lyon` | 2 | yayında | lyon-traboule-iki-gar-valiz | lyon-luggage-storage-traboules-two-stations |
+| 127 | FR | Bordeaux | `bordeaux` | 1 | yayında | bordeaux-saint-jean-uc-kilometre-valiz | bordeaux-luggage-storage-saint-jean |
+| 128 | FR | Strasbourg | `strasbourg` | 1 | yayında | strasbourg-grande-ile-noel-pazari-valiz | strasbourg-luggage-storage-grande-ile-christmas-market |
 | 129 | FR | Cannes | `cannes` | 1 | — |  |  |
 | 130 | MC | Monako | `monako` | 1 | — |  |  |
 | 131 | GE | Batumi | `batum` | 1 | — |  |  |

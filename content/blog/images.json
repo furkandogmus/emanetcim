@@ -509,6 +509,36 @@
     "license": "CC BY-SA 2.0",
     "cityKey": "bodrum"
   },
+  "bordeaux-miroir": {
+    "file": "/images/blog/bordeaux-miroir.webp",
+    "alt": {
+      "tr": "Place de la Bourse ve önündeki su aynası",
+      "en": "The Place de la Bourse and the water mirror in front of it"
+    },
+    "caption": {
+      "tr": "Miroir d'eau, Bordeaux",
+      "en": "The Miroir d'eau, Bordeaux"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Miroir_d%27eau_place_de_la_bourse_%C3%A0_Bordeaux.jpg",
+    "author": "Calabri",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "bordeaux"
+  },
+  "bordeaux-saint-jean": {
+    "file": "/images/blog/bordeaux-saint-jean.webp",
+    "alt": {
+      "tr": "Bordeaux-Saint-Jean garının cephesi",
+      "en": "The frontage of Bordeaux-Saint-Jean station"
+    },
+    "caption": {
+      "tr": "Bordeaux-Saint-Jean",
+      "en": "Bordeaux-Saint-Jean station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Bordeaux_-_Gare_Saint-Jean_1.jpg",
+    "author": "Christophe.Finot",
+    "license": "CC BY-SA 2.5",
+    "cityKey": "bordeaux"
+  },
   "brasov-piata-sfatului": {
     "file": "/images/blog/brasov-piata-sfatului.webp",
     "alt": {
@@ -2054,6 +2084,36 @@
     "license": "CC BY 2.0",
     "cityKey": "luzern"
   },
+  "lyon-fourviere": {
+    "file": "/images/blog/lyon-fourviere.webp",
+    "alt": {
+      "tr": "Lyon'da Fourvière tepesi ve altındaki eski şehir",
+      "en": "The Fourviere hill in Lyon and the old town below it"
+    },
+    "caption": {
+      "tr": "Fourvière, Lyon",
+      "en": "Fourviere, Lyon"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Fourviere_Lyon.jpg",
+    "author": "Elwood j blues",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "lyon"
+  },
+  "lyon-part-dieu": {
+    "file": "/images/blog/lyon-part-dieu.webp",
+    "alt": {
+      "tr": "Lyon Part-Dieu garının girişi",
+      "en": "The entrance to Lyon Part-Dieu station"
+    },
+    "caption": {
+      "tr": "Lyon Part-Dieu",
+      "en": "Lyon Part-Dieu station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Entr%C3%A9e_gare_Part-Dieu_Lyon.JPG",
+    "author": "Bilinmiyor",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "lyon"
+  },
   "madrid-atocha": {
     "file": "/images/blog/madrid-atocha.webp",
     "alt": {
@@ -2234,6 +2294,36 @@
     "license": "CC BY 4.0",
     "cityKey": "marmaris"
   },
+  "marsilya-saint-charles": {
+    "file": "/images/blog/marsilya-saint-charles.webp",
+    "alt": {
+      "tr": "Marseille-Saint-Charles garının peronları",
+      "en": "The platforms at Marseille-Saint-Charles station"
+    },
+    "caption": {
+      "tr": "Marseille-Saint-Charles",
+      "en": "Marseille-Saint-Charles station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Marseille_-_Gare_de_Marseille_Saint-Charles_(16443395531).jpg",
+    "author": "Fred Romero from Paris, France",
+    "license": "CC BY 2.0",
+    "cityKey": "marsilya"
+  },
+  "marsilya-vieux-port": {
+    "file": "/images/blog/marsilya-vieux-port.webp",
+    "alt": {
+      "tr": "Marsilya'da Vieux-Port ve tekneler",
+      "en": "The Vieux-Port in Marseille with its boats"
+    },
+    "caption": {
+      "tr": "Vieux-Port, Marsilya",
+      "en": "The Vieux-Port, Marseille"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Marseille_Old_Port.jpg",
+    "author": "Ingo Mehling",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "marsilya"
+  },
   "mersin-kizkalesi": {
     "file": "/images/blog/mersin-kizkalesi.webp",
     "alt": {
@@ -2413,6 +2503,36 @@
     "author": "TatsuoTabei",
     "license": "Public domain",
     "cityKey": "napoli"
+  },
+  "nice-cours-saleya": {
+    "file": "/images/blog/nice-cours-saleya.webp",
+    "alt": {
+      "tr": "Vieux Nice'te Cours Saleya pazarı ve tezgâhlar",
+      "en": "The Cours Saleya market and its stalls in Vieux Nice"
+    },
+    "caption": {
+      "tr": "Cours Saleya, Nice",
+      "en": "The Cours Saleya, Nice"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Nice_Cours_Saleya_10.jpg",
+    "author": "Zairon",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "nice"
+  },
+  "nice-promenade": {
+    "file": "/images/blog/nice-promenade.webp",
+    "alt": {
+      "tr": "Nice'te Promenade des Anglais ve sahil şeridi",
+      "en": "The Promenade des Anglais and the shoreline at Nice"
+    },
+    "caption": {
+      "tr": "Promenade des Anglais, Nice",
+      "en": "The Promenade des Anglais, Nice"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Nice,_Quai_des_%C3%89tats-Unis_and_Promenade_des_Anglais_FRANCE.jpg",
+    "author": "Lspigon",
+    "license": "Public domain",
+    "cityKey": "nice"
   },
   "ohrid-eski-sehir": {
     "file": "/images/blog/ohrid-eski-sehir.webp",
@@ -3223,6 +3343,66 @@
     "author": "Arild Vågen",
     "license": "CC BY-SA 4.0",
     "cityKey": "stockholm"
+  },
+  "strasbourg-katedral": {
+    "file": "/images/blog/strasbourg-katedral.webp",
+    "alt": {
+      "tr": "Strasbourg Katedrali'nin tek kuleli batı cephesi",
+      "en": "The single-towered west front of Strasbourg Cathedral"
+    },
+    "caption": {
+      "tr": "Strasbourg Katedrali",
+      "en": "Strasbourg Cathedral"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Strasbourg_Cathedral_Exterior_-_Diliff.jpg",
+    "author": "Diliff",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "strasbourg"
+  },
+  "strasbourg-petite-france": {
+    "file": "/images/blog/strasbourg-petite-france.webp",
+    "alt": {
+      "tr": "Petite France'ta su kanalı ve ahşap iskeletli evler",
+      "en": "The canal and half-timbered houses of Petite France"
+    },
+    "caption": {
+      "tr": "Petite France, Strasbourg",
+      "en": "Petite France, Strasbourg"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Stra%C3%9Fburg_(Frankreich),_Petite_France_--_2011_--_1759.jpg",
+    "author": "Dietmar Rabich",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "strasbourg"
+  },
+  "tallinn-raekoja": {
+    "file": "/images/blog/tallinn-raekoja.webp",
+    "alt": {
+      "tr": "Tallinn'de Belediye Meydanı ve çevresindeki tarihi cepheler",
+      "en": "Tallinn's Town Hall Square and the historic frontages around it"
+    },
+    "caption": {
+      "tr": "Raekoja plats, Tallinn",
+      "en": "Town Hall Square, Tallinn"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Raekoja_plats,_Tallinn.jpg",
+    "author": "Samuli Lintula User:Samulili",
+    "license": "CC BY 2.5",
+    "cityKey": "tallinn"
+  },
+  "tallinn-toompea": {
+    "file": "/images/blog/tallinn-toompea.webp",
+    "alt": {
+      "tr": "Yukarıdaki Toompea'dan aşağı şehrin çatıları",
+      "en": "The roofs of the lower town seen from Toompea above"
+    },
+    "caption": {
+      "tr": "Toompea'dan aşağı şehir",
+      "en": "The lower town from Toompea"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Tallinn_Toompea_Upper_Old_Town_2013.jpg",
+    "author": "Ivar Leidus",
+    "license": "CC BY-SA 3.0 ee",
+    "cityKey": "tallinn"
   },
   "tiran-dajti": {
     "file": "/images/blog/tiran-dajti.webp",
