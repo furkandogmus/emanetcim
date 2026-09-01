@@ -297,7 +297,9 @@
     "bagRevisionHint": "Si le client est venu avec un nombre différent, corrigez ici. Le prix est recalculé.",
     "bagRevisionApply": "Appliquer",
     "bagRevisionDelta": "de {from} à {to} bagages",
-    "bagRevisionSaved": "Mis à jour. Nouveau total : {total}"
+    "bagRevisionSaved": "Mis à jour. Nouveau total : {total}",
+    "settingsImpactHours": "Attention : {count} réservation(s) tombent hors de vos horaires. Ces clients ne pourront pas être enregistrés — contactez-les si besoin.",
+    "settingsImpactCapacity": "Attention : les bagages actuellement en garde dépassent la nouvelle capacité de {count}."
   },
   "Guest": {
     "heroTitle": "Déposez vos bagages, explorez librement",

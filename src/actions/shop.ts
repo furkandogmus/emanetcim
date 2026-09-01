@@ -6,6 +6,7 @@ import { getPricingRules } from "@/lib/platform-settings";
 import { z } from "zod";
 import { requireUser, requirePartner } from "@/lib/action-auth";
 import { shopService } from "@/services/ShopService";
+import { shopSettingsImpactService } from "@/services/ShopSettingsImpact";
 
 const hm = /^\d{1,2}:\d{2}$/;
 
@@ -63,6 +64,21 @@ export async function updateShopSettingsAction(
     }
   }
 
+  /*
+    ETKI, YAZMADAN ONCE olculuyor: yazdiktan sonra "eski saatlere gore kac
+    rezervasyon disarida kaliyordu" sorusu artik sorulamaz.
+
+    Degisiklik ENGELLENMIYOR -- esnafin saatini degistirme hakki var ve
+    dukkanini kapatmasi gerekebilir. Dogru olan sonucu SOYLEMEK, boylece esnaf
+    etkilenen misafirlere ulasabilir. Bkz. `ShopSettingsImpact`.
+  */
+  const impact = await shopSettingsImpactService.assess({
+    shopId,
+    openingTime: parsed.data.openingTime,
+    closingTime: parsed.data.closingTime,
+    capacity: parsed.data.capacity,
+  });
+
   await prisma.shop.update({
     where: { id: shopId },
     data: {
@@ -74,7 +90,7 @@ export async function updateShopSettingsAction(
   revalidatePathAllLocales("/partner");
   revalidatePathAllLocales("/partner/settings");
   revalidatePathAllLocales("/partner/bookings");
-  return { success: true };
+  return { success: true, impact };
 }
 
 /**

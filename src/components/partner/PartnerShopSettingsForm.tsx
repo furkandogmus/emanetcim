@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { Clock, Loader2, Luggage, Settings, CheckCircle, Phone, MapPin } from "lucide-react";
+import { Clock, Loader2, Luggage, Settings, CheckCircle, Phone, MapPin , AlertTriangle } from "lucide-react";
 import { updateShopSettingsAction } from "@/actions/shop";
 import { updatePartnerPhoneAction } from "@/actions/partner";
 import { isValidPartnerTrPhone } from "@/lib/netgsm";
@@ -56,6 +56,16 @@ export default function PartnerShopSettingsForm({
   const [closingTime, setClosingTime] = useState(initialClosing);
   const [pricePerDay, setPricePerDay] = useState(initialPricePerDay);
   const [partnerPhone, setPartnerPhone] = useState(initialPhone);
+  /**
+   * Ayar değişikliğinin MEVCUT rezervasyonlara etkisi (`ShopSettingsImpact`).
+   * Kayıt başarılı olsa bile gösterilir: saat daraltmak zaten kabul edilmiş
+   * rezervasyonları imkânsız hâle getirebiliyor ve esnaf bunu tezgâhta
+   * öğreniyordu.
+   */
+  const [impact, setImpact] = useState<{
+    bookingsOutsideHours: number;
+    bagsOverCapacity: number;
+  } | null>(null);
   const [location, setLocation] = useState({
     address: initialAddress,
     city: initialCity,
@@ -129,6 +139,17 @@ export default function PartnerShopSettingsForm({
         setPhoneError(errorText(shopRes.error));
         return;
       }
+      /*
+        AYAR DEGISIKLIGININ SONUCU SOYLENIYOR. Kayit basarili -- ama saat
+        daraltmak, zaten kabul edilmis rezervasyonlari IMKANSIZ hale
+        getirebiliyor: check-in kapisi `SHOP_CLOSED` doner ve misafir valiziyle
+        tezgahta reddedilir. Esnaf bunu ancak o an ogreniyordu.
+
+        Degisiklik ENGELLENMIYOR (esnafin saatini degistirme hakki var),
+        yalnizca sonucu goruniyor ki etkilenen misafirlere ulasabilsin.
+      */
+      setImpact(shopRes.impact ?? null);
+
       const phoneRes = await updatePartnerPhoneAction(partnerPhone);
       if (!phoneRes.success) {
         setPhoneError(errorText(phoneRes.error));
@@ -141,6 +162,15 @@ export default function PartnerShopSettingsForm({
       setIsUpdating(false);
     }
   };
+
+  const impactMessages = [
+    impact && impact.bookingsOutsideHours > 0
+      ? t("settingsImpactHours", { count: impact.bookingsOutsideHours })
+      : null,
+    impact && impact.bagsOverCapacity > 0
+      ? t("settingsImpactCapacity", { count: impact.bagsOverCapacity })
+      : null,
+  ].filter(Boolean) as string[];
 
   const wrap = compact ? "flex flex-col gap-6" : "flex flex-col gap-8 max-w-md mx-auto w-full";
 
@@ -282,6 +312,22 @@ export default function PartnerShopSettingsForm({
           <div className="ui-state ui-state-success flex items-center gap-2 rounded-2xl px-4 py-3">
             <CheckCircle size={16} />
             {t("settingsSaved")}
+          </div>
+        )}
+
+        {/*
+          UYARI, HATA DEGIL. Kayit basarili -- ama saat daraltmak zaten kabul
+          edilmis rezervasyonlari imkansiz hale getirebiliyor. Esnaf bunu ancak
+          tezgahta, misafir valiziyle karsisindayken ogreniyordu.
+        */}
+        {impactMessages.length > 0 && (
+          <div className="flex items-start gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            <AlertTriangle size={16} className="mt-0.5 shrink-0" />
+            <div className="space-y-1">
+              {impactMessages.map((m) => (
+                <p key={m}>{m}</p>
+              ))}
+            </div>
           </div>
         )}
 

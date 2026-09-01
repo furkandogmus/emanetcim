@@ -148,6 +148,49 @@ UNUTMANIN MÜMKÜN OLMASIYDI.
 - Gizlilik metni paylaşımı **söylüyor** (`Privacy.a2`: "dükkan sahipleriyle
   iletişimi yönetmek", `Privacy.a4`: iş ortakları).
 
+## 2026-09-01 — ayar değişikliği mevcut rezervasyonları sessizce imkânsız kılabiliyordu
+
+`updateShopSettingsAction` yalnızca BİÇİM doğruluyordu (`HH:mm` mi, kapasite
+tamsayı mı). Değişikliğin **zaten kabul edilmiş** rezervasyonlara ne yaptığını
+hiç sormuyordu.
+
+İki sessiz sonuç:
+
+1. **Saat daraltma.** Esnaf 09:00–20:00'ı 09:00–18:00 yaparsa, 19:00 check-in'li
+   mevcut rezervasyon İMKÂNSIZ hâle gelir: check-in kapısı `SHOP_CLOSED` döner
+   ve misafir valiziyle tezgâhta reddedilir. `shop-hours.ts`teki yorumun
+   anlattığı hatanın aynısı — bu sefer AYARLAR tarafından üretilmiş hâli.
+2. **Kapasite düşürme.** Rafta 4 valiz varken kapasiteyi 2'ye çekmek dükkanı
+   kendi beyan ettiği sınırın üstünde bırakır (R17'den sonra bu sayı artık
+   gerçekten anlamlı).
+
+**Düzeltildi:** kayıttan ÖNCE etki ölçülüyor ve esnafa söyleniyor. Değişiklik
+**engellenmiyor** — esnafın saatini değiştirme hakkı var ve dükkanını kapatması
+gerekebilir; onu engellemek daha kötü olurdu. Doğru olan sonucu önceden
+söylemek, böylece esnaf etkilenen misafirlere ulaşabilir.
+
+Kontrol `isShopOpenForHandover` ile yapılıyor — check-in kapısının sorduğu soru
+birebir bu. Ayrı bir saat aritmetiği yazmak iki tarafın ayrışması demek olurdu;
+`shop-hours.ts` o hatanın bir kez yaşandığını yazıyor.
+
+Gerçek veriye karşı doğrulandı (Sultanahmet, 09:00–20:00, üç gelecek rezervasyon
+10:00/15:00/19:00): değişmemiş saatte 0, 18:00'e daraltınca 1, 11:00'e daraltınca
+2 etkilenen.
+
+### Kusur BULUNMAYAN — check-out'ta saat kapısı yok, ve bu DOĞRU
+
+Check-in `SHOP_CLOSED` ile engelleniyor, check-out engellenmiyor. Bu bir
+asimetri ama kusur değil: misafirin KENDİ eşyasını saate takılıp geri
+alamaması, yeni eşya kabul etmemekten kötü olurdu.
+
+### Doğrulama notu
+
+Tarayıcıda gösterilemedi, iki sebeple: (a) `form_input` ile programatik olarak
+set edilen `<input type="time">` React state'ini tetiklemiyor, yani kayıt eski
+değerle gitti; (b) test dükkanı `open247 = true` — 7/24 dükkanda saat kısıtı
+zaten yok ve servis doğru olarak 0 döndürüyor. Sunucu tarafı yukarıdaki gerçek
+veri denemesiyle doğrulandı.
+
 ## 2026-09-01 — rafta duran valizler kapasiteden düşülmüyordu (esnaf fazla rezervasyon alıyordu)
 
 `assertCapacityTx` örtüşmeyi `checkOutTime > yeniCheckIn` ile arıyordu. Çıkış

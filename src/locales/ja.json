@@ -297,7 +297,9 @@
     "bagRevisionHint": "ゲストの荷物の数が違う場合はここで修正します。料金は再計算されます。",
     "bagRevisionApply": "適用",
     "bagRevisionDelta": "{from}個から{to}個へ",
-    "bagRevisionSaved": "更新しました。新しい合計: {total}"
+    "bagRevisionSaved": "更新しました。新しい合計: {total}",
+    "settingsImpactHours": "注意: {count}件の予約が新しい営業時間外になりました。これらのゲストはチェックインできません。連絡が必要かもしれません。",
+    "settingsImpactCapacity": "注意: 現在お預かり中の荷物が新しい上限を{count}個超えています。"
   },
   "Guest": {
     "heroTitle": "荷物を預けて、身軽に街へ",

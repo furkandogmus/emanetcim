@@ -297,7 +297,9 @@
     "bagRevisionHint": "Misafir farklı sayıda valizle geldiyse buradan düzelt. Tutar yeniden hesaplanır.",
     "bagRevisionApply": "Uygula",
     "bagRevisionDelta": "{from} valizden {to} valize",
-    "bagRevisionSaved": "Güncellendi. Yeni tutar: {total}"
+    "bagRevisionSaved": "Güncellendi. Yeni tutar: {total}",
+    "settingsImpactHours": "Dikkat: yeni saatlerin dışında kalan {count} rezervasyon var. Bu misafirler geldiğinde check-in yapılamaz — onlara ulaşmanız gerekebilir.",
+    "settingsImpactCapacity": "Dikkat: şu an rafınızdaki valiz sayısı yeni kapasiteyi {count} valiz aşıyor."
   },
   "Guest": {
     "heroTitle": "Valizini Güvenle Bırak, Özgürce Gez",

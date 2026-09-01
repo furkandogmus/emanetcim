@@ -297,7 +297,9 @@
     "bagRevisionHint": "Wenn der Gast mit einer anderen Anzahl kam, hier korrigieren. Der Preis wird neu berechnet.",
     "bagRevisionApply": "Übernehmen",
     "bagRevisionDelta": "von {from} auf {to} Stück",
-    "bagRevisionSaved": "Aktualisiert. Neue Summe: {total}"
+    "bagRevisionSaved": "Aktualisiert. Neue Summe: {total}",
+    "settingsImpactHours": "Achtung: {count} Buchung(en) liegen jetzt außerhalb deiner Zeiten. Diese Gäste können nicht eingecheckt werden — kontaktiere sie ggf.",
+    "settingsImpactCapacity": "Achtung: Die aktuell eingelagerten Stücke überschreiten die neue Kapazität um {count}."
   },
   "Guest": {
     "heroTitle": "Gepäck abgeben, die Stadt frei erkunden",

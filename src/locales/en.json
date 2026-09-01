@@ -297,7 +297,9 @@
     "bagRevisionHint": "If the guest arrived with a different number of bags, fix it here. The price is recalculated.",
     "bagRevisionApply": "Apply",
     "bagRevisionDelta": "from {from} bags to {to}",
-    "bagRevisionSaved": "Updated. New total: {total}"
+    "bagRevisionSaved": "Updated. New total: {total}",
+    "settingsImpactHours": "Heads up: {count} booking(s) now fall outside your hours. Those guests cannot be checked in — you may need to contact them.",
+    "settingsImpactCapacity": "Heads up: the bags currently in your storage exceed the new capacity by {count}."
   },
   "Guest": {
     "heroTitle": "Drop Your Bags, Explore Freely",
