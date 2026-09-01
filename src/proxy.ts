@@ -144,9 +144,36 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Matcher for i18n and Auth (Excluding static assets strictly)
+  /*
+    STATIK DOSYALAR ARA KATMANA HIC GIRMEZ.
+
+    Eski matcher statik yollari TEK TEK sayiyordu (`sw.js|manifest.json|icons/`
+    ...) ve bu liste dort yerde eksikti. Sayilmayan her statik yol i18n
+    yonlendirmesine yakalaniyordu: `/images/blog/x.webp` -> 307 ->
+    `/tr/images/blog/x.webp`.
+
+    Uretimde olculdu (2026-09-01, konteynerin icinden 127.0.0.1:3000):
+
+      /images/blog/*.webp   307 -> /tr/images/...   blog kapaklari + sehir kartlari
+      /og-image.png         307 -> /tr/og-image.png  butun paylasim kartlari
+      /push-sw.js           307 -> /tr/push-sw.js    web push worker kaydi
+      /next.svg             307 -> /tr/next.svg
+
+    Disaridan fark edilmiyordu cunku nginx `/images/*`i Next'e hic ugratmadan
+    servis ediyor. Ama `next/image` yerel dosyayi KENDI ICINDEN cekiyor, oradaki
+    307'ye takiliyor ve "The requested resource isn't a valid image" (400)
+    donuyordu. Blog listesindeki kirik kucuk resimler buydu.
+
+    Enumerasyon yerine kural: NOKTA ICEREN her yol statik dosyadir ve gecmez.
+    Uygulama rotalarinda nokta yok (blog slug'lari `[a-z0-9-]` ile sinirli;
+    `blog-city-posts.ts --verify` bunu zorunlu tutuyor). `_next/` ve
+    `monitoring` noktasiz oldugu icin ayrica yaziliyor.
+
+    Bu satiri degistirirken `proxy-static-matcher` testini de calistirin;
+    yukaridaki dort yol orada sabitlendi.
+  */
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|sw.js|manifest.json|icons/|monitoring).*)',
+    '/((?!_next/|monitoring|.*\\.).*)',
     '/',
     '/(tr|en|de|fr|ja|fa)/:path*',
   ],
