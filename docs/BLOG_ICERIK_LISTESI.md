@@ -1,5 +1,5 @@
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 243/265 sehir -->
+<!-- 249/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -246,12 +246,12 @@
 | 241 | ZA | Johannesburg | `johannesburg` | 1 | yayında | johannesburg-aktarma-sehri-gautrain-sandton-valiz | johannesburg-luggage-storage-transit-city |
 | 242 | KE | Nairobi | `nairobi` | 1 | yayında | nairobi-safari-yumusak-canta-sgr-terminali-valiz | nairobi-luggage-storage-safari-soft-bags |
 | 243 | TZ | Zanzibar | `zanzibar` | 1 | yayında | zanzibar-stone-town-dar-sokaklar-plaj-mesafesi-valiz | zanzibar-luggage-storage-stone-town-lanes |
-| 244 | AU | Sydney | `sidney` | 3 | — |  |  |
-| 245 | AU | Melbourne | `melbourne` | 2 | — |  |  |
-| 246 | AU | Brisbane | `brisbane` | 1 | — |  |  |
-| 247 | AU | Gold Coast | `gold-coast` | 1 | — |  |  |
-| 248 | NZ | Auckland | `auckland` | 1 | — |  |  |
-| 249 | NZ | Queenstown | `queenstown` | 1 | — |  |  |
+| 244 | AU | Sydney | `sidney` | 3 | yayında | sidney-uzun-ucus-varis-sabah-otel-ogleden-sonra-valiz | sydney-luggage-storage-morning-arrival |
+| 245 | AU | Melbourne | `melbourne` | 2 | yayında | melbourne-tramvay-bedava-bolge-flinders-valiz | melbourne-luggage-storage-free-tram-zone |
+| 246 | AU | Brisbane | `brisbane` | 1 | yayında | brisbane-citycat-feribot-nehir-valiz | brisbane-luggage-storage-citycat-ferries |
+| 247 | AU | Gold Coast | `gold-coast` | 1 | yayında | gold-coast-surfers-paradise-plaj-dolabi-valiz | gold-coast-luggage-storage-no-beach-lockers |
+| 248 | NZ | Auckland | `auckland` | 1 | yayında | auckland-queen-street-yokus-feribot-valiz | auckland-luggage-storage-queen-street-hill |
+| 249 | NZ | Queenstown | `queenstown` | 1 | yayında | queenstown-macera-turlari-teleferik-valiz | queenstown-luggage-storage-adventure-bookings |
 | 250 | RU | Moscow | `moskova` | 4 | — |  |  |
 | 251 | RU | Saint Petersburg | `st-petersburg` | 3 | — |  |  |
 | 252 | IL | Tel Aviv | `tel-aviv` | 3 | — |  |  |

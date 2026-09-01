@@ -449,6 +449,36 @@
     "license": "Public domain",
     "source": "https://commons.wikimedia.org/wiki/File:Athens_Plaka07.jpg"
   },
+  "auckland-liman": {
+    "alt": {
+      "en": "Auckland's harbour with the Sky Tower",
+      "tr": "Auckland'ın limanı ve Sky Tower"
+    },
+    "author": "Hawk666",
+    "caption": {
+      "en": "The harbour and Sky Tower, Auckland",
+      "tr": "Liman ve Sky Tower, Auckland"
+    },
+    "cityKey": "auckland",
+    "file": "/images/blog/auckland-liman.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Foto_a%C3%A9rea_de_Auckland_con_la_Sky_tower_a_la_izquierda,_P1010469.jpg"
+  },
+  "auckland-queen-street": {
+    "alt": {
+      "en": "Queen Street in Auckland",
+      "tr": "Auckland'da Queen Street'in caddesi"
+    },
+    "author": "Krzysztof Golik",
+    "caption": {
+      "en": "Queen Street, Auckland",
+      "tr": "Queen Street, Auckland"
+    },
+    "cityKey": "auckland",
+    "file": "/images/blog/auckland-queen-street.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Queen_Street_in_Auckland_04.jpg"
+  },
   "ayvalik-adalar": {
     "alt": {
       "en": "The islands in Ayvalik's bay at dusk",
@@ -1048,6 +1078,36 @@
     "file": "/images/blog/bratislava-meydan.webp",
     "license": "Public domain",
     "source": "https://commons.wikimedia.org/wiki/File:Bratislava_november_2007.jpg"
+  },
+  "brisbane-citycat": {
+    "file": "/images/blog/brisbane-citycat.webp",
+    "alt": {
+      "tr": "Brisbane Nehri'nde South Bank iskelesine yaklaşan CityCat feribotları",
+      "en": "CityCat ferries approaching the South Bank terminal on the Brisbane River"
+    },
+    "caption": {
+      "tr": "CityCat feribotları, Brisbane Nehri",
+      "en": "CityCat ferries, Brisbane River"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:CityCat_Spirit_of_Brisbane_and_CityCat_Mooroolbin_approach_South_Bank_Ferry_Terminal_South_Brisbane_P1220394.jpg",
+    "author": "John Robert McPherson",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "brisbane"
+  },
+  "brisbane-south-bank": {
+    "alt": {
+      "en": "The South Bank parklands and riverside in Brisbane",
+      "tr": "Brisbane'de South Bank parkları ve nehir kıyısı"
+    },
+    "author": "Kgbo",
+    "caption": {
+      "en": "South Bank, Brisbane",
+      "tr": "South Bank, Brisbane"
+    },
+    "cityKey": "brisbane",
+    "file": "/images/blog/brisbane-south-bank.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:South_Bank_Parklands,_Brisbane_01.jpg"
   },
   "brugge-kanal": {
     "alt": {
@@ -2338,6 +2398,36 @@
     "file": "/images/blog/goa-plaj.webp",
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Palolem_beach.jpg"
+  },
+  "gold-coast-plaj": {
+    "alt": {
+      "en": "The sand and surf on the Gold Coast",
+      "tr": "Gold Coast'ta kumsal ve dalgalar"
+    },
+    "author": "S B from Sydney, Australia",
+    "caption": {
+      "en": "The Gold Coast sand",
+      "tr": "Gold Coast kumsalı"
+    },
+    "cityKey": "gold-coast",
+    "file": "/images/blog/gold-coast-plaj.webp",
+    "license": "CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Beach,_Gold_Coast.jpg"
+  },
+  "gold-coast-surfers": {
+    "alt": {
+      "en": "The towers and beach of Surfers Paradise on the Gold Coast",
+      "tr": "Gold Coast'ta Surfers Paradise'ın kuleleri ve kumsalı"
+    },
+    "author": "Donaldytong",
+    "caption": {
+      "en": "Surfers Paradise, Gold Coast",
+      "tr": "Surfers Paradise, Gold Coast"
+    },
+    "cityKey": "gold-coast",
+    "file": "/images/blog/gold-coast-surfers.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Surfers_Paradise_Dec_2013.JPG"
   },
   "granada-albaicin": {
     "alt": {
@@ -4259,6 +4349,36 @@
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Zocalo_Mexico_City_panorama_at_nightfall.jpg"
   },
+  "melbourne-flinders": {
+    "alt": {
+      "en": "The main building of Flinders Street Station in Melbourne",
+      "tr": "Melbourne'de Flinders Street istasyonunun ana binası"
+    },
+    "author": "Medelam",
+    "caption": {
+      "en": "Flinders Street Station, Melbourne",
+      "tr": "Flinders Street istasyonu, Melbourne"
+    },
+    "cityKey": "melbourne",
+    "file": "/images/blog/melbourne-flinders.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Flinders_Street_Station_Main_Building,_May_2019.jpg"
+  },
+  "melbourne-tramvay": {
+    "alt": {
+      "en": "A tram on Bourke Street in Melbourne",
+      "tr": "Melbourne'de Bourke Sokağı'ndan geçen tramvay"
+    },
+    "author": "Nick-D",
+    "caption": {
+      "en": "A tram on Bourke Street",
+      "tr": "Tramvay, Bourke Sokağı"
+    },
+    "cityKey": "melbourne",
+    "file": "/images/blog/melbourne-tramvay.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Tram_on_Bourke_Street_March_2019.jpg"
+  },
   "mersin-kizkalesi": {
     "alt": {
       "en": "Maiden's Castle standing offshore in the sea",
@@ -4575,19 +4695,19 @@
     "source": "https://commons.wikimedia.org/wiki/File:Nairobi_Skyline_from_Nairobi_National_Park_-_panoramio.jpg"
   },
   "nairobi-terminus": {
-    "file": "/images/blog/nairobi-terminus.webp",
     "alt": {
-      "tr": "Nairobi'nin şehir dışındaki hızlı tren terminali",
-      "en": "Nairobi's high-speed rail terminus outside the city"
+      "en": "Nairobi's high-speed rail terminus outside the city",
+      "tr": "Nairobi'nin şehir dışındaki hızlı tren terminali"
     },
-    "caption": {
-      "tr": "Nairobi Terminus",
-      "en": "Nairobi Terminus"
-    },
-    "source": "https://commons.wikimedia.org/wiki/File:Nairobi_Terminus.jpg",
     "author": "Macabe5387",
+    "caption": {
+      "en": "Nairobi Terminus",
+      "tr": "Nairobi Terminus"
+    },
+    "cityKey": "nairobi",
+    "file": "/images/blog/nairobi-terminus.webp",
     "license": "CC BY-SA 4.0",
-    "cityKey": "nairobi"
+    "source": "https://commons.wikimedia.org/wiki/File:Nairobi_Terminus.jpg"
   },
   "napoli-centrale": {
     "alt": {
@@ -5368,6 +5488,36 @@
     "file": "/images/blog/punta-cana-saona.webp",
     "license": "Public domain",
     "source": "https://commons.wikimedia.org/wiki/File:Saona_Island_Beach.jpg"
+  },
+  "queenstown-gol": {
+    "alt": {
+      "en": "Queenstown and Lake Wakatipu",
+      "tr": "Queenstown ve Wakatipu Gölü"
+    },
+    "author": "Matthias Klappenbach",
+    "caption": {
+      "en": "Queenstown and Lake Wakatipu",
+      "tr": "Queenstown ve Wakatipu Gölü"
+    },
+    "cityKey": "queenstown",
+    "file": "/images/blog/queenstown-gol.webp",
+    "license": "CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Queenstown,_New_Zealand-16Jan2008.jpg"
+  },
+  "queenstown-teleferik": {
+    "alt": {
+      "en": "Queenstown and the mountains from the Skyline gondola deck",
+      "tr": "Skyline teleferiğinin seyir terasından Queenstown ve dağlar"
+    },
+    "author": "Bilinmiyor",
+    "caption": {
+      "en": "Queenstown from the Skyline gondola",
+      "tr": "Skyline teleferiğinden Queenstown"
+    },
+    "cityKey": "queenstown",
+    "file": "/images/blog/queenstown-teleferik.webp",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Queenstown_-_Wakatipu_Lake_%26_Remarkable_Mountains_View_from_Skyline_Gondola_Observation_Deck.jpg"
   },
   "quito-merkez": {
     "alt": {
@@ -6328,6 +6478,36 @@
     "file": "/images/blog/side-manavgat.webp",
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Manavgat_Waterfall_(1)_Red.jpg"
+  },
+  "sidney-bondi": {
+    "alt": {
+      "en": "Bondi beach and the shoreline in Sydney",
+      "tr": "Sidney'de Bondi plajı ve kıyı şeridi"
+    },
+    "author": "Dietmar Rabich",
+    "caption": {
+      "en": "Bondi beach, Sydney",
+      "tr": "Bondi plajı, Sidney"
+    },
+    "cityKey": "sidney",
+    "file": "/images/blog/sidney-bondi.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Sydney_(AU),_Bondi_Beach_--_2019_--_2349.jpg"
+  },
+  "sidney-circular-quay": {
+    "alt": {
+      "en": "The Sydney Opera House seen from Circular Quay",
+      "tr": "Circular Quay'den Sidney Opera Binası"
+    },
+    "author": "Kgbo",
+    "caption": {
+      "en": "Circular Quay, Sydney",
+      "tr": "Circular Quay, Sidney"
+    },
+    "cityKey": "sidney",
+    "file": "/images/blog/sidney-circular-quay.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Sydney_Opera_House_from_Circular_Quay,_2023,_03.jpg"
   },
   "siem-reap-angkor": {
     "alt": {
