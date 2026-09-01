@@ -1,5 +1,5 @@
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 153/265 sehir -->
+<!-- 159/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -53,11 +53,11 @@
 | 48 | IT | Venezia | `venedik` | 3 | yayında | venedik-koprulerde-valiz-tasimak | venice-luggage-storage-bridges |
 | 49 | IT | Firenze | `floransa` | 3 | yayında | floransa-kubbe-463-basamak-valiz | florence-luggage-storage-dome-463-steps |
 | 50 | IT | Napoli | `napoli` | 2 | yayında | napoli-pompei-circumvesuviana-valiz | naples-luggage-storage-pompeii-train |
-| 51 | IT | Pisa | `pisa` | 1 | — |  |  |
-| 52 | IT | Verona | `verona` | 1 | — |  |  |
-| 53 | IT | Bologna | `bologna` | 1 | — |  |  |
-| 54 | IT | Torino | `torino` | 1 | — |  |  |
-| 55 | IT | Palermo | `palermo` | 1 | — |  |  |
+| 51 | IT | Pisa | `pisa` | 1 | yayında | pisa-egik-kule-canta-yasak-valiz | pisa-luggage-storage-leaning-tower |
+| 52 | IT | Verona | `verona` | 1 | yayında | verona-arena-opera-canta-valiz | verona-luggage-storage-arena-opera |
+| 53 | IT | Bologna | `bologna` | 1 | yayında | bologna-centrale-aktarma-valiz | bologna-luggage-storage-train-connection |
+| 54 | IT | Torino | `torino` | 1 | yayında | torino-iki-gar-mise-egizio-valiz | turin-luggage-storage-two-stations |
+| 55 | IT | Palermo | `palermo` | 1 | yayında | palermo-gece-feribotu-carsi-valiz | palermo-luggage-storage-evening-ferry |
 | 56 | PT | Lisboa | `lizbon` | 6 | yayında | lizbon-calcada-yokus-valiz | lisbon-luggage-storage-hills-calcada |
 | 57 | PT | Porto | `porto` | 2 | yayında | porto-ribeira-yokus-kopru-valiz | porto-luggage-storage-ribeira-hill |
 | 58 | ES | Sevilla | `sevilla` | 2 | yayında | sevilla-sicak-santa-cruz-valiz | seville-luggage-storage-heat-santa-cruz |
@@ -161,7 +161,7 @@
 | 156 | MA | Casablanca | `kazablanka` | 1 | yayında | kazablanka-iki-gar-hassan-camii-valiz | casablanca-luggage-storage-two-stations |
 | 157 | MA | Fès | `fes` | 1 | yayında | fes-el-bali-araba-girmeyen-medina-valiz | fes-luggage-storage-car-free-medina |
 | 158 | MA | Tanger | `tanca` | 1 | yayında | tanca-feribot-tanger-med-medina-valiz | tangier-luggage-storage-ferry-medina |
-| 159 | MA | Chefchaouen | `safsavan` | 1 | — |  |  |
+| 159 | MA | Chefchaouen | `safsavan` | 1 | yayında | sefsavan-otobus-terminali-yokus-valiz | chefchaouen-luggage-storage-uphill-medina |
 | 160 | TN | Tunis | `tunus` | 1 | — |  |  |
 | 161 | JP | Tokyo | `tokyo` | 5 | — |  |  |
 | 162 | JP | Osaka | `osaka` | 3 | — |  |  |

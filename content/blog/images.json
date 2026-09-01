@@ -689,6 +689,36 @@
     "license": "CC BY-SA 2.0",
     "source": "https://commons.wikimedia.org/wiki/File:Bodrum_harbour_west.jpg"
   },
+  "bologna-kuleler": {
+    "alt": {
+      "en": "Bologna's two towers, Asinelli and Garisenda",
+      "tr": "Bologna'nın iki kulesi: Asinelli ve Garisenda"
+    },
+    "author": "Vanni Lazzari",
+    "caption": {
+      "en": "The Due Torri, Bologna",
+      "tr": "Due Torri, Bologna"
+    },
+    "cityKey": "bologna",
+    "file": "/images/blog/bologna-kuleler.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Due_Torri_di_Bologna_Asinelli_e_Garisenda.jpg"
+  },
+  "bologna-portico": {
+    "file": "/images/blog/bologna-portico.webp",
+    "alt": {
+      "tr": "Bologna'da Via Zamboni'nin kemerli revak geçidi",
+      "en": "The arcaded portico along Via Zamboni in Bologna"
+    },
+    "caption": {
+      "tr": "Via Zamboni revakları, Bologna",
+      "en": "The Via Zamboni porticoes, Bologna"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Bologna,_portici_di_via_zamboni_01.JPG",
+    "author": "sailko",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "bologna"
+  },
   "bordeaux-miroir": {
     "alt": {
       "en": "The Place de la Bourse and the water mirror in front of it",
@@ -3314,6 +3344,36 @@
     "license": "CC BY 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Oslo_Sentralstasjon.JPG"
   },
+  "palermo-ballaro": {
+    "alt": {
+      "en": "Stalls in the Ballaro market in Palermo",
+      "tr": "Palermo'da Ballarò çarşısında tezgâhlar"
+    },
+    "author": "Alessandro Cataldo",
+    "caption": {
+      "en": "The Ballaro market, Palermo",
+      "tr": "Ballarò çarşısı, Palermo"
+    },
+    "cityKey": "palermo",
+    "file": "/images/blog/palermo-ballaro.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Ballar%C3%B2_Palermo.JPG"
+  },
+  "palermo-liman": {
+    "alt": {
+      "en": "A ferry leaving the port of Palermo at dusk with Monte Pellegrino behind",
+      "tr": "Akşamüstü Palermo limanından ayrılan bir feribot ve arkada Monte Pellegrino"
+    },
+    "author": "Dedda71",
+    "caption": {
+      "en": "The evening ferry, port of Palermo",
+      "tr": "Akşam feribotu, Palermo limanı"
+    },
+    "cityKey": "palermo",
+    "file": "/images/blog/palermo-liman.webp",
+    "license": "CC BY 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Palermo_ship.jpg"
+  },
   "pamukkale-hierapolis": {
     "alt": {
       "en": "Looking up from the south entrance to the travertines",
@@ -3403,6 +3463,36 @@
     "file": "/images/blog/petra-wadi-musa.webp",
     "license": "CC BY 2.0",
     "source": "https://commons.wikimedia.org/wiki/File:Wadi_Musa_at_dusk_(12302441624).jpg"
+  },
+  "pisa-gar": {
+    "alt": {
+      "en": "The facade of Pisa Centrale railway station",
+      "tr": "Pisa Centrale tren garının cephesi"
+    },
+    "author": "sailko",
+    "caption": {
+      "en": "Pisa Centrale station",
+      "tr": "Pisa Centrale garı"
+    },
+    "cityKey": "pisa",
+    "file": "/images/blog/pisa-gar.webp",
+    "license": "CC BY 2.5",
+    "source": "https://commons.wikimedia.org/wiki/File:Stazione_di_pisa_centrale.JPG"
+  },
+  "pisa-kule": {
+    "alt": {
+      "en": "The leaning tower of Pisa",
+      "tr": "Pisa'nın eğik kulesi"
+    },
+    "author": "Saffron Blaze",
+    "caption": {
+      "en": "The Leaning Tower, Pisa",
+      "tr": "Eğik Kule, Pisa"
+    },
+    "cityKey": "pisa",
+    "file": "/images/blog/pisa-kule.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:The_Leaning_Tower_of_Pisa_SB.jpeg"
   },
   "plovdiv-antik-tiyatro": {
     "alt": {
@@ -3974,6 +4064,36 @@
     "license": "CC BY 2.0",
     "source": "https://commons.wikimedia.org/wiki/File:Sharm_el-Sheikh_-_Naama_bay.jpg"
   },
+  "sefsavan-medina": {
+    "alt": {
+      "en": "The Chefchaouen medina with the Rif mountains behind it",
+      "tr": "Şefşaven medinası ve arkasındaki Rif dağları"
+    },
+    "author": "Jerzystrzelecki",
+    "caption": {
+      "en": "Chefchaouen and the Rif mountains",
+      "tr": "Şefşaven ve Rif dağları"
+    },
+    "cityKey": "safsavan",
+    "file": "/images/blog/sefsavan-medina.webp",
+    "license": "CC BY 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Chefchaouen3(js).jpg"
+  },
+  "sefsavan-sokak": {
+    "alt": {
+      "en": "A blue-painted stepped lane in Chefchaouen",
+      "tr": "Şefşaven'de mavi boyalı basamaklı bir sokak"
+    },
+    "author": "Mark Fischer",
+    "caption": {
+      "en": "The blue lanes, Chefchaouen",
+      "tr": "Mavi sokaklar, Şefşaven"
+    },
+    "cityKey": "safsavan",
+    "file": "/images/blog/sefsavan-sokak.webp",
+    "license": "CC BY-SA 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:A_view_of_one_of_the_many_blue-painted_streets_in_Chefchaouen,_Morocco.jpg"
+  },
   "selanik-aristotelous": {
     "alt": {
       "en": "Aristotelous Square and the arcaded buildings around it",
@@ -4334,6 +4454,36 @@
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Tirana_-_Skanderbeg_Square_(Sheshi_Sk%C3%ABnderbej)_-_by_Pudelek.jpg"
   },
+  "torino-gar": {
+    "alt": {
+      "en": "The facade of Torino Porta Nuova station",
+      "tr": "Torino Porta Nuova garının cephesi"
+    },
+    "author": "Incola",
+    "caption": {
+      "en": "Porta Nuova station, Turin",
+      "tr": "Porta Nuova garı, Torino"
+    },
+    "cityKey": "torino",
+    "file": "/images/blog/torino-gar.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Torino_Porta_Nuova_03.jpg"
+  },
+  "torino-mole": {
+    "alt": {
+      "en": "The Mole Antonelliana in Turin",
+      "tr": "Torino'da Mole Antonelliana binası"
+    },
+    "author": "Livioandronico2013",
+    "caption": {
+      "en": "The Mole Antonelliana, Turin",
+      "tr": "Mole Antonelliana, Torino"
+    },
+    "cityKey": "torino",
+    "file": "/images/blog/torino-mole.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Mole_Antonelliana_Torino.JPG"
+  },
   "trabzon-liman": {
     "alt": {
       "en": "Trabzon harbour with the city rising behind it",
@@ -4528,6 +4678,36 @@
     "file": "/images/blog/venedik-santa-lucia.webp",
     "license": "Public domain",
     "source": "https://commons.wikimedia.org/wiki/File:Venezia_Stazione_di_Venezia_Santa_Lucia_001.JPG"
+  },
+  "verona-arena": {
+    "alt": {
+      "en": "The Roman arena in Verona",
+      "tr": "Verona'nın Roma dönemi arenası"
+    },
+    "author": "Snapshots Of The Past",
+    "caption": {
+      "en": "The Arena, Verona",
+      "tr": "Arena, Verona"
+    },
+    "cityKey": "verona",
+    "file": "/images/blog/verona-arena.webp",
+    "license": "CC BY-SA 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:The_Arena_Verona_Italy.jpg"
+  },
+  "verona-erbe": {
+    "alt": {
+      "en": "Piazza delle Erbe and the surrounding rooftops seen from the Lamberti tower",
+      "tr": "Lamberti Kulesi'nden Piazza delle Erbe ve çevresindeki çatılar"
+    },
+    "author": "High Contrast",
+    "caption": {
+      "en": "Piazza delle Erbe, Verona",
+      "tr": "Piazza delle Erbe, Verona"
+    },
+    "cityKey": "verona",
+    "file": "/images/blog/verona-erbe.webp",
+    "license": "CC BY 3.0 de",
+    "source": "https://commons.wikimedia.org/wiki/File:Verona_-_Piazza_Erbe_as_seen_from_Lamberti_tower.jpg"
   },
   "vilnius-eski-sehir": {
     "alt": {
