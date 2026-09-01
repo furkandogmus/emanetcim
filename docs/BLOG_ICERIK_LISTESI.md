@@ -1,5 +1,5 @@
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 225/265 sehir -->
+<!-- 231/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -66,7 +66,7 @@
 | 61 | ES | Málaga | `malaga` | 2 | yayında | malaga-costa-del-sol-aktarma-valiz | malaga-luggage-storage-costa-del-sol |
 | 62 | ES | Bilbao | `bilbao` | 1 | yayında | bilbao-guggenheim-buyuk-canta-valiz | bilbao-luggage-storage-guggenheim |
 | 63 | ES | San Sebastián | `san-sebastian` | 1 | yayında | san-sebastian-pintxo-turu-ayakta-valiz | san-sebastian-luggage-storage-pintxo-crawl |
-| 64 | ES | Palma | `mallorca` | 1 | yayında | mallorca-palma-sóller-treni-valiz | mallorca-luggage-storage-soller-train |
+| 64 | ES | Palma | `mallorca` | 1 | yayında | mallorca-palma-soller-treni-valiz | mallorca-luggage-storage-soller-train |
 | 65 | ES | Eivissa | `ibiza` | 1 | yayında | ibiza-dalt-vila-rampa-valiz | ibiza-luggage-storage-dalt-vila |
 | 66 | AT | Wien | `viyana` | 3 | yayında | viyana-schonbrunn-yarim-gun-valiz | vienna-luggage-storage-schonbrunn |
 | 67 | AT | Salzburg | `salzburg` | 1 | yayında | salzburg-gunubirlik-altstadt-valiz | salzburg-luggage-storage-day-trip |
@@ -228,12 +228,12 @@
 | 223 | CA | Vancouver | `vancouver` | 1 | yayında | vancouver-stanley-parki-sahil-yolu-alaska-gemisi-valiz | vancouver-luggage-storage-stanley-park-seawall |
 | 224 | MX | Ciudad de México | `meksiko` | 2 | yayında | meksiko-dort-otogar-rakim-metro-valiz | mexico-city-luggage-storage-four-bus-terminals |
 | 225 | MX | Cancun | `cancun` | 2 | yayında | cancun-otel-bolgesi-merkez-otobus-terminali-valiz | cancun-luggage-storage-bus-terminal-downtown |
-| 226 | MX | Playa del Carmen | `playa-del-carmen` | 1 | — |  |  |
-| 227 | CU | La Habana | `havana` | 1 | — |  |  |
-| 228 | DO | Punta Cana | `punta-cana` | 1 | — |  |  |
-| 229 | CO | Bogota | `bogota` | 1 | — |  |  |
-| 230 | CO | Cartagena | `cartagena` | 1 | — |  |  |
-| 231 | CO | Medellin | `medellin` | 1 | — |  |  |
+| 226 | MX | Playa del Carmen | `playa-del-carmen` | 1 | yayında | playa-del-carmen-quinta-avenida-cozumel-feribotu-valiz | playa-del-carmen-luggage-storage-quinta-avenida |
+| 227 | CU | La Habana | `havana` | 1 | yayında | havana-casa-particular-merdiven-viazul-valiz | havana-luggage-storage-casa-particular-stairs |
+| 228 | DO | Punta Cana | `punta-cana` | 1 | yayında | punta-cana-resort-cikisi-saona-turu-valiz | punta-cana-luggage-storage-resort-checkout |
+| 229 | CO | Bogota | `bogota` | 1 | yayında | bogota-rakim-candelaria-yokus-transmilenio-valiz | bogota-luggage-storage-altitude-candelaria |
+| 230 | CO | Cartagena | `cartagena` | 1 | yayında | cartagena-surlar-ici-tas-sokak-nem-valiz | cartagena-luggage-storage-cobbles-heat |
+| 231 | CO | Medellin | `medellin` | 1 | yayında | medellin-metrocable-comuna-13-yuruyen-merdiven-valiz | medellin-luggage-storage-metrocable-comuna-13 |
 | 232 | PE | Lima | `lima` | 1 | — |  |  |
 | 233 | PE | Cusco | `cusco` | 1 | — |  |  |
 | 234 | EC | Quito | `quito` | 1 | — |  |  |

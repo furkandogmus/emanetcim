@@ -5,7 +5,7 @@ export const entry: CityBlogEntry = {
   posts: [
     {
       locale: "tr",
-      slug: "mallorca-palma-sóller-treni-valiz",
+      slug: "mallorca-palma-soller-treni-valiz",
       title: "Sóller Treni Yüz Yıllık Ahşap Vagonlarla Çalışıyor ve Bavula Yer Yok",
       excerpt:
         "Palma'nın dar sokakları, akşam uçuşları ve kruvaziyer limanı — Mallorca'da bavul nereye bırakılır?",

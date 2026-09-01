@@ -839,6 +839,36 @@
     "license": "CC BY-SA 2.0",
     "source": "https://commons.wikimedia.org/wiki/File:Bodrum_harbour_west.jpg"
   },
+  "bogota-candelaria": {
+    "alt": {
+      "en": "The coloured streets of the La Candelaria district in Bogota",
+      "tr": "Bogota'da La Candelaria mahallesinin renkli sokakları"
+    },
+    "author": "Pedro Szekely from Los Angeles, USA",
+    "caption": {
+      "en": "La Candelaria, Bogota",
+      "tr": "La Candelaria, Bogota"
+    },
+    "cityKey": "bogota",
+    "file": "/images/blog/bogota-candelaria.webp",
+    "license": "CC BY-SA 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:La_Candelaria,_Bogota_(8135515519).jpg"
+  },
+  "bogota-monserrate": {
+    "alt": {
+      "en": "The funicular station up to Monserrate in Bogota",
+      "tr": "Bogota'da Monserrate'ye çıkan füniküler istasyonu"
+    },
+    "author": "by inyucho",
+    "caption": {
+      "en": "The Monserrate funicular, Bogota",
+      "tr": "Monserrate füniküleri, Bogota"
+    },
+    "cityKey": "bogota",
+    "file": "/images/blog/bogota-monserrate.webp",
+    "license": "CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Estaci%C3%B3n_Monserrate,_Bogot%C3%A1.jpg"
+  },
   "bologna-kuleler": {
     "alt": {
       "en": "Bologna's two towers, Asinelli and Garisenda",
@@ -1348,6 +1378,36 @@
     "file": "/images/blog/cannes-suquet.webp",
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Cannes_from_Suquet_Tower_02.jpg"
+  },
+  "cartagena-sokak": {
+    "alt": {
+      "en": "A coloured street with balconies in Cartagena",
+      "tr": "Cartagena'da balkonlu ve renkli bir sokak"
+    },
+    "author": "Jami430",
+    "caption": {
+      "en": "Inside the walled city, Cartagena",
+      "tr": "Surlar içindeki sokaklar, Cartagena"
+    },
+    "cityKey": "cartagena",
+    "file": "/images/blog/cartagena-sokak.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Street_in_Cartagena,_Colombia_in_August_2016.jpg"
+  },
+  "cartagena-surlar": {
+    "alt": {
+      "en": "The wall surrounding Cartagena",
+      "tr": "Cartagena'yı çevreleyen surlar"
+    },
+    "author": "Joe Ross from Lansing, Michigan",
+    "caption": {
+      "en": "The city wall, Cartagena",
+      "tr": "Surlar, Cartagena"
+    },
+    "cityKey": "cartagena",
+    "file": "/images/blog/cartagena-surlar.webp",
+    "license": "CC BY-SA 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:The_Wall_Surrounding_Cartagena,_Colombia_(24207777833).jpg"
   },
   "cebu-bazilika": {
     "alt": {
@@ -2278,6 +2338,36 @@
     "file": "/images/blog/hanoi-gar.webp",
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Ga_Ha_Noi.JPG"
+  },
+  "havana-malecon": {
+    "alt": {
+      "en": "The Malecon seafront in Havana",
+      "tr": "Havana'da Malecón sahil yolu"
+    },
+    "author": "Antonio Schubert from Rio de Janeiro, Brasil",
+    "caption": {
+      "en": "The Malecon, Havana",
+      "tr": "Malecón, Havana"
+    },
+    "cityKey": "havana",
+    "file": "/images/blog/havana-malecon.webp",
+    "license": "CC BY-SA 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Malec%C3%B3n_de_La_Habana_(32153146504).jpg"
+  },
+  "havana-plaza-vieja": {
+    "alt": {
+      "en": "Plaza Vieja in Havana and the coloured facades around it",
+      "tr": "Havana'da Plaza Vieja ve çevresindeki renkli cepheler"
+    },
+    "author": "Soniasantana",
+    "caption": {
+      "en": "Plaza Vieja, Havana",
+      "tr": "Plaza Vieja, Havana"
+    },
+    "cityKey": "havana",
+    "file": "/images/blog/havana-plaza-vieja.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Plaza_Vieja_de_La_Habana,_Cuba.jpg"
   },
   "hcm-ben-thanh": {
     "alt": {
@@ -3899,6 +3989,36 @@
     "license": "CC BY-SA 2.0",
     "source": "https://commons.wikimedia.org/wiki/File:Oman_-_Muscat_-_Mutrah.jpg"
   },
+  "medellin-metrocable": {
+    "alt": {
+      "en": "Metrocable cabins climbing to the hillside neighbourhoods of Medellin",
+      "tr": "Medellin'de yamaç mahallelerine çıkan Metrocable kabinleri"
+    },
+    "author": "Lucelupe",
+    "caption": {
+      "en": "The Metrocable, Medellin",
+      "tr": "Metrocable, Medellin"
+    },
+    "cityKey": "medellin",
+    "file": "/images/blog/medellin-metrocable.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Cabinas_del_Metrocable_en_Medell%C3%ADn.jpg"
+  },
+  "medellin-poblado": {
+    "alt": {
+      "en": "Avenida El Poblado in Medellin",
+      "tr": "Medellin'de El Poblado bulvarı"
+    },
+    "author": "Daniel Gómez",
+    "caption": {
+      "en": "El Poblado, Medellin",
+      "tr": "El Poblado, Medellin"
+    },
+    "cityKey": "medellin",
+    "file": "/images/blog/medellin-poblado.webp",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Medellin_avenida_el_poblado.jpg"
+  },
   "medine-haram-aksam": {
     "alt": {
       "en": "The Masjid an-Nabawi and its plaza in the evening",
@@ -4859,6 +4979,36 @@
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:The_Leaning_Tower_of_Pisa_SB.jpeg"
   },
+  "playa-feribot": {
+    "alt": {
+      "en": "The maritime terminal in Playa del Carmen where the Cozumel ferries leave from",
+      "tr": "Playa del Carmen'de Cozumel feribotlarının kalktığı deniz terminali"
+    },
+    "author": "TampAGS, for AGS Media",
+    "caption": {
+      "en": "The ferry terminal, Playa del Carmen",
+      "tr": "Feribot terminali, Playa del Carmen"
+    },
+    "cityKey": "playa-del-carmen",
+    "file": "/images/blog/playa-feribot.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Terminal_Maritima_Playa_del_Carmen.JPG"
+  },
+  "playa-quinta": {
+    "alt": {
+      "en": "The pedestrian stretch of Quinta Avenida in Playa del Carmen",
+      "tr": "Playa del Carmen'de Quinta Avenida'nın yaya bölümü"
+    },
+    "author": "Giorgio Galeotti",
+    "caption": {
+      "en": "Quinta Avenida, Playa del Carmen",
+      "tr": "Quinta Avenida, Playa del Carmen"
+    },
+    "cityKey": "playa-del-carmen",
+    "file": "/images/blog/playa-quinta.webp",
+    "license": "CC BY 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Quinta_Avenida_at_Calle_6_Norte_-_Playa_del_Carmen,_Mexico_-_August_15,_2014.jpg"
+  },
   "plovdiv-antik-tiyatro": {
     "alt": {
       "en": "The Roman theatre in Plovdiv",
@@ -4978,6 +5128,36 @@
     "file": "/images/blog/prag-karluv-most.webp",
     "license": "CC BY 2.0",
     "source": "https://commons.wikimedia.org/wiki/File:Lascar_Karl%C5%AFv_most_(Charles_Bridge)_(4504590172).jpg"
+  },
+  "punta-cana-sahil": {
+    "alt": {
+      "en": "The palm-lined beach at Punta Cana",
+      "tr": "Punta Cana'da palmiyelerle kaplı kumsal"
+    },
+    "author": "CT Cooper",
+    "caption": {
+      "en": "The Punta Cana shore",
+      "tr": "Punta Cana sahili"
+    },
+    "cityKey": "punta-cana",
+    "file": "/images/blog/punta-cana-sahil.webp",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:View_southwards_along_coastline_at_Punta_Cana_9.jpg"
+  },
+  "punta-cana-saona": {
+    "file": "/images/blog/punta-cana-saona.webp",
+    "alt": {
+      "tr": "Punta Cana'dan tekneyle gidilen Saona adasının kumsalı",
+      "en": "The beach on Saona island, reached by boat from Punta Cana"
+    },
+    "caption": {
+      "tr": "Saona adası",
+      "en": "Saona island"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Saona_Island_Beach.jpg",
+    "author": "Pierpunk",
+    "license": "Public domain",
+    "cityKey": "punta-cana"
   },
   "reykjavik-hallgrimskirkja": {
     "alt": {

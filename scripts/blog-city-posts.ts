@@ -143,6 +143,19 @@ async function verify(): Promise<number> {
       }
       seenSlugs.set(post.slug, e.cityKey);
 
+      /*
+        SLUG SADECE ASCII. Bu bir bicim tercihi degil: slug URL'e giriyor
+        (`/tr/blog/<slug>`) ve `sóller` gibi bir harf orada yuzde-kodlamaya
+        donusuyor. Sonuc paylasilan baglantida okunmayan bir dizi, arama
+        motorunda ayri gorunen iki adres ve elle yazilamayan bir URL.
+        Iki kez oldu (`mallorca-palma-sóller`, `medellin-...-yurüyen`), ikisi
+        de gozle yakalandi -- bu satir onu mandala baglar.
+      */
+      if (!/^[a-z0-9-]+$/.test(post.slug)) {
+        console.log(`SLUG ASCII DEGIL   ${post.slug} (${e.cityKey})`);
+        problems++;
+      }
+
       const keys = [post.cover, ...[...post.body.matchAll(IMG_RE)].map((m) => m[1])];
       if (keys.length < 2) {
         console.log(`GORSELSIZ GOVDE    ${post.slug} (gövdede {{img:...}} yok)`);
