@@ -1289,6 +1289,36 @@
     "license": "CC BY 2.0",
     "source": "https://commons.wikimedia.org/wiki/File:Bayt_Nasif,_1872,_old_Jeddah,_Saudi_Arabia_(9)_(50703482701).jpg"
   },
+  "danang-ejderha-koprusu": {
+    "alt": {
+      "en": "The Dragon Bridge in Da Nang",
+      "tr": "Da Nang'da Ejderha Köprüsü"
+    },
+    "author": "Thangphan",
+    "caption": {
+      "en": "The Dragon Bridge, Da Nang",
+      "tr": "Ejderha Köprüsü, Da Nang"
+    },
+    "cityKey": "da-nang",
+    "file": "/images/blog/danang-ejderha-koprusu.webp",
+    "license": "CC0",
+    "source": "https://commons.wikimedia.org/wiki/File:Da_nang_dragon_bridge.jpg"
+  },
+  "danang-hoi-an": {
+    "alt": {
+      "en": "A lantern-hung street in Hoi An ancient town",
+      "tr": "Hoi An eski şehirde fenerlerle süslü bir sokak"
+    },
+    "author": "Steffen Schmitz (more photos)",
+    "caption": {
+      "en": "Hoi An ancient town",
+      "tr": "Hoi An eski şehir"
+    },
+    "cityKey": "da-nang",
+    "file": "/images/blog/danang-hoi-an.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:H%E1%BB%99i_An,_Ancient_Town,_2020-01_CN-05.jpg"
+  },
   "datca-koy": {
     "alt": {
       "en": "Gulets moored in Datca's harbour and its marina",
@@ -1918,6 +1948,66 @@
     "file": "/images/blog/hamburg-speicherstadt.webp",
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Speicherstadt_abends.jpg"
+  },
+  "hanoi-eski-mahalle": {
+    "alt": {
+      "en": "A narrow street with motorbikes in Hanoi's Old Quarter",
+      "tr": "Hanoi Eski Mahalle'de dar bir sokak ve motosikletler"
+    },
+    "author": "Richard Mortel from Riyadh, Saudi Arabia",
+    "caption": {
+      "en": "The Old Quarter, Hanoi",
+      "tr": "Eski Mahalle, Hanoi"
+    },
+    "cityKey": "hanoi",
+    "file": "/images/blog/hanoi-eski-mahalle.webp",
+    "license": "CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Old_Quarter_street_scene,_Hanoi_(2)_(38496798321).jpg"
+  },
+  "hanoi-gar": {
+    "alt": {
+      "en": "The facade of Hanoi railway station",
+      "tr": "Hanoi tren garının cephesi"
+    },
+    "author": "My work.",
+    "caption": {
+      "en": "Hanoi railway station",
+      "tr": "Hanoi garı"
+    },
+    "cityKey": "hanoi",
+    "file": "/images/blog/hanoi-gar.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Ga_Ha_Noi.JPG"
+  },
+  "hcm-ben-thanh": {
+    "alt": {
+      "en": "Stalls inside the Ben Thanh Market",
+      "tr": "Ben Thanh Çarşısı'nın içinde tezgâhlar"
+    },
+    "author": "calflier001",
+    "caption": {
+      "en": "Ben Thanh Market, Ho Chi Minh City",
+      "tr": "Ben Thanh Çarşısı, Ho Chi Minh"
+    },
+    "cityKey": "ho-chi-minh",
+    "file": "/images/blog/hcm-ben-thanh.webp",
+    "license": "CC BY-SA 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:BEN_THANH_MARKET_SAIGON_VIETNAM_JAN_2012_(6966716295).jpg"
+  },
+  "hcm-motosiklet": {
+    "alt": {
+      "en": "Motorbike traffic filling a street in Ho Chi Minh City",
+      "tr": "Ho Chi Minh'de caddeyi dolduran motosiklet trafiği"
+    },
+    "author": "Mike",
+    "caption": {
+      "en": "Motorbike traffic, Ho Chi Minh City",
+      "tr": "Motosiklet trafiği, Ho Chi Minh"
+    },
+    "cityKey": "ho-chi-minh",
+    "file": "/images/blog/hcm-motosiklet.webp",
+    "license": "CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Motorbike_jam_Saigon_Vietnam.jpg"
   },
   "helsinki-gar": {
     "alt": {
@@ -2878,6 +2968,36 @@
     "file": "/images/blog/londra-kings-cross.webp",
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:King%27s_Cross_Western_Concourse.jpg"
+  },
+  "luang-prabang-pazar": {
+    "alt": {
+      "en": "The stalls of the night market in Luang Prabang",
+      "tr": "Luang Prabang'da gece pazarının tezgâhları"
+    },
+    "author": "Allie Caulfield",
+    "caption": {
+      "en": "The night market, Luang Prabang",
+      "tr": "Gece pazarı, Luang Prabang"
+    },
+    "cityKey": "luang-prabang",
+    "file": "/images/blog/luang-prabang-pazar.webp",
+    "license": "CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Night_Market_(Luang_Prabang).jpg"
+  },
+  "luang-prabang-tapinak": {
+    "alt": {
+      "en": "Wat Xieng Thong temple in Luang Prabang",
+      "tr": "Luang Prabang'da Wat Xieng Thong tapınağı"
+    },
+    "author": "Jakub Hałun",
+    "caption": {
+      "en": "Wat Xieng Thong, Luang Prabang",
+      "tr": "Wat Xieng Thong, Luang Prabang"
+    },
+    "cityKey": "luang-prabang",
+    "file": "/images/blog/luang-prabang-tapinak.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:20171111_Wat_Xieng_Thong_Luang_Prabang_1214_DxO.jpg"
   },
   "luksor-karnak": {
     "alt": {
@@ -3899,6 +4019,36 @@
     "license": "CC BY 2.0",
     "source": "https://commons.wikimedia.org/wiki/File:Wadi_Musa_at_dusk_(12302441624).jpg"
   },
+  "phnom-penh-nehir": {
+    "alt": {
+      "en": "The riverside park and promenade in Phnom Penh",
+      "tr": "Phnom Penh'de nehir kıyısındaki park ve yürüyüş yolu"
+    },
+    "author": "Christophe95",
+    "caption": {
+      "en": "The riverside, Phnom Penh",
+      "tr": "Nehir kıyısı, Phnom Penh"
+    },
+    "cityKey": "phnom-penh",
+    "file": "/images/blog/phnom-penh-nehir.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Riverside_Park,_Phnom_Penh.jpg"
+  },
+  "phnom-penh-saray": {
+    "alt": {
+      "en": "The Royal Palace in Phnom Penh",
+      "tr": "Phnom Penh'de Kraliyet Sarayı"
+    },
+    "author": "Hanay",
+    "caption": {
+      "en": "The Royal Palace, Phnom Penh",
+      "tr": "Kraliyet Sarayı, Phnom Penh"
+    },
+    "cityKey": "phnom-penh",
+    "file": "/images/blog/phnom-penh-saray.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Royal_Palace,_Phnom_Penh_Cambodia_1.jpg"
+  },
   "phuket-eski-sehir": {
     "alt": {
       "en": "A Sino-Portuguese building in Phuket old town",
@@ -4768,6 +4918,36 @@
     "file": "/images/blog/side-manavgat.webp",
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Manavgat_Waterfall_(1)_Red.jpg"
+  },
+  "siem-reap-angkor": {
+    "alt": {
+      "en": "The towers of Angkor Wat",
+      "tr": "Angkor Wat tapınağının kuleleri"
+    },
+    "author": "Pierre André Leclercq",
+    "caption": {
+      "en": "Angkor Wat, Siem Reap",
+      "tr": "Angkor Wat, Siem Reap"
+    },
+    "cityKey": "siem-reap",
+    "file": "/images/blog/siem-reap-angkor.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:2014-Cambodge_Angkor_Wat_(21).jpg"
+  },
+  "siem-reap-pub-street": {
+    "alt": {
+      "en": "Pub Street in Siem Reap with tuk-tuks waiting at the kerb",
+      "tr": "Siem Reap'te Pub Street ve kaldırım kenarında bekleyen tuk-tuk'lar"
+    },
+    "author": "Stefan Fussan",
+    "caption": {
+      "en": "Pub Street and its tuk-tuks, Siem Reap",
+      "tr": "Pub Street ve tuk-tuk'lar, Siem Reap"
+    },
+    "cityKey": "siem-reap",
+    "file": "/images/blog/siem-reap-pub-street.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Siem_Reap_Pub_Street.jpg"
   },
   "singapur-chinatown": {
     "alt": {

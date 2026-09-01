@@ -1,5 +1,5 @@
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 183/265 sehir -->
+<!-- 189/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -186,12 +186,12 @@
 | 181 | ID | Bali | `bali` | 3 | yayında | bali-ubud-havalimani-arasi-trafik-valiz | bali-luggage-storage-ubud-airport-traffic |
 | 182 | ID | Jakarta | `cakarta` | 1 | yayında | cakarta-trafik-gambir-aktarma-valiz | jakarta-luggage-storage-traffic-gambir |
 | 183 | ID | Yogyakarta | `yogyakarta` | 1 | yayında | yogyakarta-borobudur-gun-dogumu-tugu-gari-valiz | yogyakarta-luggage-storage-borobudur-sunrise |
-| 184 | VN | Hanoi | `hanoi` | 2 | — |  |  |
-| 185 | VN | Ho Chi Minh | `ho-chi-minh` | 2 | — |  |  |
-| 186 | VN | Da Nang | `da-nang` | 2 | — |  |  |
-| 187 | KH | Siem Reap | `siem-reap` | 1 | — |  |  |
-| 188 | KH | Phnom Penh | `phnom-penh` | 1 | — |  |  |
-| 189 | LA | Luang Prabang | `luang-prabang` | 1 | — |  |  |
+| 184 | VN | Hanoi | `hanoi` | 2 | yayında | hanoi-eski-mahalle-kaldirim-halong-valiz | hanoi-luggage-storage-old-quarter |
+| 185 | VN | Ho Chi Minh | `ho-chi-minh` | 2 | yayında | ho-chi-minh-yatakli-otobus-mekong-valiz | ho-chi-minh-luggage-storage-sleeper-buses |
+| 186 | VN | Da Nang | `da-nang` | 2 | yayında | da-nang-hoi-an-arasi-yaya-bolgesi-valiz | da-nang-luggage-storage-hoi-an |
+| 187 | KH | Siem Reap | `siem-reap` | 1 | yayında | siem-reap-angkor-gun-dogumu-tuk-tuk-valiz | siem-reap-luggage-storage-angkor-sunrise |
+| 188 | KH | Phnom Penh | `phnom-penh` | 1 | yayında | phnom-penh-saray-kiyafet-kurali-otobus-valiz | phnom-penh-luggage-storage-royal-palace |
+| 189 | LA | Luang Prabang | `luang-prabang` | 1 | yayında | luang-prabang-sadaka-toreni-gece-pazari-valiz | luang-prabang-luggage-storage-alms-night-market |
 | 190 | NP | Katmandu | `katmandu` | 1 | — |  |  |
 | 191 | NP | Pokhara | `pokhara` | 1 | — |  |  |
 | 192 | IN | Delhi | `delhi` | 2 | — |  |  |
