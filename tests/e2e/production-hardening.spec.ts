@@ -73,7 +73,21 @@ test.describe('BagajPark Production Hardening & PWA E2E Tests', () => {
 
     await expect(page).toHaveURL(/\/tr\/partner/, { timeout: 15000 });
 
-    await expect(page.getByText('Aktif Emanetler', { exact: true })).toBeVisible();
+    /*
+      METIN DEGIL TESTID. Bu satir eskiden `getByText('Aktif Emanetler')`
+      bekliyordu ve 2026-09-01'de KIRILDI: o kart panelden BILEREK kaldirildi
+      (ustteki gunluk durum blogu ayni sayiyi farkli birimle gosterdigi icin
+      iki rakam birbirini yalanliyordu -- gerekce `PartnerClient.tsx`te).
+      Yani test uygulamanin bir hatasini degil, kendi eskimisligini
+      raporluyordu.
+
+      `partner-shop-name` panelin baslik `h1`i ve yalnizca dukkan cozuldugunde
+      ciziliyor -- yani "esnaf paneline gercekten girildi"nin karsiligi.
+      Testid bir SOZLESME; gorunur metin ise urun ekibinin istedigi zaman
+      degistirebilecegi bir seydir ve e2e'nin ona baglanmasi bu kirilmanin
+      sebebiydi.
+    */
+    await expect(page.getByTestId('partner-shop-name')).toBeVisible();
   });
 
 });
