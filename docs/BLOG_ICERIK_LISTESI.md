@@ -1,5 +1,5 @@
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 207/265 sehir -->
+<!-- 213/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -210,12 +210,12 @@
 | 205 | KG | Bishkek | `biskek` | 1 | yayında | biskek-dag-turlari-marsrutka-valiz | bishkek-luggage-storage-mountain-trips |
 | 206 | PH | Manila | `manila` | 1 | yayında | manila-terminaller-arasi-aktarma-intramuros-valiz | manila-luggage-storage-terminal-transfer |
 | 207 | PH | Cebu | `cebu` | 1 | yayında | cebu-havalimani-mactan-oslob-turu-valiz | cebu-luggage-storage-mactan-oslob |
-| 208 | US | New York | `new-york` | 7 | — |  |  |
-| 209 | US | Washington DC | `washington` | 2 | — |  |  |
-| 210 | US | Boston | `boston` | 2 | — |  |  |
-| 211 | US | Chicago | `chicago` | 2 | — |  |  |
-| 212 | US | Los Angeles | `los-angeles` | 5 | — |  |  |
-| 213 | US | San Francisco | `san-francisco` | 2 | — |  |  |
+| 208 | US | New York | `new-york` | 7 | yayında | new-york-metro-turnike-valiz-gecmiyor | new-york-luggage-storage-subway-turnstile |
+| 209 | US | Washington DC | `washington` | 2 | yayında | washington-national-mall-yuruyus-muze-guvenlik-valiz | washington-luggage-storage-national-mall |
+| 210 | US | Boston | `boston` | 2 | yayında | boston-freedom-trail-dort-kilometre-valiz | boston-luggage-storage-freedom-trail |
+| 211 | US | Chicago | `chicago` | 2 | yayında | chicago-uzun-mesafe-trenleri-ogleden-sonra-valiz | chicago-luggage-storage-afternoon-trains |
+| 212 | US | Los Angeles | `los-angeles` | 5 | yayında | los-angeles-hollywood-santa-monica-arasi-valiz | los-angeles-luggage-storage-distances |
+| 213 | US | San Francisco | `san-francisco` | 2 | yayında | san-francisco-yokuslar-cable-car-alcatraz-valiz | san-francisco-luggage-storage-hills |
 | 214 | US | Las Vegas | `las-vegas` | 1 | — |  |  |
 | 215 | US | Miami | `miami` | 2 | — |  |  |
 | 216 | US | Orlando | `orlando` | 1 | — |  |  |

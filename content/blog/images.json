@@ -899,6 +899,36 @@
     "license": "CC BY-SA 2.5",
     "source": "https://commons.wikimedia.org/wiki/File:Bordeaux_-_Gare_Saint-Jean_1.jpg"
   },
+  "boston-back-bay": {
+    "alt": {
+      "en": "The brownstone rows of Back Bay in Boston",
+      "tr": "Boston'da Back Bay'in sıra evleri"
+    },
+    "author": "Pi.1415926535",
+    "caption": {
+      "en": "Back Bay, Boston",
+      "tr": "Back Bay, Boston"
+    },
+    "cityKey": "boston",
+    "file": "/images/blog/boston-back-bay.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Back_Bay_brownstones_from_the_Westin.jpg"
+  },
+  "boston-south-station": {
+    "alt": {
+      "en": "The South Station building in Boston",
+      "tr": "Boston'da South Station binası"
+    },
+    "author": "Tim Sackton",
+    "caption": {
+      "en": "South Station, Boston",
+      "tr": "South Station, Boston"
+    },
+    "cityKey": "boston",
+    "file": "/images/blog/boston-south-station.webp",
+    "license": "CC BY-SA 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:South_Station,_Boston_on_a_cloudy_day.jpg"
+  },
   "brasov-piata-sfatului": {
     "alt": {
       "en": "The Council Square in Brasov and the old town hall",
@@ -1408,6 +1438,36 @@
     "file": "/images/blog/chiang-mai-tapinak.webp",
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Chiang_Mai_-_Wat_Phra_Singh_-_0001.jpg"
+  },
+  "chicago-el": {
+    "alt": {
+      "en": "The elevated railway running above the Loop in Chicago",
+      "tr": "Chicago'da Loop'un üstünden geçen yükseltilmiş demiryolu"
+    },
+    "author": "User:JeremyA",
+    "caption": {
+      "en": "The elevated line, Chicago",
+      "tr": "Yükseltilmiş hat, Chicago"
+    },
+    "cityKey": "chicago",
+    "file": "/images/blog/chicago-el.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Lake_Street_Elevated_20110115.jpg"
+  },
+  "chicago-union-hol": {
+    "alt": {
+      "en": "The Great Hall of Chicago Union Station",
+      "tr": "Chicago Union Station'ın Büyük Hol'ü"
+    },
+    "author": "Velvet",
+    "caption": {
+      "en": "The Great Hall, Chicago Union Station",
+      "tr": "Union Station Büyük Hol, Chicago"
+    },
+    "cityKey": "chicago",
+    "file": "/images/blog/chicago-union-hol.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Chicago_union_station_hall.jpg"
   },
   "cidde-ahsap": {
     "alt": {
@@ -3149,6 +3209,36 @@
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Facade_of_a_dwelling_with_sudare,_wooden_balustrades_and_yellow_lamp,_Shinbashi-dori,_Gion,_Kyoto,_Japan.jpg"
   },
+  "la-downtown": {
+    "file": "/images/blog/la-downtown.webp",
+    "alt": {
+      "tr": "Los Angeles'ta şehir merkezinin gökdelenleri",
+      "en": "The towers of downtown Los Angeles"
+    },
+    "caption": {
+      "tr": "Downtown, Los Angeles",
+      "en": "Downtown Los Angeles"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Los_Angeles_downtown_p1000070.jpg",
+    "author": "Bilinmiyor",
+    "license": "CC BY-SA 2.0 fr",
+    "cityKey": "los-angeles"
+  },
+  "la-santa-monica": {
+    "alt": {
+      "en": "Santa Monica beach and its pier",
+      "tr": "Santa Monica plajı ve iskelesi"
+    },
+    "author": "Daniel Schwen",
+    "caption": {
+      "en": "Santa Monica pier",
+      "tr": "Santa Monica iskelesi"
+    },
+    "cityKey": "los-angeles",
+    "file": "/images/blog/la-santa-monica.webp",
+    "license": "CC BY-SA 2.5",
+    "source": "https://commons.wikimedia.org/wiki/File:USA_Santa_Monica_Beach_and_pier_CA.jpg"
+  },
   "lahey-binnenhof": {
     "alt": {
       "en": "The Binnenhof courtyard and the Gothic Ridderzaal",
@@ -4138,6 +4228,36 @@
     "file": "/images/blog/nice-promenade.webp",
     "license": "Public domain",
     "source": "https://commons.wikimedia.org/wiki/File:Nice,_Quai_des_%C3%89tats-Unis_and_Promenade_des_Anglais_FRANCE.jpg"
+  },
+  "ny-grand-central": {
+    "alt": {
+      "en": "The main concourse of Grand Central Terminal",
+      "tr": "Grand Central Terminal'in ana holü"
+    },
+    "author": "Original photography &amp; stitching by Diliff, horizontal correction by Janke",
+    "caption": {
+      "en": "Grand Central Terminal, New York",
+      "tr": "Grand Central Terminal, New York"
+    },
+    "cityKey": "new-york",
+    "file": "/images/blog/ny-grand-central.webp",
+    "license": "CC BY 2.5",
+    "source": "https://commons.wikimedia.org/wiki/File:Grand_Central_Station_Main_Concourse_Jan_2006.jpg"
+  },
+  "ny-times-square": {
+    "alt": {
+      "en": "The lit billboards and crowds of Times Square at night",
+      "tr": "Gece Times Square'in ışıklı panoları ve kalabalık"
+    },
+    "author": "Robert Parma",
+    "caption": {
+      "en": "Times Square, New York",
+      "tr": "Times Square, New York"
+    },
+    "cityKey": "new-york",
+    "file": "/images/blog/ny-times-square.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Times_Square_night_Sep_2004.jpg"
   },
   "ohrid-eski-sehir": {
     "alt": {
@@ -5369,6 +5489,36 @@
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Sevilla_Santa_Justa_train_station_2018_5.jpg"
   },
+  "sf-cable-car": {
+    "alt": {
+      "en": "A cable car climbing a hill in San Francisco",
+      "tr": "San Francisco'da yokuşta ilerleyen teleferikli tramvay"
+    },
+    "author": "Dietmar Rabich",
+    "caption": {
+      "en": "A cable car, San Francisco",
+      "tr": "Cable car, San Francisco"
+    },
+    "cityKey": "san-francisco",
+    "file": "/images/blog/sf-cable-car.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:San_Francisco_(California,_USA),_Cable_Car_--_2012_--_4180.jpg"
+  },
+  "sf-fishermans-wharf": {
+    "alt": {
+      "en": "Fisherman's Wharf in San Francisco",
+      "tr": "San Francisco'da Fisherman's Wharf"
+    },
+    "author": "King of Hearts",
+    "caption": {
+      "en": "Fisherman's Wharf, San Francisco",
+      "tr": "Fisherman's Wharf, San Francisco"
+    },
+    "cityKey": "san-francisco",
+    "file": "/images/blog/sf-fishermans-wharf.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Fisherman%27s_Wharf_San_Francisco_January_2013_001.jpg"
+  },
   "side-apollon": {
     "alt": {
       "en": "The columns of the Temple of Apollo by the sea at Side",
@@ -6163,6 +6313,36 @@
     "file": "/images/blog/viyana-schonbrunn.webp",
     "license": "CC BY-SA 3.0 de",
     "source": "https://commons.wikimedia.org/wiki/File:Schloss_Sch%C3%B6nbrunn_Wien_2014_(Zuschnitt_1).jpg"
+  },
+  "washington-capitol": {
+    "alt": {
+      "en": "The Capitol building in Washington",
+      "tr": "Washington'da Kongre Binası"
+    },
+    "author": "Martin Falbisoner",
+    "caption": {
+      "en": "The Capitol, Washington",
+      "tr": "Kongre Binası, Washington"
+    },
+    "cityKey": "washington",
+    "file": "/images/blog/washington-capitol.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:US_Capitol_east_side.JPG"
+  },
+  "washington-union-gar": {
+    "alt": {
+      "en": "The facade of Union Station in Washington",
+      "tr": "Washington'da Union Station'ın cephesi"
+    },
+    "author": "Ralf Roletschek (talk) - Infos über Fahrräder auf fahrradmonteur.de Wikis in der Ausbildung",
+    "caption": {
+      "en": "Union Station, Washington",
+      "tr": "Union Station, Washington"
+    },
+    "cityKey": "washington",
+    "file": "/images/blog/washington-union-gar.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:12-07-13-washington-by-RalfR-62.jpg"
   },
   "wroclaw-glowny": {
     "alt": {
