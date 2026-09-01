@@ -1,5 +1,5 @@
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 171/265 sehir -->
+<!-- 177/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -174,12 +174,12 @@
 | 169 | KR | Busan | `busan` | 2 | yayında | busan-haeundae-gar-arasi-mesafe-valiz | busan-luggage-storage-station-to-beach |
 | 170 | CN | Beijing | `pekin` | 3 | yayında | pekin-yasak-sehir-tek-yon-metro-kontrol-valiz | beijing-luggage-storage-forbidden-city-one-way |
 | 171 | CN | Shanghai | `sanghay` | 3 | yayında | sanghay-iki-havalimani-hongqiao-pudong-valiz | shanghai-luggage-storage-two-airports |
-| 172 | CN | Xi'an | `xian` | 1 | — |  |  |
-| 173 | TW | Taipei | `taipei` | 3 | — |  |  |
-| 174 | TH | Bangkok | `bangkok` | 4 | — |  |  |
-| 175 | TH | Chiang Mai | `chiang-mai` | 1 | — |  |  |
-| 176 | TH | Phuket | `phuket` | 2 | — |  |  |
-| 177 | TH | Pattaya | `pattaya` | 1 | — |  |  |
+| 172 | CN | Xi'an | `xian` | 1 | yayında | xian-terracotta-gunubirlik-surlar-valiz | xian-luggage-storage-terracotta-army |
+| 173 | TW | Taipei | `taipei` | 3 | yayında | taipei-ana-istasyon-jiufen-gece-pazari-valiz | taipei-luggage-storage-main-station-maze |
+| 174 | TH | Bangkok | `bangkok` | 4 | yayında | bangkok-skytrain-merdiven-khao-san-valiz | bangkok-luggage-storage-skytrain-stairs |
+| 175 | TH | Chiang Mai | `chiang-mai` | 1 | yayında | chiang-mai-gece-otobusu-sabah-varis-valiz | chiang-mai-luggage-storage-night-bus |
+| 176 | TH | Phuket | `phuket` | 2 | yayında | phuket-havalimani-patong-arasi-tekne-turu-valiz | phuket-luggage-storage-airport-patong |
+| 177 | TH | Pattaya | `pattaya` | 1 | yayında | pattaya-songthaew-koh-larn-bangkok-otobusu-valiz | pattaya-luggage-storage-songthaew-koh-larn |
 | 178 | SG | Singapur | `singapur` | 3 | — |  |  |
 | 179 | MY | Kuala Lumpur | `kuala-lumpur` | 3 | — |  |  |
 | 180 | MY | Penang | `penang` | 1 | — |  |  |

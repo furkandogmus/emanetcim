@@ -449,6 +449,36 @@
     "license": "Public domain",
     "source": "https://commons.wikimedia.org/wiki/File:Walled_City_of_Baku.jpg"
   },
+  "bangkok-khaosan": {
+    "alt": {
+      "en": "Crowds and stalls on Khao San Road at night",
+      "tr": "Gece Khao San Yolu'nda kalabalık ve tezgâhlar"
+    },
+    "author": "Kevin Poh from Petaling Jaya, Malaysia",
+    "caption": {
+      "en": "Khao San Road, Bangkok",
+      "tr": "Khao San Yolu, Bangkok"
+    },
+    "cityKey": "bangkok",
+    "file": "/images/blog/bangkok-khaosan.webp",
+    "license": "CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Khao_San_Road_at_night_by_kevinpoh.jpg"
+  },
+  "bangkok-skytrain": {
+    "alt": {
+      "en": "The Skytrain viaduct in Bangkok at sunset",
+      "tr": "Bangkok'ta gün batımında Skytrain viyadüğü"
+    },
+    "author": "User:Diliff",
+    "caption": {
+      "en": "The Skytrain, Bangkok",
+      "tr": "Skytrain, Bangkok"
+    },
+    "cityKey": "bangkok",
+    "file": "/images/blog/bangkok-skytrain.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Bangkok_skytrain_sunset.jpg"
+  },
   "barcelona-sagrada": {
     "alt": {
       "en": "The towers of the Sagrada Familia and the square in front of it",
@@ -990,19 +1020,19 @@
     "source": "https://commons.wikimedia.org/wiki/File:Bursa,_Ulu_Cami,_pillars_with_calligraphy.jpg"
   },
   "busan-gamcheon": {
-    "file": "/images/blog/busan-gamcheon.webp",
     "alt": {
-      "tr": "Busan'da yamaca kurulmuş Gamcheon Kültür Köyü'nün renkli evleri",
-      "en": "The coloured houses of Gamcheon Culture Village on its hillside in Busan"
+      "en": "The coloured houses of Gamcheon Culture Village on its hillside in Busan",
+      "tr": "Busan'da yamaca kurulmuş Gamcheon Kültür Köyü'nün renkli evleri"
     },
-    "caption": {
-      "tr": "Gamcheon Kültür Köyü, Busan",
-      "en": "Gamcheon Culture Village, Busan"
-    },
-    "source": "https://commons.wikimedia.org/wiki/File:Gamcheon_Culture_Village_Busan_(30809158777).jpg",
     "author": "bryan...",
+    "caption": {
+      "en": "Gamcheon Culture Village, Busan",
+      "tr": "Gamcheon Kültür Köyü, Busan"
+    },
+    "cityKey": "busan",
+    "file": "/images/blog/busan-gamcheon.webp",
     "license": "CC BY-SA 2.0",
-    "cityKey": "busan"
+    "source": "https://commons.wikimedia.org/wiki/File:Gamcheon_Culture_Village_Busan_(30809158777).jpg"
   },
   "busan-haeundae": {
     "alt": {
@@ -1138,6 +1168,36 @@
     "file": "/images/blog/cesme-kale.webp",
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:%C3%87e%C5%9Fme_Kalesi,_%C4%B0zmir,_2020_02.jpg"
+  },
+  "chiang-mai-pazar": {
+    "alt": {
+      "en": "The Sunday evening walking street market in Chiang Mai",
+      "tr": "Chiang Mai'de pazar akşamı kurulan yürüyüş sokağı pazarı"
+    },
+    "author": "Takeaway",
+    "caption": {
+      "en": "The Sunday walking street, Chiang Mai",
+      "tr": "Pazar akşamı yürüyüş sokağı, Chiang Mai"
+    },
+    "cityKey": "chiang-mai",
+    "file": "/images/blog/chiang-mai-pazar.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Chiang_Mai_sunday_evening_walking_street.jpg"
+  },
+  "chiang-mai-tapinak": {
+    "alt": {
+      "en": "Wat Phra Singh temple in Chiang Mai",
+      "tr": "Chiang Mai'de Wat Phra Singh tapınağı"
+    },
+    "author": "Stefan Fussan",
+    "caption": {
+      "en": "Wat Phra Singh, Chiang Mai",
+      "tr": "Wat Phra Singh, Chiang Mai"
+    },
+    "cityKey": "chiang-mai",
+    "file": "/images/blog/chiang-mai-tapinak.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Chiang_Mai_-_Wat_Phra_Singh_-_0001.jpg"
   },
   "cidde-ahsap": {
     "alt": {
@@ -3629,6 +3689,36 @@
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Paris,_Sacr%C3%A9-C%C5%93ur_de_Montmartre_--_2014_--_1180.jpg"
   },
+  "pattaya-plaj": {
+    "alt": {
+      "en": "A speedboat waiting off the Pattaya shore with the city skyline behind",
+      "tr": "Pattaya kıyısında bekleyen bir sürat teknesi ve arkada şehrin silueti"
+    },
+    "author": "Vyacheslav Argenberg",
+    "caption": {
+      "en": "Boats waiting off the shore, Pattaya",
+      "tr": "Kıyıda bekleyen tekneler, Pattaya"
+    },
+    "cityKey": "pattaya",
+    "file": "/images/blog/pattaya-plaj.webp",
+    "license": "CC BY 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Pattaya_Beach,_Thailand.jpg"
+  },
+  "pattaya-sahil-yolu": {
+    "alt": {
+      "en": "Beach Road and the shoreline in Pattaya",
+      "tr": "Pattaya'da Beach Road ve sahil şeridi"
+    },
+    "author": "Vyacheslav Argenberg",
+    "caption": {
+      "en": "Beach Road, Pattaya",
+      "tr": "Beach Road, Pattaya"
+    },
+    "cityKey": "pattaya",
+    "file": "/images/blog/pattaya-sahil-yolu.webp",
+    "license": "CC BY 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Pattaya_Beach,_Beach_Road,_Thailand.jpg"
+  },
   "pekin-wangfujing": {
     "alt": {
       "en": "The Wangfujing pedestrian street in Beijing",
@@ -3688,6 +3778,36 @@
     "file": "/images/blog/petra-wadi-musa.webp",
     "license": "CC BY 2.0",
     "source": "https://commons.wikimedia.org/wiki/File:Wadi_Musa_at_dusk_(12302441624).jpg"
+  },
+  "phuket-eski-sehir": {
+    "alt": {
+      "en": "A Sino-Portuguese building in Phuket old town",
+      "tr": "Phuket eski şehirde Çin-Portekiz üslubunda bir yapı"
+    },
+    "author": "Ahoerstemeier",
+    "caption": {
+      "en": "The old town, Phuket",
+      "tr": "Eski şehir, Phuket"
+    },
+    "cityKey": "phuket",
+    "file": "/images/blog/phuket-eski-sehir.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Phuket_town_house.jpg"
+  },
+  "phuket-patong": {
+    "alt": {
+      "en": "Patong beach in Phuket with its parasols",
+      "tr": "Phuket'te Patong plajı ve şemsiyeler"
+    },
+    "author": "William Cho",
+    "caption": {
+      "en": "Patong beach, Phuket",
+      "tr": "Patong plajı, Phuket"
+    },
+    "cityKey": "phuket",
+    "file": "/images/blog/phuket-patong.webp",
+    "license": "CC BY-SA 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Patong_Beach,_Phuket_(3047828351).jpg"
   },
   "pisa-gar": {
     "alt": {
@@ -4649,6 +4769,36 @@
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Stra%C3%9Fburg_(Frankreich),_Petite_France_--_2011_--_1759.jpg"
   },
+  "taipei-101": {
+    "alt": {
+      "en": "The Taipei skyline with the Taipei 101 tower",
+      "tr": "Taipei silueti ve Taipei 101 kulesi"
+    },
+    "author": "Sinchen.Lin",
+    "caption": {
+      "en": "Taipei 101 and the city skyline",
+      "tr": "Taipei 101 ve şehir silueti"
+    },
+    "cityKey": "taipei",
+    "file": "/images/blog/taipei-101.webp",
+    "license": "CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Taipei_Skyline_2016.jpg"
+  },
+  "taipei-gar": {
+    "alt": {
+      "en": "The main hall of Taipei Main Station",
+      "tr": "Taipei Ana İstasyonu'nun ana salonu"
+    },
+    "author": "yeowatzup",
+    "caption": {
+      "en": "Taipei Main Station",
+      "tr": "Taipei Ana İstasyonu"
+    },
+    "cityKey": "taipei",
+    "file": "/images/blog/taipei-gar.webp",
+    "license": "CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Taipei_Main_Station,_Taiwan_(2363785685).jpg"
+  },
   "tallinn-raekoja": {
     "alt": {
       "en": "Tallinn's Town Hall Square and the historic frontages around it",
@@ -5173,6 +5323,36 @@
     "file": "/images/blog/wroclaw-rynek.webp",
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:2016_Wroc%C5%82aw,_Rynek_49.jpg"
+  },
+  "xian-cankule": {
+    "alt": {
+      "en": "The Bell Tower at the centre of Xi'an",
+      "tr": "Xi'an'ın merkezindeki Çan Kulesi"
+    },
+    "author": "CEphoto, Uwe Aranas",
+    "caption": {
+      "en": "The Bell Tower, Xi'an",
+      "tr": "Çan Kulesi, Xi'an"
+    },
+    "cityKey": "xian",
+    "file": "/images/blog/xian-cankule.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Xian_Shaanxi_China_Bell-Tower-01.jpg"
+  },
+  "xian-surlar": {
+    "alt": {
+      "en": "The historic city wall encircling Xi'an",
+      "tr": "Xi'an'ın şehri çevreleyen tarihi surları"
+    },
+    "author": "xiquinhosilva",
+    "caption": {
+      "en": "The city wall, Xi'an",
+      "tr": "Şehir surları, Xi'an"
+    },
+    "cityKey": "xian",
+    "file": "/images/blog/xian-surlar.webp",
+    "license": "CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:City_wall_of_Xi%27an_51550-Xian_(27959363326).jpg"
   },
   "zagreb-funikuler": {
     "alt": {
