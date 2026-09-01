@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| Yazısı olan şehir | **135 / 265** — Türkiye'nin 39 şehri tamamlandı |
+| Yazısı olan şehir | **141 / 265** — Türkiye'nin 39 şehri tamamlandı |
 | Yayına yazma | `npx tsx scripts/blog-city-posts.ts --apply` (kuru çalışma varsayılan) |
 | Denetim | `npx tsx scripts/blog-city-posts.ts --verify` + `npx tsx scripts/blog-images.ts --verify` |
 | Eksik listesi | `npx tsx scripts/blog-city-posts.ts --coverage` |
@@ -66,7 +66,7 @@ alakasız olabilir.
 
 <!-- Aşağısı üretilmiştir: npx tsx scripts/blog-city-posts.ts --list-md -->
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 135/265 sehir -->
+<!-- 141/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -210,12 +210,12 @@ alakasız olabilir.
 | 138 | SA | Riyadh | `riyad` | 2 | yayında | riyad-mesafeler-diriyah-valiz | riyadh-luggage-storage-distances-diriyah |
 | 139 | AE | Dubai | `dubai` | 6 | yayında | dubai-metroda-bavul-siniri-abra-valiz | dubai-luggage-storage-metro-size-limit |
 | 140 | AE | Abu Dhabi | `abu-dabi` | 2 | yayında | abu-dabi-seyh-zayed-camii-kural-valiz | abu-dhabi-luggage-storage-grand-mosque |
-| 141 | AE | Sharjah | `sarja` | 1 | — |  |  |
-| 142 | QA | Doha | `doha` | 2 | — |  |  |
-| 143 | KW | Kuwait City | `kuveyt` | 1 | — |  |  |
-| 144 | BH | Manama | `manama` | 1 | — |  |  |
-| 145 | OM | Muscat | `maskat` | 1 | — |  |  |
-| 146 | JO | Amman | `amman` | 2 | — |  |  |
+| 141 | AE | Sharjah | `sarja` | 1 | yayında | sarja-dubai-trafigi-carsi-valiz | sharjah-luggage-storage-dubai-traffic |
+| 142 | QA | Doha | `doha` | 2 | yayında | doha-aktarma-souq-waqif-valiz | doha-luggage-storage-layover-souq-waqif |
+| 143 | KW | Kuwait City | `kuveyt` | 1 | yayında | kuveyt-sicak-mubarakiye-valiz | kuwait-luggage-storage-heat-mubarakiya |
+| 144 | BH | Manama | `manama` | 1 | yayında | manama-kral-fahd-koprusu-carsi-valiz | manama-luggage-storage-causeway-souq |
+| 145 | OM | Muscat | `maskat` | 1 | yayında | maskat-uzun-sehir-mutrah-valiz | muscat-luggage-storage-linear-city-mutrah |
+| 146 | JO | Amman | `amman` | 2 | yayında | amman-tepeler-merdiven-petra-valiz | amman-luggage-storage-hills-stairs |
 | 147 | JO | Wadi Musa | `petra` | 1 | — |  |  |
 | 148 | JO | Aqaba | `akabe` | 1 | — |  |  |
 | 149 | LB | Beirut | `beyrut` | 2 | — |  |  |

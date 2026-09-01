@@ -149,6 +149,36 @@
     "license": "CC BY-SA 2.0",
     "cityKey": "amasya"
   },
+  "amman-kale": {
+    "file": "/images/blog/amman-kale.webp",
+    "alt": {
+      "tr": "Kaleden Amman'ın tepelere yayılmış görüntüsü",
+      "en": "Amman spread over its hills, seen from the Citadel"
+    },
+    "caption": {
+      "tr": "Kaleden Amman",
+      "en": "Amman from the Citadel"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Looking_down_at_Amman_from_the_citadel.jpg",
+    "author": "Shannon Hobbs",
+    "license": "CC BY-SA 2.0",
+    "cityKey": "amman"
+  },
+  "amman-roma-tiyatrosu": {
+    "file": "/images/blog/amman-roma-tiyatrosu.webp",
+    "alt": {
+      "tr": "Amman'da şehir merkezindeki Roma tiyatrosu",
+      "en": "The Roman theatre in downtown Amman"
+    },
+    "caption": {
+      "tr": "Roma tiyatrosu, Amman",
+      "en": "The Roman theatre, Amman"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Amman_Roman_Amphi_Theatre_1.jpg",
+    "author": "Producer (talk)",
+    "license": "CC BY 2.5",
+    "cityKey": "amman"
+  },
   "amsterdam-centraal": {
     "file": "/images/blog/amsterdam-centraal.webp",
     "alt": {
@@ -1108,6 +1138,36 @@
     "author": "Dosseman",
     "license": "CC BY-SA 4.0",
     "cityKey": "diyarbakir"
+  },
+  "doha-corniche": {
+    "file": "/images/blog/doha-corniche.webp",
+    "alt": {
+      "tr": "Doha Corniche'i ve körfezin karşısındaki gökdelenler",
+      "en": "The Doha Corniche and the towers across the bay"
+    },
+    "caption": {
+      "tr": "Doha Corniche",
+      "en": "The Doha Corniche"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Doha_Corniche_and_Skyline.JPG",
+    "author": "Shyam Subhash Nair",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "doha"
+  },
+  "doha-souq-waqif": {
+    "file": "/images/blog/doha-souq-waqif.webp",
+    "alt": {
+      "tr": "Souq Waqif'te dar bir çarşı sokağı",
+      "en": "A narrow market lane in Souq Waqif"
+    },
+    "caption": {
+      "tr": "Souq Waqif, Doha",
+      "en": "Souq Waqif, Doha"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Souq_Waqif,_Doha,_Catar,_2013-08-05,_DD_09.JPG",
+    "author": "Diego Delso",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "doha"
   },
   "dubai-abra": {
     "file": "/images/blog/dubai-abra.webp",
@@ -2114,6 +2174,36 @@
     "license": "CC BY 3.0",
     "cityKey": "kusadasi"
   },
+  "kuveyt-carsi": {
+    "file": "/images/blog/kuveyt-carsi.webp",
+    "alt": {
+      "tr": "Mübarekiye Çarşısı'nda üstü örtülü bir sokak",
+      "en": "A covered lane in the Mubarakiya souq"
+    },
+    "caption": {
+      "tr": "Mübarekiye Çarşısı, Kuveyt",
+      "en": "The Mubarakiya souq, Kuwait"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Kuwait_City_Souq_al-Mubarakeya_1.jpg",
+    "author": "Zairon",
+    "license": "CC BY 4.0",
+    "cityKey": "kuveyt"
+  },
+  "kuveyt-kuleler": {
+    "file": "/images/blog/kuveyt-kuleler.webp",
+    "alt": {
+      "tr": "Kuveyt Kuleleri ve körfez",
+      "en": "The Kuwait Towers and the bay"
+    },
+    "caption": {
+      "tr": "Kuveyt Kuleleri",
+      "en": "The Kuwait Towers"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Kuwait_towers.jpg",
+    "author": "Mikael Lindmark",
+    "license": "CC BY-SA 2.5 se",
+    "cityKey": "kuveyt"
+  },
   "lahey-binnenhof": {
     "file": "/images/blog/lahey-binnenhof.webp",
     "alt": {
@@ -2414,6 +2504,36 @@
     "license": "CC BY-SA 3.0",
     "cityKey": "mallorca"
   },
+  "manama-bab-al-bahrain": {
+    "file": "/images/blog/manama-bab-al-bahrain.webp",
+    "alt": {
+      "tr": "Manama'da Bab Al Bahrain kapısı",
+      "en": "The Bab Al Bahrain gateway in Manama"
+    },
+    "caption": {
+      "tr": "Bab Al Bahrain, Manama",
+      "en": "Bab Al Bahrain, Manama"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Manama_Bab_al-Bahrain_01.jpg",
+    "author": "Zairon",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "manama"
+  },
+  "manama-carsi": {
+    "file": "/images/blog/manama-carsi.webp",
+    "alt": {
+      "tr": "Manama çarşısında sokak kahvesi ve dar geçit",
+      "en": "A street cafe and narrow lane in the Manama souq"
+    },
+    "caption": {
+      "tr": "Manama çarşısı",
+      "en": "The Manama souq"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Street_cafe_in_Manama_souq,_Bahrain.jpg",
+    "author": "Andrew Griffith",
+    "license": "CC BY 2.0",
+    "cityKey": "manama"
+  },
   "manchester-northern-quarter": {
     "file": "/images/blog/manchester-northern-quarter.webp",
     "alt": {
@@ -2533,6 +2653,36 @@
     "author": "Ingo Mehling",
     "license": "CC BY-SA 3.0",
     "cityKey": "marsilya"
+  },
+  "maskat-carsi": {
+    "file": "/images/blog/maskat-carsi.webp",
+    "alt": {
+      "tr": "Mutrah çarşısında üstü örtülü dar bir sokak",
+      "en": "A covered narrow lane in the Mutrah souq"
+    },
+    "caption": {
+      "tr": "Mutrah çarşısı",
+      "en": "The Mutrah souq"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Muttrah_(3).jpg",
+    "author": "Andries Oudshoorn",
+    "license": "CC BY-SA 2.0",
+    "cityKey": "maskat"
+  },
+  "maskat-mutrah": {
+    "file": "/images/blog/maskat-mutrah.webp",
+    "alt": {
+      "tr": "Mutrah Corniche'i ve arkasındaki kayalık tepeler",
+      "en": "The Mutrah Corniche and the rocky hills behind it"
+    },
+    "caption": {
+      "tr": "Mutrah Corniche, Maskat",
+      "en": "The Mutrah Corniche, Muscat"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Oman_-_Muscat_-_Mutrah.jpg",
+    "author": "Flickr user: Andries3 https://www.flickr.com/photos/andriesoudshoorn/",
+    "license": "CC BY-SA 2.0",
+    "cityKey": "maskat"
   },
   "medine-haram-aksam": {
     "file": "/images/blog/medine-haram-aksam.webp",
@@ -3463,6 +3613,36 @@
     "author": "Julian Nyča",
     "license": "CC BY-SA 3.0",
     "cityKey": "saraybosna"
+  },
+  "sarja-al-majaz": {
+    "file": "/images/blog/sarja-al-majaz.webp",
+    "alt": {
+      "tr": "Şarja'da Al Majaz sahili ve arkasındaki kuleler",
+      "en": "The Al Majaz waterfront in Sharjah with the towers behind it"
+    },
+    "caption": {
+      "tr": "Al Majaz sahili, Şarja",
+      "en": "The Al Majaz waterfront, Sharjah"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Al_Majaz_Waterfront,_Sharjah_UAE.jpg",
+    "author": "Sayfbhai",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "sarja"
+  },
+  "sarja-carsi": {
+    "file": "/images/blog/sarja-carsi.webp",
+    "alt": {
+      "tr": "Akşam saatlerinde Şarja Merkez Çarşı binası ve rüzgâr kuleleri",
+      "en": "The Sharjah Central Souq building and its wind towers at dusk"
+    },
+    "caption": {
+      "tr": "Merkez Çarşı (Mavi Çarşı), Şarja",
+      "en": "The Central Souq (Blue Souq), Sharjah"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Sharjah_in_picture_31_20111016_1724021537.jpg",
+    "author": "Sharjah Media Centre",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "sarja"
   },
   "selanik-aristotelous": {
     "file": "/images/blog/selanik-aristotelous.webp",
