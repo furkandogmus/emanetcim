@@ -1,5 +1,5 @@
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 159/265 sehir -->
+<!-- 165/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -162,12 +162,12 @@
 | 157 | MA | Fès | `fes` | 1 | yayında | fes-el-bali-araba-girmeyen-medina-valiz | fes-luggage-storage-car-free-medina |
 | 158 | MA | Tanger | `tanca` | 1 | yayında | tanca-feribot-tanger-med-medina-valiz | tangier-luggage-storage-ferry-medina |
 | 159 | MA | Chefchaouen | `safsavan` | 1 | yayında | sefsavan-otobus-terminali-yokus-valiz | chefchaouen-luggage-storage-uphill-medina |
-| 160 | TN | Tunis | `tunus` | 1 | — |  |  |
-| 161 | JP | Tokyo | `tokyo` | 5 | — |  |  |
-| 162 | JP | Osaka | `osaka` | 3 | — |  |  |
-| 163 | JP | Kyoto | `kyoto` | 3 | — |  |  |
-| 164 | JP | Hiroshima | `hirosima` | 1 | — |  |  |
-| 165 | JP | Nara | `nara` | 1 | — |  |  |
+| 160 | TN | Tunis | `tunus` | 1 | yayında | tunus-medina-kartaca-tgm-valiz | tunis-luggage-storage-medina-carthage |
+| 161 | JP | Tokyo | `tokyo` | 5 | yayında | tokyo-dolaplar-dolu-shinjuku-valiz | tokyo-luggage-storage-lockers-full |
+| 162 | JP | Osaka | `osaka` | 3 | yayında | osaka-shin-osaka-umeda-namba-valiz | osaka-luggage-storage-shin-osaka-umeda |
+| 163 | JP | Kyoto | `kyoto` | 3 | yayında | kyoto-istasyon-dolaplari-otobus-valiz | kyoto-luggage-storage-lockers-buses |
+| 164 | JP | Hiroshima | `hirosima` | 1 | yayında | hirosima-baris-parki-miyajima-valiz | hiroshima-luggage-storage-peace-park-miyajima |
+| 165 | JP | Nara | `nara` | 1 | yayında | nara-geyikler-canta-kemiriyor-valiz | nara-luggage-storage-deer-park |
 | 166 | JP | Sapporo | `sapporo` | 1 | — |  |  |
 | 167 | JP | Fukuoka | `fukuoka` | 1 | — |  |  |
 | 168 | KR | Seoul | `seul` | 4 | — |  |  |

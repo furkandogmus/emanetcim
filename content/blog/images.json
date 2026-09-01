@@ -705,19 +705,19 @@
     "source": "https://commons.wikimedia.org/wiki/File:Due_Torri_di_Bologna_Asinelli_e_Garisenda.jpg"
   },
   "bologna-portico": {
-    "file": "/images/blog/bologna-portico.webp",
     "alt": {
-      "tr": "Bologna'da Via Zamboni'nin kemerli revak geçidi",
-      "en": "The arcaded portico along Via Zamboni in Bologna"
+      "en": "The arcaded portico along Via Zamboni in Bologna",
+      "tr": "Bologna'da Via Zamboni'nin kemerli revak geçidi"
     },
-    "caption": {
-      "tr": "Via Zamboni revakları, Bologna",
-      "en": "The Via Zamboni porticoes, Bologna"
-    },
-    "source": "https://commons.wikimedia.org/wiki/File:Bologna,_portici_di_via_zamboni_01.JPG",
     "author": "sailko",
+    "caption": {
+      "en": "The Via Zamboni porticoes, Bologna",
+      "tr": "Via Zamboni revakları, Bologna"
+    },
+    "cityKey": "bologna",
+    "file": "/images/blog/bologna-portico.webp",
     "license": "CC BY-SA 3.0",
-    "cityKey": "bologna"
+    "source": "https://commons.wikimedia.org/wiki/File:Bologna,_portici_di_via_zamboni_01.JPG"
   },
   "bordeaux-miroir": {
     "alt": {
@@ -1769,6 +1769,36 @@
     "license": "CC0",
     "source": "https://commons.wikimedia.org/wiki/File:View_from_Helsinki_Cathedral_towards_Senate_Square.JPG"
   },
+  "hirosima-miyajima": {
+    "alt": {
+      "en": "The Itsukushima Shrine and its torii standing in the water at Miyajima",
+      "tr": "Miyajima'da Itsukushima Tapınağı ve suyun içindeki torii kapısı"
+    },
+    "author": "Bernard Gagnon",
+    "caption": {
+      "en": "Itsukushima Shrine, Miyajima",
+      "tr": "Itsukushima Tapınağı, Miyajima"
+    },
+    "cityKey": "hirosima",
+    "file": "/images/blog/hirosima-miyajima.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Torii_and_Itsukushima_Shrine.jpg"
+  },
+  "hirosima-park": {
+    "alt": {
+      "en": "The Hiroshima Peace Memorial Park and the cenotaph",
+      "tr": "Hiroşima Barış Anıt Parkı ve anıt mezar"
+    },
+    "author": "DXR",
+    "caption": {
+      "en": "The Peace Memorial Park, Hiroshima",
+      "tr": "Barış Anıt Parkı, Hiroşima"
+    },
+    "cityKey": "hirosima",
+    "file": "/images/blog/hirosima-park.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Peace_Memorial_Park_and_Cenotaph,_Hiroshima,_South_view_20190417_1.jpg"
+  },
   "hurgada-deniz": {
     "alt": {
       "en": "A hotel beach with straw parasols at Hurghada and the bay behind it",
@@ -2443,6 +2473,51 @@
     "file": "/images/blog/kuveyt-kuleler.webp",
     "license": "CC BY-SA 2.5 se",
     "source": "https://commons.wikimedia.org/wiki/File:Kuwait_towers.jpg"
+  },
+  "kyoto-dolap": {
+    "alt": {
+      "en": "A bank of coin lockers at Kyoto Station",
+      "tr": "Kyoto istasyonunda sıralanmış jetonlu emanet dolapları"
+    },
+    "author": "Marek Ślusarczyk (Tupungato) Photo gallery",
+    "caption": {
+      "en": "Coin lockers, Kyoto Station",
+      "tr": "Emanet dolapları, Kyoto istasyonu"
+    },
+    "cityKey": "kyoto",
+    "file": "/images/blog/kyoto-dolap.webp",
+    "license": "CC BY 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:015_Baggage_lockers_at_Kyoto_Station,_Japan.JPG"
+  },
+  "kyoto-gar": {
+    "alt": {
+      "en": "The glass and steel building of Kyoto Station",
+      "tr": "Kyoto istasyonunun cam ve çelik binası"
+    },
+    "author": "ZhengZhou",
+    "caption": {
+      "en": "Kyoto Station",
+      "tr": "Kyoto istasyonu"
+    },
+    "cityKey": "kyoto",
+    "file": "/images/blog/kyoto-gar.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Kyoto_Station_Building.jpg"
+  },
+  "kyoto-gion": {
+    "alt": {
+      "en": "A wooden-fronted building on Shinbashi-dori in Gion",
+      "tr": "Gion'da Shinbashi-dori üzerinde ahşap cepheli bir yapı"
+    },
+    "author": "Basile Morin",
+    "caption": {
+      "en": "Shinbashi-dori, Gion, Kyoto",
+      "tr": "Shinbashi-dori, Gion, Kyoto"
+    },
+    "cityKey": "kyoto",
+    "file": "/images/blog/kyoto-gion.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Facade_of_a_dwelling_with_sudare,_wooden_balustrades_and_yellow_lamp,_Shinbashi-dori,_Gion,_Kyoto,_Japan.jpg"
   },
   "lahey-binnenhof": {
     "alt": {
@@ -3254,6 +3329,36 @@
     "license": "Public domain",
     "source": "https://commons.wikimedia.org/wiki/File:Spaccanapoli_verso_Castel_Sant%27Elmo.jpg"
   },
+  "nara-geyik": {
+    "alt": {
+      "en": "A sika deer standing beside a stone marker in Nara Park",
+      "tr": "Nara Parkı'nda taş bir sınır taşının önünde duran sika geyiği"
+    },
+    "author": "Martin Falbisoner",
+    "caption": {
+      "en": "A deer in Nara Park",
+      "tr": "Nara Parkı'nda bir geyik"
+    },
+    "cityKey": "nara",
+    "file": "/images/blog/nara-geyik.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Sika_deer_in_Nara_Park,_November_2016.jpg"
+  },
+  "nara-todaiji": {
+    "alt": {
+      "en": "The main hall of Todaiji Temple in Nara",
+      "tr": "Nara'da Todaiji Tapınağı'nın ana salonu"
+    },
+    "author": "Hyppolyte de Saint-Rambert",
+    "caption": {
+      "en": "Todaiji Temple, Nara",
+      "tr": "Todaiji Tapınağı, Nara"
+    },
+    "cityKey": "nara",
+    "file": "/images/blog/nara-todaiji.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:T%C5%8Ddai-ji_hdsr_IMG_3862.jpg"
+  },
   "nice-cours-saleya": {
     "alt": {
       "en": "The Cours Saleya market and its stalls in Vieux Nice",
@@ -3313,6 +3418,36 @@
     "file": "/images/blog/ohrid-kale.webp",
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Fortaleza_de_Samuel,_Ohrid,_Macedonia,_2014-04-17,_DD_44.JPG"
+  },
+  "osaka-dotonbori": {
+    "alt": {
+      "en": "The Dotonbori canal in Osaka with its illuminated signs",
+      "tr": "Osaka'da Dotonbori kanalı ve ışıklı tabelalar"
+    },
+    "author": "Daderot",
+    "caption": {
+      "en": "Dotonbori, Osaka",
+      "tr": "Dotonbori, Osaka"
+    },
+    "cityKey": "osaka",
+    "file": "/images/blog/osaka-dotonbori.webp",
+    "license": "CC0",
+    "source": "https://commons.wikimedia.org/wiki/File:Dotonbori,_Osaka_-_DSC05722.JPG"
+  },
+  "osaka-shinkansen": {
+    "alt": {
+      "en": "Passengers wheeling suitcases along a shinkansen platform",
+      "tr": "Shinkansen peronunda valizini çeken yolcular"
+    },
+    "author": "Indiana jo",
+    "caption": {
+      "en": "A shinkansen platform",
+      "tr": "Shinkansen peronu"
+    },
+    "cityKey": "osaka",
+    "file": "/images/blog/osaka-shinkansen.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Hamamatsu_Station_Tokaido_Shinkansen_platform_-_2.jpg"
   },
   "oslo-opera": {
     "alt": {
@@ -4454,6 +4589,36 @@
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Tirana_-_Skanderbeg_Square_(Sheshi_Sk%C3%ABnderbej)_-_by_Pudelek.jpg"
   },
+  "tokyo-dolap-tabela": {
+    "alt": {
+      "en": "A sign explaining how to use a coin locker at Shinjuku Station",
+      "tr": "Shinjuku istasyonunda emanet dolabının nasıl kullanılacağını anlatan tabela"
+    },
+    "author": "MiNe",
+    "caption": {
+      "en": "Coin locker instructions, Shinjuku Station",
+      "tr": "Dolap kullanım tabelası, Shinjuku istasyonu"
+    },
+    "cityKey": "tokyo",
+    "file": "/images/blog/tokyo-dolap-tabela.webp",
+    "license": "CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Sign_of_How_to_use_a_Coinlocker_in_Shinjuku_Station.jpg"
+  },
+  "tokyo-shinjuku": {
+    "alt": {
+      "en": "The east exit of Shinjuku station and the crowd around it",
+      "tr": "Shinjuku istasyonunun doğu çıkışı ve çevresindeki kalabalık"
+    },
+    "author": "Carles Tomás Martí from Stockholm, Sverige",
+    "caption": {
+      "en": "Shinjuku station east exit, Tokyo",
+      "tr": "Shinjuku istasyonu doğu çıkışı, Tokyo"
+    },
+    "cityKey": "tokyo",
+    "file": "/images/blog/tokyo-shinjuku.webp",
+    "license": "CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Area_around_Shinjuku_station_east_exit2.jpg"
+  },
   "torino-gar": {
     "alt": {
       "en": "The facade of Torino Porta Nuova station",
@@ -4528,6 +4693,36 @@
     "file": "/images/blog/trabzon-uzungol.webp",
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Uzung%C3%B6l,Trabzon.jpg"
+  },
+  "tunus-bourguiba": {
+    "alt": {
+      "en": "Avenue Habib Bourguiba in Tunis",
+      "tr": "Tunus'ta Habib Burgiba Bulvarı"
+    },
+    "author": "Josiehen",
+    "caption": {
+      "en": "Avenue Habib Bourguiba, Tunis",
+      "tr": "Habib Burgiba Bulvarı, Tunus"
+    },
+    "cityKey": "tunus",
+    "file": "/images/blog/tunus-bourguiba.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Ave_Habib_Bourguiba,_Tunis.JPG"
+  },
+  "tunus-medina": {
+    "alt": {
+      "en": "A lane with shops in the Tunis medina",
+      "tr": "Tunus medinasında bir sokak ve dükkânlar"
+    },
+    "author": "Elena Tatiana Chis",
+    "caption": {
+      "en": "The Tunis medina",
+      "tr": "Tunus medinası"
+    },
+    "cityKey": "tunus",
+    "file": "/images/blog/tunus-medina.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Medina_of_Tunis_-_Medina%27s_life.jpg"
   },
   "uskup-carsi": {
     "alt": {
