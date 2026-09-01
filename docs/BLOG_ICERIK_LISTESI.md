@@ -1,5 +1,5 @@
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 177/265 sehir -->
+<!-- 183/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -180,12 +180,12 @@
 | 175 | TH | Chiang Mai | `chiang-mai` | 1 | yayında | chiang-mai-gece-otobusu-sabah-varis-valiz | chiang-mai-luggage-storage-night-bus |
 | 176 | TH | Phuket | `phuket` | 2 | yayında | phuket-havalimani-patong-arasi-tekne-turu-valiz | phuket-luggage-storage-airport-patong |
 | 177 | TH | Pattaya | `pattaya` | 1 | yayında | pattaya-songthaew-koh-larn-bangkok-otobusu-valiz | pattaya-luggage-storage-songthaew-koh-larn |
-| 178 | SG | Singapur | `singapur` | 3 | — |  |  |
-| 179 | MY | Kuala Lumpur | `kuala-lumpur` | 3 | — |  |  |
-| 180 | MY | Penang | `penang` | 1 | — |  |  |
-| 181 | ID | Bali | `bali` | 3 | — |  |  |
-| 182 | ID | Jakarta | `cakarta` | 1 | — |  |  |
-| 183 | ID | Yogyakarta | `yogyakarta` | 1 | — |  |  |
+| 178 | SG | Singapur | `singapur` | 3 | yayında | singapur-uzun-aktarma-sehre-inmek-valiz | singapore-luggage-storage-long-layover |
+| 179 | MY | Kuala Lumpur | `kuala-lumpur` | 3 | yayında | kuala-lumpur-kl-sentral-batu-magaralari-valiz | kuala-lumpur-luggage-storage-kl-sentral |
+| 180 | MY | Penang | `penang` | 1 | yayında | penang-george-town-bes-ayak-yolu-valiz | penang-luggage-storage-five-foot-way |
+| 181 | ID | Bali | `bali` | 3 | yayında | bali-ubud-havalimani-arasi-trafik-valiz | bali-luggage-storage-ubud-airport-traffic |
+| 182 | ID | Jakarta | `cakarta` | 1 | yayında | cakarta-trafik-gambir-aktarma-valiz | jakarta-luggage-storage-traffic-gambir |
+| 183 | ID | Yogyakarta | `yogyakarta` | 1 | yayında | yogyakarta-borobudur-gun-dogumu-tugu-gari-valiz | yogyakarta-luggage-storage-borobudur-sunrise |
 | 184 | VN | Hanoi | `hanoi` | 2 | — |  |  |
 | 185 | VN | Ho Chi Minh | `ho-chi-minh` | 2 | — |  |  |
 | 186 | VN | Da Nang | `da-nang` | 2 | — |  |  |

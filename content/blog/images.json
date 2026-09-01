@@ -449,6 +449,36 @@
     "license": "Public domain",
     "source": "https://commons.wikimedia.org/wiki/File:Walled_City_of_Baku.jpg"
   },
+  "bali-kuta": {
+    "alt": {
+      "en": "A beach at Kuta sheltered by breakwaters, with a boat close inshore",
+      "tr": "Kuta'da dalgakıranlarla korunan bir kumsal ve kıyıya yakın bir tekne"
+    },
+    "author": "Jakub Hałun",
+    "caption": {
+      "en": "The shore at Kuta, Bali",
+      "tr": "Kuta kıyısı, Bali"
+    },
+    "cityKey": "bali",
+    "file": "/images/blog/bali-kuta.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Jerman_Beach_in_Kuta,_Bali,_Indonesia,_20220825_1254_0822.jpg"
+  },
+  "bali-teras": {
+    "alt": {
+      "en": "Rice terraces near Ubud",
+      "tr": "Ubud yakınlarında pirinç tarlası terasları"
+    },
+    "author": "Bilinmiyor",
+    "caption": {
+      "en": "Rice terraces near Ubud",
+      "tr": "Pirinç terasları, Ubud"
+    },
+    "cityKey": "bali",
+    "file": "/images/blog/bali-teras.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Rice_terrace_Kadewatan_200507-1.jpg"
+  },
   "bangkok-khaosan": {
     "alt": {
       "en": "Crowds and stalls on Khao San Road at night",
@@ -1048,6 +1078,36 @@
     "file": "/images/blog/busan-haeundae.webp",
     "license": "CC BY 2.0",
     "source": "https://commons.wikimedia.org/wiki/File:Haeundae_Beach_in_Busan.jpg"
+  },
+  "cakarta-fatahillah": {
+    "alt": {
+      "en": "Fatahillah Square in Jakarta with its rental bicycles",
+      "tr": "Jakarta'da Fatahillah Meydanı ve kiralık bisikletler"
+    },
+    "author": "CEphoto, Uwe Aranas",
+    "caption": {
+      "en": "Fatahillah Square, Kota Tua",
+      "tr": "Fatahillah Meydanı, Kota Tua"
+    },
+    "cityKey": "cakarta",
+    "file": "/images/blog/cakarta-fatahillah.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Jakarta_Indonesia_Bicycles-at-Fatahillah-Square-01.jpg"
+  },
+  "cakarta-gambir": {
+    "alt": {
+      "en": "The platform at Gambir station in Jakarta",
+      "tr": "Jakarta'da Gambir istasyonunun peronu"
+    },
+    "author": "Gunawan Kartapranata",
+    "caption": {
+      "en": "Gambir station, Jakarta",
+      "tr": "Gambir istasyonu, Jakarta"
+    },
+    "cityKey": "cakarta",
+    "file": "/images/blog/cakarta-gambir.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Gambir_Station_Platform.jpg"
   },
   "canakkale-assos": {
     "alt": {
@@ -2383,6 +2443,36 @@
     "file": "/images/blog/kemer-tahtali.webp",
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:%D0%92%D0%B8%D0%B4_%D0%BD%D0%B0_%D0%B3%D0%BE%D1%80%D1%83_%D0%9E%D0%BB%D0%B8%D0%BC%D0%BF%D0%BE%D1%81_(%D0%A2%D0%B0%D1%85%D1%82%D0%B0%D0%BB%D1%8B)_-_panoramio.jpg"
+  },
+  "kl-petronas": {
+    "alt": {
+      "en": "The Petronas Twin Towers in Kuala Lumpur",
+      "tr": "Kuala Lumpur'da Petronas İkiz Kuleleri"
+    },
+    "author": "Someformofhuman",
+    "caption": {
+      "en": "The Petronas Twin Towers, Kuala Lumpur",
+      "tr": "Petronas İkiz Kuleleri, Kuala Lumpur"
+    },
+    "cityKey": "kuala-lumpur",
+    "file": "/images/blog/kl-petronas.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Petronas_Panorama_II.jpg"
+  },
+  "kl-sentral": {
+    "alt": {
+      "en": "The main concourse of KL Sentral station",
+      "tr": "KL Sentral istasyonunun ana holü"
+    },
+    "author": "Brownc",
+    "caption": {
+      "en": "KL Sentral, Kuala Lumpur",
+      "tr": "KL Sentral, Kuala Lumpur"
+    },
+    "cityKey": "kuala-lumpur",
+    "file": "/images/blog/kl-sentral.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:KL_Sentral_station_councorse1.jpg"
   },
   "koln-dom": {
     "alt": {
@@ -3749,6 +3839,36 @@
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Beijing_China_Forbidden-City-01.jpg"
   },
+  "penang-georgetown": {
+    "alt": {
+      "en": "Old shophouses in George Town",
+      "tr": "George Town'da eski dükkân evleri"
+    },
+    "author": "Bilinmiyor",
+    "caption": {
+      "en": "George Town, Penang",
+      "tr": "George Town, Penang"
+    },
+    "cityKey": "penang",
+    "file": "/images/blog/penang-georgetown.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:George_Town,_Penang.JPG"
+  },
+  "penang-sokak-sanati": {
+    "alt": {
+      "en": "The mural of children on a bicycle painted on a wall in George Town",
+      "tr": "George Town'da bir duvara işlenmiş bisikletli çocuklar duvar resmi"
+    },
+    "author": "Andrew Harvey",
+    "caption": {
+      "en": "Street art, George Town",
+      "tr": "Sokak sanatı, George Town"
+    },
+    "cityKey": "penang",
+    "file": "/images/blog/penang-sokak-sanati.webp",
+    "license": "CC BY 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Georgetown,_George_Town,_Penang,_Malaysia_-_panoramio_(5).jpg"
+  },
   "petra-hazine": {
     "alt": {
       "en": "The facade of the Treasury seen from the end of the Siq",
@@ -4649,6 +4769,36 @@
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Manavgat_Waterfall_(1)_Red.jpg"
   },
+  "singapur-chinatown": {
+    "alt": {
+      "en": "Trengganu Street and its shophouses in Singapore's Chinatown",
+      "tr": "Singapur Chinatown'da Trengganu Sokağı ve dükkân evleri"
+    },
+    "author": "Ypsilon from Finland.",
+    "caption": {
+      "en": "Chinatown, Singapore",
+      "tr": "Chinatown, Singapur"
+    },
+    "cityKey": "singapur",
+    "file": "/images/blog/singapur-chinatown.webp",
+    "license": "CC0",
+    "source": "https://commons.wikimedia.org/wiki/File:Trengganu_Street_and_Ba_Dao_Guan_restaurant,_Chinatown,_Singapore_-_20130329.jpg"
+  },
+  "singapur-marina": {
+    "alt": {
+      "en": "Marina Bay Sands and the ArtScience Museum in Singapore",
+      "tr": "Singapur'da Marina Bay Sands ve ArtScience Müzesi"
+    },
+    "author": "Marcin Konsek",
+    "caption": {
+      "en": "Marina Bay, Singapore",
+      "tr": "Marina Bay, Singapur"
+    },
+    "cityKey": "singapur",
+    "file": "/images/blog/singapur-marina.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:2016_Singapur,_Downtown_Core,_Marina_Bay_Sands_i_ArtScience_Museum_(10).jpg"
+  },
   "sofya-gar": {
     "alt": {
       "en": "The concrete frontage of Sofia Central Station",
@@ -5353,6 +5503,36 @@
     "file": "/images/blog/xian-surlar.webp",
     "license": "CC BY 2.0",
     "source": "https://commons.wikimedia.org/wiki/File:City_wall_of_Xi%27an_51550-Xian_(27959363326).jpg"
+  },
+  "yogyakarta-borobudur": {
+    "alt": {
+      "en": "The stupas on the upper terrace of Borobudur Temple",
+      "tr": "Borobudur Tapınağı'nın üst terasındaki stupalar"
+    },
+    "author": "CEphoto, Uwe Aranas",
+    "caption": {
+      "en": "The stupas of Borobudur",
+      "tr": "Borobudur stupaları"
+    },
+    "cityKey": "yogyakarta",
+    "file": "/images/blog/yogyakarta-borobudur.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Borobudur-Temple-Park_Indonesia_Stupas-of-Borobudur-01.jpg"
+  },
+  "yogyakarta-malioboro": {
+    "alt": {
+      "en": "Malioboro street in Yogyakarta",
+      "tr": "Yogyakarta'da Malioboro caddesi"
+    },
+    "author": "Gunawan Kartapranata",
+    "caption": {
+      "en": "Malioboro, Yogyakarta",
+      "tr": "Malioboro, Yogyakarta"
+    },
+    "cityKey": "yogyakarta",
+    "file": "/images/blog/yogyakarta-malioboro.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Malioboro_Street,_Yogyakarta.JPG"
   },
   "zagreb-funikuler": {
     "alt": {
