@@ -1,72 +1,5 @@
-# Talep testi şehirleri için blog içeriği — durum listesi
-
-**Son durum: 2026-09-01.** Talep testi (`isPrelaunch`) noktası koyduğumuz **265
-şehrin** her biri için TR + EN bir blog yazısı yazılıyor. Yazılar kodda durur
-(`content/blog/cities/<anahtar>.ts`), görseller depoda
-(`public/images/blog/*.webp`), veritabanına `scripts/blog-city-posts.ts` yazar.
-
-| | |
-|---|---|
-| Yazısı olan şehir | **147 / 265** — Türkiye'nin 39 şehri tamamlandı |
-| Yayına yazma | `npx tsx scripts/blog-city-posts.ts --apply` (kuru çalışma varsayılan) |
-| Denetim | `npx tsx scripts/blog-city-posts.ts --verify` + `npx tsx scripts/blog-images.ts --verify` |
-| Eksik listesi | `npx tsx scripts/blog-city-posts.ts --coverage` |
-| Bu tabloyu üret | `npx tsx scripts/blog-city-posts.ts --list-md` |
-
-## Neden bu iş var
-
-Talep testi noktaları aramada ve haritada görünüyor
-(`src/lib/public-shop-filter.ts`), yani bir misafir "Ankara valiz emanet" arayıp
-noktaya geliyor — ve arkasında okuyacak hiçbir şey bulamıyordu. Yazı iki işi
-birden yapıyor: o şehre gelen insana gerçekten işe yarar bilgi veriyor (hangi
-müze valizi içeri almıyor, terminal emaneti kaçta kapanıyor, hangi semtte
-bavulla yürünmez) ve nokta sayfasına organik giriş üretiyor.
-
-## Kurallar
-
-1. **Şehir başına iki yazı: TR ve EN.** `--verify` eksik dili sayar.
-2. **Her yazıda en az iki görsel** (kapak + gövdede en az bir `{{img:...}}`).
-3. **Görsel anahtarı yalnızca `[a-z0-9-]` içerebilir.** Türkçe harf konursa
-   gövdedeki `{{img:...}}` yer tutucusu HİÇ eşleşmiyor ve yayına ham metin
-   olarak çıkıyor; `blog-images.ts --verify` bunu 2026-09-01'den beri yakalıyor.
-4. **Görsel o şehrin görseli olmak zorunda.** Manifestteki `cityKey` yazının
-   şehriyle eşleşmiyorsa `--verify` `ILGISIZ GORSEL` der ve düşer. Görseller
-   Wikimedia Commons'tan indiriliyor; kaynak URL, fotoğrafçı ve lisans manifeste
-   yazılıyor ve künye yazının sonunda otomatik basılıyor (çoğu CC BY-SA, atıfsız
-   kullanım ihlal).
-5. **Ticari kullanıma kapalı lisans reddedilir** (`NonCommercial`,
-   `NoDerivatives`) — `scripts/blog-images.ts` indirmeden önce durdurur.
-6. **Yazı en az 350 kelime** ve o şehre özgü somut bilgi taşımalı. Şehir adı
-   değiştirilince hâlâ doğru olan bir metin, hiçbir şey anlatmıyor demektir.
-7. **Kapanış paragrafı dürüst olmalı:** nokta henüz açık değil, talep ölçülüyor,
-   e-posta bırakılabilir. Açık gibi anlatmak yalan olurdu.
-
-## Görsel eklemek
-
-```bash
-npx tsx scripts/blog-images.ts --search "Izmir Konak clock tower"
-
-# serbest metin arama kucuk sehirlerde coker ("Samsun" sorgusu bir hastane
-# sevk defteri fotografi dondurdu). Kategori elle kurelenmis, cok daha iyi:
-npx tsx scripts/blog-images.ts --category "Samsun"
-
-npx tsx scripts/blog-images.ts --add izmir-saat-kulesi \
-  --file "File:Izmir Saat Kulesi.jpg" --city izmir \
-  --alt-tr "..." --alt-en "..." \
-  --caption-tr "..." --caption-en "..."
-```
-
-İndirilen dosya 1200px genişliğe küçültülüp WebP'ye çevrilir (tipik 70–130 KB).
-2026-09-01'de 1400px/q72'den daraltıldı: 265 şehir aynı hızla ~80 MB ederdi.
-`--verify` 400 KB üstünü ve manifestte karşılığı olmayan dosyayı yakalar.
-**İndirdiğiniz her görseli açıp bakın** — Commons'ta başlık doğru, fotoğraf
-alakasız olabilir.
-
-## Şehir tablosu
-
-<!-- Aşağısı üretilmiştir: npx tsx scripts/blog-city-posts.ts --list-md -->
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 147/265 sehir -->
+<!-- 153/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -222,12 +155,12 @@ alakasız olabilir.
 | 150 | EG | Cairo | `kahire` | 3 | yayında | kahire-piramitler-trafik-han-halili-valiz | cairo-luggage-storage-pyramids-traffic |
 | 151 | EG | Alexandria | `iskenderiye` | 1 | yayında | iskenderiye-gunubirlik-tren-corniche-valiz | alexandria-luggage-storage-day-trip-corniche |
 | 152 | EG | Luxor | `luksor` | 1 | yayında | luksor-gece-treni-sabah-variyor-valiz | luxor-luggage-storage-night-train-arrival |
-| 153 | EG | Hurghada | `hurgada` | 1 | — |  |  |
-| 154 | EG | Sharm El Sheikh | `sarm-el-seyh` | 1 | — |  |  |
-| 155 | MA | Marrakech | `marakes` | 2 | — |  |  |
-| 156 | MA | Casablanca | `kazablanka` | 1 | — |  |  |
-| 157 | MA | Fès | `fes` | 1 | — |  |  |
-| 158 | MA | Tanger | `tanca` | 1 | — |  |  |
+| 153 | EG | Hurghada | `hurgada` | 1 | yayında | hurgada-oda-cikisi-gece-ucusu-valiz | hurghada-luggage-storage-late-flight |
+| 154 | EG | Sharm El Sheikh | `sarm-el-seyh` | 1 | yayında | sarm-el-seyh-sina-dagi-gece-turu-valiz | sharm-el-sheikh-luggage-storage-sinai-tour |
+| 155 | MA | Marrakech | `marakes` | 2 | yayında | marakes-medina-riad-valiz-emanet | marrakech-luggage-storage-medina-riad |
+| 156 | MA | Casablanca | `kazablanka` | 1 | yayında | kazablanka-iki-gar-hassan-camii-valiz | casablanca-luggage-storage-two-stations |
+| 157 | MA | Fès | `fes` | 1 | yayında | fes-el-bali-araba-girmeyen-medina-valiz | fes-luggage-storage-car-free-medina |
+| 158 | MA | Tanger | `tanca` | 1 | yayında | tanca-feribot-tanger-med-medina-valiz | tangier-luggage-storage-ferry-medina |
 | 159 | MA | Chefchaouen | `safsavan` | 1 | — |  |  |
 | 160 | TN | Tunis | `tunus` | 1 | — |  |  |
 | 161 | JP | Tokyo | `tokyo` | 5 | — |  |  |
