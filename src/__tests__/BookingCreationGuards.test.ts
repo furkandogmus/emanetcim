@@ -54,6 +54,28 @@ import {
   BookingShopPrelaunchError,
 } from "@/services/booking/errors";
 
+/*
+  TARIHLER SABIT DEGIL, "YARIN"DAN TURETILIYOR.
+
+  Eskiden `2026-09-01T09:00:00Z` yaziliydi ve test TAM O GUN saat 09:05 UTC'de
+  kirildi: check-in gecmise dustu, `validateBookingStayWindow` daha ilk kapida
+  `BookingWindowInvalidError` firlatti ve tatil ile prelaunch kapilarina hic
+  sira gelmedi. Uc test birden, ayni sebeple.
+
+  Bu bir "test eskimesi": urunde hicbir sey bozulmamisti, testin varsayimi
+  takvimle birlikte gecersizlesti. Sabit gelecek tarih yazmak sorunu yalnizca
+  erteler -- 2027'de ayni sey olur. Tarih artik CALISMA ANINDAN turetiliyor,
+  boylece hangi gun kosulursa kosulsun gecerli bir pencere olusuyor.
+
+  `HOLIDAY_DAY` ayni gunden turetiliyor: tatil kontrolu check-in gunuyle
+  eslesmezse test yanlis sebepten gecerdi.
+*/
+const DAY_MS = 24 * 60 * 60 * 1000;
+/** Yarin — bugun kosulsa bile check-in her zaman gelecekte. */
+const STAY_DAY = new Date(Date.now() + DAY_MS).toISOString().slice(0, 10);
+/** 30 gunluk azami konaklamayi kesin asan bir cikis gunu. */
+const TOO_FAR_DAY = new Date(Date.now() + 91 * DAY_MS).toISOString().slice(0, 10);
+
 const BASE_INPUT = {
   guestId: "g1",
   shopId: "shop-1",
@@ -61,8 +83,8 @@ const BASE_INPUT = {
   bagCountS: 1,
   bagCountM: 0,
   bagCountXl: 0,
-  checkInTime: new Date("2026-09-01T09:00:00Z"),
-  checkOutTime: new Date("2026-09-01T18:00:00Z"),
+  checkInTime: new Date(`${STAY_DAY}T09:00:00Z`),
+  checkOutTime: new Date(`${STAY_DAY}T18:00:00Z`),
 };
 
 beforeEach(() => {
@@ -78,7 +100,7 @@ describe("createInitialBooking tarih kapıları", () => {
     // web `Errors.generic`e duser, mobil ise 500 doner.
     const tooLong = {
       ...BASE_INPUT,
-      checkOutTime: new Date("2026-12-01T18:00:00Z"), // 30 gunu asar
+      checkOutTime: new Date(`${TOO_FAR_DAY}T18:00:00Z`), // 30 gunu asar
     };
 
     await expect(createInitialBooking(tooLong)).rejects.toBeInstanceOf(
@@ -94,7 +116,7 @@ describe("createInitialBooking tarih kapıları", () => {
   it("platform tatiline denk gelen aralığı reddeder — mobil uç bunu HİÇ yapmıyordu", async () => {
     mockGetPricingRules.mockResolvedValue({
       ...RULES,
-      platformHolidayDates: ["2026-09-01"],
+      platformHolidayDates: [STAY_DAY],
     });
 
     await expect(createInitialBooking(BASE_INPUT)).rejects.toBeInstanceOf(
@@ -131,7 +153,7 @@ describe("createInitialBooking tarih kapıları", () => {
     await expect(
       createInitialBooking({
         ...BASE_INPUT,
-        checkOutTime: new Date("2026-12-01T18:00:00Z"),
+        checkOutTime: new Date(`${TOO_FAR_DAY}T18:00:00Z`),
       }),
     ).rejects.toMatchObject({ code: "INVALID_DATES" });
   });
@@ -140,7 +162,7 @@ describe("createInitialBooking tarih kapıları", () => {
     // Tasiyicilar `instanceof BookingRejectedError` ile TEK dalda esleyebilsin diye.
     mockGetPricingRules.mockResolvedValue({
       ...RULES,
-      platformHolidayDates: ["2026-09-01"],
+      platformHolidayDates: [STAY_DAY],
     });
     await expect(createInitialBooking(BASE_INPUT)).rejects.toBeInstanceOf(
       BookingRejectedError,
@@ -150,7 +172,7 @@ describe("createInitialBooking tarih kapıları", () => {
   // Varsayilan: normal (prelaunch olmayan) dukkan.
   mockPrisma.shop.findUnique.mockResolvedValue({ isPrelaunch: false });
     await expect(
-      createInitialBooking({ ...BASE_INPUT, checkOutTime: new Date("2026-12-01T18:00:00Z") }),
+      createInitialBooking({ ...BASE_INPUT, checkOutTime: new Date(`${TOO_FAR_DAY}T18:00:00Z`) }),
     ).rejects.toBeInstanceOf(BookingRejectedError);
   });
 
