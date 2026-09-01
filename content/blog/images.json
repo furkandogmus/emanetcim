@@ -1289,6 +1289,36 @@
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:%C3%87anakkale_truva_at%C4%B1_-_panoramio.jpg"
   },
+  "cancun-mercado": {
+    "alt": {
+      "en": "The stalls of Mercado 28 in downtown Cancun",
+      "tr": "Cancún merkezinde Mercado 28'in tezgâhları"
+    },
+    "author": "Kirt Edblom",
+    "caption": {
+      "en": "Mercado 28, downtown Cancun",
+      "tr": "Mercado 28, Cancún merkezi"
+    },
+    "cityKey": "cancun",
+    "file": "/images/blog/cancun-mercado.webp",
+    "license": "CC BY-SA 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Mercado_28_Cancun,_Mexico_Julio_2012_-_03.jpg"
+  },
+  "cancun-otel-bolgesi": {
+    "alt": {
+      "en": "Hotels lined along the narrow sand strip at Cancun, with the beach",
+      "tr": "Cancún'da dar kum şeridi üzerine dizilmiş oteller ve kumsal"
+    },
+    "author": "dronepicr",
+    "caption": {
+      "en": "The hotel zone strip, Cancun",
+      "tr": "Otel bölgesinin kıyı şeridi, Cancún"
+    },
+    "cityKey": "cancun",
+    "file": "/images/blog/cancun-otel-bolgesi.webp",
+    "license": "CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Cancun_Strand_Luftbild_(22179809191).jpg"
+  },
   "cannes-croisette": {
     "alt": {
       "en": "The harbour at Cannes and the shore along the Croisette",
@@ -3929,6 +3959,36 @@
     "license": "CC BY 2.0",
     "source": "https://commons.wikimedia.org/wiki/File:Kaaba,_Masjid_Al_Haram,_Mecca.jpg"
   },
+  "meksiko-katedral": {
+    "alt": {
+      "en": "The bell tower of the Metropolitan Cathedral in Mexico City",
+      "tr": "Meksiko'da Metropolitan Katedrali'nin çan kulesi"
+    },
+    "author": "Lazjak",
+    "caption": {
+      "en": "The Metropolitan Cathedral, Mexico City",
+      "tr": "Metropolitan Katedrali, Meksiko"
+    },
+    "cityKey": "meksiko",
+    "file": "/images/blog/meksiko-katedral.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Mexico_City_Metropolitan_Cathedral_west_bell_tower_night.jpg"
+  },
+  "meksiko-zocalo": {
+    "alt": {
+      "en": "The Zocalo square and the cathedral in Mexico City",
+      "tr": "Meksiko'da Zócalo meydanı ve katedral"
+    },
+    "author": "Uwebart",
+    "caption": {
+      "en": "The Zocalo, Mexico City",
+      "tr": "Zócalo, Meksiko"
+    },
+    "cityKey": "meksiko",
+    "file": "/images/blog/meksiko-zocalo.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Zocalo_Mexico_City_panorama_at_nightfall.jpg"
+  },
   "mersin-kizkalesi": {
     "alt": {
       "en": "Maiden's Castle standing offshore in the sea",
@@ -4048,6 +4108,36 @@
     "file": "/images/blog/monako-kazino.webp",
     "license": "CC BY 2.0",
     "source": "https://commons.wikimedia.org/wiki/File:Real_Monte_Carlo_Casino.jpg"
+  },
+  "montreal-eski-sehir": {
+    "alt": {
+      "en": "The cobbled Rue Saint-Paul in Old Montreal",
+      "tr": "Eski Montreal'de arnavut kaldırımlı Saint-Paul sokağı"
+    },
+    "author": "Ken Lund from Reno, Nevada, USA",
+    "caption": {
+      "en": "Rue Saint-Paul, Old Montreal",
+      "tr": "Rue Saint-Paul, Eski Montreal"
+    },
+    "cityKey": "montreal",
+    "file": "/images/blog/montreal-eski-sehir.webp",
+    "license": "CC BY-SA 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Rue_Saint-Paul,_Vieux-Montr%C3%A9al,_Montreal,_Quebec_(30033989226).jpg"
+  },
+  "montreal-notre-dame": {
+    "alt": {
+      "en": "The interior of the Notre-Dame Basilica in Montreal",
+      "tr": "Montreal'de Notre-Dame Bazilikası'nın içi"
+    },
+    "author": "Diego Delso",
+    "caption": {
+      "en": "Notre-Dame Basilica, Montreal",
+      "tr": "Notre-Dame Bazilikası, Montreal"
+    },
+    "cityKey": "montreal",
+    "file": "/images/blog/montreal-notre-dame.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Bas%C3%ADlica_de_Notre-Dame,_Montreal,_Canad%C3%A1,_2017-08-12,_DD_07-09_HDR.jpg"
   },
   "mostar-carsi": {
     "alt": {
@@ -4648,6 +4738,36 @@
     "file": "/images/blog/petra-wadi-musa.webp",
     "license": "CC BY 2.0",
     "source": "https://commons.wikimedia.org/wiki/File:Wadi_Musa_at_dusk_(12302441624).jpg"
+  },
+  "philadelphia-30th-street": {
+    "alt": {
+      "en": "The facade of 30th Street Station in Philadelphia",
+      "tr": "Philadelphia'da 30th Street Station'ın cephesi"
+    },
+    "author": "Smallbones",
+    "caption": {
+      "en": "30th Street Station, Philadelphia",
+      "tr": "30th Street Station, Philadelphia"
+    },
+    "cityKey": "philadelphia",
+    "file": "/images/blog/philadelphia-30th-street.webp",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:30th_Street_Station_Philly.JPG"
+  },
+  "philadelphia-independence": {
+    "alt": {
+      "en": "Independence Hall in Philadelphia",
+      "tr": "Philadelphia'da Independence Hall"
+    },
+    "author": "Kwdavids",
+    "caption": {
+      "en": "Independence Hall, Philadelphia",
+      "tr": "Independence Hall, Philadelphia"
+    },
+    "cityKey": "philadelphia",
+    "file": "/images/blog/philadelphia-independence.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Independence_Hall,_Philadelphia_PA.JPG"
   },
   "phnom-penh-nehir": {
     "alt": {
@@ -6119,6 +6239,36 @@
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Mole_Antonelliana_Torino.JPG"
   },
+  "toronto-cn-kule": {
+    "alt": {
+      "en": "The observation pod of the CN Tower in Toronto",
+      "tr": "Toronto'da CN Kulesi'nin gözlem katı"
+    },
+    "author": "Wladyslaw",
+    "caption": {
+      "en": "The CN Tower, Toronto",
+      "tr": "CN Kulesi, Toronto"
+    },
+    "cityKey": "toronto",
+    "file": "/images/blog/toronto-cn-kule.webp",
+    "license": "CC BY 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Toronto_-_ON_-_CN_Tower_Turmkorb.jpg"
+  },
+  "toronto-union": {
+    "alt": {
+      "en": "The great hall of Toronto Union Station",
+      "tr": "Toronto Union Station'ın ana holü"
+    },
+    "author": "Ville Miettinen from Helsinki, Finland",
+    "caption": {
+      "en": "Union Station, Toronto",
+      "tr": "Union Station, Toronto"
+    },
+    "cityKey": "toronto",
+    "file": "/images/blog/toronto-union.webp",
+    "license": "CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Union_Station_Toronto_8.jpg"
+  },
   "trabzon-liman": {
     "alt": {
       "en": "Trabzon harbour with the city rising behind it",
@@ -6283,6 +6433,36 @@
     "file": "/images/blog/van-kale.webp",
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Van_Fortress_From_Northwest.JPG"
+  },
+  "vancouver-downtown": {
+    "alt": {
+      "en": "The downtown Vancouver skyline",
+      "tr": "Vancouver'da şehir merkezinin silueti"
+    },
+    "author": "MagnusL3D",
+    "caption": {
+      "en": "Downtown Vancouver",
+      "tr": "Downtown, Vancouver"
+    },
+    "cityKey": "vancouver",
+    "file": "/images/blog/vancouver-downtown.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Downtown_Vancouver_Sunset.jpg"
+  },
+  "vancouver-stanley": {
+    "alt": {
+      "en": "The seawall path around Stanley Park in Vancouver",
+      "tr": "Vancouver'da Stanley Parkı'nı çevreleyen sahil yürüyüş yolu"
+    },
+    "author": "bobanny",
+    "caption": {
+      "en": "The Stanley Park seawall, Vancouver",
+      "tr": "Stanley Parkı sahil yolu, Vancouver"
+    },
+    "cityKey": "vancouver",
+    "file": "/images/blog/vancouver-stanley.webp",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Stanley_Seawall.jpg"
   },
   "varanasi-ganj": {
     "alt": {

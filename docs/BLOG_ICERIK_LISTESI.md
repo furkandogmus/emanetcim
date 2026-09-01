@@ -1,5 +1,5 @@
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 219/265 sehir -->
+<!-- 225/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -222,12 +222,12 @@
 | 217 | US | Seattle | `seattle` | 1 | yayında | seattle-pike-place-yokus-alaska-gemisi-valiz | seattle-luggage-storage-pike-place-hill |
 | 218 | US | New Orleans | `new-orleans` | 1 | yayında | new-orleans-fransiz-mahallesi-tramvay-valiz | new-orleans-luggage-storage-streetcar |
 | 219 | US | San Diego | `san-diego` | 1 | yayında | san-diego-tijuana-sinir-kuyrugu-balboa-valiz | san-diego-luggage-storage-tijuana-border |
-| 220 | US | Philadelphia | `philadelphia` | 1 | — |  |  |
-| 221 | CA | Toronto | `toronto` | 2 | — |  |  |
-| 222 | CA | Montreal | `montreal` | 1 | — |  |  |
-| 223 | CA | Vancouver | `vancouver` | 1 | — |  |  |
-| 224 | MX | Ciudad de México | `meksiko` | 2 | — |  |  |
-| 225 | MX | Cancun | `cancun` | 2 | — |  |  |
+| 220 | US | Philadelphia | `philadelphia` | 1 | yayında | philadelphia-independence-hall-guvenlik-30th-street-valiz | philadelphia-luggage-storage-independence-hall |
+| 221 | CA | Toronto | `toronto` | 2 | yayında | toronto-path-yeralti-agi-union-station-valiz | toronto-luggage-storage-path-network |
+| 222 | CA | Montreal | `montreal` | 1 | yayında | montreal-eski-sehir-arnavut-kaldirimi-kis-valiz | montreal-luggage-storage-cobblestones |
+| 223 | CA | Vancouver | `vancouver` | 1 | yayında | vancouver-stanley-parki-sahil-yolu-alaska-gemisi-valiz | vancouver-luggage-storage-stanley-park-seawall |
+| 224 | MX | Ciudad de México | `meksiko` | 2 | yayında | meksiko-dort-otogar-rakim-metro-valiz | mexico-city-luggage-storage-four-bus-terminals |
+| 225 | MX | Cancun | `cancun` | 2 | yayında | cancun-otel-bolgesi-merkez-otobus-terminali-valiz | cancun-luggage-storage-bus-terminal-downtown |
 | 226 | MX | Playa del Carmen | `playa-del-carmen` | 1 | — |  |  |
 | 227 | CU | La Habana | `havana` | 1 | — |  |  |
 | 228 | DO | Punta Cana | `punta-cana` | 1 | — |  |  |
