@@ -89,6 +89,36 @@
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Heads_on_Mount_Nemrut.JPG"
   },
+  "agra-kale": {
+    "alt": {
+      "en": "The red sandstone walls of Agra Fort",
+      "tr": "Agra Kalesi'nin kırmızı kumtaşı surları"
+    },
+    "author": "Diego Delso",
+    "caption": {
+      "en": "Agra Fort",
+      "tr": "Agra Kalesi"
+    },
+    "cityKey": "agra",
+    "file": "/images/blog/agra-kale.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Agra_Fort_walls.jpg"
+  },
+  "agra-tac-mahal": {
+    "alt": {
+      "en": "The Taj Mahal in Agra with the reflecting pool in front",
+      "tr": "Agra'da Tac Mahal ve önündeki havuz"
+    },
+    "author": "Dhirad, picture edited by J. A. Knudsen",
+    "caption": {
+      "en": "The Taj Mahal, Agra",
+      "tr": "Tac Mahal, Agra"
+    },
+    "cityKey": "agra",
+    "file": "/images/blog/agra-tac-mahal.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Taj_Mahal_in_March_2004.jpg"
+  },
   "akabe-kizildeniz": {
     "alt": {
       "en": "The Red Sea shore at Aqaba at sunset",
@@ -1349,6 +1379,36 @@
     "license": "Public domain",
     "source": "https://commons.wikimedia.org/wiki/File:Dat%C3%A7a_yelde%C4%9Firmeni_1.jpg"
   },
+  "delhi-connaught": {
+    "alt": {
+      "en": "The arcaded colonnade of Connaught Place in New Delhi",
+      "tr": "Yeni Delhi'de Connaught Place'in kemerli revakları"
+    },
+    "author": "Ville Miettinen from Helsinki, Finland",
+    "caption": {
+      "en": "Connaught Place, Delhi",
+      "tr": "Connaught Place, Delhi"
+    },
+    "cityKey": "delhi",
+    "file": "/images/blog/delhi-connaught.webp",
+    "license": "CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Connaught_Place_sunset.jpg"
+  },
+  "delhi-eski-sehir": {
+    "alt": {
+      "en": "A cycle rickshaw in Old Delhi with an auto-rickshaw behind it",
+      "tr": "Eski Delhi'de bir çekçek ve arkasında motorlu riksa"
+    },
+    "author": "Marcin Białek",
+    "caption": {
+      "en": "Cycle rickshaw and auto-rickshaw, Old Delhi",
+      "tr": "Çekçek ve riksa, Eski Delhi"
+    },
+    "cityKey": "delhi",
+    "file": "/images/blog/delhi-eski-sehir.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Old_Delhi_rickshaw_2011.JPG"
+  },
   "didim-altinkum": {
     "alt": {
       "en": "The beach at Altinkum with rows of parasols",
@@ -2324,6 +2384,36 @@
     "license": "CC BY 2.0",
     "source": "https://commons.wikimedia.org/wiki/File:%C4%B0zmir_Konak_saat_kulesi_ve_Konak_meydan%C4%B1.jpg"
   },
+  "jaipur-amber": {
+    "alt": {
+      "en": "Amber Fort on its hillside near Jaipur",
+      "tr": "Jaipur yakınlarında yamaca kurulmuş Amber Kalesi"
+    },
+    "author": "A.Savin",
+    "caption": {
+      "en": "Amber Fort, Jaipur",
+      "tr": "Amber Kalesi, Jaipur"
+    },
+    "cityKey": "jaipur",
+    "file": "/images/blog/jaipur-amber.webp",
+    "license": "FAL",
+    "source": "https://commons.wikimedia.org/wiki/File:Jaipur_03-2016_02_Amber_Fort.jpg"
+  },
+  "jaipur-hawa-mahal": {
+    "alt": {
+      "en": "The facade of the Hawa Mahal in Jaipur",
+      "tr": "Jaipur'da Hawa Mahal'in cephesi"
+    },
+    "author": "Marcin Białek",
+    "caption": {
+      "en": "The Hawa Mahal, Jaipur",
+      "tr": "Hawa Mahal, Jaipur"
+    },
+    "cityKey": "jaipur",
+    "file": "/images/blog/jaipur-hawa-mahal.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Hawa_Mahal_2011.jpg"
+  },
   "kahire-han-halili": {
     "alt": {
       "en": "A narrow lane and shops in the Khan el-Khalili bazaar",
@@ -2443,6 +2533,36 @@
     "file": "/images/blog/kas-merkez.webp",
     "license": "CC BY 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Akdeniz-_the_mediterranean-ka%C5%9F_-_panoramio.jpg"
+  },
+  "katmandu-swayambhunath": {
+    "alt": {
+      "en": "The steep stone staircase up to Swayambhunath",
+      "tr": "Swayambhunath'a çıkan dik taş merdiven"
+    },
+    "author": "Greg Willis from Denver, CO, usa",
+    "caption": {
+      "en": "The Swayambhunath stairs, Kathmandu",
+      "tr": "Swayambhunath merdivenleri, Katmandu"
+    },
+    "cityKey": "katmandu",
+    "file": "/images/blog/katmandu-swayambhunath.webp",
+    "license": "CC BY-SA 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Stairs_Going_Up_to_Swayambhunath_from_the_East_(5202517692).jpg"
+  },
+  "katmandu-thamel": {
+    "alt": {
+      "en": "The narrow lanes and signage of Thamel in Kathmandu",
+      "tr": "Katmandu'da Thamel'in dar sokakları ve tabelaları"
+    },
+    "author": "Vyacheslav Argenberg",
+    "caption": {
+      "en": "Thamel, Kathmandu",
+      "tr": "Thamel, Katmandu"
+    },
+    "cityKey": "katmandu",
+    "file": "/images/blog/katmandu-thamel.webp",
+    "license": "CC BY 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Kathmandu,_Nepal,_Thamel_streets.jpg"
   },
   "kayseri-erciyes": {
     "alt": {
@@ -3569,6 +3689,36 @@
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Mostar_Old_Town_Panorama.jpg"
   },
+  "mumbai-cst": {
+    "alt": {
+      "en": "The Chhatrapati Shivaji Terminus building in Mumbai",
+      "tr": "Mumbai'de Chhatrapati Shivaji Terminus binası"
+    },
+    "author": "Joe Ravi",
+    "caption": {
+      "en": "Chhatrapati Shivaji Terminus, Mumbai",
+      "tr": "Chhatrapati Shivaji Terminus, Mumbai"
+    },
+    "cityKey": "mumbai",
+    "file": "/images/blog/mumbai-cst.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Chhatrapati_Shivaji_Terminus_(Victoria_Terminus).jpg"
+  },
+  "mumbai-gateway": {
+    "alt": {
+      "en": "The Gateway of India in Mumbai",
+      "tr": "Mumbai'de Hindistan Kapısı"
+    },
+    "author": "Shobhitsingh309",
+    "caption": {
+      "en": "The Gateway of India, Mumbai",
+      "tr": "Hindistan Kapısı, Mumbai"
+    },
+    "cityKey": "mumbai",
+    "file": "/images/blog/mumbai-gateway.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Gateway_of_India,_Mumbai_7.jpg"
+  },
   "munih-hauptbahnhof": {
     "alt": {
       "en": "Munich's main station and its platform sheds from above",
@@ -4138,6 +4288,36 @@
     "file": "/images/blog/plovdiv-eski-sehir.webp",
     "license": "CC BY-SA 2.5",
     "source": "https://commons.wikimedia.org/wiki/File:Straat_in_Oud_Plovdiv_2.jpeg"
+  },
+  "pokhara-annapurna": {
+    "alt": {
+      "en": "The Annapurna range seen from Pokhara",
+      "tr": "Pokhara'dan görünen Annapurna sıradağları"
+    },
+    "author": "Jmhullot",
+    "caption": {
+      "en": "The Annapurna range from Pokhara",
+      "tr": "Annapurna sıradağları, Pokhara"
+    },
+    "cityKey": "pokhara",
+    "file": "/images/blog/pokhara-annapurna.webp",
+    "license": "CC BY 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:The_Annapurna_range_from_Pokhara.jpg"
+  },
+  "pokhara-gol": {
+    "alt": {
+      "en": "Phewa Lake in Pokhara with the mountains behind it",
+      "tr": "Pokhara'da Phewa Gölü ve arkasındaki dağlar"
+    },
+    "author": "Iamavinashk",
+    "caption": {
+      "en": "Phewa Lake, Pokhara",
+      "tr": "Phewa Gölü, Pokhara"
+    },
+    "cityKey": "pokhara",
+    "file": "/images/blog/pokhara-gol.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Phewa_Lake_of_Pokhara_city.jpg"
   },
   "porto-ribeira": {
     "alt": {

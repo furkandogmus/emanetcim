@@ -1,5 +1,5 @@
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 189/265 sehir -->
+<!-- 195/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -192,12 +192,12 @@
 | 187 | KH | Siem Reap | `siem-reap` | 1 | yayında | siem-reap-angkor-gun-dogumu-tuk-tuk-valiz | siem-reap-luggage-storage-angkor-sunrise |
 | 188 | KH | Phnom Penh | `phnom-penh` | 1 | yayında | phnom-penh-saray-kiyafet-kurali-otobus-valiz | phnom-penh-luggage-storage-royal-palace |
 | 189 | LA | Luang Prabang | `luang-prabang` | 1 | yayında | luang-prabang-sadaka-toreni-gece-pazari-valiz | luang-prabang-luggage-storage-alms-night-market |
-| 190 | NP | Katmandu | `katmandu` | 1 | — |  |  |
-| 191 | NP | Pokhara | `pokhara` | 1 | — |  |  |
-| 192 | IN | Delhi | `delhi` | 2 | — |  |  |
-| 193 | IN | Agra | `agra` | 1 | — |  |  |
-| 194 | IN | Jaipur | `jaipur` | 1 | — |  |  |
-| 195 | IN | Mumbai | `mumbai` | 2 | — |  |  |
+| 190 | NP | Katmandu | `katmandu` | 1 | yayında | katmandu-trekking-oncesi-buyuk-canta-nereye | kathmandu-luggage-storage-before-trekking |
+| 191 | NP | Pokhara | `pokhara` | 1 | yayında | pokhara-annapurna-trekking-sarangkot-valiz | pokhara-luggage-storage-annapurna-trek |
+| 192 | IN | Delhi | `delhi` | 2 | yayında | delhi-metro-canta-taramasi-agra-treni-valiz | delhi-luggage-storage-metro-security |
+| 193 | IN | Agra | `agra` | 1 | yayında | agra-tac-mahal-canta-kurallari-gunubirlik-valiz | agra-luggage-storage-taj-mahal-rules |
+| 194 | IN | Jaipur | `jaipur` | 1 | yayında | jaipur-amber-kalesi-carsi-altin-ucgen-valiz | jaipur-luggage-storage-golden-triangle |
+| 195 | IN | Mumbai | `mumbai` | 2 | yayında | mumbai-banliyo-treni-valizle-binilmez | mumbai-luggage-storage-local-trains |
 | 196 | IN | Goa | `goa` | 1 | — |  |  |
 | 197 | IN | Varanasi | `varanasi` | 1 | — |  |  |
 | 198 | LK | Kolombo | `kolombo` | 1 | — |  |  |
