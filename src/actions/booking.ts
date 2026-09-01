@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@/auth";
-import { bookingService } from "@/services/BookingService";
+import { bookingService, awardLoyaltyPoints } from "@/services/BookingService";
 import {
   BookingRejectedError,
   type BookingRejectionCode,
@@ -261,9 +261,17 @@ export async function createBookingAction(data: CreateBookingInput) {
           alamadiginda sebebi HICBIR yerde yazmiyordu. "Sadakat puani kazaniliyor
           ama gorunmuyor" hatasi (b069522) tam bu korlukten cikmisti.
         */
-        void prisma.$executeRaw`UPDATE "User" SET "loyaltyPoints" = "loyaltyPoints" + ${earnedPoints} WHERE id = ${userId}`.catch(
-          (err) => logger.error({ err, userId, earnedPoints }, "loyalty_points_increment_failed"),
-        );
+        /*
+          GOVDE SERVISTE (`awardLoyaltyPoints`). `Booking` yazmalari servis
+          disina kapali; ama asil sebep, puani VEREN ve GERI ALAN kodun ayni
+          yerde durmasi. Ayri yerlerde oldukca biri `floor(totalPrice)` derken
+          digeri baska bir sey diyebiliyordu -- nitekim oyle oldu ve misafir
+          baska rezervasyonlardan kazandigi puani kaybediyordu (olculdu: 112).
+        */
+        void awardLoyaltyPoints({ bookingId: booking.id, guestId: userId, points: earnedPoints })
+          .catch((err) =>
+            logger.error({ err, userId, earnedPoints }, "loyalty_points_increment_failed"),
+          );
       }
     }
 

@@ -95,6 +95,7 @@ export type TxClient = Omit<
 >;
 
 export { BookingCapacityExceededError } from '@/services/booking/errors';
+export { awardLoyaltyPoints } from '@/services/booking/lifecycle';
 export type { PartnerReviewActor, PartnerReviewResult, PartnerReviewErrorCode, ForceCancelSummary } from '@/services/booking/partner-review';
 export type { BagRevisionActor, BagCounts, BagRevisionResult, ProposeRevisionResult, BagRevisionErrorCode } from '@/services/booking/bag-revision';
 

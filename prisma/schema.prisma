@@ -270,6 +270,21 @@ model Booking {
   referralDiscountAmount Decimal           @default(0) @db.Decimal(12, 2)
   /// Rezervasyonda kullanılan referans kodu (varsa)
   referredByCode         String?
+  /// Bu rezervasyon için VERİLEN sadakat puanı.
+  ///
+  /// NEDEN EKLENDİ (2026-09-01'de ölçüldü): puan oluşturmada
+  /// `floor(totalPrice)` kadar EKLENİYOR, iptalde `floor(booking.totalPrice)`
+  /// kadar ÇIKARILIYORDU — yani iptal, GÜNCEL fiyattan hesaplıyordu. Valiz
+  /// düzeltmesi (`applyBagRevision`) `totalPrice`ı değiştirdiği için ikisi
+  /// ayrışıyordu.
+  ///
+  /// Ölçüldü: 80 TRY rezervasyon +80 puan; valiz 1→3 düzeltilince tutar 192
+  /// TRY; iptalde 192 puan silindi. Misafir, BAŞKA rezervasyonlardan kazandığı
+  /// 112 puanı kaybetti. `GREATEST(0, ...)` yalnızca negatifi engelliyordu,
+  /// başkasının puanını korumuyordu.
+  ///
+  /// Verilen puan artık KAYITLI: iptal tam olarak onu geri alır.
+  loyaltyPointsAwarded   Int               @default(0)
   /// Kupon ile uygulanan indirim miktarı (TRY).
   ///
   /// NEDEN EKLENDİ (2026-09-01'de ölçüldü): kupon `totalPrice`'ı DOĞRUDAN

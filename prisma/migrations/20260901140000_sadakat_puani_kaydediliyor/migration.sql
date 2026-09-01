@@ -1,0 +1,13 @@
+-- Verilen sadakat puani rezervasyonda KAYITLI.
+--
+-- NEDEN: puan olusturmada `floor(totalPrice)` kadar ekleniyor, iptalde
+-- `floor(booking.totalPrice)` kadar cikariliyordu -- yani iptal GUNCEL fiyattan
+-- hesapliyordu. Valiz duzeltmesi `totalPrice`i degistirdigi icin ikisi
+-- ayrisiyordu ve misafir baska rezervasyonlardan kazandigi puani kaybediyordu.
+-- Olculdu: 80 TRY -> +80 puan, valiz 1->3 -> tutar 192 TRY, iptal -> 192 puan
+-- silindi, kayip 112 puan.
+--
+-- Mevcut satirlar 0 ile baslar: gecmiste verilen puan geriye donuk BILINEMEZ.
+-- O rezervasyonlarin iptalinde puan artik HIC dusulmez -- yanlis miktar dusmek
+-- yerine hic dusmemek tercih edildi.
+ALTER TABLE "Booking" ADD COLUMN "loyaltyPointsAwarded" INTEGER NOT NULL DEFAULT 0;

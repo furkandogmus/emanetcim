@@ -148,6 +148,58 @@ UNUTMANIN MÜMKÜN OLMASIYDI.
 - Gizlilik metni paylaşımı **söylüyor** (`Privacy.a2`: "dükkan sahipleriyle
   iletişimi yönetmek", `Privacy.a4`: iş ortakları).
 
+## 2026-09-01 — iptal, misafirin BAŞKA rezervasyonlardan kazandığı puanı siliyordu
+
+Sadakat puanı rezervasyon oluşturulurken `floor(totalPrice)` kadar **ekleniyor**,
+iptalde `floor(booking.totalPrice)` kadar **çıkarılıyordu** — yani iptal, verilen
+miktarı değil **güncel fiyatı** kullanıyordu. Verilen puan hiçbir yere
+yazılmadığı için başka kaynak da yoktu.
+
+Valiz düzeltmesi (`applyBagRevision`) `totalPrice`ı değiştirdiği için ikisi
+ayrışıyor. Gerçek veriyle ölçüldü:
+
+```
+başlangıç:                    5860
+80 TRY rezervasyon → +80:     5940
+valiz 1→3, tutar 192 TRY oldu
+iptal → 192 puan silindi:     5748
+olması gereken:               5860
+KAYIP:                        112 puan
+```
+
+`GREATEST(0, ...)` yalnızca negatifi engelliyordu; **başkasının puanını
+korumuyordu.** Misafir, tamamen ilgisiz rezervasyonlardan kazandığı 112 puanı
+kaybetti.
+
+**Düzeltildi:** `Booking.loyaltyPointsAwarded` eklendi; iptal tam olarak
+verileni geri alıyor. Aynı senaryo düzeltmeden sonra **kayıp 0** verdi.
+
+Puanı VEREN ve GERİ ALAN kod artık aynı yerde (`booking/lifecycle.ts`). Ayrı
+yerlerde oldukları sürece biri `floor(totalPrice)` derken diğeri başka bir şey
+diyebiliyordu — nitekim öyle oldu. Verme işlemi puan artışı ile kaydı **tek
+transaction'da** yapıyor: aradaki bir hata "puan verildi ama kayıt yok" bırakır
+ve iptal yine yanlış miktar düşerdi.
+
+**2026-09-01 öncesi rezervasyonlarda alan 0'dır ve puan HİÇ düşülmez.** Geçmişte
+verilen miktar geriye dönük bilinemez; yanlış miktar düşmek yerine hiç düşmemek
+tercih edildi.
+
+### Aynı taramada bulunan, DÜZELTİLMEYEN
+
+**`cancelFixedFeeTry` hiçbir yerde uygulanmıyor.** Admin panelinde
+düzenlenebilen, `PlatformSettings`te saklanan bir iptal ücreti — ve onu OKUYAN
+tek satır yok (`admin.ts` yazıyor, `platform-settings.ts` okuyup taşıyor, sonu
+yok). İptal her zaman TAM iade veriyor.
+
+Bugün zaten uygulanamaz: `manual` sağlayıcıda tahsilat dükkanda yapılıyor, yani
+elde tutulacak bir para yok. Ama admin paneli bunu çalışan bir kural gibi
+gösteriyor — `isVerified` rozetiyle (P2-7) aynı sınıf. Ücretin uygulanıp
+uygulanmayacağı bir İŞ KARARIDIR; misafirden para kesmeye tek taraflı
+başlanamaz.
+
+(`earlyRefundRatio` ise KULLANILIYOR — `PricingService`te erken teslim alma
+iadesinde. Yalnızca iptalde değil.)
+
 ## 2026-09-01 — ayar değişikliği mevcut rezervasyonları sessizce imkânsız kılabiliyordu
 
 `updateShopSettingsAction` yalnızca BİÇİM doğruluyordu (`HH:mm` mi, kapasite

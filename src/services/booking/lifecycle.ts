@@ -60,6 +60,34 @@ export async function issueCancellationCreditCoupon(amountTry: number): Promise<
  * Not: iade `PaymentLog`'da işaretlenir; para gerçekten geri gönderilmez —
  * entegre bir sağlayıcı yok (P0-2, docs/PAYMENTS.md).
  */
+/**
+ * Rezervasyon için sadakat puanı verir ve VERİLEN MİKTARI kaydeder.
+ *
+ * NEDEN SERVİSTE: `Booking` yazmaları servis dışına kapalı
+ * (`service-layer-writes` mandalı, kesin yasak listesi). Ama asıl sebep şu:
+ * puanı veren ve geri alan kod AYNI YERDE durmalı. Ayrı yerlerde oldukları
+ * sürece biri `floor(totalPrice)` derken diğeri başka bir şey diyebiliyordu —
+ * nitekim öyle oldu.
+ *
+ * İKİSİ TEK TRANSACTION'DA: aradaki bir hata "puan verildi ama kayıt yok" ya
+ * da tersini bırakır, ve iptal o zaman yine yanlış miktar düşer.
+ */
+export async function awardLoyaltyPoints(params: {
+  bookingId: string;
+  guestId: string;
+  points: number;
+}): Promise<void> {
+  const { bookingId, guestId, points } = params;
+  if (points <= 0) return;
+  await prisma.$transaction([
+    prisma.$executeRaw`UPDATE "User" SET "loyaltyPoints" = "loyaltyPoints" + ${points} WHERE id = ${guestId}`,
+    prisma.booking.update({
+      where: { id: bookingId },
+      data: { loyaltyPointsAwarded: points },
+    }),
+  ]);
+}
+
 export async function cancelBooking(bookingId: string): Promise<CancelBookingResult> {
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId },
@@ -120,9 +148,22 @@ export async function cancelBooking(bookingId: string): Promise<CancelBookingRes
       }
     });
 
-    // Sadakat puanlarını geri al
+    /*
+      SADAKAT PUANI: VERILEN kadar geri alinir, guncel fiyattan DEGIL.
+
+      Onceden `floor(booking.totalPrice)` kadar dusuluyordu. Valiz duzeltmesi
+      (`applyBagRevision`) tutari degistirdigi icin bu, VERILENDEN FAZLA
+      olabiliyordu: olculdu -- 80 TRY rezervasyon +80 puan, valiz 1->3
+      duzeltilince tutar 192 TRY, iptalde 192 puan silindi, misafir BASKA
+      rezervasyonlardan kazandigi 112 puani kaybetti. `GREATEST(0, ...)`
+      yalnizca negatifi engelliyordu, baskasinin puanini korumuyordu.
+
+      2026-09-01 ONCESI rezervasyonlarda alan 0'dir ve puan HIC dusulmez:
+      gecmiste verilen miktar geriye donuk bilinemez, ve yanlis miktar dusmek
+      yerine hic dusmemek tercih edildi.
+    */
     if (booking.guestId) {
-      const earnedPoints = Math.floor(moneyToNumber(booking.totalPrice));
+      const earnedPoints = booking.loyaltyPointsAwarded;
       if (earnedPoints > 0) {
         prisma.$executeRaw`UPDATE "User" SET "loyaltyPoints" = GREATEST(0, "loyaltyPoints" - ${earnedPoints}) WHERE id = ${booking.guestId}`.catch((err) =>
           logger.error({ err, bookingId, guestId: booking.guestId, earnedPoints }, "loyalty_points_decrement_failed")
