@@ -1,6 +1,8 @@
 import type { Prisma, Shop } from '@prisma/client';
 import { Role } from '@prisma/client';
 import prisma from '@/lib/db';
+import { randomUUID } from 'crypto';
+import { getStorage, validateImageBytes, buildObjectKey } from '@/lib/storage';
 import { getSiteBaseUrl } from "@/lib/site-base-url";
 import {
   RESPONSE_TIME_LOOKBACK_DAYS,
@@ -201,6 +203,23 @@ export interface IShopService {
  * karsiligi olmayan bir rezervasyon kalir. Cagirana `throw` yerine sebep
  * donuluyor cunku bu bir HATA degil, gecerli bir "hayir".
  */
+export type SetShopImageResult =
+  | { ok: true; url: string }
+  | { ok: false; reason: "not_found" | "not_owner" | "empty" | "too_large" | "unsupported_type" };
+
+/**
+ * Kayitli URL'den nesne anahtarini geri cikarir.
+ *
+ * URL veritabaninda TAM adres olarak duruyor (misafir tarafi onu dogrudan
+ * basiyor). Eski nesneyi silmek icin anahtara ihtiyac var; kok adres eslesmezse
+ * -- ornegin CDN alan adi degistiyse -- `null` donuyor ve silme atlaniyor.
+ * Yanlis bir anahtari silmeye calismaktansa yetim nesne birakmak yeglenir.
+ */
+function extractKeyFromUrl(url: string, storage: { publicUrl: (k: string) => string }): string | null {
+  const base = storage.publicUrl("");
+  return url.startsWith(base) ? url.slice(base.length) : null;
+}
+
 export type RejectShopResult =
   | { ok: true; releasedSeals: number }
   | { ok: false; reason: "not_found" | "has_active_bookings" };
@@ -833,6 +852,71 @@ export class ShopService implements IShopService {
     }
 
     return { updated, cleared, samples, written };
+  }
+
+  /**
+   * Dükkanın vitrin fotoğrafını değiştirir.
+   *
+   * NEDEN VAR (2026-09-01): `Shop.image` misafir vitrininde çiziliyordu ama
+   * kod tabanında ona YAZAN tek bir satır yoktu — ne esnaf panelinde, ne admin
+   * formunda, ne seed'de. Yani pazar yerindeki her dükkan kalıcı olarak
+   * fotoğrafsızdı ve bunu ürün içinden kimse değiştiremiyordu. Tek engel bir
+   * depolama kararıydı; karar S3 olarak verildi (`src/lib/storage/`).
+   *
+   * ÜÇ ŞEY BU SIRAYLA: sahiplik → görsel doğrulama → yükleme. Yükleme en
+   * pahalı adım ve geri alınması en zor olanı; başkasının dükkanı için ya da
+   * görsel olmayan bir dosya için S3'e yazmak istemeyiz.
+   */
+  async setShopImage(params: {
+    shopId: string;
+    actorId: string;
+    actorRole: Role;
+    bytes: Uint8Array;
+  }): Promise<SetShopImageResult> {
+    const { shopId, actorId, actorRole, bytes } = params;
+
+    const shop = await prisma.shop.findUnique({
+      where: { id: shopId },
+      select: { ownerId: true, image: true },
+    });
+    if (!shop) return { ok: false, reason: "not_found" };
+    // Admin sahiplik kontrolunu atlar; bu bir ALAN kurali, rol kapisi degil.
+    if (shop.ownerId !== actorId && actorRole !== Role.ADMIN) {
+      return { ok: false, reason: "not_owner" };
+    }
+
+    const validation = validateImageBytes(bytes);
+    if (!validation.ok) return { ok: false, reason: validation.reason };
+
+    const storage = getStorage();
+    const key = buildObjectKey({
+      prefix: "shops",
+      ownerId: shopId,
+      uniqueId: randomUUID(),
+      extension: validation.extension,
+    });
+    const { url } = await storage.put({
+      key,
+      body: bytes,
+      contentType: validation.contentType,
+    });
+
+    await prisma.shop.update({ where: { id: shopId }, data: { image: url } });
+
+    /*
+      ESKI NESNE SONRA SILINIR ve hatasi YUTULUR: veritabani zaten yeni adresi
+      gosteriyor, yani kullanici acisindan is bitti. Silme basarisiz olursa
+      kovada yetim bir nesne kalir -- rahatsiz edici ama zararsiz. Once silip
+      sonra yazmak ise, yazma basarisiz oldugunda dukkani fotografsiz birakirdi.
+    */
+    const previousKey = shop.image ? extractKeyFromUrl(shop.image, storage) : null;
+    if (previousKey && previousKey !== key) {
+      void storage
+        .remove(previousKey)
+        .catch((err: unknown) => logger.warn({ err, shopId, previousKey }, "shop_image_cleanup_failed"));
+    }
+
+    return { ok: true, url };
   }
 
   /**

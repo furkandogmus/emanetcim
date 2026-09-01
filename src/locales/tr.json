@@ -282,7 +282,13 @@
     "pulseVsLastMonthDown": "geçen aya göre %{pct} düşüş",
     "totalCollected": "Toplam kazancın",
     "partnerWhatsAppGuest": "WhatsApp'tan yaz",
-    "partnerWhatsAppGuestMessage": "Merhaba, {shop} — BagajPark rezervasyonunuz ({code}) hakkında yazıyorum."
+    "partnerWhatsAppGuestMessage": "Merhaba, {shop} — BagajPark rezervasyonunuz ({code}) hakkında yazıyorum.",
+    "shopPhotoTitle": "Vitrin fotoğrafı",
+    "shopPhotoHint": "Misafirler dükkanını bu fotoğrafla görüyor. İyi bir fotoğraf rezervasyonu artırır.",
+    "shopPhotoChoose": "Fotoğraf seç",
+    "shopPhotoUploading": "Yükleniyor…",
+    "shopPhotoSaved": "Fotoğraf güncellendi.",
+    "shopPhotoNone": "Henüz fotoğraf yok"
   },
   "Guest": {
     "heroTitle": "Valizini Güvenle Bırak, Özgürce Gez",
@@ -1703,7 +1709,9 @@
     "verificationCooldown": "Yeni bir e-posta göndermek için {seconds} saniye beklemeniz gerekiyor.",
     "verifyEmailRequired": "Lütfen rezervasyon yapabilmek için önce e-posta adresinizi doğrulayın.",
     "shopNotOpenYet": "Bu nokta henüz hizmete açılmadı. Açıldığında haberdar olmak için e-postanı bırakabilirsin.",
-    "shopNowOpenBookInstead": "Bu nokta artık hizmete açıldı — doğrudan rezervasyon yapabilirsiniz."
+    "shopNowOpenBookInstead": "Bu nokta artık hizmete açıldı — doğrudan rezervasyon yapabilirsiniz.",
+    "imageTooLarge": "Fotoğraf çok büyük. En fazla 8 MB olabilir.",
+    "imageUnsupportedType": "Bu dosya bir fotoğraf değil. JPEG, PNG veya WebP yükleyin."
   },
   "Emails": {
     "verificationSubject": "E-postanızı Doğrulayın",

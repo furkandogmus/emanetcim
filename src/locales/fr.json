@@ -282,7 +282,13 @@
     "pulseVsLastMonthDown": "{pct}% de moins qu'au mois dernier",
     "totalCollected": "Vos gains totaux",
     "partnerWhatsAppGuest": "Écrire sur WhatsApp",
-    "partnerWhatsAppGuestMessage": "Bonjour, ici {shop} — au sujet de votre réservation BagajPark ({code})."
+    "partnerWhatsAppGuestMessage": "Bonjour, ici {shop} — au sujet de votre réservation BagajPark ({code}).",
+    "shopPhotoTitle": "Photo de la vitrine",
+    "shopPhotoHint": "C'est ainsi que les clients voient votre boutique. Une bonne photo augmente les réservations.",
+    "shopPhotoChoose": "Choisir une photo",
+    "shopPhotoUploading": "Envoi…",
+    "shopPhotoSaved": "Photo mise à jour.",
+    "shopPhotoNone": "Pas encore de photo"
   },
   "Guest": {
     "heroTitle": "Déposez vos bagages, explorez librement",
@@ -1645,7 +1651,9 @@
     "verificationCooldown": "Veuillez patienter {seconds} secondes avant d'envoyer un autre e-mail.",
     "verifyEmailRequired": "Veuillez vérifier votre adresse e-mail avant de réserver.",
     "shopNotOpenYet": "Ce point n'est pas encore ouvert. Laissez votre e-mail et nous vous préviendrons à l'ouverture.",
-    "shopNowOpenBookInstead": "Ce point est désormais ouvert — vous pouvez réserver directement."
+    "shopNowOpenBookInstead": "Ce point est désormais ouvert — vous pouvez réserver directement.",
+    "imageTooLarge": "La photo est trop lourde. 8 Mo maximum.",
+    "imageUnsupportedType": "Ce fichier n'est pas une photo. Envoyez un JPEG, PNG ou WebP."
   },
   "Emails": {
     "verificationSubject": "Vérifiez votre e-mail",

@@ -28,6 +28,19 @@ const serverSchema = z.object({
    * bkz. `src/lib/payments/index.ts`. Ayrıntı: docs/PAYMENTS.md
    */
   PAYMENT_PROVIDER: z.string().optional(),
+  /**
+   * Nesne depolama (S3). Beşi birden tanımlı değilse yükleme yüzeyi HİÇ
+   * açılmaz — bkz. `src/lib/storage/index.ts`. Eksik yapılandırmada sistem
+   * sessizce "yüklendi" demez.
+   */
+  S3_BUCKET: z.string().optional(),
+  S3_REGION: z.string().optional(),
+  S3_ACCESS_KEY_ID: z.string().optional(),
+  S3_SECRET_ACCESS_KEY: z.string().optional(),
+  /** Nesnelerin okunacağı kök adres — CloudFront alan adı ya da kova adresi. */
+  S3_PUBLIC_BASE_URL: z.string().optional(),
+  /** MinIO / R2 gibi S3 uyumlu servisler için; boşsa AWS. */
+  S3_ENDPOINT: z.string().optional(),
 });
 
 export type ServerEnv = z.infer<typeof serverSchema>;

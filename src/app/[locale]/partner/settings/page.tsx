@@ -5,6 +5,8 @@ import { Link } from "@/i18n/routing";
 import { requirePartnerPage } from "@/lib/page-auth";
 import { resolvePartnerShops } from "@/lib/partner-shop";
 import PartnerShopSettingsForm from "@/components/partner/PartnerShopSettingsForm";
+import ShopPhotoUpload from "@/components/partner/ShopPhotoUpload";
+import { isStorageConfigured } from "@/lib/storage";
 import { moneyToNumber } from "@/lib/money";
 import { getPricingRules } from "@/lib/platform-settings";
 import prisma from "@/lib/db";
@@ -45,6 +47,7 @@ export default async function PartnerSettingsPage({
           openingTime: true,
           closingTime: true,
           pricePerDay: true,
+          image: true,
           address: true,
           city: true,
           district: true,
@@ -85,6 +88,17 @@ export default async function PartnerSettingsPage({
       </header>
 
       <div className="p-6 max-w-2xl mx-auto w-full space-y-6">
+        {/*
+          VITRIN FOTOGRAFI. `Shop.image` misafir vitrininde ciziliyordu ama ona
+          YAZAN tek bir kod yolu yoktu -- esnaf fotograf ekleyemiyordu. Depolama
+          yapilandirilmamissa bilesen kendini hic cizmiyor.
+        */}
+        <ShopPhotoUpload
+          shopId={shop.id}
+          initialUrl={shop.image}
+          configured={isStorageConfigured()}
+        />
+
         <PartnerShopSettingsForm
           shopId={shop.id}
           initialCapacity={shop.capacity}

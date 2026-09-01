@@ -251,7 +251,7 @@ Unicode blok başlangıcından çıkarılarak yapılıyor.
    neyi kapsar?" diyor ama `insuranceFeeTry` = 0 ve `booking-server-price.ts:68`
    her zaman 0 üretiyor — ödemede öyle bir satır yok.
 
-## 2026-09-01 — dükkan fotoğrafının HİÇBİR yazma yolu yok (kod tabanı tarandı)
+## 2026-09-01 — dükkan fotoğrafının HİÇBİR yazma yolu yok (ÇÖZÜLDÜ: S3)
 
 Pazar yerinde bir dükkanın vitrin fotoğrafı, misafirin rezervasyon kararını
 veren şeydir. İki alan bunu taşıyor ve **ikisi de yalnızca OKUNUYOR**:
@@ -273,7 +273,18 @@ içinden kimse — admin dahil — değiştiremiyor. Tek yol Postgres'e elle yaz
 Bu, `isVerified` rozetiyle (P2-7) aynı sınıf: kolon şemada var, üç yüzeyde
 çiziliyor, `src/` içinde onu yazan hiçbir kod yolu yok.
 
-### Neden burada duruyor, düzeltilmiş değil
+### ÇÖZÜLDÜ (2026-09-01, aynı gün)
+
+Depolama kararı **S3** olarak verildi. `src/lib/storage/` altında port/adapter
+kuruldu (`src/lib/payments/` ile aynı kalıp) ve esnaf paneline vitrin fotoğrafı
+yükleme eklendi. Adaptör yerel bir S3 uyumlu sunucuya (MinIO) karşı uçtan uca
+doğrulandı: tür baytlardan tespit ediliyor, nesne sunucunun belirlediği tiple
+yazılıyor, baytlar birebir dönüyor, silme çalışıyor ve idempotent.
+
+`BookingSeal.photoUrl` (mühür kanıt fotoğrafı) **henüz bağlanmadı** — aynı port
+onu da açıyor, sıradaki iş.
+
+### Özgün kayıt — neden bekliyordu
 
 Yükleme bir **depolama kararı** gerektiriyor ve o karar ürün sahibinindir:
 S3/R2 mi, sunucu diski mi, bir görsel CDN'i mi. Base64'ü veritabanına yazmak

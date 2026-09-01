@@ -282,7 +282,13 @@
     "pulseVsLastMonthDown": "{pct}% down vs last month",
     "totalCollected": "Your total earnings",
     "partnerWhatsAppGuest": "Message on WhatsApp",
-    "partnerWhatsAppGuestMessage": "Hello, this is {shop} — writing about your BagajPark booking ({code})."
+    "partnerWhatsAppGuestMessage": "Hello, this is {shop} — writing about your BagajPark booking ({code}).",
+    "shopPhotoTitle": "Storefront photo",
+    "shopPhotoHint": "This is how guests see your shop. A good photo increases bookings.",
+    "shopPhotoChoose": "Choose photo",
+    "shopPhotoUploading": "Uploading…",
+    "shopPhotoSaved": "Photo updated.",
+    "shopPhotoNone": "No photo yet"
   },
   "Guest": {
     "heroTitle": "Drop Your Bags, Explore Freely",
@@ -1703,7 +1709,9 @@
     "verificationCooldown": "Please wait {seconds} seconds before sending another email.",
     "verifyEmailRequired": "Please verify your email address before booking.",
     "shopNotOpenYet": "This location isn't open yet. Leave your email and we'll let you know when it launches.",
-    "shopNowOpenBookInstead": "This location is now open — you can book it directly."
+    "shopNowOpenBookInstead": "This location is now open — you can book it directly.",
+    "imageTooLarge": "The photo is too large. Maximum size is 8 MB.",
+    "imageUnsupportedType": "That file is not a photo. Upload a JPEG, PNG or WebP."
   },
   "Emails": {
     "verificationSubject": "Verify Your Email",

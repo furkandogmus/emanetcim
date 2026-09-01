@@ -282,7 +282,13 @@
     "pulseVsLastMonthDown": "{pct}٪ کمتر از ماه گذشته",
     "totalCollected": "مجموع درآمد شما",
     "partnerWhatsAppGuest": "پیام در واتساپ",
-    "partnerWhatsAppGuestMessage": "سلام، {shop} هستم — درباره رزرو BagajPark شما ({code}) می‌نویسم."
+    "partnerWhatsAppGuestMessage": "سلام، {shop} هستم — درباره رزرو BagajPark شما ({code}) می‌نویسم.",
+    "shopPhotoTitle": "عکس ویترین",
+    "shopPhotoHint": "مهمان‌ها فروشگاه شما را با این عکس می‌بینند. عکس خوب رزرو را بیشتر می‌کند.",
+    "shopPhotoChoose": "انتخاب عکس",
+    "shopPhotoUploading": "در حال بارگذاری…",
+    "shopPhotoSaved": "عکس به‌روزرسانی شد.",
+    "shopPhotoNone": "هنوز عکسی نیست"
   },
   "Guest": {
     "heroTitle": "چمدان را بسپارید، آزاد بگردید",
@@ -1645,7 +1651,9 @@
     "verificationCooldown": "لطفاً {seconds} ثانیه صبر کنید قبل از ارسال ایمیل دیگر.",
     "verifyEmailRequired": "قبل از رزرو ایمیل را تأیید کنید.",
     "shopNotOpenYet": "این نقطه هنوز افتتاح نشده است. ایمیل خود را بگذارید تا هنگام راه‌اندازی به شما اطلاع دهیم.",
-    "shopNowOpenBookInstead": "این نقطه اکنون افتتاح شده است — می‌توانید مستقیماً رزرو کنید."
+    "shopNowOpenBookInstead": "این نقطه اکنون افتتاح شده است — می‌توانید مستقیماً رزرو کنید.",
+    "imageTooLarge": "حجم عکس زیاد است. حداکثر ۸ مگابایت.",
+    "imageUnsupportedType": "این فایل عکس نیست. JPEG، PNG یا WebP بارگذاری کنید."
   },
   "Emails": {
     "verificationSubject": "ایمیل خود را تأیید کنید",
