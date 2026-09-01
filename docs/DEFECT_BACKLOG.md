@@ -10,6 +10,55 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-09-01 — mühür KANIT FOTOĞRAFI hiç çekilmiyor; ürün üç yerde vaat ediyor
+
+Ürünün güven mekanizması "mühürle + fotoğrafla" ikilisi olarak anlatılıyor.
+Fotoğraf tarafı **hiç uygulanmamış**. Üç ayrı yerden doğrulandı:
+
+1. `src/services/booking/check-in.ts:215` — `applyCheckInWithinTx`in TEK
+   çağıranı, `sealPhotoUrl: null` **sabit** geçiyor.
+2. `src/components/partner/CheckInDialog.tsx` — fotoğraf/kamera alanı **yok**.
+   Esnaf isteseydi bile çekemez.
+3. `BookingSeal.photoUrl` üretimde hiçbir zaman dolmuyor (2'nin sonucu).
+
+Buna karşılık fotoğraf **üç yerde vaat ediliyor**:
+
+| Nerede | Ne diyor |
+|---|---|
+| `README_AI` akışı | "mühür takıp **fotoğraf çekerek** teslim alır" |
+| `SealService` başlığı | "**kanıt fotoğraflarının** (`photoUrl`) yönetimi" |
+| `Guest.trustInsuranceBody` | "teslimde **mühür ve fotoğraf**" — MİSAFİRE gösteriliyor |
+
+Üçüncüsü ağır olanı: güvence paketini anlatan cümlenin içinde, yani misafir
+bunu teminatın bir parçası olarak okuyor.
+
+### Neden esnaf için önemli
+
+Bir valiz hasarlı/eksik çıktığında esnafın elindeki tek kanıt **mühür
+numarasıdır**. Mühür, valizin AÇILMADIĞINI gösterir; ama valizin esnafa
+HANGİ DURUMDA geldiğini göstermez. Fotoğraf tam olarak o boşluğu kapatacak
+şeydi. `2026-09-01 — güvence tutarı` maddesindeki bulguyla birleştiğinde tablo
+şu: esnafa kayıp/hasar durumunda kimin ödeyeceği hiç söylenmiyor **ve** onu
+koruyacak kanıt da toplanmıyor.
+
+### Düzeltilenler (bu turda)
+
+Yalnızca BELGELER. `README_AI` ve `SealService`, uygulanmamış bir özelliği
+uygulanmış gibi anlatıyordu — bir sonraki okuyanın (insan ya da agent)
+"fotoğraf çalışıyor" varsayması bu yüzden kaçınılmazdı. `sealPhotoUrl`
+parametresi bilerek DURUYOR ve neden hep `null` geldiği yerinde yazıyor.
+
+### Düzeltilmeyenler — karar gerektiriyor
+
+- **Yükleme, bir görsel DEPOLAMA kararı bekliyor** — dükkan fotoğrafıyla
+  (`2026-09-01 — dükkan fotoğrafı`) tıpatıp aynı engel. Tek bir karar ikisini
+  birden açar. Base64'ü veritabanına yazmak seçenek değil.
+- **`Guest.trustInsuranceBody` ve `FAQ.a1`daki "fotoğraf" ibaresi** bugün
+  karşılıksız. İki yol var ve seçim ürün sahibinindir: fotoğrafı UYGULAMAK
+  (tercih edilen — güven mekanizması gerçekten çalışır) ya da ibareyi metinden
+  ÇIKARMAK. Metin tek başına değiştirilirse ürün bir güven işaretini kaybeder;
+  bu yüzden burada tek taraflı değiştirilmedi.
+
 ## 2026-09-01 — güvence tutarının tek kaynağı yok; Farsça Şartlar farklı rakam söylüyordu
 
 Valiz başına güvence tutarı kod tabanında **hiçbir ayarda tutulmuyor**.

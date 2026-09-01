@@ -149,6 +149,23 @@ export class SealService {
       bookingId: string;
       assignments: SealAssignmentInput[];
       faultySealNumbers: number[];
+      /**
+       * Mühürlenmiş valizin kanıt fotoğrafı.
+       *
+       * BUGÜN HER ZAMAN `null` GELİYOR — tek çağıran (`booking/check-in.ts`)
+       * sabit `null` geçiyor ve `CheckInDialog` içinde fotoğraf/kamera alanı
+       * hiç yok. Yani `BookingSeal.photoUrl` üretimde hiçbir zaman dolmuyor.
+       *
+       * Parametre BİLEREK duruyor: eksik olan tek şey bir görsel DEPOLAMA
+       * kararı (dükkan fotoğrafıyla aynı engel, bkz. DEFECT_BACKLOG). Karar
+       * verildiğinde yazma yolu buraya bağlanır.
+       *
+       * Bunu okuyan biri fotoğrafın çalıştığını SANMASIN: ürün üç yerde
+       * fotoğraf vaat ediyor (`README_AI` akışı, bu servisin eski başlığı ve
+       * misafire gösterilen `Guest.trustInsuranceBody` → "teslimde mühür ve
+       * fotoğraf"), ve üçü de bugün karşılıksız. Uyuşmazlıkta esnafın tek
+       * kanıtı mühür numarasıdır.
+       */
       sealPhotoUrl: string | null;
     }
   ): Promise<void> {
