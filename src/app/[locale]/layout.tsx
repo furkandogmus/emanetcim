@@ -85,6 +85,20 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
       : undefined,
     manifest: "/manifest.json",
+    /*
+      APPLE TOUCH IKONU BILDIRILIYOR.
+
+      `src/app/favicon.ico` dosya kuralindan otomatik baglaniyor, ama iOS
+      bildirilmemis `apple-touch-icon`u KOK DIZINDEN kendisi ister ve 404
+      alirdi. Sitede zaten duran PWA ikonuna isaret ediyoruz; yeni dosya
+      uretmeye gerek yok.
+
+      `icon` BILINCLI OLARAK YAZILMIYOR: onu dosya kurali (`favicon.ico`)
+      saglıyor, burada tekrar tanimlamak iki ayri kaynak demek olurdu.
+    */
+    icons: {
+      apple: [{ url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" }],
+    },
     appleWebApp: {
       capable: true,
       title: "BagajPark",
