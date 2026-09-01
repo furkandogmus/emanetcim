@@ -4,6 +4,7 @@ import { shopService } from "@/services/ShopService";
 import { validateBookingStayWindow } from "@/lib/booking-server-price";
 import { getPricingRules } from "@/lib/platform-settings";
 import {
+  SEARCH_ALL_RADIUS_KM,
   SEARCH_DEFAULT_CENTER,
   SEARCH_NEARBY_RADIUS_KM,
 } from "@/lib/search-defaults";
@@ -57,7 +58,9 @@ export async function refreshSearchShopsAction(input: {
     shopService.findShopsForSearch({
       centerLat: lat,
       centerLng: lng,
-      radiusKm: null,
+      // Sunucu sayfasiyla AYNI tavan: iki tasiyici ayni listeyi vermezse
+      // ilk cizim ile ilk yenileme arasinda sonuc sayisi degisir.
+      radiusKm: SEARCH_ALL_RADIUS_KM,
       checkIn,
       checkOut,
       requestedBags: bags,

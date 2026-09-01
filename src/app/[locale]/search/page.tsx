@@ -3,6 +3,7 @@ import { shopService } from '@/services/ShopService';
 import SearchClient from '@/components/guest/SearchClient';
 import type { Metadata } from 'next';
 import {
+  SEARCH_ALL_RADIUS_KM,
   SEARCH_DEFAULT_CENTER,
   SEARCH_NEARBY_RADIUS_KM,
   defaultSearchStayWindow,
@@ -88,7 +89,9 @@ export default async function SearchPage({
   const allShops = await shopService.findShopsForSearch({
     centerLat: center.lat,
     centerLng: center.lng,
-    radiusKm: null,
+    // `null` DEGIL: bkz. SEARCH_ALL_RADIUS_KM -- sinirsiz liste, aranan yere
+    // 1.128 km uzaktaki noktalari "tum noktalar" diye sayiyordu.
+    radiusKm: SEARCH_ALL_RADIUS_KM,
     checkIn,
     checkOut,
     requestedBags: 1,

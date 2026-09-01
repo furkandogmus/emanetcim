@@ -41,6 +41,7 @@ import {
   readGeoPermission,
 } from "@/lib/geolocation";
 import { STORAGE_CITIES } from "@/lib/storage-cities";
+import { matchesSearchFilters, type SearchQueryKind } from "@/lib/search-filter";
 import {
   PLAUSIBLE_EVENTS,
   trackPlausibleEvent,
@@ -129,6 +130,28 @@ export default function SearchClient({
   const [filterDirty, setFilterDirty] = useState(false);
   const [dynamicCenter, setDynamicCenter] = useState(searchCenter);
   const [resolvedPlaceLabel, setResolvedPlaceLabel] = useState<string | null>(null);
+  /**
+   * Arama kutusundaki metin BIR YER MI, yoksa dukkan adi mi.
+   *
+   * NEDEN VAR (2026-09-01'de uretimde olculdu): kutudaki metin AYNI ANDA iki is
+   * yapiyordu -- haritanin merkezini oraya tasiyor (geocode) VE listeyi
+   * "adi/adresi bu metni icersin" diye suzuyordu. `/tr/search?q=amsterdam`
+   * sekmede "TUM NOKTALAR (100)" yazarken listede 7 kart gosteriyordu: yalnizca
+   * adresinde "amsterdam" gecenler. Amsterdam'a 51 km'deki Den Haag noktasi,
+   * Amsterdam aramasinda kayboluyordu; adresinde sehrin adi yazmayan bir dukkan
+   * ise kendi sehrinin aramasinda hic gorunmezdi.
+   *
+   * Bir yer cozumlendiginde metin suzgeci GEREKSIZ: merkez zaten oraya tasindi,
+   * liste de merkeze gore siralaniyor. Suzgec yalnizca metin bir yere
+   * cozulemediginde (gercekten dukkan adi arandiginda) calisir.
+   *
+   * `pending`: geocode 450 ms geciktirmeli. O sirada suzmek, listeyi once
+   * daraltip sonra genisletirdi -- kullanicinin gozunde sonuclar "kaybolup geri
+   * geliyor". Genisten dara gitmek daha az rahatsiz.
+   */
+  const [queryKind, setQueryKind] = useState<SearchQueryKind>(
+    initialSearchQuery.trim().length >= 3 ? "pending" : "text",
+  );
   const [panelOpen, setPanelOpen] = useState(true);
   /**
    * Tarih/valiz/filtre değiştiğinde `refreshSearchShopsAction` çağrılırken hiçbir
@@ -318,8 +341,10 @@ export default function SearchClient({
     const q = normalize(searchQuery);
     if (q.length < 3) {
       setResolvedPlaceLabel(null);
+      setQueryKind("text");
       return;
     }
+    setQueryKind("pending");
     let cancelled = false;
     const timer = window.setTimeout(async () => {
       const geocoded = await geocodeSearchCenterAction(searchQuery, locale);
@@ -332,6 +357,7 @@ export default function SearchClient({
           return { lat: geocoded.lat, lng: geocoded.lng };
         });
         setResolvedPlaceLabel(geocoded.label);
+        setQueryKind("place");
         return;
       }
 
@@ -340,13 +366,21 @@ export default function SearchClient({
         const slug = normalize(city.slug.replace(/-/g, " "));
         return q === slug || q.includes(slug);
       });
-      if (!matchedCity) return;
+      if (!matchedCity) {
+        // Metin bir yere cozulemedi: dukkan adi arandigi kabul edilir.
+        // Etiket de TEMIZLENIR -- yoksa panelde bir onceki sehrin adi asili
+        // kalir ve haritanin hala orada oldugu izlenimi verir.
+        setResolvedPlaceLabel(null);
+        setQueryKind("text");
+        return;
+      }
       setDynamicCenter((prev) => {
         if (prev.lat === matchedCity.lat && prev.lng === matchedCity.lng) return prev;
         setFilterDirty(true);
         return { lat: matchedCity.lat, lng: matchedCity.lng };
       });
       setResolvedPlaceLabel(matchedCity.slug);
+      setQueryKind("place");
     }, 450);
 
     return () => {
@@ -369,25 +403,41 @@ export default function SearchClient({
     [router, checkInLocal, checkOutLocal, requestedBags]
   );
 
-  const sourceShops = activeTab === "nearby" ? nearbyList : allList;
+  /**
+   * Filtre TEK yerde tanimlanir, HER IKI listeye de uygulanir.
+   *
+   * NEDEN (2026-09-01, uretimde olculdu): sekme basliklari ham `nearbyList` /
+   * `allList` uzunlugunu yaziyordu, liste basligi ise suzulmus sayiyi. Ayni
+   * ekranda "TUM NOKTALAR (100)" dugmesi ile "Tum Noktalar (7)" basligi yan
+   * yana duruyordu -- kullanicinin gordugu, tikladigi sayinin 93 sonucu
+   * gostermemesiydi. Sekmedeki sayi, o sekmeye basinca kac kart cikacagini
+   * soylemek zorunda.
+   */
+  const matchesFilters = useCallback(
+    (shop: ShopSearchHit) =>
+      matchesSearchFilters(shop, {
+        query: searchQuery,
+        queryKind,
+        minRating,
+        maxPrice,
+        open247Only,
+        hasRestroom,
+        hasCctv,
+        hasClimateControl: hasClimateControlFilter,
+        acceptsLargeItems: acceptsLargeItemsFilter,
+      }),
+    [searchQuery, queryKind, minRating, maxPrice, open247Only, hasRestroom, hasCctv, hasClimateControlFilter, acceptsLargeItemsFilter],
+  );
 
-  const filteredShops = useMemo(() => {
-    return sourceShops.filter((shop) => {
-      const matchText =
-        shop.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (shop.address &&
-          shop.address.toLowerCase().includes(searchQuery.toLowerCase()));
-      const r = shop.rating ?? 0;
-      const p = shop.pricePerDay ?? 50;
-      const open = open247Only ? shop.open247 === true : true;
-      const wc = hasRestroom ? shop.hasRestroom === true : true;
-      const amenities = shop as unknown as { hasCctv?: boolean; hasClimateControl?: boolean; acceptsLargeItems?: boolean };
-      const cctv = hasCctv ? amenities.hasCctv === true : true;
-      const climate = hasClimateControlFilter ? amenities.hasClimateControl === true : true;
-      const large = acceptsLargeItemsFilter ? amenities.acceptsLargeItems === true : true;
-      return matchText && r >= minRating && p <= maxPrice && open && wc && cctv && climate && large;
-    });
-  }, [searchQuery, sourceShops, minRating, maxPrice, open247Only, hasRestroom, hasCctv, hasClimateControlFilter, acceptsLargeItemsFilter]);
+  const filteredNearby = useMemo(
+    () => nearbyList.filter(matchesFilters),
+    [nearbyList, matchesFilters],
+  );
+  const filteredAll = useMemo(
+    () => allList.filter(matchesFilters),
+    [allList, matchesFilters],
+  );
+  const filteredShops = activeTab === "nearby" ? filteredNearby : filteredAll;
 
   const markFiltersDirty = () => setFilterDirty(true);
 
@@ -476,7 +526,7 @@ export default function SearchClient({
           <p className="text-xs text-gray-400 max-w-[200px]">
             {t("noShopsFoundDesc")}
           </p>
-          {activeTab === "nearby" && allList.length > 0 && (
+          {activeTab === "nearby" && filteredAll.length > 0 && (
             <button
               type="button"
               onClick={() => setActiveTab("all")}
@@ -826,7 +876,7 @@ export default function SearchClient({
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              {t("nearbyShops")} ({nearbyList.length})
+              {t("nearbyShops")} ({filteredNearby.length})
             </button>
             <button
               type="button"
@@ -837,7 +887,7 @@ export default function SearchClient({
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              {t("allShops")} ({allList.length})
+              {t("allShops")} ({filteredAll.length})
             </button>
           </div>
         </div>
@@ -884,14 +934,14 @@ export default function SearchClient({
                   onClick={() => setActiveTab("nearby")}
                   className={`flex-1 py-2 px-3 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${activeTab === "nearby" ? "bg-white text-orange-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
                 >
-                  {t("nearbyShops")} ({nearbyList.length})
+                  {t("nearbyShops")} ({filteredNearby.length})
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveTab("all")}
                   className={`flex-1 py-2 px-3 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${activeTab === "all" ? "bg-white text-orange-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
                 >
-                  {t("allShops")} ({allList.length})
+                  {t("allShops")} ({filteredAll.length})
                 </button>
               </div>
               <button
