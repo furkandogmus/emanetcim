@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| Yazısı olan şehir | **99 / 265** — Türkiye'nin 39 şehri tamamlandı |
+| Yazısı olan şehir | **105 / 265** — Türkiye'nin 39 şehri tamamlandı |
 | Yayına yazma | `npx tsx scripts/blog-city-posts.ts --apply` (kuru çalışma varsayılan) |
 | Denetim | `npx tsx scripts/blog-city-posts.ts --verify` + `npx tsx scripts/blog-images.ts --verify` |
 | Eksik listesi | `npx tsx scripts/blog-city-posts.ts --coverage` |
@@ -63,7 +63,7 @@ alakasız olabilir.
 
 <!-- Aşağısı üretilmiştir: npx tsx scripts/blog-city-posts.ts --list-md -->
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 99/265 sehir -->
+<!-- 105/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -171,12 +171,12 @@ alakasız olabilir.
 | 102 | GR | Crete | `girit` | 2 | yayında | girit-samarya-tek-yon-yuruyus-valiz | crete-luggage-storage-samaria-one-way |
 | 103 | GR | Rhodes | `rodos` | 1 | yayında | rodos-eski-sehir-deniz-cakili-valiz | rhodes-luggage-storage-pebble-paving |
 | 104 | HR | Dubrovnik | `dubrovnik` | 1 | yayında | dubrovnik-surlarin-icine-arac-girmiyor-valiz | dubrovnik-luggage-storage-no-cars-inside-walls |
-| 105 | HR | Split | `split` | 2 | — |  |  |
-| 106 | HR | Zagreb | `zagreb` | 1 | — |  |  |
-| 107 | SI | Ljubljana | `ljubljana` | 1 | — |  |  |
-| 108 | SK | Bratislava | `bratislava` | 1 | — |  |  |
-| 109 | RO | București | `bukres` | 2 | — |  |  |
-| 110 | RO | Brașov | `brasov` | 1 | — |  |  |
+| 105 | HR | Split | `split` | 2 | yayında | split-diokletian-sarayi-icinde-yasayan-sehir-valiz | split-luggage-storage-diocletians-palace |
+| 106 | HR | Zagreb | `zagreb` | 1 | yayında | zagreb-yukari-sehir-funikuler-valiz | zagreb-luggage-storage-upper-town-funicular |
+| 107 | SI | Ljubljana | `ljubljana` | 1 | yayında | ljubljana-merkez-araca-kapali-bled-valiz | ljubljana-luggage-storage-car-free-centre-bled |
+| 108 | SK | Bratislava | `bratislava` | 1 | yayında | bratislava-viyanadan-gunubirlik-valiz | bratislava-luggage-storage-day-trip-from-vienna |
+| 109 | RO | București | `bukres` | 2 | yayında | bukres-parlamento-sarayi-kimlik-valiz | bucharest-luggage-storage-palace-of-parliament |
+| 110 | RO | Brașov | `brasov` | 1 | yayında | brasov-strada-sforii-bran-gunubirlik-valiz | brasov-luggage-storage-strada-sforii-bran |
 | 111 | BG | Sofia | `sofya` | 2 | — |  |  |
 | 112 | BG | Plovdiv | `plovdiv` | 1 | — |  |  |
 | 113 | RS | Beograd | `belgrad` | 1 | — |  |  |

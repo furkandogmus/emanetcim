@@ -479,6 +479,66 @@
     "license": "CC BY-SA 2.0",
     "cityKey": "bodrum"
   },
+  "brasov-piata-sfatului": {
+    "file": "/images/blog/brasov-piata-sfatului.webp",
+    "alt": {
+      "tr": "Braşov'da Konsey Meydanı ve eski belediye binası",
+      "en": "The Council Square in Brasov and the old town hall"
+    },
+    "caption": {
+      "tr": "Piaţa Sfatului, Braşov",
+      "en": "Piata Sfatului, Brasov"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Brasov_council_square.jpg",
+    "author": "Ionpetrache at English Wikipedia",
+    "license": "Public domain",
+    "cityKey": "brasov"
+  },
+  "brasov-strada-sforii": {
+    "file": "/images/blog/brasov-strada-sforii.webp",
+    "alt": {
+      "tr": "Avrupa'nın en dar sokaklarından Strada Sforii",
+      "en": "Strada Sforii, one of the narrowest streets in Europe"
+    },
+    "caption": {
+      "tr": "Strada Sforii, Braşov",
+      "en": "Strada Sforii, Brasov"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Brasov,_strada_sforii_01.JPG",
+    "author": "sailko",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "brasov"
+  },
+  "bratislava-kale": {
+    "file": "/images/blog/bratislava-kale.webp",
+    "alt": {
+      "tr": "Tuna kıyısından Bratislava Kalesi ve UFO köprüsü",
+      "en": "Bratislava Castle and the UFO bridge seen from the Danube"
+    },
+    "caption": {
+      "tr": "Bratislava Kalesi ve Tuna",
+      "en": "Bratislava Castle and the Danube"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Danube_in_Bratislava_skyline,_New_Bridge,_Bratislava_Castle_in_Bratislava,_Bratislava_I_District.jpg",
+    "author": "Frettie",
+    "license": "CC BY 3.0",
+    "cityKey": "bratislava"
+  },
+  "bratislava-meydan": {
+    "file": "/images/blog/bratislava-meydan.webp",
+    "alt": {
+      "tr": "Bratislava'nın Ana Meydanı ve çevresindeki renkli cepheler",
+      "en": "Bratislava's Main Square and the coloured facades around it"
+    },
+    "caption": {
+      "tr": "Hlavné námestie, Bratislava",
+      "en": "The Main Square, Bratislava"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Bratislava_november_2007.jpg",
+    "author": "Wizzard",
+    "license": "Public domain",
+    "cityKey": "bratislava"
+  },
   "brugge-kanal": {
     "file": "/images/blog/brugge-kanal.webp",
     "alt": {
@@ -568,6 +628,36 @@
     "author": "Wilfredor",
     "license": "CC0",
     "cityKey": "budapeste"
+  },
+  "bukres-gara-de-nord": {
+    "file": "/images/blog/bukres-gara-de-nord.webp",
+    "alt": {
+      "tr": "Bükreş Gara de Nord'un peronları ve çatısı",
+      "en": "The platforms and roof of Bucharest's Gara de Nord"
+    },
+    "caption": {
+      "tr": "Gara de Nord, Bükreş",
+      "en": "Gara de Nord, Bucharest"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Gara_de_Nord,_Bucharest,_Romania_(5681621924).jpg",
+    "author": "yeowatzup",
+    "license": "CC BY 2.0",
+    "cityKey": "bukres"
+  },
+  "bukres-lipscani": {
+    "file": "/images/blog/bukres-lipscani.webp",
+    "alt": {
+      "tr": "Bükreş'in eski merkezinde taş döşeli bir sokak",
+      "en": "A cobbled street in Bucharest's old centre"
+    },
+    "caption": {
+      "tr": "Lipscani, Bükreş",
+      "en": "Lipscani, Bucharest"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Old_center_Bucharest_Bucuresti_Romania.jpg",
+    "author": "Crislia",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "bukres"
   },
   "bursa-cumalikizik": {
     "file": "/images/blog/bursa-cumalikizik.webp",
@@ -1784,6 +1874,36 @@
     "license": "CC BY 2.0",
     "cityKey": "lizbon"
   },
+  "ljubljana-kale": {
+    "file": "/images/blog/ljubljana-kale.webp",
+    "alt": {
+      "tr": "Kale tepesinden Ljubljana şehri",
+      "en": "Ljubljana seen from the castle hill"
+    },
+    "caption": {
+      "tr": "Kale tepesinden Ljubljana",
+      "en": "Ljubljana from the castle hill"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Ljubljana_from_castle_hill.JPG",
+    "author": "Petar Milošević",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "ljubljana"
+  },
+  "ljubljana-uc-kopru": {
+    "file": "/images/blog/ljubljana-uc-kopru.webp",
+    "alt": {
+      "tr": "Ljubljanica nehri, köprüleri ve kıyıdaki kafeler",
+      "en": "The Ljubljanica river, its bridges and the cafes along the bank"
+    },
+    "caption": {
+      "tr": "Ljubljanica nehri, Ljubljana",
+      "en": "The Ljubljanica, Ljubljana"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Ljubljanica_01.jpg",
+    "author": "Mihael Grmek",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "ljubljana"
+  },
   "londra-covent-garden": {
     "file": "/images/blog/londra-covent-garden.webp",
     "alt": {
@@ -2774,6 +2894,36 @@
     "license": "CC BY-SA 3.0",
     "cityKey": "side"
   },
+  "split-diokletian": {
+    "file": "/images/blog/split-diokletian.webp",
+    "alt": {
+      "tr": "Split'te Diocletianus Sarayı'nın içindeki eski şehir sokakları",
+      "en": "The old town streets inside Diocletian's Palace in Split"
+    },
+    "caption": {
+      "tr": "Diocletianus Sarayı, Split",
+      "en": "Diocletian's Palace, Split"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Old_Town,_Split_(P1080876).jpg",
+    "author": "Matti Blume",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "split"
+  },
+  "split-riva": {
+    "file": "/images/blog/split-riva.webp",
+    "alt": {
+      "tr": "Split'te Riva promenadı ve arkada Marjan yarımadası",
+      "en": "The Riva promenade in Split with the Marjan peninsula behind"
+    },
+    "caption": {
+      "tr": "Riva, Split",
+      "en": "The Riva, Split"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Split_Waterfront,_Looking_Towards_the_Marjan_Peninsula.jpg",
+    "author": "Alistair Young",
+    "license": "CC BY 2.0",
+    "cityKey": "split"
+  },
   "stockholm-centralstation": {
     "file": "/images/blog/stockholm-centralstation.webp",
     "alt": {
@@ -3028,6 +3178,36 @@
     "author": "Jacek Halicki",
     "license": "CC BY-SA 4.0",
     "cityKey": "wroclaw"
+  },
+  "zagreb-funikuler": {
+    "file": "/images/blog/zagreb-funikuler.webp",
+    "alt": {
+      "tr": "Zagreb'in Yukarı Şehir'e çıkan kısa fünikülerinin vagonu",
+      "en": "The car of Zagreb's short funicular up to the Upper Town"
+    },
+    "caption": {
+      "tr": "Zagreb füniküleri",
+      "en": "The Zagreb funicular"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Zagreb_Uspinja%C4%8Da.jpg",
+    "author": "Kaiser87",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "zagreb"
+  },
+  "zagreb-jelacic": {
+    "file": "/images/blog/zagreb-jelacic.webp",
+    "alt": {
+      "tr": "Zagreb'de Ban Jelačić Meydanı ve tramvaylar",
+      "en": "Ban Jelacic Square in Zagreb with its trams"
+    },
+    "caption": {
+      "tr": "Ban Jelačić Meydanı, Zagreb",
+      "en": "Ban Jelacic Square, Zagreb"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Zagreb_-_Ban_Jela%C4%8Di%C4%87_Square.JPG",
+    "author": "Husond",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "zagreb"
   },
   "zurih-bahnhofstrasse": {
     "file": "/images/blog/zurih-bahnhofstrasse.webp",
