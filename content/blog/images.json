@@ -89,6 +89,36 @@
     "license": "CC BY-SA 3.0",
     "cityKey": "adiyaman"
   },
+  "akabe-kizildeniz": {
+    "file": "/images/blog/akabe-kizildeniz.webp",
+    "alt": {
+      "tr": "Akabe'de Kızıldeniz kıyısı ve gün batımı",
+      "en": "The Red Sea shore at Aqaba at sunset"
+    },
+    "caption": {
+      "tr": "Kızıldeniz, Akabe",
+      "en": "The Red Sea at Aqaba"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Aqaba,_Red_Sea,_sunset_(6737672001).jpg",
+    "author": "Arian Zwegers",
+    "license": "CC BY 2.0",
+    "cityKey": "akabe"
+  },
+  "akabe-wadi-rum": {
+    "file": "/images/blog/akabe-wadi-rum.webp",
+    "alt": {
+      "tr": "Wadi Rum'da kumul ve kayalık dağlar",
+      "en": "Sand and rock mountains in Wadi Rum"
+    },
+    "caption": {
+      "tr": "Wadi Rum",
+      "en": "Wadi Rum"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Wadi_rum_desert.jpg",
+    "author": "Peter Chisholm",
+    "license": "CC0",
+    "cityKey": "akabe"
+  },
   "alanya-kizilkule": {
     "file": "/images/blog/alanya-kizilkule.webp",
     "alt": {
@@ -568,6 +598,36 @@
     "author": "MaryG90",
     "license": "CC BY-SA 3.0",
     "cityKey": "berlin"
+  },
+  "beyrut-corniche": {
+    "file": "/images/blog/beyrut-corniche.webp",
+    "alt": {
+      "tr": "Beyrut Corniche'i ve deniz kıyısı",
+      "en": "The Beirut Corniche along the sea"
+    },
+    "caption": {
+      "tr": "Corniche, Beyrut",
+      "en": "The Corniche, Beirut"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Corniche_beirut_16.jpg",
+    "author": "A.K.Khalifeh",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "beyrut"
+  },
+  "beyrut-merkez": {
+    "file": "/images/blog/beyrut-merkez.webp",
+    "alt": {
+      "tr": "Beyrut şehir merkezinde taş cepheli binalar",
+      "en": "Stone-fronted buildings in downtown Beirut"
+    },
+    "caption": {
+      "tr": "Beyrut merkez",
+      "en": "Downtown Beirut"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Downtown_Beirut.jpg",
+    "author": "Brian Dell Bdell555",
+    "license": "Public domain",
+    "cityKey": "beyrut"
   },
   "bilbao-casco-viejo": {
     "file": "/images/blog/bilbao-casco-viejo.webp",
@@ -1739,6 +1799,36 @@
     "license": "CC BY 3.0",
     "cityKey": "interlaken"
   },
+  "iskenderiye-kaitbay": {
+    "file": "/images/blog/iskenderiye-kaitbay.webp",
+    "alt": {
+      "tr": "İskenderiye'de Kayıtbay Kalesi ve deniz",
+      "en": "The Qaitbay Citadel and the sea at Alexandria"
+    },
+    "caption": {
+      "tr": "Kayıtbay Kalesi, İskenderiye",
+      "en": "The Qaitbay Citadel, Alexandria"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Citadel_of_Qaitbay,_Alexandria,_Egypt.jpg",
+    "author": "Argenberg",
+    "license": "CC BY 2.0",
+    "cityKey": "iskenderiye"
+  },
+  "iskenderiye-kutuphane": {
+    "file": "/images/blog/iskenderiye-kutuphane.webp",
+    "alt": {
+      "tr": "İskenderiye Kütüphanesi'nin eğimli disk biçimli çatısı",
+      "en": "The tilted disc roof of the Bibliotheca Alexandrina"
+    },
+    "caption": {
+      "tr": "İskenderiye Kütüphanesi",
+      "en": "The Bibliotheca Alexandrina"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Bibliotheca_Alexandrina_002.jpg",
+    "author": "Original uploader was Moushira at meta.wikimedia",
+    "license": "Public domain",
+    "cityKey": "iskenderiye"
+  },
   "istanbul-eminonu": {
     "file": "/images/blog/istanbul-eminonu.webp",
     "alt": {
@@ -1843,6 +1933,36 @@
     "author": "LWY from Pasadena, USA",
     "license": "CC BY 2.0",
     "cityKey": "izmir"
+  },
+  "kahire-han-halili": {
+    "file": "/images/blog/kahire-han-halili.webp",
+    "alt": {
+      "tr": "Han el-Halili çarşısında dar bir sokak ve dükkânlar",
+      "en": "A narrow lane and shops in the Khan el-Khalili bazaar"
+    },
+    "caption": {
+      "tr": "Han el-Halili, Kahire",
+      "en": "Khan el-Khalili, Cairo"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Flickr_-_Gaspa_-_Cairo,_Bazar_el-Khalili.jpg",
+    "author": "Francesco Gasparetti from Senigallia, Italy",
+    "license": "CC BY 2.0",
+    "cityKey": "kahire"
+  },
+  "kahire-piramitler": {
+    "file": "/images/blog/kahire-piramitler.webp",
+    "alt": {
+      "tr": "Giza'daki üç piramit ve çöl",
+      "en": "The three pyramids at Giza and the desert"
+    },
+    "caption": {
+      "tr": "Giza piramitleri",
+      "en": "The Giza pyramids"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:All_Gizah_Pyramids.jpg",
+    "author": "Ricardo Liberato",
+    "license": "CC BY-SA 2.0",
+    "cityKey": "kahire"
   },
   "kapadokya-goreme": {
     "file": "/images/blog/kapadokya-goreme.webp",
@@ -2353,6 +2473,36 @@
     "author": "Colin",
     "license": "CC BY-SA 3.0",
     "cityKey": "londra"
+  },
+  "luksor-karnak": {
+    "file": "/images/blog/luksor-karnak.webp",
+    "alt": {
+      "tr": "Karnak'ta Khonsu Tapınağı'nın sütunları",
+      "en": "The columns of the Khonsu temple at Karnak"
+    },
+    "caption": {
+      "tr": "Karnak, Khonsu Tapınağı",
+      "en": "Karnak, the Khonsu temple"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Karnak_Khonsu_Temple_R01.jpg",
+    "author": "Marc Ryckaert (MJJR)",
+    "license": "CC BY 3.0",
+    "cityKey": "luksor"
+  },
+  "luksor-tapinak": {
+    "file": "/images/blog/luksor-tapinak.webp",
+    "alt": {
+      "tr": "Luksor Tapınağı'nın sütunlu avlusu",
+      "en": "The colonnaded court of the Luxor Temple"
+    },
+    "caption": {
+      "tr": "Luksor Tapınağı",
+      "en": "The Luxor Temple"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Luxor_Temple_R04.jpg",
+    "author": "Marc Ryckaert",
+    "license": "CC BY 3.0",
+    "cityKey": "luksor"
   },
   "luzern-kapellbrucke": {
     "file": "/images/blog/luzern-kapellbrucke.webp",
@@ -3103,6 +3253,36 @@
     "author": "Dietmar Rabich",
     "license": "CC BY-SA 4.0",
     "cityKey": "paris"
+  },
+  "petra-hazine": {
+    "file": "/images/blog/petra-hazine.webp",
+    "alt": {
+      "tr": "Siq'in çıkışından görünen Hazine cephesi",
+      "en": "The facade of the Treasury seen from the end of the Siq"
+    },
+    "caption": {
+      "tr": "Hazine, Petra",
+      "en": "The Treasury, Petra"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Petra_Treasury_from_the_Siq.JPG",
+    "author": "LiAnna Davis",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "petra"
+  },
+  "petra-wadi-musa": {
+    "file": "/images/blog/petra-wadi-musa.webp",
+    "alt": {
+      "tr": "Alacakaranlıkta yamaca yayılmış Wadi Musa kasabası",
+      "en": "The town of Wadi Musa spread over its slope at dusk"
+    },
+    "caption": {
+      "tr": "Wadi Musa",
+      "en": "Wadi Musa"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Wadi_Musa_at_dusk_(12302441624).jpg",
+    "author": "Jorge Láscar from Australia",
+    "license": "CC BY 2.0",
+    "cityKey": "petra"
   },
   "plovdiv-antik-tiyatro": {
     "file": "/images/blog/plovdiv-antik-tiyatro.webp",

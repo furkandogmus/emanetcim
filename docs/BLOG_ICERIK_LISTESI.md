@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| Yazısı olan şehir | **141 / 265** — Türkiye'nin 39 şehri tamamlandı |
+| Yazısı olan şehir | **147 / 265** — Türkiye'nin 39 şehri tamamlandı |
 | Yayına yazma | `npx tsx scripts/blog-city-posts.ts --apply` (kuru çalışma varsayılan) |
 | Denetim | `npx tsx scripts/blog-city-posts.ts --verify` + `npx tsx scripts/blog-images.ts --verify` |
 | Eksik listesi | `npx tsx scripts/blog-city-posts.ts --coverage` |
@@ -66,7 +66,7 @@ alakasız olabilir.
 
 <!-- Aşağısı üretilmiştir: npx tsx scripts/blog-city-posts.ts --list-md -->
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 141/265 sehir -->
+<!-- 147/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -216,12 +216,12 @@ alakasız olabilir.
 | 144 | BH | Manama | `manama` | 1 | yayında | manama-kral-fahd-koprusu-carsi-valiz | manama-luggage-storage-causeway-souq |
 | 145 | OM | Muscat | `maskat` | 1 | yayında | maskat-uzun-sehir-mutrah-valiz | muscat-luggage-storage-linear-city-mutrah |
 | 146 | JO | Amman | `amman` | 2 | yayında | amman-tepeler-merdiven-petra-valiz | amman-luggage-storage-hills-stairs |
-| 147 | JO | Wadi Musa | `petra` | 1 | — |  |  |
-| 148 | JO | Aqaba | `akabe` | 1 | — |  |  |
-| 149 | LB | Beirut | `beyrut` | 2 | — |  |  |
-| 150 | EG | Cairo | `kahire` | 3 | — |  |  |
-| 151 | EG | Alexandria | `iskenderiye` | 1 | — |  |  |
-| 152 | EG | Luxor | `luksor` | 1 | — |  |  |
+| 147 | JO | Wadi Musa | `petra` | 1 | yayında | petra-siq-sekiz-kilometre-valiz | petra-luggage-storage-siq-eight-kilometres |
+| 148 | JO | Aqaba | `akabe` | 1 | yayında | akabe-dort-sinir-wadi-rum-valiz | aqaba-luggage-storage-wadi-rum-ferry |
+| 149 | LB | Beirut | `beyrut` | 2 | yayında | beyrut-merdivenli-mahalleler-corniche-valiz | beirut-luggage-storage-stairs-corniche |
+| 150 | EG | Cairo | `kahire` | 3 | yayında | kahire-piramitler-trafik-han-halili-valiz | cairo-luggage-storage-pyramids-traffic |
+| 151 | EG | Alexandria | `iskenderiye` | 1 | yayında | iskenderiye-gunubirlik-tren-corniche-valiz | alexandria-luggage-storage-day-trip-corniche |
+| 152 | EG | Luxor | `luksor` | 1 | yayında | luksor-gece-treni-sabah-variyor-valiz | luxor-luggage-storage-night-train-arrival |
 | 153 | EG | Hurghada | `hurgada` | 1 | — |  |  |
 | 154 | EG | Sharm El Sheikh | `sarm-el-seyh` | 1 | — |  |  |
 | 155 | MA | Marrakech | `marakes` | 2 | — |  |  |
