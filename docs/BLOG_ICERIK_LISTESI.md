@@ -1,5 +1,5 @@
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 249/265 sehir -->
+<!-- 255/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -252,12 +252,12 @@
 | 247 | AU | Gold Coast | `gold-coast` | 1 | yayında | gold-coast-surfers-paradise-plaj-dolabi-valiz | gold-coast-luggage-storage-no-beach-lockers |
 | 248 | NZ | Auckland | `auckland` | 1 | yayında | auckland-queen-street-yokus-feribot-valiz | auckland-luggage-storage-queen-street-hill |
 | 249 | NZ | Queenstown | `queenstown` | 1 | yayında | queenstown-macera-turlari-teleferik-valiz | queenstown-luggage-storage-adventure-bookings |
-| 250 | RU | Moscow | `moskova` | 4 | — |  |  |
-| 251 | RU | Saint Petersburg | `st-petersburg` | 3 | — |  |  |
-| 252 | IL | Tel Aviv | `tel-aviv` | 3 | — |  |  |
-| 253 | IR | Tehran | `tahran` | 3 | — |  |  |
-| 254 | IR | Isfahan | `isfahan` | 2 | — |  |  |
-| 255 | IR | Shiraz | `siraz` | 2 | — |  |  |
+| 250 | RU | Moscow | `moskova` | 4 | yayında | moskova-uc-gar-ayni-meydanda-metro-derin-valiz | moscow-luggage-storage-three-stations-square |
+| 251 | RU | Saint Petersburg | `st-petersburg` | 3 | yayında | st-petersburg-koprular-gece-aciliyor-metro-derin-valiz | saint-petersburg-luggage-storage-bridges-open-at-night |
+| 252 | IL | Tel Aviv | `tel-aviv` | 3 | yayında | tel-aviv-shabbat-toplu-tasima-durunca-valiz | tel-aviv-luggage-storage-shabbat-transport |
+| 253 | IR | Tehran | `tahran` | 3 | yayında | tahran-iki-havalimani-gece-ucuslari-carsi-valiz | tehran-luggage-storage-night-departures |
+| 254 | IR | Isfahan | `isfahan` | 2 | yayında | isfahan-naksi-cihan-meydani-gece-otobusu-valiz | isfahan-luggage-storage-naqsh-e-jahan |
+| 255 | IR | Shiraz | `siraz` | 2 | yayında | siraz-pembe-cami-sabah-isigi-persepolis-valiz | shiraz-luggage-storage-pink-mosque-morning-light |
 | 256 | IN | Kolkata | `kalkuta` | 3 | — |  |  |
 | 257 | IN | Chennai | `chennai` | 3 | — |  |  |
 | 258 | IN | Bengaluru | `bengaluru` | 3 | — |  |  |

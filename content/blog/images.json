@@ -1080,19 +1080,19 @@
     "source": "https://commons.wikimedia.org/wiki/File:Bratislava_november_2007.jpg"
   },
   "brisbane-citycat": {
-    "file": "/images/blog/brisbane-citycat.webp",
     "alt": {
-      "tr": "Brisbane Nehri'nde South Bank iskelesine yaklaşan CityCat feribotları",
-      "en": "CityCat ferries approaching the South Bank terminal on the Brisbane River"
+      "en": "CityCat ferries approaching the South Bank terminal on the Brisbane River",
+      "tr": "Brisbane Nehri'nde South Bank iskelesine yaklaşan CityCat feribotları"
     },
-    "caption": {
-      "tr": "CityCat feribotları, Brisbane Nehri",
-      "en": "CityCat ferries, Brisbane River"
-    },
-    "source": "https://commons.wikimedia.org/wiki/File:CityCat_Spirit_of_Brisbane_and_CityCat_Mooroolbin_approach_South_Bank_Ferry_Terminal_South_Brisbane_P1220394.jpg",
     "author": "John Robert McPherson",
+    "caption": {
+      "en": "CityCat ferries, Brisbane River",
+      "tr": "CityCat feribotları, Brisbane Nehri"
+    },
+    "cityKey": "brisbane",
+    "file": "/images/blog/brisbane-citycat.webp",
     "license": "CC BY-SA 4.0",
-    "cityKey": "brisbane"
+    "source": "https://commons.wikimedia.org/wiki/File:CityCat_Spirit_of_Brisbane_and_CityCat_Mooroolbin_approach_South_Bank_Ferry_Terminal_South_Brisbane_P1220394.jpg"
   },
   "brisbane-south-bank": {
     "alt": {
@@ -2758,6 +2758,36 @@
     "file": "/images/blog/interlaken-ost.webp",
     "license": "CC BY 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Interlaken_Ost.jpg"
+  },
+  "isfahan-nakshe-cihan": {
+    "alt": {
+      "en": "Naqsh-e Jahan Square in Isfahan and the buildings around it",
+      "tr": "İsfahan'da Nakş-ı Cihan Meydanı ve çevresindeki yapılar"
+    },
+    "author": "en:User:Arad",
+    "caption": {
+      "en": "Naqsh-e Jahan Square, Isfahan",
+      "tr": "Nakş-ı Cihan Meydanı, İsfahan"
+    },
+    "cityKey": "isfahan",
+    "file": "/images/blog/isfahan-nakshe-cihan.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Naghshe_Jahan_Square_Isfahan_modified.jpg"
+  },
+  "isfahan-si-o-se-pol": {
+    "alt": {
+      "en": "The arches of the Si-o-se Pol bridge in Isfahan",
+      "tr": "İsfahan'da Si-o-se Pol köprüsünün kemerleri"
+    },
+    "author": "Reza Haji-pour رضا حاجی‌پور",
+    "caption": {
+      "en": "Si-o-se Pol, Isfahan",
+      "tr": "Si-o-se Pol, İsfahan"
+    },
+    "cityKey": "isfahan",
+    "file": "/images/blog/isfahan-si-o-se-pol.webp",
+    "license": "CC BY 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Si-o-se-Pol.jpg"
   },
   "iskenderiye-kaitbay": {
     "alt": {
@@ -4558,6 +4588,36 @@
     "file": "/images/blog/montreal-notre-dame.webp",
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Bas%C3%ADlica_de_Notre-Dame,_Montreal,_Canad%C3%A1,_2017-08-12,_DD_07-09_HDR.jpg"
+  },
+  "moskova-kizil-meydan": {
+    "alt": {
+      "en": "Red Square and St Basil's Cathedral in Moscow",
+      "tr": "Moskova'da Kızıl Meydan ve Aziz Basil Katedrali"
+    },
+    "author": "Alvesgaspar",
+    "caption": {
+      "en": "Red Square, Moscow",
+      "tr": "Kızıl Meydan, Moskova"
+    },
+    "cityKey": "moskova",
+    "file": "/images/blog/moskova-kizil-meydan.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Moscow_July_2011-16.jpg"
+  },
+  "moskova-metro": {
+    "alt": {
+      "en": "The vaulted hall of Komsomolskaya station on the Moscow metro",
+      "tr": "Moskova metrosunda Komsomolskaya istasyonunun tonozlu holü"
+    },
+    "author": "yeowatzup",
+    "caption": {
+      "en": "Komsomolskaya station, Moscow",
+      "tr": "Komsomolskaya istasyonu, Moskova"
+    },
+    "cityKey": "moskova",
+    "file": "/images/blog/moskova-metro.webp",
+    "license": "CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Komsomolskaya_Metro_Station,_Moscow_(149193238).jpg"
   },
   "mostar-carsi": {
     "alt": {
@@ -6569,6 +6629,36 @@
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:2016_Singapur,_Downtown_Core,_Marina_Bay_Sands_i_ArtScience_Museum_(10).jpg"
   },
+  "siraz-hafiziye": {
+    "alt": {
+      "en": "The dome over Hafez's tomb in Shiraz",
+      "tr": "Şiraz'da Hafız'ın türbesinin kubbesi"
+    },
+    "author": "Pentocelo",
+    "caption": {
+      "en": "The tomb of Hafez, Shiraz",
+      "tr": "Hafız Türbesi, Şiraz"
+    },
+    "cityKey": "siraz",
+    "file": "/images/blog/siraz-hafiziye.webp",
+    "license": "CC BY 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Roof_hafez_tomb.jpg"
+  },
+  "siraz-vekil-carsisi": {
+    "alt": {
+      "en": "The vaulted passage of the Vakil Bazaar in Shiraz",
+      "tr": "Şiraz'da Vekil Çarşısı'nın tonozlu geçidi"
+    },
+    "author": "dynamosquito",
+    "caption": {
+      "en": "The Vakil Bazaar, Shiraz",
+      "tr": "Vekil Çarşısı, Şiraz"
+    },
+    "cityKey": "siraz",
+    "file": "/images/blog/siraz-vekil-carsisi.webp",
+    "license": "CC BY-SA 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Vakil_Bazaar_-_Shiraz.jpg"
+  },
   "sofya-gar": {
     "alt": {
       "en": "The concrete frontage of Sofia Central Station",
@@ -6629,6 +6719,36 @@
     "license": "CC BY 2.0",
     "source": "https://commons.wikimedia.org/wiki/File:Split_Waterfront,_Looking_Towards_the_Marjan_Peninsula.jpg"
   },
+  "st-petersburg-ermitaj": {
+    "alt": {
+      "en": "The Neva embankment and the Peter and Paul Fortress in Saint Petersburg",
+      "tr": "Saint Petersburg'da Neva kıyısı ve Petropavlovsk Kalesi"
+    },
+    "author": "Florstein (Telegram:WikiPhoto.Space)",
+    "caption": {
+      "en": "The Neva embankment, Saint Petersburg",
+      "tr": "Neva kıyısı, Saint Petersburg"
+    },
+    "cityKey": "st-petersburg",
+    "file": "/images/blog/st-petersburg-ermitaj.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Peter_%26_Paul_fortress_in_SPB_03.jpg"
+  },
+  "st-petersburg-metro": {
+    "alt": {
+      "en": "A long escalator on the Saint Petersburg metro",
+      "tr": "Saint Petersburg metrosunda uzun bir yürüyen merdiven"
+    },
+    "author": "Wolfgang Moroder",
+    "caption": {
+      "en": "A metro escalator, Saint Petersburg",
+      "tr": "Metro yürüyen merdiveni, Saint Petersburg"
+    },
+    "cityKey": "st-petersburg",
+    "file": "/images/blog/st-petersburg-metro.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Nevsky_Prospekt_escalator_Saint_Petersburg_Metro.jpg"
+  },
   "stockholm-centralstation": {
     "alt": {
       "en": "The frontage of Stockholm Central Station",
@@ -6688,6 +6808,36 @@
     "file": "/images/blog/strasbourg-petite-france.webp",
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Stra%C3%9Fburg_(Frankreich),_Petite_France_--_2011_--_1759.jpg"
+  },
+  "tahran-azadi": {
+    "alt": {
+      "en": "The Azadi Tower in Tehran",
+      "tr": "Tahran'da Azadi Kulesi"
+    },
+    "author": "درفش کاویانی",
+    "caption": {
+      "en": "The Azadi Tower, Tehran",
+      "tr": "Azadi Kulesi, Tahran"
+    },
+    "cityKey": "tahran",
+    "file": "/images/blog/tahran-azadi.webp",
+    "license": "CC BY 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Azadi_Tower_Darafsh_(72).JPG"
+  },
+  "tahran-golestan": {
+    "file": "/images/blog/tahran-golestan.webp",
+    "alt": {
+      "tr": "Tahran'da Gülistan Sarayı'nın çinili cephesi",
+      "en": "The tiled facade of the Golestan Palace in Tehran"
+    },
+    "caption": {
+      "tr": "Gülistan Sarayı, Tahran",
+      "en": "The Golestan Palace, Tehran"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Golestan_Palace06.jpg",
+    "author": "Maziar Abidian",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "tahran"
   },
   "taipei-101": {
     "alt": {
@@ -6808,6 +6958,36 @@
     "file": "/images/blog/taskent-metro.webp",
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:%D0%A1%D1%82%D0%B0%D0%BD%D1%86%D0%B8%D1%8F_%D0%BC%D0%B5%D1%82%D1%80%D0%BE_%D0%91%D0%B5%D1%80%D1%83%D0%BD%D0%B8.jpg"
+  },
+  "tel-aviv-carmel": {
+    "alt": {
+      "en": "The stalls of the Carmel Market in Tel Aviv",
+      "tr": "Tel Aviv'de Karmel Pazarı'nın tezgâhları"
+    },
+    "author": "Jorge Láscar from Australia",
+    "caption": {
+      "en": "Carmel Market, Tel Aviv",
+      "tr": "Karmel Pazarı, Tel Aviv"
+    },
+    "cityKey": "tel-aviv",
+    "file": "/images/blog/tel-aviv-carmel.webp",
+    "license": "CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Carmel_Market,_Tel_Aviv_(9869191184).jpg"
+  },
+  "tel-aviv-rothschild": {
+    "alt": {
+      "en": "The pedestrian and cycle strip down the middle of Rothschild Boulevard in Tel Aviv",
+      "tr": "Tel Aviv'de Rothschild Bulvarı'nın ortasındaki yaya ve bisiklet şeridi"
+    },
+    "author": "Izemah",
+    "caption": {
+      "en": "Rothschild Boulevard, Tel Aviv",
+      "tr": "Rothschild Bulvarı, Tel Aviv"
+    },
+    "cityKey": "tel-aviv",
+    "file": "/images/blog/tel-aviv-rothschild.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Rothschild_Boulevard_bike_lane.JPG"
   },
   "tiflis-eski-sehir": {
     "alt": {
