@@ -10,6 +10,41 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-09-01 — dükkan fotoğrafının HİÇBİR yazma yolu yok (kod tabanı tarandı)
+
+Pazar yerinde bir dükkanın vitrin fotoğrafı, misafirin rezervasyon kararını
+veren şeydir. İki alan bunu taşıyor ve **ikisi de yalnızca OKUNUYOR**:
+
+| Alan | Nerede çiziliyor | Yazan kod |
+|---|---|---|
+| `Shop.image` | `app/[locale]/shop/[shopId]/page.tsx:163` | **yok** |
+| `ShopImage` (tablo) | aynı sayfa, `:188` — `ShopService.getShopImages` | **yok** |
+
+Tarandı: `src/actions/`, `src/services/`, `src/app/api/`. `ShopImage`'a tek
+referans `getShopImages` (bir `SELECT`). `Shop.image` alanına yazan tek bir
+`create`/`update` yok — ne esnaf panelinde, ne admin düzenleme formunda, ne
+seed'de. Esnaf ayarları yalnızca şunları düzenletiyor: kapasite, açılış/kapanış,
+günlük fiyat, adres, il/ilçe, koordinat, telefon.
+
+Sonuç: **pazar yerindeki her dükkan kalıcı olarak fotoğrafsız** ve bunu ürün
+içinden kimse — admin dahil — değiştiremiyor. Tek yol Postgres'e elle yazmak.
+
+Bu, `isVerified` rozetiyle (P2-7) aynı sınıf: kolon şemada var, üç yüzeyde
+çiziliyor, `src/` içinde onu yazan hiçbir kod yolu yok.
+
+### Neden burada duruyor, düzeltilmiş değil
+
+Yükleme bir **depolama kararı** gerektiriyor ve o karar ürün sahibinindir:
+S3/R2 mi, sunucu diski mi, bir görsel CDN'i mi. Base64'ü veritabanına yazmak
+seçenek DEĞİL — bu kod tabanı o hatayı bir kez yaşadı (misafir avatarları
+2 MB'a kadar base64 olarak geliyordu ve `include: { guest: true }` yapan her
+sorgu onu da çekiyordu; `partner/bookings` sorgusunda dar seçime geçilerek
+düzeltildi).
+
+Karar verildiğinde iş küçük: `ShopService`e bir yazma metodu, esnaf ayarlarına
+bir alan, ve `PUBLIC_SHOP_FILTER`a fotoğrafsız dükkan için bir uyarı (dışlama
+DEĞİL — fotoğrafsız dükkan da hizmet veriyor).
+
 ## 2026-08-31 — talep noktası kapsamında 16 şehirlik boşluk (üretimde ölçülerek bulundu)
 
 Nokta listesi 482'de "tamam" sayılıyordu. Üretimde farklı alfabelerden on şehir
