@@ -269,6 +269,36 @@
     "license": "CC BY-SA 4.0",
     "cityKey": "anvers"
   },
+  "atina-akropol": {
+    "file": "/images/blog/atina-akropol.webp",
+    "alt": {
+      "tr": "Akropolis'te Parthenon'un batı cephesi",
+      "en": "The west front of the Parthenon on the Acropolis"
+    },
+    "caption": {
+      "tr": "Parthenon, Akropolis",
+      "en": "The Parthenon, Acropolis"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Parthenon_-_facade_ouest.jpg",
+    "author": "Eusebius",
+    "license": "CC BY 3.0",
+    "cityKey": "atina"
+  },
+  "atina-plaka": {
+    "file": "/images/blog/atina-plaka.webp",
+    "alt": {
+      "tr": "Plaka'da dar, taş döşeli bir sokak",
+      "en": "A narrow, stone-paved lane in Plaka"
+    },
+    "caption": {
+      "tr": "Plaka, Atina",
+      "en": "Plaka, Athens"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Athens_Plaka07.jpg",
+    "author": "JFKennedy at English Wikipedia",
+    "license": "Public domain",
+    "cityKey": "atina"
+  },
   "ayvalik-adalar": {
     "file": "/images/blog/ayvalik-adalar.webp",
     "alt": {
@@ -989,6 +1019,36 @@
     "license": "CC BY-SA 3.0",
     "cityKey": "gaziantep"
   },
+  "gdansk-dlugi-targ": {
+    "file": "/images/blog/gdansk-dlugi-targ.webp",
+    "alt": {
+      "tr": "Długi Targ boyunca sıralanmış süslü tüccar evleri",
+      "en": "The ornate merchant houses along the Dlugi Targ"
+    },
+    "caption": {
+      "tr": "Długi Targ, Gdańsk",
+      "en": "The Dlugi Targ, Gdansk"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Gda%C5%84sk_kamienice_przy_D%C5%82ugim_Targu.jpg",
+    "author": "Marcin Białek",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "gdansk"
+  },
+  "gdansk-zuraw": {
+    "file": "/images/blog/gdansk-zuraw.webp",
+    "alt": {
+      "tr": "Motława kıyısındaki tarihi Żuraw vinci",
+      "en": "The historic Zuraw crane on the Motlawa waterfront"
+    },
+    "caption": {
+      "tr": "Żuraw, Gdańsk",
+      "en": "The Zuraw crane, Gdansk"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Pl_gdansk_zuraw_dlugiepobrzeze2006.jpg",
+    "author": "Rafal Konkolewski",
+    "license": "CC BY-SA 2.5",
+    "cityKey": "gdansk"
+  },
   "granada-albaicin": {
     "file": "/images/blog/granada-albaicin.webp",
     "alt": {
@@ -1138,6 +1198,36 @@
     "author": "mendhak",
     "license": "CC BY-SA 2.0",
     "cityKey": "innsbruck"
+  },
+  "interlaken-hohematte": {
+    "file": "/images/blog/interlaken-hohematte.webp",
+    "alt": {
+      "tr": "Interlaken'de Höhematte çayırı ve arkasındaki karlı dağlar",
+      "en": "The Hohematte meadow at Interlaken with the snowy peaks behind"
+    },
+    "caption": {
+      "tr": "Höhematte, Interlaken",
+      "en": "The Hohematte, Interlaken"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:2011-07-21-Interlaken_(Foto_Dietrich_Michael_Weidmann)_031.JPG",
+    "author": "Dietrich Michael Weidmann",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "interlaken"
+  },
+  "interlaken-ost": {
+    "file": "/images/blog/interlaken-ost.webp",
+    "alt": {
+      "tr": "Interlaken Ost garının peronları",
+      "en": "The platforms at Interlaken Ost station"
+    },
+    "caption": {
+      "tr": "Interlaken Ost",
+      "en": "Interlaken Ost station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Interlaken_Ost.jpg",
+    "author": "[Tycho] talk , http://shansov.net",
+    "license": "CC BY 3.0",
+    "cityKey": "interlaken"
   },
   "istanbul-eminonu": {
     "file": "/images/blog/istanbul-eminonu.webp",
@@ -1483,6 +1573,36 @@
     "author": "Dietmar Rabich",
     "license": "CC BY-SA 4.0",
     "cityKey": "kopenhag"
+  },
+  "krakov-glowny": {
+    "file": "/images/blog/krakov-glowny.webp",
+    "alt": {
+      "tr": "Kraków Główny garının eski binası",
+      "en": "The old building of Krakow Glowny station"
+    },
+    "caption": {
+      "tr": "Kraków Główny",
+      "en": "Krakow Glowny station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Old_Krakow_Glowny_building,_20240807.jpg",
+    "author": "Abzeronow",
+    "license": "CC BY 4.0",
+    "cityKey": "krakov"
+  },
+  "krakov-rynek": {
+    "file": "/images/blog/krakov-rynek.webp",
+    "alt": {
+      "tr": "Rynek Główny meydanındaki tarihi cepheler",
+      "en": "The historic frontages on the Rynek Glowny"
+    },
+    "caption": {
+      "tr": "Rynek Główny, Krakov",
+      "en": "The Rynek Glowny, Krakow"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Krakow_Rynek_Glowny_kamienice.jpg",
+    "author": "Andrzej Otrębski",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "krakov"
   },
   "kusadasi-guvercinada": {
     "file": "/images/blog/kusadasi-guvercinada.webp",
@@ -2609,6 +2729,36 @@
     "license": "CC BY-SA 3.0",
     "cityKey": "van"
   },
+  "varsova-centralna": {
+    "file": "/images/blog/varsova-centralna.webp",
+    "alt": {
+      "tr": "Warszawa Centralna garı ve çevresindeki yüksek binalar",
+      "en": "Warszawa Centralna station and the towers around it"
+    },
+    "caption": {
+      "tr": "Warszawa Centralna",
+      "en": "Warszawa Centralna station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Warszawa-Centralna_%26_al.png",
+    "author": "W-wa-centralna.jpg: pl:wikipedysta:Juri derivative work: User:Ulamm",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "varsova"
+  },
+  "varsova-stare-miasto": {
+    "file": "/images/blog/varsova-stare-miasto.webp",
+    "alt": {
+      "tr": "Varşova Eski Şehir Meydanı ve renkli cepheleri",
+      "en": "Warsaw's Old Town Market Square and its coloured facades"
+    },
+    "caption": {
+      "tr": "Stare Miasto, Varşova",
+      "en": "The Old Town Market Square, Warsaw"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Warsaw_Old_Town_Market_Square_10.JPG",
+    "author": "Adrian Grycuk",
+    "license": "CC BY-SA 3.0 pl",
+    "cityKey": "varsova"
+  },
   "venedik-rialto": {
     "file": "/images/blog/venedik-rialto.webp",
     "alt": {
@@ -2668,6 +2818,36 @@
     "author": "Thomas Wolf, www.foto-tw.de",
     "license": "CC BY-SA 3.0 de",
     "cityKey": "viyana"
+  },
+  "wroclaw-glowny": {
+    "file": "/images/blog/wroclaw-glowny.webp",
+    "alt": {
+      "tr": "Wrocław Główny garının neo-gotik cephesi",
+      "en": "The neo-Gothic frontage of Wroclaw Glowny station"
+    },
+    "caption": {
+      "tr": "Wrocław Główny",
+      "en": "Wroclaw Glowny station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Wroclaw_Glowny_-_budynek_dworca.jpg",
+    "author": "Jar.ciurus",
+    "license": "CC BY-SA 3.0 pl",
+    "cityKey": "wroclaw"
+  },
+  "wroclaw-rynek": {
+    "file": "/images/blog/wroclaw-rynek.webp",
+    "alt": {
+      "tr": "Wrocław Rynek meydanındaki renkli cepheler",
+      "en": "The coloured frontages on Wroclaw's Rynek"
+    },
+    "caption": {
+      "tr": "Rynek, Wrocław",
+      "en": "The Rynek, Wroclaw"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:2016_Wroc%C5%82aw,_Rynek_49.jpg",
+    "author": "Jacek Halicki",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "wroclaw"
   },
   "zurih-bahnhofstrasse": {
     "file": "/images/blog/zurih-bahnhofstrasse.webp",

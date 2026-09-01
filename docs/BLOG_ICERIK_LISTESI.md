@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| Yazısı olan şehir | **87 / 265** — Türkiye'nin 39 şehri tamamlandı |
+| Yazısı olan şehir | **93 / 265** — Türkiye'nin 39 şehri tamamlandı |
 | Yayına yazma | `npx tsx scripts/blog-city-posts.ts --apply` (kuru çalışma varsayılan) |
 | Denetim | `npx tsx scripts/blog-city-posts.ts --verify` + `npx tsx scripts/blog-images.ts --verify` |
 | Eksik listesi | `npx tsx scripts/blog-city-posts.ts --coverage` |
@@ -63,7 +63,7 @@ alakasız olabilir.
 
 <!-- Aşağısı üretilmiştir: npx tsx scripts/blog-city-posts.ts --list-md -->
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 87/265 sehir -->
+<!-- 93/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -159,12 +159,12 @@ alakasız olabilir.
 | 90 | CH | Zürich | `zurih` | 1 | yayında | zurih-gunubirlik-dag-turlari-valiz | zurich-luggage-storage-day-trips |
 | 91 | CH | Genève | `cenevre` | 1 | yayında | cenevre-chamonix-annecy-gunubirlik-valiz | geneva-luggage-storage-chamonix-annecy |
 | 92 | CH | Luzern | `luzern` | 1 | yayında | luzern-pilatus-dort-tasit-valiz | lucerne-luggage-storage-pilatus-four-vehicles |
-| 93 | CH | Interlaken | `interlaken` | 1 | — |  |  |
-| 94 | PL | Warszawa | `varsova` | 2 | — |  |  |
-| 95 | PL | Kraków | `krakov` | 2 | — |  |  |
-| 96 | PL | Gdańsk | `gdansk` | 1 | — |  |  |
-| 97 | PL | Wrocław | `wroclaw` | 1 | — |  |  |
-| 98 | GR | Athens | `atina` | 4 | — |  |  |
+| 93 | CH | Interlaken | `interlaken` | 1 | yayında | interlaken-jungfraujoch-aktarma-valiz | interlaken-luggage-storage-jungfraujoch |
+| 94 | PL | Warszawa | `varsova` | 2 | yayında | varsova-centralna-kat-kat-stare-miasto-valiz | warsaw-luggage-storage-centralna-old-town |
+| 95 | PL | Kraków | `krakov` | 2 | yayında | krakov-auschwitz-canta-kurali-valiz | krakow-luggage-storage-auschwitz-bag-rule |
+| 96 | PL | Gdańsk | `gdansk` | 1 | yayında | gdansk-uc-sehir-skm-treni-valiz | gdansk-luggage-storage-tricity-skm |
+| 97 | PL | Wrocław | `wroclaw` | 1 | yayında | wroclaw-cuceler-rynek-valiz | wroclaw-luggage-storage-dwarves-rynek |
+| 98 | GR | Athens | `atina` | 4 | yayında | atina-akropol-canta-pire-limani-valiz | athens-luggage-storage-acropolis-piraeus |
 | 99 | GR | Thessaloniki | `selanik` | 2 | — |  |  |
 | 100 | GR | Santorini | `santorini` | 2 | — |  |  |
 | 101 | GR | Mykonos | `mykonos` | 1 | — |  |  |
