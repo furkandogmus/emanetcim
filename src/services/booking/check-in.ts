@@ -212,7 +212,17 @@ export async function checkIn(
           bookingId,
           assignments: seals.sealAssignments ?? [],
           faultySealNumbers: seals.faultySealNumbers ?? [],
-          sealPhotoUrl: null,
+          /*
+            KANIT FOTOGRAFI (2026-09-01). Bu satir `null` SABITTI ve
+            `BookingSeal.photoUrl` uretimde hicbir zaman dolmuyordu -- oysa urun
+            uc yerde "teslimde muhur ve fotograf" vaat ediyordu. Tek engel bir
+            depolama karariydi; karar S3 olarak verildi.
+
+            Deger SUNUCUDAN geliyor: `checkInAction` baytlari dogrulayip
+            depolamaya yaziyor ve donen adresi buraya koyuyor. Istemcinin
+            gonderdigi bir adres asla buraya ulasmaz.
+          */
+          sealPhotoUrl: seals.sealPhotoUrl ?? null,
         });
       }
     });

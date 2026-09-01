@@ -7,6 +7,7 @@ import { partnerEarningsService } from "@/services/PartnerEarningsService";
 import { partnerDashboardService } from "@/services/PartnerDashboardService";
 import { getEffectiveCommission } from "@/lib/commission";
 import { getPricingRules } from "@/lib/platform-settings";
+import { isStorageConfigured } from "@/lib/storage";
 import { moneyToNumber } from "@/lib/money";
 import { requirePartnerPage } from "@/lib/page-auth";
 import { resolvePartnerShops } from "@/lib/partner-shop";
@@ -132,6 +133,8 @@ export default async function PartnerPage({
       initialCheckoutBookingId={initialCheckoutBookingId}
       initialPhone={ownerPhoneRow?.phone ?? ""}
       requireSeals={pricingRules.requireSealsOnCheckIn}
+      /* Depolama hazir degilse check-in fotograf alani hic cizilmez. */
+      storageReady={isStorageConfigured()}
       monthlyShopViews={monthlyShopViews}
       pulse={pulse}
       capacity={shopDetail.capacity}

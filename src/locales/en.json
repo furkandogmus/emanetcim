@@ -288,7 +288,11 @@
     "shopPhotoChoose": "Choose photo",
     "shopPhotoUploading": "Uploading…",
     "shopPhotoSaved": "Photo updated.",
-    "shopPhotoNone": "No photo yet"
+    "shopPhotoNone": "No photo yet",
+    "sealPhotoTitle": "Evidence photo",
+    "sealPhotoOptional": "Optional — a photo of the sealed bag",
+    "sealPhotoAdd": "Take photo",
+    "sealPhotoChange": "Change"
   },
   "Guest": {
     "heroTitle": "Drop Your Bags, Explore Freely",

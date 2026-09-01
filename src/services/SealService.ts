@@ -1,5 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import prisma from "@/lib/db";
+import { randomUUID } from "crypto";
+import { getStorage, validateImageBytes, buildObjectKey } from "@/lib/storage";
 import {
   createSealRequest as createSealRequestImpl,
   confirmSealDelivery as confirmSealDeliveryImpl,
@@ -142,6 +144,43 @@ export class SealService {
   /**
    * Check-in içinde: hatalı mühürleri FAULTY yap, atananları IN_USE + BookingSeal kaydı.
    */
+  /**
+   * Mühür kanıt fotoğrafını depolamaya yazar ve adresini döndürür.
+   *
+   * TRANSACTION'IN DIŞINDA çağrılmalı: ağ işi bir veritabanı işleminin içinde
+   * yapılamaz — yavaş bir yükleme, kilitleri tutan bir transaction demektir.
+   * Bu yüzden sıra şu: fotoğrafı yaz → adresi al → transaction'ı aç.
+   *
+   * Fotoğrafın kendisi ZORUNLU DEĞİL. Zorunlu kılmak, kamerası çalışmayan ya
+   * da izin vermeyen bir esnafın valizi HİÇ teslim alamaması demek olurdu;
+   * `requireSealsOnCheckIn` ayarının lansmanda `false` bırakılma gerekçesiyle
+   * aynı (P1-23): kanıt toplamak iyidir, işi durdurmak değil.
+   */
+  async uploadSealPhoto(params: {
+    bookingId: string;
+    bytes: Uint8Array;
+  }): Promise<
+    | { ok: true; url: string }
+    | { ok: false; reason: "empty" | "too_large" | "unsupported_type" }
+  > {
+    const validation = validateImageBytes(params.bytes);
+    if (!validation.ok) return { ok: false, reason: validation.reason };
+
+    const storage = getStorage();
+    const key = buildObjectKey({
+      prefix: "seals",
+      ownerId: params.bookingId,
+      uniqueId: randomUUID(),
+      extension: validation.extension,
+    });
+    const { url } = await storage.put({
+      key,
+      body: params.bytes,
+      contentType: validation.contentType,
+    });
+    return { ok: true, url };
+  }
+
   async applyCheckInWithinTx(
     tx: Tx,
     params: {
@@ -152,19 +191,20 @@ export class SealService {
       /**
        * Mühürlenmiş valizin kanıt fotoğrafı.
        *
-       * BUGÜN HER ZAMAN `null` GELİYOR — tek çağıran (`booking/check-in.ts`)
-       * sabit `null` geçiyor ve `CheckInDialog` içinde fotoğraf/kamera alanı
-       * hiç yok. Yani `BookingSeal.photoUrl` üretimde hiçbir zaman dolmuyor.
+       * ARTIK DOLUYOR (2026-09-01). 2026-09-01 öncesinde tek çağıran
+       * (`booking/check-in.ts`) buraya sabit `null` geçiyordu ve
+       * `CheckInDialog` içinde kamera alanı yoktu — yani ürün üç yerde
+       * "teslimde mühür ve fotoğraf" vaat ederken `BookingSeal.photoUrl`
+       * hiçbir zaman dolmuyordu. Tek engel bir görsel depolama kararıydı;
+       * karar S3 olarak verildi (`src/lib/storage/`).
        *
-       * Parametre BİLEREK duruyor: eksik olan tek şey bir görsel DEPOLAMA
-       * kararı (dükkan fotoğrafıyla aynı engel, bkz. DEFECT_BACKLOG). Karar
-       * verildiğinde yazma yolu buraya bağlanır.
+       * DEĞER SUNUCUDAN GELİR. `checkInAction` baytları doğrulayıp depolamaya
+       * yazar ve dönen adresi buraya koyar; istemcinin gönderdiği bir adres
+       * asla buraya ulaşmaz. Aksi hâlde esnaf uyuşmazlıkta "kanıt" diye
+       * kendi seçtiği bir görseli gösterebilirdi.
        *
-       * Bunu okuyan biri fotoğrafın çalıştığını SANMASIN: ürün üç yerde
-       * fotoğraf vaat ediyor (`README_AI` akışı, bu servisin eski başlığı ve
-       * misafire gösterilen `Guest.trustInsuranceBody` → "teslimde mühür ve
-       * fotoğraf"), ve üçü de bugün karşılıksız. Uyuşmazlıkta esnafın tek
-       * kanıtı mühür numarasıdır.
+       * Fotoğraf ZORUNLU DEĞİL: kamerası çalışmayan bir esnafın valizi hiç
+       * teslim alamaması, kanıt toplayamamaktan kötüdür.
        */
       sealPhotoUrl: string | null;
     }

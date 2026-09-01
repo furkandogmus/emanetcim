@@ -288,7 +288,11 @@
     "shopPhotoChoose": "Choisir une photo",
     "shopPhotoUploading": "Envoi…",
     "shopPhotoSaved": "Photo mise à jour.",
-    "shopPhotoNone": "Pas encore de photo"
+    "shopPhotoNone": "Pas encore de photo",
+    "sealPhotoTitle": "Photo de preuve",
+    "sealPhotoOptional": "Facultatif — une photo du bagage scellé",
+    "sealPhotoAdd": "Prendre une photo",
+    "sealPhotoChange": "Changer"
   },
   "Guest": {
     "heroTitle": "Déposez vos bagages, explorez librement",

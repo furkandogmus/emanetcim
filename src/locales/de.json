@@ -288,7 +288,11 @@
     "shopPhotoChoose": "Foto wählen",
     "shopPhotoUploading": "Wird hochgeladen…",
     "shopPhotoSaved": "Foto aktualisiert.",
-    "shopPhotoNone": "Noch kein Foto"
+    "shopPhotoNone": "Noch kein Foto",
+    "sealPhotoTitle": "Nachweisfoto",
+    "sealPhotoOptional": "Optional — ein Foto des versiegelten Gepäcks",
+    "sealPhotoAdd": "Foto aufnehmen",
+    "sealPhotoChange": "Ändern"
   },
   "Guest": {
     "heroTitle": "Gepäck abgeben, die Stadt frei erkunden",

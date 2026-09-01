@@ -148,7 +148,7 @@ UNUTMANIN MÜMKÜN OLMASIYDI.
 - Gizlilik metni paylaşımı **söylüyor** (`Privacy.a2`: "dükkan sahipleriyle
   iletişimi yönetmek", `Privacy.a4`: iş ortakları).
 
-## 2026-09-01 — mühür KANIT FOTOĞRAFI hiç çekilmiyor; ürün üç yerde vaat ediyor
+## 2026-09-01 — mühür KANIT FOTOĞRAFI hiç çekilmiyor (ÇÖZÜLDÜ: S3)
 
 Ürünün güven mekanizması "mühürle + fotoğrafla" ikilisi olarak anlatılıyor.
 Fotoğraf tarafı **hiç uygulanmamış**. Üç ayrı yerden doğrulandı:
@@ -179,7 +179,27 @@ HANGİ DURUMDA geldiğini göstermez. Fotoğraf tam olarak o boşluğu kapatacak
 şu: esnafa kayıp/hasar durumunda kimin ödeyeceği hiç söylenmiyor **ve** onu
 koruyacak kanıt da toplanmıyor.
 
-### Düzeltilenler (bu turda)
+### ÇÖZÜLDÜ (2026-09-01, aynı gün)
+
+Depolama kararı S3 olarak verildikten sonra zincir uçtan uca bağlandı:
+`CheckInDialog`'a kamera alanı (`capture="environment"`), `checkInAction`'a
+bayt parametresi, `SealService.uploadSealPhoto` ve `BookingSeal.photoUrl`.
+
+**Adres istemciden GELMEZ:** `checkInSealsSchema` onu taşımıyor; istemci
+baytları gönderiyor, sunucu doğrulayıp depolamaya yazıyor ve adresi oradan
+üretiyor. Aksi hâlde esnaf uyuşmazlıkta "kanıt" diye kendi seçtiği bir görseli
+gösterebilirdi. Bu, testle tutuluyor.
+
+Fotoğraf **zorunlu değil**: kamerası çalışmayan bir esnafın valizi hiç teslim
+alamaması, kanıt toplayamamaktan kötüdür (`requireSealsOnCheckIn`'in lansmanda
+`false` bırakılma gerekçesiyle aynı). Yükleme hatası check-in'i düşürmüyor,
+yalnızca loglanıyor.
+
+Yükleme MinIO'ya karşı canlı doğrulandı. Zincirin son halkası
+(`applyCheckInWithinTx` → `BookingSeal.photoUrl`) testle kapatıldı: geliştirme
+veritabanında mühürlü bir check-in kaydı olmadığı için canlı sınanamadı.
+
+### Özgün kayıt — düzeltilenler (o turda)
 
 Yalnızca BELGELER. `README_AI` ve `SealService`, uygulanmamış bir özelliği
 uygulanmış gibi anlatıyordu — bir sonraki okuyanın (insan ya da agent)

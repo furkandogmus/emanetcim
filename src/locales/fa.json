@@ -288,7 +288,11 @@
     "shopPhotoChoose": "انتخاب عکس",
     "shopPhotoUploading": "در حال بارگذاری…",
     "shopPhotoSaved": "عکس به‌روزرسانی شد.",
-    "shopPhotoNone": "هنوز عکسی نیست"
+    "shopPhotoNone": "هنوز عکسی نیست",
+    "sealPhotoTitle": "عکس مدرک",
+    "sealPhotoOptional": "اختیاری — عکس چمدان پلمب‌شده",
+    "sealPhotoAdd": "گرفتن عکس",
+    "sealPhotoChange": "تغییر"
   },
   "Guest": {
     "heroTitle": "چمدان را بسپارید، آزاد بگردید",

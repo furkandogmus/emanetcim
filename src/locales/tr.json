@@ -288,7 +288,11 @@
     "shopPhotoChoose": "Fotoğraf seç",
     "shopPhotoUploading": "Yükleniyor…",
     "shopPhotoSaved": "Fotoğraf güncellendi.",
-    "shopPhotoNone": "Henüz fotoğraf yok"
+    "shopPhotoNone": "Henüz fotoğraf yok",
+    "sealPhotoTitle": "Kanıt fotoğrafı",
+    "sealPhotoOptional": "İsteğe bağlı — mühürlü valizin fotoğrafı",
+    "sealPhotoAdd": "Fotoğraf çek",
+    "sealPhotoChange": "Değiştir"
   },
   "Guest": {
     "heroTitle": "Valizini Güvenle Bırak, Özgürce Gez",

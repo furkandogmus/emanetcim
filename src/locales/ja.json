@@ -288,7 +288,11 @@
     "shopPhotoChoose": "写真を選ぶ",
     "shopPhotoUploading": "アップロード中…",
     "shopPhotoSaved": "写真を更新しました。",
-    "shopPhotoNone": "写真はまだありません"
+    "shopPhotoNone": "写真はまだありません",
+    "sealPhotoTitle": "証拠写真",
+    "sealPhotoOptional": "任意 — 封印済みの荷物の写真",
+    "sealPhotoAdd": "写真を撮る",
+    "sealPhotoChange": "変更"
   },
   "Guest": {
     "heroTitle": "荷物を預けて、身軽に街へ",

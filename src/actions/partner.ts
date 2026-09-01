@@ -1,6 +1,6 @@
 "use server";
 
-import { bookingService } from "@/services/BookingService";
+import { bookingService, type CheckInSealPayload } from "@/services/BookingService";
 import { notificationService } from "@/services/NotificationService";
 import prisma from "@/lib/db";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
@@ -8,6 +8,7 @@ import { verifyQrToken } from "@/lib/qr-token";
 import { partnerProfileService } from "@/services/PartnerProfileService";
 import { getLocale } from "next-intl/server";
 import { sealService } from "@/services/SealService";
+import logger from "@/lib/logger";
 import { z } from "zod";
 import { parseCheckInSeals } from "@/lib/seal-payload";
 import { bookingNotificationEmail } from "@/services/booking/guest-contact";
@@ -225,6 +226,14 @@ export async function getPartnerBookingSealsAction(bookingIdRaw: string) {
 export async function checkInAction(
   qrTokenOrBookingId: string,
   seals?: unknown,
+  /**
+   * Mühürlenmiş valizin kanıt fotoğrafı — BAYT olarak.
+   *
+   * ADRES DEĞİL BAYT alınıyor: adres istemciden gelseydi esnaf oraya istediği
+   * görselin adresini yazabilir ve uyuşmazlıkta "kanıt" diye gösterilen şey
+   * onun seçtiği bir dosya olurdu. Doğrulama ve yükleme sunucuda.
+   */
+  sealPhoto?: ArrayBuffer | null,
 ) {
   const actor = await assertPartner();
 
@@ -260,7 +269,35 @@ export async function checkInAction(
       code: "SEAL_INVALID" as const,
     };
   }
-  const sealPayload = parsedSeals.value;
+  /*
+    Tip SEMA tipinden degil SERVIS tipinden: `checkInSealsSchema` fotograf
+    adresini BILEREK tasimiyor (istemciden gelmemeli), servis tipi ise tasiyor
+    cunku adresi sunucu uretiyor.
+  */
+  let sealPayload: CheckInSealPayload | undefined = parsedSeals.value;
+
+  /*
+    FOTOGRAF TRANSACTION'DAN ONCE YUKLENIYOR. Ag isi bir veritabani isleminin
+    icinde yapilamaz; yavas bir yukleme kilitleri tutan bir transaction demek.
+
+    FOTOGRAF ZORUNLU DEGIL ve yukleme HATASI check-in'i DUSURMEZ: kamerasi
+    calismayan bir esnafin valizi hic teslim alamamasi, kanit toplayamamaktan
+    kotudur (`requireSealsOnCheckIn`in lansmanda `false` birakilma gerekcesiyle
+    ayni, P1-23). Basarisizlik loglaniyor ki sessiz kalmasin.
+  */
+  if (sealPhoto && sealPayload) {
+    const bytes = new Uint8Array(sealPhoto);
+    try {
+      const uploaded = await sealService.uploadSealPhoto({ bookingId, bytes });
+      if (uploaded.ok) {
+        sealPayload = { ...sealPayload, sealPhotoUrl: uploaded.url };
+      } else {
+        logger.warn({ bookingId, reason: uploaded.reason }, "seal_photo_rejected");
+      }
+    } catch (err) {
+      logger.warn({ err, bookingId }, "seal_photo_upload_failed");
+    }
+  }
 
   // Aktör kim: dükkanda tahsilat modunda check-in aynı zamanda "parayı aldım"
   // beyanıdır ve bu denetim izine yazılır (P1-9).

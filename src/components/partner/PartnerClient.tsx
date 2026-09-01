@@ -85,6 +85,8 @@ interface PartnerClientProps {
    * basıp anlaşılmaz bir hata görür (P1-23).
    */
   requireSeals?: boolean;
+  /** Depolama yapılandırıldı mı? Check-in fotoğraf alanı buna bağlı. */
+  storageReady?: boolean;
   /** `AnalyticsService.getShopViewCountThisMonth` — bu ay kaç kez görüntülendi. */
   monthlyShopViews?: number;
   /** Günlük enstantane — `PartnerDashboardService.getSnapshot`. */
@@ -116,6 +118,7 @@ export default function PartnerClient({
   initialCheckoutBookingId,
   initialPhone = "",
   requireSeals = false,
+  storageReady = false,
   monthlyShopViews = 0,
   pulse,
   capacity = 0,
@@ -440,6 +443,7 @@ export default function PartnerClient({
           preview={scanResult}
           shopId={shopId}
           requireSeals={requireSeals}
+          storageReady={storageReady}
           onClose={closeScanResult}
           onSuccess={handleCheckInSuccess}
         />

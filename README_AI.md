@@ -8,7 +8,7 @@ Bu dosya, projede geliştirme, hata ayıklama (debugging) veya kod analizi yapac
 
 **Emanetçi (BagajPark)**, seyahat eden gezginlerin (misafirlerin) bagajlarını güvenli yerel dükkanlara (esnaflara / iş ortaklarına) emanet etmesini sağlayan bir **luggage storage marketplace (bagaj depolama pazar yeri)** uygulamasıdır.
 
-*   **Uçtan Uca Süreç:** Misafir Haritadan Arayıp Öder (`PAID`) ➡️ Esnafa Gelir ➡️ Esnaf Valize Plastik Mühür Takıp Teslim Alır (`CHECKED_IN`) ➡️ Misafir Almaya Gelir ➡️ Esnaf Mührü Kontrol Edip Teslim Eder (`COMPLETED`) ➡️ Esnafın Hakedişi Cüzdanına Eklenir.
+*   **Uçtan Uca Süreç:** Misafir Haritadan Arayıp Öder (`PAID`) ➡️ Esnafa Gelir ➡️ Esnaf Valize Plastik Mühür Takıp (isteğe bağlı kanıt fotoğrafıyla) Teslim Alır (`CHECKED_IN`) ➡️ Misafir Almaya Gelir ➡️ Esnaf Mührü Kontrol Edip Teslim Eder (`COMPLETED`) ➡️ Esnafın Hakedişi Cüzdanına Eklenir.
 *   **Temel Limitler:** Fiyatlandırma ve iptal kesintisi gibi kurallar `PlatformSettings` tablosunda dinamik olarak tutulur. **Valiz başına güvence tutarını buraya YAZMAYIN:** bu belge onu `5.000 TL` olarak sabitliyordu, oysa arayüz `10.000 TL` diyor — rakam bir noktada yükseltilmiş ve belge geride kalmıştı. Güncel değer çeviri dosyalarındadır (`Terms.a2`, `Guest.trustInsuranceBody`) ve tutarlılığı `src/__tests__/coverage-amount-consistency.test.ts` mandalıyla korunur.
 
 ---
@@ -29,7 +29,7 @@ Projeyle ilgili çalışırken bakılması gereken ana klasörler ve kritik dosy
 
 ### ⚙️ İş Mantığı (Core Services) ➡️ `src/services/`
 *   [BookingService.ts](src/services/BookingService.ts): Rezervasyon durumları, check-in, check-out ve iptal lojiği.
-*   [SealService.ts](src/services/SealService.ts): Bagajların teslim alınırken bağlandığı fiziksel mühür numaralarının yönetimi. **`photoUrl` alanı bugün HİÇ DOLMUYOR** — tek çağıran sabit `null` geçiyor ve check-in ekranında fotoğraf alanı yok; eksik olan bir görsel depolama kararıdır (bkz. `docs/DEFECT_BACKLOG.md`).
+*   [SealService.ts](src/services/SealService.ts): Bagajların teslim alınırken bağlandığı fiziksel mühür numaralarının yönetimi. `photoUrl` kanıt fotoğrafını taşır; adresi SUNUCU üretir (`SealService.uploadSealPhoto` → S3), istemciden gelmez. Fotoğraf isteğe bağlıdır.
 *   [NotificationService.ts](src/services/NotificationService.ts): Kullanıcılara ve esnafa giden SMS'ler, doğrulama kodları (OTP).
 *   [PricingService.ts](src/services/PricingService.ts): Boyut katsayıları ve gün sayısına göre dinamik sepet hesaplama.
 *   [ShopService.ts](src/services/ShopService.ts): Esnaf dükkan koordinatları, harita sorguları ve kapasite durumları.

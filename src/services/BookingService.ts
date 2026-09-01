@@ -92,6 +92,15 @@ export type { BagRevisionActor, BagCounts, BagRevisionResult, ProposeRevisionRes
 export type CheckInSealPayload = {
   sealAssignments: SealAssignmentInput[];
   faultySealNumbers: number[];
+  /**
+   * Mühürlenmiş valizin kanıt fotoğrafının adresi.
+   *
+   * SUNUCUNUN ÜRETTİĞİ DEĞER — istemciden GELMEZ ve `checkInSealsSchema`da
+   * yoktur. İstemci baytları gönderir, sunucu doğrular ve depolamaya yazar;
+   * adres oradan döner. Aksi hâlde esnaf bu alana istediği adresi yazabilir ve
+   * uyuşmazlıkta "kanıt" diye gösterilen şey onun seçtiği bir görsel olurdu.
+   */
+  sealPhotoUrl?: string | null;
 };
 
 export interface IBookingService {
