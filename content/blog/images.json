@@ -989,6 +989,36 @@
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Bursa,_Ulu_Cami,_pillars_with_calligraphy.jpg"
   },
+  "busan-gamcheon": {
+    "file": "/images/blog/busan-gamcheon.webp",
+    "alt": {
+      "tr": "Busan'da yamaca kurulmuş Gamcheon Kültür Köyü'nün renkli evleri",
+      "en": "The coloured houses of Gamcheon Culture Village on its hillside in Busan"
+    },
+    "caption": {
+      "tr": "Gamcheon Kültür Köyü, Busan",
+      "en": "Gamcheon Culture Village, Busan"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Gamcheon_Culture_Village_Busan_(30809158777).jpg",
+    "author": "bryan...",
+    "license": "CC BY-SA 2.0",
+    "cityKey": "busan"
+  },
+  "busan-haeundae": {
+    "alt": {
+      "en": "Haeundae beach in Busan with the towers behind it",
+      "tr": "Busan'da Haeundae plajı ve arkasındaki gökdelenler"
+    },
+    "author": "StephNurnberg",
+    "caption": {
+      "en": "Haeundae beach, Busan",
+      "tr": "Haeundae plajı, Busan"
+    },
+    "cityKey": "busan",
+    "file": "/images/blog/busan-haeundae.webp",
+    "license": "CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Haeundae_Beach_in_Busan.jpg"
+  },
   "canakkale-assos": {
     "alt": {
       "en": "The columns of the Temple of Athena at Assos above the sea",
@@ -1588,6 +1618,36 @@
     "file": "/images/blog/frankfurt-romer.webp",
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:R%C3%B6merberg_Weihnachten.jpg"
+  },
+  "fukuoka-hakata": {
+    "alt": {
+      "en": "Taihaku Dori seen from the Hakata Station bus terminal",
+      "tr": "Hakata istasyonu otobüs terminalinden Taihaku caddesi"
+    },
+    "author": "Hirho",
+    "caption": {
+      "en": "Around Hakata Station, Fukuoka",
+      "tr": "Hakata istasyonu çevresi, Fukuoka"
+    },
+    "cityKey": "fukuoka",
+    "file": "/images/blog/fukuoka-hakata.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Taihaku_D%C5%8Dri_NW_from_Hakata_Station_Bus_Terminal_INT_Hakata-eki-ch%C5%AB%C5%8Dgai_Hakata-ku_Fukuoka_20230725.jpg"
+  },
+  "fukuoka-yatai": {
+    "alt": {
+      "en": "The yatai street food stalls at Nakasu in Fukuoka",
+      "tr": "Fukuoka'da Nakasu'daki yatai adı verilen sokak yemeği tezgâhları"
+    },
+    "author": "Yoshikazu TAKADA from Tokyo, Japan",
+    "caption": {
+      "en": "The Nakasu yatai stalls, Fukuoka",
+      "tr": "Nakasu yatai tezgâhları, Fukuoka"
+    },
+    "cityKey": "fukuoka",
+    "file": "/images/blog/fukuoka-yatai.webp",
+    "license": "CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Nakasu_Yatai_Stalls_(19979437930).jpg"
   },
   "gaziantep-kale": {
     "alt": {
@@ -3569,6 +3629,36 @@
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Paris,_Sacr%C3%A9-C%C5%93ur_de_Montmartre_--_2014_--_1180.jpg"
   },
+  "pekin-wangfujing": {
+    "alt": {
+      "en": "The Wangfujing pedestrian street in Beijing",
+      "tr": "Pekin'de Wangfujing yaya caddesi"
+    },
+    "author": "Anagoria",
+    "caption": {
+      "en": "Wangfujing street, Beijing",
+      "tr": "Wangfujing caddesi, Pekin"
+    },
+    "cityKey": "pekin",
+    "file": "/images/blog/pekin-wangfujing.webp",
+    "license": "CC BY 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:2016-08-07_WangFuJing_Fu%C3%9Fg%C3%A4ngerzone_anagoria.jpg"
+  },
+  "pekin-yasak-sehir": {
+    "alt": {
+      "en": "A courtyard and halls of the Forbidden City in Beijing",
+      "tr": "Pekin'de Yasak Şehir'in avlusu ve salonları"
+    },
+    "author": "CEphoto, Uwe Aranas",
+    "caption": {
+      "en": "The Forbidden City, Beijing",
+      "tr": "Yasak Şehir, Pekin"
+    },
+    "cityKey": "pekin",
+    "file": "/images/blog/pekin-yasak-sehir.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Beijing_China_Forbidden-City-01.jpg"
+  },
   "petra-hazine": {
     "alt": {
       "en": "The facade of the Treasury seen from the end of the Siq",
@@ -4049,6 +4139,36 @@
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Parte_zaharra_ta_gu_ze_01.JPG"
   },
+  "sanghay-bund": {
+    "alt": {
+      "en": "The Pudong skyline seen from the Bund",
+      "tr": "Bund'dan Pudong'un gökdelen siluetine bakış"
+    },
+    "author": "King of Hearts",
+    "caption": {
+      "en": "The Pudong skyline, Shanghai",
+      "tr": "Pudong silueti, Şangay"
+    },
+    "cityKey": "sanghay",
+    "file": "/images/blog/sanghay-bund.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Pudong_Shanghai_November_2017_panorama.jpg"
+  },
+  "sanghay-nanjing": {
+    "alt": {
+      "en": "The pedestrian section of Nanjing Road in Shanghai",
+      "tr": "Şangay'da Nanjing Caddesi'nin yaya bölümü"
+    },
+    "author": "Another Believer",
+    "caption": {
+      "en": "Nanjing Road, Shanghai",
+      "tr": "Nanjing Caddesi, Şangay"
+    },
+    "cityKey": "sanghay",
+    "file": "/images/blog/sanghay-nanjing.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Nanjing_Road,_Shanghai,_China_(December_2015)_-_30.JPG"
+  },
   "sanliurfa-balikligol": {
     "alt": {
       "en": "The arcades beside Balikligol and the carp swimming in the pool",
@@ -4108,6 +4228,36 @@
     "file": "/images/blog/santorini-oia.webp",
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Oia_-_Santorini_-_Greece_-_16.jpg"
+  },
+  "sapporo-gar": {
+    "alt": {
+      "en": "The Sapporo Station building",
+      "tr": "Sapporo istasyonunun binası"
+    },
+    "author": "J o",
+    "caption": {
+      "en": "Sapporo Station",
+      "tr": "Sapporo istasyonu"
+    },
+    "cityKey": "sapporo",
+    "file": "/images/blog/sapporo-gar.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:NHK-Sapporo-Station-01.jpg"
+  },
+  "sapporo-odori": {
+    "alt": {
+      "en": "Odori Park in Sapporo with the TV tower",
+      "tr": "Sapporo'da Odori Parkı ve televizyon kulesi"
+    },
+    "author": "Nkns",
+    "caption": {
+      "en": "Odori Park, Sapporo",
+      "tr": "Odori Parkı, Sapporo"
+    },
+    "cityKey": "sapporo",
+    "file": "/images/blog/sapporo-odori.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Hokkaido_Sapporo_Odori_Park.jpg"
   },
   "saraybosna-bascarsija": {
     "alt": {
@@ -4288,6 +4438,36 @@
     "file": "/images/blog/selcuk-sirince.webp",
     "license": "CC BY 2.0",
     "source": "https://commons.wikimedia.org/wiki/File:Sirinceroad.jpg"
+  },
+  "seul-gar": {
+    "alt": {
+      "en": "The Seoul Station building",
+      "tr": "Seul istasyonunun binası"
+    },
+    "author": "Jongsu Pyeon",
+    "caption": {
+      "en": "Seoul Station",
+      "tr": "Seul istasyonu"
+    },
+    "cityKey": "seul",
+    "file": "/images/blog/seul-gar.webp",
+    "license": "CC BY 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Seoul_Station_(229045223).jpeg"
+  },
+  "seul-myeongdong": {
+    "alt": {
+      "en": "The busy shopping street of Myeongdong in Seoul",
+      "tr": "Seul'de Myeongdong'un kalabalık alışveriş sokağı"
+    },
+    "author": "by Tom@HK",
+    "caption": {
+      "en": "Myeongdong, Seoul",
+      "tr": "Myeongdong, Seul"
+    },
+    "cityKey": "seul",
+    "file": "/images/blog/seul-myeongdong.webp",
+    "license": "CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Seoul-Myeongdong-01.jpg"
   },
   "sevilla-katedral": {
     "alt": {

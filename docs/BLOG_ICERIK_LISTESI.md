@@ -1,5 +1,5 @@
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 165/265 sehir -->
+<!-- 171/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -168,12 +168,12 @@
 | 163 | JP | Kyoto | `kyoto` | 3 | yayında | kyoto-istasyon-dolaplari-otobus-valiz | kyoto-luggage-storage-lockers-buses |
 | 164 | JP | Hiroshima | `hirosima` | 1 | yayında | hirosima-baris-parki-miyajima-valiz | hiroshima-luggage-storage-peace-park-miyajima |
 | 165 | JP | Nara | `nara` | 1 | yayında | nara-geyikler-canta-kemiriyor-valiz | nara-luggage-storage-deer-park |
-| 166 | JP | Sapporo | `sapporo` | 1 | — |  |  |
-| 167 | JP | Fukuoka | `fukuoka` | 1 | — |  |  |
-| 168 | KR | Seoul | `seul` | 4 | — |  |  |
-| 169 | KR | Busan | `busan` | 2 | — |  |  |
-| 170 | CN | Beijing | `pekin` | 3 | — |  |  |
-| 171 | CN | Shanghai | `sanghay` | 3 | — |  |  |
+| 166 | JP | Sapporo | `sapporo` | 1 | yayında | sapporo-kar-tekerlekli-valiz-emanet | sapporo-luggage-storage-snow |
+| 167 | JP | Fukuoka | `fukuoka` | 1 | yayında | fukuoka-havalimani-bes-dakika-yatai-valiz | fukuoka-luggage-storage-airport-yatai |
+| 168 | KR | Seoul | `seul` | 4 | yayında | seul-metro-merdiven-myeongdong-valiz | seoul-luggage-storage-subway-stairs |
+| 169 | KR | Busan | `busan` | 2 | yayında | busan-haeundae-gar-arasi-mesafe-valiz | busan-luggage-storage-station-to-beach |
+| 170 | CN | Beijing | `pekin` | 3 | yayında | pekin-yasak-sehir-tek-yon-metro-kontrol-valiz | beijing-luggage-storage-forbidden-city-one-way |
+| 171 | CN | Shanghai | `sanghay` | 3 | yayında | sanghay-iki-havalimani-hongqiao-pudong-valiz | shanghai-luggage-storage-two-airports |
 | 172 | CN | Xi'an | `xian` | 1 | — |  |  |
 | 173 | TW | Taipei | `taipei` | 3 | — |  |  |
 | 174 | TH | Bangkok | `bangkok` | 4 | — |  |  |
