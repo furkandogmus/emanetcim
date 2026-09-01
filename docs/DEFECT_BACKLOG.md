@@ -10,6 +10,53 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-09-01 — geç teslim uyarısı esnafa HER GÜN, SÜRESİZ gidiyordu
+
+`booking-reminders` işi geç teslim uyarısını `status: CHECKED_IN,
+checkOutTime < now - 30dk` sorgusuyla gönderiyordu ve **hiçbir tekrar kontrolü
+yoktu**. İş günde bir çalışıyor (`7 9 * * *`), yani aynı rezervasyon için esnafa
+**her gün, süresiz** aynı e-posta gidiyordu: bir ay unutulmuş valiz = **otuz
+özdeş e-posta**.
+
+Zararı gürültü değil. Esnafı platform e-postalarını görmezden gelmeye alıştırır,
+ve o alışkanlık **yeni rezervasyon bildirimini** de öldürür — esnafın işini
+başlatan tek şeyi. (E-posta, esnafın çalışan tek kanalı: SMS bilerek devre dışı,
+mobil push gönderim kodu hiç yok.)
+
+Doğru kalıp aynı kod tabanında **zaten vardı**: `OverdueBookingService` açıkça
+idempotent ("aynı rezervasyon için aynı eşikte ikinci kez olay yazmaz") ve
+eşiklerle çalışıyor. Niyet tekti, iki yerden yalnızca birinde uygulanmıştı.
+
+**Düzeltildi:** en fazla **beş** uyarı gider — 0,5sa / 24sa / 72sa / 1hf / 1ay.
+İlk eşik yarım saatte kaldı bilerek: esnaf rafındaki valizin sahibinin
+gelmediğini ertesi gün değil hemen bilmeli. Sonraki eşikler
+`OverdueBookingService.OVERDUE_TIERS` ile aynı hizada. Sayım `NotificationLog`
+üzerinden, ortak bir konu önekiyle; önek sabit çünkü metin değişirse sayım
+sessizce sıfırlanır ve gürültü geri gelir. Gerçek veritabanına karşı doğrulandı.
+
+İki yan düzeltme aynı sorguda:
+- **Sıralama eklendi** (`checkOutTime: asc`). `take: 100` sınırı aşıldığında
+  hangi kayıtların düşeceği belirsizdi; en çok gecikmiş olan en çok ihtiyacı
+  olandır.
+- **Sessiz kesilme görünür oldu**: sınır dolduğunda artık uyarı loglanıyor.
+
+### Düzeltilmeyenler — karar gerektiriyor
+
+1. **MİSAFİR geç teslimden hiç haberdar edilmiyor.** Üç hatırlatmanın ikisi
+   misafire gidiyor (check-in öncesi, check-out'tan 1 saat önce) ama çıkış
+   saati geçtikten sonra misafire **hiçbir şey** gitmiyor. Uyarı yalnızca
+   esnafa gidiyor ve metni *"Lütfen misafir ile iletişime geçin"* diyor — yani
+   platform, unutulmuş valiz problemini esnafın omzuna bırakıyor. Valizi
+   almaya gelebilecek tek kişi ise misafir.
+
+2. **`take: 100` iki misafir hatırlatma sorgusunda da var** ve orada sıralama
+   ya da uyarı yok. Aynı 2 saatlik pencerede 100'den fazla check-in olursa bir
+   kısmı hatırlatma almaz ve kimse fark etmez.
+
+3. **`latePickupFeeTry` = 0** ve check-out hatırlatması *"Geç teslim almalarda
+   ek ücret uygulanabilir"* diyor — bugün uygulanmıyor. Ücretin ne olacağı ve
+   kimin tahsil edeceği (nakit tahsilatta esnaf) bir iş kararı.
+
 ## 2026-09-01 — mobilden açılan HIRSIZLIK/HASAR şikâyeti kimseye haber vermiyordu
 
 Uyuşmazlık açma iki taşıyıcıda ayrı yazılmıştı. Mobil uç

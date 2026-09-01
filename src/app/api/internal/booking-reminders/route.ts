@@ -4,6 +4,10 @@ import prisma from "@/lib/db";
 import { withJobRun } from "@/lib/jobs/run-ledger";
 import logger from "@/lib/logger";
 import { notificationService } from "@/services/NotificationService";
+import {
+  shouldSendOverdueNotice,
+  OVERDUE_NOTICE_SUBJECT_PREFIX,
+} from "@/lib/overdue-notice";
 import { bookingShortCode } from "@/lib/booking-code";
 
 // Booking Reminder Cron
@@ -91,27 +95,71 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // 3. Check-out saati geçmiş CHECKED_IN booking'ler (partner uyarısı)
+    /*
+      3. Check-out saati gecmis CHECKED_IN rezervasyonlar -- ESNAF uyarisi.
+
+      TEKRAR KONTROLU EKLENDI (2026-09-01). Onceki hal yalnizca "cikis saati
+      30dk'dan once gecmis" diyordu ve bu is GUNDE BIR calisiyor: ayni valiz
+      icin esnafa HER GUN, SURESIZ ayni e-posta gidiyordu. Bir ay unutulmus
+      valiz = otuz ozdes e-posta.
+
+      Zarari gurultu degil: esnafi platform e-postalarini gormezden gelmeye
+      alistirir, ve o aliskanlik YENI REZERVASYON bildirimini de oldurur --
+      esnafin isini baslatan tek seyi.
+
+      Dogru kalip ayni kod tabaninda ZATEN vardi: `OverdueBookingService`
+      acikca idempotent ve esiklerle calisiyor. Niyet tekti, iki yerden
+      yalnizca birinde uygulanmisti. Artik en fazla BES uyari gider
+      (0,5sa / 24sa / 72sa / 1hf / 1ay) -- bkz. `src/lib/overdue-notice.ts`.
+    */
+    const OVERDUE_SCAN_LIMIT = 100;
     const overdue = await prisma.booking.findMany({
       where: {
         status: "CHECKED_IN",
         checkOutTime: { lt: new Date(now.getTime() - 30 * 60 * 1000) },
       },
       include: { shop: { include: { owner: { select: { email: true, phone: true } } } } },
-      take: 100,
+      /*
+        SIRALAMA EKLENDI: `take` siniri asildiginda HANGI kayitlarin dusecegi
+        onceden belirsizdi. En cok gecikmis olan en cok ihtiyaci olandir.
+      */
+      orderBy: { checkOutTime: "asc" },
+      take: OVERDUE_SCAN_LIMIT,
     });
+
+    /*
+      SESSIZ KESILME GORUNUR OLDU. Sinir asilirsa kalan rezervasyonlar bu
+      calismada hic islenmiyordu ve bunu soyleyen hicbir sey yoktu.
+    */
+    if (overdue.length === OVERDUE_SCAN_LIMIT) {
+      logger.warn(
+        { limit: OVERDUE_SCAN_LIMIT },
+        "booking_reminders_overdue_limit_reached",
+      );
+    }
 
     for (const booking of overdue) {
       const partnerEmail = booking.shop.owner?.email;
-      if (partnerEmail) {
-        void notificationService.sendEmail(
-          partnerEmail,
-          `BagajPark: Geç teslim — ${booking.shop.name} ⏰`,
-          `Merhaba,\n\nAşağıdaki rezervasyonun check-out saati geçti ancak valiz henüz teslim alınmamış:\n\nRezervasyon Kodu: ${bookingShortCode(booking.id)}\nPlanlanan check-out: ${booking.checkOutTime.toLocaleString("tr-TR")}\n\nLütfen misafir ile iletişime geçin.`,
-          booking.id,
-        ).catch((e) => logger.warn({ err: e, bookingId: booking.id }, "reminder_overdue_email_failed"));
-        results.overdueNotifications++;
-      }
+      if (!partnerEmail) continue;
+
+      const overdueHours =
+        (now.getTime() - booking.checkOutTime.getTime()) / 3_600_000;
+      const alreadySent = await prisma.notificationLog.count({
+        where: {
+          bookingId: booking.id,
+          type: "EMAIL",
+          subject: { startsWith: OVERDUE_NOTICE_SUBJECT_PREFIX },
+        },
+      });
+      if (!shouldSendOverdueNotice(overdueHours, alreadySent)) continue;
+
+      void notificationService.sendEmail(
+        partnerEmail,
+        `${OVERDUE_NOTICE_SUBJECT_PREFIX} — ${booking.shop.name} ⏰`,
+        `Merhaba,\n\nAşağıdaki rezervasyonun check-out saati geçti ancak valiz henüz teslim alınmamış:\n\nRezervasyon Kodu: ${bookingShortCode(booking.id)}\nPlanlanan check-out: ${booking.checkOutTime.toLocaleString("tr-TR")}\n\nLütfen misafir ile iletişime geçin.`,
+        booking.id,
+      ).catch((e) => logger.warn({ err: e, bookingId: booking.id }, "reminder_overdue_email_failed"));
+      results.overdueNotifications++;
     }
 
     logger.info({ results }, "booking_reminders_cron_completed");
