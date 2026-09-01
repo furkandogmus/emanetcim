@@ -359,6 +359,36 @@
     "license": "CC BY-SA 4.0",
     "cityKey": "barcelona"
   },
+  "belgrad-kalemegdan": {
+    "file": "/images/blog/belgrad-kalemegdan.webp",
+    "alt": {
+      "tr": "Kalemegdan Kalesi ve iki nehrin birleştiği nokta",
+      "en": "The Kalemegdan fortress above the confluence of the two rivers"
+    },
+    "caption": {
+      "tr": "Kalemegdan, Belgrad",
+      "en": "Kalemegdan, Belgrade"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Belgrade_Fortress_Kalemegdan-9924.NEF.jpg",
+    "author": "Zcvetkovic",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "belgrad"
+  },
+  "belgrad-knez-mihailova": {
+    "file": "/images/blog/belgrad-knez-mihailova.webp",
+    "alt": {
+      "tr": "Belgrad'da Knez Mihailova yaya caddesi",
+      "en": "The pedestrian Knez Mihailova street in Belgrade"
+    },
+    "caption": {
+      "tr": "Knez Mihailova, Belgrad",
+      "en": "Knez Mihailova, Belgrade"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Knez_Mihailova_street,_Belgrade_(by_Pudelek).JPG",
+    "author": "Pudelek (Marcin Szala)",
+    "license": "CC BY-SA 3.0 rs",
+    "cityKey": "belgrad"
+  },
   "bergama-akropol": {
     "file": "/images/blog/bergama-akropol.webp",
     "alt": {
@@ -2204,6 +2234,36 @@
     "license": "CC BY-SA 3.0",
     "cityKey": "milano"
   },
+  "mostar-carsi": {
+    "file": "/images/blog/mostar-carsi.webp",
+    "alt": {
+      "tr": "Kujundžiluk çarşısında dükkânlar ve yuvarlak nehir taşlarıyla döşeli zemin",
+      "en": "Shops in the Kujundziluk bazaar and its paving of rounded river stones"
+    },
+    "caption": {
+      "tr": "Kujundžiluk çarşısı ve taş zemini",
+      "en": "The Kujundziluk bazaar and its stone paving"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Mostar_-_Kujund%C5%BEiluk_(49033904027).jpg",
+    "author": "Fred Romero from Paris, France",
+    "license": "CC BY 2.0",
+    "cityKey": "mostar"
+  },
+  "mostar-stari-most": {
+    "file": "/images/blog/mostar-stari-most.webp",
+    "alt": {
+      "tr": "Neretva üzerindeki Stari Most ve iki yakadaki eski şehir",
+      "en": "The Stari Most over the Neretva and the old town on both banks"
+    },
+    "caption": {
+      "tr": "Stari Most, Mostar",
+      "en": "The Stari Most, Mostar"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Mostar_Old_Town_Panorama.jpg",
+    "author": "Ramirez HUN",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "mostar"
+  },
   "munih-hauptbahnhof": {
     "file": "/images/blog/munih-hauptbahnhof.webp",
     "alt": {
@@ -2383,6 +2443,36 @@
     "author": "Dietmar Rabich",
     "license": "CC BY-SA 4.0",
     "cityKey": "paris"
+  },
+  "plovdiv-antik-tiyatro": {
+    "file": "/images/blog/plovdiv-antik-tiyatro.webp",
+    "alt": {
+      "tr": "Plovdiv'de Roma dönemi antik tiyatrosu",
+      "en": "The Roman theatre in Plovdiv"
+    },
+    "caption": {
+      "tr": "Antik tiyatro, Plovdiv",
+      "en": "The Roman theatre, Plovdiv"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Antique-theater-plovdiv.jpg",
+    "author": "Edal Anton Lefterov",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "plovdiv"
+  },
+  "plovdiv-eski-sehir": {
+    "file": "/images/blog/plovdiv-eski-sehir.webp",
+    "alt": {
+      "tr": "Plovdiv eski şehrinde dik ve taş döşeli bir sokak",
+      "en": "A steep, stone-paved lane in Plovdiv's old town"
+    },
+    "caption": {
+      "tr": "Plovdiv eski şehri",
+      "en": "Plovdiv old town"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Straat_in_Oud_Plovdiv_2.jpeg",
+    "author": "Jeroen Kransen, Netherlands",
+    "license": "CC BY-SA 2.5",
+    "cityKey": "plovdiv"
   },
   "porto-ribeira": {
     "file": "/images/blog/porto-ribeira.webp",
@@ -2774,6 +2864,36 @@
     "license": "CC BY-SA 3.0",
     "cityKey": "santorini"
   },
+  "saraybosna-bascarsija": {
+    "file": "/images/blog/saraybosna-bascarsija.webp",
+    "alt": {
+      "tr": "Saraybosna'da Baščaršija meydanı ve sebil",
+      "en": "The Bascarsija square in Sarajevo with its fountain"
+    },
+    "caption": {
+      "tr": "Baščaršija, Saraybosna",
+      "en": "Bascarsija, Sarajevo"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Ba%C5%A1%C4%8Dar%C5%A1ija_2006.jpg",
+    "author": "en:User:Dark Apostrophe",
+    "license": "Public domain",
+    "cityKey": "saraybosna"
+  },
+  "saraybosna-vadi": {
+    "file": "/images/blog/saraybosna-vadi.webp",
+    "alt": {
+      "tr": "Trebević'ten Saraybosna'nın dar vadiye yayılmış görüntüsü",
+      "en": "Sarajevo spread through its narrow valley, seen from Trebevic"
+    },
+    "caption": {
+      "tr": "Trebević'ten Saraybosna",
+      "en": "Sarajevo from Trebevic"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Sarajevo_Bascarsija_from_Trebevic.JPG",
+    "author": "Julian Nyča",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "saraybosna"
+  },
   "selanik-aristotelous": {
     "file": "/images/blog/selanik-aristotelous.webp",
     "alt": {
@@ -2894,6 +3014,36 @@
     "license": "CC BY-SA 3.0",
     "cityKey": "side"
   },
+  "sofya-gar": {
+    "file": "/images/blog/sofya-gar.webp",
+    "alt": {
+      "tr": "Sofya Merkez Garı'nın beton cephesi",
+      "en": "The concrete frontage of Sofia Central Station"
+    },
+    "caption": {
+      "tr": "Sofya Merkez Garı",
+      "en": "Sofia Central Station"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Central_Railway_Station_Sofia_2012_PD_02.jpg",
+    "author": "Bin im Garten",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "sofya"
+  },
+  "sofya-nevski": {
+    "file": "/images/blog/sofya-nevski.webp",
+    "alt": {
+      "tr": "Sofya'da Aleksandr Nevski Katedrali'nin kubbeleri",
+      "en": "The domes of the Alexander Nevsky Cathedral in Sofia"
+    },
+    "caption": {
+      "tr": "Aleksandr Nevski Katedrali, Sofya",
+      "en": "The Alexander Nevsky Cathedral, Sofia"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:AlexanderNevskyCathedral-Sofia-6.jpg",
+    "author": "Plamen Agov (user:MrPanyGoff)",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "sofya"
+  },
   "split-diokletian": {
     "file": "/images/blog/split-diokletian.webp",
     "alt": {
@@ -2998,6 +3148,36 @@
     "author": "g",
     "license": "CC BY-SA 4.0",
     "cityKey": "trabzon"
+  },
+  "uskup-carsi": {
+    "file": "/images/blog/uskup-carsi.webp",
+    "alt": {
+      "tr": "Üsküp Eski Çarşı'da dar bir sokak ve dükkânlar",
+      "en": "A narrow lane and shops in Skopje's Old Bazaar"
+    },
+    "caption": {
+      "tr": "Eski Çarşı, Üsküp",
+      "en": "The Old Bazaar, Skopje"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Skopje_OldBazaar.jpg",
+    "author": "Nikkyb",
+    "license": "Public domain",
+    "cityKey": "uskup"
+  },
+  "uskup-tas-kopru": {
+    "file": "/images/blog/uskup-tas-kopru.webp",
+    "alt": {
+      "tr": "Vardar üzerindeki Taş Köprü ve arkasındaki binalar",
+      "en": "The Stone Bridge over the Vardar with the buildings behind it"
+    },
+    "caption": {
+      "tr": "Taş Köprü, Üsküp",
+      "en": "The Stone Bridge, Skopje"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Stone_Bridge_so_Arheolo%C5%A1kiot.jpg",
+    "author": "Prince Roy",
+    "license": "CC BY 2.0",
+    "cityKey": "uskup"
   },
   "valensiya-nord": {
     "file": "/images/blog/valensiya-nord.webp",

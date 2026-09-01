@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| Yazısı olan şehir | **105 / 265** — Türkiye'nin 39 şehri tamamlandı |
+| Yazısı olan şehir | **111 / 265** — Türkiye'nin 39 şehri tamamlandı |
 | Yayına yazma | `npx tsx scripts/blog-city-posts.ts --apply` (kuru çalışma varsayılan) |
 | Denetim | `npx tsx scripts/blog-city-posts.ts --verify` + `npx tsx scripts/blog-images.ts --verify` |
 | Eksik listesi | `npx tsx scripts/blog-city-posts.ts --coverage` |
@@ -63,7 +63,7 @@ alakasız olabilir.
 
 <!-- Aşağısı üretilmiştir: npx tsx scripts/blog-city-posts.ts --list-md -->
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 105/265 sehir -->
+<!-- 111/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -177,12 +177,12 @@ alakasız olabilir.
 | 108 | SK | Bratislava | `bratislava` | 1 | yayında | bratislava-viyanadan-gunubirlik-valiz | bratislava-luggage-storage-day-trip-from-vienna |
 | 109 | RO | București | `bukres` | 2 | yayında | bukres-parlamento-sarayi-kimlik-valiz | bucharest-luggage-storage-palace-of-parliament |
 | 110 | RO | Brașov | `brasov` | 1 | yayında | brasov-strada-sforii-bran-gunubirlik-valiz | brasov-luggage-storage-strada-sforii-bran |
-| 111 | BG | Sofia | `sofya` | 2 | — |  |  |
-| 112 | BG | Plovdiv | `plovdiv` | 1 | — |  |  |
-| 113 | RS | Beograd | `belgrad` | 1 | — |  |  |
-| 114 | BA | Sarajevo | `saraybosna` | 1 | — |  |  |
-| 115 | BA | Mostar | `mostar` | 1 | — |  |  |
-| 116 | MK | Skopje | `uskup` | 1 | — |  |  |
+| 111 | BG | Sofia | `sofya` | 2 | yayında | sofya-sari-parke-tas-serdika-valiz | sofia-luggage-storage-yellow-cobbles |
+| 112 | BG | Plovdiv | `plovdiv` | 1 | yayında | plovdiv-uc-tepe-eski-sehir-valiz | plovdiv-luggage-storage-three-hills |
+| 113 | RS | Beograd | `belgrad` | 1 | yayında | belgrad-gar-tasindi-kalemegdan-valiz | belgrade-luggage-storage-station-moved |
+| 114 | BA | Sarajevo | `saraybosna` | 1 | yayında | saraybosna-dar-vadi-bascarsija-valiz | sarajevo-luggage-storage-valley-bascarsija |
+| 115 | BA | Mostar | `mostar` | 1 | yayında | mostar-stari-most-kaygan-tas-valiz | mostar-luggage-storage-stari-most |
+| 116 | MK | Skopje | `uskup` | 1 | yayında | uskup-eski-carsi-vardar-valiz | skopje-luggage-storage-old-bazaar |
 | 117 | MK | Ohrid | `ohrid` | 1 | — |  |  |
 | 118 | AL | Tiranë | `tiran` | 1 | — |  |  |
 | 119 | ME | Budva | `budva` | 1 | — |  |  |
