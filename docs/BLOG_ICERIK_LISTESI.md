@@ -1,5 +1,5 @@
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 195/265 sehir -->
+<!-- 201/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -198,13 +198,13 @@
 | 193 | IN | Agra | `agra` | 1 | yayında | agra-tac-mahal-canta-kurallari-gunubirlik-valiz | agra-luggage-storage-taj-mahal-rules |
 | 194 | IN | Jaipur | `jaipur` | 1 | yayında | jaipur-amber-kalesi-carsi-altin-ucgen-valiz | jaipur-luggage-storage-golden-triangle |
 | 195 | IN | Mumbai | `mumbai` | 2 | yayında | mumbai-banliyo-treni-valizle-binilmez | mumbai-luggage-storage-local-trains |
-| 196 | IN | Goa | `goa` | 1 | — |  |  |
-| 197 | IN | Varanasi | `varanasi` | 1 | — |  |  |
-| 198 | LK | Kolombo | `kolombo` | 1 | — |  |  |
-| 199 | LK | Kandy | `kandy` | 1 | — |  |  |
-| 200 | MV | Male | `male` | 1 | — |  |  |
+| 196 | IN | Goa | `goa` | 1 | yayında | goa-plajlar-arasi-mesafe-scooter-valiz | goa-luggage-storage-beaches-distance |
+| 197 | IN | Varanasi | `varanasi` | 1 | yayında | varanasi-gali-sokaklari-ghat-basamaklari-valiz | varanasi-luggage-storage-narrow-galis |
+| 198 | LK | Kolombo | `kolombo` | 1 | yayında | kolombo-fort-gari-kandy-ella-treni-valiz | colombo-luggage-storage-fort-station |
+| 199 | LK | Kandy | `kandy` | 1 | yayında | kandy-dis-tapinagi-puja-saatleri-ella-treni-valiz | kandy-luggage-storage-tooth-temple-puja |
+| 200 | MV | Male | `male` | 1 | yayında | male-havalimani-ayri-ada-deniz-ucagi-valiz | male-luggage-storage-airport-island |
 | 201 | UZ | Toshkent | `taskent` | 1 | — |  |  |
-| 202 | UZ | Samarqand | `semerkant` | 1 | — |  |  |
+| 202 | UZ | Samarqand | `semerkant` | 1 | yayında | semerkant-afrosiyob-treni-registan-valiz | samarkand-luggage-storage-afrosiyob-train |
 | 203 | UZ | Buxoro | `buhara` | 1 | — |  |  |
 | 204 | KZ | Almaty | `almati` | 1 | — |  |  |
 | 205 | KG | Bishkek | `biskek` | 1 | — |  |  |

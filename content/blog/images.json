@@ -1949,6 +1949,36 @@
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Venetian_Fortress_of_Koules_in_Heraklion,_Crete_003.jpg"
   },
+  "goa-panaji": {
+    "alt": {
+      "en": "The coloured houses of the Latin Quarter in Panaji",
+      "tr": "Panaji'de Latin Mahallesi'nin renkli evleri"
+    },
+    "author": "FrancesGoa",
+    "caption": {
+      "en": "The Latin Quarter, Panaji",
+      "tr": "Latin Mahallesi, Panaji"
+    },
+    "cityKey": "goa",
+    "file": "/images/blog/goa-panaji.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Panjim,_Goa_and_its_Latin_Quarter._December_2022._02.jpg"
+  },
+  "goa-plaj": {
+    "alt": {
+      "en": "Palolem beach in Goa with boats along the shore",
+      "tr": "Goa'da Palolem plajı ve kıyıdaki tekneler"
+    },
+    "author": "Satyajit Nayak",
+    "caption": {
+      "en": "Palolem beach, Goa",
+      "tr": "Palolem plajı, Goa"
+    },
+    "cityKey": "goa",
+    "file": "/images/blog/goa-plaj.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Palolem_beach.jpg"
+  },
   "granada-albaicin": {
     "alt": {
       "en": "The Albaicin quarter and its white houses on the hillside",
@@ -2444,6 +2474,36 @@
     "license": "CC BY-SA 2.0",
     "source": "https://commons.wikimedia.org/wiki/File:All_Gizah_Pyramids.jpg"
   },
+  "kandy-gol": {
+    "alt": {
+      "en": "Kandy Lake and the hills around it",
+      "tr": "Kandy Gölü ve çevresindeki tepeler"
+    },
+    "author": "Ji-Elle",
+    "caption": {
+      "en": "Kandy Lake",
+      "tr": "Kandy Gölü"
+    },
+    "cityKey": "kandy",
+    "file": "/images/blog/kandy-gol.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Kandy_Lake-Sri_Lanka_(5).jpg"
+  },
+  "kandy-tapinak": {
+    "alt": {
+      "en": "The Temple of the Tooth in Kandy",
+      "tr": "Kandy'de Diş Tapınağı"
+    },
+    "author": "Vyacheslav Argenberg",
+    "caption": {
+      "en": "The Temple of the Tooth, Kandy",
+      "tr": "Diş Tapınağı, Kandy"
+    },
+    "cityKey": "kandy",
+    "file": "/images/blog/kandy-tapinak.webp",
+    "license": "CC BY 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Sri_Lanka,_Kandy,_Temple_of_the_Tooth,_Sri_Dalada_Maligawa.jpg"
+  },
   "kapadokya-goreme": {
     "alt": {
       "en": "Fairy chimneys and rock-cut rooms in the Goreme Valley",
@@ -2713,6 +2773,36 @@
     "file": "/images/blog/koln-dom-yakin.webp",
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:K%C3%B6lner_Dom_-_Nordportal.jpg"
+  },
+  "kolombo-fort-gar": {
+    "alt": {
+      "en": "A train waiting at Colombo Fort station",
+      "tr": "Kolombo Fort istasyonunda bekleyen tren"
+    },
+    "author": "calflier001",
+    "caption": {
+      "en": "Fort station, Colombo",
+      "tr": "Fort istasyonu, Kolombo"
+    },
+    "cityKey": "kolombo",
+    "file": "/images/blog/kolombo-fort-gar.webp",
+    "license": "CC BY-SA 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:CLASS_M6_LOCO_HAULED_TRAIN_OF_SRI_LANKAN_RAILWAYS_AT_FORT_STATION_COLOMBO_SRI_LANKA_JAN_2013_(8584353700).jpg"
+  },
+  "kolombo-galle-face": {
+    "alt": {
+      "en": "The Galle Face seafront in Colombo",
+      "tr": "Kolombo'da Galle Face sahil şeridi"
+    },
+    "author": "Mayakaru at English Wikipedia",
+    "caption": {
+      "en": "Galle Face, Colombo",
+      "tr": "Galle Face, Kolombo"
+    },
+    "cityKey": "kolombo",
+    "file": "/images/blog/kolombo-galle-face.webp",
+    "license": "CC BY 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Colombo_-_Galle_Face.jpg"
   },
   "konya-manzara": {
     "alt": {
@@ -3268,6 +3358,36 @@
     "file": "/images/blog/malaga-larios.webp",
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Calle_Larios_1,_M%C3%A1laga_01.jpg"
+  },
+  "male-deniz-ucagi": {
+    "alt": {
+      "en": "A seaplane on the water at Velana airport",
+      "tr": "Velana Havalimanı'nda su üstünde bekleyen deniz uçağı"
+    },
+    "author": "Martin Falbisoner",
+    "caption": {
+      "en": "A seaplane at Velana airport",
+      "tr": "Deniz uçağı, Velana Havalimanı"
+    },
+    "cityKey": "male",
+    "file": "/images/blog/male-deniz-ucagi.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:TMA_DHC-6_Twin_Otter_at_Velana_International_Airport,_May_2017.jpg"
+  },
+  "male-sehir": {
+    "alt": {
+      "en": "The city packed onto the island of Malé",
+      "tr": "Malé adasının üzerine sıkışmış şehri"
+    },
+    "author": "Shahee Ilyas",
+    "caption": {
+      "en": "Malé",
+      "tr": "Malé"
+    },
+    "cityKey": "male",
+    "file": "/images/blog/male-sehir.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Male-total.jpg"
   },
   "mallorca-born": {
     "alt": {
@@ -5009,6 +5129,36 @@
     "license": "CC BY 2.0",
     "source": "https://commons.wikimedia.org/wiki/File:Sirinceroad.jpg"
   },
+  "semerkant-bibi-hanim": {
+    "alt": {
+      "en": "The Bibi-Khanym Mosque in Samarkand",
+      "tr": "Semerkant'ta Bibi Hanım Camii"
+    },
+    "author": "Arian Zwegers",
+    "caption": {
+      "en": "The Bibi-Khanym Mosque, Samarkand",
+      "tr": "Bibi Hanım Camii, Semerkant"
+    },
+    "cityKey": "semerkant",
+    "file": "/images/blog/semerkant-bibi-hanim.webp",
+    "license": "CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Samarkand,_Bibi-Khanym_Mosque_(6238617046).jpg"
+  },
+  "semerkant-registan": {
+    "alt": {
+      "en": "The Registan square and its madrasas in Samarkand",
+      "tr": "Semerkant'ta Registan meydanı ve medreseleri"
+    },
+    "author": "Gustavo Jeronimo from Aranjuez, Spain",
+    "caption": {
+      "en": "The Registan, Samarkand",
+      "tr": "Registan, Semerkant"
+    },
+    "cityKey": "semerkant",
+    "file": "/images/blog/semerkant-registan.webp",
+    "license": "CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Registan_-_Gusjer.jpg"
+  },
   "seul-gar": {
     "alt": {
       "en": "The Seoul Station building",
@@ -5653,6 +5803,36 @@
     "file": "/images/blog/van-kale.webp",
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Van_Fortress_From_Northwest.JPG"
+  },
+  "varanasi-ganj": {
+    "alt": {
+      "en": "Boats on the Ganges with the ghats behind",
+      "tr": "Ganj Nehri üzerinde kayıklar ve arkada ghatlar"
+    },
+    "author": "Vyacheslav Argenberg",
+    "caption": {
+      "en": "The Ganges and its boats, Varanasi",
+      "tr": "Ganj Nehri ve kayıklar, Varanasi"
+    },
+    "cityKey": "varanasi",
+    "file": "/images/blog/varanasi-ganj.webp",
+    "license": "CC BY 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Varanasi,_India,_Boats_and_river_Ganges_under_the_sun.jpg"
+  },
+  "varanasi-ghat": {
+    "file": "/images/blog/varanasi-ghat.webp",
+    "alt": {
+      "tr": "Varanasi'de ghatların basamakları ve nehir kıyısındaki yaşam",
+      "en": "The steps of the ghats and riverside life in Varanasi"
+    },
+    "caption": {
+      "tr": "Ghatlar, Varanasi",
+      "en": "The ghats, Varanasi"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:City_Scene_along_Ghats_-_Varanasi_-_Uttar_Pradesh_-_India_(12499103155).jpg",
+    "author": "Adam Jones from Kelowna, BC, Canada",
+    "license": "CC BY-SA 2.0",
+    "cityKey": "varanasi"
   },
   "varsova-centralna": {
     "alt": {
