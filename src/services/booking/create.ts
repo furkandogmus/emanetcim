@@ -392,8 +392,48 @@ export async function assertCapacityTx(
         }
       ],
       AND: [
-        { checkInTime: { lt: checkOutTime } },
-        { checkOutTime: { gt: checkInTime } },
+        {
+          /*
+            ORTUSME -- ama RAFTA DURAN VALIZ ISTISNASI ile.
+
+            NEDEN (2026-09-01'de olculdu): kosul `checkOutTime > yeniCheckIn`
+            istiyordu. Cikis saati GECMIS ama hala `CHECKED_IN` olan bir
+            rezervasyon -- yani valiz fiziksel olarak rafta duruyor ama teslim
+            alinmamis -- bu kosulu SAGLAMIYOR ve kapasiteden DUSULMUYORDU.
+
+            Gelistirme veritabaninda olculdu: Galata dukkani, kapasite 50,
+            sayilan 23 valiz, GORUNMEYEN 3 valiz. Yani rafta 26 valiz varken
+            sistem 23 saniyor ve 27 valiz daha kabul etmeye hazir -- oysa yalnizca
+            24 yer var.
+
+            Uretimde daha agir: `OverdueBookingService` basligindaki olcume gore
+            19 rezervasyonun 18'i cikis saatini gecmis halde ACIKTI ve uc musterinin
+            bavulu aylardir "dukkanda" gorunuyordu. O tabloda gorunmeyen valizler
+            kapasitenin COGUNLUGU olur ve esnaf tezgahta, gercek musteri
+            karsisinda yer bulamaz.
+
+            KURAL: teslim alinmis bir valiz, GERCEKTEN teslim edilene kadar yer
+            kaplar. Cikis saati bir PLANDIR, bir olgu degil.
+
+            TAKASI ACIK: aylarca alinmayan bir valiz kapasiteyi kalici olarak
+            dusurur. Bu DOGRUDUR -- raf gercekten dolu. Yanlis olan, bos
+            gostermekti; esnaf icin tezgahta yer bulamamak, kacirilan bir
+            rezervasyondan kotudur. Esnaf zaten gecikme uyarisi aliyor
+            (`booking-reminders`) ve valizi teslim edince yer aciliyor.
+          */
+          OR: [
+            { checkOutTime: { gt: checkInTime } },
+            { AND: [{ status: 'CHECKED_IN' }, { checkOutTime: { lte: new Date() } }] },
+          ],
+        },
+        {
+          /*
+            Pencere baslangici kosulu: rafta duran valizin `checkInTime`i zaten
+            gecmiste oldugu icin bu kosulu her zaman saglar; normal
+            rezervasyonlar icinse ortusmenin diger yarisidir.
+          */
+          checkInTime: { lt: checkOutTime },
+        },
       ],
     },
     select: { bagCountS: true, bagCountM: true, bagCountXl: true },

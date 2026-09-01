@@ -177,10 +177,18 @@ describe("kapasite: fiziksel sınır her iki yolda da tutar", () => {
 
     await service.createInitialBooking(input(2, ["slot-1"]) as any);
 
+    /*
+      NIYET: kullanilan PENCERE dogru mu -- yani `snapped*` degerleri mi
+      sorgulaniyor. Onceki hal `where.AND`in TAM SEKLINI dogruluyordu ve bu
+      testi asiri hassas yapiyordu: 2026-09-01'de ortusme kosuluna "rafta duran
+      valiz" dali eklenince (cikis saati gecmis `CHECKED_IN` rezervasyonlar
+      kapasiteden dusulmuyordu) sekil degisti ve test, DAVRANIS dogru oldugu
+      halde kirildi. Artik degerler dogrulaniyor, dizilim degil.
+    */
     const capacityQuery = mockTx.booking.findMany.mock.calls[0][0];
-    expect(capacityQuery.where.AND).toEqual([
-      { checkInTime: { lt: snappedOut } },
-      { checkOutTime: { gt: snappedIn } },
-    ]);
+    const and = capacityQuery.where.AND;
+    expect(and).toContainEqual({ checkInTime: { lt: snappedOut } });
+    const overlap = and.find((c: { OR?: unknown[] }) => Array.isArray(c.OR));
+    expect(overlap.OR).toContainEqual({ checkOutTime: { gt: snappedIn } });
   });
 });

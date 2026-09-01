@@ -148,6 +148,45 @@ UNUTMANIN MÜMKÜN OLMASIYDI.
 - Gizlilik metni paylaşımı **söylüyor** (`Privacy.a2`: "dükkan sahipleriyle
   iletişimi yönetmek", `Privacy.a4`: iş ortakları).
 
+## 2026-09-01 — rafta duran valizler kapasiteden düşülmüyordu (esnaf fazla rezervasyon alıyordu)
+
+`assertCapacityTx` örtüşmeyi `checkOutTime > yeniCheckIn` ile arıyordu. Çıkış
+saati **geçmiş** ama hâlâ `CHECKED_IN` olan bir rezervasyon — yani valiz
+fiziksel olarak rafta duruyor ama teslim alınmamış — bu koşulu sağlamıyor ve
+**kapasiteden düşülmüyordu**.
+
+Geliştirme veritabanında ölçüldü (Galata, kapasite 50):
+
+| | valiz |
+|---|---|
+| Sistemin saydığı | 23 |
+| **Rafta duran ama görünmeyen** | **3** |
+| Gerçek doluluk | 26 |
+
+Yani sistem 27 valiz daha kabul etmeye hazırdı; oysa yalnızca 24 yer vardı.
+Çalıştırılarak doğrulandı: düzeltmeden sonra sınır 24'e indi.
+
+**Üretimde çok daha ağır.** `OverdueBookingService` başlığındaki ölçüme göre 19
+rezervasyonun 18'i çıkış saatini geçmiş hâlde AÇIKTI ve üç müşterinin bavulu
+aylardır "dükkanda" görünüyordu. O tabloda görünmeyen valizler kapasitenin
+**çoğunluğu** olur — ve sonucunu esnaf tezgahta, gerçek müşteri karşısında yer
+bulamayarak öder.
+
+**Kural:** teslim alınmış bir valiz, GERÇEKTEN teslim edilene kadar yer kaplar.
+Çıkış saati bir PLANDIR, bir olgu değil.
+
+**Takası açık:** aylarca alınmayan bir valiz kapasiteyi kalıcı olarak düşürür.
+Bu doğrudur — raf gerçekten dolu. Yanlış olan, boş göstermekti. Esnaf için
+tezgahta yer bulamamak, kaçırılan bir rezervasyondan kötüdür; ve esnaf zaten
+gecikme uyarısı alıyor (`booking-reminders`), valizi teslim edince yer açılıyor.
+
+### Aşırı hassas bir test kırıldı
+
+`BookingCapacityPaths` testi `where.AND`in TAM ŞEKLİNİ doğruluyordu. Örtüşme
+koşuluna yeni dal eklenince şekil değişti ve test, **davranış doğru olduğu
+hâlde** kırıldı. Testin niyeti hangi PENCERENİN kullanıldığıydı; artık değerler
+doğrulanıyor, dizilim değil.
+
 ## 2026-09-01 — valiz sayısı düzeltmesi MOBİLDE vardı, WEBDE hiç yoktu
 
 Tezgahtaki en sık sürtünme: misafir 3 valiz için rezervasyon yapıp 4'le geliyor.
