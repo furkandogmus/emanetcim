@@ -9,7 +9,7 @@ Bu dosya, projede geliştirme, hata ayıklama (debugging) veya kod analizi yapac
 **Emanetçi (BagajPark)**, seyahat eden gezginlerin (misafirlerin) bagajlarını güvenli yerel dükkanlara (esnaflara / iş ortaklarına) emanet etmesini sağlayan bir **luggage storage marketplace (bagaj depolama pazar yeri)** uygulamasıdır.
 
 *   **Uçtan Uca Süreç:** Misafir Haritadan Arayıp Öder (`PAID`) ➡️ Esnafa Gelir ➡️ Esnaf Valize Plastik Mühür Takıp Fotoğraf Çekerek Teslim Alır (`CHECKED_IN`) ➡️ Misafir Almaya Gelir ➡️ Esnaf Mührü Kontrol Edip Teslim Eder (`COMPLETED`) ➡️ Esnafın Hakedişi Cüzdanına Eklenir.
-*   **Temel Limitler:** Standart sigorta teminatı valiz başına **5.000 TL**'dir. Fiyatlandırma ve iptal kesintisi gibi kurallar `PlatformSettings` tablosunda dinamik olarak tutulur.
+*   **Temel Limitler:** Fiyatlandırma ve iptal kesintisi gibi kurallar `PlatformSettings` tablosunda dinamik olarak tutulur. **Valiz başına güvence tutarını buraya YAZMAYIN:** bu belge onu `5.000 TL` olarak sabitliyordu, oysa arayüz `10.000 TL` diyor — rakam bir noktada yükseltilmiş ve belge geride kalmıştı. Güncel değer çeviri dosyalarındadır (`Terms.a2`, `Guest.trustInsuranceBody`) ve tutarlılığı `src/__tests__/coverage-amount-consistency.test.ts` mandalıyla korunur.
 
 ---
 

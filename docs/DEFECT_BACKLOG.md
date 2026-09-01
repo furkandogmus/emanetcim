@@ -10,6 +10,60 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-09-01 — güvence tutarının tek kaynağı yok; Farsça Şartlar farklı rakam söylüyordu
+
+Valiz başına güvence tutarı kod tabanında **hiçbir ayarda tutulmuyor**.
+`PlatformSettings` yalnızca `insuranceFeeTry`yi (alınan ücret; üretimde **0**,
+yani ödemede sigorta satırı hiç çıkmıyor) taşıyor. TEMİNAT rakamı altı çeviri
+dosyasına elle, toplam 60 yere yazılmış.
+
+Tutar bir noktada 5.000'den 10.000'e çıkarılmış ve göç **yarım kalmış**:
+
+| Dil | 10.000 | 5.000 |
+|---|---|---|
+| tr / en / de / fr / ja | 10 yerde | — |
+| **fa** | 8 yerde | **2 yerde** |
+
+İkisinden biri `Terms.a2` — yani **Kullanım Şartları'nın sorumluluk maddesi**.
+Farsça okuyan bir misafire hukuki belgede 5.000, SSS'te 10.000 yazıyordu.
+
+**Düzeltildi:** iki Farsça satır 10.000'e çekildi ve
+`src/__tests__/coverage-amount-consistency.test.ts` mandalı eklendi — teminat
+rakamının geçtiği beş anahtarın bütün dillerde aynı tutarı söylemesini şart
+koşuyor. `locales.test.ts` bunu yakalayamıyordu: o anahtarın VAR olup
+olmadığına bakar, DEĞERİN tutarlılığına değil.
+
+Tarama tuzağı: ASCII rakam araması `fa`yı "yalnızca 1 yerde geçiyor" gösterdi,
+çünkü Farsça Doğu Arap rakamı kullanıyor (۱۰٬۰۰۰). `Number("۵")` JS'te `NaN`
+döner; mandalın ilk hâli bu yüzden hatayı yanlış yerde gösterdi. Dönüşüm artık
+Unicode blok başlangıcından çıkarılarak yapılıyor.
+
+### DÜZELTİLMEYENLER — karar gerektiriyor
+
+1. **Sorumluluk maddesi tek cümle.** `Terms.a2`nin tamamı "Maksimum 10.000 TL
+   sigorta." Oysa `FAQ.a5` "kapsam, istisnalar ve başvuru **Şartlar'da**" diyor
+   — işaret edilen yer boş. Kimin, hangi şartla, hangi istisnalarla sorumlu
+   olduğu hiçbir yerde yazmıyor. Bu hukuki metin yazımıdır, kod değil.
+
+2. **Esnafa sorumluluktan hiç söz edilmiyor.** `Partner`, `Partners` ve
+   `MarketingBecomePartner` namespace'lerinde sigorta/teminat/sorumluluk/zarar
+   geçmiyor (tarandı). Yabancıların valizini fiziksel olarak teslim alan bir
+   esnafa, kayıp veya hasar durumunda kimin ödeyeceği **hiç söylenmiyor** — oysa
+   esnaf için bu, komisyon oranından daha önemli bir sorudur.
+
+3. **"Sigorta" terimi.** Metinlerin çoğu düz "sigortalıdır" diyor
+   (`About.value1Desc`, `Guest.insured`, `Guest.checkoutInsuranceDetailBody`:
+   "anlaşmalı kurumlarca ... sigortalıdır"), ama `Guest.trustInsuranceBody`
+   açıkça **"Bağımsız perakende poliçe değildir"** diyor. İkisi aynı misafire
+   gösteriliyor; biri yanlış. Hangisinin doğru olduğu bir SÖZLEŞME olgusudur
+   (anlaşmalı bir sigortacı var mı?) ve kodda görünmez — bu yüzden burada
+   **düzeltilmedi**. Türkiye'de sigortacılık 5684 sayılı Kanun ve SEDDK
+   düzenlemesi altındadır; terimin kullanımı hukuk danışmanına sorulmalıdır.
+
+4. **`FAQ.q5` olmayan bir ödeme satırını anlatıyor.** "Ödemedeki sigorta satırı
+   neyi kapsar?" diyor ama `insuranceFeeTry` = 0 ve `booking-server-price.ts:68`
+   her zaman 0 üretiyor — ödemede öyle bir satır yok.
+
 ## 2026-09-01 — dükkan fotoğrafının HİÇBİR yazma yolu yok (kod tabanı tarandı)
 
 Pazar yerinde bir dükkanın vitrin fotoğrafı, misafirin rezervasyon kararını
