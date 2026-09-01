@@ -98,7 +98,19 @@ export default async function CityLuggageStoragePage({
   const q = encodeURIComponent(t(`${slug}.searchQuery`));
   const searchHref = `/search?q=${q}&lat=${city.lat}&lng=${city.lng}`;
   const cityData = t.raw(`${slug}`) as Record<string, unknown> | undefined;
-  const sections = (cityData?.sections ?? []) as Array<{ title: string; body: string; keywords?: string }>;
+  /*
+    `keywords` ALANI KALDIRILDI (2026-09-01).
+
+    Her bolumun altina `text-gray-300` ile (beyaz uzerinde neredeyse gorunmez)
+    `#Sultanahmet valiz emanet, Taksim bagaj depolama, ...` diye virgullu bir
+    anahtar kelime listesi basiliyordu. Bu, Google'in spam politikasindaki iki
+    maddenin ayni anda karsiligi: anahtar kelime doldurma ve gizli metin.
+    Ziyaretciye hicbir sey anlatmiyor, yalnizca arama motoruna yaziliyordu.
+
+    Kelime hedeflemesi artik metnin KENDISINDE: basliklar, giris ve bolum
+    govdeleri gercekten "emanetci", "otogar", "Kizilay" diyor.
+  */
+  const sections = (cityData?.sections ?? []) as Array<{ title: string; body: string }>;
   const tips = (cityData?.tips ?? []) as string[];
   const nearbyPlaces = (cityData?.nearbyPlaces ?? []) as string[];
 
@@ -214,12 +226,12 @@ export default async function CityLuggageStoragePage({
             {sections.map((section, idx) => (
               <section key={idx} className="rounded-2xl border border-gray-100 bg-white p-6">
                 <h2 className="text-lg font-black text-gray-900">{section.title}</h2>
-                <p className="mt-3 text-sm leading-relaxed text-gray-600">{section.body}</p>
-                {section.keywords && (
-                  <p className="mt-3 id-eyebrow text-gray-300">
-                    #{section.keywords}
+                {/* Bos satir paragraf ayirir; govde tek <p> icine sikistirilmaz. */}
+                {section.body.split(/\n\s*\n/).map((para, pIdx) => (
+                  <p key={pIdx} className="mt-3 text-sm leading-relaxed text-gray-600">
+                    {para}
                   </p>
-                )}
+                ))}
               </section>
             ))}
           </div>

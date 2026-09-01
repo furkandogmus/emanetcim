@@ -32,7 +32,6 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const base = getSiteBaseUrl();
-  const t = await getTranslations({ locale, namespace: "Guest" });
   const tHome = await getTranslations({ locale, namespace: "Home" });
   /**
    * SEO başlığı 14 dilde. Eskiden `locale === "tr" ? ... : ...` idi, yani ana sayfa
@@ -41,7 +40,21 @@ export async function generateMetadata({
    * için bu doğrudan görünürlük kaybı.
    */
   const title = tHome("seoTitle");
-  const description = t("heroSubtitle");
+  /*
+    ACIKLAMA `SEO.description`TAN, `Guest.heroSubtitle`TEN DEGIL.
+
+    `heroSubtitle` ana sayfada GORUNEN kahraman metni: "Dunyanin dort bir
+    yaninda valiz emanet noktalari." -- 48 karakter. Meta aciklamasi olarak da
+    kullanilinca sitenin en cok paylasilan sayfasi arama sonucunda yarim satir
+    kaliyordu, oysa `layout.tsx` zaten 230 karakterlik dolu bir aciklama
+    tasiyor ve ana sayfa onu EZIYORDU.
+
+    Ikisi ayni sey degil: kahraman metni kisa olmali, meta aciklamasi ise
+    aramada goruneni yazar. Gorunen kopyaya dokunmadan kaynagi degistirmek
+    yeterli.
+  */
+  const tSeo = await getTranslations({ locale, namespace: "SEO" });
+  const description = tSeo("description");
   /*
     MARKA EKI ELLE: `[locale]/layout.tsx` icinde `title.template` = "%s |
     BagajPark" var, ama Next'te bu sablon AYNI SEGMENTTEKI `page.tsx`e
