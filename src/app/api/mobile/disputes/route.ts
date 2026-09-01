@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
 import { requireMobileUser } from "@/lib/mobile-auth";
-import prisma from "@/lib/db";
+import { disputeService } from "@/services/DisputeService";
 
 const disputeSchema = z.object({
   bookingId: z.string().min(1),
@@ -22,32 +22,30 @@ export async function POST(req: NextRequest) {
 
   const { bookingId, reason, description } = parsed.data;
 
-  const booking = await prisma.booking.findUnique({
-    where: { id: bookingId },
-    select: { id: true, guestId: true, status: true },
+  /*
+    GOVDE `DisputeService`TE (2026-09-01). Burasi yalnizca `dispute.create`
+    yapiyordu: rezervasyon zaman cizelgesine `DISPUTED` izi DUSMUYOR ve
+    ADMINLERE HIC BILDIRIM GITMIYORDU. Yani mobil uygulamadan acilan bir HASAR
+    ya da HIRSIZLIK sikayeti, biri /admin/disputes sayfasini acana kadar
+    veritabaninda sessizce bekliyordu.
+  */
+  const result = await disputeService.create({
+    bookingId,
+    guestId: auth.user.id,
+    reason,
+    description,
   });
-
-  if (!booking) return NextResponse.json({ error: "not_found" }, { status: 404 });
-  if (booking.guestId !== auth.user.id) return NextResponse.json({ error: "forbidden" }, { status: 403 });
-  if (booking.status !== "CHECKED_IN" && booking.status !== "CHECKED_OUT") {
-    return NextResponse.json({ error: "booking_not_ready" }, { status: 400 });
+  if (!result.ok) {
+    const STATUS = {
+      not_found: 404,
+      not_owner: 403,
+      booking_not_ready: 400,
+      duplicate: 409,
+    } as const;
+    return NextResponse.json(
+      { error: result.reason === "duplicate" ? "duplicate_dispute" : result.reason },
+      { status: STATUS[result.reason] },
+    );
   }
-
-  try {
-    const dispute = await prisma.dispute.create({
-      data: {
-        bookingId,
-        reason,
-        description,
-        status: "OPEN",
-      },
-    });
-    return NextResponse.json({ success: true, id: dispute.id });
-  } catch (e: unknown) {
-    const err = e as { code?: string };
-    if (err.code === "P2002") {
-      return NextResponse.json({ error: "duplicate_dispute" }, { status: 409 });
-    }
-    return NextResponse.json({ error: "server_error" }, { status: 500 });
-  }
+  return NextResponse.json({ success: true, id: result.id });
 }

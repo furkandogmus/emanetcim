@@ -92,7 +92,11 @@ const CEILINGS: Record<string, number> = {
   campaign: 4,
   contactMessage: 9,
   contactReply: 1,
-  dispute: 3,
+  /*
+    3 -> 1 (2026-09-01): uyusmazlik ACMA govdesi `DisputeService`e tasindi. Mobil
+    kopya yalnizca kaydi olusturuyor, ize ve ADMIN BILDIRIMINE hic dokunmuyordu.
+  */
+  dispute: 1,
   featureFlag: 1,
   jobRun: 2,
   mobilePushToken: 2,
@@ -122,7 +126,7 @@ const CEILINGS: Record<string, number> = {
 */
 
 /** Toplam tavan — yeni bir MODELİN sessizce eklenmesini de yakalar. */
-const TOTAL_CEILING = 68;
+const TOTAL_CEILING = 66;
 
 /**
  * Yorumlar ayıklanır: bu dosyaların çoğunda "eskiden burada ham

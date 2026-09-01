@@ -10,6 +10,51 @@
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
 
+## 2026-09-01 — mobilden açılan HIRSIZLIK/HASAR şikâyeti kimseye haber vermiyordu
+
+Uyuşmazlık açma iki taşıyıcıda ayrı yazılmıştı. Mobil uç
+(`api/mobile/disputes`) yalnızca `prisma.dispute.create` yapıyordu; web
+action'ının yaptığı **iki şeyi birden** atlıyordu:
+
+- `bookingEventService.record({ event: "DISPUTED" })` — rezervasyonun zaman
+  çizelgesinde hiçbir iz kalmıyordu
+- `notificationService.notifyAdminsForDispute(...)` — **hiç kimseye haber
+  gitmiyordu**
+
+Yani mobil uygulamadan açılan bir **hasar veya hırsızlık** şikâyeti, biri
+`/admin/disputes` sayfasını açana kadar veritabanında sessizce bekliyordu. Bir
+valiz emaneti platformunda bundan ağır bir operasyonel kusur azdır.
+
+CLAUDE.md'nin uyardığı sınıfın aynısı: *"mobil 'reddet' iadeyi ve slot
+temizliğini atlıyordu, mobil 'teslim aldım' mühürleri hiç atamıyordu."*
+
+**Düzeltildi:** gövde `DisputeService.create`te; iki taşıyıcı da onu çağırıyor.
+Sahiplik, durum ve tekrar kontrolleri tek yerde; `not_found` ile `not_owner`
+ayrı dönüyor (404 / 403). Yarışta `P2002` de `duplicate`a düşüyor. İz ve
+bildirim ateşle-unut: bildirim sağlayıcısı düşerse misafirin şikâyeti
+kaybolmuyor.
+
+Yan bulgu: mevcut `DisputeActions` testinde `prisma.dispute.create` mock'u
+`undefined` dönüyordu — Prisma her zaman oluşturulan satırı döner. Mock
+gerçekçi değildi; gövde taşınıp `id` döndürülmeye başlayınca ortaya çıktı.
+
+### Düzeltilmeyen — karar gerektiriyor
+
+**Esnaf uyuşmazlığı HİÇ GÖRMÜYOR.** `Dispute` modelinde esnaf için bir alan yok
+(ne yanıt, ne bildirim izi); `src/app/[locale]/partner`, `src/components/partner`
+ve `src/app/api/mobile/partner` altında `Dispute` geçen tek dosya yok. Yani
+hakkında hasar/hırsızlık şikâyeti açılan esnaf:
+
+- şikâyetten haberdar edilmiyor,
+- görüşünü bildiremiyor,
+- ve `2026-09-01 — mühür KANIT FOTOĞRAFI` maddesi gereği elinde kanıt da yok.
+
+Esnafa şikâyeti bildirmenin doğru olup olmadığı bir **ürün/hukuk kararıdır**
+(platform önce incelemek isteyebilir), bu yüzden tek taraflı eklenmedi. Ama
+`2026-09-01 — güvence tutarı` maddesindeki "esnafa sorumluluktan hiç söz
+edilmiyor" bulgusuyla birleşince tablo şu: **esnaf, sözleşmesiz, kanıtsız ve
+haberi olmadan yargılanıyor.**
+
 ## 2026-09-01 — hesap anonimleştirmesi mobil cihaz token'ını geride bırakıyordu (KVKK silme hakkı)
 
 Hesap anonimleştirme yolu (`account-privacy.ts` ve mobil `account/delete`) altı

@@ -2,10 +2,8 @@
 
 import prisma from "@/lib/db";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
-import { notificationService } from "@/services/NotificationService";
-import { bookingEventService } from "@/services/BookingEventService";
+import { disputeService } from "@/services/DisputeService";
 import { z } from "zod";
-import logger from "@/lib/logger";
 import { requireAdmin, requireUser } from "@/lib/action-auth";
 
 const disputeStatusSchema = z.enum([
@@ -23,50 +21,28 @@ export async function createDisputeAction(input: {
   const auth = await requireUser();
   if (!auth.ok) return { success: false as const, error: auth.error };
 
-  const booking = await prisma.booking.findUnique({ where: { id: input.bookingId } });
-  if (!booking || booking.guestId !== auth.actor.id) {
-    return { success: false as const, error: "Errors.unauthorized" };
-  }
-
-  if (booking.status !== "CHECKED_IN" && booking.status !== "CHECKED_OUT") {
-    return {
-      success: false as const,
-      error: "Errors.disputeNotReady",
-    };
-  }
-
-  const existing = await prisma.dispute.findUnique({ where: { bookingId: input.bookingId } });
-  if (existing) {
-    return { success: false as const, error: "Errors.duplicateDispute" };
-  }
-
-  await prisma.dispute.create({
-    data: {
-      bookingId: input.bookingId,
-      reason: input.reason,
-      description: input.description,
-      status: "OPEN",
-    },
-  });
-
-  void bookingEventService.record({
+  /*
+    GOVDE `DisputeService`TE. Ayni is mobil ucta da yaziliydi ve orada IKI SEY
+    birden atlaniyordu: rezervasyon zaman cizelgesine `DISPUTED` izi ve
+    ADMINLERE BILDIRIM. Yani mobilden acilan bir hasar/hirsizlik sikayeti
+    kimseye haber vermiyordu. Burada kalan tek is oturum cozumu, hata anahtari
+    eslemesi ve `revalidate`.
+  */
+  const result = await disputeService.create({
     bookingId: input.bookingId,
-    event: "DISPUTED",
-    actorId: auth.actor.id,
-    actorRole: "GUEST",
-    metadata: { reason: input.reason, description: input.description },
-  }).catch((err) =>
-    logger.error({ err, bookingId: input.bookingId }, "booking_event_disputed_failed"),
-  );
-
-  void notificationService
-    .notifyAdminsForDispute({
-      bookingId: input.bookingId,
-      reason: input.reason,
-    })
-    .catch((err) =>
-      logger.error({ err, bookingId: input.bookingId }, "notify_admins_dispute_failed"),
-    );
+    guestId: auth.actor.id,
+    reason: input.reason,
+    description: input.description,
+  });
+  if (!result.ok) {
+    const ERROR_KEYS = {
+      not_found: "Errors.unauthorized",
+      not_owner: "Errors.unauthorized",
+      booking_not_ready: "Errors.disputeNotReady",
+      duplicate: "Errors.duplicateDispute",
+    } as const;
+    return { success: false as const, error: ERROR_KEYS[result.reason] };
+  }
 
   revalidatePathAllLocales("/bookings");
   revalidatePathAllLocales("/admin");

@@ -83,6 +83,13 @@ describe("Dispute Actions", () => {
         status: "CHECKED_IN",
       });
       mockPrisma.dispute.findUnique.mockResolvedValue(null);
+      /*
+        Prisma `create` HER ZAMAN olusturulan satiri doner; mock bunu
+        yapmiyordu ve `undefined` donuyordu. Govde `DisputeService`e tasinip
+        olusan kaydin `id`si dondurulmeye baslayinca ortaya cikti -- yani mock
+        gercekci degildi, davranis dogruydu.
+      */
+      mockPrisma.dispute.create.mockResolvedValue({ id: "d-new" });
 
       const result = await createDisputeAction({
         bookingId: "b1",
