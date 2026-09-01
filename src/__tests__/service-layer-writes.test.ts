@@ -108,7 +108,12 @@ const CEILINGS: Record<string, number> = {
     sekilde eksikti -- mobil onay esnafa hic bildirim gondermiyor, web red
     muhurleri stoga dondurmuyordu.
   */
-  shop: 4,
+  /*
+    4 -> 3 (2026-09-01): dukkan ortalama puani hesabi `ReviewService`e toplandi;
+    `deleteReviewAction` ayni `aggregate` + `update` ikilisinin satir ici bir
+    kopyasini tasiyordu.
+  */
+  shop: 3,
   /*
     22 -> 20 (2026-09-01): telefon guncelleme govdesi `PartnerProfileService`e
     tasindi. Web action'inda ve mobil ucta ayri yaziliydi; mobil kopya
@@ -119,7 +124,7 @@ const CEILINGS: Record<string, number> = {
 };
 
 /** Toplam tavan — yeni bir MODELİN sessizce eklenmesini de yakalar. */
-const TOTAL_CEILING = 81;
+const TOTAL_CEILING = 80;
 
 /**
  * Yorumlar ayıklanır: bu dosyaların çoğunda "eskiden burada ham

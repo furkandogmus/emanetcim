@@ -4,6 +4,7 @@ import { getClientIpOrNull } from "@/lib/client-ip";
 
 import prisma from "@/lib/db";
 import { shopService } from "@/services/ShopService";
+import { reviewService } from "@/services/ReviewService";
 import { BookingStatus, Prisma, Role } from "@prisma/client";
 import { z } from "zod";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
@@ -717,15 +718,15 @@ export async function deleteReviewAction(reviewId: string) {
     select: { shopId: true },
   });
 
-  // BUG-10: Yorum silindiğinde dükkan ortalama puanı güncellenmeli
-  const aggregations = await prisma.review.aggregate({
-    where: { shopId: review.shopId },
-    _avg: { rating: true },
-  });
-  await prisma.shop.update({
-    where: { id: review.shopId },
-    data: { rating: aggregations._avg.rating ?? 0 },
-  });
+  /*
+    BUG-10: yorum silinince dukkan ortalama puani guncellenmeli.
+
+    GOVDE ARTIK SERVISTE (2026-09-01). Burasi `ReviewService`teki hesabin satir
+    ici bir KOPYASINI tasiyordu -- ayni `aggregate`, ayni `update`. Ayni sayiyi
+    iki yerde hesaplamak, bu kod tabaninin tekrar tekrar duzelttigi sinif:
+    birinin filtresi degistiginde digeri sessizce geride kalir.
+  */
+  await reviewService.updateShopAverageRating(review.shopId);
 
   revalidatePathAllLocales(`/admin/partners/${review.shopId}/edit`);
   revalidatePathAllLocales("/search");
