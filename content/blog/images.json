@@ -719,6 +719,36 @@
     "license": "CC BY-SA 3.0 rs",
     "source": "https://commons.wikimedia.org/wiki/File:Knez_Mihailova_street,_Belgrade_(by_Pudelek).JPG"
   },
+  "bengaluru-gar": {
+    "alt": {
+      "en": "The facade of Bengaluru City railway station",
+      "tr": "Bengaluru City tren istasyonunun cephesi"
+    },
+    "author": "Rsrikanth05",
+    "caption": {
+      "en": "Bengaluru City station",
+      "tr": "Bengaluru City istasyonu"
+    },
+    "cityKey": "bengaluru",
+    "file": "/images/blog/bengaluru-gar.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Bangalore-City-Stn.jpg"
+  },
+  "bengaluru-vidhana": {
+    "alt": {
+      "en": "The Vidhana Soudha building in Bengaluru",
+      "tr": "Bengaluru'da Vidhana Soudha binası"
+    },
+    "author": "DeepanjanGhosh",
+    "caption": {
+      "en": "Vidhana Soudha, Bengaluru",
+      "tr": "Vidhana Soudha, Bengaluru"
+    },
+    "cityKey": "bengaluru",
+    "file": "/images/blog/bengaluru-vidhana.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Vidhana_Soudha_LE.jpg"
+  },
   "bergama-akropol": {
     "alt": {
       "en": "The ancient theatre cut into the steep slope of the Pergamon acropolis",
@@ -1619,6 +1649,66 @@
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:%C3%87e%C5%9Fme_Kalesi,_%C4%B0zmir,_2020_02.jpg"
   },
+  "chengdu-chunxi": {
+    "alt": {
+      "en": "The Chunxi Road pedestrian area in Chengdu",
+      "tr": "Chengdu'da Chunxi Yolu'nun yaya bölgesi"
+    },
+    "author": "Gong Chen, Mlogic",
+    "caption": {
+      "en": "Chunxi Road, Chengdu",
+      "tr": "Chunxi Yolu, Chengdu"
+    },
+    "cityKey": "chengdu",
+    "file": "/images/blog/chengdu-chunxi.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Chunxi_Road_seen_from_viaduct,_Chengdu.jpg"
+  },
+  "chengdu-dogu-gar": {
+    "alt": {
+      "en": "The Chengdu East railway station building",
+      "tr": "Chengdu Doğu istasyonunun binası"
+    },
+    "author": "Fxqf",
+    "caption": {
+      "en": "Chengdu East station",
+      "tr": "Chengdu Doğu istasyonu"
+    },
+    "cityKey": "chengdu",
+    "file": "/images/blog/chengdu-dogu-gar.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Chengdu_East_Railway_Station.jpg"
+  },
+  "chennai-central": {
+    "alt": {
+      "en": "The red facade of Chennai Central station",
+      "tr": "Chennai Central istasyonunun kırmızı cephesi"
+    },
+    "author": "Arian Zwegers derivative work: MrPanyGoff",
+    "caption": {
+      "en": "Chennai Central",
+      "tr": "Chennai Central"
+    },
+    "cityKey": "chennai",
+    "file": "/images/blog/chennai-central.webp",
+    "license": "CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Chennai_train_station.jpg"
+  },
+  "chennai-marina": {
+    "alt": {
+      "en": "Marina beach and the shoreline in Chennai",
+      "tr": "Chennai'de Marina plajı ve sahil şeridi"
+    },
+    "author": "w:user:PlaneMad",
+    "caption": {
+      "en": "Marina beach, Chennai",
+      "tr": "Marina plajı, Chennai"
+    },
+    "cityKey": "chennai",
+    "file": "/images/blog/chennai-marina.webp",
+    "license": "CC BY-SA 2.5",
+    "source": "https://commons.wikimedia.org/wiki/File:Chennai_Marina_beach_panorama1.jpg"
+  },
   "chiang-mai-pazar": {
     "alt": {
       "en": "The Sunday evening walking street market in Chiang Mai",
@@ -2459,6 +2549,36 @@
     "license": "Public domain",
     "source": "https://commons.wikimedia.org/wiki/File:Alhambra_in_the_evening.jpg"
   },
+  "guangzhou-beijing-lu": {
+    "alt": {
+      "en": "The Beijing Lu pedestrian street in Guangzhou",
+      "tr": "Guangzhou'da Beijing Lu yaya caddesi"
+    },
+    "author": "Wpcpey",
+    "caption": {
+      "en": "Beijing Lu, Guangzhou",
+      "tr": "Beijing Lu, Guangzhou"
+    },
+    "cityKey": "guangzhou",
+    "file": "/images/blog/guangzhou-beijing-lu.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Beijing_Lu_Pedestrian_Area_2019.jpg"
+  },
+  "guangzhou-guney-gar": {
+    "alt": {
+      "en": "High-speed trains at Guangzhou South station",
+      "tr": "Guangzhou Güney istasyonunda bekleyen hızlı trenler"
+    },
+    "author": "Shihu7",
+    "caption": {
+      "en": "Guangzhou South station",
+      "tr": "Guangzhou Güney istasyonu"
+    },
+    "cityKey": "guangzhou",
+    "file": "/images/blog/guangzhou-guney-gar.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Guangzhou_South_Station_with_trains.jpg"
+  },
   "hamburg-reeperbahn": {
     "alt": {
       "en": "A building front and neon signs on the Reeperbahn",
@@ -3013,6 +3133,36 @@
     "file": "/images/blog/kahire-piramitler.webp",
     "license": "CC BY-SA 2.0",
     "source": "https://commons.wikimedia.org/wiki/File:All_Gizah_Pyramids.jpg"
+  },
+  "kalkuta-howrah": {
+    "alt": {
+      "en": "The Howrah railway station building in Kolkata",
+      "tr": "Kalküta'da Howrah tren istasyonunun binası"
+    },
+    "author": "Bernard Gagnon",
+    "caption": {
+      "en": "Howrah station, Kolkata",
+      "tr": "Howrah istasyonu, Kalküta"
+    },
+    "cityKey": "kalkuta",
+    "file": "/images/blog/kalkuta-howrah.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Howrah_Railway_Station_01.jpg"
+  },
+  "kalkuta-taksi": {
+    "alt": {
+      "en": "One of Kolkata's yellow taxis",
+      "tr": "Kalküta'nın sarı taksilerinden biri"
+    },
+    "author": "Bernard Gagnon",
+    "caption": {
+      "en": "A yellow taxi, Kolkata",
+      "tr": "Sarı taksi, Kalküta"
+    },
+    "cityKey": "kalkuta",
+    "file": "/images/blog/kalkuta-taksi.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Taxi_of_Kolkata.jpg"
   },
   "kandy-gol": {
     "alt": {
@@ -6509,6 +6659,36 @@
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Fisherman%27s_Wharf_San_Francisco_January_2013_001.jpg"
   },
+  "shenzhen-futian": {
+    "alt": {
+      "en": "The towers of the Futian district in Shenzhen",
+      "tr": "Shenzhen'de Futian bölgesinin gökdelenleri"
+    },
+    "author": "Huangdan2060",
+    "caption": {
+      "en": "Futian, Shenzhen",
+      "tr": "Futian, Shenzhen"
+    },
+    "cityKey": "shenzhen",
+    "file": "/images/blog/shenzhen-futian.webp",
+    "license": "CC BY 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Shenzhen_Skyline_from_Futian_District2.jpg"
+  },
+  "shenzhen-luohu": {
+    "file": "/images/blog/shenzhen-luohu.webp",
+    "alt": {
+      "tr": "Shenzhen'de Hong Kong'a açılan Luohu sınır kapısı",
+      "en": "The Luohu border crossing to Hong Kong in Shenzhen"
+    },
+    "caption": {
+      "tr": "Luohu sınır kapısı, Shenzhen",
+      "en": "The Luohu border crossing, Shenzhen"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Luohu_Border_Crossing_01.JPG",
+    "author": "Abasaa",
+    "license": "Public domain",
+    "cityKey": "shenzhen"
+  },
   "side-apollon": {
     "alt": {
       "en": "The columns of the Temple of Apollo by the sea at Side",
@@ -6825,19 +7005,19 @@
     "source": "https://commons.wikimedia.org/wiki/File:Azadi_Tower_Darafsh_(72).JPG"
   },
   "tahran-golestan": {
-    "file": "/images/blog/tahran-golestan.webp",
     "alt": {
-      "tr": "Tahran'da Gülistan Sarayı'nın çinili cephesi",
-      "en": "The tiled facade of the Golestan Palace in Tehran"
+      "en": "The tiled facade of the Golestan Palace in Tehran",
+      "tr": "Tahran'da Gülistan Sarayı'nın çinili cephesi"
     },
-    "caption": {
-      "tr": "Gülistan Sarayı, Tahran",
-      "en": "The Golestan Palace, Tehran"
-    },
-    "source": "https://commons.wikimedia.org/wiki/File:Golestan_Palace06.jpg",
     "author": "Maziar Abidian",
+    "caption": {
+      "en": "The Golestan Palace, Tehran",
+      "tr": "Gülistan Sarayı, Tahran"
+    },
+    "cityKey": "tahran",
+    "file": "/images/blog/tahran-golestan.webp",
     "license": "CC BY-SA 4.0",
-    "cityKey": "tahran"
+    "source": "https://commons.wikimedia.org/wiki/File:Golestan_Palace06.jpg"
   },
   "taipei-101": {
     "alt": {

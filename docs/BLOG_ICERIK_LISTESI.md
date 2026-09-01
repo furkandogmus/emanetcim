@@ -1,5 +1,5 @@
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 255/265 sehir -->
+<!-- 261/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -258,12 +258,12 @@
 | 253 | IR | Tehran | `tahran` | 3 | yayında | tahran-iki-havalimani-gece-ucuslari-carsi-valiz | tehran-luggage-storage-night-departures |
 | 254 | IR | Isfahan | `isfahan` | 2 | yayında | isfahan-naksi-cihan-meydani-gece-otobusu-valiz | isfahan-luggage-storage-naqsh-e-jahan |
 | 255 | IR | Shiraz | `siraz` | 2 | yayında | siraz-pembe-cami-sabah-isigi-persepolis-valiz | shiraz-luggage-storage-pink-mosque-morning-light |
-| 256 | IN | Kolkata | `kalkuta` | 3 | — |  |  |
-| 257 | IN | Chennai | `chennai` | 3 | — |  |  |
-| 258 | IN | Bengaluru | `bengaluru` | 3 | — |  |  |
-| 259 | CN | Guangzhou | `guangzhou` | 3 | — |  |  |
-| 260 | CN | Shenzhen | `shenzhen` | 2 | — |  |  |
-| 261 | CN | Chengdu | `chengdu` | 2 | — |  |  |
+| 256 | IN | Kolkata | `kalkuta` | 3 | yayında | kalkuta-howrah-nehrin-karsi-yakasinda-sealdah-valiz | kolkata-luggage-storage-howrah-across-the-river |
+| 257 | IN | Chennai | `chennai` | 3 | yayında | chennai-central-egmore-iki-gar-marina-valiz | chennai-luggage-storage-central-egmore |
+| 258 | IN | Bengaluru | `bengaluru` | 3 | yayında | bengaluru-havalimani-kirk-kilometre-majestic-valiz | bengaluru-luggage-storage-airport-two-hours |
+| 259 | CN | Guangzhou | `guangzhou` | 3 | yayında | guangzhou-guney-gari-hizli-tren-fuar-valiz | guangzhou-luggage-storage-south-station |
+| 260 | CN | Shenzhen | `shenzhen` | 2 | yayında | shenzhen-hong-kong-sinir-kapisi-kuyruk-valiz | shenzhen-luggage-storage-hong-kong-border |
+| 261 | CN | Chengdu | `chengdu` | 2 | yayında | chengdu-panda-merkezi-sabah-iki-havalimani-valiz | chengdu-luggage-storage-panda-base-morning |
 | 262 | UA | Kyiv | `kiev` | 3 | — |  |  |
 | 263 | US | Houston | `houston` | 2 | — |  |  |
 | 264 | US | Dallas | `dallas` | 2 | — |  |  |
