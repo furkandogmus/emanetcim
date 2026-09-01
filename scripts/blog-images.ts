@@ -229,6 +229,18 @@ function verify(): number {
   let problems = 0;
 
   for (const [key, img] of Object.entries(manifest)) {
+    /*
+      ANAHTAR SADECE [a-z0-9-] OLABILIR. Sebep sessiz bir hata: gövdedeki yer
+      tutucuyu `scripts/blog-city-posts.ts` içindeki `/\{\{img:([a-z0-9-]+)\}\}/`
+      yakalıyor. Anahtarda Türkçe bir harf olursa (2026-09-01'de `riyad-silüet`
+      ile oldu) yer tutucu HİÇ eşleşmiyor: görsel basılmıyor, künye eklenmiyor
+      ve yayına `{{img:riyad-silüet}}` metni olduğu gibi çıkıyor. Hiçbir kontrol
+      bunu yakalamıyordu -- bu satır o yüzden var.
+    */
+    if (!/^[a-z0-9-]+$/.test(key)) {
+      console.log(`GECERSIZ ANAHTAR ${key} (yalnizca a-z, 0-9 ve tire)`);
+      problems++;
+    }
     const abs = path.join(ROOT, "public", img.file.replace(/^\//, ""));
     if (!fs.existsSync(abs)) {
       console.log(`EKSIK DOSYA   ${key} -> ${img.file}`);

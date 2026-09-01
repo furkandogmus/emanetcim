@@ -1,4 +1,34 @@
 {
+  "abu-dabi-cami": {
+    "file": "/images/blog/abu-dabi-cami.webp",
+    "alt": {
+      "tr": "Şeyh Zayed Camii'nin beyaz kubbeleri ve avlusu",
+      "en": "The white domes and courtyard of the Sheikh Zayed Grand Mosque"
+    },
+    "caption": {
+      "tr": "Şeyh Zayed Camii, Abu Dabi",
+      "en": "The Sheikh Zayed Grand Mosque, Abu Dhabi"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Sheikh_Zayed_Grand_Mosque_in_Abu_Dhabi_-_panoramio.jpg",
+    "author": "Jaseem Hamza",
+    "license": "CC BY 3.0",
+    "cityKey": "abu-dabi"
+  },
+  "abu-dabi-corniche": {
+    "file": "/images/blog/abu-dabi-corniche.webp",
+    "alt": {
+      "tr": "Abu Dabi Corniche sahili ve arkasındaki kuleler",
+      "en": "The Abu Dhabi Corniche beach with the towers behind it"
+    },
+    "caption": {
+      "tr": "Corniche, Abu Dabi",
+      "en": "The Corniche, Abu Dhabi"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Abu_Dhabi_Corniche_Beach.jpg",
+    "author": "Aravind Sivaraj",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "abu-dabi"
+  },
   "adana-sabanci-camii": {
     "file": "/images/blog/adana-sabanci-camii.webp",
     "alt": {
@@ -959,6 +989,36 @@
     "license": "CC BY-SA 4.0",
     "cityKey": "cesme"
   },
+  "cidde-ahsap": {
+    "file": "/images/blog/cidde-ahsap.webp",
+    "alt": {
+      "tr": "Eski Cidde'de yeşil boyalı ahşap cumbalar",
+      "en": "Green-painted wooden bay windows in old Jeddah"
+    },
+    "caption": {
+      "tr": "Eski Cidde'de ahşap işçiliği",
+      "en": "Woodwork in old Jeddah"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Green_woodwork_in_old_Jeddah_(Al_Balad)_October_8_2021.jpg",
+    "author": "Francisco Anzola",
+    "license": "CC BY 2.0",
+    "cityKey": "cidde"
+  },
+  "cidde-balad": {
+    "file": "/images/blog/cidde-balad.webp",
+    "alt": {
+      "tr": "Cidde'nin tarihi Balad semtinde mercan taşı ev ve ahşap cumbalar",
+      "en": "A coral-stone house with wooden bay windows in historic Jeddah"
+    },
+    "caption": {
+      "tr": "Al-Balad, Cidde",
+      "en": "Al-Balad, Jeddah"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Bayt_Nasif,_1872,_old_Jeddah,_Saudi_Arabia_(9)_(50703482701).jpg",
+    "author": "Richard Mortel from Riyadh, Saudi Arabia",
+    "license": "CC BY 2.0",
+    "cityKey": "cidde"
+  },
   "datca-koy": {
     "file": "/images/blog/datca-koy.webp",
     "alt": {
@@ -1048,6 +1108,36 @@
     "author": "Dosseman",
     "license": "CC BY-SA 4.0",
     "cityKey": "diyarbakir"
+  },
+  "dubai-abra": {
+    "file": "/images/blog/dubai-abra.webp",
+    "alt": {
+      "tr": "Dubai Creek'te abra teknesinden karşı kıyı",
+      "en": "The far bank of Dubai Creek seen from an abra"
+    },
+    "caption": {
+      "tr": "Dubai Creek, abra",
+      "en": "Dubai Creek from an abra"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Dubai_Creek_from_an_abra_2.jpg",
+    "author": "CT Cooper",
+    "license": "Public domain",
+    "cityKey": "dubai"
+  },
+  "dubai-burj": {
+    "file": "/images/blog/dubai-burj.webp",
+    "alt": {
+      "tr": "Dubai silueti ve Burj Khalifa",
+      "en": "The Dubai skyline and the Burj Khalifa"
+    },
+    "caption": {
+      "tr": "Dubai silueti",
+      "en": "The Dubai skyline"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Dubai_Skyline_and_Burj_Khalifa_-_25072008.jpg",
+    "author": "petter palander",
+    "license": "CC BY 2.0",
+    "cityKey": "dubai"
   },
   "dublin-connolly": {
     "file": "/images/blog/dublin-connolly.webp",
@@ -2444,6 +2534,66 @@
     "license": "CC BY-SA 3.0",
     "cityKey": "marsilya"
   },
+  "medine-haram-aksam": {
+    "file": "/images/blog/medine-haram-aksam.webp",
+    "alt": {
+      "tr": "Akşam saatlerinde Mescid-i Nebevi ve çevresindeki meydan",
+      "en": "The Masjid an-Nabawi and its plaza in the evening"
+    },
+    "caption": {
+      "tr": "Medine, akşam",
+      "en": "Medina in the evening"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Madina_Haram_at_evening.jpg",
+    "author": "Ahmed Medineli",
+    "license": "Public domain",
+    "cityKey": "medine"
+  },
+  "medine-nebevi": {
+    "file": "/images/blog/medine-nebevi.webp",
+    "alt": {
+      "tr": "Mescid-i Nebevi'nin avlusu ve minareleri",
+      "en": "The courtyard and minarets of the Masjid an-Nabawi"
+    },
+    "caption": {
+      "tr": "Mescid-i Nebevi, Medine",
+      "en": "The Masjid an-Nabawi, Medina"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Al_Masjid_an_Nabawi_3.jpg",
+    "author": "Aymanzaid2",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "medine"
+  },
+  "mekke-haram": {
+    "file": "/images/blog/mekke-haram.webp",
+    "alt": {
+      "tr": "Mescid-i Haram'ın iç avlusu ve ziyaretçiler",
+      "en": "The inner courtyard of the Masjid al-Haram with worshippers"
+    },
+    "caption": {
+      "tr": "Mescid-i Haram, Mekke",
+      "en": "The Masjid al-Haram, Mecca"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Masjid_al-Haram,_Mecca._Inside..jpg",
+    "author": "Mbasit",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "mekke"
+  },
+  "mekke-kabe": {
+    "file": "/images/blog/mekke-kabe.webp",
+    "alt": {
+      "tr": "Mescid-i Haram'ın ortasındaki Kâbe",
+      "en": "The Kaaba at the centre of the Masjid al-Haram"
+    },
+    "caption": {
+      "tr": "Kâbe, Mekke",
+      "en": "The Kaaba, Mecca"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Kaaba,_Masjid_Al_Haram,_Mecca.jpg",
+    "author": "Shahin Olakara",
+    "license": "CC BY 2.0",
+    "cityKey": "mekke"
+  },
   "mersin-kizkalesi": {
     "file": "/images/blog/mersin-kizkalesi.webp",
     "alt": {
@@ -2953,6 +3103,36 @@
     "author": "David Holt uploaded and derivative work: MrPanyGoff",
     "license": "CC BY-SA 2.0",
     "cityKey": "riga"
+  },
+  "riyad-masmak": {
+    "file": "/images/blog/riyad-masmak.webp",
+    "alt": {
+      "tr": "Riyad'da kerpiç Masmak Kalesi",
+      "en": "The mud-brick Masmak fortress in Riyadh"
+    },
+    "caption": {
+      "tr": "Masmak Kalesi, Riyad",
+      "en": "The Masmak fortress, Riyadh"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Masmak_castle.jpg",
+    "author": "Baptiste Marcel",
+    "license": "Public domain",
+    "cityKey": "riyad"
+  },
+  "riyad-siluet": {
+    "file": "/images/blog/riyad-siluet.webp",
+    "alt": {
+      "tr": "Gece aydınlatılmış Kingdom Centre kulesi",
+      "en": "The Kingdom Centre tower lit at night"
+    },
+    "caption": {
+      "tr": "Kingdom Centre, Riyad",
+      "en": "The Kingdom Centre, Riyadh"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Kingdom_Tower_at_night.JPG",
+    "author": "BroadArrow at English Wikipedia",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "riyad"
   },
   "rize-ayder": {
     "file": "/images/blog/rize-ayder.webp",

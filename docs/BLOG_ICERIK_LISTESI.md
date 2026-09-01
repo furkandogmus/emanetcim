@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| Yazısı olan şehir | **129 / 265** — Türkiye'nin 39 şehri tamamlandı |
+| Yazısı olan şehir | **135 / 265** — Türkiye'nin 39 şehri tamamlandı |
 | Yayına yazma | `npx tsx scripts/blog-city-posts.ts --apply` (kuru çalışma varsayılan) |
 | Denetim | `npx tsx scripts/blog-city-posts.ts --verify` + `npx tsx scripts/blog-images.ts --verify` |
 | Eksik listesi | `npx tsx scripts/blog-city-posts.ts --coverage` |
@@ -26,16 +26,19 @@ bavulla yürünmez) ve nokta sayfasına organik giriş üretiyor.
 
 1. **Şehir başına iki yazı: TR ve EN.** `--verify` eksik dili sayar.
 2. **Her yazıda en az iki görsel** (kapak + gövdede en az bir `{{img:...}}`).
-3. **Görsel o şehrin görseli olmak zorunda.** Manifestteki `cityKey` yazının
+3. **Görsel anahtarı yalnızca `[a-z0-9-]` içerebilir.** Türkçe harf konursa
+   gövdedeki `{{img:...}}` yer tutucusu HİÇ eşleşmiyor ve yayına ham metin
+   olarak çıkıyor; `blog-images.ts --verify` bunu 2026-09-01'den beri yakalıyor.
+4. **Görsel o şehrin görseli olmak zorunda.** Manifestteki `cityKey` yazının
    şehriyle eşleşmiyorsa `--verify` `ILGISIZ GORSEL` der ve düşer. Görseller
    Wikimedia Commons'tan indiriliyor; kaynak URL, fotoğrafçı ve lisans manifeste
    yazılıyor ve künye yazının sonunda otomatik basılıyor (çoğu CC BY-SA, atıfsız
    kullanım ihlal).
-4. **Ticari kullanıma kapalı lisans reddedilir** (`NonCommercial`,
+5. **Ticari kullanıma kapalı lisans reddedilir** (`NonCommercial`,
    `NoDerivatives`) — `scripts/blog-images.ts` indirmeden önce durdurur.
-5. **Yazı en az 350 kelime** ve o şehre özgü somut bilgi taşımalı. Şehir adı
+6. **Yazı en az 350 kelime** ve o şehre özgü somut bilgi taşımalı. Şehir adı
    değiştirilince hâlâ doğru olan bir metin, hiçbir şey anlatmıyor demektir.
-6. **Kapanış paragrafı dürüst olmalı:** nokta henüz açık değil, talep ölçülüyor,
+7. **Kapanış paragrafı dürüst olmalı:** nokta henüz açık değil, talep ölçülüyor,
    e-posta bırakılabilir. Açık gibi anlatmak yalan olurdu.
 
 ## Görsel eklemek
@@ -63,7 +66,7 @@ alakasız olabilir.
 
 <!-- Aşağısı üretilmiştir: npx tsx scripts/blog-city-posts.ts --list-md -->
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 129/265 sehir -->
+<!-- 135/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -201,12 +204,12 @@ alakasız olabilir.
 | 132 | GE | Tbilisi | `tiflis` | 2 | yayında | tiflis-kukurt-hamami-dolap-valiz | tbilisi-luggage-storage-sulphur-baths |
 | 133 | AM | Yerevan | `erivan` | 1 | yayında | erivan-cascade-basamaklar-valiz | yerevan-luggage-storage-cascade |
 | 134 | AZ | Bakı | `baku` | 1 | yayında | baku-icerisehir-surlar-bulvar-valiz | baku-luggage-storage-icherisheher |
-| 135 | SA | Makkah | `mekke` | 5 | — |  |  |
-| 136 | SA | Madinah | `medine` | 5 | — |  |  |
-| 137 | SA | Jeddah | `cidde` | 2 | — |  |  |
-| 138 | SA | Riyadh | `riyad` | 2 | — |  |  |
-| 139 | AE | Dubai | `dubai` | 6 | — |  |  |
-| 140 | AE | Abu Dhabi | `abu-dabi` | 2 | — |  |  |
+| 135 | SA | Makkah | `mekke` | 5 | yayında | mekke-umre-otel-cikisi-valiz | mecca-luggage-storage-umrah-checkout |
+| 136 | SA | Madinah | `medine` | 5 | yayında | medine-mescid-i-nebevi-canta-valiz | medina-luggage-storage-ziyarat-tours |
+| 137 | SA | Jeddah | `cidde` | 2 | yayında | cidde-havalimani-aktarma-balad-valiz | jeddah-luggage-storage-al-balad-layover |
+| 138 | SA | Riyadh | `riyad` | 2 | yayında | riyad-mesafeler-diriyah-valiz | riyadh-luggage-storage-distances-diriyah |
+| 139 | AE | Dubai | `dubai` | 6 | yayında | dubai-metroda-bavul-siniri-abra-valiz | dubai-luggage-storage-metro-size-limit |
+| 140 | AE | Abu Dhabi | `abu-dabi` | 2 | yayında | abu-dabi-seyh-zayed-camii-kural-valiz | abu-dhabi-luggage-storage-grand-mosque |
 | 141 | AE | Sharjah | `sarja` | 1 | — |  |  |
 | 142 | QA | Doha | `doha` | 2 | — |  |  |
 | 143 | KW | Kuwait City | `kuveyt` | 1 | — |  |  |
