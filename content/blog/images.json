@@ -479,6 +479,36 @@
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Cunda_adas%C4%B1_konak_%22road_house_on_the_cunda_island%22_ayval%C4%B1k_-_panoramio.jpg"
   },
+  "ba-caminito": {
+    "file": "/images/blog/ba-caminito.webp",
+    "alt": {
+      "tr": "Buenos Aires'te La Boca'daki Caminito'nun renkli cepheleri",
+      "en": "The coloured facades of Caminito in La Boca, Buenos Aires"
+    },
+    "caption": {
+      "tr": "Caminito, La Boca",
+      "en": "Caminito, La Boca"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Buenos_Aires_-_La_Boca_-_Caminito_-_200807i.jpg",
+    "author": "Luis Argerich from Buenos Aires, Argentina",
+    "license": "CC BY 2.0",
+    "cityKey": "buenos-aires"
+  },
+  "ba-san-telmo": {
+    "file": "/images/blog/ba-san-telmo.webp",
+    "alt": {
+      "tr": "Buenos Aires'te San Telmo'nun pazar günü kurulan antika pazarı",
+      "en": "The Sunday antiques market in San Telmo, Buenos Aires"
+    },
+    "caption": {
+      "tr": "San Telmo pazarı, Buenos Aires",
+      "en": "The San Telmo market, Buenos Aires"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:San_Telmo_Sunday_Antique_Market.jpg",
+    "author": "LWY",
+    "license": "CC BY 2.0",
+    "cityKey": "buenos-aires"
+  },
   "baku-bulvar": {
     "alt": {
       "en": "Baku's Caspian boulevard with the towers behind it",
@@ -1588,6 +1618,36 @@
     "file": "/images/blog/cidde-balad.webp",
     "license": "CC BY 2.0",
     "source": "https://commons.wikimedia.org/wiki/File:Bayt_Nasif,_1872,_old_Jeddah,_Saudi_Arabia_(9)_(50703482701).jpg"
+  },
+  "cusco-plaza": {
+    "file": "/images/blog/cusco-plaza.webp",
+    "alt": {
+      "tr": "Cusco'da Plaza de Armas ve katedral",
+      "en": "The Plaza de Armas and the cathedral in Cusco"
+    },
+    "caption": {
+      "tr": "Plaza de Armas, Cusco",
+      "en": "Plaza de Armas, Cusco"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Catedral,_Plaza_de_Armas,_Cusco,_Per%C3%BA,_2015-07-31,_DD_57.JPG",
+    "author": "Diego Delso",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "cusco"
+  },
+  "cusco-sacsayhuaman": {
+    "file": "/images/blog/cusco-sacsayhuaman.webp",
+    "alt": {
+      "tr": "Cusco'nun üstündeki Sacsayhuamán'ın dev taş duvarları",
+      "en": "The massive stone walls of Sacsayhuaman above Cusco"
+    },
+    "caption": {
+      "tr": "Sacsayhuamán, Cusco",
+      "en": "Sacsayhuaman, Cusco"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Sacsayhuam%C3%A1n,_Cusco,_Per%C3%BA,_2015-07-31,_DD_05.JPG",
+    "author": "Diego Delso",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "cusco"
   },
   "danang-ejderha-koprusu": {
     "alt": {
@@ -3389,6 +3449,36 @@
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Den_Haag_Centraal-1589.jpg"
   },
+  "lima-miraflores": {
+    "file": "/images/blog/lima-miraflores.webp",
+    "alt": {
+      "tr": "Lima'da Miraflores'in falezleri ve arkasındaki binalar",
+      "en": "The cliffs of Miraflores in Lima with the buildings behind"
+    },
+    "caption": {
+      "tr": "Miraflores, Lima",
+      "en": "Miraflores, Lima"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Miraflores_Lima_Peru_skyline.jpg",
+    "author": "Mira4espina78y",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "lima"
+  },
+  "lima-plaza-mayor": {
+    "file": "/images/blog/lima-plaza-mayor.webp",
+    "alt": {
+      "tr": "Lima'da Plaza Mayor ve çevresindeki sömürge dönemi yapıları",
+      "en": "The Plaza Mayor in Lima and its colonial buildings"
+    },
+    "caption": {
+      "tr": "Plaza Mayor, Lima",
+      "en": "Plaza Mayor, Lima"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:25_-_Lima_-_Ao%C3%BBt_2008.jpg",
+    "author": "Martin St-Amant (S23678)",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "lima"
+  },
   "liverpool-albert-dock": {
     "alt": {
       "en": "The brick warehouses of the Albert Dock and the water in front of them",
@@ -5159,6 +5249,36 @@
     "license": "Public domain",
     "cityKey": "punta-cana"
   },
+  "quito-merkez": {
+    "file": "/images/blog/quito-merkez.webp",
+    "alt": {
+      "tr": "Quito tarihi merkezinde Venezuela caddesi ve arkada bazilika",
+      "en": "Calle Venezuela in Quito's historic centre with the basilica behind"
+    },
+    "caption": {
+      "tr": "Tarihi merkez, Quito",
+      "en": "The historic centre, Quito"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Quito_calle_Venezuela_Basilica.jpg",
+    "author": "Cayambe",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "quito"
+  },
+  "quito-panorama": {
+    "file": "/images/blog/quito-panorama.webp",
+    "alt": {
+      "tr": "El Panecillo'dan Quito'nun vadi boyunca uzanan görünümü",
+      "en": "Quito stretching along its valley, seen from El Panecillo"
+    },
+    "caption": {
+      "tr": "Quito, El Panecillo'dan",
+      "en": "Quito from El Panecillo"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Quito_as_from_panecillo_Basilica.jpg",
+    "author": "Cayambe",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "quito"
+  },
   "reykjavik-hallgrimskirkja": {
     "alt": {
       "en": "The stepped concrete tower of the Hallgrimskirkja",
@@ -5218,6 +5338,36 @@
     "file": "/images/blog/riga-pazar.webp",
     "license": "CC BY-SA 2.0",
     "source": "https://commons.wikimedia.org/wiki/File:Riga_Central_Market_Hall.jpg"
+  },
+  "rio-copacabana": {
+    "file": "/images/blog/rio-copacabana.webp",
+    "alt": {
+      "tr": "Rio de Janeiro'da Copacabana plajı ve sahil şeridi",
+      "en": "Copacabana beach and the seafront in Rio de Janeiro"
+    },
+    "caption": {
+      "tr": "Copacabana, Rio de Janeiro",
+      "en": "Copacabana, Rio de Janeiro"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Rio_de_Janeiro_Copacabana-20110505-RM-100035.jpg",
+    "author": "Ermell",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "rio"
+  },
+  "rio-seker-somunu": {
+    "file": "/images/blog/rio-seker-somunu.webp",
+    "alt": {
+      "tr": "Rio'da Şeker Somunu'na çıkan teleferik kabini",
+      "en": "The cable car up Sugarloaf Mountain in Rio"
+    },
+    "caption": {
+      "tr": "Şeker Somunu teleferiği, Rio",
+      "en": "The Sugarloaf cable car, Rio"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Rio_de_Janeiro_-_P%C3%A3o_de_A%C3%A7ucar_-_Cablecar.jpg",
+    "author": "Wutzofant.",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "rio"
   },
   "riyad-masmak": {
     "alt": {
@@ -5578,6 +5728,36 @@
     "file": "/images/blog/sanliurfa-gobeklitepe.webp",
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Urfa_G%C3%B6beklitepe_Building_A_5340.jpg"
+  },
+  "santiago-plaza": {
+    "file": "/images/blog/santiago-plaza.webp",
+    "alt": {
+      "tr": "Santiago'da Plaza de Armas",
+      "en": "The Plaza de Armas in Santiago"
+    },
+    "caption": {
+      "tr": "Plaza de Armas, Santiago",
+      "en": "Plaza de Armas, Santiago"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Plaza_de_Armas_3.JPG",
+    "author": "Apincheira",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "santiago"
+  },
+  "santiago-san-cristobal": {
+    "file": "/images/blog/santiago-san-cristobal.webp",
+    "alt": {
+      "tr": "Santiago'da San Cristóbal tepesi ve arkasındaki Andlar",
+      "en": "Cerro San Cristobal in Santiago with the Andes behind"
+    },
+    "caption": {
+      "tr": "San Cristóbal tepesi, Santiago",
+      "en": "Cerro San Cristobal, Santiago"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Santiago_cerro_san_cristobal.jpg",
+    "author": "Velvet",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "santiago"
   },
   "santorini-fira": {
     "alt": {

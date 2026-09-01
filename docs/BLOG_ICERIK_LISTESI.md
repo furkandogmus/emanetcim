@@ -1,5 +1,5 @@
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 231/265 sehir -->
+<!-- 237/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -234,12 +234,12 @@
 | 229 | CO | Bogota | `bogota` | 1 | yayında | bogota-rakim-candelaria-yokus-transmilenio-valiz | bogota-luggage-storage-altitude-candelaria |
 | 230 | CO | Cartagena | `cartagena` | 1 | yayında | cartagena-surlar-ici-tas-sokak-nem-valiz | cartagena-luggage-storage-cobbles-heat |
 | 231 | CO | Medellin | `medellin` | 1 | yayında | medellin-metrocable-comuna-13-yuruyen-merdiven-valiz | medellin-luggage-storage-metrocable-comuna-13 |
-| 232 | PE | Lima | `lima` | 1 | — |  |  |
-| 233 | PE | Cusco | `cusco` | 1 | — |  |  |
-| 234 | EC | Quito | `quito` | 1 | — |  |  |
-| 235 | CL | Santiago | `santiago` | 1 | — |  |  |
-| 236 | AR | Buenos Aires | `buenos-aires` | 3 | — |  |  |
-| 237 | BR | Rio de Janeiro | `rio` | 2 | — |  |  |
+| 232 | PE | Lima | `lima` | 1 | yayında | lima-miraflores-merkez-arasi-aktarma-valiz | lima-luggage-storage-miraflores-centre |
+| 233 | PE | Cusco | `cusco` | 1 | yayında | cusco-rakim-machu-picchu-treni-valiz | cusco-luggage-storage-machu-picchu-train |
+| 234 | EC | Quito | `quito` | 1 | yayında | quito-rakim-tarihi-merkez-havalimani-valiz | quito-luggage-storage-airport-altitude |
+| 235 | CL | Santiago | `santiago` | 1 | yayında | santiago-metro-yogun-saat-dag-turlari-valiz | santiago-luggage-storage-metro-peak-hours |
+| 236 | AR | Buenos Aires | `buenos-aires` | 3 | yayında | buenos-aires-iki-havalimani-san-telmo-pazari-valiz | buenos-aires-luggage-storage-two-airports |
+| 237 | BR | Rio de Janeiro | `rio` | 2 | yayında | rio-plaj-dolabi-yok-teleferik-kabini-valiz | rio-luggage-storage-beach-cable-car |
 | 238 | BR | São Paulo | `sao-paulo` | 1 | — |  |  |
 | 239 | UY | Montevideo | `montevideo` | 1 | — |  |  |
 | 240 | ZA | Cape Town | `cape-town` | 2 | — |  |  |
