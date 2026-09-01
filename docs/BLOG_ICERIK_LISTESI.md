@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| Yazısı olan şehir | **111 / 265** — Türkiye'nin 39 şehri tamamlandı |
+| Yazısı olan şehir | **117 / 265** — Türkiye'nin 39 şehri tamamlandı |
 | Yayına yazma | `npx tsx scripts/blog-city-posts.ts --apply` (kuru çalışma varsayılan) |
 | Denetim | `npx tsx scripts/blog-city-posts.ts --verify` + `npx tsx scripts/blog-images.ts --verify` |
 | Eksik listesi | `npx tsx scripts/blog-city-posts.ts --coverage` |
@@ -63,7 +63,7 @@ alakasız olabilir.
 
 <!-- Aşağısı üretilmiştir: npx tsx scripts/blog-city-posts.ts --list-md -->
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 111/265 sehir -->
+<!-- 117/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -183,12 +183,12 @@ alakasız olabilir.
 | 114 | BA | Sarajevo | `saraybosna` | 1 | yayında | saraybosna-dar-vadi-bascarsija-valiz | sarajevo-luggage-storage-valley-bascarsija |
 | 115 | BA | Mostar | `mostar` | 1 | yayında | mostar-stari-most-kaygan-tas-valiz | mostar-luggage-storage-stari-most |
 | 116 | MK | Skopje | `uskup` | 1 | yayında | uskup-eski-carsi-vardar-valiz | skopje-luggage-storage-old-bazaar |
-| 117 | MK | Ohrid | `ohrid` | 1 | — |  |  |
-| 118 | AL | Tiranë | `tiran` | 1 | — |  |  |
-| 119 | ME | Budva | `budva` | 1 | — |  |  |
-| 120 | ME | Kotor | `kotor` | 1 | — |  |  |
-| 121 | LV | Riga | `riga` | 1 | — |  |  |
-| 122 | LT | Vilnius | `vilnius` | 1 | — |  |  |
+| 117 | MK | Ohrid | `ohrid` | 1 | yayında | ohri-eski-sehir-yokus-kaneo-valiz | ohrid-luggage-storage-old-town-climb |
+| 118 | AL | Tiranë | `tiran` | 1 | yayında | tiran-otogar-dagitik-dajti-valiz | tirana-luggage-storage-scattered-bus-terminals |
+| 119 | ME | Budva | `budva` | 1 | yayında | budva-stari-grad-mermer-plaj-valiz | budva-luggage-storage-polished-marble |
+| 120 | ME | Kotor | `kotor` | 1 | yayında | kotor-surlara-1350-basamak-valiz | kotor-luggage-storage-1350-steps |
+| 121 | LV | Riga | `riga` | 1 | yayında | riga-vecriga-tas-pazar-valiz | riga-luggage-storage-old-town-market |
+| 122 | LT | Vilnius | `vilnius` | 1 | yayında | vilnius-eski-sehir-buyuk-uzupis-valiz | vilnius-luggage-storage-old-town-uzupis |
 | 123 | EE | Tallinn | `tallinn` | 1 | — |  |  |
 | 124 | FR | Nice | `nice` | 2 | — |  |  |
 | 125 | FR | Marseille | `marsilya` | 2 | — |  |  |

@@ -659,6 +659,36 @@
     "license": "CC0",
     "cityKey": "budapeste"
   },
+  "budva-sokak": {
+    "file": "/images/blog/budva-sokak.webp",
+    "alt": {
+      "tr": "Budva eski şehrinde dar, taş döşeli bir sokak",
+      "en": "A narrow, stone-paved lane in Budva's old town"
+    },
+    "caption": {
+      "tr": "Budva eski şehri",
+      "en": "Budva old town"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Old_Budva_str_2.jpg",
+    "author": "Bratislav Tabaš",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "budva"
+  },
+  "budva-surlar": {
+    "file": "/images/blog/budva-surlar.webp",
+    "alt": {
+      "tr": "Budva eski şehrinin deniz kenarındaki surları",
+      "en": "The seaward walls of Budva's old town"
+    },
+    "caption": {
+      "tr": "Budva surları",
+      "en": "The walls of Budva"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Budva,citty_wall.jpg",
+    "author": "Bratislav Tabaš",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "budva"
+  },
   "bukres-gara-de-nord": {
     "file": "/images/blog/bukres-gara-de-nord.webp",
     "alt": {
@@ -1754,6 +1784,36 @@
     "license": "CC BY-SA 4.0",
     "cityKey": "kopenhag"
   },
+  "kotor-eski-sehir": {
+    "file": "/images/blog/kotor-eski-sehir.webp",
+    "alt": {
+      "tr": "Kotor eski şehrinde meydan ve taş binalar",
+      "en": "A square and stone buildings in Kotor's old town"
+    },
+    "caption": {
+      "tr": "Kotor eski şehri",
+      "en": "Kotor old town"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Kotor_old_town_1.jpg",
+    "author": "Gzzz",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "kotor"
+  },
+  "kotor-korfez": {
+    "file": "/images/blog/kotor-korfez.webp",
+    "alt": {
+      "tr": "Kotor Körfezi ve suya kadar inen dağ yamaçları",
+      "en": "The Bay of Kotor with the mountain slopes falling to the water"
+    },
+    "caption": {
+      "tr": "Kotor Körfezi",
+      "en": "The Bay of Kotor"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Kotor,_Montenegro.jpg",
+    "author": "User: (WT-shared) Ronnie Pander at wts wikivoyage",
+    "license": "Public domain",
+    "cityKey": "kotor"
+  },
   "krakov-glowny": {
     "file": "/images/blog/krakov-glowny.webp",
     "alt": {
@@ -2354,6 +2414,36 @@
     "license": "Public domain",
     "cityKey": "napoli"
   },
+  "ohrid-eski-sehir": {
+    "file": "/images/blog/ohrid-eski-sehir.webp",
+    "alt": {
+      "tr": "Ohri Gölü kıyısından yamaca tırmanan eski şehir",
+      "en": "Ohrid's old town climbing the slope above the lake"
+    },
+    "caption": {
+      "tr": "Ohri eski şehri ve göl",
+      "en": "Ohrid's old town and the lake"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:OhridLake-and-the-Old-town.jpg",
+    "author": "Edal Anton Lefterov",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "ohrid"
+  },
+  "ohrid-kale": {
+    "file": "/images/blog/ohrid-kale.webp",
+    "alt": {
+      "tr": "Ohri'de Samuel Kalesi'nin surları",
+      "en": "The walls of Samuel's Fortress in Ohrid"
+    },
+    "caption": {
+      "tr": "Samuel Kalesi, Ohri",
+      "en": "Samuel's Fortress, Ohrid"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Fortaleza_de_Samuel,_Ohrid,_Macedonia,_2014-04-17,_DD_44.JPG",
+    "author": "Diego Delso",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "ohrid"
+  },
   "oslo-opera": {
     "file": "/images/blog/oslo-opera.webp",
     "alt": {
@@ -2563,6 +2653,36 @@
     "author": "Marek Ślusarczyk (Tupungato) Photo gallery",
     "license": "CC BY 3.0",
     "cityKey": "reykjavik"
+  },
+  "riga-eski-sehir": {
+    "file": "/images/blog/riga-eski-sehir.webp",
+    "alt": {
+      "tr": "Riga'da Kara Kafalar Evi ve Aziz Petrus Kilisesi kulesi",
+      "en": "The House of the Blackheads and St Peter's tower in Riga"
+    },
+    "caption": {
+      "tr": "Kara Kafalar Evi, Riga",
+      "en": "The House of the Blackheads, Riga"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:House_of_Blackheads_and_St._Peter%27s_Church_Tower,_Riga,_Latvia_-_Diliff.jpg",
+    "author": "Diliff",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "riga"
+  },
+  "riga-pazar": {
+    "file": "/images/blog/riga-pazar.webp",
+    "alt": {
+      "tr": "Riga Merkez Pazarı'nın eski zeplin hangarlarından dönüştürülmüş salonları",
+      "en": "Riga Central Market in its converted zeppelin hangars"
+    },
+    "caption": {
+      "tr": "Riga Merkez Pazarı",
+      "en": "Riga Central Market"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Riga_Central_Market_Hall.jpg",
+    "author": "David Holt uploaded and derivative work: MrPanyGoff",
+    "license": "CC BY-SA 2.0",
+    "cityKey": "riga"
   },
   "rize-ayder": {
     "file": "/images/blog/rize-ayder.webp",
@@ -3104,6 +3224,36 @@
     "license": "CC BY-SA 4.0",
     "cityKey": "stockholm"
   },
+  "tiran-dajti": {
+    "file": "/images/blog/tiran-dajti.webp",
+    "alt": {
+      "tr": "Dajti Dağı'na çıkan teleferiğin kabinleri",
+      "en": "The cabins of the cable car up Mount Dajti"
+    },
+    "caption": {
+      "tr": "Dajti teleferiği, Tiran",
+      "en": "The Dajti cable car, Tirana"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Dajt_Tirana_cable_car.jpg",
+    "author": "Tobias Michaelsen",
+    "license": "CC BY 2.0",
+    "cityKey": "tiran"
+  },
+  "tiran-skanderbeg": {
+    "file": "/images/blog/tiran-skanderbeg.webp",
+    "alt": {
+      "tr": "Tiran'da Skanderbeg Meydanı ve çevresindeki binalar",
+      "en": "Skanderbeg Square in Tirana and the buildings around it"
+    },
+    "caption": {
+      "tr": "Skanderbeg Meydanı, Tiran",
+      "en": "Skanderbeg Square, Tirana"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Tirana_-_Skanderbeg_Square_(Sheshi_Sk%C3%ABnderbej)_-_by_Pudelek.jpg",
+    "author": "Pudelek",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "tiran"
+  },
   "trabzon-liman": {
     "file": "/images/blog/trabzon-liman.webp",
     "alt": {
@@ -3298,6 +3448,36 @@
     "author": "Janericloebe",
     "license": "Public domain",
     "cityKey": "venedik"
+  },
+  "vilnius-eski-sehir": {
+    "file": "/images/blog/vilnius-eski-sehir.webp",
+    "alt": {
+      "tr": "Vilnius eski şehrinde taş döşeli bir sokak",
+      "en": "A cobbled street in Vilnius old town"
+    },
+    "caption": {
+      "tr": "Vilnius eski şehri",
+      "en": "Vilnius old town"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Vilnius_old_town_8.JPG",
+    "author": "Karmen media",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "vilnius"
+  },
+  "vilnius-uzupis": {
+    "file": "/images/blog/vilnius-uzupis.webp",
+    "alt": {
+      "tr": "Užupis mahallesinde nehir kıyısı ve binalar",
+      "en": "The riverside and buildings in the Uzupis quarter"
+    },
+    "caption": {
+      "tr": "Užupis, Vilnius",
+      "en": "Uzupis, Vilnius"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Vilnius_Uzupio_Respublica.jpg",
+    "author": "No machine-readable author provided. Wojsyl assumed (based on copyright claims).",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "vilnius"
   },
   "viyana-hauptbahnhof": {
     "file": "/images/blog/viyana-hauptbahnhof.webp",
