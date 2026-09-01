@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| Yazısı olan şehir | **93 / 265** — Türkiye'nin 39 şehri tamamlandı |
+| Yazısı olan şehir | **99 / 265** — Türkiye'nin 39 şehri tamamlandı |
 | Yayına yazma | `npx tsx scripts/blog-city-posts.ts --apply` (kuru çalışma varsayılan) |
 | Denetim | `npx tsx scripts/blog-city-posts.ts --verify` + `npx tsx scripts/blog-images.ts --verify` |
 | Eksik listesi | `npx tsx scripts/blog-city-posts.ts --coverage` |
@@ -63,7 +63,7 @@ alakasız olabilir.
 
 <!-- Aşağısı üretilmiştir: npx tsx scripts/blog-city-posts.ts --list-md -->
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 93/265 sehir -->
+<!-- 99/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -165,12 +165,12 @@ alakasız olabilir.
 | 96 | PL | Gdańsk | `gdansk` | 1 | yayında | gdansk-uc-sehir-skm-treni-valiz | gdansk-luggage-storage-tricity-skm |
 | 97 | PL | Wrocław | `wroclaw` | 1 | yayında | wroclaw-cuceler-rynek-valiz | wroclaw-luggage-storage-dwarves-rynek |
 | 98 | GR | Athens | `atina` | 4 | yayında | atina-akropol-canta-pire-limani-valiz | athens-luggage-storage-acropolis-piraeus |
-| 99 | GR | Thessaloniki | `selanik` | 2 | — |  |  |
-| 100 | GR | Santorini | `santorini` | 2 | — |  |  |
-| 101 | GR | Mykonos | `mykonos` | 1 | — |  |  |
-| 102 | GR | Crete | `girit` | 2 | — |  |  |
-| 103 | GR | Rhodes | `rodos` | 1 | — |  |  |
-| 104 | HR | Dubrovnik | `dubrovnik` | 1 | — |  |  |
+| 99 | GR | Thessaloniki | `selanik` | 2 | yayında | selanik-sahil-yuruyusu-ano-poli-valiz | thessaloniki-luggage-storage-waterfront-ano-poli |
+| 100 | GR | Santorini | `santorini` | 2 | yayında | santorini-588-basamak-fira-oia-valiz | santorini-luggage-storage-588-steps |
+| 101 | GR | Mykonos | `mykonos` | 1 | yayında | mykonos-chora-labirent-valiz | mykonos-luggage-storage-chora-maze |
+| 102 | GR | Crete | `girit` | 2 | yayında | girit-samarya-tek-yon-yuruyus-valiz | crete-luggage-storage-samaria-one-way |
+| 103 | GR | Rhodes | `rodos` | 1 | yayında | rodos-eski-sehir-deniz-cakili-valiz | rhodes-luggage-storage-pebble-paving |
+| 104 | HR | Dubrovnik | `dubrovnik` | 1 | yayında | dubrovnik-surlarin-icine-arac-girmiyor-valiz | dubrovnik-luggage-storage-no-cars-inside-walls |
 | 105 | HR | Split | `split` | 2 | — |  |  |
 | 106 | HR | Zagreb | `zagreb` | 1 | — |  |  |
 | 107 | SI | Ljubljana | `ljubljana` | 1 | — |  |  |

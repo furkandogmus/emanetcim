@@ -809,6 +809,36 @@
     "license": "CC BY-SA 4.0",
     "cityKey": "dublin"
   },
+  "dubrovnik-stradun": {
+    "file": "/images/blog/dubrovnik-stradun.webp",
+    "alt": {
+      "tr": "Stradun'un cilalı taş zemini ve iki yanındaki binalar",
+      "en": "The polished stone paving of the Stradun and the buildings along it"
+    },
+    "caption": {
+      "tr": "Stradun, Dubrovnik",
+      "en": "The Stradun, Dubrovnik"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Main_street-Dubrovnik-1.jpg",
+    "author": "László Szalai (Beyond silence)",
+    "license": "Public domain",
+    "cityKey": "dubrovnik"
+  },
+  "dubrovnik-surlar": {
+    "file": "/images/blog/dubrovnik-surlar.webp",
+    "alt": {
+      "tr": "Dubrovnik'in surları ve içindeki kırmızı çatılı eski şehir",
+      "en": "Dubrovnik's walls and the red-roofed old town inside them"
+    },
+    "caption": {
+      "tr": "Dubrovnik surları",
+      "en": "The walls of Dubrovnik"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Casco_viejo_de_Dubrovnik,_Croacia,_2014-04-14,_DD_04.JPG",
+    "author": "Diego Delso",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "dubrovnik"
+  },
   "dusseldorf-altstadt": {
     "file": "/images/blog/dusseldorf-altstadt.webp",
     "alt": {
@@ -1048,6 +1078,36 @@
     "author": "Rafal Konkolewski",
     "license": "CC BY-SA 2.5",
     "cityKey": "gdansk"
+  },
+  "girit-hanya": {
+    "file": "/images/blog/girit-hanya.webp",
+    "alt": {
+      "tr": "Hanya'nın Venedik döneminden kalma eski limanı",
+      "en": "The Venetian old harbour at Chania"
+    },
+    "caption": {
+      "tr": "Hanya eski limanı, Girit",
+      "en": "The old harbour at Chania, Crete"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Chania_Old_Harbour_in_Crete,_Greece_001.jpg",
+    "author": "Moonik",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "girit"
+  },
+  "girit-iraklio": {
+    "file": "/images/blog/girit-iraklio.webp",
+    "alt": {
+      "tr": "İraklio limanındaki Venedik kalesi Koules",
+      "en": "The Venetian Koules fortress in Heraklion harbour"
+    },
+    "caption": {
+      "tr": "Koules Kalesi, İraklio",
+      "en": "The Koules fortress, Heraklion"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Venetian_Fortress_of_Koules_in_Heraklion,_Crete_003.jpg",
+    "author": "Moonik",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "girit"
   },
   "granada-albaicin": {
     "file": "/images/blog/granada-albaicin.webp",
@@ -2054,6 +2114,36 @@
     "license": "CC BY-SA 3.0",
     "cityKey": "munih"
   },
+  "mykonos-chora": {
+    "file": "/images/blog/mykonos-chora.webp",
+    "alt": {
+      "tr": "Mykonos Chora'da dar, beyaz badanalı bir sokak",
+      "en": "A narrow whitewashed lane in Mykonos Chora"
+    },
+    "caption": {
+      "tr": "Chora, Mykonos",
+      "en": "Chora, Mykonos"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Narrow_street_in_the_old_town_Mykonos,_Greece.jpg",
+    "author": "dronepicr",
+    "license": "CC BY 2.0",
+    "cityKey": "mykonos"
+  },
+  "mykonos-little-venice": {
+    "file": "/images/blog/mykonos-little-venice.webp",
+    "alt": {
+      "tr": "Little Venice'te suyun kıyısına kurulmuş evler",
+      "en": "The houses built at the water's edge in Little Venice"
+    },
+    "caption": {
+      "tr": "Little Venice, Mykonos",
+      "en": "Little Venice, Mykonos"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Mykonos,_little_venice_03.JPG",
+    "author": "sailko",
+    "license": "CC BY 2.5",
+    "cityKey": "mykonos"
+  },
   "napoli-centrale": {
     "file": "/images/blog/napoli-centrale.webp",
     "alt": {
@@ -2294,6 +2384,36 @@
     "license": "CC BY 3.0",
     "cityKey": "rize"
   },
+  "rodos-eski-sehir": {
+    "file": "/images/blog/rodos-eski-sehir.webp",
+    "alt": {
+      "tr": "Rodos eski şehrinde Şövalyeler Sokağı'nın taş cepheleri",
+      "en": "The stone frontages of the Street of the Knights in Rhodes old town"
+    },
+    "caption": {
+      "tr": "Şövalyeler Sokağı, Rodos",
+      "en": "The Street of the Knights, Rhodes"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Rhodes_Old_Town_Street_of_Knights_4.JPG",
+    "author": "Bilinmiyor",
+    "license": "Public domain",
+    "cityKey": "rodos"
+  },
+  "rodos-lindos": {
+    "file": "/images/blog/rodos-lindos.webp",
+    "alt": {
+      "tr": "Lindos Akropolü ve altındaki beyaz köy",
+      "en": "The acropolis of Lindos above the white village"
+    },
+    "caption": {
+      "tr": "Lindos Akropolü",
+      "en": "The acropolis of Lindos"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Acropolis_Lindos_Rhodes_1.jpg",
+    "author": "Jebulon",
+    "license": "CC0",
+    "cityKey": "rodos"
+  },
   "roma-kolezyum": {
     "file": "/images/blog/roma-kolezyum.webp",
     "alt": {
@@ -2503,6 +2623,66 @@
     "author": "Dosseman",
     "license": "CC BY-SA 4.0",
     "cityKey": "sanliurfa"
+  },
+  "santorini-fira": {
+    "file": "/images/blog/santorini-fira.webp",
+    "alt": {
+      "tr": "Fira'da uçurum yamacına tutunmuş geleneksel beyaz evler",
+      "en": "Traditional white houses clinging to the cliff side at Fira"
+    },
+    "caption": {
+      "tr": "Fira'da uçurum yamacındaki evler",
+      "en": "The cliffside houses of Fira"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:The_traditional_houses_in_Fira_cling_to_the_cliff_side_in_Santorini,_Greece_(33704466353).jpg",
+    "author": "Winniepix",
+    "license": "CC BY 2.0",
+    "cityKey": "santorini"
+  },
+  "santorini-oia": {
+    "file": "/images/blog/santorini-oia.webp",
+    "alt": {
+      "tr": "Oia'nın kaldera kenarına sıralanmış beyaz evleri",
+      "en": "The white houses of Oia stacked along the caldera rim"
+    },
+    "caption": {
+      "tr": "Oia, Santorini",
+      "en": "Oia, Santorini"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Oia_-_Santorini_-_Greece_-_16.jpg",
+    "author": "Norbert Nagel",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "santorini"
+  },
+  "selanik-aristotelous": {
+    "file": "/images/blog/selanik-aristotelous.webp",
+    "alt": {
+      "tr": "Aristotelous Meydanı ve çevresindeki kemerli binalar",
+      "en": "Aristotelous Square and the arcaded buildings around it"
+    },
+    "caption": {
+      "tr": "Aristotelous Meydanı",
+      "en": "Aristotelous Square"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Aristotelous_Plateia.jpg",
+    "author": "User:JFKennedy",
+    "license": "Public domain",
+    "cityKey": "selanik"
+  },
+  "selanik-beyaz-kule": {
+    "file": "/images/blog/selanik-beyaz-kule.webp",
+    "alt": {
+      "tr": "Selanik sahili ve Beyaz Kule",
+      "en": "The Thessaloniki waterfront and the White Tower"
+    },
+    "caption": {
+      "tr": "Beyaz Kule, Selanik",
+      "en": "The White Tower, Thessaloniki"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Thessaloniki_View.jpg",
+    "author": "Ωριγένης",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "selanik"
   },
   "selcuk-efes": {
     "file": "/images/blog/selcuk-efes.webp",
