@@ -1,5 +1,5 @@
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 201/265 sehir -->
+<!-- 207/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -203,13 +203,13 @@
 | 198 | LK | Kolombo | `kolombo` | 1 | yayında | kolombo-fort-gari-kandy-ella-treni-valiz | colombo-luggage-storage-fort-station |
 | 199 | LK | Kandy | `kandy` | 1 | yayında | kandy-dis-tapinagi-puja-saatleri-ella-treni-valiz | kandy-luggage-storage-tooth-temple-puja |
 | 200 | MV | Male | `male` | 1 | yayında | male-havalimani-ayri-ada-deniz-ucagi-valiz | male-luggage-storage-airport-island |
-| 201 | UZ | Toshkent | `taskent` | 1 | — |  |  |
+| 201 | UZ | Toshkent | `taskent` | 1 | yayında | taskent-gece-yarisi-inen-ucuslar-metro-valiz | tashkent-luggage-storage-night-arrivals |
 | 202 | UZ | Samarqand | `semerkant` | 1 | yayında | semerkant-afrosiyob-treni-registan-valiz | samarkand-luggage-storage-afrosiyob-train |
-| 203 | UZ | Buxoro | `buhara` | 1 | — |  |  |
-| 204 | KZ | Almaty | `almati` | 1 | — |  |  |
-| 205 | KG | Bishkek | `biskek` | 1 | — |  |  |
-| 206 | PH | Manila | `manila` | 1 | — |  |  |
-| 207 | PH | Cebu | `cebu` | 1 | — |  |  |
+| 203 | UZ | Buxoro | `buhara` | 1 | yayında | buhara-gari-kagan-eski-sehir-valiz | bukhara-luggage-storage-kagan-station |
+| 204 | KZ | Almaty | `almati` | 1 | yayında | almati-iki-gar-dag-turlari-valiz | almaty-luggage-storage-mountains-two-stations |
+| 205 | KG | Bishkek | `biskek` | 1 | yayında | biskek-dag-turlari-marsrutka-valiz | bishkek-luggage-storage-mountain-trips |
+| 206 | PH | Manila | `manila` | 1 | yayında | manila-terminaller-arasi-aktarma-intramuros-valiz | manila-luggage-storage-terminal-transfer |
+| 207 | PH | Cebu | `cebu` | 1 | yayında | cebu-havalimani-mactan-oslob-turu-valiz | cebu-luggage-storage-mactan-oslob |
 | 208 | US | New York | `new-york` | 7 | — |  |  |
 | 209 | US | Washington DC | `washington` | 2 | — |  |  |
 | 210 | US | Boston | `boston` | 2 | — |  |  |

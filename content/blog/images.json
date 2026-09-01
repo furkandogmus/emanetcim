@@ -179,6 +179,36 @@
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Antalya,_Alanya_plaj%C4%B1_1.JPG"
   },
+  "almati-gar": {
+    "alt": {
+      "en": "Almaty-2 railway station and its surroundings from above",
+      "tr": "Yukarıdan Almatı-2 tren garı ve çevresi"
+    },
+    "author": "Nikolai Bulykin",
+    "caption": {
+      "en": "Almaty-2 station",
+      "tr": "Almatı-2 garı"
+    },
+    "cityKey": "almati",
+    "file": "/images/blog/almati-gar.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:%D0%90%D0%BB%D0%BC%D0%B0%D1%82%D1%8B-2_%D1%81%D0%B2%D0%B5%D1%80%D1%85%D1%83_(1).jpg"
+  },
+  "almati-katedral": {
+    "alt": {
+      "en": "The wooden Zenkov Cathedral inside Panfilov Park in Almaty",
+      "tr": "Almatı'da Panfilov Parkı içindeki ahşap Zenkov Katedrali"
+    },
+    "author": "Brian Harrington Spier from Shanghai, China",
+    "caption": {
+      "en": "Zenkov Cathedral, Almaty",
+      "tr": "Zenkov Katedrali, Almatı"
+    },
+    "cityKey": "almati",
+    "file": "/images/blog/almati-katedral.webp",
+    "license": "CC BY-SA 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Almaty_Russian_Orthodox_Cathedral.jpg"
+  },
   "amasya-kral-mezarlari": {
     "alt": {
       "en": "The Pontic royal tombs cut into the cliff at Amasya",
@@ -749,6 +779,36 @@
     "license": "CC BY-SA 2.0",
     "source": "https://commons.wikimedia.org/wiki/File:Museo_Guggenheim_Bilbao,_Bilbao._(23811575351).jpg"
   },
+  "biskek-ala-too": {
+    "alt": {
+      "en": "Ala-Too square in Bishkek",
+      "tr": "Bişkek'te Ala-Too meydanı"
+    },
+    "author": "Bala Biott",
+    "caption": {
+      "en": "Ala-Too square, Bishkek",
+      "tr": "Ala-Too meydanı, Bişkek"
+    },
+    "cityKey": "biskek",
+    "file": "/images/blog/biskek-ala-too.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Ala_Too_Square_Bishkek_2010_08_25_01.jpg"
+  },
+  "biskek-osh-pazari": {
+    "alt": {
+      "en": "The stalls of the Osh Bazaar in Bishkek",
+      "tr": "Bişkek'te Oş Pazarı'nın tezgâhları"
+    },
+    "author": "neiljs",
+    "caption": {
+      "en": "The Osh Bazaar, Bishkek",
+      "tr": "Oş Pazarı, Bişkek"
+    },
+    "cityKey": "biskek",
+    "file": "/images/blog/biskek-osh-pazari.webp",
+    "license": "CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Osh_Bazaar_in_Bishkek,_Kyrgyzstan.jpg"
+  },
   "bodrum-kale": {
     "alt": {
       "en": "Bodrum Castle above the harbour",
@@ -1019,6 +1079,36 @@
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Budva,citty_wall.jpg"
   },
+  "buhara-kalyan": {
+    "alt": {
+      "en": "The Kalyan minaret and mosque courtyard in Bukhara",
+      "tr": "Buhara'da Kalyan Minaresi ve cami avlusu"
+    },
+    "author": "Adam Harangozó",
+    "caption": {
+      "en": "The Kalyan minaret, Bukhara",
+      "tr": "Kalyan Minaresi, Buhara"
+    },
+    "cityKey": "buhara",
+    "file": "/images/blog/buhara-kalyan.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Kalyan_minaret_in_Bukhara.jpg"
+  },
+  "buhara-labi-hovuz": {
+    "alt": {
+      "en": "The Lyabi-Hauz pool in Bukhara with its mulberry trees",
+      "tr": "Buhara'da Labi Hovuz havuzu ve çevresindeki dut ağaçları"
+    },
+    "author": "Arian Zwegers",
+    "caption": {
+      "en": "Lyabi-Hauz, Bukhara",
+      "tr": "Labi Hovuz, Buhara"
+    },
+    "cityKey": "buhara",
+    "file": "/images/blog/buhara-labi-hovuz.webp",
+    "license": "CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Bukhara,_around_Lyabi-Hauz_Square_(6234994643).jpg"
+  },
   "bukres-gara-de-nord": {
     "alt": {
       "en": "The platforms and roof of Bucharest's Gara de Nord",
@@ -1198,6 +1288,36 @@
     "file": "/images/blog/cannes-suquet.webp",
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Cannes_from_Suquet_Tower_02.jpg"
+  },
+  "cebu-bazilika": {
+    "alt": {
+      "en": "The Basilica of the Santo Niño in Cebu",
+      "tr": "Cebu'da Santo Niño Bazilikası"
+    },
+    "author": "Arnold Carl Sancover",
+    "caption": {
+      "en": "The Santo Niño Basilica, Cebu",
+      "tr": "Santo Niño Bazilikası, Cebu"
+    },
+    "cityKey": "cebu",
+    "file": "/images/blog/cebu-bazilika.webp",
+    "license": "CC BY 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Basilica_of_the_Santo_Ni%C3%B1o_de_Ceb%C3%BA_by_Arnold_Carl_Sancover.jpg"
+  },
+  "cebu-magellan": {
+    "alt": {
+      "en": "The pavilion housing Magellan's Cross in Cebu",
+      "tr": "Cebu'da Magellan Haçı'nın bulunduğu pavyon"
+    },
+    "author": "Nickrds09",
+    "caption": {
+      "en": "Magellan's Cross, Cebu",
+      "tr": "Magellan Haçı, Cebu"
+    },
+    "cityKey": "cebu",
+    "file": "/images/blog/cebu-magellan.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Cross_of_Magellan_Cebu_City.JPG"
   },
   "cenevre-cornavin": {
     "alt": {
@@ -3479,6 +3599,36 @@
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Manchester_Piccadilly_station_MMB_01_390051_390037.jpg"
   },
+  "manila-fort-santiago": {
+    "alt": {
+      "en": "The gate of Fort Santiago in Manila",
+      "tr": "Manila'da Fort Santiago'nun kapısı"
+    },
+    "author": "en:User:Drumlanrig",
+    "caption": {
+      "en": "Fort Santiago, Manila",
+      "tr": "Fort Santiago, Manila"
+    },
+    "cityKey": "manila",
+    "file": "/images/blog/manila-fort-santiago.webp",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Fort_Santiago_Gate.jpg"
+  },
+  "manila-intramuros": {
+    "alt": {
+      "en": "The walls of Intramuros in Manila",
+      "tr": "Manila'da Intramuros'un surları"
+    },
+    "author": "P199",
+    "caption": {
+      "en": "Intramuros, Manila",
+      "tr": "Intramuros, Manila"
+    },
+    "cityKey": "manila",
+    "file": "/images/blog/manila-intramuros.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Intramuros.jpg"
+  },
   "marakes-jemaa": {
     "alt": {
       "en": "The Jemaa el-Fna square and its food stalls at night",
@@ -5519,6 +5669,36 @@
     "license": "CC BY 2.0",
     "source": "https://commons.wikimedia.org/wiki/File:Tangier_Morocco.jpg"
   },
+  "taskent-amir-temur": {
+    "alt": {
+      "en": "Amir Temur square in Tashkent and the trees around it",
+      "tr": "Taşkent'te Emir Timur meydanı ve çevresindeki ağaçlar"
+    },
+    "author": "Tim Adams",
+    "caption": {
+      "en": "Amir Temur square, Tashkent",
+      "tr": "Emir Timur meydanı, Taşkent"
+    },
+    "cityKey": "taskent",
+    "file": "/images/blog/taskent-amir-temur.webp",
+    "license": "CC BY 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Amir_Temur_Square_in_Tashkent_Uzbekistan_in_October_2024.jpg"
+  },
+  "taskent-metro": {
+    "alt": {
+      "en": "Passengers on a Tashkent metro platform as a train pulls in",
+      "tr": "Taşkent metrosunda perondaki yolcular ve yanaşan tren"
+    },
+    "author": "Sick Spiny",
+    "caption": {
+      "en": "A metro platform, Tashkent",
+      "tr": "Metro peronu, Taşkent"
+    },
+    "cityKey": "taskent",
+    "file": "/images/blog/taskent-metro.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:%D0%A1%D1%82%D0%B0%D0%BD%D1%86%D0%B8%D1%8F_%D0%BC%D0%B5%D1%82%D1%80%D0%BE_%D0%91%D0%B5%D1%80%D1%83%D0%BD%D0%B8.jpg"
+  },
   "tiflis-eski-sehir": {
     "alt": {
       "en": "Houses with carved wooden balconies in Tbilisi's old town",
@@ -5820,19 +6000,19 @@
     "source": "https://commons.wikimedia.org/wiki/File:Varanasi,_India,_Boats_and_river_Ganges_under_the_sun.jpg"
   },
   "varanasi-ghat": {
-    "file": "/images/blog/varanasi-ghat.webp",
     "alt": {
-      "tr": "Varanasi'de ghatların basamakları ve nehir kıyısındaki yaşam",
-      "en": "The steps of the ghats and riverside life in Varanasi"
+      "en": "The steps of the ghats and riverside life in Varanasi",
+      "tr": "Varanasi'de ghatların basamakları ve nehir kıyısındaki yaşam"
     },
-    "caption": {
-      "tr": "Ghatlar, Varanasi",
-      "en": "The ghats, Varanasi"
-    },
-    "source": "https://commons.wikimedia.org/wiki/File:City_Scene_along_Ghats_-_Varanasi_-_Uttar_Pradesh_-_India_(12499103155).jpg",
     "author": "Adam Jones from Kelowna, BC, Canada",
+    "caption": {
+      "en": "The ghats, Varanasi",
+      "tr": "Ghatlar, Varanasi"
+    },
+    "cityKey": "varanasi",
+    "file": "/images/blog/varanasi-ghat.webp",
     "license": "CC BY-SA 2.0",
-    "cityKey": "varanasi"
+    "source": "https://commons.wikimedia.org/wiki/File:City_Scene_along_Ghats_-_Varanasi_-_Uttar_Pradesh_-_India_(12499103155).jpg"
   },
   "varsova-centralna": {
     "alt": {
