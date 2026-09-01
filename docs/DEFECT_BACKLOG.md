@@ -9,6 +9,65 @@
 > dokunulmadı. `docs/UX_AUDIT_BOUNCE_COMPARISON_2026-06-15.md` ise 15 Haziran'dan
 > kalma, yalnızca UX kapsayan eski bir denetim; hâlâ geçerli ama **eksik** — 21
 > Ağustos'ta bulunan iki kritik hatanın ikisi de içinde yoktu.
+>
+> **En üstteki "BEKLEYEN KARARLAR" bölümü, aşağıdaki maddelerin düzeltilmeyen
+> kısımlarının tek listesidir.** Kod yazılmadan önce bakılacak yer orasıdır;
+> aşağısı tarihli ve append-only geçmiştir.
+
+## BEKLEYEN KARARLAR — 2026-09-01 itibarıyla
+
+> Bu bölüm aşağıdaki tarihli maddelerin **düzeltilmeyen** kısımlarının tek
+> listesidir. Her satır bir kararı bekliyor ve karar verilmeden kod yazılamaz —
+> ya bir iş/hukuk tercihi gerektiriyor ya da bu depoda yapılamayacak bir adım.
+>
+> Neden ayrı bir bölüm: kararlar 12 maddenin içine 8 ayrı yerde dağılmıştı ve
+> hiçbir yerde **liste** hâlinde durmuyordu. Sohbette söylenmiş olması saymaz.
+>
+> Bir karar verildiğinde: ilgili satırı buradan sil, kararı ait olduğu tarihli
+> maddeye yaz. Bu bölüm yerinde güncellenir, geçmiş aşağıda birikir.
+
+### A. Hukuk danışmanı gerektirenler
+
+| # | Konu | Neden bekliyor | Kaynak madde |
+|---|---|---|---|
+| A1 | **Esnaf sözleşme paketi** — ortaklık sözleşmesi, veri işleyen sözleşmesi, emanet/sorumluluk şartları | Esnaf, misafirle **tam aynı iki tüketici belgesini** kabul ederek kaydoluyor (`terms`, `privacy`). Esnafa özel tanımlı belge YOK. Oysa esnaf misafirin adını/telefonunu/e-postasını görüyor ve fiziksel emanet alıyor. | KVKK silme hakkı |
+| A2 | **Sorumluluk maddesi** | `Terms.a2`nin tamamı tek cümle: *"Maksimum 10.000 TL sigorta."* SSS "kapsam, istisnalar ve başvuru **Şartlar'da**" diyor — işaret ettiği yer boş. | Güvence tutarı |
+| A3 | **"Sigorta" terimi** | Metinlerin çoğu düz *"sigortalıdır"* diyor ama `Guest.trustInsuranceBody` *"Bağımsız perakende poliçe değildir"* diyor. İkisi aynı misafire gösteriliyor; biri yanlış. Hangisinin doğru olduğu bir **sözleşme olgusudur** (anlaşmalı sigortacı var mı?) ve kodda görünmez. TR'de sigortacılık 5684 sayılı Kanun / SEDDK altında. | Güvence tutarı |
+| A4 | **Terk edilmiş valiz prosedürü** | Kapasite artık doğru sayıyor, dolayısıyla alınmayan valiz kalıcı maliyet. Kaç gün sonra ne olur, hangi bildirimle, nasıl tasfiye? | Kapasite / geç teslim |
+
+### B. Ürün sahibi kararı — para ve politika
+
+| # | Konu | Seçenekler | Kaynak madde |
+|---|---|---|---|
+| B1 | **İndirim politikası** — kuponun bedelini kim karşılar? | Bugün **tamamen esnaf** karşılıyor (hakediş indirilmiş `totalPrice` üzerinden). Pazar yerleri bunu üç şekilde çözer: esnaf / platform / paylaşımlı. Esnafa bunu söyleyen hiçbir metin yok. Artık **ölçülebilir** (`couponDiscountAmount` kayıtlı). | Kupon indirimi |
+| B2 | **İptal ücreti** — `cancelFixedFeeTry` | Ayar var, **onu okuyan tek satır yok**; iptal her zaman tam iade. Nakit tahsilatta zaten uygulanamaz (elde tutulacak para yok). Ya PSP sonrası uygulanır, ya admin panelinden **kaldırılır** — şu an var olmayan bir kuralı ayarlanabilir gösteriyor. | Sadakat puanı |
+| B3 | **"Fotoğraf" ibaresi** | Mühür kanıt fotoğrafı artık çekiliyor (web). Ama `Guest.trustInsuranceBody` ve `FAQ.a1` bunu **her teslimde** vaat ediyor; mobilde hâlâ yok ve fotoğraf isteğe bağlı. Ya ibare yumuşatılır ya mobil tamamlanır. | Mühür kanıt fotoğrafı |
+| B4 | **`FAQ.q5` olmayan bir ödeme satırını anlatıyor** | *"Ödemedeki sigorta satırı neyi kapsar?"* — `insuranceFeeTry` = 0 ve kod her zaman 0 üretiyor. Ücret konacak mı, yoksa metin mi kalkacak? | Güvence tutarı |
+| B5 | **`AnalyticsEvent.userId` anonimleştirmeden sağ çıkıyor** | Saklama gerekçesi zayıf; analitik kimlik olmadan da çalışır. Sil / `userId`yi boşalt / olduğu gibi bırak. | KVKK silme hakkı |
+| B6 | **Esnafa şikâyet bildirimi** | Hakkında hırsızlık/hasar şikâyeti açılan esnaf **haberdar edilmiyor** ve görüşünü bildiremiyor. Platform önce incelemek isteyebilir — bu bir süreç tercihi. | Uyuşmazlık |
+
+### C. Sende — bu depoda yapılamayan adımlar
+
+| # | Konu | Ne gerekiyor |
+|---|---|---|
+| C1 | **S3 ortam değişkenleri** | `S3_BUCKET`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_PUBLIC_BASE_URL`. Beşi birden tanımlı olmadan yükleme yüzeyi hiç açılmaz. `S3_PUBLIC_BASE_URL` değişince **yeniden derleme** gerekir (`next/image` alan adı ondan türetiliyor). |
+| C2 | **VAPID anahtarları** | `npx web-push generate-vapid-keys` → `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `NEXT_PUBLIC_VAPID_PUBLIC_KEY`. Tanımlanana kadar push gönderimi `SKIPPED` kalır. |
+| C3 | **Mobil biçim borcu** | 37 dosya `dart format` dışı; mobil CI kalıcı kırmızı, yani mobile giren hiçbir değişiklik gerçek kapıdan geçmiyor. Bu makinede dart/flutter yok. |
+| C4 | **Mobil check-in fotoğrafı** | Sunucu iki taşıyıcıyı da destekliyor; Flutter ekranı eksik ve buradan doğrulanamıyor. |
+
+### D. Sen seçersen yapılabilir — teknik iş, karar küçük
+
+| # | Konu | Kaynak madde |
+|---|---|---|
+| D1 | **Misafire geç teslim hatırlatması** — bugün uyarı yalnızca esnafa gidiyor ve *"misafir ile iletişime geçin"* diyor; yükü esnafa bırakıyor | Geç teslim |
+| D2 | **Esnafa uyuşmazlık yüzeyi** — haberdar et + kendi kanıtını göster (kanıt artık toplanıyor ve admin görüyor) | Uyuşmazlık / kanıt |
+| D3 | **Ayar değişikliğinde etkilenen misafirleri listeleme** — uyarı sayıyı söylüyor, kimler olduğunu değil | Ayar değişikliği |
+| D4 | **`take: 100` iki misafir hatırlatma sorgusunda** — sıralama ve uyarı yok (geç teslim sorgusunda düzeltildi) | Geç teslim |
+| D5 | **Valiz düzeltmesine misafir onayı** — `pendingBagRevision` altyapısı hazır, misafir yüzeyi yok; esnaf şu an fiyatı onaysız artırabiliyor | Valiz düzeltmesi |
+| D6 | **Mobil push gönderimi (FCM)** — token toplanıyor, gönderim kodu hiç yok. Kullanılmayan amaç için veri toplamak ayrıca KVKK riski | Push bildirimi |
+| D7 | **İlk giriş kontrol listesi** — yeni esnaf panelde sekiz sıfır görüyor | — |
+| D8 | **Vitrin afişi / QR** — yazdırılabilir tabela | — |
+| D9 | **Koordinat uyarısı** — onayda "konumu yok, aramada çıkmaz" (bugün tüm dükkanlarda koordinat var, sessiz bir tuzak) | — |
 
 ## 2026-09-01 — geç teslim uyarısı esnafa HER GÜN, SÜRESİZ gidiyordu
 
