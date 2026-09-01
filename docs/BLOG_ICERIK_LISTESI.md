@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| Yazısı olan şehir | **123 / 265** — Türkiye'nin 39 şehri tamamlandı |
+| Yazısı olan şehir | **129 / 265** — Türkiye'nin 39 şehri tamamlandı |
 | Yayına yazma | `npx tsx scripts/blog-city-posts.ts --apply` (kuru çalışma varsayılan) |
 | Denetim | `npx tsx scripts/blog-city-posts.ts --verify` + `npx tsx scripts/blog-images.ts --verify` |
 | Eksik listesi | `npx tsx scripts/blog-city-posts.ts --coverage` |
@@ -63,7 +63,7 @@ alakasız olabilir.
 
 <!-- Aşağısı üretilmiştir: npx tsx scripts/blog-city-posts.ts --list-md -->
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 123/265 sehir -->
+<!-- 129/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -195,12 +195,12 @@ alakasız olabilir.
 | 126 | FR | Lyon | `lyon` | 2 | yayında | lyon-traboule-iki-gar-valiz | lyon-luggage-storage-traboules-two-stations |
 | 127 | FR | Bordeaux | `bordeaux` | 1 | yayında | bordeaux-saint-jean-uc-kilometre-valiz | bordeaux-luggage-storage-saint-jean |
 | 128 | FR | Strasbourg | `strasbourg` | 1 | yayında | strasbourg-grande-ile-noel-pazari-valiz | strasbourg-luggage-storage-grande-ile-christmas-market |
-| 129 | FR | Cannes | `cannes` | 1 | — |  |  |
-| 130 | MC | Monako | `monako` | 1 | — |  |  |
-| 131 | GE | Batumi | `batum` | 1 | — |  |  |
-| 132 | GE | Tbilisi | `tiflis` | 2 | — |  |  |
-| 133 | AM | Yerevan | `erivan` | 1 | — |  |  |
-| 134 | AZ | Bakı | `baku` | 1 | — |  |  |
+| 129 | FR | Cannes | `cannes` | 1 | yayında | cannes-festival-akreditasyon-suquet-valiz | cannes-luggage-storage-festival-week |
+| 130 | MC | Monako | `monako` | 1 | yayında | monako-asansorler-kat-kat-sehir-valiz | monaco-luggage-storage-public-lifts |
+| 131 | GE | Batumi | `batum` | 1 | yayında | batum-sinirdan-gelenler-bulvar-valiz | batumi-luggage-storage-border-boulevard |
+| 132 | GE | Tbilisi | `tiflis` | 2 | yayında | tiflis-kukurt-hamami-dolap-valiz | tbilisi-luggage-storage-sulphur-baths |
+| 133 | AM | Yerevan | `erivan` | 1 | yayında | erivan-cascade-basamaklar-valiz | yerevan-luggage-storage-cascade |
+| 134 | AZ | Bakı | `baku` | 1 | yayında | baku-icerisehir-surlar-bulvar-valiz | baku-luggage-storage-icherisheher |
 | 135 | SA | Makkah | `mekke` | 5 | — |  |  |
 | 136 | SA | Madinah | `medine` | 5 | — |  |  |
 | 137 | SA | Jeddah | `cidde` | 2 | — |  |  |

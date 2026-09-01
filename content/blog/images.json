@@ -329,6 +329,36 @@
     "license": "CC BY-SA 3.0",
     "cityKey": "ayvalik"
   },
+  "baku-bulvar": {
+    "file": "/images/blog/baku-bulvar.webp",
+    "alt": {
+      "tr": "Hazar kıyısındaki Bakü bulvarı ve arkasındaki kuleler",
+      "en": "Baku's Caspian boulevard with the towers behind it"
+    },
+    "caption": {
+      "tr": "Bakü bulvarı",
+      "en": "The Baku boulevard"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Baku_Bulvar9.JPG",
+    "author": "Frokor",
+    "license": "CC BY-SA 3.0",
+    "cityKey": "baku"
+  },
+  "baku-icerisehir": {
+    "file": "/images/blog/baku-icerisehir.webp",
+    "alt": {
+      "tr": "Bakü'de İçərişəhər'in surları ve içindeki eski şehir",
+      "en": "The walls of Icherisheher in Baku and the old city inside them"
+    },
+    "caption": {
+      "tr": "İçərişəhər, Bakü",
+      "en": "Icherisheher, Baku"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Walled_City_of_Baku.jpg",
+    "author": "Interfase",
+    "license": "Public domain",
+    "cityKey": "baku"
+  },
   "barcelona-sagrada": {
     "file": "/images/blog/barcelona-sagrada.webp",
     "alt": {
@@ -358,6 +388,36 @@
     "author": "Smiley.toerist",
     "license": "CC BY-SA 4.0",
     "cityKey": "barcelona"
+  },
+  "batum-bulvar": {
+    "file": "/images/blog/batum-bulvar.webp",
+    "alt": {
+      "tr": "Batum bulvarında sütunlu geçit ve sahil",
+      "en": "The colonnade and shoreline on Batumi's boulevard"
+    },
+    "caption": {
+      "tr": "Batum bulvarı",
+      "en": "The Batumi boulevard"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Batumi_Boulevard_Colonnades.jpg",
+    "author": "Sosotedrd",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "batum"
+  },
+  "batum-piazza": {
+    "file": "/images/blog/batum-piazza.webp",
+    "alt": {
+      "tr": "Batum'da Pharnavaz caddesi ve çevresindeki binalar",
+      "en": "Pharnavaz street in Batumi and the buildings along it"
+    },
+    "caption": {
+      "tr": "Batum eski şehri",
+      "en": "Batumi old town"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Pharnavaz_street,_Batumi,_Georgia.jpg",
+    "author": "Przemysław Wollenszleger",
+    "license": "CC BY-SA 2.0",
+    "cityKey": "batum"
   },
   "belgrad-kalemegdan": {
     "file": "/images/blog/belgrad-kalemegdan.webp",
@@ -809,6 +869,36 @@
     "license": "CC BY-SA 3.0",
     "cityKey": "canakkale"
   },
+  "cannes-croisette": {
+    "file": "/images/blog/cannes-croisette.webp",
+    "alt": {
+      "tr": "Cannes'da liman ve Croisette boyunca uzanan sahil",
+      "en": "The harbour at Cannes and the shore along the Croisette"
+    },
+    "caption": {
+      "tr": "Cannes limanı ve Croisette",
+      "en": "Cannes harbour and the Croisette"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Cannes_-_port_et_croisette.jpg",
+    "author": "Christophe.Finot",
+    "license": "CC BY-SA 2.5",
+    "cityKey": "cannes"
+  },
+  "cannes-suquet": {
+    "file": "/images/blog/cannes-suquet.webp",
+    "alt": {
+      "tr": "Le Suquet kulesinden Cannes ve körfez",
+      "en": "Cannes and the bay seen from the Suquet tower"
+    },
+    "caption": {
+      "tr": "Le Suquet'ten Cannes",
+      "en": "Cannes from Le Suquet"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Cannes_from_Suquet_Tower_02.jpg",
+    "author": "Spike",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "cannes"
+  },
   "cenevre-cornavin": {
     "file": "/images/blog/cenevre-cornavin.webp",
     "alt": {
@@ -1078,6 +1168,36 @@
     "author": "Martin Dawes",
     "license": "CC BY-SA 2.0",
     "cityKey": "edinburgh"
+  },
+  "erivan-cascade": {
+    "file": "/images/blog/erivan-cascade.webp",
+    "alt": {
+      "tr": "Erivan'da Cascade'ın basamakları ve heykel parkı",
+      "en": "The steps of the Yerevan Cascade and its sculpture park"
+    },
+    "caption": {
+      "tr": "Cascade, Erivan",
+      "en": "The Cascade, Yerevan"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:2014_Erywa%C5%84,_Park_przy_Kaskadach_(01).jpg",
+    "author": "Marcin Konsek",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "erivan"
+  },
+  "erivan-cumhuriyet": {
+    "file": "/images/blog/erivan-cumhuriyet.webp",
+    "alt": {
+      "tr": "Erivan'da Cumhuriyet Meydanı ve fıskiyeler",
+      "en": "Republic Square in Yerevan and its fountains"
+    },
+    "caption": {
+      "tr": "Cumhuriyet Meydanı, Erivan",
+      "en": "Republic Square, Yerevan"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Republic_Square_Metro_Station_Fountains_in_Yerevan_2019-06-20v2.jpg",
+    "author": "Armenak Margarian",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "erivan"
   },
   "eskisehir-odunpazari": {
     "file": "/images/blog/eskisehir-odunpazari.webp",
@@ -2384,6 +2504,36 @@
     "license": "CC BY-SA 3.0",
     "cityKey": "milano"
   },
+  "monako-eski-sehir": {
+    "file": "/images/blog/monako-eski-sehir.webp",
+    "alt": {
+      "tr": "Monaco-Ville'de dar bir sokak",
+      "en": "A narrow lane in Monaco-Ville"
+    },
+    "caption": {
+      "tr": "Monaco-Ville sokakları",
+      "en": "The lanes of Monaco-Ville"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Monaco-Ville-ruelle.jpg",
+    "author": "Rundvald",
+    "license": "Public domain",
+    "cityKey": "monako"
+  },
+  "monako-kazino": {
+    "file": "/images/blog/monako-kazino.webp",
+    "alt": {
+      "tr": "Monte Carlo Kumarhanesi'nin süslü cephesi",
+      "en": "The ornate frontage of the Monte Carlo Casino"
+    },
+    "caption": {
+      "tr": "Monte Carlo Kumarhanesi",
+      "en": "The Monte Carlo Casino"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Real_Monte_Carlo_Casino.jpg",
+    "author": "sam garza from Los Angeles, USA",
+    "license": "CC BY 2.0",
+    "cityKey": "monako"
+  },
   "mostar-carsi": {
     "file": "/images/blog/mostar-carsi.webp",
     "alt": {
@@ -3403,6 +3553,36 @@
     "author": "Ivar Leidus",
     "license": "CC BY-SA 3.0 ee",
     "cityKey": "tallinn"
+  },
+  "tiflis-eski-sehir": {
+    "file": "/images/blog/tiflis-eski-sehir.webp",
+    "alt": {
+      "tr": "Tiflis eski şehrinde ahşap balkonlu evler",
+      "en": "Houses with carved wooden balconies in Tbilisi's old town"
+    },
+    "caption": {
+      "tr": "Tiflis eski şehri",
+      "en": "Tbilisi old town"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:2014_Tbilisi,_Domy_na_Starym_Mie%C5%9Bcie_(04).jpg",
+    "author": "Marcin Konsek",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "tiflis"
+  },
+  "tiflis-narikala": {
+    "file": "/images/blog/tiflis-narikala.webp",
+    "alt": {
+      "tr": "Narikala Kalesi'nden Tiflis ve Kura nehri",
+      "en": "Tbilisi and the Kura river seen from the Narikala fortress"
+    },
+    "caption": {
+      "tr": "Narikala'dan Tiflis",
+      "en": "Tbilisi from Narikala"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Tbilisi13.jpg",
+    "author": "BBCLCD",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "tiflis"
   },
   "tiran-dajti": {
     "file": "/images/blog/tiran-dajti.webp",
