@@ -1,5 +1,5 @@
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 237/265 sehir -->
+<!-- 243/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -240,12 +240,12 @@
 | 235 | CL | Santiago | `santiago` | 1 | yayında | santiago-metro-yogun-saat-dag-turlari-valiz | santiago-luggage-storage-metro-peak-hours |
 | 236 | AR | Buenos Aires | `buenos-aires` | 3 | yayında | buenos-aires-iki-havalimani-san-telmo-pazari-valiz | buenos-aires-luggage-storage-two-airports |
 | 237 | BR | Rio de Janeiro | `rio` | 2 | yayında | rio-plaj-dolabi-yok-teleferik-kabini-valiz | rio-luggage-storage-beach-cable-car |
-| 238 | BR | São Paulo | `sao-paulo` | 1 | — |  |  |
-| 239 | UY | Montevideo | `montevideo` | 1 | — |  |  |
-| 240 | ZA | Cape Town | `cape-town` | 2 | — |  |  |
-| 241 | ZA | Johannesburg | `johannesburg` | 1 | — |  |  |
-| 242 | KE | Nairobi | `nairobi` | 1 | — |  |  |
-| 243 | TZ | Zanzibar | `zanzibar` | 1 | — |  |  |
+| 238 | BR | São Paulo | `sao-paulo` | 1 | yayında | sao-paulo-uc-havalimani-viracopos-valiz | sao-paulo-luggage-storage-three-airports |
+| 239 | UY | Montevideo | `montevideo` | 1 | yayında | montevideo-buenos-aires-feribotu-ciudad-vieja-valiz | montevideo-luggage-storage-buenos-aires-ferry |
+| 240 | ZA | Cape Town | `cape-town` | 2 | yayında | cape-town-teleferik-ruzgar-robben-adasi-valiz | cape-town-luggage-storage-cableway-wind |
+| 241 | ZA | Johannesburg | `johannesburg` | 1 | yayında | johannesburg-aktarma-sehri-gautrain-sandton-valiz | johannesburg-luggage-storage-transit-city |
+| 242 | KE | Nairobi | `nairobi` | 1 | yayında | nairobi-safari-yumusak-canta-sgr-terminali-valiz | nairobi-luggage-storage-safari-soft-bags |
+| 243 | TZ | Zanzibar | `zanzibar` | 1 | yayında | zanzibar-stone-town-dar-sokaklar-plaj-mesafesi-valiz | zanzibar-luggage-storage-stone-town-lanes |
 | 244 | AU | Sydney | `sidney` | 3 | — |  |  |
 | 245 | AU | Melbourne | `melbourne` | 2 | — |  |  |
 | 246 | AU | Brisbane | `brisbane` | 1 | — |  |  |

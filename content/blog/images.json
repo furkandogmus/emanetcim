@@ -480,34 +480,34 @@
     "source": "https://commons.wikimedia.org/wiki/File:Cunda_adas%C4%B1_konak_%22road_house_on_the_cunda_island%22_ayval%C4%B1k_-_panoramio.jpg"
   },
   "ba-caminito": {
-    "file": "/images/blog/ba-caminito.webp",
     "alt": {
-      "tr": "Buenos Aires'te La Boca'daki Caminito'nun renkli cepheleri",
-      "en": "The coloured facades of Caminito in La Boca, Buenos Aires"
+      "en": "The coloured facades of Caminito in La Boca, Buenos Aires",
+      "tr": "Buenos Aires'te La Boca'daki Caminito'nun renkli cepheleri"
     },
-    "caption": {
-      "tr": "Caminito, La Boca",
-      "en": "Caminito, La Boca"
-    },
-    "source": "https://commons.wikimedia.org/wiki/File:Buenos_Aires_-_La_Boca_-_Caminito_-_200807i.jpg",
     "author": "Luis Argerich from Buenos Aires, Argentina",
+    "caption": {
+      "en": "Caminito, La Boca",
+      "tr": "Caminito, La Boca"
+    },
+    "cityKey": "buenos-aires",
+    "file": "/images/blog/ba-caminito.webp",
     "license": "CC BY 2.0",
-    "cityKey": "buenos-aires"
+    "source": "https://commons.wikimedia.org/wiki/File:Buenos_Aires_-_La_Boca_-_Caminito_-_200807i.jpg"
   },
   "ba-san-telmo": {
-    "file": "/images/blog/ba-san-telmo.webp",
     "alt": {
-      "tr": "Buenos Aires'te San Telmo'nun pazar günü kurulan antika pazarı",
-      "en": "The Sunday antiques market in San Telmo, Buenos Aires"
+      "en": "The Sunday antiques market in San Telmo, Buenos Aires",
+      "tr": "Buenos Aires'te San Telmo'nun pazar günü kurulan antika pazarı"
     },
-    "caption": {
-      "tr": "San Telmo pazarı, Buenos Aires",
-      "en": "The San Telmo market, Buenos Aires"
-    },
-    "source": "https://commons.wikimedia.org/wiki/File:San_Telmo_Sunday_Antique_Market.jpg",
     "author": "LWY",
+    "caption": {
+      "en": "The San Telmo market, Buenos Aires",
+      "tr": "San Telmo pazarı, Buenos Aires"
+    },
+    "cityKey": "buenos-aires",
+    "file": "/images/blog/ba-san-telmo.webp",
     "license": "CC BY 2.0",
-    "cityKey": "buenos-aires"
+    "source": "https://commons.wikimedia.org/wiki/File:San_Telmo_Sunday_Antique_Market.jpg"
   },
   "baku-bulvar": {
     "alt": {
@@ -1409,6 +1409,36 @@
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Cannes_from_Suquet_Tower_02.jpg"
   },
+  "cape-town-tepe": {
+    "alt": {
+      "en": "Cape Town with Table Mountain behind it",
+      "tr": "Cape Town ve arkasındaki Masa Dağı"
+    },
+    "author": "Dietmar Rabich",
+    "caption": {
+      "en": "Table Mountain, Cape Town",
+      "tr": "Masa Dağı, Cape Town"
+    },
+    "cityKey": "cape-town",
+    "file": "/images/blog/cape-town-tepe.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Cape_Town_(ZA),_Table_Mountain_--_2024_--_2821.jpg"
+  },
+  "cape-town-waterfront": {
+    "alt": {
+      "en": "The clocktower and bridge at the V&A Waterfront in Cape Town",
+      "tr": "Cape Town'da V&A Waterfront'un saat kulesi ve köprüsü"
+    },
+    "author": "Dietmar Rabich",
+    "caption": {
+      "en": "The V&A Waterfront, Cape Town",
+      "tr": "V&A Waterfront, Cape Town"
+    },
+    "cityKey": "cape-town",
+    "file": "/images/blog/cape-town-waterfront.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Cape_Town_(ZA),_Waterfront,_Clocktower_Bridge_--_2024_--_2904.jpg"
+  },
   "cartagena-sokak": {
     "alt": {
       "en": "A coloured street with balconies in Cartagena",
@@ -1620,34 +1650,34 @@
     "source": "https://commons.wikimedia.org/wiki/File:Bayt_Nasif,_1872,_old_Jeddah,_Saudi_Arabia_(9)_(50703482701).jpg"
   },
   "cusco-plaza": {
-    "file": "/images/blog/cusco-plaza.webp",
     "alt": {
-      "tr": "Cusco'da Plaza de Armas ve katedral",
-      "en": "The Plaza de Armas and the cathedral in Cusco"
+      "en": "The Plaza de Armas and the cathedral in Cusco",
+      "tr": "Cusco'da Plaza de Armas ve katedral"
     },
-    "caption": {
-      "tr": "Plaza de Armas, Cusco",
-      "en": "Plaza de Armas, Cusco"
-    },
-    "source": "https://commons.wikimedia.org/wiki/File:Catedral,_Plaza_de_Armas,_Cusco,_Per%C3%BA,_2015-07-31,_DD_57.JPG",
     "author": "Diego Delso",
+    "caption": {
+      "en": "Plaza de Armas, Cusco",
+      "tr": "Plaza de Armas, Cusco"
+    },
+    "cityKey": "cusco",
+    "file": "/images/blog/cusco-plaza.webp",
     "license": "CC BY-SA 4.0",
-    "cityKey": "cusco"
+    "source": "https://commons.wikimedia.org/wiki/File:Catedral,_Plaza_de_Armas,_Cusco,_Per%C3%BA,_2015-07-31,_DD_57.JPG"
   },
   "cusco-sacsayhuaman": {
-    "file": "/images/blog/cusco-sacsayhuaman.webp",
     "alt": {
-      "tr": "Cusco'nun üstündeki Sacsayhuamán'ın dev taş duvarları",
-      "en": "The massive stone walls of Sacsayhuaman above Cusco"
+      "en": "The massive stone walls of Sacsayhuaman above Cusco",
+      "tr": "Cusco'nun üstündeki Sacsayhuamán'ın dev taş duvarları"
     },
-    "caption": {
-      "tr": "Sacsayhuamán, Cusco",
-      "en": "Sacsayhuaman, Cusco"
-    },
-    "source": "https://commons.wikimedia.org/wiki/File:Sacsayhuam%C3%A1n,_Cusco,_Per%C3%BA,_2015-07-31,_DD_05.JPG",
     "author": "Diego Delso",
+    "caption": {
+      "en": "Sacsayhuaman, Cusco",
+      "tr": "Sacsayhuamán, Cusco"
+    },
+    "cityKey": "cusco",
+    "file": "/images/blog/cusco-sacsayhuaman.webp",
     "license": "CC BY-SA 4.0",
-    "cityKey": "cusco"
+    "source": "https://commons.wikimedia.org/wiki/File:Sacsayhuam%C3%A1n,_Cusco,_Per%C3%BA,_2015-07-31,_DD_05.JPG"
   },
   "danang-ejderha-koprusu": {
     "alt": {
@@ -2804,6 +2834,36 @@
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Hawa_Mahal_2011.jpg"
   },
+  "johannesburg-sandton": {
+    "alt": {
+      "en": "The towers of Sandton in Johannesburg",
+      "tr": "Johannesburg'da Sandton'ın gökdelenleri"
+    },
+    "author": "Bizcallers",
+    "caption": {
+      "en": "Sandton, Johannesburg",
+      "tr": "Sandton, Johannesburg"
+    },
+    "cityKey": "johannesburg",
+    "file": "/images/blog/johannesburg-sandton.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:View_Of_Sandto_From_The_West_Cliff_Hotel_In_Forst_Town.jpg"
+  },
+  "johannesburg-sehir": {
+    "alt": {
+      "en": "The Johannesburg skyline",
+      "tr": "Johannesburg'un şehir silueti"
+    },
+    "author": "Aleph500Adam",
+    "caption": {
+      "en": "Johannesburg",
+      "tr": "Johannesburg"
+    },
+    "cityKey": "johannesburg",
+    "file": "/images/blog/johannesburg-sehir.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Johannesburg_in_December.jpg"
+  },
   "kahire-han-halili": {
     "alt": {
       "en": "A narrow lane and shops in the Khan el-Khalili bazaar",
@@ -3450,34 +3510,34 @@
     "source": "https://commons.wikimedia.org/wiki/File:Den_Haag_Centraal-1589.jpg"
   },
   "lima-miraflores": {
-    "file": "/images/blog/lima-miraflores.webp",
     "alt": {
-      "tr": "Lima'da Miraflores'in falezleri ve arkasındaki binalar",
-      "en": "The cliffs of Miraflores in Lima with the buildings behind"
+      "en": "The cliffs of Miraflores in Lima with the buildings behind",
+      "tr": "Lima'da Miraflores'in falezleri ve arkasındaki binalar"
     },
-    "caption": {
-      "tr": "Miraflores, Lima",
-      "en": "Miraflores, Lima"
-    },
-    "source": "https://commons.wikimedia.org/wiki/File:Miraflores_Lima_Peru_skyline.jpg",
     "author": "Mira4espina78y",
+    "caption": {
+      "en": "Miraflores, Lima",
+      "tr": "Miraflores, Lima"
+    },
+    "cityKey": "lima",
+    "file": "/images/blog/lima-miraflores.webp",
     "license": "CC BY-SA 3.0",
-    "cityKey": "lima"
+    "source": "https://commons.wikimedia.org/wiki/File:Miraflores_Lima_Peru_skyline.jpg"
   },
   "lima-plaza-mayor": {
-    "file": "/images/blog/lima-plaza-mayor.webp",
     "alt": {
-      "tr": "Lima'da Plaza Mayor ve çevresindeki sömürge dönemi yapıları",
-      "en": "The Plaza Mayor in Lima and its colonial buildings"
+      "en": "The Plaza Mayor in Lima and its colonial buildings",
+      "tr": "Lima'da Plaza Mayor ve çevresindeki sömürge dönemi yapıları"
     },
-    "caption": {
-      "tr": "Plaza Mayor, Lima",
-      "en": "Plaza Mayor, Lima"
-    },
-    "source": "https://commons.wikimedia.org/wiki/File:25_-_Lima_-_Ao%C3%BBt_2008.jpg",
     "author": "Martin St-Amant (S23678)",
+    "caption": {
+      "en": "Plaza Mayor, Lima",
+      "tr": "Plaza Mayor, Lima"
+    },
+    "cityKey": "lima",
+    "file": "/images/blog/lima-plaza-mayor.webp",
     "license": "CC BY-SA 3.0",
-    "cityKey": "lima"
+    "source": "https://commons.wikimedia.org/wiki/File:25_-_Lima_-_Ao%C3%BBt_2008.jpg"
   },
   "liverpool-albert-dock": {
     "alt": {
@@ -4319,6 +4379,36 @@
     "license": "CC BY 2.0",
     "source": "https://commons.wikimedia.org/wiki/File:Real_Monte_Carlo_Casino.jpg"
   },
+  "montevideo-ciudad-vieja": {
+    "alt": {
+      "en": "Ciudad Vieja and the centre of Montevideo",
+      "tr": "Montevideo'da Ciudad Vieja ve merkezin görünümü"
+    },
+    "author": "Jaan-Cornelius K.",
+    "caption": {
+      "en": "Ciudad Vieja, Montevideo",
+      "tr": "Ciudad Vieja, Montevideo"
+    },
+    "cityKey": "montevideo",
+    "file": "/images/blog/montevideo-ciudad-vieja.webp",
+    "license": "CC BY-SA 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Centro_y_Ciudad_Vieja_Montevideo.jpg"
+  },
+  "montevideo-rambla": {
+    "alt": {
+      "en": "The Rambla seafront in Montevideo",
+      "tr": "Montevideo'da Rambla sahil yolu"
+    },
+    "author": "Adriano Pesce",
+    "caption": {
+      "en": "The Rambla, Montevideo",
+      "tr": "Rambla, Montevideo"
+    },
+    "cityKey": "montevideo",
+    "file": "/images/blog/montevideo-rambla.webp",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Rambla_de_montevideo.jpg"
+  },
   "montreal-eski-sehir": {
     "alt": {
       "en": "The cobbled Rue Saint-Paul in Old Montreal",
@@ -4468,6 +4558,36 @@
     "file": "/images/blog/mykonos-little-venice.webp",
     "license": "CC BY 2.5",
     "source": "https://commons.wikimedia.org/wiki/File:Mykonos,_little_venice_03.JPG"
+  },
+  "nairobi-silueti": {
+    "alt": {
+      "en": "The Nairobi skyline seen from Nairobi National Park",
+      "tr": "Nairobi Ulusal Parkı'ndan şehrin silueti"
+    },
+    "author": "Greg Gebhardt",
+    "caption": {
+      "en": "The Nairobi skyline",
+      "tr": "Nairobi silueti"
+    },
+    "cityKey": "nairobi",
+    "file": "/images/blog/nairobi-silueti.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Nairobi_Skyline_from_Nairobi_National_Park_-_panoramio.jpg"
+  },
+  "nairobi-terminus": {
+    "file": "/images/blog/nairobi-terminus.webp",
+    "alt": {
+      "tr": "Nairobi'nin şehir dışındaki hızlı tren terminali",
+      "en": "Nairobi's high-speed rail terminus outside the city"
+    },
+    "caption": {
+      "tr": "Nairobi Terminus",
+      "en": "Nairobi Terminus"
+    },
+    "source": "https://commons.wikimedia.org/wiki/File:Nairobi_Terminus.jpg",
+    "author": "Macabe5387",
+    "license": "CC BY-SA 4.0",
+    "cityKey": "nairobi"
   },
   "napoli-centrale": {
     "alt": {
@@ -5235,49 +5355,49 @@
     "source": "https://commons.wikimedia.org/wiki/File:View_southwards_along_coastline_at_Punta_Cana_9.jpg"
   },
   "punta-cana-saona": {
-    "file": "/images/blog/punta-cana-saona.webp",
     "alt": {
-      "tr": "Punta Cana'dan tekneyle gidilen Saona adasının kumsalı",
-      "en": "The beach on Saona island, reached by boat from Punta Cana"
+      "en": "The beach on Saona island, reached by boat from Punta Cana",
+      "tr": "Punta Cana'dan tekneyle gidilen Saona adasının kumsalı"
     },
-    "caption": {
-      "tr": "Saona adası",
-      "en": "Saona island"
-    },
-    "source": "https://commons.wikimedia.org/wiki/File:Saona_Island_Beach.jpg",
     "author": "Pierpunk",
+    "caption": {
+      "en": "Saona island",
+      "tr": "Saona adası"
+    },
+    "cityKey": "punta-cana",
+    "file": "/images/blog/punta-cana-saona.webp",
     "license": "Public domain",
-    "cityKey": "punta-cana"
+    "source": "https://commons.wikimedia.org/wiki/File:Saona_Island_Beach.jpg"
   },
   "quito-merkez": {
-    "file": "/images/blog/quito-merkez.webp",
     "alt": {
-      "tr": "Quito tarihi merkezinde Venezuela caddesi ve arkada bazilika",
-      "en": "Calle Venezuela in Quito's historic centre with the basilica behind"
+      "en": "Calle Venezuela in Quito's historic centre with the basilica behind",
+      "tr": "Quito tarihi merkezinde Venezuela caddesi ve arkada bazilika"
     },
-    "caption": {
-      "tr": "Tarihi merkez, Quito",
-      "en": "The historic centre, Quito"
-    },
-    "source": "https://commons.wikimedia.org/wiki/File:Quito_calle_Venezuela_Basilica.jpg",
     "author": "Cayambe",
+    "caption": {
+      "en": "The historic centre, Quito",
+      "tr": "Tarihi merkez, Quito"
+    },
+    "cityKey": "quito",
+    "file": "/images/blog/quito-merkez.webp",
     "license": "CC BY-SA 3.0",
-    "cityKey": "quito"
+    "source": "https://commons.wikimedia.org/wiki/File:Quito_calle_Venezuela_Basilica.jpg"
   },
   "quito-panorama": {
-    "file": "/images/blog/quito-panorama.webp",
     "alt": {
-      "tr": "El Panecillo'dan Quito'nun vadi boyunca uzanan görünümü",
-      "en": "Quito stretching along its valley, seen from El Panecillo"
+      "en": "Quito stretching along its valley, seen from El Panecillo",
+      "tr": "El Panecillo'dan Quito'nun vadi boyunca uzanan görünümü"
     },
-    "caption": {
-      "tr": "Quito, El Panecillo'dan",
-      "en": "Quito from El Panecillo"
-    },
-    "source": "https://commons.wikimedia.org/wiki/File:Quito_as_from_panecillo_Basilica.jpg",
     "author": "Cayambe",
+    "caption": {
+      "en": "Quito from El Panecillo",
+      "tr": "Quito, El Panecillo'dan"
+    },
+    "cityKey": "quito",
+    "file": "/images/blog/quito-panorama.webp",
     "license": "CC BY-SA 3.0",
-    "cityKey": "quito"
+    "source": "https://commons.wikimedia.org/wiki/File:Quito_as_from_panecillo_Basilica.jpg"
   },
   "reykjavik-hallgrimskirkja": {
     "alt": {
@@ -5340,34 +5460,34 @@
     "source": "https://commons.wikimedia.org/wiki/File:Riga_Central_Market_Hall.jpg"
   },
   "rio-copacabana": {
-    "file": "/images/blog/rio-copacabana.webp",
     "alt": {
-      "tr": "Rio de Janeiro'da Copacabana plajı ve sahil şeridi",
-      "en": "Copacabana beach and the seafront in Rio de Janeiro"
+      "en": "Copacabana beach and the seafront in Rio de Janeiro",
+      "tr": "Rio de Janeiro'da Copacabana plajı ve sahil şeridi"
     },
-    "caption": {
-      "tr": "Copacabana, Rio de Janeiro",
-      "en": "Copacabana, Rio de Janeiro"
-    },
-    "source": "https://commons.wikimedia.org/wiki/File:Rio_de_Janeiro_Copacabana-20110505-RM-100035.jpg",
     "author": "Ermell",
+    "caption": {
+      "en": "Copacabana, Rio de Janeiro",
+      "tr": "Copacabana, Rio de Janeiro"
+    },
+    "cityKey": "rio",
+    "file": "/images/blog/rio-copacabana.webp",
     "license": "CC BY-SA 4.0",
-    "cityKey": "rio"
+    "source": "https://commons.wikimedia.org/wiki/File:Rio_de_Janeiro_Copacabana-20110505-RM-100035.jpg"
   },
   "rio-seker-somunu": {
-    "file": "/images/blog/rio-seker-somunu.webp",
     "alt": {
-      "tr": "Rio'da Şeker Somunu'na çıkan teleferik kabini",
-      "en": "The cable car up Sugarloaf Mountain in Rio"
+      "en": "The cable car up Sugarloaf Mountain in Rio",
+      "tr": "Rio'da Şeker Somunu'na çıkan teleferik kabini"
     },
-    "caption": {
-      "tr": "Şeker Somunu teleferiği, Rio",
-      "en": "The Sugarloaf cable car, Rio"
-    },
-    "source": "https://commons.wikimedia.org/wiki/File:Rio_de_Janeiro_-_P%C3%A3o_de_A%C3%A7ucar_-_Cablecar.jpg",
     "author": "Wutzofant.",
+    "caption": {
+      "en": "The Sugarloaf cable car, Rio",
+      "tr": "Şeker Somunu teleferiği, Rio"
+    },
+    "cityKey": "rio",
+    "file": "/images/blog/rio-seker-somunu.webp",
     "license": "CC BY-SA 3.0",
-    "cityKey": "rio"
+    "source": "https://commons.wikimedia.org/wiki/File:Rio_de_Janeiro_-_P%C3%A3o_de_A%C3%A7ucar_-_Cablecar.jpg"
   },
   "riyad-masmak": {
     "alt": {
@@ -5730,34 +5850,34 @@
     "source": "https://commons.wikimedia.org/wiki/File:Urfa_G%C3%B6beklitepe_Building_A_5340.jpg"
   },
   "santiago-plaza": {
-    "file": "/images/blog/santiago-plaza.webp",
     "alt": {
-      "tr": "Santiago'da Plaza de Armas",
-      "en": "The Plaza de Armas in Santiago"
+      "en": "The Plaza de Armas in Santiago",
+      "tr": "Santiago'da Plaza de Armas"
     },
-    "caption": {
-      "tr": "Plaza de Armas, Santiago",
-      "en": "Plaza de Armas, Santiago"
-    },
-    "source": "https://commons.wikimedia.org/wiki/File:Plaza_de_Armas_3.JPG",
     "author": "Apincheira",
+    "caption": {
+      "en": "Plaza de Armas, Santiago",
+      "tr": "Plaza de Armas, Santiago"
+    },
+    "cityKey": "santiago",
+    "file": "/images/blog/santiago-plaza.webp",
     "license": "CC BY-SA 3.0",
-    "cityKey": "santiago"
+    "source": "https://commons.wikimedia.org/wiki/File:Plaza_de_Armas_3.JPG"
   },
   "santiago-san-cristobal": {
-    "file": "/images/blog/santiago-san-cristobal.webp",
     "alt": {
-      "tr": "Santiago'da San Cristóbal tepesi ve arkasındaki Andlar",
-      "en": "Cerro San Cristobal in Santiago with the Andes behind"
+      "en": "Cerro San Cristobal in Santiago with the Andes behind",
+      "tr": "Santiago'da San Cristóbal tepesi ve arkasındaki Andlar"
     },
-    "caption": {
-      "tr": "San Cristóbal tepesi, Santiago",
-      "en": "Cerro San Cristobal, Santiago"
-    },
-    "source": "https://commons.wikimedia.org/wiki/File:Santiago_cerro_san_cristobal.jpg",
     "author": "Velvet",
+    "caption": {
+      "en": "Cerro San Cristobal, Santiago",
+      "tr": "San Cristóbal tepesi, Santiago"
+    },
+    "cityKey": "santiago",
+    "file": "/images/blog/santiago-san-cristobal.webp",
     "license": "CC BY-SA 4.0",
-    "cityKey": "santiago"
+    "source": "https://commons.wikimedia.org/wiki/File:Santiago_cerro_san_cristobal.jpg"
   },
   "santorini-fira": {
     "alt": {
@@ -5788,6 +5908,36 @@
     "file": "/images/blog/santorini-oia.webp",
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Oia_-_Santorini_-_Greece_-_16.jpg"
+  },
+  "sao-paulo-luz": {
+    "alt": {
+      "en": "The clock tower and building of Estação da Luz in São Paulo",
+      "tr": "São Paulo'da Estação da Luz'un saat kulesi ve binası"
+    },
+    "author": "Wilfredor",
+    "caption": {
+      "en": "Estação da Luz, São Paulo",
+      "tr": "Estação da Luz, São Paulo"
+    },
+    "cityKey": "sao-paulo",
+    "file": "/images/blog/sao-paulo-luz.webp",
+    "license": "CC0",
+    "source": "https://commons.wikimedia.org/wiki/File:Esta%C3%A7%C3%A3o_da_Luz_in_S%C3%A3o_Paulo.jpg"
+  },
+  "sao-paulo-masp": {
+    "alt": {
+      "en": "The MASP building on Avenida Paulista and the open space beneath it",
+      "tr": "Avenida Paulista'da MASP binası ve altındaki açık alan"
+    },
+    "author": "Wilfredor",
+    "caption": {
+      "en": "MASP, Avenida Paulista",
+      "tr": "MASP, Avenida Paulista"
+    },
+    "cityKey": "sao-paulo",
+    "file": "/images/blog/sao-paulo-masp.webp",
+    "license": "CC0",
+    "source": "https://commons.wikimedia.org/wiki/File:MASP_Brazil.jpg"
   },
   "sapporo-gar": {
     "alt": {
@@ -7183,6 +7333,36 @@
     "file": "/images/blog/zagreb-jelacic.webp",
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:Zagreb_-_Ban_Jela%C4%8Di%C4%87_Square.JPG"
+  },
+  "zanzibar-dhow": {
+    "alt": {
+      "en": "Dhow sailing boats off the Zanzibar coast",
+      "tr": "Zanzibar kıyısında dhow adı verilen yelkenli tekneler"
+    },
+    "author": "Murky1",
+    "caption": {
+      "en": "Dhow boats, Zanzibar",
+      "tr": "Dhow tekneleri, Zanzibar"
+    },
+    "cityKey": "zanzibar",
+    "file": "/images/blog/zanzibar-dhow.webp",
+    "license": "CC BY-SA 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Dhows_at_manta_reef.jpg"
+  },
+  "zanzibar-stone-town": {
+    "alt": {
+      "en": "A narrow lane and stone facades in Stone Town",
+      "tr": "Stone Town'da dar bir sokak ve taş cepheler"
+    },
+    "author": "Kgbo",
+    "caption": {
+      "en": "Stone Town, Zanzibar",
+      "tr": "Stone Town, Zanzibar"
+    },
+    "cityKey": "zanzibar",
+    "file": "/images/blog/zanzibar-stone-town.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Stone_Town,_Zanzibar,_2021,_02.jpg"
   },
   "zurih-bahnhofstrasse": {
     "alt": {
