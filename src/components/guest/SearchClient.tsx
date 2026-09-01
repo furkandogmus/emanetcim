@@ -176,6 +176,27 @@ export default function SearchClient({
    * verilip yalnizca EN GUNCEL istegin sonucu uygulanir.
    */
   const searchRequestSeq = useRef(0);
+  /**
+   * Kullanici KUTUYA bir yer yazdi mi.
+   *
+   * NEDEN VAR (2026-09-01, uretimde goruldu): `/tr/search?q=amsterdam`
+   * acildiginda liste bir sure sonra kendiliginden LONDRA noktalarina
+   * donuyordu. Iki mekanizma ayni degiskene yaziyor ve gec gelen kazaniyordu:
+   * geocode 450 ms sonra merkezi Amsterdam'a tasiyor, sayfa acilisinda
+   * baslatilan otomatik konum istegi ise cevabi ne zaman gelirse merkezi
+   * ZIYARETCININ konumuna cekiyordu. Kullanici bir sehir yazmisken listesi
+   * kendi sehrine donuyordu -- yazdigi hicbir sey yanlis degilken.
+   *
+   * Asagidaki efektin kendi 1. kurali zaten "kullanici bir yer sectiyse
+   * sorulmaz" diyor; eksik olan, kutuya YAZILAN yerin de bir secim
+   * sayilmasiydi. `?lat=&lng=` ile gelen merkez (`hasExplicitCenter`) korunuyor
+   * ama kutuya yazilan sehir korunmuyordu.
+   *
+   * `state` degil `ref`: bu deger cizimi degil, gec donen bir istegin sonucunu
+   * UYGULAYIP uygulamayacagimizi belirliyor. "Konumumu bul" dugmesi bundan
+   * etkilenmez -- orada kullanici konumu BILEREK istiyor.
+   */
+  const placeSearchedRef = useRef(initialSearchQuery.trim().length >= 3);
   useEffect(() => {
     setCheckInLocal(toDatetimeLocalValueInTimeZone(new Date(defaultCheckInIso)));
     setCheckOutLocal(toDatetimeLocalValueInTimeZone(new Date(defaultCheckOutIso)));
@@ -215,7 +236,8 @@ export default function SearchClient({
    *    Sessizce İstanbul varsayılanında kalınır (`SEARCH_DEFAULT_CENTER`).
    */
   useEffect(() => {
-    if (hasExplicitCenter || !isGeolocationSupported()) return;
+    if (hasExplicitCenter || placeSearchedRef.current || !isGeolocationSupported())
+      return;
 
     let cancelled = false;
 
@@ -242,7 +264,9 @@ export default function SearchClient({
           // bastan calistirmak hem yavas hem pil yakan bir davranis.
           maximumAge: 60_000,
         });
-        if (cancelled) return;
+        // Istek ucarken kullanici bir yer aradiysa cevap ARTIK GECERSIZ:
+        // onun yazdigi sehri kendi konumumuzla ezemeyiz.
+        if (cancelled || placeSearchedRef.current) return;
         setDynamicCenter(point);
         setFilterDirty(true);
       } catch {
@@ -358,6 +382,7 @@ export default function SearchClient({
         });
         setResolvedPlaceLabel(geocoded.label);
         setQueryKind("place");
+        placeSearchedRef.current = true;
         return;
       }
 
@@ -381,6 +406,7 @@ export default function SearchClient({
       });
       setResolvedPlaceLabel(matchedCity.slug);
       setQueryKind("place");
+      placeSearchedRef.current = true;
     }, 450);
 
     return () => {

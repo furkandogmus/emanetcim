@@ -126,3 +126,38 @@ describe("sekme sayaci listedeki kart sayisini soyler", () => {
     expect(src).not.toMatch(/t\("nearbyShops"\)\}\s*\(\{nearbyList\.length\}\)/);
   });
 });
+
+describe("otomatik konum, aranan yeri ezmez", () => {
+  /*
+    Uretimde goruldu (2026-09-01): `/tr/search?q=amsterdam` acildiginda liste
+    bir sure sonra kendiliginden LONDRA noktalarina donuyordu. Geocode merkezi
+    Amsterdam'a tasiyor, sayfa acilisinda baslatilan otomatik konum istegi ise
+    cevabi ne zaman gelirse merkezi ziyaretcinin konumuna cekiyordu -- gec
+    gelen kazaniyordu.
+
+    Yaris bir React efektinde oldugu icin olculen sey KAPININ VARLIGI: konum
+    cevabi uygulanmadan once "kullanici bir yer aradi mi" diye bakiliyor mu.
+  */
+  const src = readFileSync(
+    join(process.cwd(), "src/components/guest/SearchClient.tsx"),
+    "utf-8",
+  );
+
+  it("konum cevabi uygulanmadan once aranan yer kontrol ediliyor", () => {
+    expect(src).toMatch(/if \(cancelled \|\| placeSearchedRef\.current\) return;/);
+  });
+
+  it("geocode basarili oldugunda bayrak KALDIRILIYOR", () => {
+    // Iki dal: geocode servisi ve bilinen sehir yedegi. Ikisi de isaretlemeli.
+    const isaret = src.match(/placeSearchedRef\.current = true;/g) ?? [];
+    expect(isaret.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('"konumumu bul" dugmesi bu kapidan etkilenmiyor', () => {
+    // Kullanici konumu BILEREK istedi; orada bayrak sorgulanmamali.
+    const handler = src.slice(src.indexOf("const handleUseMyLocation"));
+    const govde = handler.slice(0, handler.indexOf("};"));
+    expect(govde).toContain("setDynamicCenter(point)");
+    expect(govde).not.toContain("placeSearchedRef");
+  });
+});
