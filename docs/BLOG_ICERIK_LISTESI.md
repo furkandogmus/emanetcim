@@ -1,5 +1,5 @@
 <!-- URETILDI: npx tsx scripts/blog-city-posts.ts --list-md -->
-<!-- 213/265 sehir -->
+<!-- 219/265 sehir -->
 
 | # | Ülke | Şehir | Anahtar | Nokta | Durum | TR slug | EN slug |
 |---|---|---|---|---|---|---|---|
@@ -216,12 +216,12 @@
 | 211 | US | Chicago | `chicago` | 2 | yayında | chicago-uzun-mesafe-trenleri-ogleden-sonra-valiz | chicago-luggage-storage-afternoon-trains |
 | 212 | US | Los Angeles | `los-angeles` | 5 | yayında | los-angeles-hollywood-santa-monica-arasi-valiz | los-angeles-luggage-storage-distances |
 | 213 | US | San Francisco | `san-francisco` | 2 | yayında | san-francisco-yokuslar-cable-car-alcatraz-valiz | san-francisco-luggage-storage-hills |
-| 214 | US | Las Vegas | `las-vegas` | 1 | — |  |  |
-| 215 | US | Miami | `miami` | 2 | — |  |  |
-| 216 | US | Orlando | `orlando` | 1 | — |  |  |
-| 217 | US | Seattle | `seattle` | 1 | — |  |  |
-| 218 | US | New Orleans | `new-orleans` | 1 | — |  |  |
-| 219 | US | San Diego | `san-diego` | 1 | — |  |  |
+| 214 | US | Las Vegas | `las-vegas` | 1 | yayında | las-vegas-strip-yaya-koprusu-mesafe-valiz | las-vegas-luggage-storage-strip-distances |
+| 215 | US | Miami | `miami` | 2 | yayında | miami-south-beach-downtown-arasi-koprusu-valiz | miami-luggage-storage-south-beach-downtown |
+| 216 | US | Orlando | `orlando` | 1 | yayında | orlando-tema-parki-dolabi-otel-cikisi-valiz | orlando-luggage-storage-park-lockers |
+| 217 | US | Seattle | `seattle` | 1 | yayında | seattle-pike-place-yokus-alaska-gemisi-valiz | seattle-luggage-storage-pike-place-hill |
+| 218 | US | New Orleans | `new-orleans` | 1 | yayında | new-orleans-fransiz-mahallesi-tramvay-valiz | new-orleans-luggage-storage-streetcar |
+| 219 | US | San Diego | `san-diego` | 1 | yayında | san-diego-tijuana-sinir-kuyrugu-balboa-valiz | san-diego-luggage-storage-tijuana-border |
 | 220 | US | Philadelphia | `philadelphia` | 1 | — |  |  |
 | 221 | CA | Toronto | `toronto` | 2 | — |  |  |
 | 222 | CA | Montreal | `montreal` | 1 | — |  |  |

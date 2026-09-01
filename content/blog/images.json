@@ -3210,19 +3210,19 @@
     "source": "https://commons.wikimedia.org/wiki/File:Facade_of_a_dwelling_with_sudare,_wooden_balustrades_and_yellow_lamp,_Shinbashi-dori,_Gion,_Kyoto,_Japan.jpg"
   },
   "la-downtown": {
-    "file": "/images/blog/la-downtown.webp",
     "alt": {
-      "tr": "Los Angeles'ta şehir merkezinin gökdelenleri",
-      "en": "The towers of downtown Los Angeles"
+      "en": "The towers of downtown Los Angeles",
+      "tr": "Los Angeles'ta şehir merkezinin gökdelenleri"
     },
-    "caption": {
-      "tr": "Downtown, Los Angeles",
-      "en": "Downtown Los Angeles"
-    },
-    "source": "https://commons.wikimedia.org/wiki/File:Los_Angeles_downtown_p1000070.jpg",
     "author": "Bilinmiyor",
+    "caption": {
+      "en": "Downtown Los Angeles",
+      "tr": "Downtown, Los Angeles"
+    },
+    "cityKey": "los-angeles",
+    "file": "/images/blog/la-downtown.webp",
     "license": "CC BY-SA 2.0 fr",
-    "cityKey": "los-angeles"
+    "source": "https://commons.wikimedia.org/wiki/File:Los_Angeles_downtown_p1000070.jpg"
   },
   "la-santa-monica": {
     "alt": {
@@ -3959,6 +3959,36 @@
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Mersin_Atat%C3%BCrk_park.jpg"
   },
+  "miami-ocean-drive": {
+    "alt": {
+      "en": "The art deco facades of Ocean Drive in Miami Beach",
+      "tr": "Miami Beach'te Ocean Drive'ın art deco cepheleri"
+    },
+    "author": "Infrogmation of New Orleans",
+    "caption": {
+      "en": "Ocean Drive, Miami Beach",
+      "tr": "Ocean Drive, Miami Beach"
+    },
+    "cityKey": "miami",
+    "file": "/images/blog/miami-ocean-drive.webp",
+    "license": "CC BY 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:South_Beach_Ocean_Drive_Strip,_Miami_Beach_Florida,_January_2018_-_01.jpg"
+  },
+  "miami-plaj": {
+    "alt": {
+      "en": "A lifeguard tower and the sand at Miami Beach",
+      "tr": "Miami Beach'te cankurtaran kulesi ve kumsal"
+    },
+    "author": "Jorge Royan",
+    "caption": {
+      "en": "Miami Beach",
+      "tr": "Miami Beach"
+    },
+    "cityKey": "miami",
+    "file": "/images/blog/miami-plaj.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Miami_-_Lifeguard_tower_and_flags_-_0497.jpg"
+  },
   "milano-centrale": {
     "alt": {
       "en": "The monumental stone frontage of Milano Centrale station",
@@ -4199,6 +4229,36 @@
     "license": "CC BY-SA 4.0",
     "source": "https://commons.wikimedia.org/wiki/File:T%C5%8Ddai-ji_hdsr_IMG_3862.jpg"
   },
+  "new-orleans-bourbon": {
+    "alt": {
+      "en": "Bourbon Street in New Orleans",
+      "tr": "New Orleans'ta Bourbon Sokağı"
+    },
+    "author": "Diego Delso",
+    "caption": {
+      "en": "Bourbon Street, New Orleans",
+      "tr": "Bourbon Sokağı, New Orleans"
+    },
+    "cityKey": "new-orleans",
+    "file": "/images/blog/new-orleans-bourbon.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Bourbon_St,_French_Quarter,_New_Orleans,_USA2.jpg"
+  },
+  "new-orleans-fransiz-mahallesi": {
+    "alt": {
+      "en": "The iron-balconied facades of the French Quarter in New Orleans",
+      "tr": "New Orleans'ta Fransız Mahallesi'nin demir balkonlu cepheleri"
+    },
+    "author": "Infrogmation of New Orleans",
+    "caption": {
+      "en": "The French Quarter, New Orleans",
+      "tr": "Fransız Mahallesi, New Orleans"
+    },
+    "cityKey": "new-orleans",
+    "file": "/images/blog/new-orleans-fransiz-mahallesi.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:French_Quarter_New_Orleans_25th_February_2019_19.jpg"
+  },
   "nice-cours-saleya": {
     "alt": {
       "en": "The Cours Saleya market and its stalls in Vieux Nice",
@@ -4288,6 +4348,36 @@
     "file": "/images/blog/ohrid-kale.webp",
     "license": "CC BY-SA 3.0",
     "source": "https://commons.wikimedia.org/wiki/File:Fortaleza_de_Samuel,_Ohrid,_Macedonia,_2014-04-17,_DD_44.JPG"
+  },
+  "orlando-idrive": {
+    "alt": {
+      "en": "Hotels, wide roads and car parks around International Drive in Orlando",
+      "tr": "Orlando'da International Drive çevresindeki oteller, geniş yollar ve otoparklar"
+    },
+    "author": "Gabriel Vanslette",
+    "caption": {
+      "en": "Around International Drive, Orlando",
+      "tr": "International Drive çevresi, Orlando"
+    },
+    "cityKey": "orlando",
+    "file": "/images/blog/orlando-idrive.webp",
+    "license": "CC BY 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:International_Drive_-_panoramio.jpg"
+  },
+  "orlando-lake-eola": {
+    "alt": {
+      "en": "Lake Eola in Orlando with the fountain in the middle",
+      "tr": "Orlando'da Lake Eola ve gölün ortasındaki fıskiye"
+    },
+    "author": "David Akers",
+    "caption": {
+      "en": "Lake Eola, Orlando",
+      "tr": "Lake Eola, Orlando"
+    },
+    "cityKey": "orlando",
+    "file": "/images/blog/orlando-lake-eola.webp",
+    "license": "Public domain",
+    "source": "https://commons.wikimedia.org/wiki/File:Lake_eola_in_Orlando_Florida_with_fountain.jpg"
   },
   "osaka-dotonbori": {
     "alt": {
@@ -5069,6 +5159,36 @@
     "license": "CC0",
     "source": "https://commons.wikimedia.org/wiki/File:Band%C4%B1rma_Vapuru_M%C3%BCzesi_ve_Mill%C3%AE_Kurtulu%C5%9F_An%C4%B1t%C4%B1_(2).JPG"
   },
+  "san-diego-balboa": {
+    "alt": {
+      "en": "The Botanical Building in Balboa Park, San Diego",
+      "tr": "San Diego'da Balboa Parkı'ndaki Botanik Binası"
+    },
+    "author": "Bernard Gagnon",
+    "caption": {
+      "en": "Balboa Park, San Diego",
+      "tr": "Balboa Parkı, San Diego"
+    },
+    "cityKey": "san-diego",
+    "file": "/images/blog/san-diego-balboa.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Balboa_Park_Botanical_Building_01.jpg"
+  },
+  "san-diego-gaslamp": {
+    "alt": {
+      "en": "A street in San Diego's Gaslamp Quarter",
+      "tr": "San Diego'da Gaslamp Quarter'ın caddesi"
+    },
+    "author": "Bernard Gagnon",
+    "caption": {
+      "en": "The Gaslamp Quarter, San Diego",
+      "tr": "Gaslamp Quarter, San Diego"
+    },
+    "cityKey": "san-diego",
+    "file": "/images/blog/san-diego-gaslamp.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Gaslamp_Quarter_01.jpg"
+  },
   "san-sebastian-concha": {
     "alt": {
       "en": "La Concha bay and its beach seen from above",
@@ -5308,6 +5428,36 @@
     "file": "/images/blog/sarm-naama.webp",
     "license": "CC BY 2.0",
     "source": "https://commons.wikimedia.org/wiki/File:Sharm_el-Sheikh_-_Naama_bay.jpg"
+  },
+  "seattle-pike-place": {
+    "alt": {
+      "en": "The entrance to Pike Place Market in Seattle",
+      "tr": "Seattle'da Pike Place Market'in girişi"
+    },
+    "author": "User:Postdlf",
+    "caption": {
+      "en": "Pike Place Market, Seattle",
+      "tr": "Pike Place Market, Seattle"
+    },
+    "cityKey": "seattle",
+    "file": "/images/blog/seattle-pike-place.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Pike_Place_Market_1.jpg"
+  },
+  "seattle-space-needle": {
+    "alt": {
+      "en": "The Space Needle and the Seattle skyline",
+      "tr": "Seattle'da Space Needle ve şehir silueti"
+    },
+    "author": "photographed by S. Bach, stitched by A. Hornung using Hugin",
+    "caption": {
+      "en": "The Space Needle, Seattle",
+      "tr": "Space Needle, Seattle"
+    },
+    "cityKey": "seattle",
+    "file": "/images/blog/seattle-space-needle.webp",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Space_Needle_panorama_large.jpg"
   },
   "sefsavan-medina": {
     "alt": {
@@ -6193,6 +6343,36 @@
     "file": "/images/blog/varsova-stare-miasto.webp",
     "license": "CC BY-SA 3.0 pl",
     "source": "https://commons.wikimedia.org/wiki/File:Warsaw_Old_Town_Market_Square_10.JPG"
+  },
+  "vegas-strip": {
+    "alt": {
+      "en": "The lights of the Las Vegas Strip at night",
+      "tr": "Gece Las Vegas Strip'in ışıkları"
+    },
+    "author": "Clément Bardot",
+    "caption": {
+      "en": "The Las Vegas Strip",
+      "tr": "Las Vegas Strip"
+    },
+    "cityKey": "las-vegas",
+    "file": "/images/blog/vegas-strip.webp",
+    "license": "CC BY-SA 3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Las_Vegas_Strip_at_night,_2012.jpg"
+  },
+  "vegas-yaya-koprusu": {
+    "alt": {
+      "en": "The Las Vegas Strip's traffic and resorts seen from a pedestrian bridge",
+      "tr": "Yaya köprüsünden Las Vegas Strip'in trafiği ve otelleri"
+    },
+    "author": "InSapphoWeTrust from Los Angeles, California, USA",
+    "caption": {
+      "en": "The Strip from a pedestrian bridge, Las Vegas",
+      "tr": "Yaya köprüsünden Strip, Las Vegas"
+    },
+    "cityKey": "las-vegas",
+    "file": "/images/blog/vegas-yaya-koprusu.webp",
+    "license": "CC BY-SA 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Las_Vegas_Strip_(5792063911).jpg"
   },
   "venedik-rialto": {
     "alt": {
