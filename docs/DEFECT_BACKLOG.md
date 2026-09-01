@@ -148,6 +148,56 @@ UNUTMANIN MÜMKÜN OLMASIYDI.
 - Gizlilik metni paylaşımı **söylüyor** (`Privacy.a2`: "dükkan sahipleriyle
   iletişimi yönetmek", `Privacy.a4`: iş ortakları).
 
+## 2026-09-01 — kupon indiriminin deftere HİÇ izi kalmıyordu; referans indiriminin kalıyordu
+
+Kupon `Booking.totalPrice`ı **doğrudan düşürüyor** ama indirimin kendisinden
+deftere hiçbir iz kalmıyordu. `appliedCouponId` yalnızca rezervasyon
+oluşturulamazsa kotayı geri vermek için bellekte tutuluyor, hiçbir yere
+yazılmıyordu. Yani **"bu rezervasyon neden 50 değil de 40 TRY?" sorusunun cevabı
+veride yoktu.**
+
+Asıl kanıt asimetride: **referans indirimi ta baştan kaydediliyordu**
+(`Booking.referralDiscountAmount` + `referredByCode`). Aynı olay — fiyat
+düşürüldü — bir yolda denetlenebilir, diğerinde görünmezdi.
+
+**Düzeltildi:** `Booking.couponDiscountAmount` + `couponCode` eklendi, referans
+çiftiyle aynı muamele. `CouponService.claim` artık kodu ve indirim tutarını da
+döndürüyor. Tutar **farktan** hesaplanıyor, orandan yeniden türetilmiyor —
+aksi hâlde defterde `totalPrice + indirim ≠ asıl fiyat` gibi bir kuruş açığı
+kalırdı (`platform-split.ts`teki aynı gerekçe).
+
+Migrasyon iki NULLABLE/DEFAULT kolon; mevcut satırlar değişmiyor. **Geçmiş
+kuponlu rezervasyonların indirimi geriye dönük BİLİNEMEZ** — veri hiç yazılmadı.
+
+### Test kendi kusurunu buldu: `applyDiscount` girdisini yuvarlamıyordu
+
+Kuruş açığını sınayan test, kuruş altı bir girdide (`120.005`) düştü. Sebep:
+fonksiyon yalnızca SONUCU yuvarlıyordu. Ölçüldü — indirim 96,00 ve fark 24,00
+çıkıyor, toplam 120,00; oysa fiyatın kuruşa yuvarlanmışı 120,01. Bir kuruş
+defterden kayboluyordu.
+
+`Booking.totalPrice` zaten `Decimal(12,2)`: kuruş altı bir değer yazılırken
+veritabanı onu yuvarlıyor, yani servisin döndürdüğü sayı ile deftere giren sayı
+ayrışıyordu. Girdi de kuruşa çekildi.
+
+### Düzeltilmeyen — İŞ KARARI
+
+**Pazarlama indiriminin bedelini bugün tamamen ESNAF karşılıyor.** Esnafın
+hakedişi indirilmiş `totalPrice` üzerinden hesaplanıyor; platform kupon
+veriyor, esnaf ödüyor. Nakit tahsilatta bu daha da doğrudan: misafir dükkanda
+az ödüyor, esnafın kasasına az para giriyor.
+
+Bu bir hata değil, bir POLİTİKA — ve pazar yerleri bunu üç farklı şekilde
+çözer (esnaf karşılar / platform karşılar / paylaşılır). Ama:
+
+- Esnafa bunu söyleyen **hiçbir metin yok** (`Partner` namespace'inde indirim
+  geçmiyor),
+- ve bunu düzenleyecek **bir esnaf sözleşmesi de yok** (bkz. 2026-09-01 —
+  hesap anonimleştirmesi maddesindeki "esnafa özel hiçbir hukuki belge yok").
+
+Artık en azından **ölçülebilir**: hangi rezervasyonda ne kadar indirim
+uygulandığı kayıtlı. Politika kararı sizindir.
+
 ## 2026-09-01 — toplanan kanıt uyuşmazlık ekranında GÖRÜNMÜYORDU (aynı gün çözüldü)
 
 Kanıt fotoğrafı çekilmeye başlandıktan sonra ortaya çıkan yarım halka: fotoğraf

@@ -136,6 +136,15 @@ export async function createInitialBooking(data: CreateInitialBookingInput): Pro
           insuranceFee,
           referralDiscountAmount,
           referredByCode: data.referredByCode ?? null,
+          /*
+            Kupon indirimi de referans indirimi gibi DEFTERE yaziliyor. Ikisi
+            ayni olay: fiyat dusuruldu ve sebebi kayitli olmali.
+          */
+          couponDiscountAmount:
+            typeof data.couponDiscountAmount === 'number' && Number.isFinite(data.couponDiscountAmount)
+              ? Math.max(0, data.couponDiscountAmount)
+              : 0,
+          couponCode: data.couponCode ?? null,
           bagCountS: data.bagCountS,
           bagCountM: data.bagCountM,
           bagCountXl: data.bagCountXl,
@@ -280,6 +289,15 @@ export async function createSlotBooking(
           insuranceFee,
           referralDiscountAmount,
           referredByCode: data.referredByCode ?? null,
+          /*
+            Kupon indirimi de referans indirimi gibi DEFTERE yaziliyor. Ikisi
+            ayni olay: fiyat dusuruldu ve sebebi kayitli olmali.
+          */
+          couponDiscountAmount:
+            typeof data.couponDiscountAmount === 'number' && Number.isFinite(data.couponDiscountAmount)
+              ? Math.max(0, data.couponDiscountAmount)
+              : 0,
+          couponCode: data.couponCode ?? null,
           bagCountS: data.bagCountS,
           bagCountM: data.bagCountM,
           bagCountXl: data.bagCountXl,

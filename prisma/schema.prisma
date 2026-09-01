@@ -270,6 +270,24 @@ model Booking {
   referralDiscountAmount Decimal           @default(0) @db.Decimal(12, 2)
   /// Rezervasyonda kullanılan referans kodu (varsa)
   referredByCode         String?
+  /// Kupon ile uygulanan indirim miktarı (TRY).
+  ///
+  /// NEDEN EKLENDİ (2026-09-01'de ölçüldü): kupon `totalPrice`'ı DOĞRUDAN
+  /// düşürüyordu ve bunun deftere hiçbir izi kalmıyordu — `appliedCouponId`
+  /// yalnızca hata hâlinde kotayı geri vermek için bellekte tutuluyor, hiçbir
+  /// yere yazılmıyordu. Yani "bu rezervasyon neden 50 değil de 40 TRY?"
+  /// sorusunun cevabı VERİDE YOKTU.
+  ///
+  /// Referans indirimi (`referralDiscountAmount`) ta baştan kaydediliyordu:
+  /// aynı olay bir yolda denetlenebilir, diğerinde görünmezdi. Bu alan o
+  /// asimetriyi kapatır.
+  ///
+  /// Esnafın hakedişi indirilmiş `totalPrice` üzerinden hesaplandığı için
+  /// pazarlama indiriminin bedelini bugün esnaf karşılıyor; bu bir İŞ KARARIDIR
+  /// ve burada değiştirilmiyor — ama artık ÖLÇÜLEBİLİR.
+  couponDiscountAmount   Decimal           @default(0) @db.Decimal(12, 2)
+  /// Rezervasyonda kullanılan kupon kodu (varsa)
+  couponCode             String?
   reservationSlots       ReservationSlot[]
   guest                  User?             @relation(fields: [guestId], references: [id], onDelete: Cascade)
   shop                   Shop              @relation(fields: [shopId], references: [id], onDelete: Cascade)

@@ -20,6 +20,18 @@ export type ClaimedCoupon = {
   couponId: string;
   /** Kupon uygulandiktan SONRAKI tutar. */
   totalPrice: number;
+  /**
+   * Uygulanan kupon kodu ve indirim TUTARI -- deftere yazilmak icin.
+   *
+   * NEDEN EKLENDI (2026-09-01): servis yalnizca indirilmis tutari donduruyordu.
+   * Cagiran onu `totalPrice`a yaziyor ve indirimin kendisi hicbir yere
+   * kaydedilmiyordu; `couponId` de yalnizca hata halinde kotayi geri vermek
+   * icin bellekte tutuluyordu. "Bu rezervasyon neden 50 degil de 40 TRY?"
+   * sorusunun cevabi VERIDE YOKTU -- oysa referans indirimi ta bastan
+   * kaydediliyordu.
+   */
+  code: string;
+  discountAmount: number;
 };
 
 export type CouponClaimResult =
@@ -38,9 +50,21 @@ export function applyDiscount(
   discount: number,
   isPercent: boolean,
 ): number {
-  const next = isPercent
-    ? totalPrice * (1 - discount / 100)
-    : totalPrice - discount;
+  /*
+    GIRDI DE KURUSA CEKILIYOR (2026-09-01'de olculdu).
+
+    Onceden yalnizca SONUC yuvarlaniyordu. Kurus alti bir girdi geldiginde
+    (`120.005`) sonuc ile "girdi eksi sonuc" toplami asil fiyati TUTMUYORDU:
+    indirim 96,00 ve fark 24,00 cikiyor, toplam 120,00 -- oysa fiyatin kurusa
+    yuvarlanmisi 120,01. Deftere bir kurusluk acik olarak giriyordu.
+
+    `Booking.totalPrice` zaten `Decimal(12,2)`: kurus alti bir deger yazilirken
+    veritabani onu yuvarliyor, yani servisin dondurdugu sayi ile deftere giren
+    sayi ayrisiyordu. Para fonksiyonu kendi icinde tutarli olmali --
+    `platform-split.ts`teki ayni gerekce.
+  */
+  const base = Math.round(totalPrice * 100) / 100;
+  const next = isPercent ? base * (1 - discount / 100) : base - discount;
   return Math.max(0, Math.round(next * 100) / 100);
 }
 
@@ -79,11 +103,25 @@ export async function claimCoupon(
   });
   if (count === 0) return { ok: false };
 
+  const discounted = applyDiscount(
+    totalPrice,
+    moneyToNumber(coupon.discount),
+    coupon.isPercent,
+  );
   return {
     ok: true,
     claimed: {
       couponId: coupon.id,
-      totalPrice: applyDiscount(totalPrice, moneyToNumber(coupon.discount), coupon.isPercent),
+      totalPrice: discounted,
+      code: coupon.code,
+      /*
+        FARKTAN hesaplaniyor, orandan yeniden turetilmiyor: `applyDiscount`in
+        yuvarlamasi neyse indirim de o. Ikisini ayri hesaplamak, defterde
+        `totalPrice + indirim != asil fiyat` gibi bir kurus acigi birakirdi --
+        `platform-split.ts`teki ayni gerekce.
+      */
+      discountAmount:
+        Math.round((Math.round(totalPrice * 100) / 100 - discounted) * 100) / 100,
     },
   };
 }

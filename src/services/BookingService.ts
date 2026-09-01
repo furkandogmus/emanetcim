@@ -41,6 +41,15 @@ export type CreateInitialBookingInput = {
   insuranceFee?: number;
   referralDiscountAmount?: number;
   referredByCode?: string;
+  /**
+   * Kupon indirimi -- referans indirimiyle AYNI muamele.
+   *
+   * 2026-09-01'e kadar kupon yalnizca `totalPrice`i dusuruyordu ve kendisinden
+   * hicbir iz kalmiyordu; referans indirimi ise ta bastan kaydediliyordu. Ayni
+   * olay bir yolda denetlenebilir, digerinde gorunmezdi.
+   */
+  couponDiscountAmount?: number;
+  couponCode?: string;
   /** Time-slot based: if provided, slot IDs to reserve instead of datetime pair */
   slotIds?: string[];
   /**

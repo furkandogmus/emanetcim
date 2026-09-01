@@ -152,11 +152,22 @@ export async function createBookingAction(data: CreateBookingInput) {
     katmanından geçer (`service-layer-writes` mandalı).
   */
   let appliedCouponId: string | undefined;
+  /*
+    INDIRIM DEFTERE YAZILIYOR (2026-09-01). Onceden yalnizca indirilmis
+    `totalPrice` kaydediliyordu; kuponun kendisinden hicbir iz kalmiyordu ve
+    "bu rezervasyon neden 50 degil de 40 TRY?" sorusunun cevabi veride yoktu.
+    Referans indirimi (`referralDiscountAmount`) ta bastan kaydediliyordu --
+    ayni olay bir yolda denetlenebilir, digerinde gorunmezdi.
+  */
+  let couponDiscountAmount = 0;
+  let appliedCouponCode: string | undefined;
   if (data.couponCode) {
     const claim = await couponService.claim(data.couponCode, totalPrice);
     if (claim.ok) {
       totalPrice = claim.claimed.totalPrice;
       appliedCouponId = claim.claimed.couponId;
+      couponDiscountAmount = claim.claimed.discountAmount;
+      appliedCouponCode = claim.claimed.code;
     }
   }
 
@@ -205,6 +216,8 @@ export async function createBookingAction(data: CreateBookingInput) {
       insuranceFee: authTotals.insuranceFee,
       referralDiscountAmount,
       referredByCode: appliedReferralCode,
+      couponDiscountAmount,
+      couponCode: appliedCouponCode,
       slotIds: data.slotIds,
       /*
         Doğrudan APPROVED: esnaf onayı beklenmez. Eskiden rezervasyon `PENDING`
