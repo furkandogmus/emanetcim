@@ -3,6 +3,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { formatDateTimeInZone, bookingTimeZone } from "@/lib/format-datetime";
 import { PLATFORM_TIMEZONE } from "@/lib/datetime-local";
+import { stripComments } from "./helpers/strip-comments";
 
 /**
  * SUNUCUDA TARIH BICIMLENDIRMESI SAAT DILIMI ISTER.
@@ -71,10 +72,10 @@ describe("sunucuda tarih bicimlendirmesi saat dilimi tasiyor", () => {
   function ihlalleriTopla(desen: RegExp): string[] {
     const ihlaller: string[] = [];
     for (const f of dosyalar) {
-      const satirlar = readFileSync(f, "utf-8").split("\n");
+      // Yorumlar sıyrılır (satır numaraları korunur): bu mandalların
+      // gerekçeleri ihlal ettikleri kalıbı metin olarak içeriyor.
+      const satirlar = stripComments(readFileSync(f, "utf-8")).split("\n");
       satirlar.forEach((satir, i) => {
-        const kirpik = satir.trimStart();
-        if (kirpik.startsWith("*") || kirpik.startsWith("//")) return;
         if (!desen.test(satir)) return;
         const pencere = satirlar.slice(i, i + 4).join("\n");
         if (!/timeZone/.test(pencere)) {
