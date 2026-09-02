@@ -225,6 +225,38 @@ export async function applyBagRevision(
       GUVENILMIYOR — o kayit onerildigi anda yazildi, aradan zaman gecmis olabilir.
     */
     const { totals, rulesSource } = await recompute(booking, counts);
+
+    /*
+      SESSIZ KIRPMA YOK (2026-09-02'de gercek veritabaninda olculdu).
+
+      `recompute` -> `clampBagCount(n, rules.maxBagsPerSlot)` istenen sayiyi
+      platform sinirina KIRPIYOR ve eskiden sonuc yine `ok: true` donuyordu:
+
+        istenen=100 -> sonuc ok, kayitli bagCountS: 50
+        istenen=999 -> sonuc ok, kayitli bagCountS: 50, delta: 0
+
+      Esnaf "100 valiz aldim" der, sistem 50 kaydeder ve BASARILI der. Rafta
+      100 valiz, defterde 50: kapasite tasmasinin ta kendisi, ustelik hicbir
+      uyari birakmadan. `delta: 0` donen ucuncu satir daha da yaniltici --
+      esnaf hicbir sey degismedigini sanir.
+
+      Bu ayrica kapasite kontrolunu ETKISIZ birakiyordu: kirpma ondan once
+      oldugu icin `updateReservedBags`a her zaman sigan bir sayi gidiyordu.
+
+      Sinir asildiginda dogru cevap kirpmak degil REDDETMEK. Mobil uc zaten
+      oyle yapiyor (`z.number().max(20)`); servis kirpiyordu -- ayni girdi iki
+      tasiyicida iki farkli sonuc veriyordu.
+    */
+    const istenenToplam = counts.bagCountS + counts.bagCountM + counts.bagCountXl;
+    const hesaplananToplam =
+      totals.bagCountS + totals.bagCountM + totals.bagCountXl;
+    if (hesaplananToplam !== istenenToplam) {
+      logger.warn(
+        { bookingId, istenenToplam, hesaplananToplam },
+        "bag_revision_counts_clamped",
+      );
+      return { ok: false, code: 'INVALID_COUNTS' };
+    }
     const previousTotal = moneyToNumber(booking.totalPrice);
     const delta = round2(totals.subtotalBeforeCoupon - previousTotal);
 

@@ -81,6 +81,50 @@ beforeEach(() => {
   mockGetPricingRules.mockResolvedValue(RULES);
 });
 
+/**
+ * SINIR ASILDIGINDA KIRPMA DEGIL RET.
+ *
+ * Gercek veritabaninda olculdu (2026-09-02): `recompute` icindeki
+ * `clampBagCount(n, rules.maxBagsPerSlot)` istenen sayiyi sessizce kirpiyor ve
+ * sonuc yine `ok: true` donuyordu:
+ *
+ *     istenen=100 -> sonuc ok, kayitli bagCountS: 50
+ *     istenen=999 -> sonuc ok, kayitli bagCountS: 50, delta: 0
+ *
+ * Esnaf "100 valiz aldim" der, sistem 50 kaydeder ve BASARILI der. Rafta 100
+ * valiz, defterde 50 -- kapasite tasmasi, ustelik hicbir uyari birakmadan.
+ * `delta: 0` donen ucuncu satir daha da yaniltici: esnaf hicbir sey
+ * degismedigini sanir.
+ *
+ * Ayrica kapasite kontrolunu ETKISIZ birakiyordu: kirpma ondan once oldugu
+ * icin `updateReservedBags`a her zaman sigan bir sayi gidiyordu.
+ *
+ * Mobil uc zaten reddediyor (`z.number().max(20)`); servis kirpiyordu -- ayni
+ * girdi iki tasiyicida iki farkli sonuc veriyordu.
+ */
+describe("valiz sayisi sinirini asan istek", () => {
+  it("REDDEDILIYOR -- sessizce kirpilmiyor", async () => {
+    mockPrisma.booking.findUnique.mockResolvedValue(booking());
+    const res = await applyBagRevision("b1", PARTNER, {
+      counts: { bagCountS: RULES.maxBagsPerSlot + 50, bagCountM: 0, bagCountXl: 0 },
+    });
+    expect(res.ok, "sinir asan istek kabul edilmemeli").toBe(false);
+    if (!res.ok) expect(res.code).toBe("INVALID_COUNTS");
+    expect(
+      mockPrisma.booking.update,
+      "reddedilen istek kayda yazilmamali",
+    ).not.toHaveBeenCalled();
+  });
+
+  it("sinira TAM esit istek kabul ediliyor", async () => {
+    mockPrisma.booking.findUnique.mockResolvedValue(booking());
+    const res = await applyBagRevision("b1", PARTNER, {
+      counts: { bagCountS: RULES.maxBagsPerSlot, bagCountM: 0, bagCountXl: 0 },
+    });
+    expect(res.ok, "sinirin kendisi gecerli bir deger").toBe(true);
+  });
+});
+
 describe("applyBagRevision", () => {
   it("bekleyen öneriyi HER DURUMDA temizler — mobil uç temizlemiyordu", async () => {
     // Temizlenmezse: web'den onerilmis eski bir revizyon mobil duzeltmeden sonra
