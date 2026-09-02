@@ -108,6 +108,22 @@ export const JOB_REGISTRY: readonly JobDefinition[] = [
     enforced: true,
   },
   {
+    name: "consistency-check",
+    what: "İki kaydın sessizce ayrıştığı rezervasyon ve dükkanları sayar (okur, düzeltmez).",
+    ifItStops:
+      "Kapasite defteri, mühür sayısı ve tahsil edilen tutar gibi ayrışmalar hiçbir ekranda görünmez; ilk belirtileri tezgâhta ortaya çıkar.",
+    method: "GET",
+    /*
+      Günlük yeter: bu tarama bir ALARM değil, bir DEFTER. Ayrışma anında
+      yakalanacak bir şey değil — kodda kapıları var; buradaki amaç, kapılar
+      konmadan ÖNCE üretilmiş kayıtları ve gözden kaçan yeni bir yolu görünür
+      kılmak.
+    */
+    cron: "41 5 * * *",
+    maxStaleHours: 72,
+    enforced: true,
+  },
+  {
     name: "cleanup",
     what: "Süresi geçmiş doğrulama token'larını, oturumları ve 90 günden eski analitik olaylarını siler.",
     ifItStops:
