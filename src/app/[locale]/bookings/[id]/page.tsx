@@ -1,3 +1,4 @@
+import { formatDateInZone, bookingTimeZone } from "@/lib/format-datetime";
 import { auth } from "@/auth";
 import prisma from "@/lib/db";
 import { notFound, redirect } from "next/navigation";
@@ -63,7 +64,7 @@ export default async function BookingDetailPage({
         id: true, guestId: true, shopId: true, checkInTime: true, checkOutTime: true,
         totalPrice: true, bagCountS: true, bagCountM: true, bagCountXl: true,
         status: true, qrCodeToken: true, createdAt: true,
-        shop: { select: { name: true, pricePerDay: true, address: true, latitude: true, longitude: true, owner: { select: { phone: true } } } },
+        shop: { select: { name: true, pricePerDay: true, address: true, latitude: true, longitude: true, timezone: true, owner: { select: { phone: true } } } },
         seals: { orderBy: { bagIndex: "asc" } },
       },
     }),
@@ -179,14 +180,14 @@ export default async function BookingDetailPage({
                     <Calendar size={14} className="text-gray-400" />
                     <span className="id-eyebrow text-gray-400">{t("checkIn")}</span>
                  </div>
-                 <p className="text-sm font-bold text-gray-900">{new Date(booking.checkInTime).toLocaleDateString(dateLocale)}</p>
+                 <p className="text-sm font-bold text-gray-900">{formatDateInZone(booking.checkInTime, { locale: dateLocale, timeZone: bookingTimeZone(booking.shop) })}</p>
               </div>
               <div className="p-4 bg-gray-50 rounded-2xl">
                  <div className="flex items-center gap-2 mb-1">
                     <Calendar size={14} className="text-gray-400" />
                     <span className="id-eyebrow text-gray-400">{t("checkOut")}</span>
                  </div>
-                 <p className="text-sm font-bold text-gray-900">{new Date(booking.checkOutTime).toLocaleDateString(dateLocale)}</p>
+                 <p className="text-sm font-bold text-gray-900">{formatDateInZone(booking.checkOutTime, { locale: dateLocale, timeZone: bookingTimeZone(booking.shop) })}</p>
               </div>
            </div>
 

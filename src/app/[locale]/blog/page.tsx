@@ -1,3 +1,5 @@
+import { formatDateInZone } from "@/lib/format-datetime";
+import { PLATFORM_TIMEZONE } from "@/lib/datetime-local";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import type { Metadata } from "next";
@@ -85,7 +87,7 @@ export default async function BlogListPage({
 
                   <div className="p-8 flex-1 flex flex-col">
                     <div className="flex items-center gap-4 id-eyebrow text-gray-400 mb-4">
-                      <span className="flex items-center gap-1.5"><Clock size={12} /> {new Date(post.createdAt).toLocaleDateString(locale)}</span>
+                      <span className="flex items-center gap-1.5"><Clock size={12} /> {formatDateInZone(post.createdAt, { locale, timeZone: PLATFORM_TIMEZONE })}</span>
                       <span className="flex items-center gap-1.5"><User size={12} /> {post.authorName}</span>
                     </div>
                     <h2 className="text-xl font-black text-gray-900 group-hover:text-orange-600 transition-colors mb-3 leading-tight">

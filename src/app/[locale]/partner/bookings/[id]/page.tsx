@@ -14,6 +14,7 @@ import { requirePartnerPage } from "@/lib/page-auth";
 import { waMeUrl } from "@/lib/whatsapp";
 import prisma from "@/lib/db";
 import { notFound } from "next/navigation";
+import { formatDateTimeInZone, bookingTimeZone } from "@/lib/format-datetime";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import { guestBookingStatusMessageKey } from "@/lib/booking-status-i18n";
 import { formatTryCurrency } from "@/lib/currency";
@@ -59,7 +60,7 @@ export default async function PartnerBookingDetailPage({
     */
     include: {
       guest: { select: { name: true, phone: true, email: true } },
-      shop: { select: { name: true } },
+      shop: { select: { name: true, timezone: true } },
     },
   });
 
@@ -68,8 +69,15 @@ export default async function PartnerBookingDetailPage({
   }
 
   const dateLocale = bcp47ForUiLocale(locale);
+  // Saat DUKKANIN diliminde; `timeZone`suz `toLocaleString` sunucunun
+  // dilimini (uretimde UTC) kullanir ve uc saat geri gosterirdi.
   const fmt = (d: Date) =>
-    d.toLocaleString(dateLocale, { dateStyle: "medium", timeStyle: "short" });
+    formatDateTimeInZone(d, {
+      locale: dateLocale,
+      timeZone: bookingTimeZone(booking.shop),
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
 
   /*
     Hazir mesaj BILEREK: esnaftan sifirdan cumle kurmasini beklemek, dugmeye
@@ -259,10 +267,7 @@ export default async function PartnerBookingDetailPage({
           <Clock size={14} className="text-gray-400" />
           <span>
             {t("partnerBookingCreatedAt")}:{" "}
-            {booking.createdAt.toLocaleString(dateLocale, {
-              dateStyle: "medium",
-              timeStyle: "short",
-            })}
+            {fmt(booking.createdAt)}
           </span>
         </div>
 

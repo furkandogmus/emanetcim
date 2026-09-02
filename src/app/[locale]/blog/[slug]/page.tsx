@@ -1,3 +1,5 @@
+import { formatDateInZone } from "@/lib/format-datetime";
+import { PLATFORM_TIMEZONE } from "@/lib/datetime-local";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import prisma from "@/lib/db";
 import { Link } from "@/i18n/routing";
@@ -106,7 +108,7 @@ export default async function BlogDetailPage({
         </Link>
         <div className="flex items-center gap-4 id-eyebrow text-orange-600 mb-6 font-sans">
           <span className="bg-orange-600 text-white px-3 py-1 rounded-full uppercase">{t("blogCategory")}</span>
-          <span className="flex items-center gap-1.5 text-gray-400"><Clock size={12} /> {new Date(post.createdAt).toLocaleDateString(locale)}</span>
+          <span className="flex items-center gap-1.5 text-gray-400"><Clock size={12} /> {formatDateInZone(post.createdAt, { locale, timeZone: PLATFORM_TIMEZONE })}</span>
         </div>
         <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-gray-900 leading-[1.1] mb-8">
           {post.title}

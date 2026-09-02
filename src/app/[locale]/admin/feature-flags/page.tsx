@@ -1,3 +1,5 @@
+import { formatDateTimeInZone } from "@/lib/format-datetime";
+import { PLATFORM_TIMEZONE } from "@/lib/datetime-local";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { ChevronLeft } from "lucide-react";
 import { Link } from "@/i18n/routing";
@@ -38,9 +40,12 @@ export default async function AdminFeatureFlagsPage({
     rolloutPct: r.rolloutPct,
     allowedUserIdsLines: allowListToLines(r.allowedUserIds),
     description: r.description ?? "",
-    updatedAtLabel: r.updatedAt.toLocaleString(
-      locale === "en" ? "en-GB" : "tr-TR",
-    ),
+    updatedAtLabel: formatDateTimeInZone(r.updatedAt, {
+      locale: locale === "en" ? "en-GB" : "tr-TR",
+      timeZone: PLATFORM_TIMEZONE,
+      dateStyle: "short",
+      timeStyle: "short",
+    }),
   }));
 
   return (

@@ -15,6 +15,7 @@ import {
   CHECK_IN_REMINDER_WINDOW_MINUTES,
   CHECK_OUT_REMINDER_WINDOW_MINUTES,
 } from "@/lib/reminder-notice";
+import { formatDateTimeInZone, bookingTimeZone } from "@/lib/format-datetime";
 
 /**
  * Bu rezervasyonlardan HANGILERINE bu hatirlatma daha once gonderildi.
@@ -107,7 +108,11 @@ export async function GET(req: NextRequest) {
           lte: new Date(now.getTime() + CHECK_IN_REMINDER_WINDOW_MINUTES * 60_000),
         },
       },
-      include: { guest: { select: { email: true, name: true } }, shop: { select: { name: true } } },
+      include: {
+        guest: { select: { email: true, name: true } },
+        // `timezone` SART: e-postadaki saat dukkanin diliminde yazilir.
+        shop: { select: { name: true, timezone: true } },
+      },
       // En yakin check-in en acil olandir: sinira dayanildiginda dusen, en
       // gec olan olsun.
       orderBy: { checkInTime: "asc" },
@@ -131,7 +136,7 @@ export async function GET(req: NextRequest) {
         void notificationService.sendEmail(
           booking.guest.email,
           `${CHECK_IN_REMINDER_SUBJECT_PREFIX}! 🎒`,
-          `Merhaba ${booking.guest.name ?? ""},\n\nBagajınızı ${booking.shop.name} mağazasına teslim etme zamanınız yaklaşıyor.\n\nCheck-in: ${booking.checkInTime.toLocaleString("tr-TR")}\n\nQR kodunuzu göstermeyi unutmayın.`,
+          `Merhaba ${booking.guest.name ?? ""},\n\nBagajınızı ${booking.shop.name} mağazasına teslim etme zamanınız yaklaşıyor.\n\nCheck-in: ${formatDateTimeInZone(booking.checkInTime, { locale: "tr-TR", timeZone: bookingTimeZone(booking.shop), dateStyle: "short", timeStyle: "short" })}\n\nQR kodunuzu göstermeyi unutmayın.`,
           booking.id,
         ).catch((e) => logger.warn({ err: e, bookingId: booking.id }, "reminder_checkin_email_failed"));
         results.checkInReminders++;
@@ -147,7 +152,11 @@ export async function GET(req: NextRequest) {
           lte: new Date(now.getTime() + CHECK_OUT_REMINDER_WINDOW_MINUTES * 60_000),
         },
       },
-      include: { guest: { select: { email: true, name: true } }, shop: { select: { name: true } } },
+      include: {
+        guest: { select: { email: true, name: true } },
+        // `timezone` SART: e-postadaki saat dukkanin diliminde yazilir.
+        shop: { select: { name: true, timezone: true } },
+      },
       orderBy: { checkOutTime: "asc" },
       take: REMINDER_SCAN_LIMIT,
     });
@@ -169,7 +178,7 @@ export async function GET(req: NextRequest) {
         void notificationService.sendEmail(
           booking.guest.email,
           `${CHECK_OUT_REMINDER_SUBJECT_PREFIX}! 🔔`,
-          `Merhaba ${booking.guest.name ?? ""},\n\n${booking.shop.name} mağazasındaki bagajınızı teslim alma zamanınız yaklaşıyor.\n\nCheck-out: ${booking.checkOutTime.toLocaleString("tr-TR")}\n\nGeç teslim almalarda ek ücret uygulanabilir.`,
+          `Merhaba ${booking.guest.name ?? ""},\n\n${booking.shop.name} mağazasındaki bagajınızı teslim alma zamanınız yaklaşıyor.\n\nCheck-out: ${formatDateTimeInZone(booking.checkOutTime, { locale: "tr-TR", timeZone: bookingTimeZone(booking.shop), dateStyle: "short", timeStyle: "short" })}\n\nGeç teslim almalarda ek ücret uygulanabilir.`,
           booking.id,
         ).catch((e) => logger.warn({ err: e, bookingId: booking.id }, "reminder_checkout_email_failed"));
         results.checkOutReminders++;
@@ -237,7 +246,7 @@ export async function GET(req: NextRequest) {
       void notificationService.sendEmail(
         partnerEmail,
         `${OVERDUE_NOTICE_SUBJECT_PREFIX} — ${booking.shop.name} ⏰`,
-        `Merhaba,\n\nAşağıdaki rezervasyonun check-out saati geçti ancak valiz henüz teslim alınmamış:\n\nRezervasyon Kodu: ${bookingShortCode(booking.id)}\nPlanlanan check-out: ${booking.checkOutTime.toLocaleString("tr-TR")}\n\nLütfen misafir ile iletişime geçin.`,
+        `Merhaba,\n\nAşağıdaki rezervasyonun check-out saati geçti ancak valiz henüz teslim alınmamış:\n\nRezervasyon Kodu: ${bookingShortCode(booking.id)}\nPlanlanan check-out: ${formatDateTimeInZone(booking.checkOutTime, { locale: "tr-TR", timeZone: bookingTimeZone(booking.shop), dateStyle: "short", timeStyle: "short" })}\n\nLütfen misafir ile iletişime geçin.`,
         booking.id,
       ).catch((e) => logger.warn({ err: e, bookingId: booking.id }, "reminder_overdue_email_failed"));
       results.overdueNotifications++;

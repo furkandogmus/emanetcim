@@ -3,6 +3,7 @@ import { ChevronLeft, Package, Clock, CheckCircle2, Phone, ChevronRight } from "
 import { Link } from "@/i18n/routing";
 import { requirePartnerPage } from "@/lib/page-auth";
 import prisma from "@/lib/db";
+import { formatDateTimeInZone, bookingTimeZone } from "@/lib/format-datetime";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import { guestBookingStatusMessageKey } from "@/lib/booking-status-i18n";
 import {
@@ -72,7 +73,11 @@ export default async function PartnerBookingsPage({
       bir gun biri nesneyi oldugu gibi bir istemci bilesenine verirse bcrypt
       hash'i RSC yukuyle tarayiciya gider.
     */
-      include: { guest: { select: { name: true, phone: true } } },
+      include: {
+        guest: { select: { name: true, phone: true } },
+        // Saatler DUKKANIN diliminde yazilir; bkz. `format-datetime.ts`.
+        shop: { select: { timezone: true } },
+      },
       orderBy: { checkInTime: "desc" },
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
@@ -83,8 +88,18 @@ export default async function PartnerBookingsPage({
 
   const timeLocale = bcp47ForUiLocale(locale);
 
-  const fmtDt = (d: Date) =>
-    d.toLocaleString(timeLocale, { dateStyle: "short", timeStyle: "short" });
+  /*
+    `d.toLocaleString(...)` DEGIL: `timeZone` verilmeyince Intl SUNUCUNUN saat
+    dilimini kullanir ve uretim konteyneri UTC. Esnaf, misafirin 13:00'te
+    gelecegini 10:00 olarak okuyordu.
+  */
+  const fmtDt = (d: Date, timeZone: string) =>
+    formatDateTimeInZone(d, {
+      locale: timeLocale,
+      timeZone,
+      dateStyle: "short",
+      timeStyle: "short",
+    });
 
   const tasks = dbBookings.map((b) => {
     const totalBags = b.bagCountS + b.bagCountM + b.bagCountXl;
@@ -97,7 +112,7 @@ export default async function PartnerBookingsPage({
       bookingId: b.id,
       shortRef: "EMN-" + b.id.substring(0, 6).toUpperCase(),
       customer: b.guest?.name || tGuest("guestDefaultName"),
-      scheduleLine: `${fmtDt(b.checkInTime)} — ${t("checkInWord")} · ${fmtDt(b.checkOutTime)} — ${t("partnerBookingsCheckOut")}`,
+      scheduleLine: `${fmtDt(b.checkInTime, bookingTimeZone(b.shop))} — ${t("checkInWord")} · ${fmtDt(b.checkOutTime, bookingTimeZone(b.shop))} — ${t("partnerBookingsCheckOut")}`,
       listStatus,
       bookingStatus: b.status,
       bags: `${totalBags} ${tGuest("bagsUnit")}`,

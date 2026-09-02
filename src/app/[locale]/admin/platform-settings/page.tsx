@@ -1,3 +1,5 @@
+import { formatDateTimeInZone } from "@/lib/format-datetime";
+import { PLATFORM_TIMEZONE } from "@/lib/datetime-local";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { ChevronLeft } from "lucide-react";
 import { Link } from "@/i18n/routing";
@@ -68,7 +70,12 @@ export default async function AdminPlatformSettingsPage({
       };
 
   const updatedAtLabel = row?.updatedAt
-    ? row.updatedAt.toLocaleString(locale === "en" ? "en-GB" : "tr-TR")
+    ? formatDateTimeInZone(row.updatedAt, {
+        locale: locale === "en" ? "en-GB" : "tr-TR",
+        timeZone: PLATFORM_TIMEZONE,
+        dateStyle: "short",
+        timeStyle: "short",
+      })
     : "—";
 
   return (
