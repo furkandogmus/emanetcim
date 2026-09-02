@@ -1,3 +1,4 @@
+import { couponService } from "@/services/CouponService";
 import { resolveRequestLocale } from "@/lib/request-locale";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
@@ -38,6 +39,17 @@ const schema = z.object({
   bagCountS: z.number().int().min(0).max(20),
   bagCountM: z.number().int().min(0).max(20),
   bagCountXl: z.number().int().min(0).max(20),
+  /*
+    KUPON KODU (2026-09-02'de eklendi).
+
+    Mobil istemci bu alani ZATEN GONDERIYORDU
+    (`mobile/lib/features/checkout/checkout_screen.dart`), ama sema onu
+    tanimlamadigi icin zod sessizce ATIYORDU ve ucta kuponu isleyen tek satir
+    yoktu. Sonuc: misafir kupon kodunu girer, uygulandigini sanir ve TAM FIYAT
+    oder. Web'de ayni kupon calisiyordu -- ayni is kurali iki tasiyicidan
+    yalnizca birinde vardi ve aradaki fark PARAYDI.
+  */
+  couponCode: z.string().trim().min(1).max(64).optional(),
 });
 
 /** Mobil checkout: sağlayıcısız rezervasyon oluşturur ve doğrudan onaylar. */
@@ -86,6 +98,25 @@ export async function POST(req: NextRequest) {
     rules,
   );
 
+  /*
+    Kupon hakki rezervasyondan ONCE alinir (web ile ayni sira): yaris
+    kosulunda kota tutmazsa indirim hic uygulanmaz. Rezervasyon olusmazsa
+    asagidaki `catch` hakki geri verir.
+  */
+  let toplam = totals.subtotalBeforeCoupon;
+  let couponDiscountAmount = 0;
+  let appliedCouponCode: string | undefined;
+  let appliedCouponId: string | undefined;
+  if (parsed.data.couponCode) {
+    const claim = await couponService.claim(parsed.data.couponCode, toplam);
+    if (claim.ok) {
+      toplam = claim.claimed.totalPrice;
+      appliedCouponId = claim.claimed.couponId;
+      couponDiscountAmount = claim.claimed.discountAmount;
+      appliedCouponCode = claim.claimed.code;
+    }
+  }
+
   let booking;
   try {
     booking = await bookingService.createInitialBooking({
@@ -96,7 +127,9 @@ export async function POST(req: NextRequest) {
         `getLocale()` -- orada rota zaten `[locale]` tasiyor.
       */
       locale: resolveRequestLocale(req.headers.get("accept-language")),
-      totalPrice: totals.subtotalBeforeCoupon,
+      totalPrice: toplam,
+      couponDiscountAmount,
+      couponCode: appliedCouponCode,
       unitPrice: totals.unitPrice,
       insuranceFee: totals.insuranceFee,
       bagCountS: totals.bagCountS,
@@ -113,6 +146,14 @@ export async function POST(req: NextRequest) {
       initialStatus: BookingStatus.APPROVED,
     });
   } catch (e) {
+    /*
+      Rezervasyon olusmadi: alinan kupon hakki GERI VERILMELI, yoksa kampanya
+      kotasi gerceklesmemis bir rezervasyon yuzunden yanar. Web tarafi da
+      boyle yapiyor.
+    */
+    if (appliedCouponId) {
+      await couponService.release(appliedCouponId);
+    }
     if (e instanceof BookingRejectedError) {
       const { status, error } = REJECTION_TO_HTTP[e.code];
       return NextResponse.json({ error }, { status });
@@ -133,7 +174,8 @@ export async function POST(req: NextRequest) {
       .notifyBookingSuccess(
         auth.user.email,
         booking.id,
-        totals.subtotalBeforeCoupon,
+        // Misafire giden e-postadaki tutar da INDIRIMLI olan.
+        toplam,
       )
       .catch((err) =>
         logger.error(
@@ -154,7 +196,7 @@ export async function POST(req: NextRequest) {
       bookingId: booking.id,
       shopName: shop.name,
       partnerPhone: shop.owner.phone,
-      totalPrice: totals.subtotalBeforeCoupon,
+      totalPrice: toplam,
     })
     .catch((err) =>
       logger.error(
@@ -166,6 +208,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     bookingId: booking.id,
     status: "APPROVED",
-    totalPrice: totals.subtotalBeforeCoupon,
+    // Istemci bunu `serverTotal` olarak okuyup ekranda gosteriyor.
+    totalPrice: toplam,
   });
 }
