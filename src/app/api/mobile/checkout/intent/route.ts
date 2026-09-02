@@ -1,3 +1,4 @@
+import { resolveRequestLocale } from "@/lib/request-locale";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
@@ -90,6 +91,11 @@ export async function POST(req: NextRequest) {
     booking = await bookingService.createInitialBooking({
       guestId: auth.user.id,
       shopId,
+      /*
+        Mobil istemci dilini yalnizca bu baslikta bildiriyor. Web'de karsiligi
+        `getLocale()` -- orada rota zaten `[locale]` tasiyor.
+      */
+      locale: resolveRequestLocale(req.headers.get("accept-language")),
       totalPrice: totals.subtotalBeforeCoupon,
       unitPrice: totals.unitPrice,
       insuranceFee: totals.insuranceFee,

@@ -218,6 +218,8 @@ export async function createBookingAction(data: CreateBookingInput) {
       referredByCode: appliedReferralCode,
       couponDiscountAmount,
       couponCode: appliedCouponCode,
+      // Misafirin dili: rota zaten `[locale]` tasiyor, bildirimler bunu okur.
+      locale: await getLocale(),
       slotIds: data.slotIds,
       /*
         Doğrudan APPROVED: esnaf onayı beklenmez. Eskiden rezervasyon `PENDING`

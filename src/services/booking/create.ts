@@ -131,6 +131,8 @@ export async function createInitialBooking(data: CreateInitialBookingInput): Pro
           guestId: data.guestId ?? null,
           guestEmail: data.guestEmail ?? null,
           guestPhone: data.guestPhone ?? null,
+          // Misafirin dili: bildirimler bunu okur. Bkz. `Booking.locale`.
+          locale: data.locale ?? null,
           shopId: data.shopId,
           totalPrice: data.totalPrice,
           insuranceFee,
@@ -284,6 +286,8 @@ export async function createSlotBooking(
           guestId: data.guestId ?? null,
           guestEmail: data.guestEmail ?? null,
           guestPhone: data.guestPhone ?? null,
+          // Misafirin dili: bildirimler bunu okur. Bkz. `Booking.locale`.
+          locale: data.locale ?? null,
           shopId: data.shopId,
           totalPrice: data.totalPrice,
           insuranceFee,

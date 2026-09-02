@@ -1,0 +1,17 @@
+-- Misafirin REZERVASYON ANINDAKI dili.
+--
+-- NEDEN: hatirlatma e-postalari duz Turkce gidiyordu. `NotificationService`
+-- coktandir `pickLocale` ile cok dilli yaziyor ve `notification-locale-coverage`
+-- mandali her sablonun her dili tasimasini zorluyor; ama hatirlatma uclari o
+-- yoldan gecmiyordu. Gecemezlerdi de: dili saklayan alan YOKTU. `hardcoded-copy`
+-- mandalinin notu bunu "tek MISAFIR yuzeyi" diye isaretlemis ve "duzeltmesi kod
+-- degil SEMA isi" demisti.
+--
+-- Urun Amsterdam, Londra, Berlin noktalariyla Turkiye disina cikiyor; oradaki
+-- misafire Turkce e-posta gondermek artik kenar durum degil.
+--
+-- NULLABLE ve VARSAYILANSIZ: mevcut satirlar icin `NULL` = "bilinmiyor" ve
+-- okuyan taraf platform diline duser, yani eski davranis aynen korunur. Bu
+-- ayrica kilitsiz bir islem -- varsayilanli kolon eklemek tabloyu yeniden
+-- yazardi.
+ALTER TABLE "Booking" ADD COLUMN "locale" TEXT;

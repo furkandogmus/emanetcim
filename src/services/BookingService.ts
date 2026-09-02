@@ -50,6 +50,14 @@ export type CreateInitialBookingInput = {
    */
   couponDiscountAmount?: number;
   couponCode?: string;
+  /**
+   * Misafirin dili (`tr`, `en`, ...). Bildirimler bunu kullanir.
+   *
+   * Tasiyicidan gelir: web'de `[locale]` rota parametresi, mobilde istegin
+   * dil basligi. Servis onu yalnizca KAYDEDER -- secim tasiyicinin bildigi bir
+   * sey, is kuralinin degil.
+   */
+  locale?: string | null;
   /** Time-slot based: if provided, slot IDs to reserve instead of datetime pair */
   slotIds?: string[];
   /**

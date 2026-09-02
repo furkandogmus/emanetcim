@@ -4,6 +4,7 @@ import { formatTryCurrency } from "@/lib/currency";
 import { fetchWithTimeout } from "@/lib/async-timeout";
 import { renderEmailHtml, escapeEmailHtml, EMAIL_BRAND_COLOR } from "@/lib/email-template";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
+import { formatDateTimeInZone } from "@/lib/format-datetime";
 import {
   isNetgsmConfigured,
   normalizeTrGsm10,
@@ -1230,6 +1231,157 @@ export class NotificationService implements INotificationService {
 
     if (email.includes("@")) {
       await this.sendEmail(email, content.subject, content.body, bookingId);
+    }
+  }
+
+  /**
+   * YAKLASAN CHECK-IN / CHECK-OUT hatirlatmasi -- MISAFIRE.
+   *
+   * NEDEN BURADA (2026-09-02): bu iki e-posta `booking-reminders` ucunun
+   * icinde, duz Turkce string olarak yaziliyordu. `hardcoded-copy` mandalinin
+   * kendi notu onlari "kalan borcun icindeki tek MISAFIR yuzeyi" diye
+   * isaretlemis: "Japon bir misafire Turkce e-posta gidiyor."
+   *
+   * Duzeltilememesinin sebebi metnin yeri degil, VERI eksikligiydi -- misafirin
+   * dili hicbir yerde saklanmiyordu. `Booking.locale` eklendi; metinler de
+   * kod tabaninin geri kalaniyla ayni yoldan geciyor artik: `pickLocale` +
+   * `renderEmailHtml`, ve `notification-locale-coverage` mandali her dili
+   * tasidiklarini dogruluyor.
+   *
+   * Saat DUKKANIN diliminde bicimlenir (`formatDateTimeInZone`); tarih
+   * bicimlendirmesinin sunucunun dilimine dusmesi ayri bir hataydi ve ayni gun
+   * duzeltildi.
+   */
+  async sendStayReminder(
+    email: string,
+    bookingId: string,
+    params: {
+      kind: "check-in" | "check-out";
+      shopName: string;
+      at: Date;
+      timeZone: string;
+    },
+    locale: string,
+  ) {
+    const when = formatDateTimeInZone(params.at, {
+      locale: bcp47ForUiLocale(locale),
+      timeZone: params.timeZone,
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+    const shop = params.shopName;
+    const girisMi = params.kind === "check-in";
+
+    const content = pickLocale(
+      {
+        tr: girisMi
+          ? {
+              subject: "BagajPark: Bırakma saatiniz yaklaşıyor 🎒",
+              heading: "Bırakma saatiniz yaklaşıyor 🎒",
+              p1: `Bagajınızı ${shop} noktasına bırakma zamanınız yaklaşıyor. QR kodunuzu göstermeyi unutmayın.`,
+              row1: "Nokta",
+              row2: "Bırakma",
+            }
+          : {
+              subject: "BagajPark: Valizinizi alma saatiniz yaklaşıyor 🔔",
+              heading: "Valizinizi alma saatiniz yaklaşıyor 🔔",
+              p1: `${shop} noktasındaki bagajınızı teslim alma zamanınız yaklaşıyor. Geç teslim almalarda ek ücret uygulanabilir.`,
+              row1: "Nokta",
+              row2: "Alma",
+            },
+        en: girisMi
+          ? {
+              subject: "BagajPark: Your drop-off time is near 🎒",
+              heading: "Your drop-off time is near 🎒",
+              p1: `It is almost time to drop your luggage off at ${shop}. Remember to show your QR code.`,
+              row1: "Location",
+              row2: "Drop-off",
+            }
+          : {
+              subject: "BagajPark: Your pick-up time is near 🔔",
+              heading: "Your pick-up time is near 🔔",
+              p1: `It is almost time to collect your luggage from ${shop}. Late pick-ups may incur an extra charge.`,
+              row1: "Location",
+              row2: "Pick-up",
+            },
+        de: girisMi
+          ? {
+              subject: "BagajPark: Ihre Abgabezeit rückt näher 🎒",
+              heading: "Ihre Abgabezeit rückt näher 🎒",
+              p1: `Es ist fast Zeit, Ihr Gepäck bei ${shop} abzugeben. Denken Sie an Ihren QR-Code.`,
+              row1: "Standort",
+              row2: "Abgabe",
+            }
+          : {
+              subject: "BagajPark: Ihre Abholzeit rückt näher 🔔",
+              heading: "Ihre Abholzeit rückt näher 🔔",
+              p1: `Es ist fast Zeit, Ihr Gepäck bei ${shop} abzuholen. Bei verspäteter Abholung können Zusatzkosten anfallen.`,
+              row1: "Standort",
+              row2: "Abholung",
+            },
+        fr: girisMi
+          ? {
+              subject: "BagajPark : l'heure de dépôt approche 🎒",
+              heading: "L'heure de dépôt approche 🎒",
+              p1: `Il est bientôt temps de déposer vos bagages à ${shop}. N'oubliez pas votre code QR.`,
+              row1: "Point",
+              row2: "Dépôt",
+            }
+          : {
+              subject: "BagajPark : l'heure de récupération approche 🔔",
+              heading: "L'heure de récupération approche 🔔",
+              p1: `Il est bientôt temps de récupérer vos bagages à ${shop}. Une récupération tardive peut entraîner des frais.`,
+              row1: "Point",
+              row2: "Récupération",
+            },
+        ja: girisMi
+          ? {
+              subject: "BagajPark: お預けのお時間が近づいています 🎒",
+              heading: "お預けのお時間が近づいています 🎒",
+              p1: `${shop} でお荷物をお預けいただくお時間が近づいています。QRコードをご提示ください。`,
+              row1: "場所",
+              row2: "お預け",
+            }
+          : {
+              subject: "BagajPark: お受け取りのお時間が近づいています 🔔",
+              heading: "お受け取りのお時間が近づいています 🔔",
+              p1: `${shop} でお荷物をお受け取りいただくお時間が近づいています。お受け取りが遅れると追加料金が発生する場合があります。`,
+              row1: "場所",
+              row2: "お受け取り",
+            },
+        fa: girisMi
+          ? {
+              subject: "BagajPark: زمان تحویل چمدان شما نزدیک است 🎒",
+              heading: "زمان تحویل چمدان شما نزدیک است 🎒",
+              p1: `زمان تحویل چمدان شما در ${shop} نزدیک است. لطفاً کد QR خود را نشان دهید.`,
+              row1: "مکان",
+              row2: "تحویل",
+            }
+          : {
+              subject: "BagajPark: زمان دریافت چمدان شما نزدیک است 🔔",
+              heading: "زمان دریافت چمدان شما نزدیک است 🔔",
+              p1: `زمان دریافت چمدان شما از ${shop} نزدیک است. دریافت با تأخیر ممکن است هزینه اضافی داشته باشد.`,
+              row1: "مکان",
+              row2: "دریافت",
+            },
+      },
+      locale,
+    );
+
+    const body = `${content.p1}\n\n${content.row1}: ${shop}\n${content.row2}: ${when}`;
+    const html = renderEmailHtml({
+      locale,
+      heading: content.heading,
+      paragraphs: [content.p1],
+      rows: [
+        { label: content.row1, value: shop },
+        { label: content.row2, value: when },
+      ],
+      footer: "BagajPark",
+    });
+
+    if (email.includes("@")) {
+      await this.sendEmail(email, content.subject, body, bookingId, html);
     }
   }
 }

@@ -16,6 +16,7 @@ import {
   CHECK_OUT_REMINDER_WINDOW_MINUTES,
 } from "@/lib/reminder-notice";
 import { formatDateTimeInZone, bookingTimeZone } from "@/lib/format-datetime";
+import { DEFAULT_NOTIFICATION_LOCALE } from "@/lib/request-locale";
 
 /**
  * Bu rezervasyonlardan HANGILERINE bu hatirlatma daha once gonderildi.
@@ -133,11 +134,16 @@ export async function GET(req: NextRequest) {
     for (const booking of checkInSoon) {
       if (checkInNotified.has(booking.id)) continue;
       if (booking.guest?.email) {
-        void notificationService.sendEmail(
+        void notificationService.sendStayReminder(
           booking.guest.email,
-          `${CHECK_IN_REMINDER_SUBJECT_PREFIX}! 🎒`,
-          `Merhaba ${booking.guest.name ?? ""},\n\nBagajınızı ${booking.shop.name} mağazasına teslim etme zamanınız yaklaşıyor.\n\nCheck-in: ${formatDateTimeInZone(booking.checkInTime, { locale: "tr-TR", timeZone: bookingTimeZone(booking.shop), dateStyle: "short", timeStyle: "short" })}\n\nQR kodunuzu göstermeyi unutmayın.`,
           booking.id,
+          {
+            kind: "check-in",
+            shopName: booking.shop.name,
+            at: booking.checkInTime,
+            timeZone: bookingTimeZone(booking.shop),
+          },
+          booking.locale ?? DEFAULT_NOTIFICATION_LOCALE,
         ).catch((e) => logger.warn({ err: e, bookingId: booking.id }, "reminder_checkin_email_failed"));
         results.checkInReminders++;
       }
@@ -175,11 +181,16 @@ export async function GET(req: NextRequest) {
     for (const booking of checkOutSoon) {
       if (checkOutNotified.has(booking.id)) continue;
       if (booking.guest?.email) {
-        void notificationService.sendEmail(
+        void notificationService.sendStayReminder(
           booking.guest.email,
-          `${CHECK_OUT_REMINDER_SUBJECT_PREFIX}! 🔔`,
-          `Merhaba ${booking.guest.name ?? ""},\n\n${booking.shop.name} mağazasındaki bagajınızı teslim alma zamanınız yaklaşıyor.\n\nCheck-out: ${formatDateTimeInZone(booking.checkOutTime, { locale: "tr-TR", timeZone: bookingTimeZone(booking.shop), dateStyle: "short", timeStyle: "short" })}\n\nGeç teslim almalarda ek ücret uygulanabilir.`,
           booking.id,
+          {
+            kind: "check-out",
+            shopName: booking.shop.name,
+            at: booking.checkOutTime,
+            timeZone: bookingTimeZone(booking.shop),
+          },
+          booking.locale ?? DEFAULT_NOTIFICATION_LOCALE,
         ).catch((e) => logger.warn({ err: e, bookingId: booking.id }, "reminder_checkout_email_failed"));
         results.checkOutReminders++;
       }

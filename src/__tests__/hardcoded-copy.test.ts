@@ -156,15 +156,23 @@ const TURKISH_OK_FILES = new Set([
 ]);
 
 /**
- * Kalan borç, tamamı SUNUCU tarafında. 2026-08-24: 119 satırdan 13'e indi.
+ * Kalan borç, tamamı SUNUCU tarafında. 2026-08-24: 119 satırdan 13'e,
+ * 2026-09-02: 13'ten 11'e indi.
  *
- * İçindeki tek MİSAFİR yüzeyi `booking-reminders` (3 satır): hatırlatma
- * e-postaları sabit Türkçe ve tarihler `toLocaleString("tr-TR")` ile yazılıyor,
- * yani Japon bir misafire Türkçe e-posta gidiyor. Düzeltmesi kod değil ŞEMA
- * işi — rezervasyonda misafirin dili saklanmıyor (bkz. DEFECT_BACKLOG).
- * Kalan 10 satır esnaf/admin'e giden e-posta ve SMS metinleri.
+ * MİSAFİR YÜZEYİ ARTIK BOŞ. Önceki not şöyle diyordu: "İçindeki tek MİSAFİR
+ * yüzeyi `booking-reminders` (3 satır) ... yani Japon bir misafire Türkçe
+ * e-posta gidiyor. Düzeltmesi kod değil ŞEMA işi — rezervasyonda misafirin
+ * dili saklanmıyor." Teşhis doğruydu: `Booking.locale` eklendi, iki taşıyıcı
+ * da dolduruyor ve hatırlatmalar `NotificationService` üzerinden altı dilde
+ * yazılıyor (`sendStayReminder`).
+ *
+ * Kalan 11 satırın tamamı ESNAF/ADMİN yüzeyi: geç teslim uyarısı, mühür
+ * tahmini e-postası ve SMS'i, webhook yönetici notları. Onların düzeltmesi de
+ * aynı sınıf bir veri eksiğini bekliyor — `User.locale` yok, yani esnafın
+ * dili de bilinmiyor. Türkiye dışında esnaf açıldığı gün bu satır sırasını
+ * bekleyen iş olacak.
  */
-const TURKISH_TEXT_CEILING = 13;
+const TURKISH_TEXT_CEILING = 11;
 
 function findTurkishText(): Array<{ file: string; line: number; text: string }> {
   const hits: Array<{ file: string; line: number; text: string }> = [];

@@ -251,6 +251,21 @@ model Booking {
   pendingBagRevision     Json?
   /// Erken teslimat iadesi başarısız olduysa reconcile için tutulan tutar
   failedRefundAmount     Decimal?          @default(0) @db.Decimal(12, 2)
+  /// Misafirin REZERVASYON ANINDAKİ dili (`tr`, `en`, `de`, ...).
+  ///
+  /// NEDEN VAR (2026-09-02): bildirimler dil seçemiyordu. `NotificationService`
+  /// çoktandır `pickLocale` ile çok dilli yazıyor ve `notification-locale-coverage`
+  /// mandalı her şablonun her dili taşımasını zorluyor -- ama hatırlatma
+  /// e-postaları bu yoldan geçmiyor, düz Türkçe gidiyordu. `hardcoded-copy`
+  /// mandalının kendi notu bunu "tek MİSAFİR yüzeyi" diye işaretlemiş ve
+  /// "düzeltmesi kod değil ŞEMA işi" demişti: dili saklayan alan yoktu.
+  ///
+  /// Ürün Amsterdam, Londra, Berlin noktalarıyla Türkiye dışına çıkıyor; o
+  /// noktalardaki misafire Türkçe e-posta göndermek artık kenar durum değil.
+  ///
+  /// `null` = bilinmiyor (bu alandan ÖNCEKİ rezervasyonlar). Okuyan taraf
+  /// platform diline düşer, yani eski davranış aynen korunur.
+  locale                 String?
   createdAt              DateTime          @default(now())
   updatedAt              DateTime          @updatedAt
   /// Eşzamanlı durum geçişleri için optimistic sürüm (onay vb. updateMany ile artırılır).
