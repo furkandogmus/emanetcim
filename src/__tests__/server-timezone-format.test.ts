@@ -27,6 +27,25 @@ import { stripComments } from "./helpers/strip-comments";
 
 const SUNUCU_KOKLERI = ["src/app", "src/services", "src/lib"];
 
+/**
+ * ISTEMCI TARAFI DA MISAFIR YUZEYINDE AYNI KURALA TABI (2026-09-02'de eklendi).
+ *
+ * Ilk yazilisinda bu mandal `"use client"` dosyalarini "ayri bir tartisma"
+ * diye disariya almisti. Degildi: `datetime-local.ts` kurali coktan koymus --
+ * "rezervasyon saatleri DUKKANIN yerel saatidir, misafirin cihazininki degil"
+ * -- ve o kural GIRDI tarafinda uygulanmisken (`parseDatetimeLocalInTimeZone`)
+ * GOSTERIM tarafinda uygulanmamisti.
+ *
+ * En agiri `ManageBookingClient`ti: saati `checkIn.getHours()` ile yaziyordu,
+ * yani ziyaretcinin CIHAZ saatiyle. Berlin'deki bir misafir Istanbul'daki
+ * dukkana 14:00 rezervasyon yapip kendi "rezervasyonumu yonet" ekraninda
+ * 13:00 goruyordu -- kendi sectigi saatten farkli. Tokyo'da 20:00.
+ *
+ * Kapsam MISAFIR yuzeyi (`components/guest`): admin ve esnaf panelleri kendi
+ * borc listelerinde duruyor.
+ */
+const ISTEMCI_KOKLERI = ["src/components/guest"];
+
 function tsDosyalari(dir: string, out: string[] = []): string[] {
   for (const ad of readdirSync(dir)) {
     const tam = join(dir, ad);
@@ -45,10 +64,13 @@ function sunucuDosyalari(): string[] {
   for (const kok of SUNUCU_KOKLERI) {
     for (const f of tsDosyalari(join(process.cwd(), kok))) {
       const src = readFileSync(f, "utf-8");
-      // Istemci bilesenleri ziyaretcinin cihazinda kosar; ayri bir tartisma.
       if (/^\s*["']use client["']/m.test(src.slice(0, 200))) continue;
       hepsi.push(f);
     }
+  }
+  // Misafir yuzeyindeki istemci bilesenleri: gerekce ISTEMCI_KOKLERI'nde.
+  for (const kok of ISTEMCI_KOKLERI) {
+    hepsi.push(...tsDosyalari(join(process.cwd(), kok)));
   }
   return hepsi;
 }
@@ -117,5 +139,30 @@ describe("formatDateTimeInZone makinenin dilimine bakmaz", () => {
     expect(bookingTimeZone({ timezone: "Europe/Amsterdam" })).toBe("Europe/Amsterdam");
     expect(bookingTimeZone({ timezone: null })).toBe(PLATFORM_TIMEZONE);
     expect(bookingTimeZone(null)).toBe(PLATFORM_TIMEZONE);
+  });
+});
+
+describe("misafir yuzeyi cihazin saatini okumuyor", () => {
+  /*
+    `d.getHours()` / `getMinutes()` CIHAZIN dilimini okur. Bir rezervasyon
+    saatini boyle yazmak, misafire kendi sectigi saatten farkli bir saat
+    gostermek demekti (`ManageBookingClient`, 2026-09-02).
+  */
+  it("saat parcalari elle kurulmuyor", () => {
+    const ihlaller: string[] = [];
+    for (const kok of ISTEMCI_KOKLERI) {
+      for (const f of tsDosyalari(join(process.cwd(), kok))) {
+        const satirlar = stripComments(readFileSync(f, "utf-8")).split("\n");
+        satirlar.forEach((satir, i) => {
+          if (/\.get(Hours|Minutes)\s*\(\s*\)/.test(satir)) {
+            ihlaller.push(`${f.replace(process.cwd() + "/", "")}:${i + 1}`);
+          }
+        });
+      }
+    }
+    expect(
+      ihlaller,
+      `cihazin saati okunuyor -- \`formatDateTimeInZone\` kullanin:\n${ihlaller.join("\n")}`,
+    ).toEqual([]);
   });
 });

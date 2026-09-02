@@ -1,5 +1,7 @@
 "use client";
 
+import { formatDateInZone } from "@/lib/format-datetime";
+import { PLATFORM_TIMEZONE } from "@/lib/datetime-local";
 import {
   ArrowLeft,
   MapPin,
@@ -610,11 +612,7 @@ export default function ShopDetailClient({
                     </p>
                   ) : null}
                   <p className="text-[10px] text-gray-400 mt-2 font-medium">
-                    {new Date(r.createdAt).toLocaleDateString(dateLocale, {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
+                    {formatDateInZone(r.createdAt, { locale: dateLocale, timeZone: PLATFORM_TIMEZONE, dateStyle: "medium" })}
                   </p>
                 </li>
               ))}

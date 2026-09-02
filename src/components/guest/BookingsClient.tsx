@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDateInZone, bookingTimeZone } from "@/lib/format-datetime";
 import { useCallback, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -208,7 +209,7 @@ export default function BookingsClient({
             <div className="rounded-2xl bg-slate-50 p-3">
               <p className="text-[10px] font-black uppercase text-gray-400">{t('checkIn')}</p>
               <p className="mt-1 text-sm font-black text-gray-900">
-                {new Date(featuredBooking.checkInTime).toLocaleDateString(dateLocale)}
+                {formatDateInZone(featuredBooking.checkInTime, { locale: dateLocale, timeZone: bookingTimeZone(featuredBooking.shop) })}
               </p>
             </div>
             <div className="rounded-2xl bg-slate-50 p-3">
@@ -244,7 +245,7 @@ export default function BookingsClient({
                 <div className="flex-1 min-w-0">
                   <p className="truncate font-bold text-gray-900">{booking.shop?.name || t('defaultShopName')}</p>
                   <p className="text-xs text-gray-500">
-                    {new Date(booking.checkInTime).toLocaleDateString(dateLocale)} • {formatTryCurrency(moneyToNumber(booking.totalPrice), locale)}
+                    {formatDateInZone(booking.checkInTime, { locale: dateLocale, timeZone: bookingTimeZone(booking.shop) })} • {formatTryCurrency(moneyToNumber(booking.totalPrice), locale)}
                   </p>
                 </div>
                 <ChevronRight size={16} className="text-gray-300" />
@@ -322,7 +323,7 @@ export default function BookingsClient({
                   <div>
                     <div className="text-[10px] text-gray-400 font-bold uppercase">{t('checkIn')}</div>
                     <div className="text-sm font-bold text-gray-700">
-                      {new Date(booking.checkInTime).toLocaleDateString(dateLocale)}
+                      {formatDateInZone(booking.checkInTime, { locale: dateLocale, timeZone: bookingTimeZone(booking.shop) })}
                     </div>
                   </div>
                 </div>

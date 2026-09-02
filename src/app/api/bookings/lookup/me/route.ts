@@ -1,3 +1,4 @@
+import { bookingTimeZone } from "@/lib/format-datetime";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { authenticateGuestLookup } from "@/lib/guest-lookup-token";
@@ -22,7 +23,8 @@ export async function GET(req: NextRequest) {
       where: { id: payload.bookingId },
       select: {
         id: true,
-        shop: { select: { name: true, address: true } },
+        // `timezone`: saatler DUKKANIN diliminde gosterilir, cihazinkinde degil.
+        shop: { select: { name: true, address: true, timezone: true } },
         checkInTime: true,
         checkOutTime: true,
         totalPrice: true,
@@ -67,6 +69,7 @@ export async function GET(req: NextRequest) {
         id: booking.id,
         shopName: booking.shop.name,
         shopAddress: booking.shop.address,
+        shopTimeZone: bookingTimeZone(booking.shop),
         checkInTime: booking.checkInTime.toISOString(),
         checkOutTime: booking.checkOutTime.toISOString(),
         totalPrice: Number(booking.totalPrice),

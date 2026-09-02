@@ -7,12 +7,15 @@ import { toast } from "sonner";
 import { MapPin, Calendar, Clock, Package, Shield, XCircle } from "lucide-react";
 import Money from "@/components/common/Money";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
+import { formatDateTimeInZone } from "@/lib/format-datetime";
 import { useActionErrorText } from "@/lib/use-action-error";
 
 interface BookingInfo {
   id: string;
   shopName: string;
   shopAddress: string;
+  /** Dukkanin saat dilimi -- saatler bunda gosterilir. */
+  shopTimeZone: string;
   checkInTime: string;
   checkOutTime: string;
   totalPrice: number;
@@ -141,7 +144,7 @@ export default function ManageBookingClient({ initialToken }: { initialToken: st
                   <Calendar size={12} /> {t("checkIn")}
                 </span>
                 <span className="text-sm font-bold text-gray-900">
-                  {checkIn.toLocaleDateString(dateLocale)} {String(checkIn.getHours()).padStart(2, "0")}:{String(checkIn.getMinutes()).padStart(2, "0")}
+                  {formatDateTimeInZone(checkIn, { locale: dateLocale, timeZone: booking.shopTimeZone, dateStyle: "medium", timeStyle: "short" })}
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -149,7 +152,7 @@ export default function ManageBookingClient({ initialToken }: { initialToken: st
                   <Calendar size={12} /> {t("checkOut")}
                 </span>
                 <span className="text-sm font-bold text-gray-900">
-                  {checkOut.toLocaleDateString(dateLocale)} {String(checkOut.getHours()).padStart(2, "0")}:{String(checkOut.getMinutes()).padStart(2, "0")}
+                  {formatDateTimeInZone(checkOut, { locale: dateLocale, timeZone: booking.shopTimeZone, dateStyle: "medium", timeStyle: "short" })}
                 </span>
               </div>
               <div className="flex justify-between items-center">
