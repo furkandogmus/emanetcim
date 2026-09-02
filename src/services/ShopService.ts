@@ -94,6 +94,59 @@ export type ShopSearchHit = ShopWithDistance & {
  */
 const NEUTRAL_RATING = 3;
 
+/** `HH:MM`, 00:00-23:59. */
+const SAAT_BICIMI = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+/**
+ * Dukkan guncellemesinin SERVIS SEVIYESINDEKI kapisi.
+ *
+ * NEDEN VAR (2026-09-02'de gercek veritabaninda olculdu): `updateShop` hicbir
+ * dogrulama yapmiyordu ve servis dogrudan cagrildiginda su degerler KAYDA
+ * GIRIYORDU --
+ *
+ *     capacity: -10       -> kaydedildi
+ *     pricePerDay: -100   -> kaydedildi
+ *     openingTime: "99:99" -> kaydedildi
+ *
+ * Her biri dukkani farkli bir bicimde bozar:
+ *
+ *   - NEGATIF KAPASITE dukkani olduruyor: `assertCapacityTx`
+ *     `used + newBags > shop.capacity` diye bakiyor, yani ilk valiz bile
+ *     sigmiyor ve dukkan hicbir rezervasyon alamiyor. Esnaf sebebini goremez.
+ *   - NEGATIF FIYAT, fiyat hesabinin tabanidir; oradan asagisi misafire para
+ *     vermek demek.
+ *   - GECERSIZ SAAT `isShopOpenForStay`in ayristiramadigi bir deger; acik/kapali
+ *     karari belirsizlesir ve check-in tezgahta reddedilebilir.
+ *
+ * Tasiyicilar zod ile doguruyor (mobil `capacity: z.number().int().min(1)`,
+ * web action ayni sekilde), yani bu degerler bugun disaridan gelemez. Ama
+ * CLAUDE.md "yazma islemleri yalnizca `src/services/` uzerinden" diyor; son
+ * savunma hatti da orasi olmali. Ayni gerekce rezervasyon girdi kapisinda da
+ * yazili (`BookingInputInvalidError`).
+ */
+function assertShopUpdate(data: Partial<Shop>): void {
+  if (data.capacity !== undefined) {
+    if (!Number.isInteger(data.capacity) || data.capacity < 1) {
+      throw new Error('SHOP_INVALID_CAPACITY');
+    }
+  }
+  for (const alan of ['pricePerDay', 'pricePerHour'] as const) {
+    const deger = data[alan];
+    if (deger === undefined || deger === null) continue;
+    const sayi = moneyToNumber(deger);
+    if (!Number.isFinite(sayi) || sayi < 0) {
+      throw new Error(`SHOP_INVALID_PRICE:${alan}`);
+    }
+  }
+  for (const alan of ['openingTime', 'closingTime'] as const) {
+    const deger = data[alan];
+    if (deger === undefined || deger === null) continue;
+    if (!SAAT_BICIMI.test(deger)) {
+      throw new Error(`SHOP_INVALID_HOURS:${alan}`);
+    }
+  }
+}
+
 function ratingScore(rating: number | null | undefined): number {
   const r = rating ?? 0;
   return (r > 0 ? r : NEUTRAL_RATING) / 5;
@@ -781,6 +834,7 @@ export class ShopService implements IShopService {
   }
 
   async updateShop(shopId: string, data: Partial<Shop>): Promise<Shop> {
+    assertShopUpdate(data);
     return await prisma.shop.update({
       where: { id: shopId },
       data,
