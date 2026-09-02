@@ -1666,7 +1666,8 @@
     "shopNotOpenYet": "この拠点はまだオープンしていません。メールアドレスをご登録いただければ、開始時にお知らせします。",
     "shopNowOpenBookInstead": "この拠点はオープンしました。そのままご予約いただけます。",
     "imageTooLarge": "写真のサイズが大きすぎます。最大8MBです。",
-    "imageUnsupportedType": "このファイルは写真ではありません。JPEG、PNG、WebPをアップロードしてください。"
+    "imageUnsupportedType": "このファイルは写真ではありません。JPEG、PNG、WebPをアップロードしてください。",
+    "shopMissingCoordinates": "店舗の位置情報がありません。承認する前に座標を設定してください。"
   },
   "Emails": {
     "verificationSubject": "メールアドレスを確認してください",

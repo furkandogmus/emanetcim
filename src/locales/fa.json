@@ -1666,7 +1666,8 @@
     "shopNotOpenYet": "این نقطه هنوز افتتاح نشده است. ایمیل خود را بگذارید تا هنگام راه‌اندازی به شما اطلاع دهیم.",
     "shopNowOpenBookInstead": "این نقطه اکنون افتتاح شده است — می‌توانید مستقیماً رزرو کنید.",
     "imageTooLarge": "حجم عکس زیاد است. حداکثر ۸ مگابایت.",
-    "imageUnsupportedType": "این فایل عکس نیست. JPEG، PNG یا WebP بارگذاری کنید."
+    "imageUnsupportedType": "این فایل عکس نیست. JPEG، PNG یا WebP بارگذاری کنید.",
+    "shopMissingCoordinates": "فروشگاه موقعیت مکانی ندارد. پیش از تأیید، مختصات را وارد کنید."
   },
   "Emails": {
     "verificationSubject": "ایمیل خود را تأیید کنید",

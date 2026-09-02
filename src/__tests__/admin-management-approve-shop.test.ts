@@ -33,7 +33,7 @@ describe("approveShopAction", () => {
   });
 
   it("delegates to shopService.approveShop — bu, partnere onay e-postası + SMS gönderen tek yol", async () => {
-    mockShopService.approveShop.mockResolvedValue(true);
+    mockShopService.approveShop.mockResolvedValue({ ok: true });
 
     const result = await approveShopAction("shop-1");
 
@@ -45,7 +45,7 @@ describe("approveShopAction", () => {
   });
 
   it("shopService.approveShop false dönerse hata fırlatır ve audit log yazmaz", async () => {
-    mockShopService.approveShop.mockResolvedValue(false);
+    mockShopService.approveShop.mockResolvedValue({ ok: false, reason: "not_found" });
 
     await expect(approveShopAction("missing-shop")).rejects.toThrow();
     expect(mockAuditLog).not.toHaveBeenCalled();

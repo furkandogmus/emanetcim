@@ -188,7 +188,7 @@ export interface IShopService {
   getShopPublicDetail(shopId: string): Promise<ShopPublicDetail | null>;
   getShopImages(shopId: string): Promise<Array<{ id: string; url: string; order: number }>>;
   getPendingShops(): Promise<ShopWithOwner[]>;
-  approveShop(shopId: string): Promise<boolean>;
+  approveShop(shopId: string): Promise<ApproveShopResult>;
   rejectShop(shopId: string): Promise<RejectShopResult>;
   getShopsByOwner(ownerId: string): Promise<Shop[]>;
   getShopByOwner(ownerId: string): Promise<Shop | null>;
@@ -219,6 +219,28 @@ function extractKeyFromUrl(url: string, storage: { publicUrl: (k: string) => str
   const base = storage.publicUrl("");
   return url.startsWith(base) ? url.slice(base.length) : null;
 }
+
+/**
+ * Onay sonucu.
+ *
+ * NEDEN `boolean` DEGIL (2026-09-02'de gercek veritabaninda olculdu):
+ * koordinati OLMAYAN bir dukkan onaylanabiliyordu ve sonuc sessizdi --
+ *
+ *     approveShop -> true, isActive: true, koordinat: null
+ *     esnafa giden e-posta: "Basvurunuz Onaylandi! 🎉"
+ *     500 km yariyapli aramada: GORUNMUYOR
+ *
+ * Arama tamamen mesafe uzerinden calisiyor (`getActiveShopsOrderedByDistanceKm`),
+ * yani koordinatsiz dukkan HICBIR aramada cikmaz. Esnaf onaylandigini
+ * biliyor, rezervasyon bekliyor ve neden gelmedigini bilmiyor; admin de bir
+ * sey yaptigini sanmiyor cunku islem "basarili" donuyor.
+ *
+ * `boolean` bu farki tasiyamiyordu: `false` hem "dukkan yok" hem "koordinat
+ * yok" demekti. `rejectShop` zaten yapilandirilmis sonuc donuyor; ayni kalip.
+ */
+export type ApproveShopResult =
+  | { ok: true }
+  | { ok: false; reason: "not_found" | "missing_coordinates" };
 
 export type RejectShopResult =
   | { ok: true; releasedSeals: number }
@@ -585,13 +607,37 @@ export class ShopService implements IShopService {
     });
   }
 
-  async approveShop(shopId: string): Promise<boolean> {
+  async approveShop(shopId: string): Promise<ApproveShopResult> {
     try {
       const shop = await prisma.shop.findUnique({
         where: { id: shopId },
         include: { owner: true },
       });
-      if (!shop) return false;
+      if (!shop) return { ok: false, reason: "not_found" };
+
+      /*
+        KOORDINATSIZ DUKKAN ONAYLANMAZ.
+
+        Arama tamamen mesafe uzerinden calisiyor
+        (`getActiveShopsOrderedByDistanceKm`), yani koordinati olmayan bir
+        dukkan HICBIR aramada cikmaz. Onceden onay yine de geciyordu ve olculdu:
+
+          approveShop -> true, isActive: true, koordinat: null
+          esnafa giden e-posta: "Basvurunuz Onaylandi! 🎉"
+          500 km yariyapli aramada: GORUNMUYOR
+
+        Esnaf onaylandigini biliyor, rezervasyon bekliyor ve neden gelmedigini
+        bilmiyor. Admin de bir sey yaptigini saniyor, cunku islem "basarili"
+        donuyordu. Sessiz basarisizligi acik hataya cevirmek, onayi engellemek
+        pahasina dogru: koordinat girilmeden onay, tutulamayacak bir sozdur.
+      */
+      if (shop.latitude == null || shop.longitude == null) {
+        logger.warn(
+          { shopId, name: shop.name },
+          "approve_shop_blocked_missing_coordinates",
+        );
+        return { ok: false, reason: "missing_coordinates" };
+      }
 
       await prisma.$transaction(async (tx) => {
         await tx.shop.update({
@@ -685,10 +731,11 @@ export class ShopService implements IShopService {
         );
       }
 
-      return true;
+      return { ok: true };
     } catch (error) {
       logger.error({ err: error, shopId }, 'ShopService::approveShop error');
-      return false;
+      // Beklenmeyen hata da "onaylanmadi" demek; cagiran ayni yolu izler.
+      return { ok: false, reason: "not_found" };
     }
   }
 

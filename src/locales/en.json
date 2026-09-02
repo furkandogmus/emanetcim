@@ -1724,7 +1724,8 @@
     "shopNotOpenYet": "This location isn't open yet. Leave your email and we'll let you know when it launches.",
     "shopNowOpenBookInstead": "This location is now open — you can book it directly.",
     "imageTooLarge": "The photo is too large. Maximum size is 8 MB.",
-    "imageUnsupportedType": "That file is not a photo. Upload a JPEG, PNG or WebP."
+    "imageUnsupportedType": "That file is not a photo. Upload a JPEG, PNG or WebP.",
+    "shopMissingCoordinates": "The shop has no location. Set its coordinates before approving."
   },
   "Emails": {
     "verificationSubject": "Verify Your Email",

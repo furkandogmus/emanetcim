@@ -155,12 +155,20 @@ describe("ShopService", () => {
         id: "shop-1",
         ownerId: "owner-1",
         name: "Test Shop",
+        /*
+          KOORDINAT SART (2026-09-02): arama tamamen mesafe uzerinden calisiyor,
+          o yuzden koordinatsiz dukkan artik onaylanmiyor. Mock'ta da olmali --
+          yoksa test, gercekte olmayan bir durumu (konumsuz onaylanmis dukkan)
+          dogruluyor olurdu.
+        */
+        latitude: 41.0256,
+        longitude: 28.9741,
         owner: { email: "owner@test.com", name: "Owner Name" },
       });
 
-      const success = await service.approveShop("shop-1");
+      const sonuc = await service.approveShop("shop-1");
 
-      expect(success).toBe(true);
+      expect(sonuc).toEqual({ ok: true });
       expect(mockPrisma.shop.update).toHaveBeenCalledWith({
         where: { id: "shop-1" },
         data: { isActive: true },

@@ -1666,7 +1666,8 @@
     "shopNotOpenYet": "Dieser Standort ist noch nicht geöffnet. Hinterlassen Sie Ihre E-Mail-Adresse, und wir informieren Sie zum Start.",
     "shopNowOpenBookInstead": "Dieser Standort ist jetzt geöffnet — Sie können direkt buchen.",
     "imageTooLarge": "Das Foto ist zu groß. Maximal 8 MB.",
-    "imageUnsupportedType": "Diese Datei ist kein Foto. Lade ein JPEG, PNG oder WebP hoch."
+    "imageUnsupportedType": "Diese Datei ist kein Foto. Lade ein JPEG, PNG oder WebP hoch.",
+    "shopMissingCoordinates": "Der Laden hat keinen Standort. Legen Sie die Koordinaten vor der Freigabe fest."
   },
   "Emails": {
     "verificationSubject": "Bestätigen Sie Ihre E-Mail",

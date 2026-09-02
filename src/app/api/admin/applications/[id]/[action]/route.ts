@@ -29,9 +29,20 @@ export async function POST(
     dondurmuyordu (bkz. o metodun yorumu).
   */
   if (action === "approve") {
-    const ok = await shopService.approveShop(id);
-    if (!ok) {
-      return NextResponse.json({ error: "Shop not found." }, { status: 404 });
+    /*
+      `if (!ok)` DEGIL: `approveShop` artik yapilandirilmis sonuc donuyor ve bir
+      NESNE her zaman truthy'dir -- eski kosul sessizce hicbir hatayi
+      yakalamazdi. TypeScript bunu uyarmaz, o yuzden burada acikca `.ok`
+      okunuyor.
+    */
+    const result = await shopService.approveShop(id);
+    if (!result.ok) {
+      return result.reason === "missing_coordinates"
+        ? NextResponse.json(
+            { error: "Shop has no coordinates; set them before approving." },
+            { status: 409 },
+          )
+        : NextResponse.json({ error: "Shop not found." }, { status: 404 });
     }
   } else if (action === "reject") {
     const result = await shopService.rejectShop(id);

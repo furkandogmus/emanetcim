@@ -536,9 +536,19 @@ export async function resendVerificationEmailAction(email: string) {
 export async function approveShopAction(shopId: string) {
   const session = await ensureAdmin();
 
-  const success = await shopService.approveShop(shopId);
-  if (!success) {
-    throw new Error("Errors.generic");
+  /*
+    `if (!success)` DEGIL: `approveShop` yapilandirilmis sonuc donuyor ve bir
+    NESNE her zaman truthy -- eski kosul hicbir hatayi yakalamazdi ve
+    TypeScript bunu uyarmaz. Sebep de tasiniyor: "konum yok" ile "dukkan yok"
+    admin icin ayri seyler, ilki duzeltilebilir bir eksik.
+  */
+  const result = await shopService.approveShop(shopId);
+  if (!result.ok) {
+    throw new Error(
+      result.reason === "missing_coordinates"
+        ? "Errors.shopMissingCoordinates"
+        : "Errors.generic",
+    );
   }
 
   writeAuditLog({

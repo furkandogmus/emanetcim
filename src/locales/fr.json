@@ -1666,7 +1666,8 @@
     "shopNotOpenYet": "Ce point n'est pas encore ouvert. Laissez votre e-mail et nous vous préviendrons à l'ouverture.",
     "shopNowOpenBookInstead": "Ce point est désormais ouvert — vous pouvez réserver directement.",
     "imageTooLarge": "La photo est trop lourde. 8 Mo maximum.",
-    "imageUnsupportedType": "Ce fichier n'est pas une photo. Envoyez un JPEG, PNG ou WebP."
+    "imageUnsupportedType": "Ce fichier n'est pas une photo. Envoyez un JPEG, PNG ou WebP.",
+    "shopMissingCoordinates": "La boutique n'a pas de localisation. Renseignez les coordonnées avant d'approuver."
   },
   "Emails": {
     "verificationSubject": "Vérifiez votre e-mail",
