@@ -245,12 +245,18 @@ export default function PartnerShopSettingsForm({
 
           {/* SMS telefon */}
           <div>
-            <label className="ui-kicker mb-2 block">
+            {/*
+              `htmlFor`/`id` BAGI SART: gorsel bir etiketin yanindaki girdi,
+              ekran okuyucu icin etiketli DEGILDIR. Bag kurulmadiginda okuyucu
+              yalnizca placeholder'i okur -- o da yazmaya baslayinca kaybolur.
+            */}
+            <label htmlFor="partner-sms-phone" className="ui-kicker mb-2 block">
               {t("smsNotifyPhone")}
             </label>
             <div className="flex items-center gap-4">
               <Phone size={20} className="text-gray-300 shrink-0" />
               <input
+                id="partner-sms-phone"
                 type="tel"
                 inputMode="tel"
                 autoComplete="tel"

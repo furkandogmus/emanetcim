@@ -250,8 +250,15 @@ export default function PartnerSealsClient({
 
           {showRequestForm && (
             <div className="flex gap-2">
+              {/*
+                Bu girdinin GORSEL etiketi yok, yalnizca placeholder vardi:
+                yazmaya baslayinca kaybolur ve ekran okuyucu icin alan adsiz
+                kalir. Gorsel duzeni degistirmeden `aria-label` veriliyor --
+                metin zaten cevirilerde.
+              */}
               <input
                 type="number"
+                aria-label={t("sealsQuantityPlaceholder")}
                 value={requestQty}
                 onChange={(e) => setRequestQty(e.target.value)}
                 min={1}

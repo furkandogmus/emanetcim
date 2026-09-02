@@ -32,11 +32,23 @@ const GUEST_SURFACES = [
 ];
 
 /**
- * Yönetim/partner panellerindeki mevcut borç. Ölçüldü: 2026-08-22.
+ * Yönetim/partner panellerindeki mevcut borç. Ölçüldü: 2026-08-22 (19),
+ * 2026-09-02'de 17'ye indi.
  *
  * Bu sayı bir MANDAL: düşebilir, yükselemez. Borç kapatıldıkça düşürün.
+ *
+ * KALAN BORÇ ARTIK TAMAMEN ADMİN YÜZEYİNDE. 2026-09-02'de esnaf tarafındaki
+ * iki girdi kapatıldı ve ikisi farklı sebeptendi:
+ *
+ *   - `PartnerSealsClient` (mühür talep adedi): hiç görsel etiketi yoktu,
+ *     yalnızca placeholder — yazmaya başlayınca kaybolur ve alan adsız kalır.
+ *   - `PartnerShopSettingsForm` (SMS telefonu): görsel etiket vardı ama
+ *     `htmlFor`/`id` bağı yoktu; ekran okuyucu için etiketsizdi.
+ *
+ * Ayrım önemli, çünkü esnaf bu ekranları HER GÜN kullanıyor; admin paneli az
+ * sayıda kişinin ara sıra açtığı bir yüzey. Borcun kalan kısmı oraya ait.
  */
-const ADMIN_LABEL_DEBT_CEILING = 19;
+const ADMIN_LABEL_DEBT_CEILING = 17;
 
 function walk(dir: string, out: string[] = []): string[] {
   if (!fs.existsSync(dir)) return out;
@@ -57,6 +69,24 @@ function unlabelledInputs(file: string): number {
     if (tag.includes('type="hidden"') || tag.includes("aria-hidden")) continue;
     if (!tag.includes("placeholder")) continue;
     if (tag.includes("aria-label") || tag.includes("aria-labelledby")) continue;
+
+    /*
+      `htmlFor`/`id` BAGI DA GECERLI ETIKETTIR (2026-09-02'de eklendi).
+
+      Test yalnizca `aria-label` ile sarmalayan `<label>`i taniyordu. Ama
+      erisilebilirligin TERCIH EDILEN bicimi ucuncu bir yol: gorunur bir
+      `<label htmlFor="x">` ve `id="x"` tasiyan girdi. Bu, hem ekran okuyucuya
+      ad verir hem etikete tiklaninca alana odaklanmayi saglar -- `aria-label`
+      ikincisini yapmaz.
+
+      Ilk yazilisinda bu yol sayilmadigi icin test, DOGRU duzeltmeyi ihlal
+      olarak isaretliyordu: `PartnerShopSettingsForm`daki telefon alanina
+      `htmlFor`/`id` bagi eklendi ve sayac dusmedi. Yani mandal, kendisini
+      memnun etmek icin daha zayif bir cozume (`aria-label`) itiyordu.
+    */
+    const idMatch = tag.match(/\bid="([^"]+)"/);
+    if (idMatch && src.includes(`htmlFor="${idMatch[1]}"`)) continue;
+
     const before = src.slice(Math.max(0, m.index! - 400), m.index!);
     const wrappedInLabel =
       (before.match(/<label/g)?.length ?? 0) >
