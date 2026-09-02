@@ -1,3 +1,4 @@
+import { DEFAULT_NOTIFICATION_LOCALE } from "@/lib/request-locale";
 import { canOperateBookingAtShop } from "@/services/booking/access";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
@@ -51,7 +52,8 @@ export async function POST(
 
   const booking = await prisma.booking.findUnique({
     where: { id },
-    select: { shop: { select: { ownerId: true } }, guestEmail: true, guestId: true },
+    // `locale`: bildirim MISAFIRIN dilinde gider; bkz. `Booking.locale`.
+    select: { shop: { select: { ownerId: true } }, guestEmail: true, guestId: true, locale: true },
   });
   if (!booking) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
@@ -81,7 +83,7 @@ export async function POST(
   const recipient = bookingNotificationEmail(booking);
   if (recipient) {
     void notificationService
-      .notifyCheckIn(recipient, id)
+      .notifyCheckIn(recipient, id, booking.locale ?? DEFAULT_NOTIFICATION_LOCALE)
       .catch((err) => logger.error({ err, bookingId: id }, "mobile_checkin_notify_failed"));
   }
 

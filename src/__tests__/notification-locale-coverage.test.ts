@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { APP_LOCALES } from "@/i18n/locales";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -26,12 +27,16 @@ import path from "node:path";
  * `createNavigation` uzerinden `next/navigation`'i cekiyor ve test ortaminda
  * cozulmuyor. Kaynak yine tek: liste orada tanimli.
  */
+/*
+  DOGRUDAN IMPORT (2026-09-02): liste eskiden `routing.ts`ten REGEX ile
+  okunuyordu, cunku o dosya `createNavigation()` uzerinden `next/navigation`
+  cekiyor ve vitest'te cozulemiyor. Liste artik `src/i18n/locales.ts`te, saf bir
+  sabit olarak duruyor; import edilebiliyor ve okuma bicimi bir metin desenine
+  bagli olmaktan cikiyor -- regex, listenin yazimi degistigi gun sessizce bos
+  donerdi.
+*/
 function supportedLocales(): string[] {
-  const src = fs.readFileSync(path.join(process.cwd(), "src/i18n/routing.ts"), "utf8");
-  const block = src.slice(src.indexOf("locales: ["), src.indexOf("]", src.indexOf("locales: [")));
-  const found = [...block.matchAll(/'([a-z]{2})'/g)].map((m) => m[1]);
-  if (found.length === 0) throw new Error("routing.ts icindeki dil listesi okunamadi");
-  return found;
+  return [...APP_LOCALES];
 }
 
 const LOCALES = supportedLocales();

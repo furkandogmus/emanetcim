@@ -11,16 +11,13 @@ import {createNavigation} from 'next-intl/navigation';
  * kalitesi taşıyorduk. Dosyalar git tarihçesinde; talep gelirse geri alınır
  * (`git log -- src/locales/ru.json`).
  */
+import { APP_LOCALES, DEFAULT_APP_LOCALE } from './locales';
+
 export const routing = defineRouting({
-  locales: [
-    'tr',
-    'en',
-    'de',
-    'fr',
-    'ja',
-    'fa',
-  ],
-  defaultLocale: 'tr',
+  // Liste `./locales`te: bu dosya `createNavigation` uzerinden `next/navigation`
+  // cekiyor ve dil listesine ihtiyaci olan SUNUCU kodu o zinciri tasiyamaz.
+  locales: [...APP_LOCALES],
+  defaultLocale: DEFAULT_APP_LOCALE,
   localeDetection: false
 });
 

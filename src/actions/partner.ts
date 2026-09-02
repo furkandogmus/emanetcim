@@ -1,5 +1,6 @@
 "use server";
 
+import { DEFAULT_NOTIFICATION_LOCALE } from "@/lib/request-locale";
 import { bookingService, type CheckInSealPayload } from "@/services/BookingService";
 import { notificationService } from "@/services/NotificationService";
 import prisma from "@/lib/db";
@@ -314,8 +315,17 @@ export async function checkInAction(
     */
     const recipient = bookingNotificationEmail(booking);
     if (recipient) {
-      const locale = await getLocale();
-      await notificationService.notifyCheckIn(recipient, booking.id, locale);
+      /*
+        MISAFIRIN dili, esnafinki DEGIL. Burada `getLocale()` cagriliyordu ve o,
+        action'i calistiran ESNAFIN arayuz dilidir: Almanca panel kullanan bir
+        esnaf check-in yapinca Japon misafire Almanca "valizinizi teslim aldik"
+        gidiyordu. Dogru kaynak rezervasyonun kendisi (`Booking.locale`).
+      */
+      await notificationService.notifyCheckIn(
+        recipient,
+        booking.id,
+        booking.locale ?? DEFAULT_NOTIFICATION_LOCALE,
+      );
     }
 
     revalidatePartnerPaths();
@@ -363,8 +373,12 @@ export async function checkOutAction(qrTokenOrBookingId: string) {
   if (result.ok) {
     const recipient = bookingNotificationEmail(booking);
     if (recipient) {
-      const locale = await getLocale();
-      await notificationService.notifyCheckOut(recipient, booking.id, locale);
+      // MISAFIRIN dili; gerekcesi check-in dalinda.
+      await notificationService.notifyCheckOut(
+        recipient,
+        booking.id,
+        booking.locale ?? DEFAULT_NOTIFICATION_LOCALE,
+      );
     }
 
     revalidatePartnerPaths();

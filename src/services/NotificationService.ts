@@ -1121,7 +1121,20 @@ export class NotificationService implements INotificationService {
     }
   }
 
-  async notifyCheckIn(email: string, bookingId: string, locale: string = "tr"): Promise<void> {
+  /**
+   * `locale` VARSAYILANI YOK (2026-09-02'de kaldirildi).
+   *
+   * Imza `locale: string = "tr"` idi ve bu varsayilan iki yerde birden yanlis
+   * dil gonderilmesini SESSIZ hale getiriyordu: mobil check-in ucu parametreyi
+   * hic vermiyordu (yani her misafire Turkce gidiyordu), web action'i ise
+   * `getLocale()` veriyordu -- o ESNAFIN arayuz dili, e-postayi alan MISAFIRIN
+   * degil. Almanca panel kullanan bir esnaf check-in yapinca Japon misafire
+   * Almanca "valizinizi teslim aldik" gidiyordu.
+   *
+   * Varsayilansiz imza, unutmayi derleme hatasina cevirir. Dogru kaynak
+   * `Booking.locale`.
+   */
+  async notifyCheckIn(email: string, bookingId: string, locale: string): Promise<void> {
     /**
      * NEDEN 6 DİL (2026-08-25'te ölçüldü): `tr`/`en` dışındaki 4 dil (`de`/`fr`/
      * `ja`/`fa`) hem başlık/gövdede hem de aşağıdaki mühür listesinde Türkçe'ye
@@ -1219,7 +1232,7 @@ export class NotificationService implements INotificationService {
     }
   }
 
-  async notifyCheckOut(email: string, bookingId: string, locale: string = "tr"): Promise<void> {
+  async notifyCheckOut(email: string, bookingId: string, locale: string): Promise<void> {
     const content = {
       tr: { subject: "İyi Yolculuklar! 👋", body: "Valiziniz size teslim edildi." },
       en: { subject: "Safe Travels! 👋", body: "Your luggage has been delivered to you." },

@@ -1,4 +1,4 @@
-import { routing } from "@/i18n/routing";
+import { APP_LOCALES, DEFAULT_APP_LOCALE } from "@/i18n/locales";
 
 /**
  * Dili bilinmeyen bir alicida kullanilacak dil.
@@ -6,7 +6,7 @@ import { routing } from "@/i18n/routing";
  * `Booking.locale` bu alandan ONCEKI rezervasyonlarda `null`; okuyan taraf
  * buraya duser, yani eski davranis (Turkce) aynen korunur.
  */
-export const DEFAULT_NOTIFICATION_LOCALE = routing.defaultLocale;
+export const DEFAULT_NOTIFICATION_LOCALE: string = DEFAULT_APP_LOCALE;
 
 /**
  * `Accept-Language` basligindan desteklenen bir dil secer.
@@ -27,7 +27,7 @@ export const DEFAULT_NOTIFICATION_LOCALE = routing.defaultLocale;
 export function resolveRequestLocale(acceptLanguage: string | null | undefined): string {
   if (!acceptLanguage) return DEFAULT_NOTIFICATION_LOCALE;
 
-  const desteklenen = routing.locales as readonly string[];
+  const desteklenen = APP_LOCALES as readonly string[];
   const adaylar = acceptLanguage
     .split(",")
     .map((parca) => {

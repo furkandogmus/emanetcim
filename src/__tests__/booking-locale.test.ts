@@ -1,4 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
+import { APP_LOCALES } from "@/i18n/locales";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { stripComments } from "./helpers/strip-comments";
@@ -10,20 +11,11 @@ import { stripComments } from "./helpers/strip-comments";
   ve asagidaki test mock listesinin gercek listeden sapmadigini dogruluyor --
   yoksa mock, olcmesi gereken seyi gizlerdi.
 */
-const GERCEK_DILLER = (() => {
-  const src = readFileSync(join(process.cwd(), "src/i18n/routing.ts"), "utf8");
-  const blok = src.slice(src.indexOf("locales: ["), src.indexOf("]", src.indexOf("locales: [")));
-  return [...blok.matchAll(/'([a-z]{2})'/g)].map((m) => m[1]);
-})();
-
-vi.mock("@/i18n/routing", () => ({
-  routing: { locales: ["tr", "en", "de", "fr", "ja", "fa"], defaultLocale: "tr" },
-}));
+const GERCEK_DILLER = [...APP_LOCALES];
 
 const { resolveRequestLocale, DEFAULT_NOTIFICATION_LOCALE } = await import(
   "@/lib/request-locale"
 );
-const { routing } = await import("@/i18n/routing");
 
 /**
  * MISAFIRIN DILI REZERVASYONDA SAKLANIR.
@@ -64,13 +56,13 @@ describe("Accept-Language cozumlemesi", () => {
     expect(resolveRequestLocale("ja;q=0, en;q=0.5")).toBe("en");
   });
 
-  it("mock listesi routing.ts ile ayni", () => {
-    // Sapma olursa bu test, digerlerinin sessizce yanlis sey olcmesini onler.
-    expect([...routing.locales].sort()).toEqual([...GERCEK_DILLER].sort());
+  it("cozumleyici ile uygulama AYNI listeyi kullanir", () => {
+    // Mock yok: `locales.ts` saf oldugu icin dogrudan import ediliyor.
+    for (const l of GERCEK_DILLER) expect(resolveRequestLocale(l)).toBe(l);
   });
 
   it("desteklenen her dili tanir", () => {
-    for (const l of routing.locales) {
+    for (const l of GERCEK_DILLER) {
       expect(resolveRequestLocale(l)).toBe(l);
     }
   });
@@ -118,5 +110,48 @@ describe("hatirlatmalar artik duz Turkce degil", () => {
 
   it("rezervasyonun dili okunuyor, sabit deger degil", () => {
     expect(uc).toMatch(/booking\.locale \?\? DEFAULT_NOTIFICATION_LOCALE/);
+  });
+});
+
+/**
+ * MISAFIRE GIDEN BILDIRIMIN DILI REZERVASYONDAN GELIR.
+ *
+ * 2026-09-02, `Booking.locale` eklendikten hemen sonra ayni sinifin iki
+ * ornegi daha bulundu -- ikisi de check-in/check-out bildiriminde:
+ *
+ *   - MOBIL uc `notifyCheckIn(recipient, id)` diyordu, yani parametreyi hic
+ *     vermiyordu ve imzadaki `locale: string = "tr"` varsayilani devreye
+ *     giriyordu: her misafire Turkce.
+ *   - WEB action `getLocale()` veriyordu. O, action'i calistiran ESNAFIN
+ *     arayuz dilidir. Almanca panel kullanan bir esnaf check-in yapinca Japon
+ *     misafire Almanca "valizinizi teslim aldik" gidiyordu.
+ *
+ * Varsayilan parametre, iki yanlisi da SESSIZ hale getiren seydi. Kaldirildi:
+ * artik unutmak derleme hatasi (nitekim `tsc` iki mobil ucu da gosterdi).
+ */
+describe("bildirim dili rezervasyondan okunur", () => {
+  const servis = oku("src/services/NotificationService.ts");
+
+  it("notifyCheckIn / notifyCheckOut varsayilan dil TASIMIYOR", () => {
+    // `locale: string = "tr"` unutmayi sessiz kilar.
+    expect(servis).not.toMatch(/async notifyCheck(In|Out)\([^)]*locale:\s*string\s*=/);
+    expect(servis).toMatch(/async notifyCheckIn\([^)]*locale: string\)/);
+    expect(servis).toMatch(/async notifyCheckOut\([^)]*locale: string\)/);
+  });
+
+  it.each([
+    "src/actions/partner.ts",
+    "src/app/api/mobile/bookings/[id]/check-in/route.ts",
+    "src/app/api/mobile/bookings/[id]/check-out/route.ts",
+  ])("%s rezervasyonun dilini geciyor", (rel) => {
+    const src = oku(rel);
+    expect(src).toContain("booking.locale ?? DEFAULT_NOTIFICATION_LOCALE");
+  });
+
+  it("web action misafire ESNAFIN dilini gondermiyor", () => {
+    const src = oku("src/actions/partner.ts");
+    // `getLocale()` esnafin arayuz dili; misafir bildiriminde kullanilamaz.
+    expect(src).not.toMatch(/notifyCheck(In|Out)\([^)]*await getLocale\(\)/);
+    expect(src).not.toMatch(/const locale = await getLocale\(\);\s*await notificationService\.notifyCheck/);
   });
 });
