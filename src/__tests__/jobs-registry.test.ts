@@ -125,6 +125,35 @@ describe("HTTP metodu uçla örtüşüyor", () => {
   });
 });
 
+/**
+ * Bir cron ifadesinin GERCEK periyodu, saat cinsinden.
+ *
+ * NEDEN YENIDEN YAZILDI (2026-09-02): onceki hal yalnizca gun-of-week alanina
+ * bakip `dow === "*" ? 24 : 168` diyordu -- yani dakika ve saat alanlarini hic
+ * okumadan HER isi gunluk ya da haftalik sayiyordu. Gunde birden sik kosan bir
+ * is eklendiginde test onu 24 saatlik sanip `maxStaleHours` esigini gereksiz
+ * yere yuksege zorluyordu. Olcmesi gereken seyi olcmuyordu.
+ */
+function cronPeriodHours(expr: string): number {
+  const [minute, hour, , , dow] = expr.trim().split(/\s+/);
+
+  const kacKez = (alan: string, tavan: number): number | null => {
+    if (alan === "*") return tavan;
+    const step = alan.match(/^\*\/(\d+)$/);
+    if (step) return Math.floor(tavan / Number(step[1]));
+    if (alan.includes(",")) return alan.split(",").length;
+    return null; // tek sabit deger
+  };
+
+  const dakikaKez = kacKez(minute, 60);
+  if (dakikaKez) return 1 / dakikaKez; // saat icinde birden cok kez
+
+  const saatKez = kacKez(hour, 24);
+  if (saatKez) return 24 / saatKez; // gun icinde birden cok kez
+
+  return dow === "*" ? 24 : 168;
+}
+
 describe("kayıt defteri tanımları tutarlı", () => {
   it("iş adları benzersiz", () => {
     const names = JOB_REGISTRY.map((j) => j.name);
@@ -154,9 +183,7 @@ describe("kayıt defteri tanımları tutarlı", () => {
 
   it("maxStaleHours cron periyodundan büyük — tek kaçırılan çalışma alarm üretmez", () => {
     for (const j of JOB_REGISTRY) {
-      const [, , , , dow] = j.cron.trim().split(/\s+/);
-      // Haftalik islerde periyot 168 saat, gunluklerde 24.
-      const periodHours = dow === "*" ? 24 : 168;
+      const periodHours = cronPeriodHours(j.cron);
       expect(
         j.maxStaleHours,
         `${j.name}: maxStaleHours (${j.maxStaleHours}) periyottan (${periodHours}s) büyük olmalı`,

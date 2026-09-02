@@ -84,8 +84,27 @@ export const JOB_REGISTRY: readonly JobDefinition[] = [
     what: "Yaklaşan rezervasyonlar için misafire hatırlatma gönderir.",
     ifItStops: "Misafir check-in saatini kaçırır; no-show ve destek yükü artar.",
     method: "GET",
-    cron: "7 9 * * *",
-    maxStaleHours: 48,
+    /*
+      GÜNDE BİR DEĞİL, 15 DAKİKADA BİR (2026-09-02'de düzeltildi).
+
+      Uç `2 saat içinde check-in yapacaklar` diye sorguluyor; bu pencere ancak
+      periyottan büyükse anlamlı. `7 9 * * *` ile iş 09:07'de bir kez çalışıp
+      yalnızca 09:07–11:07 arasını tarıyordu: günün kalan 22 saatinde check-in
+      yapan hiçbir misafir hatırlatma ALMIYORDU. Uç dosyasının kendi başlığı
+      "her 15 dakikada bir çalışacak şekilde tasarlanmıştır" diyordu — iki yer
+      ayrışmıştı ve iş bu haliyle her gün "başarılı" raporluyordu.
+
+      Sıklaştırma tek başına spam üretirdi (aynı rezervasyon 2 saatlik pencerede
+      sekiz çalışmaya girer); bu yüzden aynı değişiklikte tekrar kontrolü de
+      eklendi — `NotificationLog` üzerinden, geç teslim uyarısıyla aynı kalıp.
+    */
+    // `*/15` DEGIL: o, isi :00 ve :30'a da koyar -- kayit defterinin butun
+    // isleri o iki dakikadan bilerek kaciniyor (aynikayittaki yigilma testi).
+    // Bu liste ayni 15 dakikalik periyodu verir, tepe dakikalara girmeden.
+    cron: "7,22,37,52 * * * *",
+    // Periyodun ~2 katı kuralı 30 dakika verir; alan saat cinsinden olduğu
+    // için en küçük anlamlı değer 1 saat (dört çalışma kaçarsa alarm).
+    maxStaleHours: 1,
     enforced: true,
   },
   {
