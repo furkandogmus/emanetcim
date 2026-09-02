@@ -117,6 +117,45 @@ export async function cancelBooking(bookingId: string): Promise<CancelBookingRes
   const hadPayment =
     booking.status === 'PAID' || !!hasCapturedPayment;
 
+  /*
+    IPTAL HAKKI ATOMIK OLARAK ALINIR (2026-09-02'de gercek veritabaninda
+    olculdu).
+
+    Yukaridaki durum kontrolu okuma-sonra-yazma: ayni rezervasyona dort es
+    zamanli iptal geldiginde dordu de rezervasyonu `PAID` gorur, dordu de
+    kontrolu gecer ve dordu de YAN ETKILERI calistirirdi. Olcum:
+
+        iptal basarili: 4/4
+        sadakat puani: 500 -> 100   (100 dusmeliydi, 400 dustu)
+        CANCELLED olayi: 4          (bir olmaliydi)
+
+    Misafir uc yuz puanini haksiz yere kaybediyordu. Bu, es zamanli iki
+    istemci gerektirmiyor: "Iptal Et" dugmesine iki kez basmak ya da agin
+    istegi tekrarlamasi yeter.
+
+    Durum degisikligi artik KOSULLU: yalnizca rezervasyon hala iptal
+    edilebilir durumdaysa geciyor ve etkilenen satir sayisi sifirsa bu cagri
+    YARISI KAYBETMISTIR -- yan etkilere hic girmez. Ayni kalip kupon kotasinda
+    ve (bugun) muhur atamasinda calisiyor.
+
+    Kaybedene donen cevap, SIRALI cagridaki cevabin aynisi (`INVALID_STATUS`):
+    ikinci iptal her iki durumda da ayni seyi duymali.
+  */
+  const kilit = await prisma.booking.updateMany({
+    where: {
+      id: bookingId,
+      status: { notIn: ['CANCELLED', 'CHECKED_IN', 'CHECKED_OUT'] },
+    },
+    data: { status: 'CANCELLED' },
+  });
+  if (kilit.count === 0) {
+    return {
+      ok: false,
+      code: 'INVALID_STATUS',
+      message: 'Bu rezervasyon iptal edilemez.',
+    };
+  }
+
   try {
     // İade defter üzerinden. Ham `updateMany` kaldırıldı: kısmi iadeyi
     // modelleyemiyordu, `refundedAmount` yazmıyordu ve denetim izi bırakmıyordu.
@@ -140,11 +179,10 @@ export async function cancelBooking(bookingId: string): Promise<CancelBookingRes
     }
 
     await prisma.$transaction(async (tx) => {
-      await tx.booking.update({
-        where: { id: bookingId },
-        data: { status: 'CANCELLED' },
-      });
-
+      /*
+        Durum YUKARIDA atomik olarak yazildi; burada tekrar yazmak gereksiz.
+        Kalan is, iptalin yan etkileri: slot defteri ve sadakat puani.
+      */
       if (booking.reservationSlots.length > 0) {
         await tx.reservationSlot.deleteMany({ where: { bookingId } });
       }

@@ -17,6 +17,12 @@ const { mockPrisma, mockRecord } = vi.hoisted(() => {
         findFirst: vi.fn(),
         create: vi.fn(),
         update: vi.fn(),
+        /*
+          `updateMany`: iade hakki artik SAGLAYICIYA GITMEDEN ONCE atomik
+          olarak aliniyor (2026-09-02) ve bu, islemin DISINDA oluyor -- o
+          yuzden sahte `tx`e degil ana istemciye ait.
+        */
+        updateMany: vi.fn(),
       },
       booking: { findUnique: vi.fn(), update: vi.fn() },
       paymentSplit: { findUnique: vi.fn(), update: vi.fn(), upsert: vi.fn() },
@@ -53,6 +59,7 @@ describe("PaymentService — defter", () => {
     mockPrisma.paymentLog.findUnique.mockResolvedValue(null);
     mockPrisma.paymentLog.create.mockResolvedValue({ id: "p1" });
     mockPrisma.paymentLog.update.mockResolvedValue({ id: "p1" });
+    mockPrisma.paymentLog.updateMany.mockResolvedValue({ count: 1 });
     mockPrisma.booking.findUnique.mockResolvedValue({ shopId: "s1" });
     mockPrisma.paymentSplit.findUnique.mockResolvedValue(null);
   });

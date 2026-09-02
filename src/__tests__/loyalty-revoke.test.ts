@@ -2,7 +2,13 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const { mockPrisma } = vi.hoisted(() => ({
   mockPrisma: {
-    booking: { findUnique: vi.fn(), update: vi.fn() },
+    /*
+      `updateMany`: iptal hakki artik atomik aliniyor (2026-09-02) -- dort es
+      zamanli iptal sadakat puanini DORT KEZ dusuruyordu. Sahte istemci
+      varsayilan olarak "hakki aldim" (count: 1) donuyor; kaybeden yol ayri
+      testte (`cancel-refund-race`).
+    */
+    booking: { findUnique: vi.fn(), update: vi.fn(), updateMany: vi.fn() },
     paymentLog: { findFirst: vi.fn() },
     reservationSlot: { deleteMany: vi.fn() },
     $transaction: vi.fn(async (fn: unknown) =>
@@ -35,6 +41,7 @@ function booking(over: Record<string, unknown> = {}) {
 }
 
 beforeEach(() => {
+    mockPrisma.booking.updateMany.mockResolvedValue({ count: 1 });
   vi.clearAllMocks();
   mockPrisma.paymentLog.findFirst.mockResolvedValue(null);
   mockPrisma.$executeRaw.mockResolvedValue(1);

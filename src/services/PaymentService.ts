@@ -325,6 +325,35 @@ export class PaymentService {
       };
     }
 
+    /*
+      IADE HAKKI SAGLAYICIYA GITMEDEN ONCE ATOMIK OLARAK ALINIR
+      (2026-09-02'de gercek veritabaninda olculdu).
+
+      Yukaridaki `remaining` hesabi okuma-sonra-yazma: ayni odemeye bes es
+      zamanli 40 TL iade istegi geldiginde besi de `refundedAmount = 0` okur,
+      besi de sinir kontrolunu gecer ve BESI DE saglayiciya iade cagrisi
+      yapardi. Defter son yazani tuttugu icin 40 TL gorunuyordu -- yani KAYIT
+      dogru, DUNYA yanlis: gercek bir saglayicida bes ayri iade islemi.
+
+      Bugun gorunmuyor cunku aktif saglayici tahsilat yapmiyor (no-op). PSP
+      baglandigi gun bu, musteriye bes kez para iadesi demek.
+
+      `refundedAmount` kosullu artiriliyor: yalnizca defter HALA okudugumuz
+      degerdeyse geciyor. Kaybeden cagri saglayiciya HIC gitmez. Ayni kalip
+      kupon kotasinda, muhur atamasinda ve iptalde calisiyor.
+    */
+    const hak = await prisma.paymentLog.updateMany({
+      where: { id: log.id, refundedAmount: log.refundedAmount },
+      data: { refundedAmount: nextTotal, status: nextStatus },
+    });
+    if (hak.count === 0) {
+      return {
+        ok: false,
+        code: "CONCURRENT_MODIFICATION",
+        message: "Bu ödeme aynı anda başka bir işlemle güncellendi; tekrar deneyin.",
+      };
+    }
+
     const result = await this.provider.refund({
       bookingId: params.bookingId,
       providerRef: log.providerRef,
