@@ -6,6 +6,7 @@ import prisma from '@/lib/db';
 
 import logger from '@/lib/logger';
 import { totalBagCount } from '@/lib/bag-pricing';
+import { reserveSlots, releaseSlots, SlotAvailabilityError } from '@/services/SlotService';
 import { getPricingRules } from '@/lib/platform-settings';
 import { moneyToNumber } from '@/lib/money';
 import { CancelBookingResult, ModifyBookingResult } from '@/types/partner-booking';
@@ -310,11 +311,60 @@ export async function modifyBooking(
           bookingId
         );
 
+        /*
+          SLOT DEFTERI DE TASINIR (2026-09-02'de duzeltildi).
+
+          Buraya kadar yalnizca `Booking` guncelleniyordu: tarihler ve valiz
+          sayilari yeni degerlere geciyor, `ReservationSlot` satirlari ise ESKI
+          slotlara bagli kaliyordu. Iki muhasebe birden bozuluyordu:
+
+            - Eski saatte hayalet rezervasyon: kimse gelmeyecek ama defter o
+              saati dolu sayiyor -- kapasite bosa yaniyor.
+            - Yeni saatte GORUNMEZ rezervasyon: slot defterinde yok (slotlar
+              eskiye bagli) ve eski-yol sayimina da girmiyor, cunku o sayim
+              slotu OLMAYAN kayitlari suzuyor (`reservationSlots: { none: {} }`).
+              Yani dukkan o saati bir kez daha satabiliyor ve misafir valiziyle
+              gelince yer yok.
+
+          `assertCapacityTx` bunu yakalayamaz: o `Booking` tablosunu sayar,
+          slot defterini degil. Iki ayri kapasite muhasebesi var ve degistirme
+          yolu yanlis olanina bakiyordu.
+
+          Once serbest birakilir, sonra yeniden rezerve edilir: `reserveSlots`
+          kendi kapasite kontrolunu yapiyor ve bu sirayla rezervasyonun KENDI
+          payi sayimdan zaten dusmus oluyor.
+        */
+        const slotluMu = await tx.reservationSlot.count({ where: { bookingId } });
+
+        let kayitliGiris = input.checkInTime;
+        let kayitliCikis = input.checkOutTime;
+
+        if (slotluMu > 0) {
+          await releaseSlots(tx, bookingId);
+          const yeni = await reserveSlots(
+            tx,
+            booking.shopId,
+            input.checkInTime,
+            input.checkOutTime,
+            newBags,
+          );
+          await tx.reservationSlot.createMany({
+            data: yeni.data.map((d) => ({ ...d, bookingId })),
+          });
+          /*
+            Kaydedilen zaman, istenen degil SLOT SINIRLARINA YUVARLANMIS olan --
+            olusturma yolu da boyle yapiyor. Ikisi ayrisirsa rezervasyonun
+            saati ile kapladigi slotlar birbirini tutmaz.
+          */
+          kayitliGiris = yeni.checkInTime;
+          kayitliCikis = yeni.checkOutTime;
+        }
+
         await tx.booking.update({
           where: { id: bookingId },
           data: {
-            checkInTime: input.checkInTime,
-            checkOutTime: input.checkOutTime,
+            checkInTime: kayitliGiris,
+            checkOutTime: kayitliCikis,
             bagCountS: authTotals.bagCountS,
             bagCountM: authTotals.bagCountM,
             bagCountXl: authTotals.bagCountXl,
@@ -346,6 +396,19 @@ export async function modifyBooking(
     return { ok: true };
   } catch (error) {
     if (error instanceof BookingCapacityExceededError) {
+      return {
+        ok: false,
+        code: 'CAPACITY',
+        message: error.message,
+      };
+    }
+    /*
+      Slot defteri yeniden rezerve edilirken kapasite dolduysa bu da bir
+      KAPASITE reddidir, beklenmeyen bir hata degil. Ayri tur oldugu icin
+      ayrica yakalanmasi gerekiyor -- yoksa misafir "beklenmeyen bir hata"
+      gorurdu ve neyi degistirecegini bilemezdi.
+    */
+    if (error instanceof SlotAvailabilityError) {
       return {
         ok: false,
         code: 'CAPACITY',
