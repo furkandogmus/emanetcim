@@ -368,6 +368,38 @@ export default function SearchClient({
       setQueryKind("text");
       return;
     }
+
+    /*
+      URL'DEKI MERKEZ GEOCODE TARAFINDAN EZILMEZ (2026-09-02'de URETIMDE
+      goruldu).
+
+      `/tr/search?q=galata&lat=41.0256&lng=28.9741` -- yani Istanbul'daki
+      Galata icin acik koordinat -- acildiginda geocode "galata"yi soyle
+      cozuyordu:
+
+          "Galata, Solea, Lefkosa kazasi, Guney Kibris, Kibris"
+
+      Merkez Kibris'a tasiniyor ve kullanici SIFIR nokta goruyordu; oysa ayni
+      sayfa `?q=` olmadan on bir nokta listeliyor. Sehir sayfalari tam bu
+      bicimde baglanti veriyor (`/search?q=<sehir>&lat=&lng=`), yani bu yol
+      gunluk kullanimda.
+
+      `?lat=&lng=` ile gelen merkez KULLANICININ SECIMIDIR; `q` orada arama
+      metni degil, sayfanin basligi ve SEO'su icin tasiniyor. Bu yuzden
+      ILK sorgu geocode'a hic gitmez.
+
+      Kullanici kutuyu DEGISTIRIRSE geocode yine calisir: o an artik URL'deki
+      secim degil, kisinin yeni istegi soz konusudur.
+
+      Ayni bosluğun tarayici-konumu yarisi 2026-09-02'de kapatilmisti
+      (`placeSearchedRef`); bu, o duzeltmenin eksik kalan yarisi.
+    */
+    if (hasExplicitCenter && searchQuery === initialSearchQuery) {
+      // Merkez zaten dogru; metin suzgeci de calismamali.
+      setQueryKind("place");
+      return;
+    }
+
     setQueryKind("pending");
     let cancelled = false;
     const timer = window.setTimeout(async () => {
@@ -413,7 +445,7 @@ export default function SearchClient({
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [searchQuery, locale]);
+  }, [searchQuery, locale, hasExplicitCenter, initialSearchQuery]);
 
   const onSelectShop = useCallback(
     (id: string) => {
