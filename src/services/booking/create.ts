@@ -4,6 +4,7 @@
  * `BookingService`'ten ayrildi (2026-08-22): 1186 satirlik sinif bes ayri
  * yasam dongusu adimini tasiyordu. Sinif cephe olarak kaldi; davranis ayni.
  */
+import { retryOnWriteConflict } from '@/lib/tx-retry';
 import { Booking, BookingStatus, Prisma } from '@prisma/client';
 import prisma from '@/lib/db';
 
@@ -94,7 +95,12 @@ export async function createInitialBooking(data: CreateInitialBookingInput): Pro
   }
 
   // Legacy datetime-pair path (backward compat)
-  const booking = await prisma.$transaction(
+  /*
+    CAKISMADA YENIDEN DENENIR. `Serializable` bu hatayi URETMEK uzere
+    tasarlanmistir ve cagirandan yeniden denemesini bekler -- Postgres'in kendi
+    mesaji da "please retry" diyor. Olcum ve gerekce `@/lib/tx-retry`de.
+  */
+  const booking = await retryOnWriteConflict(() => prisma.$transaction(
     async (tx) => {
       const shop = await tx.shop.findUnique({ where: { id: data.shopId } });
       if (!shop) {
@@ -171,7 +177,7 @@ export async function createInitialBooking(data: CreateInitialBookingInput): Pro
       });
     },
     { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
-  );
+  ), { label: "createInitialBooking" });
 
   bookingEventService.record({
     bookingId: booking.id,
@@ -213,7 +219,8 @@ export async function createSlotBooking(
   rules: Awaited<ReturnType<typeof getPricingRules>>,
 ): Promise<Booking> {
   const initialStatus = data.initialStatus ?? DEFAULT_INITIAL_STATUS;
-  const booking = await prisma.$transaction(
+  // Cakismada yeniden denenir; gerekce `@/lib/tx-retry`de.
+  const booking = await retryOnWriteConflict(() => prisma.$transaction(
     async (tx) => {
       const shop = await tx.shop.findUnique({ where: { id: data.shopId } });
       if (!shop) throw new Error('Dükkan bulunamadı.');
@@ -332,7 +339,7 @@ export async function createSlotBooking(
       });
     },
     { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
-  );
+  ), { label: "createSlotBooking" });
 
   bookingEventService.record({
     bookingId: booking.id,

@@ -1,6 +1,7 @@
 /**
  * Iptal ve duzenleme: kesinti, kredi kuponu, kapasite yeniden kontrolu.
  */
+import { retryOnWriteConflict } from '@/lib/tx-retry';
 import { Prisma } from '@prisma/client';
 import prisma from '@/lib/db';
 
@@ -286,7 +287,12 @@ export async function modifyBooking(
   }
 
   try {
-    await prisma.$transaction(
+    /*
+      Cakismada yeniden denenir -- olusturma yoluyla ayni gerekce
+      (`@/lib/tx-retry`). Degistirme de ayni slot satirlarina yaziyor, yani
+      ayni yaris burada da olusur.
+    */
+    await retryOnWriteConflict(() => prisma.$transaction(
       async (tx) => {
         await tx.$executeRaw`SELECT 1 FROM "Shop" WHERE id = ${booking.shopId} FOR UPDATE`;
         const shop = await tx.shop.findUnique({
@@ -375,7 +381,7 @@ export async function modifyBooking(
         });
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
-    );
+    ), { label: "modifyBooking" });
 
     bookingEventService.record({
       bookingId,
