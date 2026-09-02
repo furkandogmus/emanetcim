@@ -1,3 +1,4 @@
+import { slotCalendarDays } from "@/lib/slot-calendar";
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 import { OPERATING_SHOP_FILTER } from "@/lib/public-shop-filter";
@@ -67,18 +68,10 @@ export async function generateSlotsForShop(
   let created = 0;
   const now = new Date();
 
-  for (let dayOffset = 0; dayOffset < daysForward; dayOffset++) {
-    const dayStart = new Date(now);
-    dayStart.setDate(dayStart.getDate() + dayOffset);
+  const takvimGunleri = slotCalendarDays(now, tz, daysForward);
 
-    // Get year-month-day in shop's timezone using Intl
-    const fmt = new Intl.DateTimeFormat("en-CA", {
-      timeZone: tz,
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
-    const localDay = fmt.format(dayStart); // "2026-06-15"
+  for (let dayOffset = 0; dayOffset < takvimGunleri.length; dayOffset++) {
+    const localDay = takvimGunleri[dayOffset];
 
     // Parse opening hour to get slot base in local time
     const [oh, om] = (shop.openingTime || "09:00").split(":").map(Number);
