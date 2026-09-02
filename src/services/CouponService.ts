@@ -63,8 +63,28 @@ export function applyDiscount(
     sayi ayrisiyordu. Para fonksiyonu kendi icinde tutarli olmali --
     `platform-split.ts`teki ayni gerekce.
   */
+  /*
+    INDIRIM ASLA FIYATI ARTIRMAZ (2026-09-02'de gercek veritabaninda olculdu).
+
+    Negatif bir `discount` ile bu fonksiyon fiyati YUKSELTIYORDU:
+
+        applyDiscount(240, -50, false) = 290
+        gercek kupon: totalPrice 290, discountAmount -50
+
+    Yani misafir "indirim kuponu" girip elli lira FAZLA oduyordu ve deftere
+    negatif bir indirim yaziliyordu. Admin action zaten `z.number().positive()`
+    ile doguruyor -- ama bu fonksiyon veritabanindan gelen bir degeri isliyor:
+    elle yazilmis bir satir, bir bakim scripti ya da eski bir kayit yeter.
+    Aritmetigin kendisi guvenli olmali.
+
+    Yuzde de 100'de tavanlanir: %500 indirim zaten sifira iniyordu
+    (`Math.max(0, ...)`), ama tavan niyeti acikca yaziyor.
+  */
+  const indirim = Math.max(0, discount);
   const base = Math.round(totalPrice * 100) / 100;
-  const next = isPercent ? base * (1 - discount / 100) : base - discount;
+  const next = isPercent
+    ? base * (1 - Math.min(100, indirim) / 100)
+    : base - indirim;
   return Math.max(0, Math.round(next * 100) / 100);
 }
 
@@ -154,7 +174,8 @@ export type CouponInput = {
 
 export type CouponCreateResult =
   | { ok: true; id: string; code: string }
-  | { ok: false; reason: 'duplicate_code' };
+  /* `invalid_input`: indirim/kota degerleri anlamsiz -- gerekce `createCoupon`da. */
+  | { ok: false; reason: 'duplicate_code' | 'invalid_input' };
 
 /**
  * Yeni kupon uretir.
@@ -170,6 +191,36 @@ export type CouponCreateResult =
  * demekti. Cakismayi P2002 uzerinden yakalamak yarissiz tek yoldur.
  */
 export async function createCoupon(input: CouponInput): Promise<CouponCreateResult> {
+  /*
+    SERVIS SEVIYESINDE GIRDI KAPISI (2026-09-02'de olculdu).
+
+    Servis dogrudan cagrildiginda su kuponlar KAYDA GIRIYORDU:
+
+        %500 indirim      -> kaydedildi (tutari sifira indiriyor)
+        -50 TL indirim    -> kaydedildi ve FIYATI ARTIRIYORDU
+        maxUses: -1       -> kaydedildi, kupon hic kullanilamaz (sessiz olu)
+        minPrice: -100    -> kaydedildi
+
+    Admin action zaten doguruyor (`discount: z.number().positive()`,
+    `maxUses: min(1)`, `minPrice: min(0)`) -- ama CLAUDE.md "yazma islemleri
+    yalnizca `src/services/` uzerinden" diyor ve son savunma hatti orasi
+    olmali. Ayni gerekceyle bu oturumda rezervasyon ve dukkan guncelleme
+    kapilari da eklendi.
+  */
+  if (
+    !Number.isFinite(input.discount) ||
+    input.discount <= 0 ||
+    (input.isPercent && input.discount > 100)
+  ) {
+    return { ok: false, reason: 'invalid_input' };
+  }
+  if (input.maxUses != null && (!Number.isInteger(input.maxUses) || input.maxUses < 1)) {
+    return { ok: false, reason: 'invalid_input' };
+  }
+  if (input.minPrice != null && (!Number.isFinite(input.minPrice) || input.minPrice < 0)) {
+    return { ok: false, reason: 'invalid_input' };
+  }
+
   const code = normalizeCouponCode(input.code);
   try {
     const row = await prisma.coupon.create({

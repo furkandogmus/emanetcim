@@ -58,7 +58,21 @@ export async function createCouponAction(data: unknown) {
   });
 
   if (!result.ok) {
-    return { success: false as const, error: "duplicate_code" as const };
+    /*
+      SEBEP AYIRT EDILIYOR (2026-09-02). Onceden her basarisizlik
+      "duplicate_code" olarak doniyordu; servise `invalid_input` eklendiginde
+      admin "bu kod zaten var" mesajini gorurdu -- oysa sorun kodun kendisi
+      degil, girdigi degerdi. Bu action'in semasi zaten dogru dogruluyor, yani
+      `invalid_input` normalde erisilemez; erisildiginde de DOGRU seyi
+      soylemeli.
+    */
+    return {
+      success: false as const,
+      error:
+        result.reason === "invalid_input"
+          ? ("invalid_data" as const)
+          : ("duplicate_code" as const),
+    };
   }
 
   writeAuditLog({
