@@ -258,10 +258,38 @@ export class SealService {
         }
       }
 
-      await tx.seal.updateMany({
-        where: { serialNumber: { in: assignmentNumsArr } },
+      /*
+        MUHRU ATOMIK OLARAK KAPAR (2026-09-02'de gercek veritabaninda olculdu).
+
+        Yukaridaki dogrulama okuma-sonra-yazma: uc es zamanli check-in ayni
+        muhrü ASSIGNED gorur, ucu de kontrolu gecer ve ucu de kayit yazardi.
+        Olcum -- ayni muhurle dort es zamanli check-in:
+
+            check-in basarili: 3
+            ayni muhre bagli kayit: 3
+            muhur durumu: IN_USE
+
+        Fiziksel muhur TEK bir valizde. Uc rezervasyonun kaydinda ayni numara
+        gorunurse teslimde hangisinin dogru oldugu bilinemez -- urunun guven
+        mekanizmasi tam da bu numaranin tekligine dayaniyor.
+
+        `status: "ASSIGNED"` KOSULU eklendi: guncelleme yalnizca muhur HALA
+        stokta ise geciyor ve etkilenen satir sayisi bekleneni tutmuyorsa
+        baskasi kapmis demektir. Ayni kalip kupon kotasinda zaten var ve
+        calisiyor (yirmi es zamanli talepten tam bes hak veriyor, olculdu).
+      */
+      const kapilan = await tx.seal.updateMany({
+        where: { serialNumber: { in: assignmentNumsArr }, status: "ASSIGNED" },
         data: { status: "IN_USE" },
       });
+      if (kapilan.count !== assignmentNumsArr.length) {
+        /*
+          Hangi muhrun kapildigini burada aramiyoruz: islem geri alinacak ve
+          cagiran zaten "gecersiz muhur" cevabini veriyor. Onemli olan, bu
+          check-in'in KAYIT YAZMAMASI.
+        */
+        throw new Error(`SEAL_NOT_ASSIGNED:${assignmentNumsArr.join(",")}`);
+      }
 
       await tx.bookingSeal.createMany({
         data: assignments.map((a, i) => ({

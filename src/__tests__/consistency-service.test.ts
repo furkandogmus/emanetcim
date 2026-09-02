@@ -82,3 +82,53 @@ describe("is kayit defterine bagli", () => {
     expect(uc).toContain("withJobRun");
   });
 });
+
+/**
+ * BESINCI BULGU: ayni muhur birden cok rezervasyonda.
+ *
+ * Es zamanlilik testinde bulundu (2026-09-02): dort es zamanli check-in ayni
+ * muhrü `ASSIGNED` gorup UCU birden kayit yazabiliyordu. `SealService` icinde
+ * atomik kapma ile duzeltildi, ama duzeltme yalnizca bundan sonrasini korur --
+ * daha once yazilmis kayitlar durabilir ve teslimde hangi rezervasyonun dogru
+ * oldugunu kimse bilemez.
+ */
+describe("muhur teklıgı", () => {
+  const servis = readFileSync(
+    join(process.cwd(), "src/services/ConsistencyService.ts"),
+    "utf-8",
+  );
+
+  it("`seal_used_by_multiple_bookings` bulgusu var", () => {
+    expect(servis).toContain("seal_used_by_multiple_bookings");
+  });
+
+  it("sorgu FARKLI rezervasyon sayar -- ayni rezervasyonun iki valizi sayilmaz", () => {
+    /*
+      Bir rezervasyon iki valiz icin iki `BookingSeal` satiri tasir; onlar
+      FARKLI muhurlerdir. Ihlal, AYNI muhrun farkli REZERVASYONLARDA
+      gecmesidir -- o yuzden `COUNT(DISTINCT bookingId)`.
+    */
+    expect(servis).toMatch(/COUNT\(DISTINCT bs\."bookingId"\) > 1/);
+  });
+});
+
+/**
+ * ATOMIK MUHUR KAPMA.
+ *
+ * Olcum (dort es zamanli check-in, ayni muhur):
+ *
+ *     ONCE : basarili 3, ayni muhre bagli kayit 3
+ *     SONRA: basarili 1, ayni muhre bagli kayit 1
+ */
+describe("muhur atama yarisi", () => {
+  const seal = readFileSync(join(process.cwd(), "src/services/SealService.ts"), "utf-8");
+
+  it("guncelleme `ASSIGNED` KOSULUYLA yapiliyor", () => {
+    // Kosulsuz `updateMany` idempotenttir: uc yaris da "basarili" olurdu.
+    expect(seal).toMatch(/serialNumber: \{ in: assignmentNumsArr \}, status: "ASSIGNED"/);
+  });
+
+  it("etkilenen satir sayisi DOGRULANIYOR", () => {
+    expect(seal).toMatch(/kapilan\.count !== assignmentNumsArr\.length/);
+  });
+});

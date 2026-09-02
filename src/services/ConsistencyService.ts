@@ -30,7 +30,8 @@ export type ConsistencyFinding = {
     | "slot_bag_mismatch"
     | "unsealed_checked_in_bags"
     | "active_shop_without_coordinates"
-    | "captured_amount_mismatch";
+    | "captured_amount_mismatch"
+    | "seal_used_by_multiple_bookings";
   count: number;
   /** En fazla 10 örnek kimlik — tamamı değil, araştırmaya başlamak için. */
   samples: string[];
@@ -148,6 +149,34 @@ export class ConsistencyService {
         kind: "captured_amount_mismatch",
         count: amountMismatch.length,
         samples: amountMismatch.slice(0, SAMPLE_LIMIT).map((r) => r.id),
+      });
+    }
+
+    /*
+      5. AYNI MUHUR birden cok rezervasyonda.
+
+      Fiziksel muhur TEK bir valizde. 2026-09-02'de olculdu: es zamanli
+      check-in'ler ayni muhrü ASSIGNED gorup ucu de kayit yazabiliyordu
+      (`SealService` icinde atomik kapma ile duzeltildi). Duzeltme yalnizca
+      bundan sonrasini korur; daha once yazilmis kayitlar duruyor olabilir ve
+      teslimde hangi rezervasyonun dogru oldugunu kimse bilemez.
+
+      `BookingSeal.sealNumber` uzerinde benzersizlik KISITI YOK. Kisit eklemek
+      dogru olur ama once mevcut ihlallerin temizlenmesi gerekir -- migration
+      ihlal varsa basarisiz olur. Bu sayim, o temizligin girdisi.
+    */
+    const sharedSeals = await prisma.$queryRaw<{ seal_number: number }[]>`
+      SELECT bs."sealNumber" AS seal_number
+      FROM "BookingSeal" bs
+      GROUP BY bs."sealNumber"
+      HAVING COUNT(DISTINCT bs."bookingId") > 1
+      LIMIT 100
+    `;
+    if (sharedSeals.length > 0) {
+      findings.push({
+        kind: "seal_used_by_multiple_bookings",
+        count: sharedSeals.length,
+        samples: sharedSeals.slice(0, SAMPLE_LIMIT).map((r) => String(r.seal_number)),
       });
     }
 
