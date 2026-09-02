@@ -488,6 +488,88 @@ export async function reserveSlots(
   return { slots, data, checkInTime: slots[0].startTime, checkOutTime: slots[slots.length - 1].endTime };
 }
 
+/**
+ * Bir rezervasyonun SLOT DEFTERINDEKI valiz sayisini gunceller.
+ *
+ * NEDEN VAR (2026-09-02'de olculdu): valiz duzeltmesi (`applyBagRevision`)
+ * `Booking.bagCountS/M/XL`i guncelliyor ama slot defterine hic dokunmuyordu.
+ * Musaitlik hesabi ise slot tabanli rezervasyonlarda `ReservationSlot.bagCount`
+ * TOPLAMINI okuyor (`getSlotAvailabilityForShops`); `Booking.bagCount*`
+ * yalnizca slotu OLMAYAN eski kayitlar icin kullaniliyor.
+ *
+ * Sonuc, kapasitenin IKI KEZ SATILMASI:
+ *
+ *   kapasite 10 · misafir A 2 valizle rezerve eder   -> slot defteri: 2
+ *   esnaf duzeltmeyle 8 valize cikarir               -> Booking: 8, defter: 2
+ *   sistem 8 valizlik yer bos sanir                  -> misafir B 8 valiz alir
+ *   dukkanda 16 valiz, kapasite 10
+ *
+ * Tasma tezgahin basinda ortaya cikar ve kimse onu bir yazilim hatasi olarak
+ * gormez -- "bugun cok yogunuz" gibi gorunur.
+ *
+ * KAPASITE KONTROLU DE BURADA. `applyBagRevision` hicbir sinir bakmiyordu:
+ * esnaf valiz sayisini kapasitenin ustune cikarabiliyordu. Sayimdan bu
+ * rezervasyonun KENDI payi dusuluyor, yoksa kendi valizleri iki kez sayilir.
+ *
+ * Statu kumesi `reserveSlots`taki ile AYNI: iki yer ayni "yer kapliyor mu"
+ * sorusunu soruyor, ayri tanimlari olamaz.
+ */
+export async function updateReservedBags(
+  tx: Prisma.TransactionClient,
+  bookingId: string,
+  newTotalBags: number,
+): Promise<{ ok: true } | { ok: false; slotStart: Date; available: number }> {
+  const rows = await tx.reservationSlot.findMany({
+    where: { bookingId },
+    select: {
+      slotId: true,
+      slot: { select: { capacity: true, startTime: true } },
+    },
+  });
+  // Slotu olmayan (eski) rezervasyon: defter zaten `Booking.bagCount*`tan
+  // okunuyor, guncellenecek satir yok.
+  if (rows.length === 0) return { ok: true };
+
+  const slotIds = rows.map((r) => r.slotId);
+  const cutoff = new Date(Date.now() - 24 * 3600000);
+
+  const digerleri = await tx.reservationSlot.groupBy({
+    by: ["slotId"],
+    where: {
+      slotId: { in: slotIds },
+      // KENDI payi haric: yoksa kendi valizlerini iki kez sayardik.
+      bookingId: { not: bookingId },
+      booking: {
+        OR: [
+          { status: { in: ["PAID", "CHECKED_IN", "APPROVED"] } },
+          { status: { in: ["WAITING_APPROVAL", "PENDING"] }, checkInTime: { gte: cutoff } },
+        ],
+      },
+    },
+    _sum: { bagCount: true },
+  });
+
+  const doluluk = new Map<string, number>();
+  for (const d of digerleri) doluluk.set(d.slotId, d._sum.bagCount ?? 0);
+
+  for (const r of rows) {
+    const baskalari = doluluk.get(r.slotId) ?? 0;
+    if (baskalari + newTotalBags > r.slot.capacity) {
+      return {
+        ok: false,
+        slotStart: r.slot.startTime,
+        available: Math.max(0, r.slot.capacity - baskalari),
+      };
+    }
+  }
+
+  await tx.reservationSlot.updateMany({
+    where: { bookingId },
+    data: { bagCount: newTotalBags },
+  });
+  return { ok: true };
+}
+
 export async function releaseSlots(
   tx: Prisma.TransactionClient,
   bookingId: string,

@@ -1,5 +1,6 @@
 "use server";
 
+import type { BagRevisionErrorCode } from '@/services/booking/bag-revision';
 import { DEFAULT_NOTIFICATION_LOCALE } from "@/lib/request-locale";
 import { bookingService, type CheckInSealPayload } from "@/services/BookingService";
 import { notificationService } from "@/services/NotificationService";
@@ -71,10 +72,21 @@ const CHECKOUT_CODE_TO_KEY: Record<string, string> = COMMON_CODE_TO_KEY;
 /** Onay ve red aynı sonuç tipini döndürür; ikisi de tabanla karşılanır. */
 const REVIEW_CODE_TO_KEY: Record<string, string> = COMMON_CODE_TO_KEY;
 
-const BAG_REVISION_CODE_TO_KEY: Record<string, string> = {
+/*
+  `Record<string, string>` DEGIL, `Record<BagRevisionErrorCode, string>`.
+
+  Gevsek tip, servise yeni bir red kodu eklendiginde web tarafinin sessizce
+  genel hataya dusmesine izin veriyordu. Mobil karsiligi
+  (`CODE_TO_HTTP`) zaten sikiydi ve `CAPACITY_EXCEEDED` eklendiginde derleyici
+  ONU gosterdi, web'i gostermedi -- ayni kural iki tasiyicida farkli sikilikta
+  tutuluyordu. Misafire "bir seyler ters gitti" demek ile "bu saatte o kadar
+  yer yok" demek arasindaki fark, tam olarak bu tip.
+*/
+const BAG_REVISION_CODE_TO_KEY: Record<BagRevisionErrorCode, string> = {
   ...COMMON_CODE_TO_KEY,
   INVALID_COUNTS: "Errors.invalidData",
   NO_PENDING_REVISION: "Errors.invalidData",
+  CAPACITY_EXCEEDED: "Errors.insufficientCapacity",
 };
 
 /**

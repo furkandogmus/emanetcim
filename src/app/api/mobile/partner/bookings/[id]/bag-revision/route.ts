@@ -23,6 +23,12 @@ const CODE_TO_HTTP: Record<BagRevisionErrorCode, { status: number; error: string
   INVALID_STATUS: { status: 400, error: "invalid_status" },
   INVALID_COUNTS: { status: 400, error: "at_least_one_bag" },
   NO_PENDING_REVISION: { status: 400, error: "no_bag_counts" },
+  /*
+    409: istek gecerli ama kaynagin SU ANKI durumu kabul etmiyor -- ayni
+    gerekce `checkout/intent`teki `CAPACITY_EXCEEDED` icin de yazili. Valiz
+    sayisi dusurulurse ya da baska bir rezervasyon dusunce ayni istek calisir.
+  */
+  CAPACITY_EXCEEDED: { status: 409, error: "insufficient_capacity" },
   UNKNOWN: { status: 500, error: "server_error" },
 };
 

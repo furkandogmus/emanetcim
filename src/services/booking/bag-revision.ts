@@ -33,6 +33,7 @@ import { getPricingRules } from '@/lib/platform-settings';
 import { readPricingSnapshot } from '@/lib/pricing-snapshot';
 import { computeAuthoritativeCheckoutTotals } from '@/lib/booking-server-price';
 import { bookingEventService } from '@/services/BookingEventService';
+import { updateReservedBags } from '@/services/SlotService';
 
 export type BagRevisionActor = { id: string; role: 'PARTNER' | 'ADMIN' };
 
@@ -44,6 +45,8 @@ export type BagRevisionErrorCode =
   | 'INVALID_STATUS'
   | 'INVALID_COUNTS'
   | 'NO_PENDING_REVISION'
+  /* Yeni valiz sayisi slot kapasitesine sigmiyor. */
+  | 'CAPACITY_EXCEEDED'
   | 'UNKNOWN';
 
 export type BagRevisionResult =
@@ -225,19 +228,58 @@ export async function applyBagRevision(
     const previousTotal = moneyToNumber(booking.totalPrice);
     const delta = round2(totals.subtotalBeforeCoupon - previousTotal);
 
-    await prisma.booking.update({
-      where: { id: bookingId },
-      data: {
-        bagCountS: totals.bagCountS,
-        bagCountM: totals.bagCountM,
-        bagCountXl: totals.bagCountXl,
-        unitPrice: totals.unitPrice,
-        insuranceFee: totals.insuranceFee,
-        totalPrice: totals.subtotalBeforeCoupon,
-        /* Uygulandi; bekleyen oneri her iki akista da DUSER. */
-        pendingBagRevision: Prisma.JsonNull,
-      },
+    /*
+      SLOT DEFTERI DE GUNCELLENIR -- ve TEK ISLEMDE.
+
+      Onceki hali yalnizca `Booking.bagCount*`i yaziyordu. Ama musaitlik hesabi
+      slot tabanli rezervasyonlarda `ReservationSlot.bagCount` toplamini okuyor;
+      `Booking.bagCount*` yalnizca slotu OLMAYAN eski kayitlar icin. Yani valiz
+      sayisi artiyor, defter eski kaliyor ve dukkan AYNI kapasiteyi ikinci kez
+      satabiliyordu:
+
+        kapasite 10 · A 2 valizle rezerve eder  -> defter: 2
+        esnaf 8 valize cikarir                  -> Booking: 8, defter: 2
+        sistem 8 yer bos sanir, B 8 valiz alir  -> dukkanda 16 valiz
+
+      Kapasite kontrolu de yoktu: esnaf sayiyi kapasitenin ustune cikarabiliyordu.
+      Ikisi `updateReservedBags` icinde, cunku ayni soruyu soruyorlar.
+
+      Tek transaction: defter guncellenip rezervasyon guncellenmeden surec
+      olurse, misafirin odedigi tutar ile yer kaplamasi ayrisirdi.
+    */
+    const yeniToplam = totals.bagCountS + totals.bagCountM + totals.bagCountXl;
+    const slotSonucu = await prisma.$transaction(async (tx) => {
+      const defter = await updateReservedBags(tx, bookingId, yeniToplam);
+      if (!defter.ok) return defter;
+
+      await tx.booking.update({
+        where: { id: bookingId },
+        data: {
+          bagCountS: totals.bagCountS,
+          bagCountM: totals.bagCountM,
+          bagCountXl: totals.bagCountXl,
+          unitPrice: totals.unitPrice,
+          insuranceFee: totals.insuranceFee,
+          totalPrice: totals.subtotalBeforeCoupon,
+          /* Uygulandi; bekleyen oneri her iki akista da DUSER. */
+          pendingBagRevision: Prisma.JsonNull,
+        },
+      });
+      return { ok: true as const };
     });
+
+    if (!slotSonucu.ok) {
+      logger.warn(
+        {
+          bookingId,
+          yeniToplam,
+          slotStart: slotSonucu.slotStart,
+          available: slotSonucu.available,
+        },
+        "bag_revision_capacity_exceeded",
+      );
+      return { ok: false, code: 'CAPACITY_EXCEEDED' };
+    }
 
     await bookingEventService
       .record({

@@ -28,7 +28,17 @@ const { mockPrisma, mockEvents, mockGetPricingRules, RULES } = vi.hoisted(() => 
   return {
     RULES,
     mockGetPricingRules: vi.fn().mockResolvedValue(RULES),
-    mockPrisma: { booking: { findUnique: vi.fn(), update: vi.fn() } },
+    /*
+      `$transaction`: `applyBagRevision` artik rezervasyonu ve SLOT DEFTERINI
+      tek islemde yaziyor (2026-09-02). Sahte istemci, geri cagriya kendisini
+      veriyor -- boylece `tx.booking.update` ayni casusa dusuyor ve testler
+      guncellemeyi eskisi gibi okuyabiliyor.
+    */
+    mockPrisma: {
+      booking: { findUnique: vi.fn(), update: vi.fn() },
+      reservationSlot: { findMany: vi.fn(), groupBy: vi.fn(), updateMany: vi.fn() },
+      $transaction: vi.fn(),
+    },
     mockEvents: { record: vi.fn().mockResolvedValue(undefined) },
   };
 });
@@ -59,6 +69,14 @@ function booking(overrides: Record<string, unknown> = {}) {
 }
 
 beforeEach(() => {
+    mockPrisma.$transaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+      fn(mockPrisma),
+    );
+    // Slotu OLMAYAN rezervasyon: defterde guncellenecek satir yok, kapasite
+    // kontrolu de atlanir. Slot davranisi ayri testte olculuyor.
+    mockPrisma.reservationSlot.findMany.mockResolvedValue([]);
+    mockPrisma.reservationSlot.groupBy.mockResolvedValue([]);
+    mockPrisma.reservationSlot.updateMany.mockResolvedValue({ count: 0 });
   vi.clearAllMocks();
   mockGetPricingRules.mockResolvedValue(RULES);
 });
