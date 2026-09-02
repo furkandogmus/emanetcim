@@ -47,6 +47,8 @@ export type BagRevisionErrorCode =
   | 'NO_PENDING_REVISION'
   /* Yeni valiz sayisi slot kapasitesine sigmiyor. */
   | 'CAPACITY_EXCEEDED'
+  /* Valizler MUHURLENMIS; artan valizin muhru olmazdi. */
+  | 'SEAL_COUNT_MISMATCH'
   | 'UNKNOWN';
 
 export type BagRevisionResult =
@@ -247,6 +249,38 @@ export async function applyBagRevision(
       oyle yapiyor (`z.number().max(20)`); servis kirpiyordu -- ayni girdi iki
       tasiyicida iki farkli sonuc veriyordu.
     */
+    /*
+      TESLIM ALINMIS VALIZ MUHURLUDUR -- SAYISI ARTIRILAMAZ.
+      (2026-09-02'de gercek veritabaninda olculdu.)
+
+      `REVISABLE_STATUSES` `CHECKED_IN`i iceriyor, yani valizler teslim alinip
+      MUHURLENDIKTEN sonra da sayi degistirilebiliyordu. Olcum:
+
+        check-in sonrasi : 2 valiz, 2 muhur
+        valiz 2 -> 5     : ok: true, tutar 320 TL
+        sonuc            : 5 valiz kayitli, 2 muhur bagli -> 3 valiz MUHURSUZ
+
+      Muhur bu urunun temel guven mekanizmasi: teslimde esnaf muhru kontrol
+      ediyor. Muhursuz kaydedilen valiz o kontrolden gecemez, ustelik misafir
+      besinin parasini odemis olur. Muhur atama akisi YALNIZCA check-in'de var,
+      dolayisiyla artan valizin muhru hicbir zaman olusmuyordu.
+
+      Azaltmaya dokunulmuyor: valizin bir kismi erken alinmis olabilir ve
+      fazladan muhur kaydi kimseyi muhursuz birakmaz.
+    */
+    if (booking.status === 'CHECKED_IN') {
+      const bagliMuhur = await prisma.bookingSeal.count({ where: { bookingId } });
+      const yeniToplamIstek =
+        counts.bagCountS + counts.bagCountM + counts.bagCountXl;
+      if (bagliMuhur > 0 && yeniToplamIstek > bagliMuhur) {
+        logger.warn(
+          { bookingId, bagliMuhur, yeniToplamIstek },
+          "bag_revision_would_leave_unsealed_bags",
+        );
+        return { ok: false, code: 'SEAL_COUNT_MISMATCH' };
+      }
+    }
+
     const istenenToplam = counts.bagCountS + counts.bagCountM + counts.bagCountXl;
     const hesaplananToplam =
       totals.bagCountS + totals.bagCountM + totals.bagCountXl;

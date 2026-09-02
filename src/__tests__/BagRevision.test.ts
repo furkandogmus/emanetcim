@@ -37,6 +37,7 @@ const { mockPrisma, mockEvents, mockGetPricingRules, RULES } = vi.hoisted(() => 
     mockPrisma: {
       booking: { findUnique: vi.fn(), update: vi.fn() },
       reservationSlot: { findMany: vi.fn(), groupBy: vi.fn(), updateMany: vi.fn() },
+      bookingSeal: { count: vi.fn() },
       $transaction: vi.fn(),
     },
     mockEvents: { record: vi.fn().mockResolvedValue(undefined) },
@@ -77,6 +78,8 @@ beforeEach(() => {
     mockPrisma.reservationSlot.findMany.mockResolvedValue([]);
     mockPrisma.reservationSlot.groupBy.mockResolvedValue([]);
     mockPrisma.reservationSlot.updateMany.mockResolvedValue({ count: 0 });
+    // Muhur sayimi: varsayilan olarak muhursuz (check-in oncesi rezervasyon).
+    mockPrisma.bookingSeal.count.mockResolvedValue(0);
   vi.clearAllMocks();
   mockGetPricingRules.mockResolvedValue(RULES);
 });
@@ -102,6 +105,59 @@ beforeEach(() => {
  * Mobil uc zaten reddediyor (`z.number().max(20)`); servis kirpiyordu -- ayni
  * girdi iki tasiyicida iki farkli sonuc veriyordu.
  */
+/**
+ * TESLIM ALINMIS VALIZ MUHURLUDUR -- SAYISI ARTIRILAMAZ.
+ *
+ * Gercek veritabaninda olculdu (2026-09-02): `REVISABLE_STATUSES`
+ * `CHECKED_IN`i iceriyor, yani valizler teslim alinip MUHURLENDIKTEN sonra da
+ * sayi degistirilebiliyordu.
+ *
+ *     check-in sonrasi : 2 valiz, 2 muhur
+ *     valiz 2 -> 5     : ok: true, tutar 320 TL
+ *     sonuc            : 5 valiz kayitli, 2 muhur bagli -> 3 valiz MUHURSUZ
+ *
+ * Muhur bu urunun temel guven mekanizmasi: teslimde esnaf muhru kontrol
+ * ediyor. Muhursuz kaydedilen valiz o kontrolden gecemez, ustelik misafir
+ * besinin parasini odemis olur. Muhur atama akisi YALNIZCA check-in'de var.
+ */
+describe("check-in sonrasi valiz artisi", () => {
+  it("muhur sayisini asan istek REDDEDILIYOR", async () => {
+    mockPrisma.booking.findUnique.mockResolvedValue(booking({ status: "CHECKED_IN" }));
+    mockPrisma.bookingSeal.count.mockResolvedValue(2);
+
+    const res = await applyBagRevision("b1", PARTNER, {
+      counts: { bagCountS: 5, bagCountM: 0, bagCountXl: 0 },
+    });
+
+    expect(res.ok).toBe(false);
+    if (!res.ok) expect(res.code).toBe("SEAL_COUNT_MISMATCH");
+    expect(mockPrisma.booking.update).not.toHaveBeenCalled();
+  });
+
+  it("AZALTMA serbest -- fazladan muhur kimseyi muhursuz birakmaz", async () => {
+    mockPrisma.booking.findUnique.mockResolvedValue(booking({ status: "CHECKED_IN" }));
+    mockPrisma.bookingSeal.count.mockResolvedValue(5);
+
+    const res = await applyBagRevision("b1", PARTNER, {
+      counts: { bagCountS: 2, bagCountM: 0, bagCountXl: 0 },
+    });
+
+    expect(res.ok, "valizin bir kismi erken alinmis olabilir").toBe(true);
+  });
+
+  it("check-in ONCESI rezervasyonda muhur kapisi calismiyor", async () => {
+    // Muhur henuz yok; sinir yalnizca kapasite ve platform sinirlari.
+    mockPrisma.booking.findUnique.mockResolvedValue(booking({ status: "PAID" }));
+    mockPrisma.bookingSeal.count.mockResolvedValue(0);
+
+    const res = await applyBagRevision("b1", PARTNER, {
+      counts: { bagCountS: 5, bagCountM: 0, bagCountXl: 0 },
+    });
+
+    expect(res.ok).toBe(true);
+  });
+});
+
 describe("valiz sayisi sinirini asan istek", () => {
   it("REDDEDILIYOR -- sessizce kirpilmiyor", async () => {
     mockPrisma.booking.findUnique.mockResolvedValue(booking());

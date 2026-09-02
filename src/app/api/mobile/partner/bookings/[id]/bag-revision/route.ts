@@ -29,6 +29,11 @@ const CODE_TO_HTTP: Record<BagRevisionErrorCode, { status: number; error: string
     sayisi dusurulurse ya da baska bir rezervasyon dusunce ayni istek calisir.
   */
   CAPACITY_EXCEEDED: { status: 409, error: "insufficient_capacity" },
+  /*
+    409: valizler zaten muhurlenmis; istek gecerli ama kaynagin su anki
+    durumu kabul etmiyor. Muhur akisi yalnizca check-in'de calisiyor.
+  */
+  SEAL_COUNT_MISMATCH: { status: 409, error: "seal_count_mismatch" },
   UNKNOWN: { status: 500, error: "server_error" },
 };
 
