@@ -1,3 +1,4 @@
+import type { DisputeStatus } from "@/lib/dispute-status";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
 import { redirect, notFound } from "next/navigation";
@@ -12,17 +13,29 @@ import type { Metadata } from "next";
  * gosteriliyordu -- teknik/ingilizce bir enum degeri. Durum + renk eslemesi
  * burada, tek yerde.
  */
+/*
+  ESLEME TAM: `Record<DisputeStatus, ...>` yeni bir durum eklendiginde bu
+  dosyayi DERLEME HATASIYLA gosterir. Onceki hali `switch` + `default` idi ve
+  taninmayan her durum sessizce "Acik" olarak ciziliyordu -- admin "Kapali"
+  yaparken misafirin "Acik" gormesi tam da bu daldan gecerdi.
+*/
+const DISPUTE_STATUS_VIEW: Record<
+  DisputeStatus,
+  { labelKey: string; stateClass: string }
+> = {
+  OPEN: { labelKey: "statusOpen", stateClass: "ui-state-empty" },
+  IN_REVIEW: { labelKey: "statusInReview", stateClass: "ui-state-empty" },
+  RESOLVED: { labelKey: "statusResolved", stateClass: "ui-state-success" },
+  CLOSED: { labelKey: "statusClosed", stateClass: "ui-state-empty" },
+};
+
 function disputeStatusView(status: string): { labelKey: string; stateClass: string } {
-  switch (status) {
-    case "RESOLVED":
-      return { labelKey: "statusResolved", stateClass: "ui-state-success" };
-    case "CLOSED":
-      return { labelKey: "statusClosed", stateClass: "ui-state-empty" };
-    case "IN_REVIEW":
-      return { labelKey: "statusInReview", stateClass: "ui-state-empty" };
-    default:
-      return { labelKey: "statusOpen", stateClass: "ui-state-empty" };
-  }
+  /*
+    Deger veritabanindan `String` olarak geliyor (sema enum degil), o yuzden
+    calisma aninda kontrol sart. Bilinmeyen bir deger "Acik" olarak cizilir --
+    ama artik bu YALNIZCA veri bozuksa olur, kod eksik kaldigi icin degil.
+  */
+  return DISPUTE_STATUS_VIEW[status as DisputeStatus] ?? DISPUTE_STATUS_VIEW.OPEN;
 }
 
 export async function generateMetadata({

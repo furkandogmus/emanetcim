@@ -1,5 +1,6 @@
 "use client";
 
+import { DISPUTE_STATUSES } from "@/lib/dispute-status";
 import { useState } from "react";
 import { AlertTriangle, ChevronDown, ChevronUp, ArrowLeft, Loader2 } from "lucide-react";
 import { Link } from "@/i18n/routing";
@@ -46,7 +47,8 @@ interface Dispute {
   booking: DisputeBooking;
 }
 
-const STATUS_OPTIONS = ["OPEN", "IN_REVIEW", "RESOLVED", "CLOSED"] as const;
+// Liste `@/lib/dispute-status`ta; gerekcesi orada.
+const STATUS_OPTIONS = DISPUTE_STATUSES;
 
 const STATUS_I18N = {
   OPEN: "statusDisputeOpen",

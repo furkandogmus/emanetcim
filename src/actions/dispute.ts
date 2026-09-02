@@ -1,17 +1,14 @@
 "use server";
 
+import { DISPUTE_STATUSES } from "@/lib/dispute-status";
 import prisma from "@/lib/db";
 import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { disputeService } from "@/services/DisputeService";
 import { z } from "zod";
 import { requireAdmin, requireUser } from "@/lib/action-auth";
 
-const disputeStatusSchema = z.enum([
-  "OPEN",
-  "IN_REVIEW",
-  "RESOLVED",
-  "CLOSED",
-]);
+// Liste `@/lib/dispute-status`ta; gerekcesi orada.
+const disputeStatusSchema = z.enum(DISPUTE_STATUSES);
 
 export async function createDisputeAction(input: {
   bookingId: string;

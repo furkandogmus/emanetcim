@@ -1,3 +1,4 @@
+import { DISPUTE_INITIAL_STATUS } from "@/lib/dispute-status";
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 import { notificationService } from "@/services/NotificationService";
@@ -61,7 +62,7 @@ class DisputeService {
     let dispute;
     try {
       dispute = await prisma.dispute.create({
-        data: { bookingId, reason, description, status: "OPEN" },
+        data: { bookingId, reason, description, status: DISPUTE_INITIAL_STATUS },
       });
     } catch (e: unknown) {
       // `Dispute.bookingId` @unique -- yarista ikinci istek buraya duser.
