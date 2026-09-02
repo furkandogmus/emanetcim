@@ -3,14 +3,20 @@ import { NextRequest } from "next/server";
 import { EARNING_BOOKING_STATUSES } from "@/lib/platform-split";
 import { moneyToNumber } from "@/lib/money";
 import prisma from "@/lib/db";
-import { requireMobileUser } from "@/lib/mobile-auth";
+import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 
 export async function GET(req: NextRequest) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
-  if (auth.user.role !== "ADMIN") {
-    return NextResponse.json({ error: "forbidden" }, { status: 403 });
-  }
+  /*
+    ELLE YAZILMIS ROL KONTROLU DEGIL. Bu uc `auth.user.role !== "ADMIN"` diye
+    kendi kapisini yaziyordu; diger uc admin ucu (`applications`, `messages`,
+    `messages/[id]`) `requireRole` cagiriyor. Bugun ikisi ayni govdeyi donuyor
+    (`{ error: "forbidden" }`, 403), yani davranis farki YOKTU -- ama kapinin
+    kendisi kopyaydi ve kopya kapi, degistigi gun tek yerde degisir.
+  */
+  const forbid = requireRole(auth.user, ["ADMIN"]);
+  if (forbid) return forbid;
 
   const [totalBookings, totalRevenueResult, totalPartners, pendingApps, unreadMessages] = await Promise.all([
     prisma.booking.count(),

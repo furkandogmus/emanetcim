@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import prisma from "@/lib/db";
+import { rateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/get-ip";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -15,6 +17,26 @@ export async function GET() {
   }
 
   const userId = session.user.id;
+
+  /*
+    HIZ SINIRI (2026-09-02'de eklendi). Bu uc TEK istekte kullanicinin butun
+    gecmisini topluyor -- dort ayri sorgu, hicbirinde `take` yok. Kimlik
+    dogrulamasi var, yani veri sizmiyor; sinirsiz olan sey MALIYET: ayni oturum
+    ucu istedigi kadar cagirabiliyordu ve her cagri veritabanina dort tam tarama
+    demek.
+
+    Kod tabanindaki butun hassas/agir uclar (auth, OTP, parola sifirlama, arama
+    yenileme) zaten bu kapidan geciyor; burasi atlanmisti. Sinir kullanici
+    basina: KVKK ihracati insan hizinda bir istek, dakikada birden fazlasinin
+    mesru karsiligi yok.
+  */
+  const ip = await getClientIp();
+  if (!(await rateLimit(`data-export:${userId}`, 5, 60 * 60 * 1000))) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+  if (!(await rateLimit(`data-export:ip:${ip}`, 20, 60 * 60 * 1000))) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
 
   const [user, bookings, reviews, legalAcceptances] = await Promise.all([
     prisma.user.findUnique({

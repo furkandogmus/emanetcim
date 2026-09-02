@@ -1,3 +1,4 @@
+import { canOperateBookingAtShop } from "@/services/booking/access";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
@@ -48,7 +49,8 @@ export async function POST(req: NextRequest) {
         include: { shop: true, guest: { select: { name: true } } },
       });
       if (!booking) return NextResponse.json({ error: "not_found" }, { status: 404 });
-      if (booking.shop.ownerId !== auth.user.id && auth.user.role !== "ADMIN") {
+      // Dukkan operasyonu: kural `booking/access.ts`te, uc yerde degil.
+      if (!canOperateBookingAtShop(booking, auth.user)) {
         return NextResponse.json({ error: "forbidden" }, { status: 403 });
       }
       return NextResponse.json({

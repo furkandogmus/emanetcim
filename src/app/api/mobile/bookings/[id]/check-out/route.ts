@@ -1,3 +1,4 @@
+import { canOperateBookingAtShop } from "@/services/booking/access";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
@@ -26,7 +27,8 @@ export async function POST(
   if (!booking) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
-  if (auth.user.role !== "ADMIN" && booking.shop.ownerId !== auth.user.id) {
+  // Dukkan operasyonu: esnaf ya da admin; misafir haric. Kural tek yerde.
+  if (!canOperateBookingAtShop(booking, auth.user)) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
