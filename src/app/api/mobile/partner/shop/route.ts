@@ -31,10 +31,31 @@ export async function GET(req: NextRequest) {
     where: { shopId: shop.id, status: "ASSIGNED" }
   });
 
+  /*
+    TELEFON `User`DA, `Shop`TA DEGIL (2026-09-02'de bulundu).
+
+    Esnaf ayarlar ekrani bu uctan okuyup telefon alanini dolduruyor:
+
+        res.data['phone'] ?? res.data['phoneNumber'] ?? ''
+
+    ...ama yanit `...shop` yayilimindan olusuyor ve `Shop` modelinde `phone`
+    alani YOK -- telefon dukkanin degil, SAHIBIN alani. Sonuc: esnafin kayitli
+    bir telefonu olsa bile ayarlar ekrani her acilisinda alan BOS geliyordu.
+    Yazma yolu ayri bir ucta (`PUT /partner/phone`) ve calisiyor; yani esnaf
+    telefonunu yazabiliyor ama okuyamiyordu.
+
+    Silme riski yok: istemci bos alani gondermiyor (`if (_phone.text.isNotEmpty)`).
+  */
+  const owner = await prisma.user.findUnique({
+    where: { id: auth.user.id },
+    select: { phone: true },
+  });
+
   return NextResponse.json({
     ...shop,
     pricePerDay: Number(shop.pricePerDay),
     sealCount,
+    phone: owner?.phone ?? null,
   });
 }
 
