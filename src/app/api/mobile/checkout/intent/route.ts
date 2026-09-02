@@ -30,6 +30,8 @@ const REJECTION_TO_HTTP: Record<BookingRejectionCode, { status: number; error: s
   // 409: istek gecerli ama kaynagin SU ANKI durumu kabul etmiyor. Nokta hizmete
   // acildiginda ayni istek calisir; 400 "istegin bozuk" demek olurdu.
   SHOP_PRELAUNCH: { status: 409, error: "shop_not_open_yet" },
+  // 400: istegin kendisi bozuk (sifir/negatif valiz, negatif tutar).
+  INVALID_INPUT: { status: 400, error: "invalid_data" },
 };
 
 const schema = z.object({

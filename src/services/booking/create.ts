@@ -4,6 +4,7 @@
  * `BookingService`'ten ayrildi (2026-08-22): 1186 satirlik sinif bes ayri
  * yasam dongusu adimini tasiyordu. Sinif cephe olarak kaldi; davranis ayni.
  */
+import { BookingInputInvalidError } from '@/services/booking/errors';
 import { retryOnWriteConflict } from '@/lib/tx-retry';
 import { Booking, BookingStatus, Prisma } from '@prisma/client';
 import prisma from '@/lib/db';
@@ -44,7 +45,28 @@ import type { CreateInitialBookingInput, TxClient } from '@/services/BookingServ
  */
 const DEFAULT_INITIAL_STATUS: BookingStatus = 'PENDING';
 
+/**
+ * Servis seviyesinde girdi kapisi -- tasiyicilardan BAGIMSIZ.
+ *
+ * Gerekce `BookingInputInvalidError`de: negatif valiz slot dolulugunu
+ * DUSURUP kapasiteyi sisiriyor, negatif tutar hakedise negatif taban veriyordu.
+ */
+function assertBookingInput(data: CreateInitialBookingInput): void {
+  const sayilar = [data.bagCountS, data.bagCountM, data.bagCountXl];
+  if (sayilar.some((n) => !Number.isFinite(n) || !Number.isInteger(n) || n < 0)) {
+    throw new BookingInputInvalidError('Valiz sayısı geçersiz.');
+  }
+  if (sayilar.reduce((a, b) => a + b, 0) < 1) {
+    // Sifir valiz yer kaplamaz ama kayit uretir; rezervasyonun konusu yok.
+    throw new BookingInputInvalidError('En az bir valiz gerekli.');
+  }
+  if (!Number.isFinite(data.totalPrice) || data.totalPrice < 0) {
+    throw new BookingInputInvalidError('Tutar geçersiz.');
+  }
+}
+
 export async function createInitialBooking(data: CreateInitialBookingInput): Promise<Booking> {
+  assertBookingInput(data);
   const rules = await getPricingRules();
   const initialStatus = data.initialStatus ?? DEFAULT_INITIAL_STATUS;
 
@@ -218,6 +240,7 @@ export async function createSlotBooking(
   newBags: number,
   rules: Awaited<ReturnType<typeof getPricingRules>>,
 ): Promise<Booking> {
+  assertBookingInput(data);
   const initialStatus = data.initialStatus ?? DEFAULT_INITIAL_STATUS;
   // Cakismada yeniden denenir; gerekce `@/lib/tx-retry`de.
   const booking = await retryOnWriteConflict(() => prisma.$transaction(

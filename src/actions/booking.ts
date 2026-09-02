@@ -330,6 +330,8 @@ const BOOKING_REJECTION_TO_KEY: Record<BookingRejectionCode, string> = {
   INVALID_DATES: "Errors.invalidBookingDates",
   PLATFORM_HOLIDAY: "Errors.bookingIncludesPlatformHoliday",
   SHOP_PRELAUNCH: "Errors.shopNotOpenYet",
+  // Sifir/negatif valiz ya da negatif tutar: istek bozuk.
+  INVALID_INPUT: "Errors.invalidData",
 };
 
 const CANCEL_ERROR_TO_KEY: Record<CancelBookingErrorCode, string> = {

@@ -31,7 +31,9 @@ export type BookingRejectionCode =
   | 'CAPACITY_EXCEEDED'
   | 'INVALID_DATES'
   | 'PLATFORM_HOLIDAY'
-  | 'SHOP_PRELAUNCH';
+  | 'SHOP_PRELAUNCH'
+  /* Valiz sayisi ya da tutar anlamsiz (sifir, negatif). */
+  | 'INVALID_INPUT';
 
 /** Dukkan kapasitesi secilen aralikta yetmiyor. */
 export class BookingCapacityExceededError extends BookingRejectedError {
@@ -72,5 +74,32 @@ export class BookingHolidayError extends BookingRejectedError {
 export class BookingShopPrelaunchError extends BookingRejectedError {
   constructor(message = 'Bu nokta henuz hizmete acilmadi.') {
     super(message, 'SHOP_PRELAUNCH');
+  }
+}
+
+/**
+ * Valiz sayisi ya da tutar anlamsiz.
+ *
+ * NEDEN SERVISTE (2026-09-02'de gercek veritabaninda olculdu): tasiyicilar
+ * zod ile doguruyor (`bagCountS: z.number().int().min(0).max(20)`), ama servis
+ * KENDI BASINA kabul ediyordu. Dogrudan cagrilan bir servis su girdileri
+ * yaziyordu:
+ *
+ *     bagCountS: 0   -> KABUL (hicbir valiz yok, ama yer kapliyor)
+ *     bagCountS: -5  -> KABUL
+ *     totalPrice: -500 -> KABUL
+ *
+ * Negatif valiz en zararlisi: `ReservationSlot.bagCount` negatif yazilir ve o
+ * slotun DOLULUK TOPLAMINI DUSURUR -- yani dukkanin kapasitesi sisirilmis olur
+ * ve fazla rezervasyon alinir. Negatif tutar ise hakedise ve iadeye negatif
+ * taban verir.
+ *
+ * CLAUDE.md kurali "yazma islemleri yalnizca `src/services/` uzerinden" diyor;
+ * o zaman son savunma hatti da orasi olmali. Bir tasiyici eklendiginde ya da
+ * bir bakim scripti servisi dogrudan cagirdiginda kural yine gecerli olsun.
+ */
+export class BookingInputInvalidError extends BookingRejectedError {
+  constructor(message = 'Rezervasyon bilgileri geçersiz.') {
+    super(message, 'INVALID_INPUT');
   }
 }
