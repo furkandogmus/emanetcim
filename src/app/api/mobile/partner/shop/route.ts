@@ -13,6 +13,22 @@ const shopUpdateSchema = z.object({
   pricePerDay: z.number().min(1).max(100000).optional(),
   openingTime: z.string().optional(),
   closingTime: z.string().optional(),
+  /*
+    ADRES ALANLARI (2026-09-02'de eklendi).
+
+    Mobil esnaf ayarlar ekrani bu ucu `address`, `city` ve `district` ile
+    cagiriyordu (`partner_settings_screen.dart`), ama sema uctunu de
+    tanimlamiyordu -- zod onlari sessizce ATIYOR, asagidaki `data` da
+    yazmiyordu. Esnaf adresini duzeltir, "kaydedildi" yanitini alir ve HICBIR
+    SEY degismezdi.
+
+    Adres misafirin dukkani buldugu metin: yanlis kalan bir adres, misafiri
+    yanlis kapiya gonderir. Web tarafi (`actions/shop.ts`) uc alani da kabul
+    ediyordu; sinirlar oradan alindi.
+  */
+  address: z.string().max(500).optional(),
+  city: z.string().max(100).optional(),
+  district: z.string().max(100).optional(),
 });
 
 export async function GET(req: NextRequest) {
@@ -84,6 +100,9 @@ export async function PUT(req: NextRequest) {
     if (parsed.data.pricePerDay !== undefined) data.pricePerDay = new Prisma.Decimal(parsed.data.pricePerDay);
     if (parsed.data.openingTime !== undefined) data.openingTime = parsed.data.openingTime;
     if (parsed.data.closingTime !== undefined) data.closingTime = parsed.data.closingTime;
+    if (parsed.data.address !== undefined) data.address = parsed.data.address;
+    if (parsed.data.city !== undefined) data.city = parsed.data.city;
+    if (parsed.data.district !== undefined) data.district = parsed.data.district;
 
     const updated = await shopService.updateShop(shop.id, data);
 
