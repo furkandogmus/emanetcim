@@ -432,11 +432,30 @@ export async function deleteUserAction(
       userId,
       activeStatuses,
     );
+    /*
+      KAPATILAMAYAN REZERVASYON KALDIYSA SILME YAPILMAZ.
+
+      Onceki hali yalnizca UYARI yaziyor ve silmeye devam ediyordu. Ama
+      `cancelBooking` `CHECKED_IN` durumunu bilerek REDDEDIYOR -- valiz o anda
+      fiziksel olarak dukkanin rafinda ve iptal onu ortadan kaldirmaz. Yani
+      zorla iptal tam olarak bu durumda basarisiz oluyor ve hesap yine de
+      siliniyordu:
+
+        esnafin rafinda valiz var, sahibi kayitta yok
+        `Booking.guestId` bosalir, `guest` iliskisi kaybolur
+        hesapli misafirde `guestEmail`/`guestPhone` zaten null
+        -> esnaf valizi kime teslim edecegini, kime haber verecegini bilemez
+
+      Ayni koruma NORMAL kullanicida zaten vardi (asagidaki dal): aktif
+      rezervasyonu olan hesap silinmiyor. Yasakli hesapta yoktu -- yasaklamak,
+      valizi dukkandan kaldirmiyor.
+    */
     if (summary.failed > 0) {
       logger.warn(
         { userId, ...summary },
-        "admin_delete_user_force_cancel_partial",
+        "admin_delete_user_blocked_uncancellable_booking",
       );
+      return { ok: false, error: DELETE_USER_HAS_ACTIVE_BOOKING_CODE };
     }
   } else {
     // Normal kullanıcı: Aktif rezervasyon kontrolü (silmeyi engelle)
