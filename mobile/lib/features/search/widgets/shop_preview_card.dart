@@ -120,11 +120,21 @@ class ShopPreviewCard extends ConsumerWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      GestureDetector(
-                        onTap: () => ref.read(favoritesProvider.notifier).toggle(shop.id),
-                        child: Icon(
-                          isFav ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
-                          size: 22,
+                      IconButton(
+                        onPressed: () =>
+                            ref.read(favoritesProvider.notifier).toggle(shop.id),
+                        iconSize: 22,
+                        padding: EdgeInsets.zero,
+                        // Dokunma hedefi >= 48x48 dp (Material/erisilebilirlik).
+                        constraints:
+                            const BoxConstraints(minWidth: 48, minHeight: 48),
+                        // Tooltip ayni zamanda ekran okuyucu etiketini saglar.
+                        tooltip:
+                            isFav ? 'shop.unfavorite'.tr() : 'shop.favorite'.tr(),
+                        icon: Icon(
+                          isFav
+                              ? Icons.favorite_rounded
+                              : Icons.favorite_outline_rounded,
                           color: isFav ? Colors.redAccent : Colors.grey,
                         ),
                       ),

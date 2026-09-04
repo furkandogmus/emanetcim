@@ -22,6 +22,7 @@ dependencies:
   dio: 5.9.2
   retrofit: 4.9.2
   pretty_dio_logger: 1.4.0
+  http_parser: 4.1.2
 
   # Storage
   flutter_secure_storage: 10.0.0
@@ -52,7 +53,7 @@ dependencies:
   json_annotation: 4.9.0
 
   # Utils
-  intl: 0.20.2
+  intl: ^0.20.3
   easy_localization: 3.0.8
   cached_network_image: 3.4.1
   url_launcher: 6.3.1

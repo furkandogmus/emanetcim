@@ -303,6 +303,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                           hintText: 'auth.email_or_phone'.tr(),
                                           prefixIcon: const Icon(Icons.person_outline_rounded),
                                           helperText: 'auth.identity_hint'.tr(),
+                                          // Uzun ipucu tek satira sigmayip kesiliyordu.
+                                          helperMaxLines: 2,
                                           helperStyle: GoogleFonts.outfit(fontSize: isTablet ? 13 : 11, color: const Color(0xFF616161)),
                                         ),
                                         validator: (v) => _isValid(v ?? '') ? null : 'auth.invalid_identity'.tr(),

@@ -6,6 +6,9 @@ analyzer:
     - "**/*.freezed.dart"
     - "build/**"
     - "lib/generated_plugin_registrant.dart"
+    - android/**
+    - ios/**
+    - macos/**
   errors:
     todo: ignore
     missing_required_param: error

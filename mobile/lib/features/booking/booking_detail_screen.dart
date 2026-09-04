@@ -550,7 +550,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                   final date = await showDatePicker(context: context, initialDate: newCheckIn, firstDate: DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 365)));
                   // Tarih secici acikken sayfa kapatilmis olabilir; `context`
                   // o durumda bayat ve saat secici cokerdi.
-                  if (!context.mounted) return;
+                  if (!mounted) return;
                   if (date != null) {
                     final time = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(newCheckIn!));
                     if (time != null) {
@@ -565,7 +565,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                 trailing: const Icon(Icons.calendar_today_rounded, color: AppColors.brandOrange),
                 onTap: () async {
                   final date = await showDatePicker(context: context, initialDate: newCheckOut, firstDate: newCheckIn ?? DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 365)));
-                  if (!context.mounted) return;
+                  if (!mounted) return;
                   if (date != null) {
                     final time = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(newCheckOut!));
                     if (time != null) {
@@ -716,7 +716,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
               Text('booking.dispute_title'.tr(), style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
               DropdownButtonFormField<String>(
-                value: reason,
+                initialValue: reason,
                 items: [
                   DropdownMenuItem(value: 'DAMAGE', child: Text('booking.dispute_damage'.tr())),
                   DropdownMenuItem(value: 'THEFT', child: Text('booking.dispute_theft'.tr())),
