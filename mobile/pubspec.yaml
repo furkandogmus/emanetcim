@@ -101,3 +101,6 @@ flutter:
     - assets/images/logo_white.png
     - assets/l10n/en.json
     - assets/l10n/tr.json
+    # Outfit fontlari paketle gelir: google_fonts once asset'e bakar, ilk acilista
+    # aga cikmaz ve testler gercek font metrikleriyle olcer (allowRuntimeFetching=false).
+    - assets/fonts/

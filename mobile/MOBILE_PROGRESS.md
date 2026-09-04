@@ -1,51 +1,81 @@
 # BagajPark Mobil — İyileştirme İlerlemesi
 
-## Son durum — 2026-09-04
+## Son durum — 2026-09-05
 
-**Ortam kuruldu:** Flutter 3.47.2, Android SDK 36, gerçek cihaz (Redmi Note 13 Pro,
-kablosuz adb) çalışıyor. Uygulama telefonda kuruluyor ve açılıyor. `flutter analyze`
-0 hata, `flutter test` 22 geçiyor.
+**Ortam:** Flutter 3.47.2 yerelde VE CI'da (mobile-ci.yml 3.47.x, commit 716ed2b).
+Sürüm kararı (A) ile çözüldü; **paket modernizasyonu artık bloke değil.** Gerçek
+cihaz (Redmi Note 13 Pro, kablosuz adb) çalışıyor; "Uyanık kal" geliştirici
+seçeneği açık (`stay_on_while_plugged_in=15`), screencap için ekran uyandırma gerekmiyor.
 
-**Uygulanan düzeltmeler (çalışma ağacında, commit YOK):**
+**Commit durumu:** Tur 1-8 çıktıları kullanıcı isteğiyle 2026-09-05'te dört commit
+olarak `mobil-kalite-duzeltmeleri` dalına atıldı ve push'landı (e36e518, c25d80b,
+716ed2b, 4bec971). PR #13 CI'da `pub get` artık geçiyor; Build Android koşuyor.
+Tur 9-10 çıktıları **çalışma ağacında, commit YOK** (loop kuralı).
+
+**Çalışma ağacındaki değişiklik seti (Tur 9-10):**
 | # | Değişiklik | Dosya | Durum |
 |---|---|---|---|
-| 1 | intl 0.20.2 → ^0.20.3 (Flutter 3.47 şartı) | pubspec.yaml | applied |
-| 2 | AGP 8.9.1 → 8.13.2 (min 8.11.1) | android/settings.gradle.kts | applied |
-| 3 | debug cleartext HTTP izni (yerel API için, sadece debug) | android/app/src/debug/AndroidManifest.xml | applied |
-| 4 | http_parser doğrudan bağımlılık (4.1.2) — depend_on_referenced_packages | pubspec.yaml | applied |
-| 5 | use_build_context_synchronously: State.context guard'ı State.mounted'a çevrildi | booking_detail_screen.dart | applied |
-| 6 | deprecated: activeColor→activeThumbColor (4x), Dropdown value→initialValue | profile_screen, booking_detail_screen | applied |
-| 7 | a11y: favori butonu 22px→48px dokunma alanı + tooltip etiketi; a11y test ağı | shop_preview_card.dart + yeni test | applied |
-| 8 | login yardım metni kesiliyordu → helperMaxLines: 2 (sarabilir) | login_screen.dart | applied — CİHAZDA DOĞRULANDI |
-| 9 | a11y: metin kontrastı (WCAG AA) testi eklendi | shop_preview_card_a11y_test | applied |
+| 10 | Outfit fontları (Regular/Medium/SemiBold/Bold) paketlendi; google_fonts önce asset'e bakar, ilk açılışta ağa çıkmaz | assets/fonts/*.ttf, pubspec.yaml (assets) | applied — CİHAZDA DOĞRULANDI |
+| 11 | Testte `GoogleFonts.config.allowRuntimeFetching=false`: font ağ çağrısı mock HttpClient'a çarpıp yakalanmamış hata üretiyordu | test/flutter_test_config.dart | applied |
+| 12 | a11y: "Kayıt Ol" dokunma hedefi 72x21 → 48 (shrinkWrap/Size.zero kaldırıldı), satır Row→Wrap (büyük yazı ölçeğinde taşmaz) | login_screen.dart | applied — CİHAZDA DOĞRULANDI |
+| 13 | a11y: şifre göster/gizle butonuna tooltip (ekran okuyucu etiketi), `auth.show_password`/`hide_password` tr+en | login_screen.dart, l10n | applied |
+| 14 | a11y: sabit Türkçe `Semantics(label:'Giriş Yap'/'Nasıl Çalışır?')` kaldırıldı — İngilizce arayüzde ekran okuyucu Türkçe okuyordu; buton metni zaten etiket | login_screen.dart | applied |
+| 15 | Login a11y testi (3 test: gerçek çeviri, tap target, etiket) | test/features/auth/login_screen_a11y_test.dart | applied |
+| 16 | Sabit Türkçe 'Hesap Seçin' / 'Biyometrik Giriş (N)' → `auth.select_account`, `auth.biometric_multi` (tr+en, 405/405 parite) | login_screen.dart, l10n | applied (Tur 10) |
 
-**Sıradaki iş:** a11y ağını login ekranına genişlet (viewport-bağımsız desen).
-NOT: Paket modernizasyonu (öncelik 6) ŞU AN BLOKE — pubspec/lock'a dokunuyor ve
-bu, bekleyen Flutter sürüm kararına (3.41 vs 3.47) ve açık PR #13'e bağlı.
-Karar çözülene kadar pubspec'e dokunulmayacak.
+**Sayılar:** analyze 48 (tavan 48). Test 30 geçti, 1 atlandı. Biçim: yeni borç yok
+(login_screen.dart eski borçluydu; dosya tamamen biçimlendi, diff bu yüzden büyük).
 
-**Bulgu (Tur 4):** `ShopPreviewCard` genişliğini `MediaQuery.of(context).size.width
-* 0.85` ile EKRAN genişliğinden alıyor, ebeveyn kısıtlamasından değil. Gerçek
-uygulamada kart tam ekranda kullanıldığı için kullanıcıya yansıyan hata YOK; ama
-kart yeniden-kullanılabilir değil (dar bir kapsayıcıda taşar) ve widget-test
-viewport'unda güvenilmez taşma üretiyor. Fiat: ya kartı LayoutBuilder/constraints'e
-çevir (davranış değişikliği — ayrı karar), ya da golden harness'te MediaQuery.size'ı
-tester.view ile doğru ayarla. ŞU AN kullanıcı-etkili değil, düşük öncelik.
+**Sıradaki iş:** Paket modernizasyonu (öncelik 6), sırayla, her biri ayrı tur:
+flutter_secure_storage 10→11 ilk. ÖNCE Tur 9-10 commit'lenmeli: pubspec.yaml'da
+Tur 9'un asset değişikliği duruyor, paket yükseltmesi aynı diff'e karışmamalı
+(mobile/CLAUDE.md: her paket ayrı commit). Commit kararı kullanıcının. `/mobil-paket` akışı: changelog oku, breaking
+change tara, kapı, ayrı commit'e hazır bırak.
 
-**Bloke/beklemede:**
-- **PR #13 KIRMIZI + paket modernizasyonu BLOKE:** CI Flutter 3.41.9 kullanıyor,
-  `flutter_localizations` intl'i 0.20.2'ye pinliyor; ben (yerel 3.47.2) intl'i
-  ^0.20.3 yaptım → CI'da `pub get` version-solving hatası. Karar bekliyor:
-  (A) projeyi/CI'ı 3.47'ye taşı, ya da (B) değişiklikleri 3.41'e uyarla. Karar
-  gelene kadar pubspec/lock'a dokunulmuyor.
-- Cleartext düzeltmesinin canlı doğrulaması → integration_test ile giriş denemesi
-  gerekiyor (adb input Xiaomi'de kapalı, integration_test bunu aşar).
-- Uyarı sayısı: 48 (başlangıç 56). Test sayısı: 25 (a11y kontrast +1).
-- CİHAZ NOTU: ekran uyanıkken screencap sorunsuz; uykudayken programatik
-  uyandırma engelli (Xiaomi INJECT_EVENTS). `svc power stayon true` ayarlandı.
-  Cihaz-üstü görsel doğrulama için ekranın açık olması yeterli.
+**Bilinen ama dokunulmayan:**
+- `textContrastGuideline` login ekranında BİLEREK yok: algoritma düğüm
+  dikdörtgenindeki pikselleri ortalama açıklığa göre bölüp her gruptan en sık rengi
+  alıyor; dekoratif soluk turuncu daire "koyu" gruba düşünce beyazla 1.2 çıkıyor,
+  metin rengi hiç ölçülmüyor. Düz zeminli widget'larda (kart) geçerli, dekorlu tam
+  ekranlarda değil. (flutter_test accessibility.dart `_ContrastReport`)
+- `ShopPreviewCard` genişliğini ekrandan alıyor (Tur 4 bulgusu), düşük öncelik.
+- Cleartext düzeltmesinin canlı doğrulaması → integration_test ile giriş; yerel
+  backend'in ayakta olması gerekir.
 
 ## Geçmiş
+
+### 2026-09-05 — Tur 10: login'deki son sabit Türkçe metinler çeviriye taşındı
+- **Yapıldı:** biyometrik hesap seçicideki 'Hesap Seçin' ve 'Biyometrik Giriş (N)'
+  `auth.select_account` / `auth.biometric_multi` (`{}` argümanlı) oldu; tr ve en'e
+  eklendi. Dosyada sabit Türkçe metin kalmadı (grep ile doğrulandı).
+- **Kanıt:** tr/en anahtar paritesi 405/405, fark yok. Kapı yeşil: analyze 48, test
+  +30 ~1, biçim yeni borç yok. Görsel etki yok (yalnızca biyometrik hesap varken
+  görünen metin; cihazda biyometrik hesap kayıtlı değil, screencap alınmadı).
+### 2026-09-05 — Tur 9: login a11y ağı → 3 gerçek düzeltme + fontlar paketlendi
+- **Test yazıldı:** harness ile login ekranı (tokenStoreProvider fake: biyometrik hesap yok).
+- **İlk koşuda iki sahte, üç gerçek bulgu:**
+  - SAHTE: "Hesabınız yok mu? Kayıt Ol" satırı 32px taşıyordu → test fontu (her glif
+    kare) yüzünden; gerçek Outfit yüklenince kayboldu. Yine de Row→Wrap yapıldı.
+  - SAHTE: kontrast 1.2 → dekoratif daire artefaktı (yukarıda). Test bilerek dışarıda.
+  - GERÇEK: google_fonts testte ağa çıkıyor, mock HttpClient'ta `Null is not a subtype
+    of Future<HttpClientRequest>` ile yakalanmamış hata. Çözüm: fontlar asset olarak
+    paketlendi (google_fonts'un beklediği hash'lerle birebir, fonts.gstatic'ten indirildi)
+    + `allowRuntimeFetching=false`. Yan kazanım: uygulama ilk açılışta font için ağa çıkmıyor.
+  - GERÇEK: "Kayıt Ol" dokunma hedefi 72x21 (androidTapTargetGuideline).
+  - GERÇEK: şifre göster/gizle IconButton etiketsiz (labeledTapTargetGuideline).
+- **Kanıt:** login testi +3 yeşil; kapı `verify-20260904T224122Z.log` → analyze 48,
+  test +30 ~1, biçim yeni borç yok. Cihaza kuruldu, login screencap'i alındı ve BAKILDI:
+  kayıt satırı doğal boşlukla, font Outfit, göz ikonu yerinde.
+
+### 2026-09-05 — Tur 8: gerçek çeviri yükleyen test harness'i (önceki oturum, buraya sonradan yazıldı)
+- **Yapıldı:** `test/support/harness.dart` (`pumpApp`: gerçek tema + l10n + Riverpod +
+  ağ görseli mock + cihaz profili + yazı ölçeği), `test/flutter_test_config.dart`
+  (EasyLocalization/SharedPreferences hazırlığı), kanıt testi.
+- **Bulundu ve düzeltildi:** aynı dosyadaki ikinci test ham anahtar görüyordu — çeviri
+  dosyası gerçek asset I/O ile geliyor, `pumpAndSettle` beklemiyor. `pumpWidget`
+  `tester.runAsync` altına alındı.
+- **Kanıt:** kapı yeşil (+27 ~1), sonra commit c25d80b.
+
 
 ### 2026-09-05 — Tur 7: a11y kontrast testi (pubspec-güvenli tur)
 - **Bağlam:** Sıradaki öncelik paket modernizasyonuydu ama o pubspec'e dokunuyor
