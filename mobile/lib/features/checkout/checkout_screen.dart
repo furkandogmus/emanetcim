@@ -1,7 +1,6 @@
 import 'dart:async' show unawaited;
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -210,10 +209,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               ),
               Text(
                 weight,
-                style: GoogleFonts.outfit(
-                  fontSize: 12,
-                  color: Colors.grey,
-                ),
+                style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),
               ),
             ],
           ),
@@ -360,8 +356,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Text('common.error'.tr()),
               data: (shop) {
-                final ms = _checkOut.millisecondsSinceEpoch - _checkIn.millisecondsSinceEpoch;
-                final days = ms <= 0 ? 1 : (ms / (24 * 60 * 60 * 1000)).ceil().clamp(1, 30);
+                final ms =
+                    _checkOut.millisecondsSinceEpoch -
+                    _checkIn.millisecondsSinceEpoch;
+                final days = ms <= 0
+                    ? 1
+                    : (ms / (24 * 60 * 60 * 1000)).ceil().clamp(1, 30);
                 // BagajPark fiyatlandırması sunucu tarafında hesaplanır.
                 // Buradaki hesaplama yalnızca tahmini gösterim içindir.
                 // Kesin fiyat onay anında sunucudan alınır.
@@ -464,41 +464,44 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       Semantics(
                         label: 'Ödemeyi Yap',
                         child: FilledButton(
-                        onPressed: _busy || _total == 0 ? null : _pay,
-                        style: FilledButton.styleFrom(
-                          backgroundColor: AppColors.brandOrange,
-                          foregroundColor: Colors.white,
-                          minimumSize: const Size(double.infinity, 64),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                          onPressed: _busy || _total == 0 ? null : _pay,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.brandOrange,
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size(double.infinity, 64),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            elevation: 0,
                           ),
-                          elevation: 0,
-                        ),
-                        child: _busy
-                            ? const SizedBox(
-                                height: 24,
-                                width: 24,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.security_rounded, size: 22),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    'checkout.pay_button'.tr(),
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                          child: _busy
+                              ? const SizedBox(
+                                  height: 24,
+                                  width: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
                                   ),
-                                ],
-                              ),
+                                )
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.security_rounded,
+                                      size: 22,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      'checkout.pay_button'.tr(),
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ),
                       ),
-                    ),
                     ],
                   ),
                 );

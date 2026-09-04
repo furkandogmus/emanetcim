@@ -2,10 +2,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:geolocator/geolocator.dart';
 
 import '../../../core/services/favorites_service.dart';
 import '../../../shared/models/shop.dart';
@@ -28,8 +28,10 @@ class ShopPreviewCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isFav = ref.watch(favoritesProvider).contains(shop.id);
-    double? displayDistance = shop.distanceKm;
-    if (userLocation != null && shop.latitude != null && shop.longitude != null) {
+    var displayDistance = shop.distanceKm;
+    if (userLocation != null &&
+        shop.latitude != null &&
+        shop.longitude != null) {
       final meters = Geolocator.distanceBetween(
         userLocation!.latitude,
         userLocation!.longitude,
@@ -44,7 +46,9 @@ class ShopPreviewCard extends ConsumerWidget {
         duration: const Duration(milliseconds: 300),
         width: isFullWidth ? null : MediaQuery.of(context).size.width * 0.85,
         constraints: const BoxConstraints(minHeight: 124),
-        margin: isFullWidth ? EdgeInsets.zero : const EdgeInsets.only(right: 16),
+        margin: isFullWidth
+            ? EdgeInsets.zero
+            : const EdgeInsets.only(right: 16),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -80,7 +84,10 @@ class ShopPreviewCard extends ConsumerWidget {
                             Container(color: Colors.grey.shade100),
                         errorWidget: (context, url, error) => Container(
                           color: AppColors.brandOrange.withValues(alpha: 0.1),
-                          child: const Icon(Icons.image_not_supported_outlined, color: Colors.grey),
+                          child: const Icon(
+                            Icons.image_not_supported_outlined,
+                            color: Colors.grey,
+                          ),
                         ),
                       )
                     : Container(
@@ -121,16 +128,20 @@ class ShopPreviewCard extends ConsumerWidget {
                         ),
                       ),
                       IconButton(
-                        onPressed: () =>
-                            ref.read(favoritesProvider.notifier).toggle(shop.id),
+                        onPressed: () => ref
+                            .read(favoritesProvider.notifier)
+                            .toggle(shop.id),
                         iconSize: 22,
                         padding: EdgeInsets.zero,
                         // Dokunma hedefi >= 48x48 dp (Material/erisilebilirlik).
-                        constraints:
-                            const BoxConstraints(minWidth: 48, minHeight: 48),
+                        constraints: const BoxConstraints(
+                          minWidth: 48,
+                          minHeight: 48,
+                        ),
                         // Tooltip ayni zamanda ekran okuyucu etiketini saglar.
-                        tooltip:
-                            isFav ? 'shop.unfavorite'.tr() : 'shop.favorite'.tr(),
+                        tooltip: isFav
+                            ? 'shop.unfavorite'.tr()
+                            : 'shop.favorite'.tr(),
                         icon: Icon(
                           isFav
                               ? Icons.favorite_rounded
@@ -143,10 +154,20 @@ class ShopPreviewCard extends ConsumerWidget {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.star_rounded, color: Colors.amber, size: 18),
+                      const Icon(
+                        Icons.star_rounded,
+                        color: Colors.amber,
+                        size: 18,
+                      ),
                       const SizedBox(width: 4),
-                      Text('${shop.rating?.toStringAsFixed(1) ?? '-'}',
-                        style: GoogleFonts.outfit(fontSize: 14, color: const Color(0xFF424242), fontWeight: FontWeight.w500)),
+                      Text(
+                        shop.rating?.toStringAsFixed(1) ?? '-',
+                        style: GoogleFonts.outfit(
+                          fontSize: 14,
+                          color: const Color(0xFF424242),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                       if (displayDistance != null) ...[
                         const SizedBox(width: 8),
                         const Icon(
@@ -171,12 +192,24 @@ class ShopPreviewCard extends ConsumerWidget {
                       // yerde "Yakinda" yaziyor; ikisi ayrismamali.
                       if (shop.isPrelaunch) ...[
                         const Spacer(),
-                        Text('search.coming_soon'.tr(),
-                          style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.brandOrange)),
+                        Text(
+                          'search.coming_soon'.tr(),
+                          style: GoogleFonts.outfit(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.brandOrange,
+                          ),
+                        ),
                       ] else if (shop.pricePerDay > 0) ...[
                         const Spacer(),
-                        Text('₺${shop.pricePerDay.toStringAsFixed(0)}${'search.day_unit'.tr()}',
-                          style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.brandOrange)),
+                        Text(
+                          '₺${shop.pricePerDay.toStringAsFixed(0)}${'search.day_unit'.tr()}',
+                          style: GoogleFonts.outfit(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.brandOrange,
+                          ),
+                        ),
                       ],
                     ],
                   ),

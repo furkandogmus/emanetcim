@@ -11,8 +11,8 @@ import '../../core/api/api_client.dart';
 import '../../core/sync/sync_service.dart';
 import '../../shared/models/booking.dart';
 import '../../shared/utils/app_colors.dart';
-import '../booking/booking_detail_screen.dart';
 import '../../shared/utils/booking_helpers.dart';
+import '../booking/booking_detail_screen.dart';
 
 class PartnerBookingDetailScreen extends ConsumerStatefulWidget {
   const PartnerBookingDetailScreen({required this.bookingId, super.key});
@@ -38,7 +38,8 @@ class _PartnerBookingDetailScreenState
       }
       final current = ref.read(bookingProvider(widget.bookingId));
       final status = current.asData?.value.status;
-      final isTerminal = status == BookingStatus.checkedOut ||
+      final isTerminal =
+          status == BookingStatus.checkedOut ||
           status == BookingStatus.cancelled;
       if (isTerminal) {
         timer.cancel();
@@ -146,8 +147,14 @@ class _PartnerBookingDetailScreenState
         title: Text('booking.approve'.tr()),
         content: Text('booking.approve_confirm'.tr()),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('common.cancel'.tr())),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text('booking.approve'.tr())),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('common.cancel'.tr()),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text('booking.approve'.tr()),
+          ),
         ],
       ),
     );
@@ -157,12 +164,16 @@ class _PartnerBookingDetailScreenState
       final dio = ref.read(dioProvider);
       await dio.post('/partner/bookings/${b.id}/approve');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('booking.approve_success'.tr())));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('booking.approve_success'.tr())));
         ref.invalidate(bookingProvider(b.id));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('common.error'.tr())));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('common.error'.tr())));
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -176,8 +187,14 @@ class _PartnerBookingDetailScreenState
         title: Text('booking.reject'.tr()),
         content: Text('booking.reject_confirm'.tr()),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('common.cancel'.tr())),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text('booking.reject'.tr())),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('common.cancel'.tr()),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text('booking.reject'.tr()),
+          ),
         ],
       ),
     );
@@ -187,12 +204,16 @@ class _PartnerBookingDetailScreenState
       final dio = ref.read(dioProvider);
       await dio.post('/partner/bookings/${b.id}/reject');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('booking.reject_success'.tr())));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('booking.reject_success'.tr())));
         ref.invalidate(bookingProvider(b.id));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('common.error'.tr())));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('common.error'.tr())));
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -368,13 +389,22 @@ class _PartnerBookingDetailScreenState
                         child: FilledButton.icon(
                           onPressed: _busy ? null : () => _approveBooking(b),
                           icon: _busy
-                              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
                               : const Icon(Icons.check_circle_rounded),
                           label: Text('partner.approve'.tr()),
                           style: FilledButton.styleFrom(
                             backgroundColor: Colors.green,
                             padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
                           ),
                         ),
                       ),
@@ -386,13 +416,22 @@ class _PartnerBookingDetailScreenState
                         child: FilledButton.icon(
                           onPressed: _busy ? null : () => _rejectBooking(b),
                           icon: _busy
-                              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
                               : const Icon(Icons.cancel_rounded),
                           label: Text('partner.reject'.tr()),
                           style: FilledButton.styleFrom(
                             backgroundColor: Colors.redAccent,
                             padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
                           ),
                         ),
                       ),
@@ -452,7 +491,7 @@ class _PartnerBookingDetailScreenState
                               ),
                             )
                           : const Icon(Icons.exit_to_app_rounded),
-label: Text('partner.check_out_button'.tr()),
+                      label: Text('partner.check_out_button'.tr()),
                       style: FilledButton.styleFrom(
                         backgroundColor: const Color(0xFF3B82F6),
                         shape: RoundedRectangleBorder(
@@ -560,13 +599,11 @@ class _BagRevisionBottomSheet extends StatefulWidget {
   final BookingDto booking;
   final Dio dio;
 
-  const _BagRevisionBottomSheet({
-    required this.booking,
-    required this.dio,
-  });
+  const _BagRevisionBottomSheet({required this.booking, required this.dio});
 
   @override
-  State<_BagRevisionBottomSheet> createState() => _BagRevisionBottomSheetState();
+  State<_BagRevisionBottomSheet> createState() =>
+      _BagRevisionBottomSheetState();
 }
 
 class _BagRevisionBottomSheetState extends State<_BagRevisionBottomSheet> {
@@ -604,10 +641,11 @@ class _BagRevisionBottomSheetState extends State<_BagRevisionBottomSheet> {
       }
     } on DioException catch (e) {
       if (mounted) {
-        final msg = e.response?.data?['error'] ?? 'partner.bag_revision_error'.tr();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(msg.toString())),
-        );
+        final msg =
+            e.response?.data?['error'] ?? 'partner.bag_revision_error'.tr();
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(msg.toString())));
       }
     } catch (e) {
       if (mounted) {
@@ -622,7 +660,12 @@ class _BagRevisionBottomSheetState extends State<_BagRevisionBottomSheet> {
     }
   }
 
-  Widget _buildCounterRow(String label, String description, int val, ValueChanged<int> onChange) {
+  Widget _buildCounterRow(
+    String label,
+    String description,
+    int val,
+    ValueChanged<int> onChange,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(

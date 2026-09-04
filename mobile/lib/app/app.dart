@@ -11,9 +11,9 @@ import 'package:screen_protector/screen_protector.dart';
 import '../core/auth/auth_controller.dart';
 import '../core/auth/biometric_service.dart';
 import '../core/auth/session_timeout.dart';
+import '../core/config/theme_mode_provider.dart';
 import '../core/services/deep_link_service.dart';
 import '../core/sync/sync_service.dart';
-import '../core/config/theme_mode_provider.dart';
 import '../shared/models/user.dart';
 import '../shared/utils/app_colors.dart';
 import 'router.dart';
@@ -79,7 +79,7 @@ class _BagajParkAppState extends ConsumerState<BagajParkApp>
         reason: 'profile.biometric_reason'.tr(),
       );
       if (!ok && mounted) {
-        ref.read(authControllerProvider.notifier).logout();
+        await ref.read(authControllerProvider.notifier).logout();
       }
     } catch (_) {
       // Biometric check failed silently

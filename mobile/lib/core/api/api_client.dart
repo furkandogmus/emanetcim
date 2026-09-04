@@ -22,9 +22,7 @@ final dioProvider = Provider<Dio>((ref) {
   const cacheTtl = Duration(minutes: 5);
   const maxCacheSize = 100;
 
-  ref.onDispose(() {
-    cache.clear();
-  });
+  ref.onDispose(cache.clear);
 
   dio.interceptors.add(
     InterceptorsWrapper(
@@ -131,8 +129,10 @@ final dioProvider = Provider<Dio>((ref) {
           final key = '$tokenHash:${response.requestOptions.uri.toString()}';
 
           if (cache.length >= maxCacheSize) {
-            final oldestKey = cache.keys.reduce((a, b) =>
-                cache[a]!.timestamp.isBefore(cache[b]!.timestamp) ? a : b);
+            final oldestKey = cache.keys.reduce(
+              (a, b) =>
+                  cache[a]!.timestamp.isBefore(cache[b]!.timestamp) ? a : b,
+            );
             cache.remove(oldestKey);
           }
 

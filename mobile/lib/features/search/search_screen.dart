@@ -1,13 +1,14 @@
 import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:geolocator/geolocator.dart';
 
 import '../../core/repositories/shop_repository.dart';
 import '../../core/services/analytics_service.dart';
@@ -44,10 +45,7 @@ final nearbyShopsProvider = FutureProvider<List<ShopDto>>((ref) async {
   final result = await ref
       .watch(shopRepositoryProvider)
       .getNearby(lat: center.latitude, lng: center.longitude);
-  return result.fold(
-    (data) => data,
-    (error) => throw Exception(error),
-  );
+  return result.fold((data) => data, (error) => throw Exception(error));
 });
 
 class SearchScreen extends ConsumerStatefulWidget {
@@ -95,16 +93,26 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     var filtered = list;
     if (_only247) filtered = filtered.where((s) => s.open247).toList();
     if (_onlyOpenNow) filtered = filtered.where((s) => s.isActive).toList();
-    if (_minRating > 0) filtered = filtered.where((s) => (s.rating ?? 0) >= _minRating).toList();
+    if (_minRating > 0) {
+      filtered = filtered.where((s) => (s.rating ?? 0) >= _minRating).toList();
+    }
     if (_hasRestroom) filtered = filtered.where((s) => s.hasRestroom).toList();
     if (_hasCctv) filtered = filtered.where((s) => s.hasCctv).toList();
-    if (_hasClimate) filtered = filtered.where((s) => s.hasClimateControl).toList();
-    if (_acceptsLarge) filtered = filtered.where((s) => s.acceptsLargeItems).toList();
-    if (_maxPrice > 0) filtered = filtered.where((s) => s.pricePerDay <= _maxPrice).toList();
+    if (_hasClimate) {
+      filtered = filtered.where((s) => s.hasClimateControl).toList();
+    }
+    if (_acceptsLarge) {
+      filtered = filtered.where((s) => s.acceptsLargeItems).toList();
+    }
+    if (_maxPrice > 0) {
+      filtered = filtered.where((s) => s.pricePerDay <= _maxPrice).toList();
+    }
     if (_sortBy == 'price') {
-      filtered = filtered..sort((a, b) => a.pricePerDay.compareTo(b.pricePerDay));
+      filtered = filtered
+        ..sort((a, b) => a.pricePerDay.compareTo(b.pricePerDay));
     } else if (_sortBy == 'rating') {
-      filtered = filtered..sort((a, b) => -(a.rating ?? 0).compareTo(b.rating ?? 0));
+      filtered = filtered
+        ..sort((a, b) => -(a.rating ?? 0).compareTo(b.rating ?? 0));
     }
     return filtered;
   }
@@ -113,7 +121,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (context) => StatefulBuilder(
         builder: (context, setSheetState) => Padding(
           padding: EdgeInsets.only(
@@ -127,41 +137,152 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('search.filter'.tr(), style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold)),
+                Text(
+                  'search.filter'.tr(),
+                  style: GoogleFonts.outfit(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 16),
 
-                SwitchListTile(title: Text('search.open_now'.tr(), style: GoogleFonts.outfit()), subtitle: Text('search.open_now_hint'.tr(), style: GoogleFonts.outfit(fontSize: 12)), value: _onlyOpenNow,
-                  onChanged: (v) { setState(() => _onlyOpenNow = v); setSheetState(() {}); }, activeThumbColor: AppColors.brandOrange),
-                SwitchListTile(title: Text('search.open_247'.tr(), style: GoogleFonts.outfit()), subtitle: Text('search.open_247_hint'.tr(), style: GoogleFonts.outfit(fontSize: 12)), value: _only247,
-                  onChanged: (v) { setState(() => _only247 = v); setSheetState(() {}); }, activeThumbColor: AppColors.brandOrange),
+                SwitchListTile(
+                  title: Text(
+                    'search.open_now'.tr(),
+                    style: GoogleFonts.outfit(),
+                  ),
+                  subtitle: Text(
+                    'search.open_now_hint'.tr(),
+                    style: GoogleFonts.outfit(fontSize: 12),
+                  ),
+                  value: _onlyOpenNow,
+                  onChanged: (v) {
+                    setState(() => _onlyOpenNow = v);
+                    setSheetState(() {});
+                  },
+                  activeThumbColor: AppColors.brandOrange,
+                ),
+                SwitchListTile(
+                  title: Text(
+                    'search.open_247'.tr(),
+                    style: GoogleFonts.outfit(),
+                  ),
+                  subtitle: Text(
+                    'search.open_247_hint'.tr(),
+                    style: GoogleFonts.outfit(fontSize: 12),
+                  ),
+                  value: _only247,
+                  onChanged: (v) {
+                    setState(() => _only247 = v);
+                    setSheetState(() {});
+                  },
+                  activeThumbColor: AppColors.brandOrange,
+                ),
 
                 const SizedBox(height: 8),
-                Text('search.sort_by'.tr(), style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold)),
-                Wrap(spacing: 8, runSpacing: 8, children: [
-                  _filterChip('search.sort_distance'.tr(), _sortBy == 'distance', () { setState(() => _sortBy = 'distance'); setSheetState(() {}); }),
-                  _filterChip('search.sort_price'.tr(), _sortBy == 'price', () { setState(() => _sortBy = 'price'); setSheetState(() {}); }),
-                  _filterChip('search.sort_rating'.tr(), _sortBy == 'rating', () { setState(() => _sortBy = 'rating'); setSheetState(() {}); }),
-                ]),
+                Text(
+                  'search.sort_by'.tr(),
+                  style: GoogleFonts.outfit(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _filterChip(
+                      'search.sort_distance'.tr(),
+                      _sortBy == 'distance',
+                      () {
+                        setState(() => _sortBy = 'distance');
+                        setSheetState(() {});
+                      },
+                    ),
+                    _filterChip(
+                      'search.sort_price'.tr(),
+                      _sortBy == 'price',
+                      () {
+                        setState(() => _sortBy = 'price');
+                        setSheetState(() {});
+                      },
+                    ),
+                    _filterChip(
+                      'search.sort_rating'.tr(),
+                      _sortBy == 'rating',
+                      () {
+                        setState(() => _sortBy = 'rating');
+                        setSheetState(() {});
+                      },
+                    ),
+                  ],
+                ),
 
                 const SizedBox(height: 12),
-                Text('search.amenities'.tr(), style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold)),
+                Text(
+                  'search.amenities'.tr(),
+                  style: GoogleFonts.outfit(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 8),
-                Wrap(spacing: 8, runSpacing: 8, children: [
-                  _filterChip('search.restroom'.tr(), _hasRestroom, () { setState(() => _hasRestroom = !_hasRestroom); setSheetState(() {}); }),
-                  _filterChip('search.camera'.tr(), _hasCctv, () { setState(() => _hasCctv = !_hasCctv); setSheetState(() {}); }),
-                  _filterChip('search.climate'.tr(), _hasClimate, () { setState(() => _hasClimate = !_hasClimate); setSheetState(() {}); }),
-                  _filterChip('search.large_items'.tr(), _acceptsLarge, () { setState(() => _acceptsLarge = !_acceptsLarge); setSheetState(() {}); }),
-                ]),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _filterChip('search.restroom'.tr(), _hasRestroom, () {
+                      setState(() => _hasRestroom = !_hasRestroom);
+                      setSheetState(() {});
+                    }),
+                    _filterChip('search.camera'.tr(), _hasCctv, () {
+                      setState(() => _hasCctv = !_hasCctv);
+                      setSheetState(() {});
+                    }),
+                    _filterChip('search.climate'.tr(), _hasClimate, () {
+                      setState(() => _hasClimate = !_hasClimate);
+                      setSheetState(() {});
+                    }),
+                    _filterChip('search.large_items'.tr(), _acceptsLarge, () {
+                      setState(() => _acceptsLarge = !_acceptsLarge);
+                      setSheetState(() {});
+                    }),
+                  ],
+                ),
 
                 const SizedBox(height: 12),
-                Text('search.min_rating'.tr(), style: GoogleFonts.outfit(fontSize: 14)),
-                Row(children: List.generate(5, (i) => IconButton(
-                  icon: Icon(i < _minRating ? Icons.star_rounded : Icons.star_outline_rounded, color: Colors.amber),
-                  onPressed: () { setState(() => _minRating = i + 1 == _minRating ? i : i + 1); setSheetState(() {}); },
-                ))),
+                Text(
+                  'search.min_rating'.tr(),
+                  style: GoogleFonts.outfit(fontSize: 14),
+                ),
+                Row(
+                  children: List.generate(
+                    5,
+                    (i) => IconButton(
+                      icon: Icon(
+                        i < _minRating
+                            ? Icons.star_rounded
+                            : Icons.star_outline_rounded,
+                        color: Colors.amber,
+                      ),
+                      onPressed: () {
+                        setState(
+                          () => _minRating = i + 1 == _minRating ? i : i + 1,
+                        );
+                        setSheetState(() {});
+                      },
+                    ),
+                  ),
+                ),
 
                 const SizedBox(height: 12),
-                Text('search.max_price'.tr(), style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold)),
+                Text(
+                  'search.max_price'.tr(),
+                  style: GoogleFonts.outfit(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _maxPriceController,
@@ -169,16 +290,25 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   decoration: InputDecoration(
                     hintText: 'search.max_price'.tr(),
                     prefixText: '₺ ',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                   ),
-                  onChanged: (v) { setState(() => _maxPrice = double.tryParse(v) ?? 0); },
+                  onChanged: (v) {
+                    setState(() => _maxPrice = double.tryParse(v) ?? 0);
+                  },
                 ),
 
                 const SizedBox(height: 24),
                 FilledButton(
                   onPressed: () => Navigator.pop(context),
-                  style: FilledButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 50),
+                  ),
                   child: Text('search.show_results'.tr()),
                 ),
                 const SizedBox(height: 16),
@@ -313,9 +443,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     } catch (e) {
       debugPrint('Location error: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('search.location_denied'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('search.location_denied'.tr())));
       }
     } finally {
       if (mounted) {
@@ -334,7 +464,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         minChildSize: 0.4,
         maxChildSize: 0.9,
         expand: false,
-        builder: (context, scrollController) => Container(
+        builder: (context, scrollController) => DecoratedBox(
           decoration: const BoxDecoration(
             color: Color(0xFFF8FAFC),
             borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
@@ -365,7 +495,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     ),
                     const Spacer(),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.brandOrange.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
@@ -440,7 +573,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               return SearchMap(
                 mapController: _mapController,
                 shops: filtered,
-                selectedShopIndex: filtered.indexWhere((s) => s.id == _selectedShopId),
+                selectedShopIndex: filtered.indexWhere(
+                  (s) => s.id == _selectedShopId,
+                ),
                 center: _center,
                 userPosition: _userLocation,
                 customPosition: _customLocation,
@@ -454,7 +589,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   setState(() {
                     _customLocation = latLng;
                   });
-                  ref.read(debouncedLocationProvider.notifier).updateLocation(latLng);
+                  ref
+                      .read(debouncedLocationProvider.notifier)
+                      .updateLocation(latLng);
                 },
               );
             },
@@ -565,7 +702,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   return GestureDetector(
                     behavior: HitTestBehavior.translucent,
                     onVerticalDragEnd: (details) {
-                      if (details.primaryVelocity != null && details.primaryVelocity! < -200) {
+                      if (details.primaryVelocity != null &&
+                          details.primaryVelocity! < -200) {
                         _showAllShopsSheet(context, filtered);
                       }
                     },
@@ -576,7 +714,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         GestureDetector(
                           onTap: () => _showAllShopsSheet(context, filtered),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 6,
+                            ),
                             margin: const EdgeInsets.only(bottom: 8),
                             decoration: BoxDecoration(
                               color: Colors.white.withValues(alpha: 0.9),
@@ -686,10 +827,16 @@ class _SearchSuffixIcon extends StatelessWidget {
             child: Container(
               margin: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: hasActiveFilter ? AppColors.textDark : AppColors.brandOrange,
+                color: hasActiveFilter
+                    ? AppColors.textDark
+                    : AppColors.brandOrange,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.tune_rounded, color: Colors.white, size: 20),
+              child: const Icon(
+                Icons.tune_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
           ),
         );

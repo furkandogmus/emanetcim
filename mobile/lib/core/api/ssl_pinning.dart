@@ -19,20 +19,15 @@ final class SslPinning {
     if (!isRelease) return;
 
     dio.httpClientAdapter = IOHttpClientAdapter(
-      createHttpClient: () {
-        final client = HttpClient();
-        client.badCertificateCallback = (cert, host, port) {
+      createHttpClient: () => HttpClient()
+        ..badCertificateCallback = (cert, host, port) {
           final fingerprint = _sha256(cert);
           final trusted = _pinnedFingerprints.contains(fingerprint);
           if (!trusted) {
-            throw HandshakeException(
-              'Certificate pinning failed for $host',
-            );
+            throw HandshakeException('Certificate pinning failed for $host');
           }
           return true;
-        };
-        return client;
-      },
+        },
     );
   }
 

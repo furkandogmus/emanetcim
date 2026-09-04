@@ -6,20 +6,20 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:http_parser/http_parser.dart';
+import 'package:image_picker/image_picker.dart';
 
-import '../../core/auth/auth_controller.dart';
-import '../../core/utils/error_handler.dart';
-import '../../core/services/haptic_service.dart';
-import '../../core/services/share_service.dart';
-import '../../shared/models/user.dart';
-import '../../shared/utils/app_colors.dart';
 import '../../core/api/api_client.dart';
-import '../../core/config/theme_mode_provider.dart';
+import '../../core/auth/auth_controller.dart';
 import '../../core/auth/biometric_service.dart';
 import '../../core/auth/token_store.dart';
+import '../../core/config/theme_mode_provider.dart';
 import '../../core/push/notification_prefs.dart';
+import '../../core/services/haptic_service.dart';
+import '../../core/services/share_service.dart';
+import '../../core/utils/error_handler.dart';
+import '../../shared/models/user.dart';
+import '../../shared/utils/app_colors.dart';
 
 final profileStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
   final dio = ref.read(dioProvider);
@@ -74,7 +74,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     try {
       final dio = ref.read(dioProvider);
       final ext = image.name.split('.').last.toLowerCase();
-      String mimeType = 'image/jpeg';
+      var mimeType = 'image/jpeg';
       if (ext == 'png') {
         mimeType = 'image/png';
       } else if (ext == 'webp') {
@@ -96,7 +96,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(getErrorMessage(e, fallback: 'common.error'.tr()))),
+          SnackBar(
+            content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+          ),
         );
       }
     } finally {
@@ -131,35 +133,44 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                   )
                 : (avatarUrl != null && avatarUrl.isNotEmpty)
-                    ? ClipOval(
-                        child: CachedNetworkImage(
-                          imageUrl: avatarUrl,
-                          width: 96,
-                          height: 96,
-                          fit: BoxFit.cover,
-                          placeholder: (_, __) => Center(
-                            child: Text(initial, style: GoogleFonts.outfit(
-                              fontSize: 40,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.brandOrange,
-                            )),
-                          ),
-                          errorWidget: (_, __, ___) => Center(
-                            child: Text(initial, style: GoogleFonts.outfit(
-                              fontSize: 40,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.brandOrange,
-                            )),
+                ? ClipOval(
+                    child: CachedNetworkImage(
+                      imageUrl: avatarUrl,
+                      width: 96,
+                      height: 96,
+                      fit: BoxFit.cover,
+                      placeholder: (_, _) => Center(
+                        child: Text(
+                          initial,
+                          style: GoogleFonts.outfit(
+                            fontSize: 40,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.brandOrange,
                           ),
                         ),
-                      )
-                    : Center(
-                        child: Text(initial, style: GoogleFonts.outfit(
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.brandOrange,
-                        )),
                       ),
+                      errorWidget: (_, _, _) => Center(
+                        child: Text(
+                          initial,
+                          style: GoogleFonts.outfit(
+                            fontSize: 40,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.brandOrange,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                : Center(
+                    child: Text(
+                      initial,
+                      style: GoogleFonts.outfit(
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.brandOrange,
+                      ),
+                    ),
+                  ),
           ),
           Positioned(
             right: 0,
@@ -231,9 +242,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               return statsAsync.when(
                 data: (stats) => Row(
                   children: [
-                    _statItem('${stats['totalBookings'] ?? 0}', 'profile.stats_bookings'.tr()),
-                    _statItem('₺${stats['totalSavings'] ?? '0'}', 'profile.stats_savings'.tr()),
-                    _statItem('${stats['completedBookings'] ?? 0}', 'profile.stats_favorites'.tr()),
+                    _statItem(
+                      '${stats['totalBookings'] ?? 0}',
+                      'profile.stats_bookings'.tr(),
+                    ),
+                    _statItem(
+                      '₺${stats['totalSavings'] ?? '0'}',
+                      'profile.stats_savings'.tr(),
+                    ),
+                    _statItem(
+                      '${stats['completedBookings'] ?? 0}',
+                      'profile.stats_favorites'.tr(),
+                    ),
                   ],
                 ),
                 loading: () => Row(
@@ -243,7 +263,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     _statItem('...', 'profile.stats_favorites'.tr()),
                   ],
                 ),
-                error: (_, __) => Row(
+                error: (_, _) => Row(
                   children: [
                     _statItem('-', 'profile.stats_bookings'.tr()),
                     _statItem('-', 'profile.stats_savings'.tr()),
@@ -604,7 +624,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ? const Icon(Icons.check, color: AppColors.brandOrange)
                     : null,
                 onTap: () {
-                  ref.read(themeModeProvider.notifier).setMode(ThemeMode.system);
+                  ref
+                      .read(themeModeProvider.notifier)
+                      .setMode(ThemeMode.system);
                   Navigator.pop(ctx);
                 },
               ),
@@ -639,7 +661,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _biometricToggle(BuildContext context) {
-    if (!_biometricLoaded || !_biometricAvailable) return const SizedBox.shrink();
+    if (!_biometricLoaded || !_biometricAvailable) {
+      return const SizedBox.shrink();
+    }
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -676,32 +700,34 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-Future<void> _handleBiometricToggle(bool val) async {
+  Future<void> _handleBiometricToggle(bool val) async {
     setState(() => _biometricEnabled = val);
     try {
       if (val) {
-        final ok = await ref.read(biometricServiceProvider).authenticate(
-          reason: 'profile.biometric_reason'.tr(),
-        );
+        final ok = await ref
+            .read(biometricServiceProvider)
+            .authenticate(reason: 'profile.biometric_reason'.tr());
         if (ok) {
-                  await ref.read(biometricServiceProvider).setEnabled(true);
-                  final store = ref.read(tokenStoreProvider);
-                  final rt = await store.readRefreshToken();
-                  final user = ref.read(authControllerProvider).session;
-                  if (rt != null && user?.email != null) {
-                    await store.saveBiometricAccount(user!.email!, rt);
-                  }
-                } else {
+          await ref.read(biometricServiceProvider).setEnabled(true);
+          final store = ref.read(tokenStoreProvider);
+          final rt = await store.readRefreshToken();
+          final user = ref.read(authControllerProvider).session;
+          if (rt != null && user?.email != null) {
+            await store.saveBiometricAccount(user!.email!, rt);
+          }
+        } else {
           await ref.read(biometricServiceProvider).setEnabled(false);
           if (mounted) setState(() => _biometricEnabled = false);
         }
-} else {
-                await ref.read(biometricServiceProvider).setEnabled(false);
-                final user = ref.read(authControllerProvider).session;
-                if (user?.email != null) {
-                  await ref.read(tokenStoreProvider).removeBiometricAccount(user!.email!);
-                }
-              }
+      } else {
+        await ref.read(biometricServiceProvider).setEnabled(false);
+        final user = ref.read(authControllerProvider).session;
+        if (user?.email != null) {
+          await ref
+              .read(tokenStoreProvider)
+              .removeBiometricAccount(user!.email!);
+        }
+      }
     } catch (_) {
       await ref.read(biometricServiceProvider).setEnabled(false);
       if (mounted) setState(() => _biometricEnabled = false);
@@ -730,36 +756,42 @@ Future<void> _handleBiometricToggle(bool val) async {
               ),
               const SizedBox(height: 24),
               SwitchListTile(
-                title: Text('Rezervasyon Güncellemeleri'),
+                title: const Text('Rezervasyon Güncellemeleri'),
                 subtitle: Text(
                   'Onay, check-in, check-out ve QR kod bildirimleri',
                   style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),
                 ),
                 value: prefs.bookingUpdates,
                 activeThumbColor: AppColors.brandOrange,
-                onChanged: (v) => ref.read(notificationPrefsProvider.notifier).setBookingUpdates(v),
+                onChanged: (v) => ref
+                    .read(notificationPrefsProvider.notifier)
+                    .setBookingUpdates(v),
               ),
               const Divider(),
               SwitchListTile(
-                title: Text('Kampanya & İndirim'),
+                title: const Text('Kampanya & İndirim'),
                 subtitle: Text(
                   'Özel indirimler, kampanya duyuruları ve promosyon kodları',
                   style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),
                 ),
                 value: prefs.promotions,
                 activeThumbColor: AppColors.brandOrange,
-                onChanged: (v) => ref.read(notificationPrefsProvider.notifier).setPromotions(v),
+                onChanged: (v) => ref
+                    .read(notificationPrefsProvider.notifier)
+                    .setPromotions(v),
               ),
               const Divider(),
               SwitchListTile(
-                title: Text('Esnaf Uyarıları'),
+                title: const Text('Esnaf Uyarıları'),
                 subtitle: Text(
                   'Yeni rezervasyon, mesaj ve acil durum bildirimleri',
                   style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),
                 ),
                 value: prefs.partnerAlerts,
                 activeThumbColor: AppColors.brandOrange,
-                onChanged: (v) => ref.read(notificationPrefsProvider.notifier).setPartnerAlerts(v),
+                onChanged: (v) => ref
+                    .read(notificationPrefsProvider.notifier)
+                    .setPartnerAlerts(v),
               ),
               const SizedBox(height: 16),
             ],
@@ -901,7 +933,10 @@ Future<void> _handleBiometricToggle(bool val) async {
                         setModalState(() => isSaving = true);
                         try {
                           final dio = ref.read(dioProvider);
-                          await dio.put('/auth/me', data: {'name': nameController.text});
+                          await dio.put(
+                            '/auth/me',
+                            data: {'name': nameController.text},
+                          );
                           if (context.mounted) {
                             ref.invalidate(authControllerProvider);
                             Navigator.pop(context);
@@ -910,7 +945,12 @@ Future<void> _handleBiometricToggle(bool val) async {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+                                content: Text(
+                                  getErrorMessage(
+                                    e,
+                                    fallback: 'common.error'.tr(),
+                                  ),
+                                ),
                               ),
                             );
                           }
@@ -938,7 +978,6 @@ Future<void> _handleBiometricToggle(bool val) async {
       ),
     );
   }
-
 
   void _showLegal(BuildContext context, String title, String content) {
     showModalBottomSheet(

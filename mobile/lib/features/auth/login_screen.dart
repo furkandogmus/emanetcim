@@ -463,9 +463,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     imageUrl:
                                         'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_Color_Icon.svg/1024px-Google_Color_Icon.svg.png',
                                     height: 20,
-                                    placeholder: (_, __) =>
+                                    placeholder: (_, _) =>
                                         const Icon(Icons.login, size: 20),
-                                    errorWidget: (_, __, ___) =>
+                                    errorWidget: (_, _, _) =>
                                         const Icon(Icons.login),
                                   ),
                                   label: Text(
@@ -727,10 +727,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('auth.forgot_password_email_only'.tr()),
-          duration: const Duration(seconds: 4),
-        ),
+        SnackBar(content: Text('auth.forgot_password_email_only'.tr())),
       );
     }
   }

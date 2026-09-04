@@ -67,25 +67,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           name: 'home.city_istanbul'.tr(),
                           icon: Icons.mosque_rounded,
                           color: const Color(0xFF2563EB),
-                          onTap: () => context.push('/search', extra: _cityCoords['istanbul']),
+                          onTap: () => context.push(
+                            '/search',
+                            extra: _cityCoords['istanbul'],
+                          ),
                         ),
                         _CityCard(
                           name: 'home.city_ankara'.tr(),
                           icon: Icons.account_balance_rounded,
                           color: const Color(0xFF7C3AED),
-                          onTap: () => context.push('/search', extra: _cityCoords['ankara']),
+                          onTap: () => context.push(
+                            '/search',
+                            extra: _cityCoords['ankara'],
+                          ),
                         ),
                         _CityCard(
                           name: 'home.city_izmir'.tr(),
                           icon: Icons.sailing_rounded,
                           color: const Color(0xFF0891B2),
-                          onTap: () => context.push('/search', extra: _cityCoords['izmir']),
+                          onTap: () => context.push(
+                            '/search',
+                            extra: _cityCoords['izmir'],
+                          ),
                         ),
                         _CityCard(
                           name: 'home.city_antalya'.tr(),
                           icon: Icons.wb_sunny_rounded,
                           color: const Color(0xFFD97706),
-                          onTap: () => context.push('/search', extra: _cityCoords['antalya']),
+                          onTap: () => context.push(
+                            '/search',
+                            extra: _cityCoords['antalya'],
+                          ),
                         ),
                       ],
                     ),
@@ -314,11 +326,7 @@ class _TrustItem extends StatelessWidget {
 }
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({
-    required this.title,
-    this.action,
-    this.onAction,
-  });
+  const _SectionHeader({required this.title, this.action, this.onAction});
 
   final String title;
   final String? action;
@@ -411,12 +419,12 @@ class _HowItWorksCard extends StatelessWidget {
           border: Border.all(color: AppColors.border),
           borderRadius: BorderRadius.circular(20),
         ),
-        child: Row(
+        child: const Row(
           children: [
             _StepIcon(icon: Icons.search_rounded, number: '1'),
-            const Expanded(child: Divider(color: AppColors.border)),
+            Expanded(child: Divider(color: AppColors.border)),
             _StepIcon(icon: Icons.qr_code_rounded, number: '2'),
-            const Expanded(child: Divider(color: AppColors.border)),
+            Expanded(child: Divider(color: AppColors.border)),
             _StepIcon(icon: Icons.explore_rounded, number: '3'),
           ],
         ),
@@ -484,10 +492,7 @@ class _SafetyCard extends StatelessWidget {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: const Icon(
-                Icons.shield_rounded,
-                color: Color(0xFF2563EB),
-              ),
+              child: const Icon(Icons.shield_rounded, color: Color(0xFF2563EB)),
             ),
             const SizedBox(width: 14),
             Expanded(
