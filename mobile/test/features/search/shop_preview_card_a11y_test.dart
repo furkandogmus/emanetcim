@@ -49,4 +49,11 @@ void main() {
     await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
     handle.dispose();
   });
+
+  testWidgets('ShopPreviewCard: metin kontrasti WCAG AA', (tester) async {
+    final handle = tester.ensureSemantics();
+    await pumpCard(tester);
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    handle.dispose();
+  });
 }
