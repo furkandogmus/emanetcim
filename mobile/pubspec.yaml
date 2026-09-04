@@ -57,7 +57,7 @@ dependencies:
   easy_localization: 3.0.8
   cached_network_image: 4.0.0
   url_launcher: 6.3.1
-  package_info_plus: 9.0.1
+  package_info_plus: 10.2.1
   flutter_jailbreak_detection:
     git:
       url: https://github.com/pdurasie-ecovery/flutter_jailbreak_detection.git
@@ -67,7 +67,7 @@ dependencies:
   screen_protector: 1.5.1
   shimmer: 4.0.0
   app_links: ^7.0.0
-  share_plus: ^12.0.2
+  share_plus: 13.3.0
   in_app_review: ^2.0.11
   permission_handler: ^12.0.3
   image_picker: ^1.1.2
