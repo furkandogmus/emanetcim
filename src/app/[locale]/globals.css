@@ -56,7 +56,15 @@
   --color-gray-100:   var(--id-neutral-100);
   --color-gray-200:   var(--id-neutral-200);
   --color-gray-300:   var(--id-neutral-300);
-  --color-gray-400:   #a8a29e;
+  /* #a8a29e (stone-400) beyaz/açık zeminde 2.4-2.5:1 kontrast veriyordu (WCAG
+     AA metin eşiği 4.5:1) — Lighthouse a11y denetimi bunu footer linkleri,
+     alt gezinme çubuğu, çerez rızası ve istatistik etiketleri dahil OTUZA
+     YAKIN yerde işaretledi (2026-09-05). stone-500'e (#78716c, 4.8:1) çekildi.
+     TEK bilinen istisna: koyu (bg-gray-900) kartlarda gray-400 kullanan metin
+     bu değişiklikle KARARIR ve okunmaz hale gelir — böyle bir yer bulunursa
+     `text-gray-300` (kimlik nötrü, koyu zeminde ~11:1) kullanın, global
+     token'a dokunmayın. */
+  --color-gray-400:   #78716c;
   --color-gray-500:   #78716c;
   --color-gray-600:   #57534e;
   --color-gray-700:   #44403c;
@@ -330,7 +338,13 @@ body {
   --id-accent-300:  hsl(21 92% 74%);
   --id-accent-400:  hsl(21 91% 62%);
   --id-accent-500:  hsl(21 91% 53%);
-  --id-accent-600:  hsl(21 90% 48%);
+  /* 48% açıklık beyaz metinle/beyaz zeminde 3.56:1 veriyordu (WCAG AA eşiği
+     4.5:1) — Lighthouse a11y denetimi bunu üst gezinme linklerinde, footer
+     linklerinde ve çerez rızası butonunda işaretledi (2026-09-05). 41%'e
+     koyulaştırıldı (4.7:1). Kontrast simetrik olduğu için hem "beyaz metin /
+     turuncu zemin" hem "turuncu metin / beyaz zemin" durumunu aynı anda
+     düzeltiyor. */
+  --id-accent-600:  hsl(21 90% 41%);
   --id-accent-700:  hsl(21 86% 40%);
   --id-accent-800:  hsl(21 80% 32%);
   --id-accent-900:  hsl(21 72% 25%);
@@ -768,11 +782,14 @@ body {
   .btn-ui-lg { min-height: 3.25rem; padding: 0.875rem 1.25rem; font-size: 0.75rem; }
 
   .btn-ui-primary {
-    background: hsl(21 90% 48%);
+    /* 48% açıklık beyaz metinle 3.56:1 veriyordu (WCAG AA eşiği 4.5:1) —
+       kimlik katmanındaki --id-accent-600 ile aynı gerekçeyle 41%'e
+       koyulaştırıldı (2026-09-05, Lighthouse a11y denetimi). */
+    background: hsl(21 90% 41%);
     color: hsl(0 0% 100%);
-    box-shadow: 0 8px 18px -8px hsl(21 90% 48% / .55);
+    box-shadow: 0 8px 18px -8px hsl(21 90% 41% / .55);
   }
-  .btn-ui-primary:hover { background: hsl(21 86% 42%); }
+  .btn-ui-primary:hover { background: hsl(21 88% 34%); }
 
   .btn-ui-secondary {
     background: hsl(0 0% 100%);

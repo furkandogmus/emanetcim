@@ -155,6 +155,7 @@ export default function Footer() {
                   alt="Bagaj Emanet ve Valiz Depolama - Drop Your Bags, Explore Freely | Product Hunt"
                   width="250"
                   height="54"
+                  loading="lazy"
                   src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1168828&theme=light&t=1781124802196"
                 />
               </a>
@@ -279,7 +280,12 @@ export default function Footer() {
           <p className="text-xs font-bold text-gray-400">
             © {currentYear} {tCommon("appName")}. {t("rights")}
           </p>
-          <div className="flex items-center gap-4 id-eyebrow text-gray-300">
+          {/* `text-gray-300` (kimlik nötrü) beyaz zeminde 1.48:1 veriyordu
+              (WCAG AA eşiği 4.5:1, Lighthouse 2026-09-05) — bu satır için
+              `text-gray-500`'e çekildi; token'ın diğer ~30 kullanımının çoğu
+              dekoratif ikon/disabled durum olduğu için global olarak
+              değiştirilmedi. */}
+          <div className="flex items-center gap-4 id-eyebrow text-gray-500">
             <span className="flex items-center gap-1">
               <MapPin size={12} /> {t("location")}
             </span>
