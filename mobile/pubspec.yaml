@@ -25,7 +25,7 @@ dependencies:
   http_parser: 4.1.2
 
   # Storage
-  flutter_secure_storage: 10.0.0
+  flutter_secure_storage: 11.0.0
   hive: 2.2.3
   hive_flutter: 1.1.0
   shared_preferences: 2.5.5
