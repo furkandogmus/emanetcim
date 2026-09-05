@@ -37,10 +37,9 @@ dependencies:
   # Maps + location
   flutter_map: 8.3.2
   latlong2: 0.10.1
-  geolocator: 14.0.2
-
+  geolocator: 14.0.3
   # QR
-  mobile_scanner: 7.2.0
+  mobile_scanner: 7.4.0
   qr_flutter: 4.1.0
 
   # Push
@@ -56,22 +55,22 @@ dependencies:
   intl: ^0.20.3
   easy_localization: 3.0.8
   cached_network_image: 4.0.0
-  url_launcher: 6.3.1
+  url_launcher: 6.3.2
   package_info_plus: 10.2.1
   flutter_jailbreak_detection:
     git:
       url: https://github.com/pdurasie-ecovery/flutter_jailbreak_detection.git
       ref: add-namespace
-  google_fonts: 8.0.2
-  connectivity_plus: 7.1.1
-  screen_protector: 1.5.1
+  google_fonts: 8.2.1
+  connectivity_plus: 7.3.1
+  screen_protector: 1.5.3
   shimmer: 4.0.0
-  app_links: ^7.0.0
+  app_links: 7.2.1
   share_plus: 13.3.0
   in_app_review: ^2.0.11
   permission_handler: 13.0.2
-  image_picker: ^1.1.2
-  local_auth: ^3.0.1
+  image_picker: 1.2.3
+  local_auth: 3.0.2
   crypto: ^3.0.7
 
 dev_dependencies:
@@ -85,8 +84,7 @@ dev_dependencies:
   riverpod_generator: 4.0.9
   network_image_mock: ^2.1.1
   mocktail: ^1.0.5
-  flutter_launcher_icons: ^0.13.1
-
+  flutter_launcher_icons: 0.14.4
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
