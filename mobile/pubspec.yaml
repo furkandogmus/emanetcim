@@ -35,8 +35,8 @@ dependencies:
   sign_in_with_apple: 8.2.0
 
   # Maps + location
-  flutter_map: 8.3.0
-  latlong2: 0.9.1
+  flutter_map: 8.3.2
+  latlong2: 0.10.1
   geolocator: 14.0.2
 
   # QR
