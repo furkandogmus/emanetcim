@@ -1,5 +1,10 @@
 include: package:flutter_lints/flutter.yaml
 
+# riverpod_lint 3.1.4+ custom_lint yerine Dart'in yerlesik analyzer plugin sistemini
+# kullanir; dev_dependency degil, buradan kurulur ve `flutter analyze` icinde calisir.
+plugins:
+  riverpod_lint: 3.1.9
+
 analyzer:
   exclude:
     - "**/*.g.dart"
