@@ -69,7 +69,7 @@ dependencies:
   app_links: ^7.0.0
   share_plus: 13.3.0
   in_app_review: ^2.0.11
-  permission_handler: ^12.0.3
+  permission_handler: 13.0.2
   image_picker: ^1.1.2
   local_auth: ^3.0.1
   crypto: ^3.0.7
