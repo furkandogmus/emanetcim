@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
@@ -11,7 +12,6 @@ import '../config/env.dart';
 import '../push/push_service.dart';
 import '../services/logger_service.dart';
 import 'token_store.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 class AuthState {
   final UserDto? session;
@@ -42,7 +42,7 @@ final authControllerProvider = NotifierProvider<AuthController, AuthState>(
 class AuthController extends Notifier<AuthState> {
   @override
   AuthState build() {
-    Future.microtask(() => _bootstrap());
+    Future.microtask(_bootstrap);
     return const AuthState(loading: true);
   }
 
@@ -104,7 +104,7 @@ class AuthController extends Notifier<AuthState> {
     try {
       final dio = ref.read(dioProvider);
       final isEmail = identity.contains('@');
-      String cleanIdentity = identity;
+      var cleanIdentity = identity;
       if (!isEmail) {
         var d = identity.replaceAll(RegExp(r'\D'), '');
         if (d.startsWith('90') && d.length >= 12) {
@@ -118,10 +118,7 @@ class AuthController extends Notifier<AuthState> {
 
       final data = isEmail
           ? {'email': identity, 'password': password}
-          : {
-              'phone': cleanIdentity,
-              'password': password,
-            };
+          : {'phone': cleanIdentity, 'password': password};
 
       final res = await dio.post('/auth/session', data: data);
       await _completeSession(res.data as Map<String, dynamic>);
@@ -176,7 +173,9 @@ class AuthController extends Notifier<AuthState> {
       final auth = account.authentication;
       final idToken = auth.idToken;
 
-      debugPrint('GoogleSignIn idToken present: ${idToken != null}, length: ${idToken?.length ?? 0}');
+      debugPrint(
+        'GoogleSignIn idToken present: ${idToken != null}, length: ${idToken?.length ?? 0}',
+      );
 
       if (idToken == null) {
         throw Exception('Google login failed: No ID Token');
@@ -201,11 +200,14 @@ class AuthController extends Notifier<AuthState> {
         ],
       );
       final dio = ref.read(dioProvider);
-      final res = await dio.post('/auth/apple', data: {
-        'identityToken': credential.identityToken,
-        'givenName': credential.givenName,
-        'familyName': credential.familyName,
-      });
+      final res = await dio.post(
+        '/auth/apple',
+        data: {
+          'identityToken': credential.identityToken,
+          'givenName': credential.givenName,
+          'familyName': credential.familyName,
+        },
+      );
       await _completeSession(res.data as Map<String, dynamic>);
     } catch (e) {
       state = state.copyWith(loading: false);

@@ -14,80 +14,77 @@ dependencies:
     sdk: flutter
 
   # State + routing
-  flutter_riverpod: 3.1.0
-  riverpod_annotation: 4.0.0
-  go_router: 17.2.2
+  flutter_riverpod: 3.4.3
+  riverpod_annotation: 4.0.7
+  go_router: 18.0.1
 
   # Networking
-  dio: 5.9.2
-  retrofit: 4.9.2
+  dio: 5.11.1
+  retrofit: 4.10.0
   pretty_dio_logger: 1.4.0
+  http_parser: 4.1.2
 
   # Storage
-  flutter_secure_storage: 10.0.0
-  hive: 2.2.3
-  hive_flutter: 1.1.0
+  flutter_secure_storage: 11.0.0
+  # hive/hive_flutter 2022'den beri yayinlanmiyor; hive_ce ayni API ve dosya bicimiyle devam ediyor.
+  hive_ce: 2.19.3
+  hive_ce_flutter: 2.3.4
   shared_preferences: 2.5.5
 
   # Auth
   google_sign_in: 7.2.0
-  sign_in_with_apple: 7.0.1
+  sign_in_with_apple: 8.2.0
 
   # Maps + location
-  flutter_map: 8.3.0
-  latlong2: 0.9.1
-  geolocator: 14.0.2
-
+  flutter_map: 8.3.2
+  latlong2: 0.10.1
+  geolocator: 14.0.3
   # QR
-  mobile_scanner: 7.2.0
+  mobile_scanner: 7.4.0
   qr_flutter: 4.1.0
 
   # Push
-  firebase_core: 4.7.0
-  firebase_messaging: 16.2.0
-  flutter_local_notifications: 21.0.0
+  firebase_core: 4.14.0
+  firebase_messaging: 16.6.0
+  flutter_local_notifications: 22.3.0
 
   # Models
   freezed_annotation: 3.1.0
-  json_annotation: 4.9.0
+  json_annotation: 4.12.0
 
   # Utils
-  intl: 0.20.2
+  intl: ^0.20.3
   easy_localization: 3.0.8
-  cached_network_image: 3.4.1
-  url_launcher: 6.3.1
-  package_info_plus: 9.0.1
-  flutter_jailbreak_detection:
-    git:
-      url: https://github.com/pdurasie-ecovery/flutter_jailbreak_detection.git
-      ref: add-namespace
-  google_fonts: 8.0.2
-  connectivity_plus: 7.1.1
-  screen_protector: 1.5.1
-  shimmer: ^3.0.0
-  app_links: ^7.0.0
-  share_plus: ^12.0.2
+  cached_network_image: 4.0.0
+  url_launcher: 6.3.2
+  package_info_plus: 10.2.1
+  # flutter_jailbreak_detection 2023'ten beri yayinlanmiyor ve rastgele bir fork'a bagliydi;
+  # jailbreak_root_detection ayni RootBeer (+DetectFrida) / IOSSecuritySuite tabanini bakimli sunuyor.
+  jailbreak_root_detection: 1.2.3
+  google_fonts: 8.2.1
+  connectivity_plus: 7.3.1
+  screen_protector: 1.5.3
+  shimmer: 4.0.0
+  app_links: 7.2.1
+  share_plus: 13.3.0
   in_app_review: ^2.0.11
-  permission_handler: ^12.0.3
-  image_picker: ^1.1.2
-  local_auth: ^3.0.1
+  permission_handler: 13.0.2
+  image_picker: 1.2.3
+  local_auth: 3.0.2
   crypto: ^3.0.7
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: 6.0.0
-  build_runner: 2.14.0
-  freezed: 3.2.3
-  json_serializable: 6.11.2
-  retrofit_generator: 10.2.1
-  riverpod_generator: 4.0.0+1
-  custom_lint: 0.8.1
-  riverpod_lint: 3.1.0
+  build_runner: 2.16.1
+  freezed: 4.0.1
+  json_serializable: 6.14.1
+  retrofit_generator: 10.2.11
+  riverpod_generator: 4.0.9
   network_image_mock: ^2.1.1
   mocktail: ^1.0.5
-  flutter_launcher_icons: ^0.13.1
-
+  flutter_launcher_icons: 0.14.4
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
@@ -100,3 +97,6 @@ flutter:
     - assets/images/logo_white.png
     - assets/l10n/en.json
     - assets/l10n/tr.json
+    # Outfit fontlari paketle gelir: google_fonts once asset'e bakar, ilk acilista
+    # aga cikmaz ve testler gercek font metrikleriyle olcer (allowRuntimeFetching=false).
+    - assets/fonts/

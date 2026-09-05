@@ -1,5 +1,5 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -17,7 +17,8 @@ class EmailVerificationScreen extends ConsumerStatefulWidget {
       _EmailVerificationScreenState();
 }
 
-class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScreen> {
+class _EmailVerificationScreenState
+    extends ConsumerState<EmailVerificationScreen> {
   final _codeController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _busy = false;
@@ -47,15 +48,15 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
         final msg = err == 'token_not_found' || err == 'token_expired'
             ? 'auth.verify_email_error'.tr()
             : 'common.error'.tr();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(msg)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(msg)));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('common.error'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('common.error'.tr())));
       }
     } finally {
       if (mounted) setState(() => _busy = false);

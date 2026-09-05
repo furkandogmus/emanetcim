@@ -39,16 +39,10 @@ class BiometricService {
     await prefs.setBool(_prefKey, enabled);
   }
 
-  Future<bool> authenticate({
-    required String reason,
-  }) async {
+  Future<bool> authenticate({required String reason}) async {
     _lastAuth = DateTime.now();
     try {
-      return await _auth.authenticate(
-        localizedReason: reason,
-        biometricOnly: false,
-        sensitiveTransaction: true,
-      );
+      return await _auth.authenticate(localizedReason: reason);
     } catch (_) {
       return false;
     }

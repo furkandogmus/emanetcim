@@ -53,7 +53,14 @@ export async function registerPrelaunchInterestAction(data: unknown) {
       error:
         result.code === "shop_not_prelaunch"
           ? "Errors.shopNowOpenBookInstead"
-          : "Errors.generic",
+          : result.code === "invalid_email"
+            ? /*
+                Adres bicimi bozuk. Bu action'in semasi zaten doguruyor, yani
+                normalde erisilemez -- erisildiginde de "bir seyler ters gitti"
+                yerine DUZELTILEBILIR olani soylemeli.
+              */
+              "Errors.invalidEmail"
+            : "Errors.generic",
     };
   }
 

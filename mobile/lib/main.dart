@@ -2,9 +2,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:jailbreak_root_detection/jailbreak_root_detection.dart';
 
 import 'app/app.dart';
 import 'core/auth/token_store.dart';
@@ -55,12 +55,14 @@ Future<void> main() async {
     await Hive.openBox('partner_bookings_cache', encryptionCipher: cipher);
     await Hive.openBox('my_bookings_cache', encryptionCipher: cipher);
   } else {
-    Logger.e('Hive encryption key unavailable; caching disabled. Data will not persist across restarts.');
+    Logger.e(
+      'Hive encryption key unavailable; caching disabled. Data will not persist across restarts.',
+    );
   }
 
   var isRooted = false;
   try {
-    isRooted = await FlutterJailbreakDetection.jailbroken;
+    isRooted = await JailbreakRootDetection.instance.isJailBroken;
   } catch (e) {
     Logger.w('Security check error', e);
   }
@@ -81,7 +83,5 @@ Future<void> main() async {
     child: const ProviderScope(child: BagajParkApp()),
   );
 
-  runApp(
-    isRooted ? RootWarningScreen(onContinue: () => runApp(app)) : app,
-  );
+  runApp(isRooted ? RootWarningScreen(onContinue: () => runApp(app)) : app);
 }
