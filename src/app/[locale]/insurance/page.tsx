@@ -6,7 +6,7 @@ import { getSiteBaseUrl } from "@/lib/site-urls";
 import { alternatesForPath } from "@/lib/seo-alternates";
 import { buildFaqJsonLd } from "@/lib/faq-json-ld";
 import { isInsuranceEnabled } from "@/lib/commerce-context";
-import { getPricingRules } from "@/lib/platform-settings";
+import { getPricingRulesForStaticRender } from "@/lib/platform-settings";
 import { socialMetadata } from "@/lib/social-metadata";
 import { serializeJsonLd } from "@/lib/json-ld-script";
 
@@ -46,7 +46,7 @@ export default async function InsurancePage({
   const { locale } = await params;
   setRequestLocale(locale);
   // Kurallar burada bir kez okunuyor; kök layout'un DB'ye dokunmasına gerek yok.
-  const insuranceEnabled = isInsuranceEnabled(await getPricingRules());
+  const insuranceEnabled = isInsuranceEnabled(await getPricingRulesForStaticRender());
   const t = await getTranslations("Insurance");
   const faqItems = [
     { question: t("faq1Question"), answer: t("faq1Answer") },
