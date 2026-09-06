@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { alternatesForPath } from "@/lib/seo-alternates";
 import { TrendingUp, LayoutDashboard, MapPin, Clock, BadgePercent } from "lucide-react";
-import { getPricingRules } from "@/lib/platform-settings";
+import { getPricingRulesForStaticRender } from "@/lib/platform-settings";
 import { getEffectiveCommission } from "@/lib/commission";
 import PartnerEarningsCalculator from "@/components/guest/PartnerEarningsCalculator";
 import prisma from "@/lib/db";
@@ -56,21 +56,39 @@ export default async function BecomePartnerPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("MarketingBecomePartner");
-  const pricingRules = await getPricingRules();
+  const pricingRules = await getPricingRulesForStaticRender();
   /*
     YURURLUKTEKI oran. Ayarda %50 yaziyor ama platform su an tahsilat yapmiyor
     (`manual` saglayici) -- yani esnaftan kesilen bir sey yok. Hesaplayici
     ayardaki orani gosterirken, kazanmaya calistigi esnafa var olmayan bir %50
     komisyon vaat ediyordu. Bkz. `platform-split.ts` -> `effectiveCommissionRate`.
   */
-  const { merchantShareRatio, rate: commissionRate } = await getEffectiveCommission();
   /**
    * OPERATING: burada esnafa "şu kadar ortağımız var" deniyor. Talep testi
    * noktalarının sahibi platformun kendisi (`prelaunch@bagajpark.com`), ortak
    * değil — onları saymak, aşağıdaki eşik mantığının önlemeye çalıştığı şeyin
    * ta kendisi olurdu: gerçek olmayan bir sosyal kanıt.
+   *
+   * İkisi de burada try/catch içinde: `generateStaticParams` eklendiği için
+   * (bkz. `layout.tsx`) bu sayfa deploy anında tüm diller için build ortamında
+   * (DB'siz Docker imaj job'u) önceden üretiliyor. Hata olursa "beta, komisyon
+   * yok" durumuna ve 0 aktif esnafa düşer; `revalidate` (120sn) canlıda gerçek
+   * veriyle kendini düzeltir.
    */
-  const activePartnerCount = await prisma.shop.count({ where: OPERATING_SHOP_FILTER });
+  let merchantShareRatio = 1;
+  let commissionRate = 0;
+  let activePartnerCount = 0;
+  try {
+    const [commission, count] = await Promise.all([
+      getEffectiveCommission(),
+      prisma.shop.count({ where: OPERATING_SHOP_FILTER }),
+    ]);
+    merchantShareRatio = commission.merchantShareRatio;
+    commissionRate = commission.rate;
+    activePartnerCount = count;
+  } catch {
+    // yukarıdaki varsayılanlar kalır
+  }
 
   return (
     <div className="min-h-screen bg-white text-gray-900">

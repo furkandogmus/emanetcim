@@ -71,3 +71,23 @@ export async function getPricingRules(): Promise<PricingRules> {
 export function invalidatePricingRulesCache(): void {
   cache = null;
 }
+
+/**
+ * `getPricingRules()` HATAYI YUTMUYOR -- rezervasyon/checkout/admin akisi
+ * gercek bir DB kesintisinde sessizce yanlis fiyatla devam ETMEMELI.
+ *
+ * Bu saricinin varligi ayrı: `[locale]` artik `generateStaticParams`
+ * tasidigi icin (bkz. `layout.tsx`) ana sayfa/insurance/become-partner gibi
+ * misafir sayfalari DEPLOY ANINDA butun diller icin onceden uretiliyor --
+ * o build ortaminin (Docker imaj job'u) gercek bir veritabanina erisimi YOK.
+ * Yalnizca bu MISAFIR-GORUNTULEME baglaminda hata varsayilana duser;
+ * `revalidate` (120sn) canli ortamda gercek veriyle kendini duzeltir --
+ * `guest-landing-stats.ts`/`home-testimonials.ts`teki ayni desen.
+ */
+export async function getPricingRulesForStaticRender(): Promise<PricingRules> {
+  try {
+    return await getPricingRules();
+  } catch {
+    return { ...DEFAULT_PRICING_RULES };
+  }
+}
