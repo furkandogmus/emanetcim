@@ -36,11 +36,28 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+/**
+ * `[locale]` segmenti hicbir yerde `generateStaticParams` tanimlamiyordu --
+ * Next.js hangi locale degerlerinin gecerli oldugunu bilmedigi icin TUM
+ * `[locale]/*` agacini (ozel/kisisel sayfalar disinda) varsayilan olarak tam
+ * dinamik (her istekte sunucuda, cache'lenemez) render ediyordu (2026-09-06'da
+ * olculdu: sifir bagimliligi olan bos bir test sayfasi bile `ƒ Dynamic`
+ * cikiyordu). Bu satir eklenince ana sayfa + ~20 misafir sayfasi her dil icin
+ * statik/ISR uretime giriyor (dogrulandi: gercek DB'ye karsi build, 6 locale
+ * icin `● SSG`); oturum/kisisel sayfalar (account, bookings, admin, partner,
+ * checkout, shop) Next'in kendi Dynamic API tespiti sayesinde dokunulmadan
+ * dinamik kaliyor -- `auth()`/`cookies()` kullanan her yer otomatik hariç
+ * tutuluyor.
+ */
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "SEO" });
   const { setRequestLocale } = await import("next-intl/server");
   setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: "SEO" });
 
   const baseUrl = getSiteBaseUrl();
   let metadataBase: URL;
