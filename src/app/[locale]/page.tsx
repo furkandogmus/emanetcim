@@ -510,9 +510,14 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
           </div>
           <div className="flex-1 text-center md:text-left">
             <h3 className="text-lg font-black text-white">{t('appBannerTitle')}</h3>
-            <p className="text-gray-400 text-sm mt-1">{t('appBannerBody')}</p>
+            {/* `text-gray-400` koyu (bg-gray-900) kartlarda okunur kalmıyor
+                (bkz. globals.css --color-gray-400 yorumu) — bu kart için
+                `text-gray-300` kullanılıyor (kimlik nötrü, koyu zeminde ~11:1). */}
+            <p className="text-gray-300 text-sm mt-1">{t('appBannerBody')}</p>
           </div>
-          <Link href="/search" className="inline-flex items-center gap-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-white px-6 py-3 font-black text-sm transition-colors shrink-0">
+          {/* `orange-500` beyaz metinle 3.1:1 veriyordu (WCAG AA eşiği 4.5:1,
+              Lighthouse 2026-09-05) — `orange-600`'a çekildi (4.7:1). */}
+          <Link href="/search" className="inline-flex items-center gap-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 font-black text-sm transition-colors shrink-0">
             {t('appBannerCta')}
           </Link>
         </div>

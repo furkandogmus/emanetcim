@@ -342,7 +342,7 @@ export default function DateTimePicker({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        aria-label={ariaLabel}
+        aria-label={parsed && ariaLabel ? `${ariaLabel} — ${display}` : ariaLabel}
         aria-haspopup="dialog"
         aria-expanded={open}
         className="w-full flex items-center gap-2 text-left bg-transparent outline-none relative rounded-lg focus-visible:ring-2 focus-visible:ring-orange-500/40 transition-colors"
