@@ -14,6 +14,15 @@ import { socialMetadata } from "@/lib/social-metadata";
 import { serializeJsonLd } from "@/lib/json-ld-script";
 import { sanitizeRichText } from "@/lib/rich-text";
 
+/**
+ * `generateStaticParams` eklendiği için (bkz. `layout.tsx`) bu sayfa artık
+ * statik/ISR üretime giriyor (ilk istekte üretilip cache'lenir — 530 yazı için
+ * build anında `generateStaticParams` YAZILMADI, bilerek: hepsini build'de
+ * üretmek deploy'u ciddi yavaşlatırdı). `revalidate` olmadan admin'de
+ * düzenlenen/yayınlanan bir yazı sonraki deploy'a kadar görünmezdi.
+ */
+export const revalidate = 120;
+
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; slug: string }> }): Promise<Metadata> {
   const { locale, slug } = await params;
   let post = await prisma.blogPost.findUnique({ where: { slug, isPublished: true } });

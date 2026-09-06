@@ -9,6 +9,14 @@ import { Clock, User, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { ensureDefaultBlogPosts } from "@/lib/blog-initializer";
 
+/**
+ * `generateStaticParams` eklendiği için (bkz. `layout.tsx`) bu sayfa artık
+ * statik/ISR üretime giriyor. Yazı listesi DB'den geliyor (`ensureDefaultBlogPosts`)
+ * — `revalidate` olmadan yeni yayınlanan bir yazı sonraki deploy'a kadar
+ * listede görünmezdi.
+ */
+export const revalidate = 120;
+
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "Guest" });
