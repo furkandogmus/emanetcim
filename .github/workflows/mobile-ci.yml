@@ -39,6 +39,11 @@ concurrency:
   group: mobile-${{ github.ref }}
   cancel-in-progress: true
 
+# Iki job da yalnizca checkout + build + `upload-artifact` yapiyor -- hicbiri
+# repoya/pakete yazmiyor (CodeQL `missing-workflow-permissions`, 2026-09-06).
+permissions:
+  contents: read
+
 jobs:
   build-android:
     name: Build Android
