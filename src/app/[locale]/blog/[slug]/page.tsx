@@ -12,7 +12,7 @@ import { ensureDefaultBlogPosts } from "@/lib/blog-initializer";
 import { alternatesForPath } from "@/lib/seo-alternates";
 import { socialMetadata } from "@/lib/social-metadata";
 import { serializeJsonLd } from "@/lib/json-ld-script";
-import { sanitizeRichText } from "@/lib/rich-text";
+import { sanitizeRichText, stripHtmlToText } from "@/lib/rich-text";
 
 /**
  * `generateStaticParams` eklendiği için (bkz. `layout.tsx`) bu sayfa artık
@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   if (!post) return { title: "Not Found" };
 
   const base = getSiteBaseUrl();
-  const description = post.excerpt || post.content.substring(0, 160).replace(/<[^>]*>/g, "");
+  const description = post.excerpt || stripHtmlToText(post.content).substring(0, 160);
   const canonical = `${base}/${locale}/blog/${slug}`;
   return {
     title: post.title,

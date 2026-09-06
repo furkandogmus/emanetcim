@@ -56,6 +56,14 @@ on:
 # gereken de odur. `deploy` asla kesilmez, ustelik kendi grubunda sirayla
 # calisir (asagiya bakin).
 
+# Varsayilan GITHUB_TOKEN izni en dar haline cekildi (CodeQL
+# `missing-workflow-permissions`, 2026-09-06). `verify` hicbir yere yazmiyor,
+# yalnizca checkout icin `contents: read` yeterli. `image`/`deploy` kendi
+# ihtiyaclarini (packages: write / id-token: write) zaten job seviyesinde
+# ayrica tanimliyor -- bu varsayilani ELE GECIRMEZ, yalnizca genisletir.
+permissions:
+  contents: read
+
 jobs:
   # ---------------------------------------------------------------------------
   # Her sey TEK job'da: lint, typecheck, migrasyon sapmasi, birim testleri,

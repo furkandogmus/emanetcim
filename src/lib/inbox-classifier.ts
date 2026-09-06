@@ -100,10 +100,18 @@ function headersOf(raw: unknown): Record<string, string> {
   return out;
 }
 
-/** `Ad Soyad <a@b.com>` -> `a@b.com` */
+/**
+ * `Ad Soyad <a@b.com>` -> `a@b.com`
+ *
+ * Regex yerine `indexOf` KULLANILIYOR: `from` gelen e-postanın header'ından
+ * geliyor (güvenilmeyen kaynak) — `/<([^>]+)>/` CodeQL'in işaretlediği gibi
+ * çok sayıda `<` içeren bir girdide polinom zaman alabilirdi (2026-09-06).
+ */
 export function extractEmail(from: string): string {
-  const m = from.match(/<([^>]+)>/);
-  return (m ? m[1] : from).trim().toLowerCase();
+  const start = from.indexOf("<");
+  const end = start === -1 ? -1 : from.indexOf(">", start + 1);
+  const extracted = start !== -1 && end !== -1 ? from.slice(start + 1, end) : from;
+  return extracted.trim().toLowerCase();
 }
 
 function localPart(address: string): string {

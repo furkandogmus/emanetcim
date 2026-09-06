@@ -3,17 +3,7 @@
 import prisma from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/action-auth";
-
-function sanitizeHtml(html: string): string {
-  return html
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    .replace(/\bon\w+\s*=\s*"[^"]*"/gi, '')
-    .replace(/\bon\w+\s*=\s*'[^']*'/gi, '')
-    .replace(/\bon\w+\s*=\s*[^\s>]+/gi, '')
-    .replace(/href\s*=\s*"\s*javascript\s*:/gi, 'href="#"')
-    .replace(/href\s*=\s*'\s*javascript\s*:/gi, "href='#'")
-    .replace(/href\s*=\s*javascript\s*:/gi, 'href="#"');
-}
+import { sanitizeRichText } from "@/lib/rich-text";
 
 type BlogPostFormData = {
   id?: string;
@@ -34,7 +24,7 @@ export async function upsertBlogPostAction(formData: BlogPostFormData) {
   if (!auth.ok) return { success: false, error: auth.error };
 
   const { id, title, slug, excerpt, coverImage, locale, isPublished } = formData;
-  const content = sanitizeHtml(formData.content);
+  const content = sanitizeRichText(formData.content);
 
   const data = {
     title,
