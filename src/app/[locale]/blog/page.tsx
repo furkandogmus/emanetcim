@@ -8,6 +8,7 @@ import { alternatesForPath } from "@/lib/seo-alternates";
 import { Clock, User, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { ensureDefaultBlogPosts } from "@/lib/blog-initializer";
+import { stripHtmlToText } from "@/lib/rich-text";
 
 /**
  * `generateStaticParams` eklendiği için (bkz. `layout.tsx`) bu sayfa artık
@@ -102,7 +103,7 @@ export default async function BlogListPage({
                       {post.title}
                     </h2>
                     <p className="text-sm font-bold text-gray-400 line-clamp-2 mb-6 leading-relaxed">
-                      {post.excerpt || post.content.substring(0, 150).replace(/<[^>]*>/g, "")}
+                      {post.excerpt || stripHtmlToText(post.content).substring(0, 150)}
                     </p>
                     <div className="mt-auto flex items-center gap-1 text-xs id-eyebrow text-gray-900 group-hover:gap-2 transition-all">
                       {t("readMore")} <ChevronRight size={16} className="text-orange-600" />

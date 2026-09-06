@@ -65,6 +65,19 @@ const ALLOWED_ATTRIBUTES: sanitizeHtml.IOptions["allowedAttributes"] = {
  */
 const ALLOWED_SCHEMES = ["http", "https", "mailto"];
 
+/**
+ * Zengin metni DUZ METNE indirger (ozet/meta description icin).
+ *
+ * `content.replace(/<[^>]*>/g, "")` KULLANMAYIN: iç içe/bozuk etiketlerde
+ * (`<<script>script>`) regex etiketi tam temizleyemeyebilir. `sanitize-html`
+ * gercek bir HTML ayrıştırıcı kullanıyor — `allowedTags: []` her etiketi
+ * güvenli şekilde çıkarır, regex'in düşebileceği tuzaklara düşmez.
+ */
+export function stripHtmlToText(html: string | null | undefined): string {
+  if (!html) return "";
+  return sanitizeHtml(html, { allowedTags: [], allowedAttributes: {} });
+}
+
 export function sanitizeRichText(html: string | null | undefined): string {
   if (!html) return "";
   return sanitizeHtml(html, {
