@@ -10,6 +10,14 @@ import PartnerEarningsCalculator from "@/components/guest/PartnerEarningsCalcula
 import prisma from "@/lib/db";
 import { OPERATING_SHOP_FILTER } from "@/lib/public-shop-filter";
 import { Users } from "lucide-react";
+
+/**
+ * `generateStaticParams` eklendiği için (bkz. `layout.tsx`) bu sayfa artık
+ * statik/ISR üretime giriyor. `activePartnerCount` ve komisyon oranı DB'den
+ * geliyor ve değişebilir — `revalidate` olmadan bu sayı ilk deploy'daki
+ * değerde donup kalırdı.
+ */
+export const revalidate = 120;
 import { socialMetadata } from "@/lib/social-metadata";
 
 /** Sosyal kanıt için gerçek sayı bu eşiğin altındaysa "ilk ortaklardan olun"

@@ -10,6 +10,13 @@ import { getPricingRules } from "@/lib/platform-settings";
 import { socialMetadata } from "@/lib/social-metadata";
 import { serializeJsonLd } from "@/lib/json-ld-script";
 
+/**
+ * `generateStaticParams` eklendiği için (bkz. `layout.tsx`) bu sayfa artık
+ * statik/ISR üretime giriyor. `isInsuranceEnabled` platform ayarından geliyor
+ * — admin panelden kapatılırsa `revalidate` olmadan sayfa eski durumda donardı.
+ */
+export const revalidate = 120;
+
 export async function generateMetadata({
   params,
 }: {
