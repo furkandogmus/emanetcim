@@ -28,7 +28,9 @@ void main() {
         const ProviderScope(
           child: MaterialApp(
             home: Scaffold(
-              body: Center(child: ShopPreviewCard(shop: shop, isSelected: false)),
+              body: Center(
+                child: ShopPreviewCard(shop: shop, isSelected: false),
+              ),
             ),
           ),
         ),
@@ -43,7 +45,9 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('ShopPreviewCard: dokunulabilir dugumler etiketli', (tester) async {
+  testWidgets('ShopPreviewCard: dokunulabilir dugumler etiketli', (
+    tester,
+  ) async {
     final handle = tester.ensureSemantics();
     await pumpCard(tester);
     await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
