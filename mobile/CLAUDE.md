@@ -12,6 +12,9 @@ flutter test                         # tek dosya: flutter test test/features/sea
 dart run build_runner build --delete-conflicting-outputs   # freezed/retrofit/riverpod üretimi
 dart format <dosya>                  # Edit hook'u .dart dosyalarını zaten otomatik biçimler
 scripts/device.sh --screencap        # gerçek cihazdan ekran görüntüsü (build/screenshots/)
+scripts/screen-tour.sh               # üç rolle (misafir/esnaf/admin) tüm rotaları gezip
+                                      # toplu ekran görüntüsü alır (build/screenshots/tour/);
+                                      # yalnızca yerel backend'e karşı, önkoşullar --help'te
 ```
 
 Yerel API için `flutter run` HER ZAMAN `--dart-define=API_BASE_URL=...` ister;

@@ -11,6 +11,7 @@ import 'package:screen_protector/screen_protector.dart';
 import '../core/auth/auth_controller.dart';
 import '../core/auth/biometric_service.dart';
 import '../core/auth/session_timeout.dart';
+import '../core/config/env.dart';
 import '../core/config/theme_mode_provider.dart';
 import '../core/services/deep_link_service.dart';
 import '../core/sync/sync_service.dart';
@@ -87,7 +88,7 @@ class _BagajParkAppState extends ConsumerState<BagajParkApp>
   }
 
   void _updateScreenProtection(UserDto? user) {
-    if (user?.role == UserRole.partner) {
+    if (user?.role == UserRole.partner && !Env.e2eCapture) {
       ScreenProtector.preventScreenshotOn();
     } else {
       // Per-screen protection will turn this back on if needed
