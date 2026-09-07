@@ -17,7 +17,7 @@ import { alternatesForPath } from "@/lib/seo-alternates";
 import { buildFaqJsonLd } from "@/lib/faq-json-ld";
 import { buildItemListJsonLd, buildWebPageJsonLd } from "@/lib/page-json-ld";
 import { formatDecimal } from "@/lib/currency";
-import { getPricingRules } from "@/lib/platform-settings";
+import { getPricingRulesForStaticRender } from "@/lib/platform-settings";
 import { isInsuranceEnabled } from "@/lib/commerce-context";
 import AmbientBackdrop from "@/components/common/AmbientBackdrop";
 import { socialMetadata } from "@/lib/social-metadata";
@@ -102,7 +102,7 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
   const [stats, testimonials, pricingRules] = await Promise.all([
     getGuestLandingStats(),
     getHomeTestimonials(14),
-    getPricingRules(),
+    getPricingRulesForStaticRender(),
   ]);
   const insuranceEnabled = isInsuranceEnabled(pricingRules);
   // Arama kutusunun varsayilanlari burada, SUNUCUDA uretilir. Istemcide
