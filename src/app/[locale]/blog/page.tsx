@@ -45,7 +45,14 @@ export default async function BlogListPage({
   setRequestLocale(locale);
   const t = await getTranslations("Guest");
 
-  const posts = await ensureDefaultBlogPosts(locale);
+  /**
+   * `generateStaticParams` eklendiği için (bkz. `layout.tsx`) bu sayfa deploy
+   * anında tüm diller için build ortamında (DB'siz Docker imaj job'u) önceden
+   * üretiliyor. Hata olursa sayfa zaten sahip olduğu "yazı bulunamadı" boş
+   * durumuna düşer; `revalidate` (120sn) canlıda gerçek veriyle kendini
+   * düzeltir.
+   */
+  const posts = await ensureDefaultBlogPosts(locale).catch(() => []);
 
   return (
     <div className="min-h-screen bg-white">
