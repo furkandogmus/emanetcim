@@ -14,6 +14,7 @@ import '../../core/auth/biometric_service.dart';
 import '../../core/auth/token_store.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/utils/error_handler.dart';
+import '../../core/utils/validators.dart';
 import '../../shared/utils/app_colors.dart';
 import '../../shared/widgets/how_it_works_sheet.dart';
 
@@ -37,10 +38,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
-  bool _isValidEmail(String email) {
-    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
-  }
-
   String? _normalizePhone(String phone) {
     if (phone.trim().isEmpty) return null;
     var d = phone.replaceAll(RegExp(r'\D'), '');
@@ -61,7 +58,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   bool _isValid(String v) {
-    return _isValidEmail(v) || _isValidPhone(v);
+    return isValidEmail(v) || _isValidPhone(v);
   }
 
   Future<void> _login() async {
@@ -714,7 +711,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     try {
       final refreshToken = account['refreshToken'];
       if (refreshToken == null || refreshToken.isEmpty) {
-        if (mounted) setState(() => _busy = false);
         return;
       }
 
@@ -737,15 +733,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         'refreshToken': newRefresh,
         'user': me.data,
       });
-    } on DioException catch (e) {
+    } catch (e) {
+      // DioException disinda (ornegin beklenmeyen yanit govdesinden dogan
+      // TypeError/CastError) da yakalanmazsa _busy sonsuza kadar true kalir
+      // ve kullaniciya hicbir hata gosterilmez (diger uc giris metoduyla
+      // ayni desen: generic catch + finally).
       if (mounted) {
-        setState(() => _busy = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
           ),
         );
       }
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
   }
 
