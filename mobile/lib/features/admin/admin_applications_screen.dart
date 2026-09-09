@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/utils/error_handler.dart';
+import '../../shared/widgets/skeleton.dart';
 
 class AdminApplicationsScreen extends ConsumerStatefulWidget {
   const AdminApplicationsScreen({super.key});
@@ -55,11 +56,15 @@ class _AdminApplicationsScreenState
     try {
       final dio = ref.read(dioProvider);
       debugPrint('Admin Action: $id/${approve ? 'approve' : 'reject'}');
-      await dio.post('/admin/applications/$id/${approve ? 'approve' : 'reject'}');
+      await dio.post(
+        '/admin/applications/$id/${approve ? 'approve' : 'reject'}',
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(approve ? 'admin.approved'.tr() : 'admin.rejected'.tr()),
+            content: Text(
+              approve ? 'admin.approved'.tr() : 'admin.rejected'.tr(),
+            ),
           ),
         );
       }
@@ -69,7 +74,9 @@ class _AdminApplicationsScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(getErrorMessage(e, fallback: 'admin.action_failed'.tr())),
+            content: Text(
+              getErrorMessage(e, fallback: 'admin.action_failed'.tr()),
+            ),
           ),
         );
       }
@@ -79,7 +86,24 @@ class _AdminApplicationsScreenState
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        body: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Skeleton(height: 90, borderRadius: 20),
+                SizedBox(height: 16),
+                Skeleton(height: 90, borderRadius: 20),
+                SizedBox(height: 16),
+                Skeleton(height: 90, borderRadius: 20),
+                SizedBox(height: 16),
+                Skeleton(height: 90, borderRadius: 20),
+              ],
+            ),
+          ),
+        ),
+      );
     }
 
     return Scaffold(

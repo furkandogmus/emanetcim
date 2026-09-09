@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
 import '../../shared/utils/app_colors.dart';
+import '../../shared/widgets/skeleton.dart';
 
 class PartnerSealsScreen extends ConsumerStatefulWidget {
   const PartnerSealsScreen({super.key});
@@ -18,7 +19,7 @@ class _PartnerSealsScreenState extends ConsumerState<PartnerSealsScreen> {
   final _faultyFormKey = GlobalKey<FormState>();
   final _countController = TextEditingController(text: '10');
   final _serialController = TextEditingController();
-  
+
   int _currentSealCount = 0;
   bool _loadingShop = true;
   bool _requesting = false;
@@ -58,17 +59,16 @@ class _PartnerSealsScreenState extends ConsumerState<PartnerSealsScreen> {
       await dio.post('/partner/seals/request', data: {'count': count});
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('partner.request_success'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('partner.request_success'.tr())));
         _countController.text = '10';
         await _fetchShopInfo();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('common.error'.tr())),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('common.error'.tr())));
       }
     } finally {
       if (mounted) setState(() => _requesting = false);
@@ -82,7 +82,10 @@ class _PartnerSealsScreenState extends ConsumerState<PartnerSealsScreen> {
     try {
       final dio = ref.read(dioProvider);
       final serial = int.tryParse(_serialController.text.trim());
-      await dio.post('/partner/seals/report-faulty', data: {'serialNumber': serial});
+      await dio.post(
+        '/partner/seals/report-faulty',
+        data: {'serialNumber': serial},
+      );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -93,9 +96,8 @@ class _PartnerSealsScreenState extends ConsumerState<PartnerSealsScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('common.error'.tr())),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('common.error'.tr())));
       }
     } finally {
       if (mounted) setState(() => _reporting = false);
@@ -119,7 +121,16 @@ class _PartnerSealsScreenState extends ConsumerState<PartnerSealsScreen> {
         ),
       ),
       body: _loadingShop
-          ? const Center(child: CircularProgressIndicator())
+          ? const Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Skeleton(height: 140, borderRadius: 24),
+                  SizedBox(height: 16),
+                  Skeleton(height: 200, borderRadius: 24),
+                ],
+              ),
+            )
           : SingleChildScrollView(
               padding: const EdgeInsets.all(24),
               child: Column(
@@ -130,7 +141,10 @@ class _PartnerSealsScreenState extends ConsumerState<PartnerSealsScreen> {
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [AppColors.brandOrange, AppColors.brandOrangeDark],
+                        colors: [
+                          AppColors.brandOrange,
+                          AppColors.brandOrangeDark,
+                        ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
