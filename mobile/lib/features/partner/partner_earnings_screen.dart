@@ -1,7 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
 import '../../shared/models/earnings_stats.dart';
@@ -77,7 +76,9 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
       appBar: AppBar(
         title: Text(
           'partner.earnings'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
       ),
       body: ListView(
@@ -105,18 +106,18 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
               children: [
                 Text(
                   'partner.total_balance'.tr(),
-                  style: GoogleFonts.outfit(
-                    color: Colors.white70,
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                     fontSize: 14,
+                    color: Colors.white70,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   '₺${_stats.totalBalance}',
-                  style: GoogleFonts.outfit(
-                    color: Colors.white,
+                  style: Theme.of(context).textTheme.displaySmall!.copyWith(
                     fontSize: 40,
                     fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -150,7 +151,7 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
 
           Text(
             'partner.payment_history'.tr().toUpperCase(),
-            style: GoogleFonts.outfit(
+            style: Theme.of(context).textTheme.labelMedium!.copyWith(
               fontSize: 12,
               fontWeight: FontWeight.bold,
               color: const Color(0xFF616161),
@@ -178,9 +179,9 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
                 Expanded(
                   child: Text(
                     'partner.payout_info'.tr(),
-                    style: GoogleFonts.outfit(
-                      color: Colors.blue.shade800,
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                       fontSize: 13,
+                      color: Colors.blue.shade800,
                       height: 1.4,
                     ),
                   ),
@@ -198,15 +199,17 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.outfit(color: Colors.white38, fontSize: 11),
+          style: Theme.of(
+            context,
+          ).textTheme.labelSmall!.copyWith(fontSize: 11, color: Colors.white38),
         ),
         const SizedBox(height: 4),
         Text(
           value,
-          style: GoogleFonts.outfit(
-            color: color,
+          style: Theme.of(context).textTheme.titleMedium!.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.bold,
+            color: color,
           ),
         ),
       ],
@@ -248,16 +251,16 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
               children: [
                 Text(
                   'partner.paid_status'.tr(),
-                  style: GoogleFonts.outfit(
-                    fontWeight: FontWeight.bold,
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
                     fontSize: 15,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
                   item['date'],
-                  style: GoogleFonts.outfit(
-                    color: const Color(0xFF616161),
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
                     fontSize: 12,
+                    color: const Color(0xFF616161),
                   ),
                 ),
               ],
@@ -265,9 +268,9 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
           ),
           Text(
             '+₺${item['amount']}',
-            style: GoogleFonts.outfit(
-              fontWeight: FontWeight.bold,
+            style: Theme.of(context).textTheme.titleMedium!.copyWith(
               fontSize: 16,
+              fontWeight: FontWeight.bold,
               color: Colors.green,
             ),
           ),

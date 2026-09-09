@@ -5,7 +5,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/sync/sync_service.dart';
@@ -261,7 +260,9 @@ class _PartnerBookingDetailScreenState
       appBar: AppBar(
         title: Text(
           'nav.partner'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -311,17 +312,18 @@ class _PartnerBookingDetailScreenState
                         (b.guestName != null && b.guestName!.isNotEmpty)
                             ? b.guestName!.substring(0, 1).toUpperCase()
                             : 'G',
-                        style: GoogleFonts.outfit(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.brandOrange,
-                        ),
+                        style: Theme.of(context).textTheme.displayLarge!
+                            .copyWith(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.brandOrange,
+                            ),
                       ),
                     ),
                     const SizedBox(height: 16),
                     Text(
                       b.guestName ?? 'profile.guest'.tr(),
-                      style: GoogleFonts.outfit(
+                      style: Theme.of(context).textTheme.titleLarge!.copyWith(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
@@ -338,11 +340,12 @@ class _PartnerBookingDetailScreenState
                       ),
                       child: Text(
                         bookingStatusLabel(b.status),
-                        style: GoogleFonts.outfit(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: statusColor,
-                        ),
+                        style: Theme.of(context).textTheme.labelMedium!
+                            .copyWith(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: statusColor,
+                            ),
                       ),
                     ),
                   ],
@@ -375,7 +378,7 @@ class _PartnerBookingDetailScreenState
               // Bags Info
               Text(
                 'checkout.bags_title'.tr(),
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.labelMedium!.copyWith(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   color: const Color(0xFF616161),
@@ -571,7 +574,7 @@ class _PartnerBookingDetailScreenState
                 const SizedBox(width: 6),
                 Text(
                   label,
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
                     fontSize: 12,
                     color: const Color(0xFF424242),
                   ),
@@ -581,7 +584,7 @@ class _PartnerBookingDetailScreenState
             const SizedBox(height: 8),
             Text(
               time,
-              style: GoogleFonts.outfit(
+              style: Theme.of(context).textTheme.titleMedium!.copyWith(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
               ),
@@ -597,7 +600,7 @@ class _PartnerBookingDetailScreenState
       children: [
         Text(
           size,
-          style: GoogleFonts.outfit(
+          style: Theme.of(context).textTheme.labelMedium!.copyWith(
             fontSize: 12,
             fontWeight: FontWeight.bold,
             color: const Color(0xFF616161),
@@ -606,7 +609,7 @@ class _PartnerBookingDetailScreenState
         const SizedBox(height: 4),
         Text(
           '$count',
-          style: GoogleFonts.outfit(
+          style: Theme.of(context).textTheme.titleLarge!.copyWith(
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: const Color(0xFF0F172A),
@@ -695,7 +698,7 @@ class _BagRevisionBottomSheetState extends State<_BagRevisionBottomSheet> {
               children: [
                 Text(
                   label,
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textDark,
@@ -704,7 +707,7 @@ class _BagRevisionBottomSheetState extends State<_BagRevisionBottomSheet> {
                 const SizedBox(height: 2),
                 Text(
                   description,
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
                     fontSize: 12,
                     color: Colors.grey[600],
                   ),
@@ -724,7 +727,7 @@ class _BagRevisionBottomSheetState extends State<_BagRevisionBottomSheet> {
                 child: Text(
                   '$val',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -768,7 +771,7 @@ class _BagRevisionBottomSheetState extends State<_BagRevisionBottomSheet> {
               children: [
                 Text(
                   'partner.bag_revision_title'.tr(),
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -822,10 +825,11 @@ class _BagRevisionBottomSheetState extends State<_BagRevisionBottomSheet> {
                       )
                     : Text(
                         'common.save'.tr(),
-                        style: GoogleFonts.outfit(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium!
+                            .copyWith(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
               ),
             ),
