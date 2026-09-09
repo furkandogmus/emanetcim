@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
+import '../../core/utils/error_handler.dart';
 import '../../shared/utils/app_colors.dart';
 
 class PasswordResetConfirmScreen extends ConsumerStatefulWidget {
@@ -58,7 +59,11 @@ class _PasswordResetConfirmScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('auth.reset_password_error'.tr())),
+          SnackBar(
+            content: Text(
+              getErrorMessage(e, fallback: 'auth.reset_password_error'.tr()),
+            ),
+          ),
         );
       }
     } finally {

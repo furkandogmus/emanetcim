@@ -9,6 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/auth/auth_controller.dart';
+import '../../core/utils/error_handler.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -101,9 +102,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('common.error'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _busy = false);

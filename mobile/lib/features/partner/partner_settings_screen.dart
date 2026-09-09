@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
+import '../../core/utils/error_handler.dart';
 import '../../shared/models/shop.dart';
 import '../../shared/utils/app_colors.dart';
 
@@ -69,15 +70,19 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
         _address = TextEditingController(text: shop.address ?? '');
         _city = TextEditingController(text: shop.city ?? '');
         _district = TextEditingController(text: shop.district ?? '');
-        _phone = TextEditingController(text: (res.data['phone'] ?? res.data['phoneNumber'] ?? '') as String);
+        _phone = TextEditingController(
+          text: (res.data['phone'] ?? res.data['phoneNumber'] ?? '') as String,
+        );
         _sealCount = sealCount;
         _loading = false;
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('${'common.error'.tr()}: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+          ),
+        );
       }
     }
   }
@@ -137,9 +142,11 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('${'common.error'.tr()}: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -297,7 +304,11 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
               ),
               const SizedBox(height: 32),
               _sectionHeader('partner.address'.tr()),
-              _inputField('partner.address'.tr(), _address, Icons.location_on_rounded),
+              _inputField(
+                'partner.address'.tr(),
+                _address,
+                Icons.location_on_rounded,
+              ),
               const SizedBox(height: 16),
               Row(
                 children: [
