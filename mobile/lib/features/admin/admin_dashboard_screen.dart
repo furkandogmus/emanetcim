@@ -62,7 +62,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                 _statCard(
                   context,
                   'admin.total_revenue'.tr(),
-                  '₺${stats.totalRevenue}',
+                  '₺${stats.totalRevenue.toStringAsFixed(0)}',
                   Icons.account_balance_wallet_rounded,
                   const Color(0xFFF97316),
                   isOrange: true,

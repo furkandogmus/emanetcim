@@ -2,10 +2,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:geolocator/geolocator.dart';
 
 import '../../../core/services/favorites_service.dart';
 import '../../../shared/models/shop.dart';
@@ -33,7 +33,7 @@ class ShopPreviewCard extends ConsumerWidget {
     final isFav = ref.watch(
       favoritesProvider.select((favorites) => favorites.contains(shop.id)),
     );
-    double? displayDistance = shop.distanceKm;
+    var displayDistance = shop.distanceKm;
     if (userLocation != null &&
         shop.latitude != null &&
         shop.longitude != null) {
@@ -178,7 +178,7 @@ class ShopPreviewCard extends ConsumerWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '${shop.rating?.toStringAsFixed(1) ?? '-'}',
+                          shop.rating?.toStringAsFixed(1) ?? '-',
                           style: GoogleFonts.outfit(
                             fontSize: 14,
                             color: const Color(0xFF424242),
