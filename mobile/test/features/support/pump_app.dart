@@ -165,6 +165,33 @@ Dio fakeDio(
   return dio;
 }
 
+/// Her istekte [DioException] fırlatan sahte [Dio] — hata/kurtarma yollarını
+/// (ör. sonsuz spinner, unmounted-sonrası setState) test etmek için.
+Dio fakeDioError({
+  DioExceptionType type = DioExceptionType.connectionError,
+  String message = 'network error',
+  int? statusCode,
+}) {
+  final dio = Dio(BaseOptions(baseUrl: 'https://test.local'));
+  dio.interceptors.add(
+    InterceptorsWrapper(
+      onRequest: (options, handler) {
+        handler.reject(
+          DioException(
+            requestOptions: options,
+            type: type,
+            message: message,
+            response: statusCode == null
+                ? null
+                : Response(requestOptions: options, statusCode: statusCode),
+          ),
+        );
+      },
+    ),
+  );
+  return dio;
+}
+
 /// `authControllerProvider`'ı gerçek `_bootstrap()` (SharedPreferences +
 /// flutter_secure_storage + ağ) çalıştırmadan sabit bir [AuthState] ile
 /// başlatan sahte controller.
