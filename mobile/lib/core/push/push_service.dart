@@ -94,11 +94,14 @@ class PushService {
       final info = await PackageInfo.fromPlatform();
       await ref
           .read(dioProvider)
-          .post('/push/register', data: {
-            'token': token,
-            'platform': Platform.isIOS ? 'ios' : 'android',
-            'appVersion': '${info.version}+${info.buildNumber}',
-          });
+          .post(
+            '/push/register',
+            data: {
+              'token': token,
+              'platform': Platform.isIOS ? 'ios' : 'android',
+              'appVersion': '${info.version}+${info.buildNumber}',
+            },
+          );
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) return;
       // Retry on next token refresh

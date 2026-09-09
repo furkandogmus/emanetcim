@@ -22,8 +22,9 @@ class NotificationsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           'notifications.title'.tr(),
-          style: Theme.of(context).textTheme.titleSmall!
-              .copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
         actions: [
           if (notifications.isNotEmpty)

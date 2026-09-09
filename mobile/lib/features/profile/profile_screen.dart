@@ -239,8 +239,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       appBar: AppBar(
         title: Text(
           'profile.title'.tr(),
-          style: Theme.of(context).textTheme.titleSmall!
-              .copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
       ),
       body: ListView(
@@ -436,8 +437,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           Center(
             child: Text(
               'profile.version'.tr(args: ['1.0.0']),
-              style: Theme.of(context).textTheme.labelSmall!
-                  .copyWith(fontSize: 11, color: const Color(0xFF757575)),
+              style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                fontSize: 11,
+                color: const Color(0xFF757575),
+              ),
             ),
           ),
 
@@ -660,8 +663,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             children: [
               Text(
                 'profile.theme'.tr(),
-                style: Theme.of(context).textTheme.titleMedium!
-                    .copyWith(fontSize: 18, fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 24),
               ListTile(
@@ -731,8 +736,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
         subtitle: Text(
           'profile.biometric_desc'.tr(),
-          style: Theme.of(context).textTheme.bodySmall!
-              .copyWith(fontSize: 12, color: const Color(0xFF616161)),
+          style: Theme.of(context).textTheme.bodySmall!.copyWith(
+            fontSize: 12,
+            color: const Color(0xFF616161),
+          ),
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         onTap: () => _handleBiometricToggle(!_biometricEnabled),
@@ -810,16 +817,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 children: [
                   Text(
                     'profile.notifications'.tr(),
-                    style: Theme.of(context).textTheme.titleMedium!
-                        .copyWith(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   SwitchListTile(
                     title: const Text('Rezervasyon Güncellemeleri'),
                     subtitle: Text(
                       'Onay, check-in, check-out ve QR kod bildirimleri',
-                      style: Theme.of(context).textTheme.bodySmall!
-                          .copyWith(fontSize: 12, color: Colors.grey),
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
                     ),
                     value: prefs.bookingUpdates,
                     activeThumbColor: AppColors.brandOrange,
@@ -832,8 +843,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     title: const Text('Kampanya & İndirim'),
                     subtitle: Text(
                       'Özel indirimler, kampanya duyuruları ve promosyon kodları',
-                      style: Theme.of(context).textTheme.bodySmall!
-                          .copyWith(fontSize: 12, color: Colors.grey),
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
                     ),
                     value: prefs.promotions,
                     activeThumbColor: AppColors.brandOrange,
@@ -846,8 +859,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     title: const Text('Esnaf Uyarıları'),
                     subtitle: Text(
                       'Yeni rezervasyon, mesaj ve acil durum bildirimleri',
-                      style: Theme.of(context).textTheme.bodySmall!
-                          .copyWith(fontSize: 12, color: Colors.grey),
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
                     ),
                     value: prefs.partnerAlerts,
                     activeThumbColor: AppColors.brandOrange,
@@ -952,8 +967,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               children: [
                 Text(
                   'profile.edit_profile'.tr(),
-                  style: Theme.of(context).textTheme.titleLarge!
-                      .copyWith(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 24),
                 TextField(
@@ -1037,14 +1054,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             children: [
               Text(
                 title,
-                style: Theme.of(context).textTheme.titleLarge!
-                    .copyWith(fontSize: 20, fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 16),
               Text(
                 content,
-                style: Theme.of(context).textTheme.bodyMedium!
-                    .copyWith(height: 1.6),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium!.copyWith(height: 1.6),
               ),
             ],
           ),
@@ -1067,8 +1087,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           Text(
             label,
-            style: Theme.of(context).textTheme.bodySmall!
-                .copyWith(fontSize: 12, color: const Color(0xFF616161)),
+            style: Theme.of(context).textTheme.bodySmall!.copyWith(
+              fontSize: 12,
+              color: const Color(0xFF616161),
+            ),
           ),
         ],
       ),
