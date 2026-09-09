@@ -12,6 +12,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/repositories/booking_repository.dart';
+import '../../core/utils/error_handler.dart';
 import '../../shared/models/booking.dart';
 import '../../shared/utils/app_colors.dart';
 import '../../shared/utils/booking_helpers.dart';
@@ -883,10 +884,17 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                               ),
                             );
                           }
-                        } catch (_) {
+                        } catch (e) {
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('common.error'.tr())),
+                              SnackBar(
+                                content: Text(
+                                  getErrorMessage(
+                                    e,
+                                    fallback: 'common.error'.tr(),
+                                  ),
+                                ),
+                              ),
                             );
                           }
                         } finally {
@@ -1000,10 +1008,17 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                               ),
                             );
                           }
-                        } catch (_) {
+                        } catch (e) {
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('common.error'.tr())),
+                              SnackBar(
+                                content: Text(
+                                  getErrorMessage(
+                                    e,
+                                    fallback: 'common.error'.tr(),
+                                  ),
+                                ),
+                              ),
                             );
                           }
                         } finally {

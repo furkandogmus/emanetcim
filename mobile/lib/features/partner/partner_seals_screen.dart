@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
+import '../../core/utils/error_handler.dart';
 import '../../shared/utils/app_colors.dart';
 import '../../shared/widgets/skeleton.dart';
 
@@ -67,8 +68,11 @@ class _PartnerSealsScreenState extends ConsumerState<PartnerSealsScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('common.error'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _requesting = false);
@@ -96,8 +100,11 @@ class _PartnerSealsScreenState extends ConsumerState<PartnerSealsScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('common.error'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _reporting = false);
