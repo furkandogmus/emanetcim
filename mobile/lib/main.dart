@@ -20,8 +20,9 @@ Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await EasyLocalization.ensureInitialized();
-  await Hive.initFlutter();
+
+  // EasyLocalization ve Hive motoru init'i birbirine bagimli degil; paralel calistir.
+  await Future.wait([EasyLocalization.ensureInitialized(), Hive.initFlutter()]);
 
   // Global Error Handling
   ErrorWidget.builder = (details) => GlobalErrorWidget(details: details);
@@ -40,7 +41,8 @@ Future<void> main() async {
     return true;
   };
 
-  // Encryption for Hive (Security Hardening)
+  // Encryption for Hive (Security Hardening) — Hive.initFlutter() bitmis olmali,
+  // box'lar bu anahtara bagimli oldugu icin sirali kalir.
   final tokenStore = TokenStore();
   List<int>? hiveKey;
   try {
@@ -49,32 +51,47 @@ Future<void> main() async {
     Logger.e('Hive Key error', e);
   }
 
-  if (hiveKey != null) {
-    final cipher = HiveAesCipher(hiveKey);
-    await Hive.openBox('pending_sync_actions', encryptionCipher: cipher);
-    await Hive.openBox('partner_bookings_cache', encryptionCipher: cipher);
-    await Hive.openBox('my_bookings_cache', encryptionCipher: cipher);
-  } else {
-    Logger.e(
-      'Hive encryption key unavailable; caching disabled. Data will not persist across restarts.',
-    );
-  }
-
+  // Asagidaki uc is birbirinden bagimsiz: jailbreak kontrolu, Firebase init ve
+  // (anahtar zaten elde edilmis) Hive box'larini acma. Sirali degil, paralel.
   var isRooted = false;
-  try {
-    isRooted = await JailbreakRootDetection.instance.isJailBroken;
-  } catch (e) {
-    Logger.w('Security check error', e);
-  }
 
-  if (Env.firebaseEnabled) {
+  Future<void> checkRoot() async {
     try {
-      await Firebase.initializeApp();
-      FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
+      isRooted = await JailbreakRootDetection.instance.isJailBroken;
     } catch (e) {
-      Logger.e('Firebase init failed', e);
+      Logger.w('Security check error', e);
     }
   }
+
+  Future<void> initFirebase() async {
+    if (Env.firebaseEnabled) {
+      try {
+        await Firebase.initializeApp();
+        FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
+      } catch (e) {
+        Logger.e('Firebase init failed', e);
+      }
+    }
+  }
+
+  Future<void> openHiveBoxes() async {
+    // Yerel degiskene alinip null-check burada yapiliyor: hiveKey disaridan
+    // yakalanan (captured) degisken oldugu icin tip daraltmasinin (promotion)
+    // her derleyicide sorunsuz calismasini garantiler.
+    final key = hiveKey;
+    if (key != null) {
+      final cipher = HiveAesCipher(key);
+      await Hive.openBox('pending_sync_actions', encryptionCipher: cipher);
+      await Hive.openBox('partner_bookings_cache', encryptionCipher: cipher);
+      await Hive.openBox('my_bookings_cache', encryptionCipher: cipher);
+    } else {
+      Logger.e(
+        'Hive encryption key unavailable; caching disabled. Data will not persist across restarts.',
+      );
+    }
+  }
+
+  await Future.wait([checkRoot(), initFirebase(), openHiveBoxes()]);
 
   final app = EasyLocalization(
     supportedLocales: const [Locale('tr'), Locale('en')],
