@@ -127,6 +127,10 @@ class _BagajParkAppState extends ConsumerState<BagajParkApp>
         locale: context.locale,
         routerConfig: router,
         builder: (context, child) {
+          // `themeMode` tek basina (ozellikle `system`) gercek parlakligi
+          // soylemez; MaterialApp temayi cozdukten sonraki tek dogru yer
+          // burasi. AppColors'in tema-duyarli getter'lari bunu okur.
+          AppColors.syncBrightness(Theme.of(context).brightness);
           return Stack(
             children: [
               child ?? const SizedBox.shrink(),

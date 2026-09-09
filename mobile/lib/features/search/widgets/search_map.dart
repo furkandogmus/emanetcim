@@ -259,8 +259,11 @@ class _SearchMapState extends State<SearchMap> {
                                         horizontal: 8,
                                         vertical: 4,
                                       ),
+                                      // Sabit koyu etiket: harita ustunde
+                                      // uygulama temasindan bagimsiz sabit
+                                      // beyaz metinle eslesir.
                                       decoration: BoxDecoration(
-                                        color: AppColors.textDark,
+                                        color: const Color(0xFF0F172A),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Text(

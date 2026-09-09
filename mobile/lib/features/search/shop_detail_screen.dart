@@ -186,13 +186,15 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                                     Flexible(
                                       child: Text(
                                         s.name,
+                                        // color SABIT: bu sayfa govdesi
+                                        // yukarida (Colors.white) hep beyaz.
                                         style: Theme.of(context)
                                             .textTheme
                                             .displayLarge!
                                             .copyWith(
                                               fontSize: 28,
                                               fontWeight: FontWeight.bold,
-                                              color: AppColors.textDark,
+                                              color: const Color(0xFF0F172A),
                                             ),
                                       ),
                                     ),
@@ -694,7 +696,7 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
       style: Theme.of(context).textTheme.titleLarge!.copyWith(
         fontSize: 20,
         fontWeight: FontWeight.bold,
-        color: AppColors.textDark,
+        color: const Color(0xFF0F172A),
       ),
     );
   }
@@ -719,7 +721,7 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
             style: Theme.of(context).textTheme.titleSmall!.copyWith(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: AppColors.textDark,
+              color: const Color(0xFF0F172A),
             ),
             textAlign: TextAlign.center,
           ),
@@ -753,7 +755,7 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
             style: Theme.of(context).textTheme.titleSmall!.copyWith(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: AppColors.textDark,
+              color: const Color(0xFF0F172A),
             ),
           ),
         ],

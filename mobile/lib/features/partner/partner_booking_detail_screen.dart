@@ -283,7 +283,7 @@ class _PartnerBookingDetailScreenState
     final fmt = DateFormat('dd MMM, HH:mm');
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.bgLight,
       appBar: AppBar(
         title: Text(
           'nav.partner'.tr(),
@@ -728,7 +728,9 @@ class _BagRevisionBottomSheetState extends State<_BagRevisionBottomSheet> {
                   style: Theme.of(context).textTheme.titleMedium!.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textDark,
+                    // Bu satir daima-beyaz bir sheet icinde cizilir; sabit
+                    // kalmali.
+                    color: const Color(0xFF0F172A),
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -801,6 +803,10 @@ class _BagRevisionBottomSheetState extends State<_BagRevisionBottomSheet> {
                   style: Theme.of(context).textTheme.titleLarge!.copyWith(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
+                    // Bu sheet daima beyaz (yukarida Colors.white); renk
+                    // verilmeyince koyu temanin varsayilan (acik) rengini
+                    // miras alip gorunmez oluyordu.
+                    color: const Color(0xFF0F172A),
                   ),
                 ),
                 IconButton(

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/utils/error_handler.dart';
+import '../../shared/utils/app_colors.dart';
 import 'admin_controller.dart';
 
 class AdminMessagesScreen extends ConsumerStatefulWidget {
@@ -66,7 +67,7 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.bgLight,
       appBar: AppBar(
         title: Text(
           'admin.messages_title'.tr(),

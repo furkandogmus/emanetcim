@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api/api_client.dart';
 import '../../shared/models/earnings_stats.dart';
+import '../../shared/utils/app_colors.dart';
 import '../../shared/widgets/skeleton.dart';
 
 class PartnerEarningsScreen extends ConsumerStatefulWidget {
@@ -72,7 +73,7 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.bgLight,
       appBar: AppBar(
         title: Text(
           'partner.earnings'.tr(),
@@ -251,9 +252,11 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
               children: [
                 Text(
                   'partner.paid_status'.tr(),
+                  // color SABIT: kart yukarida (Colors.white) hep beyaz.
                   style: Theme.of(context).textTheme.titleMedium!.copyWith(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
+                    color: const Color(0xFF0F172A),
                   ),
                 ),
                 Text(

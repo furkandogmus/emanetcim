@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
 import '../../core/auth/auth_controller.dart';
+import '../../shared/utils/app_colors.dart';
 import '../../shared/widgets/confirm_dialog.dart';
 import 'admin_controller.dart';
 
@@ -22,7 +22,7 @@ class AdminDashboardScreen extends ConsumerWidget {
           const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (err, stack) => Scaffold(body: Center(child: Text('Hata: $err'))),
       data: (stats) => Scaffold(
-        backgroundColor: const Color(0xFFF8FAFC),
+        backgroundColor: AppColors.bgLight,
         appBar: AppBar(
           title: Text(
             'admin.dashboard'.tr(),
@@ -255,7 +255,7 @@ class AdminDashboardScreen extends ConsumerWidget {
           HapticFeedback.lightImpact();
           onTap?.call();
         },
-        tileColor: Colors.white,
+        tileColor: AppColors.bgCard,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: Container(
@@ -277,7 +277,7 @@ class AdminDashboardScreen extends ConsumerWidget {
           subtitle,
           style: Theme.of(context).textTheme.bodySmall!.copyWith(
             fontSize: 12,
-            color: const Color(0xFF424242),
+            color: AppColors.textSecondary,
           ),
         ),
         trailing: isPulse

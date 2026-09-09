@@ -18,7 +18,7 @@ class NotificationsScreen extends ConsumerWidget {
     final notifications = ref.watch(notificationProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.bgLight,
       appBar: AppBar(
         title: Text(
           'notifications.title'.tr(),

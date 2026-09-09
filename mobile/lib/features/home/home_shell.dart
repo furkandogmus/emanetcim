@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/auth/auth_controller.dart';
 import '../../shared/models/user.dart';
+import '../../shared/utils/app_colors.dart';
 
 class HomeShell extends ConsumerWidget {
   const HomeShell({required this.child, super.key});
@@ -111,7 +112,7 @@ class HomeShell extends ConsumerWidget {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.bgLight,
       extendBody: true,
       body: child,
       bottomNavigationBar: NavigationBar(

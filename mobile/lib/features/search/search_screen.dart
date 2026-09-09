@@ -327,9 +327,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         maxChildSize: 0.9,
         expand: false,
         builder: (context, scrollController) => DecoratedBox(
-          decoration: const BoxDecoration(
-            color: Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          // Sabit Color(0xFFF8FAFC) DEGIL: bu genel bir liste sayfasi,
+          // "her zaman beyaz" olmasi gereken bir bilet/marka elemani degil --
+          // temaya uymali (AppColors.bgLight koyu temada dogru rengi verir).
+          decoration: BoxDecoration(
+            color: AppColors.bgLight,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           ),
           child: Column(
             children: [
@@ -731,9 +734,12 @@ class _SearchSuffixIcon extends StatelessWidget {
             onTap: onFilter,
             child: Container(
               margin: const EdgeInsets.all(8),
+              // Sabit koyu/turuncu daire: icerideki ikon SABIT beyaz, zemin de
+              // AppColors.textDark gibi dinamik olamaz yoksa koyu temada
+              // beyaz ikon neredeyse-beyaz zeminde kaybolur.
               decoration: BoxDecoration(
                 color: hasActiveFilter
-                    ? AppColors.textDark
+                    ? const Color(0xFF0F172A)
                     : AppColors.brandOrange,
                 shape: BoxShape.circle,
               ),
