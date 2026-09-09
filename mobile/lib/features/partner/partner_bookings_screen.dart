@@ -8,6 +8,8 @@ import '../../core/repositories/booking_repository.dart';
 import '../../shared/models/booking.dart';
 import '../../shared/utils/app_colors.dart';
 import '../../shared/utils/booking_helpers.dart';
+import '../../shared/widgets/empty_state.dart';
+import '../../shared/widgets/error_state.dart';
 import '../../shared/widgets/how_it_works_sheet.dart';
 import '../../shared/widgets/skeleton.dart';
 
@@ -146,7 +148,10 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
                         const SizedBox(width: 8),
                         _filterChip('partner.filter_active'.tr(), 'active'),
                         const SizedBox(width: 8),
-                        _filterChip('partner.filter_completed'.tr(), 'completed'),
+                        _filterChip(
+                          'partner.filter_completed'.tr(),
+                          'completed',
+                        ),
                       ],
                     ),
                   ),
@@ -179,36 +184,50 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
               ),
             ),
             error: (e, _) => SliverFillRemaining(
-              child: Center(child: Text('common.error'.tr())),
+              child: ErrorState(title: 'common.error'.tr()),
             ),
             data: (list) {
               List<BookingDto> filtered;
               if (_filter == 'waiting') {
-                filtered = list.where((b) => b.status == BookingStatus.waitingApproval).toList();
+                filtered = list
+                    .where((b) => b.status == BookingStatus.waitingApproval)
+                    .toList();
               } else if (_filter == 'active') {
-                filtered = list.where((b) => b.status == BookingStatus.approved || b.status == BookingStatus.paid || b.status == BookingStatus.checkedIn).toList();
+                filtered = list
+                    .where(
+                      (b) =>
+                          b.status == BookingStatus.approved ||
+                          b.status == BookingStatus.paid ||
+                          b.status == BookingStatus.checkedIn,
+                    )
+                    .toList();
               } else if (_filter == 'completed') {
-                filtered = list.where((b) => b.status == BookingStatus.checkedOut).toList();
+                filtered = list
+                    .where((b) => b.status == BookingStatus.checkedOut)
+                    .toList();
               } else {
                 filtered = list;
               }
 
               return filtered.isEmpty
-                ? SliverFillRemaining(
-                    child: Center(child: Text('partner.no_bookings'.tr())),
-                  )
-                : SliverPadding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        final b = filtered[index];
-                        return _BookingPartnerCard(booking: b, fmt: fmt);
-                      }, childCount: filtered.length),
-                    ),
-                  );
+                  ? SliverFillRemaining(
+                      child: EmptyState(
+                        icon: Icons.luggage_outlined,
+                        title: 'partner.no_bookings'.tr(),
+                      ),
+                    )
+                  : SliverPadding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final b = filtered[index];
+                          return _BookingPartnerCard(booking: b, fmt: fmt);
+                        }, childCount: filtered.length),
+                      ),
+                    );
             },
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 100)),
@@ -217,56 +236,56 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
     );
   }
 
-Widget _buildSummaryCard(
-  String title,
-  String value,
-  IconData icon,
-  Color color,
-) {
-  return Expanded(
-    child: Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: color, size: 28),
-          const SizedBox(height: 12),
-          Semantics(
-            label: value,
-            child: Text(
-              value,
-              style: GoogleFonts.outfit(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+  Widget _buildSummaryCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: color, size: 28),
+            const SizedBox(height: 12),
+            Semantics(
+              label: value,
+              child: Text(
+                value,
+                style: GoogleFonts.outfit(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ),
-          Semantics(
-            label: title,
-            child: Text(
-              title,
-              style: GoogleFonts.outfit(
-                fontSize: 12,
-                color: const Color(0xFF424242),
+            Semantics(
+              label: title,
+              child: Text(
+                title,
+                style: GoogleFonts.outfit(
+                  fontSize: 12,
+                  color: const Color(0xFF424242),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   void _showHowItWorks(BuildContext context) {
     showModalBottomSheet(
@@ -280,12 +299,21 @@ Widget _buildSummaryCard(
   Widget _filterChip(String label, String value) {
     final selected = _filter == value;
     return ChoiceChip(
-      label: Text(label, style: GoogleFonts.outfit(fontSize: 13, fontWeight: selected ? FontWeight.bold : FontWeight.w500, color: selected ? Colors.white : AppColors.textDark)),
+      label: Text(
+        label,
+        style: GoogleFonts.outfit(
+          fontSize: 13,
+          fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+          color: selected ? Colors.white : AppColors.textDark,
+        ),
+      ),
       selected: selected,
       onSelected: (_) => setState(() => _filter = value),
       selectedColor: AppColors.brandOrange,
       backgroundColor: Colors.white,
-      side: BorderSide(color: selected ? AppColors.brandOrange : Colors.grey.shade300),
+      side: BorderSide(
+        color: selected ? AppColors.brandOrange : Colors.grey.shade300,
+      ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     );
   }

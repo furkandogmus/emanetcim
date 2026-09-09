@@ -8,6 +8,7 @@ import '../../core/services/haptic_service.dart';
 import '../../core/services/notification_service.dart';
 import '../../shared/models/notification.dart';
 import '../../shared/utils/app_colors.dart';
+import '../../shared/widgets/empty_state.dart';
 
 class NotificationsScreen extends ConsumerWidget {
   const NotificationsScreen({super.key});
@@ -42,33 +43,10 @@ class NotificationsScreen extends ConsumerWidget {
         ],
       ),
       body: notifications.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(32),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.withValues(alpha: 0.05),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.notifications_off_outlined,
-                      size: 64,
-                      color: Color(0xFF616161),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'notifications.empty'.tr(),
-                    style: GoogleFonts.outfit(
-                      color: const Color(0xFF616161),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
+          ? EmptyState(
+              icon: Icons.notifications_off_outlined,
+              title: 'notifications.empty'.tr(),
+              accentColor: Theme.of(context).colorScheme.onSurfaceVariant,
             )
           : ListView.separated(
               padding: const EdgeInsets.all(20),
@@ -221,8 +199,12 @@ class NotificationsScreen extends ConsumerWidget {
   String _formatTime(DateTime date) {
     final now = DateTime.now();
     final diff = now.difference(date);
-    if (diff.inMinutes < 60) return 'common.time_minutes'.tr(args: [diff.inMinutes.toString()]);
-    if (diff.inHours < 24) return 'common.time_hours'.tr(args: [diff.inHours.toString()]);
+    if (diff.inMinutes < 60) {
+      return 'common.time_minutes'.tr(args: [diff.inMinutes.toString()]);
+    }
+    if (diff.inHours < 24) {
+      return 'common.time_hours'.tr(args: [diff.inHours.toString()]);
+    }
     return DateFormat('dd MMM, HH:mm').format(date);
   }
 }
