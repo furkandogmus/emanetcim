@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -155,21 +154,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       placeholder: (_, _) => Center(
                         child: Text(
                           initial,
-                          style: GoogleFonts.outfit(
-                            fontSize: 40,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.brandOrange,
-                          ),
+                          style: Theme.of(context).textTheme.displaySmall!
+                              .copyWith(
+                                fontSize: 40,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.brandOrange,
+                              ),
                         ),
                       ),
                       errorWidget: (_, _, _) => Center(
                         child: Text(
                           initial,
-                          style: GoogleFonts.outfit(
-                            fontSize: 40,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.brandOrange,
-                          ),
+                          style: Theme.of(context).textTheme.displaySmall!
+                              .copyWith(
+                                fontSize: 40,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.brandOrange,
+                              ),
                         ),
                       ),
                     ),
@@ -177,7 +178,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 : Center(
                     child: Text(
                       initial,
-                      style: GoogleFonts.outfit(
+                      style: Theme.of(context).textTheme.displaySmall!.copyWith(
                         fontSize: 40,
                         fontWeight: FontWeight.bold,
                         color: AppColors.brandOrange,
@@ -225,7 +226,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       appBar: AppBar(
         title: Text(
           'profile.title'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
       ),
       body: ListView(
@@ -408,9 +411,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             onPressed: () => unawaited(_showDeleteAccount(context, ref)),
             child: Text(
               'profile.delete_account'.tr(),
-              style: GoogleFonts.outfit(
-                color: const Color(0xFF757575),
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                 fontSize: 13,
+                color: const Color(0xFF757575),
                 decoration: TextDecoration.underline,
               ),
             ),
@@ -421,7 +424,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           Center(
             child: Text(
               'profile.version'.tr(args: ['1.0.0']),
-              style: GoogleFonts.outfit(
+              style: Theme.of(context).textTheme.labelSmall!.copyWith(
                 fontSize: 11,
                 color: const Color(0xFF757575),
               ),
@@ -439,7 +442,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       padding: const EdgeInsets.only(bottom: 12, left: 4),
       child: Text(
         title.toUpperCase(),
-        style: GoogleFonts.outfit(
+        style: Theme.of(context).textTheme.labelMedium!.copyWith(
           fontSize: 12,
           fontWeight: FontWeight.bold,
           color: const Color(0xFF616161),
@@ -481,17 +484,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   children: [
                     Text(
                       'profile.referral_title'.tr(),
-                      style: GoogleFonts.outfit(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
                         fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
                     Text(
                       'profile.referral_hint'.tr(),
-                      style: GoogleFonts.outfit(
-                        color: const Color(0xFF757575),
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
                         fontSize: 12,
+                        color: const Color(0xFF757575),
                       ),
                     ),
                   ],
@@ -512,10 +515,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 Flexible(
                   child: Text(
                     user?.referralCode ?? 'BP-WELCOME',
-                    style: GoogleFonts.outfit(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
                       fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                       letterSpacing: 1,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -539,10 +542,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                   label: Text(
                     'profile.copy'.tr(),
-                    style: GoogleFonts.outfit(
-                      color: AppColors.brandOrange,
-                      fontWeight: FontWeight.bold,
+                    style: Theme.of(context).textTheme.labelSmall!.copyWith(
                       fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.brandOrange,
                     ),
                   ),
                   style: TextButton.styleFrom(
@@ -581,7 +584,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         leading: Icon(icon, color: AppColors.textDark, size: 22),
         title: Text(
           title,
-          style: GoogleFonts.outfit(
+          style: Theme.of(context).textTheme.titleMedium!.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w500,
             color: AppColors.textDark,
@@ -615,7 +618,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
         title: Text(
           'profile.theme'.tr(),
-          style: GoogleFonts.outfit(
+          style: Theme.of(context).textTheme.titleMedium!.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w500,
             color: AppColors.textDark,
@@ -644,7 +647,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             children: [
               Text(
                 'profile.theme'.tr(),
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -709,7 +712,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
         title: Text(
           'profile.biometric'.tr(),
-          style: GoogleFonts.outfit(
+          style: Theme.of(context).textTheme.titleMedium!.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w500,
             color: AppColors.textDark,
@@ -717,7 +720,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
         subtitle: Text(
           'profile.biometric_desc'.tr(),
-          style: GoogleFonts.outfit(
+          style: Theme.of(context).textTheme.bodySmall!.copyWith(
             fontSize: 12,
             color: const Color(0xFF616161),
           ),
@@ -782,7 +785,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             children: [
               Text(
                 'profile.notifications'.tr(),
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -792,7 +795,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 title: const Text('Rezervasyon Güncellemeleri'),
                 subtitle: Text(
                   'Onay, check-in, check-out ve QR kod bildirimleri',
-                  style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
                 ),
                 value: prefs.bookingUpdates,
                 activeThumbColor: AppColors.brandOrange,
@@ -805,7 +811,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 title: const Text('Kampanya & İndirim'),
                 subtitle: Text(
                   'Özel indirimler, kampanya duyuruları ve promosyon kodları',
-                  style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
                 ),
                 value: prefs.promotions,
                 activeThumbColor: AppColors.brandOrange,
@@ -818,7 +827,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 title: const Text('Esnaf Uyarıları'),
                 subtitle: Text(
                   'Yeni rezervasyon, mesaj ve acil durum bildirimleri',
-                  style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
                 ),
                 value: prefs.partnerAlerts,
                 activeThumbColor: AppColors.brandOrange,
@@ -905,7 +917,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               children: [
                 Text(
                   'profile.edit_profile'.tr(),
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -992,13 +1004,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             children: [
               Text(
                 title,
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 16),
-              Text(content, style: GoogleFonts.outfit(height: 1.6)),
+              Text(
+                content,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium!.copyWith(height: 1.6),
+              ),
             ],
           ),
         ),
@@ -1012,7 +1029,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         children: [
           Text(
             value,
-            style: GoogleFonts.outfit(
+            style: Theme.of(context).textTheme.titleLarge!.copyWith(
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: AppColors.textDark,
@@ -1020,7 +1037,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           Text(
             label,
-            style: GoogleFonts.outfit(
+            style: Theme.of(context).textTheme.bodySmall!.copyWith(
               fontSize: 12,
               color: const Color(0xFF616161),
             ),

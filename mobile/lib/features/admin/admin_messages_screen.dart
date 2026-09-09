@@ -1,7 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/utils/error_handler.dart';
@@ -65,7 +64,9 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
       appBar: AppBar(
         title: Text(
           'admin.messages_title'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
@@ -89,9 +90,9 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                   const SizedBox(height: 16),
                   Text(
                     'admin.no_messages'.tr(),
-                    style: GoogleFonts.outfit(
-                      color: const Color(0xFF616161),
+                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                       fontSize: 16,
+                      color: const Color(0xFF616161),
                     ),
                   ),
                 ],
@@ -141,11 +142,14 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                       ),
                       title: Text(
                         msg['subject'] ?? 'Konu Yok',
-                        style: GoogleFonts.outfit(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: isRead ? Colors.grey : const Color(0xFF0F172A),
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium!
+                            .copyWith(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: isRead
+                                  ? Colors.grey
+                                  : const Color(0xFF0F172A),
+                            ),
                       ),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,18 +157,20 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                           const SizedBox(height: 4),
                           Text(
                             'Kimden: ${msg['from'] ?? 'Bilinmiyor'}',
-                            style: GoogleFonts.outfit(
-                              fontSize: 12,
-                              color: const Color(0xFF424242),
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall!
+                                .copyWith(
+                                  fontSize: 12,
+                                  color: const Color(0xFF424242),
+                                ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             formattedDate,
-                            style: GoogleFonts.outfit(
-                              fontSize: 11,
-                              color: const Color(0xFF757575),
-                            ),
+                            style: Theme.of(context).textTheme.labelSmall!
+                                .copyWith(
+                                  fontSize: 11,
+                                  color: const Color(0xFF757575),
+                                ),
                           ),
                         ],
                       ),
@@ -209,7 +215,7 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
             children: [
               Text(
                 msg['subject'] ?? 'Konu Yok',
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -217,14 +223,18 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
               const SizedBox(height: 8),
               Text(
                 'Kimden: ${msg['from'] ?? 'Bilinmiyor'}',
-                style: GoogleFonts.outfit(color: const Color(0xFF424242)),
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  color: const Color(0xFF424242),
+                ),
               ),
               const SizedBox(height: 16),
               const Divider(),
               const SizedBox(height: 16),
               Text(
                 msg['text'] ?? msg['html'] ?? 'İçerik yok',
-                style: GoogleFonts.outfit(height: 1.6),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium!.copyWith(height: 1.6),
               ),
             ],
           ),
