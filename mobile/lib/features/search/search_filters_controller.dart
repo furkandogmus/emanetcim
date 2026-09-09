@@ -112,7 +112,15 @@ class SearchFiltersController extends Notifier<SearchFilters> {
 }
 
 List<ShopDto> applySearchFilters(List<ShopDto> list, SearchFilters f) {
-  var filtered = list;
+  // Savunmaci kopya: `list` cogunlukla `nearbyShopsProvider`'in AsyncData
+  // icinde onbelleklediği ayni liste nesnesidir (bkz. `filteredShopsProvider`
+  // altindaki not). Hicbir where-filtresi aktif degilse asagidaki hicbir
+  // `.where().toList()` calismaz ve `filtered` `list` ile ayni referansta
+  // kalirdi; sonra `sortBy == 'price'/'rating'` icin cagrilan `..sort(...)`
+  // Dart'ta listeyi YERINDE sirali, provider'in onbellekteki listesini
+  // kalici olarak bozardi. `List<ShopDto>.of(list)` her zaman yeni bir kopya
+  // aciyor, boylece `nearbyShopsProvider`'in state'i asla mutasyona ugramaz.
+  var filtered = List<ShopDto>.of(list);
   if (f.only247) filtered = filtered.where((s) => s.open247).toList();
   if (f.onlyOpenNow) filtered = filtered.where((s) => s.isActive).toList();
   if (f.minRating > 0) {
