@@ -71,8 +71,9 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
       appBar: AppBar(
         title: Text(
           'admin.messages_title'.tr(),
-          style: Theme.of(context).textTheme.titleSmall!
-              .copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
@@ -96,8 +97,10 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                   const SizedBox(height: 16),
                   Text(
                     'admin.no_messages'.tr(),
-                    style: Theme.of(context).textTheme.bodyLarge!
-                        .copyWith(fontSize: 16, color: const Color(0xFF616161)),
+                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                      fontSize: 16,
+                      color: const Color(0xFF616161),
+                    ),
                   ),
                 ],
               ),
@@ -113,8 +116,9 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                 // `lastSeenAt.toLocal()` deseniyle ayni sekilde once yerel
                 // saate cevrilmeliydi, aksi halde TR saatinden 3 saat geri
                 // gosteriliyordu.
-                final formattedDate = DateFormat('dd.MM.yyyy HH:mm')
-                    .format(date.toLocal());
+                final formattedDate = DateFormat(
+                  'dd.MM.yyyy HH:mm',
+                ).format(date.toLocal());
 
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
@@ -222,22 +226,26 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
             children: [
               Text(
                 msg['subject'] ?? 'Konu Yok',
-                style: Theme.of(context).textTheme.titleLarge!
-                    .copyWith(fontSize: 20, fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 'Kimden: ${msg['from'] ?? 'Bilinmiyor'}',
-                style: Theme.of(context).textTheme.bodyMedium!
-                    .copyWith(color: const Color(0xFF424242)),
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  color: const Color(0xFF424242),
+                ),
               ),
               const SizedBox(height: 16),
               const Divider(),
               const SizedBox(height: 16),
               Text(
                 msg['text'] ?? msg['html'] ?? 'İçerik yok',
-                style: Theme.of(context).textTheme.bodyMedium!
-                    .copyWith(height: 1.6),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium!.copyWith(height: 1.6),
               ),
             ],
           ),
