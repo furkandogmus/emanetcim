@@ -14,6 +14,7 @@ import '../../core/auth/auth_controller.dart';
 import '../../core/auth/biometric_service.dart';
 import '../../core/auth/token_store.dart';
 import '../../core/services/haptic_service.dart';
+import '../../core/utils/error_handler.dart';
 import '../../shared/utils/app_colors.dart';
 import '../../shared/widgets/how_it_works_sheet.dart';
 
@@ -88,7 +89,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         _toast('common.error'.tr());
       }
     } catch (e) {
-      _toast('common.error'.tr());
+      _toast(getErrorMessage(e, fallback: 'common.error'.tr()));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -109,7 +110,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      _toast('auth.google_error'.tr());
+      _toast(getErrorMessage(e, fallback: 'auth.google_error'.tr()));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -130,7 +131,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      _toast('auth.apple_error'.tr());
+      _toast(getErrorMessage(e, fallback: 'auth.apple_error'.tr()));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -687,12 +688,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         'refreshToken': newRefresh,
         'user': me.data,
       });
-    } on DioException {
+    } on DioException catch (e) {
       if (mounted) {
         setState(() => _busy = false);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('common.error'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+          ),
+        );
       }
     }
   }
@@ -717,11 +720,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('auth.forgot_password_sent'.tr())),
         );
-      } catch (_) {
+      } catch (e) {
         if (!mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('common.error'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+          ),
+        );
       } finally {
         if (mounted) setState(() => _busy = false);
       }
