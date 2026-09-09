@@ -13,6 +13,7 @@ import '../../core/api/api_client.dart';
 import '../../core/auth/auth_controller.dart';
 import '../../core/auth/biometric_service.dart';
 import '../../core/auth/token_store.dart';
+import '../../core/config/feature_flags_controller.dart';
 import '../../core/config/theme_mode_provider.dart';
 import '../../core/push/notification_prefs.dart';
 import '../../core/services/haptic_service.dart';
@@ -198,6 +199,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final user = ref.watch(authControllerProvider).session;
     final theme = Theme.of(context);
     final isPartner = user?.role == UserRole.partner;
+    final securityMenuEnabled =
+        ref.watch(featureFlagsControllerProvider)['mobile_security_menu'] ??
+        false;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -309,16 +313,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             'profile.notifications'.tr(),
             onTap: () => _showNotificationPrefs(context),
           ),
-          _menuItem(
-            Icons.devices_other_rounded,
-            'security.devices_title'.tr(),
-            onTap: () => context.push('/security/devices'),
-          ),
-          _menuItem(
-            Icons.shield_outlined,
-            'security.permissions_title'.tr(),
-            onTap: () => context.push('/security/permissions'),
-          ),
+          if (securityMenuEnabled) ...[
+            _menuItem(
+              Icons.devices_other_rounded,
+              'security.devices_title'.tr(),
+              onTap: () => context.push('/security/devices'),
+            ),
+            _menuItem(
+              Icons.shield_outlined,
+              'security.permissions_title'.tr(),
+              onTap: () => context.push('/security/permissions'),
+            ),
+          ],
           const SizedBox(height: 8),
           _themeToggle(context),
           const SizedBox(height: 8),
