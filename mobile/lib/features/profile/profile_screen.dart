@@ -143,6 +143,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       width: 96,
                       height: 96,
                       fit: BoxFit.cover,
+                      // 96x96 gosteriliyor; tam cozunurluk decode etmek
+                      // yerine ekran yogunluguna gore olceklenmis boyutta
+                      // decode et (bellek/CPU tasarrufu).
+                      memCacheWidth:
+                          (96 * MediaQuery.of(context).devicePixelRatio)
+                              .round(),
+                      memCacheHeight:
+                          (96 * MediaQuery.of(context).devicePixelRatio)
+                              .round(),
                       placeholder: (_, _) => Center(
                         child: Text(
                           initial,
@@ -199,7 +208,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(authControllerProvider).session;
+    // Sadece session'i izliyoruz; AuthState.loading/onboardingDone gibi bu
+    // ekranla ilgisiz alanlar degistiginde tum profil ekrani yeniden
+    // derlenmesin.
+    final user = ref.watch(
+      authControllerProvider.select((state) => state.session),
+    );
     final theme = Theme.of(context);
     final isPartner = user?.role == UserRole.partner;
     final securityMenuEnabled =
