@@ -160,7 +160,7 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
           ),
           const SizedBox(height: 16),
 
-          ..._stats.history.map((e) => _historyTile(e as Map<String, dynamic>)),
+          ..._stats.history.map(_historyTile),
 
           const SizedBox(height: 32),
 
@@ -216,7 +216,7 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
     );
   }
 
-  Widget _historyTile(Map<String, dynamic> item) {
+  Widget _historyTile(EarningsHistoryItem item) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -257,7 +257,7 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
                   ),
                 ),
                 Text(
-                  item['date'],
+                  item.date,
                   style: Theme.of(context).textTheme.bodySmall!.copyWith(
                     fontSize: 12,
                     color: const Color(0xFF616161),
@@ -267,7 +267,7 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
             ),
           ),
           Text(
-            '+₺${item['amount']}',
+            '+₺${item.amount}',
             style: Theme.of(context).textTheme.titleMedium!.copyWith(
               fontSize: 16,
               fontWeight: FontWeight.bold,

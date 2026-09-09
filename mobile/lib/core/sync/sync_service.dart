@@ -91,6 +91,24 @@ class SyncService {
     Map<String, dynamic>? data,
   ]) async {
     final userId = _ref.read(authControllerProvider).session?.id ?? 'guest';
+
+    // Ayni booking+type icin zaten bekleyen bir aksiyon varsa yenisini
+    // eklemiyoruz. Aksi halde esnaf senkronize olmadan ayni rezervasyona
+    // tekrar girip ayni aksiyonu bir daha tetiklerse (liste/detay ekrani
+    // hala eski -- onaylanmis -- durumu gosterdigi icin buton hala
+    // aktiftir), baglanti geri geldiginde ayni booking icin iki check-in/
+    // check-out istegi art arda backend'e gonderilir.
+    final alreadyPending = pendingActions.any(
+      (a) => a.userId == userId && a.bookingId == bookingId && a.type == type,
+    );
+    if (alreadyPending) {
+      debugPrint(
+        'Offline action skipped, already pending for booking '
+        '$bookingId: $type',
+      );
+      return;
+    }
+
     final action = SyncAction(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       userId: userId,
