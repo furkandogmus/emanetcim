@@ -72,6 +72,7 @@ dependencies:
   image_picker: 1.2.3
   local_auth: 3.0.2
   crypto: ^3.0.7
+  flutter_map_vector_tiles: ^2.8.1
 
 dev_dependencies:
   flutter_test:
@@ -87,6 +88,7 @@ dev_dependencies:
   network_image_mock: ^2.1.1
   mocktail: ^1.0.5
   flutter_launcher_icons: 0.14.4
+  dependency_validator: 5.0.6
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
