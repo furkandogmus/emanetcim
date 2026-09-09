@@ -173,6 +173,14 @@ type AppConfigSource = {
 };
 
 /**
+ * Uzaktan yapilandirma: degerlendirilmis { anahtar: acik/kapali } haritasi.
+ * `/api/mobile/feature-flags`'in tek yaziciysi.
+ */
+export function toMobileFeatureFlags(flags: Record<string, boolean>) {
+  return { flags };
+}
+
+/**
  * Uygulama acilis kontrolu: zorunlu/opsiyonel guncelleme kapisi.
  * `/api/mobile/config`'in tek yaziciysi.
  */
