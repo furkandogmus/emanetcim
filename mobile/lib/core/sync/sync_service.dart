@@ -1,8 +1,11 @@
 import 'dart:async';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
+
 import '../api/api_client.dart';
 import '../auth/auth_controller.dart';
 
@@ -131,6 +134,24 @@ class SyncService {
           await _box.delete(action.id);
           debugPrint('Action ${action.id} synced successfully.');
         } catch (e) {
+          // 4xx: sunucu isteği kalıcı olarak reddetti (ör. rezervasyon başka
+          // cihazdan zaten check-in edilmiş). Yeniden denemek sonucu
+          // değiştirmez, bu yüzden kuyruktan düşür ve kalan işlemlere devam
+          // et — aksi halde bu tek kalıcı hata, arkasındaki tüm geçerli
+          // işlemleri sonsuza dek bloklar (30sn'de bir tekrar denenir).
+          if (e is DioException) {
+            final statusCode = e.response?.statusCode;
+            if (statusCode != null && statusCode >= 400 && statusCode < 500) {
+              debugPrint(
+                'Action ${action.id} permanently rejected (HTTP $statusCode), '
+                'dropping from queue: $e',
+              );
+              await _box.delete(action.id);
+              continue;
+            }
+          }
+          // Geçici hata (ağ/timeout/5xx): kuyruğu olduğu gibi bırak, sonraki
+          // bağlantı/30sn zamanlayıcısında yeniden denenecek.
           debugPrint('Sync failed for action ${action.id}: $e');
           break; // Stop on failure (likely still offline or API error)
         }
