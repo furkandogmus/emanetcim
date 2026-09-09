@@ -272,21 +272,27 @@ class _TrustStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
+    return Row(
       children: [
         Expanded(
           child: _TrustItem(
             icon: Icons.verified_user_rounded,
-            label: 'Doğrulanmış',
+            label: 'home.trust_verified'.tr(),
           ),
         ),
-        SizedBox(width: 8),
+        const SizedBox(width: 8),
         Expanded(
-          child: _TrustItem(icon: Icons.lock_rounded, label: 'Mühürlü'),
+          child: _TrustItem(
+            icon: Icons.lock_rounded,
+            label: 'home.trust_sealed'.tr(),
+          ),
         ),
-        SizedBox(width: 8),
+        const SizedBox(width: 8),
         Expanded(
-          child: _TrustItem(icon: Icons.bolt_rounded, label: 'Hızlı'),
+          child: _TrustItem(
+            icon: Icons.bolt_rounded,
+            label: 'home.trust_fast'.tr(),
+          ),
         ),
       ],
     );

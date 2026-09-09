@@ -382,6 +382,9 @@
   "home": {
     "greeting": "Hello, {} 👋",
     "greeting_guest": "Hello, Guest 👋",
+    "trust_verified": "Verified",
+    "trust_sealed": "Sealed",
+    "trust_fast": "Fast",
     "hero_title": "Store Your Luggage Safely",
     "hero_subtitle": "Find the nearest shop to explore the city freely.",
     "hero_cta": "Find Storage Spot",
