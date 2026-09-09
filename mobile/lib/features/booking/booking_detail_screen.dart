@@ -17,8 +17,13 @@ import '../../shared/utils/app_colors.dart';
 import '../../shared/utils/booking_helpers.dart';
 import '../../shared/widgets/error_state.dart';
 import '../../shared/widgets/skeleton.dart';
+import 'my_bookings_screen.dart' show myBookingsProvider;
 
-final bookingProvider = FutureProvider.family<BookingDto, String>((
+// `.autoDispose`: bu ikisi olmadan provider, ekrandan cikilip tekrar
+// girilse bile Riverpod container'inda bayat sonucuyla yasamaya devam
+// ediyordu (bkz. DEFECT_BACKLOG). autoDispose ile son dinleyici kalktiginda
+// dusup bir sonraki girişte tazeden cekiliyor.
+final bookingProvider = FutureProvider.autoDispose.family<BookingDto, String>((
   ref,
   id,
 ) async {
@@ -26,8 +31,8 @@ final bookingProvider = FutureProvider.family<BookingDto, String>((
   return result.fold((data) => data, (error) => throw Exception(error));
 });
 
-final bookingSealsProvider =
-    FutureProvider.family<List<Map<String, dynamic>>, String>((ref, id) async {
+final bookingSealsProvider = FutureProvider.autoDispose
+    .family<List<Map<String, dynamic>>, String>((ref, id) async {
       final dio = ref.read(dioProvider);
       final res = await dio.get('/bookings/$id');
       final data = res.data as Map<String, dynamic>;
@@ -67,7 +72,12 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
         timer.cancel();
         return;
       }
-      ref.invalidate(bookingProvider(widget.bookingId));
+      // Muhurler ayri bir provider'dan geliyor (satir 34); yalnizca
+      // bookingProvider'i invalidate etmek check-in sirasinda takilan
+      // muhurleri hic yenilemiyordu.
+      ref
+        ..invalidate(bookingProvider(widget.bookingId))
+        ..invalidate(bookingSealsProvider(widget.bookingId));
     });
   }
 
@@ -588,13 +598,18 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('booking.cancel_success'.tr())));
-        ref.invalidate(bookingProvider(widget.bookingId));
+        // Liste ekrani (my_bookings_screen.dart) ayri, autoDispose olmayan
+        // bir provider okuyor; onu da invalidate etmezsek kullanici geri
+        // dondugunde iptal edilmeden onceki durum/fiyatla gorunmeye devam eder.
+        ref
+          ..invalidate(bookingProvider(widget.bookingId))
+          ..invalidate(myBookingsProvider);
       }
     } on DioException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.response?.data?['error'] ?? 'common.error'.tr()),
+            content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
           ),
         );
       }
@@ -669,15 +684,22 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                       initialTime: TimeOfDay.fromDateTime(newCheckIn!),
                     );
                     if (time != null) {
-                      setSheetState(
-                        () => newCheckIn = DateTime(
-                          date.year,
-                          date.month,
-                          date.day,
-                          time.hour,
-                          time.minute,
-                        ),
+                      final dt = DateTime(
+                        date.year,
+                        date.month,
+                        date.day,
+                        time.hour,
+                        time.minute,
                       );
+                      setSheetState(() {
+                        newCheckIn = dt;
+                        // checkout_screen.dart'taki _pickDate ile ayni kural:
+                        // giris, cikistan sonraya tasiniyorsa cikisi 2 saat
+                        // ileri kaydir; yoksa negatif sureli bir aralik olusur.
+                        if (newCheckOut != null && dt.isAfter(newCheckOut!)) {
+                          newCheckOut = dt.add(const Duration(hours: 2));
+                        }
+                      });
                     }
                   }
                 },
@@ -712,16 +734,31 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                       context: context,
                       initialTime: TimeOfDay.fromDateTime(newCheckOut!),
                     );
+                    if (!mounted) return;
                     if (time != null) {
-                      setSheetState(
-                        () => newCheckOut = DateTime(
-                          date.year,
-                          date.month,
-                          date.day,
-                          time.hour,
-                          time.minute,
-                        ),
+                      final dt = DateTime(
+                        date.year,
+                        date.month,
+                        date.day,
+                        time.hour,
+                        time.minute,
                       );
+                      // checkout_screen.dart'taki _pickDate ile ayni kural:
+                      // tarih secici gun sinirlamasi yalnizca GUN'u kapsiyor,
+                      // ayni gun secilip cikis saati giristen once secilebilir
+                      // -- bunu reddetmezsek negatif sureli bir modify PUT'i
+                      // sunucuya gidiyordu.
+                      if (newCheckIn != null && dt.isBefore(newCheckIn!)) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'checkout.error_checkout_before_checkin'.tr(),
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+                      setSheetState(() => newCheckOut = dt);
                     }
                   }
                 },
@@ -776,13 +813,17 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('booking.modified'.tr())));
-        ref.invalidate(bookingProvider(widget.bookingId));
+        // bkz. _cancelBooking: liste ekrani ayri provider, ayrica invalidate
+        // gerekiyor.
+        ref
+          ..invalidate(bookingProvider(widget.bookingId))
+          ..invalidate(myBookingsProvider);
       }
     } on DioException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.response?.data?['error'] ?? 'common.error'.tr()),
+            content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
           ),
         );
       }
