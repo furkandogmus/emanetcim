@@ -50,41 +50,46 @@ class SessionTimeoutWrapper extends ConsumerStatefulWidget {
   final Widget child;
 
   @override
-  ConsumerState<SessionTimeoutWrapper> createState() => _SessionTimeoutWrapperState();
+  ConsumerState<SessionTimeoutWrapper> createState() =>
+      _SessionTimeoutWrapperState();
 }
 
 class _SessionTimeoutWrapperState extends ConsumerState<SessionTimeoutWrapper>
     with WidgetsBindingObserver {
+  // initState'te bir kere okunur ve saklanir: dispose()'ta ref.read guvensiz
+  // (widget unmount edilirken BuildContext'e dayanir).
+  late final SessionTimeout _sessionTimeout;
+
   @override
   void initState() {
     super.initState();
+    _sessionTimeout = ref.read(sessionTimeoutProvider);
     WidgetsBinding.instance.addObserver(this);
 
     ref.listenManual(authControllerProvider, (prev, next) {
-      final timeout = ref.read(sessionTimeoutProvider);
       if (next.session != null && prev?.session == null) {
-        timeout.start();
+        _sessionTimeout.start();
       } else if (next.session == null && prev?.session != null) {
-        timeout.stop();
+        _sessionTimeout.stop();
       }
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) ref.read(sessionTimeoutProvider).start();
+      if (mounted) _sessionTimeout.start();
     });
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    ref.read(sessionTimeoutProvider).stop();
+    _sessionTimeout.stop();
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      ref.read(sessionTimeoutProvider).onUserActivity();
+      _sessionTimeout.onUserActivity();
     }
   }
 
@@ -92,7 +97,7 @@ class _SessionTimeoutWrapperState extends ConsumerState<SessionTimeoutWrapper>
   Widget build(BuildContext context) {
     return Listener(
       behavior: HitTestBehavior.translucent,
-      onPointerDown: (_) => ref.read(sessionTimeoutProvider).onUserActivity(),
+      onPointerDown: (_) => _sessionTimeout.onUserActivity(),
       child: widget.child,
     );
   }
