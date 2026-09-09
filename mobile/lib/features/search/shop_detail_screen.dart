@@ -2,12 +2,15 @@ import 'dart:async' show unawaited;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_vector_tiles/flutter_map_vector_tiles.dart' as vt;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/api/api_client.dart';
+import '../../core/config/map_style.dart';
 import '../../core/repositories/shop_repository.dart';
 import '../../core/services/favorites_service.dart';
 import '../../core/services/haptic_service.dart';
@@ -33,6 +36,30 @@ class ShopDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
+  // search_map.dart ile AYNI kaynak: MapStyle (bkz. o dosyadaki not).
+  vt.Style? _mapStyle;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadMapStyle());
+  }
+
+  Future<void> _loadMapStyle() async {
+    final style = await const vt.StyleReader(uri: MapStyle.styleUrl).read();
+    if (!mounted) {
+      style.dispose();
+      return;
+    }
+    setState(() => _mapStyle = style);
+  }
+
+  @override
+  void dispose() {
+    _mapStyle?.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final shopAsync = ref.watch(shopProvider(widget.shopId));
@@ -327,11 +354,15 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                                         ),
                                   ),
                                   children: [
-                                    TileLayer(
-                                      urlTemplate:
-                                          'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
-                                      userAgentPackageName: 'com.bagajpark.app',
-                                    ),
+                                    if (_mapStyle case final style?)
+                                      vt.VectorTileLayer(
+                                        theme: style.theme,
+                                        tileProviders: style.providers,
+                                        rasterSources: style.rasterSources,
+                                        sprites: style.sprites,
+                                      )
+                                    else
+                                      ColoredBox(color: Colors.grey.shade200),
                                     MarkerLayer(
                                       markers: [
                                         Marker(
@@ -345,6 +376,18 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                                             Icons.location_on_rounded,
                                             color: AppColors.brandOrange,
                                             size: 36,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    RichAttributionWidget(
+                                      showFlutterMapAttribution: false,
+                                      permanentHeight: 16,
+                                      attributions: [
+                                        TextSourceAttribution(
+                                          MapStyle.attributionText,
+                                          onTap: () => launchUrl(
+                                            Uri.parse(MapStyle.attributionUrl),
                                           ),
                                         ),
                                       ],

@@ -305,6 +305,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.14"
+  dependency_validator:
+    dependency: "direct dev"
+    description:
+      name: dependency_validator
+      sha256: eccaf72eea2a35efb9fd1a6c71165c1b00c7bdf2858c65255f7c13d2f3b376a7
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.0.6"
   dio:
     dependency: "direct main"
     description:
@@ -544,6 +552,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "8.3.2"
+  flutter_map_vector_tiles:
+    dependency: "direct main"
+    description:
+      name: flutter_map_vector_tiles
+      sha256: bf2af5da7e89502f855ccbaaf9c7e87dbd8953bae3dffd6f8a53e7227c60086b
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.8.1"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:

@@ -1,14 +1,18 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_vector_tiles/flutter_map_vector_tiles.dart' as vt;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-import '../../../core/config/env.dart';
+import '../../../core/config/map_style.dart';
 import '../../../shared/models/shop.dart';
 import '../../../shared/utils/app_colors.dart';
 
-class SearchMap extends StatelessWidget {
+class SearchMap extends StatefulWidget {
   const SearchMap({
     required this.mapController,
     required this.shops,
@@ -33,7 +37,45 @@ class SearchMap extends StatelessWidget {
   final ValueChanged<LatLng>? onTap;
 
   @override
+  State<SearchMap> createState() => _SearchMapState();
+}
+
+class _SearchMapState extends State<SearchMap> {
+  vt.Style? _style;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadStyle());
+  }
+
+  Future<void> _loadStyle() async {
+    final style = await const vt.StyleReader(uri: MapStyle.styleUrl).read();
+    if (!mounted) {
+      style.dispose();
+      return;
+    }
+    setState(() => _style = style);
+  }
+
+  @override
+  void dispose() {
+    _style?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final mapController = widget.mapController;
+    final shops = widget.shops;
+    final selectedShopIndex = widget.selectedShopIndex;
+    final onShopSelected = widget.onShopSelected;
+    final center = widget.center;
+    final onPositionChanged = widget.onPositionChanged;
+    final userPosition = widget.userPosition;
+    final customPosition = widget.customPosition;
+    final onTap = widget.onTap;
+    final style = _style;
     return Semantics(
       label: 'Interactive map showing luggage storage locations',
       child: FlutterMap(
@@ -53,16 +95,20 @@ class SearchMap extends StatelessWidget {
           ),
         ),
         children: [
-          TileLayer(
-            urlTemplate: Env.mapTileUrl,
-            subdomains: const ['a', 'b', 'c', 'd'],
-            userAgentPackageName: 'com.bagajpark.app',
-          ),
+          if (style != null)
+            vt.VectorTileLayer(
+              theme: style.theme,
+              tileProviders: style.providers,
+              rasterSources: style.rasterSources,
+              sprites: style.sprites,
+            )
+          else
+            ColoredBox(color: Colors.grey.shade200),
           MarkerLayer(
             markers: [
               if (userPosition != null)
                 Marker(
-                  point: userPosition!,
+                  point: userPosition,
                   width: 40,
                   height: 40,
                   child: Stack(
@@ -104,7 +150,7 @@ class SearchMap extends StatelessWidget {
                 ),
               if (customPosition != null)
                 Marker(
-                  point: customPosition!,
+                  point: customPosition,
                   width: 50,
                   height: 50,
                   child: Stack(
@@ -237,6 +283,19 @@ class SearchMap extends StatelessWidget {
                       ),
                     );
                   }),
+            ],
+          ),
+          RichAttributionWidget(
+            // Kucuk "i" simgesi -- daimi metin cubugu degil. showFlutterMapAttribution
+            // kapali: kutuphanenin kendi reklami degil, yalnizca lisans zorunlulugu.
+            // Sol alt: search_screen.dart'taki "konumum" FAB'i sag altta, ustune binmesin.
+            alignment: AttributionAlignment.bottomLeft,
+            showFlutterMapAttribution: false,
+            attributions: [
+              TextSourceAttribution(
+                MapStyle.attributionText,
+                onTap: () => launchUrl(Uri.parse(MapStyle.attributionUrl)),
+              ),
             ],
           ),
         ],
