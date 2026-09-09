@@ -249,7 +249,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: GHCR girisi
-        uses: docker/login-action@v3
+        # SHA'ya sabitlendi (2026-09-10, depo public): tasinabilir surum
+        # etiketleri (`@v3`), ust akista basi cekmis biri ustune yazarsa
+        # kod incelemesinden gecmemis bir Action'i sessizce calistirabilirdi.
+        # `docker/login-action` gizli GHCR parolasini isliyor -- imtiyazli.
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -257,18 +261,18 @@ jobs:
 
       - name: Etiket ve etiketler
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=latest
             type=sha,prefix=sha-
 
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
 
       - name: Derle ve gonder
         id: build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
         env:
           DOCKER_BUILD_SUMMARY: false
           DOCKER_BUILD_RECORD_UPLOAD: false
@@ -312,7 +316,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: AWS kimligi (GitHub OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
+        # SHA'ya sabitlendi (2026-09-10): AWS'e rol ustlenen bu adim en
+        # imtiyazli uc uye -- tasinabilir `@v4` etiketi buradaki tehdit
+        # modelinde en riskli olani.
+        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4.3.1
         with:
           role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
