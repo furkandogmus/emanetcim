@@ -841,6 +841,9 @@ enum PaymentStatus {
   PENDING
   /// Kart provizyonu alındı ama tahsil edilmedi (3DS/auth-capture akışı).
   AUTHORIZED
+  /// Tahsilat hakkı atomik olarak alındı, sağlayıcıya istek gönderiliyor
+  /// (2026-09-10'da eklendi — çift tahsilat yarışını kapatmak için ara durum).
+  CAPTURING
   /// Para tahsil edildi.
   SUCCESS
   /// Sağlayıcı reddetti veya tahsilat yapılamadı.

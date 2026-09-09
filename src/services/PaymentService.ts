@@ -52,8 +52,11 @@ export function fromMinor(minor: number): number {
  * test edilebilir bir kuralla engellensin.
  */
 const ALLOWED_TRANSITIONS: Record<PaymentStatus, PaymentStatus[]> = {
-  PENDING: ["AUTHORIZED", "SUCCESS", "FAILED", "CANCELLED"],
-  AUTHORIZED: ["SUCCESS", "FAILED", "CANCELLED"],
+  PENDING: ["AUTHORIZED", "CAPTURING", "FAILED", "CANCELLED"],
+  AUTHORIZED: ["CAPTURING", "FAILED", "CANCELLED"],
+  // Tahsilat hakki atomik olarak alindiktan sonraki gecici durum -- bkz.
+  // markCaptured().
+  CAPTURING: ["SUCCESS", "FAILED"],
   SUCCESS: ["REFUNDED", "PARTIALLY_REFUNDED"],
   PARTIALLY_REFUNDED: ["REFUNDED", "PARTIALLY_REFUNDED"],
   FAILED: ["PENDING"],
@@ -159,7 +162,7 @@ export class PaymentService {
       // Idempotent: aynı tahsilatın iki kez bildirilmesi hata değil.
       return { ok: true, value: { transactionId: log.transactionId } };
     }
-    if (!canTransition(log.status, "SUCCESS")) {
+    if (!canTransition(log.status, "CAPTURING")) {
       return {
         ok: false,
         code: "INVALID_TRANSITION",
@@ -167,12 +170,56 @@ export class PaymentService {
       };
     }
 
-    const captured = await this.provider.capture({
-      bookingId: params.bookingId,
-      providerRef: log.providerRef,
-      amountMinor: toMinor(moneyToNumber(log.amount)),
-      currency: log.currency,
+    /*
+      TAHSILAT HAKKI SAGLAYICIYA GITMEDEN ONCE ATOMIK OLARAK ALINIR
+      (2026-09-10'da bulundu, `refund()`teki desenle ayni gerekce).
+
+      Onceki hali `log.status`u yalnizca OKUYOR, sonra dogrudan
+      `this.provider.capture()`i cagiriyordu. Ayni odemeye es zamanli iki
+      `markCaptured()` cagrisi (ornegin check-in akisi ile bir webhook retry'i
+      cakisirsa) IKISI DE `log.status = PENDING` okur, ikisi de kontrolu gecer
+      ve saglayiciya IKI AYRI tahsilat istegi gider -- gercek bir PSP'de bu
+      musteriden iki kez para cekmek demek. Defter tek satir oldugu icin sonuc
+      yerelde fark edilmiyordu.
+
+      `status: log.status` kosuluyla `CAPTURING`e geciren bu `updateMany`,
+      yariscilardan yalnizca BIRINE hakki veriyor; kaybeden saglayiciya HIC
+      gitmiyor.
+    */
+    const claim = await prisma.paymentLog.updateMany({
+      where: { id: log.id, status: log.status },
+      data: { status: "CAPTURING" },
     });
+    if (claim.count === 0) {
+      const fresh = await prisma.paymentLog.findUnique({ where: { id: log.id } });
+      if (fresh?.status === "SUCCESS") {
+        return { ok: true, value: { transactionId: fresh.transactionId } };
+      }
+      return {
+        ok: false,
+        code: "CONCURRENT_MODIFICATION",
+        message: "Bu ödeme aynı anda başka bir işlemle güncelleniyor; tekrar deneyin.",
+      };
+    }
+
+    let captured: Awaited<ReturnType<PaymentProvider["capture"]>>;
+    try {
+      captured = await this.provider.capture({
+        bookingId: params.bookingId,
+        providerRef: log.providerRef,
+        amountMinor: toMinor(moneyToNumber(log.amount)),
+        currency: log.currency,
+      });
+    } catch (err) {
+      // CAPTURING'de asili kalmasin: hakki geri birak, "FAILED"e dus.
+      await prisma.paymentLog
+        .update({
+          where: { id: log.id },
+          data: { status: "FAILED", failureReason: String(err).slice(0, 500) },
+        })
+        .catch((e) => logger.error({ err: e, bookingId: params.bookingId }, "payment_capture_revert_failed"));
+      throw err;
+    }
     const transactionId = params.externalReference ?? captured.transactionId;
 
     // Paylaşım, tahsilatla AYNI işlemde yazılır. Ayrı yazılsaydı araya giren bir

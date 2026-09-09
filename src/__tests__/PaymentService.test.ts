@@ -119,6 +119,42 @@ describe("PaymentService — defter", () => {
     expect(mockPrisma.__tx.booking.update.mock.calls[0][0].data.status).toBe("PAID");
   });
 
+  it("tahsilat hakkını sağlayıcıya gitmeden önce atomik olarak alır (çift tahsilat yarışı)", async () => {
+    mockPrisma.paymentLog.findUnique.mockResolvedValue({
+      id: "p1",
+      status: "PENDING",
+      amount: 250,
+      currency: "TRY",
+      providerRef: "manual_b1",
+      transactionId: null,
+    });
+
+    await service.markCaptured({ bookingId: "b1" });
+
+    const claimCall = mockPrisma.paymentLog.updateMany.mock.calls[0][0];
+    expect(claimCall.where).toEqual({ id: "p1", status: "PENDING" });
+    expect(claimCall.data).toEqual({ status: "CAPTURING" });
+  });
+
+  it("hak alınamazsa (yarışı kaybetti) sağlayıcıya hiç gitmeden CONCURRENT_MODIFICATION döner", async () => {
+    mockPrisma.paymentLog.findUnique
+      .mockResolvedValueOnce({
+        id: "p1",
+        status: "PENDING",
+        amount: 250,
+        currency: "TRY",
+        providerRef: "manual_b1",
+        transactionId: null,
+      })
+      .mockResolvedValueOnce({ id: "p1", status: "CAPTURING", transactionId: null });
+    mockPrisma.paymentLog.updateMany.mockResolvedValue({ count: 0 });
+
+    const res = await service.markCaptured({ bookingId: "b1" });
+
+    expect(res).toMatchObject({ ok: false, code: "CONCURRENT_MODIFICATION" });
+    expect(mockPrisma.__tx.booking.update).not.toHaveBeenCalled();
+  });
+
   it("iade edilmiş bir ödeme tekrar tahsil edilmiş yapılamaz", async () => {
     mockPrisma.paymentLog.findUnique.mockResolvedValue({
       id: "p1",
@@ -253,6 +289,10 @@ describe("PaymentService — paylaşım (split)", () => {
     vi.clearAllMocks();
     mockPrisma.booking.findUnique.mockResolvedValue({ shopId: "s1" });
     mockPrisma.paymentSplit.findUnique.mockResolvedValue(null);
+    // markCaptured artik saglayiciya gitmeden once bu updateMany ile hakki
+    // atomik aliyor (bkz. PaymentService.markCaptured) — refund()teki pre-var
+    // olan desenin ayni testte tekrari.
+    mockPrisma.paymentLog.updateMany.mockResolvedValue({ count: 1 });
   });
 
   it("tahsilatla AYNI transaction'da paylaşımı yazar", async () => {
