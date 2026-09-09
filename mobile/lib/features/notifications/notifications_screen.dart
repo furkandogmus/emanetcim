@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/services/haptic_service.dart';
 import '../../core/services/notification_service.dart';
@@ -21,9 +22,8 @@ class NotificationsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           'notifications.title'.tr(),
-          style: Theme.of(
-            context,
-          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(context).textTheme.titleSmall!
+              .copyWith(fontWeight: FontWeight.bold),
         ),
         actions: [
           if (notifications.isNotEmpty)
@@ -55,13 +55,17 @@ class NotificationsScreen extends ConsumerWidget {
               separatorBuilder: (_, _) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 final n = notifications[index];
-                return _notificationTile(context, n);
+                return _notificationTile(context, ref, n);
               },
             ),
     );
   }
 
-  Widget _notificationTile(BuildContext context, NotificationDto n) {
+  Widget _notificationTile(
+    BuildContext context,
+    WidgetRef ref,
+    NotificationDto n,
+  ) {
     // RepaintBoundary: AnimatedContainer'in okundu/okunmadi gecisinde
     // tetikledigi repaint, listenin geri kalanina sizmasin diye izole edildi.
     return RepaintBoundary(
@@ -89,7 +93,18 @@ class NotificationsScreen extends ConsumerWidget {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: HapticFeedback.lightImpact,
+            // Onceden yalnizca titresim uretiyordu: ne bildirim okundu
+            // isaretleniyordu ne de `deepLink` alanina gore yonlendirme
+            // yapiliyordu, model bu davranis icin tasarlanmis olsa da
+            // kullanilmiyordu (2026-09-09'da bulundu).
+            onTap: () {
+              HapticFeedback.lightImpact();
+              ref.read(notificationProvider.notifier).markAsRead(n.id);
+              final deepLink = n.deepLink;
+              if (deepLink != null && deepLink.isNotEmpty) {
+                context.push(deepLink);
+              }
+            },
             borderRadius: BorderRadius.circular(24),
             child: Padding(
               padding: const EdgeInsets.all(20),
