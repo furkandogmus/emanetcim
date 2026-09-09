@@ -37,7 +37,9 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(getErrorMessage(e, fallback: 'admin.messages_load_error'.tr())),
+            content: Text(
+              getErrorMessage(e, fallback: 'admin.messages_load_error'.tr()),
+            ),
           ),
         );
       }
@@ -118,66 +120,71 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                       ),
                     ],
                   ),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.all(16),
-                    leading: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: isRead
-                            ? Colors.grey.withValues(alpha: 0.1)
-                            : Colors.blue.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.email_rounded,
-                        color: isRead ? Colors.grey : Colors.blue,
-                      ),
-                    ),
-                    title: Text(
-                      msg['subject'] ?? 'Konu Yok',
-                      style: GoogleFonts.outfit(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: isRead ? Colors.grey : const Color(0xFF0F172A),
-                      ),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 4),
-                        Text(
-                          'Kimden: ${msg['from'] ?? 'Bilinmiyor'}',
-                          style: GoogleFonts.outfit(
-                            fontSize: 12,
-                            color: const Color(0xFF424242),
-                          ),
+                  child: Material(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(16),
+                    clipBehavior: Clip.antiAlias,
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.all(16),
+                      leading: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: isRead
+                              ? Colors.grey.withValues(alpha: 0.1)
+                              : Colors.blue.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          formattedDate,
-                          style: GoogleFonts.outfit(
-                            fontSize: 11,
-                            color: const Color(0xFF757575),
-                          ),
+                        child: Icon(
+                          Icons.email_rounded,
+                          color: isRead ? Colors.grey : Colors.blue,
                         ),
-                      ],
-                    ),
-                    trailing: !isRead
-                        ? Container(
-                            width: 10,
-                            height: 10,
-                            decoration: const BoxDecoration(
-                              color: Colors.blue,
-                              shape: BoxShape.circle,
+                      ),
+                      title: Text(
+                        msg['subject'] ?? 'Konu Yok',
+                        style: GoogleFonts.outfit(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: isRead ? Colors.grey : const Color(0xFF0F172A),
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 4),
+                          Text(
+                            'Kimden: ${msg['from'] ?? 'Bilinmiyor'}',
+                            style: GoogleFonts.outfit(
+                              fontSize: 12,
+                              color: const Color(0xFF424242),
                             ),
-                          )
-                        : null,
-                    onTap: () {
-                      _showDetail(msg);
-                      if (!isRead) {
-                        _markAsRead(msg['id'] as String);
-                      }
-                    },
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            formattedDate,
+                            style: GoogleFonts.outfit(
+                              fontSize: 11,
+                              color: const Color(0xFF757575),
+                            ),
+                          ),
+                        ],
+                      ),
+                      trailing: !isRead
+                          ? Container(
+                              width: 10,
+                              height: 10,
+                              decoration: const BoxDecoration(
+                                color: Colors.blue,
+                                shape: BoxShape.circle,
+                              ),
+                            )
+                          : null,
+                      onTap: () {
+                        _showDetail(msg);
+                        if (!isRead) {
+                          _markAsRead(msg['id'] as String);
+                        }
+                      },
+                    ),
                   ),
                 );
               },
