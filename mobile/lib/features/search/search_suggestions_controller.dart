@@ -20,6 +20,14 @@ final searchSuggestionsControllerProvider =
 class SearchSuggestionsController extends Notifier<List<dynamic>> {
   Timer? _debounce;
 
+  // MM-H3-2: debounce yalnizca BEKLEYEN bir Timer'i iptal edebilir -- 500ms
+  // dolup `_fetch` bir kez baslattiktan sonra kullanicinin yazmaya devam
+  // etmesiyle tetiklenen sonraki bir `_fetch` ile ayni anda havada kalabilir.
+  // Her cagriya bir siralama numarasi vererek, yalnizca EN SON baslatilan
+  // istegin yaniti `state`'e yazilir -- yavasca donen eski bir yanit, daha
+  // yeni (ve daha hizli donen) bir sorgunun sonucunu sessizce ezemez.
+  int _requestId = 0;
+
   @override
   List<dynamic> build() {
     ref.onDispose(() => _debounce?.cancel());
@@ -32,6 +40,7 @@ class SearchSuggestionsController extends Notifier<List<dynamic>> {
   }
 
   Future<void> _fetch(String query) async {
+    final myRequestId = ++_requestId;
     if (query.length < 3) {
       state = const [];
       return;
@@ -39,6 +48,10 @@ class SearchSuggestionsController extends Notifier<List<dynamic>> {
     final result = await ref
         .read(geocodingRepositoryProvider)
         .searchPlaces(query);
+    if (myRequestId != _requestId) {
+      // Bu arada daha yeni bir sorgu baslatildi; bu yanit artik gecersiz.
+      return;
+    }
     if (result is Success<List<dynamic>>) {
       state = result.value;
     } else if (result is Failure<List<dynamic>>) {
