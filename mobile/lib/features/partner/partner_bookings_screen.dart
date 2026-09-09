@@ -37,200 +37,223 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.bgLight,
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 140,
-            floating: true,
-            pinned: true,
-            backgroundColor: AppColors.brandOrange,
-            flexibleSpace: FlexibleSpaceBar(
-              title: Text(
-                'nav.partner'.tr(),
-                style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+      // Detay ekranindaki mutasyonlar (onayla/reddet/teslim al/teslim et)
+      // basari sonrasi `partnerBookingsProvider`'i invalidate ediyor, ama
+      // esnafin listeyi elle yenileyebilecegi bir yol da olmali (ör. detay
+      // ekranina hic girmeden, baska bir cihazdan yapilan degisiklikleri
+      // gormek icin).
+      body: RefreshIndicator(
+        onRefresh: () => ref.refresh(partnerBookingsProvider.future),
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverAppBar(
+              expandedHeight: 140,
+              floating: true,
+              pinned: true,
+              backgroundColor: AppColors.brandOrange,
+              flexibleSpace: FlexibleSpaceBar(
+                title: Text(
+                  'nav.partner'.tr(),
+                  style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
-              background: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [AppColors.brandOrange, AppColors.brandOrangeDark],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+                background: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.brandOrange,
+                        AppColors.brandOrangeDark,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                   ),
                 ),
               ),
+              actions: [
+                IconButton(
+                  onPressed: () => _showHowItWorks(context),
+                  icon: const Icon(
+                    Icons.help_outline_rounded,
+                    color: Colors.white,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => context.push('/partner/scan'),
+                  icon: const Icon(
+                    Icons.qr_code_scanner_rounded,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
             ),
-            actions: [
-              IconButton(
-                onPressed: () => _showHowItWorks(context),
-                icon: const Icon(
-                  Icons.help_outline_rounded,
-                  color: Colors.white,
-                ),
-              ),
-              IconButton(
-                onPressed: () => context.push('/partner/scan'),
-                icon: const Icon(
-                  Icons.qr_code_scanner_rounded,
-                  color: Colors.white,
-                  size: 28,
-                ),
-              ),
-              const SizedBox(width: 8),
-            ],
-          ),
 
-          bookingsAsync.when(
-            loading: () => const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Expanded(child: Skeleton(height: 100, borderRadius: 20)),
-                    SizedBox(width: 12),
-                    Expanded(child: Skeleton(height: 100, borderRadius: 20)),
-                  ],
-                ),
-              ),
-            ),
-            error: (e, _) => const SliverToBoxAdapter(child: SizedBox()),
-            data: (list) {
-              final activeBags = list
-                  .where((b) => b.status == BookingStatus.checkedIn)
-                  .fold(0, (sum, b) => sum + b.totalBags);
-              final earnings = list
-                  .where((b) => b.status != BookingStatus.cancelled)
-                  .fold(0.0, (sum, b) => sum + b.totalPrice);
-
-              return SliverToBoxAdapter(
+            bookingsAsync.when(
+              loading: () => const SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: EdgeInsets.all(16),
                   child: Row(
                     children: [
-                      _buildSummaryCard(
-                        'partner.active_bags'.tr(),
-                        '$activeBags',
-                        Icons.luggage_rounded,
-                        AppColors.brandOrange,
-                      ),
-                      const SizedBox(width: 12),
-                      _buildSummaryCard(
-                        'partner.total_earnings'.tr(),
-                        '₺${earnings.toStringAsFixed(0)}',
-                        Icons.payments_rounded,
-                        AppColors.success,
-                      ),
+                      Expanded(child: Skeleton(height: 100, borderRadius: 20)),
+                      SizedBox(width: 12),
+                      Expanded(child: Skeleton(height: 100, borderRadius: 20)),
                     ],
                   ),
                 ),
-              );
-            },
-          ),
+              ),
+              error: (e, _) => const SliverToBoxAdapter(child: SizedBox()),
+              data: (list) {
+                final activeBags = list
+                    .where((b) => b.status == BookingStatus.checkedIn)
+                    .fold(0, (sum, b) => sum + b.totalBags);
+                // Yalnizca fiilen teslim alinmis/teslim edilmis rezervasyonlar
+                // sayilir -- henuz onaylanmamis (waitingApproval) veya
+                // onaylanip valiz getirilmemis (approved/paid) rezervasyonlarin
+                // tutari bu asamada gerceklesmis bir "kazanc" degil.
+                final earnings = list
+                    .where(
+                      (b) =>
+                          b.status == BookingStatus.checkedIn ||
+                          b.status == BookingStatus.checkedOut,
+                    )
+                    .fold(0.0, (sum, b) => sum + b.totalPrice);
 
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    height: 40,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
+                return SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
                       children: [
-                        _filterChip('partner.filter_all'.tr(), 'all'),
-                        const SizedBox(width: 8),
-                        _filterChip('partner.filter_waiting'.tr(), 'waiting'),
-                        const SizedBox(width: 8),
-                        _filterChip('partner.filter_active'.tr(), 'active'),
-                        const SizedBox(width: 8),
-                        _filterChip(
-                          'partner.filter_completed'.tr(),
-                          'completed',
+                        _buildSummaryCard(
+                          'partner.active_bags'.tr(),
+                          '$activeBags',
+                          Icons.luggage_rounded,
+                          AppColors.brandOrange,
+                        ),
+                        const SizedBox(width: 12),
+                        _buildSummaryCard(
+                          'partner.total_earnings'.tr(),
+                          '₺${earnings.toStringAsFixed(0)}',
+                          Icons.payments_rounded,
+                          AppColors.success,
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'partner.bookings_title'.tr(),
-                    style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textDark,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                ],
-              ),
+                );
+              },
             ),
-          ),
 
-          bookingsAsync.when(
-            loading: () => SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) => const Padding(
-                    padding: EdgeInsets.only(bottom: 12),
-                    child: Skeleton(height: 80, borderRadius: 16),
-                  ),
-                  childCount: 5,
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 40,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: [
+                          _filterChip('partner.filter_all'.tr(), 'all'),
+                          const SizedBox(width: 8),
+                          _filterChip('partner.filter_waiting'.tr(), 'waiting'),
+                          const SizedBox(width: 8),
+                          _filterChip('partner.filter_active'.tr(), 'active'),
+                          const SizedBox(width: 8),
+                          _filterChip(
+                            'partner.filter_completed'.tr(),
+                            'completed',
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'partner.bookings_title'.tr(),
+                      style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textDark,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
                 ),
               ),
             ),
-            error: (e, _) => SliverFillRemaining(
-              child: ErrorState(title: 'common.error'.tr()),
-            ),
-            data: (list) {
-              List<BookingDto> filtered;
-              if (_filter == 'waiting') {
-                filtered = list
-                    .where((b) => b.status == BookingStatus.waitingApproval)
-                    .toList();
-              } else if (_filter == 'active') {
-                filtered = list
-                    .where(
-                      (b) =>
-                          b.status == BookingStatus.approved ||
-                          b.status == BookingStatus.paid ||
-                          b.status == BookingStatus.checkedIn,
-                    )
-                    .toList();
-              } else if (_filter == 'completed') {
-                filtered = list
-                    .where((b) => b.status == BookingStatus.checkedOut)
-                    .toList();
-              } else {
-                filtered = list;
-              }
 
-              return filtered.isEmpty
-                  ? SliverFillRemaining(
-                      child: EmptyState(
-                        icon: Icons.luggage_outlined,
-                        title: 'partner.no_bookings'.tr(),
-                      ),
-                    )
-                  : SliverPadding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          final b = filtered[index];
-                          return _BookingPartnerCard(booking: b, fmt: fmt);
-                        }, childCount: filtered.length),
-                      ),
-                    );
-            },
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 100)),
-        ],
+            bookingsAsync.when(
+              loading: () => SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => const Padding(
+                      padding: EdgeInsets.only(bottom: 12),
+                      child: Skeleton(height: 80, borderRadius: 16),
+                    ),
+                    childCount: 5,
+                  ),
+                ),
+              ),
+              error: (e, _) => SliverFillRemaining(
+                child: ErrorState(title: 'common.error'.tr()),
+              ),
+              data: (list) {
+                List<BookingDto> filtered;
+                if (_filter == 'waiting') {
+                  filtered = list
+                      .where((b) => b.status == BookingStatus.waitingApproval)
+                      .toList();
+                } else if (_filter == 'active') {
+                  filtered = list
+                      .where(
+                        (b) =>
+                            b.status == BookingStatus.approved ||
+                            b.status == BookingStatus.paid ||
+                            b.status == BookingStatus.checkedIn,
+                      )
+                      .toList();
+                } else if (_filter == 'completed') {
+                  filtered = list
+                      .where((b) => b.status == BookingStatus.checkedOut)
+                      .toList();
+                } else {
+                  filtered = list;
+                }
+
+                return filtered.isEmpty
+                    ? SliverFillRemaining(
+                        child: EmptyState(
+                          icon: Icons.luggage_outlined,
+                          title: 'partner.no_bookings'.tr(),
+                        ),
+                      )
+                    : SliverPadding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        sliver: SliverList(
+                          delegate: SliverChildBuilderDelegate((
+                            context,
+                            index,
+                          ) {
+                            final b = filtered[index];
+                            return _BookingPartnerCard(booking: b, fmt: fmt);
+                          }, childCount: filtered.length),
+                        ),
+                      );
+              },
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 100)),
+          ],
+        ),
       ),
     );
   }
