@@ -920,6 +920,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
         ),
       ),
     );
+    commentCtl.dispose();
   }
 
   Future<void> _showDisputeSheet(BookingDto bk) async {
@@ -1036,6 +1037,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
         ),
       ),
     );
+    descCtl.dispose();
   }
 
   void _showCancellationPolicy(BuildContext context) {

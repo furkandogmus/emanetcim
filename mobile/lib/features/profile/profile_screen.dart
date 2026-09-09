@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart' show FormData, MultipartFile;
 import 'package:easy_localization/easy_localization.dart';
@@ -906,92 +908,97 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final nameController = TextEditingController(text: user?.name);
     var isSaving = false;
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) => Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            left: 24,
-            right: 24,
-            top: 24,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'profile.edit_profile'.tr(),
-                style: GoogleFonts.outfit(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 24),
-              TextField(
-                decoration: InputDecoration(
-                  labelText: 'auth.name_label'.tr(),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
+    // Bottom sheet'in kendi State'i yok (StatefulBuilder), yani dispose()
+    // hicbir yerden cagrilmiyordu -- her acilista bir TextEditingController
+    // sizdiriliyordu (2026-09-09'da bulundu).
+    unawaited(
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        builder: (context) => StatefulBuilder(
+          builder: (context, setModalState) => Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+              left: 24,
+              right: 24,
+              top: 24,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'profile.edit_profile'.tr(),
+                  style: GoogleFonts.outfit(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                controller: nameController,
-              ),
-              const SizedBox(height: 24),
-              FilledButton(
-                onPressed: isSaving
-                    ? null
-                    : () async {
-                        setModalState(() => isSaving = true);
-                        try {
-                          final dio = ref.read(dioProvider);
-                          await dio.put(
-                            '/auth/me',
-                            data: {'name': nameController.text},
-                          );
-                          if (context.mounted) {
-                            ref.invalidate(authControllerProvider);
-                            Navigator.pop(context);
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  getErrorMessage(
-                                    e,
-                                    fallback: 'common.error'.tr(),
+                const SizedBox(height: 24),
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: 'auth.name_label'.tr(),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  controller: nameController,
+                ),
+                const SizedBox(height: 24),
+                FilledButton(
+                  onPressed: isSaving
+                      ? null
+                      : () async {
+                          setModalState(() => isSaving = true);
+                          try {
+                            final dio = ref.read(dioProvider);
+                            await dio.put(
+                              '/auth/me',
+                              data: {'name': nameController.text},
+                            );
+                            if (context.mounted) {
+                              ref.invalidate(authControllerProvider);
+                              Navigator.pop(context);
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    getErrorMessage(
+                                      e,
+                                      fallback: 'common.error'.tr(),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
+                              );
+                            }
+                          } finally {
+                            if (context.mounted) {
+                              setModalState(() => isSaving = false);
+                            }
                           }
-                        } finally {
-                          if (context.mounted) {
-                            setModalState(() => isSaving = false);
-                          }
-                        }
-                      },
-                child: isSaving
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : Text('common.confirm'.tr()),
-              ),
-              const SizedBox(height: 40),
-            ],
+                        },
+                  child: isSaving
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text('common.confirm'.tr()),
+                ),
+                const SizedBox(height: 40),
+              ],
+            ),
           ),
         ),
-      ),
+      ).whenComplete(nameController.dispose),
     );
   }
 
