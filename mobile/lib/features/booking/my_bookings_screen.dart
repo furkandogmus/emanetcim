@@ -8,6 +8,8 @@ import '../../core/repositories/booking_repository.dart';
 import '../../shared/models/booking.dart';
 import '../../shared/utils/app_colors.dart';
 import '../../shared/utils/booking_helpers.dart';
+import '../../shared/widgets/empty_state.dart';
+import '../../shared/widgets/error_state.dart';
 
 final myBookingsProvider = FutureProvider<List<BookingDto>>((ref) async {
   final result = await ref.watch(bookingRepositoryProvider).getMyBookings();
@@ -20,7 +22,6 @@ class MyBookingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bookingsAsync = ref.watch(myBookingsProvider);
-    final theme = Theme.of(context);
     final fmt = DateFormat('dd MMM HH:mm');
 
     return Scaffold(
@@ -38,64 +39,20 @@ class MyBookingsScreen extends ConsumerWidget {
       ),
       body: bookingsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.error_outline_rounded,
-                size: 64,
-                color: Colors.redAccent,
-              ),
-              const SizedBox(height: 16),
-              Text('common.error'.tr(), style: theme.textTheme.headlineSmall),
-              TextButton(
-                onPressed: () => ref.refresh(myBookingsProvider.future),
-                child: Text('common.try_again'.tr()),
-              ),
-            ],
-          ),
+        error: (e, _) => ErrorState(
+          title: 'common.error'.tr(),
+          actionLabel: 'common.try_again'.tr(),
+          onAction: () => ref.refresh(myBookingsProvider.future),
         ),
         data: (list) {
           if (list.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(32),
-                    decoration: BoxDecoration(
-                      color: Colors.orange.shade50,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.luggage_outlined,
-                      size: 80,
-                      color: AppColors.brandOrange,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'booking.no_bookings'.tr(),
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'booking.no_bookings_desc'.tr(),
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: const Color(0xFF424242),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  FilledButton.icon(
-                    onPressed: () => context.go('/'),
-                    icon: const Icon(Icons.search_rounded),
-                    label: Text('booking.start_exploring'.tr()),
-                  ),
-                ],
-              ),
+            return EmptyState(
+              icon: Icons.luggage_outlined,
+              title: 'booking.no_bookings'.tr(),
+              description: 'booking.no_bookings_desc'.tr(),
+              actionLabel: 'booking.start_exploring'.tr(),
+              actionIcon: Icons.search_rounded,
+              onAction: () => context.go('/'),
             );
           }
 
