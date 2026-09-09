@@ -1,8 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/api/api_client.dart';
 
-final adminStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
-  final dio = ref.watch(dioProvider);
-  final res = await dio.get('/admin/stats');
-  return res.data as Map<String, dynamic>;
+import '../../core/repositories/admin_repository.dart';
+import '../../shared/models/admin_stats.dart';
+
+final adminStatsProvider = FutureProvider<AdminStatsDto>((ref) async {
+  final result = await ref.watch(adminRepositoryProvider).getStats();
+  return result.fold((data) => data, (error) => throw Exception(error));
 });
