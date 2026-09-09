@@ -3,6 +3,7 @@ import { authorizeCron } from "@/lib/internal-api-guard";
 import prisma from "@/lib/db";
 import { withJobRun } from "@/lib/jobs/run-ledger";
 import { moneyToNumber } from "@/lib/money";
+import { csvCell } from "@/lib/csv";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -71,14 +72,14 @@ export async function GET(req: NextRequest) {
   const lines = (rows as any[]).map((b) => {
     const pl = b.paymentLog;
     return [
-      b.id,
-      b.createdAt.toISOString(),
-      b.status,
-      `"${(b.shop?.name ?? "").replace(/"/g, '""')}"`,
-      moneyToNumber(b.totalPrice),
-      pl?.status ?? "",
-      pl?.transactionId ?? "",
-      pl?.chargebackStatus ?? "",
+      csvCell(b.id),
+      csvCell(b.createdAt.toISOString()),
+      csvCell(b.status),
+      csvCell(b.shop?.name ?? ""),
+      csvCell(moneyToNumber(b.totalPrice)),
+      csvCell(pl?.status ?? ""),
+      csvCell(pl?.transactionId ?? ""),
+      csvCell(pl?.chargebackStatus ?? ""),
     ].join(",");
   });
 

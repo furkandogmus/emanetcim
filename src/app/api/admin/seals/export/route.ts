@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import prisma from "@/lib/db";
+import { csvCell } from "@/lib/csv";
 
 /**
  * Admin: mühür taleplerini CSV indir.
@@ -16,16 +17,15 @@ export async function GET() {
     orderBy: { createdAt: "desc" },
   });
 
-  const escape = (s: string) => `"${s.replace(/"/g, '""')}"`;
   const lines = [
     "id,shopName,quantity,status,createdAt",
     ...rows.map((r) =>
       [
-        r.id,
-        escape(r.shop.name),
-        r.quantity,
-        r.status,
-        r.createdAt.toISOString(),
+        csvCell(r.id),
+        csvCell(r.shop.name),
+        csvCell(r.quantity),
+        csvCell(r.status),
+        csvCell(r.createdAt.toISOString()),
       ].join(",")
     ),
   ];
