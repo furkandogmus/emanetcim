@@ -4,7 +4,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/repositories/shop_repository.dart';
 import '../../core/services/haptic_service.dart';
@@ -109,7 +108,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             children: [
               Text(
                 'checkout.bags_title'.tr(),
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -154,7 +153,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             children: [
               Text(
                 label,
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                 ),
@@ -162,14 +161,17 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               const SizedBox(height: 2),
               Text(
                 dims,
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                   fontSize: 13,
                   color: const Color(0xFF616161),
                 ),
               ),
               Text(
                 weight,
-                style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),
+                style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
               ),
             ],
           ),
@@ -214,7 +216,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       appBar: AppBar(
         title: Text(
           'checkout.title'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
       ),
       body: SingleChildScrollView(
@@ -265,7 +269,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               children: [
                 Text(
                   'checkout.bags_title'.tr().toUpperCase(),
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.labelMedium!.copyWith(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                     color: const Color(0xFF616161),
@@ -322,7 +326,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   border: InputBorder.none,
                   prefixIcon: const Icon(Icons.local_offer_outlined, size: 20),
                 ),
-                style: GoogleFonts.outfit(fontSize: 14),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium!.copyWith(fontSize: 14),
               ),
             ),
 
@@ -390,27 +396,34 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             children: [
                               Text(
                                 'checkout.total'.tr().toUpperCase(),
-                                style: GoogleFonts.outfit(
-                                  color: Colors.white.withValues(alpha: 0.6),
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                  letterSpacing: 1.2,
-                                ),
+                                style: Theme.of(context).textTheme.labelMedium!
+                                    .copyWith(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.6,
+                                      ),
+                                      letterSpacing: 1.2,
+                                    ),
                               ),
                               Text(
                                 '₺${grandTotal.toStringAsFixed(2)}',
-                                style: GoogleFonts.outfit(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 32,
-                                ),
+                                style: Theme.of(context).textTheme.displayLarge!
+                                    .copyWith(
+                                      fontSize: 32,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
                               ),
                               Text(
                                 'checkout.estimated'.tr(),
-                                style: GoogleFonts.outfit(
-                                  color: Colors.white.withValues(alpha: 0.4),
-                                  fontSize: 11,
-                                ),
+                                style: Theme.of(context).textTheme.labelSmall!
+                                    .copyWith(
+                                      fontSize: 11,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.4,
+                                      ),
+                                    ),
                               ),
                             ],
                           ),
@@ -427,12 +440,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             ),
                             child: Text(
                               'BAGAJPARK',
-                              style: GoogleFonts.outfit(
-                                color: AppColors.brandOrange,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 10,
-                                letterSpacing: 1,
-                              ),
+                              style: Theme.of(context).textTheme.labelSmall!
+                                  .copyWith(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.brandOrange,
+                                    letterSpacing: 1,
+                                  ),
                             ),
                           ),
                         ],
@@ -470,10 +484,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                     const SizedBox(width: 12),
                                     Text(
                                       'checkout.pay_button'.tr(),
-                                      style: GoogleFonts.outfit(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium!
+                                          .copyWith(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                     ),
                                   ],
                                 ),
@@ -519,14 +536,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               children: [
                 Text(
                   label,
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
                     fontSize: 12,
                     color: const Color(0xFF616161),
                   ),
                 ),
                 Text(
                   DateFormat('dd MMMM, HH:mm').format(dt),
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textDark,
@@ -579,14 +596,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               children: [
                 Text(
                   label,
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.titleSmall!.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.textDark,
                   ),
                 ),
                 Text(
                   subtitle,
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.labelSmall!.copyWith(
                     fontSize: 11,
                     color: const Color(0xFF616161),
                   ),
@@ -605,7 +622,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 child: Text(
                   '$value',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -642,17 +659,17 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.outfit(
-            color: const Color(0xFF757575),
+          style: Theme.of(context).textTheme.bodyMedium!.copyWith(
             fontSize: 14,
+            color: const Color(0xFF757575),
           ),
         ),
         Text(
           value,
-          style: GoogleFonts.outfit(
-            color: valueColor ?? Colors.white,
-            fontWeight: FontWeight.bold,
+          style: Theme.of(context).textTheme.titleSmall!.copyWith(
             fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: valueColor ?? Colors.white,
           ),
         ),
       ],

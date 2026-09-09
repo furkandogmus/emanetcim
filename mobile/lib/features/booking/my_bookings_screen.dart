@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/repositories/booking_repository.dart';
 import '../../shared/models/booking.dart';
@@ -29,7 +28,9 @@ class MyBookingsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           'nav.bookings'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
@@ -141,11 +142,12 @@ class _BookingCard extends StatelessWidget {
                             const SizedBox(width: 8),
                             Text(
                               'ID: #${b.id.substring(b.id.length - 6).toUpperCase()}',
-                              style: GoogleFonts.outfit(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: statusColor,
-                              ),
+                              style: Theme.of(context).textTheme.labelMedium!
+                                  .copyWith(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: statusColor,
+                                  ),
                             ),
                           ],
                         ),
@@ -198,19 +200,21 @@ class _BookingCard extends StatelessWidget {
                                 // her ogenin ayni yukseklikte olmasini gerektirir).
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.outfit(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF0F172A),
-                                ),
+                                style: Theme.of(context).textTheme.titleMedium!
+                                    .copyWith(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: const Color(0xFF0F172A),
+                                    ),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 '${fmt.format(b.checkInTime)} → ${fmt.format(b.checkOutTime)}',
-                                style: GoogleFonts.outfit(
-                                  fontSize: 13,
-                                  color: const Color(0xFF424242),
-                                ),
+                                style: Theme.of(context).textTheme.bodyMedium!
+                                    .copyWith(
+                                      fontSize: 13,
+                                      color: const Color(0xFF424242),
+                                    ),
                               ),
                             ],
                           ),
@@ -237,20 +241,22 @@ class _BookingCard extends StatelessWidget {
                             const SizedBox(width: 8),
                             Text(
                               '${b.totalBags} ${'checkout.bag_s'.tr()}',
-                              style: GoogleFonts.outfit(
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF0F172A),
-                              ),
+                              style: Theme.of(context).textTheme.titleSmall!
+                                  .copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF0F172A),
+                                  ),
                             ),
                           ],
                         ),
                         Text(
                           '₺${b.totalPrice.toStringAsFixed(2)}',
-                          style: GoogleFonts.outfit(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.brandOrange,
-                          ),
+                          style: Theme.of(context).textTheme.titleMedium!
+                              .copyWith(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.brandOrange,
+                              ),
                         ),
                       ],
                     ),
