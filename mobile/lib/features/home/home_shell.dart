@@ -13,8 +13,15 @@ class HomeShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final role =
-        ref.watch(authControllerProvider).session?.role ?? UserRole.guest;
+    // HomeShell her ekranin etrafini sarar (Scaffold + bottom nav); tum
+    // AuthState yerine sadece role'u izliyoruz ki login/logout disindaki
+    // AuthState degisiklikleri (orn. loading toggle) tum shell'i yeniden
+    // derletmesin.
+    final role = ref.watch(
+      authControllerProvider.select(
+        (state) => state.session?.role ?? UserRole.guest,
+      ),
+    );
     final loc = GoRouterState.of(context).matchedLocation;
 
     var tabs = <_TabItem>[];
