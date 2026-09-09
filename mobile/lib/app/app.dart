@@ -46,7 +46,15 @@ class _BagajParkAppState extends ConsumerState<BagajParkApp>
     // Deep Link Init
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(deepLinkServiceProvider).init();
-      ref.read(syncServiceProvider).sync();
+      // SyncService'i burada okuyup init() calistiriyoruz ki
+      // authControllerProvider dinleyicisi (SyncService.init() icinde)
+      // erkenden kurulsun. Dogrudan .sync() cagirmiyoruz: auth bootstrap
+      // (SharedPreferences + token okuma + /auth/me) bu frame'den cok daha
+      // uzun surer, o yuzden burada cagrilan bir sync() session hala null
+      // iken no-op donerdi. Gercek tetikleme SyncService'in kendi
+      // authControllerProvider dinleyicisinden gelir (session null->dolu
+      // gecince).
+      ref.read(syncServiceProvider);
     });
   }
 
