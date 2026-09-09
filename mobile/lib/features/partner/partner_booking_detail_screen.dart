@@ -15,6 +15,7 @@ import '../../shared/utils/booking_helpers.dart';
 import '../../shared/widgets/error_state.dart';
 import '../../shared/widgets/skeleton.dart';
 import '../booking/booking_detail_screen.dart';
+import 'partner_bookings_screen.dart' show partnerBookingsProvider;
 
 class PartnerBookingDetailScreen extends ConsumerStatefulWidget {
   const PartnerBookingDetailScreen({required this.bookingId, super.key});
@@ -68,7 +69,13 @@ class _PartnerBookingDetailScreenState
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('partner.success_checkin'.tr())));
-        ref.invalidate(bookingProvider(b.id));
+        // Liste ekranindaki cache'lenmis `FutureProvider` durumu bu
+        // mutasyonlardan haberdar degildi -- esnaf listeye geri donunce
+        // rezervasyonun eski durumunu ('Onaylandi' vb.) ve eski
+        // "Toplam Kazanc" ozetini goruyordu.
+        ref
+          ..invalidate(bookingProvider(b.id))
+          ..invalidate(partnerBookingsProvider);
       }
     } catch (e) {
       if (e is DioException &&
@@ -113,7 +120,13 @@ class _PartnerBookingDetailScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('partner.success_checkout'.tr())),
         );
-        ref.invalidate(bookingProvider(b.id));
+        // Liste ekranindaki cache'lenmis `FutureProvider` durumu bu
+        // mutasyonlardan haberdar degildi -- esnaf listeye geri donunce
+        // rezervasyonun eski durumunu ('Onaylandi' vb.) ve eski
+        // "Toplam Kazanc" ozetini goruyordu.
+        ref
+          ..invalidate(bookingProvider(b.id))
+          ..invalidate(partnerBookingsProvider);
       }
     } catch (e) {
       if (e is DioException &&
@@ -173,7 +186,13 @@ class _PartnerBookingDetailScreenState
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('booking.approve_success'.tr())));
-        ref.invalidate(bookingProvider(b.id));
+        // Liste ekranindaki cache'lenmis `FutureProvider` durumu bu
+        // mutasyonlardan haberdar degildi -- esnaf listeye geri donunce
+        // rezervasyonun eski durumunu ('Onaylandi' vb.) ve eski
+        // "Toplam Kazanc" ozetini goruyordu.
+        ref
+          ..invalidate(bookingProvider(b.id))
+          ..invalidate(partnerBookingsProvider);
       }
     } catch (e) {
       if (mounted) {
@@ -215,7 +234,13 @@ class _PartnerBookingDetailScreenState
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('booking.reject_success'.tr())));
-        ref.invalidate(bookingProvider(b.id));
+        // Liste ekranindaki cache'lenmis `FutureProvider` durumu bu
+        // mutasyonlardan haberdar degildi -- esnaf listeye geri donunce
+        // rezervasyonun eski durumunu ('Onaylandi' vb.) ve eski
+        // "Toplam Kazanc" ozetini goruyordu.
+        ref
+          ..invalidate(bookingProvider(b.id))
+          ..invalidate(partnerBookingsProvider);
       }
     } catch (e) {
       if (mounted) {
@@ -246,7 +271,9 @@ class _PartnerBookingDetailScreenState
           backgroundColor: Colors.green,
         ),
       );
-      ref.invalidate(bookingProvider(b.id));
+      ref
+        ..invalidate(bookingProvider(b.id))
+        ..invalidate(partnerBookingsProvider);
     }
   }
 

@@ -28,6 +28,7 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
     try {
       final dio = ref.read(dioProvider);
       final res = await dio.get('/admin/messages');
+      if (!mounted) return;
       setState(() {
         _messages = res.data as List<dynamic>;
         _loading = false;
@@ -42,6 +43,11 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
           ),
         );
       }
+      // `admin_applications_screen.dart`'taki `_fetchApps` ile ayni desen:
+      // widget dispose olduktan sonra bu ikinci `setState` korumasizdi ve
+      // (Riverpod 3'un dispose-sonrasi `ref` erisiminde firlattigi hata dahil)
+      // yakalanmamis bir istisnaya donusuyordu.
+      if (!mounted) return;
       setState(() => _loading = false);
     }
   }
@@ -64,9 +70,8 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
       appBar: AppBar(
         title: Text(
           'admin.messages_title'.tr(),
-          style: Theme.of(
-            context,
-          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(context).textTheme.titleSmall!
+              .copyWith(fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
@@ -90,10 +95,8 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                   const SizedBox(height: 16),
                   Text(
                     'admin.no_messages'.tr(),
-                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                      fontSize: 16,
-                      color: const Color(0xFF616161),
-                    ),
+                    style: Theme.of(context).textTheme.bodyLarge!
+                        .copyWith(fontSize: 16, color: const Color(0xFF616161)),
                   ),
                 ],
               ),
@@ -105,9 +108,12 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                 final msg = _messages[index];
                 final isRead = msg['isRead'] as bool? ?? false;
                 final date = DateTime.parse(msg['createdAt'] as String);
-                final formattedDate = DateFormat(
-                  'dd.MM.yyyy HH:mm',
-                ).format(date);
+                // Backend UTC (`Z` sonekli) donuyor; `devices_screen.dart`daki
+                // `lastSeenAt.toLocal()` deseniyle ayni sekilde once yerel
+                // saate cevrilmeliydi, aksi halde TR saatinden 3 saat geri
+                // gosteriliyordu.
+                final formattedDate = DateFormat('dd.MM.yyyy HH:mm')
+                    .format(date.toLocal());
 
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
@@ -215,26 +221,22 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
             children: [
               Text(
                 msg['subject'] ?? 'Konu Yok',
-                style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(context).textTheme.titleLarge!
+                    .copyWith(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
                 'Kimden: ${msg['from'] ?? 'Bilinmiyor'}',
-                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  color: const Color(0xFF424242),
-                ),
+                style: Theme.of(context).textTheme.bodyMedium!
+                    .copyWith(color: const Color(0xFF424242)),
               ),
               const SizedBox(height: 16),
               const Divider(),
               const SizedBox(height: 16),
               Text(
                 msg['text'] ?? msg['html'] ?? 'İçerik yok',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium!.copyWith(height: 1.6),
+                style: Theme.of(context).textTheme.bodyMedium!
+                    .copyWith(height: 1.6),
               ),
             ],
           ),

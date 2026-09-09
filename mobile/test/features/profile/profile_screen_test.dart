@@ -2,8 +2,9 @@ import 'package:bagajpark/core/api/api_client.dart';
 import 'package:bagajpark/core/auth/auth_controller.dart';
 import 'package:bagajpark/features/profile/profile_screen.dart';
 import 'package:bagajpark/shared/models/user.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:network_image_mock/network_image_mock.dart';
 
 import '../support/pump_app.dart';
@@ -129,6 +130,108 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.state.session, isNull);
+    });
+  });
+
+  testWidgets(
+    'bildirim tercihleri sheet: switch dokunulunca canli guncellenir',
+    (tester) async {
+      // Varsayilan test yuzeyi (800x600 mantiksal) ve hatta normal bir
+      // telefon boyu bile, `showModalBottomSheet` `isScrollControlled: true`
+      // OLMADAN sheet'i ekranin ~9/16'siyla sinirladigindan uc
+      // SwitchListTile'i sigdiramiyor (bu, ekranin kendi mevcut davranisi --
+      // bu bulgunun kapsami disinda, dokunulmuyor). Test, gorunum
+      // tasmasiyla degil davranisla ilgilensin diye yuzeyi bolca genisletiyoruz.
+      tester.view.physicalSize = const Size(1170, 5400);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.reset);
+
+      await mockNetworkImagesFor(() async {
+        final controller = FakeAuthController(const AuthState(session: guest));
+        await pumpProfile(tester, controller: controller);
+
+        await tester.dragUntilVisible(
+          find.text('Bildirimler'),
+          find.byType(Scrollable).first,
+          const Offset(0, -200),
+        );
+        await tester.tap(find.text('Bildirimler'));
+        await tester.pumpAndSettle();
+
+        final promoSwitch = find.widgetWithText(
+          SwitchListTile,
+          'Kampanya & İndirim',
+        );
+        expect(promoSwitch, findsOneWidget);
+        expect(tester.widget<SwitchListTile>(promoSwitch).value, isTrue);
+
+        await tester.tap(promoSwitch);
+        await tester.pumpAndSettle();
+
+        // Onceden sheet icindeki uc SwitchListTile, sheet acilmadan hemen
+        // once `ref.read` ile alinan sabit bir kopyaya bagliydi; hicbir
+        // yerde `ref.watch` olmadigindan Riverpod hicbir elementi yeniden
+        // cizmeye zorlamiyor ve kullanici dokunsa da anahtar sheet
+        // kapanana kadar gorsel olarak degismiyordu (2026-09-09'da
+        // bulundu).
+        expect(tester.widget<SwitchListTile>(promoSwitch).value, isFalse);
+      });
+    },
+  );
+
+  testWidgets('profileStatsProvider autoDispose: sekmeden cikip geri donulunce '
+      'istatistikler tazelenir', (tester) async {
+    await mockNetworkImagesFor(() async {
+      var callCount = 0;
+      final controller = FakeAuthController(const AuthState(session: guest));
+
+      await pumpApp(
+        tester,
+        child: const ProfileScreen(),
+        extraRoutes: {'/away': (_) => const SizedBox.shrink()},
+        overrides: [
+          authControllerProvider.overrideWith(() => controller),
+          // ProfileScreen, `/profile/stats` disinda (ornek: feature-flags)
+          // baska uclara da istek atabiliyor; sayaci yalnizca aradigimiz
+          // uc icin arttiriyoruz, digerlerine bos bir govde donuyoruz.
+          dioProvider.overrideWith(
+            (ref) => fakeDio((options) {
+              if (options.path != '/profile/stats') return <String, dynamic>{};
+              callCount++;
+              return {
+                'totalBookings': callCount,
+                'totalSavings': 0,
+                'completedBookings': 0,
+              };
+            }),
+          ),
+        ],
+      );
+      await tester.pumpAndSettle();
+      expect(callCount, 1);
+
+      final router = GoRouter.of(tester.element(find.byType(ProfileScreen)))
+        ..go('/away');
+      await tester.pumpAndSettle();
+      expect(find.byType(ProfileScreen), findsNothing);
+
+      router.go('/');
+      await tester.pumpAndSettle();
+
+      // Onceden `profileStatsProvider` duz bir `FutureProvider`'di ve
+      // ProviderContainer omru boyunca sonucu onbellekte tutuyordu; hicbir
+      // booking akisi onu invalidate etmedigi icin istatistikler ilk
+      // yuklemeden sonra bayatliyordu (2026-09-09'da bulundu).
+      // `.autoDispose` sayesinde sekmeden cikilip geri donulunce (ShellRoute
+      // altinda ProfileScreen tamamen unmount/remount oluyor) istek
+      // tazeleniyor.
+      expect(
+        callCount,
+        2,
+        reason:
+            'ProfileScreen yeniden mount edildiginde /profile/stats '
+            'yeniden cagrilmali',
+      );
     });
   });
 }

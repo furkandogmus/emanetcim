@@ -382,6 +382,9 @@
   "home": {
     "greeting": "Merhaba, {} 👋",
     "greeting_guest": "Merhaba, Misafir 👋",
+    "trust_verified": "Doğrulanmış",
+    "trust_sealed": "Mühürlü",
+    "trust_fast": "Hızlı",
     "hero_title": "Valizlerini Güvenle Emanet Edin",
     "hero_subtitle": "Şehri özgürce gezmeniz için en yakın dükkanı bulun.",
     "hero_cta": "Emanet Noktası Bul",
