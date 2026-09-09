@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../core/auth/auth_controller.dart';
@@ -162,20 +161,20 @@ class _HomeHeader extends StatelessWidget {
             children: [
               Text(
                 'BagajPark',
-                style: GoogleFonts.outfit(
-                  color: AppColors.brandOrange,
+                style: Theme.of(context).textTheme.titleSmall!.copyWith(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
+                  color: AppColors.brandOrange,
                 ),
               ),
               Text(
                 greeting,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.outfit(
-                  color: AppColors.textDark,
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
                   fontSize: 21,
                   fontWeight: FontWeight.w700,
+                  color: AppColors.textDark,
                 ),
               ),
             ],
@@ -226,12 +225,12 @@ class _SearchHero extends StatelessWidget {
             children: [
               Text(
                 'home.hero_title'.tr(),
-                style: GoogleFonts.outfit(
-                  color: Colors.white,
+                style: Theme.of(context).textTheme.headlineMedium!.copyWith(
                   fontSize: 27,
-                  height: 1.08,
                   fontWeight: FontWeight.w800,
+                  color: Colors.white,
                   letterSpacing: -0.6,
+                  height: 1.08,
                 ),
               ),
               const SizedBox(height: 10),
@@ -239,9 +238,9 @@ class _SearchHero extends StatelessWidget {
                 width: 250,
                 child: Text(
                   'home.hero_subtitle'.tr(),
-                  style: GoogleFonts.outfit(
-                    color: Colors.white.withValues(alpha: 0.9),
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                     fontSize: 14,
+                    color: Colors.white.withValues(alpha: 0.9),
                     height: 1.4,
                   ),
                 ),
@@ -318,7 +317,7 @@ class _TrustItem extends StatelessWidget {
             child: Text(
               label,
               overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.outfit(
+              style: Theme.of(context).textTheme.labelSmall!.copyWith(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textSecondary,
@@ -345,7 +344,7 @@ class _SectionHeader extends StatelessWidget {
         Expanded(
           child: Text(
             title,
-            style: GoogleFonts.outfit(
+            style: Theme.of(context).textTheme.titleLarge!.copyWith(
               fontSize: 20,
               fontWeight: FontWeight.w700,
               color: AppColors.textDark,
@@ -394,10 +393,10 @@ class _CityCard extends StatelessWidget {
               Icon(icon, color: color, size: 28),
               Text(
                 name,
-                style: GoogleFonts.outfit(
-                  color: AppColors.textDark,
+                style: Theme.of(context).textTheme.titleSmall!.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
+                  color: AppColors.textDark,
                 ),
               ),
             ],
@@ -461,10 +460,10 @@ class _StepIcon extends StatelessWidget {
         const SizedBox(height: 7),
         Text(
           number,
-          style: GoogleFonts.outfit(
-            color: AppColors.textSecondary,
+          style: Theme.of(context).textTheme.labelSmall!.copyWith(
             fontSize: 11,
             fontWeight: FontWeight.w700,
+            color: AppColors.textSecondary,
           ),
         ),
       ],
@@ -507,9 +506,9 @@ class _SafetyCard extends StatelessWidget {
                 children: [
                   Text(
                     'home.safety_title'.tr(),
-                    style: GoogleFonts.outfit(
-                      color: AppColors.textDark,
+                    style: Theme.of(context).textTheme.titleSmall!.copyWith(
                       fontWeight: FontWeight.w700,
+                      color: AppColors.textDark,
                     ),
                   ),
                   const SizedBox(height: 3),
@@ -517,9 +516,9 @@ class _SafetyCard extends StatelessWidget {
                     'home.safety_desc'.tr(),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.outfit(
-                      color: const Color(0xFF1D4ED8),
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
                       fontSize: 12,
+                      color: const Color(0xFF1D4ED8),
                       height: 1.35,
                     ),
                   ),
