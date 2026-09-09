@@ -1,6 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class GlobalErrorWidget extends StatelessWidget {
   const GlobalErrorWidget({required this.details, super.key});
@@ -30,7 +29,7 @@ class GlobalErrorWidget extends StatelessWidget {
             const SizedBox(height: 32),
             Text(
               'fatal_error.title'.tr(),
-              style: GoogleFonts.outfit(
+              style: Theme.of(context).textTheme.titleLarge!.copyWith(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: const Color(0xFF0F172A),
@@ -40,7 +39,7 @@ class GlobalErrorWidget extends StatelessWidget {
             Text(
               'fatal_error.desc'.tr(),
               textAlign: TextAlign.center,
-              style: GoogleFonts.outfit(
+              style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                 fontSize: 15,
                 color: const Color(0xFF424242),
                 height: 1.5,

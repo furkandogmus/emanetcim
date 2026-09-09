@@ -1,10 +1,13 @@
+import 'dart:async' show unawaited;
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import '../../core/auth/auth_controller.dart';
+import '../../shared/widgets/confirm_dialog.dart';
 import 'admin_controller.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
@@ -23,11 +26,13 @@ class AdminDashboardScreen extends ConsumerWidget {
         appBar: AppBar(
           title: Text(
             'admin.dashboard'.tr(),
-            style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
           ),
           actions: [
             IconButton(
-              onPressed: () => _confirmLogout(context, ref),
+              onPressed: () => unawaited(_confirmLogout(context, ref)),
               icon: const Icon(Icons.logout_rounded, color: Colors.redAccent),
             ),
             IconButton(
@@ -51,14 +56,14 @@ class AdminDashboardScreen extends ConsumerWidget {
                 _statCard(
                   context,
                   'admin.total_bookings'.tr(),
-                  stats['totalBookings'].toString(),
+                  stats.totalBookings.toString(),
                   Icons.work_rounded,
                   const Color(0xFF0F172A),
                 ),
                 _statCard(
                   context,
                   'admin.total_revenue'.tr(),
-                  '₺${stats['totalRevenue']}',
+                  '₺${stats.totalRevenue.toStringAsFixed(0)}',
                   Icons.account_balance_wallet_rounded,
                   const Color(0xFFF97316),
                   isOrange: true,
@@ -66,14 +71,14 @@ class AdminDashboardScreen extends ConsumerWidget {
                 _statCard(
                   context,
                   'admin.active_partners'.tr(),
-                  stats['totalPartners'].toString(),
+                  stats.totalPartners.toString(),
                   Icons.store_rounded,
                   const Color(0xFF3B82F6),
                 ),
                 _statCard(
                   context,
                   'admin.pending_apps'.tr(),
-                  stats['pendingApplications'].toString(),
+                  stats.pendingApplications.toString(),
                   Icons.pending_actions_rounded,
                   const Color(0xFFEF4444),
                 ),
@@ -85,7 +90,7 @@ class AdminDashboardScreen extends ConsumerWidget {
             // Live Analytics Placeholder
             Text(
               'admin.live_analytics'.tr().toUpperCase(),
-              style: GoogleFonts.outfit(
+              style: Theme.of(context).textTheme.labelMedium!.copyWith(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
                 color: const Color(0xFF616161),
@@ -117,7 +122,9 @@ class AdminDashboardScreen extends ConsumerWidget {
                     const SizedBox(height: 8),
                     Text(
                       'admin.charts_coming_soon'.tr(),
-                      style: GoogleFonts.outfit(color: const Color(0xFF616161)),
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                        color: const Color(0xFF616161),
+                      ),
                     ),
                   ],
                 ),
@@ -129,7 +136,7 @@ class AdminDashboardScreen extends ConsumerWidget {
             // Quick Actions
             Text(
               'admin.quick_actions'.tr().toUpperCase(),
-              style: GoogleFonts.outfit(
+              style: Theme.of(context).textTheme.labelMedium!.copyWith(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
                 color: const Color(0xFF616161),
@@ -138,15 +145,17 @@ class AdminDashboardScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             _actionTile(
+              context,
               Icons.verified_user_rounded,
               'admin.approve_shops'.tr(),
               'admin.new_shop_apps'.tr(
-                args: [stats['pendingApplications'].toString()],
+                args: [stats.pendingApplications.toString()],
               ),
               const Color(0xFFF97316),
               onTap: () => context.push('/admin/applications'),
             ),
             _actionTile(
+              context,
               Icons.health_and_safety_rounded,
               'admin.system_status'.tr(),
               'admin.all_systems_active'.tr(),
@@ -155,10 +164,11 @@ class AdminDashboardScreen extends ConsumerWidget {
               onTap: () {},
             ),
             _actionTile(
+              context,
               Icons.message_rounded,
               'admin.support_messages'.tr(),
               'admin.unread_messages'.tr(
-                args: [stats['unreadMessages']?.toString() ?? '0'],
+                args: [stats.unreadMessages.toString()],
               ),
               const Color(0xFF3B82F6),
               onTap: () => context.push('/admin/messages'),
@@ -207,7 +217,7 @@ class AdminDashboardScreen extends ConsumerWidget {
             children: [
               Text(
                 value,
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: const Color(0xFF0F172A),
@@ -215,7 +225,7 @@ class AdminDashboardScreen extends ConsumerWidget {
               ),
               Text(
                 title,
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.labelSmall!.copyWith(
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
                   color: const Color(0xFF616161),
@@ -230,6 +240,7 @@ class AdminDashboardScreen extends ConsumerWidget {
   }
 
   Widget _actionTile(
+    BuildContext context,
     IconData icon,
     String title,
     String subtitle,
@@ -257,11 +268,14 @@ class AdminDashboardScreen extends ConsumerWidget {
         ),
         title: Text(
           title,
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16),
+          style: Theme.of(context).textTheme.titleMedium!.copyWith(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         subtitle: Text(
           subtitle,
-          style: GoogleFonts.outfit(
+          style: Theme.of(context).textTheme.bodySmall!.copyWith(
             fontSize: 12,
             color: const Color(0xFF424242),
           ),
@@ -284,35 +298,17 @@ class AdminDashboardScreen extends ConsumerWidget {
     );
   }
 
-  void _confirmLogout(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'profile.logout'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-        ),
-        content: Text(
-          'profile.logout_confirm'.tr(),
-          style: GoogleFonts.outfit(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('common.cancel'.tr()),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ref.read(authControllerProvider.notifier).logout();
-            },
-            child: Text(
-              'profile.logout'.tr(),
-              style: const TextStyle(color: Colors.redAccent),
-            ),
-          ),
-        ],
-      ),
+  Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
+    final confirmed = await ConfirmDialog.show(
+      context,
+      title: 'profile.logout'.tr(),
+      message: 'profile.logout_confirm'.tr(),
+      cancelLabel: 'common.cancel'.tr(),
+      confirmLabel: 'profile.logout'.tr(),
+      destructive: true,
     );
+    if (confirmed == true) {
+      unawaited(ref.read(authControllerProvider.notifier).logout());
+    }
   }
 }

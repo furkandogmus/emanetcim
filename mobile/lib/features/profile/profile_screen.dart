@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -23,6 +22,7 @@ import '../../core/services/share_service.dart';
 import '../../core/utils/error_handler.dart';
 import '../../shared/models/user.dart';
 import '../../shared/utils/app_colors.dart';
+import '../../shared/widgets/confirm_dialog.dart';
 
 final profileStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
   final dio = ref.read(dioProvider);
@@ -142,24 +142,35 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       width: 96,
                       height: 96,
                       fit: BoxFit.cover,
+                      // 96x96 gosteriliyor; tam cozunurluk decode etmek
+                      // yerine ekran yogunluguna gore olceklenmis boyutta
+                      // decode et (bellek/CPU tasarrufu).
+                      memCacheWidth:
+                          (96 * MediaQuery.of(context).devicePixelRatio)
+                              .round(),
+                      memCacheHeight:
+                          (96 * MediaQuery.of(context).devicePixelRatio)
+                              .round(),
                       placeholder: (_, _) => Center(
                         child: Text(
                           initial,
-                          style: GoogleFonts.outfit(
-                            fontSize: 40,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.brandOrange,
-                          ),
+                          style: Theme.of(context).textTheme.displaySmall!
+                              .copyWith(
+                                fontSize: 40,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.brandOrange,
+                              ),
                         ),
                       ),
                       errorWidget: (_, _, _) => Center(
                         child: Text(
                           initial,
-                          style: GoogleFonts.outfit(
-                            fontSize: 40,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.brandOrange,
-                          ),
+                          style: Theme.of(context).textTheme.displaySmall!
+                              .copyWith(
+                                fontSize: 40,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.brandOrange,
+                              ),
                         ),
                       ),
                     ),
@@ -167,7 +178,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 : Center(
                     child: Text(
                       initial,
-                      style: GoogleFonts.outfit(
+                      style: Theme.of(context).textTheme.displaySmall!.copyWith(
                         fontSize: 40,
                         fontWeight: FontWeight.bold,
                         color: AppColors.brandOrange,
@@ -198,7 +209,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(authControllerProvider).session;
+    // Sadece session'i izliyoruz; AuthState.loading/onboardingDone gibi bu
+    // ekranla ilgisiz alanlar degistiginde tum profil ekrani yeniden
+    // derlenmesin.
+    final user = ref.watch(
+      authControllerProvider.select((state) => state.session),
+    );
     final theme = Theme.of(context);
     final isPartner = user?.role == UserRole.partner;
     final securityMenuEnabled =
@@ -210,7 +226,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       appBar: AppBar(
         title: Text(
           'profile.title'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
       ),
       body: ListView(
@@ -373,7 +391,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
           // Logout Button
           OutlinedButton.icon(
-            onPressed: () => _confirmLogout(context, ref),
+            onPressed: () => unawaited(_confirmLogout(context, ref)),
             icon: const Icon(Icons.logout_rounded, size: 20),
             label: Text('profile.logout'.tr()),
             style: OutlinedButton.styleFrom(
@@ -390,12 +408,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
           // Delete Account (Apple Requirement)
           TextButton(
-            onPressed: () => _showDeleteAccount(context, ref),
+            onPressed: () => unawaited(_showDeleteAccount(context, ref)),
             child: Text(
               'profile.delete_account'.tr(),
-              style: GoogleFonts.outfit(
-                color: const Color(0xFF757575),
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                 fontSize: 13,
+                color: const Color(0xFF757575),
                 decoration: TextDecoration.underline,
               ),
             ),
@@ -406,7 +424,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           Center(
             child: Text(
               'profile.version'.tr(args: ['1.0.0']),
-              style: GoogleFonts.outfit(
+              style: Theme.of(context).textTheme.labelSmall!.copyWith(
                 fontSize: 11,
                 color: const Color(0xFF757575),
               ),
@@ -424,7 +442,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       padding: const EdgeInsets.only(bottom: 12, left: 4),
       child: Text(
         title.toUpperCase(),
-        style: GoogleFonts.outfit(
+        style: Theme.of(context).textTheme.labelMedium!.copyWith(
           fontSize: 12,
           fontWeight: FontWeight.bold,
           color: const Color(0xFF616161),
@@ -466,17 +484,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   children: [
                     Text(
                       'profile.referral_title'.tr(),
-                      style: GoogleFonts.outfit(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
                         fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
                     Text(
                       'profile.referral_hint'.tr(),
-                      style: GoogleFonts.outfit(
-                        color: const Color(0xFF757575),
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
                         fontSize: 12,
+                        color: const Color(0xFF757575),
                       ),
                     ),
                   ],
@@ -497,10 +515,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 Flexible(
                   child: Text(
                     user?.referralCode ?? 'BP-WELCOME',
-                    style: GoogleFonts.outfit(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
                       fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                       letterSpacing: 1,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -524,10 +542,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                   label: Text(
                     'profile.copy'.tr(),
-                    style: GoogleFonts.outfit(
-                      color: AppColors.brandOrange,
-                      fontWeight: FontWeight.bold,
+                    style: Theme.of(context).textTheme.labelSmall!.copyWith(
                       fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.brandOrange,
                     ),
                   ),
                   style: TextButton.styleFrom(
@@ -566,7 +584,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         leading: Icon(icon, color: AppColors.textDark, size: 22),
         title: Text(
           title,
-          style: GoogleFonts.outfit(
+          style: Theme.of(context).textTheme.titleMedium!.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w500,
             color: AppColors.textDark,
@@ -600,7 +618,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
         title: Text(
           'profile.theme'.tr(),
-          style: GoogleFonts.outfit(
+          style: Theme.of(context).textTheme.titleMedium!.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w500,
             color: AppColors.textDark,
@@ -629,7 +647,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             children: [
               Text(
                 'profile.theme'.tr(),
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -694,7 +712,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
         title: Text(
           'profile.biometric'.tr(),
-          style: GoogleFonts.outfit(
+          style: Theme.of(context).textTheme.titleMedium!.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w500,
             color: AppColors.textDark,
@@ -702,7 +720,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
         subtitle: Text(
           'profile.biometric_desc'.tr(),
-          style: GoogleFonts.outfit(
+          style: Theme.of(context).textTheme.bodySmall!.copyWith(
             fontSize: 12,
             color: const Color(0xFF616161),
           ),
@@ -767,7 +785,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             children: [
               Text(
                 'profile.notifications'.tr(),
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -777,7 +795,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 title: const Text('Rezervasyon Güncellemeleri'),
                 subtitle: Text(
                   'Onay, check-in, check-out ve QR kod bildirimleri',
-                  style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
                 ),
                 value: prefs.bookingUpdates,
                 activeThumbColor: AppColors.brandOrange,
@@ -790,7 +811,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 title: const Text('Kampanya & İndirim'),
                 subtitle: Text(
                   'Özel indirimler, kampanya duyuruları ve promosyon kodları',
-                  style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
                 ),
                 value: prefs.promotions,
                 activeThumbColor: AppColors.brandOrange,
@@ -803,7 +827,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 title: const Text('Esnaf Uyarıları'),
                 subtitle: Text(
                   'Yeni rezervasyon, mesaj ve acil durum bildirimleri',
-                  style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
                 ),
                 value: prefs.partnerAlerts,
                 activeThumbColor: AppColors.brandOrange,
@@ -819,89 +846,47 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  void _confirmLogout(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'profile.logout'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-        ),
-        content: Text(
-          'profile.logout_confirm'.tr(),
-          style: GoogleFonts.outfit(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('common.cancel'.tr()),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ref.read(authControllerProvider.notifier).logout();
-            },
-            child: Text(
-              'profile.logout'.tr(),
-              style: const TextStyle(color: Colors.redAccent),
-            ),
-          ),
-        ],
-      ),
+  Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
+    final confirmed = await ConfirmDialog.show(
+      context,
+      title: 'profile.logout'.tr(),
+      message: 'profile.logout_confirm'.tr(),
+      cancelLabel: 'common.cancel'.tr(),
+      confirmLabel: 'profile.logout'.tr(),
+      destructive: true,
     );
+    if (confirmed == true) {
+      unawaited(ref.read(authControllerProvider.notifier).logout());
+    }
   }
 
-  void _showDeleteAccount(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'profile.delete_account'.tr(),
-          style: GoogleFonts.outfit(
-            fontWeight: FontWeight.bold,
-            color: Colors.redAccent,
-          ),
-        ),
-        content: Text(
-          'profile.delete_account_confirm'.tr(),
-          style: GoogleFonts.outfit(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('common.cancel'.tr()),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              final success = await ref
-                  .read(authControllerProvider.notifier)
-                  .requestAccountDeletion();
-
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      success
-                          ? 'profile.delete_account_success'.tr()
-                          : 'profile.delete_account_error'.tr(),
-                    ),
-                    backgroundColor: success ? Colors.green : Colors.redAccent,
-                  ),
-                );
-              }
-            },
-            child: Text(
-              'common.confirm'.tr(),
-              style: const TextStyle(
-                color: Colors.redAccent,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
+  Future<void> _showDeleteAccount(BuildContext context, WidgetRef ref) async {
+    final confirmed = await ConfirmDialog.show(
+      context,
+      title: 'profile.delete_account'.tr(),
+      message: 'profile.delete_account_confirm'.tr(),
+      cancelLabel: 'common.cancel'.tr(),
+      confirmLabel: 'common.confirm'.tr(),
+      destructive: true,
     );
+    if (confirmed != true) return;
+
+    final success = await ref
+        .read(authControllerProvider.notifier)
+        .requestAccountDeletion();
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            success
+                ? 'profile.delete_account_success'.tr()
+                : 'profile.delete_account_error'.tr(),
+          ),
+          backgroundColor: success ? Colors.green : Colors.redAccent,
+        ),
+      );
+    }
   }
 
   void _showEditProfile(BuildContext context, WidgetRef ref, UserDto? user) {
@@ -932,7 +917,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               children: [
                 Text(
                   'profile.edit_profile'.tr(),
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1019,13 +1004,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             children: [
               Text(
                 title,
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 16),
-              Text(content, style: GoogleFonts.outfit(height: 1.6)),
+              Text(
+                content,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium!.copyWith(height: 1.6),
+              ),
             ],
           ),
         ),
@@ -1039,7 +1029,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         children: [
           Text(
             value,
-            style: GoogleFonts.outfit(
+            style: Theme.of(context).textTheme.titleLarge!.copyWith(
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: AppColors.textDark,
@@ -1047,7 +1037,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           Text(
             label,
-            style: GoogleFonts.outfit(
+            style: Theme.of(context).textTheme.bodySmall!.copyWith(
               fontSize: 12,
               color: const Color(0xFF616161),
             ),
