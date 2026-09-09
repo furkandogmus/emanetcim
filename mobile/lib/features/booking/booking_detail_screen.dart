@@ -1,5 +1,6 @@
 import 'dart:async' show Timer;
 import 'dart:io' show Platform;
+
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,7 @@ import '../../core/repositories/booking_repository.dart';
 import '../../shared/models/booking.dart';
 import '../../shared/utils/app_colors.dart';
 import '../../shared/utils/booking_helpers.dart';
+import '../../shared/widgets/error_state.dart';
 import '../../shared/widgets/skeleton.dart';
 
 final bookingProvider = FutureProvider.family<BookingDto, String>((
@@ -95,23 +97,10 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
       body: bookingAsync.when(
         skipLoadingOnReload: true,
         loading: _buildSkeleton,
-        error: (e, _) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.error_outline_rounded,
-                size: 64,
-                color: Colors.redAccent,
-              ),
-              const SizedBox(height: 16),
-              Text('common.error'.tr()),
-              TextButton(
-                onPressed: () => ref.refresh(bookingProvider(widget.bookingId)),
-                child: Text('common.retry'.tr()),
-              ),
-            ],
-          ),
+        error: (e, _) => ErrorState(
+          title: 'common.error'.tr(),
+          actionLabel: 'common.retry'.tr(),
+          onAction: () => ref.refresh(bookingProvider(widget.bookingId)),
         ),
         data: (bk) => SingleChildScrollView(
           padding: const EdgeInsets.all(24),

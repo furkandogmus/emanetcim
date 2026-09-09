@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/utils/error_handler.dart';
+import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/skeleton.dart';
 
 class AdminApplicationsScreen extends ConsumerStatefulWidget {
@@ -115,11 +116,10 @@ class _AdminApplicationsScreenState
         ),
       ),
       body: _apps.isEmpty
-          ? Center(
-              child: Text(
-                'Bekleyen başvuru bulunmuyor.',
-                style: GoogleFonts.outfit(color: const Color(0xFF616161)),
-              ),
+          ? EmptyState(
+              icon: Icons.inbox_outlined,
+              title: 'Bekleyen başvuru bulunmuyor.',
+              accentColor: Theme.of(context).colorScheme.onSurfaceVariant,
             )
           : ListView.builder(
               padding: const EdgeInsets.all(20),

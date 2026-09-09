@@ -1,4 +1,5 @@
 import 'dart:async' show unawaited;
+
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,7 @@ import '../../core/repositories/shop_repository.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/services/review_service.dart';
 import '../../shared/utils/app_colors.dart';
+import '../../shared/widgets/error_state.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({required this.shopId, super.key});
@@ -354,7 +356,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             // Payment Summary
             shopAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Text('common.error'.tr()),
+              error: (e, _) => ErrorState(title: 'common.error'.tr()),
               data: (shop) {
                 final ms =
                     _checkOut.millisecondsSinceEpoch -

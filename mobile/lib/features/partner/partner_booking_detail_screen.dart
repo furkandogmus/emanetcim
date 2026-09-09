@@ -12,6 +12,7 @@ import '../../core/sync/sync_service.dart';
 import '../../shared/models/booking.dart';
 import '../../shared/utils/app_colors.dart';
 import '../../shared/utils/booking_helpers.dart';
+import '../../shared/widgets/error_state.dart';
 import '../../shared/widgets/skeleton.dart';
 import '../booking/booking_detail_screen.dart';
 
@@ -172,9 +173,8 @@ class _PartnerBookingDetailScreenState
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('common.error'.tr())));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('common.error'.tr())));
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -212,9 +212,8 @@ class _PartnerBookingDetailScreenState
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('common.error'.tr())));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('common.error'.tr())));
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -269,7 +268,7 @@ class _PartnerBookingDetailScreenState
             ],
           ),
         ),
-        error: (e, _) => Center(child: Text('common.error'.tr())),
+        error: (e, _) => ErrorState(title: 'common.error'.tr()),
         data: (b) {
           final statusColor = bookingStatusColor(b.status);
 
@@ -655,9 +654,8 @@ class _BagRevisionBottomSheetState extends State<_BagRevisionBottomSheet> {
       if (mounted) {
         final msg =
             e.response?.data?['error'] ?? 'partner.bag_revision_error'.tr();
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(msg.toString())));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(msg.toString())));
       }
     } catch (e) {
       if (mounted) {
