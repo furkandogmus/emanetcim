@@ -13,14 +13,6 @@ void main() {
         dioProvider.overrideWith(
           (ref) => fakeDio((options) {
             expect(options.path, '/partner/earnings/stats');
-            // NOT: `history` bilerek bos birakildi. Ekran (`_historyTile`),
-            // `EarningsStats.fromJson`'un zaten `EarningsHistoryItem`
-            // nesnelerine cevirdigi listeyi tekrar `as Map<String, dynamic>`
-            // ile cast etmeye calisiyor (partner_earnings_screen.dart:139) —
-            // dolu bir gecmisle bu bir `TypeError` firlatip ekranin
-            // cokmesine yol aciyor. Bu var olan bir hata (bu gorevin kapsami
-            // disinda, ekran dosyasina dokunmuyoruz); testi bu hatayi tetiklemeyecek
-            // sekilde yaziyoruz.
             return {
               'totalBalance': 1234.5,
               'todayEarnings': 75.0,
@@ -36,6 +28,44 @@ void main() {
     expect(find.text('₺1234.5'), findsOneWidget);
     expect(find.text('₺75.0'), findsOneWidget);
   });
+
+  testWidgets(
+    // Regresyon: `EarningsStats.fromJson`, `history`'yi zaten
+    // `EarningsHistoryItem` nesnelerine ceviriyor. Ekran (`_historyTile`)
+    // bunu tekrar `as Map<String, dynamic>` ile cast etmeye calisiyordu
+    // (partner_earnings_screen.dart) -- dolu bir gecmisle bu her zaman bir
+    // `TypeError` firlatip ekranin cokmesine yol aciyordu.
+    'dolu odeme gecmisi ekrani coktürmeden gosterilir',
+    (tester) async {
+      await pumpApp(
+        tester,
+        child: const PartnerEarningsScreen(),
+        overrides: [
+          dioProvider.overrideWith(
+            (ref) => fakeDio(
+              (options) => {
+                'totalBalance': 1234.5,
+                'todayEarnings': 75.0,
+                'history': [
+                  {
+                    'date': '2026-09-01',
+                    'amount': 150.0,
+                    'bookingId': 'b-1',
+                    'status': 'PAID',
+                  },
+                ],
+              },
+            ),
+          ),
+        ],
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('2026-09-01'), findsOneWidget);
+      expect(find.text('+₺150.0'), findsOneWidget);
+    },
+  );
 
   testWidgets('gecmis bos oldugunda odeme gecmisi karti gorunmez', (
     tester,
