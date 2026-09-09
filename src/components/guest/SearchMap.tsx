@@ -2,10 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import maplibregl from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { formatTryCurrency } from "@/lib/currency";
 import { getMapStyle, MAP_ATTRIBUTION } from "@/lib/map-style";
+import { ensureMaplibreWorkerUrl } from "@/lib/maplibre-worker";
+
+ensureMaplibreWorkerUrl(maplibregl);
 
 /**
  * İki pin'in çakışmadan durabildiği en küçük ekran mesafesi (px).

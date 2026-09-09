@@ -5,6 +5,7 @@ import { Navigation, Loader2, MapPin, CheckCircle2 } from "lucide-react";
 import { TR_CITIES } from "@/lib/tr-cities";
 import { useTranslations } from "next-intl";
 import { getMapStyle, MAP_ATTRIBUTION } from "@/lib/map-style";
+import { ensureMaplibreWorkerUrl } from "@/lib/maplibre-worker";
 
 export interface LocationValue {
   address: string;
@@ -301,6 +302,7 @@ export default function LocationPicker({ value, onChange }: Props) {
     (async () => {
       const maplibre = await import("maplibre-gl");
       await import("maplibre-gl/dist/maplibre-gl.css");
+      ensureMaplibreWorkerUrl(maplibre);
 
       map = new maplibre.Map({
         container: containerRef.current!,

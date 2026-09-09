@@ -13,6 +13,11 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     ".claude/**",
+    // scripts/copy-maplibre-worker.mjs (predev/prebuild) node_modules'tan
+    // kopyaladigi maplibre-gl worker paketleri -- minified, gitignored, ama
+    // yerelde uretilince ESLint onlari da tarayip binlerce sahte uyari
+    // basiyordu (coverage/** icin ayni gerekce, bkz. git geçmişi).
+    "public/maplibre/**",
   ]),
   {
     /**
