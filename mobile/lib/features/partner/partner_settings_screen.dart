@@ -7,6 +7,7 @@ import '../../core/api/api_client.dart';
 import '../../core/utils/error_handler.dart';
 import '../../shared/models/shop.dart';
 import '../../shared/utils/app_colors.dart';
+import '../../shared/widgets/error_state.dart';
 
 class PartnerSettingsScreen extends ConsumerStatefulWidget {
   const PartnerSettingsScreen({super.key});
@@ -20,6 +21,7 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _busy = false;
   bool _loading = true;
+  bool _loadError = false;
   int _sealCount = 0;
 
   late TextEditingController _name;
@@ -60,6 +62,9 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
       final res = await dio.get('/partner/shop');
       final shop = ShopDto.fromJson(res.data as Map<String, dynamic>);
       final sealCount = res.data['sealCount'] as int? ?? 0;
+      // `await` sonrasi asenkron bosluk: bu istek havadayken widget dispose
+      // edilmis olabilir (ör. kullanıcı ekrandan hızlıca geri gider).
+      if (!mounted) return;
       setState(() {
         _name = TextEditingController(text: shop.name);
         _capacity = TextEditingController(text: shop.capacity.toString());
@@ -74,9 +79,18 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
         );
         _sealCount = sealCount;
         _loading = false;
+        _loadError = false;
       });
     } catch (e) {
       if (mounted) {
+        // `_loading`'i false yapmazsak build() kalıcı olarak dönen bir
+        // spinner gösterir -- form controller'ları da hiç kurulmadığından
+        // (asagida `late`) esnafin ekrandan cikip tekrar girmek disinda
+        // hicbir kurtarma yolu olmazdi.
+        setState(() {
+          _loading = false;
+          _loadError = true;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
@@ -84,6 +98,14 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
         );
       }
     }
+  }
+
+  Future<void> _retryFetchShop() async {
+    setState(() {
+      _loading = true;
+      _loadError = false;
+    });
+    await _fetchShop();
   }
 
   String? _normalizePhone(String phone) {
@@ -156,6 +178,27 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
   Widget build(BuildContext context) {
     if (_loading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (_loadError) {
+      // Form controller'ları (`_name`, `_capacity` vb.) `late` ve yalnızca
+      // basarili bir `_fetchShop()` icinde kuruluyor -- hata sonrasi bunlara
+      // dokunan bir form gostermek yerine tekrar deneme yolu sunuyoruz.
+      return Scaffold(
+        backgroundColor: AppColors.bgLight,
+        appBar: AppBar(
+          title: Text(
+            'partner.settings'.tr(),
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
+          ),
+        ),
+        body: ErrorState(
+          title: 'common.error'.tr(),
+          actionLabel: 'common.try_again'.tr(),
+          onAction: _retryFetchShop,
+        ),
+      );
     }
 
     return Scaffold(
