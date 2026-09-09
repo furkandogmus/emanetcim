@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -51,13 +53,17 @@ class AuthController extends Notifier<AuthState> {
     final onboardingDone = prefs.getBool('onboarding_done') ?? false;
     state = state.copyWith(onboardingDone: onboardingDone, loading: false);
 
-    try {
-      await GoogleSignIn.instance.initialize(
-        serverClientId: Env.googleWebClientId,
-      );
-    } catch (e) {
-      debugPrint('GoogleSignIn initialization failed: $e');
-    }
+    // Google girişi yalnızca kullanıcı "Google ile giriş yap"a dokunursa
+    // gerekir; mevcut oturumu geri yüklemekle ilgisizdir. Burada await
+    // edilirse SDK init gecikmesi HER soğuk açılışta oturum kontrolünü ve
+    // /auth/me çağrısını bloklar. Paralel çalışsın diye ateşle-unut.
+    unawaited(
+      GoogleSignIn.instance
+          .initialize(serverClientId: Env.googleWebClientId)
+          .catchError((e) {
+            debugPrint('GoogleSignIn initialization failed: $e');
+          }),
+    );
 
     final store = ref.read(tokenStoreProvider);
     final token = await store.readAccessToken();
@@ -74,7 +80,13 @@ class AuthController extends Notifier<AuthState> {
         debugPrint('Failed to init push service on bootstrap: $e\n$st');
       }
     } on DioException {
+      // Token geçersiz/süresi dolmuş: oturumu sonlandırırken kullanıcıya özel
+      // Hive önbelleklerini de temizle — aksi halde bu cihazda sonra giriş
+      // yapan farklı bir kullanıcı, çevrimdışı bir listeleme anında önceki
+      // kullanıcının rezervasyonlarını görebilir (logout() bunu zaten yapar,
+      // burada da aynı temizlik gerekir).
       await store.clear();
+      _clearCaches();
     }
   }
 

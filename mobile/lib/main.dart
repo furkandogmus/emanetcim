@@ -18,6 +18,46 @@ Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
   // Background push handler — silent. Foreground aktivitesi push_service.dart'ta.
 }
 
+/// SyncService (`pending_sync_actions`) ve cache saglayicilarinin (`*_cache`)
+/// dayandigi Hive kutularini acar.
+///
+/// `hiveKey` alinamadiysa (ör. secure storage bozuk/erisilemez) ONCEDEN bu
+/// kutular HIC ACILMAZDI: sonraki her senkron `Hive.box(name)` cagrisi
+/// `HiveError('Box not found...')` firlatiyordu ve bu hata `SyncService.sync()`
+/// gibi async fonksiyonlarin dondurdugu Future'a yansidigi icin hic
+/// yakalanmiyor, hicbir yere raporlanmiyordu — offline check-in/check-out
+/// kaydi sessizce kayboluyordu. Anahtar yoksa kutulari sifrelenmemis acarak
+/// ozelligi ayakta tutuyoruz; bu yine de bir HiveError firlatirsa (ör. disk
+/// bozuk) en azindan loglaniyor.
+@visibleForTesting
+Future<void> openHiveBoxes(
+  List<int>? hiveKey, {
+  List<String> boxNames = const [
+    'pending_sync_actions',
+    'partner_bookings_cache',
+    'my_bookings_cache',
+  ],
+}) async {
+  try {
+    if (hiveKey != null) {
+      final cipher = HiveAesCipher(hiveKey);
+      for (final name in boxNames) {
+        await Hive.openBox(name, encryptionCipher: cipher);
+      }
+    } else {
+      Logger.e(
+        'Hive encryption key unavailable; opening boxes unencrypted so '
+        'offline sync/cache keep working.',
+      );
+      for (final name in boxNames) {
+        await Hive.openBox(name);
+      }
+    }
+  } catch (e, st) {
+    Logger.e('Hive box open failed; offline sync/cache disabled', e, st);
+  }
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -74,24 +114,7 @@ Future<void> main() async {
     }
   }
 
-  Future<void> openHiveBoxes() async {
-    // Yerel degiskene alinip null-check burada yapiliyor: hiveKey disaridan
-    // yakalanan (captured) degisken oldugu icin tip daraltmasinin (promotion)
-    // her derleyicide sorunsuz calismasini garantiler.
-    final key = hiveKey;
-    if (key != null) {
-      final cipher = HiveAesCipher(key);
-      await Hive.openBox('pending_sync_actions', encryptionCipher: cipher);
-      await Hive.openBox('partner_bookings_cache', encryptionCipher: cipher);
-      await Hive.openBox('my_bookings_cache', encryptionCipher: cipher);
-    } else {
-      Logger.e(
-        'Hive encryption key unavailable; caching disabled. Data will not persist across restarts.',
-      );
-    }
-  }
-
-  await Future.wait([checkRoot(), initFirebase(), openHiveBoxes()]);
+  await Future.wait([checkRoot(), initFirebase(), openHiveBoxes(hiveKey)]);
 
   final app = EasyLocalization(
     supportedLocales: const [Locale('tr'), Locale('en')],
