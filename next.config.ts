@@ -31,11 +31,21 @@ const securityHeaders = [
       "default-src 'self'",
       // NOTE: Next.js runtime injects inline bootstrap scripts/styles.
       // Keep unsafe-inline in production until nonce/hash CSP is implemented app-wide.
-      "script-src 'self' 'unsafe-inline' https://plausible.io https://static.cloudflareinsights.com https://client.crisp.chat",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://client.crisp.chat",
+      "script-src 'self' 'unsafe-inline' https://plausible.io https://static.cloudflareinsights.com https://*.crisp.chat",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.crisp.chat",
       "img-src 'self' data: blob: https:",
-      "font-src 'self' data: https://fonts.gstatic.com https://client.crisp.chat",
-      "connect-src 'self' https: wss:",
+      "font-src 'self' data: https://fonts.gstatic.com https://*.crisp.chat",
+      /*
+        AGDAN CIKIS ADRESLERI ACIKCA SAYILDI (2026-09-10'da bulundu). Onceki
+        hali `https: wss:` idi -- yani sayfada calisan JS herhangi bir HTTPS/WSS
+        adresine fetch/XHR/WebSocket acabilirdi. CSP'nin asil amaci tam olarak
+        buydu: HTML enjeksiyonuyla calisan bir script bulunsa bile veri disari
+        SADECE bu listedeki adreslere sizdirilabilsin. Liste, istemci tarafinda
+        (tarayicida) GERCEKTEN cagrilan adreslerden cikarildi (bkz.
+        LocationPicker.tsx → nominatim, map-style.ts → openfreemap, Crisp/
+        Plausible/Cloudflare Insights widget'lari).
+      */
+      "connect-src 'self' https://tiles.openfreemap.org https://nominatim.openstreetmap.org https://plausible.io https://static.cloudflareinsights.com https://*.crisp.chat wss://*.relay.crisp.chat wss://*.relay.rescue.crisp.chat",
       // MapLibre GL blob: üzerinden web worker üretir; yoksa /search haritası CSP'ye takılır.
       "worker-src 'self' blob:",
       "frame-ancestors 'none'",
