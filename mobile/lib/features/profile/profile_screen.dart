@@ -309,6 +309,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             'profile.notifications'.tr(),
             onTap: () => _showNotificationPrefs(context),
           ),
+          _menuItem(
+            Icons.devices_other_rounded,
+            'security.devices_title'.tr(),
+            onTap: () => context.push('/security/devices'),
+          ),
+          _menuItem(
+            Icons.shield_outlined,
+            'security.permissions_title'.tr(),
+            onTap: () => context.push('/security/permissions'),
+          ),
           const SizedBox(height: 8),
           _themeToggle(context),
           const SizedBox(height: 8),

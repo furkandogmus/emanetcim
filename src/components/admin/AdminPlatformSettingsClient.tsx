@@ -23,6 +23,10 @@ export type PlatformSettingsFormValues = {
   bagMultiplierXl: number;
   /** YYYY-MM-DD satır veya virgülle */
   holidayDatesRaw: string;
+  /** `x.y.z` semver veya boş (kapı kapalı) */
+  minAppVersion: string;
+  /** `x.y.z` semver veya boş (bildirim kapalı) */
+  latestAppVersion: string;
 };
 
 function parseHolidayDatesRaw(raw: string): string[] {
@@ -56,6 +60,37 @@ function Field({
         onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
       />
     </label>
+  );
+}
+
+function TextField({
+  id,
+  label,
+  hint,
+  value,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  hint?: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label htmlFor={id} className="id-eyebrow text-gray-400">
+        {label}
+      </label>
+      <input
+        id={id}
+        type="text"
+        inputMode="numeric"
+        className="rounded-xl border border-gray-200 px-4 py-3 text-sm font-bold text-gray-900 font-mono"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+      {hint ? <span className="text-[10px] text-gray-400">{hint}</span> : null}
+    </div>
   );
 }
 
@@ -94,6 +129,8 @@ export default function AdminPlatformSettingsClient({
         bagMultiplierM: form.bagMultiplierM,
         bagMultiplierXl: form.bagMultiplierXl,
         platformHolidayDates,
+        minAppVersion: form.minAppVersion,
+        latestAppVersion: form.latestAppVersion,
       });
       if (!res.success) {
         toast.error(t("platformSettingsInvalid"));
@@ -225,6 +262,21 @@ export default function AdminPlatformSettingsClient({
           />
           <span className="text-[10px] text-gray-400">{t("platformSettingsHolidayDatesHint")}</span>
         </label>
+
+        <TextField
+          id="minAppVersion"
+          label={t("platformSettingsMinAppVersion")}
+          hint={t("platformSettingsMinAppVersionHint")}
+          value={form.minAppVersion}
+          onChange={(v) => patch({ minAppVersion: v })}
+        />
+        <TextField
+          id="latestAppVersion"
+          label={t("platformSettingsLatestAppVersion")}
+          hint={t("platformSettingsLatestAppVersionHint")}
+          value={form.latestAppVersion}
+          onChange={(v) => patch({ latestAppVersion: v })}
+        />
       </div>
 
       <button
