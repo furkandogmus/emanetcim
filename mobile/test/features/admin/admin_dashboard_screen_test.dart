@@ -1,19 +1,20 @@
 import 'package:bagajpark/core/auth/auth_controller.dart';
 import 'package:bagajpark/features/admin/admin_controller.dart';
 import 'package:bagajpark/features/admin/admin_dashboard_screen.dart';
+import 'package:bagajpark/shared/models/admin_stats.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/pump_app.dart';
 
 void main() {
-  Map<String, dynamic> stats() => {
-    'totalBookings': 42,
-    'totalRevenue': 1500,
-    'totalPartners': 8,
-    'pendingApplications': 3,
-    'unreadMessages': 5,
-  };
+  AdminStatsDto stats() => const AdminStatsDto(
+    totalBookings: 42,
+    totalRevenue: 1500,
+    totalPartners: 8,
+    pendingApplications: 3,
+    unreadMessages: 5,
+  );
 
   testWidgets('istatistik kartlarini ve hizli islemleri gosterir', (
     tester,

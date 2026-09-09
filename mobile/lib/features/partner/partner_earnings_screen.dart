@@ -17,7 +17,7 @@ class PartnerEarningsScreen extends ConsumerStatefulWidget {
 
 class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
   bool _loading = true;
-  EarningsStats _stats = EarningsStats();
+  EarningsStats _stats = const EarningsStats();
 
   @override
   void initState() {
