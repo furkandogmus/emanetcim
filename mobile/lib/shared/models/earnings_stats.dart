@@ -1,55 +1,32 @@
-class EarningsStats {
-  final double totalBalance;
-  final double todayEarnings;
-  final double thisWeek;
-  final double thisMonth;
-  final List<EarningsHistoryItem> history;
-  final String? error;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  EarningsStats({
-    this.totalBalance = 0,
-    this.todayEarnings = 0,
-    this.thisWeek = 0,
-    this.thisMonth = 0,
-    this.history = const [],
-    this.error,
-  });
+part 'earnings_stats.freezed.dart';
+part 'earnings_stats.g.dart';
 
-  factory EarningsStats.fromJson(Map<String, dynamic> json) {
-    return EarningsStats(
-      totalBalance: (json['totalBalance'] as num?)?.toDouble() ?? 0,
-      todayEarnings: (json['todayEarnings'] as num?)?.toDouble() ?? 0,
-      thisWeek: (json['thisWeek'] as num?)?.toDouble() ?? 0,
-      thisMonth: (json['thisMonth'] as num?)?.toDouble() ?? 0,
-      history: (json['history'] as List<dynamic>?)
-              ?.map((e) => EarningsHistoryItem.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
-    );
-  }
+@freezed
+abstract class EarningsStats with _$EarningsStats {
+  const factory EarningsStats({
+    @Default(0) double totalBalance,
+    @Default(0) double todayEarnings,
+    @Default(0) double thisWeek,
+    @Default(0) double thisMonth,
+    @Default(<EarningsHistoryItem>[]) List<EarningsHistoryItem> history,
+    String? error,
+  }) = _EarningsStats;
 
-  bool get hasError => error != null;
+  factory EarningsStats.fromJson(Map<String, dynamic> json) =>
+      _$EarningsStatsFromJson(json);
 }
 
-class EarningsHistoryItem {
-  final String date;
-  final double amount;
-  final String? bookingId;
-  final String? status;
+@freezed
+abstract class EarningsHistoryItem with _$EarningsHistoryItem {
+  const factory EarningsHistoryItem({
+    required String date,
+    required double amount,
+    String? bookingId,
+    String? status,
+  }) = _EarningsHistoryItem;
 
-  EarningsHistoryItem({
-    required this.date,
-    required this.amount,
-    this.bookingId,
-    this.status,
-  });
-
-  factory EarningsHistoryItem.fromJson(Map<String, dynamic> json) {
-    return EarningsHistoryItem(
-      date: json['date'] as String? ?? '',
-      amount: (json['amount'] as num?)?.toDouble() ?? 0,
-      bookingId: json['bookingId'] as String?,
-      status: json['status'] as String?,
-    );
-  }
+  factory EarningsHistoryItem.fromJson(Map<String, dynamic> json) =>
+      _$EarningsHistoryItemFromJson(json);
 }
