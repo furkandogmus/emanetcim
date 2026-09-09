@@ -1,8 +1,11 @@
 import 'dart:async';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
+
 import '../api/api_client.dart';
 import '../auth/auth_controller.dart';
 
@@ -88,6 +91,24 @@ class SyncService {
     Map<String, dynamic>? data,
   ]) async {
     final userId = _ref.read(authControllerProvider).session?.id ?? 'guest';
+
+    // Ayni booking+type icin zaten bekleyen bir aksiyon varsa yenisini
+    // eklemiyoruz. Aksi halde esnaf senkronize olmadan ayni rezervasyona
+    // tekrar girip ayni aksiyonu bir daha tetiklerse (liste/detay ekrani
+    // hala eski -- onaylanmis -- durumu gosterdigi icin buton hala
+    // aktiftir), baglanti geri geldiginde ayni booking icin iki check-in/
+    // check-out istegi art arda backend'e gonderilir.
+    final alreadyPending = pendingActions.any(
+      (a) => a.userId == userId && a.bookingId == bookingId && a.type == type,
+    );
+    if (alreadyPending) {
+      debugPrint(
+        'Offline action skipped, already pending for booking '
+        '$bookingId: $type',
+      );
+      return;
+    }
+
     final action = SyncAction(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       userId: userId,
@@ -131,8 +152,32 @@ class SyncService {
           await _box.delete(action.id);
           debugPrint('Action ${action.id} synced successfully.');
         } catch (e) {
-          debugPrint('Sync failed for action ${action.id}: $e');
-          break; // Stop on failure (likely still offline or API error)
+          // 4xx: sunucu istegi KALICI olarak reddetti (ör. rezervasyon bu
+          // arada iptal edilmis / artik bu gecise uygun degil) -- tekrar
+          // denemek sonucu degistirmez. Kuyrukta birakirsak her sync()
+          // burada hata alir.
+          final statusCode = e is DioException ? e.response?.statusCode : null;
+          final isPermanentFailure =
+              statusCode != null && statusCode >= 400 && statusCode < 500;
+          if (isPermanentFailure) {
+            await _box.delete(action.id);
+            debugPrint(
+              'Action ${action.id} kalici olarak basarisiz oldu '
+              '(HTTP $statusCode), kuyruktan cikarildi: $e',
+            );
+          } else {
+            debugPrint(
+              'Sync failed for action ${action.id} (gecici hata, '
+              'kuyrukta kalacak): $e',
+            );
+          }
+          // `break` DEGIL, `continue`: aksi halde bu tek aksiyon (kalici
+          // basarisiz ya da gecici agsizligi) ayni kullanicinin sirada
+          // bekleyen -- farkli bookinglere ait -- TUM diger aksiyonlarini
+          // sonsuza dek bloklardi, cunku basarisiz aksiyon silinmedigi
+          // surece listenin basinda kalip bir sonraki sync() cagrisinda da
+          // ayni yerde patlardi.
+          continue;
         }
       }
     } finally {
