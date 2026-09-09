@@ -72,6 +72,24 @@ void main() {
     },
   );
 
+  testWidgets('NotificationsScreen: bildirime dokunma onu okundu isaretler', (
+    tester,
+  ) async {
+    await pump(tester);
+
+    expect(find.byWidgetPredicate(_isUnreadDot), findsOneWidget);
+
+    // Onceden `onTap` yalnizca titresim uretiyordu; bildirim ne okundu
+    // isaretleniyordu ne de `deepLink` alanina gore yonlendiriliyordu
+    // (2026-09-09'da bulundu). Bu ornek bildirimde `deepLink` olmadigindan
+    // navigasyon kolu (context.push, GoRouter'siz test ortaminda calismaz)
+    // tetiklenmiyor; burada yalnizca markAsRead davranisi dogrulaniyor.
+    await tester.tap(find.text('Rezervasyonun onaylandı'));
+    await tester.pumpAndSettle();
+
+    expect(find.byWidgetPredicate(_isUnreadDot), findsNothing);
+  });
+
   testWidgets('NotificationsScreen: dokunma hedefi >= 48dp', (tester) async {
     final handle = tester.ensureSemantics();
     await pump(tester);
