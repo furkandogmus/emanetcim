@@ -7,7 +7,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/auth/auth_controller.dart';
@@ -225,22 +224,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 const SizedBox(height: 16),
                                 Text(
                                   'BagajPark',
-                                  style: GoogleFonts.outfit(
-                                    fontSize: isTablet ? 42 : 36,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.textDark,
-                                    letterSpacing: -1,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .displaySmall!
+                                      .copyWith(
+                                        fontSize: isTablet ? 42 : 36,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.textDark,
+                                        letterSpacing: -1,
+                                      ),
                                   textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
                                   'auth.register_hint'.tr(),
-                                  style: GoogleFonts.outfit(
-                                    fontSize: isTablet ? 16 : 14,
-                                    color: const Color(0xFF424242),
-                                    letterSpacing: 0.2,
-                                  ),
+                                  style: Theme.of(context).textTheme.bodyLarge!
+                                      .copyWith(
+                                        fontSize: isTablet ? 16 : 14,
+                                        color: const Color(0xFF424242),
+                                        letterSpacing: 0.2,
+                                      ),
                                   textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(height: 32),
@@ -265,11 +268,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     children: [
                                       Text(
                                         'auth.welcome'.tr(),
-                                        style: GoogleFonts.outfit(
-                                          fontSize: isTablet ? 26 : 22,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.textDark,
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .headlineMedium!
+                                            .copyWith(
+                                              fontSize: isTablet ? 26 : 22,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.textDark,
+                                            ),
                                         textAlign: TextAlign.center,
                                       ),
                                       const SizedBox(height: 4),
@@ -281,10 +287,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                         children: [
                                           Text(
                                             'auth.no_account'.tr(),
-                                            style: GoogleFonts.outfit(
-                                              fontSize: isTablet ? 15 : 13,
-                                              color: const Color(0xFF424242),
-                                            ),
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium!
+                                                .copyWith(
+                                                  fontSize: isTablet ? 15 : 13,
+                                                  color: const Color(
+                                                    0xFF424242,
+                                                  ),
+                                                ),
                                           ),
                                           TextButton(
                                             onPressed: () =>
@@ -299,11 +310,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                             ),
                                             child: Text(
                                               'auth.register'.tr(),
-                                              style: GoogleFonts.outfit(
-                                                fontSize: isTablet ? 15 : 13,
-                                                color: AppColors.brandOrange,
-                                                fontWeight: FontWeight.bold,
-                                              ),
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleSmall!
+                                                  .copyWith(
+                                                    fontSize: isTablet
+                                                        ? 15
+                                                        : 13,
+                                                    fontWeight: FontWeight.bold,
+                                                    color:
+                                                        AppColors.brandOrange,
+                                                  ),
                                             ),
                                           ),
                                         ],
@@ -317,10 +334,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                           AutofillHints.username,
                                           AutofillHints.email,
                                         ],
-                                        style: GoogleFonts.outfit(
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: isTablet ? 18 : 16,
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium!
+                                            .copyWith(
+                                              fontSize: isTablet ? 18 : 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                         decoration: InputDecoration(
                                           hintText: 'auth.email_or_phone'.tr(),
                                           prefixIcon: const Icon(
@@ -329,10 +349,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                           helperText: 'auth.identity_hint'.tr(),
                                           // Uzun ipucu tek satira sigmayip kesiliyordu.
                                           helperMaxLines: 2,
-                                          helperStyle: GoogleFonts.outfit(
-                                            fontSize: isTablet ? 13 : 11,
-                                            color: const Color(0xFF616161),
-                                          ),
+                                          helperStyle: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall!
+                                              .copyWith(
+                                                fontSize: isTablet ? 13 : 11,
+                                                color: const Color(0xFF616161),
+                                              ),
                                         ),
                                         validator: (v) => _isValid(v ?? '')
                                             ? null
@@ -347,10 +370,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                         autofillHints: const [
                                           AutofillHints.password,
                                         ],
-                                        style: GoogleFonts.outfit(
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: isTablet ? 18 : 16,
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium!
+                                            .copyWith(
+                                              fontSize: isTablet ? 18 : 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                         decoration: InputDecoration(
                                           hintText: 'auth.password'.tr(),
                                           prefixIcon: const Icon(
@@ -385,9 +411,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                               : _forgotPassword,
                                           child: Text(
                                             'auth.forgot_password'.tr(),
-                                            style: GoogleFonts.outfit(
-                                              fontSize: isTablet ? 15 : 13,
-                                            ),
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium!
+                                                .copyWith(
+                                                  fontSize: isTablet ? 15 : 13,
+                                                ),
                                           ),
                                         ),
                                       ),
@@ -418,10 +447,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                               )
                                             : Text(
                                                 'auth.sign_in'.tr(),
-                                                style: GoogleFonts.outfit(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: isTablet ? 18 : 16,
-                                                ),
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleMedium!
+                                                    .copyWith(
+                                                      fontSize: isTablet
+                                                          ? 18
+                                                          : 16,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
                                               ),
                                       ),
                                     ],
@@ -442,11 +477,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       ),
                                       child: Text(
                                         'auth.or'.tr(),
-                                        style: GoogleFonts.outfit(
-                                          fontSize: isTablet ? 14 : 12,
-                                          color: const Color(0xFF616161),
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleSmall!
+                                            .copyWith(
+                                              fontSize: isTablet ? 14 : 12,
+                                              fontWeight: FontWeight.w600,
+                                              color: const Color(0xFF616161),
+                                            ),
                                       ),
                                     ),
                                     const Expanded(
@@ -471,10 +509,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   ),
                                   label: Text(
                                     'auth.google'.tr(),
-                                    style: GoogleFonts.outfit(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: isTablet ? 16 : 14,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium!
+                                        .copyWith(
+                                          fontSize: isTablet ? 16 : 14,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                   ),
                                   style: OutlinedButton.styleFrom(
                                     padding: EdgeInsets.symmetric(
@@ -492,10 +533,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     icon: const Icon(Icons.apple, size: 24),
                                     label: Text(
                                       'auth.apple'.tr(),
-                                      style: GoogleFonts.outfit(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: isTablet ? 16 : 14,
-                                      ),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium!
+                                          .copyWith(
+                                            fontSize: isTablet ? 16 : 14,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                     ),
                                     style: OutlinedButton.styleFrom(
                                       backgroundColor: Colors.black,
@@ -522,10 +566,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   ),
                                   label: Text(
                                     'home.how_it_works'.tr(),
-                                    style: GoogleFonts.outfit(
-                                      color: AppColors.brandOrange,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall!
+                                        .copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.brandOrange,
+                                        ),
                                   ),
                                 ),
                                 const SizedBox(height: 20),
@@ -576,7 +623,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         : 'auth.biometric_multi'.tr(
                             args: ['${accounts.length}'],
                           ),
-                    style: GoogleFonts.outfit(
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
                       fontSize: isTablet ? 17 : 15,
                       fontWeight: FontWeight.w600,
                     ),
@@ -619,7 +666,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             children: [
               Text(
                 'auth.select_account'.tr(),
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -630,7 +677,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   leading: const Icon(Icons.account_circle_rounded, size: 32),
                   title: Text(
                     a['email'] ?? '',
-                    style: GoogleFonts.outfit(fontWeight: FontWeight.w600),
+                    style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   trailing: const Icon(
                     Icons.fingerprint_rounded,

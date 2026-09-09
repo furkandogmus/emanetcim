@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/auth/auth_controller.dart';
@@ -121,7 +120,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       appBar: AppBar(
         title: Text(
           'auth.register'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.transparent,
       ),
@@ -160,7 +161,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                       TextFormField(
                         controller: _nameController,
-                        style: GoogleFonts.outfit(fontSize: isTablet ? 18 : 16),
+                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                          fontSize: isTablet ? 18 : 16,
+                        ),
                         autofillHints: const [AutofillHints.name],
                         decoration: InputDecoration(
                           labelText: 'auth.name_label'.tr(),
@@ -186,7 +189,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                       TextFormField(
                         controller: _identityController,
-                        style: GoogleFonts.outfit(fontSize: isTablet ? 18 : 16),
+                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                          fontSize: isTablet ? 18 : 16,
+                        ),
                         decoration: InputDecoration(
                           labelText: 'auth.email_or_phone'.tr(),
                           prefixIcon: const Icon(Icons.mail_outline_rounded),
@@ -218,7 +223,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         obscureText: _obscure,
                         keyboardType: TextInputType.visiblePassword,
                         autofillHints: const [AutofillHints.newPassword],
-                        style: GoogleFonts.outfit(fontSize: isTablet ? 18 : 16),
+                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                          fontSize: isTablet ? 18 : 16,
+                        ),
                         decoration: InputDecoration(
                           labelText: 'auth.password'.tr(),
                           prefixIcon: const Icon(Icons.lock_outline_rounded),
@@ -335,9 +342,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 )
                               : Text(
                                   'auth.register_button'.tr(),
-                                  style: GoogleFonts.outfit(
-                                    fontSize: isTablet ? 18 : 16,
-                                  ),
+                                  style: Theme.of(context).textTheme.bodyLarge!
+                                      .copyWith(fontSize: isTablet ? 18 : 16),
                                 ),
                         ),
                       ),
@@ -365,13 +371,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           children: [
             Text(
               title,
-              style: GoogleFonts.outfit(
+              style: Theme.of(context).textTheme.titleLarge!.copyWith(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 16),
-            Text(content, style: GoogleFonts.outfit(height: 1.6)),
+            Text(
+              content,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium!.copyWith(height: 1.6),
+            ),
             const SizedBox(height: 32),
             FilledButton(
               onPressed: () => Navigator.pop(context),
@@ -401,7 +412,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           children: [
             Text(
               '${'profile.password_strength'.tr()}: $label',
-              style: GoogleFonts.outfit(
+              style: Theme.of(context).textTheme.labelMedium!.copyWith(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: color,
