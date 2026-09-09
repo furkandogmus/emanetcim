@@ -55,14 +55,14 @@ class AdminDashboardScreen extends ConsumerWidget {
                 _statCard(
                   context,
                   'admin.total_bookings'.tr(),
-                  stats['totalBookings'].toString(),
+                  stats.totalBookings.toString(),
                   Icons.work_rounded,
                   const Color(0xFF0F172A),
                 ),
                 _statCard(
                   context,
                   'admin.total_revenue'.tr(),
-                  '₺${stats['totalRevenue']}',
+                  '₺${stats.totalRevenue}',
                   Icons.account_balance_wallet_rounded,
                   const Color(0xFFF97316),
                   isOrange: true,
@@ -70,14 +70,14 @@ class AdminDashboardScreen extends ConsumerWidget {
                 _statCard(
                   context,
                   'admin.active_partners'.tr(),
-                  stats['totalPartners'].toString(),
+                  stats.totalPartners.toString(),
                   Icons.store_rounded,
                   const Color(0xFF3B82F6),
                 ),
                 _statCard(
                   context,
                   'admin.pending_apps'.tr(),
-                  stats['pendingApplications'].toString(),
+                  stats.pendingApplications.toString(),
                   Icons.pending_actions_rounded,
                   const Color(0xFFEF4444),
                 ),
@@ -145,7 +145,7 @@ class AdminDashboardScreen extends ConsumerWidget {
               Icons.verified_user_rounded,
               'admin.approve_shops'.tr(),
               'admin.new_shop_apps'.tr(
-                args: [stats['pendingApplications'].toString()],
+                args: [stats.pendingApplications.toString()],
               ),
               const Color(0xFFF97316),
               onTap: () => context.push('/admin/applications'),
@@ -162,7 +162,7 @@ class AdminDashboardScreen extends ConsumerWidget {
               Icons.message_rounded,
               'admin.support_messages'.tr(),
               'admin.unread_messages'.tr(
-                args: [stats['unreadMessages']?.toString() ?? '0'],
+                args: [stats.unreadMessages.toString()],
               ),
               const Color(0xFF3B82F6),
               onTap: () => context.push('/admin/messages'),
