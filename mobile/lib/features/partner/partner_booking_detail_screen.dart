@@ -9,6 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/sync/sync_service.dart';
+import '../../core/utils/error_handler.dart';
 import '../../shared/models/booking.dart';
 import '../../shared/utils/app_colors.dart';
 import '../../shared/utils/booking_helpers.dart';
@@ -90,9 +91,11 @@ class _PartnerBookingDetailScreenState
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('${'common.error'.tr()}: $e')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+            ),
+          );
         }
       }
     } finally {
@@ -132,9 +135,11 @@ class _PartnerBookingDetailScreenState
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('${'common.error'.tr()}: $e')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+            ),
+          );
         }
       }
     } finally {
@@ -173,8 +178,11 @@ class _PartnerBookingDetailScreenState
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('common.error'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -212,8 +220,11 @@ class _PartnerBookingDetailScreenState
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('common.error'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -650,17 +661,14 @@ class _BagRevisionBottomSheetState extends State<_BagRevisionBottomSheet> {
       if (mounted) {
         Navigator.pop(context, true);
       }
-    } on DioException catch (e) {
-      if (mounted) {
-        final msg =
-            e.response?.data?['error'] ?? 'partner.bag_revision_error'.tr();
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(msg.toString())));
-      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('partner.bag_revision_error'.tr())),
+          SnackBar(
+            content: Text(
+              getErrorMessage(e, fallback: 'partner.bag_revision_error'.tr()),
+            ),
+          ),
         );
       }
     } finally {
