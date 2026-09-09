@@ -62,6 +62,21 @@ class SyncService {
   SyncService(this._ref);
 
   void init() {
+    // Auth bootstrap (SharedPreferences + secure token okuma + /auth/me)
+    // acilista bir frame'den cok daha uzun surer, bu yuzden acilista TEK
+    // SEFERLIK bir sync() cagrisi (onceden app.dart'ta) session hala null
+    // iken calisir ve `sync()` sessizce no-op doner (bkz. asagidaki
+    // guard). Bunun yerine oturum null'dan dolu bir degere GECTIGINDE
+    // (bootstrap bitince veya login sonrasi) burada dinleyip tetikliyoruz;
+    // boylece internet zaten acikken (baglanti DEGISMEDigi icin
+    // onConnectivityChanged hic tetiklenmez) acilan uygulamada bekleyen
+    // offline check-in/check-out kayitlari gercekten senkronize olur.
+    _ref.listen(authControllerProvider, (previous, next) {
+      if (next.session != null && previous?.session == null) {
+        sync();
+      }
+    });
+
     // Listen for network changes to trigger sync
     _connectivitySub = Connectivity().onConnectivityChanged.listen((results) {
       // results is a List<ConnectivityResult> in newer versions
