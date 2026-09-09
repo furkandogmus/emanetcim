@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../core/services/analytics_service.dart';
@@ -112,7 +111,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 children: [
                   Text(
                     'search.filter'.tr(),
-                    style: GoogleFonts.outfit(
+                    style: Theme.of(context).textTheme.titleLarge!.copyWith(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
@@ -122,11 +121,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   SwitchListTile(
                     title: Text(
                       'search.open_now'.tr(),
-                      style: GoogleFonts.outfit(),
+                      style: Theme.of(context).textTheme.bodyMedium!,
                     ),
                     subtitle: Text(
                       'search.open_now_hint'.tr(),
-                      style: GoogleFonts.outfit(fontSize: 12),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall!.copyWith(fontSize: 12),
                     ),
                     value: filters.onlyOpenNow,
                     onChanged: (v) =>
@@ -136,11 +137,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   SwitchListTile(
                     title: Text(
                       'search.open_247'.tr(),
-                      style: GoogleFonts.outfit(),
+                      style: Theme.of(context).textTheme.bodyMedium!,
                     ),
                     subtitle: Text(
                       'search.open_247_hint'.tr(),
-                      style: GoogleFonts.outfit(fontSize: 12),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall!.copyWith(fontSize: 12),
                     ),
                     value: filters.only247,
                     onChanged: (v) =>
@@ -151,7 +154,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   const SizedBox(height: 8),
                   Text(
                     'search.sort_by'.tr(),
-                    style: GoogleFonts.outfit(
+                    style: Theme.of(context).textTheme.titleSmall!.copyWith(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),
@@ -184,7 +187,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   const SizedBox(height: 12),
                   Text(
                     'search.amenities'.tr(),
-                    style: GoogleFonts.outfit(
+                    style: Theme.of(context).textTheme.titleSmall!.copyWith(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),
@@ -228,7 +231,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   const SizedBox(height: 12),
                   Text(
                     'search.min_rating'.tr(),
-                    style: GoogleFonts.outfit(fontSize: 14),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium!.copyWith(fontSize: 14),
                   ),
                   Row(
                     children: List.generate(
@@ -252,7 +257,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   const SizedBox(height: 12),
                   Text(
                     'search.max_price'.tr(),
-                    style: GoogleFonts.outfit(
+                    style: Theme.of(context).textTheme.titleSmall!.copyWith(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),
@@ -299,7 +304,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   Widget _filterChip(String label, bool selected, VoidCallback onTap) {
     return FilterChip(
-      label: Text(label, style: GoogleFonts.outfit(fontSize: 13)),
+      label: Text(
+        label,
+        style: Theme.of(context).textTheme.bodyMedium!.copyWith(fontSize: 13),
+      ),
       selected: selected,
       onSelected: (_) => onTap(),
       selectedColor: AppColors.brandOrange.withValues(alpha: 0.15),
@@ -341,7 +349,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   children: [
                     Text(
                       'search.show_results'.tr(),
-                      style: GoogleFonts.outfit(
+                      style: Theme.of(context).textTheme.titleLarge!.copyWith(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textDark,
@@ -359,11 +367,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       ),
                       child: Text(
                         '${shops.length} Nokta',
-                        style: GoogleFonts.outfit(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.brandOrange,
-                        ),
+                        style: Theme.of(context).textTheme.labelMedium!
+                            .copyWith(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.brandOrange,
+                            ),
                       ),
                     ),
                   ],
@@ -570,7 +579,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           ),
                           title: Text(
                             '$name${city.isNotEmpty ? ", $city" : ""}',
-                            style: GoogleFonts.outfit(fontSize: 14),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium!.copyWith(fontSize: 14),
                           ),
                           onTap: () => _selectSuggestion(s),
                         );

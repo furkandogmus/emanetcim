@@ -5,7 +5,6 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_vector_tiles/flutter_map_vector_tiles.dart' as vt;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -187,11 +186,14 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                                     Flexible(
                                       child: Text(
                                         s.name,
-                                        style: GoogleFonts.outfit(
-                                          fontSize: 28,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.textDark,
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .displayLarge!
+                                            .copyWith(
+                                              fontSize: 28,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.textDark,
+                                            ),
                                       ),
                                     ),
                                     if (s.isVerified) ...[
@@ -229,10 +231,13 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                                         const SizedBox(width: 4),
                                         Text(
                                           s.rating?.toStringAsFixed(1) ?? 'N/A',
-                                          style: GoogleFonts.outfit(
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.brandOrange,
-                                          ),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleSmall!
+                                              .copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color: AppColors.brandOrange,
+                                              ),
                                         ),
                                       ],
                                     ),
@@ -282,9 +287,8 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                               Expanded(
                                 child: Text(
                                   '${s.address ?? ''}, ${s.district ?? ''} / ${s.city ?? ''}',
-                                  style: GoogleFonts.outfit(
-                                    color: const Color(0xFF424242),
-                                  ),
+                                  style: Theme.of(context).textTheme.bodyMedium!
+                                      .copyWith(color: const Color(0xFF424242)),
                                 ),
                               ),
                             ],
@@ -323,11 +327,12 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                           const SizedBox(height: 12),
                           Text(
                             'shop.about_desc'.tr(),
-                            style: GoogleFonts.outfit(
-                              fontSize: 15,
-                              color: const Color(0xFF424242),
-                              height: 1.6,
-                            ),
+                            style: Theme.of(context).textTheme.bodyLarge!
+                                .copyWith(
+                                  fontSize: 15,
+                                  color: const Color(0xFF424242),
+                                  height: 1.6,
+                                ),
                           ),
 
                           const SizedBox(height: 32),
@@ -407,10 +412,11 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                               child: Center(
                                 child: Text(
                                   'shop.no_location'.tr(),
-                                  style: GoogleFonts.outfit(
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.grey,
-                                  ),
+                                  style: Theme.of(context).textTheme.titleSmall!
+                                      .copyWith(
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.grey,
+                                      ),
                                 ),
                               ),
                             ),
@@ -516,22 +522,28 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                                                         ? userName[0]
                                                               .toUpperCase()
                                                         : '?',
-                                                    style: GoogleFonts.outfit(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      color:
-                                                          AppColors.brandOrange,
-                                                    ),
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .titleSmall!
+                                                        .copyWith(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: AppColors
+                                                              .brandOrange,
+                                                        ),
                                                   ),
                                                 ),
                                                 const SizedBox(width: 8),
                                                 Expanded(
                                                   child: Text(
                                                     userName,
-                                                    style: GoogleFonts.outfit(
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                    ),
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .titleSmall!
+                                                        .copyWith(
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                        ),
                                                   ),
                                                 ),
                                                 Row(
@@ -553,12 +565,15 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                                               const SizedBox(height: 8),
                                               Text(
                                                 comment,
-                                                style: GoogleFonts.outfit(
-                                                  fontSize: 13,
-                                                  color: const Color(
-                                                    0xFF424242,
-                                                  ),
-                                                ),
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyMedium!
+                                                    .copyWith(
+                                                      fontSize: 13,
+                                                      color: const Color(
+                                                        0xFF424242,
+                                                      ),
+                                                    ),
                                               ),
                                             ],
                                           ],
@@ -620,20 +635,22 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                         children: [
                           Text(
                             'shop.total_amount'.tr(),
-                            style: GoogleFonts.outfit(
-                              fontSize: 14,
-                              color: const Color(0xFF424242),
-                            ),
+                            style: Theme.of(context).textTheme.bodyMedium!
+                                .copyWith(
+                                  fontSize: 14,
+                                  color: const Color(0xFF424242),
+                                ),
                           ),
                           Text(
                             s.isPrelaunch
                                 ? 'search.coming_soon'.tr()
                                 : '\u20BA${s.pricePerDay.toStringAsFixed(2)} /g\u00fcn',
-                            style: GoogleFonts.outfit(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.brandOrange,
-                            ),
+                            style: Theme.of(context).textTheme.titleLarge!
+                                .copyWith(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.brandOrange,
+                                ),
                           ),
                         ],
                       ),
@@ -674,7 +691,7 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
   Widget _sectionHeader(String title) {
     return Text(
       title,
-      style: GoogleFonts.outfit(
+      style: Theme.of(context).textTheme.titleLarge!.copyWith(
         fontSize: 20,
         fontWeight: FontWeight.bold,
         color: AppColors.textDark,
@@ -690,7 +707,7 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
           const SizedBox(height: 8),
           Text(
             label,
-            style: GoogleFonts.outfit(
+            style: Theme.of(context).textTheme.bodySmall!.copyWith(
               fontSize: 12,
               color: const Color(0xFF616161),
             ),
@@ -699,7 +716,7 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
           const SizedBox(height: 4),
           Text(
             value,
-            style: GoogleFonts.outfit(
+            style: Theme.of(context).textTheme.titleSmall!.copyWith(
               fontSize: 14,
               fontWeight: FontWeight.bold,
               color: AppColors.textDark,
@@ -733,7 +750,7 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
           const SizedBox(width: 8),
           Text(
             label,
-            style: GoogleFonts.outfit(
+            style: Theme.of(context).textTheme.titleSmall!.copyWith(
               fontSize: 14,
               fontWeight: FontWeight.w500,
               color: AppColors.textDark,
@@ -791,7 +808,7 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
       child: Center(
         child: Text(
           name.isNotEmpty ? name.substring(0, 1).toUpperCase() : 'S',
-          style: GoogleFonts.outfit(
+          style: Theme.of(context).textTheme.displayMedium!.copyWith(
             fontSize: 48,
             fontWeight: FontWeight.bold,
             color: AppColors.brandOrange,

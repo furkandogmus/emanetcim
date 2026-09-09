@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../core/services/favorites_service.dart';
@@ -114,11 +113,12 @@ class ShopPreviewCard extends ConsumerWidget {
                               shop.name.isNotEmpty
                                   ? shop.name.substring(0, 1).toUpperCase()
                                   : 'S',
-                              style: GoogleFonts.outfit(
-                                fontSize: 32,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.brandOrange,
-                              ),
+                              style: Theme.of(context).textTheme.displayLarge!
+                                  .copyWith(
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.brandOrange,
+                                  ),
                             ),
                           ),
                         ),
@@ -135,11 +135,12 @@ class ShopPreviewCard extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             shop.name,
-                            style: GoogleFonts.outfit(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textDark,
-                            ),
+                            style: Theme.of(context).textTheme.titleMedium!
+                                .copyWith(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textDark,
+                                ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -179,11 +180,12 @@ class ShopPreviewCard extends ConsumerWidget {
                         const SizedBox(width: 4),
                         Text(
                           shop.rating?.toStringAsFixed(1) ?? '-',
-                          style: GoogleFonts.outfit(
-                            fontSize: 14,
-                            color: const Color(0xFF424242),
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: Theme.of(context).textTheme.titleSmall!
+                              .copyWith(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xFF424242),
+                              ),
                         ),
                         if (displayDistance != null) ...[
                           const SizedBox(width: 8),
@@ -195,11 +197,12 @@ class ShopPreviewCard extends ConsumerWidget {
                           const SizedBox(width: 2),
                           Text(
                             '${displayDistance.toStringAsFixed(1)} km',
-                            style: GoogleFonts.outfit(
-                              fontSize: 12,
-                              color: Colors.grey.shade600,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: Theme.of(context).textTheme.labelMedium!
+                                .copyWith(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey.shade600,
+                                ),
                           ),
                         ],
                         // Talep testi noktasinda fiyat YAZILMAZ: oradaki
@@ -211,21 +214,23 @@ class ShopPreviewCard extends ConsumerWidget {
                           const Spacer(),
                           Text(
                             'search.coming_soon'.tr(),
-                            style: GoogleFonts.outfit(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.brandOrange,
-                            ),
+                            style: Theme.of(context).textTheme.titleMedium!
+                                .copyWith(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.brandOrange,
+                                ),
                           ),
                         ] else if (shop.pricePerDay > 0) ...[
                           const Spacer(),
                           Text(
                             '₺${shop.pricePerDay.toStringAsFixed(0)}${'search.day_unit'.tr()}',
-                            style: GoogleFonts.outfit(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.brandOrange,
-                            ),
+                            style: Theme.of(context).textTheme.titleMedium!
+                                .copyWith(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.brandOrange,
+                                ),
                           ),
                         ],
                       ],
