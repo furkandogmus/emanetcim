@@ -1,7 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/utils/error_handler.dart';
@@ -112,7 +111,9 @@ class _AdminApplicationsScreenState
       appBar: AppBar(
         title: Text(
           'admin.approve_shops'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
       ),
       body: _apps.isEmpty
@@ -166,16 +167,16 @@ class _AdminApplicationsScreenState
                   children: [
                     Text(
                       app['name'],
-                      style: GoogleFonts.outfit(
-                        fontWeight: FontWeight.bold,
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
                         fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
                       app['address'],
-                      style: GoogleFonts.outfit(
-                        color: const Color(0xFF616161),
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                         fontSize: 13,
+                        color: const Color(0xFF616161),
                       ),
                     ),
                   ],
@@ -235,7 +236,7 @@ class _AdminApplicationsScreenState
         const SizedBox(width: 8),
         Text(
           text,
-          style: GoogleFonts.outfit(
+          style: Theme.of(context).textTheme.bodyMedium!.copyWith(
             fontSize: 14,
             color: const Color(0xFF424242),
           ),

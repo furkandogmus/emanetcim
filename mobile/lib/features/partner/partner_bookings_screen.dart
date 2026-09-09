@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/repositories/booking_repository.dart';
 import '../../shared/models/booking.dart';
@@ -48,7 +47,7 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
             flexibleSpace: FlexibleSpaceBar(
               title: Text(
                 'nav.partner'.tr(),
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.titleSmall!.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
@@ -158,7 +157,7 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
                   const SizedBox(height: 12),
                   Text(
                     'partner.bookings_title'.tr(),
-                    style: GoogleFonts.outfit(
+                    style: Theme.of(context).textTheme.titleLarge!.copyWith(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textDark,
@@ -265,7 +264,7 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
               label: value,
               child: Text(
                 value,
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.headlineMedium!.copyWith(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
@@ -275,7 +274,7 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
               label: title,
               child: Text(
                 title,
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.bodySmall!.copyWith(
                   fontSize: 12,
                   color: const Color(0xFF424242),
                 ),
@@ -301,7 +300,7 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
     return ChoiceChip(
       label: Text(
         label,
-        style: GoogleFonts.outfit(
+        style: Theme.of(context).textTheme.titleSmall!.copyWith(
           fontSize: 13,
           fontWeight: selected ? FontWeight.bold : FontWeight.w500,
           color: selected ? Colors.white : AppColors.textDark,
@@ -363,7 +362,7 @@ class _BookingPartnerCard extends StatelessWidget {
                   child: Center(
                     child: Text(
                       '${booking.totalBags}',
-                      style: GoogleFonts.outfit(
+                      style: Theme.of(context).textTheme.titleSmall!.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppColors.brandOrange,
                       ),
@@ -378,15 +377,16 @@ class _BookingPartnerCard extends StatelessWidget {
                     children: [
                       Text(
                         booking.guestName ?? 'profile.guest'.tr(),
-                        style: GoogleFonts.outfit(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium!
+                            .copyWith(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         '${fmt.format(booking.checkInTime)} - ${fmt.format(booking.checkOutTime)}',
-                        style: GoogleFonts.outfit(
+                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                           fontSize: 13,
                           color: const Color(0xFF424242),
                         ),
@@ -409,7 +409,7 @@ class _BookingPartnerCard extends StatelessWidget {
                       ),
                       child: Text(
                         bookingStatusLabel(booking.status),
-                        style: GoogleFonts.outfit(
+                        style: Theme.of(context).textTheme.labelSmall!.copyWith(
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                           color: statusColor,
@@ -419,9 +419,9 @@ class _BookingPartnerCard extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       '₺${booking.totalPrice}',
-                      style: GoogleFonts.outfit(
-                        fontWeight: FontWeight.bold,
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
                         fontSize: 15,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],

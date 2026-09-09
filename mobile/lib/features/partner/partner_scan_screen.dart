@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -112,8 +111,18 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: GoogleFonts.outfit(color: const Color(0xFF424242))),
-        Text(value, style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        Text(
+          label,
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium!.copyWith(color: const Color(0xFF424242)),
+        ),
+        Text(
+          value,
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
+        ),
       ],
     );
   }
@@ -138,10 +147,10 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
                     Text(
                       'partner.camera_required'.tr(),
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.outfit(
-                        color: Colors.white,
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
+                        color: Colors.white,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -194,11 +203,12 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
                             ),
                             Text(
                               'nav.scan'.tr(),
-                              style: GoogleFonts.outfit(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: Theme.of(context).textTheme.titleMedium!
+                                  .copyWith(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
                             ),
                             const SizedBox(width: 48),
                           ],
@@ -207,10 +217,8 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
                         Text(
                           'partner.scan_hint'.tr(),
                           textAlign: TextAlign.center,
-                          style: GoogleFonts.outfit(
-                            color: Colors.white70,
-                            fontSize: 14,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium!
+                              .copyWith(fontSize: 14, color: Colors.white70),
                         ),
                         const SizedBox(height: 60),
                       ],

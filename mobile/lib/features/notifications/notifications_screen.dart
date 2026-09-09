@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/services/haptic_service.dart';
 import '../../core/services/notification_service.dart';
@@ -22,7 +21,9 @@ class NotificationsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           'notifications.title'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
         actions: [
           if (notifications.isNotEmpty)
@@ -33,7 +34,7 @@ class NotificationsScreen extends ConsumerWidget {
               },
               child: Text(
                 'notifications.mark_all_read'.tr(),
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.labelMedium!.copyWith(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   color: AppColors.brandOrange,
@@ -118,11 +119,12 @@ class NotificationsScreen extends ConsumerWidget {
                             Expanded(
                               child: Text(
                                 n.title,
-                                style: GoogleFonts.outfit(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: const Color(0xFF0F172A),
-                                ),
+                                style: Theme.of(context).textTheme.titleMedium!
+                                    .copyWith(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: const Color(0xFF0F172A),
+                                    ),
                               ),
                             ),
                             if (!n.isRead)
@@ -139,20 +141,22 @@ class NotificationsScreen extends ConsumerWidget {
                         const SizedBox(height: 6),
                         Text(
                           n.body,
-                          style: GoogleFonts.outfit(
-                            fontSize: 14,
-                            color: const Color(0xFF424242),
-                            height: 1.5,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium!
+                              .copyWith(
+                                fontSize: 14,
+                                color: const Color(0xFF424242),
+                                height: 1.5,
+                              ),
                         ),
                         const SizedBox(height: 12),
                         Text(
                           _formatTime(n.createdAt),
-                          style: GoogleFonts.outfit(
-                            fontSize: 12,
-                            color: const Color(0xFF757575),
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: Theme.of(context).textTheme.labelMedium!
+                              .copyWith(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xFF757575),
+                              ),
                         ),
                       ],
                     ),

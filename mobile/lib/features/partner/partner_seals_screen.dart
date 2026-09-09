@@ -1,7 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/utils/error_handler.dart';
@@ -124,7 +123,9 @@ class _PartnerSealsScreenState extends ConsumerState<PartnerSealsScreen> {
       appBar: AppBar(
         title: Text(
           'partner.seals_management'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
       ),
       body: _loadingShop
@@ -174,18 +175,17 @@ class _PartnerSealsScreenState extends ConsumerState<PartnerSealsScreen> {
                         const SizedBox(height: 12),
                         Text(
                           '$_currentSealCount',
-                          style: GoogleFonts.outfit(
-                            fontSize: 48,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                          style: Theme.of(context).textTheme.displayMedium!
+                              .copyWith(
+                                fontSize: 48,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
                         ),
                         Text(
                           'booking.seals'.tr(),
-                          style: GoogleFonts.outfit(
-                            fontSize: 16,
-                            color: Colors.white70,
-                          ),
+                          style: Theme.of(context).textTheme.bodyLarge!
+                              .copyWith(fontSize: 16, color: Colors.white70),
                         ),
                       ],
                     ),
@@ -208,10 +208,11 @@ class _PartnerSealsScreenState extends ConsumerState<PartnerSealsScreen> {
                           children: [
                             Text(
                               'partner.request_seals'.tr(),
-                              style: GoogleFonts.outfit(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: Theme.of(context).textTheme.titleMedium!
+                                  .copyWith(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                             ),
                             const SizedBox(height: 16),
                             TextFormField(
@@ -278,11 +279,12 @@ class _PartnerSealsScreenState extends ConsumerState<PartnerSealsScreen> {
                           children: [
                             Text(
                               'partner.report_faulty_seal'.tr(),
-                              style: GoogleFonts.outfit(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.redAccent,
-                              ),
+                              style: Theme.of(context).textTheme.titleMedium!
+                                  .copyWith(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.redAccent,
+                                  ),
                             ),
                             const SizedBox(height: 16),
                             TextFormField(

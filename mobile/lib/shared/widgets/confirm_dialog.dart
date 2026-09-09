@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 /// Standart onay/bilgi dialogu.
 ///
@@ -89,7 +88,7 @@ class ConfirmDialog extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: GoogleFonts.outfit(
+              style: Theme.of(context).textTheme.titleSmall!.copyWith(
                 fontWeight: FontWeight.bold,
                 color: accentColor,
               ),
@@ -97,7 +96,9 @@ class ConfirmDialog extends StatelessWidget {
           ),
         ],
       ),
-      content: content ?? Text(message!, style: GoogleFonts.outfit()),
+      content:
+          content ??
+          Text(message!, style: Theme.of(context).textTheme.bodyMedium!),
       actions: [
         if (cancelLabel != null)
           TextButton(
@@ -108,7 +109,7 @@ class ConfirmDialog extends StatelessWidget {
           onPressed: () => Navigator.pop(context, true),
           child: Text(
             confirmLabel,
-            style: GoogleFonts.outfit(
+            style: Theme.of(context).textTheme.titleSmall!.copyWith(
               fontWeight: FontWeight.bold,
               color: accentColor,
             ),
