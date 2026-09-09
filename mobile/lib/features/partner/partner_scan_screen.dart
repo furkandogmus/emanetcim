@@ -1,4 +1,5 @@
 import 'dart:async' show unawaited;
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,6 +12,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../core/repositories/seal_repository.dart';
 import '../../shared/models/seal_scan_result.dart';
 import '../../shared/utils/app_colors.dart';
+import '../../shared/widgets/confirm_dialog.dart';
 
 class PartnerScanScreen extends ConsumerStatefulWidget {
   const PartnerScanScreen({super.key});
@@ -88,36 +90,19 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
   }
 
   void _showSealInfo(SealScanResult data) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
-          'partner.seal_info'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _infoRow('partner.seal_serial'.tr(), '${data.serialNumber}'),
-            const SizedBox(height: 8),
-            _infoRow('partner.seal_status'.tr(), '${data.status}'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(
-              'common.confirm'.tr(),
-              style: GoogleFonts.outfit(
-                fontWeight: FontWeight.bold,
-                color: AppColors.brandOrange,
-              ),
-            ),
-          ),
+    ConfirmDialog.show(
+      context,
+      title: 'partner.seal_info'.tr(),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _infoRow('partner.seal_serial'.tr(), '${data.serialNumber}'),
+          const SizedBox(height: 8),
+          _infoRow('partner.seal_status'.tr(), '${data.status}'),
         ],
       ),
+      confirmLabel: 'common.confirm'.tr(),
     ).then((_) {
       if (mounted) setState(() => _handled = false);
     });
@@ -144,7 +129,11 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.videocam_off, size: 64, color: Colors.white70),
+                    const Icon(
+                      Icons.videocam_off,
+                      size: 64,
+                      color: Colors.white70,
+                    ),
                     const SizedBox(height: 24),
                     Text(
                       'partner.camera_required'.tr(),

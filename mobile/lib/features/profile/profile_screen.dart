@@ -23,6 +23,7 @@ import '../../core/services/share_service.dart';
 import '../../core/utils/error_handler.dart';
 import '../../shared/models/user.dart';
 import '../../shared/utils/app_colors.dart';
+import '../../shared/widgets/confirm_dialog.dart';
 
 final profileStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
   final dio = ref.read(dioProvider);
@@ -373,7 +374,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
           // Logout Button
           OutlinedButton.icon(
-            onPressed: () => _confirmLogout(context, ref),
+            onPressed: () => unawaited(_confirmLogout(context, ref)),
             icon: const Icon(Icons.logout_rounded, size: 20),
             label: Text('profile.logout'.tr()),
             style: OutlinedButton.styleFrom(
@@ -390,7 +391,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
           // Delete Account (Apple Requirement)
           TextButton(
-            onPressed: () => _showDeleteAccount(context, ref),
+            onPressed: () => unawaited(_showDeleteAccount(context, ref)),
             child: Text(
               'profile.delete_account'.tr(),
               style: GoogleFonts.outfit(
@@ -819,89 +820,47 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  void _confirmLogout(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'profile.logout'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-        ),
-        content: Text(
-          'profile.logout_confirm'.tr(),
-          style: GoogleFonts.outfit(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('common.cancel'.tr()),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ref.read(authControllerProvider.notifier).logout();
-            },
-            child: Text(
-              'profile.logout'.tr(),
-              style: const TextStyle(color: Colors.redAccent),
-            ),
-          ),
-        ],
-      ),
+  Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
+    final confirmed = await ConfirmDialog.show(
+      context,
+      title: 'profile.logout'.tr(),
+      message: 'profile.logout_confirm'.tr(),
+      cancelLabel: 'common.cancel'.tr(),
+      confirmLabel: 'profile.logout'.tr(),
+      destructive: true,
     );
+    if (confirmed == true) {
+      unawaited(ref.read(authControllerProvider.notifier).logout());
+    }
   }
 
-  void _showDeleteAccount(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'profile.delete_account'.tr(),
-          style: GoogleFonts.outfit(
-            fontWeight: FontWeight.bold,
-            color: Colors.redAccent,
-          ),
-        ),
-        content: Text(
-          'profile.delete_account_confirm'.tr(),
-          style: GoogleFonts.outfit(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('common.cancel'.tr()),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              final success = await ref
-                  .read(authControllerProvider.notifier)
-                  .requestAccountDeletion();
-
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      success
-                          ? 'profile.delete_account_success'.tr()
-                          : 'profile.delete_account_error'.tr(),
-                    ),
-                    backgroundColor: success ? Colors.green : Colors.redAccent,
-                  ),
-                );
-              }
-            },
-            child: Text(
-              'common.confirm'.tr(),
-              style: const TextStyle(
-                color: Colors.redAccent,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
+  Future<void> _showDeleteAccount(BuildContext context, WidgetRef ref) async {
+    final confirmed = await ConfirmDialog.show(
+      context,
+      title: 'profile.delete_account'.tr(),
+      message: 'profile.delete_account_confirm'.tr(),
+      cancelLabel: 'common.cancel'.tr(),
+      confirmLabel: 'common.confirm'.tr(),
+      destructive: true,
     );
+    if (confirmed != true) return;
+
+    final success = await ref
+        .read(authControllerProvider.notifier)
+        .requestAccountDeletion();
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            success
+                ? 'profile.delete_account_success'.tr()
+                : 'profile.delete_account_error'.tr(),
+          ),
+          backgroundColor: success ? Colors.green : Colors.redAccent,
+        ),
+      );
+    }
   }
 
   void _showEditProfile(BuildContext context, WidgetRef ref, UserDto? user) {

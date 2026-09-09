@@ -8,6 +8,7 @@ import '../../core/repositories/booking_repository.dart';
 import '../../shared/models/booking.dart';
 import '../../shared/utils/app_colors.dart';
 import '../../shared/utils/booking_helpers.dart';
+import '../../shared/widgets/skeleton.dart';
 
 final myBookingsProvider = FutureProvider<List<BookingDto>>((ref) async {
   final result = await ref.watch(bookingRepositoryProvider).getMyBookings();
@@ -37,7 +38,7 @@ class MyBookingsScreen extends ConsumerWidget {
         ],
       ),
       body: bookingsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: _buildSkeleton,
         error: (e, _) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -269,6 +270,17 @@ class MyBookingsScreen extends ConsumerWidget {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildSkeleton() {
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      itemCount: 4,
+      itemBuilder: (context, i) => const Padding(
+        padding: EdgeInsets.only(bottom: 20),
+        child: Skeleton(height: 140, borderRadius: 24),
       ),
     );
   }
