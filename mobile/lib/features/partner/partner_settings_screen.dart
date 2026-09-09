@@ -283,11 +283,13 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
                             const SizedBox(height: 4),
                             Text(
                               '$_sealCount Adet',
+                              // color SABIT: kart yukarida (Colors.white) hep
+                              // beyaz.
                               style: Theme.of(context).textTheme.titleLarge!
                                   .copyWith(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
-                                    color: AppColors.textDark,
+                                    color: const Color(0xFF0F172A),
                                   ),
                             ),
                           ],
@@ -381,7 +383,11 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
               FilledButton(
                 onPressed: _busy ? null : _save,
                 style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.textDark,
+                  // Sabit koyu zemin: buton metni theme.dart'in
+                  // filledButtonTheme'inden SABIT beyaz geliyor (renk
+                  // vermiyor), zemin de AppColors.textDark gibi dinamik
+                  // olursa koyu temada beyaz-uzerine-beyaz olur.
+                  backgroundColor: const Color(0xFF0F172A),
                   minimumSize: const Size(double.infinity, 60),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18),
@@ -434,15 +440,17 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
           ),
         ],
       ),
+      // color'lar SABIT: kutu yukarida (Colors.white) hep beyaz.
       child: TextFormField(
         controller: controller,
         keyboardType: isNumber ? TextInputType.number : TextInputType.text,
-        style: Theme.of(
-          context,
-        ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.w600),
+        style: Theme.of(context).textTheme.titleSmall!.copyWith(
+          fontWeight: FontWeight.w600,
+          color: const Color(0xFF0F172A),
+        ),
         decoration: InputDecoration(
           labelText: label,
-          prefixIcon: Icon(icon, size: 20),
+          prefixIcon: Icon(icon, size: 20, color: const Color(0xFF616161)),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(20),
             borderSide: BorderSide.none,

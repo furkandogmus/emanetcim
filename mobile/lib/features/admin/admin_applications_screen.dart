@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/utils/error_handler.dart';
+import '../../shared/utils/app_colors.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/skeleton.dart';
 import 'admin_controller.dart';
@@ -112,12 +113,13 @@ class _AdminApplicationsScreenState
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.bgLight,
       appBar: AppBar(
         title: Text(
           'admin.approve_shops'.tr(),
-          style: Theme.of(context).textTheme.titleSmall!
-              .copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
       ),
       body: _apps.isEmpty
@@ -171,8 +173,10 @@ class _AdminApplicationsScreenState
                   children: [
                     Text(
                       app['name'],
-                      style: Theme.of(context).textTheme.titleMedium!
-                          .copyWith(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Text(
                       app['address'],
@@ -238,8 +242,10 @@ class _AdminApplicationsScreenState
         const SizedBox(width: 8),
         Text(
           text,
-          style: Theme.of(context).textTheme.bodyMedium!
-              .copyWith(fontSize: 14, color: const Color(0xFF424242)),
+          style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+            fontSize: 14,
+            color: const Color(0xFF424242),
+          ),
         ),
       ],
     );

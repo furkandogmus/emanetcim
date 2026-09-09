@@ -426,17 +426,19 @@ class _HowItWorksCard extends StatelessWidget {
       child: Ink(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
         decoration: BoxDecoration(
-          color: Colors.white,
+          // Sabit Colors.white DEGIL: koyu temada bu kart hala beyaz kalip
+          // "acik mod izi" birakiyordu.
+          color: AppColors.bgCard,
           border: Border.all(color: AppColors.border),
           borderRadius: BorderRadius.circular(20),
         ),
-        child: const Row(
+        child: Row(
           children: [
-            _StepIcon(icon: Icons.search_rounded, number: '1'),
+            const _StepIcon(icon: Icons.search_rounded, number: '1'),
             Expanded(child: Divider(color: AppColors.border)),
-            _StepIcon(icon: Icons.qr_code_rounded, number: '2'),
+            const _StepIcon(icon: Icons.qr_code_rounded, number: '2'),
             Expanded(child: Divider(color: AppColors.border)),
-            _StepIcon(icon: Icons.explore_rounded, number: '3'),
+            const _StepIcon(icon: Icons.explore_rounded, number: '3'),
           ],
         ),
       ),
@@ -512,9 +514,10 @@ class _SafetyCard extends StatelessWidget {
                 children: [
                   Text(
                     'home.safety_title'.tr(),
+                    // color SABIT: kart yukarida (0xFFEFF6FF) hep acik mavi.
                     style: Theme.of(context).textTheme.titleSmall!.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textDark,
+                      color: const Color(0xFF0F172A),
                     ),
                   ),
                   const SizedBox(height: 3),

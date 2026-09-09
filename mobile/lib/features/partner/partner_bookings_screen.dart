@@ -287,9 +287,11 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
               label: value,
               child: Text(
                 value,
+                // color SABIT: bu kart yukarida (Colors.white) hep beyaz.
                 style: Theme.of(context).textTheme.headlineMedium!.copyWith(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
+                  color: const Color(0xFF0F172A),
                 ),
               ),
             ),
@@ -321,12 +323,14 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
   Widget _filterChip(String label, String value) {
     final selected = _filter == value;
     return ChoiceChip(
+      // backgroundColor SABIT beyaz (asagida) -- secili degilken etiket rengi
+      // de sabit koyu kalmali.
       label: Text(
         label,
         style: Theme.of(context).textTheme.titleSmall!.copyWith(
           fontSize: 13,
           fontWeight: selected ? FontWeight.bold : FontWeight.w500,
-          color: selected ? Colors.white : AppColors.textDark,
+          color: selected ? Colors.white : const Color(0xFF0F172A),
         ),
       ),
       selected: selected,
@@ -400,10 +404,12 @@ class _BookingPartnerCard extends StatelessWidget {
                     children: [
                       Text(
                         booking.guestName ?? 'profile.guest'.tr(),
+                        // color SABIT: kart yukarida (Colors.white) hep beyaz.
                         style: Theme.of(context).textTheme.titleMedium!
                             .copyWith(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
+                              color: const Color(0xFF0F172A),
                             ),
                       ),
                       const SizedBox(height: 2),
@@ -445,6 +451,7 @@ class _BookingPartnerCard extends StatelessWidget {
                       style: Theme.of(context).textTheme.titleMedium!.copyWith(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
+                        color: const Color(0xFF0F172A),
                       ),
                     ),
                   ],

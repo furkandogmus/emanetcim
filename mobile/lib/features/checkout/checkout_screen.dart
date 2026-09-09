@@ -356,12 +356,16 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
                 return Container(
                   padding: const EdgeInsets.all(28),
+                  // Sabit koyu kart: _summaryRow icindeki metin (Colors.white /
+                  // Color(0xFF757575)) sabit -- zemin de AppColors.textDark
+                  // gibi dinamik olamaz, yoksa koyu temada acik zemin + beyaz
+                  // metin cikip okunmaz olurdu.
                   decoration: BoxDecoration(
-                    color: AppColors.textDark,
+                    color: const Color(0xFF0F172A),
                     borderRadius: BorderRadius.circular(32),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.textDark.withValues(alpha: 0.2),
+                        color: const Color(0xFF0F172A).withValues(alpha: 0.2),
                         blurRadius: 30,
                         offset: const Offset(0, 10),
                       ),
@@ -546,7 +550,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   style: Theme.of(context).textTheme.titleMedium!.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textDark,
+                    color: const Color(0xFF0F172A),
                   ),
                 ),
               ],
@@ -598,7 +602,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   label,
                   style: Theme.of(context).textTheme.titleSmall!.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textDark,
+                    color: const Color(0xFF0F172A),
                   ),
                 ),
                 Text(
@@ -648,7 +652,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           color: Colors.grey.shade100,
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, size: 18, color: AppColors.textDark),
+        child: Icon(icon, size: 18, color: const Color(0xFF0F172A)),
       ),
     );
   }

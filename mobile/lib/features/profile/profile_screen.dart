@@ -231,7 +231,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         false;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      // Sabit Color(0xFFF8FAFC) DEGIL: theme.dart zaten scaffoldBackgroundColor
+      // taniyor (koyu temada 0xFF121212) ama bu ekran onu eziyordu -- ekran
+      // hep acik kaliyor, uzerindeki metin (artik tema-duyarli) koyu temada
+      // acik renge donunce acik-zeminde-acik-metin olup gorunmez oluyordu.
+      backgroundColor: AppColors.bgLight,
       appBar: AppBar(
         title: Text(
           'profile.title'.tr(),
@@ -462,8 +466,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
+        // Sabit koyu degrade: bu "Invite Friends" karti markalasma geregi
+        // temadan bagimsiz hep koyu -- AppColors.textDark burada YANLIS
+        // olurdu (koyu temada acik renge donup degradeyi beyazlatirdi).
         gradient: const LinearGradient(
-          colors: [AppColors.textDark, Color(0xFF1E293B)],
+          colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
         ),
         borderRadius: BorderRadius.circular(24),
       ),
@@ -586,7 +593,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: ListTile(
-        tileColor: Colors.white,
+        tileColor: AppColors.bgCard,
         leading: Icon(icon, color: AppColors.textDark, size: 22),
         title: Text(
           title,
@@ -614,7 +621,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: ListTile(
-        tileColor: Colors.white,
+        tileColor: AppColors.bgCard,
         leading: Icon(
           ref.watch(themeModeProvider) == ThemeMode.dark
               ? Icons.dark_mode_rounded
@@ -708,8 +715,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: ListTile(
-        tileColor: Colors.white,
-        leading: const Icon(
+        tileColor: AppColors.bgCard,
+        leading: Icon(
           Icons.fingerprint_rounded,
           color: AppColors.textDark,
           size: 22,

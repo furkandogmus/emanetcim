@@ -11,6 +11,14 @@ const _textDark = Color(0xFF0F172A);
 // karanlık yüzey renkleri (arka plan, input dolgusu, kenarlıklar) buradan
 // türetilir — bkz. buildDarkTheme().
 const _darkSurface = Color(0xFF1E1E1E);
+// AppColors.border/.placeholder/.textSecondary DEGIL: buildLightTheme/
+// buildDarkTheme her build'de KOSULSUZ ikisi de cagrilir (aktif olmayan tema
+// da MaterialApp'e verilir), yani AppColors'in dinamik (o anki parlakliga
+// gore) getter'i burada YANLIS deger dondurebilir -- her fonksiyon kendi
+// sabit rengini kullanmali.
+const _borderLight = Color(0xFFE2E8F0);
+const _placeholderLight = Color(0xFF334155);
+const _textSecondaryLight = Color(0xFF1F2937);
 
 ThemeData buildLightTheme() {
   final base = ThemeData.light(useMaterial3: true);
@@ -72,12 +80,12 @@ ThemeData buildLightTheme() {
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       hintStyle: GoogleFonts.outfit(
-        color: AppColors.placeholder,
+        color: _placeholderLight,
         fontWeight: FontWeight.w400,
       ),
       prefixIconColor: _brandOrange,
       labelStyle: GoogleFonts.outfit(
-        color: AppColors.textSecondary,
+        color: _textSecondaryLight,
         fontWeight: FontWeight.w500,
       ),
     ),
@@ -85,7 +93,7 @@ ThemeData buildLightTheme() {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: AppColors.border),
+        side: const BorderSide(color: _borderLight),
       ),
       surfaceTintColor: Colors.white,
       clipBehavior: Clip.antiAlias,
@@ -129,7 +137,7 @@ ThemeData buildLightTheme() {
               : FontWeight.w500,
           color: states.contains(WidgetState.selected)
               ? _brandOrange
-              : AppColors.textSecondary,
+              : _textSecondaryLight,
         ),
       ),
       iconTheme: WidgetStateProperty.resolveWith(
@@ -137,12 +145,12 @@ ThemeData buildLightTheme() {
           size: 24,
           color: states.contains(WidgetState.selected)
               ? _brandOrange
-              : AppColors.textSecondary,
+              : _textSecondaryLight,
         ),
       ),
     ),
     chipTheme: base.chipTheme.copyWith(
-      side: const BorderSide(color: AppColors.border),
+      side: const BorderSide(color: _borderLight),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.w500),
     ),

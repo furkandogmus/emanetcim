@@ -139,10 +139,16 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                         children: [
                           Text(
                             bk.shopName,
+                            // color SABIT: bu kart yukarida (Colors.white)
+                            // temadan bagimsiz hep beyaz -- renk verilmezse
+                            // koyu temanin varsayilan (acik) rengini miras
+                            // alip bu daima-beyaz "bilet" kartinda gorunmez
+                            // oluyordu.
                             style: Theme.of(context).textTheme.headlineMedium!
                                 .copyWith(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF0F172A),
                                 ),
                             textAlign: TextAlign.center,
                           ),
@@ -200,13 +206,17 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                             QrImageView(
                               data: bk.qrCodeToken!,
                               size: 200,
+                              // Sabit koyu renk: bu "bilet" karti tema ne
+                              // olursa olsun daima beyaz (yukarida Colors.white)
+                              // -- QR taranabilirligi icin kendi zemininde SABIT
+                              // kontrast gerekir, tema rengine gore degismemeli.
                               eyeStyle: const QrEyeStyle(
                                 eyeShape: QrEyeShape.square,
-                                color: AppColors.textDark,
+                                color: Color(0xFF0F172A),
                               ),
                               dataModuleStyle: const QrDataModuleStyle(
                                 dataModuleShape: QrDataModuleShape.square,
-                                color: AppColors.textDark,
+                                color: Color(0xFF0F172A),
                               ),
                               embeddedImage: const AssetImage(
                                 'assets/images/logo.png',
@@ -531,10 +541,11 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
           child: Text(
             value,
             textAlign: TextAlign.right,
+            // color SABIT: _infoRow daima-beyaz bilet kartinda cagriliyor.
             style: Theme.of(context).textTheme.titleMedium!.copyWith(
               fontSize: isBold ? 16 : 14,
               fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
-              color: AppColors.textDark,
+              color: const Color(0xFF0F172A),
             ),
           ),
         ),

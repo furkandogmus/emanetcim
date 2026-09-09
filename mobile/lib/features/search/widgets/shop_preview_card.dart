@@ -135,11 +135,13 @@ class ShopPreviewCard extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             shop.name,
+                            // color SABIT: kart yukarida (Colors.white) hep
+                            // beyaz.
                             style: Theme.of(context).textTheme.titleMedium!
                                 .copyWith(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: AppColors.textDark,
+                                  color: const Color(0xFF0F172A),
                                 ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,

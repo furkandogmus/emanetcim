@@ -246,14 +246,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 const SizedBox(height: 32),
                                 Container(
                                   padding: const EdgeInsets.all(28),
+                                  // Bu kart daima beyaz (giris formu "acik ada"
+                                  // tasarimi) -- icindeki metin/golge rengi de
+                                  // SABIT olmali, AppColors'in dinamik (koyu
+                                  // temada acik) degerine gecmemeli, yoksa
+                                  // "Welcome" hala-beyaz kartta gorunmez olur.
                                   decoration: BoxDecoration(
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(32),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: AppColors.textDark.withValues(
-                                          alpha: 0.04,
-                                        ),
+                                        color: const Color(
+                                          0xFF0F172A,
+                                        ).withValues(alpha: 0.04),
                                         blurRadius: 30,
                                         offset: const Offset(0, 10),
                                       ),
@@ -265,13 +270,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     children: [
                                       Text(
                                         'auth.welcome'.tr(),
+                                        // AppColors.textDark DEGIL: bu kart
+                                        // yukarida (color: Colors.white)
+                                        // temadan bagimsiz hep beyaz -- metin
+                                        // de sabit koyu kalmali, yoksa koyu
+                                        // modda AppColors donunce hala-beyaz
+                                        // kartta gorunmez olur.
                                         style: Theme.of(context)
                                             .textTheme
                                             .headlineMedium!
                                             .copyWith(
                                               fontSize: isTablet ? 26 : 22,
                                               fontWeight: FontWeight.bold,
-                                              color: AppColors.textDark,
+                                              color: const Color(0xFF0F172A),
                                             ),
                                         textAlign: TextAlign.center,
                                       ),
