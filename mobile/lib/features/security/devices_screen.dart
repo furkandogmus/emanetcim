@@ -1,7 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/repositories/push_repository.dart';
 import '../../shared/models/mobile_device.dart';
@@ -43,11 +42,13 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
       builder: (context) => AlertDialog(
         title: Text(
           'security.devices_remove_confirm_title'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
         content: Text(
           'security.devices_remove_confirm_desc'.tr(),
-          style: GoogleFonts.outfit(),
+          style: Theme.of(context).textTheme.bodyMedium!,
         ),
         actions: [
           TextButton(
@@ -91,7 +92,9 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
       appBar: AppBar(
         title: Text(
           'security.devices_title'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
       ),
       body: _loading

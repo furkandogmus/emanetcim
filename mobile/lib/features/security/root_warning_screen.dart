@@ -1,6 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class RootWarningScreen extends StatelessWidget {
   const RootWarningScreen({required this.onContinue, super.key});
@@ -27,19 +26,19 @@ class RootWarningScreen extends StatelessWidget {
                 const SizedBox(height: 32),
                 Text(
                   'security.warning_title'.tr(),
-                  style: GoogleFonts.outfit(
-                    color: Colors.white,
+                  style: Theme.of(context).textTheme.headlineMedium!.copyWith(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 16),
                 Text(
                   'security.warning_desc'.tr(),
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.outfit(
-                    color: Colors.white70,
+                  style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                     fontSize: 16,
+                    color: Colors.white70,
                     height: 1.5,
                   ),
                 ),
@@ -55,7 +54,9 @@ class RootWarningScreen extends StatelessWidget {
                   ),
                   child: Text(
                     'security.accept_risk'.tr(),
-                    style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -63,7 +64,9 @@ class RootWarningScreen extends StatelessWidget {
                   onPressed: () => Navigator.pop(context),
                   child: Text(
                     'security.exit_app'.tr(),
-                    style: GoogleFonts.outfit(color: Colors.white38),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium!.copyWith(color: Colors.white38),
                   ),
                 ),
               ],
