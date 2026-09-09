@@ -1,4 +1,5 @@
 import 'dart:async' show unawaited;
+
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/api/api_client.dart';
 import '../../core/auth/auth_controller.dart';
 import '../../core/utils/error_handler.dart';
+import '../../core/utils/validators.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -32,10 +34,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _identityController.dispose();
     _passwordController.dispose();
     super.dispose();
-  }
-
-  bool _isValidEmail(String email) {
-    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
   String? _normalizePhone(String phone) {
@@ -210,7 +208,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           if (input.isEmpty) {
                             return 'auth.invalid_identity'.tr();
                           }
-                          if (_isValidEmail(input) || _isValidPhone(input)) {
+                          if (isValidEmail(input) || _isValidPhone(input)) {
                             return null;
                           }
                           return 'auth.invalid_identity'.tr();
