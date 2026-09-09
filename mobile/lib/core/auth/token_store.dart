@@ -39,8 +39,20 @@ class TokenStore {
   }
 
   Future<void> clear() async {
-    await _storage.delete(key: _access);
-    await _storage.delete(key: _refresh);
+    // Her anahtar ayri ayri, en-iyi-caba (best-effort) silinir: platform
+    // seviyesinde (ornek: cihaz yedeginden geri yukleme sonrasi Android
+    // Keystore/iOS Keychain anahtarinin gecersizlesmesi) bir `delete` atarsa
+    // eskiden ikinci `delete` hic calismiyor VE `clear()` future'i
+    // reddediliyordu; bunu cagiran `AuthController.logout()` da hic
+    // tamamlanmadigindan oturum state'i temizlenmiyor, kullanici hicbir
+    // hata gormeden 'giris yapilmis' halde kaliyordu (2026-09-09'da
+    // bulundu). `clear()` artik asla reddedilmiyor.
+    try {
+      await _storage.delete(key: _access);
+    } catch (_) {}
+    try {
+      await _storage.delete(key: _refresh);
+    } catch (_) {}
   }
 
   Future<void> saveBiometricAccount(String email, String refreshToken) async {
