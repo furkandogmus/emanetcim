@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/auth/auth_controller.dart';
 import '../../shared/widgets/confirm_dialog.dart';
@@ -27,7 +26,9 @@ class AdminDashboardScreen extends ConsumerWidget {
         appBar: AppBar(
           title: Text(
             'admin.dashboard'.tr(),
-            style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
           ),
           actions: [
             IconButton(
@@ -89,7 +90,7 @@ class AdminDashboardScreen extends ConsumerWidget {
             // Live Analytics Placeholder
             Text(
               'admin.live_analytics'.tr().toUpperCase(),
-              style: GoogleFonts.outfit(
+              style: Theme.of(context).textTheme.labelMedium!.copyWith(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
                 color: const Color(0xFF616161),
@@ -121,7 +122,9 @@ class AdminDashboardScreen extends ConsumerWidget {
                     const SizedBox(height: 8),
                     Text(
                       'admin.charts_coming_soon'.tr(),
-                      style: GoogleFonts.outfit(color: const Color(0xFF616161)),
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                        color: const Color(0xFF616161),
+                      ),
                     ),
                   ],
                 ),
@@ -133,7 +136,7 @@ class AdminDashboardScreen extends ConsumerWidget {
             // Quick Actions
             Text(
               'admin.quick_actions'.tr().toUpperCase(),
-              style: GoogleFonts.outfit(
+              style: Theme.of(context).textTheme.labelMedium!.copyWith(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
                 color: const Color(0xFF616161),
@@ -142,6 +145,7 @@ class AdminDashboardScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             _actionTile(
+              context,
               Icons.verified_user_rounded,
               'admin.approve_shops'.tr(),
               'admin.new_shop_apps'.tr(
@@ -151,6 +155,7 @@ class AdminDashboardScreen extends ConsumerWidget {
               onTap: () => context.push('/admin/applications'),
             ),
             _actionTile(
+              context,
               Icons.health_and_safety_rounded,
               'admin.system_status'.tr(),
               'admin.all_systems_active'.tr(),
@@ -159,6 +164,7 @@ class AdminDashboardScreen extends ConsumerWidget {
               onTap: () {},
             ),
             _actionTile(
+              context,
               Icons.message_rounded,
               'admin.support_messages'.tr(),
               'admin.unread_messages'.tr(
@@ -211,7 +217,7 @@ class AdminDashboardScreen extends ConsumerWidget {
             children: [
               Text(
                 value,
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: const Color(0xFF0F172A),
@@ -219,7 +225,7 @@ class AdminDashboardScreen extends ConsumerWidget {
               ),
               Text(
                 title,
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.labelSmall!.copyWith(
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
                   color: const Color(0xFF616161),
@@ -234,6 +240,7 @@ class AdminDashboardScreen extends ConsumerWidget {
   }
 
   Widget _actionTile(
+    BuildContext context,
     IconData icon,
     String title,
     String subtitle,
@@ -261,11 +268,14 @@ class AdminDashboardScreen extends ConsumerWidget {
         ),
         title: Text(
           title,
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16),
+          style: Theme.of(context).textTheme.titleMedium!.copyWith(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         subtitle: Text(
           subtitle,
-          style: GoogleFonts.outfit(
+          style: Theme.of(context).textTheme.bodySmall!.copyWith(
             fontSize: 12,
             color: const Color(0xFF424242),
           ),
