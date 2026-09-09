@@ -12,6 +12,7 @@ import '../../core/sync/sync_service.dart';
 import '../../shared/models/booking.dart';
 import '../../shared/utils/app_colors.dart';
 import '../../shared/utils/booking_helpers.dart';
+import '../../shared/widgets/error_state.dart';
 import '../booking/booking_detail_screen.dart';
 
 class PartnerBookingDetailScreen extends ConsumerStatefulWidget {
@@ -257,7 +258,7 @@ class _PartnerBookingDetailScreenState
       body: bAsync.when(
         skipLoadingOnReload: true,
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('common.error'.tr())),
+        error: (e, _) => ErrorState(title: 'common.error'.tr()),
         data: (b) {
           final statusColor = bookingStatusColor(b.status);
 

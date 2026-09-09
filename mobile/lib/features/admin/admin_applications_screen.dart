@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/utils/error_handler.dart';
+import '../../shared/widgets/empty_state.dart';
 
 class AdminApplicationsScreen extends ConsumerStatefulWidget {
   const AdminApplicationsScreen({super.key});
@@ -55,11 +56,15 @@ class _AdminApplicationsScreenState
     try {
       final dio = ref.read(dioProvider);
       debugPrint('Admin Action: $id/${approve ? 'approve' : 'reject'}');
-      await dio.post('/admin/applications/$id/${approve ? 'approve' : 'reject'}');
+      await dio.post(
+        '/admin/applications/$id/${approve ? 'approve' : 'reject'}',
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(approve ? 'admin.approved'.tr() : 'admin.rejected'.tr()),
+            content: Text(
+              approve ? 'admin.approved'.tr() : 'admin.rejected'.tr(),
+            ),
           ),
         );
       }
@@ -69,7 +74,9 @@ class _AdminApplicationsScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(getErrorMessage(e, fallback: 'admin.action_failed'.tr())),
+            content: Text(
+              getErrorMessage(e, fallback: 'admin.action_failed'.tr()),
+            ),
           ),
         );
       }
@@ -91,11 +98,10 @@ class _AdminApplicationsScreenState
         ),
       ),
       body: _apps.isEmpty
-          ? Center(
-              child: Text(
-                'Bekleyen başvuru bulunmuyor.',
-                style: GoogleFonts.outfit(color: const Color(0xFF616161)),
-              ),
+          ? EmptyState(
+              icon: Icons.inbox_outlined,
+              title: 'Bekleyen başvuru bulunmuyor.',
+              accentColor: Theme.of(context).colorScheme.onSurfaceVariant,
             )
           : ListView.builder(
               padding: const EdgeInsets.all(20),

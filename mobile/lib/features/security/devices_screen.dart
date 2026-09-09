@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/repositories/push_repository.dart';
 import '../../shared/models/mobile_device.dart';
+import '../../shared/widgets/empty_state.dart';
+import '../../shared/widgets/error_state.dart';
 
 class DevicesScreen extends ConsumerStatefulWidget {
   const DevicesScreen({super.key});
@@ -95,9 +97,12 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-          ? Center(child: Text(_error!))
+          ? ErrorState(title: _error!)
           : (_devices == null || _devices!.isEmpty)
-          ? Center(child: Text('security.devices_empty'.tr()))
+          ? EmptyState(
+              icon: Icons.devices_other_rounded,
+              title: 'security.devices_empty'.tr(),
+            )
           : RefreshIndicator(
               onRefresh: _load,
               child: ListView.separated(
