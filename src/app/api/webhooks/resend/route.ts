@@ -9,6 +9,9 @@ import { Resend as ResendCtor } from "resend";
 import { normalizeInboundSubjectLine } from "@/lib/reply-subject";
 import { classifyInboxMessage } from "@/lib/inbox-classifier";
 import logger from "@/lib/logger";
+import { rateLimit } from "@/lib/rate-limit";
+import { clientIpFromRequest } from "@/lib/client-ip";
+import { WEBHOOK_TOLERANCE_SECONDS } from "@/lib/webhook-signature";
 
 export const dynamic = "force-dynamic";
 /** Inbound gövde için art arda bekleme + birkaç deneme (self-hosted / Vercel Pro uyumu). */
@@ -114,6 +117,18 @@ export async function POST(req: Request) {
         { status: 503 },
       );
     }
+
+    /*
+      IP HIZ SINIRI (2026-09-10'da bulundu). Uc kimlik dogrulamasiz cagriliyor
+      (imza govdeden sonra kontrol ediliyor) -- imza dogrulamasi ucuz olsa da
+      sinirsiz istek akisina acik kalmamali. Resend'in gercek trafigi tek IP'den
+      cok yuksek hacimli olmadigindan cömert bir sinir yeterli.
+    */
+    const ip = clientIpFromRequest(req);
+    if (!(await rateLimit(`webhook:resend:ip:${ip}`, 120, 5 * 60_000))) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     const rawBody = await req.text();
     const sigData = extractWebhookSignature(req);
     if (!sigData) {
@@ -131,6 +146,26 @@ export async function POST(req: Request) {
     if (!verdict.ok) {
       logger.warn({ reason: verdict.reason }, "resend_webhook_rejected");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    /*
+      TEKILLESTIRME (2026-09-10'da bulundu). Imza + zaman damgasi dogrulamasi
+      "gecerli mi" sorusunu yanitliyor, "DAHA ONCE ISLENDI mi"yi degil: gecerli
+      imzayla yakalanmis bir istek, tazelik penceresi (`WEBHOOK_TOLERANCE_SECONDS`,
+      5 dk) icinde tekrar tekrar gonderilebilir ve her seferinde yeni bir
+      `ContactMessage` satiri acardi. `svix-id` her webhook denemesi icin
+      SABIT kalir (Resend/Svix ayni olayin yeniden denemelerinde ayni id'yi
+      kullanir); ayni id ikinci kez gorulurse istek reddedilir.
+    */
+    if (sigData.svixId) {
+      const seenBefore = !(await rateLimit(
+        `webhook:resend:svix:${sigData.svixId}`,
+        1,
+        WEBHOOK_TOLERANCE_SECONDS * 1000,
+      ));
+      if (seenBefore) {
+        return NextResponse.json({ message: "Duplicate delivery ignored" }, { status: 200 });
+      }
     }
 
     let body: Record<string, unknown>;
