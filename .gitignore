@@ -99,3 +99,7 @@ infra/**/*.tfvars
 
 # next-pwa kaldirildi; public/sw.js artik kendini kaldiran statik dosya (takipte)
 /public/workbox-*.js
+
+# scripts/copy-maplibre-worker.mjs (predev/prebuild) node_modules'tan kopyalar;
+# kurulu maplibre-gl surumune bagli, commit edilmez.
+/public/maplibre/
