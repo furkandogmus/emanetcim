@@ -94,7 +94,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!dbUser) return token;
 
         const emailLower = (user.email ?? "").toLowerCase();
-        if (adminEmailSet.has(emailLower) && dbUser.role !== Role.ADMIN) {
+        /*
+          YALNIZCA OAuth (Google/Apple) girisinde otomatik ADMIN yap (2026-09-10'da
+          bulundu). `account.provider !== "credentials"` sarti YOKTU: registerGuestAction
+          herkese ADMIN_EMAILS'teki bir adresle credentials hesabi actirip (emailVerified
+          hic dogrulanmadan) HEMEN giris yapmasina, ayni jwt cagrisinda ADMIN'e
+          yukseltilmesine izin veriyordu. Kimlik saglayicinin (Google/Apple) dogruladigi
+          e-posta iddiasi guvenilir; kullanicinin kendi kaydettigi credentials e-postasi
+          degil.
+        */
+        const emailProvenByIdp = Boolean(account) && account?.provider !== "credentials";
+        if (emailProvenByIdp && adminEmailSet.has(emailLower) && dbUser.role !== Role.ADMIN) {
           await prisma.user.update({
             where: { id: user.id },
             data: { role: Role.ADMIN },

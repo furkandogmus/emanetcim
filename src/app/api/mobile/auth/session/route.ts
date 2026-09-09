@@ -146,6 +146,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "invalid_input" }, { status: 400 });
   }
 
+  // Diger tum token-uretme uclariyla (apple/google/refresh) AYNI kontrol —
+  // burada eksikti (2026-09-10'da bulundu).
+  if (user.isBanned) {
+    return NextResponse.json({ error: "account_banned" }, { status: 403 });
+  }
+
   const access = await signAccessToken(user.id, user.role, user.tokenVersion);
   const refresh = await signRefreshToken(user.id, user.role, user.tokenVersion);
 
