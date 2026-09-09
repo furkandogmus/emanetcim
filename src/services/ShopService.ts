@@ -22,7 +22,7 @@ import {
   type SlotAvailability,
 } from '@/services/SlotService';
 import logger from '@/lib/logger';
-import { renderEmailHtml } from '@/lib/email-template';
+import { renderEmailHtml, escapeEmailHtml } from '@/lib/email-template';
 
 /**
  * `recomputeResponseTimes` içinde `null`'a çekilecek dükkanlar tek seferde değil,
@@ -724,6 +724,10 @@ export class ShopService implements IShopService {
       const partnerEmail = shop.owner?.email;
       const partnerPhone = shop.owner?.phone;
       const partnerName = shop.owner?.name ?? 'Esnaf';
+      // Ikisi de kullanici kontrollu (profil adi, dukkan adi) -- HTML govdesine
+      // girmeden once kacirilmali (2026-09-10'da bulundu).
+      const partnerNameHtml = escapeEmailHtml(partnerName);
+      const shopNameHtml = escapeEmailHtml(shop.name);
     /*
       KOK ADRES ORTAK YARDIMCIDAN (2026-08-31). Burasi yedek olarak URETIM alan
       adini SABITLIYORDU (`https://bagajpark.com`): degisken tanimsiz kalan bir
@@ -749,8 +753,8 @@ export class ShopService implements IShopService {
             locale: 'tr',
             heading: 'Başvurunuz Onaylandı! 🎉',
             paragraphs: [
-              `Merhaba <strong>${partnerName}</strong>,`,
-              `<strong>${shop.name}</strong> mağazanız BagajPark platformuna kabul edildi. Artık rezervasyon almaya başlayabilirsiniz!`,
+              `Merhaba <strong>${partnerNameHtml}</strong>,`,
+              `<strong>${shopNameHtml}</strong> mağazanız BagajPark platformuna kabul edildi. Artık rezervasyon almaya başlayabilirsiniz!`,
             ],
             cta: { href: panelUrl, label: 'Partner Panelime Git', variant: 'button' },
             footer: 'BagajPark — Güvenli Bagaj Emaneti',

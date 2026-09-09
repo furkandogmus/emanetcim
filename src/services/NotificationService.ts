@@ -844,6 +844,8 @@ export class NotificationService implements INotificationService {
   }): Promise<void> {
     const { bookingId, shopName, partnerPhone, totalPrice } = params;
     const shortId = bookingShortCode(bookingId);
+    /* GOVDEYE GIREN DUKKAN ADI KACIRILIR — bkz. notifyPrelaunchInterestReceived'daki ayni desen. */
+    const shopNameHtml = escapeEmailHtml(shopName);
 
     // Veritabanından rezervasyon durumunu ve partner e-posta adresini çekelim
     let partnerEmail: string | null = null;
@@ -895,7 +897,7 @@ export class NotificationService implements INotificationService {
         locale: "tr",
         heading: "Yeni Rezervasyon Talebi! 🎒",
         paragraphs: [
-          `<strong>${shopName}</strong> mağazanıza yeni bir rezervasyon talebi ulaştı. Onaylama veya reddetme işlemlerini gerçekleştirmek için lütfen partner panelinize giriş yapın.`,
+          `<strong>${shopNameHtml}</strong> mağazanıza yeni bir rezervasyon talebi ulaştı. Onaylama veya reddetme işlemlerini gerçekleştirmek için lütfen partner panelinize giriş yapın.`,
         ],
         rows: [
           { label: "Rezervasyon Kodu", value: shortId },
@@ -913,7 +915,7 @@ export class NotificationService implements INotificationService {
         tone: "success",
         heading: "Yeni Onaylı Rezervasyon!",
         paragraphs: [
-          `<strong>${shopName}</strong> mağazanıza yeni bir onaylı rezervasyon geldi. Müşteri bagajı teslim etmek üzere dükkanınıza gelecektir.`,
+          `<strong>${shopNameHtml}</strong> mağazanıza yeni bir onaylı rezervasyon geldi. Müşteri bagajı teslim etmek üzere dükkanınıza gelecektir.`,
         ],
         rows: [
           { label: "Rezervasyon Kodu", value: shortId },
@@ -1036,7 +1038,10 @@ export class NotificationService implements INotificationService {
       paragraphs: ["Bir rezervasyon için şikayet/itiraz oluşturulmuştur."],
       rows: [
         { label: "Rezervasyon Kodu", value: shortId },
-        { label: "Şikayet Nedeni", value: reason, emphasized: true },
+        // Derinlemesine savunma: `reason` artik cagiran tarafta enum'a
+        // dogrulaniyor (bkz. createDisputeAction), ama bu servis o garantiye
+        // guvenmeden de guvenli kalmali.
+        { label: "Şikayet Nedeni", value: escapeEmailHtml(reason), emphasized: true },
       ],
       footer: "BagajPark — Yönetim Masası",
     });
@@ -1095,7 +1100,10 @@ export class NotificationService implements INotificationService {
       heading: roleLabel,
       paragraphs: [],
       rows: [
-        { label: "Ad", value: name ?? "—" },
+        // `name` kayit formundan geliyor, tamamen kullanici kontrollu
+        // (2026-09-10'da bulundu) — kacirilmadan tabloya girerse admin
+        // gelen kutusuna HTML/baglanti enjekte edilebilirdi.
+        { label: "Ad", value: escapeEmailHtml(name ?? "—") },
         { label: "E-posta/Telefon", value: identity },
         { label: "Kaynak", value: source },
       ],
@@ -1291,14 +1299,14 @@ export class NotificationService implements INotificationService {
           ? {
               subject: "BagajPark: Bırakma saatiniz yaklaşıyor 🎒",
               heading: "Bırakma saatiniz yaklaşıyor 🎒",
-              p1: `Bagajınızı ${shop} noktasına bırakma zamanınız yaklaşıyor. QR kodunuzu göstermeyi unutmayın.`,
+              p1: `Bagajınızı __SHOP__ noktasına bırakma zamanınız yaklaşıyor. QR kodunuzu göstermeyi unutmayın.`,
               row1: "Nokta",
               row2: "Bırakma",
             }
           : {
               subject: "BagajPark: Valizinizi alma saatiniz yaklaşıyor 🔔",
               heading: "Valizinizi alma saatiniz yaklaşıyor 🔔",
-              p1: `${shop} noktasındaki bagajınızı teslim alma zamanınız yaklaşıyor. Geç teslim almalarda ek ücret uygulanabilir.`,
+              p1: `__SHOP__ noktasındaki bagajınızı teslim alma zamanınız yaklaşıyor. Geç teslim almalarda ek ücret uygulanabilir.`,
               row1: "Nokta",
               row2: "Alma",
             },
@@ -1306,14 +1314,14 @@ export class NotificationService implements INotificationService {
           ? {
               subject: "BagajPark: Your drop-off time is near 🎒",
               heading: "Your drop-off time is near 🎒",
-              p1: `It is almost time to drop your luggage off at ${shop}. Remember to show your QR code.`,
+              p1: `It is almost time to drop your luggage off at __SHOP__. Remember to show your QR code.`,
               row1: "Location",
               row2: "Drop-off",
             }
           : {
               subject: "BagajPark: Your pick-up time is near 🔔",
               heading: "Your pick-up time is near 🔔",
-              p1: `It is almost time to collect your luggage from ${shop}. Late pick-ups may incur an extra charge.`,
+              p1: `It is almost time to collect your luggage from __SHOP__. Late pick-ups may incur an extra charge.`,
               row1: "Location",
               row2: "Pick-up",
             },
@@ -1321,14 +1329,14 @@ export class NotificationService implements INotificationService {
           ? {
               subject: "BagajPark: Ihre Abgabezeit rückt näher 🎒",
               heading: "Ihre Abgabezeit rückt näher 🎒",
-              p1: `Es ist fast Zeit, Ihr Gepäck bei ${shop} abzugeben. Denken Sie an Ihren QR-Code.`,
+              p1: `Es ist fast Zeit, Ihr Gepäck bei __SHOP__ abzugeben. Denken Sie an Ihren QR-Code.`,
               row1: "Standort",
               row2: "Abgabe",
             }
           : {
               subject: "BagajPark: Ihre Abholzeit rückt näher 🔔",
               heading: "Ihre Abholzeit rückt näher 🔔",
-              p1: `Es ist fast Zeit, Ihr Gepäck bei ${shop} abzuholen. Bei verspäteter Abholung können Zusatzkosten anfallen.`,
+              p1: `Es ist fast Zeit, Ihr Gepäck bei __SHOP__ abzuholen. Bei verspäteter Abholung können Zusatzkosten anfallen.`,
               row1: "Standort",
               row2: "Abholung",
             },
@@ -1336,14 +1344,14 @@ export class NotificationService implements INotificationService {
           ? {
               subject: "BagajPark : l'heure de dépôt approche 🎒",
               heading: "L'heure de dépôt approche 🎒",
-              p1: `Il est bientôt temps de déposer vos bagages à ${shop}. N'oubliez pas votre code QR.`,
+              p1: `Il est bientôt temps de déposer vos bagages à __SHOP__. N'oubliez pas votre code QR.`,
               row1: "Point",
               row2: "Dépôt",
             }
           : {
               subject: "BagajPark : l'heure de récupération approche 🔔",
               heading: "L'heure de récupération approche 🔔",
-              p1: `Il est bientôt temps de récupérer vos bagages à ${shop}. Une récupération tardive peut entraîner des frais.`,
+              p1: `Il est bientôt temps de récupérer vos bagages à __SHOP__. Une récupération tardive peut entraîner des frais.`,
               row1: "Point",
               row2: "Récupération",
             },
@@ -1351,14 +1359,14 @@ export class NotificationService implements INotificationService {
           ? {
               subject: "BagajPark: お預けのお時間が近づいています 🎒",
               heading: "お預けのお時間が近づいています 🎒",
-              p1: `${shop} でお荷物をお預けいただくお時間が近づいています。QRコードをご提示ください。`,
+              p1: `__SHOP__ でお荷物をお預けいただくお時間が近づいています。QRコードをご提示ください。`,
               row1: "場所",
               row2: "お預け",
             }
           : {
               subject: "BagajPark: お受け取りのお時間が近づいています 🔔",
               heading: "お受け取りのお時間が近づいています 🔔",
-              p1: `${shop} でお荷物をお受け取りいただくお時間が近づいています。お受け取りが遅れると追加料金が発生する場合があります。`,
+              p1: `__SHOP__ でお荷物をお受け取りいただくお時間が近づいています。お受け取りが遅れると追加料金が発生する場合があります。`,
               row1: "場所",
               row2: "お受け取り",
             },
@@ -1366,14 +1374,14 @@ export class NotificationService implements INotificationService {
           ? {
               subject: "BagajPark: زمان تحویل چمدان شما نزدیک است 🎒",
               heading: "زمان تحویل چمدان شما نزدیک است 🎒",
-              p1: `زمان تحویل چمدان شما در ${shop} نزدیک است. لطفاً کد QR خود را نشان دهید.`,
+              p1: `زمان تحویل چمدان شما در __SHOP__ نزدیک است. لطفاً کد QR خود را نشان دهید.`,
               row1: "مکان",
               row2: "تحویل",
             }
           : {
               subject: "BagajPark: زمان دریافت چمدان شما نزدیک است 🔔",
               heading: "زمان دریافت چمدان شما نزدیک است 🔔",
-              p1: `زمان دریافت چمدان شما از ${shop} نزدیک است. دریافت با تأخیر ممکن است هزینه اضافی داشته باشد.`,
+              p1: `زمان دریافت چمدان شما از __SHOP__ نزدیک است. دریافت با تأخیر ممکن است هزینه اضافی داشته باشد.`,
               row1: "مکان",
               row2: "دریافت",
             },
@@ -1381,13 +1389,25 @@ export class NotificationService implements INotificationService {
       locale,
     );
 
-    const body = `${content.p1}\n\n${content.row1}: ${shop}\n${content.row2}: ${when}`;
+    /*
+      `shop` esnafin kendi yazdigi dukkan adi, DUZ METIN ve HTML govdesine
+      farkli kacisla girer (bkz. escapeEmailHtml() basindaki gerekce): metin
+      govdesi kacirilirsa kullaniciya `&amp;` gosterir, HTML govdesi
+      kacirilmazsa baglanti/isaretleme enjeksiyonuna acik kalir
+      (2026-09-10'da bulundu — bu fonksiyon o duzeltmenin disinda kalmisti).
+      `content.p1` `__SHOP__` yer tutucusuyla uretiliyor; burada iki ayri
+      degerle dolduruluyor.
+    */
+    const shopHtml = escapeEmailHtml(shop);
+    const p1Text = content.p1.replace("__SHOP__", shop);
+    const p1Html = content.p1.replace("__SHOP__", shopHtml);
+    const body = `${p1Text}\n\n${content.row1}: ${shop}\n${content.row2}: ${when}`;
     const html = renderEmailHtml({
       locale,
       heading: content.heading,
-      paragraphs: [content.p1],
+      paragraphs: [p1Html],
       rows: [
-        { label: content.row1, value: shop },
+        { label: content.row1, value: shopHtml },
         { label: content.row2, value: when },
       ],
       footer: "BagajPark",
