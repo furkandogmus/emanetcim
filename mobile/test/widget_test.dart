@@ -1,24 +1,42 @@
-// This is a basic Flutter widget test.
+// Duman (smoke) testi: uygulamanin gercek giris ve ana ekranlari, harness'in
+// `pumpApp`'i (gercek tema + Turkce ceviri + Riverpod) ile hatasiz ciziliyor mu?
 //
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+// `flutter create` kalintisi eski hali sahte bir Scaffold(Text('BagajPark'))
+// pump ediyordu; hicbir gercek widget'i tetiklemiyordu ve kirilan bir ekrani
+// yakalayamazdi.
+import 'package:bagajpark/core/auth/token_store.dart';
+import 'package:bagajpark/features/auth/login_screen.dart';
+import 'package:bagajpark/features/home/home_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/harness.dart';
+
+/// Guvenli depoya (flutter_secure_storage) test ortaminda erisilemez;
+/// biyometrik hesap listesi bos doner (bkz. login_screen_a11y_test.dart).
+class _NoBiometricTokenStore extends TokenStore {
+  @override
+  Future<List<Map<String, String>>> getBiometricAccounts() async => [];
+}
+
 void main() {
-  testWidgets('App smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    // We skip pumpAndSettle to avoid timeout from animations/localization
-    await tester.pumpWidget(
-      const ProviderScope(
-        child: MaterialApp(home: Scaffold(body: Text('BagajPark'))),
-      ),
+  testWidgets('App smoke test: LoginScreen hatasiz ciziliyor', (tester) async {
+    await pumpApp(
+      tester,
+      const LoginScreen(),
+      overrides: [
+        tokenStoreProvider.overrideWith((ref) => _NoBiometricTokenStore()),
+      ],
     );
 
-    expect(find.text('BagajPark'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    expect(find.text('Hoş Geldiniz'), findsOneWidget);
+    expect(find.text('Giriş Yap'), findsOneWidget);
+  });
+
+  testWidgets('App smoke test: HomeScreen hatasiz ciziliyor', (tester) async {
+    await pumpApp(tester, const HomeScreen());
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Valizlerini Güvenle Emanet Edin'), findsOneWidget);
   });
 }
