@@ -1,10 +1,14 @@
+import 'dart:async' show unawaited;
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 import '../../core/auth/auth_controller.dart';
+import '../../shared/widgets/confirm_dialog.dart';
 import 'admin_controller.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
@@ -27,7 +31,7 @@ class AdminDashboardScreen extends ConsumerWidget {
           ),
           actions: [
             IconButton(
-              onPressed: () => _confirmLogout(context, ref),
+              onPressed: () => unawaited(_confirmLogout(context, ref)),
               icon: const Icon(Icons.logout_rounded, color: Colors.redAccent),
             ),
             IconButton(
@@ -284,35 +288,17 @@ class AdminDashboardScreen extends ConsumerWidget {
     );
   }
 
-  void _confirmLogout(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'profile.logout'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-        ),
-        content: Text(
-          'profile.logout_confirm'.tr(),
-          style: GoogleFonts.outfit(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('common.cancel'.tr()),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ref.read(authControllerProvider.notifier).logout();
-            },
-            child: Text(
-              'profile.logout'.tr(),
-              style: const TextStyle(color: Colors.redAccent),
-            ),
-          ),
-        ],
-      ),
+  Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
+    final confirmed = await ConfirmDialog.show(
+      context,
+      title: 'profile.logout'.tr(),
+      message: 'profile.logout_confirm'.tr(),
+      cancelLabel: 'common.cancel'.tr(),
+      confirmLabel: 'profile.logout'.tr(),
+      destructive: true,
     );
+    if (confirmed == true) {
+      unawaited(ref.read(authControllerProvider.notifier).logout());
+    }
   }
 }
