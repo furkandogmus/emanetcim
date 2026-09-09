@@ -9,6 +9,12 @@ import { requireAdmin, requireUser } from "@/lib/action-auth";
 
 // Liste `@/lib/dispute-status`ta; gerekcesi orada.
 const disputeStatusSchema = z.enum(DISPUTE_STATUSES);
+// Mobil ucla (src/app/api/mobile/disputes/route.ts) AYNI sema. TS tipi
+// derleme zamaninda kisitliyordu ama server action'lar dogrudan cagirilabilen
+// bir RPC ucu -- calisma zamaninda hicbir sey `reason`i bu uc degerle
+// sinirlamiyordu, gelen deger dogrudan admin bildirim e-postasina yaziliyordu
+// (2026-09-10'da bulundu).
+const disputeReasonSchema = z.enum(["DAMAGE", "THEFT", "OTHER"]);
 
 export async function createDisputeAction(input: {
   bookingId: string;
@@ -17,6 +23,10 @@ export async function createDisputeAction(input: {
 }) {
   const auth = await requireUser();
   if (!auth.ok) return { success: false as const, error: auth.error };
+  const reasonParsed = disputeReasonSchema.safeParse(input.reason);
+  if (!reasonParsed.success) {
+    return { success: false as const, error: "Errors.invalidData" };
+  }
 
   /*
     GOVDE `DisputeService`TE. Ayni is mobil ucta da yaziliydi ve orada IKI SEY
@@ -28,7 +38,7 @@ export async function createDisputeAction(input: {
   const result = await disputeService.create({
     bookingId: input.bookingId,
     guestId: auth.actor.id,
-    reason: input.reason,
+    reason: reasonParsed.data,
     description: input.description,
   });
   if (!result.ok) {
