@@ -5,13 +5,15 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/sync/sync_service.dart';
+import '../../core/utils/error_handler.dart';
 import '../../shared/models/booking.dart';
 import '../../shared/utils/app_colors.dart';
 import '../../shared/utils/booking_helpers.dart';
+import '../../shared/widgets/error_state.dart';
+import '../../shared/widgets/skeleton.dart';
 import '../booking/booking_detail_screen.dart';
 
 class PartnerBookingDetailScreen extends ConsumerStatefulWidget {
@@ -88,9 +90,11 @@ class _PartnerBookingDetailScreenState
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('${'common.error'.tr()}: $e')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+            ),
+          );
         }
       }
     } finally {
@@ -130,9 +134,11 @@ class _PartnerBookingDetailScreenState
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('${'common.error'.tr()}: $e')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+            ),
+          );
         }
       }
     } finally {
@@ -171,9 +177,11 @@ class _PartnerBookingDetailScreenState
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('common.error'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -211,9 +219,11 @@ class _PartnerBookingDetailScreenState
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('common.error'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -250,14 +260,27 @@ class _PartnerBookingDetailScreenState
       appBar: AppBar(
         title: Text(
           'nav.partner'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
       body: bAsync.when(
         skipLoadingOnReload: true,
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('common.error'.tr())),
+        loading: () => const Padding(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            children: [
+              Skeleton(height: 120, borderRadius: 24),
+              SizedBox(height: 16),
+              Skeleton(height: 180, borderRadius: 24),
+              SizedBox(height: 16),
+              Skeleton(height: 56, borderRadius: 16),
+            ],
+          ),
+        ),
+        error: (e, _) => ErrorState(title: 'common.error'.tr()),
         data: (b) {
           final statusColor = bookingStatusColor(b.status);
 
@@ -289,17 +312,18 @@ class _PartnerBookingDetailScreenState
                         (b.guestName != null && b.guestName!.isNotEmpty)
                             ? b.guestName!.substring(0, 1).toUpperCase()
                             : 'G',
-                        style: GoogleFonts.outfit(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.brandOrange,
-                        ),
+                        style: Theme.of(context).textTheme.displayLarge!
+                            .copyWith(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.brandOrange,
+                            ),
                       ),
                     ),
                     const SizedBox(height: 16),
                     Text(
                       b.guestName ?? 'profile.guest'.tr(),
-                      style: GoogleFonts.outfit(
+                      style: Theme.of(context).textTheme.titleLarge!.copyWith(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
@@ -316,11 +340,12 @@ class _PartnerBookingDetailScreenState
                       ),
                       child: Text(
                         bookingStatusLabel(b.status),
-                        style: GoogleFonts.outfit(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: statusColor,
-                        ),
+                        style: Theme.of(context).textTheme.labelMedium!
+                            .copyWith(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: statusColor,
+                            ),
                       ),
                     ),
                   ],
@@ -353,7 +378,7 @@ class _PartnerBookingDetailScreenState
               // Bags Info
               Text(
                 'checkout.bags_title'.tr(),
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.labelMedium!.copyWith(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   color: const Color(0xFF616161),
@@ -549,7 +574,7 @@ class _PartnerBookingDetailScreenState
                 const SizedBox(width: 6),
                 Text(
                   label,
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
                     fontSize: 12,
                     color: const Color(0xFF424242),
                   ),
@@ -559,7 +584,7 @@ class _PartnerBookingDetailScreenState
             const SizedBox(height: 8),
             Text(
               time,
-              style: GoogleFonts.outfit(
+              style: Theme.of(context).textTheme.titleMedium!.copyWith(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
               ),
@@ -575,7 +600,7 @@ class _PartnerBookingDetailScreenState
       children: [
         Text(
           size,
-          style: GoogleFonts.outfit(
+          style: Theme.of(context).textTheme.labelMedium!.copyWith(
             fontSize: 12,
             fontWeight: FontWeight.bold,
             color: const Color(0xFF616161),
@@ -584,7 +609,7 @@ class _PartnerBookingDetailScreenState
         const SizedBox(height: 4),
         Text(
           '$count',
-          style: GoogleFonts.outfit(
+          style: Theme.of(context).textTheme.titleLarge!.copyWith(
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: const Color(0xFF0F172A),
@@ -639,18 +664,14 @@ class _BagRevisionBottomSheetState extends State<_BagRevisionBottomSheet> {
       if (mounted) {
         Navigator.pop(context, true);
       }
-    } on DioException catch (e) {
-      if (mounted) {
-        final msg =
-            e.response?.data?['error'] ?? 'partner.bag_revision_error'.tr();
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(msg.toString())));
-      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('partner.bag_revision_error'.tr())),
+          SnackBar(
+            content: Text(
+              getErrorMessage(e, fallback: 'partner.bag_revision_error'.tr()),
+            ),
+          ),
         );
       }
     } finally {
@@ -677,7 +698,7 @@ class _BagRevisionBottomSheetState extends State<_BagRevisionBottomSheet> {
               children: [
                 Text(
                   label,
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textDark,
@@ -686,7 +707,7 @@ class _BagRevisionBottomSheetState extends State<_BagRevisionBottomSheet> {
                 const SizedBox(height: 2),
                 Text(
                   description,
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
                     fontSize: 12,
                     color: Colors.grey[600],
                   ),
@@ -706,7 +727,7 @@ class _BagRevisionBottomSheetState extends State<_BagRevisionBottomSheet> {
                 child: Text(
                   '$val',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -750,7 +771,7 @@ class _BagRevisionBottomSheetState extends State<_BagRevisionBottomSheet> {
               children: [
                 Text(
                   'partner.bag_revision_title'.tr(),
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -804,10 +825,11 @@ class _BagRevisionBottomSheetState extends State<_BagRevisionBottomSheet> {
                       )
                     : Text(
                         'common.save'.tr(),
-                        style: GoogleFonts.outfit(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium!
+                            .copyWith(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
               ),
             ),

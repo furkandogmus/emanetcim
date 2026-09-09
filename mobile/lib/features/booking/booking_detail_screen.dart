@@ -1,19 +1,21 @@
 import 'dart:async' show Timer;
 import 'dart:io' show Platform;
+
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:screen_protector/screen_protector.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/repositories/booking_repository.dart';
+import '../../core/utils/error_handler.dart';
 import '../../shared/models/booking.dart';
 import '../../shared/utils/app_colors.dart';
 import '../../shared/utils/booking_helpers.dart';
+import '../../shared/widgets/error_state.dart';
 import '../../shared/widgets/skeleton.dart';
 
 final bookingProvider = FutureProvider.family<BookingDto, String>((
@@ -89,29 +91,18 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
       appBar: AppBar(
         title: Text(
           'booking.detail_title'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
       ),
       body: bookingAsync.when(
         skipLoadingOnReload: true,
         loading: _buildSkeleton,
-        error: (e, _) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.error_outline_rounded,
-                size: 64,
-                color: Colors.redAccent,
-              ),
-              const SizedBox(height: 16),
-              Text('common.error'.tr()),
-              TextButton(
-                onPressed: () => ref.refresh(bookingProvider(widget.bookingId)),
-                child: Text('common.retry'.tr()),
-              ),
-            ],
-          ),
+        error: (e, _) => ErrorState(
+          title: 'common.error'.tr(),
+          actionLabel: 'common.retry'.tr(),
+          onAction: () => ref.refresh(bookingProvider(widget.bookingId)),
         ),
         data: (bk) => SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -138,10 +129,11 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                         children: [
                           Text(
                             bk.shopName,
-                            style: GoogleFonts.outfit(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context).textTheme.headlineMedium!
+                                .copyWith(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 8),
@@ -172,11 +164,14 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                                   Expanded(
                                     child: Text(
                                       'booking.pay_at_shop_desc'.tr(),
-                                      style: GoogleFonts.outfit(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.orange.shade900,
-                                      ),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium!
+                                          .copyWith(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.orange.shade900,
+                                          ),
                                     ),
                                   ),
                                 ],
@@ -213,10 +208,11 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                             const SizedBox(height: 16),
                             Text(
                               'booking.qr_hint'.tr(),
-                              style: GoogleFonts.outfit(
-                                fontSize: 12,
-                                color: const Color(0xFF616161),
-                              ),
+                              style: Theme.of(context).textTheme.bodySmall!
+                                  .copyWith(
+                                    fontSize: 12,
+                                    color: const Color(0xFF616161),
+                                  ),
                             ),
                             const SizedBox(height: 32),
                           ],
@@ -263,11 +259,12 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                         children: [
                           Text(
                             'booking.seals'.tr(),
-                            style: GoogleFonts.outfit(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textDark,
-                            ),
+                            style: Theme.of(context).textTheme.titleMedium!
+                                .copyWith(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textDark,
+                                ),
                           ),
                           const SizedBox(height: 12),
                           ...seals.map(
@@ -283,9 +280,10 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                                   const SizedBox(width: 8),
                                   Text(
                                     '#${seal['sealNumber'] ?? ''}',
-                                    style: GoogleFonts.outfit(
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall!
+                                        .copyWith(fontWeight: FontWeight.w600),
                                   ),
                                   const SizedBox(width: 12),
                                   Container(
@@ -301,10 +299,13 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                                     ),
                                     child: Text(
                                       '${seal['bagSize'] ?? ''} #${(seal['bagIndex'] ?? 0) + 1}',
-                                      style: GoogleFonts.outfit(
-                                        fontSize: 12,
-                                        color: AppColors.brandOrange,
-                                      ),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall!
+                                          .copyWith(
+                                            fontSize: 12,
+                                            color: AppColors.brandOrange,
+                                          ),
                                     ),
                                   ),
                                 ],
@@ -496,10 +497,10 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
       ),
       child: Text(
         label,
-        style: GoogleFonts.outfit(
-          color: color,
-          fontWeight: FontWeight.bold,
+        style: Theme.of(context).textTheme.titleSmall!.copyWith(
           fontSize: 14,
+          fontWeight: FontWeight.bold,
+          color: color,
         ),
       ),
     );
@@ -509,15 +510,20 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: GoogleFonts.outfit(color: const Color(0xFF616161))),
+        Text(
+          label,
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium!.copyWith(color: const Color(0xFF616161)),
+        ),
         const SizedBox(width: 16),
         Expanded(
           child: Text(
             value,
             textAlign: TextAlign.right,
-            style: GoogleFonts.outfit(
-              fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+            style: Theme.of(context).textTheme.titleMedium!.copyWith(
               fontSize: isBold ? 16 : 14,
+              fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
               color: AppColors.textDark,
             ),
           ),
@@ -624,7 +630,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
             children: [
               Text(
                 'booking.modify_title'.tr(),
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -633,11 +639,15 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
               ListTile(
                 title: Text(
                   'checkout.check_in'.tr(),
-                  style: GoogleFonts.outfit(fontWeight: FontWeight.w500),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.w500),
                 ),
                 subtitle: Text(
                   DateFormat('dd MMM yyyy, HH:mm').format(newCheckIn!),
-                  style: GoogleFonts.outfit(color: AppColors.brandOrange),
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                    color: AppColors.brandOrange,
+                  ),
                 ),
                 trailing: const Icon(
                   Icons.calendar_today_rounded,
@@ -675,11 +685,15 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
               ListTile(
                 title: Text(
                   'checkout.check_out'.tr(),
-                  style: GoogleFonts.outfit(fontWeight: FontWeight.w500),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.w500),
                 ),
                 subtitle: Text(
                   DateFormat('dd MMM yyyy, HH:mm').format(newCheckOut!),
-                  style: GoogleFonts.outfit(color: AppColors.brandOrange),
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                    color: AppColors.brandOrange,
+                  ),
                 ),
                 trailing: const Icon(
                   Icons.calendar_today_rounded,
@@ -786,7 +800,12 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
     return Expanded(
       child: Column(
         children: [
-          Text(label, style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+          Text(
+            label,
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -796,7 +815,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
               ),
               Text(
                 '$val',
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -836,7 +855,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
             children: [
               Text(
                 'booking.rate_shop'.tr(),
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -894,10 +913,17 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                               ),
                             );
                           }
-                        } catch (_) {
+                        } catch (e) {
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('common.error'.tr())),
+                              SnackBar(
+                                content: Text(
+                                  getErrorMessage(
+                                    e,
+                                    fallback: 'common.error'.tr(),
+                                  ),
+                                ),
+                              ),
                             );
                           }
                         } finally {
@@ -947,7 +973,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
             children: [
               Text(
                 'booking.dispute_title'.tr(),
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -1011,10 +1037,17 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
                               ),
                             );
                           }
-                        } catch (_) {
+                        } catch (e) {
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('common.error'.tr())),
+                              SnackBar(
+                                content: Text(
+                                  getErrorMessage(
+                                    e,
+                                    fallback: 'common.error'.tr(),
+                                  ),
+                                ),
+                              ),
                             );
                           }
                         } finally {
@@ -1054,7 +1087,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
           children: [
             Text(
               'booking.cancellation_policy'.tr(),
-              style: GoogleFonts.outfit(
+              style: Theme.of(context).textTheme.titleLarge!.copyWith(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
@@ -1062,19 +1095,25 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
             const SizedBox(height: 16),
             Text(
               'booking.cancel_tier1'.tr(),
-              style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
             ),
             Text('booking.cancel_tier1_desc'.tr()),
             const SizedBox(height: 12),
             Text(
               'booking.cancel_tier2'.tr(),
-              style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
             ),
             Text('booking.cancel_tier2_desc'.tr()),
             const SizedBox(height: 12),
             Text(
               'booking.cancel_tier3'.tr(),
-              style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
             ),
             Text('booking.cancel_tier3_desc'.tr()),
             const SizedBox(height: 24),

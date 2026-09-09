@@ -2,12 +2,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/repositories/booking_repository.dart';
 import '../../shared/models/booking.dart';
 import '../../shared/utils/app_colors.dart';
 import '../../shared/utils/booking_helpers.dart';
+import '../../shared/widgets/empty_state.dart';
+import '../../shared/widgets/error_state.dart';
 import '../../shared/widgets/how_it_works_sheet.dart';
 import '../../shared/widgets/skeleton.dart';
 
@@ -46,7 +47,7 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
             flexibleSpace: FlexibleSpaceBar(
               title: Text(
                 'nav.partner'.tr(),
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.titleSmall!.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
@@ -146,14 +147,17 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
                         const SizedBox(width: 8),
                         _filterChip('partner.filter_active'.tr(), 'active'),
                         const SizedBox(width: 8),
-                        _filterChip('partner.filter_completed'.tr(), 'completed'),
+                        _filterChip(
+                          'partner.filter_completed'.tr(),
+                          'completed',
+                        ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 12),
                   Text(
                     'partner.bookings_title'.tr(),
-                    style: GoogleFonts.outfit(
+                    style: Theme.of(context).textTheme.titleLarge!.copyWith(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textDark,
@@ -179,36 +183,50 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
               ),
             ),
             error: (e, _) => SliverFillRemaining(
-              child: Center(child: Text('common.error'.tr())),
+              child: ErrorState(title: 'common.error'.tr()),
             ),
             data: (list) {
               List<BookingDto> filtered;
               if (_filter == 'waiting') {
-                filtered = list.where((b) => b.status == BookingStatus.waitingApproval).toList();
+                filtered = list
+                    .where((b) => b.status == BookingStatus.waitingApproval)
+                    .toList();
               } else if (_filter == 'active') {
-                filtered = list.where((b) => b.status == BookingStatus.approved || b.status == BookingStatus.paid || b.status == BookingStatus.checkedIn).toList();
+                filtered = list
+                    .where(
+                      (b) =>
+                          b.status == BookingStatus.approved ||
+                          b.status == BookingStatus.paid ||
+                          b.status == BookingStatus.checkedIn,
+                    )
+                    .toList();
               } else if (_filter == 'completed') {
-                filtered = list.where((b) => b.status == BookingStatus.checkedOut).toList();
+                filtered = list
+                    .where((b) => b.status == BookingStatus.checkedOut)
+                    .toList();
               } else {
                 filtered = list;
               }
 
               return filtered.isEmpty
-                ? SliverFillRemaining(
-                    child: Center(child: Text('partner.no_bookings'.tr())),
-                  )
-                : SliverPadding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        final b = filtered[index];
-                        return _BookingPartnerCard(booking: b, fmt: fmt);
-                      }, childCount: filtered.length),
-                    ),
-                  );
+                  ? SliverFillRemaining(
+                      child: EmptyState(
+                        icon: Icons.luggage_outlined,
+                        title: 'partner.no_bookings'.tr(),
+                      ),
+                    )
+                  : SliverPadding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final b = filtered[index];
+                          return _BookingPartnerCard(booking: b, fmt: fmt);
+                        }, childCount: filtered.length),
+                      ),
+                    );
             },
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 100)),
@@ -217,56 +235,56 @@ class _PartnerBookingsScreenState extends ConsumerState<PartnerBookingsScreen> {
     );
   }
 
-Widget _buildSummaryCard(
-  String title,
-  String value,
-  IconData icon,
-  Color color,
-) {
-  return Expanded(
-    child: Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: color, size: 28),
-          const SizedBox(height: 12),
-          Semantics(
-            label: value,
-            child: Text(
-              value,
-              style: GoogleFonts.outfit(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+  Widget _buildSummaryCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: color, size: 28),
+            const SizedBox(height: 12),
+            Semantics(
+              label: value,
+              child: Text(
+                value,
+                style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ),
-          Semantics(
-            label: title,
-            child: Text(
-              title,
-              style: GoogleFonts.outfit(
-                fontSize: 12,
-                color: const Color(0xFF424242),
+            Semantics(
+              label: title,
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                  fontSize: 12,
+                  color: const Color(0xFF424242),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   void _showHowItWorks(BuildContext context) {
     showModalBottomSheet(
@@ -280,12 +298,21 @@ Widget _buildSummaryCard(
   Widget _filterChip(String label, String value) {
     final selected = _filter == value;
     return ChoiceChip(
-      label: Text(label, style: GoogleFonts.outfit(fontSize: 13, fontWeight: selected ? FontWeight.bold : FontWeight.w500, color: selected ? Colors.white : AppColors.textDark)),
+      label: Text(
+        label,
+        style: Theme.of(context).textTheme.titleSmall!.copyWith(
+          fontSize: 13,
+          fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+          color: selected ? Colors.white : AppColors.textDark,
+        ),
+      ),
       selected: selected,
       onSelected: (_) => setState(() => _filter = value),
       selectedColor: AppColors.brandOrange,
       backgroundColor: Colors.white,
-      side: BorderSide(color: selected ? AppColors.brandOrange : Colors.grey.shade300),
+      side: BorderSide(
+        color: selected ? AppColors.brandOrange : Colors.grey.shade300,
+      ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     );
   }
@@ -301,101 +328,106 @@ class _BookingPartnerCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final statusColor = bookingStatusColor(booking.status);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade100),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: InkWell(
-        onTap: () => context.push('/partner/booking/${booking.id}'),
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: AppColors.brandOrange.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    '${booking.totalBags}',
-                    style: GoogleFonts.outfit(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.brandOrange,
+    // RepaintBoundary: bu SliverList ogesinin repaint'i, listenin geri
+    // kalaniyla paylasilan ust katmana sizmasin diye izole edildi.
+    return RepaintBoundary(
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.shade100),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: InkWell(
+          onTap: () => context.push('/partner/booking/${booking.id}'),
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: AppColors.brandOrange.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${booking.totalBags}',
+                      style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.brandOrange,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        booking.guestName ?? 'profile.guest'.tr(),
+                        style: Theme.of(context).textTheme.titleMedium!
+                            .copyWith(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${fmt.format(booking.checkInTime)} - ${fmt.format(booking.checkOutTime)}',
+                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          fontSize: 13,
+                          color: const Color(0xFF424242),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      booking.guestName ?? 'profile.guest'.tr(),
-                      style: GoogleFonts.outfit(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        bookingStatusLabel(booking.status),
+                        style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: statusColor,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 6),
                     Text(
-                      '${fmt.format(booking.checkInTime)} - ${fmt.format(booking.checkOutTime)}',
-                      style: GoogleFonts.outfit(
-                        fontSize: 13,
-                        color: const Color(0xFF424242),
+                      '₺${booking.totalPrice}',
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: statusColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      bookingStatusLabel(booking.status),
-                      style: GoogleFonts.outfit(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: statusColor,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '₺${booking.totalPrice}',
-                    style: GoogleFonts.outfit(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

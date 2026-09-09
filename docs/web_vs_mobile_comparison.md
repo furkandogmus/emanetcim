@@ -2,8 +2,44 @@
 
 Bu doküman, Web (Next.js) ve Mobil (Flutter) uygulamaları arasındaki özellik eşliğini (Feature Parity) ve aktif işlevsel farkları (Gaps) listelemektedir. 
 
-* **Son Güncelleme:** Haziran 2026
+* **Son Güncelleme:** 2026-09-09 (bkz. "2026-09-09 doğrulama notu" — yalnızca #6, #7, #84, #92 satırları kodla karşılaştırılarak yeniden doğrulandı; tablonun geri kalanı Haziran 2026'dan beri yeniden gözden geçirilmedi ve muhtemelen benzer şekilde eskimiştir)
 * **Durum Özeti:** Raporlanan 105 temel özelliğin büyük kısmında eşitlik (Parity) sağlanmıştır. Son yapılan güncellemelerle birlikte Misafir Rezervasyon Yönetimi (İptal, Değişiklik, Yorum/Değerlendirme, Uyuşmazlık Bildirme), Arama Filtreleri ve Esnaf Sipariş Onay/Reddetme/Telefon Güncelleme gibi kritik aşamalar **Mobil uygulamada da eşitlenmiştir (Parity/Fixed).**
+
+### 2026-09-09 doğrulama notu
+
+`mobil-kalite-duzeltmeleri` denetimi kapsamında GV-H2 (P0, #84 Mühür Yönetimi) ve GV-L1
+(doküman güncelliği) bulguları için aşağıdaki dört madde koda karşı yeniden doğrulandı;
+dördü de artık **kapatılmış** ama tabloda hâlâ *EKSİK* olarak işaretliydi:
+
+- **#84 Mühür Yönetimi (Talep/İptal):** `mobile/lib/features/partner/partner_seals_screen.dart`
+  mevcut, `mobile/lib/app/router.dart:158-159`'da `/partner/seals` rotasına bağlı ve
+  `partner_settings_screen.dart:190-192`'den erişilebiliyor. `POST /partner/seals/request` ve
+  `POST /partner/seals/report-faulty` çağırıyor; bu uçlar `src/app/api/mobile/partner/seals/request/route.ts`
+  ve `.../report-faulty/route.ts`'de `SealService.createRequest` üzerinden servis katmanını
+  kullanıyor (kod içi yorum: bu uç 2026-08-25'e kadar kendi `prisma.sealRequest.create`'ini
+  yazıyordu ve `requestedBy` boş kalıyordu — o kusur giderilmiş).
+- **#92 Bagaj Sayısı Revizyonu:** `partner_booking_detail_screen.dart:202-215,559-615`'te
+  `_showBagRevisionSheet` / `_BagRevisionBottomSheet` mevcut, `POST /partner/bookings/{id}/bag-revision`
+  çağırıyor. Uç `src/app/api/mobile/partner/bookings/[id]/bag-revision/route.ts`'de
+  `BookingService.applyBagRevision`'ı kullanıyor (kod içi yorum: 2026-08-25'e kadar kendi
+  `prisma.booking.update`'ini yazıyordu, durum koşulu web'in tersiydi ve `pendingBagRevision`
+  temizlenmiyordu — bu üç kusur da giderilmiş). `src/services/booking/bag-revision.ts` servisi
+  zaten mevcuttu, eksik olan yalnızca mobil UI'dı ve artık mevcut.
+- **#6 E-posta Doğrulama:** `mobile/lib/features/auth/email_verification_screen.dart` mevcut,
+  `router.dart:94-97`'de `/auth/verify-email` rotasına bağlı, `POST /auth/verify-email`
+  (`src/app/api/mobile/auth/verify-email/route.ts`) çağırıyor.
+- **#7 Şifre Sıfırlama Onay Ekranı:** `mobile/lib/features/auth/password_reset_confirm_screen.dart`
+  mevcut, `router.dart:98-101`'de `/auth/reset-password-confirm` rotasına bağlı, `POST
+  /auth/password-reset/confirm` çağırıyor. Nüans: `mobile/lib/core/services/deep_link_service.dart`
+  yalnızca `uri.path`'e göre yönlendiriyor; token e-postadaki linkten (`?token=...` query
+  param) ekrana otomatik doldurulmuyor — kullanıcı token'ı elle girmek zorunda. İşlevsel akış
+  çalışıyor ama deep-link'ten otomatik token doldurma küçük bir cila fırsatı olarak kalıyor.
+
+Bu doğrulama dışındaki satırlar (özellikle "DÜZELTİLDİ" etiketi taşımayan, hâlâ *EKSİK*
+görünen satırlar) bu oturumda tek tek koda karşı kontrol edilmedi — yalnızca yukarıdaki dört
+madde teyit edildi. Doğrulanan dört maddenin hepsinin dokümanın işaretlediğinden daha ileride
+olması, tablonun geri kalanının da benzer şekilde geride kalmış olabileceğine işaret ediyor;
+bir sonraki geçişte tüm tablonun yeniden doğrulanması önerilir.
 
 ---
 
@@ -17,8 +53,8 @@ Bu doküman, Web (Next.js) ve Mobil (Flutter) uygulamaları arasındaki özellik
 | 3 | Apple ile Giriş | NextAuth Apple | `login_screen.dart` / `/auth/apple` | **Eşit (Parity)** | Mobil entegrasyonu tamamlandı. |
 | 4 | Kayıt Olma | `/register/page.tsx` | `/auth/register` (`register_screen.dart`) | **Eşit (Parity)** | Sorunsuz çalışıyor. |
 | 5 | Şifremi Unuttum | `/auth/forgot-password/page.tsx` | `login_screen.dart` (İç diyalog) | **Eşit (Parity)** | Web'de özel sayfa, mobilde pop-up olarak çözülmüştür. |
-| 6 | E-posta Doğrulama | `/auth/verify-email/page.tsx` | *EKSİK* | **Fark (Gap)** | Mobil uygulamada e-posta doğrulama ekranı bulunmamaktadır. |
-| 7 | Yeni Şifre Belirleme (Sıfırlama Sonrası) | `/auth/new-password/page.tsx` | *EKSİK* (API var) | **Fark (Gap)** | Mobil uygulamada deep-link şifre sıfırlama onay ekranı eksiktir. |
+| 6 | E-posta Doğrulama | `/auth/verify-email/page.tsx` | `/auth/verify-email` (`email_verification_screen.dart`) | **Eşit (Parity) [DÜZELTİLDİ — 2026-09-09 doğrulandı]** | Mobilde kod girişli doğrulama ekranı mevcut ve `/auth/verify-email` ucuna bağlı. |
+| 7 | Yeni Şifre Belirleme (Sıfırlama Sonrası) | `/auth/new-password/page.tsx` | `/auth/reset-password-confirm` (`password_reset_confirm_screen.dart`) | **Eşit (Parity) [DÜZELTİLDİ — 2026-09-09 doğrulandı]** | Ekran ve API entegrasyonu mevcut; token deep-link'ten otomatik doldurulmuyor, kullanıcı elle giriyor (küçük cila fırsatı, engelleyici değil). |
 | 8 | Hata Sayfası (Auth Error) | `/auth/error/page.tsx` | *EKSİK* | **Fark (Gap)** | Mobilde hatalar sayfa yerine inline/toast olarak gösterilir. |
 
 ### A2. Arama ve Mağaza Keşfi (Search & Shop Discovery)
@@ -128,14 +164,14 @@ Bu doküman, Web (Next.js) ve Mobil (Flutter) uygulamaları arasındaki özellik
 | 81 | Esnaf Paneli (Dashboard) | `/partner/page.tsx` (İstatistikler, bekleyen siparişler) | `/partner` (`partner_bookings_screen.dart`) | **Fark (Gap)** | Web'de grafikler ve hızlı özetler var; mobilde ise sadece rezervasyon listesi ve basit bakiye gösterilmektedir. |
 | 82 | QR Kod Tarama (Check-in/out) | PartnerClient (Kamera) | `partner_scan_screen.dart` | **Eşit (Parity)** | Her iki tarafta da QR tarama modülü çalışıyor. |
 | 83 | Kazanç ve Cüzdan Takibi | `/partner/earnings/page.tsx` (Detaylı aylık, yoğun saatler) | `partner_earnings_screen.dart` (Bakiye) | **Fark (Gap)** | Web arayüzü çok daha detaylı grafikler sunuyor; mobilde sadece toplam bakiye ve basit liste görünmektedir. |
-| 84 | Mühür Yönetimi (Talep/İptal) | `/partner/seals/page.tsx` (Talep etme, teslim onay) | *EKSİK* (Sadece sayı yazar) | **Fark (Gap)** | Mobil uygulamadan yeni mühür siparişi verilememekte veya hatalı mühür bildirilememektedir. |
+| 84 | Mühür Yönetimi (Talep/İptal) | `/partner/seals/page.tsx` (Talep etme, teslim onay) | `/partner/seals` (`partner_seals_screen.dart`) | **Eşit (Parity) [DÜZELTİLDİ — 2026-09-09 doğrulandı]** | Mobilden mühür talebi açılabiliyor ve hatalı mühür bildirilebiliyor; `SealService.createRequest` servis katmanı üzerinden. |
 | 85 | Mağaza Ayarları (Kapasite, Fiyat, Saat) | `/partner/settings/page.tsx` | `partner_settings_screen.dart` | **Eşit (Parity)** | Kapasite, fiyat ve çalışma saatleri mobilde güncellenebilir. |
 | 86 | Mağaza Konum Ayarları (Adres, İl, İlçe) | `PartnerShopSettingsForm` | `partner_settings_screen.dart` (`_address`, `_city`, `_district`) | **Eşit (Parity) [DÜZELTİLDİ]** | Adres, il ve ilçe alanları mobilden güncellenebiliyor. |
 | 87 | İletişim Telefonu Güncelleme | `PartnerShopSettingsForm` | `partner_settings_screen.dart` (`_phone`) | **Eşit (Parity) [DÜZELTİLDİ]** | Esnaf dükkan telefon numarasını mobilden de güncelleyebiliyor. |
 | 89 | Sipariş Listesi Filtreleme | `/partner/bookings/page.tsx` | `partner_bookings_screen.dart` | **Eşit (Parity) [DÜZELTİLDİ]** | Mobilde 'Tümü', 'Bekleyen', 'Aktif', 'Tamamlanan' sekmeleri eklendi. |
 | 90 | Sipariş Onaylama / Reddetme | `PartnerBookingActionLinks` | `_approveBooking` / `_rejectBooking` | **Eşit (Parity) [DÜZELTİLDİ]** | Bekleyen rezervasyonlar mobilden onaylanabiliyor veya reddedilebiliyor. |
 | 91 | Sipariş Detayı (Müşteri İletişim) | `/partner/bookings/[id]` | `partner_booking_detail_screen.dart` | **Eşit (Parity)** | Müşteri adı ve detayları görüntülenebiliyor. |
-| 92 | Bagaj Sayısı Revizyonu | Yok | *EKSİK* (API var) | **Fark (Gap)** | Teslim sırasında çanta boyut/sayı farkı bildirme arayüzü mobilde eksiktir. |
+| 92 | Bagaj Sayısı Revizyonu | Yok | `_showBagRevisionSheet` (`partner_booking_detail_screen.dart`) | **Eşit (Parity) [DÜZELTİLDİ — 2026-09-09 doğrulandı]** | Teslim sırasında çanta sayısı revizyonu mobilden yapılabiliyor; `BookingService.applyBagRevision` servis katmanı üzerinden. |
 
 ---
 
@@ -164,14 +200,17 @@ Bu doküman, Web (Next.js) ve Mobil (Flutter) uygulamaları arasındaki özellik
 Mobil uygulamada henüz yer almayan ve geliştirilmesi gereken öncelikli alanlar şunlardır:
 
 ### 1. Misafir Tarafındaki Öncelikli Eksiklikler (Guest Gaps):
-* **E-posta Doğrulama Akışı (P1):** Kayıt sonrasında e-posta doğrulaması mobilden tamamlanamıyor.
-* **Şifre Sıfırlama Bağlantısı (P1):** E-posta ile gelen şifre sıfırlama linki tıklandığında mobilde yeni şifre belirleme ekranı açılmıyor.
-* **Ücret Dökümü ve Valiz Rehberi (P2):** Checkout ekranında "neler dahil" ve çanta boyut rehberleri yer almıyor.
-* **Veri İhracı / Gizlilik Ayarları (P3):** GDPR/KVKK uyumluluğu için veri dökümü alma seçeneği mobil ayarlarda eksik.
+* ~~**E-posta Doğrulama Akışı (P1)**~~ — **2026-09-09 itibarıyla kapatıldı**, bkz. "2026-09-09
+  doğrulama notu" (#6).
+* ~~**Şifre Sıfırlama Bağlantısı (P1)**~~ — **2026-09-09 itibarıyla kapatıldı** (#7); tek nüans,
+  deep-link token'ının ekrana otomatik doldurulmaması (elle giriş gerekiyor).
+* **Ücret Dökümü ve Valiz Rehberi (P2):** Checkout ekranında "neler dahil" ve çanta boyut rehberleri yer almıyor. *(bu oturumda yeniden doğrulanmadı)*
+* **Veri İhracı / Gizlilik Ayarları (P3):** GDPR/KVKK uyumluluğu için veri dökümü alma seçeneği mobil ayarlarda eksik. *(bu oturumda yeniden doğrulanmadı)*
 
 ### 2. Esnaf Tarafındaki Öncelikli Eksiklikler (Partner Gaps):
-* **Mühür Siparişi Arayüzü (P1):** Esnaf yeni mühür talebinde bulunamıyor veya hatalı mühürleri mobilden bildiremiyor (API'leri hazır ancak mobil UI'ı yok).
-* **Sipariş Revizyonu (P2):** Teslimat anında ek çanta ekleme/çıkarma işlemi mobilden yönetilemiyor (API'si hazır, mobil UI eksik).
+* ~~**Mühür Siparişi Arayüzü (P1)**~~ — **2026-09-09 itibarıyla kapatıldı**, bkz. "2026-09-09
+  doğrulama notu" (#84).
+* ~~**Sipariş Revizyonu (P2)**~~ — **2026-09-09 itibarıyla kapatıldı** (#92).
 
 ### 3. Yönetici Tarafındaki Eksiklikler (Admin Gaps):
 * **Sistem ve Kullanıcı Yönetimi (P2):** Kampanya kodları, uyuşmazlık biletleri (disputes), platform ayarları ve kullanıcı engellemeleri yalnızca **Web Admin Panel** üzerinden gerçekleştirilebilir. Mobil admin paneli sadece başvuru ve istatistik odaklıdır.

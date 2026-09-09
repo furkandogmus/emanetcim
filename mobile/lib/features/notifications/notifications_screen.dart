@@ -2,12 +2,12 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/services/haptic_service.dart';
 import '../../core/services/notification_service.dart';
 import '../../shared/models/notification.dart';
 import '../../shared/utils/app_colors.dart';
+import '../../shared/widgets/empty_state.dart';
 
 class NotificationsScreen extends ConsumerWidget {
   const NotificationsScreen({super.key});
@@ -21,7 +21,9 @@ class NotificationsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           'notifications.title'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
         actions: [
           if (notifications.isNotEmpty)
@@ -32,7 +34,7 @@ class NotificationsScreen extends ConsumerWidget {
               },
               child: Text(
                 'notifications.mark_all_read'.tr(),
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.labelMedium!.copyWith(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   color: AppColors.brandOrange,
@@ -42,33 +44,10 @@ class NotificationsScreen extends ConsumerWidget {
         ],
       ),
       body: notifications.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(32),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.withValues(alpha: 0.05),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.notifications_off_outlined,
-                      size: 64,
-                      color: Color(0xFF616161),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'notifications.empty'.tr(),
-                    style: GoogleFonts.outfit(
-                      color: const Color(0xFF616161),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
+          ? EmptyState(
+              icon: Icons.notifications_off_outlined,
+              title: 'notifications.empty'.tr(),
+              accentColor: Theme.of(context).colorScheme.onSurfaceVariant,
             )
           : ListView.separated(
               padding: const EdgeInsets.all(20),
@@ -83,100 +62,107 @@ class NotificationsScreen extends ConsumerWidget {
   }
 
   Widget _notificationTile(BuildContext context, NotificationDto n) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: n.isRead
-                ? Colors.black.withValues(alpha: 0.02)
-                : AppColors.brandOrange.withValues(alpha: 0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(
-          color: n.isRead
-              ? Colors.grey.shade100
-              : AppColors.brandOrange.withValues(alpha: 0.1),
-          width: 1.5,
-        ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: HapticFeedback.lightImpact,
+    // RepaintBoundary: AnimatedContainer'in okundu/okunmadi gecisinde
+    // tetikledigi repaint, listenin geri kalanina sizmasin diye izole edildi.
+    return RepaintBoundary(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        decoration: BoxDecoration(
+          color: Colors.white,
           borderRadius: BorderRadius.circular(24),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: _typeColor(n.type).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: n.isRead
+                  ? Colors.black.withValues(alpha: 0.02)
+                  : AppColors.brandOrange.withValues(alpha: 0.05),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
+            ),
+          ],
+          border: Border.all(
+            color: n.isRead
+                ? Colors.grey.shade100
+                : AppColors.brandOrange.withValues(alpha: 0.1),
+            width: 1.5,
+          ),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: HapticFeedback.lightImpact,
+            borderRadius: BorderRadius.circular(24),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: _typeColor(n.type).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(
+                      _typeIcon(n.type),
+                      color: _typeColor(n.type),
+                      size: 24,
+                    ),
                   ),
-                  child: Icon(
-                    _typeIcon(n.type),
-                    color: _typeColor(n.type),
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              n.title,
-                              style: GoogleFonts.outfit(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: const Color(0xFF0F172A),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                n.title,
+                                style: Theme.of(context).textTheme.titleMedium!
+                                    .copyWith(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: const Color(0xFF0F172A),
+                                    ),
                               ),
                             ),
-                          ),
-                          if (!n.isRead)
-                            Container(
-                              width: 8,
-                              height: 8,
-                              decoration: const BoxDecoration(
-                                color: AppColors.brandOrange,
-                                shape: BoxShape.circle,
+                            if (!n.isRead)
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.brandOrange,
+                                  shape: BoxShape.circle,
+                                ),
                               ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        n.body,
-                        style: GoogleFonts.outfit(
-                          fontSize: 14,
-                          color: const Color(0xFF424242),
-                          height: 1.5,
+                          ],
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        _formatTime(n.createdAt),
-                        style: GoogleFonts.outfit(
-                          fontSize: 12,
-                          color: const Color(0xFF757575),
-                          fontWeight: FontWeight.w500,
+                        const SizedBox(height: 6),
+                        Text(
+                          n.body,
+                          style: Theme.of(context).textTheme.bodyMedium!
+                              .copyWith(
+                                fontSize: 14,
+                                color: const Color(0xFF424242),
+                                height: 1.5,
+                              ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 12),
+                        Text(
+                          _formatTime(n.createdAt),
+                          style: Theme.of(context).textTheme.labelMedium!
+                              .copyWith(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xFF757575),
+                              ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -221,8 +207,12 @@ class NotificationsScreen extends ConsumerWidget {
   String _formatTime(DateTime date) {
     final now = DateTime.now();
     final diff = now.difference(date);
-    if (diff.inMinutes < 60) return 'common.time_minutes'.tr(args: [diff.inMinutes.toString()]);
-    if (diff.inHours < 24) return 'common.time_hours'.tr(args: [diff.inHours.toString()]);
+    if (diff.inMinutes < 60) {
+      return 'common.time_minutes'.tr(args: [diff.inMinutes.toString()]);
+    }
+    if (diff.inHours < 24) {
+      return 'common.time_hours'.tr(args: [diff.inHours.toString()]);
+    }
     return DateFormat('dd MMM, HH:mm').format(date);
   }
 }

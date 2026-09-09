@@ -1,6 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../utils/app_colors.dart';
 
 enum HowItWorksMode { guest, partner }
@@ -48,10 +47,10 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
           const SizedBox(height: 16),
           Text(
             isGuest ? 'Misafir Rehberi' : 'Esnaf Rehberi',
-            style: GoogleFonts.outfit(
-              color: const Color(0xFF757575),
-              fontWeight: FontWeight.w600,
+            style: Theme.of(context).textTheme.labelMedium!.copyWith(
               fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF757575),
               letterSpacing: 1.2,
             ),
           ),
@@ -158,7 +157,7 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
           const SizedBox(height: 48),
           Text(
             title,
-            style: GoogleFonts.outfit(
+            style: Theme.of(context).textTheme.displayLarge!.copyWith(
               fontSize: 28,
               fontWeight: FontWeight.bold,
               color: const Color(0xFF0F172A),
@@ -168,7 +167,7 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
           const SizedBox(height: 16),
           Text(
             desc,
-            style: GoogleFonts.outfit(
+            style: Theme.of(context).textTheme.bodyLarge!.copyWith(
               fontSize: 16,
               color: const Color(0xFF424242),
               height: 1.5,
