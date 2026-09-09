@@ -2,13 +2,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../core/auth/auth_controller.dart';
 import '../../core/services/analytics_service.dart';
 import '../../shared/utils/app_colors.dart';
 import '../../shared/widgets/how_it_works_sheet.dart';
+import '../update/soft_update_banner.dart';
 
 const _cityCoords = {
   'istanbul': LatLng(41.0082, 28.9784),
@@ -34,7 +34,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.read(analyticsServiceProvider).logScreenView('Home');
     }
 
-    final user = ref.watch(authControllerProvider).session;
+    // Sadece session'i izliyoruz; AuthState.loading gibi ilgisiz alanlar
+    // degistiginde HomeScreen'in agir sliver agaci yeniden derlenmesin.
+    final user = ref.watch(
+      authControllerProvider.select((state) => state.session),
+    );
     final firstName = user?.name?.trim().split(' ').first;
 
     return Scaffold(
@@ -52,6 +56,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         : 'home.greeting_guest'.tr(),
                   ),
                   const SizedBox(height: 24),
+                  const SoftUpdateBanner(),
                   _SearchHero(onTap: () => context.push('/search')),
                   const SizedBox(height: 16),
                   const _TrustStrip(),
@@ -67,25 +72,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           name: 'home.city_istanbul'.tr(),
                           icon: Icons.mosque_rounded,
                           color: const Color(0xFF2563EB),
-                          onTap: () => context.push('/search', extra: _cityCoords['istanbul']),
+                          onTap: () => context.push(
+                            '/search',
+                            extra: _cityCoords['istanbul'],
+                          ),
                         ),
                         _CityCard(
                           name: 'home.city_ankara'.tr(),
                           icon: Icons.account_balance_rounded,
                           color: const Color(0xFF7C3AED),
-                          onTap: () => context.push('/search', extra: _cityCoords['ankara']),
+                          onTap: () => context.push(
+                            '/search',
+                            extra: _cityCoords['ankara'],
+                          ),
                         ),
                         _CityCard(
                           name: 'home.city_izmir'.tr(),
                           icon: Icons.sailing_rounded,
                           color: const Color(0xFF0891B2),
-                          onTap: () => context.push('/search', extra: _cityCoords['izmir']),
+                          onTap: () => context.push(
+                            '/search',
+                            extra: _cityCoords['izmir'],
+                          ),
                         ),
                         _CityCard(
                           name: 'home.city_antalya'.tr(),
                           icon: Icons.wb_sunny_rounded,
                           color: const Color(0xFFD97706),
-                          onTap: () => context.push('/search', extra: _cityCoords['antalya']),
+                          onTap: () => context.push(
+                            '/search',
+                            extra: _cityCoords['antalya'],
+                          ),
                         ),
                       ],
                     ),
@@ -144,20 +161,20 @@ class _HomeHeader extends StatelessWidget {
             children: [
               Text(
                 'BagajPark',
-                style: GoogleFonts.outfit(
-                  color: AppColors.brandOrange,
+                style: Theme.of(context).textTheme.titleSmall!.copyWith(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
+                  color: AppColors.brandOrange,
                 ),
               ),
               Text(
                 greeting,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.outfit(
-                  color: AppColors.textDark,
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
                   fontSize: 21,
                   fontWeight: FontWeight.w700,
+                  color: AppColors.textDark,
                 ),
               ),
             ],
@@ -208,12 +225,12 @@ class _SearchHero extends StatelessWidget {
             children: [
               Text(
                 'home.hero_title'.tr(),
-                style: GoogleFonts.outfit(
-                  color: Colors.white,
+                style: Theme.of(context).textTheme.headlineMedium!.copyWith(
                   fontSize: 27,
-                  height: 1.08,
                   fontWeight: FontWeight.w800,
+                  color: Colors.white,
                   letterSpacing: -0.6,
+                  height: 1.08,
                 ),
               ),
               const SizedBox(height: 10),
@@ -221,9 +238,9 @@ class _SearchHero extends StatelessWidget {
                 width: 250,
                 child: Text(
                   'home.hero_subtitle'.tr(),
-                  style: GoogleFonts.outfit(
-                    color: Colors.white.withValues(alpha: 0.9),
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                     fontSize: 14,
+                    color: Colors.white.withValues(alpha: 0.9),
                     height: 1.4,
                   ),
                 ),
@@ -255,21 +272,27 @@ class _TrustStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
+    return Row(
       children: [
         Expanded(
           child: _TrustItem(
             icon: Icons.verified_user_rounded,
-            label: 'Doğrulanmış',
+            label: 'home.trust_verified'.tr(),
           ),
         ),
-        SizedBox(width: 8),
+        const SizedBox(width: 8),
         Expanded(
-          child: _TrustItem(icon: Icons.lock_rounded, label: 'Mühürlü'),
+          child: _TrustItem(
+            icon: Icons.lock_rounded,
+            label: 'home.trust_sealed'.tr(),
+          ),
         ),
-        SizedBox(width: 8),
+        const SizedBox(width: 8),
         Expanded(
-          child: _TrustItem(icon: Icons.bolt_rounded, label: 'Hızlı'),
+          child: _TrustItem(
+            icon: Icons.bolt_rounded,
+            label: 'home.trust_fast'.tr(),
+          ),
         ),
       ],
     );
@@ -300,7 +323,7 @@ class _TrustItem extends StatelessWidget {
             child: Text(
               label,
               overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.outfit(
+              style: Theme.of(context).textTheme.labelSmall!.copyWith(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textSecondary,
@@ -314,11 +337,7 @@ class _TrustItem extends StatelessWidget {
 }
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({
-    required this.title,
-    this.action,
-    this.onAction,
-  });
+  const _SectionHeader({required this.title, this.action, this.onAction});
 
   final String title;
   final String? action;
@@ -331,7 +350,7 @@ class _SectionHeader extends StatelessWidget {
         Expanded(
           child: Text(
             title,
-            style: GoogleFonts.outfit(
+            style: Theme.of(context).textTheme.titleLarge!.copyWith(
               fontSize: 20,
               fontWeight: FontWeight.w700,
               color: AppColors.textDark,
@@ -380,10 +399,10 @@ class _CityCard extends StatelessWidget {
               Icon(icon, color: color, size: 28),
               Text(
                 name,
-                style: GoogleFonts.outfit(
-                  color: AppColors.textDark,
+                style: Theme.of(context).textTheme.titleSmall!.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
+                  color: AppColors.textDark,
                 ),
               ),
             ],
@@ -407,17 +426,19 @@ class _HowItWorksCard extends StatelessWidget {
       child: Ink(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
         decoration: BoxDecoration(
-          color: Colors.white,
+          // Sabit Colors.white DEGIL: koyu temada bu kart hala beyaz kalip
+          // "acik mod izi" birakiyordu.
+          color: AppColors.bgCard,
           border: Border.all(color: AppColors.border),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
           children: [
-            _StepIcon(icon: Icons.search_rounded, number: '1'),
-            const Expanded(child: Divider(color: AppColors.border)),
-            _StepIcon(icon: Icons.qr_code_rounded, number: '2'),
-            const Expanded(child: Divider(color: AppColors.border)),
-            _StepIcon(icon: Icons.explore_rounded, number: '3'),
+            const _StepIcon(icon: Icons.search_rounded, number: '1'),
+            Expanded(child: Divider(color: AppColors.border)),
+            const _StepIcon(icon: Icons.qr_code_rounded, number: '2'),
+            Expanded(child: Divider(color: AppColors.border)),
+            const _StepIcon(icon: Icons.explore_rounded, number: '3'),
           ],
         ),
       ),
@@ -447,10 +468,10 @@ class _StepIcon extends StatelessWidget {
         const SizedBox(height: 7),
         Text(
           number,
-          style: GoogleFonts.outfit(
-            color: AppColors.textSecondary,
+          style: Theme.of(context).textTheme.labelSmall!.copyWith(
             fontSize: 11,
             fontWeight: FontWeight.w700,
+            color: AppColors.textSecondary,
           ),
         ),
       ],
@@ -484,10 +505,7 @@ class _SafetyCard extends StatelessWidget {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: const Icon(
-                Icons.shield_rounded,
-                color: Color(0xFF2563EB),
-              ),
+              child: const Icon(Icons.shield_rounded, color: Color(0xFF2563EB)),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -496,9 +514,10 @@ class _SafetyCard extends StatelessWidget {
                 children: [
                   Text(
                     'home.safety_title'.tr(),
-                    style: GoogleFonts.outfit(
-                      color: AppColors.textDark,
+                    // color SABIT: kart yukarida (0xFFEFF6FF) hep acik mavi.
+                    style: Theme.of(context).textTheme.titleSmall!.copyWith(
                       fontWeight: FontWeight.w700,
+                      color: const Color(0xFF0F172A),
                     ),
                   ),
                   const SizedBox(height: 3),
@@ -506,9 +525,9 @@ class _SafetyCard extends StatelessWidget {
                     'home.safety_desc'.tr(),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.outfit(
-                      color: const Color(0xFF1D4ED8),
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
                       fontSize: 12,
+                      color: const Color(0xFF1D4ED8),
                       height: 1.35,
                     ),
                   ),

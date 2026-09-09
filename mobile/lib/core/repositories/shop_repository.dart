@@ -47,14 +47,13 @@ class ShopRepository {
       if (maxPrice != null) queryParams['maxPrice'] = maxPrice;
       if (hasRestroom != null) queryParams['hasRestroom'] = hasRestroom;
       if (hasCctv != null) queryParams['hasCctv'] = hasCctv;
-      if (hasClimateControl != null) queryParams['hasClimateControl'] = hasClimateControl;
-      if (acceptsLargeItems != null) queryParams['acceptsLargeItems'] = acceptsLargeItems;
+      if (hasClimateControl != null)
+        queryParams['hasClimateControl'] = hasClimateControl;
+      if (acceptsLargeItems != null)
+        queryParams['acceptsLargeItems'] = acceptsLargeItems;
       if (sortBy != null) queryParams['sortBy'] = sortBy;
 
-      final res = await _dio.get(
-        '/shops/nearby',
-        queryParameters: queryParams,
-      );
+      final res = await _dio.get('/shops/nearby', queryParameters: queryParams);
       final list = res.data as List<dynamic>;
       return Success(
         list.map((e) => ShopDto.fromJson(e as Map<String, dynamic>)).toList(),

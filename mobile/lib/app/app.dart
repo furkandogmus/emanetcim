@@ -5,15 +5,15 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:screen_protector/screen_protector.dart';
 
 import '../core/auth/auth_controller.dart';
 import '../core/auth/biometric_service.dart';
 import '../core/auth/session_timeout.dart';
+import '../core/config/env.dart';
+import '../core/config/theme_mode_provider.dart';
 import '../core/services/deep_link_service.dart';
 import '../core/sync/sync_service.dart';
-import '../core/config/theme_mode_provider.dart';
 import '../shared/models/user.dart';
 import '../shared/utils/app_colors.dart';
 import 'router.dart';
@@ -46,7 +46,15 @@ class _BagajParkAppState extends ConsumerState<BagajParkApp>
     // Deep Link Init
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(deepLinkServiceProvider).init();
-      ref.read(syncServiceProvider).sync();
+      // SyncService'i burada okuyup init() calistiriyoruz ki
+      // authControllerProvider dinleyicisi (SyncService.init() icinde)
+      // erkenden kurulsun. Dogrudan .sync() cagirmiyoruz: auth bootstrap
+      // (SharedPreferences + token okuma + /auth/me) bu frame'den cok daha
+      // uzun surer, o yuzden burada cagrilan bir sync() session hala null
+      // iken no-op donerdi. Gercek tetikleme SyncService'in kendi
+      // authControllerProvider dinleyicisinden gelir (session null->dolu
+      // gecince).
+      ref.read(syncServiceProvider);
     });
   }
 
@@ -79,7 +87,7 @@ class _BagajParkAppState extends ConsumerState<BagajParkApp>
         reason: 'profile.biometric_reason'.tr(),
       );
       if (!ok && mounted) {
-        ref.read(authControllerProvider.notifier).logout();
+        await ref.read(authControllerProvider.notifier).logout();
       }
     } catch (_) {
       // Biometric check failed silently
@@ -87,7 +95,7 @@ class _BagajParkAppState extends ConsumerState<BagajParkApp>
   }
 
   void _updateScreenProtection(UserDto? user) {
-    if (user?.role == UserRole.partner) {
+    if (user?.role == UserRole.partner && !Env.e2eCapture) {
       ScreenProtector.preventScreenshotOn();
     } else {
       // Per-screen protection will turn this back on if needed
@@ -119,6 +127,10 @@ class _BagajParkAppState extends ConsumerState<BagajParkApp>
         locale: context.locale,
         routerConfig: router,
         builder: (context, child) {
+          // `themeMode` tek basina (ozellikle `system`) gercek parlakligi
+          // soylemez; MaterialApp temayi cozdukten sonraki tek dogru yer
+          // burasi. AppColors'in tema-duyarli getter'lari bunu okur.
+          AppColors.syncBrightness(Theme.of(context).brightness);
           return Stack(
             children: [
               child ?? const SizedBox.shrink(),
@@ -143,11 +155,12 @@ class _BagajParkAppState extends ConsumerState<BagajParkApp>
                           const SizedBox(width: 8),
                           Text(
                             'common.no_internet'.tr(),
-                            style: GoogleFonts.outfit(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context).textTheme.labelMedium!
+                                .copyWith(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
                           ),
                         ],
                       ),

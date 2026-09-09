@@ -7,9 +7,19 @@ import { revalidatePathAllLocales } from "@/lib/revalidate-locales";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { invalidatePricingRulesCache } from "@/lib/platform-settings";
+import { invalidateAppVersionGateCache } from "@/lib/app-version";
 import { sealService } from "@/services/SealService";
 import { writeAuditLog } from "@/lib/audit-log";
 import { assertAdmin } from "@/lib/action-auth";
+
+/** Boş metin = kapı kapalı (`null`); doluysa `x.y.z` semver zorunlu. */
+const semverOrEmpty = z
+  .string()
+  .trim()
+  .refine((v) => v === "" || /^\d+\.\d+\.\d+$/.test(v), {
+    message: "semver_gerekli",
+  })
+  .transform((v) => (v === "" ? null : v));
 
 const platformSettingsUpdateSchema = z.object({
   maxStayDays: z.number().int().min(1).max(365),
@@ -30,6 +40,8 @@ const platformSettingsUpdateSchema = z.object({
     .array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/))
     .max(366)
     .default([]),
+  minAppVersion: semverOrEmpty,
+  latestAppVersion: semverOrEmpty,
 });
 
 export async function updatePlatformSettingsAction(data: unknown) {
@@ -61,6 +73,8 @@ export async function updatePlatformSettingsAction(data: unknown) {
       bagMultiplierM: new Prisma.Decimal(d.bagMultiplierM),
       bagMultiplierXl: new Prisma.Decimal(d.bagMultiplierXl),
       platformHolidayDates: holidayJson,
+      minAppVersion: d.minAppVersion,
+      latestAppVersion: d.latestAppVersion,
     },
     update: {
       maxStayDays: d.maxStayDays,
@@ -78,9 +92,12 @@ export async function updatePlatformSettingsAction(data: unknown) {
       bagMultiplierM: new Prisma.Decimal(d.bagMultiplierM),
       bagMultiplierXl: new Prisma.Decimal(d.bagMultiplierXl),
       platformHolidayDates: holidayJson,
+      minAppVersion: d.minAppVersion,
+      latestAppVersion: d.latestAppVersion,
     },
   });
   invalidatePricingRulesCache();
+  invalidateAppVersionGateCache();
   writeAuditLog({
     actorUserId: actor.id,
     actorRole: actor.role,

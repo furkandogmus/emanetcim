@@ -1,10 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/utils/error_handler.dart';
+import '../../shared/utils/app_colors.dart';
+import '../../shared/widgets/empty_state.dart';
+import '../../shared/widgets/skeleton.dart';
+import 'admin_controller.dart';
 
 class AdminApplicationsScreen extends ConsumerStatefulWidget {
   const AdminApplicationsScreen({super.key});
@@ -55,21 +58,31 @@ class _AdminApplicationsScreenState
     try {
       final dio = ref.read(dioProvider);
       debugPrint('Admin Action: $id/${approve ? 'approve' : 'reject'}');
-      await dio.post('/admin/applications/$id/${approve ? 'approve' : 'reject'}');
+      await dio.post(
+        '/admin/applications/$id/${approve ? 'approve' : 'reject'}',
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(approve ? 'admin.approved'.tr() : 'admin.rejected'.tr()),
+            content: Text(
+              approve ? 'admin.approved'.tr() : 'admin.rejected'.tr(),
+            ),
           ),
         );
       }
       await _fetchApps();
+      // Dashboard'daki bekleyen basvuru sayaci `admin_messages_screen.dart`
+      // _markAsRead ile ayni sekilde tazelenmeliydi; burada eksikti ve
+      // onay/red sonrasi dashboard eski sayiyi gostermeye devam ediyordu.
+      ref.invalidate(adminStatsProvider);
     } catch (e) {
       debugPrint('Admin Action Error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(getErrorMessage(e, fallback: 'admin.action_failed'.tr())),
+            content: Text(
+              getErrorMessage(e, fallback: 'admin.action_failed'.tr()),
+            ),
           ),
         );
       }
@@ -79,23 +92,41 @@ class _AdminApplicationsScreenState
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        body: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Skeleton(height: 90, borderRadius: 20),
+                SizedBox(height: 16),
+                Skeleton(height: 90, borderRadius: 20),
+                SizedBox(height: 16),
+                Skeleton(height: 90, borderRadius: 20),
+                SizedBox(height: 16),
+                Skeleton(height: 90, borderRadius: 20),
+              ],
+            ),
+          ),
+        ),
+      );
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.bgLight,
       appBar: AppBar(
         title: Text(
           'admin.approve_shops'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
       ),
       body: _apps.isEmpty
-          ? Center(
-              child: Text(
-                'Bekleyen başvuru bulunmuyor.',
-                style: GoogleFonts.outfit(color: const Color(0xFF616161)),
-              ),
+          ? EmptyState(
+              icon: Icons.inbox_outlined,
+              title: 'Bekleyen başvuru bulunmuyor.',
+              accentColor: Theme.of(context).colorScheme.onSurfaceVariant,
             )
           : ListView.builder(
               padding: const EdgeInsets.all(20),
@@ -142,16 +173,16 @@ class _AdminApplicationsScreenState
                   children: [
                     Text(
                       app['name'],
-                      style: GoogleFonts.outfit(
-                        fontWeight: FontWeight.bold,
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
                         fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
                       app['address'],
-                      style: GoogleFonts.outfit(
-                        color: const Color(0xFF616161),
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                         fontSize: 13,
+                        color: const Color(0xFF616161),
                       ),
                     ),
                   ],
@@ -211,7 +242,7 @@ class _AdminApplicationsScreenState
         const SizedBox(width: 8),
         Text(
           text,
-          style: GoogleFonts.outfit(
+          style: Theme.of(context).textTheme.bodyMedium!.copyWith(
             fontSize: 14,
             color: const Color(0xFF424242),
           ),

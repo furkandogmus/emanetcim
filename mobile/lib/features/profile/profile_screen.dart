@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart' show FormData, MultipartFile;
 import 'package:easy_localization/easy_localization.dart';
@@ -5,23 +7,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:http_parser/http_parser.dart';
+import 'package:image_picker/image_picker.dart';
 
-import '../../core/auth/auth_controller.dart';
-import '../../core/utils/error_handler.dart';
-import '../../core/services/haptic_service.dart';
-import '../../core/services/share_service.dart';
-import '../../shared/models/user.dart';
-import '../../shared/utils/app_colors.dart';
 import '../../core/api/api_client.dart';
-import '../../core/config/theme_mode_provider.dart';
+import '../../core/auth/auth_controller.dart';
 import '../../core/auth/biometric_service.dart';
 import '../../core/auth/token_store.dart';
+import '../../core/config/feature_flags_controller.dart';
+import '../../core/config/theme_mode_provider.dart';
 import '../../core/push/notification_prefs.dart';
+import '../../core/services/haptic_service.dart';
+import '../../core/services/share_service.dart';
+import '../../core/utils/error_handler.dart';
+import '../../shared/models/user.dart';
+import '../../shared/utils/app_colors.dart';
+import '../../shared/widgets/confirm_dialog.dart';
 
-final profileStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+// `.autoDispose`: booking yasam donguisu (yeni rezervasyon, check-out) bu
+// provider'i hicbir yerden invalidate etmiyordu, bu yuzden istatistikler ilk
+// yuklemeden sonra uygulama kapanana kadar bayatliyordu (2026-09-09'da
+// bulundu). `/profile` duz bir ShellRoute rotasi (IndexedStack DEGIL), yani
+// ProfileScreen sekmeden ayrilinca tamamen unmount olur; `.autoDispose` bu
+// noktada provider'i da dusurur ve bir sonraki girişte istek tazelenir.
+final profileStatsProvider = FutureProvider.autoDispose<Map<String, dynamic>>((
+  ref,
+) async {
   final dio = ref.read(dioProvider);
   final res = await dio.get('/profile/stats');
   return res.data as Map<String, dynamic>;
@@ -39,6 +50,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _biometricAvailable = false;
   bool _biometricEnabled = false;
   bool _biometricLoaded = false;
+  bool _biometricBusy = false;
 
   @override
   void initState() {
@@ -74,7 +86,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     try {
       final dio = ref.read(dioProvider);
       final ext = image.name.split('.').last.toLowerCase();
-      String mimeType = 'image/jpeg';
+      var mimeType = 'image/jpeg';
       if (ext == 'png') {
         mimeType = 'image/png';
       } else if (ext == 'webp') {
@@ -96,7 +108,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(getErrorMessage(e, fallback: 'common.error'.tr()))),
+          SnackBar(
+            content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+          ),
         );
       }
     } finally {
@@ -131,35 +145,55 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                   )
                 : (avatarUrl != null && avatarUrl.isNotEmpty)
-                    ? ClipOval(
-                        child: CachedNetworkImage(
-                          imageUrl: avatarUrl,
-                          width: 96,
-                          height: 96,
-                          fit: BoxFit.cover,
-                          placeholder: (_, __) => Center(
-                            child: Text(initial, style: GoogleFonts.outfit(
-                              fontSize: 40,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.brandOrange,
-                            )),
-                          ),
-                          errorWidget: (_, __, ___) => Center(
-                            child: Text(initial, style: GoogleFonts.outfit(
-                              fontSize: 40,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.brandOrange,
-                            )),
-                          ),
+                ? ClipOval(
+                    child: CachedNetworkImage(
+                      imageUrl: avatarUrl,
+                      width: 96,
+                      height: 96,
+                      fit: BoxFit.cover,
+                      // 96x96 gosteriliyor; tam cozunurluk decode etmek
+                      // yerine ekran yogunluguna gore olceklenmis boyutta
+                      // decode et (bellek/CPU tasarrufu).
+                      memCacheWidth:
+                          (96 * MediaQuery.of(context).devicePixelRatio)
+                              .round(),
+                      memCacheHeight:
+                          (96 * MediaQuery.of(context).devicePixelRatio)
+                              .round(),
+                      placeholder: (_, _) => Center(
+                        child: Text(
+                          initial,
+                          style: Theme.of(context).textTheme.displaySmall!
+                              .copyWith(
+                                fontSize: 40,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.brandOrange,
+                              ),
                         ),
-                      )
-                    : Center(
-                        child: Text(initial, style: GoogleFonts.outfit(
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.brandOrange,
-                        )),
                       ),
+                      errorWidget: (_, _, _) => Center(
+                        child: Text(
+                          initial,
+                          style: Theme.of(context).textTheme.displaySmall!
+                              .copyWith(
+                                fontSize: 40,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.brandOrange,
+                              ),
+                        ),
+                      ),
+                    ),
+                  )
+                : Center(
+                    child: Text(
+                      initial,
+                      style: Theme.of(context).textTheme.displaySmall!.copyWith(
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.brandOrange,
+                      ),
+                    ),
+                  ),
           ),
           Positioned(
             right: 0,
@@ -184,16 +218,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(authControllerProvider).session;
+    // Sadece session'i izliyoruz; AuthState.loading/onboardingDone gibi bu
+    // ekranla ilgisiz alanlar degistiginde tum profil ekrani yeniden
+    // derlenmesin.
+    final user = ref.watch(
+      authControllerProvider.select((state) => state.session),
+    );
     final theme = Theme.of(context);
     final isPartner = user?.role == UserRole.partner;
+    final securityMenuEnabled =
+        ref.watch(featureFlagsControllerProvider)['mobile_security_menu'] ??
+        false;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      // Sabit Color(0xFFF8FAFC) DEGIL: theme.dart zaten scaffoldBackgroundColor
+      // taniyor (koyu temada 0xFF121212) ama bu ekran onu eziyordu -- ekran
+      // hep acik kaliyor, uzerindeki metin (artik tema-duyarli) koyu temada
+      // acik renge donunce acik-zeminde-acik-metin olup gorunmez oluyordu.
+      backgroundColor: AppColors.bgLight,
       appBar: AppBar(
         title: Text(
           'profile.title'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
       ),
       body: ListView(
@@ -231,9 +279,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               return statsAsync.when(
                 data: (stats) => Row(
                   children: [
-                    _statItem('${stats['totalBookings'] ?? 0}', 'profile.stats_bookings'.tr()),
-                    _statItem('₺${stats['totalSavings'] ?? '0'}', 'profile.stats_savings'.tr()),
-                    _statItem('${stats['completedBookings'] ?? 0}', 'profile.stats_favorites'.tr()),
+                    _statItem(
+                      '${stats['totalBookings'] ?? 0}',
+                      'profile.stats_bookings'.tr(),
+                    ),
+                    _statItem(
+                      '₺${stats['totalSavings'] ?? '0'}',
+                      'profile.stats_savings'.tr(),
+                    ),
+                    _statItem(
+                      '${stats['completedBookings'] ?? 0}',
+                      'profile.stats_favorites'.tr(),
+                    ),
                   ],
                 ),
                 loading: () => Row(
@@ -243,7 +300,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     _statItem('...', 'profile.stats_favorites'.tr()),
                   ],
                 ),
-                error: (_, __) => Row(
+                error: (_, _) => Row(
                   children: [
                     _statItem('-', 'profile.stats_bookings'.tr()),
                     _statItem('-', 'profile.stats_savings'.tr()),
@@ -289,6 +346,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             'profile.notifications'.tr(),
             onTap: () => _showNotificationPrefs(context),
           ),
+          if (securityMenuEnabled) ...[
+            _menuItem(
+              Icons.devices_other_rounded,
+              'security.devices_title'.tr(),
+              onTap: () => context.push('/security/devices'),
+            ),
+            _menuItem(
+              Icons.shield_outlined,
+              'security.permissions_title'.tr(),
+              onTap: () => context.push('/security/permissions'),
+            ),
+          ],
           const SizedBox(height: 8),
           _themeToggle(context),
           const SizedBox(height: 8),
@@ -335,7 +404,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
           // Logout Button
           OutlinedButton.icon(
-            onPressed: () => _confirmLogout(context, ref),
+            onPressed: () => unawaited(_confirmLogout(context, ref)),
             icon: const Icon(Icons.logout_rounded, size: 20),
             label: Text('profile.logout'.tr()),
             style: OutlinedButton.styleFrom(
@@ -352,12 +421,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
           // Delete Account (Apple Requirement)
           TextButton(
-            onPressed: () => _showDeleteAccount(context, ref),
+            onPressed: () => unawaited(_showDeleteAccount(context, ref)),
             child: Text(
               'profile.delete_account'.tr(),
-              style: GoogleFonts.outfit(
-                color: const Color(0xFF757575),
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                 fontSize: 13,
+                color: const Color(0xFF757575),
                 decoration: TextDecoration.underline,
               ),
             ),
@@ -368,7 +437,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           Center(
             child: Text(
               'profile.version'.tr(args: ['1.0.0']),
-              style: GoogleFonts.outfit(
+              style: Theme.of(context).textTheme.labelSmall!.copyWith(
                 fontSize: 11,
                 color: const Color(0xFF757575),
               ),
@@ -386,7 +455,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       padding: const EdgeInsets.only(bottom: 12, left: 4),
       child: Text(
         title.toUpperCase(),
-        style: GoogleFonts.outfit(
+        style: Theme.of(context).textTheme.labelMedium!.copyWith(
           fontSize: 12,
           fontWeight: FontWeight.bold,
           color: const Color(0xFF616161),
@@ -400,8 +469,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
+        // Sabit koyu degrade: bu "Invite Friends" karti markalasma geregi
+        // temadan bagimsiz hep koyu -- AppColors.textDark burada YANLIS
+        // olurdu (koyu temada acik renge donup degradeyi beyazlatirdi).
         gradient: const LinearGradient(
-          colors: [AppColors.textDark, Color(0xFF1E293B)],
+          colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
         ),
         borderRadius: BorderRadius.circular(24),
       ),
@@ -428,17 +500,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   children: [
                     Text(
                       'profile.referral_title'.tr(),
-                      style: GoogleFonts.outfit(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
                         fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
                     Text(
                       'profile.referral_hint'.tr(),
-                      style: GoogleFonts.outfit(
-                        color: const Color(0xFF757575),
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
                         fontSize: 12,
+                        color: const Color(0xFF757575),
                       ),
                     ),
                   ],
@@ -459,10 +531,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 Flexible(
                   child: Text(
                     user?.referralCode ?? 'BP-WELCOME',
-                    style: GoogleFonts.outfit(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
                       fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                       letterSpacing: 1,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -486,10 +558,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                   label: Text(
                     'profile.copy'.tr(),
-                    style: GoogleFonts.outfit(
-                      color: AppColors.brandOrange,
-                      fontWeight: FontWeight.bold,
+                    style: Theme.of(context).textTheme.labelSmall!.copyWith(
                       fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.brandOrange,
                     ),
                   ),
                   style: TextButton.styleFrom(
@@ -524,11 +596,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: ListTile(
-        tileColor: Colors.white,
+        tileColor: AppColors.bgCard,
         leading: Icon(icon, color: AppColors.textDark, size: 22),
         title: Text(
           title,
-          style: GoogleFonts.outfit(
+          style: Theme.of(context).textTheme.titleMedium!.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w500,
             color: AppColors.textDark,
@@ -552,7 +624,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: ListTile(
-        tileColor: Colors.white,
+        tileColor: AppColors.bgCard,
         leading: Icon(
           ref.watch(themeModeProvider) == ThemeMode.dark
               ? Icons.dark_mode_rounded
@@ -562,7 +634,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
         title: Text(
           'profile.theme'.tr(),
-          style: GoogleFonts.outfit(
+          style: Theme.of(context).textTheme.titleMedium!.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w500,
             color: AppColors.textDark,
@@ -591,7 +663,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             children: [
               Text(
                 'profile.theme'.tr(),
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -604,7 +676,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ? const Icon(Icons.check, color: AppColors.brandOrange)
                     : null,
                 onTap: () {
-                  ref.read(themeModeProvider.notifier).setMode(ThemeMode.system);
+                  ref
+                      .read(themeModeProvider.notifier)
+                      .setMode(ThemeMode.system);
                   Navigator.pop(ctx);
                 },
               ),
@@ -639,20 +713,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _biometricToggle(BuildContext context) {
-    if (!_biometricLoaded || !_biometricAvailable) return const SizedBox.shrink();
+    if (!_biometricLoaded || !_biometricAvailable) {
+      return const SizedBox.shrink();
+    }
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: ListTile(
-        tileColor: Colors.white,
-        leading: const Icon(
+        tileColor: AppColors.bgCard,
+        leading: Icon(
           Icons.fingerprint_rounded,
           color: AppColors.textDark,
           size: 22,
         ),
         title: Text(
           'profile.biometric'.tr(),
-          style: GoogleFonts.outfit(
+          style: Theme.of(context).textTheme.titleMedium!.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w500,
             color: AppColors.textDark,
@@ -660,7 +736,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
         subtitle: Text(
           'profile.biometric_desc'.tr(),
-          style: GoogleFonts.outfit(
+          style: Theme.of(context).textTheme.bodySmall!.copyWith(
             fontSize: 12,
             color: const Color(0xFF616161),
           ),
@@ -669,276 +745,297 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         onTap: () => _handleBiometricToggle(!_biometricEnabled),
         trailing: Switch(
           value: _biometricEnabled,
-          activeColor: AppColors.brandOrange,
+          activeThumbColor: AppColors.brandOrange,
           onChanged: _handleBiometricToggle,
         ),
       ),
     );
   }
 
-Future<void> _handleBiometricToggle(bool val) async {
+  Future<void> _handleBiometricToggle(bool val) async {
+    // Hizli ardisik dokunuslar (ornek: dogrulama gecikirken kullanicinin
+    // tekrar dokunmasi) icice iki await zinciri calistirip
+    // _biometricEnabled ile secure-storage'daki biyometrik hesap kaydini
+    // tutarsiz birakiyordu (2026-09-09'da bulundu). `_pickAndUploadAvatar`
+    // ile ayni desen: metot calisirken yeniden giris engellenir.
+    if (_biometricBusy) return;
+    _biometricBusy = true;
     setState(() => _biometricEnabled = val);
     try {
       if (val) {
-        final ok = await ref.read(biometricServiceProvider).authenticate(
-          reason: 'profile.biometric_reason'.tr(),
-        );
+        final ok = await ref
+            .read(biometricServiceProvider)
+            .authenticate(reason: 'profile.biometric_reason'.tr());
         if (ok) {
-                  await ref.read(biometricServiceProvider).setEnabled(true);
-                  final store = ref.read(tokenStoreProvider);
-                  final rt = await store.readRefreshToken();
-                  final user = ref.read(authControllerProvider).session;
-                  if (rt != null && user?.email != null) {
-                    await store.saveBiometricAccount(user!.email!, rt);
-                  }
-                } else {
+          await ref.read(biometricServiceProvider).setEnabled(true);
+          final store = ref.read(tokenStoreProvider);
+          final rt = await store.readRefreshToken();
+          final user = ref.read(authControllerProvider).session;
+          if (rt != null && user?.email != null) {
+            await store.saveBiometricAccount(user!.email!, rt);
+          }
+        } else {
           await ref.read(biometricServiceProvider).setEnabled(false);
           if (mounted) setState(() => _biometricEnabled = false);
         }
-} else {
-                await ref.read(biometricServiceProvider).setEnabled(false);
-                final user = ref.read(authControllerProvider).session;
-                if (user?.email != null) {
-                  await ref.read(tokenStoreProvider).removeBiometricAccount(user!.email!);
-                }
-              }
+      } else {
+        await ref.read(biometricServiceProvider).setEnabled(false);
+        final user = ref.read(authControllerProvider).session;
+        if (user?.email != null) {
+          await ref
+              .read(tokenStoreProvider)
+              .removeBiometricAccount(user!.email!);
+        }
+      }
     } catch (_) {
       await ref.read(biometricServiceProvider).setEnabled(false);
       if (mounted) setState(() => _biometricEnabled = false);
+    } finally {
+      _biometricBusy = false;
     }
   }
 
   void _showNotificationPrefs(BuildContext context) {
-    final prefs = ref.read(notificationPrefsProvider);
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'profile.notifications'.tr(),
-                style: GoogleFonts.outfit(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 24),
-              SwitchListTile(
-                title: Text('Rezervasyon Güncellemeleri'),
-                subtitle: Text(
-                  'Onay, check-in, check-out ve QR kod bildirimleri',
-                  style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),
-                ),
-                value: prefs.bookingUpdates,
-                activeColor: AppColors.brandOrange,
-                onChanged: (v) => ref.read(notificationPrefsProvider.notifier).setBookingUpdates(v),
-              ),
-              const Divider(),
-              SwitchListTile(
-                title: Text('Kampanya & İndirim'),
-                subtitle: Text(
-                  'Özel indirimler, kampanya duyuruları ve promosyon kodları',
-                  style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),
-                ),
-                value: prefs.promotions,
-                activeColor: AppColors.brandOrange,
-                onChanged: (v) => ref.read(notificationPrefsProvider.notifier).setPromotions(v),
-              ),
-              const Divider(),
-              SwitchListTile(
-                title: Text('Esnaf Uyarıları'),
-                subtitle: Text(
-                  'Yeni rezervasyon, mesaj ve acil durum bildirimleri',
-                  style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),
-                ),
-                value: prefs.partnerAlerts,
-                activeColor: AppColors.brandOrange,
-                onChanged: (v) => ref.read(notificationPrefsProvider.notifier).setPartnerAlerts(v),
-              ),
-              const SizedBox(height: 16),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _confirmLogout(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'profile.logout'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-        ),
-        content: Text(
-          'profile.logout_confirm'.tr(),
-          style: GoogleFonts.outfit(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('common.cancel'.tr()),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ref.read(authControllerProvider.notifier).logout();
-            },
-            child: Text(
-              'profile.logout'.tr(),
-              style: const TextStyle(color: Colors.redAccent),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showDeleteAccount(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'profile.delete_account'.tr(),
-          style: GoogleFonts.outfit(
-            fontWeight: FontWeight.bold,
-            color: Colors.redAccent,
-          ),
-        ),
-        content: Text(
-          'profile.delete_account_confirm'.tr(),
-          style: GoogleFonts.outfit(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('common.cancel'.tr()),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              final success = await ref
-                  .read(authControllerProvider.notifier)
-                  .requestAccountDeletion();
-
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      success
-                          ? 'profile.delete_account_success'.tr()
-                          : 'profile.delete_account_error'.tr(),
+      // Consumer ile sarili: `ref.read` ile alinan tek seferlik bir kopya
+      // yerine `ref.watch` kullanarak switch'lerin dokunuldugunda gercek
+      // provider state'ini yansitmasini (yeniden cizilmesini) sagliyor
+      // (2026-09-09'da bulundu -- onceden sheet kapanana kadar hicbir switch
+      // gorsel olarak degismiyordu).
+      builder: (ctx) => Consumer(
+        builder: (context, ref, _) {
+          final prefs = ref.watch(notificationPrefsProvider);
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'profile.notifications'.tr(),
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
-                    backgroundColor: success ? Colors.green : Colors.redAccent,
                   ),
-                );
-              }
-            },
-            child: Text(
-              'common.confirm'.tr(),
-              style: const TextStyle(
-                color: Colors.redAccent,
-                fontWeight: FontWeight.bold,
+                  const SizedBox(height: 24),
+                  SwitchListTile(
+                    title: const Text('Rezervasyon Güncellemeleri'),
+                    subtitle: Text(
+                      'Onay, check-in, check-out ve QR kod bildirimleri',
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    value: prefs.bookingUpdates,
+                    activeThumbColor: AppColors.brandOrange,
+                    onChanged: (v) => ref
+                        .read(notificationPrefsProvider.notifier)
+                        .setBookingUpdates(v),
+                  ),
+                  const Divider(),
+                  SwitchListTile(
+                    title: const Text('Kampanya & İndirim'),
+                    subtitle: Text(
+                      'Özel indirimler, kampanya duyuruları ve promosyon kodları',
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    value: prefs.promotions,
+                    activeThumbColor: AppColors.brandOrange,
+                    onChanged: (v) => ref
+                        .read(notificationPrefsProvider.notifier)
+                        .setPromotions(v),
+                  ),
+                  const Divider(),
+                  SwitchListTile(
+                    title: const Text('Esnaf Uyarıları'),
+                    subtitle: Text(
+                      'Yeni rezervasyon, mesaj ve acil durum bildirimleri',
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    value: prefs.partnerAlerts,
+                    activeThumbColor: AppColors.brandOrange,
+                    onChanged: (v) => ref
+                        .read(notificationPrefsProvider.notifier)
+                        .setPartnerAlerts(v),
+                  ),
+                  const SizedBox(height: 16),
+                ],
               ),
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
+  }
+
+  Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
+    final confirmed = await ConfirmDialog.show(
+      context,
+      title: 'profile.logout'.tr(),
+      message: 'profile.logout_confirm'.tr(),
+      cancelLabel: 'common.cancel'.tr(),
+      confirmLabel: 'profile.logout'.tr(),
+      destructive: true,
+    );
+    if (confirmed != true) return;
+    // `unawaited` ile hicbir hata yakalanmiyordu: secure-storage silme
+    // (ornek: cihaz yedegi sonrasi Android Keystore anahtari gecersizlesmesi)
+    // atarsa logout() future'i reddediliyor, session state'i hic
+    // temizlenmiyor ve kullanici hicbir hata gormeden 'giris yapilmis'
+    // halde kaliyordu (2026-09-09'da bulundu). `TokenStore.clear()` artik
+    // her anahtari ayri ayri en-iyi-caba (best-effort) siliyor, ama burada
+    // da `await` + hata mesaji ile ikinci bir guvenlik agi ekliyoruz.
+    try {
+      await ref.read(authControllerProvider.notifier).logout();
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _showDeleteAccount(BuildContext context, WidgetRef ref) async {
+    final confirmed = await ConfirmDialog.show(
+      context,
+      title: 'profile.delete_account'.tr(),
+      message: 'profile.delete_account_confirm'.tr(),
+      cancelLabel: 'common.cancel'.tr(),
+      confirmLabel: 'common.confirm'.tr(),
+      destructive: true,
+    );
+    if (confirmed != true) return;
+
+    final success = await ref
+        .read(authControllerProvider.notifier)
+        .requestAccountDeletion();
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            success
+                ? 'profile.delete_account_success'.tr()
+                : 'profile.delete_account_error'.tr(),
+          ),
+          backgroundColor: success ? Colors.green : Colors.redAccent,
+        ),
+      );
+    }
   }
 
   void _showEditProfile(BuildContext context, WidgetRef ref, UserDto? user) {
     final nameController = TextEditingController(text: user?.name);
     var isSaving = false;
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) => Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            left: 24,
-            right: 24,
-            top: 24,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'profile.edit_profile'.tr(),
-                style: GoogleFonts.outfit(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 24),
-              TextField(
-                decoration: InputDecoration(
-                  labelText: 'auth.name_label'.tr(),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
+    // Bottom sheet'in kendi State'i yok (StatefulBuilder), yani dispose()
+    // hicbir yerden cagrilmiyordu -- her acilista bir TextEditingController
+    // sizdiriliyordu (2026-09-09'da bulundu).
+    unawaited(
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        builder: (context) => StatefulBuilder(
+          builder: (context, setModalState) => Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+              left: 24,
+              right: 24,
+              top: 24,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'profile.edit_profile'.tr(),
+                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                controller: nameController,
-              ),
-              const SizedBox(height: 24),
-              FilledButton(
-                onPressed: isSaving
-                    ? null
-                    : () async {
-                        setModalState(() => isSaving = true);
-                        try {
-                          final dio = ref.read(dioProvider);
-                          await dio.put('/auth/me', data: {'name': nameController.text});
-                          if (context.mounted) {
-                            ref.invalidate(authControllerProvider);
-                            Navigator.pop(context);
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
-                              ),
+                const SizedBox(height: 24),
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: 'auth.name_label'.tr(),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  controller: nameController,
+                ),
+                const SizedBox(height: 24),
+                FilledButton(
+                  onPressed: isSaving
+                      ? null
+                      : () async {
+                          setModalState(() => isSaving = true);
+                          try {
+                            final dio = ref.read(dioProvider);
+                            await dio.put(
+                              '/auth/me',
+                              data: {'name': nameController.text},
                             );
+                            if (context.mounted) {
+                              ref.invalidate(authControllerProvider);
+                              Navigator.pop(context);
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    getErrorMessage(
+                                      e,
+                                      fallback: 'common.error'.tr(),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+                          } finally {
+                            if (context.mounted) {
+                              setModalState(() => isSaving = false);
+                            }
                           }
-                        } finally {
-                          if (context.mounted) {
-                            setModalState(() => isSaving = false);
-                          }
-                        }
-                      },
-                child: isSaving
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : Text('common.confirm'.tr()),
-              ),
-              const SizedBox(height: 40),
-            ],
+                        },
+                  child: isSaving
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text('common.confirm'.tr()),
+                ),
+                const SizedBox(height: 40),
+              ],
+            ),
           ),
         ),
-      ),
+      ).whenComplete(nameController.dispose),
     );
   }
-
 
   void _showLegal(BuildContext context, String title, String content) {
     showModalBottomSheet(
@@ -957,13 +1054,18 @@ Future<void> _handleBiometricToggle(bool val) async {
             children: [
               Text(
                 title,
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 16),
-              Text(content, style: GoogleFonts.outfit(height: 1.6)),
+              Text(
+                content,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium!.copyWith(height: 1.6),
+              ),
             ],
           ),
         ),
@@ -977,7 +1079,7 @@ Future<void> _handleBiometricToggle(bool val) async {
         children: [
           Text(
             value,
-            style: GoogleFonts.outfit(
+            style: Theme.of(context).textTheme.titleLarge!.copyWith(
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: AppColors.textDark,
@@ -985,7 +1087,7 @@ Future<void> _handleBiometricToggle(bool val) async {
           ),
           Text(
             label,
-            style: GoogleFonts.outfit(
+            style: Theme.of(context).textTheme.bodySmall!.copyWith(
               fontSize: 12,
               color: const Color(0xFF616161),
             ),

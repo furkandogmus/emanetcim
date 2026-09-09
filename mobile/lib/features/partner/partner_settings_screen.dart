@@ -2,11 +2,12 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
+import '../../core/utils/error_handler.dart';
 import '../../shared/models/shop.dart';
 import '../../shared/utils/app_colors.dart';
+import '../../shared/widgets/error_state.dart';
 
 class PartnerSettingsScreen extends ConsumerStatefulWidget {
   const PartnerSettingsScreen({super.key});
@@ -20,6 +21,7 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _busy = false;
   bool _loading = true;
+  bool _loadError = false;
   int _sealCount = 0;
 
   late TextEditingController _name;
@@ -60,6 +62,9 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
       final res = await dio.get('/partner/shop');
       final shop = ShopDto.fromJson(res.data as Map<String, dynamic>);
       final sealCount = res.data['sealCount'] as int? ?? 0;
+      // `await` sonrasi asenkron bosluk: bu istek havadayken widget dispose
+      // edilmis olabilir (ör. kullanıcı ekrandan hızlıca geri gider).
+      if (!mounted) return;
       setState(() {
         _name = TextEditingController(text: shop.name);
         _capacity = TextEditingController(text: shop.capacity.toString());
@@ -69,17 +74,38 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
         _address = TextEditingController(text: shop.address ?? '');
         _city = TextEditingController(text: shop.city ?? '');
         _district = TextEditingController(text: shop.district ?? '');
-        _phone = TextEditingController(text: (res.data['phone'] ?? res.data['phoneNumber'] ?? '') as String);
+        _phone = TextEditingController(
+          text: (res.data['phone'] ?? res.data['phoneNumber'] ?? '') as String,
+        );
         _sealCount = sealCount;
         _loading = false;
+        _loadError = false;
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('${'common.error'.tr()}: $e')));
+        // `_loading`'i false yapmazsak build() kalıcı olarak dönen bir
+        // spinner gösterir -- form controller'ları da hiç kurulmadığından
+        // (asagida `late`) esnafin ekrandan cikip tekrar girmek disinda
+        // hicbir kurtarma yolu olmazdi.
+        setState(() {
+          _loading = false;
+          _loadError = true;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+          ),
+        );
       }
     }
+  }
+
+  Future<void> _retryFetchShop() async {
+    setState(() {
+      _loading = true;
+      _loadError = false;
+    });
+    await _fetchShop();
   }
 
   String? _normalizePhone(String phone) {
@@ -137,9 +163,11 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('${'common.error'.tr()}: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -151,13 +179,36 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
     if (_loading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
+    if (_loadError) {
+      // Form controller'ları (`_name`, `_capacity` vb.) `late` ve yalnızca
+      // basarili bir `_fetchShop()` icinde kuruluyor -- hata sonrasi bunlara
+      // dokunan bir form gostermek yerine tekrar deneme yolu sunuyoruz.
+      return Scaffold(
+        backgroundColor: AppColors.bgLight,
+        appBar: AppBar(
+          title: Text(
+            'partner.settings'.tr(),
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
+          ),
+        ),
+        body: ErrorState(
+          title: 'common.error'.tr(),
+          actionLabel: 'common.try_again'.tr(),
+          onAction: _retryFetchShop,
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: AppColors.bgLight,
       appBar: AppBar(
         title: Text(
           'partner.settings'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
         actions: [
           if (_busy)
@@ -223,19 +274,23 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
                           children: [
                             Text(
                               'partner.seals_management'.tr(),
-                              style: GoogleFonts.outfit(
-                                fontSize: 14,
-                                color: const Color(0xFF424242),
-                              ),
+                              style: Theme.of(context).textTheme.bodyMedium!
+                                  .copyWith(
+                                    fontSize: 14,
+                                    color: const Color(0xFF424242),
+                                  ),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               '$_sealCount Adet',
-                              style: GoogleFonts.outfit(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textDark,
-                              ),
+                              // color SABIT: kart yukarida (Colors.white) hep
+                              // beyaz.
+                              style: Theme.of(context).textTheme.titleLarge!
+                                  .copyWith(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF0F172A),
+                                  ),
                             ),
                           ],
                         ),
@@ -297,7 +352,11 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
               ),
               const SizedBox(height: 32),
               _sectionHeader('partner.address'.tr()),
-              _inputField('partner.address'.tr(), _address, Icons.location_on_rounded),
+              _inputField(
+                'partner.address'.tr(),
+                _address,
+                Icons.location_on_rounded,
+              ),
               const SizedBox(height: 16),
               Row(
                 children: [
@@ -324,7 +383,11 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
               FilledButton(
                 onPressed: _busy ? null : _save,
                 style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.textDark,
+                  // Sabit koyu zemin: buton metni theme.dart'in
+                  // filledButtonTheme'inden SABIT beyaz geliyor (renk
+                  // vermiyor), zemin de AppColors.textDark gibi dinamik
+                  // olursa koyu temada beyaz-uzerine-beyaz olur.
+                  backgroundColor: const Color(0xFF0F172A),
                   minimumSize: const Size(double.infinity, 60),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18),
@@ -332,7 +395,7 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
                 ),
                 child: Text(
                   'common.save'.tr(),
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -350,7 +413,7 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
       padding: const EdgeInsets.only(bottom: 12, left: 4),
       child: Text(
         title.toUpperCase(),
-        style: GoogleFonts.outfit(
+        style: Theme.of(context).textTheme.titleSmall!.copyWith(
           fontSize: 13,
           fontWeight: FontWeight.w800,
           color: AppColors.textDark,
@@ -377,13 +440,17 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
           ),
         ],
       ),
+      // color'lar SABIT: kutu yukarida (Colors.white) hep beyaz.
       child: TextFormField(
         controller: controller,
         keyboardType: isNumber ? TextInputType.number : TextInputType.text,
-        style: GoogleFonts.outfit(fontWeight: FontWeight.w600),
+        style: Theme.of(context).textTheme.titleSmall!.copyWith(
+          fontWeight: FontWeight.w600,
+          color: const Color(0xFF0F172A),
+        ),
         decoration: InputDecoration(
           labelText: label,
-          prefixIcon: Icon(icon, size: 20),
+          prefixIcon: Icon(icon, size: 20, color: const Color(0xFF616161)),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(20),
             borderSide: BorderSide.none,

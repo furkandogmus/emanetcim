@@ -97,6 +97,16 @@ Tavan sayısını yükselten bir PR, sorunu çözmüyor, saklıyor.
 - Seed'i prod'a karşı çalıştırma (`seed-guard`).
 - Git'e ekran görüntüsü, log dökümü, çerez dosyası (`.gitignore` kökte `*.png`/`*.txt` engeller).
 
+## Mobil (Flutter) ve agent araçları
+
+- `mobile/` içinde çalışırken `mobile/CLAUDE.md` yüklenir: komutlar, mandal, cihaz kısıtları.
+- Skill'ler: `/mobil-dogrula` (kapı), `/mobil-cihaz` (gerçek cihaz + screencap),
+  `/mobil-ekran`, `/mobil-api-ucu` (web↔mobil aynı servis), `/mobil-paket`, `/commit`.
+- MCP (`.mcp.json`): `dart` (Dart/Flutter resmi MCP: analyze, test, hot reload, widget
+  inspector, driver) ve `context7` (Riverpod 3 / go_router 17 / Next.js güncel doküman).
+- Hook'lar (`.claude/settings.json`): `.dart` düzenlemesi otomatik `dart format`;
+  define'sız ya da bagajpark.com'a giden `flutter run` engellenir.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know

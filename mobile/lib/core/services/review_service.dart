@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../config/store_links.dart';
+
 final reviewServiceProvider = Provider((ref) => ReviewService());
 
 class ReviewService {
@@ -26,8 +28,9 @@ class ReviewService {
 
   Future<void> openStore() async {
     await _inAppReview.openStoreListing(
-      appStoreId: Platform.isIOS ? '6470000000' : 'com.bagajpark',
-      // TODO: Replace '6470000000' with real Apple App Store ID after first release
+      appStoreId: Platform.isIOS
+          ? StoreLinks.appStoreId
+          : StoreLinks.androidPackageId,
       // TODO: Add real macOS/Windows store IDs if applicable
     );
   }

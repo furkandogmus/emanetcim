@@ -3,8 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 final notificationPrefsProvider =
     NotifierProvider<NotificationPrefsNotifier, NotificationPrefs>(
-  NotificationPrefsNotifier.new,
-);
+      NotificationPrefsNotifier.new,
+    );
 
 class NotificationPrefs {
   final bool bookingUpdates;

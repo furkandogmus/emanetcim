@@ -45,3 +45,9 @@ app.*.map.json
 /android/app/release
 build/
 client_secret_*.json
+
+# scripts/device.sh yerel cihaz/API adresi (sablon: scripts/device.env.example)
+.device.env
+
+# Dongu ajaninin gorev dosyasi; yerel cihaz IP/port tasir, commit'lenmez
+/LOOP_TASK.md

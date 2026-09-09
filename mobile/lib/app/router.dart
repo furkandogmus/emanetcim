@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/auth/auth_controller.dart';
+import '../core/config/app_update_controller.dart';
 import '../features/admin/admin_applications_screen.dart';
 import '../features/admin/admin_dashboard_screen.dart';
 import '../features/admin/admin_messages_screen.dart';
@@ -26,6 +27,9 @@ import '../features/partner/partner_settings_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/search/search_screen.dart';
 import '../features/search/shop_detail_screen.dart';
+import '../features/security/devices_screen.dart';
+import '../features/security/permissions_screen.dart';
+import '../features/update/force_update_screen.dart';
 import '../shared/models/user.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -42,6 +46,16 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isAdminRoute = state.matchedLocation.startsWith('/admin');
       final role = auth.session?.role;
 
+      final forceUpdate =
+          ref.read(appUpdateControllerProvider).status ==
+          AppUpdateStatus.forceUpdate;
+      if (forceUpdate) {
+        return state.matchedLocation == '/force-update'
+            ? null
+            : '/force-update';
+      }
+      if (state.matchedLocation == '/force-update') return '/';
+
       if (auth.loading) return null;
 
       if (!auth.onboardingDone && state.matchedLocation != '/onboarding') {
@@ -55,7 +69,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (loggedIn) {
         final isGuest = role == UserRole.guest;
         final emailVerified = auth.session?.emailVerified;
-        if (isGuest && emailVerified == false && state.matchedLocation != '/auth/verify-email') {
+        if (isGuest &&
+            emailVerified == false &&
+            state.matchedLocation != '/auth/verify-email') {
           return '/auth/verify-email';
         }
 
@@ -85,6 +101,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/force-update',
+        builder: (_, _) => const ForceUpdateScreen(),
+      ),
+      GoRoute(
+        path: '/security/devices',
+        builder: (_, _) => const DevicesScreen(),
+      ),
+      GoRoute(
+        path: '/security/permissions',
+        builder: (_, _) => const PermissionsScreen(),
+      ),
       GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingScreen()),
       GoRoute(path: '/auth/login', builder: (_, _) => const LoginScreen()),
       GoRoute(
@@ -139,12 +167,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/booking/:id',
         builder: (_, s) =>
-          BookingDetailScreen(bookingId: s.pathParameters['id']!),
+            BookingDetailScreen(bookingId: s.pathParameters['id']!),
       ),
       GoRoute(
         path: '/partner/booking/:id',
         builder: (_, s) =>
-          PartnerBookingDetailScreen(bookingId: s.pathParameters['id']!),
+            PartnerBookingDetailScreen(bookingId: s.pathParameters['id']!),
       ),
       GoRoute(
         path: '/partner/earnings',
@@ -180,5 +208,9 @@ class RouterNotifier extends ChangeNotifier {
   final Ref _ref;
   RouterNotifier(this._ref) {
     _ref.listen(authControllerProvider, (previous, next) => notifyListeners());
+    _ref.listen(
+      appUpdateControllerProvider,
+      (previous, next) => notifyListeners(),
+    );
   }
 }

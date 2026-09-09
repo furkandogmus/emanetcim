@@ -1,11 +1,11 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
+import '../../core/utils/error_handler.dart';
 import '../../shared/utils/app_colors.dart';
 
 class PasswordResetConfirmScreen extends ConsumerStatefulWidget {
@@ -16,7 +16,8 @@ class PasswordResetConfirmScreen extends ConsumerStatefulWidget {
       _PasswordResetConfirmScreenState();
 }
 
-class _PasswordResetConfirmScreenState extends ConsumerState<PasswordResetConfirmScreen> {
+class _PasswordResetConfirmScreenState
+    extends ConsumerState<PasswordResetConfirmScreen> {
   final _formKey = GlobalKey<FormState>();
   final _tokenController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -33,10 +34,10 @@ class _PasswordResetConfirmScreenState extends ConsumerState<PasswordResetConfir
       final token = _tokenController.text.trim();
       final password = _passwordController.text.trim();
 
-      await dio.post('/auth/password-reset/confirm', data: {
-        'token': token,
-        'password': password,
-      });
+      await dio.post(
+        '/auth/password-reset/confirm',
+        data: {'token': token, 'password': password},
+      );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -50,14 +51,18 @@ class _PasswordResetConfirmScreenState extends ConsumerState<PasswordResetConfir
         final msg = err == 'invalid_or_expired_token'
             ? 'auth.verify_email_error'.tr()
             : 'auth.reset_password_error'.tr();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(msg)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(msg)));
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('auth.reset_password_error'.tr())),
+          SnackBar(
+            content: Text(
+              getErrorMessage(e, fallback: 'auth.reset_password_error'.tr()),
+            ),
+          ),
         );
       }
     } finally {
@@ -81,7 +86,9 @@ class _PasswordResetConfirmScreenState extends ConsumerState<PasswordResetConfir
       appBar: AppBar(
         title: Text(
           'auth.reset_password_confirm_title'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
       ),
       body: Center(
@@ -141,9 +148,11 @@ class _PasswordResetConfirmScreenState extends ConsumerState<PasswordResetConfir
                       labelText: 'auth.password'.tr(),
                       prefixIcon: const Icon(Icons.lock_outline_rounded),
                       suffixIcon: IconButton(
-                        icon: Icon(_obscure
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined),
+                        icon: Icon(
+                          _obscure
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                        ),
                         onPressed: () => setState(() => _obscure = !_obscure),
                       ),
                       border: OutlineInputBorder(
@@ -170,7 +179,8 @@ class _PasswordResetConfirmScreenState extends ConsumerState<PasswordResetConfir
                     ),
                     validator: (v) {
                       if (v != _passwordController.text) {
-                        return 'auth.invalid_password'.tr(); // Password mismatch
+                        return 'auth.invalid_password'
+                            .tr(); // Password mismatch
                       }
                       return null;
                     },
@@ -195,10 +205,11 @@ class _PasswordResetConfirmScreenState extends ConsumerState<PasswordResetConfir
                           )
                         : Text(
                             'auth.verify_button'.tr(),
-                            style: GoogleFonts.outfit(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context).textTheme.titleMedium!
+                                .copyWith(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                   ),
                 ],

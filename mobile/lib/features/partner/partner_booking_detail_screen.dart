@@ -5,14 +5,17 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/sync/sync_service.dart';
+import '../../core/utils/error_handler.dart';
 import '../../shared/models/booking.dart';
 import '../../shared/utils/app_colors.dart';
-import '../booking/booking_detail_screen.dart';
 import '../../shared/utils/booking_helpers.dart';
+import '../../shared/widgets/error_state.dart';
+import '../../shared/widgets/skeleton.dart';
+import '../booking/booking_detail_screen.dart';
+import 'partner_bookings_screen.dart' show partnerBookingsProvider;
 
 class PartnerBookingDetailScreen extends ConsumerStatefulWidget {
   const PartnerBookingDetailScreen({required this.bookingId, super.key});
@@ -38,7 +41,8 @@ class _PartnerBookingDetailScreenState
       }
       final current = ref.read(bookingProvider(widget.bookingId));
       final status = current.asData?.value.status;
-      final isTerminal = status == BookingStatus.checkedOut ||
+      final isTerminal =
+          status == BookingStatus.checkedOut ||
           status == BookingStatus.cancelled;
       if (isTerminal) {
         timer.cancel();
@@ -65,7 +69,13 @@ class _PartnerBookingDetailScreenState
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('partner.success_checkin'.tr())));
-        ref.invalidate(bookingProvider(b.id));
+        // Liste ekranindaki cache'lenmis `FutureProvider` durumu bu
+        // mutasyonlardan haberdar degildi -- esnaf listeye geri donunce
+        // rezervasyonun eski durumunu ('Onaylandi' vb.) ve eski
+        // "Toplam Kazanc" ozetini goruyordu.
+        ref
+          ..invalidate(bookingProvider(b.id))
+          ..invalidate(partnerBookingsProvider);
       }
     } catch (e) {
       if (e is DioException &&
@@ -87,9 +97,11 @@ class _PartnerBookingDetailScreenState
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('${'common.error'.tr()}: $e')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+            ),
+          );
         }
       }
     } finally {
@@ -108,7 +120,13 @@ class _PartnerBookingDetailScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('partner.success_checkout'.tr())),
         );
-        ref.invalidate(bookingProvider(b.id));
+        // Liste ekranindaki cache'lenmis `FutureProvider` durumu bu
+        // mutasyonlardan haberdar degildi -- esnaf listeye geri donunce
+        // rezervasyonun eski durumunu ('Onaylandi' vb.) ve eski
+        // "Toplam Kazanc" ozetini goruyordu.
+        ref
+          ..invalidate(bookingProvider(b.id))
+          ..invalidate(partnerBookingsProvider);
       }
     } catch (e) {
       if (e is DioException &&
@@ -129,9 +147,11 @@ class _PartnerBookingDetailScreenState
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('${'common.error'.tr()}: $e')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+            ),
+          );
         }
       }
     } finally {
@@ -146,8 +166,14 @@ class _PartnerBookingDetailScreenState
         title: Text('booking.approve'.tr()),
         content: Text('booking.approve_confirm'.tr()),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('common.cancel'.tr())),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text('booking.approve'.tr())),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('common.cancel'.tr()),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text('booking.approve'.tr()),
+          ),
         ],
       ),
     );
@@ -157,12 +183,24 @@ class _PartnerBookingDetailScreenState
       final dio = ref.read(dioProvider);
       await dio.post('/partner/bookings/${b.id}/approve');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('booking.approve_success'.tr())));
-        ref.invalidate(bookingProvider(b.id));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('booking.approve_success'.tr())));
+        // Liste ekranindaki cache'lenmis `FutureProvider` durumu bu
+        // mutasyonlardan haberdar degildi -- esnaf listeye geri donunce
+        // rezervasyonun eski durumunu ('Onaylandi' vb.) ve eski
+        // "Toplam Kazanc" ozetini goruyordu.
+        ref
+          ..invalidate(bookingProvider(b.id))
+          ..invalidate(partnerBookingsProvider);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('common.error'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -176,8 +214,14 @@ class _PartnerBookingDetailScreenState
         title: Text('booking.reject'.tr()),
         content: Text('booking.reject_confirm'.tr()),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('common.cancel'.tr())),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text('booking.reject'.tr())),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('common.cancel'.tr()),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text('booking.reject'.tr()),
+          ),
         ],
       ),
     );
@@ -187,12 +231,24 @@ class _PartnerBookingDetailScreenState
       final dio = ref.read(dioProvider);
       await dio.post('/partner/bookings/${b.id}/reject');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('booking.reject_success'.tr())));
-        ref.invalidate(bookingProvider(b.id));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('booking.reject_success'.tr())));
+        // Liste ekranindaki cache'lenmis `FutureProvider` durumu bu
+        // mutasyonlardan haberdar degildi -- esnaf listeye geri donunce
+        // rezervasyonun eski durumunu ('Onaylandi' vb.) ve eski
+        // "Toplam Kazanc" ozetini goruyordu.
+        ref
+          ..invalidate(bookingProvider(b.id))
+          ..invalidate(partnerBookingsProvider);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('common.error'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -215,7 +271,9 @@ class _PartnerBookingDetailScreenState
           backgroundColor: Colors.green,
         ),
       );
-      ref.invalidate(bookingProvider(b.id));
+      ref
+        ..invalidate(bookingProvider(b.id))
+        ..invalidate(partnerBookingsProvider);
     }
   }
 
@@ -225,18 +283,31 @@ class _PartnerBookingDetailScreenState
     final fmt = DateFormat('dd MMM, HH:mm');
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.bgLight,
       appBar: AppBar(
         title: Text(
           'nav.partner'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
       body: bAsync.when(
         skipLoadingOnReload: true,
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('common.error'.tr())),
+        loading: () => const Padding(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            children: [
+              Skeleton(height: 120, borderRadius: 24),
+              SizedBox(height: 16),
+              Skeleton(height: 180, borderRadius: 24),
+              SizedBox(height: 16),
+              Skeleton(height: 56, borderRadius: 16),
+            ],
+          ),
+        ),
+        error: (e, _) => ErrorState(title: 'common.error'.tr()),
         data: (b) {
           final statusColor = bookingStatusColor(b.status);
 
@@ -268,17 +339,18 @@ class _PartnerBookingDetailScreenState
                         (b.guestName != null && b.guestName!.isNotEmpty)
                             ? b.guestName!.substring(0, 1).toUpperCase()
                             : 'G',
-                        style: GoogleFonts.outfit(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.brandOrange,
-                        ),
+                        style: Theme.of(context).textTheme.displayLarge!
+                            .copyWith(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.brandOrange,
+                            ),
                       ),
                     ),
                     const SizedBox(height: 16),
                     Text(
                       b.guestName ?? 'profile.guest'.tr(),
-                      style: GoogleFonts.outfit(
+                      style: Theme.of(context).textTheme.titleLarge!.copyWith(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
@@ -295,11 +367,12 @@ class _PartnerBookingDetailScreenState
                       ),
                       child: Text(
                         bookingStatusLabel(b.status),
-                        style: GoogleFonts.outfit(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: statusColor,
-                        ),
+                        style: Theme.of(context).textTheme.labelMedium!
+                            .copyWith(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: statusColor,
+                            ),
                       ),
                     ),
                   ],
@@ -332,7 +405,7 @@ class _PartnerBookingDetailScreenState
               // Bags Info
               Text(
                 'checkout.bags_title'.tr(),
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.labelMedium!.copyWith(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   color: const Color(0xFF616161),
@@ -368,13 +441,22 @@ class _PartnerBookingDetailScreenState
                         child: FilledButton.icon(
                           onPressed: _busy ? null : () => _approveBooking(b),
                           icon: _busy
-                              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
                               : const Icon(Icons.check_circle_rounded),
                           label: Text('partner.approve'.tr()),
                           style: FilledButton.styleFrom(
                             backgroundColor: Colors.green,
                             padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
                           ),
                         ),
                       ),
@@ -386,13 +468,22 @@ class _PartnerBookingDetailScreenState
                         child: FilledButton.icon(
                           onPressed: _busy ? null : () => _rejectBooking(b),
                           icon: _busy
-                              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
                               : const Icon(Icons.cancel_rounded),
                           label: Text('partner.reject'.tr()),
                           style: FilledButton.styleFrom(
                             backgroundColor: Colors.redAccent,
                             padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
                           ),
                         ),
                       ),
@@ -452,7 +543,7 @@ class _PartnerBookingDetailScreenState
                               ),
                             )
                           : const Icon(Icons.exit_to_app_rounded),
-label: Text('partner.check_out_button'.tr()),
+                      label: Text('partner.check_out_button'.tr()),
                       style: FilledButton.styleFrom(
                         backgroundColor: const Color(0xFF3B82F6),
                         shape: RoundedRectangleBorder(
@@ -510,7 +601,7 @@ label: Text('partner.check_out_button'.tr()),
                 const SizedBox(width: 6),
                 Text(
                   label,
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
                     fontSize: 12,
                     color: const Color(0xFF424242),
                   ),
@@ -520,7 +611,7 @@ label: Text('partner.check_out_button'.tr()),
             const SizedBox(height: 8),
             Text(
               time,
-              style: GoogleFonts.outfit(
+              style: Theme.of(context).textTheme.titleMedium!.copyWith(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
               ),
@@ -536,7 +627,7 @@ label: Text('partner.check_out_button'.tr()),
       children: [
         Text(
           size,
-          style: GoogleFonts.outfit(
+          style: Theme.of(context).textTheme.labelMedium!.copyWith(
             fontSize: 12,
             fontWeight: FontWeight.bold,
             color: const Color(0xFF616161),
@@ -545,7 +636,7 @@ label: Text('partner.check_out_button'.tr()),
         const SizedBox(height: 4),
         Text(
           '$count',
-          style: GoogleFonts.outfit(
+          style: Theme.of(context).textTheme.titleLarge!.copyWith(
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: const Color(0xFF0F172A),
@@ -560,13 +651,11 @@ class _BagRevisionBottomSheet extends StatefulWidget {
   final BookingDto booking;
   final Dio dio;
 
-  const _BagRevisionBottomSheet({
-    required this.booking,
-    required this.dio,
-  });
+  const _BagRevisionBottomSheet({required this.booking, required this.dio});
 
   @override
-  State<_BagRevisionBottomSheet> createState() => _BagRevisionBottomSheetState();
+  State<_BagRevisionBottomSheet> createState() =>
+      _BagRevisionBottomSheetState();
 }
 
 class _BagRevisionBottomSheetState extends State<_BagRevisionBottomSheet> {
@@ -602,17 +691,14 @@ class _BagRevisionBottomSheetState extends State<_BagRevisionBottomSheet> {
       if (mounted) {
         Navigator.pop(context, true);
       }
-    } on DioException catch (e) {
-      if (mounted) {
-        final msg = e.response?.data?['error'] ?? 'partner.bag_revision_error'.tr();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(msg.toString())),
-        );
-      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('partner.bag_revision_error'.tr())),
+          SnackBar(
+            content: Text(
+              getErrorMessage(e, fallback: 'partner.bag_revision_error'.tr()),
+            ),
+          ),
         );
       }
     } finally {
@@ -622,7 +708,12 @@ class _BagRevisionBottomSheetState extends State<_BagRevisionBottomSheet> {
     }
   }
 
-  Widget _buildCounterRow(String label, String description, int val, ValueChanged<int> onChange) {
+  Widget _buildCounterRow(
+    String label,
+    String description,
+    int val,
+    ValueChanged<int> onChange,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -634,16 +725,18 @@ class _BagRevisionBottomSheetState extends State<_BagRevisionBottomSheet> {
               children: [
                 Text(
                   label,
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textDark,
+                    // Bu satir daima-beyaz bir sheet icinde cizilir; sabit
+                    // kalmali.
+                    color: const Color(0xFF0F172A),
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   description,
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
                     fontSize: 12,
                     color: Colors.grey[600],
                   ),
@@ -663,7 +756,7 @@ class _BagRevisionBottomSheetState extends State<_BagRevisionBottomSheet> {
                 child: Text(
                   '$val',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -707,9 +800,13 @@ class _BagRevisionBottomSheetState extends State<_BagRevisionBottomSheet> {
               children: [
                 Text(
                   'partner.bag_revision_title'.tr(),
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
+                    // Bu sheet daima beyaz (yukarida Colors.white); renk
+                    // verilmeyince koyu temanin varsayilan (acik) rengini
+                    // miras alip gorunmez oluyordu.
+                    color: const Color(0xFF0F172A),
                   ),
                 ),
                 IconButton(
@@ -761,10 +858,11 @@ class _BagRevisionBottomSheetState extends State<_BagRevisionBottomSheet> {
                       )
                     : Text(
                         'common.save'.tr(),
-                        style: GoogleFonts.outfit(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium!
+                            .copyWith(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
               ),
             ),

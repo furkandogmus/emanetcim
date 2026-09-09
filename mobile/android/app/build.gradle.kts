@@ -23,7 +23,9 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.bagajpark"
-    compileSdk = flutter.compileSdkVersion
+    // permission_handler 13 ve flutter_secure_storage 11 compileSdk 37 ister;
+    // flutter.compileSdkVersion (36) geride kaldigi icin acikca sabitlendi.
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

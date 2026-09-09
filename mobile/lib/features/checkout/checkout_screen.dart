@@ -1,17 +1,16 @@
 import 'dart:async' show unawaited;
-import 'package:dio/dio.dart';
+
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
-import '../../core/api/api_client.dart';
 import '../../core/repositories/shop_repository.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/services/review_service.dart';
 import '../../shared/utils/app_colors.dart';
+import '../../shared/widgets/error_state.dart';
+import 'checkout_controller.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({required this.shopId, super.key});
@@ -27,7 +26,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   int _m = 1;
   int _xl = 0;
   final _coupon = TextEditingController();
-  bool _busy = false;
   double _grandTotal = 0;
 
   @override
@@ -81,58 +79,18 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   Future<void> _pay() async {
     if (_total == 0) return;
-    unawaited(ref.read(hapticServiceProvider).medium());
-    setState(() => _busy = true);
-    try {
-      final dio = ref.read(dioProvider);
-      final res = await dio.post(
-        '/checkout/intent',
-        data: {
-          'shopId': widget.shopId,
-          'checkInTime': _checkIn.toUtc().toIso8601String(),
-          'checkOutTime': _checkOut.toUtc().toIso8601String(),
-          'bagCountS': _s,
-          'bagCountM': _m,
-          'bagCountXl': _xl,
-          'couponCode': _coupon.text.trim(),
-        },
-      );
-      final bookingId = res.data['bookingId'] as String?;
-      final serverTotal = res.data['totalPrice'] as num?;
-
-      if (bookingId == null) {
-        _toast('common.error'.tr());
-        return;
-      }
-
-      // Sunucu fiyatı ile tutarsızlık uyarısı
-      if (serverTotal != null && _grandTotal > 0) {
-        final server = serverTotal.toDouble();
-        final diff = (_grandTotal - server).abs();
-        if (diff > 1) {
-          debugPrint('⚠️ Price mismatch: client=$_grandTotal server=$server');
-          _grandTotal = server; // Sunucu fiyatı esas alınır
-        }
-      }
-
-      if (!mounted) return;
-      unawaited(ref.read(hapticServiceProvider).success());
-      unawaited(ref.read(reviewServiceProvider).requestReview());
-      context.go('/booking/$bookingId');
-    } catch (e) {
-      if (!mounted) return;
-      var msg = 'common.error'.tr();
-      if (e is DioException) {
-        final errCode = e.response?.data['error'];
-        if (errCode == 'no_bags') msg = 'checkout.error_no_bags'.tr();
-        if (errCode == 'shop_not_found') {
-          msg = 'checkout.error_shop_closed'.tr();
-        }
-      }
-      _toast(msg);
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
+    await ref
+        .read(checkoutControllerProvider.notifier)
+        .pay(
+          shopId: widget.shopId,
+          checkInTime: _checkIn,
+          checkOutTime: _checkOut,
+          bagCountS: _s,
+          bagCountM: _m,
+          bagCountXl: _xl,
+          couponCode: _coupon.text.trim(),
+          clientGrandTotal: _grandTotal,
+        );
   }
 
   void _showBagSizeGuide(BuildContext context) {
@@ -150,7 +108,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             children: [
               Text(
                 'checkout.bags_title'.tr(),
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -195,7 +153,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             children: [
               Text(
                 label,
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                 ),
@@ -203,14 +161,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               const SizedBox(height: 2),
               Text(
                 dims,
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                   fontSize: 13,
                   color: const Color(0xFF616161),
                 ),
               ),
               Text(
                 weight,
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.bodySmall!.copyWith(
                   fontSize: 12,
                   color: Colors.grey,
                 ),
@@ -236,12 +194,31 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   @override
   Widget build(BuildContext context) {
     final shopAsync = ref.watch(shopProvider(widget.shopId));
+    final payState = ref.watch(checkoutControllerProvider);
+    final busy = payState.status == CheckoutPayStatus.submitting;
+
+    // Odeme sonucunun bir-kerelik yan etkileri (haptik, review istemi,
+    // navigasyon / hata toast'i) burada -- `ref.listen` yalnizca widget
+    // hala mounted iken tetiklenir, eskiden `if (!mounted) return;` ile
+    // korunan davranisin karsiligi budur.
+    ref.listen<CheckoutPayState>(checkoutControllerProvider, (previous, next) {
+      if (next.status == CheckoutPayStatus.success && next.bookingId != null) {
+        unawaited(ref.read(hapticServiceProvider).success());
+        unawaited(ref.read(reviewServiceProvider).requestReview());
+        context.go('/booking/${next.bookingId}');
+      } else if (next.status == CheckoutPayStatus.error &&
+          next.errorMessage != null) {
+        _toast(next.errorMessage!);
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'checkout.title'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
       ),
       body: SingleChildScrollView(
@@ -292,7 +269,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               children: [
                 Text(
                   'checkout.bags_title'.tr().toUpperCase(),
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.labelMedium!.copyWith(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                     color: const Color(0xFF616161),
@@ -349,7 +326,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   border: InputBorder.none,
                   prefixIcon: const Icon(Icons.local_offer_outlined, size: 20),
                 ),
-                style: GoogleFonts.outfit(fontSize: 14),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium!.copyWith(fontSize: 14),
               ),
             ),
 
@@ -358,10 +337,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             // Payment Summary
             shopAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Text('common.error'.tr()),
+              error: (e, _) => ErrorState(title: 'common.error'.tr()),
               data: (shop) {
-                final ms = _checkOut.millisecondsSinceEpoch - _checkIn.millisecondsSinceEpoch;
-                final days = ms <= 0 ? 1 : (ms / (24 * 60 * 60 * 1000)).ceil().clamp(1, 30);
+                final ms =
+                    _checkOut.millisecondsSinceEpoch -
+                    _checkIn.millisecondsSinceEpoch;
+                final days = ms <= 0
+                    ? 1
+                    : (ms / (24 * 60 * 60 * 1000)).ceil().clamp(1, 30);
                 // BagajPark fiyatlandırması sunucu tarafında hesaplanır.
                 // Buradaki hesaplama yalnızca tahmini gösterim içindir.
                 // Kesin fiyat onay anında sunucudan alınır.
@@ -373,12 +356,16 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
                 return Container(
                   padding: const EdgeInsets.all(28),
+                  // Sabit koyu kart: _summaryRow icindeki metin (Colors.white /
+                  // Color(0xFF757575)) sabit -- zemin de AppColors.textDark
+                  // gibi dinamik olamaz, yoksa koyu temada acik zemin + beyaz
+                  // metin cikip okunmaz olurdu.
                   decoration: BoxDecoration(
-                    color: AppColors.textDark,
+                    color: const Color(0xFF0F172A),
                     borderRadius: BorderRadius.circular(32),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.textDark.withValues(alpha: 0.2),
+                        color: const Color(0xFF0F172A).withValues(alpha: 0.2),
                         blurRadius: 30,
                         offset: const Offset(0, 10),
                       ),
@@ -413,27 +400,34 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             children: [
                               Text(
                                 'checkout.total'.tr().toUpperCase(),
-                                style: GoogleFonts.outfit(
-                                  color: Colors.white.withValues(alpha: 0.6),
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                  letterSpacing: 1.2,
-                                ),
+                                style: Theme.of(context).textTheme.labelMedium!
+                                    .copyWith(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.6,
+                                      ),
+                                      letterSpacing: 1.2,
+                                    ),
                               ),
                               Text(
                                 '₺${grandTotal.toStringAsFixed(2)}',
-                                style: GoogleFonts.outfit(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 32,
-                                ),
+                                style: Theme.of(context).textTheme.displayLarge!
+                                    .copyWith(
+                                      fontSize: 32,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
                               ),
                               Text(
                                 'checkout.estimated'.tr(),
-                                style: GoogleFonts.outfit(
-                                  color: Colors.white.withValues(alpha: 0.4),
-                                  fontSize: 11,
-                                ),
+                                style: Theme.of(context).textTheme.labelSmall!
+                                    .copyWith(
+                                      fontSize: 11,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.4,
+                                      ),
+                                    ),
                               ),
                             ],
                           ),
@@ -450,12 +444,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             ),
                             child: Text(
                               'BAGAJPARK',
-                              style: GoogleFonts.outfit(
-                                color: AppColors.brandOrange,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 10,
-                                letterSpacing: 1,
-                              ),
+                              style: Theme.of(context).textTheme.labelSmall!
+                                  .copyWith(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.brandOrange,
+                                    letterSpacing: 1,
+                                  ),
                             ),
                           ),
                         ],
@@ -464,41 +459,47 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       Semantics(
                         label: 'Ödemeyi Yap',
                         child: FilledButton(
-                        onPressed: _busy || _total == 0 ? null : _pay,
-                        style: FilledButton.styleFrom(
-                          backgroundColor: AppColors.brandOrange,
-                          foregroundColor: Colors.white,
-                          minimumSize: const Size(double.infinity, 64),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                          onPressed: busy || _total == 0 ? null : _pay,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.brandOrange,
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size(double.infinity, 64),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            elevation: 0,
                           ),
-                          elevation: 0,
-                        ),
-                        child: _busy
-                            ? const SizedBox(
-                                height: 24,
-                                width: 24,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.security_rounded, size: 22),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    'checkout.pay_button'.tr(),
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                          child: busy
+                              ? const SizedBox(
+                                  height: 24,
+                                  width: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
                                   ),
-                                ],
-                              ),
+                                )
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.security_rounded,
+                                      size: 22,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      'checkout.pay_button'.tr(),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium!
+                                          .copyWith(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                        ),
                       ),
-                    ),
                     ],
                   ),
                 );
@@ -539,17 +540,17 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               children: [
                 Text(
                   label,
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
                     fontSize: 12,
                     color: const Color(0xFF616161),
                   ),
                 ),
                 Text(
                   DateFormat('dd MMMM, HH:mm').format(dt),
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textDark,
+                    color: const Color(0xFF0F172A),
                   ),
                 ),
               ],
@@ -599,14 +600,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               children: [
                 Text(
                   label,
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.titleSmall!.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textDark,
+                    color: const Color(0xFF0F172A),
                   ),
                 ),
                 Text(
                   subtitle,
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.labelSmall!.copyWith(
                     fontSize: 11,
                     color: const Color(0xFF616161),
                   ),
@@ -625,7 +626,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 child: Text(
                   '$value',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.outfit(
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -651,7 +652,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           color: Colors.grey.shade100,
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, size: 18, color: AppColors.textDark),
+        child: Icon(icon, size: 18, color: const Color(0xFF0F172A)),
       ),
     );
   }
@@ -662,17 +663,17 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.outfit(
-            color: const Color(0xFF757575),
+          style: Theme.of(context).textTheme.bodyMedium!.copyWith(
             fontSize: 14,
+            color: const Color(0xFF757575),
           ),
         ),
         Text(
           value,
-          style: GoogleFonts.outfit(
-            color: valueColor ?? Colors.white,
-            fontWeight: FontWeight.bold,
+          style: Theme.of(context).textTheme.titleSmall!.copyWith(
             fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: valueColor ?? Colors.white,
           ),
         ),
       ],

@@ -1,16 +1,17 @@
 import 'dart:async' show unawaited;
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../core/repositories/seal_repository.dart';
 import '../../shared/models/seal_scan_result.dart';
 import '../../shared/utils/app_colors.dart';
+import '../../shared/widgets/confirm_dialog.dart';
 
 class PartnerScanScreen extends ConsumerStatefulWidget {
   const PartnerScanScreen({super.key});
@@ -88,36 +89,19 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
   }
 
   void _showSealInfo(SealScanResult data) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
-          'partner.seal_info'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _infoRow('partner.seal_serial'.tr(), '${data.serialNumber}'),
-            const SizedBox(height: 8),
-            _infoRow('partner.seal_status'.tr(), '${data.status}'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(
-              'common.confirm'.tr(),
-              style: GoogleFonts.outfit(
-                fontWeight: FontWeight.bold,
-                color: AppColors.brandOrange,
-              ),
-            ),
-          ),
+    ConfirmDialog.show(
+      context,
+      title: 'partner.seal_info'.tr(),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _infoRow('partner.seal_serial'.tr(), '${data.serialNumber}'),
+          const SizedBox(height: 8),
+          _infoRow('partner.seal_status'.tr(), '${data.status}'),
         ],
       ),
+      confirmLabel: 'common.confirm'.tr(),
     ).then((_) {
       if (mounted) setState(() => _handled = false);
     });
@@ -127,8 +111,18 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: GoogleFonts.outfit(color: const Color(0xFF424242))),
-        Text(value, style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        Text(
+          label,
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium!.copyWith(color: const Color(0xFF424242)),
+        ),
+        Text(
+          value,
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
+        ),
       ],
     );
   }
@@ -144,15 +138,19 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.videocam_off, size: 64, color: Colors.white70),
+                    const Icon(
+                      Icons.videocam_off,
+                      size: 64,
+                      color: Colors.white70,
+                    ),
                     const SizedBox(height: 24),
                     Text(
                       'partner.camera_required'.tr(),
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.outfit(
-                        color: Colors.white,
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
+                        color: Colors.white,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -205,11 +203,12 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
                             ),
                             Text(
                               'nav.scan'.tr(),
-                              style: GoogleFonts.outfit(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: Theme.of(context).textTheme.titleMedium!
+                                  .copyWith(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
                             ),
                             const SizedBox(width: 48),
                           ],
@@ -218,10 +217,8 @@ class _PartnerScanScreenState extends ConsumerState<PartnerScanScreen> {
                         Text(
                           'partner.scan_hint'.tr(),
                           textAlign: TextAlign.center,
-                          style: GoogleFonts.outfit(
-                            color: Colors.white70,
-                            fontSize: 14,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium!
+                              .copyWith(fontSize: 14, color: Colors.white70),
                         ),
                         const SizedBox(height: 60),
                       ],

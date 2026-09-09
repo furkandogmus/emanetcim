@@ -1,3 +1,4 @@
+import { APP_LOCALES, DEFAULT_APP_LOCALE } from "@/i18n/locales";
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 import { Prisma } from "@prisma/client";
@@ -22,9 +23,29 @@ export type RecordInterestInput = {
   source?: "web" | "mobile";
 };
 
+/**
+ * Kabaca RFC 5322: bosluksuz yerel kisim, `@`, en az bir noktali alan adi.
+ * Amac tam dogrulama degil -- ADRESE BENZEMEYEN girdiyi gondermeden elemek.
+ */
+/**
+ * Desteklenmeyen dil `null`a duser (= platform dili).
+ *
+ * Olculdu (2026-09-02): `locale: "klingon"` oldugu gibi kaydediliyordu. Bu
+ * deger sonradan bildirim dilini secmek icin okunuyor; taninmayan bir kod
+ * `pickLocale`da varsayilana duser, yani zarar sessiz -- ama kayit yine de
+ * anlamsiz ve "hangi dilde haber verdik" sorusu cevapsiz kalir.
+ */
+function gecerliDil(l: string | null | undefined): string | null {
+  if (!l) return null;
+  return (APP_LOCALES as readonly string[]).includes(l) ? l : null;
+}
+
+const EPOSTA_BICIMI = /^[^\s@]+@[^\s@.]+\.[^\s@]+$/;
+
 export type RecordInterestResult =
   | { ok: true; alreadyRegistered: boolean }
-  | { ok: false; code: "shop_not_prelaunch" | "shop_not_found" };
+  /* `invalid_email`: gerekce `record` icinde. */
+  | { ok: false; code: "shop_not_prelaunch" | "shop_not_found" | "invalid_email" };
 
 export type RecordWantInput = {
   shopId: string;
@@ -51,6 +72,32 @@ class PrelaunchInterestService {
   async record(input: RecordInterestInput): Promise<RecordInterestResult> {
     const email = input.email.trim().toLowerCase();
 
+    /*
+      ADRES DOGRULANMADAN E-POSTA GONDERILMEZ (2026-09-02'de olculdu).
+
+      Servis dogrudan cagrildiginda su kayitlar giriyordu VE her birine
+      "acilinca haber verecegiz" e-postasi gonderilmeye calisiliyordu:
+
+          "duz-metin"           -> kaydedildi, gonderim denendi
+          ""      (bos)         -> kaydedildi, gonderim denendi
+          490 karakterlik dize  -> kaydedildi, gonderim denendi
+
+      Asil zarar kayit kirliligi degil GONDEREN ITIBARI: gecersiz adreslere
+      yapilan her deneme bir bounce uretir, bounce orani yukseldiginde saglayici
+      hesabi kisitlar ve o an TUM e-postalar durur -- rezervasyon onaylari,
+      hatirlatmalar, parola sifirlama dahil. Yani bir talep-testi formundaki
+      dogrulama eksigi, urunun butun bildirim yolunu riske atiyordu.
+
+      Tasiyicilar zod ile doguruyor; bu, ayni oturumda besinci kez cikan sinif:
+      kural tasiyicida var, serviste yok. CLAUDE.md "yazma islemleri yalnizca
+      `src/services/` uzerinden" diyor, son savunma hatti orasi olmali.
+
+      320 karakter RFC 5321'in adres siniri.
+    */
+    if (!EPOSTA_BICIMI.test(email) || email.length > 320) {
+      return { ok: false, code: "invalid_email" };
+    }
+
     const shop = await prisma.shop.findUnique({
       where: { id: input.shopId },
       select: { isPrelaunch: true, name: true },
@@ -73,7 +120,7 @@ class PrelaunchInterestService {
         data: {
           shopId: input.shopId,
           email,
-          locale: input.locale ?? null,
+          locale: gecerliDil(input.locale),
           source: input.source ?? "web",
         },
       });
@@ -90,7 +137,7 @@ class PrelaunchInterestService {
           email,
           input.shopId,
           shop.name,
-          input.locale ?? "tr",
+          gecerliDil(input.locale) ?? DEFAULT_APP_LOCALE,
         )
         .catch((err) =>
           logger.warn({ err, shopId: input.shopId }, "prelaunch_interest_confirm_failed"),
@@ -140,7 +187,7 @@ class PrelaunchInterestService {
         data: {
           shopId: input.shopId,
           anonId: input.anonId,
-          locale: input.locale ?? null,
+          locale: gecerliDil(input.locale),
           source: input.source ?? "web",
         },
       });

@@ -98,6 +98,16 @@
 		<string>remote-notification</string>
 		<string>fetch</string>
 	</array>
+	<!-- jailbreak_root_detection: jailbreak uygulamalarinin URL semalarini sorgulayabilmek icin -->
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>undecimus</string>
+		<string>sileo</string>
+		<string>zbra</string>
+		<string>filza</string>
+		<string>activator</string>
+		<string>cydia</string>
+	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSPhotoLibraryUsageDescription</key>

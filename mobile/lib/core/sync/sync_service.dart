@@ -1,8 +1,11 @@
 import 'dart:async';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
+
 import '../api/api_client.dart';
 import '../auth/auth_controller.dart';
 
@@ -59,6 +62,21 @@ class SyncService {
   SyncService(this._ref);
 
   void init() {
+    // Auth bootstrap (SharedPreferences + secure token okuma + /auth/me)
+    // acilista bir frame'den cok daha uzun surer, bu yuzden acilista TEK
+    // SEFERLIK bir sync() cagrisi (onceden app.dart'ta) session hala null
+    // iken calisir ve `sync()` sessizce no-op doner (bkz. asagidaki
+    // guard). Bunun yerine oturum null'dan dolu bir degere GECTIGINDE
+    // (bootstrap bitince veya login sonrasi) burada dinleyip tetikliyoruz;
+    // boylece internet zaten acikken (baglanti DEGISMEDigi icin
+    // onConnectivityChanged hic tetiklenmez) acilan uygulamada bekleyen
+    // offline check-in/check-out kayitlari gercekten senkronize olur.
+    _ref.listen(authControllerProvider, (previous, next) {
+      if (next.session != null && previous?.session == null) {
+        sync();
+      }
+    });
+
     // Listen for network changes to trigger sync
     _connectivitySub = Connectivity().onConnectivityChanged.listen((results) {
       // results is a List<ConnectivityResult> in newer versions
@@ -88,6 +106,24 @@ class SyncService {
     Map<String, dynamic>? data,
   ]) async {
     final userId = _ref.read(authControllerProvider).session?.id ?? 'guest';
+
+    // Ayni booking+type icin zaten bekleyen bir aksiyon varsa yenisini
+    // eklemiyoruz. Aksi halde esnaf senkronize olmadan ayni rezervasyona
+    // tekrar girip ayni aksiyonu bir daha tetiklerse (liste/detay ekrani
+    // hala eski -- onaylanmis -- durumu gosterdigi icin buton hala
+    // aktiftir), baglanti geri geldiginde ayni booking icin iki check-in/
+    // check-out istegi art arda backend'e gonderilir.
+    final alreadyPending = pendingActions.any(
+      (a) => a.userId == userId && a.bookingId == bookingId && a.type == type,
+    );
+    if (alreadyPending) {
+      debugPrint(
+        'Offline action skipped, already pending for booking '
+        '$bookingId: $type',
+      );
+      return;
+    }
+
     final action = SyncAction(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       userId: userId,
@@ -131,6 +167,24 @@ class SyncService {
           await _box.delete(action.id);
           debugPrint('Action ${action.id} synced successfully.');
         } catch (e) {
+          // 4xx: sunucu isteği kalıcı olarak reddetti (ör. rezervasyon başka
+          // cihazdan zaten check-in edilmiş). Yeniden denemek sonucu
+          // değiştirmez, bu yüzden kuyruktan düşür ve kalan işlemlere devam
+          // et — aksi halde bu tek kalıcı hata, arkasındaki tüm geçerli
+          // işlemleri sonsuza dek bloklar (30sn'de bir tekrar denenir).
+          if (e is DioException) {
+            final statusCode = e.response?.statusCode;
+            if (statusCode != null && statusCode >= 400 && statusCode < 500) {
+              debugPrint(
+                'Action ${action.id} permanently rejected (HTTP $statusCode), '
+                'dropping from queue: $e',
+              );
+              await _box.delete(action.id);
+              continue;
+            }
+          }
+          // Geçici hata (ağ/timeout/5xx): kuyruğu olduğu gibi bırak, sonraki
+          // bağlantı/30sn zamanlayıcısında yeniden denenecek.
           debugPrint('Sync failed for action ${action.id}: $e');
           break; // Stop on failure (likely still offline or API error)
         }

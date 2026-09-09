@@ -22,9 +22,7 @@ final dioProvider = Provider<Dio>((ref) {
   const cacheTtl = Duration(minutes: 5);
   const maxCacheSize = 100;
 
-  ref.onDispose(() {
-    cache.clear();
-  });
+  ref.onDispose(cache.clear);
 
   dio.interceptors.add(
     InterceptorsWrapper(
@@ -58,7 +56,16 @@ final dioProvider = Provider<Dio>((ref) {
         final isServerError =
             err.response != null && err.response!.statusCode! >= 500;
 
-        if (isNetworkError || isServerError) {
+        // Yalnızca doğal olarak idempotent metodları otomatik yeniden dene.
+        // POST/PATCH gibi durum değiştiren isteklerde bir timeout/5xx, isteğin
+        // sunucuya hiç ulaşmadığı anlamına gelmez — ulaşıp işlenmiş de olabilir
+        // (ör. check-in/check-out, ödeme, kupon kullanımı). Böyle bir isteği
+        // körlemesine tekrar göndermek mükerrer mutasyona yol açar.
+        final isIdempotentMethod =
+            err.requestOptions.method == 'GET' ||
+            err.requestOptions.method == 'HEAD';
+
+        if (isIdempotentMethod && (isNetworkError || isServerError)) {
           final options = err.requestOptions;
           final int retries = options.extra['retries'] ?? 0;
           if (retries < 2) {
@@ -124,23 +131,28 @@ final dioProvider = Provider<Dio>((ref) {
         handler.next(options);
       },
       onResponse: (response, handler) async {
-        if (response.requestOptions.method == 'GET') {
-          final token = await store.readAccessToken();
-          if (token == null) return handler.next(response);
-          final tokenHash = token.substring(token.length - 8);
-          final key = '$tokenHash:${response.requestOptions.uri.toString()}';
-
-          if (cache.length >= maxCacheSize) {
-            final oldestKey = cache.keys.reduce((a, b) =>
-                cache[a]!.timestamp.isBefore(cache[b]!.timestamp) ? a : b);
-            cache.remove(oldestKey);
-          }
-
-          cache[key] = _CacheEntry(
-            response: response,
-            timestamp: DateTime.now(),
-          );
+        if (response.requestOptions.method != 'GET') {
+          // Bir mutasyon başarıyla tamamlandı: önbellekteki GET yanıtları artık
+          // bayat olabilir (ör. check-in sonrası rezervasyon listesi). X-Refresh
+          // başlığı hiçbir çağıran tarafından set edilmediği için tek güvenli
+          // yol, önbelleği tamamen temizlemek.
+          if (cache.isNotEmpty) cache.clear();
+          return handler.next(response);
         }
+
+        final token = await store.readAccessToken();
+        if (token == null) return handler.next(response);
+        final tokenHash = token.substring(token.length - 8);
+        final key = '$tokenHash:${response.requestOptions.uri.toString()}';
+
+        if (cache.length >= maxCacheSize) {
+          final oldestKey = cache.keys.reduce(
+            (a, b) => cache[a]!.timestamp.isBefore(cache[b]!.timestamp) ? a : b,
+          );
+          cache.remove(oldestKey);
+        }
+
+        cache[key] = _CacheEntry(response: response, timestamp: DateTime.now());
         handler.next(response);
       },
     ),

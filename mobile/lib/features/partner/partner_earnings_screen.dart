@@ -1,10 +1,11 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
 import '../../shared/models/earnings_stats.dart';
+import '../../shared/utils/app_colors.dart';
+import '../../shared/widgets/skeleton.dart';
 
 class PartnerEarningsScreen extends ConsumerStatefulWidget {
   const PartnerEarningsScreen({super.key});
@@ -16,7 +17,7 @@ class PartnerEarningsScreen extends ConsumerStatefulWidget {
 
 class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
   bool _loading = true;
-  EarningsStats _stats = EarningsStats();
+  EarningsStats _stats = const EarningsStats();
 
   @override
   void initState() {
@@ -45,15 +46,40 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        body: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(child: Skeleton(height: 100, borderRadius: 20)),
+                    SizedBox(width: 12),
+                    Expanded(child: Skeleton(height: 100, borderRadius: 20)),
+                  ],
+                ),
+                SizedBox(height: 24),
+                Skeleton(height: 220, borderRadius: 24),
+                SizedBox(height: 24),
+                Skeleton(height: 80, borderRadius: 16),
+                SizedBox(height: 12),
+                Skeleton(height: 80, borderRadius: 16),
+              ],
+            ),
+          ),
+        ),
+      );
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.bgLight,
       appBar: AppBar(
         title: Text(
           'partner.earnings'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
       ),
       body: ListView(
@@ -81,18 +107,18 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
               children: [
                 Text(
                   'partner.total_balance'.tr(),
-                  style: GoogleFonts.outfit(
-                    color: Colors.white70,
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                     fontSize: 14,
+                    color: Colors.white70,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   '₺${_stats.totalBalance}',
-                  style: GoogleFonts.outfit(
-                    color: Colors.white,
+                  style: Theme.of(context).textTheme.displaySmall!.copyWith(
                     fontSize: 40,
                     fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -126,7 +152,7 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
 
           Text(
             'partner.payment_history'.tr().toUpperCase(),
-            style: GoogleFonts.outfit(
+            style: Theme.of(context).textTheme.labelMedium!.copyWith(
               fontSize: 12,
               fontWeight: FontWeight.bold,
               color: const Color(0xFF616161),
@@ -135,9 +161,7 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
           ),
           const SizedBox(height: 16),
 
-          ..._stats.history.map(
-            (e) => _historyTile(e as Map<String, dynamic>),
-          ),
+          ..._stats.history.map(_historyTile),
 
           const SizedBox(height: 32),
 
@@ -156,9 +180,9 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
                 Expanded(
                   child: Text(
                     'partner.payout_info'.tr(),
-                    style: GoogleFonts.outfit(
-                      color: Colors.blue.shade800,
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                       fontSize: 13,
+                      color: Colors.blue.shade800,
                       height: 1.4,
                     ),
                   ),
@@ -176,22 +200,24 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.outfit(color: Colors.white38, fontSize: 11),
+          style: Theme.of(
+            context,
+          ).textTheme.labelSmall!.copyWith(fontSize: 11, color: Colors.white38),
         ),
         const SizedBox(height: 4),
         Text(
           value,
-          style: GoogleFonts.outfit(
-            color: color,
+          style: Theme.of(context).textTheme.titleMedium!.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.bold,
+            color: color,
           ),
         ),
       ],
     );
   }
 
-  Widget _historyTile(Map<String, dynamic> item) {
+  Widget _historyTile(EarningsHistoryItem item) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -226,26 +252,28 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
               children: [
                 Text(
                   'partner.paid_status'.tr(),
-                  style: GoogleFonts.outfit(
-                    fontWeight: FontWeight.bold,
+                  // color SABIT: kart yukarida (Colors.white) hep beyaz.
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
                     fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF0F172A),
                   ),
                 ),
                 Text(
-                  item['date'],
-                  style: GoogleFonts.outfit(
-                    color: const Color(0xFF616161),
+                  item.date,
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
                     fontSize: 12,
+                    color: const Color(0xFF616161),
                   ),
                 ),
               ],
             ),
           ),
           Text(
-            '+₺${item['amount']}',
-            style: GoogleFonts.outfit(
-              fontWeight: FontWeight.bold,
+            '+₺${item.amount}',
+            style: Theme.of(context).textTheme.titleMedium!.copyWith(
               fontSize: 16,
+              fontWeight: FontWeight.bold,
               color: Colors.green,
             ),
           ),

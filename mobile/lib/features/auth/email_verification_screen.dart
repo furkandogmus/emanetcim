@@ -1,12 +1,12 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/auth/auth_controller.dart';
+import '../../core/utils/error_handler.dart';
 import '../../shared/utils/app_colors.dart';
 
 class EmailVerificationScreen extends ConsumerStatefulWidget {
@@ -17,7 +17,8 @@ class EmailVerificationScreen extends ConsumerStatefulWidget {
       _EmailVerificationScreenState();
 }
 
-class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScreen> {
+class _EmailVerificationScreenState
+    extends ConsumerState<EmailVerificationScreen> {
   final _codeController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _busy = false;
@@ -47,14 +48,16 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
         final msg = err == 'token_not_found' || err == 'token_expired'
             ? 'auth.verify_email_error'.tr()
             : 'common.error'.tr();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(msg)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(msg)));
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('common.error'.tr())),
+          SnackBar(
+            content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+          ),
         );
       }
     } finally {
@@ -76,7 +79,9 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
       appBar: AppBar(
         title: Text(
           'auth.verify_email_title'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
       ),
       body: Center(
@@ -123,7 +128,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
                     ),
                     keyboardType: TextInputType.text,
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.outfit(
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 2,
@@ -155,10 +160,11 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
                           )
                         : Text(
                             'auth.verify_button'.tr(),
-                            style: GoogleFonts.outfit(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context).textTheme.titleMedium!
+                                .copyWith(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                   ),
                 ],

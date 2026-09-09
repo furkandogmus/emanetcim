@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/auth/auth_controller.dart';
 import '../../shared/utils/app_colors.dart';
@@ -94,21 +93,23 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       children: [
                         Text(
                           p.title.tr(),
-                          style: GoogleFonts.outfit(
-                            fontSize: 36,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            height: 1.1,
-                          ),
+                          style: Theme.of(context).textTheme.displaySmall!
+                              .copyWith(
+                                fontSize: 36,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                height: 1.1,
+                              ),
                         ),
                         const SizedBox(height: 20),
                         Text(
                           p.desc.tr(),
-                          style: GoogleFonts.outfit(
-                            fontSize: 16,
-                            color: Colors.white.withValues(alpha: 0.9),
-                            height: 1.5,
-                          ),
+                          style: Theme.of(context).textTheme.bodyLarge!
+                              .copyWith(
+                                fontSize: 16,
+                                color: Colors.white.withValues(alpha: 0.9),
+                                height: 1.5,
+                              ),
                         ),
                         const SizedBox(height: 120),
                       ],
@@ -159,7 +160,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ),
                     child: Text(
                       'common.done'.tr(),
-                      style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+                      style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   )
                 else
@@ -184,9 +187,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               onPressed: _completeOnboarding,
               child: Text(
                 'auth.skip'.tr(),
-                style: GoogleFonts.outfit(
-                  color: Colors.white,
+                style: Theme.of(context).textTheme.titleSmall!.copyWith(
                   fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
             ),

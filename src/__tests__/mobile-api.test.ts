@@ -35,13 +35,20 @@ vi.mock("@/services/ShopService", () => {
   const findNearby = vi.fn().mockResolvedValue([]);
   const findShopsForSearch = vi.fn().mockResolvedValue([]);
   const getShopImages = vi.fn().mockResolvedValue([]);
-  const shopService = { findNearby, findShopsForSearch, getShopImages };
+  const getPublicShopById = vi.fn().mockResolvedValue(null);
+  const shopService = { findNearby, findShopsForSearch, getShopImages, getPublicShopById };
   return {
     ShopService: class {
       findNearby = findNearby;
+      getPublicShopById = getPublicShopById;
     },
     shopService,
   };
+});
+
+vi.mock("@/services/ReviewService", () => {
+  const getShopReviews = vi.fn().mockResolvedValue([]);
+  return { reviewService: { getShopReviews } };
 });
 
 import prisma from "@/lib/db";
@@ -122,5 +129,56 @@ describe("Mobile API - Shops Nearby", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(Array.isArray(body)).toBe(true);
+  });
+});
+
+/**
+ * Ekran turuyla bulundu (2026-09-09, Android emulator): mobil istemci
+ * `/shops/:id/reviews` cagiriyordu ama bu uc HIC yoktu -- her cagri 404
+ * doner, dukkan detayinda yorumlar sessizce "henuz yorum yok" gosterirdi.
+ */
+describe("Mobile API - Shop Reviews", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("should 404 when shop is not public", async () => {
+    const { shopService } = await import("@/services/ShopService");
+    vi.mocked(shopService.getPublicShopById).mockResolvedValue(null);
+    const { GET } = await import("@/app/api/mobile/shops/[id]/reviews/route");
+    const res = await GET(new Request("http://localhost/api/mobile/shops/x/reviews"), {
+      params: Promise.resolve({ id: "x" }),
+    });
+    expect(res.status).toBe(404);
+  });
+
+  it("should return mapped reviews (first-name-only author label)", async () => {
+    const { shopService } = await import("@/services/ShopService");
+    const { reviewService } = await import("@/services/ReviewService");
+    vi.mocked(shopService.getPublicShopById).mockResolvedValue({ id: "shop-1" } as never);
+    vi.mocked(reviewService.getShopReviews).mockResolvedValue([
+      {
+        id: "r1",
+        rating: 5,
+        comment: "harika",
+        createdAt: new Date("2026-01-01T00:00:00.000Z"),
+        guest: { name: "Ada Lovelace" },
+      },
+    ] as never);
+    const { GET } = await import("@/app/api/mobile/shops/[id]/reviews/route");
+    const res = await GET(new Request("http://localhost/api/mobile/shops/shop-1/reviews"), {
+      params: Promise.resolve({ id: "shop-1" }),
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body).toEqual([
+      {
+        id: "r1",
+        rating: 5,
+        comment: "harika",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        authorLabel: "Ada",
+      },
+    ]);
   });
 });
