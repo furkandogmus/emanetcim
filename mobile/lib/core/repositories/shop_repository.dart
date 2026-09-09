@@ -47,10 +47,12 @@ class ShopRepository {
       if (maxPrice != null) queryParams['maxPrice'] = maxPrice;
       if (hasRestroom != null) queryParams['hasRestroom'] = hasRestroom;
       if (hasCctv != null) queryParams['hasCctv'] = hasCctv;
-      if (hasClimateControl != null)
+      if (hasClimateControl != null) {
         queryParams['hasClimateControl'] = hasClimateControl;
-      if (acceptsLargeItems != null)
+      }
+      if (acceptsLargeItems != null) {
         queryParams['acceptsLargeItems'] = acceptsLargeItems;
+      }
       if (sortBy != null) queryParams['sortBy'] = sortBy;
 
       final res = await _dio.get('/shops/nearby', queryParameters: queryParams);

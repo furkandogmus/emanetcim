@@ -116,12 +116,43 @@ Future<void> main() async {
 
   await Future.wait([checkRoot(), initFirebase(), openHiveBoxes(hiveKey)]);
 
-  final app = EasyLocalization(
-    supportedLocales: const [Locale('tr'), Locale('en')],
-    path: 'assets/l10n',
-    fallbackLocale: const Locale('tr'),
-    child: const ProviderScope(child: BagajParkApp()),
+  // ProviderScope, runApp'in kok argumaninda SABIT sarmali: `riverpod_lint`
+  // yalnizca bunu statik olarak dogrulayabiliyor -- iki ayri runApp() cagrisi
+  // (biri RootWarningScreen icin, biri asil uygulama icin) ProviderScope'u
+  // kosullu/gecikmeli kildigi icin "missing_provider_scope" uyarisi veriyordu.
+  // RootWarningScreen Riverpod kullanmadigindan (duz StatelessWidget) bu bir
+  // yanlis pozitifti, ama gate'i tek runApp() altina almak hem uyariyi gercekten
+  // gideriyor hem de cift runApp() cagrisi anti-desenini kaldiriyor.
+  runApp(
+    ProviderScope(
+      child: EasyLocalization(
+        supportedLocales: const [Locale('tr'), Locale('en')],
+        path: 'assets/l10n',
+        fallbackLocale: const Locale('tr'),
+        child: _RootGate(isRooted: isRooted),
+      ),
+    ),
   );
+}
 
-  runApp(isRooted ? RootWarningScreen(onContinue: () => runApp(app)) : app);
+class _RootGate extends StatefulWidget {
+  const _RootGate({required this.isRooted});
+  final bool isRooted;
+
+  @override
+  State<_RootGate> createState() => _RootGateState();
+}
+
+class _RootGateState extends State<_RootGate> {
+  late bool _showRootWarning = widget.isRooted;
+
+  @override
+  Widget build(BuildContext context) {
+    if (_showRootWarning) {
+      return RootWarningScreen(
+        onContinue: () => setState(() => _showRootWarning = false),
+      );
+    }
+    return const BagajParkApp();
+  }
 }
