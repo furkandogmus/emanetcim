@@ -10,6 +10,36 @@ type Body = {
   keys?: { p256dh?: string; auth?: string };
 };
 
+/*
+  SSRF ONLEME: `PushSubscription.endpoint`i NotificationService, `web-push`
+  kutuphanesi araciligiyla sunucudan dogrudan POST ediyor (bkz.
+  src/services/NotificationService.ts webpush.sendNotification cagrisi).
+  Dogrulanmadan kaydedilirse, kimliklenmis herhangi bir kullanici
+  `endpoint`e ic aga/localhost/cloud metadata URL'si yazip sunucuyu kendi
+  adina istemci olarak kullanabilirdi (2026-09-10'da bulundu). Yalnizca
+  bilinen push servis originlerine izin ver.
+*/
+const ALLOWED_PUSH_ENDPOINT_HOSTS = [
+  "fcm.googleapis.com",
+  "updates.push.services.mozilla.com",
+  "web.push.apple.com",
+];
+
+function isAllowedPushEndpoint(endpoint: string): boolean {
+  let url: URL;
+  try {
+    url = new URL(endpoint);
+  } catch {
+    return false;
+  }
+  if (url.protocol !== "https:") return false;
+  const host = url.hostname.toLowerCase();
+  return (
+    ALLOWED_PUSH_ENDPOINT_HOSTS.includes(host) ||
+    host.endsWith(".notify.windows.com")
+  );
+}
+
 /**
  * Web Push aboneliği (VAPID). İstemci: `NEXT_PUBLIC_VAPID_PUBLIC_KEY` ile subscribe sonrası POST.
  */
@@ -25,6 +55,9 @@ export async function POST(req: NextRequest) {
     const p256dh = body.keys?.p256dh?.trim();
     const subAuth = body.keys?.auth?.trim();
     if (!endpoint || !p256dh || !subAuth) {
+      return NextResponse.json({ error: "Invalid subscription" }, { status: 400 });
+    }
+    if (!isAllowedPushEndpoint(endpoint)) {
       return NextResponse.json({ error: "Invalid subscription" }, { status: 400 });
     }
 
