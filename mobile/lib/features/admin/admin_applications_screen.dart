@@ -6,6 +6,7 @@ import '../../core/api/api_client.dart';
 import '../../core/utils/error_handler.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/skeleton.dart';
+import 'admin_controller.dart';
 
 class AdminApplicationsScreen extends ConsumerStatefulWidget {
   const AdminApplicationsScreen({super.key});
@@ -69,6 +70,10 @@ class _AdminApplicationsScreenState
         );
       }
       await _fetchApps();
+      // Dashboard'daki bekleyen basvuru sayaci `admin_messages_screen.dart`
+      // _markAsRead ile ayni sekilde tazelenmeliydi; burada eksikti ve
+      // onay/red sonrasi dashboard eski sayiyi gostermeye devam ediyordu.
+      ref.invalidate(adminStatsProvider);
     } catch (e) {
       debugPrint('Admin Action Error: $e');
       if (mounted) {
@@ -111,9 +116,8 @@ class _AdminApplicationsScreenState
       appBar: AppBar(
         title: Text(
           'admin.approve_shops'.tr(),
-          style: Theme.of(
-            context,
-          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(context).textTheme.titleSmall!
+              .copyWith(fontWeight: FontWeight.bold),
         ),
       ),
       body: _apps.isEmpty
@@ -167,10 +171,8 @@ class _AdminApplicationsScreenState
                   children: [
                     Text(
                       app['name'],
-                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: Theme.of(context).textTheme.titleMedium!
+                          .copyWith(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     Text(
                       app['address'],
@@ -236,10 +238,8 @@ class _AdminApplicationsScreenState
         const SizedBox(width: 8),
         Text(
           text,
-          style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-            fontSize: 14,
-            color: const Color(0xFF424242),
-          ),
+          style: Theme.of(context).textTheme.bodyMedium!
+              .copyWith(fontSize: 14, color: const Color(0xFF424242)),
         ),
       ],
     );
