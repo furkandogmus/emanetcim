@@ -24,7 +24,15 @@ import '../../shared/models/user.dart';
 import '../../shared/utils/app_colors.dart';
 import '../../shared/widgets/confirm_dialog.dart';
 
-final profileStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+// `.autoDispose`: booking yasam donguisu (yeni rezervasyon, check-out) bu
+// provider'i hicbir yerden invalidate etmiyordu, bu yuzden istatistikler ilk
+// yuklemeden sonra uygulama kapanana kadar bayatliyordu (2026-09-09'da
+// bulundu). `/profile` duz bir ShellRoute rotasi (IndexedStack DEGIL), yani
+// ProfileScreen sekmeden ayrilinca tamamen unmount olur; `.autoDispose` bu
+// noktada provider'i da dusurur ve bir sonraki girişte istek tazelenir.
+final profileStatsProvider = FutureProvider.autoDispose<Map<String, dynamic>>((
+  ref,
+) async {
   final dio = ref.read(dioProvider);
   final res = await dio.get('/profile/stats');
   return res.data as Map<String, dynamic>;
@@ -42,6 +50,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _biometricAvailable = false;
   bool _biometricEnabled = false;
   bool _biometricLoaded = false;
+  bool _biometricBusy = false;
 
   @override
   void initState() {
@@ -226,9 +235,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       appBar: AppBar(
         title: Text(
           'profile.title'.tr(),
-          style: Theme.of(
-            context,
-          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(context).textTheme.titleSmall!
+              .copyWith(fontWeight: FontWeight.bold),
         ),
       ),
       body: ListView(
@@ -424,10 +432,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           Center(
             child: Text(
               'profile.version'.tr(args: ['1.0.0']),
-              style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                fontSize: 11,
-                color: const Color(0xFF757575),
-              ),
+              style: Theme.of(context).textTheme.labelSmall!
+                  .copyWith(fontSize: 11, color: const Color(0xFF757575)),
             ),
           ),
 
@@ -647,10 +653,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             children: [
               Text(
                 'profile.theme'.tr(),
-                style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(context).textTheme.titleMedium!
+                    .copyWith(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 24),
               ListTile(
@@ -720,10 +724,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
         subtitle: Text(
           'profile.biometric_desc'.tr(),
-          style: Theme.of(context).textTheme.bodySmall!.copyWith(
-            fontSize: 12,
-            color: const Color(0xFF616161),
-          ),
+          style: Theme.of(context).textTheme.bodySmall!
+              .copyWith(fontSize: 12, color: const Color(0xFF616161)),
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         onTap: () => _handleBiometricToggle(!_biometricEnabled),
@@ -737,6 +739,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Future<void> _handleBiometricToggle(bool val) async {
+    // Hizli ardisik dokunuslar (ornek: dogrulama gecikirken kullanicinin
+    // tekrar dokunmasi) icice iki await zinciri calistirip
+    // _biometricEnabled ile secure-storage'daki biyometrik hesap kaydini
+    // tutarsiz birakiyordu (2026-09-09'da bulundu). `_pickAndUploadAvatar`
+    // ile ayni desen: metot calisirken yeniden giris engellenir.
+    if (_biometricBusy) return;
+    _biometricBusy = true;
     setState(() => _biometricEnabled = val);
     try {
       if (val) {
@@ -767,81 +776,84 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     } catch (_) {
       await ref.read(biometricServiceProvider).setEnabled(false);
       if (mounted) setState(() => _biometricEnabled = false);
+    } finally {
+      _biometricBusy = false;
     }
   }
 
   void _showNotificationPrefs(BuildContext context) {
-    final prefs = ref.read(notificationPrefsProvider);
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'profile.notifications'.tr(),
-                style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 24),
-              SwitchListTile(
-                title: const Text('Rezervasyon Güncellemeleri'),
-                subtitle: Text(
-                  'Onay, check-in, check-out ve QR kod bildirimleri',
-                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                    fontSize: 12,
-                    color: Colors.grey,
+      // Consumer ile sarili: `ref.read` ile alinan tek seferlik bir kopya
+      // yerine `ref.watch` kullanarak switch'lerin dokunuldugunda gercek
+      // provider state'ini yansitmasini (yeniden cizilmesini) sagliyor
+      // (2026-09-09'da bulundu -- onceden sheet kapanana kadar hicbir switch
+      // gorsel olarak degismiyordu).
+      builder: (ctx) => Consumer(
+        builder: (context, ref, _) {
+          final prefs = ref.watch(notificationPrefsProvider);
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'profile.notifications'.tr(),
+                    style: Theme.of(context).textTheme.titleMedium!
+                        .copyWith(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                ),
-                value: prefs.bookingUpdates,
-                activeThumbColor: AppColors.brandOrange,
-                onChanged: (v) => ref
-                    .read(notificationPrefsProvider.notifier)
-                    .setBookingUpdates(v),
-              ),
-              const Divider(),
-              SwitchListTile(
-                title: const Text('Kampanya & İndirim'),
-                subtitle: Text(
-                  'Özel indirimler, kampanya duyuruları ve promosyon kodları',
-                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                    fontSize: 12,
-                    color: Colors.grey,
+                  const SizedBox(height: 24),
+                  SwitchListTile(
+                    title: const Text('Rezervasyon Güncellemeleri'),
+                    subtitle: Text(
+                      'Onay, check-in, check-out ve QR kod bildirimleri',
+                      style: Theme.of(context).textTheme.bodySmall!
+                          .copyWith(fontSize: 12, color: Colors.grey),
+                    ),
+                    value: prefs.bookingUpdates,
+                    activeThumbColor: AppColors.brandOrange,
+                    onChanged: (v) => ref
+                        .read(notificationPrefsProvider.notifier)
+                        .setBookingUpdates(v),
                   ),
-                ),
-                value: prefs.promotions,
-                activeThumbColor: AppColors.brandOrange,
-                onChanged: (v) => ref
-                    .read(notificationPrefsProvider.notifier)
-                    .setPromotions(v),
-              ),
-              const Divider(),
-              SwitchListTile(
-                title: const Text('Esnaf Uyarıları'),
-                subtitle: Text(
-                  'Yeni rezervasyon, mesaj ve acil durum bildirimleri',
-                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                    fontSize: 12,
-                    color: Colors.grey,
+                  const Divider(),
+                  SwitchListTile(
+                    title: const Text('Kampanya & İndirim'),
+                    subtitle: Text(
+                      'Özel indirimler, kampanya duyuruları ve promosyon kodları',
+                      style: Theme.of(context).textTheme.bodySmall!
+                          .copyWith(fontSize: 12, color: Colors.grey),
+                    ),
+                    value: prefs.promotions,
+                    activeThumbColor: AppColors.brandOrange,
+                    onChanged: (v) => ref
+                        .read(notificationPrefsProvider.notifier)
+                        .setPromotions(v),
                   ),
-                ),
-                value: prefs.partnerAlerts,
-                activeThumbColor: AppColors.brandOrange,
-                onChanged: (v) => ref
-                    .read(notificationPrefsProvider.notifier)
-                    .setPartnerAlerts(v),
+                  const Divider(),
+                  SwitchListTile(
+                    title: const Text('Esnaf Uyarıları'),
+                    subtitle: Text(
+                      'Yeni rezervasyon, mesaj ve acil durum bildirimleri',
+                      style: Theme.of(context).textTheme.bodySmall!
+                          .copyWith(fontSize: 12, color: Colors.grey),
+                    ),
+                    value: prefs.partnerAlerts,
+                    activeThumbColor: AppColors.brandOrange,
+                    onChanged: (v) => ref
+                        .read(notificationPrefsProvider.notifier)
+                        .setPartnerAlerts(v),
+                  ),
+                  const SizedBox(height: 16),
+                ],
               ),
-              const SizedBox(height: 16),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -855,8 +867,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       confirmLabel: 'profile.logout'.tr(),
       destructive: true,
     );
-    if (confirmed == true) {
-      unawaited(ref.read(authControllerProvider.notifier).logout());
+    if (confirmed != true) return;
+    // `unawaited` ile hicbir hata yakalanmiyordu: secure-storage silme
+    // (ornek: cihaz yedegi sonrasi Android Keystore anahtari gecersizlesmesi)
+    // atarsa logout() future'i reddediliyor, session state'i hic
+    // temizlenmiyor ve kullanici hicbir hata gormeden 'giris yapilmis'
+    // halde kaliyordu (2026-09-09'da bulundu). `TokenStore.clear()` artik
+    // her anahtari ayri ayri en-iyi-caba (best-effort) siliyor, ama burada
+    // da `await` + hata mesaji ile ikinci bir guvenlik agi ekliyoruz.
+    try {
+      await ref.read(authControllerProvider.notifier).logout();
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+          ),
+        );
+      }
     }
   }
 
@@ -917,10 +945,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               children: [
                 Text(
                   'profile.edit_profile'.tr(),
-                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.titleLarge!
+                      .copyWith(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 24),
                 TextField(
@@ -1004,17 +1030,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             children: [
               Text(
                 title,
-                style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(context).textTheme.titleLarge!
+                    .copyWith(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               Text(
                 content,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium!.copyWith(height: 1.6),
+                style: Theme.of(context).textTheme.bodyMedium!
+                    .copyWith(height: 1.6),
               ),
             ],
           ),
@@ -1037,10 +1060,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           Text(
             label,
-            style: Theme.of(context).textTheme.bodySmall!.copyWith(
-              fontSize: 12,
-              color: const Color(0xFF616161),
-            ),
+            style: Theme.of(context).textTheme.bodySmall!
+                .copyWith(fontSize: 12, color: const Color(0xFF616161)),
           ),
         ],
       ),
