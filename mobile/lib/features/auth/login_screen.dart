@@ -711,7 +711,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     try {
       final refreshToken = account['refreshToken'];
       if (refreshToken == null || refreshToken.isEmpty) {
-        if (mounted) setState(() => _busy = false);
         return;
       }
 
@@ -734,15 +733,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         'refreshToken': newRefresh,
         'user': me.data,
       });
-    } on DioException catch (e) {
+    } catch (e) {
+      // DioException disinda (ornegin beklenmeyen yanit govdesinden dogan
+      // TypeError/CastError) da yakalanmazsa _busy sonsuza kadar true kalir
+      // ve kullaniciya hicbir hata gosterilmez (diger uc giris metoduyla
+      // ayni desen: generic catch + finally).
       if (mounted) {
-        setState(() => _busy = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
           ),
         );
       }
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
   }
 
