@@ -4,4 +4,10 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- Yerel gelistirme sirasinda backend http:// uzerinden calisir
+         (ornek: http://192.168.1.240:3000/api/mobile). Android 9+ duz metin
+         trafigi varsayilan olarak engeller. Bu yalnizca DEBUG varyantinda
+         gecerlidir; release/main manifest'e dokunulmaz, uretim HTTPS-only kalir. -->
+    <application android:usesCleartextTraffic="true" />
 </manifest>

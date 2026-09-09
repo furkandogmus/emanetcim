@@ -1,14 +1,16 @@
 import 'dart:async' show unawaited;
+
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/auth/auth_controller.dart';
+import '../../core/utils/error_handler.dart';
+import '../../core/utils/validators.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -32,10 +34,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _identityController.dispose();
     _passwordController.dispose();
     super.dispose();
-  }
-
-  bool _isValidEmail(String email) {
-    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
   String? _normalizePhone(String phone) {
@@ -95,14 +93,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           'too_many_attempts' => 'auth.too_many_attempts'.tr(),
           _ => 'common.error'.tr(),
         };
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(msg)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(msg)));
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('common.error'.tr())),
+          SnackBar(
+            content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+          ),
         );
       }
     } finally {
@@ -116,7 +116,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('auth.register'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        title: Text(
+          'auth.register'.tr(),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.transparent,
       ),
       body: Builder(
@@ -126,7 +131,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             child: SingleChildScrollView(
               padding: EdgeInsets.all(isTablet ? 48 : 24),
               child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: isTablet ? 420 : double.infinity),
+                constraints: BoxConstraints(
+                  maxWidth: isTablet ? 420 : double.infinity,
+                ),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -134,9 +141,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     children: [
                       Text(
                         'auth.register_welcome'.tr(),
-                        style: (isTablet ? theme.textTheme.headlineLarge : theme.textTheme.headlineMedium)?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style:
+                            (isTablet
+                                    ? theme.textTheme.headlineLarge
+                                    : theme.textTheme.headlineMedium)
+                                ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -150,17 +159,25 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                       TextFormField(
                         controller: _nameController,
-                        style: GoogleFonts.outfit(fontSize: isTablet ? 18 : 16),
+                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                          fontSize: isTablet ? 18 : 16,
+                        ),
                         autofillHints: const [AutofillHints.name],
                         decoration: InputDecoration(
                           labelText: 'auth.name_label'.tr(),
                           prefixIcon: const Icon(Icons.person_outline_rounded),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                         ),
                         validator: (v) {
-                          if (v == null || v.isEmpty) return 'auth.name_error'.tr();
+                          if (v == null || v.isEmpty) {
+                            return 'auth.name_error'.tr();
+                          }
                           if (v.length < 3) return 'auth.name_error'.tr();
-                          if (!RegExp(r'^[a-zA-ZçÇğĞıİöÖşŞüÜ\s]+$').hasMatch(v)) {
+                          if (!RegExp(
+                            r'^[a-zA-ZçÇğĞıİöÖşŞüÜ\s]+$',
+                          ).hasMatch(v)) {
                             return 'auth.name_invalid_error'.tr();
                           }
                           return null;
@@ -170,19 +187,30 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                       TextFormField(
                         controller: _identityController,
-                        style: GoogleFonts.outfit(fontSize: isTablet ? 18 : 16),
+                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                          fontSize: isTablet ? 18 : 16,
+                        ),
                         decoration: InputDecoration(
                           labelText: 'auth.email_or_phone'.tr(),
                           prefixIcon: const Icon(Icons.mail_outline_rounded),
                           hintText: 'E-posta veya 05xx xxx xx xx',
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                         ),
                         keyboardType: TextInputType.emailAddress,
-                        autofillHints: const [AutofillHints.email, AutofillHints.telephoneNumber],
+                        autofillHints: const [
+                          AutofillHints.email,
+                          AutofillHints.telephoneNumber,
+                        ],
                         validator: (v) {
                           final input = v ?? '';
-                          if (input.isEmpty) return 'auth.invalid_identity'.tr();
-                          if (_isValidEmail(input) || _isValidPhone(input)) return null;
+                          if (input.isEmpty) {
+                            return 'auth.invalid_identity'.tr();
+                          }
+                          if (isValidEmail(input) || _isValidPhone(input)) {
+                            return null;
+                          }
                           return 'auth.invalid_identity'.tr();
                         },
                       ),
@@ -193,18 +221,29 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         obscureText: _obscure,
                         keyboardType: TextInputType.visiblePassword,
                         autofillHints: const [AutofillHints.newPassword],
-                        style: GoogleFonts.outfit(fontSize: isTablet ? 18 : 16),
+                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                          fontSize: isTablet ? 18 : 16,
+                        ),
                         decoration: InputDecoration(
                           labelText: 'auth.password'.tr(),
                           prefixIcon: const Icon(Icons.lock_outline_rounded),
                           suffixIcon: IconButton(
-                            icon: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined),
-                            onPressed: () => setState(() => _obscure = !_obscure),
+                            icon: Icon(
+                              _obscure
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                            ),
+                            onPressed: () =>
+                                setState(() => _obscure = !_obscure),
                           ),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                         ),
                         validator: (v) {
-                          if (v == null || v.length < 6) return 'auth.password_error'.tr();
+                          if (v == null || v.length < 6) {
+                            return 'auth.password_error'.tr();
+                          }
                           return null;
                         },
                         onChanged: (_) => setState(() {}),
@@ -240,23 +279,35 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               child: Text.rich(
                                 TextSpan(
                                   text: 'auth.terms_service'.tr(),
-                                  style: const TextStyle(decoration: TextDecoration.underline),
+                                  style: const TextStyle(
+                                    decoration: TextDecoration.underline,
+                                  ),
                                   children: [
                                     TextSpan(
                                       text: ' ${'auth.or'.tr()} ',
-                                      style: const TextStyle(decoration: TextDecoration.none),
+                                      style: const TextStyle(
+                                        decoration: TextDecoration.none,
+                                      ),
                                     ),
                                     TextSpan(
                                       text: 'auth.privacy_policy'.tr(),
-                                      style: const TextStyle(color: Color(0xFFF97316), fontWeight: FontWeight.bold, decoration: TextDecoration.underline),
+                                      style: const TextStyle(
+                                        color: Color(0xFFF97316),
+                                        fontWeight: FontWeight.bold,
+                                        decoration: TextDecoration.underline,
+                                      ),
                                     ),
                                     const TextSpan(
                                       text: ' okudum, onaylıyorum.',
-                                      style: TextStyle(decoration: TextDecoration.none),
+                                      style: TextStyle(
+                                        decoration: TextDecoration.none,
+                                      ),
                                     ),
                                   ],
                                 ),
-                                style: theme.textTheme.bodySmall?.copyWith(fontSize: isTablet ? 14 : 12),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  fontSize: isTablet ? 14 : 12,
+                                ),
                               ),
                             ),
                           ),
@@ -265,19 +316,35 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                       const SizedBox(height: 32),
 
-FilledButton(
-  onPressed: (_busy || !_kvkkAccepted) ? null : _register,
-  style: FilledButton.styleFrom(
-    minimumSize: Size(double.infinity, isTablet ? 64 : 56),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-  ),
-  child: Semantics(
-    label: 'Kayıt Ol',
-    child: _busy
-        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-        : Text('auth.register_button'.tr(), style: GoogleFonts.outfit(fontSize: isTablet ? 18 : 16)),
-  ),
-),
+                      FilledButton(
+                        onPressed: (_busy || !_kvkkAccepted) ? null : _register,
+                        style: FilledButton.styleFrom(
+                          minimumSize: Size(
+                            double.infinity,
+                            isTablet ? 64 : 56,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: Semantics(
+                          label: 'Kayıt Ol',
+                          child: _busy
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(
+                                  'auth.register_button'.tr(),
+                                  style: Theme.of(context).textTheme.bodyLarge!
+                                      .copyWith(fontSize: isTablet ? 18 : 16),
+                                ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -302,13 +369,18 @@ FilledButton(
           children: [
             Text(
               title,
-              style: GoogleFonts.outfit(
+              style: Theme.of(context).textTheme.titleLarge!.copyWith(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 16),
-            Text(content, style: GoogleFonts.outfit(height: 1.6)),
+            Text(
+              content,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium!.copyWith(height: 1.6),
+            ),
             const SizedBox(height: 32),
             FilledButton(
               onPressed: () => Navigator.pop(context),
@@ -338,7 +410,7 @@ FilledButton(
           children: [
             Text(
               '${'profile.password_strength'.tr()}: $label',
-              style: GoogleFonts.outfit(
+              style: Theme.of(context).textTheme.labelMedium!.copyWith(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: color,
@@ -361,7 +433,7 @@ FilledButton(
   }
 
   _StrengthResult _getPasswordStrength(String password) {
-    int score = 0;
+    var score = 0;
 
     if (password.length >= 8) score++;
     if (password.length >= 12) score++;
@@ -371,11 +443,19 @@ FilledButton(
     if (RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)) score++;
 
     if (score <= 1) {
-      return _StrengthResult('profile.strength_weak'.tr(), Colors.redAccent, 0.25);
+      return _StrengthResult(
+        'profile.strength_weak'.tr(),
+        Colors.redAccent,
+        0.25,
+      );
     } else if (score <= 2) {
       return _StrengthResult('profile.strength_fair'.tr(), Colors.orange, 0.5);
     } else if (score <= 4) {
-      return _StrengthResult('profile.strength_good'.tr(), Colors.lightGreen, 0.75);
+      return _StrengthResult(
+        'profile.strength_good'.tr(),
+        Colors.lightGreen,
+        0.75,
+      );
     } else {
       return _StrengthResult('profile.strength_strong'.tr(), Colors.green, 1.0);
     }

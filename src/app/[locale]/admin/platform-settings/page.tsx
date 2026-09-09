@@ -50,6 +50,8 @@ export default async function AdminPlatformSettingsPage({
         holidayDatesRaw: parsePlatformHolidayDates(row.platformHolidayDates).join(
           "\n",
         ),
+        minAppVersion: row.minAppVersion ?? "",
+        latestAppVersion: row.latestAppVersion ?? "",
       }
     : {
         maxStayDays: DEFAULT_PRICING_RULES.maxStayDays,
@@ -67,6 +69,8 @@ export default async function AdminPlatformSettingsPage({
         bagMultiplierM: DEFAULT_PRICING_RULES.bagMultipliers.M,
         bagMultiplierXl: DEFAULT_PRICING_RULES.bagMultipliers.XL,
         holidayDatesRaw: "",
+        minAppVersion: "",
+        latestAppVersion: "",
       };
 
   const updatedAtLabel = row?.updatedAt

@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
 import { requireMobileUser } from "@/lib/mobile-auth";
+import { toMobileDevice } from "@/lib/mobile-dto";
 
 const schema = z.object({
   token: z.string().min(10),
@@ -10,6 +11,17 @@ const schema = z.object({
   appVersion: z.string().optional(),
   locale: z.string().optional(),
 });
+
+/** "Bildirim alan cihazlar" ekranı — kullanıcının kendi push token'ları. */
+export async function GET(req: NextRequest) {
+  const auth = await requireMobileUser(req);
+  if ("error" in auth) return auth.error;
+  const rows = await prisma.mobilePushToken.findMany({
+    where: { userId: auth.user.id },
+    orderBy: { lastSeenAt: "desc" },
+  });
+  return NextResponse.json({ items: rows.map(toMobileDevice) });
+}
 
 export async function POST(req: NextRequest) {
   const auth = await requireMobileUser(req);

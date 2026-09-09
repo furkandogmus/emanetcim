@@ -7,13 +7,14 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/auth/auth_controller.dart';
 import '../../core/auth/biometric_service.dart';
 import '../../core/auth/token_store.dart';
 import '../../core/services/haptic_service.dart';
+import '../../core/utils/error_handler.dart';
+import '../../core/utils/validators.dart';
 import '../../shared/utils/app_colors.dart';
 import '../../shared/widgets/how_it_works_sheet.dart';
 
@@ -37,10 +38,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
-  bool _isValidEmail(String email) {
-    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
-  }
-
   String? _normalizePhone(String phone) {
     if (phone.trim().isEmpty) return null;
     var d = phone.replaceAll(RegExp(r'\D'), '');
@@ -61,7 +58,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   bool _isValid(String v) {
-    return _isValidEmail(v) || _isValidPhone(v);
+    return isValidEmail(v) || _isValidPhone(v);
   }
 
   Future<void> _login() async {
@@ -81,13 +78,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         _toast('auth.invalid_credentials'.tr());
       } else if (code == 'too_many_attempts') {
         _toast('auth.too_many_attempts'.tr());
-      } else if (e.type == DioExceptionType.connectionError || e.type == DioExceptionType.connectionTimeout) {
+      } else if (e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.connectionTimeout) {
         _toast('common.no_internet'.tr());
       } else {
         _toast('common.error'.tr());
       }
     } catch (e) {
-      _toast('common.error'.tr());
+      _toast(getErrorMessage(e, fallback: 'common.error'.tr()));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -100,14 +98,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (!mounted) return;
       context.go('/');
     } on DioException catch (e) {
-      if (e.type == DioExceptionType.connectionError || e.type == DioExceptionType.connectionTimeout) {
+      if (e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.connectionTimeout) {
         _toast('common.no_internet'.tr());
       } else {
         _toast('auth.google_error'.tr());
       }
     } catch (e) {
       if (!mounted) return;
-      _toast('auth.google_error'.tr());
+      _toast(getErrorMessage(e, fallback: 'auth.google_error'.tr()));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -120,14 +119,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (!mounted) return;
       context.go('/');
     } on DioException catch (e) {
-      if (e.type == DioExceptionType.connectionError || e.type == DioExceptionType.connectionTimeout) {
+      if (e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.connectionTimeout) {
         _toast('common.no_internet'.tr());
       } else {
         _toast('auth.apple_error'.tr());
       }
     } catch (e) {
       if (!mounted) return;
-      _toast('auth.apple_error'.tr());
+      _toast(getErrorMessage(e, fallback: 'auth.apple_error'.tr()));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -204,7 +204,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       shape: BoxShape.circle,
                                       boxShadow: [
                                         BoxShadow(
-                                          color: AppColors.brandOrange.withValues(alpha: 0.15),
+                                          color: AppColors.brandOrange
+                                              .withValues(alpha: 0.15),
                                           blurRadius: 40,
                                           spreadRadius: 5,
                                         ),
@@ -220,106 +221,191 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 const SizedBox(height: 16),
                                 Text(
                                   'BagajPark',
-                                  style: GoogleFonts.outfit(
-                                    fontSize: isTablet ? 42 : 36,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.textDark,
-                                    letterSpacing: -1,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .displaySmall!
+                                      .copyWith(
+                                        fontSize: isTablet ? 42 : 36,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.textDark,
+                                        letterSpacing: -1,
+                                      ),
                                   textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
                                   'auth.register_hint'.tr(),
-                                  style: GoogleFonts.outfit(
-                                    fontSize: isTablet ? 16 : 14,
-                                    color: const Color(0xFF424242),
-                                    letterSpacing: 0.2,
-                                  ),
+                                  style: Theme.of(context).textTheme.bodyLarge!
+                                      .copyWith(
+                                        fontSize: isTablet ? 16 : 14,
+                                        color: const Color(0xFF424242),
+                                        letterSpacing: 0.2,
+                                      ),
                                   textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(height: 32),
                                 Container(
                                   padding: const EdgeInsets.all(28),
+                                  // Bu kart daima beyaz (giris formu "acik ada"
+                                  // tasarimi) -- icindeki metin/golge rengi de
+                                  // SABIT olmali, AppColors'in dinamik (koyu
+                                  // temada acik) degerine gecmemeli, yoksa
+                                  // "Welcome" hala-beyaz kartta gorunmez olur.
                                   decoration: BoxDecoration(
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(32),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: AppColors.textDark.withValues(alpha: 0.04),
+                                        color: const Color(
+                                          0xFF0F172A,
+                                        ).withValues(alpha: 0.04),
                                         blurRadius: 30,
                                         offset: const Offset(0, 10),
                                       ),
                                     ],
                                   ),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
                                     children: [
                                       Text(
                                         'auth.welcome'.tr(),
-                                        style: GoogleFonts.outfit(
-                                          fontSize: isTablet ? 26 : 22,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.textDark,
-                                        ),
+                                        // AppColors.textDark DEGIL: bu kart
+                                        // yukarida (color: Colors.white)
+                                        // temadan bagimsiz hep beyaz -- metin
+                                        // de sabit koyu kalmali, yoksa koyu
+                                        // modda AppColors donunce hala-beyaz
+                                        // kartta gorunmez olur.
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .headlineMedium!
+                                            .copyWith(
+                                              fontSize: isTablet ? 26 : 22,
+                                              fontWeight: FontWeight.bold,
+                                              color: const Color(0xFF0F172A),
+                                            ),
                                         textAlign: TextAlign.center,
                                       ),
-                                      const SizedBox(height: 12),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                      const SizedBox(height: 4),
+                                      // Wrap: buyuk yazi olceginde iki parca alt alta sarar, Row tasardi.
+                                      Wrap(
+                                        alignment: WrapAlignment.center,
+                                        crossAxisAlignment:
+                                            WrapCrossAlignment.center,
                                         children: [
                                           Text(
                                             'auth.no_account'.tr(),
-                                            style: GoogleFonts.outfit(
-                                              fontSize: isTablet ? 15 : 13,
-                                              color: const Color(0xFF424242),
-                                            ),
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium!
+                                                .copyWith(
+                                                  fontSize: isTablet ? 15 : 13,
+                                                  color: const Color(
+                                                    0xFF424242,
+                                                  ),
+                                                ),
                                           ),
                                           TextButton(
-                                            onPressed: () => context.push('/auth/register'),
+                                            onPressed: () =>
+                                                context.push('/auth/register'),
+                                            // shrinkWrap + Size.zero dokunma hedefini 72x21'e
+                                            // dusuruyordu (min 48x48, androidTapTargetGuideline).
                                             style: TextButton.styleFrom(
-                                              padding: const EdgeInsets.symmetric(horizontal: 8),
-                                              minimumSize: Size.zero,
-                                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 8,
+                                                  ),
                                             ),
                                             child: Text(
                                               'auth.register'.tr(),
-                                              style: GoogleFonts.outfit(
-                                                fontSize: isTablet ? 15 : 13,
-                                                color: AppColors.brandOrange,
-                                                fontWeight: FontWeight.bold,
-                                              ),
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleSmall!
+                                                  .copyWith(
+                                                    fontSize: isTablet
+                                                        ? 15
+                                                        : 13,
+                                                    fontWeight: FontWeight.bold,
+                                                    color:
+                                                        AppColors.brandOrange,
+                                                  ),
                                             ),
                                           ),
                                         ],
                                       ),
-                                      const SizedBox(height: 24),
+                                      const SizedBox(height: 8),
                                       TextFormField(
                                         controller: _identity,
-                                        keyboardType: TextInputType.emailAddress,
-                                        autofillHints: const [AutofillHints.username, AutofillHints.email],
-                                        style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: isTablet ? 18 : 16),
+                                        keyboardType:
+                                            TextInputType.emailAddress,
+                                        autofillHints: const [
+                                          AutofillHints.username,
+                                          AutofillHints.email,
+                                        ],
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium!
+                                            .copyWith(
+                                              fontSize: isTablet ? 18 : 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                         decoration: InputDecoration(
                                           hintText: 'auth.email_or_phone'.tr(),
-                                          prefixIcon: const Icon(Icons.person_outline_rounded),
+                                          prefixIcon: const Icon(
+                                            Icons.person_outline_rounded,
+                                          ),
                                           helperText: 'auth.identity_hint'.tr(),
-                                          helperStyle: GoogleFonts.outfit(fontSize: isTablet ? 13 : 11, color: const Color(0xFF616161)),
+                                          // Uzun ipucu tek satira sigmayip kesiliyordu.
+                                          helperMaxLines: 2,
+                                          helperStyle: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall!
+                                              .copyWith(
+                                                fontSize: isTablet ? 13 : 11,
+                                                color: const Color(0xFF616161),
+                                              ),
                                         ),
-                                        validator: (v) => _isValid(v ?? '') ? null : 'auth.invalid_identity'.tr(),
+                                        validator: (v) => _isValid(v ?? '')
+                                            ? null
+                                            : 'auth.invalid_identity'.tr(),
                                       ),
                                       const SizedBox(height: 20),
                                       TextFormField(
                                         controller: _password,
                                         obscureText: _obscure,
-                                        keyboardType: TextInputType.visiblePassword,
-                                        autofillHints: const [AutofillHints.password],
-                                        style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: isTablet ? 18 : 16),
+                                        keyboardType:
+                                            TextInputType.visiblePassword,
+                                        autofillHints: const [
+                                          AutofillHints.password,
+                                        ],
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium!
+                                            .copyWith(
+                                              fontSize: isTablet ? 18 : 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                         decoration: InputDecoration(
                                           hintText: 'auth.password'.tr(),
-                                          prefixIcon: const Icon(Icons.lock_outline_rounded),
+                                          prefixIcon: const Icon(
+                                            Icons.lock_outline_rounded,
+                                          ),
                                           suffixIcon: IconButton(
-                                            icon: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined),
-                                            onPressed: () => setState(() => _obscure = !_obscure),
+                                            // Ekran okuyucu icin etiket; etiketsiz dugum labeledTapTargetGuideline'i kiriyordu.
+                                            tooltip:
+                                                (_obscure
+                                                        ? 'auth.show_password'
+                                                        : 'auth.hide_password')
+                                                    .tr(),
+                                            icon: Icon(
+                                              _obscure
+                                                  ? Icons.visibility_outlined
+                                                  : Icons
+                                                        .visibility_off_outlined,
+                                            ),
+                                            onPressed: () => setState(
+                                              () => _obscure = !_obscure,
+                                            ),
                                           ),
                                         ),
                                         onFieldSubmitted: (_) => _login(),
@@ -328,52 +414,124 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       Align(
                                         alignment: Alignment.centerRight,
                                         child: TextButton(
-                                          onPressed: _busy ? null : _forgotPassword,
-                                          child: Text('auth.forgot_password'.tr(), style: GoogleFonts.outfit(fontSize: isTablet ? 15 : 13)),
+                                          onPressed: _busy
+                                              ? null
+                                              : _forgotPassword,
+                                          child: Text(
+                                            'auth.forgot_password'.tr(),
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium!
+                                                .copyWith(
+                                                  fontSize: isTablet ? 15 : 13,
+                                                ),
+                                          ),
                                         ),
                                       ),
                                       const SizedBox(height: 12),
                                       _buildBiometricLogin(isTablet),
                                       FilledButton(
-  onPressed: _busy ? null : _login,
-  style: FilledButton.styleFrom(
-    minimumSize: Size(double.infinity, isTablet ? 64 : 56),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-  ),
-  child: Semantics(
-    label: 'Giriş Yap',
-    child: _busy
-        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-        : Text('auth.sign_in'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: isTablet ? 18 : 16)),
-  ),
-),
+                                        onPressed: _busy ? null : _login,
+                                        style: FilledButton.styleFrom(
+                                          minimumSize: Size(
+                                            double.infinity,
+                                            isTablet ? 64 : 56,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                          ),
+                                        ),
+                                        child: _busy
+                                            ? const SizedBox(
+                                                height: 20,
+                                                width: 20,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                      color: Colors.white,
+                                                    ),
+                                              )
+                                            : Text(
+                                                'auth.sign_in'.tr(),
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleMedium!
+                                                    .copyWith(
+                                                      fontSize: isTablet
+                                                          ? 18
+                                                          : 16,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                              ),
+                                      ),
                                     ],
                                   ),
                                 ),
                                 const SizedBox(height: 24),
                                 Row(
                                   children: [
-                                    const Expanded(child: Divider(thickness: 1, color: Color(0xFFE7E5E4))),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                                      child: Text('auth.or'.tr(), style: GoogleFonts.outfit(fontSize: isTablet ? 14 : 12, color: const Color(0xFF616161), fontWeight: FontWeight.w600)),
+                                    const Expanded(
+                                      child: Divider(
+                                        thickness: 1,
+                                        color: Color(0xFFE7E5E4),
+                                      ),
                                     ),
-                                    const Expanded(child: Divider(thickness: 1, color: Color(0xFFE7E5E4))),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                      ),
+                                      child: Text(
+                                        'auth.or'.tr(),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleSmall!
+                                            .copyWith(
+                                              fontSize: isTablet ? 14 : 12,
+                                              fontWeight: FontWeight.w600,
+                                              color: const Color(0xFF616161),
+                                            ),
+                                      ),
+                                    ),
+                                    const Expanded(
+                                      child: Divider(
+                                        thickness: 1,
+                                        color: Color(0xFFE7E5E4),
+                                      ),
+                                    ),
                                   ],
                                 ),
                                 const SizedBox(height: 24),
                                 OutlinedButton.icon(
                                   onPressed: _busy ? null : _google,
                                   icon: CachedNetworkImage(
-                                    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_Color_Icon.svg/1024px-Google_Color_Icon.svg.png',
+                                    imageUrl:
+                                        'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_Color_Icon.svg/1024px-Google_Color_Icon.svg.png',
                                     height: 20,
-                                    placeholder: (_, __) => const Icon(Icons.login, size: 20),
-                                    errorWidget: (_, __, ___) => const Icon(Icons.login),
+                                    placeholder: (_, _) =>
+                                        const Icon(Icons.login, size: 20),
+                                    errorWidget: (_, _, _) =>
+                                        const Icon(Icons.login),
                                   ),
-                                  label: Text('auth.google'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: isTablet ? 16 : 14)),
+                                  label: Text(
+                                    'auth.google'.tr(),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium!
+                                        .copyWith(
+                                          fontSize: isTablet ? 16 : 14,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                  ),
                                   style: OutlinedButton.styleFrom(
-                                    padding: EdgeInsets.symmetric(vertical: isTablet ? 20 : 16),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: isTablet ? 20 : 16,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
                                   ),
                                 ),
                                 if (Platform.isIOS) ...[
@@ -381,28 +539,50 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   OutlinedButton.icon(
                                     onPressed: _busy ? null : _apple,
                                     icon: const Icon(Icons.apple, size: 24),
-                                    label: Text('auth.apple'.tr(), style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: isTablet ? 16 : 14)),
+                                    label: Text(
+                                      'auth.apple'.tr(),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium!
+                                          .copyWith(
+                                            fontSize: isTablet ? 16 : 14,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                    ),
                                     style: OutlinedButton.styleFrom(
                                       backgroundColor: Colors.black,
                                       foregroundColor: Colors.white,
                                       side: BorderSide.none,
-                                      padding: EdgeInsets.symmetric(vertical: isTablet ? 20 : 16),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: isTablet ? 20 : 16,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
                                     ),
                                   ),
                                 ],
                                 const SizedBox(height: 20),
-TextButton.icon(
-  onPressed: () {
-    ref.read(hapticServiceProvider).selection();
-    _showHowItWorks(context);
-  },
-  icon: const Icon(Icons.info_outline_rounded, size: 20),
-  label: Semantics(
-    label: 'Nasıl Çalışır?',
-    child: Text('home.how_it_works'.tr(), style: GoogleFonts.outfit(color: AppColors.brandOrange, fontWeight: FontWeight.bold)),
-  ),
-),
+                                TextButton.icon(
+                                  onPressed: () {
+                                    ref.read(hapticServiceProvider).selection();
+                                    _showHowItWorks(context);
+                                  },
+                                  icon: const Icon(
+                                    Icons.info_outline_rounded,
+                                    size: 20,
+                                  ),
+                                  label: Text(
+                                    'home.how_it_works'.tr(),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall!
+                                        .copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.brandOrange,
+                                        ),
+                                  ),
+                                ),
                                 const SizedBox(height: 20),
                               ],
                             ),
@@ -448,8 +628,10 @@ TextButton.icon(
                   TextSpan(
                     text: accounts.length == 1
                         ? accounts.first['email']!
-                        : 'Biyometrik Giriş (${accounts.length})',
-                    style: GoogleFonts.outfit(
+                        : 'auth.biometric_multi'.tr(
+                            args: ['${accounts.length}'],
+                          ),
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
                       fontSize: isTablet ? 17 : 15,
                       fontWeight: FontWeight.w600,
                     ),
@@ -461,7 +643,9 @@ TextButton.icon(
               minimumSize: Size(double.infinity, isTablet ? 64 : 56),
               foregroundColor: AppColors.brandOrange,
               side: const BorderSide(color: AppColors.brandOrange),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
             ),
           ),
         );
@@ -489,17 +673,32 @@ TextButton.icon(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Hesap Seçin',
-                style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
+                'auth.select_account'.tr(),
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 16),
-              ...accounts.map((a) => ListTile(
-                    leading: const Icon(Icons.account_circle_rounded, size: 32),
-                    title: Text(a['email'] ?? '', style: GoogleFonts.outfit(fontWeight: FontWeight.w600)),
-                    trailing: const Icon(Icons.fingerprint_rounded, color: AppColors.brandOrange),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    onTap: () => Navigator.pop(ctx, a),
-                  )),
+              ...accounts.map(
+                (a) => ListTile(
+                  leading: const Icon(Icons.account_circle_rounded, size: 32),
+                  title: Text(
+                    a['email'] ?? '',
+                    style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  trailing: const Icon(
+                    Icons.fingerprint_rounded,
+                    color: AppColors.brandOrange,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  onTap: () => Navigator.pop(ctx, a),
+                ),
+              ),
               const SizedBox(height: 8),
             ],
           ),
@@ -523,12 +722,14 @@ TextButton.icon(
     try {
       final refreshToken = account['refreshToken'];
       if (refreshToken == null || refreshToken.isEmpty) {
-        if (mounted) setState(() => _busy = false);
         return;
       }
 
       final dio = ref.read(dioProvider);
-      final res = await dio.post('/auth/refresh', data: {'refreshToken': refreshToken});
+      final res = await dio.post(
+        '/auth/refresh',
+        data: {'refreshToken': refreshToken},
+      );
       final newAccess = res.data['accessToken'] as String;
       final newRefresh = res.data['refreshToken'] as String;
 
@@ -543,13 +744,20 @@ TextButton.icon(
         'refreshToken': newRefresh,
         'user': me.data,
       });
-    } on DioException {
+    } catch (e) {
+      // DioException disinda (ornegin beklenmeyen yanit govdesinden dogan
+      // TypeError/CastError) da yakalanmazsa _busy sonsuza kadar true kalir
+      // ve kullaniciya hicbir hata gosterilmez (diger uc giris metoduyla
+      // ayni desen: generic catch + finally).
       if (mounted) {
-        setState(() => _busy = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('common.error'.tr())),
+          SnackBar(
+            content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+          ),
         );
       }
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -565,28 +773,27 @@ TextButton.icon(
       setState(() => _busy = true);
       try {
         final dio = ref.read(dioProvider);
-        await dio.post('/auth/password-reset/request', data: {
-          'email': input,
-          'locale': context.locale.languageCode,
-        });
+        await dio.post(
+          '/auth/password-reset/request',
+          data: {'email': input, 'locale': context.locale.languageCode},
+        );
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('auth.forgot_password_sent'.tr())),
         );
-      } catch (_) {
+      } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('common.error'.tr())),
+          SnackBar(
+            content: Text(getErrorMessage(e, fallback: 'common.error'.tr())),
+          ),
         );
       } finally {
         if (mounted) setState(() => _busy = false);
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('auth.forgot_password_email_only'.tr()),
-          duration: const Duration(seconds: 4),
-        ),
+        SnackBar(content: Text('auth.forgot_password_email_only'.tr())),
       );
     }
   }

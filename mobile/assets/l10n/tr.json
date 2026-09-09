@@ -74,6 +74,10 @@
     "otp_send_failed": "Kod gönderilemedi, tekrar deneyin.",
     "otp_error": "Doğrulama hatası oluştu.",
     "password": "Şifre",
+    "show_password": "Şifreyi göster",
+    "hide_password": "Şifreyi gizle",
+    "biometric_multi": "Biyometrik Giriş ({})",
+    "select_account": "Hesap Seçin",
     "password_login": "Şifre ile Giriş",
     "code_login": "Kod ile Giriş",
     "sign_in": "Giriş Yap",
@@ -378,6 +382,9 @@
   "home": {
     "greeting": "Merhaba, {} 👋",
     "greeting_guest": "Merhaba, Misafir 👋",
+    "trust_verified": "Doğrulanmış",
+    "trust_sealed": "Mühürlü",
+    "trust_fast": "Hızlı",
     "hero_title": "Valizlerini Güvenle Emanet Edin",
     "hero_subtitle": "Şehri özgürce gezmeniz için en yakın dükkanı bulun.",
     "hero_cta": "Emanet Noktası Bul",
@@ -475,11 +482,35 @@
     "warning_title": "Güvenlik Uyarısı",
     "warning_desc": "Cihazınızda root/jailbreak tespit edildi. Bu durum ödeme işlemlerinizi ve verilerinizin güvenliğini tehlikeye atabilir.",
     "accept_risk": "Riskleri Anladım, Devam Et",
-    "exit_app": "Uygulamadan Çık"
+    "exit_app": "Uygulamadan Çık",
+    "devices_title": "Bildirim Alan Cihazlar",
+    "devices_empty": "Kayıtlı cihaz yok.",
+    "devices_remove": "Kaldır",
+    "devices_remove_confirm_title": "Cihazı kaldır",
+    "devices_remove_confirm_desc": "Bu cihaz artık bildirim almayacak. Emin misiniz?",
+    "devices_last_seen": "Son görülme: {date}",
+    "permissions_title": "İzinler",
+    "permissions_camera": "Kamera",
+    "permissions_location": "Konum",
+    "permissions_notifications": "Bildirimler",
+    "permissions_open_settings": "Ayarları Aç",
+    "permissions_status_granted": "İzin verildi",
+    "permissions_status_denied": "Reddedildi",
+    "permissions_status_permanently_denied": "Kalıcı olarak reddedildi",
+    "permissions_status_restricted": "Kısıtlı",
+    "permissions_status_unknown": "Bilinmiyor"
   },
   "fatal_error": {
     "title": "Bir Şeyler Ters Gitti",
     "desc": "Beklenmedik bir hata oluştu. Ekibimiz bilgilendirildi. Lütfen uygulamayı kapatıp tekrar açmayı deneyin.",
     "refresh": "Yenile"
+  },
+  "update": {
+    "force_title": "Güncelleme gerekli",
+    "force_desc": "Devam edebilmek için uygulamayı en son sürüme güncellemeniz gerekiyor.",
+    "update_button": "Güncelle",
+    "soft_title": "Yeni sürüm mevcut",
+    "soft_desc": "Daha iyi bir deneyim için uygulamayı güncelleyin.",
+    "later_button": "Daha sonra"
   }
 }

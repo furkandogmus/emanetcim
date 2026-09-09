@@ -76,6 +76,26 @@ export class SealService {
     if (!Number.isInteger(fromSerial) || !Number.isInteger(toSerial)) {
       throw new Error("invalid_range");
     }
+    /*
+      SERI NUMARASI POZITIF OLMAK ZORUNDA (2026-09-02'de olculdu).
+
+      Uc kontrol de (tam sayi, sira, aralik genisligi) negatif bir araligi
+      GECIRIYORDU: `bulkCreateSeals(-100, -50)` elli bir muhur, `(0, 5)` alti
+      muhur uretti.
+
+      Bunlar OLU STOK: check-in govdesi `sealNumber: z.number().int().positive()`
+      istiyor, yani negatif ya da sifir numarali bir muhur hicbir zaman bir
+      valize baglanamaz. Ama envanter sayimlarina giriyor
+      (`getSealCounts`, dukkan stok rozeti, `seal-forecast` yeniden siparis
+      esigi) -- yani sistem var olmayan bir stogu var saniyor ve gercekten
+      muhur bittiginde otomatik talep acmiyor.
+
+      Sistemin geri kalani zaten pozitif varsayiyordu; uretim tarafi bunu
+      zorlamiyordu.
+    */
+    if (fromSerial < 1) {
+      throw new Error("invalid_range");
+    }
     if (fromSerial > toSerial) {
       throw new Error("invalid_range");
     }

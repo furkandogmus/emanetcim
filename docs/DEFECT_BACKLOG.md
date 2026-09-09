@@ -70,6 +70,7 @@
 | D7 | **İlk giriş kontrol listesi** — yeni esnaf panelde sekiz sıfır görüyor | — |
 | D8 | **Vitrin afişi / QR** — yazdırılabilir tabela | — |
 | D9 | **Koordinat uyarısı** — onayda "konumu yok, aramada çıkmaz" (bugün tüm dükkanlarda koordinat var, sessiz bir tuzak) | — |
+| D10 | **Mobil marka turuncusu (#EA580C) WCAG AA'yı geçmiyor** — ölçüldü (2026-09-09, `flutter test`): beyaz metin üzerinde `FilledButtonTheme` zemini olarak 3.56:1, M3 tohum renginden üretilen soluk zeminde `TextButton` ön plan rengi olarak 3.23:1 — ikisi de 4.5:1 eşiğinin altında. Uygulama genelindeki HER `FilledButton`/varsayılan `TextButton`'ı etkiler, tek ekrana özgü değil. Kanıt: `mobile/test/features/update/force_update_screen_a11y_test.dart`, `mobile/test/features/security/permissions_screen_a11y_test.dart` (ikisi de `textContrastGuideline`'ı bilinçli atlıyor, sebebi dosyada yazılı) | — |
 
 ## 2026-09-01 — geç teslim uyarısı esnafa HER GÜN, SÜRESİZ gidiyordu
 

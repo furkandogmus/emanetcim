@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/auth/auth_controller.dart';
 import '../../shared/models/user.dart';
+import '../../shared/utils/app_colors.dart';
 
 class HomeShell extends ConsumerWidget {
   const HomeShell({required this.child, super.key});
@@ -13,8 +14,15 @@ class HomeShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final role =
-        ref.watch(authControllerProvider).session?.role ?? UserRole.guest;
+    // HomeShell her ekranin etrafini sarar (Scaffold + bottom nav); tum
+    // AuthState yerine sadece role'u izliyoruz ki login/logout disindaki
+    // AuthState degisiklikleri (orn. loading toggle) tum shell'i yeniden
+    // derletmesin.
+    final role = ref.watch(
+      authControllerProvider.select(
+        (state) => state.session?.role ?? UserRole.guest,
+      ),
+    );
     final loc = GoRouterState.of(context).matchedLocation;
 
     var tabs = <_TabItem>[];
@@ -104,7 +112,7 @@ class HomeShell extends ConsumerWidget {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.bgLight,
       extendBody: true,
       body: child,
       bottomNavigationBar: NavigationBar(

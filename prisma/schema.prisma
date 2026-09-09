@@ -613,6 +613,14 @@ model PlatformSettings {
 
   /// Platform genelinde rezervasyona kapalı takvim günleri (YYYY-MM-DD JSON dizisi).
   platformHolidayDates Json?
+
+  /// Bu sürümün ALTINDAKİ mobil istemciler tam ekran, kapatılamaz güncelleme
+  /// ekranına yönlendirilir (semver, örn. "1.4.0"). `null` = zorunlu güncelleme yok.
+  minAppVersion String?
+  /// Mağazadaki güncel sürüm. Bu sürümün altındaki ama `minAppVersion`'ın
+  /// ÜSTÜNDEKİ istemcilere kapatılabilir "yeni sürüm var" bildirimi gösterilir.
+  /// `null` = bildirim gösterilmez.
+  latestAppVersion String?
 }
 
 /// Zamanlanmış iş çalıştırma defteri.

@@ -2,9 +2,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:jailbreak_root_detection/jailbreak_root_detection.dart';
 
 import 'app/app.dart';
 import 'core/auth/token_store.dart';
@@ -18,10 +18,51 @@ Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
   // Background push handler — silent. Foreground aktivitesi push_service.dart'ta.
 }
 
+/// SyncService (`pending_sync_actions`) ve cache saglayicilarinin (`*_cache`)
+/// dayandigi Hive kutularini acar.
+///
+/// `hiveKey` alinamadiysa (ör. secure storage bozuk/erisilemez) ONCEDEN bu
+/// kutular HIC ACILMAZDI: sonraki her senkron `Hive.box(name)` cagrisi
+/// `HiveError('Box not found...')` firlatiyordu ve bu hata `SyncService.sync()`
+/// gibi async fonksiyonlarin dondurdugu Future'a yansidigi icin hic
+/// yakalanmiyor, hicbir yere raporlanmiyordu — offline check-in/check-out
+/// kaydi sessizce kayboluyordu. Anahtar yoksa kutulari sifrelenmemis acarak
+/// ozelligi ayakta tutuyoruz; bu yine de bir HiveError firlatirsa (ör. disk
+/// bozuk) en azindan loglaniyor.
+@visibleForTesting
+Future<void> openHiveBoxes(
+  List<int>? hiveKey, {
+  List<String> boxNames = const [
+    'pending_sync_actions',
+    'partner_bookings_cache',
+    'my_bookings_cache',
+  ],
+}) async {
+  try {
+    if (hiveKey != null) {
+      final cipher = HiveAesCipher(hiveKey);
+      for (final name in boxNames) {
+        await Hive.openBox(name, encryptionCipher: cipher);
+      }
+    } else {
+      Logger.e(
+        'Hive encryption key unavailable; opening boxes unencrypted so '
+        'offline sync/cache keep working.',
+      );
+      for (final name in boxNames) {
+        await Hive.openBox(name);
+      }
+    }
+  } catch (e, st) {
+    Logger.e('Hive box open failed; offline sync/cache disabled', e, st);
+  }
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await EasyLocalization.ensureInitialized();
-  await Hive.initFlutter();
+
+  // EasyLocalization ve Hive motoru init'i birbirine bagimli degil; paralel calistir.
+  await Future.wait([EasyLocalization.ensureInitialized(), Hive.initFlutter()]);
 
   // Global Error Handling
   ErrorWidget.builder = (details) => GlobalErrorWidget(details: details);
@@ -40,7 +81,8 @@ Future<void> main() async {
     return true;
   };
 
-  // Encryption for Hive (Security Hardening)
+  // Encryption for Hive (Security Hardening) — Hive.initFlutter() bitmis olmali,
+  // box'lar bu anahtara bagimli oldugu icin sirali kalir.
   final tokenStore = TokenStore();
   List<int>? hiveKey;
   try {
@@ -49,30 +91,30 @@ Future<void> main() async {
     Logger.e('Hive Key error', e);
   }
 
-  if (hiveKey != null) {
-    final cipher = HiveAesCipher(hiveKey);
-    await Hive.openBox('pending_sync_actions', encryptionCipher: cipher);
-    await Hive.openBox('partner_bookings_cache', encryptionCipher: cipher);
-    await Hive.openBox('my_bookings_cache', encryptionCipher: cipher);
-  } else {
-    Logger.e('Hive encryption key unavailable; caching disabled. Data will not persist across restarts.');
-  }
-
+  // Asagidaki uc is birbirinden bagimsiz: jailbreak kontrolu, Firebase init ve
+  // (anahtar zaten elde edilmis) Hive box'larini acma. Sirali degil, paralel.
   var isRooted = false;
-  try {
-    isRooted = await FlutterJailbreakDetection.jailbroken;
-  } catch (e) {
-    Logger.w('Security check error', e);
-  }
 
-  if (Env.firebaseEnabled) {
+  Future<void> checkRoot() async {
     try {
-      await Firebase.initializeApp();
-      FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
+      isRooted = await JailbreakRootDetection.instance.isJailBroken;
     } catch (e) {
-      Logger.e('Firebase init failed', e);
+      Logger.w('Security check error', e);
     }
   }
+
+  Future<void> initFirebase() async {
+    if (Env.firebaseEnabled) {
+      try {
+        await Firebase.initializeApp();
+        FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
+      } catch (e) {
+        Logger.e('Firebase init failed', e);
+      }
+    }
+  }
+
+  await Future.wait([checkRoot(), initFirebase(), openHiveBoxes(hiveKey)]);
 
   final app = EasyLocalization(
     supportedLocales: const [Locale('tr'), Locale('en')],
@@ -81,7 +123,5 @@ Future<void> main() async {
     child: const ProviderScope(child: BagajParkApp()),
   );
 
-  runApp(
-    isRooted ? RootWarningScreen(onContinue: () => runApp(app)) : app,
-  );
+  runApp(isRooted ? RootWarningScreen(onContinue: () => runApp(app)) : app);
 }

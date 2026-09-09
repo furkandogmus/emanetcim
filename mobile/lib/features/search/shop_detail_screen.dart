@@ -2,12 +2,14 @@ import 'dart:async' show unawaited;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_vector_tiles/flutter_map_vector_tiles.dart' as vt;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/api/api_client.dart';
+import '../../core/config/map_style.dart';
 import '../../core/repositories/shop_repository.dart';
 import '../../core/services/favorites_service.dart';
 import '../../core/services/haptic_service.dart';
@@ -15,11 +17,14 @@ import '../../core/services/share_service.dart';
 import '../../shared/utils/app_colors.dart';
 import '../../shared/widgets/skeleton.dart';
 
-final shopReviewsProvider = FutureProvider.family<List<Map<String, dynamic>>, String>((ref, id) async {
-  final dio = ref.read(dioProvider);
-  final res = await dio.get('/shops/$id/reviews');
-  return (res.data as List<dynamic>).map((e) => Map<String, dynamic>.from(e as Map)).toList();
-});
+final shopReviewsProvider =
+    FutureProvider.family<List<Map<String, dynamic>>, String>((ref, id) async {
+      final dio = ref.read(dioProvider);
+      final res = await dio.get('/shops/$id/reviews');
+      return (res.data as List<dynamic>)
+          .map((e) => Map<String, dynamic>.from(e as Map))
+          .toList();
+    });
 
 class ShopDetailScreen extends ConsumerStatefulWidget {
   const ShopDetailScreen({required this.shopId, super.key});
@@ -30,6 +35,30 @@ class ShopDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
+  // search_map.dart ile AYNI kaynak: MapStyle (bkz. o dosyadaki not).
+  vt.Style? _mapStyle;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadMapStyle());
+  }
+
+  Future<void> _loadMapStyle() async {
+    final style = await const vt.StyleReader(uri: MapStyle.styleUrl).read();
+    if (!mounted) {
+      style.dispose();
+      return;
+    }
+    setState(() => _mapStyle = style);
+  }
+
+  @override
+  void dispose() {
+    _mapStyle?.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final shopAsync = ref.watch(shopProvider(widget.shopId));
@@ -92,8 +121,12 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                         backgroundColor: Colors.white.withValues(alpha: 0.9),
                         child: IconButton(
                           onPressed: () {
-                            unawaited(ref.read(hapticServiceProvider).selection());
-                            ref.read(shareServiceProvider).shareShop(
+                            unawaited(
+                              ref.read(hapticServiceProvider).selection(),
+                            );
+                            ref
+                                .read(shareServiceProvider)
+                                .shareShop(
                                   id: s.id,
                                   name: s.name,
                                   address: s.address ?? '',
@@ -119,10 +152,13 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                                   if (progress == null) return child;
                                   return Container(
                                     color: Colors.grey.shade100,
-                                    child: const Center(child: CircularProgressIndicator()),
+                                    child: const Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
                                   );
                                 },
-                                errorBuilder: (_, __, ___) => _shopPlaceholder(s.name),
+                                errorBuilder: (_, _, _) =>
+                                    _shopPlaceholder(s.name),
                               )
                             : _shopPlaceholder(s.name),
                       ),
@@ -150,19 +186,27 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                                     Flexible(
                                       child: Text(
                                         s.name,
-                                        style: GoogleFonts.outfit(
-                                          fontSize: 28,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.textDark,
-                                        ),
+                                        // color SABIT: bu sayfa govdesi
+                                        // yukarida (Colors.white) hep beyaz.
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .displayLarge!
+                                            .copyWith(
+                                              fontSize: 28,
+                                              fontWeight: FontWeight.bold,
+                                              color: const Color(0xFF0F172A),
+                                            ),
                                       ),
                                     ),
                                     if (s.isVerified) ...[
                                       const SizedBox(width: 8),
                                       Tooltip(
                                         message: 'shop.verified'.tr(),
-                                        child: Icon(Icons.verified_rounded,
-                                            color: Colors.blue.shade700, size: 24),
+                                        child: Icon(
+                                          Icons.verified_rounded,
+                                          color: Colors.blue.shade700,
+                                          size: 24,
+                                        ),
                                       ),
                                     ],
                                   ],
@@ -189,10 +233,13 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                                         const SizedBox(width: 4),
                                         Text(
                                           s.rating?.toStringAsFixed(1) ?? 'N/A',
-                                          style: GoogleFonts.outfit(
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.brandOrange,
-                                          ),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleSmall!
+                                              .copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color: AppColors.brandOrange,
+                                              ),
                                         ),
                                       ],
                                     ),
@@ -204,7 +251,9 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                                           .read(favoritesProvider.notifier)
                                           .toggle(s.id);
                                       final isNowFav = !isFav;
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
                                         SnackBar(
                                           content: Text(
                                             isNowFav
@@ -219,7 +268,9 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                                       isFav
                                           ? Icons.favorite_rounded
                                           : Icons.favorite_outline_rounded,
-                                      color: isFav ? Colors.redAccent : Colors.grey,
+                                      color: isFav
+                                          ? Colors.redAccent
+                                          : Colors.grey,
                                     ),
                                   ),
                                 ],
@@ -238,9 +289,8 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                               Expanded(
                                 child: Text(
                                   '${s.address ?? ''}, ${s.district ?? ''} / ${s.city ?? ''}',
-                                  style: GoogleFonts.outfit(
-                                    color: const Color(0xFF424242),
-                                  ),
+                                  style: Theme.of(context).textTheme.bodyMedium!
+                                      .copyWith(color: const Color(0xFF424242)),
                                 ),
                               ),
                             ],
@@ -279,11 +329,12 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                           const SizedBox(height: 12),
                           Text(
                             'shop.about_desc'.tr(),
-                            style: GoogleFonts.outfit(
-                              fontSize: 15,
-                              color: const Color(0xFF424242),
-                              height: 1.6,
-                            ),
+                            style: Theme.of(context).textTheme.bodyLarge!
+                                .copyWith(
+                                  fontSize: 15,
+                                  color: const Color(0xFF424242),
+                                  height: 1.6,
+                                ),
                           ),
 
                           const SizedBox(height: 32),
@@ -299,28 +350,51 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                                 width: double.infinity,
                                 child: FlutterMap(
                                   options: MapOptions(
-                                    initialCenter: LatLng(s.latitude!, s.longitude!),
-                                    initialZoom: 15.0,
-                                    interactionOptions: const InteractionOptions(
-                                      flags: InteractiveFlag.none,
+                                    initialCenter: LatLng(
+                                      s.latitude!,
+                                      s.longitude!,
                                     ),
+                                    initialZoom: 15.0,
+                                    interactionOptions:
+                                        const InteractionOptions(
+                                          flags: InteractiveFlag.none,
+                                        ),
                                   ),
                                   children: [
-                                    TileLayer(
-                                      urlTemplate:
-                                          'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
-                                      userAgentPackageName: 'com.bagajpark.app',
-                                    ),
+                                    if (_mapStyle case final style?)
+                                      vt.VectorTileLayer(
+                                        theme: style.theme,
+                                        tileProviders: style.providers,
+                                        rasterSources: style.rasterSources,
+                                        sprites: style.sprites,
+                                      )
+                                    else
+                                      ColoredBox(color: Colors.grey.shade200),
                                     MarkerLayer(
                                       markers: [
                                         Marker(
-                                          point: LatLng(s.latitude!, s.longitude!),
+                                          point: LatLng(
+                                            s.latitude!,
+                                            s.longitude!,
+                                          ),
                                           width: 36,
                                           height: 36,
                                           child: const Icon(
                                             Icons.location_on_rounded,
                                             color: AppColors.brandOrange,
                                             size: 36,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    RichAttributionWidget(
+                                      showFlutterMapAttribution: false,
+                                      permanentHeight: 16,
+                                      attributions: [
+                                        TextSourceAttribution(
+                                          MapStyle.attributionText,
+                                          onTap: () => launchUrl(
+                                            Uri.parse(MapStyle.attributionUrl),
                                           ),
                                         ),
                                       ],
@@ -340,10 +414,11 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                               child: Center(
                                 child: Text(
                                   'shop.no_location'.tr(),
-                                  style: GoogleFonts.outfit(
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.grey,
-                                  ),
+                                  style: Theme.of(context).textTheme.titleSmall!
+                                      .copyWith(
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.grey,
+                                      ),
                                 ),
                               ),
                             ),
@@ -389,114 +464,143 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                           // Reviews Section
                           _sectionHeader('shop.reviews'.tr()),
                           const SizedBox(height: 16),
-                          Consumer(builder: (context, ref, _) {
-                            final reviewsAsync =
-                                ref.watch(shopReviewsProvider(widget.shopId));
-                            return reviewsAsync.when(
-                              data: (reviews) {
-                                if (reviews.isEmpty) {
-                                  return Center(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(24),
-                                      child: Text(
-                                        'shop.no_reviews'.tr(),
-                                        style: const TextStyle(color: Colors.grey),
-                                      ),
-                                    ),
-                                  );
-                                }
-                                return Column(
-                                  children: reviews.take(5).map((review) {
-                                    final rating =
-                                        (review['rating'] as num?)?.toInt() ?? 0;
-                                    final userName =
-                                        (review['userName'] as String?) ??
-                                            'profile.guest'.tr();
-                                    final comment =
-                                        review['comment'] as String? ?? '';
-                                    return Container(
-                                      margin: const EdgeInsets.only(bottom: 12),
-                                      padding: const EdgeInsets.all(16),
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey.shade50,
-                                        borderRadius: BorderRadius.circular(16),
-                                        border: Border.all(
-                                            color: Colors.grey.shade100),
-                                      ),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              CircleAvatar(
-                                                radius: 16,
-                                                backgroundColor: AppColors
-                                                    .brandOrange
-                                                    .withValues(alpha: 0.1),
-                                                child: Text(
-                                                  userName.isNotEmpty
-                                                      ? userName[0].toUpperCase()
-                                                      : '?',
-                                                  style: GoogleFonts.outfit(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: AppColors.brandOrange,
-                                                  ),
-                                                ),
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Expanded(
-                                                child: Text(
-                                                  userName,
-                                                  style: GoogleFonts.outfit(
-                                                      fontWeight:
-                                                          FontWeight.w600),
-                                                ),
-                                              ),
-                                              Row(
-                                                children: List.generate(
-                                                  5,
-                                                  (i) => Icon(
-                                                    i < rating
-                                                        ? Icons.star_rounded
-                                                        : Icons
-                                                            .star_outline_rounded,
-                                                    size: 14,
-                                                    color: Colors.amber,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
+                          Consumer(
+                            builder: (context, ref, _) {
+                              final reviewsAsync = ref.watch(
+                                shopReviewsProvider(widget.shopId),
+                              );
+                              return reviewsAsync.when(
+                                data: (reviews) {
+                                  if (reviews.isEmpty) {
+                                    return Center(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(24),
+                                        child: Text(
+                                          'shop.no_reviews'.tr(),
+                                          style: const TextStyle(
+                                            color: Colors.grey,
                                           ),
-                                          if (comment.isNotEmpty) ...[
-                                            const SizedBox(height: 8),
-                                            Text(
-                                              comment,
-                                              style: GoogleFonts.outfit(
-                                                fontSize: 13,
-                                                color: const Color(0xFF424242),
-                                              ),
-                                            ),
-                                          ],
-                                        ],
+                                        ),
                                       ),
                                     );
-                                  }).toList(),
-                                );
-                              },
-                              loading: () =>
-                                  const Center(child: CircularProgressIndicator()),
-                              error: (_, __) => Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(24),
-                                  child: Text(
-                                    'shop.no_reviews'.tr(),
-                                    style: const TextStyle(color: Colors.grey),
+                                  }
+                                  return Column(
+                                    children: reviews.take(5).map((review) {
+                                      final rating =
+                                          (review['rating'] as num?)?.toInt() ??
+                                          0;
+                                      final userName =
+                                          (review['userName'] as String?) ??
+                                          'profile.guest'.tr();
+                                      final comment =
+                                          review['comment'] as String? ?? '';
+                                      return Container(
+                                        margin: const EdgeInsets.only(
+                                          bottom: 12,
+                                        ),
+                                        padding: const EdgeInsets.all(16),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.shade50,
+                                          borderRadius: BorderRadius.circular(
+                                            16,
+                                          ),
+                                          border: Border.all(
+                                            color: Colors.grey.shade100,
+                                          ),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                CircleAvatar(
+                                                  radius: 16,
+                                                  backgroundColor: AppColors
+                                                      .brandOrange
+                                                      .withValues(alpha: 0.1),
+                                                  child: Text(
+                                                    userName.isNotEmpty
+                                                        ? userName[0]
+                                                              .toUpperCase()
+                                                        : '?',
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .titleSmall!
+                                                        .copyWith(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: AppColors
+                                                              .brandOrange,
+                                                        ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Expanded(
+                                                  child: Text(
+                                                    userName,
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .titleSmall!
+                                                        .copyWith(
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                        ),
+                                                  ),
+                                                ),
+                                                Row(
+                                                  children: List.generate(
+                                                    5,
+                                                    (i) => Icon(
+                                                      i < rating
+                                                          ? Icons.star_rounded
+                                                          : Icons
+                                                                .star_outline_rounded,
+                                                      size: 14,
+                                                      color: Colors.amber,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            if (comment.isNotEmpty) ...[
+                                              const SizedBox(height: 8),
+                                              Text(
+                                                comment,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyMedium!
+                                                    .copyWith(
+                                                      fontSize: 13,
+                                                      color: const Color(
+                                                        0xFF424242,
+                                                      ),
+                                                    ),
+                                              ),
+                                            ],
+                                          ],
+                                        ),
+                                      );
+                                    }).toList(),
+                                  );
+                                },
+                                loading: () => const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                                error: (_, _) => Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(24),
+                                    child: Text(
+                                      'shop.no_reviews'.tr(),
+                                      style: const TextStyle(
+                                        color: Colors.grey,
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
-                          }),
+                              );
+                            },
+                          ),
 
                           const SizedBox(height: 120),
                         ],
@@ -533,20 +637,22 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                         children: [
                           Text(
                             'shop.total_amount'.tr(),
-                            style: GoogleFonts.outfit(
-                              fontSize: 14,
-                              color: const Color(0xFF424242),
-                            ),
+                            style: Theme.of(context).textTheme.bodyMedium!
+                                .copyWith(
+                                  fontSize: 14,
+                                  color: const Color(0xFF424242),
+                                ),
                           ),
                           Text(
                             s.isPrelaunch
                                 ? 'search.coming_soon'.tr()
                                 : '\u20BA${s.pricePerDay.toStringAsFixed(2)} /g\u00fcn',
-                            style: GoogleFonts.outfit(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.brandOrange,
-                            ),
+                            style: Theme.of(context).textTheme.titleLarge!
+                                .copyWith(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.brandOrange,
+                                ),
                           ),
                         ],
                       ),
@@ -562,7 +668,9 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                         onPressed: s.isPrelaunch
                             ? null
                             : () {
-                                unawaited(ref.read(hapticServiceProvider).medium());
+                                unawaited(
+                                  ref.read(hapticServiceProvider).medium(),
+                                );
                                 context.push('/checkout/${s.id}');
                               },
                         child: Text(
@@ -585,10 +693,10 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
   Widget _sectionHeader(String title) {
     return Text(
       title,
-      style: GoogleFonts.outfit(
+      style: Theme.of(context).textTheme.titleLarge!.copyWith(
         fontSize: 20,
         fontWeight: FontWeight.bold,
-        color: AppColors.textDark,
+        color: const Color(0xFF0F172A),
       ),
     );
   }
@@ -601,7 +709,7 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
           const SizedBox(height: 8),
           Text(
             label,
-            style: GoogleFonts.outfit(
+            style: Theme.of(context).textTheme.bodySmall!.copyWith(
               fontSize: 12,
               color: const Color(0xFF616161),
             ),
@@ -610,10 +718,10 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
           const SizedBox(height: 4),
           Text(
             value,
-            style: GoogleFonts.outfit(
+            style: Theme.of(context).textTheme.titleSmall!.copyWith(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: AppColors.textDark,
+              color: const Color(0xFF0F172A),
             ),
             textAlign: TextAlign.center,
           ),
@@ -644,10 +752,10 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
           const SizedBox(width: 8),
           Text(
             label,
-            style: GoogleFonts.outfit(
+            style: Theme.of(context).textTheme.titleSmall!.copyWith(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: AppColors.textDark,
+              color: const Color(0xFF0F172A),
             ),
           ),
         ],
@@ -702,7 +810,7 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
       child: Center(
         child: Text(
           name.isNotEmpty ? name.substring(0, 1).toUpperCase() : 'S',
-          style: GoogleFonts.outfit(
+          style: Theme.of(context).textTheme.displayMedium!.copyWith(
             fontSize: 48,
             fontWeight: FontWeight.bold,
             color: AppColors.brandOrange,

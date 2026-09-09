@@ -1,10 +1,10 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
 import '../../core/utils/error_handler.dart';
+import '../../shared/utils/app_colors.dart';
 import 'admin_controller.dart';
 
 class AdminMessagesScreen extends ConsumerStatefulWidget {
@@ -29,6 +29,7 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
     try {
       final dio = ref.read(dioProvider);
       final res = await dio.get('/admin/messages');
+      if (!mounted) return;
       setState(() {
         _messages = res.data as List<dynamic>;
         _loading = false;
@@ -37,10 +38,17 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(getErrorMessage(e, fallback: 'admin.messages_load_error'.tr())),
+            content: Text(
+              getErrorMessage(e, fallback: 'admin.messages_load_error'.tr()),
+            ),
           ),
         );
       }
+      // `admin_applications_screen.dart`'taki `_fetchApps` ile ayni desen:
+      // widget dispose olduktan sonra bu ikinci `setState` korumasizdi ve
+      // (Riverpod 3'un dispose-sonrasi `ref` erisiminde firlattigi hata dahil)
+      // yakalanmamis bir istisnaya donusuyordu.
+      if (!mounted) return;
       setState(() => _loading = false);
     }
   }
@@ -59,11 +67,13 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.bgLight,
       appBar: AppBar(
         title: Text(
           'admin.messages_title'.tr(),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
@@ -87,9 +97,9 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                   const SizedBox(height: 16),
                   Text(
                     'admin.no_messages'.tr(),
-                    style: GoogleFonts.outfit(
-                      color: const Color(0xFF616161),
+                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                       fontSize: 16,
+                      color: const Color(0xFF616161),
                     ),
                   ),
                 ],
@@ -102,9 +112,13 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                 final msg = _messages[index];
                 final isRead = msg['isRead'] as bool? ?? false;
                 final date = DateTime.parse(msg['createdAt'] as String);
+                // Backend UTC (`Z` sonekli) donuyor; `devices_screen.dart`daki
+                // `lastSeenAt.toLocal()` deseniyle ayni sekilde once yerel
+                // saate cevrilmeliydi, aksi halde TR saatinden 3 saat geri
+                // gosteriliyordu.
                 final formattedDate = DateFormat(
                   'dd.MM.yyyy HH:mm',
-                ).format(date);
+                ).format(date.toLocal());
 
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
@@ -118,66 +132,76 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                       ),
                     ],
                   ),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.all(16),
-                    leading: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: isRead
-                            ? Colors.grey.withValues(alpha: 0.1)
-                            : Colors.blue.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.email_rounded,
-                        color: isRead ? Colors.grey : Colors.blue,
-                      ),
-                    ),
-                    title: Text(
-                      msg['subject'] ?? 'Konu Yok',
-                      style: GoogleFonts.outfit(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: isRead ? Colors.grey : const Color(0xFF0F172A),
-                      ),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 4),
-                        Text(
-                          'Kimden: ${msg['from'] ?? 'Bilinmiyor'}',
-                          style: GoogleFonts.outfit(
-                            fontSize: 12,
-                            color: const Color(0xFF424242),
-                          ),
+                  child: Material(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(16),
+                    clipBehavior: Clip.antiAlias,
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.all(16),
+                      leading: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: isRead
+                              ? Colors.grey.withValues(alpha: 0.1)
+                              : Colors.blue.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          formattedDate,
-                          style: GoogleFonts.outfit(
-                            fontSize: 11,
-                            color: const Color(0xFF757575),
-                          ),
+                        child: Icon(
+                          Icons.email_rounded,
+                          color: isRead ? Colors.grey : Colors.blue,
                         ),
-                      ],
-                    ),
-                    trailing: !isRead
-                        ? Container(
-                            width: 10,
-                            height: 10,
-                            decoration: const BoxDecoration(
-                              color: Colors.blue,
-                              shape: BoxShape.circle,
+                      ),
+                      title: Text(
+                        msg['subject'] ?? 'Konu Yok',
+                        style: Theme.of(context).textTheme.titleMedium!
+                            .copyWith(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: isRead
+                                  ? Colors.grey
+                                  : const Color(0xFF0F172A),
                             ),
-                          )
-                        : null,
-                    onTap: () {
-                      _showDetail(msg);
-                      if (!isRead) {
-                        _markAsRead(msg['id'] as String);
-                      }
-                    },
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 4),
+                          Text(
+                            'Kimden: ${msg['from'] ?? 'Bilinmiyor'}',
+                            style: Theme.of(context).textTheme.bodySmall!
+                                .copyWith(
+                                  fontSize: 12,
+                                  color: const Color(0xFF424242),
+                                ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            formattedDate,
+                            style: Theme.of(context).textTheme.labelSmall!
+                                .copyWith(
+                                  fontSize: 11,
+                                  color: const Color(0xFF757575),
+                                ),
+                          ),
+                        ],
+                      ),
+                      trailing: !isRead
+                          ? Container(
+                              width: 10,
+                              height: 10,
+                              decoration: const BoxDecoration(
+                                color: Colors.blue,
+                                shape: BoxShape.circle,
+                              ),
+                            )
+                          : null,
+                      onTap: () {
+                        _showDetail(msg);
+                        if (!isRead) {
+                          _markAsRead(msg['id'] as String);
+                        }
+                      },
+                    ),
                   ),
                 );
               },
@@ -202,7 +226,7 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
             children: [
               Text(
                 msg['subject'] ?? 'Konu Yok',
-                style: GoogleFonts.outfit(
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -210,14 +234,18 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
               const SizedBox(height: 8),
               Text(
                 'Kimden: ${msg['from'] ?? 'Bilinmiyor'}',
-                style: GoogleFonts.outfit(color: const Color(0xFF424242)),
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  color: const Color(0xFF424242),
+                ),
               ),
               const SizedBox(height: 16),
               const Divider(),
               const SizedBox(height: 16),
               Text(
                 msg['text'] ?? msg['html'] ?? 'İçerik yok',
-                style: GoogleFonts.outfit(height: 1.6),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium!.copyWith(height: 1.6),
               ),
             ],
           ),

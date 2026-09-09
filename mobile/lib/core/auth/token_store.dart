@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive.dart';
 
-import '../config/env.dart';
 import '../api/ssl_pinning.dart';
+import '../config/env.dart';
 
 final tokenStoreProvider = Provider<TokenStore>((ref) => TokenStore());
 
@@ -38,14 +39,27 @@ class TokenStore {
   }
 
   Future<void> clear() async {
-    await _storage.delete(key: _access);
-    await _storage.delete(key: _refresh);
+    // Her anahtar ayri ayri, en-iyi-caba (best-effort) silinir: platform
+    // seviyesinde (ornek: cihaz yedeginden geri yukleme sonrasi Android
+    // Keystore/iOS Keychain anahtarinin gecersizlesmesi) bir `delete` atarsa
+    // eskiden ikinci `delete` hic calismiyor VE `clear()` future'i
+    // reddediliyordu; bunu cagiran `AuthController.logout()` da hic
+    // tamamlanmadigindan oturum state'i temizlenmiyor, kullanici hicbir
+    // hata gormeden 'giris yapilmis' halde kaliyordu (2026-09-09'da
+    // bulundu). `clear()` artik asla reddedilmiyor.
+    try {
+      await _storage.delete(key: _access);
+    } catch (_) {}
+    try {
+      await _storage.delete(key: _refresh);
+    } catch (_) {}
   }
 
   Future<void> saveBiometricAccount(String email, String refreshToken) async {
     final accounts = await getBiometricAccounts();
-    accounts.removeWhere((a) => a['email'] == email);
-    accounts.add({'email': email, 'refreshToken': refreshToken});
+    accounts
+      ..removeWhere((a) => a['email'] == email)
+      ..add({'email': email, 'refreshToken': refreshToken});
     // Keep max 5 accounts
     if (accounts.length > 5) accounts.removeAt(0);
     await _storage.write(key: _biometricSessions, value: jsonEncode(accounts));
@@ -88,7 +102,10 @@ class TokenStore {
         ),
       );
       SslPinning.apply(refreshDio);
-      final res = await refreshDio.post('/auth/refresh', data: {'refreshToken': rt});
+      final res = await refreshDio.post(
+        '/auth/refresh',
+        data: {'refreshToken': rt},
+      );
       await save(
         access: res.data['accessToken'] as String,
         refresh: res.data['refreshToken'] as String,

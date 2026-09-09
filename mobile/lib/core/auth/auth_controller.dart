@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
@@ -11,7 +14,6 @@ import '../config/env.dart';
 import '../push/push_service.dart';
 import '../services/logger_service.dart';
 import 'token_store.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 class AuthState {
   final UserDto? session;
@@ -42,7 +44,7 @@ final authControllerProvider = NotifierProvider<AuthController, AuthState>(
 class AuthController extends Notifier<AuthState> {
   @override
   AuthState build() {
-    Future.microtask(() => _bootstrap());
+    Future.microtask(_bootstrap);
     return const AuthState(loading: true);
   }
 
@@ -51,13 +53,17 @@ class AuthController extends Notifier<AuthState> {
     final onboardingDone = prefs.getBool('onboarding_done') ?? false;
     state = state.copyWith(onboardingDone: onboardingDone, loading: false);
 
-    try {
-      await GoogleSignIn.instance.initialize(
-        serverClientId: Env.googleWebClientId,
-      );
-    } catch (e) {
-      debugPrint('GoogleSignIn initialization failed: $e');
-    }
+    // Google girişi yalnızca kullanıcı "Google ile giriş yap"a dokunursa
+    // gerekir; mevcut oturumu geri yüklemekle ilgisizdir. Burada await
+    // edilirse SDK init gecikmesi HER soğuk açılışta oturum kontrolünü ve
+    // /auth/me çağrısını bloklar. Paralel çalışsın diye ateşle-unut.
+    unawaited(
+      GoogleSignIn.instance
+          .initialize(serverClientId: Env.googleWebClientId)
+          .catchError((e) {
+            debugPrint('GoogleSignIn initialization failed: $e');
+          }),
+    );
 
     final store = ref.read(tokenStoreProvider);
     final token = await store.readAccessToken();
@@ -74,7 +80,13 @@ class AuthController extends Notifier<AuthState> {
         debugPrint('Failed to init push service on bootstrap: $e\n$st');
       }
     } on DioException {
+      // Token geçersiz/süresi dolmuş: oturumu sonlandırırken kullanıcıya özel
+      // Hive önbelleklerini de temizle — aksi halde bu cihazda sonra giriş
+      // yapan farklı bir kullanıcı, çevrimdışı bir listeleme anında önceki
+      // kullanıcının rezervasyonlarını görebilir (logout() bunu zaten yapar,
+      // burada da aynı temizlik gerekir).
       await store.clear();
+      _clearCaches();
     }
   }
 
@@ -104,7 +116,7 @@ class AuthController extends Notifier<AuthState> {
     try {
       final dio = ref.read(dioProvider);
       final isEmail = identity.contains('@');
-      String cleanIdentity = identity;
+      var cleanIdentity = identity;
       if (!isEmail) {
         var d = identity.replaceAll(RegExp(r'\D'), '');
         if (d.startsWith('90') && d.length >= 12) {
@@ -118,10 +130,7 @@ class AuthController extends Notifier<AuthState> {
 
       final data = isEmail
           ? {'email': identity, 'password': password}
-          : {
-              'phone': cleanIdentity,
-              'password': password,
-            };
+          : {'phone': cleanIdentity, 'password': password};
 
       final res = await dio.post('/auth/session', data: data);
       await _completeSession(res.data as Map<String, dynamic>);
@@ -176,7 +185,9 @@ class AuthController extends Notifier<AuthState> {
       final auth = account.authentication;
       final idToken = auth.idToken;
 
-      debugPrint('GoogleSignIn idToken present: ${idToken != null}, length: ${idToken?.length ?? 0}');
+      debugPrint(
+        'GoogleSignIn idToken present: ${idToken != null}, length: ${idToken?.length ?? 0}',
+      );
 
       if (idToken == null) {
         throw Exception('Google login failed: No ID Token');
@@ -201,11 +212,14 @@ class AuthController extends Notifier<AuthState> {
         ],
       );
       final dio = ref.read(dioProvider);
-      final res = await dio.post('/auth/apple', data: {
-        'identityToken': credential.identityToken,
-        'givenName': credential.givenName,
-        'familyName': credential.familyName,
-      });
+      final res = await dio.post(
+        '/auth/apple',
+        data: {
+          'identityToken': credential.identityToken,
+          'givenName': credential.givenName,
+          'familyName': credential.familyName,
+        },
+      );
       await _completeSession(res.data as Map<String, dynamic>);
     } catch (e) {
       state = state.copyWith(loading: false);
