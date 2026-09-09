@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_client.dart';
 import '../../shared/models/earnings_stats.dart';
+import '../../shared/widgets/skeleton.dart';
 
 class PartnerEarningsScreen extends ConsumerStatefulWidget {
   const PartnerEarningsScreen({super.key});
@@ -45,7 +46,30 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        body: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(child: Skeleton(height: 100, borderRadius: 20)),
+                    SizedBox(width: 12),
+                    Expanded(child: Skeleton(height: 100, borderRadius: 20)),
+                  ],
+                ),
+                SizedBox(height: 24),
+                Skeleton(height: 220, borderRadius: 24),
+                SizedBox(height: 24),
+                Skeleton(height: 80, borderRadius: 16),
+                SizedBox(height: 12),
+                Skeleton(height: 80, borderRadius: 16),
+              ],
+            ),
+          ),
+        ),
+      );
     }
 
     return Scaffold(
@@ -135,9 +159,7 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
           ),
           const SizedBox(height: 16),
 
-          ..._stats.history.map(
-            (e) => _historyTile(e as Map<String, dynamic>),
-          ),
+          ..._stats.history.map((e) => _historyTile(e as Map<String, dynamic>)),
 
           const SizedBox(height: 32),
 
