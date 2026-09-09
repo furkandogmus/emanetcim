@@ -35,7 +35,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.read(analyticsServiceProvider).logScreenView('Home');
     }
 
-    final user = ref.watch(authControllerProvider).session;
+    // Sadece session'i izliyoruz; AuthState.loading gibi ilgisiz alanlar
+    // degistiginde HomeScreen'in agir sliver agaci yeniden derlenmesin.
+    final user = ref.watch(
+      authControllerProvider.select((state) => state.session),
+    );
     final firstName = user?.name?.trim().split(' ').first;
 
     return Scaffold(

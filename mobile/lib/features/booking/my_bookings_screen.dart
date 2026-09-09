@@ -62,167 +62,12 @@ class MyBookingsScreen extends ConsumerWidget {
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
               itemCount: list.length,
+              // Kart yuksekligi sabit (baslik satiri tek satira sabitlendi);
+              // gercek ilk oge prototip olarak kullanildi ki font olcegi /
+              // yerel ayar farkliliklarinda da dogru olcum yapilsin.
+              prototypeItem: _BookingCard(booking: list.first, fmt: fmt),
               itemBuilder: (context, i) {
-                final b = list[i];
-                final statusColor = bookingStatusColor(b.status);
-
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 20),
-                  child: GestureDetector(
-                    onTap: () => context.push('/booking/${b.id}'),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.04),
-                            blurRadius: 20,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(24),
-                        child: Column(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 12,
-                              ),
-                              color: statusColor.withValues(alpha: 0.08),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.calendar_today_rounded,
-                                        size: 14,
-                                        color: statusColor,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        'ID: #${b.id.substring(b.id.length - 6).toUpperCase()}',
-                                        style: GoogleFonts.outfit(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: statusColor,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 6,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: statusColor,
-                                      borderRadius: BorderRadius.circular(100),
-                                    ),
-                                    child: Text(
-                                      bookingStatusLabel(b.status),
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(20),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 60,
-                                    height: 60,
-                                    decoration: BoxDecoration(
-                                      color: Colors.orange.shade50,
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: const Icon(
-                                      Icons.storefront_rounded,
-                                      color: AppColors.brandOrange,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          b.shopName,
-                                          style: GoogleFonts.outfit(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                            color: const Color(0xFF0F172A),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          '${fmt.format(b.checkInTime)} → ${fmt.format(b.checkOutTime)}',
-                                          style: GoogleFonts.outfit(
-                                            fontSize: 13,
-                                            color: const Color(0xFF424242),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Divider(height: 1, indent: 20, endIndent: 20),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 16,
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.luggage_rounded,
-                                        size: 18,
-                                        color: Color(0xFF616161),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        '${b.totalBags} ${'checkout.bag_s'.tr()}',
-                                        style: GoogleFonts.outfit(
-                                          fontWeight: FontWeight.w600,
-                                          color: const Color(0xFF0F172A),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Text(
-                                    '₺${b.totalPrice.toStringAsFixed(2)}',
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.brandOrange,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                );
+                return _BookingCard(booking: list[i], fmt: fmt);
               },
             ),
           );
@@ -238,6 +83,183 @@ class MyBookingsScreen extends ConsumerWidget {
       itemBuilder: (context, i) => const Padding(
         padding: EdgeInsets.only(bottom: 20),
         child: Skeleton(height: 140, borderRadius: 24),
+      ),
+    );
+  }
+}
+
+class _BookingCard extends StatelessWidget {
+  const _BookingCard({required this.booking, required this.fmt});
+
+  final BookingDto booking;
+  final DateFormat fmt;
+
+  @override
+  Widget build(BuildContext context) {
+    final b = booking;
+    final statusColor = bookingStatusColor(b.status);
+
+    // RepaintBoundary: liste kaydirilirken bu kartin kendi repaint'i
+    // komsu kartlara/ust agaca sizmasin diye izole edildi.
+    return RepaintBoundary(
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 20),
+        child: GestureDetector(
+          onTap: () => context.push('/booking/${b.id}'),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 20,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                    color: statusColor.withValues(alpha: 0.08),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.calendar_today_rounded,
+                              size: 14,
+                              color: statusColor,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'ID: #${b.id.substring(b.id.length - 6).toUpperCase()}',
+                              style: GoogleFonts.outfit(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: statusColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: statusColor,
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                          child: Text(
+                            bookingStatusLabel(b.status),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade50,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Icon(
+                            Icons.storefront_rounded,
+                            color: AppColors.brandOrange,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                b.shopName,
+                                // Kart yuksekligini sabit tutmak icin tek
+                                // satira sabitlendi (prototypeItem/itemExtent
+                                // her ogenin ayni yukseklikte olmasini gerektirir).
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.outfit(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF0F172A),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${fmt.format(b.checkInTime)} → ${fmt.format(b.checkOutTime)}',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 13,
+                                  color: const Color(0xFF424242),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(height: 1, indent: 20, endIndent: 20),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.luggage_rounded,
+                              size: 18,
+                              color: Color(0xFF616161),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              '${b.totalBags} ${'checkout.bag_s'.tr()}',
+                              style: GoogleFonts.outfit(
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF0F172A),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          '₺${b.totalPrice.toStringAsFixed(2)}',
+                          style: GoogleFonts.outfit(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.brandOrange,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
