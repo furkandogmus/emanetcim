@@ -479,11 +479,35 @@
     "warning_title": "Security Warning",
     "warning_desc": "Root/jailbreak detected on your device. This may compromise payment transactions and data security.",
     "accept_risk": "I Understand, Continue",
-    "exit_app": "Exit App"
+    "exit_app": "Exit App",
+    "devices_title": "Devices Receiving Notifications",
+    "devices_empty": "No registered devices.",
+    "devices_remove": "Remove",
+    "devices_remove_confirm_title": "Remove device",
+    "devices_remove_confirm_desc": "This device will stop receiving notifications. Are you sure?",
+    "devices_last_seen": "Last seen: {date}",
+    "permissions_title": "Permissions",
+    "permissions_camera": "Camera",
+    "permissions_location": "Location",
+    "permissions_notifications": "Notifications",
+    "permissions_open_settings": "Open Settings",
+    "permissions_status_granted": "Granted",
+    "permissions_status_denied": "Denied",
+    "permissions_status_permanently_denied": "Permanently denied",
+    "permissions_status_restricted": "Restricted",
+    "permissions_status_unknown": "Unknown"
   },
   "fatal_error": {
     "title": "Something Went Wrong",
     "desc": "An unexpected error occurred. Our team has been notified. Please close and reopen the app.",
     "refresh": "Refresh"
+  },
+  "update": {
+    "force_title": "Update required",
+    "force_desc": "You need to update to the latest version to continue.",
+    "update_button": "Update",
+    "soft_title": "New version available",
+    "soft_desc": "Update the app for a better experience.",
+    "later_button": "Later"
   }
 }

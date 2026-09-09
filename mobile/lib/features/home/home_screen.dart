@@ -9,6 +9,7 @@ import '../../core/auth/auth_controller.dart';
 import '../../core/services/analytics_service.dart';
 import '../../shared/utils/app_colors.dart';
 import '../../shared/widgets/how_it_works_sheet.dart';
+import '../update/soft_update_banner.dart';
 
 const _cityCoords = {
   'istanbul': LatLng(41.0082, 28.9784),
@@ -52,6 +53,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         : 'home.greeting_guest'.tr(),
                   ),
                   const SizedBox(height: 24),
+                  const SoftUpdateBanner(),
                   _SearchHero(onTap: () => context.push('/search')),
                   const SizedBox(height: 16),
                   const _TrustStrip(),
