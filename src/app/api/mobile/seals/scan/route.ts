@@ -1,4 +1,4 @@
-import { canOperateBookingAtShop } from "@/services/booking/access";
+import { canOperateBookingAtShop, canOperateSealAtShop } from "@/services/booking/access";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
@@ -28,8 +28,17 @@ export async function POST(req: NextRequest) {
   // 1. Seal serial number (numeric)
   const serial = Number(code);
   if (Number.isInteger(serial) && serial > 0) {
-    const seal = await prisma.seal.findUnique({ where: { serialNumber: serial } });
+    const seal = await prisma.seal.findUnique({
+      where: { serialNumber: serial },
+      include: { shop: { select: { ownerId: true } } },
+    });
     if (seal) {
+      // Sahiplik kontrolu: bkz. `canOperateSealAtShop` — 2026-09-10'da
+      // bulunan IDOR (herhangi bir PARTNER, seri numarasi deneyerek baska
+      // dukkanlarin muhur envanterini gorebiliyordu).
+      if (!canOperateSealAtShop(seal, auth.user)) {
+        return NextResponse.json({ error: "forbidden" }, { status: 403 });
+      }
       return NextResponse.json({
         type: "seal",
         serialNumber: seal.serialNumber,

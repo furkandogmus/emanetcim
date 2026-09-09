@@ -81,3 +81,22 @@ export function canOperateBookingAtShop(
   if (actor.role === "ADMIN") return true;
   return booking.shop.ownerId === actor.id;
 }
+
+/**
+ * MUHUR OPERASYONU: tarama, atama. `canOperateBookingAtShop` ile AYNI kural
+ * (ADMIN her zaman, esnaf yalnizca kendi dukkani) ama konu mühür olduğunda —
+ * `Seal.shopId` NULLABLE (stoktaki muhur henuz hicbir dukkana atanmamis
+ * olabilir), o yuzden `shop` de opsiyonel: atanmamis bir muhur icin esnaf
+ * HICBIR ZAMAN "sahibiyim" diyemez, yalnizca ADMIN gorebilir.
+ *
+ * NEDEN AYRI (2026-09-10'da bulundu): `seals/scan` bu kontrolu HIC yapmiyordu
+ * -- herhangi bir kimliklenmis PARTNER, seri numarasini deneyerek (ardisik)
+ * BASKA dukkanlarin muhur envanterini gorebiliyordu (IDOR).
+ */
+export function canOperateSealAtShop(
+  seal: { shop: { ownerId: string } | null },
+  actor: BookingActor,
+): boolean {
+  if (actor.role === "ADMIN") return true;
+  return seal.shop?.ownerId === actor.id;
+}
