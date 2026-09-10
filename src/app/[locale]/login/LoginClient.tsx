@@ -160,7 +160,7 @@ export default function LoginPage({
           onChange={(e) => setEmail(e.target.value)}
           required
           disabled={busy}
-          className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 placeholder-gray-300 focus:outline-none focus:border-orange-300 disabled:opacity-50 transition"
+          className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 placeholder-gray-300 disabled:opacity-50 transition"
         />
       </div>
 
@@ -176,7 +176,7 @@ export default function LoginPage({
           onChange={(e) => setPassword(e.target.value)}
           required
           disabled={busy}
-          className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 placeholder-gray-300 focus:outline-none focus:border-orange-300 disabled:opacity-50 transition"
+          className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 placeholder-gray-300 disabled:opacity-50 transition"
         />
       </div>
 

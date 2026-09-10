@@ -252,6 +252,7 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
                 <button
                   type="button"
                   onClick={closeResetModal}
+                  aria-label={tCommon("close")}
                   className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors"
                 >
                   <X size={20} />
@@ -277,8 +278,20 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
                       onClick={() => {
                         if (!resetTarget.phone) return;
                         startResetTransition(async () => {
-                          const res = await adminInitiatePartnerPasswordResetAction(resetTarget.phone!);
-                          setResetResult(res);
+                          /*
+                            try/catch (2026-09-10'da bulundu): aksiyon
+                            beklenmedik bicimde firlarsa (DB hatasi, oturum
+                            ortasinda gecersizlesme) `setResetResult` hic
+                            cagrilmiyordu -- transition tamamlaniyor ama modal
+                            ne basari ne hata ekranina geciyor, kullanici
+                            konfirmasyon ekraninda takili kaliyordu.
+                          */
+                          try {
+                            const res = await adminInitiatePartnerPasswordResetAction(resetTarget.phone!);
+                            setResetResult(res);
+                          } catch {
+                            setResetResult({ ok: false, error: "unexpected" });
+                          }
                         });
                       }}
                       className="px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 transition-colors disabled:opacity-50 inline-flex items-center gap-2"
@@ -302,7 +315,7 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
                       type="text"
                       readOnly
                       value={resetResult.resetUrl}
-                      className="w-full pr-12 pl-4 py-3 rounded-xl border-2 border-gray-100 bg-gray-50 text-sm font-medium text-gray-700 focus:outline-none"
+                      className="w-full pr-12 pl-4 py-3 rounded-xl border-2 border-gray-100 bg-gray-50 text-sm font-medium text-gray-700"
                     />
                     <button
                       type="button"
