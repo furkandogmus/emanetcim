@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { toast } from "sonner";
-import { MapPin, Calendar, Clock, Package, Shield, XCircle } from "lucide-react";
+import { MapPin, Calendar, Clock, Luggage, CheckCircle2, XCircle } from "lucide-react";
 import Money from "@/components/common/Money";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import { formatDateTimeInZone } from "@/lib/format-datetime";
@@ -115,7 +115,7 @@ export default function ManageBookingClient({ initialToken }: { initialToken: st
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 text-center">
         <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
-          <Shield size={32} className="text-emerald-600" />
+          <CheckCircle2 size={32} className="text-emerald-600" />
         </div>
         <h1 className="text-xl font-black text-gray-900">{t("cancelSuccess")}</h1>
         {cancelFullRefund && (
@@ -194,7 +194,7 @@ export default function ManageBookingClient({ initialToken }: { initialToken: st
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-xs text-gray-400 font-bold uppercase flex items-center gap-1">
-                  <Package size={12} /> {t("bags")}
+                  <Luggage size={12} /> {t("bags")}
                 </span>
                 <span className="text-sm font-bold text-gray-900">{totalBags}</span>
               </div>

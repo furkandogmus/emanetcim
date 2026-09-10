@@ -1,6 +1,6 @@
 "use client";
 
-import { Minus, Plus, Package } from 'lucide-react';
+import { Minus, Plus, Luggage } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 interface BagSelectorProps {
@@ -58,7 +58,7 @@ export default function BagSelector({ label, sublabel, count, onIncrease, onDecr
     <div className="ui-card-soft flex flex-wrap items-center justify-between gap-3 p-4 group hover:border-orange-200 transition-all">
       <div className="flex min-w-[7.5rem] flex-1 items-center gap-4">
         <div className="bg-white p-3 rounded-xl shadow-sm text-gray-400 group-hover:text-orange-600 transition-colors">
-          <Package size={24} strokeWidth={1.5} />
+          <Luggage size={24} strokeWidth={1.5} />
         </div>
         {/*
           Taban SOL GRUPTA (`min-w-[7.5rem]`), metnin kendisinde degil.

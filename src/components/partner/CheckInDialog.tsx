@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { AlertTriangle, CheckCircle2, Loader2, Package, ShieldCheck, X , Camera } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Loader2, Luggage, ShieldCheck, X , Camera } from "lucide-react";
 import { toast } from "sonner";
 import { checkInAction, getNextAvailableSealsAction } from "@/actions/partner";
 import { Link } from "@/i18n/routing";
@@ -244,7 +244,7 @@ export default function CheckInDialog({
 
             <div className="flex items-center gap-6">
               <div className="rounded-3xl bg-orange-100 p-5 text-orange-600 ring-4 ring-orange-50 shadow-inner">
-                <Package size={32} />
+                <Luggage size={32} />
               </div>
               <div>
                 <h3

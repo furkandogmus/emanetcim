@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Loader2, Luggage, Package } from "lucide-react";
+import { Loader2, Luggage } from "lucide-react";
 import type { PartnerBookingListItem } from "@/services/BookingService";
 import { moneyToNumber } from "@/lib/money";
 import type { computeOverdue } from "@/lib/overdue-display";
@@ -39,7 +39,7 @@ export default function PartnerHistoryTab({
       <div className="flex flex-col gap-4 pb-32">
         {bookings.length === 0 ? (
           <div className="ui-state ui-state-empty p-12 rounded-4xl text-center flex flex-col items-center gap-4">
-            <Package size={48} strokeWidth={1} />
+            <Luggage size={48} strokeWidth={1} />
             <p className="font-bold">{t("noTransactionsYet")}</p>
           </div>
         ) : (

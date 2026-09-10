@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { MapPin, ShieldCheck, Clock, Star, Smartphone, Map, QrCode, ArrowRight } from "lucide-react";
+import { MapPin, ShieldCheck, Clock, Star, Smartphone, CalendarCheck, Map, QrCode, ArrowRight } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { getGuestLandingStats } from "@/lib/guest-landing-stats";
 import { getHomeTestimonials } from "@/lib/home-testimonials";
@@ -254,7 +254,7 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
           <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="flex flex-col items-center gap-4">
               <div className="w-14 h-14 bg-orange-50 border border-orange-100 rounded-2xl flex items-center justify-center text-orange-600 shadow-sm">
-                <Smartphone size={28} />
+                <CalendarCheck size={28} />
               </div>
               <h3 className="text-sm font-black text-gray-900">{msg("homeStep1Title", "Book Online")}</h3>
               <p className="text-sm text-gray-500 leading-relaxed max-w-[220px]">

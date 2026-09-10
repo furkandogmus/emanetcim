@@ -7,7 +7,7 @@ import {
   Camera,
   CheckCircle2,
   Loader2,
-  TrendingUp,
+  Wallet,
   Calendar,
   ShieldCheck,
 } from "lucide-react";
@@ -527,7 +527,7 @@ export default function PartnerClient({
             href="/partner/earnings"
             className="flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl bg-orange-50 px-2 py-2.5 text-center text-[10px] font-bold text-orange-700 transition-all hover:bg-orange-100 active:scale-[0.97] sm:flex-row sm:gap-3 sm:px-4 sm:text-sm"
           >
-            <TrendingUp size={18} />
+            <Wallet size={18} />
             {t("earnings")}
           </Link>
           <Link

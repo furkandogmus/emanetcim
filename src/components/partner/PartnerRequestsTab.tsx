@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Luggage, Package } from "lucide-react";
+import { Luggage } from "lucide-react";
 import type { PartnerBookingListItem } from "@/services/BookingService";
 import { moneyToNumber } from "@/lib/money";
 import Money from "@/components/common/Money";
@@ -34,7 +34,7 @@ export default function PartnerRequestsTab({
       <div className="flex flex-col gap-4 pb-32">
         {bookings.filter(b => (b.status as string) === "WAITING_APPROVAL").length === 0 ? (
            <div className="ui-state ui-state-empty p-12 rounded-4xl text-center flex flex-col items-center gap-4">
-            <Package size={48} strokeWidth={1} />
+            <Luggage size={48} strokeWidth={1} />
             <p className="font-bold">{t("noRequestsYet")}</p>
           </div>
         ) : (

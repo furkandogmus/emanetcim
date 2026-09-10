@@ -1,7 +1,7 @@
 "use client";
 
 import { memo } from 'react';
-import { Building2, ChevronRight, MapPin, Star, Shield } from 'lucide-react';
+import { Building2, ChevronRight, MapPin, Star, ShieldCheck } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import FavoriteButton from '@/components/guest/FavoriteButton';
@@ -144,7 +144,7 @@ function ShopListItem({
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 flex-wrap">
             <div className="flex items-center gap-1 text-[10px] text-green-600 font-bold uppercase tracking-wider">
-              <Shield size={10} />
+              <ShieldCheck size={10} />
               {t("insured")}
             </div>
             <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-md">
