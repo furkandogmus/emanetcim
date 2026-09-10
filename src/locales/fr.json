@@ -1918,7 +1918,11 @@
     "exportDesc": "Téléchargez un fichier JSON contenant les données principales liées à votre compte.",
     "exportButton": "Télécharger",
     "deleteTitle": "Anonymiser le compte",
-    "deleteDesc": "Sans réservation active, les données personnelles sont supprimées ; certains enregistrements peuvent être conservés si la loi l’exige.",
+    "deleteDesc": "Avant de fermer votre compte, voici ce qui se passe :",
+    "deleteConsequenceIdentity": "Votre nom, e-mail, numéro de téléphone et photo sont supprimés ; vous ne pourrez plus vous connecter à ce compte.",
+    "deleteConsequenceReviews": "Vos avis et abonnements aux notifications sont supprimés.",
+    "deleteConsequenceBookings": "Vos réservations passées sont conservées sous forme anonymisée, comme l'exigent les obligations légales et comptables.",
+    "deleteConsequenceIrreversible": "Cette action est irréversible.",
     "deleteButton": "Fermer le compte",
     "errors": {
       "activeBookings": "Vous avez des réservations actives ; clôturez-les avant de supprimer votre compte.",
@@ -1926,7 +1930,9 @@
       "guestContactRequired": "Veuillez saisir un e-mail ou un numéro de téléphone.",
       "unauthorized": "Vous n’êtes pas autorisé à faire cela.",
       "generic": "Une erreur est survenue."
-    }
+    },
+    "deleteTypeConfirmLabel": "Tapez {phrase} ci-dessous pour confirmer :",
+    "deleteTypeConfirmPhrase": "SUPPRIMER MON COMPTE"
   },
   "WebPush": {
     "title": "Notifications push",

@@ -110,6 +110,31 @@ export default function AccountPrivacyClient() {
       <div className="rounded-2xl border border-red-100 bg-red-50/40 p-6">
         <h2 className="text-lg font-black text-red-900">{t("deleteTitle")}</h2>
         <p className="mt-2 text-sm text-red-800/90">{t("deleteDesc")}</p>
+        {/*
+          SOMUT SONUC LISTESI (2026-09-10). Eskiden tek cumlelik ozet
+          ("kisisel verileriniz silinir") vardi; kullanicinin geri alinamaz
+          bu eylemi yeterince bilinçli sekilde secip secmedigi belirsizdi.
+          Asagida gercekten ne oldugunu (AccountPrivacyService.anonymizeSelf)
+          birebir yansitan dört madde var.
+        */}
+        <ul className="mt-3 flex flex-col gap-1.5 text-xs font-semibold text-red-800/80">
+          <li className="flex gap-2">
+            <span aria-hidden>•</span>
+            {t("deleteConsequenceIdentity")}
+          </li>
+          <li className="flex gap-2">
+            <span aria-hidden>•</span>
+            {t("deleteConsequenceReviews")}
+          </li>
+          <li className="flex gap-2">
+            <span aria-hidden>•</span>
+            {t("deleteConsequenceBookings")}
+          </li>
+          <li className="flex gap-2 text-red-900">
+            <span aria-hidden>•</span>
+            {t("deleteConsequenceIrreversible")}
+          </li>
+        </ul>
         {error ? (
           <p className="mt-2 text-sm font-bold text-red-700">{error}</p>
         ) : null}
@@ -140,6 +165,10 @@ export default function AccountPrivacyClient() {
         cancelLabel={tCommon("cancel")}
         onConfirm={anonymize}
         onCancel={() => setConfirmOpen(false)}
+        typedConfirmation={{
+          phrase: t("deleteTypeConfirmPhrase"),
+          label: t("deleteTypeConfirmLabel", { phrase: t("deleteTypeConfirmPhrase") }),
+        }}
       />
     </div>
   );

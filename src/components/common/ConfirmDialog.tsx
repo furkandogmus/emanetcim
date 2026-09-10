@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
 
 type ConfirmDialogProps = {
@@ -11,6 +11,15 @@ type ConfirmDialogProps = {
   cancelLabel: string;
   onConfirm: () => void;
   onCancel: () => void;
+  /**
+   * En yıkıcı eylemler için ek engel: kullanıcı `phrase`'i harfiyen yazmadan
+   * onay butonu etkinleşmez (hesap kapatma gibi geri alınamaz işlemler için).
+   * Verilmezse davranış öncekiyle birebir aynı kalır.
+   */
+  typedConfirmation?: {
+    phrase: string;
+    label: string;
+  };
 };
 
 /**
@@ -32,6 +41,7 @@ export default function ConfirmDialog({
   cancelLabel,
   onConfirm,
   onCancel,
+  typedConfirmation,
 }: ConfirmDialogProps) {
   useModalBehavior({ open, onClose: onCancel });
 
@@ -40,7 +50,37 @@ export default function ConfirmDialog({
     if (open) cancelRef.current?.focus();
   }, [open]);
 
+  /*
+    Her acilista sifirlanir: onceki calistirmada yazilmis ifade bir sonraki
+    acilista kalirsa (ozellikle ayni sayfada tekrar tetiklenen bir onay
+    kutusunda) onay butonu misafirin hicbir sey yazmadigi bir acilista bile
+    etkin gorunur -- tam korumak istedigimiz seyin karsiti.
+
+    `useEffect` DEGIL, render sirasinda ayarlama: React'in kendi onerdigi
+    "prop degisince state sifirla" kalibi (react-hooks/set-state-in-effect
+    tam bu yuzden bir efekt icinde senkron `setState`i reddediyor -- ekstra
+    bir render turu ve olasi kirpisma demek).
+  */
+  const [typed, setTyped] = useState("");
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) setTyped("");
+  }
+
   if (!open) return null;
+
+  /*
+    TAM (buyuk/kucuk harf DUYARLI) ESLESME -- kasitli. `toLocaleUpperCase()`
+    ile yumusatma denendi ama Turkce "i" -> varsayilan (Turkce olmayan) yerel
+    ayarda "I" (noktasiz) degil "İ" (noktali) olmasi gerekirken tam tersini
+    uretiyor, yani kullanici gosterilen ifadeyi harfiyen yazsa bile eslesme
+    bazen basarisiz oluyordu. Ifade zaten ekranda TAM yazilisiyla goruluyor
+    (placeholder), kopyalanabilir/okunabilir -- tam eslesme istemek yerel
+    ayar tuzagina girmeden ayni amaca hizmet ediyor.
+  */
+  const confirmationSatisfied =
+    !typedConfirmation || typed.trim() === typedConfirmation.phrase.trim();
 
   return (
     <div
@@ -64,6 +104,24 @@ export default function ConfirmDialog({
         <p id="confirm-dialog-message" className="ui-body-sm text-gray-700">
           {message}
         </p>
+        {typedConfirmation ? (
+          <label className="flex flex-col gap-1.5">
+            <span className="text-xs font-bold text-gray-600">
+              {typedConfirmation.label}
+            </span>
+            <input
+              type="text"
+              value={typed}
+              onChange={(e) => setTyped(e.target.value)}
+              placeholder={typedConfirmation.phrase}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm font-bold tracking-wide text-gray-900 outline-none focus:ring-2 focus:ring-orange-500/40"
+            />
+          </label>
+        ) : null}
         <div className="flex gap-3">
           <button
             ref={cancelRef}
@@ -76,6 +134,7 @@ export default function ConfirmDialog({
           <button
             type="button"
             onClick={onConfirm}
+            disabled={!confirmationSatisfied}
             className="btn-ui btn-ui-md btn-ui-primary flex-1"
           >
             {confirmLabel}

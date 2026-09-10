@@ -1306,7 +1306,11 @@
     "exportDesc": "Download a JSON file with key data linked to your account.",
     "exportButton": "Download",
     "deleteTitle": "Anonymize account",
-    "deleteDesc": "If you have no active bookings, personal data is removed; some records may be retained where the law requires.",
+    "deleteDesc": "Before you close your account, here's what happens:",
+    "deleteConsequenceIdentity": "Your name, email, phone number and photo are removed; you will not be able to sign in to this account again.",
+    "deleteConsequenceReviews": "Your reviews and notification subscriptions are deleted.",
+    "deleteConsequenceBookings": "Your past booking records are kept in anonymized form, as required by legal and accounting obligations.",
+    "deleteConsequenceIrreversible": "This action cannot be undone.",
     "deleteButton": "Close account",
     "errors": {
       "activeBookings": "You have active bookings; close them before deleting your account.",
@@ -1317,7 +1321,9 @@
     },
     "deleteConfirmTitle": "You are about to close your account",
     "deleteConfirmBody": "This cannot be undone. Your personal data will be anonymised and you will be signed out.",
-    "deleteConfirmYes": "Yes, close my account"
+    "deleteConfirmYes": "Yes, close my account",
+    "deleteTypeConfirmLabel": "Type {phrase} below to confirm:",
+    "deleteTypeConfirmPhrase": "DELETE MY ACCOUNT"
   },
   "WebPush": {
     "title": "Push notifications",
