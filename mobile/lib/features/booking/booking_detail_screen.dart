@@ -586,7 +586,7 @@ class _BookingDetailScreenState extends ConsumerState<BookingDetailScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('booking.cancel_title'.tr()),
+        title: Text('booking.cancel_confirm_title'.tr()),
         content: Text('booking.cancel_confirm'.tr()),
         actions: [
           TextButton(
