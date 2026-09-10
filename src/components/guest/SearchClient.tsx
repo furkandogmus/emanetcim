@@ -618,7 +618,7 @@ export default function SearchClient({
                   responseTimeMinutes={shop.responseTimeMinutes}
                   slotPrices={(shop as unknown as { slotPrices?: { s: number; m: number; xl: number } }).slotPrices}
                   isPrelaunch={shop.isPrelaunch}
-                  onClick={() => onSelectShop(shop.id)}
+                  onSelect={onSelectShop}
                 />
               </motion.div>
             ))}
