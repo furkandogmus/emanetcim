@@ -11,7 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
-import { DayPicker } from "react-day-picker";
+import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
 import {
   de,
@@ -26,6 +26,20 @@ import { Calendar, Clock } from "lucide-react";
 import { parseDatetimeLocal } from "@/lib/datetime-local";
 import BottomSheet from "@/components/ui/BottomSheet";
 import "react-day-picker/style.css";
+
+/*
+  DAYPICKER DINAMIK YUKLENIR (2026-09-10'da bulundu). Ana sayfa
+  `HomeSearchWidget` uzerinden bu bileseni statik olarak import ediyor;
+  kullanici takvimi HIC ACMASA bile `react-day-picker` (ve stili) ana sayfa
+  paketine giriyordu -- ayni desen `LocationPicker`/`SearchMap`/
+  `AnalyticsChart` icin zaten uygulanmis, burasi atlanmisti. Tetikleyici
+  dugme (asagida) STATIK kalir; yalniz asagida `open`/BottomSheet true
+  oldugunda cizilen takvim tembel yuklenir.
+*/
+const DayPicker = dynamic(
+  () => import("react-day-picker").then((m) => m.DayPicker),
+  { ssr: false },
+);
 
 const LOCALE_MAP: Record<string, DateFnsLocale> = {
   de,
