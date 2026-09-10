@@ -12,3 +12,11 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+
+# ci-debug.keystore ISTISNA: gercek imzalama anahtari degil, sabit sifreli
+# ("android") paylasilan bir debug keystore. CI'nin kendi otomatik uretilen
+# debug keystore'u her calistirmada farkli SHA-1 uretiyordu, bu da Google
+# Cloud Console'a kayitli hicbir fingerprint'le eslesmiyordu -- CI'dan
+# alinan debug APK'da Google ile giris hep basarisiz oluyordu. Bu dosya
+# commit'lenip Gradle'a baglaninca SHA-1 sabitleniyor.
+!app/ci-debug.keystore
