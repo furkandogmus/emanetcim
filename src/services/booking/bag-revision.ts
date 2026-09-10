@@ -154,7 +154,14 @@ export async function proposeBagRevision(
       bagCountM: booking.bagCountM,
       bagCountXl: booking.bagCountXl,
     });
-    const extraAmount = round2(after.subtotalBeforeCoupon - before.subtotalBeforeCoupon);
+    // Kilitli indirim onizlemede de dusulur -- bkz. applyBagRevision'daki ayni
+    // gerekce (2026-09-10'da bulundu).
+    const lockedDiscountPreview =
+      moneyToNumber(booking.couponDiscountAmount) +
+      moneyToNumber(booking.referralDiscountAmount);
+    const afterTotal = Math.max(0, round2(after.subtotalBeforeCoupon - lockedDiscountPreview));
+    const beforeTotal = Math.max(0, round2(before.subtotalBeforeCoupon - lockedDiscountPreview));
+    const extraAmount = round2(afterTotal - beforeTotal);
 
     await prisma.booking.update({
       where: { id: bookingId },
@@ -163,8 +170,8 @@ export async function proposeBagRevision(
           ...counts,
           /** Sunucuda hesaplandi. Negatif olabilir (valiz azaldiysa). */
           extraAmount,
-          previousTotal: before.subtotalBeforeCoupon,
-          newTotal: after.subtotalBeforeCoupon,
+          previousTotal: beforeTotal,
+          newTotal: afterTotal,
           /** Hangi kural kumesiyle hesaplandi — anlik kopya mi, bugunku mu. */
           rulesSource,
           recordedAt: new Date().toISOString(),
@@ -291,8 +298,20 @@ export async function applyBagRevision(
       );
       return { ok: false, code: 'INVALID_COUNTS' };
     }
+    /*
+      KUPON/REFERANS INDIRIMI KORUNUR (2026-09-10'da bulundu, `modifyBooking`
+      ile ayni kok neden). `recompute`/`totals.subtotalBeforeCoupon` kupon/
+      referans indirimini hic bilmiyor; kilitli indirim tutari (rezervasyon
+      olusturulurken uygulanmis) burada dusulmezse esnafin valiz sayisini
+      DUZELTMESI bile (ayni sayiyla) misafirin indirimini sessizce
+      buharlastirirdi.
+    */
+    const lockedDiscount =
+      moneyToNumber(booking.couponDiscountAmount) +
+      moneyToNumber(booking.referralDiscountAmount);
+    const newTotal = Math.max(0, round2(totals.subtotalBeforeCoupon - lockedDiscount));
     const previousTotal = moneyToNumber(booking.totalPrice);
-    const delta = round2(totals.subtotalBeforeCoupon - previousTotal);
+    const delta = round2(newTotal - previousTotal);
 
     /*
       SLOT DEFTERI DE GUNCELLENIR -- ve TEK ISLEMDE.
@@ -326,7 +345,7 @@ export async function applyBagRevision(
           bagCountXl: totals.bagCountXl,
           unitPrice: totals.unitPrice,
           insuranceFee: totals.insuranceFee,
-          totalPrice: totals.subtotalBeforeCoupon,
+          totalPrice: newTotal,
           /* Uygulandi; bekleyen oneri her iki akista da DUSER. */
           pendingBagRevision: Prisma.JsonNull,
         },
@@ -364,7 +383,7 @@ export async function applyBagRevision(
             S: totals.bagCountS,
             M: totals.bagCountM,
             XL: totals.bagCountXl,
-            total: totals.subtotalBeforeCoupon,
+            total: newTotal,
           },
           delta,
           rulesSource,
@@ -379,7 +398,7 @@ export async function applyBagRevision(
       })
       .catch((err) => logger.error({ err, bookingId }, 'bag_revision_apply_event_failed'));
 
-    return { ok: true, newTotal: totals.subtotalBeforeCoupon, delta };
+    return { ok: true, newTotal, delta };
   } catch (err) {
     logger.error({ err, bookingId }, 'apply_bag_revision_failed');
     return { ok: false, code: 'UNKNOWN' };
