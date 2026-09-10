@@ -5025,3 +5025,64 @@ Bunlar için henüz **hiçbir** kanıtlı bulgu yok — yokluğu "sorun yok" anl
 - Backend güvenlik/doğruluk (IDOR, yetkilendirme, girdi doğrulama, yarış koşulları,
   webhook imzası, rate limit) — **en yüksek değerli, henüz yapılmadı**
 - i18n (14 dil: eksik anahtarlar, ham anahtar sızıntısı, yanlış çeviriler)
+
+---
+
+## 2026-09-11 — Mobil (Flutter) taramasında bulunan ve düzeltilen hatalar
+
+Rekabet/parity denetimi kapsamında (bkz. `docs/web_vs_mobile_comparison.md`, tamamen
+yeniden yazıldı) mobil uygulama koda karşı yeniden denetlendi. 5 gerçek üretim hatası
+bulundu; 4'ü bu oturumda düzeltildi. Kanıt: `flutter analyze --no-fatal-infos` → 0
+uyarı/hata, `flutter test` → tümü yeşil (125 test), dokunulan dosyalar `dart format`
+temiz.
+
+### [MOBIL-1] ✅ DÜZELTİLDİ — İptal onay diyaloğunun başlığı yanlış anahtar kullanıyordu
+- **Nerede**: `mobile/lib/features/booking/booking_detail_screen.dart:589`
+- **Kanıt**: `AlertDialog`'un `title`'ı `'booking.cancel_title'.tr()` kullanıyordu; bu
+  anahtarın `assets/l10n/tr.json`/`en.json`'daki değeri **"İptal Politikası"/"Cancellation
+  Policy"** — yani misafir en yıkıcı aksiyonu (rezervasyon iptali) onaylarken kutunun
+  başlığında "İptal Politikası" okuyordu, "Rezervasyonu iptal et" değil.
+- **Çözüm**: Yeni, doğru anahtar `booking.cancel_confirm_title` eklendi (tr: "Rezervasyonu
+  iptal et", en: "Cancel booking") ve diyalog ona geçirildi. Eski `cancel_title` anahtarı
+  başka hiçbir yerde kullanılmıyor, dokunulmadı.
+
+### [MOBIL-2] ✅ DÜZELTİLDİ — Arama ekranı ağ hatasını sessizce yutuyordu
+- **Nerede**: `mobile/lib/features/search/search_screen.dart` (harita `Stack`'i)
+- **Kanıt**: `filteredShopsProvider`'ın `AsyncError` durumu hiçbir yerde okunmuyordu;
+  `filtered` her zaman `maybeWhen(orElse: () => <ShopDto>[])` ile boş listeye düşüyor,
+  harita boş kalıyor, kullanıcıya "internet yok" mu "sonuç yok" mu olduğunu söyleyen
+  hiçbir şey görünmüyordu.
+- **Çözüm**: Projenin paylaşılan `ErrorState` widget'ı eklendi (`common.error` +
+  `common.try_again`, aksiyon `ref.invalidate(nearbyShopsProvider)`).
+
+### [MOBIL-3] ✅ DÜZELTİLDİ — Arama filtresi sıfır sonuç verdiğinde boş durum mesajı yoktu
+- **Nerede**: `mobile/lib/features/search/search_screen.dart` (alt önizleme şeridi)
+- **Kanıt**: `if (filtered.isEmpty) return const SizedBox();` — filtre uygulanıp hiç
+  sonuç kalmadığında alan tamamen boş kalıyordu, kullanıcı filtresini neden hiçbir şey
+  görmediğini anlayamıyordu.
+- **Çözüm**: Yeni `search.no_results_title`/`no_results_desc` anahtarlarıyla kompakt bir
+  bilgi kartı eklendi; aktif filtre varsa `search.clear_filters` aksiyonu da gösteriliyor.
+
+### [MOBIL-4] ✅ DÜZELTİLDİ — Esnaf kazanç ekranı ağ hatasında sessizce ₺0 gösteriyordu
+- **Nerede**: `mobile/lib/features/partner/partner_earnings_screen.dart`
+- **Kanıt**: `_fetchStats()`'in `catch` bloğu hatayı `_stats.error`'a yazıyordu ama
+  `build()` bunu HİÇBİR YERDE okumuyordu — ağ hatasında esnaf gerçek veriye
+  ulaşılamadığını değil, GERÇEKTEN ₺0 kazandığını sanıyordu. Aynı desen
+  `partner_settings_screen.dart`'ta doğru uygulanmıştı, burası atlanmıştı.
+- **Çözüm**: `_stats.error != null` durumunda `ErrorState` (tekrar dene aksiyonuyla)
+  gösteriliyor artık. Regresyon testi eklendi
+  (`test/features/partner/partner_earnings_screen_test.dart`): `fakeDioError()` ile
+  simüle edilen ağ hatasında ekranın `₺0` DEĞİL, hata durumu gösterdiği doğrulanıyor.
+
+### [MOBIL-5] ⚠️ BÜYÜK EFOR, BU OTURUMDA YAPILMADI — Bildirimler sekmesi üretimde her zaman boş
+- **Nerede**: `mobile/lib/core/services/notification_service.dart`,
+  `mobile/lib/core/push/push_service.dart`
+- **Kanıt**: Push bildirimleri yalnızca OS seviyesinde yerel bildirim gösteriyor;
+  `notificationProvider`'a hiçbir yerden `addNotification()` çağrılmıyor ve sunucudan
+  bildirim geçmişi çeken bir endpoint de yok (`grep`: sıfır sonuç). Bottom nav'daki
+  "Bildirimler" sekmesi fiilen ölü bir özellik.
+- **Neden bu oturumda yapılmadı**: Backend endpoint eklenmesi (bildirim geçmişini
+  saklayıp döndüren yeni bir `/api/mobile/notifications` ucu) + push handler'ın buna
+  yazması gerekiyor — tek dosyalık bir düzeltme değil, ayrı bir çalışma turu gerektiriyor.
+- **Sonraki adım**: Backend'de bildirim geçmişi tablosu/ucu tasarlanıp push handler'a
+  bağlanmalı; o zamana kadar sekme boş kalmaya devam edecek.
