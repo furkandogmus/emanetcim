@@ -12,6 +12,7 @@ import {
 import type { ValueType, NameType } from "recharts/types/component/DefaultTooltipContent";
 import { useLocale, useTranslations } from "next-intl";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
+import { CHART_COLORS } from "@/lib/chart-colors";
 
 /**
  * AnalyticsChart — son 7 gün (parent’tan gelen veri).
@@ -77,29 +78,29 @@ export default function AnalyticsChart({
         >
           <defs>
             <linearGradient id="colorCiro" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#f97316" stopOpacity={0.1} />
-              <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
+              <stop offset="5%" stopColor={CHART_COLORS.brand} stopOpacity={0.1} />
+              <stop offset="95%" stopColor={CHART_COLORS.brand} stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={CHART_COLORS.gridLine} />
           <XAxis
             dataKey="name"
             axisLine={false}
             tickLine={false}
-            tick={{ fontSize: 10, fontWeight: 700, fill: "#9ca3af" }}
+            tick={{ fontSize: 10, fontWeight: 700, fill: CHART_COLORS.axisTick }}
             dy={10}
           />
           <YAxis
             axisLine={false}
             tickLine={false}
-            tick={{ fontSize: 10, fontWeight: 700, fill: "#9ca3af" }}
+            tick={{ fontSize: 10, fontWeight: 700, fill: CHART_COLORS.axisTick }}
           />
           <Tooltip content={<CustomTooltip />} />
           <Area
             type="monotone"
             dataKey="ciro"
             name={t("chartRevenue")}
-            stroke="#f97316"
+            stroke={CHART_COLORS.brand}
             strokeWidth={3}
             fillOpacity={1}
             fill="url(#colorCiro)"
