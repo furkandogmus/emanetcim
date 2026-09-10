@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import Money from "@/components/common/Money";
 import { createCouponAction, setCouponActiveAction } from "@/actions/coupon";
+import { actionErrorKey } from "@/lib/action-error";
 
 type Coupon = {
   id: string;
@@ -76,9 +77,17 @@ export default function AdminCouponsClient({ coupons }: { coupons: Coupon[] }) {
 
   function toggle(c: Coupon) {
     startTransition(async () => {
-      await setCouponActiveAction(c.id, !c.isActive);
-      toast.success(c.isActive ? t("couponsDeactivated") : t("couponsActivated"));
-      router.refresh();
+      // `setCouponActiveAction` icindeki assertAdmin()/Prisma cagrisi
+      // try/catch disinda -- oturum/yetki hatasi burada FIRLAR. catch
+      // olmadan hicbir toast gorulmuyordu (2026-09-10'da bulundu,
+      // AdminFeatureFlagsClient'taki ayni desenle kapatildi).
+      try {
+        await setCouponActiveAction(c.id, !c.isActive);
+        toast.success(c.isActive ? t("couponsDeactivated") : t("couponsActivated"));
+        router.refresh();
+      } catch (e) {
+        toast.error(tErrors(actionErrorKey(e) as never));
+      }
     });
   }
 
