@@ -1671,6 +1671,7 @@
     "shopNowOpenBookInstead": "この拠点はオープンしました。そのままご予約いただけます。",
     "imageTooLarge": "写真のサイズが大きすぎます。最大8MBです。",
     "imageUnsupportedType": "このファイルは写真ではありません。JPEG、PNG、WebPをアップロードしてください。",
+    "imageDimensionsTooLarge": "写真の解像度が高すぎます。より小さい写真をお試しください。",
     "shopMissingCoordinates": "店舗の位置情報がありません。承認する前に座標を設定してください。"
   },
   "Emails": {

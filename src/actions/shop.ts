@@ -128,6 +128,7 @@ export async function updateShopImageAction(formData: FormData) {
       empty: "Errors.invalidData",
       too_large: "Errors.imageTooLarge",
       unsupported_type: "Errors.imageUnsupportedType",
+      dimensions_too_large: "Errors.imageDimensionsTooLarge",
     } as const;
     return { success: false as const, error: ERROR_KEYS[result.reason] };
   }

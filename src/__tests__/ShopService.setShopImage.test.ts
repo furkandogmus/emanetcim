@@ -22,7 +22,12 @@ vi.mock("@/lib/storage", async (orig) => {
 import { shopService } from "@/services/ShopService";
 import { Role } from "@prisma/client";
 
-const JPEG = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, ...Array(20).fill(0)]);
+// Gercek bir SOF0 segmenti tasir (200x100) -- bkz. seal-photo.test.ts'teki
+// ayni gerekce: `validateImageBytes`in piksel-boyutu dogrulamasi (2026-09-10)
+// header'dan boyut okuyamadigi sahte fixture'lari reddeder.
+const JPEG = new Uint8Array([
+  0xff, 0xd8, 0xff, 0xc0, 0x00, 0x0b, 0x08, 0x00, 0x64, 0x00, 0xc8, 0x01, 0x01, 0x11, 0x00,
+]);
 const BASE = { shopId: "s1", actorId: "owner-1", actorRole: Role.PARTNER, bytes: JPEG };
 
 beforeEach(() => {

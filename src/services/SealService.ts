@@ -181,7 +181,7 @@ export class SealService {
     bytes: Uint8Array;
   }): Promise<
     | { ok: true; url: string }
-    | { ok: false; reason: "empty" | "too_large" | "unsupported_type" }
+    | { ok: false; reason: "empty" | "too_large" | "unsupported_type" | "dimensions_too_large" }
   > {
     const validation = validateImageBytes(params.bytes);
     if (!validation.ok) return { ok: false, reason: validation.reason };

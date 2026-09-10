@@ -1671,6 +1671,7 @@
     "shopNowOpenBookInstead": "این نقطه اکنون افتتاح شده است — می‌توانید مستقیماً رزرو کنید.",
     "imageTooLarge": "حجم عکس زیاد است. حداکثر ۸ مگابایت.",
     "imageUnsupportedType": "این فایل عکس نیست. JPEG، PNG یا WebP بارگذاری کنید.",
+    "imageDimensionsTooLarge": "وضوح تصویر بسیار بالاست. یک عکس کوچک‌تر امتحان کنید.",
     "shopMissingCoordinates": "فروشگاه موقعیت مکانی ندارد. پیش از تأیید، مختصات را وارد کنید."
   },
   "Emails": {
