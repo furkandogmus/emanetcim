@@ -286,6 +286,7 @@ export default function PartnerClient({
       try {
         const res = await rejectBookingAction(id);
         if (res.success) {
+          showSuccessBanner(t("rejectedSuccess"));
           router.refresh();
         } else {
           showError(res.error);
