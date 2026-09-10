@@ -14,6 +14,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
 import { useSwipeBack } from "@/lib/hooks/useSwipeBack";
@@ -178,8 +179,22 @@ export default function ShopDetailClient({
           {shop.images.length > 0 ? (
             <ShopGallery images={shop.images} shopName={shop.name} />
           ) : shop.image ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={shop.image} alt={shop.name} className="w-full h-full object-cover" />
+            /*
+              next/image (2026-09-10'da bulundu): bu, dukkan detay sayfasinin
+              en ustundeki hero gorseli -- sayfanin LCP adayi. Duz <img>
+              next.config.ts'teki remotePatterns/format optimizasyonunu
+              (responsive srcset, AVIF/WebP) tamamen atliyordu. `shop.image`
+              tekil alani ASIL render yolu -- setShopImage'in TEK yazdigi
+              alan -- yani bu "nadir dusen fallback" degil.
+            */
+            <Image
+              src={shop.image}
+              alt={shop.name}
+              fill
+              sizes="100vw"
+              priority
+              className="object-cover"
+            />
           ) : (
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.25),transparent_50%)]" />
           )}
