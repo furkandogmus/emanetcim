@@ -306,6 +306,10 @@
   "Guest": {
     "heroTitle": "Gepäck abgeben, die Stadt frei erkunden",
     "heroSubtitle": "Gepäckaufbewahrung rund um die Welt.",
+    "homeTrustBadgeInsurance": "Bis zu 10.000 TL Absicherung",
+    "homeTrustBadgePayAtShop": "Vor Ort bezahlen, keine Kartendaten nötig",
+    "homeTrustBadgeSeal": "Versiegelte Übergabe",
+    "homeTrustBadgeFlexible": "Stündlich oder täglich",
     "searchPlaceholder": "Wohin gehst du? (z. B. Galataturm)",
     "findShops": "Aufbewahrung finden",
     "nearbyShops": "Nahe",

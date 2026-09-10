@@ -306,6 +306,10 @@
   "Guest": {
     "heroTitle": "چمدان را بسپارید، آزاد بگردید",
     "heroSubtitle": "محل‌های نگهداری چمدان در سراسر جهان.",
+    "homeTrustBadgeInsurance": "تا ۱۰,۰۰۰ لیر پوشش بیمه",
+    "homeTrustBadgePayAtShop": "پرداخت در محل، بدون نیاز به کارت",
+    "homeTrustBadgeSeal": "تحویل مهر و موم‌شده",
+    "homeTrustBadgeFlexible": "ساعتی یا روزانه",
     "searchPlaceholder": "کجا می‌روید؟ (مثلاً برج گالاتا)",
     "findShops": "یافتن محل نگهداری",
     "nearbyShops": "نزدیک",
