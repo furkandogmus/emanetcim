@@ -8,6 +8,7 @@ import { XCircle, Calendar as CalendarIcon, Phone, ExternalLink, MessageCircle }
 import { cancelBookingAction } from "@/actions/booking";
 import { toast } from "sonner";
 import { useActionErrorText } from "@/lib/use-action-error";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 
 type Props = {
   bookingId: string;
@@ -43,9 +44,17 @@ export default function BookingDetailActions({
   );
   const errorText = useActionErrorText();
   const [cancelling, setCancelling] = useState(false);
+  /*
+    ConfirmDialog KULLANILIR (2026-09-10). Bu sayfa iptali `confirm()` --
+    tarayici kromu -- arkasina birakiyordu: markasiz, odak yonetimi olmayan,
+    mobil webview'lerde bilinen sekilde sessizce kapatilabilen bir kutu. Ayni
+    islem icin ManageBookingClient.tsx ve BookingsClient.tsx zaten
+    ConfirmDialog kullaniyor; bu ucuncu, tutarsiz uygulamaydi.
+  */
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const handleCancel = async () => {
-    if (!confirm(t("cancelBookingConfirm"))) return;
+    setConfirmOpen(false);
     setCancelling(true);
     /*
       `cancelBookingAction` `getBookingDetails` cagrisi kendi try/catch'inin
@@ -100,7 +109,7 @@ export default function BookingDetailActions({
       {canCancel && (
         <button
           type="button"
-          onClick={handleCancel}
+          onClick={() => setConfirmOpen(true)}
           disabled={cancelling}
           className="flex w-full items-center justify-center gap-2 py-3.5 rounded-2xl border border-red-200 bg-red-50 text-red-700 text-xs id-eyebrow hover:bg-red-100 transition-colors disabled:opacity-50"
         >
@@ -162,6 +171,16 @@ export default function BookingDetailActions({
           {t("getDirections")}
         </a>
       )}
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title={t("cancelDialogTitle")}
+        message={t("confirmCancel")}
+        confirmLabel={t("cancelConfirmAction")}
+        cancelLabel={t("modifyCancel")}
+        onCancel={() => setConfirmOpen(false)}
+        onConfirm={handleCancel}
+      />
     </div>
   );
 }

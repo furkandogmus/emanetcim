@@ -321,7 +321,10 @@ export default function LoginPage({
               {/* Divider */}
               <div className="flex items-center gap-3 my-1">
                 <div className="flex-1 h-px bg-gray-100" />
-                <span className="text-[10px] font-black text-gray-300 uppercase tracking-[0.15em]">{t('orDivider')}</span>
+                {/* text-gray-300 beyaz zeminde ~1.5:1 veriyordu (WCAG AA eşiği
+                    4.5:1) — aynı kontrast hatası Footer.tsx ve page.tsx'te
+                    zaten ölçülüp düzeltilmişti, bu etiket gözden kaçmıştı. */}
+                <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.15em]">{t('orDivider')}</span>
                 <div className="flex-1 h-px bg-gray-100" />
               </div>
 

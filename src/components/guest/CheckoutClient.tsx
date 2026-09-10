@@ -250,6 +250,17 @@ export default function CheckoutClient({
           .catch(() => setQrDataUrl(null));
       }
       setIsSuccess(true);
+    } else if (result.error === "Errors.guestContactRequired") {
+      /*
+        OTURUM SÜRESİ CHECKOUT SIRASINDA DOLMUŞ OLABİLİR (2026-09-10). `isLoggedIn`
+        sayfa ilk yüklenirken SUNUCUDA hesaplanan sabit bir prop; burada tekrar
+        kontrol edilmiyor. Sunucu bizi artık misafir sayıp iletişim bilgisi
+        istediğinde, ekranda o bilgiyi toplayacak HİÇBİR alan yoktu — misafir aynı
+        hatayı tekrar tekrar görüyordu. Sunucunun "misafirim" dediği an, tam da o
+        bilgiyi toplayan modali açıyoruz.
+      */
+      setShowAuthModal(true);
+      setError(null);
     } else {
       setError(errorText(result.error, t("checkoutUnexpectedError")));
     }
@@ -477,7 +488,14 @@ export default function CheckoutClient({
         </nav>
       </header>
 
-      <div className="flex-1 max-w-2xl mx-auto w-full p-4 sm:p-6 flex flex-col gap-8 pb-36 sm:pb-40">
+      {/* 2026-09-10: `pb-36 sm:pb-40` (144/160px) 1. adımın footer'ının GERÇEK
+          yüksekliğinden küçüktü — footer'a sonradan eklenen çalışan-toplam
+          satırı (~40px) + `gap-3` (12px) + `.btn-ui-lg` buton (52px) +
+          `calc(env(safe-area-inset-bottom)+6rem)` alt boşluğu (96px+çentik)
+          toplamda ~216-250px tutuyor. Kupon kodu alanı (1. adımın en altı) bu
+          yarı-saydam footer'ın ALTINDA kalıp dokunulamaz hâle geliyordu — aynı
+          çakışma sınıfı, footer'ın kendi alt boşluğu için bir kez daha. */}
+      <div className="flex-1 max-w-2xl mx-auto w-full p-4 sm:p-6 flex flex-col gap-8 pb-64 sm:pb-72">
         {step === 1 && (
           <>
             <div>
@@ -855,6 +873,24 @@ export default function CheckoutClient({
                   const phone = guestPhone.trim();
                   if (!email && !phone) {
                     setError(t("checkoutGuestContactRequired"));
+                    return;
+                  }
+                  /*
+                    BİÇİM DOĞRULAMASI MODAL AÇIKKEN (2026-09-10). Sunucu
+                    (`createBookingAction`) e-posta biçimini ve telefon
+                    uzunluğunu ayrıca doğruluyor — bunların istemci tarafında
+                    eşdeğeri yoktu. Modal ÖNCE kapanıyor, sunucunun ürettiği
+                    bu hata ARKADAKİ sayfada (footer banner) beliriyordu; ama
+                    onu düzeltecek e-posta/telefon alanları yalnızca kapanmış
+                    modalin içinde var. Aynı kurallar burada, modal kapanmadan
+                    önce çalışıyor ki hata hâlâ görünür alanların yanında kalsın.
+                  */
+                  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    setError(errorText("Errors.invalidEmail"));
+                    return;
+                  }
+                  if (phone && phone.length < 10) {
+                    setError(errorText("Errors.invalidPhone"));
                     return;
                   }
                   setError(null);

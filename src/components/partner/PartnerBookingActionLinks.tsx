@@ -72,10 +72,18 @@ export default function PartnerBookingActionLinks({
   }
 
   if (status === "CHECKED_IN") {
+    /*
+      `.btn-ui-primary` EKLENDI (2026-09-10). Bu buton, PartnerHistoryTab'daki
+      ayni islemin (`deliveryCheckoutShort`) BIREBIR ayni sinifi (`btn-ui
+      btn-ui-lg btn-ui-primary bg-gray-900 hover:bg-black`) tasiyan karsiligiyla
+      ayni islemi yapiyor -- ama burada `.btn-ui-primary` HIC yoktu, yani
+      `bg-gray-900` hicbir seyle yarismadan dogrudan uyguluyordu ve buton
+      panelin turuncu birincil-eylem renginden farkli, duz siyah goruunuyordu.
+    */
     return (
       <Link
         href={`/partner?checkoutBooking=${bookingId}`}
-        className="block w-full rounded-2xl bg-gray-900 px-4 py-3 text-center text-xs font-black text-white transition-colors hover:bg-black"
+        className="btn-ui btn-ui-lg btn-ui-primary block w-full rounded-2xl bg-gray-900 hover:bg-black"
       >
         {t("handOverCheckout")}
       </Link>
