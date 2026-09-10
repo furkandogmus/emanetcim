@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import prisma from "@/lib/db";
 import { getMobileSession } from "@/lib/mobile-auth";
+import { CONTACT_MESSAGE_LIST_SELECT, CONTACT_MESSAGE_LIST_TAKE } from "@/lib/contact-message-list";
 
 export const dynamic = 'force-dynamic';
 
@@ -32,6 +33,8 @@ export async function GET() {
 
   const messages = await prisma.contactMessage.findMany({
     orderBy: { createdAt: "desc" },
+    select: CONTACT_MESSAGE_LIST_SELECT,
+    take: CONTACT_MESSAGE_LIST_TAKE,
   });
 
   return NextResponse.json(messages);
