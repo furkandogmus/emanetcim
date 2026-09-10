@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from 'react';
 import { Building2, ChevronRight, MapPin, Star, Shield } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
@@ -26,7 +27,13 @@ interface ShopListItemProps {
   slotPrices?: { s: number; m: number; xl: number };
   /** Talep testi noktası: rezervasyon almaz, fiyatı da yoktur. */
   isPrelaunch?: boolean;
-  onClick?: () => void;
+  /**
+   * `() => void` DEĞİL, `(id: string) => void`: çağıranın (`SearchClient`)
+   * satır başına yeni bir kapanış (`() => onSelectShop(shop.id)`) kurmadan,
+   * kendi zaten `useCallback` ile sabitlediği handler'ı DOĞRUDAN geçirebilmesi
+   * için (2026-09-10'da bulundu — bkz. aşağıdaki `memo` gerekçesi).
+   */
+  onSelect?: (id: string) => void;
 }
 
 /**
@@ -41,8 +48,15 @@ const PRICE_SLOT_CLASS = "text-xl font-black text-gray-900";
 /**
  * ShopListItem - Misafir Arama Sonucu Kartı
  * Minimalist, fiyat ve güven odaklı tasarım.
+ *
+ * `memo` İLE SARILI (2026-09-10'da bulundu): `SearchClient` 26 ayrı `useState`
+ * taşıyor (arama kutusu, filtreler, harita durumu...) ve her tuş vuruşunda/
+ * filtre değişiminde yeniden render oluyor. Memo olmadan bu, GÖRÜNMEYEN her
+ * satırın da (10-50 sonuç) tamamen yeniden render edilmesi demekti. `onSelect`
+ * artık `id` alan STABİL bir prop olduğundan (çağıran satır başına yeni bir
+ * kapanış kurmuyor), shallow-equal prop karşılaştırması gerçek anlamda çalışır.
  */
-export default function ShopListItem({
+function ShopListItem({
   id,
   name,
   rating,
@@ -55,14 +69,14 @@ export default function ShopListItem({
   responseTimeMinutes,
   slotPrices,
   isPrelaunch,
-  onClick,
+  onSelect,
 }: ShopListItemProps) {
   const t = useTranslations('Guest');
   const locale = useLocale();
   return (
     <motion.div
       data-testid="shop-list-item"
-      onClick={onClick}
+      onClick={() => onSelect?.(id)}
       whileTap={{ scale: 0.97 }}
       transition={{ type: "spring", stiffness: 400, damping: 17 }}
       className="bg-white border border-gray-100 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow cursor-pointer flex gap-5 items-center group"
@@ -178,7 +192,7 @@ export default function ShopListItem({
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              onClick?.();
+              onSelect?.(id);
             }}
             className="btn-ui btn-ui-sm bg-orange-600 text-white rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-wider hover:bg-orange-700 transition-colors flex-1"
           >
@@ -206,3 +220,5 @@ export default function ShopListItem({
     </motion.div>
   );
 }
+
+export default memo(ShopListItem);
