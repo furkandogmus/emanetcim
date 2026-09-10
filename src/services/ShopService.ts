@@ -258,7 +258,16 @@ export interface IShopService {
  */
 export type SetShopImageResult =
   | { ok: true; url: string }
-  | { ok: false; reason: "not_found" | "not_owner" | "empty" | "too_large" | "unsupported_type" };
+  | {
+      ok: false;
+      reason:
+        | "not_found"
+        | "not_owner"
+        | "empty"
+        | "too_large"
+        | "unsupported_type"
+        | "dimensions_too_large";
+    };
 
 /**
  * Kayitli URL'den nesne anahtarini geri cikarir.

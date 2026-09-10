@@ -1671,6 +1671,7 @@
     "shopNowOpenBookInstead": "Dieser Standort ist jetzt geöffnet — Sie können direkt buchen.",
     "imageTooLarge": "Das Foto ist zu groß. Maximal 8 MB.",
     "imageUnsupportedType": "Diese Datei ist kein Foto. Lade ein JPEG, PNG oder WebP hoch.",
+    "imageDimensionsTooLarge": "Die Auflösung des Fotos ist zu hoch. Versuche ein kleineres Foto.",
     "shopMissingCoordinates": "Der Laden hat keinen Standort. Legen Sie die Koordinaten vor der Freigabe fest."
   },
   "Emails": {

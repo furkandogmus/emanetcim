@@ -3,14 +3,36 @@ import {
   sniffImageKind,
   validateImageBytes,
   buildObjectKey,
+  readImageDimensions,
   MAX_IMAGE_BYTES,
+  MAX_IMAGE_DIMENSION_PX,
 } from "@/lib/storage/image-validation";
 
-const bytes = (...b: number[]) => new Uint8Array([...b, ...Array(16).fill(0)]);
-const JPEG = bytes(0xff, 0xd8, 0xff, 0xe0);
-const PNG = bytes(0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a);
 const ascii = (s: string) => [...s].map((c) => c.charCodeAt(0));
-const WEBP = new Uint8Array([...ascii("RIFF"), 0, 0, 0, 0, ...ascii("WEBP"), 0, 0, 0, 0]);
+
+/*
+  ASAGIDAKI UC FIXTURE GERCEK BOYUT HEADER'I TASIR -- `validateImageBytes`e
+  piksel-boyutu dogrulamasi eklendikten sonra (2026-09-10) sahte/eksik
+  header'lar "dimensions_too_large" ile reddediliyor (dims okunamiyor).
+  Byte diziligi, `sharp` ile uretilmis gercek dosyalar karsi elle dogrulandi.
+*/
+
+/** 200x100, tek bilesenli minimal SOF0 segmenti. */
+const JPEG = new Uint8Array([
+  0xff, 0xd8, 0xff, 0xc0, 0x00, 0x0b, 0x08, 0x00, 0x64, 0x00, 0xc8, 0x01, 0x01, 0x11, 0x00,
+]);
+/** 300x150 IHDR. */
+const PNG = new Uint8Array([
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+  0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+  0x00, 0x00, 0x01, 0x2c, 0x00, 0x00, 0x00, 0x96,
+]);
+/** 400x250, VP8X (genisletilmis) konteyner. */
+const WEBP = new Uint8Array([
+  ...ascii("RIFF"), 0x00, 0x00, 0x00, 0x00, ...ascii("WEBP"), ...ascii("VP8X"),
+  0x0a, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x8f, 0x01, 0x00, 0xf9, 0x00, 0x00,
+]);
 
 /**
  * Tür İSTEMCİNİN BEYANINDAN değil, dosyanın ilk baytlarından okunur.
@@ -66,7 +88,7 @@ describe("görsel doğrulama", () => {
 
   it("sınırın TAM üstündeki dosyayı geçirir", () => {
     const atLimit = new Uint8Array(MAX_IMAGE_BYTES);
-    atLimit.set([0xff, 0xd8, 0xff, 0xe0]);
+    atLimit.set(JPEG);
     expect(validateImageBytes(atLimit).ok).toBe(true);
   });
 
@@ -74,6 +96,51 @@ describe("görsel doğrulama", () => {
     // Cok buyuk bir govdeyi ayristirmaya calismak zaten istenmeyen istir.
     const hugeNonImage = new Uint8Array(MAX_IMAGE_BYTES + 1);
     expect(validateImageBytes(hugeNonImage)).toEqual({ ok: false, reason: "too_large" });
+  });
+});
+
+describe("piksel boyutu doğrulaması (decompression bomb önleme)", () => {
+  it("JPEG/PNG/WebP header'ından gerçek genişlik×yükseklik okur", () => {
+    expect(readImageDimensions(JPEG, "jpeg")).toEqual({ width: 200, height: 100 });
+    expect(readImageDimensions(PNG, "png")).toEqual({ width: 300, height: 150 });
+    expect(readImageDimensions(WEBP, "webp")).toEqual({ width: 400, height: 250 });
+  });
+
+  it("makul boyuttaki görseli kabul eder", () => {
+    expect(validateImageBytes(JPEG)).toMatchObject({ ok: true });
+    expect(validateImageBytes(PNG)).toMatchObject({ ok: true });
+    expect(validateImageBytes(WEBP)).toMatchObject({ ok: true });
+  });
+
+  it("küçük dosya boyutuna karşılık devasa piksel sayısı taşıyan bir görseli reddeder", () => {
+    /*
+      "Decompression bomb": duz renkli 8000x8000 bir PNG birkaç yuz KB'a
+      sikisabilir (sharp ile uretilip dogrulandi) ama decode edilince 192MB
+      ciplak piksel verisi -- 2026-09-10'da bulundu.
+      Genislik=8000 (0x00001F40), yukseklik=8000 (0x00001F40).
+    */
+    const bomb = new Uint8Array([
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+      0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+      0x00, 0x00, 0x1f, 0x40, 0x00, 0x00, 0x1f, 0x40,
+    ]);
+    expect(validateImageBytes(bomb)).toEqual({ ok: false, reason: "dimensions_too_large" });
+  });
+
+  it("tek kenarı sınırın üstünde olan görseli reddeder", () => {
+    const tooWide = new Uint8Array([
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+      0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+    ]);
+    const view = new DataView(tooWide.buffer);
+    view.setUint32(16, MAX_IMAGE_DIMENSION_PX + 1);
+    expect(validateImageBytes(tooWide)).toEqual({ ok: false, reason: "dimensions_too_large" });
+  });
+
+  it("header'dan boyut okunamayan (bozuk/eksik) bir dosyayı da reddeder", () => {
+    const brokenJpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    expect(validateImageBytes(brokenJpeg)).toEqual({ ok: false, reason: "dimensions_too_large" });
   });
 });
 

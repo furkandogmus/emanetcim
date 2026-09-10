@@ -1729,6 +1729,7 @@
     "shopNowOpenBookInstead": "Bu nokta artık hizmete açıldı — doğrudan rezervasyon yapabilirsiniz.",
     "imageTooLarge": "Fotoğraf çok büyük. En fazla 8 MB olabilir.",
     "imageUnsupportedType": "Bu dosya bir fotoğraf değil. JPEG, PNG veya WebP yükleyin.",
+    "imageDimensionsTooLarge": "Görselin çözünürlüğü çok yüksek. Daha küçük bir fotoğraf deneyin.",
     "shopMissingCoordinates": "Dükkanın konum bilgisi yok. Onaylamadan önce koordinatları girin."
   },
   "Emails": {

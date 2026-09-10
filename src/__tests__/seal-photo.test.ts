@@ -18,7 +18,15 @@ vi.mock("@/lib/storage", async (orig) => {
 
 import { sealService } from "@/services/SealService";
 
-const JPEG = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, ...Array(20).fill(0)]);
+/*
+  Gercek bir SOF0 segmenti tasiyor (200x100) -- yalniz SOI+APP0 tasiyan eski
+  fixture, `validateImageBytes`in piksel-boyutu dogrulamasi eklendikten sonra
+  (bkz. src/lib/storage/image-validation.ts, 2026-09-10) "dimensions_too_large"
+  ile reddediliyordu: header'dan gercek boyut okunamiyordu.
+*/
+const JPEG = new Uint8Array([
+  0xff, 0xd8, 0xff, 0xc0, 0x00, 0x0b, 0x08, 0x00, 0x64, 0x00, 0xc8, 0x01, 0x01, 0x11, 0x00,
+]);
 
 beforeEach(() => {
   vi.clearAllMocks();

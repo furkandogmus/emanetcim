@@ -1671,6 +1671,7 @@
     "shopNowOpenBookInstead": "Ce point est désormais ouvert — vous pouvez réserver directement.",
     "imageTooLarge": "La photo est trop lourde. 8 Mo maximum.",
     "imageUnsupportedType": "Ce fichier n'est pas une photo. Envoyez un JPEG, PNG ou WebP.",
+    "imageDimensionsTooLarge": "La résolution de la photo est trop élevée. Essayez une photo plus petite.",
     "shopMissingCoordinates": "La boutique n'a pas de localisation. Renseignez les coordonnées avant d'approuver."
   },
   "Emails": {

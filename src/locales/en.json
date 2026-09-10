@@ -1729,6 +1729,7 @@
     "shopNowOpenBookInstead": "This location is now open — you can book it directly.",
     "imageTooLarge": "The photo is too large. Maximum size is 8 MB.",
     "imageUnsupportedType": "That file is not a photo. Upload a JPEG, PNG or WebP.",
+    "imageDimensionsTooLarge": "The photo's resolution is too high. Try a smaller photo.",
     "shopMissingCoordinates": "The shop has no location. Set its coordinates before approving."
   },
   "Emails": {
