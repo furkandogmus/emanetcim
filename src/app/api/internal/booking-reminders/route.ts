@@ -47,6 +47,36 @@ async function alreadyNotified(
 }
 
 /**
+ * Rezervasyon basina bu bildirimden KAC KEZ gonderildi.
+ *
+ * `alreadyNotified` gibi TEK sorguda, ama gecikmis-uyari dali sayiya ihtiyac
+ * duyuyor (`shouldSendOverdueNotice` esiklere gore en fazla BES uyari
+ * gonderiyor) -- `Set` (var/yok) yetmiyor. Eskiden dongu icinde rezervasyon
+ * basina ayri bir `count()` sorgusu vardi (N+1, 2026-09-10'da bulundu);
+ * check-in/check-out dallarindaki tekillestirme deseni buraya da tasindi.
+ */
+async function notifiedCounts(
+  bookingIds: string[],
+  subjectPrefix: string,
+): Promise<Map<string, number>> {
+  if (bookingIds.length === 0) return new Map();
+  const rows = await prisma.notificationLog.groupBy({
+    by: ["bookingId"],
+    where: {
+      bookingId: { in: bookingIds },
+      type: "EMAIL",
+      subject: { startsWith: subjectPrefix },
+    },
+    _count: { _all: true },
+  });
+  const out = new Map<string, number>();
+  for (const r of rows) {
+    if (r.bookingId) out.set(r.bookingId, r._count._all);
+  }
+  return out;
+}
+
+/**
  * Tek calismada taranacak en fazla rezervasyon.
  *
  * Siniri asmak SESSIZ VERI KAYBI: kalan rezervasyonlar o calismada hic
@@ -239,19 +269,18 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const overdueSentCounts = await notifiedCounts(
+      overdue.map((b) => b.id),
+      OVERDUE_NOTICE_SUBJECT_PREFIX,
+    );
+
     for (const booking of overdue) {
       const partnerEmail = booking.shop.owner?.email;
       if (!partnerEmail) continue;
 
       const overdueHours =
         (now.getTime() - booking.checkOutTime.getTime()) / 3_600_000;
-      const alreadySent = await prisma.notificationLog.count({
-        where: {
-          bookingId: booking.id,
-          type: "EMAIL",
-          subject: { startsWith: OVERDUE_NOTICE_SUBJECT_PREFIX },
-        },
-      });
+      const alreadySent = overdueSentCounts.get(booking.id) ?? 0;
       if (!shouldSendOverdueNotice(overdueHours, alreadySent)) continue;
 
       void notificationService.sendEmail(
