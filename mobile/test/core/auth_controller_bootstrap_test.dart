@@ -85,7 +85,18 @@ void main() {
       ); // build() -> _bootstrap tetiklenir
       // _bootstrap icindeki await zincirinin (SharedPreferences, token okuma,
       // basarisiz /auth/me cagrisi, temizlik) tamamlanmasini bekle.
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      //
+      // SABIT GECIKME YERINE YOKLAMA (2026-09-10'da CI'da gorulen flake
+      // sonrasi): CI runner'i paylasimli/yuklu olabiliyor ve sabit 50ms
+      // bazen SharedPreferences + mock HTTP + token temizligi zincirinin
+      // tamamlanmasi icin yetmiyordu -- yerelde hep gecen test CI'da ara
+      // sira "Expected: true, Actual: false" ile dusuyordu. Kosul
+      // gerceklesir gerceklesmez cikan bir yoklama dongusu, hem yerelde
+      // yavaslatmiyor hem CI'da payli zaman taniyor.
+      final deadline = DateTime.now().add(const Duration(seconds: 5));
+      while (!fakeStore.cleared && DateTime.now().isBefore(deadline)) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
 
       expect(fakeStore.cleared, isTrue);
       expect(Hive.box('my_bookings_cache').get('list'), isNull);
