@@ -306,6 +306,10 @@
   "Guest": {
     "heroTitle": "荷物を預けて、身軽に街へ",
     "heroSubtitle": "世界中の手荷物預かり所。",
+    "homeTrustBadgeInsurance": "最大10,000トルコリラを補償",
+    "homeTrustBadgePayAtShop": "店頭払い、カード情報不要",
+    "homeTrustBadgeSeal": "封印された受け渡し",
+    "homeTrustBadgeFlexible": "時間単位・日単位どちらも可能",
     "searchPlaceholder": "どこに行くの？ (ガラタ塔など)",
     "findShops": "預かり所を探す",
     "nearbyShops": "近く",

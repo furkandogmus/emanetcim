@@ -306,6 +306,10 @@
   "Guest": {
     "heroTitle": "Drop Your Bags, Explore Freely",
     "heroSubtitle": "Luggage storage points around the world.",
+    "homeTrustBadgeInsurance": "Up to ₺10,000 protection",
+    "homeTrustBadgePayAtShop": "Pay at the shop, no card needed",
+    "homeTrustBadgeSeal": "Sealed handover",
+    "homeTrustBadgeFlexible": "Hourly or daily",
     "searchPlaceholder": "Where are you going? (e.g. Galata Tower)",
     "findShops": "Find storage point",
     "nearbyShops": "Nearby",

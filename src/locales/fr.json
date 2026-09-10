@@ -306,6 +306,10 @@
   "Guest": {
     "heroTitle": "Déposez vos bagages, explorez librement",
     "heroSubtitle": "Des consignes à bagages partout dans le monde.",
+    "homeTrustBadgeInsurance": "Jusqu'à 10 000 TL de couverture",
+    "homeTrustBadgePayAtShop": "Paiement sur place, sans carte",
+    "homeTrustBadgeSeal": "Remise scellée",
+    "homeTrustBadgeFlexible": "À l'heure ou à la journée",
     "searchPlaceholder": "Où vas-tu? (par exemple la Tour de Galata)",
     "findShops": "Trouver une consigne",
     "nearbyShops": "Proche",

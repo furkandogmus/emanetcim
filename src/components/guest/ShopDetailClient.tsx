@@ -9,6 +9,7 @@ import {
   Star,
   ShieldCheck,
   Clock,
+  CalendarClock,
   Luggage,
   Sparkles,
   ExternalLink,
@@ -572,6 +573,24 @@ export default function ShopDetailClient({
                 {t("shopDetailCapacityLabel")}
               </p>
               <p>{shop.capacity}</p>
+            </div>
+          </div>
+          {/*
+            SAATLIK/GUNLUK ESNEKLIGI GORUNUR KILINDI (2026-09-11, rakip analizi).
+            Checkout'ta SlotAvailabilityGrid zaten HER dukkan icin kosulsuz
+            render ediliyor (saatlik secim her zaman mumkun), ama bu esneklik
+            dukkan detayinda hic soylenmiyordu -- misafir checkout'a gelene
+            kadar bunu bilmiyordu. Rakiplerin (Stasher) saatligi hic sunmadigi,
+            digerlerinin (Bounce, Radical Storage) ise bilincli olarak geri
+            planda tuttugu bir esneklik.
+          */}
+          <div className="flex items-center gap-2 text-xs font-bold text-gray-700 min-w-[140px]">
+            <CalendarClock size={18} className="text-orange-500 shrink-0" />
+            <div>
+              <p className="text-[9px] font-black uppercase text-gray-400">
+                {t("stayDuration")}
+              </p>
+              <p>{t("homeTrustBadgeFlexible")}</p>
             </div>
           </div>
           {/* Mobil rozetlerle ayni kural (yukarida): sigorta karsiligi yokken

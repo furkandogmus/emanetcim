@@ -10,6 +10,7 @@ import {
   AlertCircle,
   MapPin,
   User,
+  Store,
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import BagSelector from "@/components/guest/BagSelector";
@@ -357,6 +358,20 @@ export default function CheckoutClient({
               </div>
             </div>
           </div>
+
+          {/*
+            "DUKKANDA ODE" HATIRLATMASI (2026-09-11, rakip analizi). Rezervasyon
+            onayi ekrani odeme konusunda hic bir sey soylemiyordu; misafir
+            (ozellikle yabanci turist) "kartimdan cekildi mi?" diye merak
+            edebilir. Incelenen 6 rakibin TAMAMI online on odeme aliyor, bir
+            kismi checkout'ta gizli/ek ucret sikayeti aliyor -- bu bizim
+            yapisal, ucretsiz farkimiz, tam da paradan endise edilecek anda
+            soylenmeli.
+          */}
+          <p className="flex items-center justify-center gap-2 text-xs font-bold text-white/80">
+            <Store size={14} className="shrink-0" aria-hidden />
+            {t("homeTrustBadgePayAtShop")}
+          </p>
 
           <div className="w-full max-w-sm">
             <WebPushOptIn />

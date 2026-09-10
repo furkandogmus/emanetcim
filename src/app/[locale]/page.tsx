@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { MapPin, ShieldCheck, Clock, Star, Smartphone, CalendarCheck, Map, QrCode, ArrowRight } from "lucide-react";
+import { MapPin, ShieldCheck, Clock, Star, Smartphone, CalendarCheck, Map, QrCode, ArrowRight, Store, PackageCheck } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { getGuestLandingStats } from "@/lib/guest-landing-stats";
 import { getHomeTestimonials } from "@/lib/home-testimonials";
@@ -242,6 +242,36 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
             defaultCheckIn={stayWindow.checkIn}
             defaultCheckOut={stayWindow.checkOut}
           />
+
+          {/*
+            GUVEN BANDI (2026-09-11, rakip analizi). Bounce/Stasher/LuggageHero/
+            Radical Storage/Nannybag'in HEPSI hero'nun hemen altina somut
+            rakam+guven satiri koyuyor (guvence tutari, puan, sosyal kanit).
+            BagajPark'in ayni kalitede dort somut avantaji VARDI ama hicbiri
+            hero'da gorunmuyordu: 10.000 TL guvence yalnizca sayfanin cok
+            asagisinda (insuranceEnabled bolumu), "dukkanda ode" ve saatlik/
+            gunluk esnekligi HIC bir yerde tek cumleyle soylenmiyordu. Rakiplerin
+            TAMAMI online on odeme aliyor (bazilarinda gizli ucret sikayeti var,
+            Vertoe bu yuzden kapandi) -- bu bizim yapisal, ucretsiz farkimiz.
+          */}
+          <ul className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] font-bold text-gray-500 sm:text-xs">
+            <li className="flex items-center gap-1.5">
+              <ShieldCheck size={14} className="text-orange-600" aria-hidden />
+              {t("homeTrustBadgeInsurance")}
+            </li>
+            <li className="flex items-center gap-1.5">
+              <Store size={14} className="text-orange-600" aria-hidden />
+              {t("homeTrustBadgePayAtShop")}
+            </li>
+            <li className="flex items-center gap-1.5">
+              <PackageCheck size={14} className="text-orange-600" aria-hidden />
+              {t("homeTrustBadgeSeal")}
+            </li>
+            <li className="flex items-center gap-1.5">
+              <Clock size={14} className="text-orange-600" aria-hidden />
+              {t("homeTrustBadgeFlexible")}
+            </li>
+          </ul>
         </div>
       </header>
 

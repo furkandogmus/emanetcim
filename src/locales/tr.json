@@ -306,6 +306,10 @@
   "Guest": {
     "heroTitle": "Valizini Güvenle Bırak, Özgürce Gez",
     "heroSubtitle": "Dünyanın dört bir yanında valiz emanet noktaları.",
+    "homeTrustBadgeInsurance": "10.000 TL'ye kadar güvence",
+    "homeTrustBadgePayAtShop": "Dükkanda öde, kart bilgisi yok",
+    "homeTrustBadgeSeal": "Mühürlü teslim",
+    "homeTrustBadgeFlexible": "Saatlik veya günlük",
     "searchPlaceholder": "Nereye gidiyorsun? (Örn: Galata Kulesi)",
     "findShops": "Emanet Noktası Bul",
     "nearbyShops": "Yakındaki",
