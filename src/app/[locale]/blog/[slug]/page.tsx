@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { formatDateInZone } from "@/lib/format-datetime";
 import { PLATFORM_TIMEZONE } from "@/lib/datetime-local";
 import { setRequestLocale, getTranslations } from "next-intl/server";
@@ -23,14 +24,28 @@ import { sanitizeRichText, stripHtmlToText } from "@/lib/rich-text";
  */
 export const revalidate = 120;
 
-export async function generateMetadata({ params }: { params: Promise<{ locale: string; slug: string }> }): Promise<Metadata> {
-  const { locale, slug } = await params;
+/**
+ * Ayni istek icinde TEK sorgu (fallback dahil).
+ *
+ * `shop/[shopId]/page.tsx`teki `shopPublicDetail = cache(...)` ile ayni
+ * desen (2026-09-10'da bulundu): `generateMetadata` ile sayfa govdesi bu
+ * yaziyi birbirinden bagimsiz sorguluyordu, ikisi de post bulunamayinca
+ * `ensureDefaultBlogPosts` (kendi icinde findMany + olasi upsert donguSu)
+ * calistirip sorguyu TEKRAR atiyordu -- tek sayfa gorunumu en kotu senaryoda
+ * 4 `findUnique` + 2 `ensureDefaultBlogPosts` turu uretebiliyordu.
+ */
+const getBlogPostBySlug = cache(async (locale: string, slug: string) => {
   let post = await prisma.blogPost.findUnique({ where: { slug, isPublished: true } });
-
   if (!post) {
     await ensureDefaultBlogPosts(locale);
     post = await prisma.blogPost.findUnique({ where: { slug, isPublished: true } });
   }
+  return post;
+});
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string; slug: string }> }): Promise<Metadata> {
+  const { locale, slug } = await params;
+  const post = await getBlogPostBySlug(locale, slug);
 
   if (!post) return { title: "Not Found" };
 
@@ -70,16 +85,7 @@ export default async function BlogDetailPage({
   setRequestLocale(locale);
   const t = await getTranslations("Guest");
 
-  let post = await prisma.blogPost.findUnique({
-    where: { slug, isPublished: true },
-  });
-
-  if (!post) {
-    await ensureDefaultBlogPosts(locale);
-    post = await prisma.blogPost.findUnique({
-      where: { slug, isPublished: true },
-    });
-  }
+  const post = await getBlogPostBySlug(locale, slug);
 
   if (!post) {
     notFound();

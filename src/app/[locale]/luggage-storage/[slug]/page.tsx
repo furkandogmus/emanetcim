@@ -4,6 +4,7 @@ import { Link } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { MapPin, Search } from "lucide-react";
+import Image from "next/image";
 import { getStorageCity, STORAGE_CITIES } from "@/lib/storage-cities";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { routing } from "@/i18n/routing";
@@ -178,13 +179,20 @@ export default async function CityLuggageStoragePage({
           {t(`${slug}.cta`)}
         </Link>
 
-        <div className="mt-12 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-          <div
-            className="h-56 w-full bg-cover bg-center"
-            style={{
-              backgroundImage: `url(${city.image})`,
-            }}
-            aria-hidden
+        <div className="relative mt-12 h-56 w-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+          {/*
+            next/image (2026-09-10'da bulundu): bu SSG sayfası (slug × locale
+            kombinasyonu başına önceden üretilir) above-the-fold hero'sunu ham
+            CSS background-image ile çiziyordu — responsive srcset, WebP/AVIF
+            dönüşümü ve lazy-loading kontrolü olmadan, tarayıcı görünürlükten
+            bağımsız erken indiriyordu.
+          */}
+          <Image
+            src={city.image}
+            alt=""
+            fill
+            sizes="(min-width: 768px) 768px, 100vw"
+            className="object-cover"
           />
         </div>
 
