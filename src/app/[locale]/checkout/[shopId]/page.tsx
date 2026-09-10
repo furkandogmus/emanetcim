@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { shopService } from '@/services/ShopService';
 import CheckoutClient from '@/components/guest/CheckoutClient';
@@ -8,6 +9,15 @@ import type { Metadata } from 'next';
 import { auth } from '@/auth';
 import { analyticsService } from '@/services/AnalyticsService';
 import { resolveServerSessionId } from '@/lib/analytics-server';
+
+/**
+ * Ayni istek icinde TEK sorgu -- `shop/[shopId]/page.tsx`teki
+ * `shopPublicDetail = cache(...)` ile ayni desen (2026-09-10'da bulundu).
+ * `generateMetadata` ve sayfa govdesi bu dukkani birbirinden bagimsiz iki kez
+ * sorguluyordu; ODEME akisinin en kritik sayfasinda (dinamik render, ISR yok)
+ * HER istekte gereksiz ikinci bir DB gidis-donusu demekti.
+ */
+const operatingShop = cache((shopId: string) => shopService.getOperatingShopById(shopId));
 
 export async function generateMetadata({
   params,
@@ -21,7 +31,7 @@ export async function generateMetadata({
     isletilmeyen talep testi noktalarini disari aliyor -- ikisi de rezervasyon
     ALMAZ, o yuzden checkout sayfalari da olmamali.
   */
-  const shop = await shopService.getOperatingShopById(shopId);
+  const shop = await operatingShop(shopId);
   if (!shop) {
     return { title: "Checkout" };
   }
@@ -48,7 +58,7 @@ export default async function CheckoutPage({
 
   // Veritabanından dükkan bilgilerini, oturumu ve ayarları paralel çek
   const [shop, session, pricingRules] = await Promise.all([
-    shopService.getOperatingShopById(shopId),
+    operatingShop(shopId),
     auth(),
     getPricingRules(),
   ]);

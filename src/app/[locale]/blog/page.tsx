@@ -77,18 +77,20 @@ export default async function BlogListPage({
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-              {posts.map((post) => (
-                <Link 
-                  key={post.id} 
+              {posts.map((post, index) => (
+                <Link
+                  key={post.id}
                   href={`/blog/${post.slug}`}
                   className="group flex flex-col h-full bg-white rounded-4xl border border-gray-100 overflow-hidden hover:shadow-2xl hover:shadow-orange-100/50 transition-all active:scale-[0.98]"
                 >
                   <div className="relative aspect-[16/10] overflow-hidden bg-gray-100">
                     {post.coverImage ? (
-                      <Image 
-                        src={post.coverImage} 
+                      <Image
+                        src={post.coverImage}
                         alt={post.title}
                         fill
+                        sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                        priority={index < 3}
                         className="object-cover group-hover:scale-110 transition-transform duration-700"
                       />
                     ) : (
