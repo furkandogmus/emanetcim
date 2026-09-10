@@ -91,7 +91,6 @@ export default function BookingsClient({
   const hasUpcoming = upcomingBookings.length > 0;
   const itemCount = (booking: GuestBookingListItem) =>
     booking.bagCountS + booking.bagCountM + booking.bagCountXl;
-  const pseudoPassCode = featuredBooking.id.replace(/-/g, '').slice(-4).toUpperCase();
   /**
    * Eskiden `locale === 'tr' ? {...} : {...}` idi — yalnızca tr/diğer diye
    * dallanıyordu, yani Almanca/Fransızca/Farsça/Japonca kullanıcı bu metinleri
@@ -130,6 +129,18 @@ export default function BookingsClient({
       </div>
     );
   }
+
+  /*
+    BOS LISTE COKMESI (2026-09-10'da PRODUCTION'DA yakalandi -- taze, hic
+    rezervasyonu olmayan bir hesap "/bookings" acinca beyaz hata ekrani
+    goruyordu). `featuredBooking` yukarida `upcomingBookings[0] ?? bookings[0]`
+    idi ve `bookings` bosken IKISI de `undefined` donuyordu; hemen altindaki
+    `featuredBooking.id...` satiri asagidaki `bookings.length === 0` ERKEN
+    DONUS KONTROLUNDEN ONCE calisiyor, yani koruma hic devreye girmeden
+    `undefined.id` patliyordu. Yalnizca asagida (bookings.length > 0 kesin
+    iken) kullanildigi icin hesaplama buraya, korumanin ARDINDAN tasindi.
+  */
+  const pseudoPassCode = featuredBooking.id.replace(/-/g, '').slice(-4).toUpperCase();
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
