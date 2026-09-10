@@ -95,6 +95,22 @@ describe("hesap anonimleştirmesi: kullanıcıya bağlı her tablo kararlı", ()
     ).toEqual([]);
   });
 
+  it("anonimleştirme tokenVersion'ı artırır — hesap silindikten sonra eski oturumlar ölür", () => {
+    /*
+      2026-09-10'da bulundu: `prisma.session.deleteMany` bu projede JWT-stratejili
+      web oturumunu DÜŞÜRMEZ (DB session değil, çerezdeki JWT geçerli) ve mobil
+      token'lar da stateless — ikisi de geçerliliği `tokenVersion` karşılaştırmasına
+      bağlıyor (auth.ts jwt callback'i, requireMobileUser). Bu artış olmadan
+      "hesabımı sil" işleyen bir kullanıcının önceden açık oturumları
+      anonimleştirilmiş satıra karşı çalışmaya devam ediyordu.
+    */
+    const service = fs.readFileSync(
+      path.join(process.cwd(), "src/services/AccountPrivacyService.ts"),
+      "utf8",
+    );
+    expect(service).toMatch(/tokenVersion:\s*\{\s*increment:\s*1\s*\}/);
+  });
+
   it.each([
     ["web", "src/actions/account-privacy.ts"],
     ["mobil", "src/app/api/mobile/account/delete/route.ts"],

@@ -90,6 +90,20 @@ class AccountPrivacyService {
           name: null,
           image: null,
           passwordHash: null,
+          /*
+            TOKENVERSION ARTIRILIR (2026-09-10'da bulundu). `prisma.session`
+            silme, Auth.js'in JWT-stratejili web oturumunu DUSURMEZ (bu proje
+            DB session'i degil, cerezdeki JWT'yi kullaniyor) ve mobil access/
+            refresh token'lari da stateless -- ikisi de gecerliligi yalniz
+            `tokenVersion` karsilastirmasina bagliyor (auth.ts jwt callback'i,
+            requireMobileUser). Bu satir olmadan "hesabimi sil" isleyen bir
+            kullanicinin ONCEDEN acik oturumlari (web cerezi 60 saniyede bir
+            yeniden dogrulanana/30 gun boyunca, mobil access token kendi
+            omrunce) anonimlestirilmis satira karsi calismaya devam ediyordu --
+            `toggleUserBanAction`/sifre sifirlama/`revokeAllUserSessions`
+            projede kurulu ayni desen burada atlanmisti.
+          */
+          tokenVersion: { increment: 1 },
         },
       }),
     ]);
