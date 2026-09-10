@@ -6,7 +6,8 @@ import prisma from "@/lib/db";
 import { Link } from "@/i18n/routing";
 import type { Metadata } from "next";
 import { getSiteBaseUrl } from "@/lib/site-urls";
-import { Clock, User, ArrowLeft, Share2 } from "lucide-react";
+import { Clock, User, ArrowLeft } from "lucide-react";
+import BlogShareButton from "@/components/blog/BlogShareButton";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ensureDefaultBlogPosts } from "@/lib/blog-initializer";
@@ -91,6 +92,8 @@ export default async function BlogDetailPage({
     notFound();
   }
 
+  const canonical = `${getSiteBaseUrl()}/${locale}/blog/${slug}`;
+
   // JSON-LD for Article SEO
   const jsonLd = {
     "@context": "https://schema.org",
@@ -138,9 +141,7 @@ export default async function BlogDetailPage({
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">{t("editorLabel")}</p>
             </div>
           </div>
-          <button className="p-2.5 rounded-xl bg-gray-50 text-gray-400 hover:text-orange-600 transition-colors">
-            <Share2 size={18} />
-          </button>
+          <BlogShareButton title={post.title} url={canonical} />
         </div>
       </header>
 
