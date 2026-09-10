@@ -7,9 +7,9 @@ import {
   MapPin,
   Building2,
   Star,
-  Shield,
+  ShieldCheck,
   Clock,
-  Package,
+  Luggage,
   Sparkles,
   ExternalLink,
 } from "lucide-react";
@@ -566,7 +566,7 @@ export default function ShopDetailClient({
             </div>
           </div>
           <div className="flex items-center gap-2 text-xs font-bold text-gray-700 min-w-[140px]">
-            <Package size={18} className="text-orange-500 shrink-0" />
+            <Luggage size={18} className="text-orange-500 shrink-0" />
             <div>
               <p className="text-[9px] font-black uppercase text-gray-400">
                 {t("shopDetailCapacityLabel")}
@@ -579,7 +579,7 @@ export default function ShopDetailClient({
               alinmamisti. */}
           {insuranceEnabled ? (
             <div className="flex items-start gap-2 text-xs font-bold text-emerald-700 w-full sm:w-auto sm:max-w-[220px]">
-              <Shield size={18} className="shrink-0 mt-0.5" aria-hidden />
+              <ShieldCheck size={18} className="shrink-0 mt-0.5" aria-hidden />
               <div>
                 <span>{t("insuranceIncluded")}</span>
                 <p className="mt-1 text-[9px] font-medium leading-relaxed text-gray-500 normal-case">

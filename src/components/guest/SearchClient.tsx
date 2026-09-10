@@ -13,6 +13,11 @@ import {
   SlidersHorizontal,
   Crosshair,
   ArrowUpDown,
+  Clock,
+  Toilet,
+  Video,
+  Thermometer,
+  Luggage,
 } from "lucide-react";
 import DateTimePicker from "@/components/ui/DateTimePicker";
 import BottomSheet from "@/components/ui/BottomSheet";
@@ -807,6 +812,7 @@ export default function SearchClient({
             checked={open247Only}
             onChange={(e) => setOpen247Only(e.target.checked)}
           />
+          <Clock size={12} className="shrink-0" aria-hidden />
           7/24
         </label>
         <label className="flex items-center gap-1 cursor-pointer">
@@ -815,6 +821,7 @@ export default function SearchClient({
             checked={hasRestroom}
             onChange={(e) => setHasRestroom(e.target.checked)}
           />
+          <Toilet size={12} className="shrink-0" aria-hidden />
           WC
         </label>
         <label className="flex items-center gap-1 cursor-pointer">
@@ -823,6 +830,7 @@ export default function SearchClient({
             checked={hasCctv}
             onChange={(e) => setHasCctv(e.target.checked)}
           />
+          <Video size={12} className="shrink-0" aria-hidden />
           {t("filterCctv")}
         </label>
         <label className="flex items-center gap-1 cursor-pointer">
@@ -831,6 +839,7 @@ export default function SearchClient({
             checked={hasClimateControlFilter}
             onChange={(e) => setHasClimateControlFilter(e.target.checked)}
           />
+          <Thermometer size={12} className="shrink-0" aria-hidden />
           {t("filterClimate")}
         </label>
         <label className="flex items-center gap-1 cursor-pointer">
@@ -839,6 +848,7 @@ export default function SearchClient({
             checked={acceptsLargeItemsFilter}
             onChange={(e) => setAcceptsLargeItemsFilter(e.target.checked)}
           />
+          <Luggage size={12} className="shrink-0" aria-hidden />
           {t("filterLargeItems")}
         </label>
       </div>

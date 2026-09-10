@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
+import { Download, UserX } from "lucide-react";
 import { anonymizeGuestAccountAction } from "@/actions/account-privacy";
 import WebPushOptIn from "@/components/WebPushOptIn";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
@@ -93,7 +94,10 @@ export default function AccountPrivacyClient() {
     <div className="flex max-w-lg flex-col gap-6">
       <WebPushOptIn />
       <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-black text-gray-900">{t("exportTitle")}</h2>
+        <h2 className="flex items-center gap-2 text-lg font-black text-gray-900">
+          <Download size={20} className="text-gray-400" aria-hidden />
+          {t("exportTitle")}
+        </h2>
         <p className="mt-2 text-sm text-gray-600">{t("exportDesc")}</p>
         {exportError ? (
           <p className="mt-2 text-sm font-bold text-red-700">{exportError}</p>
@@ -108,7 +112,10 @@ export default function AccountPrivacyClient() {
         </button>
       </div>
       <div className="rounded-2xl border border-red-100 bg-red-50/40 p-6">
-        <h2 className="text-lg font-black text-red-900">{t("deleteTitle")}</h2>
+        <h2 className="flex items-center gap-2 text-lg font-black text-red-900">
+          <UserX size={20} className="text-red-700" aria-hidden />
+          {t("deleteTitle")}
+        </h2>
         <p className="mt-2 text-sm text-red-800/90">{t("deleteDesc")}</p>
         {/*
           SOMUT SONUC LISTESI (2026-09-10). Eskiden tek cumlelik ozet

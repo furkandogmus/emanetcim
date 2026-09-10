@@ -1,6 +1,6 @@
 "use client";
 
-import { Shield, Timer } from "lucide-react";
+import { BadgeCheck, Timer } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 interface TrustBadgeProps {
@@ -13,7 +13,7 @@ export function VerifiedBadge({ isVerified }: { isVerified: boolean }) {
   if (!isVerified) return null;
   return (
     <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md">
-      <Shield size={12} aria-hidden="true" />
+      <BadgeCheck size={12} aria-hidden="true" />
       {t("verifiedBadge")}
     </span>
   );
