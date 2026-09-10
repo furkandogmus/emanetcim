@@ -1,78 +1,123 @@
-# Bagaj Emanet Pazarı Rakip Analizi Raporu (BagajPark / Emanetçi)
+# Rakip Analizi (BagajPark / Emanetçi) — 2026-09-11
 
-Bu raporda, BagajPark (Emanetçi) projesinin faaliyet gösterdiği bagaj depolama pazar yeri (luggage storage marketplace) sektöründeki küresel ve yerel rakipler, iş modelleri, öne çıkan özellikleri, yaygın oldukları bölgeler ve BagajPark için stratejik fırsatlar detaylı bir şekilde analiz edilmiştir.
+> Bu doküman **tamamen yeniden yazıldı**. Önceki iki rakip analizi dokümanı
+> (21 Ağustos tarihli `rakip_analizi.md` ve `rakip_analizi_radical_storage.md`)
+> `docs/archive/2026-09-11-rakip-ve-parity/` altında arşivlendi — bazı iddiaları
+> artık **yanlış**: örneğin "saatlik tarife yok" ve "WhatsApp entegrasyonu yok"
+> denilen iki madde, koda bakıldığında ikisi de **zaten mevcut** çıktı (bkz.
+> aşağıda "BagajPark'ın Zaten Sahip Olduğu, Az Bilinen Güçlü Yönler"). Bu sürüm
+> 6 küresel rakibin canlı sitesi/uygulama mağazası sayfaları taranarak ve her
+> BagajPark karşılaştırması **koddan doğrulanarak** hazırlandı; hiçbir iddia
+> tahmine dayanmıyor.
 
----
+## 1. Rakip Özet Tablosu
 
-## 1. Küresel ve Yerel Rakiplerin Özeti
-
-| Platform | Merkez / Odak | Fiyatlandırma Modeli | Temel Güçlü Yönü | Yaygınlık & Konum | Sigorta / Güvence |
+| Platform | Odak Bölge | Ödeme Modeli | Güvence Tutarı | Türkçe Dil Desteği | Belirgin Zayıf Nokta |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Bounce** | ABD / Küresel | Günlük Sabit (Çanta başına) | En geniş küresel ağ, en yüksek sigorta bedeli | 10.000+ nokta (ABD, Avrupa, Asya, Avustralya) | 10.000 USD |
-| **LuggageHero** | Danimarka / Küresel | Saatlik + Günlük Seçeneği | Esnek saatlik ücretlendirme seçeneği | Avrupa ve ABD metropolleri (New York, Londra vb.) | 3.000 USD |
-| **Stasher** | İngiltere / Küresel | Günlük Sabit | Çok sıkı denetlenen yüksek kaliteli host ağı | Birleşik Krallık, Avrupa, ABD | 3.200 USD |
-| **Radical Storage** | İtalya / Küresel | Günlük Sabit | Genellikle en ucuz günlük sabit fiyat (ekstra ücret yok) | Avrupa ve Akdeniz ülkeleri ağırlıklı | 3.000 EUR |
-| **Nannybag** | Fransa / Küresel | Günlük Sabit | Gizli ücret içermeyen tamamen şeffaf düz fiyat | Fransa ve Batı Avrupa (özellikle tren garları yakını) | 1.000 EUR |
-| **KeepBag** | Türkiye / Yerel | Günlük Sabit | Yerel pazar odaklılık (İstanbul, Ankara vb.) | Türkiye (İstanbul, İzmir, Ankara, turistik Ege/Akdeniz) | Sınırlı yerel güvence |
-| **Geleneksel Emanet** | Türkiye (Yerel) | Saatlik / Günlük (Boyuta göre) | Dijital olmayan, fiziksel ve merkezi noktalar | Havalimanları, otogarlar ve büyük tren istasyonları | Güvence yok / Sınırlı |
+| **Bounce** | Küresel (30.000+ nokta, 100 ülke) | Online ön ödeme | $10.000 | Yok (İstanbul: İngilizce/Rusça) | EUR fiyat, gizli booking fee şikâyetleri |
+| **Stasher** | UK / Avrupa / ABD | Online ön ödeme, zorunlu | £10.000 (çanta başı £1.000) | Yok | Drop-off sonrası iade garantisi yok |
+| **LuggageHero** | Avrupa / ABD metropolleri | Online ön ödeme + ek "service fee" | $500 dahil + isteğe bağlı $3.000 | **İstanbul'da bile yok** | Ayrı "service fee" + sigorta kalemi sürpriz ücret hissi verir |
+| **Radical Storage** | Avrupa / Akdeniz | Online ön ödeme | €10.000 | **İstanbul'da bile yok** (EUR fiyat) | Bazı App Store sürümlerinde $3.000 yazması (tutarsız rakam) |
+| **Nannybag** | Fransa / Batı Avrupa | Online ön ödeme | €10.000 (App Store'da €1.000 yazıyor — kanal-arası tutarsızlık) | Yok | Kanal-arası güvence rakamı tutarsızlığı |
+| **Vertoe** | ABD (**2026'da kalıcı olarak kapandı**) | Online ön ödeme | $5.000 | Yok | Gizli ücret şikâyetleri + operasyonel güvenilirlik sorunları kapanma nedeni |
+| **BagajPark** | Türkiye | **Dükkanda öde** (kart bilgisi istenmiyor) | 10.000 TL | **Ana dil** + 5 dil daha (en/de/fr/fa/ja) | Aşağıya bakınız |
 
----
+## 2. Rakip Detayları (Kanıtlı Gözlemler)
 
-## 2. Küresel Rakiplerin Detaylı Analizi
+### Bounce (usebounce.com)
+Temiz, "seyahat özgürlüğü" temalı minimalist tasarım; anasayfada 4.9/5 puan, $10.000 güvence, "milyonlarca çanta güvenle saklandı" rakamları büyük puntoyla veriliyor. App Store açıklaması özellikle **"saatlik değil, uygun bir günlük fiyat ödersiniz"** mesajını avantaj olarak pazarlıyor — yani saatlik seçenek bilinçli olarak geri planda tutuluyor. İstanbul sayfalarında fiyatlar **EUR**, dil **İngilizce/Rusça** (Türkçe yok); Trustpilot'ta çanta başı booking fee ve "seçilenden fazla ücretlendirme" şikâyetleri var.
+— Kaynak: [bounce.com](https://bounce.com/), [Bounce Istanbul](https://bounce.com/luggage-storage/istanbul), [App Store](https://apps.apple.com/us/app/bounce-luggage-storage-nearby/id1444570755), [Trustpilot](https://www.trustpilot.com/review/usebounce.com)
 
-### A. Bounce (usebounce.com)
-*   **İş Modeli & Özellikler:** Pazarın en büyük oyuncusudur. 7/24 müşteri desteği, mobil uygulama üzerinden kolay QR kodlu teslim alma/teslim etme süreci sunar.
-*   **Fiyatlandırma:** Günlük sabit ücret + zorunlu servis/sigorta bedeli.
-*   **Güvenlik:** Her bagaj için $10,000 değerinde "Bounce Shield" güvencesi sunar. Fiziksel olarak mühürlü tek kullanımlık güvenlik kelepçeleri (tam olarak BagajPark'ın `SealService` tasarımı gibi) kullanırlar.
+### Stasher (stasher.com)
+Booking.com/Airbnb/Eurail/Premier Inn gibi partner logoları + BBC/Guardian/Forbes/NYT basın rozetleri anasayfada güven inşa ediyor. Tüm ödeme **online ve peşin** alınıyor; nakit kabul edilmiyor. "The Stasher Guarantee" sayfası azami £10.000 (çanta başı £1.000) güvenceyi kapsam dışı durumlarıyla (savaş/terör, 25+ çantayı etkileyen tek olay, nakit ödemeler) ayrıntılı anlatıyor. **Zayıf nokta:** drop-off sonrası iptalde iade garantisi yok — Radical Storage/Bounce'un tam iade sunduğu özellikle vurgulanan bir fark.
+— Kaynak: [stasher.com](https://stasher.com), Stasher Guarantee sayfası, [App Store](https://apps.apple.com/gb/app/stasher-luggage-storage/id1114319998)
 
-### B. LuggageHero (luggagehero.com)
-*   **İş Modeli & Özellikler:** Diğer platformlardan ayrışan en büyük özelliği **saatlik fiyatlandırma** sunmasıdır. Kullanıcı bagajı teslim ettiğinde uygulamadan süreyi başlatır, teslim alırken durdurur. Kısa süreli (2-3 saatlik) depolamalar için çok caziptir.
-*   **Güvenlik:** Çantalar teslim edilirken tek kullanımlık güvenlik şeritleriyle kilitlenir.
+### LuggageHero (luggagehero.com)
+Anasayfada 4.7/5, 310K+ yorum, +2M çanta, 14+ seyahat markası (Booking.com, Kiwi.com, Revolut) partner logosu ve NYT/Lonely Planet/CNBC basın logoları tek ekranda. Fiyat saatlik gösteriliyor ("from €1.49/hour") ama checkout'ta ayrı "one-time service fee" (~€1,99/çanta) ve isteğe bağlı sigorta (~$1,95/çanta) ekleniyor — bu, "gizli ücret" hissi riski taşıyor. **İstanbul'da hizmet verirken bile arayüz Türkçe değil** (İspanyolca, Fransızca, İtalyanca, Danca, Almanca, Hollandaca, Lehçe, Portekizce, Rusça var, Türkçe yok). Ayrı bir "insurance vs guarantee" içerik sayfasıyla güven kavramlarını netleştiriyorlar.
+— Kaynak: [luggagehero.com/istanbul](https://luggagehero.com/istanbul/), [Insurance vs Guarantee](https://luggagehero.com/insurance-vs-guarantee/)
 
-### C. Radical Storage (radicalstorage.com - Eski adıyla BagBnb)
-*   **İş Modeli & Özellikler:** "Angel" adını verdikleri iş ortakları (oteller, kafeler, marketler) üzerinden çalışır. Bagaj başına boyut veya ağırlık sınırı koymazlar.
-*   **Fiyatlandırma:** Düşük günlük sabit ücret. Fiyatları genellikle rekabetçidir ancak bazı bölgelerde yerel vergiler eklenir.
+### Radical Storage (radicalstorage.com)
+Anasayfa fiyatla açılıyor ("from €0.90/day") ve hemen altında 4.8/5 (646K+ yorum), €10.000 güvence, 16.500+ lokasyon rakamları veriliyor. Her lokasyon için **ayrı bir Google-benzeri puan** gösteriliyor (ör. "4.88, 196 yorum") — sadece platform geneli değil. App Store açıklaması "saatlik yerine uygun bir günlük fiyat ödeyin" diyor (Bounce ile aynı strateji: saatlik var ama bilinçli olarak arka planda). **Türkiye'de bile fiyatlar EUR**, dil seçicisinde ~20 dil var ama Türkçe yok. Rezervasyona sonradan çanta ekleme/saat değiştirme uygulama içinden yapılabiliyor.
+— Kaynak: [radicalstorage.com/luggage-storage/istanbul](https://radicalstorage.com/luggage-storage/istanbul), [Trustpilot](https://www.trustpilot.com/review/radicalstorage.com)
 
-### E. Stasher (stasher.com)
-*   **İş Modeli & Özellikler:** Premier Inn ve Accor Hotels gibi büyük otel zincirleriyle doğrudan ortaklıklar kurarak güvenlik standartlarını çok yüksek tutar.
-*   **Yaygınlık:** Özellikle İngiltere ve Avrupa genelinde tren istasyonları ve turistik mekanların hemen yakınında çok yoğundur.
+### Nannybag (nannybag.com)
+Hero'da fiyat ("from €2.50/day") + €10.000 koruma + 4.5/5 (33.737 Trustpilot yorumu) + "Most rated company in the world" rozeti bir arada. **Kanal-arası tutarsızlık bulundu:** App Store açıklaması €1.000 güvence yazarken web/yardım merkezi €10.000 diyor — muhtemelen App Store metni güncellenmemiş. Esnaf tarafı için **tamamen ayrı bir uygulama** var: "Nannybag for Nannies" (`com.nannybag.nanny`, Google Play) — misafir uygulamasından bağımsız bir APK.
+— Kaynak: [nannybag.com/en](https://www.nannybag.com/en), [App Store](https://apps.apple.com/us/app/nannybag-luggage-storage/id1400722568), [Nannybag for Nannies](https://play.google.com/store/apps/details?id=com.nannybag.nanny)
 
----
+### Vertoe (vertoe.com) — 2026'da kalıcı olarak kapandı
+Kontrol tarihinde (2026-09-10) site "Vertoe has permanently closed" gösteriyor. Arşiv kaynaklarına göre imza unsuru "$5.000 Vertoe Guarantee" + tamper-proof mühürdü, saatlik VE günlük kiralamayı birlikte pazarlıyordu. **Kapanma nedeni ürün eksikliği değil, operasyonel güvenilirlikti**: "$5,95'ten başlıyor" reklamına karşı checkout'ta eklenen gizli ücretler (Trustpilot şikâyetlerinin merkezinde), lokasyonda kimsenin olmaması, 6 aya varan iade anlaşmazlıkları. Trustpilot 2.1/5 (9 yorum) ile Reviews.io 4.6/5 (5.121 yorum) arasındaki çarpıcı fark bile güven tutarsızlığına işaret ediyor.
+— Kaynak: [Trustpilot](https://www.trustpilot.com/review/vertoe.com), [Reviews.io](https://www.reviews.io/company-reviews/store/vertoe), [Stasher karşılaştırma yazısı](https://stasher.com/blog/luggage-storage-apps)
 
-## 3. Türkiye Pazarı ve Yerel Dinamikler
+## 3. BagajPark'ın Zaten Sahip Olduğu, Az Bilinen Güçlü Yönler
 
-Türkiye, yoğun turizm potansiyeli ve iç göç/seyahat hareketliliği nedeniyle bu model için oldukça elverişli bir pazardır.
+Bu bölüm önemli: aşağıdakiler **hayali özellik önerisi değil**, kodda doğrulanmış,
+bugün çalışan ama yeterince görünür kılınmayan avantajlar.
 
-### Geleneksel Emanetçiler (İstasyon, Otogar ve Havalimanları)
-*   **Zayıf Yönleri:** Çok pahalıdırlar, yer sınırlıdır, merkezi oldukları için yolcuların tekrar istasyona dönmesini gerektirir. Sadece nakit çalışabilirler ve uzun kuyruklar oluşur.
-*   **Fırsat:** BagajPark gibi dağıtık bir sistem, kullanıcının otelinin veya gideceği kafenin hemen yanındaki esnafa bagajını bırakmasını sağlayarak lojistik esneklik sunar.
+1. **Dükkanda öde modeli.** İncelenen 6 rakibin **tamamı** online ön ödeme alıyor;
+   Vertoe ve LuggageHero'da checkout'ta gizli/ek ücret şikâyetleri belgelendi —
+   Vertoe bu yüzden de kapandı. BagajPark bu güven kırılmasını yapısal olarak yaşamıyor
+   (kart bilgisi hiç istenmiyor).
+2. **Saat/slot bazlı VE günlük rezervasyonun ikisi birden, aktif.**
+   (`src/lib/bag-pricing.ts: computeHourlyLineTotal`, `src/components/guest/SlotAvailabilityGrid.tsx`).
+   Stasher'da saatlik hiç yok; Bounce ve Radical Storage saatliği bilinçli olarak
+   geri planda tutuyor; bu esnekliği ikisini birden sunan Vertoe artık kapalı.
+   **Ama:** bu seçenek arama sonucu kartında ve dükkan detayında hiç görünmüyor,
+   yalnızca checkout'ta nötr bir "Depolama süresi" başlığı altında ortaya çıkıyor.
+3. **TL fiyatlandırma + tam Türkçe arayüz.** Bounce, Radical Storage ve
+   LuggageHero'nun üçü de İstanbul'da bile Türkçe sunmuyor, çoğu EUR/USD gösteriyor.
+4. **6 dil desteği (tr/en/de/fr/fa/ja).** İncelenen hiçbir rakibin dil listesinde
+   Farsça veya Japonca yok — bu niş pazarda gerçek bir farklılaştırıcı.
+5. **Fiziksel mühür + isteğe bağlı kanıt fotoğrafı.** Rakiplerin çoğunda (Nannybag
+   "tag and seal", LuggageHero tamper-proof etiket) sadece fiziksel mühür var;
+   BagajPark ayrıca isteğe bağlı fotoğraf kanıtı katmanı sunuyor — ama bu fotoğraf
+   şu an misafire hiçbir zaman gösterilmiyor (bkz. Bölüm 4, #P3).
+6. **WhatsApp ile doğrudan misafir-esnaf iletişimi.** İncelenen hiçbir rakipte bu
+   şekilde doğrudan bir WhatsApp hattı yok (hepsi kendi in-app chat/destek sistemini
+   kullanıyor). **Ama:** kapsam kısıtlı — yalnızca `BookingDetailActions.tsx` (misafir)
+   ve esnafın tekil rezervasyon detay sayfasında var; genel destek/iletişim akışında yok.
+7. **Kupon + referans indirimi + sadakat puanının bir arada var olması.** Rakiplerde
+   üçünün birlikte sunulduğu bir örnek görülmedi (Bounce'ta yalnızca anlık rezervasyon
+   kredisi var).
+8. **6 dilde tutarlılığı otomatik yakalayan bir mandal testi** (`coverage-amount-consistency.test.ts`).
+   Nannybag'de bizzat gözlemlenen App Store (€1.000) vs web (€10.000) tutarsızlığı
+   sınıfındaki hataları BagajPark önceden engelliyor.
+9. **10.000 TL güvencenin yalnızca ücret aktifken gösterilmesi** (`insuranceEnabled`
+   kontrolü) — önceki hatalı davranış (ücret sıfırken bile rozet gösterme) düzeltilmiş;
+   Nannybag'in yaşadığı kanal-arası tutarsızlık riski BagajPark'ta daha kontrollü.
 
-### Yerel Girişimler (Örn: KeepBag)
-*   **Durum:** Türkiye genelinde turistik lokasyonlarda (Taksim, Kadıköy, Sirkeci, Alaçatı vb.) butik esnaflarla anlaşarak hizmet verirler.
+## 4. Öncelikli Rekabet Boşlukları (Kanıtlı, Uygulanabilir)
 
----
+Öncelik sırasına göre; her madde somut kanıt ve tahmini eforla birlikte.
+**Efor tanımı:** küçük = tek/birkaç dosyada metin+UI değişikliği (saatler);
+orta = yeni UI bileşeni veya çok dosyalı değişiklik (bir-iki gün); büyük = yeni
+özellik/backend değişikliği gerektirir (ayrı bir çalışma turu).
 
-## 4. BagajPark (Emanetçi) İçin Stratejik Fırsatlar & Feature Karşılaştırması
+| # | Öncelik | Platform | Başlık | Efor | Durum (2026-09-11) |
+|---|---|---|---|---|---|
+| 1 | P0 | web+mobil | Saat/slot bazlı rezervasyon var ama pazarlanmıyor | küçük | Planlandı — bu oturumda uygulanacak |
+| 2 | P0 | web+mobil | "Dükkanda öde, sürpriz ücret yok" avantajı hiç mesajlaşmıyor | küçük | Planlandı — bu oturumda uygulanacak |
+| 3 | P0 | web | Anasayfada güven rakamları/rozetleri yoğunlaştırılmamış | küçük | Planlandı — bu oturumda uygulanacak |
+| 4 | P1 | web+mobil | WhatsApp desteği yalnızca tekil rezervasyon detayında, genel destek kanalı değil | orta | Backlog — genel iletişim/SSS sayfasına taşınmalı |
+| 5 | P1 | web+mobil | Esnaf/lokasyon bazlı puan-yorum sistemi yok | büyük | Backlog — ayrı çalışma turu gerektirir |
+| 6 | P1 | web+mobil | Mevcut rezervasyonu düzenleme (çanta ekle/saat değiştir) akışının bulunabilirliği belirsiz | orta | Backlog — mevcut `BookingModifyModal` bulunabilirliği artırılmalı |
+| 7 | P1 | web+mobil | QR kod tabanlı check-in katmanı yok | orta | Backlog — mühüre ek dijital katman, ayrı çalışma turu |
+| 8 | P2 | web+mobil | Sadakat puanı harcanamıyor | büyük | Bilinen ürün kararı bekliyor (bkz. `docs/DEFECT_BACKLOG.md` B7) |
+| 9 | P2 | web+mobil | Büyük/özel eşya kabul politikası net iletilmiyor | küçük | Backlog |
+| 10 | P2 | web | İptal politikası rezervasyon akışında tek cümleyle vurgulanmıyor | küçük | ❌ Geçersiz — doğrulandı: `CheckoutWhatIsIncluded.tsx` zaten "Teslimden 60 dakika öncesine kadar tam iade" diyor, checkout'ta görünür |
+| 11 | P2 | web | 10.000 TL güvence tutarı döviz bazında rakiplere kıyasla düşük algılanabilir | orta | Ürün/fiyatlandırma kararı — bu depoda karar verilemez |
+| 12 | P3 | web | Sigorta ile güvence farkını anlatan içerik/SSS maddesi yok | küçük | Backlog |
+| 13 | P3 | mobil | Esnaf paneli ayrı bir mobil uygulama olarak konumlandırılmıyor (ASO) | küçük | Backlog — mimari değişikliği gerektirmez, yalnızca metadata |
 
+Mobil tarafın kendi (çok daha büyük) boşluk listesi için bkz. **`docs/web_vs_mobile_comparison.md`**
+(bu doküman da bugün tamamen yeniden yazıldı).
 
-### 1. Fiziksel Güvenlik ve "Mühür" (Seal) Sistemi (Mevcut & Güçlü Yön)
-*   *Durum:* Projenizde `SealService` ve fiziksel mühür yönetimi yapısı mevcut.
-*   *Öneri:* Rakiplerin bir kısmı (Bounce gibi) mühür sistemini pazarlama aracı olarak çok iyi kullanıyor. BagajPark'ın mobil uygulamasında partnerlerin teslim alırken mühür numarasını girmesi/fotoğrafını çekmesi zorunlu kılınmalı ve bu süreç kullanıcıya "Bagajınız güvende" bildirimiyle (SMS/E-posta) anlık olarak iletilmelidir.
+## 5. Yöntem
 
-### 2. Saatlik Rezervasyon Seçeneği (Fark Yaratan Fırsat)
-*   *Durum:* Mevcut yapıda rezervasyonlar genellikle günlük (check-in / check-out tarihli) çalışıyor.
-*   *Fırsat:* Türkiye pazarında, özellikle uçak saati ile otelden çıkış saati arasında 3-4 saati olan yerli ve yabancı turistler için "saatlik tarife" seçeneği sunmak, Radical Storage veya Bounce karşısında büyük bir tercih sebebi yaratır. `Booking` modeline saatlik faturalandırma ve esnek giriş/çıkış saati eklenebilir.
-
-### 3. Çoklu Dil ve Para Birimi Desteği (Kritik Gereksinim)
-*   *Durum:* Projede `[locale]` yapısı (i18n) kurulmuş durumda.
-
-### 4. Esnaf (Partner) Dostu Panel ve Anında Hakediş/Ödeme (Ledger Sistemi)
-*   *Durum:* Projede partnerler için kazanç takip mekanizmaları (`earnings/stats`, `finance-export`) mevcut.
-
-### 5. Sigorta ve "Güvence" Paketi
-*   *Durum:* `PlatformSettings` tablosunda sigorta çarpanları/ayarları bulunuyor.
-*   *Öneri:* Kullanıcıların en büyük korkusu çalınma veya hasar durumudur. Türkiye'deki yerel bir sigorta acentesiyle toplu mikro-sigorta (her bagaj teslimatı için geçerli günlük seyahat/bagaj sigortası) anlaşması yapılıp, bunun pazarlaması ana sayfada "X TL'ye kadar BagajPark Güvencesi" şeklinde vurgulanmalıdır.
-
-### 6. WhatsApp Entegrasyonu (Yerel Altyapı Gücü)
-*   *Durum:* Şu an `Netgsm` ile SMS entegrasyonu var.
-*   *Öneri:* Türkiye'de ve yurt dışından gelen turistlerde WhatsApp kullanımı SMS'e göre çok daha yüksektir. Rezervasyon onay QR kodu, teslim alındı bilgisi ve esnafın konumu (Google Maps linki) müşteriye otomatik WhatsApp mesajı olarak atılmalıdır. Bu hem kullanıcı deneyimini premium hissettirir hem de esnafın adresini bulmayı kolaylaştırır.
+6 rakip (Bounce, Stasher, LuggageHero, Radical Storage, Nannybag, Vertoe) için
+anasayfa, rezervasyon akışı, App Store/Google Play sayfası ve (varsa) Trustpilot/Reviews.io
+yorumları WebSearch + WebFetch ile tarandı. Her "BagajPark'ta X eksik" iddiası,
+ayrı bir agent tarafından **koda bakılarak** doğrulandı — önceki dokümanın
+düştüğü "tahminle yazma" hatasına düşülmedi. Ham araştırma raporları ve tam
+kanıt zinciri: `docs/archive/2026-09-11-rakip-ve-parity/` (bu turun ham çıktısı
+saklanmadı, yalnızca önceki dokümanlar arşivlendi — ham agent çıktıları
+oturum geçmişindedir).
