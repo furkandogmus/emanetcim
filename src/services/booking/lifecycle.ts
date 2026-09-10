@@ -291,6 +291,28 @@ export async function modifyBooking(
   const isPaidLike =
     booking.status === 'PAID' || !!hasCapturedPayment;
 
+  /*
+    HAM GIRDI DOGRULAMASI (2026-09-10'da bulundu). `createInitialBooking`
+    (create.ts) `assertBookingInput` ile negatif/tam-sayi-olmayan valiz
+    sayisini rezervasyon OLUSTURMA aninda reddediyordu; ayni kapi
+    `modifyBooking`e hic tasinmamisti. `web`in `modifyBookingAction`'i
+    (`ModifyBookingActionInput`) yalniz TypeScript tipiyle kisitliydi --
+    calisma zamaninda hicbir kontrol yoktu -- ve asagidaki
+    `computeAuthoritativeCheckoutTotals` her alani AYRI AYRI 0'a kirpiyordu
+    (`clampBagCount`). Sonuc: `bagCountXl: -50` gibi bir girdi kirpilmis
+    toplamda gecerli (>=1) gorunup FIYATLANIRKEN, kapasite/slot rezervasyonu
+    HAM (kirpilmemis) toplami kullaniyordu -- asagida duzeltildi, bkz.
+    `newBags`.
+  */
+  const rawBagCounts = [input.bagCountS, input.bagCountM, input.bagCountXl];
+  if (rawBagCounts.some((n) => !Number.isFinite(n) || !Number.isInteger(n) || n < 0)) {
+    return {
+      ok: false,
+      code: 'INVALID_STATUS',
+      message: 'Valiz sayısı geçersiz.',
+    };
+  }
+
   const unitPrice = moneyToNumber(booking.shop.pricePerDay);
   const authTotals = computeAuthoritativeCheckoutTotals(
     unitPrice,
@@ -312,7 +334,25 @@ export async function modifyBooking(
       message: 'En az bir valiz seçilmelidir.',
     };
   }
-  const newTotal = authTotals.subtotalBeforeCoupon;
+  /*
+    KUPON/REFERANS INDIRIMI KORUNUR (2026-09-10'da bulundu). Onceki hali
+    `newTotal`i dogrudan `authTotals.subtotalBeforeCoupon`e esitliyordu --
+    indirimsiz, ham alt toplam. `computeAuthoritativeCheckoutTotals` kupon/
+    referans indirimini hic bilmiyor; rezervasyon OLUSTURULURKEN uygulanan
+    indirim `Booking.couponDiscountAmount`/`referralDiscountAmount`de
+    ayrica tutuluyor (create.ts). Duzenleme bu iki alani DEGISTIRMEDEN
+    birakiyor ama `totalPrice`i indirimsiz tutarla eziyordu -- yani zaten
+    tuketilmis bir kupon/referans kotasinin karsiligi misafirden bir daha
+    (tam fiyat uzerinden) tahsil ediliyordu. Kilitli indirim tutari burada
+    yeni alt toplamdan dusulur.
+  */
+  const lockedDiscount =
+    moneyToNumber(booking.couponDiscountAmount) +
+    moneyToNumber(booking.referralDiscountAmount);
+  const newTotal = Math.max(
+    0,
+    Math.round((authTotals.subtotalBeforeCoupon - lockedDiscount) * 100) / 100
+  );
   const oldTotal = moneyToNumber(booking.totalPrice);
 
   if (isPaidLike && Math.abs(newTotal - oldTotal) > 0.005) {
@@ -340,10 +380,16 @@ export async function modifyBooking(
           throw new Error('Shop missing');
         }
 
+        /*
+          KIRPILMIŞ (authTotals) toplam kullanilir, HAM `input` degil --
+          fiyatlanan/kaydedilen valiz sayisiyla fiilen rezerve edilen kapasite
+          HER ZAMAN ayni sayi olsun diye (2026-09-10'da bulundu, yukaridaki
+          not).
+        */
         const newBags = totalBagCount(
-          input.bagCountS,
-          input.bagCountM,
-          input.bagCountXl
+          authTotals.bagCountS,
+          authTotals.bagCountM,
+          authTotals.bagCountXl
         );
         await assertCapacityTx(
           tx,
