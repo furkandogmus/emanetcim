@@ -9,6 +9,7 @@ import Money from "@/components/common/Money";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import { formatDateTimeInZone } from "@/lib/format-datetime";
 import { useActionErrorText } from "@/lib/use-action-error";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 
 interface BookingInfo {
   id: string;
@@ -36,6 +37,14 @@ export default function ManageBookingClient({ initialToken }: { initialToken: st
   const [cancelling, setCancelling] = useState(false);
   const [cancelled, setCancelled] = useState(false);
   const [token] = useState(initialToken);
+  /*
+    ConfirmDialog KULLANILIR (2026-09-10'da bulundu): hesapsiz (token'la
+    erisilen, e-posta ile paylasilan) bu sayfa iptali `confirm()` -- tarayici
+    kromu -- arkasina birakiyordu. Mobil webview'ler bunu bilinen sekilde
+    kapatabiliyor; projenin geri kalanindaki yikici onaylar ConfirmDialog
+    kullaniyor.
+  */
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
     fetch(`/api/bookings/lookup/me`, {
@@ -49,7 +58,7 @@ export default function ManageBookingClient({ initialToken }: { initialToken: st
   }, [token, t, errorText]);
 
   const handleCancel = async () => {
-    if (!confirm(t("confirmCancel"))) return;
+    setConfirmOpen(false);
     setCancelling(true);
     try {
       const res = await fetch("/api/bookings/guest-cancel", {
@@ -176,13 +185,23 @@ export default function ManageBookingClient({ initialToken }: { initialToken: st
             {canCancel && (
               <button
                 type="button"
-                onClick={handleCancel}
+                onClick={() => setConfirmOpen(true)}
                 disabled={cancelling}
                 className="mt-6 w-full py-4 rounded-2xl bg-red-500 text-white id-eyebrow text-sm disabled:opacity-50 hover:bg-red-600 transition-colors"
               >
-                {cancelling ? "..." : t("confirmCancel")}
+                {cancelling ? "..." : t("cancelBooking")}
               </button>
             )}
+
+            <ConfirmDialog
+              open={confirmOpen}
+              title={t("cancelDialogTitle")}
+              message={t("confirmCancel")}
+              confirmLabel={t("cancelConfirmAction")}
+              cancelLabel={t("modifyCancel")}
+              onCancel={() => setConfirmOpen(false)}
+              onConfirm={handleCancel}
+            />
           </div>
         </div>
 
