@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import { CHART_COLORS } from "@/lib/chart-colors";
 
 /**
  * Kazanç sayfasının iki `recharts` grafiği.
@@ -26,11 +27,11 @@ import {
 
 const TOOLTIP_STYLE = {
   borderRadius: 12,
-  border: "1px solid #e5e7eb",
+  border: `1px solid ${CHART_COLORS.border}`,
   fontSize: 12,
 } as const;
 
-const AXIS_TICK = { fontSize: 11, fill: "#9ca3af" } as const;
+const AXIS_TICK = { fontSize: 11, fill: CHART_COLORS.axisTick } as const;
 
 interface MonthlyNetChartProps {
   data: Array<{ month: string; netTotal: number }>;
@@ -46,7 +47,7 @@ export function MonthlyNetChart({
   return (
     <ResponsiveContainer width="100%" height={160}>
       <BarChart data={data} barSize={28}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={CHART_COLORS.gridLine} />
         <XAxis
           dataKey="month"
           tickFormatter={(v) => {
@@ -79,10 +80,10 @@ export function PeakHoursChart({ data, formatCount }: PeakHoursChartProps) {
   return (
     <ResponsiveContainer width="100%" height={140}>
       <BarChart data={data} barSize={8}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={CHART_COLORS.gridLine} />
         <XAxis
           dataKey="hour"
-          tick={{ fontSize: 10, fill: "#9ca3af" }}
+          tick={{ fontSize: 10, fill: CHART_COLORS.axisTick }}
           axisLine={false}
           tickLine={false}
           interval={3}
@@ -92,7 +93,7 @@ export function PeakHoursChart({ data, formatCount }: PeakHoursChartProps) {
           formatter={(v) => [formatCount(Number(v)), ""]}
           contentStyle={TOOLTIP_STYLE}
         />
-        <Bar dataKey="count" fill="#f97316" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="count" fill={CHART_COLORS.brand} radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );
