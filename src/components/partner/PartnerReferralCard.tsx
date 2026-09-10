@@ -87,6 +87,7 @@ export default function PartnerReferralCard() {
             onClick={handleCopy}
             className="rounded-xl bg-orange-100 p-2.5 transition-colors hover:bg-orange-200"
             title={t("referralCopyTitle")}
+            aria-label={t("referralCopyTitle")}
           >
             {copied ? (
               <Check size={18} className="text-green-600" />
