@@ -41,6 +41,18 @@ android {
             storeFile = keystoreProperties["storeFile"]?.let { file(it) }
             storePassword = keystoreProperties["storePassword"] as String?
         }
+        // CI'nin ureteceği auto-generated debug keystore her calistirmada
+        // farkli bir SHA-1 uretiyordu (google-services.json'daki Android
+        // OAuth client'a kayitli olan hicbiriyle eslesmiyordu), bu yuzden
+        // CI'dan alinan debug APK'da Google ile giris hep basarisiz oluyordu.
+        // Sabit bir keystore commit'leyip debug build'i ona baglamak, SHA-1'i
+        // sabitliyor -- bir kez Google Cloud Console'a eklenince kalici olur.
+        getByName("debug") {
+            storeFile = file("ci-debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
     }
 
     defaultConfig {
