@@ -87,16 +87,6 @@ export default async function AdminDashboard({
 
   const t = await getTranslations("Admin");
 
-  const pendingApps = await shopService.getPendingShops();
-  const totalBookings = await prisma.booking.count();
-  const activePartnersCount = await prisma.shop.count({ where: { isActive: true } });
-
-  const revenueData = await prisma.booking.aggregate({
-    where: { status: { in: [...PAID_STATUSES] } },
-    _sum: { totalPrice: true },
-  });
-  const totalRevenue = moneyToNumber(revenueData._sum.totalPrice ?? 0);
-
   const now = new Date();
   const start7 = new Date(now);
   start7.setDate(start7.getDate() - 7);
@@ -104,7 +94,17 @@ export default async function AdminDashboard({
   const start14 = new Date(start7);
   start14.setDate(start14.getDate() - 7);
 
+  /*
+    ILK DORT SORGU DA BURAYA TASINDI (2026-09-10'da bulundu): birbirini
+    beklemeden calisabilecekken art arda sirali `await` ile (dort ayri
+    round-trip) calistiriliyordu, hemen ALTINDAKI blok zaten sekiz sorguyu
+    paralel yuruturken bunlar disarida kalmisti.
+  */
   const [
+    pendingApps,
+    totalBookings,
+    activePartnersCount,
+    revenueData,
     last7Bookings,
     prev7Bookings,
     last7Rev,
@@ -114,6 +114,13 @@ export default async function AdminDashboard({
     chartData,
     pendingRoleApprovals,
   ] = await Promise.all([
+    shopService.getPendingShops(),
+    prisma.booking.count(),
+    prisma.shop.count({ where: { isActive: true } }),
+    prisma.booking.aggregate({
+      where: { status: { in: [...PAID_STATUSES] } },
+      _sum: { totalPrice: true },
+    }),
     prisma.booking.count({ where: { createdAt: { gte: start7 } } }),
     prisma.booking.count({
       where: { createdAt: { gte: start14, lt: start7 } },
@@ -139,6 +146,7 @@ export default async function AdminDashboard({
     getDailyChartData(),
     prisma.adminRoleChangeRequest.count(),
   ]);
+  const totalRevenue = moneyToNumber(revenueData._sum.totalPrice ?? 0);
 
   /**
    * Sayı biçimlendirmesi SUNUCUDA yapılıyor ve `toLocaleString()` locale ARGÜMANI

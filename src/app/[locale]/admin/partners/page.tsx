@@ -17,12 +17,14 @@ export default async function AdminPartnersPage({
     redirect(`/${locale}/login`);
   }
 
-  // Tüm dükkanları çekiyoruz (aktif/pasif fark etmeksizin)
+  // Son 200 dükkan (admin pagination için yeterli — bkz. admin/users/page.tsx
+  // aynı desen; 2026-09-10'da bulundu: bu ekran tek istisna olarak sınırsızdı).
   const shops = await prisma.shop.findMany({
     orderBy: [
       { isActive: "asc" }, // Önce pasifler (onay bekleyenler veya deaktive edilenler)
       { createdAt: "desc" },
     ],
+    take: 200,
     include: {
       owner: {
         select: {
