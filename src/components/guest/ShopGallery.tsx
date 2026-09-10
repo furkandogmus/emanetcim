@@ -71,7 +71,8 @@ export default function ShopGallery({ images, shopName }: Props) {
           src={images[activeIndex].url}
           alt={`${shopName} ${activeIndex + 1}`}
           fill
-          unoptimized
+          sizes="100vw"
+          priority={activeIndex === 0}
           className="object-cover cursor-pointer"
           onClick={() => setLightboxOpen(true)}
         />
@@ -123,7 +124,7 @@ export default function ShopGallery({ images, shopName }: Props) {
               aria-current={i === activeIndex}
               className={`relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 transition-all ${i === activeIndex ? "border-orange-500" : "border-transparent opacity-60 hover:opacity-100"}`}
             >
-              <Image src={img.url} alt="" fill unoptimized className="object-cover" />
+              <Image src={img.url} alt="" fill sizes="64px" className="object-cover" />
             </button>
           ))}
         </div>
@@ -157,7 +158,7 @@ export default function ShopGallery({ images, shopName }: Props) {
               src={images[activeIndex].url}
               alt={shopName}
               fill
-              unoptimized
+              sizes="90vw"
               className="object-contain rounded-lg"
             />
           </div>
