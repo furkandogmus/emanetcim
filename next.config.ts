@@ -118,6 +118,21 @@ const nextConfig: NextConfig = {
     ],
   },
   serverExternalPackages: ["@prisma/client", "pg"],
+  /*
+    Server Action govde siniri (2026-09-10'da bulundu): Next.js server
+    action'lar icin varsayilan 1MB'dir (Next kendi action-handler'i asani
+    kendisi 413 ile reddeder, `validateImageBytes` (MAX_IMAGE_BYTES=8MB) hic
+    calismadan). `updateShopImageAction` ve check-in'deki `sealPhoto`
+    ArrayBuffer'i bu sinirdan gecmek zorunda; telefon kamerasi fotograflari
+    (2-5MB tipik, 8MB'a kadar kabul ediliyor) neredeyse hepsi bu varsayilanla
+    sunucuya hic ulasmadan reddediliyordu. ArrayBuffer'in RSC tasima
+    katmaninda base64'e donusme payi icin 8MB'in üzerinde marj birakildi.
+  */
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "12mb",
+    },
+  },
   async headers() {
     return [
       {
