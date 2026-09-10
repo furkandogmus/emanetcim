@@ -25,6 +25,7 @@ import {
 import { Calendar, Clock } from "lucide-react";
 import { parseDatetimeLocal } from "@/lib/datetime-local";
 import BottomSheet from "@/components/ui/BottomSheet";
+import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
 import "react-day-picker/style.css";
 
 /*
@@ -252,14 +253,16 @@ export default function DateTimePicker({
     };
   }, [open, isMobile, place]);
 
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [open]);
+  /*
+    ESKI ELLE-YAZILMIS Escape DINLEYICI KALDIRILDI (2026-09-10). Masaustu
+    popup'i yalnizca Escape'i kendi elleriyle isliyordu; projenin geri
+    kalanindaki her diyalogun kullandigi `useModalBehavior` (odak tuzagi,
+    kapaninca odagi tetikleyiciye geri verme, acilista popup'a odaklanma)
+    burada hic yoktu. Klavye kullanicisi Tab'a basarak takvimden ARKADAKI
+    sayfaya gecebiliyordu; kapaninca odak tetikleyici alana DONMÜYORDU.
+    Mobil zaten `BottomSheet` uzerinden bu hook'u kullaniyor.
+  */
+  useModalBehavior({ open: open && !isMobile, onClose: () => setOpen(false) });
 
 
   /**

@@ -10,6 +10,7 @@ import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import { formatDateTimeInZone } from "@/lib/format-datetime";
 import { useActionErrorText } from "@/lib/use-action-error";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
+import { guestBookingStatusMessageKey } from "@/lib/booking-status-i18n";
 
 interface BookingInfo {
   id: string;
@@ -36,6 +37,7 @@ export default function ManageBookingClient({ initialToken }: { initialToken: st
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
   const [cancelled, setCancelled] = useState(false);
+  const [cancelFullRefund, setCancelFullRefund] = useState(false);
   const [token] = useState(initialToken);
   /*
     ConfirmDialog KULLANILIR (2026-09-10'da bulundu): hesapsiz (token'la
@@ -67,6 +69,14 @@ export default function ManageBookingClient({ initialToken }: { initialToken: st
       });
       const data = await res.json();
       if (data.ok) {
+        /*
+          `fullRefund` OKUNUYOR (2026-09-10). Onceden bu sayfa iptal sonrasi
+          HER ZAMAN "odemeniz tamamen iade edilecek" diyordu -- platformun
+          "dukkanda ode" modelinde cogu iptalde hicbir tahsilat olmamisken.
+          Kardeş bilesen (`BookingsClient.tsx`) `res.fullRefund`e gore
+          zaten dallaniyor; bu sayfa `data.ok` disinda hicbir seye bakmiyordu.
+        */
+        setCancelFullRefund(!!data.fullRefund);
         setCancelled(true);
         toast.success(t("cancelSuccess"));
       } else {
@@ -108,7 +118,9 @@ export default function ManageBookingClient({ initialToken }: { initialToken: st
           <Shield size={32} className="text-emerald-600" />
         </div>
         <h1 className="text-xl font-black text-gray-900">{t("cancelSuccess")}</h1>
-        <p className="text-sm text-gray-500 mt-2">{t("cancelSuccessRefund")}</p>
+        {cancelFullRefund && (
+          <p className="text-sm text-gray-500 mt-2">{t("cancelSuccessRefund")}</p>
+        )}
         <Link href="/search" className="mt-6 btn-ui btn-ui-primary rounded-2xl px-6 py-3">
           {t("searchPlaceholder")}
         </Link>
@@ -145,7 +157,17 @@ export default function ManageBookingClient({ initialToken }: { initialToken: st
               <div className="flex justify-between items-center">
                 <span className="text-xs text-gray-400 font-bold uppercase">{t("status")}</span>
                 <span className="text-xs font-black px-2 py-1 rounded-lg bg-orange-50 text-orange-600">
-                  {booking.status}
+                  {(() => {
+                    /*
+                      Ham `booking.status` ("WAITING_APPROVAL" gibi) yazdirmak
+                      hesapsiz erisen -- coğu zaman tam bu ekrana kod cevirilerini
+                      bilmedigi icin dusen -- misafire cevrilmemis bir motor
+                      degeri gosteriyordu. `BookingsClient.tsx` ayni durumu
+                      zaten `guestBookingStatusMessageKey` ile cozuyor.
+                    */
+                    const k = guestBookingStatusMessageKey(booking.status);
+                    return k ? t(k as never) : booking.status;
+                  })()}
                 </span>
               </div>
               <div className="flex justify-between items-center">

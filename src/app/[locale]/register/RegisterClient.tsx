@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { registerGuestAction, registerPartnerApplicationAction } from '@/actions/register';
 import { normalizeTrGsm10 } from '@/lib/netgsm';
+import { MIN_PASSWORD_LENGTH } from '@/lib/auth-password';
 import dynamic from 'next/dynamic';
 import {
   Package,
@@ -290,7 +291,7 @@ export default function RegisterPage() {
               placeholder={t('password')}
               required
               autoComplete="new-password"
-              minLength={6}
+              minLength={MIN_PASSWORD_LENGTH}
               value={activeTab === 'GUEST' ? guestData.password : partnerData.password}
               onChange={(e) => activeTab === 'GUEST'
                 ? setGuestData({ ...guestData, password: e.target.value })

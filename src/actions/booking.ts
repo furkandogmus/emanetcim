@@ -241,6 +241,25 @@ export async function createBookingAction(data: CreateBookingInput) {
         );
     }
 
+    /*
+      TELEFONLA (E-POSTASIZ) MISAFIRE SMS ONAYI.
+
+      `notifyGuestBookingRequestSms` zaten yaziliydi ama HICBIR YERDEN
+      cagirilmiyordu -- checkout yalnizca e-posta VEYA telefon istiyor
+      (satir 72-74) ve arayuz de bunu vaat ediyor (`checkoutGuestContactHint`),
+      ama telefon-yalniz bir rezervasyonun ekrandaki tek seferlik QR disinda
+      HICBIR kalici kaydi olmuyordu: e-posta gitmiyordu, SMS hic cagirilmiyordu.
+      Sekmeyi kapatan/tarayicisi cokup gecen misafirin elinde rezervasyon
+      kodunu hatirlamaktan baska bir sey kalmiyordu.
+    */
+    if (!recipientEmail && data.guestPhone) {
+      void notificationService
+        .notifyGuestBookingRequestSms(data.guestPhone, booking.id, shop.name)
+        .catch((err) =>
+          logger.error({ err, bookingId: booking.id }, "notify_guest_booking_sms_failed"),
+        );
+    }
+
     // Esnafa bildirim gönder (Yeni Rezervasyon)
     void notificationService
       .notifyPartnerAndAdminsForNewPaidBooking({
