@@ -24,6 +24,8 @@ export type MobileJwtClaims = {
   role: Role;
   type: "access" | "refresh";
   tv?: number; // tokenVersion
+  /** Yalniz refresh token'larda: tekrar-kullanim (replay) tespiti icin -- bkz. refresh-token-store.ts. */
+  jti?: string;
 };
 
 /**
@@ -63,7 +65,8 @@ export async function signAccessToken(userId: string, role: Role, tokenVersion?:
 
 export async function signRefreshToken(userId: string, role: Role, tokenVersion?: number) {
   const tv = await resolveTokenVersion(userId, tokenVersion);
-  return new SignJWT({ role, type: "refresh", tv })
+  // `jti`: bkz. refresh-token-store.ts -- tekrar-kullanim (replay) tespiti bu alana dayanir.
+  return new SignJWT({ role, type: "refresh", tv, jti: crypto.randomUUID() })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuer(JWT_ISSUER)
     .setAudience(JWT_AUDIENCE.mobile)
