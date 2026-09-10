@@ -10,6 +10,7 @@ import 'package:latlong2/latlong.dart';
 import '../../core/services/analytics_service.dart';
 import '../../shared/models/shop.dart';
 import '../../shared/utils/app_colors.dart';
+import '../../shared/widgets/error_state.dart';
 import 'search_filters_controller.dart';
 import 'search_location_controller.dart';
 import 'search_suggestions_controller.dart';
@@ -499,6 +500,23 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               shopsAsync.maybeWhen(data: (d) => d, orElse: () => null) == null)
             const Center(child: CircularProgressIndicator()),
 
+          /*
+            HATA SESSIZCE YUTULUYORDU (2026-09-11'de bulundu). `filtered`
+            her zaman `maybeWhen(orElse: () => <ShopDto>[])` ile bos listeye
+            duseyordu; harita bos kaliyor, kullaniciya "internet yok" mu
+            "sonuc yok" mu oldugunu soyleyen hicbir sey gorunmuyordu.
+          */
+          if (shopsAsync.hasError &&
+              shopsAsync.maybeWhen(data: (d) => d, orElse: () => null) == null)
+            ColoredBox(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              child: ErrorState(
+                title: 'common.error'.tr(),
+                actionLabel: 'common.try_again'.tr(),
+                onAction: () => ref.invalidate(nearbyShopsProvider),
+              ),
+            ),
+
           Positioned(
             left: 16,
             right: 16,
@@ -603,7 +621,61 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               height: 180,
               child: shopsAsync.maybeWhen(
                 data: (filtered) {
-                  if (filtered.isEmpty) return const SizedBox();
+                  /*
+                    BOS SONUC SESSIZCE GIZLENIYORDU (2026-09-11'de bulundu).
+                    Filtre uygulanip hic sonuc kalmadiginda bu alan tamamen
+                    bos kaliyordu; kullanici "hicbir sey mi yuklenmedi, yoksa
+                    gercekten sonuc mu yok" ayirt edemiyordu.
+                  */
+                  if (filtered.isEmpty) {
+                    return Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
+                      ),
+                      constraints: const BoxConstraints(minHeight: 124),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.95),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.08),
+                            blurRadius: 20,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'search.no_results_title'.tr(),
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'search.no_results_desc'.tr(),
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: Colors.grey.shade600),
+                          ),
+                          if (hasActiveFilters) ...[
+                            const SizedBox(height: 8),
+                            TextButton(
+                              onPressed: () => ref
+                                  .read(searchFiltersProvider.notifier)
+                                  .reset(),
+                              child: Text('search.clear_filters'.tr()),
+                            ),
+                          ],
+                        ],
+                      ),
+                    );
+                  }
 
                   return GestureDetector(
                     behavior: HitTestBehavior.translucent,

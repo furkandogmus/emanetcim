@@ -5,6 +5,25 @@ import 'package:flutter_test/flutter_test.dart';
 import '../support/pump_app.dart';
 
 void main() {
+  testWidgets(
+    // Regresyon (2026-09-11): `_fetchStats` hatayi `_stats.error`e
+    // yaziyordu ama `build()` bunu hic okumuyordu -- ag hatasinda esnaf
+    // GERCEKTEN ₺0 kazandigini saniyordu, hata gizleniyordu.
+    'ag hatasinda sessizce ₺0 gostermez, hata durumu + tekrar dene gosterir',
+    (tester) async {
+      await pumpApp(
+        tester,
+        child: const PartnerEarningsScreen(),
+        overrides: [dioProvider.overrideWith((ref) => fakeDioError())],
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('₺0'), findsNothing);
+      expect(find.text('Bir hata oluştu'), findsOneWidget);
+      expect(find.text('Tekrar Dene'), findsOneWidget);
+    },
+  );
+
   testWidgets('bakiye ve gunluk kazanci gosterir', (tester) async {
     await pumpApp(
       tester,

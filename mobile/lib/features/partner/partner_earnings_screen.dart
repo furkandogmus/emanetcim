@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/api/api_client.dart';
 import '../../shared/models/earnings_stats.dart';
 import '../../shared/utils/app_colors.dart';
+import '../../shared/widgets/error_state.dart';
 import '../../shared/widgets/skeleton.dart';
 
 class PartnerEarningsScreen extends ConsumerStatefulWidget {
@@ -68,6 +69,35 @@ class _PartnerEarningsScreenState extends ConsumerState<PartnerEarningsScreen> {
               ],
             ),
           ),
+        ),
+      );
+    }
+
+    /*
+      SESSIZCE ₺0 GOSTERILIYORDU (2026-09-11'de bulundu). `_fetchStats`
+      hatasi `_stats.error`e yaziliyordu ama `build()` bunu HICBIR YERDE
+      okumuyordu -- ag hatasinda esnaf gercek veriye ulasilamadigini degil,
+      GERCEKTEN ₺0 kazandigini saniyordu. `partner_settings_screen.dart`
+      ayni deseni dogru uyguluyor, burasi atlanmisti.
+    */
+    if (_stats.error != null) {
+      return Scaffold(
+        backgroundColor: AppColors.bgLight,
+        appBar: AppBar(
+          title: Text(
+            'partner.earnings'.tr(),
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
+          ),
+        ),
+        body: ErrorState(
+          title: 'common.error'.tr(),
+          actionLabel: 'common.try_again'.tr(),
+          onAction: () {
+            setState(() => _loading = true);
+            _fetchStats();
+          },
         ),
       );
     }
