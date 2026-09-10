@@ -12,6 +12,7 @@ import { replySubjectForMailto } from "@/lib/reply-subject";
 import { replyToContactMessageAction } from "@/actions/contact";
 import { actionErrorKey } from "@/lib/action-error";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 
 interface AdminMessagesClientProps {
   messages: ContactMessageDTO[];
@@ -20,6 +21,7 @@ interface AdminMessagesClientProps {
 export default function AdminMessagesClient({ messages: initialMessages }: AdminMessagesClientProps) {
   const t = useTranslations("Admin");
   const tErrors = useTranslations("Errors");
+  const tCommon = useTranslations("Common");
   const locale = useLocale();
   const dateLocale = bcp47ForUiLocale(locale);
   /**
@@ -75,6 +77,14 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  /*
+    ConfirmDialog KULLANILIR (2026-09-10'da bulundu): toplu silme
+    `window.confirm()` -- tarayici kromu -- arkasindaydi; projenin geri
+    kalanindaki her yikici islem paylasilan ConfirmDialog kullaniyor
+    (Escape/odak yonetimi/role="dialog" 2026-08-22'de eklendi, bu yol o
+    sertlestirmeyi hic almamisti).
+  */
+  const [bulkDeleteConfirmOpen, setBulkDeleteConfirmOpen] = useState(false);
   /**
    * Toplu işlem metinleri artık `Admin` namespace'inden geliyor.
    *
@@ -170,7 +180,8 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
 
   const handleBulkDelete = async () => {
     const ids = [...selectedIds];
-    if (ids.length === 0 || !window.confirm(bulkCopy.confirm)) return;
+    setBulkDeleteConfirmOpen(false);
+    if (ids.length === 0) return;
 
     setLoadingId("bulk");
     try {
@@ -300,7 +311,7 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
         {selectedIds.size > 0 && (
           <button
             type="button"
-            onClick={() => void handleBulkDelete()}
+            onClick={() => setBulkDeleteConfirmOpen(true)}
             disabled={loadingId === "bulk"}
             className="ml-auto inline-flex items-center gap-2 rounded-xl bg-red-50 px-4 py-2 text-xs font-black text-red-700 transition-colors hover:bg-red-100"
           >
@@ -308,6 +319,14 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
             {bulkCopy.delete}
           </button>
         )}
+        <ConfirmDialog
+          open={bulkDeleteConfirmOpen}
+          message={bulkCopy.confirm}
+          confirmLabel={bulkCopy.delete}
+          cancelLabel={tCommon("cancel")}
+          onCancel={() => setBulkDeleteConfirmOpen(false)}
+          onConfirm={() => void handleBulkDelete()}
+        />
       </div>
 
       <div className="bg-white rounded-4xl border border-gray-100 shadow-sm overflow-hidden min-h-[500px]">
@@ -332,8 +351,25 @@ export default function AdminMessagesClient({ messages: initialMessages }: Admin
                     msg.isRead ? "bg-white hover:bg-gray-50/50" : "bg-orange-50/20 hover:bg-orange-50/30"
                   }`}
                 >
-                  <div 
+                  {/*
+                    KLAVYE ERISIMI (2026-09-10'da bulundu): bu satir yalniz
+                    fare ile genisletilebiliyordu. Ic ice checkbox/butonlar
+                    tasidigi icin gercek bir `<button>` GECERSIZ HTML uretir
+                    (interaktif-icinde-interaktif); onun yerine `role="button"`
+                    + klavye handler'i eklendi.
+                  */}
+                  <div
                     onClick={() => toggleExpand(msg.id)}
+                    onKeyDown={(e) => {
+                      if (e.target !== e.currentTarget) return;
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        toggleExpand(msg.id);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    aria-expanded={expandedId === msg.id}
                     className="p-6 md:px-8 cursor-pointer flex flex-col md:flex-row gap-4 md:items-center justify-between"
                   >
                     <div className="flex items-start gap-4 flex-1 min-w-0">

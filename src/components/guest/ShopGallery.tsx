@@ -67,15 +67,26 @@ export default function ShopGallery({ images, shopName }: Props) {
   return (
     <>
       <div className="relative w-full h-48 sm:h-56 rounded-2xl overflow-hidden bg-gray-100">
-        <Image
-          src={images[activeIndex].url}
-          alt={`${shopName} ${activeIndex + 1}`}
-          fill
-          sizes="100vw"
-          priority={activeIndex === 0}
-          className="object-cover cursor-pointer"
+        {/*
+          `button` SARMALI (2026-09-10'da bulundu): resim `onClick` tasiyordu
+          ama klavyeyle ulasilamiyordu -- alttaki ok/nokta/kucuk resim
+          dugmelerinin aksine burasi bir `<button>` degildi.
+        */}
+        <button
+          type="button"
           onClick={() => setLightboxOpen(true)}
-        />
+          aria-label={t("viewPhoto", { index: activeIndex + 1 })}
+          className="absolute inset-0 h-full w-full cursor-pointer p-0 border-0"
+        >
+          <Image
+            src={images[activeIndex].url}
+            alt={`${shopName} ${activeIndex + 1}`}
+            fill
+            sizes="100vw"
+            priority={activeIndex === 0}
+            className="object-cover"
+          />
+        </button>
         {images.length > 1 && (
           <>
             <button
