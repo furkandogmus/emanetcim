@@ -239,7 +239,7 @@ export default function RegisterPage() {
                 ? setGuestData({ ...guestData, name: e.target.value })
                 : setPartnerData({ ...partnerData, name: e.target.value })
               }
-              className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 focus:outline-none focus:border-orange-300 transition"
+              className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 transition"
             />
           </div>
 
@@ -255,7 +255,7 @@ export default function RegisterPage() {
                 autoComplete="email"
                 value={guestData.email}
                 onChange={(e) => setGuestData({ ...guestData, email: e.target.value })}
-                className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 focus:outline-none focus:border-orange-300 transition"
+                className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 transition"
               />
             </div>
           ) : (
@@ -276,7 +276,7 @@ export default function RegisterPage() {
                 inputMode="numeric"
                 autoComplete="tel-national"
                 maxLength={14}
-                className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 focus:outline-none focus:border-orange-300 transition"
+                className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 transition"
               />
             </div>
           )}
@@ -296,7 +296,7 @@ export default function RegisterPage() {
                 ? setGuestData({ ...guestData, password: e.target.value })
                 : setPartnerData({ ...partnerData, password: e.target.value })
               }
-              className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 focus:outline-none focus:border-orange-300 transition"
+              className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 transition"
             />
           </div>
 
@@ -318,7 +318,7 @@ export default function RegisterPage() {
                   autoComplete="organization"
                   value={partnerData.shopName}
                   onChange={(e) => setPartnerData({ ...partnerData, shopName: e.target.value })}
-                  className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 focus:outline-none focus:border-orange-300 transition"
+                  className="w-full h-12 pl-10 pr-4 border-2 border-gray-100 rounded-xl text-sm font-medium text-gray-800 transition"
                 />
               </div>
 
