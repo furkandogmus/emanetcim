@@ -73,6 +73,7 @@ dependencies:
   local_auth: 3.0.2
   crypto: ^3.0.7
   flutter_map_vector_tiles: ^2.8.1
+  flutter_svg: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -99,6 +100,7 @@ flutter:
   assets:
     - assets/images/logo.png
     - assets/images/logo_white.png
+    - assets/images/google_logo.svg
     - assets/l10n/en.json
     - assets/l10n/tr.json
     # Outfit fontlari paketle gelir: google_fonts once asset'e bakar, ilk acilista

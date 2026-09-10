@@ -1,11 +1,11 @@
 import 'dart:async' show unawaited;
 import 'dart:io' show Platform;
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/api/api_client.dart';
@@ -506,14 +506,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 const SizedBox(height: 24),
                                 OutlinedButton.icon(
                                   onPressed: _busy ? null : _google,
-                                  icon: CachedNetworkImage(
-                                    imageUrl:
-                                        'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_Color_Icon.svg/1024px-Google_Color_Icon.svg.png',
+                                  icon: SvgPicture.asset(
+                                    'assets/images/google_logo.svg',
                                     height: 20,
-                                    placeholder: (_, _) =>
-                                        const Icon(Icons.login, size: 20),
-                                    errorWidget: (_, _, _) =>
-                                        const Icon(Icons.login),
+                                    width: 20,
                                   ),
                                   label: Text(
                                     'auth.google'.tr(),
