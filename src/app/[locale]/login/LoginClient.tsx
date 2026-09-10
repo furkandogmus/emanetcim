@@ -309,7 +309,7 @@ export default function LoginPage({
               ) : (
                 <div className="relative">
                   <div className="w-full h-14 bg-gray-100 rounded-2xl flex items-center justify-center gap-3 cursor-not-allowed opacity-50 select-none">
-                    <Package size={20} className="text-gray-400" />
+                    <Apple size={20} className="text-gray-400" fill="currentColor" />
                     <span className="font-bold text-gray-400">{t('continueWithApple')}</span>
                   </div>
                   <span className="absolute -top-2 -right-2 bg-orange-500 text-white id-eyebrow px-2 py-0.5 rounded-full shadow">
