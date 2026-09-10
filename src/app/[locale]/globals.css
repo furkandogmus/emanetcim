@@ -545,42 +545,21 @@ body {
   --id-divider:           1px solid hsl(28 24% 88%);
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   DARK MODE — Warm dark, not pure black
-   ═══════════════════════════════════════════════════════════════ */
-.dark {
-  --background:          hsl(20 14% 8%);
-  --foreground:          hsl(30 10% 96%);
-  --card:                hsl(20 14% 11%);
-  --card-foreground:     hsl(30 10% 96%);
-  --popover:             hsl(20 14% 11%);
-  --popover-foreground:  hsl(30 10% 96%);
+/*
+  DARK MODE — KALDIRILDI (2026-09-10'da bulundu).
 
-  --primary:             hsl(21 90% 55%);   /* slightly lighter on dark */
-  --primary-foreground:  hsl(0 0% 100%);
-
-  --secondary:           hsl(20 12% 18%);
-  --secondary-foreground: hsl(30 6% 84%);
-
-  --muted:               hsl(20 12% 18%);
-  --muted-foreground:    hsl(24 6% 64%);
-
-  --accent:              hsl(38 50% 20%);
-  --accent-foreground:   hsl(38 80% 75%);
-
-  --destructive:         hsl(0 70% 50%);
-  --destructive-foreground: hsl(0 0% 100%);
-
-  --border:  hsl(20 10% 20%);
-  --input:   hsl(20 10% 20%);
-  --ring:    hsl(21 90% 55%);
-
-  --chart-1: hsl(21 80% 60%);
-  --chart-2: hsl(38 80% 58%);
-  --chart-3: hsl(160 70% 50%);
-  --chart-4: hsl(193 70% 50%);
-  --chart-5: hsl(263 60% 65%);
-}
+  Bu `.dark` bloğu tanımlıydı ama web'de hiçbir yer `dark` sınıfını
+  `<html>`/`<body>`'ye eklemiyordu -- ne bir ThemeProvider/next-themes, ne
+  `prefers-color-scheme` medya sorgusu, ne bir kullanıcı tercihi anahtarı.
+  `grep -rn "bg-background|text-foreground|bg-card"` de component katmanında
+  SIFIR kullanım döndürdü -- bu shadcn/ui-tipi token ailesi (ışık modu dahil)
+  zaten kullanılmıyor, gerçek tasarım sistemi yukarıdaki `--brand-*`/`--id-*`
+  token'ları. Duran bir `.dark` bloğu "web karanlık modu destekliyor"
+  izlenimi veriyordu; mobil uygulama tam destekli, web şimdilik yalnız açık
+  mod. Web için karanlık mod eklenecekse bu, bileşen katmanında `dark:`
+  varyantlarının gerçekten kullanılmaya başlanmasını gerektiren ayrı bir
+  tasarım kararı.
+*/
 
 /* ═══════════════════════════════════════════════════════════════
    BASE LAYER — Global defaults
