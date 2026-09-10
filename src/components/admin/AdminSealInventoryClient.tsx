@@ -205,6 +205,13 @@ export default function AdminSealInventoryClient({ sealCounts, shops, assignedBa
         </h3>
         
         <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+          {/*
+            overflow-x-auto EKLENDI (2026-09-10'da bulundu): diger 7 admin
+            tablosunun hepsi bu sarmali tasiyor; bu tablo dar ekranda
+            sikismak/tasmak yerine kaydirilabilmeli. colSpan de 3 -> 2
+            duzeltildi -- basligin yalniz iki sutunu var.
+          */}
+          <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
@@ -226,13 +233,14 @@ export default function AdminSealInventoryClient({ sealCounts, shops, assignedBa
                 ))
               ) : (
                 <tr>
-                  <td colSpan={3} className="px-6 py-10 text-center text-gray-400 text-sm font-bold">
+                  <td colSpan={2} className="px-6 py-10 text-center text-gray-400 text-sm font-bold">
                     {t("sealNoAssignments")}
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
     </div>
