@@ -1918,7 +1918,11 @@
     "exportDesc": "アカウントに関連する主要データをJSONファイルでダウンロードします。",
     "exportButton": "ダウンロード",
     "deleteTitle": "アカウントを匿名化",
-    "deleteDesc": "有効な予約がなければ個人データは削除されます。法律上必要な記録は保持される場合があります。",
+    "deleteDesc": "アカウントを閉じる前に、次のことが起きます:",
+    "deleteConsequenceIdentity": "氏名、メールアドレス、電話番号、写真が削除され、このアカウントに再度サインインすることはできなくなります。",
+    "deleteConsequenceReviews": "レビューと通知の購読は削除されます。",
+    "deleteConsequenceBookings": "過去の予約記録は、法令および会計上の義務により匿名化された形で保持されます。",
+    "deleteConsequenceIrreversible": "この操作は取り消せません。",
     "deleteButton": "アカウントを閉鎖",
     "errors": {
       "activeBookings": "有効な予約があります。アカウント削除の前に完了させてください。",
@@ -1926,7 +1930,9 @@
       "guestContactRequired": "メールアドレスまたは電話番号を入力してください。",
       "unauthorized": "この操作は許可されていません。",
       "generic": "エラーが発生しました。"
-    }
+    },
+    "deleteTypeConfirmLabel": "確認のため、下に {phrase} と入力してください:",
+    "deleteTypeConfirmPhrase": "アカウントを削除"
   },
   "WebPush": {
     "title": "プッシュ通知",

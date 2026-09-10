@@ -1918,7 +1918,11 @@
     "exportDesc": "Laden Sie eine JSON-Datei mit den wichtigsten Daten Ihres Kontos herunter.",
     "exportButton": "Herunterladen",
     "deleteTitle": "Konto anonymisieren",
-    "deleteDesc": "Ohne aktive Buchungen werden personenbezogene Daten entfernt; einige Datensätze bleiben, wo das Gesetz es verlangt.",
+    "deleteDesc": "Bevor Sie Ihr Konto schließen, hier was passiert:",
+    "deleteConsequenceIdentity": "Ihr Name, Ihre E-Mail, Telefonnummer und Ihr Foto werden entfernt; Sie können sich mit diesem Konto nicht mehr anmelden.",
+    "deleteConsequenceReviews": "Ihre Bewertungen und Benachrichtigungs-Abos werden gelöscht.",
+    "deleteConsequenceBookings": "Ihre bisherigen Buchungsdaten werden in anonymisierter Form aufbewahrt, wie es gesetzliche und buchhalterische Pflichten vorschreiben.",
+    "deleteConsequenceIrreversible": "Dieser Vorgang kann nicht rückgängig gemacht werden.",
     "deleteButton": "Konto schließen",
     "errors": {
       "activeBookings": "Sie haben aktive Buchungen; schließen Sie diese vor dem Löschen des Kontos.",
@@ -1926,7 +1930,9 @@
       "guestContactRequired": "Bitte E-Mail oder Telefonnummer eingeben.",
       "unauthorized": "Dazu sind Sie nicht berechtigt.",
       "generic": "Etwas ist schiefgelaufen."
-    }
+    },
+    "deleteTypeConfirmLabel": "Geben Sie zur Bestätigung unten {phrase} ein:",
+    "deleteTypeConfirmPhrase": "KONTO LÖSCHEN"
   },
   "WebPush": {
     "title": "Push-Benachrichtigungen",

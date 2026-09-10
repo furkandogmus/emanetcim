@@ -1306,7 +1306,11 @@
     "exportDesc": "Hesabınızla ilişkili temel verileri JSON olarak indirin.",
     "exportButton": "İndir",
     "deleteTitle": "Hesabı anonimleştir",
-    "deleteDesc": "Aktif rezervasyonunuz yoksa kişisel verileriniz silinir; geçmiş kayıtlar yasal zorunluluklar için tutulabilir.",
+    "deleteDesc": "Hesabınızı kapatmadan önce şunları bilin:",
+    "deleteConsequenceIdentity": "Adınız, e-postanız, telefon numaranız ve fotoğrafınız kaldırılır; bu hesapla bir daha giriş yapamazsınız.",
+    "deleteConsequenceReviews": "Yorumlarınız ve bildirim aboneliğiniz silinir.",
+    "deleteConsequenceBookings": "Geçmiş rezervasyon kayıtlarınız, yasal ve muhasebe zorunlulukları nedeniyle anonim biçimde saklanmaya devam eder.",
+    "deleteConsequenceIrreversible": "Bu işlem geri alınamaz.",
     "deleteButton": "Hesabı kapat",
     "errors": {
       "activeBookings": "Aktif rezervasyonunuz varken hesap kapatılamaz.",
@@ -1317,7 +1321,9 @@
     },
     "deleteConfirmTitle": "Hesabınızı kapatmak üzeresiniz",
     "deleteConfirmBody": "Bu işlem geri alınamaz. Kişisel verileriniz anonimleştirilir ve oturumunuz kapatılır.",
-    "deleteConfirmYes": "Evet, hesabımı kapat"
+    "deleteConfirmYes": "Evet, hesabımı kapat",
+    "deleteTypeConfirmLabel": "Onaylamak için aşağıya {phrase} yazın:",
+    "deleteTypeConfirmPhrase": "HESABIMI SİL"
   },
   "WebPush": {
     "title": "Anlık bildirimler",

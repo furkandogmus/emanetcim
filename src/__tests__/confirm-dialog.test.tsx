@@ -101,6 +101,60 @@ describe("ConfirmDialog", () => {
     expect(document.activeElement?.textContent).toBe("Evet, kapat");
   });
 
+  /*
+    `typedConfirmation` (2026-09-10, hesap kapatma icin eklendi): en yikici
+    eylemlerde "yanlislikla tikladim" ihtimalini azaltmak icin ifadeyi
+    harfiyen yazma sarti. Opsiyonel oldugu icin bu davranis yalnizca prop
+    verildiginde devreye girmeli -- yukaridaki testlerin hicbiri bunu
+    kullanmiyor ve hepsi hala gecmeli.
+  */
+  describe("typedConfirmation", () => {
+    it("ifade yazılana kadar onay butonu devre dışı kalır", () => {
+      const { onConfirm } = setup({
+        typedConfirmation: { phrase: "HESABIMI SİL", label: "Yazın:" },
+      });
+      const confirmBtn = screen.getByText("Evet, kapat");
+      expect(confirmBtn).toBeDisabled();
+      fireEvent.click(confirmBtn);
+      expect(onConfirm).not.toHaveBeenCalled();
+    });
+
+    it("tam (harf duyarlı) eşleşme onay butonunu etkinleştirir", () => {
+      const { onConfirm } = setup({
+        typedConfirmation: { phrase: "HESABIMI SİL", label: "Yazın:" },
+      });
+      fireEvent.change(screen.getByRole("textbox"), {
+        target: { value: "HESABIMI SİL" },
+      });
+      const confirmBtn = screen.getByText("Evet, kapat");
+      expect(confirmBtn).not.toBeDisabled();
+      fireEvent.click(confirmBtn);
+      expect(onConfirm).toHaveBeenCalledTimes(1);
+    });
+
+    it("harf büyüklüğü farklıysa devre dışı kalır (Türkçe İ/I tuzağına düşmez)", () => {
+      setup({ typedConfirmation: { phrase: "HESABIMI SİL", label: "Yazın:" } });
+      fireEvent.change(screen.getByRole("textbox"), {
+        target: { value: "hesabimi sil" },
+      });
+      expect(screen.getByText("Evet, kapat")).toBeDisabled();
+    });
+
+    it("kısmi/yanlış yazım devre dışı bırakmayı sürdürür", () => {
+      setup({ typedConfirmation: { phrase: "HESABIMI SİL", label: "Yazın:" } });
+      fireEvent.change(screen.getByRole("textbox"), {
+        target: { value: "hesabimi" },
+      });
+      expect(screen.getByText("Evet, kapat")).toBeDisabled();
+    });
+
+    it("typedConfirmation verilmezse davranış eskisiyle birebir aynı kalır", () => {
+      setup();
+      expect(screen.getByText("Evet, kapat")).not.toBeDisabled();
+      expect(screen.queryByRole("textbox")).toBeNull();
+    });
+  });
+
   it("açıkken arka plan kaydırması kilitlenir, kapanınca geri açılır", () => {
     const { unmount } = render(
       <ConfirmDialog
