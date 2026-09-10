@@ -98,6 +98,7 @@ export default function ShopDetailClient({
 }: ShopDetailClientProps) {
   const router = useRouter();
   const t = useTranslations("Guest");
+  const tCommon = useTranslations("Common");
   /**
    * Sigorta gerçekten var mı? Zaten elimizde olan `pricingRules`'tan türüyor —
    * ayrı bir sorgu veya bağlam gerekmiyor (P1-20).
@@ -223,6 +224,7 @@ export default function ShopDetailClient({
               <button
                 type="button"
                 onClick={() => share({ title: shop.name, text: `${shop.name} — BagajPark`, url: shareUrl })}
+                aria-label={tCommon("share")}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-gray-900 shadow active:scale-90 transition-transform"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
@@ -447,8 +449,24 @@ export default function ShopDetailClient({
       {shop.images.length > 0 ? (
         <ShopGallery images={shop.images} shopName={shop.name} />
       ) : (
-      <div className="relative h-48 sm:h-56 bg-gradient-to-br from-orange-500 via-orange-600 to-amber-700">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxIDAgNiAyLjY5IDYgNnMtMi42OSA2LTYgNi02LTIuNjktNi02IDIuNjktNiA2LTYiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iLjA4Ii8+PC9nPjwvc3ZnPg==')] opacity-40" />
+      <div className={`relative h-48 sm:h-56 ${shop.image ? '' : 'bg-gradient-to-br from-orange-500 via-orange-600 to-amber-700'}`}>
+        {/*
+          MASAUSTU FALLBACK (2026-09-10'da bulundu): mobil dal `shop.image`i
+          kontrol ediyordu, bu dal etmiyordu -- galeri bos ama `shop.image`
+          doluysa (esnaf panelinden yuklenen TEK yazma yolu) masaustunde
+          hicbir fotograf gorunmuyor, yalniz turuncu gradyan placeholder.
+        */}
+        {shop.image ? (
+          <Image
+            src={shop.image}
+            alt={shop.name}
+            fill
+            sizes="(min-width: 768px) 100vw, 0px"
+            className="object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxIDAgNiAyLjY5IDYgNnMtMi42OSA2LTYgNi02LTIuNjktNi02IDIuNjktNiA2LTYiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iLjA4Ii8+PC9nPjwvc3ZnPg==')] opacity-40" />
+        )}
         <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between">
           {/* Ayni koruma (bkz. mobil varyant): `inline-flex` icerikten genisler. */}
           <Link
@@ -461,6 +479,7 @@ export default function ShopDetailClient({
           <button
             type="button"
             onClick={() => share({ title: shop.name, text: `${shop.name} — BagajPark`, url: shareUrl })}
+                aria-label={tCommon("share")}
             className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-gray-900 shadow-lg hover:bg-white transition-colors active:scale-90"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
