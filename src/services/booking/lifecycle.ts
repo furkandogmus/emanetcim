@@ -160,7 +160,11 @@ export async function cancelBooking(bookingId: string): Promise<CancelBookingRes
       }
     });
 
-    bookingEventService.record({
+    /*
+      Atesle-unut: iptal/degisiklik yazildi, olay kaydi onu bekletmez. `.catch`
+      sart — yakalanmamis red sureci dusurur (`unhandled-rejection` mandali, tavan 0).
+    */
+    void bookingEventService.record({
       bookingId,
       event: "CANCELLED",
       metadata: { previousStatus: booking.status, hadPayment, fullRefund: true },
@@ -416,7 +420,7 @@ export async function modifyBooking(
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
     ), { label: "modifyBooking" });
 
-    bookingEventService.record({
+    void bookingEventService.record({
       bookingId,
       event: "MODIFIED",
       actorId: guestId,

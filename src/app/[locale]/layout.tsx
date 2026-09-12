@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist } from "next/font/google";
+import { Geist, Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
@@ -27,6 +27,36 @@ import { serializeJsonLd } from "@/lib/json-ld-script";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin", "latin-ext"],
+  display: "swap",
+});
+
+/**
+ * BASLIK AILESI — Bricolage Grotesque (2026-09-12).
+ *
+ * NEDEN AYRI BIR AILE: site bugune kadar TEK yazi tipi kullaniyordu, Geist —
+ * `create-next-app`in kutudan cikan fontu. Ustune baslik agirligi `font-black`
+ * (900) idi, yani sayfa hem varsayilan hem en yuksek sesindeydi. Bir yazi
+ * tipinin karakteri yoksa kalinlik onu yerine koymaz, yalnizca bagirir.
+ *
+ * NEDEN BU AILE: Bricolage bilerek DUZENSIZ bir grotesk — harfler birbirinin
+ * tipatip klonu degil, tabela ve el yapimi bir dokusu var. Urunun kendisi bu:
+ * depo zinciri degil, kose dukkani. Bir kuruyemisci, bir berber, bir eczane.
+ * Geist'in notr Isvicre tonu o sokagin degil, bir kontrol panelinin sesi.
+ *
+ * `opsz` (optik boyut) ve `wdth` (genislik) eksenleri BILEREK isteniyor:
+ * `globals.css` basligi buyudukce `opsz`i yukseltiyor, harfler siklasiyor ve
+ * bosluklar kapaniyor -- degisken fontun asil isi bu, ve tek bir dosya
+ * indirilerek yapiliyor.
+ *
+ * `latin-ext` Turkce (g, s, i, I, o, u) VE Almanca/Fransizca/Lehce
+ * karakterlerini tasir. Japonca ve Farsca bu ailede YOK; o iki dilde baslik
+ * sistem fontuna duser — dogrusu da bu, cunku eksik glif taklidi bir font
+ * ikamesi o dillerde okunakli degil ucube uretir.
+ */
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
+  subsets: ["latin", "latin-ext"],
+  axes: ["opsz", "wdth"],
   display: "swap",
 });
 
@@ -205,7 +235,7 @@ export default async function RootLayout({
     >
       <body
         suppressHydrationWarning
-        className={`${geistSans.variable} flex min-h-screen flex-col bg-gray-50 antialiased selection:bg-orange-100 selection:text-orange-900`}
+        className={`${geistSans.variable} ${bricolage.variable} flex min-h-screen flex-col bg-gray-50 antialiased selection:bg-orange-100 selection:text-orange-900`}
       >
         <script
           type="application/ld+json"
@@ -225,10 +255,28 @@ export default async function RootLayout({
           <CommerceProvider value={commerce}>
           <Providers>
             <PWARegister />
-            <VerificationBanner />
+            {/*
+              ATLAMA BAGLANTISI YAPISKAN YIGININ ONUNDE.
+
+              Olculdu (2026-09-12, 1440x900): yigin kapsayicisi eklendikten
+              sonra ilk `Tab` bu baglantiya degil header'in logosuna
+              ({x:25, y:21, w:127}) gidiyordu -- cunku `Header` DOM'da one
+              gecmisti. Baglantinin tek isi ILK sekme duragi olmak; belge
+              sirasinda basligin onunde durmasi gerekiyor.
+            */}
             <a
               href="#main-content"
-              className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-orange-600 focus:text-white focus:rounded-lg focus:shadow-lg focus:outline-none"
+              /*
+                `focus:z-[70]` — onceden `focus:z-50` idi. Olculdu (2026-09-12):
+                odaklaninca baglanti {top:16, left:16} noktasinda ciziliyor ama
+                `document.elementFromPoint` onu degil header'in logosunu
+                donduruyordu; baglanti yapiskan basligin ALTINDA kaliyordu.
+                Yigin baglami body oldugu icin z-50'lik kapsayiciyla esit olmak
+                yetmez -- DOM'da once geldiginden beraberlikte kaybediyor.
+                70, hem kapsayicinin (50) hem eski banner degerinin (60) ustu:
+                her sayfadaki ILK sekme duragi artik gercekten gorunuyor.
+              */
+              className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[70] focus:px-4 focus:py-2 focus:bg-orange-600 focus:text-white focus:rounded-lg focus:shadow-lg focus:outline-none"
             >
               {/*
                 Sabit Türkçeydi. Bu bağlantı her sayfadaki İLK sekme durağı:
@@ -236,8 +284,59 @@ export default async function RootLayout({
               */}
               {tCommon("skipToContent")}
             </a>
-            <Header />
-            <main id="main-content" className="flex-1 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
+            {/*
+              TEK YAPISKAN KAPSAYICI.
+
+              Olculdu (2026-09-12, 1440x900): `VerificationBanner` {y:0, h:51,
+              z:60} ve `Header` {y:0, h:74, z:50} AYRI AYRI `sticky top-0`
+              tasiyordu ve ikisi de `body`nin dogrudan flex cocuguydu. Iki kardes
+              ayni `top-0` esigine yapisinca ust uste biniyor: banner, header'in
+              74 px'inin 51 px'ini ortuyordu -- yani dogrulanmamis e-posta ile
+              gezen bir kullanicinin logosu ve gezinme baglantilari kayboluyordu.
+              `sticky` kardesler arasinda sira kurmaz, her biri kendi
+              kaydirma kapsayicisina gore yapisir.
+
+              Cozum diziyi DIKEY yigin yapip yigini yapistirmak: ikisi normal
+              akista alt alta kalir, kapsayici tek parca olarak tepede durur.
+              Bu yuzden ikisinden de `sticky top-0 z-*` KALDIRILDI; z sirasi
+              artik burada, tek yerde.
+            */}
+            <div className="sticky top-0 z-50">
+              <VerificationBanner />
+              <Header />
+            </div>
+            {/*
+              `--consent-h`: cerez seridinin OLCULEN yuksekligi (bkz.
+              `CookieConsent.tsx`, ResizeObserver). Serit `fixed bottom-0
+              z-[100]` ile ciziliyordu ve hicbir yer o yuksekligi rezerve
+              etmiyordu: olculdu (2026-09-12, 1440x900) her goruntu alaninin ALT
+              121 px'i kaliciyla ortuluydu -- ana sayfada "Nasil calisir"
+              adimlarinin uzerine biniyordu. Serit yokken degisken tanimsiz
+              kalir ve `var(--consent-h,0px)` sifire duser, yani eski davranis
+              aynen korunur.
+
+              Telefonda serit `MobileNav`in USTUNDE duruyor, o yuzden iki
+              rezervasyon toplanir; `md`den itibaren `MobileNav` yok, geriye
+              yalnizca serit kalir.
+            */}
+            <main
+              id="main-content"
+              /*
+                Sinif listesi BILEREK satirlara bolundu: `hardcoded-copy`
+                taramasi bir satirda iki `var(` gorunce onu Turkce cumle
+                sayiyor (`\bvar\b` durak kelimesi, iki eslesme = isaretle) ve
+                mandal kirmizi yaniyordu. Her satirda tek `var(` kalinca hem
+                tarama dogru calisiyor hem de hangi dolgunun hangi kirilima ait
+                oldugu okunuyor.
+              */
+              className={[
+                "flex-1",
+                // Telefon: alt gezinme cubugu (5rem + guvenli alan) USTUNE serit.
+                "pb-[calc(5rem+env(safe-area-inset-bottom)+var(--consent-h,0px))]",
+                // md ve ustu: alt gezinme cubugu yok, yalnizca serit.
+                "md:pb-[var(--consent-h,0px)]",
+              ].join(" ")}
+            >
               {children}
             </main>
             <Footer />

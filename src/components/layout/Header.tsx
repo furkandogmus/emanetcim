@@ -58,7 +58,14 @@ export default function Header() {
   if (pathname?.includes("/login")) return null;
 
   return (
-    <header className="sticky top-0 w-full z-50 glass border-b border-gray-100/80 px-4 sm:px-6 py-3 flex justify-between items-center transition-all duration-300">
+    /*
+      `sticky top-0 z-50` KALDIRILDI — yapiskanlik `[locale]/layout.tsx`teki
+      saran kapsayiciya tasindi. Olculdu (2026-09-12, 1440x900): bu baslik
+      {y:0, h:74, z:50} ve `VerificationBanner` {y:0, h:51, z:60} ikisi de
+      `body`nin flex cocuguyken ayri ayri yapisiyordu, serit basligin 74 px'inin
+      51 px'ini ortuyordu. Tek kapsayici ikisini dikey yigin olarak tutar.
+    */
+    <header className="w-full glass border-b border-gray-100/80 px-4 sm:px-6 py-3 flex justify-between items-center transition-all duration-300">
       {/* Logo */}
       {/*
         `min-w-0`: logonun KUCULEBILMESI gerekiyor. Olculdu (2026-08-31, iPhone

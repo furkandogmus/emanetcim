@@ -1,4 +1,6 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 import { Link } from "@/i18n/routing";
 import { ChevronLeft } from "lucide-react";
 import AccountPrivacyClient from "./AccountPrivacyClient";
@@ -10,6 +12,21 @@ export default async function AccountPrivacyPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+
+  /*
+    SUNUCU TARAFINDA HIC KAPI YOKTU. `src/proxy.ts` yalnizca admin/partner
+    yollarini kapatiyor, `/account/*` ona takilmiyor; bu sayfa da `auth()`
+    cagirmadigi icin oturumsuz biri dogrudan acabiliyordu. Icerideki
+    "veri disa aktar" / "hesabi sil" uclari kendi yetkilerini ayrica
+    kontrol ediyor, yani veri sizmiyordu -- ama misafir once anlamsiz bir
+    sayfa, sonra bir hata goruyordu. Kardes sayfa `account/page.tsx` ayni
+    kapiyi kuruyor; callbackUrl girisin ardindan buraya geri dondurur.
+  */
+  const session = await auth();
+  if (!session?.user?.id) {
+    redirect(`/${locale}/login?callbackUrl=/${locale}/account/privacy`);
+  }
+
   const t = await getTranslations("AccountPrivacy");
 
   return (

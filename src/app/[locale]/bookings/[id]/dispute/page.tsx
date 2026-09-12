@@ -62,7 +62,15 @@ export default async function DisputePage({
 
   const session = await auth();
   if (!session?.user?.id) {
-    redirect(`/${locale}/login`);
+    /*
+      callbackUrl EKSIKTI: bu yuzeydeki diger uc korumali sayfa
+      (`account`, `bookings`, `bookings/[id]`) girisin ardindan kullaniciyi
+      geldigi yere dondururken, itiraz sayfasina oturumu dusmus halde gelen
+      misafir giristen sonra ana sayfaya birakiliyor ve rezervasyonu
+      yeniden bulmak zorunda kaliyordu -- itiraz akisinin tam da acele
+      edilen anında.
+    */
+    redirect(`/${locale}/login?callbackUrl=/${locale}/bookings/${id}/dispute`);
   }
 
   const booking = await prisma.booking.findUnique({

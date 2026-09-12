@@ -67,24 +67,40 @@ export default async function CancellationPage({ params }: Props) {
     cta: t("cta"),
   };
 
+  // 2026-09-12: Renk sinifi artik TAM METIN olarak veride duruyor.
+  //
+  // NEDEN: onceden `color: "rose"` tutuluyor, sinif `bg-${tier.color}-100` gibi
+  // birlestirilerek uretiliyordu. Tailwind v4 kaynak dosyalari DUZ METIN olarak
+  // tarar; birlesik ad kaynakta hicbir yerde gecmedigi icin `bg-rose-100`,
+  // `text-rose-600`, `bg-rose-50`, `text-rose-700` HIC uretilmedi ve ucuncu kart
+  // renksiz cikti. Ilk iki kart yalnizca TESADUFEN calisiyordu: emerald/amber
+  // adlari projede baska dosyalarda duz metin olarak geciyor. Yani hata sessizdi
+  // -- derleme de test de uyarmiyordu. Tam ad yazildigi surece tarayici siniflari
+  // gorur; enterpolasyonla sinif adi uretmek bu dosyada tamamen birakildi.
   const tiers = [
     {
       icon: ShieldCheck,
-      color: "emerald",
+      iconWrap: "bg-emerald-100",
+      iconColor: "text-emerald-600",
+      badgeClass: "bg-emerald-50 text-emerald-700",
       title: content.tier1Title,
       badge: content.tier1Badge,
       desc: content.tier1Desc,
     },
     {
       icon: RefreshCw,
-      color: "amber",
+      iconWrap: "bg-amber-100",
+      iconColor: "text-amber-600",
+      badgeClass: "bg-amber-50 text-amber-700",
       title: content.tier2Title,
       badge: content.tier2Badge,
       desc: content.tier2Desc,
     },
     {
       icon: CreditCard,
-      color: "rose",
+      iconWrap: "bg-rose-100",
+      iconColor: "text-rose-600",
+      badgeClass: "bg-rose-50 text-rose-700",
       title: content.tier3Title,
       badge: content.tier3Badge,
       desc: content.tier3Desc,
@@ -118,16 +134,12 @@ export default async function CancellationPage({ params }: Props) {
               className="bg-white rounded-3xl p-6 shadow-lg shadow-gray-200/50 border border-gray-100 flex flex-col items-center text-center"
             >
               <div
-                className={`w-14 h-14 rounded-2xl bg-${tier.color}-100 flex items-center justify-center mb-4`}
+                className={`w-14 h-14 rounded-2xl ${tier.iconWrap} flex items-center justify-center mb-4`}
               >
-                <tier.icon
-                  size={28}
-                  className={`text-${tier.color}-600`}
-                  strokeWidth={1.5}
-                />
+                <tier.icon size={28} className={tier.iconColor} strokeWidth={1.5} />
               </div>
               <span
-                className={`inline-block rounded-full bg-${tier.color}-50 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-${tier.color}-700 mb-3`}
+                className={`inline-block rounded-full ${tier.badgeClass} px-3 py-1 text-[10px] font-black uppercase tracking-wider mb-3`}
               >
                 {tier.badge}
               </span>

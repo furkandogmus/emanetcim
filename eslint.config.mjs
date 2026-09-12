@@ -18,6 +18,29 @@ const eslintConfig = defineConfig([
     // yerelde uretilince ESLint onlari da tarayip binlerce sahte uyari
     // basiyordu (coverage/** icin ayni gerekce, bkz. git geçmişi).
     "public/maplibre/**",
+    /*
+      `coverage/` de ayni sinif: `vitest --coverage` uretiyor, gitignored, ve
+      istanbul'un kendi rapor sablonlari ESLint'e "kullanilmayan
+      eslint-disable" uyarisi verdiriyordu. Yukaridaki yorum coverage'i zaten
+      ayni gerekceyle anıyordu ama liste hic eklenmemisti (2026-09-12).
+    */
+    "coverage/**",
+    /*
+      FLUTTER DERLEME CIKTISI (2026-09-12'de bulundu).
+
+      `mobile/` bir Flutter uygulamasi; `flutter build` calistiginda
+      `mobile/build/` altina paketlerin kendi web varliklarini kopyaliyor ve
+      iclerinde derlenmis `.js` dosyalari oluyor. ESLint bunlari TARIYORDU:
+      `npm run lint` ciktisinin 10 uyarisindan 8'i tek bir upstream paketin
+      (`flutter_local_notifications_web`) service worker'inda, ayni satirda,
+      bes kez tekrarlanan ayni uyariydi.
+
+      Bizim yazmadigimiz, gitignore edilmis, derlenmis kod uzerinde uyari
+      biriktirmek lint ciktisini okunmaz yapar -- gercek bir uyari o
+      gurultunun icinde kaybolur. Dart tarafinin kendi analizcisi var
+      (`dart analyze`, bkz. mobile/CLAUDE.md); ESLint'in orada isi yok.
+    */
+    "mobile/**",
   ]),
   {
     /**

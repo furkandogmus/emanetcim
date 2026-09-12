@@ -106,8 +106,14 @@
   /* `font-black` (615 kullanım) → başlık ağırlığı kimlikten gelir. */
   --font-weight-black: var(--id-display-weight);
 
-  /* `tracking-widest` (284 kullanım) → mikro etiket harf aralığı kimlikten. */
-  --tracking-widest: var(--id-eyebrow-tracking);
+  /* `tracking-widest` → KOD/NUMARA harf aralığı.
+     2026-09-12: bu alias eskiden `--id-eyebrow-tracking`i gösteriyordu, çünkü
+     `tracking-widest` o gün 284 yerde mikro etiket üretmek için kullanılıyordu.
+     Göç sonrası geriye 5 kullanım kaldı ve HİÇBİRİ etiket değil — hepsi mühür
+     numarası / teslim kodu gösterimi, yani harf aralığı okunabilirlik için
+     gerçekten gerekli olan tek yer. Eyebrow cümle düzenine inince (0.1em →
+     0.01em) bu beş yer de aralığını kaybediyordu; alias ayrıldı. */
+  --tracking-widest: var(--id-code-tracking);
 
   /* ── Radius scale ──
      Yüzey dili kimlikten gelir (571 kullanım). `rounded-full` listede YOK:
@@ -140,23 +146,9 @@
   --duration-slow:   350ms;
   --duration-slower: 500ms;
 
-  --animate-accordion-down:   accordion-down 0.2s ease-out;
-  --animate-accordion-up:     accordion-up 0.2s ease-out;
   --animate-fade-in:          fade-in 0.4s var(--ease-out);
   --animate-slide-up:         slide-up 0.4s var(--ease-spring);
-  --animate-slide-down:       slide-down 0.3s var(--ease-out);
-  --animate-scale-in:         scale-in 0.25s var(--ease-spring);
-  --animate-shimmer:          shimmer 1.8s linear infinite;
-  --animate-pulse-brand:      pulse-brand 2.4s var(--ease-smooth) infinite;
 
-  @keyframes accordion-down {
-    from { height: 0; opacity: 0; }
-    to   { height: var(--radix-accordion-content-height); opacity: 1; }
-  }
-  @keyframes accordion-up {
-    from { height: var(--radix-accordion-content-height); opacity: 1; }
-    to   { height: 0; opacity: 0; }
-  }
   @keyframes fade-in {
     from { opacity: 0; }
     to   { opacity: 1; }
@@ -164,22 +156,6 @@
   @keyframes slide-up {
     from { opacity: 0; transform: translateY(12px); }
     to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes slide-down {
-    from { opacity: 0; transform: translateY(-10px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes scale-in {
-    from { opacity: 0; transform: scale(0.92); }
-    to   { opacity: 1; transform: scale(1); }
-  }
-  @keyframes shimmer {
-    from { background-position: -200% center; }
-    to   { background-position: 200% center; }
-  }
-  @keyframes pulse-brand {
-    0%, 100% { box-shadow: 0 0 0 0 hsl(21 90% 48% / .35); }
-    50%       { box-shadow: 0 0 0 8px hsl(21 90% 48% / 0); }
   }
 }
 
@@ -355,21 +331,45 @@ body {
   --id-accent-soft:       var(--id-accent-50);
   --id-accent-contrast:   #ffffff;
 
-  /* ── 2. Başlık karakteri ── */
-  --id-display-family:    var(--font-geist-sans, ui-sans-serif, system-ui, sans-serif);
-  --id-display-weight:    900;
-  --id-display-tracking:  -0.03em;
+  /* ── 2. Başlık karakteri ──
+     2026-09-12: aile Geist'ten Bricolage Grotesque'e geçti ve ağırlık 900'den
+     800'e indi. Gerekçe `layout.tsx`te yazılı; kısası: karakteri olmayan bir
+     yazı tipinde kalınlık karakterin yerine geçmez, yalnızca bağırır.
+     `--id-display-opsz` optik boyut eksenidir — başlık ölçeği büyüdükçe
+     `@layer base` içinde yükseltilir, harfler sıkışır, boşluklar kapanır. */
+  --id-display-family:    var(--font-bricolage, var(--font-geist-sans, ui-sans-serif, system-ui, sans-serif));
+  --id-display-weight:    800;
+  --id-display-tracking:  -0.02em;
   --id-display-transform: none;
+  --id-display-opsz:      32;
+  --id-display-wdth:      100;
 
   /* ── 3. Mikro etiket ("eyebrow") ──
      `text-[10px] font-black uppercase tracking-widest` üçlüsü tek token'a indi;
-     tek başına 284 yerde tekrarlanıyordu. Değerler o üçlünün birebir karşılığı:
-     10px · 900 · uppercase · 0.1em (Tailwind `tracking-widest`). */
+     tek başına 284 yerde tekrarlanıyordu.
+
+     2026-09-12: değerler o üçlünün birebir karşılığıydı (10px · 900 · uppercase
+     · 0.1em) ve TAM DA BU YÜZDEN değişti. Aralıklandırılmış BÜYÜK HARF mikro
+     etiket, üretilmiş sayfaların en yaygın işareti; sitede 346 yerde geçiyordu,
+     yani sayfanın her bandının üstünde bir tane vardı. Daha kötüsü: ana sayfada
+     `NASIL ÇALIŞIR?` bir <h2> idi ama 10px gri bir etiket gibi çiziliyordu —
+     bölümün en önemli satırı, sayfadaki en küçük yazıydı.
+
+     Yeni değerler onu SÜS olmaktan çıkarıp ETİKET yapıyor: 11px · 650 · cümle
+     düzeni · neredeyse aralıksız. Okunur, sessiz, ve başlığın işini çalmıyor.
+     Büyük harfe zorlama kalkınca Türkçe i/İ ve Almanca uzun bileşik kelime
+     sorunu da kendiliğinden gidiyor. */
   --id-eyebrow-family:    inherit;
-  --id-eyebrow-size:      0.625rem;
-  --id-eyebrow-weight:    900;
-  --id-eyebrow-tracking:  0.1em;
-  --id-eyebrow-transform: uppercase;
+  --id-eyebrow-size:      0.6875rem;
+  --id-eyebrow-weight:    650;
+  --id-eyebrow-tracking:  0.01em;
+  --id-eyebrow-transform: none;
+
+  /* Kod / mühür numarası aralığı — etiketten AYRI bir karar.
+     Mühür numarası ürünün güven mekanizmasının tamamı; misafir onu ekrandan
+     okuyup fiziksel mührün üstündekiyle karşılaştırıyor. Aralık burada süs
+     değil, karakterleri tek tek ayırt edilebilir kılan şey. */
+  --id-code-tracking:     0.1em;
 
   /* ── 4. Yüzey dili — TAM YARIÇAP SKALASI ──
      Tek bir değer yetmezdi. Kodda `rounded-2xl` 293, `rounded-xl` 134,
@@ -453,7 +453,6 @@ body {
   --id-surface-shadow:    0 1px 0 0 hsl(30 18% 86%);
   --id-divider:           1px dashed hsl(30 18% 72%);
 }
-
 
 /* ───────────────────────────────────────────────────────────────
    YÖN B — "Mühür numarası"
@@ -587,11 +586,53 @@ body {
     overflow-x: hidden;
   }
 
-  /* Fluid heading scale */
-  h1 { font-size: clamp(1.75rem, 1.4rem + 1.5vw, 3rem);   line-height: 1.1; letter-spacing: -0.03em; }
-  h2 { font-size: clamp(1.375rem, 1.2rem + 0.9vw, 2.25rem); line-height: 1.2; letter-spacing: -0.025em; }
-  h3 { font-size: clamp(1.125rem, 1rem + 0.6vw, 1.75rem);  line-height: 1.3; letter-spacing: -0.02em; }
-  h4 { font-size: clamp(1rem, 0.95rem + 0.3vw, 1.25rem);   line-height: 1.4; }
+  /*
+    BASLIK OLCEGI — akiskan boyut + OPTIK BOYUT (2026-09-12).
+
+    Aile artik kimlik katmanindan geliyor (`--id-display-family`), yani
+    `<h1>`den `<h4>`e kadar HICBIR bilesende sinif degistirmeden tum site yeni
+    baslik yazi tipine gecti. Oncesinde basliklar govdeyle ayni aileyi
+    kullaniyordu ve ayrismayi yalnizca `font-black` (900) sagliyordu.
+
+    `opsz` ekseni asil yeni sey: Bricolage degisken bir font ve optik boyut
+    eksenini gercekten tasiyor. Buyuk baslikta opsz yukselir -- harfler
+    siklasir, uclar incelir, boslukLar kapanir; kucuk baslikta duser ve
+    harfler acilip okunakli kalir. Tek bir font dosyasi, dort farkli cizim.
+
+    Harf araligi artik her adimda ELLE yazilmiyor: buyuk baslik zaten opsz ile
+    sikisiyor, ustune negatif aralik eklemek harfleri birbirine gecirirdi.
+  */
+  h1, h2, h3, h4 {
+    font-family: var(--id-display-family);
+    font-weight: var(--id-display-weight);
+    letter-spacing: var(--id-display-tracking);
+  }
+  h1 {
+    font-size: clamp(1.875rem, 1.4rem + 1.9vw, 3.25rem);
+    line-height: 1.05;
+    font-variation-settings: "opsz" 72, "wdth" var(--id-display-wdth);
+  }
+  h2 {
+    font-size: clamp(1.375rem, 1.2rem + 0.9vw, 2.25rem);
+    line-height: 1.18;
+    font-variation-settings: "opsz" 48, "wdth" var(--id-display-wdth);
+  }
+  /* h3/h4 kimlik aralığını DEVRALMAZ: negatif aralık küçük ölçekte harfleri
+     değil kelime boşluklarını yiyor ("2. Dükkanda QR kodunu göster" tek kelime
+     gibi okunuyordu). Optik boyut zaten sıkıştırmayı yapıyor; üstüne aralık
+     eklemek çift sıkıştırma olurdu. */
+  h3 {
+    font-size: clamp(1.125rem, 1rem + 0.6vw, 1.625rem);
+    line-height: 1.3;
+    letter-spacing: 0;
+    font-variation-settings: "opsz" 24, "wdth" var(--id-display-wdth);
+  }
+  h4 {
+    font-size: clamp(1rem, 0.95rem + 0.3vw, 1.25rem);
+    line-height: 1.45;
+    letter-spacing: 0.004em;
+    font-variation-settings: "opsz" 18, "wdth" var(--id-display-wdth);
+  }
 
   /* Smooth focus ring — always orange */
   :focus-visible {
@@ -628,6 +669,28 @@ body {
 
 /* ═══════════════════════════════════════════════════════════════
    UTILITY LAYER — Reusable design primitives
+
+   OLU KURAL TEMIZLIGI (2026-09-12). Bu dosya 1226 satirdi ve icindeki
+   yardimcilarin YARIDAN COGU hicbir bilesende kullanilmiyordu. Olculdu
+   (`grep -ro <sinif> --include=*.tsx src | wc -l`, hepsi SIFIR):
+
+     btn-primary · btn-secondary · card-base · card-brand · input-brand
+     badge-brand · badge-success · badge-amber · skeleton · section-py
+     section-px · hover-lift · text-brand-gradient · bg-surface-warm
+     bg-surface-card · divider-brand · pulse-brand · id-page · glass-brand
+     bg-brand-gradient-soft · bg-brand-gradient-dark · ui-stack-sm/md/lg
+     ui-section · id-divider
+     + animate-shimmer / pulse-brand / accordion-* / slide-down / scale-in
+
+   Neden bu bir TASARIM sorunu, temizlik degil: ayni isi yapan DORT buton
+   ailesi (`btn-primary`, `btn-ui-*`) ve UC kart ailesi (`card-base`,
+   `ui-card`, `id-surface`) yan yana duruyordu. Yeni bir ekran yazan kisi
+   hangisini secerse sectigi anda sistem catallaniyordu -- ve secim yapmak
+   zorunda kalmamak icin cogu zaman hicbirini secmeyip Tailwind'i elle
+   yaziyordu. Kullanilmayan bir primitif notr degildir, YANLIS YOLA DAVETTIR.
+
+   Geriye kullanilan aileler kaldi: `btn-ui-*` (173 kullanim), `ui-card`/
+   `ui-field`/`ui-state`/`ui-kicker` ve `id-*` kimlik sinislari.
    ═══════════════════════════════════════════════════════════════ */
 @layer utilities {
   .no-scrollbar {
@@ -641,27 +704,8 @@ body {
   .bg-brand-gradient {
     background: linear-gradient(135deg, hsl(21 90% 48%) 0%, hsl(38 92% 44%) 100%);
   }
-  .bg-brand-gradient-soft {
-    background: linear-gradient(135deg, hsl(21 100% 97%) 0%, hsl(38 80% 95%) 100%);
-  }
-  .bg-brand-gradient-dark {
-    background: linear-gradient(135deg, hsl(21 86% 40%) 0%, hsl(21 90% 30%) 100%);
-  }
-  .bg-surface-warm {
-    background: hsl(30 20% 98%);
-  }
-  .bg-surface-card {
-    background: hsl(0 0% 100%);
-    border: 1px solid hsl(30 8% 92%);
-  }
 
   /* ── Text gradients ── */
-  .text-brand-gradient {
-    background: linear-gradient(135deg, hsl(21 90% 45%) 0%, hsl(38 92% 42%) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
 
   /* ── Brand shadow utilities ── */
   .shadow-brand-sm { box-shadow: var(--shadow-brand-sm); }
@@ -670,82 +714,88 @@ body {
   .shadow-brand-xl { box-shadow: var(--shadow-brand-xl); }
 
   /* ── Card primitives ── */
-  .card-base {
-    background: white;
-    border-radius: 1.5rem;
-    border: 1px solid hsl(30 8% 92%);
-    box-shadow: 0 1px 4px 0 hsl(20 14% 11% / .04), 0 1px 2px -1px hsl(20 14% 11% / .02);
-    transition: box-shadow 200ms ease, transform 200ms ease;
-  }
-  .card-base:hover {
-    box-shadow: 0 8px 24px -4px hsl(20 14% 11% / .08), 0 4px 10px -4px hsl(20 14% 11% / .04);
-  }
-  .card-brand {
-    background: white;
-    border-radius: 1.5rem;
-    border: 1px solid hsl(21 80% 90%);
-    box-shadow: var(--shadow-brand-sm);
-    transition: box-shadow 200ms ease, transform 200ms ease;
-  }
-  .card-brand:hover {
-    box-shadow: var(--shadow-brand-md);
-    transform: translateY(-1px);
-  }
 
   /* ── Button primitives ── */
-  .btn-primary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    background: hsl(21 90% 48%);
-    color: white;
-    font-weight: 800;
-    border-radius: 9999px;
-    padding: 0.875rem 2rem;
-    font-size: 0.9375rem;
-    box-shadow: 0 4px 14px -2px hsl(21 90% 48% / .35);
-    transition: background 180ms ease, transform 150ms ease, box-shadow 200ms ease;
-  }
-  .btn-primary:hover {
-    background: hsl(21 86% 42%);
-    box-shadow: 0 6px 20px -2px hsl(21 90% 48% / .45);
-    transform: translateY(-1px);
-  }
-  .btn-primary:active { transform: scale(0.97); }
 
-  .btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    background: hsl(30 10% 96%);
-    color: hsl(20 14% 22%);
-    font-weight: 700;
-    border-radius: 9999px;
-    padding: 0.875rem 2rem;
-    font-size: 0.9375rem;
-    border: 1.5px solid hsl(30 8% 90%);
-    transition: background 180ms ease, border-color 180ms ease, transform 150ms ease;
-  }
-  .btn-secondary:hover {
-    background: hsl(21 100% 97%);
-    border-color: hsl(21 80% 80%);
-    color: hsl(21 86% 38%);
-    transform: translateY(-1px);
-  }
-  .btn-secondary:active { transform: scale(0.97); }
+  /* ── Input/Form primitives ── */
 
+  /* ── Badge variants ── */
+
+  /* ── Shimmer skeleton ── */
+
+  /* ── Divider ── */
+
+  /* ── Glass effect ── */
+  .glass {
+    background: hsl(0 0% 100% / .80);
+    backdrop-filter: blur(20px) saturate(1.4);
+    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+    border: 1px solid hsl(0 0% 100% / .5);
+  }
+
+  /* ── Section spacing (responsive) ── */
+
+  /* ── Smooth hover lift ── */
+
+  /* ── Pulse animation (brand) ── */
+
+  /* ── Responsive safe area padding (iOS PWA) ── */
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom, 1rem); }
+  .pt-safe { padding-top: env(safe-area-inset-top, 0); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   UYGULAMA PRIMITIFLERI — @layer components
+
+   NEDEN UTILITIES'TEN TASINDI (2026-09-12'de olculdu, derlenmis CSS'te
+   dogrulandi): bu bloklar `@layer utilities` icindeydi ve Tailwind'in KENDI
+   yardimcilariyla AYNI katmanda, ama onlardan SONRA yaziliyordu. Ayni
+   ozgullukte iki kural catistiginda sonra gelen kazanir, yani:
+
+     `class="btn-ui btn-ui-primary bg-gray-900"`  -> buton TURUNCU cizildi
+     `class="ui-card rounded-3xl md:rounded-4xl"` -> yaricap 1.5rem'de kaldi
+
+   Yazar className'e ne yazarsa yazsin primitif onu eziyordu; dort buton siyah
+   yerine turuncu, bes kart da istenen yaricapi almadan cikiyordu. Kimse bunu
+   fark etmemisti cunku CSS gecerli, derleme temiz ve fark yalnizca tarayicida
+   goruluyor.
+
+   `@layer components` Tailwind'in katman sirasinda utilities'ten ONCE gelir.
+   Primitif artik TABAN, className'deki yardimci ise ONUN USTUNE yazan sey --
+   yazarin bastan beri bekledigi davranis.
+   ═══════════════════════════════════════════════════════════════ */
+@layer components {
   /* ── Standardized app button system ── */
+  /*
+    BUTON DILI — BUYUK HARF KALDIRILDI (2026-09-12).
+
+    `.btn-ui` 173 yerde kullaniliyor, yani sitedeki neredeyse her buton buydu
+    ve hepsi `text-transform: uppercase` + `letter-spacing: 0.06em` tasiyordu.
+    Uc ayri sorun uretiyordu:
+
+    1. Gezinme ve footer cumle duzenine gecince (bkz. eyebrow token'lari)
+       butonlar tek basina bagiran oge olarak kaldi -- ayni sayfada iki farkli
+       ses.
+    2. Turkce'de buyuk harf donusumu KAYIPLI: "Giris yap" -> "GIRIS YAP",
+       noktali I kayboluyor. CSS `text-transform` dil farkindadir ama
+       `lang="tr"` olmayan alt agaclarda yanlis harfi uretir.
+    3. Almanca/Fransizca eylem adlari buyuk harfte %15-20 daha genis; dar
+       ekranda butonlar tasiyordu.
+
+    Agirlik 800'den 700'e indi: cumle duzeninde 800 fazla kalin duruyor, kucuk
+    boyutta harfler birbirine kapaniyordu.
+  */
   .btn-ui {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    border-radius: 1rem;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    /* Yaricap kimlikten: `--id-control-radius` tam bu is icin vardi ama
+       tuketilmiyordu; sabit 1rem yaziliyken `ticket`/`seal`/`shop` yonlerinde
+       kartlar keskinlesip butonlar yuvarlak kaliyordu (2026-09-12). */
+    border-radius: var(--id-control-radius);
+    font-weight: 700;
+    letter-spacing: 0;
     transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease, transform 140ms ease;
     border: 1px solid transparent;
   }
@@ -756,19 +806,23 @@ body {
     transform: none;
   }
 
-  .btn-ui-sm { min-height: 2.25rem; padding: 0.5rem 0.875rem; font-size: 0.625rem; }
-  .btn-ui-md { min-height: 2.75rem; padding: 0.75rem 1rem; font-size: 0.6875rem; }
-  .btn-ui-lg { min-height: 3.25rem; padding: 0.875rem 1.25rem; font-size: 0.75rem; }
+  /* Boyutlar BUYUK HARF icin olculmustu (10-12px); kucuk harf ayni piksel
+     degerinde gozle daha kucuk okunur, o yuzden her adim bir tik buyudu. */
+  .btn-ui-sm { min-height: 2.25rem; padding: 0.5rem 0.9375rem; font-size: 0.8125rem; }
+  .btn-ui-md { min-height: 2.75rem; padding: 0.75rem 1.125rem; font-size: 0.875rem; }
+  .btn-ui-lg { min-height: 3.25rem; padding: 0.875rem 1.5rem; font-size: 0.9375rem; }
 
+  /* Marka rengi de kimlikten. Elle yazilan hsl(21 90% 41%) zaten
+     `--id-accent-600`in birebir kopyasiydi -- ayni deger iki yerde durunca
+     biri gunun birinde otekinden ayrilir. (Kontrast gerekcesi token'in
+     yaninda duruyor: 41% aciklik beyaz metinle 4.7:1 veriyor, WCAG AA esigi
+     4.5:1.) */
   .btn-ui-primary {
-    /* 48% açıklık beyaz metinle 3.56:1 veriyordu (WCAG AA eşiği 4.5:1) —
-       kimlik katmanındaki --id-accent-600 ile aynı gerekçeyle 41%'e
-       koyulaştırıldı (2026-09-05, Lighthouse a11y denetimi). */
-    background: hsl(21 90% 41%);
-    color: hsl(0 0% 100%);
+    background: var(--id-accent);
+    color: var(--id-accent-contrast);
     box-shadow: 0 8px 18px -8px hsl(21 90% 41% / .55);
   }
-  .btn-ui-primary:hover { background: hsl(21 88% 34%); }
+  .btn-ui-primary:hover { background: var(--id-accent-strong); }
 
   .btn-ui-secondary {
     background: hsl(0 0% 100%);
@@ -804,10 +858,6 @@ body {
   }
 
   /* ── Spacing + layout primitives ── */
-  .ui-section { padding: clamp(1rem, 2.2vw, 1.5rem); }
-  .ui-stack-sm { display: flex; flex-direction: column; gap: 0.5rem; }
-  .ui-stack-md { display: flex; flex-direction: column; gap: 0.875rem; }
-  .ui-stack-lg { display: flex; flex-direction: column; gap: 1.25rem; }
 
   /* ── Typography primitives ── */
   .ui-kicker {
@@ -897,114 +947,6 @@ body {
     border-color: hsl(160 45% 84%);
   }
 
-  /* ── Input/Form primitives ── */
-  .input-brand {
-    width: 100%;
-    background: hsl(30 8% 97%);
-    border: 1.5px solid hsl(30 8% 90%);
-    border-radius: 0.875rem;
-    padding: 0.875rem 1rem;
-    font-size: 0.9375rem;
-    font-weight: 500;
-    color: hsl(20 14% 11%);
-    transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
-    outline: none;
-  }
-  .input-brand:focus {
-    border-color: hsl(21 90% 48%);
-    box-shadow: 0 0 0 3px hsl(21 90% 48% / .12);
-    background: white;
-  }
-  .input-brand::placeholder { color: hsl(25 6% 64%); }
-
-  /* ── Badge variants ── */
-  .badge-brand {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    background: hsl(21 100% 97%);
-    color: hsl(21 86% 38%);
-    border: 1px solid hsl(21 80% 88%);
-    border-radius: 9999px;
-    padding: 0.2rem 0.7rem;
-    font-size: 0.75rem;
-    font-weight: 700;
-  }
-  .badge-success {
-    background: hsl(160 60% 96%);
-    color: hsl(160 84% 25%);
-    border-color: hsl(160 50% 84%);
-  }
-  .badge-amber {
-    background: hsl(38 80% 95%);
-    color: hsl(38 80% 30%);
-    border-color: hsl(38 70% 80%);
-  }
-
-  /* ── Shimmer skeleton ── */
-  .skeleton {
-    background: linear-gradient(
-      90deg,
-      hsl(30 8% 92%) 0%,
-      hsl(30 8% 97%) 50%,
-      hsl(30 8% 92%) 100%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 1.8s linear infinite;
-    border-radius: 0.5rem;
-  }
-
-  /* ── Divider ── */
-  .divider-brand {
-    height: 1px;
-    background: linear-gradient(
-      to right,
-      transparent,
-      hsl(21 80% 88%) 30%,
-      hsl(21 80% 88%) 70%,
-      transparent
-    );
-    border: none;
-  }
-
-  /* ── Glass effect ── */
-  .glass {
-    background: hsl(0 0% 100% / .80);
-    backdrop-filter: blur(20px) saturate(1.4);
-    -webkit-backdrop-filter: blur(20px) saturate(1.4);
-    border: 1px solid hsl(0 0% 100% / .5);
-  }
-  .glass-brand {
-    background: hsl(21 100% 97% / .85);
-    backdrop-filter: blur(20px) saturate(1.4);
-    -webkit-backdrop-filter: blur(20px) saturate(1.4);
-    border: 1px solid hsl(21 80% 88% / .6);
-  }
-
-  /* ── Section spacing (responsive) ── */
-  .section-py {
-    padding-top: clamp(3rem, 5vw, 6rem);
-    padding-bottom: clamp(3rem, 5vw, 6rem);
-  }
-  .section-px {
-    padding-left:  clamp(1rem, 4vw, 2rem);
-    padding-right: clamp(1rem, 4vw, 2rem);
-  }
-
-  /* ── Smooth hover lift ── */
-  .hover-lift {
-    transition: transform 200ms var(--ease-spring), box-shadow 200ms ease;
-  }
-  .hover-lift:hover {
-    transform: translateY(-2px);
-  }
-
-  /* ── Pulse animation (brand) ── */
-  .pulse-brand { animation: pulse-brand 2.4s var(--ease-smooth) infinite; }
-
-  /* ── Responsive safe area padding (iOS PWA) ── */
-  .pb-safe { padding-bottom: env(safe-area-inset-bottom, 1rem); }
-  .pt-safe { padding-top: env(safe-area-inset-top, 0); }
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1074,6 +1016,7 @@ body {
     font-weight: var(--id-display-weight);
     letter-spacing: var(--id-display-tracking);
     text-transform: var(--id-display-transform);
+    font-variation-settings: "opsz" var(--id-display-opsz), "wdth" var(--id-display-wdth);
   }
 
   /* `text-[10px] font-black uppercase tracking-widest` üçlüsünün yerini alır. */
@@ -1094,11 +1037,6 @@ body {
 
   /* ── Ayraç ──
      Fiş yönünde kesikli, mühür yönünde kalın düz çizgi olur. */
-  .id-divider { border-top: var(--id-divider); }
 
   /* ── Sayfa zemini ── */
-  .id-page {
-    background: var(--id-page-bg);
-    background-image: var(--id-page-texture);
-  }
 }

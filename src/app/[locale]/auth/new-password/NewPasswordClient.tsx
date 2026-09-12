@@ -53,6 +53,20 @@ export default function NewPasswordClient() {
       else if (res.error === "expired") setError("expired");
       else if (res.error === "invalid_token") setError("invalid_token");
       else setError("invalid");
+    } catch {
+      /*
+        CATCH YOKTU: `resetPasswordWithTokenAction` yalnizca `{ok:false}`
+        dondurmuyor, FIRLATABILIYOR da (hiz siniri sayaci / DB / bcrypt
+        beklenmedik sekilde patladiginda). O durumda `finally` busy'yi
+        sifirliyordu ama `error` null kaldigi icin misafir HICBIR sey
+        gormuyordu: buton eski haline donuyor, sayfa sessiz kaliyordu --
+        kullanici sifresinin degisip degismedigini anlayamiyordu.
+        Kardes akis `ForgotPasswordClient.tsx` bunu bastan beri dogru yapiyor.
+        "unexpected" bilinen dallarin hicbirine uymaz, bu yuzden `errMsg`
+        zincirinin son dalina (`newPasswordInvalid`) duser -- yeni ceviri
+        anahtari gerekmiyor.
+      */
+      setError("unexpected");
     } finally {
       setBusy(false);
     }

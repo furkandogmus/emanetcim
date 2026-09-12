@@ -201,7 +201,13 @@ export async function createInitialBooking(data: CreateInitialBookingInput): Pro
     { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
   ), { label: "createInitialBooking" });
 
-  bookingEventService.record({
+  /*
+    Atesle-unut: olay kaydi rezervasyon akisini bloke etmemeli. `void` niyeti
+    acik eder, `.catch` zorunludur — yakalanmamis bir red Node'da SURECI dusurur,
+    yani tek bir bookingEvent yazma hatasi tum sunucuyu indirirdi
+    (`unhandled-rejection` mandali, tavan 0).
+  */
+  void bookingEventService.record({
     bookingId: booking.id,
     event: "CREATED",
     actorId: data.guestId ?? "guest",
@@ -220,7 +226,7 @@ export async function createInitialBooking(data: CreateInitialBookingInput): Pro
       Esnaf onayi beklenmeyen akis. Olay burada yazilir ki mobil ve web ayni izi
       biraksin — 2026-08-25 oncesinde yalnizca web yaziyordu.
     */
-    bookingEventService.record({
+    void bookingEventService.record({
       bookingId: booking.id,
       event: 'APPROVED',
       actorId: data.guestId ?? 'guest',
@@ -364,7 +370,7 @@ export async function createSlotBooking(
     { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
   ), { label: "createSlotBooking" });
 
-  bookingEventService.record({
+  void bookingEventService.record({
     bookingId: booking.id,
     event: "CREATED",
     actorId: data.guestId ?? "guest",
@@ -381,7 +387,7 @@ export async function createSlotBooking(
       Esnaf onayi beklenmeyen akis. Olay burada yazilir ki mobil ve web ayni izi
       biraksin — 2026-08-25 oncesinde yalnizca web yaziyordu.
     */
-    bookingEventService.record({
+    void bookingEventService.record({
       bookingId: booking.id,
       event: 'APPROVED',
       actorId: data.guestId ?? 'guest',

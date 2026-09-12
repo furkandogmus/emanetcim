@@ -18,9 +18,14 @@ export default function TestimonialCarousel({ items }: Props) {
       aria-labelledby="testimonials-heading"
     >
       <div className="mx-auto max-w-5xl">
+        {/* Bolum basligi 12px araliklandirilmis BUYUK HARF mikro etiket gibi
+            ciziliyordu -- altindaki 14px alt basliktan bile kucuktu. Gercek
+            baslik olcusune yukseldi; aile/agirlik/aralik kimlik katmanindaki
+            h2 kuralindan geliyor, o yuzden burada sabit sinif yok. `id`
+            KORUNDU: section'in `aria-labelledby` bagi buna bakiyor. */}
         <h2
           id="testimonials-heading"
-          className="text-center text-xs font-black uppercase tracking-[0.2em] text-gray-400"
+          className="text-center text-2xl md:text-3xl text-gray-900"
         >
           {t("testimonialsTitle")}
         </h2>

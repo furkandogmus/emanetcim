@@ -374,9 +374,21 @@ export default function AdminUsersClient({
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-mono text-gray-500 font-bold">{user.lastIp || "—"}</span>
                         {user.lastIp && (
-                          <button 
+                          /*
+                            KLAVYE ODAGI DA BUTONU GORUNUR YAPAR.
+
+                            Buton `opacity-0` ile gizli, yalniz satirin uzerine
+                            FARE gelince aciliyordu. Tab ile gezen yonetici butona
+                            odaklandiginda ekranda hicbir sey degismiyordu:
+                            gorunmez bir ogeye Enter basmis oluyordu -- yikici bir
+                            islem (IP engelleme) icin kabul edilemez.
+                            `focus-visible` butonun kendisini, `group-focus-within`
+                            satirin tamamini acar.
+                          */
+                          <button
+                            type="button"
                             onClick={() => handleBlockIp(user.lastIp!)}
-                            className="p-1 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                            className="p-1 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 focus-visible:opacity-100 group-focus-within:opacity-100"
                             title={t("blockThisIp")}
                           >
                             <ShieldX size={14} />

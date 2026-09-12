@@ -116,7 +116,22 @@ describe("Tailwind yardımcıları kimliğe bağlı", () => {
 
   it("başlık ağırlığı ve etiket aralığı kimlikten geliyor", () => {
     expect(css).toMatch(/--font-weight-black:\s*var\(--id-display-weight\)/);
-    expect(css).toMatch(/--tracking-widest:\s*var\(--id-eyebrow-tracking\)/);
+    /*
+      `--tracking-widest` ARTIK EYEBROW'A DEĞİL KOD ARALIĞINA BAĞLI (2026-09-12).
+
+      Bu alias kurulduğunda `tracking-widest` 284 yerde mikro etiket üretiyordu,
+      dolayısıyla onu `--id-eyebrow-tracking`e bağlamak doğruydu. Göç bittikten
+      sonra geriye 5 kullanım kaldı ve hiçbiri etiket değil — hepsi mühür
+      numarası / teslim kodu gösterimi.
+
+      Eyebrow cümle düzenine inince (0.1em → 0.01em) bu beş yer de aralığını
+      kaybediyordu: mühür numarasını ekrandan okuyup fiziksel mührün üstündekiyle
+      karşılaştıran misafir için aralık süs değil, karakteri ayırt edilebilir
+      kılan şey. İki karar ayrıldı; test de ayrımın KORUNDUĞUNU ölçüyor.
+    */
+    expect(css).toMatch(/--tracking-widest:\s*var\(--id-code-tracking\)/);
+    // Kod aralığı her kimlik yönünde tanımlı olmalı, yoksa alias boşa düşer.
+    expect(css).toMatch(/--id-code-tracking:\s*[^;]+;/);
   });
 
   it("yarıçap skalasının TAMAMI kimlikten geliyor", () => {

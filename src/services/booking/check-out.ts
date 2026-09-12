@@ -110,7 +110,11 @@ export async function checkOut(bookingId: string): Promise<PartnerCheckOutResult
       }
     });
 
-    bookingEventService.record({
+    /*
+      Atesle-unut: teslim etme yazildi, olay kaydi onu bekletmez. `.catch` sart —
+      yakalanmamis red sureci dusurur (`unhandled-rejection` mandali, tavan 0).
+    */
+    void bookingEventService.record({
       bookingId,
       event: "CHECKED_OUT",
       metadata: {

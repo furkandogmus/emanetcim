@@ -339,8 +339,23 @@ export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientP
                              <StarRating rating={review.rating} size={10} />
                              <span className="text-[10px] font-black text-gray-900">{review.guest.name}</span>
                           </div>
-                          <button 
-                            className="p-1.5 text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                          {/*
+                            KLAVYE ODAGI DA BUTONU GORUNUR YAPAR.
+
+                            Buton `opacity-0` ile gizliydi ve yalnizca FARE yorum
+                            kartinin uzerine gelince aciliyordu; Tab ile gelen
+                            yonetici odaklandiginda ekranda hicbir sey degismiyor,
+                            gorunmez bir "yorumu sil" dugmesine Enter basiyordu.
+
+                            `type="button"` de eksikti: buton bir <form> icine
+                            tasinirsa varsayilan `submit` olur ve tiklamak formu
+                            gonderir. `aria-label` ise ekran okuyucu icin --
+                            icinde yalniz bir ikon var, erisilebilir adi yoktu.
+                          */}
+                          <button
+                            type="button"
+                            aria-label={t("deleteReview")}
+                            className="p-1.5 text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 focus-visible:opacity-100 group-focus-within:opacity-100"
                             onClick={() => setPendingReviewDeleteId(review.id)}
                           >
                              <Trash2 size={14} />
