@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Clock, Loader2, Luggage, Settings, CheckCircle, Phone, MapPin , AlertTriangle } from "lucide-react";
 import { updateShopSettingsAction } from "@/actions/shop";
@@ -49,6 +49,7 @@ export default function PartnerShopSettingsForm({
 }: Props) {
   const t = useTranslations("Partner");
   const tErrors = useTranslations("Errors");
+  const locale = useLocale();
   const errorText = useActionErrorText();
   const router = useRouter();
   const [capacity, setCapacity] = useState(initialCapacity);
@@ -65,6 +66,7 @@ export default function PartnerShopSettingsForm({
   const [impact, setImpact] = useState<{
     bookingsOutsideHours: number;
     bagsOverCapacity: number;
+    affectedBookings?: { id: string; guestName: string | null; checkInTime: string | Date }[];
   } | null>(null);
   const [location, setLocation] = useState({
     address: initialAddress,
@@ -329,10 +331,30 @@ export default function PartnerShopSettingsForm({
         {impactMessages.length > 0 && (
           <div className="flex items-start gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
             <AlertTriangle size={16} className="mt-0.5 shrink-0" />
-            <div className="space-y-1">
+            <div className="space-y-1 w-full">
               {impactMessages.map((m) => (
                 <p key={m}>{m}</p>
               ))}
+              {/*
+                DEFECT_BACKLOG D3: uyarı sadece SAYI veriyordu, esnaf kimi
+                arayacağını bilmiyordu. Yalnızca saat daraltmasından etkilenen
+                rezervasyonlar isimlendirilebilir (kapasite aşımı bir agregat).
+              */}
+              {impact && impact.affectedBookings && impact.affectedBookings.length > 0 && (
+                <ul className="mt-2 space-y-0.5 border-t border-amber-200 pt-2 text-xs text-amber-700">
+                  {impact.affectedBookings.map((b) => (
+                    <li key={b.id}>
+                      {b.guestName ?? t("settingsImpactUnknownGuest")} —{" "}
+                      {new Date(b.checkInTime).toLocaleString(locale, {
+                        day: "2-digit",
+                        month: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
         )}

@@ -32,9 +32,12 @@ void main() {
     handle.dispose();
   });
 
-  // textContrastGuideline BILEREK yok: "Güncelle" dugmesi uygulama genelindeki
-  // FilledButtonTheme'i kullanir (beyaz metin / marka turuncusu #EA580C zemin),
-  // olculen oran 3.56:1 — WCAG AA'nin 4.5:1 esiginin altinda. Bu ekrana ozgu
-  // degil, temanin HER FilledButton'inda ayni; duzeltmesi marka rengi
-  // degisikligi gerektirir (bkz. docs/DEFECT_BACKLOG.md).
+  testWidgets('ForceUpdateScreen: metin kontrasti WCAG AA', (tester) async {
+    // DEFECT_BACKLOG D10 (2026-09-12): FilledButtonTheme zemini
+    // `_brandOrangeDark`e cekildi (~5.12:1) -- bu guideline artik geciyor.
+    final handle = tester.ensureSemantics();
+    await pump(tester);
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    handle.dispose();
+  });
 }

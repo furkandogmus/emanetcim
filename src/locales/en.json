@@ -136,6 +136,12 @@
     "newBagDropoff": "NEW BAG DROP-OFF",
     "netEarnings": "NET EARNINGS",
     "monthlyShopViews": "Views This Month",
+    "onboardingTitle": "Getting started checklist",
+    "onboardingSubtitle": "Finish setting up your shop to be ready for your first booking.",
+    "onboardingStepPhoto": "Add a shop photo",
+    "onboardingStepLocation": "Pin your location on the map",
+    "onboardingStepFirstBooking": "Waiting for your first booking",
+    "onboardingGo": "Finish",
     "referralTitle": "Invite a Fellow Shop Owner",
     "referralBody": "Invite a shop owner you know to join BagajPark and help grow our partner network.",
     "referralReveal": "Show My Invite Code",
@@ -301,7 +307,8 @@
     "bagRevisionDelta": "from {from} bags to {to}",
     "bagRevisionSaved": "Updated. New total: {total}",
     "settingsImpactHours": "Heads up: {count} booking(s) now fall outside your hours. Those guests cannot be checked in — you may need to contact them.",
-    "settingsImpactCapacity": "Heads up: the bags currently in your storage exceed the new capacity by {count}."
+    "settingsImpactCapacity": "Heads up: the bags currently in your storage exceed the new capacity by {count}.",
+    "settingsImpactUnknownGuest": "Unnamed guest"
   },
   "Guest": {
     "heroTitle": "Drop Your Bags, Explore Freely",
@@ -448,6 +455,14 @@
     "bookingStatus_CHECKED_OUT": "Completed",
     "bookingStatus_CANCELLED": "Cancelled",
     "bookingDetailMetaTitle": "Booking details",
+    "bagRevisionPendingTitle": "Your bag count was updated",
+    "bagRevisionPendingBody": "The shop corrected your bag count to {count} and the total increased. It's waiting for your approval.",
+    "bagRevisionNewTotal": "New total",
+    "bagRevisionApprove": "Approve",
+    "bagRevisionReject": "Reject",
+    "bagRevisionApproved": "Approved — the new total was applied.",
+    "bagRevisionRejected": "Rejected — the total is unchanged.",
+    "bagRevisionActionFailed": "That didn't go through. Please try again.",
     "noBookingsTitle": "No bookings yet.",
     "noBookingsDesc": "You can securely store your luggage at any point in the city by making a reservation.",
     "bookingsLoyaltyMember": "Loyalty Member",
@@ -1742,7 +1757,9 @@
     "imageTooLarge": "The photo is too large. Maximum size is 8 MB.",
     "imageUnsupportedType": "That file is not a photo. Upload a JPEG, PNG or WebP.",
     "imageDimensionsTooLarge": "The photo's resolution is too high. Try a smaller photo.",
-    "shopMissingCoordinates": "The shop has no location. Set its coordinates before approving."
+    "shopMissingCoordinates": "The shop has no location. Set its coordinates before approving.",
+    "shopLocationRequired": "Please pin your shop's location on the map.",
+    "bagRevisionNeedsGuestApproval": "A post-check-in price increase needs the guest's approval. The proposal was saved and will apply once the guest approves it."
   },
   "Emails": {
     "verificationSubject": "Verify Your Email",

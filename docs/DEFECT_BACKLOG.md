@@ -54,23 +54,85 @@
 |---|---|---|
 | C1 | **S3 ortam değişkenleri** | `S3_BUCKET`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_PUBLIC_BASE_URL`. Beşi birden tanımlı olmadan yükleme yüzeyi hiç açılmaz. `S3_PUBLIC_BASE_URL` değişince **yeniden derleme** gerekir (`next/image` alan adı ondan türetiliyor). |
 | C2 | **VAPID anahtarları** | `npx web-push generate-vapid-keys` → `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `NEXT_PUBLIC_VAPID_PUBLIC_KEY`. Tanımlanana kadar push gönderimi `SKIPPED` kalır. |
-| C3 | **Mobil biçim borcu** | 37 dosya `dart format` dışı; mobil CI kalıcı kırmızı, yani mobile giren hiçbir değişiklik gerçek kapıdan geçmiyor. Bu makinede dart/flutter yok. |
-| C4 | **Mobil check-in fotoğrafı** | Sunucu iki taşıyıcıyı da destekliyor; Flutter ekranı eksik ve buradan doğrulanamıyor. |
+| C4 | **Mobil check-in fotoğrafı** | Sunucu iki taşıyıcıyı da destekliyor; Flutter ekranı eksik ve buradan doğrulanamıyor (2026-09-12'de tekrar arandı, hâlâ yok). |
+| C5 | **Firebase servis hesabı (FCM)** | `FIREBASE_SERVICE_ACCOUNT_JSON` (tek satır JSON). D6 2026-09-12'de koda bağlandı — `NotificationService.sendMobilePush` VAPID ile birebir aynı desende (`C2`), bu değişken tanımlanana kadar gönderim `SKIPPED` kalır. |
 
 ### D. Sen seçersen yapılabilir — teknik iş, karar küçük
 
 | # | Konu | Kaynak madde |
 |---|---|---|
-| D1 | **Misafire geç teslim hatırlatması** — bugün uyarı yalnızca esnafa gidiyor ve *"misafir ile iletişime geçin"* diyor; yükü esnafa bırakıyor | Geç teslim |
 | D2 | **Esnafa uyuşmazlık yüzeyi** — haberdar et + kendi kanıtını göster (kanıt artık toplanıyor ve admin görüyor) | Uyuşmazlık / kanıt |
-| D3 | **Ayar değişikliğinde etkilenen misafirleri listeleme** — uyarı sayıyı söylüyor, kimler olduğunu değil | Ayar değişikliği |
-| D4 | **`take: 100` iki misafir hatırlatma sorgusunda** — sıralama ve uyarı yok (geç teslim sorgusunda düzeltildi) | Geç teslim |
-| D5 | **Valiz düzeltmesine misafir onayı** — `pendingBagRevision` altyapısı hazır, misafir yüzeyi yok; esnaf şu an fiyatı onaysız artırabiliyor | Valiz düzeltmesi |
-| D6 | **Mobil push gönderimi (FCM)** — token toplanıyor, gönderim kodu hiç yok. Kullanılmayan amaç için veri toplamak ayrıca KVKK riski | Push bildirimi |
-| D7 | **İlk giriş kontrol listesi** — yeni esnaf panelde sekiz sıfır görüyor | — |
 | D8 | **Vitrin afişi / QR** — yazdırılabilir tabela | — |
-| D9 | **Koordinat uyarısı** — onayda "konumu yok, aramada çıkmaz" (bugün tüm dükkanlarda koordinat var, sessiz bir tuzak) | — |
-| D10 | **Mobil marka turuncusu (#EA580C) WCAG AA'yı geçmiyor** — ölçüldü (2026-09-09, `flutter test`): beyaz metin üzerinde `FilledButtonTheme` zemini olarak 3.56:1, M3 tohum renginden üretilen soluk zeminde `TextButton` ön plan rengi olarak 3.23:1 — ikisi de 4.5:1 eşiğinin altında. Uygulama genelindeki HER `FilledButton`/varsayılan `TextButton`'ı etkiler, tek ekrana özgü değil. Kanıt: `mobile/test/features/update/force_update_screen_a11y_test.dart`, `mobile/test/features/security/permissions_screen_a11y_test.dart` (ikisi de `textContrastGuideline`'ı bilinçli atlıyor, sebebi dosyada yazılı) | — |
+
+## 2026-09-12 — D kategorisi teknik gedikler kapatıldı (D1, D3, D5, D6, D7, D9, D10)
+
+Kullanıcı "eksikleri düzelt" dedi; A (hukuk) ve B (ürün/para) kararları
+bilinçli olarak **askıda bırakıldı** — bunlar tek taraflı koda dökülemez.
+C'den yalnızca doğrulama yapıldı: **C3 ("bu makinede dart/flutter yok") STALE
+çıktı** — `flutter`/`dart` bu makinede kurulu, `dart format --set-exit-if-changed
+lib test` 163 dosyanın 0'ında değişiklik istiyor, `flutter analyze` "No issues
+found!" diyor, `scripts/analyze-baseline.count` = 0; madde muhtemelen ayrı bir
+mobil oturumda kapatılmış ve BEKLEYEN KARARLAR'dan silindi. C4 tekrar arandı,
+hâlâ geçerli. D6 gerçekleştirilip C5'e (Firebase servis hesabı env değişkeni)
+dönüştü. D kategorisindeki 8 maddeden 6'sı kapatıldı; D2 (B6 ile çakışıyor)
+ve D8 (sıfırdan yeni özellik) bilinçli olarak dışarıda bırakıldı.
+
+**D1 — misafire geç teslim hatırlatması:** `NotificationService.sendOverdueGuestNotice`
+eklendi, `booking-reminders` job'ı artık esnafla AYNI eşik desenini
+(`shouldSendOverdueNotice`, 0,5/24/72/168/720 saat) misafire de uyguluyor —
+AYRI konu öneki (`OVERDUE_GUEST_NOTICE_SUBJECT_PREFIX`) ile, aksi hâlde iki
+taraf aynı sayaca girip biri eksik sayılırdı. 6 dilin hepsini taşıyor.
+
+**D3 — ayar değişikliğinde etkilenen misafirleri listeleme:** `ShopSettingsImpact.assess()`
+artık saat daraltmasından etkilenen rezervasyonların KENDİSİNİ
+(`affectedBookings: {id, guestName, checkInTime}[]`) döndürüyor;
+`PartnerShopSettingsForm` uyarının altına bu listeyi açık bir tablo olarak
+basıyor. Kapasite aşımı bir agregat olduğu için orada liste yok, sadece sayı.
+
+**D5 — valiz düzeltmesine misafir onayı:** kullanıcıyla netleştirilen kapsam
+— check-in ANINDA (APPROVED/PAID) esnaf artışı hâlâ doğrudan uygulayabilir
+(misafir tezgâhta, sözlü onay yeterli); check-in TAMAMLANDIKTAN SONRA
+(CHECKED_IN) fiyat ARTIRAN bir düzeltmeyi esnaf artık TEK BAŞINA
+uygulayamıyor. `bag-revision.ts`'e `GUEST_APPROVAL_REQUIRED` kapısı ve
+`GUEST` aktör rolü eklendi; öneri `pendingBagRevision`'a yazılıp misafire
+e-posta gidiyor (`sendBagRevisionApprovalRequest`). Misafir onayı/reddi için
+iki yüzey: hesaplı misafir `/bookings/{id}` sayfasında
+(`approveBagRevisionAction`/`rejectBagRevisionAction`), hesapsız misafir
+token'lı yönetim sayfasında (`/api/bookings/guest-bag-revision`, aynı
+gövdeyi çağırıyor). Mobil tarafta ayrı bir ekran yazılmadı — e-posta linki
+zaten mobil tarayıcıda açılan aynı web sayfasına gidiyor; esnaf mobil
+uçları (`bag-revision` route) zaten aynı paylaşılan servisten geçtiği için
+onlar da otomatik olarak kapıya tabi.
+
+**D6 — mobil push gönderimi (FCM):** `firebase-admin@14.4.0` eklendi,
+`NotificationService.sendMobilePush` yazıldı — `sendPush` (VAPID) ile
+BİREBİR aynı desen: yapılandırma yoksa `SKIPPED` loglanır, geçersiz token
+(`registration-token-not-registered`/`invalid-registration-token`) silinir.
+Yeni rezervasyon bildirimine (`notifyPartnerAndAdmins*`) web-push'un yanına
+eklendi. **Gerçek gönderim `FIREBASE_SERVICE_ACCOUNT_JSON` env değişkenine
+bağlı — bkz. C5.** Kod yolu tam ve test edilmiş; eksik olan tek şey dışarıdan
+gelecek kimlik bilgisi.
+
+**D7 — ilk giriş kontrol listesi:** `PartnerOnboardingChecklist` bileşeni;
+`omür boyu 0 valiz VE 0 kazanç` olan esnaf için panelin üstünde dükkan
+fotoğrafı / konum adımlarını gösteriyor, ikisi de tamamlanana kadar link
+veriyor.
+
+**D9 — koordinat uyarısı:** kayıt formu artık koordinatı zorunlu tutuyor
+(`shopLocationRequired` hatası) hem istemci hem sunucu tarafında (formu
+atlayan doğrudan action çağrısına karşı ikinci kapı); `approveShop`'taki
+kontrol üçüncü ve son kapı olarak kalıyor.
+
+**D10 — mobil marka turuncusu WCAG AA:** `FilledButtonTheme` zemini
+`_brandOrange` (#EA580C, beyaz metinle 3,56:1) yerine `_brandOrangeDark`
+(#C2430A, ~5,12:1) kullanıyor; `textButtonTheme` artık açıkça
+`_brandOrangeDark` tanımlıyor (önceden M3 varsayılanı soluk zeminde 3,23:1
+veriyordu). İki a11y testindeki bilinçli `textContrastGuideline` atlaması
+kaldırılıp gerçek kontrol eklendi, ikisi de geçiyor.
+
+**Doğrulama:** `npm run typecheck && npm run lint && npm test` (1298 test,
+0 hata), `npm run build` (placeholder env), mobilde `flutter analyze`
+("No issues found!") ve `flutter test` (127 test, 0 hata).
 
 ## 2026-09-01 — geç teslim uyarısı esnafa HER GÜN, SÜRESİZ gidiyordu
 
@@ -104,16 +166,21 @@ sessizce sıfırlanır ve gürültü geri gelir. Gerçek veritabanına karşı d
 
 ### Düzeltilmeyenler — karar gerektiriyor
 
-1. **MİSAFİR geç teslimden hiç haberdar edilmiyor.** Üç hatırlatmanın ikisi
-   misafire gidiyor (check-in öncesi, check-out'tan 1 saat önce) ama çıkış
-   saati geçtikten sonra misafire **hiçbir şey** gitmiyor. Uyarı yalnızca
-   esnafa gidiyor ve metni *"Lütfen misafir ile iletişime geçin"* diyor — yani
-   platform, unutulmuş valiz problemini esnafın omzuna bırakıyor. Valizi
-   almaya gelebilecek tek kişi ise misafir.
+1. ~~**MİSAFİR geç teslimden hiç haberdar edilmiyor.**~~ **DÜZELTİLDİ**
+   (2026-09-12, DEFECT_BACKLOG D1): check-out saati geçtiğinde artık
+   `notificationService.sendOverdueGuestNotice` ile misafire de e-posta
+   gidiyor — esnafla AYNI eşik deseni (`shouldSendOverdueNotice`, 0,5sa /
+   24sa / 72sa / 1hf / 1ay) ama AYRI konu öneki
+   (`OVERDUE_GUEST_NOTICE_SUBJECT_PREFIX`), yoksa iki taraf aynı sayaca girip
+   biri eksik sayılırdı. 6 dilin hepsini taşıyor
+   (`notification-locale-coverage` mandalı). Bkz.
+   `src/app/api/internal/booking-reminders/route.ts`,
+   `src/lib/overdue-notice.ts`.
 
-2. **`take: 100` iki misafir hatırlatma sorgusunda da var** ve orada sıralama
-   ya da uyarı yok. Aynı 2 saatlik pencerede 100'den fazla check-in olursa bir
-   kısmı hatırlatma almaz ve kimse fark etmez.
+2. ~~**`take: 100` iki misafir hatırlatma sorgusunda da var**...~~ **DÜZELTİLDİ**
+   (2026-09-02, commit `3122fcb3`, "DEFECT_BACKLOG D4"): her iki sorguya da
+   `orderBy` (en yakın zamanlı önce) ve sınır aşıldığında `logger.warn` eklendi
+   — geç teslim dalındakiyle aynı desen. Bkz. `src/app/api/internal/booking-reminders/route.ts`.
 
 3. **`latePickupFeeTry` = 0** ve check-out hatırlatması *"Geç teslim almalarda
    ek ücret uygulanabilir"* diyor — bugün uygulanmıyor. Ücretin ne olacağı ve

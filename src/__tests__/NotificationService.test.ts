@@ -2,13 +2,17 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NotificationService } from "../services/NotificationService";
 
-const { mockPrisma } = vi.hoisted(() => {
+const { mockPrisma, mockSendEachForMulticast } = vi.hoisted(() => {
   return {
     mockPrisma: {
       notificationLog: {
         create: vi.fn(),
       },
       pushSubscription: {
+        findMany: vi.fn(),
+        deleteMany: vi.fn(),
+      },
+      mobilePushToken: {
         findMany: vi.fn(),
         deleteMany: vi.fn(),
       },
@@ -19,11 +23,23 @@ const { mockPrisma } = vi.hoisted(() => {
         findUnique: vi.fn(),
       },
     },
+    mockSendEachForMulticast: vi.fn(),
   };
 });
 
 vi.mock("@/lib/db", () => ({
   default: mockPrisma,
+}));
+
+// DEFECT_BACKLOG D6: firebase-admin dinamik import ile yükleniyor (bkz.
+// `sendMobilePush`), gerçek SDK'nın ağa çıkmasını burada engelliyoruz.
+vi.mock("firebase-admin/app", () => ({
+  initializeApp: vi.fn(),
+  getApps: vi.fn().mockReturnValue([]),
+  cert: vi.fn((v) => v),
+}));
+vi.mock("firebase-admin/messaging", () => ({
+  getMessaging: vi.fn(() => ({ sendEachForMulticast: mockSendEachForMulticast })),
 }));
 
 vi.mock("@/lib/netgsm", () => ({
@@ -43,6 +59,7 @@ describe("NotificationService", () => {
     vi.clearAllMocks();
     process.env.RESEND_API_KEY = "test_key";
     process.env.GUEST_SMS_BOOKING_NOTIFICATIONS = "true";
+    delete process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
   });
 
   describe("sendEmail", () => {
@@ -319,6 +336,91 @@ describe("NotificationService", () => {
 
       // Should call fetch for partner email and both admin emails
       expect(global.fetch).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  /**
+   * DEFECT_BACKLOG D6 (2026-09-12): token toplanıyordu, gönderim kodu hiç
+   * yoktu. `sendPush` (VAPID) ile BİREBİR aynı yapılandırma-yoksa-SKIPPED
+   * deseni.
+   */
+  describe("sendMobilePush", () => {
+    it("FIREBASE_SERVICE_ACCOUNT_JSON yoksa SKIPPED loglar, gönderim yapmaz", async () => {
+      delete process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+      mockPrisma.mobilePushToken.findMany.mockResolvedValue([{ token: "t1" }]);
+
+      const result = await service.sendMobilePush("user-1", "Başlık", "Mesaj");
+
+      expect(result).toBe(false);
+      expect(mockSendEachForMulticast).not.toHaveBeenCalled();
+      expect(mockPrisma.notificationLog.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            type: "MOBILE_PUSH",
+            status: "SKIPPED",
+            error: "fcm_not_configured",
+          }),
+        }),
+      );
+    });
+
+    it("token yoksa SKIPPED loglar", async () => {
+      process.env.FIREBASE_SERVICE_ACCOUNT_JSON = JSON.stringify({ project_id: "p" });
+      mockPrisma.mobilePushToken.findMany.mockResolvedValue([]);
+
+      const result = await service.sendMobilePush("user-1", "Başlık", "Mesaj");
+
+      expect(result).toBe(false);
+      expect(mockPrisma.notificationLog.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ status: "SKIPPED", error: "no_tokens" }),
+        }),
+      );
+    });
+
+    it("yapılandırılmışsa gönderir ve SENT loglar", async () => {
+      process.env.FIREBASE_SERVICE_ACCOUNT_JSON = JSON.stringify({ project_id: "p" });
+      mockPrisma.mobilePushToken.findMany.mockResolvedValue([{ token: "t1" }, { token: "t2" }]);
+      mockSendEachForMulticast.mockResolvedValue({
+        successCount: 1,
+        responses: [{ success: true }, { success: false, error: { code: "messaging/registration-token-not-registered" } }],
+      });
+
+      const result = await service.sendMobilePush("user-1", "Başlık", "Mesaj", "b1");
+
+      expect(result).toBe(true);
+      expect(mockSendEachForMulticast).toHaveBeenCalledWith(
+        expect.objectContaining({ tokens: ["t1", "t2"] }),
+      );
+      // Gecersiz token SILINIR -- aksi halde her gonderimde ayni olu token'a bosuna istek atilir.
+      expect(mockPrisma.mobilePushToken.deleteMany).toHaveBeenCalledWith({
+        where: { token: { in: ["t2"] } },
+      });
+      expect(mockPrisma.notificationLog.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ type: "MOBILE_PUSH", status: "SENT", bookingId: "b1" }),
+        }),
+      );
+    });
+
+    it("hepsi basarisizsa FAILED loglar", async () => {
+      process.env.FIREBASE_SERVICE_ACCOUNT_JSON = JSON.stringify({ project_id: "p" });
+      mockPrisma.mobilePushToken.findMany.mockResolvedValue([{ token: "t1" }]);
+      mockSendEachForMulticast.mockResolvedValue({
+        successCount: 0,
+        responses: [{ success: false, error: { code: "messaging/internal-error" } }],
+      });
+
+      const result = await service.sendMobilePush("user-1", "Başlık", "Mesaj");
+
+      expect(result).toBe(false);
+      // Gecici bir hata -- token SILINMEZ.
+      expect(mockPrisma.mobilePushToken.deleteMany).not.toHaveBeenCalled();
+      expect(mockPrisma.notificationLog.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ status: "FAILED", error: "all_tokens_failed" }),
+        }),
+      );
     });
   });
 

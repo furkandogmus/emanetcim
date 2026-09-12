@@ -136,6 +136,12 @@
     "newBagDropoff": "NOUVEAU DÉPÔT DE SACS",
     "netEarnings": "RÉSULTAT NET",
     "monthlyShopViews": "Vues ce mois-ci",
+    "onboardingTitle": "Liste de démarrage",
+    "onboardingSubtitle": "Complétez votre boutique pour être prêt pour votre première réservation.",
+    "onboardingStepPhoto": "Ajouter une photo de la boutique",
+    "onboardingStepLocation": "Indiquer votre emplacement sur la carte",
+    "onboardingStepFirstBooking": "En attente de votre première réservation",
+    "onboardingGo": "Terminer",
     "referralTitle": "Invitez un autre commerçant",
     "referralBody": "Invitez un commerçant que vous connaissez à rejoindre BagajPark et aidez à développer notre réseau de partenaires.",
     "referralReveal": "Afficher mon code d'invitation",
@@ -301,7 +307,8 @@
     "bagRevisionDelta": "de {from} à {to} bagages",
     "bagRevisionSaved": "Mis à jour. Nouveau total : {total}",
     "settingsImpactHours": "Attention : {count} réservation(s) tombent hors de vos horaires. Ces clients ne pourront pas être enregistrés — contactez-les si besoin.",
-    "settingsImpactCapacity": "Attention : les bagages actuellement en garde dépassent la nouvelle capacité de {count}."
+    "settingsImpactCapacity": "Attention : les bagages actuellement en garde dépassent la nouvelle capacité de {count}.",
+    "settingsImpactUnknownGuest": "Client sans nom"
   },
   "Guest": {
     "heroTitle": "Déposez vos bagages, explorez librement",
@@ -440,6 +447,14 @@
     "bookingStatus_CHECKED_OUT": "Terminé",
     "bookingStatus_CANCELLED": "Annulé",
     "bookingDetailMetaTitle": "Détails de la réservation",
+    "bagRevisionPendingTitle": "Votre nombre de bagages a été mis à jour",
+    "bagRevisionPendingBody": "La boutique a corrigé votre nombre de bagages à {count} et le montant a augmenté. Votre accord est requis.",
+    "bagRevisionNewTotal": "Nouveau montant",
+    "bagRevisionApprove": "Approuver",
+    "bagRevisionReject": "Refuser",
+    "bagRevisionApproved": "Approuvé — le nouveau montant a été appliqué.",
+    "bagRevisionRejected": "Refusé — le montant reste inchangé.",
+    "bagRevisionActionFailed": "Cela n'a pas fonctionné. Veuillez réessayer.",
     "noBookingsTitle": "Aucune réservation pour l'instant.",
     "noBookingsDesc": "Vous pouvez stocker vos bagages en toute sécurité à tout moment de la ville en effectuant une réservation.",
     "bookingsLoyaltyMember": "Membre fidélité",
@@ -1678,7 +1693,9 @@
     "imageTooLarge": "La photo est trop lourde. 8 Mo maximum.",
     "imageUnsupportedType": "Ce fichier n'est pas une photo. Envoyez un JPEG, PNG ou WebP.",
     "imageDimensionsTooLarge": "La résolution de la photo est trop élevée. Essayez une photo plus petite.",
-    "shopMissingCoordinates": "La boutique n'a pas de localisation. Renseignez les coordonnées avant d'approuver."
+    "shopMissingCoordinates": "La boutique n'a pas de localisation. Renseignez les coordonnées avant d'approuver.",
+    "shopLocationRequired": "Veuillez indiquer l'emplacement de votre boutique sur la carte.",
+    "bagRevisionNeedsGuestApproval": "Une augmentation de prix après le check-in nécessite l'accord du client. La proposition a été enregistrée et s'appliquera dès que le client l'aura approuvée."
   },
   "Emails": {
     "verificationSubject": "Vérifiez votre e-mail",

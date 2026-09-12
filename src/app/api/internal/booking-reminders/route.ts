@@ -7,6 +7,7 @@ import { notificationService } from "@/services/NotificationService";
 import {
   shouldSendOverdueNotice,
   OVERDUE_NOTICE_SUBJECT_PREFIX,
+  OVERDUE_GUEST_NOTICE_SUBJECT_PREFIX,
 } from "@/lib/overdue-notice";
 import { bookingShortCode } from "@/lib/booking-code";
 import {
@@ -124,6 +125,7 @@ export async function GET(req: NextRequest) {
     checkInReminders: 0,
     checkOutReminders: 0,
     overdueNotifications: 0,
+    overdueGuestNotifications: 0,
   };
 
   // Defter kaydi: HTTP 200 donmek yetmiyor, is CALISTIGINI JobRun'a yazmali.
@@ -249,7 +251,10 @@ export async function GET(req: NextRequest) {
         status: "CHECKED_IN",
         checkOutTime: { lt: new Date(now.getTime() - 30 * 60 * 1000) },
       },
-      include: { shop: { include: { owner: { select: { email: true, phone: true } } } } },
+      include: {
+        shop: { include: { owner: { select: { email: true, phone: true } } } },
+        guest: { select: { email: true, name: true } },
+      },
       /*
         SIRALAMA EKLENDI: `take` siniri asildiginda HANGI kayitlarin dusecegi
         onceden belirsizdi. En cok gecikmis olan en cok ihtiyaci olandir.
@@ -273,23 +278,54 @@ export async function GET(req: NextRequest) {
       overdue.map((b) => b.id),
       OVERDUE_NOTICE_SUBJECT_PREFIX,
     );
+    /*
+      DEFECT_BACKLOG D1: esnaf sayacından AYRI sayaç (bkz. overdue-notice.ts
+      yorumu) -- aksi halde ikisinden biri eksik sayılır.
+    */
+    const overdueGuestSentCounts = await notifiedCounts(
+      overdue.map((b) => b.id),
+      OVERDUE_GUEST_NOTICE_SUBJECT_PREFIX,
+    );
 
     for (const booking of overdue) {
-      const partnerEmail = booking.shop.owner?.email;
-      if (!partnerEmail) continue;
-
       const overdueHours =
         (now.getTime() - booking.checkOutTime.getTime()) / 3_600_000;
-      const alreadySent = overdueSentCounts.get(booking.id) ?? 0;
-      if (!shouldSendOverdueNotice(overdueHours, alreadySent)) continue;
 
-      void notificationService.sendEmail(
-        partnerEmail,
-        `${OVERDUE_NOTICE_SUBJECT_PREFIX} — ${booking.shop.name} ⏰`,
-        `Merhaba,\n\nAşağıdaki rezervasyonun check-out saati geçti ancak valiz henüz teslim alınmamış:\n\nRezervasyon Kodu: ${bookingShortCode(booking.id)}\nPlanlanan check-out: ${formatDateTimeInZone(booking.checkOutTime, { locale: "tr-TR", timeZone: bookingTimeZone(booking.shop), dateStyle: "short", timeStyle: "short" })}\n\nLütfen misafir ile iletişime geçin.`,
-        booking.id,
-      ).catch((e) => logger.warn({ err: e, bookingId: booking.id }, "reminder_overdue_email_failed"));
-      results.overdueNotifications++;
+      const partnerEmail = booking.shop.owner?.email;
+      if (partnerEmail) {
+        const alreadySent = overdueSentCounts.get(booking.id) ?? 0;
+        if (shouldSendOverdueNotice(overdueHours, alreadySent)) {
+          void notificationService.sendEmail(
+            partnerEmail,
+            `${OVERDUE_NOTICE_SUBJECT_PREFIX} — ${booking.shop.name} ⏰`,
+            `Merhaba,\n\nAşağıdaki rezervasyonun check-out saati geçti ancak valiz henüz teslim alınmamış:\n\nRezervasyon Kodu: ${bookingShortCode(booking.id)}\nPlanlanan check-out: ${formatDateTimeInZone(booking.checkOutTime, { locale: "tr-TR", timeZone: bookingTimeZone(booking.shop), dateStyle: "short", timeStyle: "short" })}\n\nLütfen misafir ile iletişime geçin.`,
+            booking.id,
+          ).catch((e) => logger.warn({ err: e, bookingId: booking.id }, "reminder_overdue_email_failed"));
+          results.overdueNotifications++;
+        }
+      }
+
+      /*
+        MİSAFİRE de haber ver: unutulmuş valizi almaya gelebilecek tek kişi
+        odur, esnafa "misafir ile iletişime geçin" demek yükü ona bırakıyordu.
+      */
+      const guestEmail = booking.guest?.email ?? booking.guestEmail;
+      if (guestEmail) {
+        const guestAlreadySent = overdueGuestSentCounts.get(booking.id) ?? 0;
+        if (shouldSendOverdueNotice(overdueHours, guestAlreadySent)) {
+          void notificationService.sendOverdueGuestNotice(
+            guestEmail,
+            booking.id,
+            {
+              shopName: booking.shop.name,
+              checkOutAt: booking.checkOutTime,
+              timeZone: bookingTimeZone(booking.shop),
+            },
+            booking.locale ?? DEFAULT_NOTIFICATION_LOCALE,
+          ).catch((e) => logger.warn({ err: e, bookingId: booking.id }, "reminder_overdue_guest_email_failed"));
+          results.overdueGuestNotifications++;
+        }
+      }
     }
 
     logger.info({ results }, "booking_reminders_cron_completed");

@@ -42,6 +42,22 @@ describe("ayar değişikliği etkisi", () => {
     expect(r.bookingsOutsideHours).toBe(2);
   });
 
+  it("dışarıda kalan rezervasyonları KİM olduğuyla birlikte listeler (DEFECT_BACKLOG D3)", async () => {
+    // Sayı tek başına esnafın kime ulaşacağını söylemiyordu.
+    mockPrisma.booking.findMany.mockResolvedValue([
+      { id: "b1", checkInTime: at("10:00"), guestEmail: null, guest: null }, // ICINDE
+      { id: "b2", checkInTime: at("20:00"), guestEmail: "misafir@ornek.com", guest: null },
+      { id: "b3", checkInTime: at("21:30"), guestEmail: null, guest: { name: "Ayşe Yılmaz", email: "ayse@ornek.com" } },
+    ]);
+    const r = await shopSettingsImpactService.assess({
+      shopId: "s1", openingTime: "09:00", closingTime: "18:00", now: at("08:00"),
+    });
+    expect(r.affectedBookings).toEqual([
+      { id: "b2", guestName: "misafir@ornek.com", checkInTime: at("20:00") },
+      { id: "b3", guestName: "Ayşe Yılmaz", checkInTime: at("21:30") },
+    ]);
+  });
+
   it("saat DEĞİŞMEDİYSE sorgu bile çalışmaz", async () => {
     // Fiyat ya da adres degistiren bir kayitta bosuna sorgu atmanin anlami yok.
     await shopSettingsImpactService.assess({ shopId: "s1", capacity: 100 });
@@ -81,7 +97,7 @@ describe("ayar değişikliği etkisi", () => {
     // Uyari uretmek icin patlamak, kaydin kendisini dusurmek olurdu.
     mockPrisma.shop.findUnique.mockResolvedValue(null);
     expect(await shopSettingsImpactService.assess({ shopId: "yok", capacity: 1 })).toEqual({
-      bookingsOutsideHours: 0, bagsOverCapacity: 0,
+      bookingsOutsideHours: 0, bagsOverCapacity: 0, affectedBookings: [],
     });
   });
 });

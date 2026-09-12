@@ -136,6 +136,12 @@
     "newBagDropoff": "NEUE TASCHENABGABE",
     "netEarnings": "Nettoertrag",
     "monthlyShopViews": "Aufrufe diesen Monat",
+    "onboardingTitle": "Erste-Schritte-Checkliste",
+    "onboardingSubtitle": "Schließen Sie Ihr Ladenprofil ab, um bereit für Ihre erste Buchung zu sein.",
+    "onboardingStepPhoto": "Ladenfoto hinzufügen",
+    "onboardingStepLocation": "Standort auf der Karte markieren",
+    "onboardingStepFirstBooking": "Wir warten auf Ihre erste Buchung",
+    "onboardingGo": "Erledigen",
     "referralTitle": "Laden Sie einen anderen Ladenbesitzer ein",
     "referralBody": "Laden Sie einen Ladenbesitzer ein, den Sie kennen, und helfen Sie, unser Partnernetzwerk zu vergrößern.",
     "referralReveal": "Meinen Einladungscode anzeigen",
@@ -301,7 +307,8 @@
     "bagRevisionDelta": "von {from} auf {to} Stück",
     "bagRevisionSaved": "Aktualisiert. Neue Summe: {total}",
     "settingsImpactHours": "Achtung: {count} Buchung(en) liegen jetzt außerhalb deiner Zeiten. Diese Gäste können nicht eingecheckt werden — kontaktiere sie ggf.",
-    "settingsImpactCapacity": "Achtung: Die aktuell eingelagerten Stücke überschreiten die neue Kapazität um {count}."
+    "settingsImpactCapacity": "Achtung: Die aktuell eingelagerten Stücke überschreiten die neue Kapazität um {count}.",
+    "settingsImpactUnknownGuest": "Unbenannter Gast"
   },
   "Guest": {
     "heroTitle": "Gepäck abgeben, die Stadt frei erkunden",
@@ -440,6 +447,14 @@
     "bookingStatus_CHECKED_OUT": "Abgeschlossen",
     "bookingStatus_CANCELLED": "Storniert",
     "bookingDetailMetaTitle": "Buchungsdetails",
+    "bagRevisionPendingTitle": "Ihre Gepäckanzahl wurde geändert",
+    "bagRevisionPendingBody": "Der Laden hat Ihre Gepäckanzahl auf {count} korrigiert und der Betrag ist gestiegen. Ihre Zustimmung wird benötigt.",
+    "bagRevisionNewTotal": "Neuer Betrag",
+    "bagRevisionApprove": "Zustimmen",
+    "bagRevisionReject": "Ablehnen",
+    "bagRevisionApproved": "Zugestimmt — der neue Betrag wurde angewendet.",
+    "bagRevisionRejected": "Abgelehnt — der Betrag bleibt unverändert.",
+    "bagRevisionActionFailed": "Das hat nicht funktioniert. Bitte versuchen Sie es erneut.",
     "noBookingsTitle": "Noch keine Buchungen.",
     "noBookingsDesc": "Nach einer Reservierung können Sie Ihr Gepäck an jedem Ort der Stadt sicher aufbewahren.",
     "bookingsLoyaltyMember": "Treuemitglied",
@@ -1678,7 +1693,9 @@
     "imageTooLarge": "Das Foto ist zu groß. Maximal 8 MB.",
     "imageUnsupportedType": "Diese Datei ist kein Foto. Lade ein JPEG, PNG oder WebP hoch.",
     "imageDimensionsTooLarge": "Die Auflösung des Fotos ist zu hoch. Versuche ein kleineres Foto.",
-    "shopMissingCoordinates": "Der Laden hat keinen Standort. Legen Sie die Koordinaten vor der Freigabe fest."
+    "shopMissingCoordinates": "Der Laden hat keinen Standort. Legen Sie die Koordinaten vor der Freigabe fest.",
+    "shopLocationRequired": "Bitte markieren Sie den Standort Ihres Ladens auf der Karte.",
+    "bagRevisionNeedsGuestApproval": "Eine Preiserhöhung nach dem Check-in erfordert die Zustimmung des Gastes. Der Vorschlag wurde gespeichert und wird angewendet, sobald der Gast zustimmt."
   },
   "Emails": {
     "verificationSubject": "Bestätigen Sie Ihre E-Mail",

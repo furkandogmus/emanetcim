@@ -51,3 +51,13 @@ export function shouldSendOverdueNotice(
  * gelir.
  */
 export const OVERDUE_NOTICE_SUBJECT_PREFIX = "BagajPark: Geç teslim";
+
+/**
+ * MİSAFİRE giden geç teslim uyarısının konu öneki (DEFECT_BACKLOG D1).
+ *
+ * ESNAF öneki (`OVERDUE_NOTICE_SUBJECT_PREFIX`) ile KASITLI OLARAK ayrı:
+ * `notifiedCounts` sayımı `subject.startsWith(prefix)` ile çalışıyor, aynı
+ * önek paylaşılsaydı esnafa giden ve misafire giden uyarılar aynı sayaca
+ * girer, ikisinden biri eksik sayılırdı.
+ */
+export const OVERDUE_GUEST_NOTICE_SUBJECT_PREFIX = "BagajPark: Valizinizi almayı unuttunuz";

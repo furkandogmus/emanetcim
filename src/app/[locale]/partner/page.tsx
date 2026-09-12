@@ -66,6 +66,9 @@ export default async function PartnerPage({
         closingTime: true,
         pricePerDay: true,
         timezone: true,
+        image: true,
+        latitude: true,
+        longitude: true,
       },
     }),
     getEffectiveCommission(),
@@ -139,6 +142,8 @@ export default async function PartnerPage({
       pulse={pulse}
       capacity={shopDetail.capacity}
       commissionActive={commission.rate > 0}
+      hasShopImage={!!shopDetail.image}
+      hasShopLocation={shopDetail.latitude != null && shopDetail.longitude != null}
     />
   );
 }

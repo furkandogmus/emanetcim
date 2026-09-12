@@ -98,9 +98,16 @@ ThemeData buildLightTheme() {
       surfaceTintColor: Colors.white,
       clipBehavior: Clip.antiAlias,
     ),
+    /*
+      DEFECT_BACKLOG D10 (2026-09-12): beyaz metin uzerinde `_brandOrange`
+      (#EA580C) zemin olcumu 3.56:1 idi -- WCAG AA'nin 4.5:1 esiginin altinda.
+      `_brandOrangeDark` (#C2430A, web'in brand-700'u) ayni beyaz metinle
+      ~5.12:1 veriyor. Marka kimligi korunuyor (ayni turuncu ailesi, sadece
+      koyu tonu), sadece dokunulabilir zemin degisiyor.
+    */
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        backgroundColor: _brandOrange,
+        backgroundColor: _brandOrangeDark,
         foregroundColor: Colors.white,
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -123,6 +130,16 @@ ThemeData buildLightTheme() {
           fontWeight: FontWeight.w500,
         ),
       ),
+    ),
+    /*
+      DEFECT_BACKLOG D10: `textButtonTheme` tanimli DEGILDI, yani M3
+      varsayilani `colorScheme.primary` (`_brandOrange`) kullaniyordu. M3'un
+      tohum renginden uretilen soluk seftali `Card` zemini uzerinde olculen
+      oran 3.23:1 idi. `_brandOrangeDark` ayni zeminde yeterli kontrasti
+      sagliyor; `filledButtonTheme` ile ayni koyu ton, tutarli marka.
+    */
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(foregroundColor: _brandOrangeDark),
     ),
     navigationBarTheme: NavigationBarThemeData(
       height: 72,
@@ -252,9 +269,11 @@ ThemeData buildDarkTheme() {
       ),
       clipBehavior: Clip.antiAlias,
     ),
+    // DEFECT_BACKLOG D10: light temayla ayni gerekce -- beyaz metin icin
+    // yeterli kontrastli koyu ton.
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        backgroundColor: _brandOrange,
+        backgroundColor: _brandOrangeDark,
         foregroundColor: Colors.white,
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

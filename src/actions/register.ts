@@ -163,6 +163,17 @@ export async function registerPartnerApplicationAction(data: unknown) {
     return { success: false as const, error: "Errors.phoneAlreadyRegistered" };
   }
 
+  /*
+    DEFECT_BACKLOG D9: koordinatsız kayıt sessiz bir tuzaktı — dükkan
+    oluşuyor, aramada hiç görünmüyor, admin onay ekranına gelene kadar kimse
+    fark etmiyordu. Form zaten zorunlu tutuyor; burası formu atlayan
+    (doğrudan action çağrısı) için ikinci kapı. approveShop'taki kontrol
+    üçüncü ve son kapı.
+  */
+  if (parsed.data.shopLatitude == null || parsed.data.shopLongitude == null) {
+    return { success: false as const, error: "Errors.shopLocationRequired" };
+  }
+
   const passwordHash = await hashPassword(parsed.data.password);
 
   // Yalnızca ESNAF hesabından üretilmiş bir kod kabul edilir — misafir

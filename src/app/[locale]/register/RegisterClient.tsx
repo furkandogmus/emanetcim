@@ -132,6 +132,10 @@ export default function RegisterPage() {
           setError(tErrors("cityRequired"));
           return;
         }
+        if (shopLocation.latitude == null || shopLocation.longitude == null) {
+          setError(tErrors("shopLocationRequired"));
+          return;
+        }
         const fullAddress = [
           shopLocation.address,
           shopLocation.district,

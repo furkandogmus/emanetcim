@@ -278,6 +278,113 @@ export class NotificationService implements INotificationService {
   }
 
   /**
+   * MOBİL push gönderimi (FCM) — `sendPush` ile AYNI desen, farklı kanal.
+   *
+   * NEDEN VAR (DEFECT_BACKLOG D6, 2026-09-12): `MobilePushToken` token
+   * topluyordu, `sendPush` çağrıları (yukarıda, yeni rezervasyon bildirimi)
+   * yalnızca web-push (`PushSubscription`) tablosuna bakıyordu — mobil uygulama
+   * kullanan esnaf/misafir hiçbir zaman push ALMIYORDU. Toplanan ama hiçbir işe
+   * yaramayan cihaz kimliği ayrıca KVKK riskiydi.
+   *
+   * `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY` ile BİREBİR aynı yapılandırma
+   * deseni: `FIREBASE_SERVICE_ACCOUNT_JSON` tanımsızsa gönderim `SKIPPED`
+   * olarak loglanır, kod yolu ÇALIŞIR ama gerçek bir gönderim yapmaz (bkz.
+   * `docs/DEFECT_BACKLOG.md` C2). Tanımlandığında bu, o son C2 benzeri
+   * eksiğin TEK gereken adımdır.
+   *
+   * Geçersiz/silinmiş token'lar (`registration-token-not-registered`,
+   * `invalid-registration-token`) `sendPush`in 404/410 temizliğiyle aynı
+   * gerekçeyle siliniyor — aksi hâlde her gönderimde aynı ölü token'a
+   * boşuna istek atılır.
+   */
+  async sendMobilePush(
+    userId: string,
+    title: string,
+    message: string,
+    bookingId?: string,
+  ): Promise<boolean> {
+    const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim();
+
+    try {
+      const tokens = await prisma.mobilePushToken.findMany({ where: { userId } });
+
+      if (serviceAccountJson && tokens.length > 0) {
+        const { initializeApp, getApps, cert } = await import("firebase-admin/app");
+        const { getMessaging } = await import("firebase-admin/messaging");
+
+        if (getApps().length === 0) {
+          initializeApp({ credential: cert(JSON.parse(serviceAccountJson)) });
+        }
+        const messaging = getMessaging();
+
+        const resp = await messaging.sendEachForMulticast({
+          tokens: tokens.map((t) => t.token),
+          notification: { title, body: message },
+          data: bookingId ? { bookingId } : undefined,
+        });
+
+        const staleTokens: string[] = [];
+        resp.responses.forEach((r, i) => {
+          if (r.success) return;
+          const code = r.error?.code;
+          if (
+            code === "messaging/registration-token-not-registered" ||
+            code === "messaging/invalid-registration-token"
+          ) {
+            staleTokens.push(tokens[i].token);
+          }
+          logger.warn(
+            { err: r.error, userId, token: tokens[i].token },
+            "mobile_push_send_failed",
+          );
+        });
+        if (staleTokens.length > 0) {
+          await prisma.mobilePushToken.deleteMany({
+            where: { token: { in: staleTokens } },
+          });
+        }
+
+        const anyOk = resp.successCount > 0;
+        await prisma.notificationLog.create({
+          data: {
+            bookingId,
+            type: "MOBILE_PUSH",
+            recipient: userId,
+            subject: title,
+            content: message,
+            status: anyOk ? "SENT" : "FAILED",
+            error: anyOk ? null : "all_tokens_failed",
+          },
+        });
+        return anyOk;
+      }
+
+      const skipReason = !serviceAccountJson
+        ? "fcm_not_configured"
+        : tokens.length === 0
+          ? "no_tokens"
+          : "unknown";
+      logger.info({ userId, title, skipReason }, "notification_mobile_push_skipped");
+
+      await prisma.notificationLog.create({
+        data: {
+          bookingId,
+          type: "MOBILE_PUSH",
+          recipient: userId,
+          subject: title,
+          content: message,
+          status: "SKIPPED",
+          error: skipReason,
+        },
+      });
+      return false;
+    } catch (error) {
+      logger.error({ error, userId }, "[Notification] Mobile Push Failed");
+      return false;
+    }
+  }
+
+  /**
    * Misafir: `GUEST_SMS_BOOKING_NOTIFICATIONS=true` iken yeni talep SMS’i (Netgsm).
    */
   async notifyGuestBookingRequestSms(
@@ -965,6 +1072,11 @@ export class NotificationService implements INotificationService {
       void this.sendPush(partnerUserId, pushTitle, pushBody, bookingId).catch((e) => {
         logger.error({ err: e, partnerUserId, bookingId }, "notifyPartnerAndAdmins_partner_push_failed");
       });
+      // DEFECT_BACKLOG D6: web-push'un yanına MOBİL push -- esnaf uygulamayı
+      // kullanıyorsa telefonu da titresin.
+      void this.sendMobilePush(partnerUserId, pushTitle, pushBody, bookingId).catch((e) => {
+        logger.error({ err: e, partnerUserId, bookingId }, "notifyPartnerAndAdmins_partner_mobile_push_failed");
+      });
     }
 
     // Adminlere e-posta gönder
@@ -1409,6 +1521,194 @@ export class NotificationService implements INotificationService {
       rows: [
         { label: content.row1, value: shopHtml },
         { label: content.row2, value: when },
+      ],
+      footer: "BagajPark",
+    });
+
+    if (email.includes("@")) {
+      await this.sendEmail(email, content.subject, body, bookingId, html);
+    }
+  }
+
+  /**
+   * GEÇ TESLİM uyarısı -- MİSAFİRE.
+   *
+   * NEDEN VAR (DEFECT_BACKLOG D1, 2026-09-12): check-out saati geçtiğinde
+   * yalnızca ESNAFA gidiyordu ve metni "misafir ile iletişime geçin" diyordu
+   * -- platform, unutulmuş valiz problemini esnafın omzuna bırakıyordu.
+   * Valizi almaya gelebilecek tek kişi misafirdir.
+   *
+   * Aynı eşik/idempotency deseni (`shouldSendOverdueNotice`) burada da
+   * kullanılıyor ama SAYIMI AYRI: konu öneki farklı
+   * (`OVERDUE_GUEST_NOTICE_SUBJECT_PREFIX`), yoksa esnafa giden ve misafire
+   * giden uyarılar aynı sayaçta karışır.
+   */
+  async sendOverdueGuestNotice(
+    email: string,
+    bookingId: string,
+    params: { shopName: string; checkOutAt: Date; timeZone: string },
+    locale: string,
+  ) {
+    const plannedAt = formatDateTimeInZone(params.checkOutAt, {
+      locale: bcp47ForUiLocale(locale),
+      timeZone: params.timeZone,
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+    const shop = params.shopName;
+
+    const content = pickLocale(
+      {
+        tr: {
+          subject: "BagajPark: Valizinizi almayı unuttunuz mu? 🧳",
+          heading: "Valizinizi almayı unuttunuz mu? 🧳",
+          p1: `__SHOP__ noktasındaki bagajınızın planlanan teslim alma saati geçti. Lütfen en kısa sürede dükkana uğrayıp valizinizi teslim alın.`,
+          row1: "Nokta",
+          row2: "Planlanan alma",
+        },
+        en: {
+          subject: "BagajPark: Did you forget your luggage? 🧳",
+          heading: "Did you forget your luggage? 🧳",
+          p1: `Your luggage at __SHOP__ was due for pick-up. Please visit the shop as soon as possible to collect it.`,
+          row1: "Location",
+          row2: "Planned pick-up",
+        },
+        de: {
+          subject: "BagajPark: Haben Sie Ihr Gepäck vergessen? 🧳",
+          heading: "Haben Sie Ihr Gepäck vergessen? 🧳",
+          p1: `Die geplante Abholzeit für Ihr Gepäck bei __SHOP__ ist verstrichen. Bitte holen Sie es baldmöglichst ab.`,
+          row1: "Standort",
+          row2: "Geplante Abholung",
+        },
+        fr: {
+          subject: "BagajPark : avez-vous oublié vos bagages ? 🧳",
+          heading: "Avez-vous oublié vos bagages ? 🧳",
+          p1: `L'heure prévue de récupération de vos bagages à __SHOP__ est passée. Merci de passer les récupérer dès que possible.`,
+          row1: "Point",
+          row2: "Récupération prévue",
+        },
+        ja: {
+          subject: "BagajPark: お荷物をお忘れではありませんか？🧳",
+          heading: "お荷物をお忘れではありませんか？🧳",
+          p1: `__SHOP__ でお預けのお荷物の受け取り予定時刻が過ぎています。できるだけ早くお店にお立ち寄りいただき、お受け取りください。`,
+          row1: "場所",
+          row2: "予定受け取り時刻",
+        },
+        fa: {
+          subject: "BagajPark: آیا چمدان خود را فراموش کرده‌اید؟ 🧳",
+          heading: "آیا چمدان خود را فراموش کرده‌اید؟ 🧳",
+          p1: `زمان تحویل گرفتن چمدان شما از __SHOP__ گذشته است. لطفاً هرچه زودتر به فروشگاه مراجعه کرده و چمدان خود را تحویل بگیرید.`,
+          row1: "مکان",
+          row2: "زمان تحویل برنامه‌ریزی‌شده",
+        },
+      },
+      locale,
+    );
+
+    // Bkz. sendStayReminder yorumu: dükkan adı esnafın kendi yazdığı metin,
+    // düz metin ve HTML gövdesine farklı kaçışla girer.
+    const shopHtml = escapeEmailHtml(shop);
+    const p1Text = content.p1.replace("__SHOP__", shop);
+    const p1Html = content.p1.replace("__SHOP__", shopHtml);
+    const body = `${p1Text}\n\n${content.row1}: ${shop}\n${content.row2}: ${plannedAt}`;
+    const html = renderEmailHtml({
+      locale,
+      heading: content.heading,
+      paragraphs: [p1Html],
+      rows: [
+        { label: content.row1, value: shopHtml },
+        { label: content.row2, value: plannedAt },
+      ],
+      footer: "BagajPark",
+    });
+
+    if (email.includes("@")) {
+      await this.sendEmail(email, content.subject, body, bookingId, html);
+    }
+  }
+
+  /**
+   * CHECK-IN SONRASI fiyat artışı -- MİSAFİRİN ONAYINI BEKLİYOR.
+   *
+   * NEDEN VAR (DEFECT_BACKLOG D5, 2026-09-12): esnaf artık check-in
+   * tamamlandıktan sonra (misafir gittikten sonra) fiyatı artıran bir valiz
+   * düzeltmesini tek başına uygulayamıyor -- `bag-revision.ts`teki
+   * `GUEST_APPROVAL_REQUIRED` kapısı öneriyi bekletiyor. Misafir bunu
+   * `/bookings/{id}` (hesaplı) veya token'lı yönetim sayfasında (hesapsız)
+   * görüp onaylıyor/reddediyor; bu e-posta olmadan misafir orayı hiç açmazdı.
+   */
+  async sendBagRevisionApprovalRequest(
+    email: string,
+    bookingId: string,
+    params: { shopName: string; extraAmount: number; newTotal: number },
+    locale: string,
+  ) {
+    const shop = params.shopName;
+    const bcp47 = bcp47ForUiLocale(locale);
+    const extra = formatTryCurrency(params.extraAmount, bcp47);
+    const newTotal = formatTryCurrency(params.newTotal, bcp47);
+    const baseUrl = getSiteBaseUrl();
+    const link = `${baseUrl}/${locale}/bookings/${bookingId}`;
+
+    const content = pickLocale(
+      {
+        tr: {
+          subject: "BagajPark: Valiz sayınız değişti, onayınız gerekiyor 🧳",
+          heading: "Valiz sayınız değişti, onayınız gerekiyor 🧳",
+          p1: `__SHOP__ noktasındaki valiz sayınız düzeltildi ve tutarınız __EXTRA__ arttı. Yeni tutarı onaylamanız veya reddetmeniz gerekiyor.`,
+          row1: "Nokta",
+          row2: "Yeni tutar",
+        },
+        en: {
+          subject: "BagajPark: Your bag count changed, approval needed 🧳",
+          heading: "Your bag count changed, approval needed 🧳",
+          p1: `Your bag count at __SHOP__ was corrected and your total increased by __EXTRA__. Please approve or reject the new total.`,
+          row1: "Location",
+          row2: "New total",
+        },
+        de: {
+          subject: "BagajPark: Ihre Gepäckanzahl hat sich geändert 🧳",
+          heading: "Ihre Gepäckanzahl hat sich geändert 🧳",
+          p1: `Ihre Gepäckanzahl bei __SHOP__ wurde korrigiert und Ihr Betrag ist um __EXTRA__ gestiegen. Bitte stimmen Sie dem neuen Betrag zu oder lehnen Sie ihn ab.`,
+          row1: "Standort",
+          row2: "Neuer Betrag",
+        },
+        fr: {
+          subject: "BagajPark : votre nombre de bagages a changé 🧳",
+          heading: "Votre nombre de bagages a changé 🧳",
+          p1: `Votre nombre de bagages à __SHOP__ a été corrigé et votre montant a augmenté de __EXTRA__. Merci d'approuver ou de refuser le nouveau montant.`,
+          row1: "Point",
+          row2: "Nouveau montant",
+        },
+        ja: {
+          subject: "BagajPark: お荷物の数が変更されました、承認が必要です 🧳",
+          heading: "お荷物の数が変更されました、承認が必要です 🧳",
+          p1: `__SHOP__ でのお荷物の数が修正され、金額が__EXTRA__増加しました。新しい金額を承認または拒否してください。`,
+          row1: "場所",
+          row2: "新しい金額",
+        },
+        fa: {
+          subject: "BagajPark: تعداد چمدان شما تغییر کرد، نیاز به تأیید دارید 🧳",
+          heading: "تعداد چمدان شما تغییر کرد، نیاز به تأیید دارید 🧳",
+          p1: `تعداد چمدان شما در __SHOP__ اصلاح شد و مبلغ شما __EXTRA__ افزایش یافت. لطفاً مبلغ جدید را تأیید یا رد کنید.`,
+          row1: "مکان",
+          row2: "مبلغ جدید",
+        },
+      },
+      locale,
+    );
+
+    const shopHtml = escapeEmailHtml(shop);
+    const p1Text = content.p1.replace("__SHOP__", shop).replace("__EXTRA__", extra);
+    const p1Html = content.p1.replace("__SHOP__", shopHtml).replace("__EXTRA__", extra);
+    const body = `${p1Text}\n\n${content.row1}: ${shop}\n${content.row2}: ${newTotal}\n\n${link}`;
+    const html = renderEmailHtml({
+      locale,
+      heading: content.heading,
+      paragraphs: [p1Html],
+      rows: [
+        { label: content.row1, value: shopHtml },
+        { label: content.row2, value: newTotal },
       ],
       footer: "BagajPark",
     });

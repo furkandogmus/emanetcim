@@ -23,11 +23,24 @@ import { isShopOpenForHandover } from "@/lib/shop-hours";
  * olan, sonucu ÖNCEDEN söylemek — böylece esnaf o misafirlere ulaşabilir.
  */
 
+export type AffectedBooking = {
+  id: string;
+  guestName: string | null;
+  checkInTime: Date;
+};
+
 export type SettingsImpact = {
   /** Yeni saatlerin dışında kalan, hâlâ aktif rezervasyon sayısı. */
   bookingsOutsideHours: number;
   /** Şu an rafta duran valiz sayısı yeni kapasiteyi aşıyor mu? */
   bagsOverCapacity: number;
+  /**
+   * Saat daraltmasından etkilenen rezervasyonların KENDİSİ (DEFECT_BACKLOG
+   * D3: sayı tek başına esnafın kime ulaşacağını söylemiyordu). En yakın
+   * check-in önce, en fazla 50 satır -- esnafın arayacağı liste, tarama
+   * raporu değil.
+   */
+  affectedBookings: AffectedBooking[];
 };
 
 /** Check-in'i hâlâ gerçekleşecek olan durumlar. */
@@ -47,12 +60,13 @@ class ShopSettingsImpactService {
       where: { id: shopId },
       select: { openingTime: true, closingTime: true, open247: true, timezone: true },
     });
-    if (!shop) return { bookingsOutsideHours: 0, bagsOverCapacity: 0 };
+    if (!shop) return { bookingsOutsideHours: 0, bagsOverCapacity: 0, affectedBookings: [] };
 
     const nextOpening = openingTime ?? shop.openingTime;
     const nextClosing = closingTime ?? shop.closingTime;
 
     let bookingsOutsideHours = 0;
+    let affectedBookings: AffectedBooking[] = [];
     /*
       7/24 dukkanda saat kontrolu yok; hesaplamaya da gerek yok. Saat alanlari
       hic degismediyse de sorgu bosuna calismasin.
@@ -68,7 +82,13 @@ class ShopSettingsImpactService {
           status: { in: [...UPCOMING] },
           checkInTime: { gte: now },
         },
-        select: { checkInTime: true },
+        select: {
+          id: true,
+          checkInTime: true,
+          guestEmail: true,
+          guest: { select: { name: true, email: true } },
+        },
+        orderBy: { checkInTime: "asc" },
         take: 500,
       });
       /*
@@ -77,7 +97,7 @@ class ShopSettingsImpactService {
         ayrismasi demek olurdu; `shop-hours.ts` yorumu o hatanin bir kez
         yasandigini yaziyor.
       */
-      bookingsOutsideHours = upcoming.filter(
+      const outside = upcoming.filter(
         (b) =>
           !isShopOpenForHandover(
             nextOpening,
@@ -86,7 +106,13 @@ class ShopSettingsImpactService {
             b.checkInTime,
             shop.timezone ?? undefined,
           ),
-      ).length;
+      );
+      bookingsOutsideHours = outside.length;
+      affectedBookings = outside.slice(0, 50).map((b) => ({
+        id: b.id,
+        guestName: b.guest?.name ?? b.guest?.email ?? b.guestEmail ?? null,
+        checkInTime: b.checkInTime,
+      }));
     }
 
     let bagsOverCapacity = 0;
@@ -100,7 +126,7 @@ class ShopSettingsImpactService {
       bagsOverCapacity = Math.max(0, bags - capacity);
     }
 
-    return { bookingsOutsideHours, bagsOverCapacity };
+    return { bookingsOutsideHours, bagsOverCapacity, affectedBookings };
   }
 }
 
