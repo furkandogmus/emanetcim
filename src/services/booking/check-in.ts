@@ -227,7 +227,11 @@ export async function checkIn(
       }
     });
 
-    bookingEventService.record({
+    /*
+      Atesle-unut: teslim alma yazildi, olay kaydi onu bekletmez. `.catch` sart —
+      yakalanmamis red sureci dusurur (`unhandled-rejection` mandali, tavan 0).
+    */
+    void bookingEventService.record({
       bookingId,
       event: "CHECKED_IN",
       metadata: { previousStatus: existing.status },

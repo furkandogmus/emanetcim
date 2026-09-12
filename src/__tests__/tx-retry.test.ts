@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { Prisma } from "@prisma/client";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";

@@ -11,7 +11,7 @@ import ConfirmDialog from "@/components/common/ConfirmDialog";
 export default function AccountPrivacyClient() {
   const t = useTranslations("AccountPrivacy");
   const tCommon = useTranslations("Common");
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -83,6 +83,26 @@ export default function AccountPrivacyClient() {
       }
     });
   };
+
+  /*
+    `status` OLMADAN BU KONTROL YANLIS ANI OKUYORDU: next-auth istemcideki
+    ILK render'da her zaman `status:"loading", data:undefined` doner, yani
+    `session?.user?.role` bir sure `undefined` kalir. Kontrol bunu beklemeden
+    calistigi icin GERCEK bir misafir bile sayfayi her acisinda once
+    "bu sayfa yalnizca misafirler icin" reddini goruyor, oturum cozulunce
+    reddin yerini asil icerik aliyordu -- her yuklemede goz kirpan bir hata.
+    Red artik yalnizca `status` kesinlestikten sonra ciziliyor; arada
+    icerigin yerini tutan bir iskelet var (yeni ceviri anahtari gerektirmesin
+    diye metinsiz).
+  */
+  if (status === "loading") {
+    return (
+      <div className="flex max-w-lg flex-col gap-6" aria-busy="true" aria-hidden>
+        <div className="h-40 w-full animate-pulse rounded-2xl bg-gray-100" />
+        <div className="h-64 w-full animate-pulse rounded-2xl bg-gray-100" />
+      </div>
+    );
+  }
 
   if (session?.user?.role !== "GUEST") {
     return (

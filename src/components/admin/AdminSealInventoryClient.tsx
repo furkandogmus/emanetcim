@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Loader2, PackagePlus, Truck } from "lucide-react";
 import {
@@ -31,6 +32,19 @@ export default function AdminSealInventoryClient({ sealCounts, shops, assignedBa
   const t = useTranslations("Admin");
   const tErrors = useTranslations("Errors");
   const errorText = useActionErrorText();
+  /*
+    TAM SAYFA YENILEME YERINE ROUTER TAZELEME.
+
+    Iki basarili islem de `toast.success(...)` cagirdiktan HEMEN SONRA
+    `window.location.reload()` yapiyordu. Reload React agacini komple yikar —
+    `sonner` kuyrugu da onunla gider; yani yonetici "1000 muhur uretildi" /
+    "100 muhur atandi" mesajini HIC GORMUYORDU, ekran bir anda sifirlaniyordu.
+    Islemin gecip gecmedigini ancak tablodaki sayidan cikarabiliyordu.
+
+    `router.refresh()` yalnizca sunucu bilesenlerini yeniden cektirir: sayilar
+    ve atama listesi tazelenir, istemci durumu (ve toast) ayakta kalir.
+  */
+  const router = useRouter();
   const [fromCreate, setFromCreate] = useState("");
   const [toCreate, setToCreate] = useState("");
   const [creating, setCreating] = useState(false);
@@ -55,7 +69,7 @@ export default function AdminSealInventoryClient({ sealCounts, shops, assignedBa
         toast.success(t("sealBulkCreated", { count: res.created }));
         setFromCreate("");
         setToCreate("");
-        window.location.reload();
+        router.refresh();
       } else {
         toast.error(errorText(res.error));
       }
@@ -87,7 +101,7 @@ export default function AdminSealInventoryClient({ sealCounts, shops, assignedBa
       if (res.success) {
         toast.success(t("sealAssigned", { count: res.updated }));
         setCountAssign("");
-        window.location.reload();
+        router.refresh();
       } else {
         toast.error(errorText(res.error));
       }

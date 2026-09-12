@@ -68,7 +68,18 @@ export default function VerificationBanner() {
   };
 
   return (
-    <div className="bg-orange-600 text-white py-3 px-6 sticky top-0 left-0 w-full z-[60] flex flex-col sm:flex-row items-center justify-center gap-4 animate-in slide-in-from-top duration-500 shadow-lg border-b border-orange-500">
+    /*
+      `sticky top-0 left-0 z-[60]` KALDIRILDI.
+
+      Olculdu (2026-09-12, 1440x900): bu serit {y:0, h:51, z:60} ve `Header`
+      {y:0, h:74, z:50} ikisi de `body`nin flex cocuguyken AYRI AYRI
+      yapisiyordu; ayni `top-0` esigine iki kardes yapisinca serit header'in
+      74 px'inin 51 px'ini ortuyordu. Yapiskanlik artik `[locale]/layout.tsx`te
+      ikisini saran TEK kapsayicida: serit ile header normal akista alt alta
+      kalir, yigin birlikte tepede durur. Burada kendi `z` degerini tasimak da
+      gereksiz -- kapsayici disaridaki yigin sirasini tek basina belirliyor.
+    */
+    <div className="bg-orange-600 text-white py-3 px-6 w-full flex flex-col sm:flex-row items-center justify-center gap-4 animate-in slide-in-from-top duration-500 shadow-lg border-b border-orange-500">
       <div className="flex items-center gap-2">
         <AlertCircle size={18} className="shrink-0" />
         <div className="flex flex-col">

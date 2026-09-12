@@ -31,7 +31,22 @@ const securityHeaders = [
       "default-src 'self'",
       // NOTE: Next.js runtime injects inline bootstrap scripts/styles.
       // Keep unsafe-inline in production until nonce/hash CSP is implemented app-wide.
-      "script-src 'self' 'unsafe-inline' https://plausible.io https://static.cloudflareinsights.com https://*.crisp.chat",
+      /*
+        'unsafe-eval' YALNIZCA GELISTIRMEDE (2026-09-12'de bulundu).
+
+        React'in gelistirme yapisi `eval()` kullaniyor (farkli bir ortamdan
+        cagri yiginini yeniden kurmak gibi hata ayiklama ozellikleri icin).
+        Bu CSP onu engelliyordu, sonuc: `npm run dev` ile acilan HER sayfada
+        konsolda kirmizi bir hata ve Next.js gelistirici katmaninda kalici bir
+        "1 Issue" rozeti vardi -- yani gercek bir sorun cikinca gorulmeyecekti,
+        cunku sayac zaten hic sifirlanmiyordu.
+
+        URETIM SERTLIGI DEGISMEDI: `NODE_ENV=production` oldugunda liste
+        kelimesi kelimesine eskisiyle ayni. `eval` yalnizca gelistiricinin
+        kendi makinesinde aciliyor, ki orada zaten Turbopack'in kendisi de
+        derlenmemis kod calistiriyor.
+      */
+      `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === "production" ? "" : " 'unsafe-eval'"} https://plausible.io https://static.cloudflareinsights.com https://*.crisp.chat`,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.crisp.chat",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data: https://fonts.gstatic.com https://*.crisp.chat",

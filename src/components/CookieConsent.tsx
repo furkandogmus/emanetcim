@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { usePathname } from "next/navigation";
@@ -17,10 +17,17 @@ declare global {
   }
 }
 
+/**
+ * Serit gorunurken govdenin altinda ayrilacak alani bildiren CSS degiskeni.
+ * `[locale]/layout.tsx` icindeki `<main>` dolgusu bunu okur.
+ */
+const CONSENT_HEIGHT_VAR = "--consent-h";
+
 export default function CookieConsent() {
   const t = useTranslations("CookieConsent");
   const pathname = usePathname();
   const [visible, setVisible] = useState(false);
+  const bannerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -54,11 +61,72 @@ export default function CookieConsent() {
     p.includes("/register") ||
     p.includes("/auth/");
 
-  if (!visible || hideOnCriticalFlow) return null;
+  const shown = visible && !hideOnCriticalFlow;
+
+  /**
+   * SERIDIN YUKSEKLIGINI GOVDEYE REZERVE ET.
+   *
+   * Serit `fixed` + `z-[100]` cizildigi icin akistan cikiyordu ve hicbir yer
+   * kapladigi yeri hesaba katmiyordu: olculdu (2026-09-12, 1440x900) her
+   * goruntu alaninin ALT 121 px'i kaliciyla ortuluydu ve ana sayfada "Nasil
+   * calisir" adimlarinin uzerine biniyordu. Kullanici seridi kapatmadan o
+   * icerigi okuyamiyordu -- kaydirmak da ise yaramiyor, cunku serit ekrana
+   * sabit.
+   *
+   * Yukseklik SABIT YAZILAMAZ: metin alti dilde farkli sariyor, telefonda
+   * dugmeler alt satira gecebiliyor, `env(safe-area-inset-bottom)` cihaza gore
+   * degisiyor. Bu yuzden gercek `offsetHeight` olculup degiskene yaziliyor ve
+   * `ResizeObserver` dil/yon/kirilim degisiminde yeniden olcuyor.
+   *
+   * Serit yokken degisken 0px'e cekiliyor, yani sayfa eski dolgusuna doner.
+   */
+  useEffect(() => {
+    const root = document.documentElement;
+    const el = bannerRef.current;
+    if (!shown || !el) {
+      root.style.setProperty(CONSENT_HEIGHT_VAR, "0px");
+      return;
+    }
+    const sync = () =>
+      root.style.setProperty(CONSENT_HEIGHT_VAR, `${el.offsetHeight}px`);
+    sync();
+    const observer = new ResizeObserver(sync);
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      root.style.setProperty(CONSENT_HEIGHT_VAR, "0px");
+    };
+  }, [shown]);
+
+  if (!shown) return null;
 
   return (
     <div
-      role="dialog"
+      ref={bannerRef}
+      /*
+        `role="dialog"` DEGIL, `role="region"`.
+
+        Olculdu (2026-09-12): serit `role="dialog"` ilan ediyordu ama sozlesmenin
+        hicbirini tutmuyordu -- acilista odak almiyor, odagi tuzaklamiyor,
+        Escape'i dinlemiyordu. "Tumunu kabul et" dugmesi sayfadaki 62
+        odaklanabilir ogenin 62.'siydi, yani ekran okuyucuya "bir iletisim
+        kutusu acildi" denip kullanici o kutuya ulasmak icin 61 durak sekme
+        yapmak zorunda birakiliyordu.
+
+        Iki cozumden BU secildi (serit gercek bir dialog YAPILMADI), cunku
+        serit sayfayi engellemiyor: arkasindaki icerik okunabilir ve
+        kullanilabilir olmali. Cerez bildirimini odak tuzagina almak, kullaniciyi
+        karar verene kadar siteden kilitlemek demektir -- rizanin serbestce
+        verilmesi gerekir, zorlanmasi degil. `region` + baslikla adlandirma
+        bildirimi ekran okuyucunun yer imi listesine sokar; kullanici hazir
+        oldugunda oraya atlar. `aria-labelledby` zaten `<h2>`yi gosteriyor,
+        yani bolgenin adi cevrili metinden geliyor -- yeni bir anahtar gerekmez.
+
+        Not: `modal-a11y.test.ts` yalnizca `fixed inset-0` cizen (tam ekran
+        ortan) bileseni modal sayar; bu serit `fixed left-0 right-0` ile alt
+        seride yapisiyor, dolayisiyla o mandalin kapsamina bilerek girmiyor.
+      */
+      role="region"
       aria-labelledby="cookie-consent-title"
       data-testid="cookie-consent-banner"
       className="fixed left-0 right-0 z-[100] border-t border-gray-200 bg-white/95 p-4 shadow-[0_-8px_30px_rgba(0,0,0,0.08)] backdrop-blur-md md:bottom-0 md:p-6 bottom-[calc(5rem+env(safe-area-inset-bottom))]"

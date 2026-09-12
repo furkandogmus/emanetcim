@@ -78,7 +78,7 @@ export default function Footer() {
   if (isAppSurface) {
     return (
       <footer
-        className={`border-t border-gray-100 bg-white px-6 py-6 font-sans [&_a]:inline-block [&_a]:py-1.5 [&_a]:-my-1.5 [&_a]:px-1 [&_a]:-mx-1 ${
+        className={`border-t border-gray-100 bg-white px-6 py-6 font-sans [&_li_a]:inline-block [&_a]:py-1.5 [&_a]:-my-1.5 [&_a]:px-1 [&_a]:-mx-1 ${
           isMapSurface ? "max-md:hidden" : needsMobileNavClearance ? "max-md:pb-28" : ""
         }`}
       >
@@ -104,9 +104,24 @@ export default function Footer() {
     gosterdi (sehir bolumu 187x12 px). Kokte uygulamak yarin eklenecek
     baglantiyi da kapsar. Gorunum degismiyor: `-my` yerlesimi aynen birakiyor,
     yalnizca tiklanabilir alan buyuyor.
+
+    AMA `inline-block` KOKTE KALAMAZDI. `[&_a]:inline-block` bir torun
+    seciciye derleniyor (0,1,1) ve baglantinin KENDI `.flex` sinifini (0,1,0)
+    ozgullukle yeniyor -- CDP `CSS.getMatchedStylesForNode` ile dogrulandi
+    (2026-09-12): uc sosyal ikon baglantisi 40x40 daire olarak ciziliyor ama
+    `display:inline-block` aldiklari icin `items-center justify-center`
+    calismiyordu, ikon dairenin icinde ORTALANMIYORDU.
+
+    Daraltma `[&_li_a]`: `inline-block`a gercekten ihtiyaci olan tek grup
+    liste icindeki METIN baglantilari (varsayilan `inline` olduklari icin
+    dikey dolgu kutularini buyutmez). Footer'daki diger tum baglantilar zaten
+    bir flex kapsayicinin cocugu -- sosyal ikonlar, sehir cipleri, "tumunu
+    gor", yasal nav -- ve flex cocugunun `display`i blok seviyesine yukseltilir,
+    yani dolgu onlarda zaten calisiyor. Boylece dokunma hedefi hicbir yerde
+    kucullmuyor, sosyal ikonlarin `flex`i de kaziniyor.
   */
   return (
-    <footer className="bg-white border-t border-gray-100 pt-20 pb-10 max-md:pb-28 px-6 font-sans overflow-hidden [&_a]:inline-block [&_a]:py-1.5 [&_a]:-my-1.5 [&_a]:px-1 [&_a]:-mx-1">
+    <footer className="bg-white border-t border-gray-100 pt-20 pb-10 max-md:pb-28 px-6 font-sans overflow-hidden [&_li_a]:inline-block [&_a]:py-1.5 [&_a]:-my-1.5 [&_a]:px-1 [&_a]:-mx-1">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
           <div className="col-span-1 md:col-span-1">
@@ -231,7 +246,19 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div className="bg-gray-50 p-8 rounded-3xl flex flex-col justify-between border border-gray-100">
+          {/*
+            `self-start` + `flex flex-col justify-between` kaldirildi.
+
+            Olculdu (2026-09-12, 1440x900): grid'in dort hucresi de 284x276 px
+            geliyordu -- `align-items` varsayilani `stretch`, ve yuksekligi 7
+            baglantili "Kurumsal" sutunu belirliyordu. Bu panelin ic icerigi ise
+            yalnizca 218x85 px; geri kalan 127 px BOS GRI ALAN olarak
+            ciziliyordu, yani ekranda en cok yer kaplayan sey bir hicti.
+            `justify-between` de bunu goruntuyu duzeltmek yerine pekistiriyordu:
+            tek cocugu yaslayacak yer olmayinca bosluk altta toplaniyordu.
+            `self-start` paneli kendi icerigi kadar yuksek birakir.
+          */}
+          <div className="self-start bg-gray-50 p-8 rounded-3xl border border-gray-100">
             <div>
               <h2 className="id-eyebrow text-gray-400 mb-4">
                 {t("securityProtocol")}

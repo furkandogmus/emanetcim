@@ -278,7 +278,15 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
       {/* How It Works Section */}
       <section className="py-16 px-6 bg-white" aria-label={t("howItWorks")}>
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 mb-2">
+          {/*
+            Bu satir bolumun BASLIGI, ama 12px gri araliklandirilmis BUYUK HARF
+            olarak ciziliyordu -- yani sayfanin en onemli satiri sayfadaki en
+            kucuk yaziydi. Kimlik katmani (`globals.css` `@layer base`) h2'ye
+            zaten aile/agirlik/aralik veriyor, bu yuzden burada yalnizca olcu ve
+            renk kaliyor; `font-black`/`uppercase`/`tracking-[0.2em]` uclusu
+            silindi (mandal sayilari duser).
+          */}
+          <h2 className="text-2xl md:text-3xl text-gray-900 mb-2">
             {t("howItWorks")}
           </h2>
           <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -377,7 +385,11 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
                   <p className="inline-flex items-center gap-1 text-2xl md:text-3xl font-black tabular-nums text-gray-900">
                     {tile.value}
                   </p>
-                  <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                  {/* Sitenin geri kalani cumle duzenine gecerken bu etiketler
+                      BUYUK HARF kalmisti. `id-eyebrow` olcuyu/agirligi kimlik
+                      token'indan aliyor; gri tonu 500, cunku gray-400 kontrast
+                      denetiminde isaretlenmisti. */}
+                  <p className="mt-1 id-eyebrow text-gray-500">
                     {tile.label}
                   </p>
                 </div>
@@ -392,9 +404,12 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
         aria-labelledby="city-hub-heading"
       >
         <div className="mx-auto max-w-5xl">
+          {/* Ayni duzeltme: eyebrow gibi cizilen h2 gercek bolum basligina
+              yukseldi. `id` KORUNDU -- ustteki section'in `aria-labelledby`
+              bagi buna bakiyor. */}
           <h2
             id="city-hub-heading"
-            className="text-center text-xs font-black uppercase tracking-[0.2em] text-gray-400"
+            className="text-center text-2xl md:text-3xl text-gray-900"
           >
             {t("cityHubTitle")}
           </h2>
@@ -466,9 +481,20 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
           ShopDetailClient/BagProtection, ayni hata sinifi). Kart gizlenince
           3 sutunlu izgarada bos bir hucre kalmasin diye sutun sayisi da
           o zaman 2'ye dusuyor. */}
+      {/*
+        NEDEN TEK IZGARA (2026-09-12, ui-ux-pro-max/frontend-design skilleriyle
+        pilot inceleme): bu bolumun hemen ardindan sadakat puani kaldirilinca
+        (B7) geriye kalan "Rewards"in yerini alan tek kartlik ayri bir "guven"
+        bolumu (Trustpilot metni) vardi -- ayni sayfada UST USTE IKI trust
+        bolumu (bu ikon izgarasi + o kart) tekrar ediyordu. frontend-design'in
+        kendi uyardigi kalip: "content chopped into identical rounded cards"
+        + gereksiz tekrar. Dogrulanmis yorum rozeti bu izgaraya 4. bir kutu
+        olarak katildi -- yeni bir gorsel dil icat etmeden, ayni ikon+baslik+
+        govde desenini tekrar kullanarak.
+      */}
       <section
         className={`py-20 px-6 max-w-5xl mx-auto w-full grid grid-cols-1 gap-12 text-center text-sm ${
-          insuranceEnabled ? "md:grid-cols-3" : "md:grid-cols-2"
+          insuranceEnabled ? "md:grid-cols-4" : "md:grid-cols-3"
         }`}
       >
         {insuranceEnabled ? (
@@ -500,25 +526,13 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
             <p className="text-gray-500 leading-relaxed">{t('trustSupportBody')}</p>
           </div>
         </div>
-      </section>
-
-      {/* Trust Section */}
-      {/*
-        NEDEN TEK KART (2026-09-12): bu bolum "Rewards" (sadakat puani) promosyon
-        kartiyla bu guven kartinin ikilisiydi. Sadakat puani ozelligi komple
-        kaldirildi (bkz. DEFECT_BACKLOG.md B7) -- puan hic harcanamiyordu ve
-        vaat edilen indirim gercekte yoktu. Iki sutunlu izgara tek kartla
-        cirkin durdugu icin tasarim tek, ortalanmis karta indirgendi.
-      */}
-      <section className="py-16 px-6 max-w-2xl mx-auto w-full">
-        <div className="rounded-3xl border border-gray-100 bg-white p-8 shadow-sm flex flex-col items-center justify-center text-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
-            <ShieldCheck size={24} />
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 flex items-center justify-center text-orange-600 border border-orange-100 rounded-2xl bg-orange-50">
+            <Star size={28} />
           </div>
-          <p className="text-sm text-gray-500 font-medium">{t('trustpilotRatingText')}</p>
-          <div className="flex items-center gap-1 id-eyebrow text-gray-400">
-            <ShieldCheck size={12} />
-            {t('trustVerificationBadge')}
+          <div>
+            <h4 className="font-bold mb-1">{t('trustVerificationBadge')}</h4>
+            <p className="text-gray-500 leading-relaxed">{t('trustpilotRatingText')}</p>
           </div>
         </div>
       </section>
