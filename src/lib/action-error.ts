@@ -89,6 +89,17 @@ const LEGACY_CODE_TO_KEY: Record<string, string> = {
   missing_token: "guestLinkExpired",
   invalid_token: "guestLinkExpired",
   server_error: "generic",
+  // Misafirin valiz duzeltmesi onay/red ucu (`/api/bookings/guest-bag-revision`),
+  // DEFECT_BACKLOG D5.
+  invalid_status: "bookingStateConflict",
+  no_pending_revision: "invalidData",
+  insufficient_capacity: "insufficientCapacity",
+  seal_count_mismatch: "sealCountMismatch",
+  invalid_counts: "invalidData",
+  guest_approval_required: "bagRevisionNeedsGuestApproval",
+  invalid_action: "invalidData",
+  revision_failed: "generic",
+  too_many_requests: "tooManyRequests",
 };
 
 /**

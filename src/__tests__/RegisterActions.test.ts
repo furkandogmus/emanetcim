@@ -139,6 +139,24 @@ describe("Register Actions", () => {
       expect(result.error).toBe("Errors.phoneAlreadyRegistered");
     });
 
+    it("koordinatsız kaydı reddeder (DEFECT_BACKLOG D9)", async () => {
+      // Form zaten zorunlu tutuyor; bu, formu atlayan dogrudan cagriya karsi
+      // ikinci kapi -- koordinatsiz dukkan aramada hic gorunmuyordu.
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+
+      const result = await registerPartnerApplicationAction({
+        name: "New Partner",
+        phone: "0555 555 55 88",
+        password: "password123",
+        shopName: "Konumsuz Dukkan",
+        shopAddress: "Uskudar, Istanbul",
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Errors.shopLocationRequired");
+      expect(mockPrisma.$transaction).not.toHaveBeenCalled();
+    });
+
     it("should create user and shop in a transaction", async () => {
       mockPrisma.user.findUnique.mockResolvedValue(null);
       
@@ -148,6 +166,8 @@ describe("Register Actions", () => {
         password: "password123",
         shopName: "Excellent Shop",
         shopAddress: "Besiktas, Istanbul",
+        shopLatitude: 41.0431,
+        shopLongitude: 29.0083,
       });
 
       expect(result.success).toBe(true);
@@ -171,6 +191,8 @@ describe("Register Actions", () => {
         password: "password123",
         shopName: "Referred Shop",
         shopAddress: "Kadikoy, Istanbul",
+        shopLatitude: 40.9902,
+        shopLongitude: 29.0275,
         referredByCode: "abc123",
       });
 
@@ -196,6 +218,8 @@ describe("Register Actions", () => {
         password: "password123",
         shopName: "Another Shop",
         shopAddress: "Sisli, Istanbul",
+        shopLatitude: 41.0602,
+        shopLongitude: 28.9877,
         referredByCode: "GUESTCODE",
       });
 

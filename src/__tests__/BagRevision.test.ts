@@ -10,7 +10,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
  * yaziliyordu.
  */
 
-const { mockPrisma, mockEvents, mockGetPricingRules, RULES } = vi.hoisted(() => {
+const { mockPrisma, mockEvents, mockGetPricingRules, RULES, mockSendBagRevisionApprovalRequest } = vi.hoisted(() => {
   const RULES = {
     maxStayDays: 30,
     maxBagsPerSlot: 50,
@@ -41,16 +41,21 @@ const { mockPrisma, mockEvents, mockGetPricingRules, RULES } = vi.hoisted(() => 
       $transaction: vi.fn(),
     },
     mockEvents: { record: vi.fn().mockResolvedValue(undefined) },
+    mockSendBagRevisionApprovalRequest: vi.fn().mockResolvedValue(undefined),
   };
 });
 
 vi.mock("@/lib/db", () => ({ default: mockPrisma }));
 vi.mock("@/services/BookingEventService", () => ({ bookingEventService: mockEvents }));
 vi.mock("@/lib/platform-settings", () => ({ getPricingRules: mockGetPricingRules }));
+vi.mock("@/services/NotificationService", () => ({
+  notificationService: { sendBagRevisionApprovalRequest: mockSendBagRevisionApprovalRequest },
+}));
 
 import { applyBagRevision, proposeBagRevision, clearBagRevision } from "@/services/booking/bag-revision";
 
 const PARTNER = { id: "owner-1", role: "PARTNER" as const };
+const GUEST = { id: "guest-1", role: "GUEST" as const };
 
 function booking(overrides: Record<string, unknown> = {}) {
   return {
@@ -310,6 +315,90 @@ describe("applyBagRevision", () => {
       }),
     ).toEqual({ ok: false, code: "FORBIDDEN" });
     expect(mockPrisma.booking.update).not.toHaveBeenCalled();
+  });
+});
+
+/**
+ * DEFECT_BACKLOG D5 (2026-09-12): check-in TAMAMLANDIKTAN SONRA fiyat ARTIRAN
+ * bir düzeltmeyi esnaf TEK BAŞINA uygulayamaz — misafirin onayı gerekir.
+ * Check-in ANINDA (APPROVED/PAID) bu kapı çalışmaz, bkz. yukarıdaki "durum
+ * koşulu web ve mobilin BİRLEŞİMİ" testi (aynı sayıyla delta=0, gate zaten
+ * tetiklenmiyor).
+ */
+describe("check-in sonrasi fiyat artisi misafirin onayini bekler (D5)", () => {
+  it("PARTNER artisi TEK BASINA uygulayamaz -- oneri kaydedilir, misafire haber gider", async () => {
+    mockPrisma.booking.findUnique.mockResolvedValue(
+      booking({ status: "CHECKED_IN", guestEmail: "misafir@ornek.com" }),
+    );
+    mockPrisma.bookingSeal.count.mockResolvedValue(0);
+
+    const res = await applyBagRevision("b1", PARTNER, {
+      counts: { bagCountS: 3, bagCountM: 1, bagCountXl: 0 },
+    });
+
+    expect(res).toEqual({ ok: false, code: "GUEST_APPROVAL_REQUIRED" });
+    const data = mockPrisma.booking.update.mock.calls[0][0].data;
+    expect(data.pendingBagRevision).toMatchObject({
+      bagCountS: 3, bagCountM: 1, bagCountXl: 0,
+    });
+    expect(data.pendingBagRevision.extraAmount).toBeGreaterThan(0);
+    expect(mockSendBagRevisionApprovalRequest).toHaveBeenCalledTimes(1);
+    expect(mockSendBagRevisionApprovalRequest.mock.calls[0][0]).toBe("misafir@ornek.com");
+  });
+
+  it("ayni kapida ADMIN engellenmez", async () => {
+    mockPrisma.booking.findUnique.mockResolvedValue(booking({ status: "CHECKED_IN" }));
+    mockPrisma.bookingSeal.count.mockResolvedValue(0);
+
+    const res = await applyBagRevision("b1", { id: "admin-1", role: "ADMIN" }, {
+      counts: { bagCountS: 3, bagCountM: 1, bagCountXl: 0 },
+    });
+
+    expect(res.ok).toBe(true);
+  });
+
+  it("MISAFIRIN KENDISI onaylayinca uygulanir -- bekleyen oneriyi kullanarak", async () => {
+    // Gercek akis: `approveBagRevisionAction`/`guest-bag-revision` ucu counts
+    // GECMEZ, PARTNER'in oneri asamasinda yazdigi `pendingBagRevision`i kullanir.
+    mockPrisma.booking.findUnique.mockResolvedValue(
+      booking({
+        status: "CHECKED_IN",
+        guestId: "guest-1",
+        pendingBagRevision: { bagCountS: 3, bagCountM: 1, bagCountXl: 0 },
+      }),
+    );
+    mockPrisma.bookingSeal.count.mockResolvedValue(0);
+
+    const res = await applyBagRevision("b1", GUEST);
+
+    expect(res.ok).toBe(true);
+  });
+
+  it("BASKA misafirin rezervasyonunu onaylayamaz", async () => {
+    mockPrisma.booking.findUnique.mockResolvedValue(
+      booking({ status: "CHECKED_IN", guestId: "baska-misafir" }),
+    );
+
+    const res = await applyBagRevision("b1", GUEST, {
+      counts: { bagCountS: 3, bagCountM: 1, bagCountXl: 0 },
+    });
+
+    expect(res).toEqual({ ok: false, code: "FORBIDDEN" });
+  });
+
+  it("misafir REDDEDERSE oneri silinir, rezervasyona dokunulmaz", async () => {
+    mockPrisma.booking.findUnique.mockResolvedValue(
+      booking({
+        status: "CHECKED_IN",
+        guestId: "guest-1",
+        pendingBagRevision: { bagCountS: 3, bagCountM: 1, bagCountXl: 0, extraAmount: 80 },
+      }),
+    );
+
+    expect(await clearBagRevision("b1", GUEST)).toEqual({ ok: true });
+    expect(Object.keys(mockPrisma.booking.update.mock.calls[0][0].data)).toEqual([
+      "pendingBagRevision",
+    ]);
   });
 });
 

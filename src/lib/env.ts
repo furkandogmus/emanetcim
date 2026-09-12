@@ -16,6 +16,11 @@ const serverSchema = z.object({
   LEGAL_PRIVACY_VERSION: z.string().optional(),
   VAPID_PUBLIC_KEY: z.string().optional(),
   VAPID_PRIVATE_KEY: z.string().optional(),
+  /**
+   * Firebase servis hesabı (JSON, tek satır). Mobil push (FCM) — tanımsızsa
+   * gönderim `SKIPPED` kalır, bkz. `NotificationService.sendMobilePush`.
+   */
+  FIREBASE_SERVICE_ACCOUNT_JSON: z.string().optional(),
   ENABLE_HSTS_HEADERS: z.string().optional(),
   DATABASE_SSL: z.string().optional(),
   PG_POOL_MAX: z.string().optional(),

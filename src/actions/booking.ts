@@ -452,3 +452,80 @@ export async function cancelBookingAction(bookingId: string) {
     return { success: false as const, error: `Errors.${actionErrorKey(error)}` };
   }
 }
+
+/*
+  DEFECT_BACKLOG D5 (2026-09-12): check-in sonrası fiyat ARTIRAN bir valiz
+  düzeltmesi artık esnaftan tek başına geçmiyor — `bag-revision.ts`teki
+  `GUEST_APPROVAL_REQUIRED` kapısı `pendingBagRevision`ı yazıp bekletiyor.
+  Bu iki action HESAPLI misafirin onay/red yüzeyi; hesapsız (token'la giren)
+  misafir için AYNI govdeyi `guest-bag-revision` API ucu kullanıyor.
+*/
+const BAG_REVISION_GUEST_ERROR_TO_KEY: Record<string, string> = {
+  NOT_FOUND: "Errors.bookingNotFound",
+  FORBIDDEN: "Errors.unauthorized",
+  INVALID_STATUS: "Errors.bookingStateConflict",
+  NO_PENDING_REVISION: "Errors.invalidData",
+  CAPACITY_EXCEEDED: "Errors.insufficientCapacity",
+  SEAL_COUNT_MISMATCH: "Errors.sealCountMismatch",
+  INVALID_COUNTS: "Errors.invalidData",
+  GUEST_APPROVAL_REQUIRED: "Errors.bagRevisionNeedsGuestApproval",
+  UNKNOWN: "Errors.generic",
+};
+
+async function loadOwnedBookingForGuest(bookingId: string, guestId: string) {
+  const booking = await prisma.booking.findUnique({
+    where: { id: bookingId },
+    select: { id: true, guestId: true },
+  });
+  if (!booking) return { ok: false as const, error: "Errors.bookingNotFound" };
+  if (booking.guestId !== guestId) return { ok: false as const, error: "Errors.unauthorized" };
+  return { ok: true as const };
+}
+
+/** Bekleyen valiz düzeltmesini ONAYLAR — yeni tutar hemen uygulanır. */
+export async function approveBagRevisionAction(bookingId: string) {
+  const auth = await requireUser();
+  if (!auth.ok) return { success: false as const, error: auth.error };
+
+  const owned = await loadOwnedBookingForGuest(bookingId, auth.actor.id);
+  if (!owned.ok) return { success: false as const, error: owned.error };
+
+  const result = await bookingService.applyBagRevision(bookingId, {
+    id: auth.actor.id,
+    role: "GUEST",
+  });
+  if (!result.ok) {
+    return {
+      success: false as const,
+      error: BAG_REVISION_GUEST_ERROR_TO_KEY[result.code] ?? "Errors.generic",
+    };
+  }
+
+  revalidatePathAllLocales("/bookings");
+  revalidatePathAllLocales(`/bookings/${bookingId}`);
+  return { success: true as const, newTotal: result.newTotal };
+}
+
+/** Bekleyen valiz düzeltmesini REDDEDER — öneri silinir, rezervasyona dokunulmaz. */
+export async function rejectBagRevisionAction(bookingId: string) {
+  const auth = await requireUser();
+  if (!auth.ok) return { success: false as const, error: auth.error };
+
+  const owned = await loadOwnedBookingForGuest(bookingId, auth.actor.id);
+  if (!owned.ok) return { success: false as const, error: owned.error };
+
+  const result = await bookingService.clearBagRevision(bookingId, {
+    id: auth.actor.id,
+    role: "GUEST",
+  });
+  if (!result.ok) {
+    return {
+      success: false as const,
+      error: BAG_REVISION_GUEST_ERROR_TO_KEY[result.code] ?? "Errors.generic",
+    };
+  }
+
+  revalidatePathAllLocales("/bookings");
+  revalidatePathAllLocales(`/bookings/${bookingId}`);
+  return { success: true as const };
+}

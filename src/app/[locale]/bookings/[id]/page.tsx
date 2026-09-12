@@ -19,6 +19,7 @@ import BookingDetailActions from "@/components/guest/BookingDetailActions";
 import { moneyToNumber } from "@/lib/money";
 import { getPricingRules } from "@/lib/platform-settings";
 import BookingDetailModifySection from "@/components/guest/BookingDetailModifySection";
+import BagRevisionApproval, { type PendingBagRevisionInfo } from "@/components/guest/BagRevisionApproval";
 import type { Metadata } from "next";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import { formatTryCurrency } from "@/lib/currency";
@@ -63,7 +64,7 @@ export default async function BookingDetailPage({
       select: {
         id: true, guestId: true, shopId: true, checkInTime: true, checkOutTime: true,
         totalPrice: true, bagCountS: true, bagCountM: true, bagCountXl: true,
-        status: true, qrCodeToken: true, createdAt: true,
+        status: true, qrCodeToken: true, createdAt: true, pendingBagRevision: true,
         shop: { select: { name: true, pricePerDay: true, address: true, latitude: true, longitude: true, timezone: true, owner: { select: { phone: true } } } },
         seals: { orderBy: { bagIndex: "asc" } },
       },
@@ -77,6 +78,24 @@ export default async function BookingDetailPage({
   if (!booking || (!isOwner && !isAdmin)) {
     notFound();
   }
+
+  /*
+    DEFECT_BACKLOG D5: yalnizca FIYAT ARTIRAN bir oneri misafirin onayini
+    bekler -- azaltan bir oneri esnaf tarafindan zaten dogrudan uygulanabilir
+    (bkz. bag-revision.ts kapisi), burada gosterilmesine gerek yok.
+  */
+  const pendingRevision = booking.pendingBagRevision as Partial<PendingBagRevisionInfo> | null;
+  const revisionAwaitingApproval: PendingBagRevisionInfo | null =
+    pendingRevision &&
+    typeof pendingRevision.extraAmount === "number" &&
+    pendingRevision.extraAmount > 0 &&
+    typeof pendingRevision.bagCountS === "number" &&
+    typeof pendingRevision.bagCountM === "number" &&
+    typeof pendingRevision.bagCountXl === "number" &&
+    typeof pendingRevision.newTotal === "number" &&
+    typeof pendingRevision.previousTotal === "number"
+      ? (pendingRevision as PendingBagRevisionInfo)
+      : null;
 
   const isPaidFlow =
     booking.status === "PAID" ||
@@ -235,6 +254,12 @@ export default async function BookingDetailPage({
             </ul>
           </div>
         ) : null}
+
+        {revisionAwaitingApproval && (
+          <div className="print:hidden">
+            <BagRevisionApproval bookingId={booking.id} revision={revisionAwaitingApproval} />
+          </div>
+        )}
 
         <BookingDetailModifySection
           booking={JSON.parse(

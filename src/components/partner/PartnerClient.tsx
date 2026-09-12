@@ -24,6 +24,7 @@ import PartnerBottomNav, { type PartnerTab } from "@/components/partner/PartnerB
 import PartnerReferralCard from "@/components/partner/PartnerReferralCard";
 import WebPushOptIn from "@/components/WebPushOptIn";
 import PartnerPulse, { type PulseProps } from "@/components/partner/PartnerPulse";
+import PartnerOnboardingChecklist from "@/components/partner/PartnerOnboardingChecklist";
 import { formatTryCurrency } from "@/lib/currency";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 import {
@@ -100,6 +101,9 @@ interface PartnerClientProps {
    * valiz ALINIYOR ama listede bulunamıyor → teslim edilemiyordu.
    */
   shops?: Array<{ id: string; name: string }>;
+  /** DEFECT_BACKLOG D7: yeni esnaf için ilk giriş kontrol listesi. */
+  hasShopImage?: boolean;
+  hasShopLocation?: boolean;
 }
 
 export default function PartnerClient({
@@ -123,10 +127,19 @@ export default function PartnerClient({
   pulse,
   capacity = 0,
   commissionActive = false,
+  hasShopImage = false,
+  hasShopLocation = false,
 }: PartnerClientProps) {
   const t = useTranslations("Partner");
   const errorText = useActionErrorText();
   const tCommon = useTranslations("Common");
+  /*
+    DEFECT_BACKLOG D7: "yeni esnaf" = hic valiz agirlamamis VE hic kazanci
+    olmayan esnaf. Ikisi birlikte, tek basina biri yeterli degil -- omur boyu
+    kazanc 0 ama gecmis rezervasyon iptal olmus olabilir; bagsHandledAllTime 0
+    ise dukkan hicbir zaman gercek bir teslim almamis demektir.
+  */
+  const isNewPartner = (pulse?.bagsHandledAllTime ?? 0) === 0 && totalEarnings === 0;
   /**
    * Gecikme hesabı için TEK referans an.
    *
@@ -546,6 +559,13 @@ export default function PartnerClient({
           </Link>
         </div>
       </header>
+
+      {activeTab === "PANEL" && isNewPartner && (
+        <PartnerOnboardingChecklist
+          hasShopImage={hasShopImage}
+          hasShopLocation={hasShopLocation}
+        />
+      )}
 
       {activeTab === "PANEL" && pulse && (
         <div className="mx-auto w-full max-w-5xl animate-in fade-in duration-500">

@@ -136,6 +136,12 @@
     "newBagDropoff": "تحویل چمدان جدید",
     "netEarnings": "درآمد خالص",
     "monthlyShopViews": "بازدید این ماه",
+    "onboardingTitle": "چک‌لیست شروع کار",
+    "onboardingSubtitle": "فروشگاه خود را کامل کنید تا برای اولین رزرو آماده باشید.",
+    "onboardingStepPhoto": "افزودن عکس فروشگاه",
+    "onboardingStepLocation": "مشخص کردن موقعیت روی نقشه",
+    "onboardingStepFirstBooking": "در انتظار اولین رزرو شما",
+    "onboardingGo": "تکمیل",
     "referralTitle": "یک مغازه‌دار دیگر را دعوت کنید",
     "referralBody": "مغازه‌داری که می‌شناسید را به بگاژ‌پارک دعوت کنید و به رشد شبکه همکاران ما کمک کنید.",
     "referralReveal": "نمایش کد دعوت من",
@@ -301,7 +307,8 @@
     "bagRevisionDelta": "از {from} به {to} چمدان",
     "bagRevisionSaved": "به‌روزرسانی شد. مبلغ جدید: {total}",
     "settingsImpactHours": "توجه: {count} رزرو خارج از ساعات جدید قرار گرفت. این مهمان‌ها نمی‌توانند تحویل بدهند — شاید لازم باشد با آن‌ها تماس بگیرید.",
-    "settingsImpactCapacity": "توجه: چمدان‌های موجود نزد شما {count} عدد از ظرفیت جدید بیشتر است."
+    "settingsImpactCapacity": "توجه: چمدان‌های موجود نزد شما {count} عدد از ظرفیت جدید بیشتر است.",
+    "settingsImpactUnknownGuest": "مهمان بدون نام"
   },
   "Guest": {
     "heroTitle": "چمدان را بسپارید، آزاد بگردید",
@@ -440,6 +447,14 @@
     "bookingStatus_CHECKED_OUT": "تکمیل شد",
     "bookingStatus_CANCELLED": "لغو شد",
     "bookingDetailMetaTitle": "جزئیات رزرو",
+    "bagRevisionPendingTitle": "تعداد چمدان شما به‌روزرسانی شد",
+    "bagRevisionPendingBody": "فروشگاه تعداد چمدان شما را به {count} اصلاح کرد و مبلغ افزایش یافت. منتظر تأیید شماست.",
+    "bagRevisionNewTotal": "مبلغ جدید",
+    "bagRevisionApprove": "تأیید",
+    "bagRevisionReject": "رد کردن",
+    "bagRevisionApproved": "تأیید شد — مبلغ جدید اعمال شد.",
+    "bagRevisionRejected": "رد شد — مبلغ تغییری نکرد.",
+    "bagRevisionActionFailed": "انجام نشد. لطفاً دوباره امتحان کنید.",
     "noBookingsTitle": "هنوز رزروی نیست.",
     "noBookingsDesc": "با رزرو می‌توانید در هر نقطه شهر چمدان را امن بسپارید.",
     "bookingsLoyaltyMember": "عضو باشگاه وفاداری",
@@ -1678,7 +1693,9 @@
     "imageTooLarge": "حجم عکس زیاد است. حداکثر ۸ مگابایت.",
     "imageUnsupportedType": "این فایل عکس نیست. JPEG، PNG یا WebP بارگذاری کنید.",
     "imageDimensionsTooLarge": "وضوح تصویر بسیار بالاست. یک عکس کوچک‌تر امتحان کنید.",
-    "shopMissingCoordinates": "فروشگاه موقعیت مکانی ندارد. پیش از تأیید، مختصات را وارد کنید."
+    "shopMissingCoordinates": "فروشگاه موقعیت مکانی ندارد. پیش از تأیید، مختصات را وارد کنید.",
+    "shopLocationRequired": "لطفاً موقعیت فروشگاه خود را روی نقشه مشخص کنید.",
+    "bagRevisionNeedsGuestApproval": "افزایش قیمت پس از تحویل‌گیری نیاز به تأیید مهمان دارد. پیشنهاد ذخیره شد و پس از تأیید مهمان اعمال خواهد شد."
   },
   "Emails": {
     "verificationSubject": "ایمیل خود را تأیید کنید",

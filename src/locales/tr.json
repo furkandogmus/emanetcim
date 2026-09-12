@@ -136,6 +136,12 @@
     "newBagDropoff": "YENİ VALİZ TESLİM AL",
     "netEarnings": "NET HAKEDİŞ",
     "monthlyShopViews": "Bu Ay Görüntülenme",
+    "onboardingTitle": "Başlangıç kontrol listesi",
+    "onboardingSubtitle": "Dükkanını tamamla, ilk rezervasyonuna daha hazır ol.",
+    "onboardingStepPhoto": "Dükkan fotoğrafı ekle",
+    "onboardingStepLocation": "Konumunu haritada işaretle",
+    "onboardingStepFirstBooking": "İlk rezervasyonunu bekliyoruz",
+    "onboardingGo": "Tamamla",
     "referralTitle": "Esnaf Arkadaşını Davet Et",
     "referralBody": "Tanıdığın esnafı BagajPark'a davet et, ortaklık ağımız büyüsün.",
     "referralReveal": "Davet Kodumu Göster",
@@ -301,7 +307,8 @@
     "bagRevisionDelta": "{from} valizden {to} valize",
     "bagRevisionSaved": "Güncellendi. Yeni tutar: {total}",
     "settingsImpactHours": "Dikkat: yeni saatlerin dışında kalan {count} rezervasyon var. Bu misafirler geldiğinde check-in yapılamaz — onlara ulaşmanız gerekebilir.",
-    "settingsImpactCapacity": "Dikkat: şu an rafınızdaki valiz sayısı yeni kapasiteyi {count} valiz aşıyor."
+    "settingsImpactCapacity": "Dikkat: şu an rafınızdaki valiz sayısı yeni kapasiteyi {count} valiz aşıyor.",
+    "settingsImpactUnknownGuest": "İsimsiz misafir"
   },
   "Guest": {
     "heroTitle": "Valizini Güvenle Bırak, Özgürce Gez",
@@ -448,6 +455,14 @@
     "bookingStatus_CHECKED_OUT": "Tamamlandı",
     "bookingStatus_CANCELLED": "İptal edildi",
     "bookingDetailMetaTitle": "Rezervasyon detayı",
+    "bagRevisionPendingTitle": "Valiz sayınız güncellendi",
+    "bagRevisionPendingBody": "Dükkan, valiz sayınızı {count} olarak düzeltti ve tutar arttı. Onayınızı bekliyor.",
+    "bagRevisionNewTotal": "Yeni tutar",
+    "bagRevisionApprove": "Onayla",
+    "bagRevisionReject": "Reddet",
+    "bagRevisionApproved": "Onayladınız, yeni tutar uygulandı.",
+    "bagRevisionRejected": "Reddettiniz, tutar değişmedi.",
+    "bagRevisionActionFailed": "İşlem gerçekleştirilemedi. Lütfen tekrar deneyin.",
     "noBookingsTitle": "Henüz bir rezervasyonunuz bulunmuyor.",
     "noBookingsDesc": "Rezervasyon yaparak valizlerinizi şehrin her noktasında güvenle bırakabilirsiniz.",
     "bookingsLoyaltyMember": "Sadakat Üyesi",
@@ -1742,7 +1757,9 @@
     "imageTooLarge": "Fotoğraf çok büyük. En fazla 8 MB olabilir.",
     "imageUnsupportedType": "Bu dosya bir fotoğraf değil. JPEG, PNG veya WebP yükleyin.",
     "imageDimensionsTooLarge": "Görselin çözünürlüğü çok yüksek. Daha küçük bir fotoğraf deneyin.",
-    "shopMissingCoordinates": "Dükkanın konum bilgisi yok. Onaylamadan önce koordinatları girin."
+    "shopMissingCoordinates": "Dükkanın konum bilgisi yok. Onaylamadan önce koordinatları girin.",
+    "shopLocationRequired": "Lütfen haritada dükkanının konumunu işaretle.",
+    "bagRevisionNeedsGuestApproval": "Check-in sonrası fiyat artışı misafirin onayını bekliyor. Öneri kaydedildi; misafir onayladığında uygulanacak."
   },
   "Emails": {
     "verificationSubject": "E-postanızı Doğrulayın",

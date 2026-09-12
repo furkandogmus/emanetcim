@@ -35,6 +35,7 @@ export async function GET(req: NextRequest) {
         qrCodeToken: true,
         guestEmail: true,
         guest: { select: { email: true } },
+        pendingBagRevision: true,
       },
     });
 
@@ -78,6 +79,12 @@ export async function GET(req: NextRequest) {
         bagCountXl: booking.bagCountXl,
         status: booking.status,
         qrCodeToken: booking.qrCodeToken,
+        /*
+          DEFECT_BACKLOG D5: hesapsiz misafirin bekleyen valiz duzeltmesini
+          gorebilecegi tek uc burasi -- `ManageBookingClient` bunu okuyup
+          onay/red butonlarini gosteriyor.
+        */
+        pendingBagRevision: booking.pendingBagRevision,
       },
     });
   } catch (e) {

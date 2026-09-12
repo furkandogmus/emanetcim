@@ -34,6 +34,12 @@ const CODE_TO_HTTP: Record<BagRevisionErrorCode, { status: number; error: string
     durumu kabul etmiyor. Muhur akisi yalnizca check-in'de calisiyor.
   */
   SEAL_COUNT_MISMATCH: { status: 409, error: "seal_count_mismatch" },
+  /*
+    409: istek gecerli ama check-in sonrasi fiyat artisi tek basina
+    uygulanamaz -- misafirin onayi gerekiyor (DEFECT_BACKLOG D5). Oneri
+    zaten kaydedildi; misafir onayladiginda/reddettiginde durum degisir.
+  */
+  GUEST_APPROVAL_REQUIRED: { status: 409, error: "guest_approval_required" },
   UNKNOWN: { status: 500, error: "server_error" },
 };
 

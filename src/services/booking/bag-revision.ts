@@ -34,8 +34,11 @@ import { readPricingSnapshot } from '@/lib/pricing-snapshot';
 import { computeAuthoritativeCheckoutTotals } from '@/lib/booking-server-price';
 import { bookingEventService } from '@/services/BookingEventService';
 import { updateReservedBags } from '@/services/SlotService';
+import { notificationService } from '@/services/NotificationService';
+import { bookingNotificationEmail } from '@/services/booking/guest-contact';
+import { DEFAULT_NOTIFICATION_LOCALE } from '@/lib/request-locale';
 
-export type BagRevisionActor = { id: string; role: 'PARTNER' | 'ADMIN' };
+export type BagRevisionActor = { id: string; role: 'PARTNER' | 'ADMIN' | 'GUEST' };
 
 export type BagCounts = { bagCountS: number; bagCountM: number; bagCountXl: number };
 
@@ -49,6 +52,14 @@ export type BagRevisionErrorCode =
   | 'CAPACITY_EXCEEDED'
   /* Valizler MUHURLENMIS; artan valizin muhru olmazdi. */
   | 'SEAL_COUNT_MISMATCH'
+  /*
+    DEFECT_BACKLOG D5: check-in TAMAMLANDIKTAN SONRA (misafir gittikten
+    sonra) esnaf fiyati ARTIRAN bir duzeltmeyi TEK BASINA onaylayamaz --
+    oneri pendingBagRevision'a yazilir, misafirin onayi/reddi beklenir.
+    Check-in ANINDA (APPROVED/PAID, misafir hala tezgahta) bu kapi
+    calismaz -- o an sozlu onay yeterlidir, bkz. bag-revision.ts basi.
+  */
+  | 'GUEST_APPROVAL_REQUIRED'
   | 'UNKNOWN';
 
 export type BagRevisionResult =
@@ -74,7 +85,12 @@ type RevisableBooking = NonNullable<Awaited<ReturnType<typeof findBooking>>>;
 function findBooking(bookingId: string) {
   return prisma.booking.findUnique({
     where: { id: bookingId },
-    include: { shop: true },
+    /*
+      `guest` GUEST_APPROVAL_REQUIRED kapisinda misafire bildirim gonderebilmek
+      icin -- `bookingNotificationEmail` hesapli/hesapsiz ikisini de kapsayan
+      TEK yerden okur (bkz. guest-contact.ts basi).
+    */
+    include: { shop: true, guest: { select: { email: true } } },
   });
 }
 
@@ -91,7 +107,46 @@ async function loadForRevision(
   if (actor.role === 'PARTNER' && booking.shop.ownerId !== actor.id) {
     return { error: 'FORBIDDEN' };
   }
+  /*
+    HESAPLI misafir icin sahiplik burada dogrulanir (`booking.guestId`).
+    HESAPSIZ (token'la giris yapan) misafir icin `guestId` bos olabilir --
+    o durumda sahiplik CAGIRAN tarafta (route/action, e-posta/token
+    eslesmesiyle) ZATEN dogrulanmis olmali; `bookingService.cancelBooking`
+    ile ayni kalip (bkz. `guest-cancel/route.ts`).
+  */
+  if (actor.role === 'GUEST' && booking.guestId && booking.guestId !== actor.id) {
+    return { error: 'FORBIDDEN' };
+  }
   return { booking };
+}
+
+/**
+ * Bekleyen oneriyi yazar. `proposeBagRevision` (esnaf oneri asamasi) ve
+ * `applyBagRevision`in GUEST_APPROVAL_REQUIRED kapisi (esnaf dogrudan
+ * uygulamaya calisip check-in sonrasi artis kapida takilinca) AYNI kaydi
+ * uretir -- ikisi de misafirin onaylayacagi/reddedecegi tek bir yapi.
+ */
+async function persistPendingRevision(
+  bookingId: string,
+  counts: BagCounts,
+  extraAmount: number,
+  previousTotal: number,
+  newTotal: number,
+  rulesSource: string,
+): Promise<void> {
+  await prisma.booking.update({
+    where: { id: bookingId },
+    data: {
+      pendingBagRevision: {
+        ...counts,
+        extraAmount,
+        previousTotal,
+        newTotal,
+        rulesSource,
+        recordedAt: new Date().toISOString(),
+      } as Prisma.InputJsonValue,
+    },
+  });
 }
 
 /**
@@ -163,21 +218,7 @@ export async function proposeBagRevision(
     const beforeTotal = Math.max(0, round2(before.subtotalBeforeCoupon - lockedDiscountPreview));
     const extraAmount = round2(afterTotal - beforeTotal);
 
-    await prisma.booking.update({
-      where: { id: bookingId },
-      data: {
-        pendingBagRevision: {
-          ...counts,
-          /** Sunucuda hesaplandi. Negatif olabilir (valiz azaldiysa). */
-          extraAmount,
-          previousTotal: beforeTotal,
-          newTotal: afterTotal,
-          /** Hangi kural kumesiyle hesaplandi — anlik kopya mi, bugunku mu. */
-          rulesSource,
-          recordedAt: new Date().toISOString(),
-        } as Prisma.InputJsonValue,
-      },
-    });
+    await persistPendingRevision(bookingId, counts, extraAmount, beforeTotal, afterTotal, rulesSource);
 
     return { ok: true, extraAmount };
   } catch (err) {
@@ -312,6 +353,30 @@ export async function applyBagRevision(
     const newTotal = Math.max(0, round2(totals.subtotalBeforeCoupon - lockedDiscount));
     const previousTotal = moneyToNumber(booking.totalPrice);
     const delta = round2(newTotal - previousTotal);
+
+    /*
+      DEFECT_BACKLOG D5 (2026-09-12): CHECK-IN TAMAMLANDIKTAN SONRA (misafir
+      valizi birakip GITTIKTEN sonra) esnaf fiyati ARTIRAN bir duzeltmeyi TEK
+      BASINA uygulayamaz. Check-in ANINDA (APPROVED/PAID) bu kapi calismaz --
+      misafir hala tezgahta, sozlu onay yeterli; `reviseBagsAction`in kendi
+      yorumu bu ayrimi zaten bekliyordu ("onay akisi kurulursa hazir duruyor").
+      ADMIN ve GUEST'in kendisi (onayladiginda) bu kapidan gecer.
+    */
+    if (booking.status === 'CHECKED_IN' && delta > 0 && actor.role === 'PARTNER') {
+      await persistPendingRevision(bookingId, counts, delta, previousTotal, newTotal, rulesSource);
+      const guestEmail = bookingNotificationEmail(booking);
+      if (guestEmail) {
+        void notificationService
+          .sendBagRevisionApprovalRequest(
+            guestEmail,
+            bookingId,
+            { shopName: booking.shop.name, extraAmount: delta, newTotal },
+            booking.locale ?? DEFAULT_NOTIFICATION_LOCALE,
+          )
+          .catch((err) => logger.warn({ err, bookingId }, 'bag_revision_approval_email_failed'));
+      }
+      return { ok: false, code: 'GUEST_APPROVAL_REQUIRED' };
+    }
 
     /*
       SLOT DEFTERI DE GUNCELLENIR -- ve TEK ISLEMDE.

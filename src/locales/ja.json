@@ -136,6 +136,12 @@
     "newBagDropoff": "新しいバッグのドロップオフ",
     "netEarnings": "純利益",
     "monthlyShopViews": "今月の閲覧数",
+    "onboardingTitle": "はじめてのチェックリスト",
+    "onboardingSubtitle": "初めての予約に備えて、店舗情報を完成させましょう。",
+    "onboardingStepPhoto": "店舗写真を追加する",
+    "onboardingStepLocation": "地図上で場所を指定する",
+    "onboardingStepFirstBooking": "最初のご予約をお待ちしています",
+    "onboardingGo": "完了する",
     "referralTitle": "他の店舗オーナーを招待する",
     "referralBody": "知り合いの店舗オーナーをバガジパークに招待して、パートナーネットワークの拡大にご協力ください。",
     "referralReveal": "招待コードを表示",
@@ -301,7 +307,8 @@
     "bagRevisionDelta": "{from}個から{to}個へ",
     "bagRevisionSaved": "更新しました。新しい合計: {total}",
     "settingsImpactHours": "注意: {count}件の予約が新しい営業時間外になりました。これらのゲストはチェックインできません。連絡が必要かもしれません。",
-    "settingsImpactCapacity": "注意: 現在お預かり中の荷物が新しい上限を{count}個超えています。"
+    "settingsImpactCapacity": "注意: 現在お預かり中の荷物が新しい上限を{count}個超えています。",
+    "settingsImpactUnknownGuest": "名前未登録のゲスト"
   },
   "Guest": {
     "heroTitle": "荷物を預けて、身軽に街へ",
@@ -440,6 +447,14 @@
     "bookingStatus_CHECKED_OUT": "完了",
     "bookingStatus_CANCELLED": "キャンセル済み",
     "bookingDetailMetaTitle": "予約の詳細",
+    "bagRevisionPendingTitle": "お荷物の数が更新されました",
+    "bagRevisionPendingBody": "店舗がお荷物の数を{count}個に修正し、金額が増加しました。お客様の承認をお待ちしています。",
+    "bagRevisionNewTotal": "新しい金額",
+    "bagRevisionApprove": "承認する",
+    "bagRevisionReject": "拒否する",
+    "bagRevisionApproved": "承認しました。新しい金額が適用されました。",
+    "bagRevisionRejected": "拒否しました。金額は変更されていません。",
+    "bagRevisionActionFailed": "処理に失敗しました。もう一度お試しください。",
     "noBookingsTitle": "まだ予約はありません。",
     "noBookingsDesc": "予約すれば市内どこでも安全に荷物を預けることができます。",
     "bookingsLoyaltyMember": "ロイヤルティ会員",
@@ -1678,7 +1693,9 @@
     "imageTooLarge": "写真のサイズが大きすぎます。最大8MBです。",
     "imageUnsupportedType": "このファイルは写真ではありません。JPEG、PNG、WebPをアップロードしてください。",
     "imageDimensionsTooLarge": "写真の解像度が高すぎます。より小さい写真をお試しください。",
-    "shopMissingCoordinates": "店舗の位置情報がありません。承認する前に座標を設定してください。"
+    "shopMissingCoordinates": "店舗の位置情報がありません。承認する前に座標を設定してください。",
+    "shopLocationRequired": "地図上で店舗の場所を選択してください。",
+    "bagRevisionNeedsGuestApproval": "チェックイン後の値上げにはゲストの承認が必要です。提案は保存されており、ゲストが承認すると適用されます。"
   },
   "Emails": {
     "verificationSubject": "メールアドレスを確認してください",

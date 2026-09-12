@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { toast } from "sonner";
@@ -11,6 +11,7 @@ import { formatDateTimeInZone } from "@/lib/format-datetime";
 import { useActionErrorText } from "@/lib/use-action-error";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 import { guestBookingStatusMessageKey } from "@/lib/booking-status-i18n";
+import BagRevisionApproval, { type PendingBagRevisionInfo } from "@/components/guest/BagRevisionApproval";
 
 interface BookingInfo {
   id: string;
@@ -26,6 +27,7 @@ interface BookingInfo {
   bagCountXl: number;
   status: string;
   qrCodeToken: string | null;
+  pendingBagRevision: Partial<PendingBagRevisionInfo> | null;
 }
 
 export default function ManageBookingClient({ initialToken }: { initialToken: string }) {
@@ -48,16 +50,36 @@ export default function ManageBookingClient({ initialToken }: { initialToken: st
   */
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  useEffect(() => {
-    fetch(`/api/bookings/lookup/me`, {
+  const refetchBooking = useCallback(() => {
+    return fetch(`/api/bookings/lookup/me`, {
       headers: { Authorization: `Bearer ${token}` },
     }).then(r => r.json()).then(d => {
       if (d.ok) setBooking(d.booking);
       // Suresi dolmus baglanti en sik sebep; `errorText` kodu ona cevirir.
       else toast.error(errorText(d.error, t("bookingLookupError")));
-    }).catch(() => toast.error(t("bookingLookupError")))
-    .finally(() => setLoading(false));
+    }).catch(() => toast.error(t("bookingLookupError")));
   }, [token, t, errorText]);
+
+  useEffect(() => {
+    refetchBooking().finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
+
+  /*
+    HESAPSIZ misafir icin onay/red -- `guest-bag-revision` ucu ayni govdeyi
+    (`BookingService.applyBagRevision`/`clearBagRevision`) token'la cagirir.
+    `BagRevisionApproval` hesapli misafir icin server action'lari varsayar;
+    bu iki fonksiyon onlari token tabanli fetch'le degistirir.
+  */
+  const decideBagRevision = async (action: "approve" | "reject") => {
+    const res = await fetch("/api/bookings/guest-bag-revision", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ action }),
+    });
+    const data = await res.json();
+    return { success: !!data.ok, error: data.error as string | undefined };
+  };
 
   const handleCancel = async () => {
     setConfirmOpen(false);
@@ -214,6 +236,33 @@ export default function ManageBookingClient({ initialToken }: { initialToken: st
                 {cancelling ? "..." : t("cancelBooking")}
               </button>
             )}
+
+            {(() => {
+              const pending = booking.pendingBagRevision;
+              if (
+                !pending ||
+                typeof pending.extraAmount !== "number" ||
+                pending.extraAmount <= 0 ||
+                typeof pending.bagCountS !== "number" ||
+                typeof pending.bagCountM !== "number" ||
+                typeof pending.bagCountXl !== "number" ||
+                typeof pending.newTotal !== "number" ||
+                typeof pending.previousTotal !== "number"
+              ) {
+                return null;
+              }
+              return (
+                <div className="mt-6">
+                  <BagRevisionApproval
+                    bookingId={booking.id}
+                    revision={pending as PendingBagRevisionInfo}
+                    onDecided={refetchBooking}
+                    approveAction={() => decideBagRevision("approve")}
+                    rejectAction={() => decideBagRevision("reject")}
+                  />
+                </div>
+              );
+            })()}
 
             <ConfirmDialog
               open={confirmOpen}

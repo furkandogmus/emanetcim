@@ -88,6 +88,7 @@ const BAG_REVISION_CODE_TO_KEY: Record<BagRevisionErrorCode, string> = {
   NO_PENDING_REVISION: "Errors.invalidData",
   CAPACITY_EXCEEDED: "Errors.insufficientCapacity",
   SEAL_COUNT_MISMATCH: "Errors.sealCountMismatch",
+  GUEST_APPROVAL_REQUIRED: "Errors.bagRevisionNeedsGuestApproval",
 };
 
 /**

@@ -51,9 +51,13 @@ void main() {
     handle.dispose();
   });
 
-  // textContrastGuideline BILEREK yok: "Ayarları Aç" TextButton'i varsayilan
-  // `colorScheme.primary` (marka turuncusu) rengini M3'un tohum renginden
-  // uretilen soluk seftali `Card` zemini uzerinde kullanir, olculen oran
-  // 3.23:1 — ayni kok sebep (bkz. force_update_screen_a11y_test.dart),
-  // ekrana ozgu degil (docs/DEFECT_BACKLOG.md).
+  testWidgets('PermissionsScreen: metin kontrasti WCAG AA', (tester) async {
+    // DEFECT_BACKLOG D10 (2026-09-12): `textButtonTheme` artik acikca
+    // `_brandOrangeDark` kullaniyor (soluk seftali zeminde yeterli kontrast)
+    // -- ayni kok sebep force_update_screen_a11y_test.dart'ta da duzeltildi.
+    final handle = tester.ensureSemantics();
+    await pump(tester);
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    handle.dispose();
+  });
 }
