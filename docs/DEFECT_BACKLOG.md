@@ -45,7 +45,6 @@
 | B4 | **`FAQ.q5` olmayan bir ödeme satırını anlatıyor** | *"Ödemedeki sigorta satırı neyi kapsar?"* — `insuranceFeeTry` = 0 ve kod her zaman 0 üretiyor. Ücret konacak mı, yoksa metin mi kalkacak? | Güvence tutarı |
 | B5 | **`AnalyticsEvent.userId` anonimleştirmeden sağ çıkıyor** | Saklama gerekçesi zayıf; analitik kimlik olmadan da çalışır. Sil / `userId`yi boşalt / olduğu gibi bırak. | KVKK silme hakkı |
 | B6 | **Esnafa şikâyet bildirimi** | Hakkında hırsızlık/hasar şikâyeti açılan esnaf **haberdar edilmiyor** ve görüşünü bildiremiyor. Platform önce incelemek isteyebilir — bu bir süreç tercihi. | Uyuşmazlık |
-| B7 | **Sadakat puanı KAZANILIYOR ama HARCANAMIYOR** | Puan her rezervasyonda artıyor (`actions/booking.ts`), iptalde geri alınıyor (`booking/lifecycle.ts`) ve `LoyaltyBadge` ile gösteriliyor — ama harcayacak hiçbir kod yolu yok: checkout'ta puan alanı, `redeemPoints`/`pointsToUse` benzeri bir çağrı, `Booking` üzerinde harcanan puanı tutan bir alan, hiçbiri. Buna rağmen iki yerde **indirim vaat ediliyor**: rozet `"1200 puan (12,00 TL indirim)"` yazıyor, `Guest.loyaltyRewardsBody` ise *"Her rezervasyonda puan kazan, indirim olarak kullan. 100 puan = 1 TL indirim."* Misafir bu indirimi checkout'ta arar ve bulamaz. **Ya özellik eklenir ya vaat düzeltilir** — ikisi arasındaki seçim ürün kararı. Özellik eklenirse: sunucu tarafı doğrulama, `Booking`e harcanan-puan alanı (migration), iptalde geri verme ve İKİ taşıyıcı (web + mobil) gerekir; `loyalty-not-redeemable.test.ts` o gün düşerek bu satırı hatırlatır. | 2026-09-02 taraması |
 | B8 | **Açık uyuşmazlık hakedişi bekletmiyor** | Gerçek veriyle ölçüldü (2026-09-02): misafir hasar/hırsızlık şikâyeti açar (`Dispute.status = OPEN`), esnaf valizi teslim eder, rezervasyon `CHECKED_OUT` olur ve `EARNING_BOOKING_STATUSES` içinde olduğu için **hakedişe girer**. Hakediş sorgusu (`PartnerEarningsService`) uyuşmazlığa hiç bakmıyor. Bugün etkisiz: dükkanda tahsilat modelinde para zaten esnafta ve platform hold uygulayamıyor. PSP bağlandığı gün kritik olur — platform parayı öder, sonra misafire tazminat ödemek zorunda kalır ve esnaftan geri alamaz. **Karar:** açık uyuşmazlıkta hakediş bekletilsin mi, bekletilirse hangi durumlarda serbest kalır (`RESOLVED` mi `CLOSED` mi)? Uyuşmazlık kapılarının kendisi sağlam — teslim öncesi şikâyet, sahiplik ve tekrar kontrolleri ölçüldü ve doğru çalışıyor. | 2026-09-02 taraması |
 
 ### C. Sende — bu depoda yapılamayan adımlar
@@ -63,6 +62,48 @@
 |---|---|---|
 | D2 | **Esnafa uyuşmazlık yüzeyi** — haberdar et + kendi kanıtını göster (kanıt artık toplanıyor ve admin görüyor) | Uyuşmazlık / kanıt |
 | D8 | **Vitrin afişi / QR** — yazdırılabilir tabela | — |
+
+## 2026-09-12 — sadakat puanı özelliği KOMPLE KALDIRILDI (B7 kapandı)
+
+**Karar** (kullanıcı, doğrudan): B7'deki iki seçenekten ("özellik eklenir ya da
+vaat düzeltilir") ikincisi seçildi, sonuna kadar götürüldü — yarım bir yumuşatma
+değil, özelliğin TAMAMI kaldırıldı. Gerekçe: puan hiçbir zaman harcanabilir
+olmadı, kazanma/geri alma mantığı ölçülüp iki kez düzeltilmiş olmasına rağmen
+(bkz. 2026-09-01 tarihli "iptal, misafirin BAŞKA rezervasyonlardan kazandığı
+puanı siliyordu" maddesi) hiç kimseye fayda sağlamadı. Redemption akışı
+eklemek sunucu doğrulaması + `Booking`e harcanan-puan alanı + web VE mobil iki
+taşıyıcı gerektirirdi; bunun yerine hiç var olmamış gibi silmek tercih edildi.
+
+**Kaldırılanlar:**
+- `User.loyaltyPoints`, `Booking.loyaltyPointsAwarded` alanları —
+  **migration ile DB'den de silindi** (`20260912090000_sadakat_puani_kaldirildi`).
+  **GERİ ALINAMAZ**: kullanıcıların o ana kadar biriktirdiği puan bakiyesi
+  kalıcı olarak siliniyor. Puan hiçbir zaman harcanabilir olmadığı için
+  silinen "değer" misafire zaten hiç ulaşamayan bir sayıydı — kullanıcı bu
+  riski bilerek onayladı.
+  **DOĞRULANAMADI**: bu oturumun sandbox'ı `.env.local`'a erişimi engelliyor,
+  dolayısıyla migration gerçek bir Postgres'e karşı ÇALIŞTIRILAMADI. SQL elle
+  yazıldı (önceki `ALTER TABLE ADD COLUMN` migration'larının birebir tersi).
+  **Uygulamadan önce `npm run db:verify` çalıştırılmalı.**
+- `awardLoyaltyPoints()` (`services/booking/lifecycle.ts`) ve çağıran yer
+  (`actions/booking.ts`, rezervasyon oluşturma) — puan artık hiç verilmiyor.
+- İptaldeki puan geri-alma bloğu (`lifecycle.ts`, `cancelBooking`).
+- `LoyaltyBadge` bileşeni (silindi) ve tek kullanıldığı yer
+  (`app/account/page.tsx`).
+- Ana sayfadaki "BagajPark Rewards" promosyon kartı — yerine tek, ortalanmış
+  güven (Trustpilot) kartı kondu, iki sütunlu ızgara tek kartla bozuk
+  durmasın diye.
+- Locale anahtarları (6 dil): `loyaltyPoints`, `loyaltyDiscount`,
+  `loyaltyRewardsTitle`, `loyaltyRewardsBody`. `bookingsLoyaltyMember`
+  ("Sadakat Üyesi") de `bookingsMemberBadge` ("BagajPark Üyesi") olarak
+  yeniden adlandırıldı — artık var olmayan bir programa atıf yapmasın diye.
+- Testler: `loyalty-not-redeemable.test.ts`, `loyalty-badge.test.tsx`,
+  `loyalty-revoke.test.ts` (üçü de silindi, özellik yok artık).
+- `docs/web_vs_mobile_comparison.md` satır 40 (mobil boşluğu artık geçersiz).
+
+**Doğrulama:** `npm run typecheck` (`prisma generate` sonrası) hiçbir
+`loyaltyPoints`/`loyaltyPointsAwarded` referansı bulmadı — kod tabanında iz
+kalmadı. `npm run lint` ve `npm test` (1288 test) yeşil.
 
 ## 2026-09-12 — D kategorisi teknik gedikler kapatıldı (D1, D3, D5, D6, D7, D9, D10)
 

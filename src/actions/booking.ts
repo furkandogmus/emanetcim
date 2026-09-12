@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@/auth";
-import { bookingService, awardLoyaltyPoints } from "@/services/BookingService";
+import { bookingService } from "@/services/BookingService";
 import {
   BookingRejectedError,
   type BookingRejectionCode,
@@ -271,30 +271,6 @@ export async function createBookingAction(data: CreateBookingInput) {
       .catch((err) =>
         logger.error({ err, bookingId: booking.id }, "notify_partner_admins_failed"),
       );
-
-    // Sadakat puanı: her 1 TL harcamaya 1 puan
-    if (userId) {
-      const earnedPoints = Math.floor(totalPrice);
-      if (earnedPoints > 0) {
-        /*
-          Sessizce yutulmaz. Iptal tarafi (`lifecycle.ts`) dusme hatasini zaten
-          logluyordu; kazanma tarafi loglamiyordu, yani misafir puanini
-          alamadiginda sebebi HICBIR yerde yazmiyordu. "Sadakat puani kazaniliyor
-          ama gorunmuyor" hatasi (b069522) tam bu korlukten cikmisti.
-        */
-        /*
-          GOVDE SERVISTE (`awardLoyaltyPoints`). `Booking` yazmalari servis
-          disina kapali; ama asil sebep, puani VEREN ve GERI ALAN kodun ayni
-          yerde durmasi. Ayri yerlerde oldukca biri `floor(totalPrice)` derken
-          digeri baska bir sey diyebiliyordu -- nitekim oyle oldu ve misafir
-          baska rezervasyonlardan kazandigi puani kaybediyordu (olculdu: 112).
-        */
-        void awardLoyaltyPoints({ bookingId: booking.id, guestId: userId, points: earnedPoints })
-          .catch((err) =>
-            logger.error({ err, userId, earnedPoints }, "loyalty_points_increment_failed"),
-          );
-      }
-    }
 
     revalidatePathAllLocales("/bookings");
     revalidatePathAllLocales("/search");

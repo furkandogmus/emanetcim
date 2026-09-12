@@ -502,32 +502,23 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
         </div>
       </section>
 
-      {/* Rewards + Trust Section */}
-      <section className="py-16 px-6 max-w-5xl mx-auto w-full">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="rounded-3xl bg-gradient-to-br from-amber-400 to-orange-500 p-8 text-white shadow-xl shadow-orange-200/50">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-                <Star size={20} fill="currentColor" />
-              </div>
-              <h3 className="text-lg font-black">{t('loyaltyRewardsTitle')}</h3>
-            </div>
-            <p className="text-white/90 text-sm leading-relaxed mb-4">
-              {t('loyaltyRewardsBody')}
-            </p>
-            <Link href="/search" className="inline-flex items-center gap-2 rounded-xl bg-white/20 px-4 py-2 text-xs font-black uppercase tracking-wider hover:bg-white/30 transition-colors">
-              {t('bookNow')}
-            </Link>
+      {/* Trust Section */}
+      {/*
+        NEDEN TEK KART (2026-09-12): bu bolum "Rewards" (sadakat puani) promosyon
+        kartiyla bu guven kartinin ikilisiydi. Sadakat puani ozelligi komple
+        kaldirildi (bkz. DEFECT_BACKLOG.md B7) -- puan hic harcanamiyordu ve
+        vaat edilen indirim gercekte yoktu. Iki sutunlu izgara tek kartla
+        cirkin durdugu icin tasarim tek, ortalanmis karta indirgendi.
+      */}
+      <section className="py-16 px-6 max-w-2xl mx-auto w-full">
+        <div className="rounded-3xl border border-gray-100 bg-white p-8 shadow-sm flex flex-col items-center justify-center text-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+            <ShieldCheck size={24} />
           </div>
-          <div className="rounded-3xl border border-gray-100 bg-white p-8 shadow-sm flex flex-col items-center justify-center text-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
-              <ShieldCheck size={24} />
-            </div>
-            <p className="text-sm text-gray-500 font-medium">{t('trustpilotRatingText')}</p>
-            <div className="flex items-center gap-1 id-eyebrow text-gray-400">
-              <ShieldCheck size={12} />
-              {t('trustVerificationBadge')}
-            </div>
+          <p className="text-sm text-gray-500 font-medium">{t('trustpilotRatingText')}</p>
+          <div className="flex items-center gap-1 id-eyebrow text-gray-400">
+            <ShieldCheck size={12} />
+            {t('trustVerificationBadge')}
           </div>
         </div>
       </section>

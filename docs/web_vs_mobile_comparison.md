@@ -37,7 +37,7 @@
 | # | Boşluk | Efor | Kanıt |
 |---|---|---|---|
 | 6 | Saatlik/slot bazlı rezervasyon mobilde hiç yok; checkout kaba gün-bazlı tahmin gösteriyor | büyük | `mobile/lib/features/checkout/checkout_screen.dart:23-77,342-355`; `slot`/`hourly` için mobile/lib'de 0 sonuç |
-| 7 | Sadakat puanı mobilde hem UI'da hem API'de tamamen yok (yalnızca rozet değil, puanın kendisi) | orta | `src/app/api/mobile/profile/stats/route.ts` yanıtında `loyaltyPoints` yok |
+| ~~7~~ | ~~Sadakat puanı mobilde hem UI'da hem API'de tamamen yok~~ — **KAPANDI (2026-09-12):** özellik hiç harcanamıyordu (bkz. `docs/DEFECT_BACKLOG.md` B7), web tarafından da komple kaldırıldı; artık bir boşluk değil. | — | — |
 | 8 | Hesap verisi dışa aktarma (KVKK/GDPR) mobilde yok | orta | grep `mobile/lib` "export": 0 sonuç |
 | 9 | KVKK metni kayıt ekranında yarım cümlede kesiliyor, tam metne link yok | küçük | `mobile/lib/features/auth/register_screen.dart:273-277` vs web'de 90 satırlık tam sayfa |
 | 10 | 10.000 TL sigorta tavanı mobilde hiç gösterilmiyor; sigorta ücreti sunucudan değil sabit `₺15.0` kodlanmış | orta | `mobile/lib/features/checkout/checkout_screen.dart:353` |
