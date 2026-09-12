@@ -45,7 +45,6 @@ const NON_GUEST_DEBT_CEILING = 19;
 const IDENTICAL_TO_EN_OK = new Set([
   "Contact.emailAddress", // destek e-posta adresi
   "KVKK.a1", // şirketin tescilli ünvanı
-  "Guest.loyaltyRewardsTitle", // marka adı ("BagajPark Rewards")
   "Guest.responseTimeMinutes", // "≤{minutes} min" — Fransızcada da doğru
 ]);
 

@@ -98,7 +98,7 @@ export default function BookingsClient({
    * çeviri dosyalarında, 6 dilin hepsinde gerçek karşılığı var.
    */
   const mobileCopy = {
-    loyaltyMember: t('bookingsLoyaltyMember'),
+    memberBadge: t('bookingsMemberBadge'),
     totalStays: t('bookingsTotalStays'),
     storagePoints: t('bookingsStoragePoints'),
     upcomingBooking: t('bookingsUpcomingBooking'),
@@ -168,7 +168,7 @@ export default function BookingsClient({
       <div className="p-4 flex flex-col gap-4 max-w-2xl mx-auto md:hidden">
         <section className="rounded-2xl bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#172554] text-white p-5 shadow-xl shadow-slate-200">
           <p className="text-[10px] font-black uppercase tracking-[0.24em] text-white/60">
-            {mobileCopy.loyaltyMember}
+            {mobileCopy.memberBadge}
           </p>
           <h2 className="mt-2 text-2xl font-black tracking-tight">{tCommon('demoMisafir')}</h2>
           <div className="mt-4 grid grid-cols-2 gap-3">
