@@ -5,7 +5,12 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { MapPin, Search } from "lucide-react";
 import Image from "next/image";
-import { getStorageCity, STORAGE_CITIES } from "@/lib/storage-cities";
+import {
+  getStorageCity,
+  isStorageCityIndexed,
+  STORAGE_CITIES,
+} from "@/lib/storage-cities";
+import { getCityStoragePoints } from "@/lib/city-storage-points";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { routing } from "@/i18n/routing";
 import { buildCityStorageJsonLd } from "@/lib/city-storage-json-ld";
@@ -13,6 +18,13 @@ import { buildBreadcrumbJsonLd } from "@/lib/breadcrumb-json-ld";
 import { buildFaqJsonLd } from "@/lib/faq-json-ld";
 import { socialMetadata } from "@/lib/social-metadata";
 import { serializeJsonLd } from "@/lib/json-ld-script";
+
+/*
+  Nokta listesi veritabanindan geliyor; sayfa statik uretilip saatte bir
+  yenilenir. Talep testi noktasi acildiginda ("Yakinda" -> rezervasyona acik)
+  sehir sayfasi en gec bir saat sonra dogru rozeti gosterir.
+*/
+export const revalidate = 3600;
 
 export function generateStaticParams() {
   return STORAGE_CITIES.map((c) => ({ slug: c.slug }));
@@ -34,6 +46,9 @@ export async function generateMetadata({
   return {
     title,
     description,
+    ...(isStorageCityIndexed(city)
+      ? {}
+      : { robots: { index: false, follow: true } }),
     alternates: {
       canonical,
       languages: Object.fromEntries([
@@ -65,6 +80,7 @@ export default async function CityLuggageStoragePage({
   if (!city) notFound();
 
   setRequestLocale(locale);
+  const points = await getCityStoragePoints(city);
   const t = await getTranslations("CityStorage");
   const tCommon = await getTranslations("Common");
   const appName = tCommon("appName");
@@ -196,7 +212,43 @@ export default async function CityLuggageStoragePage({
           />
         </div>
 
-        <section className="mt-12 rounded-2xl border border-gray-100 bg-gray-50 p-6">
+        {points.length > 0 && (
+          <section className="mt-12 rounded-2xl border border-gray-100 bg-white p-6">
+            <h2 className="text-xl font-black text-gray-900">
+              {t("detailPointsTitle", { city: cityLabel })}
+            </h2>
+            <ul className="mt-4 divide-y divide-gray-100">
+              {points.map((point) => (
+                <li key={point.id}>
+                  <Link
+                    href={`/shop/${point.id}`}
+                    className="flex items-center justify-between gap-3 py-3 text-sm hover:text-orange-600"
+                  >
+                    <span className="min-w-0">
+                      <span className="block font-bold text-gray-900">{point.name}</span>
+                      {point.district && (
+                        <span className="block text-xs text-gray-500">{point.district}</span>
+                      )}
+                    </span>
+                    <span
+                      className={
+                        point.isPrelaunch
+                          ? "shrink-0 rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-bold text-gray-600"
+                          : "shrink-0 rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-bold text-green-700"
+                      }
+                    >
+                      {point.isPrelaunch ? t("detailPointsSoon") : t("detailPointsOpen")}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        <section
+          className={`${points.length > 0 ? "mt-6" : "mt-12"} rounded-2xl border border-gray-100 bg-gray-50 p-6`}
+        >
           <h2 className="text-xl font-black text-gray-900">{localeCopy.whyTitle}</h2>
           <ul className="mt-4 space-y-2 text-sm text-gray-600">
             {localeCopy.whyItems.map((item) => (

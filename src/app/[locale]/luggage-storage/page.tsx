@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { Link } from "@/i18n/routing";
 import { MapPin, ChevronRight } from "lucide-react";
-import { STORAGE_CITIES } from "@/lib/storage-cities";
+import { INDEXED_STORAGE_CITIES, STORAGE_CITIES } from "@/lib/storage-cities";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { routing } from "@/i18n/routing";
 import { buildFaqJsonLd } from "@/lib/faq-json-ld";
@@ -97,7 +97,8 @@ export default async function LuggageStorageIndexPage({
     locale,
     path: "/luggage-storage",
     itemNamePrefix: t("indexHeadline"),
-    items: STORAGE_CITIES.map((city) => ({
+    // Yapisal veri yalnizca dizine acik sehirleri sayar; kartlar hepsini gosterir.
+    items: INDEXED_STORAGE_CITIES.map((city) => ({
       name: t(`${city.slug}.label`),
       urlPath: `/luggage-storage/${city.slug}`,
     })),

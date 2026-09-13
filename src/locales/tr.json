@@ -1780,7 +1780,7 @@
   "CityStorage": {
     "istanbul": {
       "label": "İstanbul",
-      "metaTitle": "İstanbul emanetçi — valiz ve bagaj emanet",
+      "metaTitle": "İstanbul emanetçi — Kadıköy valiz ve bagaj emanet",
       "metaDescription": "İstanbul'da emanetçi arıyorsanız: Sultanahmet, Taksim, Kadıköy ve Haydarpaşa çevresinde online rezervasyonlu valiz ve bagaj emanet noktaları.",
       "headline": "İstanbul'da emanetçi ve valiz emanet noktaları",
       "intro": "Tarihi Yarımada, Galata Kulesi, İstiklal Caddesi ve Kadıköy gibi hareketli bölgelerde yer alan güvenli emanet noktalarımız sayesinde seyahatinizi kolaylaştırın. Ayasofya, Sultanahmet ve Kapalıçarşı gezilerinizde veya vapur yolculuklarınızda ağır bavullarınızı taşımanıza gerek yok. BagajPark esnaflarına valizlerinizi mühürlü olarak teslim edin, İstanbul'un eşsiz manzarasını ve tarihi dokusunu bavulsuz keşfetmenin tadını çıkarın.",
@@ -2030,6 +2030,9 @@
     "detailFaq3Answer": "Fiyatlar çanta adedi ve süreye göre hesaplanır; rezervasyon akışında toplam tutar açık şekilde gösterilir.",
     "detailTipsTitle": "BagajPark İpuçları",
     "detailNearbyTitle": "Yakındaki Popüler Noktalar",
+    "detailPointsTitle": "{city} emanet noktaları",
+    "detailPointsOpen": "Rezervasyona açık",
+    "detailPointsSoon": "Yakında",
     "indexMetaTitle": "Şehirlere göre valiz emanet",
     "indexMetaDescription": "Büyük şehirlerde güvenli bagaj bırakma noktaları. Haritayı aç, yakınındaki dükkanı seç.",
     "indexHeadline": "Şehirlere göre emanet",

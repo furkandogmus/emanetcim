@@ -4,7 +4,7 @@ import { MapPin, ShieldCheck, Clock, Star, Smartphone, CalendarCheck, Map, QrCod
 import { Link } from "@/i18n/routing";
 import { getGuestLandingStats } from "@/lib/guest-landing-stats";
 import { getHomeTestimonials } from "@/lib/home-testimonials";
-import { STORAGE_CITIES } from "@/lib/storage-cities";
+import { INDEXED_STORAGE_CITIES, STORAGE_CITIES } from "@/lib/storage-cities";
 import TestimonialCarousel from "@/components/guest/TestimonialCarousel";
 import ComparisonTable from "@/components/guest/ComparisonTable";
 import BagProtection from "@/components/guest/BagProtection";
@@ -162,7 +162,8 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
     locale,
     path: "",
     itemNamePrefix: t("cityHubTitle"),
-    items: STORAGE_CITIES.map((city) => ({
+    // Yapisal veri yalnizca dizine acik sehirleri sayar; kartlar hepsini gosterir.
+    items: INDEXED_STORAGE_CITIES.map((city) => ({
       name: tCity(`${city.slug}.label`),
       urlPath: `/luggage-storage/${city.slug}`,
     })),
