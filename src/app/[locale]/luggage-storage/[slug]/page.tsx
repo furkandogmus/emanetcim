@@ -20,11 +20,17 @@ import { socialMetadata } from "@/lib/social-metadata";
 import { serializeJsonLd } from "@/lib/json-ld-script";
 
 /*
-  Nokta listesi veritabanindan geliyor; sayfa statik uretilip saatte bir
-  yenilenir. Talep testi noktasi acildiginda ("Yakinda" -> rezervasyona acik)
-  sehir sayfasi en gec bir saat sonra dogru rozeti gosterir.
+  Nokta listesi veritabanindan geliyor; sayfa statik uretilip bes dakikada bir
+  yenilenir.
+
+  NEDEN 3600 DEGIL (2026-09-13, uretimde olculdu): build sirasinda veritabani
+  yok, sayfa BOS listeyle uretiliyor. 3600 ile deploy'dan sonraki ilk saat
+  boyunca butun sehir sayfalari `x-nextjs-cache: HIT` ile listesiz dondu --
+  tam da Googlebot'un yeni sitemap'i taradigi pencere. Ana sayfa ayni sebeple
+  120 kullaniyor. Maliyet: sehir x dil basina en fazla 5 dakikada bir, indeksli
+  tek bir mesafe sorgusu.
 */
-export const revalidate = 3600;
+export const revalidate = 300;
 
 export function generateStaticParams() {
   return STORAGE_CITIES.map((c) => ({ slug: c.slug }));
