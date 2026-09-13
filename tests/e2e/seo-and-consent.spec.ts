@@ -28,7 +28,9 @@ test.describe("SEO: robots ve sitemap", () => {
     expect(text).toContain("/en/register");
     expect(text).toContain("/tr/luggage-storage/istanbul");
     expect(text).toContain("/en/luggage-storage/istanbul");
-    expect(text).toContain("/de/luggage-storage/berlin");
+    expect(text).toContain("/de/luggage-storage/antalya");
+    // Yurtdisi sehir sayfalari noindex; site haritasina girmez (isStorageCityIndexed).
+    expect(text).not.toContain("/luggage-storage/berlin");
     expect(text).toContain("/tr/become-partner");
   });
 
