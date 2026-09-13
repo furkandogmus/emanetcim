@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { buildLocalizedUrls, getSiteBaseUrl } from "@/lib/site-urls";
 import prisma from "@/lib/db";
 import { routing } from "@/i18n/routing";
-import { STORAGE_CITIES } from "@/lib/storage-cities";
+import { INDEXED_STORAGE_CITIES } from "@/lib/storage-cities";
 import { OPERATING_SHOP_FILTER } from "@/lib/public-shop-filter";
 
 export const dynamic = 'force-dynamic';
@@ -36,7 +36,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const cityStorageEntries: MetadataRoute.Sitemap = [];
   for (const locale of routing.locales) {
-    for (const c of STORAGE_CITIES) {
+    // Yalnizca dizine acik sehirler: `noindex` bir sayfayi site haritasinda
+    // bildirmek Google'a celiskili sinyal verir (bkz. `isStorageCityIndexed`).
+    for (const c of INDEXED_STORAGE_CITIES) {
       cityStorageEntries.push({
         url: `${base}/${locale}/luggage-storage/${c.slug}`,
         lastModified: now,

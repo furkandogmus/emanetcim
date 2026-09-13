@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { routing } from './i18n/routing';
 import { isAdminPath as matchesAdminPath, isPartnerPath as matchesPartnerPath } from './lib/route-protection';
+import { retiredLocaleRedirectPath } from './lib/retired-locales';
 
 const { auth } = NextAuth({
   ...authConfig,
@@ -80,6 +81,15 @@ const authProxy = auth((req) => {
     const res = NextResponse.next({ request: { headers: requestHeaders } });
     res.headers.set('x-request-id', requestId);
     return res;
+  }
+
+  // Kaldirilan dillerin eski URL'leri -> /en karsiligi, kalici (bkz. retired-locales.ts).
+  // next-intl'den ONCE: aksi halde `/ko/...` 307 ile `/tr/ko/...` yumusak 404'une gider.
+  const retiredTarget = retiredLocaleRedirectPath(pathname);
+  if (retiredTarget) {
+    const url = nextUrl.clone();
+    url.pathname = retiredTarget;
+    return NextResponse.redirect(url, 308);
   }
 
   // 2. I18n Middleware (Handles locale prefixing and redirects)
