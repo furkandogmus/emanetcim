@@ -150,6 +150,10 @@ const CITIES: City[] = [
       { slug: "uskudar", name: "Üsküdar", district: "Üsküdar", latitude: 41.01646, longitude: 29.02518 },
       { slug: "otogar", name: "İstanbul Otogarı", district: "Bayrampaşa", latitude: 41.03708, longitude: 28.89423 },
       { slug: "ortakoy", name: "Ortaköy", district: "Beşiktaş", latitude: 41.04285, longitude: 29.00753 },
+      // Search Console 2026-09-13: aranıyor, noktası yoktu (koordinat Nominatim, aynı gün).
+      { slug: "havalimani", name: "İstanbul Havalimanı", district: "Arnavutköy", latitude: 41.27487, longitude: 28.73227 },
+      { slug: "sabiha-gokcen", name: "Sabiha Gökçen Havalimanı", district: "Pendik", latitude: 40.89433, longitude: 29.31181 },
+      { slug: "haydarpasa", name: "Haydarpaşa Garı", district: "Kadıköy", latitude: 40.99655, longitude: 29.01926 },
     ],
   },
   {
@@ -171,6 +175,9 @@ const CITIES: City[] = [
       { slug: "kordon", name: "Kordon", district: "Alsancak", latitude: 38.43535, longitude: 27.13989 },
       { slug: "kemeralti", name: "Kemeraltı", district: "Konak", latitude: 38.41874, longitude: 27.13075 },
       { slug: "basmane", name: "Basmane Garı", district: "Konak", latitude: 38.42253, longitude: 27.14361 },
+      // Search Console 2026-09-13: aranıyor, noktası yoktu (koordinat Nominatim, aynı gün).
+      { slug: "havalimani", name: "Adnan Menderes Havalimanı", district: "Gaziemir", latitude: 38.29304, longitude: 27.14868 },
+      { slug: "otogar", name: "İzmir Otogarı", district: "Bornova", latitude: 38.43109, longitude: 27.2142 },
     ],
   },
   {
@@ -181,6 +188,9 @@ const CITIES: City[] = [
       { slug: "lara", name: "Lara", district: "Lara", latitude: 36.84933, longitude: 30.8345 },
       { slug: "otogar", name: "Antalya Otogarı", district: "Kepez", latitude: 36.91918, longitude: 30.66398 },
       { slug: "marina", name: "Antalya Marina", district: "Muratpaşa", latitude: 36.88657, longitude: 30.70302 },
+      // Search Console 2026-09-13: aranıyor, noktası yoktu (koordinat Nominatim, aynı gün).
+      { slug: "havalimani", name: "Antalya Havalimanı", district: "Muratpaşa", latitude: 36.89994, longitude: 30.79819 },
+      { slug: "mall-of-antalya", name: "Mall of Antalya", district: "Kepez", latitude: 36.92197, longitude: 30.78568 },
     ],
   },
   {
@@ -191,6 +201,9 @@ const CITIES: City[] = [
       { slug: "gumbet", name: "Gümbet", district: "Gümbet", latitude: 37.03319, longitude: 27.40497 },
       { slug: "yalikavak", name: "Yalıkavak", district: "Yalıkavak", latitude: 37.10562, longitude: 27.29306 },
       { slug: "otogar", name: "Bodrum Otogarı", district: "Merkez", latitude: 37.06387, longitude: 27.46362 },
+      // Search Console 2026-09-13: "bodrum eski otogar emanetçi". Yukarıdaki `otogar`
+      // Torba'daki şehirlerarası terminal; bu, Çarşı'daki eski garaj (Nominatim, aynı gün).
+      { slug: "merkez-garaj", name: "Bodrum Merkez Garaj", district: "Çarşı", latitude: 37.03924, longitude: 27.43632 },
     ],
   },
   {
