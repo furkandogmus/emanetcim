@@ -644,6 +644,65 @@ Erişim yolu: üretim Postgres dışarı açık değil (`127.0.0.1:5433`), scrip
 SSH tüneliyle koşuldu — sunucudaki imajda `scripts/` ve `src/` yok
 (bkz. `Dockerfile`), o yüzden konteyner içinde koşturulamıyor.
 
+### Üretime yazma adımları
+
+Ön koşul: repo kökündesiniz, `~/.ssh/aws-bagajpark` anahtarı var. Sunucu IP/port
+`infra/aws/stack` (`hesap2`) çıktısında; aşağıda 2026-09-13 değerleri.
+
+**Bağlantıyı `/opt/emanetci/docker-compose.env`ten ALMAYIN.** Oradaki
+`DATABASE_URL` eski (veritabanı adı `emanetci`, parola eski) ve Postgres
+`Authentication failed ... for bagajpark` (P1000) döner. Gerçek değeri compose,
+Parameter Store'dan gelen `POSTGRES_*` ile çalışan `web` konteynerine kuruyor;
+oradan okunur. Değer ekrana basılmaz, doğrudan değişkene girer.
+
+1. Tünel (salt okuma, hiçbir şey yazmaz):
+
+   ```bash
+   ssh -i ~/.ssh/aws-bagajpark -p 2222 -f -N \
+     -L 15433:127.0.0.1:5433 ec2-user@3.120.254.170
+   ```
+
+2. Bağlantı, konteynerden, host tünele çevrilerek:
+
+   ```bash
+   export DATABASE_URL=$(ssh -i ~/.ssh/aws-bagajpark -p 2222 ec2-user@3.120.254.170 \
+     "docker exec emanetci-web-1 printenv DATABASE_URL" \
+     | sed -E 's#@[^/]+/#@127.0.0.1:15433/#')
+   ```
+
+3. Kuru çalışma (yazmaz). Beklenen: yeni noktalar `OLUSTUR`, var olanlar
+   `guncelle`, sonda `Olusturulacak: N   Guncellenecek: M`.
+
+   ```bash
+   npx tsx scripts/prelaunch-points.ts --city istanbul
+   ```
+
+4. Yazma — değişiklik yapan İLK adım:
+
+   ```bash
+   npx tsx scripts/prelaunch-points.ts --apply --city istanbul
+   ```
+
+5. Doğrulama: 3. adımı tekrar koşun, `Olusturulacak: 0` beklenir (idempotent).
+   Şehir sayfası (`/tr/luggage-storage/<şehir>`) en geç 5 dakikada yeni noktayı
+   "Yakında" rozetiyle gösterir (`revalidate = 300`).
+
+6. Kapatma:
+
+   ```bash
+   unset DATABASE_URL
+   pkill -f "15433:127.0.0.1:5433"
+   ```
+
+Geri alma: `--apply --close <key>-<slug>` noktayı SİLMEZ, gizler (`isActive = false`);
+kayıt ve toplanan talep verisi durur.
+
+**Uygulananlar:**
+
+| Tarih (UTC) | Ne | Sonuç |
+|---|---|---|
+| 2026-09-13 15:50–15:52 | Search Console'da aranan 8 yer: `istanbul-havalimani`, `istanbul-sabiha-gokcen`, `istanbul-haydarpasa`, `bodrum-merkez-garaj`, `antalya-havalimani`, `antalya-mall-of-antalya`, `izmir-havalimani`, `izmir-otogar` | 8 oluşturuldu; tekrar koşu `Olusturulacak: 0`; dört şehir sayfasında 8/8 göründü |
+
 ## UI/UX regresyon taraması — `ux-sweep.mjs`
 
 ```bash
