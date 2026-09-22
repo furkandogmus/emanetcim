@@ -1,6 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
-import { Check, ArrowRight, ChevronDown, PhoneCall, Store, Luggage } from "lucide-react";
+import { Check, ArrowRight, ChevronDown, PhoneCall, Store, Luggage, QrCode, ScanLine, Lock } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { alternatesForPath } from "@/lib/seo-alternates";
@@ -8,6 +8,12 @@ import { socialMetadata } from "@/lib/social-metadata";
 import { getEffectiveCommission } from "@/lib/commission";
 import { getPaymentCopyMode } from "@/lib/payment-copy";
 import PartnerLeadForm from "@/components/guest/PartnerLeadForm";
+import PartnerQrFlow from "@/components/guest/PartnerQrFlow";
+import BagSizeGuide from "@/components/guest/BagSizeGuide";
+import BagGlyph from "@/components/guest/BagGlyph";
+import { getPricingRulesForStaticRender } from "@/lib/platform-settings";
+import { roundedSlotPrices } from "@/lib/bag-pricing";
+import { formatTryCurrency } from "@/lib/currency";
 
 /** Komisyon orani DB'den geliyor; revalidate olmadan ilk deploy'daki degerde donar. */
 export const revalidate = 120;
@@ -52,6 +58,20 @@ export default async function PartnerSignupPage({
     // varsayilan kalir
   }
 
+  const rules = await getPricingRulesForStaticRender();
+  const slot = roundedSlotPrices(rules.defaultPricePerDay, rules);
+  const bagPrices = {
+    s: formatTryCurrency(slot.s, locale, { maximumFractionDigits: 0 }),
+    m: formatTryCurrency(slot.m, locale, { maximumFractionDigits: 0 }),
+    xl: formatTryCurrency(slot.xl, locale, { maximumFractionDigits: 0 }),
+  };
+
+  const qrPoints = [
+    { Icon: QrCode, text: t("qrPoint1") },
+    { Icon: ScanLine, text: t("qrPoint2") },
+    { Icon: Lock, text: t("qrPoint3") },
+  ];
+
   const perks = [zeroCommission ? t("perkFree") : t("perkFreeSignup"), t("perkCapacity"), t("perkSealed")];
 
   const steps = [
@@ -89,6 +109,11 @@ export default async function PartnerSignupPage({
                 </li>
               ))}
             </ul>
+            <div aria-hidden="true" className="mt-12 hidden items-end gap-5 border-b-2 border-brand-100 pb-0 pl-2 lg:flex">
+              <BagGlyph size="s" className="h-16 w-auto" />
+              <BagGlyph size="m" className="h-[5.5rem] w-auto" />
+              <BagGlyph size="xl" className="h-[7.25rem] w-auto" />
+            </div>
           </div>
 
           <div
@@ -126,6 +151,53 @@ export default async function PartnerSignupPage({
               <ArrowRight size={18} />
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* QR ILE TESLIM */}
+      <section className="bg-gradient-to-b from-brand-50/70 to-white px-4 py-16 sm:px-6 md:py-24">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2">
+          <div>
+            <p className="id-eyebrow text-xs text-brand-700">{t("qrEyebrow")}</p>
+            <h2 className="id-display mt-3 text-3xl tracking-tight sm:text-4xl">{t("qrSectionTitle")}</h2>
+            <p className="mt-4 text-base leading-relaxed text-gray-600">{t("qrSectionBody")}</p>
+            <ol className="mt-7 flex flex-col gap-3">
+              {qrPoints.map(({ Icon, text }, i) => (
+                <li key={text} className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-white p-3.5">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-white">
+                    <Icon size={18} />
+                  </span>
+                  <span className="text-sm font-bold text-gray-800">
+                    <span className="mr-1.5 text-brand-600">{i + 1}.</span>
+                    {text}
+                  </span>
+                </li>
+              ))}
+            </ol>
+            <p className="mt-4 text-xs text-gray-500">{t("qrFallback")}</p>
+          </div>
+          <PartnerQrFlow
+            labels={{
+              guestPhone: t("qrGuestPhone"),
+              yourPhone: t("qrYourPhone"),
+              bookingQr: t("qrBookingQr"),
+              scanButton: t("qrScanButton"),
+              scanned: t("qrScanned"),
+              bags: t("mockBags", { count: 2 }),
+            }}
+          />
+        </div>
+      </section>
+
+      {/* VALIZ BOYLARI VE FIYAT */}
+      <section className="px-4 py-16 sm:px-6 md:py-24">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-[1fr_1.1fr]">
+          <div>
+            <h2 className="id-display text-3xl tracking-tight sm:text-4xl">{t("sizesTitle")}</h2>
+            <p className="mt-4 text-base leading-relaxed text-gray-600">{t("sizesBody")}</p>
+            <p className="mt-3 text-sm font-bold text-gray-800">{t("sizesPriceNote", { price: bagPrices.m })}</p>
+          </div>
+          <BagSizeGuide prices={bagPrices} />
         </div>
       </section>
 

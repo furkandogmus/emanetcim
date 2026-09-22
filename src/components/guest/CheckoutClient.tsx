@@ -660,7 +660,13 @@ export default function CheckoutClient({
 
             <CheckoutWhatIsIncluded insuranceEnabled={insuranceEnabled} />
 
-            <BagSizeGuide />
+            <BagSizeGuide
+              prices={{
+                s: formatTryCurrency(priceS, locale),
+                m: formatTryCurrency(priceM, locale),
+                xl: formatTryCurrency(priceXl, locale),
+              }}
+            />
 
             <section
               className="rounded-2xl border border-gray-100 bg-gray-50/90 p-4 text-xs leading-relaxed text-gray-600"

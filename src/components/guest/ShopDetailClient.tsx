@@ -400,7 +400,7 @@ export default function ShopDetailClient({
             {/*
               TALEP TESTİ NOKTASINDA FİYAT YAZILMAZ.
 
-              Bu noktalarda `pricePerDay` şema varsayılanıdır (₺50) — bir esnafla
+              Bu noktalarda `pricePerDay` şema varsayılanıdır (₺150) — bir esnafla
               anlaşılmadığı için gerçek bir fiyat yok. Yanında "Haber ver" düğmesi
               dururken bir tutar basmak, tutamayacağımız bir söz vermek olurdu; üstelik
               nokta Tokyo'da da olabilir, o zaman yanlış para biriminde bir söz.

@@ -110,7 +110,7 @@ model Shop {
   capacity            Int                 @default(10)
   isActive            Boolean             @default(false)
   rating              Float?              @default(0.0)
-  pricePerDay         Decimal             @default(50) @db.Decimal(12, 2)
+  pricePerDay         Decimal             @default(150) @db.Decimal(12, 2)
   pricePerHour        Decimal             @default(10) @db.Decimal(12, 2)
   timezone            String              @default("Europe/Istanbul")
   hasRestroom         Boolean             @default(false)
@@ -577,7 +577,7 @@ model PlatformSettings {
   /// zilyetliğin kanıtıdır; kaydı yoksa platform hiçbir şey ispat edemez (P1-23).
   requireSealsOnCheckIn  Boolean  @default(false)
   defaultShopCapacity    Int      @default(10)
-  defaultPricePerDay     Decimal  @default(50) @db.Decimal(12, 2)
+  defaultPricePerDay     Decimal  @default(150) @db.Decimal(12, 2)
   bagMultiplierS         Decimal  @default(0.8) @db.Decimal(6, 4)
   bagMultiplierM         Decimal  @default(1.0) @db.Decimal(6, 4)
   bagMultiplierXl        Decimal  @default(1.5) @db.Decimal(6, 4)

@@ -104,7 +104,7 @@ type ShopSummarySource = {
  * `isPrelaunch` de aynı sebeple burada: 2026-08-31'de arama, talep testi
  * noktalarını da döndürmeye başladı (`findShopsForSearch`) ve `/mobile/shops/
  * nearby` aynı servisi kullanıyor. Bayrak taşınmazsa mobil istemci bu noktayı
- * normal bir dükkandan AYIRT EDEMEZ: ₺50 (şema varsayılanı, gerçek fiyat değil)
+ * normal bir dükkandan AYIRT EDEMEZ: ₺150 (şema varsayılanı, gerçek fiyat değil)
  * ve "Rezervasyon yap" gösterir, misafir dener ve sunucudan `409
  * shop_not_open_yet` yer. Sunucu kapısı sağlam, ama misafire tutamayacağımız
  * sözü verdikten sonra reddetmek kapının işi değil — arayüzün işi.

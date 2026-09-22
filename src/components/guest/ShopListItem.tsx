@@ -164,7 +164,7 @@ function ShopListItem({
           <div className="text-right">
             {/*
               PRELAUNCH'TA FİYAT YOK. `pricePerDay` burada şema varsayılanıdır
-              (₺50) — esnafla anlaşılmadığı için gerçek bir fiyat değil, üstelik
+              (₺150) — esnafla anlaşılmadığı için gerçek bir fiyat değil, üstelik
               nokta Tokyo'daysa yanlış para biriminde. Detay sayfası da aynı
               yerde "Yakında" gösteriyor; ikisi ayrışmamalı.
             */}

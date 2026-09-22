@@ -252,7 +252,7 @@ export default function SearchMap({
         } else {
           /*
             Talep testi noktasında pin'e fiyat yazılmaz: oradaki `pricePerDay`
-            şema varsayılanıdır (₺50), esnafla anlaşılmadığı için gerçek bir
+            şema varsayılanıdır (₺150), esnafla anlaşılmadığı için gerçek bir
             fiyat değil ve nokta yurt dışındaysa yanlış para biriminde. Kart ve
             detay sayfası da aynı yerde "Yakında" gösteriyor.
           */
