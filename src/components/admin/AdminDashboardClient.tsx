@@ -24,6 +24,7 @@ import {
   Clock,
   Mail,
   Ticket,
+  PhoneCall,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
@@ -199,6 +200,13 @@ export default function AdminDashboardClient({
                 <span className="w-5 h-5 bg-orange-600 rounded-full flex items-center justify-center text-[10px] group-hover:scale-110 transition-transform font-black">
                   {stats.pendingApplications}
                 </span>
+              </Link>
+              <Link
+                href="/admin/partner-leads"
+                className="w-full min-h-[3rem] px-5 bg-white/10 rounded-2xl text-xs font-black uppercase tracking-wider hover:bg-white/20 transition-all text-left flex items-center gap-3"
+              >
+                <PhoneCall size={18} className="opacity-40" />
+                {t("partnerLeadsTitle")}
               </Link>
               <Link
                 href="/admin/seals"

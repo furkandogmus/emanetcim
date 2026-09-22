@@ -16,6 +16,8 @@ export const SITEMAP_PATHS: readonly string[] = [
   "/login",
   "/register",
   "/become-partner",
+  "/esnaf",
+  "/esnaf/nasil-calisir",
   "/demand",
   "/how-it-works",
   "/hotels",

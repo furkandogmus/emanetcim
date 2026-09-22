@@ -208,7 +208,7 @@ export default function Footer() {
             <ul className="flex flex-col gap-4 text-sm font-bold text-gray-400">
               {!hideGuestBookingNav && (
                 <li>
-                  <Link href="/partners" className="hover:text-orange-600 transition-colors">
+                  <Link href="/esnaf" className="hover:text-orange-600 transition-colors">
                     {t("becomePartner")}
                   </Link>
                 </li>
