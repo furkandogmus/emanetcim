@@ -86,8 +86,12 @@ test.describe('BagajPark Production Hardening & PWA E2E Tests', () => {
       Testid bir SOZLESME; gorunur metin ise urun ekibinin istedigi zaman
       degistirebilecegi bir seydir ve e2e'nin ona baglanmasi bu kirilmanin
       sebebiydi.
+
+      `.first()`: sayfa akisla gelirken ayni baslik kisa sure iki kez DOM'da
+      (biri gizli) kaliyor; strict mod bunu ihlal sayip deploy'u kesiyordu.
+      Ayni kaypaklik `use-cases.spec.ts`te 2026-08-31'de boyle cozulmustu.
     */
-    await expect(page.getByTestId('partner-shop-name')).toBeVisible();
+    await expect(page.getByTestId('partner-shop-name').first()).toBeVisible();
   });
 
 });
