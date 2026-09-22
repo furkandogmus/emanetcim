@@ -73,7 +73,7 @@ export const DEFAULT_PRICING_RULES: PricingRules = {
   checkInGraceMin: 30,
   requireSealsOnCheckIn: false,
   defaultShopCapacity: 10,
-  defaultPricePerDay: 50,
+  defaultPricePerDay: 150,
   bagMultipliers: { S: 0.8, M: 1.0, XL: 1.5 },
   platformHolidayDates: [],
 };

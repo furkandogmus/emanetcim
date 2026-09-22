@@ -19,6 +19,7 @@ import { getSiteBaseUrl } from "@/lib/site-urls";
 import { alternatesForPath } from "@/lib/seo-alternates";
 import { socialMetadata } from "@/lib/social-metadata";
 import { getPaymentCopyMode } from "@/lib/payment-copy";
+import PartnerQrFlow from "@/components/guest/PartnerQrFlow";
 
 export async function generateMetadata({
   params,
@@ -73,7 +74,6 @@ function MockButton({ children, variant = "primary" }: { children: ReactNode; va
 }
 
 const SAMPLE_GUEST = "Emma L.";
-const SAMPLE_CODE = "A3F9C21B";
 const SAMPLE_SEALS = ["004218", "004219"];
 
 export default async function PartnerHowItWorksPage({
@@ -86,7 +86,7 @@ export default async function PartnerHowItWorksPage({
   const t = await getTranslations("PartnerSignup");
   const onsite = getPaymentCopyMode() !== "online";
 
-  const steps: { Icon: typeof Bell; title: string; body: string; mock: ReactNode }[] = [
+  const steps: { Icon: typeof Bell; title: string; body: string; mock: ReactNode; wide?: boolean }[] = [
     {
       Icon: Bell,
       title: t("flow1Title"),
@@ -109,14 +109,18 @@ export default async function PartnerHowItWorksPage({
       Icon: QrCode,
       title: t("flow2Title"),
       body: t("flow2Body"),
+      wide: true,
       mock: (
-        <MockCard>
-          <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">{t("mockBookingCode")}</p>
-          <p className="mt-1 font-mono text-2xl font-bold tracking-wider text-gray-900">{SAMPLE_CODE}</p>
-          <div className="mt-2 flex items-center gap-2 rounded-xl bg-emerald-50 px-2.5 py-1.5 text-xs font-bold text-emerald-700">
-            <CheckCircle2 size={14} /> {SAMPLE_GUEST} · {t("mockBags", { count: 2 })}
-          </div>
-        </MockCard>
+        <PartnerQrFlow
+          labels={{
+            guestPhone: t("qrGuestPhone"),
+            yourPhone: t("qrYourPhone"),
+            bookingQr: t("qrBookingQr"),
+            scanButton: t("qrScanButton"),
+            scanned: t("qrScanned"),
+            bags: t("mockBags", { count: 2 }),
+          }}
+        />
       ),
     },
     {
@@ -209,7 +213,7 @@ export default async function PartnerHowItWorksPage({
 
       <section className="px-4 py-10 sm:px-6 md:py-16">
         <ol className="mx-auto flex max-w-5xl flex-col gap-14 md:gap-20">
-          {steps.map(({ Icon, title, body, mock }, i) => (
+          {steps.map(({ Icon, title, body, mock, wide }, i) => (
             <li key={title} className="grid items-center gap-8 md:grid-cols-2 md:gap-16">
               <div className={i % 2 === 1 ? "md:order-2" : ""}>
                 <div className="flex items-center gap-3">
@@ -222,7 +226,7 @@ export default async function PartnerHowItWorksPage({
                 <p className="mt-3 text-base leading-relaxed text-gray-600">{body}</p>
               </div>
               <div className={i % 2 === 1 ? "md:order-1" : ""}>
-                <PhoneMock>{mock}</PhoneMock>
+                {wide ? mock : <PhoneMock>{mock}</PhoneMock>}
               </div>
             </li>
           ))}
