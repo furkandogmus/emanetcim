@@ -1054,3 +1054,27 @@ model PrelaunchInterest {
   @@index([shopId, createdAt])
   @@index([createdAt])
 }
+
+/// Esnaf on kaydi: hesap acmadan birakilan ad, telefon, adres.
+///
+/// NEDEN AYRI MODEL: tam kayit (`/register?role=PARTNER`) e-posta, sifre ve dukkan
+/// ayrintisi istiyor; ilk donemde esnafi bizim arayip kurulumu birlikte yapmamiz
+/// hedefleniyor, o yuzden formun tek isi geri donus icin gereken iletisim bilgisini
+/// almak. `Shop`/`User` burada olusmaz; onlari ekip, esnafla konustuktan sonra acar.
+model PartnerLead {
+  id          String    @id @default(cuid())
+  fullName    String
+  /// 10 hane, basinda 0/90 olmadan (orn. 5321234567). Sabit hat da kabul edilir.
+  phone       String
+  shopName    String?
+  address     String
+  locale      String?
+  source      String    @default("web")
+  /// NEW | CONTACTED
+  status      String    @default("NEW")
+  contactedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([phone])
+  @@index([status, createdAt])
+}

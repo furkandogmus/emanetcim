@@ -129,7 +129,7 @@ export default function Header() {
               (2026-08-31) tek basina 77x12 px'te duruyordu -- komsulari 24 px'e
               cikarilmisken sirf sarmalayicisi farkli diye. Gorunus degismiyor.
             */}
-            <Link href="/partners" className="relative inline-block py-2 -my-2 id-eyebrow text-orange-600 hover:text-orange-700 transition-all duration-200">{navCopy.becomePartner}</Link>
+            <Link href="/esnaf" className="relative inline-block py-2 -my-2 id-eyebrow text-orange-600 hover:text-orange-700 transition-all duration-200">{navCopy.becomePartner}</Link>
           </nav>
         )}
         <nav aria-label={navCopy.secondaryLabel} className="hidden md:flex">

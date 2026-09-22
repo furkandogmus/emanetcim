@@ -1242,6 +1242,48 @@ export class NotificationService implements INotificationService {
   }
 
   /**
+   * Esnaf on kaydi (/esnaf). Hesap yok, geri donus bu e-postaya bagli: esnaf
+   * "sizi arayacagiz" sozuyle ayriliyor.
+   */
+  async notifyAdminsForPartnerLead(params: {
+    fullName: string;
+    phone: string;
+    shopName: string | null;
+    address: string;
+  }): Promise<void> {
+    const { fullName, phone, shopName, address } = params;
+    const adminEmails = (process.env.ADMIN_EMAILS ?? "")
+      .split(",")
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+
+    const subject = `[Admin] BagajPark: Esnaf ön kaydı (${shopName ?? fullName})`;
+    const body = `Yeni esnaf ön kaydı.\n\nAd: ${fullName}\nTelefon: ${phone}\nDükkan: ${shopName ?? "—"}\nAdres: ${address}`;
+    // Tum alanlar formdan geliyor; kacirilmadan tabloya girerse admin kutusuna HTML enjekte edilir.
+    const html = renderEmailHtml({
+      locale: "tr",
+      tone: "info",
+      heading: "Esnaf ön kaydı",
+      paragraphs: ["Esnaf aranmayı bekliyor."],
+      rows: [
+        { label: "Ad Soyad", value: escapeEmailHtml(fullName) },
+        { label: "Telefon", value: escapeEmailHtml(phone), emphasized: true },
+        { label: "Dükkan", value: escapeEmailHtml(shopName ?? "—") },
+        { label: "Adres", value: escapeEmailHtml(address) },
+      ],
+      footer: "BagajPark — Yönetim Masası",
+    });
+
+    for (const adminEmail of adminEmails) {
+      if (adminEmail.includes("@")) {
+        void this.sendEmail(adminEmail, subject, body, undefined, html).catch((e) => {
+          logger.error({ err: e, adminEmail }, "notifyAdminsForPartnerLead_email_failed");
+        });
+      }
+    }
+  }
+
+  /**
    * `locale` VARSAYILANI YOK (2026-09-02'de kaldirildi).
    *
    * Imza `locale: string = "tr"` idi ve bu varsayilan iki yerde birden yanlis
