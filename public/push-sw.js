@@ -1,15 +1,69 @@
 /*
- * Yalnızca PUSH için service worker.
+ * Uygulama service worker'i: PUSH + CEVRIMDISI SAYFA.
  *
- * BİLEREK `fetch` DİNLEYİCİSİ YOK. 2026-08-23'te eski service worker kaldırıldı
- * çünkü yetkili API yanıtlarını önbelleğe alıyordu — yani bir kullanıcının
- * verisi başka bir oturumda geri servis edilebiliyordu. `fetch` olayına hiç
- * abone olmayan bir worker tek bir isteği bile göremez, dolayısıyla o sınıf
- * hata burada yapısal olarak imkânsız.
+ * 2026-08-23'te eski worker kaldirildi cunku yetkili API yanitlarini
+ * onbellege aliyordu -- bir kullanicinin verisi baska bir oturumda geri
+ * servis edilebiliyordu. Bu worker o sinifi YAPISAL olarak disarida birakir:
  *
- * Bu dosya yalnızca kullanıcı bildirimleri AÇTIĞINDA kaydedilir
- * (`WebPushOptIn`), herkese kurulmaz.
+ *   - Onbellege yalnizca kurulumda, statik `/offline.html` yazilir. Hicbir
+ *     ag yaniti onbellege YAZILMAZ (`cache.put` yok; `push-sw-safety` testi).
+ *   - `fetch` yalnizca GET SAYFA GEZINMELERINE bakar ve her zaman once agi
+ *     dener. Ag yoksa `offline.html` doner. API, _next/, gorsel istekleri hic
+ *     gormez.
+ *
+ * 2026-09-23'e kadar yalnizca push icindi ve yalnizca bildirim acan
+ * kullaniciya kuruluyordu; artik `PWARegister` herkese kurar ki kurulu
+ * uygulama baglanti koptugunda tarayicinin hata sayfasini gostermesin.
  */
+
+var OFFLINE_CACHE = "bagajpark-offline-v1";
+var OFFLINE_URL = "/offline.html";
+
+self.addEventListener("install", function (event) {
+  event.waitUntil(
+    caches.open(OFFLINE_CACHE).then(function (cache) {
+      // `reload`: HTTP onbelleginden bayat bir kopya degil, sunucudaki surum.
+      return cache.add(new Request(OFFLINE_URL, { cache: "reload" }));
+    })
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", function (event) {
+  event.waitUntil(
+    caches
+      .keys()
+      .then(function (keys) {
+        // Yalnizca KENDI eski surumlerimiz silinir.
+        return Promise.all(
+          keys
+            .filter(function (k) { return k.indexOf("bagajpark-offline-") === 0 && k !== OFFLINE_CACHE; })
+            .map(function (k) { return caches.delete(k); })
+        );
+      })
+      .then(function () {
+        return self.registration.navigationPreload
+          ? self.registration.navigationPreload.enable()
+          : undefined;
+      })
+      .then(function () { return self.clients.claim(); })
+  );
+});
+
+self.addEventListener("fetch", function (event) {
+  var req = event.request;
+  if (req.mode !== "navigate" || req.method !== "GET") return;
+
+  event.respondWith(
+    Promise.resolve(event.preloadResponse)
+      .then(function (preloaded) { return preloaded || fetch(req); })
+      .catch(function () {
+        return caches.match(OFFLINE_URL).then(function (offline) {
+          return offline || Response.error();
+        });
+      })
+  );
+});
 
 self.addEventListener("push", function (event) {
   if (!event.data) return;
