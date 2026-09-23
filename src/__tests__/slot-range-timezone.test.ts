@@ -54,46 +54,27 @@ describe("slot aralığı ↔ checkout biçim sözleşmesi", () => {
     expect(parsed!.getTime()).toBe(new Date(apiIso).getTime());
   });
 
-  it("ızgara duvar saatine sınırda çevirir; cihazın saat dilimini kullanmaz", () => {
-    // Yorumlar sayılmaz: bu dosya hatanın kendisini yorumda ANLATIYOR.
-    const src = stripComments(
-      fs.readFileSync("src/components/guest/SlotAvailabilityGrid.tsx", "utf8"),
-    );
-
-    // Çeviri sınırda yapılmalı.
-    expect(src).toMatch(/onSelectRange\(\s*toWallValue\(/);
-
-    // Cihaz saat dilimi okuyan API'ler slot etiketinde kullanılamaz: turistin
-    // telefonu memleket saatindeyken dükkanın takvimiyle uyuşmaz.
-    expect(src).not.toMatch(/\.getHours\(\)/);
-    expect(src).not.toMatch(/setHours\(/);
-  });
-
   /**
-   * Saat dilimi UÇTAN UCA tek parametre.
+   * Saat dilimi ve dükkan saatleri UÇTAN UCA tek parametre.
    *
-   * NEDEN: `SlotService` müsaitliği `Shop.timezone`'da üretiyor, ama checkout
-   * her yerde `parseDatetimeLocalInTimeZone`'un VARSAYILANINI (İstanbul)
-   * kullanıyordu. Bugün üç dükkan da İstanbul olduğu için ikisi tesadüfen
-   * örtüşüyor; İstanbul dışı ilk dükkan eklendiğinde misafirin ızgarada
-   * gördüğü saat ile rezervasyona yazılan an ofset kadar ayrışır — hatanın
-   * kendisi de sessizdir, ekranda hiçbir uyarı yoktur.
+   * Rezervasyon gün bazlı: misafir gün seçer, pencere dükkanın saatine
+   * `resolveStayWindow` ile oturtulur. Dilim ya da saatler yolda düşerse
+   * İstanbul dışı bir dükkanda bırakış/alış anı ofset kadar kayar ve ekranda
+   * hiçbir uyarı olmaz.
    */
-  it("checkout ve ızgara dükkanın dilimini alır; varsayılana düşmez", () => {
+  it("checkout dükkanın dilimini ve saatlerini alır; varsayılana düşmez", () => {
     const checkout = stripComments(
       fs.readFileSync("src/components/guest/CheckoutClient.tsx", "utf8"),
     );
-
     expect(checkout).toMatch(/timeZone\?: string/);
-    expect(checkout).toMatch(/parseDatetimeLocalInTimeZone\(checkInLocal, timeZone\)/);
-    expect(checkout).toMatch(/parseDatetimeLocalInTimeZone\(checkOutLocal, timeZone\)/);
-    expect(checkout).toMatch(/<SlotAvailabilityGrid[\s\S]*?timeZone=\{timeZone\}/);
+    expect(checkout).toMatch(/resolveStayWindow\(dropDate, pickupDate, hours\)/);
 
-    // Sayfa dükkanın kendi dilimini geçirmeli.
     const page = stripComments(
       fs.readFileSync("src/app/[locale]/checkout/[shopId]/page.tsx", "utf8"),
     );
     expect(page).toMatch(/timeZone=\{shop\.timezone/);
+    expect(page).toMatch(/openingTime=\{shop\.openingTime\}/);
+    expect(page).toMatch(/closingTime=\{shop\.closingTime\}/);
   });
 
   /**

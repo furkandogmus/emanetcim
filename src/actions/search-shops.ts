@@ -14,10 +14,12 @@ import { roundedSlotPrices } from "@/lib/bag-pricing";
 import { analyticsService } from "@/services/AnalyticsService";
 import { resolveServerSessionId } from "@/lib/analytics-server";
 import { auth } from "@/auth";
+import { searchWindowForDays } from "@/lib/stay-days";
 
 export async function refreshSearchShopsAction(input: {
-  checkInIso: string;
-  checkOutIso: string;
+  /** `YYYY-MM-DD` — gun bazli arama. */
+  dropDate: string;
+  pickupDate: string;
   requestedBags: number;
   centerLat?: number;
   centerLng?: number;
@@ -28,12 +30,11 @@ export async function refreshSearchShopsAction(input: {
     return { ok: false as const, error: "Errors.tooManyRequests" };
   }
   const rules = await getPricingRules();
-  const checkIn = new Date(input.checkInIso);
-  const checkOut = new Date(input.checkOutIso);
-
-  if (!validateBookingStayWindow(checkIn, checkOut, rules)) {
+  const window = searchWindowForDays(input.dropDate, input.pickupDate);
+  if (!window || !validateBookingStayWindow(window.checkIn, window.checkOut, rules)) {
     return { ok: false as const, error: "Errors.invalidBookingDates" };
   }
+  const { checkIn, checkOut } = window;
 
   const bags = Math.max(1, Math.floor(Number(input.requestedBags) || 1));
 
@@ -54,6 +55,7 @@ export async function refreshSearchShopsAction(input: {
       checkIn,
       checkOut,
       requestedBags: bags,
+      ignoreOpenHours: true,
     }),
     shopService.findShopsForSearch({
       centerLat: lat,
@@ -64,6 +66,7 @@ export async function refreshSearchShopsAction(input: {
       checkIn,
       checkOut,
       requestedBags: bags,
+      ignoreOpenHours: true,
     }),
   ]);
 

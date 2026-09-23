@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { X } from "lucide-react";
-import DateTimePicker from "@/components/ui/DateTimePicker";
+import StayDaysPicker from "@/components/guest/StayDaysPicker";
 import BagSelector from "@/components/guest/BagSelector";
 import { modifyBookingAction } from "@/actions/booking";
 import {
@@ -14,16 +14,11 @@ import {
   computeStayDaysFromWindow,
   validateBookingStayWindow,
 } from "@/lib/booking-server-price";
-/**
- * Saat dilimi: rezervasyon saatleri DÜKKANIN yerel saatidir, cihazınkinin değil.
- * Ayrıntı ve ölçülen hata: `src/lib/datetime-local.ts` →
- * `parseDatetimeLocalInTimeZone`.
- */
 import {
   PLATFORM_TIMEZONE,
-  parseDatetimeLocalInTimeZone,
   toDatetimeLocalValueInTimeZone,
 } from "@/lib/datetime-local";
+import { resolveStayWindow, todayInZone } from "@/lib/stay-days";
 import type { PricingRules } from "@/lib/pricing-rules";
 import type { GuestBookingListItem } from "@/services/BookingService";
 import { moneyToNumber } from "@/lib/money";
@@ -49,6 +44,9 @@ export type BookingModifyModalBooking = Pick<
     name?: string | null;
     /** Dükkanın kendi dilimi; yoksa platform varsayılanı. */
     timezone?: string | null;
+    openingTime?: string | null;
+    closingTime?: string | null;
+    open247?: boolean | null;
   } | null;
 };
 
@@ -85,17 +83,24 @@ export default function BookingModifyModal({
   const [bagS, setBagS] = useState(booking.bagCountS);
   const [bagM, setBagM] = useState(booking.bagCountM);
   const [bagXl, setBagXl] = useState(booking.bagCountXl);
-  const [checkInLocal, setCheckInLocal] = useState(() =>
-    toDatetimeLocalValueInTimeZone(new Date(booking.checkInTime), timeZone),
-  );
-  const [checkOutLocal, setCheckOutLocal] = useState(() =>
-    toDatetimeLocalValueInTimeZone(new Date(booking.checkOutTime), timeZone),
-  );
+  /* Gun bazli: mevcut rezervasyonun gunleri, dukkanin diliminde. */
+  const [stay, setStay] = useState(() => ({
+    drop: toDatetimeLocalValueInTimeZone(new Date(booking.checkInTime), timeZone).slice(0, 10),
+    pickup: toDatetimeLocalValueInTimeZone(new Date(booking.checkOutTime), timeZone).slice(0, 10),
+  }));
+  const [minDropDate] = useState(() => todayInZone(timeZone));
+  const hours = {
+    openingTime: booking.shop?.openingTime,
+    closingTime: booking.shop?.closingTime,
+    open247: booking.shop?.open247,
+    timeZone,
+  };
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  const checkInDate = parseDatetimeLocalInTimeZone(checkInLocal, timeZone);
-  const checkOutDate = parseDatetimeLocalInTimeZone(checkOutLocal, timeZone);
+  const stayWindow = resolveStayWindow(stay.drop, stay.pickup, hours);
+  const checkInDate = stayWindow?.checkIn ?? null;
+  const checkOutDate = stayWindow?.checkOut ?? null;
   const windowOk =
     checkInDate !== null &&
     checkOutDate !== null &&
@@ -200,36 +205,23 @@ export default function BookingModifyModal({
             <p className="text-xs text-gray-500 font-medium">{booking.shop.name}</p>
           ) : null}
 
-          <div className="flex flex-col gap-3">
-            <label className="flex flex-col gap-1.5">
-              <span className="id-eyebrow text-gray-400">
-                {t("checkoutCheckInLabel")}
-              </span>
-              <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100">
-                <DateTimePicker
-                  value={checkInLocal}
-                  onChange={setCheckInLocal}
-                  ariaLabel={t("checkoutCheckInLabel")}
-                />
-              </div>
-            </label>
-            <label className="flex flex-col gap-1.5">
-              <span className="id-eyebrow text-gray-400">
-                {t("checkoutCheckOutLabel")}
-              </span>
-              <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100">
-                <DateTimePicker
-                  value={checkOutLocal}
-                  onChange={setCheckOutLocal}
-                  ariaLabel={t("checkoutCheckOutLabel")}
-                  minDate={parseDatetimeLocalInTimeZone(checkInLocal, timeZone) ?? undefined}
-                />
-              </div>
-            </label>
-          </div>
+          <StayDaysPicker
+            dropDate={stay.drop}
+            pickupDate={stay.pickup}
+            onChange={(drop, pickup) => setStay({ drop, pickup })}
+            minDropDate={minDropDate < stay.drop ? minDropDate : stay.drop}
+            maxDays={pricingRules.maxStayDays}
+            timeZone={timeZone}
+            hours={
+              booking.shop?.open247
+                ? null
+                : { open: booking.shop?.openingTime ?? "09:00", close: booking.shop?.closingTime ?? "20:00" }
+            }
+          />
 
           <div className="flex flex-col gap-3">
             <BagSelector
+              size="s"
               label={t("smallBag")}
               sublabel={`S / ${formatTryCurrency(slot.s, locale)}`}
               count={bagS}
@@ -238,6 +230,7 @@ export default function BookingModifyModal({
               onDecrease={() => setBagS(Math.max(0, bagS - 1))}
             />
             <BagSelector
+              size="m"
               label={t("mediumBag")}
               sublabel={`M/L / ${formatTryCurrency(slot.m, locale)}`}
               count={bagM}
@@ -246,6 +239,7 @@ export default function BookingModifyModal({
               onDecrease={() => setBagM(Math.max(0, bagM - 1))}
             />
             <BagSelector
+              size="xl"
               label={t("xlBag")}
               sublabel={`XL / ${formatTryCurrency(slot.xl, locale)}`}
               count={bagXl}

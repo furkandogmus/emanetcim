@@ -60,21 +60,14 @@ test.describe('UC: Misafir — Checkout fiyat ve çanta (anonim)', () => {
     await expect(page.getByTestId('checkout-total-amount')).toHaveText(/₺264(,00)?/);
   });
 
-  /**
-   * Checkout artık tarih girişi yerine slot ızgarası kullanıyor; `checkout-checkin`
-   * alanı yok. Çok günlük senaryo ızgara üzerinden yeniden yazılana kadar atlanır.
-   */
-  test.skip('Çok günlük konaklama: 3 gün 1×M (80×3+15)', async ({ page }) => {
+  /** Gun bazli kalis: hizli secim "3 gun" -> fiyat gun sayisiyla carpilir. */
+  test('Çok günlük konaklama: 3 gün 1×M (80×3)', async ({ page }) => {
     await page.goto('/tr/search');
     await openCheckoutFromSearchList(page);
     await waitForCheckoutDatesReady(page);
-    await page.getByTestId('checkout-footer-primary').click();
-    await expect(page.getByTestId('checkout-total-amount')).toHaveText(/₺80(,00)?/);
 
-    await page.getByRole('button', { name: 'Geri' }).click();
-    await page.getByTestId('checkout-checkin').fill('2030-06-01T10:00');
-    await page.getByTestId('checkout-checkout').fill('2030-06-04T10:00');
-    await expect(page.getByTestId('checkout-stay-days-value')).toHaveText('3');
+    await page.getByRole('button', { name: '3 gün', exact: true }).click();
+    await expect(page.getByTestId('checkout-days-summary')).toHaveText('3 gün');
     await page.getByTestId('checkout-footer-primary').click();
     await expect(page.getByTestId('checkout-total-amount')).toHaveText(/₺240(,00)?/);
     await expect(page.getByTestId('checkout-service-total')).toHaveText(/₺240(,00)?/);

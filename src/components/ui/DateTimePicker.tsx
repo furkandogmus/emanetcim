@@ -62,6 +62,11 @@ interface DateTimePickerProps {
   className?: string;
   icon?: ReactNode;
   iconSize?: number;
+  /**
+   * Yalnizca GUN secilir; deger `YYYY-MM-DD`. Rezervasyon gun bazli fiyatlandigi
+   * icin saat sormak misafiri gereksiz bir karara zorluyordu.
+   */
+  dateOnly?: boolean;
 }
 
 /** Popup genisligi (px). Dar ekranda %94'e kirpilir. */
@@ -126,6 +131,7 @@ export default function DateTimePicker({
   className,
   icon,
   iconSize = 18,
+  dateOnly = false,
 }: DateTimePickerProps) {
   const locale = useLocale();
   const dfLocale = LOCALE_MAP[locale] ?? enUS;
@@ -156,7 +162,11 @@ export default function DateTimePicker({
   const dateLabel = t("selectDate");
   const timeLabel = t("selectTime");
 
-  const parsed = useMemo(() => parseDatetimeLocal(value), [value]);
+  const parsed = useMemo(() => {
+    if (!dateOnly) return parseDatetimeLocal(value);
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(value ?? "");
+    return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null;
+  }, [value, dateOnly]);
   const timeOptions = useMemo(
     () => buildTimeOptions(stepMinutes),
     [stepMinutes],
@@ -183,11 +193,13 @@ export default function DateTimePicker({
    */
   const display = useMemo(() => {
     if (!parsed) return placeholder ?? "";
-    return new Intl.DateTimeFormat(locale, {
-      dateStyle: "short",
-      timeStyle: "short",
-    }).format(parsed);
-  }, [parsed, locale, placeholder]);
+    return new Intl.DateTimeFormat(
+      locale,
+      dateOnly
+        ? { weekday: "short", day: "numeric", month: "short" }
+        : { dateStyle: "short", timeStyle: "short" },
+    ).format(parsed);
+  }, [parsed, locale, placeholder, dateOnly]);
 
   /*
     Disari tiklama: popup artik `document.body` altinda (asagidaki portal), yani
@@ -300,6 +312,12 @@ export default function DateTimePicker({
   const applyDate = useCallback(
     (date: Date | undefined) => {
       if (!date) return;
+      if (dateOnly) {
+        const pad = (n: number) => String(n).padStart(2, "0");
+        onChange(`${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`);
+        setOpen(false);
+        return;
+      }
       // Tarih seçilen günden, saat mevcut değerden; ikisi de `Date` kurulmadan
       // birleştiriliyor (bkz. `applyTime` yorumu).
       const base = parsed ?? date;
@@ -313,7 +331,7 @@ export default function DateTimePicker({
         ),
       );
     },
-    [onChange, parsed],
+    [onChange, parsed, dateOnly],
   );
 
   const applyTime = useCallback(
@@ -346,8 +364,8 @@ export default function DateTimePicker({
     <div ref={rootRef} className={`relative ${className ?? ""}`}>
       {testId ? (
         <input
-          type="datetime-local"
-          step={stepMinutes * 60}
+          type={dateOnly ? "date" : "datetime-local"}
+          step={dateOnly ? undefined : stepMinutes * 60}
           data-testid={testId}
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -401,6 +419,7 @@ export default function DateTimePicker({
               className="rdp-emanet mx-auto text-sm"
             />
           </div>
+          {!dateOnly && (
           <div className="px-2 pb-2">
             <p className="id-eyebrow text-gray-400 mb-2 px-1">
               {timeLabel}
@@ -425,6 +444,7 @@ export default function DateTimePicker({
               })}
             </div>
           </div>
+          )}
           <div className="px-2 pb-3 flex gap-2">
             <button
               type="button"
@@ -472,6 +492,7 @@ export default function DateTimePicker({
             showOutsideDays
             className="rdp-emanet mx-auto"
           />
+          {!dateOnly && (
           <div className="mt-2 flex items-center gap-2 border-t border-gray-100 pt-3">
             <Clock size={16} className="text-gray-400 shrink-0" aria-hidden />
             <select
@@ -494,6 +515,7 @@ export default function DateTimePicker({
               OK
             </button>
           </div>
+          )}
         </div>,
         document.body,
         )

@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Search } from "lucide-react";
 import { useRouter } from "@/i18n/routing";
 import DateTimePicker from "@/components/ui/DateTimePicker";
-import { parseDatetimeLocalInTimeZone } from "@/lib/datetime-local";
+import { calendarDaysInclusive, dateOnlyFromParam } from "@/lib/stay-days";
 
 type Props = {
   /**
@@ -28,8 +28,8 @@ export default function HomeSearchWidget({
 }: Props) {
   const t = useTranslations("Guest");
   const router = useRouter();
-  const [checkIn, setCheckIn] = useState(defaultCheckIn);
-  const [checkOut, setCheckOut] = useState(defaultCheckOut);
+  const [checkIn, setCheckIn] = useState(() => dateOnlyFromParam(defaultCheckIn) ?? defaultCheckIn);
+  const [checkOut, setCheckOut] = useState(() => dateOnlyFromParam(defaultCheckOut) ?? defaultCheckOut);
   const [bags, setBags] = useState(1);
   const [rangeError, setRangeError] = useState(false);
 
@@ -53,14 +53,11 @@ export default function HomeSearchWidget({
     yorumu) ve dukkanin acik/kapali hesabi da o dilime gore. `new Date(value)`
     ile karsilastirmak Berlin'de 1, New York'ta 7 saatlik kayma verirdi.
   */
-  const checkInDate = useMemo(
-    () => parseDatetimeLocalInTimeZone(checkIn),
-    [checkIn],
-  );
-  const checkOutDate = useMemo(
-    () => parseDatetimeLocalInTimeZone(checkOut),
-    [checkOut],
-  );
+  /* Gun bazli: yalnizca takvimin alt siniri icin yerel `Date`. */
+  const checkInDate = useMemo(() => {
+    const [y, m, d] = checkIn.split("-").map(Number);
+    return y ? new Date(y, m - 1, d) : null;
+  }, [checkIn]);
 
   const handleSearch = () => {
     /*
@@ -70,11 +67,7 @@ export default function HomeSearchWidget({
       ciziyordu. Akisin bir sonraki adimi olan arama paneli `minDate` ile bunu
       zaten engelliyordu; giris noktasi atlanmisti.
     */
-    if (
-      !checkInDate ||
-      !checkOutDate ||
-      checkOutDate.getTime() <= checkInDate.getTime()
-    ) {
+    if (calendarDaysInclusive(checkIn, checkOut) < 1) {
       setRangeError(true);
       return;
     }
@@ -91,6 +84,8 @@ export default function HomeSearchWidget({
   // artik dogru olmayan bir hata mesaji asili kalirdi.
   const updateCheckIn = (value: string) => {
     setCheckIn(value);
+    // Birakis alistan sonraya kayarsa alis onu takip eder; hata gostermek yerine.
+    if (calendarDaysInclusive(value, checkOut) < 1) setCheckOut(value);
     setRangeError(false);
   };
   const updateCheckOut = (value: string) => {
@@ -123,7 +118,7 @@ export default function HomeSearchWidget({
             {t("searchCheckIn")}
           </label>
           <div className="p-3 bg-gray-50 rounded-xl border border-gray-100 focus-within:border-orange-200 transition-colors">
-            <DateTimePicker value={checkIn} onChange={updateCheckIn} testId="home-checkin" ariaLabel={t("searchCheckIn")} iconSize={18} minDate={minCheckIn} />
+            <DateTimePicker value={checkIn} onChange={updateCheckIn} testId="home-checkin" ariaLabel={t("searchCheckIn")} iconSize={18} minDate={minCheckIn} dateOnly />
           </div>
         </div>
         <div className="min-w-0 flex-1 flex flex-col gap-1.5">
@@ -131,7 +126,7 @@ export default function HomeSearchWidget({
             {t("searchCheckOut")}
           </label>
           <div className="p-3 bg-gray-50 rounded-xl border border-gray-100 focus-within:border-orange-200 transition-colors">
-            <DateTimePicker value={checkOut} onChange={updateCheckOut} testId="home-checkout" ariaLabel={t("searchCheckOut")} iconSize={18} minDate={checkInDate ?? minCheckIn} />
+            <DateTimePicker value={checkOut} onChange={updateCheckOut} testId="home-checkout" ariaLabel={t("searchCheckOut")} iconSize={18} minDate={checkInDate ?? minCheckIn} dateOnly />
           </div>
         </div>
         <div className="w-full lg:w-24 flex flex-col gap-1.5">

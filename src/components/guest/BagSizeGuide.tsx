@@ -3,8 +3,8 @@
 import { useTranslations } from "next-intl";
 import BagGlyph, { BAG_HEIGHT_UNITS, type BagSize } from "@/components/guest/BagGlyph";
 
-/** Piksel/birim: en buyuk valiz ~115 px. Uc boy ayni olcekte kalir. */
-const SCALE = 0.9;
+/** Piksel/birim: en buyuk valiz ~110 px. Uc boy ayni olcekte kalir. */
+const SCALE = 1.1;
 
 type Props = {
   /** Verilirse her boyun altinda gunluk fiyat gorunur (orn. checkout). */

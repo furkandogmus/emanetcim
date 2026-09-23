@@ -6,8 +6,14 @@ import {
   SEARCH_ALL_RADIUS_KM,
   SEARCH_DEFAULT_CENTER,
   SEARCH_NEARBY_RADIUS_KM,
-  defaultSearchStayWindow,
 } from '@/lib/search-defaults';
+import {
+  addDays,
+  calendarDaysInclusive,
+  dateOnlyFromParam,
+  searchWindowForDays,
+  todayInZone,
+} from "@/lib/stay-days";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { alternatesForPath } from "@/lib/seo-alternates";
 import { socialMetadata } from "@/lib/social-metadata";
@@ -75,7 +81,7 @@ export default async function SearchPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ q?: string; lat?: string; lng?: string }>;
+  searchParams: Promise<{ q?: string; lat?: string; lng?: string; checkIn?: string; checkOut?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -84,7 +90,24 @@ export default async function SearchPage({
   const center = parseCenter(sp.lat, sp.lng);
   const initialQuery = (sp.q ?? "").trim();
 
-  const { checkIn, checkOut } = defaultSearchStayWindow();
+  /*
+    Ana sayfa `?checkIn=&checkOut=` ile GUN gonderiyor; eskiden bu sayfa onlari
+    hic okumuyor ve her zaman kendi varsayilanini kullaniyordu. Varsayilan:
+    bugun birak, bugun al.
+  */
+  const today = todayInZone();
+  let dropDate = dateOnlyFromParam(sp.checkIn) ?? today;
+  if (dropDate < today) dropDate = today;
+  let pickupDate = dateOnlyFromParam(sp.checkOut) ?? dropDate;
+  if (calendarDaysInclusive(dropDate, pickupDate) < 1) pickupDate = dropDate;
+  let stay = searchWindowForDays(dropDate, pickupDate);
+  if (!stay) {
+    // Bugun icin artik gec (gun bitiyor): yarina kaydir.
+    dropDate = addDays(today, 1);
+    pickupDate = dropDate;
+    stay = searchWindowForDays(dropDate, pickupDate)!;
+  }
+  const { checkIn, checkOut } = stay;
 
   const allShops = await shopService.findShopsForSearch({
     centerLat: center.lat,
@@ -95,6 +118,7 @@ export default async function SearchPage({
     checkIn,
     checkOut,
     requestedBags: 1,
+    ignoreOpenHours: true,
   });
 
   const nearbyShops = allShops.filter(s => s.distanceKm <= SEARCH_NEARBY_RADIUS_KM);
@@ -103,8 +127,8 @@ export default async function SearchPage({
     <SearchClient
       initialNearby={JSON.parse(JSON.stringify(nearbyShops))}
       initialAll={JSON.parse(JSON.stringify(allShops))}
-      defaultCheckInIso={checkIn.toISOString()}
-      defaultCheckOutIso={checkOut.toISOString()}
+      defaultDropDate={dropDate}
+      defaultPickupDate={pickupDate}
       initialSearchQuery={initialQuery}
       searchCenter={{ lat: center.lat, lng: center.lng }}
       hasExplicitCenter={center.explicit}

@@ -43,7 +43,6 @@ export type ShopWithDistance = {
   isActive: boolean;
   rating: number | null;
   pricePerDay: number;
-  pricePerHour: number;
   hasRestroom: boolean;
   hasCctv: boolean;
   hasClimateControl: boolean;
@@ -166,7 +165,6 @@ function toShopWithDistance(shop: Shop, distanceKm: number): ShopWithDistance {
     isActive: shop.isActive,
     rating: shop.rating,
     pricePerDay: moneyToNumber(shop.pricePerDay),
-    pricePerHour: moneyToNumber(shop.pricePerHour ?? shop.pricePerDay),
     hasRestroom: shop.hasRestroom,
     hasCctv: shop.hasCctv,
     hasClimateControl: shop.hasClimateControl,
@@ -223,6 +221,12 @@ export type FindShopsForSearchOptions = {
   checkIn: Date;
   checkOut: Date;
   requestedBags: number;
+  /**
+   * Gun bazli aramada pencere tum gunleri kapsar (00:00-23:59); dukkanin o
+   * ANLARDA acik olmasi aranmaz, cunku birakis/alis dukkanin kendi saatine
+   * oturtulur (`resolveStayWindow`). Kapasite kontrolu yine uygulanir.
+   */
+  ignoreOpenHours?: boolean;
 };
 
 export interface IShopService {
@@ -370,6 +374,7 @@ export class ShopService implements IShopService {
       checkIn,
       checkOut,
       requestedBags,
+      ignoreOpenHours = false,
     } = options;
     const bags = Math.max(1, Math.floor(requestedBags));
 
@@ -474,7 +479,7 @@ export class ShopService implements IShopService {
               const minAvailable = Math.min(...availableCounts);
               if (minAvailable < bags) continue;
 
-              const openOk = isShopOpenForStay(
+              const openOk = ignoreOpenHours || isShopOpenForStay(
                 shop.openingTime,
                 shop.closingTime,
                 shop.open247,
@@ -546,7 +551,7 @@ export class ShopService implements IShopService {
           const bagsAvailable = Math.max(0, shop.capacity - used);
           if (bagsAvailable < bags) continue;
 
-          const openOk = isShopOpenForStay(
+          const openOk = ignoreOpenHours || isShopOpenForStay(
             shop.openingTime,
             shop.closingTime,
             shop.open247,
