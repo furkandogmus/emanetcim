@@ -29,6 +29,17 @@ test.describe('BagajPark Production Hardening & PWA E2E Tests', () => {
     expect(manifest.short_name).toBe('BagajPark');
   });
 
+  // Dile gore manifest (2026-09-23): kisayollar ve ad ziyaretcinin dilinde.
+  test('PWA: locale manifest carries localized shortcuts', async ({ page }) => {
+    const response = await page.goto('/manifests/de.webmanifest');
+    expect(response?.ok()).toBeTruthy();
+    const manifest = await response?.json();
+    expect(manifest.lang).toBe('de');
+    expect(manifest.id).toBe('/');
+    expect(manifest.shortcuts[0].url).toBe('/de/search?utm_source=pwa');
+    expect((await page.goto('/manifests/xx.webmanifest'))?.status()).toBe(404);
+  });
+
   // sw.js artık kendini kaldıran statik dosya; erişilebilir olmalı ki eski SW'ler temizlensin.
   test('PWA: sw.js (Service Worker) should be accessible', async ({ page }) => {
     const response = await page.goto('/sw.js');
@@ -42,7 +53,7 @@ test.describe('BagajPark Production Hardening & PWA E2E Tests', () => {
     expect(themeColor).toBe('#ea580c');
 
     const manifest = await page.locator('link[rel="manifest"]').getAttribute('href');
-    expect(manifest).toBe('/manifest.json');
+    expect(manifest).toBe('/manifests/tr.webmanifest');
   });
 
   test('i18n: should switch content language correctly', async ({ page }) => {

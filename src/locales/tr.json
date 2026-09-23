@@ -2267,5 +2267,17 @@
     "sizesTitle": "Hangi valizleri alırsınız?",
     "sizesBody": "Misafir valizini boyuna göre seçer: sırt çantası daha ucuz, büyük valiz daha pahalıdır. Kaç valiz alacağınızı siz belirlersiniz.",
     "sizesPriceNote": "Başlangıç fiyatı orta boy için günlük {price}. Fiyatı panelden istediğiniz zaman değiştirebilirsiniz."
+  },
+  "Pwa": {
+    "name": "BagajPark — Valiz Emanet",
+    "description": "Valizini güvenle bırak, özgürce gez. Yakındaki emanet noktasını bul, rezervasyon yap.",
+    "shortcutSearchName": "Nokta Ara",
+    "shortcutSearchShort": "Ara",
+    "shortcutSearchDesc": "Yakındaki emanet noktalarını bul",
+    "shortcutBookingsName": "Rezervasyonlarım",
+    "shortcutBookingsShort": "Rezervasyonlar",
+    "shortcutBookingsDesc": "Rezervasyonlarını ve QR kodunu gör",
+    "screenshotSearch": "Yakındaki emanet noktaları haritada",
+    "screenshotHome": "Valizini bırak, özgürce gez"
   }
 }

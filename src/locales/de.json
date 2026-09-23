@@ -2122,5 +2122,17 @@
     "sizesTitle": "Welche Gepäckstücke nehmen Sie an?",
     "sizesBody": "Gäste wählen nach Größe: ein Rucksack kostet weniger, ein großer Koffer mehr. Wie viele Sie annehmen, bestimmen Sie.",
     "sizesPriceNote": "Startpreis für ein mittleres Gepäckstück: {price} pro Tag. Sie können ihn jederzeit im Panel ändern."
+  },
+  "Pwa": {
+    "name": "BagajPark — Gepäckaufbewahrung",
+    "description": "Gepäck sicher abgeben und frei erkunden. Aufbewahrung in der Nähe finden und buchen.",
+    "shortcutSearchName": "Aufbewahrung finden",
+    "shortcutSearchShort": "Suchen",
+    "shortcutSearchDesc": "Gepäckaufbewahrung in der Nähe finden",
+    "shortcutBookingsName": "Meine Buchungen",
+    "shortcutBookingsShort": "Buchungen",
+    "shortcutBookingsDesc": "Buchungen und QR-Code ansehen",
+    "screenshotSearch": "Aufbewahrungsorte in der Nähe auf der Karte",
+    "screenshotHome": "Gepäck abgeben, frei erkunden"
   }
 }
