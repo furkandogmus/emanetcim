@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { ShopService } from "@/services/ShopService";
-import { toMobileShop } from "@/lib/mobile-dto";
+import { toMobilePricing, toMobileShop } from "@/lib/mobile-dto";
+import { getPricingRules } from "@/lib/platform-settings";
 
 const shopService = new ShopService();
 
@@ -19,5 +20,10 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     mobil uygulama ayni dukkani listede "dogrulanmis", detayda dogrulanmamis
     gosteriyordu. Ortak govde farki kapatti.
   */
-  return NextResponse.json(toMobileShop(s));
+  /*
+    `pricing` yalnizca detayda: odeme ekrani bu uctan okuyor ve tahmini tutari
+    sunucunun kurallariyla hesapliyor (bkz. `toMobilePricing`).
+  */
+  const rules = await getPricingRules();
+  return NextResponse.json({ ...toMobileShop(s), pricing: toMobilePricing(rules) });
 }
