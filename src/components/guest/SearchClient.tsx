@@ -606,7 +606,7 @@ export default function SearchClient({
                   id={shop.id}
                   name={shop.name}
                   rating={shop.rating || 0}
-                  price={Number(shop.pricePerDay) || 50}
+                  price={shop.pricePerDay}
                   distanceKm={shop.distanceKm}
                   lat={shop.latitude ?? undefined}
                   lng={shop.longitude ?? undefined}
