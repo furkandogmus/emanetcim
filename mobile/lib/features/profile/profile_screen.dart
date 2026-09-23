@@ -17,6 +17,7 @@ import '../../core/auth/token_store.dart';
 import '../../core/config/feature_flags_controller.dart';
 import '../../core/config/theme_mode_provider.dart';
 import '../../core/push/notification_prefs.dart';
+import '../../core/repositories/referral_repository.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/services/share_service.dart';
 import '../../core/utils/error_handler.dart';
@@ -466,6 +467,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _referralCard(BuildContext context, WidgetRef ref, UserDto? user) {
+    // Kod ve oran sunucudan (`/referrals/code`); kod yoksa sunucu uretir.
+    // Eskiden `user.referralCode ?? 'BP-WELCOME'` -- var olmayan bir kod.
+    final referral = ref.watch(myReferralProvider).value;
+    final code = referral?.code ?? user?.referralCode;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -507,7 +512,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                     ),
                     Text(
-                      'profile.referral_hint'.tr(),
+                      'profile.referral_hint'.tr(
+                        namedArgs: {
+                          'pct': (referral?.discountPct ?? 5).toStringAsFixed(
+                            0,
+                          ),
+                        },
+                      ),
                       style: Theme.of(context).textTheme.bodySmall!.copyWith(
                         fontSize: 12,
                         color: const Color(0xFF757575),
@@ -530,7 +541,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               children: [
                 Flexible(
                   child: Text(
-                    user?.referralCode ?? 'BP-WELCOME',
+                    code ?? '…',
                     style: Theme.of(context).textTheme.titleMedium!.copyWith(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -542,15 +553,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
                 const SizedBox(width: 8),
                 TextButton.icon(
-                  onPressed: () {
-                    ref.read(hapticServiceProvider).light();
-                    Clipboard.setData(
-                      ClipboardData(text: user?.referralCode ?? 'BP-WELCOME'),
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('profile.copied'.tr())),
-                    );
-                  },
+                  onPressed: code == null
+                      ? null
+                      : () {
+                          ref.read(hapticServiceProvider).light();
+                          Clipboard.setData(ClipboardData(text: code));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('profile.copied'.tr())),
+                          );
+                        },
                   icon: const Icon(
                     Icons.copy_rounded,
                     size: 16,
