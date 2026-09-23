@@ -76,5 +76,10 @@
 # Postgres yedeği + S3 kopyası. Yedekler yalnızca sunucu diskinde kalmasın diye.
 0 */6 * * * /opt/emanetci/scripts/backup-s3.sh --bucket bagajpark-backups-1d9eb152 >> /opt/emanetci/logs/backup.log 2>&1
 
+# Günlük AWS maliyet raporu (dünkü harcama, ay toplamı, kalan free tier kredisi)
+# e-postayla. Alıcı SSM /bagajpark/env/app/COST_REPORT_TO. 06:05 UTC = 09:05 TR;
+# Cost Explorer dünün verisini gece geç kapatıyor.
+5 6 * * * /opt/emanetci/scripts/aws-cost-report.sh --log-file /opt/emanetci/logs/aws-cost-report.log >> /opt/emanetci/logs/aws-cost-report.out 2>&1
+
 # Kullanılmayan docker imajları; tek diskli kutuda disk dolmasını önler.
 0 3 * * 0 docker image prune -af --filter "until=168h" >> /opt/emanetci/logs/docker-prune.log 2>&1

@@ -805,3 +805,58 @@ Varsayılan kategori listesini kalıcı değiştirmek için dosyanın başındak
   kullanıp süresi geçince yeniden koşun.
 - **Places sonuçlarıyla soğuk arama yapılırken KVKK** uygulanır; script veriyi
   Google'dan çekmekle sınırlı, arama/pazarlama tarafı ayrı bir uyum konusu.
+
+## Günlük AWS maliyet raporu — `aws-cost-report.sh`
+
+Prod EC2'de her gün 06:05 UTC (09:05 TR) çalışır ve e-postayla şunları gönderir:
+dünkü brüt harcama, ay toplamı, günlük ortalama, kalan free tier kredisi, "bu hızla
+kredi ne zaman biter" tahmini ve plan bitiş tarihi. Hesap AWS'nin **FREE** planında;
+kredi biterse hesap kapanır, yani bu e-posta bir kesinti erken uyarısıdır.
+
+**2026-09-23 ölçümü:** kalan $122.12, günde ~$2.5 → kredi ~2026-11-10'da biter
+(plan bitişi 2027-02-23'ten çok önce).
+
+Yetki EC2 rolünden gelir (`infra/aws/stack/main.tf` → `app_cost_read`: salt okur
+`ce:GetCostAndUsage`, `freetier:GetAccountPlanState`). Sunucuda statik anahtar yok.
+Resend anahtarı sunucunun `docker-compose.env`'inden okunur; alıcı SSM'de durur,
+repo public olduğu için adres git'e yazılmaz. Cost Explorer istek başına $0.01;
+günlük koşu ayda ~$0.60.
+
+### Kurulum (bir kere)
+
+Önkoşul: prod hesabına (772853132412) yazma yetkili bir AWS kimliği; komutlar repo
+kökünden. Profil adı sizin yerel ayarınızdır.
+
+1. Alıcıyı SSM'e yaz:
+   ```bash
+   aws ssm put-parameter --profile <prod-profiliniz> --region eu-central-1 \
+     --name /bagajpark/env/app/COST_REPORT_TO --type String \
+     --value 'alici@ornek.com' --overwrite
+   ```
+   Beklenen: `{"Version": 1, "Tier": "Standard"}`.
+2. IAM iznini uygula: `infra/aws/stack` içinde `terraform plan` → yalnızca
+   `aws_iam_role_policy.app_cost_read` **create** görünmeli → `terraform apply`.
+3. Script'i sunucuya taşı: PR birleşince deploy `scripts/`'i `/opt/emanetci/scripts/`e
+   senkronlar.
+4. Crontab'ı kur: `ops/crontab.prod` başındaki KURULUM adımları (önce mevcut listeyi yedekle).
+
+### Doğrulama
+
+Yerelde, prod kimliğiyle, göndermeden:
+```bash
+scripts/aws-cost-report.sh --dry-run --no-log-file --to test@ornek.com
+```
+Beklenen: `dun (YYYY-MM-DD): $… | ay toplami: $… | plan: FREE <kredi> <bitis>` ve
+e-postanın metni.
+
+Sunucuda bir kez elle (SSM Run Command ya da oturumla, `ec2-user` olarak):
+```bash
+/opt/emanetci/scripts/aws-cost-report.sh --log-file /opt/emanetci/logs/aws-cost-report.log
+```
+Beklenen son satır: `e-posta gonderildi`. `Resend HTTP 403` → gönderici alan adı
+doğrulanmamış ya da anahtar yanlış; `AccessDenied` (ce/freetier) → 2. adım uygulanmamış.
+
+### Geri alma
+
+`ops/crontab.prod`'dan satırı sil ve crontab'ı yeniden kur. İzin zararsızdır
+(salt okuma), ama kaldırmak için `app_cost_read` bloğunu silip `terraform apply`.

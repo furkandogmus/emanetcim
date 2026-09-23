@@ -157,6 +157,23 @@ resource "aws_iam_role_policy" "app_backup_write" {
   })
 }
 
+# Gunluk maliyet raporu (scripts/aws-cost-report.sh). Salt okuma: harcama ve
+# free tier kredisi. Cost Explorer ve Free Tier kaynak duzeyinde kisitlanamaz,
+# o yuzden Resource "*". Hesap FREE planinda; kredi biterse hesap kapanir.
+resource "aws_iam_role_policy" "app_cost_read" {
+  name = "read-cost-and-free-tier"
+  role = aws_iam_role.app.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["ce:GetCostAndUsage", "freetier:GetAccountPlanState"]
+      Resource = "*"
+    }]
+  })
+}
+
 resource "aws_iam_role_policy" "app_deploy_config_read" {
   name = "read-deploy-config"
   role = aws_iam_role.app.id
