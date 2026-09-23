@@ -1,0 +1,50 @@
+# =============================================================================
+# PR kapisi — main'e giren her PR'da, yol filtresi OLMADAN calisir.
+#
+# NEDEN (2026-09-23): gercek kullanicilar geliyor; main artik yalnizca PR ile
+# degisiyor ve her PR kucuk, tek konulu commit'lerle geliyor (rebase merge ile
+# main'e oldugu gibi iner). Commit basligi CHANGELOG ve surum notunun ham
+# maddesi; kural docs/GIT_COMMIT_GUIDE.md'de, burada yalnizca denetleniyor.
+# =============================================================================
+name: PR kapisi
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  pr-rules:
+    name: PR kurallari
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Commit basliklari (Conventional Commits, ASCII, <= 100)
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          hatali=0
+          while IFS= read -r baslik; do
+            if ! printf '%s' "$baslik" | grep -qE '^(feat|fix|docs|test|chore|ci|refactor|perf|build|revert|style)(\([a-z0-9._/-]+\))?!?: .+'; then
+              echo "::error::Conventional Commits degil: $baslik"; hatali=1
+            fi
+            if printf '%s' "$baslik" | LC_ALL=C grep -q '[^ -~]'; then
+              echo "::error::Baslikta ASCII disi karakter var: $baslik"; hatali=1
+            fi
+            if [ "${#baslik}" -gt 100 ]; then
+              echo "::error::Baslik 100 karakteri asiyor: $baslik"; hatali=1
+            fi
+          done < <(git log --no-merges --format=%s "${BASE_SHA}..${HEAD_SHA}")
+          if [ "$hatali" -ne 0 ]; then
+            echo "Kural: docs/GIT_COMMIT_GUIDE.md"
+            exit 1
+          fi
+          echo "Tum commit basliklari uygun."
