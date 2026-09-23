@@ -43,7 +43,11 @@
 
 # Yaklaşan rezervasyonlar için misafire hatırlatma gönderir.
 # Calismazsa: Misafir check-in saatini kaçırır; no-show ve destek yükü artar.
-7 9 * * * /opt/emanetci/scripts/call-internal-job.sh --job booking-reminders --method GET >> /opt/emanetci/logs/bagajpark-booking-reminders.log 2>&1
+7,22,37,52 * * * * /opt/emanetci/scripts/call-internal-job.sh --job booking-reminders --method GET >> /opt/emanetci/logs/bagajpark-booking-reminders.log 2>&1
+
+# İki kaydın sessizce ayrıştığı rezervasyon ve dükkanları sayar (okur, düzeltmez).
+# Calismazsa: Kapasite defteri, mühür sayısı ve tahsil edilen tutar gibi ayrışmalar hiçbir ekranda görünmez; ilk belirtileri tezgâhta ortaya çıkar.
+41 5 * * * /opt/emanetci/scripts/call-internal-job.sh --job consistency-check --method GET >> /opt/emanetci/logs/bagajpark-consistency-check.log 2>&1
 
 # Süresi geçmiş doğrulama token'larını, oturumları ve 90 günden eski analitik olaylarını siler.
 # Calismazsa: Tablolar sınırsız büyür — süresi geçmiş token'lar gereğinden uzun yaşar, AnalyticsEvent hiç küçülmez.
