@@ -2,6 +2,8 @@ import prisma from "@/lib/db";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import nextPackage from "next/package.json";
+import { isNetgsmConfigured } from "@/lib/netgsm";
 import { Server, Database, Mail, Smartphone, Cpu, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 
 
@@ -21,7 +23,10 @@ export default async function AdminStatusPage({ params }: { params: Promise<{ lo
   
   const envStatus = {
     resend: !!process.env.RESEND_API_KEY,
-    netgsm: !!process.env.NETGSM_USER && !!process.env.NETGSM_PASS,
+    // SMS gonderimiyle AYNI kontrol. Burada eskiden `NETGSM_USER`/`NETGSM_PASS`
+    // okunuyordu; gonderim `NETGSM_USERNAME`/`NETGSM_PASSWORD` okuyor ve compose
+    // da onlari veriyor -- yani SMS calisirken bu satir hep "yok" diyordu.
+    netgsm: isNetgsmConfigured(),
     auth: !!process.env.AUTH_SECRET,
     db: !!process.env.DATABASE_URL,
     production: process.env.NODE_ENV === 'production'
@@ -29,7 +34,7 @@ export default async function AdminStatusPage({ params }: { params: Promise<{ lo
 
   const systemInfo = {
     node: process.version,
-    next: "15.1.4", // Static from package.json knowledge
+    next: nextPackage.version,
     os: process.platform,
     memory: `${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB / ${Math.round(process.memoryUsage().heapTotal / 1024 / 1024)}MB`
   };
