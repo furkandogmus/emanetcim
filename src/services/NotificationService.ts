@@ -198,7 +198,9 @@ export class NotificationService implements INotificationService {
    * Push bildirim gönderimi
    */
   async sendPush(userId: string, title: string, message: string, bookingId?: string): Promise<boolean> {
-    const publicKey = process.env.VAPID_PUBLIC_KEY?.trim();
+    // Public anahtar tek kaynaktan: imaja gomulen NEXT_PUBLIC_ degeri (istemci
+    // aboneligi de onunla yapiyor). VAPID_PUBLIC_KEY yalnizca eski kurulumlar icin.
+    const publicKey = (process.env.VAPID_PUBLIC_KEY || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY)?.trim();
     const privateKey = process.env.VAPID_PRIVATE_KEY?.trim();
     const contact =
       process.env.VAPID_CONTACT_EMAIL?.trim() || "mailto:support@bagajpark.com";

@@ -322,6 +322,9 @@ jobs:
             DATABASE_URL=postgresql://bagajpark:bagajpark@localhost:5432/bagajpark?schema=public
             AUTH_SECRET=docker-build-placeholder-not-for-production
             NEXT_PUBLIC_BETA_BADGE=true
+            NEXT_PUBLIC_PLAUSIBLE_DOMAIN=${{ vars.NEXT_PUBLIC_PLAUSIBLE_DOMAIN }}
+            NEXT_PUBLIC_CRISP_WEBSITE_ID=${{ vars.NEXT_PUBLIC_CRISP_WEBSITE_ID }}
+            NEXT_PUBLIC_VAPID_PUBLIC_KEY=${{ vars.NEXT_PUBLIC_VAPID_PUBLIC_KEY }}
 
   # ---------------------------------------------------------------------------
   # Deploy. Eskiden AYRI bir workflow'daydi ve `CI`yi beklemiyordu -- yani
