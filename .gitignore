@@ -30,6 +30,9 @@ test-results/
 # i18n overlay build cache (scripts/build-locale-overlays.py)
 scripts/.translate-cache.json
 
+# scripts/find-esnaf-leads.ts çıktısı — yeniden üretilebilir, kaynak değil
+scripts/output/
+
 # misc
 .DS_Store
 *.pem
