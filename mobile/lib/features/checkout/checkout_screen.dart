@@ -118,22 +118,19 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               _bagSizeRow(
                 Icons.backpack_outlined,
                 'checkout.bag_s'.tr(),
-                '40×30×20 cm · Sırt Çantası / Kabin',
-                '0–7 kg',
+                'checkout.bag_s_hint'.tr(),
               ),
               const Divider(height: 24),
               _bagSizeRow(
                 Icons.luggage_outlined,
                 'checkout.bag_m'.tr(),
-                '65×45×25 cm · Standart Bavul',
-                '7–15 kg',
+                'checkout.bag_m_hint'.tr(),
               ),
               const Divider(height: 24),
               _bagSizeRow(
                 Icons.work_outline_rounded,
                 'checkout.bag_xl'.tr(),
-                '80×50×30 cm · Büyük Bavul / Spor',
-                '15–32 kg',
+                'checkout.bag_xl_hint'.tr(),
               ),
               const SizedBox(height: 16),
             ],
@@ -143,7 +140,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     );
   }
 
-  Widget _bagSizeRow(IconData icon, String label, String dims, String weight) {
+  Widget _bagSizeRow(IconData icon, String label, String hint) {
     return Row(
       children: [
         Icon(icon, size: 32, color: AppColors.brandOrange),
@@ -161,17 +158,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               ),
               const SizedBox(height: 2),
               Text(
-                dims,
+                hint,
                 style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                   fontSize: 13,
                   color: const Color(0xFF616161),
-                ),
-              ),
-              Text(
-                weight,
-                style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                  fontSize: 12,
-                  color: Colors.grey,
                 ),
               ),
             ],
