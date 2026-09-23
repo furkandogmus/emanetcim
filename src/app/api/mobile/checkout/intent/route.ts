@@ -1,4 +1,5 @@
 import { couponService } from "@/services/CouponService";
+import { referralService } from "@/services/ReferralService";
 import { resolveRequestLocale } from "@/lib/request-locale";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
@@ -52,6 +53,8 @@ const schema = z.object({
     yalnizca birinde vardi ve aradaki fark PARAYDI.
   */
   couponCode: z.string().trim().min(1).max(64).optional(),
+  /** Davet kodu (2026-09-23). Kural `ReferralService`te; web ile ayni cagri. */
+  referralCode: z.string().trim().min(1).max(32).optional(),
 });
 
 /** Mobil checkout: sağlayıcısız rezervasyon oluşturur ve doğrudan onaylar. */
@@ -119,6 +122,22 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Referans indirimi: kupon uygulandiysa uygulanmaz (web ile ayni kural).
+  let referralDiscountAmount = 0;
+  let appliedReferralCode: string | undefined;
+  if (!appliedCouponCode) {
+    const referral = await referralService.resolveDiscount(
+      parsed.data.referralCode,
+      { userId: auth.user.id },
+      toplam,
+    );
+    if (referral) {
+      referralDiscountAmount = referral.discountAmount;
+      toplam = referral.totalPrice;
+      appliedReferralCode = referral.code;
+    }
+  }
+
   let booking;
   try {
     booking = await bookingService.createInitialBooking({
@@ -132,6 +151,8 @@ export async function POST(req: NextRequest) {
       totalPrice: toplam,
       couponDiscountAmount,
       couponCode: appliedCouponCode,
+      referralDiscountAmount,
+      referredByCode: appliedReferralCode,
       unitPrice: totals.unitPrice,
       insuranceFee: totals.insuranceFee,
       bagCountS: totals.bagCountS,

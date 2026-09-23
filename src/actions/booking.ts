@@ -26,6 +26,7 @@ import { resolveServerSessionId } from "@/lib/analytics-server";
 import { getLocale } from "next-intl/server";
 import logger from "@/lib/logger";
 import { couponService } from "@/services/CouponService";
+import { referralService } from "@/services/ReferralService";
 import { requireUser } from "@/lib/action-auth";
 import type {
   CancelBookingErrorCode,
@@ -171,21 +172,20 @@ export async function createBookingAction(data: CreateBookingInput) {
     }
   }
 
-  // Referans kodu indirimi (kupon ile birlikte uygulanmaz, ikincisi işlenmez)
+  // Referans indirimi: kupon ile birlikte uygulanmaz. Kural `ReferralService`te
+  // (ilk rezervasyon, esnaf kodu degil, kendi kodu degil) -- mobil ayni cagriyi yapar.
   let referralDiscountAmount = 0;
   let appliedReferralCode: string | undefined;
-  if (data.referralCode && !data.couponCode) {
-    const codeUpper = data.referralCode.trim().toUpperCase();
-    const referrer = await prisma.user.findUnique({
-      where: { referralCode: codeUpper },
-      select: { id: true },
-    });
-    // Kendi kodunu kullanamaz
-    if (referrer && referrer.id !== session?.user?.id) {
-      const discountPct = Math.min(50, Math.max(0, Number(process.env.REFERRAL_DISCOUNT_PCT ?? "5")));
-      referralDiscountAmount = Math.round(totalPrice * (discountPct / 100) * 100) / 100;
-      totalPrice = Math.max(0, Math.round((totalPrice - referralDiscountAmount) * 100) / 100);
-      appliedReferralCode = codeUpper;
+  if (!appliedCouponCode) {
+    const referral = await referralService.resolveDiscount(
+      data.referralCode,
+      { userId, guestEmail: data.guestEmail },
+      totalPrice,
+    );
+    if (referral) {
+      referralDiscountAmount = referral.discountAmount;
+      totalPrice = referral.totalPrice;
+      appliedReferralCode = referral.code;
     }
   }
 
