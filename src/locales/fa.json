@@ -2122,5 +2122,17 @@
     "sizesTitle": "چه چمدان‌هایی می‌پذیرید؟",
     "sizesBody": "مهمان بر اساس اندازه انتخاب می‌کند: کوله‌پشتی ارزان‌تر و چمدان بزرگ گران‌تر است. تعداد را خودتان تعیین می‌کنید.",
     "sizesPriceNote": "قیمت شروع برای چمدان متوسط روزانه {price} است. هر زمان بخواهید از پنل تغییرش دهید."
+  },
+  "Pwa": {
+    "name": "BagajPark — امانت‌داری چمدان",
+    "description": "چمدانت را با خیال راحت بسپار و آزادانه بگرد. نزدیک‌ترین محل امانت را پیدا و رزرو کن.",
+    "shortcutSearchName": "یافتن محل امانت",
+    "shortcutSearchShort": "جستجو",
+    "shortcutSearchDesc": "یافتن محل‌های امانت نزدیک",
+    "shortcutBookingsName": "رزروهای من",
+    "shortcutBookingsShort": "رزروها",
+    "shortcutBookingsDesc": "دیدن رزروها و کد QR",
+    "screenshotSearch": "محل‌های امانت نزدیک روی نقشه",
+    "screenshotHome": "چمدانت را بسپار، آزادانه بگرد"
   }
 }

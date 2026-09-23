@@ -2122,5 +2122,17 @@
     "sizesTitle": "どんな荷物を預かりますか？",
     "sizesBody": "お客様はサイズで選びます。リュックは安く、大型スーツケースは高くなります。預かる数はあなたが決めます。",
     "sizesPriceNote": "中サイズの開始価格は1日{price}です。パネルからいつでも変更できます。"
+  },
+  "Pwa": {
+    "name": "BagajPark — 荷物預かり",
+    "description": "荷物を安全に預けて、身軽に観光。近くの預かり所を探して予約できます。",
+    "shortcutSearchName": "預かり所を探す",
+    "shortcutSearchShort": "検索",
+    "shortcutSearchDesc": "近くの荷物預かり所を探す",
+    "shortcutBookingsName": "予約一覧",
+    "shortcutBookingsShort": "予約",
+    "shortcutBookingsDesc": "予約とQRコードを確認",
+    "screenshotSearch": "地図上の近くの預かり所",
+    "screenshotHome": "荷物を預けて、身軽に観光"
   }
 }

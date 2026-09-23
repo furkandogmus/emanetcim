@@ -132,7 +132,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
       ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
       : undefined,
-    manifest: "/manifest.json",
+    // Dile gore manifest (kisayollar, ad, yon); bkz. `src/lib/pwa-manifest.ts`.
+    manifest: `/manifests/${locale}.webmanifest`,
     /*
       APPLE TOUCH IKONU BILDIRILIYOR.
 
