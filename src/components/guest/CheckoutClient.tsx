@@ -18,6 +18,9 @@ import BagProtection from "@/components/guest/BagProtection";
 import BagSizeGuide from "@/components/guest/BagSizeGuide";
 import CheckoutWhatIsIncluded from "@/components/guest/CheckoutWhatIsIncluded";
 import { createBookingAction } from "@/actions/booking";
+import { validateReferralCodeAction } from "@/actions/referral";
+import { clearReferralCode, readReferralCode } from "@/lib/referral-capture";
+import { applyReferralDiscount } from "@/lib/referral-discount";
 import {
   computeDailyBagLineTotal,
   computeServiceTotalForStay,
@@ -167,6 +170,9 @@ export default function CheckoutClient({
   const [bookingId, setBookingId] = useState("");
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [couponCode, setCouponCode] = useState("");
+  const [referralCode, setReferralCode] = useState("");
+  const [referralPct, setReferralPct] = useState<number | null>(null);
+  const [referralReason, setReferralReason] = useState<string | null>(null);
   const [guestEmail, setGuestEmail] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
 
@@ -191,6 +197,39 @@ export default function CheckoutClient({
       }
     }
   }, [shopId, hours]);
+
+  // Davet linkinden gelen kod (`?ref=`, bkz. `referral-capture.ts`)
+  useEffect(() => {
+    const stored = readReferralCode();
+    if (stored) setTimeout(() => setReferralCode(stored), 0);
+  }, []);
+
+  /*
+    Davet kodu onizlemesi: sunucudaki kuralla (`ReferralService.check`) ayni
+    cevap. Kupon girildiyse referans uygulanmaz -- sunucu da uygulamaz.
+  */
+  const referralInput = referralCode.trim();
+  const couponEntered = couponCode.trim() !== "";
+  useEffect(() => {
+    if (!referralInput || couponEntered) return;
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      void validateReferralCodeAction(referralInput, guestEmail.trim() || undefined)
+        .then((res) => {
+          if (cancelled) return;
+          setReferralPct(res.valid ? res.discountPct : null);
+          setReferralReason(res.valid ? null : (res.reason ?? "invalid_code"));
+        })
+        .catch(() => {
+          if (!cancelled) setReferralPct(null);
+        });
+    }, 400);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [referralInput, couponEntered, guestEmail]);
+  const referralActive = referralInput !== "" && !couponEntered && referralPct !== null;
 
   // Save draft to localStorage when inputs change
   useEffect(() => {
@@ -226,7 +265,10 @@ export default function CheckoutClient({
         )
       : 0;
   const insuranceFee = totalPrice > 0 ? pricingRules.insuranceFeeTry : 0;
-  const grandTotal = totalPrice + insuranceFee;
+  const subtotal = totalPrice + insuranceFee;
+  const referral =
+    referralActive && subtotal > 0 ? applyReferralDiscount(subtotal, referralPct) : null;
+  const grandTotal = referral ? referral.totalPrice : subtotal;
   const insuranceEnabled = isInsuranceEnabled(pricingRules);
 
   const totalBags = bagS + bagM + bagXl;
@@ -258,6 +300,7 @@ export default function CheckoutClient({
       checkInTime: checkInDate,
       checkOutTime: checkOutDate,
       couponCode: couponCode.trim() || undefined,
+      referralCode: couponEntered ? undefined : referralInput || undefined,
       guestEmail: !isLoggedIn ? (guestEmail.trim() || undefined) : undefined,
       guestPhone: !isLoggedIn ? (guestPhone.trim() || undefined) : undefined,
     });
@@ -266,6 +309,7 @@ export default function CheckoutClient({
 
     if (result.success && result.bookingId) {
       localStorage.removeItem(`bagajpark_checkout_draft_${shopId}`);
+      if (referralActive) clearReferralCode();
       setBookingId(result.bookingId);
       trackPlausibleEvent(PLAUSIBLE_EVENTS.BookingCreated, { shopId });
       if ("qrCodeToken" in result && result.qrCodeToken) {
@@ -613,6 +657,35 @@ export default function CheckoutClient({
                 className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-sm font-semibold uppercase"
               />
             </section>
+
+            <section className="flex flex-col gap-2">
+              <label className="text-xs font-black uppercase text-gray-400">
+                {t("checkoutReferralOptional")}
+              </label>
+              <input
+                type="text"
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value)}
+                aria-label={t("checkoutReferralPlaceholder")}
+                placeholder={t("checkoutReferralPlaceholder")}
+                className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl text-sm font-semibold uppercase"
+              />
+              {referralInput && couponEntered ? (
+                <p className="text-xs font-semibold text-gray-500">{t("checkoutReferralNotWithCoupon")}</p>
+              ) : referralActive ? (
+                <p className="text-xs font-bold text-emerald-700">
+                  {t("checkoutReferralApplied", { pct: referralPct })}
+                </p>
+              ) : referralInput && referralReason ? (
+                <p className="text-xs font-semibold text-orange-600">
+                  {referralReason === "own_code"
+                    ? t("checkoutReferralOwnCode")
+                    : referralReason === "not_first_booking"
+                      ? t("checkoutReferralFirstBookingOnly")
+                      : t("checkoutReferralInvalid")}
+                </p>
+              ) : null}
+            </section>
           </>
         )}
 
@@ -650,6 +723,16 @@ export default function CheckoutClient({
                 </span>
                 <Money amount={insuranceFee} className="text-gray-900 font-bold" />
               </div>
+              {referral ? (
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-emerald-700 font-medium">
+                    {t("checkoutReferralLine", { pct: referralPct ?? 0 })}
+                  </span>
+                  <span className="text-emerald-700 font-bold">
+                    −<Money amount={referral.discountAmount} />
+                  </span>
+                </div>
+              ) : null}
               <div className="flex justify-between items-baseline pt-4 border-t border-gray-100">
                 <span className="text-lg font-black text-gray-900 uppercase tracking-tighter">
                   {t("total")}
