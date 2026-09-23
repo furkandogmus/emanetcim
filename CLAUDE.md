@@ -88,8 +88,8 @@ Tavan sayısını yükselten bir PR, sorunu çözmüyor, saklıyor.
   (`verify` → `image` → `deploy`). Deploy doğrulamaya `needs` ile bağlı, yani
   kırmızı commit üretime çıkamaz. Actions kotası bitince job'lar 0 adımda düşer
   ve hiç log bırakmaz; o tabloyu kodda aramayın, belgede yazıyor.
-- Prod: `main` push → GHCR → deploy.
-  AWS (`infra/aws`) paralel deneme ortamıdır, prod değil.
+- Prod: AWS EC2 (2026-08-23'te Hetzner'den taşındı, `infra/aws/CUTOVER.md`).
+  `main` push → `verify` → GHCR imajı → SSM ile deploy. Altyapı kodu `infra/aws`.
 
 ## Yapma
 
