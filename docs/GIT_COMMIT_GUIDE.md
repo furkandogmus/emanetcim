@@ -1,6 +1,35 @@
 # Commit mesajları ve geçmiş düzeni
 
-## Bundan sonra: Conventional Commits
+## Değişiklik süreci (2026-09-23'ten beri)
+
+Gerçek kullanıcılar geldiği için `main` artık **yalnızca PR ile** değişir. `main`'e
+doğrudan push kapalı (GitHub ruleset); `main` = prod, çünkü her merge deploy eder.
+
+1. **Dal aç, tek konu.** `feat/…`, `fix/…`, `docs/…`, `ci/…`, `chore/…`. Bir dal bir iş:
+   "fiyat düzeltmesi + yeni özellik + belge" üç ayrı PR'dır.
+2. **Dalın içinde küçük commit'ler.** Her commit tek bir mantıksal değişiklik, kendi
+   başına derlenir ve testleri geçer. "Bir sürü değişiklik tek commit" yok.
+3. **Commit başlığı:** Conventional Commits, küçük harf tip, ASCII, ≤ 100 karakter
+   (`pr-gate.yml` denetler). Gövdede **neden** — hangi veri / hangi hata.
+4. **PR aç** (`gh pr create`). Şablonu doldur. Zorunlu kontroller:
+   `Dogrula (lint, tip, test, e2e)`, `Build Android`, `PR kurallari`. Değişmeyen
+   katmanın kontrolü koşulla atlanır ve geçmiş sayılır.
+5. **Birleştirme yalnızca "Rebase and merge".** Squash kapalı: küçük commit'ler main'e
+   olduğu gibi iner, geçmiş doğrusal kalır. Dal birleşince silinir.
+6. **Merge = deploy.** Birleştirdikten sonra `CI` workflow'unun `Deploy` adımını izle
+   (`gh run watch`). Prod'u etkileyen bir değişiklik birleştikten sonra sürüm etiketi al:
+   `npm run release:patch && git push --follow-tags origin main` — bu da bir PR değil,
+   etiket push'udur (`docs/VERSIONING.md`).
+7. **Acil durum.** Admin, kontrolü kırmızı bir PR'ı bile birleştirebilir (ruleset
+   bypass, yalnızca PR üzerinden). Doğrudan push yine yok. Bypass kullanıldıysa PR'a
+   nedenini yaz.
+
+Migrasyonlar: aynı PR'da hem şemayı daraltan hem kodu değiştiren bir değişiklik
+yapılmaz. Önce geriye uyumlu genişlet (yeni kolon/tablo), kod ikisiyle de çalışsın;
+eski yapıyı kaldırma ayrı ve sonraki PR'dır. Deploy sırasında eski imaj yeni şemayla
+birkaç dakika çalışır.
+
+## Commit başlığı: Conventional Commits
 
 Tek satır, küçük harfle tip; isteğe bağlı kapsam parantez içinde:
 
