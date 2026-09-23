@@ -111,8 +111,12 @@ services:
       CRON_SECRET: ${CRON_SECRET:-}
       # Rate limit deposu (ioredis). Yonetilen Redis'e gecilirse rediss:// URL verin.
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
-      # Crisp canlı destek widget
-      NEXT_PUBLIC_CRISP_WEBSITE_ID: ${NEXT_PUBLIC_CRISP_WEBSITE_ID:-}
+      # Crisp / Plausible / VAPID public anahtari BURADA DEGIL: NEXT_PUBLIC_*
+      # derleme aninda imaja gomulur (Dockerfile ARG + CI build-args). Burada
+      # verilen deger calisan uygulamaya hic ulasmaz.
+      # Web push gonderimi (sunucu). Public anahtar imajdan okunur.
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_CONTACT_EMAIL: ${VAPID_CONTACT_EMAIL:-}
       # Referans sistemi — tek kaynak (server-only); istemci tarafı ayrı bir
       # NEXT_PUBLIC_ kopyası artık yok, ikisi senkron kalmayabiliyordu.
       REFERRAL_DISCOUNT_PCT: ${REFERRAL_DISCOUNT_PCT:-5}
