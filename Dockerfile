@@ -20,6 +20,16 @@ ENV RESEND_API_KEY=build_placeholder
 ENV RESEND_WEBHOOK_SECRET=build_placeholder
 ARG NEXT_PUBLIC_BETA_BADGE
 ENV NEXT_PUBLIC_BETA_BADGE=${NEXT_PUBLIC_BETA_BADGE}
+# NEXT_PUBLIC_* degerleri `next build` aninda pakete GOMULUR; compose ile
+# calisma zamaninda vermek ise yaramaz (2026-09-23'e kadar Plausible, Crisp ve
+# web push bu yuzden prod'da hic calismadi). Degerler CI'da GitHub repo
+# degiskenlerinden gelir; `next-public-build-args` testi eksigi yakalar.
+ARG NEXT_PUBLIC_PLAUSIBLE_DOMAIN
+ENV NEXT_PUBLIC_PLAUSIBLE_DOMAIN=${NEXT_PUBLIC_PLAUSIBLE_DOMAIN}
+ARG NEXT_PUBLIC_CRISP_WEBSITE_ID
+ENV NEXT_PUBLIC_CRISP_WEBSITE_ID=${NEXT_PUBLIC_CRISP_WEBSITE_ID}
+ARG NEXT_PUBLIC_VAPID_PUBLIC_KEY
+ENV NEXT_PUBLIC_VAPID_PUBLIC_KEY=${NEXT_PUBLIC_VAPID_PUBLIC_KEY}
 RUN npx prisma generate
 COPY . .
 RUN --mount=type=cache,target=/app/.next/cache npm run build
