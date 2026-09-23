@@ -47,6 +47,26 @@ test.describe('BagajPark Production Hardening & PWA E2E Tests', () => {
     expect(response?.headers()['content-type']).toContain('application/javascript');
   });
 
+  // Cevrimdisi sayfa (2026-09-23): baglanti yokken tarayici hata sayfasi degil.
+  // Config service worker'lari genelde ENGELLIYOR (bayat yanit korkusu); bu
+  // test worker'in kendisini sinadigi icin yalnizca burada izinli.
+  test.describe('offline', () => {
+  test.use({ serviceWorkers: 'allow' });
+  test('PWA: offline navigation shows the offline page', async ({ page, context }) => {
+    await page.goto('/tr');
+    await page.evaluate(async () => {
+      const reg = await navigator.serviceWorker.register('/push-sw.js');
+      await navigator.serviceWorker.ready;
+      return reg.active?.state;
+    });
+    await page.reload(); // worker artik bu sayfayi kontrol ediyor
+    await context.setOffline(true);
+    await page.goto('/tr/search').catch(() => {});
+    await expect(page.locator('#t')).toHaveText('Bağlantı yok');
+    await context.setOffline(false);
+  });
+  });
+
   test('Metadata: should contain PWA and theme meta tags', async ({ page }) => {
     await page.goto('/tr');
     const themeColor = await page.locator('meta[name="theme-color"]').first().getAttribute('content');

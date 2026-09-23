@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ea580c">
+<title>BagajPark</title>
+<!--
+  Cevrimdisi sayfa (2026-09-23). push-sw.js kurulumda YALNIZCA bu dosyayi
+  onbellege alir ve ag yokken sayfa gezinmelerinde bunu gosterir. Kendi
+  basina yetmeli: _next/ varliklari, fontlar, kullanici verisi YOK.
+-->
+<style>
+  :root { color-scheme: light dark; --bg:#fafaf9; --fg:#1c1917; --muted:#57534e; --brand:#ea580c; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0c0a09; --fg:#fafaf9; --muted:#a8a29e; } }
+  * { box-sizing: border-box; }
+  body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background:var(--bg); color:var(--fg); padding:24px;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; text-align:center; }
+  main { max-width: 360px; }
+  .logo { width:56px; height:56px; border-radius:16px; background:var(--brand); display:inline-flex;
+    align-items:center; justify-content:center; margin-bottom:20px; }
+  h1 { font-size:22px; margin:0 0 8px; }
+  p { color:var(--muted); line-height:1.5; margin:0 0 20px; font-size:15px; }
+  button { background:var(--brand); color:#fff; border:0; border-radius:999px; padding:12px 24px;
+    font-size:15px; font-weight:700; cursor:pointer; }
+</style>
+</head>
+<body>
+<main>
+  <div class="logo" aria-hidden="true">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></svg>
+  </div>
+  <h1 id="t">You're offline</h1>
+  <p id="b">Check your connection and try again. Your booking details are also in your confirmation email.</p>
+  <button id="r" type="button">Try again</button>
+</main>
+<script>
+  (function () {
+    var copy = {
+      tr: ["Bağlantı yok", "İnternet bağlantını kontrol edip tekrar dene. Rezervasyon bilgilerin onay e-postanda da var.", "Tekrar dene"],
+      en: ["You're offline", "Check your connection and try again. Your booking details are also in your confirmation email.", "Try again"],
+      de: ["Keine Verbindung", "Prüfe deine Verbindung und versuche es erneut. Deine Buchungsdetails stehen auch in der Bestätigungs-E-Mail.", "Erneut versuchen"],
+      fr: ["Hors connexion", "Vérifiez votre connexion et réessayez. Les détails de votre réservation sont aussi dans l'e-mail de confirmation.", "Réessayer"],
+      ja: ["オフラインです", "接続を確認して、もう一度お試しください。予約内容は確認メールにも記載されています。", "再試行"],
+      fa: ["اتصال برقرار نیست", "اتصال اینترنت را بررسی کنید و دوباره تلاش کنید. جزئیات رزرو در ایمیل تأیید هم هست.", "تلاش دوباره"]
+    };
+    var fromPath = (location.pathname.split("/")[1] || "").toLowerCase();
+    var fromNav = (navigator.language || "en").slice(0, 2).toLowerCase();
+    var lang = copy[fromPath] ? fromPath : copy[fromNav] ? fromNav : "en";
+    var c = copy[lang];
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === "fa" ? "rtl" : "ltr";
+    document.getElementById("t").textContent = c[0];
+    document.getElementById("b").textContent = c[1];
+    var btn = document.getElementById("r");
+    btn.textContent = c[2];
+    btn.addEventListener("click", function () { location.reload(); });
+    window.addEventListener("online", function () { location.reload(); });
+  })();
+</script>
+</body>
+</html>
