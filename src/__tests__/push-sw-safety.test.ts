@@ -27,10 +27,7 @@ describe("push-sw.js guvenligi", () => {
   });
 
   it("offline.html kendi basina yeter: _next varligi ya da dis kaynak yok", () => {
-    const html = readFileSync(join(process.cwd(), "public/offline.html"), "utf-8").replace(
-      /<!--[\s\S]*?-->/g,
-      "",
-    );
+    const html = readFileSync(join(process.cwd(), "public/offline.html"), "utf-8");
     expect(html).not.toMatch(/_next\//);
     expect(html).not.toMatch(/(src|href)="https?:/);
   });
