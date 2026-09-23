@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import QRCode from "qrcode";
 import {
@@ -27,16 +27,14 @@ import {
   computeStayDaysFromWindow,
   validateBookingStayWindow,
 } from "@/lib/booking-server-price";
-/**
- * Saat dilimi: rezervasyon saatleri DÜKKANIN yerel saatidir, cihazınkinin değil.
- * Ayrıntı ve ölçülen hata: `src/lib/datetime-local.ts` →
- * `parseDatetimeLocalInTimeZone`.
- */
+import { PLATFORM_TIMEZONE } from "@/lib/datetime-local";
 import {
-  PLATFORM_TIMEZONE,
-  parseDatetimeLocalInTimeZone,
-  toDatetimeLocalValueInTimeZone,
-} from "@/lib/datetime-local";
+  addDays,
+  calendarDaysInclusive,
+  dateOnlyFromParam,
+  resolveStayWindow,
+  todayInZone,
+} from "@/lib/stay-days";
 import type { PricingRules } from "@/lib/pricing-rules";
 import { isInsuranceEnabled } from "@/lib/commerce-context";
 import {
@@ -45,9 +43,9 @@ import {
 } from "@/lib/plausible-events";
 import { useKeyboardAware } from "@/lib/hooks/useKeyboardAware";
 import WebPushOptIn from "@/components/WebPushOptIn";
-import SlotAvailabilityGrid from "@/components/guest/SlotAvailabilityGrid";
+import StayDaysPicker from "@/components/guest/StayDaysPicker";
 import Money from "@/components/common/Money";
-import { formatDecimal, formatTryCurrency } from "@/lib/currency";
+import { formatTryCurrency } from "@/lib/currency";
 import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
 import { useActionErrorText } from "@/lib/use-action-error";
 interface CheckoutClientProps {
@@ -68,6 +66,27 @@ interface CheckoutClientProps {
    * taşınıyor: sayfa → checkout → ızgara.
    */
   timeZone?: string;
+  /** Birakis/alis bu saatlere oturtulur; misafire saat sorulmaz. */
+  openingTime?: string | null;
+  closingTime?: string | null;
+  open247?: boolean;
+}
+
+/** URL/taslaktan gelen gunleri gecerli bir araliga ceker; bugun artik olmuyorsa yarina kaydirir. */
+function normalizeStayDays(
+  drop: string | null,
+  pickup: string | null,
+  hours: Parameters<typeof resolveStayWindow>[2],
+): { drop: string; pickup: string } {
+  const today = todayInZone(hours.timeZone ?? PLATFORM_TIMEZONE);
+  let d = drop && drop >= today ? drop : today;
+  let p = pickup && calendarDaysInclusive(d, pickup) >= 1 ? pickup : d;
+  if (!resolveStayWindow(d, p, hours)) {
+    const len = calendarDaysInclusive(d, p);
+    d = addDays(today, 1);
+    p = addDays(d, Math.max(1, len) - 1);
+  }
+  return { drop: d, pickup: p };
 }
 
 export default function CheckoutClient({
@@ -81,13 +100,19 @@ export default function CheckoutClient({
   initialCheckOut,
   initialBags,
   timeZone = PLATFORM_TIMEZONE,
+  openingTime,
+  closingTime,
+  open247 = false,
 }: CheckoutClientProps) {
+  const hours = useMemo(
+    () => ({ openingTime, closingTime, open247, timeZone }),
+    [openingTime, closingTime, open247, timeZone],
+  );
   const t = useTranslations("Guest");
   const tCommon = useTranslations("Common");
   const errorText = useActionErrorText();
   const locale = useLocale();
   const { keyboardHeight } = useKeyboardAware();
-  const [selectedSlotCount, setSelectedSlotCount] = useState(0);
   const slot = roundedSlotPrices(pricePerDay, pricingRules);
   const priceS = slot.s;
   const priceM = slot.m;
@@ -108,27 +133,23 @@ export default function CheckoutClient({
   const [bagM, setBagM] = useState(initialBags ?? 1);
   const [bagXl, setBagXl] = useState(0);
 
-  const [checkInLocal, setCheckInLocal] = useState(() => {
-    if (initialCheckIn && !isNaN(Date.parse(initialCheckIn))) {
-      return toDatetimeLocalValueInTimeZone(new Date(initialCheckIn), timeZone);
-    }
-    return toDatetimeLocalValueInTimeZone(new Date(), timeZone);
-  });
-  const [checkOutLocal, setCheckOutLocal] = useState(() => {
-    if (initialCheckOut && !isNaN(Date.parse(initialCheckOut))) {
-      return toDatetimeLocalValueInTimeZone(new Date(initialCheckOut), timeZone);
-    }
-    const now = new Date();
-    const defaultOut = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-    return toDatetimeLocalValueInTimeZone(defaultOut, timeZone);
-  });
+  const [stay, setStay] = useState(() =>
+    normalizeStayDays(dateOnlyFromParam(initialCheckIn), dateOnlyFromParam(initialCheckOut), hours),
+  );
+  const dropDate = stay.drop;
+  const pickupDate = stay.pickup;
 
   useEffect(() => {
     trackPlausibleEvent(PLAUSIBLE_EVENTS.CheckoutStarted, { shopId });
   }, [shopId]);
 
-  const checkInDate = parseDatetimeLocalInTimeZone(checkInLocal, timeZone);
-  const checkOutDate = parseDatetimeLocalInTimeZone(checkOutLocal, timeZone);
+  /*
+    GUN BAZLI: misafir yalnizca gun secer. Sunucunun istedigi pencere dukkanin
+    saatlerinden turetilir (bkz. `resolveStayWindow`); fiyat gun sayisindan.
+  */
+  const stayWindow = resolveStayWindow(dropDate, pickupDate, hours);
+  const checkInDate = stayWindow?.checkIn ?? null;
+  const checkOutDate = stayWindow?.checkOut ?? null;
   const windowOk =
     checkInDate !== null &&
     checkOutDate !== null &&
@@ -159,15 +180,17 @@ export default function CheckoutClient({
           if (parsed.bagS !== undefined) setBagS(parsed.bagS);
           if (parsed.bagM !== undefined) setBagM(parsed.bagM);
           if (parsed.bagXl !== undefined) setBagXl(parsed.bagXl);
-          if (parsed.checkInLocal !== undefined) setCheckInLocal(parsed.checkInLocal);
-          if (parsed.checkOutLocal !== undefined) setCheckOutLocal(parsed.checkOutLocal);
+          // Eski taslaklar saatli (`checkInLocal`) tutuyordu; gun kismi yeterli.
+          const d = dateOnlyFromParam(parsed.dropDate ?? parsed.checkInLocal);
+          const p = dateOnlyFromParam(parsed.pickupDate ?? parsed.checkOutLocal);
+          if (d || p) setStay(normalizeStayDays(d, p, hours));
           if (parsed.couponCode !== undefined) setCouponCode(parsed.couponCode);
         }, 0);
       } catch (e) {
         console.error("Failed to parse saved checkout draft", e);
       }
     }
-  }, [shopId]);
+  }, [shopId, hours]);
 
   // Save draft to localStorage when inputs change
   useEffect(() => {
@@ -177,12 +200,12 @@ export default function CheckoutClient({
         bagS,
         bagM,
         bagXl,
-        checkInLocal,
-        checkOutLocal,
+        dropDate,
+        pickupDate,
         couponCode,
       })
     );
-  }, [shopId, bagS, bagM, bagXl, checkInLocal, checkOutLocal, couponCode]);
+  }, [shopId, bagS, bagM, bagXl, dropDate, pickupDate, couponCode]);
 
   const dailyLine = computeDailyBagLineTotal(
     pricePerDay,
@@ -556,30 +579,19 @@ export default function CheckoutClient({
                 {t("stayDuration")}
               </h2>
 
-              <SlotAvailabilityGrid
-                shopId={shopId}
-                date={checkInDate ?? new Date()}
-                selectedBags={totalBags || 1}
+              <StayDaysPicker
+                dropDate={dropDate}
+                pickupDate={pickupDate}
+                onChange={(d, p) => setStay({ drop: d, pickup: p })}
+                minDropDate={normalizeStayDays(null, null, hours).drop}
+                maxDays={pricingRules.maxStayDays}
                 timeZone={timeZone}
-                onSelectRange={(from, to, count) => {
-                  setSelectedSlotCount(count);
-                  if (from) setCheckInLocal(from);
-                  if (to) setCheckOutLocal(to);
-                }}
+                hours={
+                  open247
+                    ? null
+                    : { open: openingTime ?? "09:00", close: closingTime ?? "20:00" }
+                }
               />
-
-              {selectedSlotCount > 0 && (
-                <div className="flex items-center justify-between p-4 bg-orange-50 rounded-2xl border border-orange-100">
-                  <div>
-                    <p className="id-eyebrow text-gray-400">
-                      {t("checkoutSelectedDuration")}
-                    </p>
-                    <p className="font-black text-lg text-gray-900 mt-0.5">
-                      {selectedSlotCount} {t("checkoutSlotUnit")} ({formatDecimal(selectedSlotCount * 0.5, locale)} {t("checkoutHourShort")})
-                    </p>
-                  </div>
-                </div>
-              )}
 
               {!windowOk ? (
                 <p className="text-xs font-bold text-orange-600">

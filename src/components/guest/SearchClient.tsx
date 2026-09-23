@@ -28,15 +28,13 @@ import ShopListItem from "@/components/guest/ShopListItem";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ShopSearchHit } from "@/services/ShopService";
-/**
- * Saat dilimi: rezervasyon saatleri DÜKKANIN yerel saatidir, cihazınkinin değil.
- * Ayrıntı ve ölçülen hata: `src/lib/datetime-local.ts` →
- * `parseDatetimeLocalInTimeZone`.
- */
-import {
-  parseDatetimeLocalInTimeZone,
-  toDatetimeLocalValueInTimeZone,
-} from "@/lib/datetime-local";
+import { calendarDaysInclusive } from "@/lib/stay-days";
+
+/** `YYYY-MM-DD` -> takvimin alt siniri icin yerel `Date`. */
+function localDateOf(date: string): Date | undefined {
+  const [y, m, d] = date.split("-").map(Number);
+  return y ? new Date(y, m - 1, d) : undefined;
+}
 import { refreshSearchShopsAction } from "@/actions/search-shops";
 import { geocodeSearchCenterAction } from "@/actions/geocode-search-center";
 import { toast } from "sonner";
@@ -82,8 +80,9 @@ const GEO_AUTO_ASK_KEY = "bagajpark_geo_auto_asked";
 interface SearchClientProps {
   initialNearby: ShopSearchHit[];
   initialAll: ShopSearchHit[];
-  defaultCheckInIso: string;
-  defaultCheckOutIso: string;
+  /** `YYYY-MM-DD` — arama gun bazli. */
+  defaultDropDate: string;
+  defaultPickupDate: string;
   /** URL ?q= ile şehir sayfalarından gelen metin filtresi */
   initialSearchQuery?: string;
   /** URL ?lat=&lng= veya şehir sayfası; yakın liste ve yenileme merkezi */
@@ -101,8 +100,8 @@ interface SearchClientProps {
 export default function SearchClient({
   initialNearby,
   initialAll,
-  defaultCheckInIso,
-  defaultCheckOutIso,
+  defaultDropDate,
+  defaultPickupDate,
   initialSearchQuery = "",
   searchCenter,
   hasExplicitCenter = false,
@@ -203,10 +202,10 @@ export default function SearchClient({
    */
   const placeSearchedRef = useRef(initialSearchQuery.trim().length >= 3);
   useEffect(() => {
-    setCheckInLocal(toDatetimeLocalValueInTimeZone(new Date(defaultCheckInIso)));
-    setCheckOutLocal(toDatetimeLocalValueInTimeZone(new Date(defaultCheckOutIso)));
+    setCheckInLocal(defaultDropDate);
+    setCheckOutLocal(defaultPickupDate);
     setDatesReady(true);
-  }, [defaultCheckInIso, defaultCheckOutIso]);
+  }, [defaultDropDate, defaultPickupDate]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -287,17 +286,15 @@ export default function SearchClient({
   useEffect(() => {
     if (!datesReady || !filterDirty) return;
 
-    const checkIn = parseDatetimeLocalInTimeZone(checkInLocal);
-    const checkOut = parseDatetimeLocalInTimeZone(checkOutLocal);
-    if (!checkIn || !checkOut) return;
+    if (calendarDaysInclusive(checkInLocal, checkOutLocal) < 1) return;
 
     const handle = window.setTimeout(async () => {
       const mySeq = ++searchRequestSeq.current;
       setIsSearching(true);
       try {
         const res = await refreshSearchShopsAction({
-          checkInIso: checkIn.toISOString(),
-          checkOutIso: checkOut.toISOString(),
+          dropDate: checkInLocal,
+          pickupDate: checkOutLocal,
           requestedBags,
           centerLat: dynamicCenter.lat,
           centerLng: dynamicCenter.lng,
@@ -337,15 +334,13 @@ export default function SearchClient({
   ]);
 
   const handleManualRefresh = useCallback(async () => {
-    const checkIn = parseDatetimeLocalInTimeZone(checkInLocal);
-    const checkOut = parseDatetimeLocalInTimeZone(checkOutLocal);
-    if (!checkIn || !checkOut) return;
+    if (calendarDaysInclusive(checkInLocal, checkOutLocal) < 1) return;
     // Ayni sira sayaci: asagi cekip yenileme tam bir filtre degisikligiyle
     // cakisirsa hangisinin sonucu daha yeni ise o kazanir.
     const mySeq = ++searchRequestSeq.current;
     const res = await refreshSearchShopsAction({
-      checkInIso: checkIn.toISOString(),
-      checkOutIso: checkOut.toISOString(),
+      dropDate: checkInLocal,
+      pickupDate: checkOutLocal,
       requestedBags,
       centerLat: dynamicCenter.lat,
       centerLng: dynamicCenter.lng,
@@ -528,13 +523,10 @@ export default function SearchClient({
     const list = [...filteredShops];
     switch (sortBy) {
       case "price_asc":
-        list.sort((a, b) => (a.pricePerHour ?? a.pricePerDay ?? 0) - (b.pricePerHour ?? b.pricePerDay ?? 0));
+        list.sort((a, b) => (a.pricePerDay ?? 0) - (b.pricePerDay ?? 0));
         break;
       case "price_desc":
-        list.sort((a, b) => (b.pricePerHour ?? b.pricePerDay ?? 0) - (a.pricePerHour ?? a.pricePerDay ?? 0));
-        break;
-      case "hourly":
-        list.sort((a, b) => (a.pricePerHour ?? 0) - (b.pricePerHour ?? 0));
+        list.sort((a, b) => (b.pricePerDay ?? 0) - (a.pricePerDay ?? 0));
         break;
       case "rating":
         list.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
@@ -695,8 +687,10 @@ export default function SearchClient({
                   value={checkInLocal}
                   onChange={(v) => {
                     setCheckInLocal(v);
+                    if (calendarDaysInclusive(v, checkOutLocal) < 1) setCheckOutLocal(v);
                     markFiltersDirty();
                   }}
+                  dateOnly
                   testId="search-checkin"
                   ariaLabel={t("searchCheckIn")}
                   iconSize={14}
@@ -717,7 +711,8 @@ export default function SearchClient({
                   testId="search-checkout"
                   ariaLabel={t("searchCheckOut")}
                   iconSize={14}
-                  minDate={parseDatetimeLocalInTimeZone(checkInLocal) ?? undefined}
+                  dateOnly
+                  minDate={localDateOf(checkInLocal)}
                 />
               </div>
             </label>
@@ -779,7 +774,6 @@ export default function SearchClient({
           <option value="distance">{t("sortByDistance")}</option>
           <option value="price_asc">{t("sortByPriceLow")}</option>
           <option value="price_desc">{t("sortByPriceHigh")}</option>
-          <option value="hourly">{t("sortByHourly")}</option>
           <option value="rating">{t("sortByRating")}</option>
         </select>
       </div>

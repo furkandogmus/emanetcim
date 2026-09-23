@@ -142,7 +142,7 @@ function buildSections(): Section[] {
     {
       title: "6. PLATFORMUN KULLANIM AMACI",
       paragraphs: [
-        "6.1. Hizmetin Temel Amacı: BagajPark; kullanıcıların şahsi eşyalarını kısa süreli (saatlik veya günlük) olarak güvenli noktalarda muhafaza etmelerini sağlayan bir geçici depolama ve aracılık platformudur.",
+        "6.1. Hizmetin Temel Amacı: BagajPark; kullanıcıların şahsi eşyalarını kısa süreli (gün bazında) olarak güvenli noktalarda muhafaza etmelerini sağlayan bir geçici depolama ve aracılık platformudur.",
         "6.2. Yasaklı Kullanım Amaçları: Platformun ticari lojistik ambarı, kargo transfer noktası (kurye teslimatı gibi) veya yasa dışı faaliyetlerin gizlenmesi amacıyla kullanılması yasaktır. İş Ortağı noktaları resmi tebligat adresi olarak gösterilemez.",
         "6.3. Sorumluluk Reddi: Platformun kullanım amacının dışına çıkarılması sonucu doğacak zararlardan Kullanıcı bizzat sorumludur.",
       ],

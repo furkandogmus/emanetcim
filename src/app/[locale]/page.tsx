@@ -10,7 +10,7 @@ import ComparisonTable from "@/components/guest/ComparisonTable";
 import BagProtection from "@/components/guest/BagProtection";
 import PartnerPromoModal from "@/components/partner/PartnerPromoModal";
 import HomeSearchWidget from "@/components/guest/HomeSearchWidget";
-import { defaultStayWindowLocalValues } from "@/lib/datetime-local";
+import { todayInZone } from "@/lib/stay-days";
 import type { Metadata } from "next";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 import { alternatesForPath } from "@/lib/seo-alternates";
@@ -108,7 +108,9 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
   // Arama kutusunun varsayilanlari burada, SUNUCUDA uretilir. Istemcide
   // uretilirse sunucu (UTC) ile ziyaretcinin saat dilimi farkli metin verir ve
   // hydration'da #418 metin uyusmazligi olusur.
-  const stayWindow = defaultStayWindowLocalValues();
+  // Gun bazli: varsayilan bugun birak, bugun al (en sik senaryo).
+  const today = todayInZone();
+  const stayWindow = { checkIn: today, checkOut: today };
   // Bu harita 14->6 dil geçişinde (2026-08-22) güncellenmemiş kalıp hâlâ
   // kaldırılmış es/it içeriyor, ja/fa'yı hiç tanımıyordu -- o iki dilde ana
   // sayfanın güven istatistikleri (lokasyon/konaklama/yorum sayısı) sessizce

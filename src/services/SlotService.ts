@@ -583,22 +583,3 @@ export class SlotAvailabilityError extends Error {
     this.name = "SlotAvailabilityError";
   }
 }
-
-// ── Hourly pricing ──
-
-export function computeSlotPricing(
-  slotCount: number,
-  pricePerHour: number,
-  bagCountS: number,
-  bagCountM: number,
-  bagCountXl: number,
-  bagMultiplierS: number,
-  bagMultiplierM: number,
-  bagMultiplierXl: number,
-) {
-  const hours = slotCount * (SLOT_MINUTES / 60);
-  const sTotal = hours * pricePerHour * bagCountS * bagMultiplierS;
-  const mTotal = hours * pricePerHour * bagCountM * bagMultiplierM;
-  const xlTotal = hours * pricePerHour * bagCountXl * bagMultiplierXl;
-  return Math.round((sTotal + mTotal + xlTotal) * 100) / 100;
-}

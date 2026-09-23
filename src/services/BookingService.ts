@@ -84,7 +84,7 @@ export type BookingWithGuestShop = Prisma.BookingGetPayload<{
     id: true; guestId: true; shopId: true; checkInTime: true; checkOutTime: true;
     totalPrice: true; bagCountS: true; bagCountM: true; bagCountXl: true;
     status: true; qrCodeToken: true; createdAt: true;
-    shop: { select: { name: true; address: true; pricePerDay: true; timezone: true } };
+    shop: { select: { name: true; address: true; pricePerDay: true; timezone: true; openingTime: true; closingTime: true; open247: true } };
     dispute: { select: { id: true } };
   };
 }>;
@@ -243,7 +243,7 @@ export class BookingService implements IBookingService {
           status: true, qrCodeToken: true, createdAt: true,
           // `timezone`: rezervasyon değiştirme modalı saatleri dükkanın
           // diliminde yorumlamalı; checkout ile aynı sözleşme.
-          shop: { select: { name: true, address: true, pricePerDay: true, timezone: true } },
+          shop: { select: { name: true, address: true, pricePerDay: true, timezone: true, openingTime: true, closingTime: true, open247: true } },
           dispute: { select: { id: true } },
         },
         orderBy: { createdAt: 'desc' },

@@ -257,7 +257,7 @@ export async function createSlotBooking(
       const unitPrice =
         typeof data.unitPrice === 'number' && Number.isFinite(data.unitPrice)
           ? data.unitPrice
-          : moneyToNumber(shop.pricePerHour ?? shop.pricePerDay) || rules.defaultPricePerDay;
+          : moneyToNumber(shop.pricePerDay) || rules.defaultPricePerDay;
       const insuranceFee =
         typeof data.insuranceFee === 'number' && Number.isFinite(data.insuranceFee)
           ? Math.max(0, data.insuranceFee)

@@ -65,7 +65,7 @@ export default async function BookingDetailPage({
         id: true, guestId: true, shopId: true, checkInTime: true, checkOutTime: true,
         totalPrice: true, bagCountS: true, bagCountM: true, bagCountXl: true,
         status: true, qrCodeToken: true, createdAt: true, pendingBagRevision: true,
-        shop: { select: { name: true, pricePerDay: true, address: true, latitude: true, longitude: true, timezone: true, owner: { select: { phone: true } } } },
+        shop: { select: { name: true, pricePerDay: true, address: true, latitude: true, longitude: true, timezone: true, openingTime: true, closingTime: true, open247: true, owner: { select: { phone: true } } } },
         seals: { orderBy: { bagIndex: "asc" } },
       },
     }),

@@ -33,6 +33,7 @@ import FavoriteButton from "@/components/guest/FavoriteButton";
 import ShopGallery from "@/components/guest/ShopGallery";
 import { isInsuranceEnabled } from "@/lib/commerce-context";
 import Money from "@/components/common/Money";
+import BagGlyph, { BAG_HEIGHT_UNITS } from "@/components/guest/BagGlyph";
 import { formatDecimal } from "@/lib/currency";
 import PrelaunchNotifyButton from "@/components/guest/PrelaunchNotifyButton";
 import PrelaunchDemandPanel from "@/components/guest/PrelaunchDemandPanel";
@@ -530,29 +531,48 @@ export default function ShopDetailClient({
       ) : null}
         {/* Aynı gerekçe: talep testi noktasında valiz fiyat tablosu gösterilmez. */}
         {!shop.isPrelaunch && (
-        <section className="bg-white rounded-3xl p-6 shadow-xl shadow-gray-200/50 border border-gray-100">
-          <h2 className="id-eyebrow text-gray-400 mb-4">
+        <section className="bg-white rounded-2xl p-5 shadow-xl shadow-gray-200/50 border border-gray-100">
+          <h2 className="id-eyebrow text-gray-400 mb-3">
             {t("shopDetailBagPrices")}
           </h2>
-          <div className="grid grid-cols-3 gap-3 text-center">
-            <div className="rounded-2xl bg-gray-50 p-3 border border-gray-100">
-              <p className="text-[9px] font-bold text-gray-400 uppercase">S</p>
-              <p className="text-lg font-black text-gray-900"><Money amount={slot.s} /></p>
-            </div>
-            <div className="rounded-2xl bg-orange-50 p-3 border border-orange-100">
-              <p className="text-[9px] font-bold text-orange-600 uppercase">
-                M/L
-              </p>
-              <p className="text-lg font-black text-orange-700"><Money amount={slot.m} /></p>
-            </div>
-            <div className="rounded-2xl bg-gray-50 p-3 border border-gray-100">
-              <p className="text-[9px] font-bold text-gray-400 uppercase">XL</p>
-              <p className="text-lg font-black text-gray-900"><Money amount={slot.xl} /></p>
-            </div>
-          </div>
-          <p className="text-[10px] text-gray-400 mt-3 text-center">
-            {t("perBag")} / {t("day")}
-          </p>
+          {/*
+            Boy + gorsel + fiyat bir arada (2026-09-23). Eski kart yalniz "S /
+            M/L / XL" harfleri ve fiyat gosteriyordu; misafir kendi valizinin
+            hangi boya girdigini ancak checkout'taki rehberde anliyordu.
+          */}
+          <ul className="flex flex-col gap-2">
+            {(
+              [
+                { size: "s", title: t("bagSizeS"), desc: t("bagSizeSDesc"), price: slot.s },
+                { size: "m", title: t("bagSizeM"), desc: t("bagSizeMDesc"), price: slot.m },
+                { size: "xl", title: t("bagSizeXl"), desc: t("bagSizeXlDesc"), price: slot.xl },
+              ] as const
+            ).map(({ size, title, desc, price }) => (
+              <li
+                key={size}
+                className="flex items-center gap-3 rounded-2xl border border-gray-100 p-2.5 pr-4"
+                data-testid={`shop-bag-price-${size}`}
+              >
+                <span className="flex h-16 w-16 shrink-0 items-end justify-center rounded-xl bg-gradient-to-b from-brand-50 to-gray-50 pb-1.5">
+                  <BagGlyph
+                    size={size}
+                    className="w-auto drop-shadow-sm"
+                    style={{ height: `${(BAG_HEIGHT_UNITS[size] / BAG_HEIGHT_UNITS.xl) * 52}px` }}
+                  />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-bold text-gray-900">{title}</span>
+                  <span className="block text-xs leading-snug text-gray-500">{desc}</span>
+                </span>
+                <span className="shrink-0 text-right">
+                  <span className="block text-base font-bold text-gray-900">
+                    <Money amount={price} />
+                  </span>
+                  <span className="block text-[11px] text-gray-400">{t("shopPerDay")}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
         </section>
         )}
 
@@ -576,13 +596,8 @@ export default function ShopDetailClient({
             </div>
           </div>
           {/*
-            SAATLIK/GUNLUK ESNEKLIGI GORUNUR KILINDI (2026-09-11, rakip analizi).
-            Checkout'ta SlotAvailabilityGrid zaten HER dukkan icin kosulsuz
-            render ediliyor (saatlik secim her zaman mumkun), ama bu esneklik
-            dukkan detayinda hic soylenmiyordu -- misafir checkout'a gelene
-            kadar bunu bilmiyordu. Rakiplerin (Stasher) saatligi hic sunmadigi,
-            digerlerinin (Bounce, Radical Storage) ise bilincli olarak geri
-            planda tuttugu bir esneklik.
+            GUNLUK FIYAT (2026-09-23). Rezervasyon gun bazli: misafir birakis ve
+            alis gununu secer, saat sorulmaz. Satir bunu dukkan detayinda soyluyor.
           */}
           <div className="flex items-center gap-2 text-xs font-bold text-gray-700 min-w-[140px]">
             <CalendarClock size={18} className="text-orange-500 shrink-0" />
