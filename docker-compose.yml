@@ -85,6 +85,19 @@ services:
       RESEND_WEBHOOK_SECRET: ${RESEND_WEBHOOK_SECRET:-}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      # Mobil giris ve push. Bu liste ACIK yazildigi icin (env_file yok) burada
+      # olmayan bir anahtar konteynere HIC ulasmaz. 2026-09-23'e kadar bunlar
+      # eksikti: kod okuyordu ama deger hep bostu -> mobil Apple girisi
+      # `apple_not_configured`, Google girisi yalnizca web client id'yi kabul
+      # ediyor, push bildirimleri SKIPPED. Bos kalirsa davranis ayni.
+      # MOBILE_JWT_SECRET BILEREK YOK: mobil token'lar su an AUTH_SECRET ile
+      # imzali; farkli bir deger gecirmek tum mobil oturumlari dusurur.
+      GOOGLE_IOS_CLIENT_ID: ${GOOGLE_IOS_CLIENT_ID:-}
+      GOOGLE_ANDROID_CLIENT_ID: ${GOOGLE_ANDROID_CLIENT_ID:-}
+      APPLE_BUNDLE_ID: ${APPLE_BUNDLE_ID:-}
+      APPLE_ID: ${APPLE_ID:-}
+      APPLE_SECRET: ${APPLE_SECRET:-}
+      FIREBASE_SERVICE_ACCOUNT_JSON: ${FIREBASE_SERVICE_ACCOUNT_JSON:-}
       # Virgülle ayrılmış Google e-postaları; ilk girişte otomatik ADMIN rolü verilir
       ADMIN_EMAILS: ${ADMIN_EMAILS:-}
       # /api/admin/setup endpointini korur; boş bırakılırsa endpoint kapalıdır
