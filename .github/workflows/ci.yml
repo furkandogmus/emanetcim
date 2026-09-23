@@ -37,13 +37,13 @@ on:
       - "mobile/**"
       - "ops/**"
       - "**/*.md"
+  # PR'da yol filtresi YOK (2026-09-23): `verify` main'de ZORUNLU kontrol. Yol
+  # filtresi yuzunden hic calismayan bir zorunlu kontrol PR'i sonsuza dek
+  # "bekliyor"da birakir. Kapsam asagidaki `changes` job'unda olculur;
+  # uygulamaya dokunmayan PR'da `verify` KOSULLA atlanir ve atlanan job
+  # zorunlu kontrolu gecmis sayilir.
   pull_request:
     branches: [main]
-    paths-ignore:
-      - "docs/**"
-      - "mobile/**"
-      - "ops/**"
-      - "**/*.md"
   # Path filtresi yuzunden atlanan bir degisikligi elle dogrulamak icin.
   workflow_dispatch:
 
@@ -77,8 +77,41 @@ jobs:
   # Yan faydasi: ucuz kontroller (lint, typecheck) pahali olanlardan ONCE
   # calisir, yani bir yazim hatasi 10 dakikalik E2E'yi hic baslatmadan yakalanir.
   # ---------------------------------------------------------------------------
+  # ---------------------------------------------------------------------------
+  # PR'in uygulamaya dokunup dokunmadigi. Push/dispatch'te her zaman `true`:
+  # push'un kendi `paths-ignore`'u zaten filtreliyor ve deploy zinciri
+  # (verify -> image -> deploy) oldugu gibi kaliyor.
+  # ---------------------------------------------------------------------------
+  changes:
+    name: Degisiklik kapsami
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      app: ${{ steps.kapsam.outputs.app }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: kapsam
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.base_ref }}
+        run: |
+          if [ "$EVENT" != "pull_request" ]; then
+            echo "app=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # docs/, mobile/, ops/ ve .md disinda tek bir dosya bile varsa uygulama degisti.
+          if git diff --name-only "origin/${BASE}...HEAD" | grep -qvE '^(docs/|mobile/|ops/)|\.md$'; then
+            echo "app=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "app=false" >> "$GITHUB_OUTPUT"
+          fi
+
   verify:
     name: Dogrula (lint, tip, test, e2e)
+    needs: changes
+    if: needs.changes.outputs.app == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     # Ayni dala arka arkaya push atilirsa yalnizca sonuncusu dogrulanir.
