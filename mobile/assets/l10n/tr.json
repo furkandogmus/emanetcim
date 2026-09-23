@@ -213,7 +213,14 @@
     "error_shop_closed": "Dükkan bulunamadı veya kapalı.",
     "error_payment": "Bu dükkan şu an ödeme alamıyor.",
     "error_past_time": "Geçmiş bir zaman seçemezsiniz",
-    "error_checkout_before_checkin": "Çıkış saati girişten önce olamaz"
+    "error_checkout_before_checkin": "Çıkış saati girişten önce olamaz",
+    "referral_placeholder": "Davet Kodu (Opsiyonel)",
+    "referral_applied": "Davet kodu uygulandı: ilk rezervasyonunda %{pct} indirim.",
+    "referral_line": "Davet indirimi (%{pct})",
+    "referral_not_with_coupon": "Davet indirimi indirim kuponuyla birlikte kullanılamaz.",
+    "referral_own_code": "Kendi davet kodunu kullanamazsın.",
+    "referral_first_booking_only": "Davet indirimi yalnızca ilk rezervasyonda geçerli.",
+    "referral_invalid": "Bu davet kodu bulunamadı."
   },
   "booking": {
     "detail_title": "Rezervasyon Detayı",
@@ -357,7 +364,7 @@
     "delete_account_success": "Hesap silme talebiniz alındı. 7 gün içinde hesabınız kalıcı olarak silinecektir.",
     "delete_account_error": "Hesap silme talebi iletilemedi. Lütfen aktif rezervasyonunuz olmadığını kontrol edin.",
     "referral_title": "Arkadaşlarını Davet Et",
-    "referral_hint": "Her davet için ₺20 indirim kazan!",
+    "referral_hint": "Kodunu paylaş: arkadaşın ilk rezervasyonunda %{pct} indirim alır.",
     "copy": "KOPYALA",
     "copied": "Kopyalandı!",
     "notifications_empty": "Tüm bildirimleriniz ve kampanya duyuruları burada listelenir. Şu an için aktif bir bildiriminiz bulunmuyor.",

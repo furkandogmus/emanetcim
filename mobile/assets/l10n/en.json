@@ -213,7 +213,14 @@
     "error_shop_closed": "Shop not found or closed.",
     "error_payment": "This shop cannot accept payments right now.",
     "error_past_time": "You cannot select a past time",
-    "error_checkout_before_checkin": "Check-out time cannot be before check-in"
+    "error_checkout_before_checkin": "Check-out time cannot be before check-in",
+    "referral_placeholder": "Invite Code (Optional)",
+    "referral_applied": "Invite code applied: {pct}% off your first booking.",
+    "referral_line": "Invite discount ({pct}%)",
+    "referral_not_with_coupon": "The invite discount can't be combined with a coupon.",
+    "referral_own_code": "You can't use your own invite code.",
+    "referral_first_booking_only": "The invite discount is only valid on your first booking.",
+    "referral_invalid": "This invite code wasn't found."
   },
   "booking": {
     "detail_title": "Booking Details",
@@ -357,7 +364,7 @@
     "delete_account_success": "Account deletion request received. Your account will be permanently deleted within 7 days.",
     "delete_account_error": "Could not submit deletion request. Please ensure you have no active bookings.",
     "referral_title": "Invite Friends",
-    "referral_hint": "Earn ₺20 discount for each invite!",
+    "referral_hint": "Share your code: your friend gets {pct}% off their first booking.",
     "copy": "COPY",
     "copied": "Copied!",
     "notifications_empty": "All your notifications and campaign announcements are listed here. You currently have no active notifications.",

@@ -1,10 +1,11 @@
-import 'dart:async' show unawaited;
+import 'dart:async' show Timer, unawaited;
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/repositories/referral_repository.dart';
 import '../../core/repositories/shop_repository.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/services/review_service.dart';
@@ -27,12 +28,63 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   int _m = 1;
   int _xl = 0;
   final _coupon = TextEditingController();
+  final _referral = TextEditingController();
   double _grandTotal = 0;
+
+  /// Davet kodu onizlemesi: sunucu kurali (`/referrals/validate`) ne derse o.
+  double? _referralPct;
+  String? _referralReason;
+  Timer? _referralDebounce;
 
   @override
   void dispose() {
+    _referralDebounce?.cancel();
     _coupon.dispose();
+    _referral.dispose();
     super.dispose();
+  }
+
+  bool get _couponEntered => _coupon.text.trim().isNotEmpty;
+  String get _referralInput => _referral.text.trim().toUpperCase();
+  bool get _referralActive =>
+      _referralInput.isNotEmpty && !_couponEntered && _referralPct != null;
+
+  void _onReferralChanged(String _) {
+    _referralDebounce?.cancel();
+    setState(() {
+      _referralPct = null;
+      _referralReason = null;
+    });
+    final code = _referralInput;
+    if (code.isEmpty) return;
+    _referralDebounce = Timer(const Duration(milliseconds: 400), () async {
+      final result = await ref.read(referralRepositoryProvider).validate(code);
+      if (!mounted || code != _referralInput) return;
+      result.when(
+        onSuccess: (v) => setState(() {
+          _referralPct = v.valid ? v.discountPct : null;
+          _referralReason = v.valid ? null : v.reason;
+        }),
+        onFailure: (_) => setState(() => _referralPct = null),
+      );
+    });
+  }
+
+  String _referralMessage() {
+    if (_couponEntered) return 'checkout.referral_not_with_coupon'.tr();
+    if (_referralActive) {
+      return 'checkout.referral_applied'.tr(
+        namedArgs: {'pct': _referralPct!.toStringAsFixed(0)},
+      );
+    }
+    switch (_referralReason) {
+      case 'own_code':
+        return 'checkout.referral_own_code'.tr();
+      case 'not_first_booking':
+        return 'checkout.referral_first_booking_only'.tr();
+      default:
+        return 'checkout.referral_invalid'.tr();
+    }
   }
 
   int get _total => _s + _m + _xl;
@@ -90,6 +142,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           bagCountM: _m,
           bagCountXl: _xl,
           couponCode: _coupon.text.trim(),
+          referralCode: _couponEntered ? null : _referralInput,
           clientGrandTotal: _grandTotal,
         );
   }
@@ -317,11 +370,49 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   border: InputBorder.none,
                   prefixIcon: const Icon(Icons.local_offer_outlined, size: 20),
                 ),
+                onChanged: (_) => setState(() {}),
                 style: Theme.of(
                   context,
                 ).textTheme.bodyMedium!.copyWith(fontSize: 14),
               ),
             ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: TextField(
+                controller: _referral,
+                textCapitalization: TextCapitalization.characters,
+                decoration: InputDecoration(
+                  hintText: 'checkout.referral_placeholder'.tr(),
+                  border: InputBorder.none,
+                  prefixIcon: const Icon(Icons.card_giftcard_rounded, size: 20),
+                ),
+                onChanged: _onReferralChanged,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium!.copyWith(fontSize: 14),
+              ),
+            ),
+            if (_referralInput.isNotEmpty &&
+                (_couponEntered ||
+                    _referralActive ||
+                    _referralReason != null)) ...[
+              const SizedBox(height: 8),
+              Text(
+                _referralMessage(),
+                style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: _referralActive
+                      ? const Color(0xFF047857)
+                      : const Color(0xFFC2410C),
+                ),
+              ),
+            ],
 
             const SizedBox(height: 40),
 
@@ -349,7 +440,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     shop.pricePerDay *
                     days;
                 final insuranceFee = pricing.insuranceFeeTry;
-                _grandTotal = bagTotal > 0 ? bagTotal + insuranceFee : 0.0;
+                final subtotal = bagTotal > 0 ? bagTotal + insuranceFee : 0.0;
+                // Sunucudaki `applyReferralDiscount` ile ayni aritmetik.
+                final referralDiscount = _referralActive && subtotal > 0
+                    ? (subtotal * _referralPct! / 100 * 100).roundToDouble() /
+                          100
+                    : 0.0;
+                _grandTotal = subtotal - referralDiscount;
                 final grandTotal = _grandTotal;
 
                 return Container(
@@ -380,6 +477,18 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         _summaryRow(
                           'checkout.insurance_fee'.tr(),
                           '₺${insuranceFee.toStringAsFixed(2)}',
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                      if (referralDiscount > 0) ...[
+                        _summaryRow(
+                          'checkout.referral_line'.tr(
+                            namedArgs: {
+                              'pct': _referralPct!.toStringAsFixed(0),
+                            },
+                          ),
+                          '−₺${referralDiscount.toStringAsFixed(2)}',
+                          valueColor: const Color(0xFF10B981),
                         ),
                         const SizedBox(height: 16),
                       ],
