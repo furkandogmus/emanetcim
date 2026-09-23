@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 
 /**
- * Eski service worker'ı KALDIRIR (kayıt etmez).
+ * Eski service worker'ı KALDIRIR, uygulama worker'ını (`/push-sw.js`) KAYDEDER.
  *
  * 2026-08-23'e kadar `/sw.js` kayıt ediliyordu; dosya next-pwa'nın Turbopack'te
  * hiç çalışmaması yüzünden git'teki eski bir çıktıydı ve yetkili API yanıtlarını
@@ -23,6 +23,9 @@ function isLegacyWorker(reg: ServiceWorkerRegistration): boolean {
   return url.endsWith("/sw.js");
 }
 
+/** Kendi onbellegimiz (bkz. `public/push-sw.js`). Temizlik onu SILMEZ. */
+const OWN_CACHE_PREFIX = "bagajpark-offline-";
+
 export default function PWARegister() {
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
@@ -39,9 +42,19 @@ export default function PWARegister() {
         Promise.all(regs.filter(isLegacyWorker).map((r) => r.unregister())),
       )
       .then(() => ("caches" in window ? caches.keys() : Promise.resolve([] as string[])))
-      .then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+      .then((keys) =>
+        Promise.all(
+          keys.filter((k) => !k.startsWith(OWN_CACHE_PREFIX)).map((k) => caches.delete(k)),
+        ),
+      )
+      /*
+        Uygulama worker'i herkese (2026-09-23): cevrimdisi sayfa icin. Eskiden
+        yalnizca bildirim acan kullaniciya kuruluyordu. Kayit idempotent;
+        `WebPushOptIn` ayni dosyayi kaydettiginde ayni kayit doner.
+      */
+      .then(() => navigator.serviceWorker.register("/push-sw.js"))
       .catch(() => {
-        /* temizlik en iyi çaba; hata kullanıcıya yansımaz */
+        /* temizlik ve kayit en iyi çaba; hata kullanıcıya yansımaz */
       });
   }, []);
 
