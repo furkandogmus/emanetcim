@@ -40,7 +40,7 @@ void main() {
     await pump(tester);
     expect(find.text('Rezervasyonu Tamamla'), findsOneWidget);
     expect(find.text('Küçük (S)'), findsOneWidget);
-    expect(find.text('Orta (M)'), findsOneWidget);
+    expect(find.text('Orta (M/L)'), findsOneWidget);
     expect(find.text('Büyük (XL)'), findsOneWidget);
   });
 
@@ -49,7 +49,7 @@ void main() {
   ) async {
     await pump(tester);
 
-    // Varsayilan: 1 Orta (M) bavul secili, buton aktif.
+    // Varsayilan: 1 Orta (M/L) bavul secili, buton aktif.
     final payButtonFinder = find.widgetWithText(
       FilledButton,
       'Rezervasyonu Onayla',
