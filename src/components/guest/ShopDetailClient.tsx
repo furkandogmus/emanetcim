@@ -553,11 +553,11 @@ export default function ShopDetailClient({
                 className="flex items-center gap-3 rounded-2xl border border-gray-100 p-2.5 pr-4"
                 data-testid={`shop-bag-price-${size}`}
               >
-                <span className="flex h-16 w-16 shrink-0 items-end justify-center rounded-xl bg-gradient-to-b from-brand-50 to-gray-50 pb-1.5">
+                <span className="flex h-[72px] w-[72px] shrink-0 items-end justify-center rounded-xl bg-gradient-to-b from-brand-50 to-gray-50 pb-1.5">
                   <BagGlyph
                     size={size}
                     className="w-auto drop-shadow-sm"
-                    style={{ height: `${(BAG_HEIGHT_UNITS[size] / BAG_HEIGHT_UNITS.xl) * 52}px` }}
+                    style={{ height: `${(BAG_HEIGHT_UNITS[size] / BAG_HEIGHT_UNITS.xl) * 62}px` }}
                   />
                 </span>
                 <span className="min-w-0 flex-1">
