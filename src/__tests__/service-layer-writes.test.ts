@@ -115,7 +115,7 @@ const CEILINGS: Record<string, number> = {
     22 -> 20 -> 18 (2026-09-01): telefon guncelleme `PartnerProfileService`e,
     hesap anonimlestirme `AccountPrivacyService`e tasindi.
   */
-  user: 18,
+  user: 17,
   verificationToken: 7,
 };
 
@@ -126,7 +126,7 @@ const CEILINGS: Record<string, number> = {
 */
 
 /** Toplam tavan — yeni bir MODELİN sessizce eklenmesini de yakalar. */
-const TOTAL_CEILING = 66;
+const TOTAL_CEILING = 65;
 
 /**
  * Yorumlar ayıklanır: bu dosyaların çoğunda "eskiden burada ham
