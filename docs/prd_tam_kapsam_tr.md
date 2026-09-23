@@ -25,7 +25,7 @@
 - **Detaylı Filtreleme:** "Puan", "Fiyat", "7/24 Açık", "WC Mevcut" gibi detaylı filtreler.
 
 ### 3.2. Rezervasyon ve Ödeme Süreci
-- **Boyut Bazlı Fiyatlandırma:** S (100 TL), M/L (200 TL), XL (350 TL) kademeli ücretlendirme.
+- **Fiyatlandırma:** Şimdilik tek fiyat — boyuttan bağımsız, valiz başına günlük **150 TL** (S, M ve XL aynı). Boy bazlı kademe altyapısı hazır (`PlatformSettings.bagMultiplier*`); açılması bir iş kararıdır.
 - **Dijital Makbuz:** Rezervasyon onaylandığında oluşan hukuki geçerliliği olan belge.
 
 ---
@@ -33,7 +33,7 @@
 ## 4. Teknik Olmayan Gereksinimler
 
 ### 4.1. Güvenlik ve Sigorta
-- **Zorunlu Sigorta:** Her valiz başına standart 5.000 TL sigorta koruması.
+- **Güvence:** Şartlar sağlandığında valiz başına **10.000 TL'ye kadar** güvence (Kullanım Şartları). Misafirden ayrıca sigorta ücreti alınmaz (**0 TL**).
 - **Mağaza Onay Süreci:** Adli sicil kaydı, vergi levhası ve fiziksel alan kontrolü.
 
 ---
