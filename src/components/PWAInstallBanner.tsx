@@ -1,49 +1,70 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Download, X } from "lucide-react";
+import { Download, Share, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useStandaloneMode } from "@/lib/hooks/useStandaloneMode";
-
-const DISMISS_KEY = "bagajpark-pwa-install-dismissed";
+import {
+  PWA_BOOKED_EVENT,
+  countVisit,
+  dismissInstall,
+  hasBooked,
+  isInstallDismissed,
+  isInstallEligible,
+  isIosDevice,
+} from "@/lib/pwa-install";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
+/**
+ * Ana ekrana ekleme daveti. Ne zaman / kime: `src/lib/pwa-install.ts`.
+ * Chrome/Android'de tarayicinin kurulum penceresini acar; iOS'ta o pencere
+ * olmadigi icin "Paylas -> Ana Ekrana Ekle" adimini gosterir.
+ */
 export default function PWAInstallBanner() {
   const t = useTranslations("Common");
   const { isStandalone } = useStandaloneMode();
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
-  const [visible, setVisible] = useState(false);
+  const [ios, setIos] = useState(false);
+  const [eligible, setEligible] = useState(false);
+  const [justBooked, setJustBooked] = useState(false);
+  const [dismissed, setDismissed] = useState(true);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    try {
-      if (window.localStorage.getItem(DISMISS_KEY) === "1") return;
-    } catch {
-      /* private mode */
-    }
+    const isDismissed = isInstallDismissed();
+    const visits = countVisit();
+    const booked = hasBooked();
+    const onIos = isIosDevice(navigator.userAgent, navigator.maxTouchPoints ?? 0);
+    setTimeout(() => {
+      setDismissed(isDismissed);
+      setEligible(isInstallEligible(booked, visits));
+      setIos(onIos);
+    }, 0);
 
     const onBip = (e: Event) => {
       e.preventDefault();
       setDeferred(e as BeforeInstallPromptEvent);
-      setVisible(true);
     };
-
+    const onBooked = () => {
+      setEligible(true);
+      setJustBooked(true);
+    };
     window.addEventListener("beforeinstallprompt", onBip);
-    return () => window.removeEventListener("beforeinstallprompt", onBip);
+    window.addEventListener(PWA_BOOKED_EVENT, onBooked);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", onBip);
+      window.removeEventListener(PWA_BOOKED_EVENT, onBooked);
+    };
   }, []);
 
   const dismiss = useCallback(() => {
-    setVisible(false);
+    setDismissed(true);
     setDeferred(null);
-    try {
-      window.localStorage.setItem(DISMISS_KEY, "1");
-    } catch {
-      /* ignore */
-    }
+    dismissInstall();
   }, []);
 
   const install = useCallback(async () => {
@@ -54,8 +75,14 @@ export default function PWAInstallBanner() {
   }, [deferred, dismiss]);
 
   // Erken return'ler hook'lardan SONRA — [[react-hooks/rules-of-hooks]].
-  if (isStandalone) return null;
-  if (!visible || !deferred) return null;
+  if (isStandalone || dismissed || !eligible) return null;
+  if (!deferred && !ios) return null;
+
+  const body = ios
+    ? t("pwaInstallIosBody")
+    : justBooked
+      ? t("pwaInstallAfterBookingBody")
+      : t("pwaInstallBody");
 
   return (
     <div
@@ -67,7 +94,7 @@ export default function PWAInstallBanner() {
     >
       <div className="flex gap-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-xl shadow-gray-200/50">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-600 text-white">
-          <Download className="h-5 w-5" aria-hidden />
+          {ios ? <Share className="h-5 w-5" aria-hidden /> : <Download className="h-5 w-5" aria-hidden />}
         </div>
         <div className="min-w-0 flex-1">
           <p
@@ -76,23 +103,28 @@ export default function PWAInstallBanner() {
           >
             {t("pwaInstallTitle")}
           </p>
-          <p className="mt-1 text-xs leading-relaxed text-gray-600">
-            {t("pwaInstallBody")}
-          </p>
+          <p className="mt-1 text-xs leading-relaxed text-gray-600">{body}</p>
+          {ios && justBooked ? (
+            <p className="mt-1 text-xs leading-relaxed text-gray-600">
+              {t("pwaInstallAfterBookingBody")}
+            </p>
+          ) : null}
           <div className="mt-3 flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={install}
-              className="rounded-full bg-orange-600 px-4 py-2 id-eyebrow text-white hover:bg-orange-700"
-            >
-              {t("pwaInstallCta")}
-            </button>
+            {ios ? null : (
+              <button
+                type="button"
+                onClick={install}
+                className="rounded-full bg-orange-600 px-4 py-2 id-eyebrow text-white hover:bg-orange-700"
+              >
+                {t("pwaInstallCta")}
+              </button>
+            )}
             <button
               type="button"
               onClick={dismiss}
               className="rounded-full border border-gray-200 px-4 py-2 id-eyebrow text-gray-500 hover:bg-gray-50"
             >
-              {t("pwaInstallDismiss")}
+              {ios ? t("pwaInstallIosDone") : t("pwaInstallDismiss")}
             </button>
           </div>
         </div>

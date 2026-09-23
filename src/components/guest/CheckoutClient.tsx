@@ -21,6 +21,7 @@ import { createBookingAction } from "@/actions/booking";
 import { validateReferralCodeAction } from "@/actions/referral";
 import { clearReferralCode, readReferralCode } from "@/lib/referral-capture";
 import { applyReferralDiscount } from "@/lib/referral-discount";
+import { markBooked } from "@/lib/pwa-install";
 import {
   computeDailyBagLineTotal,
   computeServiceTotalForStay,
@@ -318,6 +319,8 @@ export default function CheckoutClient({
           .catch(() => setQrDataUrl(null));
       }
       setIsSuccess(true);
+      // Ana ekrana ekleme davetinin en anlamli ani: QR artik elde.
+      markBooked();
     } else if (result.error === "Errors.guestContactRequired") {
       /*
         OTURUM SÜRESİ CHECKOUT SIRASINDA DOLMUŞ OLABİLİR (2026-09-10). `isLoggedIn`
