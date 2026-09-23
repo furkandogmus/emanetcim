@@ -46,6 +46,7 @@ class CheckoutController extends Notifier<CheckoutPayState> {
     required int bagCountXl,
     required String couponCode,
     required double clientGrandTotal,
+    String? referralCode,
   }) async {
     unawaited(ref.read(hapticServiceProvider).medium());
     state = const CheckoutPayState(status: CheckoutPayStatus.submitting);
@@ -61,6 +62,8 @@ class CheckoutController extends Notifier<CheckoutPayState> {
           'bagCountM': bagCountM,
           'bagCountXl': bagCountXl,
           'couponCode': couponCode,
+          if (referralCode != null && referralCode.isNotEmpty)
+            'referralCode': referralCode,
         },
       );
       final bookingId = res.data['bookingId'] as String?;
