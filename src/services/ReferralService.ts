@@ -16,19 +16,18 @@
  * degilse, misafirin ILK rezervasyonunda, kupon kullanilmiyorsa, ara toplamdan
  * `REFERRAL_DISCOUNT_PCT` (varsayilan 5, %0-50 arasina kirpilir) indirir.
  */
-import { randomBytes } from "crypto";
+import { randomInt } from "crypto";
 import { BookingStatus, Role } from "@prisma/client";
 import prisma from "@/lib/db";
 import { applyReferralDiscount } from "@/lib/referral-discount";
 
 const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // belirsiz karakterler çıkarıldı
 
+// `randomInt` sapmasiz secer; `bayt % 32` 256'yi tam bolse de CodeQL onu
+// (haklı olarak, genel durumda) sapmali sayar.
 function generateCode(length = 8): string {
-  const bytes = randomBytes(length * 2);
   let result = "";
-  for (let i = 0; i < bytes.length && result.length < length; i++) {
-    result += ALPHABET[bytes[i] % ALPHABET.length];
-  }
+  for (let i = 0; i < length; i++) result += ALPHABET[randomInt(ALPHABET.length)];
   return result;
 }
 
