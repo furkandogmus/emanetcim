@@ -76,7 +76,7 @@ export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientP
     latitude: shop.latitude || 41.0082,
     longitude: shop.longitude || 28.9784,
     capacity: shop.capacity || 10,
-    pricePerDay: Number(shop.pricePerDay || 50),
+    pricePerDay: shop.pricePerDay,
     isActive: shop.isActive,
     isTest: shop.isTest,
     isVerified: shop.isVerified

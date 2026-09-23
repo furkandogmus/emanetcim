@@ -47,7 +47,7 @@ export function matchesSearchFilters(
   if (!matchText) return false;
 
   if ((shop.rating ?? 0) < c.minRating) return false;
-  if ((shop.pricePerDay ?? 50) > c.maxPrice) return false;
+  if (shop.pricePerDay > c.maxPrice) return false;
   if (c.open247Only && shop.open247 !== true) return false;
   if (c.hasRestroom && shop.hasRestroom !== true) return false;
   if (c.hasCctv && shop.hasCctv !== true) return false;
