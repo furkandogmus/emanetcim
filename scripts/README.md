@@ -736,3 +736,72 @@ ikonu. Geri sızmalarının tek güvencesi tekrar ölçmek.
 **Bilinen sınır:** Cloudflare bot doğrulaması ara sıra araya giriyor. Tarama
 bunu tespit edip o sayfayı `atlandı` olarak işaretler — sessizce geçmez, çünkü
 kapsamın daraldığı görünmeli.
+
+## Esnaf aday listesi — `find-esnaf-leads.ts`
+
+Pilot bölgede (Galata/Karaköy, bkz. `docs/pazarlama_stratejisi_tr.md` § 1.2)
+telesatış için aranacak esnaf adaylarını Google Places API'den toplu çeker:
+isim, adres, telefon, website, puan → CSV. **E-posta yok** — Places API hiçbir
+planda e-posta alanı döndürmez; plan zaten telefonla aramayı öngörüyor.
+
+### 1. Places API anahtarı (bir kere kurulur)
+
+1. https://console.cloud.google.com/ → sağ üstten bir proje seçin/oluşturun
+   (örn. `emanetcim-leads`).
+2. Sol menü → **APIs & Services → Library** → `Places API (New)` arayın →
+   **Enable**. (Legacy "Places API" DEĞİL — "New" olan.)
+3. Sol menü → **Billing** → bu projeye bir fatura hesabı bağlayın. Kredi kartı
+   istenir ama **1.000 çağrıya kadar ücretsiz** (Enterprise SKU — telefon/
+   website/puan bu SKU'da; 2026-09,
+   `developers.google.com/maps/billing-and-pricing/pricing`). Bu script'in tek
+   koşusu ~6 çağrı; pilot bölge için tek kuruş çıkmaz — kart yalnızca doğrulama
+   için gerekiyor.
+4. **APIs & Services → Credentials → Create Credentials → API key.**
+5. Anahtarı oluşturduktan sonra **Edit API key**: *API restrictions* →
+   *Restrict key* → sadece `Places API (New)` işaretli kalsın. Kısıtlamadan
+   bırakılan bir anahtar başka bir Google servisinde de kullanılabilir hale
+   gelir.
+6. `.env`'e ekleyin (repo'da `.env*` gitignore'lu, commit'e girmez):
+   ```
+   GOOGLE_MAPS_API_KEY=AIza...
+   ```
+
+### 2. Çalıştırma
+
+```bash
+npx tsx scripts/find-esnaf-leads.ts
+```
+
+**Beklenen çıktı:** `Aranıyor: kafe...` gibi 6 satır, ardından
+`N benzersiz aday → scripts/output/esnaf-leads-galata-karakoy.csv`. Dosya
+git'e girmez (`.gitignore`) — telefon içeren toplu çıktı kaynak değil, yan
+üründür; her koşuda yeniden üretilir.
+
+Farklı bir şehir/bölge için CLI bayrakları kullanılır:
+
+```bash
+npx tsx scripts/find-esnaf-leads.ts --city "Bodrum" --lat 37.0344 --lng 27.4305 --limit 30
+```
+
+- `--city` arama sorgusuna eklenen ad (varsayılan: Galata-Karaköy)
+- `--lat` / `--lng` merkez koordinat (verilmezse Galata Kulesi kullanılır)
+- `--radius` metre cinsinden arama yarıçapı (varsayılan 700)
+- `--limit` çıktıyı ilk N benzersiz adayla sınırlar
+- `--out` çıktı dosyası (verilmezse `scripts/output/esnaf-leads-<şehir-slug>.csv`)
+- `--categories` virgülle ayrılmış kategori listesi; o koşu için varsayılan
+  `CATEGORIES` sabitinin yerine geçer (örn. rakip emanet noktalarını bulmak için
+  `--categories "valiz emanet,bagaj depolama,luggage storage"`)
+
+Varsayılan kategori listesini kalıcı değiştirmek için dosyanın başındaki
+`CATEGORIES` sabitini düzenleyin — tek yerde, kodun ortasına gömülü değil.
+
+### Sınırlar
+
+- **E-posta hiç yok.** Places API'nin hiçbir SKU'sunda e-posta alanı
+  bulunmuyor; website URI'si dönüyor, e-posta oradan elle/ayrı bir adımla
+  çıkarılmalı.
+- **30 günlük önbellek sınırı (Google ToS).** Bu CSV'yi kalıcı bir esnaf
+  veritabanı gibi saklamayın — telesatış için bir kerelik arama listesi olarak
+  kullanıp süresi geçince yeniden koşun.
+- **Places sonuçlarıyla soğuk arama yapılırken KVKK** uygulanır; script veriyi
+  Google'dan çekmekle sınırlı, arama/pazarlama tarafı ayrı bir uyum konusu.
