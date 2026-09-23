@@ -9,6 +9,7 @@ import { getSiteBaseUrl } from "@/lib/site-urls";
 import { siteIdentityAttribute } from "@/lib/site-identity";
 import { openGraphLocaleForUiLocale } from "@/lib/i18n-open-graph";
 import PWARegister from "@/components/PWARegister";
+import ReferralCapture from "@/components/referral/ReferralCapture";
 import PWAInstallBanner from "@/components/PWAInstallBanner";
 import { Providers } from "@/components/Providers";
 import Header from "@/components/layout/Header";
@@ -341,6 +342,7 @@ export default async function RootLayout({
             </main>
             <Footer />
             <PWAInstallBanner />
+            <ReferralCapture />
             <MobileNav />
             <CookieConsent />
             <ConsentAwareAnalytics />
