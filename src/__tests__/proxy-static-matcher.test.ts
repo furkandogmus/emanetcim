@@ -68,6 +68,8 @@ describe("proxy matcher statik dosyalari disliyor", () => {
     "/push-sw.js",
     "/sw.js",
     "/manifest.json",
+    "/manifests/tr.webmanifest",
+    "/screenshots/narrow-home.jpg",
     "/favicon.ico",
     "/icons/icon-192x192.png",
     "/next.svg",

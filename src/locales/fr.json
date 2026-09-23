@@ -2122,5 +2122,17 @@
     "sizesTitle": "Quels bagages acceptez-vous ?",
     "sizesBody": "Le client choisit selon la taille : un sac à dos coûte moins cher, une grande valise davantage. Vous décidez combien vous en acceptez.",
     "sizesPriceNote": "Prix de départ pour un bagage moyen : {price} par jour. Vous pouvez le modifier à tout moment dans l'espace."
+  },
+  "Pwa": {
+    "name": "BagajPark — Consigne à bagages",
+    "description": "Déposez vos bagages en sécurité et explorez librement. Trouvez une consigne proche et réservez.",
+    "shortcutSearchName": "Trouver une consigne",
+    "shortcutSearchShort": "Rechercher",
+    "shortcutSearchDesc": "Trouver des consignes à proximité",
+    "shortcutBookingsName": "Mes réservations",
+    "shortcutBookingsShort": "Réservations",
+    "shortcutBookingsDesc": "Voir vos réservations et votre code QR",
+    "screenshotSearch": "Consignes à proximité sur la carte",
+    "screenshotHome": "Déposez vos bagages, explorez librement"
   }
 }

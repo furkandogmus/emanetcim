@@ -2280,5 +2280,17 @@
     "sizesTitle": "Which bags do you take?",
     "sizesBody": "Guests pick their bag by size: a backpack costs less, a large suitcase more. You decide how many bags you take.",
     "sizesPriceNote": "Starting price for a medium bag is {price} per day. You can change it in the panel at any time."
+  },
+  "Pwa": {
+    "name": "BagajPark — Luggage Storage",
+    "description": "Drop your bags safely and explore freely. Find a nearby storage point and book.",
+    "shortcutSearchName": "Find Storage",
+    "shortcutSearchShort": "Search",
+    "shortcutSearchDesc": "Find nearby luggage storage points",
+    "shortcutBookingsName": "My Bookings",
+    "shortcutBookingsShort": "Bookings",
+    "shortcutBookingsDesc": "See your bookings and QR code",
+    "screenshotSearch": "Nearby storage points on the map",
+    "screenshotHome": "Drop your bags, explore freely"
   }
 }
