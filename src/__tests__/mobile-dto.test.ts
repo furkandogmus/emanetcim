@@ -1,9 +1,11 @@
 import { describe, it, expect } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
+import { DEFAULT_PRICING_RULES } from "@/lib/pricing-rules";
 import {
   toMobileUser,
   toMobileShop,
+  toMobilePricing,
   toMobileBookingSummary,
   toMobileBookingDetail,
 } from "@/lib/mobile-dto";
@@ -152,5 +154,23 @@ describe("mandal: uçlar kendi gövdesini yazmıyor", () => {
       "Kullanıcı gövdesi `toMobileUser()`'da. Bu uçlar kendi kopyasını yazıyor:\n" +
         offenders.join("\n"),
     ).toEqual([]);
+  });
+});
+
+describe("toMobilePricing", () => {
+  it("odeme tahmini icin carpanlari ve sigortayi sunucu kuralindan tasir", () => {
+    // Canlidaki satir: carpanlar 1/1/1, sigorta 0. Istemci sabit 0.8/1.5 ve ₺15
+    // yazdigi icin misafire yanlis tutar gosteriyordu.
+    const rules = {
+      ...DEFAULT_PRICING_RULES,
+      bagMultipliers: { S: 1, M: 1, XL: 1 },
+      insuranceFeeTry: 0,
+    };
+    expect(toMobilePricing(rules)).toEqual({
+      bagMultiplierS: 1,
+      bagMultiplierM: 1,
+      bagMultiplierXl: 1,
+      insuranceFeeTry: 0,
+    });
   });
 });

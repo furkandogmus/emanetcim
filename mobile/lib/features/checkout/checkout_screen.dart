@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/repositories/shop_repository.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/services/review_service.dart';
+import '../../shared/models/shop.dart';
 import '../../shared/utils/app_colors.dart';
 import '../../shared/widgets/error_state.dart';
 import 'checkout_controller.dart';
@@ -347,10 +348,17 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     : (ms / (24 * 60 * 60 * 1000)).ceil().clamp(1, 30);
                 // BagajPark fiyatlandırması sunucu tarafında hesaplanır.
                 // Buradaki hesaplama yalnızca tahmini gösterim içindir.
-                // Kesin fiyat onay anında sunucudan alınır.
+                // Kesin fiyat onay anında sunucudan alınır. Çarpanlar ve
+                // sigorta da sunucudan gelir (`ShopPricingDto`); sabit
+                // yazıldıklarında tahmin canlı fiyattan ayrışıyordu.
+                final pricing = shop.pricing ?? const ShopPricingDto();
                 final bagTotal =
-                    (_s * 0.8 + _m * 1.0 + _xl * 1.5) * shop.pricePerDay * days;
-                const insuranceFee = 15.0;
+                    (_s * pricing.bagMultiplierS +
+                        _m * pricing.bagMultiplierM +
+                        _xl * pricing.bagMultiplierXl) *
+                    shop.pricePerDay *
+                    days;
+                final insuranceFee = pricing.insuranceFeeTry;
                 _grandTotal = bagTotal > 0 ? bagTotal + insuranceFee : 0.0;
                 final grandTotal = _grandTotal;
 
@@ -378,11 +386,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         '₺${bagTotal.toStringAsFixed(2)}',
                       ),
                       const SizedBox(height: 16),
-                      _summaryRow(
-                        'checkout.insurance_fee'.tr(),
-                        '₺${insuranceFee.toStringAsFixed(2)}',
-                      ),
-                      const SizedBox(height: 16),
+                      if (insuranceFee > 0) ...[
+                        _summaryRow(
+                          'checkout.insurance_fee'.tr(),
+                          '₺${insuranceFee.toStringAsFixed(2)}',
+                        ),
+                        const SizedBox(height: 16),
+                      ],
                       _summaryRow(
                         'checkout.service_fee'.tr(),
                         'checkout.included'.tr(),

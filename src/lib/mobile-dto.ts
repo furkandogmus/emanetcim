@@ -1,4 +1,5 @@
 import { moneyToNumber } from "@/lib/money";
+import type { PricingRules } from "@/lib/pricing-rules";
 
 /**
  * Mobil istemciye giden GÖVDE biçimleri — tek yer.
@@ -129,6 +130,23 @@ export function toMobileShop(s: ShopSummarySource) {
     isActive: s.isActive,
     isVerified: s.isVerified,
     isPrelaunch: s.isPrelaunch ?? false,
+  };
+}
+
+/**
+ * Mobil ödeme ekranının TAHMİNİ tutarı hesaplarken kullandığı kurallar.
+ *
+ * NEDEN (2026-09-23): istemci çarpanları (0.8/1.0/1.5) ve sigortayı (₺15) sabit
+ * yazıyordu. Canlıda çarpanlar 1/1/1, sigorta 0 — misafir S için ₺120, XL için
+ * ₺225 ve ayrıca ₺15 sigorta görüyor, sunucu ise hepsine ₺150 kesiyordu. Aradaki
+ * fark yalnızca geliştirici loguna düşüyordu. Kural sunucuda; istemci onu okur.
+ */
+export function toMobilePricing(r: PricingRules) {
+  return {
+    bagMultiplierS: r.bagMultipliers.S,
+    bagMultiplierM: r.bagMultipliers.M,
+    bagMultiplierXl: r.bagMultipliers.XL,
+    insuranceFeeTry: r.insuranceFeeTry,
   };
 }
 
