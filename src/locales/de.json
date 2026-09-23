@@ -1769,6 +1769,38 @@
       "searchQuery": "Yachthafen",
       "cta": "Eröffnen Sie Geschäfte in Bodrum"
     },
+    "fethiye": {
+      "label": "Fethiye",
+      "metaTitle": "Gepäckaufbewahrung Fethiye – Ölüdeniz, Marina & Busbahnhof",
+      "metaDescription": "Gepäckaufbewahrung in Fethiye nahe Ölüdeniz, Çalış-Strand, Marina und Busbahnhof. Fester Tagespreis, versiegelte Gepäckstücke, Zahlung im Laden.",
+      "headline": "Gepäckaufbewahrung in Fethiye: Ölüdeniz, Marina und Busbahnhof",
+      "intro": "Ausgecheckt, aber der Flug ab Dalaman geht erst abends? Gepäck in Fethiye abgeben und den letzten Tag ohne Koffer genießen.",
+      "searchQuery": "Fethiye",
+      "cta": "Aufbewahrungsorte in Fethiye zeigen",
+      "sections": [
+        {
+          "title": "Zwischen Hotel-Check-out und dem Flug ab Dalaman",
+          "body": "Der Check-out in Fethiye ist meist gegen Mittag, Rückflüge ab dem Flughafen Dalaman gehen oft abends oder nachts. Der Flughafen liegt etwa eine Autostunde entfernt. Gib dein Gepäck morgens ab, verbringe den letzten Tag in Ölüdeniz oder in der Altstadt und hol es vor deinem Transfer wieder ab."
+        },
+        {
+          "title": "Vor Bootstour, Paragliding oder Lykischem Weg",
+          "body": "Die 12-Inseln-Bootstouren ab dem Hafen von Fethiye, Paragliding vom Babadağ über Ölüdeniz und Wanderungen auf dem Lykischen Weg, der auf der Seite Ölüdeniz–Ovacık beginnt, dauern meist den ganzen Tag. Buche einen Aufbewahrungsort, dessen Öffnungszeiten du vorher siehst."
+        }
+      ],
+      "tips": [
+        "Abendflug? Gepäck morgens abgeben und den letzten Tag in Ölüdeniz verbringen",
+        "Zur 12-Inseln-Tour ohne Koffer und danach abholen",
+        "Den Lykischen Weg mit leichtem Rucksack starten, den großen Koffer einlagern"
+      ],
+      "nearbyPlaces": [
+        "Ölüdeniz",
+        "Marina Fethiye",
+        "Çalış-Strand",
+        "Kayaköy",
+        "Göcek",
+        "Saklıkent-Schlucht"
+      ]
+    },
     "cappadocia": {
       "label": "Kappadokien",
       "metaTitle": "Gepäckaufbewahrung Kappadokien",
