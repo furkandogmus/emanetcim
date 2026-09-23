@@ -26,7 +26,12 @@ self.addEventListener("push", function (event) {
   var options = {
     body: payload.body || "",
     icon: "/icons/icon-192x192.png",
-    badge: "/icons/icon-192x192.png",
+    /*
+      Rozet Android'de TEK RENKLI MASKE olarak cizilir: yalnizca alfa kanali
+      okunur. Renkli ve dolu 192px ikon bildirim cubugunda gri bir kareye
+      donusuyordu (2026-09-23). Seffaf zeminde beyaz kutu sembolu.
+    */
+    badge: "/icons/badge-96x96.png",
     /*
       TIKLAMA HEDEFI. Sunucu (`NotificationService.sendPush`) govdede `url`
       DEGIL `bookingId` gonderiyor -- olculdu 2026-08-31:
