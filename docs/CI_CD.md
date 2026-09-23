@@ -44,7 +44,7 @@ push/PR → main                     ci.yml
                                    ASLA iptal edilmez, tek sırada
 ```
 
-`mobile-ci.yml` ayrı kalır (`mobile/**` path filtreli), `release.yml` yalnızca
+`mobile-ci.yml` ayrı kalır (push'ta `mobile/**` path filtreli), `release.yml` yalnızca
 sürüm etiketinde çalışır.
 
 ### Kurallar
@@ -76,9 +76,15 @@ sürüm etiketinde çalışır.
   deploy'u yarıda keserdi: S3 yüklemesi bitmiş, SSM komutu beklenirken kesilen bir
   koşu sunucuyu yarı güncellenmiş bırakır. `deploy` ayrıca `deploy-production`
   grubunda sırayla çalışır — iki deploy aynı anda `docker compose up` çağırmaz.
-- **`paths-ignore`:** `docs/**`, `mobile/**`, `ops/**`, `**/*.md`. Bunlar
+- **Push'ta `paths-ignore`:** `docs/**`, `mobile/**`, `ops/**`, `**/*.md`. Bunlar
   uygulamanın davranışını değiştirmez. Path filtresi yüzünden atlanan bir
   değişikliği elle doğrulamak için `workflow_dispatch` var.
+- **PR'da path filtresi YOK (2026-09-23).** `verify` ve mobildeki `Build Android`
+  main'de zorunlu kontrol. Path filtresi yüzünden hiç tetiklenmeyen bir zorunlu
+  kontrol PR'ı sonsuza dek "bekliyor"da bırakır. Kapsamı `changes` job'u ölçer;
+  uygulamaya (ya da mobile) dokunmayan PR'da iş **koşulla atlanır** ve GitHub
+  atlanan işi geçmiş sayar. Üçüncü zorunlu kontrol `pr-gate.yml` → `PR kurallari`
+  (commit başlıkları). Süreç: `docs/GIT_COMMIT_GUIDE.md`.
 - **`timeout-minutes` her job'da.** Asılı kalan bir job, kotayı sessizce yer.
 
 ### macOS 10× faturalanır

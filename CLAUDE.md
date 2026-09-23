@@ -17,6 +17,9 @@ npm run test:e2e     # Playwright; dev sunucuyu kendisi kaldırır
 - Tanımlayıcılar İngilizce; yorumlar, commit mesajları, dokümanlar Türkçe.
 - Commit: Conventional Commits, başlık ASCII (`fix(seal): muhur ...`). Gövdede **neden**
   — hangi prod verisi / hangi hata buna yol açtı. `docs/GIT_COMMIT_GUIDE.md`.
+- **`main`'e doğrudan push YOK** (ruleset, 2026-09-23). Her iş kendi dalında, tek
+  konulu küçük commit'lerle, PR ile gelir; birleştirme yalnızca rebase merge.
+  Merge = prod deploy. Süreç: `docs/GIT_COMMIT_GUIDE.md` § Değişiklik süreci.
 - Kullanıcıya görünen her metin `src/locales/<dil>.json`'a girer; bileşende
   `locale === "tr" ? ... : ...` yazılmaz (mandal testi var).
 
