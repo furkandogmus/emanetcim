@@ -3,22 +3,9 @@
 import { getClientIp } from "@/lib/client-ip";
 
 import { auth } from "@/auth";
-import prisma from "@/lib/db";
-import { randomBytes } from "crypto";
+import { referralService, type ReferralRejection } from "@/services/ReferralService";
 import { requireUser } from "@/lib/action-auth";
 import { rateLimit } from "@/lib/rate-limit";
-
-const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // belirsiz karakterler çıkarıldı
-
-function generateCode(length = 8): string {
-  const bytes = randomBytes(length * 2);
-  let result = "";
-  for (let i = 0; i < bytes.length && result.length < length; i++) {
-    const idx = bytes[i] % ALPHABET.length;
-    result += ALPHABET[idx];
-  }
-  return result;
-}
 
 /**
  * Kullanıcının referans kodunu döndürür; yoksa oluşturur ve kaydeder.
@@ -34,28 +21,8 @@ export async function getOrCreateReferralCodeAction(): Promise<
   const auth = await requireUser();
   if (!auth.ok) return { success: false, error: auth.error };
 
-  const user = await prisma.user.findUnique({
-    where: { id: auth.actor.id },
-    select: { referralCode: true },
-  });
-
-  if (user?.referralCode) {
-    return { success: true, code: user.referralCode };
-  }
-
-  // Benzersiz kod üret (çakışma döngüsü)
-  for (let attempt = 0; attempt < 5; attempt++) {
-    const code = generateCode();
-    try {
-      await prisma.user.update({
-        where: { id: auth.actor.id },
-        data: { referralCode: code },
-      });
-      return { success: true, code };
-    } catch {
-      // unique constraint ihlali — tekrar dene
-    }
-  }
+  const code = await referralService.getOrCreateCode(auth.actor.id);
+  if (code) return { success: true, code };
   return { success: false, error: "Errors.referralCodeFailed" };
 }
 
@@ -64,8 +31,9 @@ export async function getOrCreateReferralCodeAction(): Promise<
  * Kendi kodunu kullanamazsın.
  */
 export async function validateReferralCodeAction(
-  code: string
-): Promise<{ valid: boolean; discountPct: number }> {
+  code: string,
+  guestEmail?: string,
+): Promise<{ valid: boolean; discountPct: number; reason?: ReferralRejection }> {
   if (typeof code !== "string" || !code.trim() || code.length > 32) {
     return { valid: false, discountPct: 0 };
   }
@@ -86,18 +54,10 @@ export async function validateReferralCodeAction(
   }
 
   const session = await auth();
-
-  const owner = await prisma.user.findUnique({
-    where: { referralCode: code.trim().toUpperCase() },
-    select: { id: true },
+  const check = await referralService.check(code, {
+    userId: session?.user?.id,
+    guestEmail,
   });
-
-  if (!owner) return { valid: false, discountPct: 0 };
-  // Kendi kodunu kullanamaz
-  if (session?.user?.id && owner.id === session.user.id) {
-    return { valid: false, discountPct: 0 };
-  }
-
-  const discountPct = Number(process.env.REFERRAL_DISCOUNT_PCT ?? "5");
-  return { valid: true, discountPct };
+  if (!check.ok) return { valid: false, discountPct: 0, reason: check.reason };
+  return { valid: true, discountPct: check.discountPct };
 }

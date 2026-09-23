@@ -4,6 +4,8 @@ import { z } from "zod";
 import prisma from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { clientIp } from "@/lib/internal-api-guard";
+import { requireMobileUser } from "@/lib/mobile-auth";
+import { referralService } from "@/services/ReferralService";
 
 /**
  * Referans kodu dogrulama — KIMLIKSIZ cagrilabilir.
@@ -36,14 +38,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "invalid_data" }, { status: 400 });
   }
 
-  const referrer = await prisma.user.findFirst({
-    where: { referralCode: parsed.data.code.toUpperCase() },
-    select: { id: true, name: true },
-  });
-
-  if (!referrer) {
-    return NextResponse.json({ valid: false, error: "invalid_code" }, { status: 200 });
+  /*
+    Oturum ISTEGE BAGLI: odeme ekrani token ile cagirir ve "kendi kodun" /
+    "ilk rezervasyonun degil" cevabini alir; davet ekrani token'siz cagirabilir.
+    Kural `ReferralService.check`te -- web onizlemesiyle ayni cevap.
+  */
+  const auth = await requireMobileUser(req);
+  const userId = "error" in auth ? undefined : auth.user.id;
+  const check = await referralService.check(parsed.data.code, { userId });
+  if (!check.ok) {
+    return NextResponse.json({ valid: false, error: check.reason }, { status: 200 });
   }
 
-  return NextResponse.json({ valid: true, referrerName: referrer.name });
+  const referrer = await prisma.user.findUnique({
+    where: { referralCode: check.code },
+    select: { name: true },
+  });
+  return NextResponse.json({
+    valid: true,
+    discountPct: check.discountPct,
+    referrerName: referrer?.name ?? null,
+  });
 }
