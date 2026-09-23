@@ -1769,6 +1769,38 @@
       "searchQuery": "Marina",
       "cta": "Magasins ouverts à Bodrum"
     },
+    "fethiye": {
+      "label": "Fethiye",
+      "metaTitle": "Consigne à bagages Fethiye – Ölüdeniz, marina et gare routière",
+      "metaDescription": "Consigne à bagages à Fethiye près d'Ölüdeniz, de la plage de Çalış, de la marina et de la gare routière. Prix fixe à la journée, bagages scellés, paiement en boutique.",
+      "headline": "Consigne à bagages à Fethiye : Ölüdeniz, marina et gare routière",
+      "intro": "Chambre libérée mais vol depuis Dalaman le soir ? Déposez vos bagages à Fethiye et profitez de votre dernière journée les mains libres.",
+      "searchQuery": "Fethiye",
+      "cta": "Voir les consignes à Fethiye",
+      "sections": [
+        {
+          "title": "Entre le départ de l'hôtel et votre vol depuis Dalaman",
+          "body": "À Fethiye, on libère généralement la chambre vers midi, alors que les vols retour depuis l'aéroport de Dalaman partent souvent le soir ou la nuit. L'aéroport est à environ une heure de route. Déposez vos bagages le matin, profitez de votre dernier jour à Ölüdeniz ou dans la vieille ville, puis récupérez-les avant votre transfert."
+        },
+        {
+          "title": "Avant une excursion en bateau, du parapente ou la Voie lycienne",
+          "body": "Les excursions en bateau vers les 12 îles depuis le port de Fethiye, le parapente depuis le Babadağ au-dessus d'Ölüdeniz et la randonnée sur la Voie lycienne, qui commence côté Ölüdeniz–Ovacık, occupent presque toute la journée. Réservez une consigne dont vous voyez les horaires à l'avance."
+        }
+      ],
+      "tips": [
+        "Vol le soir ? Déposez vos bagages le matin et passez la dernière journée à Ölüdeniz",
+        "Partez en excursion vers les 12 îles sans valise et récupérez-la au retour",
+        "Commencez la Voie lycienne avec un sac léger et laissez la grande valise en consigne"
+      ],
+      "nearbyPlaces": [
+        "Ölüdeniz",
+        "Marina de Fethiye",
+        "Plage de Çalış",
+        "Kayaköy",
+        "Göcek",
+        "Gorges de Saklıkent"
+      ]
+    },
     "cappadocia": {
       "label": "Cappadoce",
       "metaTitle": "Consigne Bagage Cappadoce | Parc Bagaj",

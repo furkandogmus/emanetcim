@@ -48,6 +48,17 @@ export const STORAGE_CITIES = [
     image: "/images/cities/bodrum.jpg"
   },
   {
+    // 2026-09-23: ilk isleyen Mugla dukkani Fethiye'de. 30 km: Olu Deniz
+    // (~13 km) ve Gocek (~25 km) dahil; Dalaman Havalimani (~45 km) degil.
+    slug: "fethiye",
+    country: "TR",
+    pointsRadiusKm: 30,
+    lat: 36.6214,
+    lng: 29.1164,
+    // Unsplash kzEMrCC0ink (Olu Deniz, Dilek Durgun) — Unsplash lisansi, atif sart degil.
+    image: "/images/cities/fethiye.jpg"
+  },
+  {
     slug: "cappadocia",
     country: "TR",
     pointsRadiusKm: 25,

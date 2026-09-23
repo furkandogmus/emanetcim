@@ -26,7 +26,7 @@ import { getCityStoragePoints } from "@/lib/city-storage-points";
 describe("sehir sayfasi dizin kurali", () => {
   it("Turkiye sehirleri dizinde, yurtdisi degil", () => {
     expect(INDEXED_STORAGE_CITIES.map((c) => c.slug).sort()).toEqual(
-      ["ankara", "antalya", "bodrum", "cappadocia", "istanbul", "izmir"],
+      ["ankara", "antalya", "bodrum", "cappadocia", "fethiye", "istanbul", "izmir"],
     );
     for (const city of STORAGE_CITIES) {
       expect(isStorageCityIndexed(city)).toBe(city.country === "TR");

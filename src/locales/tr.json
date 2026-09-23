@@ -1943,6 +1943,38 @@
         "Yalıkavak"
       ]
     },
+    "fethiye": {
+      "label": "Fethiye",
+      "metaTitle": "Fethiye emanetçi — Ölüdeniz, otogar ve marina valiz emanet",
+      "metaDescription": "Fethiye'de emanetçi ve valiz emanet. Ölüdeniz, Çalış, marina ve otogar çevresinde güvenli emanet noktaları; günlük sabit fiyat, mühürlü teslim, dükkanda ödeme.",
+      "headline": "Fethiye'de emanetçi: Ölüdeniz, marina ve otogar çevresi",
+      "intro": "Otelden çıkış ile uçuş arasındaki boş saatlerde, tekne turundan ya da Likya Yolu yürüyüşünden önce valizini Fethiye'deki emanet noktasına bırak; gününü bavulsuz geçir.",
+      "searchQuery": "Fethiye",
+      "cta": "Fethiye'deki noktaları aç",
+      "sections": [
+        {
+          "title": "Otelden çıkış ile uçuş arası: Dalaman'a gitmeden önce",
+          "body": "Fethiye'de otel çıkışı genelde öğlen, Dalaman Havalimanı'ndan dönüş uçuşu ise çoğu zaman akşam ya da gece. Havalimanı Fethiye'ye yaklaşık bir saatlik mesafede ve aradaki saatleri valizle geçirmek istemeyen misafirler için emanet noktası en pratik çözüm: valizini bırakır, son gününü Ölüdeniz'de ya da çarşıda geçirir, transfer saatinden önce teslim alırsın."
+        },
+        {
+          "title": "Tekne turu, Babadağ ve Likya Yolu öncesi",
+          "body": "Fethiye limanından kalkan 12 Adalar tekne turları, Ölüdeniz'deki Babadağ yamaç paraşütü ve başlangıcı Ölüdeniz–Ovacık tarafında olan Likya Yolu yürüyüşleri gün boyu sürüyor. Konaklaman bitmişse ya da yürüyüşten önce fazla eşyanı bırakmak istiyorsan, açılış ve kapanış saatini baştan gördüğün bir emanet noktasında yerini ayırtabilirsin. Otobüs firmalarının yazıhanelerinde emanet olup olmadığı ve saatleri firmadan firmaya değişiyor; önceden bilmek akşam otobüsünü bekleyenlerin işini kolaylaştırıyor."
+        }
+      ],
+      "tips": [
+        "Dönüş uçuşu akşamsa valizini sabah bırak, son günü Ölüdeniz'de geçir",
+        "12 Adalar turuna bavulsuz çık; tur dönüşü teslim al",
+        "Likya Yolu'na hafif çantayla başla, büyük valizini emanet et"
+      ],
+      "nearbyPlaces": [
+        "Ölüdeniz",
+        "Fethiye Marina",
+        "Çalış Plajı",
+        "Kayaköy",
+        "Göcek",
+        "Saklıkent Kanyonu"
+      ]
+    },
     "cappadocia": {
       "label": "Kapadokya",
       "metaTitle": "Kapadokya emanetçi — valiz ve bagaj emanet",
