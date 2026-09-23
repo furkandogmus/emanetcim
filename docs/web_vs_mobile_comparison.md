@@ -40,7 +40,7 @@
 | ~~7~~ | ~~Sadakat puanı mobilde hem UI'da hem API'de tamamen yok~~ — **KAPANDI (2026-09-12):** özellik hiç harcanamıyordu (bkz. `docs/DEFECT_BACKLOG.md` B7), web tarafından da komple kaldırıldı; artık bir boşluk değil. | — | — |
 | 8 | Hesap verisi dışa aktarma (KVKK/GDPR) mobilde yok | orta | grep `mobile/lib` "export": 0 sonuç |
 | 9 | KVKK metni kayıt ekranında yarım cümlede kesiliyor, tam metne link yok | küçük | `mobile/lib/features/auth/register_screen.dart:273-277` vs web'de 90 satırlık tam sayfa |
-| 10 | 10.000 TL sigorta tavanı mobilde hiç gösterilmiyor; sigorta ücreti sunucudan değil sabit `₺15.0` kodlanmış | orta | `mobile/lib/features/checkout/checkout_screen.dart:353` |
+| 10 | 10.000 TL güvence tavanı mobil ödeme ekranında gösterilmiyor. (Sabit `₺15.0` sigorta ücreti 2026-09-23'te kapandı: ücret ve valiz çarpanları artık `/api/mobile/shops/:id` → `pricing` alanından okunuyor.) | küçük | `mobile/lib/features/checkout/checkout_screen.dart:353` |
 | 11 | WhatsApp iletişim kanalı mobilde hiçbir ekranda yok | küçük | grep `mobile/lib` "whatsapp": 0 sonuç |
 | 12 | Esnaf kazanç ekranında grafik/aylık kırılım yok (web'de `PartnerEarningsCharts.tsx`) | büyük | `mobile/lib/features/partner/partner_earnings_screen.dart` |
 | 13 | Koyu modda misafir yolculuğu ve tüm esnaf ekranları "yarım" temalanmış (sabit `Colors.white`, 65+ yer) | büyük | bkz. Bölüm 3 |
