@@ -17,7 +17,8 @@ import {
   Copy,
   Check,
   X,
-  Loader2
+  Loader2,
+  UserPlus
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { motion, AnimatePresence } from "framer-motion";
@@ -113,6 +114,13 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
           <p className="text-xs id-eyebrow text-gray-400 mt-2">
             {initialShops.length} {t("activePartners")}
           </p>
+          <Link
+            href="/admin/partners/new"
+            className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 transition-colors"
+          >
+            <UserPlus size={16} />
+            {t("addPartner")}
+          </Link>
         </div>
 
         <div className="relative w-full lg:w-96 group">
