@@ -1,12 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import tr from "@/locales/tr.json";
-import en from "@/locales/en.json";
-import de from "@/locales/de.json";
-import fr from "@/locales/fr.json";
-import ja from "@/locales/ja.json";
-import fa from "@/locales/fa.json";
+// Tam dil dosyaları her sayfanın paketine ~760 KB ekliyordu; yalnızca üç metin.
+import GLOBAL_ERROR_COPY from "./global-error-copy.json";
 const UI_LOCALES = [
   "tr",
   "en",
@@ -23,17 +19,8 @@ function pathLocale(pathname: string): UiLocale {
   return UI_LOCALES.includes(seg as UiLocale) ? (seg as UiLocale) : "tr";
 }
 
-const localeBundles = {
-  tr,
-  en,
-  de,
-  fr,
-  ja,
-  fa,
-} as const;
-
 function commonForLocale(locale: UiLocale) {
-  return localeBundles[locale].Common;
+  return GLOBAL_ERROR_COPY[locale];
 }
 
 function htmlLang(locale: UiLocale): string {

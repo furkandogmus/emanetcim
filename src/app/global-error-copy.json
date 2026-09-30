@@ -1,0 +1,32 @@
+{
+  "tr": {
+    "errorTitle": "Eyvah, bir sorun oldu!",
+    "errorDescription": "Uygulamada teknik bir aksaklık yaşandı. Lütfen sayfayı yenilemeyi deneyin.",
+    "errorRetry": "TEKRAR DENE"
+  },
+  "en": {
+    "errorTitle": "Oops, something went wrong!",
+    "errorDescription": "A technical glitch occurred. Please try refreshing the page.",
+    "errorRetry": "TRY AGAIN"
+  },
+  "de": {
+    "errorTitle": "Hoppla, etwas ist schief gelaufen!",
+    "errorDescription": "Es ist ein technischer Fehler aufgetreten. Versuchen Sie bitte, die Seite zu aktualisieren.",
+    "errorRetry": "VERSUCHEN SIE ES ERNEUT"
+  },
+  "fr": {
+    "errorTitle": "Oups, quelque chose s'est mal passé !",
+    "errorDescription": "Un problème technique est survenu. Veuillez essayer d'actualiser la page.",
+    "errorRetry": "ESSAYER À NOUVEAU"
+  },
+  "ja": {
+    "errorTitle": "おっと、何か問題が発生しました!",
+    "errorDescription": "技術的な問題が発生しました。ページを更新してみてください。",
+    "errorRetry": "もう一度やり直してください"
+  },
+  "fa": {
+    "errorTitle": "مشکلی پیش آمد",
+    "errorDescription": "خطای فنی رخ داده است. صفحه را تازه‌سازی کنید.",
+    "errorRetry": "تلاش دوباره"
+  }
+}
