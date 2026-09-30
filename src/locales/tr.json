@@ -703,7 +703,8 @@
     "stayPickupDay": "Alış günü",
     "stayDaysCount": "{count, plural, other {# gün}}",
     "stayHoursHint": "Dükkan {open}–{close} arası açık; valizinizi bu saatlerde bırakıp alırsınız.",
-    "stayOpen247Hint": "Dükkan 7/24 açık; dilediğiniz saatte bırakıp alırsınız."
+    "stayOpen247Hint": "Dükkan 7/24 açık; dilediğiniz saatte bırakıp alırsınız.",
+    "chargedInTryNote": "Ödeme Türk lirası (TRY) olarak alınır."
   },
   "Admin": {
     "dashboardTitle": "BagajPark Yönetim Masası",

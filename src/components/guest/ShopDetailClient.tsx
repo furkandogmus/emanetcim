@@ -422,7 +422,7 @@ export default function ShopDetailClient({
                       ve başına bir `₺` daha ekleniyordu — yapışkan fiyat çubuğunda
                       "₺₺50,00" yazıyordu.
                     */}
-                    <Money amount={slot.m} /> <span className="text-base text-gray-500">{mobileCopy.perDay}</span>
+                    <Money amount={slot.m} approx /> <span className="text-base text-gray-500">{mobileCopy.perDay}</span>
                   </>
                 )}
               </p>
@@ -566,7 +566,7 @@ export default function ShopDetailClient({
                 </span>
                 <span className="shrink-0 text-right">
                   <span className="block text-base font-bold text-gray-900">
-                    <Money amount={price} />
+                    <Money amount={price} approx />
                   </span>
                   <span className="block text-[11px] text-gray-400">{t("shopPerDay")}</span>
                 </span>
