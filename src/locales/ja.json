@@ -703,7 +703,8 @@
     "stayPickupDay": "受け取る日",
     "stayDaysCount": "{count, plural, other {#日}}",
     "stayHoursHint": "営業時間は{open}〜{close}です。この時間内に預け入れ・受け取りができます。",
-    "stayOpen247Hint": "24時間営業です。いつでも預け入れ・受け取りができます。"
+    "stayOpen247Hint": "24時間営業です。いつでも預け入れ・受け取りができます。",
+    "chargedInTryNote": "お支払いはトルコリラ（TRY）で請求されます。≈ の金額は目安です。"
   },
   "Admin": {
     "dashboardTitle": "BagajPark 管理センター",

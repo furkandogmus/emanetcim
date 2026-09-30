@@ -181,7 +181,7 @@ function ShopListItem({
             ) : (
               <>
                 <span className="text-[10px] text-gray-400 font-bold uppercase block -mb-0.5">{t("from")}</span>
-                <Money amount={price} className={PRICE_SLOT_CLASS} />
+                <Money amount={price} approx className={PRICE_SLOT_CLASS} />
                 <span className="text-[10px] text-gray-400 font-bold uppercase ml-1">/ {t("day")}</span>
               </>
             )}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale } from "next-intl";
-import { formatTryCurrency } from "@/lib/currency";
+import { formatApproxForeign, formatTryCurrency } from "@/lib/currency";
 
 /**
  * Para gösteriminin tek yeri.
@@ -28,10 +28,13 @@ export default function Money({
   className,
   /** Kuruşları gizle (ör. dar liste kartlarında). Yine binlik ayracı uygulanır. */
   compact = false,
+  /** Yabancı dilde yanına yaklaşık €/$ karşılığını ekle (misafir fiyatları). */
+  approx = false,
 }: {
   amount: number;
   className?: string;
   compact?: boolean;
+  approx?: boolean;
 }) {
   const locale = useLocale();
   const safe = Number.isFinite(amount) ? amount : 0;
@@ -43,5 +46,13 @@ export default function Money({
       : undefined,
   );
   // Tutar hiçbir zaman satır kırmasın: "₺1.520," / "00" diye bölünmesi okunamaz.
-  return <span className={className} style={{ whiteSpace: "nowrap" }}>{text}</span>;
+  const foreign = approx ? formatApproxForeign(safe, locale) : null;
+  return (
+    <span className={className} style={{ whiteSpace: "nowrap" }}>
+      {text}
+      {foreign && (
+        <span className="ml-1 text-[0.6em] font-semibold text-gray-400">({foreign})</span>
+      )}
+    </span>
+  );
 }

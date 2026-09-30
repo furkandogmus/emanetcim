@@ -703,7 +703,8 @@
     "stayPickupDay": "Abholtag",
     "stayDaysCount": "{count, plural, one {# Tag} other {# Tage}}",
     "stayHoursHint": "Das Geschäft ist von {open} bis {close} geöffnet; Abgabe und Abholung in dieser Zeit.",
-    "stayOpen247Hint": "Das Geschäft ist rund um die Uhr geöffnet; Abgabe und Abholung jederzeit."
+    "stayOpen247Hint": "Das Geschäft ist rund um die Uhr geöffnet; Abgabe und Abholung jederzeit.",
+    "chargedInTryNote": "Die Zahlung erfolgt in Türkischer Lira (TRY); der ≈-Betrag ist ein Richtwert."
   },
   "Admin": {
     "dashboardTitle": "BagajPark Verwaltungszentrale",
