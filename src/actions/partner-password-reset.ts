@@ -4,25 +4,9 @@ import { getClientIpOrNull } from "@/lib/client-ip";
 
 import prisma from "@/lib/db";
 import { normalizeTrGsm10 } from "@/lib/netgsm";
-import { generatePasswordResetTokenByPhone } from "@/lib/password-reset-token";
 import { writeAuditLog } from "@/lib/audit-log";
 import { requireAdmin } from "@/lib/action-auth";
-import { getSiteBaseUrl } from "@/lib/site-urls";
-import { createHash } from "crypto";
-
-/**
- * Token'in KENDISI degil, ona isaret eden geri donusu olmayan bir parmak izi.
- *
- * Denetim kaydinin cevaplamasi gereken soru "hangi yonetici, kime, ne zaman bir
- * sifirlama baslatti" -- token'in degeri buna hicbir sey katmaz. Parmak izi,
- * sonradan "su kayittaki sifirlama su token'la mi yapildi" sorusunu yanitlamayi
- * mumkun kiliyor, ama tersine cevrilip parolayi degistirmek icin kullanilamaz.
- */
-function tokenFingerprint(token: string): string {
-  return createHash("sha256").update(token).digest("hex").slice(0, 12);
-}
-
-
+import { createPartnerResetLink } from "@/lib/partner-reset-link";
 
 /**
  * Admin: partner telefonu ile şifre sıfırlama linki oluşturur.
@@ -52,7 +36,7 @@ export async function adminInitiatePartnerPasswordResetAction(
     return { ok: false, error: "user_not_found" };
   }
 
-  const row = await generatePasswordResetTokenByPhone(normalized);
+  const link = await createPartnerResetLink(normalized);
 
   /*
     SIFIRLAMA TOKEN'I DENETIM KAYDINA YAZILIYORDU (2026-08-31'de bulundu).
@@ -79,20 +63,11 @@ export async function adminInitiatePartnerPasswordResetAction(
     entityId: user.id,
     metadata: {
       phone: normalized,
-      tokenFingerprint: tokenFingerprint(row.token),
-      expiresAt: row.expires.toISOString(),
+      tokenFingerprint: link.tokenFingerprint,
+      expiresAt: link.expiresAt.toISOString(),
     },
     ip: await getClientIpOrNull(),
   });
 
-  /*
-    Taban adres ortak yardimciyla (`getSiteBaseUrl`) aliniyor. Onceden bu dosya
-    kendi yedegini yaziyordu ve YALNIZCA `NEXT_PUBLIC_APP_URL`e bakiyordu;
-    projenin geri kalani once `NEXT_PUBLIC_BASE_URL`i okuyor. Yani yalnizca
-    ikincisi tanimliysa yonetici, `localhost:3000` isaret eden bir bag alip
-    esnafa gonderiyordu -- ve bunun yanlis oldugunu ancak esnaf tiklayinca
-    ogreniyordu.
-  */
-  const resetUrl = `${getSiteBaseUrl()}/tr/auth/new-password?token=${row.token}`;
-  return { ok: true, resetUrl, userName: user.name || normalized };
+  return { ok: true, resetUrl: link.resetUrl, userName: user.name || normalized };
 }
