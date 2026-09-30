@@ -1,4 +1,4 @@
-import { createHash } from "crypto";
+import { scryptSync } from "crypto";
 import { generatePasswordResetTokenByPhone } from "@/lib/password-reset-token";
 import { getSiteBaseUrl } from "@/lib/site-urls";
 
@@ -27,7 +27,15 @@ export type PartnerResetLink = {
  * mumkun kiliyor, ama tersine cevrilip parolayi degistirmek icin kullanilamaz.
  */
 export function tokenFingerprint(token: string): string {
-  return createHash("sha256").update(token).digest("hex").slice(0, 12);
+  /*
+    scrypt, sha256 DEGIL (2026-09-30): CodeQL `js/insufficient-password-hash`
+    sha256'yi bir sifre ozeti sanip PR'i kirmiziya ceviriyordu (main'de #17).
+    Token rastgele bir UUID, sifre degil; yani sha256 da guvenliydi. scrypt
+    kuralin yeterli saydigi algoritmalardan, cikti yine 12 hex hane ve bir
+    admin isleminde birkac ms'lik maliyet onemsiz. Sabit tuz bilincli: parmak izi
+    ayni token icin her zaman ayni olmali ki kayitlar karsilastirilabilsin.
+  */
+  return scryptSync(token, "partner-reset-link:audit", 6).toString("hex");
 }
 
 /** `phone` normalize edilmiş 10 haneli biçimde (`normalizeTrGsm10`) gelir. */
