@@ -14,12 +14,7 @@ export function formatTryCurrency(
   }).format(amountTry);
 }
 
-/**
- * Yabancı dilde TRY fiyatın yanında gösterilen yaklaşık karşılık için sabit kur
- * (1 birim = X TRY). Ödeme her zaman TRY çekilir; bu yalnızca turistin "bu kaç
- * euro/dolar" sorusunu cevaplar. 2026-09-30 kuru: 250 TL ≈ €4,50 ≈ $5.
- * Kur ciddi kayarsa buradan güncellenir.
- */
+// Yalnızca gösterim için sabit kur (1 birim = X TRY, 2026-09-30); ödeme hep TRY.
 export const DISPLAY_FX_TRY_PER_UNIT = { EUR: 55.6, USD: 49 } as const;
 
 type ForeignCurrency = keyof typeof DISPLAY_FX_TRY_PER_UNIT;
