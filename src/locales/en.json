@@ -703,7 +703,8 @@
     "stayPickupDay": "Pick-up day",
     "stayDaysCount": "{count, plural, one {# day} other {# days}}",
     "stayHoursHint": "The shop is open {open}–{close}; drop off and pick up within these hours.",
-    "stayOpen247Hint": "The shop is open 24/7; drop off and pick up whenever you like."
+    "stayOpen247Hint": "The shop is open 24/7; drop off and pick up whenever you like.",
+    "chargedInTryNote": "You are charged in Turkish lira (TRY); the ≈ amount is an estimate."
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",

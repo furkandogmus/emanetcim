@@ -703,7 +703,8 @@
     "stayPickupDay": "روز دریافت",
     "stayDaysCount": "{count, plural, other {# روز}}",
     "stayHoursHint": "مغازه از {open} تا {close} باز است؛ در این ساعت‌ها تحویل می‌دهید و می‌گیرید.",
-    "stayOpen247Hint": "مغازه شبانه‌روزی باز است؛ هر زمان خواستید تحویل دهید و بگیرید."
+    "stayOpen247Hint": "مغازه شبانه‌روزی باز است؛ هر زمان خواستید تحویل دهید و بگیرید.",
+    "chargedInTryNote": "پرداخت به لیر ترکیه (TRY) انجام می‌شود؛ مبلغ ≈ تقریبی است."
   },
   "Admin": {
     "dashboardTitle": "مرکز مدیریت BagajPark",

@@ -703,7 +703,8 @@
     "stayPickupDay": "Jour de retrait",
     "stayDaysCount": "{count, plural, one {# jour} other {# jours}}",
     "stayHoursHint": "La boutique est ouverte de {open} à {close} ; déposez et récupérez pendant ces horaires.",
-    "stayOpen247Hint": "La boutique est ouverte 24 h/24 ; déposez et récupérez quand vous voulez."
+    "stayOpen247Hint": "La boutique est ouverte 24 h/24 ; déposez et récupérez quand vous voulez.",
+    "chargedInTryNote": "Le paiement est débité en livres turques (TRY) ; le montant ≈ est indicatif."
   },
   "Admin": {
     "dashboardTitle": "Centre d'administration BagajPark",

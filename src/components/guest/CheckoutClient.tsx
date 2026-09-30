@@ -49,7 +49,7 @@ import { useKeyboardAware } from "@/lib/hooks/useKeyboardAware";
 import WebPushOptIn from "@/components/WebPushOptIn";
 import StayDaysPicker from "@/components/guest/StayDaysPicker";
 import Money from "@/components/common/Money";
-import { formatTryCurrency } from "@/lib/currency";
+import { foreignDisplayCurrency, formatTryCurrency } from "@/lib/currency";
 import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
 import { useActionErrorText } from "@/lib/use-action-error";
 interface CheckoutClientProps {
@@ -744,9 +744,12 @@ export default function CheckoutClient({
                   data-testid="checkout-total-amount"
                   className="text-3xl font-black text-orange-600 tracking-tighter"
                 >
-                  <Money amount={grandTotal} />
+                  <Money amount={grandTotal} approx />
                 </span>
               </div>
+              {foreignDisplayCurrency(locale) && (
+                <p className="mt-2 text-right text-[11px] text-gray-400">{t("chargedInTryNote")}</p>
+              )}
             </section>
 
             <BagProtection variant="checkout" insuranceEnabled={insuranceEnabled} />
