@@ -6,6 +6,8 @@ import { distanceKm } from "@/lib/geo";
 import {
   PUBLIC_SHOP_FILTER,
   PUBLIC_SHOP_SQL_CONDITION,
+  PRELAUNCH_NOT_SUPERSEDED_SQL_CONDITION,
+  hideSupersededPrelaunch,
 } from "@/lib/public-shop-filter";
 
 type IdDistRow = { id: string; dist_km: unknown };
@@ -54,6 +56,7 @@ function distanceSubselect(
       (ST_Distance(${shopPoint}, ${centerPoint}) / 1000.0) AS dist_km
     FROM "Shop" s
     WHERE ${Prisma.raw(PUBLIC_SHOP_SQL_CONDITION)}
+      AND ${Prisma.raw(PRELAUNCH_NOT_SUPERSEDED_SQL_CONDITION)}
       AND s."latitude" IS NOT NULL
       AND s."longitude" IS NOT NULL
       ${withinFilter}
@@ -124,7 +127,8 @@ async function fallbackActiveShopsByDistance(
   const shops = await prisma.shop.findMany({
     where: PUBLIC_SHOP_FILTER,
   });
-  const withDist = shops
+  // Yaricaptan ONCE: yaricapin disindaki bir esnaf da icerideki noktayi gizler.
+  const withDist = hideSupersededPrelaunch(shops)
     .filter((s) => s.latitude != null && s.longitude != null)
     .map((s) => ({
       shop: s,
