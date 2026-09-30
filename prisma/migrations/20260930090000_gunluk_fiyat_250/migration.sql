@@ -1,7 +1,5 @@
--- Gunluk valiz fiyati 150 TL'den 250 TL'ye (urun sahibinin 2026-09-30 karari).
---
--- 2026-09-30 prod olcumu: 496 dukkanin tamami 150.00; platform ayari admin
--- panelinden zaten 250.00'ye cekilmis. Ikinci UPDATE o yuzden prod'da bos gecer,
+-- Gunluk fiyat 150 -> 250 TL; yalnizca 150 olanlar, esnafin ozel fiyatlari korunur.
+UPDATE o yuzden prod'da bos gecer,
 -- 150'de kalmis baska bir ortam icin duruyor.
 --
 -- YALNIZCA 150 OLANLAR degisir: esnafin panelden bilincli girdigi fiyatlara ve
