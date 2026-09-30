@@ -25,7 +25,7 @@
 - **Detaylı Filtreleme:** "Puan", "Fiyat", "7/24 Açık", "WC Mevcut" gibi detaylı filtreler.
 
 ### 3.2. Rezervasyon ve Ödeme Süreci
-- **Fiyatlandırma:** Şimdilik tek fiyat — boyuttan bağımsız, valiz başına günlük **150 TL** (S, M ve XL aynı). Boy bazlı kademe altyapısı hazır (`PlatformSettings.bagMultiplier*`); açılması bir iş kararıdır.
+- **Fiyatlandırma:** Şimdilik tek fiyat — boyuttan bağımsız, valiz başına günlük **250 TL** (2026-09-30) (S, M ve XL aynı). Boy bazlı kademe altyapısı hazır (`PlatformSettings.bagMultiplier*`); açılması bir iş kararıdır.
 - **Dijital Makbuz:** Rezervasyon onaylandığında oluşan hukuki geçerliliği olan belge.
 
 ---
