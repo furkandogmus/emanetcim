@@ -20,6 +20,9 @@ model User {
   /// JWT token sürümü — şifre değişikliğinde artırılır, eski token'lar geçersiz olur
   tokenVersion             Int                      @default(0)
   lastIp                   String?
+  /// Test/ekip hesabı (maestro, ortaklar, kendi hesaplarımız). Admin kullanıcı
+  /// listesinde "gerçek kullanıcı" sayısından ayrılır; hesabın davranışını değiştirmez.
+  isTest                   Boolean                  @default(false)
   createdAt                DateTime                 @default(now())
   updatedAt                DateTime                 @updatedAt
   /// Referans kodu: misafire ya da esnafa verilebilir. Misafirde yeni
