@@ -34,6 +34,8 @@ import { Role } from "@prisma/client";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 import { actionErrorKey } from "@/lib/action-error";
 
+const PAGE_SIZE = 25;
+
 interface User {
   id: string;
   name: string | null;
@@ -41,6 +43,7 @@ interface User {
   role: Role;
   isBanned: boolean;
   lastIp: string | null;
+  isTest: boolean;
   emailVerified: Date | null;
   createdAt: Date;
 }
@@ -80,6 +83,8 @@ export default function AdminUsersClient({
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [typeFilter, setTypeFilter] = useState("ALL");
+  const [page, setPage] = useState(1);
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [confirmState, setConfirmState] = useState<{
     open: boolean;
@@ -102,11 +107,29 @@ export default function AdminUsersClient({
     else if (statusFilter === "UNVERIFIED") matchStatus = !u.isBanned && !u.emailVerified;
     else if (statusFilter === "ACTIVE") matchStatus = !u.isBanned && !!u.emailVerified;
 
-    return matchSearch && matchRole && matchStatus;
+    const matchType =
+      typeFilter === "ALL" ||
+      (typeFilter === "TEST" ? u.isTest : !u.isTest);
+
+    return matchSearch && matchRole && matchStatus && matchType;
   });
 
+  const testCount = users.filter((u) => u.isTest).length;
+  const realGuestCount = users.filter((u) => !u.isTest && u.role === Role.GUEST).length;
+  const realPartnerCount = users.filter((u) => !u.isTest && u.role === Role.PARTNER).length;
+
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pagedUsers = filteredUsers.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
+
   const hasActiveFilters =
-    search.trim().length > 0 || roleFilter !== "ALL" || statusFilter !== "ALL";
+    search.trim().length > 0 ||
+    roleFilter !== "ALL" ||
+    statusFilter !== "ALL" ||
+    typeFilter !== "ALL";
 
   const handleToggleBan = async (id: string, currentBan: boolean) => {
     setLoadingId(id);
@@ -263,7 +286,7 @@ export default function AdminUsersClient({
         <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
           <select
             value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
+            onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}
             className="px-4 py-4 bg-white border border-gray-100 rounded-2xl text-xs id-eyebrow text-gray-500 hover:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
           >
             <option value="ALL">{t("userRole_ALL")}</option>
@@ -274,7 +297,7 @@ export default function AdminUsersClient({
 
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
             className="px-4 py-4 bg-white border border-gray-100 rounded-2xl text-xs id-eyebrow text-gray-500 hover:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
           >
             <option value="ALL">{t("userStatus_ALL")}</option>
@@ -283,13 +306,23 @@ export default function AdminUsersClient({
             <option value="BANNED">{t("userStatus_BANNED")}</option>
           </select>
 
+          <select
+            value={typeFilter}
+            onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }}
+            className="px-4 py-4 bg-white border border-gray-100 rounded-2xl text-xs id-eyebrow text-gray-500 hover:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+          >
+            <option value="ALL">{t("userType_ALL")}</option>
+            <option value="REAL">{t("userType_REAL")}</option>
+            <option value="TEST">{t("userType_TEST")}</option>
+          </select>
+
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
               type="search"
               placeholder={t("searchUsersPlaceholder")}
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               className="pl-12 pr-6 py-4 bg-white border border-gray-100 rounded-2xl w-full sm:w-64 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-bold text-sm"
             />
           </div>
@@ -300,6 +333,8 @@ export default function AdminUsersClient({
                 setSearch("");
                 setRoleFilter("ALL");
                 setStatusFilter("ALL");
+                setTypeFilter("ALL");
+                setPage(1);
               }}
               className="btn-ui btn-ui-md btn-ui-ghost"
             >
@@ -312,6 +347,13 @@ export default function AdminUsersClient({
       <div className="mb-5 flex items-center justify-between">
         <p className="text-xs id-eyebrow text-gray-400">
           {filteredUsers.length} / {users.length} users
+        </p>
+        <p className="text-xs id-eyebrow text-gray-500">
+          {t("userRealSummary", {
+            guests: realGuestCount,
+            partners: realPartnerCount,
+            test: testCount,
+          })}
         </p>
       </div>
 
@@ -343,7 +385,7 @@ export default function AdminUsersClient({
             </thead>
             <tbody className="divide-y divide-gray-50">
               <AnimatePresence>
-                {filteredUsers.map((user) => (
+                {pagedUsers.map((user) => (
                   <motion.tr
                     key={user.id}
                     initial={{ opacity: 0 }}
@@ -357,7 +399,11 @@ export default function AdminUsersClient({
                           {user.name?.[0]?.toUpperCase() || "?"}
                         </div>
                         <div>
-                          <p className="font-bold text-gray-900">{user.name || "N/A"}</p>
+                          <p className="font-bold text-gray-900">{user.name || "N/A"}{user.isTest ? (
+                            <span className="ml-2 px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[9px] id-eyebrow">
+                              {t("userTestBadge")}
+                            </span>
+                          ) : null}</p>
                           <p className="text-xs text-gray-400 font-bold">{user.email}</p>
                         </div>
                       </div>
@@ -498,7 +544,7 @@ export default function AdminUsersClient({
 
       <div className="lg:hidden space-y-3">
         <AnimatePresence>
-          {filteredUsers.map((user) => (
+          {pagedUsers.map((user) => (
             <motion.article
               key={user.id}
               initial={{ opacity: 0, y: 6 }}
@@ -512,7 +558,11 @@ export default function AdminUsersClient({
                     {user.name?.[0]?.toUpperCase() || "?"}
                   </div>
                   <div className="min-w-0">
-                    <p className="font-bold text-gray-900 truncate">{user.name || "N/A"}</p>
+                    <p className="font-bold text-gray-900 truncate">{user.name || "N/A"}{user.isTest ? (
+                            <span className="ml-2 px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[9px] id-eyebrow">
+                              {t("userTestBadge")}
+                            </span>
+                          ) : null}</p>
                     <p className="text-xs text-gray-400 font-bold truncate">{user.email}</p>
                   </div>
                 </div>
@@ -635,6 +685,29 @@ export default function AdminUsersClient({
           </div>
         )}
       </div>
+      {totalPages > 1 ? (
+        <nav className="mt-6 flex items-center justify-center gap-4">
+          <button
+            type="button"
+            onClick={() => setPage(currentPage - 1)}
+            disabled={currentPage <= 1}
+            className="btn-ui btn-ui-md btn-ui-ghost"
+          >
+            {tCommon("previous")}
+          </button>
+          <span className="text-xs id-eyebrow text-gray-500">
+            {currentPage} / {totalPages}
+          </span>
+          <button
+            type="button"
+            onClick={() => setPage(currentPage + 1)}
+            disabled={currentPage >= totalPages}
+            className="btn-ui btn-ui-md btn-ui-ghost"
+          >
+            {tCommon("next")}
+          </button>
+        </nav>
+      ) : null}
     </div>
     <ConfirmDialog
       open={confirmState.open}
