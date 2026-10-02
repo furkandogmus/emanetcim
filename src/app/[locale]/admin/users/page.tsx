@@ -17,11 +17,10 @@ export default async function AdminUsersPage({
     redirect(`/${locale}/login`);
   }
 
-  // Son 200 kullanıcı (admin pagination için yeterli)
+  // Tümü çekilir: gerçek/test sayacı tüm kullanıcılar üzerinden hesaplanır, sayfalama istemcide.
   const [users, pendingRoleApprovalCount] = await Promise.all([
     prisma.user.findMany({
       orderBy: { createdAt: "desc" },
-      take: 200,
       select: {
         id: true,
         name: true,
@@ -29,6 +28,7 @@ export default async function AdminUsersPage({
         role: true,
         isBanned: true,
         lastIp: true,
+        isTest: true,
         emailVerified: true,
         createdAt: true,
       },
