@@ -83,7 +83,7 @@ export default function AdminUsersClient({
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
-  const [typeFilter, setTypeFilter] = useState("ALL");
+  const [typeFilter, setTypeFilter] = useState("REAL");
   const [page, setPage] = useState(1);
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [confirmState, setConfirmState] = useState<{
@@ -115,6 +115,8 @@ export default function AdminUsersClient({
   });
 
   const testCount = users.filter((u) => u.isTest).length;
+  const poolSize =
+    typeFilter === "TEST" ? testCount : typeFilter === "REAL" ? users.length - testCount : users.length;
   const realGuestCount = users.filter((u) => !u.isTest && u.role === Role.GUEST).length;
   const realPartnerCount = users.filter((u) => !u.isTest && u.role === Role.PARTNER).length;
 
@@ -129,7 +131,7 @@ export default function AdminUsersClient({
     search.trim().length > 0 ||
     roleFilter !== "ALL" ||
     statusFilter !== "ALL" ||
-    typeFilter !== "ALL";
+    typeFilter !== "REAL";
 
   const handleToggleBan = async (id: string, currentBan: boolean) => {
     setLoadingId(id);
@@ -311,8 +313,8 @@ export default function AdminUsersClient({
             onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }}
             className="px-4 py-4 bg-white border border-gray-100 rounded-2xl text-xs id-eyebrow text-gray-500 hover:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
           >
-            <option value="ALL">{t("userType_ALL")}</option>
             <option value="REAL">{t("userType_REAL")}</option>
+            <option value="ALL">{t("userType_ALL")}</option>
             <option value="TEST">{t("userType_TEST")}</option>
           </select>
 
@@ -333,7 +335,7 @@ export default function AdminUsersClient({
                 setSearch("");
                 setRoleFilter("ALL");
                 setStatusFilter("ALL");
-                setTypeFilter("ALL");
+                setTypeFilter("REAL");
                 setPage(1);
               }}
               className="btn-ui btn-ui-md btn-ui-ghost"
@@ -346,7 +348,7 @@ export default function AdminUsersClient({
 
       <div className="mb-5 flex items-center justify-between">
         <p className="text-xs id-eyebrow text-gray-400">
-          {filteredUsers.length} / {users.length} users
+          {filteredUsers.length} / {poolSize} users
         </p>
         <p className="text-xs id-eyebrow text-gray-500">
           {t("userRealSummary", {
