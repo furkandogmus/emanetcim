@@ -163,6 +163,8 @@ model Shop {
   sealRequests        SealRequest[]
   images              ShopImage[]
   timeSlots           ShopTimeSlot[]
+  weeklyHours         ShopWeeklyHours[]
+  closures            ShopClosure[]
   owner               User                @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   merchantProfile        MerchantProfile?
@@ -186,6 +188,33 @@ model ShopImage {
   shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
   @@index([shopId])
+}
+
+/// Haftalık gün bazlı çalışma saati. Satırı olmayan dükkan `Shop.openingTime/closingTime`e düşer.
+model ShopWeeklyHours {
+  id          String  @id @default(cuid())
+  shopId      String
+  /// ISO hafta günü: 1 = Pazartesi ... 7 = Pazar
+  weekday     Int
+  isClosed    Boolean @default(false)
+  openingTime String  @default("09:00")
+  closingTime String  @default("20:00")
+  shop        Shop    @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@unique([shopId, weekday])
+}
+
+/// Esnafın açtığı izin/tatil aralığı (uçlar dahil, dükkan saat diliminde `YYYY-MM-DD`).
+model ShopClosure {
+  id        String   @id @default(cuid())
+  shopId    String
+  startDate String
+  endDate   String
+  reason    String?
+  createdAt DateTime @default(now())
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@index([shopId, startDate])
 }
 
 /// 30-minute bookable time slot per shop
@@ -376,14 +405,14 @@ model PaymentLog {
 }
 
 model NotificationLog {
-  id        String   @id @default(uuid())
-  bookingId String?
-  type      String
-  recipient String
-  subject   String?
-  content   String
-  status    String   @default("SENT")
-  error     String?
+  id                String   @id @default(uuid())
+  bookingId         String?
+  type              String
+  recipient         String
+  subject           String?
+  content           String
+  status            String   @default("SENT")
+  error             String?
   /// Sağlayıcının (Resend) e-posta kimliği — teslim olaylarını DOĞRU satırla
   /// eşleştirmek için.
   ///
@@ -393,12 +422,12 @@ model NotificationLog {
   /// birden eziyordu. Defter anlamsızlaşıyor, yazma maliyeti o adresin
   /// geçmişiyle büyüyordu.
   providerMessageId String?
-  createdAt DateTime @default(now())
-  booking   Booking? @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  createdAt         DateTime @default(now())
+  booking           Booking? @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
+  @@unique([providerMessageId])
   @@index([bookingId])
   @@index([recipient])
-  @@unique([providerMessageId])
 }
 
 model Review {
@@ -602,7 +631,7 @@ model PlatformSettings {
 
   /// Bu sürümün ALTINDAKİ mobil istemciler tam ekran, kapatılamaz güncelleme
   /// ekranına yönlendirilir (semver, örn. "1.4.0"). `null` = zorunlu güncelleme yok.
-  minAppVersion String?
+  minAppVersion    String?
   /// Mağazadaki güncel sürüm. Bu sürümün altındaki ama `minAppVersion`'ın
   /// ÜSTÜNDEKİ istemcilere kapatılabilir "yeni sürüm var" bildirimi gösterilir.
   /// `null` = bildirim gösterilmez.
