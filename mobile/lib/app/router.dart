@@ -22,6 +22,7 @@ import '../features/partner/partner_booking_detail_screen.dart';
 import '../features/partner/partner_bookings_screen.dart';
 import '../features/partner/partner_earnings_screen.dart';
 import '../features/partner/partner_scan_screen.dart';
+import '../features/partner/partner_schedule_screen.dart';
 import '../features/partner/partner_seals_screen.dart';
 import '../features/partner/partner_settings_screen.dart';
 import '../features/profile/profile_screen.dart';
@@ -181,6 +182,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/partner/settings',
         builder: (_, _) => const PartnerSettingsScreen(),
+      ),
+      GoRoute(
+        path: '/partner/schedule',
+        builder: (_, _) => const PartnerScheduleScreen(),
       ),
       GoRoute(
         path: '/partner/seals',

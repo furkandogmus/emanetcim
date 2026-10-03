@@ -40,6 +40,10 @@ abstract class ShopDto with _$ShopDto {
 
     /// Yalnizca detay ucu (`/shops/:id`) gonderir; listede `null`.
     ShopPricingDto? pricing,
+
+    /// Gun bazli takvim (yalniz detay ucu). Bos liste: dukkan tek saat cifti kullaniyor.
+    @Default(<ShopWeeklyHoursDto>[]) List<ShopWeeklyHoursDto> weeklyHours,
+    @Default(<ShopClosureDto>[]) List<ShopClosureDto> closures,
   }) = _ShopDto;
 
   factory ShopDto.fromJson(Map<String, dynamic> json) =>
@@ -67,4 +71,32 @@ abstract class ShopPricingDto with _$ShopPricingDto {
 
 String shopImageUrl(ShopDto shop) {
   return shop.imageUrl ?? '';
+}
+
+/// ISO hafta gunu (1 = Pazartesi ... 7 = Pazar) icin acilis/kapanis.
+@freezed
+abstract class ShopWeeklyHoursDto with _$ShopWeeklyHoursDto {
+  const factory ShopWeeklyHoursDto({
+    required int weekday,
+    @Default(false) bool isClosed,
+    @Default('09:00') String openingTime,
+    @Default('20:00') String closingTime,
+  }) = _ShopWeeklyHoursDto;
+
+  factory ShopWeeklyHoursDto.fromJson(Map<String, dynamic> json) =>
+      _$ShopWeeklyHoursDtoFromJson(json);
+}
+
+/// Esnafin actigi izin araligi (`YYYY-MM-DD`, uclar dahil).
+@freezed
+abstract class ShopClosureDto with _$ShopClosureDto {
+  const factory ShopClosureDto({
+    required String startDate,
+    required String endDate,
+    String? id,
+    String? reason,
+  }) = _ShopClosureDto;
+
+  factory ShopClosureDto.fromJson(Map<String, dynamic> json) =>
+      _$ShopClosureDtoFromJson(json);
 }
