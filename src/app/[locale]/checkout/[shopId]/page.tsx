@@ -1,3 +1,4 @@
+import { loadScheduleParts } from "@/services/ShopScheduleService";
 import { cache } from 'react';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { shopService } from '@/services/ShopService';
@@ -75,6 +76,8 @@ export default async function CheckoutPage({
     metadata: { shopId },
   });
 
+  const scheduleParts = (await loadScheduleParts([shopId], new Date().toISOString().slice(0, 10))).get(shopId);
+
   const isLoggedIn = !!session?.user?.id;
   const checkInParam = typeof sp.checkIn === "string" ? sp.checkIn : undefined;
   const checkOutParam = typeof sp.checkOut === "string" ? sp.checkOut : undefined;
@@ -97,6 +100,8 @@ export default async function CheckoutPage({
       openingTime={shop.openingTime}
       closingTime={shop.closingTime}
       open247={shop.open247}
+      weekly={scheduleParts?.weekly}
+      closures={scheduleParts?.closures}
     />
   );
 }

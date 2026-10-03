@@ -1,3 +1,4 @@
+import { loadScheduleParts } from "@/services/ShopScheduleService";
 import { formatDateInZone, bookingTimeZone } from "@/lib/format-datetime";
 import { auth } from "@/auth";
 import prisma from "@/lib/db";
@@ -72,6 +73,9 @@ export default async function BookingDetailPage({
     getPricingRules(),
   ]);
 
+  const scheduleParts = booking
+    ? (await loadScheduleParts([booking.shopId], new Date().toISOString().slice(0, 10))).get(booking.shopId)
+    : undefined;
   const isAdmin = session?.user?.role === 'ADMIN';
   const isOwner = booking?.guestId === session?.user?.id;
 
@@ -275,6 +279,12 @@ export default async function BookingDetailPage({
               shop: {
                 name: booking.shop.name,
                 pricePerDay: booking.shop.pricePerDay,
+                timezone: booking.shop.timezone,
+                openingTime: booking.shop.openingTime,
+                closingTime: booking.shop.closingTime,
+                open247: booking.shop.open247,
+                weekly: scheduleParts?.weekly ?? [],
+                closures: scheduleParts?.closures ?? [],
               },
             })
           )}

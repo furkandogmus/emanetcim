@@ -1,5 +1,6 @@
 "use client";
 
+import type { ClosureRange, WeeklyDay } from "@/lib/shop-schedule";
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { X } from "lucide-react";
@@ -47,6 +48,8 @@ export type BookingModifyModalBooking = Pick<
     openingTime?: string | null;
     closingTime?: string | null;
     open247?: boolean | null;
+    weekly?: WeeklyDay[];
+    closures?: ClosureRange[];
   } | null;
 };
 
@@ -94,6 +97,8 @@ export default function BookingModifyModal({
     closingTime: booking.shop?.closingTime,
     open247: booking.shop?.open247,
     timeZone,
+    weekly: booking.shop?.weekly,
+    closures: booking.shop?.closures,
   };
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -212,11 +217,7 @@ export default function BookingModifyModal({
             minDropDate={minDropDate < stay.drop ? minDropDate : stay.drop}
             maxDays={pricingRules.maxStayDays}
             timeZone={timeZone}
-            hours={
-              booking.shop?.open247
-                ? null
-                : { open: booking.shop?.openingTime ?? "09:00", close: booking.shop?.closingTime ?? "20:00" }
-            }
+            schedule={hours}
           />
 
           <div className="flex flex-col gap-3">

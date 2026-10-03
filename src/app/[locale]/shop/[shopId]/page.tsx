@@ -5,6 +5,7 @@ import { shopService } from "@/services/ShopService";
 import ShopDetailClient from "@/components/guest/ShopDetailClient";
 import { getPricingRules } from "@/lib/platform-settings";
 import { moneyToNumber } from "@/lib/money";
+import { loadScheduleParts } from "@/services/ShopScheduleService";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getSiteBaseUrl } from "@/lib/site-urls";
@@ -156,6 +157,9 @@ export default async function ShopDetailPage({
     { name: shop.name, path: `/${locale}/shop/${shop.id}` },
   ]);
 
+  const scheduleParts = (
+    await loadScheduleParts([shop.id], new Date().toISOString().slice(0, 10))
+  ).get(shop.id);
   const clientShop = {
     id: shop.id,
     name: shop.name,
@@ -174,6 +178,9 @@ export default async function ShopDetailPage({
     open247: shop.open247,
     openingTime: shop.openingTime,
     closingTime: shop.closingTime,
+    timezone: shop.timezone,
+    weekly: scheduleParts?.weekly ?? [],
+    closures: scheduleParts?.closures ?? [],
     isVerified: shop.isVerified,
     isPrelaunch: shop.isPrelaunch,
     responseTimeMinutes: shop.responseTimeMinutes,

@@ -734,7 +734,11 @@
     "stayDaysCount": "{count, plural, one {# day} other {# days}}",
     "stayHoursHint": "The shop is open {open}–{close}; drop off and pick up within these hours.",
     "stayOpen247Hint": "The shop is open 24/7; drop off and pick up whenever you like.",
-    "chargedInTryNote": "You are charged in Turkish lira (TRY); the ≈ amount is an estimate."
+    "chargedInTryNote": "You are charged in Turkish lira (TRY); the ≈ amount is an estimate.",
+    "stayDropHours": "Drop-off {date}: open {open}–{close}; arrive by {last} at the latest.",
+    "stayPickupHours": "Pick-up {date}: {open}–{close}.",
+    "stayDayClosed": "The shop is closed on {date}; please choose another day.",
+    "shopClosedOn": "Closed: {range}"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Admin Center",
@@ -1826,7 +1830,8 @@
     "shopMissingCoordinates": "The shop has no location. Set its coordinates before approving.",
     "shopLocationRequired": "Please pin your shop's location on the map.",
     "bagRevisionNeedsGuestApproval": "A post-check-in price increase needs the guest's approval. The proposal was saved and will apply once the guest approves it.",
-    "scheduleConflict": "Active bookings fall on these dates."
+    "scheduleConflict": "Active bookings fall on these dates.",
+    "shopClosedOnDate": "The shop is closed on one of the selected days; please choose another day."
   },
   "Emails": {
     "verificationSubject": "Verify Your Email",

@@ -734,7 +734,11 @@
     "stayDaysCount": "{count, plural, other {# gün}}",
     "stayHoursHint": "Dükkan {open}–{close} arası açık; valizinizi bu saatlerde bırakıp alırsınız.",
     "stayOpen247Hint": "Dükkan 7/24 açık; dilediğiniz saatte bırakıp alırsınız.",
-    "chargedInTryNote": "Ödeme Türk lirası (TRY) olarak alınır."
+    "chargedInTryNote": "Ödeme Türk lirası (TRY) olarak alınır.",
+    "stayDropHours": "Bırakış {date}: dükkan {open}–{close} açık; en geç {last}'ta getirin.",
+    "stayPickupHours": "Alış {date}: {open}–{close} arası.",
+    "stayDayClosed": "{date} günü dükkan kapalı; başka bir gün seçin.",
+    "shopClosedOn": "İzinli: {range}"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Yönetim Masası",
@@ -1826,7 +1830,8 @@
     "shopMissingCoordinates": "Dükkanın konum bilgisi yok. Onaylamadan önce koordinatları girin.",
     "shopLocationRequired": "Lütfen haritada dükkanının konumunu işaretle.",
     "bagRevisionNeedsGuestApproval": "Check-in sonrası fiyat artışı misafirin onayını bekliyor. Öneri kaydedildi; misafir onayladığında uygulanacak.",
-    "scheduleConflict": "Bu tarihlere denk gelen aktif rezervasyonlar var."
+    "scheduleConflict": "Bu tarihlere denk gelen aktif rezervasyonlar var.",
+    "shopClosedOnDate": "Dükkan seçtiğiniz günlerden birinde kapalı; lütfen başka bir gün seçin."
   },
   "Emails": {
     "verificationSubject": "E-postanızı Doğrulayın",
