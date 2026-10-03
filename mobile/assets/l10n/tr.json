@@ -220,7 +220,8 @@
     "referral_not_with_coupon": "Davet indirimi indirim kuponuyla birlikte kullanılamaz.",
     "referral_own_code": "Kendi davet kodunu kullanamazsın.",
     "referral_first_booking_only": "Davet indirimi yalnızca ilk rezervasyonda geçerli.",
-    "referral_invalid": "Bu davet kodu bulunamadı."
+    "referral_invalid": "Bu davet kodu bulunamadı.",
+    "error_shop_closed_on_date": "Dükkan seçtiğiniz günlerden birinde kapalı; lütfen başka bir gün seçin."
   },
   "booking": {
     "detail_title": "Rezervasyon Detayı",
@@ -344,7 +345,20 @@
     "serial_number_label": "Mühür Seri Numarası",
     "bag_revision_title": "Bagaj Sayılarını Revize Et",
     "bag_revision_success": "Bagaj sayıları başarıyla revize edildi.",
-    "bag_revision_error": "Revizyon işlemi gerçekleştirilemedi."
+    "bag_revision_error": "Revizyon işlemi gerçekleştirilemedi.",
+    "schedule_manage": "Çalışma saatleri ve izin",
+    "schedule_manage_hint": "Her gün için saat, 7/24 ve izin günleri",
+    "schedule_title": "Çalışma saatleri ve izin",
+    "schedule_open247": "7/24 açık",
+    "schedule_open247_hint": "Açıkken günlük saatler kullanılmaz; yalnızca izin günleri geçerlidir.",
+    "schedule_save": "Saatleri kaydet",
+    "schedule_saved": "Çalışma saatleri güncellendi.",
+    "schedule_closures": "İzin ve tatil günleri",
+    "schedule_closures_hint": "Seçtiğiniz tarihlerde dükkan kapalı görünür, rezervasyon alınmaz.",
+    "schedule_none": "Planlı izin yok.",
+    "schedule_add": "İzin ekle",
+    "schedule_remove": "Kaldır",
+    "schedule_conflict": "Kaydedilemedi: şu rezervasyonlar bu güne denk geliyor."
   },
   "profile": {
     "title": "Hesabım",
@@ -522,5 +536,18 @@
     "soft_title": "Yeni sürüm mevcut",
     "soft_desc": "Daha iyi bir deneyim için uygulamayı güncelleyin.",
     "later_button": "Daha sonra"
+  },
+  "schedule": {
+    "closed": "Kapalı",
+    "today": "Bugün",
+    "week_title": "Çalışma saatleri",
+    "closed_on": "İzinli: {}",
+    "day_1": "Pazartesi",
+    "day_2": "Salı",
+    "day_3": "Çarşamba",
+    "day_4": "Perşembe",
+    "day_5": "Cuma",
+    "day_6": "Cumartesi",
+    "day_7": "Pazar"
   }
 }

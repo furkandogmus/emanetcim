@@ -27,8 +27,6 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
   late TextEditingController _name;
   late TextEditingController _capacity;
   late TextEditingController _price;
-  late TextEditingController _opening;
-  late TextEditingController _closing;
   late TextEditingController _address;
   late TextEditingController _city;
   late TextEditingController _district;
@@ -46,8 +44,6 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
       _name.dispose();
       _capacity.dispose();
       _price.dispose();
-      _opening.dispose();
-      _closing.dispose();
       _address.dispose();
       _city.dispose();
       _district.dispose();
@@ -69,8 +65,6 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
         _name = TextEditingController(text: shop.name);
         _capacity = TextEditingController(text: shop.capacity.toString());
         _price = TextEditingController(text: shop.pricePerDay.toString());
-        _opening = TextEditingController(text: shop.openingTime ?? '09:00');
-        _closing = TextEditingController(text: shop.closingTime ?? '20:00');
         _address = TextEditingController(text: shop.address ?? '');
         _city = TextEditingController(text: shop.city ?? '');
         _district = TextEditingController(text: shop.district ?? '');
@@ -149,8 +143,6 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
           'name': _name.text,
           'capacity': int.parse(_capacity.text),
           'pricePerDay': double.parse(_price.text),
-          'openingTime': _opening.text,
-          'closingTime': _closing.text,
           'address': _address.text,
           'city': _city.text,
           'district': _district.text,
@@ -331,24 +323,13 @@ class _PartnerSettingsScreenState extends ConsumerState<PartnerSettingsScreen> {
               ),
               const SizedBox(height: 32),
               _sectionHeader('partner.working_hours'.tr()),
-              Row(
-                children: [
-                  Expanded(
-                    child: _inputField(
-                      'partner.opening'.tr(),
-                      _opening,
-                      Icons.access_time_rounded,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _inputField(
-                      'partner.closing'.tr(),
-                      _closing,
-                      Icons.access_time_filled_rounded,
-                    ),
-                  ),
-                ],
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.calendar_month_rounded),
+                title: Text('partner.schedule_manage'.tr()),
+                subtitle: Text('partner.schedule_manage_hint'.tr()),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => context.push('/partner/schedule'),
               ),
               const SizedBox(height: 32),
               _sectionHeader('partner.address'.tr()),

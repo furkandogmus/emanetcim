@@ -99,6 +99,9 @@ class CheckoutController extends Notifier<CheckoutPayState> {
       if (e is DioException) {
         final errCode = e.response?.data['error'];
         if (errCode == 'no_bags') msg = 'checkout.error_no_bags'.tr();
+        if (errCode == 'shop_closed_on_date') {
+          msg = 'checkout.error_shop_closed_on_date'.tr();
+        }
         if (errCode == 'shop_not_found') {
           msg = 'checkout.error_shop_closed'.tr();
         }

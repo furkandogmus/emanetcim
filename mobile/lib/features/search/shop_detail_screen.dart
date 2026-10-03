@@ -14,6 +14,7 @@ import '../../core/repositories/shop_repository.dart';
 import '../../core/services/favorites_service.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/services/share_service.dart';
+import '../../shared/models/shop.dart';
 import '../../shared/utils/app_colors.dart';
 import '../../shared/widgets/skeleton.dart';
 
@@ -304,9 +305,7 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                               _infoItem(
                                 Icons.access_time_rounded,
                                 'shop.hours'.tr(),
-                                s.open247
-                                    ? 'search.open_247'.tr()
-                                    : '${s.openingTime} - ${s.closingTime}',
+                                _hoursToday(s),
                               ),
                               _infoItem(
                                 Icons.luggage_rounded,
@@ -322,6 +321,14 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
                               ),
                             ],
                           ),
+
+                          if (s.weeklyHours.isNotEmpty ||
+                              s.closures.isNotEmpty) ...[
+                            const SizedBox(height: 32),
+                            _sectionHeader('schedule.week_title'.tr()),
+                            const SizedBox(height: 12),
+                            _weeklyHours(s),
+                          ],
 
                           const SizedBox(height: 40),
 
@@ -698,6 +705,64 @@ class _ShopDetailScreenState extends ConsumerState<ShopDetailScreen> {
         fontWeight: FontWeight.bold,
         color: const Color(0xFF0F172A),
       ),
+    );
+  }
+
+  /// Bugunun saati; haftalik satir yoksa eski tek cift.
+  String _hoursToday(ShopDto s) {
+    if (s.open247) return 'search.open_247'.tr();
+    final now = DateTime.now();
+    final iso =
+        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    final onLeave = s.closures.any(
+      (c) => c.startDate.compareTo(iso) <= 0 && c.endDate.compareTo(iso) >= 0,
+    );
+    if (onLeave) return 'schedule.closed'.tr();
+    for (final w in s.weeklyHours) {
+      if (w.weekday == now.weekday) {
+        return w.isClosed
+            ? 'schedule.closed'.tr()
+            : '${w.openingTime} - ${w.closingTime}';
+      }
+    }
+    return '${s.openingTime} - ${s.closingTime}';
+  }
+
+  Widget _weeklyHours(ShopDto s) {
+    return Column(
+      children: [
+        for (final w in s.weeklyHours)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('schedule.day_${w.weekday}'.tr()),
+                Text(
+                  w.isClosed
+                      ? 'schedule.closed'.tr()
+                      : '${w.openingTime} - ${w.closingTime}',
+                ),
+              ],
+            ),
+          ),
+        for (final c in s.closures)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                'schedule.closed_on'.tr(
+                  args: [
+                    c.startDate == c.endDate
+                        ? c.startDate
+                        : '${c.startDate} → ${c.endDate}',
+                  ],
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
