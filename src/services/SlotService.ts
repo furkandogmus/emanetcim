@@ -1,3 +1,5 @@
+import { hoursForDate } from "@/lib/shop-schedule";
+import { loadScheduleParts } from "@/services/ShopScheduleService";
 import { slotCalendarDays } from "@/lib/slot-calendar";
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
@@ -62,8 +64,14 @@ export async function generateSlotsForShop(
   });
 
   const tz = shop.timezone || "Europe/Istanbul";
-  const slotsPerDay = operatingHoursToSlots(shop.openingTime, shop.closingTime, shop.open247);
-  if (slotsPerDay === 0) return 0;
+  const parts = (await loadScheduleParts([shopId])).get(shopId);
+  const schedule = {
+    open247: shop.open247,
+    openingTime: shop.openingTime,
+    closingTime: shop.closingTime,
+    timeZone: tz,
+    ...parts,
+  };
 
   let created = 0;
   const now = new Date();
@@ -73,8 +81,11 @@ export async function generateSlotsForShop(
   for (let dayOffset = 0; dayOffset < takvimGunleri.length; dayOffset++) {
     const localDay = takvimGunleri[dayOffset];
 
-    // Parse opening hour to get slot base in local time
-    const [oh, om] = (shop.openingTime || "09:00").split(":").map(Number);
+    // Gunun kendi saati: haftalik satir ya da izin gunu (null = o gun slot yok).
+    const dayHours = hoursForDate(schedule, localDay);
+    if (!dayHours) continue;
+    const slotsPerDay = operatingHoursToSlots(dayHours.open, dayHours.close, shop.open247);
+    const [oh, om] = dayHours.open.split(":").map(Number);
     const baseMins = oh * 60 + om;
 
     for (let slotIdx = 0; slotIdx < slotsPerDay; slotIdx++) {
