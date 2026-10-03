@@ -1,5 +1,8 @@
 "use client";
 
+import ShopHoursList from "@/components/guest/ShopHoursList";
+import { hoursForDate, type ClosureRange, type ShopSchedule, type WeeklyDay } from "@/lib/shop-schedule";
+import { todayInZone } from "@/lib/stay-days";
 import { formatDateInZone } from "@/lib/format-datetime";
 import { PLATFORM_TIMEZONE } from "@/lib/datetime-local";
 import {
@@ -69,6 +72,9 @@ export type ShopDetailClientShop = {
   open247: boolean;
   openingTime: string | null;
   closingTime: string | null;
+  timezone: string | null;
+  weekly: WeeklyDay[];
+  closures: ClosureRange[];
   isVerified: boolean;
   /** Talep testi noktasi: rezervasyon alinmaz, CTA "haber ver"e doner. */
   isPrelaunch: boolean;
@@ -101,6 +107,7 @@ export default function ShopDetailClient({
   const router = useRouter();
   const t = useTranslations("Guest");
   const tCommon = useTranslations("Common");
+  const tSchedule = useTranslations("Partner.schedule");
   /**
    * Sigorta gerçekten var mı? Zaten elimizde olan `pricingRules`'tan türüyor —
    * ayrı bir sorgu veya bağlam gerekmiyor (P1-20).
@@ -115,11 +122,21 @@ export default function ShopDetailClient({
       ? buildDirectionsUrl({ latitude: shop.latitude, longitude: shop.longitude, address: shop.address }) ?? "#"
       : null;
 
-  const hoursLabel = shop.open247
+  const schedule: ShopSchedule = {
+    open247: shop.open247,
+    openingTime: shop.openingTime,
+    closingTime: shop.closingTime,
+    timeZone: shop.timezone,
+    weekly: shop.weekly,
+    closures: shop.closures,
+  };
+  const todayDate = todayInZone(shop.timezone ?? undefined);
+  const todayHours = hoursForDate(schedule, todayDate);
+  const hoursLabel = shop.open247 && todayHours
     ? t("open247")
-    : shop.openingTime && shop.closingTime
-      ? `${shop.openingTime} – ${shop.closingTime}`
-      : "—";
+    : todayHours
+      ? `${todayHours.open} – ${todayHours.close}`
+      : tSchedule("closed");
   /**
    * Bu blok eskiden `locale === "tr" ? {...} : {...}` idi, yani dükkan detay
    * sayfasındaki 13 metin diğer 12 dilde İNGİLİZCE çıkıyordu — üstelik bu sayfa
@@ -137,8 +154,6 @@ export default function ShopDetailClient({
     climate: t("shopClimate"),
     largeItems: t("shopLargeItems"),
     sealProvided: t("shopSealProvided"),
-    weekDays: t("shopWeekDays"),
-    weekEnd: t("shopWeekEnd"),
     seeAll: t("shopSeeAll"),
     perDay: t("shopPerDay"),
   };
@@ -335,10 +350,7 @@ export default function ShopDetailClient({
 
           <section className="rounded-2xl border border-gray-100 bg-[#f2f4ff] p-5">
             <h2 className="text-xl font-black text-gray-900 mb-3">{t("shopDetailHours")}</h2>
-            <div className="space-y-2 text-sm font-bold text-gray-700">
-              <div className="flex justify-between"><span>{mobileCopy.weekDays}</span><span>{hoursLabel}</span></div>
-              <div className="flex justify-between"><span>{mobileCopy.weekEnd}</span><span>{hoursLabel}</span></div>
-            </div>
+            <ShopHoursList schedule={schedule} today={todayDate} />
             {mapsUrl ? (
               <a
                 href={mapsUrl}

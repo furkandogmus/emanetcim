@@ -734,7 +734,11 @@
     "stayDaysCount": "{count, plural, one {# jour} other {# jours}}",
     "stayHoursHint": "La boutique est ouverte de {open} à {close} ; déposez et récupérez pendant ces horaires.",
     "stayOpen247Hint": "La boutique est ouverte 24 h/24 ; déposez et récupérez quand vous voulez.",
-    "chargedInTryNote": "Le paiement est débité en livres turques (TRY) ; le montant ≈ est indicatif."
+    "chargedInTryNote": "Le paiement est débité en livres turques (TRY) ; le montant ≈ est indicatif.",
+    "stayDropHours": "Dépôt {date} : ouvert {open}–{close} ; arrivez au plus tard à {last}.",
+    "stayPickupHours": "Retrait {date} : {open}–{close}.",
+    "stayDayClosed": "Le point est fermé le {date} ; choisissez un autre jour.",
+    "shopClosedOn": "Fermé : {range}"
   },
   "Admin": {
     "dashboardTitle": "Centre d'administration BagajPark",
@@ -1762,7 +1766,8 @@
     "shopMissingCoordinates": "La boutique n'a pas de localisation. Renseignez les coordonnées avant d'approuver.",
     "shopLocationRequired": "Veuillez indiquer l'emplacement de votre boutique sur la carte.",
     "bagRevisionNeedsGuestApproval": "Une augmentation de prix après le check-in nécessite l'accord du client. La proposition a été enregistrée et s'appliquera dès que le client l'aura approuvée.",
-    "scheduleConflict": "Des réservations actives tombent sur ces dates."
+    "scheduleConflict": "Des réservations actives tombent sur ces dates.",
+    "shopClosedOnDate": "Le point est fermé l’un des jours choisis ; choisissez un autre jour."
   },
   "Emails": {
     "verificationSubject": "Vérifiez votre e-mail",

@@ -58,6 +58,8 @@ interface DateTimePickerProps {
   ariaLabel?: string;
   placeholder?: string;
   minDate?: Date;
+  /** Seçilemeyen günler (örn. dükkanın kapalı olduğu gün). */
+  isDateDisabled?: (date: Date) => boolean;
   stepMinutes?: number;
   className?: string;
   icon?: ReactNode;
@@ -127,6 +129,7 @@ export default function DateTimePicker({
   ariaLabel,
   placeholder,
   minDate,
+  isDateDisabled,
   stepMinutes = 20,
   className,
   icon,
@@ -134,6 +137,10 @@ export default function DateTimePicker({
   dateOnly = false,
 }: DateTimePickerProps) {
   const locale = useLocale();
+  const disabledMatchers = [
+    ...(minDate ? [{ before: minDate }] : []),
+    ...(isDateDisabled ? [isDateDisabled] : []),
+  ];
   const dfLocale = LOCALE_MAP[locale] ?? enUS;
   const t = useTranslations("Common");
   const [open, setOpen] = useState(false);
@@ -413,7 +420,7 @@ export default function DateTimePicker({
               locale={dfLocale}
               weekStartsOn={1}
               labels={calendarLabels}
-              disabled={minDate ? { before: minDate } : undefined}
+              disabled={disabledMatchers}
               defaultMonth={parsed ?? minDate ?? new Date()}
               showOutsideDays
               className="rdp-emanet mx-auto text-sm"
@@ -487,7 +494,7 @@ export default function DateTimePicker({
             locale={dfLocale}
             weekStartsOn={1}
             labels={calendarLabels}
-            disabled={minDate ? { before: minDate } : undefined}
+            disabled={disabledMatchers}
             defaultMonth={parsed ?? minDate ?? new Date()}
             showOutsideDays
             className="rdp-emanet mx-auto"
