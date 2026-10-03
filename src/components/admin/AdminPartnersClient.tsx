@@ -34,6 +34,8 @@ interface Shop {
   isActive: boolean;
   rating: number;
   pricePerDay: number; // Decimal
+  /** Bugünün çalışma saati: aralık metni, 7/24 ya da kapalı (izin/kapalı gün). */
+  hoursToday: { kind: "range"; text: string } | { kind: "open247" | "closed" };
   createdAt: Date;
   owner: {
     name: string | null;
@@ -68,6 +70,7 @@ function resetErrorMessage(
 
 export default function AdminPartnersClient({ shops: initialShops }: AdminPartnersClientProps) {
   const t = useTranslations("Admin");
+  const tSchedule = useTranslations("Partner.schedule");
   const tErrors = useTranslations("Errors");
   const tCommon = useTranslations("Common");
   const locale = useLocale();
@@ -164,6 +167,11 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
                         <p className="text-xs text-gray-400 font-medium truncate max-w-[200px]">{shop.address}</p>
                         <p className="id-eyebrow text-orange-600">
                           <Money amount={Number(shop.pricePerDay || 0)} /> / {t("day")}
+                        </p>
+                        <p className="text-xs font-bold text-gray-500">
+                          {shop.hoursToday.kind === "range"
+                            ? shop.hoursToday.text
+                            : tSchedule(shop.hoursToday.kind === "open247" ? "open247" : "closed")}
                         </p>
                       </div>
                     </td>
