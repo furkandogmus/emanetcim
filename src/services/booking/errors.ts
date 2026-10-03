@@ -32,6 +32,7 @@ export type BookingRejectionCode =
   | 'INVALID_DATES'
   | 'PLATFORM_HOLIDAY'
   | 'SHOP_PRELAUNCH'
+  | 'SHOP_CLOSED_ON_DATE'
   /* Valiz sayisi ya da tutar anlamsiz (sifir, negatif). */
   | 'INVALID_INPUT';
 
@@ -101,5 +102,12 @@ export class BookingShopPrelaunchError extends BookingRejectedError {
 export class BookingInputInvalidError extends BookingRejectedError {
   constructor(message = 'Rezervasyon bilgileri geçersiz.') {
     super(message, 'INVALID_INPUT');
+  }
+}
+
+/** Birakis ya da alis gunu dukkan kapali (haftalik kapali gun ya da esnafin izni). */
+export class BookingShopClosedError extends BookingRejectedError {
+  constructor(message = 'Dükkan seçilen günde kapalı.') {
+    super(message, 'SHOP_CLOSED_ON_DATE');
   }
 }
