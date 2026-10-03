@@ -2,6 +2,9 @@ import { setRequestLocale } from "next-intl/server";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/db";
+import { hoursForDate } from "@/lib/shop-schedule";
+import { todayInZone } from "@/lib/stay-days";
+import { loadScheduleParts } from "@/services/ShopScheduleService";
 import AdminPartnersClient from "@/components/admin/AdminPartnersClient";
 
 export default async function AdminPartnersPage({
@@ -43,7 +46,23 @@ export default async function AdminPartnersPage({
   });
 
   // Decimal alanları number’a çeviriyoruz (build hatası ve serileştirme için)
-  const serializedShops = shops.map((shop) => ({
+  const parts = await loadScheduleParts(
+    shops.map((s) => s.id),
+    new Date().toISOString().slice(0, 10),
+  );
+  const serializedShops = shops.map((shop) => {
+    const tz = shop.timezone || "Europe/Istanbul";
+    const hours = hoursForDate(
+      { open247: shop.open247, openingTime: shop.openingTime, closingTime: shop.closingTime, timeZone: tz, ...parts.get(shop.id) },
+      todayInZone(tz),
+    );
+    const hoursToday = !hours
+      ? ({ kind: "closed" } as const)
+      : shop.open247
+        ? ({ kind: "open247" } as const)
+        : ({ kind: "range", text: `${hours.open} – ${hours.close}` } as const);
+    return { ...shop, hoursToday };
+  }).map((shop) => ({
     ...shop,
     pricePerDay: Number(shop.pricePerDay),
     rating: shop.rating || 0,
