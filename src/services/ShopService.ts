@@ -14,6 +14,8 @@ import { moneyToNumber } from '@/lib/money';
 import { getActiveShopsOrderedByDistanceKm } from '@/lib/shop-distance-postgis';
 
 import { isShopOpenForStay } from '@/lib/shop-hours';
+import { hoursForDate } from '@/lib/shop-schedule';
+import { loadScheduleParts } from '@/services/ShopScheduleService';
 import { PUBLIC_SHOP_FILTER, OPERATING_SHOP_FILTER } from '@/lib/public-shop-filter';
 import { sealService } from "@/services/SealService";
 import { notificationService } from '@/services/NotificationService';
@@ -227,6 +229,8 @@ export type FindShopsForSearchOptions = {
    * oturtulur (`resolveStayWindow`). Kapasite kontrolu yine uygulanir.
    */
   ignoreOpenHours?: boolean;
+  /** Gun bazli arama: birakis ya da alis gunu kapali/izinli olan dukkanlar elenir. */
+  stayDays?: { drop: string; pickup: string };
 };
 
 export interface IShopService {
@@ -410,7 +414,19 @@ export class ShopService implements IShopService {
          *   - Sıralamada rezervasyon ALABİLEN dükkan her zaman önce gelir;
          *     misafire önce gidip valizini bırakabileceği yer gösterilir.
          */
-        const operating = withDist.filter((s) => !s.isPrelaunch);
+        let operating = withDist.filter((s) => !s.isPrelaunch);
+        if (options.stayDays) {
+          const { drop, pickup } = options.stayDays;
+          const parts = await loadScheduleParts(
+            operating.map((s) => s.id),
+            drop,
+          );
+          operating = operating.filter((s) => {
+            const p = parts.get(s.id);
+            const schedule = { open247: s.open247, openingTime: s.openingTime, closingTime: s.closingTime, ...p };
+            return hoursForDate(schedule, drop) !== null && hoursForDate(schedule, pickup) !== null;
+          });
+        }
         const prelaunchHits: ShopSearchHit[] = withDist
           .filter((s) => s.isPrelaunch)
           .map((shop) => ({

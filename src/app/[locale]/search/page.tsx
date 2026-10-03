@@ -119,6 +119,7 @@ export default async function SearchPage({
     checkOut,
     requestedBags: 1,
     ignoreOpenHours: true,
+    stayDays: { drop: dropDate, pickup: pickupDate },
   });
 
   const nearbyShops = allShops.filter(s => s.distanceKm <= SEARCH_NEARBY_RADIUS_KM);

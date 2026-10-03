@@ -4,7 +4,8 @@
 import prisma from '@/lib/db';
 
 import logger from '@/lib/logger';
-import { isShopOpenForHandover } from '@/lib/shop-hours';
+import { isOpenForHandover } from '@/lib/shop-schedule';
+import { loadScheduleParts } from '@/services/ShopScheduleService';
 import { totalBagCount } from '@/lib/bag-pricing';
 import { sealService } from '@/services/SealService';
 import { getPricingRules } from '@/lib/platform-settings';
@@ -45,19 +46,18 @@ export async function checkIn(
         message: `Check-in için onaylanmış veya ödenmiş olmalı (durum: ${existing.status}).`,
       };
     }
+    const now = new Date();
+    const scheduleParts = (await loadScheduleParts([existing.shopId])).get(existing.shopId);
     if (
-      /*
-        `open247` ve dükkanın SAAT DİLİMİ buraya girmek zorunda: eskiden
-        `isShopOpenAt` doğrudan çağrılıyordu ve ikisi de düşüyordu. Sonucu
-        misafir ödüyordu -- 24/7 işaretli bir dükkan aramada 22:00 slotunu
-        satıyor, misafir valiziyle geliyor, tezgâhta "dükkan kapalı" yiyordu.
-      */
-      !isShopOpenForHandover(
-        existing.shop.openingTime,
-        existing.shop.closingTime,
-        existing.shop.open247,
-        new Date(),
-        existing.shop.timezone ?? undefined,
+      !isOpenForHandover(
+        {
+          open247: existing.shop.open247,
+          openingTime: existing.shop.openingTime,
+          closingTime: existing.shop.closingTime,
+          timeZone: existing.shop.timezone,
+          ...scheduleParts,
+        },
+        now,
         rules.checkInGraceMin,
       )
     ) {

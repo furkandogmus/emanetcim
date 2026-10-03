@@ -56,6 +56,7 @@ export async function refreshSearchShopsAction(input: {
       checkOut,
       requestedBags: bags,
       ignoreOpenHours: true,
+      stayDays: { drop: input.dropDate, pickup: input.pickupDate },
     }),
     shopService.findShopsForSearch({
       centerLat: lat,
@@ -67,6 +68,7 @@ export async function refreshSearchShopsAction(input: {
       checkOut,
       requestedBags: bags,
       ignoreOpenHours: true,
+      stayDays: { drop: input.dropDate, pickup: input.pickupDate },
     }),
   ]);
 
