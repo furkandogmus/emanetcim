@@ -196,3 +196,22 @@ export async function addClosure(
 export async function removeClosure(shopId: string, closureId: string): Promise<void> {
   await prisma.shopClosure.deleteMany({ where: { id: closureId, shopId } });
 }
+
+/**
+ * Birakis ya da alis gunu dukkan kapaliysa o gun (`YYYY-MM-DD`), degilse null.
+ * Istemci pencereyi kendisi kurdugu icin son savunma sunucuda.
+ */
+export async function findClosedStayDay(
+  shopId: string,
+  checkIn: Date,
+  checkOut: Date,
+): Promise<string | null> {
+  const current = await currentSchedule(shopId);
+  if (!current) return null;
+  const tz = current.timeZone || PLATFORM_TIMEZONE;
+  for (const at of [checkIn, checkOut]) {
+    const date = toDatetimeLocalValueInTimeZone(at, tz).slice(0, 10);
+    if (!hoursForDate(current, date)) return date;
+  }
+  return null;
+}

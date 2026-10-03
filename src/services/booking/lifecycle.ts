@@ -11,6 +11,7 @@ import { reserveSlots, releaseSlots, SlotAvailabilityError } from '@/services/Sl
 import { getPricingRules } from '@/lib/platform-settings';
 import { moneyToNumber } from '@/lib/money';
 import { CancelBookingResult, ModifyBookingResult } from '@/types/partner-booking';
+import { findClosedStayDay } from '@/services/ShopScheduleService';
 import { computeAuthoritativeCheckoutTotals, validateBookingStayWindow } from '@/lib/booking-server-price';
 import { bookingEventService } from '@/services/BookingEventService';
 import { paymentService } from '@/services/PaymentService';
@@ -216,6 +217,14 @@ export async function modifyBooking(
       ok: false,
       code: 'NOT_FOUND',
       message: 'Rezervasyon bulunamadı.',
+    };
+  }
+
+  if (await findClosedStayDay(booking.shopId, input.checkInTime, input.checkOutTime)) {
+    return {
+      ok: false,
+      code: 'INVALID_DATES',
+      message: 'Dükkan seçilen günde kapalı.',
     };
   }
   if (booking.guestId !== guestId) {

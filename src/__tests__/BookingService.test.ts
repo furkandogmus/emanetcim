@@ -103,6 +103,7 @@ vi.mock("@/lib/shop-schedule", () => ({
 }));
 vi.mock("@/services/ShopScheduleService", () => ({
   loadScheduleParts: vi.fn().mockResolvedValue(new Map()),
+  findClosedStayDay: vi.fn().mockResolvedValue(null),
 }));
 
 /**
