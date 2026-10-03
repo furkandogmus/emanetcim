@@ -311,7 +311,37 @@
     "bagRevisionSaved": "Mis à jour. Nouveau total : {total}",
     "settingsImpactHours": "Attention : {count} réservation(s) tombent hors de vos horaires. Ces clients ne pourront pas être enregistrés — contactez-les si besoin.",
     "settingsImpactCapacity": "Attention : les bagages actuellement en garde dépassent la nouvelle capacité de {count}.",
-    "settingsImpactUnknownGuest": "Client sans nom"
+    "settingsImpactUnknownGuest": "Client sans nom",
+    "schedule": {
+      "title": "Horaires et fermetures",
+      "hint": "Définissez l’ouverture et la fermeture de chaque jour. Les voyageurs voient ces horaires et ne peuvent réserver que les jours ouverts.",
+      "days": {
+        "1": "Lundi",
+        "2": "Mardi",
+        "3": "Mercredi",
+        "4": "Jeudi",
+        "5": "Vendredi",
+        "6": "Samedi",
+        "7": "Dimanche"
+      },
+      "closed": "Fermé",
+      "open247": "Ouvert 24h/24",
+      "open247Hint": "Activé, les horaires quotidiens sont ignorés ; seules les fermetures s’appliquent.",
+      "save": "Enregistrer les horaires",
+      "saved": "Horaires mis à jour.",
+      "closuresTitle": "Congés et jours fériés",
+      "closuresHint": "Le point apparaît fermé ces jours-là et n’accepte aucune réservation.",
+      "dateFrom": "Du",
+      "dateTo": "Au",
+      "reason": "Note (facultatif)",
+      "add": "Ajouter une fermeture",
+      "remove": "Supprimer",
+      "none": "Aucune fermeture prévue.",
+      "conflictTitle": "Modification non enregistrée : les réservations ci-dessous tombent sur ces dates.",
+      "conflictDropoff": "Dépôt",
+      "conflictPickup": "Retrait",
+      "conflictBags": "Bagages sur place"
+    }
   },
   "Guest": {
     "heroTitle": "Déposez vos bagages, explorez librement",
@@ -1731,7 +1761,8 @@
     "imageDimensionsTooLarge": "La résolution de la photo est trop élevée. Essayez une photo plus petite.",
     "shopMissingCoordinates": "La boutique n'a pas de localisation. Renseignez les coordonnées avant d'approuver.",
     "shopLocationRequired": "Veuillez indiquer l'emplacement de votre boutique sur la carte.",
-    "bagRevisionNeedsGuestApproval": "Une augmentation de prix après le check-in nécessite l'accord du client. La proposition a été enregistrée et s'appliquera dès que le client l'aura approuvée."
+    "bagRevisionNeedsGuestApproval": "Une augmentation de prix après le check-in nécessite l'accord du client. La proposition a été enregistrée et s'appliquera dès que le client l'aura approuvée.",
+    "scheduleConflict": "Des réservations actives tombent sur ces dates."
   },
   "Emails": {
     "verificationSubject": "Vérifiez votre e-mail",

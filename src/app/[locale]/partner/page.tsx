@@ -126,8 +126,6 @@ export default async function PartnerPage({
       totalEarnings={totals.gross}
       merchantShareRatio={commission.merchantShareRatio}
       initialCapacity={shopDetail.capacity}
-      initialOpening={shopDetail.openingTime || "09:00"}
-      initialClosing={shopDetail.closingTime || "20:00"}
       initialPricePerDay={moneyToNumber(shopDetail.pricePerDay) || marketPrice}
       marketPrice={marketPrice}
       bookings={JSON.parse(JSON.stringify(bookings))}

@@ -72,8 +72,6 @@ interface PartnerClientProps {
   merchantShareRatio: number;
   shopName: string;
   initialCapacity: number;
-  initialOpening: string;
-  initialClosing: string;
   initialPricePerDay: number;
   marketPrice: number;
   bookings: PartnerBookingListItem[];
@@ -112,8 +110,6 @@ export default function PartnerClient({
   merchantShareRatio,
   shopName,
   initialCapacity,
-  initialOpening,
-  initialClosing,
   initialPricePerDay,
   marketPrice,
   bookings,
@@ -679,8 +675,6 @@ export default function PartnerClient({
           <PartnerShopSettingsForm
             shopId={shopId}
             initialCapacity={initialCapacity}
-            initialOpening={initialOpening}
-            initialClosing={initialClosing}
             initialPricePerDay={initialPricePerDay}
             marketPrice={marketPrice}
             initialPhone={initialPhone}

@@ -311,7 +311,37 @@
     "bagRevisionSaved": "Güncellendi. Yeni tutar: {total}",
     "settingsImpactHours": "Dikkat: yeni saatlerin dışında kalan {count} rezervasyon var. Bu misafirler geldiğinde check-in yapılamaz — onlara ulaşmanız gerekebilir.",
     "settingsImpactCapacity": "Dikkat: şu an rafınızdaki valiz sayısı yeni kapasiteyi {count} valiz aşıyor.",
-    "settingsImpactUnknownGuest": "İsimsiz misafir"
+    "settingsImpactUnknownGuest": "İsimsiz misafir",
+    "schedule": {
+      "title": "Çalışma saatleri ve izin",
+      "hint": "Her gün için açılış ve kapanış saatini belirleyin. Misafirler bu saatleri görür ve yalnızca açık günlere rezervasyon yapabilir.",
+      "days": {
+        "1": "Pazartesi",
+        "2": "Salı",
+        "3": "Çarşamba",
+        "4": "Perşembe",
+        "5": "Cuma",
+        "6": "Cumartesi",
+        "7": "Pazar"
+      },
+      "closed": "Kapalı",
+      "open247": "7/24 açık",
+      "open247Hint": "Açıkken günlük saatler kullanılmaz; yalnızca izin günleri geçerlidir.",
+      "save": "Saatleri kaydet",
+      "saved": "Çalışma saatleri güncellendi.",
+      "closuresTitle": "İzin ve tatil günleri",
+      "closuresHint": "Seçtiğiniz tarihlerde dükkan kapalı görünür, rezervasyon alınmaz.",
+      "dateFrom": "Başlangıç",
+      "dateTo": "Bitiş",
+      "reason": "Not (isteğe bağlı)",
+      "add": "İzin ekle",
+      "remove": "Kaldır",
+      "none": "Planlı izin yok.",
+      "conflictTitle": "Bu değişiklik kaydedilemedi: aşağıdaki rezervasyonlar bu güne denk geliyor.",
+      "conflictDropoff": "Bırakış",
+      "conflictPickup": "Teslim alış",
+      "conflictBags": "Dükkanda valiz var"
+    }
   },
   "Guest": {
     "heroTitle": "Valizini Güvenle Bırak, Özgürce Gez",
@@ -1795,7 +1825,8 @@
     "imageDimensionsTooLarge": "Görselin çözünürlüğü çok yüksek. Daha küçük bir fotoğraf deneyin.",
     "shopMissingCoordinates": "Dükkanın konum bilgisi yok. Onaylamadan önce koordinatları girin.",
     "shopLocationRequired": "Lütfen haritada dükkanının konumunu işaretle.",
-    "bagRevisionNeedsGuestApproval": "Check-in sonrası fiyat artışı misafirin onayını bekliyor. Öneri kaydedildi; misafir onayladığında uygulanacak."
+    "bagRevisionNeedsGuestApproval": "Check-in sonrası fiyat artışı misafirin onayını bekliyor. Öneri kaydedildi; misafir onayladığında uygulanacak.",
+    "scheduleConflict": "Bu tarihlere denk gelen aktif rezervasyonlar var."
   },
   "Emails": {
     "verificationSubject": "E-postanızı Doğrulayın",

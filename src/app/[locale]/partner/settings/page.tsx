@@ -5,6 +5,7 @@ import { Link } from "@/i18n/routing";
 import { requirePartnerPage } from "@/lib/page-auth";
 import { resolvePartnerShops } from "@/lib/partner-shop";
 import PartnerShopSettingsForm from "@/components/partner/PartnerShopSettingsForm";
+import PartnerScheduleSection from "@/components/partner/PartnerScheduleSection";
 import ShopPhotoUpload from "@/components/partner/ShopPhotoUpload";
 import { isStorageConfigured } from "@/lib/storage";
 import { moneyToNumber } from "@/lib/money";
@@ -46,6 +47,7 @@ export default async function PartnerSettingsPage({
           capacity: true,
           openingTime: true,
           closingTime: true,
+          open247: true,
           pricePerDay: true,
           image: true,
           address: true,
@@ -99,11 +101,11 @@ export default async function PartnerSettingsPage({
           configured={isStorageConfigured()}
         />
 
+        <PartnerScheduleSection shop={shop} />
+
         <PartnerShopSettingsForm
           shopId={shop.id}
           initialCapacity={shop.capacity}
-          initialOpening={shop.openingTime || "09:00"}
-          initialClosing={shop.closingTime || "20:00"}
           initialPricePerDay={moneyToNumber(shop.pricePerDay) || marketPrice}
           initialAddress={shop.address ?? ""}
           initialCity={shop.city ?? ""}
