@@ -41,6 +41,9 @@ const { mockPrisma, mockGetPricingRules, RULES } = vi.hoisted(() => {
 });
 
 vi.mock("@/lib/db", () => ({ default: mockPrisma }));
+vi.mock("@/services/ShopScheduleService", () => ({
+  findClosedStayDay: vi.fn().mockResolvedValue(null),
+}));
 vi.mock("@/lib/platform-settings", () => ({ getPricingRules: mockGetPricingRules }));
 vi.mock("@/services/BookingEventService", () => ({
   bookingEventService: { record: vi.fn().mockResolvedValue(undefined) },
