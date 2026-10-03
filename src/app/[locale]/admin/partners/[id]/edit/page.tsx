@@ -68,11 +68,9 @@ export default async function AdminPartnerEditPage({
   };
 
   return (
-    <>
-      <AdminPartnerEditClient shop={serializedShop} />
-      <div className="mx-auto w-full max-w-3xl px-6 pb-24">
-        <PartnerScheduleSection shop={shop} />
-      </div>
-    </>
+    <AdminPartnerEditClient
+      shop={serializedShop}
+      scheduleSection={<PartnerScheduleSection shop={shop} />}
+    />
   );
 }
