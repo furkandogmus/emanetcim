@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { 
   Store, 
   ArrowLeft, 
@@ -25,6 +25,8 @@ import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import { actionErrorKey } from "@/lib/action-error";
 
 interface AdminPartnerEditClientProps {
+  /** Çalışma saati/izin editörü (sunucu bileşeni); formun altında, aynı sütunda durur. */
+  scheduleSection?: ReactNode;
   shop: {
     id: string;
     name: string;
@@ -57,7 +59,7 @@ interface AdminPartnerEditClientProps {
   };
 }
 
-export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientProps) {
+export default function AdminPartnerEditClient({ shop, scheduleSection }: AdminPartnerEditClientProps) {
   const t = useTranslations("Admin");
   const locale = useLocale();
   const dateLocale = bcp47ForUiLocale(locale);
@@ -288,6 +290,8 @@ export default function AdminPartnerEditClient({ shop }: AdminPartnerEditClientP
                 </div>
              </form>
           </section>
+
+          {scheduleSection}
 
           {/* Owner Info Cards */}
           <section className="bg-white rounded-4xl p-8 border border-gray-100 shadow-sm">
