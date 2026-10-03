@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { BookingService } from "../services/BookingService";
-import { isShopOpenAt, isShopOpenForHandover } from "@/lib/shop-hours";
+import { isShopOpenAt } from "@/lib/shop-hours";
+import { isOpenForHandover } from "@/lib/shop-schedule";
 
 /**
  * `vi.clearAllMocks()` çağrıları temizler ama `mockResolvedValue` ile verilen
@@ -97,6 +98,12 @@ vi.mock("@/lib/shop-hours", () => ({
   isShopOpenAt: vi.fn().mockReturnValue(true),
   isShopOpenForHandover: vi.fn().mockReturnValue(true),
 }));
+vi.mock("@/lib/shop-schedule", () => ({
+  isOpenForHandover: vi.fn().mockReturnValue(true),
+}));
+vi.mock("@/services/ShopScheduleService", () => ({
+  loadScheduleParts: vi.fn().mockResolvedValue(new Map()),
+}));
 
 /**
  * Ödeme defteri. Varsayılan: tahsilat YOK ve sağlayıcı online tahsil ETMİYOR
@@ -113,13 +120,13 @@ describe("BookingService Deep Logic", () => {
     vi.clearAllMocks();
     mockGetPricingRules.mockResolvedValue(BASE_PRICING_RULES);
     vi.mocked(isShopOpenAt).mockReturnValue(true);
-    vi.mocked(isShopOpenForHandover).mockReturnValue(true);
+    vi.mocked(isOpenForHandover).mockReturnValue(true);
     mockPrisma.booking.findUnique.mockResolvedValue({ id: "b1", shop: { openingTime: "09:00", closingTime: "18:00" } } as any);
   });
 
   describe("checkIn", () => {
     it("should fail if shop is closed", async () => {
-      vi.mocked(isShopOpenForHandover).mockReturnValue(false);
+      vi.mocked(isOpenForHandover).mockReturnValue(false);
       mockPrisma.booking.findUnique.mockResolvedValue({
         id: "b1",
         status: "PAID",

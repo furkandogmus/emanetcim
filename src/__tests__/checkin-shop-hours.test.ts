@@ -107,7 +107,7 @@ describe("check-in kapisi duzeltmeyi kullaniyor", () => {
     const src = fs.readFileSync("src/services/booking/check-in.ts", "utf8");
     // Ham cagri geri gelirse `open247` ve saat dilimi yine sessizce duser.
     expect(src).not.toMatch(/isShopOpenAt\s*\(/);
-    expect(src).toContain("isShopOpenForHandover");
+    expect(src).toContain("isOpenForHandover");
     expect(src).toContain("existing.shop.open247");
     expect(src).toContain("existing.shop.timezone");
     // Tolerans ayardan gelmeli; sabit bir sayi yazilirsa yonetici degistiremez.

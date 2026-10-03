@@ -4,6 +4,7 @@ import {
   toDatetimeLocalValueInTimeZone,
 } from "@/lib/datetime-local";
 import { MIN_BOOKING_STAY_MS } from "@/lib/booking-server-price";
+import { hoursForDate, type ShopSchedule } from "@/lib/shop-schedule";
 
 /**
  * GUN BAZLI REZERVASYON.
@@ -20,15 +21,9 @@ import { MIN_BOOKING_STAY_MS } from "@/lib/booking-server-price";
  * fiyat mantigina dokunmadan "gunluk fiyat" semantigi elde ediliyor.
  */
 
-export type ShopHours = {
-  openingTime?: string | null;
-  closingTime?: string | null;
-  open247?: boolean | null;
-  timeZone?: string | null;
-};
+export type ShopHours = ShopSchedule;
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
-const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 /** `YYYY-MM-DD` ya da `YYYY-MM-DDTHH:mm...` -> `YYYY-MM-DD`; gecersizse null. */
 export function dateOnlyFromParam(value: string | null | undefined): string | null {
@@ -61,13 +56,6 @@ export function calendarDaysInclusive(drop: string, pickup: string): number {
   return Math.round((b - a) / 86_400_000) + 1;
 }
 
-function hoursOf(shop: ShopHours): { open: string; close: string } {
-  if (shop.open247) return { open: "00:00", close: "23:59" };
-  const open = shop.openingTime && TIME_RE.test(shop.openingTime) ? shop.openingTime : "09:00";
-  const close = shop.closingTime && TIME_RE.test(shop.closingTime) ? shop.closingTime : "20:00";
-  return { open, close };
-}
-
 /** Dakikayi bir sonraki 5'in katina yuvarlar; "simdi"yi dogrulamanin gecmis saymamasi icin. */
 function ceilTo5Min(d: Date): Date {
   const step = 5 * 60_000;
@@ -88,19 +76,23 @@ export function resolveStayWindow(
   if (!dateOnlyFromParam(drop) || !dateOnlyFromParam(pickup)) return null;
   if (calendarDaysInclusive(drop, pickup) < 1) return null;
   const tz = shop.timeZone || PLATFORM_TIMEZONE;
-  const { open, close } = hoursOf(shop);
+  const dropHours = hoursForDate(shop, drop);
+  const pickupHours = hoursForDate(shop, pickup);
+  if (!dropHours || !pickupHours) return null;
+  const { open } = dropHours;
+  const close = pickupHours.close;
 
   let checkIn = parseDatetimeLocalInTimeZone(`${drop}T${open}`, tz);
   // Gece yarisini asan dukkan (orn. 18:00-02:00): kapanis alis gununun ertesine duser.
-  const pickupCloseDay = !shop.open247 && close <= open ? addDays(pickup, 1) : pickup;
+  const pickupCloseDay = !shop.open247 && close <= pickupHours.open ? addDays(pickup, 1) : pickup;
   const checkOut = parseDatetimeLocalInTimeZone(`${pickupCloseDay}T${close}`, tz);
   if (!checkIn || !checkOut) return null;
 
   if (checkIn.getTime() < now.getTime()) {
     // Birakis gunu bugun: dukkan kapanmadan en az yarim saat once gelinebilmeli.
     if (!shop.open247) {
-      const dropCloseDay = close <= open ? addDays(drop, 1) : drop;
-      const dropClose = parseDatetimeLocalInTimeZone(`${dropCloseDay}T${close}`, tz);
+      const dropCloseDay = dropHours.close <= open ? addDays(drop, 1) : drop;
+      const dropClose = parseDatetimeLocalInTimeZone(`${dropCloseDay}T${dropHours.close}`, tz);
       if (!dropClose || now.getTime() > dropClose.getTime() - HANDOVER_MARGIN_MS) return null;
     }
     checkIn = ceilTo5Min(now);
