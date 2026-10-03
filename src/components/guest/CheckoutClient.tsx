@@ -1,5 +1,6 @@
 "use client";
 
+import type { ClosureRange, WeeklyDay } from "@/lib/shop-schedule";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import QRCode from "qrcode";
@@ -74,6 +75,8 @@ interface CheckoutClientProps {
   openingTime?: string | null;
   closingTime?: string | null;
   open247?: boolean;
+  weekly?: WeeklyDay[];
+  closures?: ClosureRange[];
 }
 
 /** URL/taslaktan gelen gunleri gecerli bir araliga ceker; bugun artik olmuyorsa yarina kaydirir. */
@@ -87,8 +90,11 @@ function normalizeStayDays(
   let p = pickup && calendarDaysInclusive(d, pickup) >= 1 ? pickup : d;
   if (!resolveStayWindow(d, p, hours)) {
     const len = calendarDaysInclusive(d, p);
+    // Yarindan baslayip ilk gune kadar bak: kapali/izinli gunler atlanir.
     d = addDays(today, 1);
+    for (let i = 0; i < 60 && !resolveStayWindow(d, d, hours); i++) d = addDays(d, 1);
     p = addDays(d, Math.max(1, len) - 1);
+    for (let i = 0; i < 60 && !resolveStayWindow(d, p, hours); i++) p = addDays(p, 1);
   }
   return { drop: d, pickup: p };
 }
@@ -107,10 +113,12 @@ export default function CheckoutClient({
   openingTime,
   closingTime,
   open247 = false,
+  weekly,
+  closures,
 }: CheckoutClientProps) {
   const hours = useMemo(
-    () => ({ openingTime, closingTime, open247, timeZone }),
-    [openingTime, closingTime, open247, timeZone],
+    () => ({ openingTime, closingTime, open247, timeZone, weekly, closures }),
+    [openingTime, closingTime, open247, timeZone, weekly, closures],
   );
   const t = useTranslations("Guest");
   const tCommon = useTranslations("Common");
@@ -633,11 +641,7 @@ export default function CheckoutClient({
                 minDropDate={normalizeStayDays(null, null, hours).drop}
                 maxDays={pricingRules.maxStayDays}
                 timeZone={timeZone}
-                hours={
-                  open247
-                    ? null
-                    : { open: openingTime ?? "09:00", close: closingTime ?? "20:00" }
-                }
+                schedule={hours}
               />
 
               {!windowOk ? (

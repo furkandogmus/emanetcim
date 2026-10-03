@@ -69,3 +69,33 @@ describe("stay-days", () => {
     expect(validateBookingStayWindow(w.checkIn, w.checkOut, undefined, EARLY.getTime())).toBe(true);
   });
 });
+
+describe("resolveStayWindow: gun bazli takvim", () => {
+  const shop = {
+    timeZone: "Europe/Istanbul",
+    openingTime: "09:00",
+    closingTime: "20:00",
+    weekly: [
+      { weekday: 6, isClosed: false, openingTime: "10:00", closingTime: "16:00" },
+      { weekday: 7, isClosed: true, openingTime: "09:00", closingTime: "20:00" },
+    ],
+    closures: [{ startDate: "2026-10-14", endDate: "2026-10-14" }],
+  };
+  const now = new Date("2026-10-01T00:00:00Z");
+
+  it("birakis gununun acilisi, alis gununun kapanisi kullanilir", () => {
+    const w = resolveStayWindow("2026-10-10", "2026-10-10", shop, now);
+    expect(w?.checkIn.toISOString()).toBe("2026-10-10T07:00:00.000Z"); // 10:00 Istanbul
+    expect(w?.checkOut.toISOString()).toBe("2026-10-10T13:00:00.000Z"); // 16:00 Istanbul
+  });
+
+  it("kapali gun (pazar) birakis ya da alis olamaz", () => {
+    expect(resolveStayWindow("2026-10-11", "2026-10-11", shop, now)).toBeNull();
+    expect(resolveStayWindow("2026-10-10", "2026-10-11", shop, now)).toBeNull();
+  });
+
+  it("izin gunu birakis olamaz ama arada kalabilir", () => {
+    expect(resolveStayWindow("2026-10-14", "2026-10-15", shop, now)).toBeNull();
+    expect(resolveStayWindow("2026-10-13", "2026-10-15", shop, now)).not.toBeNull();
+  });
+});

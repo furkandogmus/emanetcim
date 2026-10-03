@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { CalendarDays, Clock } from "lucide-react";
 import DateTimePicker from "@/components/ui/DateTimePicker";
 import { addDays, calendarDaysInclusive } from "@/lib/stay-days";
+import { hoursForDate, lastDropOffForDate, type ShopSchedule } from "@/lib/shop-schedule";
 import { timeZoneCityLabel } from "@/lib/datetime-local";
 
 type Props = {
@@ -13,8 +14,8 @@ type Props = {
   /** Secilebilecek ilk birakis gunu (`YYYY-MM-DD`). */
   minDropDate: string;
   maxDays: number;
-  /** null: 7/24 acik. */
-  hours: { open: string; close: string } | null;
+  /** Haftalik saat + izinler; secilen gunun saati buradan okunur. */
+  schedule: ShopSchedule;
   /** Dukkanin saat dilimi; saatler onun yerel saatidir, misafirin cihazininki degil. */
   timeZone: string;
 };
@@ -30,9 +31,14 @@ function localDateOf(date: string): Date | undefined {
  * Gun bazli kalis secimi. Saat sorulmaz: birakis ve alis dukkanin calisma
  * saatine oturtulur (`resolveStayWindow`), fiyat gun sayisindan cikar.
  */
-export default function StayDaysPicker({ dropDate, pickupDate, onChange, minDropDate, maxDays, hours, timeZone }: Props) {
+export default function StayDaysPicker({ dropDate, pickupDate, onChange, minDropDate, maxDays, schedule, timeZone }: Props) {
   const t = useTranslations("Guest");
   const days = calendarDaysInclusive(dropDate, pickupDate);
+  const dropHours = hoursForDate(schedule, dropDate);
+  const pickupHours = hoursForDate(schedule, pickupDate);
+  const lastDrop = lastDropOffForDate(schedule, dropDate);
+  const isClosed = (d: Date) =>
+    hoursForDate(schedule, `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`) === null;
 
   const setDrop = (v: string) => {
     // Alis gunu birakisin gerisinde kalamaz; kalis suresi korunarak kaydirilir.
@@ -51,6 +57,7 @@ export default function StayDaysPicker({ dropDate, pickupDate, onChange, minDrop
               onChange={setDrop}
               dateOnly
               minDate={localDateOf(minDropDate)}
+              isDateDisabled={isClosed}
               testId="checkout-drop-date"
               ariaLabel={t("stayDropDay")}
               iconSize={16}
@@ -65,6 +72,7 @@ export default function StayDaysPicker({ dropDate, pickupDate, onChange, minDrop
               onChange={(v) => onChange(dropDate, v)}
               dateOnly
               minDate={localDateOf(dropDate)}
+              isDateDisabled={isClosed}
               testId="checkout-pickup-date"
               ariaLabel={t("stayPickupDay")}
               iconSize={16}
@@ -100,11 +108,23 @@ export default function StayDaysPicker({ dropDate, pickupDate, onChange, minDrop
           <p className="text-base font-bold text-gray-900" data-testid="checkout-days-summary">
             {days > 0 ? t("stayDaysCount", { count: days }) : "—"}
           </p>
-          <p className="mt-0.5 flex items-center gap-1.5 text-xs text-gray-600">
-            <Clock size={12} className="shrink-0" aria-hidden />
-            {hours ? t("stayHoursHint", { open: hours.open, close: hours.close }) : t("stayOpen247Hint")}
-          </p>
-          {hours ? (
+          {dropHours ? (
+            <p className="mt-0.5 flex items-center gap-1.5 text-xs text-gray-600" data-testid="checkout-drop-hours">
+              <Clock size={12} className="shrink-0" aria-hidden />
+              {t("stayDropHours", { date: dropDate, open: dropHours.open, close: dropHours.close, last: lastDrop ?? dropHours.close })}
+            </p>
+          ) : (
+            <p className="mt-0.5 text-xs font-bold text-orange-600">{t("stayDayClosed", { date: dropDate })}</p>
+          )}
+          {pickupHours ? (
+            <p className="mt-0.5 flex items-center gap-1.5 text-xs text-gray-600" data-testid="checkout-pickup-hours">
+              <Clock size={12} className="shrink-0" aria-hidden />
+              {t("stayPickupHours", { date: pickupDate, open: pickupHours.open, close: pickupHours.close })}
+            </p>
+          ) : (
+            <p className="mt-0.5 text-xs font-bold text-orange-600">{t("stayDayClosed", { date: pickupDate })}</p>
+          )}
+          {!schedule.open247 ? (
             <p className="mt-0.5 pl-[18px] text-[11px] text-gray-500">
               {t("timesInShopTimezone", { zone: timeZoneCityLabel(timeZone) })}
             </p>

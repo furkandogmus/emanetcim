@@ -734,7 +734,11 @@
     "stayDaysCount": "{count, plural, other {#日}}",
     "stayHoursHint": "営業時間は{open}〜{close}です。この時間内に預け入れ・受け取りができます。",
     "stayOpen247Hint": "24時間営業です。いつでも預け入れ・受け取りができます。",
-    "chargedInTryNote": "お支払いはトルコリラ（TRY）で請求されます。≈ の金額は目安です。"
+    "chargedInTryNote": "お支払いはトルコリラ（TRY）で請求されます。≈ の金額は目安です。",
+    "stayDropHours": "預け入れ {date}：営業 {open}–{close}。遅くとも {last} までにお越しください。",
+    "stayPickupHours": "受け取り {date}：{open}–{close}。",
+    "stayDayClosed": "{date} は休業です。別の日を選んでください。",
+    "shopClosedOn": "休業：{range}"
   },
   "Admin": {
     "dashboardTitle": "BagajPark 管理センター",
@@ -1762,7 +1766,8 @@
     "shopMissingCoordinates": "店舗の位置情報がありません。承認する前に座標を設定してください。",
     "shopLocationRequired": "地図上で店舗の場所を選択してください。",
     "bagRevisionNeedsGuestApproval": "チェックイン後の値上げにはゲストの承認が必要です。提案は保存されており、ゲストが承認すると適用されます。",
-    "scheduleConflict": "この日に有効な予約があります。"
+    "scheduleConflict": "この日に有効な予約があります。",
+    "shopClosedOnDate": "選択した日のいずれかは休業日です。別の日を選んでください。"
   },
   "Emails": {
     "verificationSubject": "メールアドレスを確認してください",
