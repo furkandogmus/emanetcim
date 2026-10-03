@@ -33,6 +33,7 @@ const closureSchema = z.object({
 function revalidate() {
   revalidatePathAllLocales("/partner");
   revalidatePathAllLocales("/partner/settings");
+  revalidatePathAllLocales("/admin/partners");
 }
 
 export async function saveWeeklyHoursAction(shopId: string, input: unknown) {

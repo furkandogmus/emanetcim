@@ -2,6 +2,7 @@ import { setRequestLocale } from "next-intl/server";
 import { auth } from "@/auth";
 import { redirect, notFound } from "next/navigation";
 import prisma from "@/lib/db";
+import PartnerScheduleSection from "@/components/partner/PartnerScheduleSection";
 import AdminPartnerEditClient from "@/components/admin/AdminPartnerEditClient";
 
 export default async function AdminPartnerEditPage({
@@ -66,5 +67,12 @@ export default async function AdminPartnerEditPage({
     longitude: number | null;
   };
 
-  return <AdminPartnerEditClient shop={serializedShop} />;
+  return (
+    <>
+      <AdminPartnerEditClient shop={serializedShop} />
+      <div className="mx-auto w-full max-w-3xl px-6 pb-24">
+        <PartnerScheduleSection shop={shop} />
+      </div>
+    </>
+  );
 }
