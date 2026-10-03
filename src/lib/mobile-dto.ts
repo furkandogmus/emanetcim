@@ -110,7 +110,12 @@ type ShopSummarySource = {
  * shop_not_open_yet` yer. Sunucu kapısı sağlam, ama misafire tutamayacağımız
  * sözü verdikten sonra reddetmek kapının işi değil — arayüzün işi.
  */
-export function toMobileShop(s: ShopSummarySource) {
+export type MobileSchedule = {
+  weekly: { weekday: number; isClosed: boolean; openingTime: string; closingTime: string }[];
+  closures: { startDate: string; endDate: string }[];
+};
+
+export function toMobileShop(s: ShopSummarySource, schedule?: MobileSchedule) {
   return {
     id: s.id,
     name: s.name,
@@ -130,6 +135,17 @@ export function toMobileShop(s: ShopSummarySource) {
     isActive: s.isActive,
     isVerified: s.isVerified,
     isPrelaunch: s.isPrelaunch ?? false,
+    ...(schedule
+      ? {
+          weeklyHours: schedule.weekly.map((w) => ({
+            weekday: w.weekday,
+            isClosed: w.isClosed,
+            openingTime: w.openingTime,
+            closingTime: w.closingTime,
+          })),
+          closures: schedule.closures.map((c) => ({ startDate: c.startDate, endDate: c.endDate })),
+        }
+      : {}),
   };
 }
 

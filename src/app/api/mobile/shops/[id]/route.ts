@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { ShopService } from "@/services/ShopService";
 import { toMobilePricing, toMobileShop } from "@/lib/mobile-dto";
 import { getPricingRules } from "@/lib/platform-settings";
+import { loadScheduleParts } from "@/services/ShopScheduleService";
 
 const shopService = new ShopService();
 
@@ -25,5 +26,9 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     sunucunun kurallariyla hesapliyor (bkz. `toMobilePricing`).
   */
   const rules = await getPricingRules();
-  return NextResponse.json({ ...toMobileShop(s), pricing: toMobilePricing(rules) });
+  const parts = (await loadScheduleParts([s.id], new Date().toISOString().slice(0, 10))).get(s.id);
+  return NextResponse.json({
+    ...toMobileShop(s, { weekly: parts?.weekly ?? [], closures: parts?.closures ?? [] }),
+    pricing: toMobilePricing(rules),
+  });
 }

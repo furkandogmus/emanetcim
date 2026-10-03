@@ -174,3 +174,22 @@ describe("toMobilePricing", () => {
     });
   });
 });
+
+describe("toMobileShop: haftalik takvim", () => {
+  it("takvim verilmezse alanlar yanita girmez (liste yaniti sismez)", () => {
+    const body = toMobileShop(SHOP);
+    expect(body).not.toHaveProperty("weeklyHours");
+    expect(body).not.toHaveProperty("closures");
+  });
+
+  it("takvim verilirse haftalik saat ve izinler tasinir", () => {
+    const body = toMobileShop(SHOP, {
+      weekly: [{ weekday: 7, isClosed: true, openingTime: "09:00", closingTime: "20:00" }],
+      closures: [{ startDate: "2030-01-14", endDate: "2030-01-15" }],
+    });
+    expect(body.weeklyHours).toEqual([
+      { weekday: 7, isClosed: true, openingTime: "09:00", closingTime: "20:00" },
+    ]);
+    expect(body.closures).toEqual([{ startDate: "2030-01-14", endDate: "2030-01-15" }]);
+  });
+});
