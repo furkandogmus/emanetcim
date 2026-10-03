@@ -9,14 +9,13 @@ import { updatePartnerPhoneAction } from "@/actions/partner";
 import { isValidPartnerTrPhone } from "@/lib/netgsm";
 import { useActionErrorText } from "@/lib/use-action-error";
 import dynamic from "next/dynamic";
+import { Link } from "@/i18n/routing";
 
 const LocationPicker = dynamic(() => import("./LocationPicker"), { ssr: false });
 
 type Props = {
   shopId: string;
   initialCapacity: number;
-  initialOpening: string;
-  initialClosing: string;
   initialPricePerDay: number;
   /** Platform piyasa fiyatı — min/max limitlerini belirler */
   marketPrice: number;
@@ -35,8 +34,6 @@ type Props = {
 export default function PartnerShopSettingsForm({
   shopId,
   initialCapacity,
-  initialOpening,
-  initialClosing,
   initialPricePerDay,
   marketPrice,
   compact = false,
@@ -49,12 +46,11 @@ export default function PartnerShopSettingsForm({
 }: Props) {
   const t = useTranslations("Partner");
   const tErrors = useTranslations("Errors");
+  const tSchedule = useTranslations("Partner.schedule");
   const locale = useLocale();
   const errorText = useActionErrorText();
   const router = useRouter();
   const [capacity, setCapacity] = useState(initialCapacity);
-  const [openingTime, setOpeningTime] = useState(initialOpening);
-  const [closingTime, setClosingTime] = useState(initialClosing);
   const [pricePerDay, setPricePerDay] = useState(initialPricePerDay);
   const [partnerPhone, setPartnerPhone] = useState(initialPhone);
   /**
@@ -125,8 +121,6 @@ export default function PartnerShopSettingsForm({
     try {
       const shopRes = await updateShopSettingsAction(shopId, {
         capacity,
-        openingTime,
-        closingTime,
         pricePerDay,
         address: location.address || undefined,
         city: location.city || undefined,
@@ -274,37 +268,12 @@ export default function PartnerShopSettingsForm({
             ) : null}
           </div>
 
-          {/* Çalışma saatleri */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="ui-kicker mb-2 block">
-                {t("openingTime")}
-              </label>
-              <div className="flex items-center gap-4">
-                <Clock size={20} className="text-gray-300" />
-                <input
-                  type="time"
-                  value={openingTime}
-                  onChange={(e) => setOpeningTime(e.target.value)}
-                  className="ui-field w-full rounded-2xl text-center"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="ui-kicker mb-2 block">
-                {t("closingTime")}
-              </label>
-              <div className="flex items-center gap-4">
-                <Clock size={20} className="text-gray-300" />
-                <input
-                  type="time"
-                  value={closingTime}
-                  onChange={(e) => setClosingTime(e.target.value)}
-                  className="ui-field w-full rounded-2xl text-center"
-                />
-              </div>
-            </div>
-          </div>
+          {compact ? (
+            <Link href="/partner/settings" className="flex items-center gap-2 text-sm font-bold text-orange-600 underline">
+              <Clock size={16} />
+              {tSchedule("title")}
+            </Link>
+          ) : null}
 
           {/* ── Konum / Adres bölümü ── */}
           <div className="pt-2 border-t border-gray-100">

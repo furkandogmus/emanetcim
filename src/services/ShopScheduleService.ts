@@ -121,6 +121,7 @@ const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 export async function saveWeeklyHours(
   shopId: string,
   days: WeeklyDay[],
+  open247: boolean,
 ): Promise<SaveScheduleResult> {
   const valid =
     days.length === 7 &&
@@ -135,7 +136,7 @@ export async function saveWeeklyHours(
 
   const current = await currentSchedule(shopId);
   if (!current) return { ok: false, code: "INVALID" };
-  const conflicts = await findScheduleConflicts(shopId, { ...current, weekly: days });
+  const conflicts = await findScheduleConflicts(shopId, { ...current, weekly: days, open247 });
   if (conflicts.length > 0) return { ok: false, code: "CONFLICT", conflicts };
 
   const firstOpen = days.find((d) => !d.isClosed);
@@ -151,14 +152,15 @@ export async function saveWeeklyHours(
       })),
     }),
     // Eski tek çifti okuyan yüzeyler (JSON-LD, mobil DTO) için ilk açık günün saati.
-    ...(firstOpen
-      ? [
-          prisma.shop.update({
-            where: { id: shopId },
-            data: { openingTime: firstOpen.openingTime, closingTime: firstOpen.closingTime },
-          }),
-        ]
-      : []),
+    prisma.shop.update({
+      where: { id: shopId },
+      data: {
+        open247,
+        ...(firstOpen
+          ? { openingTime: firstOpen.openingTime, closingTime: firstOpen.closingTime }
+          : {}),
+      },
+    }),
   ]);
   return { ok: true };
 }

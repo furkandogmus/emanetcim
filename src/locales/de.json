@@ -311,7 +311,37 @@
     "bagRevisionSaved": "Aktualisiert. Neue Summe: {total}",
     "settingsImpactHours": "Achtung: {count} Buchung(en) liegen jetzt außerhalb deiner Zeiten. Diese Gäste können nicht eingecheckt werden — kontaktiere sie ggf.",
     "settingsImpactCapacity": "Achtung: Die aktuell eingelagerten Stücke überschreiten die neue Kapazität um {count}.",
-    "settingsImpactUnknownGuest": "Unbenannter Gast"
+    "settingsImpactUnknownGuest": "Unbenannter Gast",
+    "schedule": {
+      "title": "Öffnungszeiten und Abwesenheit",
+      "hint": "Legen Sie für jeden Tag Öffnungs- und Schließzeit fest. Gäste sehen diese Zeiten und können nur an offenen Tagen buchen.",
+      "days": {
+        "1": "Montag",
+        "2": "Dienstag",
+        "3": "Mittwoch",
+        "4": "Donnerstag",
+        "5": "Freitag",
+        "6": "Samstag",
+        "7": "Sonntag"
+      },
+      "closed": "Geschlossen",
+      "open247": "Rund um die Uhr geöffnet",
+      "open247Hint": "Wenn aktiv, werden die Tageszeiten ignoriert; nur Abwesenheitstage gelten.",
+      "save": "Zeiten speichern",
+      "saved": "Öffnungszeiten aktualisiert.",
+      "closuresTitle": "Abwesenheit und Feiertage",
+      "closuresHint": "An diesen Tagen erscheint der Shop als geschlossen und nimmt keine Buchungen an.",
+      "dateFrom": "Von",
+      "dateTo": "Bis",
+      "reason": "Notiz (optional)",
+      "add": "Abwesenheit hinzufügen",
+      "remove": "Entfernen",
+      "none": "Keine Abwesenheit geplant.",
+      "conflictTitle": "Die Änderung wurde nicht gespeichert: Die folgenden Buchungen fallen auf diese Tage.",
+      "conflictDropoff": "Abgabe",
+      "conflictPickup": "Abholung",
+      "conflictBags": "Gepäck im Shop"
+    }
   },
   "Guest": {
     "heroTitle": "Gepäck abgeben, die Stadt frei erkunden",
@@ -1731,7 +1761,8 @@
     "imageDimensionsTooLarge": "Die Auflösung des Fotos ist zu hoch. Versuche ein kleineres Foto.",
     "shopMissingCoordinates": "Der Laden hat keinen Standort. Legen Sie die Koordinaten vor der Freigabe fest.",
     "shopLocationRequired": "Bitte markieren Sie den Standort Ihres Ladens auf der Karte.",
-    "bagRevisionNeedsGuestApproval": "Eine Preiserhöhung nach dem Check-in erfordert die Zustimmung des Gastes. Der Vorschlag wurde gespeichert und wird angewendet, sobald der Gast zustimmt."
+    "bagRevisionNeedsGuestApproval": "Eine Preiserhöhung nach dem Check-in erfordert die Zustimmung des Gastes. Der Vorschlag wurde gespeichert und wird angewendet, sobald der Gast zustimmt.",
+    "scheduleConflict": "An diesen Tagen liegen aktive Buchungen."
   },
   "Emails": {
     "verificationSubject": "Bestätigen Sie Ihre E-Mail",
