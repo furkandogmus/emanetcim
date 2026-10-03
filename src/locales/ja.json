@@ -311,7 +311,37 @@
     "bagRevisionSaved": "更新しました。新しい合計: {total}",
     "settingsImpactHours": "注意: {count}件の予約が新しい営業時間外になりました。これらのゲストはチェックインできません。連絡が必要かもしれません。",
     "settingsImpactCapacity": "注意: 現在お預かり中の荷物が新しい上限を{count}個超えています。",
-    "settingsImpactUnknownGuest": "名前未登録のゲスト"
+    "settingsImpactUnknownGuest": "名前未登録のゲスト",
+    "schedule": {
+      "title": "営業時間と休業日",
+      "hint": "曜日ごとに開店・閉店時間を設定します。ゲストにはこの時間が表示され、営業日のみ予約できます。",
+      "days": {
+        "1": "月曜日",
+        "2": "火曜日",
+        "3": "水曜日",
+        "4": "木曜日",
+        "5": "金曜日",
+        "6": "土曜日",
+        "7": "日曜日"
+      },
+      "closed": "休業",
+      "open247": "24時間営業",
+      "open247Hint": "オンの間は曜日ごとの時間は無視され、休業日のみが適用されます。",
+      "save": "営業時間を保存",
+      "saved": "営業時間を更新しました。",
+      "closuresTitle": "休業日・祝日",
+      "closuresHint": "指定した日は休業と表示され、予約を受け付けません。",
+      "dateFrom": "開始日",
+      "dateTo": "終了日",
+      "reason": "メモ（任意）",
+      "add": "休業日を追加",
+      "remove": "削除",
+      "none": "予定された休業日はありません。",
+      "conflictTitle": "変更を保存できませんでした。次の予約がこの日に該当します。",
+      "conflictDropoff": "預け入れ",
+      "conflictPickup": "受け取り",
+      "conflictBags": "荷物を預かり中"
+    }
   },
   "Guest": {
     "heroTitle": "荷物を預けて、身軽に街へ",
@@ -1731,7 +1761,8 @@
     "imageDimensionsTooLarge": "写真の解像度が高すぎます。より小さい写真をお試しください。",
     "shopMissingCoordinates": "店舗の位置情報がありません。承認する前に座標を設定してください。",
     "shopLocationRequired": "地図上で店舗の場所を選択してください。",
-    "bagRevisionNeedsGuestApproval": "チェックイン後の値上げにはゲストの承認が必要です。提案は保存されており、ゲストが承認すると適用されます。"
+    "bagRevisionNeedsGuestApproval": "チェックイン後の値上げにはゲストの承認が必要です。提案は保存されており、ゲストが承認すると適用されます。",
+    "scheduleConflict": "この日に有効な予約があります。"
   },
   "Emails": {
     "verificationSubject": "メールアドレスを確認してください",

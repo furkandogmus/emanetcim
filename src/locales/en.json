@@ -311,7 +311,37 @@
     "bagRevisionSaved": "Updated. New total: {total}",
     "settingsImpactHours": "Heads up: {count} booking(s) now fall outside your hours. Those guests cannot be checked in — you may need to contact them.",
     "settingsImpactCapacity": "Heads up: the bags currently in your storage exceed the new capacity by {count}.",
-    "settingsImpactUnknownGuest": "Unnamed guest"
+    "settingsImpactUnknownGuest": "Unnamed guest",
+    "schedule": {
+      "title": "Opening hours and time off",
+      "hint": "Set opening and closing times for each day. Guests see these hours and can only book on open days.",
+      "days": {
+        "1": "Monday",
+        "2": "Tuesday",
+        "3": "Wednesday",
+        "4": "Thursday",
+        "5": "Friday",
+        "6": "Saturday",
+        "7": "Sunday"
+      },
+      "closed": "Closed",
+      "open247": "Open 24/7",
+      "open247Hint": "When on, daily hours are ignored; only time-off dates apply.",
+      "save": "Save hours",
+      "saved": "Opening hours updated.",
+      "closuresTitle": "Time off and holidays",
+      "closuresHint": "The shop shows as closed on these dates and takes no bookings.",
+      "dateFrom": "From",
+      "dateTo": "To",
+      "reason": "Note (optional)",
+      "add": "Add time off",
+      "remove": "Remove",
+      "none": "No time off scheduled.",
+      "conflictTitle": "This change was not saved: the bookings below fall on these dates.",
+      "conflictDropoff": "Drop-off",
+      "conflictPickup": "Pick-up",
+      "conflictBags": "Bags in the shop"
+    }
   },
   "Guest": {
     "heroTitle": "Drop Your Bags, Explore Freely",
@@ -1795,7 +1825,8 @@
     "imageDimensionsTooLarge": "The photo's resolution is too high. Try a smaller photo.",
     "shopMissingCoordinates": "The shop has no location. Set its coordinates before approving.",
     "shopLocationRequired": "Please pin your shop's location on the map.",
-    "bagRevisionNeedsGuestApproval": "A post-check-in price increase needs the guest's approval. The proposal was saved and will apply once the guest approves it."
+    "bagRevisionNeedsGuestApproval": "A post-check-in price increase needs the guest's approval. The proposal was saved and will apply once the guest approves it.",
+    "scheduleConflict": "Active bookings fall on these dates."
   },
   "Emails": {
     "verificationSubject": "Verify Your Email",
