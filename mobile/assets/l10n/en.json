@@ -220,7 +220,8 @@
     "referral_not_with_coupon": "The invite discount can't be combined with a coupon.",
     "referral_own_code": "You can't use your own invite code.",
     "referral_first_booking_only": "The invite discount is only valid on your first booking.",
-    "referral_invalid": "This invite code wasn't found."
+    "referral_invalid": "This invite code wasn't found.",
+    "error_shop_closed_on_date": "The shop is closed on one of the selected days; please choose another day."
   },
   "booking": {
     "detail_title": "Booking Details",
@@ -344,7 +345,20 @@
     "serial_number_label": "Seal Serial Number",
     "bag_revision_title": "Revise Bag Counts",
     "bag_revision_success": "Bag counts revised successfully.",
-    "bag_revision_error": "Failed to revise bag counts."
+    "bag_revision_error": "Failed to revise bag counts.",
+    "schedule_manage": "Opening hours and time off",
+    "schedule_manage_hint": "Hours per day, 24/7 and time-off dates",
+    "schedule_title": "Opening hours and time off",
+    "schedule_open247": "Open 24/7",
+    "schedule_open247_hint": "When on, daily hours are ignored; only time-off dates apply.",
+    "schedule_save": "Save hours",
+    "schedule_saved": "Opening hours updated.",
+    "schedule_closures": "Time off and holidays",
+    "schedule_closures_hint": "The shop shows as closed on these dates and takes no bookings.",
+    "schedule_none": "No time off scheduled.",
+    "schedule_add": "Add time off",
+    "schedule_remove": "Remove",
+    "schedule_conflict": "Not saved: these bookings fall on those dates."
   },
   "profile": {
     "title": "My Account",
@@ -522,5 +536,18 @@
     "soft_title": "New version available",
     "soft_desc": "Update the app for a better experience.",
     "later_button": "Later"
+  },
+  "schedule": {
+    "closed": "Closed",
+    "today": "Today",
+    "week_title": "Opening hours",
+    "closed_on": "Closed: {}",
+    "day_1": "Monday",
+    "day_2": "Tuesday",
+    "day_3": "Wednesday",
+    "day_4": "Thursday",
+    "day_5": "Friday",
+    "day_6": "Saturday",
+    "day_7": "Sunday"
   }
 }
