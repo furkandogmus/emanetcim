@@ -31,6 +31,7 @@ export default async function AdminPartnersPage({
     include: {
       owner: {
         select: {
+          id: true,
           name: true,
           email: true,
           phone: true,

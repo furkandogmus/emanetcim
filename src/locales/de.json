@@ -1275,7 +1275,23 @@
     "partnerCreateSendWhatsapp": "Per WhatsApp senden",
     "partnerCreateWhatsappMessage": "Hallo {name}, Ihr BagajPark-Partnerkonto ist bereit. Legen Sie Ihr Passwort über diesen Link fest (1 Stunde gültig): {url}",
     "partnerCreateOpenShop": "Laden bearbeiten",
-    "partnerCreateAnother": "Weiteren Partner hinzufügen"
+    "partnerCreateAnother": "Weiteren Partner hinzufügen",
+    "convertToPartner": "Zum Partner machen",
+    "partnerConvertTitle": "Gast zum Partner machen",
+    "partnerConvertIntro": "Dieses Gastkonto wird zu einem Partnerkonto. Der Partner meldet sich weiterhin mit derselben E-Mail oder Telefonnummer und demselben Passwort an; keine Bestätigung nötig. Der Laden bleibt in der Suche verborgen, bis Sie ihn freigeben.",
+    "partnerConvertSubmit": "Zum Partner machen",
+    "partnerConvertSuccessTitle": "Konto wurde zum Partner",
+    "partnerConvertSuccessBody": "Der Partner kann sich mit seinem aktuellen Passwort per E-Mail oder Telefonnummer anmelden. Kennt er es nicht, legen Sie in der Benutzerliste ein neues fest und senden es ihm.",
+    "partnerConvertBackToUsers": "Zurück zu den Benutzern",
+    "setPassword": "Passwort festlegen",
+    "setPasswordTitle": "Neues Passwort festlegen",
+    "setPasswordBody": "Legen Sie ein neues Passwort für {name} fest. Das alte Passwort und offene Sitzungen werden ungültig. Senden Sie das Passwort selbst an den Benutzer.",
+    "setPasswordLabel": "Neues Passwort",
+    "setPasswordGenerate": "Zufälliges Passwort erzeugen",
+    "setPasswordSubmit": "Passwort speichern",
+    "setPasswordDone": "Passwort gespeichert. Senden Sie diese Nachricht an den Benutzer:",
+    "setPasswordCopy": "Nachricht kopieren",
+    "setPasswordWhatsappMessage": "Hallo {name}, das neue Passwort für Ihr BagajPark-Konto lautet: {password}\nMelden Sie sich mit Telefonnummer oder E-Mail an: {url}"
   },
   "Auth": {
     "loginTitle": "Melden Sie sich bei BagajPark an",
@@ -1767,7 +1783,10 @@
     "shopLocationRequired": "Bitte markieren Sie den Standort Ihres Ladens auf der Karte.",
     "bagRevisionNeedsGuestApproval": "Eine Preiserhöhung nach dem Check-in erfordert die Zustimmung des Gastes. Der Vorschlag wurde gespeichert und wird angewendet, sobald der Gast zustimmt.",
     "scheduleConflict": "An diesen Tagen liegen aktive Buchungen.",
-    "shopClosedOnDate": "Der Shop ist an einem der gewählten Tage geschlossen; bitte einen anderen Tag wählen."
+    "shopClosedOnDate": "Der Shop ist an einem der gewählten Tage geschlossen; bitte einen anderen Tag wählen.",
+    "userNotFound": "Benutzer nicht gefunden.",
+    "userNotGuest": "Dieses Konto ist kein Gastkonto; nur Gastkonten können zu Partnern werden.",
+    "passwordTooShort": "Das Passwort muss mindestens 8 Zeichen lang sein."
   },
   "Emails": {
     "verificationSubject": "Bestätigen Sie Ihre E-Mail",

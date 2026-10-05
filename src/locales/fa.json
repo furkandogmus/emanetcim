@@ -1275,7 +1275,23 @@
     "partnerCreateSendWhatsapp": "ارسال با واتس‌اپ",
     "partnerCreateWhatsappMessage": "سلام {name}، حساب شریک BagajPark شما آماده است. رمز عبور خود را با این پیوند تعیین کنید (۱ ساعت اعتبار): {url}",
     "partnerCreateOpenShop": "ویرایش مغازه",
-    "partnerCreateAnother": "افزودن شریک دیگر"
+    "partnerCreateAnother": "افزودن شریک دیگر",
+    "convertToPartner": "تبدیل به همکار",
+    "partnerConvertTitle": "تبدیل مهمان به همکار",
+    "partnerConvertIntro": "این حساب مهمان به حساب همکار تبدیل می‌شود. همکار همچنان با همان ایمیل یا تلفن و رمز عبور وارد می‌شود و نیازی به تأیید نیست. فروشگاه تا تأیید شما در جستجو نمایش داده نمی‌شود.",
+    "partnerConvertSubmit": "تبدیل به همکار",
+    "partnerConvertSuccessTitle": "حساب به همکار تبدیل شد",
+    "partnerConvertSuccessBody": "همکار می‌تواند با رمز عبور فعلی و ایمیل یا شماره تلفن خود وارد شود. اگر آن را نمی‌داند، از فهرست کاربران رمز جدیدی تعیین کنید و برایش بفرستید.",
+    "partnerConvertBackToUsers": "بازگشت به کاربران",
+    "setPassword": "تعیین رمز عبور",
+    "setPasswordTitle": "تعیین رمز عبور جدید",
+    "setPasswordBody": "برای {name} رمز عبور جدیدی تعیین کنید. رمز قبلی و نشست‌های باز از کار می‌افتند. رمز را خودتان برای کاربر بفرستید.",
+    "setPasswordLabel": "رمز عبور جدید",
+    "setPasswordGenerate": "ساخت رمز تصادفی",
+    "setPasswordSubmit": "ذخیره رمز عبور",
+    "setPasswordDone": "رمز عبور ذخیره شد. این پیام را برای کاربر بفرستید:",
+    "setPasswordCopy": "کپی پیام",
+    "setPasswordWhatsappMessage": "سلام {name}، رمز عبور جدید حساب BagajPark شما: {password}\nبا شماره تلفن یا ایمیل خود وارد شوید: {url}"
   },
   "Auth": {
     "loginTitle": "ورود به BagajPark",
@@ -1767,7 +1783,10 @@
     "shopLocationRequired": "لطفاً موقعیت فروشگاه خود را روی نقشه مشخص کنید.",
     "bagRevisionNeedsGuestApproval": "افزایش قیمت پس از تحویل‌گیری نیاز به تأیید مهمان دارد. پیشنهاد ذخیره شد و پس از تأیید مهمان اعمال خواهد شد.",
     "scheduleConflict": "در این تاریخ‌ها رزرو فعال وجود دارد.",
-    "shopClosedOnDate": "فروشگاه در یکی از روزهای انتخابی بسته است؛ روز دیگری انتخاب کنید."
+    "shopClosedOnDate": "فروشگاه در یکی از روزهای انتخابی بسته است؛ روز دیگری انتخاب کنید.",
+    "userNotFound": "کاربر پیدا نشد.",
+    "userNotGuest": "این حساب مهمان نیست؛ فقط حساب‌های مهمان به همکار تبدیل می‌شوند.",
+    "passwordTooShort": "رمز عبور باید حداقل ۸ کاراکتر باشد."
   },
   "Emails": {
     "verificationSubject": "ایمیل خود را تأیید کنید",

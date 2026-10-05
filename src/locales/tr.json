@@ -1275,7 +1275,23 @@
     "partnerCreateSendWhatsapp": "WhatsApp'tan gönder",
     "partnerCreateWhatsappMessage": "Merhaba {name}, BagajPark esnaf hesabınız açıldı. Şifrenizi belirlemek için bu bağa tıklayın (1 saat geçerli): {url}",
     "partnerCreateOpenShop": "Dükkanı düzenle",
-    "partnerCreateAnother": "Başka esnaf ekle"
+    "partnerCreateAnother": "Başka esnaf ekle",
+    "convertToPartner": "Esnafa çevir",
+    "partnerConvertTitle": "Misafiri esnafa çevir",
+    "partnerConvertIntro": "Bu misafir hesabı esnaf hesabına çevrilecek. Esnaf aynı e-posta ya da telefon ve şifreyle girmeye devam eder, doğrulama gerekmez. Dükkan, siz onaylayana kadar aramada görünmez.",
+    "partnerConvertSubmit": "Esnafa çevir",
+    "partnerConvertSuccessTitle": "Hesap esnafa çevrildi",
+    "partnerConvertSuccessBody": "Esnaf mevcut şifresiyle, e-postası ya da telefon numarasıyla giriş yapabilir. Şifresini bilmiyorsa kullanıcı listesinden yeni şifre belirleyip iletin.",
+    "partnerConvertBackToUsers": "Kullanıcılara dön",
+    "setPassword": "Şifre belirle",
+    "setPasswordTitle": "Yeni şifre belirle",
+    "setPasswordBody": "{name} için yeni şifre belirleyin. Eski şifre ve açık oturumlar geçersiz olur. Şifreyi kullanıcıya kendiniz iletin.",
+    "setPasswordLabel": "Yeni şifre",
+    "setPasswordGenerate": "Rastgele şifre üret",
+    "setPasswordSubmit": "Şifreyi kaydet",
+    "setPasswordDone": "Şifre kaydedildi. Bu mesajı kullanıcıya iletin:",
+    "setPasswordCopy": "Mesajı kopyala",
+    "setPasswordWhatsappMessage": "Merhaba {name}, BagajPark hesabınızın yeni şifresi: {password}\nTelefon numaranız ya da e-postanızla giriş yapabilirsiniz: {url}"
   },
   "Auth": {
     "loginTitle": "BagajPark'a Giriş Yap",
@@ -1831,7 +1847,10 @@
     "shopLocationRequired": "Lütfen haritada dükkanının konumunu işaretle.",
     "bagRevisionNeedsGuestApproval": "Check-in sonrası fiyat artışı misafirin onayını bekliyor. Öneri kaydedildi; misafir onayladığında uygulanacak.",
     "scheduleConflict": "Bu tarihlere denk gelen aktif rezervasyonlar var.",
-    "shopClosedOnDate": "Dükkan seçtiğiniz günlerden birinde kapalı; lütfen başka bir gün seçin."
+    "shopClosedOnDate": "Dükkan seçtiğiniz günlerden birinde kapalı; lütfen başka bir gün seçin.",
+    "userNotFound": "Kullanıcı bulunamadı.",
+    "userNotGuest": "Bu hesap misafir değil; yalnızca misafir hesapları esnafa çevrilebilir.",
+    "passwordTooShort": "Şifre en az 8 karakter olmalı."
   },
   "Emails": {
     "verificationSubject": "E-postanızı Doğrulayın",
