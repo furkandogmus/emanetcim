@@ -1275,7 +1275,23 @@
     "partnerCreateSendWhatsapp": "WhatsApp で送信",
     "partnerCreateWhatsappMessage": "{name} 様、BagajPark のパートナーアカウントが作成されました。こちらのリンクからパスワードを設定してください（1時間有効）：{url}",
     "partnerCreateOpenShop": "店舗を編集",
-    "partnerCreateAnother": "別のパートナーを追加"
+    "partnerCreateAnother": "別のパートナーを追加",
+    "convertToPartner": "パートナーに変更",
+    "partnerConvertTitle": "ゲストをパートナーに変更",
+    "partnerConvertIntro": "このゲストアカウントをパートナーアカウントに変更します。パートナーは同じメールアドレスまたは電話番号とパスワードでログインを続けられ、認証は不要です。承認するまで店舗は検索に表示されません。",
+    "partnerConvertSubmit": "パートナーに変更",
+    "partnerConvertSuccessTitle": "アカウントをパートナーに変更しました",
+    "partnerConvertSuccessBody": "パートナーは現在のパスワードとメールアドレスまたは電話番号でログインできます。パスワードが分からない場合は、ユーザー一覧から新しいパスワードを設定して伝えてください。",
+    "partnerConvertBackToUsers": "ユーザー一覧に戻る",
+    "setPassword": "パスワードを設定",
+    "setPasswordTitle": "新しいパスワードを設定",
+    "setPasswordBody": "{name} の新しいパスワードを設定します。古いパスワードとログイン中のセッションは無効になります。パスワードはご自身でユーザーに伝えてください。",
+    "setPasswordLabel": "新しいパスワード",
+    "setPasswordGenerate": "ランダムなパスワードを生成",
+    "setPasswordSubmit": "パスワードを保存",
+    "setPasswordDone": "パスワードを保存しました。このメッセージをユーザーに送ってください:",
+    "setPasswordCopy": "メッセージをコピー",
+    "setPasswordWhatsappMessage": "{name} 様、BagajPark アカウントの新しいパスワード: {password}\n電話番号またはメールアドレスでログインできます: {url}"
   },
   "Auth": {
     "loginTitle": "バガジパークにサインインする",
@@ -1767,7 +1783,10 @@
     "shopLocationRequired": "地図上で店舗の場所を選択してください。",
     "bagRevisionNeedsGuestApproval": "チェックイン後の値上げにはゲストの承認が必要です。提案は保存されており、ゲストが承認すると適用されます。",
     "scheduleConflict": "この日に有効な予約があります。",
-    "shopClosedOnDate": "選択した日のいずれかは休業日です。別の日を選んでください。"
+    "shopClosedOnDate": "選択した日のいずれかは休業日です。別の日を選んでください。",
+    "userNotFound": "ユーザーが見つかりません。",
+    "userNotGuest": "このアカウントはゲストではありません。パートナーに変更できるのはゲストアカウントのみです。",
+    "passwordTooShort": "パスワードは8文字以上にしてください。"
   },
   "Emails": {
     "verificationSubject": "メールアドレスを確認してください",

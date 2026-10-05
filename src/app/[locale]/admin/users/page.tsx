@@ -25,6 +25,7 @@ export default async function AdminUsersPage({
         id: true,
         name: true,
         email: true,
+        phone: true,
         role: true,
         isBanned: true,
         lastIp: true,

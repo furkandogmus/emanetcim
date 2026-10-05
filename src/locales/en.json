@@ -1275,7 +1275,23 @@
     "partnerCreateSendWhatsapp": "Send via WhatsApp",
     "partnerCreateWhatsappMessage": "Hello {name}, your BagajPark partner account is ready. Set your password with this link (valid for 1 hour): {url}",
     "partnerCreateOpenShop": "Edit shop",
-    "partnerCreateAnother": "Add another partner"
+    "partnerCreateAnother": "Add another partner",
+    "convertToPartner": "Convert to partner",
+    "partnerConvertTitle": "Convert guest to partner",
+    "partnerConvertIntro": "This guest account will become a partner account. The partner keeps signing in with the same email or phone and password; no verification is needed. The shop stays hidden from search until you approve it.",
+    "partnerConvertSubmit": "Convert to partner",
+    "partnerConvertSuccessTitle": "Account converted to partner",
+    "partnerConvertSuccessBody": "The partner can sign in with their current password using their email or phone number. If they do not know it, set a new password from the user list and send it to them.",
+    "partnerConvertBackToUsers": "Back to users",
+    "setPassword": "Set password",
+    "setPasswordTitle": "Set a new password",
+    "setPasswordBody": "Set a new password for {name}. The old password and open sessions stop working. Send the password to the user yourself.",
+    "setPasswordLabel": "New password",
+    "setPasswordGenerate": "Generate random password",
+    "setPasswordSubmit": "Save password",
+    "setPasswordDone": "Password saved. Send this message to the user:",
+    "setPasswordCopy": "Copy message",
+    "setPasswordWhatsappMessage": "Hello {name}, the new password for your BagajPark account is: {password}\nSign in with your phone number or email: {url}"
   },
   "Auth": {
     "loginTitle": "Sign in to BagajPark",
@@ -1831,7 +1847,10 @@
     "shopLocationRequired": "Please pin your shop's location on the map.",
     "bagRevisionNeedsGuestApproval": "A post-check-in price increase needs the guest's approval. The proposal was saved and will apply once the guest approves it.",
     "scheduleConflict": "Active bookings fall on these dates.",
-    "shopClosedOnDate": "The shop is closed on one of the selected days; please choose another day."
+    "shopClosedOnDate": "The shop is closed on one of the selected days; please choose another day.",
+    "userNotFound": "User not found.",
+    "userNotGuest": "This account is not a guest; only guest accounts can be converted to partners.",
+    "passwordTooShort": "Password must be at least 8 characters."
   },
   "Emails": {
     "verificationSubject": "Verify Your Email",

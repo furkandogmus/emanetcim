@@ -15,6 +15,7 @@ import {
   ShieldPlus,
   Store,
   User as UserIcon,
+  KeyRound,
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { motion, AnimatePresence } from "framer-motion";
@@ -33,6 +34,7 @@ import { toast } from "sonner";
 import { Role } from "@prisma/client";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 import { actionErrorKey } from "@/lib/action-error";
+import AdminSetPasswordDialog, { type SetPasswordTarget } from "@/components/admin/AdminSetPasswordDialog";
 
 const PAGE_SIZE = 25;
 
@@ -40,6 +42,7 @@ interface User {
   id: string;
   name: string | null;
   email: string | null;
+  phone: string | null;
   role: Role;
   isBanned: boolean;
   lastIp: string | null;
@@ -92,6 +95,7 @@ export default function AdminUsersClient({
     confirmLabel: string;
     onConfirm: null | (() => void | Promise<void>);
   }>({ open: false, message: "", confirmLabel: "", onConfirm: null });
+  const [setPasswordTarget, setSetPasswordTarget] = useState<SetPasswordTarget | null>(null);
   const iconBtnBase = "btn-ui btn-ui-md btn-ui-icon";
 
   const filteredUsers = users.filter(u => {
@@ -476,7 +480,28 @@ export default function AdminUsersClient({
                             <Mail size={18} />
                           </button>
                         )}
-                        {user.role !== Role.ADMIN && (
+                        {user.role === Role.GUEST && (
+                  <Link
+                    href={`/admin/partners/new?fromUser=${user.id}`}
+                    className={`${iconBtnBase} bg-blue-50 hover:bg-blue-100 text-blue-600`}
+                    title={t("convertToPartner")}
+                    aria-label={t("convertToPartner")}
+                  >
+                    <Store size={18} />
+                  </Link>
+                )}
+                {user.role !== Role.ADMIN && (
+                  <button
+                    type="button"
+                    onClick={() => setSetPasswordTarget({ userId: user.id, name: user.name || user.email || user.phone || "-", phone: user.phone })}
+                    className={`${iconBtnBase} id-accent-soft hover:opacity-80`}
+                    title={t("setPassword")}
+                    aria-label={t("setPassword")}
+                  >
+                    <KeyRound size={18} />
+                  </button>
+                )}
+                {user.role !== Role.ADMIN && (
                           <button
                             onClick={() => handleMakeAdmin(user.id)}
                             disabled={loadingId === user.id}
@@ -621,6 +646,27 @@ export default function AdminUsersClient({
                     <Mail size={18} />
                   </button>
                 )}
+                {user.role === Role.GUEST && (
+                  <Link
+                    href={`/admin/partners/new?fromUser=${user.id}`}
+                    className={`${iconBtnBase} bg-blue-50 hover:bg-blue-100 text-blue-600`}
+                    title={t("convertToPartner")}
+                    aria-label={t("convertToPartner")}
+                  >
+                    <Store size={18} />
+                  </Link>
+                )}
+                {user.role !== Role.ADMIN && (
+                  <button
+                    type="button"
+                    onClick={() => setSetPasswordTarget({ userId: user.id, name: user.name || user.email || user.phone || "-", phone: user.phone })}
+                    className={`${iconBtnBase} id-accent-soft hover:opacity-80`}
+                    title={t("setPassword")}
+                    aria-label={t("setPassword")}
+                  >
+                    <KeyRound size={18} />
+                  </button>
+                )}
                 {user.role !== Role.ADMIN && (
                   <button
                     type="button"
@@ -725,6 +771,7 @@ export default function AdminUsersClient({
         if (fn) void fn();
       }}
     />
+    <AdminSetPasswordDialog target={setPasswordTarget} onClose={() => setSetPasswordTarget(null)} />
     </>
   );
 }

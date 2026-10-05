@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { adminCreatePartnerAction } from "@/actions/admin-partner-create";
+import { adminConvertGuestToPartnerAction } from "@/actions/admin-user-account";
 import { actionErrorKey } from "@/lib/action-error";
 import { parseCoordinates } from "@/lib/coordinates";
 import { waMeUrl } from "@/lib/whatsapp";
@@ -34,13 +35,18 @@ const EMPTY = {
 const INPUT =
   "w-full bg-gray-50 border-2 border-transparent focus:border-orange-500 rounded-2xl p-4 text-sm font-bold outline-none transition-all";
 
-type Created = { shopId: string; resetUrl: string; ownerName: string; phone: string };
+type Created = { shopId: string; resetUrl: string | null; ownerName: string; phone: string };
 
-export default function AdminPartnerCreateClient() {
+export type ConvertFrom = { id: string; name: string | null; email: string | null; phone: string | null };
+
+export default function AdminPartnerCreateClient({ convertFrom = null }: { convertFrom?: ConvertFrom | null }) {
   const t = useTranslations("Admin");
   const tErrors = useTranslations("Errors");
   const tCommon = useTranslations("Common");
-  const [form, setForm] = useState(EMPTY);
+  const initialForm = convertFrom
+    ? { ...EMPTY, ownerName: convertFrom.name ?? "", email: convertFrom.email ?? "", phone: convertFrom.phone ?? "" }
+    : EMPTY;
+  const [form, setForm] = useState(initialForm);
   const [created, setCreated] = useState<Created | null>(null);
   const [copied, setCopied] = useState(false);
   const [copyFailed, setCopyFailed] = useState(false);
@@ -62,7 +68,17 @@ export default function AdminPartnerCreateClient() {
     }
     startTransition(async () => {
       try {
-        const res = await adminCreatePartnerAction(form);
+        const res = convertFrom
+          ? await adminConvertGuestToPartnerAction({
+              userId: convertFrom.id,
+              phone: form.phone,
+              shopName: form.shopName,
+              shopAddress: form.shopAddress,
+              city: form.city,
+              district: form.district,
+              location: form.location,
+            })
+          : await adminCreatePartnerAction(form);
         if (!res.ok) {
           toast.error(tErrors(actionErrorKey(new Error(res.error))));
           return;
@@ -103,24 +119,26 @@ export default function AdminPartnerCreateClient() {
       </Link>
       <h1 className="text-4xl font-black tracking-tighter text-gray-900 flex items-center gap-3">
         <UserPlus className="text-orange-600" />
-        {t("partnerCreateTitle")}
+        {convertFrom ? t("partnerConvertTitle") : t("partnerCreateTitle")}
       </h1>
     </header>
   );
 
   if (created) {
-    const whatsapp = waMeUrl(
-      created.phone,
-      t("partnerCreateWhatsappMessage", { name: created.ownerName, url: created.resetUrl }),
-    );
+    const resetUrl = created.resetUrl;
+    const whatsapp = resetUrl
+      ? waMeUrl(created.phone, t("partnerCreateWhatsappMessage", { name: created.ownerName, url: resetUrl }))
+      : null;
     return (
       <div className="min-h-screen bg-gray-50 px-6 py-32 md:px-10 md:pt-40">
         {header}
         <section className="max-w-2xl bg-white rounded-4xl p-8 border border-gray-100 shadow-sm">
           <h2 className="text-lg font-black tracking-tight mb-2 flex items-center gap-2">
             <Check size={20} className="text-green-600" />
-            {t("partnerCreateSuccessTitle")}
+            {convertFrom ? t("partnerConvertSuccessTitle") : t("partnerCreateSuccessTitle")}
           </h2>
+          {resetUrl ? (
+          <>
           <p className="text-sm text-gray-600 mb-6">{t("partnerCreateSuccessBody")}</p>
 
           <label htmlFor="partner-create-reset-url" className="id-eyebrow text-gray-400 px-1">
@@ -131,13 +149,13 @@ export default function AdminPartnerCreateClient() {
               id="partner-create-reset-url"
               type="text"
               readOnly
-              value={created.resetUrl}
+              value={resetUrl}
               className="w-full pr-12 pl-4 py-3 rounded-xl border-2 border-gray-100 bg-gray-50 text-sm font-medium text-gray-700"
             />
             <button
               type="button"
               aria-label={t("partnerCreateCopyLink")}
-              onClick={() => copyLink(created.resetUrl)}
+              onClick={() => copyLink(resetUrl)}
               className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg hover:bg-gray-200 text-gray-500 transition-colors"
             >
               {copied ? <Check size={18} className="text-green-600" /> : <Copy size={18} />}
@@ -146,6 +164,10 @@ export default function AdminPartnerCreateClient() {
           {copyFailed ? (
             <p className="mt-2 text-xs font-bold text-red-600">{tCommon("linkCopyFailed")}</p>
           ) : null}
+          </>
+          ) : (
+            <p className="text-sm text-gray-600">{t("partnerConvertSuccessBody")}</p>
+          )}
 
           <div className="mt-6 flex flex-wrap gap-3">
             {whatsapp ? (
@@ -166,6 +188,15 @@ export default function AdminPartnerCreateClient() {
               <Store size={16} />
               {t("partnerCreateOpenShop")}
             </Link>
+            {convertFrom ? (
+              <Link
+                href="/admin/users"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold id-accent-soft hover:opacity-80 transition-colors"
+              >
+                <ArrowLeft size={16} />
+                {t("partnerConvertBackToUsers")}
+              </Link>
+            ) : (
             <button
               type="button"
               onClick={() => {
@@ -177,6 +208,7 @@ export default function AdminPartnerCreateClient() {
               <UserPlus size={16} />
               {t("partnerCreateAnother")}
             </button>
+            )}
           </div>
         </section>
       </div>
@@ -187,14 +219,14 @@ export default function AdminPartnerCreateClient() {
     <div className="min-h-screen bg-gray-50 px-6 py-32 md:px-10 md:pt-40">
       {header}
       <section className="max-w-3xl bg-white rounded-4xl p-8 border border-gray-100 shadow-sm">
-        <p className="text-sm text-gray-600 mb-8">{t("partnerCreateIntro")}</p>
+        <p className="text-sm text-gray-600 mb-8">{convertFrom ? t("partnerConvertIntro") : t("partnerCreateIntro")}</p>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="flex flex-col gap-2">
             <label htmlFor="partner-create-owner" className="id-eyebrow text-gray-400 px-4">
               {t("partnerCreateOwnerName")}
             </label>
-            <input id="partner-create-owner" type="text" value={form.ownerName} onChange={set("ownerName")} className={INPUT} required minLength={2} />
+            <input id="partner-create-owner" type="text" value={form.ownerName} onChange={set("ownerName")} readOnly={!!convertFrom} className={INPUT} required minLength={2} />
           </div>
 
           <div className="flex flex-col gap-2">
@@ -208,7 +240,7 @@ export default function AdminPartnerCreateClient() {
             <label htmlFor="partner-create-email" className="id-eyebrow text-gray-400 px-4">
               {t("partnerCreateEmail")}
             </label>
-            <input id="partner-create-email" type="email" value={form.email} onChange={set("email")} className={INPUT} />
+            <input id="partner-create-email" type="email" value={form.email} onChange={set("email")} readOnly={!!convertFrom} className={INPUT} />
           </div>
 
           <div className="flex flex-col gap-2 md:col-span-2">
@@ -292,7 +324,7 @@ export default function AdminPartnerCreateClient() {
               className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {pending ? <Loader2 size={16} className="animate-spin" /> : <UserPlus size={16} />}
-              {t("partnerCreateSubmit")}
+              {convertFrom ? t("partnerConvertSubmit") : t("partnerCreateSubmit")}
             </button>
           </div>
         </form>

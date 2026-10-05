@@ -1275,7 +1275,23 @@
     "partnerCreateSendWhatsapp": "Envoyer par WhatsApp",
     "partnerCreateWhatsappMessage": "Bonjour {name}, votre compte partenaire BagajPark est prêt. Définissez votre mot de passe avec ce lien (valable 1 heure) : {url}",
     "partnerCreateOpenShop": "Modifier la boutique",
-    "partnerCreateAnother": "Ajouter un autre partenaire"
+    "partnerCreateAnother": "Ajouter un autre partenaire",
+    "convertToPartner": "Passer en partenaire",
+    "partnerConvertTitle": "Passer un invité en partenaire",
+    "partnerConvertIntro": "Ce compte invité deviendra un compte partenaire. Le partenaire continue de se connecter avec le même e-mail ou téléphone et le même mot de passe ; aucune vérification n'est nécessaire. La boutique reste masquée dans la recherche jusqu'à votre approbation.",
+    "partnerConvertSubmit": "Passer en partenaire",
+    "partnerConvertSuccessTitle": "Compte passé en partenaire",
+    "partnerConvertSuccessBody": "Le partenaire peut se connecter avec son mot de passe actuel via son e-mail ou son numéro de téléphone. S'il ne le connaît pas, définissez-en un nouveau depuis la liste des utilisateurs et envoyez-le-lui.",
+    "partnerConvertBackToUsers": "Retour aux utilisateurs",
+    "setPassword": "Définir le mot de passe",
+    "setPasswordTitle": "Définir un nouveau mot de passe",
+    "setPasswordBody": "Définissez un nouveau mot de passe pour {name}. L'ancien mot de passe et les sessions ouvertes ne fonctionnent plus. Envoyez vous-même le mot de passe à l'utilisateur.",
+    "setPasswordLabel": "Nouveau mot de passe",
+    "setPasswordGenerate": "Générer un mot de passe aléatoire",
+    "setPasswordSubmit": "Enregistrer le mot de passe",
+    "setPasswordDone": "Mot de passe enregistré. Envoyez ce message à l'utilisateur :",
+    "setPasswordCopy": "Copier le message",
+    "setPasswordWhatsappMessage": "Bonjour {name}, le nouveau mot de passe de votre compte BagajPark est : {password}\nConnectez-vous avec votre numéro de téléphone ou votre e-mail : {url}"
   },
   "Auth": {
     "loginTitle": "Connectez-vous à BagajPark",
@@ -1767,7 +1783,10 @@
     "shopLocationRequired": "Veuillez indiquer l'emplacement de votre boutique sur la carte.",
     "bagRevisionNeedsGuestApproval": "Une augmentation de prix après le check-in nécessite l'accord du client. La proposition a été enregistrée et s'appliquera dès que le client l'aura approuvée.",
     "scheduleConflict": "Des réservations actives tombent sur ces dates.",
-    "shopClosedOnDate": "Le point est fermé l’un des jours choisis ; choisissez un autre jour."
+    "shopClosedOnDate": "Le point est fermé l’un des jours choisis ; choisissez un autre jour.",
+    "userNotFound": "Utilisateur introuvable.",
+    "userNotGuest": "Ce compte n'est pas un invité ; seuls les comptes invités peuvent devenir partenaires.",
+    "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères."
   },
   "Emails": {
     "verificationSubject": "Vérifiez votre e-mail",
