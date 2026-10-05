@@ -50,7 +50,7 @@ describe("acik merkez korunuyor", () => {
       Bagimlilik dizisinde olmasalardi React eski degerleri kapatir ve kapi
       sessizce yanlis kararlar verirdi.
     */
-    expect(src).toMatch(/\[searchQuery, locale, hasExplicitCenter, initialSearchQuery\]/);
+    expect(src).toMatch(/\[searchQuery, locale, hasExplicitCenter, initialSearchQuery(, submitNonce)?\]/);
   });
 
   it("TARAYICI KONUMU yarisi da hala kapali", () => {

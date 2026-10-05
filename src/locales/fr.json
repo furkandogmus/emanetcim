@@ -738,7 +738,8 @@
     "stayDropHours": "Dépôt {date} : ouvert {open}–{close} ; arrivez au plus tard à {last}.",
     "stayPickupHours": "Retrait {date} : {open}–{close}.",
     "stayDayClosed": "Le point est fermé le {date} ; choisissez un autre jour.",
-    "shopClosedOn": "Fermé : {range}"
+    "shopClosedOn": "Fermé : {range}",
+    "searchSubmit": "Rechercher"
   },
   "Admin": {
     "dashboardTitle": "Centre d'administration BagajPark",
