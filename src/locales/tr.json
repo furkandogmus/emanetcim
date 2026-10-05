@@ -738,7 +738,8 @@
     "stayDropHours": "Bırakış {date}: dükkan {open}–{close} açık; en geç {last}'ta getirin.",
     "stayPickupHours": "Alış {date}: {open}–{close} arası.",
     "stayDayClosed": "{date} günü dükkan kapalı; başka bir gün seçin.",
-    "shopClosedOn": "İzinli: {range}"
+    "shopClosedOn": "İzinli: {range}",
+    "searchSubmit": "Ara"
   },
   "Admin": {
     "dashboardTitle": "BagajPark Yönetim Masası",
