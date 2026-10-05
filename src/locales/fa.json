@@ -738,7 +738,8 @@
     "stayDropHours": "تحویل {date}: باز {open}–{close}؛ حداکثر تا {last} برسید.",
     "stayPickupHours": "دریافت {date}: {open}–{close}.",
     "stayDayClosed": "فروشگاه در {date} بسته است؛ روز دیگری انتخاب کنید.",
-    "shopClosedOn": "تعطیل: {range}"
+    "shopClosedOn": "تعطیل: {range}",
+    "searchSubmit": "جستجو"
   },
   "Admin": {
     "dashboardTitle": "مرکز مدیریت BagajPark",

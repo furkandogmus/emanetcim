@@ -738,7 +738,8 @@
     "stayDropHours": "預け入れ {date}：営業 {open}–{close}。遅くとも {last} までにお越しください。",
     "stayPickupHours": "受け取り {date}：{open}–{close}。",
     "stayDayClosed": "{date} は休業です。別の日を選んでください。",
-    "shopClosedOn": "休業：{range}"
+    "shopClosedOn": "休業：{range}",
+    "searchSubmit": "検索"
   },
   "Admin": {
     "dashboardTitle": "BagajPark 管理センター",

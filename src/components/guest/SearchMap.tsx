@@ -73,6 +73,10 @@ interface SearchMapProps {
   userLat?: number;
   userLng?: number;
   onSelectShop?: (id: string) => void;
+  /** Kullanıcı haritayı elle kaydırıp/yakınlaştırınca yeni merkez. */
+  onUserMove?: (center: { lat: number; lng: number }) => void;
+  /** false iken yeni sonuçlar gelince harita onlara sığdırılmaz (kullanıcı gezerken). */
+  autoFit?: boolean;
 }
 
 /**
@@ -83,6 +87,8 @@ export default function SearchMap({
   userLat = 41.0256,
   userLng = 28.9741,
   onSelectShop,
+  onUserMove,
+  autoFit = true,
 }: SearchMapProps) {
   const locale = useLocale();
   const t = useTranslations("Guest");
@@ -106,6 +112,15 @@ export default function SearchMap({
   useEffect(() => {
     selectRef.current = onSelectShop;
   }, [onSelectShop]);
+
+  const userMoveRef = useRef(onUserMove);
+  useEffect(() => {
+    userMoveRef.current = onUserMove;
+  }, [onUserMove]);
+  const autoFitRef = useRef(autoFit);
+  useEffect(() => {
+    autoFitRef.current = autoFit;
+  }, [autoFit]);
 
   /*
     Harita bir KEZ kuruluyor (asagidaki etkinin bagimlilik dizisi bos), ama
@@ -162,6 +177,14 @@ export default function SearchMap({
     mapRef.current = map;
 
     map.on("load", () => setMapReady(true));
+
+    // Yalnızca kullanıcı hareketi: flyTo/fitBounds `originalEvent` taşımaz,
+    // yoksa sonuçlara sığdırma yeni arama, yeni arama yeni sığdırma doğururdu.
+    map.on("moveend", (e) => {
+      if (!e.originalEvent) return;
+      const c = map.getCenter();
+      userMoveRef.current?.({ lat: c.lat, lng: c.lng });
+    });
 
     /*
       GUVENLIK SUPABI: altlik hic gelmezse (karo sunucusuna erisilemiyor, ag
@@ -314,7 +337,7 @@ export default function SearchMap({
   /** Sonuçlara sığdırma — çizimden AYRI, yoksa `moveend` sonsuz döngü olur. */
   useEffect(() => {
     const map = mapRef.current;
-    if (!map) return;
+    if (!map || !autoFitRef.current) return;
     const valid = shops.filter((s) => s.latitude != null && s.longitude != null);
 
     if (valid.length > 0) {

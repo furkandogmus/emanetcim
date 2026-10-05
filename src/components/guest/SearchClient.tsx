@@ -133,6 +133,11 @@ export default function SearchClient({
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [filterDirty, setFilterDirty] = useState(false);
   const [dynamicCenter, setDynamicCenter] = useState(searchCenter);
+  // Kullanıcı haritayı elle gezerken harita yeni sonuçlara sığdırılmaz; yer
+  // aranınca ya da konum alınınca yeniden sonuçları takip eder.
+  const [followResults, setFollowResults] = useState(true);
+  const [submitNonce, setSubmitNonce] = useState(0);
+  const lastSubmitNonceRef = useRef(0);
   const [resolvedPlaceLabel, setResolvedPlaceLabel] = useState<string | null>(null);
   /**
    * Arama kutusundaki metin BIR YER MI, yoksa dukkan adi mi.
@@ -394,6 +399,10 @@ export default function SearchClient({
       Ayni bosluğun tarayici-konumu yarisi 2026-09-02'de kapatilmisti
       (`placeSearchedRef`); bu, o duzeltmenin eksik kalan yarisi.
     */
+    // "Ara"ya basıldıysa bekleme yok; URL'deki merkez yine de korunur (aşağıda).
+    const submitted = submitNonce !== lastSubmitNonceRef.current;
+    lastSubmitNonceRef.current = submitNonce;
+
     if (hasExplicitCenter && searchQuery === initialSearchQuery) {
       // Merkez zaten dogru; metin suzgeci de calismamali.
       setQueryKind("place");
@@ -407,6 +416,7 @@ export default function SearchClient({
       if (cancelled) return;
 
       if (geocoded.ok) {
+        setFollowResults(true);
         setDynamicCenter((prev) => {
           if (prev.lat === geocoded.lat && prev.lng === geocoded.lng) return prev;
           setFilterDirty(true);
@@ -431,6 +441,7 @@ export default function SearchClient({
         setQueryKind("text");
         return;
       }
+      setFollowResults(true);
       setDynamicCenter((prev) => {
         if (prev.lat === matchedCity.lat && prev.lng === matchedCity.lng) return prev;
         setFilterDirty(true);
@@ -439,13 +450,27 @@ export default function SearchClient({
       setResolvedPlaceLabel(matchedCity.slug);
       setQueryKind("place");
       placeSearchedRef.current = true;
-    }, 450);
+    }, submitted ? 0 : 450);
 
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [searchQuery, locale, hasExplicitCenter, initialSearchQuery]);
+  }, [searchQuery, locale, hasExplicitCenter, initialSearchQuery, submitNonce]);
+
+  const handleUserMapMove = useCallback((center: { lat: number; lng: number }) => {
+    // Elle seçilen bölge, sonradan gelen tarayıcı konumuyla ezilmemeli.
+    placeSearchedRef.current = true;
+    setFollowResults(false);
+    setResolvedPlaceLabel(null);
+    setDynamicCenter((prev) => {
+      if (Math.abs(prev.lat - center.lat) < 0.0005 && Math.abs(prev.lng - center.lng) < 0.0005) {
+        return prev;
+      }
+      setFilterDirty(true);
+      return center;
+    });
+  }, []);
 
   const onSelectShop = useCallback(
     (id: string) => {
@@ -507,6 +532,7 @@ export default function SearchClient({
     setGpsLocating(true);
     try {
       const point = await getCurrentPoint();
+      setFollowResults(true);
       setDynamicCenter(point);
       setFilterDirty(true);
       toast.success(t("searchLocationUpdated"));
@@ -633,7 +659,14 @@ export default function SearchClient({
         </p>
       ) : null}
 
-      <div className="flex gap-2 mb-3">
+      <form
+        role="search"
+        className="flex gap-2 mb-3"
+        onSubmit={(e) => {
+          e.preventDefault();
+          setSubmitNonce((n) => n + 1);
+        }}
+      >
         <div className="relative group flex-1">
           <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
             <SearchIcon
@@ -651,20 +684,14 @@ export default function SearchClient({
           />
         </div>
         <button
-          type="button"
-          onClick={handleUseMyLocation}
-          disabled={gpsLocating}
-          className="shrink-0 h-[52px] w-[52px] bg-gray-50 hover:bg-orange-50 border border-transparent hover:border-orange-200 rounded-2xl flex items-center justify-center text-gray-400 hover:text-orange-600 transition-all disabled:opacity-50"
-          title={t("useMyLocation")}
-          aria-label={t("useMyLocation")}
+          type="submit"
+          className="shrink-0 h-[52px] w-[52px] id-accent-bg hover:opacity-90 rounded-2xl flex items-center justify-center transition-all active:scale-95"
+          title={t("searchSubmit")}
+          aria-label={t("searchSubmit")}
         >
-          {gpsLocating ? (
-            <div className="w-5 h-5 border-2 border-gray-300 border-t-orange-600 rounded-full animate-spin" />
-          ) : (
-            <Crosshair size={20} />
-          )}
+          <SearchIcon size={20} />
         </button>
-      </div>
+      </form>
 
       {datesReady ? (
         <section
@@ -879,8 +906,29 @@ export default function SearchClient({
           userLat={dynamicCenter.lat}
           userLng={dynamicCenter.lng}
           onSelectShop={onSelectShop}
+          onUserMove={handleUserMapMove}
+          autoFit={followResults}
         />
       </div>
+
+      <button
+        type="button"
+        onClick={handleUseMyLocation}
+        disabled={gpsLocating}
+        className={`absolute right-4 z-20 h-12 w-12 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center text-gray-600 hover:text-gray-900 active:scale-95 transition-all disabled:opacity-50 md:bottom-8 ${
+          panelOpen
+            ? "bottom-[calc(5rem+env(safe-area-inset-bottom,0px)+42vh+0.75rem)]"
+            : "bottom-[calc(5rem+env(safe-area-inset-bottom,0px)+0.75rem)]"
+        }`}
+        title={t("useMyLocation")}
+        aria-label={t("useMyLocation")}
+      >
+        {gpsLocating ? (
+          <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-700 rounded-full animate-spin" />
+        ) : (
+          <Crosshair size={20} />
+        )}
+      </button>
 
       {!panelOpen ? (
         <button
