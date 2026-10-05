@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   AlertCircle,
   KeyRound,
+  LockKeyhole,
   Copy,
   Check,
   X,
@@ -24,6 +25,7 @@ import { Link } from "@/i18n/routing";
 import { motion, AnimatePresence } from "framer-motion";
 import { adminInitiatePartnerPasswordResetAction } from "@/actions/partner-password-reset";
 import { useModalBehavior } from "@/lib/hooks/useModalBehavior";
+import AdminSetPasswordDialog, { type SetPasswordTarget } from "@/components/admin/AdminSetPasswordDialog";
 import Money from "@/components/common/Money";
 import { formatDecimal } from "@/lib/currency";
 
@@ -38,6 +40,7 @@ interface Shop {
   hoursToday: { kind: "range"; text: string } | { kind: "open247" | "closed" };
   createdAt: Date;
   owner: {
+    id: string;
     name: string | null;
     email: string | null;
     phone: string | null;
@@ -79,6 +82,7 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
   const [resetTarget, setResetTarget] = useState<{ id: string; name: string; phone: string | null } | null>(null);
   const [resetResult, setResetResult] = useState<{ ok: true; resetUrl: string } | { ok: false; error: string } | null>(null);
   const [resetPending, startResetTransition] = useTransition();
+  const [setPasswordTarget, setSetPasswordTarget] = useState<SetPasswordTarget | null>(null);
   const [copied, setCopied] = useState(false);
   const [copyFailed, setCopyFailed] = useState(false);
 
@@ -222,6 +226,15 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
                           title={t("resetPassword")}
                         >
                           <KeyRound size={18} className="group-hover/btn:scale-110 transition-transform" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSetPasswordTarget({ userId: shop.owner.id, name: shop.owner.name || shop.name, phone: shop.owner.phone })}
+                          className="p-2.5 bg-gray-50 hover:bg-gray-100 text-gray-400 hover:text-gray-700 rounded-xl transition-all inline-flex items-center justify-center group/btn shadow-sm"
+                          title={t("setPassword")}
+                          aria-label={t("setPassword")}
+                        >
+                          <LockKeyhole size={18} className="group-hover/btn:scale-110 transition-transform" />
                         </button>
                         <Link
                           href={`/admin/partners/${shop.id}/edit`}
@@ -389,6 +402,7 @@ export default function AdminPartnersClient({ shops: initialShops }: AdminPartne
           </motion.div>
         )}
       </AnimatePresence>
+      <AdminSetPasswordDialog target={setPasswordTarget} onClose={() => setSetPasswordTarget(null)} />
     </div>
   );
 }
