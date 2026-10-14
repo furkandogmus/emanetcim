@@ -2252,5 +2252,22 @@
     "shortcutBookingsDesc": "Voir vos réservations et votre code QR",
     "screenshotSearch": "Consignes à proximité sur la carte",
     "screenshotHome": "Déposez vos bagages, explorez librement"
+  },
+  "AccountDeletion": {
+    "title": "Suppression du compte et des données",
+    "intro": "Vous pouvez supprimer à tout moment votre compte BagajPark et les données personnelles qui y sont liées. Cette page concerne l’application BagajPark et bagajpark.com.",
+    "appTitle": "Dans l’application",
+    "appStep1": "Dans l’application BagajPark, touchez l’icône de profil en haut à droite.",
+    "appStep2": "Touchez « Supprimer mon compte » et confirmez.",
+    "webTitle": "Sur le site web",
+    "webStep1": "Connectez-vous à votre compte sur bagajpark.com.",
+    "webStep2": "Sur la page « Données et confidentialité », choisissez « Fermer le compte ».",
+    "webLink": "Aller à « Données et confidentialité »",
+    "partnerNote": "Les comptes partenaires (commerces) demandent la fermeture via la page de contact.",
+    "contactLink": "Contact",
+    "deletedTitle": "Données supprimées",
+    "deletedBody": "Vos nom, adresse e-mail, numéro de téléphone et photo sont retirés ; vos avis et votre abonnement aux notifications sont supprimés. Le compte ne permet plus de se connecter.",
+    "keptTitle": "Données conservées",
+    "keptBody": "Les réservations passées sont conservées sans lien avec votre identité (anonymisées) pendant les durées légales de conservation, pour des obligations légales et comptables. Tant qu’une réservation est active, le compte ne peut être fermé qu’après sa fin."
   }
 }
