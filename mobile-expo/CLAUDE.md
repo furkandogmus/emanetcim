@@ -36,3 +36,5 @@ API adresi derleme anında: `EXPO_PUBLIC_API_BASE_URL` (varsayılan emülatör i
   ailesini iptal ederek cezalandırıyor.
 - Tema token'ları `src/theme/tokens.ts` — web `globals.css` kimliğinden elle aktarıldı.
 - `android/` ve `ios/` üretilir (CNG), elle düzenlenmez, git'e girmez.
+- **Kabul kriteri: Google Play'e yüklenebilir build.** İzin listesi, hesap silme ve
+  production profili bu yüzden var; değiştirmeden önce `PLAY_YAYIN.md`'yi oku.
