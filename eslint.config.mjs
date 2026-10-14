@@ -41,6 +41,12 @@ const eslintConfig = defineConfig([
       (`dart analyze`, bkz. mobile/CLAUDE.md); ESLint'in orada isi yok.
     */
     "mobile/**",
+    /*
+      Expo/React Native uygulamasi kendi tsconfig'i, kendi `@/` takma adi ve
+      kendi bagimliliklariyla ayri bir paket (bkz. mobile-expo/CLAUDE.md).
+      Kok kurallari (Next.js, react-compiler) onun icin gecerli degil.
+    */
+    "mobile-expo/**",
   ]),
   {
     /**
