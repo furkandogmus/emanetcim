@@ -12,6 +12,7 @@ test-results
 coverage
 .vscode
 mobile
+mobile-expo
 marketing
 /*.png
 /*.mp4
