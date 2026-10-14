@@ -1,0 +1,188 @@
+{
+  "common": {
+    "continue": "Continue",
+    "back": "Back",
+    "close": "Close",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "loading": "Loading…",
+    "genericError": "Something went wrong. Please try again.",
+    "networkError": "Couldn't reach the server. Check your connection.",
+    "day_one": "{{count}} day",
+    "day_other": "{{count}} days",
+    "bag_one": "{{count}} bag",
+    "bag_other": "{{count}} bags"
+  },
+  "auth": {
+    "title": "Sign in",
+    "subtitle": "We'll email you a 6-digit code. No password needed.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@example.com",
+    "sendCode": "Send code",
+    "codeTitle": "Enter the code",
+    "codeSubtitle": "Type the 6-digit code we sent to {{email}}.",
+    "codeLabel": "Verification code",
+    "verify": "Sign in",
+    "resend": "Resend code",
+    "changeEmail": "Change email",
+    "invalidEmail": "Enter a valid email address.",
+    "errors": {
+      "invalid_code": "The code is wrong or has expired.",
+      "too_many_otp_requests": "Too many codes requested. Try again in two minutes.",
+      "too_many_requests": "Too many requests. Try again shortly.",
+      "too_many_attempts": "Too many attempts. Try again shortly.",
+      "account_banned": "This account has been disabled."
+    }
+  },
+  "home": {
+    "heroTitle": "Drop your bags.\nEnjoy the city.",
+    "searchPlaceholder": "Where are you going?",
+    "myBookings": "My bookings",
+    "profile": "Profile"
+  },
+  "search": {
+    "locationTitle": "Where are you going?",
+    "useLocation": "Use my location",
+    "locating": "Getting your location…",
+    "locationDenied": "Location permission was denied. Pick a city from the list.",
+    "popular": "Popular cities",
+    "whenTitle": "When do you need storage?",
+    "whenHint": "Tap a date once for the same day. For several days, pick the first and last day.",
+    "dropOff": "Drop-off",
+    "pickUp": "Pick-up",
+    "pickUpBeforeDropOff": "Pick-up must be at least 1 hour after drop-off.",
+    "bagsTitle": "What are you storing?",
+    "showSpots": "Show storage spots",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "step": "Step {{current}} of {{total}}"
+  },
+  "bags": {
+    "s": "Small (S)",
+    "sDesc": "Backpack, handbag (max 10kg)",
+    "m": "Medium (M/L)",
+    "mDesc": "Cabin bag, duffel (max 20kg)",
+    "xl": "Large (XL)",
+    "xlDesc": "Large suitcase (max 30kg, 100cm)",
+    "decrease": "Decrease {{size}}",
+    "increase": "Increase {{size}}"
+  },
+  "map": {
+    "count_one": "{{count}} spot near {{place}}",
+    "count_other": "{{count}} spots near {{place}}",
+    "nearYou": "you",
+    "empty": "No available spots here. Move the map and try again.",
+    "searchHere": "Search this area",
+    "comingSoon": "Coming soon",
+    "perDay": "/ day",
+    "available": "~{{count}} free",
+    "distance": "{{km}} km",
+    "verified": "Verified",
+    "editSearch": "Edit search"
+  },
+  "shop": {
+    "open247": "Open 24/7",
+    "hours": "{{open}} – {{close}}",
+    "weeklyHours": "Opening hours",
+    "rulesTitle": "Book in the app",
+    "rulesBody": "The shop doesn't take walk-ins. Book here and show your QR code at the shop.",
+    "prelaunch": "This spot isn't taking bookings yet. You'll see it here when it opens.",
+    "restroom": "Restroom available",
+    "book": "Book this spot",
+    "perDayLabel": "Per bag, per day",
+    "weekdays": [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ],
+    "closed": "Closed"
+  },
+  "checkout": {
+    "title": "Confirm",
+    "when": "When",
+    "bags": "Bags",
+    "edit": "Edit",
+    "apply": "Apply",
+    "priceTitle": "Price",
+    "bagLine": "{{count}} × {{size}} · {{days}}",
+    "insurance": "Protection fee",
+    "estimatedTotal": "Estimated total",
+    "estimateNote": "The server calculates the final amount; you'll see it on your booking after confirming.",
+    "payAtShop": "You pay at the shop when you drop off your bags.",
+    "confirm": "Confirm booking",
+    "errors": {
+      "insufficient_capacity": "This spot has no room left for the time you picked.",
+      "invalid_dates": "The dates are invalid. Drop-off can't be in the past.",
+      "platform_holiday": "We're not operating on the date you picked.",
+      "shop_not_open_yet": "This spot isn't taking bookings yet.",
+      "shop_closed_on_date": "The shop is closed on the date you picked.",
+      "shop_not_found": "This spot is no longer taking bookings.",
+      "no_bags": "Pick at least one bag."
+    }
+  },
+  "success": {
+    "title": "You're booked!",
+    "body": "Show your QR code at the shop and drop off your bags.",
+    "viewBooking": "View booking",
+    "home": "Home"
+  },
+  "bookings": {
+    "title": "My bookings",
+    "empty": "No bookings yet.",
+    "emptyBody": "Once you book a spot, it shows up here.",
+    "emptyCta": "Find a spot",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "showQr": "Show this code at the shop",
+    "qrMissing": "The QR code isn't ready yet. Check back shortly.",
+    "dropOff": "Drop-off",
+    "pickUp": "Pick-up",
+    "total": "Total",
+    "directions": "Directions",
+    "call": "Call the shop",
+    "cancel": "Cancel booking",
+    "cancelTitle": "Cancel this booking?",
+    "cancelBody": "This can't be undone.",
+    "cancelConfirm": "Yes, cancel",
+    "cancelledTitle": "Booking cancelled",
+    "cancelledRefund": "The full amount you paid will be refunded.",
+    "cancelledNoCharge": "You haven't been charged anything.",
+    "cancelFailed": "Couldn't cancel the booking."
+  },
+  "status": {
+    "PENDING": "Pending",
+    "PAID": "Paid",
+    "WAITING_APPROVAL": "Awaiting approval",
+    "APPROVED": "Confirmed",
+    "CHECKED_IN": "Bags at the shop",
+    "CHECKED_OUT": "Completed",
+    "CANCELLED": "Cancelled"
+  },
+  "partner": {
+    "title": "Bookings",
+    "today": "Today",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "empty": "No bookings in this list.",
+    "guest": "Guest",
+    "bags": "Bags",
+    "total": "Total",
+    "new": "New",
+    "detailTitle": "Booking"
+  },
+  "profile": {
+    "title": "Profile",
+    "role": {
+      "GUEST": "Guest",
+      "PARTNER": "Partner",
+      "ADMIN": "Admin"
+    },
+    "signOut": "Sign out",
+    "signOutNote": "Signing out ends this account's sessions on all devices.",
+    "version": "Version {{version}}"
+  }
+}
