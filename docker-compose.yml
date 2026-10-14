@@ -97,6 +97,9 @@ services:
       APPLE_BUNDLE_ID: ${APPLE_BUNDLE_ID:-}
       APPLE_ID: ${APPLE_ID:-}
       APPLE_SECRET: ${APPLE_SECRET:-}
+      # Google Play inceleme hesabi (sabit OTP); bos -> kapali.
+      PLAY_REVIEW_EMAIL: ${PLAY_REVIEW_EMAIL:-}
+      PLAY_REVIEW_OTP: ${PLAY_REVIEW_OTP:-}
       FIREBASE_SERVICE_ACCOUNT_JSON: ${FIREBASE_SERVICE_ACCOUNT_JSON:-}
       # Virgülle ayrılmış Google e-postaları; ilk girişte otomatik ADMIN rolü verilir
       ADMIN_EMAILS: ${ADMIN_EMAILS:-}
