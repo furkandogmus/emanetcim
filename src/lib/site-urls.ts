@@ -13,6 +13,7 @@ export const SITEMAP_PATHS: readonly string[] = [
   "/privacy",
   "/terms",
   "/kvkk",
+  "/account-deletion",
   "/login",
   "/register",
   "/become-partner",

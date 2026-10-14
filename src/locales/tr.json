@@ -2397,5 +2397,22 @@
     "shortcutBookingsDesc": "Rezervasyonlarını ve QR kodunu gör",
     "screenshotSearch": "Yakındaki emanet noktaları haritada",
     "screenshotHome": "Valizini bırak, özgürce gez"
+  },
+  "AccountDeletion": {
+    "title": "Hesap ve veri silme",
+    "intro": "BagajPark hesabınızı ve hesabınıza bağlı kişisel verilerinizi istediğiniz zaman silebilirsiniz. Bu sayfa BagajPark mobil uygulaması ve bagajpark.com için geçerlidir.",
+    "appTitle": "Uygulamadan",
+    "appStep1": "BagajPark uygulamasında sağ üstteki profil simgesine dokunun.",
+    "appStep2": "“Hesabımı sil”e dokunun ve onaylayın.",
+    "webTitle": "Web sitesinden",
+    "webStep1": "bagajpark.com adresinde hesabınıza giriş yapın.",
+    "webStep2": "Veri ve gizlilik sayfasında “Hesabı kapat”ı seçin.",
+    "webLink": "Veri ve gizlilik sayfasına git",
+    "partnerNote": "Esnaf hesapları kapatma talebini iletişim sayfasından iletir.",
+    "contactLink": "İletişim",
+    "deletedTitle": "Silinen veriler",
+    "deletedBody": "Adınız, e-posta adresiniz, telefon numaranız ve fotoğrafınız kaldırılır; yorumlarınız ve bildirim aboneliğiniz silinir. Bu hesapla bir daha giriş yapılamaz.",
+    "keptTitle": "Saklanan veriler",
+    "keptBody": "Geçmiş rezervasyon kayıtları, yasal ve muhasebe yükümlülükleri nedeniyle kimliğinizle ilişkilendirilmeden (anonim olarak) yasal saklama süreleri boyunca tutulur. Aktif bir rezervasyonunuz varsa hesabınız, rezervasyon tamamlanana kadar kapatılamaz."
   }
 }

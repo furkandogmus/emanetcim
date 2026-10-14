@@ -2410,5 +2410,22 @@
     "shortcutBookingsDesc": "See your bookings and QR code",
     "screenshotSearch": "Nearby storage points on the map",
     "screenshotHome": "Drop your bags, explore freely"
+  },
+  "AccountDeletion": {
+    "title": "Account and data deletion",
+    "intro": "You can delete your BagajPark account and the personal data linked to it at any time. This page applies to the BagajPark mobile app and bagajpark.com.",
+    "appTitle": "In the app",
+    "appStep1": "In the BagajPark app, tap the profile icon at the top right.",
+    "appStep2": "Tap “Delete my account” and confirm.",
+    "webTitle": "On the website",
+    "webStep1": "Sign in to your account at bagajpark.com.",
+    "webStep2": "On the Data & privacy page, choose “Close account”.",
+    "webLink": "Go to Data & privacy",
+    "partnerNote": "Partner (shop) accounts request closure through the contact page.",
+    "contactLink": "Contact",
+    "deletedTitle": "What is deleted",
+    "deletedBody": "Your name, email address, phone number and photo are removed; your reviews and notification subscription are deleted. The account can no longer be used to sign in.",
+    "keptTitle": "What is kept",
+    "keptBody": "Past booking records are kept without your identity (anonymised) for the legally required retention periods, for legal and accounting obligations. While you have an active booking, the account cannot be closed until the booking is completed."
   }
 }

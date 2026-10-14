@@ -2252,5 +2252,22 @@
     "shortcutBookingsDesc": "Buchungen und QR-Code ansehen",
     "screenshotSearch": "Aufbewahrungsorte in der Nähe auf der Karte",
     "screenshotHome": "Gepäck abgeben, frei erkunden"
+  },
+  "AccountDeletion": {
+    "title": "Konto- und Datenlöschung",
+    "intro": "Du kannst dein BagajPark-Konto und die damit verbundenen personenbezogenen Daten jederzeit löschen. Diese Seite gilt für die BagajPark-App und bagajpark.com.",
+    "appTitle": "In der App",
+    "appStep1": "Tippe in der BagajPark-App oben rechts auf das Profilsymbol.",
+    "appStep2": "Tippe auf „Konto löschen“ und bestätige.",
+    "webTitle": "Auf der Website",
+    "webStep1": "Melde dich auf bagajpark.com in deinem Konto an.",
+    "webStep2": "Wähle auf der Seite „Daten und Datenschutz“ die Option „Konto schließen“.",
+    "webLink": "Zu „Daten und Datenschutz“",
+    "partnerNote": "Partner-Konten (Geschäfte) beantragen die Schließung über die Kontaktseite.",
+    "contactLink": "Kontakt",
+    "deletedTitle": "Was gelöscht wird",
+    "deletedBody": "Name, E-Mail-Adresse, Telefonnummer und Foto werden entfernt; Bewertungen und Benachrichtigungsabos werden gelöscht. Mit dem Konto ist keine Anmeldung mehr möglich.",
+    "keptTitle": "Was aufbewahrt wird",
+    "keptBody": "Frühere Buchungen werden aus rechtlichen und buchhalterischen Gründen ohne Bezug zu deiner Person (anonymisiert) für die gesetzlichen Aufbewahrungsfristen gespeichert. Solange eine Buchung aktiv ist, kann das Konto erst nach deren Abschluss geschlossen werden."
   }
 }

@@ -11,7 +11,8 @@ export type GuestStaticSeoKey =
   | "terms"
   | "kvkk"
   | "login"
-  | "register";
+  | "register"
+  | "accountDeletion";
 
 const TR: Record<GuestStaticSeoKey, { title: string; description: string }> = {
   about: {
@@ -58,6 +59,11 @@ const TR: Record<GuestStaticSeoKey, { title: string; description: string }> = {
     title: "Kayıt Ol",
     description:
       "Gezgin olarak ücretsiz kayıt; yakınınızdaki emanet noktalarını bulun ve güvenle valiz bırakın.",
+  },
+  accountDeletion: {
+    title: "Hesap ve Veri Silme",
+    description:
+      "BagajPark hesabınızı uygulamadan veya web sitesinden silin; hangi verilerin silindiği ve saklandığı.",
   },
 };
 
@@ -106,6 +112,11 @@ const EN: Record<GuestStaticSeoKey, { title: string; description: string }> = {
     title: "Create Account",
     description:
       "Register as a guest to find nearby luggage storage and book secure bag drop-off in Turkey.",
+  },
+  accountDeletion: {
+    title: "Account and Data Deletion",
+    description:
+      "Delete your BagajPark account from the app or the website, and what data is deleted or kept.",
   },
 };
 
