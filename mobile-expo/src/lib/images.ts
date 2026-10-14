@@ -1,6 +1,6 @@
 import { API_BASE_URL } from "./config";
 
-const SITE_ORIGIN = API_BASE_URL.replace(/\/api\/mobile$/, "");
+export const SITE_ORIGIN = API_BASE_URL.replace(/\/api\/mobile$/, "");
 
 /** Mutlak URL ve data URL oldugu gibi; "/uploads/..." gibi goreli yol site kokune baglanir. */
 export function resolveImage(src: string | null | undefined): string | null {
