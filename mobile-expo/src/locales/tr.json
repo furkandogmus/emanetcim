@@ -183,6 +183,14 @@
     },
     "signOut": "Çıkış yap",
     "signOutNote": "Çıkış yapınca bu hesabın tüm cihazlardaki oturumu kapanır.",
-    "version": "Sürüm {{version}}"
+    "version": "Sürüm {{version}}",
+    "privacy": "Gizlilik politikası",
+    "deleteAccount": "Hesabımı sil",
+    "deleteTitle": "Hesabın silinsin mi?",
+    "deleteBody": "Ad, e-posta ve telefon bilgilerin silinir; bu hesapla tekrar giriş yapamazsın. Geçmiş rezervasyon kayıtları senin bilgilerin olmadan saklanır.",
+    "deleteConfirm": "Evet, hesabımı sil",
+    "deleteFailedTitle": "Hesap silinemedi",
+    "deleteActiveBookings": "Devam eden rezervasyonların var. Önce onları iptal et ya da tamamlanmalarını bekle.",
+    "deleteRequest": "Hesap kapatma talebi gönder"
   }
 }
