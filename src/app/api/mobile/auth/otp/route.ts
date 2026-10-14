@@ -13,6 +13,14 @@ const schema = z.union([
   z.object({ phone: z.string().min(10) }),
 ]);
 
+/* Google Play inceleme ekibi e-postaya erisemez; bu tek hesap sabit kodla girer. */
+function playReviewLogin(identity: string): string | null {
+  const email = process.env.PLAY_REVIEW_EMAIL?.trim().toLowerCase();
+  const code = process.env.PLAY_REVIEW_OTP?.trim();
+  if (!email || !code || !/^\d{6}$/.test(code)) return null;
+  return identity === email ? code : null;
+}
+
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);
@@ -37,7 +45,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "too_many_requests" }, { status: 429 });
   }
 
-  const code = String(randomInt(100000, 999999));
+  const review = playReviewLogin(normalizedIdentity);
+  const code = review ?? String(randomInt(100000, 999999));
   const identifier = `mobile:${normalizedIdentity}`;
 
   await prisma.verificationToken.upsert({
@@ -50,7 +59,9 @@ export async function POST(req: Request) {
     },
   });
 
-  if (isEmail) {
+  if (review) {
+    logger.info("mobile_otp_play_review_login");
+  } else if (isEmail) {
     await sendMobileOtp(normalizedIdentity, code);
   } else {
     if (isNetgsmConfigured()) {
