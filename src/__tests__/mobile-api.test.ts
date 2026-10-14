@@ -96,6 +96,35 @@ describe("Mobile API - Auth OTP", () => {
     expect(prisma.verificationToken.upsert).toHaveBeenCalled();
   });
 
+  it("should use the fixed code and send no mail for the Play review account", async () => {
+    vi.stubEnv("PLAY_REVIEW_EMAIL", "Review@Example.com");
+    vi.stubEnv("PLAY_REVIEW_OTP", "246810");
+    const { POST } = await import("@/app/api/mobile/auth/otp/route");
+    const req = new Request("http://localhost/api/mobile/auth/otp", {
+      method: "POST",
+      body: JSON.stringify({ email: "review@example.com" }),
+    });
+    const res = await POST(req);
+    vi.unstubAllEnvs();
+    expect(res.status).toBe(200);
+    expect(sendMobileOtp).not.toHaveBeenCalled();
+    expect(vi.mocked(prisma.verificationToken.upsert).mock.calls[0][0].create.token).toBe("246810");
+  });
+
+  it("should ignore a malformed review code and send a normal OTP", async () => {
+    vi.stubEnv("PLAY_REVIEW_EMAIL", "review2@example.com");
+    vi.stubEnv("PLAY_REVIEW_OTP", "abc");
+    const { POST } = await import("@/app/api/mobile/auth/otp/route");
+    const req = new Request("http://localhost/api/mobile/auth/otp", {
+      method: "POST",
+      body: JSON.stringify({ email: "review2@example.com" }),
+    });
+    const res = await POST(req);
+    vi.unstubAllEnvs();
+    expect(res.status).toBe(200);
+    expect(sendMobileOtp).toHaveBeenCalled();
+  });
+
   it("should skip SMS when netgsm not configured for phone identity", async () => {
     vi.mocked(isNetgsmConfigured).mockReturnValue(false);
     const { POST } = await import("@/app/api/mobile/auth/otp/route");
