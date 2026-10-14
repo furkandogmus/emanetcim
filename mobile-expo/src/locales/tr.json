@@ -1,0 +1,188 @@
+{
+  "common": {
+    "continue": "Devam",
+    "back": "Geri",
+    "close": "Kapat",
+    "retry": "Tekrar dene",
+    "cancel": "Vazgeç",
+    "loading": "Yükleniyor…",
+    "genericError": "Bir şeyler ters gitti. Lütfen tekrar dene.",
+    "networkError": "Sunucuya ulaşılamadı. İnternet bağlantını kontrol et.",
+    "day_one": "{{count}} gün",
+    "day_other": "{{count}} gün",
+    "bag_one": "{{count}} valiz",
+    "bag_other": "{{count}} valiz"
+  },
+  "auth": {
+    "title": "Giriş yap",
+    "subtitle": "E-posta adresine 6 haneli bir kod gönderelim. Şifre yok.",
+    "emailLabel": "E-posta",
+    "emailPlaceholder": "ornek@eposta.com",
+    "sendCode": "Kod gönder",
+    "codeTitle": "Kodu gir",
+    "codeSubtitle": "{{email}} adresine gönderdiğimiz 6 haneli kodu yaz.",
+    "codeLabel": "Doğrulama kodu",
+    "verify": "Giriş yap",
+    "resend": "Kodu tekrar gönder",
+    "changeEmail": "E-postayı değiştir",
+    "invalidEmail": "Geçerli bir e-posta adresi gir.",
+    "errors": {
+      "invalid_code": "Kod hatalı ya da süresi dolmuş.",
+      "too_many_otp_requests": "Çok sık kod istedin. İki dakika sonra tekrar dene.",
+      "too_many_requests": "Çok fazla istek. Biraz sonra tekrar dene.",
+      "too_many_attempts": "Çok fazla deneme. Biraz sonra tekrar dene.",
+      "account_banned": "Bu hesap kullanıma kapatılmış."
+    }
+  },
+  "home": {
+    "heroTitle": "Valizini bırak.\nŞehrin tadını çıkar.",
+    "searchPlaceholder": "Nereye gidiyorsun?",
+    "myBookings": "Rezervasyonlarım",
+    "profile": "Profil"
+  },
+  "search": {
+    "locationTitle": "Nereye gidiyorsun?",
+    "useLocation": "Konumumu kullan",
+    "locating": "Konum alınıyor…",
+    "locationDenied": "Konum izni verilmedi. Listeden bir şehir seçebilirsin.",
+    "popular": "Popüler şehirler",
+    "whenTitle": "Ne zaman lazım?",
+    "whenHint": "Aynı gün için tarihe bir kez dokun. Birkaç gün için başlangıç ve bitiş gününü seç.",
+    "dropOff": "Bırakma",
+    "pickUp": "Alma",
+    "pickUpBeforeDropOff": "Alma saati bırakma saatinden en az 1 saat sonra olmalı.",
+    "bagsTitle": "Ne bırakıyorsun?",
+    "showSpots": "Noktaları göster",
+    "prevMonth": "Önceki ay",
+    "nextMonth": "Sonraki ay",
+    "step": "Adım {{current}}/{{total}}"
+  },
+  "bags": {
+    "s": "Küçük (S)",
+    "sDesc": "Sırt çantası, el çantası (max 10kg)",
+    "m": "Orta (M/L)",
+    "mDesc": "Kabin boy valiz, spor çantası (max 20kg)",
+    "xl": "Büyük (XL)",
+    "xlDesc": "Kargo boy valiz (max 30kg, 100cm)",
+    "decrease": "{{size}} azalt",
+    "increase": "{{size}} artır"
+  },
+  "map": {
+    "count_one": "{{place}} çevresinde {{count}} nokta",
+    "count_other": "{{place}} çevresinde {{count}} nokta",
+    "nearYou": "Yakınında",
+    "empty": "Bu bölgede uygun nokta bulamadık. Haritayı kaydırıp tekrar dene.",
+    "searchHere": "Bu bölgede ara",
+    "comingSoon": "Yakında",
+    "perDay": "/ gün",
+    "available": "~{{count}} yer",
+    "distance": "{{km}} km",
+    "verified": "Doğrulanmış",
+    "editSearch": "Aramayı düzenle"
+  },
+  "shop": {
+    "open247": "7/24 açık",
+    "hours": "{{open}} – {{close}}",
+    "weeklyHours": "Çalışma saatleri",
+    "rulesTitle": "Rezervasyon uygulamadan yapılır",
+    "rulesBody": "Dükkanda kapıdan kayıt alınmaz. Rezervasyonunu buradan yap, dükkanda QR kodunu göster.",
+    "prelaunch": "Bu nokta henüz rezervasyon almıyor. Açıldığında burada göreceksin.",
+    "restroom": "Tuvalet var",
+    "book": "Bu noktayı rezerve et",
+    "perDayLabel": "Valiz başı günlük",
+    "weekdays": [
+      "Pazar",
+      "Pazartesi",
+      "Salı",
+      "Çarşamba",
+      "Perşembe",
+      "Cuma",
+      "Cumartesi"
+    ],
+    "closed": "Kapalı"
+  },
+  "checkout": {
+    "title": "Onayla",
+    "when": "Zaman",
+    "bags": "Valizler",
+    "edit": "Düzenle",
+    "apply": "Uygula",
+    "priceTitle": "Ücret",
+    "bagLine": "{{count}} × {{size}} · {{days}}",
+    "insurance": "Güvence bedeli",
+    "estimatedTotal": "Tahmini toplam",
+    "estimateNote": "Kesin tutarı sunucu hesaplar; onaydan sonra rezervasyonunda görürsün.",
+    "payAtShop": "Ödeme, valizini bıraktığında dükkanda yapılır.",
+    "confirm": "Rezervasyonu onayla",
+    "errors": {
+      "insufficient_capacity": "Bu noktada seçtiğin zaman için yeterli yer kalmadı.",
+      "invalid_dates": "Seçtiğin tarihler geçersiz. Bırakma zamanı geçmişte olamaz.",
+      "platform_holiday": "Seçtiğin tarihte hizmet verilmiyor.",
+      "shop_not_open_yet": "Bu nokta henüz rezervasyon almıyor.",
+      "shop_closed_on_date": "Dükkan seçtiğin tarihte kapalı.",
+      "shop_not_found": "Bu nokta artık rezervasyon almıyor.",
+      "no_bags": "En az bir valiz seç."
+    }
+  },
+  "success": {
+    "title": "Rezervasyonun hazır!",
+    "body": "Dükkana gittiğinde QR kodunu göster, valizini bırak.",
+    "viewBooking": "Rezervasyonu gör",
+    "home": "Ana sayfa"
+  },
+  "bookings": {
+    "title": "Rezervasyonlarım",
+    "empty": "Henüz rezervasyonun yok.",
+    "emptyBody": "Bir nokta seçip valizini bıraktığında burada görünecek.",
+    "emptyCta": "Nokta ara",
+    "upcoming": "Yaklaşan",
+    "past": "Geçmiş",
+    "showQr": "Dükkanda bu kodu göster",
+    "qrMissing": "QR kodu henüz hazır değil. Biraz sonra tekrar bak.",
+    "dropOff": "Bırakma",
+    "pickUp": "Alma",
+    "total": "Toplam",
+    "directions": "Yol tarifi",
+    "call": "Dükkanı ara",
+    "cancel": "Rezervasyonu iptal et",
+    "cancelTitle": "İptal edilsin mi?",
+    "cancelBody": "Bu işlem geri alınamaz.",
+    "cancelConfirm": "Evet, iptal et",
+    "cancelledTitle": "Rezervasyon iptal edildi",
+    "cancelledRefund": "Ödediğin tutarın tamamı iade edilecek.",
+    "cancelledNoCharge": "Senden herhangi bir ücret alınmadı.",
+    "cancelFailed": "Rezervasyon iptal edilemedi."
+  },
+  "status": {
+    "PENDING": "Bekliyor",
+    "PAID": "Ödendi",
+    "WAITING_APPROVAL": "Onay bekliyor",
+    "APPROVED": "Onaylandı",
+    "CHECKED_IN": "Valiz dükkanda",
+    "CHECKED_OUT": "Tamamlandı",
+    "CANCELLED": "İptal edildi"
+  },
+  "partner": {
+    "title": "Rezervasyonlar",
+    "today": "Bugün",
+    "upcoming": "Yaklaşan",
+    "past": "Geçmiş",
+    "empty": "Bu listede rezervasyon yok.",
+    "guest": "Misafir",
+    "bags": "Valizler",
+    "total": "Toplam",
+    "new": "Yeni",
+    "detailTitle": "Rezervasyon"
+  },
+  "profile": {
+    "title": "Profil",
+    "role": {
+      "GUEST": "Misafir",
+      "PARTNER": "Esnaf",
+      "ADMIN": "Yönetici"
+    },
+    "signOut": "Çıkış yap",
+    "signOutNote": "Çıkış yapınca bu hesabın tüm cihazlardaki oturumu kapanır.",
+    "version": "Sürüm {{version}}"
+  }
+}
