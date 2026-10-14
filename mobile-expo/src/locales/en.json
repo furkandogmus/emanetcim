@@ -183,6 +183,14 @@
     },
     "signOut": "Sign out",
     "signOutNote": "Signing out ends this account's sessions on all devices.",
-    "version": "Version {{version}}"
+    "version": "Version {{version}}",
+    "privacy": "Privacy policy",
+    "deleteAccount": "Delete my account",
+    "deleteTitle": "Delete your account?",
+    "deleteBody": "Your name, email and phone number are erased and you can no longer sign in with this account. Past booking records are kept without your details.",
+    "deleteConfirm": "Yes, delete my account",
+    "deleteFailedTitle": "Couldn’t delete the account",
+    "deleteActiveBookings": "You have ongoing bookings. Cancel them first or wait until they’re completed.",
+    "deleteRequest": "Request account closure"
   }
 }
