@@ -126,7 +126,8 @@
       "shop_not_open_yet": "Bu nokta henüz rezervasyon almıyor.",
       "shop_closed_on_date": "Dükkan seçtiğin tarihte kapalı.",
       "shop_not_found": "Bu nokta artık rezervasyon almıyor.",
-      "no_bags": "En az bir valiz seç."
+      "no_bags": "En az bir valiz seç.",
+      "too_many_requests": "Çok fazla istek. Biraz sonra tekrar dene."
     }
   },
   "success": {
