@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, Pressable, StyleSheet, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, TextInput, View } from "react-native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
@@ -8,6 +8,7 @@ import { AppText, Banner, Button, Card } from "@/components/ui";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import type { BookingDetail } from "@/lib/types";
+import { notify } from "@/lib/notify";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 
 type BagSize = "S" | "M" | "XL";
@@ -58,7 +59,7 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
     onSuccess: () => {
       setError(null);
       refresh();
-      Alert.alert(t("partner.checkedInTitle"), t("partner.checkedInBody"));
+      notify(t("partner.checkedInTitle"), t("partner.checkedInBody"));
     },
     onError: (e) => setError(errorMessage(e, "partner")),
   });
@@ -68,7 +69,7 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
     onSuccess: () => {
       setError(null);
       refresh();
-      Alert.alert(t("partner.checkedOutTitle"), t("partner.checkedOutBody"));
+      notify(t("partner.checkedOutTitle"), t("partner.checkedOutBody"));
     },
     onError: (e) => setError(errorMessage(e, "partner")),
   });

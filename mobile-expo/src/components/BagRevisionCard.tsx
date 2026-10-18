@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { PencilLine } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
@@ -10,6 +10,7 @@ import { api, ApiError } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { formatMoney } from "@/lib/format";
 import type { BagRevisionRequest, BagRevisionResponse, BookingDetail } from "@/lib/types";
+import { notify } from "@/lib/notify";
 import { colors, space } from "@/theme/tokens";
 
 /** `REVISABLE_STATUSES` (src/services/booking/bag-revision.ts); sunucu yine de reddeder. */
@@ -44,7 +45,7 @@ export function BagRevisionCard({ booking }: { booking: BookingDetail }) {
       setError(null);
       setOpen(false);
       refresh();
-      Alert.alert(t("bagRevision.savedTitle"), t("bagRevision.savedBody", { total: formatMoney(res.newTotal) }));
+      notify(t("bagRevision.savedTitle"), t("bagRevision.savedBody", { total: formatMoney(res.newTotal) }));
     },
     onError: (e) => {
       // 409 ama hata degil: oneri kaydedildi, misafire onay e-postasi gitti.
@@ -52,7 +53,7 @@ export function BagRevisionCard({ booking }: { booking: BookingDetail }) {
         setError(null);
         setOpen(false);
         refresh();
-        Alert.alert(t("bagRevision.approvalTitle"), t("bagRevision.approvalBody"));
+        notify(t("bagRevision.approvalTitle"), t("bagRevision.approvalBody"));
         return;
       }
       setError(errorMessage(e, "bagRevision"));

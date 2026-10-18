@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -16,6 +16,7 @@ import { estimate } from "@/lib/pricing";
 import { useBooking, useShop } from "@/lib/queries";
 import { totalBags } from "@/lib/search";
 import type { BookingDetail, ModifyBookingRequest, ModifyBookingResponse } from "@/lib/types";
+import { notify } from "@/lib/notify";
 import { colors, fonts, space } from "@/theme/tokens";
 
 export default function ModifyBookingScreen() {
@@ -50,7 +51,7 @@ function ModifyForm({ booking: b }: { booking: BookingDetail }) {
       api<ModifyBookingResponse>(`/bookings/${b.id}/modify`, { method: "PUT", body }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["bookings"] });
-      Alert.alert(t("modify.savedTitle"), t("modify.savedBody"));
+      notify(t("modify.savedTitle"), t("modify.savedBody"));
       router.back();
     },
     onError: (e) => setError(errorMessage(e, "modify")),

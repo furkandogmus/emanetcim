@@ -11,7 +11,8 @@
     "day_one": "{{count}} gün",
     "day_other": "{{count}} gün",
     "bag_one": "{{count}} valiz",
-    "bag_other": "{{count}} valiz"
+    "bag_other": "{{count}} valiz",
+    "ok": "Tamam"
   },
   "auth": {
     "title": "Giriş yap",
@@ -60,7 +61,8 @@
     "showSpots": "Noktaları göster",
     "prevMonth": "Önceki ay",
     "nextMonth": "Sonraki ay",
-    "step": "Adım {{current}}/{{total}}"
+    "step": "Adım {{current}}/{{total}}",
+    "dropOffInPast": "Bırakma saati geçmişte kaldı. Yeni bir saat seç."
   },
   "bags": {
     "s": "Küçük (S)",
