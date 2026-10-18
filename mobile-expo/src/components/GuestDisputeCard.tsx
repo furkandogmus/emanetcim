@@ -50,7 +50,7 @@ export function GuestDisputeCard({ booking }: { booking: BookingDetail }) {
 
   if (!DISPUTABLE.has(booking.status)) return null;
 
-  if (done) {
+  if (done || booking.hasDispute) {
     return <Banner tone="success" body={t(done === "sent" ? "dispute.sent" : "dispute.errors.duplicate_dispute")} />;
   }
 

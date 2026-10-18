@@ -50,7 +50,7 @@ export function GuestReviewCard({ booking }: { booking: BookingDetail }) {
 
   if (booking.status !== "CHECKED_OUT") return null;
 
-  if (done) {
+  if (done || booking.hasReview) {
     return <Banner tone="success" body={t(done === "sent" ? "review.sent" : "review.errors.duplicate_review")} />;
   }
 

@@ -59,6 +59,8 @@ type BookingDetailSource = BookingSummarySource & {
     owner: { phone: string | null };
   };
   seals: Array<{ sealNumber: number; bagIndex: number; bagSize: string }>;
+  review?: { id: string } | null;
+  dispute?: { id: string } | null;
 };
 
 export function toMobileBookingDetail(b: BookingDetailSource) {
@@ -74,6 +76,10 @@ export function toMobileBookingDetail(b: BookingDetailSource) {
       bagIndex: s.bagIndex,
       bagSize: s.bagSize,
     })),
+    // Istemci "degerlendir" / "sorun bildir" dugmesini buna gore gizler; once
+    // yalnizca sunucunun 409'uyla ogreniyordu.
+    hasReview: !!b.review,
+    hasDispute: !!b.dispute,
   };
 }
 
