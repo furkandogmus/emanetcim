@@ -380,5 +380,23 @@
       "forbidden": "You can't change this booking.",
       "invalid_input": "Some details are invalid. Check the time and the number of bags."
     }
+  },
+  "review": {
+    "open": "Write a review",
+    "title": "Rate your experience",
+    "hint": "Your review of {{shop}} helps other guests.",
+    "ratingLabel": "Rating",
+    "starN": "{{n}} stars",
+    "commentLabel": "Comment (optional)",
+    "commentPlaceholder": "How was it? (optional)",
+    "submit": "Submit",
+    "sent": "Thanks, your review is saved.",
+    "errors": {
+      "invalid_data": "Please pick a rating from 1 to 5.",
+      "booking_not_completed": "You can review after picking up your bags.",
+      "duplicate_review": "You've already reviewed this booking.",
+      "not_found": "Booking not found.",
+      "forbidden": "You can't review this booking."
+    }
   }
 }

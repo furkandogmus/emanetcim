@@ -141,6 +141,11 @@ export type ModifyBookingRequest = {
 
 export type ModifyBookingResponse = { success: true };
 
+/** `POST reviews`. Puan 1-5 tam sayi; yorum en cok 2000 karakter (ReviewService). */
+export type CreateReviewRequest = { bookingId: string; rating: number; comment?: string };
+
+export type CreateReviewResponse = { success: true; review: { id: string; rating: number } };
+
 /** `admin/stats`. */
 export type AdminStats = {
   totalBookings: number;
