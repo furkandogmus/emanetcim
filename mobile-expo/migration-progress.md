@@ -163,3 +163,16 @@ Sırada: iOS. Makinede Xcode yok → `eas-simulator` (bulut) ya da Xcode kurulum
 - Not: bu uçlar dükkan yoksa ham `"Shop not found"` dönüyor (kod değil); istemci genel
   hataya çeviriyor. Küçük düzeltme adayı.
 - Sırada: iOS (Xcode kararı bekliyor); Play'deki #14 ile gerçek cihazda canlı API dumanı
+
+- **Sıradaki (yazma, öncelikli):** `partner/shop` (PATCH), `shop/schedule`, `shop/image`
+  dükkanı `shopService.getShopByOwner` → sırasız `findFirst({ ownerId })` ile seçiyor;
+  çok dükkanlı esnafın ayar/saat/fotoğraf değişikliği rastgele dükkana yazılabilir.
+  `partner/earnings/stats` ise bütün dükkanları bilerek topluyor, sorun değil.
+
+## Play dahili test geri bildirimi (2026-10-18, sürüm 14)
+
+- [x] "Sadece aynı gün seçiliyor": takvim tek gün seçiliyken ileri güne dokunmayı yeni başlangıç
+  sayıyordu; artık aralığı uzatır (`lib/date-range.ts`, testli; emülatörde 19→22 doğrulandı)
+- [ ] "Noktalar gözükmüyor": prod `shops/nearby` İstanbul/Ankara/İzmir/Antalya için 7–11 dükkan
+  dönüyor (sunucu sağlam). Ayrıntı bekleniyor: liste sayısı mı 0, harita mı boş? Konum/saat
+  filtresi ya da release build'de pin çizimi olabilir
