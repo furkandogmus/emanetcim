@@ -44,8 +44,9 @@ push/PR → main                     ci.yml
                                    ASLA iptal edilmez, tek sırada
 ```
 
-`mobile-ci.yml` ayrı kalır (push'ta `mobile/**` path filtreli), `release.yml` yalnızca
-sürüm etiketinde çalışır.
+`mobile-expo-ci.yml` ayrı kalır (yol filtreli, zorunlu değil), `release.yml` yalnızca
+sürüm etiketinde çalışır. Flutter'ın `mobile-ci.yml`'i uygulamayla birlikte 2026-10-18'de
+kaldırıldı.
 
 ### Kurallar
 
@@ -76,28 +77,22 @@ sürüm etiketinde çalışır.
   deploy'u yarıda keserdi: S3 yüklemesi bitmiş, SSM komutu beklenirken kesilen bir
   koşu sunucuyu yarı güncellenmiş bırakır. `deploy` ayrıca `deploy-production`
   grubunda sırayla çalışır — iki deploy aynı anda `docker compose up` çağırmaz.
-- **Push'ta `paths-ignore`:** `docs/**`, `mobile/**`, `ops/**`, `**/*.md`. Bunlar
+- **Push'ta `paths-ignore`:** `docs/**`, `ops/**`, `**/*.md`. Bunlar
   uygulamanın davranışını değiştirmez. Path filtresi yüzünden atlanan bir
   değişikliği elle doğrulamak için `workflow_dispatch` var.
-- **PR'da path filtresi YOK (2026-09-23).** `verify` ve mobildeki `Build Android`
-  main'de zorunlu kontrol. Path filtresi yüzünden hiç tetiklenmeyen bir zorunlu
+- **PR'da path filtresi YOK (2026-09-23).** `verify` main'de zorunlu kontrol (Flutter'ın
+  `Build Android`'i 2026-10-18'e kadar zorunluydu; uygulamayla birlikte kalktı). Path filtresi yüzünden hiç tetiklenmeyen bir zorunlu
   kontrol PR'ı sonsuza dek "bekliyor"da bırakır. Kapsamı `changes` job'u ölçer;
-  uygulamaya (ya da mobile) dokunmayan PR'da iş **koşulla atlanır** ve GitHub
+  uygulamaya dokunmayan PR'da iş **koşulla atlanır** ve GitHub
   atlanan işi geçmiş sayar. Üçüncü zorunlu kontrol `pr-gate.yml` → `PR kurallari`
   (commit başlıkları). Süreç: `docs/GIT_COMMIT_GUIDE.md`.
 - **`timeout-minutes` her job'da.** Asılı kalan bir job, kotayı sessizce yer.
 
 ### macOS 10× faturalanır
 
-`mobile-ci.yml` içindeki iOS build'i 10 koşuda **18,2 dakika gerçek süre**
-harcadı ama faturaya **182 dakika** yazıldı — kotanın ~%9'u. Ürettiği şey imzasız
-bir debug `.app` idi.
-
-Bu yüzden iOS build'i **otomatik koşmuyor**; Actions sekmesinden elle tetiklenir
-(`workflow_dispatch`, `ios` girdisi). Dart tarafındaki hatalar zaten her push'ta
-yakalanır — `flutter analyze` ve `flutter test` Android job'ında, Linux ücretiyle.
-iOS'a özgü risk (Podfile, Xcode ayarları, native eklenti) yalnızca
-`mobile/ios/**` değiştiğinde doğar ve o değişiklik nadirdir.
+Flutter'ın `mobile-ci.yml`'i iOS build'inde 10 koşuda 18,2 dakika gerçek süreye 182 dakika
+fatura yazmıştı. Expo build'leri artık EAS'te (bulut), Actions kotasını yemiyor; bir gün
+Actions'ta macOS koşucusu açılırsa bu çarpanı hesaba katın.
 
 ## Kota bittiğinde ne yapılır
 
