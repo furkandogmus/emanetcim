@@ -574,5 +574,24 @@
       "invalid_input": "A time or date is invalid. Time off cannot start in the past.",
       "schedule_save_failed": "Could not save, try again."
     }
+  },
+  "referral": {
+    "title": "My invite code",
+    "yourCode": "Your invite code",
+    "codeLabel": "Your invite code: {{code}}",
+    "share": "Share",
+    "partner": {
+      "title": "Invite a fellow shop owner",
+      "body": "Invite a shop owner you know to join BagajPark and help grow our partner network.",
+      "shareMessage": "Become a luggage storage point on BagajPark. My invite code: {{code}}\n{{url}}"
+    },
+    "guest": {
+      "title": "Invite a friend, give {{pct}}% off",
+      "body": "Share your code with a friend. They get {{pct}}% off their first booking.",
+      "shareMessage": "Get {{pct}}% off your first BagajPark luggage storage with my invite code: {{code}}\n{{url}}"
+    },
+    "errors": {
+      "referral_code_failed": "The code could not be created, please try again."
+    }
   }
 }
