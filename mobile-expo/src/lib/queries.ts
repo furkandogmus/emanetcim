@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { api } from "./api";
-import type { BookingDetail, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail } from "./types";
+import type { BookingDetail, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReview } from "./types";
 
 export const keys = {
   myBookings: ["bookings", "me"] as const,
@@ -23,6 +23,13 @@ export function useBooking(id: string) {
 
 export function useShop(id: string) {
   return useQuery({ queryKey: keys.shop(id), queryFn: () => api<ShopDetail>(`/shops/${id}`, { auth: false }) });
+}
+
+export function useShopReviews(id: string) {
+  return useQuery({
+    queryKey: ["shops", id, "reviews"],
+    queryFn: () => api<ShopReview[]>(`/shops/${id}/reviews`, { auth: false }),
+  });
 }
 
 export type NearbyParams = {

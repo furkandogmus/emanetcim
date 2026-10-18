@@ -104,7 +104,11 @@
       "Friday",
       "Saturday"
     ],
-    "closed": "Closed"
+    "closed": "Closed",
+    "prices": "Bag prices",
+    "perDay": "{{price}} / day",
+    "reviews": "Reviews ({{count}})",
+    "noReviews": "No reviews yet."
   },
   "checkout": {
     "title": "Confirm",
