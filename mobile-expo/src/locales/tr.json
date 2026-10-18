@@ -218,7 +218,8 @@
       "dimensions_too_large": "Fotoğrafın çözünürlüğü çok yüksek.",
       "empty": "Fotoğraf okunamadı, tekrar dene.",
       "storage_unavailable": "Fotoğraf yükleme şu an kullanılamıyor.",
-      "not_found": "Dükkan bulunamadı."
+      "not_found": "Dükkan bulunamadı.",
+      "no_shop": "Aktif bir dükkanın bulunamadı."
     },
     "myShop": "Dükkanım",
     "photo": "Dükkan fotoğrafı",
@@ -536,7 +537,8 @@
       "shop_update_failed": "Dükkan bilgileri kaydedilemedi. Değerleri kontrol edip tekrar dene.",
       "invalid_tr_phone": "Telefon numarası geçerli bir Türkiye cep numarası değil.",
       "already_registered": "Bu telefon numarası başka bir hesapta kayıtlı.",
-      "invalid_data": "Telefon numarası okunamadı."
+      "invalid_data": "Telefon numarası okunamadı.",
+      "no_shop": "Aktif bir dükkanın bulunamadı."
     }
   },
   "schedule": {
@@ -575,7 +577,8 @@
     "errors": {
       "schedule_conflict": "Bu değişiklik kaydedilemedi.",
       "invalid_input": "Saat ya da tarih geçersiz. Geçmiş bir tarihe izin eklenemez.",
-      "schedule_save_failed": "Kaydedilemedi, tekrar dene."
+      "schedule_save_failed": "Kaydedilemedi, tekrar dene.",
+      "no_shop": "Aktif bir dükkanın bulunamadı."
     }
   },
   "referral": {
