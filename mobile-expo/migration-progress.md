@@ -56,6 +56,26 @@ her hata buraya `— hata: <ne>` diye eklenir.
 - [ ] İtiraz aç (`/bookings/[id]/dispute`)
 - [ ] Push bildirim kaydı (`push/register`)
 
+## Admin (2026-10-18 yerel inceleme; uygulama yayından sonra)
+
+Flutter'da 3 ekran var: pano (sayılar), başvurular (onayla/reddet), mesajlar
+(okundu/sil). Mobil uçlar hazır ama şu eksikleri var; Expo ekranından ÖNCE
+sunucuda düzeltilir:
+
+- [ ] `admin/applications/[id]/[action]`: web `approveShopAction`/`rejectShopAction`
+  denetim kaydı yazıyor (`shop.approve_application`, `shop.reject_application`),
+  mobil uç yazmıyor. Reddetmek dükkanı SİLER; izsiz olmamalı.
+- [ ] Aynı uç ham İngilizce cümle dönüyor ("Shop not found."); istemci çeviremez.
+  Kod olmalı: `not_found`, `missing_coordinates`, `has_active_bookings`.
+- [ ] `admin/applications` GET ham Prisma `Shop` dönüyor (bütün kolonlar, `Decimal`
+  string). `mobile-dto.ts`'e DTO.
+- [ ] `admin/messages/[id]` PATCH/DELETE olmayan id'de Prisma P2025 → 500; 404 olmalı.
+
+Expo:
+- [ ] ADMIN girişte `(admin)` grubuna: pano (`admin/stats`), başvurular, mesajlar.
+  Reddet = dükkan silme → yıkıcı onay penceresi.
+- [ ] Mesaja e-postayla cevap yalnızca web'de (`replyToContactMessageAction`, Resend).
+
 ## nativize-later
 
 - [ ] Esnaf kazançları (`/partner/earnings`)
