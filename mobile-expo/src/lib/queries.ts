@@ -97,7 +97,11 @@ export function useAdminMessages() {
 }
 
 export function usePartnerShop() {
-  return useQuery({ queryKey: keys.partnerShop, queryFn: () => api<PartnerShop>("/partner/shop") });
+  const [shopId] = usePartnerShopSelection();
+  return useQuery({
+    queryKey: [...keys.partnerShop, shopId ?? "default"],
+    queryFn: () => api<PartnerShop>(withShop("/partner/shop", shopId)),
+  });
 }
 
 export function usePartnerSeals() {
@@ -110,13 +114,21 @@ export function usePartnerSeals() {
 
 /** `usePartnerShop` ile ayni istek ve anahtar; yalnizca tip genis. */
 export function usePartnerShopSettings() {
-  return useQuery({ queryKey: keys.partnerShop, queryFn: () => api<PartnerShopSettings>("/partner/shop") });
+  const [shopId] = usePartnerShopSelection();
+  return useQuery({
+    queryKey: [...keys.partnerShop, shopId ?? "default"],
+    queryFn: () => api<PartnerShopSettings>(withShop("/partner/shop", shopId)),
+  });
 }
 
 export const partnerScheduleKey = ["partner", "schedule"] as const;
 
 export function usePartnerSchedule() {
-  return useQuery({ queryKey: partnerScheduleKey, queryFn: () => api<PartnerSchedule>("/partner/shop/schedule") });
+  const [shopId] = usePartnerShopSelection();
+  return useQuery({
+    queryKey: [...partnerScheduleKey, shopId ?? "default"],
+    queryFn: () => api<PartnerSchedule>(withShop("/partner/shop/schedule", shopId)),
+  });
 }
 
 export function usePartnerEarnings() {

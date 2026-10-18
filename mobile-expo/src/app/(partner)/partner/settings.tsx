@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { Field } from "@/components/Field";
 import { AppText, Banner, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { api } from "@/lib/api";
+import { usePartnerShopSelection, withShop } from "@/lib/partner-shop";
 import { errorMessage } from "@/lib/errors";
 import { keys, usePartnerShopSettings } from "@/lib/queries";
 import type { PartnerShopSettings } from "@/lib/types";
@@ -51,6 +52,7 @@ export default function PartnerSettingsScreen() {
 function SettingsForm({ shop }: { shop: PartnerShopSettings }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [shopId] = usePartnerShopSelection();
   const [name, setName] = useState(shop.name);
   const [capacity, setCapacity] = useState(String(shop.capacity));
   const [price, setPrice] = useState(String(shop.pricePerDay));
@@ -62,7 +64,7 @@ function SettingsForm({ shop }: { shop: PartnerShopSettings }) {
 
   const save = useMutation({
     mutationFn: async (body: { name: string; capacity: number; pricePerDay: number }) => {
-      await api("/partner/shop", {
+      await api(withShop("/partner/shop", shopId), {
         method: "PUT",
         body: { ...body, address: address.trim(), city: city.trim(), district: district.trim() },
       });

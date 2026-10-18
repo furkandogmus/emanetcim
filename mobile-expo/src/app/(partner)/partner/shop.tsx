@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import { LinkRow } from "@/components/LinkRow";
 import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { api } from "@/lib/api";
+import { usePartnerShopSelection, withShop } from "@/lib/partner-shop";
 import { errorMessage } from "@/lib/errors";
 import { resolveImage } from "@/lib/images";
 import { keys, usePartnerShop } from "@/lib/queries";
@@ -24,6 +25,7 @@ import { colors, radius, space } from "@/theme/tokens";
 export default function PartnerShopScreen() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [shopId] = usePartnerShopSelection();
   const query = usePartnerShop();
 
   const upload = useMutation({
@@ -35,7 +37,7 @@ export default function PartnerShopScreen() {
         name: asset.fileName ?? "shop.jpg",
         type: asset.mimeType ?? "image/jpeg",
       } as unknown as Blob);
-      return api<{ url: string }>("/partner/shop/image", { method: "POST", body: form });
+      return api<{ url: string }>(withShop("/partner/shop/image", shopId), { method: "POST", body: form });
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: keys.partnerShop });
