@@ -255,6 +255,9 @@ export type ScheduleConflict = {
   kind: "dropoff" | "pickup" | "bags_on_shelf";
 };
 
+/** `referrals/code` GET. `discountPct` davet edilenin ilk rezervasyon indirimi (0-50). */
+export type ReferralCode = { code: string; discountPct: number };
+
 /** `partner/earnings/stats` GET. Tutarlar esnaf payi (komisyon dusulmus). */
 export type PartnerEarnings = {
   totalBalance: number;
