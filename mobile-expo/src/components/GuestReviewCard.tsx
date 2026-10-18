@@ -20,7 +20,7 @@ const MAX_COMMENT = 2000;
  * Detay DTO'su yorumun var olup olmadigini tasimiyor, bu yuzden kart
  * CHECKED_OUT'ta hep gorunur ve tekrar yorum sunucu cevabiyla kapanir.
  */
-export function GuestReviewCard({ booking }: { booking: BookingDetail }) {
+export function GuestReviewCard({ booking, onOpen }: { booking: BookingDetail; onOpen?: () => void }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -60,7 +60,10 @@ export function GuestReviewCard({ booking }: { booking: BookingDetail }) {
         variant="secondary"
         title={t("review.open")}
         icon={<Star size={18} color={colors.ink} />}
-        onPress={() => setOpen(true)}
+        onPress={() => {
+          setOpen(true);
+          onOpen?.();
+        }}
       />
     );
   }
