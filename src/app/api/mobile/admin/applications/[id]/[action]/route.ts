@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
-import { shopService } from "@/services/ShopService";
+import { clientIpFromRequest } from "@/lib/client-ip";
+import { applicationActionResponse } from "@/lib/admin-application-response";
 
 /*
   Mobil admin uygulaması `POST /admin/applications/:id/approve|reject`e
@@ -23,30 +23,8 @@ export async function POST(
   if (forbid) return forbid;
 
   const { id, action } = await params;
-
-  if (action === "approve") {
-    const result = await shopService.approveShop(id);
-    if (!result.ok) {
-      return result.reason === "missing_coordinates"
-        ? NextResponse.json(
-            { error: "Shop has no coordinates; set them before approving." },
-            { status: 409 },
-          )
-        : NextResponse.json({ error: "Shop not found." }, { status: 404 });
-    }
-  } else if (action === "reject") {
-    const result = await shopService.rejectShop(id);
-    if (!result.ok) {
-      return result.reason === "not_found"
-        ? NextResponse.json({ error: "Shop not found." }, { status: 404 })
-        : NextResponse.json(
-            { error: "Shop has active bookings; cannot delete." },
-            { status: 409 },
-          );
-    }
-  } else {
-    return NextResponse.json({ error: "Invalid action" }, { status: 400 });
-  }
-
-  return NextResponse.json({ success: true });
+  return applicationActionResponse(id, action, {
+    userId: auth.user.id,
+    ip: clientIpFromRequest(req),
+  });
 }
