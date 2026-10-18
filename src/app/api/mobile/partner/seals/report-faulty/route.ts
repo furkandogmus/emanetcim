@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import prisma from "@/lib/db";
+import { resolvePartnerShops } from "@/lib/partner-shop";
 import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 import { sealService } from "@/services/SealService";
 
@@ -11,9 +11,8 @@ export async function POST(req: NextRequest) {
   if (roleErr) return roleErr;
 
   // Cagiran partner'in KENDI dukkani — mühür sahipligi buna gore dogrulanir.
-  const shop = await prisma.shop.findFirst({
-    where: { ownerId: auth.user.id, isActive: true },
-  });
+  // Secim web mühür sayfasiyla ve `GET partner/seals` ile ayni (`?shop=`).
+  const { activeShop: shop } = await resolvePartnerShops(auth.user.id, req.nextUrl.searchParams.get("shop"));
   if (!shop) return NextResponse.json({ error: "no_shop" }, { status: 404 });
 
   const { serialNumber } = await req.json();
