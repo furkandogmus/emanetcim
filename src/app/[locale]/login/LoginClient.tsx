@@ -11,6 +11,7 @@ import { resolveLoginLanding } from '@/lib/auth-landing';
 import { Package, ShieldCheck, Loader2, Store, Shield, Mail, Lock, ChevronDown, Apple } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AmbientBackdrop from "@/components/common/AmbientBackdrop";
+import BrandMark from "@/components/common/BrandMark";
 
 function GoogleIcon({ size = 20 }: { size?: number }) {
   return (
@@ -235,9 +236,7 @@ export default function LoginPage({
         className="relative z-10 w-full max-w-md max-w-[calc(100vw-1rem)] bg-white rounded-3xl sm:rounded-4xl p-6 sm:p-10 shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col items-center"
       >
         {/* Logo */}
-        <div className="w-16 h-16 bg-brand-gradient rounded-2xl flex items-center justify-center mb-8 shadow-brand-md">
-          <Package size={32} className="text-white" />
-        </div>
+        <BrandMark size={64} className="h-16 w-auto mb-8" />
 
         <h1 className="text-2xl font-black text-gray-900 mb-2">{t('loginTitle')}</h1>
         <p className="text-gray-400 text-sm font-medium mb-8 text-center leading-relaxed">

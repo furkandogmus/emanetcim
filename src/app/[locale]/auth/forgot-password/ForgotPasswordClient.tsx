@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { Package, Mail, Loader2, ArrowLeft } from "lucide-react";
+import { Mail, Loader2, ArrowLeft } from "lucide-react";
 import { requestPasswordResetAction } from "@/actions/password-reset";
 import AmbientBackdrop from "@/components/common/AmbientBackdrop";
+import BrandMark from "@/components/common/BrandMark";
 
 export default function ForgotPasswordClient() {
   const t = useTranslations("Auth");
@@ -42,9 +43,7 @@ export default function ForgotPasswordClient() {
     <div className="relative flex min-h-screen flex-col items-center justify-center bg-gray-50 p-6 font-sans overflow-hidden">
       <AmbientBackdrop />
       <div className="relative z-10 w-full max-w-md rounded-4xl border border-gray-100 bg-white p-10 shadow-xl shadow-gray-200/50">
-        <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-gradient shadow-brand-md">
-          <Package size={32} className="text-white" />
-        </div>
+        <BrandMark size={64} className="mb-8 h-16 w-auto" />
 
         <h1 className="mb-2 text-2xl font-black text-gray-900">{t("forgotPasswordTitle")}</h1>
         <p className="mb-8 text-sm font-medium leading-relaxed text-gray-500">

@@ -5,8 +5,9 @@ import UserNav from "./UserNav";
 import LocaleSwitcher from "./LocaleSwitcher";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Package } from "lucide-react";
+
 import { useTranslations } from "next-intl";
+import BrandMark from "@/components/common/BrandMark";
 
 function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
   const pathname = usePathname();
@@ -83,9 +84,7 @@ export default function Header() {
         aria-label={navCopy.logoLabel}
         className="flex items-center gap-2.5 group min-w-0"
       >
-        <div className="w-8 h-8 shrink-0 bg-brand-gradient rounded-xl flex items-center justify-center shadow-brand-sm group-hover:shadow-brand-md transition-all duration-200 group-active:scale-95">
-          <Package size={16} className="text-white" strokeWidth={2.5} aria-hidden="true" />
-        </div>
+        <BrandMark size={32} className="h-8 w-auto shrink-0 transition-transform duration-200 group-active:scale-95" />
         {/*
           `max-[400px]:hidden`: 400 pikselin altinda yalnizca simge kaliyor.
           Sebep, logonun kendisi degil KOMSUSU: 360 px'lik bir ekranda logo 130 +

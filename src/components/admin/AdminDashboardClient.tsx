@@ -30,6 +30,7 @@ import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
+import BrandMark from "@/components/common/BrandMark";
 
 const AnalyticsChart = dynamic(
   () => import("@/components/admin/AnalyticsChart"),
@@ -333,9 +334,7 @@ export default function AdminDashboardClient({
             <span className="id-eyebrow opacity-40">
               {t("versionLabel")}
             </span>
-            <div className="p-2 bg-orange-600 rounded-lg shadow-lg shadow-orange-900/40">
-              <Package size={16} />
-            </div>
+            <BrandMark size={32} className="h-8 w-auto" />
           </div>
         </div>
       </motion.div>
