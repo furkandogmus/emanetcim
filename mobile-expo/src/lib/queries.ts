@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { api } from "./api";
-import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReview, PartnerShopSettings, PartnerSchedule } from "./types";
+import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReview, PartnerShopSettings, PartnerSchedule, PartnerDashboard } from "./types";
 
 export const keys = {
   myBookings: ["bookings", "me"] as const,
@@ -118,5 +118,20 @@ export function usePartnerEarnings() {
   return useQuery({
     queryKey: ["partner", "earnings"],
     queryFn: () => api<PartnerEarnings>("/partner/earnings/stats"),
+  });
+}
+
+/**
+ * Esnafin gunluk ozeti. `["partner", ...]` ailesinde: teslim al / et sonrasi
+ * `["partner"]` gecersiz kilininca sayilar da yenilenir. `shopId` yoksa sunucu
+ * web paneliyle ayni varsayilan dukkani secer.
+ */
+export function usePartnerDashboard(shopId: string | null) {
+  return useQuery({
+    queryKey: ["partner", "dashboard", shopId ?? "default"],
+    queryFn: () =>
+      api<PartnerDashboard>(`/partner/dashboard${shopId ? `?shop=${encodeURIComponent(shopId)}` : ""}`),
+    // Dukkan degisirken kart yukleme durumuna dusup dukkan seridini sifirlamasin.
+    placeholderData: (prev) => prev,
   });
 }

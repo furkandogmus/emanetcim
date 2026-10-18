@@ -593,5 +593,15 @@
     "errors": {
       "referral_code_failed": "Kod oluşturulamadı, lütfen tekrar dene."
     }
+  },
+  "pulse": {
+    "today": "Bugün · {{shop}}",
+    "arrivals": "Gelecek",
+    "pickups": "Alınacak",
+    "inStorage": "Dükkanda valiz",
+    "thisMonth": "Bu ay kazancın",
+    "vsLastMonth": "Geçen aya göre %{{pct}}",
+    "failed": "Günlük özet yüklenemedi. Yeniden denemek için dokun.",
+    "a11y": "{{shop}}, bugün: {{arrivals}} misafir gelecek, {{pickups}} valiz alınacak, dükkanda {{bags}} valiz var. Bu ay kazancın {{month}}."
   }
 }

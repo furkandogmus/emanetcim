@@ -2,10 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { QrCode, Store, User } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { BookingRow } from "@/components/BookingRow";
+import { PartnerPulseCard } from "@/components/PartnerPulseCard";
 import { Segmented } from "@/components/Segmented";
 import { AppText, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { errorMessage } from "@/lib/errors";
@@ -31,7 +33,15 @@ function bucket(b: PartnerBooking): Tab {
 export default function PartnerBookingsScreen() {
   const { t } = useTranslation();
   const query = usePartnerBookings();
+  const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>("today");
+  /** Ozetin dukkani; null = sunucunun (web paneliyle ayni) varsayilani. */
+  const [pulseShop, setPulseShop] = useState<string | null>(null);
+
+  function refreshAll() {
+    void query.refetch();
+    void queryClient.invalidateQueries({ queryKey: ["partner", "dashboard"] });
+  }
 
   /*
     "Yeni" rozeti: ekran ilk acildiginda gordugu rezervasyonlari hatirlar;
@@ -79,7 +89,8 @@ export default function PartnerBookingsScreen() {
         </View>
       </View>
 
-      <View style={{ paddingHorizontal: space.xl, paddingBottom: space.md }}>
+      <View style={{ paddingHorizontal: space.xl, paddingBottom: space.md, gap: space.md }}>
+        <PartnerPulseCard shopId={pulseShop} onShopChange={setPulseShop} />
         <Segmented
           value={tab}
           onChange={setTab}
@@ -104,7 +115,7 @@ export default function PartnerBookingsScreen() {
           keyExtractor={(b) => b.id}
           contentContainerStyle={[styles.list, items.length === 0 && { flex: 1 }]}
           refreshControl={
-            <RefreshControl refreshing={query.isRefetching} onRefresh={() => query.refetch()} tintColor={colors.accent} />
+            <RefreshControl refreshing={query.isRefetching} onRefresh={refreshAll} tintColor={colors.accent} />
           }
           renderItem={({ item }) => (
             <BookingRow
