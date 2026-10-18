@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { api } from "./api";
-import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReview } from "./types";
+import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReview, PartnerShopSettings } from "./types";
 
 export const keys = {
   myBookings: ["bookings", "me"] as const,
@@ -101,6 +101,11 @@ export function usePartnerShop() {
 
 export function usePartnerSeals() {
   return useQuery({ queryKey: keys.partnerSeals, queryFn: () => api<PartnerSealsResponse>("/partner/seals") });
+}
+
+/** `usePartnerShop` ile ayni istek ve anahtar; yalnizca tip genis. */
+export function usePartnerShopSettings() {
+  return useQuery({ queryKey: keys.partnerShop, queryFn: () => api<PartnerShopSettings>("/partner/shop") });
 }
 
 export function usePartnerEarnings() {

@@ -505,5 +505,35 @@
     "errors": {
       "no_shops": "You have no active shop."
     }
+  },
+  "shopSettings": {
+    "title": "Shop details",
+    "basics": "Basics",
+    "name": "Shop name",
+    "capacity": "Daily bag capacity",
+    "price": "Daily price (₺)",
+    "priceHint": "Daily price per bag; guests see this amount.",
+    "addressSection": "Address",
+    "address": "Street address",
+    "district": "District",
+    "city": "City",
+    "addressHint": "Guests find your shop by this address. Use the web panel to move the pin on the map.",
+    "phoneSection": "Contact",
+    "phone": "SMS notification phone (GSM)",
+    "phoneHint": "When a new booking is paid, a text message goes to this number. Leave it empty to remove the number.",
+    "phonePlaceholder": "05XX XXX XX XX",
+    "save": "Save",
+    "saved": "Settings saved.",
+    "saveFailed": "Could not save",
+    "nameInvalid": "The shop name must be at least 2 characters.",
+    "capacityInvalid": "Capacity must be a whole number of 1 or more.",
+    "priceInvalid": "Enter a valid price.",
+    "errors": {
+      "invalid_input": "One of the values is invalid. Check them and try again.",
+      "shop_update_failed": "The shop details could not be saved. Check the values and try again.",
+      "invalid_tr_phone": "The phone number is not a valid Turkish mobile number.",
+      "already_registered": "This phone number is registered to another account.",
+      "invalid_data": "The phone number could not be read."
+    }
   }
 }
