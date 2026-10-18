@@ -83,7 +83,8 @@
     "available": "~{{count}} free",
     "distance": "{{km}} km",
     "verified": "Verified",
-    "editSearch": "Edit search"
+    "editSearch": "Edit search",
+    "emptyTitle": "No bookable spots near {{place}} yet"
   },
   "shop": {
     "open247": "Open 24/7",
