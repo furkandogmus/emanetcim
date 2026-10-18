@@ -97,7 +97,7 @@ sunucuda düzeltilir:
 Expo:
 - [x] ADMIN girişte `(admin)` grubuna: pano (`admin/stats`), başvurular, mesajlar.
   Reddet = dükkan silme → yıkıcı onay penceresi.
-- [ ] Mesaja e-postayla cevap yalnızca web'de (`replyToContactMessageAction`, Resend).
+- [x] Mesaja e-postayla cevap (`POST admin/messages/[id]/reply`, web ile ortak `ContactReplyService`) — 2026-10-18
 
 ## nativize-later
 
