@@ -270,3 +270,16 @@ export type PartnerEarnings = {
   commissionRate: number;
   merchantShareRatio: number;
 };
+
+/** `toMobilePartnerDashboard` (../src/lib/mobile-dto.ts). */
+export type PartnerDashboard = {
+  shop: { id: string; name: string };
+  shops: { id: string; name: string }[];
+  todayArrivals: number;
+  todayPickups: number;
+  bagsInStorage: number;
+  monthNet: number;
+  prevMonthNet: number;
+  /** Gecen ay 0 ise `null`; "%∞" yazilmaz. */
+  monthChangePct: number | null;
+};
