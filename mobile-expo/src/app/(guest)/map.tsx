@@ -53,8 +53,10 @@ export default function MapScreen() {
   );
 
   const shops = useMemo(
-    // Rezervasyon alan noktalar once; talep testi noktalari ("Yakinda") sona.
-    () => [...(query.data ?? [])].sort((a, b) => Number(a.isPrelaunch) - Number(b.isPrelaunch) || a.distanceKm - b.distanceKm),
+    // Talep testi noktalari mobilde gosterilmez (urun karari 2026-10-18): prod'daki
+    // ~500 noktanin yalnizca ~10'u rezervasyon aliyor, gerisi harita ve listeyi
+    // "Yakinda" kartlariyla dolduruyordu. Olcum web'de surer.
+    () => (query.data ?? []).filter((s) => !s.isPrelaunch).sort((a, b) => a.distanceKm - b.distanceKm),
     [query.data],
   );
   const selected = shops.find((s) => s.id === selectedId) ?? null;
@@ -169,7 +171,9 @@ export default function MapScreen() {
           <AppText variant="title" style={{ fontSize: 22 }}>
             {query.isLoading
               ? t("common.loading")
-              : t("map.count", { count: shops.length, place: search.place.label })}
+              : shops.length === 0
+                ? t("map.emptyTitle", { place: search.place.label })
+                : t("map.count", { count: shops.length, place: search.place.label })}
           </AppText>
         </View>
         {query.isLoading ? (
