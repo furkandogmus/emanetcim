@@ -26,19 +26,9 @@ const eslintConfig = defineConfig([
     */
     "coverage/**",
     /*
-      FLUTTER DERLEME CIKTISI (2026-09-12'de bulundu).
-
-      `mobile/` bir Flutter uygulamasi; `flutter build` calistiginda
-      `mobile/build/` altina paketlerin kendi web varliklarini kopyaliyor ve
-      iclerinde derlenmis `.js` dosyalari oluyor. ESLint bunlari TARIYORDU:
-      `npm run lint` ciktisinin 10 uyarisindan 8'i tek bir upstream paketin
-      (`flutter_local_notifications_web`) service worker'inda, ayni satirda,
-      bes kez tekrarlanan ayni uyariydi.
-
-      Bizim yazmadigimiz, gitignore edilmis, derlenmis kod uzerinde uyari
-      biriktirmek lint ciktisini okunmaz yapar -- gercek bir uyari o
-      gurultunun icinde kaybolur. Dart tarafinin kendi analizcisi var
-      (`dart analyze`, bkz. mobile/CLAUDE.md); ESLint'in orada isi yok.
+      Eski Flutter uygulamasi 2026-10-18'de kaldirildi; makinelerde
+      `mobile/build/` gibi artiklar kalabilir ve icinde derlenmis paket
+      `.js`'leri var. Taramaya girmesinler.
     */
     "mobile/**",
     /*

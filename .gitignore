@@ -65,26 +65,11 @@ next-env.d.ts
 # Yerel / sunucu DB yedekleri (scripts/backup.sh çıktısı)
 /backups/
 
-# Flutter mobile
-/mobile/.dart_tool/
-/mobile/.flutter-plugins
-/mobile/.flutter-plugins-dependencies
-/mobile/.packages
-/mobile/build/
-/mobile/ios/Pods/
-/mobile/ios/.symlinks/
-/mobile/ios/Flutter/Flutter.framework
-/mobile/ios/Flutter/Flutter.podspec
-/mobile/android/.gradle/
-/mobile/android/local.properties
-/mobile/android/key.properties
-/mobile/**/GeneratedPluginRegistrant.*
-/mobile/**/*.g.dart
-/mobile/**/*.freezed.dart
+# Eski Flutter uygulamasi (2026-10-18 kaldirildi): makinelerde kalan artiklar
+/mobile/
 
 # Yerel pazarlama video çıktıları
 /marketing/assets/*.mp4
-/mobile/*.mp4
 
 # Terraform (infra/aws) — state kaynak ID'leri içerir, asla commit edilmez
 # NOT: .terraform.lock.hcl BİLEREK commit edilir (pinned provider version, iac-quality)
@@ -97,8 +82,6 @@ infra/**/*.tfvars
 /*.png
 /*.txt
 /report.xml
-/mobile/*.txt
-/mobile/*.png
 
 # next-pwa kaldirildi; public/sw.js artik kendini kaldiran statik dosya (takipte)
 /public/workbox-*.js
