@@ -72,7 +72,8 @@ talebi + çalışma saatleri, admin akışı (`admin@test.com`), sonra iOS (maki
 - [x] Esnaf: valiz revizyonu (`partner/bookings/[id]/bag-revision`) — main'de
 - [x] Esnaf: mühür talebi / arızalı bildir (`/partner/seals`) — main'de
 - [x] Şifre sıfırlama + profil düzenleme (kayıt OTP ile otomatik). OTP girişi artık e-postayı doğrulanmış sayar
-- [ ] Google / Apple girişi — sunucu hazır; `GOOGLE_ANDROID_CLIENT_ID`/`GOOGLE_IOS_CLIENT_ID` (Google Cloud Console, Play imza SHA-1) ve `APPLE_BUNDLE_ID` + Apple Developer hesabı bekliyor
+- [x] Google girişi (Android) — 2026-10-18
+- [ ] Google (iOS) / Apple girişi — Apple Developer hesabı ve iOS istemci kimliği bekliyor
 - [x] Rezervasyon değiştir (`bookings/[id]/modify`) — main'de
 - [x] Değerlendirme yaz (`reviews`) — main'de
 - [x] İtiraz / hasar bildirimi — main'de
@@ -169,5 +170,7 @@ Sırada: iOS. Makinede Xcode yok → `eas-simulator` (bulut) ya da Xcode kurulum
 - [x] "Sadece aynı gün seçiliyor": takvim tek gün seçiliyken ileri güne dokunmayı yeni başlangıç
   sayıyordu; artık aralığı uzatır (`lib/date-range.ts`, testli; emülatörde 19→22 doğrulandı)
 - [x] "Noktalar gözükmüyor": prod `shops/nearby` sağlam; kullanıcı tekrar denedi, noktalar görünüyor
-- [ ] Google ile giriş (Android): sunucu hazır, istemci kodu yok. Firebase Android uygulamasına
-  Play imzalama, yükleme ve debug SHA-1'leri eklendi (2026-10-18); sırada Expo tarafı
+- [x] Google ile giriş (Android): `@react-native-google-signin` + "Google ile devam et"; Firebase
+  Android uygulamasına Play imzalama, yükleme ve debug SHA-1'leri eklendi (2026-10-18). Emülatörde
+  düğme → hesap ekleme akışı → vazgeçme doğrulandı; hesapla giriş gerçek cihazda (sürüm 15) denenecek
+- [x] Sunucu: istemci kimliği tanımsızsa `auth/google` 503, audience kontrolü kapanmaz
