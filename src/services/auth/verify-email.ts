@@ -73,3 +73,15 @@ export async function verifyEmailToken(
     return { ok: false, code: "UNKNOWN" };
   }
 }
+
+/**
+ * E-postaya gelen kodla giris, adresin sahibi oldugunu kanitlar: kodu alan kisi
+ * o kutuya erisiyor. Mobil OTP girisi bunu hic isaretlemiyordu; kodla giren her
+ * misafir "dogrulanmamis" kaliyordu (2026-10-18). Yalnizca bos alani doldurur.
+ */
+export async function markEmailVerifiedByCode(userId: string): Promise<void> {
+  await prisma.user.updateMany({
+    where: { id: userId, emailVerified: null },
+    data: { emailVerified: new Date() },
+  });
+}
