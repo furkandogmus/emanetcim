@@ -398,5 +398,28 @@
       "not_found": "Rezervasyon bulunamadı.",
       "forbidden": "Bu rezervasyonu değerlendiremezsin."
     }
+  },
+  "dispute": {
+    "open": "Sorun bildir",
+    "title": "Sorun bildir",
+    "hint": "Valizinde hasar ya da eksik varsa bildir; ekibimiz inceleyip seninle iletişime geçer.",
+    "reasonLabel": "Sorun türü",
+    "reasons": {
+      "DAMAGE": "Hasar",
+      "THEFT": "Kayıp / hırsızlık",
+      "OTHER": "Diğer"
+    },
+    "descriptionLabel": "Açıklama",
+    "descriptionPlaceholder": "Ne oldu? Hangi valiz, ne zaman fark ettin?",
+    "descriptionMin": "En az {{n}} karakter yaz.",
+    "submit": "Bildirimi gönder",
+    "sent": "Bildirimin alındı. Ekibimiz inceleyip seninle iletişime geçecek.",
+    "errors": {
+      "invalid_data": "Bir sorun türü seç ve en az 10 karakterlik bir açıklama yaz.",
+      "booking_not_ready": "Sorun, valiz dükkana teslim edildikten sonra bildirilebilir.",
+      "duplicate_dispute": "Bu rezervasyon için zaten bir bildirimin var; ekibimiz inceliyor.",
+      "not_found": "Rezervasyon bulunamadı.",
+      "not_owner": "Bu rezervasyon için bildirim yapamazsın."
+    }
   }
 }
