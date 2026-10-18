@@ -35,11 +35,16 @@ export async function POST(req: NextRequest) {
   const androidClientId = process.env.GOOGLE_ANDROID_CLIENT_ID;
   const webClientId = process.env.GOOGLE_CLIENT_ID;
   const allowed = [iosClientId, androidClientId, webClientId].filter(Boolean) as string[];
+  // Liste bossa jose `audience` kontrolunu ATLAR: herhangi bir uygulamanin
+  // Google token'i kabul edilirdi. Yapilandirma eksigi acik kapi olmasin.
+  if (allowed.length === 0) {
+    return NextResponse.json({ error: "google_not_configured" }, { status: 503 });
+  }
 
   try {
     const { payload } = await jwtVerify(parsed.data.idToken, GOOGLE_JWKS, {
       issuer: ["https://accounts.google.com", "accounts.google.com"],
-      audience: allowed.length > 0 ? allowed : undefined,
+      audience: allowed,
     });
 
     const email = typeof payload.email === "string" ? payload.email.toLowerCase() : null;
