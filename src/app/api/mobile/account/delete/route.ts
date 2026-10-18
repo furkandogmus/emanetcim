@@ -25,7 +25,7 @@ async function handleDeleteRequest(req: NextRequest) {
   if (!result.ok) {
     return result.reason === "not_guest"
       ? NextResponse.json({ error: "forbidden" }, { status: 403 })
-      : NextResponse.json({ error: "Active bookings exist" }, { status: 400 });
+      : NextResponse.json({ error: "active_bookings" }, { status: 400 });
   }
 
   return NextResponse.json({ success: true });
