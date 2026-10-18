@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { api } from "./api";
-import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReview } from "./types";
+import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReview } from "./types";
 
 export const keys = {
   myBookings: ["bookings", "me"] as const,
@@ -9,6 +9,7 @@ export const keys = {
   shop: (id: string) => ["shops", id] as const,
   partnerBookings: ["partner", "bookings"] as const,
   partnerShop: ["partner", "shop"] as const,
+  partnerSeals: ["partner", "seals"] as const,
   admin: ["admin"] as const,
 };
 
@@ -96,4 +97,8 @@ export function useAdminMessages() {
 
 export function usePartnerShop() {
   return useQuery({ queryKey: keys.partnerShop, queryFn: () => api<PartnerShop>("/partner/shop") });
+}
+
+export function usePartnerSeals() {
+  return useQuery({ queryKey: keys.partnerSeals, queryFn: () => api<PartnerSealsResponse>("/partner/seals") });
 }
