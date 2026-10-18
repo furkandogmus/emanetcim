@@ -230,5 +230,40 @@
     "deleteFailedTitle": "Couldn’t delete the account",
     "deleteActiveBookings": "You have ongoing bookings. Cancel them first or wait until they’re completed.",
     "deleteRequest": "Request account closure"
+  },
+  "admin": {
+    "title": "Admin",
+    "pendingApplications": "Pending partner applications",
+    "unreadMessages": "Unread messages",
+    "totalBookings": "Bookings",
+    "totalPartners": "Shops",
+    "totalRevenue": "Total revenue",
+    "applications": "Partner applications",
+    "noApplications": "No pending applications.",
+    "applicationMeta": "{{price}} / day · {{capacity}} bags · {{date}}",
+    "unnamed": "Unnamed partner",
+    "call": "Call partner",
+    "approve": "Approve",
+    "reject": "Reject",
+    "rejectTitle": "Reject {{name}}?",
+    "rejectBody": "The shop and its details are deleted. This cannot be undone.",
+    "rejectConfirm": "Yes, reject",
+    "approvedTitle": "Application approved; the partner has been notified.",
+    "rejectedTitle": "Application rejected.",
+    "actionFailed": "Could not complete",
+    "messages": "Messages",
+    "noMessages": "No messages.",
+    "noSubject": "(No subject)",
+    "unread": "Unread",
+    "deleteMessageTitle": "Delete message?",
+    "deleteMessageBody": "The message is deleted permanently.",
+    "deleteConfirm": "Yes, delete",
+    "replyOnWeb": "Replies by email are sent from the web admin panel.",
+    "errors": {
+      "not_found": "Record not found; someone may have handled it already.",
+      "missing_coordinates": "The shop has no location; set it in the web panel first.",
+      "has_active_bookings": "The shop has active bookings and cannot be rejected.",
+      "invalid_action": "Invalid action."
+    }
   }
 }

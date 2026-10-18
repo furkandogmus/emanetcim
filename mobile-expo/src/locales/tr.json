@@ -230,5 +230,40 @@
     "deleteFailedTitle": "Hesap silinemedi",
     "deleteActiveBookings": "Devam eden rezervasyonların var. Önce onları iptal et ya da tamamlanmalarını bekle.",
     "deleteRequest": "Hesap kapatma talebi gönder"
+  },
+  "admin": {
+    "title": "Yönetim",
+    "pendingApplications": "Bekleyen esnaf başvurusu",
+    "unreadMessages": "Okunmamış mesaj",
+    "totalBookings": "Rezervasyon",
+    "totalPartners": "Dükkan",
+    "totalRevenue": "Toplam ciro",
+    "applications": "Esnaf başvuruları",
+    "noApplications": "Bekleyen başvuru yok.",
+    "applicationMeta": "{{price}} / gün · {{capacity}} valiz · {{date}}",
+    "unnamed": "İsimsiz esnaf",
+    "call": "Esnafı ara",
+    "approve": "Onayla",
+    "reject": "Reddet",
+    "rejectTitle": "{{name}} reddedilsin mi?",
+    "rejectBody": "Dükkan ve bilgileri silinir, geri alınamaz.",
+    "rejectConfirm": "Evet, reddet",
+    "approvedTitle": "Başvuru onaylandı; esnafa bildirim gitti.",
+    "rejectedTitle": "Başvuru reddedildi.",
+    "actionFailed": "İşlem yapılamadı",
+    "messages": "Mesajlar",
+    "noMessages": "Mesaj yok.",
+    "noSubject": "(Konu yok)",
+    "unread": "Okunmadı",
+    "deleteMessageTitle": "Mesaj silinsin mi?",
+    "deleteMessageBody": "Mesaj kalıcı olarak silinir.",
+    "deleteConfirm": "Evet, sil",
+    "replyOnWeb": "Mesajlara e-postayla cevap web yönetim panelinden verilir.",
+    "errors": {
+      "not_found": "Kayıt bulunamadı; başka biri işlem yapmış olabilir.",
+      "missing_coordinates": "Dükkanın konumu yok; önce web panelinden konumu girin.",
+      "has_active_bookings": "Dükkanın aktif rezervasyonu var; reddedilemez.",
+      "invalid_action": "Geçersiz işlem."
+    }
   }
 }

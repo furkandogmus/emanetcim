@@ -1,13 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { api } from "./api";
-import type { BookingDetail, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReview } from "./types";
+import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReview } from "./types";
 
 export const keys = {
   myBookings: ["bookings", "me"] as const,
   booking: (id: string) => ["bookings", id] as const,
   shop: (id: string) => ["shops", id] as const,
   partnerBookings: ["partner", "bookings"] as const,
+  admin: ["admin"] as const,
 };
 
 export function useMyBookings() {
@@ -75,4 +76,19 @@ export function usePartnerBookings() {
  */
 export function isActiveBooking(b: { status: string }) {
   return !["CANCELLED", "CHECKED_OUT"].includes(b.status);
+}
+
+export function useAdminStats() {
+  return useQuery({ queryKey: [...keys.admin, "stats"], queryFn: () => api<AdminStats>("/admin/stats") });
+}
+
+export function useAdminApplications() {
+  return useQuery({
+    queryKey: [...keys.admin, "applications"],
+    queryFn: () => api<AdminApplication[]>("/admin/applications"),
+  });
+}
+
+export function useAdminMessages() {
+  return useQuery({ queryKey: [...keys.admin, "messages"], queryFn: () => api<ContactMessage[]>("/admin/messages") });
 }
