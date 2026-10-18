@@ -283,14 +283,22 @@
     "deleteMessageTitle": "Mesaj silinsin mi?",
     "deleteMessageBody": "Mesaj kalıcı olarak silinir.",
     "deleteConfirm": "Evet, sil",
-    "replyOnWeb": "Mesajlara e-postayla cevap web yönetim panelinden verilir.",
     "errors": {
       "not_found": "Kayıt bulunamadı; başka biri işlem yapmış olabilir.",
       "missing_coordinates": "Dükkanın konumu yok; önce web panelinden konumu girin.",
       "has_active_bookings": "Dükkanın aktif rezervasyonu var; reddedilemez.",
-      "invalid_action": "Geçersiz işlem."
+      "invalid_action": "Geçersiz işlem.",
+      "email_send_failed": "E-posta gönderilemedi; cevap kaydedilmedi. Biraz sonra tekrar dene.",
+      "too_many_requests": "Çok fazla cevap gönderildi; biraz bekle.",
+      "invalid_input": "Cevap gönderilemedi: alıcı adresi ya da metin geçersiz."
     },
-    "deleteMessage": "Mesajı sil"
+    "deleteMessage": "Mesajı sil",
+    "replyLabel": "E-postayla cevap",
+    "replyTo": "Alıcı: {{to}}",
+    "replyPlaceholder": "Cevabını yaz…",
+    "replySend": "Cevabı gönder",
+    "replySent": "Cevap e-postayla gönderildi.",
+    "replyTooShort": "Cevap en az 2 karakter olmalı."
   },
   "scan": {
     "open": "QR okut",

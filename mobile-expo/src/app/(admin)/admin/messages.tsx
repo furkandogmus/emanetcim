@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Trash2 } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
+import { AdminMessageReply } from "@/components/AdminMessageReply";
 import { AppText, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
@@ -74,34 +75,36 @@ export default function AdminMessagesScreen() {
             <RefreshControl refreshing={query.isRefetching} onRefresh={() => query.refetch()} tintColor={colors.accent} />
           }
           ListEmptyComponent={<CenterMessage title={t("admin.noMessages")} />}
-          ListFooterComponent={<AppText variant="caption">{t("admin.replyOnWeb")}</AppText>}
           renderItem={({ item }) => {
             const expanded = open === item.id;
             return (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityState={{ expanded }}
-                onPress={() => toggle(item)}
-                style={[styles.item, !item.isRead && styles.unread]}
-              >
-                <View style={styles.row}>
-                  {!item.isRead ? <View style={styles.dot} accessibilityLabel={t("admin.unread")} /> : null}
-                  <AppText variant="bodyMedium" style={{ flex: 1 }} numberOfLines={expanded ? undefined : 1}>
-                    {item.subject || t("admin.noSubject")}
+              <View style={[styles.item, !item.isRead && styles.unread]}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityState={{ expanded }}
+                  onPress={() => toggle(item)}
+                  style={styles.head}
+                >
+                  <View style={styles.row}>
+                    {!item.isRead ? <View style={styles.dot} accessibilityLabel={t("admin.unread")} /> : null}
+                    <AppText variant="bodyMedium" style={{ flex: 1 }} numberOfLines={expanded ? undefined : 1}>
+                      {item.subject || t("admin.noSubject")}
+                    </AppText>
+                    <IconButton label={t("admin.deleteMessage")} onPress={() => confirmDelete(item)}>
+                      <Trash2 size={18} color={colors.danger} />
+                    </IconButton>
+                  </View>
+                  <AppText variant="caption">
+                    {item.from} · {formatDayTime(item.createdAt)}
                   </AppText>
-                  <IconButton label={t("admin.deleteMessage")} onPress={() => confirmDelete(item)}>
-                    <Trash2 size={18} color={colors.danger} />
-                  </IconButton>
-                </View>
-                <AppText variant="caption">
-                  {item.from} · {formatDayTime(item.createdAt)}
-                </AppText>
-                {item.text ? (
-                  <AppText variant="body" numberOfLines={expanded ? undefined : 2}>
-                    {item.text}
-                  </AppText>
-                ) : null}
-              </Pressable>
+                  {item.text ? (
+                    <AppText variant="body" numberOfLines={expanded ? undefined : 2}>
+                      {item.text}
+                    </AppText>
+                  ) : null}
+                </Pressable>
+                {expanded ? <AdminMessageReply messageId={item.id} to={item.from} onSent={refresh} /> : null}
+              </View>
             );
           }}
         />
@@ -128,6 +131,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.surface,
   },
+  head: { gap: space.xs },
   unread: { borderColor: colors.brandSoftBorder },
   row: { flexDirection: "row", alignItems: "center", gap: space.sm },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.accent },

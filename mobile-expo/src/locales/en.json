@@ -283,14 +283,22 @@
     "deleteMessageTitle": "Delete message?",
     "deleteMessageBody": "The message is deleted permanently.",
     "deleteConfirm": "Yes, delete",
-    "replyOnWeb": "Replies by email are sent from the web admin panel.",
     "errors": {
       "not_found": "Record not found; someone may have handled it already.",
       "missing_coordinates": "The shop has no location; set it in the web panel first.",
       "has_active_bookings": "The shop has active bookings and cannot be rejected.",
-      "invalid_action": "Invalid action."
+      "invalid_action": "Invalid action.",
+      "email_send_failed": "The email could not be sent; the reply was not saved. Try again shortly.",
+      "too_many_requests": "Too many replies sent; please wait a bit.",
+      "invalid_input": "Reply could not be sent: invalid recipient or text."
     },
-    "deleteMessage": "Delete message"
+    "deleteMessage": "Delete message",
+    "replyLabel": "Reply by email",
+    "replyTo": "To: {{to}}",
+    "replyPlaceholder": "Write your reply…",
+    "replySend": "Send reply",
+    "replySent": "Reply sent by email.",
+    "replyTooShort": "Reply must be at least 2 characters."
   },
   "scan": {
     "open": "Scan QR",
