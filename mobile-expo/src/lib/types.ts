@@ -242,6 +242,19 @@ export type PartnerShopSettings = PartnerShop & {
   phone: string | null;
 };
 
+/** `partner/shop/schedule` GET. Gun ISO (1 = pazartesi), saatler "HH:mm", tarihler dukkan gunu "YYYY-MM-DD". */
+export type ScheduleDay = { weekday: number; isClosed: boolean; openingTime: string; closingTime: string };
+export type ShopClosure = { id: string; startDate: string; endDate: string; reason: string | null };
+export type PartnerSchedule = { open247: boolean; days: ScheduleDay[]; closures: ShopClosure[] };
+
+/** 409 `schedule_conflict` govdesindeki `conflicts` (`ShopScheduleService.ScheduleConflict`). */
+export type ScheduleConflict = {
+  bookingId: string;
+  guestName: string | null;
+  date: string;
+  kind: "dropoff" | "pickup" | "bags_on_shelf";
+};
+
 /** `partner/earnings/stats` GET. Tutarlar esnaf payi (komisyon dusulmus). */
 export type PartnerEarnings = {
   totalBalance: number;

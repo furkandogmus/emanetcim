@@ -14,6 +14,8 @@ export class ApiError extends Error {
   constructor(
     public readonly status: number,
     public readonly code: string,
+    /** Hata yanitinin govdesi (ornegin `schedule_conflict`in `conflicts` listesi). */
+    public readonly body?: unknown,
   ) {
     super(`${status} ${code}`);
   }
@@ -125,7 +127,7 @@ export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T
       json && typeof json === "object" && "error" in json && typeof json.error === "string"
         ? json.error
         : `http_${res.status}`;
-    throw new ApiError(res.status, code);
+    throw new ApiError(res.status, code, json);
   }
   return json as T;
 }
