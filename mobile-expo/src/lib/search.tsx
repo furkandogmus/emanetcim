@@ -68,13 +68,21 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     birakma saatini gecince harita ayni gecmis tarihlerle istek atiyor, sunucu
     `invalid_dates` donuyor ve "Tekrar dene" de ayni istegi tekrarliyordu.
     On plana donuste gecmiste kalan pencere bir sonraki uygun saate kayar.
+
+    On planda saatlerce acik kalan uygulamada da ayni sey oluyordu (2026-10-18,
+    emulatorde sihirbaz 09:00'u secili ama devre disi gosterdi, "Devam" kilitli
+    kaldi): on plandayken de dakikada bir bakilir.
   */
   useEffect(() => {
     const freshen = () =>
       setState((s) => (s.checkIn.getTime() < Date.now() ? { ...s, ...defaultWindow() } : s));
     freshen();
+    const timer = setInterval(freshen, 60_000);
     const sub = AppState.addEventListener("change", (st) => st === "active" && freshen());
-    return () => sub.remove();
+    return () => {
+      clearInterval(timer);
+      sub.remove();
+    };
   }, []);
 
   const value = useMemo<SearchContextValue>(
