@@ -3,7 +3,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import QRCode from "react-native-qrcode-svg";
-import { ArrowLeft, Navigation, Phone } from "lucide-react-native";
+import { ArrowLeft, Navigation, Pencil, Phone } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { PartnerBookingActions } from "@/components/PartnerBookingActions";
@@ -18,6 +18,8 @@ import { colors, fonts, radius, space } from "@/theme/tokens";
 
 /** Misafirin iptal edebildigi durumlar: valiz henuz dukkana teslim edilmemis. */
 const CANCELLABLE = new Set(["PENDING", "WAITING_APPROVAL", "APPROVED", "PAID"]);
+/** `modifyBooking` (lifecycle.ts) yalnizca CHECKED_IN / CHECKED_OUT / CANCELLED'i reddeder. */
+const MODIFIABLE = CANCELLABLE;
 
 function openDirections(b: BookingDetail) {
   if (b.latitude == null || b.longitude == null) return;
@@ -138,6 +140,14 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
                 title={t("bookings.call")}
                 icon={<Phone size={18} color={colors.ink} />}
                 onPress={() => void Linking.openURL(`tel:${b.shopPhone}`).catch(() => undefined)}
+              />
+            ) : null}
+            {MODIFIABLE.has(b.status) ? (
+              <Button
+                variant="secondary"
+                title={t("modify.open")}
+                icon={<Pencil size={18} color={colors.ink} />}
+                onPress={() => router.push({ pathname: "/bookings/modify", params: { id: b.id } })}
               />
             ) : null}
             {CANCELLABLE.has(b.status) ? (

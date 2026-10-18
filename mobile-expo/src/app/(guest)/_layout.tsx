@@ -13,6 +13,7 @@ export default function GuestLayout() {
       <Stack.Screen name="success" options={{ gestureEnabled: false }} />
       <Stack.Screen name="bookings/index" />
       <Stack.Screen name="bookings/[id]" />
+      <Stack.Screen name="bookings/modify" />
     </Stack>
   );
 }
