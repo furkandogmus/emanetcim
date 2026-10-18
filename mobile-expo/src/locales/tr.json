@@ -421,5 +421,28 @@
       "not_found": "Rezervasyon bulunamadı.",
       "not_owner": "Bu rezervasyon için bildirim yapamazsın."
     }
+  },
+  "bagRevision": {
+    "open": "Valiz sayısını düzelt",
+    "title": "Valiz sayısını düzelt",
+    "hint": "Misafir farklı sayıda valizle geldiyse gerçek sayıyı gir. Yeni tutarı sistem hesaplar.",
+    "hintCheckedIn": "Valizler teslim alındı. Mühürlü valiz sayısı artırılamaz; tutarı artıran düzeltme için misafirin onayı istenir.",
+    "delta": "{{from}} valiz → {{to}} valiz",
+    "atLeastOne": "En az bir valiz olmalı.",
+    "apply": "Düzeltmeyi uygula",
+    "savedTitle": "Valiz sayısı güncellendi",
+    "savedBody": "Yeni toplam: {{total}}",
+    "approvalTitle": "Misafir onayı bekleniyor",
+    "approvalBody": "Bu düzeltme tutarı artırıyor. Misafire onay e-postası gönderildi; onaylarsa yeni tutar uygulanır.",
+    "errors": {
+      "not_found": "Rezervasyon bulunamadı.",
+      "forbidden": "Bu rezervasyon senin dükkanına ait değil.",
+      "invalid_status": "Bu rezervasyonun valiz sayısı artık değiştirilemez.",
+      "at_least_one_bag": "Valiz sayısı geçersiz: en az bir valiz olmalı ve platform sınırı aşılmamalı.",
+      "no_bag_counts": "Valiz sayısı gönderilmedi; tekrar dene.",
+      "insufficient_capacity": "Dükkanında bu saatlerde bu kadar valize yer yok. Sayıyı azaltıp tekrar dene.",
+      "seal_count_mismatch": "Valizler mühürlü; mühür sayısından fazla valiz kaydedilemez.",
+      "guest_approval_required": "Bu düzeltme için misafirin onayı gerekiyor."
+    }
   }
 }
