@@ -1,6 +1,8 @@
 name: Mobile Expo CI
 
-# Expo kolunun (mobile-expo/) kapisi: typecheck + tr/en anahtar paritesi.
+# Expo kolunun (mobile-expo/) kapisi: typecheck + lint + tr/en anahtar paritesi
+# + birim testler (`npm run verify`). Lint 2026-10-18'e kadar yapilandirmasizdi
+# ve hicbir dosyayi taramiyordu.
 # Daha once hic CI yoktu; typecheck'i kiran bir degisiklik fark edilmeden
 # main'e girebiliyordu. Zorunlu kontrol DEGIL, o yuzden yol filtresi guvenli
 # (zorunlu olsaydi filtre yuzunden hic kosmayan job PR'i sonsuza dek bekletirdi,
@@ -27,7 +29,7 @@ permissions:
 
 jobs:
   verify:
-    name: Expo typecheck
+    name: Expo dogrulama (tip, lint, test)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     defaults:
