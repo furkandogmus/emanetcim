@@ -13,11 +13,12 @@ export async function PATCH(
   if (forbid) return forbid;
 
   const { id } = await params;
-  await prisma.contactMessage.update({
+  // `update` olmayan kayitta P2025 firlatip 500 veriyordu; sayi kontrolu 404.
+  const { count } = await prisma.contactMessage.updateMany({
     where: { id },
     data: { isRead: true },
   });
-
+  if (count === 0) return NextResponse.json({ error: "not_found" }, { status: 404 });
   return NextResponse.json({ ok: true });
 }
 
@@ -31,7 +32,7 @@ export async function DELETE(
   if (forbid) return forbid;
 
   const { id } = await params;
-  await prisma.contactMessage.delete({ where: { id } });
-
+  const { count } = await prisma.contactMessage.deleteMany({ where: { id } });
+  if (count === 0) return NextResponse.json({ error: "not_found" }, { status: 404 });
   return NextResponse.json({ ok: true });
 }
