@@ -355,5 +355,30 @@
       "too_many_requests": "Çok sık arama yaptın. Biraz sonra tekrar dene.",
       "invalid_query": "Aramak için en az 3 harf yaz."
     }
+  },
+  "modify": {
+    "open": "Rezervasyonu değiştir",
+    "title": "Rezervasyonu değiştir",
+    "whenTitle": "Ne zaman?",
+    "bagsTitle": "Kaç valiz?",
+    "currentTotal": "Şu anki tutar",
+    "newTotal": "Tahmini yeni tutar",
+    "estimateNote": "Kesin tutarı sunucu hesaplar; kaydettikten sonra rezervasyonunda görünür.",
+    "paidNote": "Ödemesi alınmış bir rezervasyonun tutarı değiştirilemez. Tutarı değiştiren bir değişiklik için iptal edip yeniden rezervasyon yap.",
+    "noBags": "En az bir valiz seç.",
+    "save": "Değişiklikleri kaydet",
+    "savedTitle": "Rezervasyon güncellendi",
+    "savedBody": "Yeni zaman ve valiz bilgileri kaydedildi.",
+    "errors": {
+      "INVALID_DATES": "Seçtiğin zaman geçersiz ya da dükkan o gün kapalı. Bırakma zamanı geçmişte olamaz.",
+      "INVALID_STATUS": "Bu rezervasyon artık değiştirilemiyor.",
+      "PRICE_INCREASE": "Ödemesi alınmış bir rezervasyonun tutarı değiştirilemez. İptal edip yeniden rezervasyon yapabilirsin.",
+      "CAPACITY": "Bu noktada seçtiğin zaman için yeterli yer yok.",
+      "NOT_FOUND": "Rezervasyon bulunamadı.",
+      "not_found": "Rezervasyon bulunamadı.",
+      "UNAUTHORIZED": "Bu rezervasyonu değiştiremezsin.",
+      "forbidden": "Bu rezervasyonu değiştiremezsin.",
+      "invalid_input": "Gönderilen bilgiler geçersiz. Zamanı ve valiz sayısını kontrol et."
+    }
   }
 }
