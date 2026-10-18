@@ -7,11 +7,13 @@ import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
+import * as Notifications from "expo-notifications";
 import { BricolageGrotesque_700Bold, BricolageGrotesque_800ExtraBold } from "@expo-google-fonts/bricolage-grotesque";
 import { Geist_400Regular, Geist_500Medium, Geist_600SemiBold } from "@expo-google-fonts/geist";
 
 import { ApiError } from "@/lib/api";
 import { AuthProvider, useAuth } from "@/lib/auth";
+import { openFromNotification, registerForPush } from "@/lib/push";
 import { SearchProvider } from "@/lib/search";
 import { colors } from "@/theme/tokens";
 
@@ -34,6 +36,18 @@ function RootNavigator() {
   useEffect(() => {
     if (state.status !== "loading") void SplashScreen.hideAsync().catch(() => undefined);
   }, [state.status]);
+
+  // Oturum acikken cihaz bildirime kaydolur; izin reddi ya da ag hatasi uygulamayi durdurmaz.
+  useEffect(() => {
+    if (state.status !== "signedIn") return;
+    void registerForPush().catch(() => undefined);
+    // Uygulama kapaliyken dokunulan bildirim de acilsin.
+    void Notifications.getLastNotificationResponseAsync()
+      .then((r) => r && openFromNotification(r, role))
+      .catch(() => undefined);
+    const sub = Notifications.addNotificationResponseReceivedListener((r) => openFromNotification(r, role));
+    return () => sub.remove();
+  }, [state.status, role]);
 
   if (state.status === "loading") return null;
 

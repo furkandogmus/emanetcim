@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import * as SecureStore from "expo-secure-store";
 
 import { ApiError, api, clearTokens, loadTokens, saveTokens, setSessionExpiredHandler } from "./api";
+import { unregisterPush } from "./push";
 import type { MobileUser, SessionResponse } from "./types";
 
 type AuthState =
@@ -97,7 +98,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const signOut = useCallback(async () => {
-    // Sunucu tarafi iptal en iyi caba; basarisiz olsa da yerel oturum kapanir.
+    // Token oturum hala gecerliyken silinir; sonra sunucu tarafi iptal (en iyi caba).
+    await unregisterPush();
     await api("/auth/logout", { method: "POST" }).catch(() => undefined);
     await clearTokens();
     void rememberUser(null);
