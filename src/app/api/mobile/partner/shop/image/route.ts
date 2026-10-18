@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "storage_unavailable" }, { status: 503 });
   }
 
-  const shop = await shopService.getShopByOwner(auth.user.id);
+  const shop = await shopService.getShopByOwner(auth.user.id, req.nextUrl.searchParams.get("shop"));
   if (!shop) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   const form = await req.formData().catch(() => null);

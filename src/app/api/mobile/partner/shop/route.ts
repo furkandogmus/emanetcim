@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
   const forbid = requireRole(auth.user, ["PARTNER"]);
   if (forbid) return forbid;
 
-  const shop = await shopService.getShopByOwner(auth.user.id);
+  const shop = await shopService.getShopByOwner(auth.user.id, req.nextUrl.searchParams.get("shop"));
 
   if (!shop) {
     return NextResponse.json({ error: "Shop not found" }, { status: 404 });
@@ -81,7 +81,7 @@ export async function PUT(req: NextRequest) {
   const forbid = requireRole(auth.user, ["PARTNER"]);
   if (forbid) return forbid;
 
-  const shop = await shopService.getShopByOwner(auth.user.id);
+  const shop = await shopService.getShopByOwner(auth.user.id, req.nextUrl.searchParams.get("shop"));
 
   if (!shop) {
     return NextResponse.json({ error: "Shop not found" }, { status: 404 });
