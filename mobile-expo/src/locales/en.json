@@ -421,5 +421,28 @@
       "not_found": "Booking not found.",
       "not_owner": "You can't report a problem for this booking."
     }
+  },
+  "bagRevision": {
+    "open": "Correct bag count",
+    "title": "Correct bag count",
+    "hint": "If the guest arrived with a different number of bags, enter the real count. The new total is calculated for you.",
+    "hintCheckedIn": "The bags are checked in. Sealed bags cannot be increased, and a correction that raises the price needs the guest's approval.",
+    "delta": "{{from}} bags → {{to}} bags",
+    "atLeastOne": "There must be at least one bag.",
+    "apply": "Apply correction",
+    "savedTitle": "Bag count updated",
+    "savedBody": "New total: {{total}}",
+    "approvalTitle": "Waiting for the guest",
+    "approvalBody": "This correction raises the price. The guest has been emailed to approve it; the new total applies once they do.",
+    "errors": {
+      "not_found": "Booking not found.",
+      "forbidden": "This booking does not belong to your shop.",
+      "invalid_status": "The bag count of this booking can no longer be changed.",
+      "at_least_one_bag": "Invalid bag count: there must be at least one bag and the platform limit cannot be exceeded.",
+      "no_bag_counts": "No bag count was sent; try again.",
+      "insufficient_capacity": "Your shop has no room for this many bags at these times. Lower the count and try again.",
+      "seal_count_mismatch": "The bags are sealed; you cannot record more bags than seals.",
+      "guest_approval_required": "This correction needs the guest's approval."
+    }
   }
 }

@@ -105,6 +105,11 @@ export type BookingDetail = BookingSummary & {
 
 export type PartnerBooking = BookingSummary & { guestName: string };
 
+/** `partner/bookings/[id]/bag-revision` POST govdesi; uc eksik boyutu mevcut degerden tamamlar. */
+export type BagRevisionRequest = { bagCountS: number; bagCountM: number; bagCountXl: number };
+
+export type BagRevisionResponse = { success: true; newTotal: number };
+
 /** `partner/shop` GET; yalnizca kullanilan alanlar. */
 export type PartnerShop = { id: string; name: string; image: string | null };
 

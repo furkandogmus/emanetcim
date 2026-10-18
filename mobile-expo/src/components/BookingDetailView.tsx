@@ -6,6 +6,7 @@ import QRCode from "react-native-qrcode-svg";
 import { ArrowLeft, Navigation, Pencil, Phone } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
+import { BagRevisionCard } from "@/components/BagRevisionCard";
 import { GuestDisputeCard } from "@/components/GuestDisputeCard";
 import { GuestReviewCard } from "@/components/GuestReviewCard";
 import { PartnerBookingActions } from "@/components/PartnerBookingActions";
@@ -105,7 +106,13 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
           </Card>
         ) : null}
 
-        {mode === "partner" ? <PartnerBookingActions key={b.status} booking={b} /> : null}
+        {/* Anahtar valiz sayilarini da tasir: revizyondan sonra muhur satirlari yeni sayidan kurulur. */}
+        {mode === "partner" ? (
+          <PartnerBookingActions key={`${b.status}-${b.bagCountS}-${b.bagCountM}-${b.bagCountXl}`} booking={b} />
+        ) : null}
+        {mode === "partner" ? (
+          <BagRevisionCard key={`rev-${b.status}-${b.bagCountS}-${b.bagCountM}-${b.bagCountXl}`} booking={b} />
+        ) : null}
 
         <Card style={{ gap: space.md }}>
           {/* Web'deki "Rezervasyon kodu" ile ayni: QR okunamazsa telefonda soylenen kod. */}
