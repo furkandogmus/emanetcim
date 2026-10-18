@@ -21,6 +21,8 @@ export default function LoginScreen() {
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  // Google akisi ayri: o surerken kod dugmesi donmesin, yalnizca kilitlensin.
+  const [googleBusy, setGoogleBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function sendCode() {
@@ -72,18 +74,18 @@ export default function LoginScreen() {
   }
 
   async function googleSignIn() {
-    setBusy(true);
+    setGoogleBusy(true);
     setError(null);
     try {
       // Vazgecilirse null: mesaj yok. Basarida Stack.Protected dogru gruba gecirir.
-      if (!(await signInWithGoogle())) setBusy(false);
+      if (!(await signInWithGoogle())) setGoogleBusy(false);
     } catch (e) {
       if (e instanceof GoogleSignInError) {
         if (e.code !== "in_progress") setError(t(`auth.errors.${e.code}`));
       } else {
         setError(errorMessage(e, "auth"));
       }
-      setBusy(false);
+      setGoogleBusy(false);
     }
   }
 
@@ -131,8 +133,13 @@ export default function LoginScreen() {
               <AppText variant="caption">{t("auth.subtitle")}</AppText>
               {emailField(sendCode)}
               {error ? <Banner tone="danger" body={error} /> : null}
-              <Button title={t("auth.sendCode")} onPress={sendCode} loading={busy} />
-              <Button variant="ghost" title={t("auth.usePassword")} onPress={() => switchTo("password")} />
+              <Button title={t("auth.sendCode")} onPress={sendCode} loading={busy} disabled={googleBusy} />
+              <Button
+                variant="ghost"
+                title={t("auth.usePassword")}
+                onPress={() => switchTo("password")}
+                disabled={googleBusy}
+              />
               {googleSignInAvailable ? (
                 <>
                   <View style={styles.dividerRow} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
@@ -140,7 +147,12 @@ export default function LoginScreen() {
                     <AppText variant="caption">{t("auth.or")}</AppText>
                     <View style={styles.dividerLine} />
                   </View>
-                  <GoogleButton title={t("auth.continueWithGoogle")} onPress={googleSignIn} loading={busy} />
+                  <GoogleButton
+                    title={t("auth.continueWithGoogle")}
+                    onPress={googleSignIn}
+                    loading={googleBusy}
+                    disabled={busy}
+                  />
                 </>
               ) : null}
             </>
