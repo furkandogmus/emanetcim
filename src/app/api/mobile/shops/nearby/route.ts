@@ -7,6 +7,7 @@ import { getPricingRules } from "@/lib/platform-settings";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-ip";
 import { toMobileShop } from "@/lib/mobile-dto";
+import { toDatetimeLocalValueInTimeZone } from "@/lib/datetime-local";
 
 const schema = z.object({
   lat: z.coerce.number(),
@@ -46,6 +47,16 @@ export async function GET(req: NextRequest) {
       checkIn: ci,
       checkOut: co,
       requestedBags,
+      /*
+        Web aramasiyla (`actions/search-shops.ts`) ayni gun kapisi: haftalik
+        takvim ve kapanislar. Yoksa pazar gunu kapali ya da o tarihte izinli
+        dukkan haritada cikiyor, misafir ancak odeme adiminda
+        `shop_closed_on_date` aliyordu. Gunler platform saatiyle.
+      */
+      stayDays: {
+        drop: toDatetimeLocalValueInTimeZone(ci).slice(0, 10),
+        pickup: toDatetimeLocalValueInTimeZone(co).slice(0, 10),
+      },
     });
     return NextResponse.json(
       results.slice((page - 1) * limit, page * limit).map((s) => ({
