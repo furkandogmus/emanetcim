@@ -13,9 +13,9 @@ appId: com.bagajpark
 
 # Admin girişi
 - tapOn: "E-posta veya Telefon"
-- inputText: "maestro-admin@bagajpark.com"
+- inputText: "${ADMIN_EMAIL}"
 - tapOn: "Şifre"
-- inputText: "Test123!"
+- inputText: "${ADMIN_PASSWORD}"
 - pressKey: Back
 - tapOn:
     text: "Giriş Yap.*"

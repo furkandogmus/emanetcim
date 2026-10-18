@@ -13,9 +13,9 @@ appId: com.bagajpark
 
 # Partner girişi
 - tapOn: "E-posta veya Telefon"
-- inputText: "maestro-partner@bagajpark.com"
+- inputText: "${PARTNER_EMAIL}"
 - tapOn: "Şifre"
-- inputText: "Test123!"
+- inputText: "${PARTNER_PASSWORD}"
 - pressKey: Back
 - tapOn:
     text: "Giriş Yap.*"

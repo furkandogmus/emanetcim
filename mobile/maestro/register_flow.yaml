@@ -24,7 +24,7 @@ appId: com.bagajpark
 - tapOn: "E-posta veya Telefon"
 - inputText: "maestro-new@test.com"
 - tapOn: "Şifre"
-- inputText: "Test123!"
+- inputText: "${GUEST_PASSWORD}"
 
 # KVKK checkbox
 - tapOn: "Kullanım Koşulları"
@@ -56,7 +56,7 @@ appId: com.bagajpark
 - eraseText
 - inputText: "gecersiz-email"
 - tapOn: "Şifre"
-- inputText: "Test123!"
+- inputText: "${GUEST_PASSWORD}"
 - tapOn: "Kayıt Ol"
 - assertVisible: "Geçersiz e-posta veya telefon numarası"
 - takeScreenshot: "register-error-email"
