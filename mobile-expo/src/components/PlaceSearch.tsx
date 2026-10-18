@@ -32,24 +32,25 @@ function shortLabel(label: string) {
 export function PlaceSearch({ onChoose }: { onChoose: (place: Place) => void }) {
   const { t } = useTranslation();
   const [query, setQuery] = useState("");
-  const [state, setState] = useState<State>({ kind: "idle" });
+  // Sonuc, ait oldugu sorguyla birlikte tutulur. Kisa sorgu "bos", sonucu
+  // henuz gelmemis sorgu "yukleniyor" render'da turetilir; effect yalnizca
+  // ag yanitinda state yazar (effect icinde eszamanli setState = cift render).
+  const [result, setResult] = useState<{ q: string; state: State } | null>(null);
   const q = query.trim();
+  const state: State =
+    q.length < MIN_CHARS ? { kind: "idle" } : result?.q === q ? result.state : { kind: "loading" };
 
   useEffect(() => {
-    if (q.length < MIN_CHARS) {
-      setState({ kind: "idle" });
-      return;
-    }
+    if (q.length < MIN_CHARS) return;
     // Gec gelen eski yanit yeni sorgunun sonucunu ezmesin.
     let stale = false;
-    setState({ kind: "loading" });
+    const settle = (next: State) => !stale && setResult({ q, state: next });
     const timer = setTimeout(() => {
       api<GeocodeResult>(`/geocode?q=${encodeURIComponent(q)}`, { auth: false })
-        .then((place) => !stale && setState({ kind: "found", place }))
+        .then((place) => settle({ kind: "found", place }))
         .catch((err: unknown) => {
-          if (stale) return;
-          if (err instanceof ApiError && err.code === "not_found") setState({ kind: "empty" });
-          else setState({ kind: "error", message: errorMessage(err, "placeSearch") });
+          if (err instanceof ApiError && err.code === "not_found") settle({ kind: "empty" });
+          else settle({ kind: "error", message: errorMessage(err, "placeSearch") });
         });
     }, DEBOUNCE_MS);
     return () => {

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
@@ -28,6 +28,19 @@ export function isStayWindowValid(checkIn: Date, checkOut: Date, now = Date.now(
 }
 
 /**
+ * Dakikada bir ilerleyen "simdi". Render icinde `Date.now()` saf degil; ekran
+ * acik kaldikca gecmis saatler de secilemez hale gelmeli.
+ */
+function useNow(stepMs = 60_000) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), stepMs);
+    return () => clearInterval(id);
+  }, [stepMs]);
+  return now;
+}
+
+/**
  * Takvim + birakma/alma saat seridi. Arama sihirbazi ve rezervasyon degistirme
  * ayni secicinin iki kullanicisi: Istanbul duvar saati kurali tek yerde kalsin.
  */
@@ -41,7 +54,7 @@ export function StayWindowPicker({
   onChange: (checkIn: Date, checkOut: Date) => void;
 }) {
   const { t } = useTranslation();
-  const now = Date.now();
+  const now = useNow();
   const windowValid = isStayWindowValid(checkIn, checkOut, now);
 
   function setDropMinutes(m: number) {
