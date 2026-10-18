@@ -380,5 +380,23 @@
       "forbidden": "Bu rezervasyonu değiştiremezsin.",
       "invalid_input": "Gönderilen bilgiler geçersiz. Zamanı ve valiz sayısını kontrol et."
     }
+  },
+  "review": {
+    "open": "Değerlendir",
+    "title": "Deneyimini puanla",
+    "hint": "{{shop}} hakkındaki yorumun diğer misafirlere yardımcı olur.",
+    "ratingLabel": "Puan",
+    "starN": "{{n}} yıldız",
+    "commentLabel": "Yorum (isteğe bağlı)",
+    "commentPlaceholder": "Nasıldı? (isteğe bağlı)",
+    "submit": "Gönder",
+    "sent": "Teşekkürler, değerlendirmen kaydedildi.",
+    "errors": {
+      "invalid_data": "Lütfen 1 ile 5 arasında bir puan seç.",
+      "booking_not_completed": "Valizini teslim aldıktan sonra değerlendirme yapabilirsin.",
+      "duplicate_review": "Bu rezervasyonu zaten değerlendirdin.",
+      "not_found": "Rezervasyon bulunamadı.",
+      "forbidden": "Bu rezervasyonu değerlendiremezsin."
+    }
   }
 }
