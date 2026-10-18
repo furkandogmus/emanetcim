@@ -39,7 +39,7 @@ async function partnerShop(req: NextRequest) {
   if ("error" in auth) return { error: auth.error };
   const forbid = requireRole(auth.user, ["PARTNER"]);
   if (forbid) return { error: forbid };
-  const shop = await shopService.getShopByOwner(auth.user.id);
+  const shop = await shopService.getShopByOwner(auth.user.id, req.nextUrl.searchParams.get("shop"));
   if (!shop) return { error: NextResponse.json({ error: "Shop not found" }, { status: 404 }) };
   return { shop };
 }
