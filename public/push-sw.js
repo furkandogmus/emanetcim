@@ -16,7 +16,7 @@
  * uygulama baglanti koptugunda tarayicinin hata sayfasini gostermesin.
  */
 
-var OFFLINE_CACHE = "bagajpark-offline-v1";
+var OFFLINE_CACHE = "bagajpark-offline-v2"; // v2: yeni logo (2026-10-18)
 var OFFLINE_URL = "/offline.html";
 
 self.addEventListener("install", function (event) {
