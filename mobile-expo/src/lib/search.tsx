@@ -1,4 +1,5 @@
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { AppState } from "react-native";
 import type { ReactNode } from "react";
 
 import { wallInstant, wallParts } from "./time";
@@ -60,6 +61,20 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     ...defaultWindow(),
     bags: { s: 0, m: 1, xl: 0 },
   }));
+
+  /*
+    Pencere uygulama acilirken bir kez kuruluyordu. Uygulama arka planda
+    birakma saatini gecince harita ayni gecmis tarihlerle istek atiyor, sunucu
+    `invalid_dates` donuyor ve "Tekrar dene" de ayni istegi tekrarliyordu.
+    On plana donuste gecmiste kalan pencere bir sonraki uygun saate kayar.
+  */
+  useEffect(() => {
+    const freshen = () =>
+      setState((s) => (s.checkIn.getTime() < Date.now() ? { ...s, ...defaultWindow() } : s));
+    freshen();
+    const sub = AppState.addEventListener("change", (st) => st === "active" && freshen());
+    return () => sub.remove();
+  }, []);
 
   const value = useMemo<SearchContextValue>(
     () => ({

@@ -126,7 +126,8 @@
       "shop_not_open_yet": "This spot isn't taking bookings yet.",
       "shop_closed_on_date": "The shop is closed on the date you picked.",
       "shop_not_found": "This spot is no longer taking bookings.",
-      "no_bags": "Pick at least one bag."
+      "no_bags": "Pick at least one bag.",
+      "too_many_requests": "Too many requests. Try again shortly."
     }
   },
   "success": {

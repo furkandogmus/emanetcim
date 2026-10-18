@@ -17,6 +17,8 @@ import { colors, radius, space } from "@/theme/tokens";
 
 const STEPS = 3;
 const HOUR = 3600_000;
+/** Sunucu `maxStayDays` (varsayilan 30) ile ayni; gun sayisi yukari yuvarlanir. */
+const MAX_STAY_MS = 30 * 24 * HOUR;
 
 /** 00:00-23:30 arasi yarim saatlik secenekler, dakika cinsinden. */
 const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => i * 30);
@@ -78,7 +80,8 @@ export default function SearchWizard() {
 
   const now = Date.now();
   const sameDay = sameWallDay(checkIn, checkOut);
-  const windowValid = checkIn.getTime() >= now - 5 * 60_000 && checkOut.getTime() - checkIn.getTime() >= HOUR;
+  const span = checkOut.getTime() - checkIn.getTime();
+  const windowValid = checkIn.getTime() >= now - 5 * 60_000 && span >= HOUR && span <= MAX_STAY_MS;
 
   function setDropMinutes(m: number) {
     const ci = withMinutes(checkIn, m);
@@ -92,6 +95,8 @@ export default function SearchWizard() {
     const ci = fromCell(start, minutesOf(checkIn));
     let co = fromCell(end, minutesOf(checkOut));
     if (co.getTime() - ci.getTime() < HOUR) co = new Date(ci.getTime() + 4 * HOUR);
+    // 30. gunde alma saati birakmadan gec olursa sure 31 gune yuvarlanip reddediliyordu.
+    if (co.getTime() - ci.getTime() > MAX_STAY_MS) co = new Date(ci.getTime() + MAX_STAY_MS);
     setCheckIn(ci);
     setCheckOut(co);
   }
@@ -176,7 +181,10 @@ export default function SearchWizard() {
             <TimeRow
               title={`${t("search.pickUp")} · ${formatDay(checkOut)}`}
               selected={minutesOf(checkOut)}
-              isDisabled={(m) => withMinutes(checkOut, m).getTime() - checkIn.getTime() < HOUR}
+              isDisabled={(m) => {
+                const d = withMinutes(checkOut, m).getTime() - checkIn.getTime();
+                return d < HOUR || d > MAX_STAY_MS;
+              }}
               onSelect={(m) => setCheckOut(withMinutes(checkOut, m))}
             />
             {!windowValid && sameDay ? <Banner tone="warning" body={t("search.pickUpBeforeDropOff")} /> : null}
