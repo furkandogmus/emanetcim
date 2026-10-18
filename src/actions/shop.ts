@@ -135,5 +135,6 @@ export async function updateShopImageAction(formData: FormData) {
 
   revalidatePathAllLocales("/partner/settings");
   revalidatePathAllLocales(`/shop/${shopId}`);
+  revalidatePathAllLocales(`/admin/partners/${shopId}/edit`);
   return { success: true as const, url: result.url };
 }
