@@ -13,6 +13,7 @@ type AuthContextValue = {
   state: AuthState;
   requestCode: (email: string) => Promise<void>;
   verifyCode: (email: string, code: string) => Promise<MobileUser>;
+  signInWithPassword: (email: string, password: string) => Promise<MobileUser>;
   signOut: () => Promise<void>;
 };
 
@@ -43,16 +44,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await api("/auth/otp", { method: "POST", body: { email }, auth: false });
   }, []);
 
-  const verifyCode = useCallback(async (email: string, code: string) => {
-    const res = await api<SessionResponse>("/auth/session", {
-      method: "POST",
-      body: { email, code },
-      auth: false,
-    });
+  const startSession = useCallback(async (body: Record<string, string>) => {
+    const res = await api<SessionResponse>("/auth/session", { method: "POST", body, auth: false });
     await saveTokens(res.accessToken, res.refreshToken);
     setState({ status: "signedIn", user: res.user });
     return res.user;
   }, []);
+
+  const verifyCode = useCallback(
+    (email: string, code: string) => startSession({ email, code }),
+    [startSession],
+  );
+
+  // Web'de sifre belirlemis kullanicilar ve Play inceleme hesabi icin: OTP
+  // e-postasina erisemeyen biri de girebilmeli.
+  const signInWithPassword = useCallback(
+    (email: string, password: string) => startSession({ email, password }),
+    [startSession],
+  );
 
   const signOut = useCallback(async () => {
     // Sunucu tarafi iptal en iyi caba; basarisiz olsa da yerel oturum kapanir.
@@ -62,8 +71,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ state, requestCode, verifyCode, signOut }),
-    [state, requestCode, verifyCode, signOut],
+    () => ({ state, requestCode, verifyCode, signInWithPassword, signOut }),
+    [state, requestCode, verifyCode, signInWithPassword, signOut],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
