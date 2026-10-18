@@ -83,7 +83,8 @@
     "available": "~{{count}} yer",
     "distance": "{{km}} km",
     "verified": "Doğrulanmış",
-    "editSearch": "Aramayı düzenle"
+    "editSearch": "Aramayı düzenle",
+    "emptyTitle": "{{place}} çevresinde henüz rezervasyon alan nokta yok"
   },
   "shop": {
     "open247": "7/24 açık",
