@@ -8,6 +8,7 @@ import { updateShopImageAction } from "@/actions/shop";
 import { useActionErrorText } from "@/lib/use-action-error";
 import { toast } from "sonner";
 import { MAX_IMAGE_BYTES } from "@/lib/storage/image-validation";
+import { toUploadJpeg } from "@/lib/client-image";
 
 /**
  * Esnafın vitrin fotoğrafını yüklediği yer.
@@ -36,28 +37,38 @@ export default function ShopPhotoUpload({ shopId, initialUrl, configured }: Prop
 
   if (!configured) return null;
 
-  function onPick(file: File) {
-    /*
-      ISTEMCI TARAFI KONTROL YALNIZCA KOLAYLIK. Gercek dogrulama sunucuda,
-      dosyanin ILK BAYTLARINDAN yapiliyor (`validateImageBytes`) -- `file.type`
-      istemci kontrolundedir ve hic okunmuyor. Buradaki kontrol, 8 MB'lik bir
-      dosyayi bosuna yuklemeyi onlemek icin.
-    */
-    if (file.size > MAX_IMAGE_BYTES) {
-      toast.error(errorText("Errors.imageTooLarge"));
-      return;
-    }
-    const form = new FormData();
-    form.set("shopId", shopId);
-    form.set("file", file);
-
+  function onPick(picked: File) {
     startTransition(async () => {
-      const res = await updateShopImageAction(form);
-      if (res.success) {
-        setUrl(res.url);
-        toast.success(t("shopPhotoSaved"));
-      } else {
-        toast.error(errorText(res.error));
+      // JPEG'e cevirip kucultmek Cloudflare WAF'in buyuk PNG'leri kesmesini ve
+      // sunucu boyut sinirini onler; bkz. `client-image.ts`.
+      const file = await toUploadJpeg(picked);
+      /*
+        ISTEMCI TARAFI KONTROL YALNIZCA KOLAYLIK. Gercek dogrulama sunucuda,
+        dosyanin ILK BAYTLARINDAN yapiliyor (`validateImageBytes`).
+      */
+      if (file.size > MAX_IMAGE_BYTES) {
+        toast.error(errorText("Errors.imageTooLarge"));
+        return;
+      }
+      const form = new FormData();
+      form.set("shopId", shopId);
+      form.set("file", file);
+
+      try {
+        const res = await updateShopImageAction(form);
+        if (res.success) {
+          setUrl(res.url);
+          toast.success(t("shopPhotoSaved"));
+        } else {
+          toast.error(errorText(res.error));
+        }
+      } catch {
+        /*
+          Sunucudan action yaniti yerine baska bir sey donerse (Cloudflare 403,
+          deploy sirasinda eski sayfa) action FIRLATIR. Yakalanmazsa butun sayfa
+          hata ekranina dusuyordu ("Eyvah, bir sorun oldu", 2026-10-18).
+        */
+        toast.error(errorText("Errors.generic"));
       }
     });
   }
