@@ -79,7 +79,10 @@ export function StayWindowPicker({
         }}
         onSelect={(m) => onChange(checkIn, withMinutes(checkOut, m))}
       />
-      {!windowValid && sameWallDay(checkIn, checkOut) ? (
+      {/* Gecmis birakma saati de pencereyi gecersiz kilar; uyari gercek nedeni soyler. */}
+      {checkIn.getTime() < now - 5 * 60_000 ? (
+        <Banner tone="warning" body={t("search.dropOffInPast")} />
+      ) : !windowValid && sameWallDay(checkIn, checkOut) ? (
         <Banner tone="warning" body={t("search.pickUpBeforeDropOff")} />
       ) : null}
     </>
