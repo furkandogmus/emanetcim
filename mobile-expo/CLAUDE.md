@@ -14,7 +14,8 @@ aynı kural, `checkout/intent` → `APPROVED`); esnaf onay adımı bilerek yok.
 ## Komutlar (mobile-expo/ içinden)
 
 ```bash
-npm run typecheck                      # tsc --noEmit; her değişiklikten sonra
+npm run verify                         # kapı: typecheck + lint + locale paritesi + jest (CI ile aynı)
+npm test                               # jest-expo birim testleri (src/**/__tests__)
 npx expo run:android                   # development build (MapLibre native modül → Expo Go YETMEZ)
 npx expo start                         # build kuruluysa yalnızca JS için Metro
 ```
