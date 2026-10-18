@@ -542,7 +542,10 @@ export async function approveShopAction(shopId: string) {
     TypeScript bunu uyarmaz. Sebep de tasiniyor: "konum yok" ile "dukkan yok"
     admin icin ayri seyler, ilki duzeltilebilir bir eksik.
   */
-  const result = await shopService.approveShop(shopId);
+  const result = await shopService.approveApplication(shopId, {
+    userId: session.user.id ?? null,
+    ip: await getClientIpOrNull(),
+  });
   if (!result.ok) {
     throw new Error(
       result.reason === "missing_coordinates"
@@ -550,15 +553,6 @@ export async function approveShopAction(shopId: string) {
         : "Errors.generic",
     );
   }
-
-  writeAuditLog({
-    actorUserId: session.user.id ?? null,
-    actorRole: "ADMIN",
-    action: "shop.approve_application",
-    entityType: "Shop",
-    entityId: shopId,
-    ip: await getClientIpOrNull(),
-  });
 
   revalidatePathAllLocales("/admin/applications");
   revalidatePathAllLocales("/admin/partners");
@@ -588,26 +582,15 @@ export async function rejectShopAction(
     guveniyordu, oysa silme `onDelete` davranisina gore BASARILI da olabilir ve
     o durumda misafirin elinde karsiligi olmayan bir rezervasyon kalirdi.
   */
-  const result = await shopService.rejectShop(shopId);
+  // Denetim kaydi `rejectApplication`da: mobil uc da ayni yoldan gecer.
+  const result = await shopService.rejectApplication(shopId, {
+    userId: session.user.id ?? null,
+    ip: await getClientIpOrNull(),
+  });
   if (!result.ok) {
     logger.warn({ shopId, reason: result.reason }, "admin_reject_shop_blocked");
     return { success: false, error: "has_relations" };
   }
-
-  /*
-    RED DE DENETIM IZI BIRAKIYOR. Onay (`approveShopAction`) log yaziyordu, red
-    yazmiyordu -- oysa bir esnafin dukkanini SILMEK, onaylamaktan daha geri
-    donulmez bir islem.
-  */
-  writeAuditLog({
-    actorUserId: session.user.id ?? null,
-    actorRole: "ADMIN",
-    action: "shop.reject_application",
-    entityType: "Shop",
-    entityId: shopId,
-    ip: await getClientIpOrNull(),
-    metadata: { releasedSeals: result.releasedSeals },
-  });
 
   revalidatePathAllLocales("/admin/applications");
   return { success: true };

@@ -11,7 +11,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const { mockAuth, mockShopService, mockAuditLog } = vi.hoisted(() => ({
   mockAuth: vi.fn(),
-  mockShopService: { approveShop: vi.fn() },
+  mockShopService: { approveApplication: vi.fn() },
   mockAuditLog: vi.fn(),
 }));
 
@@ -32,29 +32,30 @@ describe("approveShopAction", () => {
     mockAuth.mockResolvedValue({ user: { id: "admin-1", role: "ADMIN" } });
   });
 
-  it("delegates to shopService.approveShop — bu, partnere onay e-postası + SMS gönderen tek yol", async () => {
-    mockShopService.approveShop.mockResolvedValue({ ok: true });
+  // Denetim kaydi artik `approveApplication`ta (mobil uc da oradan gecer);
+  // kaydin yazildigi `ShopService.application-audit.test.ts`te olculur.
+  it("delegates to shopService.approveApplication — partnere onay e-postası + SMS + denetim kaydı tek yol", async () => {
+    mockShopService.approveApplication.mockResolvedValue({ ok: true });
 
     const result = await approveShopAction("shop-1");
 
-    expect(mockShopService.approveShop).toHaveBeenCalledWith("shop-1");
-    expect(result).toEqual({ success: true });
-    expect(mockAuditLog).toHaveBeenCalledWith(
-      expect.objectContaining({ action: "shop.approve_application", entityId: "shop-1" }),
+    expect(mockShopService.approveApplication).toHaveBeenCalledWith(
+      "shop-1",
+      expect.objectContaining({ userId: "admin-1" }),
     );
+    expect(result).toEqual({ success: true });
   });
 
-  it("shopService.approveShop false dönerse hata fırlatır ve audit log yazmaz", async () => {
-    mockShopService.approveShop.mockResolvedValue({ ok: false, reason: "not_found" });
+  it("approveApplication başarısız dönerse hata fırlatır", async () => {
+    mockShopService.approveApplication.mockResolvedValue({ ok: false, reason: "not_found" });
 
     await expect(approveShopAction("missing-shop")).rejects.toThrow();
-    expect(mockAuditLog).not.toHaveBeenCalled();
   });
 
   it("admin olmayan kullanıcıyı reddeder", async () => {
     mockAuth.mockResolvedValue({ user: { id: "u1", role: "PARTNER" } });
 
     await expect(approveShopAction("shop-1")).rejects.toThrow();
-    expect(mockShopService.approveShop).not.toHaveBeenCalled();
+    expect(mockShopService.approveApplication).not.toHaveBeenCalled();
   });
 });

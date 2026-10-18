@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getMobileSession } from "@/lib/mobile-auth";
-import { shopService } from "@/services/ShopService";
+import { clientIpFromRequest } from "@/lib/client-ip";
+import { applicationActionResponse } from "@/lib/admin-application-response";
 
 export async function POST(
   req: Request,
@@ -12,51 +13,14 @@ export async function POST(
   }
 
   const { id, action } = await params;
-
   /*
-    HER IKI ISLEM DE SERVIS UZERINDEN (2026-09-01).
-
-    ONAY: burasi ham `prisma.shop.update({ isActive: true })` yaziyordu --
-    dukkani aciyor ama esnafa HICBIR SEY SOYLEMIYORDU. `ShopService.approveShop`
-    ayni isi yaparken onay e-postasini gonderiyor, eski kayitlarin
-    dogrulanmamis e-postasini isaretliyor ve HICBIR kanal yoksa uyari
-    logluyor. Web tarafi (`approveShopAction`) zaten servisi cagiriyordu ve
-    oradaki yorum bunun P1-3'te bir kez duzeltildigini yaziyor -- ayni hata
-    mobil ucta hic duzeltilmemisti. Yani mobilden onaylanan esnaf, panelinin
-    acildigini ogrenemiyordu.
-
-    RED: govde `ShopService.rejectShop`a tasindi; web kopyasi muhurleri stoga
-    dondurmuyordu (bkz. o metodun yorumu).
+    Govde `applicationActionResponse`te (2026-10-18): onay e-postasi, muhur
+    iadesi ve denetim kaydi `ShopService.approveApplication`/`rejectApplication`
+    icinde. Bu uc ile mobil uc ayni govdeyi iki kez yaziyordu ve ikisi de
+    denetim kaydini atliyordu.
   */
-  if (action === "approve") {
-    /*
-      `if (!ok)` DEGIL: `approveShop` artik yapilandirilmis sonuc donuyor ve bir
-      NESNE her zaman truthy'dir -- eski kosul sessizce hicbir hatayi
-      yakalamazdi. TypeScript bunu uyarmaz, o yuzden burada acikca `.ok`
-      okunuyor.
-    */
-    const result = await shopService.approveShop(id);
-    if (!result.ok) {
-      return result.reason === "missing_coordinates"
-        ? NextResponse.json(
-            { error: "Shop has no coordinates; set them before approving." },
-            { status: 409 },
-          )
-        : NextResponse.json({ error: "Shop not found." }, { status: 404 });
-    }
-  } else if (action === "reject") {
-    const result = await shopService.rejectShop(id);
-    if (!result.ok) {
-      return result.reason === "not_found"
-        ? NextResponse.json({ error: "Shop not found." }, { status: 404 })
-        : NextResponse.json(
-            { error: "Shop has active bookings; cannot delete." },
-            { status: 409 },
-          );
-    }
-  } else {
-    return NextResponse.json({ error: "Invalid action" }, { status: 400 });
-  }
-
-  return NextResponse.json({ success: true });
+  return applicationActionResponse(id, action, {
+    userId: session.userId,
+    ip: clientIpFromRequest(req),
+  });
 }

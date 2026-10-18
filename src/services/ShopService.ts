@@ -1,4 +1,5 @@
 import type { Prisma, Shop } from '@prisma/client';
+import { writeAuditLog } from "@/lib/audit-log";
 import { Role } from '@prisma/client';
 import prisma from '@/lib/db';
 import { randomUUID } from 'crypto';
@@ -251,6 +252,8 @@ export interface IShopService {
   getPendingShops(): Promise<ShopWithOwner[]>;
   approveShop(shopId: string): Promise<ApproveShopResult>;
   rejectShop(shopId: string): Promise<RejectShopResult>;
+  approveApplication(shopId: string, actor: ApplicationActor): Promise<ApproveShopResult>;
+  rejectApplication(shopId: string, actor: ApplicationActor): Promise<RejectShopResult>;
   getShopsByOwner(ownerId: string): Promise<Shop[]>;
   getShopByOwner(ownerId: string): Promise<Shop | null>;
   updateShop(shopId: string, data: Partial<Shop>): Promise<Shop>;
@@ -315,6 +318,9 @@ export type ApproveShopResult =
 export type RejectShopResult =
   | { ok: true; releasedSeals: number }
   | { ok: false; reason: "not_found" | "has_active_bookings" };
+
+/** Basvuru karari veren admin; IP tasiyicidan gelir (web action / mobil uc). */
+export type ApplicationActor = { userId: string | null; ip: string | null };
 
 /**
  * ShopService - SOLID: Single Responsibility
@@ -1097,6 +1103,43 @@ export class ShopService implements IShopService {
     */
     const releasedSeals = await sealService.releaseShopSeals(shopId);
     return { ok: true, releasedSeals };
+  }
+
+  /*
+    Basvuru KARARI: islem + denetim kaydi birlikte. Web action'i kaydi
+    kendisi yaziyordu, mobil uc hic yazmiyordu -- red dukkani SILDIGI halde
+    mobilden yapilan red iz birakmiyordu (2026-10-18). Iki tasiyici da
+    buradan gecer.
+  */
+  async approveApplication(shopId: string, actor: ApplicationActor): Promise<ApproveShopResult> {
+    const result = await this.approveShop(shopId);
+    if (result.ok) {
+      writeAuditLog({
+        actorUserId: actor.userId,
+        actorRole: "ADMIN",
+        action: "shop.approve_application",
+        entityType: "Shop",
+        entityId: shopId,
+        ip: actor.ip,
+      });
+    }
+    return result;
+  }
+
+  async rejectApplication(shopId: string, actor: ApplicationActor): Promise<RejectShopResult> {
+    const result = await this.rejectShop(shopId);
+    if (result.ok) {
+      writeAuditLog({
+        actorUserId: actor.userId,
+        actorRole: "ADMIN",
+        action: "shop.reject_application",
+        entityType: "Shop",
+        entityId: shopId,
+        ip: actor.ip,
+        metadata: { releasedSeals: result.releasedSeals },
+      });
+    }
+    return result;
   }
 }
 
