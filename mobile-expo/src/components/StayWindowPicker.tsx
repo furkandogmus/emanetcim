@@ -17,6 +17,15 @@ const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => i * 30);
 const CHIP_WIDTH = 80;
 const CHIP_GAP = 8;
 
+/**
+ * Yarim saatlik izgaraya oturmayan kayitli saat (eski rezervasyon, 05:54) de
+ * secenek olarak gorunur. Yoksa degistirme ekraninda hicbir saat secili
+ * gorunmuyor, serit 00:00'a kayiyordu (2026-10-18, emulator).
+ */
+function optionsWith(selected: number) {
+  return TIME_OPTIONS.includes(selected) ? TIME_OPTIONS : [...TIME_OPTIONS, selected].sort((a, b) => a - b);
+}
+
 function label(minutes: number) {
   return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
 }
@@ -116,7 +125,7 @@ function TimeRow({
   const ref = useRef<ScrollView>(null);
   // Secili saat ekranin solunda ikinci sirada dursun; ilk acilista da gorunsun.
   useEffect(() => {
-    const idx = Math.max(0, TIME_OPTIONS.indexOf(selected) - 1);
+    const idx = Math.max(0, optionsWith(selected).indexOf(selected) - 1);
     ref.current?.scrollTo({ x: idx * (CHIP_WIDTH + CHIP_GAP), animated: false });
   }, [selected]);
 
@@ -129,7 +138,7 @@ function TimeRow({
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ gap: CHIP_GAP }}
       >
-        {TIME_OPTIONS.map((m) => (
+        {optionsWith(selected).map((m) => (
           <View key={m} style={{ width: CHIP_WIDTH }}>
             <Chip label={label(m)} selected={m === selected} disabled={isDisabled(m)} onPress={() => onSelect(m)} />
           </View>
