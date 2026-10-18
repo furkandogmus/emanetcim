@@ -34,6 +34,28 @@ her hata buraya `— hata: <ne>` diye eklenir.
 - [x] partner listesi — 2026-10-18 prod: gelmeyen misafirin eski APPROVED kaydı "Bugün"ü dolduruyordu → "Geçmiş"e
 - [x] partner/[id] — teslim al / teslim et eklendi (aşağıda)
 
+## Yerel uçtan uca tur (2026-10-18, prod'a dokunmadan)
+
+Ortam: `postgis/postgis:16-3.4-alpine` tek kullanımlık konteyner (`bp-e2e-db`, port 5434)
++ `prisma migrate deploy` + seed; `npm run dev` açık `DATABASE_URL` ile, `RESEND_API_KEY`
+ve `FIREBASE_SERVICE_ACCOUNT_JSON` boş, `PAYMENT_PROVIDER=manual`. Dev client
+`npx expo run:android --device bagajpark_pixel8` (API varsayılanı `10.0.2.2:3000`).
+Hesaplar: `misafir@test.com` / `esnaf@test.com`, şifre seed varsayılanı. Seed mühürleri
+100100… Galata dükkanına atanmış.
+
+- [x] Misafir: şifreyle giriş → İstanbul → yarın 09:00-13:00 → M+XL → harita (2 nokta) →
+  Galata → onay ₺200 → rezervasyon `31002DBA` (QR + kod görünüyor)
+- [x] Esnaf: Yaklaşan'da görünüyor → mühür 100100/100101 ile teslim al → teslim et (tamamlandı)
+- [x] Esnaf dükkan bilgileri kaydet
+- hata (düzeltildi): sihirbaz ön planda bayatlayınca geçmiş saat seçili, "Devam" kilitli, yanlış uyarı
+- hata (düzeltildi): bilgi pencerelerinde Türkçe arayüzde İngilizce "OK"
+- hata (düzeltildi): `expo lint` yapılandırmasızdı, hiçbir dosyayı taramıyordu; test yoktu (PR #66)
+- Not: emülatörde argent `keyboard` metni karıştırıyor (Gboard); metni `adb shell input text` ile gir
+
+Sırada: misafir rezervasyon değiştir / iptal / değerlendirme / hasar bildirimi, esnaf mühür
+talebi + çalışma saatleri, admin akışı (`admin@test.com`), sonra iOS (makinede Xcode yoksa
+`eas-simulator`).
+
 ## Prod verisi bulguları (kod değil)
 
 - **Test dükkanı kamuya açık.** `Kadıköy Valiz Emanet` (`d32ea037…`) test hesabı
@@ -47,13 +69,13 @@ her hata buraya `— hata: <ne>` diye eklenir.
 
 - [x] Esnaf: teslim al — prod'da `740e72c4` CHECKED_IN (2026-10-18). QR okutma (`seals/scan`) eklendi
 - [x] Esnaf: teslim et — prod'da `740e72c4` CHECKED_OUT (2026-10-18)
-- [ ] Esnaf: valiz revizyonu (`partner/bookings/[id]/bag-revision`)
-- [ ] Esnaf: mühür talebi / arızalı bildir (`/partner/seals`)
+- [x] Esnaf: valiz revizyonu (`partner/bookings/[id]/bag-revision`) — main'de
+- [x] Esnaf: mühür talebi / arızalı bildir (`/partner/seals`) — main'de
 - [x] Şifre sıfırlama + profil düzenleme (kayıt OTP ile otomatik). OTP girişi artık e-postayı doğrulanmış sayar
 - [ ] Google / Apple girişi — sunucu hazır; `GOOGLE_ANDROID_CLIENT_ID`/`GOOGLE_IOS_CLIENT_ID` (Google Cloud Console, Play imza SHA-1) ve `APPLE_BUNDLE_ID` + Apple Developer hesabı bekliyor
-- [ ] Rezervasyon değiştir (`bookings/[id]/modify`)
-- [ ] Değerlendirme yaz (`reviews`) — dükkan yorumlarını okuma 2026-10-18'de eklendi
-- [ ] İtiraz aç (`/bookings/[id]/dispute`)
+- [x] Rezervasyon değiştir (`bookings/[id]/modify`) — main'de
+- [x] Değerlendirme yaz (`reviews`) — main'de
+- [x] İtiraz / hasar bildirimi — main'de
 - [x] Push: esnafa yeni rezervasyon (FCM; `FIREBASE_SERVICE_ACCOUNT_JSON` SSM'de, 2026-10-18). iOS APNs Apple hesabı bekliyor
 
 ## Admin (2026-10-18 yerel inceleme; uygulama yayından sonra)
@@ -78,10 +100,10 @@ Expo:
 
 ## nativize-later
 
-- [ ] Esnaf kazançları (`/partner/earnings`)
-- [ ] Esnaf ayarları + haftalık saatler (`/partner/settings`, `partner/shop/schedule`)
+- [x] Esnaf kazançları (`/partner/earnings`)
+- [x] Esnaf ayarları + haftalık saatler (`/partner/settings`, `partner/shop/schedule`)
 - [ ] Esnaf panosu (`/partner`)
-- [ ] Davet kodu (`referrals/*`)
+- [x] Davet kodu (`referrals/*`)
 
 ## Arama
 
