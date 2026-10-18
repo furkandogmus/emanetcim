@@ -14,14 +14,15 @@ flows:
   - partner_booking_management_flow.yaml
   - admin_dashboard_flow.yaml
 
+# Sifreler REPOYA YAZILMAZ: repo herkese acik ve bu hesaplar prod'da (admin
+# dahil). 2026-10-18'e kadar burada duz metin duruyordu; uc hesabin sifresi
+# degistirildi. Calistirirken verin:
+#   maestro test mobile/maestro -e GUEST_PASSWORD=... -e PARTNER_PASSWORD=... -e ADMIN_PASSWORD=...
 env:
   APP_ID: "com.bagajpark"
   GUEST_EMAIL: "maestro-guest@bagajpark.com"
-  GUEST_PASSWORD: "Test123!"
   PARTNER_EMAIL: "maestro-partner@bagajpark.com"
-  PARTNER_PASSWORD: "Test123!"
   ADMIN_EMAIL: "maestro-admin@bagajpark.com"
-  ADMIN_PASSWORD: "Test123!"
 
 executionOrder:
   continueOnFailure: false
