@@ -228,3 +228,16 @@ export type ContactMessage = {
   isRead: boolean;
   createdAt: string;
 };
+
+/** `partner/earnings/stats` GET. Tutarlar esnaf payi (komisyon dusulmus). */
+export type PartnerEarnings = {
+  totalBalance: number;
+  todayEarnings: number;
+  pendingPayout: number;
+  /** `createdAt` sonradan eklendi; eski sunucuda yalnizca "MM DD" metni (`date`) var. */
+  history: { date: string; createdAt?: string; amount: number; shopId: string; status: "PAID" }[];
+  currency: string;
+  /** Yururlukteki oran, 0..1. Dukkanda tahsilatta 0. */
+  commissionRate: number;
+  merchantShareRatio: number;
+};

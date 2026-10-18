@@ -490,5 +490,20 @@
       "seal_already_processed": "Bu mühür kullanılmış; arızalı bildirilemez.",
       "forbidden": "Bu işlem için yetkin yok."
     }
+  },
+  "earnings": {
+    "title": "Kazancım",
+    "total": "Net hakediş",
+    "today": "Bugün",
+    "commissionTitle": "Platform komisyonu %{{pct}}",
+    "commissionBody": "Her ödemeden %{{pct}} platform payı düşülür, %{{share}} sana kalır. Tutarlar komisyon düşülmüş haliyle gösterilir.",
+    "noCommissionTitle": "Komisyonsuz dönem",
+    "noCommissionBody": "Şu an platform komisyonu alınmıyor; kazancından hiçbir kesinti yapılmıyor.",
+    "recent": "Son {{count}} işlem",
+    "empty": "Henüz kazanç yok.",
+    "footnote": "Ödemeyi dükkanında misafirden alıyorsun; tutar zaten kasanda.",
+    "errors": {
+      "no_shops": "Aktif bir dükkanın yok."
+    }
   }
 }
