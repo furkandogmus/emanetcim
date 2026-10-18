@@ -490,5 +490,20 @@
       "seal_already_processed": "This seal has been used and cannot be reported as faulty.",
       "forbidden": "You are not allowed to do this."
     }
+  },
+  "earnings": {
+    "title": "My earnings",
+    "total": "Net earnings",
+    "today": "Today",
+    "commissionTitle": "Platform commission {{pct}}%",
+    "commissionBody": "A {{pct}}% platform fee is deducted from each payment and {{share}}% is yours. Amounts are shown after commission.",
+    "noCommissionTitle": "Commission-free period",
+    "noCommissionBody": "No platform commission is charged right now; nothing is deducted from your earnings.",
+    "recent": "Last {{count}} transactions",
+    "empty": "No earnings yet.",
+    "footnote": "You collect payment from the guest at your shop, so the money is already in your till.",
+    "errors": {
+      "no_shops": "You have no active shop."
+    }
   }
 }
