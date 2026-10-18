@@ -280,5 +280,25 @@
       "has_active_bookings": "Dükkanın aktif rezervasyonu var; reddedilemez.",
       "invalid_action": "Geçersiz işlem."
     }
+  },
+  "scan": {
+    "open": "QR okut",
+    "hint": "Misafirin rezervasyon QR kodunu çerçeveye getir.",
+    "permissionTitle": "Kamera izni gerekli",
+    "permissionBody": "QR kodu okutmak için kameraya erişmemiz gerekiyor. Görüntü kaydedilmez.",
+    "allow": "İzin ver",
+    "seal": "Mühür {{n}}: {{status}}",
+    "sealStatus": {
+      "STOCK": "stokta",
+      "ASSIGNED": "dükkana atanmış",
+      "IN_USE": "valizde takılı",
+      "RETURNED": "iade edilmiş",
+      "FAULTY": "arızalı"
+    },
+    "errors": {
+      "unknown_code": "Bu kod tanınmadı. BagajPark rezervasyon QR kodu mu?",
+      "forbidden": "Bu rezervasyon senin dükkanına ait değil.",
+      "not_found": "Rezervasyon bulunamadı."
+    }
   }
 }

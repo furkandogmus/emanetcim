@@ -7,6 +7,7 @@ export default function PartnerLayout() {
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
       <Stack.Screen name="partner/index" />
       <Stack.Screen name="partner/shop" />
+      <Stack.Screen name="partner/scan" options={{ presentation: "fullScreenModal" }} />
       <Stack.Screen name="partner/[id]" />
     </Stack>
   );
