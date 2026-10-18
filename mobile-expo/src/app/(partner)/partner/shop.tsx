@@ -4,7 +4,7 @@ import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ImagePlus, Store } from "lucide-react-native";
+import { ArrowLeft, ImagePlus, ShieldCheck, Store } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } from "@/components/ui";
@@ -95,6 +95,12 @@ export default function PartnerShopScreen() {
             icon={<ImagePlus size={18} color={colors.white} />}
             loading={upload.isPending}
             onPress={() => void pick()}
+          />
+          <Button
+            variant="secondary"
+            title={t("seals.open")}
+            icon={<ShieldCheck size={18} color={colors.ink} />}
+            onPress={() => router.push("/partner/seals")}
           />
         </View>
       )}
