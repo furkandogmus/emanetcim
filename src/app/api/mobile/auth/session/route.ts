@@ -12,6 +12,7 @@ import { analyticsService } from "@/services/AnalyticsService";
 import { resolveServerSessionId } from "@/lib/analytics-server";
 import logger from "@/lib/logger";
 import { toMobileUser } from "@/lib/mobile-dto";
+import { markEmailVerifiedByCode } from "@/services/auth/verify-email";
 
 const schema = z.union([
   z.object({ email: z.string().email(), code: z.string().length(6) }),
@@ -94,6 +95,8 @@ export async function POST(req: NextRequest) {
       user = await prisma.user.create({
         data: {
           email: isEmail ? normalizedIdentity : null,
+          // Kodla giris e-postanin sahibini kanitlar (bkz. `markEmailVerifiedByCode`).
+          emailVerified: isEmail ? new Date() : null,
           phone: !isEmail ? normalizedIdentity : null,
           role: "GUEST",
           name: isEmail ? normalizedIdentity.split("@")[0] : `User ${normalizedIdentity.slice(-4)}`,
@@ -116,6 +119,7 @@ export async function POST(req: NextRequest) {
         metadata: { source: "mobile_otp", role: "GUEST" },
       });
     }
+    if (isEmail && !user.emailVerified) await markEmailVerifiedByCode(user.id);
   } else if (password) {
     if (!(await rateLimit(`mobile_pwd:${normalizedIdentity}`, 5, 15 * 60_000))) {
       return NextResponse.json({ error: "too_many_attempts" }, { status: 429 });
