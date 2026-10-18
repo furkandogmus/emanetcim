@@ -102,7 +102,7 @@ Expo:
 
 - [x] Esnaf kazançları (`/partner/earnings`)
 - [x] Esnaf ayarları + haftalık saatler (`/partner/settings`, `partner/shop/schedule`)
-- [ ] Esnaf panosu (`/partner`)
+- [x] Esnaf panosu (`/partner`) — günlük özet kartı + çok dükkan seçimi (2026-10-18)
 - [x] Davet kodu (`referrals/*`)
 
 ## Arama
@@ -137,3 +137,11 @@ mesaj okundu / mesaj sil.
 - Emülatör notu: Expo dev menüsünün yüzen düğmesi sağ üstteki Profil'i örter; sürükleyip kenara çek
 
 Sırada: iOS. Makinede Xcode yok → `eas-simulator` (bulut) ya da Xcode kurulumu; kullanıcı kararı.
+
+## Tur 3 (2026-10-18): esnaf panosu
+
+- [x] `GET /api/mobile/partner/dashboard` — web paneliyle aynı servis ve dükkan seçimi
+- [x] Esnaf ana ekranında günlük özet kartı; teslim alınca emülatörde 0→1 valiz, ₺200→₺280
+- bulgu: e2e seed'de esnafın 3 dükkanı var; mühür uçları (`partner/seals*`) dükkanı
+  sırasız `findFirst` ile seçiyor → çok dükkanlı esnafta mühür stoğu rastgele dükkanın.
+  Sırada: mühür uçlarını `resolvePartnerShops` + `?shop=` ile web'e hizalamak.
