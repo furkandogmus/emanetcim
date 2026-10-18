@@ -56,7 +56,11 @@ export default function ProfileScreen() {
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
         <AppText variant="title">{t("profile.title")}</AppText>
-        <IconButton label={t("common.close")} onPress={() => router.back()}>
+        <IconButton
+          label={t("common.close")}
+          // Deep link ya da yeniden yuklemeyle tek ekran kalinca `back` hicbir sey yapmiyordu.
+          onPress={() => (router.canGoBack() ? router.back() : router.replace("/"))}
+        >
           <X size={20} color={colors.ink} />
         </IconButton>
       </View>
