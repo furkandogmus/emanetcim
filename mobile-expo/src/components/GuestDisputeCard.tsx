@@ -22,7 +22,7 @@ const MAX_DESC = 2000;
  * (`duplicate_dispute`); DTO bunu tasimadigi icin tekrar deneme sunucu
  * cevabiyla bilgi olarak kapanir.
  */
-export function GuestDisputeCard({ booking }: { booking: BookingDetail }) {
+export function GuestDisputeCard({ booking, onOpen }: { booking: BookingDetail; onOpen?: () => void }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -60,7 +60,10 @@ export function GuestDisputeCard({ booking }: { booking: BookingDetail }) {
         variant="secondary"
         title={t("dispute.open")}
         icon={<TriangleAlert size={18} color={colors.warning} />}
-        onPress={() => setOpen(true)}
+        onPress={() => {
+          setOpen(true);
+          onOpen?.();
+        }}
       />
     );
   }
