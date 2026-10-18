@@ -279,7 +279,8 @@
       "missing_coordinates": "Dükkanın konumu yok; önce web panelinden konumu girin.",
       "has_active_bookings": "Dükkanın aktif rezervasyonu var; reddedilemez.",
       "invalid_action": "Geçersiz işlem."
-    }
+    },
+    "deleteMessage": "Mesajı sil"
   },
   "scan": {
     "open": "QR okut",
