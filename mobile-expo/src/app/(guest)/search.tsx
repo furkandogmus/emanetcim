@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 
 import { BagCounter } from "@/components/BagCounter";
 import { RangeCalendar } from "@/components/Calendar";
+import { PlaceSearch } from "@/components/PlaceSearch";
 import { AppText, Banner, Button, Chip, IconButton } from "@/components/ui";
 import { formatDay } from "@/lib/format";
 import { CITIES, totalBags, useSearch } from "@/lib/search";
@@ -135,8 +136,9 @@ export default function SearchWizard() {
       </View>
 
       {step === 0 ? (
-        <ScrollView contentContainerStyle={styles.content}>
+        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <AppText variant="title">{t("search.locationTitle")}</AppText>
+          <PlaceSearch onChoose={choosePlace} />
           <Pressable
             accessibilityRole="button"
             onPress={useMyLocation}

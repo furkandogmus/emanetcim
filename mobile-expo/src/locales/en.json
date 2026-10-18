@@ -343,5 +343,17 @@
       "phone_taken": "This number is already registered to another account.",
       "no_fields": "There's nothing to change."
     }
+  },
+  "placeSearch": {
+    "label": "Search an address, hotel or neighbourhood",
+    "placeholder": "e.g. Kadıköy, Taksim, Hilton Bomonti",
+    "minChars": "Type at least 3 letters to search.",
+    "searching": "Searching…",
+    "empty": "We couldn't find that address. Try different wording or pick a city below.",
+    "clear": "Clear search",
+    "errors": {
+      "too_many_requests": "You're searching too often. Try again in a moment.",
+      "invalid_query": "Type at least 3 letters to search."
+    }
   }
 }
