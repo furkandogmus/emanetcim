@@ -104,7 +104,11 @@
       "Cuma",
       "Cumartesi"
     ],
-    "closed": "Kapalı"
+    "closed": "Kapalı",
+    "prices": "Valiz fiyatları",
+    "perDay": "{{price}} / gün",
+    "reviews": "Yorumlar ({{count}})",
+    "noReviews": "Henüz yorum yok."
   },
   "checkout": {
     "title": "Onayla",
