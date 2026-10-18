@@ -6,7 +6,6 @@ import { normalizeTrGsm10 } from '@/lib/netgsm';
 import { MIN_PASSWORD_LENGTH } from '@/lib/auth-password';
 import dynamic from 'next/dynamic';
 import {
-  Package,
   ShieldCheck,
   Loader2,
   Mail,
@@ -15,12 +14,13 @@ import {
   ChevronRight,
   Phone,
   Store,
-  CheckCircle2
+  CheckCircle2,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
 import AmbientBackdrop from "@/components/common/AmbientBackdrop";
+import BrandMark from "@/components/common/BrandMark";
 
 const LocationPicker = dynamic(() => import('@/components/partner/LocationPicker'), { ssr: false });
 
@@ -200,9 +200,7 @@ export default function RegisterPage() {
         className="relative z-10 w-full max-w-md bg-white rounded-4xl p-8 md:p-10 shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col"
       >
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 bg-brand-gradient rounded-2xl flex items-center justify-center mb-6 shadow-brand-md">
-            <Package size={32} className="text-white" />
-          </div>
+          <BrandMark size={64} className="h-16 w-auto mb-6" />
           <h1 className="text-2xl font-black text-gray-900 mb-2">{t('registerTitle')}</h1>
           <p className="text-gray-400 text-sm font-medium text-center leading-relaxed">
             {t('registerSubtitle')}
