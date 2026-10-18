@@ -27,8 +27,12 @@ import type {
 export type S3Config = {
   bucket: string;
   region: string;
-  accessKeyId: string;
-  secretAccessKey: string;
+  /**
+   * Ikisi birlikte ya da hic. Yoksa SDK'nin varsayilan zinciri kullanilir --
+   * prod'da EC2 rolu (`write-shop-media`); sunucuda uzun omurlu anahtar durmaz.
+   */
+  accessKeyId?: string;
+  secretAccessKey?: string;
   /**
    * Nesnelerin okunacağı kök adres — CloudFront alan adı ya da kovanın kendi
    * adresi. Ayrı tutuluyor çünkü CDN önü eklemek yalnızca bu değeri değiştirir.
@@ -49,10 +53,9 @@ export class S3Storage implements StoragePort {
   constructor(private readonly config: S3Config) {
     this.client = new S3Client({
       region: config.region,
-      credentials: {
-        accessKeyId: config.accessKeyId,
-        secretAccessKey: config.secretAccessKey,
-      },
+      ...(config.accessKeyId && config.secretAccessKey
+        ? { credentials: { accessKeyId: config.accessKeyId, secretAccessKey: config.secretAccessKey } }
+        : {}),
       ...(config.endpoint
         ? { endpoint: config.endpoint, forcePathStyle: true }
         : {}),
