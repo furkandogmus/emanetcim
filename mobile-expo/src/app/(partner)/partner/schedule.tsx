@@ -12,7 +12,8 @@ import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } fro
 import { api, ApiError } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { formatDay } from "@/lib/format";
-import { partnerScheduleKey, usePartnerSchedule } from "@/lib/queries";
+import { usePartnerShopSelection, withShop } from "@/lib/partner-shop";
+import { partnerScheduleKey, usePartnerSchedule, usePartnerShop } from "@/lib/queries";
 import { cellOf, wallInstant } from "@/lib/time";
 import type { PartnerSchedule, ScheduleConflict, ScheduleDay, ShopClosure } from "@/lib/types";
 import { notify } from "@/lib/notify";
@@ -67,6 +68,8 @@ function conflictsOf(e: unknown): ScheduleConflict[] {
 export default function PartnerScheduleScreen() {
   const { t } = useTranslation();
   const query = usePartnerSchedule();
+  // Cok dukkanli esnaf hangi dukkanin saatini degistirdigini gormeli.
+  const shop = usePartnerShop();
 
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
@@ -74,7 +77,14 @@ export default function PartnerScheduleScreen() {
         <IconButton label={t("common.back")} onPress={() => router.back()}>
           <ArrowLeft size={20} color={colors.ink} />
         </IconButton>
-        <AppText variant="heading">{t("schedule.title")}</AppText>
+        <View style={styles.titleBlock}>
+          <AppText variant="heading">{t("schedule.title")}</AppText>
+          {shop.data ? (
+            <AppText variant="caption" numberOfLines={1}>
+              {shop.data.name}
+            </AppText>
+          ) : null}
+        </View>
         <View style={{ width: 44 }} />
       </View>
       {query.isLoading ? (
@@ -94,6 +104,7 @@ export default function PartnerScheduleScreen() {
 function ScheduleForm({ schedule }: { schedule: PartnerSchedule }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [shopId] = usePartnerShopSelection();
   const [open247, setOpen247] = useState(schedule.open247);
   const [days, setDays] = useState<ScheduleDay[]>(schedule.days);
   const [error, setError] = useState<string | null>(null);
@@ -120,7 +131,7 @@ function ScheduleForm({ schedule }: { schedule: PartnerSchedule }) {
 
   const saveHours = useMutation({
     mutationFn: (body: { open247: boolean; days: ScheduleDay[] }) =>
-      api("/partner/shop/schedule", { method: "PUT", body }),
+      api(withShop("/partner/shop/schedule", shopId), { method: "PUT", body }),
     onSuccess: () => {
       onDone();
       notify(t("schedule.saved"));
@@ -130,7 +141,7 @@ function ScheduleForm({ schedule }: { schedule: PartnerSchedule }) {
 
   const addClosure = useMutation({
     mutationFn: () =>
-      api("/partner/shop/schedule", {
+      api(withShop("/partner/shop/schedule", shopId), {
         method: "POST",
         body: {
           startDate: cellToIso(range.start),
@@ -148,7 +159,7 @@ function ScheduleForm({ schedule }: { schedule: PartnerSchedule }) {
 
   const removeClosure = useMutation({
     mutationFn: (id: string) =>
-      api(`/partner/shop/schedule?closureId=${encodeURIComponent(id)}`, { method: "DELETE" }),
+      api(withShop(`/partner/shop/schedule?closureId=${encodeURIComponent(id)}`, shopId), { method: "DELETE" }),
     onSuccess: onDone,
     onError: onFail,
   });
@@ -316,6 +327,7 @@ function closureLabel(c: ShopClosure) {
 }
 
 const styles = StyleSheet.create({
+  titleBlock: { flex: 1, alignItems: "center", paddingHorizontal: space.sm },
   safe: { flex: 1, backgroundColor: colors.bg },
   header: {
     flexDirection: "row",
