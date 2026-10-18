@@ -4,6 +4,8 @@ import { redirect, notFound } from "next/navigation";
 import prisma from "@/lib/db";
 import PartnerScheduleSection from "@/components/partner/PartnerScheduleSection";
 import AdminPartnerEditClient from "@/components/admin/AdminPartnerEditClient";
+import ShopPhotoUpload from "@/components/partner/ShopPhotoUpload";
+import { isStorageConfigured } from "@/lib/storage";
 
 export default async function AdminPartnerEditPage({
   params,
@@ -70,6 +72,12 @@ export default async function AdminPartnerEditPage({
   return (
     <AdminPartnerEditClient
       shop={serializedShop}
+      /*
+        Admin de vitrin fotografi yukleyebilir: telefondan yukleyemeyen esnaf
+        icin (2026-10-18). Yetki `updateShopImageAction`ta (`requirePartner`
+        ADMIN'i de kabul eder), sahiplik istisnasi `ShopService.setShopImage`te.
+      */
+      photoSection={<ShopPhotoUpload shopId={shop.id} initialUrl={shop.image} configured={isStorageConfigured()} />}
       scheduleSection={<PartnerScheduleSection shop={shop} />}
     />
   );
