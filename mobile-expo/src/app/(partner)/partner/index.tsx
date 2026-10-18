@@ -10,6 +10,7 @@ import { Segmented } from "@/components/Segmented";
 import { AppText, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { errorMessage } from "@/lib/errors";
 import { isActiveBooking, usePartnerBookings } from "@/lib/queries";
+import { wallInstant, wallParts } from "@/lib/time";
 import type { PartnerBooking } from "@/lib/types";
 import { colors, space } from "@/theme/tokens";
 
@@ -17,11 +18,14 @@ type Tab = "today" | "upcoming" | "past";
 
 function bucket(b: PartnerBooking): Tab {
   if (!isActiveBooking(b)) return "past";
+  // Gelmeyen misafir: alma saati gecmis ve valiz hic teslim alinmamis. Prod'da
+  // aylar onceki APPROVED kayitlar "Bugun"u dolduruyordu.
+  if (b.status !== "CHECKED_IN" && new Date(b.checkOutTime) < new Date()) return "past";
   const start = new Date(b.checkInTime);
-  const endOfToday = new Date();
-  endOfToday.setHours(23, 59, 59, 999);
+  const p = wallParts(new Date());
+  const endOfToday = wallInstant(p.year, p.month, p.day + 1);
   // Valizi dukkanda olan (CHECKED_IN) misafir her zaman "bugun"un isi.
-  return b.status === "CHECKED_IN" || start <= endOfToday ? "today" : "upcoming";
+  return b.status === "CHECKED_IN" || start < endOfToday ? "today" : "upcoming";
 }
 
 export default function PartnerBookingsScreen() {
