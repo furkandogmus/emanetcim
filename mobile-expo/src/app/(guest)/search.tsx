@@ -11,6 +11,7 @@ import { RangeCalendar } from "@/components/Calendar";
 import { AppText, Banner, Button, Chip, IconButton } from "@/components/ui";
 import { formatDay } from "@/lib/format";
 import { CITIES, totalBags, useSearch } from "@/lib/search";
+import { atWallMinutes as withMinutes, cellOf, fromCell, sameWallDay, wallMinutes as minutesOf } from "@/lib/time";
 import type { Place } from "@/lib/search";
 import { colors, radius, space } from "@/theme/tokens";
 
@@ -22,15 +23,6 @@ const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => i * 30);
 const CHIP_WIDTH = 80;
 const CHIP_GAP = 8;
 
-function withMinutes(day: Date, minutes: number) {
-  const d = new Date(day);
-  d.setHours(Math.floor(minutes / 60), minutes % 60, 0, 0);
-  return d;
-}
-
-function minutesOf(d: Date) {
-  return d.getHours() * 60 + d.getMinutes();
-}
 
 function label(minutes: number) {
   return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
@@ -85,7 +77,7 @@ export default function SearchWizard() {
   }
 
   const now = Date.now();
-  const sameDay = checkIn.toDateString() === checkOut.toDateString();
+  const sameDay = sameWallDay(checkIn, checkOut);
   const windowValid = checkIn.getTime() >= now - 5 * 60_000 && checkOut.getTime() - checkIn.getTime() >= HOUR;
 
   function setDropMinutes(m: number) {
@@ -95,9 +87,10 @@ export default function SearchWizard() {
     if (checkOut.getTime() - ci.getTime() < HOUR) setCheckOut(new Date(ci.getTime() + 4 * HOUR));
   }
 
+  /** `start`/`end` takvim hucresi (bkz. `cellOf`); anlara Istanbul saatiyle donulur. */
   function setRange(start: Date, end: Date) {
-    const ci = withMinutes(start, minutesOf(checkIn));
-    let co = withMinutes(end, minutesOf(checkOut));
+    const ci = fromCell(start, minutesOf(checkIn));
+    let co = fromCell(end, minutesOf(checkOut));
     if (co.getTime() - ci.getTime() < HOUR) co = new Date(ci.getTime() + 4 * HOUR);
     setCheckIn(ci);
     setCheckOut(co);
@@ -172,7 +165,7 @@ export default function SearchWizard() {
           <ScrollView contentContainerStyle={styles.content}>
             <AppText variant="title">{t("search.whenTitle")}</AppText>
             <AppText variant="caption">{t("search.whenHint")}</AppText>
-            <RangeCalendar start={checkIn} end={checkOut} onChange={setRange} />
+            <RangeCalendar start={cellOf(checkIn)} end={cellOf(checkOut)} onChange={setRange} />
 
             <TimeRow
               title={`${t("search.dropOff")} · ${formatDay(checkIn)}`}

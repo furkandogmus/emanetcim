@@ -1,6 +1,8 @@
 import { createContext, useContext, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
+import { wallInstant, wallParts } from "./time";
+
 export type Place = { label: string; latitude: number; longitude: number; isCurrent?: boolean };
 export type Bags = { s: number; m: number; xl: number };
 
@@ -38,17 +40,16 @@ type SearchContextValue = SearchState & {
  * 09:00'a kayar -- yoksa misafir 01:00-05:00 gibi kimsenin acik olmadigi bir
  * aralikla haritaya gelir ve "nokta yok" gorur.
  */
-function defaultWindow() {
-  const start = new Date();
-  start.setMinutes(0, 0, 0);
-  start.setHours(start.getHours() + 1);
-  if (start.getHours() < 8 || start.getHours() > 18) {
-    if (start.getHours() > 18) start.setDate(start.getDate() + 1);
-    start.setHours(9);
+export function defaultWindow() {
+  const now = wallParts(new Date());
+  let hour = now.hour + 1;
+  let day = now.day;
+  if (hour < 8 || hour > 18) {
+    if (hour > 18) day += 1;
+    hour = 9;
   }
-  const end = new Date(start);
-  end.setHours(end.getHours() + 4);
-  return { checkIn: start, checkOut: end };
+  const start = wallInstant(now.year, now.month, day, hour);
+  return { checkIn: start, checkOut: new Date(start.getTime() + 4 * 60 * 60 * 1000) };
 }
 
 const SearchContext = createContext<SearchContextValue | null>(null);
