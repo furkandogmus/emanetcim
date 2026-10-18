@@ -13,3 +13,8 @@ output "instance_id" {
 output "ssh_port" {
   value = var.ssh_port
 }
+
+output "media_public_base_url" {
+  description = "S3_PUBLIC_BASE_URL"
+  value       = "https://${aws_s3_bucket.media.bucket}.s3.${aws_s3_bucket.media.region}.amazonaws.com"
+}

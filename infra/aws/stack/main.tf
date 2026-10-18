@@ -395,3 +395,67 @@ resource "aws_eip" "app" {
 
   tags = { Name = "${var.project_name}-eip" }
 }
+
+# Dukkan vitrin fotograflari (src/lib/storage). 2026-10-18'de CLI ile kuruldu
+# (S3 hic ayarli degildi; web'deki yukleme dugmesi bu yuzden gizliydi), sonra
+# buraya yazildi -- state'e almak icin README'deki import komutlari.
+# Yalnizca `shops/*` herkese okunur; nesne ACL'i yok (BucketOwnerEnforced).
+resource "aws_s3_bucket" "media" {
+  bucket = var.media_bucket_name
+  tags   = { Project = "bagajpark" }
+}
+
+resource "aws_s3_bucket_ownership_controls" "media" {
+  bucket = aws_s3_bucket.media.id
+  rule {
+    object_ownership = "BucketOwnerEnforced"
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "media" {
+  bucket = aws_s3_bucket.media.id
+
+  block_public_acls       = true
+  ignore_public_acls      = true
+  block_public_policy     = false # asagidaki shops/* okuma politikasi icin
+  restrict_public_buckets = false
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "media" {
+  bucket = aws_s3_bucket.media.id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_policy" "media_public_read" {
+  bucket = aws_s3_bucket.media.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Sid       = "PublicReadShopImages"
+      Effect    = "Allow"
+      Principal = "*"
+      Action    = "s3:GetObject"
+      Resource  = "${aws_s3_bucket.media.arn}/shops/*"
+    }]
+  })
+  depends_on = [aws_s3_bucket_public_access_block.media]
+}
+
+# Uygulama yalnizca `shops/*` yazar ve eski fotografi siler; statik anahtar yok,
+# SDK EC2 rolunu kullanir (IMDS hop limiti 2, konteynerden erisilir).
+resource "aws_iam_role_policy" "app_media_write" {
+  name = "write-shop-media"
+  role = aws_iam_role.app.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["s3:PutObject", "s3:DeleteObject"]
+      Resource = "${aws_s3_bucket.media.arn}/shops/*"
+    }]
+  })
+}
