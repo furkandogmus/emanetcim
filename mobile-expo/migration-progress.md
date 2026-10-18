@@ -80,7 +80,7 @@ Expo:
 
 - [ ] Esnaf kazançları (`/partner/earnings`)
 - [ ] Esnaf ayarları + haftalık saatler (`/partner/settings`, `partner/shop/schedule`)
-- [ ] Esnaf panosu (`/partner`)
+- [x] Esnaf panosu (`/partner`) — günlük özet kartı + çok dükkan seçimi (2026-10-18)
 - [ ] Davet kodu (`referrals/*`)
 
 ## Arama
@@ -100,3 +100,11 @@ blog, blog/[slug], become-partner, esnaf, esnaf/nasil-calisir
 - `bookings/lookup`, `bookings/manage/[token]` — hesapsız misafir, e-posta bağlantısıyla gelir
 - `luggage-storage`, `luggage-storage/[slug]`, `hotels`, `partners`, `demand`, `[...slug]` — SEO/pazarlama
 - `auth/error`
+
+## Tur 3 (2026-10-18): esnaf panosu
+
+- [x] `GET /api/mobile/partner/dashboard` — web paneliyle aynı servis ve dükkan seçimi
+- [x] Esnaf ana ekranında günlük özet kartı; teslim alınca emülatörde 0→1 valiz, ₺200→₺280
+- bulgu: e2e seed'de esnafın 3 dükkanı var; mühür uçları (`partner/seals*`) dükkanı
+  sırasız `findFirst` ile seçiyor → çok dükkanlı esnafta mühür stoğu rastgele dükkanın.
+  Sırada: mühür uçlarını `resolvePartnerShops` + `?shop=` ile web'e hizalamak.
