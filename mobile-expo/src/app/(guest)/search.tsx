@@ -104,7 +104,8 @@ export default function SearchWizard() {
   function finish() {
     search.setWindow(checkIn, checkOut);
     search.setBags(bags);
-    if (editing) router.back();
+    // `returnTo=map`: haritadan acildi, mevcut haritaya don (yeniden kurulmasin).
+    if (editing || params.returnTo === "map") router.back();
     else router.replace("/map");
   }
 
