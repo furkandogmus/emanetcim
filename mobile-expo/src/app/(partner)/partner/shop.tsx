@@ -73,7 +73,7 @@ export default function PartnerShopScreen() {
         <Loading />
       ) : query.isError || !query.data ? (
         <CenterMessage
-          title={errorMessage(query.error)}
+          title={errorMessage(query.error, "partner")}
           action={<Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />}
         />
       ) : (

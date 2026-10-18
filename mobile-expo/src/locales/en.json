@@ -218,7 +218,8 @@
       "dimensions_too_large": "The photo resolution is too high.",
       "empty": "The photo could not be read; try again.",
       "storage_unavailable": "Photo upload is not available right now.",
-      "not_found": "Shop not found."
+      "not_found": "Shop not found.",
+      "no_shop": "We couldn't find an active shop for you."
     },
     "myShop": "My shop",
     "photo": "Shop photo",
@@ -536,7 +537,8 @@
       "shop_update_failed": "The shop details could not be saved. Check the values and try again.",
       "invalid_tr_phone": "The phone number is not a valid Turkish mobile number.",
       "already_registered": "This phone number is registered to another account.",
-      "invalid_data": "The phone number could not be read."
+      "invalid_data": "The phone number could not be read.",
+      "no_shop": "We couldn't find an active shop for you."
     }
   },
   "schedule": {
@@ -575,7 +577,8 @@
     "errors": {
       "schedule_conflict": "This change was not saved.",
       "invalid_input": "A time or date is invalid. Time off cannot start in the past.",
-      "schedule_save_failed": "Could not save, try again."
+      "schedule_save_failed": "Could not save, try again.",
+      "no_shop": "We couldn't find an active shop for you."
     }
   },
   "referral": {
