@@ -2,10 +2,11 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { ShieldCheck, MapPin, Globe, MessageCircle, Heart } from "lucide-react";
+import { MapPin, Globe, MessageCircle, Heart } from "lucide-react";
 import { STORAGE_CITIES } from "@/lib/storage-cities";
 import { useSession } from "next-auth/react";
 import { usePathname } from "@/i18n/routing";
+import BrandMark from "@/components/common/BrandMark";
 
 /**
  * Uygulama yüzeyleri: giriş/kayıt, panel, arama, ödeme, rezervasyon, hesap.
@@ -126,9 +127,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
           <div className="col-span-1 md:col-span-1">
             <div className="flex items-center gap-2 mb-6">
-              <div className="w-8 h-8 bg-orange-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-orange-200">
-                <ShieldCheck size={20} />
-              </div>
+              <BrandMark size={32} className="h-8 w-auto shrink-0" />
               <span className="text-xl font-black tracking-tighter text-gray-900 italic">
                 {tCommon("appName")}
               </span>
