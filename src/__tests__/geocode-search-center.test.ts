@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { geocodeSearchCenterAction } from "@/actions/geocode-search-center";
+import { resetGeocodeCacheForTests } from "@/lib/geocode";
 
 /**
  * Misafir arama kutusuna yazarken canlı tetiklenen bir sunucu eylemi (bkz.
@@ -16,6 +17,26 @@ describe("geocodeSearchCenterAction", () => {
 
   afterEach(() => {
     global.fetch = originalFetch;
+    resetGeocodeCacheForTests();
+  });
+
+  it("aynı sorguyu önbellekten yanıtlar; hata önbelleğe girmez", async () => {
+    // Nominatim politikası: önbellek ve saniyede en fazla bir istek.
+    const ok = {
+      ok: true,
+      json: async () => [{ lat: "40.99", lon: "29.02", display_name: "x" }],
+    } as unknown as Response;
+    const spy = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("geocode_search_timeout_after_5000ms"))
+      .mockResolvedValue(ok);
+    global.fetch = spy as unknown as typeof fetch;
+
+    expect(await geocodeSearchCenterAction("Kadıköy", "tr")).toEqual({ ok: false });
+    expect((await geocodeSearchCenterAction("Kadıköy", "tr")).ok).toBe(true);
+    expect((await geocodeSearchCenterAction(" kadıköy ", "tr")).ok).toBe(true);
+
+    expect(spy).toHaveBeenCalledTimes(2);
   });
 
   it("her istek bir iptal sinyaliyle çıkar — asılı kalan istek soket sızdırmaz", async () => {
