@@ -42,8 +42,11 @@ function RootNavigator() {
       <Stack.Protected guard={state.status === "signedOut"}>
         <Stack.Screen name="login" />
       </Stack.Protected>
-      <Stack.Protected guard={role === "GUEST" || role === "ADMIN"}>
+      <Stack.Protected guard={role === "GUEST"}>
         <Stack.Screen name="(guest)" />
+      </Stack.Protected>
+      <Stack.Protected guard={role === "ADMIN"}>
+        <Stack.Screen name="(admin)" />
       </Stack.Protected>
       <Stack.Protected guard={role === "PARTNER"}>
         <Stack.Screen name="(partner)" />
