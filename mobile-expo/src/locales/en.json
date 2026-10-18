@@ -300,5 +300,31 @@
       "forbidden": "This booking does not belong to your shop.",
       "not_found": "Booking not found."
     }
+  },
+  "reset": {
+    "forgotPassword": "Forgot password",
+    "title": "Reset your password",
+    "requestSubtitle": "Enter your account's email address and we'll send you a link to set a new password.",
+    "sendLink": "Send link",
+    "sentTitle": "Check your email",
+    "sentBody": "If an account exists for {{email}}, we've sent it a password reset link. The link is valid for 1 hour. Open it in your browser to set a new password there, or paste it below.",
+    "linkLabel": "Reset link",
+    "linkPlaceholder": "Paste the link from the email",
+    "linkRequired": "Paste the link from the email.",
+    "newPasswordLabel": "New password",
+    "repeatPasswordLabel": "New password (again)",
+    "passwordRule": "At least {{min}} characters.",
+    "passwordMismatch": "The passwords don't match.",
+    "save": "Update password",
+    "resendLink": "Request a new link",
+    "doneTitle": "Password updated",
+    "doneBody": "You can now sign in with your new password. For your security, your sessions on other devices were signed out.",
+    "backToSignIn": "Back to sign in",
+    "errors": {
+      "invalid_data": "The link or password is invalid. Your password must be at least 8 characters.",
+      "invalid_or_expired_token": "This link is invalid or has expired. Request a new one.",
+      "user_not_found": "No account was found for this link.",
+      "too_many_requests": "Too many attempts. Please try again later."
+    }
   }
 }

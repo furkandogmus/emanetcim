@@ -300,5 +300,31 @@
       "forbidden": "Bu rezervasyon senin dükkanına ait değil.",
       "not_found": "Rezervasyon bulunamadı."
     }
+  },
+  "reset": {
+    "forgotPassword": "Şifremi unuttum",
+    "title": "Şifreni sıfırla",
+    "requestSubtitle": "Hesabının e-posta adresini yaz; şifreni yenilemen için bir bağlantı gönderelim.",
+    "sendLink": "Bağlantı gönder",
+    "sentTitle": "E-postanı kontrol et",
+    "sentBody": "Bu adresle bir hesap varsa {{email}} adresine bir şifre yenileme bağlantısı gönderdik. Bağlantı 1 saat geçerli. Bağlantıyı tarayıcıda açıp yeni şifreni orada belirleyebilir ya da aşağıya yapıştırabilirsin.",
+    "linkLabel": "Yenileme bağlantısı",
+    "linkPlaceholder": "E-postadaki bağlantıyı yapıştır",
+    "linkRequired": "E-postadaki bağlantıyı yapıştır.",
+    "newPasswordLabel": "Yeni şifre",
+    "repeatPasswordLabel": "Yeni şifre (tekrar)",
+    "passwordRule": "En az {{min}} karakter.",
+    "passwordMismatch": "Şifreler aynı değil.",
+    "save": "Şifreyi güncelle",
+    "resendLink": "Yeni bağlantı iste",
+    "doneTitle": "Şifren güncellendi",
+    "doneBody": "Yeni şifrenle giriş yapabilirsin. Güvenliğin için diğer cihazlardaki oturumların kapatıldı.",
+    "backToSignIn": "Girişe dön",
+    "errors": {
+      "invalid_data": "Bağlantı ya da şifre geçersiz. Şifren en az 8 karakter olmalı.",
+      "invalid_or_expired_token": "Bağlantı geçersiz ya da süresi dolmuş. Yeni bir bağlantı iste.",
+      "user_not_found": "Bu bağlantıya ait hesap bulunamadı.",
+      "too_many_requests": "Çok fazla deneme. Biraz sonra tekrar dene."
+    }
   }
 }

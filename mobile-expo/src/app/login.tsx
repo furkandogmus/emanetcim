@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { AppText, Banner, Button } from "@/components/ui";
@@ -143,6 +144,14 @@ export default function LoginScreen() {
                 onPress={passwordSignIn}
                 loading={busy}
                 disabled={password.length === 0}
+              />
+              <Button
+                variant="ghost"
+                title={t("reset.forgotPassword")}
+                onPress={() => {
+                  setError(null);
+                  router.push({ pathname: "/reset-password", params: { email: email.trim().toLowerCase() } });
+                }}
               />
               <Button variant="ghost" title={t("auth.useCode")} onPress={() => switchTo("email")} />
             </>
