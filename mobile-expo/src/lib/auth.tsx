@@ -18,6 +18,8 @@ type AuthContextValue = {
   verifyCode: (email: string, code: string) => Promise<MobileUser>;
   signInWithPassword: (email: string, password: string) => Promise<MobileUser>;
   signOut: () => Promise<void>;
+  /** Profil degisikliginden sonra: PUT /auth/me yalnizca { success } doner. */
+  refreshUser: () => Promise<MobileUser>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -97,6 +99,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [startSession],
   );
 
+  const refreshUser = useCallback(async () => {
+    const user = await api<MobileUser>("/auth/me");
+    void rememberUser(user);
+    setState({ status: "signedIn", user });
+    return user;
+  }, []);
+
   const signOut = useCallback(async () => {
     // Token oturum hala gecerliyken silinir; sonra sunucu tarafi iptal (en iyi caba).
     await unregisterPush();
@@ -107,8 +116,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ state, requestCode, verifyCode, signInWithPassword, signOut }),
-    [state, requestCode, verifyCode, signInWithPassword, signOut],
+    () => ({ state, requestCode, verifyCode, signInWithPassword, signOut, refreshUser }),
+    [state, requestCode, verifyCode, signInWithPassword, signOut, refreshUser],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

@@ -68,6 +68,7 @@ function RootNavigator() {
       </Stack.Protected>
       <Stack.Protected guard={state.status === "signedIn"}>
         <Stack.Screen name="profile" options={{ presentation: "modal" }} />
+        <Stack.Screen name="profile-edit" options={{ presentation: "modal" }} />
       </Stack.Protected>
     </Stack>
   );

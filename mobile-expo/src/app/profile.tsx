@@ -3,7 +3,7 @@ import { Alert, Linking, Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import Constants from "expo-constants";
-import { ExternalLink, LogOut, Trash2, X } from "lucide-react-native";
+import { ChevronRight, ExternalLink, LogOut, Trash2, X } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { AppText, Button, Card, IconButton } from "@/components/ui";
@@ -68,10 +68,18 @@ export default function ProfileScreen() {
       <Card style={{ gap: space.xs }}>
         <AppText variant="heading">{user.name || user.email}</AppText>
         {user.name && user.email ? <AppText variant="caption">{user.email}</AppText> : null}
+        {user.phone ? <AppText variant="caption">{user.phone}</AppText> : null}
         <AppText variant="label" style={{ color: colors.accent, marginTop: space.xs }}>
           {t(`profile.role.${user.role}`)}
         </AppText>
       </Card>
+
+      <Pressable accessibilityRole="button" onPress={() => router.push("/profile-edit")} style={styles.linkRow}>
+        <AppText variant="bodyMedium" style={{ flex: 1 }}>
+          {t("profileEdit.open")}
+        </AppText>
+        <ChevronRight size={18} color={colors.inkMuted} />
+      </Pressable>
 
       <Pressable
         accessibilityRole="link"
