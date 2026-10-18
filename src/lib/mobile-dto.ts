@@ -308,3 +308,14 @@ export function toMobileAdminApplication(s: AdminApplicationSource) {
     owner: { name: s.owner.name, phone: s.owner.phone, email: s.owner.email },
   };
 }
+
+type GeocodedPlaceSource = { lat: number; lng: number; label: string };
+
+/**
+ * Adres arama sonucu. Alan adlari istemcinin `Place` tipiyle ayni
+ * (`latitude`/`longitude`), sonuc dogrudan secilebilsin diye.
+ * `/api/mobile/geocode`in tek yaziciysi.
+ */
+export function toMobileGeocodeResult(p: GeocodedPlaceSource) {
+  return { label: p.label, latitude: p.lat, longitude: p.lng };
+}
