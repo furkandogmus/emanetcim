@@ -273,3 +273,38 @@ export function toMobileDevice(d: MobileDeviceSource) {
     lastSeenAt: d.lastSeenAt,
   };
 }
+
+type AdminApplicationSource = {
+  id: string;
+  name: string;
+  address: string | null;
+  city: string | null;
+  district: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  pricePerDay: unknown;
+  capacity: number;
+  createdAt: Date;
+  owner: { name: string | null; phone: string | null; email: string | null };
+};
+
+/**
+ * Admin basvuru listesi. Uc ham Prisma `Shop` donuyordu: butun kolonlar ve
+ * `Decimal` fiyat string olarak. Alan adlari Flutter'in okuduklariyla ayni
+ * (`id`, `name`, `address`, `owner.name/phone`) -- eski surum de calismali.
+ * Koordinat onay icin gerekli: konumsuz basvuru `missing_coordinates` alir.
+ */
+export function toMobileAdminApplication(s: AdminApplicationSource) {
+  return {
+    id: s.id,
+    name: s.name,
+    address: s.address,
+    city: s.city,
+    district: s.district,
+    hasCoordinates: s.latitude != null && s.longitude != null,
+    pricePerDay: moneyToNumber(s.pricePerDay),
+    capacity: s.capacity,
+    createdAt: s.createdAt.toISOString(),
+    owner: { name: s.owner.name, phone: s.owner.phone, email: s.owner.email },
+  };
+}
