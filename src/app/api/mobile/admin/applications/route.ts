@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 import prisma from "@/lib/db";
+import { toMobileAdminApplication } from "@/lib/mobile-dto";
 
 export const dynamic = 'force-dynamic';
 
@@ -21,5 +22,5 @@ export async function GET(req: NextRequest) {
     orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json(apps);
+  return NextResponse.json(apps.map(toMobileAdminApplication));
 }
