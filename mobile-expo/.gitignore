@@ -42,3 +42,6 @@ yarn-error.*
 
 # Play yayin servis hesabi anahtari (yerelde ~/.config/bagajpark/ altina symlink)
 /play-service-account.json
+
+# Firebase istemci ayari; EAS GOOGLE_SERVICES_JSON dosya degiskeniyle verir.
+/google-services.json
