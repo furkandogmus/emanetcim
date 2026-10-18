@@ -176,7 +176,7 @@ export default function MapScreen() {
           <Loading />
         ) : query.isError ? (
           <CenterMessage
-            title={errorMessage(query.error)}
+            title={errorMessage(query.error, "checkout")}
             action={<Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />}
           />
         ) : shops.length === 0 ? (
