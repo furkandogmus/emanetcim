@@ -146,6 +146,13 @@ export type CreateReviewRequest = { bookingId: string; rating: number; comment?:
 
 export type CreateReviewResponse = { success: true; review: { id: string; rating: number } };
 
+export type DisputeReason = "DAMAGE" | "THEFT" | "OTHER";
+
+/** `POST disputes`. Aciklama 10-2000 karakter (uc semasi). */
+export type CreateDisputeRequest = { bookingId: string; reason: DisputeReason; description: string };
+
+export type CreateDisputeResponse = { success: true; id: string };
+
 /** `admin/stats`. */
 export type AdminStats = {
   totalBookings: number;

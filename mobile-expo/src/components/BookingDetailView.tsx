@@ -6,6 +6,7 @@ import QRCode from "react-native-qrcode-svg";
 import { ArrowLeft, Navigation, Pencil, Phone } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
+import { GuestDisputeCard } from "@/components/GuestDisputeCard";
 import { GuestReviewCard } from "@/components/GuestReviewCard";
 import { PartnerBookingActions } from "@/components/PartnerBookingActions";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -155,6 +156,7 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
               <Button variant="danger" title={t("bookings.cancel")} loading={cancel.isPending} onPress={confirmCancel} />
             ) : null}
             <GuestReviewCard key={`review-${b.status}`} booking={b} />
+            <GuestDisputeCard key={`dispute-${b.status}`} booking={b} />
           </View>
         ) : null}
       </ScrollView>
