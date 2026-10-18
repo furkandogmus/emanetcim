@@ -45,16 +45,16 @@ her hata buraya `— hata: <ne>` diye eklenir.
 
 Çekirdek akış: misafir → esnaf → mühür → teslim. Uçları hazır, ekranı yok.
 
-- [ ] Esnaf: teslim al (`bookings/[id]/check-in`) — yazıldı; prod'da `SHOP_CLOSED` doğru çevrildi, başarılı yol dükkan açılınca (08:00 TRT) doğrulanacak. QR okutma (`seals/scan`) yok
-- [ ] Esnaf: teslim et (`bookings/[id]/check-out`) — yazıldı, mühür sağlamlık onayı web `CheckoutSealsDialog` ile aynı; prod doğrulaması bekliyor
+- [x] Esnaf: teslim al — prod'da `740e72c4` CHECKED_IN (2026-10-18). QR okutma (`seals/scan`) eklendi
+- [x] Esnaf: teslim et — prod'da `740e72c4` CHECKED_OUT (2026-10-18)
 - [ ] Esnaf: valiz revizyonu (`partner/bookings/[id]/bag-revision`)
 - [ ] Esnaf: mühür talebi / arızalı bildir (`/partner/seals`)
-- [ ] Kayıt + şifre sıfırlama (`/register`, `/auth/forgot-password`, `/auth/new-password`, `/auth/verify-email`)
-- [ ] Google / Apple girişi (`auth/google`, `auth/apple`)
+- [x] Şifre sıfırlama + profil düzenleme (kayıt OTP ile otomatik). OTP girişi artık e-postayı doğrulanmış sayar
+- [ ] Google / Apple girişi — sunucu hazır; `GOOGLE_ANDROID_CLIENT_ID`/`GOOGLE_IOS_CLIENT_ID` (Google Cloud Console, Play imza SHA-1) ve `APPLE_BUNDLE_ID` + Apple Developer hesabı bekliyor
 - [ ] Rezervasyon değiştir (`bookings/[id]/modify`)
 - [ ] Değerlendirme yaz (`reviews`) — dükkan yorumlarını okuma 2026-10-18'de eklendi
 - [ ] İtiraz aç (`/bookings/[id]/dispute`)
-- [ ] Push bildirim kaydı (`push/register`)
+- [x] Push: esnafa yeni rezervasyon (FCM; `FIREBASE_SERVICE_ACCOUNT_JSON` SSM'de, 2026-10-18). iOS APNs Apple hesabı bekliyor
 
 ## Admin (2026-10-18 yerel inceleme; uygulama yayından sonra)
 
@@ -62,17 +62,17 @@ Flutter'da 3 ekran var: pano (sayılar), başvurular (onayla/reddet), mesajlar
 (okundu/sil). Mobil uçlar hazır ama şu eksikleri var; Expo ekranından ÖNCE
 sunucuda düzeltilir:
 
-- [ ] `admin/applications/[id]/[action]`: web `approveShopAction`/`rejectShopAction`
+- [x] `admin/applications/[id]/[action]`: web `approveShopAction`/`rejectShopAction`
   denetim kaydı yazıyor (`shop.approve_application`, `shop.reject_application`),
   mobil uç yazmıyor. Reddetmek dükkanı SİLER; izsiz olmamalı.
-- [ ] Aynı uç ham İngilizce cümle dönüyor ("Shop not found."); istemci çeviremez.
+- [x] Aynı uç ham İngilizce cümle dönüyor ("Shop not found."); istemci çeviremez.
   Kod olmalı: `not_found`, `missing_coordinates`, `has_active_bookings`.
-- [ ] `admin/applications` GET ham Prisma `Shop` dönüyor (bütün kolonlar, `Decimal`
+- [x] `admin/applications` GET ham Prisma `Shop` dönüyor (bütün kolonlar, `Decimal`
   string). `mobile-dto.ts`'e DTO.
-- [ ] `admin/messages/[id]` PATCH/DELETE olmayan id'de Prisma P2025 → 500; 404 olmalı.
+- [x] `admin/messages/[id]` PATCH/DELETE olmayan id'de Prisma P2025 → 500; 404 olmalı.
 
 Expo:
-- [ ] ADMIN girişte `(admin)` grubuna: pano (`admin/stats`), başvurular, mesajlar.
+- [x] ADMIN girişte `(admin)` grubuna: pano (`admin/stats`), başvurular, mesajlar.
   Reddet = dükkan silme → yıkıcı onay penceresi.
 - [ ] Mesaja e-postayla cevap yalnızca web'de (`replyToContactMessageAction`, Resend).
 
@@ -82,6 +82,10 @@ Expo:
 - [ ] Esnaf ayarları + haftalık saatler (`/partner/settings`, `partner/shop/schedule`)
 - [ ] Esnaf panosu (`/partner`)
 - [ ] Davet kodu (`referrals/*`)
+
+## Arama
+
+- [x] Serbest metinle adres/otel/semt arama (`GET /api/mobile/geocode`, web ile ortak `geocodePlace`)
 
 ## Tarayıcıda aç (native değil, `expo-web-browser`)
 
