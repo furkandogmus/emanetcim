@@ -325,6 +325,7 @@ jobs:
             NEXT_PUBLIC_PLAUSIBLE_DOMAIN=${{ vars.NEXT_PUBLIC_PLAUSIBLE_DOMAIN }}
             NEXT_PUBLIC_CRISP_WEBSITE_ID=${{ vars.NEXT_PUBLIC_CRISP_WEBSITE_ID }}
             NEXT_PUBLIC_VAPID_PUBLIC_KEY=${{ vars.NEXT_PUBLIC_VAPID_PUBLIC_KEY }}
+            S3_PUBLIC_BASE_URL=${{ vars.S3_PUBLIC_BASE_URL }}
 
   # ---------------------------------------------------------------------------
   # Deploy. Eskiden AYRI bir workflow'daydi ve `CI`yi beklemiyordu -- yani

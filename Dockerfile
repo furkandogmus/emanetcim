@@ -30,6 +30,11 @@ ARG NEXT_PUBLIC_CRISP_WEBSITE_ID
 ENV NEXT_PUBLIC_CRISP_WEBSITE_ID=${NEXT_PUBLIC_CRISP_WEBSITE_ID}
 ARG NEXT_PUBLIC_VAPID_PUBLIC_KEY
 ENV NEXT_PUBLIC_VAPID_PUBLIC_KEY=${NEXT_PUBLIC_VAPID_PUBLIC_KEY}
+# `next.config.ts` `images.remotePatterns`i build aninda bundan turetir; yalnizca
+# calisma zamaninda verilirse next/image vitrin fotografini 400 ile reddeder
+# (2026-10-18). Yalnizca adres; sir degil.
+ARG S3_PUBLIC_BASE_URL
+ENV S3_PUBLIC_BASE_URL=${S3_PUBLIC_BASE_URL}
 RUN npx prisma generate
 COPY . .
 RUN --mount=type=cache,target=/app/.next/cache npm run build
