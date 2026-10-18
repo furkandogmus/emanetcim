@@ -343,5 +343,17 @@
       "phone_taken": "Bu numara başka bir hesapta kayıtlı.",
       "no_fields": "Değiştirilecek bir bilgi yok."
     }
+  },
+  "placeSearch": {
+    "label": "Adres, otel ya da semt ara",
+    "placeholder": "Örn. Kadıköy, Taksim, Hilton Bomonti",
+    "minChars": "Aramak için en az 3 harf yaz.",
+    "searching": "Aranıyor…",
+    "empty": "Bu adres bulunamadı. Farklı yaz ya da listeden bir şehir seç.",
+    "clear": "Aramayı temizle",
+    "errors": {
+      "too_many_requests": "Çok sık arama yaptın. Biraz sonra tekrar dene.",
+      "invalid_query": "Aramak için en az 3 harf yaz."
+    }
   }
 }

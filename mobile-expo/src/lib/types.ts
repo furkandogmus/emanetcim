@@ -150,6 +150,13 @@ export type AdminApplication = {
   owner: { name: string | null; phone: string | null; email: string | null };
 };
 
+/** `toMobileGeocodeResult` (mobile-dto.ts) — `GET /geocode?q=`. */
+export type GeocodeResult = {
+  label: string;
+  latitude: number;
+  longitude: number;
+};
+
 /** `CONTACT_MESSAGE_LIST_SELECT` (src/lib/contact-message-list.ts); yalnizca kullanilan alanlar. */
 export type ContactMessage = {
   id: string;

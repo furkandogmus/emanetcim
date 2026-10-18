@@ -8,9 +8,8 @@ export type Place = { label: string; latitude: number; longitude: number; isCurr
 export type Bags = { s: number; m: number; xl: number };
 
 /**
- * Sabit sehir listesi. Serbest metinle adres arama (geocode) web'de bir
- * server action; mobil API'de karsiligi yok. MVP bilerek sehir + "konumumu
- * kullan" ile sinirli.
+ * Sabit sehir listesi: serbest metin aramanin (`PlaceSearch`, `GET /geocode`)
+ * yaninda tek dokunusla secim.
  */
 // Sira: rezervasyon alan noktasi olan sehirler once (2026-10-18 prod: Antalya 3,
 // Ankara 3, Bodrum 1, Fethiye 1; Istanbul ve Izmir yalnizca talep testi). Mobil talep
