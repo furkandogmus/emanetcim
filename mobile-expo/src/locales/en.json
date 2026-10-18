@@ -281,7 +281,8 @@
       "missing_coordinates": "The shop has no location; set it in the web panel first.",
       "has_active_bookings": "The shop has active bookings and cannot be rejected.",
       "invalid_action": "Invalid action."
-    }
+    },
+    "deleteMessage": "Delete message"
   },
   "scan": {
     "open": "Scan QR",

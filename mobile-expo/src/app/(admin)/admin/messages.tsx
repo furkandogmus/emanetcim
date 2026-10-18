@@ -89,7 +89,7 @@ export default function AdminMessagesScreen() {
                   <AppText variant="bodyMedium" style={{ flex: 1 }} numberOfLines={expanded ? undefined : 1}>
                     {item.subject || t("admin.noSubject")}
                   </AppText>
-                  <IconButton label={t("admin.deleteMessageTitle")} onPress={() => confirmDelete(item)}>
+                  <IconButton label={t("admin.deleteMessage")} onPress={() => confirmDelete(item)}>
                     <Trash2 size={18} color={colors.danger} />
                   </IconButton>
                 </View>
