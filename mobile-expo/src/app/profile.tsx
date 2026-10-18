@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Alert, Linking, Pressable, StyleSheet, View } from "react-native";
+import { Alert, Linking, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import Constants from "expo-constants";
 import { ChevronRight, ExternalLink, LogOut, Trash2, X } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
+import { ReferralCard } from "@/components/ReferralCard";
 import { AppText, Button, Card, IconButton } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -54,6 +55,8 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
+      {/* Davet karti eklenince icerik kucuk ekrana sigmiyor; flexGrow ile alt dugmeler yine dipte. */}
+      <ScrollView contentContainerStyle={styles.content}>
       <View style={styles.header}>
         <AppText variant="title">{t("profile.title")}</AppText>
         <IconButton
@@ -73,6 +76,8 @@ export default function ProfileScreen() {
           {t(`profile.role.${user.role}`)}
         </AppText>
       </Card>
+
+      {isGuest ? <ReferralCard audience="guest" /> : null}
 
       <Pressable accessibilityRole="button" onPress={() => router.push("/profile-edit")} style={styles.linkRow}>
         <AppText variant="bodyMedium" style={{ flex: 1 }}>
@@ -121,12 +126,14 @@ export default function ProfileScreen() {
       <AppText variant="caption" style={{ textAlign: "center" }}>
         {t("profile.version", { version: Constants.expoConfig?.version ?? "" })}
       </AppText>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg, padding: space.xl, gap: space.lg },
+  safe: { flex: 1, backgroundColor: colors.bg },
+  content: { flexGrow: 1, padding: space.xl, gap: space.lg },
   header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   linkRow: {
     flexDirection: "row",

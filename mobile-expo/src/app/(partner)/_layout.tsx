@@ -12,6 +12,7 @@ export default function PartnerLayout() {
       <Stack.Screen name="partner/earnings" />
       <Stack.Screen name="partner/settings" />
       <Stack.Screen name="partner/schedule" />
+      <Stack.Screen name="partner/referral" />
       <Stack.Screen name="partner/[id]" />
     </Stack>
   );

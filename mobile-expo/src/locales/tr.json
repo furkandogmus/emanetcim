@@ -574,5 +574,24 @@
       "invalid_input": "Saat ya da tarih geçersiz. Geçmiş bir tarihe izin eklenemez.",
       "schedule_save_failed": "Kaydedilemedi, tekrar dene."
     }
+  },
+  "referral": {
+    "title": "Davet kodum",
+    "yourCode": "Davet kodun",
+    "codeLabel": "Davet kodun: {{code}}",
+    "share": "Paylaş",
+    "partner": {
+      "title": "Esnaf arkadaşını davet et",
+      "body": "Tanıdığın esnafı BagajPark'a davet et, ortaklık ağımız büyüsün.",
+      "shareMessage": "BagajPark'ta valiz emanet noktası ol. Davet kodum: {{code}}\n{{url}}"
+    },
+    "guest": {
+      "title": "Arkadaşını davet et, %{{pct}} indirim kazandır",
+      "body": "Kodunu arkadaşınla paylaş. İlk rezervasyonunda %{{pct}} indirim alır.",
+      "shareMessage": "BagajPark'ta ilk valiz emanetinde %{{pct}} indirim için davet kodum: {{code}}\n{{url}}"
+    },
+    "errors": {
+      "referral_code_failed": "Kod oluşturulamadı, lütfen tekrar dene."
+    }
   }
 }
