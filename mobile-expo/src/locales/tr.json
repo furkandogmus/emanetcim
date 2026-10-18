@@ -326,5 +326,22 @@
       "user_not_found": "Bu bağlantıya ait hesap bulunamadı.",
       "too_many_requests": "Çok fazla deneme. Biraz sonra tekrar dene."
     }
+  },
+  "profileEdit": {
+    "open": "Profili düzenle",
+    "title": "Profili düzenle",
+    "nameLabel": "Ad soyad",
+    "nameRequired": "Adını boş bırakamazsın.",
+    "phoneLabel": "Cep telefonu",
+    "phonePlaceholder": "5XX XXX XX XX",
+    "phoneHint": "Türkiye cep numarası. Boş bırakırsan numaran silinir.",
+    "emailNote": "E-posta adresin ({{email}}) uygulamadan değiştirilemez.",
+    "save": "Kaydet",
+    "errors": {
+      "invalid_name": "Ad 1–100 karakter olmalı.",
+      "invalid_phone": "Geçerli bir Türkiye cep numarası gir (5XX XXX XX XX).",
+      "phone_taken": "Bu numara başka bir hesapta kayıtlı.",
+      "no_fields": "Değiştirilecek bir bilgi yok."
+    }
   }
 }

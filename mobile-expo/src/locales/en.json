@@ -326,5 +326,22 @@
       "user_not_found": "No account was found for this link.",
       "too_many_requests": "Too many attempts. Please try again later."
     }
+  },
+  "profileEdit": {
+    "open": "Edit profile",
+    "title": "Edit profile",
+    "nameLabel": "Full name",
+    "nameRequired": "Your name can't be empty.",
+    "phoneLabel": "Mobile phone",
+    "phonePlaceholder": "5XX XXX XX XX",
+    "phoneHint": "A Turkish mobile number. Leave it empty to remove your number.",
+    "emailNote": "Your email address ({{email}}) can't be changed in the app.",
+    "save": "Save",
+    "errors": {
+      "invalid_name": "Your name must be 1–100 characters.",
+      "invalid_phone": "Enter a valid Turkish mobile number (5XX XXX XX XX).",
+      "phone_taken": "This number is already registered to another account.",
+      "no_fields": "There's nothing to change."
+    }
   }
 }
