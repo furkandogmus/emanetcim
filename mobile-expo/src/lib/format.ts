@@ -1,4 +1,5 @@
 import i18n from "./i18n";
+import { shiftedForFormat } from "./time";
 
 function locale() {
   return i18n.language === "tr" ? "tr-TR" : "en-GB";
@@ -17,13 +18,14 @@ export function formatMoney(amount: number) {
   return `₺${n}`;
 }
 
-/** "Cum 16 Eki" */
+/** "Cum 16 Eki" -- Istanbul gunu, telefonun saat dilimi degil (`time.ts`). */
 export function formatDay(d: Date | string) {
   return new Intl.DateTimeFormat(locale(), {
     weekday: "short",
     day: "numeric",
     month: "short",
-  }).format(new Date(d));
+    timeZone: "UTC",
+  }).format(shiftedForFormat(d));
 }
 
 /** "Cum 16 Eki, 10:00" */
@@ -33,11 +35,12 @@ export function formatDayTime(d: Date | string) {
 }
 
 export function formatTime(d: Date | string) {
-  return new Intl.DateTimeFormat(locale(), { hour: "2-digit", minute: "2-digit" }).format(
-    new Date(d),
+  return new Intl.DateTimeFormat(locale(), { hour: "2-digit", minute: "2-digit", timeZone: "UTC" }).format(
+    shiftedForFormat(d),
   );
 }
 
+/** Takvim hucresi (yerel `Date(y, m, 1)`) alir; saat dilimi kaydirmasi yok. */
 export function formatMonth(d: Date) {
   return new Intl.DateTimeFormat(locale(), { month: "long", year: "numeric" }).format(d);
 }
