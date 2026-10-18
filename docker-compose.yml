@@ -101,6 +101,15 @@ services:
       PLAY_REVIEW_EMAIL: ${PLAY_REVIEW_EMAIL:-}
       PLAY_REVIEW_OTP: ${PLAY_REVIEW_OTP:-}
       FIREBASE_SERVICE_ACCOUNT_JSON: ${FIREBASE_SERVICE_ACCOUNT_JSON:-}
+      # Dukkan fotograflari (src/lib/storage). Anahtarlar bos kalabilir: o zaman
+      # EC2 rolu kullanilir. Bu satirlar yokken SSM'deki deger konteynere
+      # ulasmiyor, web'deki fotograf dugmesi gizli kaliyordu (2026-10-18).
+      S3_BUCKET: ${S3_BUCKET:-}
+      S3_REGION: ${S3_REGION:-}
+      S3_PUBLIC_BASE_URL: ${S3_PUBLIC_BASE_URL:-}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-}
+      S3_ENDPOINT: ${S3_ENDPOINT:-}
       # Virgülle ayrılmış Google e-postaları; ilk girişte otomatik ADMIN rolü verilir
       ADMIN_EMAILS: ${ADMIN_EMAILS:-}
       # /api/admin/setup endpointini korur; boş bırakılırsa endpoint kapalıdır
