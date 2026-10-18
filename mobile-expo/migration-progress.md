@@ -152,7 +152,14 @@ Sırada: iOS. Makinede Xcode yok → `eas-simulator` (bulut) ya da Xcode kurulum
   `findFirst` yerine web ile aynı `resolvePartnerShops(?shop=)`; `resolvePartnerShops` ilk kez testli
 - [x] Expo: seçili dükkan esnaf ekranları arasında ortak (`lib/partner-shop.tsx`); mühür
   ekranı dükkan adını gösterir. Emülatör: Galata → 37 hazır, talep Galata'ya; Sultanahmet → 0
-- **Sıradaki (yazma, öncelikli):** `partner/shop` (PATCH), `shop/schedule`, `shop/image`
-  dükkanı `shopService.getShopByOwner` → sırasız `findFirst({ ownerId })` ile seçiyor;
-  çok dükkanlı esnafın ayar/saat/fotoğraf değişikliği rastgele dükkana yazılabilir.
-  `partner/earnings/stats` ise bütün dükkanları bilerek topluyor, sorun değil.
+- `partner/earnings/stats` bütün dükkanları bilerek topluyor, sorun değil.
+
+## Tur 5 (2026-10-18): dükkan ayarları doğru dükkana yazılır
+
+- [x] `ShopService.getShopByOwner` sırasız `findFirst` yerine `resolvePartnerShops`;
+  `partner/shop`, `shop/schedule`, `shop/image` `?shop=` iletir (testli)
+- [x] Expo: Dükkanım, dükkan bilgileri, saatler, fotoğraf ortak dükkan seçimini kullanır;
+  emülatörde Galata seçiliyken fiyat 80→85 yalnızca Galata'ya yazıldı (DB doğrulaması)
+- Not: bu uçlar dükkan yoksa ham `"Shop not found"` dönüyor (kod değil); istemci genel
+  hataya çeviriyor. Küçük düzeltme adayı.
+- Sırada: iOS (Xcode kararı bekliyor); Play'deki #14 ile gerçek cihazda canlı API dumanı
