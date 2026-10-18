@@ -11,6 +11,7 @@ import { AppText, Button, Card, IconButton } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { SITE_ORIGIN } from "@/lib/images";
+import { notify } from "@/lib/notify";
 import { colors, space } from "@/theme/tokens";
 
 function sitePage(path: string, lang: string) {
@@ -45,7 +46,7 @@ export default function ProfileScreen() {
       await signOut();
     } catch (e) {
       const activeBookings = e instanceof ApiError && e.status === 400;
-      Alert.alert(
+      notify(
         t("profile.deleteFailedTitle"),
         activeBookings ? t("profile.deleteActiveBookings") : t("common.genericError"),
       );

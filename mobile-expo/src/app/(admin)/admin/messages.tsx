@@ -12,6 +12,7 @@ import { errorMessage } from "@/lib/errors";
 import { formatDayTime } from "@/lib/format";
 import { keys, useAdminMessages } from "@/lib/queries";
 import type { ContactMessage } from "@/lib/types";
+import { notify } from "@/lib/notify";
 import { colors, radius, space } from "@/theme/tokens";
 
 export default function AdminMessagesScreen() {
@@ -32,7 +33,7 @@ export default function AdminMessagesScreen() {
   const remove = useMutation({
     mutationFn: (id: string) => api(`/admin/messages/${id}`, { method: "DELETE" }),
     onSuccess: refresh,
-    onError: (e) => Alert.alert(t("admin.actionFailed"), errorMessage(e, "admin")),
+    onError: (e) => notify(t("admin.actionFailed"), errorMessage(e, "admin")),
   });
 
   function toggle(m: ContactMessage) {

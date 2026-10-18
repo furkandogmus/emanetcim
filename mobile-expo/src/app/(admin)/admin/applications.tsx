@@ -11,6 +11,7 @@ import { errorMessage } from "@/lib/errors";
 import { formatDay, formatMoney } from "@/lib/format";
 import { keys, useAdminApplications } from "@/lib/queries";
 import type { AdminApplication } from "@/lib/types";
+import { notify } from "@/lib/notify";
 import { colors, space } from "@/theme/tokens";
 
 export default function AdminApplicationsScreen() {
@@ -23,9 +24,9 @@ export default function AdminApplicationsScreen() {
       api(`/admin/applications/${id}/${action}`, { method: "POST" }),
     onSuccess: (_res, { action }) => {
       void queryClient.invalidateQueries({ queryKey: keys.admin });
-      Alert.alert(action === "approve" ? t("admin.approvedTitle") : t("admin.rejectedTitle"));
+      notify(action === "approve" ? t("admin.approvedTitle") : t("admin.rejectedTitle"));
     },
-    onError: (e) => Alert.alert(t("admin.actionFailed"), errorMessage(e, "admin")),
+    onError: (e) => notify(t("admin.actionFailed"), errorMessage(e, "admin")),
   });
 
   function confirmReject(app: AdminApplication) {
