@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Alert, Linking, Platform, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
@@ -39,6 +40,16 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const query = useBooking(id);
+  const scrollRef = useRef<ScrollView>(null);
+
+  /**
+   * Degerlendirme / sorun formu sayfanin en altinda acilir; acildiginda ekranin
+   * altinda, gorunmeyen yerde kaliyordu (2026-10-18, emulator). Form cizildikten
+   * sonra sona kaydirilir.
+   */
+  function revealForm() {
+    setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 50);
+  }
 
   const cancel = useMutation({
     mutationFn: () => api<{ success: boolean; fullRefund: boolean }>(`/bookings/${id}/cancel`, { method: "DELETE" }),
@@ -87,7 +98,7 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
         </IconButton>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView ref={scrollRef} contentContainerStyle={styles.content}>
         <StatusBadge status={b.status} />
         <AppText variant="title">{mode === "partner" ? b.guestName || t("partner.guest") : b.shopName}</AppText>
         {mode === "partner" ? <AppText variant="caption">{b.shopName}</AppText> : null}
@@ -163,8 +174,8 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
             {CANCELLABLE.has(b.status) ? (
               <Button variant="danger" title={t("bookings.cancel")} loading={cancel.isPending} onPress={confirmCancel} />
             ) : null}
-            <GuestReviewCard key={`review-${b.status}`} booking={b} />
-            <GuestDisputeCard key={`dispute-${b.status}`} booking={b} />
+            <GuestReviewCard key={`review-${b.status}`} booking={b} onOpen={revealForm} />
+            <GuestDisputeCard key={`dispute-${b.status}`} booking={b} onOpen={revealForm} />
           </View>
         ) : null}
       </ScrollView>
