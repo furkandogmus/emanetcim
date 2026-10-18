@@ -6,6 +6,7 @@ import QRCode from "react-native-qrcode-svg";
 import { ArrowLeft, Navigation, Phone } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
+import { PartnerBookingActions } from "@/components/PartnerBookingActions";
 import { StatusBadge } from "@/components/StatusBadge";
 import { AppText, Banner, Button, Card, CenterMessage, Divider, IconButton, Loading } from "@/components/ui";
 import { api } from "@/lib/api";
@@ -100,7 +101,12 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
           </Card>
         ) : null}
 
+        {mode === "partner" ? <PartnerBookingActions key={b.status} booking={b} /> : null}
+
         <Card style={{ gap: space.md }}>
+          {/* Web'deki "Rezervasyon kodu" ile ayni: QR okunamazsa telefonda soylenen kod. */}
+          <Row label={t("bookings.code")} value={b.id.slice(0, 8).toUpperCase()} />
+          <Divider />
           <Row label={t("bookings.dropOff")} value={formatDayTime(b.checkInTime)} />
           <Row label={t("bookings.pickUp")} value={formatDayTime(b.checkOutTime)} />
           <Divider />

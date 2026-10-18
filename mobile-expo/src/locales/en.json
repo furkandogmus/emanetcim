@@ -156,7 +156,8 @@
     "cancelledTitle": "Booking cancelled",
     "cancelledRefund": "The full amount you paid will be refunded.",
     "cancelledNoCharge": "You haven't been charged anything.",
-    "cancelFailed": "Couldn't cancel the booking."
+    "cancelFailed": "Couldn't cancel the booking.",
+    "code": "Booking code"
   },
   "status": {
     "PENDING": "Pending",
@@ -177,7 +178,34 @@
     "bags": "Bags",
     "total": "Total",
     "new": "New",
-    "detailTitle": "Booking"
+    "detailTitle": "Booking",
+    "checkInTitle": "Receive the bags",
+    "checkInHint": "Enter the number of the seal on each bag. Leave empty if you take them without seals.",
+    "bagN": "Bag {{n}} · {{size}}",
+    "sealNumber": "Seal no.",
+    "sealsPartial": "Enter a seal for every bag, or for none.",
+    "checkInCta": "Bags received",
+    "checkedInTitle": "Bags received",
+    "checkedInBody": "The guest has been notified.",
+    "checkOutTitle": "Hand the bags back",
+    "checkOutHint": "Once the guest shows their QR code, hand the bags back and confirm.",
+    "checkOutSealsHint": "Check that every seal is intact and tick it.",
+    "sealIntact": "Seal {{n}} intact",
+    "checkOutCta": "Bags handed back",
+    "checkedOutTitle": "Handed back",
+    "checkedOutBody": "The booking is complete.",
+    "errors": {
+      "SHOP_CLOSED": "The shop looks closed right now. Try again during opening hours.",
+      "INVALID_STATUS": "This booking is not in a state that allows this.",
+      "PAYMENT_REQUIRED": "This booking has not been paid.",
+      "SEAL_REQUIRED": "Enter a seal number for every bag.",
+      "SEAL_COUNT_MISMATCH": "The number of seals must match the number of bags.",
+      "SEAL_INVALID": "The seal number is invalid or not from your shop.",
+      "SEAL_NOT_ASSIGNED": "This seal is not assigned to your shop.",
+      "SEAL_FAULTY_INVALID": "The seal reported as faulty is invalid.",
+      "FAULTY_OVERLAPS_ASSIGNMENT": "A seal cannot be both attached and faulty.",
+      "forbidden": "This booking does not belong to your shop."
+    }
   },
   "profile": {
     "title": "Profile",

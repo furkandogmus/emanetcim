@@ -156,7 +156,8 @@
     "cancelledTitle": "Rezervasyon iptal edildi",
     "cancelledRefund": "Ödediğin tutarın tamamı iade edilecek.",
     "cancelledNoCharge": "Senden herhangi bir ücret alınmadı.",
-    "cancelFailed": "Rezervasyon iptal edilemedi."
+    "cancelFailed": "Rezervasyon iptal edilemedi.",
+    "code": "Rezervasyon kodu"
   },
   "status": {
     "PENDING": "Bekliyor",
@@ -177,7 +178,34 @@
     "bags": "Valizler",
     "total": "Toplam",
     "new": "Yeni",
-    "detailTitle": "Rezervasyon"
+    "detailTitle": "Rezervasyon",
+    "checkInTitle": "Valizleri teslim al",
+    "checkInHint": "Her valize taktığın mührün numarasını yaz. Mühürsüz teslim alıyorsan boş bırak.",
+    "bagN": "{{n}}. valiz · {{size}}",
+    "sealNumber": "Mühür no",
+    "sealsPartial": "Ya bütün valizlerin mührünü gir ya da hiçbirini.",
+    "checkInCta": "Teslim aldım",
+    "checkedInTitle": "Teslim alındı",
+    "checkedInBody": "Misafire bildirim gönderildi.",
+    "checkOutTitle": "Valizleri teslim et",
+    "checkOutHint": "Misafir QR kodunu gösterdiyse valizleri ver ve onayla.",
+    "checkOutSealsHint": "Her mührün sağlam olduğunu kontrol edip işaretle.",
+    "sealIntact": "Mühür {{n}} sağlam",
+    "checkOutCta": "Teslim ettim",
+    "checkedOutTitle": "Teslim edildi",
+    "checkedOutBody": "Rezervasyon tamamlandı.",
+    "errors": {
+      "SHOP_CLOSED": "Dükkan şu an kapalı görünüyor. Çalışma saatleri içinde tekrar dene.",
+      "INVALID_STATUS": "Bu rezervasyonun durumu bu işleme uygun değil.",
+      "PAYMENT_REQUIRED": "Bu rezervasyonun ödemesi alınmamış.",
+      "SEAL_REQUIRED": "Her valiz için mühür numarası girmen gerekiyor.",
+      "SEAL_COUNT_MISMATCH": "Mühür sayısı valiz sayısıyla aynı olmalı.",
+      "SEAL_INVALID": "Mühür numarası geçersiz ya da dükkanına ait değil.",
+      "SEAL_NOT_ASSIGNED": "Bu mühür dükkanına tanımlı değil.",
+      "SEAL_FAULTY_INVALID": "Arızalı bildirilen mühür geçersiz.",
+      "FAULTY_OVERLAPS_ASSIGNMENT": "Aynı mühür hem takılı hem arızalı olamaz.",
+      "forbidden": "Bu rezervasyon senin dükkanına ait değil."
+    }
   },
   "profile": {
     "title": "Profil",
