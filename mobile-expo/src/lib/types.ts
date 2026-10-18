@@ -127,6 +127,20 @@ export type CheckoutResponse = {
   totalPrice: number;
 };
 
+/**
+ * `PUT bookings/[id]/modify`. Iki saat ZORUNLU; valiz sayisi verilmezse sunucu
+ * mevcut sayiyi korur. Basarida yalnizca `{ success: true }` doner.
+ */
+export type ModifyBookingRequest = {
+  checkInTime: string;
+  checkOutTime: string;
+  bagCountS?: number;
+  bagCountM?: number;
+  bagCountXl?: number;
+};
+
+export type ModifyBookingResponse = { success: true };
+
 /** `admin/stats`. */
 export type AdminStats = {
   totalBookings: number;

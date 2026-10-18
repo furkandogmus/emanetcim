@@ -355,5 +355,30 @@
       "too_many_requests": "You're searching too often. Try again in a moment.",
       "invalid_query": "Type at least 3 letters to search."
     }
+  },
+  "modify": {
+    "open": "Change booking",
+    "title": "Change booking",
+    "whenTitle": "When?",
+    "bagsTitle": "How many bags?",
+    "currentTotal": "Current total",
+    "newTotal": "Estimated new total",
+    "estimateNote": "The server calculates the final amount; you'll see it on your booking after saving.",
+    "paidNote": "The total of a paid booking can't change. To make a change that alters the price, cancel and book again.",
+    "noBags": "Select at least one bag.",
+    "save": "Save changes",
+    "savedTitle": "Booking updated",
+    "savedBody": "Your new time and bags are saved.",
+    "errors": {
+      "INVALID_DATES": "The time you picked is invalid or the shop is closed that day. Drop-off can't be in the past.",
+      "INVALID_STATUS": "This booking can no longer be changed.",
+      "PRICE_INCREASE": "The total of a paid booking can't change. You can cancel and book again.",
+      "CAPACITY": "There isn't enough space at this spot for the time you picked.",
+      "NOT_FOUND": "Booking not found.",
+      "not_found": "Booking not found.",
+      "UNAUTHORIZED": "You can't change this booking.",
+      "forbidden": "You can't change this booking.",
+      "invalid_input": "Some details are invalid. Check the time and the number of bags."
+    }
   }
 }
