@@ -29,7 +29,7 @@
         "android.permission.READ_MEDIA_VISUAL_USER_SELECTED"
       ],
       "adaptiveIcon": {
-        "backgroundColor": "#EA580C",
+        "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/android-icon-foreground.png"
       },
       "predictiveBackGestureEnabled": false,
@@ -82,6 +82,7 @@
       [
         "expo-notifications",
         {
+          "icon": "./assets/notification-icon.png",
           "color": "#EA580C"
         }
       ],

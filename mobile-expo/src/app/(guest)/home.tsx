@@ -7,6 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ChevronRight, Search, Ticket, User } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
+import { BrandMark } from "@/components/BrandMark";
 import { StatusBadge } from "@/components/StatusBadge";
 import { AppText, IconButton } from "@/components/ui";
 import { formatDayTime } from "@/lib/format";
@@ -32,7 +33,7 @@ export default function HomeScreen() {
         <View style={styles.scrim} />
         <View style={[styles.heroTop, { paddingTop: insets.top + space.sm }]}>
           <View style={styles.brandPill}>
-            <View style={styles.logoDot} />
+            <BrandMark size={22} />
             <AppText variant="bodyMedium" style={{ fontFamily: fonts.displayMedium }}>
               BagajPark
             </AppText>
@@ -110,7 +111,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.md,
     paddingVertical: 8,
   },
-  logoDot: { width: 18, height: 18, borderRadius: 6, backgroundColor: colors.brand },
   heroTitle: { color: colors.white, paddingHorizontal: space.xl, paddingBottom: space.xxl + space.lg },
   body: { marginTop: -space.xl, paddingHorizontal: space.xl, gap: space.lg },
   searchPill: {
