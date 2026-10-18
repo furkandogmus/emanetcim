@@ -280,5 +280,25 @@
       "has_active_bookings": "The shop has active bookings and cannot be rejected.",
       "invalid_action": "Invalid action."
     }
+  },
+  "scan": {
+    "open": "Scan QR",
+    "hint": "Point the camera at the guest’s booking QR code.",
+    "permissionTitle": "Camera access needed",
+    "permissionBody": "We need the camera to scan the QR code. Nothing is recorded.",
+    "allow": "Allow",
+    "seal": "Seal {{n}}: {{status}}",
+    "sealStatus": {
+      "STOCK": "in stock",
+      "ASSIGNED": "assigned to the shop",
+      "IN_USE": "on a bag",
+      "RETURNED": "returned",
+      "FAULTY": "faulty"
+    },
+    "errors": {
+      "unknown_code": "This code is not recognised. Is it a BagajPark booking QR code?",
+      "forbidden": "This booking does not belong to your shop.",
+      "not_found": "Booking not found."
+    }
   }
 }
