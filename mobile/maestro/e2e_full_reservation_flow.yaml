@@ -21,9 +21,9 @@ appId: com.bagajpark
 
 # Guest login
 - tapOn: "E-posta veya Telefon"
-- inputText: "maestro-guest@bagajpark.com"
+- inputText: "${GUEST_EMAIL}"
 - tapOn: "Şifre"
-- inputText: "Test123!"
+- inputText: "${GUEST_PASSWORD}"
 - pressKey: Back
 - tapOn:
     text: "Giriş Yap.*"
@@ -109,9 +109,9 @@ appId: com.bagajpark
 
 # Partner login
 - tapOn: "E-posta veya Telefon"
-- inputText: "maestro-partner@bagajpark.com"
+- inputText: "${PARTNER_EMAIL}"
 - tapOn: "Şifre"
-- inputText: "Test123!"
+- inputText: "${PARTNER_PASSWORD}"
 - pressKey: Back
 - tapOn:
     text: "Giriş Yap.*"

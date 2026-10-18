@@ -13,9 +13,9 @@ appId: com.bagajpark
 
 # Login
 - tapOn: "E-posta veya Telefon"
-- inputText: "maestro-guest@bagajpark.com"
+- inputText: "${GUEST_EMAIL}"
 - tapOn: "Şifre"
-- inputText: "Test123!"
+- inputText: "${GUEST_PASSWORD}"
 - pressKey: Back
 - tapOn:
     text: "Giriş Yap.*"
