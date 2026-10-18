@@ -100,3 +100,18 @@ blog, blog/[slug], become-partner, esnaf, esnaf/nasil-calisir
 - `bookings/lookup`, `bookings/manage/[token]` — hesapsız misafir, e-posta bağlantısıyla gelir
 - `luggage-storage`, `luggage-storage/[slug]`, `hotels`, `partners`, `demand`, `[...slug]` — SEO/pazarlama
 - `auth/error`
+
+## Yerel uçtan uca tur 2 (2026-10-18)
+
+Android, yerel API. Geçti: esnaf kazanç / mühür arızalı bildir / çalışma saatleri;
+misafir değerlendirme / hasar bildirimi / değiştir (fiyat güncel fiyatla yeniden hesaplandı) /
+iptal; admin pano / başvuru onayı (`shop.approve_application` denetim kaydı yazıldı) /
+mesaj okundu / mesaj sil.
+
+- hata (düzeltildi): admin mesaj silme düğmesinin ekran okuyucu etiketi onay başlığıydı
+- hata (düzeltildi): değerlendirme / sorun formu ekranın altında, görünmeden açılıyordu
+- hata (düzeltildi): ızgara dışı rezervasyon saati (05:54) değiştirme ekranında seçili görünmüyordu
+- hata değil: silinen mesajın listede kalması Fast Refresh sonrası eski kapanıştan; temiz mount'ta doğru
+- Emülatör notu: Expo dev menüsünün yüzen düğmesi sağ üstteki Profil'i örter; sürükleyip kenara çek
+
+Sırada: iOS. Makinede Xcode yok → `eas-simulator` (bulut) ya da Xcode kurulumu; kullanıcı kararı.
