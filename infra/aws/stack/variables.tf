@@ -103,3 +103,9 @@ variable "deploy_config_prefix" {
   type    = string
   default = "deploy-config"
 }
+
+variable "media_bucket_name" {
+  type        = string
+  description = "Dukkan fotograflarinin bucket'i (S3_BUCKET). hesap2: bagajpark-media-1d9eb152."
+  default     = "bagajpark-media-1d9eb152"
+}

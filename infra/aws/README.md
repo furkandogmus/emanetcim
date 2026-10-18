@@ -214,6 +214,27 @@ curl -s https://bagajpark.com/api/health/live
 > `aws-test.{crt,key}` adıyla yazıyor — nginx sertifikayı bulamaz. "Bilinen
 > sınırlamalar" bölümündeki nota bakın.
 
+## Medya bucket'ı (dükkan fotoğrafları) — state'e alınacak
+
+2026-10-18'de CLI ile kuruldu (`bagajpark-media-1d9eb152`, eu-central-1): yalnızca
+`shops/*` herkese okunur, uygulama rolü `write-shop-media` ile yazar/siler, statik
+anahtar yok. Kod `stack/main.tf`'te; `plan` drift göstermemesi için bir kez import:
+
+```bash
+cd infra/aws/stack && terraform workspace select hesap2
+export AWS_PROFILE=bagajpark-yeni   # ya da aynı hesaba bağlı başka bir profil
+terraform import aws_s3_bucket.media bagajpark-media-1d9eb152
+terraform import aws_s3_bucket_ownership_controls.media bagajpark-media-1d9eb152
+terraform import aws_s3_bucket_public_access_block.media bagajpark-media-1d9eb152
+terraform import aws_s3_bucket_server_side_encryption_configuration.media bagajpark-media-1d9eb152
+terraform import aws_s3_bucket_policy.media_public_read bagajpark-media-1d9eb152
+terraform import aws_iam_role_policy.app_media_write bagajpark-aws-test-app-role:write-shop-media
+terraform plan   # beklenen: yalnızca tag farkı (ManagedBy etiketi CLI'dan kaldı)
+```
+
+Uygulama ayarları SSM'de (`/bagajpark/env/app/S3_BUCKET`, `S3_REGION`,
+`S3_PUBLIC_BASE_URL`); deploy `secrets-render.sh` ile env dosyasına yazar.
+
 ## Maliyet
 
 - **Free Plan hesap kısıtı**: EC2 API sadece `free-tier-eligible=true` instance tiplerini
