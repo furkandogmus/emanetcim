@@ -631,6 +631,7 @@ export default function SearchClient({
                 <ShopListItem
                   id={shop.id}
                   name={shop.name}
+                  image={shop.image}
                   rating={shop.rating || 0}
                   price={shop.pricePerDay}
                   distanceKm={shop.distanceKm}

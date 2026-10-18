@@ -4,6 +4,7 @@ import { memo } from 'react';
 import { Building2, ChevronRight, MapPin, Star, ShieldCheck } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import FavoriteButton from '@/components/guest/FavoriteButton';
 import Money from "@/components/common/Money";
 import { formatDecimal } from "@/lib/currency";
@@ -14,6 +15,8 @@ import { formatDistance } from "@/lib/format-distance";
 interface ShopListItemProps {
   id: string;
   name: string;
+  /** Vitrin fotoğrafı (`Shop.image`). Yoksa turuncu yer tutucu çizilir. */
+  image?: string | null;
   rating: number;
   /** Günlük fiyat (TRY). Sayı olarak taşınır — gösterim `Money` bileşeninin işi. */
   price: number;
@@ -59,6 +62,7 @@ const PRICE_SLOT_CLASS = "text-xl font-black text-gray-900";
 function ShopListItem({
   id,
   name,
+  image,
   rating,
   price,
   distanceKm,
@@ -81,9 +85,17 @@ function ShopListItem({
       transition={{ type: "spring", stiffness: 400, damping: 17 }}
       className="bg-white border border-gray-100 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow cursor-pointer flex gap-5 items-center group"
     >
-      {/* Mini Image Placeholder */}
-      <div className="w-20 h-20 bg-gradient-to-br from-orange-100 to-amber-50 rounded-2xl flex items-center justify-center text-orange-400 shrink-0">
-        <Building2 size={28} strokeWidth={1.5} />
+      {/*
+        Vitrin fotoğrafı (2026-10-18): kart her zaman sabit ikon çiziyordu;
+        esnafın/adminin yüklediği fotoğraf yalnızca detay sayfasında görünüyordu.
+        Veri (`ShopWithDistance.image`) zaten listeye geliyordu.
+      */}
+      <div className="relative w-20 h-20 bg-gradient-to-br from-orange-100 to-amber-50 rounded-2xl flex items-center justify-center text-orange-400 shrink-0 overflow-hidden">
+        {image ? (
+          <Image src={image} alt="" fill sizes="80px" className="object-cover" />
+        ) : (
+          <Building2 size={28} strokeWidth={1.5} />
+        )}
       </div>
 
       {/*
