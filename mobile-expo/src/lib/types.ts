@@ -69,6 +69,15 @@ export type ShopDetail = Shop & {
   };
 };
 
+/** `toMobileReview` (mobile-dto.ts). */
+export type ShopReview = {
+  id: string;
+  rating: number;
+  comment: string | null;
+  createdAt: string;
+  authorLabel: string;
+};
+
 export type BookingSummary = {
   id: string;
   shopId: string;

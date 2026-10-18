@@ -8,9 +8,10 @@ import { useTranslation } from "react-i18next";
 import { hoursLabel } from "@/components/ShopCard";
 import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { errorMessage } from "@/lib/errors";
-import { formatMoney } from "@/lib/format";
+import { formatDay, formatMoney } from "@/lib/format";
 import { resolveImage } from "@/lib/images";
-import { useShop } from "@/lib/queries";
+import { useShop, useShopReviews } from "@/lib/queries";
+import { wallParts } from "@/lib/time";
 import { colors, fonts, radius, shadow, space } from "@/theme/tokens";
 
 export default function ShopDetailScreen() {
@@ -35,7 +36,7 @@ export default function ShopDetailScreen() {
   const weekdays = t("shop.weekdays", { returnObjects: true }) as string[];
   // Haftalik liste pazartesiden baslasin (API 0 = pazar).
   const weekly = [...(shop.weeklyHours ?? [])].sort((a, b) => ((a.weekday + 6) % 7) - ((b.weekday + 6) % 7));
-  const todayIdx = new Date().getDay();
+  const todayIdx = wallParts(new Date()).weekday;
 
   return (
     <View style={styles.root}>
@@ -85,7 +86,10 @@ export default function ShopDetailScreen() {
             <View style={styles.meta}>
               <MapPin size={18} color={colors.inkMuted} />
               <AppText variant="caption" style={{ flex: 1 }}>
-                {[shop.address, shop.district, shop.city].filter(Boolean).join(", ")}
+                {/* Adres cogu kayitta ilce/sehri zaten iceriyor; tekrar eklenmez. */}
+                {[shop.address, shop.district, shop.city]
+                  .filter((p, i, all): p is string => !!p && !all.slice(0, i).some((q) => q?.includes(p)))
+                  .join(", ")}
               </AppText>
             </View>
           ) : null}
@@ -107,6 +111,31 @@ export default function ShopDetailScreen() {
               </View>
             </View>
           )}
+
+          {!shop.isPrelaunch ? (
+            <Card style={{ gap: space.sm }}>
+              <AppText variant="heading">{t("shop.prices")}</AppText>
+              {(
+                [
+                  ["s", shop.pricing.bagMultiplierS],
+                  ["m", shop.pricing.bagMultiplierM],
+                  ["xl", shop.pricing.bagMultiplierXl],
+                ] as const
+              ).map(([size, mult]) => (
+                <View key={size} style={styles.hourRow}>
+                  <View style={{ flex: 1 }}>
+                    <AppText variant="bodyMedium">{t(`bags.${size}`)}</AppText>
+                    <AppText variant="caption">{t(`bags.${size}Desc`)}</AppText>
+                  </View>
+                  <AppText variant="bodyMedium">
+                    {t("shop.perDay", { price: formatMoney(shop.pricePerDay * mult) })}
+                  </AppText>
+                </View>
+              ))}
+            </Card>
+          ) : null}
+
+          <Reviews shopId={shop.id} />
 
           {weekly.length > 0 && !shop.open247 ? (
             <Card style={{ gap: space.sm }}>
@@ -145,6 +174,32 @@ export default function ShopDetailScreen() {
         </View>
       ) : null}
     </View>
+  );
+}
+
+function Reviews({ shopId }: { shopId: string }) {
+  const { t } = useTranslation();
+  const query = useShopReviews(shopId);
+  // Yorum yuklenemezse dukkan ekrani bozulmasin; bolum sessizce gizlenir.
+  if (!query.data) return null;
+  const reviews = query.data.slice(0, 5);
+  return (
+    <Card style={{ gap: space.md }}>
+      <AppText variant="heading">{t("shop.reviews", { count: query.data.length })}</AppText>
+      {reviews.length === 0 ? <AppText variant="caption">{t("shop.noReviews")}</AppText> : null}
+      {reviews.map((r) => (
+        <View key={r.id} style={{ gap: 4 }}>
+          <View style={styles.meta}>
+            <Star size={14} color={colors.brand} fill={colors.brand} />
+            <AppText variant="bodyMedium">{r.rating}</AppText>
+            <AppText variant="caption">
+              {r.authorLabel || t("partner.guest")} · {formatDay(r.createdAt)}
+            </AppText>
+          </View>
+          {r.comment ? <AppText variant="body">{r.comment}</AppText> : null}
+        </View>
+      ))}
+    </Card>
   );
 }
 
