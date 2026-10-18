@@ -1,7 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
-import { api, clearTokens, loadTokens, saveTokens, setSessionExpiredHandler } from "./api";
+import * as SecureStore from "expo-secure-store";
+
+import { ApiError, api, clearTokens, loadTokens, saveTokens, setSessionExpiredHandler } from "./api";
 import type { MobileUser, SessionResponse } from "./types";
 
 type AuthState =
@@ -19,6 +21,28 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+const USER_KEY = "bp.user";
+
+/*
+  Son bilinen kullanici. Acilista `/auth/me` ag hatasi ya da 5xx verirse
+  (havalimani wifi'si) eskiden token'lar silinip misafir giris ekranina
+  atiliyordu. Oturum yalnizca sunucu "gecersiz" derse (401/403) kapanir.
+*/
+async function rememberUser(user: MobileUser | null) {
+  if (user) await SecureStore.setItemAsync(USER_KEY, JSON.stringify(user)).catch(() => undefined);
+  else await SecureStore.deleteItemAsync(USER_KEY).catch(() => undefined);
+}
+
+async function lastKnownUser(): Promise<MobileUser | null> {
+  const raw = await SecureStore.getItemAsync(USER_KEY).catch(() => null);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as MobileUser;
+  } catch {
+    return null;
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({ status: "loading" });
 
@@ -32,9 +56,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       try {
         const user = await api<MobileUser>("/auth/me");
+        void rememberUser(user);
         setState({ status: "signedIn", user });
-      } catch {
+      } catch (e) {
+        const rejected = e instanceof ApiError && (e.status === 401 || e.status === 403);
+        const cached = rejected ? null : await lastKnownUser();
+        if (cached) {
+          setState({ status: "signedIn", user: cached });
+          return;
+        }
         await clearTokens();
+        void rememberUser(null);
         setState({ status: "signedOut" });
       }
     })();
@@ -47,6 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const startSession = useCallback(async (body: Record<string, string>) => {
     const res = await api<SessionResponse>("/auth/session", { method: "POST", body, auth: false });
     await saveTokens(res.accessToken, res.refreshToken);
+    void rememberUser(res.user);
     setState({ status: "signedIn", user: res.user });
     return res.user;
   }, []);
@@ -67,6 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Sunucu tarafi iptal en iyi caba; basarisiz olsa da yerel oturum kapanir.
     await api("/auth/logout", { method: "POST" }).catch(() => undefined);
     await clearTokens();
+    void rememberUser(null);
     setState({ status: "signedOut" });
   }, []);
 
