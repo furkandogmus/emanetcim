@@ -10,6 +10,7 @@ import { AppText, Banner, Button, Card, CenterMessage, Divider, IconButton, Load
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { formatDay } from "@/lib/format";
+import { usePartnerShopSelection, withShop } from "@/lib/partner-shop";
 import { usePartnerSeals } from "@/lib/queries";
 import type { SealDeliveryResponse, SealRequest, SealRequestResponse } from "@/lib/types";
 import { notify } from "@/lib/notify";
@@ -26,6 +27,9 @@ export default function PartnerSealsScreen() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const query = usePartnerSeals();
+  const [selectedShop] = usePartnerShopSelection();
+  // Talep ve arizali bildirimi, ekrandaki stogun dukkanina gider.
+  const shopId = query.data?.shop?.id ?? selectedShop;
   const [count, setCount] = useState("10");
   const [serial, setSerial] = useState("");
   const [requestError, setRequestError] = useState<string | null>(null);
@@ -35,7 +39,7 @@ export default function PartnerSealsScreen() {
 
   const requestSeals = useMutation({
     mutationFn: (n: number) =>
-      api<SealRequestResponse>("/partner/seals/request", { method: "POST", body: { count: n } }),
+      api<SealRequestResponse>(withShop("/partner/seals/request", shopId), { method: "POST", body: { count: n } }),
     onSuccess: (res) => {
       setRequestError(null);
       setCount("10");
@@ -47,7 +51,7 @@ export default function PartnerSealsScreen() {
 
   const reportFaulty = useMutation({
     mutationFn: (serialNumber: number) =>
-      api<{ success: true }>("/partner/seals/report-faulty", { method: "POST", body: { serialNumber } }),
+      api<{ success: true }>(withShop("/partner/seals/report-faulty", shopId), { method: "POST", body: { serialNumber } }),
     onSuccess: () => {
       setFaultyError(null);
       setSerial("");
@@ -92,7 +96,14 @@ export default function PartnerSealsScreen() {
         <IconButton label={t("common.back")} onPress={() => router.back()}>
           <ArrowLeft size={20} color={colors.ink} />
         </IconButton>
-        <AppText variant="heading">{t("seals.title")}</AppText>
+        <View style={styles.titleBlock}>
+          <AppText variant="heading">{t("seals.title")}</AppText>
+          {query.data?.shop ? (
+            <AppText variant="caption" numberOfLines={1}>
+              {query.data.shop.name}
+            </AppText>
+          ) : null}
+        </View>
         <View style={{ width: 44 }} />
       </View>
 
@@ -259,6 +270,7 @@ function RequestStatus({ status }: { status: string }) {
 }
 
 const styles = StyleSheet.create({
+  titleBlock: { flex: 1, alignItems: "center", paddingHorizontal: space.sm },
   safe: { flex: 1, backgroundColor: colors.bg },
   header: {
     flexDirection: "row",
