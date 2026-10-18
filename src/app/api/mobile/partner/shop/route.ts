@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
   const shop = await shopService.getShopByOwner(auth.user.id, req.nextUrl.searchParams.get("shop"));
 
   if (!shop) {
-    return NextResponse.json({ error: "Shop not found" }, { status: 404 });
+    return NextResponse.json({ error: "no_shop" }, { status: 404 });
   }
 
   const sealCount = await prisma.seal.count({
@@ -84,7 +84,7 @@ export async function PUT(req: NextRequest) {
   const shop = await shopService.getShopByOwner(auth.user.id, req.nextUrl.searchParams.get("shop"));
 
   if (!shop) {
-    return NextResponse.json({ error: "Shop not found" }, { status: 404 });
+    return NextResponse.json({ error: "no_shop" }, { status: 404 });
   }
 
   try {
