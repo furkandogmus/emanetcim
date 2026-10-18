@@ -4,14 +4,14 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Camera, Map, Marker, UserLocation } from "@maplibre/maplibre-react-native";
 import type { CameraRef, LngLatBounds } from "@maplibre/maplibre-react-native";
 import { Redirect, router } from "expo-router";
-import { ArrowLeft, Luggage, Search } from "lucide-react-native";
+import { ArrowLeft, Search } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { BottomSheet } from "@/components/BottomSheet";
 import { ShopCard } from "@/components/ShopCard";
 import { AppText, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { errorMessage } from "@/lib/errors";
-import { formatDay } from "@/lib/format";
+import { formatDay, formatMoney } from "@/lib/format";
 import { MAP_ATTRIBUTION, useMapStyle } from "@/lib/map-style";
 import { useNearbyShops } from "@/lib/queries";
 import { totalBags, useSearch } from "@/lib/search";
@@ -215,24 +215,36 @@ const ShopMarkers = memo(function ShopMarkers({
   selectedId: string | null;
   onSelect: (id: string) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <>
-      {shops.map((s) =>
-        s.latitude != null && s.longitude != null ? (
+      {shops.map((s) => {
+        if (s.latitude == null || s.longitude == null) return null;
+        // Web haritasiyla ayni: pinde gunluk fiyat. Talep testi noktasindaki fiyat
+        // sema varsayilani, gercek degil; orada "Yakinda" yazar.
+        const label = s.isPrelaunch ? t("map.comingSoon") : formatMoney(s.pricePerDay);
+        const selected = s.id === selectedId;
+        return (
           <Marker
             key={s.id}
             id={s.id}
             lngLat={[s.longitude, s.latitude]}
             anchor="center"
             onPress={() => onSelect(s.id)}
-            accessibilityLabel={s.name}
+            accessibilityLabel={
+              s.isPrelaunch ? `${s.name}, ${label}` : `${s.name}, ${t("shop.perDay", { price: label })}`
+            }
           >
-            <View style={[styles.pin, s.id === selectedId && styles.pinSelected]}>
-              <Luggage size={16} color={colors.white} />
+            <View
+              style={[styles.pin, s.isPrelaunch && styles.pinMuted, selected && styles.pinSelected]}
+            >
+              <Text style={styles.pinText} numberOfLines={1}>
+                {label}
+              </Text>
             </View>
           </Marker>
-        ) : null,
-      )}
+        );
+      })}
     </>
   );
 });
@@ -261,17 +273,22 @@ const styles = StyleSheet.create({
     ...shadow.floating,
   },
   searchHere: { position: "absolute", alignSelf: "center" },
+  // Fiyat hapi: dar ekranda komsu pinleri ortmesin diye kucuk tutuldu (web `h-8`).
   pin: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: colors.brand,
-    borderWidth: 2.5,
+    minWidth: 44,
+    height: 30,
+    paddingHorizontal: 10,
+    borderRadius: radius.pill,
+    backgroundColor: colors.accent,
+    borderWidth: 2,
     borderColor: colors.white,
     alignItems: "center",
     justifyContent: "center",
+    ...shadow.card,
   },
-  pinSelected: { backgroundColor: colors.ink, transform: [{ scale: 1.15 }] },
+  pinMuted: { backgroundColor: colors.inkSecondary },
+  pinSelected: { backgroundColor: colors.ink, transform: [{ scale: 1.1 }] },
+  pinText: { fontFamily: fonts.bodySemibold, fontSize: 13, color: colors.white },
   selectedCard: { position: "absolute", left: space.lg, right: space.lg, ...shadow.floating },
   attribution: {
     position: "absolute",
