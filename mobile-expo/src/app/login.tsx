@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 
+import { BrandMark } from "@/components/BrandMark";
 import { GoogleButton } from "@/components/GoogleButton";
 import { AppText, Banner, Button } from "@/components/ui";
 import { useAuth } from "@/lib/auth";
@@ -121,7 +122,7 @@ export default function LoginScreen() {
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <View style={styles.brandRow}>
-            <View style={styles.logoDot} />
+            <BrandMark size={32} />
             <AppText variant="heading" style={{ color: colors.accent }}>
               BagajPark
             </AppText>
@@ -240,7 +241,6 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   content: { padding: space.xl, gap: space.lg, paddingTop: space.xxl },
   brandRow: { flexDirection: "row", alignItems: "center", gap: space.sm, marginBottom: space.xl },
-  logoDot: { width: 28, height: 28, borderRadius: 9, backgroundColor: colors.brand },
   field: { gap: space.sm },
   input: {
     minHeight: 54,
