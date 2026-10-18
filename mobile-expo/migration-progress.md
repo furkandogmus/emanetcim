@@ -160,19 +160,14 @@ Sırada: iOS. Makinede Xcode yok → `eas-simulator` (bulut) ya da Xcode kurulum
   `partner/shop`, `shop/schedule`, `shop/image` `?shop=` iletir (testli)
 - [x] Expo: Dükkanım, dükkan bilgileri, saatler, fotoğraf ortak dükkan seçimini kullanır;
   emülatörde Galata seçiliyken fiyat 80→85 yalnızca Galata'ya yazıldı (DB doğrulaması)
-- Not: bu uçlar dükkan yoksa ham `"Shop not found"` dönüyor (kod değil); istemci genel
-  hataya çeviriyor. Küçük düzeltme adayı.
-- Sırada: iOS (Xcode kararı bekliyor); Play'deki #14 ile gerçek cihazda canlı API dumanı
+- [x] Bu uçlar ve hesap silme ham metin yerine `no_shop` / `active_bookings` kodu döner
+- Sırada: Google ile giriş; iOS için Apple Developer kaydı (Mac yeterli)
 
-- **Sıradaki (yazma, öncelikli):** `partner/shop` (PATCH), `shop/schedule`, `shop/image`
-  dükkanı `shopService.getShopByOwner` → sırasız `findFirst({ ownerId })` ile seçiyor;
-  çok dükkanlı esnafın ayar/saat/fotoğraf değişikliği rastgele dükkana yazılabilir.
-  `partner/earnings/stats` ise bütün dükkanları bilerek topluyor, sorun değil.
 
 ## Play dahili test geri bildirimi (2026-10-18, sürüm 14)
 
 - [x] "Sadece aynı gün seçiliyor": takvim tek gün seçiliyken ileri güne dokunmayı yeni başlangıç
   sayıyordu; artık aralığı uzatır (`lib/date-range.ts`, testli; emülatörde 19→22 doğrulandı)
-- [ ] "Noktalar gözükmüyor": prod `shops/nearby` İstanbul/Ankara/İzmir/Antalya için 7–11 dükkan
-  dönüyor (sunucu sağlam). Ayrıntı bekleniyor: liste sayısı mı 0, harita mı boş? Konum/saat
-  filtresi ya da release build'de pin çizimi olabilir
+- [x] "Noktalar gözükmüyor": prod `shops/nearby` sağlam; kullanıcı tekrar denedi, noktalar görünüyor
+- [ ] Google ile giriş (Android): sunucu hazır, istemci kodu yok. Firebase Android uygulamasına
+  Play imzalama, yükleme ve debug SHA-1'leri eklendi (2026-10-18); sırada Expo tarafı
