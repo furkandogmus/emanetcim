@@ -2,6 +2,7 @@ import type { Prisma, Shop } from '@prisma/client';
 import { writeAuditLog } from "@/lib/audit-log";
 import { Role } from '@prisma/client';
 import prisma from '@/lib/db';
+import { resolvePartnerShops } from '@/lib/partner-shop';
 import { randomUUID } from 'crypto';
 import { getStorage, validateImageBytes, buildObjectKey } from '@/lib/storage';
 import { getSiteBaseUrl } from "@/lib/site-base-url";
@@ -255,7 +256,7 @@ export interface IShopService {
   approveApplication(shopId: string, actor: ApplicationActor): Promise<ApproveShopResult>;
   rejectApplication(shopId: string, actor: ApplicationActor): Promise<RejectShopResult>;
   getShopsByOwner(ownerId: string): Promise<Shop[]>;
-  getShopByOwner(ownerId: string): Promise<Shop | null>;
+  getShopByOwner(ownerId: string, requestedShopId?: string | null): Promise<Shop | null>;
   updateShop(shopId: string, data: Partial<Shop>): Promise<Shop>;
   recomputeResponseTimes(now?: Date): Promise<RecomputeResponseTimesResult>;
 }
@@ -867,10 +868,14 @@ export class ShopService implements IShopService {
     });
   }
 
-  async getShopByOwner(ownerId: string): Promise<Shop | null> {
-    return await prisma.shop.findFirst({
-      where: { ownerId },
-    });
+  /**
+   * Esnafin aktif dukkani, web paneliyle AYNI kural (`resolvePartnerShops`).
+   * Eskiden siralamasiz `findFirst({ ownerId })` idi: mobil ayar/saat/fotograf
+   * uclari cok dukkanli esnafta degisikligi rastgele dukkana yazabiliyordu.
+   */
+  async getShopByOwner(ownerId: string, requestedShopId?: string | null): Promise<Shop | null> {
+    const { activeShop } = await resolvePartnerShops(ownerId, requestedShopId);
+    return activeShop ? await prisma.shop.findUnique({ where: { id: activeShop.id } }) : null;
   }
 
   async updateShop(shopId: string, data: Partial<Shop>): Promise<Shop> {

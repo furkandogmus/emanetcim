@@ -16,10 +16,10 @@ vi.mock("@/lib/storage", () => ({ isStorageConfigured: mockConfigured }));
 
 import { POST } from "@/app/api/mobile/partner/shop/image/route";
 
-function req(withFile = true) {
+function req(withFile = true, query = "") {
   const form = new FormData();
   if (withFile) form.append("file", new Blob([new Uint8Array([0xff, 0xd8, 0xff])], { type: "image/jpeg" }), "a.jpg");
-  return new NextRequest("https://bagajpark.com/api/mobile/partner/shop/image", { method: "POST", body: form });
+  return new NextRequest(`https://bagajpark.com/api/mobile/partner/shop/image${query}`, { method: "POST", body: form });
 }
 
 beforeEach(() => {
@@ -38,6 +38,11 @@ describe("mobil dükkan fotoğrafı", () => {
     expect(mockShopService.setShopImage).toHaveBeenCalledWith(
       expect.objectContaining({ shopId: "s1", actorId: "p1", actorRole: "PARTNER" }),
     );
+  });
+
+  it("çok dükkanlı esnafta ?shop= dükkan seçimine iletilir", async () => {
+    await POST(req(true, "?shop=s2"));
+    expect(mockShopService.getShopByOwner).toHaveBeenCalledWith("p1", "s2");
   });
 
   it("depolama ayarlı değilse 503", async () => {
