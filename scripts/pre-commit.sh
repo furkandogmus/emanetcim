@@ -5,30 +5,8 @@
 
 STAGED_FILES=$(git diff --cached --name-only)
 
-# --- MOBILE (FLUTTER) ---
-if echo "$STAGED_FILES" | grep -q "mobile/"; then
-  echo "🚀 Running Mobile Linter & Formatter..."
-  cd mobile
-  
-  echo "  - Formatting Dart files..."
-  dart format lib test --set-exit-if-changed
-  if [ $? -ne 0 ]; then
-    echo "  ❌ Dart formatting issues found. Please run 'dart format lib test' and stage the changes."
-    exit 1
-  fi
-
-  echo "  - Analyzing Dart code..."
-  flutter analyze
-  if [ $? -ne 0 ]; then
-    echo "  ❌ Flutter analysis failed."
-    exit 1
-  fi
-  
-  cd ..
-fi
-
 # --- WEB (NEXT.JS) ---
-if echo "$STAGED_FILES" | grep -E "\.(ts|tsx|js|jsx|mjs)$" | grep -qv "mobile/"; then
+if echo "$STAGED_FILES" | grep -qE "\.(ts|tsx|js|jsx|mjs)$"; then
   echo "🌐 Running Web Linter & Typecheck..."
   
   echo "  - Running ESLint..."
