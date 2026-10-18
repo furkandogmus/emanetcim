@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { IconButton } from "@/components/ui";
 import { formatMonth } from "@/lib/format";
+import { cellOf } from "@/lib/time";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -46,7 +47,8 @@ export function RangeCalendar({
   maxDays?: number;
 }) {
   const { t, i18n } = useTranslation();
-  const today = startOfDay(new Date());
+  // Hucreler Istanbul gunleri; "bugun" de oyle (gece yarisi farki telefonda olmasin).
+  const today = cellOf(new Date());
   const [month, setMonth] = useState(() => new Date(start.getFullYear(), start.getMonth(), 1));
   const [picking, setPicking] = useState<"start" | "end">("start");
   const cells = useMemo(() => monthGrid(month), [month]);
