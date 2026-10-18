@@ -210,8 +210,22 @@
       "SEAL_NOT_ASSIGNED": "This seal is not assigned to your shop.",
       "SEAL_FAULTY_INVALID": "The seal reported as faulty is invalid.",
       "FAULTY_OVERLAPS_ASSIGNMENT": "A seal cannot be both attached and faulty.",
-      "forbidden": "This booking does not belong to your shop."
-    }
+      "forbidden": "This booking does not belong to your shop.",
+      "too_large": "The photo is too large (max 8 MB).",
+      "unsupported_type": "This file type is not supported; pick a JPEG, PNG or WebP.",
+      "dimensions_too_large": "The photo resolution is too high.",
+      "empty": "The photo could not be read; try again.",
+      "storage_unavailable": "Photo upload is not available right now.",
+      "not_found": "Shop not found."
+    },
+    "myShop": "My shop",
+    "photo": "Shop photo",
+    "noPhoto": "No photo yet",
+    "photoHint": "Guests recognise your shop by this photo. Pick a bright shot of the entrance and sign.",
+    "addPhoto": "Add photo",
+    "changePhoto": "Change photo",
+    "photoSaved": "Photo saved.",
+    "photoFailed": "Could not upload the photo"
   },
   "profile": {
     "title": "Profile",
