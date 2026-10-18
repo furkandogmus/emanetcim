@@ -535,5 +535,44 @@
       "already_registered": "Bu telefon numarası başka bir hesapta kayıtlı.",
       "invalid_data": "Telefon numarası okunamadı."
     }
+  },
+  "schedule": {
+    "title": "Çalışma saatleri ve izin",
+    "hint": "Her gün için açılış ve kapanış saatini belirle. Misafirler bu saatleri görür ve yalnızca açık günlere rezervasyon yapabilir.",
+    "days": {
+      "1": "Pazartesi",
+      "2": "Salı",
+      "3": "Çarşamba",
+      "4": "Perşembe",
+      "5": "Cuma",
+      "6": "Cumartesi",
+      "7": "Pazar"
+    },
+    "closed": "Kapalı",
+    "open247": "7/24 açık",
+    "open247Hint": "Açıkken günlük saatler kullanılmaz; yalnızca izin günleri geçerlidir.",
+    "openingFor": "{{day}} açılış saati",
+    "closingFor": "{{day}} kapanış saati",
+    "openOn": "{{day}} açık",
+    "timeInvalid": "Saatleri SS:DD biçiminde yaz (ör. 09:00).",
+    "save": "Saatleri kaydet",
+    "saved": "Çalışma saatleri güncellendi.",
+    "closuresTitle": "İzin ve tatil günleri",
+    "closuresHint": "Seçtiğin tarihlerde dükkan kapalı görünür, rezervasyon alınmaz.",
+    "none": "Planlı izin yok.",
+    "reason": "Not (isteğe bağlı)",
+    "addOpen": "İzin günü ekle",
+    "add": "İzni kaydet",
+    "remove": "Kaldır",
+    "removeTitle": "Bu izin kaldırılsın mı?",
+    "conflictTitle": "Aşağıdaki rezervasyonlar bu güne denk geliyor:",
+    "conflictDropoff": "Bırakış",
+    "conflictPickup": "Teslim alış",
+    "conflictBags": "Dükkanda valiz var",
+    "errors": {
+      "schedule_conflict": "Bu değişiklik kaydedilemedi.",
+      "invalid_input": "Saat ya da tarih geçersiz. Geçmiş bir tarihe izin eklenemez.",
+      "schedule_save_failed": "Kaydedilemedi, tekrar dene."
+    }
   }
 }

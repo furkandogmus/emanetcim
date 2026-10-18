@@ -5,7 +5,7 @@ import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import type { Href } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ImagePlus, ShieldCheck, Store, Wallet, Settings } from "lucide-react-native";
+import { ArrowLeft, ImagePlus, ShieldCheck, Store, Wallet, Settings, Clock } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { LinkRow } from "@/components/LinkRow";
@@ -112,6 +112,11 @@ export default function PartnerShopScreen() {
             icon={<Settings size={18} color={colors.brand} />}
             label={t("shopSettings.title")}
             onPress={() => router.push("/partner/settings" as Href)}
+          />
+          <LinkRow
+            icon={<Clock size={18} color={colors.brand} />}
+            label={t("schedule.title")}
+            onPress={() => router.push("/partner/schedule" as Href)}
           />
         </ScrollView>
       )}
