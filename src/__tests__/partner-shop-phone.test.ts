@@ -47,41 +47,29 @@ describe("partner/shop yaniti", () => {
  * yalnizca ADI gecen alanlari arar -- tip uyumunu olcmez -- ama "istemci
  * okuyor, sunucu hic gondermiyor" sinifini yakalar. Kupon (ayni gun) ve
  * telefon, ikisi de bu sinifti.
+ *
+ * Istemci Expo: okunan alanlar `mobile-expo/src/lib/types.ts`te (kaynagi
+ * `mobile-dto.ts`). Flutter'daki `res.data['...']` taramasinin yerine
+ * gecti (2026-10-18). Ham Prisma kaydi donen uclar (ornegin admin mesajlari)
+ * ve servis tipleri icin sema ve `src/services` de sunucu sayilir.
  */
 describe("mobil istemcinin okudugu alanlar sunucuda geciyor", () => {
-  function dartDosyalari(dir: string, out: string[] = []): string[] {
-    for (const ad of readdirSync(dir)) {
-      const tam = join(dir, ad);
-      if (statSync(tam).isDirectory()) dartDosyalari(tam, out);
-      else if (ad.endsWith(".dart")) out.push(tam);
-    }
-    return out;
+  function oku(p: string): string {
+    const tam = join(process.cwd(), p);
+    if (statSync(tam).isFile()) return readFileSync(tam, "utf-8");
+    return readdirSync(tam).map((a) => oku(join(p, a))).join("\n");
   }
 
-  it("`res.data['...']` alanlarinin hepsi sunucu kodunda var", () => {
-    const mobilKok = join(process.cwd(), "mobile/lib");
-    const alanlar = new Set<string>();
-    for (const f of dartDosyalari(mobilKok)) {
-      const src = readFileSync(f, "utf-8");
-      for (const m of src.matchAll(/res\.data\['([a-zA-Z][a-zA-Z0-9]*)'\]/g)) {
-        alanlar.add(m[1]);
-      }
-    }
-    expect(alanlar.size, "taranacak alan bulunamadi").toBeGreaterThan(5);
+  it("Expo yanit tiplerindeki alanlarin hepsi sunucu kodunda var", () => {
+    const tipler = stripComments(oku("mobile-expo/src/lib/types.ts"));
+    const alanlar = new Set([...tipler.matchAll(/^\s+([a-zA-Z][a-zA-Z0-9]*)\??:/gm)].map((m) => m[1]));
+    expect(alanlar.size, "taranacak alan bulunamadi").toBeGreaterThan(50);
 
-    const sunucu = ["src/app/api/mobile", "src/lib/mobile-dto.ts"]
-      .map((p) => {
-        const tam = join(process.cwd(), p);
-        if (statSync(tam).isFile()) return readFileSync(tam, "utf-8");
-        const gez = (d: string): string => readdirSync(d).map((a) => {
-          const t = join(d, a);
-          return statSync(t).isDirectory() ? gez(t) : readFileSync(t, "utf-8");
-        }).join("\n");
-        return gez(tam);
-      })
+    const sunucu = ["src/app/api/mobile", "src/lib/mobile-dto.ts", "src/services", "prisma/schema.prisma"]
+      .map(oku)
       .join("\n");
 
-    const eksik = [...alanlar].filter((a) => !sunucu.includes(a));
+    const eksik = [...alanlar].filter((a) => !new RegExp(`\\b${a}\\b`).test(sunucu));
     expect(
       eksik,
       `istemci bu alanlari okuyor ama sunucu hicbir yerde uretmiyor:\n${eksik.join("\n")}`,
