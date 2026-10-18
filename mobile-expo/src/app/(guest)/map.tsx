@@ -1,8 +1,8 @@
-import { useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Camera, Map, Marker, UserLocation } from "@maplibre/maplibre-react-native";
-import type { LngLatBounds } from "@maplibre/maplibre-react-native";
+import type { CameraRef, LngLatBounds } from "@maplibre/maplibre-react-native";
 import { Redirect, router } from "expo-router";
 import { ArrowLeft, Luggage, Search } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
@@ -12,7 +12,7 @@ import { ShopCard } from "@/components/ShopCard";
 import { AppText, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { errorMessage } from "@/lib/errors";
 import { formatDay } from "@/lib/format";
-import { MAP_ATTRIBUTION, MAP_STYLE_URL } from "@/lib/map-style";
+import { MAP_ATTRIBUTION, useMapStyle } from "@/lib/map-style";
 import { useNearbyShops } from "@/lib/queries";
 import { totalBags, useSearch } from "@/lib/search";
 import type { NearbyShop } from "@/lib/types";
@@ -39,9 +39,40 @@ export default function MapScreen() {
   const [center, setCenter] = useState(() =>
     search.place ? { latitude: search.place.latitude, longitude: search.place.longitude, radiusM: DEFAULT_RADIUS_M } : null,
   );
-  const [pendingRegion, setPendingRegion] = useState<Viewport | null>(null);
+  /*
+    Kaydirilan bolge ref'te: her `onRegionDidChange`de state yazmak butun ekrani
+    (isaretciler dahil) yeniden ciziyordu. State yalnizca "bu bolgede ara"
+    dugmesinin gorunmesi icin tek bir bayrak.
+  */
+  const pendingRegion = useRef<Viewport | null>(null);
+  const [moved, setMoved] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const lastMarkerPress = useRef(0);
+  const camera = useRef<CameraRef>(null);
+  const mapStyle = useMapStyle();
+
+  /*
+    Harita yerinde kalir: "Aramayi duzenle" sihirbazi bitince yeni harita acmak
+    yerine buraya doner (`returnTo=map`). Yer degistiyse kamera tasinir ve arama
+    yeni merkezle tekrarlanir; MapLibre ve stil yeniden kurulmaz.
+  */
+  const placeKey = search.place ? `${search.place.latitude},${search.place.longitude}` : null;
+  const lastPlaceKey = useRef(placeKey);
+  useEffect(() => {
+    if (!search.place || placeKey === lastPlaceKey.current) return;
+    lastPlaceKey.current = placeKey;
+    const { latitude, longitude } = search.place;
+    setCenter({ latitude, longitude, radiusM: DEFAULT_RADIUS_M });
+    camera.current?.jumpTo({ center: [longitude, latitude], zoom: 12 });
+    pendingRegion.current = null;
+    setMoved(false);
+    setSelectedId(null);
+  }, [placeKey, search.place]);
+
+  const selectShop = useCallback((id: string) => {
+    lastMarkerPress.current = Date.now();
+    setSelectedId(id);
+  }, []);
 
   const query = useNearbyShops(
     center && {
@@ -71,7 +102,7 @@ export default function MapScreen() {
     <View style={styles.root}>
       <Map
         style={StyleSheet.absoluteFill}
-        mapStyle={MAP_STYLE_URL}
+        mapStyle={mapStyle}
         logo={false}
         attribution={false}
         compass={false}
@@ -89,36 +120,14 @@ export default function MapScreen() {
         }}
         onRegionDidChange={(e) => {
           const v = e.nativeEvent;
-          if (v.userInteraction) setPendingRegion({ longitude: v.center[0], latitude: v.center[1], bounds: v.bounds });
+          if (!v.userInteraction) return;
+          pendingRegion.current = { longitude: v.center[0], latitude: v.center[1], bounds: v.bounds };
+          setMoved(true);
         }}
       >
-        <Camera initialViewState={{ center: [center.longitude, center.latitude], zoom: 12 }} />
+        <Camera ref={camera} initialViewState={{ center: [center.longitude, center.latitude], zoom: 12 }} />
         {search.place.isCurrent ? <UserLocation /> : null}
-        {shops.map((s) =>
-          s.latitude != null && s.longitude != null ? (
-            <Marker
-              key={s.id}
-              id={s.id}
-              lngLat={[s.longitude, s.latitude]}
-              anchor="center"
-              onPress={() => {
-                lastMarkerPress.current = Date.now();
-                setSelectedId(s.id);
-              }}
-              accessibilityLabel={s.name}
-            >
-              <View
-                style={[
-                  styles.pin,
-                  s.isPrelaunch && styles.pinMuted,
-                  s.id === selectedId && styles.pinSelected,
-                ]}
-              >
-                <Luggage size={16} color={s.isPrelaunch ? colors.inkMuted : colors.white} />
-              </View>
-            </Marker>
-          ) : null,
-        )}
+        <ShopMarkers shops={shops} selectedId={selectedId} onSelect={selectShop} />
       </Map>
 
       {/* Ustte: alttaki secili kart ve sheet atfi ortmesin (lisans sarti, her zaman gorunur). */}
@@ -131,7 +140,7 @@ export default function MapScreen() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t("map.editSearch")}
-          onPress={() => router.push("/search")}
+          onPress={() => router.push({ pathname: "/search", params: { returnTo: "map" } })}
           style={styles.summary}
         >
           <Search size={18} color={colors.brand} />
@@ -141,19 +150,17 @@ export default function MapScreen() {
         </Pressable>
       </View>
 
-      {pendingRegion ? (
+      {moved ? (
         <View style={[styles.searchHere, { top: insets.top + 76 }]}>
           <Button
             variant="secondary"
             title={t("map.searchHere")}
             style={[{ minHeight: 42 }, shadow.floating]}
             onPress={() => {
-              setCenter({
-                latitude: pendingRegion.latitude,
-                longitude: pendingRegion.longitude,
-                radiusM: radiusFor(pendingRegion.bounds),
-              });
-              setPendingRegion(null);
+              const r = pendingRegion.current;
+              if (r) setCenter({ latitude: r.latitude, longitude: r.longitude, radiusM: radiusFor(r.bounds) });
+              pendingRegion.current = null;
+              setMoved(false);
               setSelectedId(null);
             }}
           />
@@ -198,6 +205,38 @@ export default function MapScreen() {
   );
 }
 
+/** Haritanin uzerindeki pinler; liste ya da secili kart degisince yeniden cizilmez. */
+const ShopMarkers = memo(function ShopMarkers({
+  shops,
+  selectedId,
+  onSelect,
+}: {
+  shops: NearbyShop[];
+  selectedId: string | null;
+  onSelect: (id: string) => void;
+}) {
+  return (
+    <>
+      {shops.map((s) =>
+        s.latitude != null && s.longitude != null ? (
+          <Marker
+            key={s.id}
+            id={s.id}
+            lngLat={[s.longitude, s.latitude]}
+            anchor="center"
+            onPress={() => onSelect(s.id)}
+            accessibilityLabel={s.name}
+          >
+            <View style={[styles.pin, s.id === selectedId && styles.pinSelected]}>
+              <Luggage size={16} color={colors.white} />
+            </View>
+          </Marker>
+        ) : null,
+      )}
+    </>
+  );
+});
+
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.surfaceMuted },
   top: {
@@ -232,7 +271,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  pinMuted: { backgroundColor: colors.surfaceMuted, borderColor: colors.borderStrong },
   pinSelected: { backgroundColor: colors.ink, transform: [{ scale: 1.15 }] },
   selectedCard: { position: "absolute", left: space.lg, right: space.lg, ...shadow.floating },
   attribution: {

@@ -1,18 +1,23 @@
+import { useEffect } from "react";
 import { Pressable, ScrollView, StyleSheet, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { router } from "expo-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { ChevronRight, Search, Ticket, User } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { StatusBadge } from "@/components/StatusBadge";
 import { AppText, IconButton } from "@/components/ui";
 import { formatDayTime } from "@/lib/format";
+import { prefetchMapStyle } from "@/lib/map-style";
 import { isActiveBooking, useMyBookings } from "@/lib/queries";
 import { colors, fonts, radius, shadow, space } from "@/theme/tokens";
 
 export default function HomeScreen() {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  useEffect(() => prefetchMapStyle(queryClient), [queryClient]);
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
   const bookings = useMyBookings();
