@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import * as SecureStore from "expo-secure-store";
 
@@ -48,9 +49,13 @@ async function lastKnownUser(): Promise<MobileUser | null> {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({ status: "loading" });
+  const queryClient = useQueryClient();
 
   useEffect(() => {
-    setSessionExpiredHandler(() => setState({ status: "signedOut" }));
+    setSessionExpiredHandler(() => {
+      queryClient.clear();
+      setState({ status: "signedOut" });
+    });
     (async () => {
       const { accessToken } = await loadTokens();
       if (!accessToken) {
@@ -73,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setState({ status: "signedOut" });
       }
     })();
-  }, []);
+  }, [queryClient]);
 
   const requestCode = useCallback(async (email: string) => {
     await api("/auth/otp", { method: "POST", body: { email }, auth: false });
@@ -112,8 +117,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await api("/auth/logout", { method: "POST" }).catch(() => undefined);
     await clearTokens();
     void rememberUser(null);
+    // Onbellek temizlenmezse ayni telefonda baska hesapla girildiginde onceki
+    // kisinin rezervasyonlari / davet kodu bir an (ya da staleTime boyunca) gorunur.
+    queryClient.clear();
     setState({ status: "signedOut" });
-  }, []);
+  }, [queryClient]);
 
   const value = useMemo(
     () => ({ state, requestCode, verifyCode, signInWithPassword, signOut, refreshUser }),
