@@ -5,10 +5,9 @@ import { useTranslation } from "react-i18next";
 
 import { IconButton } from "@/components/ui";
 import { formatMonth } from "@/lib/format";
+import { nextRange, type Picking } from "@/lib/date-range";
 import { cellOf } from "@/lib/time";
 import { colors, fonts, radius, space } from "@/theme/tokens";
-
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 function startOfDay(d: Date) {
   const x = new Date(d);
@@ -32,8 +31,8 @@ function monthGrid(month: Date) {
 }
 
 /**
- * Tarih araligi secici. Ilk dokunus baslangic, ikinci dokunus bitis; ayni
- * gune iki kez dokunmak ya da tek dokunus "ayni gun" demek.
+ * Tarih araligi secici. Ilk dokunus baslangic, ikinci dokunus bitis; tek
+ * dokunus "ayni gun" demek. Kural `nextRange`te.
  */
 export function RangeCalendar({
   start,
@@ -50,7 +49,7 @@ export function RangeCalendar({
   // Hucreler Istanbul gunleri; "bugun" de oyle (gece yarisi farki telefonda olmasin).
   const today = cellOf(new Date());
   const [month, setMonth] = useState(() => new Date(start.getFullYear(), start.getMonth(), 1));
-  const [picking, setPicking] = useState<"start" | "end">("start");
+  const [picking, setPicking] = useState<Picking>("start");
   const cells = useMemo(() => monthGrid(month), [month]);
 
   const weekdayLabels = useMemo(() => {
@@ -62,14 +61,9 @@ export function RangeCalendar({
   const canGoBack = month > new Date(today.getFullYear(), today.getMonth(), 1);
 
   function pick(day: Date) {
-    if (picking === "start" || day < startOfDay(start)) {
-      onChange(day, day);
-      setPicking("end");
-      return;
-    }
-    const span = (startOfDay(day).getTime() - startOfDay(start).getTime()) / DAY_MS;
-    onChange(start, span > maxDays ? new Date(start.getTime() + maxDays * DAY_MS) : day);
-    setPicking("start");
+    const next = nextRange(start, end, day, picking, maxDays);
+    onChange(next.start, next.end);
+    setPicking(next.picking);
   }
 
   return (
