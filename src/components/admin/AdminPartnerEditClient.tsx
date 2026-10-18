@@ -25,6 +25,8 @@ import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import { actionErrorKey } from "@/lib/action-error";
 
 interface AdminPartnerEditClientProps {
+  /** Vitrin fotoğrafı yükleyici; depolama yapılandırılmamışsa kendini çizmez. */
+  photoSection?: ReactNode;
   /** Çalışma saati/izin editörü (sunucu bileşeni); formun altında, aynı sütunda durur. */
   scheduleSection?: ReactNode;
   shop: {
@@ -59,7 +61,7 @@ interface AdminPartnerEditClientProps {
   };
 }
 
-export default function AdminPartnerEditClient({ shop, scheduleSection }: AdminPartnerEditClientProps) {
+export default function AdminPartnerEditClient({ shop, photoSection, scheduleSection }: AdminPartnerEditClientProps) {
   const t = useTranslations("Admin");
   const locale = useLocale();
   const dateLocale = bcp47ForUiLocale(locale);
@@ -290,6 +292,8 @@ export default function AdminPartnerEditClient({ shop, scheduleSection }: AdminP
                 </div>
              </form>
           </section>
+
+          {photoSection}
 
           {scheduleSection}
 
