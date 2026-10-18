@@ -35,8 +35,6 @@ export default function PartnerBookingsScreen() {
   const query = usePartnerBookings();
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>("today");
-  /** Ozetin dukkani; null = sunucunun (web paneliyle ayni) varsayilani. */
-  const [pulseShop, setPulseShop] = useState<string | null>(null);
 
   function refreshAll() {
     void query.refetch();
@@ -90,7 +88,7 @@ export default function PartnerBookingsScreen() {
       </View>
 
       <View style={{ paddingHorizontal: space.xl, paddingBottom: space.md, gap: space.md }}>
-        <PartnerPulseCard shopId={pulseShop} onShopChange={setPulseShop} />
+        <PartnerPulseCard />
         <Segmented
           value={tab}
           onChange={setTab}

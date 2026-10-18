@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { AppText, Card, Chip } from "@/components/ui";
 import { formatMoney } from "@/lib/format";
+import { usePartnerShopSelection } from "@/lib/partner-shop";
 import { usePartnerDashboard } from "@/lib/queries";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 
@@ -12,15 +13,10 @@ import { colors, fonts, radius, space } from "@/theme/tokens";
  * Rakamlar sunucudan (`partner/dashboard`), burada hesap yok. Hata listeyi
  * engellemez; tek satir ve dokununca yeniden dener.
  */
-export function PartnerPulseCard({
-  shopId,
-  onShopChange,
-}: {
-  shopId: string | null;
-  onShopChange: (id: string) => void;
-}) {
+export function PartnerPulseCard() {
   const { t } = useTranslation();
-  const query = usePartnerDashboard(shopId);
+  const query = usePartnerDashboard();
+  const [, setShopId] = usePartnerShopSelection();
 
   if (query.isLoading) {
     return (
@@ -54,7 +50,7 @@ export function PartnerPulseCard({
       {d.shops.length > 1 ? (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.shops}>
           {d.shops.map((s) => (
-            <Chip key={s.id} label={s.name} selected={s.id === d.shop.id} onPress={() => onShopChange(s.id)} />
+            <Chip key={s.id} label={s.name} selected={s.id === d.shop.id} onPress={() => setShopId(s.id)} />
           ))}
         </ScrollView>
       ) : null}
