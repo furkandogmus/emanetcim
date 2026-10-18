@@ -130,6 +130,8 @@ export type SealRequest = {
 
 /** `partner/seals` GET. */
 export type PartnerSealsResponse = {
+  /** Stogun ait oldugu dukkan; eski sunucu gondermez. */
+  shop?: { id: string; name: string };
   assignedCount: number;
   inUseCount: number;
   returnedCount: number;

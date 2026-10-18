@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { api } from "./api";
+import { usePartnerShopSelection, withShop } from "./partner-shop";
 import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReview, PartnerShopSettings, PartnerSchedule, PartnerDashboard } from "./types";
 
 export const keys = {
@@ -100,7 +101,11 @@ export function usePartnerShop() {
 }
 
 export function usePartnerSeals() {
-  return useQuery({ queryKey: keys.partnerSeals, queryFn: () => api<PartnerSealsResponse>("/partner/seals") });
+  const [shopId] = usePartnerShopSelection();
+  return useQuery({
+    queryKey: [...keys.partnerSeals, shopId ?? "default"],
+    queryFn: () => api<PartnerSealsResponse>(withShop("/partner/seals", shopId)),
+  });
 }
 
 /** `usePartnerShop` ile ayni istek ve anahtar; yalnizca tip genis. */
@@ -123,14 +128,15 @@ export function usePartnerEarnings() {
 
 /**
  * Esnafin gunluk ozeti. `["partner", ...]` ailesinde: teslim al / et sonrasi
- * `["partner"]` gecersiz kilininca sayilar da yenilenir. `shopId` yoksa sunucu
- * web paneliyle ayni varsayilan dukkani secer.
+ * `["partner"]` gecersiz kilininca sayilar da yenilenir. Dukkan esnaf
+ * ekranlarinin ortak seciminden (`partner-shop.tsx`).
  */
-export function usePartnerDashboard(shopId: string | null) {
+export function usePartnerDashboard() {
+  const [shopId] = usePartnerShopSelection();
   return useQuery({
     queryKey: ["partner", "dashboard", shopId ?? "default"],
     queryFn: () =>
-      api<PartnerDashboard>(`/partner/dashboard${shopId ? `?shop=${encodeURIComponent(shopId)}` : ""}`),
+      api<PartnerDashboard>(withShop("/partner/dashboard", shopId)),
     // Dukkan degisirken kart yukleme durumuna dusup dukkan seridini sifirlamasin.
     placeholderData: (prev) => prev,
   });
