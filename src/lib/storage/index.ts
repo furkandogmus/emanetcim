@@ -18,13 +18,8 @@ export { S3Storage } from "./s3";
  * çalışmayacak bir düğme göstermemek için.
  */
 
-const REQUIRED = [
-  "S3_BUCKET",
-  "S3_REGION",
-  "S3_ACCESS_KEY_ID",
-  "S3_SECRET_ACCESS_KEY",
-  "S3_PUBLIC_BASE_URL",
-] as const;
+// Anahtarlar zorunlu degil: yoksa sunucu rolu (EC2 instance profile) kullanilir.
+const REQUIRED = ["S3_BUCKET", "S3_REGION", "S3_PUBLIC_BASE_URL"] as const;
 
 function readConfig(): S3Config | null {
   const missing = REQUIRED.filter((k) => !process.env[k]?.trim());
@@ -32,8 +27,8 @@ function readConfig(): S3Config | null {
   return {
     bucket: process.env.S3_BUCKET!.trim(),
     region: process.env.S3_REGION!.trim(),
-    accessKeyId: process.env.S3_ACCESS_KEY_ID!.trim(),
-    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!.trim(),
+    accessKeyId: process.env.S3_ACCESS_KEY_ID?.trim() || undefined,
+    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY?.trim() || undefined,
     publicBaseUrl: process.env.S3_PUBLIC_BASE_URL!.trim(),
     endpoint: process.env.S3_ENDPOINT?.trim() || undefined,
   };
