@@ -10,6 +10,7 @@ export default function PartnerLayout() {
       <Stack.Screen name="partner/scan" options={{ presentation: "fullScreenModal" }} />
       <Stack.Screen name="partner/seals" />
       <Stack.Screen name="partner/earnings" />
+      <Stack.Screen name="partner/settings" />
       <Stack.Screen name="partner/[id]" />
     </Stack>
   );

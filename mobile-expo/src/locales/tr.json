@@ -505,5 +505,35 @@
     "errors": {
       "no_shops": "Aktif bir dükkanın yok."
     }
+  },
+  "shopSettings": {
+    "title": "Dükkan bilgileri",
+    "basics": "Temel bilgiler",
+    "name": "Dükkan adı",
+    "capacity": "Günlük valiz kapasitesi",
+    "price": "Günlük fiyat (₺)",
+    "priceHint": "Valiz başına günlük fiyat; misafir bu tutarı görür.",
+    "addressSection": "Adres",
+    "address": "Açık adres",
+    "district": "İlçe",
+    "city": "Şehir",
+    "addressHint": "Misafirler dükkanını bu adresle bulur. Haritadaki konumu değiştirmek için web panelini kullan.",
+    "phoneSection": "İletişim",
+    "phone": "SMS bildirim telefonu (GSM)",
+    "phoneHint": "Yeni ödeme alındığında bu numaraya kısa mesaj gider. Boş bırakırsan numara silinir.",
+    "phonePlaceholder": "05XX XXX XX XX",
+    "save": "Kaydet",
+    "saved": "Ayarlar güncellendi.",
+    "saveFailed": "Kaydedilemedi",
+    "nameInvalid": "Dükkan adı en az 2 karakter olmalı.",
+    "capacityInvalid": "Kapasite 1 veya daha büyük bir tam sayı olmalı.",
+    "priceInvalid": "Geçerli bir fiyat gir.",
+    "errors": {
+      "invalid_input": "Bilgilerden biri geçersiz. Değerleri kontrol edip tekrar dene.",
+      "shop_update_failed": "Dükkan bilgileri kaydedilemedi. Değerleri kontrol edip tekrar dene.",
+      "invalid_tr_phone": "Telefon numarası geçerli bir Türkiye cep numarası değil.",
+      "already_registered": "Bu telefon numarası başka bir hesapta kayıtlı.",
+      "invalid_data": "Telefon numarası okunamadı."
+    }
   }
 }

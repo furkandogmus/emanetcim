@@ -229,6 +229,19 @@ export type ContactMessage = {
   createdAt: string;
 };
 
+/**
+ * `partner/shop` GET'in ayarlar ekraninin okudugu alanlari. `phone` dukkanin
+ * degil sahibinin (`User.phone`); yazmasi ayri uctan (`PUT partner/phone`).
+ */
+export type PartnerShopSettings = PartnerShop & {
+  capacity: number;
+  pricePerDay: number;
+  address: string | null;
+  city: string | null;
+  district: string | null;
+  phone: string | null;
+};
+
 /** `partner/earnings/stats` GET. Tutarlar esnaf payi (komisyon dusulmus). */
 export type PartnerEarnings = {
   totalBalance: number;
