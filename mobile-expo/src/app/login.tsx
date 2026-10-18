@@ -4,16 +4,18 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 
+import { GoogleButton } from "@/components/GoogleButton";
 import { AppText, Banner, Button } from "@/components/ui";
 import { useAuth } from "@/lib/auth";
 import { errorMessage } from "@/lib/errors";
+import { GoogleSignInError, googleSignInAvailable } from "@/lib/google-auth";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function LoginScreen() {
   const { t } = useTranslation();
-  const { requestCode, verifyCode, signInWithPassword } = useAuth();
+  const { requestCode, verifyCode, signInWithPassword, signInWithGoogle } = useAuth();
   const [step, setStep] = useState<"email" | "code" | "password">("email");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -69,6 +71,22 @@ export default function LoginScreen() {
     }
   }
 
+  async function googleSignIn() {
+    setBusy(true);
+    setError(null);
+    try {
+      // Vazgecilirse null: mesaj yok. Basarida Stack.Protected dogru gruba gecirir.
+      if (!(await signInWithGoogle())) setBusy(false);
+    } catch (e) {
+      if (e instanceof GoogleSignInError) {
+        if (e.code !== "in_progress") setError(t(`auth.errors.${e.code}`));
+      } else {
+        setError(errorMessage(e, "auth"));
+      }
+      setBusy(false);
+    }
+  }
+
   const emailField = (onSubmit: () => void) => (
     <View style={styles.field}>
       <AppText variant="label" nativeID="emailLabel">
@@ -115,6 +133,16 @@ export default function LoginScreen() {
               {error ? <Banner tone="danger" body={error} /> : null}
               <Button title={t("auth.sendCode")} onPress={sendCode} loading={busy} />
               <Button variant="ghost" title={t("auth.usePassword")} onPress={() => switchTo("password")} />
+              {googleSignInAvailable ? (
+                <>
+                  <View style={styles.dividerRow} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+                    <View style={styles.dividerLine} />
+                    <AppText variant="caption">{t("auth.or")}</AppText>
+                    <View style={styles.dividerLine} />
+                  </View>
+                  <GoogleButton title={t("auth.continueWithGoogle")} onPress={googleSignIn} loading={busy} />
+                </>
+              ) : null}
             </>
           ) : step === "password" ? (
             <>
@@ -215,4 +243,6 @@ const styles = StyleSheet.create({
   },
   codeInput: { fontFamily: fonts.display, fontSize: 28, letterSpacing: 10, textAlign: "center" },
   row: { flexDirection: "row", justifyContent: "space-between" },
+  dividerRow: { flexDirection: "row", alignItems: "center", gap: space.md },
+  dividerLine: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: colors.borderStrong },
 });

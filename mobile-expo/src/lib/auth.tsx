@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import * as SecureStore from "expo-secure-store";
 
 import { ApiError, api, clearTokens, loadTokens, saveTokens, setSessionExpiredHandler } from "./api";
+import { forgetGoogleAccount, pickGoogleIdToken } from "./google-auth";
 import { unregisterPush } from "./push";
 import type { MobileUser, SessionResponse } from "./types";
 
@@ -18,6 +19,8 @@ type AuthContextValue = {
   requestCode: (email: string) => Promise<void>;
   verifyCode: (email: string, code: string) => Promise<MobileUser>;
   signInWithPassword: (email: string, password: string) => Promise<MobileUser>;
+  /** Kullanici hesap seciciyi kapatirsa `null`. */
+  signInWithGoogle: () => Promise<MobileUser | null>;
   signOut: () => Promise<void>;
   /** Profil degisikliginden sonra: PUT /auth/me yalnizca { success } doner. */
   refreshUser: () => Promise<MobileUser>;
@@ -84,8 +87,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await api("/auth/otp", { method: "POST", body: { email }, auth: false });
   }, []);
 
-  const startSession = useCallback(async (body: Record<string, string>) => {
-    const res = await api<SessionResponse>("/auth/session", { method: "POST", body, auth: false });
+  const startSession = useCallback(async (body: Record<string, string>, path = "/auth/session") => {
+    const res = await api<SessionResponse>(path, { method: "POST", body, auth: false });
     await saveTokens(res.accessToken, res.refreshToken);
     void rememberUser(res.user);
     setState({ status: "signedIn", user: res.user });
@@ -104,6 +107,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [startSession],
   );
 
+  // Sunucu ucu ayni oturum govdesini doner (`auth/google`); hesap yoksa misafir acar.
+  const signInWithGoogle = useCallback(async () => {
+    const idToken = await pickGoogleIdToken();
+    if (!idToken) return null;
+    return startSession({ idToken }, "/auth/google");
+  }, [startSession]);
+
   const refreshUser = useCallback(async () => {
     const user = await api<MobileUser>("/auth/me");
     void rememberUser(user);
@@ -114,6 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     // Token oturum hala gecerliyken silinir; sonra sunucu tarafi iptal (en iyi caba).
     await unregisterPush();
+    await forgetGoogleAccount();
     await api("/auth/logout", { method: "POST" }).catch(() => undefined);
     await clearTokens();
     void rememberUser(null);
@@ -124,8 +135,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [queryClient]);
 
   const value = useMemo(
-    () => ({ state, requestCode, verifyCode, signInWithPassword, signOut, refreshUser }),
-    [state, requestCode, verifyCode, signInWithPassword, signOut, refreshUser],
+    () => ({ state, requestCode, verifyCode, signInWithPassword, signInWithGoogle, signOut, refreshUser }),
+    [state, requestCode, verifyCode, signInWithPassword, signInWithGoogle, signOut, refreshUser],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
