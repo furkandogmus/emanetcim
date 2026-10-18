@@ -1,8 +1,8 @@
 # BagajPark Mobil (Expo) — çalışma kuralları
 
 Kök `CLAUDE.md` burada da geçerlidir; bu dosya yalnızca Expo kolunu ekler. Genel Expo
-rehberi `AGENTS.md`'de. Flutter uygulaması (`../mobile/`) bu MVP canlıya çıkana kadar
-yerinde duruyor; ikisi aynı `/api/mobile` uçlarını kullanır, backend'e dokunulmaz.
+rehberi `AGENTS.md`'de. Tek mobil istemci budur (Flutter 2026-10-18'de kaldırıldı); uçlar
+`/api/mobile` altında.
 
 ## Kapsam (MVP)
 
@@ -31,7 +31,7 @@ API adresi derleme anında: `EXPO_PUBLIC_API_BASE_URL` (varsayılan emülatör i
   değişirse burası da değişir.
 - **Fiyat** istemcide yalnızca tahmindir; çarpanlar ve sigorta `shops/[id]` yanıtındaki
   `pricing`'den okunur, sabit yazılmaz (`checkout.tsx` içindeki gerekçe).
-- **Harita** MapLibre + OpenFreeMap "bright" (`src/lib/map-style.ts`) — web ve Flutter ile
+- **Harita** MapLibre + OpenFreeMap "bright" (`src/lib/map-style.ts`) — web ile
   aynı altlık. Google Maps yok. OSM atfı her haritada sabit metin olarak görünür.
 - **Token yenileme** tek uçuşta (`src/lib/api.ts`): sunucu refresh token tekrarını oturum
   ailesini iptal ederek cezalandırıyor.

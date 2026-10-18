@@ -1,7 +1,7 @@
 # BagajPark (Emanetçi) — çalışma kuralları
 
 Valiz emanet pazar yeri: misafir → dükkan (esnaf) → plastik mühür → teslim. Web Next.js,
-mobil Flutter (`mobile/`), tek AWS EC2 VM'de Docker Compose. Ürün haritası: `README_AI.md`.
+mobil Expo / React Native (`mobile-expo/`), tek AWS EC2 VM'de Docker Compose. Ürün haritası: `README_AI.md`.
 
 ## Komutlar
 
@@ -100,17 +100,14 @@ Tavan sayısını yükselten bir PR, sorunu çözmüyor, saklıyor.
 - Seed'i prod'a karşı çalıştırma (`seed-guard`).
 - Git'e ekran görüntüsü, log dökümü, çerez dosyası (`.gitignore` kökte `*.png`/`*.txt` engeller).
 
-## Mobil (Flutter) ve agent araçları
+## Mobil (Expo) ve agent araçları
 
-- `mobile/` içinde çalışırken `mobile/CLAUDE.md` yüklenir: komutlar, mandal, cihaz kısıtları.
-- Skill'ler: `/mobil-dogrula` (kapı), `/mobil-cihaz` (gerçek cihaz + screencap),
-  `/mobil-ekran`, `/mobil-api-ucu` (web↔mobil aynı servis), `/mobil-paket`, `/commit`.
-- MCP (`.mcp.json`): `dart` (Dart/Flutter resmi MCP: analyze, test, hot reload, widget
-  inspector, driver) ve `context7` (Riverpod 3 / go_router 17 / Next.js güncel doküman).
-- Hook'lar (`.claude/settings.json`): `.dart` düzenlemesi otomatik `dart format`;
-  define'sız ya da bagajpark.com'a giden `flutter run` engellenir.
-
-<!-- BEGIN:nextjs-agent-rules -->
+- `mobile-expo/` içinde çalışırken `mobile-expo/CLAUDE.md` yüklenir: komutlar, kurallar, Play yayını.
+  Eski Flutter uygulaması (`mobile/`) 2026-10-18'de kaldırıldı; geçmişi git'te.
+- Skill'ler: `/mobil-api-ucu` (web↔mobil aynı servis), `/commit`; Expo için `expo:*` skill'leri.
+- MCP (`.mcp.json`): `context7` (Expo / Next.js güncel doküman).
+- Hook (`.claude/settings.json`): `EXPO_PUBLIC_API_BASE_URL` bagajpark.com'u gösterirken
+  `expo start` / `expo run:*` engellenir; geliştirme yalnızca yerel backend'e karşı.
 
 # This is NOT the Next.js you know
 
