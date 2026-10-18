@@ -1,4 +1,4 @@
-import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
@@ -14,6 +14,7 @@ import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { resolveImage } from "@/lib/images";
 import { keys, usePartnerShop } from "@/lib/queries";
+import { notify } from "@/lib/notify";
 import { colors, radius, space } from "@/theme/tokens";
 
 /**
@@ -38,9 +39,9 @@ export default function PartnerShopScreen() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: keys.partnerShop });
-      Alert.alert(t("partner.photoSaved"));
+      notify(t("partner.photoSaved"));
     },
-    onError: (e) => Alert.alert(t("partner.photoFailed"), errorMessage(e, "partner")),
+    onError: (e) => notify(t("partner.photoFailed"), errorMessage(e, "partner")),
   });
 
   async function pick() {

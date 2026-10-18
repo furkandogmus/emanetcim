@@ -11,7 +11,8 @@
     "day_one": "{{count}} day",
     "day_other": "{{count}} days",
     "bag_one": "{{count}} bag",
-    "bag_other": "{{count}} bags"
+    "bag_other": "{{count}} bags",
+    "ok": "OK"
   },
   "auth": {
     "title": "Sign in",
@@ -60,7 +61,8 @@
     "showSpots": "Show storage spots",
     "prevMonth": "Previous month",
     "nextMonth": "Next month",
-    "step": "Step {{current}} of {{total}}"
+    "step": "Step {{current}} of {{total}}",
+    "dropOffInPast": "That drop-off time has passed. Pick a new time."
   },
   "bags": {
     "s": "Small (S)",

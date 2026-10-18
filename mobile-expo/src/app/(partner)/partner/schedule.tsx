@@ -15,6 +15,7 @@ import { formatDay } from "@/lib/format";
 import { partnerScheduleKey, usePartnerSchedule } from "@/lib/queries";
 import { cellOf, wallInstant } from "@/lib/time";
 import type { PartnerSchedule, ScheduleConflict, ScheduleDay, ShopClosure } from "@/lib/types";
+import { notify } from "@/lib/notify";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 
 /** Sunucudaki `ShopScheduleService.TIME_RE` ile ayni bicim. */
@@ -122,7 +123,7 @@ function ScheduleForm({ schedule }: { schedule: PartnerSchedule }) {
       api("/partner/shop/schedule", { method: "PUT", body }),
     onSuccess: () => {
       onDone();
-      Alert.alert(t("schedule.saved"));
+      notify(t("schedule.saved"));
     },
     onError: onFail,
   });

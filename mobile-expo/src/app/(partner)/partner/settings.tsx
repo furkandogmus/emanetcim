@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -12,6 +12,7 @@ import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { keys, usePartnerShopSettings } from "@/lib/queries";
 import type { PartnerShopSettings } from "@/lib/types";
+import { notify } from "@/lib/notify";
 import { colors, space } from "@/theme/tokens";
 
 /**
@@ -73,12 +74,12 @@ function SettingsForm({ shop }: { shop: PartnerShopSettings }) {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: keys.partnerShop });
-      Alert.alert(t("shopSettings.saved"));
+      notify(t("shopSettings.saved"));
     },
     onError: (e) => {
       // Dukkan kaydi telefondan once yapilir; telefon hatasinda bilgiler yine kaydedilmis olabilir.
       void queryClient.invalidateQueries({ queryKey: keys.partnerShop });
-      Alert.alert(t("shopSettings.saveFailed"), errorMessage(e, "shopSettings"));
+      notify(t("shopSettings.saveFailed"), errorMessage(e, "shopSettings"));
     },
   });
 

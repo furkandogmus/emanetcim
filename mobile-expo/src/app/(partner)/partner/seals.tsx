@@ -12,6 +12,7 @@ import { errorMessage } from "@/lib/errors";
 import { formatDay } from "@/lib/format";
 import { usePartnerSeals } from "@/lib/queries";
 import type { SealDeliveryResponse, SealRequest, SealRequestResponse } from "@/lib/types";
+import { notify } from "@/lib/notify";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 
 /** `seals/request` ucunun mobil ust siniri (`MOBILE_MAX_COUNT`); fazlasi sunucuda sessizce kirpilir. */
@@ -39,7 +40,7 @@ export default function PartnerSealsScreen() {
       setRequestError(null);
       setCount("10");
       refresh();
-      Alert.alert(t("seals.requestedTitle"), t("seals.requestedBody", { count: res.count }));
+      notify(t("seals.requestedTitle"), t("seals.requestedBody", { count: res.count }));
     },
     onError: (e) => setRequestError(errorMessage(e, "seals")),
   });
@@ -51,7 +52,7 @@ export default function PartnerSealsScreen() {
       setFaultyError(null);
       setSerial("");
       refresh();
-      Alert.alert(t("seals.faultyReportedTitle"), t("seals.faultyReportedBody"));
+      notify(t("seals.faultyReportedTitle"), t("seals.faultyReportedBody"));
     },
     onError: (e) => setFaultyError(errorMessage(e, "seals")),
   });
@@ -61,9 +62,9 @@ export default function PartnerSealsScreen() {
       api<SealDeliveryResponse>("/partner/seals/confirm-delivery", { method: "POST", body: { requestId } }),
     onSuccess: (res) => {
       refresh();
-      Alert.alert(t("seals.deliveredTitle"), t("seals.deliveredBody", { count: res.assignedCount }));
+      notify(t("seals.deliveredTitle"), t("seals.deliveredBody", { count: res.assignedCount }));
     },
-    onError: (e) => Alert.alert(t("seals.deliveryFailed"), errorMessage(e, "seals")),
+    onError: (e) => notify(t("seals.deliveryFailed"), errorMessage(e, "seals")),
   });
 
   const parsedCount = Number(count);

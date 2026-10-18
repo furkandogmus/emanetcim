@@ -17,6 +17,7 @@ import { errorMessage } from "@/lib/errors";
 import { formatDayTime, formatMoney } from "@/lib/format";
 import { isActiveBooking, keys, useBooking } from "@/lib/queries";
 import type { BookingDetail } from "@/lib/types";
+import { notify } from "@/lib/notify";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 
 /** Misafirin iptal edebildigi durumlar: valiz henuz dukkana teslim edilmemis. */
@@ -45,12 +46,12 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
       void queryClient.invalidateQueries({ queryKey: ["bookings"] });
       // Sunucuda `fullRefund = hadPayment` (lifecycle.ts): false "kismi ucret"
       // DEGIL, "hic odeme alinmamisti" demek -- dukkanda odeme modunda hep boyle.
-      Alert.alert(
+      notify(
         t("bookings.cancelledTitle"),
         res.fullRefund ? t("bookings.cancelledRefund") : t("bookings.cancelledNoCharge"),
       );
     },
-    onError: (e) => Alert.alert(t("bookings.cancelFailed"), errorMessage(e)),
+    onError: (e) => notify(t("bookings.cancelFailed"), errorMessage(e)),
   });
 
   if (query.isLoading) return <Loading />;
