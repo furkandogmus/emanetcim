@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
@@ -7,29 +7,14 @@ import { ArrowLeft, LocateFixed, MapPin, X } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { BagCounter } from "@/components/BagCounter";
-import { RangeCalendar } from "@/components/Calendar";
 import { PlaceSearch } from "@/components/PlaceSearch";
-import { AppText, Banner, Button, Chip, IconButton } from "@/components/ui";
-import { formatDay } from "@/lib/format";
+import { StayWindowPicker, isStayWindowValid } from "@/components/StayWindowPicker";
+import { AppText, Banner, Button, IconButton } from "@/components/ui";
 import { CITIES, totalBags, useSearch } from "@/lib/search";
-import { atWallMinutes as withMinutes, cellOf, fromCell, sameWallDay, wallMinutes as minutesOf } from "@/lib/time";
 import type { Place } from "@/lib/search";
 import { colors, radius, space } from "@/theme/tokens";
 
 const STEPS = 3;
-const HOUR = 3600_000;
-/** Sunucu `maxStayDays` (varsayilan 30) ile ayni; gun sayisi yukari yuvarlanir. */
-const MAX_STAY_MS = 30 * 24 * HOUR;
-
-/** 00:00-23:30 arasi yarim saatlik secenekler, dakika cinsinden. */
-const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => i * 30);
-const CHIP_WIDTH = 80;
-const CHIP_GAP = 8;
-
-
-function label(minutes: number) {
-  return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
-}
 
 export default function SearchWizard() {
   const { t } = useTranslation();
@@ -79,28 +64,7 @@ export default function SearchWizard() {
     }
   }
 
-  const now = Date.now();
-  const sameDay = sameWallDay(checkIn, checkOut);
-  const span = checkOut.getTime() - checkIn.getTime();
-  const windowValid = checkIn.getTime() >= now - 5 * 60_000 && span >= HOUR && span <= MAX_STAY_MS;
-
-  function setDropMinutes(m: number) {
-    const ci = withMinutes(checkIn, m);
-    setCheckIn(ci);
-    // Ayni gunde alma saati bir saatten yakin kaldiysa ileri it.
-    if (checkOut.getTime() - ci.getTime() < HOUR) setCheckOut(new Date(ci.getTime() + 4 * HOUR));
-  }
-
-  /** `start`/`end` takvim hucresi (bkz. `cellOf`); anlara Istanbul saatiyle donulur. */
-  function setRange(start: Date, end: Date) {
-    const ci = fromCell(start, minutesOf(checkIn));
-    let co = fromCell(end, minutesOf(checkOut));
-    if (co.getTime() - ci.getTime() < HOUR) co = new Date(ci.getTime() + 4 * HOUR);
-    // 30. gunde alma saati birakmadan gec olursa sure 31 gune yuvarlanip reddediliyordu.
-    if (co.getTime() - ci.getTime() > MAX_STAY_MS) co = new Date(ci.getTime() + MAX_STAY_MS);
-    setCheckIn(ci);
-    setCheckOut(co);
-  }
+  const windowValid = isStayWindowValid(checkIn, checkOut);
 
   function finish() {
     search.setWindow(checkIn, checkOut);
@@ -173,24 +137,14 @@ export default function SearchWizard() {
           <ScrollView contentContainerStyle={styles.content}>
             <AppText variant="title">{t("search.whenTitle")}</AppText>
             <AppText variant="caption">{t("search.whenHint")}</AppText>
-            <RangeCalendar start={cellOf(checkIn)} end={cellOf(checkOut)} onChange={setRange} />
-
-            <TimeRow
-              title={`${t("search.dropOff")} · ${formatDay(checkIn)}`}
-              selected={minutesOf(checkIn)}
-              isDisabled={(m) => withMinutes(checkIn, m).getTime() < now}
-              onSelect={setDropMinutes}
-            />
-            <TimeRow
-              title={`${t("search.pickUp")} · ${formatDay(checkOut)}`}
-              selected={minutesOf(checkOut)}
-              isDisabled={(m) => {
-                const d = withMinutes(checkOut, m).getTime() - checkIn.getTime();
-                return d < HOUR || d > MAX_STAY_MS;
+            <StayWindowPicker
+              checkIn={checkIn}
+              checkOut={checkOut}
+              onChange={(ci, co) => {
+                setCheckIn(ci);
+                setCheckOut(co);
               }}
-              onSelect={(m) => setCheckOut(withMinutes(checkOut, m))}
             />
-            {!windowValid && sameDay ? <Banner tone="warning" body={t("search.pickUpBeforeDropOff")} /> : null}
           </ScrollView>
           <View style={styles.footer}>
             <Button
@@ -220,43 +174,6 @@ export default function SearchWizard() {
         </>
       ) : null}
     </SafeAreaView>
-  );
-}
-
-function TimeRow({
-  title,
-  selected,
-  isDisabled,
-  onSelect,
-}: {
-  title: string;
-  selected: number;
-  isDisabled: (m: number) => boolean;
-  onSelect: (m: number) => void;
-}) {
-  const ref = useRef<ScrollView>(null);
-  // Secili saat ekranin solunda ikinci sirada dursun; ilk acilista da gorunsun.
-  useEffect(() => {
-    const idx = Math.max(0, TIME_OPTIONS.indexOf(selected) - 1);
-    ref.current?.scrollTo({ x: idx * (CHIP_WIDTH + CHIP_GAP), animated: false });
-  }, [selected]);
-
-  return (
-    <View style={{ gap: space.sm }}>
-      <AppText variant="label">{title}</AppText>
-      <ScrollView
-        ref={ref}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: CHIP_GAP }}
-      >
-        {TIME_OPTIONS.map((m) => (
-          <View key={m} style={{ width: CHIP_WIDTH }}>
-            <Chip label={label(m)} selected={m === selected} disabled={isDisabled(m)} onPress={() => onSelect(m)} />
-          </View>
-        ))}
-      </ScrollView>
-    </View>
   );
 }
 
