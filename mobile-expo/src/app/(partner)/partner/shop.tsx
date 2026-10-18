@@ -16,6 +16,7 @@ import { errorMessage } from "@/lib/errors";
 import { resolveImage } from "@/lib/images";
 import { keys, usePartnerShop } from "@/lib/queries";
 import { notify } from "@/lib/notify";
+import { prepareShopPhoto } from "@/lib/shop-photo";
 import { colors, radius, space } from "@/theme/tokens";
 
 /**
@@ -29,14 +30,11 @@ export default function PartnerShopScreen() {
   const query = usePartnerShop();
 
   const upload = useMutation({
-    mutationFn: (asset: ImagePicker.ImagePickerAsset) => {
+    mutationFn: async (asset: ImagePicker.ImagePickerAsset) => {
+      const file = await prepareShopPhoto(asset);
       const form = new FormData();
       // RN FormData dosyayi { uri, name, type } nesnesiyle tasir.
-      form.append("file", {
-        uri: asset.uri,
-        name: asset.fileName ?? "shop.jpg",
-        type: asset.mimeType ?? "image/jpeg",
-      } as unknown as Blob);
+      form.append("file", file as unknown as Blob);
       return api<{ url: string }>(withShop("/partner/shop/image", shopId), { method: "POST", body: form });
     },
     onSuccess: () => {
@@ -51,8 +49,8 @@ export default function PartnerShopScreen() {
       mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [4, 3],
-      // Sunucu 8 MB ve 6000 px ustunu reddediyor; telefon fotografi kucultulup gonderilir.
-      quality: 0.8,
+      // Kucultme ve JPEG'e cevirme `prepareShopPhoto`ta; burada kalite kaybi istemiyoruz.
+      quality: 1,
     });
     if (!res.canceled && res.assets[0]) upload.mutate(res.assets[0]);
   }
