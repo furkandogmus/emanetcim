@@ -226,6 +226,9 @@ export class BookingService implements IBookingService {
         shop: { include: { owner: true } },
         guest: true,
         seals: { orderBy: { bagIndex: "asc" } },
+        // Mobil detay "zaten degerlendirdi / bildirdi" bilgisini buradan alir.
+        review: { select: { id: true } },
+        dispute: { select: { id: true } },
       },
     });
   }

@@ -98,6 +98,9 @@ export type BookingDetail = BookingSummary & {
   longitude: number | null;
   shopPhone: string;
   seals: { sealNumber: number; bagIndex: number; bagSize: string }[];
+  /** Eski sunucu gondermez; o zaman tekrar gonderim 409 ile yakalanir. */
+  hasReview?: boolean;
+  hasDispute?: boolean;
 };
 
 export type PartnerBooking = BookingSummary & { guestName: string };

@@ -45,6 +45,8 @@ export type BookingWithShopGuestDetails = Prisma.BookingGetPayload<{
     shop: { include: { owner: true } };
     guest: true;
     seals: { orderBy: { bagIndex: "asc" } };
+    review: { select: { id: true } };
+    dispute: { select: { id: true } };
   };
 }>;
 
