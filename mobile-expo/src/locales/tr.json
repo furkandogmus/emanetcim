@@ -15,7 +15,7 @@
   },
   "auth": {
     "title": "Giriş yap",
-    "subtitle": "E-posta adresine 6 haneli bir kod gönderelim. Şifre yok.",
+    "subtitle": "E-posta adresine 6 haneli bir kod gönderelim.",
     "emailLabel": "E-posta",
     "emailPlaceholder": "ornek@eposta.com",
     "sendCode": "Kod gönder",
@@ -31,8 +31,13 @@
       "too_many_otp_requests": "Çok sık kod istedin. İki dakika sonra tekrar dene.",
       "too_many_requests": "Çok fazla istek. Biraz sonra tekrar dene.",
       "too_many_attempts": "Çok fazla deneme. Biraz sonra tekrar dene.",
-      "account_banned": "Bu hesap kullanıma kapatılmış."
-    }
+      "account_banned": "Bu hesap kullanıma kapatılmış.",
+      "invalid_credentials": "E-posta ya da şifre hatalı."
+    },
+    "usePassword": "Şifreyle giriş yap",
+    "useCode": "E-postaya kod gönder",
+    "passwordSubtitle": "Web sitesinde belirlediğin şifreyle gir.",
+    "passwordLabel": "Şifre"
   },
   "home": {
     "heroTitle": "Valizini bırak.\nŞehrin tadını çıkar.",

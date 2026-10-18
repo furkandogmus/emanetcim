@@ -12,10 +12,11 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function LoginScreen() {
   const { t } = useTranslation();
-  const { requestCode, verifyCode } = useAuth();
-  const [step, setStep] = useState<"email" | "code">("email");
+  const { requestCode, verifyCode, signInWithPassword } = useAuth();
+  const [step, setStep] = useState<"email" | "code" | "password">("email");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
+  const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -51,6 +52,49 @@ export default function LoginScreen() {
     }
   }
 
+  async function passwordSignIn() {
+    const value = email.trim().toLowerCase();
+    if (!EMAIL_RE.test(value)) {
+      setError(t("auth.invalidEmail"));
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      await signInWithPassword(value, password);
+    } catch (e) {
+      setError(errorMessage(e, "auth"));
+      setBusy(false);
+    }
+  }
+
+  const emailField = (onSubmit: () => void) => (
+    <View style={styles.field}>
+      <AppText variant="label" nativeID="emailLabel">
+        {t("auth.emailLabel")}
+      </AppText>
+      <TextInput
+        accessibilityLabelledBy="emailLabel"
+        value={email}
+        onChangeText={setEmail}
+        placeholder={t("auth.emailPlaceholder")}
+        placeholderTextColor={colors.inkMuted}
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoComplete="email"
+        autoCorrect={false}
+        returnKeyType={step === "password" ? "next" : "send"}
+        onSubmitEditing={onSubmit}
+        style={styles.input}
+      />
+    </View>
+  );
+
+  const switchTo = (next: "email" | "password") => {
+    setStep(next);
+    setError(null);
+  };
+
   return (
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
@@ -66,27 +110,41 @@ export default function LoginScreen() {
             <>
               <AppText variant="title">{t("auth.title")}</AppText>
               <AppText variant="caption">{t("auth.subtitle")}</AppText>
+              {emailField(sendCode)}
+              {error ? <Banner tone="danger" body={error} /> : null}
+              <Button title={t("auth.sendCode")} onPress={sendCode} loading={busy} />
+              <Button variant="ghost" title={t("auth.usePassword")} onPress={() => switchTo("password")} />
+            </>
+          ) : step === "password" ? (
+            <>
+              <AppText variant="title">{t("auth.title")}</AppText>
+              <AppText variant="caption">{t("auth.passwordSubtitle")}</AppText>
+              {emailField(() => undefined)}
               <View style={styles.field}>
-                <AppText variant="label" nativeID="emailLabel">
-                  {t("auth.emailLabel")}
+                <AppText variant="label" nativeID="passwordLabel">
+                  {t("auth.passwordLabel")}
                 </AppText>
                 <TextInput
-                  accessibilityLabelledBy="emailLabel"
-                  value={email}
-                  onChangeText={setEmail}
-                  placeholder={t("auth.emailPlaceholder")}
-                  placeholderTextColor={colors.inkMuted}
-                  keyboardType="email-address"
+                  accessibilityLabelledBy="passwordLabel"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry
                   autoCapitalize="none"
-                  autoComplete="email"
-                  autoCorrect={false}
-                  returnKeyType="send"
-                  onSubmitEditing={sendCode}
+                  autoComplete="current-password"
+                  textContentType="password"
+                  returnKeyType="go"
+                  onSubmitEditing={passwordSignIn}
                   style={styles.input}
                 />
               </View>
               {error ? <Banner tone="danger" body={error} /> : null}
-              <Button title={t("auth.sendCode")} onPress={sendCode} loading={busy} />
+              <Button
+                title={t("auth.verify")}
+                onPress={passwordSignIn}
+                loading={busy}
+                disabled={password.length === 0}
+              />
+              <Button variant="ghost" title={t("auth.useCode")} onPress={() => switchTo("email")} />
             </>
           ) : (
             <>
