@@ -15,7 +15,7 @@ import { AppText, Banner, Button, Card, CenterMessage, Divider, IconButton, Load
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { formatDayTime, formatMoney } from "@/lib/format";
-import { isActiveBooking, keys, useBooking } from "@/lib/queries";
+import { isActiveBooking, useBooking } from "@/lib/queries";
 import type { BookingDetail } from "@/lib/types";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 
