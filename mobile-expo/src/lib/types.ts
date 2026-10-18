@@ -102,6 +102,9 @@ export type BookingDetail = BookingSummary & {
 
 export type PartnerBooking = BookingSummary & { guestName: string };
 
+/** `partner/shop` GET; yalnizca kullanilan alanlar. */
+export type PartnerShop = { id: string; name: string; image: string | null };
+
 export type PartnerBookingsResponse = {
   items: PartnerBooking[];
   total: number;

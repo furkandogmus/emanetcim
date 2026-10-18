@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import { User } from "lucide-react-native";
+import { Store, User } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { BookingRow } from "@/components/BookingRow";
@@ -66,9 +66,14 @@ export default function PartnerBookingsScreen() {
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <View style={styles.header}>
         <AppText variant="title">{t("partner.title")}</AppText>
-        <IconButton label={t("home.profile")} onPress={() => router.push("/profile")}>
-          <User size={20} color={colors.ink} />
-        </IconButton>
+        <View style={{ flexDirection: "row", gap: space.sm }}>
+          <IconButton label={t("partner.myShop")} onPress={() => router.push("/partner/shop")}>
+            <Store size={20} color={colors.ink} />
+          </IconButton>
+          <IconButton label={t("home.profile")} onPress={() => router.push("/profile")}>
+            <User size={20} color={colors.ink} />
+          </IconButton>
+        </View>
       </View>
 
       <View style={{ paddingHorizontal: space.xl, paddingBottom: space.md }}>
