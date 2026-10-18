@@ -87,6 +87,9 @@ export async function GET(req: NextRequest) {
 
   const formattedHistory = history.map((b) => ({
     date: b.createdAt.toISOString().slice(5, 10).replace("-", " "),
+    // `date` UTC'den kesilmis "MM DD": yilsiz, bicimlenemez, 00-03 TRT bir gun
+    // geri kayar. Expo ani buradan okur; `date` Flutter icin kalir.
+    createdAt: b.createdAt.toISOString(),
     // Liste de esnaf payini gosterir; ustteki toplamla ayni birim olmasi sart.
     amount: computeSplit(Number(b.totalPrice), commissionRate).merchantAmount,
     shopId: b.shopId,
