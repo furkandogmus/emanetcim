@@ -47,18 +47,19 @@ describe("onay kapisi", () => {
  */
 describe("cagiranlar sonucu DOGRU okuyor", () => {
   it.each([
-    "src/app/api/admin/applications/[id]/[action]/route.ts",
+    // Iki uc (web API + mobil) govdeyi `admin-application-response.ts`ten alir.
+    "src/lib/admin-application-response.ts",
     "src/actions/admin-management.ts",
   ])("%s `.ok` uzerinden kontrol ediyor", (rel) => {
     const src = oku(rel);
-    const cagri = src.slice(src.indexOf("shopService.approveShop"));
+    const cagri = src.slice(src.indexOf("shopService.approveApplication"));
     const pencere = cagri.slice(0, 400);
     expect(pencere, "sonuc `.ok` ile okunmali").toMatch(/!result\.ok/);
     expect(pencere, "ciplak truthy kontrolu kalmamali").not.toMatch(/if \(!(ok|success)\)/);
   });
 
   it("sebep kullaniciya AYRI mesajla donuyor", () => {
-    const uc = oku("src/app/api/admin/applications/[id]/[action]/route.ts");
+    const uc = oku("src/lib/admin-application-response.ts");
     expect(uc).toContain("missing_coordinates");
     // 409: istek gecerli, kaynagin su anki durumu kabul etmiyor.
     expect(uc).toMatch(/status:\s*409/);
