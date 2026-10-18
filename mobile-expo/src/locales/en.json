@@ -593,5 +593,15 @@
     "errors": {
       "referral_code_failed": "The code could not be created, please try again."
     }
+  },
+  "pulse": {
+    "today": "Today · {{shop}}",
+    "arrivals": "Arriving",
+    "pickups": "Picking up",
+    "inStorage": "Bags in shop",
+    "thisMonth": "Earned this month",
+    "vsLastMonth": "{{pct}}% vs last month",
+    "failed": "Couldn't load today's summary. Tap to retry.",
+    "a11y": "{{shop}}, today: {{arrivals}} guests arriving, {{pickups}} pick-ups, {{bags}} bags in the shop. Earned {{month}} this month."
   }
 }
