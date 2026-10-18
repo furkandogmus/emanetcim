@@ -1,13 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { api } from "./api";
-import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReview } from "./types";
+import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReview } from "./types";
 
 export const keys = {
   myBookings: ["bookings", "me"] as const,
   booking: (id: string) => ["bookings", id] as const,
   shop: (id: string) => ["shops", id] as const,
   partnerBookings: ["partner", "bookings"] as const,
+  partnerShop: ["partner", "shop"] as const,
   admin: ["admin"] as const,
 };
 
@@ -91,4 +92,8 @@ export function useAdminApplications() {
 
 export function useAdminMessages() {
   return useQuery({ queryKey: [...keys.admin, "messages"], queryFn: () => api<ContactMessage[]>("/admin/messages") });
+}
+
+export function usePartnerShop() {
+  return useQuery({ queryKey: keys.partnerShop, queryFn: () => api<PartnerShop>("/partner/shop") });
 }

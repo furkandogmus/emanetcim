@@ -210,8 +210,22 @@
       "SEAL_NOT_ASSIGNED": "Bu mühür dükkanına tanımlı değil.",
       "SEAL_FAULTY_INVALID": "Arızalı bildirilen mühür geçersiz.",
       "FAULTY_OVERLAPS_ASSIGNMENT": "Aynı mühür hem takılı hem arızalı olamaz.",
-      "forbidden": "Bu rezervasyon senin dükkanına ait değil."
-    }
+      "forbidden": "Bu rezervasyon senin dükkanına ait değil.",
+      "too_large": "Fotoğraf çok büyük (en fazla 8 MB).",
+      "unsupported_type": "Bu dosya türü desteklenmiyor; JPEG, PNG ya da WebP seç.",
+      "dimensions_too_large": "Fotoğrafın çözünürlüğü çok yüksek.",
+      "empty": "Fotoğraf okunamadı, tekrar dene.",
+      "storage_unavailable": "Fotoğraf yükleme şu an kullanılamıyor.",
+      "not_found": "Dükkan bulunamadı."
+    },
+    "myShop": "Dükkanım",
+    "photo": "Dükkan fotoğrafı",
+    "noPhoto": "Henüz fotoğraf yok",
+    "photoHint": "Misafirler dükkanını bu fotoğrafla tanır. Girişi ve tabelayı gösteren, aydınlık bir kare seç.",
+    "addPhoto": "Fotoğraf ekle",
+    "changePhoto": "Fotoğrafı değiştir",
+    "photoSaved": "Fotoğraf kaydedildi.",
+    "photoFailed": "Fotoğraf yüklenemedi"
   },
   "profile": {
     "title": "Profil",

@@ -90,12 +90,14 @@ export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T
       // Sunucu bildirim dilini bu basliktan cozer (`resolveRequestLocale`).
       "Accept-Language": getLocales()[0]?.languageTag ?? "tr-TR",
     };
-    if (body !== undefined) headers["Content-Type"] = "application/json";
+    // FormData (dosya yukleme) icin Content-Type'i fetch koyar: sinir (boundary) dahil.
+    const isForm = body instanceof FormData;
+    if (body !== undefined && !isForm) headers["Content-Type"] = "application/json";
     if (auth && accessToken) headers.Authorization = `Bearer ${accessToken}`;
     return fetch(`${API_BASE_URL}${path}`, {
       method,
       headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
     });
   };
 
