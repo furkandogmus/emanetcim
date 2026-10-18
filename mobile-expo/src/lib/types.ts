@@ -123,3 +123,36 @@ export type CheckoutResponse = {
   status: BookingStatus;
   totalPrice: number;
 };
+
+/** `admin/stats`. */
+export type AdminStats = {
+  totalBookings: number;
+  totalRevenue: number;
+  totalPartners: number;
+  pendingApplications: number;
+  unreadMessages: number;
+};
+
+/** `toMobileAdminApplication` (mobile-dto.ts). */
+export type AdminApplication = {
+  id: string;
+  name: string;
+  address: string | null;
+  city: string | null;
+  district: string | null;
+  hasCoordinates: boolean;
+  pricePerDay: number;
+  capacity: number;
+  createdAt: string;
+  owner: { name: string | null; phone: string | null; email: string | null };
+};
+
+/** `CONTACT_MESSAGE_LIST_SELECT` (src/lib/contact-message-list.ts); yalnizca kullanilan alanlar. */
+export type ContactMessage = {
+  id: string;
+  from: string;
+  subject: string | null;
+  text: string | null;
+  isRead: boolean;
+  createdAt: string;
+};
