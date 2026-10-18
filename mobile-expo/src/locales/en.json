@@ -398,5 +398,28 @@
       "not_found": "Booking not found.",
       "forbidden": "You can't review this booking."
     }
+  },
+  "dispute": {
+    "open": "Report a problem",
+    "title": "Report a problem",
+    "hint": "If your bag is damaged or something is missing, tell us; our team will review it and contact you.",
+    "reasonLabel": "Problem type",
+    "reasons": {
+      "DAMAGE": "Damage",
+      "THEFT": "Loss / theft",
+      "OTHER": "Other"
+    },
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "What happened? Which bag, and when did you notice?",
+    "descriptionMin": "Write at least {{n}} characters.",
+    "submit": "Send report",
+    "sent": "Your report is in. Our team will review it and contact you.",
+    "errors": {
+      "invalid_data": "Pick a problem type and write a description of at least 10 characters.",
+      "booking_not_ready": "You can report a problem once your bag has been dropped off at the shop.",
+      "duplicate_dispute": "You've already reported a problem for this booking; our team is reviewing it.",
+      "not_found": "Booking not found.",
+      "not_owner": "You can't report a problem for this booking."
+    }
   }
 }
