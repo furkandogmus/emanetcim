@@ -25,7 +25,7 @@
 - [x] 4.2 Teslim et: mühür sağlamlık onayı
 - [x] 4.3 Gelmeyen misafir "Geçmiş"e
 - [x] 4.4 Prod doğrulama: dükkan kapalıyken `SHOP_CLOSED` mesajı (2026-10-18 03:01 TRT)
-- [ ] 4.5 Prod doğrulama: başarılı teslim al ve teslim et (dükkan 08:00 TRT'de açılınca, `740e72c4`)
+- [x] 4.5 Prod doğrulama: başarılı teslim al ve teslim et (`740e72c4` → CHECKED_OUT, 2026-10-18 03:50 TRT, dükkan 7/24 yapılarak)
 
 ## 5. Yayın
 
