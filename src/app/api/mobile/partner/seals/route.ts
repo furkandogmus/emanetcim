@@ -3,11 +3,14 @@ import type { NextRequest } from "next/server";
 import prisma from "@/lib/db";
 import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 import { toMobileSealRequest } from "@/lib/mobile-dto";
+import { resolvePartnerShops } from "@/lib/partner-shop";
 
 /**
  * Esnaf: muhur stogu ve son talepler (salt okuma; web `partner/seals` sayfasiyla
- * ayni sayimlar). Dukkan secimi `seals/request` ile AYNI sorgu: stok bir
- * dukkandan okunup talep baska dukkan icin acilmasin.
+ * ayni sayimlar). Dukkan secimi web sayfasiyla ve `seals/request` ile AYNI
+ * (`resolvePartnerShops`, `?shop=`): stok bir dukkandan okunup talep baska
+ * dukkan icin acilmasin. Eskiden sirasiz `findFirst` idi; cok dukkanli esnafta
+ * stok rastgele dukkandan geliyordu (2026-10-18).
  */
 export async function GET(req: NextRequest) {
   const auth = await requireMobileUser(req);
@@ -15,10 +18,13 @@ export async function GET(req: NextRequest) {
   const roleErr = requireRole(auth.user, ["PARTNER"]);
   if (roleErr) return roleErr;
 
-  const shop = await prisma.shop.findFirst({
-    where: { ownerId: auth.user.id, isActive: true },
-    select: { id: true, sealReorderPoint: true },
-  });
+  const { activeShop } = await resolvePartnerShops(auth.user.id, req.nextUrl.searchParams.get("shop"));
+  const shop = activeShop
+    ? await prisma.shop.findUnique({
+        where: { id: activeShop.id },
+        select: { id: true, name: true, sealReorderPoint: true },
+      })
+    : null;
   if (!shop) return NextResponse.json({ error: "no_shop" }, { status: 404 });
 
   const [assignedCount, inUseCount, returnedCount, requests] = await Promise.all([
@@ -33,6 +39,7 @@ export async function GET(req: NextRequest) {
   ]);
 
   return NextResponse.json({
+    shop: { id: shop.id, name: shop.name },
     assignedCount,
     inUseCount,
     returnedCount,
