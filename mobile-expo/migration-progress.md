@@ -145,3 +145,14 @@ Sırada: iOS. Makinede Xcode yok → `eas-simulator` (bulut) ya da Xcode kurulum
 - bulgu: e2e seed'de esnafın 3 dükkanı var; mühür uçları (`partner/seals*`) dükkanı
   sırasız `findFirst` ile seçiyor → çok dükkanlı esnafta mühür stoğu rastgele dükkanın.
   Sırada: mühür uçlarını `resolvePartnerShops` + `?shop=` ile web'e hizalamak.
+
+## Tur 4 (2026-10-18): çok dükkanlı esnafta mühür
+
+- [x] Mühür uçları (`partner/seals`, `seals/request`, `seals/report-faulty`) sırasız
+  `findFirst` yerine web ile aynı `resolvePartnerShops(?shop=)`; `resolvePartnerShops` ilk kez testli
+- [x] Expo: seçili dükkan esnaf ekranları arasında ortak (`lib/partner-shop.tsx`); mühür
+  ekranı dükkan adını gösterir. Emülatör: Galata → 37 hazır, talep Galata'ya; Sultanahmet → 0
+- **Sıradaki (yazma, öncelikli):** `partner/shop` (PATCH), `shop/schedule`, `shop/image`
+  dükkanı `shopService.getShopByOwner` → sırasız `findFirst({ ownerId })` ile seçiyor;
+  çok dükkanlı esnafın ayar/saat/fotoğraf değişikliği rastgele dükkana yazılabilir.
+  `partner/earnings/stats` ise bütün dükkanları bilerek topluyor, sorun değil.
