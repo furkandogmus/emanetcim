@@ -90,8 +90,7 @@ const CEILINGS: Record<string, number> = {
   blockedIp: 1,
   blogPost: 4,
   campaign: 4,
-  contactMessage: 9,
-  contactReply: 1,
+  contactMessage: 8,
   /*
     3 -> 1 (2026-09-01): uyusmazlik ACMA govdesi `DisputeService`e tasindi. Mobil
     kopya yalnizca kaydi olusturuyor, ize ve ADMIN BILDIRIMINE hic dokunmuyordu.
