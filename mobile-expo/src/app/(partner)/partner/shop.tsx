@@ -1,12 +1,14 @@
-import { Alert, StyleSheet, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
+import type { Href } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ImagePlus, ShieldCheck, Store } from "lucide-react-native";
+import { ArrowLeft, ImagePlus, ShieldCheck, Store, Wallet } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
+import { LinkRow } from "@/components/LinkRow";
 import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
@@ -72,7 +74,7 @@ export default function PartnerShopScreen() {
           action={<Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />}
         />
       ) : (
-        <View style={styles.content}>
+        <ScrollView contentContainerStyle={styles.content}>
           <AppText variant="title">{query.data.name}</AppText>
           <Card style={styles.photoCard}>
             {image ? (
@@ -96,13 +98,17 @@ export default function PartnerShopScreen() {
             loading={upload.isPending}
             onPress={() => void pick()}
           />
-          <Button
-            variant="secondary"
-            title={t("seals.open")}
-            icon={<ShieldCheck size={18} color={colors.ink} />}
-            onPress={() => router.push("/partner/seals")}
+          <LinkRow
+            icon={<ShieldCheck size={18} color={colors.brand} />}
+            label={t("seals.open")}
+            onPress={() => router.push("/partner/seals" as Href)}
           />
-        </View>
+          <LinkRow
+            icon={<Wallet size={18} color={colors.brand} />}
+            label={t("earnings.title")}
+            onPress={() => router.push("/partner/earnings" as Href)}
+          />
+        </ScrollView>
       )}
     </SafeAreaView>
   );
