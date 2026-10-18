@@ -33,12 +33,19 @@
       "too_many_requests": "Çok fazla istek. Biraz sonra tekrar dene.",
       "too_many_attempts": "Çok fazla deneme. Biraz sonra tekrar dene.",
       "account_banned": "Bu hesap kullanıma kapatılmış.",
-      "invalid_credentials": "E-posta ya da şifre hatalı."
+      "invalid_credentials": "E-posta ya da şifre hatalı.",
+      "google_failed": "Google ile giriş yapılamadı. Biraz sonra tekrar dene ya da e-postanla gir.",
+      "play_services": "Google Play Hizmetleri gerekli. Güncelleyip tekrar dene.",
+      "invalid_token": "Google girişi doğrulanamadı. Tekrar dene.",
+      "email_not_verified": "Bu Google hesabının e-postası doğrulanmamış.",
+      "google_not_configured": "Google ile giriş şu an kullanılamıyor. E-postanla giriş yapabilirsin."
     },
     "usePassword": "Şifreyle giriş yap",
     "useCode": "E-postaya kod gönder",
     "passwordSubtitle": "Web sitesinde belirlediğin şifreyle gir.",
-    "passwordLabel": "Şifre"
+    "passwordLabel": "Şifre",
+    "or": "ya da",
+    "continueWithGoogle": "Google ile devam et"
   },
   "home": {
     "heroTitle": "Valizini bırak.\nŞehrin tadını çıkar.",
