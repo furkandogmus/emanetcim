@@ -12,7 +12,7 @@ import { AppText, Banner, Button, Card, CenterMessage, Divider, IconButton, Load
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { formatDayTime, formatMoney } from "@/lib/format";
-import { keys, useBooking } from "@/lib/queries";
+import { isActiveBooking, keys, useBooking } from "@/lib/queries";
 import type { BookingDetail } from "@/lib/types";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 
@@ -124,7 +124,7 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
 
         {mode === "guest" ? (
           <View style={{ gap: space.md }}>
-            {b.latitude != null && b.longitude != null ? (
+            {isActiveBooking(b) && b.latitude != null && b.longitude != null ? (
               <Button
                 variant="secondary"
                 title={t("bookings.directions")}

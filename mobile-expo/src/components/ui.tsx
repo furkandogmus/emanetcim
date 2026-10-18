@@ -45,6 +45,8 @@ export function Button({ title, variant = "primary", loading, disabled, icon, st
   return (
     <Pressable
       accessibilityRole="button"
+      // Yuklenirken icerik yalnizca spinner; etiket olmasa ekran okuyucu "busy" der.
+      accessibilityLabel={title}
       accessibilityState={{ disabled: !!isDisabled, busy: !!loading }}
       disabled={isDisabled}
       onPress={(e) => {
