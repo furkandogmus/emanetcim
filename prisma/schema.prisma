@@ -1110,3 +1110,43 @@ model PartnerLead {
   @@index([phone])
   @@index([status, createdAt])
 }
+
+/// Ekip içi görsel sorun ve hata takip kaydı (Berat / Furkan).
+model TeamIssue {
+  id          Int              @id @default(autoincrement())
+  title       String
+  description String?
+  /// open | resolved
+  status      String           @default("open")
+  /// Berat | Furkan
+  createdBy   String
+  createdAt   DateTime         @default(now())
+  photos      TeamIssueImage[]
+  events      TeamIssueEvent[]
+
+  @@index([createdAt])
+  @@index([status])
+}
+
+model TeamIssueImage {
+  id         String    @id @default(cuid())
+  issueId    Int
+  imageUrl   String
+  uploadedBy String
+  createdAt  DateTime  @default(now())
+  issue      TeamIssue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+  @@index([issueId])
+}
+
+model TeamIssueEvent {
+  id        String    @id @default(cuid())
+  issueId   Int
+  userName  String
+  /// created | opened | left | resolved | reopened | details_saved
+  action    String
+  createdAt DateTime  @default(now())
+  issue     TeamIssue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+  @@index([issueId])
+}
