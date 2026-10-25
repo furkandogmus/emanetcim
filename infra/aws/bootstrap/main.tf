@@ -62,6 +62,13 @@ resource "aws_ssm_parameter" "tls_cert" {
   description = "Cloudflare Origin Certificate (aws-test.bagajpark.com)"
   type        = "SecureString"
   value       = sensitive(file(pathexpand(var.tls_cert_path)))
+
+  # Canli sertifika (bagajpark.com) SSM'e scripts/tls-put.sh ile yazilir; yerel
+  # aws-test.* dosyasi yalnizca ilk olusturmada kullanilir. 2026-10-25 hesap
+  # tasimasinda bu dosya canli sertifikanin yerine gecti ve cloud-init durdu.
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
 resource "aws_ssm_parameter" "tls_key" {
@@ -69,6 +76,13 @@ resource "aws_ssm_parameter" "tls_key" {
   description = "Cloudflare Origin Certificate private key (aws-test.bagajpark.com)"
   type        = "SecureString"
   value       = sensitive(file(pathexpand(var.tls_key_path)))
+
+  # Canli sertifika (bagajpark.com) SSM'e scripts/tls-put.sh ile yazilir; yerel
+  # aws-test.* dosyasi yalnizca ilk olusturmada kullanilir. 2026-10-25 hesap
+  # tasimasinda bu dosya canli sertifikanin yerine gecti ve cloud-init durdu.
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
 # --- CI/CD: GitHub Actions OIDC → SSM Run Command, statik AWS key hic kullanilmiyor ---
