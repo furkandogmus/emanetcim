@@ -68,11 +68,11 @@ sertifikasının yanlışlıkla silinmesini engeller.
 ## Ön koşullar
 
 - `terraform >= 1.9`
-- `aws` CLI, **`bagajpark-yeni`** profili yapılandırılmış — canlı hesap (772853132412):
+- `aws` CLI, **`personal-prod`** profili yapılandırılmış — canlı hesap (710882445040, 2026-10-25'ten beri):
   ```bash
-  aws sts get-caller-identity --profile bagajpark-yeni --query Account --output text
-  # Beklenen: 772853132412
-  terraform workspace show   # Beklenen: hesap2
+  aws sts get-caller-identity --profile personal-prod --query Account --output text
+  # Beklenen: 710882445040
+  terraform workspace show   # Beklenen: hesap3
   ```
   Profil ve workspace BİRLİKTE değişir; ayrışırsa `plan` her kaynağı "to create" gösterir
   (ayrıntı `stack/variables.tf` → `aws_profile` notu). Eski hesap (269174115166) profili
@@ -221,8 +221,8 @@ curl -s https://bagajpark.com/api/health/live
 anahtar yok. Kod `stack/main.tf`'te; `plan` drift göstermemesi için bir kez import:
 
 ```bash
-cd infra/aws/stack && terraform workspace select hesap2
-export AWS_PROFILE=bagajpark-yeni   # ya da aynı hesaba bağlı başka bir profil
+cd infra/aws/stack && terraform workspace select hesap3
+export AWS_PROFILE=personal-prod   # ya da aynı hesaba bağlı başka bir profil
 terraform import aws_s3_bucket.media bagajpark-media-1d9eb152
 terraform import aws_s3_bucket_ownership_controls.media bagajpark-media-1d9eb152
 terraform import aws_s3_bucket_public_access_block.media bagajpark-media-1d9eb152
@@ -268,8 +268,8 @@ Uygulama ayarları SSM'de (`/bagajpark/env/app/S3_BUCKET`, `S3_REGION`,
   kod ile belge ayrışmıştı ve hangisinin uygulandığı repodan doğrulanamıyor. Gerçeği
   okumak (salt okunur):
   ```bash
-  aws budgets describe-budgets --profile bagajpark-yeni \
-    --account-id "$(aws sts get-caller-identity --profile bagajpark-yeni --query Account --output text)" \
+  aws budgets describe-budgets --profile personal-prod \
+    --account-id "$(aws sts get-caller-identity --profile personal-prod --query Account --output text)" \
     --query 'Budgets[].{ad:BudgetName,limit:BudgetLimit.Amount}'
   ```
   Çıkan değer `monthly_budget_usd` ile aynı değilse, bir sonraki `apply` onu sessizce
@@ -280,7 +280,7 @@ Uygulama ayarları SSM'de (`/bagajpark/env/app/S3_BUCKET`, `S3_REGION`,
 
 ## Söküm
 
-> **🚨 `stack/` CANLI ORTAMDIR.** `hesap2` workspace'inde `terraform destroy`, EC2'yi ve
+> **🚨 `stack/` CANLI ORTAMDIR.** `hesap3` workspace'inde `terraform destroy`, EC2'yi ve
 > Elastic IP'yi silerek `bagajpark.com`'u kapatır; **veritabanı da o instance'ın diskinde
 > durduğu için veri kaybı demektir**. Yedekler S3'te (`bootstrap/` sağ kalır) ama geri
 > yükleme elle yapılır. Aşağıdaki komut yalnızca kapatılmakta olan eski hesap

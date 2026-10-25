@@ -7,11 +7,46 @@
 > her zaman AWS'ten okuyun:
 >
 > ```bash
-> aws ec2 describe-addresses --profile bagajpark-yeni --region eu-central-1 \
+> aws ec2 describe-addresses --profile personal-prod --region eu-central-1 \
 >   --query 'Addresses[].PublicIp' --output text
 > ```
 
-## Son durum — 2026-08-23 15:30 (UTC+3)
+## Son durum — 2026-10-25 11:30 UTC
+
+**İKİNCİ HESAP TAŞIMA TAMAMLANDI. `bagajpark.com` artık hesap 710882445040'ta**
+(profil `personal-prod`, terraform workspace `hesap3`, iki kökte de). Eski hesap
+772853132412 yerindeburger ile ortaktı ve Free plan kredisi bitmek üzereydi.
+
+| | |
+|---|---|
+| Sunucu | `i-025a7f973c0210468` (c7i-flex.large). EIP aynı: eski hesaptan **Elastic IP transferi** ile taşındı, Cloudflare'de DNS değişmedi |
+| Kesinti | 11:28:20 → 11:30:12 UTC (~2 dk): eski `web` durdu → son dump → yeni sunucuda `restore.sh` → EIP transferi |
+| Veri | 42 tablo / 61.277 satır, iki tarafta tablo başı sayım md5'i aynı (prova + son dump) |
+| Bucket'lar | yedek + deploy config `bagajpark-backups-7bec61c6`, medya `bagajpark-media-7bec61c6`. Eski yedek geçmişi kopyalandı |
+| SSM | `/bagajpark/env/app/*` (42) ve canlı TLS sertifikası eski hesaptan kopyalandı; `S3_BUCKET` yeni medya bucket'ı |
+| Cron | `ec2-user` crontab'ı yeni sunucuda (12 iş), yedek yeni bucket'a; eski sunucunun crontab'ı kaldırıldı (`/opt/emanetci/crontab.pre-move.txt`) |
+| GitHub vars | `AWS_DEPLOY_ROLE_ARN`, `AWS_DEPLOY_BUCKET`, `S3_PUBLIC_BASE_URL` yeni hesaba çevrildi |
+
+**Açık işler**
+
+- `next/image` izinli alan adı build anında `S3_PUBLIC_BASE_URL`'den üretiliyor (`next.config.ts`).
+  Canlı imaj hâlâ eski medya bucket'ına izin veriyor, DB'deki 3 dükkan fotoğrafı URL'si de eski
+  bucket'ı gösteriyor. Bu yüzden eski medya bucket'ı **silinmedi**. `main`'e ilk merge yeni
+  değişkenle imajı yeniden üretir; o deploy'dan sonra 3 URL'de
+  `bagajpark-media-1d9eb152` → `bagajpark-media-7bec61c6` güncellenir, sonra eski bucket silinir.
+- Eski hesapta kalanlar (1 hafta geri dönüş payı, sonra `hesap2` workspace'i ile `terraform destroy`):
+  durmuş web'li instance `i-0753b8302a5f73413` (EIP'siz), bucket'lar.
+
+**Kesimde bulunanlar**
+
+- Yeni AL2023 AMI'sinde `amazon-ssm-agent` ve `cronie` kurulu gelmiyor; cloud-init `|| true` ile
+  bunu yutuyordu, instance SSM'e bağlanmadı. Artık cloud-init ikisini kuruyor.
+- `bootstrap` TLS parametresini yerel `aws-test.crt`'den yazıyor; o dosya `aws-test.bagajpark.com`
+  sertifikası, canlı olan değil. cloud-init'in alan adı kontrolü burada durdu. Canlı sertifika eski
+  hesabın SSM'inden kopyalandı; `bootstrap` artık değeri `ignore_changes` ile yeniden yazmıyor.
+- Terraform `>= 1.9` istiyor; yereldeki varsayılan 1.5.7 (`TFENV_TERRAFORM_VERSION=1.9.8`).
+
+## Önceki durum — 2026-08-23 15:30 (UTC+3)
 
 **HESAP TAŞIMA TAMAMLANDI. `bagajpark.com` artık YENİ AWS hesabında (772853132412).**
 

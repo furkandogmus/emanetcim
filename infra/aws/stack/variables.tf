@@ -9,18 +9,19 @@ variable "region" {
 
 variable "aws_profile" {
   # DIKKAT — profil ve workspace BIRLIKTE degisir:
-  #   workspace `hesap2`  -> profil `bagajpark-yeni` (hesap 772853132412) = CANLI
-  #   workspace `default` -> profil `bagajpark`      (hesap 269174115166) = eski, kapatiliyor
+  #   workspace `hesap3`  -> profil `personal-prod`  (hesap 710882445040) = CANLI (2026-10-25'ten beri)
+  #   workspace `hesap2`  -> profil `yerindeburger`  (hesap 772853132412) = eski, kapatiliyor
+  #   workspace `default` -> profil `bagajpark`      (hesap 269174115166) = eski
   # Varsayilan 2026-08-29'da `bagajpark`'tan `bagajpark-yeni`ye alindi: yerel workspace
   # zaten `hesap2` (yani CANLI hesabin state'i) ama profil hala eski hesaba bakiyordu.
   # Bu ikisi ayristiginda `terraform plan` her kaynagi "to create" gosterir ve bir apply
   # altyapiyi YANLIS hesapta ikinci kez kurar. Kesim kaydi: infra/aws/CUTOVER.md.
   # Dogrulama (salt okunur):
   #   terraform workspace show
-  #   aws sts get-caller-identity --profile bagajpark-yeni --query Account --output text
+  #   aws sts get-caller-identity --profile personal-prod --query Account --output text
   description = "~/.aws/config içindeki profil adı. Workspace ile eşleşmeli (yukarıdaki nota bakın)."
   type        = string
-  default     = "bagajpark-yeni"
+  default     = "personal-prod"
 }
 
 variable "instance_type" {
@@ -96,7 +97,7 @@ variable "deploy_config_bucket" {
   # Dogrulama: cd infra/aws/bootstrap && terraform output backup_bucket_name
   description = "bootstrap/ çıktısındaki backup_bucket_name — bucket adı random_id içerdiğinden isimlendirme sözleşmesiyle DEĞİL, bu değişkenle bağlanıyor. Hesap değişirse `terraform output backup_bucket_name` ile güncellenmeli."
   type        = string
-  default     = "bagajpark-backups-1d9eb152"
+  default     = "bagajpark-backups-7bec61c6"
 }
 
 variable "deploy_config_prefix" {
@@ -106,6 +107,6 @@ variable "deploy_config_prefix" {
 
 variable "media_bucket_name" {
   type        = string
-  description = "Dukkan fotograflarinin bucket'i (S3_BUCKET). hesap2: bagajpark-media-1d9eb152."
-  default     = "bagajpark-media-1d9eb152"
+  description = "Dukkan fotograflarinin bucket'i (S3_BUCKET). hesap3: bagajpark-media-7bec61c6 (hesap2: bagajpark-media-1d9eb152)."
+  default     = "bagajpark-media-7bec61c6"
 }
