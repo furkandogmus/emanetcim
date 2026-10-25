@@ -1,0 +1,1263 @@
+{
+  "version": 4,
+  "terraform_version": "1.9.8",
+  "serial": 24,
+  "lineage": "3022c09b-7805-a794-7d94-270e2ebd5db5",
+  "outputs": {
+    "instance_id": {
+      "value": "i-025a7f973c0210468",
+      "type": "string"
+    },
+    "media_public_base_url": {
+      "value": "https://bagajpark-media-7bec61c6.s3.eu-central-1.amazonaws.com",
+      "type": "string"
+    },
+    "public_ip": {
+      "value": "63.187.117.99",
+      "type": "string"
+    },
+    "ssh_command": {
+      "value": "ssh -i ~/.ssh/aws-bagajpark -p 2222 ec2-user@63.187.117.99",
+      "type": "string"
+    },
+    "ssh_port": {
+      "value": 2222,
+      "type": "number"
+    }
+  },
+  "resources": [
+    {
+      "mode": "data",
+      "type": "aws_ami",
+      "name": "al2023",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "architecture": "x86_64",
+            "arn": "arn:aws:ec2:eu-central-1::image/ami-0bcebf29195dfeddb",
+            "block_device_mappings": [
+              {
+                "device_name": "/dev/xvda",
+                "ebs": {
+                  "delete_on_termination": "true",
+                  "encrypted": "false",
+                  "iops": "3000",
+                  "snapshot_id": "snap-0c712854a453a2f23",
+                  "throughput": "125",
+                  "volume_initialization_rate": "0",
+                  "volume_size": "2",
+                  "volume_type": "gp3"
+                },
+                "no_device": "",
+                "virtual_name": ""
+              }
+            ],
+            "boot_mode": "uefi-preferred",
+            "creation_date": "2026-10-24T01:01:23.000Z",
+            "deprecation_time": "2027-01-22T01:03:00.000Z",
+            "description": "Amazon Linux 2023 AMI 2023.12.20261026.1 x86_64 Minimal HVM kernel-6.12",
+            "ena_support": true,
+            "executable_users": null,
+            "filter": [
+              {
+                "name": "name",
+                "values": [
+                  "al2023-ami-*-x86_64"
+                ]
+              },
+              {
+                "name": "virtualization-type",
+                "values": [
+                  "hvm"
+                ]
+              }
+            ],
+            "hypervisor": "xen",
+            "id": "ami-0bcebf29195dfeddb",
+            "image_id": "ami-0bcebf29195dfeddb",
+            "image_location": "amazon/al2023-ami-minimal-2023.12.20261026.1-kernel-6.12-x86_64",
+            "image_owner_alias": "amazon",
+            "image_type": "machine",
+            "imds_support": "v2.0",
+            "include_deprecated": false,
+            "kernel_id": "",
+            "last_launched_time": "",
+            "most_recent": true,
+            "name": "al2023-ami-minimal-2023.12.20261026.1-kernel-6.12-x86_64",
+            "name_regex": null,
+            "owner_id": "137112412989",
+            "owners": [
+              "amazon"
+            ],
+            "platform": "",
+            "platform_details": "Linux/UNIX",
+            "product_codes": [],
+            "public": true,
+            "ramdisk_id": "",
+            "root_device_name": "/dev/xvda",
+            "root_device_type": "ebs",
+            "root_snapshot_id": "snap-0c712854a453a2f23",
+            "sriov_net_support": "simple",
+            "state": "available",
+            "state_reason": {
+              "code": "UNSET",
+              "message": "UNSET"
+            },
+            "tags": {},
+            "timeouts": null,
+            "tpm_support": "",
+            "uefi_data": null,
+            "usage_operation": "RunInstances",
+            "virtualization_type": "hvm"
+          },
+          "sensitive_attributes": []
+        }
+      ]
+    },
+    {
+      "mode": "data",
+      "type": "aws_availability_zones",
+      "name": "available",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "all_availability_zones": null,
+            "exclude_names": null,
+            "exclude_zone_ids": null,
+            "filter": null,
+            "group_names": [
+              "eu-central-1-zg-1"
+            ],
+            "id": "eu-central-1",
+            "names": [
+              "eu-central-1a",
+              "eu-central-1b",
+              "eu-central-1c"
+            ],
+            "state": "available",
+            "timeouts": null,
+            "zone_ids": [
+              "euc1-az2",
+              "euc1-az3",
+              "euc1-az1"
+            ]
+          },
+          "sensitive_attributes": []
+        }
+      ]
+    },
+    {
+      "mode": "data",
+      "type": "aws_caller_identity",
+      "name": "current",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "account_id": "710882445040",
+            "arn": "arn:aws:iam::710882445040:user/terraform-admin",
+            "id": "710882445040",
+            "user_id": "AIDA2LA7FI3YJHVTQMFB6"
+          },
+          "sensitive_attributes": []
+        }
+      ]
+    },
+    {
+      "mode": "data",
+      "type": "http",
+      "name": "cloudflare_ipv4",
+      "provider": "provider[\"registry.terraform.io/hashicorp/http\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "body": "173.245.48.0/20\n103.21.244.0/22\n103.22.200.0/22\n103.31.4.0/22\n141.101.64.0/18\n108.162.192.0/18\n190.93.240.0/20\n188.114.96.0/20\n197.234.240.0/22\n198.41.128.0/17\n162.158.0.0/15\n104.16.0.0/13\n104.24.0.0/14\n172.64.0.0/13\n131.0.72.0/22",
+            "ca_cert_pem": null,
+            "client_cert_pem": null,
+            "client_key_pem": null,
+            "id": "https://www.cloudflare.com/ips-v4",
+            "insecure": null,
+            "method": null,
+            "request_body": null,
+            "request_headers": null,
+            "request_timeout_ms": null,
+            "response_body": "173.245.48.0/20\n103.21.244.0/22\n103.22.200.0/22\n103.31.4.0/22\n141.101.64.0/18\n108.162.192.0/18\n190.93.240.0/20\n188.114.96.0/20\n197.234.240.0/22\n198.41.128.0/17\n162.158.0.0/15\n104.16.0.0/13\n104.24.0.0/14\n172.64.0.0/13\n131.0.72.0/22",
+            "response_body_base64": "MTczLjI0NS40OC4wLzIwCjEwMy4yMS4yNDQuMC8yMgoxMDMuMjIuMjAwLjAvMjIKMTAzLjMxLjQuMC8yMgoxNDEuMTAxLjY0LjAvMTgKMTA4LjE2Mi4xOTIuMC8xOAoxOTAuOTMuMjQwLjAvMjAKMTg4LjExNC45Ni4wLzIwCjE5Ny4yMzQuMjQwLjAvMjIKMTk4LjQxLjEyOC4wLzE3CjE2Mi4xNTguMC4wLzE1CjEwNC4xNi4wLjAvMTMKMTA0LjI0LjAuMC8xNAoxNzIuNjQuMC4wLzEzCjEzMS4wLjcyLjAvMjI=",
+            "response_headers": {
+              "Age": "75138",
+              "Alt-Svc": "h3=\":443\"; ma=86400",
+              "Cache-Control": "s-maxage=86400",
+              "Cf-Cache-Status": "HIT",
+              "Cf-Ray": "a500c92cc868b645-IST",
+              "Content-Type": "text/plain;charset=UTF-8",
+              "Date": "Sun, 25 Oct 2026 11:12:22 GMT",
+              "Last-Modified": "Sat, 24 Oct 2026 14:20:04 GMT",
+              "Nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+              "Report-To": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=fK4eLtPhdHYweLvUdM0noljYvBNKKnOGOxmgWZ1bEfpS5TD4YFYhzAON%2BL25pUngIBQ7DZ%2B45Xl59OQ7ncBpAdSh4ZS8jolAg%2FLu9R%2BLP2o8mmDa5YA1j44Oxcd5od6i%2BFgK2Q%3D%3D\"}]}",
+              "Server": "cloudflare",
+              "Server-Timing": "cfCacheStatus;desc=\"HIT\", cfEdge;dur=6,cfOrigin;dur=0,cfWorker;dur=7",
+              "Set-Cookie": "__cf_bm=IG13Vq.CgCxp_g3y6qMXjfY_g50hH4PJGF8kVvgPsjw-1792926742.5277317-1.0.1.1-o8h9UhA8oaT.tKyL6S8WBPxRT4Vmm_NK1CJO6DJ9DUHB_dT8r0MXTYoJo.K5ZYRJERH2g5l0wFeJHD05jcXeJOMsD3t7tS89rlpCQctu9fqf_dcIdwshUskbA_pOVCQYRXLWAy8ndXPTHZz5JB_bwQ; HttpOnly; SameSite=None; Secure; Path=/; Domain=www.cloudflare.com; Expires=Sun, 25 Oct 2026 11:42:22 GMT",
+              "Vary": "accept-encoding"
+            },
+            "retry": null,
+            "status_code": 200,
+            "url": "https://www.cloudflare.com/ips-v4"
+          },
+          "sensitive_attributes": []
+        }
+      ]
+    },
+    {
+      "mode": "data",
+      "type": "http",
+      "name": "cloudflare_ipv6",
+      "provider": "provider[\"registry.terraform.io/hashicorp/http\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "body": "2400:cb00::/32\n2606:4700::/32\n2803:f800::/32\n2405:b500::/32\n2405:8100::/32\n2a06:98c0::/29\n2c0f:f248::/32",
+            "ca_cert_pem": null,
+            "client_cert_pem": null,
+            "client_key_pem": null,
+            "id": "https://www.cloudflare.com/ips-v6",
+            "insecure": null,
+            "method": null,
+            "request_body": null,
+            "request_headers": null,
+            "request_timeout_ms": null,
+            "response_body": "2400:cb00::/32\n2606:4700::/32\n2803:f800::/32\n2405:b500::/32\n2405:8100::/32\n2a06:98c0::/29\n2c0f:f248::/32",
+            "response_body_base64": "MjQwMDpjYjAwOjovMzIKMjYwNjo0NzAwOjovMzIKMjgwMzpmODAwOjovMzIKMjQwNTpiNTAwOjovMzIKMjQwNTo4MTAwOjovMzIKMmEwNjo5OGMwOjovMjkKMmMwZjpmMjQ4OjovMzI=",
+            "response_headers": {
+              "Age": "23396",
+              "Alt-Svc": "h3=\":443\"; ma=86400",
+              "Cache-Control": "s-maxage=86400",
+              "Cf-Cache-Status": "HIT",
+              "Cf-Ray": "a500c92ccd6892cc-IST",
+              "Content-Type": "text/plain;charset=UTF-8",
+              "Date": "Sun, 25 Oct 2026 11:12:22 GMT",
+              "Last-Modified": "Sun, 25 Oct 2026 04:42:26 GMT",
+              "Nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+              "Report-To": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=xxJyyv3sQVmnpTOxMpGa3fb5QkdocrI98FBhfzU0gUwonh3SEFQllu7mNpH%2BCSDfB7UXn0mMdgr1U3jMrVLPcjLyuhfg5tK8GzMB4VTJwLexUaB1UfXB8nEZ3XDgE%2BiRGEVxcg%3D%3D\"}]}",
+              "Server": "cloudflare",
+              "Server-Timing": "cfCacheStatus;desc=\"HIT\", cfEdge;dur=6,cfOrigin;dur=0,cfWorker;dur=6",
+              "Set-Cookie": "__cf_bm=ZiKAJTHF2bQEtafpfHL2Qpv1FhxkrCBT8t.9THwBJtA-1792926742.5284789-1.0.1.1-b18AnL3KBtUERiIiRMLArcEP4U2wq0Pu3m0HbP4vg_wR3MMFIFCOd9GtwETzepYvAzWK6iWqoPTjDKc7aPaLgiN85rD.4a6b2Mvypyj1G__m.ip7BzKRFPXtyVHZzacwkr4PDRwCGFCr2ibaoIx5MA; HttpOnly; SameSite=None; Secure; Path=/; Domain=www.cloudflare.com; Expires=Sun, 25 Oct 2026 11:42:22 GMT",
+              "Vary": "accept-encoding"
+            },
+            "retry": null,
+            "status_code": 200,
+            "url": "https://www.cloudflare.com/ips-v6"
+          },
+          "sensitive_attributes": []
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_eip",
+      "name": "app",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "address": null,
+            "allocation_id": "eipalloc-016663f02ba718651",
+            "arn": "arn:aws:ec2:eu-central-1:710882445040:elastic-ip/eipalloc-016663f02ba718651",
+            "associate_with_private_ip": null,
+            "association_id": "eipassoc-09c95b283e48f705e",
+            "carrier_ip": "",
+            "customer_owned_ip": "",
+            "customer_owned_ipv4_pool": "",
+            "domain": "vpc",
+            "id": "eipalloc-016663f02ba718651",
+            "instance": "i-025a7f973c0210468",
+            "ipam_pool_id": null,
+            "network_border_group": "eu-central-1",
+            "network_interface": "eni-0eb4717934439bb95",
+            "private_dns": "ip-10-20-1-118.eu-central-1.compute.internal",
+            "private_ip": "10.20.1.118",
+            "ptr_record": "",
+            "public_dns": "ec2-63-187-117-99.eu-central-1.compute.amazonaws.com",
+            "public_ip": "63.187.117.99",
+            "public_ipv4_pool": "amazon",
+            "tags": {
+              "Name": "bagajpark-aws-test-eip"
+            },
+            "tags_all": {
+              "ManagedBy": "terraform",
+              "Name": "bagajpark-aws-test-eip",
+              "Project": "bagajpark-aws-test",
+              "Stack": "stack"
+            },
+            "timeouts": null,
+            "vpc": true
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiZGVsZXRlIjoxODAwMDAwMDAwMDAsInJlYWQiOjkwMDAwMDAwMDAwMCwidXBkYXRlIjozMDAwMDAwMDAwMDB9fQ==",
+          "dependencies": [
+            "aws_iam_instance_profile.app",
+            "aws_iam_role.app",
+            "aws_instance.app",
+            "aws_key_pair.deployer",
+            "aws_security_group.web",
+            "aws_subnet.public",
+            "aws_vpc.main",
+            "data.aws_ami.al2023",
+            "data.aws_availability_zones.available",
+            "data.http.cloudflare_ipv4",
+            "data.http.cloudflare_ipv6"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_iam_instance_profile",
+      "name": "app",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:iam::710882445040:instance-profile/bagajpark-aws-test-app-profile",
+            "create_date": "2026-10-25T11:14:00Z",
+            "id": "bagajpark-aws-test-app-profile",
+            "name": "bagajpark-aws-test-app-profile",
+            "name_prefix": "",
+            "path": "/",
+            "role": "bagajpark-aws-test-app-role",
+            "tags": null,
+            "tags_all": {
+              "ManagedBy": "terraform",
+              "Project": "bagajpark-aws-test",
+              "Stack": "stack"
+            },
+            "unique_id": "AIPA2LA7FI3YIAQW5W66Y"
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "aws_iam_role.app"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_iam_role",
+      "name": "app",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:iam::710882445040:role/bagajpark-aws-test-app-role",
+            "assume_role_policy": "{\"Statement\":[{\"Action\":\"sts:AssumeRole\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"ec2.amazonaws.com\"}}],\"Version\":\"2012-10-17\"}",
+            "create_date": "2026-10-25T11:13:59Z",
+            "description": "",
+            "force_detach_policies": false,
+            "id": "bagajpark-aws-test-app-role",
+            "inline_policy": [],
+            "managed_policy_arns": [],
+            "max_session_duration": 3600,
+            "name": "bagajpark-aws-test-app-role",
+            "name_prefix": "",
+            "path": "/",
+            "permissions_boundary": "",
+            "tags": null,
+            "tags_all": {
+              "ManagedBy": "terraform",
+              "Project": "bagajpark-aws-test",
+              "Stack": "stack"
+            },
+            "unique_id": "AROA2LA7FI3YAURCL44H3"
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA=="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_iam_role_policy",
+      "name": "app_backup_write",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "bagajpark-aws-test-app-role:write-backups",
+            "name": "write-backups",
+            "name_prefix": "",
+            "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Action\":[\"s3:PutObject\"],\"Effect\":\"Allow\",\"Resource\":\"arn:aws:s3:::bagajpark-backups-7bec61c6/backups/*\"}]}",
+            "role": "bagajpark-aws-test-app-role"
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "aws_iam_role.app"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_iam_role_policy",
+      "name": "app_cost_read",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "bagajpark-aws-test-app-role:read-cost-and-free-tier",
+            "name": "read-cost-and-free-tier",
+            "name_prefix": "",
+            "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Action\":[\"ce:GetCostAndUsage\",\"freetier:GetAccountPlanState\"],\"Effect\":\"Allow\",\"Resource\":\"*\"}]}",
+            "role": "bagajpark-aws-test-app-role"
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "aws_iam_role.app"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_iam_role_policy",
+      "name": "app_deploy_config_read",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "bagajpark-aws-test-app-role:read-deploy-config",
+            "name": "read-deploy-config",
+            "name_prefix": "",
+            "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Action\":[\"s3:GetObject\"],\"Effect\":\"Allow\",\"Resource\":\"arn:aws:s3:::bagajpark-backups-7bec61c6/deploy-config/*\"},{\"Action\":[\"s3:ListBucket\"],\"Condition\":{\"StringLike\":{\"s3:prefix\":[\"deploy-config/*\"]}},\"Effect\":\"Allow\",\"Resource\":\"arn:aws:s3:::bagajpark-backups-7bec61c6\"}]}",
+            "role": "bagajpark-aws-test-app-role"
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "aws_iam_role.app"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_iam_role_policy",
+      "name": "app_media_write",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "bagajpark-aws-test-app-role:write-shop-media",
+            "name": "write-shop-media",
+            "name_prefix": "",
+            "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Action\":[\"s3:PutObject\",\"s3:DeleteObject\"],\"Effect\":\"Allow\",\"Resource\":\"arn:aws:s3:::bagajpark-media-7bec61c6/shops/*\"}]}",
+            "role": "bagajpark-aws-test-app-role"
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "aws_iam_role.app",
+            "aws_s3_bucket.media"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_iam_role_policy",
+      "name": "app_ssm_read",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "bagajpark-aws-test-app-role:read-tls-ssm-parameters",
+            "name": "read-tls-ssm-parameters",
+            "name_prefix": "",
+            "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Action\":[\"ssm:GetParameter\"],\"Effect\":\"Allow\",\"Resource\":[\"arn:aws:ssm:eu-central-1:710882445040:parameter/bagajpark/aws-test/tls/cert\",\"arn:aws:ssm:eu-central-1:710882445040:parameter/bagajpark/aws-test/tls/key\"]},{\"Action\":[\"kms:Decrypt\"],\"Condition\":{\"StringEquals\":{\"kms:ViaService\":\"ssm.eu-central-1.amazonaws.com\"}},\"Effect\":\"Allow\",\"Resource\":\"*\"}]}",
+            "role": "bagajpark-aws-test-app-role"
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "aws_iam_role.app",
+            "data.aws_caller_identity.current"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_iam_role_policy",
+      "name": "app_ssm_read_env",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "bagajpark-aws-test-app-role:read-app-env-ssm-parameters",
+            "name": "read-app-env-ssm-parameters",
+            "name_prefix": "",
+            "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Action\":[\"ssm:GetParametersByPath\",\"ssm:GetParameter\",\"ssm:GetParameters\"],\"Effect\":\"Allow\",\"Resource\":[\"arn:aws:ssm:eu-central-1:710882445040:parameter/bagajpark/env/app\",\"arn:aws:ssm:eu-central-1:710882445040:parameter/bagajpark/env/app/*\"]},{\"Action\":[\"kms:Decrypt\"],\"Condition\":{\"StringEquals\":{\"kms:ViaService\":\"ssm.eu-central-1.amazonaws.com\"}},\"Effect\":\"Allow\",\"Resource\":\"*\"}]}",
+            "role": "bagajpark-aws-test-app-role"
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "aws_iam_role.app",
+            "data.aws_caller_identity.current"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_iam_role_policy_attachment",
+      "name": "app_ssm_core",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "bagajpark-aws-test-app-role-20261025111400143900000001",
+            "policy_arn": "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
+            "role": "bagajpark-aws-test-app-role"
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "aws_iam_role.app"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_instance",
+      "name": "app",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "ami": "ami-0bcebf29195dfeddb",
+            "arn": "arn:aws:ec2:eu-central-1:710882445040:instance/i-025a7f973c0210468",
+            "associate_public_ip_address": true,
+            "availability_zone": "eu-central-1a",
+            "capacity_reservation_specification": [
+              {
+                "capacity_reservation_preference": "open",
+                "capacity_reservation_target": []
+              }
+            ],
+            "cpu_core_count": 1,
+            "cpu_options": [
+              {
+                "amd_sev_snp": "",
+                "core_count": 1,
+                "threads_per_core": 2
+              }
+            ],
+            "cpu_threads_per_core": 2,
+            "credit_specification": [],
+            "disable_api_stop": false,
+            "disable_api_termination": false,
+            "ebs_block_device": [],
+            "ebs_optimized": false,
+            "enable_primary_ipv6": null,
+            "enclave_options": [
+              {
+                "enabled": false
+              }
+            ],
+            "ephemeral_block_device": [],
+            "get_password_data": false,
+            "hibernation": false,
+            "host_id": "",
+            "host_resource_group_arn": null,
+            "iam_instance_profile": "bagajpark-aws-test-app-profile",
+            "id": "i-025a7f973c0210468",
+            "instance_initiated_shutdown_behavior": "stop",
+            "instance_lifecycle": "",
+            "instance_market_options": [],
+            "instance_state": "running",
+            "instance_type": "c7i-flex.large",
+            "ipv6_address_count": 0,
+            "ipv6_addresses": [],
+            "key_name": "bagajpark-aws-test-key",
+            "launch_template": [],
+            "maintenance_options": [
+              {
+                "auto_recovery": "default"
+              }
+            ],
+            "metadata_options": [
+              {
+                "http_endpoint": "enabled",
+                "http_protocol_ipv6": "disabled",
+                "http_put_response_hop_limit": 2,
+                "http_tokens": "required",
+                "instance_metadata_tags": "disabled"
+              }
+            ],
+            "monitoring": false,
+            "network_interface": [],
+            "outpost_arn": "",
+            "password_data": "",
+            "placement_group": "",
+            "placement_partition_number": 0,
+            "primary_network_interface_id": "eni-0eb4717934439bb95",
+            "private_dns": "ip-10-20-1-118.eu-central-1.compute.internal",
+            "private_dns_name_options": [
+              {
+                "enable_resource_name_dns_a_record": false,
+                "enable_resource_name_dns_aaaa_record": false,
+                "hostname_type": "ip-name"
+              }
+            ],
+            "private_ip": "10.20.1.118",
+            "public_dns": "ec2-18-184-135-44.eu-central-1.compute.amazonaws.com",
+            "public_ip": "18.184.135.44",
+            "root_block_device": [
+              {
+                "delete_on_termination": true,
+                "device_name": "/dev/xvda",
+                "encrypted": false,
+                "iops": 3000,
+                "kms_key_id": "",
+                "tags": null,
+                "tags_all": {
+                  "ManagedBy": "terraform",
+                  "Project": "bagajpark-aws-test",
+                  "Stack": "stack"
+                },
+                "throughput": 125,
+                "volume_id": "vol-0a83a5e55cabdb3c0",
+                "volume_size": 30,
+                "volume_type": "gp3"
+              }
+            ],
+            "secondary_private_ips": [],
+            "security_groups": [],
+            "source_dest_check": true,
+            "spot_instance_request_id": "",
+            "subnet_id": "subnet-06676bab9a053a53f",
+            "tags": {
+              "Name": "bagajpark-aws-test-app"
+            },
+            "tags_all": {
+              "ManagedBy": "terraform",
+              "Name": "bagajpark-aws-test-app",
+              "Project": "bagajpark-aws-test",
+              "Stack": "stack"
+            },
+            "tenancy": "default",
+            "timeouts": null,
+            "user_data": "c7d847c8016d8432b00175026e1a3bc2f07c6c95",
+            "user_data_base64": null,
+            "user_data_replace_on_change": false,
+            "volume_tags": null,
+            "vpc_security_group_ids": [
+              "sg-02256e0d279ac75cd"
+            ]
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6MTIwMDAwMDAwMDAwMCwicmVhZCI6OTAwMDAwMDAwMDAwLCJ1cGRhdGUiOjYwMDAwMDAwMDAwMH0sInNjaGVtYV92ZXJzaW9uIjoiMSJ9",
+          "dependencies": [
+            "aws_iam_instance_profile.app",
+            "aws_iam_role.app",
+            "aws_key_pair.deployer",
+            "aws_security_group.web",
+            "aws_subnet.public",
+            "aws_vpc.main",
+            "data.aws_ami.al2023",
+            "data.aws_availability_zones.available",
+            "data.http.cloudflare_ipv4",
+            "data.http.cloudflare_ipv6"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_internet_gateway",
+      "name": "main",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ec2:eu-central-1:710882445040:internet-gateway/igw-0291cca316ecbcdea",
+            "id": "igw-0291cca316ecbcdea",
+            "owner_id": "710882445040",
+            "tags": {
+              "Name": "bagajpark-aws-test-igw"
+            },
+            "tags_all": {
+              "ManagedBy": "terraform",
+              "Name": "bagajpark-aws-test-igw",
+              "Project": "bagajpark-aws-test",
+              "Stack": "stack"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-019b7ba66dbf3183b"
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjEyMDAwMDAwMDAwMDAsInVwZGF0ZSI6MTIwMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "aws_vpc.main"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_key_pair",
+      "name": "deployer",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:eu-central-1:710882445040:key-pair/bagajpark-aws-test-key",
+            "fingerprint": "lQm9NjtUlRkynEX3ioxckzYhO42VYmJcg8xGt/gCpJM=",
+            "id": "bagajpark-aws-test-key",
+            "key_name": "bagajpark-aws-test-key",
+            "key_name_prefix": "",
+            "key_pair_id": "key-07b9ee61b3497d97f",
+            "key_type": "ed25519",
+            "public_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICsiqqyiaAAxSOOg3JisVIytPDzpqqYXe9ulZ9Jbng37 furkandogmus@aws-bagajpark-test",
+            "tags": null,
+            "tags_all": {
+              "ManagedBy": "terraform",
+              "Project": "bagajpark-aws-test",
+              "Stack": "stack"
+            }
+          },
+          "sensitive_attributes": [],
+          "private": "eyJzY2hlbWFfdmVyc2lvbiI6IjEifQ=="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_route_table",
+      "name": "public",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ec2:eu-central-1:710882445040:route-table/rtb-0403b8b5574a4e62d",
+            "id": "rtb-0403b8b5574a4e62d",
+            "owner_id": "710882445040",
+            "propagating_vgws": [],
+            "route": [
+              {
+                "carrier_gateway_id": "",
+                "cidr_block": "0.0.0.0/0",
+                "core_network_arn": "",
+                "destination_prefix_list_id": "",
+                "egress_only_gateway_id": "",
+                "gateway_id": "igw-0291cca316ecbcdea",
+                "ipv6_cidr_block": "",
+                "local_gateway_id": "",
+                "nat_gateway_id": "",
+                "network_interface_id": "",
+                "transit_gateway_id": "",
+                "vpc_endpoint_id": "",
+                "vpc_peering_connection_id": ""
+              }
+            ],
+            "tags": {
+              "Name": "bagajpark-aws-test-public-rt"
+            },
+            "tags_all": {
+              "ManagedBy": "terraform",
+              "Name": "bagajpark-aws-test-public-rt",
+              "Project": "bagajpark-aws-test",
+              "Stack": "stack"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-019b7ba66dbf3183b"
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJ1cGRhdGUiOjEyMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "aws_internet_gateway.main",
+            "aws_vpc.main"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_route_table_association",
+      "name": "public",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "gateway_id": "",
+            "id": "rtbassoc-0b4791f2324deff8c",
+            "route_table_id": "rtb-0403b8b5574a4e62d",
+            "subnet_id": "subnet-06676bab9a053a53f",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJ1cGRhdGUiOjEyMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "aws_internet_gateway.main",
+            "aws_route_table.public",
+            "aws_subnet.public",
+            "aws_vpc.main",
+            "data.aws_availability_zones.available"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_s3_bucket",
+      "name": "media",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "acceleration_status": "",
+            "acl": null,
+            "arn": "arn:aws:s3:::bagajpark-media-7bec61c6",
+            "bucket": "bagajpark-media-7bec61c6",
+            "bucket_domain_name": "bagajpark-media-7bec61c6.s3.amazonaws.com",
+            "bucket_prefix": "",
+            "bucket_regional_domain_name": "bagajpark-media-7bec61c6.s3.eu-central-1.amazonaws.com",
+            "cors_rule": [],
+            "force_destroy": false,
+            "grant": [
+              {
+                "id": "eabd218db8cde41144dbfbe0fa87a2b259f9a32dff7b0a6573bbc01f76003fa6",
+                "permissions": [
+                  "FULL_CONTROL"
+                ],
+                "type": "CanonicalUser",
+                "uri": ""
+              }
+            ],
+            "hosted_zone_id": "Z21DNDUVLTQW6Q",
+            "id": "bagajpark-media-7bec61c6",
+            "lifecycle_rule": [],
+            "logging": [],
+            "object_lock_configuration": [],
+            "object_lock_enabled": false,
+            "policy": "",
+            "region": "eu-central-1",
+            "replication_configuration": [],
+            "request_payer": "BucketOwner",
+            "server_side_encryption_configuration": [
+              {
+                "rule": [
+                  {
+                    "apply_server_side_encryption_by_default": [
+                      {
+                        "kms_master_key_id": "",
+                        "sse_algorithm": "AES256"
+                      }
+                    ],
+                    "bucket_key_enabled": false
+                  }
+                ]
+              }
+            ],
+            "tags": {
+              "Project": "bagajpark"
+            },
+            "tags_all": {
+              "ManagedBy": "terraform",
+              "Project": "bagajpark",
+              "Stack": "stack"
+            },
+            "timeouts": null,
+            "versioning": [
+              {
+                "enabled": false,
+                "mfa_delete": false
+              }
+            ],
+            "website": [],
+            "website_domain": null,
+            "website_endpoint": null
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxMjAwMDAwMDAwMDAwLCJkZWxldGUiOjM2MDAwMDAwMDAwMDAsInJlYWQiOjEyMDAwMDAwMDAwMDAsInVwZGF0ZSI6MTIwMDAwMDAwMDAwMH19"
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_s3_bucket_ownership_controls",
+      "name": "media",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "bucket": "bagajpark-media-7bec61c6",
+            "id": "bagajpark-media-7bec61c6",
+            "rule": [
+              {
+                "object_ownership": "BucketOwnerEnforced"
+              }
+            ]
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "aws_s3_bucket.media"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_s3_bucket_policy",
+      "name": "media_public_read",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "bucket": "bagajpark-media-7bec61c6",
+            "id": "bagajpark-media-7bec61c6",
+            "policy": "{\"Statement\":[{\"Action\":\"s3:GetObject\",\"Effect\":\"Allow\",\"Principal\":\"*\",\"Resource\":\"arn:aws:s3:::bagajpark-media-7bec61c6/shops/*\",\"Sid\":\"PublicReadShopImages\"}],\"Version\":\"2012-10-17\"}"
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "aws_s3_bucket.media",
+            "aws_s3_bucket_public_access_block.media"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_s3_bucket_public_access_block",
+      "name": "media",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "block_public_acls": true,
+            "block_public_policy": false,
+            "bucket": "bagajpark-media-7bec61c6",
+            "id": "bagajpark-media-7bec61c6",
+            "ignore_public_acls": true,
+            "restrict_public_buckets": false
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "aws_s3_bucket.media"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_s3_bucket_server_side_encryption_configuration",
+      "name": "media",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "bucket": "bagajpark-media-7bec61c6",
+            "expected_bucket_owner": "",
+            "id": "bagajpark-media-7bec61c6",
+            "rule": [
+              {
+                "apply_server_side_encryption_by_default": [
+                  {
+                    "kms_master_key_id": "",
+                    "sse_algorithm": "AES256"
+                  }
+                ],
+                "bucket_key_enabled": null
+              }
+            ]
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "aws_s3_bucket.media"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_security_group",
+      "name": "web",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:eu-central-1:710882445040:security-group/sg-02256e0d279ac75cd",
+            "description": "80/443 herkese acik, SSH sadece allowed_ssh_cidr degerine acik",
+            "egress": [
+              {
+                "cidr_blocks": [
+                  "0.0.0.0/0"
+                ],
+                "description": "",
+                "from_port": 0,
+                "ipv6_cidr_blocks": [],
+                "prefix_list_ids": [],
+                "protocol": "-1",
+                "security_groups": [],
+                "self": false,
+                "to_port": 0
+              }
+            ],
+            "id": "sg-02256e0d279ac75cd",
+            "ingress": [
+              {
+                "cidr_blocks": [
+                  "173.245.48.0/20",
+                  "103.21.244.0/22",
+                  "103.22.200.0/22",
+                  "103.31.4.0/22",
+                  "141.101.64.0/18",
+                  "108.162.192.0/18",
+                  "190.93.240.0/20",
+                  "188.114.96.0/20",
+                  "197.234.240.0/22",
+                  "198.41.128.0/17",
+                  "162.158.0.0/15",
+                  "104.16.0.0/13",
+                  "104.24.0.0/14",
+                  "172.64.0.0/13",
+                  "131.0.72.0/22"
+                ],
+                "description": "HTTP (Cloudflare edge)",
+                "from_port": 80,
+                "ipv6_cidr_blocks": [
+                  "2400:cb00::/32",
+                  "2606:4700::/32",
+                  "2803:f800::/32",
+                  "2405:b500::/32",
+                  "2405:8100::/32",
+                  "2a06:98c0::/29",
+                  "2c0f:f248::/32"
+                ],
+                "prefix_list_ids": [],
+                "protocol": "tcp",
+                "security_groups": [],
+                "self": false,
+                "to_port": 80
+              },
+              {
+                "cidr_blocks": [
+                  "173.245.48.0/20",
+                  "103.21.244.0/22",
+                  "103.22.200.0/22",
+                  "103.31.4.0/22",
+                  "141.101.64.0/18",
+                  "108.162.192.0/18",
+                  "190.93.240.0/20",
+                  "188.114.96.0/20",
+                  "197.234.240.0/22",
+                  "198.41.128.0/17",
+                  "162.158.0.0/15",
+                  "104.16.0.0/13",
+                  "104.24.0.0/14",
+                  "172.64.0.0/13",
+                  "131.0.72.0/22"
+                ],
+                "description": "HTTPS (Cloudflare edge)",
+                "from_port": 443,
+                "ipv6_cidr_blocks": [
+                  "2400:cb00::/32",
+                  "2606:4700::/32",
+                  "2803:f800::/32",
+                  "2405:b500::/32",
+                  "2405:8100::/32",
+                  "2a06:98c0::/29",
+                  "2c0f:f248::/32"
+                ],
+                "prefix_list_ids": [],
+                "protocol": "tcp",
+                "security_groups": [],
+                "self": false,
+                "to_port": 443
+              },
+              {
+                "cidr_blocks": [
+                  "31.223.13.209/32"
+                ],
+                "description": "SSH (custom port, kisitli CIDR)",
+                "from_port": 2222,
+                "ipv6_cidr_blocks": [],
+                "prefix_list_ids": [],
+                "protocol": "tcp",
+                "security_groups": [],
+                "self": false,
+                "to_port": 2222
+              }
+            ],
+            "name": "bagajpark-aws-test-web",
+            "name_prefix": "",
+            "owner_id": "710882445040",
+            "revoke_rules_on_delete": false,
+            "tags": {
+              "Ingress": "yalnizca-cloudflare-edge",
+              "Name": "bagajpark-aws-test-web-sg"
+            },
+            "tags_all": {
+              "Ingress": "yalnizca-cloudflare-edge",
+              "ManagedBy": "terraform",
+              "Name": "bagajpark-aws-test-web-sg",
+              "Project": "bagajpark-aws-test",
+              "Stack": "stack"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-019b7ba66dbf3183b"
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6OTAwMDAwMDAwMDAwfSwic2NoZW1hX3ZlcnNpb24iOiIxIn0=",
+          "dependencies": [
+            "aws_vpc.main",
+            "data.http.cloudflare_ipv4",
+            "data.http.cloudflare_ipv6"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_subnet",
+      "name": "public",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:eu-central-1:710882445040:subnet/subnet-06676bab9a053a53f",
+            "assign_ipv6_address_on_creation": false,
+            "availability_zone": "eu-central-1a",
+            "availability_zone_id": "euc1-az2",
+            "cidr_block": "10.20.1.0/24",
+            "customer_owned_ipv4_pool": "",
+            "enable_dns64": false,
+            "enable_lni_at_device_index": 0,
+            "enable_resource_name_dns_a_record_on_launch": false,
+            "enable_resource_name_dns_aaaa_record_on_launch": false,
+            "id": "subnet-06676bab9a053a53f",
+            "ipv6_cidr_block": "",
+            "ipv6_cidr_block_association_id": "",
+            "ipv6_native": false,
+            "map_customer_owned_ip_on_launch": false,
+            "map_public_ip_on_launch": true,
+            "outpost_arn": "",
+            "owner_id": "710882445040",
+            "private_dns_hostname_type_on_launch": "ip-name",
+            "tags": {
+              "Name": "bagajpark-aws-test-public"
+            },
+            "tags_all": {
+              "ManagedBy": "terraform",
+              "Name": "bagajpark-aws-test-public",
+              "Project": "bagajpark-aws-test",
+              "Stack": "stack"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-019b7ba66dbf3183b"
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6MTIwMDAwMDAwMDAwMH0sInNjaGVtYV92ZXJzaW9uIjoiMSJ9",
+          "dependencies": [
+            "aws_vpc.main",
+            "data.aws_availability_zones.available"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_vpc",
+      "name": "main",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:eu-central-1:710882445040:vpc/vpc-019b7ba66dbf3183b",
+            "assign_generated_ipv6_cidr_block": false,
+            "cidr_block": "10.20.0.0/16",
+            "default_network_acl_id": "acl-0b3274a8d83772ab8",
+            "default_route_table_id": "rtb-07eee9067af2fb88b",
+            "default_security_group_id": "sg-0cd607d3bc04e88a1",
+            "dhcp_options_id": "dopt-0d41a60ff2da2a0e2",
+            "enable_dns_hostnames": true,
+            "enable_dns_support": true,
+            "enable_network_address_usage_metrics": false,
+            "id": "vpc-019b7ba66dbf3183b",
+            "instance_tenancy": "default",
+            "ipv4_ipam_pool_id": null,
+            "ipv4_netmask_length": null,
+            "ipv6_association_id": "",
+            "ipv6_cidr_block": "",
+            "ipv6_cidr_block_network_border_group": "",
+            "ipv6_ipam_pool_id": "",
+            "ipv6_netmask_length": 0,
+            "main_route_table_id": "rtb-07eee9067af2fb88b",
+            "owner_id": "710882445040",
+            "tags": {
+              "Name": "bagajpark-aws-test-vpc"
+            },
+            "tags_all": {
+              "ManagedBy": "terraform",
+              "Name": "bagajpark-aws-test-vpc",
+              "Project": "bagajpark-aws-test",
+              "Stack": "stack"
+            }
+          },
+          "sensitive_attributes": [],
+          "private": "eyJzY2hlbWFfdmVyc2lvbiI6IjEifQ=="
+        }
+      ]
+    }
+  ],
+  "check_results": [
+    {
+      "object_kind": "resource",
+      "config_addr": "aws_security_group.web",
+      "status": "pass",
+      "objects": [
+        {
+          "object_addr": "aws_security_group.web",
+          "status": "pass"
+        }
+      ]
+    }
+  ]
+}

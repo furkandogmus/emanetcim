@@ -10,18 +10,19 @@ variable "region" {
 
 variable "aws_profile" {
   # DIKKAT — profil ve workspace BIRLIKTE degisir:
-  #   workspace `hesap2`  -> profil `bagajpark-yeni` (hesap 772853132412) = CANLI
-  #   workspace `default` -> profil `bagajpark`      (hesap 269174115166) = eski, kapatiliyor
+  #   workspace `hesap3`  -> profil `personal-prod`  (hesap 710882445040) = CANLI (2026-10-25'ten beri)
+  #   workspace `hesap2`  -> profil `yerindeburger`  (hesap 772853132412) = eski, kapatiliyor
+  #   workspace `default` -> profil `bagajpark`      (hesap 269174115166) = eski
   # Varsayilan 2026-08-29'da `bagajpark`'tan `bagajpark-yeni`ye alindi: yerel workspace
   # zaten `hesap2` (yani CANLI hesabin state'i) ama profil hala eski hesaba bakiyordu.
   # Bu ikisi ayristiginda `terraform plan` her kaynagi "to create" gosterir ve bir apply
   # altyapiyi YANLIS hesapta ikinci kez kurar. Kesim kaydi: infra/aws/CUTOVER.md.
   # Dogrulama (salt okunur):
   #   terraform workspace show
-  #   aws sts get-caller-identity --profile bagajpark-yeni --query Account --output text
+  #   aws sts get-caller-identity --profile personal-prod --query Account --output text
   description = "~/.aws/config içindeki profil adı. Workspace ile eşleşmeli (yukarıdaki nota bakın)."
   type        = string
-  default     = "bagajpark-yeni"
+  default     = "personal-prod"
 }
 
 variable "backup_bucket_lifecycle_days" {
