@@ -328,6 +328,13 @@ export default function AdminDashboardClient({
                 <ShieldCheck size={18} className="opacity-40" />
                 {t("auditLogTitle")}
               </Link>
+              <Link
+                href="/admin/sorunlar"
+                className="w-full min-h-[3rem] px-5 bg-white/10 rounded-2xl text-xs id-eyebrow hover:bg-white/20 transition-all text-left flex items-center gap-3"
+              >
+                <ShieldAlert size={18} className="opacity-40" />
+                {t("teamIssuesNav")}
+              </Link>
             </div>
           </div>
           <div className="pt-8 mt-8 border-t border-white/10 flex items-center justify-between">
