@@ -49,7 +49,10 @@ chown ec2-user:ec2-user /opt/emanetci
 
 # --- SSM Agent: AL2023'te varsayilan kurulu/etkin geliyor, guvenlik agi olarak yine de
 # acikca enable ediliyor (CI/CD SSM Run Command ile deploy edecek, bkz. [[aws-paralel-ortam]]) ---
-systemctl enable --now amazon-ssm-agent 2>/dev/null || true
+# Guncel AL2023 AMI'lerinde amazon-ssm-agent ve cronie kurulu gelmiyor (2026-10-25):
+# `|| true` hatayi yutuyordu, instance SSM'e hic baglanmadi ve crontab kurulamadi.
+dnf install -y amazon-ssm-agent cronie
+systemctl enable --now amazon-ssm-agent crond
 
 # --- TLS materyalini SSM'den cek (statik AWS key kullanilmiyor, instance'in kendi
 # IAM roluyle) — manuel scp bir daha gerekmiyor, bkz. [[aws-paralel-ortam]] design.md ---
