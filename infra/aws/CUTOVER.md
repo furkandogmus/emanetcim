@@ -27,15 +27,15 @@
 | Cron | `ec2-user` crontab'ı yeni sunucuda (12 iş), yedek yeni bucket'a; eski sunucunun crontab'ı kaldırıldı (`/opt/emanetci/crontab.pre-move.txt`) |
 | GitHub vars | `AWS_DEPLOY_ROLE_ARN`, `AWS_DEPLOY_BUCKET`, `S3_PUBLIC_BASE_URL` yeni hesaba çevrildi |
 
-**Açık işler**
+**Kapanan işler (2026-10-25)**
 
-- `next/image` izinli alan adı build anında `S3_PUBLIC_BASE_URL`'den üretiliyor (`next.config.ts`).
-  Canlı imaj hâlâ eski medya bucket'ına izin veriyor, DB'deki 3 dükkan fotoğrafı URL'si de eski
-  bucket'ı gösteriyor. Bu yüzden eski medya bucket'ı **silinmedi**. `main`'e ilk merge yeni
-  değişkenle imajı yeniden üretir; o deploy'dan sonra 3 URL'de
-  `bagajpark-media-1d9eb152` → `bagajpark-media-7bec61c6` güncellenir, sonra eski bucket silinir.
-- Eski hesapta kalanlar (1 hafta geri dönüş payı, sonra `hesap2` workspace'i ile `terraform destroy`):
-  durmuş web'li instance `i-0753b8302a5f73413` (EIP'siz), bucket'lar.
+- #89 (`next` 16.4.1) ve #88 merge edildi; imaj yeni `S3_PUBLIC_BASE_URL` ile CI'dan yeni hesaba deploy
+  edildi. DB'deki 3 `Shop.image` URL'si yeni medya bucket'ına çevrildi (eski host'tan 0 kayıt kaldı);
+  üç fotoğraf hem doğrudan hem `next/image` üzerinden 200.
+- Eski hesap 772853132412 boşaltıldı: `hesap2` workspace'i `destroy` (EIP önce state'ten çıkarıldı),
+  eski bucket'lar ve SSM parametreleri silindi. İlk hesap 269174115166 de boşaltıldı (`default`
+  workspace `destroy`, bucket'lar silinmeden önce yerele arşivlendi). Hesapları kapatmak root ile
+  konsoldan yapılır.
 
 **Kesimde bulunanlar**
 
