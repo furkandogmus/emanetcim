@@ -8,7 +8,7 @@ import type {
   TeamIssueEventDto,
   TeamIssueUser,
 } from "@/services/TeamIssueService";
-import styles from "./AdminSorunlarClient.module.css";
+import styles from "./AdminIssuesClient.module.css";
 
 type Point = { x: number; y: number };
 type Stroke = { color: string; points: Point[] };
@@ -27,7 +27,7 @@ type DisplayPhoto = {
   file?: File;
 };
 
-interface AdminSorunlarClientProps {
+interface AdminIssuesClientProps {
   initialIssues: TeamIssueDto[];
 }
 
@@ -98,9 +98,9 @@ function paintStrokes(
   }
 }
 
-export default function AdminSorunlarClient({
+export default function AdminIssuesClient({
   initialIssues,
-}: AdminSorunlarClientProps) {
+}: AdminIssuesClientProps) {
   const t = useTranslations("AdminIssues");
 
   const [user, setUser] = useState<TeamIssueUser | null>(null);
@@ -159,7 +159,7 @@ export default function AdminSorunlarClient({
   const apiRequest = useCallback(
     async (action: string, options: RequestInit = {}) => {
       const response = await fetch(
-        `/api/admin/sorunlar?action=${encodeURIComponent(action)}`,
+        `/api/admin/issues?action=${encodeURIComponent(action)}`,
         options,
       );
       const result = (await response.json().catch(() => ({}))) as Record<
