@@ -2,9 +2,9 @@ import { setRequestLocale } from "next-intl/server";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { teamIssueService } from "@/services/TeamIssueService";
-import AdminSorunlarClient from "@/components/admin/AdminSorunlarClient";
+import AdminIssuesClient from "@/components/admin/AdminIssuesClient";
 
-export default async function AdminSorunlarPage({
+export default async function AdminIssuesPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
@@ -19,5 +19,5 @@ export default async function AdminSorunlarPage({
 
   const issues = await teamIssueService.listIssues();
 
-  return <AdminSorunlarClient initialIssues={issues} />;
+  return <AdminIssuesClient initialIssues={issues} />;
 }

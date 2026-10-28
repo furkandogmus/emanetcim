@@ -329,7 +329,7 @@ export default function AdminDashboardClient({
                 {t("auditLogTitle")}
               </Link>
               <Link
-                href="/admin/sorunlar"
+                href="/admin/issues"
                 className="w-full min-h-[3rem] px-5 bg-white/10 rounded-2xl text-xs id-eyebrow hover:bg-white/20 transition-all text-left flex items-center gap-3"
               >
                 <ShieldAlert size={18} className="opacity-40" />
