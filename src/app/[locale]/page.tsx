@@ -349,9 +349,6 @@ export default async function GuestPage({ params }: { params: Promise<{ locale: 
       */}
       {(() => {
         const tiles: { value: ReactNode; label: string }[] = [];
-        if (stats.activeLocations > 0) {
-          tiles.push({ value: nf.format(stats.activeLocations), label: t("trustStatLocations") });
-        }
         if (stats.completedStays > 0) {
           tiles.push({ value: nf.format(stats.completedStays), label: t("trustStatStays") });
         }
