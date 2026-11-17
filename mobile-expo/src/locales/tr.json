@@ -155,7 +155,7 @@
     }
   },
   "success": {
-    "title": "Rezervasyonun hazır!",
+    "title": "Rezervasyonun hazır",
     "body": "Dükkana gittiğinde QR kodunu göster, valizini bırak.",
     "viewBooking": "Rezervasyonu gör",
     "home": "Ana sayfa"
@@ -264,7 +264,20 @@
     "deleteConfirm": "Evet, hesabımı sil",
     "deleteFailedTitle": "Hesap silinemedi",
     "deleteActiveBookings": "Devam eden rezervasyonların var. Önce onları iptal et ya da tamamlanmalarını bekle.",
-    "deleteRequest": "Hesap kapatma talebi gönder"
+    "deleteRequest": "Hesap kapatma talebi gönder",
+    "sections": {
+      "account": "Hesap",
+      "support": "Destek"
+    },
+    "myBookings": "Rezervasyonlarım",
+    "notifications": "Bildirimler",
+    "on": "Açık",
+    "off": "Kapalı",
+    "language": "Dil",
+    "faq": "Sıkça sorulan sorular",
+    "contact": "Bize ulaş",
+    "terms": "Kullanım koşulları",
+    "addPhone": "Telefon numarası ekle"
   },
   "admin": {
     "title": "Yönetim",
@@ -364,14 +377,15 @@
     "phoneLabel": "Cep telefonu",
     "phonePlaceholder": "5XX XXX XX XX",
     "phoneHint": "Türkiye cep numarası. Boş bırakırsan numaran silinir.",
-    "emailNote": "E-posta adresin ({{email}}) uygulamadan değiştirilemez.",
     "save": "Kaydet",
     "errors": {
       "invalid_name": "Ad 1–100 karakter olmalı.",
       "invalid_phone": "Geçerli bir Türkiye cep numarası gir (5XX XXX XX XX).",
       "phone_taken": "Bu numara başka bir hesapta kayıtlı.",
       "no_fields": "Değiştirilecek bir bilgi yok."
-    }
+    },
+    "emailLabel": "E-posta",
+    "emailLocked": "E-posta adresi uygulamadan değiştirilemez."
   },
   "placeSearch": {
     "label": "Adres, otel ya da semt ara",
