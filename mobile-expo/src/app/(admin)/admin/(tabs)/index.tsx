@@ -15,7 +15,7 @@ import { errorMessage } from "@/lib/errors";
 import { formatDay, formatDayTime, formatMoney } from "@/lib/format";
 import { SITE_ORIGIN } from "@/lib/images";
 import { useAdminOverview } from "@/lib/queries";
-import type { AdminOverview } from "@/lib/types";
+import type { AdminBookingFilter, AdminOverview } from "@/lib/types";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 
 /** Mobilde olmayan yonetim isleri web panelinde; yollar `src/app/[locale]/admin/*` ile ayni. */
@@ -84,13 +84,13 @@ function Dashboard({
       {/* Bugun: operasyonun nabzi, tek kartta dort sayi. */}
       <Section title={t("admin.todayTitle")}>
         <Card style={styles.todayCard}>
-          <Stat label={t("admin.todayArrivals")} value={data.today.arrivals} />
+          <Stat label={t("admin.todayArrivals")} value={data.today.arrivals} filter="arrivals" />
           <View style={styles.rule} />
-          <Stat label={t("admin.todayPickups")} value={data.today.pickups} />
+          <Stat label={t("admin.todayPickups")} value={data.today.pickups} filter="pickups" />
           <View style={styles.rule} />
-          <Stat label={t("admin.todayInStorage")} value={data.today.bagsInStorage} accent />
+          <Stat label={t("admin.todayInStorage")} value={data.today.bagsInStorage} filter="inStorage" accent />
           <View style={styles.rule} />
-          <Stat label={t("admin.todayNew")} value={data.today.newBookings} />
+          <Stat label={t("admin.todayNew")} value={data.today.newBookings} filter="all" />
         </Card>
       </Section>
 
@@ -131,11 +131,11 @@ function Dashboard({
         </View>
         <LinkGroup>
           <AttentionRow label={t("admin.openDisputes")} value={a.openDisputes} onPress={() => openWeb("disputes")} />
-          <AttentionRow label={t("admin.overdueBookings")} value={a.overdueBookings} onPress={() => openWeb("bookings")} />
+          <AttentionRow label={t("admin.overdueBookings")} value={a.overdueBookings} onPress={() => openBookings("overdue")} />
         </LinkGroup>
       </Section>
 
-      <Section title={t("admin.recent")} action={{ label: t("home.allBookings"), onPress: () => openWeb("bookings") }}>
+      <Section title={t("admin.recent")} action={{ label: t("home.allBookings"), onPress: () => openBookings("all") }}>
         {data.recent.length === 0 ? (
           <AppText variant="caption">{t("admin.noRecent")}</AppText>
         ) : (
@@ -144,7 +144,7 @@ function Dashboard({
               <Pressable
                 key={b.id}
                 accessibilityRole="link"
-                onPress={() => openWeb("bookings")}
+                onPress={() => router.push(`/admin/booking/${b.id}`)}
                 style={({ pressed }) => [styles.recent, pressed && { backgroundColor: colors.surfaceMuted }]}
               >
                 <View style={{ flex: 1, gap: 2 }}>
@@ -214,14 +214,34 @@ function Section({
   );
 }
 
-function Stat({ label, value, accent }: { label: string; value: number; accent?: boolean }) {
+/** Genel bakistaki sayi, ilgili suzgecle Rezervasyonlar sekmesini acar. */
+function openBookings(filter: AdminBookingFilter) {
+  router.push({ pathname: "/admin/bookings", params: { filter } });
+}
+
+function Stat({
+  label,
+  value,
+  accent,
+  filter,
+}: {
+  label: string;
+  value: number;
+  accent?: boolean;
+  filter: AdminBookingFilter;
+}) {
   return (
-    <View style={styles.stat}>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${label}: ${value}`}
+      onPress={() => openBookings(filter)}
+      style={({ pressed }) => [styles.stat, pressed && { opacity: 0.6 }]}
+    >
       <AppText style={[styles.statValue, accent && value > 0 && { color: colors.accent }]}>{value}</AppText>
       <AppText variant="caption" numberOfLines={2} style={styles.statLabel}>
         {label}
       </AppText>
-    </View>
+    </Pressable>
   );
 }
 

@@ -1,14 +1,12 @@
 import { useState } from "react";
 import { Alert, FlatList, Pressable, RefreshControl, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { LuggageTag } from "@/components/Illustrations";
 import { AdminMessageReply } from "@/components/AdminMessageReply";
-import { AppText, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
+import { AppText, Button, CenterMessage, Loading } from "@/components/ui";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { formatDayTime, initial } from "@/lib/format";
@@ -52,12 +50,9 @@ export default function AdminMessagesScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
+      {/* Sekme ekrani: geri dugmesi yok, baslik diger sekmelerle ayni hizada. */}
       <View style={styles.header}>
-        <IconButton label={t("common.back")} onPress={() => router.back()}>
-          <ArrowLeft size={20} color={colors.ink} />
-        </IconButton>
-        <AppText variant="heading">{t("admin.messages")}</AppText>
-        <View style={{ width: 44 }} />
+        <AppText variant="title">{t("admin.messages")}</AppText>
       </View>
 
       {query.isLoading ? (
@@ -137,13 +132,7 @@ export default function AdminMessagesScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: space.xl,
-    paddingVertical: space.md,
-  },
+  header: { padding: space.xl, paddingBottom: space.lg },
   list: { padding: space.xl, paddingTop: space.sm, gap: space.md },
   item: {
     gap: space.md,

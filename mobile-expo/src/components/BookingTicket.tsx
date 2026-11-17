@@ -5,8 +5,11 @@ import { useTranslation } from "react-i18next";
 import { StatusBadge } from "@/components/StatusBadge";
 import { AppText, Banner } from "@/components/ui";
 import { formatDay, formatMoney, formatTime } from "@/lib/format";
-import type { BookingDetail } from "@/lib/types";
+import type { BookingSummary } from "@/lib/types";
 import { colors, fonts, radius, space } from "@/theme/tokens";
+
+/** Bilet yalnizca ozet alanlarini ve (gosterilecekse) QR token'ini okur; yonetim de kullanir. */
+type TicketBooking = BookingSummary & { qrCodeToken?: string | null };
 
 /**
  * Misafirin dukkanda gosterdigi "emanet fisi". Vestiyer/bagaj fisi gibi iki parca:
@@ -19,7 +22,7 @@ export function BookingTicket({
   title,
   subtitle,
 }: {
-  booking: BookingDetail;
+  booking: TicketBooking;
   showQr: boolean;
   /** Esnaf gorunumunde misafir adi; varsayilan dukkan adi. */
   title?: string;
