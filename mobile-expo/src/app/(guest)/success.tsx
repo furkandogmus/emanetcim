@@ -1,7 +1,7 @@
 import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
-import { CircleCheck } from "lucide-react-native";
+import { LuggageTag } from "@/components/Illustrations";
 import { useTranslation } from "react-i18next";
 
 import { AppText, Button } from "@/components/ui";
@@ -14,9 +14,7 @@ export default function SuccessScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.center}>
-        <View style={styles.icon}>
-          <CircleCheck size={56} color={colors.success} />
-        </View>
+        <LuggageTag size={104} stamp />
         <AppText variant="title" style={{ textAlign: "center" }}>
           {t("success.title")}
         </AppText>

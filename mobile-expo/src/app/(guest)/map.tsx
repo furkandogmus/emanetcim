@@ -8,6 +8,7 @@ import { ArrowLeft, Search } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { BottomSheet } from "@/components/BottomSheet";
+import { MapSnippet } from "@/components/Illustrations";
 import { ShopCard } from "@/components/ShopCard";
 import { AppText, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { errorMessage } from "@/lib/errors";
@@ -196,7 +197,7 @@ export default function MapScreen() {
             action={<Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />}
           />
         ) : shops.length === 0 ? (
-          <CenterMessage title={t("map.empty")} />
+          <CenterMessage art={<MapSnippet width={120} price="?" />} title={t("map.empty")} />
         ) : (
           <FlatList
             data={shops}

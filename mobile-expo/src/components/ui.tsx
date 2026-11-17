@@ -94,11 +94,14 @@ export function Chip({
   selected,
   onPress,
   disabled,
+  soft,
 }: {
   label: string;
   selected?: boolean;
   onPress?: () => void;
   disabled?: boolean;
+  /** Secici (dukkan, filtre): secili hali siyah dolgu yerine yumusak turuncu. */
+  soft?: boolean;
 }) {
   return (
     <Pressable
@@ -108,11 +111,12 @@ export function Chip({
       onPress={onPress}
       style={[
         styles.chip,
-        selected && { backgroundColor: colors.ink, borderColor: colors.ink },
+        selected && (soft ? { backgroundColor: colors.brandSoft, borderColor: colors.brand } : { backgroundColor: colors.ink, borderColor: colors.ink }),
+        soft && { minHeight: 36 },
         disabled && { opacity: 0.35 },
       ]}
     >
-      <Text style={[styles.chipText, selected && { color: colors.white }]}>{label}</Text>
+      <Text style={[styles.chipText, selected && { color: soft ? colors.accent : colors.white }]}>{label}</Text>
     </Pressable>
   );
 }
@@ -171,13 +175,17 @@ export function CenterMessage({
   title,
   body,
   action,
+  art,
 }: {
   title: string;
   body?: string;
   action?: ReactNode;
+  /** Bos durumda ikon yerine urunun dunyasindan bir nesne (Illustrations). */
+  art?: ReactNode;
 }) {
   return (
     <View style={styles.center}>
+      {art ? <View style={{ marginBottom: space.sm }}>{art}</View> : null}
       <AppText variant="heading" style={{ textAlign: "center" }}>
         {title}
       </AppText>
