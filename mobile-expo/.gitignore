@@ -45,3 +45,4 @@ yarn-error.*
 
 # Firebase istemci ayari; EAS GOOGLE_SERVICES_JSON dosya degiskeniyle verir.
 /google-services.json
+/build/

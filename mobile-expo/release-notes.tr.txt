@@ -1,0 +1,1 @@
+Yeni arayüz: daha sade ekranlar, rezervasyon detayında emanet fişi, popüler şehir fotoğrafları. Profilde dil seçimi (Türkçe/English), bildirim durumu ve destek bağlantıları. Esnaf panelinde sabit "QR okut" düğmesi. Zayıf bağlantıda daha hızlı açılış.
