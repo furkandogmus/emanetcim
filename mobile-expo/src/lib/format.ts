@@ -55,3 +55,12 @@ export function stayDays(checkIn: Date, checkOut: Date) {
   if (!Number.isFinite(ms) || ms <= 0) return 1;
   return Math.max(1, Math.ceil(ms / (24 * 60 * 60 * 1000)));
 }
+
+/**
+ * Avatar bas harfi. Ad NFD gelirse ("O" + birlesik nokta) ilk karakter tek basina
+ * okunmaz; once NFC, sonra Turkce buyuk harf ("i" -> "I" degil "İ").
+ */
+export function initial(name: string) {
+  const first = [...name.normalize("NFC").trim()][0] ?? "?";
+  return first.toLocaleUpperCase("tr-TR");
+}

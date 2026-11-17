@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { formatKm, stayDays } from "@/lib/format";
+import { formatKm, stayDays, initial } from "@/lib/format";
 
 const at = (iso: string) => new Date(iso);
 
@@ -26,5 +26,17 @@ describe("formatKm", () => {
     expect(formatKm(0.86)).toBe("0.9");
     expect(formatKm(9.94)).toBe("9.9");
     expect(formatKm(12.6)).toBe("13");
+  });
+});
+
+describe("initial", () => {
+  it("NFD gelen adda birlesik karakteri tek harf olarak alir", () => {
+    expect(initial("O\u0308rnek Esnaf")).toBe("Ö");
+  });
+  it("Turkce buyuk harf kurali", () => {
+    expect(initial("ilker")).toBe("İ");
+  });
+  it("bos ad", () => {
+    expect(initial("   ")).toBe("?");
   });
 });

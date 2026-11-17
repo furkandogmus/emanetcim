@@ -258,6 +258,6 @@ const styles = StyleSheet.create({
 
 /** "Test Misafir" -> "TM"; e-postada ilk harf. */
 function initials(name: string) {
-  const parts = name.split(/[\s@.]+/).filter(Boolean);
+  const parts = name.normalize("NFC").split(/[\s@.]+/).filter(Boolean);
   return ((parts[0]?.[0] ?? "") + (name.includes("@") ? "" : (parts[1]?.[0] ?? ""))).toLocaleUpperCase("tr-TR") || "?";
 }
