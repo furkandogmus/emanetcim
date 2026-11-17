@@ -92,6 +92,18 @@ export default function ProfileEditScreen() {
             </IconButton>
           </View>
 
+          {user.email ? (
+            <View style={styles.field}>
+              <AppText variant="label">{t("profileEdit.emailLabel")}</AppText>
+              <View style={[styles.input, styles.readOnly]}>
+                <AppText variant="body" style={{ color: colors.inkSecondary }} numberOfLines={1}>
+                  {user.email}
+                </AppText>
+              </View>
+              <AppText variant="caption">{t("profileEdit.emailLocked")}</AppText>
+            </View>
+          ) : null}
+
           <View style={styles.field}>
             <AppText variant="label" nativeID="profileNameLabel">
               {t("profileEdit.nameLabel")}
@@ -128,9 +140,6 @@ export default function ProfileEditScreen() {
             <AppText variant="caption">{t("profileEdit.phoneHint")}</AppText>
           </View>
 
-          {user.email ? (
-            <AppText variant="caption">{t("profileEdit.emailNote", { email: user.email })}</AppText>
-          ) : null}
 
           {error ? <Banner tone="danger" body={error} /> : null}
           <Button title={t("profileEdit.save")} onPress={save} loading={busy} />
@@ -145,6 +154,7 @@ const styles = StyleSheet.create({
   content: { padding: space.xl, gap: space.lg },
   header: { flexDirection: "row", alignItems: "center", gap: space.md },
   field: { gap: space.sm },
+  readOnly: { justifyContent: "center", backgroundColor: colors.surfaceMuted, borderColor: colors.surfaceMuted },
   input: {
     minHeight: 54,
     borderRadius: radius.control,

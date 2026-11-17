@@ -59,13 +59,17 @@ export function ReferralCard({ audience }: { audience: "partner" | "guest" }) {
         </View>
       ) : (
         <>
-          <View style={styles.codeBox} accessible accessibilityLabel={t("referral.codeLabel", { code: data.code })}>
-            <AppText variant="label">{t("referral.yourCode")}</AppText>
-            <AppText selectable style={styles.code}>
-              {data.code}
-            </AppText>
+          <View style={styles.codeRow}>
+            <View style={styles.codeBox} accessible accessibilityLabel={t("referral.codeLabel", { code: data.code })}>
+              <AppText variant="label" style={{ fontSize: 12 }}>
+                {t("referral.yourCode")}
+              </AppText>
+              <AppText selectable style={styles.code}>
+                {data.code}
+              </AppText>
+            </View>
+            <Button variant="secondary" title={t("referral.share")} onPress={() => void share()} />
           </View>
-          <Button variant="secondary" title={t("referral.share")} onPress={() => void share()} />
         </>
       )}
     </Card>
@@ -73,7 +77,7 @@ export function ReferralCard({ audience }: { audience: "partner" | "guest" }) {
 }
 
 const styles = StyleSheet.create({
-  card: { gap: space.lg },
+  card: { gap: space.md },
   head: { flexDirection: "row", gap: space.md, alignItems: "flex-start" },
   icon: {
     width: 40,
@@ -83,15 +87,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  codeRow: { flexDirection: "row", alignItems: "center", gap: space.md },
   codeBox: {
-    alignItems: "center",
-    gap: space.xs,
-    paddingVertical: space.lg,
+    flex: 1,
+    gap: 2,
+    paddingVertical: space.sm,
+    paddingHorizontal: space.md,
     borderRadius: radius.control,
     borderWidth: 1,
     borderStyle: "dashed",
     borderColor: colors.borderStrong,
     backgroundColor: colors.surfaceMuted,
   },
-  code: { fontFamily: fonts.monoMedium, fontSize: 24, letterSpacing: 4, color: colors.ink },
+  code: { fontFamily: fonts.monoMedium, fontSize: 18, lineHeight: 24, letterSpacing: 2, color: colors.ink },
 });

@@ -155,7 +155,7 @@
     }
   },
   "success": {
-    "title": "You're booked!",
+    "title": "You're booked",
     "body": "Show your QR code at the shop and drop off your bags.",
     "viewBooking": "View booking",
     "home": "Home"
@@ -264,7 +264,20 @@
     "deleteConfirm": "Yes, delete my account",
     "deleteFailedTitle": "Couldn’t delete the account",
     "deleteActiveBookings": "You have ongoing bookings. Cancel them first or wait until they’re completed.",
-    "deleteRequest": "Request account closure"
+    "deleteRequest": "Request account closure",
+    "sections": {
+      "account": "Account",
+      "support": "Support"
+    },
+    "myBookings": "My bookings",
+    "notifications": "Notifications",
+    "on": "On",
+    "off": "Off",
+    "language": "Language",
+    "faq": "FAQ",
+    "contact": "Contact us",
+    "terms": "Terms of use",
+    "addPhone": "Add a phone number"
   },
   "admin": {
     "title": "Admin",
@@ -364,14 +377,15 @@
     "phoneLabel": "Mobile phone",
     "phonePlaceholder": "5XX XXX XX XX",
     "phoneHint": "A Turkish mobile number. Leave it empty to remove your number.",
-    "emailNote": "Your email address ({{email}}) can't be changed in the app.",
     "save": "Save",
     "errors": {
       "invalid_name": "Your name must be 1–100 characters.",
       "invalid_phone": "Enter a valid Turkish mobile number (5XX XXX XX XX).",
       "phone_taken": "This number is already registered to another account.",
       "no_fields": "There's nothing to change."
-    }
+    },
+    "emailLabel": "Email",
+    "emailLocked": "Your email address can't be changed in the app."
   },
   "placeSearch": {
     "label": "Search an address, hotel or neighbourhood",

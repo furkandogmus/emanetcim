@@ -2,6 +2,17 @@ import * as SecureStore from "expo-secure-store";
 import { getLocales } from "expo-localization";
 
 import { API_BASE_URL } from "./config";
+import i18n from "./i18n";
+
+/**
+ * Sunucu bildirim dilini bu basliktan cozer (web'de de/fr/fa/ja da var). Turkce cihazda
+ * profilden English secildiyse cihaz etiketi yanlis olur; o zaman uygulama dili gider.
+ */
+function requestLanguage() {
+  const device = getLocales()[0];
+  if (i18n.language === "tr") return "tr-TR";
+  return device && device.languageCode !== "tr" ? device.languageTag : "en-GB";
+}
 
 const ACCESS_KEY = "bp.accessToken";
 const REFRESH_KEY = "bp.refreshToken";
@@ -111,8 +122,7 @@ export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T
   const send = () => {
     const headers: Record<string, string> = {
       Accept: "application/json",
-      // Sunucu bildirim dilini bu basliktan cozer (`resolveRequestLocale`).
-      "Accept-Language": getLocales()[0]?.languageTag ?? "tr-TR",
+      "Accept-Language": requestLanguage(),
     };
     // FormData (dosya yukleme) icin Content-Type'i fetch koyar: sinir (boundary) dahil.
     const isForm = body instanceof FormData;
