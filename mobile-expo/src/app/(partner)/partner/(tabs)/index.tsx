@@ -1,16 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useIsFocused } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { QrCode, Store, User } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { SealedBag } from "@/components/Illustrations";
 import { BookingRow } from "@/components/BookingRow";
 import { PartnerPulseCard } from "@/components/PartnerPulseCard";
 import { Segmented } from "@/components/Segmented";
-import { AppText, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
+import { AppText, Button, CenterMessage, Loading } from "@/components/ui";
 import { errorMessage } from "@/lib/errors";
 import { isActiveBooking, usePartnerBookings } from "@/lib/queries";
 import { wallInstant, wallParts } from "@/lib/time";
@@ -34,7 +33,6 @@ function bucket(b: PartnerBooking): Tab {
 export default function PartnerBookingsScreen() {
   const { t } = useTranslation();
   const query = usePartnerBookings(useIsFocused());
-  const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>("today");
 
@@ -76,14 +74,6 @@ export default function PartnerBookingsScreen() {
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <View style={styles.header}>
         <AppText variant="title">{t("partner.title")}</AppText>
-        <View style={{ flexDirection: "row", gap: space.sm }}>
-          <IconButton label={t("partner.myShop")} onPress={() => router.push("/partner/shop")}>
-            <Store size={20} color={colors.ink} />
-          </IconButton>
-          <IconButton label={t("home.profile")} onPress={() => router.push("/profile")}>
-            <User size={20} color={colors.ink} />
-          </IconButton>
-        </View>
       </View>
 
       <View style={{ paddingHorizontal: space.xl, paddingBottom: space.md, gap: space.md }}>
@@ -132,14 +122,6 @@ export default function PartnerBookingsScreen() {
           ListEmptyComponent={<CenterMessage art={<SealedBag size={64} />} title={t("partner.empty")} />}
         />
       )}
-      {/* Esnafin gun icindeki asil isi QR okutmak: kosedeki ikon yerine her zaman elinin altinda. */}
-      <View style={[styles.scanBar, { paddingBottom: insets.bottom + space.md }]}>
-        <Button
-          title={t("scan.open")}
-          icon={<QrCode size={18} color={colors.white} />}
-          onPress={() => router.push("/partner/scan")}
-        />
-      </View>
     </SafeAreaView>
   );
 }
@@ -153,16 +135,5 @@ const styles = StyleSheet.create({
     padding: space.xl,
     paddingBottom: space.lg,
   },
-  list: { padding: space.xl, paddingTop: space.sm, gap: space.md, paddingBottom: 120 },
-  scanBar: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    paddingHorizontal: space.xl,
-    paddingTop: space.md,
-    backgroundColor: colors.bg,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
+  list: { padding: space.xl, paddingTop: space.sm, gap: space.md, paddingBottom: space.xxl },
 });

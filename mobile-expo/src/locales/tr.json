@@ -744,5 +744,10 @@
     "vsLastMonth": "Geçen aya göre %{{pct}}",
     "failed": "Günlük özet yüklenemedi. Yeniden denemek için dokun.",
     "a11y": "{{shop}}, bugün: {{arrivals}} misafir gelecek, {{pickups}} valiz alınacak, dükkanda {{bags}} valiz var. Bu ay kazancın {{month}}."
+  },
+  "tabs": {
+    "explore": "Keşfet",
+    "bookings": "Rezervasyonlar",
+    "profile": "Profil"
   }
 }
