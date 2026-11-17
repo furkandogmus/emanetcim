@@ -381,3 +381,20 @@ export function toMobilePartnerDashboard(s: PartnerDashboardSource, shop: ShopRe
     monthChangePct: s.monthChangePct,
   };
 }
+
+type AdminOverviewSource = Awaited<ReturnType<import("@/services/AdminOverviewService").AdminOverviewService["overview"]>>;
+
+/** `admin/overview`. Son rezervasyonlar ozet DTO'sunu tasir; misafir adi yoksa e-posta. */
+export function toMobileAdminOverview(o: AdminOverviewSource) {
+  return {
+    series: o.series,
+    today: o.today,
+    attention: o.attention,
+    totals: o.totals,
+    recent: o.recent.map((b) => ({
+      ...toMobileBookingSummary(b),
+      guestName: b.guest?.name || b.guestEmail || "",
+      createdAt: b.createdAt.toISOString(),
+    })),
+  };
+}

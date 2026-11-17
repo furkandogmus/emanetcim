@@ -8,7 +8,8 @@ import { EARNING_BOOKING_STATUSES } from "@/lib/platform-split";
 import AdminDashboardClient from "@/components/admin/AdminDashboardClient";
 import { bcp47ForUiLocale } from "@/lib/intl-locale";
 import { formatTryCurrency } from "@/lib/currency";
-import { dayRangeInTimeZone, startOfDayInTimeZone } from "@/lib/timezone";
+import { dayRangeInTimeZone } from "@/lib/timezone";
+import { PLATFORM_TIMEZONE, adminOverviewService, startOfDaysAgo } from "@/services/AdminOverviewService";
 
 /**
  * Ciroya sayılan durumlar. Partner panelindekiyle AYNI küme olmak zorunda —
@@ -17,55 +18,6 @@ import { dayRangeInTimeZone, startOfDayInTimeZone } from "@/lib/timezone";
  * gösteriyordu; bu üçüncü kopyaydı).
  */
 const PAID_STATUSES = EARNING_BOOKING_STATUSES;
-
-/**
- * Admin panelinin gün sınırı.
- *
- * NEDEN VAR: buradaki tüm gün kovaları `setHours(...)` ile kuruluyordu, yani
- * SUNUCUNUN yerel saatinde. Üretim konteyneri UTC çalıştığı için "bugün"
- * İstanbul'da 03:00'te başlıyordu — esnaf paneli (`PartnerDashboardService`,
- * mobil kazanç ucu) ise `src/lib/timezone.ts` ile dükkanın dilimini kullanıyor.
- * Sonuç: aynı rezervasyon admin ile esnafta FARKLI güne düşebiliyordu ve
- * gece yarısı sonrası açılan iki panel birbirini tutmuyordu.
- *
- * Admin platformun tamamına bakar, tek bir dükkanın dilimi yoktur; platformun
- * ana dilimi esnaf tarafındaki `safeTimezone` yedeğiyle AYNI değer olmak
- * zorunda, yoksa aynı sapma başka bir kılıkta geri gelir.
- */
-const PLATFORM_TIMEZONE = "Europe/Istanbul";
-
-/**
- * `at` anının PLATFORM_TIMEZONE'daki takvim günü, grafik ekseninde göründüğü
- * gibi: `gün/ay`. Anahtar da etiket de aynı yerden üretilir ki kova ile eksen
- * asla ayrışmasın.
- */
-function dayKeyInTimeZone(at: Date): string {
-  const [, month, day] = new Intl.DateTimeFormat("en-CA", {
-    timeZone: PLATFORM_TIMEZONE,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  })
-    .format(at)
-    .split("-")
-    .map(Number);
-  return `${day}/${month}`;
-}
-
-/**
- * `daysAgo` gün önceki günün PLATFORM_TIMEZONE'daki 00:00'ı.
- *
- * Gece yarısından 24 saat çıkarmak yerine o günün ÖĞLENİNDEN geriye sayılıyor:
- * yaz saati geçişinin olduğu gün 23 ya da 25 saattir, tam gece yarısından
- * sabit 24 saat çıkarmak o hafta bir günü tekrarlar ya da atlar.
- */
-function startOfDaysAgo(todayStart: Date, daysAgo: number): Date {
-  const HOUR = 60 * 60 * 1000;
-  return startOfDayInTimeZone(
-    PLATFORM_TIMEZONE,
-    new Date(todayStart.getTime() + 12 * HOUR - daysAgo * 24 * HOUR),
-  );
-}
 
 function buildWeekOverWeekTrend(
   t: Awaited<ReturnType<typeof getTranslations>>,
@@ -79,45 +31,18 @@ function buildWeekOverWeekTrend(
   return t("trendWeekOverWeek", { pctLabel });
 }
 
+/**
+ * Gun sinirlari, gunluk seri ve `startOfDaysAgo` artik `AdminOverviewService`'te:
+ * mobil yonetim ekrani ayni seriyi okur, iki kopya gun siniri ayrisirdi.
+ */
 async function getDailyChartData(now: Date = new Date()) {
-  const today = dayRangeInTimeZone(PLATFORM_TIMEZONE, now);
-
-  /*
-    Grafiğin yedi sütunu: bugün dahil, geriye altı gün. Sınırlar da anahtarlar
-    da İstanbul saatinde üretiliyor; eskiden sorgu penceresi sunucunun yerel
-    gece yarısıyla, kova anahtarı ise `d.getDate()` ile — yani yine sunucunun
-    dilimiyle — kuruluyordu. UTC sunucuda İstanbul'un 00:00-03:00 arası
-    rezervasyonları bir önceki sütuna düşüyordu.
-  */
-  const dayStarts: Date[] = [];
-  for (let i = 6; i >= 0; i--) dayStarts.push(startOfDaysAgo(today.start, i));
-
-  const bookings = await prisma.booking.findMany({
-    where: {
-      // Yarı açık aralık: `lte: 23:59:59.999` son milisaniyeyi kaybediyordu.
-      createdAt: { gte: dayStarts[0], lt: today.end },
-      status: { in: [...PAID_STATUSES] },
-    },
-    select: { createdAt: true, totalPrice: true },
-  });
-
-  const dayBuckets: Record<string, { total: number; count: number }> = {};
-  for (const b of bookings) {
-    const key = dayKeyInTimeZone(new Date(b.createdAt));
-    if (!dayBuckets[key]) dayBuckets[key] = { total: 0, count: 0 };
-    dayBuckets[key].total += moneyToNumber(b.totalPrice);
-    dayBuckets[key].count++;
-  }
-
-  return dayStarts.map((dayStart) => {
-    const key = dayKeyInTimeZone(dayStart);
-    const bucket = dayBuckets[key];
-    return {
-      name: key,
-      ciro: bucket ? Math.round(bucket.total) : 0,
-      emanet: bucket ? bucket.count : 0,
-    };
-  });
+  const points = await adminOverviewService.dailySeries(7, now);
+  return points.map((p) => ({
+    // Eksen etiketi eskisi gibi `gün/ay`.
+    name: `${Number(p.date.slice(8, 10))}/${Number(p.date.slice(5, 7))}`,
+    ciro: Math.round(p.revenue),
+    emanet: p.bookings,
+  }));
 }
 
 /**
