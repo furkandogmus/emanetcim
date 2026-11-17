@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { BookingRow } from "@/components/BookingRow";
+import { LuggageTag } from "@/components/Illustrations";
 import { Segmented } from "@/components/Segmented";
 import { AppText, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { errorMessage } from "@/lib/errors";
@@ -66,6 +67,7 @@ export default function MyBookingsScreen() {
           )}
           ListEmptyComponent={
             <CenterMessage
+              art={<LuggageTag size={80} />}
               title={t("bookings.empty")}
               body={t("bookings.emptyBody")}
               action={<Button title={t("bookings.emptyCta")} onPress={() => router.push("/search")} />}
