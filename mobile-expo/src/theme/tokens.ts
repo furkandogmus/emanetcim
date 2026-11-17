@@ -65,7 +65,6 @@ export const fonts = {
   body: "Geist_400Regular",
   bodyMedium: "Geist_500Medium",
   bodySemibold: "Geist_600SemiBold",
-  mono: "GeistMono_400Regular",
   monoMedium: "GeistMono_500Medium",
 } as const;
 

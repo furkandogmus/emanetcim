@@ -43,8 +43,15 @@ export function ReferralCard({ audience }: { audience: "partner" | "guest" }) {
     <Card style={styles.card}>
       <View style={styles.head}>
         <View style={{ flex: 1, gap: space.xs }}>
-          <AppText variant="bodyMedium">{t(`referral.${audience}.title`, { pct: data?.discountPct ?? "" })}</AppText>
-          <AppText variant="caption">{t(`referral.${audience}.body`, { pct: data?.discountPct ?? "" })}</AppText>
+          {/* Yuzde gelmeden "%  indirim" gibi bos bir metin cizilmesin. */}
+          {data ? (
+            <>
+              <AppText variant="bodyMedium">{t(`referral.${audience}.title`, { pct: data.discountPct })}</AppText>
+              <AppText variant="caption">{t(`referral.${audience}.body`, { pct: data.discountPct })}</AppText>
+            </>
+          ) : (
+            <AppText variant="bodyMedium">{t("referral.title")}</AppText>
+          )}
         </View>
       </View>
 

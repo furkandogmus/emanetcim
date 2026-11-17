@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Alert, RefreshControl, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, CheckCircle2, Clock, Truck } from "lucide-react-native";
+import { CheckCircle2, Clock, Truck } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
-import { AppText, Banner, Button, Card, CenterMessage, Divider, IconButton, Loading } from "@/components/ui";
+import { StackHeader } from "@/components/StackHeader";
+import { AppText, Banner, Button, Card, CenterMessage, Divider, Loading } from "@/components/ui";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { formatDay } from "@/lib/format";
@@ -92,20 +92,7 @@ export default function PartnerSealsScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
-      <View style={styles.header}>
-        <IconButton label={t("common.back")} onPress={() => router.back()}>
-          <ArrowLeft size={20} color={colors.ink} />
-        </IconButton>
-        <View style={styles.titleBlock}>
-          <AppText variant="heading">{t("seals.title")}</AppText>
-          {query.data?.shop ? (
-            <AppText variant="caption" numberOfLines={1}>
-              {query.data.shop.name}
-            </AppText>
-          ) : null}
-        </View>
-        <View style={{ width: 44 }} />
-      </View>
+      <StackHeader title={t("seals.title")} subtitle={query.data?.shop ? query.data.shop.name : undefined} />
 
       {query.isLoading ? (
         <Loading />

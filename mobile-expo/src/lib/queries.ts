@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { api } from "./api";
 import { usePartnerShopSelection, withShop } from "./partner-shop";
-import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReview, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingsResponse, AdminBookingDetail, AdminShop } from "./types";
+import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReview, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingCounts, AdminBookingsResponse, AdminBookingDetail, AdminShop } from "./types";
 
 export const keys = {
   myBookings: ["bookings", "me"] as const,
@@ -77,11 +77,15 @@ export function usePartnerBookings(polling = true) {
 }
 
 /**
- * Henuz bitmemis rezervasyon. Alma saati gecmis olsa bile valiz dukkandaysa
- * (CHECKED_IN) hala aktiftir -- misafirin QR'a ihtiyaci var.
+ * Henuz bitmemis rezervasyon. Valiz dukkandaysa (CHECKED_IN) alma saati gecse de
+ * aktiftir: misafirin QR'a ihtiyaci var. Hic teslim edilmemis kayit ise alma saati
+ * gecince aktif degildir: gelmeyen misafirin APPROVED/PAID kaydi sonsuza dek oyle
+ * kalir ve "Siradaki" kartini, sekme rozetini ve Yaklasan listesini dolduruyordu.
  */
-export function isActiveBooking(b: { status: string }) {
-  return !["CANCELLED", "CHECKED_OUT"].includes(b.status);
+export function isActiveBooking(b: { status: string; checkOutTime: string }, now: number = Date.now()) {
+  if (b.status === "CHECKED_IN") return true;
+  if (b.status === "CANCELLED" || b.status === "CHECKED_OUT") return false;
+  return new Date(b.checkOutTime).getTime() > now;
 }
 
 export function useAdminStats() {
@@ -161,13 +165,26 @@ export function usePartnerDashboard() {
   });
 }
 
-/** Arama yazilirken her tusta istek gitmesin diye ekran `q`'yu geciktirerek verir. */
+/**
+ * Ekran `q`'yu geciktirerek verir. 2 karakterin altindaki arama hic gonderilmez; anahtar
+ * da ayni normal hali kullanir ki ilk tus ayni istegi ikinci kez atmasin.
+ */
 export function useAdminBookings(filter: AdminBookingFilter, q: string) {
-  const qs = new URLSearchParams({ filter, ...(q.trim().length >= 2 ? { q: q.trim() } : {}) });
+  const term = q.trim().length >= 2 ? q.trim() : "";
+  const qs = new URLSearchParams({ filter, ...(term ? { q: term } : {}) });
   return useQuery({
-    queryKey: [...keys.admin, "bookings", filter, q.trim()],
+    queryKey: [...keys.admin, "bookings", filter, term],
     queryFn: () => api<AdminBookingsResponse>(`/admin/bookings?${qs}`),
     placeholderData: (prev) => prev,
+  });
+}
+
+/** Cip adetleri aramadan bagimsiz: ayri istek, 30 sn taze. */
+export function useAdminBookingCounts() {
+  return useQuery({
+    queryKey: [...keys.admin, "bookings", "counts"],
+    queryFn: () => api<AdminBookingCounts>("/admin/bookings/counts"),
+    staleTime: 30_000,
   });
 }
 

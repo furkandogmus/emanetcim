@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 
 import { AppText } from "@/components/ui";
-import { formatKm, formatMoney } from "@/lib/format";
+import { formatKm, formatMoney, formatRating } from "@/lib/format";
 import { resolveImage } from "@/lib/images";
 import type { NearbyShop } from "@/lib/types";
 import { colors, fonts, radius, space } from "@/theme/tokens";
@@ -74,7 +74,7 @@ export const ShopCard = memo(function ShopCard({
           {shop.rating ? (
             <>
               <Star size={13} color={colors.brand} fill={colors.brand} />
-              <Text style={styles.ratingText}>{shop.rating.toFixed(1)}</Text>
+              <Text style={styles.ratingText}>{formatRating(shop.rating)}</Text>
               <Text style={styles.dot}>·</Text>
             </>
           ) : null}

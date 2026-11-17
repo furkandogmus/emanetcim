@@ -1,9 +1,10 @@
+import { memo } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { StatusBadge } from "@/components/StatusBadge";
 import { AppText } from "@/components/ui";
-import { formatDayTime, formatMoney, formatTime } from "@/lib/format";
+import { formatDayTime, formatMoney, formatMonthShort, formatTime } from "@/lib/format";
 import { shiftedForFormat } from "@/lib/time";
 import type { BookingSummary } from "@/lib/types";
 import { colors, fonts, radius, space } from "@/theme/tokens";
@@ -12,7 +13,7 @@ import { colors, fonts, radius, space } from "@/theme/tokens";
  * Liste satiri; `title` misafirde dukkan adi, esnafta misafir adi.
  * Soldaki gun karosu fisin (BookingTicket) imzasi: liste bir takvim gibi taranir.
  */
-export function BookingRow({
+export const BookingRow = memo(function BookingRow({
   booking,
   title,
   onPress,
@@ -23,10 +24,10 @@ export function BookingRow({
   onPress: () => void;
   highlight?: string;
 }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const bags = booking.bagCountS + booking.bagCountM + booking.bagCountXl;
   const day = shiftedForFormat(booking.checkInTime);
-  const month = day.toLocaleDateString(i18n.language, { month: "short", timeZone: "UTC" });
+  const month = formatMonthShort(booking.checkInTime);
   const faded = booking.status === "CANCELLED" || booking.status === "CHECKED_OUT";
 
   return (
@@ -38,7 +39,7 @@ export function BookingRow({
       <View style={[styles.dateTile, faded && { opacity: 0.55 }]}>
         <AppText style={styles.dateDay}>{day.getUTCDate()}</AppText>
         <AppText variant="label" style={styles.dateMonth}>
-          {month.replace(".", "")}
+          {month}
         </AppText>
       </View>
 
@@ -71,7 +72,7 @@ export function BookingRow({
       </View>
     </Pressable>
   );
-}
+});
 
 const styles = StyleSheet.create({
   row: {
@@ -88,11 +89,12 @@ const styles = StyleSheet.create({
     width: 52,
     paddingVertical: space.sm,
     borderRadius: radius.inner + 2,
-    backgroundColor: colors.brandSoft,
+    // Notr: turuncu her satirda olunca hicbir sey one cikmiyordu (gecmis/iptal dahil).
+    backgroundColor: colors.surfaceMuted,
     alignItems: "center",
   },
-  dateDay: { fontFamily: fonts.display, fontSize: 22, lineHeight: 26, color: colors.accent, fontVariant: ["tabular-nums"] },
-  dateMonth: { color: colors.accent, fontSize: 12, lineHeight: 16 },
+  dateDay: { fontFamily: fonts.display, fontSize: 22, lineHeight: 26, color: colors.ink, fontVariant: ["tabular-nums"] },
+  dateMonth: { color: colors.inkSecondary, fontSize: 12, lineHeight: 16 },
   meta: { flexDirection: "row", alignItems: "center", gap: space.sm, marginTop: 2 },
   right: { alignItems: "flex-end", gap: 2, alignSelf: "flex-start", paddingTop: 2 },
   highlight: {

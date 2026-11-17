@@ -3,10 +3,10 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
-import { AppText, Banner, Button, Card, CenterMessage, Divider, IconButton, Loading } from "@/components/ui";
+import { StackHeader } from "@/components/StackHeader";
+import { AppText, Banner, Button, Card, CenterMessage, Divider, Loading } from "@/components/ui";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { formatDayTime, formatMoney, stayDays } from "@/lib/format";
@@ -63,13 +63,7 @@ export default function CheckoutScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
-      <View style={styles.header}>
-        <IconButton label={t("common.back")} onPress={() => router.back()}>
-          <ArrowLeft size={20} color={colors.ink} />
-        </IconButton>
-        <AppText variant="heading">{t("checkout.title")}</AppText>
-        <View style={{ width: 44 }} />
-      </View>
+      <StackHeader title={t("checkout.title")} />
 
       <ScrollView contentContainerStyle={styles.content}>
         <Card style={{ gap: space.md }}>

@@ -105,6 +105,8 @@ export function Chip({
 }) {
   return (
     <Pressable
+      // Yumusak cip 36 px: dokunma alani 44 px olsun.
+      hitSlop={soft ? { top: 4, bottom: 4 } : undefined}
       accessibilityRole="button"
       accessibilityState={{ selected: !!selected, disabled: !!disabled }}
       disabled={disabled}

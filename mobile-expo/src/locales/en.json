@@ -568,7 +568,7 @@
     "hintCheckedIn": "The bags are checked in. Sealed bags cannot be increased, and a correction that raises the price needs the guest's approval.",
     "delta": "{{from}} bags → {{to}} bags",
     "atLeastOne": "There must be at least one bag.",
-    "apply": "Apply correction",
+    "apply": "Apply",
     "savedTitle": "Bag count updated",
     "savedBody": "New total: {{total}}",
     "approvalTitle": "Waiting for the guest",
