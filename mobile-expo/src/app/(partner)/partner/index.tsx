@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { router, useIsFocused } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { QrCode, Store, User } from "lucide-react-native";
@@ -33,6 +33,7 @@ function bucket(b: PartnerBooking): Tab {
 export default function PartnerBookingsScreen() {
   const { t } = useTranslation();
   const query = usePartnerBookings(useIsFocused());
+  const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>("today");
 
@@ -75,9 +76,6 @@ export default function PartnerBookingsScreen() {
       <View style={styles.header}>
         <AppText variant="title">{t("partner.title")}</AppText>
         <View style={{ flexDirection: "row", gap: space.sm }}>
-          <IconButton label={t("scan.open")} onPress={() => router.push("/partner/scan")}>
-            <QrCode size={20} color={colors.ink} />
-          </IconButton>
           <IconButton label={t("partner.myShop")} onPress={() => router.push("/partner/shop")}>
             <Store size={20} color={colors.ink} />
           </IconButton>
@@ -133,6 +131,14 @@ export default function PartnerBookingsScreen() {
           ListEmptyComponent={<CenterMessage title={t("partner.empty")} />}
         />
       )}
+      {/* Esnafin gun icindeki asil isi QR okutmak: kosedeki ikon yerine her zaman elinin altinda. */}
+      <View style={[styles.scanBar, { paddingBottom: insets.bottom + space.md }]}>
+        <Button
+          title={t("scan.open")}
+          icon={<QrCode size={18} color={colors.white} />}
+          onPress={() => router.push("/partner/scan")}
+        />
+      </View>
     </SafeAreaView>
   );
 }
@@ -146,5 +152,16 @@ const styles = StyleSheet.create({
     padding: space.xl,
     paddingBottom: space.lg,
   },
-  list: { padding: space.xl, paddingTop: space.sm, gap: space.md },
+  list: { padding: space.xl, paddingTop: space.sm, gap: space.md, paddingBottom: 120 },
+  scanBar: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: space.xl,
+    paddingTop: space.md,
+    backgroundColor: colors.bg,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
 });

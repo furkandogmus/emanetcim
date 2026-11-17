@@ -50,7 +50,7 @@ export function PartnerPulseCard() {
       {d.shops.length > 1 ? (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.shops}>
           {d.shops.map((s) => (
-            <Chip key={s.id} label={s.name} selected={s.id === d.shop.id} onPress={() => setShopId(s.id)} />
+            <Chip key={s.id} soft label={s.name} selected={s.id === d.shop.id} onPress={() => setShopId(s.id)} />
           ))}
         </ScrollView>
       ) : null}
@@ -62,14 +62,16 @@ export function PartnerPulseCard() {
 
         <View style={styles.stats}>
           <Stat value={d.todayArrivals} label={t("pulse.arrivals")} />
+          <View style={styles.statRule} />
           <Stat value={d.todayPickups} label={t("pulse.pickups")} />
+          <View style={styles.statRule} />
           <Stat value={d.bagsInStorage} label={t("pulse.inStorage")} emphasis />
         </View>
 
         <View style={styles.month}>
           <View style={{ flex: 1 }}>
             <AppText variant="caption">{t("pulse.thisMonth")}</AppText>
-            <AppText variant="heading">{formatMoney(d.monthNet)}</AppText>
+            <AppText style={styles.monthValue}>{formatMoney(d.monthNet)}</AppText>
           </View>
           {pct != null ? (
             <View style={[styles.badge, { backgroundColor: up ? colors.successSoft : colors.dangerSoft }]}>
@@ -100,18 +102,13 @@ const styles = StyleSheet.create({
   card: { gap: space.md },
   placeholder: { height: 168, alignItems: "center", justifyContent: "center" },
   shops: { gap: space.sm },
-  stats: { flexDirection: "row", gap: space.sm },
-  stat: {
-    flex: 1,
-    paddingVertical: space.md,
-    paddingHorizontal: space.sm,
-    borderRadius: radius.control,
-    backgroundColor: colors.surfaceMuted,
-    alignItems: "center",
-    gap: 2,
-  },
-  statEmphasis: { backgroundColor: colors.brandSoft },
-  statValue: { fontFamily: fonts.display, fontSize: 26, lineHeight: 30, color: colors.ink },
+  // Uc esit dolu karo yerine ince cizgiyle ayrilmis sayilar: vurgu yalnizca "dukkanda valiz"de.
+  stats: { flexDirection: "row", alignItems: "stretch" },
+  statRule: { width: 1, backgroundColor: colors.border, marginVertical: space.xs },
+  stat: { flex: 1, paddingVertical: space.xs, alignItems: "center", gap: 2 },
+  statEmphasis: {},
+  statValue: { fontFamily: fonts.display, fontSize: 28, lineHeight: 32, color: colors.ink, fontVariant: ["tabular-nums"] },
+  monthValue: { fontFamily: fonts.display, fontSize: 22, lineHeight: 28, color: colors.ink, fontVariant: ["tabular-nums"] },
   statLabel: { textAlign: "center", fontSize: 12, lineHeight: 16 },
   month: {
     flexDirection: "row",
