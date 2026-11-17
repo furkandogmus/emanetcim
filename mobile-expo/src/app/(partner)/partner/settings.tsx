@@ -14,7 +14,7 @@ import { errorMessage } from "@/lib/errors";
 import { keys, usePartnerShopSettings } from "@/lib/queries";
 import type { PartnerShopSettings } from "@/lib/types";
 import { notify } from "@/lib/notify";
-import { colors, space } from "@/theme/tokens";
+import { colors, fonts, space } from "@/theme/tokens";
 
 /**
  * Dukkan temel bilgileri + esnafin telefonu. Calisma saatleri burada degil,
@@ -148,8 +148,11 @@ function SettingsForm({ shop }: { shop: PartnerShopSettings }) {
         />
 
         {formError ? <Banner tone="danger" body={formError} /> : null}
-        <Button title={t("shopSettings.save")} loading={save.isPending} onPress={submit} />
       </ScrollView>
+      {/* Uzun formda kaydet sayfanin dibinde kaybolmasin: her zaman gorunur alt cubuk. */}
+      <View style={styles.footer}>
+        <Button title={t("shopSettings.save")} loading={save.isPending} onPress={submit} />
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -163,7 +166,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.xl,
     paddingVertical: space.md,
   },
-  content: { padding: space.xl, gap: space.md },
-  section: { marginTop: space.md },
+  content: { padding: space.xl, gap: space.md, paddingBottom: space.xxl },
+  section: { marginTop: space.lg, color: colors.ink, fontFamily: fonts.displayMedium, fontSize: 15 },
+  footer: { padding: space.xl, paddingTop: space.md, borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: colors.bg },
   pair: { flexDirection: "row", gap: space.md },
 });
