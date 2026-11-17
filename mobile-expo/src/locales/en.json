@@ -322,7 +322,10 @@
     "replyPlaceholder": "Write your reply…",
     "replySend": "Send reply",
     "replySent": "Reply sent by email.",
-    "replyTooShort": "Reply must be at least 2 characters."
+    "replyTooShort": "Reply must be at least 2 characters.",
+    "factPrice": "Daily price",
+    "factCapacity": "Capacity",
+    "factDate": "Applied"
   },
   "scan": {
     "open": "Scan QR",

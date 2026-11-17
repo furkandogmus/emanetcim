@@ -153,6 +153,12 @@ export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T
       onSessionExpired?.();
       throw new ApiError(401, "session_expired");
     }
+  } else if (res.status === 401 && auth) {
+    // Yenileyecek token yok ama ekran oturum acik saniyor: "bir seyler ters gitti"de
+    // takili kalmak yerine giris ekranina don.
+    await clearTokens();
+    onSessionExpired?.();
+    throw new ApiError(401, "session_expired");
   }
 
   const text = await res.text();
