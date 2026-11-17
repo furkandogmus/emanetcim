@@ -50,6 +50,15 @@ export async function registerForPush(): Promise<void> {
   registeredToken = token;
 }
 
+/**
+ * Oturum suresi dolunca: token sunucuda silinemez (oturum yok) ama bir sonraki giriste
+ * yeniden kaydedilmeli. Yoksa "ayni token" erken donusu kaydi atlar, sunucu satiri
+ * eski kullaniciya bagli kalir ve yeni kullanici oncekinin bildirimlerini alir.
+ */
+export function forgetPushRegistration() {
+  registeredToken = null;
+}
+
 /** Cikista: token silinmezse cikis yapmis esnafin telefonuna bildirim gitmeye devam eder. */
 export async function unregisterPush(): Promise<void> {
   if (!registeredToken) return;

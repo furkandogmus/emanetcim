@@ -43,6 +43,7 @@ function sitePage(path: string, lang: string) {
 export function ProfileView({ asTab = false }: { asTab?: boolean }) {
   const { t, i18n } = useTranslation();
   const { state, signOut } = useAuth();
+  const [signingOut, setSigningOut] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const notifOn = useNotificationPermission();
   if (state.status !== "signedIn") return null;
@@ -158,7 +159,17 @@ export function ProfileView({ asTab = false }: { asTab?: boolean }) {
         </Section>
 
         <View style={{ gap: space.sm, marginTop: space.sm }}>
-          <Button variant="secondary" title={t("profile.signOut")} onPress={() => void signOut()} />
+          <Button
+            variant="secondary"
+            title={t("profile.signOut")}
+            // Cikis iki ag cagrisi bekler (bildirim kaydi + oturum iptali); zayif agda geri
+            // bildirim yoksa kullanici tekrar tekrar basiyordu.
+            loading={signingOut}
+            onPress={() => {
+              setSigningOut(true);
+              void signOut().finally(() => setSigningOut(false));
+            }}
+          />
           <AppText variant="caption" style={{ textAlign: "center", fontSize: 13 }}>
             {t("profile.signOutNote")}
           </AppText>

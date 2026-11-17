@@ -56,6 +56,11 @@ export async function pickGoogleIdToken(): Promise<string | null> {
 
 /** Cikista hesap secici bir sonraki giriste yine sorsun (baska hesapla giris). */
 export async function forgetGoogleAccount() {
-  if (!configured) return;
+  // Yapilandirma yalnizca seciciyi acan surecte yapiliyordu; yeniden baslatip geri
+  // yuklenen oturumdan cikista signOut atlaniyor, sonraki giris eski hesabi sessizce aliyordu.
+  if (!configured) {
+    GoogleSignin.configure({ webClientId: WEB_CLIENT_ID });
+    configured = true;
+  }
   await GoogleSignin.signOut().catch(() => undefined);
 }
