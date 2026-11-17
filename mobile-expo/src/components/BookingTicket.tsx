@@ -13,7 +13,18 @@ import { colors, fonts, radius, space } from "@/theme/tokens";
  * ustte kim-nerede-ne zaman, delikli cizginin altinda dukkana okutulan QR ve kod.
  * Kod web'deki "Rezervasyon kodu" ile ayni: QR okunamazsa telefonda soylenir.
  */
-export function BookingTicket({ booking: b, showQr }: { booking: BookingDetail; showQr: boolean }) {
+export function BookingTicket({
+  booking: b,
+  showQr,
+  title,
+  subtitle,
+}: {
+  booking: BookingDetail;
+  showQr: boolean;
+  /** Esnaf gorunumunde misafir adi; varsayilan dukkan adi. */
+  title?: string;
+  subtitle?: string;
+}) {
   const { t } = useTranslation();
   const code = b.id.slice(0, 8).toUpperCase();
   const bagLines = [
@@ -26,9 +37,12 @@ export function BookingTicket({ booking: b, showQr }: { booking: BookingDetail; 
     <View style={styles.ticket}>
       <View style={styles.top}>
         <StatusBadge status={b.status} />
-        <AppText variant="title" numberOfLines={2}>
-          {b.shopName}
-        </AppText>
+        <View style={{ gap: 2 }}>
+          <AppText variant="title" numberOfLines={2}>
+            {title ?? b.shopName}
+          </AppText>
+          {subtitle ? <AppText variant="caption">{subtitle}</AppText> : null}
+        </View>
 
         <View style={styles.times}>
           <TimeBlock label={t("bookings.dropOff")} at={b.checkInTime} />
@@ -66,7 +80,7 @@ export function BookingTicket({ booking: b, showQr }: { booking: BookingDetail; 
           )
         ) : null}
 
-        <View style={styles.footer}>
+        <View style={[styles.footer, !showQr && styles.footerBare]}>
           <View style={{ gap: 2 }}>
             <AppText variant="label" style={{ color: colors.inkMuted }}>
               {t("bookings.code")}
@@ -168,6 +182,8 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.border,
   },
+  // QR yokken delikli cizgi zaten ayirici: ust cizgi tekrar olmasin.
+  footerBare: { borderTopWidth: 0, paddingTop: 0 },
   code: { fontSize: 18, lineHeight: 24, letterSpacing: 1.5 },
   total: { fontFamily: fonts.display, fontSize: 22, lineHeight: 28, color: colors.ink, fontVariant: ["tabular-nums"] },
 });

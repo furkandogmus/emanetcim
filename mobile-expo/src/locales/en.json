@@ -245,7 +245,8 @@
     "addPhoto": "Add photo",
     "changePhoto": "Change photo",
     "photoSaved": "Photo saved.",
-    "photoFailed": "Could not upload the photo"
+    "photoFailed": "Could not upload the photo",
+    "bagNumber": "Bag {{n}}"
   },
   "profile": {
     "title": "Profile",

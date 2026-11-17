@@ -11,15 +11,13 @@ import { BookingTicket } from "@/components/BookingTicket";
 import { GuestDisputeCard } from "@/components/GuestDisputeCard";
 import { GuestReviewCard } from "@/components/GuestReviewCard";
 import { PartnerBookingActions } from "@/components/PartnerBookingActions";
-import { StatusBadge } from "@/components/StatusBadge";
-import { AppText, Button, Card, CenterMessage, Divider, IconButton, Loading } from "@/components/ui";
+import { Button, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
-import { formatDayTime, formatMoney } from "@/lib/format";
 import { isActiveBooking, useBooking } from "@/lib/queries";
 import type { BookingDetail } from "@/lib/types";
 import { notify } from "@/lib/notify";
-import { colors, fonts, space } from "@/theme/tokens";
+import { colors, space } from "@/theme/tokens";
 
 /** Misafirin iptal edebildigi durumlar: valiz henuz dukkana teslim edilmemis. */
 const CANCELLABLE = new Set(["PENDING", "WAITING_APPROVAL", "APPROVED", "PAID"]);
@@ -77,11 +75,6 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
 
   const b = query.data;
   const showQr = mode === "guest" && !["CANCELLED", "CHECKED_OUT"].includes(b.status);
-  const bagLines = [
-    { size: "s", count: b.bagCountS },
-    { size: "m", count: b.bagCountM },
-    { size: "xl", count: b.bagCountXl },
-  ].filter((l) => l.count > 0);
 
   function confirmCancel() {
     Alert.alert(t("bookings.cancelTitle"), t("bookings.cancelBody"), [
@@ -99,15 +92,12 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
       </View>
 
       <ScrollView ref={scrollRef} contentContainerStyle={styles.content}>
-        {mode === "guest" ? (
-          <BookingTicket booking={b} showQr={showQr} />
-        ) : (
-          <>
-            <StatusBadge status={b.status} />
-            <AppText variant="title">{b.guestName || t("partner.guest")}</AppText>
-            <AppText variant="caption">{b.shopName}</AppText>
-          </>
-        )}
+        <BookingTicket
+          booking={b}
+          showQr={showQr}
+          title={mode === "partner" ? b.guestName || t("partner.guest") : undefined}
+          subtitle={mode === "partner" ? b.shopName : undefined}
+        />
 
         {/* Anahtar valiz sayilarini da tasir: revizyondan sonra muhur satirlari yeni sayidan kurulur. */}
         {mode === "partner" ? (
@@ -117,26 +107,6 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
           <BagRevisionCard key={`rev-${b.status}-${b.bagCountS}-${b.bagCountM}-${b.bagCountXl}`} booking={b} />
         ) : null}
 
-        {mode === "partner" ? (
-          <Card style={{ gap: space.md }}>
-            {/* Web'deki "Rezervasyon kodu" ile ayni: QR okunamazsa telefonda soylenen kod. */}
-            <Row label={t("bookings.code")} value={b.id.slice(0, 8).toUpperCase()} mono />
-            <Divider />
-            <Row label={t("bookings.dropOff")} value={formatDayTime(b.checkInTime)} />
-            <Row label={t("bookings.pickUp")} value={formatDayTime(b.checkOutTime)} />
-            <Divider />
-            {bagLines.map((l) => (
-              <Row key={l.size} label={t(`bags.${l.size}`)} value={`× ${l.count}`} />
-            ))}
-            <Divider />
-            <View style={styles.row}>
-              <AppText variant="heading">{t("bookings.total")}</AppText>
-              <AppText variant="heading" style={{ fontFamily: fonts.display, fontSize: 22 }}>
-                {formatMoney(b.totalPrice)}
-              </AppText>
-            </View>
-          </Card>
-        ) : null}
 
         {mode === "guest" ? (
           <View style={{ gap: space.md }}>
@@ -183,15 +153,6 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
         ) : null}
       </ScrollView>
     </SafeAreaView>
-  );
-}
-
-function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
-  return (
-    <View style={styles.row}>
-      <AppText variant="caption">{label}</AppText>
-      <AppText variant={mono ? "mono" : "bodyMedium"}>{value}</AppText>
-    </View>
   );
 }
 
