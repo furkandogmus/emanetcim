@@ -3,13 +3,15 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import * as Location from "expo-location";
-import { ArrowLeft, ChevronRight, LocateFixed, MapPin, X } from "lucide-react-native";
+import { Image } from "expo-image";
+import { ArrowLeft, ChevronRight, LocateFixed, X } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { BagCounter } from "@/components/BagCounter";
 import { PlaceSearch } from "@/components/PlaceSearch";
 import { StayWindowPicker, isStayWindowValid } from "@/components/StayWindowPicker";
 import { AppText, Banner, Button, IconButton } from "@/components/ui";
+import { CITY_IMAGES } from "@/lib/city-images";
 import { CITIES, totalBags, useSearch } from "@/lib/search";
 import type { Place } from "@/lib/search";
 import { colors, radius, space } from "@/theme/tokens";
@@ -24,9 +26,12 @@ export default function SearchWizard() {
     degil geldigi ekrana (checkout'taki "Duzenle") doner. Yer zaten secilmis
     olmali; secili degilse ilk adimdan baslanir.
   */
-  const params = useLocalSearchParams<{ step?: string; returnTo?: string }>();
+  const params = useLocalSearchParams<{ step?: string; returnTo?: string; from?: string }>();
   const editing = params.returnTo === "back" && !!search.place;
-  const [step, setStep] = useState(() => (editing ? Math.min(2, Math.max(0, Number(params.step) || 0)) : 0));
+  // Ana sayfadaki sehir kartindan gelince yer secili: dogrudan "ne zaman" adimi.
+  const [step, setStep] = useState(() =>
+    editing ? Math.min(2, Math.max(0, Number(params.step) || 0)) : params.from === "city" && search.place ? 1 : 0,
+  );
 
   const [checkIn, setCheckIn] = useState(search.checkIn);
   const [checkOut, setCheckOut] = useState(search.checkOut);
@@ -130,7 +135,11 @@ export default function SearchWizard() {
                   pressed && { backgroundColor: colors.surfaceMuted },
                 ]}
               >
-                <MapPin size={18} color={colors.inkMuted} />
+                {CITY_IMAGES[c.label] ? (
+                  <Image source={CITY_IMAGES[c.label].source} style={styles.cityThumb} contentFit="cover" />
+                ) : (
+                  <View style={styles.cityThumb} />
+                )}
                 <AppText variant="bodyMedium" style={{ flex: 1 }}>
                   {c.label}
                 </AppText>
@@ -208,7 +217,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     overflow: "hidden",
   },
-  cityRow: { flexDirection: "row", alignItems: "center", gap: space.md, minHeight: 52, paddingHorizontal: space.lg },
+  cityRow: { flexDirection: "row", alignItems: "center", gap: space.md, minHeight: 60, paddingHorizontal: space.md },
+  cityThumb: { width: 40, height: 40, borderRadius: radius.inner, backgroundColor: colors.surfaceMuted },
   cityDivider: { borderTopWidth: 1, borderTopColor: colors.border },
   placeIcon: {
     width: 40,
