@@ -81,3 +81,20 @@ telefon ekran görüntüsü (Türkçe arayüzden alınması önerilir).
 Push bildirimi (Firebase `google-services.json` gerekiyor), mühür/QR okutma, check-in,
 esnaf kazanç ve takvim ekranları, online ödeme, Google/Apple ile giriş. Flutter
 uygulaması (`../mobile/`) bunları taşımaya devam ediyor.
+
+## Hızlı yayın (2026-11-17'den beri)
+
+EAS bulut kuyruğu ve `eas submit` kuyruğu ücretsiz planda saatlerce bekleyebiliyor. İki yol:
+
+- **Native değişiklik (yeni paket, izin, `app.json`)** → yeni derleme:
+  `app.json`'da `version`'ı artır, `release-notes.tr.txt`'yi güncelle, sonra
+  `npm run release:android`. Yerelde imzalı `.aab` üretir (anahtar EAS'tan), Play
+  Developer API ile kapalı teste (alpha) tamamlanmış sürüm olarak gönderir. İç test için
+  `TRACK=internal npm run release:android`.
+- **Yalnızca JS/görsel/metin** → derleme ve Play incelemesi yok:
+  `npm run update:production -- --message "kısa açıklama"`. Aynı `version`'a sahip
+  derlemeler bir sonraki açılışta alır (`runtimeVersion: appVersion`). İlk OTA,
+  `expo-updates` içeren ilk derlemeden sonra çalışır.
+
+`eas update:configure` çalıştırma: `app.json`'daki izin listesini çözülmüş yapılandırmayla
+ezip mikrofon, arka plan konumu, depolama gibi izinler ekliyor (2026-11-17'de görüldü).

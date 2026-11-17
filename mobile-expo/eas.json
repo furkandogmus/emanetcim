@@ -13,7 +13,8 @@
       "env": {
         "EXPO_PUBLIC_API_BASE_URL": "http://10.0.2.2:3000/api/mobile",
         "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "1034885764385-c5f4o8bo3ttdg193en2m5fabj8rja90l.apps.googleusercontent.com"
-      }
+      },
+      "channel": "development"
     },
     "preview": {
       "distribution": "internal",
@@ -23,7 +24,8 @@
       "env": {
         "EXPO_PUBLIC_API_BASE_URL": "https://bagajpark.com/api/mobile",
         "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "1034885764385-c5f4o8bo3ttdg193en2m5fabj8rja90l.apps.googleusercontent.com"
-      }
+      },
+      "channel": "preview"
     },
     "production": {
       "autoIncrement": true,
@@ -33,7 +35,8 @@
       "env": {
         "EXPO_PUBLIC_API_BASE_URL": "https://bagajpark.com/api/mobile",
         "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "1034885764385-c5f4o8bo3ttdg193en2m5fabj8rja90l.apps.googleusercontent.com"
-      }
+      },
+      "channel": "production"
     },
     "ios-simulator": {
       "extends": "preview",
@@ -42,7 +45,8 @@
       },
       "env": {
         "EXPO_PUBLIC_API_BASE_URL": "https://bagajpark.com/api/mobile"
-      }
+      },
+      "channel": "ios-simulator"
     }
   },
   "submit": {
