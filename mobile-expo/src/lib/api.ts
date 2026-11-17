@@ -55,21 +55,29 @@ export function setSessionExpiredHandler(fn: () => void) {
  * 401 alan iki istek ayri ayri yenilemeye kalksaydi ikincisi kullanicinin
  * butun oturumlarini dusururdu.
  */
-let refreshing: Promise<boolean> | null = null;
+let refreshing: Promise<RefreshOutcome> | null = null;
 
-function refreshOnce(): Promise<boolean> {
+/*
+  "network": sunucuya ulasilamadi ya da 5xx -- gecici, oturum DUSURULMEZ.
+  Eskiden ikisi de `false`ti: refresh anindaki kisa bir ag kopuklugu kullaniciyi
+  cikis yaptiriyordu, oysa acilista ayni durum onbellekteki kullaniciyla tolere ediliyor.
+*/
+type RefreshOutcome = "ok" | "rejected" | "network";
+
+function refreshOnce(): Promise<RefreshOutcome> {
   if (!refreshing) {
-    refreshing = (async () => {
-      if (!refreshToken) return false;
+    refreshing = (async (): Promise<RefreshOutcome> => {
+      if (!refreshToken) return "rejected";
       const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refreshToken }),
       }).catch(() => null);
-      if (!res?.ok) return false;
+      if (!res || res.status >= 500) return "network";
+      if (!res.ok) return "rejected";
       const body = (await res.json()) as { accessToken: string; refreshToken: string };
       await saveTokens(body.accessToken, body.refreshToken);
-      return true;
+      return "ok";
     })().finally(() => {
       refreshing = null;
     });
@@ -111,8 +119,11 @@ export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T
   }
 
   if (res.status === 401 && auth && refreshToken) {
-    if (await refreshOnce()) {
+    const outcome = await refreshOnce();
+    if (outcome === "ok") {
       res = await send();
+    } else if (outcome === "network") {
+      throw new ApiError(0, "network");
     } else {
       await clearTokens();
       onSessionExpired?.();
