@@ -285,3 +285,12 @@ export type PartnerDashboard = {
   /** Gecen ay 0 ise `null`; "%∞" yazilmaz. */
   monthChangePct: number | null;
 };
+
+/** `admin/overview` (`toMobileAdminOverview`). */
+export type AdminOverview = {
+  series: { date: string; revenue: number; bookings: number }[];
+  today: { arrivals: number; pickups: number; bagsInStorage: number; newBookings: number; revenue: number };
+  attention: { pendingApplications: number; unreadMessages: number; openDisputes: number; overdueBookings: number };
+  totals: { revenue: number; bookings: number; activeShops: number };
+  recent: (BookingSummary & { guestName: string; createdAt: string })[];
+};
