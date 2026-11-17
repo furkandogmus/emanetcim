@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 
 import { BrandMark } from "@/components/BrandMark";
 import { BookingRow } from "@/components/BookingRow";
+import { LuggageTag, MapSnippet, SealedBag } from "@/components/Illustrations";
 import { CITY_IMAGES } from "@/lib/city-images";
 import { CITIES, useSearch } from "@/lib/search";
 import { AppText, IconButton } from "@/components/ui";
@@ -124,22 +125,11 @@ export default function HomeScreen() {
           <AppText variant="label">{t("home.howTitle")}</AppText>
           <View style={styles.steps}>
             {(["1", "2", "3"] as const).map((n, i) => (
-              <View key={n} style={styles.step}>
-                <View style={styles.stepRail}>
-                  <View style={styles.stepNum}>
-                    <AppText variant="mono" style={{ fontSize: 13, color: colors.accent }}>
-                      {n}
-                    </AppText>
-                  </View>
-                  {i < 2 ? <View style={styles.stepLine} /> : null}
+              <View key={n} style={[styles.step, i > 0 && styles.stepDivider]}>
+                <View style={styles.stepArt}>
+                  {n === "1" ? <MapSnippet width={80} /> : n === "2" ? <LuggageTag size={40} /> : <SealedBag size={52} />}
                 </View>
-                <View
-                  style={{
-                    flex: 1,
-                    gap: 2,
-                    paddingBottom: i < 2 ? space.lg : 0,
-                  }}
-                >
+                <View style={{ flex: 1, gap: 2 }}>
                   <AppText variant="bodyMedium">{t(`home.step${n}Title`)}</AppText>
                   <AppText variant="caption">{t(`home.step${n}Body`)}</AppText>
                 </View>
@@ -236,26 +226,21 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   steps: {
-    padding: space.lg,
     borderRadius: radius.card,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
+    overflow: "hidden",
   },
-  step: { flexDirection: "row", gap: space.md },
-  stepRail: { alignItems: "center", width: 28 },
-  stepNum: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: colors.brandSoft,
+  step: { flexDirection: "row", alignItems: "center", gap: space.lg, padding: space.lg },
+  stepDivider: { borderTopWidth: 1, borderTopColor: colors.border },
+  stepArt: {
+    width: 64,
+    height: 64,
+    borderRadius: radius.control,
+    backgroundColor: colors.surfaceMuted,
     alignItems: "center",
     justifyContent: "center",
-  },
-  stepLine: {
-    flex: 1,
-    width: 1,
-    backgroundColor: colors.border,
-    marginVertical: space.xs,
+    overflow: "hidden",
   },
 });
