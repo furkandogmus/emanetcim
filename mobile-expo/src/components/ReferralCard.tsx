@@ -1,6 +1,5 @@
 import { Share, StyleSheet, View } from "react-native";
 import { useQuery } from "@tanstack/react-query";
-import { Gift, Share2 } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { AppText, Button, Card } from "@/components/ui";
@@ -43,9 +42,6 @@ export function ReferralCard({ audience }: { audience: "partner" | "guest" }) {
   return (
     <Card style={styles.card}>
       <View style={styles.head}>
-        <View style={styles.icon}>
-          <Gift size={20} color={colors.brand} />
-        </View>
         <View style={{ flex: 1, gap: space.xs }}>
           <AppText variant="bodyMedium">{t(`referral.${audience}.title`, { pct: data?.discountPct ?? "" })}</AppText>
           <AppText variant="caption">{t(`referral.${audience}.body`, { pct: data?.discountPct ?? "" })}</AppText>
@@ -69,11 +65,7 @@ export function ReferralCard({ audience }: { audience: "partner" | "guest" }) {
               {data.code}
             </AppText>
           </View>
-          <Button
-            title={t("referral.share")}
-            icon={<Share2 size={18} color={colors.white} />}
-            onPress={() => void share()}
-          />
+          <Button variant="secondary" title={t("referral.share")} onPress={() => void share()} />
         </>
       )}
     </Card>
@@ -98,8 +90,8 @@ const styles = StyleSheet.create({
     borderRadius: radius.control,
     borderWidth: 1,
     borderStyle: "dashed",
-    borderColor: colors.brandSoftBorder,
-    backgroundColor: colors.brandSoft,
+    borderColor: colors.borderStrong,
+    backgroundColor: colors.surfaceMuted,
   },
-  code: { fontFamily: fonts.display, fontSize: 28, letterSpacing: 3, color: colors.ink },
+  code: { fontFamily: fonts.monoMedium, fontSize: 24, letterSpacing: 4, color: colors.ink },
 });

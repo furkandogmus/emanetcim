@@ -1,6 +1,7 @@
+import { memo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
-import { BadgeCheck, Clock, MapPin, Star, Store } from "lucide-react-native";
+import { BadgeCheck, Star, Store } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 
@@ -18,125 +19,126 @@ export function hoursLabel(shop: Pick<NearbyShop, "open247" | "openingTime" | "c
   return null;
 }
 
-/** Liste karti: foto, rozetler, yer, saat, fiyat. Talep testi noktasi soluk ve "Yakinda". */
-export function ShopCard({ shop, onPress, selected }: { shop: NearbyShop; onPress: () => void; selected?: boolean }) {
+/**
+ * Liste karti: kucuk foto, ad, tek satir ozet (puan, mesafe, kapasite), saat ve sagda fiyat.
+ * Talep testi noktasi soluk ve "Yakinda".
+ */
+export const ShopCard = memo(function ShopCard({
+  shop,
+  onPress,
+  selected,
+}: {
+  shop: NearbyShop;
+  onPress: (shop: NearbyShop) => void;
+  selected?: boolean;
+}) {
   const { t } = useTranslation();
   const image = resolveImage(shop.image);
   const hours = hoursLabel(shop, t);
-  const place = [shop.district, shop.city].filter(Boolean).join(", ");
+  const facts = [
+    shop.district || shop.city || null,
+    t("map.distance", { km: formatKm(shop.distanceKm) }),
+    shop.bagsAvailable !== undefined && !shop.isPrelaunch ? t("map.available", { count: shop.bagsAvailable }) : null,
+  ].filter(Boolean);
 
   return (
     <Pressable
       accessibilityRole="button"
-      onPress={onPress}
-      style={({ pressed }) => [styles.card, selected && styles.selected, pressed && { opacity: 0.9 }]}
+      onPress={() => onPress(shop)}
+      style={({ pressed }) => [
+        styles.card,
+        selected && styles.selected,
+        shop.isPrelaunch && { opacity: 0.7 },
+        pressed && { backgroundColor: colors.surfaceMuted },
+      ]}
     >
       <View style={styles.photo}>
         {image ? (
           <Image source={{ uri: image }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} />
         ) : (
-          <Store size={32} color={colors.brand} />
+          <Store size={24} color={colors.borderStrong} strokeWidth={1.5} />
         )}
-        {shop.isPrelaunch ? (
-          <View style={[styles.ribbon, { backgroundColor: colors.inkSecondary }]}>
-            <Text style={styles.ribbonText}>{t("map.comingSoon")}</Text>
-          </View>
-        ) : shop.isVerified ? (
-          <View style={styles.ribbon}>
-            <BadgeCheck size={14} color={colors.white} />
-            <Text style={styles.ribbonText}>{t("map.verified")}</Text>
-          </View>
-        ) : null}
       </View>
 
       <View style={styles.body}>
-        <AppText variant="heading" numberOfLines={2}>
-          {shop.name}
-        </AppText>
+        <View style={styles.titleRow}>
+          <AppText variant="heading" numberOfLines={1} style={{ flexShrink: 1 }}>
+            {shop.name}
+          </AppText>
+          {shop.isVerified && !shop.isPrelaunch ? (
+            <BadgeCheck size={16} color={colors.accent} accessibilityLabel={t("map.verified")} />
+          ) : null}
+        </View>
+
         <View style={styles.metaRow}>
-          <MapPin size={14} color={colors.inkMuted} />
-          <AppText variant="caption" numberOfLines={1} style={{ flexShrink: 1 }}>
-            {[place, t("map.distance", { km: formatKm(shop.distanceKm) })].filter(Boolean).join(" · ")}
+          {shop.rating ? (
+            <>
+              <Star size={13} color={colors.brand} fill={colors.brand} />
+              <Text style={styles.ratingText}>{shop.rating.toFixed(1)}</Text>
+              <Text style={styles.dot}>·</Text>
+            </>
+          ) : null}
+          <AppText variant="caption" numberOfLines={1} style={{ flexShrink: 1, fontSize: 13 }}>
+            {facts.join(" · ")}
           </AppText>
         </View>
+
         {hours ? (
           <View style={styles.metaRow}>
-            <Clock size={14} color={colors.success} />
-            <AppText variant="caption" style={{ color: colors.success }}>
+            <View style={styles.openDot} />
+            <AppText variant="caption" style={{ fontSize: 13, color: colors.inkSecondary }}>
               {hours}
             </AppText>
           </View>
         ) : null}
-        <View style={styles.footer}>
-          {shop.rating ? (
-            <View style={styles.rating}>
-              <Star size={13} color={colors.brand} fill={colors.brand} />
-              <Text style={styles.ratingText}>{shop.rating.toFixed(1)}</Text>
-            </View>
-          ) : (
-            <View />
-          )}
-          {!shop.isPrelaunch ? (
-            <Text style={styles.price}>
-              {formatMoney(shop.pricePerDay)}
-              <Text style={styles.perDay}> {t("map.perDay")}</Text>
-            </Text>
-          ) : null}
-        </View>
-        {shop.bagsAvailable !== undefined && !shop.isPrelaunch ? (
-          <AppText variant="caption">{t("map.available", { count: shop.bagsAvailable })}</AppText>
-        ) : null}
+      </View>
+
+      <View style={styles.right}>
+        {shop.isPrelaunch ? (
+          <View style={styles.soon}>
+            <Text style={styles.soonText}>{t("map.comingSoon")}</Text>
+          </View>
+        ) : (
+          <>
+            <Text style={styles.price}>{formatMoney(shop.pricePerDay)}</Text>
+            <Text style={styles.perDay}>{t("map.perDay")}</Text>
+          </>
+        )}
       </View>
     </Pressable>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
+    alignItems: "center",
     gap: space.md,
     backgroundColor: colors.surface,
     borderRadius: radius.card,
     borderWidth: 1,
     borderColor: colors.border,
-    padding: space.sm,
+    padding: space.md,
   },
   selected: { borderColor: colors.brand, borderWidth: 1.5 },
   photo: {
-    width: 104,
-    minHeight: 112,
-    borderRadius: radius.control,
+    width: 64,
+    height: 64,
+    borderRadius: radius.inner + 2,
     overflow: "hidden",
-    backgroundColor: colors.brandSoft,
+    backgroundColor: colors.surfaceMuted,
     alignItems: "center",
     justifyContent: "center",
   },
-  ribbon: {
-    position: "absolute",
-    left: 6,
-    top: 6,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: colors.accent,
-    borderRadius: radius.pill,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  ribbonText: { color: colors.white, fontFamily: fonts.bodySemibold, fontSize: 11 },
-  body: { flex: 1, gap: 4, paddingVertical: 4, paddingRight: 4 },
+  body: { flex: 1, gap: 4 },
+  titleRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   metaRow: { flexDirection: "row", alignItems: "center", gap: 4 },
-  footer: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 2 },
-  rating: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: colors.brandSoft,
-    borderRadius: radius.pill,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-  },
   ratingText: { fontFamily: fonts.bodySemibold, fontSize: 13, color: colors.ink },
-  price: { fontFamily: fonts.display, fontSize: 17, color: colors.ink },
-  perDay: { fontFamily: fonts.body, fontSize: 13, color: colors.inkMuted },
+  dot: { fontFamily: fonts.body, fontSize: 13, color: colors.inkMuted },
+  openDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.success, marginRight: 2 },
+  right: { alignItems: "flex-end", alignSelf: "flex-start", paddingTop: 2 },
+  price: { fontFamily: fonts.display, fontSize: 18, lineHeight: 22, color: colors.ink, fontVariant: ["tabular-nums"] },
+  perDay: { fontFamily: fonts.body, fontSize: 12, color: colors.inkMuted },
+  soon: { backgroundColor: colors.surfaceMuted, borderRadius: radius.pill, paddingHorizontal: 8, paddingVertical: 3 },
+  soonText: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.inkSecondary },
 });
