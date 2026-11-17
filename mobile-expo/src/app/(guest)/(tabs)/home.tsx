@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { ChevronRight, Search, Ticket, User } from "lucide-react-native";
+import { Search } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { BrandMark } from "@/components/BrandMark";
@@ -12,7 +12,7 @@ import { BookingRow } from "@/components/BookingRow";
 import { LuggageTag, MapSnippet, SealedBag } from "@/components/Illustrations";
 import { CITY_IMAGES } from "@/lib/city-images";
 import { CITIES, useSearch } from "@/lib/search";
-import { AppText, IconButton } from "@/components/ui";
+import { AppText } from "@/components/ui";
 import { prefetchMapStyle } from "@/lib/map-style";
 import { isActiveBooking, useMyBookings } from "@/lib/queries";
 import { colors, fonts, radius, shadow, space } from "@/theme/tokens";
@@ -36,7 +36,7 @@ export default function HomeScreen() {
       bounces={false}
     >
       <View style={[styles.hero, { height: Math.max(340, height * 0.44) }]}>
-        <Image source={require("../../../assets/hero.jpg")} style={StyleSheet.absoluteFill} contentFit="cover" />
+        <Image source={require("../../../../assets/hero.jpg")} style={StyleSheet.absoluteFill} contentFit="cover" />
         <View style={styles.scrim} />
         <View style={[styles.heroTop, { paddingTop: insets.top + space.sm }]}>
           <View style={styles.brandPill}>
@@ -45,9 +45,6 @@ export default function HomeScreen() {
               BagajPark
             </AppText>
           </View>
-          <IconButton label={t("home.profile")} onPress={() => router.push("/profile")}>
-            <User size={20} color={colors.ink} />
-          </IconButton>
         </View>
         <AppText variant="display" style={styles.heroTitle}>
           {t("home.heroTitle")}
@@ -78,19 +75,7 @@ export default function HomeScreen() {
             </View>
             <BookingRow booking={next} title={next.shopName} onPress={() => router.push(`/bookings/${next.id}`)} />
           </View>
-        ) : (
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => router.push("/bookings")}
-            style={({ pressed }) => [styles.row, pressed && { backgroundColor: colors.surfaceMuted }]}
-          >
-            <Ticket size={18} color={colors.inkSecondary} />
-            <AppText variant="bodyMedium" style={{ flex: 1 }}>
-              {t("home.myBookings")}
-            </AppText>
-            <ChevronRight size={18} color={colors.inkMuted} />
-          </Pressable>
-        )}
+        ) : null}
 
         <View style={styles.section}>
           <AppText variant="label">{t("home.citiesTitle")}</AppText>
@@ -213,17 +198,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space.md,
-    minHeight: 56,
-    paddingHorizontal: space.lg,
-    borderRadius: radius.card,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
   },
   steps: {
     borderRadius: radius.card,

@@ -5,11 +5,11 @@ import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import type { Href } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ImagePlus, ShieldCheck, Wallet, Settings, Clock, Gift } from "lucide-react-native";
+import { ImagePlus, ShieldCheck, Wallet, Settings, Clock, Gift } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { LinkGroup, LinkRow } from "@/components/LinkRow";
-import { AppText, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
+import { AppText, Button, CenterMessage, Loading } from "@/components/ui";
 import { api } from "@/lib/api";
 import { usePartnerShopSelection, withShop } from "@/lib/partner-shop";
 import { errorMessage } from "@/lib/errors";
@@ -60,11 +60,7 @@ export default function PartnerShopScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <View style={styles.header}>
-        <IconButton label={t("common.back")} onPress={() => router.back()}>
-          <ArrowLeft size={20} color={colors.ink} />
-        </IconButton>
-        <AppText variant="heading">{t("partner.myShop")}</AppText>
-        <View style={{ width: 44 }} />
+        <AppText variant="title">{t("partner.myShop")}</AppText>
       </View>
 
       {query.isLoading ? (
@@ -76,7 +72,7 @@ export default function PartnerShopScreen() {
         />
       ) : (
         <ScrollView contentContainerStyle={styles.content}>
-          <AppText variant="title">{query.data.name}</AppText>
+          <AppText variant="heading">{query.data.name}</AppText>
           {image ? (
             <View style={{ gap: space.md }}>
               <Image
@@ -146,13 +142,7 @@ export default function PartnerShopScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: space.xl,
-    paddingVertical: space.md,
-  },
+  header: { padding: space.xl, paddingBottom: space.sm },
   content: { padding: space.xl, gap: space.lg },
   photo: { width: "100%", aspectRatio: 16 / 10, borderRadius: radius.card },
   empty: {
