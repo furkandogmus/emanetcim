@@ -5,16 +5,21 @@ import type { ReactNode } from "react";
 
 import { colors, fonts, radius, space } from "@/theme/tokens";
 
-type Variant = "display" | "title" | "heading" | "body" | "bodyMedium" | "caption" | "label";
+type Variant = "display" | "title" | "heading" | "body" | "bodyMedium" | "caption" | "label" | "mono";
 
+/**
+ * Hiyerarsi agirliktan degil boyut ve renkten gelir: hero 800, ekran basligi 700,
+ * kart basligi 600. Kucuk metinde negatif harf araligi yok.
+ */
 const textStyles: Record<Variant, TextStyle> = {
-  display: { fontFamily: fonts.display, fontSize: 34, lineHeight: 38, letterSpacing: -0.7, color: colors.ink },
-  title: { fontFamily: fonts.display, fontSize: 26, lineHeight: 31, letterSpacing: -0.5, color: colors.ink },
-  heading: { fontFamily: fonts.displayMedium, fontSize: 18, lineHeight: 24, letterSpacing: -0.2, color: colors.ink },
-  body: { fontFamily: fonts.body, fontSize: 16, lineHeight: 23, color: colors.ink },
-  bodyMedium: { fontFamily: fonts.bodyMedium, fontSize: 16, lineHeight: 23, color: colors.ink },
+  display: { fontFamily: fonts.hero, fontSize: 32, lineHeight: 36, letterSpacing: -0.6, color: colors.ink },
+  title: { fontFamily: fonts.display, fontSize: 24, lineHeight: 30, letterSpacing: -0.3, color: colors.ink },
+  heading: { fontFamily: fonts.displayMedium, fontSize: 17, lineHeight: 22, color: colors.ink },
+  body: { fontFamily: fonts.body, fontSize: 16, lineHeight: 24, color: colors.ink },
+  bodyMedium: { fontFamily: fonts.bodyMedium, fontSize: 16, lineHeight: 24, color: colors.ink },
   caption: { fontFamily: fonts.body, fontSize: 14, lineHeight: 20, color: colors.inkMuted },
-  label: { fontFamily: fonts.bodySemibold, fontSize: 13, lineHeight: 18, color: colors.inkSecondary },
+  label: { fontFamily: fonts.bodyMedium, fontSize: 13, lineHeight: 18, color: colors.inkSecondary },
+  mono: { fontFamily: fonts.monoMedium, fontSize: 14, lineHeight: 20, color: colors.ink, fontVariant: ["tabular-nums"] },
 };
 
 export function AppText({
@@ -31,9 +36,11 @@ type ButtonProps = Omit<PressableProps, "style" | "children"> & {
   loading?: boolean;
   icon?: ReactNode;
   style?: StyleProp<ViewStyle>;
+  /** Yalnizca ghost icin: yikici metin eylemi (iptal) kirmizi ama kutusuz durur. */
+  textColor?: string;
 };
 
-export function Button({ title, variant = "primary", loading, disabled, icon, style, onPress, ...rest }: ButtonProps) {
+export function Button({ title, variant = "primary", loading, disabled, icon, style, textColor, onPress, ...rest }: ButtonProps) {
   const isDisabled = disabled || loading;
   const palette = {
     primary: { bg: colors.accent, fg: colors.white, border: colors.accent },
@@ -57,7 +64,7 @@ export function Button({ title, variant = "primary", loading, disabled, icon, st
         styles.button,
         { backgroundColor: palette.bg, borderColor: palette.border },
         isDisabled && variant === "primary" && { backgroundColor: colors.borderStrong, borderColor: colors.borderStrong },
-        pressed && !isDisabled && { opacity: 0.85, transform: [{ scale: 0.99 }] },
+        pressed && !isDisabled && { opacity: 0.9, transform: [{ scale: 0.985 }] },
         style,
       ]}
       {...rest}
@@ -67,7 +74,7 @@ export function Button({ title, variant = "primary", loading, disabled, icon, st
       ) : (
         <View style={styles.buttonInner}>
           {icon}
-          <Text style={[styles.buttonText, { color: palette.fg }]}>{title}</Text>
+          <Text style={[styles.buttonText, { color: textColor ?? palette.fg }]}>{title}</Text>
         </View>
       )}
     </Pressable>
@@ -144,7 +151,8 @@ export function Banner({
   body: string;
 }) {
   const palette = {
-    brand: { bg: colors.brandSoft, border: colors.brandSoftBorder },
+    // "brand" bilgi notudur, uyari degil: turuncu yalnizca eylem ve secimde kalsin.
+    brand: { bg: colors.surfaceMuted, border: colors.border },
     warning: { bg: colors.warningSoft, border: "#FDE68A" },
     danger: { bg: colors.dangerSoft, border: "#FECACA" },
     success: { bg: colors.successSoft, border: "#BBF7D0" },
@@ -193,8 +201,8 @@ export function Loading() {
 
 const styles = StyleSheet.create({
   button: {
-    minHeight: 54,
-    borderRadius: radius.pill,
+    minHeight: 52,
+    borderRadius: radius.control,
     borderWidth: 1,
     paddingHorizontal: space.xl,
     alignItems: "center",
@@ -207,9 +215,9 @@ const styles = StyleSheet.create({
     borderRadius: radius.card,
     borderWidth: 1,
     borderColor: colors.border,
-    padding: space.lg,
+    padding: space.xl - space.xs,
   },
-  divider: { height: 1, backgroundColor: colors.border, marginVertical: space.md },
+  divider: { height: 1, backgroundColor: colors.border, marginVertical: space.xs },
   chip: {
     minHeight: 40,
     paddingHorizontal: space.lg,
@@ -222,8 +230,8 @@ const styles = StyleSheet.create({
   },
   chipText: { fontFamily: fonts.bodyMedium, fontSize: 14, color: colors.ink },
   iconButton: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
     borderRadius: radius.pill,
     backgroundColor: colors.surface,
     borderWidth: 1,
