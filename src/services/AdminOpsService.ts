@@ -1,7 +1,6 @@
 import type { BookingStatus, Prisma } from "@prisma/client";
 
 import prisma from "@/lib/db";
-import { OPEN_BOOKING_STATUSES, PRE_CHECK_IN_STATUSES } from "@/lib/booking-status";
 import { dayRangeInTimeZone } from "@/lib/timezone";
 import { PLATFORM_TIMEZONE } from "@/services/AdminOverviewService";
 
@@ -16,8 +15,13 @@ import { PLATFORM_TIMEZONE } from "@/services/AdminOverviewService";
 export const ADMIN_BOOKING_FILTERS = ["arrivals", "pickups", "inStorage", "overdue", "upcoming", "all"] as const;
 export type AdminBookingFilter = (typeof ADMIN_BOOKING_FILTERS)[number];
 
-const PRE_CHECK_IN: BookingStatus[] = [...PRE_CHECK_IN_STATUSES];
-const OPEN: BookingStatus[] = [...OPEN_BOOKING_STATUSES];
+/** Valizi henuz dukkana gelmemis durumlar. */
+const PRE_CHECK_IN: BookingStatus[] = ["PENDING", "WAITING_APPROVAL", "APPROVED", "PAID"];
+/**
+ * Cikis saati gectiginde hala acik sayilanlar: `OverdueBookingService.OPEN_STATUSES`
+ * ile AYNI liste (orada disa acik degil). Ortak bir sabite tasininca ikisi de onu okumali.
+ */
+const OPEN: BookingStatus[] = [...PRE_CHECK_IN, "CHECKED_IN"];
 /** Gelecegi kesin olanlar; PENDING/WAITING_APPROVAL odeme ya da onay bekliyor. */
 const CONFIRMED_PRE: BookingStatus[] = ["APPROVED", "PAID"];
 
