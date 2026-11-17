@@ -342,7 +342,8 @@
       "unknown_code": "Bu kod tanınmadı. BagajPark rezervasyon QR kodu mu?",
       "forbidden": "Bu rezervasyon senin dükkanına ait değil.",
       "not_found": "Rezervasyon bulunamadı."
-    }
+    },
+    "openSettings": "Ayarlardan izin ver"
   },
   "reset": {
     "forgotPassword": "Şifremi unuttum",
