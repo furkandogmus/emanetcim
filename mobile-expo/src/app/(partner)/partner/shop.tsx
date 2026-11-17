@@ -1,15 +1,15 @@
-import { ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import type { Href } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ImagePlus, ShieldCheck, Store, Wallet, Settings, Clock, Gift } from "lucide-react-native";
+import { ArrowLeft, ImagePlus, ShieldCheck, Wallet, Settings, Clock, Gift } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
-import { LinkRow } from "@/components/LinkRow";
-import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } from "@/components/ui";
+import { LinkGroup, LinkRow } from "@/components/LinkRow";
+import { AppText, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { api } from "@/lib/api";
 import { usePartnerShopSelection, withShop } from "@/lib/partner-shop";
 import { errorMessage } from "@/lib/errors";
@@ -77,53 +77,67 @@ export default function PartnerShopScreen() {
       ) : (
         <ScrollView contentContainerStyle={styles.content}>
           <AppText variant="title">{query.data.name}</AppText>
-          <Card style={styles.photoCard}>
-            {image ? (
+          {image ? (
+            <View style={{ gap: space.md }}>
               <Image
                 source={{ uri: image }}
                 style={styles.photo}
                 contentFit="cover"
                 accessibilityLabel={t("partner.photo")}
               />
-            ) : (
-              <View style={[styles.photo, styles.placeholder]}>
-                <Store size={48} color={colors.brand} />
-                <AppText variant="caption">{t("partner.noPhoto")}</AppText>
-              </View>
-            )}
-          </Card>
-          <Banner tone="brand" body={t("partner.photoHint")} />
-          <Button
-            title={image ? t("partner.changePhoto") : t("partner.addPhoto")}
-            icon={<ImagePlus size={18} color={colors.white} />}
-            loading={upload.isPending}
-            onPress={() => void pick()}
-          />
+              <Button
+                variant="secondary"
+                title={t("partner.changePhoto")}
+                loading={upload.isPending}
+                onPress={() => void pick()}
+              />
+            </View>
+          ) : (
+            // Bos durum dokunulabilir: ayri bir buton ve yarim ekranlik bos kutu yerine tek hedef.
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t("partner.addPhoto")}
+              disabled={upload.isPending}
+              onPress={() => void pick()}
+              style={({ pressed }) => [styles.empty, pressed && { backgroundColor: colors.surfaceMuted }]}
+            >
+              <ImagePlus size={24} color={colors.accent} strokeWidth={1.75} />
+              <AppText variant="bodyMedium" style={{ color: colors.accent }}>
+                {upload.isPending ? t("common.loading") : t("partner.addPhoto")}
+              </AppText>
+              <AppText variant="caption" style={{ textAlign: "center", fontSize: 13 }}>
+                {t("partner.photoHint")}
+              </AppText>
+            </Pressable>
+          )}
+
+          <LinkGroup>
           <LinkRow
-            icon={<ShieldCheck size={18} color={colors.brand} />}
+            icon={<ShieldCheck size={18} color={colors.inkSecondary} />}
             label={t("seals.open")}
             onPress={() => router.push("/partner/seals" as Href)}
           />
           <LinkRow
-            icon={<Wallet size={18} color={colors.brand} />}
+            icon={<Wallet size={18} color={colors.inkSecondary} />}
             label={t("earnings.title")}
             onPress={() => router.push("/partner/earnings" as Href)}
           />
           <LinkRow
-            icon={<Settings size={18} color={colors.brand} />}
+            icon={<Settings size={18} color={colors.inkSecondary} />}
             label={t("shopSettings.title")}
             onPress={() => router.push("/partner/settings" as Href)}
           />
           <LinkRow
-            icon={<Clock size={18} color={colors.brand} />}
+            icon={<Clock size={18} color={colors.inkSecondary} />}
             label={t("schedule.title")}
             onPress={() => router.push("/partner/schedule" as Href)}
           />
           <LinkRow
-            icon={<Gift size={18} color={colors.brand} />}
+            icon={<Gift size={18} color={colors.inkSecondary} />}
             label={t("referral.title")}
             onPress={() => router.push("/partner/referral" as Href)}
           />
+          </LinkGroup>
         </ScrollView>
       )}
     </SafeAreaView>
@@ -140,7 +154,17 @@ const styles = StyleSheet.create({
     paddingVertical: space.md,
   },
   content: { padding: space.xl, gap: space.lg },
-  photoCard: { padding: 0, overflow: "hidden", borderRadius: radius.card },
-  photo: { width: "100%", aspectRatio: 4 / 3 },
-  placeholder: { alignItems: "center", justifyContent: "center", gap: space.sm, backgroundColor: colors.brandSoft },
+  photo: { width: "100%", aspectRatio: 16 / 10, borderRadius: radius.card },
+  empty: {
+    alignItems: "center",
+    justifyContent: "center",
+    gap: space.xs,
+    paddingVertical: space.xl,
+    paddingHorizontal: space.xl,
+    borderRadius: radius.card,
+    borderWidth: 1.5,
+    borderStyle: "dashed",
+    borderColor: colors.borderStrong,
+    backgroundColor: colors.surface,
+  },
 });

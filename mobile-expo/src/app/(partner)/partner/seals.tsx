@@ -126,7 +126,9 @@ export default function PartnerSealsScreen() {
 
           <View style={styles.stats}>
             <Stat value={query.data.assignedCount} label={t("seals.ready")} />
+            <View style={styles.statRule} />
             <Stat value={query.data.inUseCount} label={t("seals.inUse")} />
+            <View style={styles.statRule} />
             <Stat value={query.data.returnedCount} label={t("seals.returned")} />
           </View>
 
@@ -228,12 +230,12 @@ export default function PartnerSealsScreen() {
 
 function Stat({ value, label }: { value: number; label: string }) {
   return (
-    <Card style={styles.stat}>
+    <View style={styles.stat}>
       <AppText style={styles.statValue}>{value}</AppText>
-      <AppText variant="caption" style={{ textAlign: "center" }}>
+      <AppText variant="caption" style={{ textAlign: "center", fontSize: 13 }}>
         {label}
       </AppText>
-    </Card>
+    </View>
   );
 }
 
@@ -280,9 +282,18 @@ const styles = StyleSheet.create({
     paddingVertical: space.md,
   },
   content: { padding: space.xl, gap: space.lg },
-  stats: { flexDirection: "row", gap: space.md },
-  stat: { flex: 1, alignItems: "center", gap: 2, paddingVertical: space.lg },
-  statValue: { fontFamily: fonts.display, fontSize: 26, color: colors.ink },
+  // Esnaf ozetiyle ayni dil: tek kart, ince cizgiyle ayrilmis sayilar.
+  stats: {
+    flexDirection: "row",
+    paddingVertical: space.lg,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  statRule: { width: 1, backgroundColor: colors.border },
+  stat: { flex: 1, alignItems: "center", gap: 2 },
+  statValue: { fontFamily: fonts.display, fontSize: 28, lineHeight: 32, color: colors.ink, fontVariant: ["tabular-nums"] },
   card: { gap: space.md },
   input: {
     minHeight: 48,

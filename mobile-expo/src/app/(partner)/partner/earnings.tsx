@@ -8,7 +8,7 @@ import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } fro
 import { errorMessage } from "@/lib/errors";
 import { formatDayTime, formatMoney } from "@/lib/format";
 import { usePartnerEarnings } from "@/lib/queries";
-import { colors, fonts, space } from "@/theme/tokens";
+import { colors, fonts, radius, space } from "@/theme/tokens";
 
 /**
  * Esnaf kazanci. Tutarlar sunucuda komisyon dusulmus esnaf payidir; istemci
@@ -47,18 +47,13 @@ export default function PartnerEarningsScreen() {
           }
           ListHeaderComponent={
             <View style={{ gap: space.lg }}>
+              {/* Duz turuncu kart ekrandaki her seyle yarisiyordu: rakam kendi buyuklugunden ses alsin. */}
               <Card style={styles.totalCard}>
-                <AppText variant="label" style={{ color: colors.white, opacity: 0.85 }}>
-                  {t("earnings.total")}
-                </AppText>
-                <AppText variant="display" style={{ color: colors.white }}>
-                  {formatMoney(data.totalBalance)}
-                </AppText>
+                <AppText variant="label">{t("earnings.total")}</AppText>
+                <AppText style={styles.total}>{formatMoney(data.totalBalance)}</AppText>
                 <View style={styles.todayRow}>
-                  <AppText variant="caption" style={{ color: colors.white, opacity: 0.85 }}>
-                    {t("earnings.today")}
-                  </AppText>
-                  <AppText variant="bodyMedium" style={{ color: colors.white }}>
+                  <AppText variant="caption">{t("earnings.today")}</AppText>
+                  <AppText variant="bodyMedium" style={{ fontVariant: ["tabular-nums"] }}>
                     {formatMoney(data.todayEarnings)}
                   </AppText>
                 </View>
@@ -76,12 +71,19 @@ export default function PartnerEarningsScreen() {
             </View>
           }
           ListEmptyComponent={<AppText variant="caption">{t("earnings.empty")}</AppText>}
-          renderItem={({ item }) => (
-            <View style={styles.row}>
+          renderItem={({ item, index }) => (
+            <View
+              style={[
+                styles.row,
+                index === 0 && styles.rowFirst,
+                index === data.history.length - 1 && styles.rowLast,
+                index > 0 && styles.rowDivider,
+              ]}
+            >
               <AppText variant="body" style={{ flex: 1 }}>
                 {item.createdAt ? formatDayTime(item.createdAt) : item.date}
               </AppText>
-              <AppText variant="bodyMedium" style={{ fontFamily: fonts.bodySemibold }}>
+              <AppText variant="bodyMedium" style={{ fontFamily: fonts.bodySemibold, fontVariant: ["tabular-nums"] }}>
                 {formatMoney(item.amount)}
               </AppText>
             </View>
@@ -109,14 +111,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.xl,
     paddingVertical: space.md,
   },
-  content: { padding: space.xl, gap: space.sm },
-  totalCard: { backgroundColor: colors.accent, borderColor: colors.accent, gap: space.xs },
-  todayRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: space.sm },
+  content: { padding: space.xl },
+  totalCard: { gap: space.xs },
+  total: { fontFamily: fonts.display, fontSize: 36, lineHeight: 42, color: colors.ink, fontVariant: ["tabular-nums"] },
+  todayRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: space.sm,
+    paddingTop: space.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  // Islemler tek kartta: satirlar kenarlarini paylasir, ilk ve son kose yuvarlanir.
   row: {
     flexDirection: "row",
     alignItems: "center",
     minHeight: 52,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    paddingHorizontal: space.lg,
+    backgroundColor: colors.surface,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: colors.border,
   },
+  rowFirst: { marginTop: space.sm, borderTopWidth: 1, borderTopLeftRadius: radius.card, borderTopRightRadius: radius.card },
+  rowLast: { borderBottomWidth: 1, borderBottomLeftRadius: radius.card, borderBottomRightRadius: radius.card },
+  rowDivider: { borderTopWidth: 1 },
 });

@@ -245,7 +245,8 @@
     "addPhoto": "Fotoğraf ekle",
     "changePhoto": "Fotoğrafı değiştir",
     "photoSaved": "Fotoğraf kaydedildi.",
-    "photoFailed": "Fotoğraf yüklenemedi"
+    "photoFailed": "Fotoğraf yüklenemedi",
+    "bagNumber": "{{n}}. valiz"
   },
   "profile": {
     "title": "Profil",
