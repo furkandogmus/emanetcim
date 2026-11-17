@@ -1,18 +1,32 @@
-import { Pressable, StyleSheet, View } from "react-native";
+import { Children } from "react";
 import type { ReactNode } from "react";
+import { Pressable, StyleSheet, View } from "react-native";
 import { ChevronRight } from "lucide-react-native";
 
 import { AppText } from "@/components/ui";
 import { colors, radius, space } from "@/theme/tokens";
 
-/** Ayar listelerinde bir alt ekrana giden satir. */
+/** Ayar satirlarini tek kartta, ince ayiricilarla toplar (profildeki "Hesap" grubuyla ayni). */
+export function LinkGroup({ children }: { children: ReactNode }) {
+  return (
+    <View style={styles.group}>
+      {Children.toArray(children).map((child, i) => (
+        <View key={i} style={i > 0 ? styles.divider : undefined}>
+          {child}
+        </View>
+      ))}
+    </View>
+  );
+}
+
+/** Bir alt ekrana giden satir. Ikon notr: satirlar turuncu dairelerle yarismasin. */
 export function LinkRow({ icon, label, onPress }: { icon: ReactNode; label: string; onPress: () => void }) {
   return (
     <Pressable
       accessibilityRole="link"
       accessibilityLabel={label}
       onPress={onPress}
-      style={({ pressed }) => [styles.row, pressed && { opacity: 0.7 }]}
+      style={({ pressed }) => [styles.row, pressed && { backgroundColor: colors.surfaceMuted }]}
     >
       <View style={styles.icon}>{icon}</View>
       <AppText variant="bodyMedium" style={{ flex: 1 }}>
@@ -24,23 +38,14 @@ export function LinkRow({ icon, label, onPress }: { icon: ReactNode; label: stri
 }
 
 const styles = StyleSheet.create({
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space.md,
-    minHeight: 56,
-    paddingHorizontal: space.lg,
-    borderRadius: radius.control,
+  group: {
+    borderRadius: radius.card,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
+    overflow: "hidden",
   },
-  icon: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.pill,
-    backgroundColor: colors.brandSoft,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  divider: { borderTopWidth: 1, borderTopColor: colors.border },
+  row: { flexDirection: "row", alignItems: "center", gap: space.md, minHeight: 52, paddingHorizontal: space.lg },
+  icon: { width: 20, alignItems: "center" },
 });

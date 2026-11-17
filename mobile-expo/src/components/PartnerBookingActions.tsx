@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { Image } from "expo-image";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
@@ -12,6 +13,13 @@ import { notify } from "@/lib/notify";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 
 type BagSize = "S" | "M" | "XL";
+/** Valiz satirinda boyutu yazidan once gorsel anlatir; arama ekranindaki renderlarla ayni. */
+const BAG_IMAGES: Record<BagSize, number> = {
+  S: require("../../assets/bags/s.webp"),
+  M: require("../../assets/bags/m.webp"),
+  XL: require("../../assets/bags/xl.webp"),
+};
+
 type SealRow = { bagIndex: number; bagSize: BagSize; sealNumber: string };
 
 /** Siralama `BookingSeal.bagIndex` ile ayni: once S, sonra M, sonra XL (web `CheckInDialog`). */
@@ -83,9 +91,21 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
         <AppText variant="caption">{t("partner.checkInHint")}</AppText>
         {rows.map((r) => (
           <View key={r.bagIndex} style={styles.sealRow}>
-            <AppText variant="bodyMedium" nativeID={`seal-${r.bagIndex}`} style={{ flex: 1 }}>
-              {t("partner.bagN", { n: r.bagIndex + 1, size: t(`bags.${r.bagSize.toLowerCase()}`) })}
-            </AppText>
+            <View style={styles.bagThumb}>
+              <Image source={BAG_IMAGES[r.bagSize]} style={{ width: 28, height: 32 }} contentFit="contain" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <AppText
+                variant="bodyMedium"
+                nativeID={`seal-${r.bagIndex}`}
+                accessibilityLabel={t("partner.bagN", { n: r.bagIndex + 1, size: t(`bags.${r.bagSize.toLowerCase()}`) })}
+              >
+                {t("partner.bagNumber", { n: r.bagIndex + 1 })}
+              </AppText>
+              <AppText variant="caption" style={{ fontSize: 13 }}>
+                {t(`bags.${r.bagSize.toLowerCase()}`)}
+              </AppText>
+            </View>
             <TextInput
               accessibilityLabelledBy={`seal-${r.bagIndex}`}
               accessibilityLabel={t("partner.sealNumber")}
@@ -163,15 +183,23 @@ export function PartnerBookingActions({ booking }: { booking: BookingDetail }) {
 const styles = StyleSheet.create({
   card: { gap: space.md },
   sealRow: { flexDirection: "row", alignItems: "center", gap: space.md },
+  bagThumb: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.inner,
+    backgroundColor: colors.surfaceMuted,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   input: {
-    width: 150,
+    width: 124,
     minHeight: 48,
     borderRadius: radius.control,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
     paddingHorizontal: space.md,
-    fontFamily: fonts.body,
+    fontFamily: fonts.monoMedium,
     fontSize: 16,
     color: colors.ink,
   },
