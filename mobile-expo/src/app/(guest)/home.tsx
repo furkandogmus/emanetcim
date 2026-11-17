@@ -8,9 +8,8 @@ import { ChevronRight, Search, Ticket, User } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { BrandMark } from "@/components/BrandMark";
-import { StatusBadge } from "@/components/StatusBadge";
+import { BookingRow } from "@/components/BookingRow";
 import { AppText, IconButton } from "@/components/ui";
-import { formatDayTime } from "@/lib/format";
 import { prefetchMapStyle } from "@/lib/map-style";
 import { isActiveBooking, useMyBookings } from "@/lib/queries";
 import { colors, fonts, radius, shadow, space } from "@/theme/tokens";
@@ -28,7 +27,7 @@ export default function HomeScreen() {
 
   return (
     <ScrollView style={styles.root} contentContainerStyle={{ paddingBottom: insets.bottom + space.xxl }} bounces={false}>
-      <View style={[styles.hero, { height: Math.max(340, height * 0.48) }]}>
+      <View style={[styles.hero, { height: Math.max(340, height * 0.44) }]}>
         <Image source={require("../../../assets/hero.jpg")} style={StyleSheet.absoluteFill} contentFit="cover" />
         <View style={styles.scrim} />
         <View style={[styles.heroTop, { paddingTop: insets.top + space.sm }]}>
@@ -60,33 +59,52 @@ export default function HomeScreen() {
         </Pressable>
 
         {next ? (
+          <View style={styles.section}>
+            <View style={styles.sectionHead}>
+              <AppText variant="label">{t("home.nextLabel")}</AppText>
+              <Pressable accessibilityRole="link" hitSlop={8} onPress={() => router.push("/bookings")}>
+                <AppText variant="label" style={{ color: colors.accent }}>
+                  {t("home.allBookings")}
+                </AppText>
+              </Pressable>
+            </View>
+            <BookingRow booking={next} title={next.shopName} onPress={() => router.push(`/bookings/${next.id}`)} />
+          </View>
+        ) : (
           <Pressable
             accessibilityRole="button"
-            onPress={() => router.push(`/bookings/${next.id}`)}
-            style={({ pressed }) => [styles.nextCard, pressed && { opacity: 0.9 }]}
+            onPress={() => router.push("/bookings")}
+            style={({ pressed }) => [styles.row, pressed && { backgroundColor: colors.surfaceMuted }]}
           >
-            <View style={{ flex: 1, gap: 4 }}>
-              <StatusBadge status={next.status} />
-              <AppText variant="heading" numberOfLines={1}>
-                {next.shopName}
-              </AppText>
-              <AppText variant="caption">{formatDayTime(next.checkInTime)}</AppText>
-            </View>
-            <ChevronRight size={22} color={colors.inkMuted} />
+            <Ticket size={18} color={colors.inkSecondary} />
+            <AppText variant="bodyMedium" style={{ flex: 1 }}>
+              {t("home.myBookings")}
+            </AppText>
+            <ChevronRight size={18} color={colors.inkMuted} />
           </Pressable>
-        ) : null}
+        )}
 
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => router.push("/bookings")}
-          style={({ pressed }) => [styles.row, pressed && { opacity: 0.8 }]}
-        >
-          <Ticket size={20} color={colors.ink} />
-          <AppText variant="bodyMedium" style={{ flex: 1 }}>
-            {t("home.myBookings")}
-          </AppText>
-          <ChevronRight size={20} color={colors.inkMuted} />
-        </Pressable>
+        <View style={styles.section}>
+          <AppText variant="label">{t("home.howTitle")}</AppText>
+          <View style={styles.steps}>
+            {(["1", "2", "3"] as const).map((n, i) => (
+              <View key={n} style={styles.step}>
+                <View style={styles.stepRail}>
+                  <View style={styles.stepNum}>
+                    <AppText variant="mono" style={{ fontSize: 13, color: colors.accent }}>
+                      {n}
+                    </AppText>
+                  </View>
+                  {i < 2 ? <View style={styles.stepLine} /> : null}
+                </View>
+                <View style={{ flex: 1, gap: 2, paddingBottom: i < 2 ? space.lg : 0 }}>
+                  <AppText variant="bodyMedium">{t(`home.step${n}Title`)}</AppText>
+                  <AppText variant="caption">{t(`home.step${n}Body`)}</AppText>
+                </View>
+              </View>
+            ))}
+          </View>
+        </View>
       </View>
     </ScrollView>
   );
@@ -125,16 +143,8 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     ...shadow.floating,
   },
-  nextCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space.md,
-    padding: space.lg,
-    borderRadius: radius.card,
-    backgroundColor: colors.brandSoft,
-    borderWidth: 1,
-    borderColor: colors.brandSoftBorder,
-  },
+  section: { gap: space.sm },
+  sectionHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   row: {
     flexDirection: "row",
     alignItems: "center",
@@ -146,4 +156,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
+  steps: {
+    padding: space.lg,
+    borderRadius: radius.card,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  step: { flexDirection: "row", gap: space.md },
+  stepRail: { alignItems: "center", width: 28 },
+  stepNum: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: colors.brandSoft,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  stepLine: { flex: 1, width: 1, backgroundColor: colors.border, marginVertical: space.xs },
 });

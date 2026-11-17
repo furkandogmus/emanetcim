@@ -51,7 +51,16 @@
     "heroTitle": "Drop your bags.\nEnjoy the city.",
     "searchPlaceholder": "Where are you going?",
     "myBookings": "My bookings",
-    "profile": "Profile"
+    "profile": "Profile",
+    "nextLabel": "Your next drop-off",
+    "allBookings": "All",
+    "howTitle": "How it works",
+    "step1Title": "Pick a nearby spot",
+    "step1Body": "See shops and the daily price per bag on the map.",
+    "step2Title": "Show your QR code at the shop",
+    "step2Body": "The shop seals your bag with a numbered seal.",
+    "step3Title": "Collect it when you are back",
+    "step3Body": "Show the same code and get your bag back, still sealed."
   },
   "search": {
     "locationTitle": "Where are you going?",

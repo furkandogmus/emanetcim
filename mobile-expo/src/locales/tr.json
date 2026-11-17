@@ -51,7 +51,16 @@
     "heroTitle": "Valizini bırak.\nŞehrin tadını çıkar.",
     "searchPlaceholder": "Nereye gidiyorsun?",
     "myBookings": "Rezervasyonlarım",
-    "profile": "Profil"
+    "profile": "Profil",
+    "nextLabel": "Sıradaki emanetin",
+    "allBookings": "Tümü",
+    "howTitle": "Nasıl çalışır",
+    "step1Title": "Yakındaki noktayı seç",
+    "step1Body": "Haritada dükkanları ve günlük valiz fiyatını gör.",
+    "step2Title": "Dükkanda QR kodunu göster",
+    "step2Body": "Esnaf valizini numaralı mühürle kapatıp teslim alır.",
+    "step3Title": "Dönünce valizini al",
+    "step3Body": "Aynı kodu göster, valizini mühürlü haliyle geri al."
   },
   "search": {
     "locationTitle": "Nereye gidiyorsun?",

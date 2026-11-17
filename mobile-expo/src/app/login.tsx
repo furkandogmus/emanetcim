@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, View, useWindowDimensions } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 
@@ -16,6 +17,8 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function LoginScreen() {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
+  const { height } = useWindowDimensions();
   const { requestCode, verifyCode, signInWithPassword, signInWithGoogle } = useAuth();
   const [step, setStep] = useState<"email" | "code" | "password">("email");
   const [email, setEmail] = useState("");
@@ -118,15 +121,29 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <View style={styles.safe}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          <View style={styles.brandRow}>
-            <BrandMark size={32} />
-            <AppText variant="heading" style={{ color: colors.accent }}>
-              BagajPark
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + space.xl }}
+          keyboardShouldPersistTaps="handled"
+          bounces={false}
+        >
+          {/* Ana sayfadaki sahneyle ayni: giris ekrani da urunun dunyasindan acilir. */}
+          <View style={[styles.hero, { height: Math.max(220, height * 0.32) }]}>
+            <Image source={require("../../assets/hero.jpg")} style={StyleSheet.absoluteFill} contentFit="cover" />
+            <View style={styles.scrim} />
+            <View style={[styles.brandPill, { marginTop: insets.top + space.md }]}>
+              <BrandMark size={20} />
+              <AppText variant="bodyMedium" style={{ fontFamily: fonts.displayMedium }}>
+                BagajPark
+              </AppText>
+            </View>
+            <AppText variant="display" style={styles.heroTitle}>
+              {t("home.heroTitle")}
             </AppText>
           </View>
+
+          <View style={styles.content}>
 
           {step === "email" ? (
             <>
@@ -231,19 +248,40 @@ export default function LoginScreen() {
               </View>
             </>
           )}
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: space.xl, gap: space.lg, paddingTop: space.xxl },
-  brandRow: { flexDirection: "row", alignItems: "center", gap: space.sm, marginBottom: space.xl },
+  content: {
+    flexGrow: 1,
+    marginTop: -space.xl,
+    padding: space.xl,
+    gap: space.lg,
+    backgroundColor: colors.bg,
+    borderTopLeftRadius: radius.sheet,
+    borderTopRightRadius: radius.sheet,
+  },
+  hero: { justifyContent: "space-between", backgroundColor: colors.ink, paddingHorizontal: space.xl },
+  scrim: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, backgroundColor: "rgba(28,25,23,0.42)" },
+  brandPill: {
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space.sm,
+    backgroundColor: colors.surface,
+    borderRadius: radius.pill,
+    paddingHorizontal: space.md,
+    paddingVertical: 6,
+  },
+  heroTitle: { color: colors.white, fontSize: 28, lineHeight: 32, paddingBottom: space.xxl + space.sm },
   field: { gap: space.sm },
   input: {
-    minHeight: 54,
+    minHeight: 52,
     borderRadius: radius.control,
     borderWidth: 1,
     borderColor: colors.border,
@@ -253,7 +291,7 @@ const styles = StyleSheet.create({
     fontSize: 17,
     color: colors.ink,
   },
-  codeInput: { fontFamily: fonts.display, fontSize: 28, letterSpacing: 10, textAlign: "center" },
+  codeInput: { fontFamily: fonts.monoMedium, fontSize: 26, letterSpacing: 10, textAlign: "center" },
   row: { flexDirection: "row", justifyContent: "space-between" },
   dividerRow: { flexDirection: "row", alignItems: "center", gap: space.md },
   dividerLine: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: colors.borderStrong },
