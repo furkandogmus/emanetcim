@@ -398,3 +398,61 @@ export function toMobileAdminOverview(o: AdminOverviewSource) {
     })),
   };
 }
+
+type AdminOps = import("@/services/AdminOpsService").AdminOpsService;
+type AdminBookingRowSource = Awaited<ReturnType<AdminOps["listBookings"]>>["rows"][number];
+type AdminBookingDetailSource = NonNullable<Awaited<ReturnType<AdminOps["bookingDetail"]>>>;
+type AdminShopSource = Awaited<ReturnType<AdminOps["shopsOccupancy"]>>[number];
+
+/** `admin/bookings` satiri: ozet + misafir adi (yoksa e-posta) ve olusturulma ani. */
+export function toMobileAdminBookingRow(b: AdminBookingRowSource) {
+  return {
+    ...toMobileBookingSummary(b),
+    guestName: b.guest?.name || b.guest?.email || b.guestEmail || "",
+    createdAt: b.createdAt.toISOString(),
+  };
+}
+
+/** `admin/bookings/[id]`: destek hattinda gereken her sey; QR token'i TASIMAZ. */
+export function toMobileAdminBookingDetail({ booking: b, events }: AdminBookingDetailSource) {
+  const place = [b.shop.address, b.shop.district, b.shop.city].filter(Boolean).join(", ");
+  return {
+    ...toMobileAdminBookingRow(b),
+    guest: {
+      name: b.guest?.name ?? "",
+      email: b.guest?.email ?? b.guestEmail ?? "",
+      phone: b.guest?.phone ?? b.guestPhone ?? "",
+    },
+    shop: {
+      name: b.shop.name,
+      address: place,
+      phone: b.shop.owner.phone ?? "",
+      ownerName: b.shop.owner.name ?? "",
+      latitude: b.shop.latitude,
+      longitude: b.shop.longitude,
+    },
+    seals: b.seals,
+    checkedInAt: b.checkedInAt?.toISOString() ?? null,
+    checkedOutAt: b.checkedOutAt?.toISOString() ?? null,
+    couponCode: b.couponCode,
+    disputeStatus: b.dispute?.status ?? null,
+    paymentStatus: b.paymentLog?.status ?? null,
+    events: events.map((e) => ({ event: e.event, actorRole: e.actorRole, createdAt: e.createdAt.toISOString() })),
+  };
+}
+
+/** `admin/shops`: doluluk listesi satiri. */
+export function toMobileAdminShop(s: AdminShopSource) {
+  return {
+    id: s.id,
+    name: s.name,
+    place: [s.district, s.city].filter(Boolean).join(", "),
+    capacity: s.capacity,
+    rating: s.rating,
+    isPrelaunch: s.isPrelaunch,
+    phone: s.owner.phone ?? "",
+    bagsInStorage: s.bagsInStorage,
+    arrivalsToday: s.arrivalsToday,
+    pickupsToday: s.pickupsToday,
+  };
+}
