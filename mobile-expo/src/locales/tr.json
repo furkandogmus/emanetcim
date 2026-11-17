@@ -322,7 +322,10 @@
     "replyPlaceholder": "Cevabını yaz…",
     "replySend": "Cevabı gönder",
     "replySent": "Cevap e-postayla gönderildi.",
-    "replyTooShort": "Cevap en az 2 karakter olmalı."
+    "replyTooShort": "Cevap en az 2 karakter olmalı.",
+    "factPrice": "Günlük fiyat",
+    "factCapacity": "Kapasite",
+    "factDate": "Başvuru"
   },
   "scan": {
     "open": "QR okut",
