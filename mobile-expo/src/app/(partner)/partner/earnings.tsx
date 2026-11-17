@@ -1,10 +1,9 @@
 import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
-import { ArrowLeft } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
-import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } from "@/components/ui";
+import { StackHeader } from "@/components/StackHeader";
+import { AppText, Banner, Button, Card, CenterMessage, Loading } from "@/components/ui";
 import { errorMessage } from "@/lib/errors";
 import { formatDayTime, formatMoney } from "@/lib/format";
 import { usePartnerEarnings } from "@/lib/queries";
@@ -22,13 +21,7 @@ export default function PartnerEarningsScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
-      <View style={styles.header}>
-        <IconButton label={t("common.back")} onPress={() => router.back()}>
-          <ArrowLeft size={20} color={colors.ink} />
-        </IconButton>
-        <AppText variant="heading">{t("earnings.title")}</AppText>
-        <View style={{ width: 44 }} />
-      </View>
+      <StackHeader title={t("earnings.title")} />
 
       {query.isLoading ? (
         <Loading />

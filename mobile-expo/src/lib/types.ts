@@ -300,7 +300,9 @@ export type AdminBookingFilter = "arrivals" | "pickups" | "inStorage" | "overdue
 /** `admin/bookings` (`toMobileAdminBookingRow`). */
 export type AdminBookingRow = BookingSummary & { guestName: string; createdAt: string };
 
-export type AdminBookingsResponse = { counts: Record<AdminBookingFilter, number>; bookings: AdminBookingRow[] };
+export type AdminBookingsResponse = { bookings: AdminBookingRow[] };
+
+export type AdminBookingCounts = Record<AdminBookingFilter, number>;
 
 /** `admin/bookings/[id]` (`toMobileAdminBookingDetail`). QR token'i yok. */
 export type AdminBookingDetail = AdminBookingRow & {

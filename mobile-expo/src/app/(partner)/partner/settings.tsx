@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { Field } from "@/components/Field";
-import { AppText, Banner, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
+import { StackHeader } from "@/components/StackHeader";
+import { AppText, Banner, Button, CenterMessage, Loading } from "@/components/ui";
 import { api } from "@/lib/api";
 import { usePartnerShopSelection, withShop } from "@/lib/partner-shop";
 import { errorMessage } from "@/lib/errors";
@@ -27,13 +26,7 @@ export default function PartnerSettingsScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
-      <View style={styles.header}>
-        <IconButton label={t("common.back")} onPress={() => router.back()}>
-          <ArrowLeft size={20} color={colors.ink} />
-        </IconButton>
-        <AppText variant="heading">{t("shopSettings.title")}</AppText>
-        <View style={{ width: 44 }} />
-      </View>
+      <StackHeader title={t("shopSettings.title")} />
       {query.isLoading ? (
         <Loading />
       ) : query.isError || !query.data ? (

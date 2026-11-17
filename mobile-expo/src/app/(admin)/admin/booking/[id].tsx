@@ -46,7 +46,7 @@ export default function AdminBookingScreen() {
           action={<Button variant="secondary" title={t("common.back")} onPress={() => router.back()} />}
         />
       ) : (
-        <Detail b={query.data} onWeb={() => open(`${SITE_ORIGIN}/${lang}/admin/bookings`)} />
+        <Detail b={query.data} onWeb={() => open(`${SITE_ORIGIN}/${lang}/admin/bookings/${query.data?.id ?? ""}`)} />
       )}
     </SafeAreaView>
   );

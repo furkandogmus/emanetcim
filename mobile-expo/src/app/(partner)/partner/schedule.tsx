@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Switch, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Trash2 } from "lucide-react-native";
+import { Trash2 } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { RangeCalendar } from "@/components/Calendar";
 import { Field } from "@/components/Field";
+import { StackHeader } from "@/components/StackHeader";
 import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
@@ -73,20 +73,7 @@ export default function PartnerScheduleScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
-      <View style={styles.header}>
-        <IconButton label={t("common.back")} onPress={() => router.back()}>
-          <ArrowLeft size={20} color={colors.ink} />
-        </IconButton>
-        <View style={styles.titleBlock}>
-          <AppText variant="heading">{t("schedule.title")}</AppText>
-          {shop.data ? (
-            <AppText variant="caption" numberOfLines={1}>
-              {shop.data.name}
-            </AppText>
-          ) : null}
-        </View>
-        <View style={{ width: 44 }} />
-      </View>
+      <StackHeader title={t("schedule.title")} subtitle={shop.data ? shop.data.name : undefined} />
       {query.isLoading ? (
         <Loading />
       ) : query.isError || !query.data ? (

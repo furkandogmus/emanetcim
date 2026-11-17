@@ -21,7 +21,12 @@ export default function AdminMessagesScreen() {
   const query = useAdminMessages();
   const [open, setOpen] = useState<string | null>(null);
 
-  const refresh = () => void queryClient.invalidateQueries({ queryKey: keys.admin });
+  // Tum "admin" onbellegi degil: sekmeler acik kaldigi icin bu, her okundu isaretinde
+  // ozet, rezervasyon ve dukkan isteklerini de tetikliyordu.
+  const refresh = () => {
+    void queryClient.invalidateQueries({ queryKey: [...keys.admin, "messages"] });
+    void queryClient.invalidateQueries({ queryKey: [...keys.admin, "overview"] });
+  };
 
   const markRead = useMutation({
     mutationFn: (id: string) => api(`/admin/messages/${id}`, { method: "PATCH" }),

@@ -19,10 +19,8 @@ import { colors, space } from "@/theme/tokens";
 type Tab = "today" | "upcoming" | "past";
 
 function bucket(b: PartnerBooking): Tab {
+  // Gelmeyen misafir (alma saati gecmis, hic teslim alinmamis) de gecmis sayilir.
   if (!isActiveBooking(b)) return "past";
-  // Gelmeyen misafir: alma saati gecmis ve valiz hic teslim alinmamis. Prod'da
-  // aylar onceki APPROVED kayitlar "Bugun"u dolduruyordu.
-  if (b.status !== "CHECKED_IN" && new Date(b.checkOutTime) < new Date()) return "past";
   const start = new Date(b.checkInTime);
   const p = wallParts(new Date());
   const endOfToday = wallInstant(p.year, p.month, p.day + 1);

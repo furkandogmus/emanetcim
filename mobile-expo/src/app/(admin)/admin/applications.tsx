@@ -1,11 +1,11 @@
 import { Alert, FlatList, Linking, RefreshControl, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Phone } from "lucide-react-native";
+import { Phone } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { MapSnippet } from "@/components/Illustrations";
+import { StackHeader } from "@/components/StackHeader";
 import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
@@ -24,7 +24,10 @@ export default function AdminApplicationsScreen() {
     mutationFn: ({ id, action }: { id: string; action: "approve" | "reject" }) =>
       api(`/admin/applications/${id}/${action}`, { method: "POST" }),
     onSuccess: (_res, { action }) => {
-      void queryClient.invalidateQueries({ queryKey: keys.admin });
+      // Yalnizca etkilenenler: basvuru listesi, ozet sayaci ve dukkan listesi.
+      for (const k of ["applications", "overview", "shops"]) {
+        void queryClient.invalidateQueries({ queryKey: [...keys.admin, k] });
+      }
       notify(action === "approve" ? t("admin.approvedTitle") : t("admin.rejectedTitle"));
     },
     onError: (e) => notify(t("admin.actionFailed"), errorMessage(e, "admin")),
@@ -44,13 +47,7 @@ export default function AdminApplicationsScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
-      <View style={styles.header}>
-        <IconButton label={t("common.back")} onPress={() => router.back()}>
-          <ArrowLeft size={20} color={colors.ink} />
-        </IconButton>
-        <AppText variant="heading">{t("admin.applications")}</AppText>
-        <View style={{ width: 44 }} />
-      </View>
+      <StackHeader title={t("admin.applications")} />
 
       {query.isLoading ? (
         <Loading />

@@ -90,9 +90,9 @@ export function BagRevisionCard({ booking }: { booking: BookingDetail }) {
       <AppText variant="caption">
         {booking.status === "CHECKED_IN" ? t("bagRevision.hintCheckedIn") : t("bagRevision.hint")}
       </AppText>
-      <BagCounter size="s" value={counts.bagCountS} onChange={(n) => setCounts((c) => ({ ...c, bagCountS: n }))} />
-      <BagCounter size="m" value={counts.bagCountM} onChange={(n) => setCounts((c) => ({ ...c, bagCountM: n }))} />
-      <BagCounter size="xl" value={counts.bagCountXl} onChange={(n) => setCounts((c) => ({ ...c, bagCountXl: n }))} />
+      <BagCounter compact size="s" value={counts.bagCountS} onChange={(n) => setCounts((c) => ({ ...c, bagCountS: n }))} />
+      <BagCounter compact size="m" value={counts.bagCountM} onChange={(n) => setCounts((c) => ({ ...c, bagCountM: n }))} />
+      <BagCounter compact size="xl" value={counts.bagCountXl} onChange={(n) => setCounts((c) => ({ ...c, bagCountXl: n }))} />
       {changed ? (
         <AppText variant="label" style={styles.delta} accessibilityLiveRegion="polite">
           {t("bagRevision.delta", { from: initialTotal, to: total })}

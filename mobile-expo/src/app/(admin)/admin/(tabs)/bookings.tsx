@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
@@ -10,7 +10,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { AppText, Button, CenterMessage, Chip, Loading } from "@/components/ui";
 import { errorMessage } from "@/lib/errors";
 import { formatDayTime, formatMoney } from "@/lib/format";
-import { useAdminBookings } from "@/lib/queries";
+import { useAdminBookingCounts, useAdminBookings } from "@/lib/queries";
 import type { AdminBookingFilter, AdminBookingRow } from "@/lib/types";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 
@@ -28,7 +28,6 @@ export default function AdminBookingsScreen() {
   const [filter, setFilter] = useState<AdminBookingFilter>(
     FILTERS.includes(params.filter as AdminBookingFilter) ? (params.filter as AdminBookingFilter) : "all",
   );
-  const [text, setText] = useState("");
   const [q, setQ] = useState("");
 
   // Genel bakistan farkli bir filtreyle tekrar gelinirse sekme ekrani yeniden kurulmaz;
@@ -38,42 +37,25 @@ export default function AdminBookingsScreen() {
     setSeenParam(params.filter);
     if (FILTERS.includes(params.filter as AdminBookingFilter)) setFilter(params.filter as AdminBookingFilter);
   }
-  // Gecikme gunu icin "simdi" ekran acilisinda bir kez alinir (render saf kalsin).
-  const [now] = useState(() => Date.now());
 
-  // Her tusta istek gitmesin: yazma durduktan 300 ms sonra ara.
-  useEffect(() => {
-    const id = setTimeout(() => setQ(text), 300);
-    return () => clearTimeout(id);
-  }, [text]);
 
   const query = useAdminBookings(filter, q);
-  const counts = query.data?.counts;
   const rows = query.data?.bookings ?? [];
+  const counts = useAdminBookingCounts().data;
+  // Gecikme gunu verinin cekildigi ana gore: sekme acik kaldikca donmaz, render saf kalir.
+  const now = query.dataUpdatedAt;
+  const renderRow = useCallback(
+    ({ item, index }: { item: AdminBookingRow; index: number }) => (
+      <Row booking={item} now={now} first={index === 0} last={index === rows.length - 1} />
+    ),
+    [now, rows.length],
+  );
 
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <View style={styles.header}>
         <AppText variant="title">{t("admin.tabs.bookings")}</AppText>
-        <View style={styles.search}>
-          <Search size={18} color={colors.inkMuted} />
-          <TextInput
-            value={text}
-            onChangeText={setText}
-            placeholder={t("admin.searchPlaceholder")}
-            placeholderTextColor={colors.inkMuted}
-            autoCapitalize="none"
-            autoCorrect={false}
-            returnKeyType="search"
-            accessibilityLabel={t("admin.searchPlaceholder")}
-            style={styles.searchInput}
-          />
-          {text ? (
-            <Pressable accessibilityRole="button" accessibilityLabel={t("common.clear")} hitSlop={8} onPress={() => setText("")}>
-              <X size={18} color={colors.inkMuted} />
-            </Pressable>
-          ) : null}
-        </View>
+        <SearchBox onSearch={setQ} />
       </View>
 
       <View>
@@ -83,7 +65,12 @@ export default function AdminBookingsScreen() {
               key={f}
               soft
               selected={f === filter}
-              onPress={() => setFilter(f)}
+              onPress={() => {
+                setFilter(f);
+                // Parametre de guncellenmeli: yoksa genel bakistan ayni filtreye tekrar
+                // gelindiginde degisiklik gorulmez ve cip eski secimde kalir.
+                router.setParams({ filter: f });
+              }}
               label={counts ? `${t(`admin.filters.${f}`)} ${counts[f]}` : t(`admin.filters.${f}`)}
             />
           ))}
@@ -112,16 +99,59 @@ export default function AdminBookingsScreen() {
               title={q.trim().length >= 2 ? t("admin.noSearchResult") : t("admin.noBookingsInFilter")}
             />
           }
-          renderItem={({ item, index }) => (
-            <Row booking={item} now={now} first={index === 0} last={index === rows.length - 1} />
-          )}
+          renderItem={renderRow}
         />
       )}
     </SafeAreaView>
   );
 }
 
-function Row({ booking: b, now, first, last }: { booking: AdminBookingRow; now: number; first: boolean; last: boolean }) {
+/**
+ * Yazilan metin burada tutulur: her tusta liste degil yalnizca kutu yeniden cizilir.
+ * Istek, yazma durduktan 300 ms sonra gider.
+ */
+function SearchBox({ onSearch }: { onSearch: (q: string) => void }) {
+  const { t } = useTranslation();
+  const [text, setText] = useState("");
+  useEffect(() => {
+    const id = setTimeout(() => onSearch(text), 300);
+    return () => clearTimeout(id);
+  }, [text, onSearch]);
+
+  return (
+    <View style={styles.search}>
+      <Search size={18} color={colors.inkMuted} />
+      <TextInput
+        value={text}
+        onChangeText={setText}
+        placeholder={t("admin.searchPlaceholder")}
+        placeholderTextColor={colors.inkMuted}
+        autoCapitalize="none"
+        autoCorrect={false}
+        returnKeyType="search"
+        accessibilityLabel={t("admin.searchPlaceholder")}
+        style={styles.searchInput}
+      />
+      {text ? (
+        <Pressable accessibilityRole="button" accessibilityLabel={t("common.clear")} hitSlop={13} onPress={() => setText("")}>
+          <X size={18} color={colors.inkMuted} />
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
+
+const Row = memo(function Row({
+  booking: b,
+  now,
+  first,
+  last,
+}: {
+  booking: AdminBookingRow;
+  now: number;
+  first: boolean;
+  last: boolean;
+}) {
   const { t } = useTranslation();
   const open = ["PENDING", "WAITING_APPROVAL", "APPROVED", "PAID", "CHECKED_IN"].includes(b.status);
   const lateDays = open ? Math.floor((now - new Date(b.checkOutTime).getTime()) / DAY) : 0;
@@ -164,7 +194,7 @@ function Row({ booking: b, now, first, last }: { booking: AdminBookingRow; now: 
       </View>
     </Pressable>
   );
-}
+});
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },

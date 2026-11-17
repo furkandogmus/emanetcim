@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { TrendingDown, TrendingUp } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
@@ -17,6 +18,7 @@ export function PartnerPulseCard() {
   const { t } = useTranslation();
   const query = usePartnerDashboard();
   const [, setShopId] = usePartnerShopSelection();
+  const chipsRef = useRef<ScrollView>(null);
 
   if (query.isLoading) {
     return (
@@ -48,9 +50,17 @@ export function PartnerPulseCard() {
   return (
     <Card style={styles.card}>
       {d.shops.length > 1 ? (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.shops}>
+        <ScrollView ref={chipsRef} horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.shops}>
           {d.shops.map((s) => (
-            <Chip key={s.id} soft label={s.name} selected={s.id === d.shop.id} onPress={() => setShopId(s.id)} />
+            <View
+              key={s.id}
+              // Secili dukkan satirin disinda kalmasin: yerlesince gorunur alana kaydir.
+              onLayout={(e) => {
+                if (s.id === d.shop.id) chipsRef.current?.scrollTo({ x: Math.max(0, e.nativeEvent.layout.x - 16), animated: false });
+              }}
+            >
+              <Chip soft label={s.name} selected={s.id === d.shop.id} onPress={() => setShopId(s.id)} />
+            </View>
           ))}
         </ScrollView>
       ) : null}

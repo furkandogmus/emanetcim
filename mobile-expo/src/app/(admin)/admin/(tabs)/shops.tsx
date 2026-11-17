@@ -9,6 +9,7 @@ import { AppText, Button, CenterMessage, IconButton, Loading } from "@/component
 import { errorMessage } from "@/lib/errors";
 import { useAdminOverview, useAdminShops } from "@/lib/queries";
 import type { AdminShop } from "@/lib/types";
+import { formatRating } from "@/lib/format";
 import { colors, radius, space } from "@/theme/tokens";
 
 /** Doluluk bu oranin ustundeyse cubuk turuncu: o dukkana yeni rezervasyon yonlendirmek riskli. */
@@ -84,7 +85,7 @@ function ShopRow({ shop: s }: { shop: AdminShop }) {
               <>
                 <Star size={12} color={colors.brand} fill={colors.brand} />
                 <AppText variant="caption" style={{ fontSize: 13, color: colors.ink }}>
-                  {s.rating.toFixed(1)}
+                  {formatRating(s.rating)}
                 </AppText>
                 {s.place ? (
                   <AppText variant="caption" style={{ fontSize: 13 }}>
