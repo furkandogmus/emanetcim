@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
+import { router, useIsFocused } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { QrCode, Store, User } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
@@ -32,7 +32,7 @@ function bucket(b: PartnerBooking): Tab {
 
 export default function PartnerBookingsScreen() {
   const { t } = useTranslation();
-  const query = usePartnerBookings();
+  const query = usePartnerBookings(useIsFocused());
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>("today");
 

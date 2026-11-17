@@ -64,12 +64,15 @@ export function useNearbyShops(p: NearbyParams | null) {
   });
 }
 
-export function usePartnerBookings() {
+/**
+ * `polling`: esnaf listesi ekranda gorunurken 30 sn'de bir yenilenir (push gelene kadar).
+ * Liste Stack'te altta kalinca (detay, tarama acikken) yoklama durur; 100 kayit tasiyor.
+ */
+export function usePartnerBookings(polling = true) {
   return useQuery({
     queryKey: keys.partnerBookings,
     queryFn: () => api<PartnerBookingsResponse>("/partner/bookings?limit=100"),
-    // Esnaf ekrani acik dururken yeni rezervasyon gelirse gorsun (push gelene kadar).
-    refetchInterval: 30_000,
+    refetchInterval: polling ? 30_000 : false,
   });
 }
 
