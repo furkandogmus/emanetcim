@@ -3,23 +3,23 @@ import { Alert, Linking, Platform, ScrollView, StyleSheet, View } from "react-na
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import QRCode from "react-native-qrcode-svg";
 import { ArrowLeft, Navigation, Pencil, Phone } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { BagRevisionCard } from "@/components/BagRevisionCard";
+import { BookingTicket } from "@/components/BookingTicket";
 import { GuestDisputeCard } from "@/components/GuestDisputeCard";
 import { GuestReviewCard } from "@/components/GuestReviewCard";
 import { PartnerBookingActions } from "@/components/PartnerBookingActions";
 import { StatusBadge } from "@/components/StatusBadge";
-import { AppText, Banner, Button, Card, CenterMessage, Divider, IconButton, Loading } from "@/components/ui";
+import { AppText, Button, Card, CenterMessage, Divider, IconButton, Loading } from "@/components/ui";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { formatDayTime, formatMoney } from "@/lib/format";
 import { isActiveBooking, useBooking } from "@/lib/queries";
 import type { BookingDetail } from "@/lib/types";
 import { notify } from "@/lib/notify";
-import { colors, fonts, radius, space } from "@/theme/tokens";
+import { colors, fonts, space } from "@/theme/tokens";
 
 /** Misafirin iptal edebildigi durumlar: valiz henuz dukkana teslim edilmemis. */
 const CANCELLABLE = new Set(["PENDING", "WAITING_APPROVAL", "APPROVED", "PAID"]);
@@ -99,24 +99,15 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
       </View>
 
       <ScrollView ref={scrollRef} contentContainerStyle={styles.content}>
-        <StatusBadge status={b.status} />
-        <AppText variant="title">{mode === "partner" ? b.guestName || t("partner.guest") : b.shopName}</AppText>
-        {mode === "partner" ? <AppText variant="caption">{b.shopName}</AppText> : null}
-
-        {showQr ? (
-          <Card style={styles.qrCard}>
-            {b.qrCodeToken ? (
-              <>
-                <QRCode value={b.qrCodeToken} size={208} color={colors.ink} backgroundColor={colors.surface} />
-                <AppText variant="bodyMedium" style={{ textAlign: "center" }}>
-                  {t("bookings.showQr")}
-                </AppText>
-              </>
-            ) : (
-              <Banner tone="warning" body={t("bookings.qrMissing")} />
-            )}
-          </Card>
-        ) : null}
+        {mode === "guest" ? (
+          <BookingTicket booking={b} showQr={showQr} />
+        ) : (
+          <>
+            <StatusBadge status={b.status} />
+            <AppText variant="title">{b.guestName || t("partner.guest")}</AppText>
+            <AppText variant="caption">{b.shopName}</AppText>
+          </>
+        )}
 
         {/* Anahtar valiz sayilarini da tasir: revizyondan sonra muhur satirlari yeni sayidan kurulur. */}
         {mode === "partner" ? (
@@ -126,42 +117,50 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
           <BagRevisionCard key={`rev-${b.status}-${b.bagCountS}-${b.bagCountM}-${b.bagCountXl}`} booking={b} />
         ) : null}
 
-        <Card style={{ gap: space.md }}>
-          {/* Web'deki "Rezervasyon kodu" ile ayni: QR okunamazsa telefonda soylenen kod. */}
-          <Row label={t("bookings.code")} value={b.id.slice(0, 8).toUpperCase()} />
-          <Divider />
-          <Row label={t("bookings.dropOff")} value={formatDayTime(b.checkInTime)} />
-          <Row label={t("bookings.pickUp")} value={formatDayTime(b.checkOutTime)} />
-          <Divider />
-          {bagLines.map((l) => (
-            <Row key={l.size} label={t(`bags.${l.size}`)} value={`× ${l.count}`} />
-          ))}
-          <Divider />
-          <View style={styles.row}>
-            <AppText variant="heading">{t("bookings.total")}</AppText>
-            <AppText variant="heading" style={{ fontFamily: fonts.display, fontSize: 22 }}>
-              {formatMoney(b.totalPrice)}
-            </AppText>
-          </View>
-        </Card>
+        {mode === "partner" ? (
+          <Card style={{ gap: space.md }}>
+            {/* Web'deki "Rezervasyon kodu" ile ayni: QR okunamazsa telefonda soylenen kod. */}
+            <Row label={t("bookings.code")} value={b.id.slice(0, 8).toUpperCase()} mono />
+            <Divider />
+            <Row label={t("bookings.dropOff")} value={formatDayTime(b.checkInTime)} />
+            <Row label={t("bookings.pickUp")} value={formatDayTime(b.checkOutTime)} />
+            <Divider />
+            {bagLines.map((l) => (
+              <Row key={l.size} label={t(`bags.${l.size}`)} value={`× ${l.count}`} />
+            ))}
+            <Divider />
+            <View style={styles.row}>
+              <AppText variant="heading">{t("bookings.total")}</AppText>
+              <AppText variant="heading" style={{ fontFamily: fonts.display, fontSize: 22 }}>
+                {formatMoney(b.totalPrice)}
+              </AppText>
+            </View>
+          </Card>
+        ) : null}
 
         {mode === "guest" ? (
           <View style={{ gap: space.md }}>
-            {isActiveBooking(b) && b.latitude != null && b.longitude != null ? (
-              <Button
-                variant="secondary"
-                title={t("bookings.directions")}
-                icon={<Navigation size={18} color={colors.ink} />}
-                onPress={() => openDirections(b)}
-              />
-            ) : null}
-            {b.shopPhone ? (
-              <Button
-                variant="secondary"
-                title={t("bookings.call")}
-                icon={<Phone size={18} color={colors.ink} />}
-                onPress={() => void Linking.openURL(`tel:${b.shopPhone}`).catch(() => undefined)}
-              />
+            {(isActiveBooking(b) && b.latitude != null && b.longitude != null) || b.shopPhone ? (
+              <View style={styles.actionRow}>
+                {isActiveBooking(b) && b.latitude != null && b.longitude != null ? (
+                  <Button
+                    variant="secondary"
+                    style={{ flex: 1 }}
+                    title={t("bookings.directions")}
+                    icon={<Navigation size={18} color={colors.ink} />}
+                    onPress={() => openDirections(b)}
+                  />
+                ) : null}
+                {b.shopPhone ? (
+                  <Button
+                    variant="secondary"
+                    style={{ flex: 1 }}
+                    title={t("bookings.call")}
+                    icon={<Phone size={18} color={colors.ink} />}
+                    onPress={() => void Linking.openURL(`tel:${b.shopPhone}`).catch(() => undefined)}
+                  />
+                ) : null}
+              </View>
             ) : null}
             {MODIFIABLE.has(b.status) ? (
               <Button
@@ -171,11 +170,18 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
                 onPress={() => router.push({ pathname: "/bookings/modify", params: { id: b.id } })}
               />
             ) : null}
-            {CANCELLABLE.has(b.status) ? (
-              <Button variant="danger" title={t("bookings.cancel")} loading={cancel.isPending} onPress={confirmCancel} />
-            ) : null}
             <GuestReviewCard key={`review-${b.status}`} booking={b} onOpen={revealForm} />
             <GuestDisputeCard key={`dispute-${b.status}`} booking={b} onOpen={revealForm} />
+            {CANCELLABLE.has(b.status) ? (
+              <Button
+                variant="ghost"
+                title={t("bookings.cancel")}
+                loading={cancel.isPending}
+                onPress={confirmCancel}
+                style={{ marginTop: space.sm }}
+                textColor={colors.danger}
+              />
+            ) : null}
           </View>
         ) : null}
       </ScrollView>
@@ -183,11 +189,11 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <View style={styles.row}>
       <AppText variant="caption">{label}</AppText>
-      <AppText variant="bodyMedium">{value}</AppText>
+      <AppText variant={mono ? "mono" : "bodyMedium"}>{value}</AppText>
     </View>
   );
 }
@@ -195,7 +201,7 @@ function Row({ label, value }: { label: string; value: string }) {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   header: { paddingHorizontal: space.xl, paddingTop: space.sm },
-  content: { padding: space.xl, gap: space.lg },
-  qrCard: { alignItems: "center", gap: space.lg, paddingVertical: space.xl, borderRadius: radius.card },
+  content: { padding: space.xl, paddingTop: space.lg, gap: space.lg, paddingBottom: space.xxl * 2 },
+  actionRow: { flexDirection: "row", gap: space.md },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: space.md },
 });

@@ -1,14 +1,17 @@
 import { Pressable, StyleSheet, View } from "react-native";
-import { ChevronRight } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { StatusBadge } from "@/components/StatusBadge";
 import { AppText } from "@/components/ui";
-import { formatDayTime, formatMoney } from "@/lib/format";
+import { formatDayTime, formatMoney, formatTime } from "@/lib/format";
+import { shiftedForFormat } from "@/lib/time";
 import type { BookingSummary } from "@/lib/types";
-import { colors, radius, space } from "@/theme/tokens";
+import { colors, fonts, radius, space } from "@/theme/tokens";
 
-/** Liste satiri; `title` misafirde dukkan adi, esnafta misafir adi. */
+/**
+ * Liste satiri; `title` misafirde dukkan adi, esnafta misafir adi.
+ * Soldaki gun karosu fisin (BookingTicket) imzasi: liste bir takvim gibi taranir.
+ */
 export function BookingRow({
   booking,
   title,
@@ -20,16 +23,33 @@ export function BookingRow({
   onPress: () => void;
   highlight?: string;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const bags = booking.bagCountS + booking.bagCountM + booking.bagCountXl;
+  const day = shiftedForFormat(booking.checkInTime);
+  const month = day.toLocaleDateString(i18n.language, { month: "short", timeZone: "UTC" });
+  const faded = booking.status === "CANCELLED" || booking.status === "CHECKED_OUT";
+
   return (
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
-      style={({ pressed }) => [styles.row, pressed && { opacity: 0.85 }]}
+      style={({ pressed }) => [styles.row, pressed && { backgroundColor: colors.surfaceMuted }]}
     >
+      <View style={[styles.dateTile, faded && { opacity: 0.55 }]}>
+        <AppText style={styles.dateDay}>{day.getUTCDate()}</AppText>
+        <AppText variant="label" style={styles.dateMonth}>
+          {month.replace(".", "")}
+        </AppText>
+      </View>
+
       <View style={{ flex: 1, gap: 4 }}>
-        <View style={styles.badges}>
+        <AppText variant="heading" numberOfLines={1}>
+          {title}
+        </AppText>
+        <AppText variant="caption" numberOfLines={1}>
+          {formatTime(booking.checkInTime)} → {formatDayTime(booking.checkOutTime)}
+        </AppText>
+        <View style={styles.meta}>
           <StatusBadge status={booking.status} />
           {highlight ? (
             <View style={styles.highlight}>
@@ -39,17 +59,16 @@ export function BookingRow({
             </View>
           ) : null}
         </View>
-        <AppText variant="heading" numberOfLines={1}>
-          {title}
+      </View>
+
+      <View style={styles.right}>
+        <AppText variant="bodyMedium" style={{ fontFamily: fonts.bodySemibold, fontVariant: ["tabular-nums"] }}>
+          {formatMoney(booking.totalPrice)}
         </AppText>
-        <AppText variant="caption">
-          {formatDayTime(booking.checkInTime)} → {formatDayTime(booking.checkOutTime)}
-        </AppText>
-        <AppText variant="caption">
-          {t("common.bag", { count: bags })} · {formatMoney(booking.totalPrice)}
+        <AppText variant="caption" style={{ fontSize: 13 }}>
+          {t("common.bag", { count: bags })}
         </AppText>
       </View>
-      <ChevronRight size={22} color={colors.inkMuted} />
     </Pressable>
   );
 }
@@ -58,18 +77,28 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "center",
-    gap: space.md,
+    gap: space.lg,
     padding: space.lg,
     borderRadius: radius.card,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
   },
-  badges: { flexDirection: "row", gap: space.sm },
+  dateTile: {
+    width: 52,
+    paddingVertical: space.sm,
+    borderRadius: radius.inner + 2,
+    backgroundColor: colors.brandSoft,
+    alignItems: "center",
+  },
+  dateDay: { fontFamily: fonts.display, fontSize: 22, lineHeight: 26, color: colors.accent, fontVariant: ["tabular-nums"] },
+  dateMonth: { color: colors.accent, fontSize: 12, lineHeight: 16 },
+  meta: { flexDirection: "row", alignItems: "center", gap: space.sm, marginTop: 2 },
+  right: { alignItems: "flex-end", gap: 2, alignSelf: "flex-start", paddingTop: 2 },
   highlight: {
     backgroundColor: colors.accent,
     borderRadius: radius.pill,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
   },
 });
