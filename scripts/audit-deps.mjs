@@ -36,6 +36,20 @@ const ISTISNALAR = [
       "degisen, kararin dayandigi olgu.",
     gozdenGecir: "2026-11-30",
   },
+  {
+    id: "GHSA-fc5q-39xc-vjpf",
+    paket: "picomatch",
+    neden:
+      "next-intl -> @parcel/watcher -> picomatch (prod zinciri; ayrica vite/eslint " +
+      "uzerinden dev). Tek sarkili tekrarli extglob kaliplarinda ReDoS: tehlike, " +
+      "SALDIRGANIN YAZDIGI KALIBIN derlenmesi. @parcel/watcher'i yalnizca next-intl " +
+      "cikaricisinin SourceFileWatcher'i yukluyor; next.config'te " +
+      "createNextIntlPlugin() seceneksiz, cikarici kapali, yani calisma aninda hic " +
+      "yuklenmiyor. Kaliplar zaten koddan geliyor, kullanici girdisinden degil. " +
+      "Yamali surum yok (2026-11-17: 4.0.7 en son ve etkilenen). Cikarici acilirsa " +
+      "bu istisna yeniden degerlendirilir.",
+    gozdenGecir: "2026-12-15",
+  },
 ];
 
 const KIRAN = new Set(["high", "critical"]);
