@@ -1,11 +1,12 @@
 import "@/lib/i18n";
 
 import { useEffect } from "react";
+import { AppState } from "react-native";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, focusManager } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import * as Notifications from "expo-notifications";
 import {
@@ -23,6 +24,13 @@ import { SearchProvider } from "@/lib/search";
 import { colors } from "@/theme/tokens";
 
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
+
+// RN'de "pencere odagi" yok: baglanmazsa refetchOnWindowFocus hic tetiklenmez ve
+// arka plandaki uygulama refetchInterval ile istek atmayi surdurur.
+focusManager.setEventListener((setFocused) => {
+  const sub = AppState.addEventListener("change", (st) => setFocused(st === "active"));
+  return () => sub.remove();
+});
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -90,15 +98,15 @@ export default function RootLayout() {
     GeistMono_400Regular,
     GeistMono_500Medium,
   });
-  if (!fontsLoaded) return null;
-
+  // Saglayicilar font beklemeden kurulur: oturum geri yukleme (SecureStore + /auth/me)
+  // font yuklemesiyle paralel calisir. Acilis ekrani ikisi de bitene kadar kalir.
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <SearchProvider>
             <StatusBar style="dark" />
-            <RootNavigator />
+            {fontsLoaded ? <RootNavigator /> : null}
           </SearchProvider>
         </AuthProvider>
       </QueryClientProvider>

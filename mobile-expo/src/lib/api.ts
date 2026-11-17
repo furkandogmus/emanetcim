@@ -50,6 +50,20 @@ export function setSessionExpiredHandler(fn: () => void) {
 }
 
 /**
+ * RN'in fetch'inde zaman asimi yok: zayif wifi'da acilistaki `/auth/me` acilis ekranini
+ * onlarca saniye tutuyordu. Iptal edilen istek `network` hatasina duser; acilis o zaman
+ * onbellekteki kullaniciyla devam eder (auth.tsx).
+ */
+const REQUEST_TIMEOUT_MS = 12_000;
+const UPLOAD_TIMEOUT_MS = 60_000;
+
+function fetchWithTimeout(url: string, init: RequestInit, ms = REQUEST_TIMEOUT_MS): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  return fetch(url, { ...init, signal: controller.signal }).finally(() => clearTimeout(timer));
+}
+
+/**
  * Yenileme TEK UCUSTA yapilir. Sunucu refresh token'i tek kullanimlik sayar
  * (jti tekrar kullanimi = tum oturum ailesi iptal, `auth/refresh`). Ayni anda
  * 401 alan iki istek ayri ayri yenilemeye kalksaydi ikincisi kullanicinin
@@ -68,7 +82,7 @@ function refreshOnce(): Promise<RefreshOutcome> {
   if (!refreshing) {
     refreshing = (async (): Promise<RefreshOutcome> => {
       if (!refreshToken) return "rejected";
-      const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
+      const res = await fetchWithTimeout(`${API_BASE_URL}/auth/refresh`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refreshToken }),
@@ -104,11 +118,11 @@ export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T
     const isForm = body instanceof FormData;
     if (body !== undefined && !isForm) headers["Content-Type"] = "application/json";
     if (auth && accessToken) headers.Authorization = `Bearer ${accessToken}`;
-    return fetch(`${API_BASE_URL}${path}`, {
+    return fetchWithTimeout(`${API_BASE_URL}${path}`, {
       method,
       headers,
       body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
-    });
+    }, isForm ? UPLOAD_TIMEOUT_MS : REQUEST_TIMEOUT_MS);
   };
 
   let res: Response;
