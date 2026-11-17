@@ -3,7 +3,7 @@ import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Switch, 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, CalendarOff, Trash2 } from "lucide-react-native";
+import { ArrowLeft, Trash2 } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { RangeCalendar } from "@/components/Calendar";
@@ -209,11 +209,12 @@ function ScheduleForm({ schedule }: { schedule: PartnerSchedule }) {
           />
         </Card>
 
-        {!open247 &&
-          days.map((d) => {
+        {!open247 ? (
+          <View style={styles.dayList}>
+          {days.map((d, i) => {
             const name = t(`schedule.days.${d.weekday}`);
             return (
-              <View key={d.weekday} style={styles.dayRow}>
+              <View key={d.weekday} style={[styles.dayRow, i > 0 && styles.dayDivider]}>
                 <AppText variant="bodyMedium" style={styles.dayName}>
                   {name}
                 </AppText>
@@ -254,6 +255,8 @@ function ScheduleForm({ schedule }: { schedule: PartnerSchedule }) {
               </View>
             );
           })}
+          </View>
+        ) : null}
 
         <Button title={t("schedule.save")} loading={saveHours.isPending} disabled={busy} onPress={submitHours} />
 
@@ -269,7 +272,6 @@ function ScheduleForm({ schedule }: { schedule: PartnerSchedule }) {
         ) : null}
 
         <View style={styles.sectionHead}>
-          <CalendarOff size={18} color={colors.ink} />
           <AppText variant="heading">{t("schedule.closuresTitle")}</AppText>
         </View>
         <AppText variant="caption">{t("schedule.closuresHint")}</AppText>
@@ -338,8 +340,17 @@ const styles = StyleSheet.create({
   },
   content: { padding: space.xl, gap: space.md },
   switchRow: { flexDirection: "row", alignItems: "center", gap: space.md },
-  dayRow: { flexDirection: "row", alignItems: "center", gap: space.sm, minHeight: 56 },
-  dayName: { width: 96 },
+  // Gunler tek kartta: yedi ayri satir ekranda dagilmasin.
+  dayList: {
+    borderRadius: radius.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    paddingHorizontal: space.lg,
+  },
+  dayRow: { flexDirection: "row", alignItems: "center", gap: space.sm, minHeight: 60 },
+  dayDivider: { borderTopWidth: 1, borderTopColor: colors.border },
+  dayName: { width: 88 },
   times: { flex: 1, flexDirection: "row", alignItems: "center", gap: space.xs },
   time: {
     minWidth: 72,
@@ -350,6 +361,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     textAlign: "center",
     fontFamily: fonts.bodyMedium,
+    fontVariant: ["tabular-nums"],
     fontSize: 16,
     color: colors.ink,
   },
