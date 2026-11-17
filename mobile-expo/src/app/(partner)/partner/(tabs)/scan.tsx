@@ -2,12 +2,11 @@ import { useRef, useState } from "react";
 import { Linking, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { router } from "expo-router";
-import { X } from "lucide-react-native";
+import { router, useIsFocused } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { LuggageTag } from "@/components/Illustrations";
-import { AppText, Banner, Button, CenterMessage, IconButton } from "@/components/ui";
+import { AppText, Banner, Button, CenterMessage } from "@/components/ui";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { colors, radius, space } from "@/theme/tokens";
@@ -24,6 +23,7 @@ type ScanResult =
 export default function PartnerScanScreen() {
   const { t } = useTranslation();
   const [permission, requestPermission] = useCameraPermissions();
+  const focused = useIsFocused();
   const [message, setMessage] = useState<{ tone: "danger" | "brand"; body: string } | null>(null);
   // Kamera ayni kodu saniyede onlarca kez okur; tek istek gitsin.
   const busy = useRef(false);
@@ -34,7 +34,8 @@ export default function PartnerScanScreen() {
     try {
       const res = await api<ScanResult>("/seals/scan", { method: "POST", body: { code } });
       if (res.type === "booking") {
-        router.replace(`/partner/${res.id}`);
+        // Sekmede: push ki detaydan geri donunce tarayici yine burada olsun.
+        router.push(`/partner/${res.id}`);
         return;
       }
       setMessage({ tone: "brand", body: t("scan.seal", { n: res.serialNumber, status: t(`scan.sealStatus.${res.status}`, { defaultValue: res.status }) }) });
@@ -60,12 +61,9 @@ export default function PartnerScanScreen() {
             permission.canAskAgain ? (
               <Button title={t("scan.allow")} onPress={() => void requestPermission()} />
             ) : (
-              // Kalici reddedildiyse tekrar sorulamaz: tek cikis sistem ayari. Yalnizca "Geri"
-              // vardi ve esnaf QR okutamadan bu ekranda kaliyordu.
-              <View style={{ gap: space.sm, alignSelf: "stretch" }}>
-                <Button title={t("scan.openSettings")} onPress={() => void Linking.openSettings().catch(() => undefined)} />
-                <Button variant="ghost" title={t("common.back")} onPress={() => router.back()} />
-              </View>
+              // Kalici reddedildiyse tekrar sorulamaz: tek cikis sistem ayari (sekme cubugu
+              // zaten gorunur, ayri bir "Geri" gerekmez).
+              <Button title={t("scan.openSettings")} onPress={() => void Linking.openSettings().catch(() => undefined)} />
             )
           }
         />
@@ -75,17 +73,20 @@ export default function PartnerScanScreen() {
 
   return (
     <View style={styles.root}>
+      {/* Kamera yalnizca sekme gorunurken acik: baska sekmeye gecince pil ve izin isigi kapanir. */}
+      {focused ? (
       <CameraView
         style={StyleSheet.absoluteFill}
         facing="back"
         barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
         onBarcodeScanned={({ data }) => void onScanned(data)}
       />
+      ) : null}
       <SafeAreaView style={styles.overlay} edges={["top", "bottom"]}>
         <View style={styles.top}>
-          <IconButton label={t("common.close")} onPress={() => router.back()}>
-            <X size={20} color={colors.ink} />
-          </IconButton>
+          <AppText variant="title" style={{ color: colors.white }}>
+            {t("scan.open")}
+          </AppText>
         </View>
         <View style={styles.frame} accessibilityLabel={t("scan.hint")} />
         <View style={{ gap: space.md }}>
@@ -105,7 +106,7 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   root: { flex: 1, backgroundColor: "#000" },
   overlay: { flex: 1, justifyContent: "space-between", padding: space.xl },
-  top: { flexDirection: "row", justifyContent: "flex-end" },
+  top: { flexDirection: "row", justifyContent: "flex-start" },
   frame: {
     alignSelf: "center",
     width: 240,

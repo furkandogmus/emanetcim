@@ -7,9 +7,7 @@ export default function PartnerLayout() {
   return (
     <PartnerShopProvider>
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
-        <Stack.Screen name="partner/index" />
-        <Stack.Screen name="partner/shop" />
-        <Stack.Screen name="partner/scan" options={{ presentation: "fullScreenModal" }} />
+        <Stack.Screen name="partner/(tabs)" />
         <Stack.Screen name="partner/seals" />
         <Stack.Screen name="partner/earnings" />
         <Stack.Screen name="partner/settings" />

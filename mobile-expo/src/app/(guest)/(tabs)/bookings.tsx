@@ -2,13 +2,12 @@ import { useState } from "react";
 import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import { ArrowLeft } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { BookingRow } from "@/components/BookingRow";
 import { LuggageTag } from "@/components/Illustrations";
 import { Segmented } from "@/components/Segmented";
-import { AppText, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
+import { AppText, Button, CenterMessage, Loading } from "@/components/ui";
 import { errorMessage } from "@/lib/errors";
 import { isActiveBooking, useMyBookings } from "@/lib/queries";
 import { colors, space } from "@/theme/tokens";
@@ -30,9 +29,6 @@ export default function MyBookingsScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <View style={styles.header}>
-        <IconButton label={t("common.back")} onPress={() => router.back()}>
-          <ArrowLeft size={20} color={colors.ink} />
-        </IconButton>
         <AppText variant="title">{t("bookings.title")}</AppText>
       </View>
 
