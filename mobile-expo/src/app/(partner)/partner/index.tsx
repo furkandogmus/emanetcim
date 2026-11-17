@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { QrCode, Store, User } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
+import { SealedBag } from "@/components/Illustrations";
 import { BookingRow } from "@/components/BookingRow";
 import { PartnerPulseCard } from "@/components/PartnerPulseCard";
 import { Segmented } from "@/components/Segmented";
@@ -128,7 +129,7 @@ export default function PartnerBookingsScreen() {
               }}
             />
           )}
-          ListEmptyComponent={<CenterMessage title={t("partner.empty")} />}
+          ListEmptyComponent={<CenterMessage art={<SealedBag size={64} />} title={t("partner.empty")} />}
         />
       )}
       {/* Esnafin gun icindeki asil isi QR okutmak: kosedeki ikon yerine her zaman elinin altinda. */}
