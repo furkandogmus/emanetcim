@@ -18,6 +18,6 @@ export async function GET(req: NextRequest) {
     : "all";
   const q = (sp.get("q") ?? "").slice(0, 80);
 
-  const { rows, counts } = await adminOpsService.listBookings({ filter, q });
-  return NextResponse.json({ counts, bookings: rows.map(toMobileAdminBookingRow) });
+  const rows = await adminOpsService.listBookings({ filter, q });
+  return NextResponse.json({ bookings: rows.map(toMobileAdminBookingRow) });
 }

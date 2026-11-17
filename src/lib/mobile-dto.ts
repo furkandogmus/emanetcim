@@ -400,7 +400,7 @@ export function toMobileAdminOverview(o: AdminOverviewSource) {
 }
 
 type AdminOps = import("@/services/AdminOpsService").AdminOpsService;
-type AdminBookingRowSource = Awaited<ReturnType<AdminOps["listBookings"]>>["rows"][number];
+type AdminBookingRowSource = Awaited<ReturnType<AdminOps["listBookings"]>>[number];
 type AdminBookingDetailSource = NonNullable<Awaited<ReturnType<AdminOps["bookingDetail"]>>>;
 type AdminShopSource = Awaited<ReturnType<AdminOps["shopsOccupancy"]>>[number];
 

@@ -2,7 +2,6 @@ import prisma from "@/lib/db";
 import { moneyToNumber } from "@/lib/money";
 import { EARNING_BOOKING_STATUSES } from "@/lib/platform-split";
 import { dayRangeInTimeZone, startOfDayInTimeZone } from "@/lib/timezone";
-import { overdueBookingService } from "@/services/OverdueBookingService";
 
 /**
  * Admin genel bakisi: web ana sayfasi ve mobil yonetim ekrani AYNI hesaplari buradan
@@ -36,8 +35,6 @@ export function dayKey(at: Date): string {
 
 export type DailyPoint = { date: string; revenue: number; bookings: number };
 
-/** Bavulu henuz dukkana gelmemis, gelecegi kesin rezervasyonlar. */
-const UPCOMING_STATUSES = ["APPROVED", "PAID"] as const;
 const OPEN_DISPUTE_STATUSES = ["OPEN", "IN_REVIEW"];
 
 export class AdminOverviewService {
@@ -68,42 +65,52 @@ export class AdminOverviewService {
     });
   }
 
+  /**
+   * Tum zamanlar toplamlari tum Booking tablosunu okur ve dakikalar icinde anlamli
+   * degismez: surec icinde 5 dk tutulur (tek konteyner; yeniden baslatmada sifirlanir).
+   */
+  private totalsCache: { at: number; value: { revenue: number; bookings: number; activeShops: number } } | null = null;
+
+  async totals(now: Date = new Date()) {
+    if (this.totalsCache && now.getTime() - this.totalsCache.at < 5 * 60 * 1000) return this.totalsCache.value;
+    const [revenue, bookings, activeShops] = await Promise.all([
+      prisma.booking.aggregate({ where: { status: { in: [...EARNING_BOOKING_STATUSES] } }, _sum: { totalPrice: true } }),
+      prisma.booking.count(),
+      prisma.shop.count({ where: { isActive: true } }),
+    ]);
+    const value = { revenue: moneyToNumber(revenue._sum.totalPrice), bookings, activeShops };
+    this.totalsCache = { at: now.getTime(), value };
+    return value;
+  }
+
   /** Mobil yonetim ekraninin tek istekte ihtiyac duydugu her sey. */
   async overview(now: Date = new Date()) {
     const today = dayRangeInTimeZone(PLATFORM_TIMEZONE, now);
 
-    const [
-      series,
-      arrivalsToday,
-      pickupsToday,
-      inStorage,
-      newBookingsToday,
-      pendingApplications,
-      unreadMessages,
-      openDisputes,
-      overdue,
-      recent,
-      totalRevenue,
-      totalBookings,
-      activeShops,
-    ] = await Promise.all([
+    const [series, [snap], pendingApplications, unreadMessages, openDisputes, recent, totals] = await Promise.all([
       this.dailySeries(14, now),
-      prisma.booking.count({
-        where: { status: { in: [...UPCOMING_STATUSES] }, checkInTime: { gte: today.start, lt: today.end } },
-      }),
-      prisma.booking.count({
-        where: { status: "CHECKED_IN", checkOutTime: { gte: today.start, lt: today.end } },
-      }),
-      prisma.booking.aggregate({
-        where: { status: "CHECKED_IN" },
-        _sum: { bagCountS: true, bagCountM: true, bagCountXl: true },
-      }),
-      prisma.booking.count({ where: { createdAt: { gte: today.start, lt: today.end } } }),
+      // Bugunun sayilari, dukkandaki valiz ve gecikmis TEK sorguda: havuz 10 baglanti,
+      // bu uc eskiden 15+ paralel sorgu aciyordu (DEFECT_BACKLOG 2026-08-31 kurali).
+      // Gecikmis tanimi OverdueBookingService ile ayni (acik + cikis saati gecmis).
+      prisma.$queryRaw<
+        { arrivals: bigint; pickups: bigint; bags: bigint | null; new_today: bigint; overdue: bigint }[]
+      >`
+        SELECT
+          count(*) FILTER (WHERE status IN ('APPROVED','PAID')
+            AND "checkInTime" >= ${today.start} AND "checkInTime" < ${today.end}) AS arrivals,
+          count(*) FILTER (WHERE status = 'CHECKED_IN'
+            AND "checkOutTime" >= ${today.start} AND "checkOutTime" < ${today.end}) AS pickups,
+          sum("bagCountS" + "bagCountM" + "bagCountXl") FILTER (WHERE status = 'CHECKED_IN') AS bags,
+          count(*) FILTER (WHERE "createdAt" >= ${today.start} AND "createdAt" < ${today.end}) AS new_today,
+          count(*) FILTER (WHERE status IN ('PENDING','WAITING_APPROVAL','APPROVED','PAID','CHECKED_IN')
+            AND "checkOutTime" < ${now}) AS overdue
+        FROM "Booking"
+        WHERE status IN ('PENDING','WAITING_APPROVAL','APPROVED','PAID','CHECKED_IN')
+          OR "createdAt" >= ${today.start}
+      `,
       prisma.shop.count({ where: { isActive: false } }),
       prisma.contactMessage.count({ where: { isRead: false } }),
       prisma.dispute.count({ where: { status: { in: OPEN_DISPUTE_STATUSES } } }),
-      // Yalnizca okur: olay yazmaz (saglik ucuyla ayni kullanim).
-      overdueBookingService.scan({ now, limit: 1, recordEvents: false }),
       prisma.booking.findMany({
         orderBy: { createdAt: "desc" },
         take: 5,
@@ -123,31 +130,25 @@ export class AdminOverviewService {
           guest: { select: { name: true } },
         },
       }),
-      prisma.booking.aggregate({
-        where: { status: { in: [...EARNING_BOOKING_STATUSES] } },
-        _sum: { totalPrice: true },
-      }),
-      prisma.booking.count(),
-      prisma.shop.count({ where: { isActive: true } }),
+      this.totals(now),
     ]);
 
-    const s = inStorage._sum;
     return {
       series,
       today: {
-        arrivals: arrivalsToday,
-        pickups: pickupsToday,
-        bagsInStorage: (s.bagCountS ?? 0) + (s.bagCountM ?? 0) + (s.bagCountXl ?? 0),
-        newBookings: newBookingsToday,
+        arrivals: Number(snap?.arrivals ?? 0),
+        pickups: Number(snap?.pickups ?? 0),
+        bagsInStorage: Number(snap?.bags ?? 0),
+        newBookings: Number(snap?.new_today ?? 0),
         revenue: series[series.length - 1]?.revenue ?? 0,
       },
       attention: {
         pendingApplications,
         unreadMessages,
         openDisputes,
-        overdueBookings: overdue.overdueCount,
+        overdueBookings: Number(snap?.overdue ?? 0),
       },
-      totals: { revenue: moneyToNumber(totalRevenue._sum.totalPrice), bookings: totalBookings, activeShops },
+      totals,
       recent,
     };
   }
