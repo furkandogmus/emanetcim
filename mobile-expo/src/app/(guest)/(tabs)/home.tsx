@@ -26,7 +26,7 @@ export default function HomeScreen() {
   const bookings = useMyBookings();
   const search = useSearch();
   const next = bookings.data
-    ?.filter(isActiveBooking)
+    ?.filter((b) => isActiveBooking(b))
     .sort((a, b) => +new Date(a.checkInTime) - +new Date(b.checkInTime))[0];
 
   return (

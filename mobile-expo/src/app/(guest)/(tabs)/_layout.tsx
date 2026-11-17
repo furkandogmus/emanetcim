@@ -11,7 +11,7 @@ import { colors, fonts } from "@/theme/tokens";
  */
 export default function GuestTabsLayout() {
   const { t } = useTranslation();
-  const active = useMyBookings().data?.filter(isActiveBooking).length ?? 0;
+  const active = useMyBookings().data?.filter((b) => isActiveBooking(b)).length ?? 0;
 
   return (
     <Tabs

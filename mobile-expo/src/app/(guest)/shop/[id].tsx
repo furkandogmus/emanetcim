@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import { hoursLabel } from "@/components/ShopCard";
 import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { errorMessage } from "@/lib/errors";
-import { formatDay, formatMoney } from "@/lib/format";
+import { formatDay, formatMoney, formatRating } from "@/lib/format";
 import { resolveImage } from "@/lib/images";
 import { useShop, useShopReviews } from "@/lib/queries";
 import { wallParts } from "@/lib/time";
@@ -70,7 +70,7 @@ export default function ShopDetailScreen() {
             {shop.rating ? (
               <View style={styles.meta}>
                 <Star size={18} color={colors.brand} fill={colors.brand} />
-                <AppText variant="bodyMedium">{shop.rating.toFixed(1)}</AppText>
+                <AppText variant="bodyMedium">{formatRating(shop.rating)}</AppText>
               </View>
             ) : null}
             {shop.isVerified ? (

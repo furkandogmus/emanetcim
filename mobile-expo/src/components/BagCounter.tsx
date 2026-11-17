@@ -21,22 +21,30 @@ export function BagCounter({
   size,
   value,
   onChange,
+  compact = false,
 }: {
   size: BagSize;
   value: number;
   onChange: (n: number) => void;
+  /** Baska bir kartin icinde (esnaf valiz duzeltme): kart icinde kart olmasin, tek satir. */
+  compact?: boolean;
 }) {
   const { t } = useTranslation();
   const name = t(`bags.${size}`);
   return (
-    <View style={[styles.card, value > 0 && styles.cardActive]}>
-      <View style={[styles.imageBox, value > 0 && { backgroundColor: colors.brandSoft }]}>
-        <Image source={IMAGES[size]} style={styles.image} contentFit="contain" />
+    <View style={compact ? styles.row : [styles.card, value > 0 && styles.cardActive]}>
+      <View
+        style={[
+          compact ? styles.imageBoxCompact : styles.imageBox,
+          value > 0 && { backgroundColor: colors.brandSoft },
+        ]}
+      >
+        <Image source={IMAGES[size]} style={compact ? styles.imageCompact : styles.image} contentFit="contain" />
       </View>
-      <View style={styles.body}>
-        <AppText variant="heading">{name}</AppText>
-        <AppText variant="caption">{t(`bags.${size}Desc`)}</AppText>
-        <View style={styles.stepper}>
+      <View style={compact ? styles.bodyCompact : styles.body}>
+        <AppText variant={compact ? "bodyMedium" : "heading"}>{name}</AppText>
+        {compact ? null : <AppText variant="caption">{t(`bags.${size}Desc`)}</AppText>}
+        <View style={[styles.stepper, compact && { marginTop: 0 }]}>
           <StepButton
             label={t("bags.decrease", { size: name })}
             disabled={value === 0}
@@ -109,6 +117,17 @@ const styles = StyleSheet.create({
     padding: space.sm,
   },
   image: { width: 76, height: 88 },
+  row: { flexDirection: "row", alignItems: "center", gap: space.md },
+  imageBoxCompact: {
+    width: 48,
+    height: 48,
+    borderRadius: radius.inner + 2,
+    backgroundColor: colors.surfaceMuted,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  imageCompact: { width: 34, height: 40 },
+  bodyCompact: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: space.sm },
   body: { flex: 1, gap: 2, justifyContent: "center" },
   stepper: {
     flexDirection: "row",

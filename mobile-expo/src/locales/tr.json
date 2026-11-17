@@ -568,7 +568,7 @@
     "hintCheckedIn": "Valizler teslim alındı. Mühürlü valiz sayısı artırılamaz; tutarı artıran düzeltme için misafirin onayı istenir.",
     "delta": "{{from}} valiz → {{to}} valiz",
     "atLeastOne": "En az bir valiz olmalı.",
-    "apply": "Düzeltmeyi uygula",
+    "apply": "Uygula",
     "savedTitle": "Valiz sayısı güncellendi",
     "savedBody": "Yeni toplam: {{total}}",
     "approvalTitle": "Misafir onayı bekleniyor",
