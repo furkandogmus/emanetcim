@@ -14,7 +14,7 @@ import {
   BricolageGrotesque_700Bold,
   BricolageGrotesque_800ExtraBold,
 } from "@expo-google-fonts/bricolage-grotesque";
-import { GeistMono_400Regular, GeistMono_500Medium } from "@expo-google-fonts/geist-mono";
+import { GeistMono_500Medium } from "@expo-google-fonts/geist-mono";
 import { Geist_400Regular, Geist_500Medium, Geist_600SemiBold } from "@expo-google-fonts/geist";
 
 import { ApiError } from "@/lib/api";
@@ -55,8 +55,14 @@ function RootNavigator() {
     if (state.status !== "signedIn") return;
     void registerForPush().catch(() => undefined);
     // Uygulama kapaliyken dokunulan bildirim de acilsin.
+    // Son yanit surec boyunca kalir: temizlenmezse cikis/giristen sonra ayni rezervasyon
+    // (baska kullanicida 403) yeniden aciliyordu. Bir kez isle, sonra sil.
     void Notifications.getLastNotificationResponseAsync()
-      .then((r) => r && openFromNotification(r, role))
+      .then((r) => {
+        if (!r) return;
+        Notifications.clearLastNotificationResponse();
+        openFromNotification(r, role);
+      })
       .catch(() => undefined);
     const sub = Notifications.addNotificationResponseReceivedListener((r) => openFromNotification(r, role));
     return () => sub.remove();
@@ -64,26 +70,30 @@ function RootNavigator() {
 
   if (state.status === "loading") return null;
 
+  // Arama durumu kullaniciya ait: anahtar degisince sifirlanir, sonraki hesap oncekinin
+  // konumunu ("Yakinimda" GPS dahil), tarihlerini ve valizlerini devralmaz.
   return (
-    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
-      <Stack.Protected guard={state.status === "signedOut"}>
-        <Stack.Screen name="login" />
-        <Stack.Screen name="reset-password" />
-      </Stack.Protected>
-      <Stack.Protected guard={role === "GUEST"}>
-        <Stack.Screen name="(guest)" />
-      </Stack.Protected>
-      <Stack.Protected guard={role === "ADMIN"}>
-        <Stack.Screen name="(admin)" />
-      </Stack.Protected>
-      <Stack.Protected guard={role === "PARTNER"}>
-        <Stack.Screen name="(partner)" />
-      </Stack.Protected>
-      <Stack.Protected guard={state.status === "signedIn"}>
-        <Stack.Screen name="profile" options={{ presentation: "modal" }} />
-        <Stack.Screen name="profile-edit" options={{ presentation: "modal" }} />
-      </Stack.Protected>
-    </Stack>
+    <SearchProvider key={state.status === "signedIn" ? state.user.id : "anon"}>
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
+        <Stack.Protected guard={state.status === "signedOut"}>
+          <Stack.Screen name="login" />
+          <Stack.Screen name="reset-password" />
+        </Stack.Protected>
+        <Stack.Protected guard={role === "GUEST"}>
+          <Stack.Screen name="(guest)" />
+        </Stack.Protected>
+        <Stack.Protected guard={role === "ADMIN"}>
+          <Stack.Screen name="(admin)" />
+        </Stack.Protected>
+        <Stack.Protected guard={role === "PARTNER"}>
+          <Stack.Screen name="(partner)" />
+        </Stack.Protected>
+        <Stack.Protected guard={state.status === "signedIn"}>
+          <Stack.Screen name="profile" options={{ presentation: "modal" }} />
+          <Stack.Screen name="profile-edit" options={{ presentation: "modal" }} />
+        </Stack.Protected>
+      </Stack>
+    </SearchProvider>
   );
 }
 
@@ -95,7 +105,6 @@ export default function RootLayout() {
     Geist_400Regular,
     Geist_500Medium,
     Geist_600SemiBold,
-    GeistMono_400Regular,
     GeistMono_500Medium,
   });
   // Saglayicilar font beklemeden kurulur: oturum geri yukleme (SecureStore + /auth/me)
@@ -104,10 +113,8 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <SearchProvider>
-            <StatusBar style="dark" />
-            {fontsLoaded ? <RootNavigator /> : null}
-          </SearchProvider>
+          <StatusBar style="dark" />
+          {fontsLoaded ? <RootNavigator /> : null}
         </AuthProvider>
       </QueryClientProvider>
     </GestureHandlerRootView>
