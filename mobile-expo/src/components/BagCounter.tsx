@@ -16,7 +16,7 @@ const IMAGES = {
 
 const MAX_PER_SIZE = 20;
 
-/** Bounce'taki gibi gercek valiz gorseli + buyuk +/- dugmeleri. */
+/** Gercek valiz gorseli + tek parca sayac (eksi | sayi | arti). */
 export function BagCounter({
   size,
   value,
@@ -30,7 +30,7 @@ export function BagCounter({
   const name = t(`bags.${size}`);
   return (
     <View style={[styles.card, value > 0 && styles.cardActive]}>
-      <View style={styles.imageBox}>
+      <View style={[styles.imageBox, value > 0 && { backgroundColor: colors.brandSoft }]}>
         <Image source={IMAGES[size]} style={styles.image} contentFit="contain" />
       </View>
       <View style={styles.body}>
@@ -42,7 +42,7 @@ export function BagCounter({
             disabled={value === 0}
             onPress={() => onChange(value - 1)}
           >
-            <Minus size={20} color={value === 0 ? colors.borderStrong : colors.ink} />
+            <Minus size={18} color={value === 0 ? colors.borderStrong : colors.ink} />
           </StepButton>
           <Text style={styles.count} accessibilityLiveRegion="polite">
             {value}
@@ -52,7 +52,7 @@ export function BagCounter({
             disabled={value >= MAX_PER_SIZE}
             onPress={() => onChange(value + 1)}
           >
-            <Plus size={20} color={colors.ink} />
+            <Plus size={18} color={colors.ink} />
           </StepButton>
         </View>
       </View>
@@ -80,7 +80,7 @@ function StepButton({
       hitSlop={6}
       style={({ pressed }) => [
         styles.step,
-        disabled && { backgroundColor: colors.surfaceMuted, borderColor: colors.surfaceMuted },
+        disabled && { opacity: 0.6 },
         pressed && { opacity: 0.7 },
       ]}
     >
@@ -101,25 +101,41 @@ const styles = StyleSheet.create({
   },
   cardActive: { borderColor: colors.brand },
   imageBox: {
-    width: 104,
+    width: 96,
     borderRadius: radius.control,
-    backgroundColor: colors.brandSoft,
+    backgroundColor: colors.surfaceMuted,
     alignItems: "center",
     justifyContent: "center",
     padding: space.sm,
   },
-  image: { width: 84, height: 96 },
-  body: { flex: 1, gap: 2 },
-  stepper: { flexDirection: "row", alignItems: "center", gap: space.lg, marginTop: space.sm },
-  step: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+  image: { width: 76, height: 88 },
+  body: { flex: 1, gap: 2, justifyContent: "center" },
+  stepper: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    marginTop: space.md,
+    borderRadius: radius.control,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
+  },
+  step: {
+    width: 44,
+    height: 40,
     alignItems: "center",
     justifyContent: "center",
   },
-  count: { fontFamily: fonts.display, fontSize: 22, color: colors.ink, minWidth: 24, textAlign: "center" },
+  count: {
+    fontFamily: fonts.display,
+    fontSize: 18,
+    color: colors.ink,
+    minWidth: 40,
+    textAlign: "center",
+    fontVariant: ["tabular-nums"],
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: colors.border,
+    lineHeight: 40,
+  },
 });

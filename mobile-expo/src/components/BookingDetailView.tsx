@@ -3,7 +3,7 @@ import { Alert, Linking, Platform, ScrollView, StyleSheet, View } from "react-na
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Navigation, Pencil, Phone } from "lucide-react-native";
+import { ArrowLeft } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { BagRevisionCard } from "@/components/BagRevisionCard";
@@ -147,7 +147,6 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
                     variant="secondary"
                     style={{ flex: 1 }}
                     title={t("bookings.directions")}
-                    icon={<Navigation size={18} color={colors.ink} />}
                     onPress={() => openDirections(b)}
                   />
                 ) : null}
@@ -156,7 +155,6 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
                     variant="secondary"
                     style={{ flex: 1 }}
                     title={t("bookings.call")}
-                    icon={<Phone size={18} color={colors.ink} />}
                     onPress={() => void Linking.openURL(`tel:${b.shopPhone}`).catch(() => undefined)}
                   />
                 ) : null}
@@ -166,7 +164,6 @@ export function BookingDetailView({ id, mode }: { id: string; mode: "guest" | "p
               <Button
                 variant="secondary"
                 title={t("modify.open")}
-                icon={<Pencil size={18} color={colors.ink} />}
                 onPress={() => router.push({ pathname: "/bookings/modify", params: { id: b.id } })}
               />
             ) : null}

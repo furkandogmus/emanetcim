@@ -3,7 +3,7 @@ import { Alert, Linking, Pressable, ScrollView, StyleSheet, View } from "react-n
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import Constants from "expo-constants";
-import { ChevronRight, ExternalLink, LogOut, Trash2, X } from "lucide-react-native";
+import { ChevronRight, ExternalLink, X } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { ReferralCard } from "@/components/ReferralCard";
@@ -12,7 +12,7 @@ import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { SITE_ORIGIN } from "@/lib/images";
 import { notify } from "@/lib/notify";
-import { colors, space } from "@/theme/tokens";
+import { colors, fonts, radius, space } from "@/theme/tokens";
 
 function sitePage(path: string, lang: string) {
   return `${SITE_ORIGIN}/${lang === "tr" ? "tr" : "en"}/${path}`;
@@ -69,18 +69,36 @@ export default function ProfileScreen() {
         </IconButton>
       </View>
 
-      <Card style={{ gap: space.xs }}>
-        <AppText variant="heading">{user.name || user.email}</AppText>
-        {user.name && user.email ? <AppText variant="caption">{user.email}</AppText> : null}
-        {user.phone ? <AppText variant="caption">{user.phone}</AppText> : null}
-        <AppText variant="label" style={{ color: colors.accent, marginTop: space.xs }}>
-          {t(`profile.role.${user.role}`)}
-        </AppText>
+      <Card style={styles.identity}>
+        <View style={styles.avatar}>
+          <AppText style={styles.avatarText}>{initials(user.name || user.email || "?")}</AppText>
+        </View>
+        <View style={{ flex: 1, gap: 2 }}>
+          <AppText variant="heading" numberOfLines={1}>
+            {user.name || user.email}
+          </AppText>
+          {user.name && user.email ? (
+            <AppText variant="caption" numberOfLines={1}>
+              {user.email}
+            </AppText>
+          ) : null}
+          {user.phone ? <AppText variant="caption">{user.phone}</AppText> : null}
+        </View>
+        <View style={styles.rolePill}>
+          <AppText variant="label" style={{ fontSize: 12 }}>
+            {t(`profile.role.${user.role}`)}
+          </AppText>
+        </View>
       </Card>
 
       {isGuest ? <ReferralCard audience="guest" /> : null}
 
-      <Pressable accessibilityRole="button" onPress={() => router.push("/profile-edit")} style={styles.linkRow}>
+      <View style={styles.group}>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => router.push("/profile-edit")}
+        style={({ pressed }) => [styles.linkRow, pressed && { backgroundColor: colors.surfaceMuted }]}
+      >
         <AppText variant="bodyMedium" style={{ flex: 1 }}>
           {t("profileEdit.open")}
         </AppText>
@@ -90,13 +108,14 @@ export default function ProfileScreen() {
       <Pressable
         accessibilityRole="link"
         onPress={() => void Linking.openURL(sitePage("privacy", i18n.language)).catch(() => undefined)}
-        style={styles.linkRow}
+        style={({ pressed }) => [styles.linkRow, styles.linkDivider, pressed && { backgroundColor: colors.surfaceMuted }]}
       >
         <AppText variant="bodyMedium" style={{ flex: 1 }}>
           {t("profile.privacy")}
         </AppText>
-        <ExternalLink size={18} color={colors.inkMuted} />
+        <ExternalLink size={16} color={colors.inkMuted} />
       </Pressable>
+      </View>
 
       <View style={{ flex: 1 }} />
 
@@ -106,14 +125,13 @@ export default function ProfileScreen() {
       <Button
         variant="secondary"
         title={t("profile.signOut")}
-        icon={<LogOut size={18} color={colors.ink} />}
         onPress={() => void signOut()}
       />
       {isGuest ? (
         <Button
-          variant="danger"
+          variant="ghost"
+          textColor={colors.danger}
           title={t("profile.deleteAccount")}
-          icon={<Trash2 size={18} color={colors.danger} />}
           loading={deleting}
           onPress={confirmDelete}
         />
@@ -136,11 +154,36 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   content: { flexGrow: 1, padding: space.xl, gap: space.lg },
   header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  linkRow: {
-    flexDirection: "row",
+  identity: { flexDirection: "row", alignItems: "center", gap: space.md },
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.brandSoft,
     alignItems: "center",
-    minHeight: 52,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    justifyContent: "center",
   },
+  avatarText: { fontFamily: fonts.display, fontSize: 18, color: colors.accent },
+  rolePill: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: radius.pill,
+    backgroundColor: colors.surfaceMuted,
+  },
+  group: {
+    borderRadius: radius.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    overflow: "hidden",
+  },
+  linkRow: { flexDirection: "row", alignItems: "center", minHeight: 52, paddingHorizontal: space.lg },
+  linkDivider: { borderTopWidth: 1, borderTopColor: colors.border },
 });
+
+/** "Test Misafir" -> "TM"; e-postada ilk harf. */
+function initials(name: string) {
+  const parts = name.split(/[\s@.]+/).filter(Boolean);
+  return ((parts[0]?.[0] ?? "") + (name.includes("@") ? "" : (parts[1]?.[0] ?? ""))).toLocaleUpperCase("tr-TR") || "?";
+}

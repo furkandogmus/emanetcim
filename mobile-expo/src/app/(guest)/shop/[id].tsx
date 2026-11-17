@@ -2,7 +2,7 @@ import { ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
-import { ArrowLeft, Bath, BadgeCheck, Clock, Info, MapPin, Star, Store } from "lucide-react-native";
+import { ArrowLeft, BadgeCheck, Star, Store } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { hoursLabel } from "@/components/ShopCard";
@@ -63,10 +63,8 @@ export default function ShopDetailScreen() {
           <View style={styles.metaRow}>
             {hours ? (
               <View style={styles.meta}>
-                <Clock size={18} color={colors.success} />
-                <AppText variant="bodyMedium" style={{ color: colors.success }}>
-                  {hours}
-                </AppText>
+                <View style={styles.openDot} />
+                <AppText variant="bodyMedium">{hours}</AppText>
               </View>
             ) : null}
             {shop.rating ? (
@@ -85,7 +83,6 @@ export default function ShopDetailScreen() {
 
           {shop.address || shop.city ? (
             <View style={styles.meta}>
-              <MapPin size={18} color={colors.inkMuted} />
               <AppText variant="caption" style={{ flex: 1 }}>
                 {/* Adres cogu kayitta ilce/sehri zaten iceriyor; tekrar eklenmez. */}
                 {[shop.address, shop.district, shop.city]
@@ -95,17 +92,13 @@ export default function ShopDetailScreen() {
             </View>
           ) : null}
           {shop.hasRestroom ? (
-            <View style={styles.meta}>
-              <Bath size={18} color={colors.inkMuted} />
-              <AppText variant="caption">{t("shop.restroom")}</AppText>
-            </View>
+            <AppText variant="caption">{t("shop.restroom")}</AppText>
           ) : null}
 
           {shop.isPrelaunch ? (
             <Banner tone="warning" body={t("shop.prelaunch")} />
           ) : (
             <View style={styles.rule}>
-              <Info size={18} color={colors.inkSecondary} />
               <View style={{ flex: 1, gap: 2 }}>
                 <AppText variant="bodyMedium">{t("shop.rulesTitle")}</AppText>
                 <AppText variant="caption">{t("shop.rulesBody")}</AppText>
@@ -218,6 +211,7 @@ const styles = StyleSheet.create({
   },
   metaRow: { flexDirection: "row", flexWrap: "wrap", gap: space.lg },
   meta: { flexDirection: "row", alignItems: "center", gap: 6 },
+  openDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.success },
   rule: {
     flexDirection: "row",
     gap: space.md,
