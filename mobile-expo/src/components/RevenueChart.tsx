@@ -35,6 +35,17 @@ export function RevenueChart({ series }: { series: Point[] }) {
       timeZone: "UTC",
     });
 
+  // Hic odenmis gun yoksa bos bir eksen yer kaplamasin: tek satir yeter.
+  if (series.every((p) => p.revenue === 0)) {
+    return (
+      <View style={styles.empty}>
+        <AppText variant="caption" style={{ fontSize: 13 }}>
+          {t("admin.chartEmpty")}
+        </AppText>
+      </View>
+    );
+  }
+
   return (
     <View style={{ gap: space.sm }}>
       <AppText variant="caption" style={{ fontSize: 13 }} accessibilityLiveRegion="polite">
@@ -87,5 +98,6 @@ export function RevenueChart({ series }: { series: Point[] }) {
 
 const styles = StyleSheet.create({
   axis: { flexDirection: "row", justifyContent: "space-between" },
-  axisText: { fontFamily: fonts.mono, fontSize: 11, color: colors.inkMuted },
+  axisText: { fontFamily: fonts.body, fontSize: 12, color: colors.inkMuted, fontVariant: ["tabular-nums"] },
+  empty: { paddingVertical: space.lg, alignItems: "center", borderRadius: 12, backgroundColor: colors.surfaceMuted },
 });

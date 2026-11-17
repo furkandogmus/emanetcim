@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { api } from "./api";
 import { usePartnerShopSelection, withShop } from "./partner-shop";
-import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReview, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview } from "./types";
+import type { AdminApplication, AdminStats, BookingDetail, ContactMessage, PartnerEarnings, PartnerSealsResponse, PartnerShop, BookingSummary, NearbyShop, PartnerBookingsResponse, ShopDetail, ShopReview, PartnerShopSettings, PartnerSchedule, PartnerDashboard, AdminOverview, AdminBookingFilter, AdminBookingsResponse, AdminBookingDetail, AdminShop } from "./types";
 
 export const keys = {
   myBookings: ["bookings", "me"] as const,
@@ -158,5 +158,29 @@ export function usePartnerDashboard() {
       api<PartnerDashboard>(withShop("/partner/dashboard", shopId)),
     // Dukkan degisirken kart yukleme durumuna dusup dukkan seridini sifirlamasin.
     placeholderData: (prev) => prev,
+  });
+}
+
+/** Arama yazilirken her tusta istek gitmesin diye ekran `q`'yu geciktirerek verir. */
+export function useAdminBookings(filter: AdminBookingFilter, q: string) {
+  const qs = new URLSearchParams({ filter, ...(q.trim().length >= 2 ? { q: q.trim() } : {}) });
+  return useQuery({
+    queryKey: [...keys.admin, "bookings", filter, q.trim()],
+    queryFn: () => api<AdminBookingsResponse>(`/admin/bookings?${qs}`),
+    placeholderData: (prev) => prev,
+  });
+}
+
+export function useAdminBooking(id: string) {
+  return useQuery({
+    queryKey: [...keys.admin, "booking", id],
+    queryFn: () => api<AdminBookingDetail>(`/admin/bookings/${encodeURIComponent(id)}`),
+  });
+}
+
+export function useAdminShops() {
+  return useQuery({
+    queryKey: [...keys.admin, "shops"],
+    queryFn: () => api<{ shops: AdminShop[] }>("/admin/shops").then((r) => r.shops),
   });
 }
