@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { Linking, StyleSheet, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { AppState, Linking, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { router, useIsFocused } from "expo-router";
@@ -22,8 +22,17 @@ type ScanResult =
  */
 export default function PartnerScanScreen() {
   const { t } = useTranslation();
-  const [permission, requestPermission] = useCameraPermissions();
   const focused = useIsFocused();
+  const [permission, requestPermission, getPermission] = useCameraPermissions();
+  // Kanca izni yalnizca acilista okur: Ayarlar'dan izin verip donunce sekme hala
+  // "izin yok" gosteriyordu. On plana donuste ve sekmeye geliste yeniden oku.
+  useEffect(() => {
+    if (focused) void getPermission().catch(() => undefined);
+    const sub = AppState.addEventListener("change", (s) => {
+      if (s === "active") void getPermission().catch(() => undefined);
+    });
+    return () => sub.remove();
+  }, [focused, getPermission]);
   const [message, setMessage] = useState<{ tone: "danger" | "brand"; body: string } | null>(null);
   // Kamera ayni kodu saniyede onlarca kez okur; tek istek gitsin.
   const busy = useRef(false);
@@ -41,11 +50,14 @@ export default function PartnerScanScreen() {
       setMessage({ tone: "brand", body: t("scan.seal", { n: res.serialNumber, status: t(`scan.sealStatus.${res.status}`, { defaultValue: res.status }) }) });
     } catch (e) {
       setMessage({ tone: "danger", body: errorMessage(e, "scan") });
+    } finally {
+      // finally: rezervasyon bulunup detaya gecildiginde de kilit acilsin. Eskiden o dalda
+      // `return` zamanlayiciyi atliyordu ve sekme acik kaldigi icin tarayici bir daha
+      // hic okumuyordu (oturum basina tek misafir).
+      setTimeout(() => {
+        busy.current = false;
+      }, 2500);
     }
-    // Ayni kodun hemen tekrar okunmasini engelle; sonucu okuyacak zaman olsun.
-    setTimeout(() => {
-      busy.current = false;
-    }, 2500);
   }
 
   if (!permission) return <View style={styles.safe} />;

@@ -98,7 +98,9 @@ function refreshOnce(): Promise<RefreshOutcome> {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refreshToken }),
       }).catch(() => null);
-      if (!res || res.status >= 500) return "network";
+      // 429 (operator NAT'inda paylasilan IP'ye hiz siniri) ve 408 gecicidir: bunlarda
+      // token silinip kullanici disari atilmasin.
+      if (!res || res.status >= 500 || res.status === 429 || res.status === 408) return "network";
       if (!res.ok) return "rejected";
       const body = (await res.json()) as { accessToken: string; refreshToken: string };
       await saveTokens(body.accessToken, body.refreshToken);

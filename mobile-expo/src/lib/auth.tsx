@@ -6,7 +6,7 @@ import * as SecureStore from "expo-secure-store";
 
 import { ApiError, api, clearTokens, loadTokens, saveTokens, setSessionExpiredHandler } from "./api";
 import { forgetGoogleAccount, pickGoogleIdToken } from "./google-auth";
-import { unregisterPush } from "./push";
+import { forgetPushRegistration, unregisterPush } from "./push";
 import type { MobileUser, SessionResponse } from "./types";
 
 type AuthState =
@@ -56,6 +56,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setSessionExpiredHandler(() => {
+      forgetPushRegistration();
+      void forgetGoogleAccount().catch(() => undefined);
       queryClient.clear();
       setState({ status: "signedOut" });
     });
