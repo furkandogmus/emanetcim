@@ -60,7 +60,8 @@
     "step2Title": "Dükkanda QR kodunu göster",
     "step2Body": "Esnaf valizini numaralı mühürle kapatıp teslim alır.",
     "step3Title": "Dönünce valizini al",
-    "step3Body": "Aynı kodu göster, valizini mühürlü haliyle geri al."
+    "step3Body": "Aynı kodu göster, valizini mühürlü haliyle geri al.",
+    "citiesTitle": "Popüler şehirler"
   },
   "search": {
     "locationTitle": "Nereye gidiyorsun?",

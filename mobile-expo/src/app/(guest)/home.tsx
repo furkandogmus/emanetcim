@@ -9,6 +9,8 @@ import { useTranslation } from "react-i18next";
 
 import { BrandMark } from "@/components/BrandMark";
 import { BookingRow } from "@/components/BookingRow";
+import { CITY_IMAGES } from "@/lib/city-images";
+import { CITIES, useSearch } from "@/lib/search";
 import { AppText, IconButton } from "@/components/ui";
 import { prefetchMapStyle } from "@/lib/map-style";
 import { isActiveBooking, useMyBookings } from "@/lib/queries";
@@ -21,12 +23,17 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
   const bookings = useMyBookings();
+  const search = useSearch();
   const next = bookings.data
     ?.filter(isActiveBooking)
     .sort((a, b) => +new Date(a.checkInTime) - +new Date(b.checkInTime))[0];
 
   return (
-    <ScrollView style={styles.root} contentContainerStyle={{ paddingBottom: insets.bottom + space.xxl }} bounces={false}>
+    <ScrollView
+      style={styles.root}
+      contentContainerStyle={{ paddingBottom: insets.bottom + space.xxl }}
+      bounces={false}
+    >
       <View style={[styles.hero, { height: Math.max(340, height * 0.44) }]}>
         <Image source={require("../../../assets/hero.jpg")} style={StyleSheet.absoluteFill} contentFit="cover" />
         <View style={styles.scrim} />
@@ -85,6 +92,35 @@ export default function HomeScreen() {
         )}
 
         <View style={styles.section}>
+          <AppText variant="label">{t("home.citiesTitle")}</AppText>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.cities}
+            style={{ marginHorizontal: -space.xl }}
+          >
+            {CITIES.filter((c) => CITY_IMAGES[c.label]).map((c) => (
+              <Pressable
+                key={c.label}
+                accessibilityRole="button"
+                accessibilityLabel={c.label}
+                onPress={() => {
+                  search.setPlace(c);
+                  router.push({
+                    pathname: "/search",
+                    params: { from: "city" },
+                  });
+                }}
+                style={({ pressed }) => [styles.cityCard, pressed && { transform: [{ scale: 0.98 }] }]}
+              >
+                <Image source={CITY_IMAGES[c.label].source} style={StyleSheet.absoluteFill} contentFit="cover" />
+                <AppText style={styles.cityName}>{c.label}</AppText>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </View>
+
+        <View style={styles.section}>
           <AppText variant="label">{t("home.howTitle")}</AppText>
           <View style={styles.steps}>
             {(["1", "2", "3"] as const).map((n, i) => (
@@ -97,7 +133,13 @@ export default function HomeScreen() {
                   </View>
                   {i < 2 ? <View style={styles.stepLine} /> : null}
                 </View>
-                <View style={{ flex: 1, gap: 2, paddingBottom: i < 2 ? space.lg : 0 }}>
+                <View
+                  style={{
+                    flex: 1,
+                    gap: 2,
+                    paddingBottom: i < 2 ? space.lg : 0,
+                  }}
+                >
                   <AppText variant="bodyMedium">{t(`home.step${n}Title`)}</AppText>
                   <AppText variant="caption">{t(`home.step${n}Body`)}</AppText>
                 </View>
@@ -113,7 +155,14 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
   hero: { justifyContent: "space-between", backgroundColor: colors.ink },
-  scrim: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, backgroundColor: "rgba(28,25,23,0.38)" },
+  scrim: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    backgroundColor: "rgba(28,25,23,0.38)",
+  },
   heroTop: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -129,7 +178,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.md,
     paddingVertical: 8,
   },
-  heroTitle: { color: colors.white, paddingHorizontal: space.xl, paddingBottom: space.xxl + space.lg },
+  heroTitle: {
+    color: colors.white,
+    textShadowColor: "rgba(0,0,0,0.45)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 12,
+    paddingHorizontal: space.xl,
+    paddingBottom: space.xxl + space.lg,
+  },
   body: { marginTop: -space.xl, paddingHorizontal: space.xl, gap: space.lg },
   searchPill: {
     flexDirection: "row",
@@ -144,7 +200,30 @@ const styles = StyleSheet.create({
     ...shadow.floating,
   },
   section: { gap: space.sm },
-  sectionHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  cities: { paddingHorizontal: space.xl, gap: space.md },
+  cityCard: {
+    width: 132,
+    height: 168,
+    borderRadius: radius.card,
+    overflow: "hidden",
+    justifyContent: "flex-end",
+    backgroundColor: colors.surfaceMuted,
+  },
+  cityName: {
+    fontFamily: fonts.display,
+    fontSize: 17,
+    lineHeight: 22,
+    color: colors.white,
+    padding: space.md,
+    textShadowColor: "rgba(0,0,0,0.55)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 8,
+  },
+  sectionHead: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   row: {
     flexDirection: "row",
     alignItems: "center",
@@ -173,5 +252,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  stepLine: { flex: 1, width: 1, backgroundColor: colors.border, marginVertical: space.xs },
+  stepLine: {
+    flex: 1,
+    width: 1,
+    backgroundColor: colors.border,
+    marginVertical: space.xs,
+  },
 });

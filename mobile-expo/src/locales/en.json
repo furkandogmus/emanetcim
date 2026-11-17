@@ -60,7 +60,8 @@
     "step2Title": "Show your QR code at the shop",
     "step2Body": "The shop seals your bag with a numbered seal.",
     "step3Title": "Collect it when you are back",
-    "step3Body": "Show the same code and get your bag back, still sealed."
+    "step3Body": "Show the same code and get your bag back, still sealed.",
+    "citiesTitle": "Popular cities"
   },
   "search": {
     "locationTitle": "Where are you going?",
