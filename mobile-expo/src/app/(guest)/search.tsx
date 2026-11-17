@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import * as Location from "expo-location";
-import { ArrowLeft, LocateFixed, MapPin, X } from "lucide-react-native";
+import { ArrowLeft, ChevronRight, LocateFixed, MapPin, X } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { BagCounter } from "@/components/BagCounter";
@@ -115,20 +115,29 @@ export default function SearchWizard() {
             <AppText variant="bodyMedium">{locating ? t("search.locating") : t("search.useLocation")}</AppText>
           </Pressable>
           {locationError ? <Banner tone="warning" body={t("search.locationDenied")} /> : null}
-          <AppText variant="label" style={{ marginTop: space.md }}>
+          <AppText variant="label" style={{ marginTop: space.sm, marginBottom: -space.sm }}>
             {t("search.popular")}
           </AppText>
-          {CITIES.map((c) => (
-            <Pressable
-              key={c.label}
-              accessibilityRole="button"
-              onPress={() => choosePlace(c)}
-              style={({ pressed }) => [styles.placeRow, pressed && { opacity: 0.7 }]}
-            >
-              <MapPin size={20} color={colors.inkMuted} style={{ marginHorizontal: 12 }} />
-              <AppText variant="bodyMedium">{c.label}</AppText>
-            </Pressable>
-          ))}
+          <View style={styles.cityList}>
+            {CITIES.map((c, i) => (
+              <Pressable
+                key={c.label}
+                accessibilityRole="button"
+                onPress={() => choosePlace(c)}
+                style={({ pressed }) => [
+                  styles.cityRow,
+                  i > 0 && styles.cityDivider,
+                  pressed && { backgroundColor: colors.surfaceMuted },
+                ]}
+              >
+                <MapPin size={18} color={colors.inkMuted} />
+                <AppText variant="bodyMedium" style={{ flex: 1 }}>
+                  {c.label}
+                </AppText>
+                <ChevronRight size={18} color={colors.borderStrong} />
+              </Pressable>
+            ))}
+          </View>
         </ScrollView>
       ) : null}
 
@@ -181,7 +190,7 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   topBar: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: space.xl, paddingTop: space.sm },
   progress: { flexDirection: "row", gap: 6, paddingHorizontal: space.xl, marginTop: space.lg },
-  progressPart: { flex: 1, height: 5, borderRadius: 3, backgroundColor: colors.border },
+  progressPart: { flex: 1, height: 4, borderRadius: 2, backgroundColor: colors.border },
   progressDone: { backgroundColor: colors.brand },
   content: { padding: space.xl, gap: space.lg },
   placeRow: {
@@ -192,9 +201,18 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
+  cityList: {
+    borderRadius: radius.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    overflow: "hidden",
+  },
+  cityRow: { flexDirection: "row", alignItems: "center", gap: space.md, minHeight: 52, paddingHorizontal: space.lg },
+  cityDivider: { borderTopWidth: 1, borderTopColor: colors.border },
   placeIcon: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
     borderRadius: radius.pill,
     backgroundColor: colors.brandSoft,
     alignItems: "center",

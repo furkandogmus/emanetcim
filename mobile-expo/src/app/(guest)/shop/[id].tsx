@@ -41,11 +41,12 @@ export default function ShopDetailScreen() {
   return (
     <View style={styles.root}>
       <ScrollView contentContainerStyle={{ paddingBottom: 140 + insets.bottom }}>
-        <View style={styles.photo}>
+        {/* Fotografsiz dukkanda 260px bos turuncu kutu yerine kisa, notr bir baslik. */}
+        <View style={[styles.photo, !image && { height: insets.top + 140, backgroundColor: colors.surfaceMuted }]}>
           {image ? (
             <Image source={{ uri: image }} style={StyleSheet.absoluteFill} contentFit="cover" />
           ) : (
-            <Store size={56} color={colors.brand} />
+            <Store size={40} color={colors.borderStrong} strokeWidth={1.5} style={{ marginTop: insets.top }} />
           )}
           <IconButton
             label={t("common.back")}
@@ -104,7 +105,7 @@ export default function ShopDetailScreen() {
             <Banner tone="warning" body={t("shop.prelaunch")} />
           ) : (
             <View style={styles.rule}>
-              <Info size={20} color={colors.accent} />
+              <Info size={18} color={colors.inkSecondary} />
               <View style={{ flex: 1, gap: 2 }}>
                 <AppText variant="bodyMedium">{t("shop.rulesTitle")}</AppText>
                 <AppText variant="caption">{t("shop.rulesBody")}</AppText>
@@ -127,7 +128,7 @@ export default function ShopDetailScreen() {
                     <AppText variant="bodyMedium">{t(`bags.${size}`)}</AppText>
                     <AppText variant="caption">{t(`bags.${size}Desc`)}</AppText>
                   </View>
-                  <AppText variant="bodyMedium">
+                  <AppText variant="bodyMedium" style={{ fontVariant: ["tabular-nums"] }}>
                     {t("shop.perDay", { price: formatMoney(shop.pricePerDay * mult) })}
                   </AppText>
                 </View>
@@ -205,7 +206,7 @@ function Reviews({ shopId }: { shopId: string }) {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
-  photo: { height: 260, backgroundColor: colors.brandSoft, alignItems: "center", justifyContent: "center" },
+  photo: { height: 280, backgroundColor: colors.surfaceMuted, alignItems: "center", justifyContent: "center" },
   back: { position: "absolute", left: space.lg },
   sheet: {
     marginTop: -space.xl,
@@ -222,11 +223,9 @@ const styles = StyleSheet.create({
     gap: space.md,
     padding: space.lg,
     borderRadius: radius.control,
-    backgroundColor: colors.brandSoft,
-    borderWidth: 1,
-    borderColor: colors.brandSoftBorder,
+    backgroundColor: colors.surfaceMuted,
   },
-  hourRow: { flexDirection: "row", justifyContent: "space-between" },
+  hourRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: space.md, paddingVertical: 4 },
   cta: {
     position: "absolute",
     left: 0,
