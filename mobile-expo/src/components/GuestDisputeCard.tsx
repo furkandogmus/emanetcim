@@ -78,7 +78,7 @@ export function GuestDisputeCard({ booking, onOpen }: { booking: BookingDetail; 
       <AppText variant="bodyMedium">{t("dispute.reasonLabel")}</AppText>
       <View style={styles.reasons} accessibilityLabel={t("dispute.reasonLabel")}>
         {REASONS.map((r) => (
-          <Chip key={r} label={t(`dispute.reasons.${r}`)} selected={reason === r} onPress={() => setReason(r)} />
+          <Chip key={r} soft label={t(`dispute.reasons.${r}`)} selected={reason === r} onPress={() => setReason(r)} />
         ))}
       </View>
       <TextInput

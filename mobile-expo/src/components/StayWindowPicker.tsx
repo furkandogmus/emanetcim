@@ -140,7 +140,7 @@ function TimeRow({
       >
         {optionsWith(selected).map((m) => (
           <View key={m} style={{ width: CHIP_WIDTH }}>
-            <Chip label={label(m)} selected={m === selected} disabled={isDisabled(m)} onPress={() => onSelect(m)} />
+            <Chip soft label={label(m)} selected={m === selected} disabled={isDisabled(m)} onPress={() => onSelect(m)} />
           </View>
         ))}
       </ScrollView>
