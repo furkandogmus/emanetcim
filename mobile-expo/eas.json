@@ -52,6 +52,13 @@
         "releaseStatus": "draft",
         "serviceAccountKeyPath": "./play-service-account.json"
       }
+    },
+    "closed": {
+      "android": {
+        "track": "alpha",
+        "releaseStatus": "completed",
+        "serviceAccountKeyPath": "./play-service-account.json"
+      }
     }
   }
 }
