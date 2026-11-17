@@ -32,10 +32,15 @@ export const colors = {
   white: "#FFFFFF",
 } as const;
 
+/**
+ * Ic ice yaricap: ic = dis - aradaki bosluk. Kart 16 + ic bosluk 4 ise ic kutu 12.
+ * Butonlar ve girdiler ayni `control` yaricapini paylasir; pill yalnizca cip ve rozet.
+ */
 export const radius = {
-  control: 16, // --id-control-radius
-  card: 20, // --id-radius-md
-  sheet: 28,
+  inner: 10,
+  control: 14,
+  card: 18,
+  sheet: 24,
   pill: 999,
 } as const;
 
@@ -48,28 +53,35 @@ export const space = {
   xxl: 32,
 } as const;
 
-/** Basliklar Bricolage Grotesque 800 (web'in display ailesi), govde Geist. */
+/**
+ * Basliklar Bricolage Grotesque (web'in display ailesi), govde Geist, kod ve rakam
+ * Geist Mono. 800 yalnizca marka/hero icin; ekran basliklari 700, kart basliklari 600 --
+ * her yer 800 iken ekranlar bagiriyordu (2026-11-17 arayuz gecisi).
+ */
 export const fonts = {
-  display: "BricolageGrotesque_800ExtraBold",
-  displayMedium: "BricolageGrotesque_700Bold",
+  hero: "BricolageGrotesque_800ExtraBold",
+  display: "BricolageGrotesque_700Bold",
+  displayMedium: "BricolageGrotesque_600SemiBold",
   body: "Geist_400Regular",
   bodyMedium: "Geist_500Medium",
   bodySemibold: "Geist_600SemiBold",
+  mono: "GeistMono_400Regular",
+  monoMedium: "GeistMono_500Medium",
 } as const;
 
 export const shadow = {
   card: {
     shadowColor: "#1C1917",
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
   },
   floating: {
     shadowColor: "#1C1917",
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 6,
+    shadowOpacity: 0.1,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
   },
 } as const;
