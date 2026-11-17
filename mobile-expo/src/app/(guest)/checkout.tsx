@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Calendar, Luggage, Wallet } from "lucide-react-native";
+import { ArrowLeft } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { AppText, Banner, Button, Card, CenterMessage, Divider, IconButton, Loading } from "@/components/ui";
@@ -14,7 +14,7 @@ import { estimate } from "@/lib/pricing";
 import { keys, useShop } from "@/lib/queries";
 import { totalBags, useSearch } from "@/lib/search";
 import type { CheckoutRequest, CheckoutResponse } from "@/lib/types";
-import { colors, fonts, space } from "@/theme/tokens";
+import { colors, fonts, radius, space } from "@/theme/tokens";
 
 export default function CheckoutScreen() {
   const { shopId } = useLocalSearchParams<{ shopId: string }>();
@@ -76,13 +76,11 @@ export default function CheckoutScreen() {
           <AppText variant="heading">{shop.name}</AppText>
           <Divider />
           <EditableRow
-            icon={<Calendar size={20} color={colors.inkSecondary} />}
             label={t("checkout.when")}
             value={`${formatDayTime(search.checkIn)}\n→ ${formatDayTime(search.checkOut)}`}
             onEdit={() => router.push({ pathname: "/search", params: { step: "1", returnTo: "back" } })}
           />
           <EditableRow
-            icon={<Luggage size={20} color={colors.inkSecondary} />}
             label={t("checkout.bags")}
             value={t("common.bag", { count: bagCount })}
             onEdit={() => router.push({ pathname: "/search", params: { step: "2", returnTo: "back" } })}
@@ -124,8 +122,7 @@ export default function CheckoutScreen() {
         </Card>
 
         <View style={styles.payNote}>
-          <Wallet size={20} color={colors.accent} />
-          <AppText variant="bodyMedium" style={{ flex: 1 }}>
+          <AppText variant="body" style={{ flex: 1, color: colors.inkSecondary }}>
             {t("checkout.payAtShop")}
           </AppText>
         </View>
@@ -133,12 +130,18 @@ export default function CheckoutScreen() {
         {error ? <Banner tone="danger" body={error} /> : null}
       </ScrollView>
 
+      {/* Onay aninda tutar gozden kaybolmasin: dukkan ekranindaki alt cubukla ayni duzen. */}
       <View style={styles.footer}>
+        <View>
+          <AppText variant="caption">{t("checkout.estimatedTotal")}</AppText>
+          <AppText style={styles.footerTotal}>{formatMoney(price.total)}</AppText>
+        </View>
         <Button
           title={t("checkout.confirm")}
           loading={mutation.isPending}
           disabled={bagCount === 0}
           onPress={confirm}
+          style={{ flex: 1 }}
         />
       </View>
     </SafeAreaView>
@@ -146,12 +149,10 @@ export default function CheckoutScreen() {
 }
 
 function EditableRow({
-  icon,
   label,
   value,
   onEdit,
 }: {
-  icon: React.ReactNode;
   label: string;
   value: string;
   onEdit: () => void;
@@ -159,7 +160,6 @@ function EditableRow({
   const { t } = useTranslation();
   return (
     <View style={styles.editRow}>
-      {icon}
       <View style={{ flex: 1, gap: 2 }}>
         <AppText variant="label">{label}</AppText>
         <AppText variant="bodyMedium">{value}</AppText>
@@ -190,8 +190,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: space.md,
     padding: space.lg,
-    borderRadius: 16,
-    backgroundColor: colors.brandSoft,
+    borderRadius: radius.control,
+    backgroundColor: colors.surfaceMuted,
   },
-  footer: { padding: space.xl, paddingTop: space.md, borderTopWidth: 1, borderTopColor: colors.border },
+  footer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space.lg,
+    padding: space.xl,
+    paddingTop: space.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  footerTotal: { fontFamily: fonts.display, fontSize: 22, lineHeight: 28, color: colors.ink, fontVariant: ["tabular-nums"] },
 });

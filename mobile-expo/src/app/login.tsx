@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, View, useWindowDimensions } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
+  useWindowDimensions,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { router } from "expo-router";
@@ -124,7 +132,10 @@ export default function LoginScreen() {
     <View style={styles.safe}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView
-          contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + space.xl }}
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingBottom: insets.bottom + space.xl,
+          }}
           keyboardShouldPersistTaps="handled"
           bounces={false}
         >
@@ -144,110 +155,116 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.content}>
-
-          {step === "email" ? (
-            <>
-              <AppText variant="title">{t("auth.title")}</AppText>
-              <AppText variant="caption">{t("auth.subtitle")}</AppText>
-              {emailField(sendCode)}
-              {error ? <Banner tone="danger" body={error} /> : null}
-              <Button title={t("auth.sendCode")} onPress={sendCode} loading={busy} disabled={googleBusy} />
-              <Button
-                variant="ghost"
-                title={t("auth.usePassword")}
-                onPress={() => switchTo("password")}
-                disabled={googleBusy}
-              />
-              {googleSignInAvailable ? (
-                <>
-                  <View style={styles.dividerRow} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-                    <View style={styles.dividerLine} />
-                    <AppText variant="caption">{t("auth.or")}</AppText>
-                    <View style={styles.dividerLine} />
-                  </View>
-                  <GoogleButton
-                    title={t("auth.continueWithGoogle")}
-                    onPress={googleSignIn}
-                    loading={googleBusy}
-                    disabled={busy}
-                  />
-                </>
-              ) : null}
-            </>
-          ) : step === "password" ? (
-            <>
-              <AppText variant="title">{t("auth.title")}</AppText>
-              <AppText variant="caption">{t("auth.passwordSubtitle")}</AppText>
-              {emailField(() => undefined)}
-              <View style={styles.field}>
-                <AppText variant="label" nativeID="passwordLabel">
-                  {t("auth.passwordLabel")}
-                </AppText>
-                <TextInput
-                  accessibilityLabelledBy="passwordLabel"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                  autoCapitalize="none"
-                  autoComplete="current-password"
-                  textContentType="password"
-                  returnKeyType="go"
-                  onSubmitEditing={passwordSignIn}
-                  style={styles.input}
-                />
-              </View>
-              {error ? <Banner tone="danger" body={error} /> : null}
-              <Button
-                title={t("auth.verify")}
-                onPress={passwordSignIn}
-                loading={busy}
-                disabled={password.length === 0}
-              />
-              <Button
-                variant="ghost"
-                title={t("reset.forgotPassword")}
-                onPress={() => {
-                  setError(null);
-                  router.push({ pathname: "/reset-password", params: { email: email.trim().toLowerCase() } });
-                }}
-              />
-              <Button variant="ghost" title={t("auth.useCode")} onPress={() => switchTo("email")} />
-            </>
-          ) : (
-            <>
-              <AppText variant="title">{t("auth.codeTitle")}</AppText>
-              <AppText variant="caption">{t("auth.codeSubtitle", { email })}</AppText>
-              <View style={styles.field}>
-                <AppText variant="label" nativeID="codeLabel">
-                  {t("auth.codeLabel")}
-                </AppText>
-                <TextInput
-                  accessibilityLabelledBy="codeLabel"
-                  value={code}
-                  onChangeText={(v) => setCode(v.replace(/\D/g, "").slice(0, 6))}
-                  keyboardType="number-pad"
-                  autoComplete="one-time-code"
-                  textContentType="oneTimeCode"
-                  maxLength={6}
-                  autoFocus
-                  style={[styles.input, styles.codeInput]}
-                />
-              </View>
-              {error ? <Banner tone="danger" body={error} /> : null}
-              <Button title={t("auth.verify")} onPress={verify} loading={busy} disabled={code.length !== 6} />
-              <View style={styles.row}>
-                <Button variant="ghost" title={t("auth.resend")} onPress={sendCode} disabled={busy} />
+            {step === "email" ? (
+              <>
+                <AppText variant="title">{t("auth.title")}</AppText>
+                <AppText variant="caption">{t("auth.subtitle")}</AppText>
+                {emailField(sendCode)}
+                {error ? <Banner tone="danger" body={error} /> : null}
+                <Button title={t("auth.sendCode")} onPress={sendCode} loading={busy} disabled={googleBusy} />
                 <Button
                   variant="ghost"
-                  title={t("auth.changeEmail")}
+                  title={t("auth.usePassword")}
+                  onPress={() => switchTo("password")}
+                  disabled={googleBusy}
+                />
+                {googleSignInAvailable ? (
+                  <>
+                    <View
+                      style={styles.dividerRow}
+                      accessibilityElementsHidden
+                      importantForAccessibility="no-hide-descendants"
+                    >
+                      <View style={styles.dividerLine} />
+                      <AppText variant="caption">{t("auth.or")}</AppText>
+                      <View style={styles.dividerLine} />
+                    </View>
+                    <GoogleButton
+                      title={t("auth.continueWithGoogle")}
+                      onPress={googleSignIn}
+                      loading={googleBusy}
+                      disabled={busy}
+                    />
+                  </>
+                ) : null}
+              </>
+            ) : step === "password" ? (
+              <>
+                <AppText variant="title">{t("auth.title")}</AppText>
+                <AppText variant="caption">{t("auth.passwordSubtitle")}</AppText>
+                {emailField(() => undefined)}
+                <View style={styles.field}>
+                  <AppText variant="label" nativeID="passwordLabel">
+                    {t("auth.passwordLabel")}
+                  </AppText>
+                  <TextInput
+                    accessibilityLabelledBy="passwordLabel"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                    autoCapitalize="none"
+                    autoComplete="current-password"
+                    textContentType="password"
+                    returnKeyType="go"
+                    onSubmitEditing={passwordSignIn}
+                    style={styles.input}
+                  />
+                </View>
+                {error ? <Banner tone="danger" body={error} /> : null}
+                <Button
+                  title={t("auth.verify")}
+                  onPress={passwordSignIn}
+                  loading={busy}
+                  disabled={password.length === 0}
+                />
+                <Button
+                  variant="ghost"
+                  title={t("reset.forgotPassword")}
                   onPress={() => {
-                    setStep("email");
                     setError(null);
+                    router.push({
+                      pathname: "/reset-password",
+                      params: { email: email.trim().toLowerCase() },
+                    });
                   }}
                 />
-              </View>
-            </>
-          )}
+                <Button variant="ghost" title={t("auth.useCode")} onPress={() => switchTo("email")} />
+              </>
+            ) : (
+              <>
+                <AppText variant="title">{t("auth.codeTitle")}</AppText>
+                <AppText variant="caption">{t("auth.codeSubtitle", { email })}</AppText>
+                <View style={styles.field}>
+                  <AppText variant="label" nativeID="codeLabel">
+                    {t("auth.codeLabel")}
+                  </AppText>
+                  <TextInput
+                    accessibilityLabelledBy="codeLabel"
+                    value={code}
+                    onChangeText={(v) => setCode(v.replace(/\D/g, "").slice(0, 6))}
+                    keyboardType="number-pad"
+                    autoComplete="one-time-code"
+                    textContentType="oneTimeCode"
+                    maxLength={6}
+                    autoFocus
+                    style={[styles.input, styles.codeInput]}
+                  />
+                </View>
+                {error ? <Banner tone="danger" body={error} /> : null}
+                <Button title={t("auth.verify")} onPress={verify} loading={busy} disabled={code.length !== 6} />
+                <View style={styles.row}>
+                  <Button variant="ghost" title={t("auth.resend")} onPress={sendCode} disabled={busy} />
+                  <Button
+                    variant="ghost"
+                    title={t("auth.changeEmail")}
+                    onPress={() => {
+                      setStep("email");
+                      setError(null);
+                    }}
+                  />
+                </View>
+              </>
+            )}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -266,8 +283,19 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: radius.sheet,
     borderTopRightRadius: radius.sheet,
   },
-  hero: { justifyContent: "space-between", backgroundColor: colors.ink, paddingHorizontal: space.xl },
-  scrim: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, backgroundColor: "rgba(28,25,23,0.42)" },
+  hero: {
+    justifyContent: "space-between",
+    backgroundColor: colors.ink,
+    paddingHorizontal: space.xl,
+  },
+  scrim: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    backgroundColor: "rgba(28,25,23,0.42)",
+  },
   brandPill: {
     alignSelf: "flex-start",
     flexDirection: "row",
@@ -278,7 +306,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.md,
     paddingVertical: 6,
   },
-  heroTitle: { color: colors.white, fontSize: 28, lineHeight: 32, paddingBottom: space.xxl + space.sm },
+  heroTitle: {
+    color: colors.white,
+    textShadowColor: "rgba(0,0,0,0.45)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 12,
+    fontSize: 28,
+    lineHeight: 32,
+    paddingBottom: space.xxl + space.sm,
+  },
   field: { gap: space.sm },
   input: {
     minHeight: 52,
@@ -291,8 +327,17 @@ const styles = StyleSheet.create({
     fontSize: 17,
     color: colors.ink,
   },
-  codeInput: { fontFamily: fonts.monoMedium, fontSize: 26, letterSpacing: 10, textAlign: "center" },
+  codeInput: {
+    fontFamily: fonts.monoMedium,
+    fontSize: 26,
+    letterSpacing: 10,
+    textAlign: "center",
+  },
   row: { flexDirection: "row", justifyContent: "space-between" },
   dividerRow: { flexDirection: "row", alignItems: "center", gap: space.md },
-  dividerLine: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: colors.borderStrong },
+  dividerLine: {
+    flex: 1,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: colors.borderStrong,
+  },
 });

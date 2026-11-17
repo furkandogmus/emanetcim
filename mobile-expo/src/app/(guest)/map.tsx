@@ -69,6 +69,12 @@ export default function MapScreen() {
     setSelectedId(null);
   }, [placeKey, search.place]);
 
+  const openShop = useCallback((s: NearbyShop) => router.push(`/shop/${s.id}`), []);
+  // Secili pin ya da harita hareketi listeyi yeniden cizmesin: kart memo, renderItem sabit.
+  const renderShop = useCallback(
+    ({ item }: { item: NearbyShop }) => <ShopCard shop={item} onPress={openShop} />,
+    [openShop],
+  );
   const selectShop = useCallback((id: string) => {
     lastMarkerPress.current = Date.now();
     setSelectedId(id);
@@ -96,7 +102,6 @@ export default function MapScreen() {
 
   const bags = totalBags(search.bags);
   const summary = `${search.place.label} · ${formatDay(search.checkIn)} · ${t("common.bag", { count: bags })}`;
-  const openShop = (s: NearbyShop) => router.push(`/shop/${s.id}`);
 
   return (
     <View style={styles.root}>
@@ -175,7 +180,7 @@ export default function MapScreen() {
 
       <BottomSheet top={insets.top + 90} peek={SHEET_PEEK}>
         <View style={styles.sheetHeader}>
-          <AppText variant="title" style={{ fontSize: 22 }}>
+          <AppText variant="title" style={{ fontSize: 20, lineHeight: 26 }}>
             {query.isLoading
               ? t("common.loading")
               : shops.length === 0
@@ -197,7 +202,7 @@ export default function MapScreen() {
             data={shops}
             keyExtractor={(s) => s.id}
             contentContainerStyle={{ padding: space.lg, gap: space.md, paddingBottom: height * 0.2 }}
-            renderItem={({ item }) => <ShopCard shop={item} onPress={() => openShop(item)} />}
+            renderItem={renderShop}
           />
         )}
       </BottomSheet>
