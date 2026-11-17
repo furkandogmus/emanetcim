@@ -89,33 +89,49 @@ export const ADMIN_BOOKING_LIST_SELECT = {
 } satisfies Prisma.BookingSelect;
 
 export class AdminOpsService {
+  /**
+   * Bilet kodu aramasi asil kullanim ve tam bir eslesmesi var: once YALNIZCA kodla
+   * bakilir. Dort tabloyu kapsayan ILIKE + id oneki OR'u tek sonuclu aramada LIMIT ile
+   * erken duramaz ve tum tabloyu gezer (id oneki en_US.utf8'de indeksi kullanamaz,
+   * DEFECT_BACKLOG). Kod bulunamazsa ad/e-posta/dukkan aramasina dusulur.
+   */
   async listBookings(opts: { filter: AdminBookingFilter; q?: string; now?: Date; take?: number }) {
     const now = opts.now ?? new Date();
-    const search = opts.q ? searchWhere(opts.q) : null;
-    const where: Prisma.BookingWhereInput = search
-      ? { AND: [filterWhere(opts.filter, now), search] }
-      : filterWhere(opts.filter, now);
+    const take = Math.min(opts.take ?? 50, 100);
+    const base = filterWhere(opts.filter, now);
+    const term = (opts.q ?? "").trim();
 
-    const [rows, counts] = await Promise.all([
-      prisma.booking.findMany({
-        where,
+    if (/^[0-9a-f]{4,8}$/i.test(term)) {
+      const byCode = await prisma.booking.findMany({
+        where: { AND: [base, { id: { startsWith: term.toLowerCase() } }] },
         orderBy: orderFor(opts.filter),
-        take: Math.min(opts.take ?? 50, 100),
+        take,
         select: ADMIN_BOOKING_LIST_SELECT,
-      }),
-      // Cipler sayiyi gostersin: arama yokken her filtrenin toplam adedi.
-      Promise.all(
-        ADMIN_BOOKING_FILTERS.map((f) => prisma.booking.count({ where: filterWhere(f, now) })),
-      ),
-    ]);
+      });
+      if (byCode.length > 0) return byCode;
+    }
 
-    return {
-      rows,
-      counts: Object.fromEntries(ADMIN_BOOKING_FILTERS.map((f, i) => [f, counts[i]])) as Record<
-        AdminBookingFilter,
-        number
-      >,
-    };
+    const search = searchWhere(term);
+    return prisma.booking.findMany({
+      where: search ? { AND: [base, search] } : base,
+      orderBy: orderFor(opts.filter),
+      take,
+      select: ADMIN_BOOKING_LIST_SELECT,
+    });
+  }
+
+  /**
+   * Cip sayilari arama metnine ve secili suzgece bagli degil: ayri uc/onbellek, liste
+   * istegi tek sorgu kalir.
+   */
+  async bookingCounts(now: Date = new Date()) {
+    const counts = await Promise.all(
+      ADMIN_BOOKING_FILTERS.map((f) => prisma.booking.count({ where: filterWhere(f, now) })),
+    );
+    return Object.fromEntries(ADMIN_BOOKING_FILTERS.map((f, i) => [f, counts[i]])) as Record<
+      AdminBookingFilter,
+      number
+    >;
   }
 
   async bookingDetail(id: string) {
@@ -161,6 +177,8 @@ export class AdminOpsService {
     const [shops, stored, arrivals, pickups] = await Promise.all([
       prisma.shop.findMany({
         where: { isActive: true },
+        // Sayfalama gelene kadar tavan: binlerce dukkanda yanit MB'larca olmasin.
+        take: 300,
         select: {
           id: true,
           name: true,
