@@ -342,7 +342,8 @@
       "unknown_code": "This code is not recognised. Is it a BagajPark booking QR code?",
       "forbidden": "This booking does not belong to your shop.",
       "not_found": "Booking not found."
-    }
+    },
+    "openSettings": "Allow in Settings"
   },
   "reset": {
     "forgotPassword": "Forgot password",

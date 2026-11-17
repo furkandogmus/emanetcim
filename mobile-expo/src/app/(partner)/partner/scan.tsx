@@ -1,11 +1,12 @@
 import { useRef, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Linking, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { router } from "expo-router";
 import { X } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
+import { LuggageTag } from "@/components/Illustrations";
 import { AppText, Banner, Button, CenterMessage, IconButton } from "@/components/ui";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
@@ -52,13 +53,19 @@ export default function PartnerScanScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <CenterMessage
+          art={<LuggageTag size={72} />}
           title={t("scan.permissionTitle")}
           body={t("scan.permissionBody")}
           action={
             permission.canAskAgain ? (
               <Button title={t("scan.allow")} onPress={() => void requestPermission()} />
             ) : (
-              <Button variant="secondary" title={t("common.back")} onPress={() => router.back()} />
+              // Kalici reddedildiyse tekrar sorulamaz: tek cikis sistem ayari. Yalnizca "Geri"
+              // vardi ve esnaf QR okutamadan bu ekranda kaliyordu.
+              <View style={{ gap: space.sm, alignSelf: "stretch" }}>
+                <Button title={t("scan.openSettings")} onPress={() => void Linking.openSettings().catch(() => undefined)} />
+                <Button variant="ghost" title={t("common.back")} onPress={() => router.back()} />
+              </View>
             )
           }
         />
