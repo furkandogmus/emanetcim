@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Trash2 } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
+import { LuggageTag } from "@/components/Illustrations";
 import { AdminMessageReply } from "@/components/AdminMessageReply";
 import { AppText, Button, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { api } from "@/lib/api";
@@ -74,7 +75,7 @@ export default function AdminMessagesScreen() {
           refreshControl={
             <RefreshControl refreshing={query.isRefetching} onRefresh={() => query.refetch()} tintColor={colors.accent} />
           }
-          ListEmptyComponent={<CenterMessage title={t("admin.noMessages")} />}
+          ListEmptyComponent={<CenterMessage art={<LuggageTag size={64} />} title={t("admin.noMessages")} />}
           renderItem={({ item }) => {
             const expanded = open === item.id;
             return (

@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, MapPinOff, Phone } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
+import { MapSnippet } from "@/components/Illustrations";
 import { AppText, Banner, Button, Card, CenterMessage, IconButton, Loading } from "@/components/ui";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
@@ -66,7 +67,7 @@ export default function AdminApplicationsScreen() {
           refreshControl={
             <RefreshControl refreshing={query.isRefetching} onRefresh={() => query.refetch()} tintColor={colors.accent} />
           }
-          ListEmptyComponent={<CenterMessage title={t("admin.noApplications")} />}
+          ListEmptyComponent={<CenterMessage art={<MapSnippet width={112} />} title={t("admin.noApplications")} />}
           renderItem={({ item }) => {
             const busy = decide.isPending && decide.variables?.id === item.id;
             const place = [item.address, item.district, item.city].filter(Boolean).join(", ");
