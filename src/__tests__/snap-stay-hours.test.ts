@@ -23,10 +23,27 @@ describe("snapStayToShopHours", () => {
     expect(r.drop).toEqual({ at: "09:00", reason: "opens" });
   });
 
-  it("alis acilistan onceyse acilisa ceker", () => {
+  it("alis acilistan onceyse ONCEKI gunun kapanisina ceker (kalis uzamaz)", () => {
     const r = snapStayToShopHours(shop, at("2026-11-20T10:00"), at("2026-11-21T07:00"))!;
+    expect(r.checkOut).toEqual(at("2026-11-20T20:00"));
+    expect(r.pickup).toEqual({ at: "20:00", reason: "closes" });
+  });
+
+  it("onceki kapanis birakisa cok yakinsa acilisa ceker", () => {
+    const r = snapStayToShopHours(shop, at("2026-11-20T19:30"), at("2026-11-21T07:00"))!;
     expect(r.checkOut).toEqual(at("2026-11-21T09:00"));
     expect(r.pickup).toEqual({ at: "09:00", reason: "opens" });
+  });
+
+  it("gunlere gore farkli saatte gun sayisi artmaz", () => {
+    // Cumartesi 08-20, pazar 10-18. Cumartesi 08:00 -> pazar 07:30 (23.5 saat, 1 gun).
+    const weekly = [
+      { weekday: 6, isClosed: false, openingTime: "08:00", closingTime: "20:00" },
+      { weekday: 7, isClosed: false, openingTime: "10:00", closingTime: "18:00" },
+    ];
+    const r = snapStayToShopHours({ ...shop, weekly }, at("2026-11-21T08:00"), at("2026-11-22T07:30"))!;
+    expect(r.checkOut).toEqual(at("2026-11-21T20:00"));
+    expect(r.checkOut.getTime() - r.checkIn.getTime()).toBeLessThanOrEqual(24 * 3600_000);
   });
 
   it("birakis kapanistan sonraysa ya da gun kapaliysa null", () => {
