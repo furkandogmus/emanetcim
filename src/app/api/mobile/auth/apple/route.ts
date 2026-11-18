@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "invalid" }, { status: 400 });
 
-  const audience = process.env.APPLE_BUNDLE_ID; // e.g. com.bagajpark.mobile
+  const audience = process.env.APPLE_BUNDLE_ID; // com.bagajpark (docker-compose varsayilani)
   if (!audience) return NextResponse.json({ error: "apple_not_configured" }, { status: 500 });
 
   /*

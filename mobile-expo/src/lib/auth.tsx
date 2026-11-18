@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import * as SecureStore from "expo-secure-store";
 
 import { ApiError, api, clearTokens, loadTokens, saveTokens, setSessionExpiredHandler } from "./api";
+import { pickAppleCredential } from "./apple-auth";
 import { forgetGoogleAccount, pickGoogleIdToken } from "./google-auth";
 import { forgetPushRegistration, unregisterPush } from "./push";
 import { clearOfflineTickets } from "./offline-tickets";
@@ -22,6 +23,7 @@ type AuthContextValue = {
   signInWithPassword: (email: string, password: string) => Promise<MobileUser>;
   /** Kullanici hesap seciciyi kapatirsa `null`. */
   signInWithGoogle: () => Promise<MobileUser | null>;
+  signInWithApple: () => Promise<MobileUser | null>;
   signOut: () => Promise<void>;
   /** Profil degisikliginden sonra: PUT /auth/me yalnizca { success } doner. */
   refreshUser: () => Promise<MobileUser>;
@@ -117,6 +119,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return startSession({ idToken }, "/auth/google");
   }, [startSession]);
 
+  // Ayni oturum govdesi (`auth/apple`); ad alanlari yalnizca ilk giriste dolu gelir.
+  const signInWithApple = useCallback(async () => {
+    const cred = await pickAppleCredential();
+    if (!cred) return null;
+    const body: Record<string, string> = { identityToken: cred.identityToken };
+    if (cred.givenName) body.givenName = cred.givenName;
+    if (cred.familyName) body.familyName = cred.familyName;
+    return startSession(body, "/auth/apple");
+  }, [startSession]);
+
   const refreshUser = useCallback(async () => {
     const user = await api<MobileUser>("/auth/me");
     void rememberUser(user);
@@ -139,8 +151,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [queryClient]);
 
   const value = useMemo(
-    () => ({ state, requestCode, verifyCode, signInWithPassword, signInWithGoogle, signOut, refreshUser }),
-    [state, requestCode, verifyCode, signInWithPassword, signInWithGoogle, signOut, refreshUser],
+    () => ({ state, requestCode, verifyCode, signInWithPassword, signInWithGoogle, signInWithApple, signOut, refreshUser }),
+    [state, requestCode, verifyCode, signInWithPassword, signInWithGoogle, signInWithApple, signOut, refreshUser],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

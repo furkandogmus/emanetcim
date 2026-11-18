@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
   ScrollView,
@@ -13,12 +13,14 @@ import { useTranslation } from "react-i18next";
 
 import { LanguageButton } from "@/components/LanguageButton";
 import { BrandMark } from "@/components/BrandMark";
+import { AppleButton } from "@/components/AppleButton";
 import { GoogleButton } from "@/components/GoogleButton";
 import { AppText, Banner, Button, IconButton } from "@/components/ui";
 import { X } from "lucide-react-native";
 import { Input } from "@/components/Field";
 import { useAuth } from "@/lib/auth";
 import { errorMessage } from "@/lib/errors";
+import { AppleSignInError, appleSignInAvailable } from "@/lib/apple-auth";
 import { GoogleSignInError, googleSignInAvailable } from "@/lib/google-auth";
 import { colors, fonts, radius, space } from "@/theme/tokens";
 
@@ -28,7 +30,7 @@ export default function LoginScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
-  const { requestCode, verifyCode, signInWithPassword, signInWithGoogle } = useAuth();
+  const { requestCode, verifyCode, signInWithPassword, signInWithGoogle, signInWithApple } = useAuth();
   const [step, setStep] = useState<"email" | "code" | "password">("email");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -36,6 +38,16 @@ export default function LoginScreen() {
   const [busy, setBusy] = useState(false);
   // Google akisi ayri: o surerken kod dugmesi donmesin, yalnizca kilitlensin.
   const [googleBusy, setGoogleBusy] = useState(false);
+  const [appleBusy, setAppleBusy] = useState(false);
+  const [appleAvailable, setAppleAvailable] = useState(false);
+  const oauthBusy = googleBusy || appleBusy;
+  useEffect(() => {
+    let live = true;
+    void appleSignInAvailable().then((ok) => live && setAppleAvailable(ok));
+    return () => {
+      live = false;
+    };
+  }, []);
   const [error, setError] = useState<string | null>(null);
 
   async function sendCode() {
@@ -99,6 +111,17 @@ export default function LoginScreen() {
         setError(errorMessage(e, "auth"));
       }
       setGoogleBusy(false);
+    }
+  }
+
+  async function appleSignIn() {
+    setAppleBusy(true);
+    setError(null);
+    try {
+      if (!(await signInWithApple())) setAppleBusy(false);
+    } catch (e) {
+      setError(e instanceof AppleSignInError ? t("auth.errors.apple_failed") : errorMessage(e, "auth"));
+      setAppleBusy(false);
     }
   }
 
@@ -173,14 +196,14 @@ export default function LoginScreen() {
                 <AppText variant="caption">{t("auth.subtitle")}</AppText>
                 {emailField(sendCode)}
                 {error ? <Banner tone="danger" body={error} /> : null}
-                <Button title={t("auth.sendCode")} onPress={sendCode} loading={busy} disabled={googleBusy} />
+                <Button title={t("auth.sendCode")} onPress={sendCode} loading={busy} disabled={oauthBusy} />
                 <Button
                   variant="ghost"
                   title={t("auth.usePassword")}
                   onPress={() => switchTo("password")}
-                  disabled={googleBusy}
+                  disabled={oauthBusy}
                 />
-                {googleSignInAvailable ? (
+                {googleSignInAvailable || appleAvailable ? (
                   <>
                     <View
                       style={styles.dividerRow}
@@ -191,12 +214,17 @@ export default function LoginScreen() {
                       <AppText variant="caption">{t("auth.or")}</AppText>
                       <View style={styles.dividerLine} />
                     </View>
-                    <GoogleButton
-                      title={t("auth.continueWithGoogle")}
-                      onPress={googleSignIn}
-                      loading={googleBusy}
-                      disabled={busy}
-                    />
+                    {appleAvailable ? (
+                      <AppleButton onPress={appleSignIn} loading={appleBusy} disabled={busy || googleBusy} />
+                    ) : null}
+                    {googleSignInAvailable ? (
+                      <GoogleButton
+                        title={t("auth.continueWithGoogle")}
+                        onPress={googleSignIn}
+                        loading={googleBusy}
+                        disabled={busy || appleBusy}
+                      />
+                    ) : null}
                   </>
                 ) : null}
               </>
