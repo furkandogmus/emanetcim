@@ -10,7 +10,34 @@ import { getPricingRules } from '@/lib/platform-settings';
 import { PartnerCheckOutResult } from '@/types/partner-booking';
 import { bookingEventService } from '@/services/BookingEventService';
 
-export async function checkOut(bookingId: string): Promise<PartnerCheckOutResult> {
+type CheckOutChargeSource = Parameters<
+  (typeof import('@/services/PricingService'))['pricingService']['calculateEarlyRefund']
+>[0];
+
+/**
+ * Teslim aninda olusacak gecikme ucreti ve erken teslim iadesi. Check-out bunu
+ * kullanir; rezervasyon detayi da AYNI hesabi esnafa ONCEDEN gosterir. Eskiden
+ * yalnizca deftere yaziliyordu: tezgahta kimse ucreti almasi ya da iadeyi
+ * vermesi gerektigini bilmiyordu.
+ */
+export async function previewCheckOutCharges(
+  booking: CheckOutChargeSource,
+  now: Date,
+  rules?: Awaited<ReturnType<typeof getPricingRules>>,
+): Promise<{ lateFeeTry: number; earlyRefund: number }> {
+  const pricingRules = rules ?? (await getPricingRules());
+  const lateMs = now.getTime() - new Date(booking.checkOutTime).getTime();
+  const lateFeeTry = lateMs > pricingRules.latePickupGraceMin * 60 * 1000 ? pricingRules.latePickupFeeTry : 0;
+  const { pricingService } = await import('@/services/PricingService');
+  const earlyRefund = pricingService.calculateEarlyRefund(booking, now, pricingRules);
+  return { lateFeeTry, earlyRefund: earlyRefund > 0 ? earlyRefund : 0 };
+}
+
+export async function checkOut(
+  bookingId: string,
+  opts: { brokenSealNumbers?: number[] } = {},
+): Promise<PartnerCheckOutResult> {
+  const brokenSealNumbers = opts.brokenSealNumbers ?? [];
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId },
   });
@@ -46,10 +73,7 @@ export async function checkOut(bookingId: string): Promise<PartnerCheckOutResult
      * Tolerans da sabit 15 dakika değil, ayardan geliyor.
      */
     const scheduledEnd = new Date(booking.checkOutTime);
-    const graceMs = pricingRules.latePickupGraceMin * 60 * 1000;
-    const lateMs = now.getTime() - scheduledEnd.getTime();
-    const lateFeeTry =
-      lateMs > graceMs ? pricingRules.latePickupFeeTry : 0;
+    const { lateFeeTry, earlyRefund: refundAmount } = await previewCheckOutCharges(booking, now, pricingRules);
     if (lateFeeTry > 0) {
       logger.info(
         {
@@ -62,13 +86,6 @@ export async function checkOut(bookingId: string): Promise<PartnerCheckOutResult
       );
     }
 
-    // 1. Erken Teslimat İadesi Hesabı (UC_E_06_EXTRA)
-    const { pricingService } = await import('@/services/PricingService');
-    const refundAmount = pricingService.calculateEarlyRefund(
-      booking,
-      now,
-      pricingRules
-    );
 
     // Harici ödeme sağlayıcısı yok; hesaplanan erken teslim tutarı manuel takip edilir.
     const failedRefundAmount = refundAmount;
@@ -81,7 +98,7 @@ export async function checkOut(bookingId: string): Promise<PartnerCheckOutResult
 
     // 2. Mühürleri iade + statüyü CHECKED_OUT yap (her durumda tamamlanır)
     await prisma.$transaction(async (tx) => {
-      await sealService.applyCheckOutReturnSealsWithinTx(tx, bookingId);
+      await sealService.applyCheckOutReturnSealsWithinTx(tx, bookingId, brokenSealNumbers);
       const updateResult = await tx.booking.updateMany({
         where: { id: bookingId, bookingRowVersion: booking.bookingRowVersion },
         data: {
@@ -121,17 +138,23 @@ export async function checkOut(bookingId: string): Promise<PartnerCheckOutResult
         lateFeeApplied: lateFeeTry,
         refundAmount: refundAmount > 0 ? refundAmount : undefined,
         failedRefundAmount: failedRefundAmount > 0 ? failedRefundAmount : undefined,
+        // Teslimde saglam cikmayan muhurler: anlasmazlikta ilk bakilacak kayit.
+        brokenSeals: brokenSealNumbers.length > 0 ? brokenSealNumbers : undefined,
       },
     }).catch((err) => logger.error({ err, bookingId }, "booking_event_checked_out_failed"));
 
     return {
       ok: true,
+      ...(lateFeeTry > 0 ? { lateFee: lateFeeTry } : {}),
       ...(failedRefundAmount > 0
         ? { refundPending: true, refundAmount: failedRefundAmount }
         : {}),
     };
   } catch (error) {
     logger.error({ error }, 'BookingService::checkOut Error');
+    if (error instanceof Error && error.message === 'broken_seal_not_on_booking') {
+      return { ok: false, code: 'INVALID_SEALS', message: 'İşaretlenen mühür bu rezervasyona ait değil.' };
+    }
     return {
       ok: false,
       code: 'UNKNOWN',

@@ -416,16 +416,33 @@ export class SealService {
   /**
    * Check-out: BookingSeal kayıtlarındaki mühürleri RETURNED yap.
    */
-  async applyCheckOutReturnSealsWithinTx(tx: Tx, bookingId: string): Promise<void> {
+  /**
+   * Teslimde muhurleri kapatir. `brokenSealNumbers`: esnafin "saglam degil"
+   * dedigi muhurler FAULTY olur (stoga donmez); digerleri RETURNED. Eskiden
+   * yalnizca uygulama tum muhurlerin saglam isaretlenmesini istiyordu ve bozuk
+   * muhurde teslim hic tamamlanamiyordu. Bu rezervasyona ait olmayan numara
+   * yok sayilmaz, reddedilir.
+   */
+  async applyCheckOutReturnSealsWithinTx(tx: Tx, bookingId: string, brokenSealNumbers: number[] = []): Promise<void> {
     const rows = await tx.bookingSeal.findMany({
       where: { bookingId },
       select: { sealNumber: true },
     });
     const serialNumbers = rows.map((r) => r.sealNumber);
-    if (serialNumbers.length > 0) {
+    const own = new Set(serialNumbers);
+    const broken = [...new Set(brokenSealNumbers)];
+    if (broken.some((n) => !own.has(n))) throw new Error("broken_seal_not_on_booking");
+    const intact = serialNumbers.filter((n) => !broken.includes(n));
+    if (intact.length > 0) {
       await tx.seal.updateMany({
-        where: { serialNumber: { in: serialNumbers } },
+        where: { serialNumber: { in: intact } },
         data: { status: "RETURNED" },
+      });
+    }
+    if (broken.length > 0) {
+      await tx.seal.updateMany({
+        where: { serialNumber: { in: broken } },
+        data: { status: "FAULTY" },
       });
     }
   }

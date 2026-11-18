@@ -126,7 +126,7 @@ export interface IBookingService {
     seals?: CheckInSealPayload,
     actor?: PaymentActor,
   ): Promise<PartnerCheckInResult>;
-  checkOut(bookingId: string): Promise<PartnerCheckOutResult>;
+  checkOut(bookingId: string, opts?: { brokenSealNumbers?: number[] }): Promise<PartnerCheckOutResult>;
   getBookingByToken(token: string): Promise<BookingWithGuestShop | null>;
   createInitialBooking(data: CreateInitialBookingInput): Promise<Booking>;
   getUserBookings(userId: string, opts?: { page?: number; limit?: number }): Promise<{ items: GuestBookingListItem[]; total: number }>;
@@ -166,8 +166,8 @@ export class BookingService implements IBookingService {
     return checkInImpl(bookingId, seals, actor);
   }
 
-  async checkOut(bookingId: string): Promise<PartnerCheckOutResult> {
-    return checkOutImpl(bookingId);
+  async checkOut(bookingId: string, opts?: { brokenSealNumbers?: number[] }): Promise<PartnerCheckOutResult> {
+    return checkOutImpl(bookingId, opts);
   }
 
   async getBookingByToken(token: string): Promise<BookingWithGuestShop | null> {

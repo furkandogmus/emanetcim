@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { requireMobileUser } from "@/lib/mobile-auth";
+import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 import { bookingService } from "@/services/BookingService";
 import { toMobileBookingDetail } from "@/lib/mobile-dto";
 import { canAccessBooking } from "@/services/booking/access";
+import { previewCheckOutCharges } from "@/services/booking/check-out";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireMobileUser(req);
@@ -17,5 +18,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
-  return NextResponse.json(toMobileBookingDetail(b));
+  /*
+    Esnafa teslimden ONCE: su an teslim edilirse alinacak gecikme ucreti ve
+    verilecek erken teslim iadesi. Misafire gosterilmez (o kendi fisinde gorur).
+  */
+  const operator = !requireRole(auth.user, ["PARTNER", "ADMIN"]);
+  const checkoutPreview =
+    operator && b.status === "CHECKED_IN" ? await previewCheckOutCharges(b, new Date()) : null;
+  return NextResponse.json({ ...toMobileBookingDetail(b), checkoutPreview });
 }
