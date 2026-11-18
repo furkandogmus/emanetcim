@@ -32,6 +32,44 @@ export type {
   SealRequestErrorCode,
 } from '@/services/seal/requests';
 
+type SealReader = { seal: { findMany: Tx["seal"]["findMany"] } };
+
+/** Check-in muhur kurallari: tekrar yok, hatali ile atanan cakismaz, hepsi bu dukkanda ve ASSIGNED. */
+async function validateCheckInSeals(
+  db: SealReader,
+  params: { shopId: string; assignments: SealAssignmentInput[]; faultySealNumbers: number[] },
+): Promise<void> {
+  const { shopId, assignments, faultySealNumbers } = params;
+  const assignmentNums = new Set(assignments.map((a) => a.sealNumber));
+  if (assignmentNums.size !== assignments.length) {
+    throw new Error("duplicate_seal_in_assignments");
+  }
+  for (const sn of faultySealNumbers) {
+    if (assignmentNums.has(sn)) throw new Error("faulty_overlaps_assignment");
+  }
+  if (faultySealNumbers.length > 0) {
+    const faultySeals = await db.seal.findMany({ where: { serialNumber: { in: faultySealNumbers } } });
+    for (const seal of faultySeals) {
+      if (seal.shopId !== shopId || seal.status !== "ASSIGNED") {
+        throw new Error(`SEAL_FAULTY_INVALID:${seal.serialNumber}`);
+      }
+    }
+    if (faultySeals.length !== faultySealNumbers.length) {
+      const found = new Set(faultySeals.map((s) => s.serialNumber));
+      throw new Error(`SEAL_FAULTY_INVALID:${faultySealNumbers.find((sn) => !found.has(sn))}`);
+    }
+  }
+  if (assignments.length > 0) {
+    const existing = await db.seal.findMany({ where: { serialNumber: { in: [...assignmentNums] } } });
+    const byNumber = new Map(existing.map((s) => [s.serialNumber, s]));
+    for (const a of assignments) {
+      const seal = byNumber.get(a.sealNumber);
+      if (!seal || seal.shopId !== shopId) throw new Error(`SEAL_INVALID:${a.sealNumber}`);
+      if (seal.status !== "ASSIGNED") throw new Error(`SEAL_NOT_ASSIGNED:${a.sealNumber}`);
+    }
+  }
+}
+
 export class SealService {
   /**
    * Muhur TALEBI islemleri — govde `src/services/seal/requests.ts`'te.
@@ -201,6 +239,21 @@ export class SealService {
     return { ok: true, url };
   }
 
+  /**
+   * Check-in muhurlerini YAZMADAN dogrular; `applyCheckInWithinTx` ile ayni
+   * hata dizgeleri. Check-in tahsilati (manual saglayicida deftere yazilan para)
+   * bundan SONRA yapilir: eskiden muhur dogrulamasi tahsilattan sonra, islem
+   * icinde calisiyordu ve yanlis yazilan tek bir muhur numarasi rezervasyonu
+   * "odendi" birakip check-in'i reddediyordu.
+   */
+  async assertCheckInSealsUsable(params: {
+    shopId: string;
+    assignments: SealAssignmentInput[];
+    faultySealNumbers: number[];
+  }): Promise<void> {
+    await validateCheckInSeals(prisma, params);
+  }
+
   async applyCheckInWithinTx(
     tx: Tx,
     params: {
@@ -232,30 +285,10 @@ export class SealService {
     const { shopId, bookingId, assignments, faultySealNumbers, sealPhotoUrl } =
       params;
 
-    const assignmentNums = new Set(assignments.map((a) => a.sealNumber));
-    if (assignmentNums.size !== assignments.length) {
-      throw new Error("duplicate_seal_in_assignments");
-    }
-    for (const sn of faultySealNumbers) {
-      if (assignmentNums.has(sn)) {
-        throw new Error("faulty_overlaps_assignment");
-      }
-    }
+    // Islem icinde YENIDEN dogrulanir: on kontrol ile yazim arasinda muhur degismis olabilir.
+    await validateCheckInSeals(tx, { shopId, assignments, faultySealNumbers });
 
     if (faultySealNumbers.length > 0) {
-      const faultySeals = await tx.seal.findMany({
-        where: { serialNumber: { in: faultySealNumbers } },
-      });
-      for (const seal of faultySeals) {
-        if (seal.shopId !== shopId || seal.status !== "ASSIGNED") {
-          throw new Error(`SEAL_FAULTY_INVALID:${seal.serialNumber}`);
-        }
-      }
-      if (faultySeals.length !== faultySealNumbers.length) {
-        const found = new Set(faultySeals.map((s) => s.serialNumber));
-        const missing = faultySealNumbers.find((sn) => !found.has(sn));
-        throw new Error(`SEAL_FAULTY_INVALID:${missing}`);
-      }
       await tx.seal.updateMany({
         where: { serialNumber: { in: faultySealNumbers } },
         data: { status: "FAULTY" },
@@ -264,19 +297,6 @@ export class SealService {
 
     if (assignments.length > 0) {
       const assignmentNumsArr = assignments.map((a) => a.sealNumber);
-      const existingSeals = await tx.seal.findMany({
-        where: { serialNumber: { in: assignmentNumsArr } },
-      });
-      const sealMap = new Map(existingSeals.map((s) => [s.serialNumber, s]));
-      for (const a of assignments) {
-        const seal = sealMap.get(a.sealNumber);
-        if (!seal || seal.shopId !== shopId) {
-          throw new Error(`SEAL_INVALID:${a.sealNumber}`);
-        }
-        if (seal.status !== "ASSIGNED") {
-          throw new Error(`SEAL_NOT_ASSIGNED:${a.sealNumber}`);
-        }
-      }
 
       /*
         MUHRU ATOMIK OLARAK KAPAR (2026-09-02'de gercek veritabaninda olculdu).

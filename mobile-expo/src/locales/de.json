@@ -308,7 +308,17 @@
     "makeCover": "Als Titelbild festlegen",
     "deletePhoto": "Foto löschen",
     "deletePhotoTitle": "Dieses Foto löschen?",
-    "actionFailed": "Das hat nicht geklappt"
+    "actionFailed": "Das hat nicht geklappt",
+    "checkInCtaCash": "{{amount}} kassiert, Gepäck angenommen",
+    "confirmCheckInTitle": "Gepäck annehmen?",
+    "confirmCheckInCash_one": "{{count}} Gepäckstück wird als angenommen und {{amount}} als kassiert erfasst. Das lässt sich nicht rückgängig machen.",
+    "confirmCheckInCash_other": "{{count}} Gepäckstücke werden als angenommen und {{amount}} als kassiert erfasst. Das lässt sich nicht rückgängig machen.",
+    "confirmCheckInPaid_one": "{{count}} Gepäckstück wird als angenommen erfasst. Die Zahlung ist bereits erfolgt.",
+    "confirmCheckInPaid_other": "{{count}} Gepäckstücke werden als angenommen erfasst. Die Zahlung ist bereits erfolgt.",
+    "confirmCheckOutTitle": "Gepäck zurückgeben?",
+    "confirmCheckOutBody_one": "{{count}} Gepäckstück wird als an den Gast zurückgegeben erfasst. Das lässt sich nicht rückgängig machen.",
+    "confirmCheckOutBody_other": "{{count}} Gepäckstücke werden als an den Gast zurückgegeben erfasst. Das lässt sich nicht rückgängig machen.",
+    "confirmYes": "Ja, erfassen"
   },
   "profile": {
     "title": "Profil",
@@ -653,7 +663,8 @@
       "insufficient_capacity": "Dein Laden hat für so viele Gepäckstücke zu diesen Zeiten keinen Platz. Verringere die Anzahl und versuch es erneut.",
       "seal_count_mismatch": "Das Gepäck ist versiegelt; du kannst nicht mehr Gepäckstücke erfassen als Siegel.",
       "guest_approval_required": "Diese Korrektur braucht die Zustimmung des Gastes.",
-      "no_pending_revision": "Diese Korrektur steht nicht mehr aus; aktualisiere die Seite."
+      "no_pending_revision": "Diese Korrektur steht nicht mehr aus; aktualisiere die Seite.",
+      "revision_changed": "Der Laden hat die Korrektur gerade geändert. Prüf den neuen Betrag und entscheide erneut."
     },
     "pendingBody": "Der Gast wurde gebeten, {{count}} Gepäckstücke für insgesamt {{total}} zu bestätigen. Die Buchung ändert sich erst, wenn er zustimmt."
   },
