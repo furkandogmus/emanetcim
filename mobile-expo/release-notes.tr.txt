@@ -1,1 +1,1 @@
-Yeni arayüz: daha sade ekranlar, rezervasyon detayında emanet fişi, popüler şehir fotoğrafları. Profilde dil seçimi (Türkçe/English), bildirim durumu ve destek bağlantıları. Esnaf panelinde sabit "QR okut" düğmesi. Zayıf bağlantıda daha hızlı açılış.
+Ödeme ekranında indirim ve davet kodu. Dükkan valiz sayısını düzeltirse uygulamadan onaylayabilirsin. Rezervasyonun onaylandığında, valizin teslim alındığında ve alma saatin yaklaştığında bildirim. Almanca ve Rusça dil desteği. Fotoğraf yükleme hatası giderildi, formlarda klavye artık alanları kapatmıyor.
