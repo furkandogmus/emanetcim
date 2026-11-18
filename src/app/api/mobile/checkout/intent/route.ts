@@ -2,6 +2,8 @@ import { snapStayToShopHours } from "@/lib/stay-days";
 import { loadScheduleParts } from "@/services/ShopScheduleService";
 import { toDatetimeLocalValueInTimeZone } from "@/lib/datetime-local";
 import { couponService } from "@/services/CouponService";
+import { rateLimit } from "@/lib/rate-limit";
+import { clientIp } from "@/lib/internal-api-guard";
 import { referralService } from "@/services/ReferralService";
 import { resolveRequestLocale } from "@/lib/request-locale";
 import { NextResponse } from "next/server";
@@ -65,6 +67,16 @@ const schema = z.object({
 export async function POST(req: NextRequest) {
   const auth = await requireMobileUser(req);
   if ("error" in auth) return auth.error;
+
+  // Web `createBookingAction` ile ayni sinirlar: mobil uc sinirsizdi ve tek hesapla
+  // kapasite doldurulabiliyordu.
+  const ip = clientIp(req);
+  if (
+    !(await rateLimit(`booking_create:${ip}`, 10, 10 * 60 * 1000)) ||
+    !(await rateLimit(`booking_create_user:${auth.user.id}`, 5, 5 * 60 * 1000))
+  ) {
+    return NextResponse.json({ error: "too_many_requests" }, { status: 429 });
+  }
 
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);

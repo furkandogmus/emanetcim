@@ -11,10 +11,11 @@ import { reserveSlots, releaseSlots, SlotAvailabilityError } from '@/services/Sl
 import { getPricingRules } from '@/lib/platform-settings';
 import { moneyToNumber } from '@/lib/money';
 import { CancelBookingResult, ModifyBookingResult } from '@/types/partner-booking';
-import { findClosedStayDay } from '@/services/ShopScheduleService';
+import { findClosedStayDay, isClosedAtStayTimes } from '@/services/ShopScheduleService';
 import { computeAuthoritativeCheckoutTotals, validateBookingStayWindow } from '@/lib/booking-server-price';
 import { bookingEventService } from '@/services/BookingEventService';
 import { paymentService } from '@/services/PaymentService';
+import { couponService } from '@/services/CouponService';
 import { BookingCapacityExceededError } from '@/services/booking/errors';
 import { assertCapacityTx } from '@/services/booking/create';
 import type { ModifyBookingInput } from '@/services/BookingService';
@@ -129,6 +130,11 @@ export async function cancelBooking(bookingId: string): Promise<CancelBookingRes
     };
   }
 
+  // Valiz hic birakilmadi: kupon hakki geri verilir (kotali kupon iptal dongusuyle bitmesin).
+  if (booking.couponCode) {
+    void couponService.releaseByCode(booking.couponCode).catch(() => undefined);
+  }
+
   try {
     // İade defter üzerinden. Ham `updateMany` kaldırıldı: kısmi iadeyi
     // modelleyemiyordu, `refundedAmount` yazmıyordu ve denetim izi bırakmıyordu.
@@ -225,6 +231,13 @@ export async function modifyBooking(
       ok: false,
       code: 'INVALID_DATES',
       message: 'Dükkan seçilen günde kapalı.',
+    };
+  }
+  if (await isClosedAtStayTimes(booking.shopId, input.checkInTime, input.checkOutTime)) {
+    return {
+      ok: false,
+      code: 'INVALID_DATES',
+      message: 'Dükkan seçilen saatte kapalı.',
     };
   }
   if (booking.guestId !== guestId) {
