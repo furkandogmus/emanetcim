@@ -36,6 +36,16 @@ API adresi derleme anında: `EXPO_PUBLIC_API_BASE_URL` (varsayılan emülatör i
   aynı altlık. Google Maps yok. OSM atfı her haritada sabit metin olarak görünür.
 - **Token yenileme** tek uçuşta (`src/lib/api.ts`): sunucu refresh token tekrarını oturum
   ailesini iptal ederek cezalandırıyor.
+- **iOS bildirimi Expo push'tan gider.** iOS'ta yerel token APNs'indir, sunucunun FCM
+  yolu onu almaz: `src/lib/push.ts` iOS'ta Expo push token'ı kaydeder, sunucu
+  `../src/lib/expo-push.ts` ile gönderir. Android FCM'de kalır. APNs anahtarı EAS
+  kimlik bilgilerinde durur (`eas credentials -p ios`).
+- **Apple ile giriş** yerel yetkisi her iOS build'inde var ama düğme `app.json` →
+  `extra.appleSignIn: true` olmadan görünmez. Açmadan önce: Apple geliştirici hesabı,
+  EAS'ta Sign in with Apple yetkisi, sunucuda `APPLE_BUNDLE_ID` = `com.bagajpark`.
+- **Uygulama bağlantıları** yalnızca `/<dil>/shop/<id>` (`+native-intent.tsx`). Doğrulama
+  dosyaları sunucuda `ANDROID_APP_LINK_SHA256` ve `APPLE_TEAM_ID` ile açılır
+  (`../src/lib/app-links.ts`); boşken 404 döner ve bağlantı tarayıcıda açılır.
 - Tema token'ları `src/theme/tokens.ts` — web `globals.css` kimliğinden elle aktarıldı.
 - `android/` ve `ios/` üretilir (CNG), elle düzenlenmez, git'e girmez.
 - **Kabul kriteri: Google Play'e yüklenebilir build.** İzin listesi, hesap silme ve
