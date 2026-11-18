@@ -185,8 +185,12 @@ export default function MapScreen() {
             {query.isLoading
               ? t("common.loading")
               : shops.length === 0
-                ? t("map.emptyTitle", { place: search.place.label })
-                : t("map.count", { count: shops.length, place: search.place.label })}
+                ? search.place.isCurrent
+                  ? t("map.emptyTitleNear")
+                  : t("map.emptyTitle", { place: search.place.label })
+                : search.place.isCurrent
+                  ? t("map.countNear", { count: shops.length })
+                  : t("map.count", { count: shops.length, place: search.place.label })}
           </AppText>
         </View>
         {query.isLoading ? (

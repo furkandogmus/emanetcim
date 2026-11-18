@@ -7,7 +7,8 @@ import { useTranslation } from "react-i18next";
 import { BookingRow } from "@/components/BookingRow";
 import { LuggageTag } from "@/components/Illustrations";
 import { Segmented } from "@/components/Segmented";
-import { AppText, Button, CenterMessage, Loading } from "@/components/ui";
+import { RowSkeleton } from "@/components/RowSkeleton";
+import { AppText, Button, CenterMessage } from "@/components/ui";
 import { errorMessage } from "@/lib/errors";
 import { isActiveBooking, useMyBookings } from "@/lib/queries";
 import { colors, space } from "@/theme/tokens";
@@ -44,7 +45,7 @@ export default function MyBookingsScreen() {
       </View>
 
       {query.isLoading ? (
-        <Loading />
+        <RowSkeleton />
       ) : query.isError ? (
         <CenterMessage
           title={errorMessage(query.error)}

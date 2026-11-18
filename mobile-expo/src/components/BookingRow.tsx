@@ -1,9 +1,11 @@
-import { memo } from "react";
+import { memo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Pressable, StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { StatusBadge } from "@/components/StatusBadge";
 import { AppText } from "@/components/ui";
+import { prefetchBooking } from "@/lib/queries";
 import { formatDayTime, formatMoney, formatMonthShort, formatTime } from "@/lib/format";
 import { shiftedForFormat } from "@/lib/time";
 import type { BookingSummary } from "@/lib/types";
@@ -24,15 +26,22 @@ export const BookingRow = memo(function BookingRow({
   onPress: () => void;
   highlight?: string;
 }) {
+  const queryClient = useQueryClient();
   const { t } = useTranslation();
   const bags = booking.bagCountS + booking.bagCountM + booking.bagCountXl;
   const day = shiftedForFormat(booking.checkInTime);
   const month = formatMonthShort(booking.checkInTime);
   const faded = booking.status === "CANCELLED" || booking.status === "CHECKED_OUT";
+  // Satir acildigi anki saat yeterli; render saf kalsin (liste yenilenince yeniden kurulur).
+  const [now] = useState(() => Date.now());
+  // Alma saati gecmis ama valiz hala dukkanda: esnaf da misafir de bunu satirda gormeli.
+  const overdueMs = booking.status === "CHECKED_IN" ? now - new Date(booking.checkOutTime).getTime() : 0;
+  const overdueDays = Math.floor(overdueMs / 86_400_000);
 
   return (
     <Pressable
       accessibilityRole="button"
+      onPressIn={() => prefetchBooking(queryClient, booking.id)}
       onPress={onPress}
       style={({ pressed }) => [styles.row, pressed && { backgroundColor: colors.surfaceMuted }]}
     >
@@ -50,6 +59,11 @@ export const BookingRow = memo(function BookingRow({
         <AppText variant="caption" numberOfLines={1}>
           {formatTime(booking.checkInTime)} → {formatDayTime(booking.checkOutTime)}
         </AppText>
+        {overdueMs > 0 ? (
+          <AppText variant="label" style={{ color: colors.danger, fontSize: 13 }}>
+            {overdueDays >= 1 ? t("bookings.overdueDays", { count: overdueDays }) : t("bookings.overdue")}
+          </AppText>
+        ) : null}
         <View style={styles.meta}>
           <StatusBadge status={booking.status} />
           {highlight ? (

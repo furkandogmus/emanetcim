@@ -62,7 +62,19 @@
     "step2Body": "Esnaf valizini numaralı mühürle kapatıp teslim alır.",
     "step3Title": "Dönünce valizini al",
     "step3Body": "Aynı kodu göster, valizini mühürlü haliyle geri al.",
-    "citiesTitle": "Popüler şehirler"
+    "citiesTitle": "Popüler şehirler",
+    "citySpots_one": "{{count}} nokta",
+    "citySpots_other": "{{count}} nokta",
+    "qrReady": "QR kodun hazır · {{shop}}",
+    "pickupReady": "Valizin dükkanda · {{shop}}",
+    "sheet": {
+      "noBookingTitle": "Henüz rezervasyonun yok",
+      "noBookingBody": "Rezervasyon yaptığında QR kodun burada ve Rezervasyonlar sekmesinde hazır olur. Dükkanda bu kodu göstermen yeterli.",
+      "findSpot": "Yakındaki noktaları gör",
+      "notDroppedTitle": "Valizin henüz dükkanda değil",
+      "notDroppedBody": "Valizini {{shop}} noktasına bıraktığında alma kodun burada açılır. Bırakma: {{time}}.",
+      "openBooking": "Rezervasyonu aç"
+    }
   },
   "search": {
     "locationTitle": "Nereye gidiyorsun?",
@@ -104,7 +116,10 @@
     "distance": "{{km}} km",
     "verified": "Doğrulanmış",
     "editSearch": "Aramayı düzenle",
-    "emptyTitle": "{{place}} çevresinde henüz rezervasyon alan nokta yok"
+    "emptyTitle": "{{place}} çevresinde henüz rezervasyon alan nokta yok",
+    "countNear_one": "Yakınında {{count}} nokta",
+    "countNear_other": "Yakınında {{count}} nokta",
+    "emptyTitleNear": "Yakınında henüz rezervasyon alan nokta yok"
   },
   "shop": {
     "open247": "7/24 açık",
@@ -183,7 +198,10 @@
     "cancelledRefund": "Ödediğin tutarın tamamı iade edilecek.",
     "cancelledNoCharge": "Senden herhangi bir ücret alınmadı.",
     "cancelFailed": "Rezervasyon iptal edilemedi.",
-    "code": "Rezervasyon kodu"
+    "code": "Rezervasyon kodu",
+    "overdue": "Alma saati geçti",
+    "overdueDays_one": "{{count}} gün gecikti",
+    "overdueDays_other": "{{count}} gün gecikti"
   },
   "status": {
     "PENDING": "Bekliyor",
@@ -478,10 +496,17 @@
       "invalid_name": "Ad 1–100 karakter olmalı.",
       "invalid_phone": "Geçerli bir Türkiye cep numarası gir (5XX XXX XX XX).",
       "phone_taken": "Bu numara başka bir hesapta kayıtlı.",
-      "no_fields": "Değiştirilecek bir bilgi yok."
+      "no_fields": "Değiştirilecek bir bilgi yok.",
+      "file_too_large": "Fotoğraf çok büyük; başka bir fotoğraf dene.",
+      "invalid_type": "Bu dosya türü desteklenmiyor; JPEG, PNG ya da WebP seç.",
+      "no_file": "Fotoğraf seçilmedi."
     },
     "emailLabel": "E-posta",
-    "emailLocked": "E-posta adresi uygulamadan değiştirilemez."
+    "emailLocked": "E-posta adresi uygulamadan değiştirilemez.",
+    "photo": "Profil fotoğrafı",
+    "addPhoto": "Fotoğraf ekle",
+    "changePhoto": "Fotoğrafı değiştir",
+    "removePhoto": "Fotoğrafı kaldır"
   },
   "placeSearch": {
     "label": "Adres, otel ya da semt ara",
@@ -741,9 +766,10 @@
     "pickups": "Alınacak",
     "inStorage": "Dükkanda valiz",
     "thisMonth": "Bu ay kazancın",
-    "vsLastMonth": "Geçen aya göre %{{pct}}",
     "failed": "Günlük özet yüklenemedi. Yeniden denemek için dokun.",
-    "a11y": "{{shop}}, bugün: {{arrivals}} misafir gelecek, {{pickups}} valiz alınacak, dükkanda {{bags}} valiz var. Bu ay kazancın {{month}}."
+    "a11y": "{{shop}}, bugün: {{arrivals}} misafir gelecek, {{pickups}} valiz alınacak, dükkanda {{bags}} valiz var. Bu ay kazancın {{month}}.",
+    "moreThanLastMonth": "Geçen aydan %{{pct}} fazla",
+    "lessThanLastMonth": "Geçen aydan %{{pct}} az"
   },
   "tabs": {
     "explore": "Keşfet",

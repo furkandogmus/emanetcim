@@ -37,7 +37,9 @@ export function PartnerPulseCard() {
   }
 
   const d = query.data;
-  const pct = d.monthChangePct;
+  // Ay ici kazanc gecen ayin TAMAMIYLA kiyaslaniyor; bu ay henuz kazanc yokken "%100 az"
+  // hicbir sey soylemiyor, esnafi da korkutuyor. O durumda rozet gizli.
+  const pct = d.monthChangePct != null && d.monthNet > 0 ? d.monthChangePct : null;
   const up = pct != null && pct >= 0;
   const summary = t("pulse.a11y", {
     shop: d.shop.name,
@@ -87,7 +89,7 @@ export function PartnerPulseCard() {
             <View style={[styles.badge, { backgroundColor: up ? colors.successSoft : colors.dangerSoft }]}>
               {up ? <TrendingUp size={14} color={colors.success} /> : <TrendingDown size={14} color={colors.danger} />}
               <AppText variant="label" style={{ color: up ? colors.success : colors.danger }}>
-                {t("pulse.vsLastMonth", { pct: `${up ? "+" : "−"}${Math.abs(Math.round(pct))}` })}
+                {t(up ? "pulse.moreThanLastMonth" : "pulse.lessThanLastMonth", { pct: Math.abs(Math.round(pct)) })}
               </AppText>
             </View>
           ) : null}
