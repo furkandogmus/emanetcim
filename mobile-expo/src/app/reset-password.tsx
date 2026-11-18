@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { KeyboardAvoidingView, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { X } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { AppText, Banner, Button, IconButton } from "@/components/ui";
+import { Input } from "@/components/Field";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
-import { colors, fonts, radius, space } from "@/theme/tokens";
+import { colors, space } from "@/theme/tokens";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // Sunucu politikasi: src/lib/auth-password.ts (MIN/MAX_PASSWORD_LENGTH).
@@ -52,7 +53,7 @@ export default function ResetPasswordScreen() {
       // Sunucu hesap var/yok ayrimini gizlemek icin her zaman { ok: true } doner.
       await api("/auth/password-reset/request", {
         method: "POST",
-        body: { email: value, locale: i18n.language === "en" ? "en" : "tr" },
+        body: { email: value, locale: i18n.language === "tr" ? "tr" : "en" },
         auth: false,
       });
       setEmail(value);
@@ -98,7 +99,7 @@ export default function ResetPasswordScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <View style={styles.header}>
             <AppText variant="title" style={{ flex: 1 }}>
@@ -116,7 +117,7 @@ export default function ResetPasswordScreen() {
                 <AppText variant="label" nativeID="resetEmailLabel">
                   {t("auth.emailLabel")}
                 </AppText>
-                <TextInput
+                <Input
                   accessibilityLabelledBy="resetEmailLabel"
                   value={email}
                   onChangeText={setEmail}
@@ -128,7 +129,6 @@ export default function ResetPasswordScreen() {
                   autoCorrect={false}
                   returnKeyType="send"
                   onSubmitEditing={requestLink}
-                  style={styles.input}
                 />
               </View>
               {error ? <Banner tone="danger" body={error} /> : null}
@@ -141,7 +141,7 @@ export default function ResetPasswordScreen() {
                 <AppText variant="label" nativeID="resetLinkLabel">
                   {t("reset.linkLabel")}
                 </AppText>
-                <TextInput
+                <Input
                   accessibilityLabelledBy="resetLinkLabel"
                   value={link}
                   onChangeText={setLink}
@@ -149,14 +149,13 @@ export default function ResetPasswordScreen() {
                   placeholderTextColor={colors.inkMuted}
                   autoCapitalize="none"
                   autoCorrect={false}
-                  style={styles.input}
                 />
               </View>
               <View style={styles.field}>
                 <AppText variant="label" nativeID="resetPasswordLabel">
                   {t("reset.newPasswordLabel")}
                 </AppText>
-                <TextInput
+                <Input
                   accessibilityLabelledBy="resetPasswordLabel"
                   value={password}
                   onChangeText={setPassword}
@@ -165,7 +164,6 @@ export default function ResetPasswordScreen() {
                   autoComplete="new-password"
                   textContentType="newPassword"
                   maxLength={MAX_PASSWORD}
-                  style={styles.input}
                 />
                 <AppText variant="caption">{t("reset.passwordRule", { min: MIN_PASSWORD })}</AppText>
               </View>
@@ -173,7 +171,7 @@ export default function ResetPasswordScreen() {
                 <AppText variant="label" nativeID="resetRepeatLabel">
                   {t("reset.repeatPasswordLabel")}
                 </AppText>
-                <TextInput
+                <Input
                   accessibilityLabelledBy="resetRepeatLabel"
                   value={repeat}
                   onChangeText={setRepeat}
@@ -184,7 +182,6 @@ export default function ResetPasswordScreen() {
                   maxLength={MAX_PASSWORD}
                   returnKeyType="go"
                   onSubmitEditing={confirm}
-                  style={styles.input}
                 />
               </View>
               {error ? <Banner tone="danger" body={error} /> : null}
@@ -221,15 +218,4 @@ const styles = StyleSheet.create({
   content: { padding: space.xl, gap: space.lg },
   header: { flexDirection: "row", alignItems: "center", gap: space.md },
   field: { gap: space.sm },
-  input: {
-    minHeight: 54,
-    borderRadius: radius.control,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    paddingHorizontal: space.lg,
-    fontFamily: fonts.body,
-    fontSize: 17,
-    color: colors.ink,
-  },
 });

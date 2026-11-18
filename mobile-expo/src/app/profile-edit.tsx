@@ -3,11 +3,9 @@ import {
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
-  TextInput,
   View,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
@@ -18,11 +16,12 @@ import { useTranslation } from "react-i18next";
 
 import { Avatar } from "@/components/Avatar";
 import { AppText, Banner, Button, IconButton } from "@/components/ui";
+import { Input, inputBox } from "@/components/Field";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { errorMessage } from "@/lib/errors";
 import { prepareAvatar } from "@/lib/shop-photo";
-import { colors, fonts, radius, space } from "@/theme/tokens";
+import { colors, space } from "@/theme/tokens";
 
 const MAX_NAME = 100;
 
@@ -142,7 +141,7 @@ export default function ProfileEditScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <View style={styles.header}>
             <AppText variant="title" style={{ flex: 1 }}>
@@ -180,7 +179,7 @@ export default function ProfileEditScreen() {
           {user.email ? (
             <View style={styles.field}>
               <AppText variant="label">{t("profileEdit.emailLabel")}</AppText>
-              <View style={[styles.input, styles.readOnly]}>
+              <View style={[inputBox, styles.readOnly]}>
                 <AppText variant="body" style={{ color: colors.inkSecondary }} numberOfLines={1}>
                   {user.email}
                 </AppText>
@@ -193,7 +192,7 @@ export default function ProfileEditScreen() {
             <AppText variant="label" nativeID="profileNameLabel">
               {t("profileEdit.nameLabel")}
             </AppText>
-            <TextInput
+            <Input
               accessibilityLabelledBy="profileNameLabel"
               value={name}
               onChangeText={setName}
@@ -201,7 +200,6 @@ export default function ProfileEditScreen() {
               textContentType="name"
               maxLength={MAX_NAME}
               returnKeyType="next"
-              style={styles.input}
             />
           </View>
 
@@ -209,7 +207,7 @@ export default function ProfileEditScreen() {
             <AppText variant="label" nativeID="profilePhoneLabel">
               {t("profileEdit.phoneLabel")}
             </AppText>
-            <TextInput
+            <Input
               accessibilityLabelledBy="profilePhoneLabel"
               value={phone}
               onChangeText={setPhone}
@@ -220,7 +218,6 @@ export default function ProfileEditScreen() {
               textContentType="telephoneNumber"
               returnKeyType="done"
               onSubmitEditing={save}
-              style={styles.input}
             />
             <AppText variant="caption">{t("profileEdit.phoneHint")}</AppText>
           </View>
@@ -253,15 +250,4 @@ const styles = StyleSheet.create({
   header: { flexDirection: "row", alignItems: "center", gap: space.md },
   field: { gap: space.sm },
   readOnly: { justifyContent: "center", backgroundColor: colors.surfaceMuted, borderColor: colors.surfaceMuted },
-  input: {
-    minHeight: 54,
-    borderRadius: radius.control,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    paddingHorizontal: space.lg,
-    fontFamily: fonts.body,
-    fontSize: 17,
-    color: colors.ink,
-  },
 });

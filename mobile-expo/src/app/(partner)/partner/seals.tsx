@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, RefreshControl, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { Alert, KeyboardAvoidingView, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, Clock, Truck } from "lucide-react-native";
@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 
 import { StackHeader } from "@/components/StackHeader";
 import { AppText, Banner, Button, Card, CenterMessage, Divider, Loading } from "@/components/ui";
+import { Input } from "@/components/Field";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { formatDay } from "@/lib/format";
@@ -102,6 +103,7 @@ export default function PartnerSealsScreen() {
           action={<Button variant="secondary" title={t("common.retry")} onPress={() => query.refetch()} />}
         />
       ) : (
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
         <ScrollView
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
@@ -124,7 +126,7 @@ export default function PartnerSealsScreen() {
               {t("seals.requestTitle")}
             </AppText>
             <AppText variant="caption">{t("seals.requestHint", { max: MAX_REQUEST })}</AppText>
-            <TextInput
+            <Input
               accessibilityLabelledBy="seal-request-count"
               accessibilityLabel={t("seals.requestCount")}
               value={count}
@@ -132,7 +134,6 @@ export default function PartnerSealsScreen() {
               placeholder={t("seals.requestCount")}
               placeholderTextColor={colors.inkMuted}
               keyboardType="number-pad"
-              style={styles.input}
             />
             {count !== "" && !countValid ? (
               <Banner tone="warning" body={t("seals.countRange", { max: MAX_REQUEST })} />
@@ -151,7 +152,7 @@ export default function PartnerSealsScreen() {
               {t("seals.faultyTitle")}
             </AppText>
             <AppText variant="caption">{t("seals.faultyHint")}</AppText>
-            <TextInput
+            <Input
               accessibilityLabelledBy="seal-faulty-serial"
               accessibilityLabel={t("seals.serialNumber")}
               value={serial}
@@ -159,7 +160,6 @@ export default function PartnerSealsScreen() {
               placeholder={t("seals.serialNumber")}
               placeholderTextColor={colors.inkMuted}
               keyboardType="number-pad"
-              style={styles.input}
             />
             {faultyError ? <Banner tone="danger" body={faultyError} /> : null}
             <Button
@@ -210,6 +210,7 @@ export default function PartnerSealsScreen() {
             )}
           </Card>
         </ScrollView>
+        </KeyboardAvoidingView>
       )}
     </SafeAreaView>
   );
@@ -282,17 +283,6 @@ const styles = StyleSheet.create({
   stat: { flex: 1, alignItems: "center", gap: 2 },
   statValue: { fontFamily: fonts.display, fontSize: 28, lineHeight: 32, color: colors.ink, fontVariant: ["tabular-nums"] },
   card: { gap: space.md },
-  input: {
-    minHeight: 48,
-    borderRadius: radius.control,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    paddingHorizontal: space.md,
-    fontFamily: fonts.body,
-    fontSize: 16,
-    color: colors.ink,
-  },
   requestRow: { flexDirection: "row", alignItems: "center", gap: space.md },
   status: { flexDirection: "row", alignItems: "center", gap: space.xs },
 });

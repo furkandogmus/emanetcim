@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { StyleSheet, TextInput, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TriangleAlert } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 
 import { AppText, Banner, Button, Card, Chip } from "@/components/ui";
+import { Input } from "@/components/Field";
 import { ApiError, api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import type { BookingDetail, CreateDisputeRequest, CreateDisputeResponse, DisputeReason } from "@/lib/types";
-import { colors, fonts, radius, space } from "@/theme/tokens";
+import { colors, space } from "@/theme/tokens";
 
 /** `DISPUTABLE_STATUSES` (DisputeService.ts): valiz dukkana teslim edilmis olmali. */
 const DISPUTABLE = new Set(["CHECKED_IN", "CHECKED_OUT"]);
@@ -81,7 +82,7 @@ export function GuestDisputeCard({ booking, onOpen }: { booking: BookingDetail; 
           <Chip key={r} soft label={t(`dispute.reasons.${r}`)} selected={reason === r} onPress={() => setReason(r)} />
         ))}
       </View>
-      <TextInput
+      <Input
         accessibilityLabel={t("dispute.descriptionLabel")}
         value={description}
         onChangeText={setDescription}
@@ -89,7 +90,7 @@ export function GuestDisputeCard({ booking, onOpen }: { booking: BookingDetail; 
         placeholderTextColor={colors.inkMuted}
         maxLength={MAX_DESC}
         multiline
-        style={styles.input}
+        style={{ minHeight: 120 }}
       />
       {description.length > 0 && tooShort ? (
         <AppText variant="caption">{t("dispute.descriptionMin", { n: MIN_DESC })}</AppText>
@@ -113,17 +114,4 @@ export function GuestDisputeCard({ booking, onOpen }: { booking: BookingDetail; 
 const styles = StyleSheet.create({
   card: { gap: space.md },
   reasons: { flexDirection: "row", flexWrap: "wrap", gap: space.sm },
-  input: {
-    minHeight: 120,
-    borderRadius: radius.control,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    paddingHorizontal: space.md,
-    paddingVertical: space.md,
-    fontFamily: fonts.body,
-    fontSize: 15,
-    color: colors.ink,
-    textAlignVertical: "top",
-  },
 });
