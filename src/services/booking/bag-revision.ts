@@ -37,6 +37,8 @@ import { updateReservedBags } from '@/services/SlotService';
 import { notificationService } from '@/services/NotificationService';
 import { bookingNotificationEmail } from '@/services/booking/guest-contact';
 import { DEFAULT_NOTIFICATION_LOCALE } from '@/lib/request-locale';
+import { formatTryCurrency } from '@/lib/currency';
+import { bcp47ForUiLocale } from '@/lib/intl-locale';
 
 export type BagRevisionActor = { id: string; role: 'PARTNER' | 'ADMIN' | 'GUEST' };
 
@@ -374,6 +376,11 @@ export async function applyBagRevision(
             booking.locale ?? DEFAULT_NOTIFICATION_LOCALE,
           )
           .catch((err) => logger.warn({ err, bookingId }, 'bag_revision_approval_email_failed'));
+      } else {
+        const locale = booking.locale ?? DEFAULT_NOTIFICATION_LOCALE;
+        notificationService.pushGuestOnly(bookingId, 'bagRevision', locale, {
+          total: formatTryCurrency(newTotal, bcp47ForUiLocale(locale)),
+        });
       }
       return { ok: false, code: 'GUEST_APPROVAL_REQUIRED' };
     }
