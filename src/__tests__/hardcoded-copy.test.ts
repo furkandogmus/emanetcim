@@ -137,8 +137,8 @@ const TURKISH_STOPWORDS =
 /**
  * Türkçe olması DOĞRU olan dosyalar.
  *
- * - `terms/page.tsx` — T.C. hukukuna tabi üyelik sözleşmesinin kendisi. Çevirisi
- *   kod değil hukuk kararıdır.
+ * - `legal/terms-content.ts` — T.C. hukukuna tabi üyelik sözleşmesinin kendisi
+ *   (Türkçe bağlayıcı metin + İngilizce kolaylık çevirisi).
  * - `LocationPicker.tsx` — Türkçe adres ayrıştırma düzenli ifadesi ("Mahallesi").
  * - `AdminBlogEditClient.tsx` — dil adının kendisi ("Türkçe (TR)").
  * - `manifest.ts` — açıklama bilerek iki dilli.
@@ -147,7 +147,7 @@ const TURKISH_STOPWORDS =
  *   (metin `src/locales`'e ait) ama SONUÇ doğru: her dil kendi metnini görüyor.
  */
 const TURKISH_OK_FILES = new Set([
-  "src/app/[locale]/(guest)/terms/page.tsx",
+  "src/lib/legal/terms-content.ts",
   "src/components/partner/LocationPicker.tsx",
   "src/components/admin/AdminBlogEditClient.tsx",
   "src/app/manifest.ts",
