@@ -63,7 +63,7 @@
     "verify": "npm run typecheck && npm run lint && npm run check:locales && npm test -- --ci",
     "test": "jest",
     "release:android": "bash scripts/release-android.sh",
-    "update:production": "eas update --channel production --environment production"
+    "update:production": "bash scripts/update-production.sh"
   },
   "private": true,
   "jest": {
