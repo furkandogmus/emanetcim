@@ -467,7 +467,10 @@
     "occupancy": "Auslastung",
     "bagsOfCapacity": "{{bags}} / {{capacity}} Gepäckstücke",
     "shopToday": "Heute {{arrivals}} Ankünfte · {{pickups}} Abholungen",
-    "chartEmpty": "Keine bezahlten Buchungen in den letzten 14 Tagen"
+    "chartEmpty": "Keine bezahlten Buchungen in den letzten 14 Tagen",
+    "shopsLive": "In Betrieb",
+    "shopsPrelaunch": "Nachfragetest · nimmt kein Gepäck an",
+    "noBags": "Nimmt kein Gepäck an"
   },
   "scan": {
     "open": "QR scannen",

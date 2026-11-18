@@ -467,7 +467,10 @@
     "occupancy": "Doluluk",
     "bagsOfCapacity": "{{bags}} / {{capacity}} valiz",
     "shopToday": "Bugün {{arrivals}} gelecek · {{pickups}} alınacak",
-    "chartEmpty": "Son 14 günde ödenmiş rezervasyon yok"
+    "chartEmpty": "Son 14 günde ödenmiş rezervasyon yok",
+    "shopsLive": "Hizmette",
+    "shopsPrelaunch": "Talep testi · valiz almıyor",
+    "noBags": "Valiz almıyor"
   },
   "scan": {
     "open": "QR okut",
