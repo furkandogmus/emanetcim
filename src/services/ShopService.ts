@@ -289,7 +289,7 @@ export type SetShopImageResult =
  * -- ornegin CDN alan adi degistiyse -- `null` donuyor ve silme atlaniyor.
  * Yanlis bir anahtari silmeye calismaktansa yetim nesne birakmak yeglenir.
  */
-function extractKeyFromUrl(url: string, storage: { publicUrl: (k: string) => string }): string | null {
+export function extractKeyFromUrl(url: string, storage: { publicUrl: (k: string) => string }): string | null {
   const base = storage.publicUrl("");
   return url.startsWith(base) ? url.slice(base.length) : null;
 }

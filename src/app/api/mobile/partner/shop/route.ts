@@ -4,6 +4,8 @@ import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { requireMobileUser, requireRole } from "@/lib/mobile-auth";
 import { shopService } from "@/services/ShopService";
+import { shopGalleryService } from "@/services/ShopGalleryService";
+import { toMobileGalleryImage } from "@/lib/mobile-dto";
 import prisma from "@/lib/db";
 import logger from "@/lib/logger";
 
@@ -67,11 +69,14 @@ export async function GET(req: NextRequest) {
     select: { phone: true },
   });
 
+  const gallery = await shopGalleryService.list(shop.id);
+
   return NextResponse.json({
     ...shop,
     pricePerDay: Number(shop.pricePerDay),
     sealCount,
     phone: owner?.phone ?? null,
+    gallery: gallery.map(toMobileGalleryImage),
   });
 }
 
