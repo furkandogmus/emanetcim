@@ -99,15 +99,16 @@ export async function claimCoupon(
   code: string,
   totalPrice: number,
 ): Promise<CouponClaimResult> {
-  const coupon = await prisma.coupon.findUnique({ where: { code } });
+  /*
+    Kod NORMALIZE edilerek aranir (2026-11-18). Kuponlar `normalizeCouponCode`
+    ile buyuk harfle saklaniyor ama burada girilen hali aynen araniyordu:
+    "yaz10" yazan misafir "YAZ10" kuponunu bulamiyor ve sessizce TAM FIYAT
+    oduyordu -- web'de de mobilde de.
+  */
+  const coupon = await prisma.coupon.findUnique({ where: { code: normalizeCouponCode(code) } });
   if (!coupon) return { ok: false };
-
   const now = new Date();
-  const eligible =
-    coupon.isActive &&
-    (!coupon.expiresAt || coupon.expiresAt > now) &&
-    (coupon.minPrice == null || totalPrice >= moneyToNumber(coupon.minPrice));
-  if (!eligible) return { ok: false };
+  if (couponIneligibility(coupon, totalPrice, now)) return { ok: false };
 
   /*
     Kotasiz kupon da sayaci artirir — kac kez kullanildigi raporlanabilir olmali.
@@ -143,6 +144,54 @@ export async function claimCoupon(
       discountAmount:
         Math.round((Math.round(totalPrice * 100) / 100 - discounted) * 100) / 100,
     },
+  };
+}
+
+type CouponRow = {
+  isActive: boolean;
+  expiresAt: Date | null;
+  minPrice: Prisma.Decimal | number | null;
+  maxUses: number | null;
+  usedCount: number;
+};
+
+export type CouponRejection = "invalid" | "min_price";
+
+/** Uygunluk kurali TEK yerde: hak alma ve onizleme ayni cevabi verir. */
+function couponIneligibility(coupon: CouponRow, totalPrice: number, now: Date): CouponRejection | null {
+  if (!coupon.isActive) return "invalid";
+  if (coupon.expiresAt && coupon.expiresAt <= now) return "invalid";
+  if (coupon.minPrice != null && totalPrice < moneyToNumber(coupon.minPrice)) return "min_price";
+  return null;
+}
+
+export type CouponPreview =
+  | { ok: true; code: string; discountAmount: number; totalPrice: number }
+  | { ok: false; reason: CouponRejection; minPrice?: number };
+
+/**
+ * Odeme ekranindaki "Uygula" icin: kotayi ALMADAN ayni hesabi yapar.
+ * Baglayici degil -- rezervasyon aninda `claimCoupon` yeniden karar verir (kota
+ * arada dolmus olabilir).
+ */
+export async function previewCoupon(code: string, totalPrice: number): Promise<CouponPreview> {
+  const normalized = normalizeCouponCode(code);
+  if (!normalized) return { ok: false, reason: "invalid" };
+  const coupon = await prisma.coupon.findUnique({ where: { code: normalized } });
+  if (!coupon) return { ok: false, reason: "invalid" };
+  const rejection = couponIneligibility(coupon, totalPrice, new Date());
+  if (rejection === "min_price") {
+    return { ok: false, reason: "min_price", minPrice: moneyToNumber(coupon.minPrice!) };
+  }
+  if (rejection) return { ok: false, reason: rejection };
+  if (coupon.maxUses != null && coupon.usedCount >= coupon.maxUses) return { ok: false, reason: "invalid" };
+
+  const discounted = applyDiscount(totalPrice, moneyToNumber(coupon.discount), coupon.isPercent);
+  return {
+    ok: true,
+    code: coupon.code,
+    totalPrice: discounted,
+    discountAmount: Math.round((Math.round(totalPrice * 100) / 100 - discounted) * 100) / 100,
   };
 }
 
@@ -258,6 +307,10 @@ export async function setCouponActive(id: string, isActive: boolean): Promise<vo
 export class CouponService {
   claim(code: string, totalPrice: number): Promise<CouponClaimResult> {
     return claimCoupon(code, totalPrice);
+  }
+
+  preview(code: string, totalPrice: number): Promise<CouponPreview> {
+    return previewCoupon(code, totalPrice);
   }
 
   release(couponId: string): Promise<void> {
