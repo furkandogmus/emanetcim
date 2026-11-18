@@ -7,21 +7,7 @@ import { wallInstant, wallParts } from "./time";
 export type Place = { label: string; latitude: number; longitude: number; isCurrent?: boolean };
 export type Bags = { s: number; m: number; xl: number };
 
-/**
- * Sabit sehir listesi: serbest metin aramanin (`PlaceSearch`, `GET /geocode`)
- * yaninda tek dokunusla secim.
- */
-// Sira: rezervasyon alan noktasi olan sehirler once (2026-10-18 prod: Antalya 3,
-// Ankara 3, Bodrum 1, Fethiye 1; Istanbul ve Izmir yalnizca talep testi). Mobil talep
-// testi noktalarini gostermedigi icin Paris (hepsi talep testi) cikarildi.
-export const CITIES: Place[] = [
-  { label: "Antalya", latitude: 36.8969, longitude: 30.7133 },
-  { label: "Ankara", latitude: 39.9334, longitude: 32.8597 },
-  { label: "Bodrum", latitude: 37.035, longitude: 27.43 },
-  { label: "Fethiye", latitude: 36.6216, longitude: 29.1164 },
-  { label: "İstanbul", latitude: 41.0165, longitude: 28.9765 },
-  { label: "İzmir", latitude: 38.4237, longitude: 27.1428 },
-];
+// Sehir listesi sunucudan gelir (`useCities`, GET /cities): yalnizca dukkani olan sehirler.
 
 type SearchState = {
   place: Place | null;

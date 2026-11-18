@@ -100,6 +100,8 @@ export function RangeCalendar({
           const isStart = sameDay(day, start);
           const isEnd = sameDay(day, end);
           const inRange = day > startOfDay(start) && day < startOfDay(end);
+          // Aralik birden fazla gunse uclar da bandi tasir: daire bandin ucuna oturur.
+          const multi = !sameDay(start, end);
           return (
             <Pressable
               key={i}
@@ -107,8 +109,11 @@ export function RangeCalendar({
               onPress={() => pick(day)}
               accessibilityRole="button"
               accessibilityState={{ selected: isStart || isEnd, disabled: past }}
-              style={[styles.cell, inRange && styles.inRange]}
+              style={styles.cell}
             >
+              {inRange ? <View style={styles.band} /> : null}
+              {multi && isStart ? <View style={[styles.band, styles.bandRight]} /> : null}
+              {multi && isEnd ? <View style={[styles.band, styles.bandLeft]} /> : null}
               <View style={[styles.dayDot, (isStart || isEnd) && styles.selected]}>
                 <Text
                   style={[
@@ -149,8 +154,20 @@ const styles = StyleSheet.create({
   },
   grid: { flexDirection: "row", flexWrap: "wrap" },
   cell: { width: `${100 / 7}%`, height: 44, alignItems: "center", justifyContent: "center" },
-  inRange: { backgroundColor: colors.brandSoft },
-  dayDot: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
+  band: { position: "absolute", top: 2, bottom: 2, left: 0, right: 0, backgroundColor: colors.brandSoft },
+  bandRight: { left: "50%" },
+  bandLeft: { right: "50%" },
+  // Arka plan bastan verilir: Android'de yuvarlaklik, renk sonradan eklenen gorunumde
+  // dusuyordu ve sonradan secilen gun kare ciziliyordu.
+  dayDot: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "transparent",
+    overflow: "hidden",
+  },
   selected: { backgroundColor: colors.accent },
   dayText: { fontFamily: fonts.body, fontSize: 16, color: colors.ink },
 });

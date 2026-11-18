@@ -1,4 +1,8 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import * as SecureStore from "expo-secure-store";
+
+/** Son secilen dukkan: uygulama yeniden acilinca esnaf kaldigi dukkandan devam eder. */
+const KEY = "partner_shop";
 
 /**
  * Cok dukkanli esnafin secili dukkani; esnaf ekranlari arasinda TEK kaynak.
@@ -9,8 +13,23 @@ import { createContext, useContext, useState, type ReactNode } from "react";
 const PartnerShopContext = createContext<[string | null, (id: string | null) => void] | null>(null);
 
 export function PartnerShopProvider({ children }: { children: ReactNode }) {
-  const state = useState<string | null>(null);
-  return <PartnerShopContext.Provider value={state}>{children}</PartnerShopContext.Provider>;
+  const [shopId, setShopId] = useState<string | null>(null);
+
+  // Kayitli id artik bu esnafin degilse sunucu ilk dukkana duser (`resolvePartnerShops`).
+  useEffect(() => {
+    void SecureStore.getItemAsync(KEY)
+      .then((saved) => {
+        if (saved) setShopId((cur) => cur ?? saved);
+      })
+      .catch(() => undefined);
+  }, []);
+
+  const select = useCallback((id: string | null) => {
+    setShopId(id);
+    void (id ? SecureStore.setItemAsync(KEY, id) : SecureStore.deleteItemAsync(KEY)).catch(() => undefined);
+  }, []);
+
+  return <PartnerShopContext.Provider value={[shopId, select]}>{children}</PartnerShopContext.Provider>;
 }
 
 export function usePartnerShopSelection() {

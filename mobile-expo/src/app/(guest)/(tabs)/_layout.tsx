@@ -14,7 +14,10 @@ export default function GuestTabsLayout() {
   const active = useMyBookings().data?.filter((b) => isActiveBooking(b)).length ?? 0;
 
   return (
+    // Kesfet ortada ama acilis ve geri tusu yine oraya: sira gorsel, ana ekran degismedi.
     <Tabs
+      initialRouteName="home"
+      backBehavior="initialRoute"
       screenOptions={{
         headerShown: false,
         sceneStyle: { backgroundColor: colors.bg },
@@ -25,10 +28,6 @@ export default function GuestTabsLayout() {
       }}
     >
       <Tabs.Screen
-        name="home"
-        options={{ title: t("tabs.explore"), tabBarIcon: ({ color }) => <Compass size={20} color={color} /> }}
-      />
-      <Tabs.Screen
         name="bookings"
         options={{
           title: t("tabs.bookings"),
@@ -36,6 +35,10 @@ export default function GuestTabsLayout() {
           tabBarBadge: active > 0 ? active : undefined,
           tabBarBadgeStyle: { backgroundColor: colors.accent, fontFamily: fonts.bodySemibold, fontSize: 11 },
         }}
+      />
+      <Tabs.Screen
+        name="home"
+        options={{ title: t("tabs.explore"), tabBarIcon: ({ color }) => <Compass size={20} color={color} /> }}
       />
       <Tabs.Screen
         name="account"

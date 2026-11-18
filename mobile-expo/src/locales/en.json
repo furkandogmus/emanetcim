@@ -62,7 +62,19 @@
     "step2Body": "The shop seals your bag with a numbered seal.",
     "step3Title": "Collect it when you are back",
     "step3Body": "Show the same code and get your bag back, still sealed.",
-    "citiesTitle": "Popular cities"
+    "citiesTitle": "Popular cities",
+    "citySpots_one": "{{count}} spot",
+    "citySpots_other": "{{count}} spots",
+    "qrReady": "Your QR is ready · {{shop}}",
+    "pickupReady": "Your bag is at the shop · {{shop}}",
+    "sheet": {
+      "noBookingTitle": "No booking yet",
+      "noBookingBody": "Once you book, your QR code is ready here and in the Bookings tab. Just show it at the shop.",
+      "findSpot": "See nearby spots",
+      "notDroppedTitle": "Your bag isn't at the shop yet",
+      "notDroppedBody": "Once you drop your bag at {{shop}}, your pick-up code opens here. Drop-off: {{time}}.",
+      "openBooking": "Open booking"
+    }
   },
   "search": {
     "locationTitle": "Where are you going?",
@@ -104,7 +116,10 @@
     "distance": "{{km}} km",
     "verified": "Verified",
     "editSearch": "Edit search",
-    "emptyTitle": "No bookable spots near {{place}} yet"
+    "emptyTitle": "No bookable spots near {{place}} yet",
+    "countNear_one": "{{count}} spot near you",
+    "countNear_other": "{{count}} spots near you",
+    "emptyTitleNear": "No bookable spots near you yet"
   },
   "shop": {
     "open247": "Open 24/7",
@@ -183,7 +198,10 @@
     "cancelledRefund": "The full amount you paid will be refunded.",
     "cancelledNoCharge": "You haven't been charged anything.",
     "cancelFailed": "Couldn't cancel the booking.",
-    "code": "Booking code"
+    "code": "Booking code",
+    "overdue": "Pick-up time passed",
+    "overdueDays_one": "{{count}} day overdue",
+    "overdueDays_other": "{{count}} days overdue"
   },
   "status": {
     "PENDING": "Pending",
@@ -478,10 +496,17 @@
       "invalid_name": "Your name must be 1–100 characters.",
       "invalid_phone": "Enter a valid Turkish mobile number (5XX XXX XX XX).",
       "phone_taken": "This number is already registered to another account.",
-      "no_fields": "There's nothing to change."
+      "no_fields": "There's nothing to change.",
+      "file_too_large": "That photo is too large; try another one.",
+      "invalid_type": "That file type isn't supported; choose a JPEG, PNG or WebP.",
+      "no_file": "No photo selected."
     },
     "emailLabel": "Email",
-    "emailLocked": "Your email address can't be changed in the app."
+    "emailLocked": "Your email address can't be changed in the app.",
+    "photo": "Profile photo",
+    "addPhoto": "Add photo",
+    "changePhoto": "Change photo",
+    "removePhoto": "Remove photo"
   },
   "placeSearch": {
     "label": "Search an address, hotel or neighbourhood",
@@ -741,9 +766,10 @@
     "pickups": "Picking up",
     "inStorage": "Bags in shop",
     "thisMonth": "Earned this month",
-    "vsLastMonth": "{{pct}}% vs last month",
     "failed": "Couldn't load today's summary. Tap to retry.",
-    "a11y": "{{shop}}, today: {{arrivals}} guests arriving, {{pickups}} pick-ups, {{bags}} bags in the shop. Earned {{month}} this month."
+    "a11y": "{{shop}}, today: {{arrivals}} guests arriving, {{pickups}} pick-ups, {{bags}} bags in the shop. Earned {{month}} this month.",
+    "moreThanLastMonth": "{{pct}}% more than last month",
+    "lessThanLastMonth": "{{pct}}% less than last month"
   },
   "tabs": {
     "explore": "Explore",
