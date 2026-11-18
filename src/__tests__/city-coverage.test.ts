@@ -24,6 +24,17 @@ describe("CityCoverageService", () => {
     expect(list[0].coverImage).toBe("/a.jpg");
   });
 
+  it("aralik disi koordinat merkezi bozmaz ama dukkan sayilir", async () => {
+    findMany.mockResolvedValue([
+      { city: "Antalya", latitude: 36.9, longitude: 30.7, image: null },
+      { city: "Antalya", latitude: 36.8, longitude: 30714466523043455, image: null },
+    ]);
+    const [antalya] = await new CityCoverageService().list();
+    expect(antalya.shopCount).toBe(2);
+    expect(antalya.longitude).toBeCloseTo(30.7);
+    expect(antalya.latitude).toBeCloseTo(36.9);
+  });
+
   it("yalnizca isletilen dukkanlari sorar ve 10 dk onbellekte tutar", async () => {
     findMany.mockResolvedValue([]);
     const svc = new CityCoverageService();

@@ -31,26 +31,35 @@ export class CityCoverageService {
       select: { city: true, latitude: true, longitude: true, image: true },
     });
 
-    const groups = new Map<string, { spellings: Map<string, number>; lat: number; lng: number; n: number; image: string | null }>();
+    const groups = new Map<string, { spellings: Map<string, number>; lat: number; lng: number; n: number; located: number; image: string | null }>();
     for (const s of shops) {
       const raw = s.city!.trim();
       if (!raw) continue;
       const key = raw.toLocaleLowerCase("tr-TR");
-      const g = groups.get(key) ?? { spellings: new Map(), lat: 0, lng: 0, n: 0, image: null };
+      const g = groups.get(key) ?? { spellings: new Map(), lat: 0, lng: 0, n: 0, located: 0, image: null };
       g.spellings.set(raw, (g.spellings.get(raw) ?? 0) + 1);
-      g.lat += s.latitude!;
-      g.lng += s.longitude!;
       g.n += 1;
+      /*
+        Aralik disi bir koordinat (prod'da ~3e16 boylamli bir kayit goruldu,
+        2026-11-18) tek basina sehir merkezini haritanin disina tasir. Dukkan
+        sayilir ama merkeze katilmaz.
+      */
+      if (Math.abs(s.latitude!) <= 90 && Math.abs(s.longitude!) <= 180) {
+        g.lat += s.latitude!;
+        g.lng += s.longitude!;
+        g.located += 1;
+      }
       g.image ??= s.image;
       groups.set(key, g);
     }
 
     const value = [...groups.values()]
+      .filter((g) => g.located > 0)
       .map((g) => ({
         name: [...g.spellings.entries()].sort((a, b) => b[1] - a[1])[0][0],
         shopCount: g.n,
-        latitude: g.lat / g.n,
-        longitude: g.lng / g.n,
+        latitude: g.lat / g.located,
+        longitude: g.lng / g.located,
         coverImage: g.image,
       }))
       .sort((a, b) => b.shopCount - a.shopCount || a.name.localeCompare(b.name, "tr"));
