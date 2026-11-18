@@ -95,6 +95,9 @@ EAS bulut kuyruğu ve `eas submit` kuyruğu ücretsiz planda saatlerce bekleyebi
   `npm run update:production -- --message "kısa açıklama"`. Aynı `version`'a sahip
   derlemeler bir sonraki açılışta alır (`runtimeVersion: appVersion`). İlk OTA,
   `expo-updates` içeren ilk derlemeden sonra çalışır.
+  **Doğrudan `eas update` çalıştırma:** `eas.json`'daki derleme `env`ini okumaz ve EAS'ta
+  ortam değişkeni yok; 2026-11-18'de yayınlanan güncelleme API adresi olarak `10.0.2.2`
+  taşıdı. Script değerleri `eas.json` production profilinden alır, eksikse durur.
 
 `eas update:configure` çalıştırma: `app.json`'daki izin listesini çözülmüş yapılandırmayla
 ezip mikrofon, arka plan konumu, depolama gibi izinler ekliyor (2026-11-17'de görüldü).
